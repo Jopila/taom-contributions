@@ -1000,6 +1000,10 @@ with his culture's practice kit, a side effect nobody had chosen.
   settlement checks) and name which callers reach which branch, with the mission mode each caller runs in. An
   override that removes a vanilla branch says so in its doc, with what it changes in each.
 - **Source:** the v1.5.4 compatibility check, 2026-10-05 (tournament area, adversarially verified).
+- **Recurrence (2026-10-09):** the formation presets doc said a class change makes "vanilla move the troops".
+  `OrderOfBattleVM.OnFormationClassChanged` has two branches: all troops of the class move in only when no other
+  formation has that class; otherwise the formation starts at 0 percent and stays empty. The claim came from the build
+  brief's "vanilla's troop transfer" (`docs/reviews/rca-formation-presets-2026-10-09.md` finding 2).
 
 ### An override that rekeys a vanilla branch returns that branch's value; falling through to base re-applies base's condition (Arena, 2026-10-05)
 To keep tournament fighters in their own armour, `TaomTournamentModel.GetParticipantArmor` was first keyed on the
@@ -1027,3 +1031,14 @@ A TAOM `DiplomacyModel` override makes `Kingdom.IsAtWarWith` answer "at war" for
 - **Why missed:** every test faked `AreAtWar` as a constant, independent of the phase, so the feedback loop through the model could not show; the #764 Codex review found it by reading the engine, one change away from where it lived. The first M0b cut also left the phase flip after the declarations, and nobody asked what else listens to `OnWarDeclared` in between (F01).
 - **Prevent:** guard a declaration with the stored link the action itself writes (`IAllianceAdapter.HasDeclaredWar`) and keep `AreAtWar` for questions about the model; document on the adapter member that it must not guard a declaration. Fake the model-aware query in tests the way the override answers it (following the phase), in every test of the path, not one. Count a war only after re-reading the stance, since the veto prefix and unknown ids make `DeclareWar` a silent no-op. Set the phase before declaring, so vanilla's `OnWarDeclared` listeners (call to war) already see the constant war.
 - **Source:** `docs/reviews/rca-wotr-phase2-wars-2026-10-08.md` (#772), findings F01 to F04.
+
+### A later stage gets the exact set an earlier stage completed, never a weaker live test (formation presets, 2026-10-09)
+Preset Load runs a class pass, then places heroes. The hero plan took every formation that had a class
+(`HasFormation`), not the formations whose saved class the pass had put in place, so a class change that vanilla
+blocked still received that formation's saved captains and troops, now in a formation of the wrong type. The pass
+loop knew which steps applied and returned only counts.
+- **Why missed:** the build brief wrote the presence rule as "has a class", a test that holds for the intended case
+  and for the blocked one; the unit tests covered each stage alone.
+- **Prevent:** when one stage's success gates the next, return the completed items from the first stage and give
+  that set to the second; test the composition with a blocked and an unmappable step (`FormationPresetLayout.PlanLoad`).
+- **Source:** `docs/reviews/rca-formation-presets-2026-10-09.md` finding 1.
