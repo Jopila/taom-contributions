@@ -3235,5 +3235,8 @@
 	<string id="taom_oob_preset_save_failed" text="{=taom_oob_preset_save_failed}Could not save the preset." />
 	<string id="taom_oob_presets_button_count" text="{=taom_oob_presets_button_count}Presets ({COUNT})" />
 	<string id="taom_oob_presets_button" text="{=taom_oob_presets_button}Presets" />
+	<!-- FiefManagement -->
+	<string id="taom_fief_nav_disabled" text="{=taom_fief_nav_disabled}Fief management is turned off in the mod options." />
+	<string id="taom_fief_nav_busy" text="{=taom_fief_nav_busy}The fief hub cannot be opened right now." />
 
 </strings>

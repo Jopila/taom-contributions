@@ -13,6 +13,7 @@ using TAOM.Features.SupplyLines;
 using TAOM.Features.CaravanTrade;
 using TAOM.Features.CastleRecruitment;
 using TAOM.Features.FieldCommission;
+using TAOM.Features.FiefManagement;
 using TAOM.Features.FieldCommission.Domain;
 using TAOM.Features.NameplateCull;
 using TAOM.Features.PartyIconScale;
@@ -65,6 +66,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(WarChronicleSettingsProvider))]
     // Read every campaign-map frame, from the Battle Load Diagnostics page.
     [DataRow(typeof(NameplateCullSettingsProvider))]
+    // #789: the Fiefs map-bar button polls the fief hub opener every frame, which reads these.
+    [DataRow(typeof(FiefManagementSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -95,6 +98,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(ICampSettingsProvider), typeof(CampSettingsProvider))]
     [DataRow(typeof(IWarChronicleSettingsProvider), typeof(WarChronicleSettingsProvider))]
     [DataRow(typeof(INameplateCullSettingsProvider), typeof(NameplateCullSettingsProvider))]
+    [DataRow(typeof(IFiefManagementSettingsProvider), typeof(FiefManagementSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -231,6 +235,34 @@ public class CampaignHotPathSettingsProvidersTests
 
         Assert.IsFalse(sut.Enabled);
         Assert.AreEqual(8f, sut.CampSetupHours);
+    }
+
+    [TestMethod]
+    public void FiefManagement_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new FiefManagementSettingsProvider(mcm);
+        Assert.IsTrue(sut.EnableFiefManagement);
+        Assert.IsTrue(sut.AllowRemoteBuildingQueue);
+        Assert.IsFalse(sut.IsDebugMode);
+
+        mcm.EnableFiefManagement = false;
+        mcm.AllowRemoteBuildingQueue = false;
+        mcm.FiefManagementDebug = true;
+
+        Assert.IsFalse(sut.EnableFiefManagement);
+        Assert.IsFalse(sut.AllowRemoteBuildingQueue);
+        Assert.IsTrue(sut.IsDebugMode);
+    }
+
+    [TestMethod]
+    public void FiefManagement_NoMcm_FallsBackToTheDefaults()
+    {
+        var sut = new FiefManagementSettingsProvider();
+
+        Assert.IsTrue(sut.EnableFiefManagement);
+        Assert.IsTrue(sut.AllowRemoteBuildingQueue);
+        Assert.IsFalse(sut.IsDebugMode);
     }
 
     [TestMethod]
