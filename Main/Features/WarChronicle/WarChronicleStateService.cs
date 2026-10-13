@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TAOM.Core.Logging;
 using TAOM.Features.WarChronicle.Effects;
+using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarChronicle.Rally;
 using TAOM.Features.WarOfTheRingMomentum;
 
@@ -9,8 +10,8 @@ namespace TAOM.Features.WarChronicle;
 /// <summary>
 /// The War Chronicle's per-campaign state as one unit: it assembles the save payload from the effect
 /// registry, the baselines and the rally tiers, hands it to the behavior in chunks, and restores each
-/// section from a load. It also holds the chronicle section as an opaque JSON array until the event
-/// milestone gives it an owner, and resets every registry for a new session.
+/// section from a load. The chronicle section's rows belong to <see cref="ChronicleStateStore"/> (#765 M3),
+/// which parses them row by row. It resets every registry for a new session.
 ///
 /// The chunks come from <see cref="MomentumSyncChunker"/>: one SyncData string over 32,767 UTF-8
 /// bytes corrupts the save at write time, and a developed campaign's effects and baselines can grow
@@ -23,15 +24,18 @@ public sealed class WarChronicleStateService
     private readonly RallyTierStore _rallyTiers;
     private readonly IModLogger _logger;
 
-    private string _chronicleJson = WarChronicleSaveCodec.EmptyArray;
+    // #765 (M3): the chronicle section's owner. The codec still carries the section as an opaque array.
+    private readonly ChronicleStateStore _chronicle;
 
     public WarChronicleStateService(
-        IWarEffectService effects, WarBaselineService baselines, RallyTierStore rallyTiers, IModLogger logger)
+        IWarEffectService effects, WarBaselineService baselines, RallyTierStore rallyTiers, IModLogger logger,
+        ChronicleStateStore chronicle)
     {
         _effects = effects;
         _baselines = baselines;
         _rallyTiers = rallyTiers;
         _logger = logger;
+        _chronicle = chronicle;
     }
 
     /// <summary>The payload split into chunks that each stay far under the engine's per-entry limit.</summary>
@@ -39,7 +43,7 @@ public sealed class WarChronicleStateService
     {
         var payload = new WarChroniclePayload
         {
-            ChronicleJson = _chronicleJson,
+            ChronicleJson = _chronicle.ToJson(),
         };
         payload.Effects.AddRange(_effects.Snapshot());
         foreach (var pair in _baselines.Snapshot())
@@ -65,7 +69,7 @@ public sealed class WarChronicleStateService
         _effects.RestoreFromSave(payload.Effects);
         _baselines.RestoreFromSave(payload.Baselines);
         _rallyTiers.Restore(payload.RallyTiers);
-        _chronicleJson = payload.ChronicleJson;
+        _chronicle.RestoreFromJson(payload.ChronicleJson);
     }
 
     /// <summary>Empties every registry. Called from the campaign behavior's constructor (the session-reset rule).</summary>
@@ -74,6 +78,6 @@ public sealed class WarChronicleStateService
         _effects.ResetForNewSession();
         _baselines.ResetForNewSession();
         _rallyTiers.ResetForNewSession();
-        _chronicleJson = WarChronicleSaveCodec.EmptyArray;
+        _chronicle.ResetForNewSession();
     }
 }

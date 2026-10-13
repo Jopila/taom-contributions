@@ -110,6 +110,18 @@ public class WarOfTheRingService : IWarOfTheRingService
     // the phased escalation. Clamping here rather than per-source covers all four inputs at once:
     // the MCM sliders (validated nowhere — they accept any pair inside [1,365]), the JSON pair,
     // the TestMode pair, and the compiled defaults. Dual-surface rule, csharp-architecture.md.
+    // #765: the War Chronicle's phase anchors read the same clamped pair the transitions use.
+    public int? GetEffectivePhaseDay(WarPhase phase)
+    {
+        var (phase1Day, phase2Day) = GetEffectivePhaseDays();
+        switch (phase)
+        {
+            case WarPhase.IsengardWar: return phase1Day;
+            case WarPhase.FullWar: return phase2Day;
+            default: return null;
+        }
+    }
+
     private (int phase1Day, int phase2Day) GetEffectivePhaseDays()
     {
         var (phase1Day, phase2Day) = GetRawPhaseDays();

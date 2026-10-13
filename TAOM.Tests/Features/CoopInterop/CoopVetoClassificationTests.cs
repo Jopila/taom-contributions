@@ -485,6 +485,13 @@ public class CoopVetoClassificationTests
         "EstablishInitialAlliances",
         "ReconcileDeclaredWars",
         "CheckPhaseTransition",
+        // #765: the War Chronicle's world-writing entry points (effects, focus, momentum, saved event rows).
+        "LaunchChronicle",
+        "RunChronicleDay",
+        "OnTargetOwnerChanged",
+        "OnTargetBesieged",
+        "OpenChronicleEventNow",
+        "TryAwardScripted",
     };
 
     [TestMethod]

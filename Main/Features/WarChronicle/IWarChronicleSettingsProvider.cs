@@ -13,4 +13,19 @@ public interface IWarChronicleSettingsProvider
     /// every rally effect at the next daily tick; the rally's data file has its own <c>enabled</c> flag.
     /// </summary>
     bool WarRallyEnabled { get; }
+
+    /// <summary>
+    /// The MCM switch for the chronicle's event chain (#765). Off stops new work: no event opens or
+    /// resolves and the army focus is cleared. The saved event states are kept.
+    /// </summary>
+    bool ChronicleEnabled { get; }
+
+    /// <summary>Whether chronicle events are announced to the player with a popup.</summary>
+    bool ChronicleAnnouncements { get; }
+
+    /// <summary>
+    /// The army focus multiplier during a siege window: always finite and within 1 to 2.5 (a non-finite
+    /// value falls back to the default 1.4).
+    /// </summary>
+    float ArmyFocusMultiplier { get; }
 }

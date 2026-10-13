@@ -1,0 +1,411 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using TAOM.Core.Validation;
+using TAOM.Features.WarChronicle.Effects;
+using TAOM.Features.WarOfTheRingMomentum.Domain;
+
+namespace TAOM.Features.WarChronicle.Events;
+
+/// <summary>
+/// Parses and validates <c>war_chronicle/war_chronicle.json</c> (docs/features/war-chronicle.md
+/// "Validation rules"). Pure: every problem is a line in the caller's warning list.
+///
+/// <list type="bullet">
+/// <item>The file: readable JSON, <c>schemaVersion</c> 1, an <c>events</c> array, at most
+/// <see cref="MaxEvents"/> events (the rest are skipped).</item>
+/// <item>An event is skipped for: a blank or duplicate id; an unknown kind or anchor; an <c>Event</c>
+/// anchor without an <c>anchorEvent</c>, or one naming an event that is not earlier in the file (so no
+/// cycle can form); an <c>anchorEvent</c> on a phase anchor; a <c>requiresOutcome</c> without an Event
+/// anchor, of an unknown state, or one the anchor's kind never reaches; an offset outside 0 to 365; no
+/// title; a narrative without an <c>occurred</c> outcome; a siege with a window outside 1 to 60, no
+/// target, no defender, no attacker, the defender among the attackers, or an anchor chain that opens
+/// before the Full War (decision D2: peace is not blocked before Phase 2).</item>
+/// <item>An effect row is skipped alone for: a blank target; <c>attacker</c> or <c>defender</c> on a
+/// narrative; an unknown kind; a magnitude that is not finite, is zero, or is past
+/// <see cref="MaxMagnitude"/> either way (finite-checked before the range check); a duration outside 1
+/// to 60.</item>
+/// <item>A momentum award is dropped alone for a side other than <c>free</c> or <c>evil</c>, or units
+/// outside 1 to <see cref="MaxMomentumUnits"/>.</item>
+/// </list>
+/// Settlement and kingdom ids are checked against the campaign at session launch, not here.
+/// </summary>
+public static class ChronicleConfigValidator
+{
+    public const int SchemaVersion = 1;
+    public const int MaxEvents = 32;
+    public const int MaxOffsetDays = 365;
+    public const int MinWindowDays = 1;
+    public const int MaxWindowDays = 60;
+    public const float MaxMagnitude = 0.25f;
+    public const int MinDurationDays = 1;
+    public const int MaxDurationDays = 60;
+    public const int MaxMomentumUnits = 300;
+
+    internal const string TargetAttacker = "attacker";
+    internal const string TargetDefender = "defender";
+    internal const string TargetFree = "free";
+    internal const string TargetEvil = "evil";
+
+    public static IReadOnlyList<ChronicleEventDefinition> Parse(string? json, IList<string> warnings)
+    {
+        var result = new List<ChronicleEventDefinition>();
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            warnings.Add("the file is empty, so no chronicle event loads");
+            return result;
+        }
+
+        JToken root;
+        try
+        {
+            using (var reader = new JsonTextReader(new StringReader(json!)) { DateParseHandling = DateParseHandling.None })
+                root = JToken.Load(reader);
+        }
+        catch (JsonException ex)
+        {
+            warnings.Add("the file is not readable JSON, so no chronicle event loads: " + ex.Message);
+            return result;
+        }
+
+        var version = root is JObject o ? o["schemaVersion"] : null;
+        if (version == null || version.Type != JTokenType.Integer || (long)version != SchemaVersion)
+        {
+            warnings.Add($"schemaVersion must be {SchemaVersion}, so no chronicle event loads");
+            return result;
+        }
+
+        if (!(root["events"] is JArray events))
+        {
+            warnings.Add("the file has no events array, so no chronicle event loads");
+            return result;
+        }
+
+        if (events.Count > MaxEvents)
+            warnings.Add($"the file lists {events.Count} events; at most {MaxEvents} load, the rest are skipped");
+
+        var byId = new Dictionary<string, ChronicleEventDefinition>(StringComparer.Ordinal);
+        var reachesFullWar = new Dictionary<string, bool>(StringComparer.Ordinal);
+        for (var i = 0; i < events.Count && i < MaxEvents; i++)
+        {
+            var definition = ReadEvent(events[i], i, byId, reachesFullWar, warnings);
+            if (definition == null)
+                continue;
+
+            byId[definition.Id] = definition;
+            result.Add(definition);
+        }
+
+        return result;
+    }
+
+    private static ChronicleEventDefinition? ReadEvent(
+        JToken token, int index, Dictionary<string, ChronicleEventDefinition> earlier,
+        Dictionary<string, bool> reachesFullWar, IList<string> warnings)
+    {
+        if (!(token is JObject e))
+        {
+            warnings.Add($"event {index} skipped: it is not an object");
+            return null;
+        }
+
+        var id = Text(e["id"]);
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            warnings.Add($"event {index} skipped: its id is missing or empty");
+            return null;
+        }
+
+        ChronicleEventDefinition? Skip(string why)
+        {
+            warnings.Add($"event '{id}' skipped: {why}");
+            return null;
+        }
+
+        if (earlier.ContainsKey(id!))
+            return Skip("a duplicate id");
+
+        if (!TryEnum<ChronicleEventKind>(Text(e["kind"]), out var kind))
+            return Skip($"kind '{Text(e["kind"])}' is not Narrative or Siege");
+
+        if (!TryEnum<ChronicleAnchor>(Text(e["anchor"]), out var anchor))
+            return Skip($"anchor '{Text(e["anchor"])}' is not CampaignStart, Phase1, Phase2 or Event");
+
+        var definition = new ChronicleEventDefinition { Id = id!, Kind = kind, Anchor = anchor };
+
+        var anchorEvent = Text(e["anchorEvent"]);
+        if (anchor == ChronicleAnchor.Event)
+        {
+            if (string.IsNullOrWhiteSpace(anchorEvent))
+                return Skip("an Event anchor needs an anchorEvent");
+            if (!earlier.ContainsKey(anchorEvent!))
+                return Skip($"anchorEvent '{anchorEvent}' must name an earlier event that loaded");
+            definition.AnchorEventId = anchorEvent;
+        }
+        else if (!string.IsNullOrWhiteSpace(anchorEvent))
+        {
+            return Skip("anchorEvent is set but the anchor is not Event");
+        }
+
+        var requires = Text(e["requiresOutcome"]);
+        if (!string.IsNullOrWhiteSpace(requires))
+        {
+            if (anchor != ChronicleAnchor.Event)
+                return Skip("requiresOutcome needs an Event anchor");
+            if (!TryEnum<ChronicleEventState>(requires, out var required) || !Reachable(earlier[anchorEvent!].Kind, required))
+                return Skip($"requiresOutcome '{requires}' is not an outcome the anchor event can reach");
+            definition.RequiresOutcome = required;
+        }
+
+        if (!TryInt(e["offsetDays"], 0, MaxOffsetDays, out var offset))
+            return Skip($"offsetDays must be a whole number from 0 to {MaxOffsetDays}");
+        definition.OffsetDays = offset;
+
+        definition.Title = Text(e["title"]) ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(definition.Title))
+            return Skip("it has no title");
+
+        var fullWar = anchor == ChronicleAnchor.Phase2
+                      || (anchor == ChronicleAnchor.Event && reachesFullWar.TryGetValue(anchorEvent!, out var parent) && parent);
+
+        var outcomes = e["outcomes"] as JObject;
+        if (kind == ChronicleEventKind.Siege)
+        {
+            if (!ReadSiege(e, definition, fullWar, outcomes, warnings, why => Skip(why)))
+                return null;
+        }
+        else
+        {
+            var occurred = outcomes?["occurred"];
+            if (occurred == null)
+                return Skip("a narrative event needs an occurred outcome");
+            definition.Occurred = ReadOutcome(occurred, definition, "occurred", warnings);
+            WarnUnreached(outcomes!, definition, warnings, "occurred");
+        }
+
+        reachesFullWar[definition.Id] = fullWar || kind == ChronicleEventKind.Siege;
+        return definition;
+    }
+
+    private static bool ReadSiege(
+        JObject e, ChronicleEventDefinition definition, bool fullWar, JObject? outcomes,
+        IList<string> warnings, Action<string> skip)
+    {
+        if (!fullWar)
+        {
+            skip("a siege must open at Phase 2 or later (anchor Phase2, or an Event chain that reaches it)");
+            return false;
+        }
+
+        if (!TryInt(e["windowDays"], MinWindowDays, MaxWindowDays, out var window))
+        {
+            skip($"windowDays must be a whole number from {MinWindowDays} to {MaxWindowDays}");
+            return false;
+        }
+
+        definition.WindowDays = window;
+
+        definition.TargetSettlementId = Text(e["target"]);
+        if (string.IsNullOrWhiteSpace(definition.TargetSettlementId))
+        {
+            skip("a siege needs a target settlement");
+            return false;
+        }
+
+        definition.Defender = Text(e["defender"]);
+        if (string.IsNullOrWhiteSpace(definition.Defender))
+        {
+            skip("a siege needs a defender kingdom");
+            return false;
+        }
+
+        var attackers = new List<string>();
+        if (e["attackers"] is JArray list)
+        {
+            foreach (var item in list)
+            {
+                var attacker = Text(item);
+                if (!string.IsNullOrWhiteSpace(attacker) && !attackers.Contains(attacker!))
+                    attackers.Add(attacker!);
+            }
+        }
+
+        if (attackers.Count == 0)
+        {
+            skip("a siege needs at least one kingdom in attackers");
+            return false;
+        }
+
+        if (attackers.Contains(definition.Defender!))
+        {
+            skip($"the defender '{definition.Defender}' is also listed among the attackers");
+            return false;
+        }
+
+        definition.Attackers = attackers;
+        definition.OpenText = Text(e["openText"]);
+        definition.LapsedText = Text(e["lapsedText"]);
+        if (outcomes != null)
+        {
+            if (outcomes["held"] != null)
+                definition.Held = ReadOutcome(outcomes["held"]!, definition, "held", warnings);
+            if (outcomes["fell"] != null)
+                definition.Fell = ReadOutcome(outcomes["fell"]!, definition, "fell", warnings);
+            WarnUnreached(outcomes, definition, warnings, "held", "fell");
+        }
+
+        return true;
+    }
+
+    private static void WarnUnreached(JObject outcomes, ChronicleEventDefinition definition, IList<string> warnings, params string[] known)
+    {
+        foreach (var property in outcomes.Properties())
+        {
+            if (Array.IndexOf(known, property.Name) < 0)
+                warnings.Add($"event '{definition.Id}': outcome '{property.Name}' is ignored; a {definition.Kind} event resolves only as {string.Join(" or ", known)}");
+        }
+    }
+
+    private static ChronicleOutcomeDefinition ReadOutcome(JToken token, ChronicleEventDefinition definition, string name, IList<string> warnings)
+    {
+        var outcome = new ChronicleOutcomeDefinition();
+        if (!(token is JObject o))
+        {
+            warnings.Add($"event '{definition.Id}': outcome '{name}' is not an object, so it pays nothing");
+            return outcome;
+        }
+
+        outcome.Text = Text(o["text"]);
+        var effects = new List<ChronicleEffectDefinition>();
+        if (o["effects"] is JArray rows)
+        {
+            for (var i = 0; i < rows.Count; i++)
+            {
+                var effect = ReadEffect(rows[i], definition, out var problem);
+                if (effect != null)
+                    effects.Add(effect);
+                else
+                    warnings.Add($"event '{definition.Id}': {name} effect {i} skipped: {problem}");
+            }
+        }
+
+        outcome.Effects = effects;
+        if (o["momentum"] != null)
+            outcome.Momentum = ReadMomentum(o["momentum"]!, definition, name, warnings);
+        return outcome;
+    }
+
+    private static ChronicleEffectDefinition? ReadEffect(JToken token, ChronicleEventDefinition definition, out string problem)
+    {
+        problem = string.Empty;
+        if (!(token is JObject row))
+        {
+            problem = "it is not an object";
+            return null;
+        }
+
+        var target = Text(row["target"]);
+        if (string.IsNullOrWhiteSpace(target))
+        {
+            problem = "its target is missing or empty";
+            return null;
+        }
+
+        if (!definition.IsSiege && (target == TargetAttacker || target == TargetDefender))
+        {
+            problem = $"target '{target}' exists only on a siege";
+            return null;
+        }
+
+        if (!TryEnum<WarEffectKind>(Text(row["kind"]), out var kind))
+        {
+            problem = $"kind '{Text(row["kind"])}' is not VolunteerRate or PrisonerEscape";
+            return null;
+        }
+
+        // Finite first: NaN fails every comparison, so the range test alone would let it through.
+        if (!TryNumber(row["magnitude"], out var magnitude) || !FiniteFloatValidator.IsFinite(magnitude)
+            || magnitude == 0f || !FiniteFloatValidator.IsFiniteInRange(magnitude, -MaxMagnitude, MaxMagnitude))
+        {
+            problem = $"magnitude must be a finite, non-zero number within -{MaxMagnitude} to {MaxMagnitude}";
+            return null;
+        }
+
+        if (!TryInt(row["durationDays"], MinDurationDays, MaxDurationDays, out var days))
+        {
+            problem = $"durationDays must be a whole number from {MinDurationDays} to {MaxDurationDays}";
+            return null;
+        }
+
+        return new ChronicleEffectDefinition { Target = target!, Kind = kind, Magnitude = magnitude, DurationDays = days };
+    }
+
+    private static ChronicleMomentumAward? ReadMomentum(JToken token, ChronicleEventDefinition definition, string name, IList<string> warnings)
+    {
+        var side = Text(token["side"]);
+        MomentumSide parsed;
+        if (side == TargetFree)
+            parsed = MomentumSide.Free;
+        else if (side == TargetEvil)
+            parsed = MomentumSide.Evil;
+        else
+        {
+            warnings.Add($"event '{definition.Id}': {name} momentum dropped: side '{side}' is not free or evil");
+            return null;
+        }
+
+        if (!TryInt(token["units"], 1, MaxMomentumUnits, out var units))
+        {
+            warnings.Add($"event '{definition.Id}': {name} momentum dropped: units must be a whole number from 1 to {MaxMomentumUnits}");
+            return null;
+        }
+
+        return new ChronicleMomentumAward { Side = parsed, Units = units };
+    }
+
+    /// <summary>A narrative resolves only as Occurred; a siege as Held, Fell or Lapsed.</summary>
+    private static bool Reachable(ChronicleEventKind anchorKind, ChronicleEventState state) =>
+        anchorKind == ChronicleEventKind.Narrative
+            ? state == ChronicleEventState.Occurred
+            : state == ChronicleEventState.Held || state == ChronicleEventState.Fell || state == ChronicleEventState.Lapsed;
+
+    private static string? Text(JToken? token) =>
+        token is JValue v && v.Type == JTokenType.String ? (string?)v.Value : null;
+
+    /// <summary>Names only: a number such as "3" is not a kind, even where Enum.TryParse would accept it.</summary>
+    private static bool TryEnum<T>(string? text, out T value) where T : struct
+    {
+        value = default;
+        if (string.IsNullOrWhiteSpace(text) || char.IsDigit(text![0]) || text[0] == '-')
+            return false;
+        return Enum.TryParse(text, false, out value) && Enum.IsDefined(typeof(T), value);
+    }
+
+    private static bool TryInt(JToken? token, int min, int max, out int value)
+    {
+        value = 0;
+        if (token == null || token.Type != JTokenType.Integer || !(((JValue)token).Value is long raw) || raw < min || raw > max)
+            return false;
+        value = (int)raw;
+        return true;
+    }
+
+    private static bool TryNumber(JToken? token, out float value)
+    {
+        value = float.NaN;
+        if (token == null || (token.Type != JTokenType.Integer && token.Type != JTokenType.Float))
+            return false;
+        try
+        {
+            value = (float)Convert.ToDouble(((JValue)token).Value, CultureInfo.InvariantCulture);
+            return true;
+        }
+        catch (InvalidCastException)
+        {
+            return false;
+        }
+    }
+}

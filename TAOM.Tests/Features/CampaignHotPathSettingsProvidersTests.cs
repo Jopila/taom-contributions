@@ -63,7 +63,7 @@ public class CampaignHotPathSettingsProvidersTests
     // #746: read every campaign frame (supply lines always, the field camp while it stands).
     [DataRow(typeof(SupplyLinesSettingsProvider))]
     [DataRow(typeof(CampSettingsProvider))]
-    // #765: the war-effect strength is re-read by the registry's daily re-bake.
+    // #765: the war-effect strength is re-read by the registry's daily re-bake, the chronicle switch and army focus by each chronicle step.
     [DataRow(typeof(WarChronicleSettingsProvider))]
     // Read every campaign-map frame, from the Battle Load Diagnostics page.
     [DataRow(typeof(NameplateCullSettingsProvider))]

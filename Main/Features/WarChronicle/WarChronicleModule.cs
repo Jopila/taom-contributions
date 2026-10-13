@@ -8,10 +8,10 @@ namespace TAOM.Features.WarChronicle;
 
 /// <summary>
 /// The War Chronicle as a feature module (docs/features/war-chronicle.md, issue #765): the timed-effect
-/// registry, the baselines, the rally and the war ledger; the event chain, the army-focus window and the
-/// Eye of Sauron hunt come in later milestones.
-/// The campaign behavior is built fresh for each campaign (a lambda body, not a container singleton)
-/// because its constructor resets the per-campaign singletons; WarChronicleWiringTests pins the shape.
+/// registry, the baselines, the rally, the war ledger and the chronicle's event chain with its army-focus
+/// windows; the Eye of Sauron hunt comes in a later milestone.
+/// Both campaign behaviors are built fresh for each campaign (a lambda body, not a container singleton)
+/// because their constructors reset the per-campaign singletons; WarChronicleWiringTests pins the shape.
 /// </summary>
 internal sealed class WarChronicleModule : TaomFeatureModule
 {
@@ -23,6 +23,13 @@ internal sealed class WarChronicleModule : TaomFeatureModule
             r.Resolve<Ledger.WarLedgerService>(),
             r.Resolve<ICoopSessionProvider>(),
             r.Resolve<IModLogger>())),
+
+        // #765 M3: the event chain's router, also built per campaign: its constructor clears the
+        // announcement queue and the army focus. WarChronicleBehavior stays the one SyncData owner.
+        CampaignBehaviorDecl.Of(r => new Events.WarChronicleEventsBehavior(
+            r.Resolve<Events.ChronicleService>(),
+            r.Resolve<Events.ChronicleAnnouncementQueue>(),
+            r.Resolve<ICoopSessionProvider>())),
     };
 
     public override string Id => "WarChronicle";

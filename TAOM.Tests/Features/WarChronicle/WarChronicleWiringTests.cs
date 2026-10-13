@@ -79,7 +79,8 @@ public class WarChronicleWiringTests
 
         Assert.IsNotNull(module, "WarChronicleModule must be listed in FeatureModules.All.");
         Assert.IsTrue(module!.OwnsSaveData, "the behavior persists data in SyncData, so the module fails closed");
-        Assert.AreEqual(1, module.CampaignBehaviors.Count);
+        // WarChronicleBehavior (the SyncData owner) and WarChronicleEventsBehavior (the chronicle's router, #765 M3).
+        Assert.AreEqual(2, module.CampaignBehaviors.Count);
         Assert.IsNull(module.ParkedReason);
     }
 

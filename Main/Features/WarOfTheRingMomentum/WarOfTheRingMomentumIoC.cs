@@ -15,6 +15,8 @@ public static class WarOfTheRingMomentumIoC
         container.Register<IMomentumTextService, MomentumTextService>(Reuse.Singleton);
         container.Register<IPlayerMomentumService, PlayerMomentumService>(Reuse.Singleton);
         container.Register<IMomentumEventService, MomentumEventService>(Reuse.Singleton);
+        // #765 (M6): the War Chronicle's scripted awards.
+        container.Register<IMomentumAwardService, MomentumAwardService>(Reuse.Singleton);
         container.Register<IMomentumEnrollmentService, MomentumEnrollmentService>(Reuse.Singleton);
         container.Register<IMomentumVictoryService, MomentumVictoryService>(Reuse.Singleton);
         container.Register<IMomentumQueryService, MomentumQueryService>(Reuse.Singleton);

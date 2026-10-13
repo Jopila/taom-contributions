@@ -36,6 +36,7 @@ The AI target-selection system runs deep inside `AiMilitaryBehavior.AiHourlyTick
 4. **No distance term.** A score-side falloff was built on 2026-08-21 and **removed on 2026-08-22**. Measured end to end it moved the crossover between a max-boost far target and a near neutral one from 4.029 to 3.746 town gaps: 0.283 gaps, in exchange for an adapter on the hot path, a three-way cache, and a path where suppressing a committed target pushed `Army.ThinkAboutCohesionBoost` under its `0.01f` gate and disbanded the army. `IMapReachAdapter` survives, used only by `Patch22`'s rescue gate.
 5. **Theater weighting:** each kingdom holds an ordered theater list whose first entry is its primary front. A target owned by a primary-theater member scores `PrimaryTheaterWeight` (1.25), a shared non-primary theater `SecondaryTheaterWeight` (1.0), no shared theater `ForeignTheaterWeight` (0.35). Never zero.
 6. **Home defence:** `Defender` missions take `ArmyDefenderPriority` (MCM, default 1.6).
+7. **Army focus (#765):** during a War Chronicle siege window, Besieger armies of the window's attackers and Defender armies of its defender score its target times the focus multiplier. See "Army focus" below.
 
 **Why nearest fortification and not `FactionMidSettlement`.** The medoid distorts wide empires by up to 3.4x (Rhûn to Gondor is 167 path units from its nearest fort but 567 from its mid), and `Kingdom.CalculateMidSettlement` re-runs on `AddClanInternal`, its removal twin, `OnFortificationAdded` and `OnFortificationRemoved`, so the anchor drifts toward whatever a kingdom is currently conquering, widening its reach in the direction it is already winning.
 
@@ -49,7 +50,7 @@ The AI target-selection system runs deep inside `AiMilitaryBehavior.AiHourlyTick
 
 Priority list advancement is stateless — captured settlements disappear from the enemy settlement pool, so the next unconquered entry naturally becomes the highest-boosted target with no tracking required.
 
-Only `Besieger` receives the priority, theater and reach terms; only `Defender` receives the defence multiplier. `Raider` is deliberately untouched because vanilla already hard-zeroes raiders past 5 town gaps in `GetDistanceScoreForRaiding`. A non-finite or non-positive `BaseScore` returns unchanged.
+Only `Besieger` receives the priority, theater and reach terms; only `Defender` receives the defence multiplier. Both receive the army focus. `Raider` is deliberately untouched because vanilla already hard-zeroes raiders past 5 town gaps in `GetDistanceScoreForRaiding`. A non-finite or non-positive `BaseScore` returns unchanged.
 
 ### Component Diagram
 
@@ -137,6 +138,18 @@ All sections optional, missing entries default to vanilla behaviour. **Every val
 - **`FactionPriorityTargets`:** ordered target lists. Earlier entries score higher, decaying from `MaxPriorityBoost` to 1.0 across the list. Because the decay spans the list, pruning an entry re-steepens it for the survivors.
 - **`FactionAggressionMultipliers`:** how much to inflate `ourStrength` before the vanilla `2x defender` strength gate. At 2.0 the faction can siege at 1:1 parity instead of requiring 2:1.
 
+### Army focus
+
+The War Chronicle ([war-chronicle.md](war-chronicle.md), #765 M4) pushes each open siege window into `ArmyTargetFocusRegistry` (`ArmyTargetFocusRegistry.cs`, a container singleton registered here): the target settlement, the attacking kingdoms, the defending kingdom and a multiplier, the MCM "War of the Ring/War Chronicle" Army Focus Multiplier (1.0 to 2.5, default 1.4). `ApplyTargetScoreModifiers` multiplies last:
+
+- a `Besieger` army whose faction is an attacker scores the target times the focus, on top of the priority, theater and commitment terms;
+- a `Defender` army of the defender scores it times the focus, on top of the home-defence multiplier;
+- every other army, mission or settlement gets 1.
+
+The registry is read for every scored candidate, so it is an immutable array swapped in whole (copy-on-write): the read is a length check, the empty fast path outside a window, then a scan of a few entries, with no lock and no allocation. Entries are validated on write: a blank settlement id, no attacker and no defender, or a multiplier that is not finite or not above 1 is dropped, and a multiplier above 2.5 is clamped. The base score is positive by the time the focus applies, so a vanilla zero (the distance veto) stays zero and a NaN base is returned unchanged. With two windows on one target the larger focus applies.
+
+The registry is not saved: the chronicle pushes its Active windows again at session launch and on every daily step, drops a window when it resolves, and clears the set when the war ends, when the chronicle is switched off, and when each campaign's chronicle behavior is built. The focus needs Army Strategic Intelligence on, like every other term here. Tests: `ArmyTargetFocusRegistryTests` (18) and `ArmyTargetFocusScoringTests` (7).
+
 ### War theaters
 
 Kingdom to theaters, first entry being its primary front. Produced with
@@ -221,6 +234,7 @@ exact dead-key class has shipped five or more times:
 | `Main/Features/ArmyTargeting/IArmyTargetingSettingsProvider.cs` | Settings interface |
 | `Main/Features/ArmyTargeting/ArmyTargetingSettingsProvider.cs` | Reads MCM `TaomSettings.Instance` with fallback defaults |
 | `Main/Features/ArmyTargeting/ArmyTargetingIoC.cs` | DryIoc Singleton registration |
+| `Main/Features/ArmyTargeting/ArmyTargetFocusRegistry.cs`, `ArmyTargetFocus.cs` | The War Chronicle's army focus windows (#765), read in `ApplyTargetScoreModifiers` |
 | `Main/Features/ArmyTargeting/Hooks/AiMilitaryBehavior_CalculateDistanceScoreForBesieging_Patch.cs` | Harmony Postfix — substitutes border proximity floor for priority-list targets |
 | `Main/Features/ArmyTargeting/Hooks/Army_FindBestGatheringSettlementAndMoveTheLeader_Patch.cs` | Patch49 Harmony Finalizer — swallows the vanilla siege-start NRE + records diagnostics |
 | `Main/Features/ArmyTargeting/Diagnostics/SiegeGatheringFailureInfo.cs` | Boundary DTO + `FromArmy` factory (sole sealed-type reader; fortification census) |
@@ -331,6 +345,7 @@ To fix a flagged siege: look at the kingdom's fortification census + the leader/
 
 ## Changelog
 
+- 2026-10-08: **Army focus (#765, M4).** `ArmyTargetingService` takes an `ArmyTargetFocusRegistry`; during a War Chronicle siege window the attackers' Besieger armies and the defender's Defender armies score the target times the MCM Army Focus Multiplier (default 1.4). A zero or NaN base score is never lifted. +25 tests.
 - 2026-08-22 (second pass): **Deleted the distance falloff.** A second Codex review measured it at 0.283 town gaps of crossover movement against an adapter on the hot path, a three-way cache, two singletons rooting a finalized campaign, and a cohesion-disband route. Vanilla already ramps 10.0 to 0.9 over five gaps and hard-vetoes non-adjacent targets, so TAOM now applies no distance term at all. Split `Patch22`'s rescue radius into its own `BorderRescueRadiusInTownGaps` (3.2), after the re-size below accidentally widened that gate from 3 to 6 gaps and it stopped bounding anything. Also: validated `FactionAggressionMultipliers` (an infinity there defeated vanilla's siege veto map-wide), added `ArmyTargetingLifecycleBehavior` for fief-transfer invalidation, cleared both singletons from `SubModule.OnGameEnd`, made MCM rejections warn once per property, and stopped `Patch22` converting a NaN rejection into a finite score.
 - 2026-08-22: **Corrections from a Codex adversarial pass and a second deep review.** The stated root cause was wrong and is withdrawn above: vanilla's distance term is an 11.1x ramp, not a 0.9 floor, and `CalculateDistanceScoreForBesieging` hard-vetoes non-adjacent targets, so `Patch22`'s border floor was the only thing that could produce a cross-map siege. Re-sized the falloff against the real curve (inner 1.5 to 3.0 gaps, outer 3.0 to 6.0, floor 0.05 to 0.35), which took the combined spread from 44x back to about 3x on top of vanilla's own. Reverted the 26-entry priority prune. Made `analyze_war_theaters.py` report-only. Fixed a negative priority boost from duplicate ids, an unvalidated MCM float surface that let `+Infinity` into `bestDistanceScore`, a reach cache that ignored fief transfers and rooted a finalized campaign, per-process diagnostics that went silent after the first campaign, a Defender fallback that disabled the lever instead of restoring it, and the rule-4 violation in the model body.
 - 2026-08-21: **Reach falloff + war theaters + home defence.** Replaced vanilla's never-below-0.9 distance factor with a real falloff measured from the attacking faction's nearest owned fortification (`IMapReachAdapter`), flat to 1.5 town gaps then linear to a 0.05 floor at 3.0. Added soft theater weighting over four fronts, failing open for kingdoms absent from the table so player-founded and rebel realms are unaffected. Added a `Defender` multiplier, after establishing that overriding `DefendingFactor` cannot work: it has exactly one engine read, inside `CurrentObjectiveValue`, whose only consumer is `Army.ThinkAboutCohesionBoost`, while the defender weighting that reaches target selection is a hardcoded literal. Gated `Patch22`'s border floor on being in reach. Fixed a NaN gate in `ApplyTargetScoreModifiers` that read `baseScore <= 0f` and so let NaN into the multiply chain. Deleted `FactionDistanceRangeMultipliers`, `GetDistanceCompensation` and the Long-Range Priority Boost Scale setting, being the mechanism that pushed armies far. Pruned 26 of 80 inert priority entries. Added `tools/analyze_war_theaters.py`. +49 tests.

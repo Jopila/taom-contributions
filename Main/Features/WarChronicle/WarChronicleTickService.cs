@@ -18,8 +18,9 @@ namespace TAOM.Features.WarChronicle;
 /// snapshot adapter, and a throwing engine getter must never fail the campaign's daily tick, so it is
 /// logged and the rest of the day (the baselines, the rally, the escape pass and the ledger) is skipped.
 /// Baselines taken after day 1 with none held (a save from before this feature, a corrupt section or a
-/// skipped first tick) get one warning. The chronicle events (a later milestone) slot in between the rally
-/// and the ledger. The caller has already checked that this peer may run world work.
+/// skipped first tick) get one warning. The chronicle's event chain runs from its own router,
+/// <c>Events.WarChronicleEventsBehavior</c>, not from here. The caller has already checked that this peer
+/// may run world work.
 /// </summary>
 public sealed class WarChronicleTickService
 {

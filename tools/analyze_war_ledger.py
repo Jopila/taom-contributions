@@ -16,7 +16,9 @@ parses the space-separated key=value tokens after it:
 
 Rules: an unknown v exits 2; a malformed line is skipped and counted (the first one is printed as a
 WARNING); a save-reload re-emits days, so per campaign (cid) the LAST kingdom line per (day, k), side
-line per (day, side) and share line per day win, and exact repeated events collapse to one. Logs are
+line per (day, side) and share line per day win, and exact repeated events collapse to one. Chronicle
+resolutions (ev=chronicle, one per event outcome: Occurred, Held, Fell, Lapsed or Skipped) are listed by
+day and counted per outcome, keeping the last line read for each event id. Logs are
 read oldest first (by the taom_debug_ name stamp, else file time), so the newer process wins whatever
 the argument order. A reload of an OLDER save leaves the abandoned run's later days and events in the
 report: the log carries no marker for the rewind yet.
@@ -321,6 +323,16 @@ def compute_metrics(camp):
 
     m['destroyed'] = sorted((d, f['k']) for d, f in camp.events if f['ev'] == 'destroyed')
     m['chronicle'] = sorted((d, f['id'], f['outcome']) for d, f in camp.events if f['ev'] == 'chronicle')
+    # One resolution per event: a reload from before a resolution replays it, and the line read last is
+    # the outcome that stood (events are kept in read order).
+    last_outcome = {}
+    for _, f in camp.events:
+        if f['ev'] == 'chronicle':
+            last_outcome[f['id']] = f['outcome']
+    counts = {}
+    for outcome in last_outcome.values():
+        counts[outcome] = counts.get(outcome, 0) + 1
+    m['chronicle_counts'] = counts
 
     net = {}
     for side in SIDES:
@@ -395,6 +407,8 @@ def format_report(cid, m):
     if m['chronicle']:
         out.append('  day  id  outcome')
         out.extend(f'  {d}  {i}  {o}' for d, i, o in m['chronicle'])
+        out.append('  resolutions by outcome: '
+                   + ', '.join(f'{o} {n}' for o, n in sorted(m['chronicle_counts'].items())))
     else:
         out.append('  none')
     out.append('')

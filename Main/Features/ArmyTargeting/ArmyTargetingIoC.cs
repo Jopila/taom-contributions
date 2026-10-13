@@ -10,6 +10,8 @@ public static class ArmyTargetingIoC
     {
         container.Register<IArmyTargetingConfigProvider, ArmyTargetingConfigProvider>(Reuse.Singleton);
         container.Register<IArmyTargetingSettingsProvider, ArmyTargetingSettingsProvider>(Reuse.Singleton);
+        // The War Chronicle's focus windows (#765): written by the chronicle, read on the scoring path.
+        container.Register<ArmyTargetFocusRegistry>(Reuse.Singleton);
         container.Register<IArmyTargetingService, ArmyTargetingService>(Reuse.Singleton);
         // Singleton because it carries a day-scoped distance memo; a transient would rebuild the
         // per-faction fief list on every AI tick.

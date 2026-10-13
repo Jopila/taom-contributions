@@ -1,0 +1,544 @@
+{
+  "schemaVersion": 1,
+  "events": [
+    {
+      "id": "fellowship",
+      "kind": "Narrative",
+      "anchor": "CampaignStart",
+      "offsetDays": 20,
+      "title": "{=taom_wc_fellowship_title}The Fellowship Sets Out",
+      "outcomes": {
+        "occurred": {
+          "text": "{=taom_wc_fellowship_occurred}Nine walkers leave Rivendell in secret, bearing the One Ring south. The house of Elrond gathers its strength.",
+          "effects": [
+            {
+              "target": "rivendell",
+              "kind": "VolunteerRate",
+              "magnitude": 0.1,
+              "durationDays": 20
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "khazaddum",
+      "kind": "Narrative",
+      "anchor": "Event",
+      "anchorEvent": "fellowship",
+      "offsetDays": 6,
+      "title": "{=taom_wc_khazaddum_title}The Bridge of Khazad-dûm",
+      "outcomes": {
+        "occurred": {
+          "text": "{=taom_wc_khazaddum_occurred}In the deeps of Moria the Grey Pilgrim falls with the Balrog. The orcs of the Misty Mountains swarm, and the Free Peoples mourn.",
+          "effects": [
+            {
+              "target": "mistymountainorcs",
+              "kind": "VolunteerRate",
+              "magnitude": 0.1,
+              "durationDays": 15
+            },
+            {
+              "target": "free",
+              "kind": "VolunteerRate",
+              "magnitude": -0.05,
+              "durationDays": 15
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "breaking",
+      "kind": "Narrative",
+      "anchor": "Phase1",
+      "offsetDays": 0,
+      "title": "{=taom_wc_breaking_title}The Breaking of the Fellowship",
+      "outcomes": {
+        "occurred": {
+          "text": "{=taom_wc_breaking_occurred}At Parth Galen the Uruk-hai fall upon the Company. Boromir dies defending the hobbits, and Gondor loses its heir.",
+          "effects": [
+            {
+              "target": "isengard",
+              "kind": "VolunteerRate",
+              "magnitude": 0.1,
+              "durationDays": 15
+            },
+            {
+              "target": "empire_w",
+              "kind": "VolunteerRate",
+              "magnitude": -0.05,
+              "durationDays": 15
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "theoden",
+      "kind": "Narrative",
+      "anchor": "Phase1",
+      "offsetDays": 7,
+      "title": "{=taom_wc_theoden_title}Théoden King",
+      "outcomes": {
+        "occurred": {
+          "text": "{=taom_wc_theoden_occurred}Freed from the counsel of Wormtongue, Théoden takes up his sword. The Riddermark musters to its king.",
+          "effects": [
+            {
+              "target": "vlandia",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 20
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "hornburg",
+      "kind": "Siege",
+      "anchor": "Phase2",
+      "offsetDays": 5,
+      "windowDays": 20,
+      "target": "town_V2",
+      "attackers": [
+        "isengard",
+        "empire"
+      ],
+      "defender": "vlandia",
+      "title": "{=taom_wc_hornburg_title}The Battle of the Hornburg",
+      "openText": "{=taom_wc_hornburg_open}The host of Isengard and the hillmen of Dunland march on {TARGET}. The battle must be decided within {DAYS} days.",
+      "lapsedText": "{=taom_wc_hornburg_lapsed}No assault comes to {TARGET}. The muster of Isengard turns elsewhere.",
+      "outcomes": {
+        "held": {
+          "text": "{=taom_wc_hornburg_held}The Hornburg holds through the night, and the host of Isengard breaks against its walls.",
+          "effects": [
+            {
+              "target": "defender",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "attacker",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ],
+          "momentum": {
+            "side": "free",
+            "units": 100
+          }
+        },
+        "fell": {
+          "text": "{=taom_wc_hornburg_fell}{TARGET} falls, and the White Hand rules the Westfold.",
+          "effects": [
+            {
+              "target": "attacker",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "defender",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ents",
+      "kind": "Narrative",
+      "anchor": "Event",
+      "anchorEvent": "hornburg",
+      "requiresOutcome": "Held",
+      "offsetDays": 2,
+      "title": "{=taom_wc_ents_title}The Last March of the Ents",
+      "outcomes": {
+        "occurred": {
+          "text": "{=taom_wc_ents_occurred}The Ents of Fangorn come down upon Isengard and drown the pits of Saruman. The forges of the White Hand fall silent.",
+          "effects": [
+            {
+              "target": "isengard",
+              "kind": "VolunteerRate",
+              "magnitude": -0.15,
+              "durationDays": 20
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "lorien",
+      "kind": "Siege",
+      "anchor": "Phase2",
+      "offsetDays": 8,
+      "windowDays": 20,
+      "target": "town_L1",
+      "attackers": [
+        "dolguldur"
+      ],
+      "defender": "lothlorien",
+      "title": "{=taom_wc_lorien_title}Lothlórien Assailed",
+      "openText": "{=taom_wc_lorien_open}Out of Dol Guldur the Shadow assails the Golden Wood. {TARGET} must stand for {DAYS} days.",
+      "lapsedText": "{=taom_wc_lorien_lapsed}The armies of Dol Guldur never reach {TARGET}.",
+      "outcomes": {
+        "held": {
+          "text": "{=taom_wc_lorien_held}The power of the Lady holds, and the hosts of Dol Guldur fall back from the Golden Wood.",
+          "effects": [
+            {
+              "target": "defender",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "attacker",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ],
+          "momentum": {
+            "side": "free",
+            "units": 100
+          }
+        },
+        "fell": {
+          "text": "{=taom_wc_lorien_fell}{TARGET} burns, and the light of Lothlórien wanes.",
+          "effects": [
+            {
+              "target": "attacker",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "defender",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "osgiliath",
+      "kind": "Siege",
+      "anchor": "Phase2",
+      "offsetDays": 10,
+      "windowDays": 15,
+      "target": "town_EW3",
+      "attackers": [
+        "empire_s"
+      ],
+      "defender": "empire_w",
+      "title": "{=taom_wc_osgiliath_title}The Fall of Osgiliath",
+      "openText": "{=taom_wc_osgiliath_open}The Morgul host crosses the Anduin toward {TARGET}. Gondor must hold the ruined city for {DAYS} days.",
+      "lapsedText": "{=taom_wc_osgiliath_lapsed}Mordor does not come against {TARGET}, and the river stays quiet.",
+      "outcomes": {
+        "held": {
+          "text": "{=taom_wc_osgiliath_held}Faramir holds the crossings of the Anduin, and the Morgul host draws back.",
+          "effects": [
+            {
+              "target": "defender",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "attacker",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ],
+          "momentum": {
+            "side": "free",
+            "units": 100
+          }
+        },
+        "fell": {
+          "text": "{=taom_wc_osgiliath_fell}{TARGET} falls, and the road to Minas Tirith lies open.",
+          "effects": [
+            {
+              "target": "attacker",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "defender",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dale",
+      "kind": "Siege",
+      "anchor": "Phase2",
+      "offsetDays": 12,
+      "windowDays": 20,
+      "target": "town_S3",
+      "attackers": [
+        "khuzait",
+        "dolguldur"
+      ],
+      "defender": "sturgia",
+      "title": "{=taom_wc_dale_title}The Battle of Dale",
+      "openText": "{=taom_wc_dale_open}Easterlings and the servants of Dol Guldur march against the realm of Dale. {TARGET} must hold for {DAYS} days.",
+      "lapsedText": "{=taom_wc_dale_lapsed}The Easterlings turn aside, and {TARGET} is spared.",
+      "outcomes": {
+        "held": {
+          "text": "{=taom_wc_dale_held}Men of Dale and Dwarves of Erebor stand together, and the Easterling host is thrown back.",
+          "effects": [
+            {
+              "target": "defender",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "attacker",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ],
+          "momentum": {
+            "side": "free",
+            "units": 100
+          }
+        },
+        "fell": {
+          "text": "{=taom_wc_dale_fell}{TARGET} falls to the Easterlings, and the Dwarves of Erebor ride out to aid their friends.",
+          "effects": [
+            {
+              "target": "attacker",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "defender",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            },
+            {
+              "target": "erebor",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "corsairs",
+      "kind": "Siege",
+      "anchor": "Phase2",
+      "offsetDays": 14,
+      "windowDays": 15,
+      "target": "town_EW4",
+      "attackers": [
+        "umbar",
+        "empire_s"
+      ],
+      "defender": "empire_w",
+      "title": "{=taom_wc_corsairs_title}The Corsairs of Umbar",
+      "openText": "{=taom_wc_corsairs_open}The black sails of Umbar come up the Anduin toward {TARGET}. Gondor must hold the port for {DAYS} days.",
+      "lapsedText": "{=taom_wc_corsairs_lapsed}The Corsairs linger at sea, and {TARGET} is left in peace.",
+      "outcomes": {
+        "held": {
+          "text": "{=taom_wc_corsairs_held}The fleets of Umbar are driven from {TARGET}, and the southern fiefs of Gondor take heart.",
+          "effects": [
+            {
+              "target": "defender",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "attacker",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ],
+          "momentum": {
+            "side": "free",
+            "units": 100
+          }
+        },
+        "fell": {
+          "text": "{=taom_wc_corsairs_fell}The Corsairs seize {TARGET}, and their ships command the river.",
+          "effects": [
+            {
+              "target": "attacker",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "defender",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "north",
+      "kind": "Siege",
+      "anchor": "Phase2",
+      "offsetDays": 16,
+      "windowDays": 20,
+      "target": "town_AN3",
+      "attackers": [
+        "gundabad",
+        "empire"
+      ],
+      "defender": "arthedain",
+      "title": "{=taom_wc_north_title}War in the North",
+      "openText": "{=taom_wc_north_open}Orcs of Gundabad and the hillmen of Dunland come down on the North. {TARGET} must hold for {DAYS} days.",
+      "lapsedText": "{=taom_wc_north_lapsed}The northern war passes {TARGET} by.",
+      "outcomes": {
+        "held": {
+          "text": "{=taom_wc_north_held}The Rangers and the men of Arthedain hold {TARGET}, and the North stays free.",
+          "effects": [
+            {
+              "target": "defender",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "attacker",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ],
+          "momentum": {
+            "side": "free",
+            "units": 100
+          }
+        },
+        "fell": {
+          "text": "{=taom_wc_north_fell}{TARGET} falls, and the shadow spreads across Eriador.",
+          "effects": [
+            {
+              "target": "attacker",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "defender",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gondor",
+      "kind": "Siege",
+      "anchor": "Event",
+      "anchorEvent": "osgiliath",
+      "offsetDays": 3,
+      "windowDays": 20,
+      "target": "town_EW1",
+      "attackers": [
+        "empire_s"
+      ],
+      "defender": "empire_w",
+      "title": "{=taom_wc_gondor_title}The Siege of Gondor",
+      "openText": "{=taom_wc_gondor_open}The Lord of the Nazgûl leads the hosts of Mordor against {TARGET}. The city must hold for {DAYS} days.",
+      "lapsedText": "{=taom_wc_gondor_lapsed}The great host of Mordor holds back, and {TARGET} waits under a darkened sky.",
+      "outcomes": {
+        "held": {
+          "text": "{=taom_wc_gondor_held}The Rohirrim come at dawn, and the siege of {TARGET} is broken on the Pelennor Fields.",
+          "effects": [
+            {
+              "target": "defender",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "attacker",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ],
+          "momentum": {
+            "side": "free",
+            "units": 100
+          }
+        },
+        "fell": {
+          "text": "{=taom_wc_gondor_fell}The gates of {TARGET} are broken, and the White City falls to Mordor.",
+          "effects": [
+            {
+              "target": "attacker",
+              "kind": "VolunteerRate",
+              "magnitude": 0.15,
+              "durationDays": 25
+            },
+            {
+              "target": "defender",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 25
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "blackgate",
+      "kind": "Narrative",
+      "anchor": "Event",
+      "anchorEvent": "gondor",
+      "requiresOutcome": "Held",
+      "offsetDays": 5,
+      "title": "{=taom_wc_blackgate_title}The Black Gate Opens",
+      "outcomes": {
+        "occurred": {
+          "text": "{=taom_wc_blackgate_occurred}The Captains of the West march to the Morannon to draw the Eye from the Ring-bearer. The fate of the war now rests with the Ring.",
+          "effects": [
+            {
+              "target": "free",
+              "kind": "VolunteerRate",
+              "magnitude": 0.1,
+              "durationDays": 15
+            },
+            {
+              "target": "empire_s",
+              "kind": "PrisonerEscape",
+              "magnitude": 0.2,
+              "durationDays": 15
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

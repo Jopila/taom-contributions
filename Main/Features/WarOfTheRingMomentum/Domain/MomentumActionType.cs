@@ -12,5 +12,7 @@ public enum MomentumActionType
     VillageRaided,
     Sieges,
     RelativeStrength,
-    EnemiesKilled
+    EnemiesKilled,
+    // #765 (M6): a War Chronicle event's scripted award. Appended: the names are saved, never renumber.
+    Chronicle
 }

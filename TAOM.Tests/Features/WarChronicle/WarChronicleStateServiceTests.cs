@@ -6,6 +6,7 @@ using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.WarChronicle;
 using TAOM.Features.WarChronicle.Effects;
+using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarChronicle.Rally;
 using TAOM.Features.WarOfTheRingMomentum;
 
@@ -29,7 +30,7 @@ public class WarChronicleStateServiceTests
         _effects = new WarEffectService(settings, _logger);
         _baselines = new WarBaselineService();
         _tiers = new RallyTierStore();
-        _sut = new WarChronicleStateService(_effects, _baselines, _tiers, _logger);
+        _sut = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore(_logger));
     }
 
     private static KingdomWarSnapshot Kingdom(string id, int towns, int castles) =>
@@ -54,7 +55,7 @@ public class WarChronicleStateServiceTests
         var effects = new WarEffectService(settings, _logger);
         var baselines = new WarBaselineService();
         var tiers = new RallyTierStore();
-        new WarChronicleStateService(effects, baselines, tiers, _logger).RestoreFromChunks(chunks);
+        new WarChronicleStateService(effects, baselines, tiers, _logger, new ChronicleStateStore(_logger)).RestoreFromChunks(chunks);
 
         Assert.AreEqual(2, effects.Snapshot().Count);
         Assert.AreEqual(1.1f, effects.GetMultiplier("gondor", WarEffectKind.VolunteerRate), 0.0001f);
@@ -82,7 +83,7 @@ public class WarChronicleStateServiceTests
         var settings = Substitute.For<IWarChronicleSettingsProvider>();
         settings.WarEffectStrength.Returns(1f);
         var effects = new WarEffectService(settings, _logger);
-        new WarChronicleStateService(effects, new WarBaselineService(), new RallyTierStore(), _logger).RestoreFromChunks(chunks);
+        new WarChronicleStateService(effects, new WarBaselineService(), new RallyTierStore(), _logger, new ChronicleStateStore(_logger)).RestoreFromChunks(chunks);
         Assert.AreEqual(_effects.Snapshot().Count, effects.Snapshot().Count, "the chunks join back to the same payload");
     }
 
@@ -157,22 +158,29 @@ public class WarChronicleStateServiceTests
     }
 
     [TestMethod]
-    public void ChronicleSection_ARestoredOpaqueArray_IsWrittenBackUnchanged()
+    public void ChronicleSection_ARestoredRow_IsWrittenBack()
     {
-        const string chronicle = "[{\"id\":\"hornburg\",\"state\":2,\"window\":[12.5,40]}]";
+        // #765 M3: the section has an owner now (ChronicleStateStore), so a row round-trips through it.
+        const string chronicle = "[{\"id\":\"hornburg\",\"s\":1,\"open\":12.5,\"close\":40,\"a\":true}]";
         var payload = new WarChroniclePayload { ChronicleJson = chronicle };
         _sut.RestoreFromChunks(new List<string> { WarChronicleSaveCodec.Serialize(payload) });
 
         var written = WarChronicleSaveCodec.Parse(string.Concat(_sut.CaptureChunks()));
+        var store = new ChronicleStateStore(_logger);
+        store.RestoreFromJson(written.ChronicleJson);
 
-        Assert.AreEqual(chronicle, written.ChronicleJson);
+        var row = store.Get("hornburg")!;
+        Assert.AreEqual(ChronicleEventState.Active, row.State);
+        Assert.AreEqual(12.5, row.OpenDay);
+        Assert.AreEqual(40d, row.CloseDay);
+        Assert.IsTrue(row.Assaulted);
     }
 
     [TestMethod]
     public void ResetForNewSession_ClearsEveryRegistryAndTheOpaqueChronicle()
     {
         Populate();
-        _sut.RestoreFromChunks(new List<string> { WarChronicleSaveCodec.Serialize(new WarChroniclePayload { ChronicleJson = "[1]" }) });
+        _sut.RestoreFromChunks(new List<string> { WarChronicleSaveCodec.Serialize(new WarChroniclePayload { ChronicleJson = "[{\"id\":\"a\",\"s\":3}]" }) });
         Populate();
 
         _sut.ResetForNewSession();

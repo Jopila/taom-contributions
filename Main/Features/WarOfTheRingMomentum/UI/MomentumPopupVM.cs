@@ -202,6 +202,8 @@ public sealed class MomentumPopupVM : ViewModel
                 return new TextObject("{=taom_wotr_enemies_killed}Enemies Killed").ToString();
             case MomentumActionType.RelativeStrength:
                 return new TextObject("{=taom_wotr_relative_strength}Relative Strength").ToString();
+            case MomentumActionType.Chronicle:
+                return new TextObject("{=taom_wotr_chronicle_events}Chronicle Events").ToString();
             default:
                 return "";
         }

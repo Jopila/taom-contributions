@@ -1,6 +1,7 @@
 using DryIoc;
 using TAOM.Adapters;
 using TAOM.Features.WarChronicle.Effects;
+using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarChronicle.Ledger;
 using TAOM.Features.WarChronicle.Rally;
 
@@ -28,5 +29,16 @@ public static class WarChronicleIoC
         container.Register<WarLedgerService>(Reuse.Singleton);
         container.Register<WarChronicleStateService>(Reuse.Singleton);
         container.Register<WarChronicleTickService>(Reuse.Singleton);
+
+        // #765 M3, M4: the event chain. The focus registry is ArmyTargeting's (ArmyTargetingIoC) and the
+        // momentum award is WarOfTheRingMomentum's.
+        container.Register<ChronicleStateStore>(Reuse.Singleton);
+        container.Register<IChronicleConfigProvider, ChronicleConfigProvider>(Reuse.Singleton);
+        container.Register<IChronicleWorldAdapter, ChronicleWorldAdapter>(Reuse.Singleton);
+        container.Register<IChroniclePresenter, ChroniclePresenter>(Reuse.Singleton);
+        container.Register<ChronicleAnnouncementQueue>(Reuse.Singleton);
+        container.Register<ChronicleFocusSync>(Reuse.Singleton);
+        container.Register<ChronicleOutcomeService>(Reuse.Singleton);
+        container.Register<ChronicleService>(Reuse.Singleton);
     }
 }

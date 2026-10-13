@@ -270,6 +270,28 @@ class MetricTests(unittest.TestCase):
         m = metrics([ev_chron(30, "ev_b", "Fell"), ev_chron(10, "ev_a", "Held")])
         self.assertEqual(m["chronicle"], [(10, "ev_a", "Held"), (30, "ev_b", "Fell")])
 
+    def test_chronicle_resolutions_counted_per_outcome(self):
+        m = metrics([ev_chron(20, "fellowship", "Occurred"), ev_chron(49, "hornburg", "Held"),
+                     ev_chron(55, "lorien", "Lapsed"), ev_chron(60, "osgiliath", "Fell"),
+                     ev_chron(61, "dale", "Lapsed"), ev_chron(70, "ents", "Skipped")])
+        self.assertEqual(m["chronicle_counts"],
+                         {"Occurred": 1, "Held": 1, "Fell": 1, "Lapsed": 2, "Skipped": 1})
+
+    def test_chronicle_count_keeps_the_last_resolution_per_event(self):
+        # A reload from before a resolution replays the event: the later line is the outcome that stood.
+        m = metrics([ev_chron(49, "hornburg", "Fell"), ev_chron(69, "hornburg", "Held")])
+        self.assertEqual(m["chronicle_counts"], {"Held": 1})
+
+    def test_chronicle_counts_in_the_summary(self):
+        m = metrics([ev_chron(49, "hornburg", "Held"), ev_chron(55, "lorien", "Lapsed"), ev_chron(56, "dale", "Lapsed")])
+        report = awl.format_report("c1", m)
+        self.assertIn("resolutions by outcome: Held 1, Lapsed 2", report)
+
+    def test_no_chronicle_lines_counts_nothing(self):
+        m = metrics([sh(1, "0.5")])
+        self.assertEqual(m["chronicle_counts"], {})
+        self.assertNotIn("resolutions by outcome", awl.format_report("c1", m))
+
 
 class TargetTests(unittest.TestCase):
     def test_target_checks_pass(self):

@@ -23,4 +23,7 @@ public interface IWarOfTheRingService
     // #772: in FullWar, declares every Phase 2 / Hostile-pair war whose stored stance is not War (idempotent).
     // A pair first linked during Full War is already stored as War and is skipped.
     void ReconcileDeclaredWars();
+    // #765: the day the phase machine enters IsengardWar or FullWar (the clamped pair CheckPhaseTransition
+    // uses); null for any other phase. The War Chronicle anchors events on it.
+    int? GetEffectivePhaseDay(WarPhase phase);
 }

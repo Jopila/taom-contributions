@@ -150,6 +150,9 @@ public static class CoopSettingsRelevance
         // Race Abilities: the war cry is a voice line, the wave line a log message and the glow an outline
         // and sparks, all on this client only. EnableRaceAbilities stays in: it changes who fights how.
         "RaceAbilityWarCries", "RaceAbilityMessages", "RaceAbilityGlow",
+        // War Chronicle (#765): the event popups are drawn on this client only. The chronicle itself runs on
+        // the host; WarChronicleEnabled and WarChronicleArmyFocus stay in.
+        "WarChronicleAnnouncements",
         // The faction picker shapes the local player's own character creation, which each peer runs
         // for themselves; the co-op layer replicates the hero that results, not the screen.
         "FrontEndFactionScreen",

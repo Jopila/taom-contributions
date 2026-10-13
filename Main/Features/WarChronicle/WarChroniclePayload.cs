@@ -18,8 +18,8 @@ internal sealed class WarChroniclePayload
     public Dictionary<string, int> RallyTiers { get; } = new Dictionary<string, int>();
 
     /// <summary>
-    /// The chronicle section, a JSON array this milestone does not interpret: the event states are
-    /// reserved for a later one. Carried through a load and a save unchanged.
+    /// The chronicle section as a JSON array; its rows belong to <c>Events.ChronicleStateStore</c>, which
+    /// parses them row by row (#765 M3). The codec only carries the array.
     /// </summary>
     public string ChronicleJson { get; set; } = WarChronicleSaveCodec.EmptyArray;
 

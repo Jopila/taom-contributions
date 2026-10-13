@@ -355,6 +355,23 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "The farthest the hunter closes in one hour while out of your sight, in map units. Default 15.")]
     public float HunterStepCap { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultStepCap;
 
+    // --- War of the Ring / War Chronicle (#765) ---
+
+    [SettingPropertyGroup("War of the Ring/War Chronicle")]
+    [SettingPropertyBool("Enable Chronicle", Order = 0, RequireRestart = false,
+        HintText = "Runs the War Chronicle: lore events of the War of the Ring at set points, and the great sieges (Helm's Deep, Osgiliath, Minas Tirith and others) as timed windows whose result gives both sides small, temporary effects. Off stops new events and clears the army focus; the saved progress is kept. Default on.")]
+    public bool WarChronicleEnabled { get; set; } = true;
+
+    [SettingPropertyGroup("War of the Ring/War Chronicle")]
+    [SettingPropertyBool("Show Announcements", Order = 1, RequireRestart = false,
+        HintText = "Shows a popup on the campaign map when a chronicle event happens, a siege window opens, or a siege is decided. Off keeps the events running silently. Default on.")]
+    public bool WarChronicleAnnouncements { get; set; } = true;
+
+    [SettingPropertyGroup("War of the Ring/War Chronicle")]
+    [SettingPropertyFloatingInteger("Army Focus Multiplier", 1.0f, 2.5f, "#0.00", Order = 2, RequireRestart = false,
+        HintText = "During a siege window, how much more the attackers' armies want to besiege the target and the defender's armies want to defend it. 1 turns the focus off. Needs Army Strategic Intelligence. Default 1.4.")]
+    public float WarChronicleArmyFocus { get; set; } = 1.4f;
+
     // --- Battle Balance / Troop Power ---
 
     [SettingPropertyGroup("Battle Balance/Troop Power")]

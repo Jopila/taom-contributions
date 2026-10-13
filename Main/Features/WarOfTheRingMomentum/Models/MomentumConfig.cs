@@ -54,6 +54,7 @@ public class MomentumDurationsConfig
     public int ArmyGathered { get; set; } = 168;     // 7 days
     public int RelativeStrength { get; set; } = 12;  // 12 hours
     public int EnemiesKilled { get; set; } = 504;    // 21 days, like battles
+    public int Chronicle { get; set; } = 504;        // 21 days: a War Chronicle award (#765)
 
     public int GetHours(MomentumActionType type)
     {
@@ -65,6 +66,7 @@ public class MomentumDurationsConfig
             case MomentumActionType.ArmyGathered: return ArmyGathered;
             case MomentumActionType.RelativeStrength: return RelativeStrength;
             case MomentumActionType.EnemiesKilled: return EnemiesKilled;
+            case MomentumActionType.Chronicle: return Chronicle;
             default: return BattleWon;
         }
     }
