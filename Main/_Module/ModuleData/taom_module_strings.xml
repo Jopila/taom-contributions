@@ -786,6 +786,11 @@
 	<string id="taom_war_blocked" text="{=taom_war_blocked}These kingdoms are bound by an unbreakable alliance." />
 	<string id="taom_vote_lapsed" text="{=taom_vote_lapsed}The vote on &quot;{VOTE}&quot; no longer applies and has been withdrawn." />
 	<string id="taom_wotr_no_peace" text="{=taom_wotr_no_peace}The War of the Ring rages. There can be no peace." />
+	<!-- Eye of Sauron hunt (#765 M8) -->
+	<string id="taom_eye_hunt_free" text="{=taom_eye_hunt_free}The Eye of Sauron has turned upon you. {HUNTER} rides out with a host to destroy you." />
+	<string id="taom_eye_hunt_evil" text="{=taom_eye_hunt_evil}Elrond has sent {HUNTER} with a host of the Eldar to bring you down." />
+	<string id="taom_eye_hunt_won" text="{=taom_eye_hunt_won}{HUNTER} is beaten. The hunt is over, for now." />
+	<string id="taom_eye_hunt_over" text="{=taom_eye_hunt_over}The hunt is over. The Eye turns away, for now." />
 	<string id="taom_precompile_shaders" text="{=taom_precompile_shaders}Pre-compile Shaders" />
 	<string id="taom_precompile_hint" text="{=taom_precompile_hint}Pre-compiles the troop and equipment shaders so first battles do not stutter or stall. Re-run after any change to your mod list: the game clears its compiled shaders when the module list changes." />
 	<string id="taom_precompile_inquiry_title" text="{=taom_precompile_inquiry_title}Shader Pre-compilation" />

@@ -1206,7 +1206,9 @@ public class SubModule : MBSubModuleBase
         ICareerPassiveService careerPassives)
     {
         campaignStarter.AddModel(new TaomArmyManagementModel(culturalFeats));
-        campaignStarter.AddModel(new TaomPartySpeedModel(culturalFeats, careerPassives));
+        // #765 M8: the Eye of Sauron hunter's speed floor and host size seams read one shared hook.
+        var eyeOfSauron = IoC.Resolve<TAOM.Features.EyeOfSauron.IEyeOfSauronHook>();
+        campaignStarter.AddModel(new TaomPartySpeedModel(culturalFeats, careerPassives, eyeOfSauron));
         campaignStarter.AddModel(new TaomSettlementProsperityModel(culturalFeats));
         campaignStarter.AddModel(new TaomSettlementMilitiaModel(culturalFeats));
         campaignStarter.AddModel(new TaomBuildingConstructionModel(culturalFeats));
@@ -1216,7 +1218,7 @@ public class SubModule : MBSubModuleBase
         campaignStarter.AddModel(new TaomTournamentModel(IoC.Resolve<TAOM.Features.Arena.ITournamentService>()));
         campaignStarter.AddModel(new TaomPartyTroopUpgradeModel(culturalFeats, careerPassives, IoC.Resolve<ITroopCostService>()));
         var aiPartySize = IoC.Resolve<TAOM.Features.AiPartySize.IAiPartySizeService>();
-        campaignStarter.AddModel(new TaomPartySizeModel(culturalFeats, careerPassives, IoC.Resolve<ITroopWeightService>(), aiPartySize, IoC.Resolve<IModLogger>()));
+        campaignStarter.AddModel(new TaomPartySizeModel(culturalFeats, careerPassives, IoC.Resolve<ITroopWeightService>(), aiPartySize, IoC.Resolve<IModLogger>(), eyeOfSauron));
         campaignStarter.AddModel(new TaomFoodConsumptionModel(culturalFeats, aiPartySize));
         campaignStarter.AddModel(new TaomSettlementLoyaltyModel(culturalFeats, IoC.Resolve<IRevoltTuningConfigProvider>()));
         campaignStarter.AddModel(new TaomSettlementFoodModel(IoC.Resolve<ISettlementFoodService>(), IoC.Resolve<ISettlementFoodConfigProvider>()));

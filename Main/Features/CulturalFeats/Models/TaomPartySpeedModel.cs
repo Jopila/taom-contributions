@@ -5,6 +5,7 @@ using TaleWorlds.CampaignSystem.Roster;
 using TaleWorlds.Core;
 using TAOM.Features.CareerSystem;
 using TAOM.Features.CareerSystem.Domain;
+using TAOM.Features.EyeOfSauron;
 
 namespace TAOM.Features.CulturalFeats.Models;
 
@@ -12,11 +13,13 @@ public class TaomPartySpeedModel : DefaultPartySpeedCalculatingModel
 {
     private readonly ICulturalFeatsService _feats;
     private readonly ICareerPassiveService _careerPassives;
+    private readonly IEyeOfSauronHook _eyeOfSauron;
 
-    public TaomPartySpeedModel(ICulturalFeatsService feats, ICareerPassiveService careerPassives)
+    public TaomPartySpeedModel(ICulturalFeatsService feats, ICareerPassiveService careerPassives, IEyeOfSauronHook eyeOfSauron)
     {
         _feats = feats;
         _careerPassives = careerPassives;
+        _eyeOfSauron = eyeOfSauron;
     }
 
     public override ExplainedNumber CalculateFinalSpeed(MobileParty mobileParty, ExplainedNumber finalSpeed)
@@ -38,6 +41,9 @@ public class TaomPartySpeedModel : DefaultPartySpeedCalculatingModel
         _feats.ApplyTerrainSpeedFeats(culture, terrain, isNight, ref result);
         _feats.ApplyRohanInfantryPenalty(culture, mountedCount, totalCount, ref result);
         _careerPassives.ApplyFactor(mobileParty.LeaderHero?.StringId, ref result, PassiveEffectType.PartyMovementSpeed);
+        // #765 M8: the Eye of Sauron hunter outpaces the player once in sight. LAST, so the floor is compared against
+        // every other line; it reads only the main-thread snapshot, because this runs on the parallel party tick.
+        _eyeOfSauron.ApplyHunterSpeedFloor(mobileParty.StringId, ref result);
 
         return result;
     }

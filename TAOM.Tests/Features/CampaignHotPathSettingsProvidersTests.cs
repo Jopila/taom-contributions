@@ -12,6 +12,7 @@ using TAOM.Features.FieldCamp;
 using TAOM.Features.SupplyLines;
 using TAOM.Features.CaravanTrade;
 using TAOM.Features.CastleRecruitment;
+using TAOM.Features.EyeOfSauron;
 using TAOM.Features.FieldCommission;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.FieldCommission.Domain;
@@ -68,6 +69,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(NameplateCullSettingsProvider))]
     // #789: the Fiefs map-bar button polls the fief hub opener every frame, which reads these.
     [DataRow(typeof(FiefManagementSettingsProvider))]
+    // #765 M8: the hunter's speed multiplier is read every campaign frame while a hunt runs.
+    [DataRow(typeof(EyeOfSauronSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -99,6 +102,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IWarChronicleSettingsProvider), typeof(WarChronicleSettingsProvider))]
     [DataRow(typeof(INameplateCullSettingsProvider), typeof(NameplateCullSettingsProvider))]
     [DataRow(typeof(IFiefManagementSettingsProvider), typeof(FiefManagementSettingsProvider))]
+    [DataRow(typeof(IEyeOfSauronSettings), typeof(EyeOfSauronSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();

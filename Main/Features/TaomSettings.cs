@@ -307,6 +307,54 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Scales every War of the Ring catch-up and event effect (a higher daily volunteer roll, which fills recruit slots faster and promotes waiting recruits sooner; faster escapes of captured lords). 0 turns them off, 1 is the authored size, 2 doubles it. Default 1.")]
     public float WarEffectStrength { get; set; } = 1.0f;
 
+    // --- War of the Ring / Eye of Sauron (#765 M8) ---
+    // Defaults live in EyeOfSauronSettingsProvider, the single source; the provider re-validates every value.
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyBool("Enable the Hunt", Order = 0, RequireRestart = false,
+        HintText = "When on, great deeds against the enemy draw a hunter: a Free player is hunted by one of the Nine with a host of Mordor, an Evil player by Glorfindel with a host of the Eldar. Only while your kingdom is at war with the hunter's. Single-player only. Default: on.")]
+    public bool EyeOfSauronEnabled { get; set; } = true;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyFloatingInteger("Deed Threshold", EyeOfSauron.EyeOfSauronSettingsProvider.MinThreshold, EyeOfSauron.EyeOfSauronSettingsProvider.MaxThreshold, "#0.0", Order = 1, RequireRestart = false,
+        HintText = "Deed score that draws a hunt. A field victory over an enemy kingdom scores 1, a sally or a battle outside a siege 2, a siege assault 3. Default 10.")]
+    public float EyeThreshold { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultThreshold;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyFloatingInteger("Deed Half-Life (days)", EyeOfSauron.EyeOfSauronSettingsProvider.MinHalfLifeDays, EyeOfSauron.EyeOfSauronSettingsProvider.MaxHalfLifeDays, "#0", Order = 2, RequireRestart = false,
+        HintText = "Days for the deed score to fall by half. Default 30.")]
+    public float EyeHalfLifeDays { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultHalfLifeDays;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyInteger("Cooldown (days)", 0, EyeOfSauron.EyeOfSauronSettingsProvider.MaxCooldownDays, Order = 3, RequireRestart = false,
+        HintText = "Days after a hunt ends before another can start. Default 60.")]
+    public int EyeCooldownDays { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultCooldownDays;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyInteger("Hunt Timeout (days)", 1, EyeOfSauron.EyeOfSauronSettingsProvider.MaxHuntTimeoutDays, Order = 4, RequireRestart = false,
+        HintText = "Days a hunt lasts before the hunter gives up. Default 20.")]
+    public int HuntTimeoutDays { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultHuntTimeoutDays;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyFloatingInteger("Hunter Speed Multiplier", EyeOfSauron.EyeOfSauronSettingsProvider.MinSpeedMultiplier, EyeOfSauron.EyeOfSauronSettingsProvider.MaxSpeedMultiplier, "#0.00", Order = 5, RequireRestart = false,
+        HintText = "Once the hunter is within your sight, it moves at least this many times your speed. Default 1.3.")]
+    public float HunterSpeedMultiplier { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultSpeedMultiplier;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyFloatingInteger("Hunter Strength Ratio", EyeOfSauron.EyeOfSauronSettingsProvider.MinStrengthRatio, EyeOfSauron.EyeOfSauronSettingsProvider.MaxStrengthRatio, "#0.00", Order = 6, RequireRestart = false,
+        HintText = "The hunter's host is filled to this many times your strength (your army's, when you lead one). Default 1.3.")]
+    public float HunterStrengthRatio { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultStrengthRatio;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyInteger("Hunter Max Troops", EyeOfSauron.EyeOfSauronSettingsProvider.MinMaxTroops, EyeOfSauron.EyeOfSauronSettingsProvider.MaxMaxTroops, Order = 7, RequireRestart = false,
+        HintText = "The most men the hunter's party holds after its host is topped up. Default 250.")]
+    public int HunterMaxTroops { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultMaxTroops;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyFloatingInteger("Hunter Step Cap", EyeOfSauron.EyeOfSauronSettingsProvider.MinStepCap, EyeOfSauron.EyeOfSauronSettingsProvider.MaxStepCap, "#0.0", Order = 8, RequireRestart = false,
+        HintText = "The farthest the hunter closes in one hour while out of your sight, in map units. Default 15.")]
+    public float HunterStepCap { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultStepCap;
+
     // --- Battle Balance / Troop Power ---
 
     [SettingPropertyGroup("Battle Balance/Troop Power")]

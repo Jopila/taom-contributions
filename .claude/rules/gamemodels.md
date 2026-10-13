@@ -65,7 +65,7 @@ public class TaomFooModel : DefaultFooModel
 | `TaomPartyWageModel` | `DefaultPartyWageModel` | `CulturalFeats` |
 | `TaomVolunteerModel` | `DefaultVolunteerModel` | `TroopProgression` |
 | `TaomArmyManagementModel` | `DefaultArmyManagementCalculationModel` | `CulturalFeats` |
-| `TaomPartySpeedModel` | `DefaultPartySpeedCalculatingModel` | `CulturalFeats` |
+| `TaomPartySpeedModel` | `DefaultPartySpeedCalculatingModel` | `CulturalFeats` (+ the EyeOfSauron hunter speed floor, last, `IEyeOfSauronHook`; worker threads, snapshot only) |
 | `TaomSettlementProsperityModel` | `DefaultSettlementProsperityModel` | `CulturalFeats` |
 | `TaomSettlementMilitiaModel` | `DefaultSettlementMilitiaModel` | `CulturalFeats` |
 | `TaomBuildingConstructionModel` | `DefaultBuildingConstructionModel` | `CulturalFeats` |
@@ -73,7 +73,7 @@ public class TaomFooModel : DefaultFooModel
 | `TaomCaravanModel` | `DefaultCaravanModel` | `CulturalFeats` + `CaravanTrade` |
 | `TaomBattleRewardModel` | `DefaultBattleRewardModel` | `CulturalFeats` |
 | `TaomPartyTroopUpgradeModel` | `DefaultPartyTroopUpgradeModel` | `CulturalFeats` |
-| `TaomPartySizeModel` | `DefaultPartySizeLimitModel` | `CulturalFeats` |
+| `TaomPartySizeModel` | `DefaultPartySizeLimitModel` | `CulturalFeats` (+ the EyeOfSauron host size bonus before the TroopWeight line, `IEyeOfSauronHook`) |
 | `TaomFoodConsumptionModel` | `DefaultMobilePartyFoodConsumptionModel` | `CulturalFeats` |
 | `TaomSettlementLoyaltyModel` | `DefaultSettlementLoyaltyModel` | `CulturalFeats` |
 | `TaomPartyMoraleModel` | `DefaultPartyMoraleModel` | `CulturalFeats` |
