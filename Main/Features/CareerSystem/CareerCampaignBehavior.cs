@@ -75,9 +75,10 @@ public class CareerCampaignBehavior : CampaignBehaviorBase
                     .SetTextVariable("COUNT", pruned).ToString()));
         }
 
-        // A redesigned career tree refunds the hero's choices once (#769 E12). After the repair pass
-        // so it judges a clean list, before the cache refresh so the passives reflect the refund.
-        if (_lifecycle.MigrateTreeVersion(hero.StringId) > 0)
+        // A redesigned career tree refunds a hero's choices once (#769 E12), for every hero that holds
+        // career data; only the player is told. After the repair pass so it judges a clean list, before
+        // the cache refresh so the passives reflect the refund.
+        if (_lifecycle.MigrateAllTreeVersions(hero.StringId) > 0)
         {
             _logger.LogInfo($"CareerSystem: Refunded {hero.Name}'s career choices for a redesigned career tree");
             InformationManager.DisplayMessage(new InformationMessage(

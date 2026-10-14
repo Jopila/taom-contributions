@@ -376,6 +376,42 @@ public class CareerRetrainTests
         CollectionAssert.AreEquivalent(new[] { "quest_flag", "career_tree_v3" }, flags);
     }
 
+    // ── Codex review: every hero that holds career data, not only the player ──
+
+    [TestMethod]
+    public void MigrateAllTreeVersions_MigratesEveryHeroWithCareerData_AndReturnsOnlyThePlayersCount()
+    {
+        // A co-op hero, or one the player takes over later, keeps its career data in the save but is
+        // not the main hero at session launch. Left on the old tree, its fork picks would read as
+        // locked in and the player would have to pay to retrain what the migration owes for free.
+        UseCareer(Career(2, "r_fork", "r_free"));
+        GiveHero("ranger_root", "fork_a", "free_a");
+        const string other = "coop_hero";
+        _dataService.SetCareer(other, "ranger");
+        _dataService.TryAddChoice(other, "ranger_root", 100);
+        _dataService.TryAddChoice(other, "fork_b", 100);
+
+        Assert.AreEqual(2, _sut.MigrateAllTreeVersions(Hero), "the count is the player's alone");
+
+        Assert.AreEqual(1, _dataService.GetChoiceCount(other), "the other hero is migrated too");
+        Assert.IsTrue(_dataService.GetOrCreateData(other).HasChoice("ranger_root"));
+        Assert.IsTrue(_dataService.HasFlag(other, CareerTreeVersion.FlagFor(2)));
+    }
+
+    [TestMethod]
+    public void MigrateAllTreeVersions_PlayerWithoutCareerData_StillMigratesTheOthersAndReturnsZero()
+    {
+        UseCareer(Career(2, "r_fork", "r_free"));
+        const string other = "coop_hero";
+        _dataService.SetCareer(other, "ranger");
+        _dataService.TryAddChoice(other, "fork_a", 100);
+
+        Assert.AreEqual(0, _sut.MigrateAllTreeVersions(Hero));
+
+        Assert.IsFalse(_dataService.GetOrCreateData(other).HasChoice("fork_a"));
+        Assert.IsFalse(_dataService.GetAllData().ContainsKey(Hero), "no data is created for a player without a career");
+    }
+
     // ── review: a career id the registry does not know ──
 
     [TestMethod]

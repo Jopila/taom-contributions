@@ -151,11 +151,11 @@ public class CareerSessionLaunchOrderTests
         var body = src.Substring(start, end - start);
 
         int repair = body.IndexOf("_lifecycle.RepairForeignChoices", System.StringComparison.Ordinal);
-        int migrate = body.IndexOf("_lifecycle.MigrateTreeVersion", System.StringComparison.Ordinal);
+        int migrate = body.IndexOf("_lifecycle.MigrateAllTreeVersions(", System.StringComparison.Ordinal);
         int refresh = body.IndexOf("_passiveService.RefreshCache", System.StringComparison.Ordinal);
 
         Assert.IsTrue(repair >= 0, "OnSessionLaunched must call RepairForeignChoices");
-        Assert.IsTrue(migrate >= 0, "OnSessionLaunched must call MigrateTreeVersion");
+        Assert.IsTrue(migrate >= 0, "OnSessionLaunched must call MigrateAllTreeVersions (every hero, not only the player)");
         Assert.IsTrue(refresh >= 0, "OnSessionLaunched must call RefreshCache");
         Assert.IsTrue(repair < migrate, "the repair must run before the migration, so it judges a clean list");
         Assert.IsTrue(migrate < refresh, "the migration must run before the cache refresh, so the passives reflect the refund");

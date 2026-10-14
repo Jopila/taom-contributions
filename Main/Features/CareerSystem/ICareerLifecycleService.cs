@@ -37,14 +37,16 @@ public interface ICareerLifecycleService
     CareerRetrainResult TryRetrain(string heroStringId, int heroLevel);
 
     /// <summary>
-    /// #769 E12: when a career's tree was redesigned (its TreeVersion is above the one the hero is
-    /// stamped with), refund every choice once and stamp the hero. Returns how many choices were
-    /// removed: 0 when nothing migrated, and also 0 when it migrated a hero who held only the root
-    /// (the stamp is still set), so a caller announces a refund only for a count above zero.
+    /// #769 E12: for every hero holding career data, when the career's tree was redesigned (its
+    /// TreeVersion is above the one the hero is stamped with), refund every choice once and stamp
+    /// the hero. Every hero, not only the player: a co-op hero or one the player takes over later is
+    /// never the main hero at session launch. Returns how many choices the PLAYER lost: 0 when the
+    /// player's career did not migrate, and also 0 when it migrated a player who held only the root
+    /// (the stamp is still set), so the caller announces a refund only for a count above zero.
     ///
-    /// Needs proof the new tree actually loaded: the career lists at least one group and every
-    /// listed group resolves with at least one choice. Without it nothing changes and no flag is
-    /// set, because a malformed choices file looks exactly like an emptied tree.
+    /// Each migration needs proof the new tree actually loaded: the career lists at least one group
+    /// and every listed group resolves with at least one choice. Without it nothing changes and no
+    /// flag is set, because a malformed choices file looks exactly like an emptied tree.
     /// </summary>
-    int MigrateTreeVersion(string heroStringId);
+    int MigrateAllTreeVersions(string playerHeroStringId);
 }

@@ -157,6 +157,21 @@ public class CareerLifecycleService : ICareerLifecycleService
         return removed;
     }
 
+    public int MigrateAllTreeVersions(string playerHeroStringId)
+    {
+        // Every saved hero, not only the main hero: a co-op hero, or one the player takes over later,
+        // keeps career data but is never the main hero at session launch, and nothing migrates it after.
+        // Keys are copied first; the migration edits each hero's data, never the dictionary itself.
+        var playerRefunded = 0;
+        foreach (var heroStringId in new List<string>(_dataService.GetAllData().Keys))
+        {
+            var refunded = MigrateTreeVersion(heroStringId);
+            if (heroStringId == playerHeroStringId)
+                playerRefunded = refunded;
+        }
+        return playerRefunded;
+    }
+
     private bool TreeLoaded(CareerDefinition career)
     {
         if (career.ChoiceGroupIds.Count == 0) return false;
