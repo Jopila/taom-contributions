@@ -1698,3 +1698,14 @@ field set, and the one click test drove an unbound method instead of the command
   that the field is populated, and drive behaviour tests through the command the UI binds
   (`Command.Click`), never a sibling method.
 - **Source:** `docs/reviews/rca-career-e1e3-2026-10-08.md` (#766, W1-01).
+
+### Gate a data-switched destructive path with a shipped-data invariant before any data switches it on (2026-10-14)
+Career forks lock a pick for good once `max_picks` is set on its group, and `point_levels` shrinks the point
+budget; only a `tree_version` bump refunds old saves. Nothing tied the three attributes together, so a later data
+edit could have locked or shrunk every old save without a refund.
+- **Why missed:** each attribute was validated alone, and no shipped data used them yet, so no test could fail.
+  Second occurrence of the 2026-10-08 career RCA pattern 2 (a dormant destructive path switched on by data).
+- **Prevent:** when code ships a destructive behaviour that data will turn on later, write the shipped-data
+  invariant test in the same commit, even if it passes vacuously today (here: a career with a fork group or point
+  levels has `tree_version >= 2`, and no career mixes fork and unlimited groups).
+- **Source:** `docs/reviews/rca-career-e4e7-2026-10-14.md` finding 13.

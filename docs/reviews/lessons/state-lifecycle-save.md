@@ -990,3 +990,15 @@ A save made before a batch still loads `settlements.xml` (`SandBoxManager.Initia
 - **Why missed:** the map tools inserted after a region anchor to keep the file readable, a choice nobody had weighed against saves, and `docs/modding/settlements.md` predicted a crash from a v1.4.8 reading that missed the `catch`. Earlier mid-file batches had shipped as "new campaign only", so the order looked harmless.
 - **Prevent:** both map tools append (`add_map_villages.append_settlements`), and `add_map_fortifications.py --check` fails unless the unreleased batch is the file's tail under a town (`save_order_findings`). Any hand edit to the live file follows the same rule.
 - **Source:** `docs/reviews/rca-arthedain-2026-10-07.md` finding 1.
+
+### A saved version marker has one writer, and that writer replaces the old marker (2026-10-14)
+The career tree version is saved per hero as a `career_tree_vN` flag, and the migration reads the
+highest one. Character creation, a career switch and the migration each only added a flag, so a flag
+left by an earlier career could hide a later bump of the new career and certify picks made on another
+tree.
+- **Why missed:** the version belongs to a career but is stored per hero; the brief described adding
+  the marker and never replacing it. The paths that could hit it were not proven reachable, which made
+  it look harmless.
+- **Prevent:** give a saved marker exactly one writer (`CareerTreeVersion.Stamp`) that removes every
+  older marker of its kind before it writes; test it over a stale marker from another owner.
+- **Source:** `docs/reviews/rca-career-e4e7-2026-10-14.md` finding 4.

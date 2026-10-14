@@ -834,6 +834,23 @@ option (`Math.Min`), so a player already below the recommendation was told a val
   vanilla's options through vanilla's own keys (`{=1awQTVqN}Number Of Ragdolls`), so a translation matches the
   Options screen.
 - **Source:** `docs/reviews/rca-battle-corpses-2026-10-01.md` finding 1.
+- **Recurrence (2026-10-14):** the career tree-version migration said "your career choices were refunded" when it
+  had refunded nothing (a hero holding only the root). It now returns the count, and the message needs a count
+  above zero. In the same change, an inquiry's enable gate returned "You don't have enough denars." on both
+  branches, and `SingleQueryPopUpVM` shows any non-empty reason as Confirm's hint, so a player who could pay
+  read that they could not; return an empty reason on the allowed branch. `docs/reviews/rca-career-e4e7-2026-10-14.md`
+  findings 3 and C1.
+
+### A ButtonWidget with a bound IsEnabled needs `UpdateChildrenStates="true"` (2026-10-14)
+The career screen's Retrain button bound `IsEnabled="@CanRetrain"`. Disabled, its frame dimmed and its label stayed
+bright, because `Widget.SetState` passes the Disabled state to children only when `UpdateChildrenStates` is set
+(installed v1.5.5), so the label brush's own Disabled style never applied.
+- **Why missed:** it was the prefab's first bound `IsEnabled`; the markup was copied from a button that is never
+  disabled. Of vanilla's 14 buttons on this brush, 11 set `UpdateChildrenStates`, and 6 of the 7 that bind
+  `IsEnabled` do.
+- **Prevent:** whenever a prefab binds `IsEnabled` on a `ButtonWidget` with child text or icons, set
+  `UpdateChildrenStates="true"` on it.
+- **Source:** `docs/reviews/rca-career-e4e7-2026-10-14.md` finding 8.
 
 ### Never put `\n` in a `{=KEY}` default; use `{newline}` (2026-10-01)
 `harvest_literal_loc_keys.py` writes a C# `\n` into the XML `text` attribute as a raw line break, which XML parses

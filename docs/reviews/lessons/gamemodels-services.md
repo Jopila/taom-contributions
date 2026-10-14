@@ -1029,3 +1029,15 @@ the AI lord scaling added its factor, so "+4 party size" became about +12 under 
 - **Prevent:** call `ApplyFlat` after every `AddFactor` in the model, and pin the order with a
   call-token test.
 - **Source:** `docs/reviews/rca-career-e1e3-2026-10-08.md` (WIRE-02).
+
+### Validate a value derived from config, not only the attributes it is built from (2026-10-14)
+The career retrain price is `retrain_gold_base + retrain_gold_per_level * level`. Each attribute was
+checked for `>= 0`, but the sum ran in plain `int`, so a huge value wrapped negative. The switch read a
+price of 0 or less as free and skipped its confirmation, and retrain became impossible.
+- **Why missed:** the brief said "negative warns" and named no ceiling; "Config Providers MUST
+  Validate" covers absurd values, but the check was written per attribute and nothing looked at the
+  product. No `CheckForOverflowUnderflow` is set, so the wrap is silent.
+- **Prevent:** when a value is computed from config, compute it in `long` (or `double` with a NaN
+  gate) and clamp it to the range its consumers accept; test both huge inputs and the consumer's
+  verdict at the clamped value.
+- **Source:** `docs/reviews/rca-career-e4e7-2026-10-14.md` finding 1.

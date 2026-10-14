@@ -5257,3 +5257,25 @@ Report `docs/reviews/deep-review-031-settings-reads-off-hot-paths-2026-10-02.md`
   2 LOW (the "capstones" label; a stale example in the clamp comment) and 3 NIT, all comment or doc
   text, all fixed (RCA C1 to C3).
 - **RCA:** `docs/reviews/rca-uruk-hai-skirt-body-2026-10-04.md`.
+
+## Review (number assigned at merge): Career forks engine, steps E4 to E7 and E12 (#769), 7-lens deep review + convergence (2026-10-14)
+
+- **Scope:** branch `feature/career-forks` (worktree `E:/repos/taom-career-forks`), uncommitted on
+  `4f5b412d7`: one take and refund rule with lock reasons, fork groups (`max_picks`), per-career
+  `point_levels`, lock on leave, a paid retrain, a career-switch cost and a `tree_version` migration;
+  the screen VMs and prefab, `taom_careers.xml`, 15 new strings in English and 12 language files.
+- **Claude:** lenses 1, 2, 5 and 7, then 3, 4 and 6, at most four in flight. 0 CRITICAL, 0 HIGH, 2
+  MEDIUM (a retrain price that wrapped negative on absurd config and made a paid switch free; a
+  feature doc the change had made wrong) and 16 LOW or NIT, all fixed except the
+  `ICareerLifecycleService` deletion (its resolver in `Main/SubModule.cs` could not be edited this
+  session). One behaviour change, the Confirm button disabled when the player cannot pay, was the
+  maintainer's decision. Design proposals P1 to P6 applied as behaviour-preserving; P7, P8 and four
+  efficiency items are follow-ups on code the change did not modify.
+- **Final suite:** 15,285 passed, 6 skipped, 2 failed of 15,293 (the pinned game build, and the
+  language-coverage test with its 32 pre-existing missing keys and none of the new ones);
+  `lint_docs --fail-on-drift` exit 0. `validate_moduledata.py` reports 1,867 errors, none in a file
+  this change touches: the live Armory's Harad item files were rewritten the same morning.
+- **Convergence:** one pass. Every fix held and parity held for every improvement; it found 1 LOW
+  defect the fixes had introduced (the Confirm hint said "You don't have enough denars." to a player
+  who could pay) and 3 LOW doc errors, all fixed (RCA C1 to C4).
+- **RCA:** `docs/reviews/rca-career-e4e7-2026-10-14.md`.
