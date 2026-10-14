@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Inv = System.Globalization.CultureInfo;
+using System.Linq;
 using System.Threading;
 using TaleWorlds.CampaignSystem;
 using TAOM.Adapters;
@@ -18,7 +20,8 @@ namespace TAOM.Features.EyeOfSauron;
 /// party re-tasked and topped up; a free hunter gets a new party out of the player's sight. Out of sight the hunter
 /// closes in steps each hour; in sight the speed model lifts him above the player's speed. Every end releases the AI
 /// pin the hunt set. All engine work goes through <see cref="IHunterPartyAdapter"/>; this class holds no engine type.
-/// Single-player only: a co-op session or a dedicated server stops and ends the hunt.
+/// Single-player only: a co-op session (BannerlordCoop, host included), a co-op mod TAOM cannot probe (Bannerlord
+/// Together) or a dedicated server stops and ends the hunt.
 /// </summary>
 public sealed class EyeOfSauronService : IEyeOfSauronHook
 {
@@ -31,13 +34,15 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
     /// <summary>A further gap, in map units, kept between the step's end and the sight margin.</summary>
     internal const float StepSlack = 3f;
 
+    /// <summary>A spawned hunter appears in this ring around the player, in seeing ranges (beyond the sight margin).</summary>
+    internal const float SpawnRingInner = 1.6f;
+
+    internal const float SpawnRingOuter = 2.5f;
+
     /// <summary>A change in the player's speed beyond this fraction refreshes the hunter's cached speed.</summary>
     internal const float SpeedRefreshFraction = 0.05f;
 
     private const float MinFactorScale = 0.01f;
-    private const double CeilingSlack = 1e-3;
-    private const int FoodDays = 3;
-    private const int MenPerFood = 20;
 
     private readonly IHunterPartyAdapter _adapter;
     private readonly IAlignmentService _alignment;
@@ -52,8 +57,8 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
     private float _cooldownUntilDay;
     private string? _hunterHeroId;
     private string? _hunterPartyId;
-    private bool _pinnedByUs;
     private float _huntStartDay;
+    private string? _lastStep;
 
     // Published from the main thread, read by the speed and size models on the parallel party tick.
     private HuntSnapshot? _snapshot;
@@ -76,14 +81,15 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
 
     public bool IsHunting => _hunterPartyId != null;
 
-    public bool PinnedByUs => _pinnedByUs;
-
-    /// <summary>Read live on every use, never cached (ICoopSessionProvider's contract).</summary>
-    private bool IsSinglePlayer => !_coopSession.IsSessionActive && !_dedicatedServer.IsDedicatedServer;
+    /// <summary>
+    /// Read live on every use, never cached (ICoopSessionProvider's contract). Stands down while a co-op session is live
+    /// (host included), while a co-op mod TAOM cannot probe is loaded (Bannerlord Together cannot tell host from client),
+    /// and on a dedicated server.
+    /// </summary>
+    private bool IsSinglePlayer =>
+        !_coopSession.IsSessionActive && !_coopSession.ShouldDeferToHost && !_dedicatedServer.IsDedicatedServer;
 
     private float Now => (float)_adapter.NowDays;
-
-    // ------------------------------------------------------------------ session lifecycle
 
     /// <summary>
     /// Clears every per-campaign field. Called from the behavior's constructor, which the feature module runs for every
@@ -105,13 +111,15 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         ScoreVsFree = _scoreVsFree,
         LastDecayDay = _lastDecayDay,
         CooldownUntilDay = _cooldownUntilDay,
-        HunterHeroId = _hunterHeroId,
-        HunterPartyId = _hunterPartyId,
-        PinnedByUs = _pinnedByUs,
+        HunterHeroId = _hunterHeroId ?? string.Empty,
+        HunterPartyId = _hunterPartyId ?? string.Empty,
         HuntStartDay = _huntStartDay,
     };
 
-    /// <summary>Restores a saved record. The in-sight state is dropped; the hunter's party stays registered for its size.</summary>
+    /// <summary>
+    /// Restores a saved record. The in-sight state is dropped; the hunter's party stays registered for its size. A saved
+    /// hunt always holds its pin (the engine saves <c>DoNotMakeNewDecisions</c>), so its end releases it.
+    /// </summary>
     public void LoadFrom(EyeOfSauronState state)
     {
         ResetForNewSession();
@@ -126,28 +134,22 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
 
         _hunterHeroId = state.HunterHeroId;
         _hunterPartyId = state.HunterPartyId;
-        _pinnedByUs = state.PinnedByUs;
         _huntStartDay = FiniteOrZero(state.HuntStartDay);
-        Publish(new HuntSnapshot(state.HunterPartyId!, inSight: false, playerSpeed: 0f, multiplier: 0f));
+        Publish(new HuntSnapshot(state.HunterPartyId, inSight: false, playerSpeed: 0f, multiplier: 0f));
     }
 
-    /// <summary>After a load: a hunt whose party is gone ends; a stale pin flag without a hunt is dropped.</summary>
+    /// <summary>After a load: a hunt restored into a co-op session, or whose party is gone, ends at once.</summary>
     public void OnSessionLaunched()
     {
-        if (!IsHunting)
-        {
-            _pinnedByUs = false;
-            return;
-        }
-
-        if (!_adapter.ReadParty(_hunterPartyId!).Exists)
+        if (!IsHunting) return;
+        if (!IsSinglePlayer)
+            EndHunt(HuntEndReason.SessionLive);
+        else if (!_adapter.ReadParty(_hunterPartyId!).Exists)
             EndHunt(HuntEndReason.PartyLost);
     }
 
-    // ------------------------------------------------------------------ deeds and scores
-
     public float GetScore(FactionSide against) =>
-        Decay(against == FactionSide.Evil ? _scoreVsEvil : against == FactionSide.Free ? _scoreVsFree : 0f,
+        HuntMath.Decay(against == FactionSide.Evil ? _scoreVsEvil : against == FactionSide.Free ? _scoreVsFree : 0f,
             Now - _lastDecayDay, _settings.HalfLifeDays);
 
     /// <summary>Console: adds to the score earned against one side. Never below zero; a non-finite amount is ignored.</summary>
@@ -168,44 +170,33 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         if (IsHunting && summary.InvolvesHunter)
             EndHunt(summary.IsPlayerEvent && summary.PlayerWon ? HuntEndReason.HunterBeaten : HuntEndReason.BattleEnded);
 
+        // A co-op peer never writes the save-backed score: the hunt is single-player only.
+        if (!IsSinglePlayer) return;
         if (!summary.IsPlayerEvent || !summary.PlayerWon || string.IsNullOrEmpty(summary.LoserKingdomId)) return;
 
-        // GetKingdomSide, never ResolveSide (a culture fallback) or AreEnemyAlignments (Neutral is everyone's enemy).
+        // The loser by its kingdom id alone, never a culture fallback (AreEnemyAlignments would count Neutral as
+        // everyone's enemy). The player's own kingdom is sided with ResolveSide instead, so a founded one counts.
         var side = _alignment.GetKingdomSide(summary.LoserKingdomId!);
         if (side == FactionSide.Neutral) return;
-        AddScore(side, DeedWeight(summary.Kind));
+        AddScore(side, HuntMath.DeedWeight(summary.Kind));
     }
 
     private void ApplyDecay()
     {
         float now = Now;
         float halfLife = _settings.HalfLifeDays;
-        _scoreVsEvil = Decay(_scoreVsEvil, now - _lastDecayDay, halfLife);
-        _scoreVsFree = Decay(_scoreVsFree, now - _lastDecayDay, halfLife);
+        _scoreVsEvil = HuntMath.Decay(_scoreVsEvil, now - _lastDecayDay, halfLife);
+        _scoreVsFree = HuntMath.Decay(_scoreVsFree, now - _lastDecayDay, halfLife);
         if (FiniteFloatValidator.IsFinite(now))
             _lastDecayDay = now;
     }
 
     /// <summary>
-    /// <c>score * 0.5^(elapsed / halfLife)</c>. A non-finite score is zero; a negative or non-finite elapsed time, or a
-    /// half-life that is not a positive finite number, leaves the score as it is.
+    /// The player kingdom's side: its id, else its own culture (ResolveSide), so a player-founded <c>new_kingdom</c>
+    /// that alignment.json does not list is still Free or Evil. The start gate and the console share it.
     /// </summary>
-    internal static float Decay(float score, double elapsedDays, float halfLifeDays)
-    {
-        if (!FiniteFloatValidator.IsFinite(score)) return 0f;
-        if (!(elapsedDays > 0d) || !FiniteFloatValidator.IsFinite(elapsedDays)) return score;
-        if (!(halfLifeDays > 0f) || !FiniteFloatValidator.IsFinite(halfLifeDays)) return score;
-        return (float)(score * Math.Pow(0.5d, elapsedDays / halfLifeDays));
-    }
-
-    internal static float DeedWeight(DeedKind kind) => kind switch
-    {
-        DeedKind.Assault => 3f,
-        DeedKind.SallyOrOutside => 2f,
-        _ => 1f,
-    };
-
-    // ------------------------------------------------------------------ starting a hunt
+    private FactionSide PlayerKingdomSide(string kingdomId) =>
+        _alignment.ResolveSide(kingdomId, _adapter.PlayerKingdomCultureId ?? string.Empty);
 
     public void OnDailyTick()
     {
@@ -217,25 +208,25 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
 
         if (!_settings.Enabled || !IsSinglePlayer) return;
         ApplyDecay();
-        string verdict = TryStartHunt(ignoreScoreAndCooldown: false);
-        if (verdict.StartsWith("Waiting", StringComparison.Ordinal))
-            _logger.LogInfo("[EyeOfSauron] " + verdict);
+        TryStartHunt(ignoreScoreAndCooldown: false);
     }
 
     /// <summary>
     /// Starts a hunt when every gate holds and returns a one-line verdict. The console passes
     /// <paramref name="ignoreScoreAndCooldown"/>; the switch, the single-player gate, the kingdom and the war gate
-    /// hold either way.
+    /// hold either way. The hunters are tried in order: one who cannot ride today is passed over for the next, and
+    /// the hunt waits only when none can. A <paramref name="dryRun"/> returns the plan and changes nothing.
     /// </summary>
-    public string TryStartHunt(bool ignoreScoreAndCooldown)
+    public string TryStartHunt(bool ignoreScoreAndCooldown, bool dryRun = false)
     {
         if (IsHunting) return $"A hunt is already running ({_hunterHeroId}, party {_hunterPartyId}).";
         if (!_settings.Enabled) return "Refused: the hunt is switched off in MCM.";
-        if (!IsSinglePlayer) return "Refused: single-player only, and a co-op session or dedicated server is live.";
+        if (!IsSinglePlayer)
+            return "Refused: single-player only, and a co-op session, a co-op mod TAOM cannot probe, or a dedicated server is live.";
 
         string? kingdomId = _adapter.PlayerKingdomId;
         if (string.IsNullOrEmpty(kingdomId)) return "No hunt: you belong to no kingdom.";
-        var side = _alignment.GetKingdomSide(kingdomId!);
+        var side = PlayerKingdomSide(kingdomId!);
         if (side == FactionSide.Neutral) return $"No hunt: your kingdom '{kingdomId}' is on neither side.";
 
         if (!ignoreScoreAndCooldown)
@@ -247,63 +238,42 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
             if (!(score >= threshold)) return $"No hunt: score {score:0.0} is under the threshold {threshold:0.0}.";
         }
 
+        string? firstWait = null;
         var candidates = side == FactionSide.Free ? HuntTroopLists.WraithOrder : HuntTroopLists.ElvenOrder;
         foreach (string heroId in candidates)
         {
             var hero = _adapter.ReadHero(heroId);
             if (!CanHunt(hero) || !hero.AtWarWithPlayerKingdom) continue;
-            return StartWith(heroId, hero, side);
+            string? wait = WaitReason(heroId, hero);
+            if (wait != null)
+            {
+                firstWait ??= wait;
+                continue;
+            }
+            // A refused spawn stops the search: the spawn ring depends only on the player, so the next hunter's would fail too.
+            return dryRun ? DescribePlan(heroId, hero) : StartWith(heroId, hero, side);
         }
 
-        return "No hunt: no hunter is free and at war with your kingdom.";
+        if (firstWait == null) return "No hunt: no hunter is free and at war with your kingdom.";
+        if (!dryRun) _logger.LogInfo("[EyeOfSauron] " + firstWait);
+        return firstWait;
     }
 
     private static bool CanHunt(HunterHeroSnapshot hero) =>
         hero.Exists && hero.IsAlive && !hero.IsFugitive && !hero.IsPrisoner && !hero.IsHeldByAParty && !hero.IsMarkedForDeath;
 
-    private string StartWith(string heroId, HunterHeroSnapshot hero, FactionSide playerSide)
+    /// <summary>Why a fit hunter cannot ride today, or null when he can (re-task his party, or spawn one).</summary>
+    private string? WaitReason(string heroId, HunterHeroSnapshot hero)
     {
-        string? partyId;
         if (hero.LedPartyId != null)
         {
-            var party = _adapter.ReadParty(hero.LedPartyId);
-            string? busy = BusyReason(party);
-            if (busy != null) return $"Waiting: {heroId}'s party {hero.LedPartyId} is {busy}; never a second party.";
-            partyId = hero.LedPartyId;
+            string? busy = BusyReason(_adapter.ReadParty(hero.LedPartyId));
+            return busy == null ? null : $"Waiting: {heroId}'s party {hero.LedPartyId} is {busy}; never a second party.";
         }
-        else if (hero.IsInAParty)
-        {
-            return $"Waiting: {heroId} rides in another lord's party; never a second party.";
-        }
-        else
-        {
-            if (!hero.IsActive || !hero.CanLeadParty || !hero.IsLord || hero.SettlementBlocksSpawn)
-                return $"Waiting: {heroId} cannot lead a party today.";
-            partyId = _adapter.SpawnHunterParty(heroId);
-            if (string.IsNullOrEmpty(partyId)) return $"Refused: no party could be spawned for {heroId}.";
-        }
-
-        // Register the host BEFORE its roster grows: PartySizeLimit is cached per roster version.
-        _hunterHeroId = heroId;
-        _hunterPartyId = partyId;
-        _huntStartDay = Now;
-        _pinnedByUs = false;
-        Interlocked.Exchange(ref _sizeRejectionLogged, 0);
-        Publish(new HuntSnapshot(partyId!, inSight: false, playerSpeed: 0f, multiplier: 0f));
-
-        if (!_adapter.PinAndEngagePlayer(partyId!))
-        {
-            _logger.LogWarning($"[EyeOfSauron] {heroId}'s party {partyId} could not be ordered after the player; no hunt.");
-            ClearHunt();
-            return $"Refused: {heroId}'s party could not be ordered after you.";
-        }
-
-        _pinnedByUs = true;
-        TopUpHost(partyId!, heroId, hero.FactionId);
-        TopUpFood(partyId!);
-        _logger.LogInfo($"[EyeOfSauron] Hunt started: {heroId} ({hero.FactionId}) with party {partyId}.");
-        _adapter.Announce(playerSide == FactionSide.Free ? HuntAnnouncement.StartFree : HuntAnnouncement.StartEvil, heroId);
-        return $"Hunt started: {heroId} rides with party {partyId}.";
+        if (hero.IsInAParty) return $"Waiting: {heroId} rides in another lord's party; never a second party.";
+        if (!hero.IsActive || !hero.CanLeadParty || !hero.IsLord || hero.SettlementBlocksSpawn)
+            return $"Waiting: {heroId} cannot lead a party today.";
+        return null;
     }
 
     /// <summary>Why a party may not be re-tasked today, or null when it may (design 1.3).</summary>
@@ -319,18 +289,85 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         return null;
     }
 
-    // ------------------------------------------------------------------ the host
+    private string StartWith(string heroId, HunterHeroSnapshot hero, FactionSide playerSide)
+    {
+        string? partyId = hero.LedPartyId ?? _adapter.SpawnHunterParty(heroId, SpawnRingInner, SpawnRingOuter, SightMargin);
+        if (string.IsNullOrEmpty(partyId))
+        {
+            _logger.LogWarning($"[EyeOfSauron] No party could be spawned for {heroId} out of the player's sight; no hunt today.");
+            return $"Refused: no party could be spawned for {heroId} out of your sight.";
+        }
 
-    private void TopUpHost(string partyId, string heroId, string? factionId)
+        // Register the host BEFORE its roster grows: PartySizeLimit is cached per roster version.
+        _hunterHeroId = heroId;
+        _hunterPartyId = partyId;
+        _huntStartDay = Now;
+        Publish(new HuntSnapshot(partyId!, inSight: false, playerSpeed: 0f, multiplier: 0f));
+
+        // Top up BEFORE the engage: CheckPartyNeedsUpdate can start the encounter at once (MobilePartyAi.cs:468-475).
+        TopUpHost(partyId!, heroId, hero.FactionId);
+        TopUpFood(partyId!);
+
+        if (!_adapter.PinAndEngagePlayer(partyId!))
+        {
+            _logger.LogWarning($"[EyeOfSauron] {heroId}'s party {partyId} could not be ordered after the player; no hunt.");
+            ClearHunt();
+            return $"Refused: {heroId}'s party could not be ordered after you.";
+        }
+
+        _logger.LogInfo($"[EyeOfSauron] Hunt started: {heroId} ({hero.FactionId}) with party {partyId}.");
+        _adapter.Announce(playerSide == FactionSide.Free ? HuntAnnouncement.StartFree : HuntAnnouncement.StartEvil, heroId);
+        return $"Hunt started: {heroId} rides with party {partyId}.";
+    }
+
+    /// <summary>The console's dry run: who rides, re-task or spawn, the top-up, and what outlasts the hunt. Read-only.</summary>
+    private string DescribePlan(string heroId, HunterHeroSnapshot hero)
+    {
+        var lines = new List<string>();
+        string who = $"{_adapter.HeroName(heroId)} ({heroId})";
+        if (hero.LedPartyId != null)
+        {
+            lines.Add($"Dry run: {who} would ride; his party {hero.LedPartyId} is re-tasked and ordered after you.");
+            var plan = PlanHost(hero.LedPartyId, heroId, hero.FactionId, out float deficit, out int room);
+            lines.Add(plan.Count == 0
+                ? "Top-up: none needed."
+                : string.Format(Inv.InvariantCulture, "Top-up: {0} (deficit {1:0.0}, room {2}).",
+                    string.Join(", ", plan.Select(p => $"{p.TroopId} x{p.Count}")), deficit, room));
+        }
+        else
+        {
+            lines.Add($"Dry run: {who} would ride; a new party is spawned out of your sight and ordered after you.");
+            if (hero.GovernorOfSettlementId != null)
+                lines.Add($"He gives up the governorship of {hero.GovernorOfSettlementId}.");
+            lines.Add(string.Format(Inv.InvariantCulture,
+                "Top-up: to {0:0.00} times your strength ({1:0.0}), at most {2} men, after the new party's roster is rolled.",
+                _settings.HunterStrengthRatio, _adapter.PlayerStrength, _settings.HunterMaxTroops));
+        }
+        lines.Add("Grain: three days of food for the host, topped up daily.");
+        lines.Add("The party, its troops and grain, and a lost governorship all remain after taom.clear_eye_hunt.");
+        lines.Add("Run 'taom.start_eye_hunt confirm' to start it.");
+        return string.Join("\n", lines);
+    }
+
+    private IReadOnlyList<(string TroopId, int Count)> PlanHost(string partyId, string heroId, string? factionId,
+        out float deficit, out int room)
     {
         var party = _adapter.ReadParty(partyId);
         float playerStrength = _adapter.PlayerStrength;
-        if (!(playerStrength > 0f) || !FiniteFloatValidator.IsFinite(playerStrength)) return;
-        float hostStrength = FiniteFloatValidator.IsFinite(party.Strength) ? party.Strength : float.NaN;
-        float deficit = _settings.HunterStrengthRatio * playerStrength - hostStrength;
-        int room = _settings.HunterMaxTroops - party.HeadCount;
+        // A non-finite strength on either side makes a non-finite deficit, which PlanTopUp refuses.
+        deficit = _settings.HunterStrengthRatio * playerStrength - party.Strength;
+        room = _settings.HunterMaxTroops - party.HeadCount;
+        if (!(playerStrength > 0f)) return Array.Empty<(string, int)>();
+        return HuntMath.PlanTopUp(HuntTroopLists.HostFor(heroId, factionId), deficit, id => _adapter.GetTroopPower(id, heroId), room);
+    }
 
-        var plan = PlanTopUp(HuntTroopLists.HostFor(heroId, factionId), deficit, id => _adapter.GetTroopPower(id, heroId), room);
+    /// <summary>
+    /// Fills the host to the strength ratio. Deficit-driven and capped, so it also replaces the men vanilla's wage-limit
+    /// desertion takes from the roster's end (DefaultPartyDesertionModel) and follows a player who grows stronger.
+    /// </summary>
+    private void TopUpHost(string partyId, string heroId, string? factionId)
+    {
+        var plan = PlanHost(partyId, heroId, factionId, out float deficit, out int room);
         int added = 0;
         foreach (var (troopId, count) in plan)
             added += _adapter.AddTroops(partyId, troopId, count);
@@ -338,171 +375,122 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
             _logger.LogInfo($"[EyeOfSauron] {heroId}'s host topped up by {added} men (deficit {deficit:0.0}, room {room}).");
     }
 
-    /// <summary>
-    /// Splits a strength deficit over the host's troops: <c>ceil(deficit * share / power)</c> each, skipping a troop
-    /// whose power is not a positive finite number, then scaled down to fit <paramref name="room"/> men in list order.
-    /// </summary>
-    internal static IReadOnlyList<(string TroopId, int Count)> PlanTopUp(
-        IReadOnlyList<HostTroop> host, float deficit, Func<string, float> troopPower, int room)
-    {
-        var plan = new List<(string TroopId, int Count)>();
-        if (host == null || room <= 0 || !(deficit > 0f) || !FiniteFloatValidator.IsFinite(deficit)) return plan;
-
-        long total = 0;
-        foreach (var troop in host)
-        {
-            float power = troopPower(troop.TroopId);
-            if (!(power > 0f) || !FiniteFloatValidator.IsFinite(power)) continue;
-            // The small slack keeps float noise (1.3f * 100 is 130.000005) from adding a whole extra man.
-            double wanted = Math.Ceiling((double)deficit * troop.Share / power - CeilingSlack);
-            if (!(wanted >= 1d)) continue;
-            int count = wanted > room ? room : (int)wanted;
-            plan.Add((troop.TroopId, count));
-            total += count;
-        }
-
-        if (total <= room) return plan;
-
-        var scaled = new List<(string TroopId, int Count)>(plan.Count);
-        int left = room;
-        foreach (var (troopId, count) in plan)
-        {
-            int share = (int)((long)count * room / total);
-            scaled.Add((troopId, share));
-            left -= share;
-        }
-        for (int i = 0; left > 0 && i < scaled.Count; i++, left--)
-            scaled[i] = (scaled[i].TroopId, scaled[i].Count + 1);
-        scaled.RemoveAll(p => p.Count <= 0);
-        return scaled;
-    }
-
-    /// <summary>Three days of food for the host: <c>ceil(men / 20 * 3)</c>. Never the whole hunt's food: grain is heavy.</summary>
-    internal static int FoodTarget(int headCount) =>
-        headCount <= 0 ? 0 : (int)Math.Ceiling(headCount * (double)FoodDays / MenPerFood);
-
     private void TopUpFood(string partyId)
     {
         var party = _adapter.ReadParty(partyId);
         if (party.Exists)
-            _adapter.TopUpFood(partyId, FoodTarget(party.HeadCount));
+            _adapter.TopUpFood(partyId, HuntMath.FoodTarget(party.HeadCount));
     }
 
-    // ------------------------------------------------------------------ the running hunt
-
-    private void CheckActiveHunt()
+    /// <summary>
+    /// Every end gate, shared by the daily and the hourly tick, so a peace, a kingdom change or the switch takes effect
+    /// within the hour rather than at the next day. Ends the hunt and returns false when one holds.
+    /// </summary>
+    private bool HuntStillValid(out HunterHeroSnapshot hero, out HuntPartySnapshot party)
     {
-        string partyId = _hunterPartyId!;
+        hero = HunterHeroSnapshot.Missing;
+        party = HuntPartySnapshot.Missing;
         string heroId = _hunterHeroId!;
-        if (!_settings.Enabled) { EndHunt(HuntEndReason.Disabled); return; }
-        if (!IsSinglePlayer) { EndHunt(HuntEndReason.SessionLive); return; }
+        if (!_settings.Enabled) { EndHunt(HuntEndReason.Disabled); return false; }
+        if (!IsSinglePlayer) { EndHunt(HuntEndReason.SessionLive); return false; }
 
-        var hero = _adapter.ReadHero(heroId);
-        if (!CanHunt(hero)) { EndHunt(HuntEndReason.HunterDown); return; }
+        hero = _adapter.ReadHero(heroId);
+        if (!CanHunt(hero)) { EndHunt(HuntEndReason.HunterDown); return false; }
 
-        var party = _adapter.ReadParty(partyId);
+        party = _adapter.ReadParty(_hunterPartyId!);
         if (!party.Exists || !string.Equals(party.LeaderHeroId, heroId, StringComparison.Ordinal))
         {
             EndHunt(HuntEndReason.PartyLost);
-            return;
+            return false;
         }
 
-        if (string.IsNullOrEmpty(_adapter.PlayerKingdomId)) { EndHunt(HuntEndReason.Kingdomless); return; }
-        if (!hero.AtWarWithPlayerKingdom) { EndHunt(HuntEndReason.WarEnded); return; }
-        if (!(Now - _huntStartDay < _settings.HuntTimeoutDays)) { EndHunt(HuntEndReason.TimedOut); return; }
+        if (string.IsNullOrEmpty(_adapter.PlayerKingdomId)) { EndHunt(HuntEndReason.Kingdomless); return false; }
+        if (!hero.AtWarWithPlayerKingdom) { EndHunt(HuntEndReason.WarEnded); return false; }
+        if (!(Now - _huntStartDay < _settings.HuntTimeoutDays)) { EndHunt(HuntEndReason.TimedOut); return false; }
+        return true;
+    }
 
-        TopUpFood(partyId);
+    /// <summary>The running hunt's daily check: the end gates, then troops (never mid-battle) and grain.</summary>
+    private void CheckActiveHunt()
+    {
+        if (!HuntStillValid(out var hero, out var party)) return;
+        if (!party.InMapEvent)
+            TopUpHost(_hunterPartyId!, _hunterHeroId!, hero.FactionId);
+        TopUpFood(_hunterPartyId!);
     }
 
     /// <summary>The hourly tick of one party; only the hunter's party is acted on (design 1.4 and 1.7).</summary>
     public void OnHourlyTickParty(string? partyId)
     {
         if (!IsHunting || !string.Equals(partyId, _hunterPartyId, StringComparison.Ordinal)) return;
-        if (!IsSinglePlayer) { EndHunt(HuntEndReason.SessionLive); return; }
-
-        var party = _adapter.ReadParty(partyId!);
-        if (!party.Exists || !string.Equals(party.LeaderHeroId, _hunterHeroId, StringComparison.Ordinal))
-        {
-            EndHunt(HuntEndReason.PartyLost);
-            return;
-        }
+        if (!HuntStillValid(out _, out var party)) return;
 
         // Re-issue only when lost: every engage call resets all of the party's movement state.
-        if (!party.InMapEvent && !party.IsEngagingPlayer && _adapter.PinAndEngagePlayer(partyId!))
-            _pinnedByUs = true;
+        if (!party.InMapEvent && !party.IsEngagingPlayer)
+            _adapter.PinAndEngagePlayer(partyId!);
 
         TryStep(partyId!);
     }
 
     private void TryStep(string partyId)
     {
-        var ctx = _adapter.ReadStepContext(partyId);
-        if (ctx.BlockedBy != null) return;
+        var state = _adapter.ReadStepState(partyId);
+        _lastStep = StepBlock(state) ?? StepAlongPath(partyId, state) ?? "stepped";
+    }
 
-        float sight = ctx.SeeingRange;
-        if (!(sight > 0f) || !FiniteFloatValidator.IsFinite(sight)) return;
+    /// <summary>
+    /// The first engine state that forbids an out-of-sight step, or null. The hunter must be free on the map, unseen
+    /// and engaging the player; the player must be on the open map on the same island, with no true sight.
+    /// </summary>
+    internal static string? StepBlock(HuntStepState s)
+    {
+        if (!s.Valid) return "a party is missing";
+        if (!s.HunterActive) return "hunter inactive";
+        if (s.HunterInMapEvent) return "hunter in battle";
+        if (s.HunterBesieging) return "hunter in a siege";
+        if (s.HunterInArmy) return "hunter in an army";
+        if (s.HunterInSettlement) return "hunter in a settlement";
+        if (s.HunterAtSea) return "hunter at sea";
+        if (s.HunterVisible) return "hunter visible";
+        if (!s.HunterEngagingPlayer) return "hunter not engaging the player";
+        if (!s.PlayerActive) return "player inactive";
+        if (s.PlayerInMapEventOrSiege) return "player in battle or siege";
+        if (s.PlayerInSettlement) return "player in a settlement";
+        if (s.PlayerInAnotherLordsArmy) return "player in another lord's army";
+        if (s.PlayerAtSea) return "player at sea";
+        if (s.PlayerInEncounter) return "player in an encounter";
+        if (s.TrueSight) return "true sight";
+        if (!s.SameIsland) return "on another island";
+        return null;
+    }
+
+    /// <summary>
+    /// Steps the hunter along his path to the player, landing at least <see cref="SightMargin"/> sights away. The
+    /// straight-line gate runs before the path rebuild, which is wasted on a hunter already inside the margin. Returns
+    /// why it did not step, or null when it relocated the hunter.
+    /// </summary>
+    private string? StepAlongPath(string partyId, HuntStepState s)
+    {
+        float sight = s.SeeingRange;
+        if (!(sight > 0f) || !FiniteFloatValidator.IsFinite(sight)) return "no seeing range";
         float keepAway = SightMargin * sight;
-        if (!(Distance(ctx.HunterX, ctx.HunterY, ctx.PlayerX, ctx.PlayerY) >= keepAway)) return;
+        if (!(HuntMath.Distance(s.HunterX, s.HunterY, s.PlayerX, s.PlayerY) >= keepAway)) return "already within the sight margin";
 
-        float step = ComputeStep(PathLength(ctx.HunterX, ctx.HunterY, ctx.PathX, ctx.PathY), sight, _settings.HunterStepCap);
-        if (!(step > 0f)) return;
+        var path = _adapter.TryRebuildPath(partyId);
+        if (path.Count == 0) return "no path to the player";
 
-        var (x, y) = WalkPath(ctx.HunterX, ctx.HunterY, ctx.PathX, ctx.PathY, step);
-        if (!(Distance(x, y, ctx.PlayerX, ctx.PlayerY) >= keepAway)) return;
+        float step = HuntMath.ComputeStep(HuntMath.PathLength(s.HunterX, s.HunterY, path.Xs, path.Ys), sight, _settings.HunterStepCap);
+        if (!(step > 0f)) return "the path is too short to step";
+
+        var (x, y) = HuntMath.WalkPath(s.HunterX, s.HunterY, path.Xs, path.Ys, step);
+        if (!(HuntMath.Distance(x, y, s.PlayerX, s.PlayerY) >= keepAway)) return "the step would end inside the sight margin";
 
         var landing = _adapter.ResolveLanding(partyId, x, y, EnemyClearance);
-        if (!landing.Ok || !(Distance(landing.X, landing.Y, ctx.PlayerX, ctx.PlayerY) >= keepAway)) return;
+        if (!landing.Ok) return "no safe landing";
+        if (!(HuntMath.Distance(landing.X, landing.Y, s.PlayerX, s.PlayerY) >= keepAway)) return "the landing was nudged inside the sight margin";
 
         _adapter.Relocate(partyId, landing.X, landing.Y);
-    }
-
-    /// <summary><c>min(pathGap - 1.5 S - 3, cap)</c>; zero unless that is a positive finite number.</summary>
-    internal static float ComputeStep(float pathGap, float seeingRange, float stepCap)
-    {
-        if (!FiniteFloatValidator.IsFinite(pathGap) || !FiniteFloatValidator.IsFinite(seeingRange)
-            || !FiniteFloatValidator.IsFinite(stepCap))
-            return 0f;
-        float step = Math.Min(pathGap - SightMargin * seeingRange - StepSlack, stepCap);
-        return step > 0f ? step : 0f;
-    }
-
-    internal static float PathLength(float startX, float startY, float[] xs, float[] ys)
-    {
-        int n = Math.Min(xs?.Length ?? 0, ys?.Length ?? 0);
-        float total = 0f, px = startX, py = startY;
-        for (int i = 0; i < n; i++)
-        {
-            total += Distance(px, py, xs![i], ys![i]);
-            px = xs[i];
-            py = ys[i];
-        }
-        return total;
-    }
-
-    /// <summary>The point <paramref name="distance"/> along the path; the last point when the path is shorter.</summary>
-    internal static (float X, float Y) WalkPath(float startX, float startY, float[] xs, float[] ys, float distance)
-    {
-        int n = Math.Min(xs?.Length ?? 0, ys?.Length ?? 0);
-        float px = startX, py = startY, left = distance;
-        for (int i = 0; i < n; i++)
-        {
-            float leg = Distance(px, py, xs![i], ys![i]);
-            if (leg >= left && leg > 0f)
-            {
-                float t = left / leg;
-                return (px + (xs[i] - px) * t, py + (ys[i] - py) * t);
-            }
-            left -= leg;
-            px = xs[i];
-            py = ys[i];
-        }
-        return (px, py);
-    }
-
-    private static float Distance(float ax, float ay, float bx, float by)
-    {
-        float dx = bx - ax, dy = by - ay;
-        return (float)Math.Sqrt(dx * dx + dy * dy);
+        return null;
     }
 
     public void OnPartyDestroyed(string? partyId)
@@ -512,8 +500,8 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
     }
 
     /// <summary>
-    /// Ends the hunt: releases the AI pin when the hunt set it, clears the published snapshot, then refreshes the
-    /// party's speed so the old floor cannot linger, and starts the cooldown.
+    /// Ends the hunt: releases the AI pin the hunt set, clears the published snapshot, then refreshes the party's speed
+    /// so the old floor cannot linger, and starts the cooldown.
     /// </summary>
     public void EndHunt(HuntEndReason reason)
     {
@@ -521,8 +509,7 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         string partyId = _hunterPartyId!;
         string heroId = _hunterHeroId!;
 
-        if (_pinnedByUs)
-            _adapter.ReleasePin(partyId);
+        _adapter.ReleasePin(partyId);
         ClearHunt();
         _adapter.InvalidateSpeed(partyId);
 
@@ -534,16 +521,16 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
             _adapter.Announce(reason == HuntEndReason.HunterBeaten ? HuntAnnouncement.Won : HuntAnnouncement.Over, heroId);
     }
 
+    /// <summary>Clears the hunt, its published snapshot and its once-per-hunt latch (end, reset, load, refused pin).</summary>
     private void ClearHunt()
     {
         _hunterHeroId = null;
         _hunterPartyId = null;
-        _pinnedByUs = false;
         _huntStartDay = 0f;
+        _lastStep = null;
+        Interlocked.Exchange(ref _sizeRejectionLogged, 0);
         Publish(null);
     }
-
-    // ------------------------------------------------------------------ the sight snapshot (main thread)
 
     /// <summary>
     /// Every campaign frame: works out whether the hunter is within the player's sight and publishes it, with the
@@ -557,7 +544,8 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
 
         var reading = _adapter.ReadSight(partyId);
         bool inSight = IsInSight(reading);
-        float speed = FiniteFloatValidator.IsFinite(reading.PlayerSpeed) ? reading.PlayerSpeed : float.NaN;
+        // A non-finite speed is published as it is: SpeedMoved and TryGetSpeedFloor refuse it.
+        float speed = reading.PlayerSpeed;
         float multiplier = _settings.HunterSpeedMultiplier;
 
         var old = Volatile.Read(ref _snapshot);
@@ -590,7 +578,7 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
 
     private void Publish(HuntSnapshot? snapshot) => Volatile.Write(ref _snapshot, snapshot);
 
-    // ------------------------------------------------------------------ IEyeOfSauronHook (any thread)
+    // IEyeOfSauronHook: any thread, snapshot reads only.
 
     public void ApplyHunterSpeedFloor(string? partyId, ref ExplainedNumber result)
     {
@@ -618,14 +606,15 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         return true;
     }
 
-    public float GetHostSizeBonus(string? partyId, float currentLimit, float sumOfFactors, int rawCount, Func<float> weightedCount)
+    public float GetHostSizeBonus(string? partyId, float currentLimit, float sumOfFactors, int rawCount, object? party,
+        Func<object?, float> weightedCountOf)
     {
         var s = Volatile.Read(ref _snapshot);
         if (s == null || partyId == null || !string.Equals(s.PartyId, partyId, StringComparison.Ordinal)) return 0f;
         if (!FiniteFloatValidator.IsFinite(currentLimit)) return Rejected($"limit {currentLimit} is not finite");
         if (!(1f + sumOfFactors > MinFactorScale)) return Rejected($"factor scale {1f + sumOfFactors} has collapsed");
 
-        float weighted = weightedCount == null ? float.NaN : weightedCount();
+        float weighted = weightedCountOf == null ? float.NaN : weightedCountOf(party);
         float target = Math.Max(rawCount, FiniteFloatValidator.IsFinite(weighted) ? (float)Math.Ceiling(weighted) : 0f);
         if (!(target > currentLimit)) return 0f;
 
@@ -647,25 +636,24 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         return 0f;
     }
 
-    // ------------------------------------------------------------------ console
-
     public IReadOnlyList<string> Describe()
     {
         var lines = new List<string>
         {
-            $"Eye of Sauron: {(_settings.Enabled ? "on" : "off")}, {(IsSinglePlayer ? "single-player" : "co-op or server: stood down")}.",
-            string.Format(System.Globalization.CultureInfo.InvariantCulture,
+            $"Eye of Sauron: {(_settings.Enabled ? "on" : "off")}, "
+            + $"{(IsSinglePlayer ? "single-player" : "co-op, unprobeable co-op mod or server: stood down")}.",
+            string.Format(Inv.InvariantCulture,
                 "Score against Evil {0:0.0}, against Free {1:0.0} (threshold {2:0.0}, half-life {3:0} days).",
                 GetScore(FactionSide.Evil), GetScore(FactionSide.Free), _settings.Threshold, _settings.HalfLifeDays),
         };
         string? kingdom = _adapter.PlayerKingdomId;
-        lines.Add(kingdom == null
+        lines.Add(string.IsNullOrEmpty(kingdom)
             ? "Your kingdom: none (deeds still score; no hunt)."
-            : $"Your kingdom: {kingdom} ({_alignment.GetKingdomSide(kingdom)}).");
+            : $"Your kingdom: {kingdom} ({PlayerKingdomSide(kingdom!)}).");
 
         float now = Now;
         lines.Add(now < _cooldownUntilDay
-            ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "Cooldown: {0:0.0} days left.", _cooldownUntilDay - now)
+            ? string.Format(Inv.InvariantCulture, "Cooldown: {0:0.0} days left.", _cooldownUntilDay - now)
             : "Cooldown: none.");
 
         if (!IsHunting)
@@ -675,12 +663,14 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         }
 
         var snapshot = Volatile.Read(ref _snapshot);
+        var party = _adapter.ReadParty(_hunterPartyId!);
         lines.Add($"Hunter: {_adapter.HeroName(_hunterHeroId!)} ({_hunterHeroId}), party {_hunterPartyId}, "
-                  + $"pinned by the hunt: {(_pinnedByUs ? "yes" : "no")}.");
-        lines.Add(string.Format(System.Globalization.CultureInfo.InvariantCulture,
-            "Day {0:0.0} of {1}; in sight: {2}; your speed {3:0.00}, multiplier {4:0.00}.",
+                  + $"pinned: {(party.AiPinned ? "yes" : "no")}, engaging you: {(party.IsEngagingPlayer ? "yes" : "no")}.");
+        lines.Add(string.Format(Inv.InvariantCulture,
+            "Day {0:0.0} of {1}; in sight: {2}; your speed {3:0.00} (0 while the hunter is out of sight), multiplier {4:0.00}.",
             now - _huntStartDay, _settings.HuntTimeoutDays, snapshot?.InSight == true ? "yes" : "no",
             snapshot?.PlayerSpeed ?? 0f, snapshot?.Multiplier ?? 0f));
+        lines.Add($"Last hourly step: {_lastStep ?? "none yet"}.");
         return lines;
     }
 

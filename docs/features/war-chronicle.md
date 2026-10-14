@@ -4,7 +4,7 @@
 
 The War Chronicle is a feature module (`Main/Features/WarChronicle/`) that keeps the AI-versus-AI War of the Ring from snowballing, and measures whether it does. Today it ships four working parts: a registry of timed, kingdom-keyed effects (volunteer rate and prisoner escape), a rally layer that grants small effects to AI kingdoms that have lost a large share of their towns and castles, a daily war ledger written to the TAOM debug log, and `tools/analyze_war_ledger.py`, which reads that ledger.
 
-The event chain (lore events at set points), the army-focus window and the Eye of Sauron hunt are planned work under #765 and are not built yet.
+The event chain (lore events at set points) and the army-focus window are planned work under #765 and are not built yet; the Eye of Sauron hunt (M8) is built, see [eye-of-sauron.md](eye-of-sauron.md).
 
 ## Why This Exists
 
@@ -253,7 +253,7 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 - **Co-op: host-only under BannerlordCoop.** Under BannerlordCoop the tick, the escape pass, the rally, the baselines and the ledger run only on the host (`IsAuthority` and `MayWriteSaveBackedState`), `taom.war_effect_add` is refused on a client, and a client gets the host's state from the save at join and nothing after (see [coop-interop.md](coop-interop.md), "No sync of TAOM's own campaign state"). The volunteer consumer does not run on a BannerlordCoop client either: it is reached only from `DailyTickSettlementEvent` (and new-game creation), and that per-entity ticker never reaches a client. Under BannerlordTogether, which TAOM cannot probe, `IsAuthority` fails open and `IsCoopClient` reads false: every peer then runs the daily tick with its own escape rolls (`EndCaptivityAction.ApplyByEscape`) and its own rally writes, and the console refusal does not fire (UNVERIFIED whether that mod's client-side suppression contains it). This follows the `IsAuthority` policy in coop-interop.md.
 - **Effects show no tooltip line.** The volunteer probability is a plain float and the escape is an internal roll, so neither has a tooltip to carry a line. `taom.war_effects` and the ledger are the only views. (The planned event announcements will cover the player-facing side.)
 - **Small by design.** Effects touch volunteers and escapes only. They do not change a troop's combat power or auto-resolve scoring, though waiting recruits reach higher tiers sooner (the volunteer roll also gates promotion), so they cushion a skewed war rather than reverse it. Vanilla's own low-fief boost for a small kingdom can exceed the rally's x1.10 and x1.20 volunteer multipliers; the `vr` ledger column shows only the War Chronicle multiplier.
-- **Not built yet (#765):** the event chain, the army-focus window and the Eye of Sauron hunt. The `chronicle` section of the save and the `ev=chronicle` ledger line are reserved for them.
+- **Not built yet (#765):** the event chain and the army-focus window. The `chronicle` section of the save and the `ev=chronicle` ledger line are reserved for them. The Eye of Sauron hunt (M8) is built and keeps its own `_taom_eye_*` keys ([eye-of-sauron.md](eye-of-sauron.md)).
 
 ## Changelog
 
@@ -262,4 +262,4 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 ## GitHub Issue
 
 - **Issue:** #765
-- **Status:** Open (the event chain, army focus and Eye of Sauron hunt remain)
+- **Status:** Open (the event chain and army focus remain; the Eye of Sauron hunt is in [eye-of-sauron.md](eye-of-sauron.md))

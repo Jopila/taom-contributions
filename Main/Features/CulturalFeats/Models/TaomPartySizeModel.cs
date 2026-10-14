@@ -22,6 +22,8 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
     // TEMPORARY (2026-07-17) — only the load-order probe below needs this; remove with the diagnostic.
     private readonly IModLogger _logger;
     private readonly IEyeOfSauronHook _eyeOfSauron;
+    // Built once: a lambda over the method parameter would allocate a closure and a Func on every call, every party.
+    private readonly System.Func<object?, float> _weightedCountOf;
 
     public TaomPartySizeModel(
         ICulturalFeatsService feats,
@@ -37,6 +39,7 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
         _aiPartySize = aiPartySize;
         _logger = logger;
         _eyeOfSauron = eyeOfSauron;
+        _weightedCountOf = p => _troopWeight.CalculateWeightedMemberCount((PartyBase)p!);
     }
 
     public override ExplainedNumber GetPartyMemberSizeLimit(
@@ -70,7 +73,7 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
         // lines above give; pinned by AiPartySizeOrderingTests. The weighted count is walked for the hunter only.
         AiPartySizeService.AddResultFrameBonus(ref result, _eyeOfSauron.GetHostSizeBonus(
             party.MobileParty?.StringId, result.ResultNumber, result.SumOfFactors,
-            party.MemberRoster?.TotalManCount ?? 0, () => _troopWeight.CalculateWeightedMemberCount(party)));
+            party.MemberRoster?.TotalManCount ?? 0, party, _weightedCountOf));
         // TroopWeight "elite tax" (2026-07-11 rework): shrink the limit by the party's weight surplus so
         // heavy troops fill the cap at 2× while every COUNT reads raw. No-op when EnableTroopWeight is off.
         // Call position is irrelevant to the arithmetic — ExplainedNumber sums factors and applies them to

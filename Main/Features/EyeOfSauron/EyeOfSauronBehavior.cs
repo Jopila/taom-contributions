@@ -17,15 +17,6 @@ public sealed class EyeOfSauronBehavior : CampaignBehaviorBase
     private readonly EyeOfSauronService _service;
     private readonly IModLogger _logger;
 
-    private float _scoreVsEvil;
-    private float _scoreVsFree;
-    private float _lastDecayDay;
-    private float _cooldownUntilDay;
-    private string _hunterHeroId = string.Empty;
-    private string _hunterPartyId = string.Empty;
-    private bool _pinnedByUs;
-    private float _huntStartDay;
-
     public EyeOfSauronBehavior(EyeOfSauronService service, IModLogger logger)
     {
         _service = service;
@@ -43,44 +34,22 @@ public sealed class EyeOfSauronBehavior : CampaignBehaviorBase
         CampaignEvents.MobilePartyDestroyed.AddNonSerializedListener(this, OnMobilePartyDestroyed);
     }
 
+    /// <summary>
+    /// One key per field of <see cref="EyeOfSauronState"/>. A save captures the service; a load fills a fresh record
+    /// (a missing key leaves its default) and hands it over the constructor's reset.
+    /// </summary>
     public override void SyncData(IDataStore dataStore)
     {
-        if (dataStore.IsSaving)
-        {
-            var state = _service.CaptureState();
-            _scoreVsEvil = state.ScoreVsEvil;
-            _scoreVsFree = state.ScoreVsFree;
-            _lastDecayDay = state.LastDecayDay;
-            _cooldownUntilDay = state.CooldownUntilDay;
-            _hunterHeroId = state.HunterHeroId ?? string.Empty;
-            _hunterPartyId = state.HunterPartyId ?? string.Empty;
-            _pinnedByUs = state.PinnedByUs;
-            _huntStartDay = state.HuntStartDay;
-        }
-
-        dataStore.SyncData("_taom_eye_scoreVsEvil", ref _scoreVsEvil);
-        dataStore.SyncData("_taom_eye_scoreVsFree", ref _scoreVsFree);
-        dataStore.SyncData("_taom_eye_lastDecayDay", ref _lastDecayDay);
-        dataStore.SyncData("_taom_eye_cooldownUntilDay", ref _cooldownUntilDay);
-        dataStore.SyncData("_taom_eye_hunterHeroId", ref _hunterHeroId);
-        dataStore.SyncData("_taom_eye_hunterPartyId", ref _hunterPartyId);
-        dataStore.SyncData("_taom_eye_pinnedByUs", ref _pinnedByUs);
-        dataStore.SyncData("_taom_eye_huntStartDay", ref _huntStartDay);
-
+        var state = dataStore.IsSaving ? _service.CaptureState() : new EyeOfSauronState();
+        dataStore.SyncData("_taom_eye_scoreVsEvil", ref state.ScoreVsEvil);
+        dataStore.SyncData("_taom_eye_scoreVsFree", ref state.ScoreVsFree);
+        dataStore.SyncData("_taom_eye_lastDecayDay", ref state.LastDecayDay);
+        dataStore.SyncData("_taom_eye_cooldownUntilDay", ref state.CooldownUntilDay);
+        dataStore.SyncData("_taom_eye_hunterHeroId", ref state.HunterHeroId);
+        dataStore.SyncData("_taom_eye_hunterPartyId", ref state.HunterPartyId);
+        dataStore.SyncData("_taom_eye_huntStartDay", ref state.HuntStartDay);
         if (dataStore.IsLoading)
-        {
-            _service.LoadFrom(new EyeOfSauronState
-            {
-                ScoreVsEvil = _scoreVsEvil,
-                ScoreVsFree = _scoreVsFree,
-                LastDecayDay = _lastDecayDay,
-                CooldownUntilDay = _cooldownUntilDay,
-                HunterHeroId = string.IsNullOrEmpty(_hunterHeroId) ? null : _hunterHeroId,
-                HunterPartyId = string.IsNullOrEmpty(_hunterPartyId) ? null : _hunterPartyId,
-                PinnedByUs = _pinnedByUs,
-                HuntStartDay = _huntStartDay,
-            });
-        }
+            _service.LoadFrom(state);
     }
 
     private void OnSessionLaunched(CampaignGameStarter starter) => Guard("session launch", _service.OnSessionLaunched);

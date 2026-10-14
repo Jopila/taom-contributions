@@ -312,12 +312,12 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
     [SettingPropertyBool("Enable the Hunt", Order = 0, RequireRestart = false,
-        HintText = "When on, great deeds against the enemy draw a hunter: a Free player is hunted by one of the Nine with a host of Mordor, an Evil player by Glorfindel with a host of the Eldar. Only while your kingdom is at war with the hunter's. Single-player only. Default: on.")]
+        HintText = "When on, great deeds against the enemy draw a hunter: a Free player is hunted by one of the Nine with a host of Mordor (of Dol Guldur for its four wraiths), an Evil player by Glorfindel with a host of the Eldar. Only while your kingdom is at war with the hunter's. Single-player only. Default: on.")]
     public bool EyeOfSauronEnabled { get; set; } = true;
 
     [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
     [SettingPropertyFloatingInteger("Deed Threshold", EyeOfSauron.EyeOfSauronSettingsProvider.MinThreshold, EyeOfSauron.EyeOfSauronSettingsProvider.MaxThreshold, "#0.0", Order = 1, RequireRestart = false,
-        HintText = "Deed score that draws a hunt. A field victory over an enemy kingdom scores 1, a sally or a battle outside a siege 2, a siege assault 3. Default 10.")]
+        HintText = "Deed score that draws a hunt. A victory over an enemy kingdom in the field, a village raid or a forced levy scores 1, a sally or a battle outside a siege 2, a siege assault 3. Default 10.")]
     public float EyeThreshold { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultThreshold;
 
     [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
@@ -326,12 +326,12 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     public float EyeHalfLifeDays { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultHalfLifeDays;
 
     [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
-    [SettingPropertyInteger("Cooldown (days)", 0, EyeOfSauron.EyeOfSauronSettingsProvider.MaxCooldownDays, Order = 3, RequireRestart = false,
+    [SettingPropertyInteger("Cooldown (days)", EyeOfSauron.EyeOfSauronSettingsProvider.MinCooldownDays, EyeOfSauron.EyeOfSauronSettingsProvider.MaxCooldownDays, Order = 3, RequireRestart = false,
         HintText = "Days after a hunt ends before another can start. Default 60.")]
     public int EyeCooldownDays { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultCooldownDays;
 
     [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
-    [SettingPropertyInteger("Hunt Timeout (days)", 1, EyeOfSauron.EyeOfSauronSettingsProvider.MaxHuntTimeoutDays, Order = 4, RequireRestart = false,
+    [SettingPropertyInteger("Hunt Timeout (days)", EyeOfSauron.EyeOfSauronSettingsProvider.MinHuntTimeoutDays, EyeOfSauron.EyeOfSauronSettingsProvider.MaxHuntTimeoutDays, Order = 4, RequireRestart = false,
         HintText = "Days a hunt lasts before the hunter gives up. Default 20.")]
     public int HuntTimeoutDays { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultHuntTimeoutDays;
 

@@ -26,6 +26,7 @@ public class EyeOfSauronServiceTests
     private IEyeOfSauronSettings _settings = null!;
     private ICoopSessionProvider _coop = null!;
     private IDedicatedServerProvider _dedicated = null!;
+    private IModLogger _logger = null!;
     private EyeOfSauronService _sut = null!;
     private double _now;
 
@@ -42,16 +43,13 @@ public class EyeOfSauronServiceTests
         _adapter.GetTroopPower(Arg.Any<string>(), Arg.Any<string>()).Returns(2f);
         _adapter.AddTroops(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>()).Returns(ci => ci.ArgAt<int>(2));
         _adapter.PinAndEngagePlayer(Arg.Any<string>()).Returns(true);
-        _adapter.SpawnHunterParty(Arg.Any<string>()).Returns(Party);
-        _adapter.ReadStepContext(Arg.Any<string>()).Returns(HuntStepContext.Blocked("test default"));
+        _adapter.SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>()).Returns(Party);
+        _adapter.ReadStepState(Arg.Any<string>()).Returns(HuntStepState.Missing);
+        _adapter.TryRebuildPath(Arg.Any<string>()).Returns(HuntPath.Empty);
         _adapter.ReadSight(Arg.Any<string>()).Returns(HuntSightReading.Missing);
 
-        _alignment = Substitute.For<IAlignmentService>();
-        _alignment.GetKingdomSide(Arg.Any<string>()).Returns(FactionSide.Neutral);
-        _alignment.GetKingdomSide(Gondor).Returns(FactionSide.Free);
-        _alignment.GetKingdomSide("rivendell").Returns(FactionSide.Free);
-        _alignment.GetKingdomSide(MordorKingdom).Returns(FactionSide.Evil);
-        _alignment.GetKingdomSide("dolguldur").Returns(FactionSide.Evil);
+        // A real AlignmentService, so GetKingdomSide and ResolveSide (the culture fallback) agree as in the game.
+        _alignment = NewAlignment();
 
         _settings = Substitute.For<IEyeOfSauronSettings>();
         _settings.Enabled.Returns(true);
@@ -66,10 +64,27 @@ public class EyeOfSauronServiceTests
 
         _coop = Substitute.For<ICoopSessionProvider>();
         _dedicated = Substitute.For<IDedicatedServerProvider>();
-        _sut = new EyeOfSauronService(_adapter, _alignment, _settings, _coop, _dedicated, Substitute.For<IModLogger>());
+        _logger = Substitute.For<IModLogger>();
+        _sut = new EyeOfSauronService(_adapter, _alignment, _settings, _coop, _dedicated, _logger);
     }
 
     // ---------------------------------------------------------------- helpers
+
+    internal static IAlignmentService NewAlignment()
+    {
+        var config = Substitute.For<IAlignmentConfigProvider>();
+        config.LoadAlignments().Returns(new System.Collections.Generic.Dictionary<string, string>
+        {
+            [Gondor] = "free",
+            ["rivendell"] = "free",
+            [MordorKingdom] = "evil",
+            ["dolguldur"] = "evil",
+            ["gondor"] = "free",
+            ["mordor"] = "evil",
+            ["umbar"] = "neutral",
+        });
+        return new AlignmentService(config, Substitute.For<IModLogger>());
+    }
 
     private static HunterHeroSnapshot FreeHero(string faction = MordorKingdom, bool atWar = true) => new()
     {
@@ -116,24 +131,24 @@ public class EyeOfSauronServiceTests
     // ---------------------------------------------------------------- decay
 
     [TestMethod]
-    public void Decay_OneHalfLife_Halves() => Assert.AreEqual(5f, EyeOfSauronService.Decay(10f, 30d, 30f), 1e-4f);
+    public void Decay_OneHalfLife_Halves() => Assert.AreEqual(5f, HuntMath.Decay(10f, 30d, 30f), 1e-4f);
 
     [TestMethod]
-    public void Decay_NaNScore_ReturnsZero() => Assert.AreEqual(0f, EyeOfSauronService.Decay(float.NaN, 1d, 30f));
+    public void Decay_NaNScore_ReturnsZero() => Assert.AreEqual(0f, HuntMath.Decay(float.NaN, 1d, 30f));
 
     [TestMethod]
     public void Decay_InfiniteScore_ReturnsZero() =>
-        Assert.AreEqual(0f, EyeOfSauronService.Decay(float.PositiveInfinity, 1d, 30f));
+        Assert.AreEqual(0f, HuntMath.Decay(float.PositiveInfinity, 1d, 30f));
 
     [TestMethod]
     public void Decay_NegativeOrNaNElapsed_KeepsTheScore()
     {
-        Assert.AreEqual(10f, EyeOfSauronService.Decay(10f, -5d, 30f));
-        Assert.AreEqual(10f, EyeOfSauronService.Decay(10f, double.NaN, 30f));
+        Assert.AreEqual(10f, HuntMath.Decay(10f, -5d, 30f));
+        Assert.AreEqual(10f, HuntMath.Decay(10f, double.NaN, 30f));
     }
 
     [TestMethod]
-    public void Decay_NaNHalfLife_KeepsTheScore() => Assert.AreEqual(10f, EyeOfSauronService.Decay(10f, 30d, float.NaN));
+    public void Decay_NaNHalfLife_KeepsTheScore() => Assert.AreEqual(10f, HuntMath.Decay(10f, 30d, float.NaN));
 
     [TestMethod]
     public void GetScore_DecaysFromTheLastDeed()
@@ -213,7 +228,7 @@ public class EyeOfSauronServiceTests
 
         Assert.AreEqual(12f, _sut.GetScore(FactionSide.Evil), 1e-3f);
         Assert.IsFalse(_sut.IsHunting);
-        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>());
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
     }
 
     // ---------------------------------------------------------------- start gates
@@ -228,8 +243,7 @@ public class EyeOfSauronServiceTests
         Assert.IsTrue(_sut.IsHunting);
         Assert.AreEqual(HuntTroopLists.WitchKingId, _sut.HunterHeroId);
         Assert.AreEqual(Party, _sut.HunterPartyId);
-        Assert.IsTrue(_sut.PinnedByUs);
-        _adapter.Received(1).SpawnHunterParty(HuntTroopLists.WitchKingId);
+        _adapter.Received(1).SpawnHunterParty(HuntTroopLists.WitchKingId, Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
         _adapter.Received(1).PinAndEngagePlayer(Party);
         _adapter.Received(1).Announce(HuntAnnouncement.StartFree, HuntTroopLists.WitchKingId);
     }
@@ -266,7 +280,7 @@ public class EyeOfSauronServiceTests
         _sut.OnDailyTick();
 
         Assert.IsFalse(_sut.IsHunting);
-        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>());
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
     }
 
     [TestMethod]
@@ -278,6 +292,60 @@ public class EyeOfSauronServiceTests
         _sut.OnDailyTick();
 
         Assert.IsFalse(_sut.IsHunting);
+    }
+
+    // E01: KingdomManager.CreateKingdom names a player-founded kingdom "new_kingdom", which alignment.json does not
+    // list, so it is sided by its own culture (ResolveSide, #744), never left Neutral.
+    [TestMethod]
+    public void TryStartHunt_PlayerFoundedKingdom_SidedByCulture_IsHunted()
+    {
+        ArmWitchKingHunt();
+        _adapter.PlayerKingdomId.Returns("new_kingdom");
+        _adapter.PlayerKingdomCultureId.Returns("gondor");
+
+        _sut.TryStartHunt(ignoreScoreAndCooldown: false);
+
+        Assert.AreEqual(HuntTroopLists.WitchKingId, _sut.HunterHeroId);
+        _adapter.Received(1).Announce(HuntAnnouncement.StartFree, HuntTroopLists.WitchKingId);
+    }
+
+    [TestMethod]
+    public void TryStartHunt_PlayerFoundedKingdom_EvilCulture_SendsGlorfindel()
+    {
+        _adapter.PlayerKingdomId.Returns("new_kingdom1");
+        _adapter.PlayerKingdomCultureId.Returns("mordor");
+        _sut.AddScore(FactionSide.Free, 12f);
+        _adapter.ReadHero(HuntTroopLists.GlorfindelId).Returns(FreeHero("rivendell"));
+
+        _sut.TryStartHunt(ignoreScoreAndCooldown: false);
+
+        Assert.AreEqual(HuntTroopLists.GlorfindelId, _sut.HunterHeroId);
+        _adapter.DidNotReceive().ReadHero(HuntTroopLists.WitchKingId);
+    }
+
+    [DataTestMethod]
+    [DataRow("umbar")]
+    [DataRow("")]
+    [DataRow(null)]
+    public void TryStartHunt_PlayerFoundedKingdom_NeutralOrMissingCulture_NoHunt(string? culture)
+    {
+        ArmWitchKingHunt();
+        _adapter.PlayerKingdomId.Returns("new_kingdom");
+        _adapter.PlayerKingdomCultureId.Returns(culture);
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: false);
+
+        Assert.IsFalse(_sut.IsHunting, culture ?? "null");
+        StringAssert.Contains(verdict, "neither side");
+    }
+
+    [TestMethod]
+    public void Describe_PlayerFoundedKingdom_ShowsItsCultureSide()
+    {
+        _adapter.PlayerKingdomId.Returns("new_kingdom");
+        _adapter.PlayerKingdomCultureId.Returns("gondor");
+
+        StringAssert.Contains(string.Join("\n", _sut.Describe()), "Your kingdom: new_kingdom (Free)");
     }
 
     [TestMethod]
@@ -424,7 +492,7 @@ public class EyeOfSauronServiceTests
         _sut.TryStartHunt(ignoreScoreAndCooldown: false);
 
         Assert.AreEqual("lord_1_155", _sut.HunterHeroId, state);
-        _adapter.DidNotReceive().SpawnHunterParty(HuntTroopLists.WitchKingId);
+        _adapter.DidNotReceive().SpawnHunterParty(HuntTroopLists.WitchKingId, Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
     }
 
     // ---------------------------------------------------------------- busy guard, re-task, spawn
@@ -440,7 +508,15 @@ public class EyeOfSauronServiceTests
 
         Assert.AreEqual("wk_party", _sut.HunterPartyId);
         _adapter.Received(1).PinAndEngagePlayer("wk_party");
-        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>());
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+    }
+
+    private void AssertTheNextWraithRode(string because)
+    {
+        Assert.AreEqual("lord_1_155", _sut.HunterHeroId, because);
+        _adapter.Received(1).SpawnHunterParty("lord_1_155", Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().SpawnHunterParty(HuntTroopLists.WitchKingId, Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().PinAndEngagePlayer("wk_party");
     }
 
     [DataTestMethod]
@@ -451,7 +527,7 @@ public class EyeOfSauronServiceTests
     [DataRow("disbanding")]
     [DataRow("pinned")]
     [DataRow("inactive")]
-    public void TryStartHunt_HisPartyIsBusy_WaitsAndNeverSpawns(string busy)
+    public void TryStartHunt_HisPartyIsBusy_TheNextWraithRides_AndNeverASecondParty(string busy)
     {
         _sut.AddScore(FactionSide.Evil, 12f);
         _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(Leading("wk_party"));
@@ -471,23 +547,21 @@ public class EyeOfSauronServiceTests
 
         _sut.TryStartHunt(ignoreScoreAndCooldown: false);
 
-        Assert.IsFalse(_sut.IsHunting, busy);
-        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>());
-        _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
+        AssertTheNextWraithRode(busy);
     }
 
     [TestMethod]
-    public void TryStartHunt_InAnotherLordsParty_WaitsAndNeverSpawns()
+    public void TryStartHunt_InAnotherLordsParty_TheNextWraithRides()
     {
         _sut.AddScore(FactionSide.Evil, 12f);
         var wk = FreeHero();
         wk.IsInAParty = true;
         _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(wk);
+        _adapter.ReadHero("lord_1_155").Returns(FreeHero());
 
         _sut.TryStartHunt(ignoreScoreAndCooldown: false);
 
-        Assert.IsFalse(_sut.IsHunting);
-        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>());
+        AssertTheNextWraithRode("in another lord's party");
     }
 
     [DataTestMethod]
@@ -495,7 +569,7 @@ public class EyeOfSauronServiceTests
     [DataRow("notlord")]
     [DataRow("tournamentorsiege")]
     [DataRow("inactive")]
-    public void TryStartHunt_FreeHeroUnfitToLead_WaitsAndNeverSpawns(string state)
+    public void TryStartHunt_FreeHeroUnfitToLead_TheNextWraithRides(string state)
     {
         _sut.AddScore(FactionSide.Evil, 12f);
         var wk = FreeHero();
@@ -507,22 +581,75 @@ public class EyeOfSauronServiceTests
             case "inactive": wk.IsActive = false; break;
         }
         _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(wk);
+        _adapter.ReadHero("lord_1_155").Returns(FreeHero());
 
         _sut.TryStartHunt(ignoreScoreAndCooldown: false);
 
-        Assert.IsFalse(_sut.IsHunting, state);
-        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>());
+        AssertTheNextWraithRode(state);
     }
 
     [TestMethod]
-    public void TryStartHunt_SpawnRefused_NoHunt()
+    public void OnDailyTick_EveryHunterBusy_Waits_LogsTheFirstReason_AndNeverSpawns()
+    {
+        _sut.AddScore(FactionSide.Evil, 12f);
+        _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(Leading("wk_party"));
+        var party = FreeParty(HuntTroopLists.WitchKingId);
+        party.InArmy = true;
+        _adapter.ReadParty("wk_party").Returns(party);
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: false);
+
+        Assert.IsFalse(_sut.IsHunting);
+        StringAssert.StartsWith(verdict, "Waiting");
+        StringAssert.Contains(verdict, HuntTroopLists.WitchKingId);
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
+        _logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains("Waiting") && m.Contains(HuntTroopLists.WitchKingId)));
+    }
+
+    [TestMethod]
+    public void TryStartHunt_SpawnRefused_StopsTheSearch_AndLogs()
     {
         ArmWitchKingHunt();
-        _adapter.SpawnHunterParty(HuntTroopLists.WitchKingId).Returns((string?)null);
+        _adapter.ReadHero("lord_1_155").Returns(FreeHero());
+        _adapter.SpawnHunterParty(HuntTroopLists.WitchKingId, Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>()).Returns((string?)null);
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: false);
+
+        Assert.IsFalse(_sut.IsHunting);
+        StringAssert.StartsWith(verdict, "Refused");
+        _adapter.Received(1).SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains(HuntTroopLists.WitchKingId)));
+    }
+
+    [TestMethod]
+    public void TryStartHunt_SpawnsInTheRingBeyondTheSightMargin()
+    {
+        ArmWitchKingHunt();
 
         _sut.TryStartHunt(ignoreScoreAndCooldown: false);
 
-        Assert.IsFalse(_sut.IsHunting);
+        _adapter.Received(1).SpawnHunterParty(HuntTroopLists.WitchKingId, EyeOfSauronService.SpawnRingInner,
+            EyeOfSauronService.SpawnRingOuter, EyeOfSauronService.SightMargin);
+        Assert.IsTrue(EyeOfSauronService.SpawnRingInner > EyeOfSauronService.SightMargin);
+    }
+
+    // E20: the host is topped up before the engage, since CheckPartyNeedsUpdate can start the encounter at once.
+    [TestMethod]
+    public void TryStartHunt_TopsUpTheHostAndFood_BeforeTheEngage()
+    {
+        ArmWitchKingHunt();
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, heads: 50, strength: 30f));
+        var order = new System.Collections.Generic.List<string>();
+        _adapter.When(a => a.AddTroops(Party, Arg.Any<string>(), Arg.Any<int>())).Do(_ => order.Add("troops"));
+        _adapter.When(a => a.TopUpFood(Party, Arg.Any<int>())).Do(_ => order.Add("food"));
+        _adapter.When(a => a.PinAndEngagePlayer(Party)).Do(_ => order.Add("engage"));
+
+        _sut.TryStartHunt(ignoreScoreAndCooldown: false);
+
+        Assert.AreEqual("engage", order.Last());
+        CollectionAssert.Contains(order, "troops");
+        CollectionAssert.Contains(order, "food");
     }
 
     [TestMethod]
@@ -535,6 +662,116 @@ public class EyeOfSauronServiceTests
 
         Assert.IsFalse(_sut.IsHunting);
         _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void TryStartHunt_DryRun_Spawn_ChangesNothing_AndNamesTheGovernorship()
+    {
+        ArmWitchKingHunt();
+        var wk = FreeHero();
+        wk.GovernorOfSettlementId = "town_minas_morgul";
+        _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(wk);
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: true, dryRun: true);
+
+        Assert.IsFalse(_sut.IsHunting);
+        StringAssert.Contains(verdict, "spawned");
+        StringAssert.Contains(verdict, "town_minas_morgul");
+        StringAssert.Contains(verdict, "taom.start_eye_hunt confirm");
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
+        _adapter.DidNotReceive().AddTroops(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>());
+        _adapter.DidNotReceive().TopUpFood(Arg.Any<string>(), Arg.Any<int>());
+        _adapter.DidNotReceive().Announce(Arg.Any<HuntAnnouncement>(), Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void TryStartHunt_DryRun_Retask_PrintsTheExactTopUp_AndChangesNothing()
+    {
+        _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(Leading("wk_party"));
+        _adapter.ReadParty("wk_party").Returns(FreeParty(HuntTroopLists.WitchKingId, heads: 50, strength: 30f, engaging: false));
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: true, dryRun: true);
+
+        Assert.IsFalse(_sut.IsHunting);
+        StringAssert.Contains(verdict, "re-tasked");
+        StringAssert.Contains(verdict, "mordor_num_temple_knight x13");
+        _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
+        _adapter.DidNotReceive().AddTroops(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>());
+    }
+
+    // E14: the three refusals that guard the console path, each set up so the hunt would otherwise start.
+    [TestMethod]
+    public void TryStartHunt_WhileHunting_RefusesAndNeverSpawns()
+    {
+        StartWitchKingHunt();
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: true);
+
+        StringAssert.StartsWith(verdict, "A hunt is already running");
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
+        _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
+        _adapter.DidNotReceive().Announce(Arg.Any<HuntAnnouncement>(), Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void TryStartHunt_WhileAnotherWraithHunts_NeverStartsASecondHunt()
+    {
+        _sut.AddScore(FactionSide.Evil, 12f);
+        _adapter.ReadHero("lord_1_155").Returns(FreeHero());
+        _sut.TryStartHunt(ignoreScoreAndCooldown: false);
+        Assert.AreEqual("lord_1_155", _sut.HunterHeroId, "precondition");
+        _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(FreeHero());
+        _adapter.SpawnHunterParty(HuntTroopLists.WitchKingId, Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>()).Returns("wk_party");
+        _adapter.ClearReceivedCalls();
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: true);
+
+        StringAssert.StartsWith(verdict, "A hunt is already running");
+        Assert.AreEqual("lord_1_155", _sut.HunterHeroId);
+        Assert.AreEqual(Party, _sut.HunterPartyId);
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
+        _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
+    }
+
+    [DataTestMethod]
+    [DataRow("off")]
+    [DataRow("coop")]
+    [DataRow("coopdefer")]
+    [DataRow("server")]
+    public void TryStartHunt_ConsoleForce_SwitchedOffOrNotSinglePlayer_Refuses(string gate)
+    {
+        ArmWitchKingHunt();
+        switch (gate)
+        {
+            case "off": _settings.Enabled.Returns(false); break;
+            case "coop": _coop.IsSessionActive.Returns(true); break;
+            case "coopdefer": _coop.ShouldDeferToHost.Returns(true); break;
+            case "server": _dedicated.IsDedicatedServer.Returns(true); break;
+        }
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: true);
+
+        Assert.IsFalse(_sut.IsHunting, gate);
+        StringAssert.StartsWith(verdict, "Refused");
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
+    }
+
+    // E08: Bannerlord Together cannot tell host from client, so the hunt stands down while it is loaded.
+    [TestMethod]
+    public void OnDailyTick_UnprobeableCoopMod_StartsNoHunt()
+    {
+        ArmWitchKingHunt();
+        _coop.ShouldDeferToHost.Returns(true);
+
+        _sut.OnDailyTick();
+
+        Assert.IsFalse(_sut.IsHunting);
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
     }
 
     [TestMethod]
@@ -557,7 +794,7 @@ public class EyeOfSauronServiceTests
     {
         var host = new[] { new HostTroop("a", 0.5f), new HostTroop("b", 0.5f) };
 
-        var plan = EyeOfSauronService.PlanTopUp(host, 100f, id => id == "a" ? 2f : 5f, 500);
+        var plan = HuntMath.PlanTopUp(host, 100f, id => id == "a" ? 2f : 5f, 500);
 
         CollectionAssert.AreEqual(new[] { ("a", 25), ("b", 10) }, plan.ToArray());
     }
@@ -567,10 +804,20 @@ public class EyeOfSauronServiceTests
     {
         var host = new[] { new HostTroop("a", 0.5f), new HostTroop("b", 0.5f) };
 
-        var plan = EyeOfSauronService.PlanTopUp(host, 1000f, _ => 1f, 30);
+        var plan = HuntMath.PlanTopUp(host, 1000f, _ => 1f, 30);
 
         Assert.AreEqual(30, plan.Sum(p => p.Count));
         Assert.AreEqual(15, plan.Single(p => p.TroopId == "a").Count);
+    }
+
+    [TestMethod]
+    public void PlanTopUp_ScaledDown_HandsTheRemainderOutInListOrder()
+    {
+        var host = new[] { new HostTroop("a", 1f / 3f), new HostTroop("b", 1f / 3f), new HostTroop("c", 1f / 3f) };
+
+        var plan = HuntMath.PlanTopUp(host, 300f, _ => 1f, 10);
+
+        CollectionAssert.AreEqual(new[] { ("a", 4), ("b", 3), ("c", 3) }, plan.ToArray());
     }
 
     [TestMethod]
@@ -578,7 +825,7 @@ public class EyeOfSauronServiceTests
     {
         var host = new[] { new HostTroop("a", 0.5f), new HostTroop("b", 0.5f), new HostTroop("c", 0.5f) };
 
-        var plan = EyeOfSauronService.PlanTopUp(host, 100f,
+        var plan = HuntMath.PlanTopUp(host, 100f,
             id => id == "a" ? float.NaN : id == "b" ? 0f : 5f, 500);
 
         CollectionAssert.AreEqual(new[] { ("c", 10) }, plan.ToArray());
@@ -591,7 +838,7 @@ public class EyeOfSauronServiceTests
     [DataRow(-5f)]
     public void PlanTopUp_DeficitNotPositiveAndFinite_PlansNothing(float deficit)
     {
-        var plan = EyeOfSauronService.PlanTopUp(HuntTroopLists.Mordor, deficit, _ => 2f, 500);
+        var plan = HuntMath.PlanTopUp(HuntTroopLists.Mordor, deficit, _ => 2f, 500);
 
         Assert.AreEqual(0, plan.Count);
     }
@@ -599,7 +846,7 @@ public class EyeOfSauronServiceTests
     [TestMethod]
     public void PlanTopUp_NoRoom_PlansNothing()
     {
-        Assert.AreEqual(0, EyeOfSauronService.PlanTopUp(HuntTroopLists.Mordor, 100f, _ => 2f, 0).Count);
+        Assert.AreEqual(0, HuntMath.PlanTopUp(HuntTroopLists.Mordor, 100f, _ => 2f, 0).Count);
     }
 
     [TestMethod]
@@ -611,7 +858,7 @@ public class EyeOfSauronServiceTests
         _adapter.AddTroops(Party, Arg.Any<string>(), Arg.Any<int>()).Returns(ci =>
         {
             if (bonusSeenAtFirstAdd < 0f)
-                bonusSeenAtFirstAdd = _sut.GetHostSizeBonus(Party, 10f, 0f, 60, () => 60f);
+                bonusSeenAtFirstAdd = _sut.GetHostSizeBonus(Party, 10f, 0f, 60, null, _ => 60f);
             return ci.ArgAt<int>(2);
         });
 
@@ -633,6 +880,32 @@ public class EyeOfSauronServiceTests
 
         Assert.IsTrue(_sut.IsHunting);
         _adapter.DidNotReceive().AddTroops(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>());
+    }
+
+    [DataTestMethod]
+    [DataRow(float.NaN)]
+    [DataRow(float.PositiveInfinity)]
+    [DataRow(float.NegativeInfinity)]
+    public void TryStartHunt_HostStrengthNotFinite_AddsNoTroops(float strength)
+    {
+        ArmWitchKingHunt();
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, strength: strength));
+
+        _sut.OnDailyTick();
+
+        Assert.IsTrue(_sut.IsHunting);
+        _adapter.DidNotReceive().AddTroops(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>());
+    }
+
+    [TestMethod]
+    public void TryStartHunt_TopsUpTheStartFood()
+    {
+        ArmWitchKingHunt();
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, heads: 100));
+
+        _sut.OnDailyTick();
+
+        _adapter.Received(1).TopUpFood(Party, 15);
     }
 
     [TestMethod]
@@ -673,7 +946,47 @@ public class EyeOfSauronServiceTests
     }
 
     [TestMethod]
-    public void FoodTarget_IsThreeDaysForTheHost() => Assert.AreEqual(38, EyeOfSauronService.FoodTarget(250));
+    public void FoodTarget_IsThreeDaysForTheHost() => Assert.AreEqual(38, HuntMath.FoodTarget(250));
+
+    [TestMethod]
+    public void OnDailyTick_WhileHunting_WeakenedHost_IsToppedUpAgain()
+    {
+        StartWitchKingHunt();
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, heads: 50, strength: 30f));
+
+        _now += 1d;
+        _sut.OnDailyTick();
+
+        _adapter.Received(1).AddTroops(Party, "mordor_num_temple_knight", 13);
+        _adapter.Received(1).TopUpFood(Party, Arg.Any<int>());
+    }
+
+    [TestMethod]
+    public void OnDailyTick_WhileHunting_InABattle_NoTroops_ButFood()
+    {
+        StartWitchKingHunt();
+        var party = FreeParty(HuntTroopLists.WitchKingId, heads: 50, strength: 30f);
+        party.InMapEvent = true;
+        _adapter.ReadParty(Party).Returns(party);
+
+        _now += 1d;
+        _sut.OnDailyTick();
+
+        _adapter.DidNotReceive().AddTroops(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>());
+        _adapter.Received(1).TopUpFood(Party, Arg.Any<int>());
+    }
+
+    [TestMethod]
+    public void OnDailyTick_WhileHunting_HealthyHost_NoTroops()
+    {
+        StartWitchKingHunt();
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, heads: 100, strength: 130f));
+
+        _now += 1d;
+        _sut.OnDailyTick();
+
+        _adapter.DidNotReceive().AddTroops(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>());
+    }
 
     [TestMethod]
     public void OnDailyTick_WhileHunting_TopsUpThreeDaysOfFood()
@@ -691,15 +1004,15 @@ public class EyeOfSauronServiceTests
 
     [TestMethod]
     public void ComputeStep_GapInsideTheSightMargin_IsZero() =>
-        Assert.AreEqual(0f, EyeOfSauronService.ComputeStep(16f, 10f, 15f));
+        Assert.AreEqual(0f, HuntMath.ComputeStep(16f, 10f, 15f));
 
     [TestMethod]
     public void ComputeStep_LongGap_IsCappedAtTheStepCap() =>
-        Assert.AreEqual(15f, EyeOfSauronService.ComputeStep(200f, 10f, 15f));
+        Assert.AreEqual(15f, HuntMath.ComputeStep(200f, 10f, 15f));
 
     [TestMethod]
     public void ComputeStep_ShortGap_LeavesOneAndAHalfSightsPlusThree() =>
-        Assert.AreEqual(5f, EyeOfSauronService.ComputeStep(23f, 10f, 15f), 1e-4f);
+        Assert.AreEqual(5f, HuntMath.ComputeStep(23f, 10f, 15f), 1e-4f);
 
     [DataTestMethod]
     [DataRow(float.NaN, 10f, 15f)]
@@ -707,16 +1020,16 @@ public class EyeOfSauronServiceTests
     [DataRow(200f, 10f, float.NaN)]
     [DataRow(float.PositiveInfinity, 10f, 15f)]
     public void ComputeStep_NonFiniteInput_IsZero(float gap, float sight, float cap) =>
-        Assert.AreEqual(0f, EyeOfSauronService.ComputeStep(gap, sight, cap));
+        Assert.AreEqual(0f, HuntMath.ComputeStep(gap, sight, cap));
 
     [TestMethod]
     public void PathLength_SumsTheLegsFromTheStart() =>
-        Assert.AreEqual(7f, EyeOfSauronService.PathLength(0f, 0f, new[] { 3f, 3f }, new[] { 0f, 4f }), 1e-4f);
+        Assert.AreEqual(7f, HuntMath.PathLength(0f, 0f, new[] { 3f, 3f }, new[] { 0f, 4f }), 1e-4f);
 
     [TestMethod]
     public void WalkPath_StopsPartWayAlongTheSecondLeg()
     {
-        var (x, y) = EyeOfSauronService.WalkPath(0f, 0f, new[] { 3f, 3f }, new[] { 0f, 4f }, 5f);
+        var (x, y) = HuntMath.WalkPath(0f, 0f, new[] { 3f, 3f }, new[] { 0f, 4f }, 5f);
 
         Assert.AreEqual(3f, x, 1e-4f);
         Assert.AreEqual(2f, y, 1e-4f);
@@ -725,21 +1038,92 @@ public class EyeOfSauronServiceTests
     [TestMethod]
     public void WalkPath_PastTheEnd_StopsAtTheLastPoint()
     {
-        var (x, y) = EyeOfSauronService.WalkPath(0f, 0f, new[] { 3f }, new[] { 0f }, 50f);
+        var (x, y) = HuntMath.WalkPath(0f, 0f, new[] { 3f }, new[] { 0f }, 50f);
 
         Assert.AreEqual(3f, x, 1e-4f);
         Assert.AreEqual(0f, y, 1e-4f);
     }
 
-    private void StraightPathTo(float playerX, float sight)
+    /// <summary>An all-clear step state with one flag flipped (E05: the service judges every flag).</summary>
+    private static HuntStepState StepState(float playerX = 100f, float sight = 10f, string? flip = null) => new()
     {
-        _adapter.ReadStepContext(Party).Returns(new HuntStepContext
-        {
-            SeeingRange = sight, HunterX = 0f, HunterY = 0f, PlayerX = playerX, PlayerY = 0f,
-            PathX = new[] { playerX / 2f, playerX }, PathY = new[] { 0f, 0f },
-        });
+        Valid = flip != "invalid",
+        HunterActive = flip != "hunter inactive",
+        HunterInMapEvent = flip == "hunter in battle",
+        HunterBesieging = flip == "hunter besieging",
+        HunterInArmy = flip == "hunter in army",
+        HunterInSettlement = flip == "hunter in settlement",
+        HunterAtSea = flip == "hunter at sea",
+        HunterVisible = flip == "hunter visible",
+        HunterEngagingPlayer = flip != "hunter not engaging",
+        PlayerActive = flip != "player inactive",
+        PlayerInMapEventOrSiege = flip == "player in battle",
+        PlayerInSettlement = flip == "player in settlement",
+        PlayerInAnotherLordsArmy = flip == "player in army",
+        PlayerAtSea = flip == "player at sea",
+        PlayerInEncounter = flip == "player in encounter",
+        TrueSight = flip == "true sight",
+        SameIsland = flip != "other island",
+        SeeingRange = sight,
+        HunterX = 0f,
+        HunterY = 0f,
+        PlayerX = playerX,
+        PlayerY = 0f,
+    };
+
+    private void StraightPathTo(float playerX, float sight, string? flip = null)
+    {
+        _adapter.ReadStepState(Party).Returns(StepState(playerX, sight, flip));
+        _adapter.TryRebuildPath(Party).Returns(new HuntPath(new[] { playerX / 2f, playerX }, new[] { 0f, 0f }));
         _adapter.ResolveLanding(Party, Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>())
             .Returns(ci => new HuntLanding(true, ci.ArgAt<float>(1), ci.ArgAt<float>(2)));
+    }
+
+    [DataTestMethod]
+    [DataRow("invalid")]
+    [DataRow("hunter inactive")]
+    [DataRow("hunter in battle")]
+    [DataRow("hunter besieging")]
+    [DataRow("hunter in army")]
+    [DataRow("hunter in settlement")]
+    [DataRow("hunter at sea")]
+    [DataRow("hunter visible")]
+    [DataRow("hunter not engaging")]
+    [DataRow("player inactive")]
+    [DataRow("player in battle")]
+    [DataRow("player in settlement")]
+    [DataRow("player in army")]
+    [DataRow("player at sea")]
+    [DataRow("player in encounter")]
+    [DataRow("true sight")]
+    [DataRow("other island")]
+    public void OnHourlyTickParty_StepBlocked_NeverRebuildsThePathOrRelocates(string flip)
+    {
+        StartWitchKingHunt();
+        StraightPathTo(100f, 10f, flip);
+        Assert.IsNotNull(EyeOfSauronService.StepBlock(StepState(flip: flip)), flip);
+
+        _sut.OnHourlyTickParty(Party);
+
+        _adapter.DidNotReceive().TryRebuildPath(Arg.Any<string>());
+        _adapter.DidNotReceive().Relocate(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>());
+    }
+
+    [TestMethod]
+    public void StepBlock_AllClear_IsNull() => Assert.IsNull(EyeOfSauronService.StepBlock(StepState()));
+
+    [TestMethod]
+    public void OnHourlyTickParty_EmptyPath_DoesNotRelocate()
+    {
+        StartWitchKingHunt();
+        StraightPathTo(100f, 10f);
+        _adapter.TryRebuildPath(Party).Returns(HuntPath.Empty);
+
+        _sut.OnHourlyTickParty(Party);
+
+        _adapter.DidNotReceive().ResolveLanding(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().Relocate(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>());
+        StringAssert.Contains(string.Join("\n", _sut.Describe()), "Last hourly step: no path to the player");
     }
 
     [TestMethod]
@@ -791,6 +1175,19 @@ public class EyeOfSauronServiceTests
     }
 
     [TestMethod]
+    public void OnHourlyTickParty_InsideTheSightMargin_NeverRebuildsThePath()
+    {
+        StartWitchKingHunt();
+        StraightPathTo(12f, 10f);
+
+        _sut.OnHourlyTickParty(Party);
+
+        // The straight-line gate comes first: a hunter inside 1.5 sights never pays for a path rebuild.
+        _adapter.DidNotReceive().TryRebuildPath(Arg.Any<string>());
+        _adapter.DidNotReceive().Relocate(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>());
+    }
+
+    [TestMethod]
     public void OnHourlyTickParty_Blocked_DoesNotRelocate()
     {
         StartWitchKingHunt();
@@ -821,7 +1218,38 @@ public class EyeOfSauronServiceTests
 
         _sut.OnHourlyTickParty("someone_else");
 
-        _adapter.DidNotReceive().ReadStepContext(Arg.Any<string>());
+        _adapter.DidNotReceive().ReadStepState(Arg.Any<string>());
+    }
+
+    // E35: the hourly tick's own party checks.
+    [DataTestMethod]
+    [DataRow("missing")]
+    [DataRow("newleader")]
+    public void OnHourlyTickParty_PartyMissingOrNewLeader_EndsPartyLost(string state)
+    {
+        StartWitchKingHunt();
+        _adapter.ReadParty(Party).Returns(state == "missing" ? HuntPartySnapshot.Missing : FreeParty("someone_else"));
+
+        _sut.OnHourlyTickParty(Party);
+
+        Assert.IsFalse(_sut.IsHunting, state);
+        _adapter.Received(1).ReleasePin(Party);
+        _adapter.DidNotReceive().PinAndEngagePlayer(Party);
+        _adapter.DidNotReceive().ReadStepState(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void OnHourlyTickParty_InBattle_OrderLost_DoesNotReissue()
+    {
+        StartWitchKingHunt();
+        var party = FreeParty(HuntTroopLists.WitchKingId, engaging: false);
+        party.InMapEvent = true;
+        _adapter.ReadParty(Party).Returns(party);
+
+        _sut.OnHourlyTickParty(Party);
+
+        Assert.IsTrue(_sut.IsHunting);
+        _adapter.DidNotReceive().PinAndEngagePlayer(Party);
     }
 
     [TestMethod]
@@ -841,6 +1269,7 @@ public class EyeOfSauronServiceTests
 
     [DataTestMethod]
     [DataRow("beaten", HuntAnnouncement.Won)]
+    [DataRow("lost", HuntAnnouncement.Over)]
     [DataRow("otherbattle", HuntAnnouncement.Over)]
     [DataRow("destroyed", HuntAnnouncement.Over)]
     [DataRow("dead", HuntAnnouncement.Over)]
@@ -854,6 +1283,7 @@ public class EyeOfSauronServiceTests
     [DataRow("disabled", HuntAnnouncement.Over)]
     [DataRow("coopdaily", null)]
     [DataRow("coophourly", null)]
+    [DataRow("coopdefer", null)]
     [DataRow("manual", HuntAnnouncement.Over)]
     public void EveryEnd_ReleasesThePin_ClearsTheHunt_AndStartsTheCooldown(string end, HuntAnnouncement? shown)
     {
@@ -861,6 +1291,7 @@ public class EyeOfSauronServiceTests
         switch (end)
         {
             case "beaten": Battle(MordorKingdom, involvesHunter: true); break;
+            case "lost": Battle(null, playerWon: false, involvesHunter: true); break;
             case "otherbattle": Battle(null, playerEvent: false, involvesHunter: true); break;
             case "destroyed": _sut.OnPartyDestroyed(Party); break;
             case "dead": Daily(h => h.IsAlive = false); break;
@@ -895,13 +1326,16 @@ public class EyeOfSauronServiceTests
                 _dedicated.IsDedicatedServer.Returns(true);
                 _sut.OnHourlyTickParty(Party);
                 break;
+            case "coopdefer":
+                _coop.ShouldDeferToHost.Returns(true);
+                _sut.OnDailyTick();
+                break;
             case "manual": _sut.EndHunt(HuntEndReason.Manual); break;
         }
 
         Assert.IsFalse(_sut.IsHunting, end);
-        Assert.IsFalse(_sut.PinnedByUs, end);
         _adapter.Received(1).ReleasePin(Party);
-        Assert.AreEqual(0f, _sut.GetHostSizeBonus(Party, 10f, 0f, 60, () => 60f), "the size bonus lapses");
+        Assert.AreEqual(0f, _sut.GetHostSizeBonus(Party, 10f, 0f, 60, null, _ => 60f), "the size bonus lapses");
         if (shown.HasValue)
             _adapter.Received(1).Announce(shown.Value, HuntTroopLists.WitchKingId);
         else
@@ -910,6 +1344,7 @@ public class EyeOfSauronServiceTests
         // The cooldown runs from the end: a forced restart is still allowed, an organic one is not.
         _sut.AddScore(FactionSide.Evil, 50f);
         _coop.IsSessionActive.Returns(false);
+        _coop.ShouldDeferToHost.Returns(false);
         _dedicated.IsDedicatedServer.Returns(false);
         _settings.Enabled.Returns(true);
         _adapter.PlayerKingdomId.Returns(Gondor);
@@ -917,6 +1352,41 @@ public class EyeOfSauronServiceTests
         _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId));
         _sut.OnDailyTick();
         Assert.IsFalse(_sut.IsHunting, "cooldown after " + end);
+    }
+
+    // E03: every end gate also holds at the hunter's hourly tick, before the re-pin and the step. Vanilla sets Hold on
+    // peace; without the gate the hourly re-issue would re-engage the player at peace for up to a day.
+    [DataTestMethod]
+    [DataRow("peace", HuntAnnouncement.Over)]
+    [DataRow("kingdomless", HuntAnnouncement.Over)]
+    [DataRow("disabled", HuntAnnouncement.Over)]
+    [DataRow("timeout", HuntAnnouncement.Over)]
+    [DataRow("dead", HuntAnnouncement.Over)]
+    public void OnHourlyTickParty_EndGateHolds_EndsBeforeReengaging(string end, HuntAnnouncement shown)
+    {
+        StartWitchKingHunt();
+        // Vanilla's Hold at peace: the party no longer engages the player.
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, engaging: false));
+        switch (end)
+        {
+            case "peace": _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(FreeHero(atWar: false)); break;
+            case "kingdomless": _adapter.PlayerKingdomId.Returns((string?)null); break;
+            case "disabled": _settings.Enabled.Returns(false); break;
+            case "timeout": _now += 20d; break;
+            case "dead":
+                var hero = FreeHero();
+                hero.IsAlive = false;
+                _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(hero);
+                break;
+        }
+
+        _sut.OnHourlyTickParty(Party);
+
+        Assert.IsFalse(_sut.IsHunting, end);
+        _adapter.Received(1).ReleasePin(Party);
+        _adapter.Received(1).Announce(shown, HuntTroopLists.WitchKingId);
+        _adapter.DidNotReceive().PinAndEngagePlayer(Party);
+        _adapter.DidNotReceive().ReadStepState(Arg.Any<string>());
     }
 
     private void Daily(Action<HunterHeroSnapshot> change)
@@ -927,18 +1397,20 @@ public class EyeOfSauronServiceTests
         _sut.OnDailyTick();
     }
 
+    // E21: the size-rejection warning is once per hunt; the latch clears with the hunt, so the next hunt warns again.
     [TestMethod]
-    public void EndHunt_PinNotOurs_NeverReleasesIt()
+    public void GetHostSizeBonus_Rejected_WarnsOncePerHunt()
     {
-        _sut.LoadFrom(new EyeOfSauronState
-        {
-            HunterHeroId = HuntTroopLists.WitchKingId, HunterPartyId = Party, PinnedByUs = false, HuntStartDay = 1000f,
-        });
+        StartWitchKingHunt();
+        _sut.GetHostSizeBonus(Party, float.NaN, 0f, 60, null, _ => 60f);
+        _sut.GetHostSizeBonus(Party, float.NaN, 0f, 60, null, _ => 60f);
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("Host size bonus")));
 
-        _sut.EndHunt(HuntEndReason.Manual);
+        _sut.ResetForNewSession();
+        StartWitchKingHunt();
+        _sut.GetHostSizeBonus(Party, float.NaN, 0f, 60, null, _ => 60f);
 
-        Assert.IsFalse(_sut.IsHunting);
-        _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
+        _logger.Received(2).LogWarning(Arg.Is<string>(m => m.Contains("Host size bonus")));
     }
 
     [TestMethod]
@@ -1039,11 +1511,13 @@ public class EyeOfSauronServiceTests
         Assert.IsFalse(_sut.TryGetSpeedFloor(Party, 3f, out _));
     }
 
-    [TestMethod]
-    public void TryGetSpeedFloor_NaNPlayerSpeed_None()
+    [DataTestMethod]
+    [DataRow(float.NaN)]
+    [DataRow(float.PositiveInfinity)]
+    public void TryGetSpeedFloor_NonFinitePlayerSpeed_None(float speed)
     {
         StartWitchKingHunt();
-        InSight(playerSpeed: float.NaN);
+        InSight(playerSpeed: speed);
 
         Assert.IsFalse(_sut.TryGetSpeedFloor(Party, 3f, out _));
     }
@@ -1086,16 +1560,18 @@ public class EyeOfSauronServiceTests
     [DataRow("player in battle")]
     [DataRow("hunter in battle")]
     [DataRow("player inactive")]
+    [DataRow("hunter inactive")]
+    [DataRow("reading invalid")]
     public void OnTick_ExcludedState_IsOutOfSight(string state)
     {
         StartWitchKingHunt();
         var r = new HuntSightReading
         {
-            Valid = true, HunterActive = true, PlayerActive = true, SeeingRange = 10f, Distance = 5f, PlayerSpeed = 4f,
+            Valid = state != "reading invalid", HunterActive = state != "hunter inactive",
+            PlayerActive = state != "player inactive", SeeingRange = 10f, Distance = 5f, PlayerSpeed = 4f,
             PlayerAtSea = state == "player at sea", PlayerInMapEvent = state == "player in battle",
             HunterInMapEvent = state == "hunter in battle",
         };
-        if (state == "player inactive") r.PlayerActive = false;
         _adapter.ReadSight(Party).Returns(r);
 
         _sut.OnTick();
@@ -1137,21 +1613,21 @@ public class EyeOfSauronServiceTests
         StartWitchKingHunt();
         bool walked = false;
 
-        float bonus = _sut.GetHostSizeBonus("someone_else", 50f, 0f, 200, () => { walked = true; return 300f; });
+        float bonus = _sut.GetHostSizeBonus("someone_else", 50f, 0f, 200, null, _ => { walked = true; return 300f; });
 
         Assert.AreEqual(0f, bonus);
         Assert.IsFalse(walked);
     }
 
     [TestMethod]
-    public void GetHostSizeBonus_NoHunt_Zero() => Assert.AreEqual(0f, _sut.GetHostSizeBonus(Party, 50f, 0f, 200, () => 300f));
+    public void GetHostSizeBonus_NoHunt_Zero() => Assert.AreEqual(0f, _sut.GetHostSizeBonus(Party, 50f, 0f, 200, null, _ => 300f));
 
     [TestMethod]
     public void GetHostSizeBonus_HostOverTheLimit_LiftsItToTheWeightedCount_WithHalfASlotOfHeadroom()
     {
         StartWitchKingHunt();
 
-        Assert.AreEqual(250.5f, _sut.GetHostSizeBonus(Party, 50f, 0.5f, 200, () => 299.2f), 1e-3f);
+        Assert.AreEqual(250.5f, _sut.GetHostSizeBonus(Party, 50f, 0.5f, 200, null, _ => 299.2f), 1e-3f);
     }
 
     [TestMethod]
@@ -1159,7 +1635,7 @@ public class EyeOfSauronServiceTests
     {
         StartWitchKingHunt();
 
-        Assert.AreEqual(150.5f, _sut.GetHostSizeBonus(Party, 50f, 0f, 200, () => 120f), 1e-3f);
+        Assert.AreEqual(150.5f, _sut.GetHostSizeBonus(Party, 50f, 0f, 200, null, _ => 120f), 1e-3f);
     }
 
     [TestMethod]
@@ -1167,7 +1643,7 @@ public class EyeOfSauronServiceTests
     {
         StartWitchKingHunt();
 
-        Assert.AreEqual(150.5f, _sut.GetHostSizeBonus(Party, 50f, 0f, 200, () => float.NaN), 1e-3f);
+        Assert.AreEqual(150.5f, _sut.GetHostSizeBonus(Party, 50f, 0f, 200, null, _ => float.NaN), 1e-3f);
     }
 
     [TestMethod]
@@ -1175,7 +1651,7 @@ public class EyeOfSauronServiceTests
     {
         StartWitchKingHunt();
 
-        Assert.AreEqual(0f, _sut.GetHostSizeBonus(Party, 300f, 0f, 200, () => 300f));
+        Assert.AreEqual(0f, _sut.GetHostSizeBonus(Party, 300f, 0f, 200, null, _ => 300f));
     }
 
     [DataTestMethod]
@@ -1187,7 +1663,7 @@ public class EyeOfSauronServiceTests
     {
         StartWitchKingHunt();
 
-        Assert.AreEqual(0f, _sut.GetHostSizeBonus(Party, limit, sumOfFactors, 200, () => 300f));
+        Assert.AreEqual(0f, _sut.GetHostSizeBonus(Party, limit, sumOfFactors, 200, null, _ => 300f));
     }
 
     [TestMethod]
@@ -1196,7 +1672,7 @@ public class EyeOfSauronServiceTests
         StartWitchKingHunt();
 
         Assert.AreEqual(TAOM.Features.AiPartySize.AiPartySizeService.MaxFlatBonus,
-            _sut.GetHostSizeBonus(Party, 1f, 0f, 200, () => 5e6f));
+            _sut.GetHostSizeBonus(Party, 1f, 0f, 200, null, _ => 5e6f));
     }
 
     // ---------------------------------------------------------------- session reset and persistence
@@ -1210,10 +1686,9 @@ public class EyeOfSauronServiceTests
         _sut.ResetForNewSession();
 
         Assert.IsFalse(_sut.IsHunting);
-        Assert.IsFalse(_sut.PinnedByUs);
         Assert.AreEqual(0f, _sut.GetScore(FactionSide.Evil));
         Assert.IsFalse(_sut.TryGetSpeedFloor(Party, 0f, out _));
-        Assert.AreEqual(0f, _sut.GetHostSizeBonus(Party, 10f, 0f, 60, () => 60f));
+        Assert.AreEqual(0f, _sut.GetHostSizeBonus(Party, 10f, 0f, 60, null, _ => 60f));
         _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
     }
 
@@ -1230,23 +1705,67 @@ public class EyeOfSauronServiceTests
         Assert.IsTrue(_sut.IsHunting);
     }
 
+    /// <summary>Distinct non-default values in every field, so a dropped or swapped field fails the round trip.</summary>
+    internal static EyeOfSauronState Seed() => new()
+    {
+        ScoreVsEvil = 11f,
+        ScoreVsFree = 7f,
+        LastDecayDay = 990f,
+        CooldownUntilDay = 1040f,
+        HunterHeroId = HuntTroopLists.WitchKingId,
+        HunterPartyId = "wk_party",
+        HuntStartDay = 995f,
+    };
+
+    internal static void AssertSeedIsComplete(EyeOfSauronState seed)
+    {
+        foreach (var f in typeof(EyeOfSauronState).GetFields())
+        {
+            object? value = f.GetValue(seed);
+            object? empty = f.FieldType == typeof(string) ? string.Empty : Activator.CreateInstance(f.FieldType);
+            Assert.IsFalse(value == null || value.Equals(empty), $"Seed() must give {f.Name} a non-default value");
+        }
+    }
+
+    internal static void AssertSameRecord(EyeOfSauronState expected, EyeOfSauronState actual)
+    {
+        foreach (var f in typeof(EyeOfSauronState).GetFields())
+            Assert.AreEqual(f.GetValue(expected), f.GetValue(actual), f.Name);
+    }
+
     [TestMethod]
-    public void CaptureState_ThenLoadFrom_RoundTripsTheRecord()
+    public void CaptureState_ThenLoadFrom_RoundTripsEveryField()
+    {
+        var seed = Seed();
+        AssertSeedIsComplete(seed);
+
+        _sut.LoadFrom(seed);
+
+        AssertSameRecord(seed, _sut.CaptureState());
+    }
+
+    [TestMethod]
+    public void LoadFrom_Null_LoadsNothing()
     {
         StartWitchKingHunt();
-        var saved = _sut.CaptureState();
 
-        _sut.ResetForNewSession();
-        _sut.LoadFrom(saved);
-        var again = _sut.CaptureState();
+        _sut.LoadFrom(null!);
 
-        Assert.AreEqual(HuntTroopLists.WitchKingId, again.HunterHeroId);
-        Assert.AreEqual(Party, again.HunterPartyId);
-        Assert.IsTrue(again.PinnedByUs);
-        Assert.AreEqual(saved.ScoreVsEvil, again.ScoreVsEvil);
-        Assert.AreEqual(saved.HuntStartDay, again.HuntStartDay);
-        Assert.AreEqual(saved.LastDecayDay, again.LastDecayDay);
-        Assert.AreEqual(saved.CooldownUntilDay, again.CooldownUntilDay);
+        Assert.IsFalse(_sut.IsHunting);
+        Assert.AreEqual(0f, _sut.GetScore(FactionSide.Evil));
+    }
+
+    [TestMethod]
+    public void LoadFrom_HeroIdWithoutAPartyId_LoadsNoHunt_ButKeepsTheScores()
+    {
+        var seed = Seed();
+        seed.HunterPartyId = string.Empty;
+        _now = 990d;
+
+        _sut.LoadFrom(seed);
+
+        Assert.IsFalse(_sut.IsHunting);
+        Assert.AreEqual(11f, _sut.GetScore(FactionSide.Evil), 1e-3f);
     }
 
     [TestMethod]
@@ -1259,7 +1778,7 @@ public class EyeOfSauronServiceTests
         _sut.LoadFrom(saved);
 
         Assert.IsFalse(_sut.TryGetSpeedFloor(Party, 0f, out _), "no in-sight state survives a load");
-        Assert.IsTrue(_sut.GetHostSizeBonus(Party, 10f, 0f, 60, () => 60f) > 0f, "the loaded host is not shed");
+        Assert.IsTrue(_sut.GetHostSizeBonus(Party, 10f, 0f, 60, null, _ => 60f) > 0f, "the loaded host is not shed");
     }
 
     [TestMethod]
@@ -1276,7 +1795,7 @@ public class EyeOfSauronServiceTests
     {
         _sut.LoadFrom(new EyeOfSauronState
         {
-            HunterHeroId = HuntTroopLists.WitchKingId, HunterPartyId = Party, PinnedByUs = true, HuntStartDay = 1000f,
+            HunterHeroId = HuntTroopLists.WitchKingId, HunterPartyId = Party, HuntStartDay = 1000f,
         });
 
         _sut.OnSessionLaunched();
@@ -1285,11 +1804,35 @@ public class EyeOfSauronServiceTests
     }
 
     [TestMethod]
+    public void OnSessionLaunched_CoopSessionLive_EndsTheRestoredHunt()
+    {
+        _sut.LoadFrom(Seed());
+        _adapter.ReadParty("wk_party").Returns(FreeParty(HuntTroopLists.WitchKingId));
+        _coop.ShouldDeferToHost.Returns(true);
+
+        _sut.OnSessionLaunched();
+
+        Assert.IsFalse(_sut.IsHunting);
+        _adapter.Received(1).ReleasePin("wk_party");
+        _adapter.DidNotReceive().Announce(Arg.Any<HuntAnnouncement>(), Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void OnMapEventEnded_CoopPeer_ScoresNoDeed()
+    {
+        _coop.IsSessionActive.Returns(true);
+
+        Battle(MordorKingdom, DeedKind.Assault);
+
+        Assert.AreEqual(0f, _sut.GetScore(FactionSide.Evil));
+    }
+
+    [TestMethod]
     public void OnSessionLaunched_HuntersPartyThere_KeepsTheHunt()
     {
         _sut.LoadFrom(new EyeOfSauronState
         {
-            HunterHeroId = HuntTroopLists.WitchKingId, HunterPartyId = Party, PinnedByUs = true, HuntStartDay = 1000f,
+            HunterHeroId = HuntTroopLists.WitchKingId, HunterPartyId = Party, HuntStartDay = 1000f,
         });
         _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId));
 
@@ -1328,6 +1871,7 @@ public class EyeOfSauronServiceTests
 
         StringAssert.Contains(text, "Witch-king of Angmar");
         StringAssert.Contains(text, Party);
+        StringAssert.Contains(text, "engaging you: yes");
         StringAssert.Contains(text, "12.0");
     }
 }

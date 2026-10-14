@@ -34,7 +34,7 @@ public class HuntTroopListsDataTests
             foreach (var el in doc.Descendants("NPCCharacter"))
             {
                 var id = (string?)el.Attribute("id");
-                // The first definition with a culture wins; custom_battle_lords.xml carries id-and-culture stubs.
+                // The first definition is kept unless it lacks a level; custom_battle_lords.xml carries id-and-culture stubs.
                 if (id != null && (!byId.ContainsKey(id) || byId[id].Attribute("level") == null))
                     byId[id] = el;
             }
@@ -74,6 +74,7 @@ public class HuntTroopListsDataTests
     {
         var registry = new NazgulRegistry();
 
+        Assert.AreEqual(9, HuntTroopLists.WraithOrder.Count, "no hunter is listed twice");
         Assert.AreEqual(9, HuntTroopLists.WraithOrder.Distinct().Count());
         Assert.IsTrue(HuntTroopLists.WraithOrder.All(registry.IsWraith), "every hunter is one of the Nine");
         Assert.AreEqual("lord_1_15", HuntTroopLists.WraithOrder.First());
@@ -93,7 +94,10 @@ public class HuntTroopListsDataTests
     [DataRow("lord_R2_1", "rivendell", "Rivendell")]
     [DataRow("lord_1_48", "dolguldur", "DolGuldur")]
     [DataRow("lord_1_15", "empire_s", "Mordor")]
-    [DataRow("lord_1_155", "dolguldur", "DolGuldur")]
+    [DataRow("lord_1_48_1", "dolguldur", "DolGuldur")]
+    [DataRow("lord_1_48_2", "dolguldur", "DolGuldur")]
+    [DataRow("lord_1_48_3", "dolguldur", "DolGuldur")]
+    [DataRow("lord_1_155", "empire_s", "Mordor")]
     [DataRow("lord_1_155", null, "Mordor")]
     public void HostFor_PicksTheHostByHunterAndFaction(string heroId, string? faction, string expected)
     {
@@ -101,5 +105,20 @@ public class HuntTroopListsDataTests
         var name = host == HuntTroopLists.Rivendell ? "Rivendell" : host == HuntTroopLists.DolGuldur ? "DolGuldur" : "Mordor";
 
         Assert.AreEqual(expected, name);
+    }
+
+    /// <summary>
+    /// HostFor routes on the hunter's live kingdom id, so the id must stay the one ModuleData defines, ruled by Khamul;
+    /// a rename would silently give every Dol Guldur wraith Mordor's host.
+    /// </summary>
+    [TestMethod]
+    public void DolGuldurKingdomId_IsTheKingdomKhamulRules()
+    {
+        var kingdom = XDocument.Load(RepoPaths.RepoPath("Main", "_Module", "ModuleData", "taom_spkingdoms.xml"))
+            .Descendants("Kingdom")
+            .SingleOrDefault(k => (string?)k.Attribute("id") == HuntTroopLists.DolGuldurKingdomId);
+
+        Assert.IsNotNull(kingdom, $"no Kingdom id=\"{HuntTroopLists.DolGuldurKingdomId}\" in taom_spkingdoms.xml");
+        Assert.AreEqual("Hero." + HuntTroopLists.KhamulId, (string?)kingdom!.Attribute("owner"));
     }
 }

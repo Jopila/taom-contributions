@@ -3,7 +3,8 @@ namespace TAOM.Adapters;
 /// <summary>
 /// Every engine call the Eye of Sauron hunt (#765 M8) makes: heroes, the hunter's party, the player's party, the
 /// navigation mesh and the on-screen announcement (ADR-007). Ids in, plain values out; each id is resolved against the
-/// live campaign on every call, so nothing here outlives a save load. Main thread only.
+/// live campaign on every call, so nothing here outlives a save load. It reads and acts; every decision is the
+/// service's. Main thread only.
 /// </summary>
 public interface IHunterPartyAdapter
 {
@@ -12,6 +13,13 @@ public interface IHunterPartyAdapter
 
     /// <summary>The player clan's kingdom StringId (ruler, vassal or mercenary), or null when kingdomless.</summary>
     string? PlayerKingdomId { get; }
+
+    /// <summary>
+    /// The player kingdom's own <c>Kingdom.Culture</c> StringId, or null when kingdomless. It sides a kingdom that
+    /// alignment.json does not list, such as a player-founded <c>new_kingdom</c> (#744: the kingdom's culture, never the
+    /// player hero's).
+    /// </summary>
+    string? PlayerKingdomCultureId { get; }
 
     /// <summary>The player's strength: his army's when he leads one, else his party's (<c>EstimatedStrength</c>).</summary>
     float PlayerStrength { get; }
@@ -26,17 +34,22 @@ public interface IHunterPartyAdapter
     /// </summary>
     bool PinAndEngagePlayer(string partyId);
 
-    /// <summary>Unpins the party and refreshes its AI when it is free to decide. A missing party is a no-op.</summary>
+    /// <summary>
+    /// Unpins the party, drops an engage order on the player (vanilla's own peace repair), and has it rethink at its
+    /// next hourly tick: a pinned party never advanced its think counter. A missing party is a no-op.
+    /// </summary>
     void ReleasePin(string partyId);
 
     /// <summary>Bumps the party's version so its cached speed is recalculated. A missing party is a no-op.</summary>
     void InvalidateSpeed(string partyId);
 
     /// <summary>
-    /// Spawns a lord party for a free hero out of the player's sight near him, after removing the hero as governor and
-    /// re-checking that he still belongs to no party. Returns the new party's StringId, or null when refused.
+    /// Spawns a lord party for a free hero at a reachable point between <paramref name="ringInner"/> and
+    /// <paramref name="ringOuter"/> times the player's seeing range from him, and at least <paramref name="minSights"/>
+    /// seeing ranges away in a straight line; removes the hero as governor and re-checks that he still belongs to no
+    /// party first. Returns the new party's StringId, or null when refused.
     /// </summary>
-    string? SpawnHunterParty(string heroId);
+    string? SpawnHunterParty(string heroId, float ringInner, float ringOuter, float minSights);
 
     /// <summary>One troop's estimated power under the hero's leadership, or NaN when the troop or hero is unknown.</summary>
     float GetTroopPower(string troopId, string leaderHeroId);
@@ -47,10 +60,20 @@ public interface IHunterPartyAdapter
     /// <summary>Adds grain until the party carries at least <paramref name="targetFood"/> food.</summary>
     void TopUpFood(string partyId, int targetFood);
 
+    /// <summary>
+    /// The in-sight inputs, every frame. The hunter is searched for only within the player's seeing range (the locator
+    /// grid around him), so a hunter beyond it, or gone, reads as <see cref="HuntSightReading.Missing"/>.
+    /// </summary>
     HuntSightReading ReadSight(string partyId);
 
-    /// <summary>Checks the step guards and rebuilds the hunter's path to the player.</summary>
-    HuntStepContext ReadStepContext(string partyId);
+    /// <summary>The raw facts for an hourly step, read without side effects.</summary>
+    HuntStepState ReadStepState(string partyId);
+
+    /// <summary>
+    /// Rebuilds the hunter's long-term path to the player and returns its waypoints; <see cref="HuntPath.Empty"/> when the
+    /// rebuild fails or the path is empty (a failed rebuild also clears the party's path mode).
+    /// </summary>
+    HuntPath TryRebuildPath(string partyId);
 
     /// <summary>
     /// Validates a candidate landing point: on the navigation mesh, on the player's island (nudged once when not), and
@@ -58,7 +81,7 @@ public interface IHunterPartyAdapter
     /// </summary>
     HuntLanding ResolveLanding(string partyId, float x, float y, float enemyClearance);
 
-    /// <summary>Moves the party (and anything attached to it) to the point, then rebuilds its path and refreshes its AI.</summary>
+    /// <summary>Moves the party to the point, then rebuilds its path and refreshes its AI.</summary>
     void Relocate(string partyId, float x, float y);
 
     /// <summary>Shows one of the hunt's lines with the hero's name.</summary>

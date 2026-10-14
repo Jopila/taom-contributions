@@ -20,7 +20,9 @@ public interface IEyeOfSauronHook
     /// <summary>
     /// The result-frame body count to add to the hunter's party-size limit so its host is never shed: enough to lift
     /// <paramref name="currentLimit"/> to the larger of <paramref name="rawCount"/> and the weighted count. Zero for any
-    /// other party; <paramref name="weightedCount"/> is invoked only for the hunter.
+    /// other party. <paramref name="party"/> is an opaque token handed only to <paramref name="weightedCountOf"/>, which
+    /// is invoked for the hunter alone; the model passes a delegate it built once, so no call allocates.
     /// </summary>
-    float GetHostSizeBonus(string? partyId, float currentLimit, float sumOfFactors, int rawCount, Func<float> weightedCount);
+    float GetHostSizeBonus(string? partyId, float currentLimit, float sumOfFactors, int rawCount, object? party,
+        Func<object?, float> weightedCountOf);
 }

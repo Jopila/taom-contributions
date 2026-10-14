@@ -1,40 +1,13 @@
-using System;
 using TAOM.Core.Validation;
 
 namespace TAOM.Features.EyeOfSauron;
 
-/// <summary>The Eye of Sauron hunt's MCM knobs (#765 M8), validated.</summary>
-public interface IEyeOfSauronSettings
-{
-    bool Enabled { get; }
-
-    /// <summary>The decayed deed score that draws a hunt.</summary>
-    float Threshold { get; }
-
-    /// <summary>Days for a deed score to halve.</summary>
-    float HalfLifeDays { get; }
-
-    int CooldownDays { get; }
-
-    int HuntTimeoutDays { get; }
-
-    /// <summary>The hunter's speed floor in sight, as a multiple of the player's speed.</summary>
-    float HunterSpeedMultiplier { get; }
-
-    /// <summary>The host's target strength, as a multiple of the player's.</summary>
-    float HunterStrengthRatio { get; }
-
-    int HunterMaxTroops { get; }
-
-    /// <summary>The longest single out-of-sight step, in map units.</summary>
-    float HunterStepCap { get; }
-}
-
 /// <summary>
 /// MCM (<c>TaomSettings</c>) over the compiled defaults. A stale settings file can hold anything, so every float is
 /// checked for NaN and infinity first (a non-finite value reverts to the default) and then clamped into its slider
-/// range; ints are clamped. The multiplier is read every campaign frame while a hunt runs, so the settings object is
-/// taken once in the lazy accessor and read through (CampaignHotPathSettingsProvidersTests).
+/// range; ints are clamped (<see cref="SettingClamp"/>). The multiplier is read every campaign frame while a hunt
+/// runs, so the settings object is taken once in the lazy accessor and read through
+/// (CampaignHotPathSettingsProvidersTests). The constants here are the single source of the sliders' bounds.
 /// </summary>
 public sealed class EyeOfSauronSettingsProvider : IEyeOfSauronSettings
 {
@@ -45,8 +18,10 @@ public sealed class EyeOfSauronSettingsProvider : IEyeOfSauronSettings
     public const float MinHalfLifeDays = 1f;
     public const float MaxHalfLifeDays = 365f;
     public const int DefaultCooldownDays = 60;
+    public const int MinCooldownDays = 0;
     public const int MaxCooldownDays = 365;
     public const int DefaultHuntTimeoutDays = 20;
+    public const int MinHuntTimeoutDays = 1;
     public const int MaxHuntTimeoutDays = 120;
     public const float DefaultSpeedMultiplier = 1.3f;
     public const float MinSpeedMultiplier = 1.1f;
@@ -70,31 +45,24 @@ public sealed class EyeOfSauronSettingsProvider : IEyeOfSauronSettings
 
     public bool Enabled => Settings?.EyeOfSauronEnabled ?? true;
 
-    public float Threshold => Clamp(Settings?.EyeThreshold, MinThreshold, MaxThreshold, DefaultThreshold);
+    public float Threshold => SettingClamp.Clamp(Settings?.EyeThreshold, DefaultThreshold, MinThreshold, MaxThreshold);
 
-    public float HalfLifeDays => Clamp(Settings?.EyeHalfLifeDays, MinHalfLifeDays, MaxHalfLifeDays, DefaultHalfLifeDays);
+    public float HalfLifeDays =>
+        SettingClamp.Clamp(Settings?.EyeHalfLifeDays, DefaultHalfLifeDays, MinHalfLifeDays, MaxHalfLifeDays);
 
-    public int CooldownDays => Clamp(Settings?.EyeCooldownDays ?? DefaultCooldownDays, 0, MaxCooldownDays);
+    public int CooldownDays =>
+        SettingClamp.Clamp(Settings?.EyeCooldownDays, DefaultCooldownDays, MinCooldownDays, MaxCooldownDays);
 
-    public int HuntTimeoutDays => Clamp(Settings?.HuntTimeoutDays ?? DefaultHuntTimeoutDays, 1, MaxHuntTimeoutDays);
+    public int HuntTimeoutDays =>
+        SettingClamp.Clamp(Settings?.HuntTimeoutDays, DefaultHuntTimeoutDays, MinHuntTimeoutDays, MaxHuntTimeoutDays);
 
     public float HunterSpeedMultiplier =>
-        Clamp(Settings?.HunterSpeedMultiplier, MinSpeedMultiplier, MaxSpeedMultiplier, DefaultSpeedMultiplier);
+        SettingClamp.Clamp(Settings?.HunterSpeedMultiplier, DefaultSpeedMultiplier, MinSpeedMultiplier, MaxSpeedMultiplier);
 
     public float HunterStrengthRatio =>
-        Clamp(Settings?.HunterStrengthRatio, MinStrengthRatio, MaxStrengthRatio, DefaultStrengthRatio);
+        SettingClamp.Clamp(Settings?.HunterStrengthRatio, DefaultStrengthRatio, MinStrengthRatio, MaxStrengthRatio);
 
-    public int HunterMaxTroops => Clamp(Settings?.HunterMaxTroops ?? DefaultMaxTroops, MinMaxTroops, MaxMaxTroops);
+    public int HunterMaxTroops => SettingClamp.Clamp(Settings?.HunterMaxTroops, DefaultMaxTroops, MinMaxTroops, MaxMaxTroops);
 
-    public float HunterStepCap => Clamp(Settings?.HunterStepCap, MinStepCap, MaxStepCap, DefaultStepCap);
-
-    /// <summary>Non-finite reverts to the default BEFORE the range check (a NaN passes every comparison); then clamps.</summary>
-    internal static float Clamp(float? raw, float min, float max, float fallback)
-    {
-        if (!raw.HasValue || !FiniteFloatValidator.IsFinite(raw.Value))
-            return fallback;
-        return Math.Min(Math.Max(raw.Value, min), max);
-    }
-
-    private static int Clamp(int raw, int min, int max) => Math.Min(Math.Max(raw, min), max);
+    public float HunterStepCap => SettingClamp.Clamp(Settings?.HunterStepCap, DefaultStepCap, MinStepCap, MaxStepCap);
 }

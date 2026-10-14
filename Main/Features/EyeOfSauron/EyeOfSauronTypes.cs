@@ -6,7 +6,7 @@ public enum HuntEndReason
     /// <summary>The player beat the hunter's party in battle.</summary>
     HunterBeaten,
 
-    /// <summary>The hunter's party fought any other battle, or lost to someone else.</summary>
+    /// <summary>The hunter's party fought any other battle (the player's flee included), or lost to someone else.</summary>
     BattleEnded,
 
     /// <summary>The party was destroyed, cannot be found, or is no longer led by the hunter.</summary>
@@ -21,7 +21,7 @@ public enum HuntEndReason
     /// <summary>The player left his kingdom.</summary>
     Kingdomless,
 
-    /// <summary>A co-op session or a dedicated server went live.</summary>
+    /// <summary>A co-op session, a co-op mod TAOM cannot probe, or a dedicated server went live.</summary>
     SessionLive,
 
     /// <summary>HuntTimeoutDays passed.</summary>
@@ -30,14 +30,17 @@ public enum HuntEndReason
     /// <summary>The MCM switch was turned off.</summary>
     Disabled,
 
-    /// <summary><c>taom.eye_end_hunt</c>.</summary>
+    /// <summary><c>taom.clear_eye_hunt</c>.</summary>
     Manual,
 }
 
 /// <summary>The battle types a deed is weighted by (MapEvent.cs:197-215).</summary>
 public enum DeedKind
 {
-    /// <summary>Weight 1: a field battle, or any other kind.</summary>
+    /// <summary>
+    /// Weight 1: a field battle, or any other kind the player wins against an enemy kingdom, a village raid and a
+    /// forced levy of supplies or volunteers included.
+    /// </summary>
     Field,
 
     /// <summary>Weight 2: a sally out or a battle outside a siege.</summary>
@@ -64,22 +67,23 @@ public sealed class HuntBattleSummary
     public bool InvolvesHunter { get; set; }
 }
 
-/// <summary>The hunt's saved record: StringIds and primitives only, resolved against the campaign on every use.</summary>
+/// <summary>
+/// The hunt's saved record: StringIds and primitives only, resolved against the campaign on every use. Public fields,
+/// so the behavior's SyncData takes each one by ref; an empty id means no hunt.
+/// </summary>
 public sealed class EyeOfSauronState
 {
-    public float ScoreVsEvil { get; set; }
+    public float ScoreVsEvil;
 
-    public float ScoreVsFree { get; set; }
+    public float ScoreVsFree;
 
-    public float LastDecayDay { get; set; }
+    public float LastDecayDay;
 
-    public float CooldownUntilDay { get; set; }
+    public float CooldownUntilDay;
 
-    public string? HunterHeroId { get; set; }
+    public string HunterHeroId = string.Empty;
 
-    public string? HunterPartyId { get; set; }
+    public string HunterPartyId = string.Empty;
 
-    public bool PinnedByUs { get; set; }
-
-    public float HuntStartDay { get; set; }
+    public float HuntStartDay;
 }

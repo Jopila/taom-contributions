@@ -13,10 +13,11 @@ using TaleWorlds.ObjectSystem;
 namespace TAOM.Adapters;
 
 /// <summary>
-/// The Eye of Sauron hunt's engine boundary (#765 M8; members verified against the installed v1.5.4 decompile:
-/// MobileParty.cs, MobilePartyAi.cs, SetPartyAiAction.cs, NavigationHelper.cs, MobilePartyHelper.cs). Every call looks
-/// its hero or party up by StringId in the live campaign, so a loaded save never meets an object from the last one.
-/// Main thread only: the campaign's daily, hourly-party, frame and map-event callbacks.
+/// The Eye of Sauron hunt's engine boundary (#765 M8; members verified against the v1.5.4 decompile: MobileParty.cs,
+/// MobilePartyAi.cs, AiPartyThinkBehavior.cs, SetPartyAiAction.cs, NavigationHelper.cs, MobilePartyHelper.cs). Every
+/// call looks its hero or party up by StringId in the live campaign, so a loaded save never meets an object from the
+/// last one. It reads and acts; every decision is the service's. Main thread only: the campaign's daily,
+/// hourly-party, frame and map-event callbacks.
 /// </summary>
 public sealed class HunterPartyAdapter : IHunterPartyAdapter
 {
@@ -25,6 +26,8 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
     public double NowDays => CampaignTime.Now.ToDays;
 
     public string? PlayerKingdomId => Clan.PlayerClan?.Kingdom?.StringId;
+
+    public string? PlayerKingdomCultureId => Clan.PlayerClan?.Kingdom?.Culture?.StringId;
 
     public float PlayerStrength
     {
@@ -39,6 +42,7 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
 
     private static Hero? FindHero(string id) => Campaign.Current?.CampaignObjectManager.Find<Hero>(id);
 
+    // A linear walk over every party: daily, hourly and on a sight flip only, never every frame (ReadSight).
     private static MobileParty? FindParty(string id) => Campaign.Current?.CampaignObjectManager.Find<MobileParty>(id);
 
     public HunterHeroSnapshot ReadHero(string heroId)
@@ -67,6 +71,7 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
             CanLeadParty = hero.CanLeadParty(),
             IsLord = hero.CharacterObject?.Occupation == Occupation.Lord,
             SettlementBlocksSpawn = settlement?.Town != null && (settlement.Town.HasTournament || settlement.IsUnderSiege),
+            GovernorOfSettlementId = hero.GovernorOf?.Settlement?.StringId,
         };
     }
 
@@ -88,12 +93,14 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
             InSettlement = party.CurrentSettlement != null,
             IsDisbanding = party.IsDisbanding,
             AiPinned = party.Ai?.DoNotMakeNewDecisions ?? false,
-            IsEngagingPlayer = main != null && party.DefaultBehavior == AiBehavior.EngageParty && party.TargetParty == main,
+            IsEngagingPlayer = IsEngaging(party, main),
             HeadCount = party.MemberRoster?.TotalManCount ?? 0,
             Strength = party.Party.EstimatedStrength,
-            Food = party.ItemRoster?.TotalFood ?? 0,
         };
     }
+
+    private static bool IsEngaging(MobileParty party, MobileParty? main) =>
+        main != null && party.DefaultBehavior == AiBehavior.EngageParty && party.TargetParty == main;
 
     public bool PinAndEngagePlayer(string partyId)
     {
@@ -115,20 +122,27 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
         if (party?.Ai == null) return;
 
         party.Ai.SetDoNotMakeNewDecisions(false);
-        // A party still inside the ending battle refreshes on its own next AI tick.
-        if (party.IsActive && party.MapEvent == null)
-            party.Ai.CheckPartyNeedsUpdate();
+        // A pinned party returns before HourCounter++ (AiPartyThinkBehavior.cs:49-52, 213), and vanilla thinks only at
+        // HourCounter % 6 == 0, so the hunt's engage order would stand for up to six hours. Rethink next hour (num 1).
+        party.Ai.RethinkAtNextHourlyTick = true;
+        if (!party.IsActive || party.MapEvent != null) return;
+
+        // Drop the engage order on the player, as vanilla does at peace (FactionHelper.cs:346-350); the AI then
+        // chooses afresh, and re-engages on its own if it still wants to.
+        if (IsEngaging(party, Campaign.Current?.MainParty))
+            party.SetMoveModeHold();
+        party.Ai.CheckPartyNeedsUpdate();
     }
 
     public void InvalidateSpeed(string partyId) => FindParty(partyId)?.UpdateVersionNo();
 
-    public string? SpawnHunterParty(string heroId)
+    public string? SpawnHunterParty(string heroId, float ringInner, float ringOuter, float minSights)
     {
         var hero = FindHero(heroId);
         var main = Campaign.Current?.MainParty;
         if (hero == null || main == null || !main.IsActive || hero.PartyBelongedTo != null) return null;
 
-        if (!TryFindPointOutOfSight(main, out var at)) return null;
+        if (!TryFindPointOutOfSight(main, ringInner, ringOuter, minSights, out var at)) return null;
         if (hero.GovernorOf != null)
             ChangeGovernorAction.RemoveGovernorOf(hero);
 
@@ -137,18 +151,24 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
         return MobilePartyHelper.SpawnLordParty(hero, at, 1f)?.StringId;
     }
 
-    /// <summary>A reachable point between 1.6 and 2.5 of the player's sight from him, straight-line beyond 1.5.</summary>
-    private static bool TryFindPointOutOfSight(MobileParty main, out CampaignVec2 point)
+    /// <summary>A reachable point in the ring around the player, straight-line beyond <paramref name="minSights"/>.</summary>
+    private static bool TryFindPointOutOfSight(MobileParty main, float ringInner, float ringOuter, float minSights,
+        out CampaignVec2 point)
     {
+        var center = main.Position;
+        point = center;
         float sight = main.SeeingRange;
-        point = main.Position;
         if (!(sight > 0f) || float.IsInfinity(sight)) return false;
 
         for (int i = 0; i < SpawnTries; i++)
         {
-            var candidate = NavigationHelper.FindReachablePointAroundPosition(main.Position, MobileParty.NavigationType.Default,
-                2.5f * sight, 1.6f * sight);
-            if (!candidate.IsValid() || candidate.Distance(main.Position) < 1.5f * sight) continue;
+            var candidate = NavigationHelper.FindReachablePointAroundPosition(center, MobileParty.NavigationType.Default,
+                ringOuter * sight, ringInner * sight);
+            // On failure the engine returns the centre after its own 250 samples (NavigationHelper.cs:193-213); a retry
+            // would repeat them, so tomorrow's daily tick is the retry.
+            if (candidate == center) return false;
+            // Near a map border the engine shrinks its clamped box (198-201), so a point can land inside the margin.
+            if (!candidate.IsValid() || candidate.Distance(center) < minSights * sight) continue;
             point = candidate;
             return true;
         }
@@ -185,9 +205,26 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
 
     public HuntSightReading ReadSight(string partyId)
     {
-        var party = FindParty(partyId);
         var main = Campaign.Current?.MainParty;
-        if (party?.Party == null || main?.Party == null) return HuntSightReading.Missing;
+        if (main?.Party == null) return HuntSightReading.Missing;
+
+        // Read once: it is the search radius and the reading's S. An infinite radius would walk every locator cell.
+        float sight = main.SeeingRange;
+        if (!(sight > 0f) || float.IsInfinity(sight)) return HuntSightReading.Missing;
+
+        // The locator grid around the player, the search vanilla's own visibility pass runs; no allocation. A hunter
+        // beyond the radius, or gone, reads as Missing: both are out of sight.
+        MobileParty? party = null;
+        var search = MobileParty.StartFindingLocatablesAroundPosition(main.Position.ToVec2(), sight);
+        for (var p = MobileParty.FindNextLocatable(ref search); p != null; p = MobileParty.FindNextLocatable(ref search))
+        {
+            if (p.StringId == partyId)
+            {
+                party = p;
+                break;
+            }
+        }
+        if (party?.Party == null) return HuntSightReading.Missing;
 
         return new HuntSightReading
         {
@@ -197,28 +234,58 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
             HunterInMapEvent = party.MapEvent != null,
             PlayerInMapEvent = main.MapEvent != null,
             PlayerAtSea = main.IsCurrentlyAtSea,
-            SeeingRange = main.SeeingRange,
+            SeeingRange = sight,
             Distance = party.Position.Distance(main.Position),
             // Speed asserts on an inactive party (MobileParty.cs:419-431).
             PlayerSpeed = main.IsActive ? main.Speed : 0f,
         };
     }
 
-    public HuntStepContext ReadStepContext(string partyId)
+    public HuntStepState ReadStepState(string partyId)
     {
         var party = FindParty(partyId);
         var main = Campaign.Current?.MainParty;
-        if (party?.Party == null || main?.Party == null) return HuntStepContext.Blocked("a party is missing");
+        if (party?.Party == null || main?.Party == null) return HuntStepState.Missing;
 
-        string? blocked = HunterBlock(party, main) ?? PlayerBlock(main);
-        if (blocked != null) return HuntStepContext.Blocked(blocked);
-        if (party.CurrentNavigationFace.FaceIslandIndex != main.CurrentNavigationFace.FaceIslandIndex)
-            return HuntStepContext.Blocked("on another island");
-        if (!party.RecalculateLongTermPath()) return HuntStepContext.Blocked("no path to the player");
+        var hunterAt = party.Position.ToVec2();
+        var playerAt = main.Position.ToVec2();
+        return new HuntStepState
+        {
+            Valid = true,
+            HunterActive = party.IsActive,
+            HunterInMapEvent = party.MapEvent != null,
+            HunterBesieging = party.BesiegerCamp != null,
+            HunterInArmy = party.Army != null || party.AttachedTo != null,
+            HunterInSettlement = party.CurrentSettlement != null,
+            HunterAtSea = party.IsCurrentlyAtSea || party.IsTransitionInProgress,
+            HunterVisible = party.IsVisible,
+            HunterEngagingPlayer = IsEngaging(party, main),
+            // IsActive is the enlistment guard: MobilePartyAttachmentAdapter hides an enlisted player that way.
+            PlayerActive = main.IsActive,
+            PlayerInMapEventOrSiege = main.MapEvent != null || main.BesiegerCamp != null,
+            PlayerInSettlement = main.CurrentSettlement != null,
+            PlayerInAnotherLordsArmy = main.Army != null && main.Army.LeaderParty != main,
+            PlayerAtSea = main.IsCurrentlyAtSea,
+            PlayerInEncounter = PlayerEncounter.Current != null,
+            TrueSight = Campaign.Current?.TrueSight == true,
+            // CurrentNavigationFace is Position.Face (MobileParty.cs:1018), a plain read.
+            SameIsland = party.CurrentNavigationFace.FaceIslandIndex == main.CurrentNavigationFace.FaceIslandIndex,
+            SeeingRange = main.SeeingRange,
+            HunterX = hunterAt.x,
+            HunterY = hunterAt.y,
+            PlayerX = playerAt.x,
+            PlayerY = playerAt.y,
+        };
+    }
+
+    public HuntPath TryRebuildPath(string partyId)
+    {
+        var party = FindParty(partyId);
+        if (party == null || !party.RecalculateLongTermPath()) return HuntPath.Empty;
 
         var path = party.Path;
         int n = path?.Size ?? 0;
-        if (n <= 0) return HuntStepContext.Blocked("empty path");
+        if (n <= 0) return HuntPath.Empty;
         var xs = new float[n];
         var ys = new float[n];
         for (int i = 0; i < n; i++)
@@ -226,45 +293,7 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
             xs[i] = path!.PathPoints[i].x;
             ys[i] = path.PathPoints[i].y;
         }
-
-        var hunterAt = party.Position.ToVec2();
-        var playerAt = main.Position.ToVec2();
-        return new HuntStepContext
-        {
-            SeeingRange = main.SeeingRange,
-            HunterX = hunterAt.x,
-            HunterY = hunterAt.y,
-            PlayerX = playerAt.x,
-            PlayerY = playerAt.y,
-            PathX = xs,
-            PathY = ys,
-        };
-    }
-
-    private static string? HunterBlock(MobileParty party, MobileParty main)
-    {
-        if (!party.IsActive) return "hunter inactive";
-        if (party.MapEvent != null) return "hunter in battle";
-        if (party.BesiegerCamp != null) return "hunter in a siege";
-        if (party.Army != null || party.AttachedTo != null) return "hunter in an army";
-        if (party.CurrentSettlement != null) return "hunter in a settlement";
-        if (party.IsCurrentlyAtSea || party.IsTransitionInProgress) return "hunter at sea";
-        if (party.IsVisible) return "hunter visible";
-        if (party.DefaultBehavior != AiBehavior.EngageParty || party.TargetParty != main) return "hunter not engaging the player";
-        return null;
-    }
-
-    private static string? PlayerBlock(MobileParty main)
-    {
-        // IsActive is the enlistment guard: MobilePartyAttachmentAdapter hides an enlisted player that way.
-        if (!main.IsActive) return "player inactive";
-        if (main.MapEvent != null || main.BesiegerCamp != null) return "player in battle or siege";
-        if (main.CurrentSettlement != null) return "player in a settlement";
-        if (main.Army != null && main.Army.LeaderParty != main) return "player in another lord's army";
-        if (main.IsCurrentlyAtSea) return "player at sea";
-        if (PlayerEncounter.Current != null) return "player in an encounter";
-        if (Campaign.Current?.TrueSight == true) return "true sight";
-        return null;
+        return new HuntPath(xs, ys);
     }
 
     public HuntLanding ResolveLanding(string partyId, float x, float y, float enemyClearance)
@@ -277,7 +306,7 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
         var point = new CampaignVec2(new Vec2(x, y), true);
         if (!OnIsland(point, island))
         {
-            // On failure this returns the centre unchanged (NavigationHelper.cs:159-219).
+            // On failure this returns the centre unchanged (NavigationHelper.cs:193-219).
             var nudged = NavigationHelper.FindReachablePointAroundPosition(point, MobileParty.NavigationType.Default, 2f);
             if (nudged == point || !OnIsland(nudged, island)) return default;
             point = nudged;
@@ -303,12 +332,11 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
         var party = FindParty(partyId);
         if (party == null) return;
 
-        var point = new CampaignVec2(new Vec2(x, y), true);
-        // The setter only moves the locator (MobileParty.cs:1064-1078); the navigation face follows the position.
-        party.Position = point;
-        foreach (var attached in party.AttachedParties)
-            attached.Position = point;
-        // Without the rebuild a hunter chasing a still player walks back to its old waypoint (MobileParty.cs:3772-3795).
+        // The setter only moves the locator (MobileParty.cs:1064-1078); the navigation face follows the position. The
+        // service never steps a hunter in an army or with parties attached (HunterInArmy).
+        party.Position = new CampaignVec2(new Vec2(x, y), true);
+        // Without the rebuild a hunter chasing a still player walks back to its old waypoint (DoAiPathMode,
+        // MobileParty.cs:3758-3796).
         party.RecalculateLongTermPath();
         party.Ai.CheckPartyNeedsUpdate();
     }
@@ -320,7 +348,7 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
             HuntAnnouncement.StartFree => new TextObject("{=taom_eye_hunt_free}The Eye of Sauron has turned upon you. {HUNTER} rides out with a host to destroy you."),
             HuntAnnouncement.StartEvil => new TextObject("{=taom_eye_hunt_evil}Elrond has sent {HUNTER} with a host of the Eldar to bring you down."),
             HuntAnnouncement.Won => new TextObject("{=taom_eye_hunt_won}{HUNTER} is beaten. The hunt is over, for now."),
-            _ => new TextObject("{=taom_eye_hunt_over}The hunt is over. The Eye turns away, for now."),
+            _ => new TextObject("{=taom_eye_hunt_over}The hunt is over, for now."),
         };
         var name = FindHero(heroId)?.Name ?? new TextObject(heroId);
         text.SetTextVariable("HUNTER", name);

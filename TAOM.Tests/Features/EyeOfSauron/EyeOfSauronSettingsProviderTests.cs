@@ -3,7 +3,6 @@ using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Features;
 using TAOM.Features.EyeOfSauron;
-using TAOM.Features.Execution;
 
 namespace TAOM.Tests.Features.EyeOfSauron;
 
@@ -108,25 +107,5 @@ public class EyeOfSauronSettingsProviderTests
 
         Assert.IsFalse(sut.Enabled);
         Assert.AreEqual(1.8f, sut.HunterSpeedMultiplier, 1e-5f);
-    }
-
-    [DataTestMethod]
-    [DataRow("evil", FactionSide.Evil)]
-    [DataRow("EVIL", FactionSide.Evil)]
-    [DataRow(" free ", FactionSide.Free)]
-    public void Console_TryParseSide_AcceptsTheTwoSides(string raw, FactionSide expected)
-    {
-        Assert.IsTrue(EyeOfSauronConsole.TryParseSide(raw, out var side));
-        Assert.AreEqual(expected, side);
-    }
-
-    [DataTestMethod]
-    [DataRow("enemy")]
-    [DataRow("")]
-    [DataRow("neutral")]
-    [DataRow(null)]
-    public void Console_TryParseSide_RefusesAnythingElse(string? raw)
-    {
-        Assert.IsFalse(EyeOfSauronConsole.TryParseSide(raw!, out _));
     }
 }
