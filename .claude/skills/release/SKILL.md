@@ -35,6 +35,9 @@ characters to players. Full contract: [`docs/reference/release-process.md`](../.
 5. `git grep -l taom_test_ -- Main/_Module` prints nothing. Custom-Battle test riders show in every player's
    Custom Battle picker; delete them (with their SubModule node and their ladder and recruitment exemptions)
    before a release. The Animalia ones (#646) were removed for v2.0.31.
+6. Every release channel's `TAOM_Map` package carries each settlement TAOM data names; Arthedain's
+   `town_AN1` to `town_AN3` are the open case. The check per channel is in
+   [`release-process.md`](../../../docs/reference/release-process.md) ("TAOM_Map ships in the same release").
 
 ## Phase 2 — Verify
 
