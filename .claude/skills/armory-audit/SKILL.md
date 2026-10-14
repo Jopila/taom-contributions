@@ -37,7 +37,7 @@ proves nothing, because UVs are normalized ([module-armory.md](../../../docs/mod
 python tools/audit_armory_refs.py                    # check
 python tools/audit_armory_refs.py --regen-catalogue  # regen
 python tools/wire_hill_troll_race.py --check         # both modes: the only gate that catches an unkeyed troll clip on a melee-table code (the +0x6590B9 swing CTD)
-python tools/bind_orc_goblin_locomotion.py --check   # both modes: exit 1 when the orc and goblin locomotion rows in as_orc_warrior / as_goblin_warrior are missing or wrong (#791); a reinstall reverts them
+python tools/bind_orc_goblin_locomotion.py --check   # both modes: exit 1 when the orc and goblin locomotion rows in as_orc_warrior / as_goblin_warrior are missing or wrong, or a race's clip folder is empty (#791); a reinstall reverts both
 python tools/validate_moduledata.py --code CREATURE_GEAR_OBTAINABLE  # both modes: a reinstall reverts the troll gear lock; repair: python tools/lock_creature_gear.py --apply
 ```
 

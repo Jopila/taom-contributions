@@ -78,7 +78,8 @@ parent's row. A missing twin logs `<name> not found for combat animation blendin
 
 **Blends with action** is a different box: it names an *action* whose clip plays together with this
 one at runtime (an unknown name becomes -1, silently). Blends with animation names a *clip*, never
-reaches the runtime clip, and is `UnknownClipName` in [TpacTool](/resources/tpactool/).
+reaches the runtime clip, and is `UnknownClipName` in [TpacTool](/resources/tpactool/)
+(`BlendWithAnimation` in ShortJake's v0.5.1 fork).
 
 !!! danger "Never name a vanilla clip in the box, and never give your clip a vanilla parent"
     A generated child fills a slot in its parent's row, so a vanilla parent rewrites part of a

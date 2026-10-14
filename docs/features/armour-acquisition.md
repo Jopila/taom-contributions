@@ -529,7 +529,9 @@ The lord's gear ladder: #693. The base feature: none yet (see Owed).
 - 2026-10-14: the class generator now classes a piece by the item's own `Type`, not by its file. Harad's
   art drop filed four camel bardings (`Type="HorseHarness"`) in `body_armors.xml`, and classed by file they
   entered the class table as body armour, with 12 heavy Harad and Shaghana chests upgrading into the elite
-  barding. Caught in review before any commit.
+  barding. Caught in review before any commit; the filter shipped in `776054c0c` and moved into the shared
+  index (`derive_armor_tiers.build_armory_index`, `rebalance_armor.CHARACTER_ARMOUR_TYPES`) in `2952ccc54`,
+  so the tier map skips the bardings too.
 - 2026-09-27: built (KEYforce's design, Mike's decisions): the class table and its generator, the
   NotMerchandise gate, the market gate and sweep, the armoury bench, the Lord's Harness, the event,
   visiting armourers, the Armourer's Commission rows.

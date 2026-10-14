@@ -320,7 +320,8 @@ an item folder loads as a duplicate item id.
   `_replaceWhileMerging="true"` (without it the engine appended their sets after vanilla's), and the
   vanilla override shrank from 70 to 58 rosters because Harad uses its own culture-default rosters since
   Erkam's `08b30bfc4`. `StarterKitCoverageTests` now accepts that route. In-game checks are owed (see
-  above).
+  above). Committed in `776054c0c`; the tool's single roster-id reader and its comment skip followed in
+  `2952ccc54` ([RCA](../reviews/rca-orc-goblin-locomotion-2026-10-14.md)).
 
 ## Related docs
 

@@ -138,7 +138,7 @@ foley and facial ids from clips cloned from vanilla.
 | Field | What the game does | Trap |
 |---|---|---|
 | Blends with action | An action whose clip plays alongside at a blend factor | Unknown name: -1, silently |
-| Blends with animation | A clip name: the melee attack table key, read at load ([melee page](/guides/custom_creature_melee/#the-key-is-the-blends-with-animation-box)) | Empty on a swing clip: first-swing crash. TpacTool calls it `UnknownClipName` |
+| Blends with animation | A clip name: the melee attack table key, read at load ([melee page](/guides/custom_creature_melee/#the-key-is-the-blends-with-animation-box)) | Empty on a swing clip: first-swing crash. TpacTool calls it `UnknownClipName` (ShortJake's v0.5.1 fork: `BlendWithAnimation`) |
 | Continue to action | The next action, started when blend out begins | Unknown: -1; one the set lacks: a likely crash |
 | Left, Right hand pose | 0 to 4; hand morph key 5 x left + right + 1 | Needs hand channels ([race page](/guides/custom_creature_race/#face-and-hand-morph-channels)); no upper bound check |
 | Combat parameter id | An entry in `combat_parameters.xml`: hit window, hit bone ([melee page](/guides/custom_creature_melee/#combat-parameters-the-hit-window-lives-outside-the-clip)) | A miss is logged and leaves no collision window |

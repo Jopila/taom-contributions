@@ -306,7 +306,8 @@ The checks, for this and the later items:
 | `tools/tests/test_bind_orc_goblin_locomotion.py` | The binder's tests, and the live reinstall gate |
 | `tools/read_anim_keyframes_tpac.ps1` | Dumps the vanilla source masters and `clips_index.json` |
 | `tools/blender/human_skeleton_engine.json` | Engine rest frames of `human_skeleton` |
-| `tools/blender/retarget_mannequin_to_human.py` | Engine-frame rig, Kit-ready exporter and export check (reused) |
+| `tools/blender/retarget_mannequin_to_human.py` | Engine-frame rig, Kit-ready exporter and export check (reused); `json_pose_sampler` and `two_bone_ik` are shared with the restyle |
+| `tools/tests/test_restyle_human_clip_pure.py` | The restyle's pure parts (spec loading, caps, clip kinds, stale markers) with `bpy` stubbed |
 | `tools/gen_troll_anim_clips.ps1` | Clones vanilla clip recipes onto the new masters |
 | `tools/wire_anim_master_skeletons.ps1` | Wires Kit-imported masters to the skeleton |
 | `tools/check_rdc_entries.py` | Confirms each clip package has its RuntimeDataCache entry |
@@ -339,8 +340,10 @@ The checks, for this and the later items:
 - 2026-10-14: the binder binds every walk and run code that plays one of the 16 clips (42 per race, was 18);
   it reads Native with ElementTree (a commented-out row is never read), refuses to drop a bound row without
   `--allow-shrink`, fails `--check` on an empty clip folder, checks every link of each derived chain, and
-  exits 2 on bad input.
+  exits 2 on bad input. The restyle shares its leg IK and a JSON pose sampler with the retarget tool (about 5 s
+  per variant, was 31 s; parity held on all 32 clips). `2952ccc54`.
 - 2026-10-14: deep review; the binder gained tests and a live reinstall gate; Mike's in-game check passed.
+  Committed with item 1 in `776054c0c`.
 - 2026-10-14: item 1 imported, wired, generated, Kit-saved and bound in the live Armory (both races).
 - 2026-10-14: item 1 built and validated (32 clips), binder written and proven on a copy of the Armory file.
 - 2026-10-14: Phase 1 discovery and motion spec. Binding through the Armory's own XSLT ruled out (merge order).
@@ -348,4 +351,5 @@ The checks, for this and the later items:
 ## GitHub Issue
 
 - **Issue:** #791, [Orc and goblin walk, run and idle animations](https://github.com/haterade22/TAOM/issues/791)
-- **Status:** Open
+- **Status:** Open (items 2 to 6 remain; the in-game check of the 24 codes bound later on 2026-10-14 is owed)
+- **Review:** [rca-orc-goblin-locomotion-2026-10-14.md](../reviews/rca-orc-goblin-locomotion-2026-10-14.md)
