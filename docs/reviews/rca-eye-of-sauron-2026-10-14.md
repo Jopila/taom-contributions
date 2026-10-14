@@ -45,8 +45,9 @@ The highest severity was E01 and E02 (HIGH). The rows below are the confirmed fi
   Guldur id data test), E31 and E49 (the dead relocate loop and the banner comments are no longer in the tree).
 - **Decided by the maintainer:** E17 (below).
 - **Decisions, kept:** E38 and E48, below.
-- **Left as notes** (no change traced in the fix commits): E16 (battle types other than siege score as
-  Field), E21, E25 to E27, E34, E36, E39 and E40 (doc rows and engine line references).
+- **Applied** (fixer's report): E16, E21, E26, E34, E36 and E40. **Rejected:** E27 (a consistency-only
+  interface member; the simplicity criterion rejects it). **Not traced:** E25 and E39 appear in no fixer
+  report and no fix diff; treat them as open notes.
 - **Follow-up:** E41 to E47, below.
 
 ## Decisions (maintainer, 2026-10-14)

@@ -52,9 +52,10 @@ claim and the fix.
   test name), C46 (typed rows through the codec), C47 (`ChronicleFocusSync` deleted), C48 (shared
   `SettingClamp`), C49 (`ITextLocalizerAdapter` instead of the presenter), C50 and C51 (dead clause removed,
   `TryGetValue`).
-- **Left as notes** (no change in `7e8451555`): C27 (use `BesiegerCamp.MapFaction`), C28 (a negative escape
-  magnitude passes the validator and does nothing), C36 (untested refusals of `OpenChronicleEventNow`), C43 to
-  C45 (analyzer docstring and `--compare` for chronicle rows).
+- **Rejected with a reason** (fixer's report): C27 (`BesiegerCamp.MapFaction` is a cached field refreshed on a
+  tick, so it does not give the live answer), C28 (effect magnitudes are summed before the clamp, so a negative
+  escape row does offset another source), C45 (it would add a second copy of the outcome names).
+- **Applied:** C36 and C43. **Moot:** C44 (the trunk already reads logs oldest first).
 - **Follow-up:** C52 to C56, below.
 
 ## Decisions (maintainer, 2026-10-14)
