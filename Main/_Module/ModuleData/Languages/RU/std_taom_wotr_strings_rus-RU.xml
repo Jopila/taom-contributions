@@ -30,5 +30,54 @@
     <string id="taom_wotr_victory_free" text="Война окончена. Свободные Народы выстояли и завоевали будущее для своих детей. Да здравствует свобода!" />
     <string id="taom_wotr_victory_evil" text="Королевства Людей и Эльфов сокрушены. Да здравствует Саурон!" />
     <string id="taom_wotr_continue" text="Продолжить" />
+    <string id="taom_wotr_chronicle_events" text="События Хроники" />
+    <string id="taom_wc_siege_lost" text="{TARGET} переходит из рук в руки прежде, чем битва успевает решиться." />
+    <string id="taom_wc_fellowship_title" text="Братство выступает в путь" />
+    <string id="taom_wc_fellowship_occurred" text="Девять путников тайно покидают Ривенделл, унося Единое Кольцо на юг. Дом Элронда собирает свои силы." />
+    <string id="taom_wc_khazaddum_title" text="Мост Казад-дума" />
+    <string id="taom_wc_khazaddum_occurred" text="В глубинах Мории Серый Странник падает вместе с барлогом. Орки Мглистых гор множатся, и Свободные Народы скорбят." />
+    <string id="taom_wc_breaking_title" text="Распад Братства" />
+    <string id="taom_wc_breaking_occurred" text="У Парт Галена урук-хай обрушиваются на Отряд. Боромир гибнет, защищая хоббитов, и Гондор теряет своего наследника." />
+    <string id="taom_wc_theoden_title" text="Король Теоден" />
+    <string id="taom_wc_theoden_occurred" text="Освободившись от нашёптываний Гнилоуста, Теоден берётся за меч. Ристания собирается под знамёна своего короля." />
+    <string id="taom_wc_hornburg_title" text="Битва при Хорнбурге" />
+    <string id="taom_wc_hornburg_open" text="Войско Изенгарда и горцы Дунланда идут на {TARGET}. Битва должна решиться в течение {DAYS} дней." />
+    <string id="taom_wc_hornburg_lapsed" text="Нападения на {TARGET} так и не последовало. Рать Изенгарда обращается в иную сторону." />
+    <string id="taom_wc_hornburg_held" text="Хорнбург выстоял всю ночь, и войско Изенгарда разбилось о его стены." />
+    <string id="taom_wc_hornburg_fell" text="{TARGET} пал, и Белая Длань правит Западной Излучиной." />
+    <string id="taom_wc_ents_title" text="Последний поход энтов" />
+    <string id="taom_wc_ents_occurred" text="Энты Фангорна обрушиваются на Изенгард и затопляют подземелья Сарумана. Горны Белой Длани умолкают." />
+    <string id="taom_wc_lorien_title" text="Лотлориэн в осаде" />
+    <string id="taom_wc_lorien_open" text="Из Дол Гулдура Тень нападает на Золотой Лес. {TARGET} должен устоять {DAYS} дней." />
+    <string id="taom_wc_lorien_lapsed" text="Войска Дол Гулдура так и не достигают {TARGET}." />
+    <string id="taom_wc_lorien_held" text="Сила Владычицы держится, и рати Дол Гулдура отступают от Золотого Леса." />
+    <string id="taom_wc_lorien_fell" text="{TARGET} горит, и свет Лотлориэна угасает." />
+    <string id="taom_wc_osgiliath_title" text="Падение Осгилиата" />
+    <string id="taom_wc_osgiliath_open" text="Моргульское войско переправляется через Андуин к {TARGET}. Гондор должен удержать разрушенный город {DAYS} дней." />
+    <string id="taom_wc_osgiliath_lapsed" text="Мордор не выступает против {TARGET}, и река остаётся спокойна." />
+    <string id="taom_wc_osgiliath_held" text="Фарамир удерживает переправы Андуина, и моргульское войско отходит." />
+    <string id="taom_wc_osgiliath_fell" text="{TARGET} пал, и дорога на Минас Тирит открыта." />
+    <string id="taom_wc_dale_title" text="Битва при Доле" />
+    <string id="taom_wc_dale_open" text="Истерлинги и слуги Дол Гулдура идут войной на королевство Дол. {TARGET} должен выстоять {DAYS} дней." />
+    <string id="taom_wc_dale_lapsed" text="Истерлинги отступают, и {TARGET} спасён." />
+    <string id="taom_wc_dale_held" text="Люди Дейла и гномы Эребора стоят плечом к плечу, и воинство истерлингов отброшено." />
+    <string id="taom_wc_dale_fell" text="{TARGET} пал под натиском истерлингов, и гномы Эребора выступают на помощь своим друзьям." />
+    <string id="taom_wc_corsairs_title" text="Корсары Умбара" />
+    <string id="taom_wc_corsairs_open" text="Чёрные паруса Умбара поднимаются по Андуину к {TARGET}. Гондор должен удерживать порт {DAYS} дней." />
+    <string id="taom_wc_corsairs_lapsed" text="Корсары медлят в море, и {TARGET} остаётся в покое." />
+    <string id="taom_wc_corsairs_held" text="Флоты Умбара отогнаны от {TARGET}, и южные владения Гондора воспряли духом." />
+    <string id="taom_wc_corsairs_fell" text="Корсары захватили {TARGET}, и их корабли господствуют на реке." />
+    <string id="taom_wc_north_title" text="Война на Севере" />
+    <string id="taom_wc_north_open" text="Орки Гундабада и горцы Дунланда обрушились на Север. {TARGET} должен продержаться {DAYS} дней." />
+    <string id="taom_wc_north_lapsed" text="Северная война обошла {TARGET} стороной." />
+    <string id="taom_wc_north_held" text="Следопыты и люди Артедайна удержали {TARGET}, и Север остаётся свободным." />
+    <string id="taom_wc_north_fell" text="{TARGET} пал, и тень расползается по Эриадору." />
+    <string id="taom_wc_gondor_title" text="Осада Гондора" />
+    <string id="taom_wc_gondor_open" text="Повелитель назгулов ведёт воинства Мордора на {TARGET}. Город должен продержаться {DAYS} дней." />
+    <string id="taom_wc_gondor_lapsed" text="Великое воинство Мордора медлит, и {TARGET} ждёт под потемневшим небом." />
+    <string id="taom_wc_gondor_held" text="На рассвете приходят рохиррим, и осада {TARGET} сломлена на Пеленнорских полях." />
+    <string id="taom_wc_gondor_fell" text="Врата {TARGET} сокрушены, и Белый Город пал перед Мордором." />
+    <string id="taom_wc_blackgate_title" text="Чёрные Врата отворяются" />
+    <string id="taom_wc_blackgate_occurred" text="Вожди Запада идут к Мораннону, чтобы отвлечь Око от Хранителя Кольца. Исход войны теперь в руках Кольца." />
   </strings>
 </base>

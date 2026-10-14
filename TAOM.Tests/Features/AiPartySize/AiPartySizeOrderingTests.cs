@@ -120,6 +120,28 @@ public class AiPartySizeOrderingTests
     }
 
     [TestMethod]
+    public void PartySizeModel_AddsTheEyeOfSauronHostBonus_AfterTheCaravanCap_BeforeTheTroopWeightEliteTax()
+    {
+        // #765 M8. The hunter's host bonus is a third member of the same trap: applied after the weight penalty
+        // snapshots the true base, the daily shed would trim the topped-up host back to its unscaled cap. The pin
+        // covers the bonus's effect too: the statement hands the hook's answer to AddResultFrameBonus, so a call
+        // whose result were thrown away would not match.
+        var src = ReadPartySizeModel();
+
+        int caravan = src.IndexOf("_aiPartySize.ApplyCaravanScaling", System.StringComparison.Ordinal);
+        int host = src.IndexOf(
+            "AiPartySizeService.AddResultFrameBonus(ref result, _eyeOfSauron.GetHostSizeBonus(",
+            System.StringComparison.Ordinal);
+        int weightPenalty = src.IndexOf(
+            "_troopWeight.ApplyPartySizeWeightPenalty", System.StringComparison.Ordinal);
+
+        Assert.AreNotEqual(-1, host, "TaomPartySizeModel must add the hook's host bonus through AddResultFrameBonus");
+        Assert.IsTrue(caravan < host && host < weightPenalty,
+            "The Eye of Sauron host bonus must run after ApplyCaravanScaling and BEFORE ApplyPartySizeWeightPenalty, "
+            + "or the daily shed trims the hunter's host to its unscaled limit.");
+    }
+
+    [TestMethod]
     public void PartySizeModel_ScalesGarrisonsThroughTheGarrisonOverride()
     {
         var src = ReadPartySizeModel();

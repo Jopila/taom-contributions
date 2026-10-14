@@ -42,6 +42,15 @@ VERDICT: CLEAN / ISSUES FOUND
 ### Lessons From Prior Reviews (87 reviews, 193+ bugs found), distilled
 
 **What Codex does especially well (2026-09-01 memory-diagnostics review: 4/4 HIGH real, 0 false positives).**
+- **Deletes and reorders a call the unit tests cannot reach** (2026-10-08, War of the Ring Phase 2 wars
+  #772, 3 of 3 findings real): handed a host-only handler that reads `Campaign.Current`, it ran the real
+  fixtures in memory, then removed `ReconcileDeclaredWars()` and moved it after the phase check; both
+  mutants kept all six behavior tests green. For a handler with a client gate, ask for the deletion and
+  reorder mutants of the host call.
+- **Mutation-checks a new guard in memory** (2026-10-08, War of the Ring session reset #764, 1 of 1
+  MEDIUM real): it rewrote the guarded line into a cached construction as a string and showed every
+  predicate of the new source-text pin still held. For a new wiring or source-text test, ask for the
+  cheapest regression that keeps it green.
 - **Feeds a new filter or gate the input that should fail it** (2026-09-30, KEYforce art, 2 of 2 LOW
   real): a troop whose spider sat only in its second battle set (the filter kept it), and three XML
   fragments the new siege-scene gate misjudged. For a new filter or gate, ask for that input.
@@ -177,6 +186,8 @@ archive the 6th-oldest, harvest durable patterns into `docs/reviews/lessons/<cat
 - **A gate made only of prohibitions.** #525 shipped 15 rosters with no weapon in them past four green gates, because every rule said what a kit must NOT contain and none said what it MUST. When a gate exists for a defect, look for the defect's negation stated positively; if it is absent, the gate cannot fail on the thing it was written for.
 - **A ratchet or suppression list with no multiplicity.** Keyed on `(owner, item)` alone, 10 entries were suppressing 13 occurrences, so an already-listed roster gaining a SECOND copy of the same bad item filed as old debt.
 - **What the deserializer assembles, not the XML's shape** (2026-09-30, KEYforce art: a Codex miss that three scoped Claude lenses caught in the fix review). Codex's fix for a first-roster-only mount read named every battle roster and battle `EquipmentSet` references, but not the `<equipment>` written directly under `<Equipments>`, which `MBEquipmentRoster.AddOverriddenEquipments` writes over its slot in every set; 88 troops mount that way. When a finding models what a troop carries, list every path `BasicCharacterObject.Deserialize` takes.
+
+- **State that one screen event sets and another clears** (2026-10-08, yotthani adoption: a Codex miss that a convergence lens caught). A pending map-view release keyed on a layer reference survived Save/Load (itself a cover) into the next campaign's new map screen. Name as suspects the paths that replace the object without the clearing event (load, exit to menu, new campaign), and check ordering claims about Harmony priorities against equal priorities and `HarmonyBefore`.
 
 **False positives to NOT repeat + the Evidence Calibration Rule above** (downgrade a claim you cannot back with quoted decompiled vanilla): full list in the track record. When two agents disagree on a TaleWorlds API, re-run `ilspycmd` rather than siding with confidence.
 
@@ -327,7 +338,7 @@ ALWAYS decompile the target method before writing a patch. Verify:
 - Exact method signature (parameters, return types, access modifiers)
 - Whether the method is virtual, sealed, or static
 - Correct namespace and class hierarchy
-- Method existence in Bannerlord v1.5.2
+- Method existence in the pinned Bannerlord version (`.claude/pinned-game-version.txt`)
 
 ### Patch Types
 - **Prefix** — Runs before original method. Return `false` to skip original.
@@ -566,7 +577,7 @@ Engine concepts come from the process docs; signatures come only from the instal
 
 ### Pre-Decompiled Source (`E:\Decompiled_Bannerlord\`)
 
-The entire Bannerlord v1.5.2 codebase is pre-decompiled and organized by category (`E:\Decompiled_Bannerlord\_categories_v1.5.2`; older trees beside it):
+The entire Bannerlord v1.5.5 codebase is pre-decompiled and organized by category (`E:\Decompiled_Bannerlord\_categories_v1.5.5`; older trees beside it):
 
 | Folder | Contents |
 |--------|----------|
@@ -585,13 +596,13 @@ The entire Bannerlord v1.5.2 codebase is pre-decompiled and organized by categor
 
 ```bash
 # Find a class
-find "E:/Decompiled_Bannerlord/" -name "DefaultPartyWageModel.cs"
+find "E:/Decompiled_Bannerlord/_categories_v1.5.5/" -name "DefaultPartyWageModel.cs"
 
 # Search for a method across all decompiled source
-grep -r "GetCharacterWage" "E:/Decompiled_Bannerlord/Campaign/"
+grep -r "GetCharacterWage" "E:/Decompiled_Bannerlord/_categories_v1.5.5/Campaign/"
 
 # Browse a namespace
-ls "E:/Decompiled_Bannerlord/Campaign/TaleWorlds.CampaignSystem/TaleWorlds/CampaignSystem/GameComponents/"
+ls "E:/Decompiled_Bannerlord/_categories_v1.5.5/Campaign/TaleWorlds.CampaignSystem/TaleWorlds.CampaignSystem.GameComponents/"
 ```
 
 ### When to Look Up TaleWorlds Source

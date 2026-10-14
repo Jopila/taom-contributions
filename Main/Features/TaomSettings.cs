@@ -295,6 +295,83 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "How many battles/sieges you must take part in before either side can win. Default 5.")]
     public int MomentumMinPlayerEvents { get; set; } = 5;
 
+    // --- War of the Ring / Rally (#765) ---
+
+    [SettingPropertyGroup("War of the Ring/Rally")]
+    [SettingPropertyBool("Enable Rally", Order = 0, RequireRestart = false,
+        HintText = "Gives AI kingdoms that have lost a large share of their towns and castles a small, temporary boost: a higher daily volunteer roll in their towns, castles and villages (empty recruit slots fill faster and waiting recruits are promoted sooner) and faster escapes for their captured lords. Never applies to a kingdom you rule, or to your own clan's settlements and lords; its lords in your prisons escape faster too. Takes effect at the next daily tick; turning it off removes every rally effect. Default on.")]
+    public bool WarRallyEnabled { get; set; } = true;
+
+    [SettingPropertyGroup("War of the Ring/Rally")]
+    [SettingPropertyFloatingInteger("War Effect Strength", 0.0f, 2.0f, "#0.00", Order = 1, RequireRestart = false,
+        HintText = "Scales every War of the Ring catch-up and event effect (a higher daily volunteer roll, which fills recruit slots faster and promotes waiting recruits sooner; faster escapes of captured lords). 0 turns them off, 1 is the authored size, 2 doubles it. Default 1.")]
+    public float WarEffectStrength { get; set; } = 1.0f;
+
+    // --- War of the Ring / Eye of Sauron (#765 M8) ---
+    // Defaults live in EyeOfSauronSettingsProvider, the single source; the provider re-validates every value.
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyBool("Enable the Hunt", Order = 0, RequireRestart = false,
+        HintText = "When on, great deeds against the enemy draw a hunter: a Free player is hunted by one of the Nine with a host of Mordor (of Dol Guldur for its four wraiths), an Evil player by Glorfindel with a host of the Eldar. Only while your kingdom is at war with the hunter's. Single-player only. Default: on.")]
+    public bool EyeOfSauronEnabled { get; set; } = true;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyFloatingInteger("Deed Threshold", EyeOfSauron.EyeOfSauronSettingsProvider.MinThreshold, EyeOfSauron.EyeOfSauronSettingsProvider.MaxThreshold, "#0.0", Order = 1, RequireRestart = false,
+        HintText = "Deed score that draws a hunt. A victory over an enemy kingdom in the field, a village raid or a forced levy scores 1, a sally or a battle outside a siege 2, a siege assault 3. Default 10.")]
+    public float EyeThreshold { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultThreshold;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyFloatingInteger("Deed Half-Life (days)", EyeOfSauron.EyeOfSauronSettingsProvider.MinHalfLifeDays, EyeOfSauron.EyeOfSauronSettingsProvider.MaxHalfLifeDays, "#0", Order = 2, RequireRestart = false,
+        HintText = "Days for the deed score to fall by half. Default 30.")]
+    public float EyeHalfLifeDays { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultHalfLifeDays;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyInteger("Cooldown (days)", EyeOfSauron.EyeOfSauronSettingsProvider.MinCooldownDays, EyeOfSauron.EyeOfSauronSettingsProvider.MaxCooldownDays, Order = 3, RequireRestart = false,
+        HintText = "Days after a hunt ends before another can start. Default 60.")]
+    public int EyeCooldownDays { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultCooldownDays;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyInteger("Hunt Timeout (days)", EyeOfSauron.EyeOfSauronSettingsProvider.MinHuntTimeoutDays, EyeOfSauron.EyeOfSauronSettingsProvider.MaxHuntTimeoutDays, Order = 4, RequireRestart = false,
+        HintText = "Days a hunt lasts before the hunter gives up. Default 20.")]
+    public int HuntTimeoutDays { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultHuntTimeoutDays;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyFloatingInteger("Hunter Speed Multiplier", EyeOfSauron.EyeOfSauronSettingsProvider.MinSpeedMultiplier, EyeOfSauron.EyeOfSauronSettingsProvider.MaxSpeedMultiplier, "#0.00", Order = 5, RequireRestart = false,
+        HintText = "Once the hunter is within your sight, it moves at least this many times your speed. Default 1.3.")]
+    public float HunterSpeedMultiplier { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultSpeedMultiplier;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyFloatingInteger("Hunter Strength Ratio", EyeOfSauron.EyeOfSauronSettingsProvider.MinStrengthRatio, EyeOfSauron.EyeOfSauronSettingsProvider.MaxStrengthRatio, "#0.00", Order = 6, RequireRestart = false,
+        HintText = "The hunter's host is filled to this many times your strength (your army's, when you lead one). Default 1.3.")]
+    public float HunterStrengthRatio { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultStrengthRatio;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyInteger("Hunter Max Troops", EyeOfSauron.EyeOfSauronSettingsProvider.MinMaxTroops, EyeOfSauron.EyeOfSauronSettingsProvider.MaxMaxTroops, Order = 7, RequireRestart = false,
+        HintText = "The most men the hunter's party holds after its host is topped up. Default 250.")]
+    public int HunterMaxTroops { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultMaxTroops;
+
+    [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
+    [SettingPropertyFloatingInteger("Hunter Step Cap", EyeOfSauron.EyeOfSauronSettingsProvider.MinStepCap, EyeOfSauron.EyeOfSauronSettingsProvider.MaxStepCap, "#0.0", Order = 8, RequireRestart = false,
+        HintText = "The farthest the hunter closes in one hour while out of your sight, in map units. Default 15.")]
+    public float HunterStepCap { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultStepCap;
+
+    // --- War of the Ring / War Chronicle (#765) ---
+
+    [SettingPropertyGroup("War of the Ring/War Chronicle")]
+    [SettingPropertyBool("Enable Chronicle", Order = 0, RequireRestart = false,
+        HintText = "Runs the War Chronicle: lore events of the War of the Ring at set points, and the great sieges (Helm's Deep, Osgiliath, Minas Tirith and others) as timed windows whose result gives both sides small, temporary effects. Off stops new events and clears the army focus; the saved progress is kept. Default on.")]
+    public bool WarChronicleEnabled { get; set; } = true;
+
+    [SettingPropertyGroup("War of the Ring/War Chronicle")]
+    [SettingPropertyBool("Show Announcements", Order = 1, RequireRestart = false,
+        HintText = "Shows a popup on the campaign map when a chronicle event happens, a siege window opens, or a siege is decided. Off keeps the events running silently. Default on.")]
+    public bool WarChronicleAnnouncements { get; set; } = true;
+
+    [SettingPropertyGroup("War of the Ring/War Chronicle")]
+    [SettingPropertyFloatingInteger("Army Focus Multiplier", TAOM.Features.WarChronicle.WarChronicleSettingsProvider.ArmyFocusMin, TAOM.Features.WarChronicle.WarChronicleSettingsProvider.ArmyFocusMax, "#0.00", Order = 2, RequireRestart = false,
+        HintText = "During a siege window, how much more the attackers' armies want to besiege the target and the defender's armies want to defend it once it is attacked. 1 turns the focus off. Needs AI Strategic Intelligence on. Default 1.4.")]
+    public float WarChronicleArmyFocus { get; set; } = 1.4f;
+
     // --- Battle Balance / Troop Power ---
 
     [SettingPropertyGroup("Battle Balance/Troop Power")]
@@ -704,12 +781,12 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Fief Management", GroupOrder = 26)]
     [SettingPropertyBool("Enable Fief Management", Order = 0, RequireRestart = false,
-        HintText = "Master toggle. When off, the F6 hotkey is inert and the carousel options are disabled. Effective immediately at runtime. Default: true.")]
+        HintText = "Master toggle. When off, the F6 hotkey and the Fiefs button on the map bar are inert and the carousel options are disabled. Effective immediately at runtime. Default: true.")]
     public bool EnableFiefManagement { get; set; } = true;
 
     [SettingPropertyGroup("Fief Management")]
     [SettingPropertyBool("Allow Remote Building Queue", Order = 1, RequireRestart = false,
-        HintText = "When on, you can manage any owned fief from anywhere via F6. When off, the Manage option is disabled unless you are physically at the selected fief. Default: true.")]
+        HintText = "When on, you can manage any owned fief from anywhere via F6 or the Fiefs button on the map bar. When off, the Manage option is disabled unless you are physically at the selected fief. Default: true.")]
     public bool AllowRemoteBuildingQueue { get; set; } = true;
 
     [SettingPropertyGroup("Fief Management")]
@@ -941,7 +1018,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Battle Tactics/Formation Presets", GroupOrder = 28)]
     [SettingPropertyBool("Enable Formation Presets", Order = 0, RequireRestart = false,
-        HintText = "Save/load named OOB hero-to-formation assignments per campaign. Work-in-progress (loading a preset is not yet wired) — off by default; opt in to try it.")]
+        HintText = "Presets save and load the formation types, captains and hero troops of the Order of Battle, per campaign. Off by default until it is checked in game; opt in to try it.")]
     public bool EnableFormationPresets { get; set; } = false;
 
     [SettingPropertyGroup("Battle Tactics/Formation Presets")]
@@ -1222,7 +1299,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Combat Mechanics")]
     [SettingPropertyBool("Signature Strikes", Order = 11, RequireRestart = false,
-        HintText = "Configured heroes (shipped: Sauron and the Nine) get direction-mapped effects on any melee hit. Sauron: an overhead is a Slam (the struck foe always goes down, enemies in a ring around the impact are knocked down and take part of the damage, a burst of fear drains their morale; also fires on an overhead into the ground), a side swing is a Sweep (the struck foe and enemies in front are staggered back). The Nine: an overhead or a side swing is a Scream (enemies around the wraith take part of the damage, are staggered back and lose morale; the struck foe is staggered and frightened too). Never on a throw, a shot, a kick or bare hands. In a Custom Battle the struck foe keeps vanilla's knockdown and stagger rules; the ring and the fear still apply. Cooldowns and radii live in signature_strikes_config.json.")]
+        HintText = "Configured heroes (shipped: Sauron and the Nine) get direction-mapped effects on any melee hit. Sauron: an overhead is a Slam (the struck foe always goes down, enemies in a ring around the impact are knocked down and take part of the damage, a burst of fear drains their morale; also fires on an overhead into the ground), a side swing is a Sweep (the struck foe and enemies in front are staggered back). The Nine: an overhead or a side swing is a Scream (enemies around the wraith take part of the damage, are staggered back and lose morale; the struck foe is staggered and frightened too). Never on a throw, a shot, a kick or bare hands. The same rules apply in a Custom Battle. Cooldowns and radii live in signature_strikes_config.json.")]
     public bool EnableSignatureStrikes { get; set; } = true;
 
     [SettingPropertyGroup("Combat Mechanics")]

@@ -867,28 +867,28 @@
     <string id="aom_gondor_loss_noble_veteran_name" text="[ゴンドール] ロッサールナッハの斧兵" />
     <string id="aom_gondor_loss_noble_warden_name" text="[ゴンドール] ロッサールナッハの斧衛長" />
     <string id="aom_harad_howdah_crew_name" text="[ハラド] 象輿の射手" />
-    <string id="aom_arthedain_citadel_guard_name" text="[Arthedain] Guard of the Citadel" />
-    <string id="aom_arthedain_dunadan_youth_merc_name" text="[Arthedain] Dunadan Sellsword" />
-    <string id="aom_arthedain_dunadan_youth_name" text="[Arthedain] Dunadan Youth" />
-    <string id="aom_arthedain_footman_name" text="[Arthedain] Fornost Footman" />
-    <string id="aom_arthedain_fornost_guard_name" text="[Arthedain] Fornost Guard" />
-    <string id="aom_arthedain_kings_guard_name" text="[Arthedain] King's Guard of Fornost" />
-    <string id="aom_arthedain_knight_name" text="[Arthedain] Knight of Arthedain" />
-    <string id="aom_arthedain_lancer_name" text="[Arthedain] Lancer" />
-    <string id="aom_arthedain_levy_name" text="[Arthedain] Levy" />
-    <string id="aom_arthedain_militia_archer_name" text="[Arthedain] Militia Archer" />
-    <string id="aom_arthedain_militia_spearman_name" text="[Arthedain] Militia Spearman" />
-    <string id="aom_arthedain_militia_veteran_archer_name" text="[Arthedain] Veteran Militia Archer" />
-    <string id="aom_arthedain_militia_veteran_spearman_name" text="[Arthedain] Veteran Militia Spearman" />
-    <string id="aom_arthedain_outrider_name" text="[Arthedain] Outrider" />
-    <string id="aom_arthedain_ranger_captain_name" text="[Arthedain] Ranger Captain" />
-    <string id="aom_arthedain_ranger_name" text="[Arthedain] Ranger" />
-    <string id="aom_arthedain_ranger_of_the_north_name" text="[Arthedain] Ranger of the North" />
-    <string id="aom_arthedain_shieldman_name" text="[Arthedain] Fornost Shieldman" />
-    <string id="aom_arthedain_spearman_name" text="[Arthedain] Spearman" />
-    <string id="aom_arthedain_squire_name" text="[Arthedain] Dunadan Squire" />
-    <string id="aom_arthedain_veteran_citadel_guard_name" text="[Arthedain] Veteran Citadel Guard" />
-    <string id="aom_arthedain_veteran_ranger_name" text="[Arthedain] Veteran Ranger" />
-    <string id="aom_arthedain_warden_name" text="[Arthedain] Warden of Fornost" />
+    <string id="aom_arthedain_citadel_guard_name" text="[アルセダイン] 城塞の衛兵" />
+    <string id="aom_arthedain_dunadan_youth_merc_name" text="[アルセダイン] ドゥーナダンの傭兵" />
+    <string id="aom_arthedain_dunadan_youth_name" text="[アルセダイン] ドゥーナダンの若者" />
+    <string id="aom_arthedain_footman_name" text="[アルセダイン] フォルノストの歩兵" />
+    <string id="aom_arthedain_fornost_guard_name" text="[アルセダイン] フォルノストの衛兵" />
+    <string id="aom_arthedain_kings_guard_name" text="[アルセダイン] フォルノストの王の親衛兵" />
+    <string id="aom_arthedain_knight_name" text="[アルセダイン] アルセダインの騎士" />
+    <string id="aom_arthedain_lancer_name" text="[アルセダイン] 槍騎兵" />
+    <string id="aom_arthedain_levy_name" text="[アルセダイン] 徴集兵" />
+    <string id="aom_arthedain_militia_archer_name" text="[アルセダイン] 民兵弓兵" />
+    <string id="aom_arthedain_militia_spearman_name" text="[アルセダイン] 民兵槍兵" />
+    <string id="aom_arthedain_militia_veteran_archer_name" text="[アルセダイン] 熟練民兵弓兵" />
+    <string id="aom_arthedain_militia_veteran_spearman_name" text="[アルセダイン] 熟練民兵槍兵" />
+    <string id="aom_arthedain_outrider_name" text="[アルセダイン] 斥候騎兵" />
+    <string id="aom_arthedain_ranger_captain_name" text="[アルセダイン] 野伏の隊長" />
+    <string id="aom_arthedain_ranger_name" text="[アルセダイン] 野伏" />
+    <string id="aom_arthedain_ranger_of_the_north_name" text="[アルセダイン] 北方の野伏" />
+    <string id="aom_arthedain_shieldman_name" text="[アルセダイン] フォルノストの盾兵" />
+    <string id="aom_arthedain_spearman_name" text="[アルセダイン] 槍兵" />
+    <string id="aom_arthedain_squire_name" text="[アルセダイン] ドゥーナダンの従士" />
+    <string id="aom_arthedain_veteran_citadel_guard_name" text="[アルセダイン] 古参城塞衛兵" />
+    <string id="aom_arthedain_veteran_ranger_name" text="[アルセダイン] 古参野伏" />
+    <string id="aom_arthedain_warden_name" text="[アルセダイン] フォルノストの守護者" />
   </strings>
 </base>

@@ -972,51 +972,51 @@
     <string id="taom_cc_taom_education_lindon_5_desc" text="Você servi nas salas de cura de Lindon, aprendendo o saber das ervas e as artes de curar sob a orientação dos curandeiros de Círdan. Cuidar de viajantes exaustos e Elfos feridos lhe deu tanto conhecimento quanto a empatia que dele advém." />
     <string id="taom_cc_taom_education_lindon_6_text" text="Vagou pelas estradas selvagens além do vale." />
     <string id="taom_cc_taom_education_lindon_6_desc" text="Você escapava para além das fronteiras de Lindon sempre que podia, explorando as Colinas das Torres e as costas do Golfo de Lune. Você desenvolveu gosto pelo risco e descobriu que podia sobreviver pela astúcia onde uma espada só traria problemas." />
-    <string id="taom_cc_taom_parent_arthedain_1_text" text="Noble Houses of Arthedain" />
-    <string id="taom_cc_taom_parent_arthedain_1_desc" text="Your family belonged to one of the old houses of Arthedain, whose blood runs back to the Númenóreans who came north with Elendil. Your father rode in the King's host at Fornost, while your mother kept the family's thinning lands and its long memory." />
-    <string id="taom_cc_taom_parent_arthedain_2_text" text="Merchants of Bree" />
-    <string id="taom_cc_taom_parent_arthedain_2_desc" text="Your family kept a trading house in Bree, where the Great East Road meets the Greenway. Dwarves from the Blue Mountains, Hobbits from the Shire and Men of the Bree-land all passed through their doors, and every one of them paid." />
-    <string id="taom_cc_taom_parent_arthedain_3_text" text="Farmers of the North Downs" />
-    <string id="taom_cc_taom_parent_arthedain_3_desc" text="Your family worked the thin soil of the North Downs below Fornost. They sent a son to the levy every spring and kept a spear by the door, for Angmar's raiders came over the hills more often than the rain." />
-    <string id="taom_cc_taom_parent_arthedain_4_text" text="Smiths of Fornost" />
-    <string id="taom_cc_taom_parent_arthedain_4_desc" text="Your family were smiths and stonewrights in Fornost Erain, mending the walls the Witch-king's hosts broke and forging the blades that held them. Their craft came down unbroken from Númenórean masters." />
-    <string id="taom_cc_taom_parent_arthedain_5_text" text="Rangers of the North" />
-    <string id="taom_cc_taom_parent_arthedain_5_desc" text="Your family were Rangers of the Dúnedain, walking the empty lands of Eriador to keep its roads and borders. Few thanked them and fewer knew their names, but the wild places of the North were safer for their watch." />
-    <string id="taom_cc_taom_parent_arthedain_6_text" text="Drifters of the Greenway" />
-    <string id="taom_cc_taom_parent_arthedain_6_desc" text="Your family lived on the roads, drifting between Bree, the borders of the Shire and the ruined towns of fallen Cardolan. They traded what they found, took what they could, and learned that a stranger's purse was often looser than his tongue." />
-    <string id="taom_cc_taom_youth_arthedain_1_text" text="Rode with the King's horse at Fornost." />
-    <string id="taom_cc_taom_youth_arthedain_1_desc" text="You joined the mounted companies of Fornost, learning to ride and fight with the lance under knights who still carry the old banners of the North-kingdom." />
-    <string id="taom_cc_taom_youth_arthedain_2_text" text="Stood watch on the walls of Fornost." />
-    <string id="taom_cc_taom_youth_arthedain_2_desc" text="You served in the garrison of Fornost Erain, keeping the night watch on its walls and learning the craft of siege defence from captains who had held them against Angmar." />
-    <string id="taom_cc_taom_youth_arthedain_3_text" text="Rode with the Rangers of the North." />
-    <string id="taom_cc_taom_youth_arthedain_3_desc" text="You followed the Rangers along the Greenway and through the Weather Hills, striking at orcs and wolves from cover and learning to read the wild as other men read letters." />
-    <string id="taom_cc_taom_youth_arthedain_4_text" text="Trained with the Guard of the Citadel." />
-    <string id="taom_cc_taom_youth_arthedain_4_desc" text="You joined the King's guard in the citadel of Fornost, training in disciplined infantry warfare to protect the King and the hall of his fathers." />
-    <string id="taom_cc_taom_youth_arthedain_5_text" text="Lived by your wits in the ruins of Cardolan." />
-    <string id="taom_cc_taom_youth_arthedain_5_desc" text="You scraped by among the broken towns of fallen Cardolan, where barrow-robbers and outlaws made their living. You learned the value of a quick hand, a well-thrown stone and a story nobody could check." />
-    <string id="taom_cc_taom_adulthood_arthedain_1_text" text="You held the Weather Hills against a host of Angmar." />
-    <string id="taom_cc_taom_adulthood_arthedain_1_desc" text="When the hill-men of Rhudaur came over the Weather Hills under Angmar's banners, you held your line on the slopes until the King's riders came. Your name was spoken in the hall at Fornost." />
-    <string id="taom_cc_taom_adulthood_arthedain_2_text" text="You won the Dwarves of the Blue Mountains as partners in trade." />
-    <string id="taom_cc_taom_adulthood_arthedain_2_desc" text="When iron ran short in Fornost's forges, you rode west to the Ered Luin and bargained with the Dwarves until the ore carts rolled east again. The King's treasurer does not forget who kept the forges lit." />
-    <string id="taom_cc_taom_adulthood_arthedain_3_text" text="You brought in the harvest of the North Downs under threat of wolves." />
-    <string id="taom_cc_taom_adulthood_arthedain_3_desc" text="When wolves and orcs came down from the north in a hard autumn, you gathered the farmers' levies to guard the fields and brought the harvest in before the snow. The villages remember." />
-    <string id="taom_cc_taom_adulthood_arthedain_4_text" text="You forged a blade presented to a knight of Fornost." />
-    <string id="taom_cc_taom_adulthood_arthedain_4_desc" text="A knight of the King's guard had heard of your work and commissioned a sword for the day he took his oath. When he drew it before the assembled guard and it rang true, you knew your name was made." />
-    <string id="taom_cc_taom_adulthood_arthedain_5_text" text="You guided a Ranger company out of an ambush in the Ettenmoors." />
-    <string id="taom_cc_taom_adulthood_arthedain_5_desc" text="When a Ranger patrol was cut off in the Ettenmoors, you led them out by a path no orc scout knew, losing not a single man. Their captain clasped your arm and named you a friend of the Dúnedain." />
-    <string id="taom_cc_taom_adulthood_arthedain_6_text" text="You uncovered a band of barrow-robbers working out of Bree." />
-    <string id="taom_cc_taom_adulthood_arthedain_6_desc" text="For months grave-goods from the Barrow-downs had been turning up in the back rooms of Bree. You traced the trade, found the men behind it and handed them to the King's wardens, keeping a little of the gold for your trouble." />
-    <string id="taom_cc_taom_education_arthedain_1_text" text="Drilled with the sons of the old houses." />
-    <string id="taom_cc_taom_education_arthedain_1_desc" text="You grew up training alongside the children of Arthedain's noble families in the yards of Fornost. You learned sword and lance under knights sworn to the King, and the long lineages of the Dúnedain by heart." />
-    <string id="taom_cc_taom_education_arthedain_2_text" text="Apprenticed at the Bree market." />
-    <string id="taom_cc_taom_education_arthedain_2_desc" text="You spent your youth carrying ledgers and running errands in the market of Bree, where every road in Eriador seems to meet. You learned to bargain with Dwarves, flatter Hobbits and never trust a Southerner's scales." />
-    <string id="taom_cc_taom_education_arthedain_3_text" text="Labored on the farms of the North Downs." />
-    <string id="taom_cc_taom_education_arthedain_3_desc" text="You worked from dawn to dusk on the cold farms below Fornost, hauling stone and driving sheep across the downs. When the levy was called you were handed a spear and taught to hold a line." />
-    <string id="taom_cc_taom_education_arthedain_4_text" text="Apprenticed to a smith of Fornost." />
-    <string id="taom_cc_taom_education_arthedain_4_desc" text="You learned your craft in the forges of Fornost Erain, working the bellows under a master who still kept the Númenórean ways of tempering steel. By the time you were grown your hands knew the work better than your head." />
-    <string id="taom_cc_taom_education_arthedain_5_text" text="Ranged the wilds with the Dúnedain." />
-    <string id="taom_cc_taom_education_arthedain_5_desc" text="You followed the Rangers as a youngster, learning to move without sound through the Chetwood and along the Hoarwell. You strung your first bow before you could grow a beard, and your first orc fell to it soon after." />
-    <string id="taom_cc_taom_education_arthedain_6_text" text="Scrounged along the Great East Road." />
-    <string id="taom_cc_taom_education_arthedain_6_desc" text="You grew up on the road between Bree and the Brandywine, running messages for coin and selling what travellers left behind. The road taught you quick hands, a quicker tongue and when to vanish." />
+    <string id="taom_cc_taom_parent_arthedain_1_text" text="Nobres Casas de Arthedain" />
+    <string id="taom_cc_taom_parent_arthedain_1_desc" text="Sua família pertencia a uma das antigas casas de Arthedain, cujo sangue remonta aos Númenóreanos que vieram para o norte com Elendil. Seu pai cavalgou na hoste do Rei em Fornost, enquanto sua mãe cuidava das terras minguantes da família e de sua longa memória." />
+    <string id="taom_cc_taom_parent_arthedain_2_text" text="Mercadores de Bri" />
+    <string id="taom_cc_taom_parent_arthedain_2_desc" text="Sua família mantinha uma casa de comércio em Bri, onde a Grande Estrada do Leste encontra a Estrada Verde. Anões das Montanhas Azuis, Hobbits do Condado e Homens da Terra de Bri passavam por suas portas, e todos eles pagavam." />
+    <string id="taom_cc_taom_parent_arthedain_3_text" text="Fazendeiros das Colinas do Norte" />
+    <string id="taom_cc_taom_parent_arthedain_3_desc" text="Sua família trabalhava o solo pobre das Colinas do Norte, abaixo de Fornost. Enviavam um filho ao recrutamento toda primavera e mantinham uma lança junto à porta, pois os saqueadores de Angmar vinham pelas colinas mais vezes do que a chuva." />
+    <string id="taom_cc_taom_parent_arthedain_4_text" text="Ferreiros de Fornost" />
+    <string id="taom_cc_taom_parent_arthedain_4_desc" text="Sua família era de ferreiros e canteiros em Fornost Erain, reparando as muralhas que as hostes do Rei-bruxo quebravam e forjando as lâminas que as defendiam. Seu ofício veio ininterrupto dos mestres Númenóreanos." />
+    <string id="taom_cc_taom_parent_arthedain_5_text" text="Guardiões do Norte" />
+    <string id="taom_cc_taom_parent_arthedain_5_desc" text="Sua família era de Guardiões dos Dúnedain, percorrendo as terras vazias de Eriador para proteger suas estradas e fronteiras. Poucos lhes agradeciam e menos ainda sabiam seus nomes, mas as terras selvagens do Norte eram mais seguras graças à sua vigília." />
+    <string id="taom_cc_taom_parent_arthedain_6_text" text="Errantes da Estrada Verde" />
+    <string id="taom_cc_taom_parent_arthedain_6_desc" text="Sua família vivia nas estradas, vagando entre Bri, as fronteiras do Condado e as cidades arruinadas da caída Cardolan. Trocavam o que achavam, tomavam o que podiam, e aprenderam que a bolsa de um estranho muitas vezes era mais solta que sua língua." />
+    <string id="taom_cc_taom_youth_arthedain_1_text" text="Cavalgou com a cavalaria do Rei em Fornost." />
+    <string id="taom_cc_taom_youth_arthedain_1_desc" text="Você se juntou às companhias montadas de Fornost, aprendendo a cavalgar e lutar com a lança sob cavaleiros que ainda carregam os antigos estandartes do Reino do Norte." />
+    <string id="taom_cc_taom_youth_arthedain_2_text" text="Montou guarda nas muralhas de Fornost." />
+    <string id="taom_cc_taom_youth_arthedain_2_desc" text="Você serviu na guarnição de Fornost Erain, fazendo a vigília noturna em suas muralhas e aprendendo a arte da defesa de cercos com capitães que as haviam defendido contra Angmar." />
+    <string id="taom_cc_taom_youth_arthedain_3_text" text="Cavalgou com os Guardiões do Norte." />
+    <string id="taom_cc_taom_youth_arthedain_3_desc" text="Você seguiu os Guardiões pela Estrada Verde e pelas Colinas do Tempo, atacando orcs e lobos de emboscada e aprendendo a ler as terras selvagens como outros homens leem letras." />
+    <string id="taom_cc_taom_youth_arthedain_4_text" text="Treinou com a Guarda da Cidadela." />
+    <string id="taom_cc_taom_youth_arthedain_4_desc" text="Você se juntou à guarda do Rei na cidadela de Fornost, treinando na disciplinada guerra de infantaria para proteger o Rei e o salão de seus pais." />
+    <string id="taom_cc_taom_youth_arthedain_5_text" text="Viveu de esperteza nas ruínas de Cardolan." />
+    <string id="taom_cc_taom_youth_arthedain_5_desc" text="Você sobreviveu a duras penas entre as cidades em ruínas da caída Cardolan, onde ladrões de tumbas e foras da lei ganhavam a vida. Aprendeu o valor de uma mão rápida, de uma pedra bem lançada e de uma história que ninguém podia checar." />
+    <string id="taom_cc_taom_adulthood_arthedain_1_text" text="Você defendeu as Colinas do Tempo contra uma hoste de Angmar." />
+    <string id="taom_cc_taom_adulthood_arthedain_1_desc" text="Quando os homens-das-colinas de Rhudaur vieram pelas Colinas do Tempo sob os estandartes de Angmar, você manteve sua linha nas encostas até que os cavaleiros do Rei chegassem. Seu nome foi pronunciado no salão de Fornost." />
+    <string id="taom_cc_taom_adulthood_arthedain_2_text" text="Você conquistou os Anões das Montanhas Azuis como parceiros de comércio." />
+    <string id="taom_cc_taom_adulthood_arthedain_2_desc" text="Quando o ferro escasseou nas forjas de Fornost, você cavalgou para oeste até Ered Luin e negociou com os Anões até que as carroças de minério rolassem para leste novamente. O tesoureiro do Rei não esquece quem manteve as forjas acesas." />
+    <string id="taom_cc_taom_adulthood_arthedain_3_text" text="Você colheu a safra das Colinas do Norte sob a ameaça dos lobos." />
+    <string id="taom_cc_taom_adulthood_arthedain_3_desc" text="Quando lobos e orcs desceram do norte num outono rigoroso, você reuniu os recrutas camponeses para guardar os campos e trouxe a colheita antes da neve. As aldeias se lembram." />
+    <string id="taom_cc_taom_adulthood_arthedain_4_text" text="Você forjou uma lâmina entregue a um cavaleiro de Fornost." />
+    <string id="taom_cc_taom_adulthood_arthedain_4_desc" text="Um cavaleiro da guarda do Rei ouvira falar do seu trabalho e encomendou uma espada para o dia em que faria seu juramento. Quando ele a desembainhou diante da guarda reunida e ela soou verdadeira, você soube que seu nome estava feito." />
+    <string id="taom_cc_taom_adulthood_arthedain_5_text" text="Você guiou uma companhia de Guardiões para fora de uma emboscada nos Ettenmoors." />
+    <string id="taom_cc_taom_adulthood_arthedain_5_desc" text="Quando uma patrulha de Guardiões ficou isolada nos Ettenmoors, você os conduziu por uma trilha que nenhum batedor orc conhecia, sem perder um único homem. O capitão deles apertou seu braço e o nomeou amigo dos Dúnedain." />
+    <string id="taom_cc_taom_adulthood_arthedain_6_text" text="Você desmascarou um bando de ladrões de tumbas que atuava em Bri." />
+    <string id="taom_cc_taom_adulthood_arthedain_6_desc" text="Por meses, objetos funerários das Colinas dos Túmulos apareceram nos fundos das casas de Bri. Você rastreou o comércio, encontrou os homens por trás dele e os entregou aos guardas do Rei, ficando com um pouco do ouro pelo trabalho." />
+    <string id="taom_cc_taom_education_arthedain_1_text" text="Treinou com os filhos das antigas casas." />
+    <string id="taom_cc_taom_education_arthedain_1_desc" text="Você cresceu treinando ao lado dos filhos das famílias nobres de Arthedain nos pátios de Fornost. Aprendeu a espada e a lança sob cavaleiros juramentados ao Rei, e decorou as longas linhagens dos Dúnedain." />
+    <string id="taom_cc_taom_education_arthedain_2_text" text="Aprendiz no mercado de Bri." />
+    <string id="taom_cc_taom_education_arthedain_2_desc" text="Você passou a juventude carregando livros de registro e fazendo recados no mercado de Bri, onde todas as estradas de Eriador parecem se encontrar. Aprendeu a pechinchar com Anões, a lisonjear Hobbits e a nunca confiar nas balanças de um sulista." />
+    <string id="taom_cc_taom_education_arthedain_3_text" text="Trabalhou nas fazendas das Colinas do Norte." />
+    <string id="taom_cc_taom_education_arthedain_3_desc" text="Você trabalhou do amanhecer ao anoitecer nas frias fazendas abaixo de Fornost, carregando pedras e conduzindo ovelhas pelas colinas. Quando a convocação veio, puseram-lhe uma lança nas mãos e ensinaram-lhe a manter a formação." />
+    <string id="taom_cc_taom_education_arthedain_4_text" text="Aprendiz de um ferreiro de Fornost." />
+    <string id="taom_cc_taom_education_arthedain_4_desc" text="Você aprendeu seu ofício nas forjas de Fornost Erain, trabalhando os foles sob um mestre que ainda guardava os métodos númenorianos de temperar o aço. Ao chegar à idade adulta, suas mãos conheciam o trabalho melhor que sua cabeça." />
+    <string id="taom_cc_taom_education_arthedain_5_text" text="Percorreu as terras selvagens com os Dúnedain." />
+    <string id="taom_cc_taom_education_arthedain_5_desc" text="Você seguiu os Guardiões ainda jovem, aprendendo a mover-se sem ruído pelo Bosque de Chet e ao longo do Fontegris. Retesou seu primeiro arco antes de ter barba, e logo depois seu primeiro orc tombou por ele." />
+    <string id="taom_cc_taom_education_arthedain_6_text" text="Vagou pela Grande Estrada do Leste." />
+    <string id="taom_cc_taom_education_arthedain_6_desc" text="Você cresceu na estrada entre Bri e o Brandevin, levando mensagens por moedas e vendendo o que os viajantes deixavam para trás. A estrada lhe ensinou mãos rápidas, uma língua ainda mais rápida e a hora de sumir." />
   </strings>
 </base>

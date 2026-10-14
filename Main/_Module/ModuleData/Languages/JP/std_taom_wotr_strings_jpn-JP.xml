@@ -30,5 +30,54 @@
     <string id="taom_wotr_victory_free" text="戦争は終わった。自由の民は耐え抜き、子らのための未来を勝ち取った。自由万歳!" />
     <string id="taom_wotr_victory_evil" text="人間とエルフの国々は悉く砕かれた。サウロン万歳!" />
     <string id="taom_wotr_continue" text="続ける" />
+    <string id="taom_wotr_chronicle_events" text="年代記の出来事" />
+    <string id="taom_wc_siege_lost" text="{TARGET}は、戦いの決着がつく前に主を替えた。" />
+    <string id="taom_wc_fellowship_title" text="旅の仲間、出立す" />
+    <string id="taom_wc_fellowship_occurred" text="九人の徒歩の者が一つの指輪を携え、密かに裂け谷を発って南へ向かう。エルロンドの館はその力を結集する。" />
+    <string id="taom_wc_khazaddum_title" text="カザド=ドゥムの橋" />
+    <string id="taom_wc_khazaddum_occurred" text="モリアの深淵にて、灰色の巡礼者はバルログと共に落ちた。霧ふり山脈のオークどもが群がり、自由の民は嘆き悲しむ。" />
+    <string id="taom_wc_breaking_title" text="旅の仲間の解散" />
+    <string id="taom_wc_breaking_occurred" text="パルス・ガレンにてウルク=ハイが一行に襲いかかる。ボロミアはホビットたちを守って斃れ、ゴンドールはその世継ぎを失った。" />
+    <string id="taom_wc_theoden_title" text="セーオデン王" />
+    <string id="taom_wc_theoden_occurred" text="蛇の舌の讒言から解き放たれ、セーオデンは剣を取る。騎士国はその王のもとに集結する。" />
+    <string id="taom_wc_hornburg_title" text="角笛城の合戦" />
+    <string id="taom_wc_hornburg_open" text="アイゼンガルドの軍勢とダンランドの丘人が{TARGET}へ進軍する。この戦いは{DAYS}日以内に決せねばならぬ。" />
+    <string id="taom_wc_hornburg_lapsed" text="{TARGET}に攻撃は来なかった。アイゼンガルドの軍勢は他所へ向かう。" />
+    <string id="taom_wc_hornburg_held" text="角笛城は夜を通して持ちこたえ、アイゼンガルドの軍勢はその城壁に砕け散った。" />
+    <string id="taom_wc_hornburg_fell" text="{TARGET}は陥落し、白い手が西谷を支配する。" />
+    <string id="taom_wc_ents_title" text="エントの最後の進軍" />
+    <string id="taom_wc_ents_occurred" text="ファンゴルンのエントたちがアイゼンガルドに下り、サルマンの坑を水に沈めた。白い手の鍛冶場は静まり返る。" />
+    <string id="taom_wc_lorien_title" text="ロスローリエン襲わる" />
+    <string id="taom_wc_lorien_open" text="ドル・グルドゥアより影が黄金の森を襲う。{TARGET}は{DAYS}日間持ちこたえねばならぬ。" />
+    <string id="taom_wc_lorien_lapsed" text="ドル・グルドゥアの軍勢は{TARGET}に辿り着くことはなかった。" />
+    <string id="taom_wc_lorien_held" text="奥方の力は揺るがず、ドル・グルドゥアの軍勢は黄金の森から退いた。" />
+    <string id="taom_wc_lorien_fell" text="{TARGET}は燃え、ロスローリエンの光は衰える。" />
+    <string id="taom_wc_osgiliath_title" text="オスギリアスの陥落" />
+    <string id="taom_wc_osgiliath_open" text="ミナス・モルグルの軍勢がアンドゥインを渡り{TARGET}へ迫る。ゴンドールはこの廃墟の都を{DAYS}日間守り抜かねばならぬ。" />
+    <string id="taom_wc_osgiliath_lapsed" text="モルドールは{TARGET}へ攻め寄せず、大河は静かなままである。" />
+    <string id="taom_wc_osgiliath_held" text="ファラミアはアンドゥインの渡しを守り抜き、モルグルの軍勢は退いた。" />
+    <string id="taom_wc_osgiliath_fell" text="{TARGET}は陥落し、ミナス・ティリスへの道が開かれた。" />
+    <string id="taom_wc_dale_title" text="デイルの合戦" />
+    <string id="taom_wc_dale_open" text="東夷とドル・グルドゥアの僕どもがデイルの国へ進軍する。{TARGET}は{DAYS}日間持ちこたえねばならぬ。" />
+    <string id="taom_wc_dale_lapsed" text="東夷は進路を変え、{TARGET}は難を逃れた。" />
+    <string id="taom_wc_dale_held" text="デイルの人間とエレボールのドワーフが肩を並べて戦い、東夷の軍勢は押し返された。" />
+    <string id="taom_wc_dale_fell" text="{TARGET}は東夷の手に落ち、エレボールのドワーフたちは友を助けに出陣した。" />
+    <string id="taom_wc_corsairs_title" text="ウンバールの海賊" />
+    <string id="taom_wc_corsairs_open" text="ウンバールの黒き帆がアンドゥインを遡り、{TARGET}へと迫る。ゴンドールはこの港を{DAYS}日間守り抜かねばならない。" />
+    <string id="taom_wc_corsairs_lapsed" text="海賊たちは沖に留まり、{TARGET}は平穏のままであった。" />
+    <string id="taom_wc_corsairs_held" text="ウンバールの船団は{TARGET}から追い払われ、ゴンドール南方の領地は勇気を取り戻した。" />
+    <string id="taom_wc_corsairs_fell" text="海賊たちは{TARGET}を奪い、その船団が大河を支配した。" />
+    <string id="taom_wc_north_title" text="北方の戦い" />
+    <string id="taom_wc_north_open" text="グンダバドのオークとダンランドの丘陵人が北方に攻め下る。{TARGET}は{DAYS}日間持ちこたえねばならない。" />
+    <string id="taom_wc_north_lapsed" text="北方の戦火は{TARGET}を素通りした。" />
+    <string id="taom_wc_north_held" text="野伏とアルセダインの人々が{TARGET}を守り抜き、北方は自由のままであった。" />
+    <string id="taom_wc_north_fell" text="{TARGET}は陥落し、影がエリアドール全土に広がった。" />
+    <string id="taom_wc_gondor_title" text="ゴンドールの包囲" />
+    <string id="taom_wc_gondor_open" text="ナズグルの長がモルドールの軍勢を率いて{TARGET}に迫る。都は{DAYS}日間持ちこたえねばならない。" />
+    <string id="taom_wc_gondor_lapsed" text="モルドールの大軍は動かず、{TARGET}は暗く閉ざされた空の下で待ち続けた。" />
+    <string id="taom_wc_gondor_held" text="夜明けとともにローヒアリムが到着し、{TARGET}の包囲はペレンノール野にて打ち破られた。" />
+    <string id="taom_wc_gondor_fell" text="{TARGET}の門は破られ、白の都はモルドールの手に落ちた。" />
+    <string id="taom_wc_blackgate_title" text="黒門開く" />
+    <string id="taom_wc_blackgate_occurred" text="西軍の総大将たちは、指輪所持者から「目」をそらすためモランノンへ進軍した。今や戦の運命は指輪に委ねられている。" />
   </strings>
 </base>

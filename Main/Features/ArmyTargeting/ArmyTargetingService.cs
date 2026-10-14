@@ -22,6 +22,7 @@ public class ArmyTargetingService : IArmyTargetingService
     private readonly Dictionary<string, Dictionary<string, int>> _priorityIndex;
     private readonly Dictionary<string, float> _aggressionIndex;
     private readonly Dictionary<string, string[]> _theaterIndex;
+    private readonly ArmyTargetFocusRegistry _focus;
 
     // One-shot breadcrumbs: each path fires per-army-per-tick, so log the first occurrence
     // (with real values) then stay silent.
@@ -33,9 +34,12 @@ public class ArmyTargetingService : IArmyTargetingService
     private bool _loggedStrengthMultiplier;
     private bool _loggedTheaterWeight;
 
-    public ArmyTargetingService(IArmyTargetingSettingsProvider settings, IArmyTargetingConfigProvider configProvider, IModLogger logger)
+    public ArmyTargetingService(
+        IArmyTargetingSettingsProvider settings, IArmyTargetingConfigProvider configProvider, IModLogger logger,
+        ArmyTargetFocusRegistry focus)
     {
         _settings = settings;
+        _focus = focus;
         _logger = logger;
         _config = configProvider.GetConfig() ?? new ArmyTargetingConfig();
         _priorityIndex = BuildPriorityIndex(_config);
@@ -191,15 +195,19 @@ public class ArmyTargetingService : IArmyTargetingService
             // under its 0.01f gate and disbanded the army. Distance is vanilla's job. TAOM's job is
             // only to stop its OWN priority boost from overturning vanilla's verdict, and Patch22's
             // border-rescue gate is where that happens.
+            // The War Chronicle's focus (#765) multiplies last. The registry stores only finite values
+            // above 1 and the base score is positive here, so the focus never lifts vanilla's zero.
             case ArmyTargetingMission.Besieger:
                 return context.BaseScore
                      * GetTargetMultiplier(context.TargetSettlementId, context.CommittedTargetId, context.FactionId)
-                     * GetTheaterWeight(context.FactionId, context.TargetFactionId);
+                     * GetTheaterWeight(context.FactionId, context.TargetFactionId)
+                     * _focus.GetMultiplier(context.Mission, context.TargetSettlementId, context.FactionId);
 
             // Raider is absent on purpose: vanilla already hard-zeroes raiders past 5 town gaps in
             // GetDistanceScoreForRaiding.
             case ArmyTargetingMission.Defender:
-                return context.BaseScore * ResolvedDefenderMultiplier();
+                return context.BaseScore * ResolvedDefenderMultiplier()
+                     * _focus.GetMultiplier(context.Mission, context.TargetSettlementId, context.FactionId);
 
             default:
                 return context.BaseScore;

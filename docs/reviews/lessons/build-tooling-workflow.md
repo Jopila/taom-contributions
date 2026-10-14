@@ -3498,3 +3498,51 @@ caught by gates, never by skill text.
 - **Prevent:** before adding a skill, check whether the model already does the job by running the script;
   measure Skill-tool calls in the transcripts before keeping one. A gate beats skill text.
 - **Source:** `docs/reviews/skill-usage-audit-2026-10-08.md`.
+
+### A dry run and the patch that adds it are chained with `&&` (2026-10-08)
+- **Why missed:** a heredoc patch meant to add a `--dry` flag to a doc-fix script failed on mangled backslashes (the
+  known heredoc trap), and the next command on the same shell line ran the unpatched script, which ignored `--dry`
+  and wrote 13 docs while review agents were still reading them.
+- **Prevent:** write scripts with the Write tool and give a script its dry-run mode when it is written; chain
+  dependent shell steps with `&&` so a failed step stops the rest.
+- **Source:** `docs/reviews/rca-yotthani-adoption-2026-10-08.md` finding 28.
+
+### Read engine types only from vanilla modules: a third-party mod can bundle engine DLLs (2026-10-14)
+The first v1.5.5 body diff reported 509 changed members. The installed Coop module ships 40 v1.5.4
+`TaleWorlds` and `SandBox` DLLs of its own, `tools/decompile_bannerlord.ps1` decompiles every module's
+bin, and so `_modules_build` held a second, stale copy of every engine type. The new side indexed two
+definitions of each type, and the tool joined both bodies, so every member compared one body against two.
+- **Why missed:** the decompile and the lookup tools treated "a file under `_modules_build`" as "engine
+  source", and the calibration run (v1.5.3 to v1.5.4) predated the Coop module.
+- **Prevent:** `engine_body_diff.py` and `check_engine_member_refs.ps1` read engine assemblies only from
+  vanilla modules (`test_third_party_engine_copy_is_ignored`). `decompile_bannerlord.ps1` and
+  `taom-src.ps1` do not yet: `taom-src` probes module bins in name order, so `Coop` wins lookups before
+  `SandBox` and `StoryMode` (follow-up in `rca-engine-bump-v1.5.5-2026-10-14.md`). Never quote an engine
+  type from a non-vanilla `_modules_build` file or a `taom-src` hit under `Modules\Coop`.
+- **Source:** v1.5.5 engine bump, 509 false CHANGED rows.
+
+### "Installed" is not "effective": prove a guard can see the failure it targets (2026-10-14)
+`SubModuleConstructionGuard` put a Harmony finalizer on `MBSubModuleBase` constructors and
+`Module.AddSubModule` to swallow a third-party SubModule constructor failure. It logged "installed" on
+every launch: 526 installs since 2026-05-27, 0 logged swallows. It could never fire. `Install()` ran from
+`OnSubModuleLoad`, after `Module.LoadSubModules` had constructed every SubModule, and on v1.5.5 the only
+`MBSubModuleBase` constructor is 7 bytes with no fields, so a derived class's initialiser exceptions never
+reach it. The class was deleted in the v1.5.5 bump.
+- **Why missed:** a clean log read as proof of safety, and no test or log line could tell "nothing
+  threw" from "the guard was never in position".
+- **Prevent:** a guard needs proof it can see the failure it targets: the patched method can actually
+  throw, and the install precedes the guarded event. Install time against the event's time is the first
+  check; a deliberately failing fixture is the second. Count swallows against installs over a long
+  window before keeping one.
+- **Source:** v1.5.5 engine bump deep review.
+
+### A check must fail on inputs it could not read, never report 0 of what it read as clean (2026-10-14)
+The v1.5.5 deep review found the new tools passing in states where they had checked nothing:
+`check_engine_member_refs` and `engine_body_diff` could report clean on a missing directory, on an
+assembly that was never indexed, or when the "old" baseline was the same build as the new one.
+- **Why missed:** each tool counted hits against what it did read, so an empty or unreadable input gave
+  0 hits and a green result.
+- **Prevent:** every check reports how many inputs it read against how many it expected, and exits
+  non-zero on a missing directory, an unindexed assembly or a same-build baseline. A positive control
+  (a build known to miss) and a negative control (a fresh build) sit beside it.
+- **Source:** v1.5.5 engine bump deep review (`check_engine_member_refs`, `engine_body_diff`).

@@ -109,6 +109,13 @@ public class CoopVetoClassificationTests
             "sync, and no TAOM SyncData or config. Replication is asynchronous, so this is a " +
             "same-integration-as-vanilla argument, not a claim of identical snapshots; two-peer " +
             "execution is UNVERIFIED (Codex review 98)."),
+        ["SettlementNameplatesVM_Update_NameplateCull_Patch"] = new(CoopVeto.ReviewedSafe,
+            "Patch104: client-side UI. The prefix replaces SettlementNameplatesVM.Update, the campaign map's per-frame " +
+            "nameplate refresh, with the same update over the plates that are hidden-and-staying-hidden left out. The " +
+            "view model feeds widgets on this client only: it reads settlement state, the camera and the visual " +
+            "tracker, and writes nothing to campaign state, so there is no replicated mutation to skip and nothing for " +
+            "two peers to disagree about. Every other outcome (toggle off, cull unavailable, any error) returns true " +
+            "and runs vanilla whole. The toggle is presentation in CoopSettingsRelevance."),
         ["Patch86_HideoutAssaultBossFight"] = new(CoopVeto.ReviewedSafe,
             "Replaces MapEventHelper.GetPriorityListForHideoutMission, a pure roster-ORDERING " +
             "function for the local hideout mission: it decides which troops spawn in phase 1 and " +
@@ -470,11 +477,26 @@ public class CoopVetoClassificationTests
     // OnSessionLaunched calls EnforcePermanentAlliances, which reaches MakePeace/StartAlliance
     // straight from TAOM config and touches none of the three predicates. Codex found it (P1) after
     // this test had already passed over it. A divergence surface is not only "decisions that read
-    // drifting state" — it is also "writes that happen on every peer".
+    // drifting state" — it is also "writes that happen on every peer". WarOfTheRingBehavior's
+    // war-declaring entry points are listed too (CheckPhaseTransition, ReconcileDeclaredWars, #772).
     private static readonly string[] DivergenceProneMutators =
     {
         "EnforcePermanentAlliances",
         "EstablishInitialAlliances",
+        "ReconcileDeclaredWars",
+        "CheckPhaseTransition",
+        // #765: the War Chronicle's world-writing entry points (effects, focus, momentum, saved event rows).
+        "LaunchChronicle",
+        "RunChronicleDay",
+        "OnTargetOwnerChanged",
+        "OnTargetBesieged",
+        "OpenChronicleEventNow",
+        // Matches nothing today: its only caller, ChronicleOutcomeService.Apply, is a *Service file, which
+        // the scan below skips. That call is gated transitively: Apply runs only from ChronicleService.Resolve,
+        // reached through the entries above, which run behind WarChronicleEventsBehavior's IsAuthority and
+        // MayWriteSaveBackedState gate or taom.chronicle_open's IsAuthority refusal. The entry catches a future
+        // direct caller outside a *Service file.
+        "TryAwardScripted",
     };
 
     [TestMethod]

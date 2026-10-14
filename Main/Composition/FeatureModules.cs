@@ -29,5 +29,11 @@ internal static class FeatureModules
         new Features.CreatureSiegeRole.CreatureSiegeRoleModule(),
         new Features.ButterLibDistanceMatrix.ButterLibDistanceMatrixModule(),
         new Features.MapEventGuard.StuckBattleModule(),
+        new Features.WarChronicle.WarChronicleModule(),
+        new Features.MissionStartGuard.MissionStartGuardModule(),
+        new Features.SkeletonBuffer.SkeletonBufferModule(),
+        new Features.NameplateCull.NameplateCullModule(),
+        new Features.MapViewRelease.MapViewReleaseModule(),
+        new Features.EyeOfSauron.EyeOfSauronModule(),
     };
 }

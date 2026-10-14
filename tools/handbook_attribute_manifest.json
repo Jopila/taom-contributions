@@ -1,5 +1,5 @@
 {
-  "dump_root_name": "_categories_v1.5.4",
+  "dump_root_name": "_categories_v1.5.5",
   "markers": {
     "TaleWorlds.CampaignSystem.CharacterObject|Campaign/TaleWorlds.CampaignSystem/TaleWorlds.CampaignSystem/CharacterObject.cs|Deserialize": {
       "attributes": [
@@ -1039,7 +1039,11 @@
         "Version"
       ],
       "file": "Platform/TaleWorlds.ModuleManager/TaleWorlds.ModuleManager/ModuleInfo.cs",
-      "helpers": [],
+      "helpers": [
+        "GetRequiredAttribute",
+        "GetRequiredValueAttribute",
+        "GetValueAttribute"
+      ],
       "method": "LoadWithFullPath",
       "prefixes": [],
       "type": "TaleWorlds.ModuleManager.ModuleInfo"
@@ -1090,7 +1094,10 @@
         "file"
       ],
       "file": "Core/TaleWorlds.ObjectSystem/TaleWorlds.ObjectSystem/XmlResource.cs",
-      "helpers": [],
+      "helpers": [
+        "GetLineHint",
+        "LoadXmlDocumentWithLineInfo"
+      ],
       "method": "GetMbprojxmls",
       "prefixes": [],
       "type": "TaleWorlds.ObjectSystem.XmlResource"
@@ -1110,7 +1117,10 @@
         "Xmls"
       ],
       "file": "Core/TaleWorlds.ObjectSystem/TaleWorlds.ObjectSystem/XmlResource.cs",
-      "helpers": [],
+      "helpers": [
+        "GetLineHint",
+        "LoadXmlDocumentWithLineInfo"
+      ],
       "method": "GetXmlListAndApply",
       "prefixes": [],
       "type": "TaleWorlds.ObjectSystem.XmlResource"

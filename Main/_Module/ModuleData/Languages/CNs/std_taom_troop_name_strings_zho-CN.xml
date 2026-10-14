@@ -867,28 +867,28 @@
     <string id="aom_gondor_loss_noble_veteran_name" text="[刚铎] 洛萨那赫斧兵" />
     <string id="aom_gondor_loss_noble_warden_name" text="[刚铎] 洛萨那赫斧卫" />
     <string id="aom_harad_howdah_crew_name" text="[哈拉德] 象轿弓箭手" />
-    <string id="aom_arthedain_citadel_guard_name" text="[Arthedain] Guard of the Citadel" />
-    <string id="aom_arthedain_dunadan_youth_merc_name" text="[Arthedain] Dunadan Sellsword" />
-    <string id="aom_arthedain_dunadan_youth_name" text="[Arthedain] Dunadan Youth" />
-    <string id="aom_arthedain_footman_name" text="[Arthedain] Fornost Footman" />
-    <string id="aom_arthedain_fornost_guard_name" text="[Arthedain] Fornost Guard" />
-    <string id="aom_arthedain_kings_guard_name" text="[Arthedain] King's Guard of Fornost" />
-    <string id="aom_arthedain_knight_name" text="[Arthedain] Knight of Arthedain" />
-    <string id="aom_arthedain_lancer_name" text="[Arthedain] Lancer" />
-    <string id="aom_arthedain_levy_name" text="[Arthedain] Levy" />
-    <string id="aom_arthedain_militia_archer_name" text="[Arthedain] Militia Archer" />
-    <string id="aom_arthedain_militia_spearman_name" text="[Arthedain] Militia Spearman" />
-    <string id="aom_arthedain_militia_veteran_archer_name" text="[Arthedain] Veteran Militia Archer" />
-    <string id="aom_arthedain_militia_veteran_spearman_name" text="[Arthedain] Veteran Militia Spearman" />
-    <string id="aom_arthedain_outrider_name" text="[Arthedain] Outrider" />
-    <string id="aom_arthedain_ranger_captain_name" text="[Arthedain] Ranger Captain" />
-    <string id="aom_arthedain_ranger_name" text="[Arthedain] Ranger" />
-    <string id="aom_arthedain_ranger_of_the_north_name" text="[Arthedain] Ranger of the North" />
-    <string id="aom_arthedain_shieldman_name" text="[Arthedain] Fornost Shieldman" />
-    <string id="aom_arthedain_spearman_name" text="[Arthedain] Spearman" />
-    <string id="aom_arthedain_squire_name" text="[Arthedain] Dunadan Squire" />
-    <string id="aom_arthedain_veteran_citadel_guard_name" text="[Arthedain] Veteran Citadel Guard" />
-    <string id="aom_arthedain_veteran_ranger_name" text="[Arthedain] Veteran Ranger" />
-    <string id="aom_arthedain_warden_name" text="[Arthedain] Warden of Fornost" />
+    <string id="aom_arthedain_citadel_guard_name" text="[阿塞丹]城塞卫兵" />
+    <string id="aom_arthedain_dunadan_youth_merc_name" text="[阿塞丹]杜内丹佣兵" />
+    <string id="aom_arthedain_dunadan_youth_name" text="[阿塞丹]杜内丹青年" />
+    <string id="aom_arthedain_footman_name" text="[阿塞丹]佛诺斯特步兵" />
+    <string id="aom_arthedain_fornost_guard_name" text="[阿塞丹]佛诺斯特卫兵" />
+    <string id="aom_arthedain_kings_guard_name" text="[阿塞丹]佛诺斯特国王卫士" />
+    <string id="aom_arthedain_knight_name" text="[阿塞丹]阿塞丹骑士" />
+    <string id="aom_arthedain_lancer_name" text="[阿塞丹]枪骑兵" />
+    <string id="aom_arthedain_levy_name" text="[阿塞丹]征召兵" />
+    <string id="aom_arthedain_militia_archer_name" text="[阿塞丹]民兵弓手" />
+    <string id="aom_arthedain_militia_spearman_name" text="[阿塞丹]民兵长矛手" />
+    <string id="aom_arthedain_militia_veteran_archer_name" text="[阿塞丹]老练民兵弓手" />
+    <string id="aom_arthedain_militia_veteran_spearman_name" text="[阿塞丹]老练民兵长矛手" />
+    <string id="aom_arthedain_outrider_name" text="[阿塞丹]游骑哨骑" />
+    <string id="aom_arthedain_ranger_captain_name" text="[阿塞丹]游侠队长" />
+    <string id="aom_arthedain_ranger_name" text="[阿塞丹]游侠" />
+    <string id="aom_arthedain_ranger_of_the_north_name" text="[阿塞丹]北方游侠" />
+    <string id="aom_arthedain_shieldman_name" text="[阿塞丹]佛诺斯特盾兵" />
+    <string id="aom_arthedain_spearman_name" text="[阿塞丹]长矛手" />
+    <string id="aom_arthedain_squire_name" text="[阿塞丹]杜内丹侍从" />
+    <string id="aom_arthedain_veteran_citadel_guard_name" text="[阿尔塞丹] 老兵城堡卫士" />
+    <string id="aom_arthedain_veteran_ranger_name" text="[阿尔塞丹] 老兵游侠" />
+    <string id="aom_arthedain_warden_name" text="[阿尔塞丹] 佛诺斯特守护者" />
   </strings>
 </base>

@@ -700,6 +700,18 @@ class ManifestTests(_Tree):
         self.assertEqual(self.labels(report), ["MANIFEST_STALE"])
         self.assertEqual(cha.exit_code_for(report), 1)
 
+    def test_subset_docs_run_does_not_flag_markers_outside_it(self):
+        # A --docs run over part of the handbook sees only its own markers; the committed manifest
+        # also holds the rest, which is not drift.
+        _write(self.docs / "widgets.md", _chapter())
+        out = self.root / "manifest.json"
+        full = self.run_tool()["manifest"]
+        full["markers"]["Fake.Engine.Elsewhere|Core/Elsewhere.cs|Deserialize"] = {"attributes": ["x"]}
+        cha.write_manifest(full, out)
+        report = self.run_tool(manifest_path=out)
+        self.assertEqual(report["source"], "dump")
+        self.assertNotIn("MANIFEST_STALE", self.labels(report))
+
     def test_dump_wins_over_manifest_when_both_exist(self):
         _write(self.docs / "widgets.md", _chapter())
         out = self.root / "manifest.json"
@@ -730,8 +742,10 @@ class DumpRootResolutionTests(unittest.TestCase):
         env = {cha.DUMP_ENV_VAR: "   "}
         self.assertEqual(cha.resolve_dump_root(None, env), Path(cha.DEFAULT_DUMP_ROOT))
 
-    def test_default_names_the_v148_dump(self):
-        self.assertTrue(cha.DEFAULT_DUMP_ROOT.endswith("_categories_v1.5.4"))
+    def test_default_names_the_pinned_game_version(self):
+        pin = (cha.REPO_ROOT / ".claude" / "pinned-game-version.txt").read_text(
+            encoding="utf-8-sig").strip()
+        self.assertTrue(cha.DEFAULT_DUMP_ROOT.endswith("_categories_" + pin))
 
 
 class CliTests(_Tree):
@@ -835,3 +849,48 @@ class MarkersInsideCodeAreIllustrationsTests(unittest.TestCase):
         markers = cha.parse_markers(text)
         self.assertEqual(len(markers), 1)
         self.assertEqual(markers[0]['line'], 4)
+
+
+class ManifestDriftTests(_Tree):
+    def _committed(self):
+        _write(self.docs / "widgets.md", _chapter())
+        out = self.root / "manifest.json"
+        cha.write_manifest(self.run_tool()["manifest"], out)
+        return out
+
+    def test_dump_mode_flags_a_manifest_that_disagrees_with_the_dump(self):
+        out = self._committed()
+        data = json.loads(out.read_text(encoding="utf-8"))
+        entry = next(iter(data["markers"].values()))
+        entry["helpers"] = []
+        out.write_text(json.dumps(data), encoding="utf-8")
+        report = self.run_tool(manifest_path=out)
+        self.assertEqual(self.labels(report), ["MANIFEST_STALE"])
+        self.assertEqual(cha.exit_code_for(report), 1)
+
+    def test_dump_mode_accepts_a_current_manifest(self):
+        out = self._committed()
+        report = self.run_tool(manifest_path=out)
+        self.assertEqual(report["findings"], [])
+
+    def test_manifest_from_another_dump_is_stale_in_dump_mode(self):
+        out = self._committed()
+        data = json.loads(out.read_text(encoding="utf-8"))
+        data["dump_root_name"] = "_categories_v0.0.1"
+        out.write_text(json.dumps(data), encoding="utf-8")
+        report = self.run_tool(manifest_path=out)
+        self.assertEqual(self.labels(report), ["MANIFEST_STALE"])
+
+    def test_update_does_not_flag_the_manifest_it_rewrites(self):
+        out = self._committed()
+        data = json.loads(out.read_text(encoding="utf-8"))
+        data["dump_root_name"] = "_categories_v0.0.1"
+        out.write_text(json.dumps(data), encoding="utf-8")
+        report = self.run_tool(manifest_path=out, check_manifest=False)
+        self.assertEqual(report["findings"], [])
+
+
+class CommittedManifestTests(unittest.TestCase):
+    def test_committed_manifest_was_built_from_the_default_dump(self):
+        data = json.loads(cha.MANIFEST_PATH.read_text(encoding="utf-8-sig"))
+        self.assertEqual(data["dump_root_name"], Path(cha.DEFAULT_DUMP_ROOT).name)

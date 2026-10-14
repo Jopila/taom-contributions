@@ -1589,7 +1589,7 @@
     <string id="taom_faction_khudorom_of_khand_weakness_2" text="傭兵隊長忠於金幣,而非領主" />
     <string id="taom_faction_kingdom_of_angaladh_desc" text="安加拉德王國。" />
     <string id="taom_faction_kingdom_of_angaladh_name" text="安加拉德王國" />
-    <string id="taom_faction_kingdom_of_arthedain_desc" text="The last of Arnor's three successor kingdoms, and the only one still standing. Arvedui's line holds Fornost upon the North Downs and its Rangers keep the roads of Eriador, but Angmar, Dunland and the orcs of Gundabad press on every border of a realm with too few swords." />
+    <string id="taom_faction_kingdom_of_arthedain_desc" text="亞爾諾三個繼承王國中最後僅存的一個。亞維多的血脈據守北崗上的佛諾斯特,其遊俠守護著伊利雅德的道路;然而安格馬、登蘭德與剛達巴的半獸人正從四面八方進逼,而這個王國的刀劍實在太少。" />
     <string id="taom_faction_kingdom_of_arthedain_name" text="雅西頓王國" />
     <string id="taom_faction_kingdom_of_arthedain_trait_0" text="雅諾的最後傳承" />
     <string id="taom_faction_kingdom_of_arthedain_trait_1" text="安努米那斯真知晶球" />
@@ -2842,45 +2842,106 @@
   <string id="taom_bc_advice_keep" text="保留我的設定" />
   <string id="taom_bc_advice_done" text="戰鬥設定已儲存。" />
   <string id="taom_bc_advice_failed" text="戰鬥設定無法儲存。請在「選項」的 {PERFORMANCE} 中手動設定。" />
-  <string id="taom_str_faction_official.arthedain" text="a noble lord" />
-  <string id="taom_str_faction_official.arthedain_f" text="a noble lady" />
-  <string id="taom_str_faction_ruler.arthedain" text="King" />
-  <string id="taom_str_faction_ruler.arthedain_f" text="Queen" />
-  <string id="taom_str_faction_ruler_term_in_speech.arthedain" text="{?RULER.GENDER}the Queen{?}the King{\?} {RULER.NAME}" />
-  <string id="taom_str_faction_ruler_name_with_title.arthedain" text="{?RULER.GENDER}Queen{?}King{\?} {RULER.NAME}" />
-  <string id="taom_str_faction_noble_name_with_title.arthedain" text="{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
-  <string id="taom_str_faction_formal_name_for_culture.arthedain" text="Arthedain" />
-  <string id="taom_str_faction_informal_name_for_culture.arthedain" text="the Dúnedain of the North" />
-  <string id="taom_str_neutral_term_for_culture.arthedain" text="Dúnedain" />
-  <string id="taom_str_culture_description.arthedain" text="The Dúnedain of Arthedain are the last heirs of Arnor, the North-kingdom Elendil founded. From Fornost upon the North Downs the line of Arvedui still keeps the watch that Isildur's heirs have kept for a thousand years, though their towns are few, their lords are poor and the shadow of Angmar never leaves the hills. They are fewer than their southern kin and prouder than their numbers warrant, and every season the wild lands press closer." />
-  <string id="taom_str_culture_rich_name.arthedain" text="Dúnedain of Arthedain" />
-  <string id="taom_str_adjective_for_culture.arthedain" text="Arthedain" />
-  <string id="taom_str_player_father_name.arthedain" text="Aravir" />
-  <string id="taom_str_player_mother_name.arthedain" text="Ivorwen" />
-  <string id="taom_aso_kingdom.arthedain" text="Arthedain" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_0" text="+10% party speed on plains (Rangers' Roads)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_1" text="-20% garrison wage (Wardens of the Walls)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_2" text="+5 party morale (Dúnedain Resolve)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_3" text="+1 settlement loyalty per day (Line of Isildur)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_4" text="-15% village hearth growth (A Dwindling People)" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_0_desc" text="-20% garrison wage and +1 settlement loyalty per day." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_0_name" text="Wardens of the Walls" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_1_desc" text="+5 party morale. Few as they are, the Dúnedain do not break." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_1_name" text="Dúnedain Resolve" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_2_desc" text="+10% party speed on plains, where the Rangers keep the old roads open." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_2_name" text="Rangers' Roads" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_0" text="Fine Dúnedain archers and guards" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_1" text="Steadfast morale and loyal towns" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_2" text="Cheap garrisons behind old walls" />
-  <string id="taom_faction_kingdom_of_arthedain_su_0_desc" text="Two-handed elite guard of the King's citadel." />
-  <string id="taom_faction_kingdom_of_arthedain_su_0_name" text="King's Guard of Fornost" />
-  <string id="taom_faction_kingdom_of_arthedain_su_1_desc" text="Veteran Dúnedain scout-bowman of the North." />
-  <string id="taom_faction_kingdom_of_arthedain_su_1_name" text="Ranger Captain" />
-  <string id="taom_faction_kingdom_of_arthedain_su_2_desc" text="Sword-and-shield knight of the old blood." />
-  <string id="taom_faction_kingdom_of_arthedain_su_2_name" text="Knight of Arthedain" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_0" text="Few lords and small hosts" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_1" text="Poor lands that grow slowly" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="Ringed by Angmar, Dunland and Gundabad" />
+  <string id="taom_str_faction_official.arthedain" text="一位尊貴的領主" />
+  <string id="taom_str_faction_official.arthedain_f" text="一位尊貴的夫人" />
+  <string id="taom_str_faction_ruler.arthedain" text="國王" />
+  <string id="taom_str_faction_ruler.arthedain_f" text="女王" />
+  <string id="taom_str_faction_ruler_term_in_speech.arthedain" text="{?RULER.GENDER}女王{?}國王{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_ruler_name_with_title.arthedain" text="{?RULER.GENDER}女王{?}國王{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_noble_name_with_title.arthedain" text="{?RULER.GENDER}夫人{?}領主{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_formal_name_for_culture.arthedain" text="雅西頓" />
+  <string id="taom_str_faction_informal_name_for_culture.arthedain" text="北方的登丹人" />
+  <string id="taom_str_neutral_term_for_culture.arthedain" text="登丹人" />
+  <string id="taom_str_culture_description.arthedain" text="雅西頓的登丹人是埃蘭迪爾所建北方王國亞爾諾的最後繼承者。自北崗上的佛諾斯特，亞瓦杜伊的血脈仍守著埃西鐸子嗣千年以來的守望；儘管他們的城鎮稀少、領主貧窮，而安格馬的陰影從未離開過群丘。他們比南方的同族人數更少，卻比其人數所應有的更為驕傲，而荒野之地每一季都逼得更近。" />
+  <string id="taom_str_culture_rich_name.arthedain" text="雅西頓的登丹人" />
+  <string id="taom_str_adjective_for_culture.arthedain" text="雅西頓" />
+  <string id="taom_str_player_father_name.arthedain" text="亞拉維爾" />
+  <string id="taom_str_player_mother_name.arthedain" text="伊芙温" />
+  <string id="taom_aso_kingdom.arthedain" text="雅西頓" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_0" text="平原上隊伍速度 +10%(遊俠之路)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_1" text="駐軍薪餉 -20%(城牆守望者)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_2" text="隊伍士氣 +5(督內丹人的堅毅)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_3" text="每日聚落忠誠度 +1(埃西鐸血脈)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_4" text="村莊爐灶成長 -15%(日漸凋零的子民)" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_0_desc" text="駐軍薪餉 -20%,每日聚落忠誠度 +1。" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_0_name" text="城牆守望者" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_1_desc" text="隊伍士氣 +5。督內丹人雖寡,卻決不潰散。" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_1_name" text="督內丹人的堅毅" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_2_desc" text="平原上隊伍速度 +10%,遊俠在此地維繫著古道暢通。" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_2_name" text="遊俠之路" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_0" text="精良的督內丹弓手與衛士" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_1" text="堅定的士氣與忠誠的城鎮" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_2" text="古老城牆後廉價的駐軍" />
+  <string id="taom_faction_kingdom_of_arthedain_su_0_desc" text="國王要塞中手持雙手兵器的精銳衛士。" />
+  <string id="taom_faction_kingdom_of_arthedain_su_0_name" text="佛諾斯特御前衛士" />
+  <string id="taom_faction_kingdom_of_arthedain_su_1_desc" text="北方身經百戰的督內丹斥候弓手。" />
+  <string id="taom_faction_kingdom_of_arthedain_su_1_name" text="遊俠隊長" />
+  <string id="taom_faction_kingdom_of_arthedain_su_2_desc" text="持劍帶盾的古老血脈騎士。" />
+  <string id="taom_faction_kingdom_of_arthedain_su_2_name" text="雅西頓騎士" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_0" text="領主稀少,軍力薄弱" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_1" text="土地貧瘠,發展緩慢" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="遭安格馬、登蘭德與剛達巴環伺" />
+  <string id="taom_eye_hunt_free" text="索倫之眼已轉向你。{HUNTER} 率領大軍出征,誓要將你毀滅。" />
+  <string id="taom_eye_hunt_evil" text="愛隆已派遣 {HUNTER} 率領一支精靈大軍前來擊潰你。" />
+  <string id="taom_eye_hunt_won" text="{HUNTER} 已被擊敗。追獵暫告一段落。" />
+  <string id="taom_eye_hunt_over" text="追獵暫告一段落。" />
+  <string id="taom_tr_prize_advertised" text="{ITEM_NAME}(公告的獎品)" />
+  <string id="taom_tr_prize_hint" text="價值約 {VALUE} 第納爾。" />
+  <string id="taom_tr_prize_title" text="選擇你的獎品" />
+  <string id="taom_tr_prize_desc" text="比武大會的主持人提供了數項獎品供你挑選。選定你為之而戰的獎品;若你獲勝,它便歸你所有。" />
+  <string id="taom_tr_skill_title" text="選擇你的訓練" />
+  <string id="taom_tr_skill_desc" text="選擇本次比武大會所訓練的技能。你每贏下一輪便會獲得該技能的經驗,贏得整場大會則收穫更多。" />
+  <string id="taom_tr_skill_gained" text="這場比武大會鍛鍊了你的{SKILL_NAME}。" />
+  <string id="taom_tr_choose" text="選擇" />
+  <string id="taom_tr_cancel" text="取消" />
+  <string id="taom_race_ability_berserk" text="狂戰" />
+  <string id="taom_race_ability_bloodlust" text="嗜血" />
+  <string id="taom_race_ability_stand_fast" text="堅守陣地" />
+  <string id="taom_race_ability_swiftness" text="精靈之迅捷" />
+  <string id="taom_race_ability_wave_ally" text="{ABILITY}：我方 {COUNT} 名士兵" />
+  <string id="taom_race_ability_wave_enemy" text="敵方 {ABILITY}：{COUNT} 名士兵" />
+  <string id="taom_race_ability_swarm" text="蜂擁" />
+  <string id="taom_race_ability_scurry" text="疾竄" />
+  <string id="taom_race_ability_iron_discipline" text="鐵血紀律" />
+  <string id="taom_race_ability_hunters_rush" text="獵手突進" />
+  <string id="taom_race_ability_necromancer_shadow" text="死靈法師的陰影" />
+  <string id="taom_race_ability_citadel_guard" text="城堡衛士" />
+  <string id="taom_race_ability_forth_eorlingas" text="前進吧，伊歐的子孫" />
+  <string id="taom_race_ability_bards_aim" text="巴德的準星" />
+  <string id="taom_race_ability_hillclan_fury" text="山丘氏族之怒" />
+  <string id="taom_race_ability_serpent_venom" text="毒蛇之毒" />
+  <string id="taom_race_ability_wainrider_wall" text="戰車民之牆" />
+  <string id="taom_race_ability_corsair_raid" text="海盜劫掠" />
+  <string id="taom_race_ability_variag_ferocity" text="瓦里亞格之兇猛" />
+  <string id="taom_race_ability_shadow_servants" text="黑影的僕從" />
+  <string id="taom_shader_notice_title_total" text="正在編譯著色器：{COUNT}／約 {TOTAL}" />
+  <string id="taom_shader_notice_title_count" text="正在編譯著色器：{COUNT}" />
+  <string id="taom_shader_notice_detail" text="由於模組列表或遊戲有所變更，遊戲正在重建著色器。遊戲並未當機。" />
+  <string id="taom_mission_start_guard_notice" text="{MODULE} 在 {CALL} 中失敗（{EXCEPTION}）。任務將繼續進行，該步驟已被中止。" />
+  <string id="taom_skeleton_buffer_warning" text="此任務使用了引擎骨架緩衝區的 {PERCENT}％，一旦填滿遊戲將永久當機。請調低戰鬥規模。" />
+  <string id="taom_oob_assign_heroes" text="分配英雄" />
+  <string id="taom_oob_no_screen" text="未偵測到戰鬥序列畫面。" />
+  <string id="taom_oob_preset_save_option" text="將目前編制儲存為預設" />
+  <string id="taom_oob_preset_load_option" text="載入：{NAME}" />
+  <string id="taom_oob_preset_delete_option" text="刪除：{NAME}" />
+  <string id="taom_oob_presets_title" text="陣型預設" />
+  <string id="taom_oob_presets_description" text="儲存、載入或刪除陣型類型、隊長與英雄部隊的編制配置。" />
+  <string id="taom_oob_preset_deleted" text="已刪除預設「{NAME}」。" />
+  <string id="taom_oob_preset_not_general" text="只有本場戰鬥的主帥才能使用預設。" />
+  <string id="taom_oob_preset_loaded" text="已載入預設「{NAME}」。陣型類型：{CLASSES}，隊長：{CAPTAINS}，英雄部隊：{TROOPS}。" />
+  <string id="taom_oob_preset_skipped" text="不適用於本場戰鬥的已存配置：{COUNT}。" />
+  <string id="taom_oob_preset_save_title" text="儲存陣型預設" />
+  <string id="taom_oob_preset_save_prompt" text="請為此預設輸入名稱：" />
+  <string id="taom_oob_preset_save_button" text="儲存" />
+  <string id="taom_oob_preset_name_empty" text="預設名稱不可為空。" />
+  <string id="taom_oob_preset_saved" text="已儲存預設「{NAME}」。陣型類型：{CLASSES}，隊長：{CAPTAINS}，英雄部隊：{TROOPS}。" />
+  <string id="taom_oob_preset_limit" text="已達預設數量上限。請先刪除一個再儲存。" />
+  <string id="taom_oob_preset_name_in_use" text="名為「{NAME}」的預設已存在。" />
+  <string id="taom_oob_preset_save_failed" text="無法儲存此預設。" />
+  <string id="taom_oob_presets_button_count" text="預設（{COUNT}）" />
+  <string id="taom_oob_presets_button" text="預設" />
+  <string id="taom_fief_nav_disabled" text="領地管理已在模組選項中關閉。" />
+  <string id="taom_fief_nav_busy" text="目前無法開啟領地中樞。" />
   <string id="taom_career_lock_fork" text="You took another choice on this path." />
   <string id="taom_career_lock_keystone" text="You took another keystone in this tier." />
   <string id="taom_career_lock_points" text="No free career points." />

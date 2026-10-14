@@ -30,5 +30,54 @@
     <string id="taom_wotr_victory_free" text="Der Krieg ist vorüber. Die Freien Völker haben standgehalten und die Zukunft für ihre Kinder gewonnen. Es lebe die Freiheit!" />
     <string id="taom_wotr_victory_evil" text="Die Reiche der Menschen und Elben wurden gleichermaßen zermalmt. Lang lebe Sauron!" />
     <string id="taom_wotr_continue" text="Fortsetzen" />
+    <string id="taom_wotr_chronicle_events" text="Chronikereignisse" />
+    <string id="taom_wc_siege_lost" text="{TARGET} wechselt den Besitzer, ehe die Schlacht entschieden werden kann." />
+    <string id="taom_wc_fellowship_title" text="Die Gefährten brechen auf" />
+    <string id="taom_wc_fellowship_occurred" text="Neun Wanderer verlassen heimlich Bruchtal und tragen den Einen Ring nach Süden. Das Haus Elronds sammelt seine Kraft." />
+    <string id="taom_wc_khazaddum_title" text="Die Brücke von Khazad-dûm" />
+    <string id="taom_wc_khazaddum_occurred" text="In den Tiefen Morias stürzt der Graue Pilger mit dem Balrog. Die Orks des Nebelgebirges schwärmen aus, und die Freien Völker trauern." />
+    <string id="taom_wc_breaking_title" text="Der Zerfall der Gemeinschaft" />
+    <string id="taom_wc_breaking_occurred" text="Bei Parth Galen fallen die Uruk-hai über die Gefährten her. Boromir stirbt bei der Verteidigung der Hobbits, und Gondor verliert seinen Erben." />
+    <string id="taom_wc_theoden_title" text="König Théoden" />
+    <string id="taom_wc_theoden_occurred" text="Befreit vom Rat Schlangenzunges greift Théoden zu seinem Schwert. Die Mark sammelt sich um ihren König." />
+    <string id="taom_wc_hornburg_title" text="Die Schlacht um die Hornburg" />
+    <string id="taom_wc_hornburg_open" text="Das Heer Isengarts und die Bergleute von Dunland marschieren auf {TARGET}. Die Schlacht muss binnen {DAYS} Tagen entschieden werden." />
+    <string id="taom_wc_hornburg_lapsed" text="Kein Angriff erreicht {TARGET}. Das Aufgebot Isengarts wendet sich anderswohin." />
+    <string id="taom_wc_hornburg_held" text="Die Hornburg hält die Nacht hindurch stand, und das Heer Isengarts zerbricht an ihren Mauern." />
+    <string id="taom_wc_hornburg_fell" text="{TARGET} fällt, und die Weiße Hand beherrscht die Westfalte." />
+    <string id="taom_wc_ents_title" text="Der letzte Marsch der Ents" />
+    <string id="taom_wc_ents_occurred" text="Die Ents von Fangorn kommen über Isengart und ertränken die Gruben Sarumans. Die Schmieden der Weißen Hand verstummen." />
+    <string id="taom_wc_lorien_title" text="Lothlórien bedrängt" />
+    <string id="taom_wc_lorien_open" text="Aus Dol Guldur greift der Schatten den Goldenen Wald an. {TARGET} muss {DAYS} Tage standhalten." />
+    <string id="taom_wc_lorien_lapsed" text="Die Heere von Dol Guldur erreichen {TARGET} niemals." />
+    <string id="taom_wc_lorien_held" text="Die Macht der Herrin hält stand, und die Heere von Dol Guldur weichen aus dem Goldenen Wald zurück." />
+    <string id="taom_wc_lorien_fell" text="{TARGET} brennt, und das Licht Lothlóriens schwindet." />
+    <string id="taom_wc_osgiliath_title" text="Der Fall von Osgiliath" />
+    <string id="taom_wc_osgiliath_open" text="Das Heer von Morgul überquert den Anduin auf {TARGET} zu. Gondor muss die zerstörte Stadt {DAYS} Tage halten." />
+    <string id="taom_wc_osgiliath_lapsed" text="Mordor zieht nicht gegen {TARGET}, und der Strom bleibt still." />
+    <string id="taom_wc_osgiliath_held" text="Faramir hält die Übergänge des Anduin, und das Heer von Morgul zieht sich zurück." />
+    <string id="taom_wc_osgiliath_fell" text="{TARGET} fällt, und der Weg nach Minas Tirith liegt offen." />
+    <string id="taom_wc_dale_title" text="Die Schlacht von Thal" />
+    <string id="taom_wc_dale_open" text="Ostlinge und die Diener von Dol Guldur marschieren gegen das Reich von Thal. {TARGET} muss {DAYS} Tage standhalten." />
+    <string id="taom_wc_dale_lapsed" text="Die Ostlinge wenden sich ab, und {TARGET} bleibt verschont." />
+    <string id="taom_wc_dale_held" text="Menschen von Thal und Zwerge aus Erebor stehen gemeinsam, und das Heer der Ostlinge wird zurückgeworfen." />
+    <string id="taom_wc_dale_fell" text="{TARGET} fällt an die Ostlinge, und die Zwerge des Erebor ziehen aus, um ihren Freunden beizustehen." />
+    <string id="taom_wc_corsairs_title" text="Die Korsaren von Umbar" />
+    <string id="taom_wc_corsairs_open" text="Die schwarzen Segel von Umbar fahren den Anduin hinauf nach {TARGET}. Gondor muss den Hafen {DAYS} Tage lang halten." />
+    <string id="taom_wc_corsairs_lapsed" text="Die Korsaren verweilen auf See, und {TARGET} bleibt in Frieden." />
+    <string id="taom_wc_corsairs_held" text="Die Flotten von Umbar werden von {TARGET} vertrieben, und die südlichen Lehen Gondors fassen neuen Mut." />
+    <string id="taom_wc_corsairs_fell" text="Die Korsaren nehmen {TARGET} ein, und ihre Schiffe beherrschen den Strom." />
+    <string id="taom_wc_north_title" text="Krieg im Norden" />
+    <string id="taom_wc_north_open" text="Orks von Gundabad und die Bergleute von Dunland fallen über den Norden her. {TARGET} muss {DAYS} Tage lang standhalten." />
+    <string id="taom_wc_north_lapsed" text="Der Krieg im Norden zieht an {TARGET} vorüber." />
+    <string id="taom_wc_north_held" text="Die Waldläufer und die Männer von Arthedain halten {TARGET}, und der Norden bleibt frei." />
+    <string id="taom_wc_north_fell" text="{TARGET} fällt, und der Schatten breitet sich über Eriador aus." />
+    <string id="taom_wc_gondor_title" text="Die Belagerung Gondors" />
+    <string id="taom_wc_gondor_open" text="Der Herr der Nazgûl führt die Heerscharen Mordors gegen {TARGET}. Die Stadt muss {DAYS} Tage lang standhalten." />
+    <string id="taom_wc_gondor_lapsed" text="Das große Heer Mordors hält sich zurück, und {TARGET} harrt unter verdunkeltem Himmel." />
+    <string id="taom_wc_gondor_held" text="Die Rohirrim kommen im Morgengrauen, und die Belagerung von {TARGET} wird auf den Pelennor-Feldern gebrochen." />
+    <string id="taom_wc_gondor_fell" text="Die Tore von {TARGET} sind zerbrochen, und die Weiße Stadt fällt an Mordor." />
+    <string id="taom_wc_blackgate_title" text="Das Schwarze Tor öffnet sich" />
+    <string id="taom_wc_blackgate_occurred" text="Die Hauptleute des Westens ziehen zum Morannon, um das Auge vom Ringträger abzulenken. Das Schicksal des Krieges ruht nun auf dem Ring." />
   </strings>
 </base>

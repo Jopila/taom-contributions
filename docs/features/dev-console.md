@@ -176,7 +176,7 @@ appears **zero times**.
 | Case | `^[a-z][a-z0-9_]*$` |
 | Order | `<verb>_<object>[_of_<owner>\|_to_<target>]`, matching vanilla |
 | Read-only verb | **`print_` by default.** `audit_` is the single admitted alternative, for a command that returns a verdict plus a computed replacement value rather than printing current state (`audit_settlement_entrances`). `dump_`, `list_`, `get_` stay banned — they are pure synonyms for `print_`, and admitting synonyms is how the convention drifts |
-| Mutating verbs | `add_ set_ remove_ clear_ give_ toggle_ spawn_ damage_ requeue_` |
+| Mutating verbs | `add_ set_ remove_ clear_ give_ toggle_ spawn_ damage_ requeue_ start_` (`start_` begins a timed process that may re-task an existing party rather than spawn one, `taom.start_eye_hunt`; `spawn_` would misname the re-task) |
 | `show_` / `hide_` | Reserved for genuine visibility toggles, as in `campaign.show_settlements` |
 | Redundancy | Never put `taom` in the name; the group carries it |
 | Mirroring vanilla | Encouraged — `taom.add_special_resources` deliberately echoes `campaign.add_gold_to_hero` |
@@ -184,8 +184,9 @@ appears **zero times**.
 `print_` also sorts adjacent to `campaign.print_*` in console autocomplete, which is a real
 discoverability win.
 
-`ConsoleCommandBindingTests` enforces the ban list literally — `dump_`, `list_`, `get_` — not the
-`print_`-first rule, so any other new read-only verb compiles and passes the suite. It has to be
+`ConsoleCommandBindingTests` enforces the ban list on every `_`-separated token of a name, so `dump`,
+`list` and `get` fail anywhere in it (`war_ledger_dump` as much as `dump_war_ledger`), but it does not
+enforce the `print_`-first rule, so any other new read-only verb compiles and passes the suite. It has to be
 argued into the table above first; that argument is the only gate there is.
 
 ### Risk tiers — apply ceremony only where it is earned
@@ -292,6 +293,12 @@ answer is conclusive and fails open in every path.
 | `taom.add_special_resources [amount]` | B | campaign | — (see [special-resources.md](special-resources.md)) |
 | `taom.print_special_resources` | A | campaign | Read-only balance/cap/tier plus the daily breakdown (income with town count, one upkeep line per troop type, net) since 2026-09-11. **Not** `GrantAmount(…, 0f)` — that clamps and writes back |
 | `taom.print_momentum [keys]` | A | campaign | ~50 in-game days of play to reach the 32 KB save-corruption threshold |
+| `taom.war_effects` | A | campaign | Nothing else shows the War Chronicle registry: every active timed effect with its time left, plus each affected kingdom's volunteer and escape multiplier with the MCM strength applied. See [war-chronicle.md](war-chronicle.md) |
+| `taom.war_effect_add <kingdomId> <VolunteerRate\|PrisonerEscape> <magnitude> <days>` | B | campaign | Hand-editing a save. Adds a timed effect from source `console` (magnitude -1 to 1, days above 0 up to 365, kingdom must exist), echoes the multiplier before and after; run it again to refresh. Refused on a BannerlordCoop client |
+| `taom.rally_status` | A | campaign | Per kingdom: fortification points, baseline, share lost, stored rally tier (0 to 2) and eligibility, plus whether the rally is on. Reads the tier the last daily tick left |
+| `taom.print_war_ledger` | A | campaign | Waiting a day for the log. Prints the `[WarLedger]` lines the daily tick would write now; logs and changes nothing |
+| `taom.chronicle_status` | A | campaign | Nothing else shows the War Chronicle's event chain: every event with its state (Pending, Active, Occurred, Held, Fell, Lapsed, Skipped), its open, close or resolution day, whether an Active siege was assaulted, and the army focus the open windows set. See [war-chronicle.md](war-chronicle.md) |
+| `taom.chronicle_open <id>` | B | campaign | Waiting for an event's day. Opens a Pending chronicle event now, still checking its preconditions (a siege needs the Full War, the target held by the defender and a war with an attacker); a failed check leaves it Pending and says why. Refused on a co-op client |
 | `taom.print_party_size` | A | campaign | The #337 weight-deflation chain, invisible in-game. Distinguishes a light party from a degenerate base limit, and since #545 prints the ENFORCED frame (`raw/deflated`) beside the DISPLAYED one (`weighted/true-base`) so the two can be compared in one line |
 | `taom.print_town_economy [town]` | A | campaign | A 4–8 in-game-day observation for #317, plus the vanilla side-by-side that answers "is the buff doing anything" |
 | `taom.print_town_ledger [town]` | A | campaign | Where the town's gold actually went, by day and by flow. **No engine code logs a gold movement at all** — the alternative is inferring the drain from a balance that changes once a day. See [economy-diagnostics.md](economy-diagnostics.md) |
@@ -308,6 +315,10 @@ answer is conclusive and fails open in every path.
 | `taom.print_player_state` | A | campaign | Nothing. The engine holds "who is the player" in four places updated by different code (`Hero.MainHero`, `Clan.PlayerClan`, `MobileParty.MainParty`, `Game.Current.PlayerTroop`), and a Player Switcher takeover repoints the player at an existing lord then deletes the throwaway creation hero and clan. A link left pointing at a deleted object throws nowhere the TAOM log can see, so the only symptom is that things resolving the player quietly misbehave. Reports every disagreeing link, not just the first |
 | `taom.print_stuck_battles` | A | campaign | Nothing: an AI battle with one side at 0 healthy troops, or a destroyed party still attached, never ends and never logs. Every live map event with its healthy counts, age, attached destroyed parties and the [stuck-battle](map-event-guard.md#stuck-ai-battles) verdict. In a co-op session it says first that the hourly sweep is standing down; an event that cannot be read is left out (#748) |
 | `taom.print_battle_scene` | A | campaign | Which battle terrain a fight here loads. **Zero candidates is the money output** — the stale-scene-ref class an engine bump introduces silently |
+| `taom.print_eye_of_sauron` | A | campaign | Nothing: the [Eye of Sauron](eye-of-sauron.md) scores decay unseen and a hunt runs off-screen. Scores, threshold, cooldown, the player's kingdom and side, and the hunter, party, live pin and engage state, day, in-sight state and last hourly step |
+| `taom.add_eye_score <evil\|free> <n>` | B | campaign | Winning battles until the score crosses the threshold. Reversible with a negative amount; between -1000 and 1000; never below zero |
+| `taom.start_eye_hunt [confirm]` | C | campaign | The same, plus the cooldown. Dry run without `confirm` (who rides, re-task or spawn, a governorship given up, the top-up). Ignores the score and the cooldown; the switch, single-player, kingdom and war gates still hold. The party, its troops and grain, and a lost governorship persist after `taom.clear_eye_hunt` |
+| `taom.clear_eye_hunt` | B | campaign | Waiting out a hunt. Releases the hunter's AI pin and starts the cooldown; a spawned hunter stays as an ordinary lord party |
 | `taom.audit_settlement_entrances` | A | campaign | Nothing — an unreachable settlement entrance never crashes and never logs, it only makes AI parties fail their path query every tick. Three were caught in the field solely because the testers had written their own pathfinding instrumentation. See below |
 | `taom.print_mission_scene` | A | mission | Scene name + player/camera position |
 | `taom.print_hud_layout [maxNodes] [layerNameFilter]` | A | cheat mode | Widget-tree dump with real on-screen rectangles (`Logs/taom_hud_layout.log`, bounded, collapsed-tree warning). Ported from the career-UX reference module's diagnostic, whose dumps found three UI bugs code reading did not (#384). Walks `ScreenManager.SortedLayers`, so **global** layers are included: a top-screen-only walk cannot see `Tooltip` or `MapBar` at all. Those two sort last, so pass a filter (`taom.print_hud_layout Tooltip`) rather than risking truncation before reaching them. A layer with no widget tree is reported rather than skipped, distinguishing a null `UIContext` from a null `Root`: that is what an unloaded movie looks like, and it is a finding, not noise |

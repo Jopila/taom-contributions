@@ -578,3 +578,17 @@ engine folds into raid and extortion events.
   twice for one event (#790), so a payout keyed on an event checks a state the engine sets once (here
   `MapEvent.IsFinalized`), not a field the payout remembers, which a save and load would reset.
 - **Source:** `docs/reviews/rca-career-e1e3-2026-10-08.md` (#770, #774).
+
+### A resume path must reuse the start path's availability checks (2026-10-14)
+The Eye of Sauron hunt's stand-off (the player rides in another lord's army) released the hunter and re-pinned
+him an hour after the player left. The start path refused a hunter in an army, a battle, a siege or a town, or
+under another order; the resume path checked only for a map event, so a hunter whose own AI led or joined an army
+meanwhile was claimed and recorded as hunting while attached (vanilla attached members skip path movement and
+the speed model). The save-load side repeated it: a stand-off save loaded into co-op released a pin the hunt no
+longer owned.
+- **Why missed:** the decision that added the second way into the state (resume) was tested from the player's
+  side only, and the hunter's side was assumed to be as the stand-off left it.
+- **Prevent:** a path that re-enters a state calls the same availability check as the path that first enters it,
+  one method, not a copy. A release reads the live engine flag (the pin) before acting, not a flag the feature
+  set earlier. After a maintainer decision adds a transition, re-run the lens that reads state transitions.
+- **Source:** `docs/reviews/rca-eye-of-sauron-2026-10-14.md` F1 and F3 (Codex), fixed in `2d17ceba3`.

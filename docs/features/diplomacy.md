@@ -54,11 +54,12 @@ DiplomacyBehavior --> IDiplomacyService.EstablishInitialAlliances
                                |
                          IAllianceAdapter (StartAlliance, AreAllied)
 
-CampaignEvents.DailyTickEvent
+CampaignEvents.DailyTickEvent, CampaignEvents.OnSessionLaunchedEvent (host only)
         |
-WarOfTheRingBehavior --> IWarOfTheRingService.CheckPhaseTransition
+WarOfTheRingBehavior --> IWarOfTheRingService.CheckPhaseTransition (both events)
+                     --> IWarOfTheRingService.ReconcileDeclaredWars (session launch only, runs only in FullWar, idempotent, #772)
                                   |
-                            IAllianceAdapter (DeclareWar, AreAtWar)
+                            IAllianceAdapter (HasDeclaredWar, DeclareWar, GetAllKingdomIds)
                             IDiplomacyService.GetRelationshipTier
 
 Harmony Patch11_Diplomacy
@@ -180,7 +181,7 @@ Phase 1 (Isengard and Dunland attack Rohan) triggers on day 30; Phase 2 (the ful
 |------|---------|
 | `Main/Features/Diplomacy/DiplomacyIoC.cs` | DryIoc registrations and static `InitializeHooks` wiring |
 | `Main/Features/Diplomacy/DiplomacyBehavior.cs` | `CampaignBehaviorBase`: establishes/enforces permanent alliances on new game and session load |
-| `Main/Features/Diplomacy/WarOfTheRingBehavior.cs` | `CampaignBehaviorBase`: daily tick drives phase transition checks |
+| `Main/Features/Diplomacy/WarOfTheRingBehavior.cs` | `CampaignBehaviorBase`: daily tick drives phase transition checks; its constructor resets the process-lifetime service for each campaign (#764) |
 | `Main/Features/Diplomacy/PlayerAllianceProposalBehavior.cs` | `CampaignBehaviorBase`: conversation dialog letting a player kingdom-ruler initiate an alliance with another ruler |
 | `Main/Features/Diplomacy/IDiplomacyService.cs` | Service interface: tier lookup, score modifier, alliance enforcement, player-freedom overloads + proposal methods |
 | `Main/Features/Diplomacy/DiplomacyService.cs` | Implementation: loads config, computes scores, enforces alliances, player-freedom score/permission + `CanPlayerProposeAlliance`/`FormPlayerAlliance` |
@@ -216,7 +217,7 @@ Phase 1 (Isengard and Dunland attack Rohan) triggers on day 30; Phase 2 (the ful
 | `Main/_Module/ModuleData/diplomacy/war_of_the_ring.json` | War of the Ring phase config |
 
 ## Dependencies
-- `IAllianceAdapter` — wraps `AllianceCampaignBehavior`, `StanceLink`, `Kingdom` (sealed TaleWorlds types); provides `AreAllied`, `StartAlliance`, `AreAtWar`, `DeclareWar`, `MakePeace`, `GetAllKingdomIds`
+- `IAllianceAdapter`: wraps `AllianceCampaignBehavior`, `StanceLink`, `Kingdom` (sealed TaleWorlds types); provides `AreAllied`, `StartAlliance`, `AreAtWar`, `HasDeclaredWar` (reads the stored stance link, ignoring `IsAtConstantWar` and the shallow stance), `DeclareWar`, `MakePeace`, `GetAllKingdomIds`, `GetKingdomCultureId`
 - `IDiplomacyConfigProvider` — loads diplomacy.json
 - `IWarOfTheRingConfigProvider` — loads war_of_the_ring.json
 - `ITaomSettingsProvider` — wraps `TaomSettings` MCM

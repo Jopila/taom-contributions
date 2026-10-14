@@ -102,9 +102,13 @@ Settings live on a dedicated MCM page **TAOM — Crash Report** (separate from t
 | Master | Enable Crash Capture | true | Master toggle. When off, the AppDomain hook does nothing, and every Patch37 finalizer hands exceptions back uncaptured, with the throw site recorded (`RethrowStackPreserver`), so Harmony's rethrow keeps it with or without PatchShield. A later finalizer on the same method, such as ButterLib's BetterExceptionWindow finalizer on four of the Patch37 targets, then sees the exception without its live frames. Live: the patches are always installed. |
 | Master | Suspend BUTR Exception Handler | true | On first capture, calls ButterLib's `Disable()`. |
 | Master | Enable Native-to-Managed Capture | true | When off, the allowlisted callback-shim finalizers hand exceptions back uncaptured, with the throw site recorded (`RethrowStackPreserver`). Live: the shims are always patched. |
+| Master | Survive Mission Start Failures | true | A behaviour, submodule or mission object that throws while a battle starts is logged, its call is cut short, and the battle starts, instead of the engine loading the mission again ([mission-start-guard.md](mission-start-guard.md), Patch103). Independent of Enable Crash Capture: turning capture off does not bring the endless reload back. Live: read when an exception arrives. |
+| Master | Skeleton Buffer Guard | true | Bounds-checks both of the engine's per-frame skeleton pools, so a crowded battle no longer freezes when either of them fills (the engine has more unbounded per-frame pools, which are not guarded: [skeleton-buffer-guard.md](skeleton-buffer-guard.md)). Restart: installed once at the first main menu. |
+| Master | Skeleton Buffer Watch | true | Logs each mission's peak fill of both skeleton pools ([skeleton-buffer-guard.md](skeleton-buffer-guard.md)). Live: read at each mission start. |
 | Bundle | Write Crash Bundle ZIP | true | Produces `Logs/taom_crash_*.zip`. Set false if you only want the log line. |
 | QA — Dev Triggers | Throw On Next Mission Tick | false | Throws `TaomDevTriggerException` on the next `MissionLogic.OnMissionTick`. Auto-resets. |
 | QA — Dev Triggers | Throw On Next Application Tick | false | Throws `TaomDevTriggerException` on the next `Module.OnApplicationTick`. Auto-resets. Works on the main menu (no mission needed). |
+| `QA — Dev Triggers` | Throw On Next Mission AfterStart | false | Throws `TaomDevTriggerException` from a TAOM behaviour's `AfterStart` on the next mission start (#699's shape). Auto-resets before it throws. With "Survive Mission Start Failures" on, the battle starts and one message shows; with it off, the throw escapes once, TAOM's crash capture writes a bundle and shows its crash dialog, and the engine loads the mission again. Needs Enable Crash Capture on. |
 
 ## Data captured (sections in `report.txt`)
 
@@ -293,13 +297,13 @@ No restart is needed before TAOM's first capture of the session: TAOM's finalize
 
   | Callback (`CoreCallbacksGenerated`) | Managed target (v1.5.3) | TAOM code reached |
   |---|---|---|
-  | `Mission_MeleeHitCallback` | `Mission.MeleeHitCallback` | `OnMeleeHit` (`SignatureStrikesMissionLogic`); `TaomCombatMechanicsModel.DecideWeaponCollisionReaction` (campaign); `RegisterBlow` into `Agent.HandleBlow`: `Mission.OnAgentHit` (`BehaviorTreeMissionLogic.OnAgentHit`, `CareerPerkMissionBehavior.OnScoreHit`), `Agent.Die` and `Agent.HandleBlowAux` (BlowDiagnostics and Spider patches) |
+  | `Mission_MeleeHitCallback` | `Mission.MeleeHitCallback` | `OnMeleeHit` (`SignatureStrikesMissionLogic`); `TaomCombatMechanicsModel.DecideWeaponCollisionReaction` (campaign) and `TaomCustomBattleDamageModel.DecideWeaponCollisionReaction` (Custom Battle); `RegisterBlow` into `Agent.HandleBlow`: `Mission.OnAgentHit` (`BehaviorTreeMissionLogic.OnAgentHit`, `CareerPerkMissionBehavior.OnScoreHit`), `Agent.Die` and `Agent.HandleBlowAux` (BlowDiagnostics and Spider patches) |
   | `Mission_MissileHitCallback` | `Mission.MissileHitCallback` | the same `RegisterBlow` chain |
   | `Mission_ChargeDamageCallback` | `Mission.ChargeDamageCallback` | the same `RegisterBlow` chain |
   | `Mission_FallDamageCallback` | `Mission.FallDamageCallback` | the same `RegisterBlow` chain |
   | `Mission_MissileAreaDamageCallback` | `Mission.MissileAreaDamageCallback` | the same `RegisterBlow` chain |
   | `Mission_OnAgentHitBlocked` | `Mission.OnAgentHitBlocked` | `Mission.OnAgentHit`: `BehaviorTreeMissionLogic.OnAgentHit`, `CareerPerkMissionBehavior.OnScoreHit` |
-  | `Mission_GetDefendCollisionResults` | `Mission.GetDefendCollisionResults` | `MissionCombatMechanicsHelper.GetDefendCollisionResults`: `TaomCombatMechanicsModel.DecideCrushedThrough` (campaign) |
+  | `Mission_GetDefendCollisionResults` | `Mission.GetDefendCollisionResults` | `MissionCombatMechanicsHelper.GetDefendCollisionResults`: `TaomCombatMechanicsModel.DecideCrushedThrough` (campaign) and `TaomCustomBattleDamageModel.DecideCrushedThrough` (Custom Battle) |
   | `Mission_OnAgentRemoved` | `Mission.OnAgentRemoved` | `OnAgentRemoved` in `BehaviorTreeMissionLogic`, `CareerPerkMissionBehavior`, `EnlistmentMeritMissionBehavior`, `FieldCommissionMissionLogic`, `MountDespawnMissionBehavior`; `Agent.OnRemove` into `BehaviorTreeAgentComponent.OnAgentRemoved` |
   | `Mission_OnAgentDeleted` | `Mission.OnAgentDeleted` | `OnAgentDeleted` in `BehaviorTreeMissionLogic`, `AdvancedCombatBehavior`, `CareerPerkMissionBehavior`, `MixedFormationsMissionBehavior`, `MountDespawnMissionBehavior`, `SignatureStrikesMissionLogic` |
   | `Mission_OnAgentShootMissile` | `Mission.OnAgentShootMissile` | `OnAgentShootMissile` in `BehaviorTreeMissionLogic`, `ElephantMissionBehavior` |

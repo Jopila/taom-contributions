@@ -1799,19 +1799,19 @@
     <string id="aom_umbar_male_name_8" text="Rohzar" />
     <string id="aom_umbar_male_name_9" text="Nazrin" />
     <string id="aom_umbar_name" text="Umbar" />
-    <string id="aom_arthedain_clan_1" text="House of Amlaith" />
-    <string id="aom_arthedain_clan_10" text="House of Deadmen's Dike" />
-    <string id="aom_arthedain_clan_11" text="House of the Weather Hills" />
-    <string id="aom_arthedain_clan_12" text="House of Nenuial" />
-    <string id="aom_arthedain_clan_2" text="House of Fornost" />
-    <string id="aom_arthedain_clan_3" text="House of Annúminas" />
-    <string id="aom_arthedain_clan_4" text="House of Amon Sûl" />
-    <string id="aom_arthedain_clan_5" text="House of the North Downs" />
-    <string id="aom_arthedain_clan_6" text="House of Evendim" />
-    <string id="aom_arthedain_clan_7" text="House of the Baranduin" />
-    <string id="aom_arthedain_clan_8" text="House of the Angle" />
-    <string id="aom_arthedain_clan_9" text="House of Bree" />
-    <string id="aom_arthedain_desc" text="The Dúnedain of Arthedain are the last heirs of Arnor, the North-kingdom Elendil founded. From Fornost upon the North Downs the line of Arvedui still keeps the watch that Isildur's heirs have kept for a thousand years, though their towns are few, their lords are poor and the shadow of Angmar never leaves the hills. They are fewer than their southern kin and prouder than their numbers warrant, and every season the wild lands press closer." />
+    <string id="aom_arthedain_clan_1" text="Amlaith Hanedanı" />
+    <string id="aom_arthedain_clan_10" text="Ölüler Hendeği Hanedanı" />
+    <string id="aom_arthedain_clan_11" text="Hava Tepeleri Hanedanı" />
+    <string id="aom_arthedain_clan_12" text="Nenuial Hanedanı" />
+    <string id="aom_arthedain_clan_2" text="Fornost Hanedanı" />
+    <string id="aom_arthedain_clan_3" text="Annúminas Hanedanı" />
+    <string id="aom_arthedain_clan_4" text="Amon Sûl Hanedanı" />
+    <string id="aom_arthedain_clan_5" text="Kuzey Yaylaları Hanedanı" />
+    <string id="aom_arthedain_clan_6" text="Evendim Hanedanı" />
+    <string id="aom_arthedain_clan_7" text="Baranduin Hanedanı" />
+    <string id="aom_arthedain_clan_8" text="Angle Hanedanı" />
+    <string id="aom_arthedain_clan_9" text="Bree Hanedanı" />
+    <string id="aom_arthedain_desc" text="Arthedain Dúnedain'i, Elendil'in kurduğu Kuzey Krallığı Arnor'un son varisleridir. Kuzey Yaylaları üzerindeki Fornost'tan Arvedui'nin soyu, Isildur'un mirasçılarının bin yıldır sürdürdüğü nöbeti hâlâ tutmaktadır; gerçi kasabaları azdır, lordları yoksuldur ve Angmar'ın gölgesi tepelerden hiç eksilmez. Güneydeki akrabalarından daha azdırlar ve sayılarının hak ettiğinden daha gururludurlar; her mevsim yabanıl topraklar biraz daha yaklaşır." />
     <string id="aom_arthedain_female_name_1" text="Gilraen" />
     <string id="aom_arthedain_female_name_10" text="Rhiannel" />
     <string id="aom_arthedain_female_name_11" text="Silivren" />

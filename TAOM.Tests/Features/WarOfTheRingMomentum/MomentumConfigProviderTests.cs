@@ -161,6 +161,28 @@ public class MomentumConfigProviderTests
         Assert.AreEqual(504, _sut.GetConfig().DurationsHours.BattleWon);
     }
 
+    [DataTestMethod]
+    [DataRow(0)]
+    [DataRow(100001)]
+    public void GetConfig_ChronicleDurationOutOfRange_RevertsToDefault(int hours)
+    {
+        WriteConfig(@"{ ""durationsHours"": { ""chronicle"": " + hours + " } }");
+
+        Assert.AreEqual(504, _sut.GetConfig().DurationsHours.Chronicle);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("durationsHours.chronicle")));
+    }
+
+    [TestMethod]
+    public void GetConfig_ChronicleDuration_IsReadAndUsedForTheChronicleType()
+    {
+        WriteConfig(@"{ ""durationsHours"": { ""chronicle"": 240 } }");
+
+        var config = _sut.GetConfig();
+
+        Assert.AreEqual(240, config.DurationsHours.Chronicle);
+        Assert.AreEqual(240, config.DurationsHours.GetHours(MomentumActionType.Chronicle));
+    }
+
     [TestMethod]
     public void GetConfig_ParticipationMultiplierBelowOne_RevertsToDefault()
     {

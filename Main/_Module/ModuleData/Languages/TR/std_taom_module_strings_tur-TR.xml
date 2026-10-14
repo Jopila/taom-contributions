@@ -1589,7 +1589,7 @@
     <string id="taom_faction_khudorom_of_khand_weakness_2" text="Paralı asker kaptanları paraya sadıktır, beye değil" />
     <string id="taom_faction_kingdom_of_angaladh_desc" text="Angaladh Krallığı." />
     <string id="taom_faction_kingdom_of_angaladh_name" text="Angaladh Krallığı" />
-    <string id="taom_faction_kingdom_of_arthedain_desc" text="The last of Arnor's three successor kingdoms, and the only one still standing. Arvedui's line holds Fornost upon the North Downs and its Rangers keep the roads of Eriador, but Angmar, Dunland and the orcs of Gundabad press on every border of a realm with too few swords." />
+    <string id="taom_faction_kingdom_of_arthedain_desc" text="Arnor'un üç ardıl krallığının sonuncusu ve hâlâ ayakta duran tek olanı. Arvedui'nin soyu Kuzey Tepeleri üzerindeki Fornost'u elinde tutar ve Kolcuları Eriador'un yollarını korur; ancak Angmar, Dunland ve Gundabad orkları, kılıcı çok az olan bu diyarın her sınırına baskı yapar." />
     <string id="taom_faction_kingdom_of_arthedain_name" text="Arthedain Krallığı" />
     <string id="taom_faction_kingdom_of_arthedain_trait_0" text="Arnor'un Sonuncusu" />
     <string id="taom_faction_kingdom_of_arthedain_trait_1" text="Annuminas Palantiri" />
@@ -2842,45 +2842,106 @@
   <string id="taom_bc_advice_keep" text="Benimkini koru" />
   <string id="taom_bc_advice_done" text="Savaş ayarları kaydedildi." />
   <string id="taom_bc_advice_failed" text="Savaş ayarları kaydedilemedi. Bunları Seçenekler, {PERFORMANCE} bölümünden elle ayarla." />
-  <string id="taom_str_faction_official.arthedain" text="a noble lord" />
-  <string id="taom_str_faction_official.arthedain_f" text="a noble lady" />
-  <string id="taom_str_faction_ruler.arthedain" text="King" />
-  <string id="taom_str_faction_ruler.arthedain_f" text="Queen" />
-  <string id="taom_str_faction_ruler_term_in_speech.arthedain" text="{?RULER.GENDER}the Queen{?}the King{\?} {RULER.NAME}" />
-  <string id="taom_str_faction_ruler_name_with_title.arthedain" text="{?RULER.GENDER}Queen{?}King{\?} {RULER.NAME}" />
-  <string id="taom_str_faction_noble_name_with_title.arthedain" text="{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_official.arthedain" text="soylu bir lord" />
+  <string id="taom_str_faction_official.arthedain_f" text="soylu bir leydi" />
+  <string id="taom_str_faction_ruler.arthedain" text="Kral" />
+  <string id="taom_str_faction_ruler.arthedain_f" text="Kraliçe" />
+  <string id="taom_str_faction_ruler_term_in_speech.arthedain" text="{?RULER.GENDER}Kraliçe{?}Kral{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_ruler_name_with_title.arthedain" text="{?RULER.GENDER}Kraliçe{?}Kral{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_noble_name_with_title.arthedain" text="{?RULER.GENDER}Leydi{?}Lord{\?} {RULER.NAME}" />
   <string id="taom_str_faction_formal_name_for_culture.arthedain" text="Arthedain" />
-  <string id="taom_str_faction_informal_name_for_culture.arthedain" text="the Dúnedain of the North" />
+  <string id="taom_str_faction_informal_name_for_culture.arthedain" text="Kuzeyin Dúnedainleri" />
   <string id="taom_str_neutral_term_for_culture.arthedain" text="Dúnedain" />
-  <string id="taom_str_culture_description.arthedain" text="The Dúnedain of Arthedain are the last heirs of Arnor, the North-kingdom Elendil founded. From Fornost upon the North Downs the line of Arvedui still keeps the watch that Isildur's heirs have kept for a thousand years, though their towns are few, their lords are poor and the shadow of Angmar never leaves the hills. They are fewer than their southern kin and prouder than their numbers warrant, and every season the wild lands press closer." />
-  <string id="taom_str_culture_rich_name.arthedain" text="Dúnedain of Arthedain" />
+  <string id="taom_str_culture_description.arthedain" text="Arthedain Dúnedainleri, Elendil'in kurduğu Kuzey Krallığı Arnor'un son mirasçılarıdır. Kuzey Tepeleri üzerindeki Fornost'tan, Arvedui'nin soyu Isildur'un varislerinin bin yıldır sürdürdüğü nöbeti hâlâ tutar; gerçi kasabaları azdır, lordları yoksuldur ve Angmar'ın gölgesi tepelerden hiç eksilmez. Güneydeki akrabalarından daha azdırlar ve sayılarının hak ettiğinden daha gururludurlar; her mevsim yabani topraklar biraz daha yaklaşır." />
+  <string id="taom_str_culture_rich_name.arthedain" text="Arthedain Dúnedainleri" />
   <string id="taom_str_adjective_for_culture.arthedain" text="Arthedain" />
   <string id="taom_str_player_father_name.arthedain" text="Aravir" />
   <string id="taom_str_player_mother_name.arthedain" text="Ivorwen" />
   <string id="taom_aso_kingdom.arthedain" text="Arthedain" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_0" text="+10% party speed on plains (Rangers' Roads)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_1" text="-20% garrison wage (Wardens of the Walls)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_2" text="+5 party morale (Dúnedain Resolve)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_3" text="+1 settlement loyalty per day (Line of Isildur)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_4" text="-15% village hearth growth (A Dwindling People)" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_0_desc" text="-20% garrison wage and +1 settlement loyalty per day." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_0_name" text="Wardens of the Walls" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_1_desc" text="+5 party morale. Few as they are, the Dúnedain do not break." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_1_name" text="Dúnedain Resolve" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_2_desc" text="+10% party speed on plains, where the Rangers keep the old roads open." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_2_name" text="Rangers' Roads" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_0" text="Fine Dúnedain archers and guards" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_1" text="Steadfast morale and loyal towns" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_2" text="Cheap garrisons behind old walls" />
-  <string id="taom_faction_kingdom_of_arthedain_su_0_desc" text="Two-handed elite guard of the King's citadel." />
-  <string id="taom_faction_kingdom_of_arthedain_su_0_name" text="King's Guard of Fornost" />
-  <string id="taom_faction_kingdom_of_arthedain_su_1_desc" text="Veteran Dúnedain scout-bowman of the North." />
-  <string id="taom_faction_kingdom_of_arthedain_su_1_name" text="Ranger Captain" />
-  <string id="taom_faction_kingdom_of_arthedain_su_2_desc" text="Sword-and-shield knight of the old blood." />
-  <string id="taom_faction_kingdom_of_arthedain_su_2_name" text="Knight of Arthedain" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_0" text="Few lords and small hosts" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_1" text="Poor lands that grow slowly" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="Ringed by Angmar, Dunland and Gundabad" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_0" text="Ovalarda %10 müfreze hızı (Kolcu Yolları)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_1" text="-%20 garnizon ücreti (Surların Muhafızları)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_2" text="+5 müfreze morali (Dúnedain Azmi)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_3" text="Günde +1 yerleşim sadakati (Isildur'un Soyu)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_4" text="-%15 köy ocak büyümesi (Azalan Bir Halk)" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_0_desc" text="-%20 garnizon ücreti ve günde +1 yerleşim sadakati." />
+  <string id="taom_faction_kingdom_of_arthedain_perk_0_name" text="Surların Muhafızları" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_1_desc" text="+5 müfreze morali. Sayıları az olsa da Dúnedain yılmaz." />
+  <string id="taom_faction_kingdom_of_arthedain_perk_1_name" text="Dúnedain Azmi" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_2_desc" text="Kolcuların eski yolları açık tuttuğu ovalarda %10 müfreze hızı." />
+  <string id="taom_faction_kingdom_of_arthedain_perk_2_name" text="Kolcu Yolları" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_0" text="Usta Dúnedain okçuları ve muhafızları" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_1" text="Sarsılmaz moral ve sadık şehirler" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_2" text="Eski surlar ardında ucuz garnizonlar" />
+  <string id="taom_faction_kingdom_of_arthedain_su_0_desc" text="Kralın kalesinin çift elli seçkin muhafızı." />
+  <string id="taom_faction_kingdom_of_arthedain_su_0_name" text="Fornost Kral Muhafızı" />
+  <string id="taom_faction_kingdom_of_arthedain_su_1_desc" text="Kuzey'in tecrübeli Dúnedain izci-okçusu." />
+  <string id="taom_faction_kingdom_of_arthedain_su_1_name" text="Kolcu Yüzbaşısı" />
+  <string id="taom_faction_kingdom_of_arthedain_su_2_desc" text="Eski kandan kılıç ve kalkan şövalyesi." />
+  <string id="taom_faction_kingdom_of_arthedain_su_2_name" text="Arthedain Şövalyesi" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_0" text="Az sayıda lord ve küçük ordular" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_1" text="Yavaş büyüyen yoksul topraklar" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="Angmar, Dunland ve Gundabad ile çevrili" />
+  <string id="taom_eye_hunt_free" text="Sauron'un Gözü sana döndü. {HUNTER} seni yok etmek için bir orduyla yola çıktı." />
+  <string id="taom_eye_hunt_evil" text="Elrond, seni devirmek için {HUNTER} ve bir Eldar ordusunu gönderdi." />
+  <string id="taom_eye_hunt_won" text="{HUNTER} yenildi. Av şimdilik sona erdi." />
+  <string id="taom_eye_hunt_over" text="Av şimdilik sona erdi." />
+  <string id="taom_tr_prize_advertised" text="{ITEM_NAME} (ilan edilen ödül)" />
+  <string id="taom_tr_prize_hint" text="Yaklaşık {VALUE} dinar değerinde." />
+  <string id="taom_tr_prize_title" text="Ödülünü Seç" />
+  <string id="taom_tr_prize_desc" text="Turnuva ustası ödüller arasında bir seçim sunuyor. Uğruna dövüşeceğin ödülü seç; kazanırsan senin olur." />
+  <string id="taom_tr_skill_title" text="Eğitimini Seç" />
+  <string id="taom_tr_skill_desc" text="Bu turnuvanın geliştireceği yeteneği seç. Kazandığın her turda o yetenekte tecrübe kazanırsın, turnuvayı kazanırsan daha fazlasını." />
+  <string id="taom_tr_skill_gained" text="Turnuva {SKILL_NAME} yeteneğini geliştirdi." />
+  <string id="taom_tr_choose" text="Seç" />
+  <string id="taom_tr_cancel" text="İptal" />
+  <string id="taom_race_ability_berserk" text="Cinnet" />
+  <string id="taom_race_ability_bloodlust" text="Kan Susuzluğu" />
+  <string id="taom_race_ability_stand_fast" text="Sıkı Durun" />
+  <string id="taom_race_ability_swiftness" text="Eldar'ın Çevikliği" />
+  <string id="taom_race_ability_wave_ally" text="{ABILITY}: Sizin tarafınızda {COUNT} asker" />
+  <string id="taom_race_ability_wave_enemy" text="Düşman {ABILITY}: {COUNT} asker" />
+  <string id="taom_race_ability_swarm" text="Sürü Akını" />
+  <string id="taom_race_ability_scurry" text="Seğirtme" />
+  <string id="taom_race_ability_iron_discipline" text="Demir Disiplin" />
+  <string id="taom_race_ability_hunters_rush" text="Avcının Hamlesi" />
+  <string id="taom_race_ability_necromancer_shadow" text="Nekromantik'in Gölgesi" />
+  <string id="taom_race_ability_citadel_guard" text="Kale Muhafızı" />
+  <string id="taom_race_ability_forth_eorlingas" text="İleri Eorlingalılar" />
+  <string id="taom_race_ability_bards_aim" text="Bard'ın Nişanı" />
+  <string id="taom_race_ability_hillclan_fury" text="Tepe Klanı Öfkesi" />
+  <string id="taom_race_ability_serpent_venom" text="Yılanın Zehri" />
+  <string id="taom_race_ability_wainrider_wall" text="Araba Sürücüleri Duvarı" />
+  <string id="taom_race_ability_corsair_raid" text="Korsan Baskını" />
+  <string id="taom_race_ability_variag_ferocity" text="Variag Vahşeti" />
+  <string id="taom_race_ability_shadow_servants" text="Gölgenin Hizmetkârları" />
+  <string id="taom_shader_notice_title_total" text="Gölgelendiriciler derleniyor: {TOTAL} kadarının {COUNT} tanesi" />
+  <string id="taom_shader_notice_title_count" text="Gölgelendiriciler derleniyor: {COUNT}" />
+  <string id="taom_shader_notice_detail" text="Oyun, mod listenizdeki ya da oyundaki bir değişiklik sonrası gölgelendiricilerini yeniden derliyor. Donmuş değil." />
+  <string id="taom_mission_start_guard_notice" text="{MODULE}, {CALL} içinde başarısız oldu ({EXCEPTION}). Görev devam ediyor, ancak o adım yarıda kesildi." />
+  <string id="taom_skeleton_buffer_warning" text="Bu görev, motorun iskelet tamponunun yüzde {PERCENT} kadarını kullanıyor ve tampon dolduğunda oyun kalıcı olarak donar. Savaş boyutunu düşürün." />
+  <string id="taom_oob_assign_heroes" text="Kahramanları Ata" />
+  <string id="taom_oob_no_screen" text="Savaş Düzeni ekranı tespit edilemedi." />
+  <string id="taom_oob_preset_save_option" text="Mevcut Düzeni Hazır Ayar Olarak Kaydet" />
+  <string id="taom_oob_preset_load_option" text="Yükle: {NAME}" />
+  <string id="taom_oob_preset_delete_option" text="Sil: {NAME}" />
+  <string id="taom_oob_presets_title" text="Birlik Düzeni Hazır Ayarları" />
+  <string id="taom_oob_presets_description" text="Birlik türleri, kumandanlar ve kahraman askerlerden oluşan bir düzeni kaydet, yükle veya sil." />
+  <string id="taom_oob_preset_deleted" text="&quot;{NAME}&quot; hazır ayarı silindi." />
+  <string id="taom_oob_preset_not_general" text="Hazır ayarları yalnızca bu savaşın komutanı kullanabilir." />
+  <string id="taom_oob_preset_loaded" text="&quot;{NAME}&quot; hazır ayarı yüklendi. Birlik türleri: {CLASSES}, kumandanlar: {CAPTAINS}, kahraman askerler: {TROOPS}." />
+  <string id="taom_oob_preset_skipped" text="Bu savaşa uymayan kayıtlı atamalar: {COUNT}." />
+  <string id="taom_oob_preset_save_title" text="Birlik Düzeni Hazır Ayarını Kaydet" />
+  <string id="taom_oob_preset_save_prompt" text="Bu hazır ayar için bir isim girin:" />
+  <string id="taom_oob_preset_save_button" text="Kaydet" />
+  <string id="taom_oob_preset_name_empty" text="Hazır ayar adı boş olamaz." />
+  <string id="taom_oob_preset_saved" text="&quot;{NAME}&quot; hazır ayarı kaydedildi. Birlik türleri: {CLASSES}, kumandanlar: {CAPTAINS}, kahraman askerler: {TROOPS}." />
+  <string id="taom_oob_preset_limit" text="Hazır ayar sınırına ulaşıldı. Kaydetmeden önce birini silin." />
+  <string id="taom_oob_preset_name_in_use" text="&quot;{NAME}&quot; adında bir hazır ayar zaten var." />
+  <string id="taom_oob_preset_save_failed" text="Hazır ayar kaydedilemedi." />
+  <string id="taom_oob_presets_button_count" text="Hazır Ayarlar ({COUNT})" />
+  <string id="taom_oob_presets_button" text="Hazır Ayarlar" />
+  <string id="taom_fief_nav_disabled" text="Tımar yönetimi mod seçeneklerinde kapalı." />
+  <string id="taom_fief_nav_busy" text="Tımar merkezi şu anda açılamıyor." />
   <string id="taom_career_lock_fork" text="You took another choice on this path." />
   <string id="taom_career_lock_keystone" text="You took another keystone in this tier." />
   <string id="taom_career_lock_points" text="No free career points." />

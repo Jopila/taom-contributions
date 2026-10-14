@@ -30,5 +30,54 @@
     <string id="taom_wotr_victory_free" text="Wojna się skończyła. Wolne Ludy przetrwały i wywalczyły przyszłość dla swoich dzieci. Niech żyje wolność!" />
     <string id="taom_wotr_victory_evil" text="Królestwa Ludzi i Elfów zostały zmiażdżone. Niech żyje Sauron!" />
     <string id="taom_wotr_continue" text="Kontynuuj" />
+    <string id="taom_wotr_chronicle_events" text="Wydarzenia Kroniki" />
+    <string id="taom_wc_siege_lost" text="{TARGET} zmienia właściciela, nim bitwa zdąży się rozstrzygnąć." />
+    <string id="taom_wc_fellowship_title" text="Drużyna wyrusza" />
+    <string id="taom_wc_fellowship_occurred" text="Dziewięciu wędrowców opuszcza potajemnie Rivendell, niosąc Jedyny Pierścień na południe. Dom Elronda gromadzi siły." />
+    <string id="taom_wc_khazaddum_title" text="Most Khazad-dûm" />
+    <string id="taom_wc_khazaddum_occurred" text="W głębiach Morii Szary Pielgrzym spada wraz z Balrogiem. Orkowie Gór Mglistych rozlewają się hordą, a Wolne Ludy pogrążają się w żałobie." />
+    <string id="taom_wc_breaking_title" text="Rozpad Drużyny" />
+    <string id="taom_wc_breaking_occurred" text="Pod Parth Galen Uruk-hai napadają na Kompanię. Boromir ginie, broniąc hobbitów, a Gondor traci swego dziedzica." />
+    <string id="taom_wc_theoden_title" text="Król Théoden" />
+    <string id="taom_wc_theoden_occurred" text="Uwolniony spod wpływu Gadziego Języka, Théoden chwyta za miecz. Rohan staje pod sztandarem swego króla." />
+    <string id="taom_wc_hornburg_title" text="Bitwa o Rogatą Twierdzę" />
+    <string id="taom_wc_hornburg_open" text="Zastępy Isengardu i Dunlendingowie z gór ciągną na {TARGET}. Bitwa musi zostać rozstrzygnięta w ciągu {DAYS} dni." />
+    <string id="taom_wc_hornburg_lapsed" text="Żaden szturm nie nadchodzi na {TARGET}. Zastępy Isengardu kierują się gdzie indziej." />
+    <string id="taom_wc_hornburg_held" text="Rogata Twierdza wytrzymuje przez noc, a wojsko Isengardu rozbija się o jej mury." />
+    <string id="taom_wc_hornburg_fell" text="{TARGET} pada, a Biała Dłoń włada Zachodnią Bruzdą." />
+    <string id="taom_wc_ents_title" text="Ostatni marsz Entów" />
+    <string id="taom_wc_ents_occurred" text="Entowie z Fangornu spadają na Isengard i zatapiają podziemia Sarumana. Kuźnie Białej Dłoni milkną." />
+    <string id="taom_wc_lorien_title" text="Atak na Lothlórien" />
+    <string id="taom_wc_lorien_open" text="Z Dol Guldur Cień naciera na Złoty Las. {TARGET} musi wytrwać {DAYS} dni." />
+    <string id="taom_wc_lorien_lapsed" text="Armie Dol Guldur nigdy nie docierają do {TARGET}." />
+    <string id="taom_wc_lorien_held" text="Moc Władczyni trwa, a zastępy Dol Guldur cofają się ze Złotego Lasu." />
+    <string id="taom_wc_lorien_fell" text="{TARGET} płonie, a światło Lothlórien gaśnie." />
+    <string id="taom_wc_osgiliath_title" text="Upadek Osgiliath" />
+    <string id="taom_wc_osgiliath_open" text="Wojsko z Morgul przeprawia się przez Anduinę ku {TARGET}. Gondor musi utrzymać zrujnowane miasto przez {DAYS} dni." />
+    <string id="taom_wc_osgiliath_lapsed" text="Mordor nie rusza na {TARGET}, a rzeka pozostaje spokojna." />
+    <string id="taom_wc_osgiliath_held" text="Faramir utrzymuje przeprawy przez Anduinę, a zastępy z Morgul cofają się." />
+    <string id="taom_wc_osgiliath_fell" text="{TARGET} pada, a droga do Minas Tirith stoi otworem." />
+    <string id="taom_wc_dale_title" text="Bitwa pod Dale" />
+    <string id="taom_wc_dale_open" text="Easterlingowie i słudzy Dol Guldur ciągną przeciw królestwu Dale. {TARGET} musi wytrwać {DAYS} dni." />
+    <string id="taom_wc_dale_lapsed" text="Easterlingowie odstępują, a {TARGET} zostaje oszczędzone." />
+    <string id="taom_wc_dale_held" text="Ludzie z Dale i krasnoludowie z Ereboru stoją ramię w ramię, a zastęp Easterlingów zostaje odparty." />
+    <string id="taom_wc_dale_fell" text="{TARGET} pada pod ciosami Easterlingów, a krasnoludowie z Ereboru ruszają z pomocą swym przyjaciołom." />
+    <string id="taom_wc_corsairs_title" text="Korsarze z Umbaru" />
+    <string id="taom_wc_corsairs_open" text="Czarne żagle Umbaru płyną w górę Anduiny ku {TARGET}. Gondor musi utrzymać port przez {DAYS} dni." />
+    <string id="taom_wc_corsairs_lapsed" text="Korsarze zwlekają na morzu, a {TARGET} pozostaje w spokoju." />
+    <string id="taom_wc_corsairs_held" text="Floty Umbaru zostają odparte od {TARGET}, a południowe lenna Gondoru nabierają otuchy." />
+    <string id="taom_wc_corsairs_fell" text="Korsarze zdobywają {TARGET}, a ich okręty panują nad rzeką." />
+    <string id="taom_wc_north_title" text="Wojna na Północy" />
+    <string id="taom_wc_north_open" text="Orkowie z Gundabadu i górale z Dunlandu spadają na Północ. {TARGET} musi się bronić przez {DAYS} dni." />
+    <string id="taom_wc_north_lapsed" text="Północna wojna omija {TARGET}." />
+    <string id="taom_wc_north_held" text="Strażnicy i ludzie z Arthedainu utrzymują {TARGET}, a Północ pozostaje wolna." />
+    <string id="taom_wc_north_fell" text="{TARGET} pada, a cień rozlewa się po Eriadorze." />
+    <string id="taom_wc_gondor_title" text="Oblężenie Gondoru" />
+    <string id="taom_wc_gondor_open" text="Pan Nazgûli prowadzi zastępy Mordoru przeciw {TARGET}. Miasto musi wytrzymać {DAYS} dni." />
+    <string id="taom_wc_gondor_lapsed" text="Wielki zastęp Mordoru wstrzymuje się, a {TARGET} czeka pod pociemniałym niebem." />
+    <string id="taom_wc_gondor_held" text="Rohirrimowie przybywają o świcie, a oblężenie {TARGET} zostaje złamane na polach Pelennoru." />
+    <string id="taom_wc_gondor_fell" text="Bramy {TARGET} zostają rozbite, a Białe Miasto pada łupem Mordoru." />
+    <string id="taom_wc_blackgate_title" text="Czarna Brama się otwiera" />
+    <string id="taom_wc_blackgate_occurred" text="Wodzowie Zachodu maszerują ku Morannon, by odciągnąć Oko od Powiernika Pierścienia. Los wojny spoczywa teraz w Pierścieniu." />
   </strings>
 </base>

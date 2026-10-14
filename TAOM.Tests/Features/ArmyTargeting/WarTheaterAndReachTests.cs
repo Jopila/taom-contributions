@@ -65,7 +65,7 @@ public class WarTheaterAndReachTests
         _configProvider.GetConfig().Returns(_config);
     }
 
-    private ArmyTargetingService CreateSut() => new ArmyTargetingService(_settings, _configProvider, _logger);
+    private ArmyTargetingService CreateSut() => new ArmyTargetingService(_settings, _configProvider, _logger, new ArmyTargetFocusRegistry());
 
     private static TargetScoreContext Ctx(
         float baseScore = 100f,

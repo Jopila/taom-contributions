@@ -7,16 +7,21 @@ using NSubstitute;
 using TAOM.Core.Logging;
 using TAOM.Features;
 using TAOM.Features.AlignmentDesertion;
+using TAOM.Features.BattleLoadDiagnostics;
 using TAOM.Features.FieldCamp;
 using TAOM.Features.SupplyLines;
 using TAOM.Features.CaravanTrade;
 using TAOM.Features.CastleRecruitment;
+using TAOM.Features.EyeOfSauron;
 using TAOM.Features.FieldCommission;
+using TAOM.Features.FiefManagement;
 using TAOM.Features.FieldCommission.Domain;
+using TAOM.Features.NameplateCull;
 using TAOM.Features.PartyIconScale;
 using TAOM.Features.QuickActions;
 using TAOM.Features.RealmBorders;
 using TAOM.Features.TimeAcceleration;
+using TAOM.Features.WarChronicle;
 using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features;
@@ -34,9 +39,11 @@ public class CampaignHotPathSettingsProvidersTests
     private const BindingFlags Declared = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic
                                           | BindingFlags.Instance | BindingFlags.Static;
 
-    // MCM declares Instance on a generic base (GlobalSettings<T>), so match any type TaomSettings derives from.
+    // MCM declares Instance on a generic base (GlobalSettings<T>), so match any declaring type the settings class derives from.
     private static bool IsInstanceGetter(MethodBase m) =>
-        m.Name == "get_Instance" && m.DeclaringType != null && m.DeclaringType.IsAssignableFrom(typeof(TaomSettings));
+        m.Name == "get_Instance" && m.DeclaringType != null
+        && (m.DeclaringType.IsAssignableFrom(typeof(TaomSettings))
+            || m.DeclaringType.IsAssignableFrom(typeof(BattleLoadDiagnosticsSettings)));
 
     private static bool CallsInstance(MethodBase m)
     {
@@ -56,6 +63,14 @@ public class CampaignHotPathSettingsProvidersTests
     // #746: read every campaign frame (supply lines always, the field camp while it stands).
     [DataRow(typeof(SupplyLinesSettingsProvider))]
     [DataRow(typeof(CampSettingsProvider))]
+    // #765: the war-effect strength is re-read by the registry's daily re-bake, the chronicle switch and army focus by each chronicle step.
+    [DataRow(typeof(WarChronicleSettingsProvider))]
+    // Read every campaign-map frame, from the Battle Load Diagnostics page.
+    [DataRow(typeof(NameplateCullSettingsProvider))]
+    // #789: the Fiefs map-bar button polls the fief hub opener every frame, which reads these.
+    [DataRow(typeof(FiefManagementSettingsProvider))]
+    // #765 M8: the hunter's speed multiplier is read every campaign frame while a hunt runs.
+    [DataRow(typeof(EyeOfSauronSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -84,6 +99,10 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(ITimeAccelerationSettingsProvider), typeof(TimeAccelerationSettingsProvider))]
     [DataRow(typeof(ISupplyLinesSettingsProvider), typeof(SupplyLinesSettingsProvider))]
     [DataRow(typeof(ICampSettingsProvider), typeof(CampSettingsProvider))]
+    [DataRow(typeof(IWarChronicleSettingsProvider), typeof(WarChronicleSettingsProvider))]
+    [DataRow(typeof(INameplateCullSettingsProvider), typeof(NameplateCullSettingsProvider))]
+    [DataRow(typeof(IFiefManagementSettingsProvider), typeof(FiefManagementSettingsProvider))]
+    [DataRow(typeof(IEyeOfSauronSettings), typeof(EyeOfSauronSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -223,6 +242,34 @@ public class CampaignHotPathSettingsProvidersTests
     }
 
     [TestMethod]
+    public void FiefManagement_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new FiefManagementSettingsProvider(mcm);
+        Assert.IsTrue(sut.EnableFiefManagement);
+        Assert.IsTrue(sut.AllowRemoteBuildingQueue);
+        Assert.IsFalse(sut.IsDebugMode);
+
+        mcm.EnableFiefManagement = false;
+        mcm.AllowRemoteBuildingQueue = false;
+        mcm.FiefManagementDebug = true;
+
+        Assert.IsFalse(sut.EnableFiefManagement);
+        Assert.IsFalse(sut.AllowRemoteBuildingQueue);
+        Assert.IsTrue(sut.IsDebugMode);
+    }
+
+    [TestMethod]
+    public void FiefManagement_NoMcm_FallsBackToTheDefaults()
+    {
+        var sut = new FiefManagementSettingsProvider();
+
+        Assert.IsTrue(sut.EnableFiefManagement);
+        Assert.IsTrue(sut.AllowRemoteBuildingQueue);
+        Assert.IsFalse(sut.IsDebugMode);
+    }
+
+    [TestMethod]
     public void TimeAcceleration_ReadsThroughTheCachedSettings()
     {
         var mcm = new TaomSettings();
@@ -239,6 +286,18 @@ public class CampaignHotPathSettingsProvidersTests
         Assert.AreEqual(32, sut.CtrlSpaceMultiplier);
     }
 
+    [TestMethod]
+    public void NameplateCull_ReadsThroughTheCachedSettings()
+    {
+        var settings = new BattleLoadDiagnosticsSettings();
+        var sut = new NameplateCullSettingsProvider(settings);
+        Assert.IsTrue(sut.CullEnabled);
+
+        settings.CullHiddenNameplates = false;
+
+        Assert.IsFalse(sut.CullEnabled);
+    }
+
     // No-MCM pins: TaomSettings.Instance is null in the test host (MCM is never initialised), so these
     // hold today's fallbacks through the caching change.
     [TestMethod]
@@ -248,6 +307,10 @@ public class CampaignHotPathSettingsProvidersTests
     [TestMethod]
     public void PartyIconScale_NoMcm_GetScaleIsTheDefault()
         => Assert.AreEqual(PartyIconScaleConfig.Default, PartyIconScaleConfig.GetScale(), 0.0001f);
+
+    [TestMethod]
+    public void NameplateCull_NoMcm_CullDefaultsOn()
+        => Assert.IsTrue(new NameplateCullSettingsProvider().CullEnabled);
 
     [TestMethod]
     public void CastleRecruitment_NoMcm_TogglesFallBackToJson()

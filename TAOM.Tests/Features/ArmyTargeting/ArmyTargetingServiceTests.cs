@@ -40,7 +40,7 @@ public class ArmyTargetingServiceTests
         _configProvider.GetConfig().Returns(_config);
     }
 
-    private ArmyTargetingService CreateSut() => new ArmyTargetingService(_settings, _configProvider, _logger);
+    private ArmyTargetingService CreateSut() => new ArmyTargetingService(_settings, _configProvider, _logger, new ArmyTargetFocusRegistry());
 
     [TestMethod]
     public void GetTargetMultiplier_FeatureDisabled_ReturnsOne()
