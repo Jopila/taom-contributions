@@ -10,8 +10,8 @@ namespace TAOM.Features.WarChronicle;
 /// <summary>
 /// The War Chronicle's per-campaign state as one unit: it assembles the save payload from the effect
 /// registry, the baselines and the rally tiers, hands it to the behavior in chunks, and restores each
-/// section from a load. The chronicle section's rows belong to <see cref="ChronicleStateStore"/> (#765 M3),
-/// which parses them row by row. It resets every registry for a new session.
+/// section from a load, the chronicle's event rows (<see cref="ChronicleStateStore"/>, #765 M3) included.
+/// It resets every registry for a new session.
 ///
 /// The chunks come from <see cref="MomentumSyncChunker"/>: one SyncData string over 32,767 UTF-8
 /// bytes corrupts the save at write time, and a developed campaign's effects and baselines can grow
@@ -24,7 +24,7 @@ public sealed class WarChronicleStateService
     private readonly RallyTierStore _rallyTiers;
     private readonly IModLogger _logger;
 
-    // #765 (M3): the chronicle section's owner. The codec still carries the section as an opaque array.
+    // #765 (M3): the chronicle section's owner.
     private readonly ChronicleStateStore _chronicle;
 
     public WarChronicleStateService(
@@ -43,9 +43,9 @@ public sealed class WarChronicleStateService
     {
         var payload = new WarChroniclePayload
         {
-            ChronicleJson = _chronicle.ToJson(),
         };
         payload.Effects.AddRange(_effects.Snapshot());
+        payload.Chronicle.AddRange(_chronicle.Snapshot());
         foreach (var pair in _baselines.Snapshot())
             payload.Baselines[pair.Key] = pair.Value;
         foreach (var pair in _rallyTiers.Snapshot())
@@ -69,7 +69,7 @@ public sealed class WarChronicleStateService
         _effects.RestoreFromSave(payload.Effects);
         _baselines.RestoreFromSave(payload.Baselines);
         _rallyTiers.Restore(payload.RallyTiers);
-        _chronicle.RestoreFromJson(payload.ChronicleJson);
+        _chronicle.Restore(payload.Chronicle);
     }
 
     /// <summary>Empties every registry. Called from the campaign behavior's constructor (the session-reset rule).</summary>

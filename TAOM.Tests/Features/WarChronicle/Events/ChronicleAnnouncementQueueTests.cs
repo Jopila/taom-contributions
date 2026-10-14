@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.WarChronicle;
@@ -12,7 +11,8 @@ namespace TAOM.Tests.Features.WarChronicle.Events;
 
 /// <summary>
 /// The chronicle's announcements: an in-memory queue, shown one at a time only when the map is free and
-/// this peer is the authority (re-checked at show time), never stacked, not saved.
+/// this peer is the authority (re-checked at show time), never stacked, not saved. The presenter fake's
+/// map is busy while its popup is open, as <c>IsAnyInquiryActive</c> makes the real one.
 /// </summary>
 [TestClass]
 public class ChronicleAnnouncementQueueTests
@@ -21,20 +21,22 @@ public class ChronicleAnnouncementQueueTests
     private ICoopSessionProvider _coop = null!;
     private IWarChronicleSettingsProvider _settings = null!;
     private IModLogger _logger = null!;
-    private readonly List<Action> _closers = new List<Action>();
     private readonly List<string> _shown = new List<string>();
+    private bool _open;
+    private bool _mapBusy;
     private ChronicleAnnouncementQueue _sut = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _presenter = Substitute.For<IChroniclePresenter>();
-        _presenter.IsMapFree().Returns(true);
-        _presenter.When(p => p.Show(Arg.Any<ChronicleAnnouncement>(), Arg.Any<Action>()))
-            .Do(c => { _shown.Add(c.Arg<ChronicleAnnouncement>().EventId); _closers.Add(c.Arg<Action>()); });
+        _presenter.IsMapFree().Returns(_ => !_open && !_mapBusy);
+        _presenter.When(p => p.Show(Arg.Any<ChronicleAnnouncement>()))
+            .Do(c => { _shown.Add(c.Arg<ChronicleAnnouncement>().EventId); _open = true; });
         _coop = Substitute.For<ICoopSessionProvider>();
         _coop.IsAuthority.Returns(true);
         _settings = Substitute.For<IWarChronicleSettingsProvider>();
+        _settings.ChronicleEnabled.Returns(true);
         _settings.ChronicleAnnouncements.Returns(true);
         _logger = Substitute.For<IModLogger>();
         _sut = new ChronicleAnnouncementQueue(_presenter, _coop, _settings, _logger);
@@ -83,7 +85,7 @@ public class ChronicleAnnouncementQueueTests
         _sut.Enqueue(A("two"));
         _sut.TryShowNext();
 
-        _closers[0]();
+        _open = false;
         _sut.TryShowNext();
 
         CollectionAssert.AreEqual(new[] { "one", "two" }, _shown);
@@ -91,15 +93,31 @@ public class ChronicleAnnouncementQueueTests
     }
 
     [TestMethod]
-    public void TryShowNext_MapBusy_WaitsWithTheItemQueued()
+    public void TryShowNext_PopupHiddenWithoutItsCallback_ShowsTheNext()
     {
-        _presenter.IsMapFree().Returns(false);
+        // InformationManager.HideInquiry closes an inquiry without running its button action: the queue must
+        // not wait on a callback that never comes.
+        _sut.Enqueue(A("one"));
+        _sut.Enqueue(A("two"));
+        _sut.TryShowNext();
+
+        _open = false;
+        _sut.TryShowNext();
+
+        CollectionAssert.AreEqual(new[] { "one", "two" }, _shown);
+    }
+
+    [TestMethod]
+    public void TryShowNext_MapBusy_WaitsWithTheItemQueuedAndSkipsTheCoopProbe()
+    {
+        _mapBusy = true;
         _sut.Enqueue(A("one"));
 
         _sut.TryShowNext();
 
         Assert.AreEqual(0, _shown.Count);
         Assert.AreEqual(1, _sut.Count);
+        _ = _coop.DidNotReceive().IsAuthority;
     }
 
     [TestMethod]
@@ -111,7 +129,7 @@ public class ChronicleAnnouncementQueueTests
         _sut.TryShowNext();
 
         Assert.AreEqual(0, _shown.Count);
-        _presenter.DidNotReceive().IsMapFree();
+        Assert.AreEqual(1, _sut.Count);
     }
 
     [TestMethod]
@@ -124,11 +142,27 @@ public class ChronicleAnnouncementQueueTests
         Assert.AreEqual(0, _sut.Count);
     }
 
+    [DataTestMethod]
+    [DataRow(false, true)]
+    [DataRow(true, false)]
+    public void TryShowNext_SwitchedOffWithItemsQueued_DropsThemUnshown(bool enabled, bool announcements)
+    {
+        _sut.Enqueue(A("one"));
+        _sut.Enqueue(A("two"));
+        _settings.ChronicleEnabled.Returns(enabled);
+        _settings.ChronicleAnnouncements.Returns(announcements);
+
+        _sut.TryShowNext();
+
+        Assert.AreEqual(0, _shown.Count);
+        Assert.AreEqual(0, _sut.Count);
+    }
+
     [TestMethod]
     public void TryShowNext_PresenterThrows_DropsTheItemLogsAndDoesNotStick()
     {
-        _presenter.When(p => p.Show(Arg.Is<ChronicleAnnouncement>(a => a.EventId == "bad"), Arg.Any<Action>()))
-            .Do(_ => throw new InvalidOperationException("no screen"));
+        _presenter.When(p => p.Show(Arg.Is<ChronicleAnnouncement>(a => a.EventId == "bad")))
+            .Do(_ => { _open = false; throw new InvalidOperationException("no screen"); });
         _sut.Enqueue(A("bad"));
         _sut.Enqueue(A("good"));
 
@@ -140,34 +174,14 @@ public class ChronicleAnnouncementQueueTests
     }
 
     [TestMethod]
-    public void ResetForNewSession_ClearsTheQueueAndTheOpenLatch()
+    public void ResetForNewSession_ClearsTheQueue()
     {
         _sut.Enqueue(A("one"));
         _sut.Enqueue(A("two"));
-        _sut.TryShowNext();
 
         _sut.ResetForNewSession();
-        _sut.Enqueue(A("three"));
-        _sut.TryShowNext();
 
-        CollectionAssert.AreEqual(new[] { "one", "three" }, _shown);
-    }
-
-    [TestMethod]
-    public void AStaleCloserFromAnEarlierCampaign_DoesNotReleaseTheNewLatch()
-    {
-        _sut.Enqueue(A("one"));
-        _sut.TryShowNext();
-        var staleCloser = _closers[0];
-        _sut.ResetForNewSession();
-        _sut.Enqueue(A("two"));
-        _sut.Enqueue(A("three"));
-        _sut.TryShowNext();
-
-        staleCloser();
-        _sut.TryShowNext();
-
-        CollectionAssert.AreEqual(new[] { "one", "two" }, _shown);
+        Assert.AreEqual(0, _sut.Count);
     }
 
     [TestMethod]

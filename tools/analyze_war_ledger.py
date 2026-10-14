@@ -18,7 +18,7 @@ Rules: an unknown v exits 2; a malformed line is skipped and counted (the first 
 WARNING); a save-reload re-emits days, so per campaign (cid) the LAST kingdom line per (day, k), side
 line per (day, side) and share line per day win, and exact repeated events collapse to one. Chronicle
 resolutions (ev=chronicle, one per event outcome: Occurred, Held, Fell, Lapsed or Skipped) are listed by
-day and counted per outcome, keeping the last line read for each event id. Logs are
+day and counted per outcome, one per event id: the last line read, even an exact repeat of an earlier one. Logs are
 read oldest first (by the taom_debug_ name stamp, else file time), so the newer process wins whatever
 the argument order. A reload of an OLDER save leaves the abandoned run's later days and events in the
 report: the log carries no marker for the rewind yet.
@@ -92,8 +92,9 @@ class Campaign:
         self.kingdoms = {}   # (day, k) -> field dict
         self.sides = {}      # (day, side) -> field dict
         self.shares = {}     # day -> float or None (na)
-        self.events = []     # de-duplicated, in read order
+        self.events = []     # de-duplicated, in first-read order
         self._event_keys = set()
+        self.chronicle_last = {}  # event id -> (day, outcome) of the last chronicle line read, repeats included
 
     def days(self):
         found = {d for d, _ in self.kingdoms} | {d for d, _ in self.sides} | set(self.shares)
@@ -173,6 +174,8 @@ def _ingest(parsed, fields):
         if keys is None or any(k not in fields for k in keys):
             raise ValueError('bad event')
         camp = parsed.campaign(fields['cid'])
+        if fields['ev'] == 'chronicle':
+            camp.chronicle_last[fields['id']] = (day, fields['outcome'])
         key = tuple(sorted(fields.items()))
         if key not in camp._event_keys:
             camp._event_keys.add(key)
@@ -322,15 +325,11 @@ def compute_metrics(camp):
     m['tiers'] = tiers
 
     m['destroyed'] = sorted((d, f['k']) for d, f in camp.events if f['ev'] == 'destroyed')
-    m['chronicle'] = sorted((d, f['id'], f['outcome']) for d, f in camp.events if f['ev'] == 'chronicle')
     # One resolution per event: a reload from before a resolution replays it, and the line read last is
-    # the outcome that stood (events are kept in read order).
-    last_outcome = {}
-    for _, f in camp.events:
-        if f['ev'] == 'chronicle':
-            last_outcome[f['id']] = f['outcome']
+    # the outcome that stood, even when it repeats an earlier line byte for byte.
+    m['chronicle'] = sorted((d, eid, o) for eid, (d, o) in camp.chronicle_last.items())
     counts = {}
-    for outcome in last_outcome.values():
+    for _, outcome in camp.chronicle_last.values():
         counts[outcome] = counts.get(outcome, 0) + 1
     m['chronicle_counts'] = counts
 

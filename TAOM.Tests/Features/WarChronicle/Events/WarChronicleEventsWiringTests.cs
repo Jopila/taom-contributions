@@ -91,12 +91,16 @@ public class WarChronicleEventsWiringTests
         container.RegisterInstance(Substitute.For<IPathService>());
         container.RegisterInstance(Substitute.For<IAllianceAdapter>());
         container.RegisterInstance(Substitute.For<IMomentumAwardService>());
-        container.Register<ArmyTargetFocusRegistry>(Reuse.Singleton);
+        container.RegisterInstance(Substitute.For<ITextLocalizerAdapter>());
+        // The real ArmyTargeting registration: the chronicle (writer) and the scoring path (reader) must share
+        // one focus registry, which only its Reuse.Singleton guarantees.
+        ArmyTargetingIoC.RegisterArmyTargetingFeature(container);
         WarChronicleIoC.RegisterWarChronicleFeature(container);
 
         Assert.AreSame(container.Resolve<ChronicleService>(), container.Resolve<ChronicleService>());
         Assert.AreSame(container.Resolve<ChronicleAnnouncementQueue>(), container.Resolve<ChronicleAnnouncementQueue>());
         Assert.AreSame(container.Resolve<ChronicleStateStore>(), container.Resolve<ChronicleStateStore>());
+        Assert.AreSame(container.Resolve<ArmyTargetFocusRegistry>(), container.Resolve<ArmyTargetFocusRegistry>());
         Assert.IsInstanceOfType(container.Resolve<IChronicleConfigProvider>(), typeof(ChronicleConfigProvider));
         Assert.IsInstanceOfType(container.Resolve<IChronicleWorldAdapter>(), typeof(ChronicleWorldAdapter));
 

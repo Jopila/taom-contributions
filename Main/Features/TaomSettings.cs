@@ -368,8 +368,8 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     public bool WarChronicleAnnouncements { get; set; } = true;
 
     [SettingPropertyGroup("War of the Ring/War Chronicle")]
-    [SettingPropertyFloatingInteger("Army Focus Multiplier", 1.0f, 2.5f, "#0.00", Order = 2, RequireRestart = false,
-        HintText = "During a siege window, how much more the attackers' armies want to besiege the target and the defender's armies want to defend it. 1 turns the focus off. Needs Army Strategic Intelligence. Default 1.4.")]
+    [SettingPropertyFloatingInteger("Army Focus Multiplier", TAOM.Features.WarChronicle.WarChronicleSettingsProvider.ArmyFocusMin, TAOM.Features.WarChronicle.WarChronicleSettingsProvider.ArmyFocusMax, "#0.00", Order = 2, RequireRestart = false,
+        HintText = "During a siege window, how much more the attackers' armies want to besiege the target and the defender's armies want to defend it once it is attacked. 1 turns the focus off. Needs AI Strategic Intelligence on. Default 1.4.")]
     public float WarChronicleArmyFocus { get; set; } = 1.4f;
 
     // --- Battle Balance / Troop Power ---

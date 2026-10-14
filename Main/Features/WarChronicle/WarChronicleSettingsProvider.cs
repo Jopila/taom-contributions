@@ -1,4 +1,5 @@
 using TAOM.Core.Validation;
+using TAOM.Features.ArmyTargeting;
 using TAOM.Features.WarChronicle.Effects;
 
 namespace TAOM.Features.WarChronicle;
@@ -15,7 +16,8 @@ public class WarChronicleSettingsProvider : IWarChronicleSettingsProvider
 {
     internal const float ArmyFocusDefault = 1.4f;
     internal const float ArmyFocusMin = 1f;
-    internal const float ArmyFocusMax = 2.5f;
+    /// <summary>The focus registry's own cap, so the slider, this clamp and the registry cannot drift.</summary>
+    internal const float ArmyFocusMax = ArmyTargetFocusRegistry.MaxMultiplier;
 
     private TaomSettings? _settings;
     private TaomSettings? Settings => _settings ??= TaomSettings.Instance;
@@ -33,14 +35,6 @@ public class WarChronicleSettingsProvider : IWarChronicleSettingsProvider
 
     public bool ChronicleAnnouncements => Settings?.WarChronicleAnnouncements ?? true;
 
-    public float ArmyFocusMultiplier
-    {
-        get
-        {
-            var value = Settings?.WarChronicleArmyFocus ?? ArmyFocusDefault;
-            if (!FiniteFloatValidator.IsFinite(value))
-                return ArmyFocusDefault;
-            return value < ArmyFocusMin ? ArmyFocusMin : value > ArmyFocusMax ? ArmyFocusMax : value;
-        }
-    }
+    public float ArmyFocusMultiplier =>
+        SettingClamp.Clamp(Settings?.WarChronicleArmyFocus, ArmyFocusDefault, ArmyFocusMin, ArmyFocusMax);
 }

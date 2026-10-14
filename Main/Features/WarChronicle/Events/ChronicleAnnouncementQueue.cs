@@ -10,15 +10,16 @@ namespace TAOM.Features.WarChronicle.Events;
 /// not saved, drained one item per campaign tick and only when the map is free.
 ///
 /// <list type="bullet">
-/// <item><b>No stacking:</b> one inquiry at a time, released by its close callback (the CareerQuest
-/// <c>_offerPending</c> guard). A show that throws releases the latch and drops the item, so the queue
-/// never sticks.</item>
-/// <item><b>Map free:</b> <see cref="IChroniclePresenter.IsMapFree"/>, the Messenger
-/// <c>IsPlayerAvailable</c> check.</item>
-/// <item><b>Authority re-checked at show time:</b> only the co-op authority runs the chronicle, so only
-/// it announces (clients see nothing, as with the momentum meter).</item>
-/// <item><b>Per campaign:</b> <see cref="ResetForNewSession"/> runs from the events behavior's
-/// constructor; a close callback from an earlier campaign's popup cannot release the new latch.</item>
+/// <item><b>No stacking:</b> <see cref="IChroniclePresenter.IsMapFree"/> is false while any inquiry is open
+/// (<c>InformationManager.IsAnyInquiryActive</c>), ours included, so the queue keeps no latch of its own and
+/// a popup closed without its button action (<c>InformationManager.HideInquiry</c>) cannot stall it. A show
+/// that throws drops the item.</item>
+/// <item><b>Switches re-checked at show time:</b> with the chronicle or its announcements switched off, what
+/// is still queued is dropped unshown.</item>
+/// <item><b>Map free, then authority:</b> the map test (the Messenger <c>IsPlayerAvailable</c> check) runs
+/// before the co-op probe, which uses reflection. Only the co-op authority runs the chronicle, so only it
+/// announces (clients see nothing, as with the momentum meter).</item>
+/// <item><b>Per campaign:</b> <see cref="ResetForNewSession"/> runs from the events behavior's constructor.</item>
 /// </list>
 /// The empty-queue test comes first, because the campaign tick calls this every frame.
 /// </summary>
@@ -32,9 +33,6 @@ public sealed class ChronicleAnnouncementQueue
     private readonly IWarChronicleSettingsProvider _settings;
     private readonly IModLogger _logger;
     private readonly Queue<ChronicleAnnouncement> _queue = new Queue<ChronicleAnnouncement>();
-
-    private bool _showing;
-    private int _session;
 
     public ChronicleAnnouncementQueue(
         IChroniclePresenter presenter, ICoopSessionProvider coop, IWarChronicleSettingsProvider settings, IModLogger logger)
@@ -58,37 +56,31 @@ public sealed class ChronicleAnnouncementQueue
             _queue.Dequeue();
     }
 
-    /// <summary>Shows the oldest item when nothing is open, this peer is the authority and the map is free.</summary>
+    /// <summary>Shows the oldest item when the map is free (no inquiry open) and this peer is the authority.</summary>
     public void TryShowNext()
     {
-        if (_queue.Count == 0 || _showing)
+        if (_queue.Count == 0)
             return;
-        if (!_coop.IsAuthority || !_presenter.IsMapFree())
+        if (!_settings.ChronicleEnabled || !_settings.ChronicleAnnouncements)
+        {
+            _queue.Clear();
+            return;
+        }
+
+        if (!_presenter.IsMapFree() || !_coop.IsAuthority)
             return;
 
         var next = _queue.Dequeue();
-        var session = _session;
-        _showing = true;
         try
         {
-            _presenter.Show(next, () =>
-            {
-                if (session == _session)
-                    _showing = false;
-            });
+            _presenter.Show(next);
         }
         catch (Exception ex)
         {
-            _showing = false;
             _logger.LogWarning($"[WarChronicle] Announcement for '{next.EventId}' could not be shown ({ex.GetType().Name}: {ex.Message}).");
         }
     }
 
-    /// <summary>Empties the queue and releases the latch: called from the events behavior's constructor.</summary>
-    public void ResetForNewSession()
-    {
-        _queue.Clear();
-        _showing = false;
-        _session++;
-    }
+    /// <summary>Empties the queue: called from the events behavior's constructor.</summary>
+    public void ResetForNewSession() => _queue.Clear();
 }

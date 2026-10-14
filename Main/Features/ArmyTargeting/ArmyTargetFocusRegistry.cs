@@ -18,8 +18,9 @@ namespace TAOM.Features.ArmyTargeting;
 /// can only raise a positive score; a zero (vanilla's distance veto) stays zero.</para>
 ///
 /// <para><b>Not saved.</b> It is derived state: the chronicle pushes its Active windows again at session
-/// launch, and clears the set when a window resolves and when the war ends. A process-lifetime singleton,
-/// so the chronicle also clears it when each campaign's behavior is built.</para>
+/// launch, and clears the set when a window resolves, when the war ends and when the chronicle is switched
+/// off. A process-lifetime singleton holding campaign state: <see cref="ResetForNewSession"/> runs from the
+/// events behavior's constructor, through <c>ChronicleService.ResetTransientState</c>.</para>
 /// </summary>
 public sealed class ArmyTargetFocusRegistry
 {
@@ -55,6 +56,9 @@ public sealed class ArmyTargetFocusRegistry
     }
 
     public void Clear() => _entries = Empty;
+
+    /// <summary>Drops an earlier campaign's focus (the session-reset rule).</summary>
+    public void ResetForNewSession() => _entries = Empty;
 
     /// <summary>
     /// The largest focus multiplier that applies to this army and candidate, or 1. Besieger armies of an

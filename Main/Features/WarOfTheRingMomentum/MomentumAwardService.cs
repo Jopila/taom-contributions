@@ -11,7 +11,7 @@ namespace TAOM.Features.WarOfTheRingMomentum;
 /// </summary>
 public sealed class MomentumAwardService : IMomentumAwardService
 {
-    /// <summary>The largest single award, in displayed units: the size of the shipped battle cap.</summary>
+    /// <summary>The largest single award, in displayed units: the compiled default battle cap.</summary>
     public const int MaxScriptedUnits = 300;
 
     private readonly IMomentumStateStore _store;

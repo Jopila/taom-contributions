@@ -47,7 +47,7 @@ public class WarChronicleBehaviorTests
         _effects = new WarEffectService(_settings, _logger);
         _baselines = new WarBaselineService();
         _tiers = new RallyTierStore();
-        _state = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore(_logger));
+        _state = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore());
         _snapshots = Substitute.For<IKingdomWarSnapshotAdapter>();
         _snapshots.GetCampaignId().Returns("c1");
         _snapshots.GetNowHours().Returns(100d);
@@ -122,7 +122,7 @@ public class WarChronicleBehaviorTests
 
         var effects2 = new WarEffectService(_settings, _logger);
         var baselines2 = new WarBaselineService();
-        var state2 = new WarChronicleStateService(effects2, baselines2, new RallyTierStore(), _logger, new ChronicleStateStore(_logger));
+        var state2 = new WarChronicleStateService(effects2, baselines2, new RallyTierStore(), _logger, new ChronicleStateStore());
         var ledger2 = new WarLedgerService(_snapshots, baselines2, new RallyTierStore(), effects2, Substitute.For<IWarOfTheRingService>(),
             Substitute.For<IAlignmentService>(), _logger);
         var loaded = new WarChronicleBehavior(

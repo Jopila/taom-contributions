@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TAOM.Features.WarChronicle.Effects;
+using TAOM.Features.WarChronicle.Events;
 
 namespace TAOM.Features.WarChronicle;
 
@@ -17,11 +18,8 @@ internal sealed class WarChroniclePayload
 
     public Dictionary<string, int> RallyTiers { get; } = new Dictionary<string, int>();
 
-    /// <summary>
-    /// The chronicle section as a JSON array; its rows belong to <c>Events.ChronicleStateStore</c>, which
-    /// parses them row by row (#765 M3). The codec only carries the array.
-    /// </summary>
-    public string ChronicleJson { get; set; } = WarChronicleSaveCodec.EmptyArray;
+    /// <summary>The chronicle's event rows (#765 M3), owned by <see cref="ChronicleStateStore"/>.</summary>
+    public List<ChronicleEventRecord> Chronicle { get; } = new List<ChronicleEventRecord>();
 
     /// <summary>What was skipped or reset while parsing, one line each, for the log.</summary>
     public List<string> Warnings { get; } = new List<string>();

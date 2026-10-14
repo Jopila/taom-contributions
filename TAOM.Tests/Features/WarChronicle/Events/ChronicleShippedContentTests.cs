@@ -7,15 +7,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using TAOM.Features.WarChronicle.Effects;
 using TAOM.Features.WarChronicle.Events;
+using TAOM.Features.WarOfTheRingMomentum.Domain;
 using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.WarChronicle.Events;
 
 /// <summary>
 /// The shipped <c>war_chronicle/war_chronicle.json</c> (#765 v1 content): it loads with no warning, the sieges
-/// target the towns their defenders own at game start (live TAOM_Map settlements.xml, checked 2026-10-08), every
-/// attacker and defender pair is Hostile in diplomacy.json, the stalemate rule pays both sides, and every text
-/// key is registered in taom_wotr_strings.xml with the same English.
+/// keep the agreed target and sides (owners confirmed by hand in the live TAOM_Map settlements.xml on
+/// 2026-10-08, not re-checked here; at runtime the open precondition Skips a siege whose target the defender
+/// no longer holds), every attacker and defender pair is Hostile in diplomacy.json, the stalemate rule pays
+/// both sides, and every text key is registered in taom_wotr_strings.xml with the same English.
 /// </summary>
 [TestClass]
 public class ChronicleShippedContentTests
@@ -84,6 +86,9 @@ public class ChronicleShippedContentTests
             AssertRow(siege.Id + " held", siege.Held.Effects, "attacker", WarEffectKind.PrisonerEscape, 0.20f);
             AssertRow(siege.Id + " fell", siege.Fell!.Effects, "attacker", WarEffectKind.VolunteerRate, 0.15f);
             AssertRow(siege.Id + " fell", siege.Fell.Effects, "defender", WarEffectKind.PrisonerEscape, 0.20f);
+            // A held siege earns the Free side nothing from the capture path, so the file pays it momentum.
+            Assert.AreEqual(MomentumSide.Free, siege.Held.Momentum?.Side, siege.Id + " held momentum side");
+            Assert.AreEqual(100, siege.Held.Momentum!.Units, siege.Id + " held momentum units");
         }
     }
 
@@ -141,13 +146,19 @@ public class ChronicleShippedContentTests
         }
     }
 
-    [TestMethod]
-    public void TheChronicleMomentumLabel_IsRegistered()
+    [DataTestMethod]
+    [DataRow("taom_wotr_chronicle_events", "Chronicle Events")]
+    [DataRow("taom_wc_siege_lost", null)]
+    public void ACodeDefinedChronicleText_IsRegisteredWithTheSameEnglish(string id, string? english)
     {
-        var registered = XDocument.Load(RepoPaths.RepoPath("Main", "_Module", "ModuleData", "taom_wotr_strings.xml"))
-            .Root!.Elements("string").Select(s => (string)s.Attribute("id")!).ToList();
+        // The two texts written in C#, not in war_chronicle.json, which the JSON key test cannot see.
+        if (english == null)
+            english = ChronicleService.LostText.Substring(ChronicleService.LostText.IndexOf('}') + 1);
+        var row = XDocument.Load(RepoPaths.RepoPath("Main", "_Module", "ModuleData", "taom_wotr_strings.xml"))
+            .Root!.Elements("string").SingleOrDefault(s => (string)s.Attribute("id")! == id);
 
-        CollectionAssert.Contains(registered, "taom_wotr_chronicle_events");
+        Assert.IsNotNull(row, id + " is not registered");
+        Assert.AreEqual(english, (string)row!.Attribute("text")!);
     }
 
     private static string Pair(string a, string b) => string.CompareOrdinal(a, b) < 0 ? a + "|" + b : b + "|" + a;

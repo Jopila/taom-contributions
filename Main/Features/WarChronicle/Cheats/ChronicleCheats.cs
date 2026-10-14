@@ -21,8 +21,9 @@ public static class ChronicleCheats
             ChronicleCheatReport.FormatStatus(
                 IoC.Resolve<ChronicleService>().Status(),
                 IoC.Resolve<ArmyTargetFocusRegistry>().Snapshot(),
-                IoC.Resolve<IChronicleWorldAdapter>().GetElapsedDays(),
-                IoC.Resolve<IWarChronicleSettingsProvider>().ChronicleEnabled));
+                System.Math.Floor(IoC.Resolve<IChronicleWorldAdapter>().GetElapsedDays()),
+                IoC.Resolve<IWarChronicleSettingsProvider>().ChronicleEnabled,
+                IoC.Resolve<IArmyTargetingSettingsProvider>().EnableArmyStrategicIntelligence));
 
     [CommandLineFunctionality.CommandLineArgumentFunction("chronicle_open", "taom")]
     public static string ChronicleOpen(List<string> strings) =>

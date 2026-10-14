@@ -20,7 +20,7 @@ public class ChronicleCheatReportTests
     [TestMethod]
     public void FormatStatus_ListsEveryEventWithItsStateAndDays()
     {
-        var text = ChronicleCheatReport.FormatStatus(Rows(), new ArmyTargetFocus[0], 55.2, true);
+        var text = ChronicleCheatReport.FormatStatus(Rows(), new ArmyTargetFocus[0], 55.2, true, true);
 
         StringAssert.Contains(text, "day 55.2");
         StringAssert.Contains(text, "fellowship");
@@ -39,21 +39,40 @@ public class ChronicleCheatReportTests
     {
         var focus = new[] { new ArmyTargetFocus("town_V2", new[] { "isengard", "empire" }, "vlandia", 1.4f) };
 
-        var text = ChronicleCheatReport.FormatStatus(Rows(), focus, 55, true);
+        var text = ChronicleCheatReport.FormatStatus(Rows(), focus, 55, true, true);
 
         StringAssert.Contains(text, "town_V2 x1.40: besieged by isengard, empire; defended by vlandia");
+        Assert.IsFalse(text.Contains("inactive"));
+    }
+
+    [TestMethod]
+    public void FormatStatus_StrategicIntelligenceOff_SaysTheFocusIsInactive()
+    {
+        var focus = new[] { new ArmyTargetFocus("town_V2", new[] { "isengard" }, "vlandia", 1.4f) };
+
+        var text = ChronicleCheatReport.FormatStatus(Rows(), focus, 55, true, false);
+
+        StringAssert.Contains(text, "inactive: AI Strategic Intelligence is off");
+    }
+
+    [TestMethod]
+    public void FormatStatus_ActivePastItsCloseDay_SaysTheCloseWaitsOnTheSiege()
+    {
+        var text = ChronicleCheatReport.FormatStatus(Rows(), new ArmyTargetFocus[0], 72, true, true);
+
+        StringAssert.Contains(text, "overtime: an attacker still besieges it");
     }
 
     [TestMethod]
     public void FormatStatus_ChronicleOff_SaysSo()
     {
-        StringAssert.Contains(ChronicleCheatReport.FormatStatus(Rows(), new ArmyTargetFocus[0], 1, false), "off");
+        StringAssert.Contains(ChronicleCheatReport.FormatStatus(Rows(), new ArmyTargetFocus[0], 1, false, true), "off");
     }
 
     [TestMethod]
     public void FormatStatus_NoEvents_SaysTheFileLoadedNone()
     {
-        StringAssert.Contains(ChronicleCheatReport.FormatStatus(new List<ChronicleStatusRow>(), new ArmyTargetFocus[0], 1, true), "No chronicle events");
+        StringAssert.Contains(ChronicleCheatReport.FormatStatus(new List<ChronicleStatusRow>(), new ArmyTargetFocus[0], 1, true, true), "No chronicle events");
     }
 
     [DataTestMethod]

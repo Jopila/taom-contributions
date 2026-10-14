@@ -102,6 +102,7 @@ public class ChronicleConfigValidatorTests
     [DataRow("2")]
     [DataRow("0")]
     [DataRow("\"1\"")]
+    [DataRow("99999999999999999999")]
     public void Parse_UnknownSchemaVersion_ReturnsNothingAndWarns(string version)
     {
         var json = "{ \"schemaVersion\": " + version + ", \"events\": [" + Narrative() + "] }";
@@ -546,5 +547,169 @@ public class ChronicleConfigValidatorTests
 
         Assert.AreEqual(1, ChronicleConfigValidator.Parse(json, _warnings).Count);
         AssertWarned("event 0");
+    }
+
+    // ---- Names only (EnumNames): numbers, signs, padding tricks and comma lists never parse --------------
+
+    [DataTestMethod]
+    [DataRow("1")]
+    [DataRow("+1")]
+    [DataRow(" 1")]
+    [DataRow("Narrative,Siege")]
+    public void Parse_AKindThatIsNotAName_SkipsTheEvent(string kind)
+    {
+        var bad = Siege();
+        bad["kind"] = kind;
+
+        Assert.AreEqual(0, Parse(bad).Count);
+        AssertWarned("kind");
+    }
+
+    [DataTestMethod]
+    [DataRow("1")]
+    [DataRow("+1")]
+    [DataRow(" 1")]
+    [DataRow("CampaignStart,Phase1")]
+    public void Parse_AnAnchorThatIsNotAName_SkipsTheEvent(string anchor)
+    {
+        Assert.AreEqual(0, Parse(Narrative(anchor: anchor)).Count);
+        AssertWarned("is not CampaignStart");
+    }
+
+    [DataTestMethod]
+    [DataRow("+3")]
+    [DataRow(" 3")]
+    [DataRow("Active,Occurred")]
+    public void Parse_ARequiredOutcomeThatIsNotAName_SkipsTheEvent(string requires)
+    {
+        var child = Narrative("ents", "Event", 2);
+        child["anchorEvent"] = "hornburg";
+        child["requiresOutcome"] = requires;
+
+        var events = Parse(Siege(), child);
+
+        Assert.AreEqual(1, events.Count);
+        AssertWarned("requiresOutcome");
+    }
+
+    [DataTestMethod]
+    [DataRow("+1")]
+    [DataRow(" 1")]
+    [DataRow("VolunteerRate,PrisonerEscape")]
+    public void Parse_AnEffectKindThatIsNotAName_SkipsTheRowOnly(string kind)
+    {
+        var bad = Narrative();
+        bad["outcomes"]!["occurred"]!["effects"] = new JArray(Effect("rivendell", kind: kind));
+
+        var events = Parse(bad);
+
+        Assert.AreEqual(1, events.Count);
+        Assert.AreEqual(0, events[0].Occurred!.Effects.Count);
+        AssertWarned("kind");
+    }
+
+    [TestMethod]
+    public void Parse_ANameInAnotherCaseWithPadding_Loads()
+    {
+        var ok = Siege();
+        ok["kind"] = " siege ";
+
+        Assert.AreEqual(ChronicleEventKind.Siege, Parse(ok).Single().Kind);
+    }
+
+    // ---- Unknown keys and wrong types warn instead of dropping silently -------------------------------
+
+    [DataTestMethod]
+    [DataRow("event")]
+    [DataRow("outcome")]
+    [DataRow("effect")]
+    [DataRow("momentum")]
+    public void Parse_AnUnknownKey_WarnsAndKeepsTheEvent(string level)
+    {
+        var e = Siege();
+        var held = (JObject)e["outcomes"]!["held"]!;
+        held["momentum"] = new JObject { ["side"] = "free", ["units"] = 100 };
+        switch (level)
+        {
+            case "event": e["RequiresOutcome"] = "Held"; break;
+            case "outcome": held["momentm"] = 1; break;
+            case "effect": ((JObject)held["effects"]![0]!)["duration"] = 5; break;
+            default: ((JObject)held["momentum"]!)["amount"] = 5; break;
+        }
+
+        var events = Parse(e);
+
+        Assert.AreEqual(1, events.Count);
+        AssertWarned("is not a known key");
+    }
+
+    [TestMethod]
+    public void Parse_AnUnderscoreCommentKey_DoesNotWarn()
+    {
+        var e = Narrative();
+        e["_comment"] = "a note for the author";
+
+        Parse(e);
+
+        Assert.AreEqual(0, _warnings.Count, string.Join("\n", _warnings));
+    }
+
+    [DataTestMethod]
+    [DataRow("null")]
+    [DataRow("5")]
+    [DataRow("\"free\"")]
+    [DataRow("[]")]
+    public void Parse_AMomentumThatIsNotAnObject_DropsTheAwardOnly(string raw)
+    {
+        var bad = Siege();
+        bad["outcomes"]!["held"]!["momentum"] = JToken.Parse(raw);
+
+        var events = Parse(bad);
+
+        Assert.AreEqual(1, events.Count);
+        Assert.IsNull(events[0].Held!.Momentum);
+        Assert.AreEqual(1, events[0].Held!.Effects.Count);
+        AssertWarned("momentum");
+    }
+
+    [TestMethod]
+    public void Parse_EffectsThatAreNotAnArray_Warns()
+    {
+        var bad = Narrative();
+        bad["outcomes"]!["occurred"]!["effects"] = new JObject();
+
+        Assert.AreEqual(1, Parse(bad).Count);
+        AssertWarned("effects");
+    }
+
+    [TestMethod]
+    public void Parse_ATextThatIsNotAString_Warns()
+    {
+        var bad = Siege();
+        bad["lapsedText"] = 3;
+
+        Assert.AreEqual(1, Parse(bad).Count);
+        AssertWarned("lapsedText");
+    }
+
+    [TestMethod]
+    public void Parse_ARequiredOutcomeThatIsNotAString_SkipsTheEvent()
+    {
+        var child = Narrative("ents", "Event", 2);
+        child["anchorEvent"] = "hornburg";
+        child["requiresOutcome"] = 3;
+
+        Assert.AreEqual(1, Parse(Siege(), child).Count);
+        AssertWarned("requiresOutcome");
+    }
+
+    [TestMethod]
+    public void Parse_ASiegeOutcomesThatIsNotAnObject_Warns()
+    {
+        var bad = Siege();
+        bad["outcomes"] = new JArray();
+
+        Assert.AreEqual(1, Parse(bad).Count);
+        AssertWarned("outcomes");
     }
 }

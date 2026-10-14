@@ -103,13 +103,6 @@ public class WarOfTheRingService : IWarOfTheRingService
         return _config.Enabled;
     }
 
-    // Phase 2 must land strictly after Phase 1. CheckPhaseTransition's two guards are sequential
-    // ifs and TransitionToPhase mutates CurrentPhase in place, so an equal or inverted pair runs
-    // BOTH transitions inside one call — IsengardWar is entered and overwritten by FullWar before
-    // any external reader (map meter, momentum service, save) can observe it, silently collapsing
-    // the phased escalation. Clamping here rather than per-source covers all four inputs at once:
-    // the MCM sliders (validated nowhere — they accept any pair inside [1,365]), the JSON pair,
-    // the TestMode pair, and the compiled defaults. Dual-surface rule, csharp-architecture.md.
     // #765: the War Chronicle's phase anchors read the same clamped pair the transitions use.
     public int? GetEffectivePhaseDay(WarPhase phase)
     {
@@ -122,6 +115,13 @@ public class WarOfTheRingService : IWarOfTheRingService
         }
     }
 
+    // Phase 2 must land strictly after Phase 1. CheckPhaseTransition's two guards are sequential
+    // ifs and TransitionToPhase mutates CurrentPhase in place, so an equal or inverted pair runs
+    // BOTH transitions inside one call — IsengardWar is entered and overwritten by FullWar before
+    // any external reader (map meter, momentum service, save) can observe it, silently collapsing
+    // the phased escalation. Clamping here rather than per-source covers all four inputs at once:
+    // the MCM sliders (validated nowhere — they accept any pair inside [1,365]), the JSON pair,
+    // the TestMode pair, and the compiled defaults. Dual-surface rule, csharp-architecture.md.
     private (int phase1Day, int phase2Day) GetEffectivePhaseDays()
     {
         var (phase1Day, phase2Day) = GetRawPhaseDays();

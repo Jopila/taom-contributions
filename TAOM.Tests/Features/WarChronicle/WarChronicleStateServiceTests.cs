@@ -30,7 +30,7 @@ public class WarChronicleStateServiceTests
         _effects = new WarEffectService(settings, _logger);
         _baselines = new WarBaselineService();
         _tiers = new RallyTierStore();
-        _sut = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore(_logger));
+        _sut = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore());
     }
 
     private static KingdomWarSnapshot Kingdom(string id, int towns, int castles) =>
@@ -55,7 +55,7 @@ public class WarChronicleStateServiceTests
         var effects = new WarEffectService(settings, _logger);
         var baselines = new WarBaselineService();
         var tiers = new RallyTierStore();
-        new WarChronicleStateService(effects, baselines, tiers, _logger, new ChronicleStateStore(_logger)).RestoreFromChunks(chunks);
+        new WarChronicleStateService(effects, baselines, tiers, _logger, new ChronicleStateStore()).RestoreFromChunks(chunks);
 
         Assert.AreEqual(2, effects.Snapshot().Count);
         Assert.AreEqual(1.1f, effects.GetMultiplier("gondor", WarEffectKind.VolunteerRate), 0.0001f);
@@ -83,7 +83,7 @@ public class WarChronicleStateServiceTests
         var settings = Substitute.For<IWarChronicleSettingsProvider>();
         settings.WarEffectStrength.Returns(1f);
         var effects = new WarEffectService(settings, _logger);
-        new WarChronicleStateService(effects, new WarBaselineService(), new RallyTierStore(), _logger, new ChronicleStateStore(_logger)).RestoreFromChunks(chunks);
+        new WarChronicleStateService(effects, new WarBaselineService(), new RallyTierStore(), _logger, new ChronicleStateStore()).RestoreFromChunks(chunks);
         Assert.AreEqual(_effects.Snapshot().Count, effects.Snapshot().Count, "the chunks join back to the same payload");
     }
 
@@ -160,16 +160,14 @@ public class WarChronicleStateServiceTests
     [TestMethod]
     public void ChronicleSection_ARestoredRow_IsWrittenBack()
     {
-        // #765 M3: the section has an owner now (ChronicleStateStore), so a row round-trips through it.
-        const string chronicle = "[{\"id\":\"hornburg\",\"s\":1,\"open\":12.5,\"close\":40,\"a\":true}]";
-        var payload = new WarChroniclePayload { ChronicleJson = chronicle };
+        // #765 M3: the section's owner is ChronicleStateStore, so a row round-trips through it.
+        var payload = new WarChroniclePayload();
+        payload.Chronicle.Add(new ChronicleEventRecord("hornburg", ChronicleEventState.Active) { OpenDay = 12.5, CloseDay = 40, Assaulted = true });
         _sut.RestoreFromChunks(new List<string> { WarChronicleSaveCodec.Serialize(payload) });
 
         var written = WarChronicleSaveCodec.Parse(string.Concat(_sut.CaptureChunks()));
-        var store = new ChronicleStateStore(_logger);
-        store.RestoreFromJson(written.ChronicleJson);
 
-        var row = store.Get("hornburg")!;
+        var row = written.Chronicle.Single();
         Assert.AreEqual(ChronicleEventState.Active, row.State);
         Assert.AreEqual(12.5, row.OpenDay);
         Assert.AreEqual(40d, row.CloseDay);
@@ -177,10 +175,12 @@ public class WarChronicleStateServiceTests
     }
 
     [TestMethod]
-    public void ResetForNewSession_ClearsEveryRegistryAndTheOpaqueChronicle()
+    public void ResetForNewSession_ClearsEveryRegistryAndTheChronicleRows()
     {
         Populate();
-        _sut.RestoreFromChunks(new List<string> { WarChronicleSaveCodec.Serialize(new WarChroniclePayload { ChronicleJson = "[{\"id\":\"a\",\"s\":3}]" }) });
+        var payload = new WarChroniclePayload();
+        payload.Chronicle.Add(new ChronicleEventRecord("a", ChronicleEventState.Held) { ResolvedDay = 3 });
+        _sut.RestoreFromChunks(new List<string> { WarChronicleSaveCodec.Serialize(payload) });
         Populate();
 
         _sut.ResetForNewSession();
@@ -188,6 +188,6 @@ public class WarChronicleStateServiceTests
         Assert.AreEqual(0, _effects.Snapshot().Count);
         Assert.IsNull(_baselines.GetBaseline("gondor"));
         Assert.AreEqual(0, _tiers.GetTier("gondor"));
-        Assert.AreEqual("[]", WarChronicleSaveCodec.Parse(string.Concat(_sut.CaptureChunks())).ChronicleJson);
+        Assert.AreEqual(0, WarChronicleSaveCodec.Parse(string.Concat(_sut.CaptureChunks())).Chronicle.Count);
     }
 }

@@ -38,7 +38,7 @@ The behavior listens to `DailyTickEvent` and `KingdomDestroyedEvent`. The daily 
 
 The whole body is wrapped in one try/catch that logs a warning and skips the rest of the day, because a throwing engine getter must never fail the campaign's daily tick: a throwing snapshot read skips the baselines, the rally, the escape pass and the ledger together. The escape pass and the rally also catch their own failures. The escape pass runs after the rally, so a boost the rally grants, refreshes or removes reaches that same day's roll, with no lag in either direction; turning the rally off ends its escape boost before the next roll.
 
-The event chain does not run inside this tick. It has its own router behavior, `WarChronicleEventsBehavior` (`Events/WarChronicleEventsBehavior.cs`), whose daily listener calls `ChronicleService.RunChronicleDay()`; see "The event chain" below. The two listeners run in whatever order the engine calls them, and nothing depends on it: an effect the chronicle writes is baked into the registry at once and expires at its own end time.
+The event chain does not run inside this tick. It has its own router behavior, `WarChronicleEventsBehavior` (`Events/WarChronicleEventsBehavior.cs`), whose daily listener calls `ChronicleService.RunChronicleDay()`; see "The event chain" below. The engine calls daily listeners newest first (`MbEvent.AddNonSerializedListener` prepends), and feature-module behaviors are added after every hand-wired one, `WarOfTheRingBehavior` included, so the chronicle steps first: an effect it writes is baked at once and already counts in that day's escape roll and ledger line.
 
 ### The timed-effect registry
 
@@ -98,20 +98,20 @@ Vanilla's value already includes its low-fief boost (see **Why This Exists**), s
 
 ### The event chain
 
-`ChronicleService` (`Events/ChronicleService.cs`) is the state machine, driven by `WarChronicleEventsBehavior`, a thin router that is built fresh in every campaign like `WarChronicleBehavior` and saves nothing. Every call it makes is gated on `IsAuthority` and `MayWriteSaveBackedState`. Times are campaign days (`IChronicleWorldAdapter.GetElapsedDays`, fractional).
+`ChronicleService` (`Events/ChronicleService.cs`) is the state machine, driven by `WarChronicleEventsBehavior`, a thin router that is built fresh in every campaign like `WarChronicleBehavior` and saves nothing. Every call it makes is gated on `IsAuthority` and `MayWriteSaveBackedState`. Times are whole campaign days: the floor of `IChronicleWorldAdapter.GetElapsedDays`, the same day as the ledger's `day=`. The daily tick fires a few game minutes past midnight, or at a fixed mid-day time after a mid-day load, so fractional days would let a window or a child slip a day.
 
 - **Adoption (decision D5):** at session launch, and at the start of every daily step, each configured event with no saved row gets one. When its open day is already past, or its anchor was Skipped, it becomes Skipped with no retroactive effect. A campaign started before this feature therefore gets no chronicle events once their days have passed; the rally and the ledger still work. A saved Pending row is not re-adopted: it opens on the next daily step even if late.
 - **World check at session launch:** a Pending or Active event that names a settlement or kingdom the campaign does not have (`SettlementExists`, `KingdomExists`, also for effect targets that are kingdom ids) is Skipped with a warning.
 - **Open day:** `CampaignStart` is day 0; `Phase1` and `Phase2` are `IWarOfTheRingService.GetEffectivePhaseDay(IsengardWar or FullWar)`, the clamped pair the phase machine itself uses, and count only once the phase has been reached; `Event` is the anchor event's resolution day. The offset is added in days. An event anchored on a Skipped event is Skipped; one whose `requiresOutcome` the anchor did not reach is Skipped.
 - **Preconditions at open:** the required anchor outcome; for a siege also the Full War (decision D2: peace between Hostile pairs is blocked only then), the defender alive, at least one attacker alive, the target owned by the defender, and the defender at war (`IAllianceAdapter.AreAtWar`) with at least one live attacker. A failure Skips the event, logged with the reason.
 - **Narrative:** Occurred at once; its effects are written and it is announced.
-- **Siege:** Active, with `open` = today and `close` = today + `windowDays`, stored and fixed; the army focus is pushed and the opening line is announced. If an attacker already besieges the target, the window counts as assaulted.
+- **Siege:** Active, with `open` = today and `close` = today + `windowDays`, both stored; the army focus is pushed and the opening line is announced. If an attacker already besieges the target, the window counts as assaulted.
 - **Assault:** `OnSiegeEventStartedEvent` at the target by an attacker kingdom (the besieging party's map faction), or the same seen on a daily step, marks the window assaulted.
-- **Owner change while Active** (`OnSettlementOwnerChangedEvent`, which fires twice per conquest, capture then fief grant): the new owner is an attacker, Fell at once; any other owner that is not the defender (a third kingdom, or a clan outside any kingdom), Lapsed. The second fire finds the window resolved and does nothing; a re-grant inside the defender does nothing.
-- **Window close:** an attacker holds the target, Fell; assaulted and still the defender's, Held; otherwise Lapsed (no effects, a toast only).
+- **Owner change while Active** (`OnSettlementOwnerChangedEvent`, which fires again when a multi-clan kingdom's fief vote grants the town): the new owner is an attacker, Fell at once; any other owner that is not the defender (a third kingdom, or a clan outside any kingdom), Lapsed with the generic "changes hands" line (`taom_wc_siege_lost`), because every event's own lapsed line says no attack came. The second fire finds the window resolved and does nothing; a re-grant inside the defender does nothing. Every daily step runs the same owner check first, because a clan that defects or leaves its kingdom with rebellion takes its fiefs along with no owner-changed event (`ChangeKingdomAction`), and a change while the chronicle is off is never seen.
+- **Window close:** the daily owner check has just confirmed the defender holds the target, so assaulted means Held, otherwise Lapsed (no effects, a toast only). While an attacker still besieges the target the close waits: the siege decides it (lifted, Held on the next daily step; taken, Fell). The overtime is capped at one more `windowDays`, because the engine never makes a besieging party leave and a player's camp could otherwise hold the window and its focus open; at the cap the window closes as above.
 - **War Ended:** every Pending or Active event is Skipped, silently, and the focus clears.
-- **MCM off:** nothing opens or resolves and the focus clears; the saved states are kept, and an Active window resumes when the switch comes back.
-- **Errors:** a throwing engine read is logged as `[WarChronicle] Chronicle <step> skipped` and the step is skipped. A non-finite clock skips the step.
+- **MCM off:** nothing opens or resolves and the focus clears; the saved states are kept, and an Active window resumes when the switch comes back, re-checking its owner on its first daily step.
+- **Errors:** a throwing engine read is logged as `[WarChronicle] Chronicle <step> skipped` and the step is skipped. A non-finite clock skips the step: the adapter passes a non-finite engine value through, and returns NaN with no campaign.
 
 Each resolution goes through `ChronicleOutcomeService` (`Events/ChronicleOutcomeService.cs`): the outcome's effect rows into the registry, its optional momentum award, and one `[WarLedger] ev=chronicle` line. Effect targets: `attacker` is every listed attacker, `defender` the defender, `free` and `evil` every kingdom of that side (`IAlignmentService.ResolveSide` with the kingdom's own culture), anything else a kingdom id; only kingdoms alive at the time are written. Each row is its own source, `chronicle:<event>:<outcome>:<row>`, so two rows reaching one kingdom add up. The end time is now plus `durationDays` × 24 hours. The player rule holds at the consumers ("The player rule" above): the player's own clan never gains or loses.
 
@@ -119,11 +119,11 @@ Each resolution goes through `ChronicleOutcomeService` (`Events/ChronicleOutcome
 
 ### Army focus
 
-`ChronicleFocusSync` (`Events/ChronicleFocusSync.cs`) writes every Active siege into ArmyTargeting's `ArmyTargetFocusRegistry` (`Main/Features/ArmyTargeting/ArmyTargetFocusRegistry.cs`) after every chronicle step: the target, the attackers, the defender and the MCM Army Focus Multiplier (1 to 2.5, default 1.4). During a window, Besieger armies of the attackers and Defender armies of the defender score the target times the focus, on top of the priority lists, theater weights and home-defence multiplier ([army-targeting.md](army-targeting.md) "Army focus"). The registry stores only finite multipliers above 1, so vanilla's zero (the distance veto) stays zero. It is not saved: session launch pushes the Active windows again, a resolution drops its window, War Ended and the MCM switch clear it, and the router's constructor clears whatever an earlier campaign left. It needs Army Strategic Intelligence on.
+`ChronicleService` writes every Active siege into ArmyTargeting's `ArmyTargetFocusRegistry` (`Main/Features/ArmyTargeting/ArmyTargetFocusRegistry.cs`) after every chronicle step: the target, the attackers, the defender and the MCM Army Focus Multiplier (1 to 2.5, default 1.4). During a window, Besieger armies of the attackers and Defender armies of the defender score the target times the focus, on top of the priority lists, theater weights and home-defence multiplier ([army-targeting.md](army-targeting.md) "Army focus"). A Defender army's candidate is scored only once the target is attacked (vanilla's `AiMilitaryBehavior` needs an active, at-war `LastAttackerParty`), so the defender's focus waits for the first besieger. The registry stores only finite multipliers above 1, so vanilla's zero (the strength gate in `DefaultTargetScoreCalculatingModel`) stays zero; the distance veto returns before the model is called. The focused score also reaches `CurrentObjectiveValue`, which `Army.ThinkAboutCohesionBoost` reads, so during a window armies at the target spend influence on cohesion boosts up to 2.5 times as often. It is not saved: session launch pushes the Active windows again, a resolution drops its window, War Ended and the MCM switch clear it, and the router's constructor resets whatever an earlier campaign left (`ArmyTargetFocusRegistry.ResetForNewSession`). It needs AI Strategic Intelligence on.
 
 ### Announcements
 
-`ChronicleAnnouncementQueue` (`Events/ChronicleAnnouncementQueue.cs`) holds texts and their `{TARGET}` and `{DAYS}` values in memory, not in the save, at most 16 (the oldest drop). The router's `TickEvent` listener calls `TryShowNext`, which returns at once on an empty queue, shows nothing while another of its popups is open (the CareerQuest stacked-popup guard), re-checks `IsAuthority`, and needs the map free: `ChroniclePresenter.IsMapFree` is the Messenger `IsPlayerAvailable` check (a main party, no encounter, the map state not at a menu) plus no other inquiry open. The presenter shows a one-button `InquiryData` ("Continue") with the event title and line; never a scene notification, which NREs for custom races. A show that throws is logged and the item dropped, so the queue never sticks. Openings, narratives, Held, Fell and Lapsed are announced; Skipped is silent. With Show Announcements off nothing is queued. Co-op clients see no announcements, as with the momentum meter.
+`ChronicleAnnouncementQueue` (`Events/ChronicleAnnouncementQueue.cs`) holds texts and their `{TARGET}` and `{DAYS}` values in memory, not in the save, at most 16 (the oldest drop). The router's `TickEvent` listener calls `TryShowNext`, which returns at once on an empty queue, drops what is queued when the chronicle or its announcements are switched off, needs the map free, and then re-checks `IsAuthority` (the co-op probe uses reflection, so the cheap map test goes first). `ChroniclePresenter.IsMapFree` is the Messenger `IsPlayerAvailable` check (a main party, no encounter, the map state not at a menu) plus no inquiry open (`InformationManager.IsAnyInquiryActive`), the chronicle's own included: that is what keeps popups from stacking, so the queue holds no latch of its own and a popup closed without its button action (`InformationManager.HideInquiry`) cannot stall it. The presenter shows a one-button `InquiryData` ("Continue") with the event title and line; never a scene notification, which NREs for custom races. A show that throws is logged and the item dropped, so the queue never sticks. Openings, narratives, Held, Fell and Lapsed are announced; Skipped is silent. With Show Announcements off nothing is queued, and what was queued is dropped unshown. Co-op clients see no announcements, as with the momentum meter.
 
 ### Momentum awards
 
@@ -131,7 +131,7 @@ An outcome may carry `"momentum": {"side": "free"|"evil", "units": 1..300}`. `Ch
 
 ### The save payload
 
-`WarChronicleStateService` (`WarChronicleStateService.cs`) assembles one JSON payload through `WarChronicleSaveCodec` (`WarChronicleSaveCodec.cs`): `{"v":1,"effects":[{"s","k","kind","m","end"}],"baselines":{},"rally":{"tiers":{}},"chronicle":[{"id","s","open","close","a","res"}]}`. The codec carries the `chronicle` array as one section; its rows belong to `ChronicleStateStore` (`Events/ChronicleStateStore.cs`): the event id, its state as an int (`ChronicleEventState`: Pending 0, Active 1, Occurred 2, Held 3, Fell 4, Lapsed 5, Skipped 6, never renumbered), the open and close days of a window, whether it was assaulted, and the resolution day. A row with no id, an undefined state, an Active state without a finite window, or a day that is not a finite number is skipped alone with a warning, and the adoption rule re-creates it at session launch. A row for an id the configuration no longer lists is kept, so a later release's save survives a load in this one. The army focus and the announcement queue are not saved.
+`WarChronicleStateService` (`WarChronicleStateService.cs`) assembles one JSON payload through `WarChronicleSaveCodec` (`WarChronicleSaveCodec.cs`): `{"v":1,"effects":[{"s","k","kind","m","end"}],"baselines":{},"rally":{"tiers":{}},"chronicle":[{"id","s","open","close","a","res"}]}`. The codec reads and writes the `chronicle` rows itself, as typed records the payload hands to `ChronicleStateStore` (`Events/ChronicleStateStore.cs`): the event id, its state as an int (`ChronicleEventState`: Pending 0, Active 1, Occurred 2, Held 3, Fell 4, Lapsed 5, Skipped 6, never renumbered), the open and close days of a window, whether it was assaulted, and the resolution day. A row with no id, a duplicate id, an undefined state, an Active state without a finite window, a resolved state without its resolution day (an Event-anchored child counts from it), or a day that is not a finite number is skipped alone with a warning, and the adoption rule re-creates it at session launch. A row for an id the configuration no longer lists is kept, so a later release's save survives a load in this one. The army focus and the announcement queue are not saved.
 
 - **Chunking:** `MomentumSyncChunker.Split` cuts the string into chunks of at most 10,000 characters, because one `SyncData` string over 32,767 UTF-8 bytes corrupts the save at write time. `WarChronicleBehavior` writes `_taom_war_chronicle_v1_count` and `_taom_war_chronicle_v1_{i}`. A count below 0 or above 4,096 is ignored with a warning.
 - **Forgiving parse:** an unreadable payload, a non-object or an unknown `v` resets every section. A section that does not parse resets alone, and a bad row inside a section (an unknown effect kind, a non-finite number, a rally tier outside 0 to 2) is skipped alone; each leaves a `[WarChronicle] Save:` warning. An empty payload (a corrupt or out-of-range chunk count) restores nothing; a save from before this feature never reaches `SyncData` at all. A development save that still carries the dropped `baselinesMidCampaign` key loads fine, because unknown keys are ignored.
@@ -157,7 +157,7 @@ SessionLaunched, DailyTick, OwnerChanged, SiegeStarted -> WarChronicleEventsBeha
         ChronicleStateStore (saved in WarChronicleBehavior's payload)
         IChronicleWorldAdapter, IAllianceAdapter, IWarOfTheRingService (phase days)
         ChronicleOutcomeService -> IWarEffectService, IMomentumAwardService, WarLedgerService
-        ChronicleFocusSync -> ArmyTargetFocusRegistry <- ArmyTargetingService (TaomTargetScoreModel)
+        ChronicleService -> ArmyTargetFocusRegistry <- ArmyTargetingService (TaomTargetScoreModel)
         ChronicleAnnouncementQueue -> IChroniclePresenter (TickEvent, one inquiry at a time)
 ```
 
@@ -190,13 +190,15 @@ One test each in `ChronicleConfigValidatorTests`. Each problem is a warning; one
 - **The file:** readable JSON, `schemaVersion` 1, an `events` array; otherwise no event loads. At most 32 events; the rest are skipped.
 - **An event is skipped** for: a blank or duplicate id; a `kind` other than `Narrative` or `Siege`; an `anchor` other than `CampaignStart`, `Phase1`, `Phase2` or `Event`; an `Event` anchor without `anchorEvent`, or one naming an event that is not earlier in the file and loaded (so no cycle can form); an `anchorEvent` on a phase anchor; a `requiresOutcome` without an Event anchor, of an unknown state, or one the anchor's kind never reaches (a narrative only `Occurred`, a siege `Held`, `Fell` or `Lapsed`); `offsetDays` outside 0 to 365; no `title`; a narrative without an `occurred` outcome; a siege with `windowDays` outside 1 to 60, no `target`, no `defender`, no `attackers`, the defender among the attackers, or an anchor chain that does not reach Phase 2 (anchor `Phase2`, or an `Event` chain through a Phase 2 event or a siege).
 - **An effect row is skipped alone** for: a blank `target`; `attacker` or `defender` on a narrative; a `kind` other than `VolunteerRate` or `PrisonerEscape`; a `magnitude` that is not finite (checked first), is zero, or is past 0.25 either way; `durationDays` outside 1 to 60.
-- **A momentum award is dropped alone** for a `side` other than `free` or `evil`, or `units` outside 1 to 300.
+- **A momentum award is dropped alone** when it is not an object, for a `side` other than `free` or `evil`, or for `units` outside 1 to 300 (the momentum service's own cap).
+- **Names only:** `kind`, `anchor`, `requiresOutcome` and an effect's `kind` match a name, trimmed and in any case; a number, a sign or a comma list never parses.
+- **Unknown keys warn:** a key the level does not know (event, outcome, effect, momentum) is ignored with a warning, so a typo such as `momentm` cannot drop a block silently; a key starting with `_` is an author's note. An optional text that is not a string, a siege's `outcomes` that is not an object and `effects` that is not an array warn too; a `requiresOutcome` that is not a string skips the event.
 - An outcome the kind never reaches (`held` on a narrative, `lapsed` anywhere) is ignored with a warning.
 - Settlement and kingdom ids are checked against the campaign at session launch, not at load.
 
 #### The v1 content
 
-Every siege opens at Phase 2 or later. Target owners confirmed in the live `TAOM_Map/ModuleData/settlements.xml` and the clan files on 2026-10-08, and every attacker and defender pair is Hostile in `diplomacy.json` (both pinned by `ChronicleShippedContentTests`). Siege rows use the stalemate rule and award the Free side 100 momentum units when held.
+Every siege opens at Phase 2 or later. Target owners were confirmed by hand in the live `TAOM_Map/ModuleData/settlements.xml` and the clan files on 2026-10-08; at runtime the open precondition Skips a siege whose target the defender no longer holds. `ChronicleShippedContentTests` pins the target, defender and attacker ids, and that every attacker and defender pair is Hostile in `diplomacy.json`. Siege rows use the stalemate rule and award the Free side 100 momentum units when held.
 
 | # | Event (`id`) | Kind | Opens | Window | Target: attackers -> defender | Effects |
 |---|---|---|---|---|---|---|
@@ -253,7 +255,7 @@ The group `War of the Ring/War Chronicle`, also `RequireRestart = false`:
 |---|---|---|---|
 | Enable Chronicle | `WarChronicleEnabled` | true | Off stops new work: nothing opens or resolves and the army focus clears. The saved states are kept |
 | Show Announcements | `WarChronicleAnnouncements` | true | Off queues no popup; the events still run. Presentation only, so it is excluded from the co-op settings fingerprint |
-| Army Focus Multiplier | `WarChronicleArmyFocus` | 1.4 | Slider 1 to 2.5; 1 turns the focus off. Needs Army Strategic Intelligence |
+| Army Focus Multiplier | `WarChronicleArmyFocus` | 1.4 | Slider 1 to 2.5 (the registry's cap, one constant); 1 turns the focus off. The defender's focus applies once the target is attacked. Needs AI Strategic Intelligence |
 
 `WarChronicleSettingsProvider` re-validates the strength (non-finite to 1, else clamp 0 to 2) and the focus multiplier (non-finite to 1.4, else clamp 1 to 2.5), and takes the settings object once, lazily, on first read; it is registered in `CampaignHotPathSettingsProvidersTests`. The focus multiplier is read when the chronicle pushes its windows (every daily step), never on the scoring path.
 
@@ -271,7 +273,7 @@ Registered in `Main/Features/WarChronicle/Cheats/WarChronicleCheats.cs` and `Chr
 | `taom.war_effect_add <kingdomId> <VolunteerRate\|PrisonerEscape> <magnitude> <days>` | Adds an effect from source `console`: magnitude -1 to 1, days above 0 up to 365; the kingdom must exist in the campaign. Echoes the multiplier before and after. Refused on a BannerlordCoop client |
 | `taom.rally_status` | Per kingdom: points, baseline, loss, stored tier and eligibility, plus whether the rally is on |
 | `taom.print_war_ledger` | Prints the ledger lines today's tick would write; logs and changes nothing |
-| `taom.chronicle_status` | Every chronicle event with its state, its open, close or resolution day, whether an Active siege was assaulted, and the army focus. Read-only |
+| `taom.chronicle_status` | Every chronicle event with its state, its open, close or resolution day (an Active window past its close day reads "overtime: an attacker still besieges it"), whether an Active siege was assaulted, and the army focus, marked inactive when AI Strategic Intelligence is off. Read-only |
 | `taom.chronicle_open <id>` | Opens a Pending event now, ignoring its day but still checking its preconditions; a failure leaves it Pending and says why. Refused on a co-op client and while the chronicle is off |
 
 ## How to measure
@@ -280,7 +282,7 @@ The ledger is the proof that the rally changes anything.
 
 1. **Run an observer campaign.** Start a campaign with the War of the Ring test mode (short phase days, see [war-of-the-ring.md](war-of-the-ring.md)), park the player somewhere harmless, and fast-forward with the TAOM time tiers for a few hundred in-game days. One run per setting: for example the MCM `Enable Rally` off for a control and on for the test.
 2. **Read the log.** The default is the newest `taom_debug_*.log` under the game's `bin/Win64_Shipping_Client/Logs/`; `BANNERLORD_GAME_DIR` overrides the install path. Run `python tools/analyze_war_ledger.py [logs ...] [--cid ID]`. The tool is read-only, groups by campaign id, reads the logs oldest first, and keeps the last line per kingdom and day, so reloading the same save does not double-count. A reload of an OLDER save still leaves the abandoned run's later days and events in the report, because the log carries no marker for the rewind yet. A malformed line is skipped and counted, and the first one is printed as a warning. Exit codes: 0 success; 1 no ledger lines, an unknown cid, an unreadable log or an unwritable `--csv` path; 2 an unknown `v` or a usage error.
-3. **Metrics in the summary:** days covered; the Free share series (mean deviation from 0.5, maximum deviation and its day, fraction of days in 0.4 to 0.6, lead changes with a dead band of 0.48 to 0.52); first capital loss per kingdom and per side; kingdoms destroyed; fief churn per 10-day bucket; days at tier 1 and tier 2 and tier changes per kingdom; net change per side; chronicle outcomes by day, then counted per outcome (`resolutions by outcome: Held 2, Lapsed 3`, keeping the last line read for each event, so a reload that replays a resolution counts once); and a target check, (a) share in 0.4 to 0.6 on at least 80% of non-na days, (b) no capital lost before day 120, with four verdicts, judged per kingdom: FAIL (any `cap=0` before day 120, reported as "day N" for an observed transition and "lost by day N" when the first capital state is already 0), PASS (every kingdom has a capital state on every day 1 to 119, or up to the day before its `ev=destroyed` line, and none was lost), NO DATA (no line carries a capital state) and UNKNOWN (some kingdom has a hole in that range: `cap=na` days, a kingdom first seen after day 1, a destroyed kingdom with no rows, or missing days; the reason names the kingdom, and another kingdom's complete rows never fill it).
+3. **Metrics in the summary:** days covered; the Free share series (mean deviation from 0.5, maximum deviation and its day, fraction of days in 0.4 to 0.6, lead changes with a dead band of 0.48 to 0.52); first capital loss per kingdom and per side; kingdoms destroyed; fief churn per 10-day bucket; days at tier 1 and tier 2 and tier changes per kingdom; net change per side; chronicle outcomes by day, one row per event, then counted per outcome (`resolutions by outcome: Held 2, Lapsed 3`), keeping the last line read for each event even when it repeats an earlier line byte for byte, so a reload that replays a resolution counts once; and a target check, (a) share in 0.4 to 0.6 on at least 80% of non-na days, (b) no capital lost before day 120, with four verdicts, judged per kingdom: FAIL (any `cap=0` before day 120, reported as "day N" for an observed transition and "lost by day N" when the first capital state is already 0), PASS (every kingdom has a capital state on every day 1 to 119, or up to the day before its `ev=destroyed` line, and none was lost), NO DATA (no line carries a capital state) and UNKNOWN (some kingdom has a hole in that range: `cap=na` days, a kingdom first seen after day 1, a destroyed kingdom with no rows, or missing days; the reason names the kingdom, and another kingdom's complete rows never fill it).
 4. **Compare two runs.** `--compare off.log on.log` (each argument is `path` or `path:cid`; with no cid the campaign with the most days is used) prints each metric for A, B and B minus A, then the target verdicts for each. `--compare` reads one file per side (concatenate a run's logs, oldest first) and refuses `--csv`, `--cid` or extra log paths. `--csv PATH` writes the per-day series.
 
 The analyzer's tests are `tools/tests/test_analyze_war_ledger.py` (run `python -m unittest tools.tests.test_analyze_war_ledger` from the repo root; `/verify`'s `python -m unittest discover -s tools/tests -t .` covers them too).
@@ -292,9 +294,9 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 1. **Narratives:** on day 1 or 2 "The Breaking of the Fellowship" and on day 8 or 9 "Théoden King" pop up on the map (one at a time, never over a menu or a battle). `taom.war_effects` lists `chronicle:breaking:Occurred:0` on isengard.
 2. **A siege opens:** on day 8 the Hornburg window opens (Phase 2 + 5). `taom.chronicle_status` shows it Active with its close day and the focus line `town_V2 x1.40`. Or open one at once: `taom.chronicle_open osgiliath`.
 3. **Held:** let an Isengard or Dunland army besiege Helm's Deep and fail (or, as a vassal of Isengard, besiege it yourself and lift the siege); at the close the event is Held, vlandia shows volunteers x1.15 and isengard and empire escape x1.20 in `taom.war_effects`, and the momentum breakdown gains a "Chronicle Events" row for the Free side.
-4. **Fell:** take a target town for an attacker (join Isengard and capture Helm's Deep). The window resolves Fell the moment the town changes hands. Check the double fire: the fief-grant election a day later must not log a second `ev=chronicle` line or a second popup.
+4. **Fell:** take a target town for an attacker (join Isengard and capture Helm's Deep). The window resolves Fell the moment the town changes hands. Check the double fire: in a kingdom of more than one clan the fief vote fires the owner change again when it resolves, and it must not log a second `ev=chronicle` line or a second popup.
 5. **Lapsed:** open a window early (`taom.chronicle_open north`) and watch that no Gundabad or Dunland army besieges Bree before the close: a Lapsed popup, no new effect. Repeat on another front if one does.
-6. **Save and reload mid-window:** save while a window is Active, reload: `taom.chronicle_status` shows the same close day and the focus line again, and the window resolves on its old close day.
+6. **Save and reload mid-window:** save while a window is Active, reload: `taom.chronicle_status` shows the same close day and the focus line again, and the window resolves on its old close day unless an attacker still besieges the target.
 7. **New campaign after a resolved chain:** exit to the menu and start a new campaign in the same process: every event is Pending again.
 8. **Old save:** load a campaign past day 60 that was started before this feature: the events whose day has passed are Skipped (silently, one `outcome=Skipped` ledger line each); later events still open.
 
@@ -310,7 +312,7 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 | `Main/Features/WarChronicle/Rally/` | Baselines, tier machine and store, rally service, config provider |
 | `Main/Features/WarChronicle/Ledger/` | Ledger service and formatter |
 | `Main/Features/WarChronicle/Cheats/` | Console commands and their report text |
-| `Main/Features/WarChronicle/Events/` | The event chain: definitions, validator and provider, state store, service, outcome service, focus sync, announcement queue, presenter, router behavior |
+| `Main/Features/WarChronicle/Events/` | The event chain: definitions, validator and provider, state store, service, outcome service, announcement queue, presenter, router behavior |
 | `Main/Adapters/ChronicleWorldAdapter.cs`, `IChronicleWorldAdapter.cs` | Clock, settlement and kingdom ids, target owner and besieger |
 | `Main/Features/ArmyTargeting/ArmyTargetFocusRegistry.cs`, `ArmyTargetFocus.cs` | The army focus windows read by `ArmyTargetingService` |
 | `Main/Features/WarOfTheRingMomentum/MomentumAwardService.cs` | The `Chronicle` momentum award |
@@ -337,14 +339,14 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 
 ## Tests
 
-Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute lines (2026-10-08); they exclude `[DataRow]` expansions. The 447 under `TAOM.Tests/Features/WarChronicle/` plus 61 in the seven outside files below make 508 C# tests, of which 81 are `[DataTestMethod]`. `MomentumConfigProviderTests` also gained 2 for the `chronicle` duration.
+Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute lines (2026-10-14); they exclude `[DataRow]` expansions. The 493 under `TAOM.Tests/Features/WarChronicle/` plus 75 in the eight outside files below make 568 C# tests, of which 97 are `[DataTestMethod]`. `MomentumConfigProviderTests` also gained 2 for the `chronicle` duration.
 
 | Class | File | Tests |
 |---|---|---|
 | `WarEffectServiceTests` | `TAOM.Tests/Features/WarChronicle/Effects/` | 33 |
 | `WarEscapeServiceTests` | same | 32 |
 | `WarEscapeDailyPassTests` | same | 13 |
-| `RallyServiceTests` | `.../Rally/` | 41 |
+| `RallyServiceTests` | `.../Rally/` | 42 |
 | `RallyConfigProviderTests` | same | 29 |
 | `RallyTierMachineTests` | same | 14 |
 | `RallyTierStoreTests` | same | 10 |
@@ -352,7 +354,7 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 | `WarLedgerFormatterTests` | `.../Ledger/` | 18 |
 | `WarLedgerServiceTests` | same | 16 |
 | `WarChronicleCheatReportTests` | `.../Cheats/` | 19 |
-| `WarChronicleSaveCodecTests` | `.../WarChronicle/` | 25 |
+| `WarChronicleSaveCodecTests` | `.../WarChronicle/` | 24 |
 | `WarChronicleStateServiceTests` | same | 10 |
 | `WarChronicleTickServiceTests` | same | 15 |
 | `WarChronicleBehaviorTests` | same | 8 |
@@ -361,23 +363,24 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 | `WarChronicleWiringTests` | same | 5 |
 | `VolunteerProductionServiceTests` | `TAOM.Tests/Features/TroopProgression/` | 21 |
 | `VolunteerProductionWiringTests` | same | 1 |
-| `ChronicleServiceTests` | `.../WarChronicle/Events/` | 55 |
-| `ChronicleConfigValidatorTests` | same | 43 |
-| `ChronicleAnnouncementQueueTests` | same | 11 |
+| `ChronicleServiceTests` | `.../WarChronicle/Events/` | 68 |
+| `ChronicleConfigValidatorTests` | same | 55 |
+| `ChronicleConfigProviderTests` | same | 5 |
+| `ChronicleAnnouncementQueueTests` | same | 12 |
 | `ChronicleShippedContentTests` | same | 9 |
-| `ChronicleStateStoreTests` | same | 8 |
+| `ChronicleStateStoreTests` | same | 5 |
 | `ChroniclePersistenceTests` | same | 5 |
 | `WarChronicleEventsWiringTests` | same | 5 |
-| `ChronicleCheatReportTests` | `.../WarChronicle/Cheats/` | 6 |
-| `WarChronicleEventSettingsTests` | `.../WarChronicle/` | 4 |
-| `ArmyTargetFocusRegistryTests` | `TAOM.Tests/Features/ArmyTargeting/` | 18 |
+| `ChronicleCheatReportTests` | `.../WarChronicle/Cheats/` | 8 |
+| `WarChronicleEventSettingsTests` | `.../WarChronicle/` | 5 |
+| `ArmyTargetFocusRegistryTests` | `TAOM.Tests/Features/ArmyTargeting/` | 19 |
 | `ArmyTargetFocusScoringTests` | same | 7 |
 | `MomentumAwardServiceTests` | `TAOM.Tests/Features/WarOfTheRingMomentum/` | 9 |
 | `WarOfTheRingPhaseDayTests` | `TAOM.Tests/Features/Diplomacy/` | 5 |
 | `PrisonerEscapeAdapterTests` | `TAOM.Tests/Adapters/` | 4 |
 | `KingdomWarSnapshotAdapterTests` | same | 9 |
 
-`WarChronicleSettingsProvider` is also a row in `CampaignHotPathSettingsProvidersTests`, and `CastleRecruitmentServiceTests` covers the castle consumer. The analyzer has 64 Python tests (`def test_` count) in `tools/tests/test_analyze_war_ledger.py`.
+`WarChronicleSettingsProvider` is also a row in `CampaignHotPathSettingsProvidersTests`, and `CastleRecruitmentServiceTests` covers the castle consumer. The analyzer has 81 Python tests (`def test_` count) in `tools/tests/test_analyze_war_ledger.py`.
 
 ## Known limitations
 
@@ -393,10 +396,13 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 - **The Eye of Sauron hunt (M8) is a separate module** and keeps its own `_taom_eye_*` save keys ([eye-of-sauron.md](eye-of-sauron.md)).
 - **Old saves get no chronicle.** A campaign past an event's day when it first loads this feature skips that event (decision D5); one past about day 60 gets no chronicle events at all.
 - **Lapsing sieges.** An attacker may not reach its target in the window (Dunland drawn north, Umbar by sea, Osgiliath before Minas Tirith). The window lapses with no effects; the ledger shows how often.
-- **The chronicle runs one day behind a phase change.** The chronicle's daily listener can run before the phase machine's on the day a phase turns, so a `Phase1 + 0` event can open on the next day.
-- **The army focus needs Army Strategic Intelligence.** With that MCM switch off, TAOM's army scoring, the focus included, is vanilla's.
+- **The chronicle runs one day behind a phase change.** The chronicle's daily listener always runs before the phase machine's, so a `Phase1 + 0` event opens one daily tick after the phase changes; it is never skipped.
+- **The army focus needs AI Strategic Intelligence.** With that MCM switch off, TAOM's army scoring, the focus included, is vanilla's.
 - **Co-op clients see no announcements** and run no chronicle step; they take the host's chronicle state through the save.
 - **The 12 languages show English** for the chronicle's text until the paid translation run.
+- **Phase anchors read the configured day, not the day the phase began.** When a phase begins after its configured day (the war switched on late, a phase day lowered below today, Test Mode switched on), every Phase 1 and Phase 2 event already past its day opens on one daily step: up to eight announcements in a row (the queue caps at 16) and six siege windows that open and close together. Raising a phase day, or turning Test Mode off, after the phase began postpones its Pending events. Switching the chronicle off and on opens on one step whatever came due in between.
+- **Test Mode inverts the lore order.** With Phase 1 before day 20 (Test Mode puts it on day 1), `breaking` (Phase 1 + 0) fires before `fellowship` (day 20) and `khazaddum` (day 26).
+- **A siege can hold its window past the close.** While an attacker still besieges the target, the close waits for one more `windowDays` at most, and the children anchored on its resolution (ents, gondor, blackgate) open later.
 
 ## Changelog
 

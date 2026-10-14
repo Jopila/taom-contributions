@@ -168,6 +168,16 @@ public class ArmyTargetFocusRegistryTests
     }
 
     [TestMethod]
+    public void ResetForNewSession_DropsAnEarlierCampaignsFocus()
+    {
+        var sut = With(Hornburg());
+
+        sut.ResetForNewSession();
+
+        Assert.IsTrue(sut.IsEmpty);
+    }
+
+    [TestMethod]
     public void GetMultiplier_TwoFocusesOnOneTarget_ReturnsTheLarger()
     {
         var sut = With(Hornburg(1.2f), Hornburg(1.8f));

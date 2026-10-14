@@ -6,21 +6,22 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TAOM.Core.Validation;
 using TAOM.Features.WarChronicle.Effects;
+using TAOM.Features.WarChronicle.Events;
 
 namespace TAOM.Features.WarChronicle;
 
 /// <summary>
 /// The War Chronicle payload as JSON: <c>{"v":1,"effects":[{"s","k","kind","m","end"}],"baselines":{},
-/// "rally":{"tiers":{}},"chronicle":[]}</c>. Pure. Parsing is forgiving by
+/// "rally":{"tiers":{}},"chronicle":[{"id","s","open","close","a","res"}]}</c>. Pure. Parsing is forgiving by
 /// section: a bad section resets alone with a warning, a bad row inside a section is skipped alone, and
 /// nothing here throws on save content. Effect kinds are saved by name; an unknown name (a kind from a
-/// newer build) is skipped. The chronicle array is carried as parsed JSON, dates left as text, and is
-/// never interpreted here.
+/// newer build) is skipped. A chronicle row saves its state as the <see cref="ChronicleEventState"/> int
+/// and leaves an absent day out; it is skipped for no id, a duplicate id, an undefined state, a day that
+/// is not a finite number, an Active state without a window, or a resolved state without its day.
 /// </summary>
 internal static class WarChronicleSaveCodec
 {
     internal const int Version = 1;
-    internal const string EmptyArray = "[]";
 
     internal static string Serialize(WarChroniclePayload payload)
     {
@@ -43,7 +44,7 @@ internal static class WarChronicleSaveCodec
             ["effects"] = effects,
             ["baselines"] = IntMap(payload.Baselines),
             ["rally"] = new JObject { ["tiers"] = IntMap(payload.RallyTiers) },
-            ["chronicle"] = ChronicleToken(payload.ChronicleJson),
+            ["chronicle"] = ChronicleRows(payload.Chronicle),
         };
         return root.ToString(Formatting.None);
     }
@@ -92,7 +93,7 @@ internal static class WarChronicleSaveCodec
 
     private static JToken Load(string json)
     {
-        // Dates stay text: the chronicle section must come back as it went in.
+        // Dates stay text: no section holds a date, and an id that looks like one must stay a string.
         using (var reader = new JsonTextReader(new StringReader(json)) { DateParseHandling = DateParseHandling.None })
         {
             return JToken.Load(reader);
@@ -109,18 +110,27 @@ internal static class WarChronicleSaveCodec
         return result;
     }
 
-    private static JToken ChronicleToken(string? json)
+    private static JArray ChronicleRows(IEnumerable<ChronicleEventRecord> records)
     {
-        if (string.IsNullOrWhiteSpace(json))
-            return new JArray();
-        try
+        var rows = new JArray();
+        foreach (var record in records)
         {
-            return Load(json!) as JArray ?? new JArray();
+            var row = new JObject { ["id"] = record.Id, ["s"] = (int)record.State };
+            Day(row, "open", record.OpenDay);
+            Day(row, "close", record.CloseDay);
+            if (record.Assaulted)
+                row["a"] = true;
+            Day(row, "res", record.ResolvedDay);
+            rows.Add(row);
         }
-        catch (JsonException)
-        {
-            return new JArray();
-        }
+
+        return rows;
+    }
+
+    private static void Day(JObject row, string key, double? value)
+    {
+        if (value.HasValue && FiniteFloatValidator.IsFinite(value.Value))
+            row[key] = value.Value;
     }
 
     private static void ReadEffects(JObject root, WarChroniclePayload payload)
@@ -226,10 +236,83 @@ internal static class WarChronicleSaveCodec
         var section = root["chronicle"];
         if (section == null)
             return;
-        if (section is JArray array)
-            payload.ChronicleJson = array.ToString(Formatting.None);
-        else
+        if (!(section is JArray rows))
+        {
             payload.Warnings.Add("the chronicle section is not an array, so it is reset");
+            return;
+        }
+
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        for (var i = 0; i < rows.Count; i++)
+        {
+            if (!TryReadChronicleRow(rows[i], out var record, out var problem))
+                payload.Warnings.Add($"chronicle row {i} skipped: {problem}");
+            else if (!seen.Add(record!.Id))
+                payload.Warnings.Add($"chronicle row {i} skipped: a duplicate of '{record.Id}'");
+            else
+                payload.Chronicle.Add(record);
+        }
+    }
+
+    private static bool TryReadChronicleRow(JToken token, out ChronicleEventRecord? record, out string problem)
+    {
+        record = null;
+        problem = string.Empty;
+        if (!(token is JObject row))
+        {
+            problem = "it is not an object";
+            return false;
+        }
+
+        if (!TryString(row["id"], out var id))
+        {
+            problem = "its id is missing or empty";
+            return false;
+        }
+
+        if (!(row["s"] is JValue { Value: long raw }) || raw < int.MinValue || raw > int.MaxValue
+            || !Enum.IsDefined(typeof(ChronicleEventState), (int)raw))
+        {
+            problem = $"'{id}' has a state this build does not know ({row["s"]})";
+            return false;
+        }
+
+        if (!TryDay(row, "open", out var open) || !TryDay(row, "close", out var close) || !TryDay(row, "res", out var resolved))
+        {
+            problem = $"'{id}' has a window or resolution day (open, close or res) that is not a finite number";
+            return false;
+        }
+
+        var state = (ChronicleEventState)(int)raw;
+        if (state == ChronicleEventState.Active && (!open.HasValue || !close.HasValue))
+        {
+            problem = $"'{id}' is Active without a finite window";
+            return false;
+        }
+
+        // An Event-anchored child counts from its anchor's resolution day; without it the child never opens.
+        if (state != ChronicleEventState.Pending && state != ChronicleEventState.Active && !resolved.HasValue)
+        {
+            problem = $"'{id}' is {state} without a finite resolution day (res)";
+            return false;
+        }
+
+        var assaulted = row["a"] is JValue { Type: JTokenType.Boolean } a && (bool)a.Value!;
+        record = new ChronicleEventRecord(id, state) { OpenDay = open, CloseDay = close, Assaulted = assaulted, ResolvedDay = resolved };
+        return true;
+    }
+
+    /// <summary>False when the key holds something other than a finite number; an absent or null key is a null day.</summary>
+    private static bool TryDay(JObject row, string key, out double? day)
+    {
+        day = null;
+        var token = row[key];
+        if (token == null || token.Type == JTokenType.Null)
+            return true;
+        if (!TryNumber(token, out var value))
+            return false;
+        day = value;
+        return true;
     }
 
     private static Dictionary<string, int> ReadIntMap(JObject map, string what, int min, int max, WarChroniclePayload payload)

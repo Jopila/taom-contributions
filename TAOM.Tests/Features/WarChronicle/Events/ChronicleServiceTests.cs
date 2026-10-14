@@ -40,6 +40,16 @@ public class ChronicleServiceTests
         _sut.RunChronicleDay();
     }
 
+    /// <summary>Shows every queued announcement and returns their texts in order.</summary>
+    private System.Collections.Generic.List<string?> DrainTexts()
+    {
+        var texts = new System.Collections.Generic.List<string?>();
+        _f.Presenter.When(p => p.Show(Arg.Any<ChronicleAnnouncement>())).Do(c => texts.Add(c.Arg<ChronicleAnnouncement>().Text));
+        while (_f.Queue.Count > 0)
+            _f.Queue.TryShowNext();
+        return texts;
+    }
+
     // ---- Session launch: adoption and world checks -------------------------------------------------
 
     [TestMethod]
@@ -76,6 +86,16 @@ public class ChronicleServiceTests
         Launch(100);
 
         Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("hornburg"));
+    }
+
+    [TestMethod]
+    public void LaunchChronicle_OnAnEventsOwnDay_KeepsItPending()
+    {
+        _f.Events.Add(Narrative("fellowship", offset: 20));
+
+        Launch(20.4);
+
+        Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("fellowship"), "day 20.4 is still day 20");
     }
 
     [TestMethod]
@@ -337,7 +357,7 @@ public class ChronicleServiceTests
         _f.Events.Add(SiegeDef());
         Launch(0);
         ChronicleAnnouncement? shown = null;
-        _f.Presenter.When(p => p.Show(Arg.Any<ChronicleAnnouncement>(), Arg.Any<System.Action>())).Do(c => shown = c.Arg<ChronicleAnnouncement>());
+        _f.Presenter.When(p => p.Show(Arg.Any<ChronicleAnnouncement>())).Do(c => shown = c.Arg<ChronicleAnnouncement>());
 
         Day(49);
         _f.Queue.TryShowNext();
@@ -445,6 +465,7 @@ public class ChronicleServiceTests
         Day(49);
         _f.World.Besiegers["town_V2"] = "isengard";
         _sut.OnTargetBesieged("town_V2");
+        _f.World.Besiegers.Remove("town_V2");
 
         Day(69);
 
@@ -471,6 +492,90 @@ public class ChronicleServiceTests
         Assert.AreEqual(0, _f.Effects.Snapshot().Count);
         Assert.AreEqual(1, _f.Queue.Count, "a lapse is announced");
         Assert.IsTrue(_f.Focus.IsEmpty);
+        CollectionAssert.AreEqual(new[] { "{=taom_wc_hornburg_lapsed}lapsed" }, DrainTexts());
+    }
+
+    [TestMethod]
+    public void WindowClose_AttackerStillBesieging_DefersTheClose()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        _f.World.Besiegers["town_V2"] = "isengard";
+
+        Day(69);
+
+        Assert.AreEqual(ChronicleEventState.Active, _f.StateOf("hornburg"), "a siege still being fought decides the window");
+        Assert.AreEqual(0, _f.Effects.Snapshot().Count);
+        Assert.AreEqual(1.4f, _f.Focus.GetMultiplier(ArmyTargetingMission.Besieger, "town_V2", "isengard"), 0.0001f);
+    }
+
+    [TestMethod]
+    public void WindowClose_DeferredThenTaken_FallsAndSkipsTheHeldChild()
+    {
+        _f.Events.Add(SiegeDef());
+        _f.Events.Add(Narrative("ents", ChronicleAnchor.Event, 2, anchorEvent: "hornburg", requires: ChronicleEventState.Held));
+        Launch(0);
+        Day(49);
+        _f.World.Besiegers["town_V2"] = "isengard";
+        Day(69);
+
+        _f.World.Owners["town_V2"] = "isengard";
+        _f.World.Day = 71;
+        _sut.OnTargetOwnerChanged("town_V2");
+        Day(72);
+
+        Assert.AreEqual(ChronicleEventState.Fell, _f.StateOf("hornburg"));
+        Assert.AreEqual(1.15f, _f.Volunteers("isengard"), 0.0001f);
+        Assert.AreEqual(1.2f, _f.Escape("vlandia"), 0.0001f);
+        Assert.AreEqual(1f, _f.Volunteers("vlandia"), "Held never paid");
+        Assert.AreEqual(ChronicleEventState.Skipped, _f.StateOf("ents"));
+    }
+
+    [TestMethod]
+    public void WindowClose_DeferredThenLifted_IsHeldOnTheNextDay()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        _f.World.Besiegers["town_V2"] = "isengard";
+        Day(69);
+        Day(70);
+
+        _f.World.Besiegers.Remove("town_V2");
+        Day(71);
+
+        Assert.AreEqual(ChronicleEventState.Held, _f.StateOf("hornburg"));
+        Assert.AreEqual(71d, _f.Store.Get("hornburg")!.ResolvedDay);
+    }
+
+    [TestMethod]
+    public void WindowClose_ThirdPartyBesieging_DoesNotDefer()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        _f.World.Besiegers["town_V2"] = "empire_s";
+
+        Day(69);
+
+        Assert.AreEqual(ChronicleEventState.Lapsed, _f.StateOf("hornburg"));
+    }
+
+    [TestMethod]
+    public void WindowClose_StillBesiegedAtTheCap_Closes()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        _f.World.Besiegers["town_V2"] = "isengard";
+        Day(69);
+        Day(88);
+        Assert.AreEqual(ChronicleEventState.Active, _f.StateOf("hornburg"), "one extra window of overtime at most");
+
+        Day(89);
+
+        Assert.AreEqual(ChronicleEventState.Held, _f.StateOf("hornburg"));
     }
 
     [TestMethod]
@@ -483,6 +588,131 @@ public class ChronicleServiceTests
         Day(68.9);
 
         Assert.AreEqual(ChronicleEventState.Active, _f.StateOf("hornburg"));
+    }
+
+    // An owner change can raise no OnSettlementOwnerChangedEvent: a clan that defects or leaves with
+    // rebellion takes its fiefs along (ChangeKingdomAction), and a change while the chronicle is off is
+    // never seen. Setting the owner without calling OnTargetOwnerChanged simulates both.
+
+    [TestMethod]
+    public void RunChronicleDay_AnAttackerOwnsTheTargetUnseen_FallsOnTheNextStep()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        _f.World.Owners["town_V2"] = "isengard";
+
+        Day(50);
+
+        Assert.AreEqual(ChronicleEventState.Fell, _f.StateOf("hornburg"));
+        Assert.AreEqual(1.15f, _f.Volunteers("isengard"), 0.0001f);
+        Assert.AreEqual(1.15f, _f.Volunteers("empire"), 0.0001f);
+        Assert.AreEqual(1.2f, _f.Escape("vlandia"), 0.0001f);
+        Assert.IsTrue(_f.Focus.IsEmpty);
+    }
+
+    [DataTestMethod]
+    [DataRow("empire_s")]
+    [DataRow(null)]
+    public void RunChronicleDay_AnotherOwnsTheTargetUnseen_LapsesOnTheNextStep(string? owner)
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        _f.World.Owners["town_V2"] = owner;
+
+        Day(50);
+        _f.World.Owners["town_V2"] = "isengard";
+        _sut.OnTargetOwnerChanged("town_V2");
+
+        Assert.AreEqual(ChronicleEventState.Lapsed, _f.StateOf("hornburg"));
+        Assert.AreEqual(0, _f.Effects.Snapshot().Count, "a later capture of a lapsed window changes nothing");
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_CapturedWhileTheChronicleWasOff_FallsOnceWhenBackOn()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        _f.Settings.ChronicleEnabled.Returns(false);
+        _f.World.Owners["town_V2"] = "isengard";
+        _sut.OnTargetOwnerChanged("town_V2");
+        _f.Settings.ChronicleEnabled.Returns(true);
+
+        Day(70);
+
+        Assert.AreEqual(ChronicleEventState.Fell, _f.StateOf("hornburg"));
+        Assert.AreEqual(1, _f.LedgerLines.Count(l => l.Contains("outcome=")));
+        Assert.AreEqual(1f, _f.Volunteers("vlandia"), "no Held pay");
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_UnseenChangeOnTheCloseDay_ResolvesOnce()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        _f.World.Owners["town_V2"] = "isengard";
+
+        Day(69);
+
+        Assert.AreEqual(ChronicleEventState.Fell, _f.StateOf("hornburg"));
+        Assert.AreEqual(1, _f.LedgerLines.Count(l => l.Contains("outcome=")));
+        Assert.AreEqual(3, _f.Effects.Snapshot().Count);
+    }
+
+    [DataTestMethod]
+    [DataRow("empire_s")]
+    [DataRow(null)]
+    public void WindowClose_AssaultedButAnotherHoldsIt_LapsesWithNoEffect(string? owner)
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        _f.World.Besiegers["town_V2"] = "isengard";
+        _sut.OnTargetBesieged("town_V2");
+        _f.World.Besiegers.Remove("town_V2");
+        _f.World.Owners["town_V2"] = owner;
+        _f.Queue.ResetForNewSession();
+
+        Day(69);
+
+        Assert.IsTrue(_f.Store.Get("hornburg")!.Assaulted);
+        Assert.AreEqual(ChronicleEventState.Lapsed, _f.StateOf("hornburg"));
+        Assert.AreEqual(0, _f.Effects.Snapshot().Count, "Held must not pay for a town another holds");
+        CollectionAssert.AreEqual(new[] { ChronicleService.LostText }, DrainTexts());
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_FractionalClock_ClosesAfterExactlyTheWindow()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49.003);
+
+        Day(69.001);
+
+        var record = _f.Store.Get("hornburg")!;
+        Assert.AreEqual(ChronicleEventState.Lapsed, record.State);
+        Assert.AreEqual(49d, record.OpenDay);
+        Assert.AreEqual(69d, record.CloseDay);
+    }
+
+    [TestMethod]
+    public void OnTargetOwnerChanged_MidDay_ChildCountsFromTheResolutionDay()
+    {
+        _f.Events.Add(SiegeDef());
+        _f.Events.Add(Narrative("after", ChronicleAnchor.Event, 2, anchorEvent: "hornburg"));
+        Launch(0);
+        Day(49.003);
+        _f.World.Day = 60.5;
+        _f.World.Owners["town_V2"] = "isengard";
+        _sut.OnTargetOwnerChanged("town_V2");
+
+        Day(62.001);
+
+        Assert.AreEqual(ChronicleEventState.Occurred, _f.StateOf("after"));
     }
 
     [TestMethod]
@@ -544,11 +774,13 @@ public class ChronicleServiceTests
         Launch(0);
         Day(49);
         _f.World.Owners["town_V2"] = "empire_s";
+        _f.Queue.ResetForNewSession();
 
         _sut.OnTargetOwnerChanged("town_V2");
 
         Assert.AreEqual(ChronicleEventState.Lapsed, _f.StateOf("hornburg"));
         Assert.AreEqual(0, _f.Effects.Snapshot().Count);
+        CollectionAssert.AreEqual(new[] { ChronicleService.LostText }, DrainTexts(), "not the event's no-assault line");
     }
 
     [TestMethod]
@@ -558,10 +790,12 @@ public class ChronicleServiceTests
         Launch(0);
         Day(49);
         _f.World.Owners["town_V2"] = null;
+        _f.Queue.ResetForNewSession();
 
         _sut.OnTargetOwnerChanged("town_V2");
 
         Assert.AreEqual(ChronicleEventState.Lapsed, _f.StateOf("hornburg"));
+        CollectionAssert.AreEqual(new[] { ChronicleService.LostText }, DrainTexts());
     }
 
     [TestMethod]
@@ -638,6 +872,7 @@ public class ChronicleServiceTests
         Day(49);
         _f.World.Besiegers["town_V2"] = "isengard";
         Day(50);
+        _f.World.Besiegers.Remove("town_V2");
 
         Day(69);
 
@@ -716,8 +951,8 @@ public class ChronicleServiceTests
         var world = Substitute.For<TAOM.Adapters.IChronicleWorldAdapter>();
         world.GetElapsedDays().Returns(_ => throw new System.NullReferenceException("engine"));
         var sut = new ChronicleService(_f.Config, _f.Store, world, _f.Alliance, _f.Wotr,
-            new ChronicleOutcomeService(_f.Effects, _f.Alliance, _f.Alignment, _f.Momentum, _f.Ledger, _f.Presenter),
-            _f.Queue, new ChronicleFocusSync(_f.Focus, _f.Settings), _f.Settings, _f.Logger);
+            new ChronicleOutcomeService(_f.Effects, _f.Alliance, _f.Alignment, _f.Momentum, _f.Ledger, _f.Text, _f.Logger),
+            _f.Queue, _f.Focus, _f.Settings, _f.Logger);
 
         sut.RunChronicleDay();
 

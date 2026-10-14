@@ -282,6 +282,20 @@ class MetricTests(unittest.TestCase):
         m = metrics([ev_chron(49, "hornburg", "Fell"), ev_chron(69, "hornburg", "Held")])
         self.assertEqual(m["chronicle_counts"], {"Held": 1})
 
+    def test_chronicle_count_keeps_a_repeat_read_after_another_outcome(self):
+        # Held, Lapsed and Fell-at-close resolve on the saved close day, so a reload that ends the same way
+        # writes a byte-identical line: it must still count as the last one read.
+        m = metrics([ev_chron(69, "hornburg", "Held"), ev_chron(60, "hornburg", "Fell"), ev_chron(69, "hornburg", "Held")])
+        self.assertEqual(m["chronicle_counts"], {"Held": 1})
+
+    def test_chronicle_count_follows_read_order_not_day(self):
+        m = metrics([ev_chron(69, "hornburg", "Held"), ev_chron(60, "hornburg", "Fell")])
+        self.assertEqual(m["chronicle_counts"], {"Fell": 1})
+
+    def test_chronicle_table_has_one_row_per_event_the_last_read(self):
+        m = metrics([ev_chron(69, "hornburg", "Held"), ev_chron(60, "hornburg", "Fell")])
+        self.assertEqual(m["chronicle"], [(60, "hornburg", "Fell")])
+
     def test_chronicle_counts_in_the_summary(self):
         m = metrics([ev_chron(49, "hornburg", "Held"), ev_chron(55, "lorien", "Lapsed"), ev_chron(56, "dale", "Lapsed")])
         report = awl.format_report("c1", m)

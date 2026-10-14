@@ -95,20 +95,21 @@ internal sealed class ChronicleFixture
 
         Presenter = Substitute.For<IChroniclePresenter>();
         Presenter.IsMapFree().Returns(true);
-        Presenter.Resolve(Arg.Any<string?>()).Returns(c => "resolved:" + c.Arg<string?>());
+        Text = Substitute.For<ITextLocalizerAdapter>();
+        Text.Localize(Arg.Any<string>()).Returns(c => "resolved:" + c.Arg<string>());
 
         Momentum = Substitute.For<IMomentumAwardService>();
         Momentum.TryAwardScripted(Arg.Any<MomentumSide>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<double>()).Returns(true);
 
         Effects = new WarEffectService(Settings, Logger);
-        Store = new ChronicleStateStore(Logger);
+        Store = new ChronicleStateStore();
         Focus = new ArmyTargetFocusRegistry();
         Queue = new ChronicleAnnouncementQueue(Presenter, Coop, Settings, Logger);
 
         var snapshots = Substitute.For<IKingdomWarSnapshotAdapter>();
         snapshots.GetCampaignId().Returns("c1");
         snapshots.GetElapsedDay().Returns(_ => (int)World.Day);
-        Ledger = new WarLedgerService(snapshots, new WarBaselineService(Logger), new RallyTierStore(), Effects, Wotr, Alignment, Logger);
+        Ledger = new WarLedgerService(snapshots, new WarBaselineService(), new RallyTierStore(), Effects, Wotr, Alignment, Logger);
 
         Config = Substitute.For<IChronicleConfigProvider>();
         Config.GetEvents().Returns(_ => Events);
@@ -138,6 +139,8 @@ internal sealed class ChronicleFixture
 
     public IChroniclePresenter Presenter { get; }
 
+    public ITextLocalizerAdapter Text { get; }
+
     public IMomentumAwardService Momentum { get; }
 
     public WarEffectService Effects { get; }
@@ -156,8 +159,8 @@ internal sealed class ChronicleFixture
 
     public ChronicleService CreateService() => new ChronicleService(
         Config, Store, World, Alliance, Wotr,
-        new ChronicleOutcomeService(Effects, Alliance, Alignment, Momentum, Ledger, Presenter),
-        Queue, new ChronicleFocusSync(Focus, Settings), Settings, Logger);
+        new ChronicleOutcomeService(Effects, Alliance, Alignment, Momentum, Ledger, Text, Logger),
+        Queue, Focus, Settings, Logger);
 
     public IEnumerable<string> LedgerLines => Logged.Where(l => l.Contains("ev=chronicle"));
 

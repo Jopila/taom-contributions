@@ -1,8 +1,6 @@
-using System;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Encounters;
 using TaleWorlds.CampaignSystem.GameState;
-using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
@@ -22,7 +20,8 @@ public sealed class ChroniclePresenter : IChroniclePresenter
 {
     public bool IsMapFree()
     {
-        if (Campaign.Current == null || PartyBase.MainParty == null)
+        // Campaign.MainParty is a stored property; PartyBase.MainParty dereferences it unguarded (v1.5.4).
+        if (Campaign.Current?.MainParty == null)
             return false;
         if (PlayerEncounter.Current != null)
             return false;
@@ -31,19 +30,18 @@ public sealed class ChroniclePresenter : IChroniclePresenter
         return GameStateManager.Current?.ActiveState is MapState mapState && !mapState.AtMenu;
     }
 
-    public void Show(ChronicleAnnouncement announcement, Action onClosed)
+    public void Show(ChronicleAnnouncement announcement)
     {
         var title = Text(announcement.Title, announcement).ToString();
         var body = announcement.Text == null ? string.Empty : Text(announcement.Text, announcement).ToString();
         var button = new TextObject("{=taom_wotr_continue}Continue").ToString();
 
+        // SingleQueryPopUpVM null-checks the affirmative action: the button only closes the popup.
         InformationManager.ShowInquiry(
-            new InquiryData(title, body, true, false, button, null, () => onClosed(), null),
+            new InquiryData(title, body, true, false, button, null, null, null),
             true,
             false);
     }
-
-    public string Resolve(string? text) => text == null ? string.Empty : new TextObject(text).ToString();
 
     private static TextObject Text(string text, ChronicleAnnouncement announcement)
     {

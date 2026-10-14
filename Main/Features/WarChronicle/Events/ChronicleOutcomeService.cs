@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TAOM.Adapters;
+using TAOM.Core.Logging;
 using TAOM.Features.Execution;
 using TAOM.Features.WarChronicle.Effects;
 using TAOM.Features.WarChronicle.Ledger;
@@ -18,7 +19,7 @@ namespace TAOM.Features.WarChronicle.Events;
 /// kingdom's own culture), anything else a kingdom id. Only kingdoms alive now are written. Each row is its
 /// own source, <c>chronicle:&lt;event&gt;:&lt;outcome&gt;:&lt;row&gt;</c>, so two rows reaching one kingdom
 /// add up instead of replacing each other. The player rule holds at the consumers, which are passed the
-/// owner's kingdom id and a player-clan flag (<see cref="VolunteerProductionService"/>,
+/// owner's kingdom id and a player-clan flag (<see cref="TroopProgression.VolunteerProductionService"/>,
 /// <see cref="WarEscapeService"/>): the player's own clan never gains or loses.</para>
 /// </summary>
 public sealed class ChronicleOutcomeService
@@ -28,18 +29,20 @@ public sealed class ChronicleOutcomeService
     private readonly IAlignmentService _alignment;
     private readonly IMomentumAwardService _momentum;
     private readonly WarLedgerService _ledger;
-    private readonly IChroniclePresenter _presenter;
+    private readonly ITextLocalizerAdapter _text;
+    private readonly IModLogger _logger;
 
     public ChronicleOutcomeService(
         IWarEffectService effects, IAllianceAdapter alliance, IAlignmentService alignment,
-        IMomentumAwardService momentum, WarLedgerService ledger, IChroniclePresenter presenter)
+        IMomentumAwardService momentum, WarLedgerService ledger, ITextLocalizerAdapter text, IModLogger logger)
     {
         _effects = effects;
         _alliance = alliance;
         _alignment = alignment;
         _momentum = momentum;
         _ledger = ledger;
-        _presenter = presenter;
+        _text = text;
+        _logger = logger;
     }
 
     public void Apply(ChronicleEventDefinition definition, ChronicleEventState outcome, double nowHours)
@@ -56,8 +59,11 @@ public sealed class ChronicleOutcomeService
                     _effects.Apply(new WarEffect(source, kingdom, effect.Kind, effect.Magnitude, nowHours + effect.DurationDays * 24d));
             }
 
-            if (block.Momentum != null)
-                _momentum.TryAwardScripted(block.Momentum.Side, block.Momentum.Units, _presenter.Resolve(definition.Title), nowHours);
+            if (block.Momentum != null
+                && !_momentum.TryAwardScripted(block.Momentum.Side, block.Momentum.Units, _text.Localize(definition.Title ?? string.Empty), nowHours))
+            {
+                _logger.LogInfo($"[WarChronicle] '{definition.Id}' {outcome}: the {block.Momentum.Side} momentum award was refused (momentum off, or the war not running).");
+            }
         }
 
         _ledger.LogChronicleResolution(definition.Id, outcome.ToString());

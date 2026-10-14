@@ -9,7 +9,10 @@ namespace TAOM.Adapters;
 /// </summary>
 public interface IChronicleWorldAdapter
 {
-    /// <summary>Days since the campaign start, with the fraction; 0 with no campaign.</summary>
+    /// <summary>
+    /// Days since the campaign start, with the fraction; NaN with no campaign, and a non-finite engine value
+    /// is passed through unmasked, so the caller's finite gate can skip the step.
+    /// </summary>
     double GetElapsedDays();
 
     /// <summary>Campaign time in hours (<c>CampaignTime.Now.ToHours</c>); 0 with no campaign.</summary>

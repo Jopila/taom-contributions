@@ -10,8 +10,8 @@ namespace TAOM.Tests.Features.Diplomacy;
 
 /// <summary>
 /// <c>IWarOfTheRingService.GetEffectivePhaseDay</c> (#765, the War Chronicle's phase anchors): the same
-/// clamped pair <c>CheckPhaseTransition</c> uses, so an event anchored on a phase opens from the day
-/// the phase machine itself fires on.
+/// clamped pair <c>CheckPhaseTransition</c> compares against, read live. It is the configured trigger day,
+/// not the day the phase was entered (a war switched on late enters its phase after this day).
 /// </summary>
 [TestClass]
 public class WarOfTheRingPhaseDayTests

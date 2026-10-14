@@ -491,6 +491,11 @@ public class CoopVetoClassificationTests
         "OnTargetOwnerChanged",
         "OnTargetBesieged",
         "OpenChronicleEventNow",
+        // Matches nothing today: its only caller, ChronicleOutcomeService.Apply, is a *Service file, which
+        // the scan below skips. That call is gated transitively: Apply runs only from ChronicleService.Resolve,
+        // reached through the entries above, which run behind WarChronicleEventsBehavior's IsAuthority and
+        // MayWriteSaveBackedState gate or taom.chronicle_open's IsAuthority refusal. The entry catches a future
+        // direct caller outside a *Service file.
         "TryAwardScripted",
     };
 

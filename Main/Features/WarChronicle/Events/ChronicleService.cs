@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TAOM.Adapters;
+using TAOM.Features.ArmyTargeting;
 using TAOM.Core.Logging;
 using TAOM.Core.Validation;
 using TAOM.Features.Diplomacy;
@@ -11,7 +12,8 @@ namespace TAOM.Features.WarChronicle.Events;
 
 /// <summary>
 /// The War Chronicle's event chain (docs/features/war-chronicle.md "Events", #765 M3): the state machine
-/// over <see cref="ChronicleStateStore"/>. Times are campaign days (<see cref="IChronicleWorldAdapter.GetElapsedDays"/>).
+/// over <see cref="ChronicleStateStore"/>. Times are whole campaign days: the floor of
+/// <see cref="IChronicleWorldAdapter.GetElapsedDays"/>, the same day as the ledger's <c>day=</c>.
 ///
 /// <list type="bullet">
 /// <item><b>Adoption (D5):</b> an event with no saved row gets one; when its open day is already past, or
@@ -20,9 +22,11 @@ namespace TAOM.Features.WarChronicle.Events;
 /// <see cref="IWarOfTheRingService.GetEffectivePhaseDay"/> and also need the phase reached; an Event anchor
 /// needs the anchor resolved, not Skipped, and with the required outcome. A failed precondition Skips it.</item>
 /// <item><b>Narrative:</b> Occurred at once, effects applied.</item>
-/// <item><b>Siege:</b> Active with a fixed window and an army focus; assaulted when an attacker besieges the
-/// target; Fell the moment an attacker owns it; Lapsed if a third party does; at the close Held when
-/// assaulted and still the defender's, otherwise Lapsed.</item>
+/// <item><b>Siege:</b> Active with a stored window and an army focus; assaulted when an attacker besieges the
+/// target. An attacker owner means Fell, at once on a capture and on the next daily step when a clan's
+/// change of kingdom moved the town with no owner-changed event; any other owner that is not the defender
+/// means Lapsed. At the close, assaulted means Held, otherwise Lapsed; while an attacker still besieges the
+/// target the close waits, for at most one more window.</item>
 /// <item><b>War Ended:</b> every Pending or Active event is Skipped and the focus clears.</item>
 /// </list>
 /// Every owner-changed handler is idempotent: the event fires twice per conquest, and the second fire finds
@@ -32,6 +36,12 @@ namespace TAOM.Features.WarChronicle.Events;
 /// </summary>
 public sealed class ChronicleService
 {
+    /// <summary>
+    /// What a window says when the target changed hands to neither side: a third kingdom took it, or its clan
+    /// left the defender's kingdom with it. The events' own lapsed lines all say no attack came.
+    /// </summary>
+    public const string LostText = "{=taom_wc_siege_lost}{TARGET} changes hands before the battle can be decided.";
+
     private readonly IChronicleConfigProvider _config;
     private readonly ChronicleStateStore _store;
     private readonly IChronicleWorldAdapter _world;
@@ -39,14 +49,14 @@ public sealed class ChronicleService
     private readonly IWarOfTheRingService _wotr;
     private readonly ChronicleOutcomeService _outcomes;
     private readonly ChronicleAnnouncementQueue _announcements;
-    private readonly ChronicleFocusSync _focus;
+    private readonly ArmyTargetFocusRegistry _focus;
     private readonly IWarChronicleSettingsProvider _settings;
     private readonly IModLogger _logger;
 
     public ChronicleService(
         IChronicleConfigProvider config, ChronicleStateStore store, IChronicleWorldAdapter world,
         IAllianceAdapter alliance, IWarOfTheRingService wotr, ChronicleOutcomeService outcomes,
-        ChronicleAnnouncementQueue announcements, ChronicleFocusSync focus, IWarChronicleSettingsProvider settings,
+        ChronicleAnnouncementQueue announcements, ArmyTargetFocusRegistry focus, IWarChronicleSettingsProvider settings,
         IModLogger logger)
     {
         _config = config;
@@ -62,7 +72,7 @@ public sealed class ChronicleService
     }
 
     /// <summary>Drops the focus an earlier campaign left: called from the events behavior's constructor.</summary>
-    public void ResetTransientState() => _focus.Clear();
+    public void ResetTransientState() => _focus.ResetForNewSession();
 
     /// <summary>Session launch: adopt missing rows, Skip events the campaign cannot host, push the focus again.</summary>
     public void LaunchChronicle() => Guarded("session launch", now =>
@@ -104,13 +114,11 @@ public sealed class ChronicleService
 
         Guarded("owner change", now =>
         {
-            foreach (var definition in ActiveSiegesAt(settlementId))
+            foreach (var definition in _config.GetEvents())
             {
-                var owner = _world.GetOwnerKingdomId(settlementId);
-                if (owner != null && definition.Attackers.Contains(owner))
-                    Resolve(definition, _store.Get(definition.Id)!, ChronicleEventState.Fell, now, true, owner + " took it");
-                else if (!string.Equals(owner, definition.Defender, StringComparison.Ordinal))
-                    Resolve(definition, _store.Get(definition.Id)!, ChronicleEventState.Lapsed, now, true, (owner ?? "no kingdom") + " took it");
+                var record = ActiveSiegeAt(definition, settlementId);
+                if (record != null)
+                    CheckOwner(definition, record, now);
             }
         });
     }
@@ -123,8 +131,12 @@ public sealed class ChronicleService
 
         Guarded("siege start", _ =>
         {
-            foreach (var definition in ActiveSiegesAt(settlementId))
-                MarkAssaultIfBesieged(definition, _store.Get(definition.Id)!);
+            foreach (var definition in _config.GetEvents())
+            {
+                var record = ActiveSiegeAt(definition, settlementId);
+                if (record != null)
+                    MarkAssaultIfBesieged(definition, record);
+            }
         });
     }
 
@@ -145,7 +157,7 @@ public sealed class ChronicleService
             return false;
         }
 
-        var now = _world.GetElapsedDays();
+        var now = Today();
         if (!FiniteFloatValidator.IsFinite(now))
         {
             reason = "The campaign clock is not readable.";
@@ -210,7 +222,7 @@ public sealed class ChronicleService
 
         try
         {
-            var now = _world.GetElapsedDays();
+            var now = Today();
             // Positive requirement on the engine clock: a NaN day would pass no `>=` gate, but it must not
             // reach a stored window either.
             if (!FiniteFloatValidator.IsFinite(now))
@@ -224,6 +236,14 @@ public sealed class ChronicleService
             _logger.LogWarning($"[WarChronicle] Chronicle {step} skipped ({ex.GetType().Name}: {ex.Message}).");
         }
     }
+
+    /// <summary>
+    /// Whole campaign days, like vanilla's weekly tick (Campaign.cs) and the ledger's <c>day=</c>. The daily
+    /// tick fires a few game minutes past midnight, or at a fixed mid-day time after a mid-day load, so
+    /// fractional days would let a window or a child slip a day. Math.Floor keeps NaN and Infinity, so the
+    /// finite gates still stop a bad clock.
+    /// </summary>
+    private double Today() => Math.Floor(_world.GetElapsedDays());
 
     private void Adopt(double now)
     {
@@ -261,9 +281,22 @@ public sealed class ChronicleService
         if (record.State != ChronicleEventState.Active)
             return;
 
+        // An owner change can raise no event (a clan that defects or leaves with rebellion keeps its fiefs,
+        // and a change while the chronicle is off is unseen): the daily step catches it.
+        if (CheckOwner(definition, record, now))
+            return;
+
         MarkAssaultIfBesieged(definition, record);
-        if (record.CloseDay.HasValue && now >= record.CloseDay.Value)
-            Close(definition, record, now);
+        if (!record.CloseDay.HasValue || now < record.CloseDay.Value)
+            return;
+
+        // A siege still being fought decides the window: lifted, Held on the next daily step; taken, Fell
+        // through OnTargetOwnerChanged. The overtime is capped at one more window, because the engine never
+        // makes a besieging party leave (a player's camp could otherwise hold the window and its focus open).
+        if (AttackerBesieges(definition) && now < record.CloseDay.Value + definition.WindowDays)
+            return;
+
+        Close(definition, record, now);
     }
 
     /// <summary>The open day, or null while the anchor is unknown. A non-null failure means the event can never open.</summary>
@@ -384,32 +417,50 @@ public sealed class ChronicleService
         return true;
     }
 
-    private void Close(ChronicleEventDefinition definition, ChronicleEventRecord record, double now)
+    /// <summary>
+    /// Resolves the window when the target left the defender: Fell when an attacker owns it, Lapsed (with
+    /// <see cref="LostText"/>) when a third kingdom or no kingdom does. True when it resolved the window.
+    /// </summary>
+    private bool CheckOwner(ChronicleEventDefinition definition, ChronicleEventRecord record, double now)
     {
         var owner = _world.GetOwnerKingdomId(definition.TargetSettlementId!);
         if (owner != null && definition.Attackers.Contains(owner))
-            Resolve(definition, record, ChronicleEventState.Fell, now, true, owner + " holds it at the close");
-        else if (record.Assaulted && string.Equals(owner, definition.Defender, StringComparison.Ordinal))
-            Resolve(definition, record, ChronicleEventState.Held, now, true, "assaulted and held");
-        else
-            Resolve(definition, record, ChronicleEventState.Lapsed, now, true, record.Assaulted ? "lost to another" : "never assaulted");
+        {
+            Resolve(definition, record, ChronicleEventState.Fell, now, true, owner + " took it");
+            return true;
+        }
+
+        if (!string.Equals(owner, definition.Defender, StringComparison.Ordinal))
+        {
+            Resolve(definition, record, ChronicleEventState.Lapsed, now, true, (owner ?? "no kingdom") + " took it", LostText);
+            return true;
+        }
+
+        return false;
     }
+
+    /// <summary>The close: Step's <see cref="CheckOwner"/> has just confirmed the defender holds the target.</summary>
+    private void Close(ChronicleEventDefinition definition, ChronicleEventRecord record, double now) =>
+        Resolve(definition, record, record.Assaulted ? ChronicleEventState.Held : ChronicleEventState.Lapsed, now, true,
+            record.Assaulted ? "assaulted and held" : "never assaulted");
 
     private void MarkAssaultIfBesieged(ChronicleEventDefinition definition, ChronicleEventRecord record)
     {
-        if (record.Assaulted)
+        if (record.Assaulted || !AttackerBesieges(definition))
             return;
 
+        record.Assaulted = true;
+        _logger.LogInfo($"[WarChronicle] '{definition.Id}': an attacker besieges {definition.TargetSettlementId}; the window counts as assaulted.");
+    }
+
+    private bool AttackerBesieges(ChronicleEventDefinition definition)
+    {
         var besieger = _world.GetBesiegerKingdomId(definition.TargetSettlementId!);
-        if (besieger != null && definition.Attackers.Contains(besieger))
-        {
-            record.Assaulted = true;
-            _logger.LogInfo($"[WarChronicle] '{definition.Id}': {besieger} besieges {definition.TargetSettlementId}; the window counts as assaulted.");
-        }
+        return besieger != null && definition.Attackers.Contains(besieger);
     }
 
     private void Resolve(ChronicleEventDefinition definition, ChronicleEventRecord record, ChronicleEventState outcome,
-        double now, bool announce, string why)
+        double now, bool announce, string why, string? text = null)
     {
         record.State = outcome;
         record.ResolvedDay = now;
@@ -417,7 +468,7 @@ public sealed class ChronicleService
         if (announce)
         {
             _announcements.Enqueue(new ChronicleAnnouncement(
-                definition.Id, definition.Title, TextFor(definition, outcome), definition.TargetSettlementId, definition.WindowDays));
+                definition.Id, definition.Title, text ?? TextFor(definition, outcome), definition.TargetSettlementId, definition.WindowDays));
         }
 
         _logger.LogInfo($"[WarChronicle] '{definition.Id}' {outcome} on day {Day(now)} ({why}).");
@@ -433,23 +484,32 @@ public sealed class ChronicleService
         }
     }
 
+    /// <summary>
+    /// Writes every Active siege window into ArmyTargeting's registry (#765 M4), replacing the whole set, so a
+    /// resolved window drops out by not being listed. The MCM multiplier is read here and baked in, so the
+    /// scoring path never reads a setting.
+    /// </summary>
     private void SyncFocus()
     {
-        var active = new List<ChronicleEventDefinition>();
+        var multiplier = _settings.ArmyFocusMultiplier;
+        var focuses = new List<ArmyTargetFocus>();
         foreach (var definition in _config.GetEvents())
         {
             if (definition.IsSiege && _store.Get(definition.Id)?.State == ChronicleEventState.Active)
-                active.Add(definition);
+                focuses.Add(new ArmyTargetFocus(definition.TargetSettlementId, definition.Attackers, definition.Defender, multiplier));
         }
 
-        _focus.Push(active);
+        _focus.Replace(focuses);
     }
 
-    private IEnumerable<ChronicleEventDefinition> ActiveSiegesAt(string settlementId) =>
-        _config.GetEvents()
-            .Where(d => d.IsSiege && string.Equals(d.TargetSettlementId, settlementId, StringComparison.Ordinal)
-                        && _store.Get(d.Id)?.State == ChronicleEventState.Active)
-            .ToList();
+    /// <summary>The event's record when it is an Active siege window on this settlement; null otherwise.</summary>
+    private ChronicleEventRecord? ActiveSiegeAt(ChronicleEventDefinition definition, string settlementId)
+    {
+        if (!definition.IsSiege || !string.Equals(definition.TargetSettlementId, settlementId, StringComparison.Ordinal))
+            return null;
+        var record = _store.Get(definition.Id);
+        return record?.State == ChronicleEventState.Active ? record : null;
+    }
 
     /// <summary>Every settlement and kingdom id the event names exists in this campaign; the first missing one otherwise.</summary>
     private bool KnowsEveryId(ChronicleEventDefinition definition, out string unknown)

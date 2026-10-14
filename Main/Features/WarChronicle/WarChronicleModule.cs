@@ -34,7 +34,10 @@ internal sealed class WarChronicleModule : TaomFeatureModule
 
     public override string Id => "WarChronicle";
 
-    /// <summary>The campaign behavior persists the effects, baselines and rally tiers in SyncData.</summary>
+    /// <summary>
+    /// <c>WarChronicleBehavior</c> persists the effects, baselines, rally tiers and chronicle rows in SyncData;
+    /// the events behavior saves nothing.
+    /// </summary>
     public override bool OwnsSaveData => true;
 
     public override void RegisterServices(IRegistrator registrator) =>

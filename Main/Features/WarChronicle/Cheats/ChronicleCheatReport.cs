@@ -37,7 +37,8 @@ internal static class ChronicleCheatReport
     }
 
     internal static string FormatStatus(
-        IReadOnlyList<ChronicleStatusRow> rows, IReadOnlyList<ArmyTargetFocus> focus, double nowDay, bool enabled)
+        IReadOnlyList<ChronicleStatusRow> rows, IReadOnlyList<ArmyTargetFocus> focus, double nowDay, bool enabled,
+        bool focusScored)
     {
         var sb = new StringBuilder();
         sb.Append("[WarChronicle] Chronicle on campaign day ").Append(Day(nowDay))
@@ -54,12 +55,14 @@ internal static class ChronicleCheatReport
             sb.Append("  ").Append(row.Id).Append(" (").Append(row.Kind).Append(") ").Append(row.State);
             if (row.Target != null)
                 sb.Append(" at ").Append(row.Target);
-            sb.Append(": ").Append(Days(row)).Append('\n');
+            sb.Append(": ").Append(Days(row, nowDay)).Append('\n');
         }
 
         sb.Append("Army focus:");
         if (focus.Count == 0)
             sb.Append(" none");
+        else if (!focusScored)
+            sb.Append(" (inactive: AI Strategic Intelligence is off, so army scoring ignores it)");
         foreach (var f in focus)
         {
             sb.Append("\n  ").Append(f.SettlementId).Append(" x").Append(f.Multiplier.ToString("0.00", CultureInfo.InvariantCulture))
@@ -70,14 +73,16 @@ internal static class ChronicleCheatReport
         return sb.ToString();
     }
 
-    private static string Days(ChronicleStatusRow row)
+    private static string Days(ChronicleStatusRow row, double nowDay)
     {
         switch (row.State)
         {
             case ChronicleEventState.Pending:
                 return row.OpenDay.HasValue ? "opens day " + Day(row.OpenDay.Value) : "opens when its anchor is known";
             case ChronicleEventState.Active:
-                return "opened day " + Day(row.OpenDay) + ", closes day " + Day(row.CloseDay)
+                // Active past its close day only while an attacker still besieges the target (ChronicleService).
+                var overtime = row.CloseDay.HasValue && nowDay >= row.CloseDay.Value;
+                return "opened day " + Day(row.OpenDay) + (overtime ? ", overtime: an attacker still besieges it" : ", closes day " + Day(row.CloseDay))
                        + (row.Assaulted ? ", assaulted" : ", not assaulted yet");
             default:
                 return "resolved day " + Day(row.ResolvedDay);

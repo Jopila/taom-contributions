@@ -37,7 +37,6 @@ public static class WarChronicleIoC
         container.Register<IChronicleWorldAdapter, ChronicleWorldAdapter>(Reuse.Singleton);
         container.Register<IChroniclePresenter, ChroniclePresenter>(Reuse.Singleton);
         container.Register<ChronicleAnnouncementQueue>(Reuse.Singleton);
-        container.Register<ChronicleFocusSync>(Reuse.Singleton);
         container.Register<ChronicleOutcomeService>(Reuse.Singleton);
         container.Register<ChronicleService>(Reuse.Singleton);
     }

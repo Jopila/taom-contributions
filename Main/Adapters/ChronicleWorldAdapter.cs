@@ -1,6 +1,5 @@
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Settlements;
-using TAOM.Core.Validation;
 
 namespace TAOM.Adapters;
 
@@ -16,11 +15,9 @@ namespace TAOM.Adapters;
 /// </summary>
 public sealed class ChronicleWorldAdapter : IChronicleWorldAdapter
 {
-    public double GetElapsedDays()
-    {
-        var days = Campaign.Current?.Models?.CampaignTimeModel?.CampaignStartTime.ElapsedDaysUntilNow;
-        return days.HasValue && FiniteFloatValidator.IsFinite(days.Value) ? days.Value : 0d;
-    }
+    /// <summary>NaN with no campaign, and a non-finite engine value passes through, so the chronicle's finite gate skips the step.</summary>
+    public double GetElapsedDays() =>
+        Campaign.Current?.Models?.CampaignTimeModel?.CampaignStartTime.ElapsedDaysUntilNow ?? double.NaN;
 
     public double GetNowHours() => Campaign.Current == null ? 0d : CampaignTime.Now.ToHours;
 

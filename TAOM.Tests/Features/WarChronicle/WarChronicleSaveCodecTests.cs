@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using TAOM.Features.WarChronicle;
 using TAOM.Features.WarChronicle.Effects;
+using TAOM.Features.WarChronicle.Events;
 
 namespace TAOM.Tests.Features.WarChronicle;
 
@@ -12,10 +13,9 @@ public class WarChronicleSaveCodecTests
 {
     private static WarChroniclePayload Sample()
     {
-        var payload = new WarChroniclePayload
-        {
-            ChronicleJson = "[{\"id\":\"hornburg\",\"state\":2}]",
-        };
+        var payload = new WarChroniclePayload();
+        payload.Chronicle.Add(new ChronicleEventRecord("hornburg", ChronicleEventState.Active) { OpenDay = 49.5, CloseDay = 69.5, Assaulted = true });
+        payload.Chronicle.Add(new ChronicleEventRecord("fellowship", ChronicleEventState.Occurred) { ResolvedDay = 20.25 });
         payload.Baselines["empire_w"] = 7;
         payload.Baselines["empire_s"] = 5;
         payload.Effects.Add(new WarEffect("rally:empire_w", "empire_w", WarEffectKind.VolunteerRate, 0.1f, 1234.5));
@@ -44,7 +44,15 @@ public class WarChronicleSaveCodecTests
         Assert.AreEqual(7, back.Baselines["empire_w"]);
         Assert.AreEqual(5, back.Baselines["empire_s"]);
         Assert.AreEqual(1, back.RallyTiers["empire_w"]);
-        Assert.AreEqual("[{\"id\":\"hornburg\",\"state\":2}]", back.ChronicleJson);
+        var hornburg = back.Chronicle[0];
+        Assert.AreEqual("hornburg", hornburg.Id);
+        Assert.AreEqual(ChronicleEventState.Active, hornburg.State);
+        Assert.AreEqual(49.5, hornburg.OpenDay);
+        Assert.AreEqual(69.5, hornburg.CloseDay);
+        Assert.IsTrue(hornburg.Assaulted);
+        Assert.IsNull(hornburg.ResolvedDay);
+        Assert.AreEqual(ChronicleEventState.Occurred, back.Chronicle[1].State);
+        Assert.AreEqual(20.25, back.Chronicle[1].ResolvedDay);
     }
 
     [TestMethod]
@@ -62,7 +70,10 @@ public class WarChronicleSaveCodecTests
         Assert.AreEqual(7, (int)root["baselines"]!["empire_w"]!);
         Assert.IsNull(root["baselinesMidCampaign"], "lateness is derived from the data, not saved");
         Assert.AreEqual(1, (int)root["rally"]!["tiers"]!["empire_w"]!);
-        Assert.AreEqual(JTokenType.Array, root["chronicle"]!.Type);
+        var chronicle = (JObject)((JArray)root["chronicle"]!)[0];
+        Assert.AreEqual(1, (int)chronicle["s"]!, "the state is saved as its int");
+        Assert.IsNull(chronicle["res"], "an absent day is left out");
+        Assert.IsTrue((bool)chronicle["a"]!);
     }
 
     [TestMethod]
@@ -72,7 +83,7 @@ public class WarChronicleSaveCodecTests
 
         Assert.AreEqual(0, back.Effects.Count);
         Assert.AreEqual(0, back.Baselines.Count);
-        Assert.AreEqual("[]", back.ChronicleJson);
+        Assert.AreEqual(0, back.Chronicle.Count);
         Assert.AreEqual(0, back.Warnings.Count);
     }
 
@@ -86,7 +97,7 @@ public class WarChronicleSaveCodecTests
 
         Assert.AreEqual(0, back.Effects.Count);
         Assert.AreEqual(0, back.Baselines.Count);
-        Assert.AreEqual("[]", back.ChronicleJson);
+        Assert.AreEqual(0, back.Chronicle.Count);
         Assert.AreEqual(0, back.Warnings.Count);
     }
 
@@ -195,12 +206,12 @@ public class WarChronicleSaveCodecTests
     [TestMethod]
     public void Parse_EffectsSectionNotAnArray_ResetsAloneAndTheOtherSectionsSurvive()
     {
-        var back = ParseJson("{\"v\":1,\"effects\":\"oops\",\"baselines\":{\"a\":4},\"rally\":{\"tiers\":{\"a\":1}},\"chronicle\":[1]}");
+        var back = ParseJson("{\"v\":1,\"effects\":\"oops\",\"baselines\":{\"a\":4},\"rally\":{\"tiers\":{\"a\":1}},\"chronicle\":[{\"id\":\"a\",\"s\":3,\"res\":4}]}");
 
         Assert.AreEqual(0, back.Effects.Count);
         Assert.AreEqual(4, back.Baselines["a"]);
         Assert.AreEqual(1, back.RallyTiers["a"]);
-        Assert.AreEqual("[1]", back.ChronicleJson);
+        Assert.AreEqual(1, back.Chronicle.Count);
         Assert.AreEqual(1, back.Warnings.Count);
     }
 
@@ -272,73 +283,58 @@ public class WarChronicleSaveCodecTests
     }
 
     [TestMethod]
-    public void Parse_ChronicleNotAnArray_ResetsAloneToAnEmptyArray()
+    public void Parse_ChronicleNotAnArray_ResetsAlone()
     {
         var back = ParseJson("{\"v\":1,\"baselines\":{\"a\":1},\"chronicle\":{\"a\":1}}");
 
-        Assert.AreEqual("[]", back.ChronicleJson);
+        Assert.AreEqual(0, back.Chronicle.Count);
         Assert.AreEqual(1, back.Baselines["a"]);
         Assert.AreEqual(1, back.Warnings.Count);
     }
 
-    [TestMethod]
-    public void Chronicle_AnOpaqueArray_RoundTripsUnchanged()
-    {
-        // Nested objects, a date-looking string and non-ASCII text: a save that does not understand
-        // the section must not reformat any of it.
-        const string chronicle = "[{\"id\":\"hornburg\",\"state\":2,\"window\":[12.5,40],\"when\":\"2026-10-08T00:00:00Z\","
-            + "\"name\":\"Helm’s Deep\",\"ratio\":1.0,\"flags\":{\"a\":true,\"b\":null}},[],\"tail\"]";
-        var payload = new WarChroniclePayload { ChronicleJson = chronicle };
-
-        var back = WarChronicleSaveCodec.Parse(WarChronicleSaveCodec.Serialize(payload));
-
-        Assert.AreEqual(chronicle, back.ChronicleJson);
-        Assert.AreEqual(0, back.Warnings.Count);
-    }
-
-    [TestMethod]
-    public void Chronicle_AnExoticNumberSpelling_KeepsItsValue()
-    {
-        // Newtonsoft does not keep a number's source text, so 1e5 may come back as 100000.0: the value
-        // is what the later milestone reads.
-        var payload = new WarChroniclePayload { ChronicleJson = "[{\"big\":1e5,\"small\":-2.5e-3}]" };
-
-        var back = WarChronicleSaveCodec.Parse(WarChronicleSaveCodec.Serialize(payload));
-
-        Assert.IsTrue(JToken.DeepEquals(JToken.Parse(payload.ChronicleJson), JToken.Parse(back.ChronicleJson)));
-    }
-
-    [TestMethod]
-    public void Serialize_UnparseableChronicleText_WritesAnEmptyArray()
-    {
-        var payload = new WarChroniclePayload { ChronicleJson = "{not an array" };
-
-        var back = WarChronicleSaveCodec.Parse(WarChronicleSaveCodec.Serialize(payload));
-
-        Assert.AreEqual("[]", back.ChronicleJson);
-    }
-
     [DataTestMethod]
-    [DataRow("{\"a\":1}")]
-    [DataRow("42")]
-    [DataRow("\"text\"")]
-    public void Serialize_ParseableNonArrayChronicleText_WritesAnEmptyArray(string chronicle)
+    [DataRow("{\"s\":2,\"res\":1}", "id")]
+    [DataRow("{\"id\":\"\",\"s\":2,\"res\":1}", "id")]
+    [DataRow("{\"id\":\"a\",\"s\":99}", "state")]
+    [DataRow("{\"id\":\"a\",\"s\":-1}", "state")]
+    [DataRow("{\"id\":\"a\",\"s\":\"Held\"}", "state")]
+    [DataRow("{\"id\":\"a\",\"s\":1,\"open\":1}", "window")]
+    [DataRow("{\"id\":\"a\",\"s\":1,\"open\":\"NaN\",\"close\":2}", "window")]
+    [DataRow("{\"id\":\"a\",\"s\":2,\"res\":\"x\"}", "res")]
+    [DataRow("{\"id\":\"a\",\"s\":3}", "resolution day")]
+    [DataRow("7", "object")]
+    public void Parse_ABadChronicleRow_IsSkippedAloneWithAWarning(string badRow, string fragment)
     {
-        var payload = new WarChroniclePayload { ChronicleJson = chronicle };
+        var back = ParseJson("{\"v\":1,\"chronicle\":[" + badRow + ",{\"id\":\"good\",\"s\":3,\"res\":40}]}");
 
-        var back = WarChronicleSaveCodec.Parse(WarChronicleSaveCodec.Serialize(payload));
+        Assert.AreEqual(1, back.Chronicle.Count);
+        Assert.AreEqual("good", back.Chronicle[0].Id);
+        Assert.IsTrue(back.Warnings.Any(w => w.Contains(fragment)), string.Join("\n", back.Warnings));
+    }
 
-        Assert.AreEqual("[]", back.ChronicleJson);
+    [TestMethod]
+    public void Parse_ADuplicateChronicleId_KeepsTheFirst()
+    {
+        var back = ParseJson("{\"v\":1,\"chronicle\":[{\"id\":\"a\",\"s\":3,\"res\":1},{\"id\":\"a\",\"s\":4,\"res\":1}]}");
+
+        Assert.AreEqual(ChronicleEventState.Held, back.Chronicle.Single().State);
+        Assert.AreEqual(1, back.Warnings.Count);
+    }
+
+    [TestMethod]
+    public void Parse_AChronicleRowForAnUnknownEvent_IsKeptSoANewerSaveSurvivesAnOlderBuild()
+    {
+        var back = ParseJson("{\"v\":1,\"chronicle\":[{\"id\":\"from_a_later_release\",\"s\":5,\"res\":12}]}");
+
+        Assert.AreEqual(ChronicleEventState.Lapsed, back.Chronicle.Single().State);
         Assert.AreEqual(0, back.Warnings.Count);
     }
 
     [TestMethod]
-    public void Serialize_NullChronicleText_WritesAnEmptyArray()
+    public void Parse_APendingRowWithNoDays_IsKept()
     {
-        var payload = new WarChroniclePayload { ChronicleJson = null! };
+        var back = ParseJson("{\"v\":1,\"chronicle\":[{\"id\":\"a\",\"s\":0}]}");
 
-        var back = WarChronicleSaveCodec.Parse(WarChronicleSaveCodec.Serialize(payload));
-
-        Assert.AreEqual("[]", back.ChronicleJson);
+        Assert.AreEqual(ChronicleEventState.Pending, back.Chronicle.Single().State);
     }
 }

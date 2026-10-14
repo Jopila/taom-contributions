@@ -40,6 +40,7 @@
 	<!-- ============================================== -->
 
 	<string id="taom_wotr_chronicle_events" text="Chronicle Events" />
+	<string id="taom_wc_siege_lost" text="{TARGET} changes hands before the battle can be decided." />
 	<string id="taom_wc_fellowship_title" text="The Fellowship Sets Out" />
 	<string id="taom_wc_fellowship_occurred" text="Nine walkers leave Rivendell in secret, bearing the One Ring south. The house of Elrond gathers its strength." />
 	<string id="taom_wc_khazaddum_title" text="The Bridge of Khazad-dûm" />

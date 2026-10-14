@@ -20,7 +20,7 @@ namespace TAOM.Tests.Features.WarChronicle.Events;
 public class ChroniclePersistenceTests
 {
     private static WarChronicleStateService StateFor(ChronicleFixture f) =>
-        new WarChronicleStateService(f.Effects, new WarBaselineService(f.Logger), new RallyTierStore(), f.Logger, f.Store);
+        new WarChronicleStateService(f.Effects, new WarBaselineService(), new RallyTierStore(), f.Logger, f.Store);
 
     [TestMethod]
     public void SaveAndLoadMidWindow_KeepsTheFixedWindowRestoresTheFocusAndResolvesOnTheOldCloseDay()

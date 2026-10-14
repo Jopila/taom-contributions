@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TAOM.Core.Validation;
 using TAOM.Features.WarChronicle.Effects;
+using TAOM.Features.WarOfTheRingMomentum;
 using TAOM.Features.WarOfTheRingMomentum.Domain;
 
 namespace TAOM.Features.WarChronicle.Events;
@@ -28,8 +29,15 @@ namespace TAOM.Features.WarChronicle.Events;
 /// narrative; an unknown kind; a magnitude that is not finite, is zero, or is past
 /// <see cref="MaxMagnitude"/> either way (finite-checked before the range check); a duration outside 1
 /// to 60.</item>
-/// <item>A momentum award is dropped alone for a side other than <c>free</c> or <c>evil</c>, or units
-/// outside 1 to <see cref="MaxMomentumUnits"/>.</item>
+/// <item>A momentum award is dropped alone when it is not an object, for a side other than <c>free</c> or
+/// <c>evil</c>, or units outside 1 to <see cref="MaxMomentumUnits"/>.</item>
+/// <item>Kinds, anchors, outcome states and effect kinds are names only (<see cref="EnumNames"/>: trimmed,
+/// any case); a number, a sign or a comma list never parses.</item>
+/// <item>A key the level does not know (event, outcome, effect, momentum) warns and is ignored, so a typo
+/// cannot drop a block silently; a key starting with <c>_</c> is an author's note. An optional text that
+/// is not a string, a siege's <c>outcomes</c> that is not an object and <c>effects</c> that is not an
+/// array warn too; a <c>requiresOutcome</c> that is not a string skips the event, since the author meant
+/// a gate.</item>
 /// </list>
 /// Settlement and kingdom ids are checked against the campaign at session launch, not here.
 /// </summary>
@@ -43,12 +51,24 @@ public static class ChronicleConfigValidator
     public const float MaxMagnitude = 0.25f;
     public const int MinDurationDays = 1;
     public const int MaxDurationDays = 60;
-    public const int MaxMomentumUnits = 300;
+    /// <summary>The momentum service clamps to the same cap; the chronicle never redefines it.</summary>
+    public const int MaxMomentumUnits = MomentumAwardService.MaxScriptedUnits;
 
     internal const string TargetAttacker = "attacker";
     internal const string TargetDefender = "defender";
     internal const string TargetFree = "free";
     internal const string TargetEvil = "evil";
+
+    private static readonly string[] NarrativeKeys = { "id", "kind", "anchor", "anchorEvent", "requiresOutcome", "offsetDays", "title", "outcomes" };
+    private static readonly string[] SiegeKeys =
+    {
+        "id", "kind", "anchor", "anchorEvent", "requiresOutcome", "offsetDays", "title", "outcomes",
+        "windowDays", "target", "attackers", "defender", "openText", "lapsedText",
+    };
+
+    private static readonly string[] OutcomeKeys = { "text", "effects", "momentum" };
+    private static readonly string[] EffectKeys = { "target", "kind", "magnitude", "durationDays" };
+    private static readonly string[] MomentumKeys = { "side", "units" };
 
     public static IReadOnlyList<ChronicleEventDefinition> Parse(string? json, IList<string> warnings)
     {
@@ -72,7 +92,7 @@ public static class ChronicleConfigValidator
         }
 
         var version = root is JObject o ? o["schemaVersion"] : null;
-        if (version == null || version.Type != JTokenType.Integer || (long)version != SchemaVersion)
+        if (!(version is JValue jv && jv.Value is long v && v == SchemaVersion))
         {
             warnings.Add($"schemaVersion must be {SchemaVersion}, so no chronicle event loads");
             return result;
@@ -128,20 +148,23 @@ public static class ChronicleConfigValidator
         if (earlier.ContainsKey(id!))
             return Skip("a duplicate id");
 
-        if (!TryEnum<ChronicleEventKind>(Text(e["kind"]), out var kind))
+        if (!EnumNames.TryParse<ChronicleEventKind>(Text(e["kind"]), out var kind))
             return Skip($"kind '{Text(e["kind"])}' is not Narrative or Siege");
 
-        if (!TryEnum<ChronicleAnchor>(Text(e["anchor"]), out var anchor))
+        if (!EnumNames.TryParse<ChronicleAnchor>(Text(e["anchor"]), out var anchor))
             return Skip($"anchor '{Text(e["anchor"])}' is not CampaignStart, Phase1, Phase2 or Event");
+
+        WarnUnknownKeys(e, kind == ChronicleEventKind.Siege ? SiegeKeys : NarrativeKeys, $"event '{id}'", warnings);
 
         var definition = new ChronicleEventDefinition { Id = id!, Kind = kind, Anchor = anchor };
 
         var anchorEvent = Text(e["anchorEvent"]);
+        ChronicleEventDefinition? anchorDefinition = null;
         if (anchor == ChronicleAnchor.Event)
         {
             if (string.IsNullOrWhiteSpace(anchorEvent))
                 return Skip("an Event anchor needs an anchorEvent");
-            if (!earlier.ContainsKey(anchorEvent!))
+            if (!earlier.TryGetValue(anchorEvent!, out anchorDefinition))
                 return Skip($"anchorEvent '{anchorEvent}' must name an earlier event that loaded");
             definition.AnchorEventId = anchorEvent;
         }
@@ -150,12 +173,16 @@ public static class ChronicleConfigValidator
             return Skip("anchorEvent is set but the anchor is not Event");
         }
 
-        var requires = Text(e["requiresOutcome"]);
+        var requiresToken = e["requiresOutcome"];
+        if (requiresToken != null && requiresToken.Type != JTokenType.Null && requiresToken.Type != JTokenType.String)
+            return Skip("requiresOutcome must be an outcome name in quotes");
+
+        var requires = Text(requiresToken);
         if (!string.IsNullOrWhiteSpace(requires))
         {
             if (anchor != ChronicleAnchor.Event)
                 return Skip("requiresOutcome needs an Event anchor");
-            if (!TryEnum<ChronicleEventState>(requires, out var required) || !Reachable(earlier[anchorEvent!].Kind, required))
+            if (!EnumNames.TryParse<ChronicleEventState>(requires, out var required) || !Reachable(anchorDefinition!.Kind, required))
                 return Skip($"requiresOutcome '{requires}' is not an outcome the anchor event can reach");
             definition.RequiresOutcome = required;
         }
@@ -172,6 +199,8 @@ public static class ChronicleConfigValidator
                       || (anchor == ChronicleAnchor.Event && reachesFullWar.TryGetValue(anchorEvent!, out var parent) && parent);
 
         var outcomes = e["outcomes"] as JObject;
+        if (outcomes == null && e["outcomes"] != null && e["outcomes"]!.Type != JTokenType.Null)
+            warnings.Add($"event '{id}': outcomes is not an object, so it is ignored");
         if (kind == ChronicleEventKind.Siege)
         {
             if (!ReadSiege(e, definition, fullWar, outcomes, warnings, why => Skip(why)))
@@ -186,7 +215,8 @@ public static class ChronicleConfigValidator
             WarnUnreached(outcomes!, definition, warnings, "occurred");
         }
 
-        reachesFullWar[definition.Id] = fullWar || kind == ChronicleEventKind.Siege;
+        // A siege that loaded had fullWar true (ReadSiege refuses one without it).
+        reachesFullWar[definition.Id] = fullWar;
         return definition;
     }
 
@@ -246,8 +276,8 @@ public static class ChronicleConfigValidator
         }
 
         definition.Attackers = attackers;
-        definition.OpenText = Text(e["openText"]);
-        definition.LapsedText = Text(e["lapsedText"]);
+        definition.OpenText = OptionalText(e, "openText", $"event '{definition.Id}'", warnings);
+        definition.LapsedText = OptionalText(e, "lapsedText", $"event '{definition.Id}'", warnings);
         if (outcomes != null)
         {
             if (outcomes["held"] != null)
@@ -278,12 +308,18 @@ public static class ChronicleConfigValidator
             return outcome;
         }
 
-        outcome.Text = Text(o["text"]);
+        var where = $"event '{definition.Id}': outcome '{name}'";
+        WarnUnknownKeys(o, OutcomeKeys, where, warnings);
+        outcome.Text = OptionalText(o, "text", where, warnings);
         var effects = new List<ChronicleEffectDefinition>();
+        if (o["effects"] != null && o["effects"]!.Type != JTokenType.Null && !(o["effects"] is JArray))
+            warnings.Add($"{where}: effects is not an array, so it pays no effect");
         if (o["effects"] is JArray rows)
         {
             for (var i = 0; i < rows.Count; i++)
             {
+                if (rows[i] is JObject effectRow)
+                    WarnUnknownKeys(effectRow, EffectKeys, $"{where} effect {i}", warnings);
                 var effect = ReadEffect(rows[i], definition, out var problem);
                 if (effect != null)
                     effects.Add(effect);
@@ -320,7 +356,7 @@ public static class ChronicleConfigValidator
             return null;
         }
 
-        if (!TryEnum<WarEffectKind>(Text(row["kind"]), out var kind))
+        if (!EnumNames.TryParse<WarEffectKind>(Text(row["kind"]), out var kind))
         {
             problem = $"kind '{Text(row["kind"])}' is not VolunteerRate or PrisonerEscape";
             return null;
@@ -345,7 +381,15 @@ public static class ChronicleConfigValidator
 
     private static ChronicleMomentumAward? ReadMomentum(JToken token, ChronicleEventDefinition definition, string name, IList<string> warnings)
     {
-        var side = Text(token["side"]);
+        // A non-object would throw on the indexer below and take the whole file down with it.
+        if (!(token is JObject m))
+        {
+            warnings.Add($"event '{definition.Id}': {name} momentum dropped: it is not an object");
+            return null;
+        }
+
+        WarnUnknownKeys(m, MomentumKeys, $"event '{definition.Id}': {name} momentum", warnings);
+        var side = Text(m["side"]);
         MomentumSide parsed;
         if (side == TargetFree)
             parsed = MomentumSide.Free;
@@ -357,7 +401,7 @@ public static class ChronicleConfigValidator
             return null;
         }
 
-        if (!TryInt(token["units"], 1, MaxMomentumUnits, out var units))
+        if (!TryInt(m["units"], 1, MaxMomentumUnits, out var units))
         {
             warnings.Add($"event '{definition.Id}': {name} momentum dropped: units must be a whole number from 1 to {MaxMomentumUnits}");
             return null;
@@ -375,13 +419,23 @@ public static class ChronicleConfigValidator
     private static string? Text(JToken? token) =>
         token is JValue v && v.Type == JTokenType.String ? (string?)v.Value : null;
 
-    /// <summary>Names only: a number such as "3" is not a kind, even where Enum.TryParse would accept it.</summary>
-    private static bool TryEnum<T>(string? text, out T value) where T : struct
+    /// <summary>Warns on every key the level does not know; a key starting with <c>_</c> is an author's note.</summary>
+    private static void WarnUnknownKeys(JObject o, string[] known, string where, IList<string> warnings)
     {
-        value = default;
-        if (string.IsNullOrWhiteSpace(text) || char.IsDigit(text![0]) || text[0] == '-')
-            return false;
-        return Enum.TryParse(text, false, out value) && Enum.IsDefined(typeof(T), value);
+        foreach (var property in o.Properties())
+        {
+            if (!property.Name.StartsWith("_", StringComparison.Ordinal) && Array.IndexOf(known, property.Name) < 0)
+                warnings.Add($"{where}: '{property.Name}' is not a known key, so it is ignored");
+        }
+    }
+
+    /// <summary>A text key's string; a present value of another type warns and reads as absent.</summary>
+    private static string? OptionalText(JObject o, string key, string where, IList<string> warnings)
+    {
+        var token = o[key];
+        if (token != null && token.Type != JTokenType.Null && token.Type != JTokenType.String)
+            warnings.Add($"{where}: {key} is not a string, so it is ignored");
+        return Text(token);
     }
 
     private static bool TryInt(JToken? token, int min, int max, out int value)

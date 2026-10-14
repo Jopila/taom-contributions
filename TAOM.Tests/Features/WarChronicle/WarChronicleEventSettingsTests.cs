@@ -1,5 +1,8 @@
+using System.Linq;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Features;
+using TAOM.Features.ArmyTargeting;
 using TAOM.Features.WarChronicle;
 
 namespace TAOM.Tests.Features.WarChronicle;
@@ -46,6 +49,18 @@ public class WarChronicleEventSettingsTests
         var sut = new WarChronicleSettingsProvider(new TaomSettings { WarChronicleArmyFocus = stored });
 
         Assert.AreEqual(expected, sut.ArmyFocusMultiplier, 0.0001f);
+    }
+
+    [TestMethod]
+    public void ArmyFocusSlider_SpansExactlyTheProvidersClamp()
+    {
+        // MCM's slider attribute takes (displayName, minValue, maxValue, ...) as constructor arguments.
+        var slider = typeof(TaomSettings).GetProperty(nameof(TaomSettings.WarChronicleArmyFocus), BindingFlags.Public | BindingFlags.Instance)!
+            .GetCustomAttributesData()
+            .Single(a => a.AttributeType.Name == "SettingPropertyFloatingIntegerAttribute");
+
+        Assert.AreEqual(1.0, System.Convert.ToDouble(slider.ConstructorArguments[1].Value), 0.0001);
+        Assert.AreEqual((double)ArmyTargetFocusRegistry.MaxMultiplier, System.Convert.ToDouble(slider.ConstructorArguments[2].Value), 0.0001);
     }
 
     [TestMethod]
