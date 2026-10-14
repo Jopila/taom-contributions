@@ -28,7 +28,7 @@ The behavior listens to `DailyTickEvent` and `KingdomDestroyedEvent`. The daily 
 
 ### Tick order
 
-`WarChronicleTickService.RunDaily()` (`WarChronicleTickService.cs`) runs, in this order:
+`WarChronicleTickService.RunDaily()` (`WarChronicleTickService.cs`) first claims the day from `WarChronicleDailyGate` (`WarChronicleDailyGate.cs`) and returns when the day already ran (see "Once per day" below), then runs, in this order:
 
 1. `IWarEffectService.Expire(nowHours)`: drop effects whose end time has passed and re-bake the multipliers, so a changed MCM strength applies from this tick.
 2. `WarBaselineService.EnsureBaselines(kingdoms)`: baseline for any kingdom not seen before. When none were held and the day is past 1, the take is late and logs one warning (see the rally's **Baseline**).
@@ -39,6 +39,10 @@ The behavior listens to `DailyTickEvent` and `KingdomDestroyedEvent`. The daily 
 The whole body is wrapped in one try/catch that logs a warning and skips the rest of the day, because a throwing engine getter must never fail the campaign's daily tick: a throwing snapshot read skips the baselines, the rally, the escape pass and the ledger together. The escape pass and the rally also catch their own failures. The escape pass runs after the rally, so a boost the rally grants, refreshes or removes reaches that same day's roll, with no lag in either direction; turning the rally off ends its escape boost before the next roll.
 
 The event chain does not run inside this tick. It has its own router behavior, `WarChronicleEventsBehavior` (`Events/WarChronicleEventsBehavior.cs`), whose daily listener calls `ChronicleService.RunChronicleDay()`; see "The event chain" below. The engine calls daily listeners newest first (`MbEvent.AddNonSerializedListener` prepends), and feature-module behaviors are added after every hand-wired one, `WarOfTheRingBehavior` included, so the chronicle steps first: an effect it writes is baked at once and already counts in that day's escape roll and ledger line.
+
+**Once per day.** Both daily listeners run at most once per campaign day (whole days, floored, like the ledger's `day=`). On a load the engine waits only the elapsed part of the day before the next daily tick (`Campaign.CreateCampaignEvents`, v1.5.5 `Campaign.cs:1024-1030`; `MBCampaignEvent` sets `NextTriggerTime` from that wait), so a save made at fraction f of day S next ticks at S + 2f: day S a second time when f is under a half. These are elapsed campaign days, counted from `CampaignStartTime` (09:00 on vanilla's calendar clock, `DefaultCampaignTimeModel`), so the repeat follows a save in the first half of the elapsed day (about 09:00 to 21:00 on the calendar clock), not one made before midday. `WarChronicleDailyGate` keeps the last day each listener ran in its own lane (`tick` for `RunDaily`, `chronicle` for `ChronicleService.RunChronicleDay`), claimed before any work; the days are saved in the payload's `daily` section, so the reloaded run skips the repeat. A save without the section (an older build) holds no day, so its first tick runs, and a new campaign's constructor reset clears it. A day that is not a finite number in range claims nothing, and an unreadable engine clock (no campaign, NaN, infinite or negative) never becomes day 0: `IKingdomWarSnapshotAdapter.TryGetElapsedDay` reports it, so `RunDaily` skips the day with one warning and `LogLoad` writes no load marker.
+
+**Line order.** One daily tick writes the chronicle's `ev=chronicle` lines first (its listener runs first), then the rally's `ev=tier` lines (`RunDaily` runs the rally before `WriteDaily`), then the kingdom, side and share lines. `ev=destroyed` lines and the resolutions of an owner change or a siege land mid-day, between two ticks. A load writes `t=load` before the reloaded run's first tick.
 
 ### The timed-effect registry
 
@@ -93,12 +97,13 @@ Vanilla's value already includes its low-fief boost (see **Why This Exists**), s
 | `t=event ev=tier` | `cid day k from to loss` |
 | `t=event ev=destroyed` | `cid day k` |
 | `t=event ev=chronicle` | `cid day id outcome` |
+| `t=load` (once per game load) | `cid day` (the day of the save that was loaded) |
 
-`cid` is `Campaign.UniqueGameId`, `day` the elapsed days since campaign start, `phase` the War of the Ring phase name. `ai` and `war` are 0 or 1; `cap` is 1, 0, or `na` (whether the kingdom's initial home settlement is still held); `str` is the kingdom's total strength as a whole number, or -1 when the engine value is not finite or negative; `pris` counts the kingdom's clan heroes who are prisoners; `vr` and `pe` are the current volunteer and escape multipliers to two decimals, written after that tick's rally and escape pass, so `pe` is the multiplier the day's roll used. `pris` is read before the escape pass, so it still counts lords who escaped that tick. `ev=chronicle` is written once per chronicle resolution by `ChronicleOutcomeService` through `LogChronicleResolution`: `outcome` is `Occurred`, `Held`, `Fell`, `Lapsed` or `Skipped`. A change to a line is a format change: bump `v` and teach the analyzer.
+`cid` is `Campaign.UniqueGameId`, `day` the elapsed days since campaign start, `phase` the War of the Ring phase name. `ai` and `war` are 0 or 1; `cap` is 1, 0, or `na` (whether the kingdom's initial home settlement is still held); `str` is the kingdom's total strength as a whole number, or -1 when the engine value is not finite or negative; `pris` counts the kingdom's clan heroes who are prisoners; `vr` and `pe` are the current volunteer and escape multipliers to two decimals, written after that tick's rally and escape pass, so `pe` is the multiplier the day's roll used. `pris` is read before the escape pass, so it still counts lords who escaped that tick. `ev=chronicle` is written once per chronicle resolution by `ChronicleOutcomeService` through `LogChronicleResolution`: `outcome` is `Occurred`, `Held`, `Fell`, `Lapsed` or `Skipped`. `t=load` is written by `WarChronicleBehavior` on `OnGameLoadedEvent`, on the authority only, through `WarLedgerService.LogLoad`, with the same day as the daily lines; it is how the analyzer drops the days of a run the player abandoned. A change to a line is a format change: bump `v` and teach the analyzer.
 
 ### The event chain
 
-`ChronicleService` (`Events/ChronicleService.cs`) is the state machine, driven by `WarChronicleEventsBehavior`, a thin router that is built fresh in every campaign like `WarChronicleBehavior` and saves nothing. Every call it makes is gated on `IsAuthority` and `MayWriteSaveBackedState`. Times are whole campaign days: the floor of `IChronicleWorldAdapter.GetElapsedDays`, the same day as the ledger's `day=`. The daily tick fires a few game minutes past midnight, or at a fixed mid-day time after a mid-day load, so fractional days would let a window or a child slip a day.
+`ChronicleService` (`Events/ChronicleService.cs`) is the state machine, driven by `WarChronicleEventsBehavior`, a thin router that is built fresh in every campaign like `WarChronicleBehavior` and saves nothing. Every call it makes is gated on `IsAuthority` and `MayWriteSaveBackedState`. Times are whole campaign days: the floor of `IChronicleWorldAdapter.GetElapsedDays`, the same day as the ledger's `day=`. The daily tick fires a few game minutes past an elapsed-day boundary (`CampaignStartTime` plus whole days, 09:00 on vanilla's calendar clock, not midnight), or at a fractional time after a load, so fractional days would let a window or a child slip a day.
 
 - **Adoption (decision D5):** at session launch, and at the start of every daily step, each configured event with no saved row gets one. When its open day is already past, or its anchor was Skipped, it becomes Skipped with no retroactive effect. A campaign started before this feature therefore gets no chronicle events once their days have passed; the rally and the ledger still work. A saved Pending row is not re-adopted: it opens on the next daily step even if late.
 - **World check at session launch:** a Pending or Active event that names a settlement or kingdom the campaign does not have (`SettlementExists`, `KingdomExists`, also for effect targets that are kingdom ids) is Skipped with a warning.
@@ -131,9 +136,9 @@ An outcome may carry `"momentum": {"side": "free"|"evil", "units": 1..300}`. `Ch
 
 ### The save payload
 
-`WarChronicleStateService` (`WarChronicleStateService.cs`) assembles one JSON payload through `WarChronicleSaveCodec` (`WarChronicleSaveCodec.cs`): `{"v":1,"effects":[{"s","k","kind","m","end"}],"baselines":{},"rally":{"tiers":{}},"chronicle":[{"id","s","open","close","a","res"}],"phases":{"IsengardWar":day,"FullWar":day}}`. The codec reads and writes the `chronicle` rows itself, as typed records the payload hands to `ChronicleStateStore` (`Events/ChronicleStateStore.cs`): the event id, its state as an int (`ChronicleEventState`: Pending 0, Active 1, Occurred 2, Held 3, Fell 4, Lapsed 5, Skipped 6, never renumbered), the open and close days of a window, whether it was assaulted, and the resolution day. A row with no id, a duplicate id, an undefined state, an Active state without a finite window, a resolved state without its resolution day (an Event-anchored child counts from it), or a day that is not a finite number is skipped alone with a warning, and the adoption rule re-creates it at session launch. A row for an id the configuration no longer lists is kept, so a later release's save survives a load in this one. The `phases` object holds the day the chronicle first saw each anchoring phase reached, keyed by the `WarPhase` name, and also lives in `ChronicleStateStore`; an entry for another phase (`Peace`, `WarEnded`, an unknown name) or without a finite day is skipped alone with a warning, and a missing day is recorded again on the first step after the load. Section isolation holds: a `phases` value that is not an object resets alone. The army focus and the announcement queue are not saved.
+`WarChronicleStateService` (`WarChronicleStateService.cs`) assembles one JSON payload through `WarChronicleSaveCodec` (`WarChronicleSaveCodec.cs`): `{"v":1,"effects":[{"s","k","kind","m","end"}],"baselines":{},"rally":{"tiers":{}},"chronicle":[{"id","s","open","close","a","res"}],"phases":{"IsengardWar":day,"FullWar":day},"daily":{"tick":day,"chronicle":day}}`. The codec reads and writes the `chronicle` rows itself, as typed records the payload hands to `ChronicleStateStore` (`Events/ChronicleStateStore.cs`): the event id, its state as an int (`ChronicleEventState`: Pending 0, Active 1, Occurred 2, Held 3, Fell 4, Lapsed 5, Skipped 6, never renumbered), the open and close days of a window, whether it was assaulted, and the resolution day. A row with no id, a duplicate id, an undefined state, an Active state without a finite window, a resolved state without its resolution day (an Event-anchored child counts from it), or a day that is not a finite number is skipped alone with a warning, and the adoption rule re-creates it at session launch. A row for an id the configuration no longer lists is kept, so a later release's save survives a load in this one. The `phases` object holds the day the chronicle first saw each anchoring phase reached, keyed by the `WarPhase` name, and also lives in `ChronicleStateStore`; an entry for another phase (`Peace`, `WarEnded`, an unknown name) or without a finite day is skipped alone with a warning, and a missing day is recorded again on the first step after the load. Section isolation holds: a `phases` value that is not an object resets alone. The `daily` object holds the last whole day each `WarChronicleDailyGate` lane ran ("Once per day"); an entry that is not a non-negative integer is skipped alone, a value that is not an object resets alone, and a save without it has run no day. The army focus and the announcement queue are not saved.
 
-- **Chunking:** `MomentumSyncChunker.Split` cuts the string into chunks of at most 10,000 characters, because one `SyncData` string over 32,767 UTF-8 bytes corrupts the save at write time. `WarChronicleBehavior` writes `_taom_war_chronicle_v1_count` and `_taom_war_chronicle_v1_{i}`. A count below 0 or above 4,096 is ignored with a warning.
+- **Chunking:** `SyncDataChunker.Split` (`Main/Core/Persistence`, shared with the momentum behavior) cuts the string into chunks of at most 10,000 characters, because one `SyncData` string over 32,763 UTF-8 bytes corrupts the save at write time (the engine writes a short length of 4 plus the bytes, v1.5.5 `SaveContext.SaveStringTo`). `WarChronicleBehavior` writes `_taom_war_chronicle_v1_count` and `_taom_war_chronicle_v1_{i}` through `SyncDataChunker.SyncChunks`. A count below 0 or above 4,096 is ignored with a warning.
 - **Forgiving parse:** an unreadable payload, a non-object or an unknown `v` resets every section. A section that does not parse resets alone, and a bad row inside a section (an unknown effect kind, a non-finite number, a rally tier outside 0 to 2) is skipped alone; each leaves a `[WarChronicle] Save:` warning. An empty payload (a corrupt or out-of-range chunk count) restores nothing; a save from before this feature never reaches `SyncData` at all. A development save that still carries the dropped `baselinesMidCampaign` key loads fine, because unknown keys are ignored.
 
 ### Component flow
@@ -281,7 +286,7 @@ Registered in `Main/Features/WarChronicle/Cheats/WarChronicleCheats.cs` and `Chr
 The ledger is the proof that the rally changes anything.
 
 1. **Run an observer campaign.** Start a campaign with the War of the Ring test mode (short phase days, see [war-of-the-ring.md](war-of-the-ring.md)), park the player somewhere harmless, and fast-forward with the TAOM time tiers for a few hundred in-game days. One run per setting: for example the MCM `Enable Rally` off for a control and on for the test.
-2. **Read the log.** The default is the newest `taom_debug_*.log` under the game's `bin/Win64_Shipping_Client/Logs/`; `BANNERLORD_GAME_DIR` overrides the install path. Run `python tools/analyze_war_ledger.py [logs ...] [--cid ID]`. The tool is read-only, groups by campaign id, reads the logs oldest first, and keeps the last line per kingdom and day, so reloading the same save does not double-count. A reload of an OLDER save still leaves the abandoned run's later days and events in the report, because the log carries no marker for the rewind yet. A malformed line is skipped and counted, and the first one is printed as a warning. Exit codes: 0 success; 1 no ledger lines, an unknown cid, an unreadable log or an unwritable `--csv` path; 2 an unknown `v` or a usage error.
+2. **Read the log.** The default is the newest `taom_debug_*.log` under the game's `bin/Win64_Shipping_Client/Logs/`; `BANNERLORD_GAME_DIR` overrides the install path. Run `python tools/analyze_war_ledger.py [logs ...] [--cid ID]`. The tool is read-only, groups by campaign id, reads the logs oldest first, and keeps the last line per kingdom and day, so reloading the same save does not double-count. A load is a rewind: a `t=load` line at day S drops every stored record of that campaign with a day after S (kingdom, side and share lines, events and chronicle resolutions), which belong to the run the player abandoned. Day S is kept from both runs, since a save made in the first half of elapsed day S can tick day S again ("Once per day") and the old run's day-S lines came before the save or in the same day; exact repeats still collapse. A log with no load markers gets no rewind: logs from builds before the marker can keep an abandoned run's days. A malformed line is skipped and counted, and the first one is printed as a warning. Exit codes: 0 success; 1 no ledger lines, an unknown cid, an unreadable log or an unwritable `--csv` path; 2 an unknown `v` or a usage error.
 3. **Metrics in the summary:** days covered; the Free share series (mean deviation from 0.5, maximum deviation and its day, fraction of days in 0.4 to 0.6, lead changes with a dead band of 0.48 to 0.52); first capital loss per kingdom and per side; kingdoms destroyed; fief churn per 10-day bucket; days at tier 1 and tier 2 and tier changes per kingdom; net change per side; chronicle outcomes by day, one row per event, then counted per outcome (`resolutions by outcome: Held 2, Lapsed 3`), keeping the last line read for each event even when it repeats an earlier line byte for byte, so a reload that replays a resolution counts once; and a target check, (a) share in 0.4 to 0.6 on at least 80% of non-na days, (b) no capital lost before day 120, with four verdicts, judged per kingdom: FAIL (any `cap=0` before day 120, reported as "day N" for an observed transition and "lost by day N" when the first capital state is already 0), PASS (every kingdom has a capital state on every day 1 to 119, or up to the day before its `ev=destroyed` line, and none was lost), NO DATA (no line carries a capital state) and UNKNOWN (some kingdom has a hole in that range: `cap=na` days, a kingdom first seen after day 1, a destroyed kingdom with no rows, or missing days; the reason names the kingdom, and another kingdom's complete rows never fill it).
 4. **Compare two runs.** `--compare off.log on.log` (each argument is `path` or `path:cid`; with no cid the campaign with the most days is used) prints each metric for A, B and B minus A, then the target verdicts for each. `--compare` reads one file per side (concatenate a run's logs, oldest first) and refuses `--csv`, `--cid` or extra log paths. `--csv PATH` writes the per-day series.
 
@@ -306,8 +311,9 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 | File | Purpose |
 |---|---|
 | `Main/Features/WarChronicle/WarChronicleModule.cs` | Feature module, behavior declaration |
-| `Main/Features/WarChronicle/WarChronicleBehavior.cs` | Per-campaign behavior: daily tick, destroyed line, SyncData |
+| `Main/Features/WarChronicle/WarChronicleBehavior.cs` | Per-campaign behavior: daily tick, destroyed and load lines, SyncData |
 | `Main/Features/WarChronicle/WarChronicleTickService.cs` | Tick order |
+| `Main/Features/WarChronicle/WarChronicleDailyGate.cs` | Once-per-day guard for both daily listeners |
 | `Main/Features/WarChronicle/WarChronicleStateService.cs`, `WarChronicleSaveCodec.cs`, `WarChroniclePayload.cs` | Save payload, chunking, parsing |
 | `Main/Features/WarChronicle/Effects/` | Registry, math, escape service and daily pass |
 | `Main/Features/WarChronicle/Rally/` | Baselines, tier machine and store, rally service, config provider |
@@ -331,7 +337,7 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 - `IWarOfTheRingService` (Diplomacy): the current phase, for the ledger's `phase` key.
 - `IAlignmentService` (Execution): `ResolveSide`, for the ledger's `side` key and the rally's Neutral eligibility check.
 - `ICoopSessionProvider` and `CoopSessionPolicy` (CoopInterop): the authority and save-write gates in the daily tick and in `taom.war_effect_add`.
-- `MomentumSyncChunker` (WarOfTheRingMomentum): SyncData chunking.
+- `SyncDataChunker` (Core/Persistence): SyncData chunking and the count-and-chunks pass, shared with the momentum behavior.
 - `TaomConsole` (DevConsole): the four commands.
 - `IKingdomWarSnapshotAdapter` and `IPrisonerEscapeAdapter` (Adapters, registered by this feature): kingdom fiefs and strength; captured lords, their escape factors and `EndCaptivityAction.ApplyByEscape`.
 - `IPathService` and `IModLogger` (Core), and `TaomSettings` through `WarChronicleSettingsProvider` (MCM).
@@ -340,7 +346,7 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 
 ## Tests
 
-Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute lines (2026-10-14); they exclude `[DataRow]` expansions. The 517 under `TAOM.Tests/Features/WarChronicle/` plus 75 in the eight outside files below make 592 C# tests, of which 102 are `[DataTestMethod]`. `MomentumConfigProviderTests` also gained 2 for the `chronicle` duration.
+Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute lines (2026-10-14); they exclude `[DataRow]` expansions. The 552 under `TAOM.Tests/Features/WarChronicle/` plus 77 in the eight outside files below make 629 C# tests, of which 105 are `[DataTestMethod]`. The once-per-day gate has its own class (`WarChronicleDailyGateTests`) and a test each in the tick, chronicle, codec, state and behavior classes; the load marker has a golden line, a line in the shared fixture, two `LogLoad` tests and three behavior tests. An unreadable clock has three tick tests, a `LogLoad` test, a behavior test, the adapter's `TryFloorElapsedDays` cases and a chronicle case per invalid value. `MomentumConfigProviderTests` also gained 2 for the `chronicle` duration.
 
 | Class | File | Tests |
 |---|---|---|
@@ -352,19 +358,20 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 | `RallyTierMachineTests` | same | 14 |
 | `RallyTierStoreTests` | same | 10 |
 | `WarBaselineServiceTests` | same | 16 |
-| `WarLedgerFormatterTests` | `.../Ledger/` | 18 |
-| `WarLedgerServiceTests` | same | 16 |
+| `WarLedgerFormatterTests` | `.../Ledger/` | 20 |
+| `WarLedgerServiceTests` | same | 17 |
 | `WarChronicleCheatReportTests` | `.../Cheats/` | 19 |
-| `WarChronicleSaveCodecTests` | `.../WarChronicle/` | 28 |
-| `WarChronicleStateServiceTests` | same | 10 |
-| `WarChronicleTickServiceTests` | same | 15 |
-| `WarChronicleBehaviorTests` | same | 8 |
+| `WarChronicleSaveCodecTests` | `.../WarChronicle/` | 32 |
+| `WarChronicleStateServiceTests` | same | 13 |
+| `WarChronicleTickServiceTests` | same | 18 |
+| `WarChronicleBehaviorTests` | same | 10 |
+| `WarChronicleDailyGateTests` | same | 9 |
 | `WarChronicleSettingsProviderTests` | same | 7 |
 | `WarChronicleIoCTests` | same | 5 |
 | `WarChronicleWiringTests` | same | 5 |
 | `VolunteerProductionServiceTests` | `TAOM.Tests/Features/TroopProgression/` | 21 |
 | `VolunteerProductionWiringTests` | same | 1 |
-| `ChronicleServiceTests` | `.../WarChronicle/Events/` | 73 |
+| `ChronicleServiceTests` | `.../WarChronicle/Events/` | 79 |
 | `ChronicleConfigValidatorTests` | same | 55 |
 | `ChronicleConfigProviderTests` | same | 5 |
 | `ChronicleAnnouncementQueueTests` | same | 12 |
@@ -380,9 +387,9 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 | `MomentumAwardServiceTests` | `TAOM.Tests/Features/WarOfTheRingMomentum/` | 9 |
 | `WarOfTheRingPhaseDayTests` | `TAOM.Tests/Features/Diplomacy/` | 5 |
 | `PrisonerEscapeAdapterTests` | `TAOM.Tests/Adapters/` | 4 |
-| `KingdomWarSnapshotAdapterTests` | same | 9 |
+| `KingdomWarSnapshotAdapterTests` | same | 11 |
 
-`WarChronicleSettingsProvider` is also a row in `CampaignHotPathSettingsProvidersTests`, and `CastleRecruitmentServiceTests` covers the castle consumer. The analyzer has 81 Python tests (`def test_` count) in `tools/tests/test_analyze_war_ledger.py`.
+`WarChronicleSettingsProvider` is also a row in `CampaignHotPathSettingsProvidersTests`, and `CastleRecruitmentServiceTests` covers the castle consumer. The analyzer has 90 Python tests (`def test_` count) in `tools/tests/test_analyze_war_ledger.py`, the load-marker cases among them (`LoadMarkerTests`).
 
 ## Known limitations
 
@@ -406,6 +413,7 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 - **A siege whose target an attacker already holds falls at once.** It pays its Fell outcome on the day it would have opened, with no window to fight over (decided by the maintainer 2026-10-14).
 - **Test Mode inverts the lore order.** With Phase 1 before day 20 (Test Mode puts it on day 1), `breaking` (Phase 1 + 0) fires before `fellowship` (day 20) and `khazaddum` (day 26).
 - **A siege can hold its window past the close.** While an attacker still besieges the target, the close waits for one more `windowDays` at most, and the children anchored on its resolution (ents, gondor, blackgate) open later.
+- **The north event needs Arthedain's towns in TAOM_Map.** Its target, Bree (`town_AN3`), exists only in the live TAOM_Map: the TAOM_Map packaged in `E:\LOTRAOM_Releases\{patreon,public,testing}` had none of Arthedain's towns when checked on 2026-10-14. Played on that package, the event is Skipped at session launch with a logged warning and no effects (`ChronicleService.LaunchChronicle`). The next release must ship a TAOM_Map package that carries them ([release-process.md](../reference/release-process.md)).
 
 ## Changelog
 
@@ -416,4 +424,4 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 ## GitHub Issue
 
 - **Issue:** #765
-- **Status:** Open (the chronicle's in-game checks are owed; the Eye of Sauron hunt is in [eye-of-sauron.md](eye-of-sauron.md))
+- **Status:** Closed (the Eye of Sauron hunt is in [eye-of-sauron.md](eye-of-sauron.md))

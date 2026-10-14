@@ -24,14 +24,32 @@ public interface ICareerRegistry
     /// </summary>
     string GetOwningCareerId(string choiceStringId);
     bool IsEligible(string careerStringId, ICareerHeroAdapter hero);
-    int GetMaxChoicesForHero(int heroLevel);
+
+    /// <summary>
+    /// The choice budget (root plus career points) at <paramref name="heroLevel"/>. A career that
+    /// declares <c>PointLevels</c> grants one point per listed level reached; any other career,
+    /// including a null one, gets the legacy one point per level.
+    /// </summary>
+    int GetMaxChoicesForHero(CareerDefinition career, int heroLevel);
 
     /// <summary>
     /// Issue #379 — unspent career points: max(0, budget-for-level − taken). The single
     /// source for the character-screen badge and the career screen's "Free Points" readout;
     /// clamps for saves whose taken count exceeds the current budget (post-rebalance).
     /// </summary>
-    int GetUnspentPoints(int heroLevel, int takenChoiceCount);
+    int GetUnspentPoints(CareerDefinition career, int heroLevel, int takenChoiceCount);
+
+    /// <summary>
+    /// The first of the career's point levels above <paramref name="heroLevel"/>, or null for a
+    /// legacy career (a point every level) or when every point level has been reached.
+    /// </summary>
+    int? GetNextPointLevel(CareerDefinition career, int heroLevel);
+
+    /// <summary>
+    /// #769 E7: gold price of a retrain, and of leaving a career that holds fork picks:
+    /// base + per-level × hero level (a level below 1 prices as level 1).
+    /// </summary>
+    int GetRetrainCost(int heroLevel);
     bool IsTierAvailable(int heroLevel, int tier);
 
     /// <summary>Hero level at which the given tier (1-3) unlocks. Returns int.MaxValue for unknown tiers.</summary>

@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Features.ArmyTargeting;
 using TAOM.Features.Diplomacy.Models;
+using TAOM.Features.WarChronicle;
 using TAOM.Features.WarChronicle.Effects;
 using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarOfTheRingMomentum.Domain;
@@ -1069,7 +1070,7 @@ public class ChronicleServiceTests
         world.GetElapsedDays().Returns(_ => throw new System.NullReferenceException("engine"));
         var sut = new ChronicleService(_f.Config, _f.Store, world, _f.Alliance, _f.Wotr,
             new ChronicleOutcomeService(_f.Effects, _f.Alliance, _f.Alignment, _f.Momentum, _f.Ledger, _f.Text, _f.Logger),
-            _f.Queue, _f.Focus, _f.Settings, _f.Logger);
+            _f.Queue, _f.Focus, _f.Settings, _f.Logger, _f.Daily);
 
         sut.RunChronicleDay();
 
@@ -1084,6 +1085,62 @@ public class ChronicleServiceTests
         _sut.ResetTransientState();
 
         Assert.IsTrue(_f.Focus.IsEmpty);
+    }
+
+    // ---- Once per campaign day -----------------------------------------------------------------------
+    // A save made in the first half of an elapsed campaign day ticks that day again after a load (v1.5.5
+    // Campaign.cs:1024-1030). The elapsed day starts at CampaignStartTime (09:00 on vanilla's calendar clock).
+
+    [TestMethod]
+    public void RunChronicleDay_TwiceOnTheSameDay_StepsOnce()
+    {
+        _f.Events.Add(Narrative("fellowship"));
+        Day(5);
+        _f.Config.ClearReceivedCalls();
+
+        Day(5.6);
+
+        _f.Config.DidNotReceive().GetEvents();
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_TheNextDay_Steps()
+    {
+        _f.Events.Add(Narrative("fellowship"));
+        Day(5);
+        _f.Config.ClearReceivedCalls();
+
+        Day(6);
+
+        _f.Config.Received().GetEvents();
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_TheTickAlreadyRanToday_StillSteps()
+    {
+        _f.Daily.TryClaim(WarChronicleDailyGate.TickLane, 5d);
+
+        Day(5);
+
+        _f.Config.Received().GetEvents();
+    }
+
+    [DataTestMethod]
+    [DataRow(double.NaN)]
+    [DataRow(double.PositiveInfinity)]
+    [DataRow(double.NegativeInfinity)]
+    [DataRow(-1d)]
+    [DataRow(-0.5d)]
+    public void RunChronicleDay_AnInvalidClock_ClaimsNoDay(double day)
+    {
+        // ChronicleWorldAdapter passes the engine value through unmasked (no day-0 fallback), so the
+        // finite check and the gate's range check see the bad clock and skip the day.
+        _f.Events.Add(Narrative("fellowship"));
+
+        Day(day);
+
+        Assert.AreEqual(0, _f.Daily.Snapshot().Count);
+        _f.Config.DidNotReceive().GetEvents();
     }
 
     // ---- Console: open now ---------------------------------------------------------------------------

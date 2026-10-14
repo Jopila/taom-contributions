@@ -6,6 +6,8 @@ Running scorecard of all reviews. **Reviews 1-99, 2026-04-05 to 2026-09-12.** 93
 
 | # | Date | Feature | Codex Verdict | Claude Verdict | Real Bugs | False Positives | Missed Bugs | Prompt Version |
 |---|------|---------|--------------|----------------|-----------|-----------------|-------------|----------------|
+| career-e4e7 | 2026-10-14 | Career forks engine #769 E4 to E7 and E12, plus the merge of trunk a9437a492 (one choice rule, forks, point levels, lock on leave, paid retrain, switch cost, tree-version migration) | issues-found (0 P1, 1 P2, 0 P3; 5 of 6 suspects disputed); pass 2 on the fix: none | agree (P2 confirmed in the source, fixed in 59c1803d2) | 1 P2 (the tree migration ran for the main hero only) | 0 | 0 | review-codex skill prompt, max; pass 2 high |
+| career-e1e3 | 2026-10-09 | Career fixes #766, #767, #768, #770, #771 (choice group link, resource gain on every source, party-size cache and leader-only scope, raid battle credit, party-screen handler) | issues-found (0 P1, 1 P2, 0 P3; 4 of 5 suspects disputed) | agree (P2 confirmed in the v1.5.5 decompile, fixed as #790) | 1 P2 (hideout send-troops paid twice, pre-existing) | 0 | 0 | review-codex skill prompt, xhigh |
 | (at merge) | 2026-10-08 | yotthani adoption, items 1 to 4: mission-start guard (Patch103), skeleton-buffer guard and watch (two native jumps), nameplate cull (Patch104), map-view release (layer event) | issues-found (0 HIGH, 1 MEDIUM conditional, 2 LOW) | agree (all three confirmed and fixed) | 3 | 0 | 4 LOW, found by two convergence lenses on the same tree (a due release across a campaign change, the closer's tick order, an unpinned engine order, a Priority.First overclaim) | gpt-6-astra, ultra; RCA `docs/reviews/rca-yotthani-adoption-2026-10-08.md` findings 34 to 37 |
 | (at merge) | 2026-10-08 | yotthani adoption, Codex pass 2 on the fixes of pass 1 and the convergence lenses (the closer in a `finally`, the map-view drop rule, an order pin, wording) | issues-found (0 MEDIUM or above, 2 LOW) | agree (both confirmed; one fixed, one documented) | 2 | 0 | 0 | gpt-6-astra, high; RCA findings 38 and 39 |
 | (at merge) | 2026-10-09 | yotthani adoption item 5: formation presets save and load the Order of Battle (#779), and the reflection-site label gate | issues-found (0 MEDIUM or above, 3 LOW) | agree (all three confirmed and fixed) | 3 | 0 | 3 LOW, found by a Claude convergence lens on the same tree (an unread binding pin, the first label gate's rule, wording) | gpt-6-astra, high; RCA `docs/reviews/rca-formation-presets-2026-10-09.md` findings 14 to 19 |
@@ -5260,6 +5262,34 @@ Report `docs/reviews/deep-review-031-settings-reads-off-hot-paths-2026-10-02.md`
   2 LOW (the "capstones" label; a stale example in the clamp comment) and 3 NIT, all comment or doc
   text, all fixed (RCA C1 to C3).
 - **RCA:** `docs/reviews/rca-uruk-hai-skirt-body-2026-10-04.md`.
+
+## Review (number assigned at merge): Career forks engine, steps E4 to E7 and E12 (#769), 7-lens deep review + convergence (2026-10-14)
+
+- **Scope:** branch `feature/career-forks` (worktree `E:/repos/taom-career-forks`), uncommitted on
+  `4f5b412d7`: one take and refund rule with lock reasons, fork groups (`max_picks`), per-career
+  `point_levels`, lock on leave, a paid retrain, a career-switch cost and a `tree_version` migration;
+  the screen VMs and prefab, `taom_careers.xml`, 15 new strings in English and 12 language files.
+- **Claude:** lenses 1, 2, 5 and 7, then 3, 4 and 6, at most four in flight. 0 CRITICAL, 0 HIGH, 2
+  MEDIUM (a retrain price that wrapped negative on absurd config and made a paid switch free; a
+  feature doc the change had made wrong) and 16 LOW or NIT, all fixed except the
+  `ICareerLifecycleService` deletion (its resolver in `Main/SubModule.cs` could not be edited this
+  session). One behaviour change, the Confirm button disabled when the player cannot pay, was the
+  maintainer's decision. Design proposals P1 to P6 applied as behaviour-preserving; P7, P8 and four
+  efficiency items are follow-ups on code the change did not modify.
+- **Final suite:** 15,285 passed, 6 skipped, 2 failed of 15,293 (the pinned game build, and the
+  language-coverage test with its 32 pre-existing missing keys and none of the new ones);
+  `lint_docs --fail-on-drift` exit 0. `validate_moduledata.py` reports 1,867 errors, none in a file
+  this change touches: the live Armory's Harad item files were rewritten the same morning.
+- **Convergence:** one pass. Every fix held and parity held for every improvement; it found 1 LOW
+  defect the fixes had introduced (the Confirm hint said "You don't have enough denars." to a player
+  who could pay) and 3 LOW doc errors, all fixed (RCA C1 to C4).
+- **Merge review:** trunk `a9437a492` merged as `1e6a97c6d`; a three-lens workflow with two refuters
+  per finding found 1 NIT (blank lines lost at five doc seams), fixed before the merge commit. Pure
+  trunk fails the same 9 dotnet tests as the merged tree.
+- **Codex:** `max` on `4f5b412d7..1e6a97c6d`: 1 P2, five of six suspects disputed with evidence. The
+  P2 (the tree migration ran for the main hero only) is fixed in `59c1803d2`; pass 2 at `high` on that
+  commit found nothing (RCA X1).
+- **RCA:** `docs/reviews/rca-career-e4e7-2026-10-14.md`.
 
 ## Review (number assigned at merge): War of the Ring session reset (#764), 8-lens deep review in two waves + Codex gpt-6-astra max (2026-10-08)
 

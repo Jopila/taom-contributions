@@ -136,13 +136,88 @@ public class CareerRegistryTests
     [TestMethod]
     public void GetMaxChoicesForHero_Level5_Returns6()
     {
-        Assert.AreEqual(6, _registry.GetMaxChoicesForHero(5));
+        Assert.AreEqual(6, _registry.GetMaxChoicesForHero(WarbossCareer, 5));
     }
 
     [TestMethod]
     public void GetMaxChoicesForHero_Level50_CapsAtMaxPerkPoints()
     {
-        Assert.AreEqual(31, _registry.GetMaxChoicesForHero(50));
+        Assert.AreEqual(31, _registry.GetMaxChoicesForHero(WarbossCareer, 50));
+    }
+
+    // ── #769 E6 — per-career point levels (empty list = the legacy formula above) ──
+
+    private static readonly CareerDefinition PacedCareer = new CareerDefinition(
+        id: "paced", displayName: "Paced", description: "", portraitSprite: "",
+        abilityTemplateId: "rally_horde", minClanTier: 0, rootChoiceId: "p_root",
+        eligibleCultureIds: new List<string>(),
+        choiceGroupIds: new List<string>(),
+        pointLevels: new List<int> { 1, 5, 10, 15, 20, 25 });
+
+    [TestMethod]
+    public void GetMaxChoicesForHero_PointLevelsAtLevel1_RootPlusFirstPoint()
+    {
+        Assert.AreEqual(2, _registry.GetMaxChoicesForHero(PacedCareer, 1));
+    }
+
+    [TestMethod]
+    public void GetMaxChoicesForHero_PointLevelsAtLevel4_StillTwo()
+    {
+        Assert.AreEqual(2, _registry.GetMaxChoicesForHero(PacedCareer, 4));
+    }
+
+    [TestMethod]
+    public void GetMaxChoicesForHero_PointLevelsAtLevel5_Three()
+    {
+        Assert.AreEqual(3, _registry.GetMaxChoicesForHero(PacedCareer, 5));
+    }
+
+    [TestMethod]
+    public void GetMaxChoicesForHero_PointLevelsAtLevel30_AllSixPointsPlusRoot()
+    {
+        Assert.AreEqual(7, _registry.GetMaxChoicesForHero(PacedCareer, 30));
+    }
+
+    [TestMethod]
+    public void GetMaxChoicesForHero_PointLevelsAtLevel0_TreatedAsLevel1()
+    {
+        Assert.AreEqual(2, _registry.GetMaxChoicesForHero(PacedCareer, 0));
+    }
+
+    [TestMethod]
+    public void GetMaxChoicesForHero_NullCareer_UsesTheLegacyFormula()
+    {
+        Assert.AreEqual(6, _registry.GetMaxChoicesForHero(null, 5));
+    }
+
+    [TestMethod]
+    public void GetUnspentPoints_PointLevels_SubtractsTakenFromThePacedBudget()
+    {
+        // Level 10 → 1 root + points at 1, 5, 10 = 4; 2 taken → 2 free.
+        Assert.AreEqual(2, _registry.GetUnspentPoints(PacedCareer, 10, 2));
+        Assert.AreEqual(0, _registry.GetUnspentPoints(PacedCareer, 10, 9));
+    }
+
+    [TestMethod]
+    public void GetNextPointLevel_BelowTheNextThreshold_ReturnsIt()
+    {
+        Assert.AreEqual(5, _registry.GetNextPointLevel(PacedCareer, 1));
+        Assert.AreEqual(5, _registry.GetNextPointLevel(PacedCareer, 4));
+        Assert.AreEqual(10, _registry.GetNextPointLevel(PacedCareer, 5));
+    }
+
+    [TestMethod]
+    public void GetNextPointLevel_AtOrPastTheLastThreshold_ReturnsNull()
+    {
+        Assert.IsNull(_registry.GetNextPointLevel(PacedCareer, 25));
+        Assert.IsNull(_registry.GetNextPointLevel(PacedCareer, 40));
+    }
+
+    [TestMethod]
+    public void GetNextPointLevel_LegacyOrNullCareer_ReturnsNull()
+    {
+        Assert.IsNull(_registry.GetNextPointLevel(WarbossCareer, 1));
+        Assert.IsNull(_registry.GetNextPointLevel(null, 1));
     }
 
     // ── Issue #379 — unspent-points computation (single source for the badge + screen) ──
@@ -151,13 +226,13 @@ public class CareerRegistryTests
     public void GetUnspentPoints_TakenBelowMax_ReturnsDifference()
     {
         // Level 5 → max 6; 4 taken → 2 free.
-        Assert.AreEqual(2, _registry.GetUnspentPoints(5, 4));
+        Assert.AreEqual(2, _registry.GetUnspentPoints(WarbossCareer, 5, 4));
     }
 
     [TestMethod]
     public void GetUnspentPoints_TakenEqualsMax_ReturnsZero()
     {
-        Assert.AreEqual(0, _registry.GetUnspentPoints(5, 6));
+        Assert.AreEqual(0, _registry.GetUnspentPoints(WarbossCareer, 5, 6));
     }
 
     [TestMethod]
@@ -165,7 +240,7 @@ public class CareerRegistryTests
     {
         // A save from a higher max (e.g. after a rebalance) can hold more choices than the
         // current budget — the badge must clamp, not go negative.
-        Assert.AreEqual(0, _registry.GetUnspentPoints(5, 10));
+        Assert.AreEqual(0, _registry.GetUnspentPoints(WarbossCareer, 5, 10));
     }
 
     [TestMethod]
@@ -358,5 +433,149 @@ public class CareerRegistryTests
 
         Assert.AreEqual("warboss", registry.GetOwningCareerId("wb_root"));
         Assert.IsNull(registry.GetOwningCareerId("wb_brut_key"));
+    }
+
+    // -- Ambiguity: an id that two owners claim has no owner (W1-02) --
+
+    private static CareerDefinition CareerWith(string id, string root, params string[] groups)
+        => new CareerDefinition(
+            id: id, displayName: id, description: "", portraitSprite: "", abilityTemplateId: "t",
+            minClanTier: 0, rootChoiceId: root, eligibleCultureIds: new List<string>(),
+            choiceGroupIds: new List<string>(groups));
+
+    private static CareerChoiceDefinition ChoiceIn(string id, string groupId)
+        => new CareerChoiceDefinition(id: id, groupId: groupId, type: ChoiceType.Passive,
+            description: "d", iconSprite: "i", passive: null, mutations: null);
+
+    private static CareerRegistry RegistryOf(IModLogger logger, List<CareerDefinition> careers,
+        List<CareerChoiceDefinition> choices)
+    {
+        var config = Substitute.For<ICareerConfigProvider>();
+        config.GetMaxPerkPoints().Returns(30);
+        config.LoadCareers().Returns(careers);
+        config.LoadChoiceGroups().Returns(new List<CareerChoiceGroupDefinition>());
+        config.LoadChoices().Returns(choices);
+        return new CareerRegistry(config, logger);
+    }
+
+    [TestMethod]
+    public void GetOwningCareerId_GroupListedByTwoCareers_ReturnsNullAndWarns()
+    {
+        var logger = Substitute.For<IModLogger>();
+        var registry = RegistryOf(logger,
+            new List<CareerDefinition> { CareerWith("a", "a_root", "shared_g"), CareerWith("b", "b_root", "shared_g") },
+            new List<CareerChoiceDefinition> { ChoiceIn("shared_key", "shared_g") });
+
+        Assert.IsNull(registry.GetOwningCareerId("shared_key"));
+        logger.Received(1).LogWarning(Arg.Is<string>(s => s.Contains("shared_g")));
+    }
+
+    [TestMethod]
+    public void GetOwningCareerId_RootSharedByTwoCareers_ReturnsNull()
+    {
+        var logger = Substitute.For<IModLogger>();
+        var registry = RegistryOf(logger,
+            new List<CareerDefinition> { CareerWith("a", "same_root"), CareerWith("b", "same_root") },
+            new List<CareerChoiceDefinition> { ChoiceIn("same_root", "") });
+
+        Assert.IsNull(registry.GetOwningCareerId("same_root"));
+        logger.Received(1).LogWarning(Arg.Is<string>(s => s.Contains("same_root")));
+    }
+
+    [TestMethod]
+    public void GetOwningCareerId_ChoiceIdInTwoCareersGroups_ReturnsNull()
+    {
+        var logger = Substitute.For<IModLogger>();
+        var registry = RegistryOf(logger,
+            new List<CareerDefinition> { CareerWith("a", "a_root", "a_g"), CareerWith("b", "b_root", "b_g") },
+            new List<CareerChoiceDefinition>
+            {
+                ChoiceIn("dup", "a_g"), ChoiceIn("dup", "b_g"), ChoiceIn("only_a", "a_g"),
+            });
+
+        Assert.IsNull(registry.GetOwningCareerId("dup"));
+        Assert.AreEqual("a", registry.GetOwningCareerId("only_a"));
+        logger.Received(1).LogWarning(Arg.Is<string>(s => s.Contains("'dup'")));
+    }
+
+    [TestMethod]
+    public void GetOwningCareerId_NestedIdEqualToRootId_ReturnsNull()
+    {
+        var registry = RegistryOf(Substitute.For<IModLogger>(),
+            new List<CareerDefinition> { CareerWith("a", "a_root", "a_g") },
+            new List<CareerChoiceDefinition> { ChoiceIn("a_root", ""), ChoiceIn("a_root", "a_g") });
+
+        Assert.IsNull(registry.GetOwningCareerId("a_root"));
+    }
+
+    [TestMethod]
+    public void GetOwningCareerId_GroupListedTwiceBySameCareer_ResolvesToThatCareer()
+    {
+        var logger = Substitute.For<IModLogger>();
+        var registry = RegistryOf(logger,
+            new List<CareerDefinition> { CareerWith("a", "a_root", "a_g", "a_g") },
+            new List<CareerChoiceDefinition> { ChoiceIn("a_key", "a_g") });
+
+        Assert.AreEqual("a", registry.GetOwningCareerId("a_key"));
+        logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("a_g")));
+    }
+
+    // ── #769 E7: the retrain price ──
+
+    [TestMethod]
+    public void GetRetrainCost_IsBasePlusPerLevelTimesLevel()
+    {
+        _config.GetRetrainGoldBase().Returns(1000);
+        _config.GetRetrainGoldPerLevel().Returns(250);
+
+        Assert.AreEqual(2250, _registry.GetRetrainCost(5));
+        Assert.AreEqual(1250, _registry.GetRetrainCost(1));
+    }
+
+    [TestMethod]
+    public void GetRetrainCost_LevelBelowOne_PricesAsLevelOne()
+    {
+        _config.GetRetrainGoldBase().Returns(1000);
+        _config.GetRetrainGoldPerLevel().Returns(250);
+
+        Assert.AreEqual(1250, _registry.GetRetrainCost(0));
+    }
+
+    [TestMethod]
+    public void GetRetrainCost_UsesTheConfiguredValues()
+    {
+        _config.GetRetrainGoldBase().Returns(500);
+        _config.GetRetrainGoldPerLevel().Returns(100);
+
+        Assert.AreEqual(1000, _registry.GetRetrainCost(5));
+    }
+
+    [TestMethod]
+    public void GetRetrainCost_HugeBase_ClampsToIntMaxValue()
+    {
+        _config.GetRetrainGoldBase().Returns(int.MaxValue);
+        _config.GetRetrainGoldPerLevel().Returns(250);
+
+        Assert.AreEqual(int.MaxValue, _registry.GetRetrainCost(5));
+    }
+
+    [TestMethod]
+    public void GetRetrainCost_HugePerLevel_ClampsToIntMaxValueAndNeverGoesNegative()
+    {
+        _config.GetRetrainGoldBase().Returns(1000);
+        _config.GetRetrainGoldPerLevel().Returns(int.MaxValue);
+
+        var cost = _registry.GetRetrainCost(25);
+
+        Assert.AreEqual(int.MaxValue, cost);
+        Assert.IsTrue(cost > 0);
+    }
+
+    [TestMethod]
+    public void GetNextPointLevel_LevelBelowOne_ReadsAsLevelOne()
+    {
+        // Same clamp as GetMaxChoicesForHero: a level below 1 reads as level 1.
+        Assert.AreEqual(5, _registry.GetNextPointLevel(PacedCareer, 0));
+        Assert.AreEqual(_registry.GetNextPointLevel(PacedCareer, 1), _registry.GetNextPointLevel(PacedCareer, -3));
     }
 }

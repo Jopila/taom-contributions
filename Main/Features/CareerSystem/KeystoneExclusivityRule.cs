@@ -10,9 +10,10 @@ namespace TAOM.Features.CareerSystem;
 ///
 /// Grandfathering: an already-taken choice is never locked, so a save holding multiple
 /// same-tier keystones (pre-rule or post-rebalance) keeps them taken and refundable —
-/// the rule gates FUTURE takes only. One rule, three consumers: both CareerScreenVM
-/// select paths and the RebuildChoiceGroups display state (a locked keystone dims and
-/// loses its + button instead of silently rejecting the click).
+/// the rule gates FUTURE takes only. Its one consumer is CareerChoiceRules.CanTake, which asks
+/// it for unlimited groups only (a fork group has its own pick limit), and which the select
+/// click and the RebuildChoiceGroups display state both call (a locked keystone dims and
+/// shows why instead of silently rejecting the click).
 /// </summary>
 public static class KeystoneExclusivityRule
 {

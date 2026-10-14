@@ -44,7 +44,7 @@ public class WarChronicleWiringTests
     {
         var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
             .Where(path => !IsFile(path, "WarChronicleModule.cs") && !IsFile(path, "WarChronicleBehavior.cs"))
-            .Where(path => Regex.IsMatch(RepoPaths.StripComments(File.ReadAllText(path)), @"\bWarChronicleBehavior\b"))
+            .Where(path => RepoPaths.MentionsOutsideComments(path, "WarChronicleBehavior", wholeWord: true))
             .ToList();
 
         Assert.AreEqual(0, offenders.Count,

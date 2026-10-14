@@ -807,6 +807,7 @@
 	<string id="taom_career_tier2" text="{=taom_career_tier2}Tier 2" />
 	<string id="taom_career_tier3" text="{=taom_career_tier3}Tier 3" />
 	<string id="taom_career_free_points" text="{=taom_career_free_points}Free Points: {COUNT}" />
+	<string id="taom_career_repair_refund" text="{=taom_career_repair_refund}Career choices that belonged to another career were refunded: {COUNT}." />
 	<string id="taom_career_tier_requirement" text="{=taom_career_tier_requirement}Requires Level {LEVEL}" />
 	<!-- Choice tree effect-scope badges (passive vs ability-bound) -->
 	<string id="taom_career_choice_while_active" text="{=taom_career_choice_while_active}While active" />
@@ -3213,6 +3214,22 @@
 
   <!-- TAOM-NEWCULTURE:arthedain:END -->
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- CareerSystem -->
+	<string id="taom_career_lock_fork" text="{=taom_career_lock_fork}You took another choice on this path." />
+	<string id="taom_career_lock_keystone" text="{=taom_career_lock_keystone}You took another keystone in this tier." />
+	<string id="taom_career_lock_points" text="{=taom_career_lock_points}No free career points." />
+	<string id="taom_career_lock_locked_in" text="{=taom_career_lock_locked_in}Locked in. Retrain to change this choice." />
+	<string id="taom_career_next_point" text="{=taom_career_next_point}Next point at level {LEVEL}" />
+	<string id="taom_career_tree_reset" text="{=taom_career_tree_reset}Your career was redesigned, so your career choices were refunded." />
+	<string id="taom_career_retrain" text="{=taom_career_retrain}Retrain ({GOLD} gold)" />
+	<string id="taom_career_switch_cost_title" text="{=taom_career_switch_cost_title}Switch career" />
+	<string id="taom_career_switch_cost_body" text="{=taom_career_switch_cost_body}Switching careers refunds all your career choices and costs {GOLD} gold." />
+	<string id="taom_career_switch_confirm" text="{=taom_career_switch_confirm}Switch" />
+	<string id="taom_career_switch_no_gold" text="{=taom_career_switch_no_gold}You need {GOLD} gold to switch careers." />
+	<string id="taom_career_retrain_title" text="{=taom_career_retrain_title}Retrain career" />
+	<string id="taom_career_retrain_body" text="{=taom_career_retrain_body}Refund every career choice except your first for {GOLD} gold? You keep your career and the tiers you unlocked." />
+	<string id="taom_career_retrain_confirm" text="{=taom_career_retrain_confirm}Retrain" />
+	<string id="taom_career_retrain_no_gold" text="{=taom_career_retrain_no_gold}You need {GOLD} gold to retrain." />
 	<!-- MissionStartGuardAdapter -->
 	<string id="taom_mission_start_guard_notice" text="{=taom_mission_start_guard_notice}{MODULE} failed in {CALL} ({EXCEPTION}). The mission goes on, with that step cut short." />
 	<!-- SkeletonBufferEngineAdapter -->

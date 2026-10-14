@@ -75,4 +75,35 @@ public class RepoPathsTests
         Assert.IsFalse(stripped.Contains("new ParkedModel("), "A commented-out registration must not survive.");
         Assert.IsFalse(stripped.Contains("block") || stripped.Contains("spans"), "A block comment must not survive.");
     }
+
+    [DataTestMethod]
+    [DataRow("// FooBehavior only here\nint x;\n", "FooBehavior", false, false)]
+    [DataRow("/* FooBehavior */ int x;\n", "FooBehavior", true, false)]
+    [DataRow("new FooBehavior();\n", "FooBehavior", false, true)]
+    [DataRow("new FooBehavior();\n", "FooBehavior", true, true)]
+    [DataRow("new FooBehaviorExtra();\n", "FooBehavior", true, false)]
+    [DataRow("new FooBehaviorExtra();\n", "FooBehavior", false, true)]
+    public void MentionsOutsideComments_ReadsCodeNotComments(string content, string needle, bool wholeWord, bool expected)
+    {
+        var probe = RepoPaths.RepoPath("TAOM.Tests", "bin", "repopaths-mentions-probe.txt");
+        Directory.CreateDirectory(Path.GetDirectoryName(probe)!);
+        File.WriteAllText(probe, content);
+        try
+        {
+            Assert.AreEqual(expected, RepoPaths.MentionsOutsideComments(probe, needle, wholeWord));
+        }
+        finally
+        {
+            File.Delete(probe);
+        }
+    }
+
+    [TestMethod]
+    public void MentionsOutsideComments_MissingFile_Throws()
+    {
+        var missing = RepoPaths.RepoPath("TAOM.Tests", "bin", "no-such-mentions-probe.txt");
+
+        Assert.ThrowsException<FileNotFoundException>(
+            () => RepoPaths.MentionsOutsideComments(missing, "X"));
+    }
 }

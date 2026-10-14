@@ -1711,6 +1711,29 @@ yotthani's `save-fast` patch cut allocation and was byte-identical to vanilla on
 - **Prevent:** when a test pins what a JSON file carries and the target class initialises a collection, deserialize with `ObjectCreationHandling.Replace`, then prove RED by removing the row from the file while the compiled default still has it.
 - **Source:** `docs/reviews/rca-lindon-balance-tables-2026-10-06.md` finding 1.
 
+### A rule that reads a parsed field needs a shipped-data test that the field is populated
+`CareerChoiceDefinition.GroupId` was empty for all 2,100 shipped group choices because the loader read
+it from an attribute no nested choice carries. The tier gate, the keystone rule and the foreign-choice
+repair all keyed on it and silently did nothing; every test built the definitions by hand with the
+field set, and the one click test drove an unbound method instead of the command the prefab binds.
+- **Why missed:** the tests encoded the author's belief about the data, not the parser's output. Second
+  occurrence of the stubbed-collaborator lesson in `state-lifecycle-save.md`.
+- **Prevent:** for every rule that reads a field the loader fills, add one test over the SHIPPED data
+  that the field is populated, and drive behaviour tests through the command the UI binds
+  (`Command.Click`), never a sibling method.
+- **Source:** `docs/reviews/rca-career-e1e3-2026-10-08.md` (#766, W1-01).
+
+### Gate a data-switched destructive path with a shipped-data invariant before any data switches it on (2026-10-14)
+Career forks lock a pick for good once `max_picks` is set on its group, and `point_levels` shrinks the point
+budget; only a `tree_version` bump refunds old saves. Nothing tied the three attributes together, so a later data
+edit could have locked or shrunk every old save without a refund.
+- **Why missed:** each attribute was validated alone, and no shipped data used them yet, so no test could fail.
+  Second occurrence of the 2026-10-08 career RCA pattern 2 (a dormant destructive path switched on by data).
+- **Prevent:** when code ships a destructive behaviour that data will turn on later, write the shipped-data
+  invariant test in the same commit, even if it passes vacuously today (here: a career with a fork group or point
+  levels has `tree_version >= 2`, and no career mixes fork and unlimited groups).
+- **Source:** `docs/reviews/rca-career-e4e7-2026-10-14.md` finding 13.
+
 ### Mutation-check a source-text pin: feed it the cheapest regression that keeps its predicate true (#764, 2026-10-08)
 A source-text test that pins a wiring invariant ("SubModule builds this behavior with `new` per campaign") is only as strong as the shapes it rejects. The first `WarOfTheRingWiringTests` checked that `new WarOfTheRingBehavior(` appeared and that no `Resolve<...>` of it did; a cached construction, `AddBehavior(_cachedWotr ??= new WarOfTheRingBehavior(...))`, kept every predicate true while it broke the per-campaign reset the test existed to protect.
 - **Why missed:** the pin copied the contains-check shape of `FieldCampWiringTests`, which guards against a link being DROPPED, while this one guards against an instance being SHARED. Neither the design lens that proposed it nor the orchestrator tried a regression against it; Codex did, by evaluating the predicates on the mutant in memory.

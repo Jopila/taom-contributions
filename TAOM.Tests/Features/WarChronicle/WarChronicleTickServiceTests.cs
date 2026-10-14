@@ -28,6 +28,7 @@ public class WarChronicleTickServiceTests
     private IWarOfTheRingService _wotr = null!;
     private IAlignmentService _alignment = null!;
     private IRallyConfigProvider _rallyConfig = null!;
+    private WarChronicleDailyGate _daily = null!;
     private WarChronicleTickService _sut = null!;
     private readonly List<string> _logged = new List<string>();
 
@@ -37,7 +38,7 @@ public class WarChronicleTickServiceTests
         _logged.Clear();
         _snapshots = Substitute.For<IKingdomWarSnapshotAdapter>();
         _snapshots.GetCampaignId().Returns("c1");
-        _snapshots.GetElapsedDay().Returns(1);
+        _snapshots.SetElapsedDay(1);
         _snapshots.GetNowHours().Returns(500d);
         _snapshots.GetKingdoms().Returns(new List<KingdomWarSnapshot>
         {
@@ -61,6 +62,7 @@ public class WarChronicleTickServiceTests
         _settings.WarRallyEnabled.Returns(true);
         // NSubstitute's default strength of 0 would bake every multiplier to 1 in a real registry.
         _settings.WarEffectStrength.Returns(1f);
+        _daily = new WarChronicleDailyGate();
         _sut = Build(_effects);
     }
 
@@ -69,7 +71,79 @@ public class WarChronicleTickServiceTests
         var ledger = new WarLedgerService(_snapshots, _baselines, _tiers, effects, _wotr, _alignment, _logger);
         var escapes = new WarEscapeDailyPass(_escapeAdapter, effects, new WarEscapeService(), _logger);
         var rally = new RallyService(_baselines, _tiers, effects, _rallyConfig, _settings, _alignment, ledger, _logger);
-        return new WarChronicleTickService(_snapshots, effects, _baselines, ledger, escapes, rally, _logger);
+        return new WarChronicleTickService(_snapshots, effects, _baselines, ledger, escapes, rally, _logger, _daily);
+    }
+
+    [TestMethod]
+    public void RunDaily_TwiceOnTheSameDay_RunsOnce()
+    {
+        // A save made in the first half of an elapsed campaign day ticks that day again after a load
+        // (v1.5.5 Campaign.cs:1024-1030). The elapsed day starts at CampaignStartTime, not at midnight.
+        _sut.RunDaily();
+        _sut.RunDaily();
+
+        _effects.Received(1).Expire(Arg.Any<double>());
+        Assert.AreEqual(1, _logged.Count(l => l.Contains("t=share")), "one ledger block for the day");
+    }
+
+    [TestMethod]
+    public void RunDaily_TheNextDay_RunsAgain()
+    {
+        _sut.RunDaily();
+        _snapshots.SetElapsedDay(2);
+
+        _sut.RunDaily();
+
+        _effects.Received(2).Expire(Arg.Any<double>());
+        Assert.AreEqual(2, _logged.Count(l => l.Contains("t=share")));
+    }
+
+    [TestMethod]
+    public void RunDaily_AnInvalidClock_SkipsTheDayAndClaimsNothing()
+    {
+        // The production adapter fails TryGetElapsedDay for a NaN, infinite or negative engine clock.
+        _snapshots.SetClockInvalid();
+
+        _sut.RunDaily();
+
+        _effects.DidNotReceive().Expire(Arg.Any<double>());
+        Assert.AreEqual(0, _daily.Snapshot().Count, "no day is claimed on an unreadable clock");
+        Assert.AreEqual(0, _logged.Count, "no ledger line for a day that cannot be named");
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("clock")));
+    }
+
+    [TestMethod]
+    public void RunDaily_AnInvalidClockOnTwoTicks_WarnsOnce()
+    {
+        _snapshots.SetClockInvalid();
+
+        _sut.RunDaily();
+        _sut.RunDaily();
+
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("clock")));
+    }
+
+    [TestMethod]
+    public void RunDaily_AnInvalidClockThenAValidDay_RunsTheValidDay()
+    {
+        _snapshots.SetClockInvalid();
+        _sut.RunDaily();
+        _snapshots.SetElapsedDay(3);
+
+        _sut.RunDaily();
+
+        _effects.Received(1).Expire(Arg.Any<double>());
+        Assert.AreEqual(3, _daily.Snapshot()[WarChronicleDailyGate.TickLane]);
+    }
+
+    [TestMethod]
+    public void RunDaily_TheChronicleAlreadyRanToday_StillRuns()
+    {
+        _daily.TryClaim(WarChronicleDailyGate.ChronicleLane, 1d);
+
+        _sut.RunDaily();
+
+        _effects.Received(1).Expire(Arg.Any<double>());
     }
 
     [TestMethod]
@@ -171,7 +245,7 @@ public class WarChronicleTickServiceTests
     [TestMethod]
     public void RunDaily_EmptyBaselinesAfterDayOne_LogsTheLateWarningOnce()
     {
-        _snapshots.GetElapsedDay().Returns(5);
+        _snapshots.SetElapsedDay(5);
 
         _sut.RunDaily();
         _snapshots.GetKingdoms().Returns(new List<KingdomWarSnapshot>
@@ -189,7 +263,7 @@ public class WarChronicleTickServiceTests
     [DataRow(1)]
     public void RunDaily_FirstTickOfANewCampaign_LogsNoLateWarning(int day)
     {
-        _snapshots.GetElapsedDay().Returns(day);
+        _snapshots.SetElapsedDay(day);
 
         _sut.RunDaily();
 
@@ -201,7 +275,7 @@ public class WarChronicleTickServiceTests
     public void RunDaily_RestoredBaselinesThenARebelKingdom_LogsNoLateWarning()
     {
         _baselines.RestoreFromSave(new Dictionary<string, int> { ["empire_w"] = 9, ["empire_s"] = 6 });
-        _snapshots.GetElapsedDay().Returns(50);
+        _snapshots.SetElapsedDay(50);
         _snapshots.GetKingdoms().Returns(new List<KingdomWarSnapshot>
         {
             new KingdomWarSnapshot { Id = "empire_w", Towns = 3 },

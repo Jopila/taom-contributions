@@ -48,7 +48,8 @@ internal class CharacterDeveloperCareerMixin : BaseViewModelMixin<CharacterDevel
         // Issue #379 — badge state comes from the services, NOT career-screen state: the
         // badge exists to prompt a player who has never opened that screen.
         var unspent = HasCareer && _registry != null && _dataService != null
-            ? _registry.GetUnspentPoints(hero.Level, _dataService.GetChoiceCount(hero.StringId))
+            ? _registry.GetUnspentPoints(_registry.GetCareer(_dataService.GetCareerStringId(hero.StringId)),
+                hero.Level, _dataService.GetChoiceCount(hero.StringId))
             : 0;
         HasUnspentPoints = unspent > 0;
         UnspentPointsText = unspent > 0 ? unspent.ToString() : "";

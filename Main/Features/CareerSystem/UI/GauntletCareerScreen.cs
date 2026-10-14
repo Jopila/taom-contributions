@@ -1,11 +1,15 @@
+using System;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.InputSystem;
+using TaleWorlds.Library;
+using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade.View.Screens;
 using TaleWorlds.ScreenSystem;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
+using TAOM.Features.CareerSystem.Domain;
 
 namespace TAOM.Features.CareerSystem.UI;
 
@@ -24,7 +28,9 @@ public class GauntletCareerScreen : ScreenBase, IGameStateListener
     private readonly ICareerPassiveService _passiveService;
     private readonly ICareerConfigProvider _configProvider;
     private readonly ICareerQuestService _questService;
-    private readonly ICareerSwitchService _switchService;
+    private readonly CareerSwitchService _switchService;
+    private readonly ICareerLifecycleService _lifecycle;
+    private readonly ICareerPurseAdapter _purse;
     private readonly ICareerHeroAdapterFactory _adapterFactory;
     private readonly IModLogger _logger;
     private readonly string _heroStringId;
@@ -47,7 +53,9 @@ public class GauntletCareerScreen : ScreenBase, IGameStateListener
         _passiveService = IoC.Resolve<ICareerPassiveService>();
         _configProvider = IoC.Resolve<ICareerConfigProvider>();
         _questService = IoC.Resolve<ICareerQuestService>();
-        _switchService = IoC.Resolve<ICareerSwitchService>();
+        _switchService = IoC.Resolve<CareerSwitchService>();
+        _lifecycle = IoC.Resolve<ICareerLifecycleService>();
+        _purse = IoC.Resolve<ICareerPurseAdapter>();
         _adapterFactory = IoC.Resolve<ICareerHeroAdapterFactory>();
         _logger = IoC.Resolve<IModLogger>();
         _heroStringId = hero?.StringId ?? "";
@@ -94,7 +102,8 @@ public class GauntletCareerScreen : ScreenBase, IGameStateListener
             _heroStringId, _heroLevel, CloseScreen, _questService,
             isSwitchMode: _isSwitchMode,
             heroAdapter: _heroAdapter,
-            onChooseSwitchTarget: OnChooseSwitchTarget);
+            onChooseSwitchTarget: OnChooseSwitchTarget,
+            onRetrainRequested: OnRetrainRequested);
         _movie = _gauntletLayer.LoadMovie("CareerScreen", _viewModel);
         _gauntletLayer.InputRestrictions.SetInputRestrictions();
         AddLayer(_gauntletLayer);
@@ -110,14 +119,91 @@ public class GauntletCareerScreen : ScreenBase, IGameStateListener
             return;
         }
 
-        var success = _switchService.SwitchCareer(_heroStringId, _heroAdapter, newCareerId);
-        if (success)
-            _logger?.LogInfo($"CareerSystem: Player switched career to '{newCareerId}'");
-        else
-            _logger?.LogWarning($"CareerSystem: SwitchCareer rejected '{newCareerId}' for hero '{_heroStringId}'");
+        // Leaving a career that holds fork picks costs gold (#769 E7): ask first. Cancel stays in the picker.
+        var cost = _switchService.GetSwitchCost(_heroStringId, _heroAdapter.Level);
+        if (cost <= 0)
+        {
+            SwitchAndClose(newCareerId, cost);
+            return;
+        }
+
+        ShowConfirmation(
+            new TextObject("{=taom_career_switch_cost_title}Switch career").ToString(),
+            new TextObject("{=taom_career_switch_cost_body}Switching careers refunds all your career choices and costs {GOLD} gold.")
+                .SetTextVariable("GOLD", cost).ToString(),
+            new TextObject("{=taom_career_switch_confirm}Switch").ToString(),
+            () => SwitchAndClose(newCareerId, cost),
+            CanAfford(cost));
+    }
+
+    private void SwitchAndClose(string newCareerId, int cost)
+    {
+        var result = _switchService.SwitchCareer(_heroStringId, _heroAdapter, newCareerId);
+        switch (result)
+        {
+            case CareerSwitchResult.Switched:
+                _logger?.LogInfo($"CareerSystem: Player switched career to '{newCareerId}'");
+                break;
+            case CareerSwitchResult.NotEnoughGold:
+                _logger?.LogWarning($"CareerSystem: SwitchCareer to '{newCareerId}' refused for hero '{_heroStringId}': not enough gold");
+                ShowMessage(new TextObject("{=taom_career_switch_no_gold}You need {GOLD} gold to switch careers.")
+                    .SetTextVariable("GOLD", cost).ToString());
+                break;
+            default:
+                _logger?.LogWarning($"CareerSystem: SwitchCareer rejected '{newCareerId}' for hero '{_heroStringId}'");
+                break;
+        }
 
         CloseScreen();
     }
+
+    private void OnRetrainRequested(int cost)
+    {
+        ShowConfirmation(
+            new TextObject("{=taom_career_retrain_title}Retrain career").ToString(),
+            new TextObject("{=taom_career_retrain_body}Refund every career choice except your first for {GOLD} gold? You keep your career and the tiers you unlocked.")
+                .SetTextVariable("GOLD", cost).ToString(),
+            new TextObject("{=taom_career_retrain_confirm}Retrain").ToString(),
+            () => ConfirmRetrain(cost),
+            CanAfford(cost));
+    }
+
+    private void ConfirmRetrain(int cost)
+    {
+        var result = _lifecycle.TryRetrain(_heroStringId, _heroLevel);
+        _logger?.LogInfo($"CareerSystem: Retrain for hero '{_heroStringId}' -> {result}");
+        switch (result)
+        {
+            case CareerRetrainResult.Done:
+                _viewModel?.OnRetrained();
+                break;
+            case CareerRetrainResult.NotEnoughGold:
+                ShowMessage(new TextObject("{=taom_career_retrain_no_gold}You need {GOLD} gold to retrain.")
+                    .SetTextVariable("GOLD", cost).ToString());
+                break;
+        }
+    }
+
+    // Evaluated by the inquiry each time it draws, so the Confirm button dims while the purse is short.
+    // The reason is vanilla's own string (PerkResetCampaignBehavior uses it), which ships translated.
+    // The affordable branch returns no reason: SingleQueryPopUpVM.UpdateButtonEnabledStates shows any
+    // non-empty reason as Confirm's hover hint, enabled or not.
+    private Func<(bool, string)> CanAfford(int cost)
+        => () => _purse.Gold >= cost
+            ? (true, string.Empty)
+            : (false, new TextObject("{=QOWyEJrm}You don't have enough denars.").ToString());
+
+    private static void ShowConfirmation(
+        string title, string body, string confirmText, Action onConfirm,
+        Func<(bool, string)> isConfirmEnabled = null)
+    {
+        InformationManager.ShowInquiry(new InquiryData(
+            title, body, true, true, confirmText, GameTexts.FindText("str_cancel").ToString(),
+            onConfirm, null, isAffirmativeOptionEnabled: isConfirmEnabled), pauseGameActiveState: true);
+    }
+
+    private static void ShowMessage(string text)
+        => InformationManager.DisplayMessage(new InformationMessage(text));
 
     protected override void OnFrameTick(float dt)
     {
@@ -131,6 +217,10 @@ public class GauntletCareerScreen : ScreenBase, IGameStateListener
 
     private void CloseScreen()
     {
+        // A late callback (an inquiry answered after Escape, say) must never pop whatever state is
+        // on top now: PopState pops by level, not by identity.
+        if (Game.Current?.GameStateManager?.ActiveState != _state) return;
+
         _logger?.LogInfo("CareerSystem: Closing career screen");
         _gauntletLayer?.InputRestrictions.ResetInputRestrictions();
         if (_movie != null)

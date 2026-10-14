@@ -70,7 +70,7 @@ public class EyeOfSauronWiringTests
     {
         var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
             .Where(path => !IsFile(path, "EyeOfSauronModule.cs") && !IsFile(path, "EyeOfSauronBehavior.cs"))
-            .Where(path => Regex.IsMatch(RepoPaths.StripComments(File.ReadAllText(path)), @"\bEyeOfSauronBehavior\b"))
+            .Where(path => RepoPaths.MentionsOutsideComments(path, "EyeOfSauronBehavior", wholeWord: true))
             .ToList();
 
         Assert.AreEqual(0, offenders.Count,

@@ -17,7 +17,10 @@ public class CareerRegistry : ICareerRegistry
     private List<CareerDefinition> _allCareers;
     private Dictionary<string, string> _careerIdByGroupId;
     private Dictionary<string, string> _careerIdByRootChoiceId;
+    private HashSet<string> _ambiguousChoiceIds;
     private int _maxPerkPoints;
+    private int _retrainGoldBase;
+    private int _retrainGoldPerLevel;
 
     private static readonly IReadOnlyList<CareerChoiceDefinition> EmptyChoices = new List<CareerChoiceDefinition>();
 
@@ -50,7 +53,10 @@ public class CareerRegistry : ICareerRegistry
         EnsureLoaded();
         if (string.IsNullOrEmpty(choiceStringId)) return null;
 
-        // Root first: it resolves from taom_careers.xml alone, so a ghost root is still
+        // An id parsed more than once (root and/or nested, any groups) is ambiguous: no owner.
+        if (_ambiguousChoiceIds.Contains(choiceStringId)) return null;
+
+        // Root next: it resolves from taom_careers.xml alone, so a ghost root is still
         // identifiable when taom_career_choices.xml failed to load.
         if (_careerIdByRootChoiceId.TryGetValue(choiceStringId, out var rootOwner)) return rootOwner;
 
@@ -122,17 +128,49 @@ public class CareerRegistry : ICareerRegistry
         return true;
     }
 
-    public int GetMaxChoicesForHero(int heroLevel)
+    public int GetMaxChoicesForHero(CareerDefinition career, int heroLevel)
     {
         EnsureLoaded();
+        var effectiveLevel = Math.Max(1, heroLevel);
+
+        // #769 E6: a career with point_levels grants a point at each listed level, plus the root.
+        if (career?.PointLevels.Count > 0)
+        {
+            var points = 0;
+            foreach (var level in career.PointLevels)
+            {
+                if (level <= effectiveLevel) points++;
+            }
+            return 1 + points;
+        }
+
         // Budget: 1 root (auto-added at CC) + N free points for level N
         // Hero starts at level 1 with 1 free point, gains 1 per level.
-        var effectiveLevel = Math.Max(1, heroLevel);
         return Math.Min(effectiveLevel + 1, _maxPerkPoints + 1);
     }
 
-    public int GetUnspentPoints(int heroLevel, int takenChoiceCount)
-        => Math.Max(0, GetMaxChoicesForHero(heroLevel) - takenChoiceCount);
+    public int GetUnspentPoints(CareerDefinition career, int heroLevel, int takenChoiceCount)
+        => Math.Max(0, GetMaxChoicesForHero(career, heroLevel) - takenChoiceCount);
+
+    public int GetRetrainCost(int heroLevel)
+    {
+        EnsureLoaded();
+        // long, then clamped: a huge configured price must not wrap negative, because the switch and
+        // retrain paths read a cost at or below zero as free.
+        var cost = (long)_retrainGoldBase + (long)_retrainGoldPerLevel * Math.Max(1, heroLevel);
+        return (int)Math.Min(cost, int.MaxValue);
+    }
+
+    public int? GetNextPointLevel(CareerDefinition career, int heroLevel)
+    {
+        if (career == null) return null;
+        var effectiveLevel = Math.Max(1, heroLevel);
+        foreach (var level in career.PointLevels)
+        {
+            if (level > effectiveLevel) return level;
+        }
+        return null;
+    }
 
     public bool IsTierAvailable(int heroLevel, int tier)
     {
@@ -166,6 +204,22 @@ public class CareerRegistry : ICareerRegistry
         return targets;
     }
 
+    private void IndexOwner(Dictionary<string, string> index, HashSet<string> ambiguous,
+        string kind, string key, string careerId)
+    {
+        if (string.IsNullOrEmpty(key) || ambiguous.Contains(key)) return;
+        if (!index.TryGetValue(key, out var existing))
+        {
+            index[key] = careerId;
+            return;
+        }
+        if (existing == careerId) return;
+
+        index.Remove(key);
+        ambiguous.Add(key);
+        _logger.LogWarning($"CareerSystem: {kind} '{key}' is used by careers '{existing}' and '{careerId}'; it has no owner, so the repair pass keeps its choices");
+    }
+
     private void EnsureLoaded()
     {
         if (_careers != null) return;
@@ -175,8 +229,13 @@ public class CareerRegistry : ICareerRegistry
         _groups = new Dictionary<string, CareerChoiceGroupDefinition>();
         _careerIdByGroupId = new Dictionary<string, string>();
         _careerIdByRootChoiceId = new Dictionary<string, string>();
+        _ambiguousChoiceIds = new HashSet<string>();
+        var ambiguousGroupIds = new HashSet<string>();
+        var ambiguousRootIds = new HashSet<string>();
 
         _maxPerkPoints = _configProvider.GetMaxPerkPoints();
+        _retrainGoldBase = _configProvider.GetRetrainGoldBase();
+        _retrainGoldPerLevel = _configProvider.GetRetrainGoldPerLevel();
 
         var careers = _configProvider.LoadCareers();
         _allCareers = new List<CareerDefinition>(careers);
@@ -186,24 +245,25 @@ public class CareerRegistry : ICareerRegistry
             // Root choices carry group_id="" in the data, so they are unreachable through the
             // group index and need their own. Without this a ghost root from another career
             // resolves to no owner and survives the repair, which is the entire bug.
-            if (!string.IsNullOrEmpty(career.RootChoiceId) && !_careerIdByRootChoiceId.ContainsKey(career.RootChoiceId))
-                _careerIdByRootChoiceId[career.RootChoiceId] = career.Id;
+            IndexOwner(_careerIdByRootChoiceId, ambiguousRootIds, "root choice", career.RootChoiceId, career.Id);
 
-            // Reverse index for GetOwningCareerId. First writer wins: a group listed by two
-            // careers is a data error, and silently reassigning ownership to the later career
-            // would make a legitimately-held choice look foreign to the earlier one.
+            // Reverse index for GetOwningCareerId. Ownership is proof, and the repair pass deletes
+            // on proof: a group listed by two different careers has no single owner, so it gets
+            // none (either guess would delete a legitimately-held pick from the other career).
+            // The same career listing a group twice is still one owner.
             foreach (var groupId in career.ChoiceGroupIds)
-            {
-                if (!_careerIdByGroupId.ContainsKey(groupId))
-                    _careerIdByGroupId[groupId] = career.Id;
-            }
+                IndexOwner(_careerIdByGroupId, ambiguousGroupIds, "choice group", groupId, career.Id);
         }
 
         foreach (var group in _configProvider.LoadChoiceGroups())
             _groups[group.Id] = group;
 
         foreach (var choice in _configProvider.LoadChoices())
+        {
+            if (_choices.ContainsKey(choice.Id) && _ambiguousChoiceIds.Add(choice.Id))
+                _logger.LogWarning($"CareerSystem: choice '{choice.Id}' is declared more than once; it has no owner, so the repair pass keeps it");
             _choices[choice.Id] = choice;
+        }
 
         _logger.LogInfo($"CareerSystem: Registry initialized: {_careers.Count} careers, {_groups.Count} groups, {_choices.Count} choices, maxPerkPoints={_maxPerkPoints}");
     }

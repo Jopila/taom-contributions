@@ -113,11 +113,11 @@ For any system that sets timed/stateful data (buffs, tracked dictionaries, sched
 - **Prevent:** For every `SetBuff`/`ScheduleRestore`/dictionary write, verify these clear paths exist and work: (1) normal expiry (timer fires) — guards against replacement? refreshes stats? (2) reactivation (new buff overwrites old) — does the old timer's restore guard against clearing the new buff? (3) entity death (hero/agent dies) — are all tracked entries for that entity cleaned up? (4) mission end — are all static dictionaries and pending callbacks cleared? (5) screen/state change — are UI-bound references released? Each "set" line needs a traceable "clear" for every exit path; if the clear is delegated to a scheduled callback, verify the callback survives context clearing (e.g. `_activeContexts.Clear()` dropping pending restores).
 - **Source:** memory/feedback_lifecycle_state_matrix.md
 
-### CampaignBehaviorBase has no OnGameEnd — use OnGameOverEvent / OnNewGameCreatedEvent for singleton cleanup
-`CampaignBehaviorBase` in v1.3.15 (verified via `ilspycmd ... -t TaleWorlds.CampaignSystem.CampaignBehaviorBase`) exposes only `RegisterEvents()` + `SyncData(IDataStore)` — there is no `OnFinalize` and no `OnGameEnd` virtual. An audit on `SpecialResources` (#133) recommended overriding `OnGameEnd()` to unsubscribe a static event; that method doesn't exist.
-- **Why missed:** Codex audit (Phase 9b #133, 2026-05-13) recommended overriding `OnGameEnd()`; verified via `ilspycmd` that no such virtual exists. An inline comment in `SpecialResourcesBehavior.RegisterEvents` documents the constraint.
-- **Prevent:** For singleton cleanup at campaign teardown: (1) best-effort hook `CampaignEvents.OnGameOverEvent.AddNonSerializedListener(this, UnsubscribeMethod)` — covers the death-of-character flow but NOT main-menu-exit (the orphan listener becomes GC-eligible once `CampaignGameStarter` releases). (2) For static event subscriptions on long-lived objects (e.g. `ScreenManager.OnPushScreen += handler`): same pattern, document the limitation inline. (3) For `Reuse.Singleton` service teardown needing campaign-2-in-same-process safety: use `OnNewGameCreatedEvent` on the ENTERING campaign (not OnGameOver on the exiting one) so reset happens just before fresh state is built — pattern shipped in #124 (BannerInjection), #128 (CareerSystem), #130 (HeroRace), #131 (RaceAge), #132 (Siege).
-- **Source:** memory/feedback_campaignbehavior_no_ongameend.md (Phase 9b #133 SpecialResources ScreenManager event-leak fix)
+### CampaignBehaviorBase has no OnGameEnd, and a static engine event outlives the campaign
+`CampaignBehaviorBase` in v1.3.15 (verified via `ilspycmd ... -t TaleWorlds.CampaignSystem.CampaignBehaviorBase`) exposes only `RegisterEvents()` + `SyncData(IDataStore)`: no `OnFinalize`, no `OnGameEnd` virtual. A static engine event such as `ScreenManager.OnPushScreen` outlives every campaign and keeps each subscribed handler's target alive, so a campaign behavior that subscribes leaves one handler per save load behind. Nothing makes the orphan collectable, and an `OnGameOverEvent` unsubscribe does not run on a main-menu exit or a load over a live campaign.
+- **Why missed:** Codex audit (Phase 9b #133, 2026-05-13) recommended an `OnGameEnd()` override that does not exist; the fix unsubscribed on Game Over and documented the limitation, claiming the orphan became GC-eligible. It never did: after N loads each party-screen open ran N handlers and wrote N `[SpecRes] PartyScreen session BEGUN` lines (#771). `TroopCountDiagnosticsBehavior` had the same shape.
+- **Prevent:** (1) A campaign behavior subscribing to a static event keeps exactly one live handler per process: store the handler in a private static field, and in `RegisterEvents` remove the previous one, then store and add this instance's; Game Over removes it and clears the field. Or subscribe from a process-lifetime object (a `Reuse.Singleton` service) and add the handler once, removing before adding. Never write that the orphan is collectable. (2) `OnGameOverEvent.AddNonSerializedListener(this, ...)` is only a best-effort cleanup and does not cover main-menu exit. (3) For `Reuse.Singleton` service teardown needing campaign-2-in-same-process safety, use `OnNewGameCreatedEvent` on the ENTERING campaign (not OnGameOver on the exiting one), so reset happens just before fresh state is built: shipped in #124 (BannerInjection), #128 (CareerSystem), #130 (HeroRace), #131 (RaceAge), #132 (Siege).
+- **Source:** #771 (static `ScreenManager.OnPushScreen` handlers stacked once per save load); earlier memory/feedback_campaignbehavior_no_ongameend.md (Phase 9b #133)
 
 ### Pick a lifecycle hook by locating the engine call it must precede — never by copying a neighbour
 
@@ -999,6 +999,18 @@ A save made before a batch still loads `settlements.xml` (`SandBoxManager.Initia
 - **Prevent:** both map tools append (`add_map_villages.append_settlements`), and `add_map_fortifications.py --check` fails unless the unreleased batch is the file's tail under a town (`save_order_findings`). Any hand edit to the live file follows the same rule.
 - **Source:** `docs/reviews/rca-arthedain-2026-10-07.md` finding 1.
 
+### A saved version marker has one writer, and that writer replaces the old marker (2026-10-14)
+The career tree version is saved per hero as a `career_tree_vN` flag, and the migration reads the
+highest one. Character creation, a career switch and the migration each only added a flag, so a flag
+left by an earlier career could hide a later bump of the new career and certify picks made on another
+tree.
+- **Why missed:** the version belongs to a career but is stored per hero; the brief described adding
+  the marker and never replacing it. The paths that could hit it were not proven reachable, which made
+  it look harmless.
+- **Prevent:** give a saved marker exactly one writer (`CareerTreeVersion.Stamp`) that removes every
+  older marker of its kind before it writes; test it over a stale marker from another owner.
+- **Source:** `docs/reviews/rca-career-e4e7-2026-10-14.md` finding 4.
+
 ### Reset a per-campaign singleton in the constructor of a behavior built per campaign, not in a campaign event (#764, 2026-10-08)
 A process-lifetime singleton that holds persisted per-campaign state must be reset before anything can read it. The one point TAOM owns that precedes every campaign event on both paths is the constructor of a behavior built with `new` in `SubModule.OnGameStart`: `Campaign.cs:1410` runs before `LoadBehaviorData` (`:1448`) on a load and before `OnNewGameCreated` (`:1709`) on a new game, and a load's `SyncData` then restores the saved record over the reset (v1.5.4). `OnSessionLaunched` is too late whenever another reader gets there first: listeners run newest-first (see "Campaign-event listener dispatch is LIFO" in `harmony-il.md`), so a behavior added later runs its handler before yours, and vanilla's `OnNewGameCreated` handlers run before any session event. `RegisterEvents` is wrong too: on a load it runs after `LoadBehaviorData` and would wipe the restored record.
 - **Why missed:** #764's first cut followed the session-reset rule in `csharp-architecture.md` and the earlier lessons in this file, which prescribe an `OnSessionLaunched` reset behind a `_syncedThisSession` latch. `WarOfTheRingMomentumBehavior`, added two lines later in `SubModule.cs`, read the stale FullWar in its own `OnSessionLaunched` and started the momentum war on day 0, and vanilla's `CampaignFactionManagerBehaviour` cached the stale "constant war" in `OnNewGameCreated`. The LIFO lesson had existed since #557, but it was filed under Harmony, not under resets.
@@ -1023,3 +1035,14 @@ an Active siege and left a stale army focus (Codex F1, #765 Batch B).
   point that can resolve or pay (daily tick, each engine event, each console command) and put the check where they
   converge, here the shared callback wrapper. Add one test per entry point that fires after the terminal state.
 - **Source:** `docs/reviews/rca-war-chronicle-events-2026-10-14.md` F1 (Codex), fixed in `8f2c9e458`.
+
+### A migration over saved data runs for every record the save restores, not only the player's (2026-10-14)
+The career tree-version migration ran at session launch for `Hero.MainHero` only, while persistence restores
+career data for every saved hero and the passive cache walks them all. A co-op hero, or one the player takes over
+later, is never the main hero at launch, and the possession path skips a hero reconciled in an earlier session, so
+such a hero kept its old-tree picks after a tree update.
+- **Why missed:** the call was placed beside the existing repair pass, which runs for the main hero only, and took
+  its scope; the review traced the load order and every assignment path, not which records exist at load.
+- **Prevent:** before writing a load-time migration, list where the records come from (`SyncData` restores the whole
+  dictionary) and migrate each one; tell only the player. Test it with two records, the player and another.
+- **Source:** `docs/reviews/rca-career-e4e7-2026-10-14.md` X1 (Codex), fixed in `59c1803d2`.

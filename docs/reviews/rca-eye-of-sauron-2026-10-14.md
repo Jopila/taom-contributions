@@ -46,9 +46,10 @@ The highest severity was E01 and E02 (HIGH). The rows below are the confirmed fi
 - **Decided by the maintainer:** E17 (below).
 - **Decisions, kept:** E38 and E48, below.
 - **Applied** (fixer's report): E16, E21, E26, E34, E36 and E40. **Rejected:** E27 (a consistency-only
-  interface member; the simplicity criterion rejects it). **Not traced:** E25 and E39 appear in no fixer
-  report and no fix diff; treat them as open notes.
-- **Follow-up:** E41 to E47, below.
+  interface member; the simplicity criterion rejects it). **E25:** fixed in `ac0a3e0c0` (a typed wait
+  decision replaced the `StartsWith("Waiting")` check); tests that pin it came with the 2026-10-14 notes pass.
+  **E39:** done in the notes pass (the co-op row, key files, a How-to, test claims, open risks).
+- **Follow-ups E41 to E47:** all closed on 2026-10-14 (E43 rejected), below.
 
 ## Decisions (maintainer, 2026-10-14)
 
@@ -116,15 +117,19 @@ efficiency, and it found all three.
 
 ## Follow-ups (outside this change; issues on Mike's word)
 
-- E41: update issue #765's body for M8 (the Eye of Sauron hunt).
-- E42: four private `IDataStore` fakes (WarOfTheRing, ArmourAcquisition, SpecialResources, CareerPersistence)
-  drifted from the engine's save semantics; share the engine-faithful store.
-- E43: both party models allocate a `CultureFeatAdapter` per call, cost UNVERIFIED.
-- E44: a comment says the AI pin is not persisted; the engine saves it as `[SaveableProperty(11)]`.
-- E45: the main checkout's uncommitted chronicle work bumps the same settings pins and the same
-  `FeatureModules.cs` list; recount on merge.
-- E46: the installed game is v1.5.5 while the pin and the suite are v1.5.4.
-- E47: the four `taom_eye_hunt_*` keys need translations in 12 languages (`/localize`; paid, on Mike's word).
+- E41: done; issue #765's body has an M8 section (2026-10-14).
+- E42: done; one engine-faithful `TAOM.Tests/Infrastructure/EngineDataStore.cs` replaces six private fakes
+  (`test(infra): v2.0.34 - one engine-faithful data store fake`).
+- E43: rejected. A per-culture `ConditionalWeakTable` cache was tried and reverted. On .NET Framework 4.x
+  `ConditionalWeakTable.GetValue` calls `TryGetValue`, which takes `lock (_lock)` on every read, and the speed,
+  size and morale models call `FromOrNull` on the engine's parallel party tick (`CampaignTickCacheDataStore`,
+  `TWParallel.For`). The cache put a process-wide lock on that path to save an unmeasured 24-byte allocation;
+  the simplicity criterion rejects it. If a profile ever shows the allocation matters, build a lock-free map
+  on the main thread at session launch instead.
+- E44: done; the Refuge comment and doc now say the pin is saved; Refuge relied on nothing else.
+- E45: done; the settings pins and `FeatureModules.cs` were recounted when both branches landed.
+- E46: closed; the v1.5.5 engine bump was merged on 2026-10-14.
+- E47: done; the 12-language run translated the four keys (`a9437a492`).
 - Context, not this work: 9 data tests fail on trunk from `08b30bfc4`.
 
 ## Lessons recorded

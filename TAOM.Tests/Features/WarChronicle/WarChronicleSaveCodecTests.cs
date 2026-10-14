@@ -391,4 +391,53 @@ public class WarChronicleSaveCodecTests
         Assert.AreEqual(1, back.Warnings.Count, string.Join(" | ", back.Warnings));
         Assert.IsTrue(back.Warnings.Any(w => w.Contains(fragment)), string.Join(" | ", back.Warnings));
     }
+
+    [TestMethod]
+    public void RoundTrip_DailyRunDays_ComeBackEqual()
+    {
+        var payload = new WarChroniclePayload();
+        payload.DailyRunDays[WarChronicleDailyGate.TickLane] = 12;
+        payload.DailyRunDays[WarChronicleDailyGate.ChronicleLane] = 11;
+
+        var json = WarChronicleSaveCodec.Serialize(payload);
+        var back = WarChronicleSaveCodec.Parse(json);
+
+        Assert.AreEqual(0, back.Warnings.Count, string.Join(" | ", back.Warnings));
+        Assert.AreEqual(12, back.DailyRunDays[WarChronicleDailyGate.TickLane]);
+        Assert.AreEqual(11, back.DailyRunDays[WarChronicleDailyGate.ChronicleLane]);
+        Assert.AreEqual(12, (int)JObject.Parse(json)["daily"]!["tick"]!);
+    }
+
+    [TestMethod]
+    public void Parse_DailySectionAbsent_IsEmptyWithoutAWarning()
+    {
+        var back = ParseJson("{\"v\":1,\"chronicle\":[{\"id\":\"a\",\"s\":0}]}");
+
+        Assert.AreEqual(0, back.DailyRunDays.Count);
+        Assert.AreEqual(0, back.Warnings.Count);
+    }
+
+    [TestMethod]
+    public void Parse_DailySectionNotAnObject_ResetsAloneAndTheOtherSectionsSurvive()
+    {
+        var back = ParseJson("{\"v\":1,\"chronicle\":[{\"id\":\"a\",\"s\":0}],\"daily\":[12]}");
+
+        Assert.AreEqual(0, back.DailyRunDays.Count);
+        Assert.AreEqual(1, back.Chronicle.Count);
+        Assert.AreEqual(1, back.Warnings.Count, string.Join(" | ", back.Warnings));
+    }
+
+    [DataTestMethod]
+    [DataRow("\"tick\":-1")]
+    [DataRow("\"tick\":1.5")]
+    [DataRow("\"tick\":\"12\"")]
+    [DataRow("\"tick\":99999999999999999999")]
+    public void Parse_ADailyDayThatIsNotANonNegativeInteger_IsSkippedAlone(string badRow)
+    {
+        var back = ParseJson("{\"v\":1,\"daily\":{" + badRow + ",\"chronicle\":40}}");
+
+        Assert.IsFalse(back.DailyRunDays.ContainsKey(WarChronicleDailyGate.TickLane));
+        Assert.AreEqual(40, back.DailyRunDays[WarChronicleDailyGate.ChronicleLane]);
+        Assert.AreEqual(1, back.Warnings.Count, string.Join(" | ", back.Warnings));
+    }
 }

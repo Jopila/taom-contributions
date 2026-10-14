@@ -389,7 +389,7 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
 
     /// <summary>On the open map, no encounter, no menu, and no other popup open (no stacking).</summary>
     private static bool IsMapFree() =>
-        PartyBase.MainParty != null
+        Campaign.Current?.MainParty != null
         && PlayerEncounter.Current == null
         && GameStateManager.Current?.ActiveState is MapState { AtMenu: false }
         && !InformationManager.IsAnyInquiryActive();

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Adapters;
@@ -7,6 +8,7 @@ using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.EyeOfSauron;
 using TAOM.Features.Execution;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.EyeOfSauron;
 
@@ -589,7 +591,7 @@ public class EyeOfSauronServiceTests
     }
 
     [TestMethod]
-    public void OnDailyTick_EveryHunterBusy_Waits_LogsTheFirstReason_AndNeverSpawns()
+    public void TryStartHunt_EveryHunterBusy_Waits_LogsTheFirstReason_AndNeverSpawns()
     {
         _sut.AddScore(FactionSide.Evil, 12f);
         _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(Leading("wk_party"));
@@ -605,6 +607,70 @@ public class EyeOfSauronServiceTests
         _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
         _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
         _logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains("Waiting") && m.Contains(HuntTroopLists.WitchKingId)));
+    }
+
+    // E25: the daily tick logs a wait because WaitReason returned one, never by reading the verdict's wording. The
+    // assertions name the hunter and his party only, so a reworded message keeps these tests green.
+    private void ArmWitchKingWaitingInAnArmy()
+    {
+        _sut.AddScore(FactionSide.Evil, 12f);
+        _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(Leading("wk_party"));
+        var party = FreeParty(HuntTroopLists.WitchKingId);
+        party.InArmy = true;
+        _adapter.ReadParty("wk_party").Returns(party);
+    }
+
+    [TestMethod]
+    public void OnDailyTick_HunterWaits_LogsTheReason()
+    {
+        ArmWitchKingWaitingInAnArmy();
+
+        _sut.OnDailyTick();
+
+        Assert.IsFalse(_sut.IsHunting);
+        _logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains(HuntTroopLists.WitchKingId) && m.Contains("wk_party")));
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+    }
+
+    [TestMethod]
+    public void OnDailyTick_NoHunterAtWar_IsNotAWait_LogsNothing()
+    {
+        _sut.AddScore(FactionSide.Evil, 12f);
+        _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(FreeHero(atWar: false));
+
+        _sut.OnDailyTick();
+
+        Assert.IsFalse(_sut.IsHunting);
+        _logger.DidNotReceive().LogInfo(Arg.Any<string>());
+    }
+
+    // E25, the part the behaviour tests above cannot pin: every wait reason begins "Waiting:" today, so a decision
+    // that parsed the text would still pass them. The method that makes the logging decision must not inspect
+    // the reason's text at all.
+    [TestMethod]
+    public void TryStartHunt_Source_TheWaitLogDecisionNeverReadsTheReasonText()
+    {
+        var source = RepoPaths.ReadSource("Main/Features/EyeOfSauron/EyeOfSauronService.cs", stripComments: true);
+        var start = source.IndexOf("public string TryStartHunt(", StringComparison.Ordinal);
+        var end = source.IndexOf("private static bool CanHunt(", StringComparison.Ordinal);
+        Assert.IsTrue(start >= 0 && end > start, "TryStartHunt or the CanHunt that follows it not found");
+        var body = source.Substring(start, end - start);
+
+        StringAssert.Contains(body, "_logger.LogInfo(\"[EyeOfSauron] \" + firstWait)", "the wait is still logged");
+        var parse = Regex.Match(body, @"\b(?:StartsWith|EndsWith|Contains|IndexOf|Equals|Substring|Split|Regex)\b");
+        Assert.IsFalse(parse.Success,
+            $"TryStartHunt inspects text ('{parse.Value}'): the wait is logged because WaitReason returned one, never by its wording.");
+    }
+
+    [TestMethod]
+    public void TryStartHunt_DryRunWhileTheHunterWaits_ReturnsTheReason_LogsNothing()
+    {
+        ArmWitchKingWaitingInAnArmy();
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: false, dryRun: true);
+
+        StringAssert.Contains(verdict, "wk_party");
+        _logger.DidNotReceive().LogInfo(Arg.Any<string>());
     }
 
     [TestMethod]

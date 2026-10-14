@@ -199,6 +199,18 @@ public class WarLedgerFormatterTests
     }
 
     [TestMethod]
+    public void Load_IsTheGoldenLine()
+    {
+        Assert.AreEqual("[WarLedger] v=1 t=load cid=c1 day=72", WarLedgerFormatter.Load("c1", 72));
+    }
+
+    [TestMethod]
+    public void Load_ACampaignIdWithSpaces_StaysOneToken()
+    {
+        Assert.AreEqual("[WarLedger] v=1 t=load cid=a_b_c day=3", WarLedgerFormatter.Load("a b=c", 3));
+    }
+
+    [TestMethod]
     public void Fixture_IsExactlyWhatTheFormatterWrites()
     {
         var fixture = RepoPaths.ReadSource("tools/tests/fixtures/war_ledger_v1.txt")
@@ -218,6 +230,7 @@ public class WarLedgerFormatterTests
             WarLedgerFormatter.DestroyedEvent("c1", 70, "vlandia"),
             WarLedgerFormatter.ChronicleEvent("c1", 71, "hornburg", "Held"),
             WarLedgerFormatter.TierEvent("c1", 41, "k", -2, 7, float.NaN),
+            WarLedgerFormatter.Load("c1", 72),
         };
 
         CollectionAssert.AreEqual(written, fixture);

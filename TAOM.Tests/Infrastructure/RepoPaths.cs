@@ -50,5 +50,23 @@ public static class RepoPaths
     public static string StripComments(string source) =>
         CommentPattern.Replace(source, m => Regex.Replace(m.Value, "[^\n]", " "));
 
+    /// <summary>
+    /// True when <paramref name="needle"/> appears in the file outside comments (as a whole word when
+    /// <paramref name="wholeWord"/>). The file is read raw first and only stripped when the raw text
+    /// holds the needle, which is a necessary condition, so a scan over every Main file strips only
+    /// its few candidates and returns the same set as stripping them all.
+    /// </summary>
+    public static bool MentionsOutsideComments(string path, string needle, bool wholeWord = false)
+    {
+        var text = File.ReadAllText(path);
+        if (text.IndexOf(needle, System.StringComparison.Ordinal) < 0)
+            return false;
+
+        var stripped = StripComments(text);
+        return wholeWord
+            ? Regex.IsMatch(stripped, @"\b" + Regex.Escape(needle) + @"\b")
+            : stripped.Contains(needle);
+    }
+
     private static string ThisFile([CallerFilePath] string path = "") => Path.GetDirectoryName(path)!;
 }

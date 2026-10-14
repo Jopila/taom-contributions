@@ -3,7 +3,7 @@
 > Category file of the master lessons record — index + house shape: [LESSONS-LEARNED.md](../LESSONS-LEARNED.md). **Append new GameModels & Services lessons HERE** (`### rule` → `**Why missed:**` → `**Prevent:**` → `**Source:**`).
 
 ### A single SyncData string must stay under 32,767 UTF-8 bytes — chunk any unbounded/growing string payload
-The engine's `ArchiveSerializer.SerializeEntry` (v1.4.6) writes each save-archive entry's byte length as `WriteShort((short)Data.Length)` — a signed int16 truncation — then writes the data in full. So **any single `SyncData` string whose UTF-8 payload exceeds 32,767 bytes is written with a wrong length and CORRUPTS THE SAVE at write time** (unloadable next launch: `ArgumentException: Source array was not long enough` inside `ArchiveDeserializer.LoadFrom` for >65,535 B, or `OverflowException` for the 32,768–65,535 B negative-int16 range). WarOfTheRingMomentum (#327) serialized its whole event log — up to 100 events/type × 6 types × 2 sides, each with a full localized description — as ONE `SyncData` string; it crossed 32 KB around day ~50 and every subsequent save was bricked. The fix (`MomentumSyncChunker`) splits the JSON across N chunk keys ≤10,000 chars each; the per-chunk cap makes corruption impossible regardless of log size, with no data or gameplay change.
+The engine's `ArchiveSerializer.SerializeEntry` (v1.4.6) writes each save-archive entry's byte length as `WriteShort((short)Data.Length)` (a signed int16 truncation), then writes the data in full. So **any single `SyncData` string whose UTF-8 payload exceeds 32,767 bytes is written with a wrong length and CORRUPTS THE SAVE at write time** (unloadable next launch: `ArgumentException: Source array was not long enough` inside `ArchiveDeserializer.LoadFrom` for >65,535 B, or `OverflowException` for the 32,768 to 65,535 B negative-int16 range). WarOfTheRingMomentum (#327) serialized its whole event log (up to 100 events/type × 6 types × 2 sides, each with a full localized description) as ONE `SyncData` string; it crossed 32 KB around day ~50 and every subsequent save was bricked. The fix (`MomentumSyncChunker`, since 2026-10-14 `SyncDataChunker.SyncChunks` in `Main/Core/Persistence`, shared with the War Chronicle) splits the JSON across N chunk keys ≤10,000 chars each; the per-chunk cap makes corruption impossible regardless of log size, with no data or gameplay change.
 - **Why missed:** the #327 deep-review + Codex passes verified persistence *round-trip fidelity* (does the state survive save/load?) and never checked the *byte size* of any single synced string against the archive-entry limit. The single-string transport was itself a fix for a `Dictionary<string,string>` container that didn't round-trip `IDataStore` at ~1,000 entries — it was reviewed as a fix, not as a new risk, and traded a data-loss bug for a worse save-corruption bug. The limit is undocumented and only bites at scale, so nothing in the suite surfaced it.
 - **Prevent:** never sync an unbounded or growing string via a single `SyncData` key. Chunk it (count key + `_{i}` chunk keys, each capped so worst-case UTF-8 ≤ 32,763 B: 10,000 UTF-16 chars × 3 B/char = 30,000 B), or use proper saveable containers of small entries (the engine handles many small entries fine — only a *single* entry >32,767 B is fatal). Add a test that builds the realistic MAX state, asserts it exceeds the limit as one string, and asserts every chunk stays under it. `SaveLoadDiagnostics` (Patch61) stamps `[SaveLoad] GraphFault kind=archiveParse` at this exact site; `tools/inspect_sav.py` / `repair_sav_strings.py` triage + recover already-bricked saves offline.
 - **Source:** docs/reviews/rca-momentum-save-corruption-2026-07-07.md (multi-user v2.0.9 "A problem occured while trying to load the saved game."; engine `ArchiveSerializer.cs:27`).
@@ -1031,6 +1031,26 @@ opposite of the comment above it. The unit tests passed: they pinned the service
 - **Why missed:** `TaomCombatMechanicsModel` kept two `if (IsHorseCharge)` routing guards, which gamemodels.md rule 4 forbids in an override body, because its own header called them "the parent's accepted idiom". No ADR and no `.ai/review-reference.md` "Intentional Patterns" entry records that idiom; the claim outlived several reviews and the #737 plan because each reader took the file's account of itself.
 - **Prevent:** before keeping code a rule forbids, find its exception in `.ai/review-reference.md` "Intentional Patterns" or an ADR. With none, fix the code (here each facade declines the hits it does not own, so the override is a `??` chain) or record the exception with its reason; either way the excusing comment goes.
 - **Source:** `docs/reviews/rca-combat-mechanics-model-split-2026-10-05.md` F1.
+
+### A flat ApplyFlat term goes after the last AddFactor
+`ApplyFlat` divides out only the factors already on the number. The career party-size count ran before
+the AI lord scaling added its factor, so "+4 party size" became about +12 under a 3x host setting.
+- **Why missed:** the helper's comment promised it worked whatever the call order.
+- **Prevent:** call `ApplyFlat` after every `AddFactor` in the model, and pin the order with a
+  call-token test.
+- **Source:** `docs/reviews/rca-career-e1e3-2026-10-08.md` (WIRE-02).
+
+### Validate a value derived from config, not only the attributes it is built from (2026-10-14)
+The career retrain price is `retrain_gold_base + retrain_gold_per_level * level`. Each attribute was
+checked for `>= 0`, but the sum ran in plain `int`, so a huge value wrapped negative. The switch read a
+price of 0 or less as free and skipped its confirmation, and retrain became impossible.
+- **Why missed:** the brief said "negative warns" and named no ceiling; "Config Providers MUST
+  Validate" covers absurd values, but the check was written per attribute and nothing looked at the
+  product. No `CheckForOverflowUnderflow` is set, so the wrap is silent.
+- **Prevent:** when a value is computed from config, compute it in `long` (or `double` with a NaN
+  gate) and clamp it to the range its consumers accept; test both huge inputs and the consumer's
+  verdict at the clamped value.
+- **Source:** `docs/reviews/rca-career-e4e7-2026-10-14.md` finding 1.
 
 ### Guard an action by the stored state it writes, not by a model-aware query (#772, 2026-10-08)
 A TAOM `DiplomacyModel` override makes `Kingdom.IsAtWarWith` answer "at war" for pairs whose stance link is still neutral (`TaomDiplomacyModel.IsAtConstantWar`: every Hostile pair at Full War). A guard of the form `if (!AreAtWar(a, b)) DeclareWar(a, b)` then skips exactly the declarations the feature exists to make: Phase 2 of the War of the Ring declared none, so no `OnWarDeclared` fired and the stance links stayed neutral. `DeclareWarAction` itself consults only the shallow stance (`FactionManager.cs:121-122`, v1.5.4), so the guard added a refusal the engine never had. `Kingdom.GetStanceWith` is not a pure read either: it creates a missing link typed from `GetDefaultDiplomaticStance`, which is War whenever `IsAtConstantWar` is true.

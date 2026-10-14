@@ -11,7 +11,7 @@ namespace TAOM.Features.CareerSystem;
 // first in iteration order, giving the player no choice.
 public class CareerSwitchDialogueBehavior : CampaignBehaviorBase
 {
-    // Note: ICareerSwitchService is NOT injected here -- the switch action is invoked from
+    // Note: CareerSwitchService is NOT injected here -- the switch action is invoked from
     // GauntletCareerScreen.OnChooseSwitchTarget instead. This behavior only registers the
     // dialogue lines + visibility gate. SubModule.cs must call the 4-arg ctor.
     private readonly ICareerDataService _dataService;

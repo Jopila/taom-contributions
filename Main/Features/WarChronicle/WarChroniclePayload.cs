@@ -28,6 +28,12 @@ internal sealed class WarChroniclePayload
     /// </summary>
     public Dictionary<WarPhase, double> PhaseSeenDays { get; } = new Dictionary<WarPhase, double>();
 
+    /// <summary>
+    /// The last campaign day each daily listener ran, by <see cref="WarChronicleDailyGate"/> lane; empty for a
+    /// save without them, so its first tick runs.
+    /// </summary>
+    public Dictionary<string, int> DailyRunDays { get; } = new Dictionary<string, int>();
+
     /// <summary>What was skipped or reset while parsing, one line each, for the log.</summary>
     public List<string> Warnings { get; } = new List<string>();
 }

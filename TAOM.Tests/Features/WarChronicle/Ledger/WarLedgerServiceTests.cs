@@ -30,7 +30,7 @@ public class WarLedgerServiceTests
     {
         _snapshots = Substitute.For<IKingdomWarSnapshotAdapter>();
         _snapshots.GetCampaignId().Returns("c1");
-        _snapshots.GetElapsedDay().Returns(12);
+        _snapshots.SetElapsedDay(12);
         _logger = Substitute.For<IModLogger>();
         _baselines = new WarBaselineService();
         _tiers = new RallyTierStore();
@@ -223,6 +223,26 @@ public class WarLedgerServiceTests
         _sut.LogDestroyed(id);
 
         _logger.DidNotReceive().LogInfo(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void LogLoad_WritesTheLoadMarkerWithTheSavesDay()
+    {
+        _sut.LogLoad();
+
+        _logger.Received(1).LogInfo("[WarLedger] v=1 t=load cid=c1 day=12");
+    }
+
+    [TestMethod]
+    public void LogLoad_AnInvalidClock_WritesNoMarkerAndWarns()
+    {
+        // A day=0 marker would make the analyzer drop every retained day after day 0.
+        _snapshots.SetClockInvalid();
+
+        _sut.LogLoad();
+
+        _logger.DidNotReceive().LogInfo(Arg.Any<string>());
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("clock")));
     }
 
     [TestMethod]

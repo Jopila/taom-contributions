@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Careers max_perk_points="30">
+<Careers max_perk_points="30" retrain_gold_base="1000" retrain_gold_per_level="250">
 
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- GONDOR (gondor / empire_w)                                 -->

@@ -56,12 +56,13 @@ public sealed class ChronicleService
     private readonly ArmyTargetFocusRegistry _focus;
     private readonly IWarChronicleSettingsProvider _settings;
     private readonly IModLogger _logger;
+    private readonly WarChronicleDailyGate _daily;
 
     public ChronicleService(
         IChronicleConfigProvider config, ChronicleStateStore store, IChronicleWorldAdapter world,
         IAllianceAdapter alliance, IWarOfTheRingService wotr, ChronicleOutcomeService outcomes,
         ChronicleAnnouncementQueue announcements, ArmyTargetFocusRegistry focus, IWarChronicleSettingsProvider settings,
-        IModLogger logger)
+        IModLogger logger, WarChronicleDailyGate daily)
     {
         _config = config;
         _store = store;
@@ -73,6 +74,7 @@ public sealed class ChronicleService
         _focus = focus;
         _settings = settings;
         _logger = logger;
+        _daily = daily;
     }
 
     /// <summary>Drops the focus an earlier campaign left: called from the events behavior's constructor.</summary>
@@ -97,8 +99,11 @@ public sealed class ChronicleService
             SkipEveryOpenEvent(now);
     });
 
-    /// <summary>The daily step: open what is due, watch the Active windows, close what has run out.</summary>
-    public void RunChronicleDay() => Guarded("daily step", now =>
+    /// <summary>
+    /// The daily step: open what is due, watch the Active windows, close what has run out. At most once per
+    /// campaign day (<see cref="WarChronicleDailyGate"/>): after a load the next daily tick can repeat the save's day.
+    /// </summary>
+    public void RunChronicleDay() => Guarded("daily step", WarChronicleDailyGate.ChronicleLane, now =>
     {
         NotePhasesSeen(now);
         Adopt(now);
@@ -219,7 +224,13 @@ public sealed class ChronicleService
         return rows;
     }
 
-    private void Guarded(string step, Action<double> body)
+    private void Guarded(string step, Action<double> body) => Guarded(step, null, body);
+
+    /// <param name="dailyLane">The daily step's <see cref="WarChronicleDailyGate"/> lane: a day already run is
+    /// skipped (a save made in the first half of an elapsed campaign day ticks that day again after a load;
+    /// the elapsed day starts at CampaignStartTime, 09:00 on vanilla's calendar clock, not at midnight); null
+    /// for every other entry.</param>
+    private void Guarded(string step, string? dailyLane, Action<double> body)
     {
         if (!_settings.ChronicleEnabled)
         {
@@ -233,6 +244,9 @@ public sealed class ChronicleService
             // Positive requirement on the engine clock: a NaN day would pass no `>=` gate, but it must not
             // reach a stored window either.
             if (!FiniteFloatValidator.IsFinite(now))
+                return;
+
+            if (dailyLane != null && !_daily.TryClaim(dailyLane, now))
                 return;
 
             // Every entry point, callbacks included, stops at War Ended: no payout can land after the war.
@@ -255,9 +269,10 @@ public sealed class ChronicleService
     }
 
     /// <summary>
-    /// Whole campaign days, like vanilla's weekly tick (Campaign.cs) and the ledger's <c>day=</c>. The daily
-    /// tick fires a few game minutes past midnight, or at a fixed mid-day time after a mid-day load, so
-    /// fractional days would let a window or a child slip a day. Math.Floor keeps NaN and Infinity, so the
+    /// Whole elapsed campaign days, like vanilla's weekly tick (Campaign.cs) and the ledger's <c>day=</c>.
+    /// An elapsed day starts at CampaignStartTime plus whole days (09:00 on vanilla's calendar clock, not
+    /// midnight). The daily tick fires a few game minutes past that boundary, or at a fractional time after
+    /// a load, so fractional days would let a window or a child slip a day. Math.Floor keeps NaN and Infinity, so the
     /// finite gates still stop a bad clock.
     /// </summary>
     private double Today() => Math.Floor(_world.GetElapsedDays());

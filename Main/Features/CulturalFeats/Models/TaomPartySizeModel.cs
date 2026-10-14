@@ -50,10 +50,6 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
         // Replaces the prior `party.Owner?.Culture ?? party.Culture` which skipped LeaderHero.Culture
         // (Codex review 43 caught the same systemic gap in TaomPartySpeedModel).
         _feats.ApplyPartySizeFeats(CultureFeatAdapter.FromOrNull(party), ref result);
-        // PartySize passives are authored as flat counts ("+2 party size"), so apply via ApplyFlat
-        // (result.Add). ApplyFactor would treat magnitude=2 as +200% (x3 the base) — the "+2 -> +150"
-        // bug. Culture party-size feats above remain factor-based (ApplyPartySizeFeats uses AddFactor).
-        _careerPassives.ApplyFlat(CareerPassiveHero.ResolveId(party), ref result, PassiveEffectType.PartySize);
         // AI lord scaling (#461): lets AI lords HOLD their spawned roster instead of being trimmed to
         // the vanilla 50-150 cap within a day. MUST run BEFORE the TroopWeight line below — that call
         // snapshots (int)result.ResultNumber as the "true base" the shed later trims a heavy party to,
@@ -68,9 +64,21 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
         // trimming to the unscaled cap and the caravan would bleed back to 30 men over a week with
         // every unit test still green. Pinned by AiPartySizeOrderingTests.
         _aiPartySize.ApplyCaravanScaling(party, ref result);
+        // PartySize passives are authored as flat counts ("+2 party size"), so apply via ApplyFlat
+        // (result.Add). ApplyFactor would treat magnitude=2 as +200% (x3 the base) — the "+2 -> +150"
+        // bug. Culture party-size feats above remain factor-based (ApplyPartySizeFeats uses AddFactor).
+        // Leader only, not CareerPassiveHero.ResolveId (owner first): a +50 pick must not grow every
+        // caravan the player owns (#768).
+        // MUST run after the last AddFactor (the culture feats and the AI lord scaling above; the caravan bonus adds no factor): ApplyFlat divides
+        // out only the factors already on the number, so a later factor would multiply the flat count
+        // again. MUST run before the TroopWeight line below so its snapshot includes the career count.
+        // Pinned by AiPartySizeOrderingTests.
+        _careerPassives.ApplyFlat(party?.LeaderHero?.StringId, ref result, PassiveEffectType.PartySize);
         // #765 M8: the Eye of Sauron hunter's host. Lifts the hunter's limit to its own head count (weighted), so the
-        // daily shed never trims the topped-up host. MUST run before the TroopWeight line, for the reason the two
+        // daily shed never trims the topped-up host. MUST run before the TroopWeight line, for the reason the scaling
         // lines above give; pinned by AiPartySizeOrderingTests. The weighted count is walked for the hunter only.
+        // Its place after the career count is free: AddResultFrameBonus adds no factor, and no career hero leads the
+        // hunter, so each of the two adds zero wherever the other applies.
         AiPartySizeService.AddResultFrameBonus(ref result, _eyeOfSauron.GetHostSizeBonus(
             party.MobileParty?.StringId, result.ResultNumber, result.SumOfFactors,
             party.MemberRoster?.TotalManCount ?? 0, party, _weightedCountOf));

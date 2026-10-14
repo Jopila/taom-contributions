@@ -118,7 +118,7 @@
 
                     <ListPanel DataSource="{ChoiceGroupsTier3}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="4" StackLayout.LayoutMethod="HorizontalLeftToRight">
                       <ItemTemplate>
-                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="640" Command.HoverBegin="ExecuteBeginHover" Command.HoverEnd="ExecuteEndHover">
+                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="640">
                           <Children>
                             <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom">
                               <Children>
@@ -130,6 +130,7 @@
                                         <TaomCareerDiamondWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" IsTakenState="@IsTaken" IsKeystoneState="@IsKeystone">
                                           <Children>
                                             <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#7D6810FF" IsVisible="@IsUnavailable" />
+                                            <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#6B2E2EFF" IsVisible="@IsForkLocked" />
                                             <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#EBBE12FF" IsVisible="@IsFreeToTake" />
                                             <Widget Id="DiamondGlow" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#FFE84FFF" IsVisible="false" />
                                             <Widget Id="DiamondCentre" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="70" SuggestedHeight="70" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#3A3630FF" />
@@ -142,6 +143,7 @@
                                                   <Children>
                                                     <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Text="@Description" Brush="CareerSystem.Effects.Passive" Brush.FontSize="17" />
                                                     <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="3" Text="@EffectScopeBadge" Brush="CareerSystem.Effects.Keystone" Brush.FontSize="14" IsVisible="@IsKeystone" />
+                                                    <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="3" Text="@LockReasonText" Brush="CareerSystem.Effects.Passive" Brush.FontSize="14" IsVisible="@HasLockReason" />
                                                   </Children>
                                                 </ListPanel>
                                                 <BrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Popup.Frame" IsEnabled="false" />
@@ -179,7 +181,7 @@
 
                     <ListPanel DataSource="{ChoiceGroupsTier2}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="4" StackLayout.LayoutMethod="HorizontalLeftToRight">
                       <ItemTemplate>
-                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="640" Command.HoverBegin="ExecuteBeginHover" Command.HoverEnd="ExecuteEndHover">
+                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="640">
                           <Children>
                             <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom">
                               <Children>
@@ -191,6 +193,7 @@
                                         <TaomCareerDiamondWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" IsTakenState="@IsTaken" IsKeystoneState="@IsKeystone">
                                           <Children>
                                             <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#6E767EFF" IsVisible="@IsUnavailable" />
+                                            <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#6B2E2EFF" IsVisible="@IsForkLocked" />
                                             <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#E8EFF7FF" IsVisible="@IsFreeToTake" />
                                             <Widget Id="DiamondGlow" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#FFFFFFFF" IsVisible="false" />
                                             <Widget Id="DiamondCentre" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="70" SuggestedHeight="70" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#3A3630FF" />
@@ -203,6 +206,7 @@
                                                   <Children>
                                                     <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Text="@Description" Brush="CareerSystem.Effects.Passive" Brush.FontSize="17" />
                                                     <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="3" Text="@EffectScopeBadge" Brush="CareerSystem.Effects.Keystone" Brush.FontSize="14" IsVisible="@IsKeystone" />
+                                                    <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="3" Text="@LockReasonText" Brush="CareerSystem.Effects.Passive" Brush.FontSize="14" IsVisible="@HasLockReason" />
                                                   </Children>
                                                 </ListPanel>
                                                 <BrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Popup.Frame" IsEnabled="false" />
@@ -239,7 +243,7 @@
 
                     <ListPanel DataSource="{ChoiceGroupsTier1}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="4" StackLayout.LayoutMethod="HorizontalLeftToRight">
                       <ItemTemplate>
-                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="640" Command.HoverBegin="ExecuteBeginHover" Command.HoverEnd="ExecuteEndHover">
+                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="640">
                           <Children>
                             <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom">
                               <Children>
@@ -251,6 +255,7 @@
                                         <TaomCareerDiamondWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" IsTakenState="@IsTaken" IsKeystoneState="@IsKeystone">
                                           <Children>
                                             <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#5A4A38FF" IsVisible="@IsUnavailable" />
+                                            <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#6B2E2EFF" IsVisible="@IsForkLocked" />
                                             <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#B08D57FF" IsVisible="@IsFreeToTake" />
                                             <Widget Id="DiamondGlow" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="78" SuggestedHeight="78" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#E8B87AFF" IsVisible="false" />
                                             <Widget Id="DiamondCentre" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="70" SuggestedHeight="70" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="TAOM\Encyclopedia\clan_diamond_mask" Color="#3A3630FF" />
@@ -263,6 +268,7 @@
                                                   <Children>
                                                     <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Text="@Description" Brush="CareerSystem.Effects.Passive" Brush.FontSize="17" />
                                                     <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="3" Text="@EffectScopeBadge" Brush="CareerSystem.Effects.Keystone" Brush.FontSize="14" IsVisible="@IsKeystone" />
+                                                    <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="3" Text="@LockReasonText" Brush="CareerSystem.Effects.Passive" Brush.FontSize="14" IsVisible="@HasLockReason" />
                                                   </Children>
                                                 </ListPanel>
                                                 <BrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Popup.Frame" IsEnabled="false" />
@@ -293,6 +299,12 @@
                         <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom">
                           <Children>
                             <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Text="@FreeCareerPointsText" Brush="CareerSystem.Effects.Title" Brush.FontSize="22" />
+                            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Text="@NextPointText" Brush="CareerSystem.Effects.Passive" Brush.FontSize="16" IsVisible="@HasNextPoint" />
+                            <ButtonWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="44" MarginTop="8" Brush="Popup.Done.Button.NineGrid" IsVisible="@ShowRetrain" IsEnabled="@CanRetrain" UpdateChildrenStates="true" Command.Click="ExecuteRetrain">
+                              <Children>
+                                <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" VerticalAlignment="Center" HorizontalAlignment="Center" Text="@RetrainText" Brush="Popup.Button.Text" Brush.FontSize="18" />
+                              </Children>
+                            </ButtonWidget>
                             <Widget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="4" MarginTop="10" Sprite="Clan\divider_mid" />
                             <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="10" Text="@ActiveEffectsLabel" Brush="CareerSystem.Effects.Title" Brush.FontSize="22" />
                             <ListPanel DataSource="{KeystoneEffectLines}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="8" StackLayout.LayoutMethod="VerticalTopToBottom">

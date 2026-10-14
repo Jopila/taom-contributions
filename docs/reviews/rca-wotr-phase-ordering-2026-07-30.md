@@ -18,6 +18,16 @@ periodic event to an exact tick multiple of `CampaignStartTime` on both new-game
 `CampaignTime.Days(1f)` is bit-exact at 864,000,000 ticks, so Day 30/44 carries no fractional-drift
 risk that Day 2/14 did not.
 
+**Correction (2026-10-14):** the load half of that claim is wrong. On a load, `CreateCampaignEvents`
+sets the daily event's initial wait to the elapsed part of the current day, not to the rest of it
+(v1.5.4 and v1.5.5 `Campaign.cs:1024-1030`; `MBCampaignEvent.cs:32` sets `NextTriggerTime` to now plus
+that wait). A save made at fraction f of day S next ticks at S + 2f, so the daily event leaves the
+elapsed-day boundary after a load part way through a day, and a save made in the first half of
+elapsed day S ticks day S a second time. Elapsed days start at `CampaignStartTime` (09:00 on
+vanilla's calendar clock), not at midnight. The new-game
+half holds: a new campaign waits one whole day. The War Chronicle now guards its daily work against the
+repeat (`WarChronicleDailyGate`, docs/features/war-chronicle.md "Once per day").
+
 The mistake was in **how** the retune avoided a collision it had already noticed. `PhaseConfig`'s
 own default is `TriggerDay = 30`, so `Phase1` and `Phase2` both defaulted to 30 — equal days. The
 retune fixed that by giving `Phase2` a distinct compiled default of 44 and wrote a comment

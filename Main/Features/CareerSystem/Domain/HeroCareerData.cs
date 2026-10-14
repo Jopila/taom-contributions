@@ -12,7 +12,9 @@ public class HeroCareerData
     /// <summary>
     /// Career-quest attribute flags: string
     /// markers granted by quest completion (GrantAttributeFlag reward) and read by downstream
-    /// dialog/content gating. Persisted alongside the rest of the hero's career data.
+    /// dialog/content gating. Also carries the <c>career_tree_vN</c> marker that records the tree
+    /// version the hero was built on (CareerTreeVersion). Persisted alongside the rest of the
+    /// hero's career data.
     /// </summary>
     public List<string> Flags { get; set; }
 

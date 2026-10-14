@@ -13,14 +13,17 @@ namespace TAOM.Features.WarChronicle;
 
 /// <summary>
 /// The War Chronicle payload as JSON: <c>{"v":1,"effects":[{"s","k","kind","m","end"}],"baselines":{},
-/// "rally":{"tiers":{}},"chronicle":[{"id","s","open","close","a","res"}],"phases":{"IsengardWar":day,"FullWar":day}}</c>. Pure. Parsing is forgiving by
+/// "rally":{"tiers":{}},"chronicle":[{"id","s","open","close","a","res"}],"phases":{"IsengardWar":day,"FullWar":day},
+/// "daily":{"tick":day,"chronicle":day}}</c>. Pure. Parsing is forgiving by
 /// section: a bad section resets alone with a warning, a bad row inside a section is skipped alone, and
 /// nothing here throws on save content. Effect kinds are saved by name; an unknown name (a kind from a
 /// newer build) is skipped. A chronicle row saves its state as the <see cref="ChronicleEventState"/> int
 /// and leaves an absent day out; it is skipped for no id, a duplicate id, an undefined state, a day that
 /// is not a finite number, an Active state without a window, or a resolved state without its day. A
 /// <c>phases</c> entry is the day the chronicle first saw that phase reached, keyed by the
-/// <see cref="WarPhase"/> name; one that names another phase or holds no finite number is skipped.
+/// <see cref="WarPhase"/> name; one that names another phase or holds no finite number is skipped. A
+/// <c>daily</c> entry is the last whole day a <see cref="WarChronicleDailyGate"/> lane ran; one that is not a
+/// non-negative integer is skipped, and a save without the section (an older build) has run no day.
 /// </summary>
 internal static class WarChronicleSaveCodec
 {
@@ -49,6 +52,7 @@ internal static class WarChronicleSaveCodec
             ["rally"] = new JObject { ["tiers"] = IntMap(payload.RallyTiers) },
             ["chronicle"] = ChronicleRows(payload.Chronicle),
             ["phases"] = PhaseDays(payload.PhaseSeenDays),
+            ["daily"] = IntMap(payload.DailyRunDays),
         };
         return root.ToString(Formatting.None);
     }
@@ -93,6 +97,7 @@ internal static class WarChronicleSaveCodec
         ReadRally(root, payload);
         ReadChronicle(root, payload);
         ReadPhases(root, payload);
+        ReadDaily(root, payload);
         return payload;
     }
 
@@ -246,6 +251,21 @@ internal static class WarChronicleSaveCodec
 
         foreach (var pair in ReadIntMap(map, "rally tier", 0, 2, payload))
             payload.RallyTiers[pair.Key] = pair.Value;
+    }
+
+    private static void ReadDaily(JObject root, WarChroniclePayload payload)
+    {
+        var section = root["daily"];
+        if (section == null)
+            return;
+        if (!(section is JObject map))
+        {
+            payload.Warnings.Add("the daily section is not an object, so it is reset");
+            return;
+        }
+
+        foreach (var pair in ReadIntMap(map, "daily day", 0, int.MaxValue, payload))
+            payload.DailyRunDays[pair.Key] = pair.Value;
     }
 
     private static void ReadChronicle(JObject root, WarChroniclePayload payload)

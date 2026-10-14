@@ -59,12 +59,13 @@ public class CareerScreenVMTests
         _registry.GetChoice("wb_brut_key").Returns(KeystoneChoice);
         _registry.GetChoice("wb_brut_p1").Returns(PassiveChoice);
         _registry.GetChoicesForGroup("wb_brutality").Returns(new List<CareerChoiceDefinition> { KeystoneChoice, PassiveChoice });
-        _registry.GetMaxChoicesForHero(5).Returns(6);
+        StubMaxChoices(6);
         // Issue #379 — the VM reads unspent points through the registry's single-source
         // helper; mirror the real formula so per-test GetMaxChoicesForHero overrides flow
         // through without each test re-stubbing the derived method.
-        _registry.GetUnspentPoints(Arg.Any<int>(), Arg.Any<int>())
-            .Returns(ci => System.Math.Max(0, _registry.GetMaxChoicesForHero(ci.ArgAt<int>(0)) - ci.ArgAt<int>(1)));
+        _registry.GetUnspentPoints(Arg.Any<CareerDefinition>(), Arg.Any<int>(), Arg.Any<int>())
+            .Returns(ci => System.Math.Max(0,
+                _registry.GetMaxChoicesForHero(ci.ArgAt<CareerDefinition>(0), ci.ArgAt<int>(1)) - ci.ArgAt<int>(2)));
         _registry.IsTierAvailable(5, 1).Returns(true);
         _registry.IsTierAvailable(5, 2).Returns(false);
         _registry.IsTierAvailable(5, 3).Returns(false);
@@ -116,13 +117,13 @@ public class CareerScreenVMTests
     }
 
     [TestMethod]
-    public void ExecuteSelectChoice_ValidChoice_AddsAndRefreshes()
+    public void ToggleChoice_ValidChoice_AddsAndRefreshes()
     {
         SetupHeroWithCareer();
-        _registry.GetMaxChoicesForHero(5).Returns(10);
+        StubMaxChoices(10);
         var vm = CreateVM();
 
-        vm.ExecuteSelectChoice("wb_brut_key");
+        Take(vm, "wb_brut_key");
 
         Assert.IsTrue(_dataService.GetOrCreateData("hero1").HasChoice("wb_brut_key"));
         _passiveService.Received().RefreshCache(_dataService, _registry);
@@ -131,31 +132,38 @@ public class CareerScreenVMTests
     // ── Preventive: Tier Gating (root cause: missing integration test for composed selection flow) ──
 
     [TestMethod]
-    public void ExecuteSelectChoice_Tier2ChoiceAtLevel5_Rejected()
+    public void ToggleChoice_Tier2ChoiceAtLevel5_Rejected()
     {
         // Tier 2 requires level 10. Hero is level 5 → IsTierAvailable(5, 2) returns false.
         SetupHeroWithCareer();
-
-        var tier2Group = new CareerChoiceGroupDefinition(
-            id: "wb_scavenger", careerId: "warboss", tier: 2,
-            choiceIds: new List<string> { "wb_scav_key" });
-        var tier2Keystone = new CareerChoiceDefinition(
-            id: "wb_scav_key", groupId: "wb_scavenger", type: ChoiceType.Keystone,
-            description: "Tier 2 keystone", iconSprite: "icon", passive: null, mutations: null);
-
-        _registry.GetGroup("wb_scavenger").Returns(tier2Group);
-        _registry.GetChoice("wb_scav_key").Returns(tier2Keystone);
-        _registry.GetMaxChoicesForHero(5).Returns(10);
+        AddGroup("wb_scavenger", tier: 2, maxPicks: 0, Passive("wb_scav_p1", "wb_scavenger"));
+        StubMaxChoices(10);
 
         var vm = CreateVM();
-        vm.ExecuteSelectChoice("wb_scav_key");
+        Take(vm, "wb_scav_p1");
 
-        Assert.IsFalse(_dataService.GetOrCreateData("hero1").HasChoice("wb_scav_key"),
+        Assert.IsFalse(_dataService.GetOrCreateData("hero1").HasChoice("wb_scav_p1"),
             "Tier 2 choice should be rejected when hero level is below threshold");
     }
 
     [TestMethod]
-    public void ExecuteSelectChoice_SecondKeystoneInSameTier_Rejected()
+    public void LockReasonText_TierLockedChoice_ShowsTheRequiredLevel()
+    {
+        SetupHeroWithCareer();
+        AddGroup("wb_scavenger", tier: 2, maxPicks: 0, Passive("wb_scav_p1", "wb_scavenger"));
+        _registry.GetTierUnlockLevel(2).Returns(10);
+        StubMaxChoices(10);
+
+        var vm = CreateVM();
+
+        var choice = FindChoiceVM(vm, "wb_scav_p1");
+        Assert.IsTrue(choice.HasLockReason);
+        Assert.AreEqual("Requires Level 10", choice.LockReasonText);
+        Assert.IsFalse(choice.IsForkLocked);
+    }
+
+    [TestMethod]
+    public void ToggleChoice_SecondKeystoneInSameTier_Rejected()
     {
         // Set up career with 2 groups in tier 1, each with a keystone.
         // Selecting the first keystone should succeed, selecting the second should be rejected.
@@ -181,31 +189,32 @@ public class CareerScreenVMTests
         _registry.GetGroup("wb_dominion").Returns(dominionGroup);
         _registry.GetChoice("wb_dom_key").Returns(dominionKeystone);
         _registry.GetChoicesForGroup("wb_dominion").Returns(new List<CareerChoiceDefinition> { dominionKeystone });
-        _registry.GetMaxChoicesForHero(5).Returns(10);
+        StubMaxChoices(10);
 
         var vm = CreateVM();
 
         // First keystone succeeds
-        vm.ExecuteSelectChoice("wb_brut_key");
+        Take(vm, "wb_brut_key");
         Assert.IsTrue(_dataService.GetOrCreateData("hero1").HasChoice("wb_brut_key"),
             "First keystone in tier should be accepted");
 
         // Second keystone in same tier rejected
-        vm.ExecuteSelectChoice("wb_dom_key");
+        Take(vm, "wb_dom_key");
         Assert.IsFalse(_dataService.GetOrCreateData("hero1").HasChoice("wb_dom_key"),
             "Second keystone in same tier should be rejected (mutual exclusion)");
+        Assert.AreEqual("You took another keystone in this tier.", FindChoiceVM(vm, "wb_dom_key").LockReasonText);
     }
 
     [TestMethod]
-    public void ExecuteSelectChoice_PassiveInSameTierAsExistingKeystone_Allowed()
+    public void ToggleChoice_PassiveInSameTierAsExistingKeystone_Allowed()
     {
         // Passives should still be selectable even after a keystone in the same tier
         SetupHeroWithCareer();
-        _registry.GetMaxChoicesForHero(5).Returns(10);
+        StubMaxChoices(10);
         _dataService.TryAddChoice("hero1", "wb_brut_key", 10);
 
         var vm = CreateVM();
-        vm.ExecuteSelectChoice("wb_brut_p1");
+        Take(vm, "wb_brut_p1");
 
         Assert.IsTrue(_dataService.GetOrCreateData("hero1").HasChoice("wb_brut_p1"),
             "Passive choices in same tier should still be selectable");
@@ -307,75 +316,24 @@ public class CareerScreenVMTests
         Assert.AreEqual("ranger", chosenCareerId);
     }
 
-    // ── Collapse on level-up: taking or refunding a choice refreshes the screen, which rebuilds
-    // every group VM. Fresh VMs start with ButtonsVisible=false and Gauntlet fires no new
-    // HoverBegin for a widget recreated under a stationary cursor, so the +/- strip vanished on
-    // every click. Rebuilds must carry the open state over to the replacement VMs. ──
-
     [TestMethod]
-    public void ClickIncrease_HoveredGroup_StaysOpenAfterRebuild()
-    {
-        SetupHeroWithCareer();
-        _registry.GetMaxChoicesForHero(5).Returns(10);
-        var vm = CreateVM();
-        var group = vm.ChoiceGroupsTier1[0];
-        group.ExecuteBeginHover();
-
-        group.ExecuteClickIncrease();
-
-        Assert.IsTrue(_dataService.GetOrCreateData("hero1").HasChoice("wb_brut_key"),
-            "sanity: the click should take the first untaken choice");
-        Assert.IsTrue(vm.ChoiceGroupsTier1[0].ButtonsVisible,
-            "the rebuilt group VM under the cursor should stay open");
-    }
-
-    [TestMethod]
-    public void ClickDecrease_HoveredGroup_StaysOpenAfterRebuild()
-    {
-        SetupHeroWithCareer();
-        _registry.GetMaxChoicesForHero(5).Returns(10);
-        _dataService.TryAddChoice("hero1", "wb_brut_key", 10);
-        var vm = CreateVM();
-        var group = vm.ChoiceGroupsTier1[0];
-        group.ExecuteBeginHover();
-
-        group.ExecuteClickDecrease();
-
-        Assert.IsFalse(_dataService.GetOrCreateData("hero1").HasChoice("wb_brut_key"),
-            "sanity: the click should refund the last taken choice");
-        Assert.IsTrue(vm.ChoiceGroupsTier1[0].ButtonsVisible,
-            "the rebuilt group VM under the cursor should stay open");
-    }
-
-    [TestMethod]
-    public void RefreshValues_NoGroupHovered_GroupsStayClosed()
-    {
-        SetupHeroWithCareer();
-        var vm = CreateVM();
-
-        vm.RefreshValues();
-
-        Assert.IsFalse(vm.ChoiceGroupsTier1[0].ButtonsVisible,
-            "carry-over must not open groups that were closed before the rebuild");
-    }
-
-    [TestMethod]
-    public void ClickIncrease_RebuildsGroupsOnce_NotTwice()
+    public void ToggleChoice_RebuildsGroupsOnce_NotTwice()
     {
         // Keystone already taken so the click lands on the passive choice -- keystone
         // selection also scans GetChoicesForGroup for the mutual-exclusion check, which
         // would muddy the rebuild count this test pins down.
         SetupHeroWithCareer();
-        _registry.GetMaxChoicesForHero(5).Returns(10);
+        StubMaxChoices(10);
         _dataService.TryAddChoice("hero1", "wb_brut_key", 10);
         var vm = CreateVM();
         _registry.ClearReceivedCalls();
 
-        vm.ChoiceGroupsTier1[0].ExecuteClickIncrease();
+        FindChoiceVM(vm, "wb_brut_p1").ExecuteToggleChoice();
 
-        // One successful selection = one RefreshValues = one rebuild. The group VM's
-        // choiceChangedAction fired a second, redundant rebuild after TrySelectChoice
-        // had already refreshed the screen.
+        // One successful selection = one RefreshValues = one rebuild. The count is the same one
+        // the old group-level click asserted: CanTake runs no registry scan for a passive, and the
+        // rebuild's per-choice rule (CanTake or CanRefund) reuses the group's single
+        // GetChoicesForGroup walk.
         //
         // Still exactly one call after #388: the Active Effects panel is accumulated from
         // THIS walk rather than a second pass of its own, precisely so this guard keeps
@@ -413,10 +371,10 @@ public class CareerScreenVMTests
     public void ActiveEffects_TakenPassive_ListsFormattedTotal()
     {
         SetupHeroWithCareer();
-        _registry.GetMaxChoicesForHero(5).Returns(10);
+        StubMaxChoices(10);
         var vm = CreateVM();
 
-        vm.ExecuteSelectChoice("wb_brut_p1"); // Damage 0.1
+        Take(vm, "wb_brut_p1"); // Damage 0.1
 
         Assert.AreEqual(1, vm.PassiveEffectLines.Count);
         Assert.AreEqual("+10% damage", vm.PassiveEffectLines[0].LineText);
@@ -426,10 +384,10 @@ public class CareerScreenVMTests
     public void ActiveEffects_TakenKeystone_ListsItsDescription()
     {
         SetupHeroWithCareer();
-        _registry.GetMaxChoicesForHero(5).Returns(10);
+        StubMaxChoices(10);
         var vm = CreateVM();
 
-        vm.ExecuteSelectChoice("wb_brut_key");
+        Take(vm, "wb_brut_key");
 
         Assert.AreEqual(1, vm.KeystoneEffectLines.Count);
         Assert.AreEqual("Keystone", vm.KeystoneEffectLines[0].LineText);
@@ -448,11 +406,11 @@ public class CareerScreenVMTests
             new List<CareerChoiceDefinition> { KeystoneChoice, PassiveChoice, second });
 
         SetupHeroWithCareer();
-        _registry.GetMaxChoicesForHero(5).Returns(10);
+        StubMaxChoices(10);
         var vm = CreateVM();
 
-        vm.ExecuteSelectChoice("wb_brut_p1");
-        vm.ExecuteSelectChoice("wb_brut_p2");
+        Take(vm, "wb_brut_p1");
+        Take(vm, "wb_brut_p2");
 
         Assert.AreEqual(1, vm.PassiveEffectLines.Count);
         Assert.AreEqual("+20% damage", vm.PassiveEffectLines[0].LineText);
@@ -464,7 +422,7 @@ public class CareerScreenVMTests
         // #388 — the diamond is the whole click target, so one command serves both
         // directions. Losing this would strand every taken choice as unrefundable.
         SetupHeroWithCareer();
-        _registry.GetMaxChoicesForHero(5).Returns(10);
+        StubMaxChoices(10);
         var vm = CreateVM();
         var choice = vm.ChoiceGroupsTier1[0].Choices.First(c => c.ChoiceId == "wb_brut_p1");
 
@@ -480,15 +438,481 @@ public class CareerScreenVMTests
     public void ActiveEffects_Deselect_RemovesTheLine()
     {
         SetupHeroWithCareer();
-        _registry.GetMaxChoicesForHero(5).Returns(10);
+        StubMaxChoices(10);
         var vm = CreateVM();
-        vm.ExecuteSelectChoice("wb_brut_p1");
+        Take(vm, "wb_brut_p1");
 
         // The real user path: the choice VM's "−" callback into TryDeselectChoice.
         var taken = vm.ChoiceGroupsTier1[0].Choices.First(c => c.ChoiceId == "wb_brut_p1");
         taken.DeSelectChoice();
 
         Assert.AreEqual(0, vm.PassiveEffectLines.Count);
+    }
+
+    // -- #766 click path: the REAL parser feeds the REAL registry, and the click goes through
+    // CareerChoiceObjectVM.ExecuteToggleChoice. Hand-built definitions (everything above) carry a
+    // GroupId the parser never stamped, so they could not see the tier gate and the keystone rule
+    // going inert. --
+
+    private const string ClickPathCareersXml = @"<?xml version='1.0'?>
+<Careers max_perk_points=""30"">
+  <Career id=""tester"" display_name=""Tester"" description="""" portrait_sprite="""" ability_template_id=""t_ability""
+          min_clan_tier=""0"" root_choice_id=""t_root"">
+    <EligibleCultures><Culture id=""mordor"" /></EligibleCultures>
+    <ChoiceGroups>
+      <Group id=""t_g1"" /><Group id=""t_g2"" /><Group id=""t_g3"" /><Group id=""t_g4"" />
+    </ChoiceGroups>
+  </Career>
+</Careers>";
+
+    private const string ClickPathChoicesXml = @"<?xml version='1.0'?>
+<CareerChoices>
+  <Choice id=""t_root"" type=""Passive"" description=""r"" icon_sprite=""i"" />
+  <ChoiceGroup id=""t_g1"" career_id=""tester"" tier=""1"">
+    <Choice id=""t_g1_key"" type=""Keystone"" description=""k1"" icon_sprite=""i"" />
+    <Choice id=""t_g1_p1"" type=""Passive"" description=""p1"" icon_sprite=""i"">
+      <PassiveEffect type=""Damage"" magnitude=""0.1"" />
+    </Choice>
+  </ChoiceGroup>
+  <ChoiceGroup id=""t_g2"" career_id=""tester"" tier=""1"">
+    <Choice id=""t_g2_key"" type=""Keystone"" description=""k2"" icon_sprite=""i"" />
+  </ChoiceGroup>
+  <ChoiceGroup id=""t_g4"" career_id=""tester"" tier=""1"" max_picks=""1"">
+    <Choice id=""t_g4_a"" type=""Passive"" description=""f1"" icon_sprite=""i"">
+      <PassiveEffect type=""Damage"" magnitude=""0.1"" />
+    </Choice>
+    <Choice id=""t_g4_b"" type=""Passive"" description=""f2"" icon_sprite=""i"">
+      <PassiveEffect type=""Damage"" magnitude=""0.1"" />
+    </Choice>
+  </ChoiceGroup>
+  <ChoiceGroup id=""t_g3"" career_id=""tester"" tier=""3"">
+    <Choice id=""t_g3_p1"" type=""Passive"" description=""p3"" icon_sprite=""i"">
+      <PassiveEffect type=""Damage"" magnitude=""0.1"" />
+    </Choice>
+    <Choice id=""t_g3_p2"" type=""Passive"" description=""p3b"" icon_sprite=""i"">
+      <PassiveEffect type=""Damage"" magnitude=""0.1"" />
+    </Choice>
+  </ChoiceGroup>
+</CareerChoices>";
+
+    private (CareerScreenVM Vm, CareerRegistry Registry, string Dir) CreateParsedVM(int heroLevel)
+    {
+        var dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "taom_test_" + System.IO.Path.GetRandomFileName());
+        System.IO.Directory.CreateDirectory(System.IO.Path.Combine(dir, "career_system"));
+        System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "career_system", "taom_careers.xml"), ClickPathCareersXml);
+        System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "career_system", "taom_career_choices.xml"), ClickPathChoicesXml);
+
+        var pathService = Substitute.For<TAOM.Core.Infrastructure.IPathService>();
+        pathService.ModuleDataPath.Returns(dir);
+        var provider = new CareerConfigProvider(pathService, _logger);
+        var registry = new CareerRegistry(provider, _logger);
+
+        _dataService.SetCareer("hero1", "tester");
+        var vm = new CareerScreenVM(_dataService, registry, _passiveService, provider, _logger,
+            "hero1", heroLevel, () => _closeCalled = true);
+        return (vm, registry, dir);
+    }
+
+    private static CareerChoiceObjectVM FindChoiceVM(CareerScreenVM vm, string choiceId)
+        => vm.ChoiceGroupsTier1.Concat(vm.ChoiceGroupsTier2).Concat(vm.ChoiceGroupsTier3)
+            .SelectMany(g => g.Choices).First(c => c.ChoiceId == choiceId);
+
+    [TestMethod]
+    public void ExecuteToggleChoice_ParsedTier3ChoiceAtLevel1_IsRefused()
+    {
+        var (vm, registry, dir) = CreateParsedVM(heroLevel: 1);
+        try
+        {
+            Assert.AreEqual("t_g3", registry.GetChoice("t_g3_p1").GroupId);
+            Assert.IsTrue(vm.FreeCareerPoints > 0, "points must not be the refuser");
+
+            FindChoiceVM(vm, "t_g3_p1").ExecuteToggleChoice();
+
+            Assert.IsFalse(_dataService.GetOrCreateData("hero1").HasChoice("t_g3_p1"), "tier 3 is locked at level 1");
+            Assert.IsFalse(FindChoiceVM(vm, "t_g3_p1").IsTaken);
+
+            // Positive control: a tier-1 passive in the same VM is accepted.
+            FindChoiceVM(vm, "t_g1_p1").ExecuteToggleChoice();
+            Assert.IsTrue(_dataService.GetOrCreateData("hero1").HasChoice("t_g1_p1"));
+        }
+        finally
+        {
+            System.IO.Directory.Delete(dir, true);
+        }
+    }
+
+    [TestMethod]
+    public void ExecuteToggleChoice_ParsedSecondKeystoneInSameTier_IsRefused()
+    {
+        var (vm, registry, dir) = CreateParsedVM(heroLevel: 5);
+        try
+        {
+            Assert.AreEqual("t_g1", registry.GetChoice("t_g1_key").GroupId);
+            Assert.AreEqual("t_g2", registry.GetChoice("t_g2_key").GroupId);
+
+            FindChoiceVM(vm, "t_g1_key").ExecuteToggleChoice();
+            Assert.IsTrue(_dataService.GetOrCreateData("hero1").HasChoice("t_g1_key"), "the first keystone is taken");
+            Assert.IsTrue(vm.FreeCareerPoints > 0, "points must not be the refuser");
+
+            // RefreshValues rebuilt every choice VM, so fetch the second one fresh.
+            FindChoiceVM(vm, "t_g2_key").ExecuteToggleChoice();
+
+            Assert.IsFalse(_dataService.GetOrCreateData("hero1").HasChoice("t_g2_key"), "one keystone per tier");
+            Assert.IsFalse(FindChoiceVM(vm, "t_g2_key").IsTaken);
+        }
+        finally
+        {
+            System.IO.Directory.Delete(dir, true);
+        }
+    }
+
+    // ── #769 E4/E5: forks, lock on leave, lock reasons, per-career pacing ──
+
+    [TestMethod]
+    public void ToggleChoice_ForkGroupWithOnePick_RefusesTheSiblingWithTheForkText()
+    {
+        SetupHeroWithCareer();
+        AddGroup("wb_fork", tier: 1, maxPicks: 1, Passive("wb_fork_a", "wb_fork"), Passive("wb_fork_b", "wb_fork"));
+        StubMaxChoices(10);
+        var vm = CreateVM();
+
+        Take(vm, "wb_fork_a");
+        Take(vm, "wb_fork_b");
+
+        var data = _dataService.GetOrCreateData("hero1");
+        Assert.IsTrue(data.HasChoice("wb_fork_a"));
+        Assert.IsFalse(data.HasChoice("wb_fork_b"), "the fork holds one pick");
+        Assert.IsTrue(vm.FreeCareerPoints > 0, "points must not be the refuser");
+        var sibling = FindChoiceVM(vm, "wb_fork_b");
+        Assert.IsTrue(sibling.IsForkLocked);
+        Assert.IsTrue(sibling.HasLockReason);
+        Assert.AreEqual("You took another choice on this path.", sibling.LockReasonText);
+    }
+
+    [TestMethod]
+    public void ToggleChoice_ForkPickRefundedInTheSameVisit_ReopensTheFork()
+    {
+        SetupHeroWithCareer();
+        AddGroup("wb_fork", tier: 1, maxPicks: 1, Passive("wb_fork_a", "wb_fork"), Passive("wb_fork_b", "wb_fork"));
+        StubMaxChoices(10);
+        var vm = CreateVM();
+        Take(vm, "wb_fork_a");
+
+        Take(vm, "wb_fork_a");
+
+        Assert.IsFalse(_dataService.GetOrCreateData("hero1").HasChoice("wb_fork_a"), "free to refund the same visit");
+        Assert.IsFalse(FindChoiceVM(vm, "wb_fork_b").IsForkLocked);
+        Take(vm, "wb_fork_b");
+        Assert.IsTrue(_dataService.GetOrCreateData("hero1").HasChoice("wb_fork_b"), "the other path is now open");
+    }
+
+    [TestMethod]
+    public void ToggleChoice_ForkPickAfterReopeningTheScreen_IsLockedIn()
+    {
+        SetupHeroWithCareer();
+        AddGroup("wb_fork", tier: 1, maxPicks: 1, Passive("wb_fork_a", "wb_fork"), Passive("wb_fork_b", "wb_fork"));
+        StubMaxChoices(10);
+        Take(CreateVM(), "wb_fork_a");
+
+        var reopened = CreateVM();
+        var taken = FindChoiceVM(reopened, "wb_fork_a");
+        Assert.IsTrue(taken.IsTaken);
+        Assert.AreEqual("Locked in. Retrain to change this choice.", taken.LockReasonText);
+        Assert.IsFalse(taken.IsForkLocked, "a taken choice is not shown as a refused fork sibling");
+
+        taken.ExecuteToggleChoice();
+
+        Assert.IsTrue(_dataService.GetOrCreateData("hero1").HasChoice("wb_fork_a"), "the refund is refused");
+        Assert.IsTrue(FindChoiceVM(reopened, "wb_fork_a").IsTaken);
+    }
+
+    [TestMethod]
+    public void ToggleChoice_UnlimitedGroupAfterReopeningTheScreen_StillRefundsFreely()
+    {
+        SetupHeroWithCareer();
+        StubMaxChoices(10);
+        Take(CreateVM(), "wb_brut_p1");
+
+        var reopened = CreateVM();
+        var taken = FindChoiceVM(reopened, "wb_brut_p1");
+        Assert.IsFalse(taken.HasLockReason);
+
+        taken.ExecuteToggleChoice();
+
+        Assert.IsFalse(_dataService.GetOrCreateData("hero1").HasChoice("wb_brut_p1"));
+    }
+
+    [TestMethod]
+    public void LockReasonText_NoFreePoints_ExplainsTheMissingPoint()
+    {
+        SetupHeroWithCareer();
+        _dataService.TryAddChoice("hero1", "wb_root", 10);
+        StubMaxChoices(1);
+
+        var vm = CreateVM();
+
+        Assert.AreEqual(0, vm.FreeCareerPoints);
+        Assert.AreEqual("No free career points.", FindChoiceVM(vm, "wb_brut_p1").LockReasonText);
+    }
+
+    [TestMethod]
+    public void LockReasonText_TakeableChoice_IsEmpty()
+    {
+        SetupHeroWithCareer();
+        StubMaxChoices(10);
+
+        var vm = CreateVM();
+
+        var choice = FindChoiceVM(vm, "wb_brut_p1");
+        Assert.AreEqual("", choice.LockReasonText);
+        Assert.IsFalse(choice.HasLockReason);
+        Assert.IsTrue(choice.IsFreeToTake);
+    }
+
+    [TestMethod]
+    public void NextPointText_CareerWithAnUpcomingPointLevel_NamesIt()
+    {
+        SetupHeroWithCareer();
+        _registry.GetNextPointLevel(Arg.Any<CareerDefinition>(), 5).Returns(10);
+
+        var vm = CreateVM();
+
+        Assert.IsTrue(vm.HasNextPoint);
+        Assert.AreEqual("Next point at level 10", vm.NextPointText);
+    }
+
+    [TestMethod]
+    public void NextPointText_NoUpcomingPointLevel_IsEmpty()
+    {
+        SetupHeroWithCareer();
+        _registry.GetNextPointLevel(Arg.Any<CareerDefinition>(), 5).Returns((int?)null);
+
+        var vm = CreateVM();
+
+        Assert.IsFalse(vm.HasNextPoint);
+        Assert.AreEqual("", vm.NextPointText);
+    }
+
+    // ── #769 E7: paid retrain button ──
+
+    private void AddForkAB()
+        => AddGroup("wb_fork", tier: 1, maxPicks: 1, Passive("wb_fork_a", "wb_fork"), Passive("wb_fork_b", "wb_fork"));
+
+    private CareerScreenVM CreateRetrainVM(Action<int> onRetrainRequested)
+        => new CareerScreenVM(_dataService, _registry, _passiveService, _configProvider, _logger,
+            "hero1", 5, () => _closeCalled = true, onRetrainRequested: onRetrainRequested);
+
+    [TestMethod]
+    public void ShowRetrain_CareerWithAForkGroup_IsTrue()
+    {
+        SetupHeroWithCareer();
+        AddForkAB();
+
+        Assert.IsTrue(CreateVM().ShowRetrain);
+    }
+
+    [TestMethod]
+    public void ShowRetrain_CareerWithOnlyUnlimitedGroups_IsFalse()
+    {
+        SetupHeroWithCareer();
+
+        var vm = CreateVM();
+
+        Assert.IsFalse(vm.ShowRetrain);
+        Assert.IsFalse(vm.CanRetrain);
+    }
+
+    [TestMethod]
+    public void CanRetrain_ForkPickFromAnEarlierVisit_IsTrue()
+    {
+        SetupHeroWithCareer();
+        AddForkAB();
+        StubMaxChoices(10);
+        Take(CreateVM(), "wb_fork_a");
+
+        Assert.IsTrue(CreateVM().CanRetrain);
+    }
+
+    [TestMethod]
+    public void CanRetrain_ForkPickTakenThisVisit_IsFalse()
+    {
+        SetupHeroWithCareer();
+        AddForkAB();
+        StubMaxChoices(10);
+        var vm = CreateVM();
+
+        Take(vm, "wb_fork_a");
+
+        Assert.IsFalse(vm.CanRetrain, "a pick taken this visit refunds free, so retraining is not offered");
+    }
+
+    [TestMethod]
+    public void CanRetrain_OnePickThisVisitAndOneFromAnEarlierVisit_IsTrue()
+    {
+        // A pick taken now must not hide the earlier one that still needs the paid retrain (this
+        // replaced a rule test when the retrain state moved into the screen's own walk).
+        SetupHeroWithCareer();
+        AddForkAB();
+        AddGroup("wb_fork2", tier: 1, maxPicks: 1, Passive("wb_fork2_c", "wb_fork2"), Passive("wb_fork2_d", "wb_fork2"));
+        StubMaxChoices(10);
+        Take(CreateVM(), "wb_fork_a"); // an earlier visit
+        var vm = CreateVM();
+
+        Take(vm, "wb_fork2_c"); // this visit
+
+        Assert.IsTrue(vm.CanRetrain);
+    }
+
+    [TestMethod]
+    public void CanRetrain_NoForkPick_IsFalse()
+    {
+        SetupHeroWithCareer();
+        AddForkAB();
+
+        Assert.IsFalse(CreateVM().CanRetrain);
+    }
+
+    [TestMethod]
+    public void RetrainText_ShowsTheCostInGold()
+    {
+        SetupHeroWithCareer();
+        AddForkAB();
+        _registry.GetRetrainCost(5).Returns(2250);
+
+        Assert.AreEqual("Retrain (2250 gold)", CreateVM().RetrainText);
+    }
+
+    [TestMethod]
+    public void ExecuteRetrain_WhenRetrainable_InvokesTheCallbackWithTheCost()
+    {
+        SetupHeroWithCareer();
+        AddForkAB();
+        StubMaxChoices(10);
+        _registry.GetRetrainCost(5).Returns(2250);
+        Take(CreateVM(), "wb_fork_a");
+        int? requested = null;
+        var vm = CreateRetrainVM(cost => requested = cost);
+
+        vm.ExecuteRetrain();
+
+        Assert.AreEqual(2250, requested);
+    }
+
+    [TestMethod]
+    public void ExecuteRetrain_WhenNotRetrainable_DoesNotInvokeTheCallback()
+    {
+        SetupHeroWithCareer();
+        AddForkAB();
+        StubMaxChoices(10);
+        var calls = 0;
+        var vm = CreateRetrainVM(_ => calls++);
+        Take(vm, "wb_fork_a"); // taken this visit: free to refund, so not retrainable
+
+        vm.ExecuteRetrain();
+
+        Assert.AreEqual(0, calls);
+    }
+
+    [TestMethod]
+    public void ExecuteRetrain_WithoutACallback_DoesNotThrow()
+    {
+        SetupHeroWithCareer();
+        AddForkAB();
+        StubMaxChoices(10);
+        Take(CreateVM(), "wb_fork_a");
+
+        CreateVM().ExecuteRetrain();
+    }
+
+    [TestMethod]
+    public void OnRetrained_RebuildsWithNothingLockedAndClearsTheVisitSet()
+    {
+        SetupHeroWithCareer();
+        AddForkAB();
+        StubMaxChoices(10);
+        var vm = CreateVM();
+        Take(vm, "wb_fork_a"); // now in the visit set
+
+        // The lifecycle service has refunded the picks; the screen is told afterwards.
+        _dataService.RemoveChoice("hero1", "wb_fork_a");
+        vm.OnRetrained();
+
+        Assert.IsFalse(FindChoiceVM(vm, "wb_fork_a").IsTaken);
+        Assert.IsFalse(FindChoiceVM(vm, "wb_fork_b").IsForkLocked, "nothing is re-locked after a retrain");
+        Assert.IsFalse(vm.CanRetrain);
+
+        // The visit set was cleared: a pick that reappears is no longer "taken this visit".
+        _dataService.TryAddChoice("hero1", "wb_fork_a", 10);
+        vm.RefreshValues();
+        Assert.AreEqual("Locked in. Retrain to change this choice.", FindChoiceVM(vm, "wb_fork_a").LockReasonText);
+        Assert.IsTrue(vm.CanRetrain);
+    }
+
+    private void StubMaxChoices(int max)
+        => _registry.GetMaxChoicesForHero(Arg.Any<CareerDefinition>(), 5).Returns(max);
+
+    private static void Take(CareerScreenVM vm, string choiceId)
+        => FindChoiceVM(vm, choiceId).ExecuteToggleChoice();
+
+    private static CareerChoiceDefinition Passive(string id, string groupId)
+        => new CareerChoiceDefinition(id, groupId, ChoiceType.Passive, "Passive", "icon",
+            new PassiveEffect(PassiveEffectType.Damage, 0.1f), null);
+
+    private readonly List<string> _extraGroupIds = new List<string>();
+
+    // Adds a group to the Warboss career on top of the fixture's wb_brutality group.
+    private void AddGroup(string groupId, int tier, int maxPicks, params CareerChoiceDefinition[] choices)
+    {
+        _extraGroupIds.Add(groupId);
+        var ids = new List<string>();
+        foreach (var c in choices)
+        {
+            ids.Add(c.Id);
+            _registry.GetChoice(c.Id).Returns(c);
+        }
+        _registry.GetGroup(groupId).Returns(new CareerChoiceGroupDefinition(
+            groupId, "warboss", tier, ids, maxPicks: maxPicks));
+        _registry.GetChoicesForGroup(groupId).Returns(new List<CareerChoiceDefinition>(choices));
+
+        var groupIds = new List<string> { "wb_brutality" };
+        groupIds.AddRange(_extraGroupIds);
+        _registry.GetCareer("warboss").Returns(new CareerDefinition(
+            id: "warboss", displayName: "Warboss", description: "A brute.",
+            portraitSprite: "wb_sprite", abilityTemplateId: "rally_horde",
+            minClanTier: 0, rootChoiceId: "wb_root",
+            eligibleCultureIds: new List<string> { "mordor" },
+            choiceGroupIds: groupIds));
+    }
+
+    [TestMethod]
+    public void ExecuteToggleChoice_ParsedForkGroup_RefusesTheSiblingAndLocksInOnReopen()
+    {
+        var (vm, registry, dir) = CreateParsedVM(heroLevel: 5);
+        string reopenedDir = null;
+        try
+        {
+            Assert.AreEqual(1, registry.GetGroup("t_g4").MaxPicks);
+
+            FindChoiceVM(vm, "t_g4_a").ExecuteToggleChoice();
+            FindChoiceVM(vm, "t_g4_b").ExecuteToggleChoice();
+
+            var data = _dataService.GetOrCreateData("hero1");
+            Assert.IsTrue(data.HasChoice("t_g4_a"));
+            Assert.IsFalse(data.HasChoice("t_g4_b"), "the parsed fork holds one pick");
+            Assert.IsTrue(FindChoiceVM(vm, "t_g4_b").IsForkLocked);
+
+            CareerScreenVM reopened;
+            (reopened, _, reopenedDir) = CreateParsedVM(heroLevel: 5);
+            FindChoiceVM(reopened, "t_g4_a").ExecuteToggleChoice();
+
+            Assert.IsTrue(data.HasChoice("t_g4_a"), "locked in once the screen is reopened");
+            Assert.AreEqual("Locked in. Retrain to change this choice.", FindChoiceVM(reopened, "t_g4_a").LockReasonText);
+        }
+        finally
+        {
+            System.IO.Directory.Delete(dir, true);
+            if (reopenedDir != null) System.IO.Directory.Delete(reopenedDir, true);
+        }
     }
 
     private void SetupHeroWithCareer()

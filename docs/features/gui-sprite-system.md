@@ -186,7 +186,7 @@ Prefab XML (declarative layout)
     @PropertyName    → ViewModel.[DataSourceProperty] string/bool/int
     {CollectionName} → ViewModel.[DataSourceProperty] MBBindingList<T>
     Command.Click    → ViewModel.ExecuteMethodName()
-    Command.HoverBegin/End → ViewModel.ExecuteBeginHover()/ExecuteEndHover()
+    Command.HoverBegin/End → ViewModel.ExecuteMethodName()
 ```
 
 ### Screen Lifecycle
@@ -259,7 +259,7 @@ Expandable choice panels.
 **Key features:**
 - `VisualDefinition="ExtendablePanel"` — choice groups expand 80px→750px on hover
 - `@IsTaken` / `@IsFreeToTake` / `@IsUnavailable` — distinct pip art per state: taken draws the brighter **`career_point_pip_lit`** ring (whitened + glow halo) at full opacity; available/locked draw the hollow `career_point_pip` ring at a low/very-low alpha. (Pre-2026-06-19 all three shared the hollow ring at near-identical alpha, so an increased skill didn't visibly "light up" — see the worked example below.)
-- `@IsActive` + `@ButtonsVisible` — +/- buttons appear on hover, hidden when locked
+- `@IsTaken` + `ExecuteToggleChoice`: the diamond is the click target; it takes an untaken choice and refunds a taken one (no +/- buttons); `@IsForkLocked` draws the dark red overlay and `@LockReasonText` fills the tooltip line
 - `CareerSystem\locked_chains` sprite overlay on locked tiers
 - `<Standard.Background />` and `<Standard.DialogCloseButtons />` for native look
 
@@ -275,12 +275,11 @@ CareerScreenVM
 ├── {AbilityEffects} → MBBindingList<CareerAbilityEffectVM>
 │   └── @LineText
 ├── {ChoiceGroupsTier1/2/3} → MBBindingList<CareerChoiceGroupObjectVM>
-│   ├── @GroupName, @IsActive, @ButtonsVisible, @IsLocked
-│   ├── ExecuteBeginHover(), ExecuteEndHover()
-│   ├── ExecuteClickIncrease(), ExecuteClickDecrease()
+│   ├── @GroupName
 │   └── {Choices} → MBBindingList<CareerChoiceObjectVM>
 │       ├── @Description, @IconSprite, @IsKeystone
-│       ├── @IsTaken (gold icon), @IsFreeToTake (brown icon)
+│       ├── @IsTaken (gold icon), @IsFreeToTake (brown icon), @IsForkLocked, @LockReasonText
+│       ├── ExecuteToggleChoice() (the diamond click)
 │       └── ChoiceId (non-binding, used by parent)
 └── ExecuteClose()
 ```

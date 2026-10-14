@@ -76,29 +76,27 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         // one (elephant/spider). The RecruitmentVM gate (Patch51) blocks confirming an unaffordable
         // cart, so this deduction never drives the balance negative for those troops.
         CampaignEvents.OnUnitRecruitedEvent.AddNonSerializedListener(this, OnUnitRecruited);
-        // Phase 9b #133 P1 — ScreenManager is static/global and outlives any campaign. New campaign
-        // in same process: a second behavior instance registers another listener; first instance's
-        // listener stays alive, calling _service.BeginPartyScreenSession() on the shared singleton
-        // service → resets _pendingSpend/_inSession for new campaign sessions, potentially
-        // cancelling legitimate spends. OnGameOverEvent is the only public lifecycle hook in
-        // v1.3.15 that fires when a campaign ends; CampaignBehaviorBase has no OnFinalize/OnGameEnd
-        // overrides. Best-effort: unsubscribe on game over. (If a player exits via main menu
-        // without "Game Over" firing, the listener is still orphaned — but the next campaign's
-        // ScreenManager.OnPushScreen += in its OWN RegisterEvents at least won't double-subscribe
-        // because the orphan listener was bound to the prior behavior instance, which is GC-eligible
-        // once its CampaignGameStarter is released.)
-        ScreenManager.OnPushScreen += OnScreenPushed;
+        // ScreenManager.OnPushScreen is a static event: it outlives every campaign and keeps each
+        // subscribed delegate's target alive, so an orphaned handler is never garbage-collected. A
+        // behavior instance is built on every campaign start or save load, and a load without a Game
+        // Over leaves the previous instance subscribed, still calling BeginPartyScreenSession on the
+        // shared singleton service (#133 P1, #771). So the behavior keeps exactly one live handler per
+        // process: remove the stored one, then store and add this instance's.
+        if (_screenPushHandler != null)
+            ScreenManager.OnPushScreen -= _screenPushHandler;
+        _screenPushHandler = OnScreenPushed;
+        ScreenManager.OnPushScreen += _screenPushHandler;
         CampaignEvents.OnGameOverEvent.AddNonSerializedListener(this, UnsubscribeScreenManager);
     }
 
-    private bool _screenManagerSubscribed = true;
+    private static ScreenManager.OnPushScreenEvent _screenPushHandler;
 
     private void UnsubscribeScreenManager()
     {
-        if (!_screenManagerSubscribed) return;
-        ScreenManager.OnPushScreen -= OnScreenPushed;
-        _screenManagerSubscribed = false;
-        _logger.LogInfo("[SpecRes] OnGameOver — unsubscribed from ScreenManager.OnPushScreen");
+        if (_screenPushHandler == null) return;
+        ScreenManager.OnPushScreen -= _screenPushHandler;
+        _screenPushHandler = null;
+        _logger.LogInfo("[SpecRes] OnGameOver - unsubscribed from ScreenManager.OnPushScreen");
     }
 
     public override void SyncData(IDataStore dataStore)
@@ -229,13 +227,14 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
 
         var balance = _service.GetCurrentAmount(hero.StringId, kingdomId, cultureId);
         // Only troops whose row carries a daily_upkeep count: a merchant-only row is not an upkeep
-        // troop and must neither desert nor trigger the warnings (#558 finding 5).
-        var hasUpkeepTroops = breakdown.UpkeepLines.Count > 0;
+        // troop and must neither desert nor trigger the warnings (#558 finding 5). A troop whose
+        // career-modified upkeep is zero is not in arrears either (#767).
+        var hasUpkeepDue = breakdown.HasUpkeepDue;
 
         // The daily line and the overdraft line show on the grace tick too: the deduction happened,
         // only the desertion below is deferred by one day, and a line that goes quiet on the tick the
         // player loads into would hide the one deduction they most want explained.
-        if (hasUpkeepTroops)
+        if (hasUpkeepDue)
         {
             var daily = SpecialResourceMessages.DailyUpkeep(resource.DisplayName, breakdown.Earning, breakdown.Upkeep, balance).ToString();
             InformationManager.DisplayMessage(breakdown.Net < 0f
@@ -257,7 +256,7 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         // SECOND daily tick (one in-game day later) applies desertion as normal.
         var inGracePeriod = _isFirstTickAfterLoad;
 
-        if (balance <= 0f && hasUpkeepTroops && !inGracePeriod)
+        if (balance <= 0f && hasUpkeepDue && !inGracePeriod)
         {
             // Desertion: remove troops from roster
             var desertions = _service.CalculateDesertion(hero.StringId, kingdomId, cultureId, troopUpkeep);
@@ -277,11 +276,11 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
                     extraTimeInMs: 3000);
             }
         }
-        else if (balance <= 0f && hasUpkeepTroops && inGracePeriod)
+        else if (balance <= 0f && hasUpkeepDue && inGracePeriod)
         {
             _logger.LogInfo($"[SpecRes] DailyTick: desertion grace active (first tick after load) — {breakdown.UpkeepLines.Count} upkeep troop types spared this tick");
         }
-        else if (balance > 0f && hasUpkeepTroops)
+        else if (balance > 0f && hasUpkeepDue)
         {
             // Warn only when heading into a deficit: the next daily tick (steady-state — same
             // towns/party as this tick) would push the balance to zero or below, which is exactly the
@@ -324,10 +323,19 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
             // (deep-review 2026-07-11 GAP#2 — otherwise "off = vanilla" breaks for this consumer).
             bool weightOn = TaomSettings.Instance?.EnableTroopWeight ?? true;
             var enemyCount = 0;
+            var beatAFieldParty = false;
             foreach (var p in enemySide.Parties)
+            {
                 enemyCount += weightOn
                     ? (int)System.Math.Ceiling(_troopWeight.CalculateWeightedMemberCount(p.Party))
                     : (p.Party?.NumberOfAllMembers ?? 0);
+                if (p.Party?.MobileParty is { IsMilitia: false, IsVillager: false } && p.HealthyManCountAtStart > 0)
+                    beatAFieldParty = true;
+            }
+
+            // A raid or extortion event pays only when a real field party was beaten in it (#770).
+            if (!SpecialResourceEarnPolicy.PaysBattleCredit(mapEvent.EventType, beatAFieldParty))
+                return;
 
             var playerCount = hero.PartyBelongedTo?.MemberRoster?.TotalManCount ?? 1;
             var ratio = (float)enemyCount / playerCount;
@@ -349,13 +357,18 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
     {
         if (side != BattleSideEnum.Attacker) return;
         if (component?.MapEvent == null || !component.MapEvent.IsPlayerMapEvent) return;
+        // RaidCompleted also reports the attacker as winner when only the militia was beaten (#770);
+        // per_raid is for the loot. The engine sets the village to Looted just before raising the event.
+        if (component.MapEventSettlement?.Village?.VillageState != Village.VillageStates.Looted) return;
+        if (!SpecialResourceEarnPolicy.IsPlayerVictory(component.MapEvent.PlayerSide, side)) return;
         if (!CanEarn()) return;
 
         var hero = Hero.MainHero;
         GetHeroIds(hero, out var kingdomId, out var cultureId);
 
+        var before = _service.GetCurrentAmount(hero.StringId, kingdomId, cultureId);
         _service.EarnFromRaid(hero.StringId, kingdomId, cultureId);
-        NotifyEarning(hero.StringId, kingdomId, cultureId, "raid");
+        NotifyEarning(hero.StringId, kingdomId, cultureId, "raid", before);
     }
 
     private void OnPrisonerTaken(FlattenedTroopRoster roster)
@@ -383,8 +396,9 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         if (!CanEarn()) return;
 
         GetHeroIds(Hero.MainHero, out var kingdomId, out var cultureId);
+        var before = _service.GetCurrentAmount(Hero.MainHero.StringId, kingdomId, cultureId);
         _service.EarnFromTournament(Hero.MainHero.StringId, kingdomId, cultureId);
-        NotifyEarning(Hero.MainHero.StringId, kingdomId, cultureId, "tournament");
+        NotifyEarning(Hero.MainHero.StringId, kingdomId, cultureId, "tournament", before);
     }
 
     // v1.4.3 added the 3rd param HideoutBattleEndState; we don't act on it (any attacker win
@@ -393,13 +407,20 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
     {
         if (winnerSide != BattleSideEnum.Attacker) return;
         if (component?.MapEvent == null || !component.MapEvent.IsPlayerMapEvent) return;
+        // A "send troops" clear raises this twice for one event (#790): first from its success menu,
+        // before the event is finalized, then from HideoutEventComponent.OnBeforeMapEventFinalize.
+        // MapEvent.FinalizeEventAux sets WaitingRemoval just before that second raise (v1.5.5), so
+        // paying only a finalized event pays once, and a save made in the success menu still pays
+        // once after load. Re-check this line order at an engine bump.
+        if (!component.MapEvent.IsFinalized) return;
         if (!CanEarn()) return;
 
         var hero = Hero.MainHero;
         GetHeroIds(hero, out var kingdomId, out var cultureId);
 
+        var before = _service.GetCurrentAmount(hero.StringId, kingdomId, cultureId);
         _service.EarnFromHideout(hero.StringId, kingdomId, cultureId);
-        NotifyEarning(hero.StringId, kingdomId, cultureId, "hideout");
+        NotifyEarning(hero.StringId, kingdomId, cultureId, "hideout", before);
     }
 
     // Charges the one-time recruit_cost for the recruited troop (no-op unless it carries one). Player-only
@@ -423,25 +444,14 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         }
     }
 
-    // Unified earning toast (round-4 O1 — was NotifyEarning + NotifyEarningDelta + an inline copy in
-    // OnMapEventEnded): resolves the hero's resource, then displays either the running total
-    // (before == null — sources whose earn call has no readable delta) or the positive delta earned
-    // across the earn call (before != null; non-positive deltas stay silent).
-    private void NotifyEarning(string heroId, string kingdomId, string cultureId, string source, float? before = null)
+    // Unified earning toast (round-4 O1): resolves the hero's resource, then displays the positive
+    // delta earned across the earn call; a zero or negative delta stays silent.
+    private void NotifyEarning(string heroId, string kingdomId, string cultureId, string source, float before)
     {
         var resource = _service.ResolveResource(kingdomId, cultureId);
         if (resource == null) return;
 
-        var amount = _service.GetCurrentAmount(heroId, kingdomId, cultureId);
-        if (before == null)
-        {
-            InformationManager.DisplayMessage(new InformationMessage(
-                $"{resource.DisplayName} earned from {source} (total: {amount:F0})",
-                Colors.Green));
-            return;
-        }
-
-        var earned = amount - before.Value;
+        var earned = _service.GetCurrentAmount(heroId, kingdomId, cultureId) - before;
         if (earned > 0f)
         {
             InformationManager.DisplayMessage(new InformationMessage(

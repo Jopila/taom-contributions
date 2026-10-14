@@ -37,11 +37,12 @@ public class CareerCreationHandler : ICareerCreationHandler
         }
 
         _dataService.SetCareer(heroStringId, careerStringId);
+        CareerTreeVersion.Stamp(_dataService, heroStringId, career);
 
         // Auto-select root choice
         if (!string.IsNullOrEmpty(career.RootChoiceId))
         {
-            var maxChoices = _registry.GetMaxChoicesForHero(1); // Level 1 at creation
+            var maxChoices = _registry.GetMaxChoicesForHero(career, 1); // Level 1 at creation
             _dataService.TryAddChoice(heroStringId, career.RootChoiceId, maxChoices);
         }
 

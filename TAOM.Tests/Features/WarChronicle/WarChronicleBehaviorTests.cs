@@ -13,6 +13,7 @@ using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarChronicle.Ledger;
 using TAOM.Features.WarChronicle.Rally;
 using TaleWorlds.CampaignSystem;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.WarChronicle;
 
@@ -30,6 +31,7 @@ public class WarChronicleBehaviorTests
     private WarEffectService _effects = null!;
     private WarBaselineService _baselines = null!;
     private RallyTierStore _tiers = null!;
+    private WarChronicleDailyGate _daily = null!;
     private WarChronicleStateService _state = null!;
     private IKingdomWarSnapshotAdapter _snapshots = null!;
     private ICoopSessionProvider _coop = null!;
@@ -47,10 +49,12 @@ public class WarChronicleBehaviorTests
         _effects = new WarEffectService(_settings, _logger);
         _baselines = new WarBaselineService();
         _tiers = new RallyTierStore();
-        _state = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore());
+        _daily = new WarChronicleDailyGate();
+        _state = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore(), _daily);
         _snapshots = Substitute.For<IKingdomWarSnapshotAdapter>();
         _snapshots.GetCampaignId().Returns("c1");
         _snapshots.GetNowHours().Returns(100d);
+        _snapshots.SetElapsedDay(0);
         _snapshots.GetKingdoms().Returns(new List<KingdomWarSnapshot>
         {
             new KingdomWarSnapshot { Id = "empire_w", CultureId = "gondor", Towns = 3, Castles = 1 },
@@ -66,7 +70,7 @@ public class WarChronicleBehaviorTests
         var effectService = effects ?? _effects;
         var wotr = Substitute.For<IWarOfTheRingService>();
         var ledger = new WarLedgerService(_snapshots, _baselines, _tiers, effectService, wotr, Substitute.For<IAlignmentService>(), _logger);
-        var tick = new WarChronicleTickService(_snapshots, effectService, _baselines, ledger, NoEscapes(effectService), QuietRally(effectService, _baselines, _tiers, ledger), _logger);
+        var tick = new WarChronicleTickService(_snapshots, effectService, _baselines, ledger, NoEscapes(effectService), QuietRally(effectService, _baselines, _tiers, ledger), _logger, _daily);
         return new WarChronicleBehavior(tick, _state, ledger, _coop, _logger);
     }
 
@@ -91,19 +95,21 @@ public class WarChronicleBehaviorTests
         _effects.Apply(Effect());
         _baselines.EnsureBaselines(new[] { new KingdomWarSnapshot { Id = "empire_w", Towns = 3 } });
         _tiers.Restore(new Dictionary<string, int> { ["empire_w"] = 2 });
+        _daily.TryClaim(WarChronicleDailyGate.TickLane, 40d);
 
         NewBehavior();
 
         Assert.AreEqual(0, _effects.Snapshot().Count);
         Assert.IsNull(_baselines.GetBaseline("empire_w"));
         Assert.AreEqual(0, _tiers.GetTier("empire_w"));
+        Assert.IsTrue(_daily.TryClaim(WarChronicleDailyGate.TickLane, 12d), "a new campaign forgets the last day run");
     }
 
     [TestMethod]
     public void SyncData_Saving_WritesTheCountAndOneKeyPerChunk()
     {
         _effects.Apply(Effect());
-        var store = new FakeDataStore { Loading = false };
+        var store = new EngineDataStore { Loading = false };
 
         _sut.SyncData(store);
 
@@ -117,16 +123,17 @@ public class WarChronicleBehaviorTests
     {
         _effects.Apply(Effect());
         _baselines.EnsureBaselines(new[] { new KingdomWarSnapshot { Id = "empire_w", Towns = 3, Castles = 1 } });
-        var store = new FakeDataStore { Loading = false };
+        var store = new EngineDataStore { Loading = false };
         _sut.SyncData(store);
 
         var effects2 = new WarEffectService(_settings, _logger);
         var baselines2 = new WarBaselineService();
-        var state2 = new WarChronicleStateService(effects2, baselines2, new RallyTierStore(), _logger, new ChronicleStateStore());
+        var daily2 = new WarChronicleDailyGate();
+        var state2 = new WarChronicleStateService(effects2, baselines2, new RallyTierStore(), _logger, new ChronicleStateStore(), daily2);
         var ledger2 = new WarLedgerService(_snapshots, baselines2, new RallyTierStore(), effects2, Substitute.For<IWarOfTheRingService>(),
             Substitute.For<IAlignmentService>(), _logger);
         var loaded = new WarChronicleBehavior(
-            new WarChronicleTickService(_snapshots, effects2, baselines2, ledger2, NoEscapes(effects2), QuietRally(effects2, baselines2, new RallyTierStore(), ledger2), _logger), state2, ledger2, _coop, _logger);
+            new WarChronicleTickService(_snapshots, effects2, baselines2, ledger2, NoEscapes(effects2), QuietRally(effects2, baselines2, new RallyTierStore(), ledger2), _logger, daily2), state2, ledger2, _coop, _logger);
         store.Loading = true;
 
         loaded.SyncData(store);
@@ -140,8 +147,8 @@ public class WarChronicleBehaviorTests
     [DataRow(5000)]
     public void SyncData_LoadingAnAbsurdChunkCount_IsTreatedAsNoPayload(int count)
     {
-        var store = new FakeDataStore { Loading = true };
-        store.Put("_taom_war_chronicle_v1_count", count);
+        var store = new EngineDataStore { Loading = true };
+        store.Seed("_taom_war_chronicle_v1_count", count);
 
         _sut.SyncData(store);
 
@@ -181,7 +188,7 @@ public class WarChronicleBehaviorTests
     [TestMethod]
     public void HandleKingdomDestroyed_Authority_WritesTheDestroyedLine()
     {
-        _snapshots.GetElapsedDay().Returns(70);
+        _snapshots.SetElapsedDay(70);
 
         _sut.HandleKingdomDestroyed("vlandia");
 
@@ -198,42 +205,41 @@ public class WarChronicleBehaviorTests
         Assert.AreEqual(0, _logged.Count);
     }
 
+    [TestMethod]
+    public void HandleGameLoaded_Authority_WritesTheLoadMarker()
+    {
+        _snapshots.SetElapsedDay(41);
+
+        _sut.HandleGameLoaded();
+
+        CollectionAssert.AreEqual(new[] { "[WarLedger] v=1 t=load cid=c1 day=41" }, _logged);
+    }
+
+    [TestMethod]
+    public void HandleGameLoaded_AnInvalidClock_WritesNoLoadMarker()
+    {
+        _snapshots.SetClockInvalid();
+
+        _sut.HandleGameLoaded();
+
+        Assert.AreEqual(0, _logged.Count);
+    }
+
+    [TestMethod]
+    public void HandleGameLoaded_NotAuthority_WritesNothing()
+    {
+        _coop.IsAuthority.Returns(false);
+
+        _sut.HandleGameLoaded();
+
+        Assert.AreEqual(0, _logged.Count);
+    }
+
     private WarChronicleBehavior NewBehaviorWith(IWarEffectService effects)
     {
         var ledger = new WarLedgerService(_snapshots, _baselines, _tiers, effects, Substitute.For<IWarOfTheRingService>(),
             Substitute.For<IAlignmentService>(), _logger);
-        var tick = new WarChronicleTickService(_snapshots, effects, _baselines, ledger, NoEscapes(effects), QuietRally(effects, _baselines, _tiers, ledger), _logger);
+        var tick = new WarChronicleTickService(_snapshots, effects, _baselines, ledger, NoEscapes(effects), QuietRally(effects, _baselines, _tiers, ledger), _logger, _daily);
         return new WarChronicleBehavior(tick, _state, ledger, _coop, _logger);
-    }
-
-    private sealed class FakeDataStore : IDataStore
-    {
-        private readonly Dictionary<string, object?> _data = new Dictionary<string, object?>();
-
-        public bool Loading { get; set; }
-
-        public bool IsSaving => !Loading;
-
-        public bool IsLoading => Loading;
-
-        public bool Has(string key) => _data.ContainsKey(key);
-
-        public T Get<T>(string key) => (T)_data[key]!;
-
-        public void Put(string key, object value) => _data[key] = value;
-
-        public bool SyncData<T>(string key, ref T data)
-        {
-            if (Loading)
-            {
-                if (!_data.TryGetValue(key, out var stored))
-                    return false;
-                data = (T)stored!;
-                return true;
-            }
-
-            _data[key] = data;
-            return true;
-        }
     }
 }

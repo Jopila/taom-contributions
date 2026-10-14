@@ -20,7 +20,7 @@ claim and the fix.
 |---|---|---|---|---|---|
 | C01 | MEDIUM | An Active siege window closed Held at its close day while an attacker still besieged the target; a capture a few days later was ignored and the Held children (ents, gondor, blackgate) still fired. | State machine gap | The close was written as a pure date test; no test put a live besieger past the close day. | The close defers while an attacker besieges, capped at one more `windowDays`. Tests: deferred, third party does not defer, capped. |
 | C02 | LOW | `ChangeKingdomAction` join, defection and rebellion leave change `clan.Kingdom` without `OnSettlementOwnerChangedEvent`, so an open window noticed a new owner only at its close. | Event-only detection | The design leaned on one engine event as the owner signal. | The daily step re-checks the owner of every Active window; the event stays as the fast path. |
-| C03 | LOW | Days were fractional (`ElapsedDaysUntilNow`), so a daily handler running just after midnight carried its overshoot into `CloseDay`. | Unit drift | The ledger floors the same clock; the chronicle did not. | Whole campaign days, the same floor as the ledger. |
+| C03 | LOW | Days were fractional (`ElapsedDaysUntilNow`), so a daily handler running just after the elapsed-day boundary carried its overshoot into `CloseDay`. | Unit drift | The ledger floors the same clock; the chronicle did not. | Whole campaign days, the same floor as the ledger. |
 | C04 | LOW | Phase-anchored events opened on the live configured phase day, so switching the War of the Ring on late or lowering a phase day fired every overdue event at once. | Config read at the wrong time | The anchor was derived from a setting, not from when the phase began. | Maintainer decision, see "Decisions". |
 | C05 | LOW | Two Lapsed causes shared one text; all seven shipped texts say no attack came, which is false when a third party took the town. | Wrong player text | The text was chosen per event, not per cause. | New generic line `taom_wc_siege_lost` for a town that changes hands. |
 | C06 | LOW | The queue's own `_showing` latch relied on a close callback that a hidden popup never runs, so the queue could stall. | Duplicated state | The latch re-implemented `IsAnyInquiryActive`. | The latch is gone; the queue asks the engine. |
@@ -113,12 +113,15 @@ written from intent. The fix is mechanical (recount, reread the test), the gate 
 - C52: the ledger analyzer's capital verdict reports PASS for a campaign with no kingdom lines (a chronicle-only
   log from an old save loaded and closed). Needs a "no kingdom lines" UNKNOWN.
 - C53: `RepoPaths.StripComments` over all `Main` files in three wiring tests; same one-place fix as Batch A's
-  B31 and B44, cost never timed.
+  B31 and B44, cost never timed. Done by the tests branch (#792).
 - C54: Bree (`town_AN3`) and every Arthedain town exist only in the live `TAOM_Map`; the packaged TAOM_Map in
-  the releases folders has none, so `north` is Skipped at session launch until the next package.
+  the releases folders has none, so `north` is Skipped at session launch until the next package. Done
+  2026-10-14 as a release check: `docs/reference/release-process.md` says the next release must ship a
+  TAOM_Map package with `town_AN1` to `town_AN3`, and `/release` points to it.
 - C55: issue #765 still names Dale and Fornost as siege targets; the data targets Eldby (`town_S3`) and Bree.
 - C56: `check_external_loc_coverage.py` fails on live-install drift (+38 TAOM_Map rows and +5 Armory rows per
-  language, from 2026-10-07 edits), not on this diff.
+  language, from 2026-10-07 edits), not on this diff. Done 2026-10-14: the TAOM_Map coverage baseline was
+  re-taken for the new place names.
 - Context, not this work: the installed game moved to v1.5.5 on 2026-10-09 while the target stays v1.5.4, and
   9 data tests fail on trunk from `08b30bfc4`.
 

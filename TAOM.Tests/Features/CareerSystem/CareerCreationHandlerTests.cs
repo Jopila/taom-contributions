@@ -32,7 +32,7 @@ public class CareerCreationHandlerTests
             eligibleCultureIds: new List<string> { "mordor" },
             choiceGroupIds: new List<string>()));
 
-        _registry.GetMaxChoicesForHero(1).Returns(2);
+        _registry.GetMaxChoicesForHero(Arg.Any<CareerDefinition>(), 1).Returns(2);
     }
 
     [TestMethod]
@@ -66,5 +66,36 @@ public class CareerCreationHandlerTests
     {
         _handler.OnCareerSelected(null, "warboss");
         Assert.AreEqual(0, _dataService.GetAllData().Count);
+    }
+
+    // ── #769 E12: the tree-version stamp ──
+
+    private void RegisterCareer(string id, int treeVersion)
+    {
+        _registry.GetCareer(id).Returns(new CareerDefinition(
+            id: id, displayName: id, description: "", portraitSprite: "",
+            abilityTemplateId: "rally", minClanTier: 0, rootChoiceId: id + "_root",
+            eligibleCultureIds: new List<string> { "mordor" },
+            choiceGroupIds: new List<string>(), treeVersion: treeVersion));
+    }
+
+    [TestMethod]
+    public void OnCareerSelected_VersionTwoCareer_StampsTheTreeVersion()
+    {
+        RegisterCareer("redesigned", treeVersion: 2);
+
+        _handler.OnCareerSelected("hero1", "redesigned");
+
+        Assert.IsTrue(_dataService.HasFlag("hero1", CareerTreeVersion.FlagFor(2)));
+    }
+
+    [TestMethod]
+    public void OnCareerSelected_VersionOneCareer_StampsNothing()
+    {
+        RegisterCareer("classic", treeVersion: 1);
+
+        _handler.OnCareerSelected("hero1", "classic");
+
+        Assert.AreEqual(0, _dataService.GetOrCreateData("hero1").Flags.Count);
     }
 }

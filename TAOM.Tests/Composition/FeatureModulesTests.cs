@@ -142,7 +142,7 @@ public class FeatureModulesTests
         var readers = Directory.GetFiles(mainDir, "*.cs", SearchOption.AllDirectories)
             .Select(f => f.Substring(mainDir.Length + 1).Replace('\\', '/'))
             .Where(rel => !rel.StartsWith("obj/", StringComparison.Ordinal) && !rel.StartsWith("bin/", StringComparison.Ordinal))
-            .Where(rel => RepoPaths.StripComments(File.ReadAllText(Path.Combine(mainDir, rel))).Contains("IoC.Resolver"))
+            .Where(rel => RepoPaths.MentionsOutsideComments(Path.Combine(mainDir, rel), "IoC.Resolver"))
             .ToList();
 
         CollectionAssert.AreEquivalent(new[] { "Composition/FeatureModuleHooks.cs" }, readers,
