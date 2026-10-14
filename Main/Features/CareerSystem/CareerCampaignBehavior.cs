@@ -75,6 +75,15 @@ public class CareerCampaignBehavior : CampaignBehaviorBase
                     .SetTextVariable("COUNT", pruned).ToString()));
         }
 
+        // A redesigned career tree refunds the hero's choices once (#769 E12). After the repair pass
+        // so it judges a clean list, before the cache refresh so the passives reflect the refund.
+        if (_lifecycle.MigrateTreeVersion(hero.StringId) > 0)
+        {
+            _logger.LogInfo($"CareerSystem: Refunded {hero.Name}'s career choices for a redesigned career tree");
+            InformationManager.DisplayMessage(new InformationMessage(
+                new TextObject("{=taom_career_tree_reset}Your career was redesigned, so your career choices were refunded.").ToString()));
+        }
+
         _logger.LogInfo("CareerSystem: Refreshing passive cache after session launch");
         _passiveService.RefreshCache(_dataService, _registry);
 
@@ -112,7 +121,8 @@ public class CareerCampaignBehavior : CampaignBehaviorBase
             return;
         }
 
-        var unspent = _registry.GetUnspentPoints(hero.Level, _dataService.GetChoiceCount(hero.StringId));
+        var career = _registry.GetCareer(_dataService.GetCareerStringId(hero.StringId));
+        var unspent = _registry.GetUnspentPoints(career, hero.Level, _dataService.GetChoiceCount(hero.StringId));
         if (unspent > 0)
             _logger.LogInfo($"CareerSystem: {hero.Name} leveled up — {unspent} career choice(s) available");
     }

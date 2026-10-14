@@ -30,6 +30,18 @@ public sealed class CareerDefinition
     /// </summary>
     public string KeystoneIcon { get; }
 
+    /// <summary>
+    /// #769 E6 — the hero levels at which this career grants a career point, strictly ascending
+    /// (the root choice is free on top). Empty = the legacy formula of one point per level.
+    /// </summary>
+    public IReadOnlyList<int> PointLevels { get; }
+
+    /// <summary>
+    /// #769 E12 — the revision of this career's choice tree. 1 = the original tree. A redesigned
+    /// tree ships a higher number; a hero stamped with a lower one is refunded once on load.
+    /// </summary>
+    public int TreeVersion { get; }
+
     public CareerDefinition(
         string id,
         string displayName,
@@ -43,7 +55,9 @@ public sealed class CareerDefinition
         string rank1Name = "",
         string rank2Name = "",
         string rank3Name = "",
-        string keystoneIcon = "")
+        string keystoneIcon = "",
+        IReadOnlyList<int> pointLevels = null,
+        int treeVersion = 1)
     {
         Id = id;
         DisplayName = displayName;
@@ -58,5 +72,7 @@ public sealed class CareerDefinition
         Rank2Name = rank2Name ?? "";
         Rank3Name = rank3Name ?? "";
         KeystoneIcon = keystoneIcon ?? "";
+        PointLevels = pointLevels ?? new List<int>();
+        TreeVersion = treeVersion;
     }
 }

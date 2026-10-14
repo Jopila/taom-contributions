@@ -17,7 +17,11 @@ public class CareerConfigProvider : ICareerConfigProvider
     private List<CareerDefinition> _careers;
     private List<CareerChoiceGroupDefinition> _groups;
     private List<CareerChoiceDefinition> _choices;
+    private const int DefaultRetrainGoldBase = 1000;
+    private const int DefaultRetrainGoldPerLevel = 250;
     private int _maxPerkPoints = 30;
+    private int _retrainGoldBase = DefaultRetrainGoldBase;
+    private int _retrainGoldPerLevel = DefaultRetrainGoldPerLevel;
     private Dictionary<string, AbilityTemplateData> _abilityTemplates;
     private AbilityTuningConfig _abilityTuning;
 
@@ -49,6 +53,18 @@ public class CareerConfigProvider : ICareerConfigProvider
     {
         EnsureLoaded();
         return _maxPerkPoints;
+    }
+
+    public int GetRetrainGoldBase()
+    {
+        EnsureLoaded();
+        return _retrainGoldBase;
+    }
+
+    public int GetRetrainGoldPerLevel()
+    {
+        EnsureLoaded();
+        return _retrainGoldPerLevel;
     }
 
     public AbilityTemplateData GetAbilityTemplate(string templateId)
@@ -103,6 +119,8 @@ public class CareerConfigProvider : ICareerConfigProvider
             if (root == null) return;
 
             _maxPerkPoints = ParseInt(root, "max_perk_points", 30);
+            _retrainGoldBase = ParseIntAtLeast(root, "retrain_gold_base", 0, DefaultRetrainGoldBase, "the career root");
+            _retrainGoldPerLevel = ParseIntAtLeast(root, "retrain_gold_per_level", 0, DefaultRetrainGoldPerLevel, "the career root");
 
             foreach (var el in root.Elements("Career"))
             {
@@ -145,7 +163,9 @@ public class CareerConfigProvider : ICareerConfigProvider
                         rank1Name: el.Attribute("rank1_name")?.Value ?? "",
                         rank2Name: el.Attribute("rank2_name")?.Value ?? "",
                         rank3Name: el.Attribute("rank3_name")?.Value ?? "",
-                        keystoneIcon: el.Attribute("keystone_icon")?.Value ?? "");
+                        keystoneIcon: el.Attribute("keystone_icon")?.Value ?? "",
+                        pointLevels: ParsePointLevels(el),
+                        treeVersion: ParseIntAtLeast(el, "tree_version", 1, 1, $"career '{el.Attribute("id")?.Value}'"));
 
                     // Issue #380 — no fallback glyph by design (the reference module's culture
                     // fallback regressed Rivendell to its clan-sigil ring). Missing attr =
@@ -216,7 +236,8 @@ public class CareerConfigProvider : ICareerConfigProvider
                         careerId: groupEl.Attribute("career_id")?.Value ?? "",
                         tier: ParseInt(groupEl, "tier", 1),
                         choiceIds: choiceIds,
-                        displayName: groupEl.Attribute("display_name")?.Value ?? "");
+                        displayName: groupEl.Attribute("display_name")?.Value ?? "",
+                        maxPicks: ParseIntAtLeast(groupEl, "max_picks", 0, 0, $"group '{groupId}'"));
 
                     _groups.Add(group);
                 }
@@ -502,6 +523,42 @@ public class CareerConfigProvider : ICareerConfigProvider
         }
 
         return new GlobalTuning(seconds, minSeconds, minReportable);
+    }
+
+    // #769 E5, E7 and E12: an optional whole-number attribute. A bad value must not silently turn a
+    // fork into an unlimited group, a price free or absurd, or a redesigned tree into the old one,
+    // so it warns, naming the owner and the attribute, and takes the default.
+    private int ParseIntAtLeast(XElement el, string attrName, int min, int defaultValue, string owner)
+    {
+        var raw = el.Attribute(attrName)?.Value;
+        if (raw == null) return defaultValue;
+        if (int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value >= min)
+            return value;
+
+        _logger.LogWarning($"CareerConfig: {owner} has invalid {attrName} '{raw}'; expected a whole number of {min} or more, using {defaultValue}");
+        return defaultValue;
+    }
+
+    // #769 E6: absent = empty (the legacy one-point-per-level formula). Every token must be a
+    // positive integer and the list strictly ascending, otherwise the whole attribute is dropped.
+    private IReadOnlyList<int> ParsePointLevels(XElement careerEl)
+    {
+        var raw = careerEl.Attribute("point_levels")?.Value;
+        var levels = new List<int>();
+        if (raw == null) return levels;
+
+        foreach (var token in raw.Split(','))
+        {
+            if (!int.TryParse(token.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var level)
+                || level <= 0
+                || (levels.Count > 0 && level <= levels[levels.Count - 1]))
+            {
+                _logger.LogWarning($"CareerConfig: career '{careerEl.Attribute("id")?.Value}' has invalid point_levels '{raw}'; expected strictly ascending positive integers, using the one-point-per-level formula");
+                return new List<int>();
+            }
+            levels.Add(level);
+        }
+        return levels;
     }
 
     private static int ParseInt(XElement el, string attrName, int defaultValue)

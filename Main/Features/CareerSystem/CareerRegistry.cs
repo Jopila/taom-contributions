@@ -19,6 +19,8 @@ public class CareerRegistry : ICareerRegistry
     private Dictionary<string, string> _careerIdByRootChoiceId;
     private HashSet<string> _ambiguousChoiceIds;
     private int _maxPerkPoints;
+    private int _retrainGoldBase;
+    private int _retrainGoldPerLevel;
 
     private static readonly IReadOnlyList<CareerChoiceDefinition> EmptyChoices = new List<CareerChoiceDefinition>();
 
@@ -126,17 +128,49 @@ public class CareerRegistry : ICareerRegistry
         return true;
     }
 
-    public int GetMaxChoicesForHero(int heroLevel)
+    public int GetMaxChoicesForHero(CareerDefinition career, int heroLevel)
     {
         EnsureLoaded();
+        var effectiveLevel = Math.Max(1, heroLevel);
+
+        // #769 E6: a career with point_levels grants a point at each listed level, plus the root.
+        if (career?.PointLevels.Count > 0)
+        {
+            var points = 0;
+            foreach (var level in career.PointLevels)
+            {
+                if (level <= effectiveLevel) points++;
+            }
+            return 1 + points;
+        }
+
         // Budget: 1 root (auto-added at CC) + N free points for level N
         // Hero starts at level 1 with 1 free point, gains 1 per level.
-        var effectiveLevel = Math.Max(1, heroLevel);
         return Math.Min(effectiveLevel + 1, _maxPerkPoints + 1);
     }
 
-    public int GetUnspentPoints(int heroLevel, int takenChoiceCount)
-        => Math.Max(0, GetMaxChoicesForHero(heroLevel) - takenChoiceCount);
+    public int GetUnspentPoints(CareerDefinition career, int heroLevel, int takenChoiceCount)
+        => Math.Max(0, GetMaxChoicesForHero(career, heroLevel) - takenChoiceCount);
+
+    public int GetRetrainCost(int heroLevel)
+    {
+        EnsureLoaded();
+        // long, then clamped: a huge configured price must not wrap negative, because the switch and
+        // retrain paths read a cost at or below zero as free.
+        var cost = (long)_retrainGoldBase + (long)_retrainGoldPerLevel * Math.Max(1, heroLevel);
+        return (int)Math.Min(cost, int.MaxValue);
+    }
+
+    public int? GetNextPointLevel(CareerDefinition career, int heroLevel)
+    {
+        if (career == null) return null;
+        var effectiveLevel = Math.Max(1, heroLevel);
+        foreach (var level in career.PointLevels)
+        {
+            if (level > effectiveLevel) return level;
+        }
+        return null;
+    }
 
     public bool IsTierAvailable(int heroLevel, int tier)
     {
@@ -200,6 +234,8 @@ public class CareerRegistry : ICareerRegistry
         var ambiguousRootIds = new HashSet<string>();
 
         _maxPerkPoints = _configProvider.GetMaxPerkPoints();
+        _retrainGoldBase = _configProvider.GetRetrainGoldBase();
+        _retrainGoldPerLevel = _configProvider.GetRetrainGoldPerLevel();
 
         var careers = _configProvider.LoadCareers();
         _allCareers = new List<CareerDefinition>(careers);

@@ -4,6 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
+using TAOM.Core.Infrastructure;
+using TAOM.Core.Logging;
+using TAOM.Features.CareerSystem;
 
 namespace TAOM.Tests.Features.CareerSystem;
 
@@ -228,5 +232,60 @@ public class CareerChoiceIntegrityTests
         if (!index.TryGetValue(id!, out var set))
             index[id!] = set = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         set.Add(careerId);
+    }
+
+    // ── #769 shipped-data invariants, read through the real provider ──
+    // Vacuously true until a career ships a fork or point levels; that is intended. They fire the
+    // day content starts using the new schema without the rest of it.
+
+    private static CareerConfigProvider RealProvider()
+    {
+        var pathService = Substitute.For<IPathService>();
+        pathService.ModuleDataPath.Returns(ModuleDataPath);
+        return new CareerConfigProvider(pathService, Substitute.For<IModLogger>());
+    }
+
+    [TestMethod]
+    public void EveryCareerWithAForkGroupOrPointLevels_IsTreeVersionTwoOrHigher()
+    {
+        // A fork or paced career on tree version 1 never migrates: StoredVersion reads 1 for every
+        // hero, so a save built on the old tree keeps picks the new rules would refuse.
+        var provider = RealProvider();
+        var groups = provider.LoadChoiceGroups().ToDictionary(g => g.Id, StringComparer.OrdinalIgnoreCase);
+
+        var offenders = new List<string>();
+        foreach (var career in provider.LoadCareers())
+        {
+            var hasFork = career.ChoiceGroupIds.Any(id => groups.TryGetValue(id, out var g) && g.MaxPicks > 0);
+            if ((hasFork || career.PointLevels.Count > 0) && career.TreeVersion < 2)
+                offenders.Add($"{career.Id} (treeVersion {career.TreeVersion})");
+        }
+
+        Assert.AreEqual(0, offenders.Count,
+            "Careers with a fork group (max_picks > 0) or point_levels must declare tree_version >= 2: "
+            + string.Join(", ", offenders));
+    }
+
+    [TestMethod]
+    public void NoCareer_MixesForkGroupsWithUnlimitedGroups()
+    {
+        // The refund rule treats a fork pick as locked in on later visits and an unlimited pick as
+        // free at any time; one career holding both has two refund rules in one tree.
+        var provider = RealProvider();
+        var groups = provider.LoadChoiceGroups().ToDictionary(g => g.Id, StringComparer.OrdinalIgnoreCase);
+
+        var offenders = new List<string>();
+        foreach (var career in provider.LoadCareers())
+        {
+            var resolved = career.ChoiceGroupIds
+                .Select(id => groups.TryGetValue(id, out var g) ? g : null)
+                .Where(g => g != null)
+                .ToList();
+            if (resolved.Any(g => g!.MaxPicks > 0) && resolved.Any(g => g!.MaxPicks == 0))
+                offenders.Add(career.Id);
+        }
+
+        Assert.AreEqual(0, offenders.Count,
+            "Careers mixing fork groups (max_picks > 0) with unlimited groups: " + string.Join(", ", offenders));
     }
 }

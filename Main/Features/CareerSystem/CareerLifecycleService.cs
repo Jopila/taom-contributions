@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using TAOM.Adapters;
 using TAOM.Core.Logging;
+using TAOM.Features.CareerSystem.Domain;
 
 namespace TAOM.Features.CareerSystem;
 
@@ -9,17 +11,23 @@ public class CareerLifecycleService : ICareerLifecycleService
     private readonly ICareerDataService _dataService;
     private readonly ICareerRegistry _registry;
     private readonly ICareerCreationHandler _creationHandler;
+    private readonly ICareerPassiveService _passiveService;
+    private readonly ICareerPurseAdapter _purse;
     private readonly IModLogger _logger;
 
     public CareerLifecycleService(
         ICareerDataService dataService,
         ICareerRegistry registry,
         ICareerCreationHandler creationHandler,
+        ICareerPassiveService passiveService,
+        ICareerPurseAdapter purse,
         IModLogger logger)
     {
         _dataService = dataService;
         _registry = registry;
         _creationHandler = creationHandler;
+        _passiveService = passiveService;
+        _purse = purse;
         _logger = logger;
     }
 
@@ -82,5 +90,82 @@ public class CareerLifecycleService : ICareerLifecycleService
         foreach (var choiceId in foreign)
             _dataService.RemoveChoice(heroStringId, choiceId);
         return foreign.Count;
+    }
+
+    // internal for TAOM.Tests (InternalsVisibleTo): only TryRetrain and MigrateTreeVersion refund.
+    internal int RefundAll(string heroStringId)
+    {
+        var careerId = _dataService.GetCareerStringId(heroStringId);
+        if (string.IsNullOrEmpty(careerId)) return 0;
+
+        var career = _registry.GetCareer(careerId);
+        if (career == null) return 0;
+
+        // Choices only. ClearCareer would also wipe the quest tier unlocks and the flags.
+        var removed = 0;
+        foreach (var choiceId in new List<string>(_dataService.GetChoiceIds(heroStringId)))
+        {
+            if (choiceId == career.RootChoiceId) continue;
+            _dataService.RemoveChoice(heroStringId, choiceId);
+            removed++;
+        }
+
+        if (!string.IsNullOrEmpty(career.RootChoiceId))
+            _dataService.TryAddChoice(heroStringId, career.RootChoiceId, int.MaxValue);
+
+        return removed;
+    }
+
+    public CareerRetrainResult TryRetrain(string heroStringId, int heroLevel)
+    {
+        var careerId = _dataService.GetCareerStringId(heroStringId);
+        var career = string.IsNullOrEmpty(careerId) ? null : _registry.GetCareer(careerId);
+        if (career == null) return CareerRetrainResult.NoCareer;
+
+        if (!CareerChoiceRules.HoldsForkPick(career, _registry, _dataService.GetOrCreateData(heroStringId)))
+            return CareerRetrainResult.NothingToRetrain;
+
+        var cost = _registry.GetRetrainCost(heroLevel);
+        if (!_purse.ChargeGold(cost))
+            return CareerRetrainResult.NotEnoughGold;
+
+        var removed = RefundAll(heroStringId);
+        _passiveService.RefreshCache(_dataService, _registry);
+        _logger.LogInfo($"CareerSystem: Retrained '{heroStringId}' ({careerId}) for {cost} gold, refunded {removed} choice(s)");
+        return CareerRetrainResult.Done;
+    }
+
+    public int MigrateTreeVersion(string heroStringId)
+    {
+        var careerId = _dataService.GetCareerStringId(heroStringId);
+        if (string.IsNullOrEmpty(careerId)) return 0;
+
+        var career = _registry.GetCareer(careerId);
+        if (career == null || career.TreeVersion <= 1) return 0;
+        if (CareerTreeVersion.StoredVersion(_dataService.GetOrCreateData(heroStringId)) >= career.TreeVersion)
+            return 0;
+
+        if (!TreeLoaded(career))
+        {
+            _logger.LogWarning($"CareerSystem: career '{careerId}' is tree version {career.TreeVersion} but its groups did not load as expected; keeping '{heroStringId}' choices and setting no version flag");
+            return 0;
+        }
+
+        var removed = RefundAll(heroStringId);
+        CareerTreeVersion.Stamp(_dataService, heroStringId, career);
+        _logger.LogInfo($"CareerSystem: '{careerId}' moved to tree version {career.TreeVersion}; refunded {removed} choice(s) for '{heroStringId}'");
+        return removed;
+    }
+
+    private bool TreeLoaded(CareerDefinition career)
+    {
+        if (career.ChoiceGroupIds.Count == 0) return false;
+
+        foreach (var groupId in career.ChoiceGroupIds)
+        {
+            if (_registry.GetGroup(groupId) == null) return false;
+            if (_registry.GetChoicesForGroup(groupId).Count == 0) return false;
+        }
+        return true;
     }
 }

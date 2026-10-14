@@ -21,9 +21,12 @@ public static class CareerSystemIoC
         container.Register<ICareerPassiveService, CareerPassiveService>(Reuse.Singleton);
         container.Register<IMutationCalculatorRegistry, MutationCalculatorRegistry>(Reuse.Singleton);
 
+        // The player's purse, for the paid retrain and the fork-holding career switch (#769 E7).
+        container.Register<ICareerPurseAdapter, CareerPurseAdapter>(Reuse.Singleton);
+
         // Phase 3: Campaign integration
         container.Register<ICareerCreationHandler, CareerCreationHandler>(Reuse.Singleton);
-        container.Register<ICareerSwitchService, CareerSwitchService>(Reuse.Singleton);
+        container.Register<CareerSwitchService>(Reuse.Singleton);
         container.Register<ICareerLifecycleService, CareerLifecycleService>(Reuse.Singleton);
 
         // Phase 4: Abilities and mutations

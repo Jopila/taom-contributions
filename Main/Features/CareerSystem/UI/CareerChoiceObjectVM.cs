@@ -11,6 +11,8 @@ public class CareerChoiceObjectVM : ViewModel
     private readonly Func<string, bool> _selectChoice;
     private readonly Func<string, bool> _deselectChoice;
     private readonly string _keystoneIconSprite;
+    private readonly ChoiceLockReason _lockReason;
+    private readonly string _lockReasonText;
     private bool _isTaken;
     private bool _isFreeToTake;
 
@@ -20,7 +22,9 @@ public class CareerChoiceObjectVM : ViewModel
         bool isFreeToTake,
         Func<string, bool> selectChoice = null,
         Func<string, bool> deselectChoice = null,
-        string keystoneIconSprite = "")
+        string keystoneIconSprite = "",
+        ChoiceLockReason lockReason = ChoiceLockReason.None,
+        int tierUnlockLevel = 0)
     {
         _choice = choice;
         _isTaken = isTaken;
@@ -28,6 +32,30 @@ public class CareerChoiceObjectVM : ViewModel
         _selectChoice = selectChoice;
         _deselectChoice = deselectChoice;
         _keystoneIconSprite = keystoneIconSprite ?? "";
+        _lockReason = lockReason;
+        _lockReasonText = BuildLockReasonText(lockReason, tierUnlockLevel);
+    }
+
+    // #769: why the diamond is shut. None and the not-a-lock reasons (a taken choice, a choice
+    // from outside the career) show nothing.
+    private static string BuildLockReasonText(ChoiceLockReason reason, int tierUnlockLevel)
+    {
+        switch (reason)
+        {
+            case ChoiceLockReason.TierLocked:
+                return new TextObject("{=taom_career_tier_requirement}Requires Level {LEVEL}")
+                    .SetTextVariable("LEVEL", tierUnlockLevel).ToString();
+            case ChoiceLockReason.ForkFull:
+                return new TextObject("{=taom_career_lock_fork}You took another choice on this path.").ToString();
+            case ChoiceLockReason.KeystoneLocked:
+                return new TextObject("{=taom_career_lock_keystone}You took another keystone in this tier.").ToString();
+            case ChoiceLockReason.NoPoints:
+                return new TextObject("{=taom_career_lock_points}No free career points.").ToString();
+            case ChoiceLockReason.LockedIn:
+                return new TextObject("{=taom_career_lock_locked_in}Locked in. Retrain to change this choice.").ToString();
+            default:
+                return string.Empty;
+        }
     }
 
     public void SelectChoice()
@@ -46,8 +74,9 @@ public class CareerChoiceObjectVM : ViewModel
     /// Issue #388 — the diamond is the whole click target, so one command has to serve both
     /// directions: take an untaken choice, refund a taken one. (The old screen had a separate
     /// +/- button column per group; the diamond grid has no room for it and image-3 parity
-    /// has none.) Both halves already gate themselves — TrySelectChoice enforces free points,
-    /// tier locks and keystone exclusivity; TryDeselectChoice no-ops on an untaken id.
+    /// has none.) Both halves already gate themselves by asking CareerChoiceRules: TrySelectChoice
+    /// enforces free points, tier locks, fork limits and keystone exclusivity; TryDeselectChoice
+    /// no-ops on an untaken id and refuses a fork pick taken on an earlier visit.
     /// </summary>
     public void ExecuteToggleChoice()
     {
@@ -109,10 +138,22 @@ public class CareerChoiceObjectVM : ViewModel
         : string.Empty;
 
     // Empty/locked pip state: shown dim when a slot is neither taken nor currently takeable.
-    // The prefab renders three tinted copies of the point-pip gated on IsTaken / IsFreeToTake /
-    // IsUnavailable so every slot always shows a pip (gold / brown / dim) instead of a blank gap.
+    // The prefab renders tinted copies of the diamond gated on IsTaken / IsFreeToTake /
+    // IsUnavailable, plus the IsForkLocked ring over the dim one, so every slot always shows a
+    // diamond (gold / brown / dim, red-rimmed when its fork is full) instead of a blank gap.
     [DataSourceProperty]
     public bool IsUnavailable => !_isTaken && !_isFreeToTake;
+
+    // The fork-full ring: a sibling the player can no longer take. Only an untaken diamond is
+    // refused; the taken pick of the same fork reads LockedIn through LockReasonText instead.
+    [DataSourceProperty]
+    public bool IsForkLocked => !_isTaken && _lockReason == ChoiceLockReason.ForkFull;
+
+    [DataSourceProperty]
+    public string LockReasonText => _lockReasonText;
+
+    [DataSourceProperty]
+    public bool HasLockReason => _lockReasonText.Length > 0;
 
     [DataSourceProperty]
     public bool IsTaken

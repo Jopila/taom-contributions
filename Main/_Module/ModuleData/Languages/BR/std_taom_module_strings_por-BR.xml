@@ -2881,5 +2881,20 @@
   <string id="taom_faction_kingdom_of_arthedain_weakness_0" text="Few lords and small hosts" />
   <string id="taom_faction_kingdom_of_arthedain_weakness_1" text="Poor lands that grow slowly" />
   <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="Ringed by Angmar, Dunland and Gundabad" />
+  <string id="taom_career_lock_fork" text="You took another choice on this path." />
+  <string id="taom_career_lock_keystone" text="You took another keystone in this tier." />
+  <string id="taom_career_lock_points" text="No free career points." />
+  <string id="taom_career_lock_locked_in" text="Locked in. Retrain to change this choice." />
+  <string id="taom_career_next_point" text="Next point at level {LEVEL}" />
+  <string id="taom_career_tree_reset" text="Your career was redesigned, so your career choices were refunded." />
+  <string id="taom_career_retrain" text="Retrain ({GOLD} gold)" />
+  <string id="taom_career_switch_cost_title" text="Switch career" />
+  <string id="taom_career_switch_cost_body" text="Switching careers refunds all your career choices and costs {GOLD} gold." />
+  <string id="taom_career_switch_confirm" text="Switch" />
+  <string id="taom_career_switch_no_gold" text="You need {GOLD} gold to switch careers." />
+  <string id="taom_career_retrain_title" text="Retrain career" />
+  <string id="taom_career_retrain_body" text="Refund every career choice except your first for {GOLD} gold? You keep your career and the tiers you unlocked." />
+  <string id="taom_career_retrain_confirm" text="Retrain" />
+  <string id="taom_career_retrain_no_gold" text="You need {GOLD} gold to retrain." />
   </strings>
 </base>

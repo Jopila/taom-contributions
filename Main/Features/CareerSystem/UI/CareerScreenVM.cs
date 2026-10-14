@@ -21,6 +21,11 @@ public class CareerScreenVM : ViewModel
     private readonly string _heroStringId;
     private readonly int _heroLevel;
     private readonly Action _onClose;
+    // #769 E7: asks the screen to run the paid retrain, passing the price. Null = no retrain wired.
+    private readonly Action<int> _onRetrainRequested;
+    // #769 lock on leave: a fork pick is freely refundable only during the visit it was taken
+    // in. Each CareerScreenVM is created fresh when the screen opens, so this set is the visit.
+    private readonly HashSet<string> _takenThisVisit = new HashSet<string>();
 
     private string _screenTitle;
     private string _doneLbl;
@@ -31,6 +36,10 @@ public class CareerScreenVM : ViewModel
     private string _abilitySpriteName;
     private string _abilityLabel;
     private string _freeCareerPointsText;
+    private string _nextPointText = "";
+    private string _retrainText = "";
+    private bool _showRetrain;
+    private bool _canRetrain;
     private string _tier1Label;
     private string _tier2Label;
     private string _tier3Label;
@@ -51,7 +60,7 @@ public class CareerScreenVM : ViewModel
     // Switch-mode wiring -- when isSwitchMode is true the screen renders a list of eligible
     // alternative careers (current career excluded) instead of the normal-mode choice tree.
     // Selecting one invokes _onChooseSwitchTarget, which the screen wires to
-    // ICareerSwitchService.SwitchCareer + CloseScreen.
+    // CareerSwitchService.SwitchCareer + CloseScreen.
     private readonly bool _isSwitchMode;
     private readonly ICareerHeroAdapter _heroAdapter;
     private readonly Action<string> _onChooseSwitchTarget;
@@ -71,7 +80,8 @@ public class CareerScreenVM : ViewModel
         ICareerQuestService questService = null,
         bool isSwitchMode = false,
         ICareerHeroAdapter heroAdapter = null,
-        Action<string> onChooseSwitchTarget = null)
+        Action<string> onChooseSwitchTarget = null,
+        Action<int> onRetrainRequested = null)
     {
         _dataService = dataService;
         _registry = registry;
@@ -85,6 +95,7 @@ public class CareerScreenVM : ViewModel
         _isSwitchMode = isSwitchMode;
         _heroAdapter = heroAdapter;
         _onChooseSwitchTarget = onChooseSwitchTarget;
+        _onRetrainRequested = onRetrainRequested;
 
         _screenTitle = isSwitchMode
             ? new TextObject("{=taom_career_switch_title}Choose Your Path").ToString()
@@ -159,9 +170,15 @@ public class CareerScreenVM : ViewModel
         AbilitySpriteName = $"CareerSystem\\Abilities\\{career.AbilityTemplateId}";
         HasAbilitySprite = !string.IsNullOrEmpty(career.AbilityTemplateId);
 
-        FreeCareerPoints = _registry.GetUnspentPoints(_heroLevel, _dataService.GetChoiceCount(_heroStringId));
+        FreeCareerPoints = _registry.GetUnspentPoints(career, _heroLevel, _dataService.GetChoiceCount(_heroStringId));
         FreeCareerPointsText = new TextObject("{=taom_career_free_points}Free Points: {COUNT}")
             .SetTextVariable("COUNT", FreeCareerPoints).ToString();
+
+        var nextPointLevel = _registry.GetNextPointLevel(career, _heroLevel);
+        NextPointText = nextPointLevel.HasValue
+            ? new TextObject("{=taom_career_next_point}Next point at level {LEVEL}")
+                .SetTextVariable("LEVEL", nextPointLevel.Value).ToString()
+            : "";
 
         Tier2Locked = !IsTierAvail(2);
         Tier3Locked = !IsTierAvail(3);
@@ -235,7 +252,7 @@ public class CareerScreenVM : ViewModel
     //
     // Fed by the existing group walk rather than a second pass of its own: the screen rebuilds
     // on every click, and a duplicate registry walk per rebuild is pure waste (it also broke
-    // ClickIncrease_RebuildsGroupsOnce_NotTwice, which counts registry queries to prove exactly
+    // ToggleChoice_RebuildsGroupsOnce_NotTwice, which counts registry queries to prove exactly
     // one rebuild ran).
     private void PublishActiveEffects(
         List<string> keystoneDescriptions,
@@ -265,18 +282,16 @@ public class CareerScreenVM : ViewModel
 
     private void RebuildChoiceGroups(CareerDefinition career)
     {
-        // Selecting or deselecting a choice refreshes the screen, which replaces every group VM.
-        // Fresh VMs start with ButtonsVisible=false and Gauntlet fires no new HoverBegin for a
-        // widget recreated under a stationary cursor, so without carrying the open state over,
-        // the +/- strip collapsed on every click.
-        var openGroupIds = new HashSet<string>();
-        CollectOpenGroupIds(_choiceGroupsTier1, openGroupIds);
-        CollectOpenGroupIds(_choiceGroupsTier2, openGroupIds);
-        CollectOpenGroupIds(_choiceGroupsTier3, openGroupIds);
-
         // Issue #388 — filled by the choice walk below, published once at the end.
         var takenKeystoneDescriptions = new List<string>();
         var takenPassiveTotals = new Dictionary<Domain.PassiveEffectType, float>();
+
+        // #769 E7: the retrain button, read off the same walk. It shows for any career with a fork and
+        // is enabled only while a fork pick from an earlier visit stands (LockedIn); a pick taken this
+        // visit still refunds free.
+        var hasFork = false;
+        var holdsLockedInPick = false;
+        Func<int, bool> isTierAvail = IsTierAvail;
 
         _choiceGroupsTier1.Clear();
         _choiceGroupsTier2.Clear();
@@ -287,11 +302,9 @@ public class CareerScreenVM : ViewModel
             var group = _registry.GetGroup(groupId);
             if (group == null) continue;
 
-            var isLocked = !IsTierAvail(group.Tier);
-            var groupVM = new CareerChoiceGroupObjectVM(group, isLocked)
-            {
-                ButtonsVisible = openGroupIds.Contains(group.Id)
-            };
+            if (group.MaxPicks > 0) hasFork = true;
+            var isLocked = !isTierAvail(group.Tier);
+            var groupVM = new CareerChoiceGroupObjectVM(group, isLocked);
 
             var choices = _registry.GetChoicesForGroup(groupId);
             foreach (var choice in choices)
@@ -313,11 +326,16 @@ public class CareerScreenVM : ViewModel
                         takenPassiveTotals[choice.Passive.EffectType] = running + choice.Passive.Magnitude;
                     }
                 }
-                // Issue #381 — a keystone closed by exclusivity dims (pip + no + button)
-                // instead of silently rejecting the click at select time.
-                var isFreeToTake = FreeCareerPoints > 0 && !isLocked
-                    && !KeystoneExclusivityRule.IsLocked(career, choice, _registry, heroData);
-                groupVM.Choices.Add(new CareerChoiceObjectVM(choice, isTaken, isFreeToTake, TrySelectChoice, TryDeselectChoice, career.KeystoneIcon));
+                // Issue #381 — a choice the rule refuses (tier, fork, keystone, points) dims and
+                // says why, instead of silently rejecting the click at select time. The same
+                // rule gates the click itself (TrySelectChoice / TryDeselectChoice).
+                var lockReason = isTaken
+                    ? CareerChoiceRules.CanRefund(career, choice, _registry, heroData, _takenThisVisit)
+                    : CareerChoiceRules.CanTake(career, choice, _registry, heroData, FreeCareerPoints, isTierAvail);
+                if (isTaken && lockReason == ChoiceLockReason.LockedIn) holdsLockedInPick = true;
+                var isFreeToTake = !isTaken && lockReason == ChoiceLockReason.None;
+                groupVM.Choices.Add(new CareerChoiceObjectVM(choice, isTaken, isFreeToTake, TrySelectChoice, TryDeselectChoice,
+                    career.KeystoneIcon, lockReason, _registry.GetTierUnlockLevel(group.Tier)));
             }
 
             switch (group.Tier)
@@ -329,44 +347,11 @@ public class CareerScreenVM : ViewModel
         }
 
         PublishActiveEffects(takenKeystoneDescriptions, takenPassiveTotals);
-    }
 
-    private static void CollectOpenGroupIds(
-        MBBindingList<CareerChoiceGroupObjectVM> groups, HashSet<string> openGroupIds)
-    {
-        foreach (var groupVM in groups)
-        {
-            if (groupVM.ButtonsVisible)
-                openGroupIds.Add(groupVM.GroupId);
-        }
-    }
-
-    public void ExecuteSelectChoice(string choiceId)
-    {
-        _logger?.LogInfo($"CareerSystem: ExecuteSelectChoice — choiceId='{choiceId}' freePoints={FreeCareerPoints}");
-        if (FreeCareerPoints <= 0) return;
-
-        var choice = _registry.GetChoice(choiceId);
-        if (choice == null) return;
-
-        if (!string.IsNullOrEmpty(choice.GroupId))
-        {
-            var group = _registry.GetGroup(choice.GroupId);
-            if (group != null && !IsTierAvail(group.Tier))
-                return;
-
-            // Issue #381 — one keystone per tier, tier-3-completion exemption, grandfathered.
-            if (KeystoneExclusivityRule.IsLocked(CurrentCareer(), choice, _registry,
-                    _dataService.GetOrCreateData(_heroStringId)))
-                return;
-        }
-
-        var maxChoices = _registry.GetMaxChoicesForHero(_heroLevel);
-        if (_dataService.TryAddChoice(_heroStringId, choiceId, maxChoices))
-        {
-            _passiveService.RefreshCache(_dataService, _registry);
-            RefreshValues();
-        }
+        ShowRetrain = hasFork;
+        CanRetrain = holdsLockedInPick;
+        RetrainText = new TextObject("{=taom_career_retrain}Retrain ({GOLD} gold)")
+            .SetTextVariable("GOLD", _registry.GetRetrainCost(_heroLevel)).ToString();
     }
 
     private Domain.CareerDefinition CurrentCareer()
@@ -375,29 +360,18 @@ public class CareerScreenVM : ViewModel
         return careerId != null ? _registry.GetCareer(careerId) : null;
     }
 
-    // Invoked by CareerChoiceObjectVM.SelectChoice via callback (+ button in UI)
+    // Invoked by CareerChoiceObjectVM.SelectChoice via callback (the diamond click)
     private bool TrySelectChoice(string choiceId)
     {
-        if (FreeCareerPoints <= 0) return false;
+        var career = CurrentCareer();
+        if (CareerChoiceRules.CanTake(career, _registry.GetChoice(choiceId), _registry,
+                _dataService.GetOrCreateData(_heroStringId), FreeCareerPoints, IsTierAvail) != ChoiceLockReason.None)
+            return false;
 
-        var choice = _registry.GetChoice(choiceId);
-        if (choice == null) return false;
-
-        if (!string.IsNullOrEmpty(choice.GroupId))
-        {
-            var group = _registry.GetGroup(choice.GroupId);
-            if (group != null && !IsTierAvail(group.Tier))
-                return false;
-
-            // Issue #381 — one keystone per tier, tier-3-completion exemption, grandfathered.
-            if (KeystoneExclusivityRule.IsLocked(CurrentCareer(), choice, _registry,
-                    _dataService.GetOrCreateData(_heroStringId)))
-                return false;
-        }
-
-        var maxChoices = _registry.GetMaxChoicesForHero(_heroLevel);
+        var maxChoices = _registry.GetMaxChoicesForHero(career, _heroLevel);
         if (_dataService.TryAddChoice(_heroStringId, choiceId, maxChoices))
         {
+            _takenThisVisit.Add(choiceId);
             _passiveService.RefreshCache(_dataService, _registry);
             RefreshValues();
             return true;
@@ -405,16 +379,32 @@ public class CareerScreenVM : ViewModel
         return false;
     }
 
-    // Invoked by CareerChoiceObjectVM.DeSelectChoice via callback (- button in UI)
+    // Invoked by CareerChoiceObjectVM.DeSelectChoice via callback (the diamond click on a taken choice)
     private bool TryDeselectChoice(string choiceId)
     {
-        var heroData = _dataService.GetOrCreateData(_heroStringId);
-        if (!heroData.HasChoice(choiceId)) return false;
+        if (CareerChoiceRules.CanRefund(CurrentCareer(), _registry.GetChoice(choiceId), _registry,
+                _dataService.GetOrCreateData(_heroStringId), _takenThisVisit) != ChoiceLockReason.None)
+            return false;
 
         _dataService.RemoveChoice(_heroStringId, choiceId);
+        _takenThisVisit.Remove(choiceId);
         _passiveService.RefreshCache(_dataService, _registry);
         RefreshValues();
         return true;
+    }
+
+    public void ExecuteRetrain()
+    {
+        if (CanRetrain)
+            _onRetrainRequested?.Invoke(_registry.GetRetrainCost(_heroLevel));
+    }
+
+    // Called by the screen once the lifecycle service has refunded the choices: nothing taken
+    // before now counts as "this visit" any more, and the tree is rebuilt from the stored data.
+    public void OnRetrained()
+    {
+        _takenThisVisit.Clear();
+        RefreshValues();
     }
 
     public void ExecuteClose()
@@ -506,6 +496,45 @@ public class CareerScreenVM : ViewModel
     {
         get => _freeCareerPointsText;
         set { if (_freeCareerPointsText != value) { _freeCareerPointsText = value; OnPropertyChangedWithValue(value, nameof(FreeCareerPointsText)); } }
+    }
+
+    [DataSourceProperty]
+    public string NextPointText
+    {
+        get => _nextPointText;
+        set
+        {
+            if (_nextPointText != value)
+            {
+                _nextPointText = value;
+                OnPropertyChangedWithValue(value, nameof(NextPointText));
+                OnPropertyChanged(nameof(HasNextPoint));
+            }
+        }
+    }
+
+    [DataSourceProperty]
+    public bool HasNextPoint => _nextPointText.Length > 0;
+
+    [DataSourceProperty]
+    public string RetrainText
+    {
+        get => _retrainText;
+        set { if (_retrainText != value) { _retrainText = value; OnPropertyChangedWithValue(value, nameof(RetrainText)); } }
+    }
+
+    [DataSourceProperty]
+    public bool ShowRetrain
+    {
+        get => _showRetrain;
+        set { if (_showRetrain != value) { _showRetrain = value; OnPropertyChangedWithValue(value, nameof(ShowRetrain)); } }
+    }
+
+    [DataSourceProperty]
+    public bool CanRetrain
+    {
+        get => _canRetrain;
+        set { if (_canRetrain != value) { _canRetrain = value; OnPropertyChangedWithValue(value, nameof(CanRetrain)); } }
     }
 
     [DataSourceProperty]

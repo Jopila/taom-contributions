@@ -15,17 +15,26 @@ public sealed class CareerChoiceGroupDefinition
     /// </summary>
     public string DisplayName { get; }
 
+    /// <summary>
+    /// #769 E5 — how many of this group's choices a hero may hold at once. 0 = unlimited (every
+    /// group shipped before forks); a positive value makes the group a fork, and a pick in it is
+    /// only refundable during the screen visit it was taken in.
+    /// </summary>
+    public int MaxPicks { get; }
+
     public CareerChoiceGroupDefinition(
         string id,
         string careerId,
         int tier,
         IReadOnlyList<string> choiceIds,
-        string displayName = "")
+        string displayName = "",
+        int maxPicks = 0)
     {
         Id = id;
         CareerId = careerId;
         Tier = tier;
         ChoiceIds = choiceIds ?? new List<string>();
         DisplayName = displayName ?? "";
+        MaxPicks = maxPicks;
     }
 }

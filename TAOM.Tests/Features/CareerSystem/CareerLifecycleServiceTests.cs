@@ -67,7 +67,7 @@ public class CareerLifecycleServiceTests
         _registry.GetOwningCareerId("ranger_t1_a").Returns("ranger");
         _registry.GetOwningCareerId("blademaster_of_ren_root").Returns("blademaster_of_ren");
 
-        _sut = new CareerLifecycleService(_dataService, _registry, _creationHandler, _logger);
+        _sut = new CareerLifecycleService(_dataService, _registry, _creationHandler, Substitute.For<ICareerPassiveService>(), Substitute.For<TAOM.Adapters.ICareerPurseAdapter>(), _logger);
     }
 
     // -- the fallback itself (behaviour unchanged, now exercised through the real method) --
@@ -169,7 +169,7 @@ public class CareerLifecycleServiceTests
             pathService.ModuleDataPath.Returns(dir);
             var provider = new CareerConfigProvider(pathService, _logger);
             var registry = new CareerRegistry(provider, _logger);
-            var sut = new CareerLifecycleService(_dataService, registry, _creationHandler, _logger);
+            var sut = new CareerLifecycleService(_dataService, registry, _creationHandler, Substitute.For<ICareerPassiveService>(), Substitute.For<TAOM.Adapters.ICareerPurseAdapter>(), _logger);
 
             Assert.AreEqual("ranger", registry.GetOwningCareerId("ranger_key"));
             Assert.AreEqual("warboss", registry.GetOwningCareerId("wb_key"));
@@ -225,7 +225,7 @@ public class CareerLifecycleServiceTests
             pathService.ModuleDataPath.Returns(dir);
             var provider = new CareerConfigProvider(pathService, _logger);
             var registry = new CareerRegistry(provider, _logger);
-            var sut = new CareerLifecycleService(_dataService, registry, _creationHandler, _logger);
+            var sut = new CareerLifecycleService(_dataService, registry, _creationHandler, Substitute.For<ICareerPassiveService>(), Substitute.For<TAOM.Adapters.ICareerPurseAdapter>(), _logger);
 
             Assert.IsNull(registry.GetOwningCareerId("shared_key"));
 
@@ -294,19 +294,20 @@ public class CareerLifecycleServiceTests
     {
         // Level 1 budget is 2 (root plus one free point). The ghost took the free point, so the
         // player saw "Free Points: 0" from the first minute of the campaign.
-        _registry.GetMaxChoicesForHero(1).Returns(2);
-        _registry.GetUnspentPoints(Arg.Any<int>(), Arg.Any<int>())
-            .Returns(ci => System.Math.Max(0, _registry.GetMaxChoicesForHero(ci.ArgAt<int>(0)) - ci.ArgAt<int>(1)));
+        _registry.GetMaxChoicesForHero(Arg.Any<CareerDefinition>(), 1).Returns(2);
+        _registry.GetUnspentPoints(Arg.Any<CareerDefinition>(), Arg.Any<int>(), Arg.Any<int>())
+            .Returns(ci => System.Math.Max(0,
+                _registry.GetMaxChoicesForHero(ci.ArgAt<CareerDefinition>(0), ci.ArgAt<int>(1)) - ci.ArgAt<int>(2)));
 
         _dataService.SetCareer(Hero, "ranger");
         _dataService.TryAddChoice(Hero, "blademaster_of_ren_root", 10);
         _dataService.TryAddChoice(Hero, "ranger_root", 10);
 
-        Assert.AreEqual(0, _registry.GetUnspentPoints(1, _dataService.GetChoiceCount(Hero)));
+        Assert.AreEqual(0, _registry.GetUnspentPoints(null, 1, _dataService.GetChoiceCount(Hero)));
 
         _sut.RepairForeignChoices(Hero);
 
-        Assert.AreEqual(1, _registry.GetUnspentPoints(1, _dataService.GetChoiceCount(Hero)));
+        Assert.AreEqual(1, _registry.GetUnspentPoints(null, 1, _dataService.GetChoiceCount(Hero)));
     }
     [TestMethod]
     public void RepairForeignChoices_RegistryCannotResolveOwners_KeepsEverything()

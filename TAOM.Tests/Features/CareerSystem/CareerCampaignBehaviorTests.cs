@@ -125,7 +125,39 @@ public class CareerAutoAssignTests
     /// </summary>
     private bool TryAutoAssign(string heroStringId, string cultureId)
     {
-        var service = new CareerLifecycleService(_dataService, _registry, _creationHandler, _logger);
+        var service = new CareerLifecycleService(_dataService, _registry, _creationHandler, Substitute.For<ICareerPassiveService>(), Substitute.For<TAOM.Adapters.ICareerPurseAdapter>(), _logger);
         return service.AssignFallbackCareerIfMissing(heroStringId, cultureId);
+    }
+}
+
+/// <summary>
+/// <c>CareerCampaignBehavior.OnSessionLaunched</c> runs on the engine's campaign event, so its order
+/// cannot be exercised without a campaign. The order is load-bearing: the repair drops another
+/// career's picks so the migration judges a clean list, and the cache refresh must come last so
+/// the passives reflect both. Pinned against the source, like the other ordering gates.
+/// </summary>
+[TestClass]
+public class CareerSessionLaunchOrderTests
+{
+    [TestMethod]
+    public void OnSessionLaunched_RunsTheRepairThenTheMigrationThenTheCacheRefresh()
+    {
+        var src = TAOM.Tests.Infrastructure.RepoPaths.ReadSource(
+            "Main/Features/CareerSystem/CareerCampaignBehavior.cs", stripComments: true);
+
+        int start = src.IndexOf("void OnSessionLaunched(", System.StringComparison.Ordinal);
+        int end = src.IndexOf("void OnGameLoaded(", System.StringComparison.Ordinal);
+        Assert.IsTrue(start >= 0 && end > start, "OnSessionLaunched or OnGameLoaded was renamed: update this pin.");
+        var body = src.Substring(start, end - start);
+
+        int repair = body.IndexOf("_lifecycle.RepairForeignChoices", System.StringComparison.Ordinal);
+        int migrate = body.IndexOf("_lifecycle.MigrateTreeVersion", System.StringComparison.Ordinal);
+        int refresh = body.IndexOf("_passiveService.RefreshCache", System.StringComparison.Ordinal);
+
+        Assert.IsTrue(repair >= 0, "OnSessionLaunched must call RepairForeignChoices");
+        Assert.IsTrue(migrate >= 0, "OnSessionLaunched must call MigrateTreeVersion");
+        Assert.IsTrue(refresh >= 0, "OnSessionLaunched must call RefreshCache");
+        Assert.IsTrue(repair < migrate, "the repair must run before the migration, so it judges a clean list");
+        Assert.IsTrue(migrate < refresh, "the migration must run before the cache refresh, so the passives reflect the refund");
     }
 }

@@ -1,8 +1,11 @@
+using TAOM.Features.CareerSystem.Domain;
+
 namespace TAOM.Features.CareerSystem;
 
 /// <summary>
 /// The campaign-lifecycle decisions for a hero's career: which career a save with none should be
-/// given, and which stored choices no longer belong to the hero's career. Both were inline in
+/// given, which stored choices no longer belong to the hero's career, the paid retrain (#769 E7) and
+/// the one-time refund when a career's tree is redesigned (#769 E12). The first two were inline in
 /// <c>CareerCampaignBehavior</c>; they are business logic, so ADR-002 puts them here and leaves the
 /// behavior a thin delegate.
 /// </summary>
@@ -26,4 +29,22 @@ public interface ICareerLifecycleService
     /// inverse polarity would delete every choice the player has ever taken.
     /// </summary>
     int RepairForeignChoices(string heroStringId);
+
+    /// <summary>
+    /// #769 E7: the paid retrain. Charges the registry's retrain cost, refunds every choice but the
+    /// root and refreshes the passive cache. A short purse changes no state.
+    /// </summary>
+    CareerRetrainResult TryRetrain(string heroStringId, int heroLevel);
+
+    /// <summary>
+    /// #769 E12: when a career's tree was redesigned (its TreeVersion is above the one the hero is
+    /// stamped with), refund every choice once and stamp the hero. Returns how many choices were
+    /// removed: 0 when nothing migrated, and also 0 when it migrated a hero who held only the root
+    /// (the stamp is still set), so a caller announces a refund only for a count above zero.
+    ///
+    /// Needs proof the new tree actually loaded: the career lists at least one group and every
+    /// listed group resolves with at least one choice. Without it nothing changes and no flag is
+    /// set, because a malformed choices file looks exactly like an emptied tree.
+    /// </summary>
+    int MigrateTreeVersion(string heroStringId);
 }

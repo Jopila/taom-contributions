@@ -1,4 +1,3 @@
-using System.Linq;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TAOM.Features.CareerSystem.Domain;
@@ -10,47 +9,13 @@ public class CareerChoiceGroupObjectVM : ViewModel
     private readonly CareerChoiceGroupDefinition _group;
     private bool _isExpanded;
     private bool _isLocked;
-    private bool _isActive;
-    private bool _buttonsVisible;
     private MBBindingList<CareerChoiceObjectVM> _choices;
 
     public CareerChoiceGroupObjectVM(CareerChoiceGroupDefinition group, bool isLocked)
     {
         _group = group;
         _isLocked = isLocked;
-        _isActive = !isLocked;
-        _buttonsVisible = false;
         _choices = new MBBindingList<CareerChoiceObjectVM>();
-    }
-
-    public void ExecuteBeginHover()
-    {
-        ButtonsVisible = true;
-    }
-
-    public void ExecuteEndHover()
-    {
-        ButtonsVisible = false;
-    }
-
-    public void ExecuteClickIncrease()
-    {
-        if (!_isActive) return;
-
-        var next = _choices.FirstOrDefault(c => !c.IsTaken);
-        if (next == null) return;
-        // SelectChoice routes through the screen VM's TrySelectChoice, which already
-        // refreshes the whole screen on success; no second refresh belongs here.
-        next.SelectChoice();
-    }
-
-    public void ExecuteClickDecrease()
-    {
-        if (!_isActive) return;
-
-        var last = _choices.LastOrDefault(c => c.IsTaken);
-        if (last == null) return;
-        last.DeSelectChoice();
     }
 
     [DataSourceProperty]
@@ -108,34 +73,6 @@ public class CareerChoiceGroupObjectVM : ViewModel
     }
 
     [DataSourceProperty]
-    public bool IsActive
-    {
-        get => _isActive;
-        set
-        {
-            if (_isActive != value)
-            {
-                _isActive = value;
-                OnPropertyChangedWithValue(value, nameof(IsActive));
-            }
-        }
-    }
-
-    [DataSourceProperty]
-    public bool ButtonsVisible
-    {
-        get => _buttonsVisible;
-        set
-        {
-            if (_buttonsVisible != value)
-            {
-                _buttonsVisible = value;
-                OnPropertyChangedWithValue(value, nameof(ButtonsVisible));
-            }
-        }
-    }
-
-    [DataSourceProperty]
     public MBBindingList<CareerChoiceObjectVM> Choices
     {
         get => _choices;
@@ -154,6 +91,4 @@ public class CareerChoiceGroupObjectVM : ViewModel
         if (!_isLocked)
             IsExpanded = !IsExpanded;
     }
-
-    public string GroupId => _group.Id;
 }

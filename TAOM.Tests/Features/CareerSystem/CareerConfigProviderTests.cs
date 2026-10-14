@@ -644,6 +644,141 @@ public class CareerConfigProviderTests
         _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("keystone_icon") && s.Contains("warboss")));
     }
 
+    // ── #769 E5 — max_picks on a ChoiceGroup (0 = unlimited) ──
+
+    private void WriteGroupWithMaxPicks(string maxPicksAttr)
+    {
+        WriteCareersXml(@"<?xml version='1.0'?><Careers max_perk_points=""30""></Careers>");
+        WriteChoicesXml(@"<?xml version='1.0'?>
+<CareerChoices>
+  <ChoiceGroup id=""wb_fork"" career_id=""warboss"" tier=""1"" " + maxPicksAttr + @">
+    <Choice id=""wb_fork_a"" type=""Passive"" description=""a"" icon_sprite=""icon"" />
+  </ChoiceGroup>
+</CareerChoices>");
+    }
+
+    [TestMethod]
+    public void LoadChoices_GroupWithoutMaxPicks_DefaultsToUnlimited()
+    {
+        WriteGroupWithMaxPicks("");
+
+        Assert.AreEqual(0, _provider.LoadChoiceGroups()[0].MaxPicks);
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("max_picks")));
+    }
+
+    [TestMethod]
+    public void LoadChoices_GroupWithMaxPicks_ParsesIt()
+    {
+        WriteGroupWithMaxPicks(@"max_picks=""2""");
+
+        Assert.AreEqual(2, _provider.LoadChoiceGroups()[0].MaxPicks);
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("max_picks")));
+    }
+
+    [TestMethod]
+    public void LoadChoices_GroupWithNonIntegerMaxPicks_WarnsAndUsesUnlimited()
+    {
+        WriteGroupWithMaxPicks(@"max_picks=""one""");
+
+        Assert.AreEqual(0, _provider.LoadChoiceGroups()[0].MaxPicks);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("max_picks") && s.Contains("wb_fork")));
+    }
+
+    [TestMethod]
+    public void LoadChoices_GroupWithNegativeMaxPicks_WarnsAndUsesUnlimited()
+    {
+        WriteGroupWithMaxPicks(@"max_picks=""-1""");
+
+        Assert.AreEqual(0, _provider.LoadChoiceGroups()[0].MaxPicks);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("max_picks") && s.Contains("wb_fork")));
+    }
+
+    // ── #769 E6 — point_levels on a Career (empty = the legacy one-point-per-level formula) ──
+
+    private void WriteCareerWithPointLevels(string pointLevelsAttr)
+    {
+        WriteCareersXml(@"<?xml version='1.0'?>
+<Careers max_perk_points=""30"">
+  <Career id=""warboss"" display_name=""Warboss"" description=""A brute.""
+          portrait_sprite=""wb_sprite"" ability_template_id=""rally_horde""
+          min_clan_tier=""0"" root_choice_id=""wb_root"" " + pointLevelsAttr + @">
+    <EligibleCultures><Culture id=""mordor"" /></EligibleCultures>
+    <ChoiceGroups><Group id=""wb_brutality"" /></ChoiceGroups>
+  </Career>
+</Careers>");
+    }
+
+    [TestMethod]
+    public void LoadCareers_WithoutPointLevels_IsEmpty()
+    {
+        WriteCareerWithPointLevels("");
+
+        Assert.AreEqual(0, _provider.LoadCareers()[0].PointLevels.Count);
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("point_levels")));
+    }
+
+    [TestMethod]
+    public void LoadCareers_WithPointLevels_ParsesTheAscendingList()
+    {
+        WriteCareerWithPointLevels(@"point_levels=""1,5,10,15,20,25""");
+
+        CollectionAssert.AreEqual(new[] { 1, 5, 10, 15, 20, 25 }, _provider.LoadCareers()[0].PointLevels.ToArray());
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("point_levels")));
+    }
+
+    [TestMethod]
+    public void LoadCareers_PointLevelsWithSpaces_Parses()
+    {
+        WriteCareerWithPointLevels(@"point_levels=""1, 5 ,10""");
+
+        CollectionAssert.AreEqual(new[] { 1, 5, 10 }, _provider.LoadCareers()[0].PointLevels.ToArray());
+    }
+
+    [TestMethod]
+    public void LoadCareers_PointLevelsNonInteger_WarnsAndUsesLegacy()
+    {
+        WriteCareerWithPointLevels(@"point_levels=""1,five,10""");
+
+        Assert.AreEqual(0, _provider.LoadCareers()[0].PointLevels.Count);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("point_levels") && s.Contains("warboss")));
+    }
+
+    [TestMethod]
+    public void LoadCareers_PointLevelsUnsorted_WarnsAndUsesLegacy()
+    {
+        WriteCareerWithPointLevels(@"point_levels=""1,10,5""");
+
+        Assert.AreEqual(0, _provider.LoadCareers()[0].PointLevels.Count);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("point_levels") && s.Contains("warboss")));
+    }
+
+    [TestMethod]
+    public void LoadCareers_PointLevelsDuplicate_WarnsAndUsesLegacy()
+    {
+        WriteCareerWithPointLevels(@"point_levels=""1,5,5""");
+
+        Assert.AreEqual(0, _provider.LoadCareers()[0].PointLevels.Count);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("point_levels")));
+    }
+
+    [TestMethod]
+    public void LoadCareers_PointLevelsNonPositive_WarnsAndUsesLegacy()
+    {
+        WriteCareerWithPointLevels(@"point_levels=""0,5""");
+
+        Assert.AreEqual(0, _provider.LoadCareers()[0].PointLevels.Count);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("point_levels")));
+    }
+
+    [TestMethod]
+    public void LoadCareers_PointLevelsEmptyEntry_WarnsAndUsesLegacy()
+    {
+        WriteCareerWithPointLevels(@"point_levels=""1,,5""");
+
+        Assert.AreEqual(0, _provider.LoadCareers()[0].PointLevels.Count);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("point_levels")));
+    }
+
     private void WriteCareersXml(string content)
     {
         File.WriteAllText(Path.Combine(_tempDir, "career_system", "taom_careers.xml"), content);
@@ -657,5 +792,112 @@ public class CareerConfigProviderTests
     private void WriteAbilityTuningXml(string content)
     {
         File.WriteAllText(Path.Combine(_tempDir, "career_system", "taom_ability_tuning.xml"), content);
+    }
+
+    // ── #769 E7: retrain price attributes on the <Careers> root ──
+
+    private void WriteCareersRoot(string rootAttrs)
+    {
+        WriteCareersXml(@"<?xml version='1.0'?><Careers max_perk_points=""30"" " + rootAttrs + "></Careers>");
+    }
+
+    [TestMethod]
+    public void GetRetrainGold_AttributesAbsent_UseDefaults()
+    {
+        WriteCareersRoot("");
+
+        Assert.AreEqual(1000, _provider.GetRetrainGoldBase());
+        Assert.AreEqual(250, _provider.GetRetrainGoldPerLevel());
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("retrain_gold")));
+    }
+
+    [TestMethod]
+    public void GetRetrainGold_ValidAttributes_AreRead()
+    {
+        WriteCareersRoot(@"retrain_gold_base=""1500"" retrain_gold_per_level=""0""");
+
+        Assert.AreEqual(1500, _provider.GetRetrainGoldBase());
+        Assert.AreEqual(0, _provider.GetRetrainGoldPerLevel());
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("retrain_gold")));
+    }
+
+    [TestMethod]
+    public void GetRetrainGold_NonInteger_WarnsAndUsesTheDefault()
+    {
+        WriteCareersRoot(@"retrain_gold_base=""lots"" retrain_gold_per_level=""2.5""");
+
+        Assert.AreEqual(1000, _provider.GetRetrainGoldBase());
+        Assert.AreEqual(250, _provider.GetRetrainGoldPerLevel());
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("retrain_gold_base")));
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("retrain_gold_per_level")));
+    }
+
+    [TestMethod]
+    public void GetRetrainGold_Negative_WarnsAndUsesTheDefault()
+    {
+        WriteCareersRoot(@"retrain_gold_base=""-5"" retrain_gold_per_level=""-1""");
+
+        Assert.AreEqual(1000, _provider.GetRetrainGoldBase());
+        Assert.AreEqual(250, _provider.GetRetrainGoldPerLevel());
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("retrain_gold_base")));
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("retrain_gold_per_level")));
+    }
+
+    [TestMethod]
+    public void GetRetrainGold_CareersFileMissing_UsesDefaults()
+    {
+        Assert.AreEqual(1000, _provider.GetRetrainGoldBase());
+        Assert.AreEqual(250, _provider.GetRetrainGoldPerLevel());
+    }
+
+    // ── #769 E12: tree_version on a Career ──
+
+    private void WriteCareerWithTreeVersion(string treeVersionAttr)
+    {
+        WriteCareersXml(@"<?xml version='1.0'?>
+<Careers max_perk_points=""30"">
+  <Career id=""warboss"" display_name=""Warboss"" description=""A brute.""
+          portrait_sprite=""wb_sprite"" ability_template_id=""rally_horde""
+          min_clan_tier=""0"" root_choice_id=""wb_root"" " + treeVersionAttr + @">
+    <EligibleCultures><Culture id=""mordor"" /></EligibleCultures>
+    <ChoiceGroups><Group id=""wb_brutality"" /></ChoiceGroups>
+  </Career>
+</Careers>");
+    }
+
+    [TestMethod]
+    public void LoadCareers_WithoutTreeVersion_IsOne()
+    {
+        WriteCareerWithTreeVersion("");
+
+        Assert.AreEqual(1, _provider.LoadCareers()[0].TreeVersion);
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("tree_version")));
+    }
+
+    [TestMethod]
+    public void LoadCareers_WithTreeVersion_ParsesIt()
+    {
+        WriteCareerWithTreeVersion(@"tree_version=""2""");
+
+        Assert.AreEqual(2, _provider.LoadCareers()[0].TreeVersion);
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("tree_version")));
+    }
+
+    [TestMethod]
+    public void LoadCareers_TreeVersionNonInteger_WarnsAndUsesOne()
+    {
+        WriteCareerWithTreeVersion(@"tree_version=""two""");
+
+        Assert.AreEqual(1, _provider.LoadCareers()[0].TreeVersion);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("tree_version") && s.Contains("warboss")));
+    }
+
+    [TestMethod]
+    public void LoadCareers_TreeVersionBelowOne_WarnsAndUsesOne()
+    {
+        WriteCareerWithTreeVersion(@"tree_version=""0""");
+
+        Assert.AreEqual(1, _provider.LoadCareers()[0].TreeVersion);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("tree_version") && s.Contains("warboss")));
     }
 }

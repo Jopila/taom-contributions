@@ -38,7 +38,9 @@ public class SpecialResourcesWiringTests
     {
         var container = BuildContainer();
 
-        var errors = container.Validate(typeof(ISpecialResourceService), typeof(ICareerPassiveService));
+        var errors = container.Validate(
+            typeof(ISpecialResourceService), typeof(ICareerPassiveService),
+            typeof(ICareerLifecycleService), typeof(CareerSwitchService));
 
         Assert.AreEqual(0, errors.Length, string.Join("; ", errors.Select(e => e.Value.Message)));
     }
