@@ -235,6 +235,16 @@ public sealed class ChronicleService
             if (!FiniteFloatValidator.IsFinite(now))
                 return;
 
+            // Every entry point, callbacks included, stops at War Ended: no payout can land after the war.
+            if (_wotr.CurrentPhase == WarPhase.WarEnded)
+            {
+                NotePhasesSeen(now);
+                Adopt(now);
+                SkipEveryOpenEvent(now);
+                SyncFocus();
+                return;
+            }
+
             body(now);
             SyncFocus();
         }

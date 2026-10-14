@@ -978,6 +978,44 @@ public class ChronicleServiceTests
     }
 
     [TestMethod]
+    public void OnTargetOwnerChanged_AfterWarEnded_SkipsTheWindowAndPaysNothing()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        DrainTexts();
+        _f.Phase = WarPhase.WarEnded;
+        _f.World.Owners["town_V2"] = "isengard";
+
+        _sut.OnTargetOwnerChanged("town_V2");
+        _sut.OnTargetOwnerChanged("town_V2");
+
+        Assert.AreEqual(ChronicleEventState.Skipped, _f.StateOf("hornburg"));
+        Assert.AreEqual(0, _f.Effects.Snapshot().Count);
+        Assert.AreEqual(0, DrainTexts().Count, "no resolution announcement");
+        Assert.IsTrue(_f.Focus.IsEmpty);
+    }
+
+    [TestMethod]
+    public void OnTargetBesieged_AfterWarEnded_SkipsTheWindowAndPaysNothing()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        Day(49);
+        DrainTexts();
+        _f.Phase = WarPhase.WarEnded;
+        _f.World.Besiegers["town_V2"] = "empire";
+
+        _sut.OnTargetBesieged("town_V2");
+
+        Assert.AreEqual(ChronicleEventState.Skipped, _f.StateOf("hornburg"));
+        Assert.IsFalse(_f.Store.Get("hornburg")!.Assaulted);
+        Assert.AreEqual(0, _f.Effects.Snapshot().Count);
+        Assert.AreEqual(0, DrainTexts().Count, "no resolution announcement");
+        Assert.IsTrue(_f.Focus.IsEmpty);
+    }
+
+    [TestMethod]
     public void RunChronicleDay_ChronicleOff_OpensNothingAndClearsTheFocus()
     {
         _f.Events.Add(SiegeDef());
