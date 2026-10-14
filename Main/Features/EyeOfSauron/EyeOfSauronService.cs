@@ -61,6 +61,10 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
     private float _huntStartDay;
     private string? _lastStep;
 
+    // The hunt holds the hunter's AI pin. False while he stands off for another lord's army (E17); every release goes
+    // through it, so a stand-off release and an end never release twice. Main thread only.
+    private bool _pinnedByUs;
+
     // Published from the main thread, read by the speed and size models on the parallel party tick.
     private HuntSnapshot? _snapshot;
     private int _sizeRejectionLogged;
@@ -119,7 +123,8 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
 
     /// <summary>
     /// Restores a saved record. The in-sight state is dropped; the hunter's party stays registered for its size. A saved
-    /// hunt always holds its pin (the engine saves <c>DoNotMakeNewDecisions</c>), so its end releases it.
+    /// hunt is taken to hold its pin until <see cref="OnSessionLaunched"/> reads the live one (the engine saves
+    /// <c>DoNotMakeNewDecisions</c>): a save taken while the hunter stood off holds none.
     /// </summary>
     public void LoadFrom(EyeOfSauronState state)
     {
@@ -136,17 +141,27 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         _hunterHeroId = state.HunterHeroId;
         _hunterPartyId = state.HunterPartyId;
         _huntStartDay = FiniteOrZero(state.HuntStartDay);
+        _pinnedByUs = true;
         Publish(new HuntSnapshot(state.HunterPartyId, inSight: false, playerSpeed: 0f, multiplier: 0f));
     }
 
-    /// <summary>After a load: a hunt restored into a co-op session, or whose party is gone, ends at once.</summary>
+    /// <summary>
+    /// After a load: a hunt restored into a co-op session, or whose party is gone, ends at once. Otherwise the live pin
+    /// says whether the hunt still holds it, so a hunt saved during a stand-off re-pins on resume.
+    /// </summary>
     public void OnSessionLaunched()
     {
         if (!IsHunting) return;
         if (!IsSinglePlayer)
+        {
             EndHunt(HuntEndReason.SessionLive);
-        else if (!_adapter.ReadParty(_hunterPartyId!).Exists)
+            return;
+        }
+        var party = _adapter.ReadParty(_hunterPartyId!);
+        if (!party.Exists)
             EndHunt(HuntEndReason.PartyLost);
+        else
+            _pinnedByUs = party.AiPinned;
     }
 
     public float GetScore(FactionSide against) =>
@@ -325,6 +340,7 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
             ClearHunt();
             return $"Refused: {heroId}'s party could not be ordered after you.";
         }
+        _pinnedByUs = true;
 
         _logger.LogInfo($"[EyeOfSauron] Hunt started: {heroId} ({hero.FactionId}) with party {partyId}.");
         _adapter.Announce(playerSide == FactionSide.Free ? HuntAnnouncement.StartFree : HuntAnnouncement.StartEvil, heroId);
@@ -436,19 +452,39 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         if (!IsHunting || !string.Equals(partyId, _hunterPartyId, StringComparison.Ordinal)) return;
         if (!HuntStillValid(out _, out var party)) return;
 
-        // E17: while the player rides in another lord's army the hunter stands off: no re-engage and no step. The end
-        // gates above still run, and the chase resumes the first hour after he leaves.
+        // E17: while the player rides in another lord's army the hunter stands off: his order and pin are released, with
+        // no step. The hunt itself goes on (the end gates above still run, the timeout counts).
         if (_adapter.PlayerInAnotherLordsArmy)
         {
+            StandOff(partyId!);
             _lastStep = "player in another lord's army";
             return;
         }
 
+        if (!_pinnedByUs)
+        {
+            // Resuming after a stand-off: re-pin and re-engage once, whatever the free AI chose; a battle waits.
+            if (!party.InMapEvent && _adapter.PinAndEngagePlayer(partyId!))
+                _pinnedByUs = true;
+        }
         // Re-issue only when lost: every engage call resets all of the party's movement state.
-        if (!party.InMapEvent && !party.IsEngagingPlayer)
+        else if (!party.InMapEvent && !party.IsEngagingPlayer)
+        {
             _adapter.PinAndEngagePlayer(partyId!);
+        }
 
         TryStep(partyId!);
+    }
+
+    /// <summary>
+    /// E17: drops the hunter's engage order and pin through the end's release path, once, so his own AI resumes while
+    /// the hunt state stays (no end, no cooldown). The hourly tick re-pins him when the player leaves the army.
+    /// </summary>
+    private void StandOff(string partyId)
+    {
+        if (!_pinnedByUs) return;
+        _adapter.ReleasePin(partyId);
+        _pinnedByUs = false;
     }
 
     private void TryStep(string partyId)
@@ -527,7 +563,9 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         string partyId = _hunterPartyId!;
         string heroId = _hunterHeroId!;
 
-        _adapter.ReleasePin(partyId);
+        // A stand-off already released the pin; never twice.
+        if (_pinnedByUs)
+            _adapter.ReleasePin(partyId);
         ClearHunt();
         _adapter.InvalidateSpeed(partyId);
 
@@ -546,6 +584,7 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         _hunterPartyId = null;
         _huntStartDay = 0f;
         _lastStep = null;
+        _pinnedByUs = false;
         Interlocked.Exchange(ref _sizeRejectionLogged, 0);
         Publish(null);
     }
@@ -561,7 +600,10 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         string? partyId = _hunterPartyId;
         if (partyId == null) return;
 
-        var reading = _adapter.ReadSight(partyId, SightMargin);
+        // E17: in another lord's army the hunter stands off at once, and no floor applies until the hunt re-pins him.
+        if (_adapter.PlayerInAnotherLordsArmy)
+            StandOff(partyId);
+        var reading = _pinnedByUs ? _adapter.ReadSight(partyId, SightMargin) : HuntSightReading.Missing;
         bool inSight = IsInFloorBand(reading);
         // A non-finite speed is published as it is: SpeedMoved and TryGetSpeedFloor refuse it.
         float speed = reading.PlayerSpeed;

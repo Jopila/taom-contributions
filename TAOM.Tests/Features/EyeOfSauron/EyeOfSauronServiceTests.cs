@@ -1531,20 +1531,161 @@ public class EyeOfSauronServiceTests
         _adapter.PlayerInAnotherLordsArmy.Returns(true);
 
         _sut.OnHourlyTickParty(Party);
+        _sut.OnHourlyTickParty(Party);
 
         Assert.IsTrue(_sut.IsHunting, "standing off is not an end");
+        // The engage order is dropped through the end's release path, once, so normal AI resumes.
+        _adapter.Received(1).ReleasePin(Party);
         _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
         _adapter.DidNotReceive().ReadStepState(Arg.Any<string>());
         _adapter.DidNotReceive().Relocate(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>());
-        _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
         StringAssert.Contains(string.Join("\n", _sut.Describe()), "Last hourly step: player in another lord's army");
 
-        // He leaves the army: the next hour re-engages and steps again.
+        // He leaves the army: the next hour re-pins and re-engages exactly once, and steps again.
         _adapter.PlayerInAnotherLordsArmy.Returns(false);
         _sut.OnHourlyTickParty(Party);
 
         _adapter.Received(1).PinAndEngagePlayer(Party);
         _adapter.Received(1).Relocate(Party, Arg.Any<float>(), Arg.Any<float>());
+    }
+
+    // E17: after the release the free AI may engage the player on its own; the resume still re-pins, exactly once.
+    [TestMethod]
+    public void OnHourlyTickParty_ResumeWhileTheFreeAiEngagesHim_StillRepinsOnce()
+    {
+        StartWitchKingHunt();
+        StraightPathTo(100f, 10f);
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+        _sut.OnHourlyTickParty(Party);
+
+        _adapter.PlayerInAnotherLordsArmy.Returns(false);
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, engaging: true));
+        _sut.OnHourlyTickParty(Party);
+        _sut.OnHourlyTickParty(Party);
+
+        _adapter.Received(1).PinAndEngagePlayer(Party);
+    }
+
+    // E17: a resume hour the hunter spends in a battle waits; the next free hour re-pins.
+    [TestMethod]
+    public void OnHourlyTickParty_ResumeWhileTheHunterIsInABattle_RepinsTheNextFreeHour()
+    {
+        StartWitchKingHunt();
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+        _sut.OnHourlyTickParty(Party);
+
+        _adapter.PlayerInAnotherLordsArmy.Returns(false);
+        var fighting = FreeParty(HuntTroopLists.WitchKingId, engaging: true);
+        fighting.InMapEvent = true;
+        _adapter.ReadParty(Party).Returns(fighting);
+        _sut.OnHourlyTickParty(Party);
+        _adapter.DidNotReceive().PinAndEngagePlayer(Party);
+
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, engaging: true));
+        _sut.OnHourlyTickParty(Party);
+        _adapter.Received(1).PinAndEngagePlayer(Party);
+    }
+
+    // E17: the frame tick stands the hunter off at once (one release), and no speed floor applies in the army.
+    [TestMethod]
+    public void OnTick_PlayerInAnotherLordsArmy_ReleasesOnce_AndPublishesNoFloor()
+    {
+        StartWitchKingHunt();
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+
+        InSight(distance: 5f);
+        InSight(distance: 5f);
+
+        Assert.IsTrue(_sut.IsHunting);
+        Assert.IsFalse(_sut.TryGetSpeedFloor(Party, 3f, out _), "no floor while he rides in another lord's army");
+        _adapter.Received(1).ReleasePin(Party);
+    }
+
+    // E17: out of the army, the floor waits for the hourly re-pin, then applies again.
+    [TestMethod]
+    public void OnTick_AfterTheArmy_FloorReturnsOnlyOnceTheHuntHoldsThePinAgain()
+    {
+        StartWitchKingHunt();
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+        InSight(distance: 5f);
+
+        _adapter.PlayerInAnotherLordsArmy.Returns(false);
+        InSight(distance: 5f);
+        Assert.IsFalse(_sut.TryGetSpeedFloor(Party, 3f, out _), "the free AI is not the hunt: no floor yet");
+
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, engaging: false));
+        _sut.OnHourlyTickParty(Party);
+        InSight(distance: 5f);
+        Assert.IsTrue(_sut.TryGetSpeedFloor(Party, 3f, out _), "re-pinned: the floor applies again");
+    }
+
+    // E17: an end during the stand-off keeps the hunt's other effects but never releases a second time; the timeout
+    // still counts while standing off.
+    [DataTestMethod]
+    [DataRow("timeout")]
+    [DataRow("peace")]
+    [DataRow("manual")]
+    [DataRow("beaten")]
+    public void EndDuringTheStandOff_ReleasesOnlyOnce(string end)
+    {
+        StartWitchKingHunt();
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+        _sut.OnHourlyTickParty(Party);
+        _adapter.Received(1).ReleasePin(Party);
+
+        switch (end)
+        {
+            case "timeout":
+                _now += 20d;
+                _sut.OnHourlyTickParty(Party);
+                break;
+            case "peace": Daily(h => h.AtWarWithPlayerKingdom = false); break;
+            case "manual": _sut.EndHunt(HuntEndReason.Manual); break;
+            case "beaten": Battle(MordorKingdom, involvesHunter: true, hunterLost: true); break;
+        }
+
+        Assert.IsFalse(_sut.IsHunting, end);
+        _adapter.Received(1).ReleasePin(Party);
+        _adapter.Received(1).Announce(end == "beaten" ? HuntAnnouncement.Won : HuntAnnouncement.Over, HuntTroopLists.WitchKingId);
+    }
+
+    // E17: a save taken during the stand-off holds no pin; after the load the hunt knows it, so it re-pins on resume and
+    // its end releases nothing a second time.
+    [TestMethod]
+    public void OnSessionLaunched_SavedDuringTheStandOff_RepinsOnResume_AndEndsWithoutASecondRelease()
+    {
+        _sut.LoadFrom(new EyeOfSauronState
+        {
+            HunterHeroId = HuntTroopLists.WitchKingId, HunterPartyId = Party, HuntStartDay = 1000f,
+        });
+        _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(FreeHero());
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, engaging: true));
+        _sut.OnSessionLaunched();
+
+        _sut.OnHourlyTickParty(Party);
+        _adapter.Received(1).PinAndEngagePlayer(Party);
+
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+        _sut.OnHourlyTickParty(Party);
+        _sut.EndHunt(HuntEndReason.Manual);
+        _adapter.Received(1).ReleasePin(Party);
+    }
+
+    [TestMethod]
+    public void OnSessionLaunched_SavedWhilePinned_EndReleasesThePin()
+    {
+        _sut.LoadFrom(new EyeOfSauronState
+        {
+            HunterHeroId = HuntTroopLists.WitchKingId, HunterPartyId = Party, HuntStartDay = 1000f,
+        });
+        var pinned = FreeParty(HuntTroopLists.WitchKingId);
+        pinned.AiPinned = true;
+        _adapter.ReadParty(Party).Returns(pinned);
+        _sut.OnSessionLaunched();
+
+        _sut.EndHunt(HuntEndReason.Manual);
+
+        _adapter.Received(1).ReleasePin(Party);
     }
 
     [TestMethod]
