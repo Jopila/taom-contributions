@@ -1799,83 +1799,83 @@
     <string id="aom_umbar_male_name_8" text="羅扎爾" />
     <string id="aom_umbar_male_name_9" text="納茲林" />
     <string id="aom_umbar_name" text="昂巴" />
-    <string id="aom_arthedain_clan_1" text="House of Amlaith" />
-    <string id="aom_arthedain_clan_10" text="House of Deadmen's Dike" />
-    <string id="aom_arthedain_clan_11" text="House of the Weather Hills" />
-    <string id="aom_arthedain_clan_12" text="House of Nenuial" />
-    <string id="aom_arthedain_clan_2" text="House of Fornost" />
-    <string id="aom_arthedain_clan_3" text="House of Annúminas" />
-    <string id="aom_arthedain_clan_4" text="House of Amon Sûl" />
-    <string id="aom_arthedain_clan_5" text="House of the North Downs" />
-    <string id="aom_arthedain_clan_6" text="House of Evendim" />
-    <string id="aom_arthedain_clan_7" text="House of the Baranduin" />
-    <string id="aom_arthedain_clan_8" text="House of the Angle" />
-    <string id="aom_arthedain_clan_9" text="House of Bree" />
-    <string id="aom_arthedain_desc" text="The Dúnedain of Arthedain are the last heirs of Arnor, the North-kingdom Elendil founded. From Fornost upon the North Downs the line of Arvedui still keeps the watch that Isildur's heirs have kept for a thousand years, though their towns are few, their lords are poor and the shadow of Angmar never leaves the hills. They are fewer than their southern kin and prouder than their numbers warrant, and every season the wild lands press closer." />
-    <string id="aom_arthedain_female_name_1" text="Gilraen" />
-    <string id="aom_arthedain_female_name_10" text="Rhiannel" />
-    <string id="aom_arthedain_female_name_11" text="Silivren" />
-    <string id="aom_arthedain_female_name_12" text="Ithilwen" />
-    <string id="aom_arthedain_female_name_13" text="Aerwen" />
-    <string id="aom_arthedain_female_name_14" text="Calwen" />
-    <string id="aom_arthedain_female_name_15" text="Elthiel" />
-    <string id="aom_arthedain_female_name_16" text="Maethil" />
-    <string id="aom_arthedain_female_name_17" text="Varwen" />
-    <string id="aom_arthedain_female_name_18" text="Anwiel" />
-    <string id="aom_arthedain_female_name_19" text="Cúwen" />
-    <string id="aom_arthedain_female_name_2" text="Ivorwen" />
-    <string id="aom_arthedain_female_name_20" text="Faerwen" />
-    <string id="aom_arthedain_female_name_21" text="Hethlin" />
-    <string id="aom_arthedain_female_name_22" text="Luinil" />
-    <string id="aom_arthedain_female_name_23" text="Tirwen" />
-    <string id="aom_arthedain_female_name_24" text="Arwiel" />
-    <string id="aom_arthedain_female_name_3" text="Fíriel" />
-    <string id="aom_arthedain_female_name_4" text="Dírwen" />
-    <string id="aom_arthedain_female_name_5" text="Eirien" />
-    <string id="aom_arthedain_female_name_6" text="Elanwen" />
-    <string id="aom_arthedain_female_name_7" text="Gilwen" />
-    <string id="aom_arthedain_female_name_8" text="Lothwen" />
-    <string id="aom_arthedain_female_name_9" text="Meneliel" />
-    <string id="aom_arthedain_male_name_1" text="Amlaith" />
-    <string id="aom_arthedain_male_name_10" text="Arvegil" />
-    <string id="aom_arthedain_male_name_11" text="Araval" />
-    <string id="aom_arthedain_male_name_12" text="Araphant" />
-    <string id="aom_arthedain_male_name_13" text="Arvedui" />
-    <string id="aom_arthedain_male_name_14" text="Aranarth" />
-    <string id="aom_arthedain_male_name_15" text="Arahael" />
-    <string id="aom_arthedain_male_name_16" text="Aranuir" />
-    <string id="aom_arthedain_male_name_17" text="Aravir" />
-    <string id="aom_arthedain_male_name_18" text="Aragost" />
-    <string id="aom_arthedain_male_name_19" text="Aravorn" />
-    <string id="aom_arthedain_male_name_2" text="Beleg" />
-    <string id="aom_arthedain_male_name_20" text="Arahad" />
-    <string id="aom_arthedain_male_name_21" text="Argonui" />
-    <string id="aom_arthedain_male_name_22" text="Arador" />
-    <string id="aom_arthedain_male_name_23" text="Arassuil" />
-    <string id="aom_arthedain_male_name_24" text="Dírhael" />
-    <string id="aom_arthedain_male_name_25" text="Malbeth" />
-    <string id="aom_arthedain_male_name_26" text="Halbarad" />
-    <string id="aom_arthedain_male_name_27" text="Calmir" />
-    <string id="aom_arthedain_male_name_28" text="Dorlas" />
-    <string id="aom_arthedain_male_name_29" text="Galdir" />
-    <string id="aom_arthedain_male_name_3" text="Mallor" />
-    <string id="aom_arthedain_male_name_30" text="Haldan" />
-    <string id="aom_arthedain_male_name_31" text="Iorhael" />
-    <string id="aom_arthedain_male_name_32" text="Mablost" />
-    <string id="aom_arthedain_male_name_33" text="Nardil" />
-    <string id="aom_arthedain_male_name_34" text="Rodnor" />
-    <string id="aom_arthedain_male_name_35" text="Tharion" />
-    <string id="aom_arthedain_male_name_36" text="Saelon" />
-    <string id="aom_arthedain_male_name_37" text="Morvegil" />
-    <string id="aom_arthedain_male_name_38" text="Cirdir" />
-    <string id="aom_arthedain_male_name_39" text="Hirvegil" />
-    <string id="aom_arthedain_male_name_4" text="Celepharn" />
-    <string id="aom_arthedain_male_name_40" text="Hallatan" />
-    <string id="aom_arthedain_male_name_5" text="Celebrindor" />
-    <string id="aom_arthedain_male_name_6" text="Malvegil" />
-    <string id="aom_arthedain_male_name_7" text="Argeleb" />
-    <string id="aom_arthedain_male_name_8" text="Arveleg" />
-    <string id="aom_arthedain_male_name_9" text="Araphor" />
-    <string id="aom_arthedain_name" text="Arthedain" />
+    <string id="aom_arthedain_clan_1" text="阿姆萊斯家族" />
+    <string id="aom_arthedain_clan_10" text="死人堤家族" />
+    <string id="aom_arthedain_clan_11" text="風雲丘陵家族" />
+    <string id="aom_arthedain_clan_12" text="奈努伊爾家族" />
+    <string id="aom_arthedain_clan_2" text="福諾斯特家族" />
+    <string id="aom_arthedain_clan_3" text="安努米那斯家族" />
+    <string id="aom_arthedain_clan_4" text="阿蒙蘇爾家族" />
+    <string id="aom_arthedain_clan_5" text="北崗家族" />
+    <string id="aom_arthedain_clan_6" text="暮影湖家族" />
+    <string id="aom_arthedain_clan_7" text="巴蘭都因家族" />
+    <string id="aom_arthedain_clan_8" text="河灣地家族" />
+    <string id="aom_arthedain_clan_9" text="布理家族" />
+    <string id="aom_arthedain_desc" text="亞爾希丹的杜內丹人是埃蘭迪爾所建北方王國亞爾諾的最後繼承者。在北崗之上的佛諾斯特，亞維杜的血脈仍守著伊西鐸子嗣千年來未曾放下的警戒，縱然他們的城鎮稀少、領主貧寒，而安格馬的陰影從未離開這些丘陵。他們的人數比南方的親族更少，驕傲卻遠超其人數所能支撐，而荒野每一季都逼得更近。" />
+    <string id="aom_arthedain_female_name_1" text="姬爾蘭" />
+    <string id="aom_arthedain_female_name_10" text="瑞安奈爾" />
+    <string id="aom_arthedain_female_name_11" text="希利芙蓮" />
+    <string id="aom_arthedain_female_name_12" text="伊西爾雯" />
+    <string id="aom_arthedain_female_name_13" text="艾爾雯" />
+    <string id="aom_arthedain_female_name_14" text="卡爾雯" />
+    <string id="aom_arthedain_female_name_15" text="艾爾希爾" />
+    <string id="aom_arthedain_female_name_16" text="梅希爾" />
+    <string id="aom_arthedain_female_name_17" text="瓦爾雯" />
+    <string id="aom_arthedain_female_name_18" text="安薇爾" />
+    <string id="aom_arthedain_female_name_19" text="庫雯" />
+    <string id="aom_arthedain_female_name_2" text="伊芙雯" />
+    <string id="aom_arthedain_female_name_20" text="費爾雯" />
+    <string id="aom_arthedain_female_name_21" text="赫斯林" />
+    <string id="aom_arthedain_female_name_22" text="露伊妮爾" />
+    <string id="aom_arthedain_female_name_23" text="提爾雯" />
+    <string id="aom_arthedain_female_name_24" text="阿薇爾" />
+    <string id="aom_arthedain_female_name_3" text="菲瑞爾" />
+    <string id="aom_arthedain_female_name_4" text="狄爾雯" />
+    <string id="aom_arthedain_female_name_5" text="艾瑞恩" />
+    <string id="aom_arthedain_female_name_6" text="艾蘭雯" />
+    <string id="aom_arthedain_female_name_7" text="姬爾雯" />
+    <string id="aom_arthedain_female_name_8" text="洛斯雯" />
+    <string id="aom_arthedain_female_name_9" text="梅奈利爾" />
+    <string id="aom_arthedain_male_name_1" text="阿姆萊斯" />
+    <string id="aom_arthedain_male_name_10" text="阿維吉爾" />
+    <string id="aom_arthedain_male_name_11" text="阿拉瓦爾" />
+    <string id="aom_arthedain_male_name_12" text="阿拉凡特" />
+    <string id="aom_arthedain_male_name_13" text="亞維杜" />
+    <string id="aom_arthedain_male_name_14" text="阿拉納斯" />
+    <string id="aom_arthedain_male_name_15" text="阿拉海爾" />
+    <string id="aom_arthedain_male_name_16" text="阿拉努伊爾" />
+    <string id="aom_arthedain_male_name_17" text="阿拉維爾" />
+    <string id="aom_arthedain_male_name_18" text="阿拉戈斯特" />
+    <string id="aom_arthedain_male_name_19" text="阿拉沃恩" />
+    <string id="aom_arthedain_male_name_2" text="貝烈格" />
+    <string id="aom_arthedain_male_name_20" text="阿拉哈德" />
+    <string id="aom_arthedain_male_name_21" text="阿爾戈努伊" />
+    <string id="aom_arthedain_male_name_22" text="阿拉多" />
+    <string id="aom_arthedain_male_name_23" text="阿拉蘇伊爾" />
+    <string id="aom_arthedain_male_name_24" text="狄爾哈埃爾" />
+    <string id="aom_arthedain_male_name_25" text="馬爾貝斯" />
+    <string id="aom_arthedain_male_name_26" text="哈爾巴拉德" />
+    <string id="aom_arthedain_male_name_27" text="卡爾米爾" />
+    <string id="aom_arthedain_male_name_28" text="多爾拉斯" />
+    <string id="aom_arthedain_male_name_29" text="加爾迪爾" />
+    <string id="aom_arthedain_male_name_3" text="馬洛爾" />
+    <string id="aom_arthedain_male_name_30" text="哈爾丹" />
+    <string id="aom_arthedain_male_name_31" text="伊歐哈埃爾" />
+    <string id="aom_arthedain_male_name_32" text="馬布洛斯特" />
+    <string id="aom_arthedain_male_name_33" text="納爾迪爾" />
+    <string id="aom_arthedain_male_name_34" text="羅德諾爾" />
+    <string id="aom_arthedain_male_name_35" text="薩瑞安" />
+    <string id="aom_arthedain_male_name_36" text="賽隆" />
+    <string id="aom_arthedain_male_name_37" text="莫爾維吉爾" />
+    <string id="aom_arthedain_male_name_38" text="奇爾迪爾" />
+    <string id="aom_arthedain_male_name_39" text="希爾維吉爾" />
+    <string id="aom_arthedain_male_name_4" text="凱列法恩" />
+    <string id="aom_arthedain_male_name_40" text="哈拉坦" />
+    <string id="aom_arthedain_male_name_5" text="凱勒布林多" />
+    <string id="aom_arthedain_male_name_6" text="馬爾維吉爾" />
+    <string id="aom_arthedain_male_name_7" text="阿爾吉烈布" />
+    <string id="aom_arthedain_male_name_8" text="阿爾維烈格" />
+    <string id="aom_arthedain_male_name_9" text="阿拉佛爾" />
+    <string id="aom_arthedain_name" text="雅爾諾斯特" />
   </strings>
 </base>

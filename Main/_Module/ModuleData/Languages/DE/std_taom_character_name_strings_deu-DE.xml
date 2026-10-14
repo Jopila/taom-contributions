@@ -1525,76 +1525,76 @@
     <string id="taom_spider_creature_name" text="Spinnenreiter" />
     <string id="taom_spider_rider_brown_name" text="Großspinnenreiter" />
     <string id="taom_spider_rider_pale_name" text="Bleicher Spinnenreiter" />
-    <string id="aom_arth_arena" text="Arena Master" />
-    <string id="aom_arth_armed_trader" text="Arthedain Armed Trader" />
-    <string id="aom_arth_armorer" text="Armorer" />
-    <string id="aom_arth_barber" text="Barber" />
-    <string id="aom_arth_beggar" text="Beggar" />
-    <string id="aom_arth_blacksmith" text="Blacksmith" />
-    <string id="aom_arth_caravan_guard" text="Arthedain Caravan Guard" />
-    <string id="aom_arth_caravan_master" text="Arthedain Caravan Master" />
-    <string id="aom_arth_dancer" text="Dancer" />
-    <string id="aom_arth_female_beggar" text="Beggar" />
-    <string id="aom_arth_gamehost" text="Game Host" />
-    <string id="aom_arth_gang_bodyguard" text="Gang Bodyguard" />
-    <string id="aom_arth_gear_dummy" text="Gear Dummy" />
-    <string id="aom_arth_guard" text="Guard" />
-    <string id="aom_arth_headman_1" text="Rebellious Arthedain headman" />
-    <string id="aom_arth_headman_2" text="Conservative Arthedain headman" />
-    <string id="aom_arth_headman_3" text="Devious Arthedain headman" />
-    <string id="aom_arth_horse_merchant" text="Horse Merchant" />
-    <string id="aom_arth_merchant" text="Trader" />
-    <string id="aom_arth_musician" text="Musician" />
-    <string id="aom_arth_notable_0" text="Prudent Arthedain merchant" />
-    <string id="aom_arth_notable_0b" text="Arthedain vintner" />
-    <string id="aom_arth_notable_1" text="Ruthless Arthedain trader" />
-    <string id="aom_arth_notable_10" text="Sardonic Arthedain outlaw" />
-    <string id="aom_arth_notable_11" text="Intimidating Arthedain enforcer" />
-    <string id="aom_arth_notable_12" text="Cunning Arthedain smuggler" />
-    <string id="aom_arth_notable_13" text="Menacing Arthedain schemer" />
-    <string id="aom_arth_notable_1b" text="Cold Arthedain merchant" />
-    <string id="aom_arth_notable_2" text="Fornost gem dealer" />
-    <string id="aom_arth_notable_21" text="Stern Arthedain landowner" />
-    <string id="aom_arth_notable_22" text="Agreeable Arthedain elder" />
-    <string id="aom_arth_notable_2b" text="Wise Arthedain merchant" />
-    <string id="aom_arth_notable_3" text="Self-made Arthedain merchant" />
-    <string id="aom_arth_notable_3b" text="Jovial Arthedain merchant" />
-    <string id="aom_arth_notable_4" text="Shrewd Arthedain merchant" />
-    <string id="aom_arth_notable_4b" text="Devious Arthedain merchant" />
-    <string id="aom_arth_notable_5" text="Zealous Arthedain loremaster" />
-    <string id="aom_arth_notable_6" text="Stern lord of Arthedain" />
-    <string id="aom_arth_notable_7" text="Arthedain keeper of traditions" />
-    <string id="aom_arth_notable_8" text="Gruff Fornost artisan" />
-    <string id="aom_arth_notable_9" text="Gifted Arthedain craftsman" />
-    <string id="aom_arth_notable_gl1" text="Protective Arthedain ringleader" />
-    <string id="aom_arth_notable_gl4" text="Ruthless Arthedain thug" />
-    <string id="aom_arth_practice_1" text="Practice Fighter" />
-    <string id="aom_arth_practice_2" text="Practice Fighter" />
-    <string id="aom_arth_practice_3" text="Practice Fighter" />
-    <string id="aom_arth_practice_dummy" text="Practice Dummy" />
-    <string id="aom_arth_prison_guard" text="Prison Guard" />
-    <string id="aom_arth_ransom_broker" text="Ransom Broker" />
-    <string id="aom_arth_shop_worker" text="Shop Worker" />
-    <string id="aom_arth_tavern_wench" text="Tavern Wench" />
-    <string id="aom_arth_tavernkeeper" text="Tavern Keeper" />
-    <string id="aom_arth_townsman" text="Townsman" />
-    <string id="aom_arth_townsman_child" text="Townsman" />
-    <string id="aom_arth_townsman_infant" text="Townsman" />
-    <string id="aom_arth_townsman_teen" text="Townsman" />
-    <string id="aom_arth_townswoman" text="Townswoman" />
-    <string id="aom_arth_townswoman_child" text="Townswoman" />
-    <string id="aom_arth_townswoman_infant" text="Townswoman" />
-    <string id="aom_arth_townswoman_teen" text="Townswoman" />
-    <string id="aom_arth_vet_caravan_guard" text="Arthedain Veteran Caravan Guard" />
-    <string id="aom_arth_village_woman" text="Village Woman" />
-    <string id="aom_arth_village_woman_child" text="Village Child" />
-    <string id="aom_arth_village_woman_teen" text="Village Teenager" />
-    <string id="aom_arth_villager" text="Villager" />
-    <string id="aom_arth_villager_child" text="Village Child" />
-    <string id="aom_arth_villager_teen" text="Village Teenager" />
-    <string id="aom_arth_weaponsmith" text="Weaponsmith" />
-    <string id="aom_arthedain_lord_1" text="Bold Arthedain lord" />
-    <string id="aom_arthedain_lord_2" text="Cautious Arthedain lord" />
+    <string id="aom_arth_arena" text="Arenameister" />
+    <string id="aom_arth_armed_trader" text="Bewaffneter Händler aus Arthedain" />
+    <string id="aom_arth_armorer" text="Rüstungsschmied" />
+    <string id="aom_arth_barber" text="Barbier" />
+    <string id="aom_arth_beggar" text="Bettler" />
+    <string id="aom_arth_blacksmith" text="Schmied" />
+    <string id="aom_arth_caravan_guard" text="Karawanenwache aus Arthedain" />
+    <string id="aom_arth_caravan_master" text="Karawanenführer aus Arthedain" />
+    <string id="aom_arth_dancer" text="Tänzerin" />
+    <string id="aom_arth_female_beggar" text="Bettlerin" />
+    <string id="aom_arth_gamehost" text="Spielleiter" />
+    <string id="aom_arth_gang_bodyguard" text="Bandenleibwächter" />
+    <string id="aom_arth_gear_dummy" text="Ausrüstungspuppe" />
+    <string id="aom_arth_guard" text="Wache" />
+    <string id="aom_arth_headman_1" text="Aufsässiger Dorfvorsteher aus Arthedain" />
+    <string id="aom_arth_headman_2" text="Konservativer Dorfvorsteher aus Arthedain" />
+    <string id="aom_arth_headman_3" text="Hinterlistiger Dorfvorsteher aus Arthedain" />
+    <string id="aom_arth_horse_merchant" text="Pferdehändler" />
+    <string id="aom_arth_merchant" text="Händler" />
+    <string id="aom_arth_musician" text="Musikant" />
+    <string id="aom_arth_notable_0" text="Umsichtiger Kaufmann aus Arthedain" />
+    <string id="aom_arth_notable_0b" text="Weinhändler aus Arthedain" />
+    <string id="aom_arth_notable_1" text="Skrupelloser Händler aus Arthedain" />
+    <string id="aom_arth_notable_10" text="Spöttischer Gesetzloser aus Arthedain" />
+    <string id="aom_arth_notable_11" text="Einschüchternder Vollstrecker aus Arthedain" />
+    <string id="aom_arth_notable_12" text="Gerissener Schmuggler aus Arthedain" />
+    <string id="aom_arth_notable_13" text="Bedrohlicher Ränkeschmied aus Arthedain" />
+    <string id="aom_arth_notable_1b" text="Kalter Kaufmann aus Arthedain" />
+    <string id="aom_arth_notable_2" text="Edelsteinhändler aus Fornost" />
+    <string id="aom_arth_notable_21" text="Strenger Grundbesitzer aus Arthedain" />
+    <string id="aom_arth_notable_22" text="Umgänglicher Ältester aus Arthedain" />
+    <string id="aom_arth_notable_2b" text="Weiser Kaufmann aus Arthedain" />
+    <string id="aom_arth_notable_3" text="Selfgemachter Kaufmann aus Arthedain" />
+    <string id="aom_arth_notable_3b" text="Jovialer Kaufmann aus Arthedain" />
+    <string id="aom_arth_notable_4" text="Gewiefter Kaufmann aus Arthedain" />
+    <string id="aom_arth_notable_4b" text="Hinterlistiger Kaufmann aus Arthedain" />
+    <string id="aom_arth_notable_5" text="Eifriger Überlieferungsmeister aus Arthedain" />
+    <string id="aom_arth_notable_6" text="Strenger Fürst von Arthedain" />
+    <string id="aom_arth_notable_7" text="Hüter der Traditionen von Arthedain" />
+    <string id="aom_arth_notable_8" text="Barscher Handwerker aus Fornost" />
+    <string id="aom_arth_notable_9" text="Begabter Handwerker aus Arthedain" />
+    <string id="aom_arth_notable_gl1" text="Beschützender Bandenführer aus Arthedain" />
+    <string id="aom_arth_notable_gl4" text="Skrupelloser Schläger aus Arthedain" />
+    <string id="aom_arth_practice_1" text="Übungskämpfer" />
+    <string id="aom_arth_practice_2" text="Übungskämpfer" />
+    <string id="aom_arth_practice_3" text="Übungskämpfer" />
+    <string id="aom_arth_practice_dummy" text="Übungspuppe" />
+    <string id="aom_arth_prison_guard" text="Gefängniswärter" />
+    <string id="aom_arth_ransom_broker" text="Lösegeldmakler" />
+    <string id="aom_arth_shop_worker" text="Ladengehilfe" />
+    <string id="aom_arth_tavern_wench" text="Schankmagd" />
+    <string id="aom_arth_tavernkeeper" text="Wirt" />
+    <string id="aom_arth_townsman" text="Städter" />
+    <string id="aom_arth_townsman_child" text="Städter" />
+    <string id="aom_arth_townsman_infant" text="Städter" />
+    <string id="aom_arth_townsman_teen" text="Städter" />
+    <string id="aom_arth_townswoman" text="Städterin" />
+    <string id="aom_arth_townswoman_child" text="Städterin" />
+    <string id="aom_arth_townswoman_infant" text="Städterin" />
+    <string id="aom_arth_townswoman_teen" text="Städterin" />
+    <string id="aom_arth_vet_caravan_guard" text="Erfahrener Karawanenwächter aus Arthedain" />
+    <string id="aom_arth_village_woman" text="Dorffrau" />
+    <string id="aom_arth_village_woman_child" text="Dorfkind" />
+    <string id="aom_arth_village_woman_teen" text="Dorfjugendliche" />
+    <string id="aom_arth_villager" text="Dorfbewohner" />
+    <string id="aom_arth_villager_child" text="Dorfkind" />
+    <string id="aom_arth_villager_teen" text="Dorfjugendlicher" />
+    <string id="aom_arth_weaponsmith" text="Waffenschmied" />
+    <string id="aom_arthedain_lord_1" text="Kühner Fürst von Arthedain" />
+    <string id="aom_arthedain_lord_2" text="Vorsichtiger Fürst von Arthedain" />
     <string id="aom_spc_wanderer_arthedain_0_name" text="{FIRSTNAME} Calendorionath" />
     <string id="aom_spc_wanderer_arthedain_10_name" text="{FIRSTNAME} Morvegilionath" />
     <string id="aom_spc_wanderer_arthedain_11_name" text="{FIRSTNAME} Arandurionath" />
@@ -1613,11 +1613,11 @@
     <string id="aom_spc_wanderer_dale_2_name" text="{FIRSTNAME} Hallbrand" />
     <string id="aom_spc_wanderer_dale_3_name" text="{FIRSTNAME} Esgarothing" />
     <string id="aom_spc_wanderer_dale_4_name" text="{FIRSTNAME} Dalecroft" />
-    <string id="aom_spc_wanderer_dale_5_name" text="{FIRSTNAME} Longlakeson" />
+    <string id="aom_spc_wanderer_dale_5_name" text="{FIRSTNAME} Langseesson" />
     <string id="aom_spc_wanderer_dale_6_name" text="{FIRSTNAME} Brandwyn" />
-    <string id="aom_spc_wanderer_dale_7_name" text="{FIRSTNAME} Ravenhild" />
-    <string id="aom_spc_wanderer_dale_8_name" text="{FIRSTNAME} Lonelyfell" />
-    <string id="aom_spc_wanderer_dale_9_name" text="{FIRSTNAME} Fellrider" />
+    <string id="aom_spc_wanderer_dale_7_name" text="{FIRSTNAME} Rabenhild" />
+    <string id="aom_spc_wanderer_dale_8_name" text="{FIRSTNAME} Einsamfell" />
+    <string id="aom_spc_wanderer_dale_9_name" text="{FIRSTNAME} Fellreiter" />
     <string id="aom_spc_wanderer_khand_0_name" text="{FIRSTNAME} Variagor" />
     <string id="aom_spc_wanderer_khand_1_name" text="{FIRSTNAME} Azrakhan" />
     <string id="aom_spc_wanderer_khand_2_name" text="{FIRSTNAME} Dunhazur" />

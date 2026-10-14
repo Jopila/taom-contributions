@@ -30,5 +30,54 @@
     <string id="taom_wotr_victory_free" text="A guerra acabou. Os Povos Livres perseveraram e conquistaram o futuro para seus filhos. Viva a liberdade!" />
     <string id="taom_wotr_victory_evil" text="Os reinos dos Homens e Elfos foram esmagados. Viva Sauron!" />
     <string id="taom_wotr_continue" text="Continuar" />
+    <string id="taom_wotr_chronicle_events" text="Eventos da Crônica" />
+    <string id="taom_wc_siege_lost" text="{TARGET} muda de mãos antes que a batalha possa ser decidida." />
+    <string id="taom_wc_fellowship_title" text="A Sociedade Parte" />
+    <string id="taom_wc_fellowship_occurred" text="Nove caminhantes deixam Valfenda em segredo, levando o Um Anel para o sul. A casa de Elrond reúne suas forças." />
+    <string id="taom_wc_khazaddum_title" text="A Ponte de Khazad-dûm" />
+    <string id="taom_wc_khazaddum_occurred" text="Nas profundezas de Moria, o Peregrino Cinzento cai junto com o Balrog. Os orcs das Montanhas Nevoentas se multiplicam, e os Povos Livres pranteiam." />
+    <string id="taom_wc_breaking_title" text="A Dissolução da Sociedade" />
+    <string id="taom_wc_breaking_occurred" text="Em Parth Galen os Uruk-hai caem sobre a Comitiva. Boromir morre defendendo os hobbits, e Gondor perde seu herdeiro." />
+    <string id="taom_wc_theoden_title" text="Théoden Rei" />
+    <string id="taom_wc_theoden_occurred" text="Livre dos conselhos de Língua de Cobra, Théoden empunha sua espada. A Marca dos Cavaleiros se reúne ao seu rei." />
+    <string id="taom_wc_hornburg_title" text="A Batalha do Forte da Trombeta" />
+    <string id="taom_wc_hornburg_open" text="A hoste de Isengard e os montanheses de Dunlendia marcham sobre {TARGET}. A batalha deve ser decidida em {DAYS} dias." />
+    <string id="taom_wc_hornburg_lapsed" text="Nenhum assalto chega a {TARGET}. A convocação de Isengard volta-se para outro lugar." />
+    <string id="taom_wc_hornburg_held" text="O Forte da Trombeta resiste durante a noite, e a hoste de Isengard se despedaça contra suas muralhas." />
+    <string id="taom_wc_hornburg_fell" text="{TARGET} cai, e a Mão Branca domina o Folde Ocidental." />
+    <string id="taom_wc_ents_title" text="A Última Marcha dos Ents" />
+    <string id="taom_wc_ents_occurred" text="Os Ents de Fangorn descem sobre Isengard e afogam os poços de Saruman. As forjas da Mão Branca silenciam." />
+    <string id="taom_wc_lorien_title" text="Lothlórien Sitiada" />
+    <string id="taom_wc_lorien_open" text="De Dol Guldur a Sombra investe contra o Bosque Dourado. {TARGET} deve resistir por {DAYS} dias." />
+    <string id="taom_wc_lorien_lapsed" text="Os exércitos de Dol Guldur jamais alcançam {TARGET}." />
+    <string id="taom_wc_lorien_held" text="O poder da Dama resiste, e as hostes de Dol Guldur recuam do Bosque Dourado." />
+    <string id="taom_wc_lorien_fell" text="{TARGET} arde, e a luz de Lothlórien se esvai." />
+    <string id="taom_wc_osgiliath_title" text="A Queda de Osgiliath" />
+    <string id="taom_wc_osgiliath_open" text="A hoste de Morgul cruza o Anduin rumo a {TARGET}. Gondor deve manter a cidade em ruínas por {DAYS} dias." />
+    <string id="taom_wc_osgiliath_lapsed" text="Mordor não avança contra {TARGET}, e o rio permanece silencioso." />
+    <string id="taom_wc_osgiliath_held" text="Faramir mantém as travessias do Anduin, e a hoste de Morgul recua." />
+    <string id="taom_wc_osgiliath_fell" text="{TARGET} cai, e a estrada para Minas Tirith fica aberta." />
+    <string id="taom_wc_dale_title" text="A Batalha de Valle" />
+    <string id="taom_wc_dale_open" text="Orientais e os servos de Dol Guldur marcham contra o reino de Valle. {TARGET} deve resistir por {DAYS} dias." />
+    <string id="taom_wc_dale_lapsed" text="Os Orientais desviam seu rumo, e {TARGET} é poupada." />
+    <string id="taom_wc_dale_held" text="Os Homens de Valle e os Anões de Erebor lutam lado a lado, e a hoste dos Orientais é repelida." />
+    <string id="taom_wc_dale_fell" text="{TARGET} cai diante dos Orientais, e os Anões de Erebor marcham para socorrer seus amigos." />
+    <string id="taom_wc_corsairs_title" text="Os Corsários de Umbar" />
+    <string id="taom_wc_corsairs_open" text="As velas negras de Umbar sobem o Anduin rumo a {TARGET}. Gondor deve manter o porto por {DAYS} dias." />
+    <string id="taom_wc_corsairs_lapsed" text="Os Corsários permanecem no mar, e {TARGET} é deixada em paz." />
+    <string id="taom_wc_corsairs_held" text="As frotas de Umbar são expulsas de {TARGET}, e os feudos do sul de Gondor ganham ânimo." />
+    <string id="taom_wc_corsairs_fell" text="Os Corsários tomam {TARGET}, e seus navios dominam o rio." />
+    <string id="taom_wc_north_title" text="Guerra no Norte" />
+    <string id="taom_wc_north_open" text="Orcs de Gundabad e os montanheses de Terras Brunas descem sobre o Norte. {TARGET} deve resistir por {DAYS} dias." />
+    <string id="taom_wc_north_lapsed" text="A guerra do norte passa ao largo de {TARGET}." />
+    <string id="taom_wc_north_held" text="Os Guardiões e os homens de Arthedain mantêm {TARGET}, e o Norte segue livre." />
+    <string id="taom_wc_north_fell" text="{TARGET} cai, e a sombra se espalha por Eriador." />
+    <string id="taom_wc_gondor_title" text="O Cerco de Gondor" />
+    <string id="taom_wc_gondor_open" text="O Senhor dos Nazgûl conduz as hostes de Mordor contra {TARGET}. A cidade deve resistir por {DAYS} dias." />
+    <string id="taom_wc_gondor_lapsed" text="A grande hoste de Mordor se contém, e {TARGET} aguarda sob um céu escurecido." />
+    <string id="taom_wc_gondor_held" text="Os Rohirrim chegam ao amanhecer, e o cerco de {TARGET} é rompido nos Campos de Pelennor." />
+    <string id="taom_wc_gondor_fell" text="Os portões de {TARGET} são arrombados, e a Cidade Branca cai diante de Mordor." />
+    <string id="taom_wc_blackgate_title" text="O Portão Negro se Abre" />
+    <string id="taom_wc_blackgate_occurred" text="Os Capitães do Oeste marcham para o Morannon para desviar o Olho do Portador do Anel. O destino da guerra agora repousa sobre o Anel." />
   </strings>
 </base>

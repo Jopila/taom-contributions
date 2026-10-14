@@ -30,5 +30,54 @@
     <string id="taom_wotr_victory_free" text="전쟁이 끝났습니다. 자유 민족들이 견뎌내어 자손들을 위한 미래를 쟁취했습니다. 자유 만세!" />
     <string id="taom_wotr_victory_evil" text="인간과 엘프의 왕국들이 모두 무너졌습니다. 사우론 만세!" />
     <string id="taom_wotr_continue" text="계속" />
+    <string id="taom_wotr_chronicle_events" text="연대기 사건" />
+    <string id="taom_wc_siege_lost" text="{TARGET}이(가) 전투가 결판나기도 전에 주인이 바뀌었다." />
+    <string id="taom_wc_fellowship_title" text="반지 원정대의 출발" />
+    <string id="taom_wc_fellowship_occurred" text="아홉 도보자가 절대반지를 지닌 채 은밀히 깊은골을 떠나 남쪽으로 향한다. 엘론드의 가문이 힘을 모은다." />
+    <string id="taom_wc_khazaddum_title" text="카자드둠의 다리" />
+    <string id="taom_wc_khazaddum_occurred" text="모리아의 심연에서 회색의 순례자가 발로그와 함께 추락한다. 안개산맥의 오르크들이 들끓고, 자유민들은 애도한다." />
+    <string id="taom_wc_breaking_title" text="원정대의 해산" />
+    <string id="taom_wc_breaking_occurred" text="파르스 갈렌에서 우루크하이가 일행을 덮친다. 보로미르는 호빗들을 지키다 죽고, 곤도르는 후계자를 잃는다." />
+    <string id="taom_wc_theoden_title" text="세오덴 왕" />
+    <string id="taom_wc_theoden_occurred" text="뱀혓바닥의 간언에서 풀려난 세오덴이 검을 든다. 로한이 왕의 부름에 소집된다." />
+    <string id="taom_wc_hornburg_title" text="나팔산성 전투" />
+    <string id="taom_wc_hornburg_open" text="아이센가드의 군세와 던랜드의 구릉민들이 {TARGET}(으)로 진군한다. 이 전투는 {DAYS}일 안에 결판나야 한다." />
+    <string id="taom_wc_hornburg_lapsed" text="{TARGET}에 공격은 오지 않았다. 아이센가드의 군세는 다른 곳으로 향한다." />
+    <string id="taom_wc_hornburg_held" text="나팔산성은 밤새 버텨냈고, 아이센가드의 군세는 그 성벽에 부딪혀 부서졌다." />
+    <string id="taom_wc_hornburg_fell" text="{TARGET}이(가) 함락되고, 백색의 손이 웨스트폴드를 지배한다." />
+    <string id="taom_wc_ents_title" text="엔트들의 마지막 행군" />
+    <string id="taom_wc_ents_occurred" text="팡고른의 엔트들이 아이센가드로 내려와 사루만의 갱도를 물에 잠기게 한다. 백색의 손의 대장간은 침묵에 빠진다." />
+    <string id="taom_wc_lorien_title" text="로슬로리엔 피습" />
+    <string id="taom_wc_lorien_open" text="돌 굴두르에서 어둠의 세력이 황금숲을 공격한다. {TARGET}은(는) {DAYS}일 동안 버텨야 한다." />
+    <string id="taom_wc_lorien_lapsed" text="돌 굴두르의 군대는 끝내 {TARGET}에 이르지 못했다." />
+    <string id="taom_wc_lorien_held" text="귀부인의 힘이 굳건히 버티고, 돌 굴두르의 군세는 황금숲에서 물러난다." />
+    <string id="taom_wc_lorien_fell" text="{TARGET}이(가) 불타고, 로슬로리엔의 빛이 스러진다." />
+    <string id="taom_wc_osgiliath_title" text="오스길리아스의 함락" />
+    <string id="taom_wc_osgiliath_open" text="모르굴의 군세가 안두인을 건너 {TARGET}(으)로 향한다. 곤도르는 폐허가 된 도시를 {DAYS}일 동안 지켜야 한다." />
+    <string id="taom_wc_osgiliath_lapsed" text="모르도르는 {TARGET}을(를) 공격하지 않았고, 강은 고요히 남는다." />
+    <string id="taom_wc_osgiliath_held" text="파라미르가 안두인의 도하점을 지켜내고, 모르굴의 군세는 물러난다." />
+    <string id="taom_wc_osgiliath_fell" text="{TARGET}이(가) 함락되고, 미나스 티리스로 가는 길이 열린다." />
+    <string id="taom_wc_dale_title" text="데일 전투" />
+    <string id="taom_wc_dale_open" text="동부인들과 돌 굴두르의 하수인들이 데일 왕국을 향해 진군한다. {TARGET}은(는) {DAYS}일 동안 버텨야 한다." />
+    <string id="taom_wc_dale_lapsed" text="동부인들이 물러가고, {TARGET}은(는) 화를 면했다." />
+    <string id="taom_wc_dale_held" text="데일의 인간들과 에레보르의 난쟁이들이 함께 맞서, 동부인 군세를 물리쳤다." />
+    <string id="taom_wc_dale_fell" text="{TARGET}이(가) 동부인들에게 함락되자, 에레보르의 난쟁이들이 벗들을 돕기 위해 출진했다." />
+    <string id="taom_wc_corsairs_title" text="움바르의 해적들" />
+    <string id="taom_wc_corsairs_open" text="움바르의 검은 돛들이 안두인 강을 거슬러 {TARGET}(으)로 다가온다. 곤도르는 {DAYS}일 동안 항구를 지켜내야 한다." />
+    <string id="taom_wc_corsairs_lapsed" text="해적들은 바다에 머물렀고, {TARGET}은(는) 평온을 유지했다." />
+    <string id="taom_wc_corsairs_held" text="움바르의 함대가 {TARGET}에서 쫓겨나고, 곤도르 남부 영지들이 용기를 되찾았다." />
+    <string id="taom_wc_corsairs_fell" text="해적들이 {TARGET}을(를) 점령하고, 그들의 배가 강을 장악했다." />
+    <string id="taom_wc_north_title" text="북방의 전쟁" />
+    <string id="taom_wc_north_open" text="군다바드의 오르크들과 던랜드의 산사람들이 북방으로 내려온다. {TARGET}은(는) {DAYS}일 동안 버텨야 한다." />
+    <string id="taom_wc_north_lapsed" text="북방의 전쟁이 {TARGET}을(를) 비껴갔다." />
+    <string id="taom_wc_north_held" text="순찰자들과 아르세다인의 인간들이 {TARGET}을(를) 지켜내어, 북방은 자유를 유지했다." />
+    <string id="taom_wc_north_fell" text="{TARGET}이(가) 함락되고, 어둠이 에리아도르 전역으로 퍼져나갔다." />
+    <string id="taom_wc_gondor_title" text="곤도르 공성전" />
+    <string id="taom_wc_gondor_open" text="나즈굴의 군주가 모르도르의 군세를 이끌고 {TARGET}을(를) 공격한다. 도시는 {DAYS}일 동안 버텨야 한다." />
+    <string id="taom_wc_gondor_lapsed" text="모르도르의 대군이 진격을 멈추고, {TARGET}은(는) 어두워진 하늘 아래에서 기다린다." />
+    <string id="taom_wc_gondor_held" text="새벽에 로히림이 당도하여, 펠렌노르 평원에서 {TARGET}의 포위가 깨어졌다." />
+    <string id="taom_wc_gondor_fell" text="{TARGET}의 성문이 부서지고, 백색도시가 모르도르에 함락되었다." />
+    <string id="taom_wc_blackgate_title" text="검은 문이 열리다" />
+    <string id="taom_wc_blackgate_occurred" text="서부의 대장들이 반지의 사자로부터 그 눈을 돌리기 위해 모란논으로 진군한다. 이제 전쟁의 운명은 반지에 달렸다." />
   </strings>
 </base>

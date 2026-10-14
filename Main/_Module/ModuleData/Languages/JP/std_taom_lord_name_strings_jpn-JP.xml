@@ -995,25 +995,25 @@
     <string id="aom_lord_rohan_2_1_name" text="イセンムンド・ケルディキング" />
     <string id="aom_lord_rohan_5_1_name" text="エアドウィグ・オスキュテリング" />
     <string id="aom_lord_rohan_9_1_name" text="ドゥーンヘレ・ドゥーニング" />
-    <string id="aom_lord_AN1_1_name" text="Arvegil II" />
-    <string id="aom_lord_AN1_2_name" text="Malvegil" />
-    <string id="aom_lord_AN1_3_name" text="Gilraen" />
-    <string id="aom_lord_AN1_4_name" text="Ivorwen" />
-    <string id="aom_lord_AN2_1_name" text="Amlaith" />
-    <string id="aom_lord_AN2_2_name" text="Celepharn" />
-    <string id="aom_lord_AN2_3_name" text="Fíriel" />
-    <string id="aom_lord_AN2_4_name" text="Elanwen" />
-    <string id="aom_lord_AN3_1_name" text="Argeleb" />
-    <string id="aom_lord_AN3_2_name" text="Araphor" />
-    <string id="aom_lord_AN3_3_name" text="Meneliel" />
-    <string id="aom_lord_AN3_4_name" text="Silivren" />
-    <string id="aom_lord_AN4_1_name" text="Halbarad" />
-    <string id="aom_lord_AN4_2_name" text="Aranuir" />
-    <string id="aom_lord_AN4_3_name" text="Ithilwen" />
-    <string id="aom_lord_AN4_4_name" text="Calwen" />
-    <string id="aom_lord_AN5_1_name" text="Celebrindor" />
-    <string id="aom_lord_AN5_2_name" text="Arveleg" />
-    <string id="aom_lord_AN5_3_name" text="Maethil" />
-    <string id="aom_lord_AN5_4_name" text="Tirwen" />
+    <string id="aom_lord_AN1_1_name" text="アルヴェギル二世" />
+    <string id="aom_lord_AN1_2_name" text="マルヴェギル" />
+    <string id="aom_lord_AN1_3_name" text="ギルラエン" />
+    <string id="aom_lord_AN1_4_name" text="イヴォルウェン" />
+    <string id="aom_lord_AN2_1_name" text="アムライス" />
+    <string id="aom_lord_AN2_2_name" text="ケレファルン" />
+    <string id="aom_lord_AN2_3_name" text="フィリエル" />
+    <string id="aom_lord_AN2_4_name" text="エランウェン" />
+    <string id="aom_lord_AN3_1_name" text="アルゲレブ" />
+    <string id="aom_lord_AN3_2_name" text="アラフォル" />
+    <string id="aom_lord_AN3_3_name" text="メネリエル" />
+    <string id="aom_lord_AN3_4_name" text="シリヴレン" />
+    <string id="aom_lord_AN4_1_name" text="ハルバラド" />
+    <string id="aom_lord_AN4_2_name" text="アラヌイア" />
+    <string id="aom_lord_AN4_3_name" text="イシルウェン" />
+    <string id="aom_lord_AN4_4_name" text="カルウェン" />
+    <string id="aom_lord_AN5_1_name" text="ケレブリンドル" />
+    <string id="aom_lord_AN5_2_name" text="アルヴェレグ" />
+    <string id="aom_lord_AN5_3_name" text="マエシル" />
+    <string id="aom_lord_AN5_4_name" text="ティルウェン" />
   </strings>
 </base>

@@ -798,137 +798,137 @@
     <string id="taom_szt_t3b_p2" text="兵士の士気+20%。" />
     <string id="taom_szt_t3b_p3" text="兵士ダメージ+8%。" />
     <string id="taom_szt_t3b_p4" text="部隊規模+5。" />
-    <string id="taom_ability_knight_of_arthedain" text="Stampede" />
-    <string id="taom_ability_knight_of_arthedain_tt" text="Thunder forward with an unstoppable cavalry charge — boosts +25% charge damage, +20% mount speed, and +10% melee damage for 8s." />
-    <string id="taom_ability_ranger_of_the_north" text="Ambush" />
-    <string id="taom_ability_ranger_of_the_north_tt" text="Spring a deadly ambush — boosts +20% ranged damage, +20% draw speed, and +15% movement speed for 8s." />
-    <string id="taom_ability_warden_of_fornost" text="Hold the Line" />
-    <string id="taom_ability_warden_of_fornost_tt" text="Rally your soldiers with iron discipline — boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
-    <string id="taom_career_grp_knight_of_arthedain_t1_a" text="Lancer of the North Downs" />
-    <string id="taom_career_grp_knight_of_arthedain_t1_b" text="Warden of Evendim" />
-    <string id="taom_career_grp_knight_of_arthedain_t2_a" text="Rider of the Seven Stars" />
-    <string id="taom_career_grp_knight_of_arthedain_t2_b" text="Shieldwall of Arvegil" />
-    <string id="taom_career_grp_knight_of_arthedain_t3_a" text="Knight of the Silver Crown" />
-    <string id="taom_career_grp_knight_of_arthedain_t3_b" text="Charge of Fornost" />
-    <string id="taom_career_grp_ranger_of_the_north_t1_a" text="Hunter of the Greenway" />
-    <string id="taom_career_grp_ranger_of_the_north_t1_b" text="Watcher of Weathertop" />
-    <string id="taom_career_grp_ranger_of_the_north_t2_a" text="Scout of the North Downs" />
-    <string id="taom_career_grp_ranger_of_the_north_t2_b" text="Bowman of the Angle" />
-    <string id="taom_career_grp_ranger_of_the_north_t3_a" text="Arrow of Nenuial" />
-    <string id="taom_career_grp_ranger_of_the_north_t3_b" text="Shadow of the Chetwood" />
-    <string id="taom_career_grp_warden_of_fornost_t1_a" text="Warden of the Dike" />
-    <string id="taom_career_grp_warden_of_fornost_t1_b" text="Keeper of the Baranduin Crossing" />
-    <string id="taom_career_grp_warden_of_fornost_t2_a" text="Vanguard of the North Downs" />
-    <string id="taom_career_grp_warden_of_fornost_t2_b" text="Sword of the Last Bridge" />
-    <string id="taom_career_grp_warden_of_fornost_t3_a" text="Host of Arvedui" />
-    <string id="taom_career_grp_warden_of_fornost_t3_b" text="Keeper of Amon Sûl" />
-    <string id="taom_career_knight_of_arthedain" text="Knight of Arthedain" />
-    <string id="taom_career_knight_of_arthedain_desc" text="An armored champion of the North-kingdom, whose thundering charge has broken countless enemy formations. The Knight of Arthedain combines Arthedain discipline with Fornost's proud cavalry tradition, becoming an immovable wall of steel." />
-    <string id="taom_career_ranger_of_the_north" text="Ranger of the North" />
-    <string id="taom_career_ranger_of_the_north_desc" text="An elite scout who strikes from the wilds of Eriador, ambushing the servants of Angmar with deadly precision." />
-    <string id="taom_career_rank1_knight_of_arthedain" text="Squire of Fornost" />
-    <string id="taom_career_rank1_ranger_of_the_north" text="Scout of Eriador" />
-    <string id="taom_career_rank1_warden_of_fornost" text="Ohtar of the North Downs" />
-    <string id="taom_career_rank2_knight_of_arthedain" text="Silver Knight" />
-    <string id="taom_career_rank2_ranger_of_the_north" text="Ranger of the North" />
-    <string id="taom_career_rank2_warden_of_fornost" text="Warden of the Walls" />
-    <string id="taom_career_rank3_knight_of_arthedain" text="Knight of the Seven Stars" />
-    <string id="taom_career_rank3_ranger_of_the_north" text="Chieftain of the Rangers" />
-    <string id="taom_career_rank3_warden_of_fornost" text="Warden of Fornost" />
-    <string id="taom_career_warden_of_fornost" text="Warden of Fornost" />
-    <string id="taom_career_warden_of_fornost_desc" text="A battle-hardened infantry officer who holds the walls of Fornost against the hosts of Angmar, forging order from chaos when the North Downs burn. The Warden holds the line where others would break, rallying soldiers through sheer force of will." />
-    <string id="taom_knight_of_arthedain_root_desc" text="Stampede grants +5% melee damage and scales with the force of a mounted charge." />
-    <string id="taom_koa_t1a_key" text="Stampede ability radius increased, sweeping through wider enemy formations." />
-    <string id="taom_koa_t1a_p1" text="+8% melee damage." />
-    <string id="taom_koa_t1a_p2" text="+10% horse charge damage." />
-    <string id="taom_koa_t1a_p3" text="+3% troop damage." />
-    <string id="taom_koa_t1a_p4" text="+5% battle renown gain." />
-    <string id="taom_koa_t1b_key" text="Stampede duration extended, maintaining the charge longer." />
-    <string id="taom_koa_t1b_p1" text="+8% resistance." />
-    <string id="taom_koa_t1b_p2" text="+7 max health." />
-    <string id="taom_koa_t1b_p3" text="+10% horse health." />
-    <string id="taom_koa_t1b_p4" text="+10% troop resistance." />
-    <string id="taom_koa_t2a_key" text="Stampede charge requirement reduced for more frequent thundering charges." />
-    <string id="taom_koa_t2a_p1" text="+13% horse charge damage." />
-    <string id="taom_koa_t2a_p2" text="+12% melee damage." />
-    <string id="taom_koa_t2a_p3" text="+8% movement speed." />
-    <string id="taom_koa_t2a_p4" text="+10% battle renown gain." />
-    <string id="taom_koa_t2b_key" text="Stampede also boosts troop resistance while active." />
-    <string id="taom_koa_t2b_p1" text="+10% resistance." />
-    <string id="taom_koa_t2b_p2" text="+8 max health." />
-    <string id="taom_koa_t2b_p3" text="+13% horse health." />
-    <string id="taom_koa_t2b_p4" text="+13% troop resistance." />
-    <string id="taom_koa_t3a_key" text="Stampede grants troop morale while active, inspiring the host of Arthedain." />
-    <string id="taom_koa_t3a_p1" text="+15% troop morale." />
-    <string id="taom_koa_t3a_p2" text="+4 party size." />
-    <string id="taom_koa_t3a_p3" text="-10% troop upgrade cost." />
-    <string id="taom_koa_t3a_p4" text="-10% custom resource upgrade cost." />
-    <string id="taom_koa_t3b_key" text="Stampede radius and duration maximized — the charge of Fornost is unstoppable." />
-    <string id="taom_koa_t3b_p1" text="+15% resistance." />
-    <string id="taom_koa_t3b_p2" text="+9 max health." />
-    <string id="taom_koa_t3b_p3" text="+15% horse charge damage." />
-    <string id="taom_koa_t3b_p4" text="+15% troop resistance." />
-    <string id="taom_ranger_of_the_north_root_desc" text="Ambush grants +5% ranged damage and scales duration with Bow skill." />
-    <string id="taom_rotn_t1a_key" text="Ambush radius increased, arrows deal bonus damage from stealth." />
-    <string id="taom_rotn_t1a_p1" text="+8% ranged damage." />
-    <string id="taom_rotn_t1a_p2" text="+5% armor penetration." />
-    <string id="taom_rotn_t1a_p3" text="+7% movement speed." />
-    <string id="taom_rotn_t1a_p4" text="+5% battle renown gain." />
-    <string id="taom_rotn_t1b_key" text="Ambush duration extended, granting additional evasion." />
-    <string id="taom_rotn_t1b_p1" text="+5% resistance." />
-    <string id="taom_rotn_t1b_p2" text="+5 max health." />
-    <string id="taom_rotn_t1b_p3" text="+5% party spotting range." />
-    <string id="taom_rotn_t1b_p4" text="+10% stealth bonus." />
-    <string id="taom_rotn_t2a_key" text="Ambush charge requirement reduced, activating more frequently." />
-    <string id="taom_rotn_t2a_p1" text="+10% party spotting range." />
-    <string id="taom_rotn_t2a_p2" text="+10% movement speed." />
-    <string id="taom_rotn_t2a_p3" text="+13% stealth bonus." />
-    <string id="taom_rotn_t2a_p4" text="+10% battle renown gain." />
-    <string id="taom_rotn_t2b_key" text="Ambush also increases troop ranged damage while active." />
-    <string id="taom_rotn_t2b_p1" text="+12% ranged damage." />
-    <string id="taom_rotn_t2b_p2" text="+10% armor penetration." />
-    <string id="taom_rotn_t2b_p3" text="+8 max health." />
-    <string id="taom_rotn_t2b_p4" text="+3% troop damage." />
-    <string id="taom_rotn_t3a_key" text="Ambush radius greatly increased, devastating arrow volleys." />
-    <string id="taom_rotn_t3a_p1" text="+18% ranged damage." />
-    <string id="taom_rotn_t3a_p2" text="+15% armor penetration." />
-    <string id="taom_rotn_t3a_p3" text="+15% battle renown gain." />
-    <string id="taom_rotn_t3a_p4" text="+5% troop damage." />
-    <string id="taom_rotn_t3b_key" text="Ambush charge greatly reduced, becoming nearly always available." />
-    <string id="taom_rotn_t3b_p1" text="+15% stealth bonus." />
-    <string id="taom_rotn_t3b_p2" text="+15% movement speed." />
-    <string id="taom_rotn_t3b_p3" text="+9 max health." />
-    <string id="taom_rotn_t3b_p4" text="+15% party spotting range." />
-    <string id="taom_wof_root_desc" text="Career Ability grants +5% melee damage and improves troop morale near rivers and coasts." />
-    <string id="taom_wof_t1a_key" text="Career Ability radius increased, commanding wider river approaches." />
-    <string id="taom_wof_t1a_p1" text="+8% melee damage." />
-    <string id="taom_wof_t1a_p2" text="+10% swing speed." />
-    <string id="taom_wof_t1a_p3" text="+3% troop damage." />
-    <string id="taom_wof_t1a_p4" text="+5% battle renown gain." />
-    <string id="taom_wof_t1b_key" text="Career Ability duration extended, holding the harbor line longer." />
-    <string id="taom_wof_t1b_p1" text="+5% resistance." />
-    <string id="taom_wof_t1b_p2" text="+6 max health." />
-    <string id="taom_wof_t1b_p3" text="+5% troop morale." />
-    <string id="taom_wof_t1b_p4" text="-5% troop wages." />
-    <string id="taom_wof_t2a_key" text="Career Ability charge requirement reduced, allowing more frequent activation." />
-    <string id="taom_wof_t2a_p1" text="+8% party movement speed." />
-    <string id="taom_wof_t2a_p2" text="+10% troop morale." />
-    <string id="taom_wof_t2a_p3" text="+2 party size." />
-    <string id="taom_wof_t2a_p4" text="+10% battle renown gain." />
-    <string id="taom_wof_t2b_key" text="Career Ability also boosts troop melee damage while active." />
-    <string id="taom_wof_t2b_p1" text="+12% melee damage." />
-    <string id="taom_wof_t2b_p2" text="+8% armor penetration." />
-    <string id="taom_wof_t2b_p3" text="+15% swing speed." />
-    <string id="taom_wof_t2b_p4" text="+6 max health." />
-    <string id="taom_wof_t3a_key" text="Career Ability grants troop resistance while active, fortifying the fleet." />
-    <string id="taom_wof_t3a_p1" text="+15% troop morale." />
-    <string id="taom_wof_t3a_p2" text="+4 party size." />
-    <string id="taom_wof_t3a_p3" text="-10% troop wages." />
-    <string id="taom_wof_t3a_p4" text="+10% custom resource gain." />
-    <string id="taom_wof_t3b_key" text="Career Ability radius and duration maximized, dominating every waterway." />
-    <string id="taom_wof_t3b_p1" text="+15% melee damage." />
-    <string id="taom_wof_t3b_p2" text="+10% resistance." />
-    <string id="taom_wof_t3b_p3" text="+15% armor penetration." />
-    <string id="taom_wof_t3b_p4" text="+8 max health." />
+    <string id="taom_ability_knight_of_arthedain" text="猛進" />
+    <string id="taom_ability_knight_of_arthedain_tt" text="止められぬ騎兵突撃で雷のごとく進む。8秒間、突撃ダメージ+25%、騎乗速度+20%、近接ダメージ+10%。" />
+    <string id="taom_ability_ranger_of_the_north" text="待ち伏せ" />
+    <string id="taom_ability_ranger_of_the_north_tt" text="致命的な待ち伏せを仕掛ける。8秒間、遠隔ダメージ+20%、弓引き速度+20%、移動速度+15%。" />
+    <string id="taom_ability_warden_of_fornost" text="戦列を守れ" />
+    <string id="taom_ability_warden_of_fornost_tt" text="鉄の規律で兵を鼓舞する。8秒間、50m以内の味方の近接ダメージ+15%、被ダメージ軽減+10%。" />
+    <string id="taom_career_grp_knight_of_arthedain_t1_a" text="北方丘陵の槍騎兵" />
+    <string id="taom_career_grp_knight_of_arthedain_t1_b" text="イヴンディムの守護者" />
+    <string id="taom_career_grp_knight_of_arthedain_t2_a" text="七つ星の騎手" />
+    <string id="taom_career_grp_knight_of_arthedain_t2_b" text="アルヴェギルの盾壁" />
+    <string id="taom_career_grp_knight_of_arthedain_t3_a" text="銀の王冠の騎士" />
+    <string id="taom_career_grp_knight_of_arthedain_t3_b" text="フォルノストの突撃" />
+    <string id="taom_career_grp_ranger_of_the_north_t1_a" text="緑道の狩人" />
+    <string id="taom_career_grp_ranger_of_the_north_t1_b" text="風見が丘の見張り" />
+    <string id="taom_career_grp_ranger_of_the_north_t2_a" text="北連丘の斥候" />
+    <string id="taom_career_grp_ranger_of_the_north_t2_b" text="アングルの弓兵" />
+    <string id="taom_career_grp_ranger_of_the_north_t3_a" text="ネヌイアルの矢" />
+    <string id="taom_career_grp_ranger_of_the_north_t3_b" text="チェトの森の影" />
+    <string id="taom_career_grp_warden_of_fornost_t1_a" text="防塁の守護者" />
+    <string id="taom_career_grp_warden_of_fornost_t1_b" text="バランドゥイン渡しの守り手" />
+    <string id="taom_career_grp_warden_of_fornost_t2_a" text="北連丘の先鋒" />
+    <string id="taom_career_grp_warden_of_fornost_t2_b" text="最後の橋の剣" />
+    <string id="taom_career_grp_warden_of_fornost_t3_a" text="アルヴェドゥイの軍勢" />
+    <string id="taom_career_grp_warden_of_fornost_t3_b" text="アモン・スールの守り手" />
+    <string id="taom_career_knight_of_arthedain" text="アルセダインの騎士" />
+    <string id="taom_career_knight_of_arthedain_desc" text="北方王国の甲冑に身を固めた勇士であり、その轟く突撃は数知れぬ敵の陣形を打ち砕いてきた。アルセダインの騎士はアルセダインの規律とフォルノストの誇り高き騎兵の伝統を併せ持ち、揺るがぬ鋼の壁となる。" />
+    <string id="taom_career_ranger_of_the_north" text="北方のレンジャー" />
+    <string id="taom_career_ranger_of_the_north_desc" text="エリアドールの荒野から襲いかかる精鋭の斥候であり、アングマールの手下どもを恐るべき正確さで待ち伏せる。" />
+    <string id="taom_career_rank1_knight_of_arthedain" text="フォルノストの従士" />
+    <string id="taom_career_rank1_ranger_of_the_north" text="エリアドールの斥候" />
+    <string id="taom_career_rank1_warden_of_fornost" text="北連丘のオフタル" />
+    <string id="taom_career_rank2_knight_of_arthedain" text="銀の騎士" />
+    <string id="taom_career_rank2_ranger_of_the_north" text="北方のレンジャー" />
+    <string id="taom_career_rank2_warden_of_fornost" text="城壁の守護者" />
+    <string id="taom_career_rank3_knight_of_arthedain" text="七つ星の騎士" />
+    <string id="taom_career_rank3_ranger_of_the_north" text="レンジャーの首領" />
+    <string id="taom_career_rank3_warden_of_fornost" text="フォルノストの守護者" />
+    <string id="taom_career_warden_of_fornost" text="フォルノストの守護者" />
+    <string id="taom_career_warden_of_fornost_desc" text="歴戦の歩兵指揮官であり、アングマールの軍勢に対してフォルノストの城壁を守り抜き、北連丘が燃える時にも混沌から秩序を築き上げる。守護者は他の者なら崩れる戦線を保ち、純然たる意志の力で兵を奮い立たせる。" />
+    <string id="taom_knight_of_arthedain_root_desc" text="「突進」は近接ダメージ+5%を与え、騎乗突撃の勢いに応じて効果が高まる。" />
+    <string id="taom_koa_t1a_key" text="「突進」の効果範囲が拡大し、より広い敵陣形を薙ぎ払う。" />
+    <string id="taom_koa_t1a_p1" text="近接ダメージ+8%。" />
+    <string id="taom_koa_t1a_p2" text="馬の突撃ダメージ+10%。" />
+    <string id="taom_koa_t1a_p3" text="兵士のダメージ+3%。" />
+    <string id="taom_koa_t1a_p4" text="戦闘での名声獲得+5%。" />
+    <string id="taom_koa_t1b_key" text="「突進」の持続時間が延長され、突撃をより長く維持する。" />
+    <string id="taom_koa_t1b_p1" text="耐性+8%。" />
+    <string id="taom_koa_t1b_p2" text="最大体力+7。" />
+    <string id="taom_koa_t1b_p3" text="馬の体力+10%。" />
+    <string id="taom_koa_t1b_p4" text="兵士の耐性+10%。" />
+    <string id="taom_koa_t2a_key" text="突進の必要チャージが減少し、轟く突撃をより頻繁に行える。" />
+    <string id="taom_koa_t2a_p1" text="馬の突撃ダメージ+13%。" />
+    <string id="taom_koa_t2a_p2" text="近接ダメージ+12%。" />
+    <string id="taom_koa_t2a_p3" text="移動速度+8%。" />
+    <string id="taom_koa_t2a_p4" text="戦闘での名声獲得+10%。" />
+    <string id="taom_koa_t2b_key" text="突進は発動中、兵士の耐性も高める。" />
+    <string id="taom_koa_t2b_p1" text="耐性+10%。" />
+    <string id="taom_koa_t2b_p2" text="最大体力+8。" />
+    <string id="taom_koa_t2b_p3" text="馬の体力+13%。" />
+    <string id="taom_koa_t2b_p4" text="兵士の耐性+13%。" />
+    <string id="taom_koa_t3a_key" text="突進は発動中に兵士の士気を高め、アルセダインの軍勢を鼓舞する。" />
+    <string id="taom_koa_t3a_p1" text="兵士の士気+15%。" />
+    <string id="taom_koa_t3a_p2" text="部隊人数+4。" />
+    <string id="taom_koa_t3a_p3" text="兵士の昇格費用-10%。" />
+    <string id="taom_koa_t3a_p4" text="特殊資源の昇格費用-10%。" />
+    <string id="taom_koa_t3b_key" text="突進の範囲と持続時間が最大化される——フォルノストの突撃は止められない。" />
+    <string id="taom_koa_t3b_p1" text="耐性+15%。" />
+    <string id="taom_koa_t3b_p2" text="最大体力+9。" />
+    <string id="taom_koa_t3b_p3" text="馬の突撃ダメージ+15%。" />
+    <string id="taom_koa_t3b_p4" text="兵士の耐性+15%。" />
+    <string id="taom_ranger_of_the_north_root_desc" text="待ち伏せは遠距離ダメージ+5%を与え、持続時間が弓術スキルに応じて伸びる。" />
+    <string id="taom_rotn_t1a_key" text="待ち伏せの範囲が拡大し、隠密からの矢が追加ダメージを与える。" />
+    <string id="taom_rotn_t1a_p1" text="遠距離ダメージ+8%。" />
+    <string id="taom_rotn_t1a_p2" text="防具貫通+5%。" />
+    <string id="taom_rotn_t1a_p3" text="移動速度+7%。" />
+    <string id="taom_rotn_t1a_p4" text="戦闘での名声獲得+5%。" />
+    <string id="taom_rotn_t1b_key" text="待ち伏せの持続時間が延び、追加の回避を得る。" />
+    <string id="taom_rotn_t1b_p1" text="耐性+5%。" />
+    <string id="taom_rotn_t1b_p2" text="最大体力+5。" />
+    <string id="taom_rotn_t1b_p3" text="部隊の索敵範囲+5%。" />
+    <string id="taom_rotn_t1b_p4" text="隠密ボーナス+10%。" />
+    <string id="taom_rotn_t2a_key" text="待ち伏せの必要チャージが減少し、より頻繁に発動する。" />
+    <string id="taom_rotn_t2a_p1" text="部隊の索敵範囲+10%。" />
+    <string id="taom_rotn_t2a_p2" text="移動速度+10%。" />
+    <string id="taom_rotn_t2a_p3" text="隠密ボーナス+13%。" />
+    <string id="taom_rotn_t2a_p4" text="戦闘での名声獲得+10%。" />
+    <string id="taom_rotn_t2b_key" text="待ち伏せは発動中、兵士の遠距離ダメージも高める。" />
+    <string id="taom_rotn_t2b_p1" text="遠距離ダメージ+12%。" />
+    <string id="taom_rotn_t2b_p2" text="装甲貫通+10%。" />
+    <string id="taom_rotn_t2b_p3" text="最大体力+8。" />
+    <string id="taom_rotn_t2b_p4" text="兵士の与ダメージ+3%。" />
+    <string id="taom_rotn_t3a_key" text="待ち伏せの範囲が大幅に増加し、壊滅的な矢の一斉射撃を放つ。" />
+    <string id="taom_rotn_t3a_p1" text="遠距離ダメージ+18%。" />
+    <string id="taom_rotn_t3a_p2" text="装甲貫通+15%。" />
+    <string id="taom_rotn_t3a_p3" text="戦闘での名声獲得+15%。" />
+    <string id="taom_rotn_t3a_p4" text="兵士の与ダメージ+5%。" />
+    <string id="taom_rotn_t3b_key" text="待ち伏せのチャージが大幅に減少し、ほぼ常時使用可能となる。" />
+    <string id="taom_rotn_t3b_p1" text="隠密ボーナス+15%。" />
+    <string id="taom_rotn_t3b_p2" text="移動速度+15%。" />
+    <string id="taom_rotn_t3b_p3" text="最大体力+9。" />
+    <string id="taom_rotn_t3b_p4" text="部隊の視認範囲+15%。" />
+    <string id="taom_wof_root_desc" text="キャリアアビリティにより近接ダメージ+5%、川や海岸付近で兵士の士気が向上する。" />
+    <string id="taom_wof_t1a_key" text="キャリアアビリティの範囲が増加し、より広い河川の渡河点を制圧する。" />
+    <string id="taom_wof_t1a_p1" text="近接ダメージ+8%。" />
+    <string id="taom_wof_t1a_p2" text="振り速度+10%。" />
+    <string id="taom_wof_t1a_p3" text="兵士の与ダメージ+3%。" />
+    <string id="taom_wof_t1a_p4" text="戦闘での名声獲得+5%。" />
+    <string id="taom_wof_t1b_key" text="キャリアアビリティの持続時間が延長され、港の防衛線をより長く保つ。" />
+    <string id="taom_wof_t1b_p1" text="耐性+5%。" />
+    <string id="taom_wof_t1b_p2" text="最大体力+6。" />
+    <string id="taom_wof_t1b_p3" text="兵士の士気+5%。" />
+    <string id="taom_wof_t1b_p4" text="兵士の賃金-5%。" />
+    <string id="taom_wof_t2a_key" text="キャリアアビリティに必要なチャージが減少し、より頻繁に発動できる。" />
+    <string id="taom_wof_t2a_p1" text="部隊の移動速度+8%。" />
+    <string id="taom_wof_t2a_p2" text="兵士の士気+10%。" />
+    <string id="taom_wof_t2a_p3" text="部隊規模+2。" />
+    <string id="taom_wof_t2a_p4" text="戦闘での名声獲得+10%。" />
+    <string id="taom_wof_t2b_key" text="キャリアアビリティは発動中、兵士の近接ダメージも強化する。" />
+    <string id="taom_wof_t2b_p1" text="近接ダメージ+12%。" />
+    <string id="taom_wof_t2b_p2" text="装甲貫通+8%。" />
+    <string id="taom_wof_t2b_p3" text="振り速度+15%。" />
+    <string id="taom_wof_t2b_p4" text="最大体力+6。" />
+    <string id="taom_wof_t3a_key" text="キャリアアビリティは発動中、兵士に耐性を付与し、船団を強固にする。" />
+    <string id="taom_wof_t3a_p1" text="兵士の士気+15%。" />
+    <string id="taom_wof_t3a_p2" text="部隊規模+4。" />
+    <string id="taom_wof_t3a_p3" text="兵士の賃金-10%。" />
+    <string id="taom_wof_t3a_p4" text="特殊資源の獲得+10%。" />
+    <string id="taom_wof_t3b_key" text="キャリアアビリティの範囲と持続時間が最大化され、あらゆる水路を支配する。" />
+    <string id="taom_wof_t3b_p1" text="近接ダメージ+15%。" />
+    <string id="taom_wof_t3b_p2" text="耐性+10%。" />
+    <string id="taom_wof_t3b_p3" text="防具貫通+15%。" />
+    <string id="taom_wof_t3b_p4" text="最大体力+8。" />
   </strings>
 </base>

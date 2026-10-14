@@ -1588,7 +1588,7 @@
     <string id="taom_faction_khudorom_of_khand_weakness_2" text="Наёмные капитаны верны монете, а не лорду" />
     <string id="taom_faction_kingdom_of_angaladh_desc" text="Королевство Ангаладх." />
     <string id="taom_faction_kingdom_of_angaladh_name" text="Королевство Ангаладх" />
-    <string id="taom_faction_kingdom_of_arthedain_desc" text="The last of Arnor's three successor kingdoms, and the only one still standing. Arvedui's line holds Fornost upon the North Downs and its Rangers keep the roads of Eriador, but Angmar, Dunland and the orcs of Gundabad press on every border of a realm with too few swords." />
+    <string id="taom_faction_kingdom_of_arthedain_desc" text="Последнее из трёх королевств-наследников Арнора и единственное, что ещё держится. Род Арведуи владеет Форностом на Северном нагорье, а его следопыты хранят дороги Эриадора, но Ангмар, Дунланд и орки Гундабада давят на все границы державы, у которой слишком мало мечей." />
     <string id="taom_faction_kingdom_of_arthedain_name" text="Королевство Артэдайн" />
     <string id="taom_faction_kingdom_of_arthedain_trait_0" text="Последний из Арнора" />
     <string id="taom_faction_kingdom_of_arthedain_trait_1" text="Палантир Аннуминаса" />
@@ -2841,44 +2841,105 @@
   <string id="taom_bc_advice_keep" text="Оставить мои" />
   <string id="taom_bc_advice_done" text="Настройки боя сохранены." />
   <string id="taom_bc_advice_failed" text="Не удалось сохранить настройки боя. Задайте их вручную в Настройках, {PERFORMANCE}." />
-  <string id="taom_str_faction_official.arthedain" text="a noble lord" />
-  <string id="taom_str_faction_official.arthedain_f" text="a noble lady" />
-  <string id="taom_str_faction_ruler.arthedain" text="King" />
-  <string id="taom_str_faction_ruler.arthedain_f" text="Queen" />
-  <string id="taom_str_faction_ruler_term_in_speech.arthedain" text="{?RULER.GENDER}the Queen{?}the King{\?} {RULER.NAME}" />
-  <string id="taom_str_faction_ruler_name_with_title.arthedain" text="{?RULER.GENDER}Queen{?}King{\?} {RULER.NAME}" />
-  <string id="taom_str_faction_noble_name_with_title.arthedain" text="{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
-  <string id="taom_str_faction_formal_name_for_culture.arthedain" text="Arthedain" />
-  <string id="taom_str_faction_informal_name_for_culture.arthedain" text="the Dúnedain of the North" />
-  <string id="taom_str_neutral_term_for_culture.arthedain" text="Dúnedain" />
-  <string id="taom_str_culture_description.arthedain" text="The Dúnedain of Arthedain are the last heirs of Arnor, the North-kingdom Elendil founded. From Fornost upon the North Downs the line of Arvedui still keeps the watch that Isildur's heirs have kept for a thousand years, though their towns are few, their lords are poor and the shadow of Angmar never leaves the hills. They are fewer than their southern kin and prouder than their numbers warrant, and every season the wild lands press closer." />
-  <string id="taom_str_culture_rich_name.arthedain" text="Dúnedain of Arthedain" />
-  <string id="taom_str_adjective_for_culture.arthedain" text="Arthedain" />
-  <string id="taom_str_player_father_name.arthedain" text="Aravir" />
-  <string id="taom_str_player_mother_name.arthedain" text="Ivorwen" />
-  <string id="taom_aso_kingdom.arthedain" text="Arthedain" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_0" text="+10% party speed on plains (Rangers' Roads)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_1" text="-20% garrison wage (Wardens of the Walls)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_2" text="+5 party morale (Dúnedain Resolve)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_3" text="+1 settlement loyalty per day (Line of Isildur)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_4" text="-15% village hearth growth (A Dwindling People)" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_0_desc" text="-20% garrison wage and +1 settlement loyalty per day." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_0_name" text="Wardens of the Walls" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_1_desc" text="+5 party morale. Few as they are, the Dúnedain do not break." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_1_name" text="Dúnedain Resolve" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_2_desc" text="+10% party speed on plains, where the Rangers keep the old roads open." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_2_name" text="Rangers' Roads" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_0" text="Fine Dúnedain archers and guards" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_1" text="Steadfast morale and loyal towns" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_2" text="Cheap garrisons behind old walls" />
-  <string id="taom_faction_kingdom_of_arthedain_su_0_desc" text="Two-handed elite guard of the King's citadel." />
-  <string id="taom_faction_kingdom_of_arthedain_su_0_name" text="King's Guard of Fornost" />
-  <string id="taom_faction_kingdom_of_arthedain_su_1_desc" text="Veteran Dúnedain scout-bowman of the North." />
-  <string id="taom_faction_kingdom_of_arthedain_su_1_name" text="Ranger Captain" />
-  <string id="taom_faction_kingdom_of_arthedain_su_2_desc" text="Sword-and-shield knight of the old blood." />
-  <string id="taom_faction_kingdom_of_arthedain_su_2_name" text="Knight of Arthedain" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_0" text="Few lords and small hosts" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_1" text="Poor lands that grow slowly" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="Ringed by Angmar, Dunland and Gundabad" />
+  <string id="taom_str_faction_official.arthedain" text="благородный лорд" />
+  <string id="taom_str_faction_official.arthedain_f" text="благородная леди" />
+  <string id="taom_str_faction_ruler.arthedain" text="Король" />
+  <string id="taom_str_faction_ruler.arthedain_f" text="Королева" />
+  <string id="taom_str_faction_ruler_term_in_speech.arthedain" text="{?RULER.GENDER}королева{?}король{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_ruler_name_with_title.arthedain" text="{?RULER.GENDER}Королева{?}Король{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_noble_name_with_title.arthedain" text="{?RULER.GENDER}Леди{?}Лорд{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_formal_name_for_culture.arthedain" text="Артедайн" />
+  <string id="taom_str_faction_informal_name_for_culture.arthedain" text="дунэдайн Севера" />
+  <string id="taom_str_neutral_term_for_culture.arthedain" text="Дунэдайн" />
+  <string id="taom_str_culture_description.arthedain" text="Дунэдайн Артедайна — последние наследники Арнора, Северного королевства, основанного Элендилом. Из Форноста на Северных холмах род Арведуи всё ещё несёт дозор, который наследники Исилдура держат уже тысячу лет, хотя городов у них мало, лорды их бедны, а тень Ангмара не покидает холмов. Их меньше, чем их южных сородичей, и гордости в них больше, чем оправдано их числом, и с каждым сезоном дикие земли подступают всё ближе." />
+  <string id="taom_str_culture_rich_name.arthedain" text="Дунэдайн Артедайна" />
+  <string id="taom_str_adjective_for_culture.arthedain" text="артедайнский" />
+  <string id="taom_str_player_father_name.arthedain" text="Аравир" />
+  <string id="taom_str_player_mother_name.arthedain" text="Иворвен" />
+  <string id="taom_aso_kingdom.arthedain" text="Артедайн" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_0" text="+10% к скорости отряда на равнинах (Дороги следопытов)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_1" text="-20% к жалованью гарнизона (Стражи стен)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_2" text="+5 к боевому духу отряда (Стойкость дунэдайн)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_3" text="+1 к лояльности поселения в день (Род Исильдура)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_4" text="-15% к росту очагов в деревнях (Угасающий народ)" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_0_desc" text="-20% к жалованью гарнизона и +1 к лояльности поселения в день." />
+  <string id="taom_faction_kingdom_of_arthedain_perk_0_name" text="Стражи стен" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_1_desc" text="+5 к боевому духу отряда. Как бы мало их ни было, дунэдайн не дрогнут." />
+  <string id="taom_faction_kingdom_of_arthedain_perk_1_name" text="Стойкость дунэдайн" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_2_desc" text="+10% к скорости отряда на равнинах, где следопыты хранят старые дороги открытыми." />
+  <string id="taom_faction_kingdom_of_arthedain_perk_2_name" text="Дороги следопытов" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_0" text="Превосходные лучники и стражи дунэдайн" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_1" text="Непоколебимый дух и верные города" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_2" text="Дешёвые гарнизоны за старыми стенами" />
+  <string id="taom_faction_kingdom_of_arthedain_su_0_desc" text="Отборная двуручная стража королевской цитадели." />
+  <string id="taom_faction_kingdom_of_arthedain_su_0_name" text="Королевский страж Форноста" />
+  <string id="taom_faction_kingdom_of_arthedain_su_1_desc" text="Опытный лучник-разведчик дунэдайн Севера." />
+  <string id="taom_faction_kingdom_of_arthedain_su_1_name" text="Капитан следопытов" />
+  <string id="taom_faction_kingdom_of_arthedain_su_2_desc" text="Рыцарь древней крови с мечом и щитом." />
+  <string id="taom_faction_kingdom_of_arthedain_su_2_name" text="Рыцарь Артедайна" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_0" text="Мало лордов и малые дружины" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_1" text="Бедные земли, растущие медленно" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="В кольце Ангмара, Дунланда и Гундабада" />
+  <string id="taom_eye_hunt_free" text="Око Саурона обратилось на вас. {HUNTER} выступает с войском, чтобы уничтожить вас." />
+  <string id="taom_eye_hunt_evil" text="Элронд послал {HUNTER} с воинством эльдар, чтобы сокрушить вас." />
+  <string id="taom_eye_hunt_won" text="{HUNTER} повержен. Охота окончена — до поры." />
+  <string id="taom_eye_hunt_over" text="Охота окончена — до поры." />
+  <string id="taom_tr_prize_advertised" text="{ITEM_NAME} (объявленная награда)" />
+  <string id="taom_tr_prize_hint" text="Стоит около {VALUE} денаров." />
+  <string id="taom_tr_prize_title" text="Выберите награду" />
+  <string id="taom_tr_prize_desc" text="Распорядитель турнира предлагает на выбор несколько наград. Выберите ту, за которую будете сражаться; она ваша, если победите." />
+  <string id="taom_tr_skill_title" text="Выберите обучение" />
+  <string id="taom_tr_skill_desc" text="Выберите навык, который развивает этот турнир. Вы получаете опыт за каждый выигранный раунд и больше — за победу в турнире." />
+  <string id="taom_tr_skill_gained" text="Турнир развил ваш навык: {SKILL_NAME}." />
+  <string id="taom_tr_choose" text="Выбрать" />
+  <string id="taom_tr_cancel" text="Отмена" />
+  <string id="taom_race_ability_berserk" text="Берсерк" />
+  <string id="taom_race_ability_bloodlust" text="Жажда крови" />
+  <string id="taom_race_ability_stand_fast" text="Стоять насмерть" />
+  <string id="taom_race_ability_swiftness" text="Быстрота эльдар" />
+  <string id="taom_race_ability_wave_ally" text="{ABILITY}: {COUNT} воинов на вашей стороне" />
+  <string id="taom_race_ability_wave_enemy" text="Вражеское {ABILITY}: {COUNT} воинов" />
+  <string id="taom_race_ability_swarm" text="Орда" />
+  <string id="taom_race_ability_scurry" text="Суетливость" />
+  <string id="taom_race_ability_iron_discipline" text="Железная дисциплина" />
+  <string id="taom_race_ability_hunters_rush" text="Натиск охотника" />
+  <string id="taom_race_ability_necromancer_shadow" text="Тень Некроманта" />
+  <string id="taom_race_ability_citadel_guard" text="Стража Цитадели" />
+  <string id="taom_race_ability_forth_eorlingas" text="Вперёд, эорлинги!" />
+  <string id="taom_race_ability_bards_aim" text="Меткость Барда" />
+  <string id="taom_race_ability_hillclan_fury" text="Ярость горных кланов" />
+  <string id="taom_race_ability_serpent_venom" text="Яд змеи" />
+  <string id="taom_race_ability_wainrider_wall" text="Стена кибитников" />
+  <string id="taom_race_ability_corsair_raid" text="Набег корсаров" />
+  <string id="taom_race_ability_variag_ferocity" text="Свирепость вариагов" />
+  <string id="taom_race_ability_shadow_servants" text="Слуги Тени" />
+  <string id="taom_shader_notice_title_total" text="Компиляция шейдеров: {COUNT} примерно из {TOTAL}" />
+  <string id="taom_shader_notice_title_count" text="Компиляция шейдеров: {COUNT}" />
+  <string id="taom_shader_notice_detail" text="Игра пересобирает шейдеры после изменения списка модов или самой игры. Она не зависла." />
+  <string id="taom_mission_start_guard_notice" text="{MODULE} дал сбой в {CALL} ({EXCEPTION}). Миссия продолжается, но этот шаг прерван." />
+  <string id="taom_skeleton_buffer_warning" text="Эта миссия использует {PERCENT} процентов буфера скелетов движка, и при его заполнении игра зависнет окончательно. Уменьшите размер битвы." />
+  <string id="taom_oob_assign_heroes" text="Назначить героев" />
+  <string id="taom_oob_no_screen" text="Экран боевого порядка не обнаружен." />
+  <string id="taom_oob_preset_save_option" text="Сохранить текущую расстановку как шаблон" />
+  <string id="taom_oob_preset_load_option" text="Загрузить: {NAME}" />
+  <string id="taom_oob_preset_delete_option" text="Удалить: {NAME}" />
+  <string id="taom_oob_presets_title" text="Шаблоны построений" />
+  <string id="taom_oob_presets_description" text="Сохраняйте, загружайте или удаляйте расстановку типов построений, командиров и героев." />
+  <string id="taom_oob_preset_deleted" text="Шаблон «{NAME}» удалён." />
+  <string id="taom_oob_preset_not_general" text="Только полководец в этой битве может использовать шаблоны." />
+  <string id="taom_oob_preset_loaded" text="Шаблон «{NAME}» загружен. Типы построений: {CLASSES}, командиры: {CAPTAINS}, герои: {TROOPS}." />
+  <string id="taom_oob_preset_skipped" text="Сохранённых назначений, не подходящих для этой битвы: {COUNT}." />
+  <string id="taom_oob_preset_save_title" text="Сохранить шаблон построения" />
+  <string id="taom_oob_preset_save_prompt" text="Введите имя для этого шаблона:" />
+  <string id="taom_oob_preset_save_button" text="Сохранить" />
+  <string id="taom_oob_preset_name_empty" text="Имя шаблона не может быть пустым." />
+  <string id="taom_oob_preset_saved" text="Шаблон «{NAME}» сохранён. Типы построений: {CLASSES}, командиры: {CAPTAINS}, герои: {TROOPS}." />
+  <string id="taom_oob_preset_limit" text="Достигнут предел числа шаблонов. Удалите один перед сохранением." />
+  <string id="taom_oob_preset_name_in_use" text="Шаблон с именем «{NAME}» уже существует." />
+  <string id="taom_oob_preset_save_failed" text="Не удалось сохранить шаблон." />
+  <string id="taom_oob_presets_button_count" text="Шаблоны ({COUNT})" />
+  <string id="taom_oob_presets_button" text="Шаблоны" />
+  <string id="taom_fief_nav_disabled" text="Управление владениями отключено в настройках мода." />
+  <string id="taom_fief_nav_busy" text="Сейчас невозможно открыть управление владениями." />
   </strings>
 </base>

@@ -126,10 +126,10 @@
     <string id="aom_clan_umbar_4_name" text="Дом Бел Инзула" />
     <string id="aom_clan_umbar_5_name" text="Дом Халракса" />
     <string id="aom_clan_umbar_6_name" text="Дом Хатуга" />
-    <string id="aom_clan_arthedain_1_name" text="House of Arvedui" />
-    <string id="aom_clan_arthedain_2_name" text="House of Evendim" />
-    <string id="aom_clan_arthedain_3_name" text="Wardens of Amon Sûl" />
-    <string id="aom_clan_arthedain_4_name" text="House of the Baranduin" />
-    <string id="aom_clan_arthedain_5_name" text="House of Emyn Beraid" />
+    <string id="aom_clan_arthedain_1_name" text="Дом Арведуи" />
+    <string id="aom_clan_arthedain_2_name" text="Дом Эвендима" />
+    <string id="aom_clan_arthedain_3_name" text="Стражи Амон-Сул" />
+    <string id="aom_clan_arthedain_4_name" text="Дом Барандуина" />
+    <string id="aom_clan_arthedain_5_name" text="Дом Эмин-Берайд" />
   </strings>
 </base>

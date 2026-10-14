@@ -1588,7 +1588,7 @@
     <string id="taom_faction_khudorom_of_khand_weakness_2" text="Söldnerhauptleute sind dem Sold treu, nicht dem Herrn" />
     <string id="taom_faction_kingdom_of_angaladh_desc" text="Das Königreich Angaladh." />
     <string id="taom_faction_kingdom_of_angaladh_name" text="Königreich Angaladh" />
-    <string id="taom_faction_kingdom_of_arthedain_desc" text="The last of Arnor's three successor kingdoms, and the only one still standing. Arvedui's line holds Fornost upon the North Downs and its Rangers keep the roads of Eriador, but Angmar, Dunland and the orcs of Gundabad press on every border of a realm with too few swords." />
+    <string id="taom_faction_kingdom_of_arthedain_desc" text="Das letzte der drei Nachfolgereiche Arnors und das einzige, das noch besteht. Arveduis Linie hält Fornost auf dem Nordhügelland, und seine Waldläufer bewachen die Straßen Eriadors, doch Angmar, Dunland und die Orks von Gundabad drängen an jeder Grenze eines Reiches mit allzu wenigen Schwertern." />
     <string id="taom_faction_kingdom_of_arthedain_name" text="Königreich Arthedain" />
     <string id="taom_faction_kingdom_of_arthedain_trait_0" text="Letztes von Arnor" />
     <string id="taom_faction_kingdom_of_arthedain_trait_1" text="Palantir von Annúminas" />
@@ -2841,44 +2841,105 @@
   <string id="taom_bc_advice_keep" text="Meine behalten" />
   <string id="taom_bc_advice_done" text="Kampfeinstellungen gespeichert." />
   <string id="taom_bc_advice_failed" text="Kampfeinstellungen konnten nicht gespeichert werden. Stelle sie von Hand unter Optionen, {PERFORMANCE}, ein." />
-  <string id="taom_str_faction_official.arthedain" text="a noble lord" />
-  <string id="taom_str_faction_official.arthedain_f" text="a noble lady" />
-  <string id="taom_str_faction_ruler.arthedain" text="King" />
-  <string id="taom_str_faction_ruler.arthedain_f" text="Queen" />
-  <string id="taom_str_faction_ruler_term_in_speech.arthedain" text="{?RULER.GENDER}the Queen{?}the King{\?} {RULER.NAME}" />
-  <string id="taom_str_faction_ruler_name_with_title.arthedain" text="{?RULER.GENDER}Queen{?}King{\?} {RULER.NAME}" />
-  <string id="taom_str_faction_noble_name_with_title.arthedain" text="{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_official.arthedain" text="ein edler Herr" />
+  <string id="taom_str_faction_official.arthedain_f" text="eine edle Dame" />
+  <string id="taom_str_faction_ruler.arthedain" text="König" />
+  <string id="taom_str_faction_ruler.arthedain_f" text="Königin" />
+  <string id="taom_str_faction_ruler_term_in_speech.arthedain" text="{?RULER.GENDER}die Königin{?}der König{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_ruler_name_with_title.arthedain" text="{?RULER.GENDER}Königin{?}König{\?} {RULER.NAME}" />
+  <string id="taom_str_faction_noble_name_with_title.arthedain" text="{?RULER.GENDER}Herrin{?}Herr{\?} {RULER.NAME}" />
   <string id="taom_str_faction_formal_name_for_culture.arthedain" text="Arthedain" />
-  <string id="taom_str_faction_informal_name_for_culture.arthedain" text="the Dúnedain of the North" />
+  <string id="taom_str_faction_informal_name_for_culture.arthedain" text="die Dúnedain des Nordens" />
   <string id="taom_str_neutral_term_for_culture.arthedain" text="Dúnedain" />
-  <string id="taom_str_culture_description.arthedain" text="The Dúnedain of Arthedain are the last heirs of Arnor, the North-kingdom Elendil founded. From Fornost upon the North Downs the line of Arvedui still keeps the watch that Isildur's heirs have kept for a thousand years, though their towns are few, their lords are poor and the shadow of Angmar never leaves the hills. They are fewer than their southern kin and prouder than their numbers warrant, and every season the wild lands press closer." />
-  <string id="taom_str_culture_rich_name.arthedain" text="Dúnedain of Arthedain" />
-  <string id="taom_str_adjective_for_culture.arthedain" text="Arthedain" />
+  <string id="taom_str_culture_description.arthedain" text="Die Dúnedain von Arthedain sind die letzten Erben Arnors, des von Elendil gegründeten Nordreichs. Von Fornost auf den Nordhöhen hält das Geschlecht Arveduis noch immer jene Wacht, die Isildurs Erben seit tausend Jahren halten, wenngleich ihre Städte wenige sind, ihre Herren arm und der Schatten Angmars nie von den Hügeln weicht. Sie sind weniger zahlreich als ihre südliche Verwandtschaft und stolzer, als ihre Zahl es rechtfertigt, und mit jeder Jahreszeit rücken die wilden Lande näher." />
+  <string id="taom_str_culture_rich_name.arthedain" text="Dúnedain von Arthedain" />
+  <string id="taom_str_adjective_for_culture.arthedain" text="arthedainisch" />
   <string id="taom_str_player_father_name.arthedain" text="Aravir" />
   <string id="taom_str_player_mother_name.arthedain" text="Ivorwen" />
   <string id="taom_aso_kingdom.arthedain" text="Arthedain" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_0" text="+10% party speed on plains (Rangers' Roads)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_1" text="-20% garrison wage (Wardens of the Walls)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_2" text="+5 party morale (Dúnedain Resolve)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_3" text="+1 settlement loyalty per day (Line of Isildur)" />
-  <string id="taom_faction_kingdom_of_arthedain_bonus_4" text="-15% village hearth growth (A Dwindling People)" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_0_desc" text="-20% garrison wage and +1 settlement loyalty per day." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_0_name" text="Wardens of the Walls" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_1_desc" text="+5 party morale. Few as they are, the Dúnedain do not break." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_1_name" text="Dúnedain Resolve" />
-  <string id="taom_faction_kingdom_of_arthedain_perk_2_desc" text="+10% party speed on plains, where the Rangers keep the old roads open." />
-  <string id="taom_faction_kingdom_of_arthedain_perk_2_name" text="Rangers' Roads" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_0" text="Fine Dúnedain archers and guards" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_1" text="Steadfast morale and loyal towns" />
-  <string id="taom_faction_kingdom_of_arthedain_strength_2" text="Cheap garrisons behind old walls" />
-  <string id="taom_faction_kingdom_of_arthedain_su_0_desc" text="Two-handed elite guard of the King's citadel." />
-  <string id="taom_faction_kingdom_of_arthedain_su_0_name" text="King's Guard of Fornost" />
-  <string id="taom_faction_kingdom_of_arthedain_su_1_desc" text="Veteran Dúnedain scout-bowman of the North." />
-  <string id="taom_faction_kingdom_of_arthedain_su_1_name" text="Ranger Captain" />
-  <string id="taom_faction_kingdom_of_arthedain_su_2_desc" text="Sword-and-shield knight of the old blood." />
-  <string id="taom_faction_kingdom_of_arthedain_su_2_name" text="Knight of Arthedain" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_0" text="Few lords and small hosts" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_1" text="Poor lands that grow slowly" />
-  <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="Ringed by Angmar, Dunland and Gundabad" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_0" text="+10 % Truppengeschwindigkeit in der Ebene (Straßen der Waldläufer)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_1" text="-20 % Garnisonssold (Hüter der Mauern)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_2" text="+5 Truppenmoral (Entschlossenheit der Dúnedain)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_3" text="+1 Siedlungsloyalität pro Tag (Linie Isildurs)" />
+  <string id="taom_faction_kingdom_of_arthedain_bonus_4" text="-15 % Herdwachstum in Dörfern (Ein schwindendes Volk)" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_0_desc" text="-20 % Garnisonssold und +1 Siedlungsloyalität pro Tag." />
+  <string id="taom_faction_kingdom_of_arthedain_perk_0_name" text="Hüter der Mauern" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_1_desc" text="+5 Truppenmoral. So wenige sie auch sind, die Dúnedain brechen nicht." />
+  <string id="taom_faction_kingdom_of_arthedain_perk_1_name" text="Entschlossenheit der Dúnedain" />
+  <string id="taom_faction_kingdom_of_arthedain_perk_2_desc" text="+10 % Truppengeschwindigkeit in der Ebene, wo die Waldläufer die alten Straßen offen halten." />
+  <string id="taom_faction_kingdom_of_arthedain_perk_2_name" text="Straßen der Waldläufer" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_0" text="Treffliche Bogenschützen und Wachen der Dúnedain" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_1" text="Standhafte Moral und treue Städte" />
+  <string id="taom_faction_kingdom_of_arthedain_strength_2" text="Günstige Garnisonen hinter alten Mauern" />
+  <string id="taom_faction_kingdom_of_arthedain_su_0_desc" text="Zweihändige Elitewache der Zitadelle des Königs." />
+  <string id="taom_faction_kingdom_of_arthedain_su_0_name" text="Königswache von Fornost" />
+  <string id="taom_faction_kingdom_of_arthedain_su_1_desc" text="Erfahrener Späher und Bogenschütze der Dúnedain des Nordens." />
+  <string id="taom_faction_kingdom_of_arthedain_su_1_name" text="Waldläufer-Hauptmann" />
+  <string id="taom_faction_kingdom_of_arthedain_su_2_desc" text="Ritter alten Blutes mit Schwert und Schild." />
+  <string id="taom_faction_kingdom_of_arthedain_su_2_name" text="Ritter von Arthedain" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_0" text="Wenige Lords und kleine Heere" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_1" text="Karge Lande, die langsam wachsen" />
+  <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="Umringt von Angmar, Dunland und Gundabad" />
+  <string id="taom_eye_hunt_free" text="Das Auge Saurons hat sich dir zugewandt. {HUNTER} zieht mit einem Heer aus, um dich zu vernichten." />
+  <string id="taom_eye_hunt_evil" text="Elrond hat {HUNTER} mit einem Heer der Eldar entsandt, um dich zu Fall zu bringen." />
+  <string id="taom_eye_hunt_won" text="{HUNTER} ist geschlagen. Die Jagd ist vorerst beendet." />
+  <string id="taom_eye_hunt_over" text="Die Jagd ist vorerst beendet." />
+  <string id="taom_tr_prize_advertised" text="{ITEM_NAME} (der ausgeschriebene Preis)" />
+  <string id="taom_tr_prize_hint" text="Etwa {VALUE} Denare wert." />
+  <string id="taom_tr_prize_title" text="Wähle deinen Preis" />
+  <string id="taom_tr_prize_desc" text="Der Turniermeister bietet eine Auswahl an Preisen. Wähle jenen, für den du kämpfen willst; er gehört dir, wenn du siegst." />
+  <string id="taom_tr_skill_title" text="Wähle dein Training" />
+  <string id="taom_tr_skill_desc" text="Wähle die Fertigkeit, die dieses Turnier schult. Du erhältst Erfahrung darin für jede gewonnene Runde und mehr für den Turniersieg." />
+  <string id="taom_tr_skill_gained" text="Das Turnier hat deine Fertigkeit {SKILL_NAME} geschult." />
+  <string id="taom_tr_choose" text="Wählen" />
+  <string id="taom_tr_cancel" text="Abbrechen" />
+  <string id="taom_race_ability_berserk" text="Berserkerwut" />
+  <string id="taom_race_ability_bloodlust" text="Blutdurst" />
+  <string id="taom_race_ability_stand_fast" text="Standhaft" />
+  <string id="taom_race_ability_swiftness" text="Schnelligkeit der Eldar" />
+  <string id="taom_race_ability_wave_ally" text="{ABILITY}: {COUNT} Soldaten auf deiner Seite" />
+  <string id="taom_race_ability_wave_enemy" text="Feindlich {ABILITY}: {COUNT} Soldaten" />
+  <string id="taom_race_ability_swarm" text="Schwarm" />
+  <string id="taom_race_ability_scurry" text="Huschen" />
+  <string id="taom_race_ability_iron_discipline" text="Eiserne Disziplin" />
+  <string id="taom_race_ability_hunters_rush" text="Ansturm des Jägers" />
+  <string id="taom_race_ability_necromancer_shadow" text="Schatten des Totenbeschwörers" />
+  <string id="taom_race_ability_citadel_guard" text="Wache der Zitadelle" />
+  <string id="taom_race_ability_forth_eorlingas" text="Vorwärts, Eorlingas" />
+  <string id="taom_race_ability_bards_aim" text="Bards Zielschuss" />
+  <string id="taom_race_ability_hillclan_fury" text="Zorn der Hügelsippe" />
+  <string id="taom_race_ability_serpent_venom" text="Gift der Schlange" />
+  <string id="taom_race_ability_wainrider_wall" text="Wall der Wagenfahrer" />
+  <string id="taom_race_ability_corsair_raid" text="Korsarenüberfall" />
+  <string id="taom_race_ability_variag_ferocity" text="Wildheit der Variags" />
+  <string id="taom_race_ability_shadow_servants" text="Diener des Schattens" />
+  <string id="taom_shader_notice_title_total" text="Shader werden kompiliert: {COUNT} von etwa {TOTAL}" />
+  <string id="taom_shader_notice_title_count" text="Shader werden kompiliert: {COUNT}" />
+  <string id="taom_shader_notice_detail" text="Das Spiel baut seine Shader nach einer Änderung an deiner Modliste oder am Spiel neu auf. Es ist nicht abgestürzt." />
+  <string id="taom_mission_start_guard_notice" text="{MODULE} ist in {CALL} fehlgeschlagen ({EXCEPTION}). Die Mission läuft weiter, dieser Schritt wurde abgebrochen." />
+  <string id="taom_skeleton_buffer_warning" text="Diese Mission nutzt {PERCENT} Prozent des Skelett-Puffers der Engine, und das Spiel friert endgültig ein, wenn er voll ist. Verringere die Schlachtgröße." />
+  <string id="taom_oob_assign_heroes" text="Helden zuweisen" />
+  <string id="taom_oob_no_screen" text="Kein Schlachtordnungs-Bildschirm erkannt." />
+  <string id="taom_oob_preset_save_option" text="Aktuelle Aufstellung als Vorlage speichern" />
+  <string id="taom_oob_preset_load_option" text="Laden: {NAME}" />
+  <string id="taom_oob_preset_delete_option" text="Löschen: {NAME}" />
+  <string id="taom_oob_presets_title" text="Formationsvorlagen" />
+  <string id="taom_oob_presets_description" text="Speichere, lade oder lösche eine Anordnung von Formationstypen, Hauptleuten und Heldentruppen." />
+  <string id="taom_oob_preset_deleted" text="Vorlage &quot;{NAME}&quot; gelöscht." />
+  <string id="taom_oob_preset_not_general" text="Nur der Feldherr dieser Schlacht kann Vorlagen verwenden." />
+  <string id="taom_oob_preset_loaded" text="Vorlage &quot;{NAME}&quot; geladen. Formationstypen: {CLASSES}, Hauptleute: {CAPTAINS}, Heldentruppen: {TROOPS}." />
+  <string id="taom_oob_preset_skipped" text="Gespeicherte Zuweisungen, die zu dieser Schlacht nicht passen: {COUNT}." />
+  <string id="taom_oob_preset_save_title" text="Formationsvorlage speichern" />
+  <string id="taom_oob_preset_save_prompt" text="Gib einen Namen für diese Vorlage ein:" />
+  <string id="taom_oob_preset_save_button" text="Speichern" />
+  <string id="taom_oob_preset_name_empty" text="Der Vorlagenname darf nicht leer sein." />
+  <string id="taom_oob_preset_saved" text="Vorlage &quot;{NAME}&quot; gespeichert. Formationstypen: {CLASSES}, Hauptleute: {CAPTAINS}, Heldentruppen: {TROOPS}." />
+  <string id="taom_oob_preset_limit" text="Vorlagenlimit erreicht. Lösche eine, bevor du speicherst." />
+  <string id="taom_oob_preset_name_in_use" text="Eine Vorlage namens &quot;{NAME}&quot; existiert bereits." />
+  <string id="taom_oob_preset_save_failed" text="Die Vorlage konnte nicht gespeichert werden." />
+  <string id="taom_oob_presets_button_count" text="Vorlagen ({COUNT})" />
+  <string id="taom_oob_presets_button" text="Vorlagen" />
+  <string id="taom_fief_nav_disabled" text="Die Lehensverwaltung ist in den Mod-Optionen deaktiviert." />
+  <string id="taom_fief_nav_busy" text="Das Lehenszentrum kann derzeit nicht geöffnet werden." />
   </strings>
 </base>

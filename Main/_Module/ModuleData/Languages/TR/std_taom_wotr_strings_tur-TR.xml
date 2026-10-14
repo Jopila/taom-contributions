@@ -30,5 +30,54 @@
     <string id="taom_wotr_victory_free" text="Savaş bitti. Özgür Halklar direndi ve çocukları için geleceği kazandı. Yaşasın özgürlük!" />
     <string id="taom_wotr_victory_evil" text="İnsanların ve Elflerin krallıkları ezildi. Yaşasın Sauron!" />
     <string id="taom_wotr_continue" text="Devam Et" />
+    <string id="taom_wotr_chronicle_events" text="Vakayiname Olayları" />
+    <string id="taom_wc_siege_lost" text="{TARGET} savaş sonuçlanamadan el değiştirir." />
+    <string id="taom_wc_fellowship_title" text="Kardeşlik Yola Çıkar" />
+    <string id="taom_wc_fellowship_occurred" text="Dokuz yürüyücü, Tek Yüzük'ü güneye taşıyarak Ayrıkvadi'den gizlice ayrılır. Elrond'un hanesi gücünü toplar." />
+    <string id="taom_wc_khazaddum_title" text="Khazad-dûm Köprüsü" />
+    <string id="taom_wc_khazaddum_occurred" text="Moria'nın derinliklerinde Gri Hacı, Balrog ile birlikte düşer. Puslu Dağlar'ın orkları kaynaşır ve Özgür Halklar yas tutar." />
+    <string id="taom_wc_breaking_title" text="Kardeşliğin Dağılması" />
+    <string id="taom_wc_breaking_occurred" text="Parth Galen'de Uruk-hai'ler Topluluğun üzerine çöker. Boromir hobbitleri savunurken ölür ve Gondor varisini yitirir." />
+    <string id="taom_wc_theoden_title" text="Kral Théoden" />
+    <string id="taom_wc_theoden_occurred" text="Solucandil'in öğütlerinden kurtulan Théoden kılıcını kuşanır. Binicimarkı kralının çağrısına koşar." />
+    <string id="taom_wc_hornburg_title" text="Hornburg Muharebesi" />
+    <string id="taom_wc_hornburg_open" text="Isengard'ın ordusu ve Dunland'ın dağlıları {TARGET} üzerine yürüyor. Savaş {DAYS} gün içinde sonuçlanmalı." />
+    <string id="taom_wc_hornburg_lapsed" text="{TARGET} üzerine hiçbir saldırı gelmez. Isengard'ın ordusu başka yöne döner." />
+    <string id="taom_wc_hornburg_held" text="Hornburg gece boyunca direnir ve Isengard'ın ordusu surlarında paramparça olur." />
+    <string id="taom_wc_hornburg_fell" text="{TARGET} düşer ve Ak El, Batıyazı'na hükmeder." />
+    <string id="taom_wc_ents_title" text="Entlerin Son Yürüyüşü" />
+    <string id="taom_wc_ents_occurred" text="Fangorn'un Entleri Isengard'ın üzerine iner ve Saruman'ın çukurlarını sular altında bırakır. Ak El'in demirhaneleri susar." />
+    <string id="taom_wc_lorien_title" text="Lothlórien Kuşatma Altında" />
+    <string id="taom_wc_lorien_open" text="Gölge, Dol Guldur'dan Altın Orman'a saldırır. {TARGET} {DAYS} gün dayanmalı." />
+    <string id="taom_wc_lorien_lapsed" text="Dol Guldur'un orduları {TARGET} hedefine hiç ulaşamaz." />
+    <string id="taom_wc_lorien_held" text="Leydi'nin gücü direnir ve Dol Guldur'un orduları Altın Orman'dan geri çekilir." />
+    <string id="taom_wc_lorien_fell" text="{TARGET} yanar ve Lothlórien'in ışığı söner." />
+    <string id="taom_wc_osgiliath_title" text="Osgiliath'ın Düşüşü" />
+    <string id="taom_wc_osgiliath_open" text="Morgul ordusu Anduin'i geçerek {TARGET} üzerine ilerliyor. Gondor yıkık şehri {DAYS} gün tutmalı." />
+    <string id="taom_wc_osgiliath_lapsed" text="Mordor {TARGET} üzerine yürümez ve nehir sessiz kalır." />
+    <string id="taom_wc_osgiliath_held" text="Faramir Anduin geçitlerini tutar ve Morgul ordusu geri çekilir." />
+    <string id="taom_wc_osgiliath_fell" text="{TARGET} düşer ve Minas Tirith'e giden yol açılır." />
+    <string id="taom_wc_dale_title" text="Dale Muharebesi" />
+    <string id="taom_wc_dale_open" text="Doğulular ve Dol Guldur'un uşakları Dale krallığına karşı yürüyor. {TARGET} {DAYS} gün dayanmalı." />
+    <string id="taom_wc_dale_lapsed" text="Doğulular yollarını değiştirir ve {TARGET} kurtulur." />
+    <string id="taom_wc_dale_held" text="Dale'in İnsanları ile Erebor'un Cüceleri omuz omuza durur ve Doğuluların ordusu geri püskürtülür." />
+    <string id="taom_wc_dale_fell" text="{TARGET} Doğuluların eline düşer ve Erebor'un Cüceleri dostlarına yardıma koşar." />
+    <string id="taom_wc_corsairs_title" text="Umbar Korsanları" />
+    <string id="taom_wc_corsairs_open" text="Umbar'ın kara yelkenleri Anduin'i çıkarak {TARGET} üzerine geliyor. Gondor limanı {DAYS} gün boyunca tutmalı." />
+    <string id="taom_wc_corsairs_lapsed" text="Korsanlar denizde oyalanır ve {TARGET} huzur içinde kalır." />
+    <string id="taom_wc_corsairs_held" text="Umbar donanmaları {TARGET} önünden sürülür ve Gondor'un güney tımarları cesaret bulur." />
+    <string id="taom_wc_corsairs_fell" text="Korsanlar {TARGET} şehrini ele geçirir ve gemileri nehre hükmeder." />
+    <string id="taom_wc_north_title" text="Kuzeyde Savaş" />
+    <string id="taom_wc_north_open" text="Gundabad Orkları ve Dunland'ın dağ adamları Kuzey'e iner. {TARGET} {DAYS} gün dayanmalı." />
+    <string id="taom_wc_north_lapsed" text="Kuzey savaşı {TARGET} yanından geçip gider." />
+    <string id="taom_wc_north_held" text="Kolcular ve Arthedain'in adamları {TARGET} şehrini tutar ve Kuzey özgür kalır." />
+    <string id="taom_wc_north_fell" text="{TARGET} düşer ve gölge Eriador'a yayılır." />
+    <string id="taom_wc_gondor_title" text="Gondor Kuşatması" />
+    <string id="taom_wc_gondor_open" text="Nazgûl Efendisi, Mordor ordularını {TARGET} üzerine sürer. Şehir {DAYS} gün dayanmalı." />
+    <string id="taom_wc_gondor_lapsed" text="Mordor'un büyük ordusu geri durur ve {TARGET} kararmış bir gök altında bekler." />
+    <string id="taom_wc_gondor_held" text="Rohirrim şafakta gelir ve {TARGET} kuşatması Pelennor Kırları'nda kırılır." />
+    <string id="taom_wc_gondor_fell" text="{TARGET} kapıları kırılır ve Ak Şehir Mordor'un eline düşer." />
+    <string id="taom_wc_blackgate_title" text="Kara Kapı Açılıyor" />
+    <string id="taom_wc_blackgate_occurred" text="Batı'nın Komutanları, Göz'ü Yüzük Taşıyıcı'dan uzaklaştırmak için Morannon'a yürür. Savaşın kaderi artık Yüzük'e bağlıdır." />
   </strings>
 </base>

@@ -30,5 +30,54 @@
     <string id="taom_wotr_victory_free" text="La guerre est terminée. Les Peuples Libres ont persévéré et ont gagné l'avenir pour leurs enfants. Vive la liberté !" />
     <string id="taom_wotr_victory_evil" text="Les royaumes des Hommes et des Elfes ont été écrasés. Vive Sauron !" />
     <string id="taom_wotr_continue" text="Continuer" />
+    <string id="taom_wotr_chronicle_events" text="Événements de la Chronique" />
+    <string id="taom_wc_siege_lost" text="{TARGET} change de mains avant que la bataille ne puisse être décidée." />
+    <string id="taom_wc_fellowship_title" text="La Communauté se met en route" />
+    <string id="taom_wc_fellowship_occurred" text="Neuf marcheurs quittent Fondcombe en secret, portant l'Anneau Unique vers le sud. La maison d'Elrond rassemble ses forces." />
+    <string id="taom_wc_khazaddum_title" text="Le Pont de Khazad-dûm" />
+    <string id="taom_wc_khazaddum_occurred" text="Dans les profondeurs de la Moria, le Pèlerin Gris tombe avec le Balrog. Les orques des Monts Brumeux grouillent, et les Peuples Libres portent le deuil." />
+    <string id="taom_wc_breaking_title" text="La Dislocation de la Communauté" />
+    <string id="taom_wc_breaking_occurred" text="À Parth Galen, les Uruk-hai fondent sur la Compagnie. Boromir meurt en défendant les hobbits, et le Gondor perd son héritier." />
+    <string id="taom_wc_theoden_title" text="Théoden Roi" />
+    <string id="taom_wc_theoden_occurred" text="Libéré des conseils de Langue de Serpent, Théoden reprend son épée. La Marche se rassemble autour de son roi." />
+    <string id="taom_wc_hornburg_title" text="La Bataille du Gouffre de Helm" />
+    <string id="taom_wc_hornburg_open" text="L'armée d'Isengard et les montagnards du Pays de Dun marchent sur {TARGET}. La bataille doit être décidée en {DAYS} jours." />
+    <string id="taom_wc_hornburg_lapsed" text="Aucun assaut ne vient contre {TARGET}. Le ban d'Isengard se tourne ailleurs." />
+    <string id="taom_wc_hornburg_held" text="Fort le Cor tient toute la nuit, et l'armée d'Isengard se brise contre ses murs." />
+    <string id="taom_wc_hornburg_fell" text="{TARGET} tombe, et la Main Blanche règne sur l'Ouestfolde." />
+    <string id="taom_wc_ents_title" text="La Dernière Marche des Ents" />
+    <string id="taom_wc_ents_occurred" text="Les Ents de Fangorn descendent sur Isengard et noient les fosses de Saroumane. Les forges de la Main Blanche se taisent." />
+    <string id="taom_wc_lorien_title" text="Lothlórien assaillie" />
+    <string id="taom_wc_lorien_open" text="Hors de Dol Guldur, l'Ombre assaille le Bois d'Or. {TARGET} doit tenir {DAYS} jours." />
+    <string id="taom_wc_lorien_lapsed" text="Les armées de Dol Guldur n'atteignent jamais {TARGET}." />
+    <string id="taom_wc_lorien_held" text="Le pouvoir de la Dame tient bon, et les armées de Dol Guldur refluent loin du Bois d'Or." />
+    <string id="taom_wc_lorien_fell" text="{TARGET} brûle, et la lumière de Lothlórien décline." />
+    <string id="taom_wc_osgiliath_title" text="La Chute d'Osgiliath" />
+    <string id="taom_wc_osgiliath_open" text="L'armée de Morgul franchit l'Anduin en direction de {TARGET}. Le Gondor doit tenir la cité en ruines pendant {DAYS} jours." />
+    <string id="taom_wc_osgiliath_lapsed" text="Le Mordor ne marche pas contre {TARGET}, et le fleuve demeure calme." />
+    <string id="taom_wc_osgiliath_held" text="Faramir tient les passages de l'Anduin, et l'armée de Morgul se retire." />
+    <string id="taom_wc_osgiliath_fell" text="{TARGET} tombe, et la route de Minas Tirith est ouverte." />
+    <string id="taom_wc_dale_title" text="La Bataille de Dale" />
+    <string id="taom_wc_dale_open" text="Les Orientaux et les serviteurs de Dol Guldur marchent contre le royaume de Dale. {TARGET} doit tenir {DAYS} jours." />
+    <string id="taom_wc_dale_lapsed" text="Les Orientaux se détournent, et {TARGET} est épargnée." />
+    <string id="taom_wc_dale_held" text="Les Hommes de Dale et les Nains d'Erebor font front ensemble, et l'armée orientale est repoussée." />
+    <string id="taom_wc_dale_fell" text="{TARGET} tombe aux mains des Orientaux, et les Nains d'Erebor chevauchent au secours de leurs amis." />
+    <string id="taom_wc_corsairs_title" text="Les Corsaires d'Umbar" />
+    <string id="taom_wc_corsairs_open" text="Les voiles noires d'Umbar remontent l'Anduin vers {TARGET}. Le Gondor doit tenir le port pendant {DAYS} jours." />
+    <string id="taom_wc_corsairs_lapsed" text="Les Corsaires s'attardent en mer, et {TARGET} est laissée en paix." />
+    <string id="taom_wc_corsairs_held" text="Les flottes d'Umbar sont chassées de {TARGET}, et les fiefs méridionaux du Gondor reprennent courage." />
+    <string id="taom_wc_corsairs_fell" text="Les Corsaires s'emparent de {TARGET}, et leurs navires commandent le fleuve." />
+    <string id="taom_wc_north_title" text="La Guerre dans le Nord" />
+    <string id="taom_wc_north_open" text="Les Orques de Gundabad et les montagnards du Pays de Dun fondent sur le Nord. {TARGET} doit tenir pendant {DAYS} jours." />
+    <string id="taom_wc_north_lapsed" text="La guerre du Nord épargne {TARGET}." />
+    <string id="taom_wc_north_held" text="Les Rôdeurs et les hommes d'Arthedain tiennent {TARGET}, et le Nord demeure libre." />
+    <string id="taom_wc_north_fell" text="{TARGET} tombe, et l'ombre s'étend sur l'Eriador." />
+    <string id="taom_wc_gondor_title" text="Le Siège du Gondor" />
+    <string id="taom_wc_gondor_open" text="Le Seigneur des Nazgûl mène les armées du Mordor contre {TARGET}. La cité doit tenir pendant {DAYS} jours." />
+    <string id="taom_wc_gondor_lapsed" text="La grande armée du Mordor se retient, et {TARGET} attend sous un ciel assombri." />
+    <string id="taom_wc_gondor_held" text="Les Rohirrim arrivent à l'aube, et le siège de {TARGET} est brisé sur les Champs du Pelennor." />
+    <string id="taom_wc_gondor_fell" text="Les portes de {TARGET} sont brisées, et la Cité Blanche tombe aux mains du Mordor." />
+    <string id="taom_wc_blackgate_title" text="La Porte Noire s'ouvre" />
+    <string id="taom_wc_blackgate_occurred" text="Les Capitaines de l'Ouest marchent vers le Morannon pour détourner l'Œil du Porteur de l'Anneau. Le sort de la guerre repose désormais sur l'Anneau." />
   </strings>
 </base>

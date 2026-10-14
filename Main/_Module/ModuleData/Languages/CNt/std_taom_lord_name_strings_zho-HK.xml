@@ -995,25 +995,25 @@
     <string id="aom_lord_rohan_2_1_name" text="伊森蒙德·瑟迪辛" />
     <string id="aom_lord_rohan_5_1_name" text="伊德威格·歐斯奇特林" />
     <string id="aom_lord_rohan_9_1_name" text="杜恩希爾·杜寧" />
-    <string id="aom_lord_AN1_1_name" text="Arvegil II" />
-    <string id="aom_lord_AN1_2_name" text="Malvegil" />
-    <string id="aom_lord_AN1_3_name" text="Gilraen" />
-    <string id="aom_lord_AN1_4_name" text="Ivorwen" />
-    <string id="aom_lord_AN2_1_name" text="Amlaith" />
-    <string id="aom_lord_AN2_2_name" text="Celepharn" />
-    <string id="aom_lord_AN2_3_name" text="Fíriel" />
-    <string id="aom_lord_AN2_4_name" text="Elanwen" />
-    <string id="aom_lord_AN3_1_name" text="Argeleb" />
-    <string id="aom_lord_AN3_2_name" text="Araphor" />
-    <string id="aom_lord_AN3_3_name" text="Meneliel" />
-    <string id="aom_lord_AN3_4_name" text="Silivren" />
-    <string id="aom_lord_AN4_1_name" text="Halbarad" />
-    <string id="aom_lord_AN4_2_name" text="Aranuir" />
-    <string id="aom_lord_AN4_3_name" text="Ithilwen" />
-    <string id="aom_lord_AN4_4_name" text="Calwen" />
-    <string id="aom_lord_AN5_1_name" text="Celebrindor" />
-    <string id="aom_lord_AN5_2_name" text="Arveleg" />
-    <string id="aom_lord_AN5_3_name" text="Maethil" />
-    <string id="aom_lord_AN5_4_name" text="Tirwen" />
+    <string id="aom_lord_AN1_1_name" text="阿維吉爾二世" />
+    <string id="aom_lord_AN1_2_name" text="馬爾維吉爾" />
+    <string id="aom_lord_AN1_3_name" text="吉爾蕾恩" />
+    <string id="aom_lord_AN1_4_name" text="伊沃雯" />
+    <string id="aom_lord_AN2_1_name" text="阿姆萊斯" />
+    <string id="aom_lord_AN2_2_name" text="凱勒法恩" />
+    <string id="aom_lord_AN2_3_name" text="費瑞爾" />
+    <string id="aom_lord_AN2_4_name" text="埃蘭雯" />
+    <string id="aom_lord_AN3_1_name" text="阿吉勒布" />
+    <string id="aom_lord_AN3_2_name" text="阿拉佛爾" />
+    <string id="aom_lord_AN3_3_name" text="梅涅利爾" />
+    <string id="aom_lord_AN3_4_name" text="希利芙蓮" />
+    <string id="aom_lord_AN4_1_name" text="哈爾巴拉德" />
+    <string id="aom_lord_AN4_2_name" text="阿拉努伊爾" />
+    <string id="aom_lord_AN4_3_name" text="伊西爾雯" />
+    <string id="aom_lord_AN4_4_name" text="卡爾雯" />
+    <string id="aom_lord_AN5_1_name" text="凱勒布林多" />
+    <string id="aom_lord_AN5_2_name" text="阿維列格" />
+    <string id="aom_lord_AN5_3_name" text="梅希爾" />
+    <string id="aom_lord_AN5_4_name" text="提爾雯" />
   </strings>
 </base>

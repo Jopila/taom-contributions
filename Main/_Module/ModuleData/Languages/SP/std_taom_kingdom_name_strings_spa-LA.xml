@@ -66,10 +66,10 @@
     <string id="taom_umbar_ruler_title" text="Rey Corsario" />
     <string id="taom_umbar_short_name" text="Umbar" />
     <string id="taom_umbar_title" text="Puerto de Umbar" />
-    <string id="taom_arthedain_desc" text="The last of the three realms into which Arnor was sundered, Arthedain did not fall. Arvedui's line still holds Fornost upon the North Downs, though its lords are few, its towns poor, and Angmar's shadow lies always on the northern hills." />
-    <string id="taom_arthedain_name" text="Kingdom of Arthedain" />
-    <string id="taom_arthedain_ruler_title" text="King" />
+    <string id="taom_arthedain_desc" text="El último de los tres reinos en que Arnor fue dividido, Arthedain no cayó. El linaje de Arvedui aún conserva Fornost sobre las Quebradas del Norte, aunque sus señores son pocos, sus aldeas pobres, y la sombra de Angmar pesa siempre sobre las colinas del norte." />
+    <string id="taom_arthedain_name" text="Reino de Arthedain" />
+    <string id="taom_arthedain_ruler_title" text="Rey" />
     <string id="taom_arthedain_short_name" text="Arthedain" />
-    <string id="taom_arthedain_title" text="North-Kingdom of Arthedain" />
+    <string id="taom_arthedain_title" text="Reino del Norte de Arthedain" />
   </strings>
 </base>
