@@ -48,7 +48,7 @@ public class WarChronicleEventsWiringTests
         var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
             .Where(p => !p.EndsWith("WarChronicleModule.cs", StringComparison.OrdinalIgnoreCase)
                         && !p.EndsWith("WarChronicleEventsBehavior.cs", StringComparison.OrdinalIgnoreCase))
-            .Where(p => Regex.IsMatch(RepoPaths.StripComments(File.ReadAllText(p)), @"\bWarChronicleEventsBehavior\b"))
+            .Where(p => RepoPaths.MentionsOutsideComments(p, "WarChronicleEventsBehavior", wholeWord: true))
             .ToList();
 
         Assert.AreEqual(0, offenders.Count, string.Join(", ", offenders));

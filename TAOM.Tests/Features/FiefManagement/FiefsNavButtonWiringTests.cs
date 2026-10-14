@@ -121,7 +121,7 @@ public class FiefsNavButtonWiringTests
         var holders = Directory.EnumerateFiles(mainDir, "*.cs", SearchOption.AllDirectories)
             .Where(f => !f.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar)
                         && !f.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar))
-            .Where(f => StripComments(File.ReadAllText(f)).Contains("IsMapIncidentActive"))
+            .Where(f => MentionsOutsideComments(f, "IsMapIncidentActive"))
             .Select(f => Path.GetFullPath(f).Substring(Path.GetFullPath(RepoPath()).Length).TrimStart('\\', '/').Replace('\\', '/'))
             .OrderBy(f => f)
             .ToList();

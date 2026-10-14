@@ -44,7 +44,7 @@ public class WarOfTheRingWiringTests
     {
         var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
             .Where(path => !IsFile(path, "SubModule.cs") && !IsFile(path, "WarOfTheRingBehavior.cs"))
-            .Where(path => Regex.IsMatch(RepoPaths.StripComments(File.ReadAllText(path)), @"\bWarOfTheRingBehavior\b"))
+            .Where(path => RepoPaths.MentionsOutsideComments(path, "WarOfTheRingBehavior", wholeWord: true))
             .ToList();
 
         Assert.AreEqual(0, offenders.Count,
