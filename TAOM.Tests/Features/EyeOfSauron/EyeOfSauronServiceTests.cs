@@ -589,7 +589,7 @@ public class EyeOfSauronServiceTests
     }
 
     [TestMethod]
-    public void OnDailyTick_EveryHunterBusy_Waits_LogsTheFirstReason_AndNeverSpawns()
+    public void TryStartHunt_EveryHunterBusy_Waits_LogsTheFirstReason_AndNeverSpawns()
     {
         _sut.AddScore(FactionSide.Evil, 12f);
         _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(Leading("wk_party"));
@@ -605,6 +605,52 @@ public class EyeOfSauronServiceTests
         _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
         _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
         _logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains("Waiting") && m.Contains(HuntTroopLists.WitchKingId)));
+    }
+
+    // E25: the daily tick logs a wait because WaitReason returned one, never by reading the verdict's wording. The
+    // assertions name the hunter and his party only, so a reworded message keeps these tests green.
+    private void ArmWitchKingWaitingInAnArmy()
+    {
+        _sut.AddScore(FactionSide.Evil, 12f);
+        _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(Leading("wk_party"));
+        var party = FreeParty(HuntTroopLists.WitchKingId);
+        party.InArmy = true;
+        _adapter.ReadParty("wk_party").Returns(party);
+    }
+
+    [TestMethod]
+    public void OnDailyTick_HunterWaits_LogsTheReason()
+    {
+        ArmWitchKingWaitingInAnArmy();
+
+        _sut.OnDailyTick();
+
+        Assert.IsFalse(_sut.IsHunting);
+        _logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains(HuntTroopLists.WitchKingId) && m.Contains("wk_party")));
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+    }
+
+    [TestMethod]
+    public void OnDailyTick_NoHunterAtWar_IsNotAWait_LogsNothing()
+    {
+        _sut.AddScore(FactionSide.Evil, 12f);
+        _adapter.ReadHero(HuntTroopLists.WitchKingId).Returns(FreeHero(atWar: false));
+
+        _sut.OnDailyTick();
+
+        Assert.IsFalse(_sut.IsHunting);
+        _logger.DidNotReceive().LogInfo(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void TryStartHunt_DryRunWhileTheHunterWaits_ReturnsTheReason_LogsNothing()
+    {
+        ArmWitchKingWaitingInAnArmy();
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: false, dryRun: true);
+
+        StringAssert.Contains(verdict, "wk_party");
+        _logger.DidNotReceive().LogInfo(Arg.Any<string>());
     }
 
     [TestMethod]
