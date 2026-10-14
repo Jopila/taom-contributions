@@ -66,13 +66,17 @@ under "Not applied".
 - **B26 refuted:** the opaque chronicle save section has no writer in Batch A, but the built Batch B
   uses it unchanged. Kept.
 - **B31 not applied:** the wiring test strips comments from every `Main` file. The fix belongs in
-  `TAOM.Tests/Infrastructure/RepoPaths.cs` (shared, committed), as a separate change.
-- **B44 not applied:** the same scan in `WarOfTheRingWiringTests`; the same one-place fix as B31.
+  `TAOM.Tests/Infrastructure/RepoPaths.cs` (shared, committed), as a separate change. Closed 2026-10-14
+  (Follow-ups).
+- **B44 not applied:** the same scan in `WarOfTheRingWiringTests`; the same one-place fix as B31. Closed
+  2026-10-14 (Follow-ups).
 - **B45 not applied:** the momentum behavior still passes a saved chunk count unchecked to
-  `new List<string>(count)`; share one guarded sync helper when momentum is next touched.
+  `new List<string>(count)`; share one guarded sync helper when momentum is next touched. Closed
+  2026-10-14 (Follow-ups).
 - **B16, open:** the logs are read oldest first, but the `t=load` marker and the `h=` hours field that
   would drop an abandoned run's later days are not built. A reload of an older save still leaves those
-  days in the report, and the docs say so. Needs a format decision.
+  days in the report, and the docs say so. Needs a format decision. Closed 2026-10-14 with the marker
+  alone (Follow-ups).
 - **B46 to B53:** eight NIT and INFO items were never verified and stay notes.
 
 ## Codex review (gpt-6-astra, after the deep-review fixes)
@@ -112,9 +116,15 @@ PASS reached by omission. Each verdict needs a fixture for the "unknown" cases, 
 
 ## Follow-ups (outside this change; issues on Mike's word)
 
-- B16: decide the `t=load` marker and `h=` field, then drop an abandoned run's later days.
-- B31 and B44: speed up `RepoPaths.StripComments` once, as its own change.
-- B45: one guarded chunk-sync helper shared with momentum.
+- B16: done 2026-10-14 with a load marker, not the planned `h=` field. `WarChronicleBehavior` writes
+  `t=load cid day` on each game load, and the analyzer drops that campaign's records after the save's
+  day. An `h=` field would not have been enough: on a load the engine waits only the elapsed part of the
+  day before the next daily tick (v1.5.5 `Campaign.cs:1024-1030`), so a save made before midday ticks
+  its own day again. The same fact added a once-per-day guard to the chronicle's daily work.
+- B31 and B44: done by the tests branch (#792).
+- B45: done 2026-10-14: `SyncDataChunker.SyncChunks`, the guarded count-and-chunks pass both behaviors use.
+- Rejected 2026-10-14: having `SyncChunks` take and return the whole payload string. It removes one
+  `Split`/`Join` step at each caller but changes an API about 10 tests use (simplicity criterion).
 - Real-run check: `cap=na` makes a kingdom UNKNOWN. If real logs carry `cap=na` for a normal kingdom,
   decide whether that should read as "no capital" instead.
 

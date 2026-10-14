@@ -113,12 +113,15 @@ written from intent. The fix is mechanical (recount, reread the test), the gate 
 - C52: the ledger analyzer's capital verdict reports PASS for a campaign with no kingdom lines (a chronicle-only
   log from an old save loaded and closed). Needs a "no kingdom lines" UNKNOWN.
 - C53: `RepoPaths.StripComments` over all `Main` files in three wiring tests; same one-place fix as Batch A's
-  B31 and B44, cost never timed.
+  B31 and B44, cost never timed. Done by the tests branch (#792).
 - C54: Bree (`town_AN3`) and every Arthedain town exist only in the live `TAOM_Map`; the packaged TAOM_Map in
-  the releases folders has none, so `north` is Skipped at session launch until the next package.
+  the releases folders has none, so `north` is Skipped at session launch until the next package. Done
+  2026-10-14 as a release check: `docs/reference/release-process.md` says the next release must ship a
+  TAOM_Map package with `town_AN1` to `town_AN3`, and `/release` points to it.
 - C55: issue #765 still names Dale and Fornost as siege targets; the data targets Eldby (`town_S3`) and Bree.
 - C56: `check_external_loc_coverage.py` fails on live-install drift (+38 TAOM_Map rows and +5 Armory rows per
-  language, from 2026-10-07 edits), not on this diff.
+  language, from 2026-10-07 edits), not on this diff. Done 2026-10-14: the TAOM_Map coverage baseline was
+  re-taken for the new place names.
 - Context, not this work: the installed game moved to v1.5.5 on 2026-10-09 while the target stays v1.5.4, and
   9 data tests fail on trunk from `08b30bfc4`.
 
