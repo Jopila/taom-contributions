@@ -254,7 +254,6 @@ public class StarterKitCoverageTests
         var cultureDefaultRosters = PlayerRosters(LoadRosters(CultureDefaultFile))
             .GroupBy(r => r.Attribute("id")!.Value, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
-        var cultureDefaultIds = new HashSet<string>(cultureDefaultRosters.Keys, StringComparer.OrdinalIgnoreCase);
         var overrideIds = new HashSet<string>(
             PlayerRosters(LoadRosters(VanillaOverrideFile)).Select(r => r.Attribute("id")!.Value),
             StringComparer.OrdinalIgnoreCase);
@@ -270,7 +269,7 @@ public class StarterKitCoverageTests
         foreach (var culture in cultures)
         {
             if (!titlesByCulture.TryGetValue(culture!, out var titles)) continue;
-            if (cultureDefaultIds.Any(id => id.StartsWith($"player_char_creation_{culture}_", StringComparison.OrdinalIgnoreCase)))
+            if (cultureDefaultRosters.Keys.Any(id => id.StartsWith($"player_char_creation_{culture}_", StringComparison.OrdinalIgnoreCase)))
             {
                 // A vanilla culture with its own TAOM rosters (aserai, 08b30bfc4) reuses vanilla's ids, so
                 // each roster must REPLACE vanilla's; without the flag MergeElements appends its sets after

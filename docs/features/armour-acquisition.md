@@ -83,7 +83,8 @@ engine's own ItemCategory is an absolute tier that ignores TAOM's per-kingdom ca
 ### Solution Approach
 
 1. **One class per piece, generated.** `tools/generate_armour_classes.py` classes every character armour
-   piece in the live Armory and writes `armour_classes.xml`: named hero kit
+   piece in the live Armory (a piece only when the item's own `Type` is HeadArmor, BodyArmor, LegArmor,
+   HandArmor or Cape, never by the file it sits in) and writes `armour_classes.xml`: named hero kit
    (`rebalance_armor.is_excluded`) first, then the `_lord` token (a lord variant is a lord variant
    whoever wears it), then `_civ` kit, then `derive_armor_tiers`' tier (the lowest battle wearer's band,
    else the id token), then the band whose kingdom-cap target is nearest the piece's primary stat. Each
@@ -525,6 +526,10 @@ The lord's gear ladder: #693. The base feature: none yet (see Owed).
 
 ## Changelog
 
+- 2026-10-14: the class generator now classes a piece by the item's own `Type`, not by its file. Harad's
+  art drop filed four camel bardings (`Type="HorseHarness"`) in `body_armors.xml`, and classed by file they
+  entered the class table as body armour, with 12 heavy Harad and Shaghana chests upgrading into the elite
+  barding. Caught in review before any commit.
 - 2026-09-27: built (KEYforce's design, Mike's decisions): the class table and its generator, the
   NotMerchandise gate, the market gate and sweep, the armoury bench, the Lord's Harness, the event,
   visiting armourers, the Armourer's Commission rows.

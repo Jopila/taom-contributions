@@ -211,6 +211,18 @@ class TestVanillaReplacement(unittest.TestCase):
         self.assertEqual(twice, once)
         self.assertEqual(marked, [])
 
+    def test_a_commented_out_roster_is_neither_flagged_nor_counted(self):
+        text = ('<EquipmentRosters><!-- <EquipmentRoster id="a" culture="Culture.aserai"></EquipmentRoster> -->'
+                '<EquipmentRoster id="b"><EquipmentSet /></EquipmentRoster></EquipmentRosters>')
+        out, marked = wk.mark_vanilla_replacements(text, frozenset({"a", "b"}))
+        self.assertEqual(marked, ["b"])
+        self.assertIn('<!-- <EquipmentRoster id="a" culture="Culture.aserai"></EquipmentRoster> -->', out)
+
+    def test_a_commented_out_flagged_roster_is_not_stray(self):
+        text = ('<EquipmentRosters><!-- <EquipmentRoster id="gone" _replaceWhileMerging="true"> -->'
+                '<EquipmentRoster id="a" _replaceWhileMerging="true" /></EquipmentRosters>')
+        self.assertEqual(wk.stray_replace_ids(text, frozenset({"a"})), [])
+
     def test_a_flag_on_a_roster_vanilla_lacks_is_reported(self):
         out, _ = wk.mark_vanilla_replacements(CC, self.VANILLA)
         self.assertEqual(wk.stray_replace_ids(out, self.VANILLA), [])
@@ -221,7 +233,7 @@ class TestVanillaReplacement(unittest.TestCase):
 @unittest.skipUnless(all(p.exists() for p in wk.VANILLA_ROSTER_FILES), "needs the Bannerlord install; skipped, never faked")
 class TestCommittedCultureFileAgainstVanilla(unittest.TestCase):
     def test_every_culture_roster_vanilla_also_defines_replaces_it_and_no_other_does(self):
-        vanilla = wk.vanilla_roster_ids()
+        vanilla = wk.roster_ids(wk.VANILLA_ROSTER_FILES)
         text = wk.gk.read_xml(wk.CC_FILE)[0]
         rosters = list(ET.fromstring(text.encode("utf-8")).iter("EquipmentRoster"))
         unflagged = sorted(r.get("id") for r in rosters
@@ -332,7 +344,7 @@ class TestCareerKitIsNotRewired(unittest.TestCase):
         # re-running the tool leaves the overridden vanilla starts on the old kit
         built = wk.build_vanilla_override(wk.gk.read_xml(wk.CAREER_FILE)[0],
                                           wk.titles_from_menus(wk.MENUS_DIR), wk.BORROW,
-                                          owned=wk.owned_roster_ids())
+                                          owned=wk.roster_ids(wk.REWIRE_FILES))
         committed = wk.gk.read_xml(wk.OVERRIDE_FILE)[0]
         self.assertEqual(committed.replace("\r\n", "\n"), built.replace("\r\n", "\n"),
                          "re-run python tools/wire_starter_kit_rosters.py --apply")
@@ -342,28 +354,28 @@ class TestCareerKitIsNotRewired(unittest.TestCase):
         # last, _replaceWhileMerging) silently wins over the culture's own start (aserai, 2026-10-14)
         override = {r.get("id") for r in ET.fromstring(wk.gk.read_xml(wk.OVERRIDE_FILE)[0].encode("utf-8"))
                     .iter("EquipmentRoster")}
-        self.assertEqual(sorted(override & wk.owned_roster_ids()), [])
+        self.assertEqual(sorted(override & wk.roster_ids(wk.REWIRE_FILES)), [])
 
 
-VANILLA_SETS = """<EquipmentRosters>
-    <EquipmentRoster id="player_char_creation_khuzait_hunter_m" culture="Culture.khuzait"><EquipmentSet /></EquipmentRoster>
-    <EquipmentRoster id="npc_disguised_hero_equipment_template"><EquipmentSet /></EquipmentRoster>
-</EquipmentRosters>"""
+VANILLA_SETS = frozenset({"player_char_creation_khuzait_hunter_m", "npc_disguised_hero_equipment_template"})
 
 
 class TestOverrideIdsExistInVanilla(unittest.TestCase):
     """An override roster whose id vanilla lacks does not append: MBObjectManager.MergeElements
     merges it into the FIRST roster of the accumulated document (1.5.3, lines 846 and 857-859),
-    so that roster loses its id and its content. The tool must refuse to write one."""
+    so that roster loses its id and its content. The tool must refuse to write one, through
+    stray_replace_ids: every override roster carries _replaceWhileMerging."""
+
+    FLAG = ' _replaceWhileMerging="true"'
 
     def test_every_id_present_is_accepted(self):
-        override = '<EquipmentRosters><EquipmentRoster id="player_char_creation_khuzait_hunter_m" /></EquipmentRosters>'
-        self.assertEqual(wk.missing_vanilla_ids(override, VANILLA_SETS), [])
+        override = f'<EquipmentRosters><EquipmentRoster id="player_char_creation_khuzait_hunter_m"{self.FLAG} /></EquipmentRosters>'
+        self.assertEqual(wk.stray_replace_ids(override, VANILLA_SETS), [])
 
     def test_an_id_vanilla_lacks_is_reported(self):
-        override = ('<EquipmentRosters><EquipmentRoster id="player_char_creation_khuzait_hunter_m" />'
-                    '<EquipmentRoster id="player_char_creation_khuzait_prophet_f" /></EquipmentRosters>')
-        self.assertEqual(wk.missing_vanilla_ids(override, VANILLA_SETS), ["player_char_creation_khuzait_prophet_f"])
+        override = (f'<EquipmentRosters><EquipmentRoster id="player_char_creation_khuzait_hunter_m"{self.FLAG} />'
+                    f'<EquipmentRoster id="player_char_creation_khuzait_prophet_f"{self.FLAG} /></EquipmentRosters>')
+        self.assertEqual(wk.stray_replace_ids(override, VANILLA_SETS), ["player_char_creation_khuzait_prophet_f"])
 
 
 if __name__ == "__main__":

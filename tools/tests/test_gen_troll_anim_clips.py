@@ -11,8 +11,10 @@ The generator itself needs TpacTool, the Kit's loader and the install, so these 
 functions out of the script with the PowerShell parser and run them on plain objects shaped like TpacTool's
 AnimationClip. The same parse checks that both write paths and both -Verify modes go through them.
 """
+import glob
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -162,6 +164,70 @@ class ClipKeyRuleTests(unittest.TestCase):
         for bad in ("keyed_blank", "keyed_other", "keyed_action", "keyed_child", "keyed_case", "unkeyed_key",
                     "unkeyed_src2"):
             self.assertTrue(f[bad], bad)
+
+
+TOOLS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SAVE_CALL = re.compile(r"\.Save\(", re.I)   # PowerShell binds .NET method names in any case
+COMMENT_OR_STRING = re.compile(r"(\"[^\"]*\"|'[^']*')|#.*")
+
+
+def strip_comment(line):
+    """The line without its `#` comment; a `#` inside a quoted string stays."""
+    return COMMENT_OR_STRING.sub(lambda m: m.group(1) or "", line)
+
+
+def save_call_arg_counts(line):
+    """Argument count of every `.Save(` call on one line: top-level commas, so `Save($a, (f 1, 2), 2)` is 3."""
+    counts = []
+    for m in SAVE_CALL.finditer(line):
+        depth, args, quote, seen = 1, 1, None, False
+        for ch in line[m.end():]:
+            if quote:
+                quote = None if ch == quote else quote
+                continue
+            if ch in "'\"":
+                quote, seen = ch, True
+            elif ch in "([{":
+                depth, seen = depth + 1, True
+            elif ch in ")]}":
+                depth -= 1
+                if depth == 0:
+                    break
+            elif ch == "," and depth == 1:
+                args += 1
+            elif not ch.isspace():
+                seen = True
+        counts.append(args if seen else 0)
+    return counts
+
+
+class TestTpacSaveCallsPassThreeArguments(unittest.TestCase):
+    """TpacTool v0.5.1 is AssetPackage.Save(string newFilePath = null, bool useOriginalChecksum = false,
+    int tpacVersion = 2). A two-argument `Save($out, 2)` binds useOriginalChecksum = $true and writes the
+    old checksum, silently. Every tools/*.ps1 package save must spell all three."""
+
+    def test_the_matcher_flags_a_short_call(self):
+        self.assertEqual(save_call_arg_counts("$pkg.Save($out, 2)"), [2])
+        self.assertEqual(save_call_arg_counts("$pkg.Save($out)"), [1])
+        self.assertEqual(save_call_arg_counts("$pkg.Save()"), [0])
+        self.assertEqual(save_call_arg_counts("$pkg.Save($out, $false, 2)   # path, flag, version"), [3])
+        self.assertEqual(save_call_arg_counts("$p.Save((Join-Path $a 'x,y'), $false, 2)"), [3])
+        # PowerShell binds .NET method names in any case, and a `#` inside a string is not a comment
+        self.assertEqual(save_call_arg_counts(strip_comment("$pkg.save($out, 2)")), [2])
+        self.assertEqual(save_call_arg_counts(strip_comment('$tag = "#1"; $pkg.Save($out, 2)')), [2])
+        self.assertEqual(save_call_arg_counts(strip_comment("# $pkg.Save($out, 2)")), [])
+
+    def test_every_package_save_in_tools_passes_three_arguments(self):
+        bad, seen = [], 0
+        for path in sorted(glob.glob(os.path.join(TOOLS_DIR, "*.ps1"))):
+            with open(path, encoding="utf-8-sig") as fh:
+                for no, line in enumerate(fh, 1):
+                    for n in save_call_arg_counts(strip_comment(line)):
+                        seen += 1
+                        if n != 3:
+                            bad.append(f"{os.path.basename(path)}:{no} passes {n} argument(s)")
+        self.assertGreater(seen, 0, "no .Save( call found: the scan checks nothing")
+        self.assertEqual(bad, [])
 
 
 if __name__ == "__main__":

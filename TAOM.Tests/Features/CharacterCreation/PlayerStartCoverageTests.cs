@@ -38,7 +38,9 @@ public class PlayerStartCoverageTests
     /// The two files TAOM authors player rosters in. The six vanilla-mapped cultures (vlandia=Rohan,
     /// empire=Dunland, and so on) used to be excluded here because their rosters shipped only in
     /// the game's own <c>SandBox/ModuleData/sandbox_equipment_sets.xml</c>; since #569 TAOM overrides
-    /// those rosters in <c>taom_player_start_vanilla_override.xml</c>, so every selectable culture is
+    /// those rosters in <c>taom_player_start_vanilla_override.xml</c> (five cultures today: vlandia,
+    /// empire, sturgia, battania and khuzait; aserai has its own rosters in the culture-default file),
+    /// so every selectable culture is
     /// checked and <see cref="StarterKitCoverageTests"/> pins what those overrides contain.
     /// </summary>
     private static readonly string[] PlayerRosterFiles =

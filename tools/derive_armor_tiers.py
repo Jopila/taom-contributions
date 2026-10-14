@@ -166,7 +166,7 @@ def build_armory_index():
             for item in root.findall('.//Item'):
                 item_id = item.get('id', '')
                 armor = item.find('.//Armor')
-                if armor is None or not item_id:
+                if armor is None or not item_id or item.get('Type') not in ra.CHARACTER_ARMOUR_TYPES:
                     continue
                 values = ra.parse_current_values(armor, slot_type)
                 try:
@@ -179,8 +179,7 @@ def build_armory_index():
                     'primary': ra._get_primary_stat(values, slot_type),
                     'weight': weight,
                     'name': ra.get_display_name(item.get('name', '')),
-                    # the item's own Type: a slot file can hold other items (Harad's camel bardings,
-                    # Type="HorseHarness", sit in body_armors.xml); generate_armour_classes filters on it
+                    # the item's own Type, kept for the shipped-table test
                     'type': item.get('Type'),
                 }
     return index, armory_dir
@@ -228,7 +227,6 @@ def derive():
         records[item_id] = {
             'culture': culture,
             'slot': slot,
-            'itemType': info.get('type'),
             'name': info['name'],
             'current': current,
             'weight': info['weight'],

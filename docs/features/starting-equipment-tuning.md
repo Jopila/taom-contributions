@@ -73,7 +73,7 @@ Two stacked rosters build the player's kit at CC finalize (`Main/Features/Charac
 `CharacterCreationContentService.GrantPlayerStartupResources`):
 
 1. **Culture-default**: `player_char_creation_{culture}_{title}_{m|f}` in
-   `Main/_Module/ModuleData/equipmentsets/taom_char_creation_equipment.xml`. 256 rosters (16 cultures x 8
+   `Main/_Module/ModuleData/equipmentsets/taom_char_creation_equipment.xml`. 288 rosters (18 cultures x 8
    titles x 2), each with a battle set and a civilian set. This is the final kit for the careerless cultures
    (lothlorien, umbar, lindon, goblin, mistymountainorcs, bluecraig, shaghana, abanissa) and the civilian kit
    for everyone, because the career layer carries no civilian set and `PlayerEquipmentAdapter` applies the
@@ -136,7 +136,7 @@ back on once removed until Bow reaches the number.
 ### The starter items
 
 Named `starter_<donor_id>` (a trailing `_starter` on the donor is stripped first, so
-`gondor_steel_bow_starter` becomes `starter_gondor_steel_bow`), one per donor, 127 on disk today: 39
+`gondor_steel_bow_starter` becomes `starter_gondor_steel_bow`), one per donor, 128 on disk today: 40
 crafted weapons, 38 plain weapons (bows, arrows, shields), 50 armour. 18 of them only the pre-#629 career
 kits named; the generator keeps those in its `RETIRED_DONORS` list (see Tools) because saves started since
 #569 hold them. They live in
@@ -175,7 +175,7 @@ folder's `starter_armors.xml`, anchors Ranged 5, Cavalry 7, Infantry 9, from `ge
 |---|---|
 | `tools/generate_career_kits.py` | Derive the 78 career kits from the troops (#629, rule above): dry run by default, `--apply` rewrites only the five slot ids per roster (byte-faithful), `--verify` exits 1 when the career file drifts from the rule, for instance after a troop rebalance moves a culture's floor. Needs the install; stops rather than guesses without it. Follow an `--apply` with the wiring tool. |
 | `tools/generate_starter_kit.py` | Author the twins. Reads the culture-default roster file (not the career file since #629, whose troop items it would otherwise twin) and plans every donor in `RETIRED_DONORS` as well, a committed list of the 18 twins only the old career kits named, so a reinstall that wiped them restores them and a retired donor that stops resolving fails the run. A twin already on disk keeps its folder when its donor's culture later changes (the run prints a note). Indexes the Armory plus vanilla item and piece files, floors per class, writes the per-folder item files and the three marker blocks in the live Armory and the mirror. Dry run by default; `--apply`; `--verify` (exit 1 on any missing item, piece or registration: the reversion gate for the unversioned install); `--revert`; `--crafted-value` (0 lets the engine price crafted twins). Prints per clone the ratio, the class percentile and the resulting weapon tier. Aborts on a donor with no definition, a class with no anchor, a blade registered nowhere, a folder the Armory does not register. |
-| `tools/wire_starter_kit_rosters.py` | Point the culture-default rosters at the twins: in-place `id=` substitution over the 256 rosters of `REWIRE_FILES` (both sets, Horse and HorseHarness untouched; the career file is excluded since #629), then write the vanilla override from the career kit exactly as the career file names it, refusing any override id vanilla's `sandbox_equipment_sets.xml` lacks (the engine would merge such a roster into the first vanilla roster instead of adding it). Shares the id rule and the roster filter with the generator. Re-run it after any career roster change. |
+| `tools/wire_starter_kit_rosters.py` | Point the culture-default rosters at the twins: in-place `id=` substitution over the 288 rosters of `REWIRE_FILES` (both sets, Horse and HorseHarness untouched; the career file is excluded since #629), then write the vanilla override from the career kit exactly as the career file names it, refusing any override id that both vanilla SandBox and SandBoxCore lack (the engine would merge such a roster into the first vanilla roster instead of adding it). Shares the id rule and the roster filter with the generator. It also gives `_replaceWhileMerging="true"` to every roster of the culture-default file whose id vanilla SandBox or SandBoxCore also defines (37 today, all aserai: the 16 youth rosters plus the parent, childhood, education and show rosters), refuses that flag on any roster whose id vanilla lacks (the engine would merge it into the first roster of the document), and leaves out of the vanilla override every roster the culture-default file defines; without the flag the engine appends the roster's sets after vanilla's and the player keeps vanilla's first set. Re-run it after any career roster change. |
 | `tools/generate_starter_armor.py` | The older career-layer armour pass (see above); its items stay on disk for old saves. Its wiring script, `wire_career_starter_armor.py`, was deleted in #629. |
 
 Re-run the generator whenever a culture-default roster gains a new donor, then the wiring tool. `--verify` after any
@@ -191,18 +191,21 @@ reports every player roster slot as `BROKEN_ITEM_REF`, which is the backstop.
   their polearm is `sm_md_num_lance_a`, which resolves one-handed.
 - `python tools/check_external_xslt.py`: both modified stylesheets compile.
 - `python tools/generate_starter_kit.py --verify` on both Armory copies (the live install and
-  `lotraom-assets\v1.5`). It checks ids only, not stats.
+  `lotraom-assets\v1.5`). It checks ids only, not stats. Without `--no-asset-repo` it also checks the
+  mirror, which stays red (5 drift lines on 2026-10-14) until Mike syncs it; the live Armory is the source
+  of truth, and `--no-asset-repo --verify` reports no drift.
 - `python tools/generate_career_kits.py --verify`: the career file is exactly what the rule derives.
-- Python: `tools/tests/test_generate_starter_kit.py` (52), `test_wire_starter_kit_rosters.py` (16, including
-  the committed override being byte-for-byte what the tool builds from the committed career file) and
-  `test_generate_career_kits.py` (25, one of them the install-gated `--verify` pin).
+- Python: `tools/tests/test_generate_starter_kit.py`, `test_wire_starter_kit_rosters.py` (including
+  the committed override being byte-for-byte what the tool builds from the committed career file, and the
+  flag rules above) and `test_generate_career_kits.py` (one test is the install-gated `--verify` pin).
 - C#: `TAOM.Tests/Features/CharacterCreation/StarterKitCoverageTests.cs` pins that every weapon and armour
   slot in the culture-default file is a `starter_` item (no allowlist), that every career and override slot
   names an item a non-hero troop of its culture carries in a battle set (Khand through Rhun, no borrowing),
   that every career roster's `culture=` matches its id and its `_m` and `_f` kits are identical, that both
   culture-default sets are rewired, that the childhood, education, show and parent rosters are not, that
   every vanilla-mapped title has an override roster, and that every override roster carries the replace
-  attribute.
+  attribute. It counts each of the six vanilla cultures as covered either by the override or, for a
+  culture with its own culture-default rosters (aserai), only when each of its youth rosters carries the flag.
   `PlayerStartCoverageTests` reads the override file too and no longer excludes the six.
 
 ## Verifying in-game (MANDATORY, validators cannot catch this)
@@ -224,12 +227,19 @@ After any `--apply`:
    reads the override) shows the career kit's troop items from issue #629. Meshes render (no bare legs or
    hands), the smithing designer offers no starter blade, and a town merchant stocks no starter item.
 
+Owed since #795 (2026-10-14), run `./build.ps1` first because the installed `Modules\TAOM` still holds
+the old roster files, then restart fully and use new campaigns:
+
+- A Harad start without a career and with one: check both the battle kit and the civilian outfit.
+- The Harad parent, childhood and education screens.
+- Abanissa and Shaghana starts, if the youth menu reaches them (#570).
+
 Keep backups on a non-`.xml` extension (`.bak-starterkit`): the glob is `*.xml`, so a `*.xml` backup left in
 an item folder loads as a duplicate item id.
 
 ## Residuals / follow-ups
 
-- About 127 new `{=starter_*}` item names use inline English defaults, plus the 180 older
+- About 128 new `{=starter_*}` item names use inline English defaults, plus the 180 older
   `{=starter_*}` armour names: none harvested into the 12-language pipeline (`/localize`).
 - Horse and HorseHarness are untouched by #629; the career layer hands a vanilla `saddle_horse` to seven
   cultures' cavalry (six of them with `light_harness`), a warg to four, the war ram to Erebor (#515) and the
@@ -304,6 +314,13 @@ an item folder loads as a duplicate item id.
   Gondor troop weapons (simulated sustained damage 34.8 against `_a02` 35.4, and 28.5 against
   `wm_gondor_spear_b` 32.1): `998f054c` (#669) re-kitted Gondor's low troops on 2026-09-25 without
   regenerating, so the file had drifted from v2.0.31 to v2.0.34 with the install-gated pin unrun.
+- 2026-10-14 (#795): the starter-kit fix for the aserai (Harad) start. Five twins were generated in the live
+  Armory (`rhun/` and `harad/` `starter_kit.xml`), 320 roster slots in 48 aserai, abanissa and shaghana
+  rosters were repointed to twins, the 37 aserai rosters whose ids vanilla also defines got
+  `_replaceWhileMerging="true"` (without it the engine appended their sets after vanilla's), and the
+  vanilla override shrank from 70 to 58 rosters because Harad uses its own culture-default rosters since
+  Erkam's `08b30bfc4`. `StarterKitCoverageTests` now accepts that route. In-game checks are owed (see
+  above).
 
 ## Related docs
 

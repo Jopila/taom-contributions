@@ -3546,3 +3546,38 @@ assembly that was never indexed, or when the "old" baseline was the same build a
   non-zero on a missing directory, an unindexed assembly or a same-build baseline. A positive control
   (a build known to miss) and a negative control (a fresh build) sit beside it.
 - **Source:** v1.5.5 engine bump deep review (`check_engine_member_refs`, `engine_body_diff`).
+- **Recurred the same day (#791):** `bind_orc_goblin_locomotion.py --check` built its plan from the clips on
+  disk, so an Armory reinstall (no clips and no rows) matched an empty plan and read "0 problems"; and
+  `--apply` with a wrong clips folder would strip every bound row and pass its own post-write check. Now
+  `--check` fails a set with no clips unless `--allow-no-clips`, and `--apply` refuses to drop a bound row
+  unless `--allow-shrink` (`docs/reviews/rca-orc-goblin-locomotion-2026-10-14.md` W2-1, W2-2). A reinstall
+  gate must treat "nothing to check" as the failure it exists for.
+
+### Class an item by its own `Type`, never by the file it sits in (2026-10-14)
+`derive_armor_tiers.build_armory_index` took every `<Item>` with an `<Armor>` child from the Armory's slot
+files and gave it the file's slot. Harad's art drop filed four camel bardings (`Type="HorseHarness"`) in
+`body_armors.xml`, so the regenerated `armour_classes.xml` classed them as body armour and 12 heavy Harad and
+Shaghana chests upgraded into the elite barding. The table's `--check` said "current", because the
+generator had produced exactly that.
+- **Why missed:** every earlier slot file held only its own Type, so file and Type never disagreed, and the
+  class table's only gate compares the table with the generator's own output.
+- **Prevent:** `rebalance_armor.CHARACTER_ARMOUR_TYPES` filters the index at its source, so its consumers
+  (the class table and the tier map) see only character armour; the restat writer walks the files itself
+  (`rebalance_armor.process_file`) and still needs the same guard (a follow-up). A temp-Armory test pins the
+  filter, and a
+  live test checks that every row and every upgrade link of the committed table is character armour of one
+  Type. A generator's `--check` proves the output is what the generator makes, not that it is right: give it
+  an invariant test on the output too.
+- **Source:** `docs/reviews/rca-orc-goblin-locomotion-2026-10-14.md` W1-2.
+
+### TpacTool v0.5.1 binds `Save($out, 2)` to `useOriginalChecksum = true`, silently (2026-10-14)
+ShortJake's TpacTool v0.5.1 changed `AssetPackage.Save` to `Save(string newFilePath = null, bool
+useOriginalChecksum = false, int tpacVersion = 2)`. PowerShell converts the old call's `2` to `$true` for
+the bool and uses the default version, with no error. The bytes came out the same only because
+`OriginalUnknownChecksum` is never filled.
+- **Why missed:** a two-argument call still compiles and runs; only reading the new signature shows the
+  shift.
+- **Prevent:** every call passes all three, `Save($out, $false, 2)`; `TestTpacSaveCallsPassThreeArguments`
+  in `tools/tests/test_gen_troll_anim_clips.py` fails any `.Save(` call in `tools/*.ps1` with another count.
+  After a library update, diff every public signature the scripts call (ilspycmd) before the first run.
+- **Source:** `docs/reviews/rca-orc-goblin-locomotion-2026-10-14.md` (TpacTool switch).

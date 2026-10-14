@@ -441,3 +441,19 @@ with differing kits (#648).
   (the #644 shape), then deleting the row. `NazgulRaceDataTests.LordsXml_DefinesNoneOfTheNine` pins
   the Nine; #648 carries the general gate.
 - **Source:** `docs/reviews/rca-nazgul-race-2026-09-23.md` finding 1 (2026-09-23).
+
+### A module's XSLT runs before that module's own XML merges (#791, 2026-10-14)
+`MBObjectManager.CreateMergedXmlFile` (v1.5.5, lines 962 to 978) walks the registered entries in module load
+order and, for each, applies its XSLT to the document built so far, THEN merges its XML. So a module's
+stylesheet sees only what earlier modules defined. The #791 plan bound the orc and goblin rows with a template
+in the Armory's `action_sets.xslt` matching `as_orc_warrior`; that template could never fire, because the
+Armory's own `action_sets.xml` defines the set. A module that loads after the Armory does see it (DualWield's
+`action_sets.xslt` rewrites every `*_warrior` set).
+- **Why missed:** the plan assumed a module's XSLT post-processes the merged result, the way a reader
+  pictures "patch the data". The Armory's existing `action_sets.xslt` worked only because its elephant rows
+  target Native's `as_human_warrior`.
+- **Prevent:** before an XSLT edit, name the module that defines the target element and check it loads
+  BEFORE the stylesheet's module. To change a set the same module defines, edit its XML (the
+  `bind_*_action_set.py` binders do this, with a `--check` gate for reinstalls).
+- **Source:** `docs/reviews/rca-orc-goblin-locomotion-2026-10-14.md` finding W1-4; `docs/features/orc-goblin-locomotion.md`
+  "Design Challenge".

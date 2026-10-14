@@ -4,8 +4,8 @@
 Pure stdlib, synthetic inputs, no game install. The two things worth pinning are
 the ones that were wrong when the tool was first written:
 
-  - the override lookup keys on the ESCAPED name, because one shipped mesh
-    carries eight NUL bytes and raw != escaped for exactly that asset
+  - the override lookup keys on the ESCAPED name, because a shipped mesh
+    carried eight NUL bytes until 2026-10-14, and raw != escaped for such an asset
   - rename/move/delete classification cannot join on the tpac path alone. A geo
     tpac holds many meshes, so a genuine deletion from a tpac that also gained a
     name read as a rename until a similarity check was added.

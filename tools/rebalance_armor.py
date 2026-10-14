@@ -53,6 +53,11 @@ SLOT_TYPES = {
     'shoulder_armors.xml': 'shoulder',
 }
 
+# An item a slot file holds is character armour only with one of these Types: Harad's camel bardings
+# (Type="HorseHarness") sit in body_armors.xml, and classed by the file they became the upgrade target
+# of 12 heavy chests (2026-10-14). Every consumer of derive_armor_tiers.build_armory_index gets the filter.
+CHARACTER_ARMOUR_TYPES = ('HeadArmor', 'BodyArmor', 'LegArmor', 'HandArmor', 'Cape')
+
 TIERS = ['civilian', 'light', 'medium', 'heavy', 'elite', 'lord']
 
 # =============================================================================

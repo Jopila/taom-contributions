@@ -1,6 +1,8 @@
 """Restyle vanilla human_skeleton clips (walk, run, stand) into a per-variant gait or idle on the SAME skeleton.
 
-Headless (the launcher DETACHES and prints nothing; read <out>/restyle_report.json and its .DONE twin):
+Headless (the launcher DETACHES and prints nothing; read <out>/restyle_report.json and its .DONE twin). Delete
+<out>/restyle_report.json.DONE before you launch: until Blender reaches main(), or after an import-time failure, the
+file there is the previous run's verdict.
     %LOCALAPPDATA%\\Microsoft\\WindowsApps\\blender-launcher.exe -b -P tools/blender/restyle_human_clip.py -- ^
         --source-dir "E:\\LOTRAOMAssets\\orc_locomotion\\src" ^
         --variant tools/blender/locomotion_variants/orc.json ^
@@ -21,13 +23,15 @@ source2 N-1): that tool then names each master <prefix>mst_<clip> and each clip 
 clip's flags, priority and usages from its own vanilla clip. Pass -TravelScale <stride_scale> to it.
 
 Method, per frame, on the engine-frame rig (retarget_mannequin_to_human.build_engine_rig):
-  1. Source pose: the vanilla master keyed by retarget_mannequin_to_human.key_source_from_json.
-  2. Gaits: arm swing (upper arm) and pelvis roll/yaw deviation scaled about their cycle mean; pelvis bob (Z) and
-     sway (X) scaled about their mean. A scaled periodic signal stays periodic, so the loop stays closed.
+  1. Source pose: the vanilla master sampled straight from its keyframe JSON (retarget_mannequin_to_human.
+     json_pose_sampler, the matrices key_source_from_json keys), once per clip.
+  2. Gaits: the upper arm's rotation deviation scaled by arm_swing_scale about its cycle mean; sway_scale scales
+     the pelvis's whole rotation deviation (roll, yaw and pitch) and its sway (X), bob_scale its bob (Z), all about
+     their mean. A scaled periodic signal stays periodic, so the loop stays closed.
   3. Posture: world turns about each bone head, top-down, each bone turned toward a direction (spine toward +Y,
      clavicle toward -Z then +Y, upper arm toward the midline, forearm toward +Y). Children follow.
   4. Pelvis lowered by the drop that adds knee_bend_deg at the clip's mean knee angle.
-  5. Legs: two-bone IK (the retarget tool's _leg_ik math, with the goal given) to the SOURCE ankle path, widened by
+  5. Legs: two-bone IK (retarget_mannequin_to_human.two_bone_ik, which _leg_ik also uses, with the goal given) to the SOURCE ankle path, widened by
      stance_width_m, its forward swing about the pelvis scaled by stride_scale (gaits only), and lowered with the
      pelvis while the foot is off the ground (SWING_LIFT_M). The foot keeps the source foot's world orientation,
      turned toe-out by foot_splay_deg. Contacts keep the vanilla timing and height.
@@ -79,9 +83,16 @@ DEFAULTS = {
 
 
 def load_spec(path):
-    """Variant spec merged over DEFAULTS. Keys that start with '_' are notes."""
+    """Variant spec merged over DEFAULTS. Keys that start with '_' are notes. A key DEFAULTS does not know (a typo
+    such as stride_scal would silently run at the default) is refused, top level and inside idle."""
     with open(path, encoding="utf-8-sig") as fh:
         raw = {k: v for k, v in json.load(fh).items() if not k.startswith("_")}
+    for k in raw:
+        if k != "clip_prefix" and k not in DEFAULTS:
+            raise SystemExit("variant spec %s: unknown key %r" % (path, k))
+    for ik in raw.get("idle", {}):
+        if not ik.startswith("_") and ik not in DEFAULTS["idle"]:
+            raise SystemExit("variant spec %s: unknown idle key %r" % (path, ik))
     spec = json.loads(json.dumps(DEFAULTS))
     for k, v in raw.items():
         if k == "idle":
@@ -111,10 +122,6 @@ def cap_violations(spec):
 
 
 # ------------------------------------------------------------------ math helpers
-def _rot3(m):
-    return m.to_3x3().normalized()
-
-
 def _toward(d, v, deg):
     """Rotation that turns direction d toward v by deg (a negative deg turns it away)."""
     if abs(deg) < 1e-9:
@@ -127,7 +134,7 @@ def _toward(d, v, deg):
 
 def _turn(Mw, t, q):
     """Turn bone t by world rotation q about its own head."""
-    M = (q.to_matrix() @ _rot3(Mw[t])).to_4x4()
+    M = (q.to_matrix() @ rt._rot(Mw[t])).to_4x4()
     M.translation = Mw[t].translation.copy()
     Mw[t] = M
 
@@ -180,61 +187,21 @@ def _knee_angle(H, K, A):
     return u.angle(v)
 
 
-def _two_bone_ik(Mw, th, ca, fo, G, a, b, pole_local, stats):
-    """Two-bone IK, the math of retarget_mannequin_to_human._leg_ik with the goal G given. The knee bends in the
-    plane of its rest pole carried by the thigh; the calf follows the thigh's turn, then aims at the goal."""
-    H, K0, A0 = Mw[th].translation.copy(), Mw[ca].translation.copy(), Mw[fo].translation.copy()
-    dv = G - H
-    d = dv.length
-    if d < 1e-6:
-        return
-    u = dv / d
-    dc = min(max(d, abs(a - b) + 1e-4), a + b - 1e-4)
-    pole = _rot3(Mw[th]) @ pole_local
-    v = pole - u * pole.dot(u)
-    if v.length < 1e-6:
-        return
-    v.normalize()
-    alpha = math.acos(max(-1.0, min(1.0, (a * a + dc * dc - b * b) / (2.0 * a * dc))))
-    K = H + (u * math.cos(alpha) + v * math.sin(alpha)) * a
-    reach = H + u * dc
-    q1 = (K0 - H).rotation_difference(K - H)
-    q2 = (q1 @ (A0 - K0)).rotation_difference(reach - K)
-    M = (q1.to_matrix() @ _rot3(Mw[th])).to_4x4()
-    M.translation = H
-    Mw[th] = M
-    M = (q2.to_matrix() @ q1.to_matrix() @ _rot3(Mw[ca])).to_4x4()
-    M.translation = K
-    Mw[ca] = M
-    stats["max_unreached_m"] = max(stats["max_unreached_m"], (G - reach).length)
-
-
 # ------------------------------------------------------------------ source sampling
 class Source:
-    """One vanilla master keyed on its own engine rig; frames read on demand (JSON t is Blender frame t + 1)."""
+    """A vanilla master evaluated straight from its keyframe JSON: no rig, no action, no frame_set. world(t) is
+    {bone: armature-space 4x4} at JSON frame t, a fresh dict each call."""
 
     def __init__(self, json_path):
         with open(json_path, encoding="utf-8-sig") as fh:
-            spec = json.load(fh)
-        self.arm = rt.build_engine_rig(json_path, name="src_" + os.path.splitext(os.path.basename(json_path))[0][:40])
-        self.action, self.frames = rt.key_source_from_json(self.arm, spec, self.arm.name + "_act")
-        self.order = rt._hierarchy_order(self.arm)
-        self.parent = {b.name: (b.parent.name if b.parent else None) for b in self.arm.data.bones}
+            _, self._at, _ = rt.json_pose_sampler(json.load(fh))
 
     def world(self, t):
-        ad = self.arm.animation_data
-        ad.action = self.action
-        rt._assign_slot(self.arm)
-        bpy.context.scene.frame_set(int(t) + 1)
-        return {pb.name: pb.matrix.copy() for pb in self.arm.pose.bones}
+        return self._at(int(t))
 
-    def remove(self):
-        act = self.action
-        rt._delete_objects([self.arm])
-        try:
-            bpy.data.actions.remove(act)
-        except Exception:
-            pass
+    def frames(self, s1, s2):
+        """The world poses of JSON frames s1..s2, in order."""
+        return [self.world(t) for t in range(s1, s2 + 1)]
 
 
 def _locals(world, order, parent):
@@ -284,10 +251,10 @@ def _key_pose(tgt, Mw, frame, prev_q):
         pb.keyframe_insert("location", frame=frame)
 
 
-def restyle_clip(tgt, src, clip, info, spec, kind, action_name):
-    """Key `action_name` on tgt.arm: frame 0 rest, frames 1..N the restyled source1..source2. Returns (act, entry)."""
+def restyle_clip(tgt, worlds, clip, info, spec, kind, action_name):
+    """Key `action_name` on tgt.arm: frame 0 rest, frames 1..N the restyled source (`worlds`, Source.frames of
+    source1..source2). Returns (act, entry)."""
     s1, s2 = int(round(info["source1"])), int(round(info["source2"]))
-    worlds = [src.world(t) for t in range(s1, s2 + 1)]
     N = len(worlds)
     order, parent = tgt.order, tgt.parent
     rest_w = tgt.rest_w
@@ -301,7 +268,7 @@ def restyle_clip(tgt, src, clip, info, spec, kind, action_name):
     period = (N - 1) if closed else N
     entry.update({"source_loop_delta_deg": round(close_deg, 2), "closed_loop": closed, "period_frames": period})
 
-    # 2. deviation scaling (gaits): arm swing, pelvis roll/yaw, pelvis bob and sway
+    # 2. deviation scaling (gaits): arm swing, the pelvis's whole rotation (sway_scale), pelvis bob and sway
     if gait:
         for side, _ in SIDES:
             b = side + "_upperarm_twist"
@@ -362,10 +329,10 @@ def restyle_clip(tgt, src, clip, info, spec, kind, action_name):
         else:
             continue
         if d.length > 1e-6:
-            rest_dir[t] = _rot3(rest_w[t]).transposed() @ d.normalized()
+            rest_dir[t] = rt._rot(rest_w[t]).transposed() @ d.normalized()
 
     def bdir(Mw, t):
-        return (_rot3(Mw[t]) @ rest_dir[t]).normalized()
+        return (rt._rot(Mw[t]) @ rest_dir[t]).normalized()
 
     idle = spec["idle"]
     act = _new_action(tgt.arm, action_name)
@@ -428,9 +395,9 @@ def restyle_clip(tgt, src, clip, info, spec, kind, action_name):
             G = Vector((A.x + lg["side"] * spec["stance_width_m"],
                         py + mean_off[fo] + (A.y - py - mean_off[fo]) * stride,
                         A.z - drop * max(0.0, min(1.0, lift / SWING_LIFT_M))))
-            _two_bone_ik(Mw, th, ca, fo, G, lg["a"], lg["b"], lg["pole"], stats)
+            rt.two_bone_ik(Mw, th, ca, fo, G, lg["a"], lg["b"], lg["pole"], stats)
             splay = Quaternion(UP, math.radians(-lg["side"] * spec["foot_splay_deg"]))
-            F = (splay.to_matrix() @ _rot3(w[fo])).to_4x4()
+            F = (splay.to_matrix() @ rt._rot(w[fo])).to_4x4()
             F.translation = Mw[ca] @ lc[fo].translation
             Mw[fo] = F
             Mw[toe] = Mw[fo] @ lc[toe]
@@ -444,9 +411,9 @@ def restyle_clip(tgt, src, clip, info, spec, kind, action_name):
     return act, entry
 
 
-def compare_to_source(tgt, act, src, info):
-    """Largest bone-local rotation difference (deg) between `act` (yaw undone) and the source, over all frames."""
-    s1 = int(round(info["source1"]))
+def compare_to_source(tgt, act, worlds):
+    """Largest bone-local rotation difference (deg) between `act` (yaw undone) and the source (`worlds`, one pose per
+    frame), over all frames."""
     worst, where = 0.0, None
     ad = tgt.arm.animation_data
     ad.action = act
@@ -457,9 +424,7 @@ def compare_to_source(tgt, act, src, info):
         bpy.context.scene.frame_set(k)
         cur = {pb.name: inv @ pb.matrix.copy() for pb in tgt.arm.pose.bones}
         lc = _locals(cur, tgt.order, tgt.parent)
-        ls = _locals(src.world(s1 + k - 1), tgt.order, tgt.parent)
-        ad.action = act
-        rt._assign_slot(tgt.arm)
+        ls = _locals(worlds[k - 1], tgt.order, tgt.parent)
         for t in tgt.order:
             dg = _qangle_deg(lc[t].to_quaternion(), ls[t].to_quaternion())
             if dg > worst:
@@ -548,6 +513,26 @@ def clip_kind(clip):
     return None
 
 
+def clear_stale_verdict(out):
+    """Remove the previous run's .DONE and error log once a run reaches main(); the caller still deletes .DONE before
+    launching, because the launcher detaches and an import-time failure never gets here."""
+    for name in ("restyle_report.json.DONE", "restyle_error.log"):
+        path = os.path.join(out, name)
+        if os.path.exists(path):
+            os.remove(path)
+
+
+def error_out_dir(argv):
+    """The --out folder named in argv (both `--out X` and `--out=X`), else the current directory. Never raises."""
+    out = None
+    for i, a in enumerate(argv):
+        if a == "--out":
+            out = argv[i + 1] if i + 1 < len(argv) else None
+        elif a.startswith("--out="):
+            out = a[len("--out="):]
+    return out or os.getcwd()
+
+
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     ap = argparse.ArgumentParser()
@@ -574,6 +559,7 @@ def main():
             raise SystemExit("--only names not in clips_index.json: " + ", ".join(unknown))
         clips = [c for c in clips if c in args.only]
     os.makedirs(args.out, exist_ok=True)
+    clear_stale_verdict(args.out)
     if args.preview:
         os.makedirs(args.preview, exist_ok=True)
 
@@ -614,12 +600,12 @@ def main():
             master = info["master"]
             if master not in sources:
                 sources[master] = Source(os.path.join(args.source_dir, master + ".json"))
-            src = sources[master]
-            act, e = restyle_clip(tgt, src, clip, info, spec, kind, action_name)
+            worlds = sources[master].frames(int(round(info["source1"])), int(round(info["source2"])))
+            act, e = restyle_clip(tgt, worlds, clip, info, spec, kind, action_name)
             entry.update(e)
-            ident, _ = restyle_clip(tgt, src, clip, info, identity_spec(spec), kind, action_name + "_identity")
-            entry["identity_max_deg"], entry["identity_worst_at"] = compare_to_source(tgt, ident, src, info)
-            entry["restyle_max_deg"], entry["restyle_worst_at"] = compare_to_source(tgt, act, src, info)
+            ident, _ = restyle_clip(tgt, worlds, clip, info, identity_spec(spec), kind, action_name + "_identity")
+            entry["identity_max_deg"], entry["identity_worst_at"] = compare_to_source(tgt, ident, worlds)
+            entry["restyle_max_deg"], entry["restyle_worst_at"] = compare_to_source(tgt, act, worlds)
             if args.preview:
                 contact_sheet(tgt, [ident, act], os.path.join(args.preview, clip + ".png"))
             tgt.arm.animation_data.action = act
@@ -663,10 +649,13 @@ if __name__ == "__main__":
             raise
         # the launcher detaches, so write the error where the caller waits for .DONE
         _argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-        _out = _argv[_argv.index("--out") + 1] if "--out" in _argv else os.getcwd()
-        os.makedirs(_out, exist_ok=True)
-        with open(os.path.join(_out, "restyle_error.log"), "w") as fh:
-            fh.write(traceback.format_exc())
-        with open(os.path.join(_out, "restyle_report.json.DONE"), "w") as fh:
-            fh.write("fail: see restyle_error.log\n")
+        try:
+            _out = error_out_dir(_argv)
+            os.makedirs(_out, exist_ok=True)
+            with open(os.path.join(_out, "restyle_error.log"), "w") as fh:
+                fh.write(traceback.format_exc())
+            with open(os.path.join(_out, "restyle_report.json.DONE"), "w") as fh:
+                fh.write("fail: see restyle_error.log\n")
+        except Exception:
+            pass
         raise

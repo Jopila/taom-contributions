@@ -135,7 +135,7 @@ empty: `tools/bind_troll_action_set.py` owns its 213 overrides.
 | ARP authoring rig | `E:\LOTRAOMAssets\troll_rig_01.blend` (rig + `troll_hill_body_a` + cloth; IK rig) |
 | Retarget work scene | `E:\LOTRAOMAssets\troll_anim_WORK_20260613.blend` (has proven `troll_walk_forward`) |
 | Retarget driver + map | `tools/blender/arp_retarget.py`, `tools/blender/bannerlord_human_to_troll.bmap` |
-| Human-clip extractor | `tools/extract_human_anims_tpac.ps1` (tpac→FBX; **run under Windows PowerShell 5.1**) |
+| Human-clip extractor | `tools/extract_human_anims_tpac.ps1` (tpac→FBX; **run under Windows PowerShell 5.1**). On 2026-10-14 it stalled at "loading animations.tpac (resolver)" with TpacTool v0.5.1 (cause unknown); it feeds the old Auto-Rig Pro route, which `read_anim_keyframes_tpac.ps1` replaced for human clips |
 | Extracted source clips | `E:\LOTRAOMAssets\_troll_extract\` (e.g. `core\anim_walk_forward_unarmed.fbx`) |
 | No-assimp clip pipeline | `tools/read_anim_keyframes_tpac.ps1` (tpac→JSON) + `tools/blender/rebuild_anim_from_json.py` (JSON→Blender; **transpose-fixed 2026-06-14**) |
 | Lumber clips (SUPERSEDED 2026-09-18, authored on the mesh rig, would fold in the Kit) | `E:\LOTRAOMAssets\troll_clips_to_import\troll_{walk,run}_lumber.fbx` |

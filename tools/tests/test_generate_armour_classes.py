@@ -355,18 +355,28 @@ class BuildRows(unittest.TestCase):
         self.assertEqual(rows['sk_gd_q_chest_lord_a'], ('lord', None))
         self.assertEqual(rows['rohan_cap_a'], ('light', None))
 
-    def test_a_piece_that_is_not_character_armour_is_left_out(self):
+
+class ArmoryIndexType(unittest.TestCase):
+    def test_a_piece_that_is_not_character_armour_is_left_out_of_the_index(self):
         # Harad's art drop filed four camel bardings (Type="HorseHarness") in body_armors.xml; the
-        # slot file alone classed them as body armour and 12 heavy chests "upgraded" into one (2026-10-14)
-        records = {
-            'sk_hr_st_chest_heavy_a': {'culture': 'harad', 'slot': 'body', 'name': 'Chest', 'tier': 'heavy',
-                                       'current': 40, 'itemType': 'BodyArmor'},
-            'sk_hr_pz_camel_bard_elite_a': {'culture': 'harad', 'slot': 'body', 'name': 'Barding', 'tier': 'elite',
-                                            'current': 50, 'itemType': 'HorseHarness'},
-        }
-        rows = gac.build_rows(records, targets=lambda item_id, slot, folder: {})
-        self.assertNotIn('sk_hr_pz_camel_bard_elite_a', rows)
-        self.assertEqual(rows['sk_hr_st_chest_heavy_a'][1], None)
+        # slot file alone put them in the index as body armour and 12 heavy chests "upgraded" into
+        # one (2026-10-14). The filter lives in the index so every consumer gets it.
+        import derive_armor_tiers as dat
+        items = (
+            '<Items>'
+            '<Item id="sk_hr_st_chest_heavy_a" name="{=a}Chest" Type="BodyArmor" weight="10">'
+            '<ItemComponent><Armor body_armor="40" /></ItemComponent></Item>'
+            '<Item id="sk_hr_pz_camel_bard_elite_a" name="{=b}Barding" Type="HorseHarness" weight="20">'
+            '<ItemComponent><Armor body_armor="50" /></ItemComponent></Item>'
+            '</Items>')
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, 'harad'))
+            with open(os.path.join(tmp, 'harad', 'body_armors.xml'), 'w', encoding='utf-8') as fh:
+                fh.write(items)
+            with mock.patch.object(gac.ra, 'ARMORY_DIR', tmp):
+                index, _ = dat.build_armory_index()
+        self.assertEqual(sorted(index), ['sk_hr_st_chest_heavy_a'])
+        self.assertEqual(index['sk_hr_st_chest_heavy_a']['type'], 'BodyArmor')
 
 
 @unittest.skipUnless(os.path.isdir(gac.ra.ARMORY_DIR), "needs the LOTRLOME_Armory install; skipped, never faked")
@@ -378,7 +388,7 @@ class CommittedTableAgainstTheArmory(unittest.TestCase):
         bad = []
         for item_id, (_cls, nxt) in rows.items():
             kind = index.get(item_id, {}).get('type')
-            if kind not in gac.CHARACTER_ARMOUR_TYPES:
+            if kind not in gac.ra.CHARACTER_ARMOUR_TYPES:
                 bad.append(f'{item_id} is {kind}')
             elif nxt and index.get(nxt, {}).get('type') != kind:
                 bad.append(f'{item_id} ({kind}) -> {nxt} ({index.get(nxt, {}).get("type")})')

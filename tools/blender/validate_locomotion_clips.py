@@ -1,13 +1,15 @@
 """Validate restyled locomotion clips (restyle_human_clip.py output) against their vanilla sources. Read-only.
 
-Headless (the launcher DETACHES; read <out>/validate_report.json and its .DONE twin):
+Headless (the launcher DETACHES; read <out>/validate_report.json and its .DONE twin). Delete
+<out>/validate_report.json.DONE before you launch: until Blender reaches main(), or after an import-time failure, the
+file there is the previous run's verdict.
     %LOCALAPPDATA%\\Microsoft\\WindowsApps\\blender-launcher.exe -b -P tools/blender/validate_locomotion_clips.py -- ^
         --out "E:\\LOTRAOMAssets\\troll_clips_to_import\\orc_locomotion\\orc" ^
         --source-dir "E:\\LOTRAOMAssets\\orc_locomotion\\src" ^
         --engine-skeleton tools/blender/human_skeleton_engine.json [--only walk_forward_1h]
 
 Each exported FBX is RE-IMPORTED (what the Kit will read), turned back to face +Y, and compared frame by frame with
-its vanilla source (the master JSON keyed on the engine rig). Pass or fail per clip, per check:
+its vanilla source (the master JSON sampled straight from its keyframes). Pass or fail per clip, per check:
   bones        the 28 bone names and parents of the engine skeleton, nothing more or less
   frames       N posed frames after the rest frame, N = source2 - source1 + 1; the scene runs at 30 fps
   finite       no NaN or infinite value in any bone matrix
@@ -153,7 +155,7 @@ def validate_clip(entry, src, info, eng_names, eng_parents, fbx, spec):
     s1, s2 = int(round(info["source1"])), int(round(info["source2"]))
     N = s2 - s1 + 1
     posed = frames[1:]
-    src_w = [src.world(t) for t in range(s1, s2 + 1)]
+    src_w = src.frames(s1, s2)
     lo = [rs._locals(fr, order, eng_parents) for fr in posed]
     ls = [rs._locals(fr, order, eng_parents) for fr in src_w]
     res = {}
@@ -232,6 +234,10 @@ def main():
     ap.add_argument("--only", nargs="*", default=None)
     args = ap.parse_args(argv)
 
+    os.makedirs(args.out, exist_ok=True)
+    for stale in ("validate_report.json.DONE", "validate_error.log"):   # the previous run's verdict
+        if os.path.exists(os.path.join(args.out, stale)):
+            os.remove(os.path.join(args.out, stale))
     with open(os.path.join(args.out, "restyle_report.json"), encoding="utf-8") as fh:
         report = json.load(fh)
     with open(os.path.join(args.source_dir, "clips_index.json"), encoding="utf-8-sig") as fh:
@@ -282,9 +288,13 @@ if __name__ == "__main__":
         if isinstance(exc, SystemExit) and not exc.code:
             raise
         _argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-        _out = _argv[_argv.index("--out") + 1] if "--out" in _argv else os.getcwd()
-        with open(os.path.join(_out, "validate_error.log"), "w") as fh:
-            fh.write(traceback.format_exc())
-        with open(os.path.join(_out, "validate_report.json.DONE"), "w") as fh:
-            fh.write("fail: see validate_error.log\n")
+        try:
+            _out = rs.error_out_dir(_argv)
+            os.makedirs(_out, exist_ok=True)
+            with open(os.path.join(_out, "validate_error.log"), "w") as fh:
+                fh.write(traceback.format_exc())
+            with open(os.path.join(_out, "validate_report.json.DONE"), "w") as fh:
+                fh.write("fail: see validate_error.log\n")
+        except Exception:
+            pass
         raise

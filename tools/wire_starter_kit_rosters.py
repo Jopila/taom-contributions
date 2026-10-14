@@ -21,7 +21,7 @@ TWO STEPS
    and khuzait had no TAOM culture-default rosters, so their careerless start read vanilla's
    `SandBox/ModuleData/sandbox_equipment_sets.xml` and handed a Rohan player a Calradian sword
    in a hemp tunic. A roster the culture-default file already defines is left out
-   (`owned_roster_ids`; all of aserai's since Erkam's 2026-10-10 rosters). The override
+   (`roster_ids(REWIRE_FILES)`; all of aserai's since Erkam's 2026-10-10 rosters). The override
    carries a roster with the same id as vanilla's for every title the culture's youth menu
    offers, built from the mapped culture's career kit (copied as the career file names it) by
    title: hunter/skirmisher/bard take the ranged kit, guard/infantry the infantry kit,
@@ -98,11 +98,24 @@ def _is_target(roster_id: str) -> bool:
     return roster_id.startswith(gk.TARGET_PREFIXES) and not any(m in roster_id for m in gk.EXCLUDED_ROSTER_MARKERS)
 
 
-def vanilla_roster_ids(paths=VANILLA_ROSTER_FILES) -> frozenset:
+def roster_ids(paths) -> frozenset:
+    """Every `EquipmentRoster` id the given files define: vanilla's (VANILLA_ROSTER_FILES) decide which
+    rosters replace, and the culture-default files' (REWIRE_FILES) are left out of the override, because
+    the same id twice in one module is DUPLICATE_ROSTER_ID and the override, which loads after the
+    culture-default file with _replaceWhileMerging, would replace the culture's own start (aserai,
+    2026-10-14)."""
     ids = set()
     for path in paths:
         ids.update(r.get("id") for r in ET.fromstring(gk.read_xml(path)[0].encode("utf-8")).iter("EquipmentRoster"))
     return frozenset(ids)
+
+
+def _comment_spans(text: str) -> list[tuple[int, int]]:
+    return [m.span() for m in re.finditer(r"<!--.*?-->", text, re.S)]
+
+
+def _in_spans(pos: int, spans: list[tuple[int, int]]) -> bool:
+    return any(start <= pos < end for start, end in spans)
 
 
 def mark_vanilla_replacements(text: str, vanilla: frozenset) -> tuple[str, list[str]]:
@@ -112,8 +125,11 @@ def mark_vanilla_replacements(text: str, vanilla: frozenset) -> tuple[str, list[
     battle and civilian set: the aserai start fell back to Calradian gear (2026-10-14). Only those
     ids: on a roster vanilla lacks, the flag merges it into the document's first roster."""
     marked: list[str] = []
+    comments = _comment_spans(text)
 
     def one(m: re.Match) -> str:
+        if _in_spans(m.start(), comments):
+            return m.group(0)
         attrs = m.group(1)
         idm = ID_ATTR_RE.search(attrs)
         if attrs.endswith("/") or not idm or idm.group(1) not in vanilla or "_replaceWhileMerging" in attrs:
@@ -127,20 +143,12 @@ def mark_vanilla_replacements(text: str, vanilla: frozenset) -> tuple[str, list[
 
 def stray_replace_ids(text: str, vanilla: frozenset) -> list[str]:
     """Rosters carrying `_replaceWhileMerging` whose id vanilla does not define: MergeElements would
-    merge each one into the FIRST roster of the accumulated document (see missing_vanilla_ids)."""
+    merge each one into the FIRST roster of the accumulated document (1.5.3 MBObjectManager.MergeElements,
+    lines 846 and 857-859: it loses its own id and content). The override file is checked through this too,
+    since every override roster carries the flag. ElementTree drops comments, so a commented-out roster is
+    never reported."""
     return [r.get("id") for r in ET.fromstring(text.encode("utf-8")).iter("EquipmentRoster")
             if r.get("_replaceWhileMerging") == "true" and r.get("id") not in vanilla]
-
-
-def owned_roster_ids(paths=REWIRE_FILES) -> frozenset:
-    """Every roster id the culture-default files define. The override must leave these out: the
-    same id twice in one module is DUPLICATE_ROSTER_ID, and the override, which loads after the
-    culture-default file with _replaceWhileMerging, would replace the culture's own start (aserai,
-    2026-10-14)."""
-    ids = set()
-    for path in paths:
-        ids.update(r.get("id") for r in ET.fromstring(gk.read_xml(path)[0].encode("utf-8")).iter("EquipmentRoster"))
-    return frozenset(ids)
 
 
 def rewire_text(text: str) -> tuple[str, int, list[str]]:
@@ -213,7 +221,7 @@ def titles_from_menus(menus_dir: Path, cultures=VANILLA_CULTURES) -> "OrderedDic
 
 def build_vanilla_override(career_text: str, titles_by_culture, borrow: dict[str, str], eol: str = "\r\n",
                            owned: frozenset = frozenset()) -> str:
-    """`owned`: roster ids the culture-default file already defines (owned_roster_ids); they are
+    """`owned`: roster ids the culture-default file already defines (roster_ids(REWIRE_FILES)); they are
     left out, and a culture with nothing left gets no block."""
     root = ET.fromstring(career_text.encode("utf-8"))
     career = {r.get("id"): r for r in root.iter("EquipmentRoster")}
@@ -281,15 +289,6 @@ def build_vanilla_override(career_text: str, titles_by_culture, borrow: dict[str
     return eol.join(lines) + eol
 
 
-def missing_vanilla_ids(override_text: str, vanilla_text: str) -> list[str]:
-    """Override roster ids vanilla's roster file does not define. Such a roster does not append:
-    MBObjectManager.MergeElements (1.5.3, lines 846 and 857-859) merges it into the FIRST
-    roster of the accumulated document, which then loses its own id and content."""
-    vanilla = {r.get("id") for r in ET.fromstring(vanilla_text.encode("utf-8")).iter("EquipmentRoster")}
-    return [r.get("id") for r in ET.fromstring(override_text.encode("utf-8")).iter("EquipmentRoster")
-            if r.get("id") not in vanilla]
-
-
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--apply", action="store_true", help="write (default: dry run)")
@@ -301,7 +300,7 @@ def main() -> int:
     if missing:
         print(f"ERROR: {', '.join(map(str, missing))} not found; the vanilla roster ids decide which rosters replace")
         return 2
-    vanilla = vanilla_roster_ids()
+    vanilla = roster_ids(VANILLA_ROSTER_FILES)
     for path in REWIRE_FILES:
         text, had_bom = gk.read_xml(path)
         new_text, changed, rosters = rewire_text(text)
@@ -328,14 +327,11 @@ def main() -> int:
             titles = titles_from_menus(MENUS_DIR)
             # the career kit exactly as the career file names it, never rewired (#629); a roster the
             # culture-default file already defines is left out
-            override = build_vanilla_override(gk.read_xml(CAREER_FILE)[0], titles, BORROW, owned=owned_roster_ids())
+            override = build_vanilla_override(gk.read_xml(CAREER_FILE)[0], titles, BORROW, owned=roster_ids(REWIRE_FILES))
         except WireError as exc:
             print("ERROR:", exc)
             return 2
-        if not VANILLA_SETS_FILE.exists():
-            print(f"ERROR: {VANILLA_SETS_FILE} not found; every override id must exist there")
-            return 2
-        missing = missing_vanilla_ids(override, gk.read_xml(VANILLA_SETS_FILE)[0])
+        missing = stray_replace_ids(override, vanilla)
         if missing:
             print(f"ERROR: {len(missing)} override roster id(s) vanilla does not define, which the engine "
                   f"would merge into another roster: {', '.join(missing)}")

@@ -86,8 +86,9 @@ basename fallback and a similarity check inside the candidate set.
 
 Two things about the format are load-bearing:
 
-- **It is TSV, not markdown.** One shipped mesh carries eight embedded NUL bytes
-  (`sk_dwarf\x00\x00\x00\x00\x00\x00\x00\x00_10`) and four contain spaces. A markdown table cannot
+- **It is TSV, not markdown.** Until 2026-10-14 one shipped mesh carried eight embedded NUL bytes
+  (`sk_dwarf\x00\x00\x00\x00\x00\x00\x00\x00_10`; the same tpac now ships `sk_dwarf_beard_a_10`, and
+  `escape()` still guards the case), and four contain spaces. A markdown table cannot
   represent those, and any whitespace-delimited dump splits them into phantom extra rows, which is
   exactly what the retired `mesh-audit` text dump did. Values are C-escaped.
 - **Both `folder` and the name-derived columns are kept.** Neither is sufficient: the name carries

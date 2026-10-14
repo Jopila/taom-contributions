@@ -273,12 +273,11 @@ def build_engine_rig(json_path, name="human_skeleton_notused"):
     return arm
 
 
-def key_source_from_json(arm, spec, action_name):
-    """Key `arm` (built by build_engine_rig from the same JSON, so matrix_local == engine world rest) with the clip's
-    per-bone local frames, JSON t = 0..duration-1 onto Blender frames 1..duration. A bone's local is
-    Translation(pos) @ Rotation(quat) in the parent's frame, the engine's own composition (the quaternion needs no
-    axis swap or conjugate; rebuild_anim_from_json.py, 2026-06-14). The pose is written as matrix_basis from the
-    accumulated armature-space matrices, so no per-bone depsgraph update is needed."""
+def json_pose_sampler(spec):
+    """Returns (order, at, dur): the bone names parents first, `at(fi)` is {bone: armature-space 4x4} of the clip's JSON t = fi, the
+    matrices key_source_from_json keys, evaluated straight from the keyframes with no rig, action or frame_set.
+    A bone's local is Translation(pos) @ Rotation(quat) in the parent's frame, the engine's own composition (the
+    quaternion needs no axis swap or conjugate; rebuild_anim_from_json.py, 2026-06-14). `dur` is the frame count."""
     bones = spec["bones"]
     order = [b["name"] for b in bones]
     parent = {b["name"]: b["parent"] for b in bones}
@@ -287,7 +286,6 @@ def key_source_from_json(arm, spec, action_name):
         m = b["rest"]
         rest_local[b["name"]] = Matrix(((m[0], m[4], m[8], m[12]), (m[1], m[5], m[9], m[13]),
                                         (m[2], m[6], m[10], m[14]), (0.0, 0.0, 0.0, 1.0)))
-    rest_w = {b.name: b.matrix_local.copy() for b in arm.data.bones}
     anim = {a["bone"]: a for a in spec["boneAnims"]}
     # the root bone's translation lives in RootPositionFrames as a delta from rest (anim_run_forward_unarmed: z
     # -0.084 to +0.019, the bob; its own PositionFrames are empty), so it is added to the rest offset
@@ -335,6 +333,30 @@ def key_source_from_json(arm, spec, action_name):
             return va
         return va.lerp(Vector((b["x"], b["y"], b["z"])), u)
 
+    def at(fi):
+        armmat = {}
+        for bn in order:
+            a = anim.get(bn)
+            q = sample_rot(a["rot"], fi) if a and a["rot"] else rest_local[bn].to_quaternion()
+            loc = sample_vec(a["pos"], fi) if a and a["pos"] else rest_local[bn].to_translation()
+            par = parent[bn]
+            if not par and root_pos:
+                loc = loc + sample_vec(root_pos, fi)
+            local = Matrix.Translation(loc) @ q.to_matrix().to_4x4()
+            armmat[bn] = (armmat[par] @ local) if par else local
+        return armmat
+
+    return order, at, dur
+
+
+def key_source_from_json(arm, spec, action_name):
+    """Key `arm` (built by build_engine_rig from the same JSON, so matrix_local == engine world rest) with the clip's
+    per-bone local frames, JSON t = 0..duration-1 onto Blender frames 1..duration (see json_pose_sampler). The pose
+    is written as matrix_basis from the accumulated armature-space matrices, so no per-bone depsgraph update is
+    needed."""
+    order, at, dur = json_pose_sampler(spec)
+    rest_w = {b.name: b.matrix_local.copy() for b in arm.data.bones}
+    parent = {b["name"]: b["parent"] for b in spec["bones"]}
     for pb in arm.pose.bones:
         pb.rotation_mode = "QUATERNION"
     act = bpy.data.actions.new(action_name)
@@ -347,18 +369,11 @@ def key_source_from_json(arm, spec, action_name):
         pass
     worst = 0.0
     for fi in range(dur):
-        armmat = {}
+        armmat = at(fi)
         for bn in order:
-            a = anim.get(bn)
-            q = sample_rot(a["rot"], fi) if a and a["rot"] else rest_local[bn].to_quaternion()
-            loc = sample_vec(a["pos"], fi) if a and a["pos"] else rest_local[bn].to_translation()
-            par = parent[bn]
-            if not par and root_pos:
-                loc = loc + sample_vec(root_pos, fi)
-            local = Matrix.Translation(loc) @ q.to_matrix().to_4x4()
-            armmat[bn] = (armmat[par] @ local) if par else local
             if bn not in arm.pose.bones:
                 continue
+            par = parent[bn]
             # Blender: pose = parent_pose @ parent_rest^-1 @ rest @ basis
             rel = (rest_w[par].inverted() @ rest_w[bn]) if par else rest_w[bn]
             pp = armmat[par] if par else Matrix.Identity(4)
@@ -498,6 +513,38 @@ def _knee_pole(rest_w, thigh, calf, foot):
     return _rot(rest_w[thigh]).transposed() @ out.normalized()
 
 
+def two_bone_ik(Mw, th, ca, fo, G, a, b, pole_local, stats):
+    """Two-bone IK of one leg toward the goal G (world), shared by _leg_ik and restyle_human_clip.py. The knee bends
+    in the plane of its rest pole (pole_local, in the thigh's rest frame) carried by the thigh; the calf follows the
+    thigh's turn, then aims at the goal. Rewrites Mw[th] and Mw[ca], raises stats["max_unreached_m"] and returns
+    (q1, q2), the thigh turn and the calf turn; None when the goal or the pole is degenerate (Mw untouched)."""
+    H, K0, A0 = Mw[th].translation.copy(), Mw[ca].translation.copy(), Mw[fo].translation.copy()
+    dv = G - H
+    d = dv.length
+    if d < 1e-6:
+        return None
+    u = dv / d
+    dc = min(max(d, abs(a - b) + 1e-4), a + b - 1e-4)
+    pole = _rot(Mw[th]) @ pole_local
+    v = pole - u * pole.dot(u)
+    if v.length < 1e-6:
+        return None
+    v.normalize()
+    alpha = math.acos(max(-1.0, min(1.0, (a * a + dc * dc - b * b) / (2.0 * a * dc))))
+    K = H + (u * math.cos(alpha) + v * math.sin(alpha)) * a
+    reach = H + u * dc
+    q1 = (K0 - H).rotation_difference(K - H)
+    q2 = (q1 @ (A0 - K0)).rotation_difference(reach - K)
+    M = (q1.to_matrix() @ _rot(Mw[th])).to_4x4()
+    M.translation = H
+    Mw[th] = M
+    M = (q2.to_matrix() @ q1.to_matrix() @ _rot(Mw[ca])).to_4x4()
+    M.translation = K
+    Mw[ca] = M
+    stats["max_unreached_m"] = max(stats["max_unreached_m"], (G - reach).length)
+    return q1, q2
+
+
 def _leg_ik(Mw, legs, src_arm, M_f, k, root_world_yaw, stats):
     """Two-bone IK per leg on this frame's pose. The ankle goes to its stance reference plus the source ankle's move
     from its bind position, scaled like the pelvis (and turned with the root); the knee bends toward its rest pole
@@ -508,35 +555,14 @@ def _leg_ik(Mw, legs, src_arm, M_f, k, root_world_yaw, stats):
     leg jumped 58 to 63 deg in one frame where the source moved 15 (2026-09-24)."""
     for leg in legs:
         th, ca, fo = leg["t"]
-        H, K0, A0 = Mw[th].translation.copy(), Mw[ca].translation.copy(), Mw[fo].translation.copy()
         G = leg["A_ref"] + (M_f @ src_arm.pose.bones[leg["s_foot"]].head - leg["A_s_rest"]) * k
         if root_world_yaw is not None:
             G = root_world_yaw @ G
-        a, b = leg["a"], leg["b"]
-        dv = G - H
-        d = dv.length
-        if d < 1e-6:
+        turns = two_bone_ik(Mw, th, ca, fo, G, leg["a"], leg["b"], leg["pole"], stats)
+        if turns is None:
             continue
-        u = dv / d
-        dc = min(max(d, abs(a - b) + 1e-4), a + b - 1e-4)
-        pole = _rot(Mw[th]) @ leg["pole"]
-        v = pole - u * pole.dot(u)
-        if v.length < 1e-6:
-            continue
-        v.normalize()
-        alpha = math.acos(max(-1.0, min(1.0, (a * a + dc * dc - b * b) / (2.0 * a * dc))))
-        K = H + (u * math.cos(alpha) + v * math.sin(alpha)) * a
-        reach = H + u * dc
-        q1 = (K0 - H).rotation_difference(K - H)
-        q2 = (q1 @ (A0 - K0)).rotation_difference(reach - K)
-        M = (q1.to_matrix() @ _rot(Mw[th])).to_4x4()
-        M.translation = H
-        Mw[th] = M
-        M = (q2.to_matrix() @ q1.to_matrix() @ _rot(Mw[ca])).to_4x4()
-        M.translation = K
-        Mw[ca] = M
+        q1, q2 = turns
         stats["max_turn_deg"] = max(stats["max_turn_deg"], math.degrees(q1.angle), math.degrees((q2 @ q1).angle))
-        stats["max_unreached_m"] = max(stats["max_unreached_m"], (G - reach).length)
 
 
 def retarget_clip(tgt, src_arm, action_name, report, src_ref=None, keep_root_yaw=False, root_world_yaw=None):
