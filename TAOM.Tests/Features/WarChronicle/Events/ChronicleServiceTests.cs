@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Features.ArmyTargeting;
 using TAOM.Features.Diplomacy.Models;
+using TAOM.Features.WarChronicle;
 using TAOM.Features.WarChronicle.Effects;
 using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarOfTheRingMomentum.Domain;
@@ -1069,7 +1070,7 @@ public class ChronicleServiceTests
         world.GetElapsedDays().Returns(_ => throw new System.NullReferenceException("engine"));
         var sut = new ChronicleService(_f.Config, _f.Store, world, _f.Alliance, _f.Wotr,
             new ChronicleOutcomeService(_f.Effects, _f.Alliance, _f.Alignment, _f.Momentum, _f.Ledger, _f.Text, _f.Logger),
-            _f.Queue, _f.Focus, _f.Settings, _f.Logger);
+            _f.Queue, _f.Focus, _f.Settings, _f.Logger, _f.Daily);
 
         sut.RunChronicleDay();
 
@@ -1084,6 +1085,51 @@ public class ChronicleServiceTests
         _sut.ResetTransientState();
 
         Assert.IsTrue(_f.Focus.IsEmpty);
+    }
+
+    // ---- Once per campaign day -----------------------------------------------------------------------
+    // A save made before midday ticks its own day again after a load (v1.5.5 Campaign.cs:1024-1030).
+
+    [TestMethod]
+    public void RunChronicleDay_TwiceOnTheSameDay_StepsOnce()
+    {
+        _f.Events.Add(Narrative("fellowship"));
+        Day(5);
+        _f.Config.ClearReceivedCalls();
+
+        Day(5.6);
+
+        _f.Config.DidNotReceive().GetEvents();
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_TheNextDay_Steps()
+    {
+        _f.Events.Add(Narrative("fellowship"));
+        Day(5);
+        _f.Config.ClearReceivedCalls();
+
+        Day(6);
+
+        _f.Config.Received().GetEvents();
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_TheTickAlreadyRanToday_StillSteps()
+    {
+        _f.Daily.TryClaim(WarChronicleDailyGate.TickLane, 5d);
+
+        Day(5);
+
+        _f.Config.Received().GetEvents();
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_ANaNClock_ClaimsNoDay()
+    {
+        Day(double.NaN);
+
+        Assert.AreEqual(0, _f.Daily.Snapshot().Count);
     }
 
     // ---- Console: open now ---------------------------------------------------------------------------

@@ -27,6 +27,7 @@ public static class WarChronicleIoC
         container.Register<IRallyConfigProvider, RallyConfigProvider>(Reuse.Singleton);
         container.Register<RallyService>(Reuse.Singleton);
         container.Register<WarLedgerService>(Reuse.Singleton);
+        container.Register<WarChronicleDailyGate>(Reuse.Singleton);
         container.Register<WarChronicleStateService>(Reuse.Singleton);
         container.Register<WarChronicleTickService>(Reuse.Singleton);
 

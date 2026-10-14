@@ -153,6 +153,9 @@ internal sealed class ChronicleFixture
 
     public WarLedgerService Ledger { get; }
 
+    /// <summary>The once-per-day gate, shared like the container singleton it stands for.</summary>
+    public WarChronicleDailyGate Daily { get; } = new WarChronicleDailyGate();
+
     public IChronicleConfigProvider Config { get; }
 
     public List<ChronicleEventDefinition> Events { get; } = new List<ChronicleEventDefinition>();
@@ -160,7 +163,7 @@ internal sealed class ChronicleFixture
     public ChronicleService CreateService() => new ChronicleService(
         Config, Store, World, Alliance, Wotr,
         new ChronicleOutcomeService(Effects, Alliance, Alignment, Momentum, Ledger, Text, Logger),
-        Queue, Focus, Settings, Logger);
+        Queue, Focus, Settings, Logger, Daily);
 
     public IEnumerable<string> LedgerLines => Logged.Where(l => l.Contains("ev=chronicle"));
 

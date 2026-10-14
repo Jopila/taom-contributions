@@ -4,11 +4,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
-using TAOM.Core.Persistence;
 using TAOM.Features.WarChronicle;
 using TAOM.Features.WarChronicle.Effects;
 using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarChronicle.Rally;
+using TAOM.Core.Persistence;
 
 namespace TAOM.Tests.Features.WarChronicle;
 
@@ -19,6 +19,7 @@ public class WarChronicleStateServiceTests
     private WarEffectService _effects = null!;
     private WarBaselineService _baselines = null!;
     private RallyTierStore _tiers = null!;
+    private WarChronicleDailyGate _daily = null!;
     private WarChronicleStateService _sut = null!;
 
     [TestInitialize]
@@ -30,7 +31,8 @@ public class WarChronicleStateServiceTests
         _effects = new WarEffectService(settings, _logger);
         _baselines = new WarBaselineService();
         _tiers = new RallyTierStore();
-        _sut = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore());
+        _daily = new WarChronicleDailyGate();
+        _sut = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore(), _daily);
     }
 
     private static KingdomWarSnapshot Kingdom(string id, int towns, int castles) =>
@@ -55,7 +57,7 @@ public class WarChronicleStateServiceTests
         var effects = new WarEffectService(settings, _logger);
         var baselines = new WarBaselineService();
         var tiers = new RallyTierStore();
-        new WarChronicleStateService(effects, baselines, tiers, _logger, new ChronicleStateStore()).RestoreFromChunks(chunks);
+        new WarChronicleStateService(effects, baselines, tiers, _logger, new ChronicleStateStore(), new WarChronicleDailyGate()).RestoreFromChunks(chunks);
 
         Assert.AreEqual(2, effects.Snapshot().Count);
         Assert.AreEqual(1.1f, effects.GetMultiplier("gondor", WarEffectKind.VolunteerRate), 0.0001f);
@@ -83,7 +85,7 @@ public class WarChronicleStateServiceTests
         var settings = Substitute.For<IWarChronicleSettingsProvider>();
         settings.WarEffectStrength.Returns(1f);
         var effects = new WarEffectService(settings, _logger);
-        new WarChronicleStateService(effects, new WarBaselineService(), new RallyTierStore(), _logger, new ChronicleStateStore()).RestoreFromChunks(chunks);
+        new WarChronicleStateService(effects, new WarBaselineService(), new RallyTierStore(), _logger, new ChronicleStateStore(), new WarChronicleDailyGate()).RestoreFromChunks(chunks);
         Assert.AreEqual(_effects.Snapshot().Count, effects.Snapshot().Count, "the chunks join back to the same payload");
     }
 
@@ -189,5 +191,42 @@ public class WarChronicleStateServiceTests
         Assert.IsNull(_baselines.GetBaseline("gondor"));
         Assert.AreEqual(0, _tiers.GetTier("gondor"));
         Assert.AreEqual(0, WarChronicleSaveCodec.Parse(string.Concat(_sut.CaptureChunks())).Chronicle.Count);
+    }
+
+    [TestMethod]
+    public void CaptureThenRestore_KeepsTheLastDayEachDailyListenerRan()
+    {
+        _daily.TryClaim(WarChronicleDailyGate.TickLane, 12d);
+        _daily.TryClaim(WarChronicleDailyGate.ChronicleLane, 12d);
+        var chunks = _sut.CaptureChunks();
+        var loaded = new WarChronicleDailyGate();
+
+        new WarChronicleStateService(new WarEffectService(Substitute.For<IWarChronicleSettingsProvider>(), _logger),
+            new WarBaselineService(), new RallyTierStore(), _logger, new ChronicleStateStore(), loaded).RestoreFromChunks(chunks);
+
+        Assert.IsFalse(loaded.TryClaim(WarChronicleDailyGate.TickLane, 12d), "the save's day already ran");
+        Assert.IsFalse(loaded.TryClaim(WarChronicleDailyGate.ChronicleLane, 12d));
+        Assert.IsTrue(loaded.TryClaim(WarChronicleDailyGate.TickLane, 13d));
+    }
+
+    [TestMethod]
+    public void RestoreFromChunks_AnOldSaveWithoutTheDailySection_RunsItsFirstTick()
+    {
+        _daily.TryClaim(WarChronicleDailyGate.TickLane, 40d);
+
+        _sut.RestoreFromChunks(new List<string> { "{\"v\":1,\"effects\":[],\"baselines\":{}}" });
+
+        Assert.IsTrue(_daily.TryClaim(WarChronicleDailyGate.TickLane, 12d));
+        Assert.IsTrue(_daily.TryClaim(WarChronicleDailyGate.ChronicleLane, 12d));
+    }
+
+    [TestMethod]
+    public void ResetForNewSession_ForgetsTheLastDayRun()
+    {
+        _daily.TryClaim(WarChronicleDailyGate.TickLane, 12d);
+
+        _sut.ResetForNewSession();
+
+        Assert.IsTrue(_daily.TryClaim(WarChronicleDailyGate.TickLane, 12d));
     }
 }

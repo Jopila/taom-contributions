@@ -30,7 +30,7 @@ public class ChroniclePhaseAnchorTests
     }
 
     private static WarChronicleStateService StateFor(ChronicleFixture f) =>
-        new WarChronicleStateService(f.Effects, new WarBaselineService(), new RallyTierStore(), f.Logger, f.Store);
+        new WarChronicleStateService(f.Effects, new WarBaselineService(), new RallyTierStore(), f.Logger, f.Store, f.Daily);
 
     private void Day(double day)
     {

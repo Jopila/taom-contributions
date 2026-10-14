@@ -18,7 +18,9 @@ namespace TAOM.Features.WarChronicle;
 /// snapshot adapter, and a throwing engine getter must never fail the campaign's daily tick, so it is
 /// logged and the rest of the day (the baselines, the rally, the escape pass and the ledger) is skipped.
 /// Baselines taken after day 1 with none held (a save from before this feature, a corrupt section or a
-/// skipped first tick) get one warning. The chronicle's event chain runs from its own router,
+/// skipped first tick) get one warning. All of it runs at most once per campaign day
+/// (<see cref="WarChronicleDailyGate"/>): after a load the engine's next daily tick can repeat the save's day.
+/// The chronicle's event chain runs from its own router,
 /// <c>Events.WarChronicleEventsBehavior</c>, not from here. The caller has already checked that this peer
 /// may run world work.
 /// </summary>
@@ -31,10 +33,12 @@ public sealed class WarChronicleTickService
     private readonly WarEscapeDailyPass _escapes;
     private readonly RallyService _rally;
     private readonly IModLogger _logger;
+    private readonly WarChronicleDailyGate _daily;
 
     public WarChronicleTickService(
         IKingdomWarSnapshotAdapter snapshots, IWarEffectService effects, WarBaselineService baselines,
-        WarLedgerService ledger, WarEscapeDailyPass escapes, RallyService rally, IModLogger logger)
+        WarLedgerService ledger, WarEscapeDailyPass escapes, RallyService rally, IModLogger logger,
+        WarChronicleDailyGate daily)
     {
         _snapshots = snapshots;
         _effects = effects;
@@ -43,12 +47,17 @@ public sealed class WarChronicleTickService
         _escapes = escapes;
         _rally = rally;
         _logger = logger;
+        _daily = daily;
     }
 
     public void RunDaily()
     {
         try
         {
+            // At most once per campaign day: a save made before midday ticks its own day again after a load.
+            if (!_daily.TryClaim(WarChronicleDailyGate.TickLane, _snapshots.GetElapsedDay()))
+                return;
+
             var nowHours = _snapshots.GetNowHours();
             _effects.Expire(nowHours);
 

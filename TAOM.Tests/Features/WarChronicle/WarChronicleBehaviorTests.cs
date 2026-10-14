@@ -31,6 +31,7 @@ public class WarChronicleBehaviorTests
     private WarEffectService _effects = null!;
     private WarBaselineService _baselines = null!;
     private RallyTierStore _tiers = null!;
+    private WarChronicleDailyGate _daily = null!;
     private WarChronicleStateService _state = null!;
     private IKingdomWarSnapshotAdapter _snapshots = null!;
     private ICoopSessionProvider _coop = null!;
@@ -48,7 +49,8 @@ public class WarChronicleBehaviorTests
         _effects = new WarEffectService(_settings, _logger);
         _baselines = new WarBaselineService();
         _tiers = new RallyTierStore();
-        _state = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore());
+        _daily = new WarChronicleDailyGate();
+        _state = new WarChronicleStateService(_effects, _baselines, _tiers, _logger, new ChronicleStateStore(), _daily);
         _snapshots = Substitute.For<IKingdomWarSnapshotAdapter>();
         _snapshots.GetCampaignId().Returns("c1");
         _snapshots.GetNowHours().Returns(100d);
@@ -67,7 +69,7 @@ public class WarChronicleBehaviorTests
         var effectService = effects ?? _effects;
         var wotr = Substitute.For<IWarOfTheRingService>();
         var ledger = new WarLedgerService(_snapshots, _baselines, _tiers, effectService, wotr, Substitute.For<IAlignmentService>(), _logger);
-        var tick = new WarChronicleTickService(_snapshots, effectService, _baselines, ledger, NoEscapes(effectService), QuietRally(effectService, _baselines, _tiers, ledger), _logger);
+        var tick = new WarChronicleTickService(_snapshots, effectService, _baselines, ledger, NoEscapes(effectService), QuietRally(effectService, _baselines, _tiers, ledger), _logger, _daily);
         return new WarChronicleBehavior(tick, _state, ledger, _coop, _logger);
     }
 
@@ -92,12 +94,14 @@ public class WarChronicleBehaviorTests
         _effects.Apply(Effect());
         _baselines.EnsureBaselines(new[] { new KingdomWarSnapshot { Id = "empire_w", Towns = 3 } });
         _tiers.Restore(new Dictionary<string, int> { ["empire_w"] = 2 });
+        _daily.TryClaim(WarChronicleDailyGate.TickLane, 40d);
 
         NewBehavior();
 
         Assert.AreEqual(0, _effects.Snapshot().Count);
         Assert.IsNull(_baselines.GetBaseline("empire_w"));
         Assert.AreEqual(0, _tiers.GetTier("empire_w"));
+        Assert.IsTrue(_daily.TryClaim(WarChronicleDailyGate.TickLane, 12d), "a new campaign forgets the last day run");
     }
 
     [TestMethod]
@@ -123,11 +127,12 @@ public class WarChronicleBehaviorTests
 
         var effects2 = new WarEffectService(_settings, _logger);
         var baselines2 = new WarBaselineService();
-        var state2 = new WarChronicleStateService(effects2, baselines2, new RallyTierStore(), _logger, new ChronicleStateStore());
+        var daily2 = new WarChronicleDailyGate();
+        var state2 = new WarChronicleStateService(effects2, baselines2, new RallyTierStore(), _logger, new ChronicleStateStore(), daily2);
         var ledger2 = new WarLedgerService(_snapshots, baselines2, new RallyTierStore(), effects2, Substitute.For<IWarOfTheRingService>(),
             Substitute.For<IAlignmentService>(), _logger);
         var loaded = new WarChronicleBehavior(
-            new WarChronicleTickService(_snapshots, effects2, baselines2, ledger2, NoEscapes(effects2), QuietRally(effects2, baselines2, new RallyTierStore(), ledger2), _logger), state2, ledger2, _coop, _logger);
+            new WarChronicleTickService(_snapshots, effects2, baselines2, ledger2, NoEscapes(effects2), QuietRally(effects2, baselines2, new RallyTierStore(), ledger2), _logger, daily2), state2, ledger2, _coop, _logger);
         store.Loading = true;
 
         loaded.SyncData(store);
@@ -203,7 +208,7 @@ public class WarChronicleBehaviorTests
     {
         var ledger = new WarLedgerService(_snapshots, _baselines, _tiers, effects, Substitute.For<IWarOfTheRingService>(),
             Substitute.For<IAlignmentService>(), _logger);
-        var tick = new WarChronicleTickService(_snapshots, effects, _baselines, ledger, NoEscapes(effects), QuietRally(effects, _baselines, _tiers, ledger), _logger);
+        var tick = new WarChronicleTickService(_snapshots, effects, _baselines, ledger, NoEscapes(effects), QuietRally(effects, _baselines, _tiers, ledger), _logger, _daily);
         return new WarChronicleBehavior(tick, _state, ledger, _coop, _logger);
     }
 }
