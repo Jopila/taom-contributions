@@ -22,7 +22,9 @@ risk that Day 2/14 did not.
 sets the daily event's initial wait to the elapsed part of the current day, not to the rest of it
 (v1.5.4 and v1.5.5 `Campaign.cs:1024-1030`; `MBCampaignEvent.cs:32` sets `NextTriggerTime` to now plus
 that wait). A save made at fraction f of day S next ticks at S + 2f, so the daily event leaves the
-day boundary after a mid-day load, and a save made before midday ticks day S a second time. The new-game
+elapsed-day boundary after a load part way through a day, and a save made in the first half of
+elapsed day S ticks day S a second time. Elapsed days start at `CampaignStartTime` (09:00 on
+vanilla's calendar clock), not at midnight. The new-game
 half holds: a new campaign waits one whole day. The War Chronicle now guards its daily work against the
 repeat (`WarChronicleDailyGate`, docs/features/war-chronicle.md "Once per day").
 

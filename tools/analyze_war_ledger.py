@@ -25,9 +25,10 @@ the argument order. A load is a rewind: a t=load line at day S drops every store
 (kingdom, side and share lines, events, chronicle resolutions) with a day after S, which belongs to the
 run the player abandoned. Day S is kept from both runs: on a load the engine waits only the elapsed part
 of the day before the next daily tick (Campaign.CreateCampaignEvents, v1.5.5 Campaign.cs:1024-1030), so
-a save made early on day S can tick day S again, and the old run's day-S events happened before the
-save or in the same day. A log with no load markers gets no rewind: logs from builds before the marker
-can keep an abandoned run's days.
+a save made in the first half of elapsed day S can tick day S again, and the old run's day-S events
+happened before the save or in the same day. Days are elapsed campaign days, counted from
+CampaignStartTime (09:00 on vanilla's calendar clock), not calendar days from midnight. A log with no
+load markers gets no rewind: logs from builds before the marker can keep an abandoned run's days.
 
 Capital target (b) has four verdicts, judged per kingdom. FAIL: any kingdom line with cap=0 before day
 120; the report says "day N" for an observed 1 to 0 transition and "lost by day N" when the kingdom's first

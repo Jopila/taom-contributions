@@ -1088,7 +1088,8 @@ public class ChronicleServiceTests
     }
 
     // ---- Once per campaign day -----------------------------------------------------------------------
-    // A save made before midday ticks its own day again after a load (v1.5.5 Campaign.cs:1024-1030).
+    // A save made in the first half of an elapsed campaign day ticks that day again after a load (v1.5.5
+    // Campaign.cs:1024-1030). The elapsed day starts at CampaignStartTime (09:00 on vanilla's calendar clock).
 
     [TestMethod]
     public void RunChronicleDay_TwiceOnTheSameDay_StepsOnce()

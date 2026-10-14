@@ -664,15 +664,15 @@ class LoadMarkerTests(unittest.TestCase):
     """
 
     def abandoned(self):
-        # Days 1 to 4 played. Day 2's tick resolves dale; the game is saved on day 2 after a mid-day
-        # destruction, then hornburg falls the same afternoon. Day 3 rallies gondor; Rohan dies on day 4.
+        # Days 1 to 4 played. Day 2's tick resolves dale; the game is saved on day 2 after a destruction
+        # between ticks, then hornburg falls later the same elapsed day. Day 3 rallies gondor; Rohan dies on day 4.
         lines = tick(1, "0.5") + tick(2, "0.5", chronicle=[("dale", "Occurred")]) + [ev_destroyed(2, "isengard")]
         lines += [ev_chron(2, "hornburg", "Fell")]
         lines += tick(3, "0.9", tiers=[("gondor", 0, 1)]) + tick(4, "0.9", chronicle=[("erebor", "Lapsed")])
         return lines + [ev_destroyed(4, "rohan")]
 
-    def test_a_load_before_midday_rewrites_day_s_and_loses_none_of_its_events(self):
-        # Saved early on day 2: the reloaded run ticks day 2 again (an exact repeat of dale), then day 3.
+    def test_a_load_in_the_first_half_of_day_s_rewrites_it_and_loses_none_of_its_events(self):
+        # Saved in the first half of elapsed day 2: the reloaded run ticks day 2 again (an exact repeat of dale), then day 3.
         lines = self.abandoned() + [ev_load(2)]
         lines += tick(2, "0.5", chronicle=[("dale", "Occurred")]) + tick(3, "0.4", k_pts=7)
         c = parse(lines).campaigns["c1"]

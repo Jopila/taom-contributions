@@ -227,7 +227,9 @@ public sealed class ChronicleService
     private void Guarded(string step, Action<double> body) => Guarded(step, null, body);
 
     /// <param name="dailyLane">The daily step's <see cref="WarChronicleDailyGate"/> lane: a day already run is
-    /// skipped (a save made before midday ticks its own day again after a load); null for every other entry.</param>
+    /// skipped (a save made in the first half of an elapsed campaign day ticks that day again after a load;
+    /// the elapsed day starts at CampaignStartTime, 09:00 on vanilla's calendar clock, not at midnight); null
+    /// for every other entry.</param>
     private void Guarded(string step, string? dailyLane, Action<double> body)
     {
         if (!_settings.ChronicleEnabled)
@@ -267,9 +269,10 @@ public sealed class ChronicleService
     }
 
     /// <summary>
-    /// Whole campaign days, like vanilla's weekly tick (Campaign.cs) and the ledger's <c>day=</c>. The daily
-    /// tick fires a few game minutes past midnight, or at a fixed mid-day time after a mid-day load, so
-    /// fractional days would let a window or a child slip a day. Math.Floor keeps NaN and Infinity, so the
+    /// Whole elapsed campaign days, like vanilla's weekly tick (Campaign.cs) and the ledger's <c>day=</c>.
+    /// An elapsed day starts at CampaignStartTime plus whole days (09:00 on vanilla's calendar clock, not
+    /// midnight). The daily tick fires a few game minutes past that boundary, or at a fractional time after
+    /// a load, so fractional days would let a window or a child slip a day. Math.Floor keeps NaN and Infinity, so the
     /// finite gates still stop a bad clock.
     /// </summary>
     private double Today() => Math.Floor(_world.GetElapsedDays());

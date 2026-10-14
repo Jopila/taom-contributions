@@ -5,9 +5,10 @@ using TAOM.Features.WarChronicle;
 namespace TAOM.Tests.Features.WarChronicle;
 
 /// <summary>
-/// The War Chronicle's daily work runs at most once per campaign day. On a load the engine waits only the
-/// elapsed part of the day before the next daily tick (v1.5.5 Campaign.cs:1024-1030), so a save made before
-/// midday ticks its own day a second time; the gate's saved last-run day stops the repeat.
+/// The War Chronicle's daily work runs at most once per elapsed campaign day. On a load the engine waits only
+/// the elapsed part of the day before the next daily tick (v1.5.5 Campaign.cs:1024-1030), so a save made in
+/// the first half of an elapsed day (which starts at CampaignStartTime, 09:00 on vanilla's calendar clock)
+/// ticks that day a second time; the gate's saved last-run day stops the repeat.
 /// </summary>
 [TestClass]
 public class WarChronicleDailyGateTests
@@ -43,7 +44,7 @@ public class WarChronicleDailyGateTests
     [TestMethod]
     public void TryClaim_LaterTheSameDay_IsTheSameWholeDay()
     {
-        // A tick after a mid-day load fires at a fractional time: day 12.2 and day 12.9 are both day 12.
+        // A tick after a load fires at a fractional time: day 12.2 and day 12.9 are both day 12.
         _sut.TryClaim(WarChronicleDailyGate.ChronicleLane, 12.2d);
 
         Assert.IsFalse(_sut.TryClaim(WarChronicleDailyGate.ChronicleLane, 12.9d));

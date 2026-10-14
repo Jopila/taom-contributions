@@ -119,8 +119,9 @@ PASS reached by omission. Each verdict needs a fixture for the "unknown" cases, 
 - B16: done 2026-10-14 with a load marker, not the planned `h=` field. `WarChronicleBehavior` writes
   `t=load cid day` on each game load, and the analyzer drops that campaign's records after the save's
   day. An `h=` field would not have been enough: on a load the engine waits only the elapsed part of the
-  day before the next daily tick (v1.5.5 `Campaign.cs:1024-1030`), so a save made before midday ticks
-  its own day again. The same fact added a once-per-day guard to the chronicle's daily work.
+  day before the next daily tick (v1.5.5 `Campaign.cs:1024-1030`), so a save made in the first half of an
+  elapsed campaign day (from `CampaignStartTime`, 09:00 on vanilla's calendar clock, not midnight)
+  ticks its own day again. The same fact added a once-per-day guard to the chronicle's daily work.
 - B31 and B44: done by the tests branch (#792).
 - B45: done 2026-10-14: `SyncDataChunker.SyncChunks`, the guarded count-and-chunks pass both behaviors use.
 - Rejected 2026-10-14: having `SyncChunks` take and return the whole payload string. It removes one
