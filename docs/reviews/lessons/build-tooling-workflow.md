@@ -3581,3 +3581,39 @@ the bool and uses the default version, with no error. The bytes came out the sam
   in `tools/tests/test_gen_troll_anim_clips.py` fails any `.Save(` call in `tools/*.ps1` with another count.
   After a library update, diff every public signature the scripts call (ilspycmd) before the first run.
 - **Source:** `docs/reviews/rca-orc-goblin-locomotion-2026-10-14.md` (TpacTool switch).
+
+### A vendor's clip name is not evidence: check every gait's loop and Root path before binding it (2026-10-14)
+The WildMesh3D pack names its forward gaits `_F`. The mountain goat's `TrotFast_F`, `RunFast_F`, `HoppingFast_F`
+and seven unnamed `A_F_*` clips move the Root bone 0.8 to 3.4 m sideways while turning 20 to 145 degrees, and
+its `WalkFast_F`, `RunSlow_F` and `TrotSlow_F` never close their loop; three warthog gaits hold the same broken
+data under three names. The first clip plan picked them by name, and all of them passed every retarget check
+(export, bone order, frame 0 at rest), because none of those checks looks at the loop.
+- **Why missed:** the first survey measured loop closure over every bone, so face and helper bones drowned
+  the signal (the deer's `RunFast_F` read 30 degrees from two chest helpers that drive nothing), and its pelvis
+  "yaw" means nothing on a rig whose pelvis bone points straight up.
+- **Prevent:** before binding a gait, measure its loop per MAPPED bone and its Root bone path from the first
+  to the last frame; over about 1 degree, or any Root travel, it is not a forward loop. A broken gait borrows
+  a clean `horse_skeleton` clip from a similar animal (the warthog runs on the boar's, the goat gallops on
+  the deer's): [wildmesh-mounts.md](../../features/wildmesh-mounts.md) "Broken vendor gaits".
+- **Source:** #794.
+
+### A closed loop repeats frame 0 at its end, so frame 0's predecessor is `loop - 1` (2026-10-14)
+`measure_animalia_clips.py` found a hoof plant as the rising edge `zs[i] <= lo and zs[i - 1] > lo`. For
+`i = 0`, `zs[-1]` is the closing frame, which repeats frame 0, so a contact that starts on frame 0 never
+registered. Four WildMesh walks and trots measured 3 plants for 4 hooves, and `gen_animalia_anim_clips.ps1`
+refused them (a walk or trot needs 4).
+- **Why missed:** none of the seven measured Animalia clips plants a hoof on frame 0.
+- **Prevent:** take the predecessor cyclically, `zs[(i - 1) % loop]`; a re-measure of the Animalia elk gives
+  the committed values unchanged.
+- **Source:** #794.
+
+### The clip generator counts 30 fps and root motion; a pack with neither breaks both silently (2026-10-14)
+`gen_animalia_anim_clips.ps1` sets a clip's Duration to its frames / 30, and the measure read travel from root
+motion only. The Animalia clips came out of Unreal at 30 fps with root motion. The WildMesh3D clips run at 24 or
+25 fps and play in place: Blender's FBX importer takes the file's frame rate, so the retarget kept 24 fps and a
+clip would have played up to 25 per cent fast in game, and every gait measured 0 m of travel.
+- **Why missed:** the first pack happened to satisfy both assumptions, so neither was ever tested.
+- **Prevent:** `export_blend_pack.py --fps 30` samples each source clip at its own time and bakes it at 30 fps
+  (length kept, pose within 0.07 degrees); the measure takes the planted hoof's slide when the root does not
+  move (`"travel_mode": "stride"`).
+- **Source:** #794.

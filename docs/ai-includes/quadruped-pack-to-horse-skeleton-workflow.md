@@ -58,6 +58,13 @@ E:\UE_5.4\Engine\Binaries\Win64\UnrealEditor-Cmd.exe <uproject> -run=pythonscrip
 only GFur load errors is fine (no GFur plugin; fur is not portable). Read `inventory.json`: the skeleton's
 bones, root-motion vs in-place clips, LODs as separate assets.
 
+A pack shipped as `.blend` files (WildMesh3D, #794: [wildmesh-mounts.md](../features/wildmesh-mounts.md)) skips
+Unreal: `tools/blender/export_blend_pack.py --pack <key>=<file.blend> --out <dir> --fps 30` writes the same
+layout (one FBX per mesh part, one per clip). It skins bone-parented parts (antlers, tusks) onto their bone at
+weight 1 in the rest pose, since the reskin moves an unweighted vertex with the global fit only, and resamples
+clips to 30 fps. Before picking a gait, check its loop per mapped bone and its Root bone path: a vendor's
+`_F` name does not prove a straight, looping clip (gotchas).
+
 **2. Reskin.** One run per animal; a variant is a set of parts joined per LOD (body + antler set).
 ```
 blender-launcher.exe -b -P tools/blender/reskin_animalia_to_horse.py -- --template C:\Users\mikew\Downloads\horse.fbx ^
@@ -83,11 +90,15 @@ horse rest. Pilot three clips (a walk, an idle, an attack) with `--only` and rea
 
 **4. Textures** at 1K (Mike's rule for these packs): `convert_tripo_prop_textures.py --src <export>\textures\Textures
 --match <set prefix> --stem <kit material name> --dst <dir> --max-size 1024`. Name each set exactly as the FBX
-materials (the Kit binds by name).
+materials (the Kit binds by name). The converter finds a map by a role word in its name (`basecolor`, `normal`,
+`roughness`); a pack with plain names (`T_Boar_Body.png`) is copied to `<kit material>_basecolor.png` first, never
+renamed in place (the `.blend` links the originals). A pack with colour maps only gets no `_n`.
 
 **5. Clip metadata.** `measure_animalia_clips.py` on the pack's root-motion clips: the ground covered per loop at
 horse size (gaits), the hoof plants (footstep sounds), a death's fall point. Without the travel the engine cannot
-match the legs to the ground speed and the hooves slide.
+match the legs to the ground speed and the hooves slide. A clip that plays in place takes its travel from the
+planted hoof's backward slide instead (`"travel_mode": "stride"`); the map's `measure` block names the pelvis and
+hoof bones (the Animalia names are the default). The clips must be 30 fps, because stage 8 counts 30.
 
 **6. Kit import (Mike).** Sources under `LOTRLOME_Armory/AssetSources/creature/<folder>/` (meshes, `animations/`,
 `textures/`); textures first, then one material per set named exactly as the FBX material, then the meshes on
@@ -105,7 +116,9 @@ Rerun the census, and the clip generator's `-Verify` (stage 8), after any clip r
 **8. Clip resources.** `powershell.exe -File tools\gen_animalia_anim_clips.ps1` (dry run), then `-Apply`. Each clip
 is the vanilla horse clip `as_horse` binds to the same action, cloned (flags, priority, blends, sounds and usages
 verbatim), with the measured travel and step points. Gaits get a `_stand` twin; the standing pace gets a
-`_movement` clip; turns and jumps are left to the horse (see gotchas). Extend `$PLAN` for a new pack.
+`_movement` clip; turns and jumps are left to the horse (see gotchas). `-Pack` picks the pack (`animalia` by
+default, `wildmesh`); a new pack is an entry in `$PLANS`. A gait one animal borrows from another gets no clip:
+the action set binds the lender's.
 
 **9. Register the clips (Mike):** open the Kit once and close it. A clip package without a RuntimeDataCache entry
 does not load in game; masters never get one and play anyway.
@@ -169,17 +182,22 @@ changing it (withers and total height); a resize is one XML edit and a new Custo
 | A jump would fly twice as high | the pack's jumps lift the pelvis about 2 m, and the engine flies a mount's jump | leave jumps to the horse until they are cut into start / loop / end with the lift removed |
 | A slow-looking trot | the pack's trot covers 6.3 m per loop, so at horse trot speeds the legs play slower | correct (no slide); tune Duration or LoopDisplacement if it reads wrong |
 | The validator reported a new "kingdom" | a `troops_*.xml` file is grouped by name | exempt the test riders (stage 11) |
+| A neck stretched 2 to 3.8 times (WildMesh) | every WildMesh neck is far shorter than the horse's | `--profile keepneck` |
+| A `_F` gait that pops at its loop or drifts sideways (WildMesh goat, warthog) | the vendor mislabeled turns and shipped clips that never loop | check each gait per mapped bone and Root path; borrow a clean `horse_skeleton` clip |
+| A gait measured at 0 m (WildMesh) | the clip plays in place: no root travel | stride travel (stage 5) |
+| A 24 fps clip playing 25 % fast | stage 8 sets Duration from frames / 30 | `export_blend_pack.py --fps 30` |
+| A trot with 3 hoof plants | the measure read frame 0's predecessor as the closing frame (fixed 2026-10-14) | re-run the measure |
 
 ## Adapting it to the next pack
 
-What is Animalia-specific lives mainly in four tables: the bone map
-(`tools/blender/animalia_to_horse_map.json`: `joints`, `chains`, `weights`, `hoof_split`, `profiles`), the clip
-plan (`$PLAN` in `tools/gen_animalia_anim_clips.ps1`), the action overrides (`OVERRIDES` in
-`tools/apply_animalia_armory.py`), and the measured stems (`--gaits` / `--deaths` of `measure_animalia_clips.py`).
-Hard-coded beside them, and to change for a new pack: in `tools/apply_animalia_armory.py` the Monster file and its
-path, `SUBMODULE_BLOCK`, `ITEMS`, `ANTLER`, the id tuples, the clip folder and the `as_animalia_` / `anim_animalia_`
-prefixes; in `tools/gen_animalia_anim_clips.ps1` the `-Masters` default, the two measure files, the
-`'elk', 'moose'` loops, the `animalia_${animal}_` prefix and the `$meas` keys; and the two animals built into
+What is pack-specific lives mainly in four tables: the bone map
+(`tools/blender/animalia_to_horse_map.json`: `joints`, `chains`, `weights`, `hoof_split`, `profiles`, and an
+optional `measure`; the WildMesh one is `wildmesh_to_horse_map.json`), the clip plan (`$PLANS.<pack>` in
+`tools/gen_animalia_anim_clips.ps1`, with the pack's `-Pack` value and `-Masters` default), the action overrides
+(`OVERRIDES` in `tools/apply_animalia_armory.py`), and the measured stems (`--gaits` / `--deaths` of
+`measure_animalia_clips.py`, written to `<pack>_<animal>_clip_measure.json`). Still hard-coded, and to change for a
+new pack: in `tools/apply_animalia_armory.py` the Monster file and its path, `SUBMODULE_BLOCK`, `ITEMS`, `ANTLER`,
+the id tuples, the clip folder and the `as_animalia_` / `anim_animalia_` prefixes; and the two animals built into
 `Main/Features/Animalia/`. The
 PowerShell stages need Windows PowerShell 5.1, TpacTool's `bin` and `TolerantTpacLoader.cs` (both outside the repo,
 passed as `-TpacBin` / `-Loader`); the Blender stages detach, so their only completion signal is the report's

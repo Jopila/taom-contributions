@@ -1,10 +1,9 @@
 param(
   [switch]$Apply,
   [switch]$Verify,
-  [string]$Masters = 'E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\LOTRLOME_Armory\Assets\creature\elk\animations',
+  [ValidateSet('animalia', 'wildmesh')][string]$Pack = 'animalia',
+  [string]$Masters = '',
   [string]$Vanilla = 'E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Native\AssetPackages\animation_clips.tpac',
-  [string]$ElkMeasure = "$PSScriptRoot\blender\animalia_elk_clip_measure.json",
-  [string]$MooseMeasure = "$PSScriptRoot\blender\animalia_moose_clip_measure.json",
   [string]$TpacBin = 'E:\Release_v0.5.1\bin',
   [string]$Loader = 'E:\LOTRAOMAssets\_auto_workspace\chariot\TolerantTpacLoader.cs'
 )
@@ -63,9 +62,18 @@ A gait or death clip is generated only from a sound measurement (Get-MeasureProb
 recorded as an error, a loop that covers no ground, too few hoof plants or a fall fraction outside (0, 1) is
 reported BAD MEASURE and counted as an error, never written with zeros.
 
+-Pack picks the pack (default animalia, the elk and moose above). wildmesh is the WildMesh3D boar, warthog,
+mountain goat, deer and moose (#794): masters under Assets\creature\creatures\animations, named
+wildmesh_<animal>_<stem>, measured in tools\blender\wildmesh_<animal>_clip_measure.json (every pack reads
+<pack>_<animal>_clip_measure.json). Its gaits play in place, so their travel is the hoof stride the measure tool
+reads. Gaits a WildMesh animal borrows (the warthog's canter and gallop are the boar's runslow_f and runfast_f, the
+goat's gallop is the deer's runfast_f, because the pack's own versions do not loop or curve sideways) get no clip
+of their own: the action set binds the lender's clip, which already carries the travel, since every reskin sits
+on the same horse joints. Falls, rear, kick and walking backwards stay vanilla for that pack.
+
 Exit 2 when it cannot run (game or Kit open, not Windows PowerShell, a tool path missing, -Apply and -Verify
 together). Windows PowerShell 5.1 (TolerantTpacLoader.cs is .NET Framework):
-  powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools\gen_animalia_anim_clips.ps1 [-Apply | -Verify]
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools\gen_animalia_anim_clips.ps1 [-Pack wildmesh] [-Apply | -Verify]
 #>
 $ErrorActionPreference = 'Stop'
 
@@ -104,8 +112,11 @@ $TEMPLATE_OF = @{
   fallR = 'horse_death_right_side'; fallR_cont = 'horse_death_right_side_continue'
   standmove = 'horse_stand_for_movement_data'
 }
-# master stem (after animalia_<animal>_) -> role; a gait also gets its _stand twin. Measure key = the pack stem.
-$PLAN = @{
+$CREATURE = 'E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\LOTRLOME_Armory\Assets\creature'
+if (-not $Masters) { $Masters = @{ animalia = "$CREATURE\elk\animations"; wildmesh = "$CREATURE\creatures\animations" }[$Pack] }
+# master stem (after <pack>_<animal>_) -> role; a gait also gets its _stand twin. Measure key = the pack stem.
+$PLANS = @{
+ animalia = [ordered]@{
   elk = [ordered]@{
     loco_walk = 'walk'; loco_trot = 'trot'; loco_run = 'canter'; loco_sprint = 'gallop'; loco_walkback = 'back'
     stand_01 = @('idle', 'standmove'); stand_02 = 'idle'; stand_03 = 'idle'; alert_looking_l = 'idle'; alert_looking_r = 'idle'
@@ -122,7 +133,45 @@ $PLAN = @{
     attack_legs_01 = 'kick'; attack_head_01 = 'antler'
     death_l = 'fallL'; death_l_pose = 'fallL_cont'; death_r = 'fallR'; death_r_pose = 'fallR_cont'
   }
+ }
+ wildmesh = [ordered]@{
+  boar = [ordered]@{
+    walkmedium_f = 'walk'; trotfast_f = 'trot'; runslow_f = 'canter'; runfast_f = 'gallop'
+    idle_breathing = @('idle', 'standmove'); idle = 'idle'; idle_secondarymovecalm_2 = 'idle'
+    idle_secondarymovecalm_3 = 'idle'; idle_secondarymovecalm_4 = 'idle'; idle_secondarymovecalm_5 = 'idle'
+    grazingonspota_1 = 'eat'; grazingonspota_2 = 'eat'; grazingonspotb_1 = 'eat'; grazingonspotb_2 = 'eat'
+    hitlegfl2runslow_f = 'hitf'; hitlegbl2runslow_f = 'hitb'
+  }
+  warthog = [ordered]@{
+    walkmedium_f = 'walk'; trotfast_f_2 = 'trot'
+    idle_breathing = @('idle', 'standmove'); idle = 'idle'; idle_secondarymovecalm_2 = 'idle'
+    idle_secondarymovecalm_3 = 'idle'; idle_secondarymovecalm_4 = 'idle'; idle_secondarymovecalm_5 = 'idle'
+    grazingonspota_1 = 'eat'; grazingonspota_2 = 'eat'; grazingonspotb_1 = 'eat'; grazingonspotb_2 = 'eat'
+    hitlegfl2runslow_f = 'hitf'; hitlegbl2runslow_f = 'hitb'
+  }
+  mountaingoat = [ordered]@{
+    walkmedium_f = 'walk'; trotslow_f_2 = 'trot'; hoppingslow_f = 'canter'
+    idle_breathing = @('idle', 'standmove'); idle_secondarymovecalm_1 = 'idle'; idle_secondarymovecalm_2 = 'idle'
+    idle_secondarymovecalm_3 = 'idle'; idle_secondarymovecalm_4 = 'idle'; idle_secondarymovecalm_5 = 'idle'
+    cue_bleat = 'idle'
+    grazingonspota_1 = 'eat'; grazingonspota_2 = 'eat'; grazingonspotb_1 = 'eat'; grazingonspotb_2 = 'eat'
+    hitinrunhead_f = 'hitf'
+  }
+  deer = [ordered]@{
+    walkmedium_f = 'walk'; trotfast_f = 'trot'; runslow_f = 'canter'; runfast_f = 'gallop'
+    idle_breathing = @('idle', 'standmove'); idle = 'idle'; idle_1 = 'idle'; idle_2 = 'idle'; idle_3 = 'idle'; idle_4 = 'idle'
+    grazingonspotb_1 = 'eat'; grazingonspotb_2 = 'eat'; grazingonspotb_3 = 'eat'; grazingsteps = 'eat'
+    hitinrunhead_f = 'hitf'; hitlegbl2runslow_f = 'hitb'
+  }
+  moose = [ordered]@{
+    walkmedium_f = 'walk'; trotslow_f = 'trot'; runslow_f = 'canter'; runfast_f = 'gallop'
+    idle_breathing = @('idle', 'standmove'); idle = 'idle'; grazingstepslookat = 'idle'
+    grazingonspota_1 = 'eat'; grazingonspota_2 = 'eat'; grazingonspotb_1 = 'eat'; grazingonspotb_2 = 'eat'
+    hitlegfl2runslow_f = 'hitf'; hitlegbl2runslow_f = 'hitb'
+  }
+ }
 }
+$PLAN = $PLANS[$Pack]
 function Get-MeasureProblem($ms, [string]$role) {
   # $null when the measurement can drive a clip, else why not. The measure run stores a failed clip as
   # {"error": ...}, and PowerShell reads its missing fields as $null, which [float] turns into 0.
@@ -168,9 +217,9 @@ function Test-AnimaliaClips {
   # NO MASTER / ORPHAN / STALE over every planned clip (read-only). Shared by -Verify and by the
   # post--Apply re-check, so both read the same thing off disk the same way.
   $ok = 0; $stale = 0; $orphan = 0; $noMaster = 0
-  foreach ($animal in 'elk', 'moose') {
+  foreach ($animal in $PLAN.Keys) {
     foreach ($stem in $PLAN[$animal].Keys) {
-      $mname = "animalia_${animal}_$stem"
+      $mname = "${Pack}_${animal}_$stem"
       $plans = @(Get-AnimaliaClipPlan $animal $stem $mname)
       if (-not $master.ContainsKey($mname)) {
         $noMaster += $plans.Count
@@ -217,7 +266,10 @@ if ($Verify) {
   if ($result.stale + $result.orphan + $result.noMaster -gt 0) { exit 1 } else { exit 0 }
 }
 
-$meas = @{ elk = (Get-Content $ElkMeasure -Raw | ConvertFrom-Json).clips; moose = (Get-Content $MooseMeasure -Raw | ConvertFrom-Json).clips }
+$meas = @{}
+foreach ($animal in $PLAN.Keys) {
+  $meas[$animal] = (Get-Content "$PSScriptRoot\blender\${Pack}_${animal}_clip_measure.json" -Raw | ConvertFrom-Json).clips
+}
 
 # ---- templates + snapshots
 $van = @{}
@@ -241,9 +293,9 @@ function Restore($c, $s) {
 }
 
 $rows = @(); $written = 0; $skipped = 0; $errors = 0
-foreach ($animal in 'elk', 'moose') {
+foreach ($animal in $PLAN.Keys) {
   foreach ($stem in $PLAN[$animal].Keys) {
-    $mname = "animalia_${animal}_$stem"
+    $mname = "${Pack}_${animal}_$stem"
     if (-not $master.ContainsKey($mname)) { $errors++; Write-Output ("NO MASTER {0}" -f $mname); continue }
     $m = $master[$mname]
     foreach ($slot in (Get-AnimaliaClipPlan $animal $stem $mname)) {

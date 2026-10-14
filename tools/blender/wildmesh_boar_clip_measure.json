@@ -42,11 +42,12 @@
    "speed_mps_at_30fps": 7.922,
    "plants": {
     "LF": 0.5,
-    "RF": null,
+    "RF": 0.0,
     "LB": 0.0,
     "RB": 0.5625
    },
    "plants_sorted": [
+    0.0,
     0.0,
     0.5,
     0.5625
@@ -67,11 +68,12 @@
    "speed_mps_at_30fps": 7.938,
    "plants": {
     "LF": 0.7778,
-    "RF": null,
+    "RF": 0.0,
     "LB": 0.2222,
     "RB": 0.4444
    },
    "plants_sorted": [
+    0.0,
     0.2222,
     0.4444,
     0.7778

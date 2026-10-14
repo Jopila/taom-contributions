@@ -105,7 +105,9 @@ def measure(path, template_heads, spec, is_death):
     plants = {}
     for k, zs in z.items():
         lo = min(zs[:loop]) + 0.02
-        hits = [i for i in range(loop) if zs[i] <= lo and zs[i - 1] > lo]   # i - 1 wraps: a loop
+        # the frame before frame 0 is loop - 1: frame `loop` closes the loop by repeating frame 0, so zs[-1] would
+        # miss a contact that starts on frame 0 (3 plants for 4 hooves on the WildMesh trots, #794)
+        hits = [i for i in range(loop) if zs[i] <= lo and zs[(i - 1) % loop] > lo]
         plants[k] = round(hits[0] / loop, 4) if hits else None
     out["plants"] = plants
     out["plants_sorted"] = sorted(v for v in plants.values() if v is not None)

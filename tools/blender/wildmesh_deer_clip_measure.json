@@ -68,11 +68,12 @@
    "speed_mps_at_30fps": 7.073,
    "plants": {
     "LF": 0.9,
-    "RF": null,
+    "RF": 0.0,
     "LB": 0.25,
     "RB": 0.4
    },
    "plants_sorted": [
+    0.0,
     0.25,
     0.4,
     0.9
