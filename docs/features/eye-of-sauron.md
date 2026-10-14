@@ -5,9 +5,9 @@
 Great deeds draw a hunter. A player whose battles against enemy kingdoms build up a deed score is hunted by a
 named hero with a formidable host: one of the Nine with high-tier Mordor troops (Dol Guldur troops for the four of
 the Nine who ride for Dol Guldur) when the player fights for the Free Peoples, or Glorfindel with a host of the
-Eldar, sent by Elrond, when the player fights for the Dark. The hunter closes in while out of sight and, once in
-sight, moves faster than the player, so a player who stops, or turns to face him, meets him in battle. A player who
-keeps riding can be shadowed out of sight (see "Open risks"). Milestone M8 of #765 (War Chronicle).
+Eldar, sent by Elrond, when the player fights for the Dark. The hunter closes in while out of sight and, once within
+1.5 of the player's seeing ranges, moves faster than the player, so a player who stops, turns to face him, or keeps
+riding meets him in battle. Milestone M8 of #765 (War Chronicle).
 
 ## Why This Exists
 
@@ -34,6 +34,24 @@ keeps riding can be shadowed out of sight (see "Open risks"). Milestone M8 of #7
 
 The player is told once when a hunt starts and once when it ends (orchestrator decision: no warning phase).
 
+Decided by the maintainer 2026-10-14:
+
+7. **Flee keeps the hunt.** A battle ends the hunt only when the hunter took part and someone won it (the player's
+   battle against him), or when the hunter's side was defeated. A player who gets away ("Try to get away" leaves the
+   battle with no winner) is still hunted, and the hourly re-issue restores the engage order. A battle without the
+   player that the hunter wins, or that nobody wins, leaves the hunt running.
+8. **Speed floor from 1.5 S.** The in-sight speed floor applies from 1.5 times the player's seeing range inward, the
+   same margin the steps keep (`SightMargin`), so a moving player cannot be shadowed between S and 1.5 S.
+9. **No hunt while in another lord's army.** While the player's party is in an army another lord leads (never his
+   own), no hunt starts: the start is deferred, with no cooldown, and the daily tick tries again. A running hunt
+   stands off: no re-engage order and no step while he is in that army; the end gates still run, and the chase
+   resumes the first hour after he leaves.
+10. **Bannerlord Together enabled means no hunt.** A co-op mod TAOM cannot probe stands the hunt down like a live
+    co-op session, since it cannot tell host from client.
+11. **The Dol Guldur kingdom rule.** A wraith whose live kingdom is `dolguldur` brings the Dol Guldur host; every
+    other wraith brings the Mordor host.
+12. **On by default.** `EyeOfSauronEnabled` defaults to on.
+
 ## Architecture
 
 ### Design Challenge
@@ -48,16 +66,16 @@ be left pinned.
 | Piece | What it does |
 |---|---|
 | Deeds | `MapEventEnded`: a player victory over a side whose faction is a `Kingdom` scores 1 (any field battle, a village raid and a forced levy of supplies or volunteers included), 2 (sally out or a battle outside a siege) or 3 (siege assault) against that kingdom's side (`AlignmentService.GetKingdomSide`; Neutral never scores). Two scores, against Evil and against Free, decay with a half-life when read. Deeds score even while kingdomless, but never on a co-op peer. |
-| Start (daily) | Single-player (read live: no co-op session, no co-op mod TAOM cannot probe, no dedicated server); the player clan has a kingdom; its side is Free or Evil, from the kingdom id, else the kingdom's own culture (`ResolveSide`), so a player-founded `new_kingdom` is sided; the score against the other side reaches the threshold; no cooldown. |
+| Start (daily) | Single-player (read live: no co-op session, no co-op mod TAOM cannot probe, no dedicated server); the player clan has a kingdom; its side is Free or Evil, from the kingdom id, else the kingdom's own culture (`ResolveSide`), so a player-founded `new_kingdom` is sided; the score against the other side reaches the threshold; no cooldown. While the player is in another lord's army the start is deferred (no cooldown; retried daily), on the console path too. |
 | Hunter | Free player: the Nine in order, Witch-king (`lord_1_15`) first, Khamûl (`lord_1_48`) last. Evil player: Glorfindel only. The first in order who is alive, not a fugitive or prisoner, not marked for death, whose live faction is at war with the player's kingdom, and who can ride today is chosen. |
 | Busy hunter | His party is re-tasked only when it is not in a battle, an army, a siege or a settlement, not disbanding and not pinned by anyone else; a free hunter must be able to lead a party. A busy or unfit hunter is passed over for the next in order; the hunt waits for tomorrow only when none can ride. A busy hunter never gets a second party. |
 | Free hunter | Spawned with `MobilePartyHelper.SpawnLordParty` at a reachable point 1.6 to 2.5 of the player's sight away (straight line beyond 1.5; the service passes the ring), after removing him as governor and re-checking that he belongs to no party. A failed search is not retried that day (the engine has already tried 250 points), and a refused spawn stops the day's search and is logged. |
 | Order | Host and grain first, then `SetPartyAiAction.GetActionForEngagingParty(hunter, MainParty)`, `CheckPartyNeedsUpdate`, `SetDoNotMakeNewDecisions(true)`. Re-issued hourly only when lost, since every call resets the party's movement state. |
 | Host | Registered as the hunter's party first, then topped up to `HunterStrengthRatio` times the player's strength (his army's when he leads one) with the host's troops, `ceil(deficit * share / power)` each, capped at `HunterMaxTroops` men. Troops and three days of grain are topped up again every day, never during a battle. |
-| Steps (hourly) | Out of sight only. The service judges the adapter's raw step state: the hunter active, not in a battle, siege, army, settlement or at sea, not visible, engaging the player; the player active, on the open map (no battle, siege, settlement, encounter, sea, or another lord's army), no true sight, same island. Then, only beyond 1.5 S in a straight line, it rebuilds the path, walks `min(pathGap - 1.5 S - 3, StepCap)` along it, accepts the point only on the player's island with no enemy of the hunter within 3 and at least 1.5 S from the player, and moves the party. S is the player's seeing range, re-read each hour. `taom.print_eye_of_sauron` shows the last step's outcome. |
-| Speed | A main-thread frame tick finds the hunter with the locator search around the player (radius S, no allocation) and publishes `{hunter party, in sight, player speed, multiplier}`. `TaomPartySpeedModel` raises the hunter to `player speed * HunterSpeedMultiplier` (never under 1) while in sight. The hunter's speed cache is refreshed when the in-sight state flips or the player's speed moves more than 5%. |
+| Steps (hourly) | First the end gates; then, while the player is in another lord's army, the hunter stands off (no re-engage, no step; the last step reads "player in another lord's army"). Out of sight only. The service judges the adapter's raw step state: the hunter active, not in a battle, siege, army, settlement or at sea, not visible, engaging the player; the player active, on the open map (no battle, siege, settlement, encounter or sea), no true sight, same island. Then, only beyond 1.5 S in a straight line, it rebuilds the path, walks `min(pathGap - 1.5 S - 3, StepCap)` along it, accepts the point only on the player's island with no enemy of the hunter within 3 and at least 1.5 S from the player, and moves the party. S is the player's seeing range, re-read each hour. `taom.print_eye_of_sauron` shows the last step's outcome. |
+| Speed | A main-thread frame tick finds the hunter with the locator search around the player (radius 1.5 S, the service's `SightMargin`; no allocation) and publishes `{hunter party, in band, player speed, multiplier}`; the hunter is in band at a straight-line distance of at most 1.5 S (a NaN distance or S is out). `TaomPartySpeedModel` raises the hunter to `player speed * HunterSpeedMultiplier` (never under 1) while in band, reading only that snapshot on the worker threads. The hunter's speed cache is refreshed when the in-band state flips or the player's speed moves more than 5%. |
 | Size | `TaomPartySizeModel` lifts the hunter's limit to the larger of its raw and weighted head count, before the TroopWeight line, so the size sheds (the TroopWeight shed and vanilla's size rule) never trim the host. It does not stop vanilla's wage-limit desertion (up to 20 men a day once the clan leader holds 90,000 gold or less); the daily top-up replaces those men. |
-| End | The first of: any battle involving the hunter's party; the party destroyed, missing or under another leader; the hunter dead, captured or a fugitive; the war ending; the player kingdomless; a co-op session, an unprobeable co-op mod or a server; `HuntTimeoutDays`; the switch off; `taom.clear_eye_hunt`. The gates run at the hunter's hourly tick as well as daily, so a peace or a kingdom change ends the hunt within the hour. Every end releases the pin (dropping an engage order on the player and having the party rethink next hour), clears the snapshot, refreshes the speed and starts the cooldown. |
+| End | The first of: a battle the hunter's side lost, or the player's battle against the hunter that someone won (`HuntBattleReader` reads the winner and the hunter's side at `MapEventEnded`; a flee, with no winner, never ends the hunt); the party destroyed, missing or under another leader; the hunter dead, captured or a fugitive; the war ending; the player kingdomless; a co-op session, an unprobeable co-op mod or a server; `HuntTimeoutDays`; the switch off; `taom.clear_eye_hunt`. The gates run at the hunter's hourly tick as well as daily, so a peace or a kingdom change ends the hunt within the hour. Every end releases the pin (dropping an engage order on the player and having the party rethink next hour), clears the snapshot, refreshes the speed and starts the cooldown. |
 
 ### Component Diagram
 
@@ -92,9 +110,10 @@ per-party call allocates nothing.
 
 ### Open risks
 
-- **Shadowing:** steps land a hunter at least 1.5 S away, and the speed floor applies only within S. A player who
-  keeps riding can be shadowed between S and 1.5 S by a host slower than him; only a player who stops, or a town,
-  brings the battle. Whether to widen the floor band is the maintainer's decision.
+- **Standing off keeps the last order:** while the player is in another lord's army the hunter gets no new engage
+  order, but one he still holds from before is not dropped, and the speed floor still applies within 1.5 S. A
+  hunter already engaging the player when he joins the army can still reach it. Whether the stand-off should also
+  hold the hunter in place is open.
 - **Uninstalling mid-hunt** leaves the hunter's saved AI pin with nothing to clear it. The timeout bounds the window in
   a game that keeps TAOM; remove TAOM only between hunts.
 - **At sea:** the sea guards are unreachable in a supported setup, since TAOM declares the War Sails module
@@ -178,7 +197,8 @@ and that `dolguldur` is the kingdom Khamûl rules.
   non-kingdom, lost-battle and co-op cases, the start gates (the console path's refusals included), a player-founded
   kingdom, hunter order and the pass-over of a busy hunter, the spawn ring and a refused spawn, the dry run, host
   sizing, the daily re-top-up and the head cap, food, every step gate and the step order, landing, the speed floor
-  and size bonus with their NaN gates, the ends (daily and hourly) releasing the pin, reset and a field-by-field
+  and size bonus with their NaN gates, the floor band's 1.5 S edges, the ends (daily and hourly) releasing the pin, a
+  flee and a third-party battle keeping the hunt, the start deferred and the hunter standing off in another lord's army, reset and a field-by-field
   persistence round trip. Uses a real `AlignmentService`.
 - `EyeOfSauronCheatsTests.cs`: the `confirm` token, the side parser and the score bounds.
 - `EyeOfSauronWiringTests.cs`: the module, the per-campaign construction pin and its negative rows, SubModule's hook,
@@ -203,8 +223,8 @@ Owed before the issue closes (`triage-needs-ingame`). Use a Free kingdom (Gondor
 5. **Spawned hunter:** with the Witch-king without a party, run `taom.start_eye_hunt` (the dry run says spawned),
    then `taom.start_eye_hunt confirm`. A new party appears out of sight and closes in hour by hour; in sight it
    outpaces you. Run the Map Profiler `top=EyeOfSauronBehavior` during the hunt.
-6. **Keep riding:** with a hunt running, keep riding away from the hunter for a day; note in
-   `taom.print_eye_of_sauron` whether it stays out of sight (the shadowing risk).
+6. **Keep riding:** with a hunt running, keep riding away from the hunter once he is in sight; he closes the gap and
+   brings the battle (the floor applies from 1.5 S).
 7. **Save and reload mid-hunt:** save while hunted, reload. `taom.print_eye_of_sauron` shows the same hunter, party
    and day; the hunter still chases and is not shed back to its old size.
 8. **Glorfindel:** join an Evil kingdom at war with Rivendell, `taom.add_eye_score free 20`. Glorfindel rides with an
@@ -217,6 +237,11 @@ Owed before the issue closes (`triage-needs-ingame`). Use a Free kingdom (Gondor
 12. **Peace:** make peace with the hunter's kingdom mid-hunt; the hunt ends within the hour and the hunter stops
     chasing.
 13. **Kingdomless:** leave your kingdom with a high score; no hunt starts, and a running one ends.
+14. **Flee:** let the hunter catch you and choose "Try to get away". `taom.print_eye_of_sauron` still shows the hunt,
+    and within the hour he engages you again.
+15. **Another lord's army:** with a high score, join another lord's army; no hunt starts while you stay. Start one,
+    then join an army: the last hourly step reads "player in another lord's army" and the hunter stops stepping;
+    leave the army and the chase resumes within the hour.
 
 ## Changelog
 
@@ -225,6 +250,8 @@ Owed before the issue closes (`triage-needs-ingame`). Use a Free kingdom (Gondor
 - 2026-10-14: review fixes: a player-founded kingdom is sided by its culture; the per-frame sight read searches only
   around the player; the end gates run hourly; a busy hunter is passed over; the host is topped up daily; Bannerlord
   Together stands the hunt down; `start_eye_hunt` is tier C with a dry run; the step decisions moved into the service.
+- 2026-10-14: the maintainer's decisions: a flee keeps the hunt (E06); the speed floor applies from 1.5 S (E09); no
+  hunt while in another lord's army, and a running one stands off (E17).
 
 ## GitHub Issue
 

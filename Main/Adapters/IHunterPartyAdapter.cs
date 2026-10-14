@@ -24,6 +24,12 @@ public interface IHunterPartyAdapter
     /// <summary>The player's strength: his army's when he leads one, else his party's (<c>EstimatedStrength</c>).</summary>
     float PlayerStrength { get; }
 
+    /// <summary>
+    /// The player's party is in an army another lord leads (<c>MainParty.Army</c> set, its leader not the player), so
+    /// never while he leads his own army.
+    /// </summary>
+    bool PlayerInAnotherLordsArmy { get; }
+
     HunterHeroSnapshot ReadHero(string heroId);
 
     HuntPartySnapshot ReadParty(string partyId);
@@ -61,10 +67,11 @@ public interface IHunterPartyAdapter
     void TopUpFood(string partyId, int targetFood);
 
     /// <summary>
-    /// The in-sight inputs, every frame. The hunter is searched for only within the player's seeing range (the locator
-    /// grid around him), so a hunter beyond it, or gone, reads as <see cref="HuntSightReading.Missing"/>.
+    /// The speed-floor inputs, every frame. The hunter is searched for only within <paramref name="searchSights"/> times
+    /// the player's seeing range (the locator grid around him), so a hunter beyond it, or gone, reads as
+    /// <see cref="HuntSightReading.Missing"/>; so does a search width that is not a finite positive number.
     /// </summary>
-    HuntSightReading ReadSight(string partyId);
+    HuntSightReading ReadSight(string partyId, float searchSights);
 
     /// <summary>The raw facts for an hourly step, read without side effects.</summary>
     HuntStepState ReadStepState(string partyId);

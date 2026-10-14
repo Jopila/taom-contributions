@@ -40,9 +40,6 @@ public sealed class HuntStepState
 
     public bool PlayerInSettlement { get; init; }
 
-    /// <summary>In an army another lord leads.</summary>
-    public bool PlayerInAnotherLordsArmy { get; init; }
-
     public bool PlayerAtSea { get; init; }
 
     /// <summary><c>PlayerEncounter.Current != null</c>.</summary>

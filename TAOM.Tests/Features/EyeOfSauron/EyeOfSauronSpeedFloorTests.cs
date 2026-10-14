@@ -36,7 +36,7 @@ public class EyeOfSauronSpeedFloorTests
     }
 
     private void Sight(float distance) =>
-        _adapter.ReadSight(Party).Returns(new HuntSightReading
+        _adapter.ReadSight(Party, Arg.Any<float>()).Returns(new HuntSightReading
         {
             Valid = true, HunterActive = true, PlayerActive = true, SeeingRange = 10f, Distance = distance, PlayerSpeed = 4f,
         });

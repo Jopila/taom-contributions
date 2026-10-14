@@ -46,7 +46,7 @@ public class EyeOfSauronServiceTests
         _adapter.SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>()).Returns(Party);
         _adapter.ReadStepState(Arg.Any<string>()).Returns(HuntStepState.Missing);
         _adapter.TryRebuildPath(Arg.Any<string>()).Returns(HuntPath.Empty);
-        _adapter.ReadSight(Arg.Any<string>()).Returns(HuntSightReading.Missing);
+        _adapter.ReadSight(Arg.Any<string>(), Arg.Any<float>()).Returns(HuntSightReading.Missing);
 
         // A real AlignmentService, so GetKingdomSide and ResolveSide (the culture fallback) agree as in the game.
         _alignment = NewAlignment();
@@ -105,11 +105,11 @@ public class EyeOfSauronServiceTests
     };
 
     private void Battle(string? loserKingdom, DeedKind kind = DeedKind.Field, bool playerWon = true, bool playerEvent = true,
-        bool involvesHunter = false) =>
+        bool involvesHunter = false, bool hasWinner = true, bool hunterLost = false) =>
         _sut.OnMapEventEnded(new HuntBattleSummary
         {
             IsPlayerEvent = playerEvent, PlayerWon = playerWon, LoserKingdomId = loserKingdom, Kind = kind,
-            InvolvesHunter = involvesHunter,
+            InvolvesHunter = involvesHunter, HasWinner = hasWinner, HunterLost = hunterLost,
         });
 
     /// <summary>Gives the player a Free kingdom, a score over the threshold, and the Witch-king free and at war.</summary>
@@ -1059,7 +1059,6 @@ public class EyeOfSauronServiceTests
         PlayerActive = flip != "player inactive",
         PlayerInMapEventOrSiege = flip == "player in battle",
         PlayerInSettlement = flip == "player in settlement",
-        PlayerInAnotherLordsArmy = flip == "player in army",
         PlayerAtSea = flip == "player at sea",
         PlayerInEncounter = flip == "player in encounter",
         TrueSight = flip == "true sight",
@@ -1092,7 +1091,6 @@ public class EyeOfSauronServiceTests
     [DataRow("player inactive")]
     [DataRow("player in battle")]
     [DataRow("player in settlement")]
-    [DataRow("player in army")]
     [DataRow("player at sea")]
     [DataRow("player in encounter")]
     [DataRow("true sight")]
@@ -1270,7 +1268,7 @@ public class EyeOfSauronServiceTests
     [DataTestMethod]
     [DataRow("beaten", HuntAnnouncement.Won)]
     [DataRow("lost", HuntAnnouncement.Over)]
-    [DataRow("otherbattle", HuntAnnouncement.Over)]
+    [DataRow("otherbattlelost", HuntAnnouncement.Over)]
     [DataRow("destroyed", HuntAnnouncement.Over)]
     [DataRow("dead", HuntAnnouncement.Over)]
     [DataRow("captured", HuntAnnouncement.Over)]
@@ -1290,9 +1288,10 @@ public class EyeOfSauronServiceTests
         StartWitchKingHunt();
         switch (end)
         {
-            case "beaten": Battle(MordorKingdom, involvesHunter: true); break;
+            case "beaten": Battle(MordorKingdom, involvesHunter: true, hunterLost: true); break;
             case "lost": Battle(null, playerWon: false, involvesHunter: true); break;
-            case "otherbattle": Battle(null, playerEvent: false, involvesHunter: true); break;
+            // E06: a battle without the player ends the hunt only when the hunter's side was defeated.
+            case "otherbattlelost": Battle(null, playerWon: false, playerEvent: false, involvesHunter: true, hunterLost: true); break;
             case "destroyed": _sut.OnPartyDestroyed(Party); break;
             case "dead": Daily(h => h.IsAlive = false); break;
             case "captured": Daily(h => h.IsPrisoner = true); break;
@@ -1448,6 +1447,121 @@ public class EyeOfSauronServiceTests
         Assert.IsTrue(_sut.IsHunting);
     }
 
+    // E06 (maintainer, 2026-10-14): a player who gets away from the hunter keeps the hunt; nobody won that battle.
+    [TestMethod]
+    public void OnMapEventEnded_PlayerGetsAway_KeepsTheHunt_AndTheHourlyTickReengages()
+    {
+        StartWitchKingHunt();
+
+        Battle(null, playerWon: false, involvesHunter: true, hasWinner: false);
+
+        Assert.IsTrue(_sut.IsHunting, "a flee has no winner: the hunt goes on");
+        _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
+        _adapter.DidNotReceive().Announce(Arg.Any<HuntAnnouncement>(), Arg.Any<string>());
+
+        // The battle dropped the engage order; the hourly re-issue restores it.
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, engaging: false));
+        _sut.OnHourlyTickParty(Party);
+        _adapter.Received(1).PinAndEngagePlayer(Party);
+    }
+
+    // E06: a battle without the player that the hunter's side wins leaves the hunt running.
+    [TestMethod]
+    public void OnMapEventEnded_HunterWinsAThirdPartyBattle_KeepsTheHunt()
+    {
+        StartWitchKingHunt();
+
+        Battle(null, playerWon: false, playerEvent: false, involvesHunter: true, hasWinner: true, hunterLost: false);
+
+        Assert.IsTrue(_sut.IsHunting);
+        _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
+    }
+
+    // E06: a battle without the player that nobody won leaves the hunt running too.
+    [TestMethod]
+    public void OnMapEventEnded_ThirdPartyBattleWithNoWinner_KeepsTheHunt()
+    {
+        StartWitchKingHunt();
+
+        Battle(null, playerWon: false, playerEvent: false, involvesHunter: true, hasWinner: false);
+
+        Assert.IsTrue(_sut.IsHunting);
+        _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
+    }
+
+    // ---------------------------------------------------------------- E17: another lord's army
+
+    [TestMethod]
+    public void OnDailyTick_PlayerInAnotherLordsArmy_DefersTheStart_WithoutACooldown()
+    {
+        ArmWitchKingHunt();
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+
+        _sut.OnDailyTick();
+
+        Assert.IsFalse(_sut.IsHunting, "no hunt while in another lord's army");
+        _adapter.DidNotReceive().SpawnHunterParty(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
+
+        // Retried the next day once he has left the army: the deferral started no cooldown.
+        _adapter.PlayerInAnotherLordsArmy.Returns(false);
+        _now += 1d;
+        _sut.OnDailyTick();
+        Assert.IsTrue(_sut.IsHunting, "the deferred hunt starts once the player leaves the army");
+    }
+
+    [TestMethod]
+    public void TryStartHunt_Console_PlayerInAnotherLordsArmy_IsRefused()
+    {
+        ArmWitchKingHunt();
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+
+        string verdict = _sut.TryStartHunt(ignoreScoreAndCooldown: true);
+
+        Assert.IsFalse(_sut.IsHunting, verdict);
+        StringAssert.Contains(verdict, "another lord's army");
+    }
+
+    [TestMethod]
+    public void OnHourlyTickParty_PlayerInAnotherLordsArmy_StandsOff_ThenResumes()
+    {
+        StartWitchKingHunt();
+        StraightPathTo(100f, 10f);
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, engaging: false));
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+
+        _sut.OnHourlyTickParty(Party);
+
+        Assert.IsTrue(_sut.IsHunting, "standing off is not an end");
+        _adapter.DidNotReceive().PinAndEngagePlayer(Arg.Any<string>());
+        _adapter.DidNotReceive().ReadStepState(Arg.Any<string>());
+        _adapter.DidNotReceive().Relocate(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>());
+        _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
+        StringAssert.Contains(string.Join("\n", _sut.Describe()), "Last hourly step: player in another lord's army");
+
+        // He leaves the army: the next hour re-engages and steps again.
+        _adapter.PlayerInAnotherLordsArmy.Returns(false);
+        _sut.OnHourlyTickParty(Party);
+
+        _adapter.Received(1).PinAndEngagePlayer(Party);
+        _adapter.Received(1).Relocate(Party, Arg.Any<float>(), Arg.Any<float>());
+    }
+
+    [TestMethod]
+    public void OnHourlyTickParty_PlayerLeadsHisOwnArmy_KeepsHunting()
+    {
+        // The adapter's fact is false for the player's own army; nothing else stands the hunter off.
+        StartWitchKingHunt();
+        StraightPathTo(100f, 10f);
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, engaging: false));
+        _adapter.PlayerInAnotherLordsArmy.Returns(false);
+
+        _sut.OnHourlyTickParty(Party);
+
+        _adapter.Received(1).PinAndEngagePlayer(Party);
+        _adapter.Received(1).Relocate(Party, Arg.Any<float>(), Arg.Any<float>());
+    }
+
     [TestMethod]
     public void OnPartyDestroyed_AnotherParty_LeavesTheHunt()
     {
@@ -1462,7 +1576,7 @@ public class EyeOfSauronServiceTests
 
     private void InSight(float playerSpeed = 4f, float distance = 5f, float sight = 10f)
     {
-        _adapter.ReadSight(Party).Returns(new HuntSightReading
+        _adapter.ReadSight(Party, Arg.Any<float>()).Returns(new HuntSightReading
         {
             Valid = true, HunterActive = true, PlayerActive = true, SeeingRange = sight, Distance = distance,
             PlayerSpeed = playerSpeed,
@@ -1494,9 +1608,36 @@ public class EyeOfSauronServiceTests
     public void TryGetSpeedFloor_OutOfSight_None()
     {
         StartWitchKingHunt();
-        InSight(distance: 11f, sight: 10f);
+        InSight(distance: 16f, sight: 10f);
 
         Assert.IsFalse(_sut.TryGetSpeedFloor(Party, 3f, out _));
+    }
+
+    // E09 (maintainer, 2026-10-14): the floor applies from 1.5 S inward, the same margin the steps keep, so a moving
+    // player cannot be shadowed between S and 1.5 S. S = 10 here, so the edge is 15.
+    [DataTestMethod]
+    [DataRow(12f, true)]
+    [DataRow(14.99f, true)]
+    [DataRow(15f, true)]
+    [DataRow(15.01f, false)]
+    [DataRow(float.NaN, false)]
+    public void TryGetSpeedFloor_FromOneAndAHalfSightsInward(float distance, bool floored)
+    {
+        StartWitchKingHunt();
+        InSight(distance: distance, sight: 10f);
+
+        Assert.AreEqual(floored, _sut.TryGetSpeedFloor(Party, 3f, out var floor), $"distance {distance}");
+        if (floored) Assert.AreEqual(5.2f, floor, 1e-4f);
+    }
+
+    [TestMethod]
+    public void OnTick_SearchesForTheHunterOutToTheSightMargin()
+    {
+        StartWitchKingHunt();
+
+        _sut.OnTick();
+
+        _adapter.Received(1).ReadSight(Party, EyeOfSauronService.SightMargin);
     }
 
     [DataTestMethod]
@@ -1572,7 +1713,7 @@ public class EyeOfSauronServiceTests
             PlayerAtSea = state == "player at sea", PlayerInMapEvent = state == "player in battle",
             HunterInMapEvent = state == "hunter in battle",
         };
-        _adapter.ReadSight(Party).Returns(r);
+        _adapter.ReadSight(Party, Arg.Any<float>()).Returns(r);
 
         _sut.OnTick();
 
@@ -1602,7 +1743,7 @@ public class EyeOfSauronServiceTests
     {
         _sut.OnTick();
 
-        _adapter.DidNotReceive().ReadSight(Arg.Any<string>());
+        _adapter.DidNotReceive().ReadSight(Arg.Any<string>(), Arg.Any<float>());
     }
 
     // ---------------------------------------------------------------- the size bonus

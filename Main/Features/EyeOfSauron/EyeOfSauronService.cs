@@ -18,7 +18,8 @@ namespace TAOM.Features.EyeOfSauron;
 /// build a decaying deed score; past the threshold, and only while the player's kingdom is at war with the hunter's,
 /// a hunter rides: one of the Nine for a Free player, Glorfindel for an Evil one. A hunter who leads a party has that
 /// party re-tasked and topped up; a free hunter gets a new party out of the player's sight. Out of sight the hunter
-/// closes in steps each hour; in sight the speed model lifts him above the player's speed. Every end releases the AI
+/// closes in steps each hour; within 1.5 of the player's seeing ranges the speed model lifts him above the player's
+/// speed. While the player rides in another lord's army no hunt starts and a running one stands off. Every end releases the AI
 /// pin the hunt set. All engine work goes through <see cref="IHunterPartyAdapter"/>; this class holds no engine type.
 /// Single-player only: a co-op session (BannerlordCoop, host included), a co-op mod TAOM cannot probe (Bannerlord
 /// Together) or a dedicated server stops and ends the hunt.
@@ -167,7 +168,7 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
     {
         if (summary == null) return;
 
-        if (IsHunting && summary.InvolvesHunter)
+        if (IsHunting && EndsTheHunt(summary))
             EndHunt(summary.IsPlayerEvent && summary.PlayerWon ? HuntEndReason.HunterBeaten : HuntEndReason.BattleEnded);
 
         // A co-op peer never writes the save-backed score: the hunt is single-player only.
@@ -180,6 +181,14 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         if (side == FactionSide.Neutral) return;
         AddScore(side, HuntMath.DeedWeight(summary.Kind));
     }
+
+    /// <summary>
+    /// E06 (the maintainer, 2026-10-14): a battle ends the hunt only when the hunter's side was defeated, or when it was
+    /// the player's battle against the hunter and someone won it. A player who got away (no winner) keeps the hunt, and
+    /// the hourly re-issue restores the engage order; a battle without the player that the hunter won keeps it too.
+    /// </summary>
+    private static bool EndsTheHunt(HuntBattleSummary s) =>
+        s.InvolvesHunter && (s.HunterLost || (s.IsPlayerEvent && s.HasWinner));
 
     private void ApplyDecay()
     {
@@ -228,6 +237,8 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         if (string.IsNullOrEmpty(kingdomId)) return "No hunt: you belong to no kingdom.";
         var side = PlayerKingdomSide(kingdomId!);
         if (side == FactionSide.Neutral) return $"No hunt: your kingdom '{kingdomId}' is on neither side.";
+        // E17: deferred, not refused: no cooldown starts, and the daily tick tries again.
+        if (_adapter.PlayerInAnotherLordsArmy) return "No hunt: you ride in another lord's army.";
 
         if (!ignoreScoreAndCooldown)
         {
@@ -425,6 +436,14 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         if (!IsHunting || !string.Equals(partyId, _hunterPartyId, StringComparison.Ordinal)) return;
         if (!HuntStillValid(out _, out var party)) return;
 
+        // E17: while the player rides in another lord's army the hunter stands off: no re-engage and no step. The end
+        // gates above still run, and the chase resumes the first hour after he leaves.
+        if (_adapter.PlayerInAnotherLordsArmy)
+        {
+            _lastStep = "player in another lord's army";
+            return;
+        }
+
         // Re-issue only when lost: every engage call resets all of the party's movement state.
         if (!party.InMapEvent && !party.IsEngagingPlayer)
             _adapter.PinAndEngagePlayer(partyId!);
@@ -456,7 +475,6 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         if (!s.PlayerActive) return "player inactive";
         if (s.PlayerInMapEventOrSiege) return "player in battle or siege";
         if (s.PlayerInSettlement) return "player in a settlement";
-        if (s.PlayerInAnotherLordsArmy) return "player in another lord's army";
         if (s.PlayerAtSea) return "player at sea";
         if (s.PlayerInEncounter) return "player in an encounter";
         if (s.TrueSight) return "true sight";
@@ -533,8 +551,9 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
     }
 
     /// <summary>
-    /// Every campaign frame: works out whether the hunter is within the player's sight and publishes it, with the
-    /// player's speed and the multiplier, for the speed model on the worker threads. When the in-sight state flips or
+    /// Every campaign frame: works out whether the hunter is within the floor's band (1.5 of the player's seeing ranges)
+    /// and publishes it, with the player's speed and the multiplier, for the speed model on the worker threads. The
+    /// snapshot's <c>InSight</c> means that band. When the in-band state flips or
     /// the player's speed moves past 5%, the hunter's cached speed is refreshed (the cache never notices distance).
     /// </summary>
     public void OnTick()
@@ -542,8 +561,8 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         string? partyId = _hunterPartyId;
         if (partyId == null) return;
 
-        var reading = _adapter.ReadSight(partyId);
-        bool inSight = IsInSight(reading);
+        var reading = _adapter.ReadSight(partyId, SightMargin);
+        bool inSight = IsInFloorBand(reading);
         // A non-finite speed is published as it is: SpeedMoved and TryGetSpeedFloor refuse it.
         float speed = reading.PlayerSpeed;
         float multiplier = _settings.HunterSpeedMultiplier;
@@ -560,12 +579,18 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
             _adapter.InvalidateSpeed(partyId);
     }
 
-    private static bool IsInSight(HuntSightReading r)
+    /// <summary>
+    /// E09 (the maintainer, 2026-10-14): the floor's band reaches <see cref="SightMargin"/> sights, the margin the steps
+    /// keep, so a moving player cannot be shadowed between S and 1.5 S. Every comparison is a positive requirement:
+    /// NaN fails it.
+    /// </summary>
+    private static bool IsInFloorBand(HuntSightReading r)
     {
         if (!r.Valid || !r.PlayerActive || !r.HunterActive || r.HunterInMapEvent || r.PlayerInMapEvent || r.PlayerAtSea)
             return false;
         float sight = r.SeeingRange, d = r.Distance;
-        return sight > 0f && FiniteFloatValidator.IsFinite(sight) && FiniteFloatValidator.IsFinite(d) && d <= sight;
+        return sight > 0f && FiniteFloatValidator.IsFinite(sight) && FiniteFloatValidator.IsFinite(d)
+               && d <= SightMargin * sight;
     }
 
     private static bool SpeedMoved(float old, float now)
@@ -587,7 +612,7 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
     }
 
     /// <summary>
-    /// The hunter's floor: the player's speed times the multiplier, applied only to the hunter's party while in sight,
+    /// The hunter's floor: the player's speed times the multiplier, applied only to the hunter's party within 1.5 S,
     /// only when it is a finite number above the current speed, and never under 1 (LimitMin replaces vanilla's floor).
     /// </summary>
     internal bool TryGetSpeedFloor(string? partyId, float current, out float floor)

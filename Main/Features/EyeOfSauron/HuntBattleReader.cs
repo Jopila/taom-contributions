@@ -17,6 +17,8 @@ internal static class HuntBattleReader
     {
         bool isPlayerEvent = mapEvent.IsPlayerMapEvent;
         bool playerWon = isPlayerEvent && SpecialResourceEarnPolicy.IsPlayerVictory(mapEvent.PlayerSide, mapEvent.WinningSide);
+        var hunterSide = hunterPartyId == null ? BattleSideEnum.None : SideOf(mapEvent, hunterPartyId);
+        var defeated = mapEvent.DefeatedSide;
         return new HuntBattleSummary
         {
             IsPlayerEvent = isPlayerEvent,
@@ -25,7 +27,10 @@ internal static class HuntBattleReader
             Kind = mapEvent.IsSiegeAssault ? DeedKind.Assault
                 : mapEvent.IsSallyOut || mapEvent.IsSiegeOutside ? DeedKind.SallyOrOutside
                 : DeedKind.Field,
-            InvolvesHunter = hunterPartyId != null && Involves(mapEvent, hunterPartyId),
+            InvolvesHunter = hunterSide != BattleSideEnum.None,
+            // None when nobody won: a player who got away (PlayerEncounter.LeaveBattle finalizes with no victory state).
+            HasWinner = mapEvent.WinningSide != BattleSideEnum.None,
+            HunterLost = hunterSide != BattleSideEnum.None && hunterSide == defeated,
         };
     }
 
@@ -39,11 +44,20 @@ internal static class HuntBattleReader
         return (side.MapFaction as Kingdom)?.StringId;
     }
 
-    private static bool Involves(MapEvent mapEvent, string partyId)
+    /// <summary>The side the party fought on, or None when it took no part. The sides are cleared only after this event.</summary>
+    private static BattleSideEnum SideOf(MapEvent mapEvent, string partyId)
     {
-        foreach (var party in mapEvent.InvolvedParties)
+        if (OnSide(mapEvent.AttackerSide, partyId)) return BattleSideEnum.Attacker;
+        if (OnSide(mapEvent.DefenderSide, partyId)) return BattleSideEnum.Defender;
+        return BattleSideEnum.None;
+    }
+
+    private static bool OnSide(MapEventSide? side, string partyId)
+    {
+        if (side == null) return false;
+        foreach (var party in side.Parties)
         {
-            if (string.Equals(party?.MobileParty?.StringId, partyId, StringComparison.Ordinal))
+            if (string.Equals(party?.Party?.MobileParty?.StringId, partyId, StringComparison.Ordinal))
                 return true;
         }
         return false;

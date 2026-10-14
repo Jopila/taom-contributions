@@ -40,6 +40,10 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
         }
     }
 
+    public bool PlayerInAnotherLordsArmy => InAnotherLordsArmy(Campaign.Current?.MainParty);
+
+    private static bool InAnotherLordsArmy(MobileParty? main) => main?.Army != null && main.Army.LeaderParty != main;
+
     private static Hero? FindHero(string id) => Campaign.Current?.CampaignObjectManager.Find<Hero>(id);
 
     // A linear walk over every party: daily, hourly and on a sight flip only, never every frame (ReadSight).
@@ -203,19 +207,20 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
             party.ItemRoster.AddToCounts(grain, missing);
     }
 
-    public HuntSightReading ReadSight(string partyId)
+    public HuntSightReading ReadSight(string partyId, float searchSights)
     {
         var main = Campaign.Current?.MainParty;
         if (main?.Party == null) return HuntSightReading.Missing;
 
-        // Read once: it is the search radius and the reading's S. An infinite radius would walk every locator cell.
+        // Read once: it sets the search radius and is the reading's S. An infinite radius would walk every locator cell.
         float sight = main.SeeingRange;
-        if (!(sight > 0f) || float.IsInfinity(sight)) return HuntSightReading.Missing;
+        float radius = searchSights * sight;
+        if (!(sight > 0f) || !(radius > 0f) || float.IsInfinity(radius)) return HuntSightReading.Missing;
 
         // The locator grid around the player, the search vanilla's own visibility pass runs; no allocation. A hunter
-        // beyond the radius, or gone, reads as Missing: both are out of sight.
+        // beyond the radius, or gone, reads as Missing: both are outside the floor's band.
         MobileParty? party = null;
-        var search = MobileParty.StartFindingLocatablesAroundPosition(main.Position.ToVec2(), sight);
+        var search = MobileParty.StartFindingLocatablesAroundPosition(main.Position.ToVec2(), radius);
         for (var p = MobileParty.FindNextLocatable(ref search); p != null; p = MobileParty.FindNextLocatable(ref search))
         {
             if (p.StringId == partyId)
@@ -264,7 +269,6 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
             PlayerActive = main.IsActive,
             PlayerInMapEventOrSiege = main.MapEvent != null || main.BesiegerCamp != null,
             PlayerInSettlement = main.CurrentSettlement != null,
-            PlayerInAnotherLordsArmy = main.Army != null && main.Army.LeaderParty != main,
             PlayerAtSea = main.IsCurrentlyAtSea,
             PlayerInEncounter = PlayerEncounter.Current != null,
             TrueSight = Campaign.Current?.TrueSight == true,

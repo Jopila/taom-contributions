@@ -6,7 +6,7 @@ public enum HuntEndReason
     /// <summary>The player beat the hunter's party in battle.</summary>
     HunterBeaten,
 
-    /// <summary>The hunter's party fought any other battle (the player's flee included), or lost to someone else.</summary>
+    /// <summary>The hunter beat the player, or the hunter's side was defeated by someone else (never a flee: no winner).</summary>
     BattleEnded,
 
     /// <summary>The party was destroyed, cannot be found, or is no longer led by the hunter.</summary>
@@ -65,6 +65,15 @@ public sealed class HuntBattleSummary
 
     /// <summary>The hunter's party took part.</summary>
     public bool InvolvesHunter { get; set; }
+
+    /// <summary>
+    /// <c>WinningSide != None</c>. False when the battle ended with no victor, such as a player who got away
+    /// (<c>PlayerEncounter.LeaveBattle</c> finalizes the event without a victory state).
+    /// </summary>
+    public bool HasWinner { get; set; }
+
+    /// <summary>The hunter's party fought on the <c>DefeatedSide</c>.</summary>
+    public bool HunterLost { get; set; }
 }
 
 /// <summary>
