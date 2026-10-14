@@ -290,9 +290,9 @@ pose-blend, is refuted).
   `lock_movement` + `client_prediction` at priority 60 on the taunt's base. The reason first written here,
   that vanilla has no standalone melee clip, is wrong: a swing plays real clips through the engine's melee
   attack table. A clip has a row there only through the clip inspector's "Blends with animation" box
-  (TpacTool calls it `UnknownClipName`; no clip flag sets it): its own name self-keys the clip, and a balanced
+  (TpacTool v0.5.1 calls it `BlendWithAnimation`, `UnknownClipName` before; no clip flag sets it): its own name self-keys the clip, and a balanced
   twin's name makes the Kit generate ten blend children between the two on save. Since 2026-09-26 this generator
-  writes a clone of a keyed vanilla template self-keyed (`Set-ClipKey`: its own name in `UnknownClipName`,
+  writes a clone of a keyed vanilla template self-keyed (`Set-ClipKey`: its own name in `BlendWithAnimation`,
   `BlendsWithAction` empty, `ClipSource1Name` and `ClipSource2Name` blank, `GeneratedIndex` -1) and a clone of an
   unkeyed one blank, and `-Verify` reports a clip that breaks the rule as `KEY`
   (`tools/tests/test_gen_troll_anim_clips.py`). So a re-cut keeps the key, but its packages have no

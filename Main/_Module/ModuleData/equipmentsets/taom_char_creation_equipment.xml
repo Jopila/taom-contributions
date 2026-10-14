@@ -11082,10 +11082,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11095,7 +11095,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11103,17 +11103,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_retainer_f"
@@ -11130,10 +11130,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11143,7 +11143,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11151,17 +11151,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_mercenary_m"
@@ -11178,10 +11178,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11191,7 +11191,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11199,17 +11199,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_mercenary_f"
@@ -11226,10 +11226,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11239,7 +11239,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11247,17 +11247,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_guard_m"
@@ -11277,10 +11277,10 @@
 				id="Item.starter_steppe_arrows" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11290,7 +11290,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11298,17 +11298,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_guard_f"
@@ -11328,10 +11328,10 @@
 				id="Item.starter_steppe_arrows" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11341,7 +11341,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11349,17 +11349,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_hunter_m"
@@ -11376,10 +11376,10 @@
 				id="Item.starter_steppe_arrows" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11389,7 +11389,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11397,17 +11397,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_hunter_f"
@@ -11424,10 +11424,10 @@
 				id="Item.starter_steppe_arrows" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11437,7 +11437,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11445,17 +11445,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_infantry_m"
@@ -11469,10 +11469,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11482,7 +11482,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11490,17 +11490,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_infantry_f"
@@ -11514,10 +11514,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11527,7 +11527,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11535,17 +11535,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_skirmisher_m"
@@ -11562,10 +11562,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11575,7 +11575,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11583,17 +11583,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_skirmisher_f"
@@ -11610,10 +11610,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11623,7 +11623,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11631,17 +11631,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_bard_m"
@@ -11655,10 +11655,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11668,7 +11668,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11676,17 +11676,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_bard_f"
@@ -11700,10 +11700,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11713,7 +11713,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11721,17 +11721,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_6_m"
@@ -11745,10 +11745,10 @@
 				id="Item.starter_desert_round_shield" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11758,7 +11758,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11766,17 +11766,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_shaghana_6_f"
@@ -11790,10 +11790,10 @@
 				id="Item.starter_desert_round_shield" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -11803,7 +11803,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -11811,17 +11811,17 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<!-- Show -->
 	<EquipmentRoster
@@ -12377,10 +12377,10 @@
 				id="Item.starter_eastern_spear_4_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12390,7 +12390,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12398,14 +12398,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_retainer_f"
@@ -12422,10 +12422,10 @@
 				id="Item.starter_eastern_spear_4_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12435,7 +12435,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12443,14 +12443,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_mercenary_m"
@@ -12467,10 +12467,10 @@
 				id="Item.starter_eastern_spear_4_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12480,7 +12480,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12488,14 +12488,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_mercenary_f"
@@ -12512,10 +12512,10 @@
 				id="Item.starter_eastern_spear_4_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12525,7 +12525,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12533,14 +12533,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_guard_m"
@@ -12560,10 +12560,10 @@
 				id="Item.starter_bodkin_arrows_b" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12573,7 +12573,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12581,14 +12581,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_guard_f"
@@ -12608,10 +12608,10 @@
 				id="Item.starter_bodkin_arrows_b" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12621,7 +12621,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12629,14 +12629,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_hunter_m"
@@ -12653,10 +12653,10 @@
 				id="Item.starter_bodkin_arrows_b" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12666,7 +12666,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12674,14 +12674,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_hunter_f"
@@ -12698,10 +12698,10 @@
 				id="Item.starter_bodkin_arrows_b" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12711,7 +12711,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12719,14 +12719,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_infantry_m"
@@ -12740,10 +12740,10 @@
 				id="Item.starter_eastern_spear_4_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12753,7 +12753,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12761,14 +12761,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_infantry_f"
@@ -12782,10 +12782,10 @@
 				id="Item.starter_eastern_spear_4_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12795,7 +12795,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12803,14 +12803,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_skirmisher_m"
@@ -12827,10 +12827,10 @@
 				id="Item.starter_bodkin_arrows_b" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12840,7 +12840,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12848,14 +12848,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_skirmisher_f"
@@ -12872,10 +12872,10 @@
 				id="Item.starter_bodkin_arrows_b" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12885,7 +12885,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12893,14 +12893,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_bard_m"
@@ -12917,10 +12917,10 @@
 				id="Item.starter_bodkin_arrows_b" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12930,7 +12930,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12938,14 +12938,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_bard_f"
@@ -12962,10 +12962,10 @@
 				id="Item.starter_bodkin_arrows_b" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -12975,7 +12975,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -12983,14 +12983,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_6_m"
@@ -13004,10 +13004,10 @@
 				id="Item.starter_desert_round_shield" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -13017,7 +13017,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -13025,14 +13025,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_abanissa_6_f"
@@ -13046,10 +13046,10 @@
 				id="Item.starter_desert_round_shield" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -13059,7 +13059,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -13067,14 +13067,14 @@
 				id="Item.starter_aserai_sword_5_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<!-- Show -->
 	<EquipmentRoster
@@ -19909,7 +19909,8 @@
 	<!-- Parent fallback -->
 	<EquipmentRoster
 		id="mother_char_creation_none_aserai"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -19927,7 +19928,8 @@
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="father_char_creation_none_aserai"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -19943,7 +19945,8 @@
 	<!--1.Retainer-->
 	<EquipmentRoster
 		id="mother_char_creation_retainer_aserai"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -19964,7 +19967,8 @@
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="father_char_creation_retainer_aserai"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20017,7 +20021,8 @@
 	<!--3.Farmer-->
 	<EquipmentRoster
 		id="mother_char_creation_farmer_aserai"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20032,7 +20037,8 @@
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="father_char_creation_farmer_aserai"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20048,7 +20054,8 @@
 	<!--4.Artisan-->
 	<EquipmentRoster
 		id="mother_char_creation_artisan_aserai"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20066,7 +20073,8 @@
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="father_char_creation_artisan_aserai"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20150,7 +20158,8 @@
 	<!-- Childhood & Education age -->
 	<EquipmentRoster
 		id="player_char_creation_childhood_age_aserai_retainer_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 			<EquipmentSet>
 				<Equipment
 					slot="Body"
@@ -20162,7 +20171,8 @@
 		</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_education_age_aserai_retainer_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20173,7 +20183,8 @@
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_childhood_age_aserai_retainer_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 			<EquipmentSet>
 				<Equipment
 					slot="Body"
@@ -20185,7 +20196,8 @@
 		</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_education_age_aserai_retainer_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20242,7 +20254,8 @@
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_childhood_age_aserai_farmer_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 			<EquipmentSet>
 				<Equipment
 					slot="Body"
@@ -20254,7 +20267,8 @@
 		</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_education_age_aserai_farmer_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20265,7 +20279,8 @@
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_childhood_age_aserai_farmer_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 			<EquipmentSet>
 				<Equipment
 					slot="Body"
@@ -20277,7 +20292,8 @@
 		</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_education_age_aserai_farmer_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20288,7 +20304,8 @@
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_childhood_age_aserai_artisan_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 			<EquipmentSet>
 				<Equipment
 					slot="Body"
@@ -20300,7 +20317,8 @@
 		</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_education_age_aserai_artisan_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20311,7 +20329,8 @@
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_childhood_age_aserai_artisan_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 			<EquipmentSet>
 				<Equipment
 					slot="Body"
@@ -20323,7 +20342,8 @@
 		</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_education_age_aserai_artisan_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"
@@ -20427,7 +20447,8 @@
 	<!-- Adult careers -->
 	<EquipmentRoster
 		id="player_char_creation_aserai_retainer_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20440,10 +20461,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20453,7 +20474,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20461,21 +20482,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_retainer_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20488,10 +20510,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20501,7 +20523,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20509,21 +20531,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_mercenary_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20536,10 +20559,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20549,7 +20572,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20557,21 +20580,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_mercenary_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20584,10 +20608,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20597,7 +20621,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20605,21 +20629,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_guard_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20635,10 +20660,10 @@
 				id="Item.starter_steppe_arrows" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20648,7 +20673,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20656,21 +20681,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_guard_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20686,10 +20712,10 @@
 				id="Item.starter_steppe_arrows" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20699,7 +20725,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20707,21 +20733,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_hunter_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20734,10 +20761,10 @@
 				id="Item.starter_steppe_arrows" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20747,7 +20774,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20755,21 +20782,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_hunter_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20782,10 +20810,10 @@
 				id="Item.starter_steppe_arrows" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20795,7 +20823,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20803,21 +20831,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_infantry_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20827,10 +20856,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20840,7 +20869,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20848,21 +20877,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_infantry_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20872,10 +20902,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20885,7 +20915,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20893,21 +20923,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_skirmisher_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20920,10 +20951,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20933,7 +20964,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20941,21 +20972,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_skirmisher_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -20968,10 +21000,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -20981,7 +21013,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -20989,21 +21021,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_bard_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -21013,10 +21046,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -21026,7 +21059,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -21034,21 +21067,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_bard_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item0"
@@ -21058,10 +21092,10 @@
 				id="Item.starter_eastern_javelin_3_t4" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -21071,7 +21105,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -21079,21 +21113,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_6_m"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item2"
@@ -21103,10 +21138,10 @@
 				id="Item.starter_desert_round_shield" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -21116,7 +21151,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -21124,21 +21159,22 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_a" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_a" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<EquipmentRoster
 		id="player_char_creation_aserai_6_f"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Item2"
@@ -21148,10 +21184,10 @@
 				id="Item.starter_desert_round_shield" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 			<Equipment
 				slot="Horse"
 				id="Item.sumpter_horse" />
@@ -21161,7 +21197,7 @@
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 		<EquipmentSet
 			equipmentType="Civilian">
 			<Equipment
@@ -21169,22 +21205,23 @@
 				id="Item.starter_aserai_sword_3_t3" />
 			<Equipment
 				slot="Body"
-				id="Item.sk_hr_st_chest_inf_chest_light_b" />
+				id="Item.starter_sk_hr_st_chest_inf_chest_light_b" />
 			<Equipment
 				slot="Cape"
-				id="Item.sk_hr_st_pauld_inf_med_a" />
+				id="Item.starter_sk_hr_st_pauld_inf_med_a" />
 			<Equipment
 				slot="Leg"
-				id="Item.eastern_leather_boots" />
+				id="Item.starter_eastern_leather_boots" />
 		
 			<Equipment
 				slot="Gloves"
-				id="Item.sk_hr_st_bracer_light_a" /></EquipmentSet>
+				id="Item.starter_sk_hr_st_bracer_light_a" /></EquipmentSet>
 	</EquipmentRoster>
 	<!-- Show -->
 	<EquipmentRoster
 		id="player_char_creation_show_aserai"
-		culture="Culture.aserai">
+		culture="Culture.aserai"
+		_replaceWhileMerging="true">
 		<EquipmentSet>
 			<Equipment
 				slot="Body"

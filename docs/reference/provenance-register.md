@@ -57,6 +57,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | Alliance.Wargs (Byak0) | `Alliance.Wargs` | author-granted, terms informal | redistributed | `<game>/Modules/Alliance.Wargs/**` (and, after absorption, the warg subset inside `LOTRLOME_Armory`) | cleared |
 | BetterExceptionWindow | `BetterExceptionWindow` `BEW` | AGPL-3.0 | comparison-only | (none) | cleared |
 | TpacTool | `TpacTool` `szszss/TpacTool` | MIT | behavioural-port | `tools/tpac_skeleton_scan.py` `tools/tpac_clipinfo.py` | cleared |
+| TpacTool (ShortJake fork) | `ShortJake/TpacTool` | MIT | interop-only | the `tools/*.ps1` tpac tools load its v0.5.1 `TpacTool.Lib.dll` at run time (`-TpacBin` / `-TpacToolBin`); never shipped, nothing derived (see the TpacTool detail) | cleared |
 | NVIDIA SkillSpector | `SkillSpector` `NVIDIA/SkillSpector` | Apache-2.0 | behavioural-port | `tools/audit_claude_config.py` | cleared |
 | ECC (Everything Claude Code) | `affaan-m/ECC` `everything-claude-code` `AgentShield` | MIT | behavioural-port | `tools/audit_claude_config.py`; `.claude/skills/{context-budget,build-fix,verify}/**`; `.claude/hooks/{config-protection,mcp-health-check,mcp-health-mark,block-dangerous-git}.sh`; `tools/blender/harness.py` (`stance_height`) (context-save, context-restore, skill-stocktake and agent-introspection-debugging removed 2026-10-08: [skill usage audit](../reviews/skill-usage-audit-2026-10-08.md)) | cleared |
 | graphify | `graphify` `graphifyy` `Graphify-Labs` `safishamsi/graphify` | Apache-2.0 (MIT when ported, see detail) | behavioural-port | `tools/doc_graph.py` `tools/graph_query.py`; `tools/graphify_taom.py` runs the CLI (interop-only, see detail) | cleared |
@@ -177,6 +178,12 @@ Upstream: https://github.com/szszss/TpacTool · MIT.
 
 The `.tpac` binary format was reverse-engineered from decompiling `TpacTool.Lib.dll`. MIT permits
 this; the attribution is at [`docs/tools/spider-skeleton-tpac-tools.md:378`](../tools/spider-skeleton-tpac-tools.md).
+
+Since 2026-10-14 the PowerShell tpac tools load `TpacTool.Lib.dll` from ShortJake's fork,
+https://github.com/ShortJake/TpacTool (MIT, a fork of hunharibo/TpacTool), release v0.5.1, through `-TpacBin`
+or `-TpacToolBin`.
+That is `interop-only`: the library is loaded at run time on the desktop, never shipped, and no code is derived
+from it.
 
 ### NVIDIA SkillSpector
 

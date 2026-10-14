@@ -140,7 +140,7 @@ run while Bannerlord or the Modding Kit is open (a Kit save rewrites what it loa
 
 Steps 2 and 3 need Windows PowerShell 5.1 (`powershell.exe -NoProfile -ExecutionPolicy Bypass -File ...`; `pwsh`
 exits 2) and two things outside the repo: TpacTool's `bin` folder (`-TpacBin`, default
-`E:\Bannerlord_Art\TpacTool_0.4.0\TpacTool\bin`) and `TolerantTpacLoader.cs` (`-Loader`, default
+`E:\Release_v0.5.1\bin`, ShortJake's v0.5.1 since 2026-10-14) and `TolerantTpacLoader.cs` (`-Loader`, default
 `E:\LOTRAOMAssets\_auto_workspace\chariot\TolerantTpacLoader.cs`). Both scripts exit 2 when either is missing.
 
 ## 7. Comments on the item block (2026-09-23 night)

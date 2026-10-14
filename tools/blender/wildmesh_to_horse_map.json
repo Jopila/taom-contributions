@@ -1,0 +1,47 @@
+{
+  "_comment": "WildMesh3D 'Realistic Animals' main quadruped rig (Boar, Deer, Moose, MountainGoat, Warthog: one bone layout, 105 to 134 bones, most of them face bones and _end leaves) onto Bannerlord's horse_skeleton. Consumed by tools/blender/reskin_animalia_to_horse.py and retarget_animalia_to_horse.py exactly as animalia_to_horse_map.json is; the sources come from tools/blender/export_blend_pack.py. Same method and key meanings as that map. Differences from the Animalia rig: the 'Collarbone' is a real shoulder blade (lateral, withers to shoulder joint), so the front chains keep it; every leg ends in a 'Digit11' hoof bone, so the hooves are joints and need no 'hoof_split'; the spine is Spine1, Spine2, Chest (Chest is the third spine segment); Deer, Moose and MountainGoat add a Neck3, which moves with Neck2 and weights horseneck2. The Moose has only Tail1 and Tail2; the fit skips absent bones. Unlisted groups (ears, eyes, lids, nose, mouth, tongue, beard, ChestL/R) climb to their nearest mapped ancestor: Head or Chest.",
+  "_chains_note": "Pelvis is in no chain, as in the Animalia map: horsepelvis is a pivot above horsespine1, not a spine segment. The tail is anchored at its root and never stretched. NeckFix1 and NeckFix2 are neck-root helpers parented to Chest; they weight horseneck1 so the neck root follows the neck (check the neck_down bend in the reskin report).",
+  "chains": [
+    ["Spine1", "Spine2", "Chest", "Neck1", "Neck2", "Head"],
+    ["LegFLCollarbone", "LegFL1", "LegFL2", "LegFL3", "LegFLAnkle", "LegFLDigit11"],
+    ["LegFRCollarbone", "LegFR1", "LegFR2", "LegFR3", "LegFRAnkle", "LegFRDigit11"],
+    ["LegBL1", "LegBL2", "LegBL3", "LegBLAnkle", "LegBLDigit11"],
+    ["LegBR1", "LegBR2", "LegBR3", "LegBRAnkle", "LegBRDigit11"],
+    {"bones": ["Tail1", "Tail2", "Tail3"], "stretch": false, "anchor_first_only": true}
+  ],
+  "profiles": {
+    "_note": "keepneck: every WildMesh neck is far shorter than the horse's (Boar 0.18 m, Deer 0.48 m, Moose 0.38 m from Neck1 to Head), so the default chains stretch it to a horse neck. keepneck moves the neck into place unstretched and unswung, as the Animalia moose profile does; the cost is a horse_head pivot away from the animal's head (the reskin report's joint_residual_after_m names the gap).",
+    "keepneck": {
+      "chains": [
+        ["Spine1", "Spine2", "Chest", "Neck1"],
+        {"bones": ["Neck1", "Neck2", "Head"], "stretch": false, "swing": false, "anchor_first_only": true},
+        ["LegFLCollarbone", "LegFL1", "LegFL2", "LegFL3", "LegFLAnkle", "LegFLDigit11"],
+        ["LegFRCollarbone", "LegFR1", "LegFR2", "LegFR3", "LegFRAnkle", "LegFRDigit11"],
+        ["LegBL1", "LegBL2", "LegBL3", "LegBLAnkle", "LegBLDigit11"],
+        ["LegBR1", "LegBR2", "LegBR3", "LegBRAnkle", "LegBRDigit11"],
+        {"bones": ["Tail1", "Tail2", "Tail3"], "stretch": false, "anchor_first_only": true}
+      ]
+    }
+  },
+  "joints": {
+    "Pelvis": "horsepelvis", "Spine1": "horsespine1", "Spine2": "horsespine2", "Chest": "horsespine3",
+    "Neck1": "horseneck1", "Neck2": "horseneck2", "Head": "horse_head",
+    "LegFLCollarbone": "horselleg1", "LegFL1": "horselleg2", "LegFL2": "horselleg3", "LegFL3": "horselleg4", "LegFLAnkle": "horsellegankle", "LegFLDigit11": "horselfronthoof",
+    "LegFRCollarbone": "horserleg1", "LegFR1": "horserleg2", "LegFR2": "horserleg3", "LegFR3": "horserleg4", "LegFRAnkle": "horserlegankle", "LegFRDigit11": "horserfronthoof",
+    "LegBL1": "horselfemur", "LegBL2": "horseltibia", "LegBL3": "horsellargecannon", "LegBLAnkle": "horselphalanx", "LegBLDigit11": "horselrearhoof",
+    "LegBR1": "horserfemur", "LegBR2": "horsertibia", "LegBR3": "horserlargecannon", "LegBRAnkle": "horserphalanx", "LegBRDigit11": "horserrearthoof",
+    "Tail1": "horsetail1", "Tail2": "horsetail2", "Tail3": "horsetail3"
+  },
+  "weights": {
+    "Pelvis": "horsepelvis", "Spine1": "horsespine1", "Spine2": "horsespine2", "Chest": "horsespine3",
+    "NeckFix1": "horseneck1", "NeckFix2": "horseneck1",
+    "Neck1": "horseneck1", "Neck2": "horseneck2", "Neck3": "horseneck2", "Head": "horse_head",
+    "LegFLCollarbone": "horselleg1", "LegFL1": "horselleg2", "LegFL2": "horselleg3", "LegFL3": "horselleg4", "LegFLAnkle": "horsellegankle", "LegFLDigit11": "horselfronthoof",
+    "LegFRCollarbone": "horserleg1", "LegFR1": "horserleg2", "LegFR2": "horserleg3", "LegFR3": "horserleg4", "LegFRAnkle": "horserlegankle", "LegFRDigit11": "horserfronthoof",
+    "LegBL1": "horselfemur", "LegBL2": "horseltibia", "LegBL3": "horsellargecannon", "LegBLAnkle": "horselphalanx", "LegBLDigit11": "horselrearhoof",
+    "LegBR1": "horserfemur", "LegBR2": "horsertibia", "LegBR3": "horserlargecannon", "LegBRAnkle": "horserphalanx", "LegBRDigit11": "horserrearthoof",
+    "Tail1": "horsetail1", "Tail2": "horsetail1", "Tail3": "horsetail1", "Tail4": "horsetail1"
+  },
+  "hoof_split": {},
+  "measure": {"pelvis": "Pelvis", "hooves": {"LF": "LegFLDigit11", "RF": "LegFRDigit11", "LB": "LegBLDigit11", "RB": "LegBRDigit11"}}
+}

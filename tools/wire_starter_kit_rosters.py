@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Point the culture-default player-start rosters at the `starter_` twins, and override the six
-vanilla-mapped cultures' starts with TAOM rosters.
+"""Point the culture-default player-start rosters at the `starter_` twins, make the ones whose ids vanilla
+also defines replace vanilla's, and override the other vanilla cultures' starts with TAOM rosters.
 
 TWO STEPS
 ---------
@@ -13,14 +13,19 @@ TWO STEPS
    generate_starter_kit.py, so the two tools cannot disagree about which items exist. The
    career file is NOT rewired (#629): its 78 `player_career_*` rosters name the gear each
    culture's lowest troops carry, and `REWIRE_FILES` pins that.
+   The same pass gives `_replaceWhileMerging="true"` to every roster of that file whose id
+   vanilla also defines (`mark_vanilla_replacements`; aserai's 37 since Erkam's 2026-10-10
+   rosters), and refuses the flag on any other (`stray_replace_ids`).
 
 2. Write `taom_player_start_vanilla_override.xml`: vlandia, empire, sturgia, aserai, battania
-   and khuzait have no TAOM culture-default rosters, so their careerless start read vanilla's
+   and khuzait had no TAOM culture-default rosters, so their careerless start read vanilla's
    `SandBox/ModuleData/sandbox_equipment_sets.xml` and handed a Rohan player a Calradian sword
-   in a hemp tunic. The override carries a roster with the same id as vanilla's for every
-   title the culture's youth menu offers, built from the mapped culture's career kit (copied
-   as the career file names it) by title: hunter/skirmisher/bard take the ranged kit,
-   guard/infantry the infantry kit, retainer the cavalry kit with its mount. Khand (battania) borrows Rhun's (khuzait) kit
+   in a hemp tunic. A roster the culture-default file already defines is left out
+   (`owned_roster_ids`; all of aserai's since Erkam's 2026-10-10 rosters). The override
+   carries a roster with the same id as vanilla's for every title the culture's youth menu
+   offers, built from the mapped culture's career kit (copied as the career file names it) by
+   title: hunter/skirmisher/bard take the ranged kit, guard/infantry the infantry kit,
+   retainer the cavalry kit with its mount. Khand (battania) borrows Rhun's (khuzait) kit
    until it has its own (#571). The civilian set is the kit's one-handed weapon, body and legs.
 
    The roster element carries `_replaceWhileMerging="true"`. MBObjectManager.MergeElements
@@ -72,8 +77,14 @@ TITLE_TO_ARCHETYPE = {
 # where each career archetype keeps its one-handed weapon (taom_career_starting_equipment.xml header)
 SIDEARM_SLOT = {"ranged": "Item2", "cavalry": "Item2", "infantry": "Item0"}
 VANILLA_SETS_FILE = gk.DEFAULT_MODULES / "SandBox" / "ModuleData" / "sandbox_equipment_sets.xml"
+# every vanilla file that defines an id a culture-default roster may reuse (SandBoxCore: the aserai
+# parents' `*_none_aserai` rosters)
+VANILLA_ROSTER_FILES = (VANILLA_SETS_FILE,
+                        gk.DEFAULT_MODULES / "SandBoxCore" / "ModuleData" / "sandboxcore_equipment_sets.xml")
+REPLACE_ATTR = '_replaceWhileMerging="true"'
 
 ROSTER_RE = re.compile(r"<EquipmentRoster\b([^>]*)>(.*?)</EquipmentRoster>", re.S)
+ROSTER_OPEN_RE = re.compile(r"<EquipmentRoster\b([^>]*)>", re.S)
 EQUIPMENT_RE = re.compile(r"<Equipment\b[^>]*?/?>", re.S)
 ID_ATTR_RE = re.compile(r'\bid="([^"]*)"')
 SLOT_ATTR_RE = re.compile(r'\bslot="([^"]*)"')
@@ -85,6 +96,51 @@ class WireError(Exception):
 
 def _is_target(roster_id: str) -> bool:
     return roster_id.startswith(gk.TARGET_PREFIXES) and not any(m in roster_id for m in gk.EXCLUDED_ROSTER_MARKERS)
+
+
+def vanilla_roster_ids(paths=VANILLA_ROSTER_FILES) -> frozenset:
+    ids = set()
+    for path in paths:
+        ids.update(r.get("id") for r in ET.fromstring(gk.read_xml(path)[0].encode("utf-8")).iter("EquipmentRoster"))
+    return frozenset(ids)
+
+
+def mark_vanilla_replacements(text: str, vanilla: frozenset) -> tuple[str, list[str]]:
+    """Give `_replaceWhileMerging="true"` to every roster whose id vanilla also defines, on a new
+    attribute line indented like its `id=` (inline when the tag is one line). Without it
+    MergeElements APPENDS the roster's sets after vanilla's and the adapter takes vanilla's first
+    battle and civilian set: the aserai start fell back to Calradian gear (2026-10-14). Only those
+    ids: on a roster vanilla lacks, the flag merges it into the document's first roster."""
+    marked: list[str] = []
+
+    def one(m: re.Match) -> str:
+        attrs = m.group(1)
+        idm = ID_ATTR_RE.search(attrs)
+        if attrs.endswith("/") or not idm or idm.group(1) not in vanilla or "_replaceWhileMerging" in attrs:
+            return m.group(0)
+        marked.append(idm.group(1))
+        ws = re.search(r'(\s+)id="', attrs).group(1)
+        return f"<EquipmentRoster{attrs}{ws}{REPLACE_ATTR}>"
+
+    return ROSTER_OPEN_RE.sub(one, text), marked
+
+
+def stray_replace_ids(text: str, vanilla: frozenset) -> list[str]:
+    """Rosters carrying `_replaceWhileMerging` whose id vanilla does not define: MergeElements would
+    merge each one into the FIRST roster of the accumulated document (see missing_vanilla_ids)."""
+    return [r.get("id") for r in ET.fromstring(text.encode("utf-8")).iter("EquipmentRoster")
+            if r.get("_replaceWhileMerging") == "true" and r.get("id") not in vanilla]
+
+
+def owned_roster_ids(paths=REWIRE_FILES) -> frozenset:
+    """Every roster id the culture-default files define. The override must leave these out: the
+    same id twice in one module is DUPLICATE_ROSTER_ID, and the override, which loads after the
+    culture-default file with _replaceWhileMerging, would replace the culture's own start (aserai,
+    2026-10-14)."""
+    ids = set()
+    for path in paths:
+        ids.update(r.get("id") for r in ET.fromstring(gk.read_xml(path)[0].encode("utf-8")).iter("EquipmentRoster"))
+    return frozenset(ids)
 
 
 def rewire_text(text: str) -> tuple[str, int, list[str]]:
@@ -155,18 +211,23 @@ def titles_from_menus(menus_dir: Path, cultures=VANILLA_CULTURES) -> "OrderedDic
     return titles
 
 
-def build_vanilla_override(career_text: str, titles_by_culture, borrow: dict[str, str], eol: str = "\r\n") -> str:
+def build_vanilla_override(career_text: str, titles_by_culture, borrow: dict[str, str], eol: str = "\r\n",
+                           owned: frozenset = frozenset()) -> str:
+    """`owned`: roster ids the culture-default file already defines (owned_roster_ids); they are
+    left out, and a culture with nothing left gets no block."""
     root = ET.fromstring(career_text.encode("utf-8"))
     career = {r.get("id"): r for r in root.iter("EquipmentRoster")}
     lines = [
         '<?xml version="1.0" encoding="utf-8"?>',
         "<!--",
-        "  TAOM player-start rosters for the six vanilla-mapped cultures. GENERATED by",
+        "  TAOM player-start rosters for the vanilla-mapped cultures. GENERATED by",
         "  tools/wire_starter_kit_rosters.py (do not hand-edit; re-run the tool).",
         "",
         "  vlandia (Rohan), empire (Dunland), sturgia (Dale), aserai (Harad), khuzait (Rhun) and",
-        "  battania (Khand) have no TAOM culture-default rosters, so their careerless start read",
-        "  vanilla SandBox's rosters and handed out Calradian gear. Each roster here carries the",
+        "  battania (Khand) had no TAOM culture-default rosters, so their careerless start read",
+        "  vanilla SandBox's rosters and handed out Calradian gear. A roster that",
+        "  taom_char_creation_equipment.xml now defines is left out (all of aserai's since",
+        "  2026-10-10): this file loads after that one and would replace it. Each roster here carries the",
         "  SAME id as vanilla's and _replaceWhileMerging=\"true\": MBObjectManager.MergeElements",
         "  (1.4.8, lines 799-875) then drops every vanilla attribute and child before adding ours,",
         "  which is the only shape that replaces rather than appends (EquipmentSet has no unique",
@@ -179,6 +240,8 @@ def build_vanilla_override(career_text: str, titles_by_culture, borrow: dict[str
     ]
     for culture, titles in titles_by_culture.items():
         source = borrow.get(culture, culture)
+        if all(f"player_char_creation_{culture}_{t}_{s}" in owned for t in titles for s in ("m", "f")):
+            continue
         lines.append("")
         lines.append(f"    <!-- {culture}{' (borrows ' + source + ')' if source != culture else ''} -->")
         for title in titles:
@@ -186,6 +249,8 @@ def build_vanilla_override(career_text: str, titles_by_culture, borrow: dict[str
             if archetype is None:
                 raise WireError(f"{culture}: youth title {title!r} has no archetype mapping")
             for sex in ("m", "f"):
+                if f"player_char_creation_{culture}_{title}_{sex}" in owned:
+                    continue
                 source_id = f"player_career_{source}_{archetype}_{sex}"
                 roster = career.get(source_id)
                 if roster is None:
@@ -232,14 +297,26 @@ def main() -> int:
     args = ap.parse_args()
 
     rc = 0
+    missing = [p for p in VANILLA_ROSTER_FILES if not p.exists()]
+    if missing:
+        print(f"ERROR: {', '.join(map(str, missing))} not found; the vanilla roster ids decide which rosters replace")
+        return 2
+    vanilla = vanilla_roster_ids()
     for path in REWIRE_FILES:
         text, had_bom = gk.read_xml(path)
         new_text, changed, rosters = rewire_text(text)
+        new_text, marked = mark_vanilla_replacements(new_text, vanilla)
         left = leftovers(new_text)
         print(f"{path.name}: {changed} id(s) in {len(rosters)} roster(s) -> starter_; leftovers after: {len(left)}")
+        print(f"   {len(marked)} roster(s) that vanilla also defines now replace it ({REPLACE_ATTR})")
         for roster, slot, iid in left[:10]:
             print(f"   leftover {roster} {slot} {iid}")
-        if changed and args.apply:
+        stray = stray_replace_ids(new_text, vanilla)
+        if stray:
+            print(f"ERROR: {len(stray)} roster(s) carry {REPLACE_ATTR} but vanilla does not define them; the engine "
+                  f"would merge each into the first roster: {', '.join(stray)}")
+            return 2
+        if (changed or marked) and args.apply:
             err = gk.checked_write(path, new_text, had_bom, gk.BACKUP_TAG, backup=False)
             if err:
                 print("ERROR:", err)
@@ -249,8 +326,9 @@ def main() -> int:
     if not args.skip_override:
         try:
             titles = titles_from_menus(MENUS_DIR)
-            # the career kit exactly as the career file names it, never rewired (#629)
-            override = build_vanilla_override(gk.read_xml(CAREER_FILE)[0], titles, BORROW)
+            # the career kit exactly as the career file names it, never rewired (#629); a roster the
+            # culture-default file already defines is left out
+            override = build_vanilla_override(gk.read_xml(CAREER_FILE)[0], titles, BORROW, owned=owned_roster_ids())
         except WireError as exc:
             print("ERROR:", exc)
             return 2

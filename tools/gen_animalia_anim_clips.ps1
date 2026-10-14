@@ -5,7 +5,7 @@ param(
   [string]$Vanilla = 'E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Native\AssetPackages\animation_clips.tpac',
   [string]$ElkMeasure = "$PSScriptRoot\blender\animalia_elk_clip_measure.json",
   [string]$MooseMeasure = "$PSScriptRoot\blender\animalia_moose_clip_measure.json",
-  [string]$TpacBin = 'E:\Bannerlord_Art\TpacTool_0.4.0\TpacTool\bin',
+  [string]$TpacBin = 'E:\Release_v0.5.1\bin',
   [string]$Loader = 'E:\LOTRAOMAssets\_auto_workspace\chariot\TolerantTpacLoader.cs'
 )
 <#
@@ -290,7 +290,7 @@ foreach ($animal in 'elk', 'moose') {
         $pkg = New-Object TpacTool.Lib.AssetPackage
         $pkg.Guid = [Guid]::NewGuid()
         $pkg.Items.Add($c)
-        $pkg.Save($out, 2)
+        $pkg.Save($out, $false, 2)   # path, useOriginalChecksum, tpac version
         $written++
         $chk = @((Load $out).Package.Items | Where-Object { $_.GetType().Name -eq 'AnimationClip' })[0]
         if ($null -eq $chk -or $chk.Name -ne $clipName -or $chk.Animation -ne [Guid]$m.guid -or [int]$chk.Source2 -ne ($m.frames - 1)) {

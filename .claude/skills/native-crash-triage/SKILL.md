@@ -116,7 +116,7 @@ common patterns:
   the owning class from its vtable's RTTI (`tools/native_sig_author.py xref` / `rtti`), then read the
   insert's condition in the builder's C (`native_decompile.py --rva <builder>`). It gives the data rule in one
   read, where crash-by-crash guessing does not (the melee table's rule, the Kit's "Blends with
-  animation" box, TpacTool's `UnknownClipName`:
+  animation" box, TpacTool's `BlendWithAnimation`, `UnknownClipName` before v0.5.1:
   [bannerlord-animation-system-map.md](../../../docs/reference/bannerlord-animation-system-map.md) section 3).
 - faulting address ≈ heap, or an index register holding float bits → **corrupted record**
   consumed downstream; check binding targets (phantom-animation sweep) and route around if

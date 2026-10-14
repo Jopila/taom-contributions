@@ -1,0 +1,81 @@
+{
+ "_comment": "tools/blender/measure_animalia_clips.py; keys are the pack's clip stems",
+ "clips": {
+  "WalkMedium_F": {
+   "frames": [
+    2,
+    46
+   ],
+   "n": 45,
+   "loop_frames": 44,
+   "fit_scale": 1.3818,
+   "travel_mode": "stride",
+   "fps": 30.0,
+   "travel_source_m": 1.3296,
+   "loop_displacement_m": 1.8372,
+   "speed_mps_at_30fps": 1.253,
+   "plants": {
+    "LF": 0.4773,
+    "RF": 0.9773,
+    "LB": 0.2273,
+    "RB": 0.7273
+   },
+   "plants_sorted": [
+    0.2273,
+    0.4773,
+    0.7273,
+    0.9773
+   ]
+  },
+  "TrotSlow_F_2": {
+   "frames": [
+    2,
+    28
+   ],
+   "n": 27,
+   "loop_frames": 26,
+   "fit_scale": 1.3818,
+   "travel_mode": "stride",
+   "fps": 30.0,
+   "travel_source_m": 1.7153,
+   "loop_displacement_m": 2.3702,
+   "speed_mps_at_30fps": 2.735,
+   "plants": {
+    "LF": 0.5385,
+    "RF": null,
+    "LB": 0.2692,
+    "RB": 0.8077
+   },
+   "plants_sorted": [
+    0.2692,
+    0.5385,
+    0.8077
+   ]
+  },
+  "HoppingSlow_F": {
+   "frames": [
+    2,
+    23
+   ],
+   "n": 22,
+   "loop_frames": 21,
+   "fit_scale": 1.3818,
+   "travel_mode": "stride",
+   "fps": 30.0,
+   "travel_source_m": 2.9623,
+   "loop_displacement_m": 4.0933,
+   "speed_mps_at_30fps": 5.848,
+   "plants": {
+    "LF": 0.5238,
+    "RF": 0.0,
+    "LB": null,
+    "RB": 0.4762
+   },
+   "plants_sorted": [
+    0.0,
+    0.4762,
+    0.5238
+   ]
+  }
+ }
+}

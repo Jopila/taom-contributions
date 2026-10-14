@@ -1,0 +1,55 @@
+{
+ "_comment": "tools/blender/measure_animalia_clips.py; keys are the pack's clip stems",
+ "clips": {
+  "WalkMedium_F": {
+   "frames": [
+    2,
+    32
+   ],
+   "n": 31,
+   "loop_frames": 30,
+   "fit_scale": 1.3796,
+   "travel_mode": "stride",
+   "fps": 30.0,
+   "travel_source_m": 1.2263,
+   "loop_displacement_m": 1.6919,
+   "speed_mps_at_30fps": 1.692,
+   "plants": {
+    "LF": 0.4667,
+    "RF": null,
+    "LB": 0.1,
+    "RB": 0.6
+   },
+   "plants_sorted": [
+    0.1,
+    0.4667,
+    0.6
+   ]
+  },
+  "TrotFast_F_2": {
+   "frames": [
+    2,
+    22
+   ],
+   "n": 21,
+   "loop_frames": 20,
+   "fit_scale": 1.3796,
+   "travel_mode": "stride",
+   "fps": 30.0,
+   "travel_source_m": 1.4747,
+   "loop_displacement_m": 2.0345,
+   "speed_mps_at_30fps": 3.052,
+   "plants": {
+    "LF": 0.5,
+    "RF": null,
+    "LB": 0.15,
+    "RB": 0.65
+   },
+   "plants_sorted": [
+    0.15,
+    0.5,
+    0.65
+   ]
+  }
+ }
+}

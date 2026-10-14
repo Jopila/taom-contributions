@@ -66,6 +66,10 @@ TABLE_PATH = os.path.join(REPO_ROOT, 'Main', '_Module', 'ModuleData', 'armour_ac
 CLASS_ORDER = ('light', 'medium', 'heavy', 'elite', 'lord')
 UPGRADABLE = ('light', 'medium', 'heavy', 'elite')
 BANDS = ('light', 'medium', 'heavy', 'elite')
+# An item a slot file holds is armour the player wears only with one of these Types: Harad's camel
+# bardings (Type="HorseHarness") sit in body_armors.xml, and classed by the file they became the
+# upgrade target of 12 heavy chests (2026-10-14).
+CHARACTER_ARMOUR_TYPES = ('HeadArmor', 'BodyArmor', 'LegArmor', 'HandArmor', 'Cape')
 
 Row = Tuple[str, Optional[str]]
 
@@ -186,6 +190,8 @@ def build_rows(records: Dict[str, dict], targets: TargetsFn = stat_targets) -> D
     """{item id: (class, next id or None)} for derive_armor_tiers-shaped records."""
     pieces = []
     for item_id, rec in records.items():
+        if rec.get('itemType') is not None and rec['itemType'] not in CHARACTER_ARMOUR_TYPES:
+            continue
         derived = rec.get('tier')
         band = None
         if derived is None and ra.mesh_tier_of(item_id) is None:

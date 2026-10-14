@@ -355,6 +355,35 @@ class BuildRows(unittest.TestCase):
         self.assertEqual(rows['sk_gd_q_chest_lord_a'], ('lord', None))
         self.assertEqual(rows['rohan_cap_a'], ('light', None))
 
+    def test_a_piece_that_is_not_character_armour_is_left_out(self):
+        # Harad's art drop filed four camel bardings (Type="HorseHarness") in body_armors.xml; the
+        # slot file alone classed them as body armour and 12 heavy chests "upgraded" into one (2026-10-14)
+        records = {
+            'sk_hr_st_chest_heavy_a': {'culture': 'harad', 'slot': 'body', 'name': 'Chest', 'tier': 'heavy',
+                                       'current': 40, 'itemType': 'BodyArmor'},
+            'sk_hr_pz_camel_bard_elite_a': {'culture': 'harad', 'slot': 'body', 'name': 'Barding', 'tier': 'elite',
+                                            'current': 50, 'itemType': 'HorseHarness'},
+        }
+        rows = gac.build_rows(records, targets=lambda item_id, slot, folder: {})
+        self.assertNotIn('sk_hr_pz_camel_bard_elite_a', rows)
+        self.assertEqual(rows['sk_hr_st_chest_heavy_a'][1], None)
+
+
+@unittest.skipUnless(os.path.isdir(gac.ra.ARMORY_DIR), "needs the LOTRLOME_Armory install; skipped, never faked")
+class CommittedTableAgainstTheArmory(unittest.TestCase):
+    def test_every_row_and_every_next_is_character_armour_of_one_type(self):
+        import derive_armor_tiers as dat
+        index, _ = dat.build_armory_index()
+        rows = gac.parse(gac.read_committed())
+        bad = []
+        for item_id, (_cls, nxt) in rows.items():
+            kind = index.get(item_id, {}).get('type')
+            if kind not in gac.CHARACTER_ARMOUR_TYPES:
+                bad.append(f'{item_id} is {kind}')
+            elif nxt and index.get(nxt, {}).get('type') != kind:
+                bad.append(f'{item_id} ({kind}) -> {nxt} ({index.get(nxt, {}).get("type")})')
+        self.assertEqual(bad, [], 'run python tools/generate_armour_classes.py --apply')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -3,7 +3,7 @@ param(
   [string]$SkeletonGuid = '1163bb17-777d-49b1-b083-aad79dc544fd',
   [int]$BoneNum = 0,
   [switch]$Apply,
-  [string]$TpacBin = 'E:\Bannerlord_Art\TpacTool_0.4.0\TpacTool\bin',
+  [string]$TpacBin = 'E:\Release_v0.5.1\bin',
   [string]$Loader = 'E:\LOTRAOMAssets\_auto_workspace\chariot\TolerantTpacLoader.cs'
 )
 <#

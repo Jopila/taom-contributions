@@ -93,8 +93,14 @@ Known gaps on the laptop, both deliberate:
 - **Unreal Engine** is desktop-only as well: launcher installs `E:\UE_5.7` (5.7.4, since May), `E:\UE_5.4`
   (5.4.4) and `E:\UE_5.3` (5.3.2, both 2026-09-17), each with the Fab plugin; `E:\UE_5.6` is an empty shell
   with a stale registry key. The Fab purchases and their UE projects live under `E:\LOTRAOMAssets\`
-  (`Troll_Animation_5_4`), and `E:\Bannerlord_Art\TpacTool_0.4.0` is the TpacTool the tpac tools load.
-  Pipeline: [ue-to-bannerlord-asset-pipeline.md](ue-to-bannerlord-asset-pipeline.md).
+  (`Troll_Animation_5_4`). Pipeline: [ue-to-bannerlord-asset-pipeline.md](ue-to-bannerlord-asset-pipeline.md).
+- **TpacTool** is set up on the desktop; the laptop has not been checked. The PowerShell tpac tools load
+  ShortJake's TpacTool v0.5.1 (MIT, .NET Framework 4.6.2) from `E:\Release_v0.5.1\bin` by default
+  (`-TpacBin` / `-TpacToolBin`), since 2026-10-14, when the old `E:\Bannerlord_Art\TpacTool_0.4.0` was found
+  gone. The folder is byte-identical to the GitHub release (123 files; zip SHA-256 `81896c0a...5e78`).
+  Unblock it once after a fresh download: the zip's Internet zone mark makes .NET Framework refuse the DLLs
+  (`0x80131515` in Windows PowerShell 5.1; pwsh ignores it). The API changes from 0.4.0 that the tools
+  account for: [tools/README.md](../../tools/README.md), "Which TpacTool the PowerShell tools load".
 - **Ghidra** is desktop-only (below). On the laptop `tools/native_decompile.py` exits 2 naming this
   page, and `/native-crash-triage` falls back to hand-decoding the disassembly.
 

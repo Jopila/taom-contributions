@@ -374,7 +374,7 @@ Same fallback policy as the runtime grant: missing roster → log + leave the yo
    career that is not a bow career a row in `RANGED`, and a culture whose armour must come from one line a row
    in `ARMOUR_LINE`. No
    new items: the culture's troops already carry them. `--verify` and `StarterKitCoverageTests` pin the result.
-3. If the culture is one of the six vanilla-mapped ones, re-run `python tools/wire_starter_kit_rosters.py --apply`
+3. If the culture is one of the five vanilla-mapped ones, re-run `python tools/wire_starter_kit_rosters.py --apply`
    so its careerless override follows the new kit.
 4. Verify the archetype for each career in [`CareerSystemIoC.GetCareerArchetypeMap()`](../../Main/Features/CareerSystem/CareerSystemIoC.cs) and adjust if needed.
 5. Run `StarterKitCoverageTests`, `python tools/audit_polearm_shield_parity.py` (a spear beside a shield must

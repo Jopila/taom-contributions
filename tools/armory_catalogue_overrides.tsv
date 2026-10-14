@@ -13,7 +13,9 @@
 # The list is bounded and genuinely small: 802 unresolved on the first run,
 # 206 after the vocabulary was extracted from the live names, 3 once the
 # parser learned to split on whitespace, strip trailing indexes and read
-# Rohan's abbreviations. Two proper names and one corrupt export.
+# Rohan's abbreviations. Two proper names and one corrupt export; since then,
+# creature meshes the vocabulary does not name (elk, Animalia) and the lord's
+# material bars, which have no armour slot.
 #
 # mesh	culture	category	reason
 clo_witch_king	nazgul	chest	cloth layer over the Witch-King body; 'witch_king' is a proper name carrying no slot word
@@ -21,3 +23,18 @@ witch_king	nazgul	body	the Witch-King body mesh itself; a proper name carrying n
 sk_dwarf\x00\x00\x00\x00\x00\x00\x00\x00_10	dwarf	beard	name carries 8 embedded NUL bytes from a bad Kit export; it is a dwarf beard, per its tpac Race Test/Beards/SK_Dwarf_Beards_geo.tpac
 elk_001	creature	body	the great elk's body mesh (#636), filed as the war ram's sk_eb_goat_* are; 'elk' is a creature name the parser's vocabulary does not carry
 elk_saddle_001	creature	barding	the great elk's saddle, its HorseHarness item taom_elk_saddle_a (#636); 'elk' is a creature name the parser's vocabulary does not carry
+animalia_elk_08	creature	body	the Animalia elk's body mesh (#646), worn by a Horse item in LOTRAOM_horses.xml; filed as elk_001 is
+animalia_moose_big	creature	body	the Animalia moose's body mesh (#646), worn by a Horse item in LOTRAOM_horses.xml; filed as elk_001 is
+lord_material_01	gondor	prop	the lord's material bar for Numenorean Steel, taom_lords_material_gondor (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_02	rohan	prop	the lord's material bar for Eorling Steel, taom_lords_material_vlandia (vlandia is Rohan) (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_03	dwarf	prop	the lord's material bar for Erebor Dwarf-steel, taom_lords_material_erebor (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_04	dale	prop	the lord's material bar for Dale-forged Steel, taom_lords_material_sturgia (sturgia is Dale) (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_05	rivendell	prop	the lord's material bar for Noldorin Silver-steel, taom_lords_material_rivendell (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_06	mirkwood	prop	the lord's material bar for Greenwood Silver, taom_lords_material_mirkwood (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_07	mordor	prop	the lord's material bar for Barad-dur Black Iron, taom_lords_material_mordor (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_08	isengard	prop	the lord's material bar for Isengard Forge-iron, taom_lords_material_isengard (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_09	dol_guldur	prop	the lord's material bar for Dol Guldur Shadow-iron, taom_lords_material_dolguldur (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_10	gundabad	prop	the lord's material bar for Gundabad Orc-steel, taom_lords_material_gundabad (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_11	rhun	prop	the lord's material bar for Rhunic Gilt-bronze, taom_lords_material_khuzait (khuzait is Rhun) (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_12	harad	prop	the lord's material bar for Haradric Bronze, taom_lords_material_aserai (aserai is Harad) (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot
+lord_material_13	dunland	prop	the lord's material bar for Dunland Bog-iron, taom_lords_material_empire (empire is Dunland) (Main/_Module/ModuleData/armour_acquisition/taom_lords_materials.xml); a smithing material, no armour slot

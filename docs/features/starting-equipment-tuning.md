@@ -83,10 +83,14 @@ Two stacked rosters build the player's kit at CC finalize (`Main/Features/Charac
    `taom_career_starting_equipment.xml`, 78 rosters, applied via `Equipment.FillFrom`: a complete 12-slot
    replacement of the battle set (`Equipment.cs:184-194` copies every slot), so Head, Cape and Gloves are
    empty for a careered player by design. Real troop items, not twins (#629); see "Career kits" below.
-3. **Vanilla override**: `taom_player_start_vanilla_override.xml`, 70 rosters with the same ids as vanilla
-   SandBox's for vlandia (Rohan), empire (Dunland), sturgia (Dale), aserai (Harad), khuzait (Rhun) and
-   battania (Khand), each roster carrying `_replaceWhileMerging="true"`. Before it those six started in
-   Calradian gear. Each is the mapped culture's career kit by title, copied as the career file names it
+3. **Vanilla override**: `taom_player_start_vanilla_override.xml`, 58 rosters with the same ids as vanilla
+   SandBox's for vlandia (Rohan), empire (Dunland), sturgia (Dale), khuzait (Rhun) and
+   battania (Khand), each roster carrying `_replaceWhileMerging="true"`. Before it those five started in
+   Calradian gear. aserai (Harad) is no longer in this file: since commit 08b30bfc4 (2026-10-10) it has its own
+   culture-default rosters in `taom_char_creation_equipment.xml`. Because vanilla SandBox defines the same
+   roster ids, the wiring tool gives every culture-default roster whose id vanilla also defines
+   `_replaceWhileMerging="true"` (37 today: the 16 aserai youth rosters plus the aserai parent, childhood,
+   education and show rosters), and leaves out of the override any roster the culture file defines. Each is the mapped culture's career kit by title, copied as the career file names it
    (hunter, skirmisher and bard take the ranged kit; guard and infantry the infantry kit; retainer the
    cavalry kit with its mount), plus a civilian set of the kit's one-handed weapon, body and legs. Khand
    borrows Rhun's kit until it has one (#571).
@@ -245,7 +249,7 @@ an item folder loads as a duplicate item id.
   culture-default kits do.
 - shaghana and abanissa ship 16 culture-default rosters each but offer no youth-menu title, so the
   coverage test cannot reach them (#570). Khand has no kit of its own (#571).
-- Vanilla also ships `mercenary` (and, for battania, `kern`) player rosters for the six overridden
+- Vanilla also ships `mercenary` (and, for battania, `kern`) player rosters for the five overridden
   cultures; TAOM's youth menu never offers those titles, so they are unreachable and have no
   override. The coverage test derives its expectations from the youth menu, so adding one of those
   titles later without an override roster would put that start back in Calradian gear unnoticed;
@@ -263,7 +267,7 @@ an item folder loads as a duplicate item id.
 |---|---|
 | `Main/_Module/ModuleData/equipmentsets/taom_char_creation_equipment.xml` | Culture-default rosters (in repo) |
 | `Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml` | Career rosters: the culture's lowest troop gear (in repo) |
-| `Main/_Module/ModuleData/equipmentsets/taom_player_start_vanilla_override.xml` | The six vanilla-mapped cultures' rosters, generated from the career kit (in repo, registered in `SubModule.xml`) |
+| `Main/_Module/ModuleData/equipmentsets/taom_player_start_vanilla_override.xml` | The five vanilla-mapped cultures' rosters, generated from the career kit (in repo, registered in `SubModule.xml`) |
 | `LOTRLOME_Armory/.../LOTRLOME_items/<folder>/starter_kit.xml` | Starter item defs, generated (live install and `E:\repos\lotraom-assets\v1.5\LOTRLOME_Armory`) |
 | `LOTRLOME_Armory/.../LOTRLOME_crafting_pieces.xml`, `weapon_descriptions.xslt`, `crafting_templates.xslt` | Starter blades and their registrations, in marker blocks |
 | `LOTRLOME_Armory/.../LOTRLOME_items/<culture>/starter_armors.xml` | The older career-layer starter armour |

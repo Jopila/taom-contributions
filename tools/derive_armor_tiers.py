@@ -179,6 +179,9 @@ def build_armory_index():
                     'primary': ra._get_primary_stat(values, slot_type),
                     'weight': weight,
                     'name': ra.get_display_name(item.get('name', '')),
+                    # the item's own Type: a slot file can hold other items (Harad's camel bardings,
+                    # Type="HorseHarness", sit in body_armors.xml); generate_armour_classes filters on it
+                    'type': item.get('Type'),
                 }
     return index, armory_dir
 
@@ -225,6 +228,7 @@ def derive():
         records[item_id] = {
             'culture': culture,
             'slot': slot,
+            'itemType': info.get('type'),
             'name': info['name'],
             'current': current,
             'weight': info['weight'],

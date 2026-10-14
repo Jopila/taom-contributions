@@ -1,9 +1,9 @@
 """gen_troll_anim_clips.ps1: the melee attack table key a generated clip carries (2026-09-26).
 
-A clip gets a row in the engine's melee attack table only when its "Blends with animation" box (TpacTool
-UnknownClipName) holds its own name, or through the blend children the Kit generates toward a _balanced twin; a
-release or blocked action on a clip with no row crashes. The generator used to blank the box on every clone, so a
-re-cut silently undid set_clip_balance_name.py. The rule now: a clone of a KEYED vanilla template (UnknownClipName
+A clip gets a row in the engine's melee attack table only when its "Blends with animation" box (ShortJake's
+TpacTool v0.5.1 BlendWithAnimation; 0.4.0 called it UnknownClipName) holds its own name, or through the blend
+children the Kit generates toward a _balanced twin; a release or blocked action on a clip with no row crashes. The generator used to blank the box on every clone, so a
+re-cut silently undid set_clip_balance_name.py. The rule now: a clone of a KEYED vanilla template (BlendWithAnimation
 or ClipSource1Name set) is self-keyed, "Blends with action" (BlendsWithAction) emptied, the generated-child fields
 cleared; a clone of an unkeyed template keeps the three names blank.
 
@@ -37,7 +37,7 @@ foreach ($n in $want) {
 }
 $out.calls = $calls
 $setDef = $defs | Where-Object { $_.Name -eq 'Set-ClipKey' } | Select-Object -First 1
-$keyFields = @('UnknownClipName', 'ClipSource1Name', 'ClipSource2Name', 'BlendsWithAction', 'GeneratedIndex')
+$keyFields = @('BlendWithAnimation', 'ClipSource1Name', 'ClipSource2Name', 'BlendsWithAction', 'GeneratedIndex')
 # every Set-ClipKey call comes after an if on the clone name's length in its own block: the name IS the key, and
 # the engine's clip name and row key are 64-byte buffers, 63 usable
 $out.name_guarded = @($ast.FindAll({ param($a) $a -is [System.Management.Automation.Language.CommandAst] -and $a.GetCommandName() -eq 'Set-ClipKey' }, $true) | ForEach-Object {
@@ -57,11 +57,11 @@ $out.stray_writes = @($ast.FindAll({ param($a)
 if ($defs.Count -ne $want.Count) { $out | ConvertTo-Json -Depth 6 -Compress; exit 0 }
 foreach ($d in $defs) { . ([scriptblock]::Create($d.Extent.Text)) }
 
-function Clip($name, $ucn = '', $bwa = '', $cs1 = '', $cs2 = '', $gen = -1) {
-  [pscustomobject]@{ Name = $name; UnknownClipName = $ucn; BlendsWithAction = $bwa; ClipSource1Name = $cs1; ClipSource2Name = $cs2; GeneratedIndex = [sbyte]$gen }
+function Clip($name, $bwanim = '', $bwa = '', $cs1 = '', $cs2 = '', $gen = -1) {
+  [pscustomobject]@{ Name = $name; BlendWithAnimation = $bwanim; BlendsWithAction = $bwa; ClipSource1Name = $cs1; ClipSource2Name = $cs2; GeneratedIndex = [sbyte]$gen }
 }
 function Snap($c) {
-  [ordered]@{ UnknownClipName = $c.UnknownClipName; BlendsWithAction = $c.BlendsWithAction; ClipSource1Name = $c.ClipSource1Name
+  [ordered]@{ BlendWithAnimation = $c.BlendWithAnimation; BlendsWithAction = $c.BlendsWithAction; ClipSource1Name = $c.ClipSource1Name
               ClipSource2Name = $c.ClipSource2Name; GeneratedIndex = [int]$c.GeneratedIndex }
 }
 function Twin { Clip 'release_overswing_2h' 'release_overswing_2h_balanced' 'act_release_overswing_2h_balanced' }
@@ -75,11 +75,11 @@ $out.keyed = [ordered]@{
 
 $set = [ordered]@{}
 $c = Twin; $r = @(Set-ClipKey $c 'anim_hill_troll_release_overswing_2h' $true)
-$set.keyed = [ordered]@{ out = $r.Count; clip = Snap $c; fault = Get-ClipKeyFault ([pscustomobject]@{ Name = 'anim_hill_troll_release_overswing_2h'; UnknownClipName = $c.UnknownClipName; BlendsWithAction = $c.BlendsWithAction; ClipSource1Name = $c.ClipSource1Name; ClipSource2Name = $c.ClipSource2Name; GeneratedIndex = $c.GeneratedIndex }) $true }
+$set.keyed = [ordered]@{ out = $r.Count; clip = Snap $c; fault = Get-ClipKeyFault ([pscustomobject]@{ Name = 'anim_hill_troll_release_overswing_2h'; BlendWithAnimation = $c.BlendWithAnimation; BlendsWithAction = $c.BlendsWithAction; ClipSource1Name = $c.ClipSource1Name; ClipSource2Name = $c.ClipSource2Name; GeneratedIndex = $c.GeneratedIndex }) $true }
 $c = Clip 'release_overswing_2h_3' '' 'act_x' 'release_overswing_2h' 'release_overswing_2h_balanced' 3; $r = @(Set-ClipKey $c 'anim_hill_troll_child' $true)
 $set.keyed_child = [ordered]@{ out = $r.Count; clip = Snap $c }
 $c = Clip 'walk_forward_unarmed' '' 'act_walk' '' 'stale'; $r = @(Set-ClipKey $c 'anim_hill_troll_walk' $false)
-$set.unkeyed = [ordered]@{ out = $r.Count; clip = Snap $c; fault = Get-ClipKeyFault ([pscustomobject]@{ Name = 'anim_hill_troll_walk'; UnknownClipName = $c.UnknownClipName; BlendsWithAction = $c.BlendsWithAction; ClipSource1Name = $c.ClipSource1Name; ClipSource2Name = $c.ClipSource2Name; GeneratedIndex = $c.GeneratedIndex }) $false }
+$set.unkeyed = [ordered]@{ out = $r.Count; clip = Snap $c; fault = Get-ClipKeyFault ([pscustomobject]@{ Name = 'anim_hill_troll_walk'; BlendWithAnimation = $c.BlendWithAnimation; BlendsWithAction = $c.BlendsWithAction; ClipSource1Name = $c.ClipSource1Name; ClipSource2Name = $c.ClipSource2Name; GeneratedIndex = $c.GeneratedIndex }) $false }
 $out.set = $set
 
 $n = 'anim_hill_troll_release_overswing_2h'
@@ -139,20 +139,20 @@ class ClipKeyRuleTests(unittest.TestCase):
     def test_a_keyed_template_makes_a_self_keyed_clone(self):
         s = self.r["set"]["keyed"]
         self.assertEqual(s["out"], 0, "Set-ClipKey only sets fields")
-        self.assertEqual(s["clip"], {"UnknownClipName": "anim_hill_troll_release_overswing_2h", "BlendsWithAction": "",
+        self.assertEqual(s["clip"], {"BlendWithAnimation": "anim_hill_troll_release_overswing_2h", "BlendsWithAction": "",
                                      "ClipSource1Name": "", "ClipSource2Name": "", "GeneratedIndex": -1})
         self.assertEqual(s["fault"], "", "a fresh clone passes -Verify")
 
     def test_a_generated_child_template_loses_its_parents_and_index(self):
         s = self.r["set"]["keyed_child"]
         self.assertEqual(s["out"], 0)
-        self.assertEqual(s["clip"], {"UnknownClipName": "anim_hill_troll_child", "BlendsWithAction": "",
+        self.assertEqual(s["clip"], {"BlendWithAnimation": "anim_hill_troll_child", "BlendsWithAction": "",
                                      "ClipSource1Name": "", "ClipSource2Name": "", "GeneratedIndex": -1})
 
     def test_an_unkeyed_template_keeps_todays_blank_names(self):
         s = self.r["set"]["unkeyed"]
         self.assertEqual(s["out"], 0)
-        self.assertEqual(s["clip"], {"UnknownClipName": "", "BlendsWithAction": "act_walk",
+        self.assertEqual(s["clip"], {"BlendWithAnimation": "", "BlendsWithAction": "act_walk",
                                      "ClipSource1Name": "", "ClipSource2Name": "", "GeneratedIndex": -1})
         self.assertEqual(s["fault"], "")
 

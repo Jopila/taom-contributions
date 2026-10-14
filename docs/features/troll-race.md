@@ -485,7 +485,7 @@ empty: `tools/bind_troll_action_set.py` owns its 213 overrides.
   keeps a melee attack table, keyed by clip index, with ten clip slots per row that it picks by the weapon's
   balance. The table is filled while a clip's package loads (`Animation_clip_item` at 0x58BEA0, inserting through
   0x5682B0). The key is the Modding Kit clip inspector's "Blends with animation" box (editor name
-  `blends_with_animation_`, in memory at +0xD8; TpacTool calls it `UnknownClipName`). A clip whose box holds its own
+  `blends_with_animation_`, in memory at +0xD8; TpacTool v0.5.1 calls it `BlendWithAnimation`, `UnknownClipName` before). A clip whose box holds its own
   name is self-keyed: its row points all ten slots at itself. A clip whose box names its balanced twin
   (`release_overswing_2h` names `release_overswing_2h_balanced`) makes the Kit generate ten FNV-hashed blend
   children between the two on save (`parent_animation_1_`, `parent_animation_2_` and `child_index_` set, none of

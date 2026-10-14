@@ -5,7 +5,7 @@ param(
   [string]$Names = "$PSScriptRoot\blender\fab_cave_troll_clip_names.json",
   [string]$Measure = "$PSScriptRoot\blender\fab_cave_troll_clip_measure.json",
   [string]$Vanilla = 'E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Native\AssetPackages\animation_clips.tpac',
-  [string]$TpacBin = 'E:\Bannerlord_Art\TpacTool_0.4.0\TpacTool\bin',
+  [string]$TpacBin = 'E:\Release_v0.5.1\bin',
   [string]$Loader = 'E:\LOTRAOMAssets\_auto_workspace\chariot\TolerantTpacLoader.cs',
   [string]$SkeletonGuid = 'dd7f3586-10ea-47d5-880e-a0c263862217',
   [string]$ClipPrefix = 'anim_troll_',
@@ -105,14 +105,15 @@ wire_anim_master_skeletons.ps1 -SkeletonGuid <rig> -BoneNum 28 first. After -App
 failure or python missing exits 1.
 The melee attack table key (2026-09-26): a release or blocked action on a clip with no row in the engine's melee attack
 table crashes (TaleWorlds.Native.dll +0x6590B9). A clip gets a row only when its Kit "Blends with animation" box
-(TpacTool UnknownClipName, engine +0xD8) holds its own name, or through the ten blend children the Kit generates toward
-a _balanced twin (docs/features/troll-race.md, "The swing CTD"). So a clone of a KEYED vanilla template (UnknownClipName
-set, self-keyed or twin-keyed, or ClipSource1Name set, a generated child) is written SELF-KEYED: UnknownClipName = the
+(TpacTool BlendWithAnimation, called UnknownClipName before ShortJake's v0.5.1; engine +0xD8) holds its own name, or
+through the ten blend children the Kit generates toward a _balanced twin (docs/features/troll-race.md, "The swing
+CTD"). So a clone of a KEYED vanilla template (BlendWithAnimation set, self-keyed or twin-keyed, or ClipSource1Name
+set, a generated child) is written SELF-KEYED: BlendWithAnimation = the
 clone's own name, "Blends with action" (BlendsWithAction) empty as on all 175 vanilla self-keyed clips, ClipSource1Name
 and ClipSource2Name blank, GeneratedIndex -1. A troll clip never names a vanilla parent or twin: a generated child fills
 a slot of its parent's row, so that would change every human's attack. Both paths refuse a clone name over 63
 characters as TOO LONG before keying it, never truncated: the name is the row key, and both are 64-byte buffers. A
-clone of an unkeyed template keeps UnknownClipName, ClipSource1Name and ClipSource2Name blank, as before. Both paths
+clone of an unkeyed template keeps BlendWithAnimation, ClipSource1Name and ClipSource2Name blank, as before. Both paths
 apply the rule (Set-ClipKey, which only sets the fields), read a template's keying from the vanilla table as loaded
 (the Fab path mutates one shared template per clip type), and mark a keyed clip KEYED in the dry-run rows. Both
 -Verify modes fail a clip as KEY when it breaks the rule (Get-ClipKeyFault).
@@ -211,22 +212,22 @@ if ($foreign.Count -gt 0) {
 # its loop or death displacement scaled by -TravelScale. Several clips share one master, as in vanilla. -Verify checks
 # the clips on disk against the index instead of the whole-master rule below.
 # ---- the melee attack table key (see header)
-function Test-KeyedTemplate($tpl) { return [bool]($tpl.UnknownClipName -or $tpl.ClipSource1Name) }
+function Test-KeyedTemplate($tpl) { return [bool]($tpl.BlendWithAnimation -or $tpl.ClipSource1Name) }
 # keys the clone $c as $newName; only sets fields. Both callers refuse a name over 63 characters first (the name is the key)
 function Set-ClipKey($c, [string]$newName, [bool]$keyed) {
-  if ($keyed) { $c.UnknownClipName = $newName; $c.BlendsWithAction = ''; $c.GeneratedIndex = [sbyte]-1 }
-  else { $c.UnknownClipName = '' }
+  if ($keyed) { $c.BlendWithAnimation = $newName; $c.BlendsWithAction = ''; $c.GeneratedIndex = [sbyte]-1 }
+  else { $c.BlendWithAnimation = '' }
   $c.ClipSource1Name = ''; $c.ClipSource2Name = ''
 }
 # -Verify's half: '' when a clip on disk carries the key its template calls for, else what is wrong
 function Get-ClipKeyFault($cl, [bool]$keyed) {
   if ($keyed) {
-    if ($cl.UnknownClipName -cne $cl.Name) { return ("keyed template, but UnknownClipName is '{0}' (want its own name)" -f $cl.UnknownClipName) }
+    if ($cl.BlendWithAnimation -cne $cl.Name) { return ("keyed template, but BlendWithAnimation is '{0}' (want its own name)" -f $cl.BlendWithAnimation) }
     if ($cl.BlendsWithAction -or $cl.ClipSource1Name -or $cl.ClipSource2Name -or $cl.GeneratedIndex -ne -1) {
       return ("self-keyed, but BlendsWithAction '{0}' ClipSource1Name '{1}' ClipSource2Name '{2}' GeneratedIndex {3} (want blank, blank, blank, -1)" -f $cl.BlendsWithAction, $cl.ClipSource1Name, $cl.ClipSource2Name, $cl.GeneratedIndex)
     }
-  } elseif ($cl.UnknownClipName -or $cl.ClipSource1Name -or $cl.ClipSource2Name) {
-    return ("unkeyed template, but UnknownClipName '{0}' ClipSource1Name '{1}' ClipSource2Name '{2}' (want all blank)" -f $cl.UnknownClipName, $cl.ClipSource1Name, $cl.ClipSource2Name)
+  } elseif ($cl.BlendWithAnimation -or $cl.ClipSource1Name -or $cl.ClipSource2Name) {
+    return ("unkeyed template, but BlendWithAnimation '{0}' ClipSource1Name '{1}' ClipSource2Name '{2}' (want all blank)" -f $cl.BlendWithAnimation, $cl.ClipSource1Name, $cl.ClipSource2Name)
   }
   return ''
 }
@@ -339,8 +340,8 @@ if ($CloneByName) {
       foreach ($u in $c.ClipUsages) {
         if ($u.GetType().Name -eq 'BipMovIkUsage') { $u.LoopDisplacement = [float]([double]$u.LoopDisplacement * $TravelScale); $usageNote = ('loop={0}' -f $u.LoopDisplacement) }
         elseif ($u.GetType().Name -eq 'DisplacementUsage') {
-          $v = $u.DisplacementVector
-          $u.DisplacementVector = New-Object System.Numerics.Vector3 -ArgumentList @([float]($v.X * $TravelScale), [float]($v.Y * $TravelScale), [float]($v.Z * $TravelScale))
+          $v = $u.DisplacementVector   # a Vector4 in TpacTool v0.5.1; W is kept
+          $u.DisplacementVector = New-Object System.Numerics.Vector4 -ArgumentList @([float]($v.X * $TravelScale), [float]($v.Y * $TravelScale), [float]($v.Z * $TravelScale), [float]$v.W)
           $usageNote = ('disp={0}' -f $u.DisplacementVector)
         }
       }
@@ -353,7 +354,7 @@ if ($CloneByName) {
       $pkg = New-Object TpacTool.Lib.AssetPackage
       $pkg.Guid = [Guid]::NewGuid()
       $pkg.Items.Add($c)
-      $pkg.Save($out, 2)
+      $pkg.Save($out, $false, 2)   # path, useOriginalChecksum, tpac version
       $written++
     }
   }
@@ -511,7 +512,7 @@ foreach ($mname in ($masterMap.Keys | Sort-Object)) {
   elseif ($type -eq 'death') {
     foreach ($u in $c.ClipUsages) {
       if ($u.GetType().Name -eq 'DisplacementUsage') {
-        $u.DisplacementVector = New-Object System.Numerics.Vector3 -ArgumentList @([float]0, (Travel $meas), [float]0)
+        $u.DisplacementVector = New-Object System.Numerics.Vector4 -ArgumentList @([float]0, (Travel $meas), [float]0, [float]$u.DisplacementVector.W)
         $usageNote = ('disp={0}' -f $u.DisplacementVector)
       }
     }
@@ -524,7 +525,7 @@ foreach ($mname in ($masterMap.Keys | Sort-Object)) {
     $pkg = New-Object TpacTool.Lib.AssetPackage
     $pkg.Guid = [Guid]::NewGuid()
     $pkg.Items.Add($c)
-    $pkg.Save($out, 2)
+    $pkg.Save($out, $false, 2)   # path, useOriginalChecksum, tpac version
     $written++
   }
 }

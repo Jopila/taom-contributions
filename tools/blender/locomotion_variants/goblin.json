@@ -1,0 +1,28 @@
+{
+ "_doc": "Goblin (race goblin): deeper crouch, shorter and faster steps, head thrust forward, restless idle. Approved motion spec in docs/features/orc-goblin-locomotion.md. Read by tools/blender/restyle_human_clip.py. Angles in degrees, distances in metres.",
+ "clip_prefix": "taom_goblin_",
+ "trunk_flex_deg": {"spine": 9.0, "spine1": 9.0, "spine2": 10.0},
+ "neck_head_flex_deg": {"neck": -7.0, "head": -8.0},
+ "pelvis_tilt_deg": 10.0,
+ "clavicle_drop_deg": 5.0,
+ "clavicle_protract_deg": 6.0,
+ "upperarm_hang_deg": 3.0,
+ "elbow_bend_deg": 12.0,
+ "arm_swing_scale": 0.9,
+ "knee_bend_deg": 16.0,
+ "stance_width_m": 0.015,
+ "foot_splay_deg": 4.0,
+ "stride_scale": 0.8,
+ "bob_scale": 0.8,
+ "sway_scale": 1.1,
+ "idle": {
+  "_doc": "Quick glances (a third harmonic sharpens the turns), hunch pulses, constant weight shift.",
+  "head_yaw_deg": 20.0,
+  "head_cycles": 2,
+  "glance_harmonic": 0.35,
+  "breath_pitch_deg": 2.5,
+  "breath_cycles": 4,
+  "weight_shift_m": 0.025,
+  "weight_cycles": 2
+ }
+}

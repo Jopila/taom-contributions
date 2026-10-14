@@ -21,12 +21,13 @@ namespace TAOM.Tests.Features.CharacterCreation;
 /// and never named by an <c>NPCCharacter</c>, so <c>validate_moduledata.py</c>'s troop sweeps cannot
 /// see them; this is the same blind spot <see cref="CareerCultureCoverageTests"/> covers for mounts.
 ///
-/// The six vanilla-mapped cultures (vlandia, empire, sturgia, aserai, battania, khuzait) get their
-/// culture-default rosters from <c>taom_player_start_vanilla_override.xml</c>, which carries the same
-/// ids as vanilla's rosters plus <c>_replaceWhileMerging="true"</c> on each roster element. Without
-/// that attribute the engine's XML merge (<c>MBObjectManager.MergeElements</c>) APPENDS a second
-/// battle set to vanilla's roster and the adapter keeps taking vanilla's first, so the whole
-/// override is invisible in game while every file-level check passes.
+/// The six vanilla cultures (vlandia, empire, sturgia, aserai, battania, khuzait) reuse vanilla's
+/// roster ids. Five get their culture-default rosters from <c>taom_player_start_vanilla_override.xml</c>;
+/// aserai has its own in <c>taom_char_creation_equipment.xml</c> since 2026-10-10. Either way each
+/// roster carries <c>_replaceWhileMerging="true"</c>. Without that attribute the engine's XML merge
+/// (<c>MBObjectManager.MergeElements</c>) APPENDS a second battle set to vanilla's roster and the
+/// adapter keeps taking vanilla's first, so the roster is invisible in game while every file-level
+/// check passes.
 /// </summary>
 [TestClass]
 public class StarterKitCoverageTests
@@ -50,6 +51,11 @@ public class StarterKitCoverageTests
     // tools/wire_starter_kit_rosters.py.
     private static readonly Dictionary<string, string> KitSourceCulture =
         new Dictionary<string, string>(StringComparer.Ordinal) { ["battania"] = "khuzait" };
+
+    // The vanilla cultures whose player_char_creation_* roster ids vanilla SandBox also defines;
+    // mirrors VANILLA_CULTURES in tools/wire_starter_kit_rosters.py.
+    private static readonly HashSet<string> VanillaCultures = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        { "vlandia", "empire", "sturgia", "aserai", "battania", "khuzait" };
 
     private static bool IsPlayerRoster(string id) =>
         (id.StartsWith("player_char_creation_", StringComparison.Ordinal)
@@ -245,9 +251,10 @@ public class StarterKitCoverageTests
             .ToDictionary(g => g.Key, g => g.Select(o => o.Value<string>("title_type")!).Distinct().ToList(),
                 StringComparer.OrdinalIgnoreCase);
 
-        var cultureDefaultIds = new HashSet<string>(
-            PlayerRosters(LoadRosters(CultureDefaultFile)).Select(r => r.Attribute("id")!.Value),
-            StringComparer.OrdinalIgnoreCase);
+        var cultureDefaultRosters = PlayerRosters(LoadRosters(CultureDefaultFile))
+            .GroupBy(r => r.Attribute("id")!.Value, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+        var cultureDefaultIds = new HashSet<string>(cultureDefaultRosters.Keys, StringComparer.OrdinalIgnoreCase);
         var overrideIds = new HashSet<string>(
             PlayerRosters(LoadRosters(VanillaOverrideFile)).Select(r => r.Attribute("id")!.Value),
             StringComparer.OrdinalIgnoreCase);
@@ -264,7 +271,22 @@ public class StarterKitCoverageTests
         {
             if (!titlesByCulture.TryGetValue(culture!, out var titles)) continue;
             if (cultureDefaultIds.Any(id => id.StartsWith($"player_char_creation_{culture}_", StringComparison.OrdinalIgnoreCase)))
+            {
+                // A vanilla culture with its own TAOM rosters (aserai, 08b30bfc4) reuses vanilla's ids, so
+                // each roster must REPLACE vanilla's; without the flag MergeElements appends its sets after
+                // vanilla's and the adapter takes vanilla's first (the Harad start in Calradian gear).
+                if (!VanillaCultures.Contains(culture!)) continue;
+                covered++;
+                foreach (var title in titles)
+                foreach (var sex in new[] { "m", "f" })
+                {
+                    var id = $"player_char_creation_{culture}_{title}_{sex}";
+                    if (!cultureDefaultRosters.TryGetValue(id, out var own)
+                        || (string?)own.Attribute("_replaceWhileMerging") != "true")
+                        gaps.Add(id + " (culture-default roster without _replaceWhileMerging)");
+                }
                 continue;
+            }
             covered++;
             foreach (var title in titles)
             foreach (var sex in new[] { "m", "f" })
@@ -274,6 +296,8 @@ public class StarterKitCoverageTests
             }
         }
 
+        // the six vanilla cultures: covered by the override, or (aserai since 2026-10-10) by their own
+        // culture-default rosters carrying _replaceWhileMerging (tools/wire_starter_kit_rosters.py)
         Assert.IsTrue(covered >= 6, $"expected the six vanilla-mapped cultures to be derived, found {covered}");
         Assert.AreEqual(0, gaps.Count,
             "A vanilla-mapped culture offers a youth title with no TAOM override roster, so that start "

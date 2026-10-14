@@ -15,13 +15,18 @@ the travel comes back here as metadata, the way the troll's did (fab_cave_troll_
 Frames: the retarget keys source frames f0..f1 as master frames 1..n (n = f1 - f0 + 1, frame 0 = rest) and a
 clip plays Source1 = 1 .. Source2 = master Duration - 1, so ONE LOOP = n - 1 frames starting at f0.
   travel      horizontal root (armature object) speed over f0..f1, times the loop length, times the reskin's
-              fit scale (the mesh was scaled to horse size by the same global fit), metres per loop
-  plants      per hoof (the pack's four ankle joints), the first frame of each ground contact (ankle height
-              falls below its minimum + 2 cm) as a fraction of the loop, in [0, 1)
+              fit scale (the mesh was scaled to horse size by the same global fit), metres per loop. A clip that
+              plays in place (root travel under IN_PLACE_M, every WildMesh3D gait, #794) has no root speed, so its
+              speed is the median horizontal speed of a planted hoof instead: in place, a hoof on the ground
+              slides back at the ground speed the animal would cover ("travel_mode": "stride").
+  plants      per hoof (the map's 'measure' hooves, else the Animalia ankle joints), the first frame of each
+              ground contact (height falls below its minimum + 2 cm) as a fraction of the loop, in [0, 1)
   fall        deaths: the fraction of the clip at which the pelvis first comes within 5 cm of its final height
+The bone names come from the map's optional "measure": {"pelvis": ..., "hooves": {"LF", "RF", "LB", "RB"}}.
 """
 import argparse
 import json
+import math
 import os
 import sys
 import traceback
@@ -32,7 +37,22 @@ TOOLS = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, TOOLS)
 import reskin_animalia_to_horse as rk  # noqa: E402
 
-ANKLES = {"LF": "RigLFLegAnkle", "RF": "RigRFLegAnkle", "LB": "RigLBLegAnkle", "RB": "RigRBLegAnkle"}
+DEFAULT_MEASURE = {"pelvis": "RigPelvis",
+                   "hooves": {"LF": "RigLFLegAnkle", "RF": "RigRFLegAnkle", "LB": "RigLBLegAnkle", "RB": "RigRBLegAnkle"}}
+IN_PLACE_M = 0.05   # root travel below this over the whole clip: the clip plays in place
+
+
+def stride_speed(pos, loop):
+    """Median horizontal speed per frame of a hoof while it stays within 2 cm of its lowest point."""
+    speeds = []
+    for ps in pos.values():
+        lo = min(p.z for p in ps[:loop]) + 0.02
+        for i in range(1, loop + 1):
+            if ps[i].z <= lo and ps[i - 1].z <= lo:
+                dv = ps[i] - ps[i - 1]
+                speeds.append(math.hypot(dv.x, dv.y))
+    speeds.sort()
+    return speeds[len(speeds) // 2] if speeds else 0.0
 
 
 def _frame_range(arm):
@@ -60,19 +80,26 @@ def measure(path, template_heads, spec, is_death):
     _, fit = rk.global_fit(heads, template_heads, spec["joints"])
     n = f1 - f0 + 1
     loop = n - 1
-    root, z = [], {k: [] for k in ANKLES}
+    names = dict(DEFAULT_MEASURE, **spec.get("measure", {}))
+    hooves = names["hooves"]
+    root, pos = [], {k: [] for k in hooves}
     pelvis_z = []
     for f in range(f0, f1 + 1):
         scn.frame_set(f)
         root.append(arm.matrix_world.translation.copy())
-        for k, b in ANKLES.items():
-            z[k].append(_world_head(arm, b).z)
-        pelvis_z.append(_world_head(arm, "RigPelvis").z)
+        for k, b in hooves.items():
+            pos[k].append(_world_head(arm, b))
+        pelvis_z.append(_world_head(arm, names["pelvis"]).z)
+    z = {k: [p.z for p in ps] for k, ps in pos.items()}
     d = root[-1] - root[0]
     d.z = 0.0
-    speed_per_frame = d.length / max(1, f1 - f0)
-    out = {"frames": [f0, f1], "n": n, "loop_frames": loop, "fit_scale": fit["scale"],
-           "travel_source_m": round(d.length, 4),
+    if d.length >= IN_PLACE_M:
+        speed_per_frame, mode = d.length / max(1, f1 - f0), "root"
+    else:
+        speed_per_frame, mode = stride_speed(pos, loop), "stride"
+    out = {"frames": [f0, f1], "n": n, "loop_frames": loop, "fit_scale": fit["scale"], "travel_mode": mode,
+           "fps": scn.render.fps / scn.render.fps_base,
+           "travel_source_m": round(d.length, 4) if mode == "root" else round(speed_per_frame * loop, 4),
            "loop_displacement_m": round(speed_per_frame * loop * fit["scale"], 4),
            "speed_mps_at_30fps": round(speed_per_frame * 30.0 * fit["scale"], 3)}
     plants = {}

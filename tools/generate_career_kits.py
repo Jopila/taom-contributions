@@ -26,7 +26,7 @@ USAGE
     python tools/generate_career_kits.py --apply    # write the career file
     python tools/generate_career_kits.py --verify   # exit 1 if the career file drifts from the rule
 
-After --apply, run `python tools/wire_starter_kit_rosters.py --apply`: the six vanilla-mapped
+After --apply, run `python tools/wire_starter_kit_rosters.py --apply`: the five vanilla-mapped
 cultures' careerless rosters are built from this kit. Needs the game install (item classes,
 meshes); without it the run stops rather than guessing.
 """

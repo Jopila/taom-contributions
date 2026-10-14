@@ -58,7 +58,7 @@ master Duration - 1`, hands 3/3 on weapon-agnostic clips):
 Two gotchas: a `StepPoints` entry on a clip with no `SoundCode` is a sound trigger with no sound (the Kit warns
 "Sound points and/or sound id not valid"), so clear them together; and a race's own clip on a release or blocked
 code crashes the swing unless the engine's melee attack table has a row for it. **No flag gives a clip that row.**
-The key is the clip inspector's "Blends with animation" box (TpacTool calls it `UnknownClipName`): the clip's own
+The key is the clip inspector's "Blends with animation" box (TpacTool v0.5.1 calls it `BlendWithAnimation`, `UnknownClipName` before): the clip's own
 name there self-keys it (vanilla's 175 self-keyed swings all leave "Blends with action" empty), and its balanced
 twin's name there makes the Kit generate ten blend children between the two on save, which fill the row.
 Since 2026-09-26 `gen_troll_anim_clips.ps1` writes a clone of a keyed vanilla template self-keyed (and a clone of

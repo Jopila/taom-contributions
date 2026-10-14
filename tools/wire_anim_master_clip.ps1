@@ -4,7 +4,7 @@ param(
   [string]$SkeletonGuid = '1163bb17-777d-49b1-b083-aad79dc544fd',
   [double]$Fps = 30.0,
   [switch]$Apply,
-  [string]$TpacBin = 'E:\Bannerlord_Art\TpacTool_0.4.0\TpacTool\bin',
+  [string]$TpacBin = 'E:\Release_v0.5.1\bin',
   [string]$Loader = 'E:\LOTRAOMAssets\_auto_workspace\chariot\TolerantTpacLoader.cs'
 )
 <#
@@ -84,7 +84,7 @@ if ($Apply) {
   $pkg.Guid = $pkgGuid
   $pkg.Items.Add($cl)
   if (-not (Test-Path -LiteralPath "$Clip.bak-prewire")) { [IO.File]::Copy($Clip, "$Clip.bak-prewire") }
-  $pkg.Save($Clip, 2)
+  $pkg.Save($Clip, $false, 2)   # path, useOriginalChecksum, tpac version
   $chk = (Load $Clip).Package
   $c2 = $chk.Items | Where-Object { $_.GetType().Name -eq 'AnimationClip' } | Select-Object -First 1
   if ("$($c2.Animation)" -ne "$($sa.Guid)" -or "$($chk.Guid)" -ne "$pkgGuid" -or "$($c2.Guid)" -ne "$($cl.Guid)") { throw "clip did not read back as written" }

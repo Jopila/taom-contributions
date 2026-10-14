@@ -177,6 +177,59 @@ class TestRewire(unittest.TestCase):
         self.assertGreater(n1, 0)
 
 
+class TestVanillaReplacement(unittest.TestCase):
+    """A culture-default roster whose id vanilla also defines must carry _replaceWhileMerging:
+    without it MBObjectManager.MergeElements APPENDS its sets after vanilla's and the adapter takes
+    vanilla's first one (aserai, 2026-10-14: the Harad start fell back to Calradian gear). The flag
+    on a roster vanilla LACKS is worse: the engine merges it into the document's first roster."""
+
+    VANILLA = frozenset({"player_char_creation_gondor_retainer_m", "mother_char_creation_gondor_retainer"})
+
+    def test_marks_only_the_rosters_vanilla_defines(self):
+        out, marked = wk.mark_vanilla_replacements(CC, self.VANILLA)
+        self.assertEqual(sorted(marked), sorted(self.VANILLA))
+        root = ET.fromstring(out.encode("utf-8"))
+        flags = {r.get("id"): r.get("_replaceWhileMerging") for r in root.iter("EquipmentRoster")}
+        self.assertEqual(flags["player_char_creation_gondor_retainer_m"], "true")
+        self.assertEqual(flags["mother_char_creation_gondor_retainer"], "true")
+        self.assertIsNone(flags["player_char_creation_childhood_age_gondor_retainer_m"])
+
+    def test_the_flag_takes_the_id_line_indentation_and_nothing_else_moves(self):
+        out, _ = wk.mark_vanilla_replacements(CC, self.VANILLA)
+        self.assertIn('\t\tculture="Culture.gondor"\r\n\t\t_replaceWhileMerging="true">', out)
+        self.assertEqual(out.replace('\r\n\t\t_replaceWhileMerging="true"', ""), CC)
+
+    def test_a_single_line_roster_gets_the_flag_inline(self):
+        text = '<EquipmentRosters><EquipmentRoster id="a" culture="Culture.aserai"><EquipmentSet /></EquipmentRoster></EquipmentRosters>'
+        out, marked = wk.mark_vanilla_replacements(text, frozenset({"a"}))
+        self.assertEqual(marked, ["a"])
+        self.assertIn('<EquipmentRoster id="a" culture="Culture.aserai" _replaceWhileMerging="true">', out)
+
+    def test_idempotent(self):
+        once, _ = wk.mark_vanilla_replacements(CC, self.VANILLA)
+        twice, marked = wk.mark_vanilla_replacements(once, self.VANILLA)
+        self.assertEqual(twice, once)
+        self.assertEqual(marked, [])
+
+    def test_a_flag_on_a_roster_vanilla_lacks_is_reported(self):
+        out, _ = wk.mark_vanilla_replacements(CC, self.VANILLA)
+        self.assertEqual(wk.stray_replace_ids(out, self.VANILLA), [])
+        self.assertEqual(wk.stray_replace_ids(out, frozenset({"mother_char_creation_gondor_retainer"})),
+                         ["player_char_creation_gondor_retainer_m"])
+
+
+@unittest.skipUnless(all(p.exists() for p in wk.VANILLA_ROSTER_FILES), "needs the Bannerlord install; skipped, never faked")
+class TestCommittedCultureFileAgainstVanilla(unittest.TestCase):
+    def test_every_culture_roster_vanilla_also_defines_replaces_it_and_no_other_does(self):
+        vanilla = wk.vanilla_roster_ids()
+        text = wk.gk.read_xml(wk.CC_FILE)[0]
+        rosters = list(ET.fromstring(text.encode("utf-8")).iter("EquipmentRoster"))
+        unflagged = sorted(r.get("id") for r in rosters
+                           if r.get("id") in vanilla and r.get("_replaceWhileMerging") != "true")
+        self.assertEqual(unflagged, [], "run python tools/wire_starter_kit_rosters.py --apply")
+        self.assertEqual(wk.stray_replace_ids(text, vanilla), [])
+
+
 class TestVanillaOverride(unittest.TestCase):
     def setUp(self):
         self.text = wk.build_vanilla_override(CAREER, TITLES, {"battania": "khuzait"}, eol="\n")
@@ -223,6 +276,22 @@ class TestVanillaOverride(unittest.TestCase):
         for e in self.root.iter("Equipment"):
             self.assertIn(e.get("id"), career_ids)
 
+    def test_a_roster_the_culture_file_already_defines_is_left_out(self):
+        # Erkam gave aserai its own culture-default rosters (2026-10-10); the override, loaded
+        # last with _replaceWhileMerging, replaced them and the module carried 12 duplicate ids
+        owned = frozenset({"player_char_creation_khuzait_hunter_m"})
+        text = wk.build_vanilla_override(CAREER, TITLES, {"battania": "khuzait"}, eol="\n", owned=owned)
+        ids = {r.get("id") for r in ET.fromstring(text.encode("utf-8")).iter("EquipmentRoster")}
+        self.assertNotIn("player_char_creation_khuzait_hunter_m", ids)
+        self.assertIn("player_char_creation_khuzait_hunter_f", ids)
+        self.assertEqual(len(ids), (6 + 2) * 2 - 1)
+
+    def test_a_culture_whose_every_roster_is_owned_gets_no_block(self):
+        owned = frozenset(f"player_char_creation_battania_{t}_{s}" for t in TITLES["battania"] for s in "mf")
+        text = wk.build_vanilla_override(CAREER, TITLES, {"battania": "khuzait"}, eol="\n", owned=owned)
+        self.assertNotIn("battania", text.split("-->", 1)[1])
+        self.assertIn("player_char_creation_khuzait_guard_m", text)
+
 
 # Since #629 the career rosters name the culture's lowest troop items, not starter_ twins.
 CAREER_TROOP = CAREER.replace("starter_composite_bow", "ladder_rhun_new_bow_t2") \
@@ -260,12 +329,20 @@ class TestCareerKitIsNotRewired(unittest.TestCase):
 
     def test_committed_override_is_what_the_tool_builds_from_the_committed_career_file(self):
         # the override is generated from the career kit; editing the career file without
-        # re-running the tool leaves the six vanilla-mapped starts on the old kit
+        # re-running the tool leaves the overridden vanilla starts on the old kit
         built = wk.build_vanilla_override(wk.gk.read_xml(wk.CAREER_FILE)[0],
-                                          wk.titles_from_menus(wk.MENUS_DIR), wk.BORROW)
+                                          wk.titles_from_menus(wk.MENUS_DIR), wk.BORROW,
+                                          owned=wk.owned_roster_ids())
         committed = wk.gk.read_xml(wk.OVERRIDE_FILE)[0]
         self.assertEqual(committed.replace("\r\n", "\n"), built.replace("\r\n", "\n"),
                          "re-run python tools/wire_starter_kit_rosters.py --apply")
+
+    def test_no_override_roster_is_also_a_culture_default_roster(self):
+        # one module defining a roster id twice is DUPLICATE_ROSTER_ID, and the override (loaded
+        # last, _replaceWhileMerging) silently wins over the culture's own start (aserai, 2026-10-14)
+        override = {r.get("id") for r in ET.fromstring(wk.gk.read_xml(wk.OVERRIDE_FILE)[0].encode("utf-8"))
+                    .iter("EquipmentRoster")}
+        self.assertEqual(sorted(override & wk.owned_roster_ids()), [])
 
 
 VANILLA_SETS = """<EquipmentRosters>

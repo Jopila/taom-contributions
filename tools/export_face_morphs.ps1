@@ -14,14 +14,14 @@
        -Metamesh sk_dwarf_bm_f1_head -Out head.json
 
 .NOTES
-  -TpacToolBin defaults to this machine's TpacTool 0.4.0 build; pass another path elsewhere.
+  -TpacToolBin defaults to this machine's TpacTool v0.5.1 (ShortJake's fork); pass another path elsewhere.
   2026-09-26, the female dwarf's eyes (docs/reference/race-face-and-hand-morphs.md).
 #>
 param(
   [Parameter(Mandatory=$true)][string]$Package,
   [Parameter(Mandatory=$true)][string]$Metamesh,
   [Parameter(Mandatory=$true)][string]$Out,
-  [string]$TpacToolBin = "E:\Bannerlord_Art\TpacTool_0.4.0\TpacTool\bin"
+  [string]$TpacToolBin = "E:\Release_v0.5.1\bin"
 )
 $ErrorActionPreference = "Stop"
 $script:BINDIR = $TpacToolBin
