@@ -23,18 +23,25 @@ Row accounting: every table row of an input file ends up parsed or counted unpar
 prints 'rows_in_file=N parsed=N unparsed=N' per file. A silently dropped row is how the v1.5.4
 body diff lost 27 generic-arity targets (RCA finding F4).
 
-Text normalization (on by default, --no-normalize to disable): the v1.5.3 era decompile went
-through a lossy pipe that turned non-ASCII into '?'. Before comparing, the 'Latest version is' nag
-line is dropped and every non-ASCII char, and every '?' inside a string literal or comment, becomes
-one placeholder, so a pure encoding difference does not count as a change.
+Text normalization (on by default, --no-normalize to disable): the v1.5.3 and v1.5.4 decompiles
+mapped some letters to ASCII or '?'; the v1.5.5 one is lossless. Before comparing, the 'Latest
+version is' nag line is dropped and every non-ASCII char, and every '?' inside a string literal or
+comment, becomes one placeholder, so normalization makes '?' and non-ASCII differences invisible.
+
+Input checks: all four build folders (_shipping_build and _modules_build, old suffix and new
+suffix) must exist, every --taom-src folder must exist, and BuildInfo.GameVersion (read from
+_shipping_build<suffix>/TaleWorlds.Library.cs) must be present and differ between the two sides;
+otherwise exit 2. The run prints 'old=... new=...', the count of third-party engine copies it
+skipped per module, and clears the *.diff files an earlier run left in --out.
 
 Usage for the 1.5.4 to 1.5.5 bump (new decompile in the unsuffixed folders):
     python tools/engine_body_diff.py --old-suffix _v1.5.4 \\
         --out E:\\Decompiled_Bannerlord\\_diff_1.5.4_to_1.5.5\\bound_members
 
 Output: <out>/<Type>.<Member>.diff per changed member and <out>/summary.txt (also printed).
-Exit 0 when every row parsed (changed rows are information, not failure), 1 when any row is
-unparsed, 2 on bad input (missing folder or snapshot file).
+Exit 0 when every row parsed and resolved (changed rows are information, not failure), 1 when any
+row is unparsed or unresolved, 2 on bad input (missing folder, snapshot file or build version,
+or the same build on both sides).
 
 Limits: text based, not a parser. It assumes ilspycmd layout (tab indentation, one namespace
 line per file, direct members one tab inside their type). Overloads of a member are diffed
@@ -57,6 +64,18 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_ROOT = r"E:\Decompiled_Bannerlord"
 DEFAULT_SNAPSHOT = REPO_ROOT / "docs" / "reference" / "taleworlds-api-snapshot"
 BUILD_DIRS = ("_shipping_build", "_modules_build")
+# _modules_build names each file <Module>__<Assembly>.cs. A third-party module can ship its own copy
+# of an engine assembly (the Coop module carries 40 v1.5.4 TaleWorlds/SandBox DLLs), which would put a
+# second, stale definition of every engine type into the new side. Engine assemblies are read only
+# from vanilla modules; a mod's own assemblies (TAOM, its dependencies) are still read.
+VANILLA_MODULES = frozenset({"Native", "SandBox", "SandBoxCore", "StoryMode", "CustomBattle",
+                             "BirthAndDeath", "Multiplayer", "NavalDLC", "FastMode"})
+ENGINE_ASSEMBLY_PREFIXES = ("TaleWorlds.", "SandBox", "StoryMode", "NavalDLC")
+
+
+def is_third_party_engine_copy(file_name: str) -> bool:
+    module, sep, assembly = file_name.partition("__")
+    return bool(sep) and module not in VANILLA_MODULES and assembly.startswith(ENGINE_ASSEMBLY_PREFIXES)
 
 NAG = re.compile(r"^Latest version is")
 STR = re.compile(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'')
@@ -65,6 +84,8 @@ NON_ASCII = re.compile(r"[^\x00-\x7f]")
 ARITY = re.compile(r"`\d+")
 SEPARATOR_ROW = re.compile(r"^\|[\s:|-]+$")
 TYPE_DECL = re.compile(r"^(\s*)(?:[\w\[\]]+\s+)*(?:class|struct|interface)\s+(\w+)")
+NAMESPACE = re.compile(r"^namespace\s+([\w.]+)")
+GAME_VERSION = re.compile(r'GameVersion\s*=\s*"([^"]+)"')
 LOADER = re.compile(r"\bDeserialize\s*\(\s*MBObjectManager\b")
 BACKING = re.compile(r"^<(\w+)>k__BackingField$")
 
@@ -75,6 +96,8 @@ class BadInput(Exception):
 
 def normalize_line(line: str) -> str:
     """Make a pure encoding difference invisible: see the module docstring."""
+    if line.isascii() and "?" not in line:
+        return line
     out = []
     pos = 0
     for m in STR.finditer(line):
@@ -93,19 +116,34 @@ def _code_part(s: str) -> str:
     return s
 
 
-def load_assemblies(root: Path, suffix: str, normalize: bool) -> dict[str, list[str]]:
+def load_assemblies(root: Path, suffix: str, normalize: bool, skipped: dict | None = None) -> dict[str, list[str]]:
+    absent = [sub + suffix for sub in BUILD_DIRS if not (root / (sub + suffix)).is_dir()]
+    if absent:
+        raise BadInput(f"decompile folder(s) not found under {root}: {', '.join(absent)}")
     texts: dict[str, list[str]] = {}
     for sub in BUILD_DIRS:
         d = root / (sub + suffix)
-        if not d.is_dir():
-            continue
         for f in sorted(d.glob("*.cs")):
+            if sub == "_modules_build" and is_third_party_engine_copy(f.name):
+                if skipped is not None:
+                    module = f.name.partition("__")[0]
+                    skipped[module] = skipped.get(module, 0) + 1
+                continue
             raw = f.read_text(encoding="utf-8-sig", errors="replace").splitlines()
             lines = [ln for ln in raw if not NAG.match(ln)]
             if normalize:
                 lines = [normalize_line(ln) for ln in lines]
             texts[sub + "/" + f.name] = lines
     return texts
+
+
+def game_version(texts: dict[str, list[str]]) -> str | None:
+    """BuildInfo.GameVersion of one decompile (TaleWorlds.Library), or None."""
+    for line in texts.get("_shipping_build/TaleWorlds.Library.cs", []):
+        m = GAME_VERSION.search(line)
+        if m:
+            return m.group(1)
+    return None
 
 
 def strip_strings(s: str) -> str:
@@ -117,6 +155,8 @@ def brace_block(lines: list[str], start: int) -> int:
     depth = 0
     seen = False
     for i in range(start, len(lines)):
+        if seen and "{" not in lines[i] and "}" not in lines[i]:
+            continue
         s = strip_strings(lines[i])
         for ch in s:
             if ch == "{":
@@ -138,10 +178,13 @@ def index_types(texts: dict[str, list[str]]) -> dict[str, list[tuple[str, int, i
         ns = ""
         stack: list[tuple[int, str]] = []
         for i, line in enumerate(lines):
-            m = re.match(r"^namespace\s+([\w.]+)", line)
-            if m:
-                ns = m.group(1)
-                stack = []
+            if line.startswith("namespace"):
+                m = NAMESPACE.match(line)
+                if m:
+                    ns = m.group(1)
+                    stack = []
+                    continue
+            if "class" not in line and "struct" not in line and "interface" not in line:
                 continue
             m = TYPE_DECL.match(line)
             if m and not line.strip().startswith("//"):
@@ -291,10 +334,10 @@ def parse_models(text: str, rows: list[Row], unparsed: list[str], taom_src: dict
         if m and cur is not None:
             cur["base"] = m.group(1)
             continue
-        if line.startswith("- `") and cur is not None:
+        if line.startswith("- `"):
             total += 1
             mm = re.match(r"^- `\S+ (\w+)\(", line)
-            if mm and cur["base"]:
+            if cur is not None and mm and cur["base"]:
                 parsed += 1
                 cur["methods"].append(mm.group(1))
             else:
@@ -379,7 +422,7 @@ def loader_rows(texts: dict[str, list[str]], idx: dict) -> set[str]:
     found = set()
     for fname, lines in texts.items():
         for i, ln in enumerate(lines):
-            if LOADER.search(ln):
+            if "Deserialize" in ln and LOADER.search(ln):
                 inner = [sp for sp in spans[fname] if sp[0] < i <= sp[1]]
                 if inner:
                     found.add(max(inner, key=lambda sp: sp[0])[2])
@@ -510,18 +553,33 @@ def declared(typ, decl):
 def run(args) -> int:
     root, snapshot, out_dir = Path(args.root), Path(args.snapshot), Path(args.out)
     normalize = not args.no_normalize
-    old = load_assemblies(root, args.old_suffix, normalize)
-    new = load_assemblies(root, args.new_suffix, normalize)
+    old_skipped: dict = {}
+    new_skipped: dict = {}
+    old = load_assemblies(root, args.old_suffix, normalize, old_skipped)
+    new = load_assemblies(root, args.new_suffix, normalize, new_skipped)
     if not old:
         raise BadInput(f"no decompiled .cs files under {root} for suffix '{args.old_suffix}'")
     if not new:
         raise BadInput(f"no decompiled .cs files under {root} for suffix '{args.new_suffix}'")
 
+    ov, nv = game_version(old), game_version(new)
+    if not ov or not nv:
+        raise BadInput(f"BuildInfo.GameVersion not found in TaleWorlds.Library.cs (old={ov} new={nv})")
+    if ov == nv:
+        raise BadInput(f"old and new decompiles are the same build (BuildInfo.GameVersion {ov})")
+
     rows: list[Row] = []
     unparsed: list[str] = []
     taom_dirs = [Path(d) for d in args.taom_src] if args.taom_src else [REPO_ROOT / "Main", REPO_ROOT / "Dependencies"]
+    absent = [str(d) for d in taom_dirs if not d.is_dir()]
+    if absent:
+        raise BadInput(f"TAOM source folder not found: {', '.join(absent)}")
     taom_src = scan_taom_source(taom_dirs)
-    report: list[str] = []
+    report: list[str] = [f"old={ov} new={nv}"]
+    for side, sk in (("old", old_skipped), ("new", new_skipped)):
+        if sk:
+            report.append(f"skipped third-party engine copies ({side}): "
+                          + ", ".join(f"{m}={n}" for m, n in sorted(sk.items())))
     for name, parser in (("patch-targets.md", parse_patch_targets), ("gamemodel-bases.md", None),
                          ("reflection-sites.md", parse_reflection)):
         text = read_snapshot(snapshot, name)
@@ -535,6 +593,11 @@ def run(args) -> int:
         report.append(f"UNPARSED  {line}")
     report.append(f"unparsed={len(unparsed)}")
 
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stale = sorted(out_dir.glob("*.diff"))
+    for p in stale:
+        p.unlink()
+    report.append(f"cleared {len(stale)} .diff file(s) left in {out_dir} by an earlier run")
     seen, same, changed, missing, inherited = compare(rows, old, new, out_dir)
     report.append(f"rows={len(seen)} same={same} changed={len(changed)} unresolved={len(missing)}")
     for c in sorted(changed, key=lambda r: -r[3]):
@@ -547,7 +610,7 @@ def run(args) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "summary.txt").write_text("\n".join(report) + "\n", encoding="utf-8")
     print("\n".join(report))
-    return 1 if unparsed else 0
+    return 1 if unparsed or missing else 0
 
 
 def main(argv=None) -> int:

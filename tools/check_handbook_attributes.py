@@ -624,11 +624,13 @@ def _manifest_entry(marker: dict, reads: dict) -> dict:
             "calls_base": bool(reads["calls_base"])}
 
 
-def run(docs_dir, dump_root, repo_root, game_modules, manifest_path) -> dict:
+def run(docs_dir, dump_root, repo_root, game_modules, manifest_path, check_manifest=True) -> dict:
     """Check every marker under docs_dir. Returns the report dict (so --json is free).
 
     Raises DumpRootMissing when engine-table markers exist but neither the dump
-    root nor a manifest does. Example markers never need the dump.
+    root nor a manifest does. Example markers never need the dump. In dump mode the
+    freshly read manifest is compared with the committed one (MANIFEST_STALE on any
+    difference) unless check_manifest is False, which --update uses.
     """
     docs_dir = Path(docs_dir)
     dump_root = Path(dump_root) if dump_root is not None else None
@@ -691,6 +693,19 @@ def run(docs_dir, dump_root, repo_root, game_modules, manifest_path) -> dict:
             continue
         manifest_out["markers"][key] = _manifest_entry(first, reads)
         findings.extend(check_tables(doc, group, reads))
+
+    if source == "dump" and check_manifest and manifest_data is not None:
+        # Only the markers this run saw: a --docs run over part of the handbook must not read the
+        # committed entries for the rest as drift.
+        committed = manifest_data.get("markers", {})
+        drift = sorted(k for k in manifest_out["markers"]
+                       if committed.get(k) != manifest_out["markers"][k])
+        if drift or manifest_data.get("dump_root_name") != manifest_out["dump_root_name"]:
+            findings.append(_finding(
+                "MANIFEST_STALE", Path(manifest_path).name, 1, manifest_data.get("dump_root_name", ""),
+                f"the committed manifest ({manifest_data.get('dump_root_name')}) disagrees with the dump "
+                f"at {dump_root} on {len(drift)} marker(s){': ' + drift[0] if drift else ''}; "
+                f"re-run with --update"))
 
     return {"findings": findings, "markers": markers_total, "docs": docs_seen,
             "source": source, "manifest": manifest_out,
@@ -758,15 +773,16 @@ def main(argv=None) -> int:
     dump_root = resolve_dump_root(args.dump_root)
     if args.update and not dump_root.is_dir():
         print(f"ERROR: --update needs the decompile dump, and none was found at {dump_root}\n"
-              f"       Set ${DUMP_ENV_VAR} or pass --dump-root to the v1.5.3 decompile "
+              f"       Set ${DUMP_ENV_VAR} or pass --dump-root to the category decompile "
               f"(default {DEFAULT_DUMP_ROOT}).", file=sys.stderr)
         return 2
 
     try:
-        report = run(args.docs, dump_root, args.repo_root, args.game_modules, args.manifest)
+        report = run(args.docs, dump_root, args.repo_root, args.game_modules, args.manifest,
+                     check_manifest=not args.update)
     except DumpRootMissing as exc:
         print(f"ERROR: decompile dump root not found: {exc.dump_root}\n"
-              f"       Set ${DUMP_ENV_VAR} (or pass --dump-root) to the v1.5.3 decompile,"
+              f"       Set ${DUMP_ENV_VAR} (or pass --dump-root) to the category decompile, "
               f"default {DEFAULT_DUMP_ROOT}.\n"
               f"       No committed manifest at {exc.manifest_path} to fall back on either; "
               f"a machine with the dump writes one with --update.", file=sys.stderr)

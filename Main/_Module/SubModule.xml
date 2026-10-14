@@ -34,7 +34,7 @@
     <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" />
     <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" />
     <!-- Co-op interop (2026-07-31). BUTR/BLSE launchers read this block; the VANILLA launcher does
-         not — `TaleWorlds.ModuleManager.ModuleInfo.LoadWithFullPath` (installed v1.5.4) parses only
+         not — `TaleWorlds.ModuleManager.ModuleInfo.LoadWithFullPath` (installed v1.5.5) parses only
          DependedModules, ModulesToLoadAfterThis, IncompatibleModules and SubModules, with no branch
          for DependedModuleMetadatas at all. The engine-honoured pin is the <ModulesToLoadAfterThis>
          element below; this line is the BUTR-launcher mirror of it. Deliberately NOT a

@@ -24,7 +24,7 @@
   -->
   <PropertyGroup>
     <TaomGameRefs Condition="'$(TaomGameRefs)' == ''">Install</TaomGameRefs>
-    <BannerlordRefAsmVersion>1.5.4.123627-beta</BannerlordRefAsmVersion>
+    <BannerlordRefAsmVersion>1.5.5.124170-beta</BannerlordRefAsmVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TaomGameRefs)' == 'Install'">
@@ -82,8 +82,8 @@
 
   <!-- RefAsm, test project only: lay the BUTR module assemblies out the way GameAssemblies expects
        a game folder (bin\Win64_Shipping_Client\Bannerlord.exe, which may be empty, plus
-       Modules\<module>\bin\Win64_Shipping_Client), so the binding gate can run with no game. The CI
-       binding step points BANNERLORD_GAME_DIR at this folder for that one run. -->
+       Modules\<module>\bin\Win64_Shipping_Client), so the binding gate can run with no game. Point
+       BANNERLORD_GAME_DIR at this folder for that one run. -->
   <Target Name="TaomWriteRefAsmGameFolder" AfterTargets="Build"
           Condition="'$(TaomGameRefs)' == 'RefAsm' AND '$(MSBuildProjectName)' == 'TAOM.Tests'">
     <PropertyGroup>

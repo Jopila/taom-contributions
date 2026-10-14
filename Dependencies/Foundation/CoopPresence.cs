@@ -120,17 +120,10 @@ public static class CoopPresence
         EnsureProbed();
     }
 
-    // KNOWN GAP, deliberately not papered over: detection is based on the launcher's ACTIVE-module
-    // list, which reflects what the player enabled, not what successfully constructed. On
-    // Bannerlord v1.5.5 (changeset 124170) Module.AddSubModule catches an exception thrown by a
-    // module's SubModule constructor body, shows a message box naming the module and ends the game,
-    // so a co-op module that fails there never reaches a session. What remains is a failure that
-    // SubModuleConstructionGuard swallows (a base-constructor or field-initialiser exception): the
-    // constructor then returns normally, this probe still reports the module as active, and TAOM
-    // runs in co-op mode for a co-op layer that is dead: PatchShield withholds its rescue and
-    // SaveShield rethrows save-load faults. Closing it needs the guard to map a failing assembly
-    // back to its module id AND a suppression set that survives re-probing.
-    // See docs/features/bannerlord-together-compat.md "Known limitations".
+    // Detection reads the launcher's ACTIVE-module list. On Bannerlord v1.5.5 a SubModule constructor
+    // failure (or an OnSubModuleLoad throw) ends the game in Module.LoadSubModules /
+    // InitializeSubModuleBases. An active co-op module can still be unconstructed: LoadSubModules only
+    // shows a message box for a missing SubModule DLL, and skips a SubModule its tags exclude.
 
     private static void EnsureProbed()
     {

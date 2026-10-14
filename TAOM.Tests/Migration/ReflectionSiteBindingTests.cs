@@ -148,6 +148,11 @@ public class ReflectionSiteBindingTests
     // --- CreatureSiegeRole: a siege tower's navmesh id start is a protected field, read through AccessTools.FieldRefAccess.
     // A miss binds nothing (fail-soft): every tower then reads as having no navmesh (start 0) and the role rules skip it with a named warning.
     [DataRow("TaleWorlds.MountAndBlade.MissionObject", "MissionObject", "DynamicNavmeshIdStart", "Field", "CreatureSiegeMissionAdapter.cs:227")]
+    // --- Dependencies foundation probes, resolved by string through Type.GetMethod. A GetActiveModules
+    // miss sends IncompatibleModDetector to a directory scan but makes CoopPresence read co-op as absent
+    // (a live co-op session then desyncs); a FromParametersFile miss leaves the game version undetected.
+    [DataRow("TaleWorlds.ModuleManager.ModuleHelper", "ModuleHelper", "GetActiveModules", "Method", "IncompatibleModDetector.cs:210")]
+    [DataRow("TaleWorlds.Library.ApplicationVersion", "ApplicationVersion", "FromParametersFile", "Method", "VersionProbe.cs:78")]
     public void ReflectionSite_ResolvesAgainstInstalledEngine(string fullName, string simpleName, string member, string kind, string source)
     {
         if (!_gameLoaded)

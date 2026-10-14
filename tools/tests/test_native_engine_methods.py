@@ -472,27 +472,28 @@ class InstalledEngineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             m = nem.load_or_build(dll, Path(d), "it")
         self.assertEqual(m.problems, [])
-        # Client addresses per engine version; add a row at every engine bump.
+        # Client addresses and mapped-method counts per engine version; add a row at every engine
+        # bump. v1.5.5 dropped MBPeer.debug_refresh_disconnect_timeout and added
+        # Util.get_naval_dlc_version_mismatch, so its MountAndBlade and Engine counts differ.
         pins = {
-            "v1.5.3": (("get_current_action_type", 0x6E19B0), ("set_attack_state", 0x6DF670),
-                       ("set_scripted_target_entity", 0x6E2540)),
-            "v1.5.4": (("get_current_action_type", 0x6E1C40), ("set_attack_state", 0x6DF900),
-                       ("set_scripted_target_entity", 0x6E27D0)),
-            "v1.5.5": (("get_current_action_type", 0x6E2170), ("set_attack_state", 0x6DFE30),
-                       ("set_scripted_target_entity", 0x6E2D00)),
+            "v1.5.3": {"addresses": (("get_current_action_type", 0x6E19B0), ("set_attack_state", 0x6DF670),
+                                     ("set_scripted_target_entity", 0x6E2540)),
+                       "counts": {"MountAndBlade": 688, "Engine": 1561, "DotNet": 33}},
+            "v1.5.4": {"addresses": (("get_current_action_type", 0x6E1C40), ("set_attack_state", 0x6DF900),
+                                     ("set_scripted_target_entity", 0x6E27D0)),
+                       "counts": {"MountAndBlade": 688, "Engine": 1561, "DotNet": 33}},
+            "v1.5.5": {"addresses": (("get_current_action_type", 0x6E2170), ("set_attack_state", 0x6DFE30),
+                                     ("set_scripted_target_entity", 0x6E2D00)),
+                       "counts": {"MountAndBlade": 687, "Engine": 1562, "DotNet": 33}},
         }
-        # Mapped methods per assembly; the v1.5.5 client moved one from MountAndBlade to Engine.
-        expected_counts = {"MountAndBlade": 688, "Engine": 1561, "DotNet": 33}
-        if nd.engine_version(dll) == "v1.5.5":
-            expected_counts = {"MountAndBlade": 687, "Engine": 1562, "DotNet": 33}
         version = nd.engine_version(dll)
         if version not in pins:
             self.skipTest(f"no address pins for client {version}; add its row at the engine bump")
-        for name, rva in pins[version]:
+        for name, rva in pins[version]["addresses"]:
             with self.subTest(name=name):
                 self.assertEqual([r.rva for r in m.lookup(f"MBAgent.{name}")], [rva])
         counts = {a: sum(1 for r in m.methods if r.assembly == a) for a in nem.ASSEMBLIES}
-        self.assertEqual(counts, expected_counts)
+        self.assertEqual(counts, pins[version]["counts"])
 
 
 if __name__ == "__main__":

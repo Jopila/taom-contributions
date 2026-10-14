@@ -1,6 +1,6 @@
 # TaleWorlds API Snapshot + Binding-Verification Gate
 
-A committed, in-repo snapshot of the exact TaleWorlds v1.5.2 engine surface that TAOM patches, overrides, and reflects into, plus the offline test gate that keeps it honest. The goal: **answer "what's the signature of X / is this member still here in v1.5.2?" without the external decompile dump** (`E:\Decompiled_Bannerlord\`), and **turn a silent in-game binding failure into a red `dotnet test`.**
+A committed, in-repo snapshot of the exact TaleWorlds engine surface (the pinned game version) that TAOM patches, overrides, and reflects into, plus the offline test gate that keeps it honest. The goal: **answer "what's the signature of X / is this member still here in the pinned version?" without the external decompile dump** (`E:\Decompiled_Bannerlord\`), and **turn a silent in-game binding failure into a red `dotnet test`.**
 
 ## Why this exists
 
@@ -15,7 +15,7 @@ The v1.3.15 → v1.4.5 migration completed its code stages but the formal runtim
 | File | What it is |
 |------|------------|
 | [`reflection-sites.md`](./reflection-sites.md) | Authoritative catalogue of every reflection touchpoint, grouped by gated / runtime-dynamic / internal. Data source for `ReflectionSiteBindingTests`. |
-| [`gamemodel-bases.md`](./gamemodel-bases.md) | Auto-generated: each `Taom*Model`, its `Default*Model` base, and the exact v1.5.2 signature of every overridden method. |
+| [`gamemodel-bases.md`](./gamemodel-bases.md) | Auto-generated: each `Taom*Model`, its `Default*Model` base, and the exact signature of every overridden method, as of the pinned version. |
 | [`patch-targets.md`](./patch-targets.md) | Auto-generated: each of the 220 `[HarmonyPatch]` / `TargetMethod` classes and the engine method it patches, resolved as Harmony resolves it. |
 | [`../../../tools/snapshot_api_surface.ps1`](../../../tools/snapshot_api_surface.ps1) | Regenerates the two auto-generated files from the installed DLLs. Auto-derives the type list from `TAOM.dll`. |
 
@@ -34,13 +34,13 @@ The v1.3.15 → v1.4.5 migration completed its code stages but the formal runtim
 
 ## The gate (`TAOM.Tests/Migration/`)
 
-Runs under `dotnet test`, no game launch. TAOM.Tests references the installed `TaleWorlds.*.dll` (v1.5.2); `GameAssemblies.cs` pre-loads the SandBox/CustomBattle/StoryMode module DLLs from the install so every engine type resolves.
+Runs under `dotnet test`, no game launch. TAOM.Tests references the installed `TaleWorlds.*.dll` (the pinned game version); `GameAssemblies.cs` pre-loads the SandBox/CustomBattle/StoryMode module DLLs from the install so every engine type resolves.
 
 | Test class | Covers | Granularity |
 |------------|--------|-------------|
 | `HarmonyPatchBindingTests` | All 220 `[HarmonyPatch]` / `TargetMethod` targets, resolved as Harmony does at `PatchAll`. | one assertion accumulating all failures |
 | `GameModelOverrideBindingTests` | All 46 GameModels: registered in `SubModule.cs`, override ≥1 base virtual, no shadow-without-`override`. | 2 tests |
-| `ReflectionSiteBindingTests` | The 32 auxiliary static-engine reflection members from `reflection-sites.md` Category B. | one `[DataRow]` per site |
+| `ReflectionSiteBindingTests` | The auxiliary static-engine reflection members (74 at v1.5.5) from `reflection-sites.md` Category B. | one `[DataRow]` per site |
 
 > **First run (2026-05-28) caught a real defect.** `HeroViewModel_FillFrom_Patch` used a name-only `[HarmonyPatch(typeof(HeroViewModel), "FillFrom")]`. `HeroViewModel` inherits two more `FillFrom` overloads from `CharacterViewModel`, so Harmony's `AccessTools.Method` resolution found 3 candidates and threw `AmbiguousMatchException` — the postfix silently never applied in v1.4.5 (hero-portrait clan colors broken). Fixed by pinning argument types. This is exactly the gap the compiler and the BUTR analyzer miss.
 

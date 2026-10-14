@@ -16,7 +16,7 @@ misattributed crashes) or we migrate deliberately. The session-start hook warns 
    timestamp bounds which test runs were on which engine — decisive for crash attribution).
    `Version.xml` carries only `vX.Y.Z`; read the build number from `TaleWorlds.Library`
    (`ApplicationVersion.DefaultChangeSet`, `BuildInfo.GameVersion`) or `package_info.txt`. Steam
-   re-stamps every engine DLL on an update (v1.5.5: 51 of 51 client, 59 of 59 editor), so
+   re-stamps every engine DLL on an update, so
    timestamps bound the update time but cannot show what changed.
 2. **The wEditor build — run this every time; it is the step that got skipped on 1.4.7 → 1.4.8.**
    The Modding Kit build (`bin/Win64_Shipping_wEditor`) updates on its OWN Steam schedule, so read
@@ -46,22 +46,18 @@ misattributed crashes) or we migrate deliberately. The session-start hook warns 
    offset ([ghidra-native-decompile.md](../../../docs/features/ghidra-native-decompile.md)).
 5. **Resolve the last RELEASED `TAOM.dll` against the new engine, not just a fresh build.** A fresh
    compile binds whatever overload the new engine offers, so it hides a removed member that a shipped
-   binary still calls. v1.5.4 removed `TooltipProperty(string, string, int, bool, TooltipPropertyFlags)`
-   for a six-parameter twin: source and every binding gate stayed green while the v2.0.33 testing
-   build would throw `MissingMethodException` on 21 tooltip sites. Read every engine `MemberRef` of
-   each channel's `TAOM.dll` (`E:\LOTRAOM_Releases\<channel>\Modules\TAOM\bin\Win64_Shipping_Client`)
-   with System.Reflection.Metadata and resolve it, by name and full signature, against the installed
-   engine assemblies; run a fresh build as the negative control (it must report 0). Run
+   binary still calls (v1.5.4 removed a `TooltipProperty` constructor: every gate stayed green while
+   the released build would have thrown `MissingMethodException`). Run
    `pwsh tools/check_engine_member_refs.ps1 -Dll <every shipped engine-referencing DLL, comma-joined>
    -Baseline <the cached old BUTR reference assemblies, comma-joined>`
-   (`E:\nuget\packages\bannerlord.referenceassemblies.{core,native,sandbox,storymode,custombattle}\<old>\ref\net472`).
-   The BUTR reference assemblies keep non-public members, so they also serve as an old-engine
-   baseline after Steam overwrites the install. The checker skips members whose parent is a generic
-   type instantiation, so a clean run is not proof for those. A hit means that channel needs a
-   rebuilt release before players take the engine update.
-6. **Early signature-level API diff.** Old BUTR reference assemblies against the installed DLLs, in
-   memory, runs in minutes before any decompile (v1.5.5: 14 of 72 assemblies changed, mostly
-   multiplayer).
+   (`E:\nuget\packages\bannerlord.referenceassemblies.{core,native,sandbox,storymode,custombattle}\<old>\ref\net472`;
+   they keep non-public members, so they also serve as the old-engine baseline after Steam overwrites
+   the install). Shipped DLLs live under `E:\LOTRAOM_Releases\<channel>\Modules\`. Negative control:
+   a fresh build of HEAD must report 0 misses. A NEW miss means that channel needs a rebuilt release
+   before players take the engine update; a miss the baseline also has is pre-existing.
+6. **Early signature-level API diff.** No committed tool does this yet. The committed signature-level
+   check is `tools/check_engine_member_refs.ps1` (item 5) against the old BUTR reference assemblies,
+   which covers what TAOM calls but not what changed elsewhere.
 
 ## Phase 2 — Preserve the baseline, THEN regenerate
 
@@ -97,6 +93,10 @@ the OLD version until you run it — archive them first as `_categories_v<OLD>`,
 the build folders. Note that tool takes only the PRIMARY DLL per module (SandBox.dll, StoryMode.dll,
 …), which is the other half of why the satellites were never in any artifact.
 
+`tools/decompile_bannerlord.ps1` decompiles every module's bin, including third-party mods that
+bundle their own engine DLLs (the Coop module ships stale copies). Never read an engine type from a
+non-vanilla `_modules_build` file; `engine_body_diff.py` skips them.
+
 ## Phase 3 — Diff to scope the blast radius
 
 Compare **all three** archived folders against their regenerated twins — `_shipping_build`,
@@ -128,17 +128,16 @@ decompile, and diff them. **Regenerate the API snapshot first** (`pwsh tools/sna
 after a TAOM.Tests build), or members added since the last regeneration are never compared. Run
 `python tools/engine_body_diff.py --old-suffix _v<OLD> --out E:\Decompiled_Bannerlord\_diff_<OLD>_to_<NEW>\bound_members`;
 it requires `unparsed=0`, covers reflection sites and `Deserialize` loaders, and normalizes
-non-ASCII text, which matters because `tools/decompile_bannerlord.ps1` output is ASCII-lossy (about
-25 types differ only in curly quotes otherwise). An earlier cut parsed table rows with a regex that
-skipped every target carrying a generic-arity backtick (`` List`1 ``): 27 of 292 patch rows, one of
-them a real change, while still reporting "0 unresolved". Rank the CHANGED rows and hand them to review agents in
+non-ASCII text (older decompiles mapped some letters to ASCII or `?`, so identical bodies differed
+in quotes and accents). Positive control: run it on the previous bump pair; it must still report that
+bump's known changes. Rank the CHANGED rows and hand them to review agents in
 batches of six to ten with the diff, the TAOM override and the question "does TAOM re-implement a
 term that moved". **Full-replacement GameModel overrides first**: an additive override (`base.`
 then TAOM on top) inherits a body change for free, a replacement inherits nothing, and the two are
 indistinguishable to a signature gate. v1.5.2 calibration: 51 changed bodies, one drift
 (`TaomPartyWageModel.GetTroopRecruitmentCost`, a replacement still carrying the v1.4.8 perk
 shape), one abstract-new patch target that `HarmonyPatchBindingTests` had passed because an
-abstract method resolves by name. Record the verdicts in `docs/migration/v<ver>-diff-ranked.md`.
+abstract method resolves by name. A row it cannot resolve is a failure, not a pass. Record the verdicts in `docs/migration/v<ver>-diff-ranked.md`.
 
 ## Phase 4 — Re-verify TAOM against the new engine
 
@@ -210,9 +209,9 @@ abstract method resolves by name. Record the verdicts in `docs/migration/v<ver>-
      `KnownBuilds` table in `ClipBudgetSignatureInstalledBinaryTests`, `PINS` in
      `tools/tests/test_native_decompile.py` and the `pins` table in
      `tools/tests/test_native_engine_methods.py` (run those two with `TAOM_GHIDRA_IT=1`). Add a row
-     per build; derive engine methods with `native_engine_methods.load_or_build`. The engine-method map counts in
-     `test_native_engine_methods.py` are version-keyed (v1.5.5: MountAndBlade 687, Engine 1562,
-     DotNet 33) and the `ProcessPreloadQueue` thunk target is a per-row `thunk_target` key.
+     per build; derive engine methods with `native_engine_methods.load_or_build`. The engine-method map
+     counts are version-keyed and the `ProcessPreloadQueue` thunk target is a per-row `thunk_target`
+     key. The latest numbers are in `docs/migration/v<ver>-impact.md`.
    - The category tree (`decompile_to_folder.ps1 -Destination _categories_v<new>`) and the three
      handbook-gate references to it (`tools/check_handbook_attributes.py`,
      `tools/handbook_attribute_manifest.json`, its test).
@@ -221,12 +220,13 @@ abstract method resolves by name. Record the verdicts in `docs/migration/v<ver>-
    - The hand-copied engine id sets, which stay green when the engine drops an id: the 32 policy ids
      in `KingdomPolicyIdsTests.EnginePolicyIds` (re-read `DefaultPolicies.RegisterAll`, #756) and
      `ENGINE_REGISTERED_ITEMS` in `tools/validate_moduledata.py` (`DefaultItems`).
-8. `TAOM.Dependencies` binds engine members by name outside the API snapshot
-   (`SubModuleConstructionGuard`, `IncompatibleModDetector.cs:206-222`, `VersionProbe.cs:78-90`);
-   re-check them by hand until a gate covers them. v1.5.5 made `Module.AddSubModule` catch
-   `SubModule` constructor exceptions itself, which killed the guard's `AddSubModule` site.
+8. `TAOM.Dependencies` binds some engine members by name. The binding gate (item 1) covers two of
+   them, `ModuleHelper.GetActiveModules` and `ApplicationVersion.FromParametersFile` (Category B of
+   `reflection-sites.md`). Re-check the rest by hand: `ModuleInfo.Id` (`IncompatibleModDetector.cs`,
+   Category C), the `ApplicationVersion` Major, Minor and Revision reads (`VersionProbe.cs`) and the
+   string targets in `SaveShield.cs`.
 9. Run `/armory-audit` and `tools/audit_scene_names.py` plus `tools/build_battle_scenes.py --check`,
-   because an update re-packs Native asset packages and scenes (v1.5.5 re-packed all Native tpacs).
+   because an update can re-pack Native asset packages and scenes.
 
 ## Phase 5 — Control battles before believing anything
 

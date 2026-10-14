@@ -336,7 +336,7 @@ ALWAYS decompile the target method before writing a patch. Verify:
 - Exact method signature (parameters, return types, access modifiers)
 - Whether the method is virtual, sealed, or static
 - Correct namespace and class hierarchy
-- Method existence in Bannerlord v1.5.2
+- Method existence in the pinned Bannerlord version (`.claude/pinned-game-version.txt`)
 
 ### Patch Types
 - **Prefix** — Runs before original method. Return `false` to skip original.
@@ -594,13 +594,13 @@ The entire Bannerlord v1.5.5 codebase is pre-decompiled and organized by categor
 
 ```bash
 # Find a class
-find "E:/Decompiled_Bannerlord/" -name "DefaultPartyWageModel.cs"
+find "E:/Decompiled_Bannerlord/_categories_v1.5.5/" -name "DefaultPartyWageModel.cs"
 
 # Search for a method across all decompiled source
-grep -r "GetCharacterWage" "E:/Decompiled_Bannerlord/Campaign/"
+grep -r "GetCharacterWage" "E:/Decompiled_Bannerlord/_categories_v1.5.5/Campaign/"
 
 # Browse a namespace
-ls "E:/Decompiled_Bannerlord/Campaign/TaleWorlds.CampaignSystem/TaleWorlds/CampaignSystem/GameComponents/"
+ls "E:/Decompiled_Bannerlord/_categories_v1.5.5/Campaign/TaleWorlds.CampaignSystem/TaleWorlds.CampaignSystem.GameComponents/"
 ```
 
 ### When to Look Up TaleWorlds Source

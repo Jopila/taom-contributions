@@ -9,10 +9,10 @@ namespace TAOM.Tests.Infrastructure;
 
 /// <summary>
 /// GameReferences.targets owns where every project finds the Bannerlord assemblies: the install
-/// (TaomGameRefs=Install, the default) or BUTR's reference assemblies (RefAsm, used by the hosted
-/// CI job). These pin the two relationships that rot silently: the BUTR build must be the pinned
-/// game version, and no project may spell the install path itself (it would bypass RefAsm and
-/// break only on CI).
+/// (TaomGameRefs=Install, the default) or BUTR's reference assemblies (RefAsm, for building on a
+/// machine without the game). These pin the two relationships that rot silently: the BUTR build
+/// must be the pinned game version, and no project may spell the install path itself (it would
+/// bypass RefAsm and break only on a machine without the game).
 /// </summary>
 [TestClass]
 public class GameReferencesTargetsTests

@@ -254,7 +254,7 @@ The other two numbers pair with nothing: `TAOM_Map`'s only tie to `TAOM` is the 
 row at line 19, and `LOTRLOME_Armory` names `TAOM` nowhere. All three pin the engine the same way now:
 `v1.5.5.*` on the `Native` metadata row (`TAOM_Map/SubModule.xml:15`, `LOTRLOME_Armory/SubModule.xml:15`,
 `Main/_Module/SubModule.xml`), and the installed game reports `v1.5.5` (`bin/Win64_Shipping_Client/Version.xml`,
-matching the repo pin file). The two live manifests carried `v1.4.5.*` until 2026-09-14 and `v1.5.3.*` until 2026-10-05. <!-- measured: cat "<game>/bin/Win64_Shipping_Client/Version.xml"; cat .claude/pinned-game-version.txt 2026-10-05 -->
+matching the repo pin file). The two live manifests carried `v1.4.5.*` until 2026-09-14, `v1.5.3.*` until 2026-10-05 and `v1.5.4.*` until 2026-10-09. <!-- measured: cat "<game>/bin/Win64_Shipping_Client/Version.xml"; cat .claude/pinned-game-version.txt 2026-10-05 -->
 The stale values are harmless only because no launcher on this machine reads them. The alias stubs
 carry a fifth kind of number, `v2.4.99.0` at `Stubs/Bannerlord.Harmony/_Module/SubModule.xml:44`: the
 shipped package's minor with `.99`, so any `v2.4.*` lower bound in a third-party manifest is satisfied
