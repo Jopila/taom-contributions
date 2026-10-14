@@ -3498,6 +3498,14 @@ caught by gates, never by skill text.
   measure Skill-tool calls in the transcripts before keeping one. A gate beats skill text.
 - **Source:** `docs/reviews/skill-usage-audit-2026-10-08.md`.
 
+### A dry run and the patch that adds it are chained with `&&` (2026-10-08)
+- **Why missed:** a heredoc patch meant to add a `--dry` flag to a doc-fix script failed on mangled backslashes (the
+  known heredoc trap), and the next command on the same shell line ran the unpatched script, which ignored `--dry`
+  and wrote 13 docs while review agents were still reading them.
+- **Prevent:** write scripts with the Write tool and give a script its dry-run mode when it is written; chain
+  dependent shell steps with `&&` so a failed step stops the rest.
+- **Source:** `docs/reviews/rca-yotthani-adoption-2026-10-08.md` finding 28.
+
 ### Read engine types only from vanilla modules: a third-party mod can bundle engine DLLs (2026-10-14)
 The first v1.5.5 body diff reported 509 changed members. The installed Coop module ships 40 v1.5.4
 `TaleWorlds` and `SandBox` DLLs of its own, `tools/decompile_bannerlord.ps1` decompiles every module's

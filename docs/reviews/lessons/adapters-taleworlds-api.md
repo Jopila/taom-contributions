@@ -879,6 +879,11 @@ The takeover changes the stage list from a handler's `OnStageCompleted`, which d
 - **Why missed:** the branch was written against the campaign's type; the service tests mock the adapter, so nothing executed it under the game type that calls it, and its only runtime trace was a DEBUG line that never printed.
 - **Prevent:** before an adapter casts to an engine subtype, check what type each calling game type registers (`OnRegisterTypes` of `CustomGame`, `Campaign`). When the base type drops the data, read it back from the merged XML for the current game type (`MBObjectManager.GetMergedXmlForManaged` with `Game.Current.GameType.GameTypeStringId`, as `MonsterSizeCatalogAdapter` does and `ObjectManagerAdapter` now does for cultures, parsing with `CultureTroopIdReader`), and log once at INFO that the read ran. Then check the data the read returns against the consumer's own filter: the culture troops TAOM reads fit vanilla's Custom Battle slot filter in only 33 of 88 slots, so the service also checks culture and formation class before offering one.
 - **Source:** `docs/reviews/rca-custom-battle-bannerless-factions-2026-10-02.md` "Two older Custom Battle defects", B.
+- **Recurrence (2026-10-09):** the CompanionTactics Order of Battle overlay attached in Custom Battle too. Its
+  Auto-Assign resolves heroes as `CharacterObject` and finds none there (Custom Battle agents are
+  `BasicCharacterObject`), and its presets wrote to a store that only the campaign behavior's `SyncData` persists.
+  Fixed with a `Campaign.Current` gate in `OOBOverlayService.OnTick`
+  (`docs/reviews/rca-formation-presets-2026-10-09.md` finding 4).
 
 ### A drift guard pins an engine dependency at the strength the code relies on it (2026-10-02)
 Patch99 re-implements `CreateMergedXmlFile`'s loop, copies `ApplyXslt`, and drops the `ToXDocument`/`ToXmlDocument`
@@ -987,3 +992,26 @@ a substituted adapter and `null!` handles. The "key by id" remedy above does not
   (`IStuckBattleAdapter.LiveBattles()` returning `IStuckBattleEventAdapter`), and the service drives those. A class that
   takes constructor injection, is registered `Reuse.Singleton` and is unit-tested is a service, whatever folder it sits in.
 - **Source:** `docs/reviews/rca-stuck-battle-guard-2026-10-06.md` row 1 (Standards, adversarial Step 2b).
+
+### An engine cache keyed on a different version counter than the one you bump (2026-10-14)
+`PartyBase.PartySizeLimit` caches its value against `MemberRoster.VersionNo`. The hunt start and end invalidated
+the party speed (`UpdateVersionNo`) and relied on the top-up changing the roster; a start that added no troops,
+and every end, left the old size limit in place, so the hunt's allowance outlived the hunt (Codex F2, #765 M8).
+- **Why missed:** the author invalidated the cache they were thinking of (speed). The size cache's key was never
+  read, and the tests mocked the adapter, so no test read the limit back.
+- **Prevent:** before invalidating an engine cache, read the getter and name the version it compares
+  (`taom-src path <Type>`). Bump that counter on every transition (`MemberRoster.UpdateVersion`), not only on those
+  that change the data, and pin it with an IL test.
+- **Source:** `docs/reviews/rca-eye-of-sauron-2026-10-14.md` F2 (Codex), fixed in `2d17ceba3`.
+
+### A broad-phase search radius must exceed the exact filter's edge (2026-10-14)
+The hunter's frame read searches the locator grid around the player with radius `1.5 S`, and the service accepts
+the hunter at `d <= 1.5 S`. The engine's locator skips a locatable at exactly its radius (`>=` on the squared
+distance, `LocatorGrid.cs:126`), so a hunter exactly on the edge was never found. The edge had just moved there
+by a maintainer decision (E09) and the adapter's radius was copied from it (Codex F4, #765 M8).
+- **Why missed:** the tests handed the service a reading directly; none passed through the locator's half-open
+  comparison.
+- **Prevent:** a spatial broad phase searches slightly past the exact edge (here 1%) and the exact filter stays in
+  the service. When a decision moves an edge, grep every search radius that feeds the old one. Pin the radius with
+  an IL or boundary test.
+- **Source:** `docs/reviews/rca-eye-of-sauron-2026-10-14.md` F4 (Codex), fixed in `2d17ceba3`.

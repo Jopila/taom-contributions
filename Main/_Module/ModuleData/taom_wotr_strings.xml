@@ -35,4 +35,58 @@
 	<string id="taom_wotr_victory_evil" text="The realms of Men and Elf alike have been crushed. Long live Sauron!" />
 	<string id="taom_wotr_continue" text="Continue" />
 
+	<!-- ============================================== -->
+	<!-- War Chronicle events (#765): war_chronicle.json -->
+	<!-- ============================================== -->
+
+	<string id="taom_wotr_chronicle_events" text="Chronicle Events" />
+	<string id="taom_wc_siege_lost" text="{TARGET} changes hands before the battle can be decided." />
+	<string id="taom_wc_fellowship_title" text="The Fellowship Sets Out" />
+	<string id="taom_wc_fellowship_occurred" text="Nine walkers leave Rivendell in secret, bearing the One Ring south. The house of Elrond gathers its strength." />
+	<string id="taom_wc_khazaddum_title" text="The Bridge of Khazad-dûm" />
+	<string id="taom_wc_khazaddum_occurred" text="In the deeps of Moria the Grey Pilgrim falls with the Balrog. The orcs of the Misty Mountains swarm, and the Free Peoples mourn." />
+	<string id="taom_wc_breaking_title" text="The Breaking of the Fellowship" />
+	<string id="taom_wc_breaking_occurred" text="At Parth Galen the Uruk-hai fall upon the Company. Boromir dies defending the hobbits, and Gondor loses its heir." />
+	<string id="taom_wc_theoden_title" text="Théoden King" />
+	<string id="taom_wc_theoden_occurred" text="Freed from the counsel of Wormtongue, Théoden takes up his sword. The Riddermark musters to its king." />
+	<string id="taom_wc_hornburg_title" text="The Battle of the Hornburg" />
+	<string id="taom_wc_hornburg_open" text="The host of Isengard and the hillmen of Dunland march on {TARGET}. The battle must be decided within {DAYS} days." />
+	<string id="taom_wc_hornburg_lapsed" text="No assault comes to {TARGET}. The muster of Isengard turns elsewhere." />
+	<string id="taom_wc_hornburg_held" text="The Hornburg holds through the night, and the host of Isengard breaks against its walls." />
+	<string id="taom_wc_hornburg_fell" text="{TARGET} falls, and the White Hand rules the Westfold." />
+	<string id="taom_wc_ents_title" text="The Last March of the Ents" />
+	<string id="taom_wc_ents_occurred" text="The Ents of Fangorn come down upon Isengard and drown the pits of Saruman. The forges of the White Hand fall silent." />
+	<string id="taom_wc_lorien_title" text="Lothlórien Assailed" />
+	<string id="taom_wc_lorien_open" text="Out of Dol Guldur the Shadow assails the Golden Wood. {TARGET} must stand for {DAYS} days." />
+	<string id="taom_wc_lorien_lapsed" text="The armies of Dol Guldur never reach {TARGET}." />
+	<string id="taom_wc_lorien_held" text="The power of the Lady holds, and the hosts of Dol Guldur fall back from the Golden Wood." />
+	<string id="taom_wc_lorien_fell" text="{TARGET} burns, and the light of Lothlórien wanes." />
+	<string id="taom_wc_osgiliath_title" text="The Fall of Osgiliath" />
+	<string id="taom_wc_osgiliath_open" text="The Morgul host crosses the Anduin toward {TARGET}. Gondor must hold the ruined city for {DAYS} days." />
+	<string id="taom_wc_osgiliath_lapsed" text="Mordor does not come against {TARGET}, and the river stays quiet." />
+	<string id="taom_wc_osgiliath_held" text="Faramir holds the crossings of the Anduin, and the Morgul host draws back." />
+	<string id="taom_wc_osgiliath_fell" text="{TARGET} falls, and the road to Minas Tirith lies open." />
+	<string id="taom_wc_dale_title" text="The Battle of Dale" />
+	<string id="taom_wc_dale_open" text="Easterlings and the servants of Dol Guldur march against the realm of Dale. {TARGET} must hold for {DAYS} days." />
+	<string id="taom_wc_dale_lapsed" text="The Easterlings turn aside, and {TARGET} is spared." />
+	<string id="taom_wc_dale_held" text="Men of Dale and Dwarves of Erebor stand together, and the Easterling host is thrown back." />
+	<string id="taom_wc_dale_fell" text="{TARGET} falls to the Easterlings, and the Dwarves of Erebor ride out to aid their friends." />
+	<string id="taom_wc_corsairs_title" text="The Corsairs of Umbar" />
+	<string id="taom_wc_corsairs_open" text="The black sails of Umbar come up the Anduin toward {TARGET}. Gondor must hold the port for {DAYS} days." />
+	<string id="taom_wc_corsairs_lapsed" text="The Corsairs linger at sea, and {TARGET} is left in peace." />
+	<string id="taom_wc_corsairs_held" text="The fleets of Umbar are driven from {TARGET}, and the southern fiefs of Gondor take heart." />
+	<string id="taom_wc_corsairs_fell" text="The Corsairs seize {TARGET}, and their ships command the river." />
+	<string id="taom_wc_north_title" text="War in the North" />
+	<string id="taom_wc_north_open" text="Orcs of Gundabad and the hillmen of Dunland come down on the North. {TARGET} must hold for {DAYS} days." />
+	<string id="taom_wc_north_lapsed" text="The northern war passes {TARGET} by." />
+	<string id="taom_wc_north_held" text="The Rangers and the men of Arthedain hold {TARGET}, and the North stays free." />
+	<string id="taom_wc_north_fell" text="{TARGET} falls, and the shadow spreads across Eriador." />
+	<string id="taom_wc_gondor_title" text="The Siege of Gondor" />
+	<string id="taom_wc_gondor_open" text="The Lord of the Nazgûl leads the hosts of Mordor against {TARGET}. The city must hold for {DAYS} days." />
+	<string id="taom_wc_gondor_lapsed" text="The great host of Mordor holds back, and {TARGET} waits under a darkened sky." />
+	<string id="taom_wc_gondor_held" text="The Rohirrim come at dawn, and the siege of {TARGET} is broken on the Pelennor Fields." />
+	<string id="taom_wc_gondor_fell" text="The gates of {TARGET} are broken, and the White City falls to Mordor." />
+	<string id="taom_wc_blackgate_title" text="The Black Gate Opens" />
+	<string id="taom_wc_blackgate_occurred" text="The Captains of the West march to the Morannon to draw the Eye from the Ring-bearer. The fate of the war now rests with the Ring." />
+
 </strings>

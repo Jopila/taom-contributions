@@ -41,7 +41,7 @@ The phase turns to Full War first, so that vanilla's `OnWarDeclared` listeners a
 
 **Limits of the repair.** It cannot declare a Hostile pair that had no stored stance when Full War began: the engine creates that link as War from `IsAtConstantWar`, either on the reconcile's own read or earlier during vanilla's daily tribute pass, so the pair stays at war with no event and no war start date. In practice this means a campaign started on the stale Full War phase of #764. While War of the Ring is disabled the repair waits until the first session launch after it is re-enabled; meanwhile the model, the peace blocks and momentum enrollment keep treating the save as Full War, and only the stance link and the war-declared notices are missing. With `blockPeaceBetweenHostileTiers` on and `autoWarBetweenHostileTiers` off (not the shipped setting), Hostile pairs are at constant war in the model with no declared stance from the Phase 2 transition onward; that predates #772 and the reconcile does not repair it.
 
-When Phase 2 declares its wars, vanilla's alliance logic asks each Permanent ally that is not itself Hostile with the enemy to join (for example Harad into Mordor's wars). A repaired Full War save shows the encyclopedia history entries and map notices of those wars, dated at the load day, but no chat line for them: the repair runs in `OnSessionLaunched`, and vanilla turns chat notices on, and registers `KingdomManager`'s war listener (a kingdom aggressiveness increase that nothing in v1.5.4 reads), only after the session-launch listeners have run (`Campaign.OnSessionStart`). Both are known, accepted behaviours pending the maintainer's review.
+When Phase 2 declares its wars, vanilla's alliance logic asks each Permanent ally that is not itself Hostile with the enemy to join (for example Harad into Mordor's wars). A repaired Full War save shows the encyclopedia history entries and map notices of those wars, dated at the load day, but no chat line for them: the repair runs in `OnSessionLaunched`, and vanilla turns chat notices on, and registers `KingdomManager`'s war listener (a kingdom aggressiveness increase that nothing in v1.5.4 reads), only after the session-launch listeners have run (`Campaign.OnSessionStart`). Both were decided by the maintainer on 2026-10-14: keep.
 
 **What gets blocked:** Any pair with `Hostile` relationship tier cannot make peace. This includes Gondor-Mordor, Rohan-Isengard, Erebor-Gundabad, all Elven kingdoms vs all evil kingdoms, etc.
 
@@ -246,12 +246,11 @@ The MCM branch of `GetEffectivePhaseDays` had no coverage until 2026-07-30 — e
 6. Second campaign in one process (#764): play past the Phase 2 day, exit to the main menu without closing the game, and start a new campaign. The log shows "phase reset to Peace at campaign start", then the Phase 1 wars on day 1, and the War of the Ring meter stays hidden until Full War.
 7. Older Full War save (#772): with test mode on, play past Day 3 on a build without the fix (v2.0.34 has the old code) and save. Load that save on this build. The log shows 'War of the Ring: declared N missing Full War wars (#772)' once, and each kingdom's encyclopedia History lists the declarations; the chat shows no line for them, which is expected (Phase 2 above). Save and reload: the line must not appear again. The first load proves the host-only call in `OnSessionLaunched` runs. The quiet second load proves `AllianceAdapter.DeclareWar` wrote the real stance; the old model-aware guard would skip the declaration and log the line on every load.
 
-## How to Add New War Phases
+## Do not add WarPhase values
 
-1. Add a new `PhaseConfig` to `WarOfTheRingConfig`
-2. Add a new `WarPhase` enum value
-3. Add transition logic in `WarOfTheRingService.CheckPhaseTransition`
-4. Update tests
+The four phases are closed. Every rule that holds the war together asks for one phase by equality: the three peace-block layers key on `CurrentPhase == WarPhase.FullWar` (`ShouldBlockPeace`, `IsWarOfTheRingActive`), and momentum enrollment sweeps only in `FullWar` (`MomentumEnrollmentService.SweepEnrollment`). A new value after `FullWar` is not "more war": while the machine sits in it, all three peace-block layers lift at once, Hostile pairs can sign peace, and no kingdom enrolls in the momentum meter. Nothing fails or logs; the war quietly stops being one. The saved phase is an int, so a value inserted before `WarEnded` would also renumber older saves.
+
+Later War of the Ring beats belong in their own state, keyed off the phases rather than added to them. The War Chronicle does this: it reads `CurrentPhase` and `GetEffectivePhaseDay(WarPhase)` and keeps its event states in its own save section ([war-chronicle.md](war-chronicle.md)). The Ring mechanic will end the war through `EndWar(outcome)`, the one terminal transition.
 
 ## Kingdom ID Reference
 
@@ -292,6 +291,7 @@ The MCM branch of `GetEffectivePhaseDays` had no coverage until 2026-07-30 — e
 <!-- backlinks-end -->
 ## Changelog
 
+- 2026-10-08: `GetEffectivePhaseDay(WarPhase)` exposes the clamped Phase 1 and Phase 2 days to the War Chronicle (#765). "How to Add New War Phases" is replaced by "Do not add WarPhase values": a value after Full War would lift all three peace-block layers and stop momentum enrollment.
 - 2026-10-08: Phase 2 now really declares the Hostile-pair wars (#772). The phase turns first and the guard reads the real stance (`HasDeclaredWar`), because the constant-war model had made every pair look already at war and skipped them all; the phase-first order keeps vanilla's call-to-war logic from pulling allies into wars the loop is about to declare. `ReconcileDeclaredWars` declares, at session launch, the Hostile-pair wars that a Full War save still stores as neutral.
 - 2026-10-08: A new campaign in the same process no longer inherits the previous campaign's phase and outcome: `WarOfTheRingBehavior`'s constructor calls `WarOfTheRingService.ResetForNewSession()` before any campaign event can read the service (#764).
 - 2026-07-30 — Phase defaults retuned to Day 30 (Isengard/Dunland attack Rohan) / Day 44 (full War of the Ring), set at all four sources (shipped JSON, MCM defaults, `TaomSettingsProvider` fallbacks, `WarOfTheRingConfig` compiled defaults). `GetEffectivePhaseDays` now clamps `phase2 > phase1 >= 1` for every source — previously only the JSON pair was validated (strictly-`<`, so equal days passed) while the MCM sliders were unvalidated, and an equal or inverted pair ran both transitions in one tick with `IsengardWar` never observable. RCA: `docs/reviews/rca-wotr-phase-ordering-2026-07-30.md`.

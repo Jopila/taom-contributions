@@ -21,7 +21,7 @@ Located at `Main/_Module/ModuleData/Languages/<LANG>/`:
 | `std_taom_lotr_issue_strings_{locale}.xml` | LOTR custom-issue text — issue/quest titles, descriptions, giver dialog, objectives | ~308 |
 | `std_taom_xslt_strings_{locale}.xml` | Kingdom/culture/clan/lord/hero descriptions injected via XSLT (Encyclopedia content) | ~1,431 |
 | `std_taom_emissary_strings_{locale}.xml` | Elite Emissary feature UI | ~22 |
-| `std_taom_wotr_strings_{locale}.xml` | War of the Ring momentum UI + event strings | ~24 |
+| `std_taom_wotr_strings_{locale}.xml` | War of the Ring momentum UI + event strings, and the War Chronicle event text (`taom_wc_*`, #765) | ~72 |
 | `std_taom_enlistment_strings_{locale}.xml` | Enlistment + field-commission strings | ~252 |
 | `std_taom_keybind_strings_{locale}.xml` | Options-screen keybinding labels (from `global_strings.xml`) | ~8 |
 | `std_taom_player_switcher_strings_{locale}.xml` | Player Switcher feature UI | ~13 |

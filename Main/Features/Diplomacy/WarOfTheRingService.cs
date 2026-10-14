@@ -103,6 +103,18 @@ public class WarOfTheRingService : IWarOfTheRingService
         return _config.Enabled;
     }
 
+    // #765: the War Chronicle's phase anchors read the same clamped pair the transitions use.
+    public int? GetEffectivePhaseDay(WarPhase phase)
+    {
+        var (phase1Day, phase2Day) = GetEffectivePhaseDays();
+        switch (phase)
+        {
+            case WarPhase.IsengardWar: return phase1Day;
+            case WarPhase.FullWar: return phase2Day;
+            default: return null;
+        }
+    }
+
     // Phase 2 must land strictly after Phase 1. CheckPhaseTransition's two guards are sequential
     // ifs and TransitionToPhase mutates CurrentPhase in place, so an equal or inverted pair runs
     // BOTH transitions inside one call — IsengardWar is entered and overwritten by FullWar before

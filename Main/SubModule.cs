@@ -871,12 +871,10 @@ public class SubModule : MBSubModuleBase
             // + TroopProgression model registration block. Replaces all CareerPassiveHelper static
             // calls with instance-injected ICareerPassiveService.
             var careerPassives = IoC.Resolve<TAOM.Features.CareerSystem.ICareerPassiveService>();
-            // Hoisted: TaomVolunteerModel consumes ICulturalFeatsService for the village
-            // volunteer-respawn-rate feats (Dunland/Gundabad/Dol Guldur/Mordor); the cultural-feat
-            // model group reuses this same reference.
+            // Resolved once for the cultural-feat model group (RegisterCulturalFeatModels).
             var culturalFeats = IoC.Resolve<TAOM.Features.CulturalFeats.ICulturalFeatsService>();
 
-            RegisterProgressionAndIdentity(campaignStarter, careerPassives, culturalFeats);
+            RegisterProgressionAndIdentity(campaignStarter, careerPassives);
             RegisterRaceAgeAndFamily(campaignStarter);
             RegisterDiplomacyAndConflict(campaignStarter);
             RegisterCulturalFeatModels(campaignStarter, culturalFeats, careerPassives);
@@ -1033,8 +1031,7 @@ public class SubModule : MBSubModuleBase
     // former OnGameStart inline block — bodies are verbatim, order unchanged).
     private static void RegisterProgressionAndIdentity(
         CampaignGameStarter campaignStarter,
-        ICareerPassiveService careerPassives,
-        TAOM.Features.CulturalFeats.ICulturalFeatsService culturalFeats)
+        ICareerPassiveService careerPassives)
     {
         var racePersistenceService = IoC.Resolve<IRacePersistenceService>();
         campaignStarter.AddBehavior(new RacePersistenceBehavior(racePersistenceService));
@@ -1116,7 +1113,7 @@ public class SubModule : MBSubModuleBase
         campaignStarter.AddModel(new TaomCharacterStatsModel(careerPassives,
             IoC.Resolve<TAOM.Features.CombatMechanics.IRaceCombatModifiersResolver>()));
         campaignStarter.AddModel(new TaomPartyWageModel(costService, careerPassives, wageModifiers, aiPartySize));
-        campaignStarter.AddModel(new TaomVolunteerModel(volunteerService, recruitmentService, volunteerContextAdapter, culturalFeats, recruitmentAlignment));
+        campaignStarter.AddModel(new TaomVolunteerModel(volunteerService, recruitmentService, volunteerContextAdapter, IoC.Resolve<VolunteerProductionService>(), recruitmentAlignment));
 
         // Prisoner-recruitment morale waiver: no morale lost recruiting a prisoner of your own
         // faction or alignment side (Isengard taking on Mordor/Gundabad/Dunland troops). Vanilla
@@ -1202,14 +1199,16 @@ public class SubModule : MBSubModuleBase
     // Cultural feat models — Phase 9b #144/#176: dispatch logic extracted to
     // ICulturalFeatsService. Each model is a thin boundary that converts
     // CultureObject → ICultureFeatAdapter and delegates (gamemodels.md rule 4).
-    // `culturalFeats` is passed in (hoisted resolve, shared with TaomVolunteerModel).
+    // `culturalFeats` is passed in (hoisted resolve).
     private static void RegisterCulturalFeatModels(
         CampaignGameStarter campaignStarter,
         TAOM.Features.CulturalFeats.ICulturalFeatsService culturalFeats,
         ICareerPassiveService careerPassives)
     {
         campaignStarter.AddModel(new TaomArmyManagementModel(culturalFeats));
-        campaignStarter.AddModel(new TaomPartySpeedModel(culturalFeats, careerPassives));
+        // #765 M8: the Eye of Sauron hunter's speed floor and host size seams read one shared hook.
+        var eyeOfSauron = IoC.Resolve<TAOM.Features.EyeOfSauron.IEyeOfSauronHook>();
+        campaignStarter.AddModel(new TaomPartySpeedModel(culturalFeats, careerPassives, eyeOfSauron));
         campaignStarter.AddModel(new TaomSettlementProsperityModel(culturalFeats));
         campaignStarter.AddModel(new TaomSettlementMilitiaModel(culturalFeats));
         campaignStarter.AddModel(new TaomBuildingConstructionModel(culturalFeats));
@@ -1219,7 +1218,7 @@ public class SubModule : MBSubModuleBase
         campaignStarter.AddModel(new TaomTournamentModel(IoC.Resolve<TAOM.Features.Arena.ITournamentService>()));
         campaignStarter.AddModel(new TaomPartyTroopUpgradeModel(culturalFeats, careerPassives, IoC.Resolve<ITroopCostService>()));
         var aiPartySize = IoC.Resolve<TAOM.Features.AiPartySize.IAiPartySizeService>();
-        campaignStarter.AddModel(new TaomPartySizeModel(culturalFeats, careerPassives, IoC.Resolve<ITroopWeightService>(), aiPartySize, IoC.Resolve<IModLogger>()));
+        campaignStarter.AddModel(new TaomPartySizeModel(culturalFeats, careerPassives, IoC.Resolve<ITroopWeightService>(), aiPartySize, IoC.Resolve<IModLogger>(), eyeOfSauron));
         campaignStarter.AddModel(new TaomFoodConsumptionModel(culturalFeats, aiPartySize));
         campaignStarter.AddModel(new TaomSettlementLoyaltyModel(culturalFeats, IoC.Resolve<IRevoltTuningConfigProvider>()));
         campaignStarter.AddModel(new TaomSettlementFoodModel(IoC.Resolve<ISettlementFoodService>(), IoC.Resolve<ISettlementFoodConfigProvider>()));
@@ -1346,8 +1345,13 @@ public class SubModule : MBSubModuleBase
     /// Custom Battle (and the editor's test battle) hand a BasicGameStarter here after the game
     /// type has added its own models (CustomGame.OnInitialize: InitializeGameModels, then
     /// GameManager.OnGameStart), so a model added now is the one MissionGameModels resolves.
-    /// Mirrored: the culture doctrine's mission-side models (what the Custom Battle A/B measures)
-    /// and the banner bearers' race gate. Every other TAOM model stays campaign-only.
+    /// Mirrored: the culture doctrine's mission-side models (what the Custom Battle A/B measures),
+    /// the banner bearers' race gate and the damage model (Combat Mechanics, the Race Abilities,
+    /// Creature Bandits and Creature Siege Role damage hooks, Signature Strikes knockdown and knock-back). The damage
+    /// twin extends the engine's Custom Battle base, never SandBox's (it throws on a mounted hit outside
+    /// a campaign). Stays campaign-only: the career passives and the Refuge reduction, which read heroes
+    /// and parties, and every other model. No feature module may declare a Custom Battle model for a slot
+    /// filled here: the module step runs after this one and the last model added wins.
     /// </summary>
     private static void RegisterCustomBattleModels(IGameStarter gameStarterObject)
     {
@@ -1360,6 +1364,12 @@ public class SubModule : MBSubModuleBase
         // BannerBearers: trolls never carry a standard, in Custom Battle too (race gate only).
         basicStarter.AddModel<BattleBannerBearersModel>(new TaomCustomBattleBannerBearersModel(
             IoC.Resolve<Features.BannerBearers.IBannerBearerService>()));
+        // CombatMechanics (#788): the damage rules run in Custom Battle too, with the same collaborators the campaign
+        // registration resolves; the two Signature Strikes resolves are what turn its knockdown and knock-back verdicts on.
+        basicStarter.AddModel<AgentApplyDamageModel>(new TaomCustomBattleDamageModel(
+            IoC.Resolve<Features.CombatMechanics.Hooks.CombatMechanicsHooks>(),
+            IoC.Resolve<Features.SignatureStrikes.ISignatureStrikeService>(),
+            IoC.Resolve<Features.SignatureStrikes.Hooks.ISignatureAgentRoster>()));
     }
 
     // Campaign-life behaviors: startup resources, companions, inventory/equipment QoL, fief +
@@ -2047,6 +2057,51 @@ public class SubModule : MBSubModuleBase
     {
         base.OnMissionBehaviorInitialize(mission);
 
+        // BattleLoadDiagnostics phase-6: "battle playable" marker on first tick + closes
+        // the loading window so the stall watchdog stands down and phase-5 stops logging.
+        //
+        // Registered UNCONDITIONALLY (TAOM convention, and latch rule 3 in
+        // .claude/rules/harmony-patches.md: verify "unconditional" at the OUTERMOST gate). This
+        // behavior is the loading window's ONLY closer; the opener runs in Mission.Initialize's
+        // prefix. The 2026-07-06 RCA deferred this one as "the same synchronous call chain", and
+        // the three-bucket measurement disproves that premise: the two evaluations are separated by
+        // a tick boundary AND a measured ~11.9 s native load (MissionState.cs:221-350). A toggle
+        // flipped inside that window latched the loading window open until the next
+        // Mission.Initialize, and the stall watchdog then fired at 300 s and wrote a spurious
+        // bundle. This changeset makes toggling MCM mid-session an EXPECTED operator action during
+        // the commit-attribution matrix, so the window is no longer theoretical.
+        //
+        // Registered in the finally around ALL of TAOM's mission wiring: the mission-start guard
+        // (Patch103) survives a throw out of this method, the first mission's patch application
+        // included, and starts the mission, so the closer must exist whatever the wiring did. It is
+        // registered last, so it ticks first: a TAOM behavior that throws in every tick cannot keep
+        // the window open (2026-10-08 reviews). No catch: the throw still reaches the guard.
+        //
+        // Safe to register while disabled: BattleLoadPhaseBehavior already self-gates its logging
+        // (LogBattlePlayable returns early when disabled) while Close()/ClearInflight() are
+        // unconditional state transitions. Steady-state cost is one `if (_playableLogged) return;`
+        // per mission tick.
+        try
+        {
+            AddTaomMissionBehaviors(mission);
+        }
+        finally
+        {
+            // One closer per mission: with the guard off, a throw makes the engine load the same Mission
+            // again, and a second closer would stamp BattlePlayable twice (Codex pass 2).
+            var loadDiagnostics = IoC.Resolve<Features.BattleLoadDiagnostics.IBattleLoadDiagnosticsService>();
+            if (loadDiagnostics != null
+                && mission.GetMissionBehavior<Features.BattleLoadDiagnostics.Hooks.BattleLoadPhaseBehavior>() == null)
+                mission.AddMissionBehavior(new Features.BattleLoadDiagnostics.Hooks.BattleLoadPhaseBehavior(
+                    loadDiagnostics, IoC.Resolve<Features.BattleLoadDiagnostics.IBattleLoadStallMarker>()));
+        }
+    }
+
+    // TAOM's mission wiring: the first mission's patch application, then every TAOM mission behavior.
+    // Runs inside OnMissionBehaviorInitialize's try, so the loading window's closer exists whatever
+    // this throws.
+    private void AddTaomMissionBehaviors(Mission mission)
+    {
         // Apply Formation.SetMovementOrder patches (Patch31_SmartCavalryAI + Patch35
         // CancelStanceOnMove) only once Mission.Current is non-null — MovementOrder's
         // type initializer constructs static fields whose ctor reads
@@ -2165,7 +2220,7 @@ public class SubModule : MBSubModuleBase
         AddTaomBehavior(new Features.CompanionTactics.BattleActionBar.Hooks.BattleActionBarMissionView());
 
         // Feature modules' mission behaviors: after the feature behaviors above, before the kernel tail
-        // below (MissionDiagnostic, BattleLoadPhase, the CrashReport dev trigger, CareerPerk).
+        // below (MissionDiagnostic, the CrashReport dev trigger, CareerPerk).
         FeatureModuleHooks.AddMissionBehaviors(mission, AddTaomBehavior);
 
         // MissionDiagnostic: added LAST so it sees all behaviors added by TAOM AND
@@ -2178,28 +2233,6 @@ public class SubModule : MBSubModuleBase
         var diagLogger = IoC.Resolve<IModLogger>();
         if (diagSvc != null && raceMgr != null && diagLogger != null)
             AddTaomBehavior(new Features.MissionDiagnostic.Hooks.MissionDiagnosticBehavior(diagSvc, raceMgr, diagLogger));
-
-        // BattleLoadDiagnostics phase-6: "battle playable" marker on first tick + closes
-        // the loading window so the stall watchdog stands down and phase-5 stops logging.
-        //
-        // Registered UNCONDITIONALLY (TAOM convention, and latch rule 3 in
-        // .claude/rules/harmony-patches.md — verify "unconditional" at the OUTERMOST gate). This
-        // behavior is the loading window's ONLY closer; the opener runs in Mission.Initialize's
-        // prefix. The 2026-07-06 RCA deferred this one as "the same synchronous call chain", and
-        // the three-bucket measurement disproves that premise: the two evaluations are separated by
-        // a tick boundary AND a measured ~11.9 s native load (MissionState.cs:221-350). A toggle
-        // flipped inside that window latched the loading window open until the next
-        // Mission.Initialize, and the stall watchdog then fired at 300 s and wrote a spurious
-        // bundle. This changeset makes toggling MCM mid-session an EXPECTED operator action during
-        // the commit-attribution matrix, so the window is no longer theoretical.
-        //
-        // Safe to register while disabled: BattleLoadPhaseBehavior already self-gates its logging
-        // (LogBattlePlayable returns early when disabled) while Close()/ClearInflight() are
-        // unconditional state transitions. Steady-state cost is one `if (_playableLogged) return;`
-        // per mission tick.
-        if (battleLoadDiagSvc != null)
-            AddTaomBehavior(new Features.BattleLoadDiagnostics.Hooks.BattleLoadPhaseBehavior(
-                battleLoadDiagSvc, IoC.Resolve<Features.BattleLoadDiagnostics.IBattleLoadStallMarker>()));
 
         // Dev-trigger behavior watches the CrashReport MCM toggle and throws a tagged
         // TaomDevTriggerException on the next OnMissionTick when the player flips

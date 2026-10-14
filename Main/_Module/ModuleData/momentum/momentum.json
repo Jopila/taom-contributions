@@ -16,7 +16,8 @@
     "raid": 504,
     "armyGathered": 168,
     "relativeStrength": 12,
-    "enemiesKilled": 504
+    "enemiesKilled": 504,
+    "chronicle": 504
   },
   "player": {
     "requireParticipationForVictory": true,

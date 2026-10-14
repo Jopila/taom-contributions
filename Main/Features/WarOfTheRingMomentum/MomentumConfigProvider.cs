@@ -86,6 +86,7 @@ public class MomentumConfigProvider : IMomentumConfigProvider
         rejected |= ValidateDuration("armyGathered", () => parsed.DurationsHours.ArmyGathered, v => parsed.DurationsHours.ArmyGathered = v, defaults.DurationsHours.ArmyGathered);
         rejected |= ValidateDuration("relativeStrength", () => parsed.DurationsHours.RelativeStrength, v => parsed.DurationsHours.RelativeStrength = v, defaults.DurationsHours.RelativeStrength);
         rejected |= ValidateDuration("enemiesKilled", () => parsed.DurationsHours.EnemiesKilled, v => parsed.DurationsHours.EnemiesKilled = v, defaults.DurationsHours.EnemiesKilled);
+        rejected |= ValidateDuration("chronicle", () => parsed.DurationsHours.Chronicle, v => parsed.DurationsHours.Chronicle = v, defaults.DurationsHours.Chronicle);
 
         if (!FiniteFloatValidator.IsFiniteInRange(parsed.Player.ParticipationMultiplier, 1f, 100f))
         {

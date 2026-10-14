@@ -38,6 +38,10 @@ Every service is pure and unit-tested; the behavior holds no logic beyond routin
 - Each side keeps `Dictionary<MomentumActionType, Queue<MomentumEvent>>`, capped 100 per type. Events **decay**: their value is subtracted back out when their `EndTimeHours` passes (battles/sieges/raids 504h, army 168h, strength 12h).
 - Config event values are **internal-scale units** and are ×100'd into the store on the way in (`MomentumEventService`). This is a deliberate fix of a donor bug — LOTRAOM added config values raw while comparing `raw/100` against the threshold, so its own tuning comments ("~2 sieges for victory") were 100× off. Here `siege 250 + siege 250 ≥ threshold 500` as intended.
 
+### Chronicle awards (#765, M6)
+
+`MomentumActionType.Chronicle` (appended last: the type names are saved, so no value is ever renumbered) carries the War Chronicle's scripted awards. `IMomentumAwardService.TryAwardScripted(side, units, description, nowHours)` (`MomentumAwardService.cs`) adds `units × 100` to one side as a `Chronicle` event that decays after `durationsHours.chronicle` (504 hours). It refuses, and adds nothing, while momentum is off, before the war has started (no Full War enrollment yet), after it has ended, for units below 1 and for a non-finite clock; units above 300 are clamped to 300. The breakdown shows the type as "Chronicle Events" (`{=taom_wotr_chronicle_events}`). Only the chronicle calls it, on the co-op authority, once per resolution; in the shipped `war_chronicle.json` every held siege awards the Free side 100 units, because a held siege earns nothing from the capture path. Victory stays off, so the award only moves the meter. See [war-chronicle.md](war-chronicle.md).
+
 ### Enrollment (deviation from LOTRAOM, justified)
 
 LOTRAOM enrolled kingdoms from its own war-event scripting. TAOM's phase machine already owns war declaration, so momentum **enrolls dynamically**: on session launch and each daily tick while `CurrentPhase == FullWar`, every kingdom whose side is Free or Evil is swept into that side (Neutral excluded). Enrollment is bookkeeping only — it never declares wars or alliances (the donor's `StanceType.Alliance` reflection is impossible on 1.4.6 anyway; the enum has no `Alliance` value).
@@ -95,7 +99,7 @@ Kingdoms are resolved by StringId with `Kingdom.All.FirstOrDefault(k => k.String
 | `events.armyMomentum` | 50 | fixed per army gathered (was 200 — lowered 2026-07-06 to match raids: gathering an army is a routine move, not a war outcome) |
 | `events.maxStrengthMomentum` | **0** | daily strength-differential cap — **retired 2026-07-05** (was 300): Evil out-strengths Free for most of a campaign, so it just fed Evil free daily momentum. At 0 the award is skipped and the `RelativeStrength` row is dropped from the breakdown; set > 0 to bring it back |
 | `events.killMomentumPerHundred` | 10 | **new 2026-07-05** — momentum per 100 enemies killed in battle, RAW attrition (not strength-normalized like battle-won, which stays tiny). Displayed = kills × this ÷ 100. Accrues for both sides on every war battle (mirrors the kill stat). Shows as an "Enemies Killed" breakdown row. 0 disables |
-| `durationsHours.*` | 504/504/504/168/12/504 | decay windows (battle/siege/raid/army/strength/**enemiesKilled**) |
+| `durationsHours.*` | 504/504/504/168/12/504/504 | decay windows (battle/siege/raid/army/strength/**enemiesKilled**/**chronicle**); `chronicle` is the War Chronicle award (#765) |
 | `player.requireParticipationForVictory` | true | war can't end until the player has fought enough |
 | `player.participationMultiplier` | 1.5 | momentum ×1.5 when the player takes part — see [What counts as player participation](#what-counts-as-player-participation) |
 | `player.minimumPlayerEventsForVictory` | 5 | player events needed before either side can win |
@@ -121,6 +125,7 @@ Defaults equal LOTRAOM's shipped `momentum_config.xml`, so the out-of-box balanc
 | `Domain/MomentumEvent.cs`, `MomentumTotalStats.cs`, `MomentumActionType.cs`, `MomentumSide.cs` | domain POCOs |
 | `Snapshots/*.cs` | flat DTOs (battle/siege/raid/army, incl. `TroopCasualties`) built at the adapter boundary |
 | `MomentumEventService.cs` | scoring + decay |
+| `MomentumAwardService.cs`, `IMomentumAwardService.cs` | the War Chronicle's scripted `Chronicle` awards (#765) |
 | `MomentumEnrollmentService.cs` | side membership sweep |
 | `MomentumVictoryService.cs` | victory decision + ordered peace-out |
 | `PlayerMomentumService.cs` | participation multiplier + victory gate |

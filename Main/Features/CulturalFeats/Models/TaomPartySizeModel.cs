@@ -8,6 +8,7 @@ using TAOM.Features.AiPartySize;
 using TAOM.Features.CareerSystem;
 using TAOM.Features.CareerSystem.Domain;
 using TAOM.Features.CulturalFeats.Diagnostics;
+using TAOM.Features.EyeOfSauron;
 using TAOM.Features.TroopWeight;
 
 namespace TAOM.Features.CulturalFeats.Models;
@@ -20,19 +21,25 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
     private readonly IAiPartySizeService _aiPartySize;
     // TEMPORARY (2026-07-17) — only the load-order probe below needs this; remove with the diagnostic.
     private readonly IModLogger _logger;
+    private readonly IEyeOfSauronHook _eyeOfSauron;
+    // Built once: a lambda over the method parameter would allocate a closure and a Func on every call, every party.
+    private readonly System.Func<object?, float> _weightedCountOf;
 
     public TaomPartySizeModel(
         ICulturalFeatsService feats,
         ICareerPassiveService careerPassives,
         ITroopWeightService troopWeight,
         IAiPartySizeService aiPartySize,
-        IModLogger logger)
+        IModLogger logger,
+        IEyeOfSauronHook eyeOfSauron)
     {
         _feats = feats;
         _careerPassives = careerPassives;
         _troopWeight = troopWeight;
         _aiPartySize = aiPartySize;
         _logger = logger;
+        _eyeOfSauron = eyeOfSauron;
+        _weightedCountOf = p => _troopWeight.CalculateWeightedMemberCount((PartyBase)p!);
     }
 
     public override ExplainedNumber GetPartyMemberSizeLimit(
@@ -61,6 +68,12 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
         // trimming to the unscaled cap and the caravan would bleed back to 30 men over a week with
         // every unit test still green. Pinned by AiPartySizeOrderingTests.
         _aiPartySize.ApplyCaravanScaling(party, ref result);
+        // #765 M8: the Eye of Sauron hunter's host. Lifts the hunter's limit to its own head count (weighted), so the
+        // daily shed never trims the topped-up host. MUST run before the TroopWeight line, for the reason the two
+        // lines above give; pinned by AiPartySizeOrderingTests. The weighted count is walked for the hunter only.
+        AiPartySizeService.AddResultFrameBonus(ref result, _eyeOfSauron.GetHostSizeBonus(
+            party.MobileParty?.StringId, result.ResultNumber, result.SumOfFactors,
+            party.MemberRoster?.TotalManCount ?? 0, party, _weightedCountOf));
         // TroopWeight "elite tax" (2026-07-11 rework): shrink the limit by the party's weight surplus so
         // heavy troops fill the cap at 2× while every COUNT reads raw. No-op when EnableTroopWeight is off.
         // Call position is irrelevant to the arithmetic — ExplainedNumber sums factors and applies them to

@@ -563,3 +563,17 @@ never finishes. `IsAuthority` also fails open under BannerlordTogether.
 - **Prevent:** a world-mutating pass over shared entities (battles, parties, settlements) either asks who controls each
   entity or stands down while `IsSessionActive || ShouldDeferToHost`, and says which in `coop-interop.md`'s gated table.
 - **Source:** `docs/reviews/rca-stuck-battle-guard-2026-10-06.md` row 2 (Engine and Data-flow lenses, independently).
+
+### A resume path must reuse the start path's availability checks (2026-10-14)
+The Eye of Sauron hunt's stand-off (the player rides in another lord's army) released the hunter and re-pinned
+him an hour after the player left. The start path refused a hunter in an army, a battle, a siege or a town, or
+under another order; the resume path checked only for a map event, so a hunter whose own AI led or joined an army
+meanwhile was claimed and recorded as hunting while attached (vanilla attached members skip path movement and
+the speed model). The save-load side repeated it: a stand-off save loaded into co-op released a pin the hunt no
+longer owned.
+- **Why missed:** the decision that added the second way into the state (resume) was tested from the player's
+  side only, and the hunter's side was assumed to be as the stand-off left it.
+- **Prevent:** a path that re-enters a state calls the same availability check as the path that first enters it,
+  one method, not a copy. A release reads the live engine flag (the pin) before acting, not a flag the feature
+  set earlier. After a maintainer decision adds a transition, re-run the lens that reads state transitions.
+- **Source:** `docs/reviews/rca-eye-of-sauron-2026-10-14.md` F1 and F3 (Codex), fixed in `2d17ceba3`.

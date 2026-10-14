@@ -786,6 +786,11 @@
 	<string id="taom_war_blocked" text="{=taom_war_blocked}These kingdoms are bound by an unbreakable alliance." />
 	<string id="taom_vote_lapsed" text="{=taom_vote_lapsed}The vote on &quot;{VOTE}&quot; no longer applies and has been withdrawn." />
 	<string id="taom_wotr_no_peace" text="{=taom_wotr_no_peace}The War of the Ring rages. There can be no peace." />
+	<!-- Eye of Sauron hunt (#765 M8) -->
+	<string id="taom_eye_hunt_free" text="{=taom_eye_hunt_free}The Eye of Sauron has turned upon you. {HUNTER} rides out with a host to destroy you." />
+	<string id="taom_eye_hunt_evil" text="{=taom_eye_hunt_evil}Elrond has sent {HUNTER} with a host of the Eldar to bring you down." />
+	<string id="taom_eye_hunt_won" text="{=taom_eye_hunt_won}{HUNTER} is beaten. The hunt is over, for now." />
+	<string id="taom_eye_hunt_over" text="{=taom_eye_hunt_over}The hunt is over, for now." />
 	<string id="taom_precompile_shaders" text="{=taom_precompile_shaders}Pre-compile Shaders" />
 	<string id="taom_precompile_hint" text="{=taom_precompile_hint}Pre-compiles the troop and equipment shaders so first battles do not stutter or stall. Re-run after any change to your mod list: the game clears its compiled shaders when the module list changes." />
 	<string id="taom_precompile_inquiry_title" text="{=taom_precompile_inquiry_title}Shader Pre-compilation" />
@@ -3207,4 +3212,36 @@
   <string id="str_player_mother_name.arthedain" text="{=taom_str_player_mother_name.arthedain}Ivorwen" />
 
   <!-- TAOM-NEWCULTURE:arthedain:END -->
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- MissionStartGuardAdapter -->
+	<string id="taom_mission_start_guard_notice" text="{=taom_mission_start_guard_notice}{MODULE} failed in {CALL} ({EXCEPTION}). The mission goes on, with that step cut short." />
+	<!-- SkeletonBufferEngineAdapter -->
+	<string id="taom_skeleton_buffer_warning" text="{=taom_skeleton_buffer_warning}This mission uses {PERCENT} percent of the engine's skeleton buffer, and the game freezes for good when it is full. Lower the battle size." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- CompanionTactics -->
+	<string id="taom_oob_assign_heroes" text="{=taom_oob_assign_heroes}Assign Heroes" />
+	<string id="taom_oob_no_screen" text="{=taom_oob_no_screen}No Order of Battle screen detected." />
+	<string id="taom_oob_preset_save_option" text="{=taom_oob_preset_save_option}Save Current Layout as Preset" />
+	<string id="taom_oob_preset_load_option" text="{=taom_oob_preset_load_option}Load: {NAME}" />
+	<string id="taom_oob_preset_delete_option" text="{=taom_oob_preset_delete_option}Delete: {NAME}" />
+	<string id="taom_oob_presets_title" text="{=taom_oob_presets_title}Formation Presets" />
+	<string id="taom_oob_presets_description" text="{=taom_oob_presets_description}Save, load or delete a layout of formation types, captains and hero troops." />
+	<string id="taom_oob_preset_deleted" text="{=taom_oob_preset_deleted}Preset &quot;{NAME}&quot; deleted." />
+	<string id="taom_oob_preset_not_general" text="{=taom_oob_preset_not_general}Only the general of this battle can use presets." />
+	<string id="taom_oob_preset_loaded" text="{=taom_oob_preset_loaded}Preset &quot;{NAME}&quot; loaded. Formation types: {CLASSES}, captains: {CAPTAINS}, hero troops: {TROOPS}." />
+	<string id="taom_oob_preset_skipped" text="{=taom_oob_preset_skipped}Saved assignments that do not fit this battle: {COUNT}." />
+	<string id="taom_oob_preset_save_title" text="{=taom_oob_preset_save_title}Save Formation Preset" />
+	<string id="taom_oob_preset_save_prompt" text="{=taom_oob_preset_save_prompt}Enter a name for this preset:" />
+	<string id="taom_oob_preset_save_button" text="{=taom_oob_preset_save_button}Save" />
+	<string id="taom_oob_preset_name_empty" text="{=taom_oob_preset_name_empty}Preset name cannot be empty." />
+	<string id="taom_oob_preset_saved" text="{=taom_oob_preset_saved}Preset &quot;{NAME}&quot; saved. Formation types: {CLASSES}, captains: {CAPTAINS}, hero troops: {TROOPS}." />
+	<string id="taom_oob_preset_limit" text="{=taom_oob_preset_limit}Preset limit reached. Delete one before saving." />
+	<string id="taom_oob_preset_name_in_use" text="{=taom_oob_preset_name_in_use}A preset named &quot;{NAME}&quot; already exists." />
+	<string id="taom_oob_preset_save_failed" text="{=taom_oob_preset_save_failed}Could not save the preset." />
+	<string id="taom_oob_presets_button_count" text="{=taom_oob_presets_button_count}Presets ({COUNT})" />
+	<string id="taom_oob_presets_button" text="{=taom_oob_presets_button}Presets" />
+	<!-- FiefManagement -->
+	<string id="taom_fief_nav_disabled" text="{=taom_fief_nav_disabled}Fief management is turned off in the mod options." />
+	<string id="taom_fief_nav_busy" text="{=taom_fief_nav_busy}The fief hub cannot be opened right now." />
+
 </strings>
