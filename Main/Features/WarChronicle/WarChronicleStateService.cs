@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using TAOM.Core.Logging;
+using TAOM.Core.Persistence;
 using TAOM.Features.WarChronicle.Effects;
 using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarChronicle.Rally;
-using TAOM.Features.WarOfTheRingMomentum;
 
 namespace TAOM.Features.WarChronicle;
 
@@ -13,9 +13,9 @@ namespace TAOM.Features.WarChronicle;
 /// section from a load, the chronicle's event rows (<see cref="ChronicleStateStore"/>, #765 M3) included.
 /// It resets every registry for a new session.
 ///
-/// The chunks come from <see cref="MomentumSyncChunker"/>: one SyncData string over 32,767 UTF-8
-/// bytes corrupts the save at write time, and a developed campaign's effects and baselines can grow
-/// past that.
+/// The chunks come from <see cref="SyncDataChunker"/>: one SyncData string over 32,763 UTF-8
+/// bytes corrupts the save at write time (the engine writes a short length of 4 plus the bytes, v1.5.5
+/// SaveContext.SaveStringTo), and a developed campaign's effects and baselines can grow past that.
 /// </summary>
 public sealed class WarChronicleStateService
 {
@@ -53,7 +53,7 @@ public sealed class WarChronicleStateService
         foreach (var pair in _rallyTiers.Snapshot())
             payload.RallyTiers[pair.Key] = pair.Value;
 
-        return MomentumSyncChunker.Split(WarChronicleSaveCodec.Serialize(payload));
+        return SyncDataChunker.Split(WarChronicleSaveCodec.Serialize(payload));
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public sealed class WarChronicleStateService
     {
         ResetForNewSession();
 
-        var payload = WarChronicleSaveCodec.Parse(MomentumSyncChunker.Join(chunks));
+        var payload = WarChronicleSaveCodec.Parse(SyncDataChunker.Join(chunks));
         foreach (var warning in payload.Warnings)
             _logger.LogWarning("[WarChronicle] Save: " + warning + ".");
 

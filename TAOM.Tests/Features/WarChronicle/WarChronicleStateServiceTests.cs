@@ -4,11 +4,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
+using TAOM.Core.Persistence;
 using TAOM.Features.WarChronicle;
 using TAOM.Features.WarChronicle.Effects;
 using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarChronicle.Rally;
-using TAOM.Features.WarOfTheRingMomentum;
 
 namespace TAOM.Tests.Features.WarChronicle;
 
@@ -76,8 +76,8 @@ public class WarChronicleStateServiceTests
         Assert.IsTrue(chunks.Count > 1, "the payload must span several chunks for this test to mean anything");
         foreach (var chunk in chunks)
         {
-            Assert.IsTrue(chunk.Length <= MomentumSyncChunker.MaxChunkChars, "chunk of " + chunk.Length + " chars");
-            Assert.IsTrue(MomentumSyncChunker.Utf8ByteLength(chunk) <= MomentumSyncChunker.EngineEntryByteLimit);
+            Assert.IsTrue(chunk.Length <= SyncDataChunker.MaxChunkChars, "chunk of " + chunk.Length + " chars");
+            Assert.IsTrue(SyncDataChunker.Utf8ByteLength(chunk) <= SyncDataChunker.EngineEntryByteLimit);
         }
 
         var settings = Substitute.For<IWarChronicleSettingsProvider>();

@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using TAOM.Core.Logging;
+using TAOM.Core.Persistence;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.WarChronicle.Ledger;
 using TaleWorlds.CampaignSystem;
@@ -18,10 +18,6 @@ public class WarChronicleBehavior : CampaignBehaviorBase
 {
     private const string CountKey = "_taom_war_chronicle_v1_count";
     private const string ChunkKeyPrefix = "_taom_war_chronicle_v1_";
-
-    // 4,096 chunks of 10,000 chars is 40 MB of payload: far past any real save, so a count beyond it is
-    // a corrupt or foreign value, not a payload to loop over.
-    private const int MaxChunks = 4096;
 
     private readonly WarChronicleTickService _tick;
     private readonly WarChronicleStateService _state;
@@ -50,40 +46,10 @@ public class WarChronicleBehavior : CampaignBehaviorBase
 
     public override void SyncData(IDataStore dataStore)
     {
-        if (dataStore.IsSaving)
-        {
-            var chunks = _state.CaptureChunks();
-            var count = chunks.Count;
-            dataStore.SyncData(CountKey, ref count);
-            for (var i = 0; i < count; i++)
-            {
-                var chunk = chunks[i];
-                dataStore.SyncData(ChunkKeyPrefix + i, ref chunk);
-            }
-
-            return;
-        }
-
-        if (!dataStore.IsLoading)
-            return;
-
-        var savedCount = 0;
-        dataStore.SyncData(CountKey, ref savedCount);
-        if (savedCount < 0 || savedCount > MaxChunks)
-        {
-            _logger.LogWarning($"[WarChronicle] Save: the chunk count {savedCount} is out of range, so the payload is ignored.");
-            savedCount = 0;
-        }
-
-        var saved = new List<string>(savedCount);
-        for (var i = 0; i < savedCount; i++)
-        {
-            string chunk = string.Empty;
-            dataStore.SyncData(ChunkKeyPrefix + i, ref chunk);
-            saved.Add(chunk ?? string.Empty);
-        }
-
-        _state.RestoreFromChunks(saved);
+        var saved = SyncDataChunker.SyncChunks(
+            dataStore, CountKey, ChunkKeyPrefix, dataStore.IsSaving ? _state.CaptureChunks() : null, _logger, "[WarChronicle]");
+        if (dataStore.IsLoading)
+            _state.RestoreFromChunks(saved);
     }
 
     // internal for TAOM.Tests (InternalsVisibleTo): the co-op gate is asserted directly.

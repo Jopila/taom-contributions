@@ -6,7 +6,7 @@ using TAOM.Features.ArmyTargeting;
 using TAOM.Features.WarChronicle;
 using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarChronicle.Rally;
-using TAOM.Features.WarOfTheRingMomentum;
+using TAOM.Core.Persistence;
 using static TAOM.Tests.Features.WarChronicle.Events.ChronicleFixture;
 
 namespace TAOM.Tests.Features.WarChronicle.Events;
@@ -113,7 +113,7 @@ public class ChroniclePersistenceTests
         var json = string.Concat(chunks).Replace("\"chronicle\":[]", "\"chronicle\":[{\"id\":\"hornburg\",\"s\":42}]");
 
         var g = new ChronicleFixture();
-        StateFor(g).RestoreFromChunks(MomentumSyncChunker.Split(json));
+        StateFor(g).RestoreFromChunks(SyncDataChunker.Split(json));
 
         Assert.AreEqual(0, g.Store.Records.Count);
         Assert.AreEqual(1, g.Effects.Snapshot().Count);
