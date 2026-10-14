@@ -23,6 +23,9 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
 {
     private const int SpawnTries = 15;
 
+    /// <summary>One percent of broad-phase headroom, so a hunter exactly on the band's edge is found.</summary>
+    private const float LocatorSlack = 1.01f;
+
     public double NowDays => CampaignTime.Now.ToDays;
 
     public string? PlayerKingdomId => Clan.PlayerClan?.Kingdom?.StringId;
@@ -91,7 +94,8 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
             IsActive = party.IsActive,
             LeaderHeroId = party.LeaderHero?.StringId,
             InMapEvent = party.MapEvent != null,
-            InArmy = party.Army != null,
+            // A leader has Army set; an attached member AttachedTo as well (Army.cs:845), as in ReadStepState.
+            InArmy = party.Army != null || party.AttachedTo != null,
             // BesiegedSettlement dereferences BesiegerCamp.SiegeEvent unguarded (MobileParty.cs:1172).
             Besieging = party.BesiegerCamp != null,
             InSettlement = party.CurrentSettlement != null,
@@ -139,6 +143,10 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
     }
 
     public void InvalidateSpeed(string partyId) => FindParty(partyId)?.UpdateVersionNo();
+
+    // MobileParty.UpdateVersionNo leaves MemberRoster.VersionNo, the size cache's key, alone; TroopRoster.UpdateVersion
+    // bumps both (TroopRoster.cs:731-735).
+    public void InvalidatePartySize(string partyId) => FindParty(partyId)?.MemberRoster?.UpdateVersion();
 
     public string? SpawnHunterParty(string heroId, float ringInner, float ringOuter, float minSights)
     {
@@ -214,7 +222,7 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
 
         // Read once: it sets the search radius and is the reading's S. An infinite radius would walk every locator cell.
         float sight = main.SeeingRange;
-        float radius = searchSights * sight;
+        float radius = LocatorRadius(searchSights, sight);
         if (!(sight > 0f) || !(radius > 0f) || float.IsInfinity(radius)) return HuntSightReading.Missing;
 
         // The locator grid around the player, the search vanilla's own visibility pass runs; no allocation. A hunter
@@ -245,6 +253,13 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
             PlayerSpeed = main.IsActive ? main.Speed : 0f,
         };
     }
+
+    /// <summary>
+    /// The locator search's radius: a little beyond <paramref name="searchSights"/> sights, because the locator skips a
+    /// party at <c>d^2 &gt;= r^2</c> (LocatorGrid.cs:131, 139) and the service's band includes its edge. The service
+    /// keeps the exact filter on the reading's distance.
+    /// </summary>
+    internal static float LocatorRadius(float searchSights, float sight) => searchSights * sight * LocatorSlack;
 
     public HuntStepState ReadStepState(string partyId)
     {

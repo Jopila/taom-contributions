@@ -146,22 +146,19 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
     }
 
     /// <summary>
-    /// After a load: a hunt restored into a co-op session, or whose party is gone, ends at once. Otherwise the live pin
-    /// says whether the hunt still holds it, so a hunt saved during a stand-off re-pins on resume.
+    /// After a load the live pin says first whether the hunt still holds it, so no end path releases a pin a hunt saved
+    /// during a stand-off no longer owns, and a resume re-pins. Then a hunt restored into a co-op session, or whose
+    /// party is gone, ends at once.
     /// </summary>
     public void OnSessionLaunched()
     {
         if (!IsHunting) return;
-        if (!IsSinglePlayer)
-        {
-            EndHunt(HuntEndReason.SessionLive);
-            return;
-        }
         var party = _adapter.ReadParty(_hunterPartyId!);
-        if (!party.Exists)
+        _pinnedByUs = party.Exists && party.AiPinned;
+        if (!IsSinglePlayer)
+            EndHunt(HuntEndReason.SessionLive);
+        else if (!party.Exists)
             EndHunt(HuntEndReason.PartyLost);
-        else
-            _pinnedByUs = party.AiPinned;
     }
 
     public float GetScore(FactionSide against) =>
@@ -329,6 +326,8 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         _hunterPartyId = partyId;
         _huntStartDay = Now;
         Publish(new HuntSnapshot(partyId!, inSight: false, playerSpeed: 0f, multiplier: 0f));
+        // A top-up that adds nobody leaves the roster version, and so the cached size limit, unchanged.
+        _adapter.InvalidatePartySize(partyId!);
 
         // Top up BEFORE the engage: CheckPartyNeedsUpdate can start the encounter at once (MobilePartyAi.cs:468-475).
         TopUpHost(partyId!, heroId, hero.FactionId);
@@ -338,6 +337,7 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         {
             _logger.LogWarning($"[EyeOfSauron] {heroId}'s party {partyId} could not be ordered after the player; no hunt.");
             ClearHunt();
+            _adapter.InvalidatePartySize(partyId!);
             return $"Refused: {heroId}'s party could not be ordered after you.";
         }
         _pinnedByUs = true;
@@ -463,9 +463,21 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
 
         if (!_pinnedByUs)
         {
-            // Resuming after a stand-off: re-pin and re-engage once, whatever the free AI chose; a battle waits.
-            if (!party.InMapEvent && _adapter.PinAndEngagePlayer(partyId!))
-                _pinnedByUs = true;
+            // Resuming after a stand-off: re-pin and re-engage once, whatever the free AI chose. A hunter his own AI
+            // left busy (a battle, an army he leads or rides in, a siege, a town, another's pin) is not his to claim:
+            // the engage order cannot undo it. The resume waits, unpinned and unstepped, and retries next hour.
+            string? busy = BusyReason(party);
+            if (busy != null)
+            {
+                _lastStep = "resume waits: hunter " + busy;
+                return;
+            }
+            if (!_adapter.PinAndEngagePlayer(partyId!))
+            {
+                _lastStep = "resume waits: the order was refused";
+                return;
+            }
+            _pinnedByUs = true;
         }
         // Re-issue only when lost: every engage call resets all of the party's movement state.
         else if (!party.InMapEvent && !party.IsEngagingPlayer)
@@ -554,8 +566,8 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
     }
 
     /// <summary>
-    /// Ends the hunt: releases the AI pin the hunt set, clears the published snapshot, then refreshes the party's speed
-    /// so the old floor cannot linger, and starts the cooldown.
+    /// Ends the hunt: releases the AI pin the hunt set, clears the published snapshot, then refreshes the party's size
+    /// limit and speed so the old allowance and floor cannot linger, and starts the cooldown.
     /// </summary>
     public void EndHunt(HuntEndReason reason)
     {
@@ -567,6 +579,7 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
         if (_pinnedByUs)
             _adapter.ReleasePin(partyId);
         ClearHunt();
+        _adapter.InvalidatePartySize(partyId);
         _adapter.InvalidateSpeed(partyId);
 
         float now = Now;

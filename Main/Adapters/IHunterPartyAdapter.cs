@@ -50,6 +50,13 @@ public interface IHunterPartyAdapter
     void InvalidateSpeed(string partyId);
 
     /// <summary>
+    /// Bumps the member roster's version (<c>MemberRoster.UpdateVersion</c>), so the party's cached
+    /// <c>PartySizeLimit</c>, keyed on that version (PartyBase.cs:356-366), is recalculated on its next read. Called on
+    /// every change to the hunt's membership, even one that adds no troops. A missing party is a no-op.
+    /// </summary>
+    void InvalidatePartySize(string partyId);
+
+    /// <summary>
     /// Spawns a lord party for a free hero at a reachable point between <paramref name="ringInner"/> and
     /// <paramref name="ringOuter"/> times the player's seeing range from him, and at least <paramref name="minSights"/>
     /// seeing ranges away in a straight line; removes the hero as governor and re-checks that he still belongs to no

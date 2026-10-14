@@ -2089,7 +2089,9 @@ public class EyeOfSauronServiceTests
     public void OnSessionLaunched_CoopSessionLive_EndsTheRestoredHunt()
     {
         _sut.LoadFrom(Seed());
-        _adapter.ReadParty("wk_party").Returns(FreeParty(HuntTroopLists.WitchKingId));
+        var pinned = FreeParty(HuntTroopLists.WitchKingId);
+        pinned.AiPinned = true;
+        _adapter.ReadParty("wk_party").Returns(pinned);
         _coop.ShouldDeferToHost.Returns(true);
 
         _sut.OnSessionLaunched();
@@ -2121,6 +2123,142 @@ public class EyeOfSauronServiceTests
         _sut.OnSessionLaunched();
 
         Assert.IsTrue(_sut.IsHunting);
+    }
+
+    // ---------------------------------------------------------------- Codex review 2026-10-14
+
+    // F3: a save taken during a stand-off holds no pin. Loaded into co-op, the launch-time end must not release a pin
+    // the hunt no longer owns (the release drops orders and forces a rethink).
+    [TestMethod]
+    public void OnSessionLaunched_StandOffSaveLoadedIntoCoop_EndsWithoutReleasing()
+    {
+        _sut.LoadFrom(Seed());
+        _adapter.ReadParty("wk_party").Returns(FreeParty(HuntTroopLists.WitchKingId));
+        _coop.IsSessionActive.Returns(true);
+
+        _sut.OnSessionLaunched();
+
+        Assert.IsFalse(_sut.IsHunting);
+        _adapter.DidNotReceive().ReleasePin(Arg.Any<string>());
+    }
+
+    // F1: while standing off, the hunter's own AI may lead an army, attach to one, enter a town, besiege or take
+    // another order. The engage call cannot undo any of that, so the resume claims no pin: it waits, unpinned (no
+    // floor, no step, no second release at the end), and retries every hour until he is free.
+    [DataTestMethod]
+    [DataRow("army leader")]
+    [DataRow("attached army member")]
+    [DataRow("in a settlement")]
+    [DataRow("besieging")]
+    [DataRow("pinned by another order")]
+    public void Resume_HunterUnavailable_ClaimsNoPin_AndRetriesHourly(string state)
+    {
+        StartWitchKingHunt();
+        StraightPathTo(100f, 10f);
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+        _sut.OnHourlyTickParty(Party);
+        _adapter.Received(1).ReleasePin(Party);
+
+        _adapter.PlayerInAnotherLordsArmy.Returns(false);
+        var busy = FreeParty(HuntTroopLists.WitchKingId, engaging: false);
+        switch (state)
+        {
+            // The adapter reads a leader (Army set) and an attached member (Army and AttachedTo set) as InArmy.
+            case "army leader": busy.InArmy = true; break;
+            case "attached army member": busy.InArmy = true; busy.IsEngagingPlayer = true; break;
+            case "in a settlement": busy.InSettlement = true; break;
+            case "besieging": busy.Besieging = true; break;
+            case "pinned by another order": busy.AiPinned = true; break;
+        }
+        _adapter.ReadParty(Party).Returns(busy);
+        _sut.OnHourlyTickParty(Party);
+        _sut.OnHourlyTickParty(Party);
+
+        _adapter.DidNotReceive().PinAndEngagePlayer(Party);
+        _adapter.DidNotReceive().Relocate(Arg.Any<string>(), Arg.Any<float>(), Arg.Any<float>());
+        InSight(distance: 5f);
+        Assert.IsFalse(_sut.TryGetSpeedFloor(Party, 3f, out _), $"{state}: the hunt holds no pin, so no floor");
+
+        // Free again: the next hour re-pins once.
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, engaging: false));
+        _sut.OnHourlyTickParty(Party);
+        _adapter.Received(1).PinAndEngagePlayer(Party);
+    }
+
+    [TestMethod]
+    public void Resume_HunterInAnArmy_EndReleasesNothingASecondTime()
+    {
+        StartWitchKingHunt();
+        _adapter.PlayerInAnotherLordsArmy.Returns(true);
+        _sut.OnHourlyTickParty(Party);
+
+        _adapter.PlayerInAnotherLordsArmy.Returns(false);
+        var inArmy = FreeParty(HuntTroopLists.WitchKingId);
+        inArmy.InArmy = true;
+        _adapter.ReadParty(Party).Returns(inArmy);
+        _sut.OnHourlyTickParty(Party);
+        _sut.EndHunt(HuntEndReason.Manual);
+
+        _adapter.Received(1).ReleasePin(Party);
+    }
+
+    // F2: PartySizeLimit is cached per MemberRoster.VersionNo, which MobileParty.UpdateVersionNo does not touch. Every
+    // membership change invalidates it, after the snapshot changed, even when no troop is added.
+    [TestMethod]
+    public void TryStartHunt_AddingNoTroops_StillInvalidatesThePartySize_AfterRegistering()
+    {
+        ArmWitchKingHunt();
+        // Strength 200 is over 1.3 times the player's 100: the top-up adds nobody.
+        _adapter.ReadParty(Party).Returns(FreeParty(HuntTroopLists.WitchKingId, heads: 50, strength: 200f));
+        float bonusAtInvalidate = -1f;
+        _adapter.When(a => a.InvalidatePartySize(Party)).Do(_ =>
+            bonusAtInvalidate = _sut.GetHostSizeBonus(Party, 10f, 0f, 60, null, _ => 60f));
+
+        _sut.OnDailyTick();
+
+        Assert.IsTrue(_sut.IsHunting);
+        _adapter.DidNotReceive().AddTroops(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>());
+        _adapter.Received(1).InvalidatePartySize(Party);
+        Assert.IsTrue(bonusAtInvalidate > 0f, "the recalculated limit must already see the hunter's host");
+    }
+
+    [DataTestMethod]
+    [DataRow("manual")]
+    [DataRow("timeout")]
+    [DataRow("party destroyed")]
+    public void EndHunt_InvalidatesThePartySize_AfterClearing(string end)
+    {
+        StartWitchKingHunt();
+        float bonusAtInvalidate = -1f;
+        _adapter.When(a => a.InvalidatePartySize(Party)).Do(_ =>
+            bonusAtInvalidate = _sut.GetHostSizeBonus(Party, 10f, 0f, 60, null, _ => 60f));
+
+        switch (end)
+        {
+            case "manual": _sut.EndHunt(HuntEndReason.Manual); break;
+            case "timeout": _now += 20d; _sut.OnHourlyTickParty(Party); break;
+            case "party destroyed": _sut.OnPartyDestroyed(Party); break;
+        }
+
+        Assert.IsFalse(_sut.IsHunting, end);
+        _adapter.Received(1).InvalidatePartySize(Party);
+        Assert.AreEqual(0f, bonusAtInvalidate, "the recalculated limit must not see the old host");
+    }
+
+    [TestMethod]
+    public void TryStartHunt_PinRefusedAfterRegistering_InvalidatesThePartySize_AfterClearing()
+    {
+        ArmWitchKingHunt();
+        _adapter.PinAndEngagePlayer(Party).Returns(false);
+        var bonuses = new System.Collections.Generic.List<float>();
+        _adapter.When(a => a.InvalidatePartySize(Party)).Do(_ =>
+            bonuses.Add(_sut.GetHostSizeBonus(Party, 10f, 0f, 60, null, _ => 60f)));
+
+        _sut.TryStartHunt(ignoreScoreAndCooldown: false);
+
+        Assert.IsFalse(_sut.IsHunting);
+        Assert.AreEqual(0f, bonuses.Count > 0 ? bonuses[bonuses.Count - 1] : -1f, "the last invalidation follows the refused start's clear");
+        Assert.AreEqual(2, bonuses.Count, "once at registration, once at the clear");
     }
 
     // ---------------------------------------------------------------- console helpers

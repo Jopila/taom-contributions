@@ -13,7 +13,7 @@ public sealed class HuntPartySnapshot
 
     public bool InMapEvent { get; set; }
 
-    /// <summary><c>Army != null</c> (leading one or attached to one).</summary>
+    /// <summary><c>Army != null || AttachedTo != null</c>: leading an army, or attached to one.</summary>
     public bool InArmy { get; set; }
 
     /// <summary>Besieging a settlement (a siege camp).</summary>
