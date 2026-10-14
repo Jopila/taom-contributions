@@ -6,6 +6,7 @@ Running scorecard of all reviews. **Reviews 1-99, 2026-04-05 to 2026-09-12.** 93
 
 | # | Date | Feature | Codex Verdict | Claude Verdict | Real Bugs | False Positives | Missed Bugs | Prompt Version |
 |---|------|---------|--------------|----------------|-----------|-----------------|-------------|----------------|
+| career-e4e7 | 2026-10-14 | Career forks engine #769 E4 to E7 and E12, plus the merge of trunk a9437a492 (one choice rule, forks, point levels, lock on leave, paid retrain, switch cost, tree-version migration) | issues-found (0 P1, 1 P2, 0 P3; 5 of 6 suspects disputed); pass 2 on the fix: none | agree (P2 confirmed in the source, fixed in 59c1803d2) | 1 P2 (the tree migration ran for the main hero only) | 0 | 0 | review-codex skill prompt, max; pass 2 high |
 | career-e1e3 | 2026-10-09 | Career fixes #766, #767, #768, #770, #771 (choice group link, resource gain on every source, party-size cache and leader-only scope, raid battle credit, party-screen handler) | issues-found (0 P1, 1 P2, 0 P3; 4 of 5 suspects disputed) | agree (P2 confirmed in the v1.5.5 decompile, fixed as #790) | 1 P2 (hideout send-troops paid twice, pre-existing) | 0 | 0 | review-codex skill prompt, xhigh |
 | (at merge) | 2026-10-08 | yotthani adoption, items 1 to 4: mission-start guard (Patch103), skeleton-buffer guard and watch (two native jumps), nameplate cull (Patch104), map-view release (layer event) | issues-found (0 HIGH, 1 MEDIUM conditional, 2 LOW) | agree (all three confirmed and fixed) | 3 | 0 | 4 LOW, found by two convergence lenses on the same tree (a due release across a campaign change, the closer's tick order, an unpinned engine order, a Priority.First overclaim) | gpt-6-astra, ultra; RCA `docs/reviews/rca-yotthani-adoption-2026-10-08.md` findings 34 to 37 |
 | (at merge) | 2026-10-08 | yotthani adoption, Codex pass 2 on the fixes of pass 1 and the convergence lenses (the closer in a `finally`, the map-view drop rule, an order pin, wording) | issues-found (0 MEDIUM or above, 2 LOW) | agree (both confirmed; one fixed, one documented) | 2 | 0 | 0 | gpt-6-astra, high; RCA findings 38 and 39 |
@@ -5282,6 +5283,12 @@ Report `docs/reviews/deep-review-031-settings-reads-off-hot-paths-2026-10-02.md`
 - **Convergence:** one pass. Every fix held and parity held for every improvement; it found 1 LOW
   defect the fixes had introduced (the Confirm hint said "You don't have enough denars." to a player
   who could pay) and 3 LOW doc errors, all fixed (RCA C1 to C4).
+- **Merge review:** trunk `a9437a492` merged as `1e6a97c6d`; a three-lens workflow with two refuters
+  per finding found 1 NIT (blank lines lost at five doc seams), fixed before the merge commit. Pure
+  trunk fails the same 9 dotnet tests as the merged tree.
+- **Codex:** `max` on `4f5b412d7..1e6a97c6d`: 1 P2, five of six suspects disputed with evidence. The
+  P2 (the tree migration ran for the main hero only) is fixed in `59c1803d2`; pass 2 at `high` on that
+  commit found nothing (RCA X1).
 - **RCA:** `docs/reviews/rca-career-e4e7-2026-10-14.md`.
 
 ## Review (number assigned at merge): War of the Ring session reset (#764), 8-lens deep review in two waves + Codex gpt-6-astra max (2026-10-08)

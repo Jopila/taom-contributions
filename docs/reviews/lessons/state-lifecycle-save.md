@@ -1035,3 +1035,14 @@ an Active siege and left a stale army focus (Codex F1, #765 Batch B).
   point that can resolve or pay (daily tick, each engine event, each console command) and put the check where they
   converge, here the shared callback wrapper. Add one test per entry point that fires after the terminal state.
 - **Source:** `docs/reviews/rca-war-chronicle-events-2026-10-14.md` F1 (Codex), fixed in `8f2c9e458`.
+
+### A migration over saved data runs for every record the save restores, not only the player's (2026-10-14)
+The career tree-version migration ran at session launch for `Hero.MainHero` only, while persistence restores
+career data for every saved hero and the passive cache walks them all. A co-op hero, or one the player takes over
+later, is never the main hero at launch, and the possession path skips a hero reconciled in an earlier session, so
+such a hero kept its old-tree picks after a tree update.
+- **Why missed:** the call was placed beside the existing repair pass, which runs for the main hero only, and took
+  its scope; the review traced the load order and every assignment path, not which records exist at load.
+- **Prevent:** before writing a load-time migration, list where the records come from (`SyncData` restores the whole
+  dictionary) and migrate each one; tell only the player. Test it with two records, the player and another.
+- **Source:** `docs/reviews/rca-career-e4e7-2026-10-14.md` X1 (Codex), fixed in `59c1803d2`.

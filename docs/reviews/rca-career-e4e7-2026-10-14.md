@@ -111,3 +111,29 @@ vanilla count, and the template's doc-name placeholder.
 
 In-game checks, listed in the commit body. Translation of the 15 new strings (paid, the maintainer's
 word).
+
+## Codex review (2026-10-14)
+
+Codex (`gpt-6-astra`, `max`) reviewed `4f5b412d7..1e6a97c6d`, the three branch commits and the merge,
+against the installed v1.5.5 DLLs. It disputed five of six suspects with evidence: the money paths (no
+charge without a refund, no free respec, quoted and charged prices agree in single player), display and
+click parity (330 level and count combinations against a parsed schedule), the shipped-data invariants
+(probed with in-memory XML mutations through the real provider), the merge's party-size order for every
+party type, and the v1.5.5 engine glue. It confirmed one finding:
+
+| # | Sev | Finding | Category | Why missed | Preventive action |
+|---|---|---|---|---|---|
+| X1 | P2 | The tree-version migration ran at session launch for `Hero.MainHero` only, while persistence restores career data for every saved hero and the passive cache walks them all. A co-op hero, or one the player takes over later, is never the main hero at launch, and `PlayerPossessionBehavior.CheckForPossession` returns early for a hero reconciled in an earlier session, so such a hero kept old-tree picks; its fork picks read as locked in, and its player would pay to retrain what the migration owes for free | Stale state / lifecycle (a per-record migration run over one record) | The plan said "per hero", but the brief placed the call beside the existing repair pass, which runs for the main hero only, and copied its scope. The data-flow lens checked the load order and the stamp at every assignment path, not which heroes hold career data when the session starts | `MigrateAllTreeVersions` migrates every hero in `GetAllData()` and returns the player's count (`59c1803d2`); two tests (a co-op hero beside the player, a player without a career); the order pin names the new call; lesson in `state-lifecycle-save.md` |
+
+A second pass (`high`) on `59c1803d2` found no defect and confirmed the fix for every record present
+at session launch. It left three observations, none a finding against this change:
+
+- The foreign-choice repair still runs for the main hero only. A non-player record that already holds
+  a foreign choice keeps it, and its passive still counts; the repair's documented producer (the
+  character-creation ghost root) is a main-hero cause, and no normal path producing such a record was
+  found. Older than this change; left as a follow-up.
+- `OnCareerSelected` over a hero that already holds choices certifies them with the stamp. Every saved
+  record is current once the session starts and tree versions change only between sessions, so no
+  reachable stale-tree case was found.
+- A co-op implementation that restores career records after session launch would miss the one-shot
+  sweep. UNVERIFIED: no TAOM path does it.
