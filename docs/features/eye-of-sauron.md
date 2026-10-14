@@ -122,8 +122,15 @@ per-party call allocates nothing.
   choose to engage the army on its own initiative.
 - **Uninstalling mid-hunt** leaves the hunter's saved AI pin with nothing to clear it. The timeout bounds the window in
   a game that keeps TAOM; remove TAOM only between hunts.
-- **At sea:** the sea guards are unreachable in a supported setup, since TAOM declares the War Sails module
-  (`NavalDLC`) incompatible in `SubModule.xml`.
+- **At sea:** the sea guards (`HunterAtSea`, `PlayerAtSea`) are unreachable in a supported setup. TAOM declares
+  the War Sails module (`NavalDLC`) incompatible in `Main/_Module/SubModule.xml` (`<IncompatibleModules>`, see
+  [advanced start options](advanced-start-options.md)), and TAOM's own sailing is parked
+  ([naval travel](naval-travel.md)), so no party reaches the sea. The guards stay as a belt.
+- **UNVERIFIED in the engine:** save and load in a running game, the landing point's native navmesh results, and
+  live Bannerlord Together behaviour were never exercised (the reviews ran unit tests and IL checks only); the
+  in-game checklist below covers the first two.
+- **A co-op session that goes live mid-hunt** is noticed at the hunter's next hourly tick; until then the ungated
+  frame tick keeps publishing the snapshot ([co-op](coop-interop.md)).
 
 ## Configuration
 
@@ -158,10 +165,33 @@ and that `dolguldur` is the kingdom Khamûl rules.
 
 ## How to
 
-- **Change a host's troops:** edit the list in `HuntTroopLists.cs`. The shares must sum to 1, and every id must be a
-  level 36 or higher soldier of the host's culture; `HuntTroopListsDataTests` checks both.
-- **Change the hunter order:** reorder `HuntTroopLists.WraithOrder`. It must stay exactly the Nine, the Witch-king
-  first and Khamûl last (`WraithOrder_IsExactlyTheNine_WitchKingFirst_KhamulLast`).
+### Change a host's troops
+
+1. Edit the host's list in `Main/Features/EyeOfSauron/HuntTroopLists.cs` (`Mordor`, `DolGuldur` or `Rivendell`):
+   each entry is a troop id and its share of the deficit.
+2. Keep the shares summing to 1, and use only soldiers of level 36 or higher from the host's culture in
+   `Main/_Module/ModuleData`.
+3. Run `dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId= --filter FullyQualifiedName~HuntTroopListsDataTests`;
+   it checks both rules for every id. Code change only: no data file holds the lists.
+
+### Change the hunter order
+
+1. Reorder `HuntTroopLists.WraithOrder` (Free player) or `ElvenOrder` (Evil player). The first hunter in order who
+   can ride today is chosen; one who cannot is passed over for the next.
+2. `WraithOrder` must stay exactly the Nine, the Witch-king first and Khamûl last
+   (`WraithOrder_IsExactlyTheNine_WitchKingFirst_KhamulLast`). A wraith's host follows his live kingdom
+   (`HostFor`), so moving a wraith in the order does not change his troops.
+3. Run the same filtered test, plus `EyeOfSauronServiceTests` for the order rows.
+
+### Tune the settings
+
+1. In game: MCM, group **War of the Ring/Eye of Sauron** (the table above). The provider reads MCM on every use,
+   so a slider change applies at its next read (the speed multiplier on the next frame), with no restart or reload.
+2. A slider bound is a constant in `EyeOfSauronSettingsProvider.cs`, the single source for both the clamp and the
+   slider in `Main/Features/TaomSettings.cs`. A persisted MCM default never flips: MCM loads the saved json2 value
+   over the compiled default, so rename the setting to change its default
+   ([shader precompilation](shader-precompilation.md); orientation.md "Persisted MCM defaults").
+3. Run `EyeOfSauronSettingsProviderTests` (defaults, NaN, infinity and range clamps).
 
 ## Console commands
 
@@ -186,10 +216,13 @@ and that `dolguldur` is the kingdom Khamûl rules.
 | `Main/Features/EyeOfSauron/HuntBattleReader.cs` | `MapEvent` to a plain battle summary |
 | `Main/Features/EyeOfSauron/EyeOfSauronSettingsProvider.cs`, `IEyeOfSauronSettings.cs` | Validated MCM values |
 | `Main/Features/EyeOfSauron/Cheats/EyeOfSauronCheats.cs` | The four console commands |
+| `Main/Features/TaomSettings.cs` | The MCM group **War of the Ring/Eye of Sauron** |
+| `Main/Composition/FeatureModules.cs` | Lists `EyeOfSauronModule` |
+| `Main/SubModule.cs` | Hands the one resolved `IEyeOfSauronHook` to both party models |
 | `Main/Adapters/IHunterPartyAdapter.cs`, `HunterPartyAdapter.cs` | Engine boundary |
 | `Main/Adapters/HunterHeroSnapshot.cs`, `HuntPartySnapshot.cs`, `HuntSightReading.cs`, `HuntStepState.cs`, `HuntPath.cs`, `HuntLanding.cs`, `HuntAnnouncement.cs` | The boundary's plain values |
 | `Main/Features/CulturalFeats/Models/TaomPartySpeedModel.cs`, `TaomPartySizeModel.cs` | One seam line each |
-| `Main/_Module/ModuleData/taom_module_strings.xml` | The four `taom_eye_hunt_*` lines |
+| `Main/_Module/ModuleData/taom_module_strings.xml` | The four popup lines: `taom_eye_hunt_free`, `taom_eye_hunt_evil`, `taom_eye_hunt_won`, `taom_eye_hunt_over` |
 
 ## Dependencies
 
@@ -205,16 +238,22 @@ and that `dolguldur` is the kingdom Khamûl rules.
   sizing, the daily re-top-up and the head cap, food, every step gate and the step order, landing, the speed floor
   and size bonus with their NaN gates, the floor band's 1.5 S edges, the ends (daily and hourly) releasing the pin, a
   flee and a third-party battle keeping the hunt, the start deferred and the hunter standing off in another lord's army, a resume waiting while the hunter is busy (army leader or member included), the size limit refreshed on every membership change, a stand-off save loaded into co-op releasing nothing, reset and a field-by-field
-  persistence round trip. Uses a real `AlignmentService`.
+  persistence round trip, the console's score edits and `Describe`, and a waiting hunter logged by the typed wait
+  (never by the message's wording; a dry run logs nothing). Uses a real `AlignmentService`.
 - `EyeOfSauronCheatsTests.cs`: the `confirm` token, the side parser and the score bounds.
-- `EyeOfSauronWiringTests.cs`: the module, the per-campaign construction pin and its negative rows, SubModule's hook,
-  the speed seam's order. `AiPartySizeOrderingTests` pins the size seam before the TroopWeight line.
+- `EyeOfSauronWiringTests.cs`: the module listed once and owning its save data, no hand registration, the
+  per-campaign construction pin and its negative rows, SubModule's one hook for both models, the speed seam's order,
+  and the service graph resolving. `AiPartySizeOrderingTests` pins the size seam before the TroopWeight line.
 - RequiresGame: `EyeOfSauronBehaviorSessionResetTests.cs` (save into a fresh behavior through an engine-faithful
   store), `EyeOfSauronSpeedFloorTests.cs` (`LimitMin` on a real `ExplainedNumber`), `HunterPartyAdapterIlTests.cs`
   (no linear party walk per frame, the widened locator radius, the army attachment read),
   `TaomPartySizeModelAllocationTests.cs` (no per-call delegate). `HunterPartyAdapterLocatorRadiusTests` (no game)
   pins the radius past the exact 1.5 S edge.
-- `EyeOfSauronSettingsProviderTests.cs`, `HuntTroopListsDataTests.cs`.
+- `EyeOfSauronSettingsProviderTests.cs`: each float's default, NaN and infinity reverting to it and the range
+  clamp; the int clamps; reads through the cached settings object.
+- `HuntTroopListsDataTests.cs` (reads `Main/_Module/ModuleData`): every host troop a level 36 or higher soldier of its
+  culture, shares summing to 1, the wraith order, Glorfindel a Rivendell lord, the host picked by hunter and live
+  faction, and `dolguldur` the kingdom Khamûl rules.
 
 ## In-game test checklist
 
@@ -269,4 +308,4 @@ Owed before the issue closes (`triage-needs-ingame`). Use a Free kingdom (Gondor
 ## GitHub Issue
 
 - **Issue:** #765 (War Chronicle), milestone M8
-- **Status:** Open
+- **Status:** Closed

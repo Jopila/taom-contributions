@@ -91,7 +91,7 @@ both TAOM manifests say so in their comments (`Main/_Module/SubModule.xml:20-22,
 | `ModuleCategory@value` | `Singleplayer`, `Multiplayer`, `MultiplayerOptional`, `Server` (`ModuleCategory.cs:3-9`) | no | `Singleplayer` | launcher filtering | `ModuleInfo.cs:99-104` |
 | `DependedModules/DependedModule@Id` (+ `@DependentVersion`, `@Optional`) | list | no | empty list | the engine-honoured hard dependency list; see below for what it does and does not do | `ModuleInfo.cs:105-130` |
 | `ModulesToLoadAfterThis/Module@Id` | list | no | empty list | soft "construct me before these" pin; unknown ids are stored and never matched | `ModuleInfo.cs:131-139` |
-| `IncompatibleModules/Module@Id` | list | no | empty list | ids that must not be enabled alongside this module; neither TAOM manifest uses it | `ModuleInfo.cs:140-148` |
+| `IncompatibleModules/Module@Id` | list | no | empty list | ids that must not be enabled alongside this module; TAOM's own manifest lists `NavalDLC` (`Main/_Module/SubModule.xml`) | `ModuleInfo.cs:140-148` |
 | `SubModules/SubModule` | list | no | none (the method returns) | one `SubModuleInfo` per entry; a throw inside one entry is caught and an empty entry is still added | `ModuleInfo.cs:149-166` |
 
 **`DependedModuleMetadatas` is absent from that table because the engine never parses it.**
