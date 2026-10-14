@@ -7,6 +7,7 @@ using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.EyeOfSauron;
 using TAOM.Features.Execution;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.EyeOfSauron;
 
@@ -80,10 +81,10 @@ public class EyeOfSauronBehaviorSessionResetTests
         EyeOfSauronServiceTests.AssertSeedIsComplete(seed);
         var a = NewBehavior();
         _service.LoadFrom(seed);
-        var store = new FakeDataStore { Mode = FakeDataStore.StoreMode.Saving };
+        var store = new EngineDataStore { Loading = false };
         a.SyncData(store);
 
-        store.Mode = FakeDataStore.StoreMode.Loading;
+        store.Loading = true;
         var b = NewBehavior();
         Assert.IsFalse(_service.IsHunting, "precondition: the fresh behavior's constructor reset the service");
         b.SyncData(store);
@@ -95,10 +96,10 @@ public class EyeOfSauronBehaviorSessionResetTests
     public void SaveWithoutAHunt_LoadsWithoutOne()
     {
         var a = NewBehavior();
-        var store = new FakeDataStore { Mode = FakeDataStore.StoreMode.Saving };
+        var store = new EngineDataStore { Loading = false };
         a.SyncData(store);
 
-        store.Mode = FakeDataStore.StoreMode.Loading;
+        store.Loading = true;
         NewBehavior().SyncData(store);
 
         Assert.IsFalse(_service.IsHunting);
@@ -108,7 +109,7 @@ public class EyeOfSauronBehaviorSessionResetTests
     [TestMethod]
     public void LoadOfASaveWithoutTheKeys_LoadsNoHunt_NoScore_NoCooldown()
     {
-        var store = new FakeDataStore { Mode = FakeDataStore.StoreMode.Loading };
+        var store = new EngineDataStore { Loading = true };
 
         NewBehavior().SyncData(store);
 
@@ -117,36 +118,5 @@ public class EyeOfSauronBehaviorSessionResetTests
         Assert.AreEqual(0f, state.ScoreVsEvil);
         Assert.AreEqual(0f, state.ScoreVsFree);
         Assert.AreEqual(0f, state.CooldownUntilDay);
-    }
-
-    /// <summary>
-    /// Mirrors the engine's behavior data store (copied from SpecialResourcesBehaviorSessionResetTests): a load of a
-    /// missing key returns false and leaves the ref unchanged; a save records what it is handed, null included, and a
-    /// second save of the same key throws, as the engine's <c>Add</c> does.
-    /// </summary>
-    private sealed class FakeDataStore : IDataStore
-    {
-        public enum StoreMode { Saving, Loading }
-
-        private readonly Dictionary<string, object?> _data = new();
-
-        public StoreMode Mode { get; set; }
-
-        public bool SyncData<T>(string key, ref T data)
-        {
-            if (Mode == StoreMode.Loading)
-            {
-                if (!_data.TryGetValue(key, out var stored)) return false;
-                data = (T)stored!;
-                return true;
-            }
-
-            _data.Add(key, data);
-            return true;
-        }
-
-        public bool IsSaving => Mode == StoreMode.Saving;
-
-        public bool IsLoading => Mode == StoreMode.Loading;
     }
 }

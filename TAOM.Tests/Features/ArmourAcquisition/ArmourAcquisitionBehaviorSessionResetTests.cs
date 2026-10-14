@@ -8,6 +8,7 @@ using TAOM.Features.ArmourAcquisition;
 using TAOM.Features.ArmourAcquisition.Domain;
 using TAOM.Features.ArmourAcquisition.Hooks;
 using TAOM.Features.CoopInterop;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.ArmourAcquisition;
 
@@ -70,7 +71,7 @@ public class ArmourAcquisitionBehaviorSessionResetTests
         LeavePriorCampaignState();
         var behavior = NewBehavior();
 
-        behavior.SyncData(new FakeDataStore { Loading = true });
+        behavior.SyncData(new EngineDataStore { Loading = true });
         behavior.OnSessionLaunched(null);
 
         Assert.AreEqual(0, _state.LadderClaimed.Count, "a key miss must not leave the previous campaign's state");
@@ -82,7 +83,7 @@ public class ArmourAcquisitionBehaviorSessionResetTests
         _state.LadderClaimed["main_hero"] = 3;
         _state.LadderReady["main_hero"] = 4;
         _state.LordEventLastDay["main_hero"] = 40;
-        var store = new FakeDataStore();
+        var store = new EngineDataStore();
         NewBehavior().SyncData(store);
 
         _state.Reset();
@@ -96,33 +97,5 @@ public class ArmourAcquisitionBehaviorSessionResetTests
         Assert.AreEqual(4, _state.LadderReady["main_hero"]);
         Assert.AreEqual(40, _state.LordEventLastDay["main_hero"]);
         Assert.IsFalse(_state.LadderClaimed.ContainsKey("other_hero"));
-    }
-
-    /// <summary>
-    /// Mirrors the engine's behavior data store (v1.5.3 BehaviorSaveData.SyncData): a load of a missing key
-    /// returns false and leaves the ref unchanged; a save records what it is handed.
-    /// </summary>
-    private sealed class FakeDataStore : IDataStore
-    {
-        private readonly Dictionary<string, object?> _data = new();
-
-        public bool Loading { get; set; }
-
-        public bool IsSaving => !Loading;
-
-        public bool IsLoading => Loading;
-
-        public bool SyncData<T>(string key, ref T data)
-        {
-            if (Loading)
-            {
-                if (!_data.TryGetValue(key, out var stored))
-                    return false;
-                data = (T)stored!;
-                return true;
-            }
-            _data[key] = data;
-            return true;
-        }
     }
 }

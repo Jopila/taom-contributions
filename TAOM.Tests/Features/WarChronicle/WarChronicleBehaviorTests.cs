@@ -13,6 +13,7 @@ using TAOM.Features.WarChronicle.Events;
 using TAOM.Features.WarChronicle.Ledger;
 using TAOM.Features.WarChronicle.Rally;
 using TaleWorlds.CampaignSystem;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.WarChronicle;
 
@@ -103,7 +104,7 @@ public class WarChronicleBehaviorTests
     public void SyncData_Saving_WritesTheCountAndOneKeyPerChunk()
     {
         _effects.Apply(Effect());
-        var store = new FakeDataStore { Loading = false };
+        var store = new EngineDataStore { Loading = false };
 
         _sut.SyncData(store);
 
@@ -117,7 +118,7 @@ public class WarChronicleBehaviorTests
     {
         _effects.Apply(Effect());
         _baselines.EnsureBaselines(new[] { new KingdomWarSnapshot { Id = "empire_w", Towns = 3, Castles = 1 } });
-        var store = new FakeDataStore { Loading = false };
+        var store = new EngineDataStore { Loading = false };
         _sut.SyncData(store);
 
         var effects2 = new WarEffectService(_settings, _logger);
@@ -140,8 +141,8 @@ public class WarChronicleBehaviorTests
     [DataRow(5000)]
     public void SyncData_LoadingAnAbsurdChunkCount_IsTreatedAsNoPayload(int count)
     {
-        var store = new FakeDataStore { Loading = true };
-        store.Put("_taom_war_chronicle_v1_count", count);
+        var store = new EngineDataStore { Loading = true };
+        store.Seed("_taom_war_chronicle_v1_count", count);
 
         _sut.SyncData(store);
 
@@ -204,36 +205,5 @@ public class WarChronicleBehaviorTests
             Substitute.For<IAlignmentService>(), _logger);
         var tick = new WarChronicleTickService(_snapshots, effects, _baselines, ledger, NoEscapes(effects), QuietRally(effects, _baselines, _tiers, ledger), _logger);
         return new WarChronicleBehavior(tick, _state, ledger, _coop, _logger);
-    }
-
-    private sealed class FakeDataStore : IDataStore
-    {
-        private readonly Dictionary<string, object?> _data = new Dictionary<string, object?>();
-
-        public bool Loading { get; set; }
-
-        public bool IsSaving => !Loading;
-
-        public bool IsLoading => Loading;
-
-        public bool Has(string key) => _data.ContainsKey(key);
-
-        public T Get<T>(string key) => (T)_data[key]!;
-
-        public void Put(string key, object value) => _data[key] = value;
-
-        public bool SyncData<T>(string key, ref T data)
-        {
-            if (Loading)
-            {
-                if (!_data.TryGetValue(key, out var stored))
-                    return false;
-                data = (T)stored!;
-                return true;
-            }
-
-            _data[key] = data;
-            return true;
-        }
     }
 }
