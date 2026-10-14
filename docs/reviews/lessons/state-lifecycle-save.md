@@ -1011,3 +1011,15 @@ A process-lifetime singleton that holds persisted per-campaign state must be res
 - **Why missed:** the call was placed where the phase check already lived, and the question "which listeners of the event I raise exist yet" is not one the session-reset lessons ask. The Engine lens (F26) and Codex (R1) reached the mechanism separately; the loss turned out harmless (faction Aggressiveness is written and never read in the v1.5.4 decompile; only the chat line is lost).
 - **Prevent:** before raising a campaign event from a session event, list the listeners that matter and where each registers; if one is registered later, either defer the write to a first tick or prove and document the loss. Here a delayed repair was rejected (a tick handler, a flag, up to about 67 chat lines at once) and `docs/features/war-of-the-ring.md` states the behavior. The same limit applies to a phase transition fired at launch.
 - **Source:** `docs/reviews/rca-wotr-phase2-wars-2026-10-08.md` (#772), Codex R1 and review finding F26.
+
+### Every engine callback path re-checks the terminal state, not only the daily tick (2026-10-14)
+`ChronicleService` skipped every Pending and Active event once the War of the Ring ended, and said so in the
+feature doc, but only the launch and the daily step made the check. `OnSettlementOwnerChanged` and the siege-start
+callback reached the same resolve method around it, so a conquest between War Ended and the next daily step paid
+an Active siege and left a stale army focus (Codex F1, #765 Batch B).
+- **Why missed:** the guard was written where the contract was read, the daily path; the engine-callback entry
+  points were added afterwards, and no test fired a callback after the terminal state.
+- **Prevent:** when a feature has a terminal state (war ended, feature off, campaign over), list every entry
+  point that can resolve or pay (daily tick, each engine event, each console command) and put the check where they
+  converge, here the shared callback wrapper. Add one test per entry point that fires after the terminal state.
+- **Source:** `docs/reviews/rca-war-chronicle-events-2026-10-14.md` F1 (Codex), fixed in `8f2c9e458`.
