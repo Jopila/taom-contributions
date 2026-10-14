@@ -42,9 +42,16 @@ public class KingdomWarSnapshotAdapterTests
     }
 
     [TestMethod]
-    public void FloorElapsedDays_Null_ReturnsZero()
+    [TestCategory("RequiresGame")]
+    public void TryGetElapsedDay_NoCampaign_IsInvalid()
     {
-        Assert.AreEqual(0, KingdomWarSnapshotAdapter.FloorElapsedDays(null));
+        Assert.IsFalse(_sut.TryGetElapsedDay(out _));
+    }
+
+    [TestMethod]
+    public void TryFloorElapsedDays_Null_IsInvalid()
+    {
+        Assert.IsFalse(KingdomWarSnapshotAdapter.TryFloorElapsedDays(null, out _));
     }
 
     [DataTestMethod]
@@ -52,27 +59,37 @@ public class KingdomWarSnapshotAdapterTests
     [DataRow(float.PositiveInfinity)]
     [DataRow(float.NegativeInfinity)]
     [DataRow(-1f)]
-    public void FloorElapsedDays_NonFiniteOrNegative_ReturnsZero(float days)
+    public void TryFloorElapsedDays_NonFiniteOrNegative_IsInvalid(float days)
     {
-        Assert.AreEqual(0, KingdomWarSnapshotAdapter.FloorElapsedDays(days));
+        // Not day 0: a day-0 claim or load marker from a broken clock is a decision on a made-up value.
+        Assert.IsFalse(KingdomWarSnapshotAdapter.TryFloorElapsedDays(days, out _));
     }
 
     [TestMethod]
-    public void FloorElapsedDays_AFraction_IsFloored()
+    public void TryFloorElapsedDays_AFraction_IsFloored()
     {
-        Assert.AreEqual(3, KingdomWarSnapshotAdapter.FloorElapsedDays(3.9f));
+        Assert.IsTrue(KingdomWarSnapshotAdapter.TryFloorElapsedDays(3.9f, out var day));
+        Assert.AreEqual(3, day);
     }
 
     [TestMethod]
-    public void FloorElapsedDays_TheLargestFloatBelowTwoToThe31_IsKept()
+    public void TryFloorElapsedDays_Zero_IsAValidDayZero()
     {
-        Assert.AreEqual(2147483520, KingdomWarSnapshotAdapter.FloorElapsedDays(2147483520f));
+        Assert.IsTrue(KingdomWarSnapshotAdapter.TryFloorElapsedDays(0f, out var day));
+        Assert.AreEqual(0, day);
     }
 
     [TestMethod]
-    public void FloorElapsedDays_TwoToThe31_ReturnsZeroNotIntMinValue()
+    public void TryFloorElapsedDays_TheLargestFloatBelowTwoToThe31_IsKept()
+    {
+        Assert.IsTrue(KingdomWarSnapshotAdapter.TryFloorElapsedDays(2147483520f, out var day));
+        Assert.AreEqual(2147483520, day);
+    }
+
+    [TestMethod]
+    public void TryFloorElapsedDays_TwoToThe31_IsInvalidNotIntMinValue()
     {
         // 2^31 passes a float bound of int.MaxValue (which rounds up to 2^31), and the cast then overflows.
-        Assert.AreEqual(0, KingdomWarSnapshotAdapter.FloorElapsedDays(2147483648f));
+        Assert.IsFalse(KingdomWarSnapshotAdapter.TryFloorElapsedDays(2147483648f, out _));
     }
 }

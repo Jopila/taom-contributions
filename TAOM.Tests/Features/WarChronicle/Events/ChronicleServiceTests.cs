@@ -1124,12 +1124,22 @@ public class ChronicleServiceTests
         _f.Config.Received().GetEvents();
     }
 
-    [TestMethod]
-    public void RunChronicleDay_ANaNClock_ClaimsNoDay()
+    [DataTestMethod]
+    [DataRow(double.NaN)]
+    [DataRow(double.PositiveInfinity)]
+    [DataRow(double.NegativeInfinity)]
+    [DataRow(-1d)]
+    [DataRow(-0.5d)]
+    public void RunChronicleDay_AnInvalidClock_ClaimsNoDay(double day)
     {
-        Day(double.NaN);
+        // ChronicleWorldAdapter passes the engine value through unmasked (no day-0 fallback), so the
+        // finite check and the gate's range check see the bad clock and skip the day.
+        _f.Events.Add(Narrative("fellowship"));
+
+        Day(day);
 
         Assert.AreEqual(0, _f.Daily.Snapshot().Count);
+        _f.Config.DidNotReceive().GetEvents();
     }
 
     // ---- Console: open now ---------------------------------------------------------------------------

@@ -33,19 +33,23 @@ public sealed class KingdomWarSnapshotAdapter : IKingdomWarSnapshotAdapter
 
     public string GetCampaignId() => Campaign.Current?.UniqueGameId ?? string.Empty;
 
-    public int GetElapsedDay() =>
-        FloorElapsedDays(Campaign.Current?.Models?.CampaignTimeModel?.CampaignStartTime.ElapsedDaysUntilNow);
+    public int GetElapsedDay() => TryGetElapsedDay(out var day) ? day : 0;
+
+    public bool TryGetElapsedDay(out int day) =>
+        TryFloorElapsedDays(Campaign.Current?.Models?.CampaignTimeModel?.CampaignStartTime.ElapsedDaysUntilNow, out day);
 
     /// <summary>
-    /// Whole days, floored; 0 for null, a non-finite or negative value, or one at or past 2^31. The check
-    /// runs on a double, where int.MaxValue is exact: the float overload's bound rounds up to 2^31, which
-    /// the cast would turn into int.MinValue.
+    /// Whole days, floored; false (day 0) for null, a non-finite or negative value, or one at or past 2^31.
+    /// The check runs on a double, where int.MaxValue is exact: the float overload's bound rounds up to
+    /// 2^31, which the cast would turn into int.MinValue.
     /// </summary>
-    internal static int FloorElapsedDays(float? days)
+    internal static bool TryFloorElapsedDays(float? days, out int day)
     {
+        day = 0;
         if (!days.HasValue || !FiniteFloatValidator.IsFiniteInRange((double)days.Value, 0d, int.MaxValue))
-            return 0;
-        return (int)Math.Floor(days.Value);
+            return false;
+        day = (int)Math.Floor(days.Value);
+        return true;
     }
 
     public double GetNowHours() => Campaign.Current == null ? 0d : CampaignTime.Now.ToHours;

@@ -54,6 +54,7 @@ public class WarChronicleBehaviorTests
         _snapshots = Substitute.For<IKingdomWarSnapshotAdapter>();
         _snapshots.GetCampaignId().Returns("c1");
         _snapshots.GetNowHours().Returns(100d);
+        _snapshots.SetElapsedDay(0);
         _snapshots.GetKingdoms().Returns(new List<KingdomWarSnapshot>
         {
             new KingdomWarSnapshot { Id = "empire_w", CultureId = "gondor", Towns = 3, Castles = 1 },
@@ -187,7 +188,7 @@ public class WarChronicleBehaviorTests
     [TestMethod]
     public void HandleKingdomDestroyed_Authority_WritesTheDestroyedLine()
     {
-        _snapshots.GetElapsedDay().Returns(70);
+        _snapshots.SetElapsedDay(70);
 
         _sut.HandleKingdomDestroyed("vlandia");
 
@@ -207,11 +208,21 @@ public class WarChronicleBehaviorTests
     [TestMethod]
     public void HandleGameLoaded_Authority_WritesTheLoadMarker()
     {
-        _snapshots.GetElapsedDay().Returns(41);
+        _snapshots.SetElapsedDay(41);
 
         _sut.HandleGameLoaded();
 
         CollectionAssert.AreEqual(new[] { "[WarLedger] v=1 t=load cid=c1 day=41" }, _logged);
+    }
+
+    [TestMethod]
+    public void HandleGameLoaded_AnInvalidClock_WritesNoLoadMarker()
+    {
+        _snapshots.SetClockInvalid();
+
+        _sut.HandleGameLoaded();
+
+        Assert.AreEqual(0, _logged.Count);
     }
 
     [TestMethod]

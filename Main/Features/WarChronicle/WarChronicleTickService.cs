@@ -20,6 +20,8 @@ namespace TAOM.Features.WarChronicle;
 /// Baselines taken after day 1 with none held (a save from before this feature, a corrupt section or a
 /// skipped first tick) get one warning. All of it runs at most once per campaign day
 /// (<see cref="WarChronicleDailyGate"/>): after a load the engine's next daily tick can repeat the save's day.
+/// An unreadable clock (no campaign, or a NaN, infinite or negative engine value) skips the day, with one
+/// warning until a readable day comes back: day 0 there would be a claim on a made-up value.
 /// The chronicle's event chain runs from its own router,
 /// <c>Events.WarChronicleEventsBehavior</c>, not from here. The caller has already checked that this peer
 /// may run world work.
@@ -34,6 +36,7 @@ public sealed class WarChronicleTickService
     private readonly RallyService _rally;
     private readonly IModLogger _logger;
     private readonly WarChronicleDailyGate _daily;
+    private bool _clockWarned;
 
     public WarChronicleTickService(
         IKingdomWarSnapshotAdapter snapshots, IWarEffectService effects, WarBaselineService baselines,
@@ -54,15 +57,26 @@ public sealed class WarChronicleTickService
     {
         try
         {
-            // At most once per campaign day: a save made before midday ticks its own day again after a load.
-            if (!_daily.TryClaim(WarChronicleDailyGate.TickLane, _snapshots.GetElapsedDay()))
+            if (!_snapshots.TryGetElapsedDay(out var day))
+            {
+                if (!_clockWarned)
+                    _logger.LogWarning("[WarChronicle] Daily tick skipped: the campaign clock is not readable.");
+                _clockWarned = true;
+                return;
+            }
+
+            _clockWarned = false;
+            // At most once per elapsed campaign day: a save made in the first half of one ticks that day
+            // again after a load. The elapsed day starts at CampaignStartTime (09:00 on vanilla's calendar
+            // clock), not at midnight.
+            if (!_daily.TryClaim(WarChronicleDailyGate.TickLane, day))
                 return;
 
             var nowHours = _snapshots.GetNowHours();
             _effects.Expire(nowHours);
 
             var kingdoms = _snapshots.GetKingdoms();
-            TakeBaselines(kingdoms);
+            TakeBaselines(kingdoms, day);
             _rally.RunDaily(kingdoms, nowHours);
             _escapes.Run();
             _ledger.WriteDaily(kingdoms);
@@ -75,9 +89,8 @@ public sealed class WarChronicleTickService
 
     // A new campaign's first daily tick is day 1 (a one-day initial wait from CampaignStartTime), so an
     // empty registry after it means the baselines are measured from today's map, not from the war's start.
-    private void TakeBaselines(IReadOnlyList<KingdomWarSnapshot> kingdoms)
+    private void TakeBaselines(IReadOnlyList<KingdomWarSnapshot> kingdoms, int day)
     {
-        var day = _snapshots.GetElapsedDay();
         var late = _baselines.Count == 0 && day > 1;
         var taken = _baselines.EnsureBaselines(kingdoms);
         if (taken > 0 && late)

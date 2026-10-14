@@ -107,10 +107,19 @@ public sealed class WarLedgerService
     /// <summary>
     /// On a game load: the load marker with the save's day, so the analyzer can drop the abandoned run's later
     /// days. The engine's next daily tick can repeat the save's day (Campaign.CreateCampaignEvents waits only
-    /// the elapsed part of the day), so no other line can tell a reload apart.
+    /// the elapsed part of the day), so no other line can tell a reload apart. An unreadable clock writes no
+    /// marker, only a warning: a day=0 marker would make the analyzer drop every retained day after day 0.
     /// </summary>
-    public void LogLoad() =>
-        _logger.LogInfo(WarLedgerFormatter.Load(_snapshots.GetCampaignId(), _snapshots.GetElapsedDay()));
+    public void LogLoad()
+    {
+        if (!_snapshots.TryGetElapsedDay(out var day))
+        {
+            _logger.LogWarning("[WarChronicle] No ledger load marker: the campaign clock is not readable.");
+            return;
+        }
+
+        _logger.LogInfo(WarLedgerFormatter.Load(_snapshots.GetCampaignId(), day));
+    }
 
     /// <summary>For the rally: one line when a kingdom's tier changes. <paramref name="loss"/> is the share of the baseline lost.</summary>
     public void LogTierChange(string kingdomId, int from, int to, float loss) =>
