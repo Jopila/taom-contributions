@@ -226,6 +226,14 @@ public class WarLedgerServiceTests
     }
 
     [TestMethod]
+    public void LogLoad_WritesTheLoadMarkerWithTheSavesDay()
+    {
+        _sut.LogLoad();
+
+        _logger.Received(1).LogInfo("[WarLedger] v=1 t=load cid=c1 day=12");
+    }
+
+    [TestMethod]
     public void LogTierChange_WritesTheEventLine()
     {
         _sut.LogTierChange("empire_w", 0, 1, 0.25f);

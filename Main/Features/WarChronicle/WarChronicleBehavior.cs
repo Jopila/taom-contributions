@@ -8,7 +8,7 @@ namespace TAOM.Features.WarChronicle;
 
 /// <summary>
 /// Thin entry point for the War Chronicle (docs/features/war-chronicle.md, issue #765): the daily tick,
-/// the kingdom-destroyed ledger line and the SyncData halves. Always registered, so the save payload
+/// the kingdom-destroyed and game-loaded ledger lines and the SyncData halves. Always registered, so the save payload
 /// survives a toggle. Every singleton holding campaign state is reset in the CONSTRUCTOR: the module
 /// builds this behavior fresh in each campaign's OnGameStart (WarChronicleModule, pinned by
 /// WarChronicleWiringTests), before any campaign event and before a load's SyncData, which then
@@ -42,6 +42,7 @@ public class WarChronicleBehavior : CampaignBehaviorBase
     {
         CampaignEvents.DailyTickEvent.AddNonSerializedListener(this, OnDailyTick);
         CampaignEvents.KingdomDestroyedEvent.AddNonSerializedListener(this, OnKingdomDestroyed);
+        CampaignEvents.OnGameLoadedEvent.AddNonSerializedListener(this, _ => HandleGameLoaded());
     }
 
     public override void SyncData(IDataStore dataStore)
@@ -61,6 +62,16 @@ public class WarChronicleBehavior : CampaignBehaviorBase
             return;
 
         _tick.RunDaily();
+    }
+
+    // The ledger's load marker: the next daily tick can repeat the save's own day, so only this line tells
+    // the analyzer which later days belong to the run the player abandoned.
+    internal void HandleGameLoaded()
+    {
+        if (!_coop.IsAuthority)
+            return;
+
+        _ledger.LogLoad();
     }
 
     private void OnKingdomDestroyed(Kingdom kingdom) => HandleKingdomDestroyed(kingdom?.StringId);

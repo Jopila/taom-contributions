@@ -204,6 +204,26 @@ public class WarChronicleBehaviorTests
         Assert.AreEqual(0, _logged.Count);
     }
 
+    [TestMethod]
+    public void HandleGameLoaded_Authority_WritesTheLoadMarker()
+    {
+        _snapshots.GetElapsedDay().Returns(41);
+
+        _sut.HandleGameLoaded();
+
+        CollectionAssert.AreEqual(new[] { "[WarLedger] v=1 t=load cid=c1 day=41" }, _logged);
+    }
+
+    [TestMethod]
+    public void HandleGameLoaded_NotAuthority_WritesNothing()
+    {
+        _coop.IsAuthority.Returns(false);
+
+        _sut.HandleGameLoaded();
+
+        Assert.AreEqual(0, _logged.Count);
+    }
+
     private WarChronicleBehavior NewBehaviorWith(IWarEffectService effects)
     {
         var ledger = new WarLedgerService(_snapshots, _baselines, _tiers, effects, Substitute.For<IWarOfTheRingService>(),

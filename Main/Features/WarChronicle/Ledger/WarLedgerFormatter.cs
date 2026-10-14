@@ -59,6 +59,13 @@ internal static class WarLedgerFormatter
     internal static string ChronicleEvent(string campaignId, int day, string eventId, string outcome) =>
         Inv($"{Head} t=event cid={Token(campaignId)} day={day} ev=chronicle id={Token(eventId)} outcome={Token(outcome)}");
 
+    /// <summary>
+    /// A save was loaded on <paramref name="day"/>: the analyzer drops this campaign's records of later days,
+    /// which belong to the run the player abandoned.
+    /// </summary>
+    internal static string Load(string campaignId, int day) =>
+        Inv($"{Head} t=load cid={Token(campaignId)} day={day}");
+
     internal static string SideName(FactionSide side)
     {
         switch (side)

@@ -13,6 +13,7 @@ parses the space-separated key=value tokens after it:
     t=side    cid day side pts base alive
     t=share   cid day share                (free / (free + evil), "na" when both are 0)
     t=event   cid day ev=tier|destroyed|chronicle plus that event's own keys
+    t=load    cid day                      (a save was loaded; day is the save's own day)
 
 Rules: an unknown v exits 2; a malformed line is skipped and counted (the first one is printed as a
 WARNING); a save-reload re-emits days, so per campaign (cid) the LAST kingdom line per (day, k), side
@@ -20,8 +21,13 @@ line per (day, side) and share line per day win, and exact repeated events colla
 resolutions (ev=chronicle, one per event outcome: Occurred, Held, Fell, Lapsed or Skipped) are listed by
 day and counted per outcome, one per event id: the last line read, even an exact repeat of an earlier one. Logs are
 read oldest first (by the taom_debug_ name stamp, else file time), so the newer process wins whatever
-the argument order. A reload of an OLDER save leaves the abandoned run's later days and events in the
-report: the log carries no marker for the rewind yet.
+the argument order. A load is a rewind: a t=load line at day S drops every stored record of that cid
+(kingdom, side and share lines, events, chronicle resolutions) with a day after S, which belongs to the
+run the player abandoned. Day S is kept from both runs: on a load the engine waits only the elapsed part
+of the day before the next daily tick (Campaign.CreateCampaignEvents, v1.5.5 Campaign.cs:1024-1030), so
+a save made early on day S can tick day S again, and the old run's day-S events happened before the
+save or in the same day. A log with no load markers gets no rewind: logs from builds before the marker
+can keep an abandoned run's days.
 
 Capital target (b) has four verdicts, judged per kingdom. FAIL: any kingdom line with cap=0 before day
 120; the report says "day N" for an observed 1 to 0 transition and "lost by day N" when the kingdom's first
@@ -87,18 +93,45 @@ class UnknownVersion(Exception):
     pass
 
 
+def _event_key(fields):
+    """Exact repeats of an event line collapse to one."""
+    return tuple(sorted(fields.items()))
+
+
 class Campaign:
     def __init__(self):
         self.kingdoms = {}   # (day, k) -> field dict
         self.sides = {}      # (day, side) -> field dict
         self.shares = {}     # day -> float or None (na)
         self.events = []     # de-duplicated, in first-read order
-        self._event_keys = set()
-        self.chronicle_last = {}  # event id -> (day, outcome) of the last chronicle line read, repeats included
+        self._event_seen = set()  # event keys already in self.events
+        self._chronicle_reads = []  # (day, id, outcome), repeats included, in read order
+
+    @property
+    def chronicle_last(self):
+        """Event id -> (day, outcome) of the last chronicle line read, repeats included."""
+        return {eid: (day, outcome) for day, eid, outcome in self._chronicle_reads}
 
     def days(self):
         found = {d for d, _ in self.kingdoms} | {d for d, _ in self.sides} | set(self.shares)
         return sorted(found)
+
+    def add_event(self, day, fields):
+        if fields['ev'] == 'chronicle':
+            self._chronicle_reads.append((day, fields['id'], fields['outcome']))
+        key = _event_key(fields)
+        if key not in self._event_seen:
+            self._event_seen.add(key)
+            self.events.append((day, fields))
+
+    def load(self, day):
+        """A save of day `day` was loaded: every record after that day is the abandoned run's."""
+        self.kingdoms = {key: rec for key, rec in self.kingdoms.items() if key[0] <= day}
+        self.sides = {key: rec for key, rec in self.sides.items() if key[0] <= day}
+        self.shares = {d: s for d, s in self.shares.items() if d <= day}
+        self.events = [(d, f) for d, f in self.events if d <= day]
+        self._event_seen = {_event_key(f) for _, f in self.events}
+        self._chronicle_reads = [r for r in self._chronicle_reads if r[0] <= day]
 
 
 class Parsed:
@@ -155,8 +188,7 @@ def _ingest(parsed, fields):
             raise ValueError('missing ' + missing[0])
         _num(fields['pts'], int)
         _num(fields['tier'], int)
-        rec = parsed.campaign(fields['cid'])
-        rec.kingdoms[(day, fields['k'])] = fields
+        parsed.campaign(fields['cid']).kingdoms[(day, fields['k'])] = fields
     elif kind == 'side':
         missing = [k for k in SIDE_KEYS if k not in fields]
         if missing:
@@ -169,17 +201,13 @@ def _ingest(parsed, fields):
         if 'share' not in fields:
             raise ValueError('missing share')
         parsed.campaign(fields['cid']).shares[day] = _opt_float(fields['share'])
+    elif kind == 'load':
+        parsed.campaign(fields['cid']).load(day)
     elif kind == 'event':
         keys = EVENT_KEYS.get(fields.get('ev'))
         if keys is None or any(k not in fields for k in keys):
             raise ValueError('bad event')
-        camp = parsed.campaign(fields['cid'])
-        if fields['ev'] == 'chronicle':
-            camp.chronicle_last[fields['id']] = (day, fields['outcome'])
-        key = tuple(sorted(fields.items()))
-        if key not in camp._event_keys:
-            camp._event_keys.add(key)
-            camp.events.append((day, fields))
+        parsed.campaign(fields['cid']).add_event(day, fields)
     else:
         raise ValueError('unknown t')
 

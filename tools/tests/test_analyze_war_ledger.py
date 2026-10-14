@@ -1,7 +1,7 @@
 """analyze_war_ledger: reads the [WarLedger] lines and measures how close the AI war stays to a stalemate.
 
 Builds small synthetic logs in a temp dir, so it runs anywhere with no game install and no real logs.
-Covers the parser (logger prefix, malformed lines, unknown version), the reload de-duplication, every
+Covers the parser (logger prefix, malformed lines, unknown version), the reload de-duplication and rewind, every
 metric, the two target checks, the --csv and --compare outputs and the exit codes.
 
 The line helpers below are modelled on WarLedgerFormatter. The real contract is the shared fixture
@@ -499,8 +499,9 @@ class CliTests(unittest.TestCase):
         self.assertIn("target A: share PASS, capital NO DATA", out)
 
     def test_csv_output(self):
-        path = self.write("a.log", [sh(1, "0.4"), sh(2, "na"), sl(1, "free", 7), sl(1, "evil", 5),
-                                    sl(1, "neutral", 2)])
+        # Real emission order: a day's side lines, then its share line, which closes the day.
+        path = self.write("a.log", [sl(1, "free", 7), sl(1, "evil", 5), sl(1, "neutral", 2),
+                                    sh(1, "0.4"), sh(2, "na")])
         csv_path = os.path.join(self.tmp.name, "out.csv")
         code, _, _ = self.run_main([path, "--csv", csv_path])
         self.assertEqual(code, 0)
@@ -633,6 +634,121 @@ class OrderingTests(unittest.TestCase):
         old = self.write("x.log", [sh(5, "0.9")], mtime=1_000_000_000)
         new = self.write("y.log", [sh(5, "0.5")], mtime=1_100_000_000)
         self.assertEqual(awl.order_logs([new, old, new]), [old, new])
+
+
+def day_block(day, share, k_pts=10, cid="c1"):
+    """One daily tick as WarLedgerService writes it: kingdom lines, the three side lines, then the share."""
+    return [kl(day, "gondor", pts=k_pts, cid=cid), sl(day, "free", k_pts, cid=cid),
+            sl(day, "evil", 10, cid=cid), sl(day, "neutral", 0, cid=cid), sh(day, share, cid=cid)]
+
+
+def ev_load(day, cid="c1"):
+    return f"{PFX}[WarLedger] v=1 t=load cid={cid} day={day}"
+
+
+def tick(day, share, k_pts=10, chronicle=(), tiers=(), cid="c1"):
+    """One daily tick in the order the game writes it. WarChronicleModule adds WarChronicleBehavior before
+    WarChronicleEventsBehavior and MbEvent listeners run newest-first, so the chronicle's resolution lines
+    come first, then the rally's tier lines (RunDaily logs them before WriteDaily), then the day's block."""
+    lines = [ev_chron(day, eid, outcome, cid=cid) for eid, outcome in chronicle]
+    lines += [ev_tier(day, k, frm, to, cid=cid) for k, frm, to in tiers]
+    return lines + day_block(day, share, k_pts=k_pts, cid=cid)
+
+
+class LoadMarkerTests(unittest.TestCase):
+    """A load writes `t=load day=S`: every record of that campaign after day S belongs to the abandoned run.
+
+    On a load the engine waits only the elapsed part of the day before the next daily tick
+    (Campaign.CreateCampaignEvents, v1.5.5 Campaign.cs:1024-1030), so a save at fraction f of day S next
+    ticks at S + 2f: day S again when f < 0.5, day S + 1 otherwise. Day S is kept from both runs.
+    """
+
+    def abandoned(self):
+        # Days 1 to 4 played. Day 2's tick resolves dale; the game is saved on day 2 after a mid-day
+        # destruction, then hornburg falls the same afternoon. Day 3 rallies gondor; Rohan dies on day 4.
+        lines = tick(1, "0.5") + tick(2, "0.5", chronicle=[("dale", "Occurred")]) + [ev_destroyed(2, "isengard")]
+        lines += [ev_chron(2, "hornburg", "Fell")]
+        lines += tick(3, "0.9", tiers=[("gondor", 0, 1)]) + tick(4, "0.9", chronicle=[("erebor", "Lapsed")])
+        return lines + [ev_destroyed(4, "rohan")]
+
+    def test_a_load_before_midday_rewrites_day_s_and_loses_none_of_its_events(self):
+        # Saved early on day 2: the reloaded run ticks day 2 again (an exact repeat of dale), then day 3.
+        lines = self.abandoned() + [ev_load(2)]
+        lines += tick(2, "0.5", chronicle=[("dale", "Occurred")]) + tick(3, "0.4", k_pts=7)
+        c = parse(lines).campaigns["c1"]
+        m = awl.compute_metrics(c)
+        self.assertEqual(c.shares, {1: 0.5, 2: 0.5, 3: 0.4})
+        self.assertEqual(c.kingdoms[(3, "gondor")]["pts"], "7")
+        self.assertEqual(m["destroyed"], [(2, "isengard")], "day 2's event stays, day 4's goes")
+        self.assertEqual(m["chronicle"], [(2, "dale", "Occurred"), (2, "hornburg", "Fell")])
+        self.assertEqual([f["ev"] for d, f in c.events if f["ev"] == "tier"], [], "the abandoned day-3 rally is gone")
+
+    def test_a_load_late_in_the_day_drops_the_abandoned_days_before_the_next_block(self):
+        lines = self.abandoned() + [ev_load(2)] + tick(3, "0.4", k_pts=7)
+        c = parse(lines).campaigns["c1"]
+        m = awl.compute_metrics(c)
+        self.assertEqual(c.days(), [1, 2, 3])
+        self.assertNotIn((4, "gondor"), c.kingdoms)
+        self.assertEqual(m["destroyed"], [(2, "isengard")])
+        self.assertEqual(m["tiers"]["gondor"]["changes"], 0)
+        self.assertNotIn("erebor", [eid for _, eid, _ in m["chronicle"]])
+
+    def test_a_load_after_an_abandoned_run_that_closed_exactly_at_s_plus_1_drops_that_day(self):
+        # The abandoned run's last lines are day 3's; the reloaded run writes day 3 with no events.
+        lines = tick(1, "0.5") + tick(2, "0.5")
+        lines += tick(3, "0.9", chronicle=[("dale", "Lapsed")], tiers=[("gondor", 0, 1)])
+        lines += [ev_load(2)] + tick(3, "0.4")
+        c = parse(lines).campaigns["c1"]
+        m = awl.compute_metrics(c)
+        self.assertEqual(c.events, [])
+        self.assertEqual((m["chronicle"], m["chronicle_counts"]), ([], {}))
+        self.assertEqual(c.shares[3], 0.4)
+
+    def test_the_reloaded_runs_own_next_day_lines_are_kept_in_the_order_the_game_writes_them(self):
+        lines = self.abandoned() + [ev_load(2)]
+        lines += tick(3, "0.4", chronicle=[("hornburg", "Held")], tiers=[("gondor", 0, 2)]) + [ev_destroyed(3, "dale")]
+        c = parse(lines).campaigns["c1"]
+        m = awl.compute_metrics(c)
+        self.assertEqual([(d, f["to"]) for d, f in c.events if f["ev"] == "tier"], [(3, "2")])
+        self.assertEqual(m["destroyed"], [(2, "isengard"), (3, "dale")])
+        self.assertEqual(m["chronicle"], [(2, "dale", "Occurred"), (3, "hornburg", "Held")],
+                         "the line read last stands for hornburg")
+
+    def test_without_a_load_marker_nothing_is_rewound(self):
+        # Logs from builds before the marker: a reload of an older save keeps the abandoned run's days.
+        lines = self.abandoned() + tick(3, "0.4", k_pts=7)
+        c = parse(lines).campaigns["c1"]
+        m = awl.compute_metrics(c)
+        self.assertEqual(c.shares, {1: 0.5, 2: 0.5, 3: 0.4, 4: 0.9})
+        self.assertEqual(c.kingdoms[(3, "gondor")]["pts"], "7", "the last line of a day still wins")
+        self.assertEqual(m["destroyed"], [(2, "isengard"), (4, "rohan")])
+
+    def test_a_load_marker_counts_as_a_ledger_line_and_is_not_malformed(self):
+        p = parse([ev_load(5)])
+        self.assertEqual((p.ledger_lines, p.malformed), (1, 0))
+
+    def test_a_load_marker_without_a_day_is_malformed(self):
+        p = parse([f"{PFX}[WarLedger] v=1 t=load cid=c1"])
+        self.assertEqual(p.malformed, 1)
+
+    def test_reload_of_the_same_save_double_counts_nothing(self):
+        # Days 1 to 3 with their events, then the day-1 save again: days 2 and 3 come back unchanged.
+        def from_day_2():
+            return (tick(2, "0.6", chronicle=[("dale", "Lapsed")], tiers=[("gondor", 0, 1)])
+                    + tick(3, "0.7") + [ev_destroyed(3, "rohan")])
+        lines = tick(1, "0.5") + from_day_2() + [ev_load(1)] + from_day_2()
+        c = parse(lines).campaigns["c1"]
+        m = awl.compute_metrics(c)
+        self.assertEqual(len(c.events), 3)
+        self.assertEqual(m["destroyed"], [(3, "rohan")])
+        self.assertEqual(m["chronicle_counts"], {"Lapsed": 1})
+        self.assertEqual((m["day_count"], m["share_days"]), (3, 3))
+
+    def test_a_load_is_per_campaign(self):
+        lines = tick(5, "0.5", cid="a") + tick(5, "0.5", cid="b") + [ev_load(2, cid="b")]
+        p = parse(lines)
+        self.assertEqual(sorted(p.campaigns["a"].shares), [5])
+        self.assertEqual(sorted(p.campaigns["b"].shares), [])
 
 
 if __name__ == "__main__":

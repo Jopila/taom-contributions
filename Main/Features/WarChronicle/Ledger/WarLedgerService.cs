@@ -104,6 +104,14 @@ public sealed class WarLedgerService
         _logger.LogInfo(WarLedgerFormatter.DestroyedEvent(_snapshots.GetCampaignId(), _snapshots.GetElapsedDay(), kingdomId));
     }
 
+    /// <summary>
+    /// On a game load: the load marker with the save's day, so the analyzer can drop the abandoned run's later
+    /// days. The engine's next daily tick can repeat the save's day (Campaign.CreateCampaignEvents waits only
+    /// the elapsed part of the day), so no other line can tell a reload apart.
+    /// </summary>
+    public void LogLoad() =>
+        _logger.LogInfo(WarLedgerFormatter.Load(_snapshots.GetCampaignId(), _snapshots.GetElapsedDay()));
+
     /// <summary>For the rally: one line when a kingdom's tier changes. <paramref name="loss"/> is the share of the baseline lost.</summary>
     public void LogTierChange(string kingdomId, int from, int to, float loss) =>
         _logger.LogInfo(WarLedgerFormatter.TierEvent(
