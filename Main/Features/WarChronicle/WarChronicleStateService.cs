@@ -46,6 +46,8 @@ public sealed class WarChronicleStateService
         };
         payload.Effects.AddRange(_effects.Snapshot());
         payload.Chronicle.AddRange(_chronicle.Snapshot());
+        foreach (var pair in _chronicle.PhaseSeenSnapshot())
+            payload.PhaseSeenDays[pair.Key] = pair.Value;
         foreach (var pair in _baselines.Snapshot())
             payload.Baselines[pair.Key] = pair.Value;
         foreach (var pair in _rallyTiers.Snapshot())
@@ -70,6 +72,7 @@ public sealed class WarChronicleStateService
         _baselines.RestoreFromSave(payload.Baselines);
         _rallyTiers.Restore(payload.RallyTiers);
         _chronicle.Restore(payload.Chronicle);
+        _chronicle.RestorePhaseSeenDays(payload.PhaseSeenDays);
     }
 
     /// <summary>Empties every registry. Called from the campaign behavior's constructor (the session-reset rule).</summary>

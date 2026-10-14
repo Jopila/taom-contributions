@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
+using TAOM.Features.Diplomacy.Models;
 using TAOM.Features.WarChronicle;
 using TAOM.Features.WarChronicle.Effects;
 using TAOM.Features.WarChronicle.Events;
@@ -336,5 +337,58 @@ public class WarChronicleSaveCodecTests
         var back = ParseJson("{\"v\":1,\"chronicle\":[{\"id\":\"a\",\"s\":0}]}");
 
         Assert.AreEqual(ChronicleEventState.Pending, back.Chronicle.Single().State);
+    }
+
+    [TestMethod]
+    public void RoundTrip_PhaseSeenDays_ComeBackEqual()
+    {
+        var payload = new WarChroniclePayload();
+        payload.PhaseSeenDays[WarPhase.IsengardWar] = 101;
+        payload.PhaseSeenDays[WarPhase.FullWar] = 120.5;
+
+        var json = WarChronicleSaveCodec.Serialize(payload);
+        var back = WarChronicleSaveCodec.Parse(json);
+
+        Assert.AreEqual(0, back.Warnings.Count, string.Join(" | ", back.Warnings));
+        Assert.AreEqual(101d, back.PhaseSeenDays[WarPhase.IsengardWar]);
+        Assert.AreEqual(120.5, back.PhaseSeenDays[WarPhase.FullWar]);
+        Assert.AreEqual(101d, (double)JObject.Parse(json)["phases"]!["IsengardWar"]!, "saved by phase name");
+    }
+
+    [TestMethod]
+    public void Parse_PhasesSectionAbsent_IsEmptyWithoutAWarning()
+    {
+        var back = ParseJson("{\"v\":1,\"chronicle\":[{\"id\":\"a\",\"s\":0}]}");
+
+        Assert.AreEqual(0, back.PhaseSeenDays.Count);
+        Assert.AreEqual(1, back.Chronicle.Count);
+        Assert.AreEqual(0, back.Warnings.Count);
+    }
+
+    [TestMethod]
+    public void Parse_PhasesSectionNotAnObject_ResetsAloneAndTheOtherSectionsSurvive()
+    {
+        var back = ParseJson("{\"v\":1,\"chronicle\":[{\"id\":\"a\",\"s\":0}],\"phases\":[1]}");
+
+        Assert.AreEqual(0, back.PhaseSeenDays.Count);
+        Assert.AreEqual(1, back.Chronicle.Count);
+        Assert.AreEqual(1, back.Warnings.Count);
+    }
+
+    [DataTestMethod]
+    [DataRow("\"Peace\":3", "Peace")]
+    [DataRow("\"WarEnded\":3", "WarEnded")]
+    [DataRow("\"Phase9\":3", "Phase9")]
+    [DataRow("\"1\":3", "'1'")]
+    [DataRow("\"FullWar\":\"NaN\"", "FullWar")]
+    [DataRow("\"FullWar\":null", "FullWar")]
+    public void Parse_ABadPhaseRow_IsSkippedAloneWithAWarning(string badRow, string fragment)
+    {
+        var back = ParseJson("{\"v\":1,\"phases\":{" + badRow + ",\"IsengardWar\":40}}");
+
+        Assert.AreEqual(40d, back.PhaseSeenDays[WarPhase.IsengardWar]);
+        Assert.IsFalse(back.PhaseSeenDays.ContainsKey(WarPhase.FullWar));
+        Assert.AreEqual(1, back.Warnings.Count, string.Join(" | ", back.Warnings));
+        Assert.IsTrue(back.Warnings.Any(w => w.Contains(fragment)), string.Join(" | ", back.Warnings));
     }
 }

@@ -18,11 +18,15 @@ namespace TAOM.Features.WarChronicle.Events;
 /// <list type="bullet">
 /// <item><b>Adoption (D5):</b> an event with no saved row gets one; when its open day is already past, or
 /// its anchor was Skipped, it is Skipped with no retroactive effect.</item>
-/// <item><b>Pending:</b> opens once its anchor is known and its day has come. Phase anchors use
-/// <see cref="IWarOfTheRingService.GetEffectivePhaseDay"/> and also need the phase reached; an Event anchor
-/// needs the anchor resolved, not Skipped, and with the required outcome. A failed precondition Skips it.</item>
+/// <item><b>Pending:</b> opens once its anchor is known and its day has come. A phase anchor needs the phase
+/// reached and counts from the later of <see cref="IWarOfTheRingService.GetEffectivePhaseDay"/> and the day
+/// before the chronicle first saw the phase (decided by the maintainer 2026-10-14; see <see cref="PhaseDay"/>);
+/// an Event anchor needs the anchor resolved, not Skipped, and with the required outcome. A failed
+/// precondition Skips it.</item>
 /// <item><b>Narrative:</b> Occurred at once, effects applied.</item>
-/// <item><b>Siege:</b> Active with a stored window and an army focus; assaulted when an attacker besieges the
+/// <item><b>Siege:</b> Fell at once when an attacker already owns the target as it opens (decided by the
+/// maintainer 2026-10-14), so its Event-anchored children still open; otherwise Active with a stored window
+/// and an army focus; assaulted when an attacker besieges the
 /// target. An attacker owner means Fell, at once on a capture and on the next daily step when a clan's
 /// change of kingdom moved the town with no owner-changed event; any other owner that is not the defender
 /// means Lapsed. At the close, assaulted means Held, otherwise Lapsed; while an attacker still besieges the
@@ -77,6 +81,7 @@ public sealed class ChronicleService
     /// <summary>Session launch: adopt missing rows, Skip events the campaign cannot host, push the focus again.</summary>
     public void LaunchChronicle() => Guarded("session launch", now =>
     {
+        NotePhasesSeen(now);
         Adopt(now);
         foreach (var definition in _config.GetEvents())
         {
@@ -95,6 +100,7 @@ public sealed class ChronicleService
     /// <summary>The daily step: open what is due, watch the Active windows, close what has run out.</summary>
     public void RunChronicleDay() => Guarded("daily step", now =>
     {
+        NotePhasesSeen(now);
         Adopt(now);
         if (_wotr.CurrentPhase == WarPhase.WarEnded)
         {
@@ -170,6 +176,7 @@ public sealed class ChronicleService
             return false;
         }
 
+        NotePhasesSeen(now);
         Adopt(now);
         var record = _store.Get(definition.Id)!;
         if (record.State != ChronicleEventState.Pending)
@@ -182,7 +189,7 @@ public sealed class ChronicleService
             return false;
 
         SyncFocus();
-        reason = definition.IsSiege
+        reason = record.State == ChronicleEventState.Active
             ? $"'{definition.Id}' is Active until day {Day(record.CloseDay)}."
             : $"'{definition.Id}' {record.State}.";
         return true;
@@ -245,6 +252,15 @@ public sealed class ChronicleService
     /// </summary>
     private double Today() => Math.Floor(_world.GetElapsedDays());
 
+    /// <summary>Records the first day the chronicle sees each anchoring phase reached; a saved day is kept.</summary>
+    private void NotePhasesSeen(double now)
+    {
+        if (PhaseReached(WarPhase.IsengardWar))
+            _store.NotePhaseSeen(WarPhase.IsengardWar, now);
+        if (PhaseReached(WarPhase.FullWar))
+            _store.NotePhaseSeen(WarPhase.FullWar, now);
+    }
+
     private void Adopt(double now)
     {
         foreach (var definition in _config.GetEvents())
@@ -254,7 +270,9 @@ public sealed class ChronicleService
 
             var record = new ChronicleEventRecord(definition.Id, ChronicleEventState.Pending);
             _store.Set(record);
-            var openDay = OpenDayOf(definition, out var anchorFailure);
+            // D5 judges a missing row by the configured day: a save from before the chronicle gets no phase
+            // event whose configured day has passed, whatever day the chronicle first saw the phase.
+            var openDay = OpenDayOf(definition, out var anchorFailure, fromFirstSighting: false);
             if (anchorFailure != null)
                 Resolve(definition, record, ChronicleEventState.Skipped, now, false, anchorFailure);
             else if (openDay.HasValue && openDay.Value < now)
@@ -299,8 +317,11 @@ public sealed class ChronicleService
         Close(definition, record, now);
     }
 
-    /// <summary>The open day, or null while the anchor is unknown. A non-null failure means the event can never open.</summary>
-    private double? OpenDayOf(ChronicleEventDefinition definition, out string? failure)
+    /// <summary>
+    /// The open day, or null while the anchor is unknown. A non-null failure means the event can never open.
+    /// <paramref name="fromFirstSighting"/> false reads a phase anchor's configured day alone (adoption).
+    /// </summary>
+    private double? OpenDayOf(ChronicleEventDefinition definition, out string? failure, bool fromFirstSighting = true)
     {
         failure = null;
         switch (definition.Anchor)
@@ -309,10 +330,10 @@ public sealed class ChronicleService
                 return definition.OffsetDays;
 
             case ChronicleAnchor.Phase1:
-                return PhaseDay(WarPhase.IsengardWar) + definition.OffsetDays;
+                return PhaseDay(WarPhase.IsengardWar, fromFirstSighting) + definition.OffsetDays;
 
             case ChronicleAnchor.Phase2:
-                return PhaseDay(WarPhase.FullWar) + definition.OffsetDays;
+                return PhaseDay(WarPhase.FullWar, fromFirstSighting) + definition.OffsetDays;
 
             case ChronicleAnchor.Event:
                 var anchor = _store.Get(definition.AnchorEventId);
@@ -337,19 +358,47 @@ public sealed class ChronicleService
         }
     }
 
-    /// <summary>The phase's effective day once the phase machine has reached it; null before.</summary>
-    private double? PhaseDay(WarPhase phase) =>
-        (int)_wotr.CurrentPhase >= (int)phase ? _wotr.GetEffectivePhaseDay(phase) : null;
+    /// <summary>
+    /// The day a phase anchor counts from once the phase is reached; null before. It is the later of the
+    /// configured effective day and the day before the chronicle first saw the phase, so a phase entered
+    /// late (the war switched on late, a phase day lowered below today, Test Mode switched on, the first load of
+    /// a save without the saved days) opens its events from that day plus their offsets instead of all on one step. The day
+    /// before, because the chronicle's daily listener runs before the phase machine's: a phase entered on
+    /// day N's tick is first seen on N + 1, so a campaign on schedule keeps its configured days. Raising a
+    /// phase day after the phase began still postpones its Pending events. A step that has not yet noted
+    /// the phase (<see cref="Status"/>), and adoption, read the configured day alone.
+    /// </summary>
+    private double? PhaseDay(WarPhase phase, bool fromFirstSighting)
+    {
+        if (!PhaseReached(phase))
+            return null;
+
+        var configured = _wotr.GetEffectivePhaseDay(phase);
+        var seen = fromFirstSighting ? _store.GetPhaseSeenDay(phase) : null;
+        if (!configured.HasValue || !seen.HasValue)
+            return configured;
+        return Math.Max(configured.Value, seen.Value - 1d);
+    }
+
+    private bool PhaseReached(WarPhase phase) => (int)_wotr.CurrentPhase >= (int)phase;
 
     private bool TryOpen(ChronicleEventDefinition definition, ChronicleEventRecord record, double now, out string reason)
     {
-        if (!PreconditionsHold(definition, out reason))
+        if (!PreconditionsHold(definition, out reason, out var takenBy))
             return false;
 
         record.OpenDay = now;
         if (!definition.IsSiege)
         {
             Resolve(definition, record, ChronicleEventState.Occurred, now, true, "its day came");
+            return true;
+        }
+
+        // Decided by the maintainer 2026-10-14: a target an attacker already holds has fallen. Recording it
+        // Fell, not Skipped, pays the Fell outcome and lets the Event-anchored children open.
+        if (takenBy != null)
+        {
+            Resolve(definition, record, ChronicleEventState.Fell, now, true, takenBy + " already held it when it opened");
             return true;
         }
 
@@ -364,9 +413,15 @@ public sealed class ChronicleService
         return true;
     }
 
-    private bool PreconditionsHold(ChronicleEventDefinition definition, out string reason)
+    /// <summary>
+    /// True when the event may open. For a siege whose target an attacker already owns, <paramref name="takenBy"/>
+    /// names that attacker and the event resolves Fell instead of opening a window: then only the anchor
+    /// outcome and the Full War are required, because the defender may be gone and nobody need be at war.
+    /// </summary>
+    private bool PreconditionsHold(ChronicleEventDefinition definition, out string reason, out string? takenBy)
     {
         reason = string.Empty;
+        takenBy = null;
         if (definition.RequiresOutcome.HasValue)
         {
             var anchor = _store.Get(definition.AnchorEventId);
@@ -387,6 +442,13 @@ public sealed class ChronicleService
             return false;
         }
 
+        var owner = _world.GetOwnerKingdomId(definition.TargetSettlementId!);
+        if (owner != null && definition.Attackers.Contains(owner))
+        {
+            takenBy = owner;
+            return true;
+        }
+
         var live = new HashSet<string>(_alliance.GetAllKingdomIds() ?? new List<string>(), StringComparer.Ordinal);
         if (!live.Contains(definition.Defender!))
         {
@@ -401,7 +463,6 @@ public sealed class ChronicleService
             return false;
         }
 
-        var owner = _world.GetOwnerKingdomId(definition.TargetSettlementId!);
         if (!string.Equals(owner, definition.Defender, StringComparison.Ordinal))
         {
             reason = $"{definition.TargetSettlementId} is held by {owner ?? "no kingdom"}, not {definition.Defender}";

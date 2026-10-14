@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TAOM.Features.Diplomacy.Models;
 using TAOM.Features.WarChronicle.Effects;
 using TAOM.Features.WarChronicle.Events;
 
@@ -20,6 +21,12 @@ internal sealed class WarChroniclePayload
 
     /// <summary>The chronicle's event rows (#765 M3), owned by <see cref="ChronicleStateStore"/>.</summary>
     public List<ChronicleEventRecord> Chronicle { get; } = new List<ChronicleEventRecord>();
+
+    /// <summary>
+    /// The day the chronicle first saw each anchoring phase reached (decided 2026-10-14), owned by
+    /// <see cref="ChronicleStateStore"/>; empty for a save without them.
+    /// </summary>
+    public Dictionary<WarPhase, double> PhaseSeenDays { get; } = new Dictionary<WarPhase, double>();
 
     /// <summary>What was skipped or reset while parsing, one line each, for the log.</summary>
     public List<string> Warnings { get; } = new List<string>();

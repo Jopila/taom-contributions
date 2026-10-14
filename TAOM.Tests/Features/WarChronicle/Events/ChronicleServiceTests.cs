@@ -368,17 +368,96 @@ public class ChronicleServiceTests
         StringAssert.Contains(shown.Text, "taom_wc_hornburg_open");
     }
 
-    [TestMethod]
-    public void RunChronicleDay_TargetNotHeldByTheDefender_SkipsTheSiege()
+    [DataTestMethod]
+    [DataRow("rivendell")]
+    [DataRow(null)]
+    public void RunChronicleDay_TargetHeldByAThirdKingdomOrNone_SkipsTheSiege(string? owner)
     {
         _f.Events.Add(SiegeDef());
+        _f.Events.Add(Narrative("after", ChronicleAnchor.Event, 0, anchorEvent: "hornburg"));
         Launch(0);
-        _f.World.Owners["town_V2"] = "isengard";
+        _f.World.Owners["town_V2"] = owner;
 
         Day(49);
 
         Assert.AreEqual(ChronicleEventState.Skipped, _f.StateOf("hornburg"));
+        Assert.AreEqual(ChronicleEventState.Skipped, _f.StateOf("after"), "a skipped siege still skips its children");
         Assert.IsTrue(_f.Focus.IsEmpty);
+        Assert.AreEqual(0, _f.Effects.Snapshot().Count);
+        Assert.AreEqual(0, _f.Queue.Count, "a skip is silent");
+    }
+
+    // Decided by the maintainer 2026-10-14: a target an attacker already owns when its siege opens has fallen.
+    [DataTestMethod]
+    [DataRow("isengard")]
+    [DataRow("empire")]
+    public void RunChronicleDay_TargetAlreadyOwnedByAnAttacker_FallsAndPaysItsFellOutcome(string attacker)
+    {
+        _f.Events.Add(SiegeDef());
+        _f.Events[0].Fell!.Momentum = new ChronicleMomentumAward { Side = MomentumSide.Evil, Units = 40 };
+        Launch(0);
+        _f.World.Owners["town_V2"] = attacker;
+
+        Day(49);
+
+        var record = _f.Store.Get("hornburg")!;
+        Assert.AreEqual(ChronicleEventState.Fell, record.State);
+        Assert.AreEqual(49d, record.OpenDay);
+        Assert.AreEqual(49d, record.ResolvedDay);
+        Assert.IsNull(record.CloseDay, "no window was opened");
+        Assert.AreEqual(1.15f, _f.Volunteers("isengard"), 0.0001f, "Fell pays the attackers");
+        Assert.AreEqual(1.15f, _f.Volunteers("empire"), 0.0001f);
+        Assert.AreEqual(1.2f, _f.Escape("vlandia"), 0.0001f, "and the defender's lords escape sooner");
+        _f.Momentum.Received(1).TryAwardScripted(MomentumSide.Evil, 40, Arg.Any<string>(), Arg.Any<double>());
+        Assert.IsTrue(_f.Focus.IsEmpty, "no army focus for a town already taken");
+        Assert.AreEqual(1, _f.LedgerLines.Count(l => l.Contains("id=hornburg outcome=Fell")));
+        CollectionAssert.AreEqual(new[] { "{=taom_wc_hornburg_fell}fell" }, DrainTexts(), "the normal fell line, no opening line");
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_TargetAlreadyOwnedByAnAttacker_OpensTheEventAnchoredChild()
+    {
+        _f.Events.Add(SiegeDef("osgiliath", "town_EW3", "empire_w", new[] { "empire_s" }, offset: 10));
+        _f.Events.Add(SiegeDef("gondor", "town_EW1", "empire_w", new[] { "empire_s" }, ChronicleAnchor.Event, 3, anchorEvent: "osgiliath"));
+        _f.Events.Add(Narrative("blackgate", ChronicleAnchor.Event, 5, anchorEvent: "gondor", requires: ChronicleEventState.Held));
+        Launch(0);
+        _f.World.Owners["town_EW3"] = "empire_s";
+
+        Day(54);
+        Assert.AreEqual(ChronicleEventState.Fell, _f.StateOf("osgiliath"));
+        Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("gondor"));
+
+        Day(57);
+        Assert.AreEqual(ChronicleEventState.Active, _f.StateOf("gondor"), "the child opens instead of being skipped");
+        Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("blackgate"));
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_TargetOwnedByAnAttackerWhoseDefenderIsGone_StillFalls()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        _f.World.Owners["town_V2"] = "isengard";
+        _f.World.Kingdoms.Remove("vlandia");
+
+        Day(49);
+
+        Assert.AreEqual(ChronicleEventState.Fell, _f.StateOf("hornburg"));
+        Assert.AreEqual(1f, _f.Escape("vlandia"), "no effect is written for a dead kingdom");
+    }
+
+    [TestMethod]
+    public void RunChronicleDay_TargetOwnedByAnAttackerBeforeTheFullWar_IsSkippedAsBefore()
+    {
+        _f.Phase = WarPhase.IsengardWar;
+        _f.Events.Add(SiegeDef(anchor: ChronicleAnchor.CampaignStart, offset: 10));
+        Launch(0);
+        _f.World.Owners["town_V2"] = "isengard";
+
+        Day(10);
+
+        Assert.AreEqual(ChronicleEventState.Skipped, _f.StateOf("hornburg"), "a siege opens only in the Full War, whoever owns it");
+        Assert.AreEqual(0, _f.Effects.Snapshot().Count);
     }
 
     [TestMethod]
@@ -989,12 +1068,26 @@ public class ChronicleServiceTests
     {
         _f.Events.Add(SiegeDef());
         Launch(0);
-        _f.World.Owners["town_V2"] = "isengard";
+        _f.World.Owners["town_V2"] = "rivendell";
 
         Assert.IsFalse(_sut.OpenChronicleEventNow("hornburg", out var reason));
 
         Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("hornburg"));
         StringAssert.Contains(reason, "vlandia");
+    }
+
+    [TestMethod]
+    public void OpenChronicleEventNow_TargetAlreadyOwnedByAnAttacker_RecordsItFell()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        _f.World.Owners["town_V2"] = "isengard";
+        _f.World.Day = 3;
+
+        Assert.IsTrue(_sut.OpenChronicleEventNow("hornburg", out var reason), reason);
+
+        Assert.AreEqual(ChronicleEventState.Fell, _f.StateOf("hornburg"));
+        StringAssert.Contains(reason, "Fell");
     }
 
     [TestMethod]

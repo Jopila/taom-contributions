@@ -5,6 +5,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TAOM.Core.Validation;
+using TAOM.Features.Diplomacy.Models;
 using TAOM.Features.WarChronicle.Effects;
 using TAOM.Features.WarChronicle.Events;
 
@@ -12,12 +13,14 @@ namespace TAOM.Features.WarChronicle;
 
 /// <summary>
 /// The War Chronicle payload as JSON: <c>{"v":1,"effects":[{"s","k","kind","m","end"}],"baselines":{},
-/// "rally":{"tiers":{}},"chronicle":[{"id","s","open","close","a","res"}]}</c>. Pure. Parsing is forgiving by
+/// "rally":{"tiers":{}},"chronicle":[{"id","s","open","close","a","res"}],"phases":{"IsengardWar":day,"FullWar":day}}</c>. Pure. Parsing is forgiving by
 /// section: a bad section resets alone with a warning, a bad row inside a section is skipped alone, and
 /// nothing here throws on save content. Effect kinds are saved by name; an unknown name (a kind from a
 /// newer build) is skipped. A chronicle row saves its state as the <see cref="ChronicleEventState"/> int
 /// and leaves an absent day out; it is skipped for no id, a duplicate id, an undefined state, a day that
-/// is not a finite number, an Active state without a window, or a resolved state without its day.
+/// is not a finite number, an Active state without a window, or a resolved state without its day. A
+/// <c>phases</c> entry is the day the chronicle first saw that phase reached, keyed by the
+/// <see cref="WarPhase"/> name; one that names another phase or holds no finite number is skipped.
 /// </summary>
 internal static class WarChronicleSaveCodec
 {
@@ -45,6 +48,7 @@ internal static class WarChronicleSaveCodec
             ["baselines"] = IntMap(payload.Baselines),
             ["rally"] = new JObject { ["tiers"] = IntMap(payload.RallyTiers) },
             ["chronicle"] = ChronicleRows(payload.Chronicle),
+            ["phases"] = PhaseDays(payload.PhaseSeenDays),
         };
         return root.ToString(Formatting.None);
     }
@@ -88,6 +92,7 @@ internal static class WarChronicleSaveCodec
         ReadBaselines(root, payload);
         ReadRally(root, payload);
         ReadChronicle(root, payload);
+        ReadPhases(root, payload);
         return payload;
     }
 
@@ -125,6 +130,18 @@ internal static class WarChronicleSaveCodec
         }
 
         return rows;
+    }
+
+    private static JObject PhaseDays(IReadOnlyDictionary<WarPhase, double> days)
+    {
+        var result = new JObject();
+        foreach (var pair in days)
+        {
+            if (ChronicleStateStore.IsAnchorPhase(pair.Key) && FiniteFloatValidator.IsFinite(pair.Value))
+                result[pair.Key.ToString()] = pair.Value;
+        }
+
+        return result;
     }
 
     private static void Day(JObject row, string key, double? value)
@@ -251,6 +268,36 @@ internal static class WarChronicleSaveCodec
                 payload.Warnings.Add($"chronicle row {i} skipped: a duplicate of '{record.Id}'");
             else
                 payload.Chronicle.Add(record);
+        }
+    }
+
+    private static void ReadPhases(JObject root, WarChroniclePayload payload)
+    {
+        var section = root["phases"];
+        if (section == null)
+            return;
+        if (!(section is JObject map))
+        {
+            payload.Warnings.Add("the phases section is not an object, so it is reset");
+            return;
+        }
+
+        foreach (var property in map.Properties())
+        {
+            // An exact enum name only: Enum.IsDefined rejects "1" and a case variant, which Enum.Parse would take.
+            if (!Enum.IsDefined(typeof(WarPhase), property.Name)
+                || !ChronicleStateStore.IsAnchorPhase((WarPhase)Enum.Parse(typeof(WarPhase), property.Name)))
+            {
+                payload.Warnings.Add($"phase '{property.Name}' skipped: no event anchors on it");
+            }
+            else if (!TryNumber(property.Value, out var day))
+            {
+                payload.Warnings.Add($"phase '{property.Name}' skipped: {property.Value} is not a finite day");
+            }
+            else
+            {
+                payload.PhaseSeenDays[(WarPhase)Enum.Parse(typeof(WarPhase), property.Name)] = day;
+            }
         }
     }
 
