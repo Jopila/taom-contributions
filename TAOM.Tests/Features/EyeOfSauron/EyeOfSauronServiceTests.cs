@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Adapters;
@@ -7,6 +8,7 @@ using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.EyeOfSauron;
 using TAOM.Features.Execution;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.EyeOfSauron;
 
@@ -640,6 +642,24 @@ public class EyeOfSauronServiceTests
 
         Assert.IsFalse(_sut.IsHunting);
         _logger.DidNotReceive().LogInfo(Arg.Any<string>());
+    }
+
+    // E25, the part the behaviour tests above cannot pin: every wait reason begins "Waiting:" today, so a decision
+    // that parsed the text would still pass them. The method that makes the logging decision must not inspect
+    // the reason's text at all.
+    [TestMethod]
+    public void TryStartHunt_Source_TheWaitLogDecisionNeverReadsTheReasonText()
+    {
+        var source = RepoPaths.ReadSource("Main/Features/EyeOfSauron/EyeOfSauronService.cs", stripComments: true);
+        var start = source.IndexOf("public string TryStartHunt(", StringComparison.Ordinal);
+        var end = source.IndexOf("private static bool CanHunt(", StringComparison.Ordinal);
+        Assert.IsTrue(start >= 0 && end > start, "TryStartHunt or the CanHunt that follows it not found");
+        var body = source.Substring(start, end - start);
+
+        StringAssert.Contains(body, "_logger.LogInfo(\"[EyeOfSauron] \" + firstWait)", "the wait is still logged");
+        var parse = Regex.Match(body, @"\b(?:StartsWith|EndsWith|Contains|IndexOf|Equals|Substring|Split|Regex)\b");
+        Assert.IsFalse(parse.Success,
+            $"TryStartHunt inspects text ('{parse.Value}'): the wait is logged because WaitReason returned one, never by its wording.");
     }
 
     [TestMethod]
