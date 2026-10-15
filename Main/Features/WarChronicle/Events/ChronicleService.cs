@@ -151,8 +151,12 @@ public sealed class ChronicleService
         });
     }
 
-    /// <summary>Console: opens a Pending event now, ignoring its day but not its preconditions.</summary>
-    public bool OpenChronicleEventNow(string? eventId, out string reason)
+    /// <summary>
+    /// Console: opens a Pending event now, ignoring its day but not its preconditions. With
+    /// <paramref name="dryRun"/> it changes nothing (no adoption, no phase days, no row) and says what a
+    /// confirmed open would do; true then means a confirmed open would act.
+    /// </summary>
+    public bool OpenChronicleEventNow(string? eventId, bool dryRun, out string reason)
     {
         reason = string.Empty;
         if (!_settings.ChronicleEnabled)
@@ -181,12 +185,15 @@ public sealed class ChronicleService
             return false;
         }
 
+        if (dryRun)
+            return PreviewOpen(definition, now, out reason);
+
         NotePhasesSeen(now);
         Adopt(now);
         var record = _store.Get(definition.Id)!;
         if (record.State != ChronicleEventState.Pending)
         {
-            reason = $"'{definition.Id}' is {record.State}; only a Pending event can be opened.";
+            reason = NotPending(definition, record);
             return false;
         }
 
@@ -199,6 +206,45 @@ public sealed class ChronicleService
             : $"'{definition.Id}' {record.State}.";
         return true;
     }
+
+    /// <summary>
+    /// The dry run of <see cref="OpenChronicleEventNow"/>: the same checks and preconditions, read only. A row
+    /// not yet adopted is reported, not adopted, because adoption can itself resolve the event Skipped.
+    /// </summary>
+    private bool PreviewOpen(ChronicleEventDefinition definition, double now, out string reason)
+    {
+        var record = _store.Get(definition.Id);
+        if (record == null)
+        {
+            reason = $"'{definition.Id}' has no saved row yet; 'confirm' adopts it first (Skipped when its day "
+                     + "has passed), then opens it if it is still Pending.";
+            return false;
+        }
+
+        if (record.State != ChronicleEventState.Pending)
+        {
+            reason = NotPending(definition, record);
+            return false;
+        }
+
+        if (!PreconditionsHold(definition, out var why, out var takenBy))
+        {
+            reason = $"'{definition.Id}' would stay Pending: {why}.";
+            return false;
+        }
+
+        if (!definition.IsSiege)
+            reason = $"'{definition.Id}' would occur now and apply its effects.";
+        else if (takenBy != null)
+            reason = $"'{definition.Id}' would resolve Fell at once ({takenBy} already holds "
+                     + $"{definition.TargetSettlementId}) and pay its Fell outcome.";
+        else
+            reason = $"'{definition.Id}' would open its window until day {Day(now + definition.WindowDays)}.";
+        return true;
+    }
+
+    private static string NotPending(ChronicleEventDefinition definition, ChronicleEventRecord record) =>
+        $"'{definition.Id}' is {record.State}; only a Pending event can be opened.";
 
     /// <summary>Every configured event with its state and days, for <c>taom.chronicle_status</c>.</summary>
     public IReadOnlyList<ChronicleStatusRow> Status()

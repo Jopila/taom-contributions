@@ -77,21 +77,67 @@ public class ChronicleCheatReportTests
 
     [DataTestMethod]
     [DataRow(0)]
-    [DataRow(2)]
-    public void TryReadOpenArgs_NotExactlyOneId_ReturnsTheUsage(int count)
+    [DataRow(3)]
+    public void TryReadOpenArgs_NeitherAnIdNorAnIdAndConfirm_ReturnsTheUsage(int count)
     {
         var args = new List<string>();
         for (var i = 0; i < count; i++)
             args.Add("x" + i);
 
-        Assert.IsFalse(ChronicleCheatReport.TryReadOpenArgs(args, out _, out var error));
-        StringAssert.Contains(error, "taom.chronicle_open <id>");
+        Assert.IsFalse(ChronicleCheatReport.TryReadOpenArgs(args, out _, out _, out var error));
+        StringAssert.Contains(error, "taom.chronicle_open <id> [confirm]");
     }
 
     [TestMethod]
-    public void TryReadOpenArgs_OneId_ReturnsItTrimmed()
+    public void TryReadOpenArgs_OneId_IsADryRunWithTheIdTrimmed()
     {
-        Assert.IsTrue(ChronicleCheatReport.TryReadOpenArgs(new List<string> { " hornburg " }, out var id, out _));
+        Assert.IsTrue(ChronicleCheatReport.TryReadOpenArgs(new List<string> { " hornburg " }, out var id, out var confirmed, out _));
         Assert.AreEqual("hornburg", id);
+        Assert.IsFalse(confirmed);
+    }
+
+    [TestMethod]
+    public void TryReadOpenArgs_IdThenTheLiteralConfirm_Acts()
+    {
+        Assert.IsTrue(ChronicleCheatReport.TryReadOpenArgs(new List<string> { "hornburg", "confirm" }, out var id, out var confirmed, out _));
+        Assert.AreEqual("hornburg", id);
+        Assert.IsTrue(confirmed);
+    }
+
+    [DataTestMethod]
+    [DataRow("Confirm")]
+    [DataRow("yes")]
+    [DataRow("confirm!")]
+    public void TryReadOpenArgs_ASecondWordOtherThanConfirm_IsRefused(string word)
+    {
+        Assert.IsFalse(ChronicleCheatReport.TryReadOpenArgs(new List<string> { "hornburg", word }, out _, out var confirmed, out var error));
+        Assert.IsFalse(confirmed);
+        StringAssert.Contains(error, "confirm");
+    }
+
+    [TestMethod]
+    public void FormatOpen_ADryRunThatWouldAct_SaysHowToConfirm()
+    {
+        var text = ChronicleCheatReport.FormatOpen("hornburg", dryRun: true, acted: true, "'hornburg' would open its window until day 23.");
+
+        StringAssert.StartsWith(text, "[WarChronicle] Dry run, nothing changed: ");
+        StringAssert.Contains(text, "taom.chronicle_open hornburg confirm");
+    }
+
+    [TestMethod]
+    public void FormatOpen_ADryRunThatWouldNotAct_OffersNoConfirm()
+    {
+        var text = ChronicleCheatReport.FormatOpen("hornburg", dryRun: true, acted: false, "'hornburg' would stay Pending: x.");
+
+        StringAssert.StartsWith(text, "[WarChronicle] Dry run, nothing changed: ");
+        Assert.IsFalse(text.Contains("confirm"), text);
+    }
+
+    [DataTestMethod]
+    [DataRow(true, "[WarChronicle] Opened: ")]
+    [DataRow(false, "[WarChronicle] Not opened: ")]
+    public void FormatOpen_Confirmed_SaysWhatHappened(bool acted, string prefix)
+    {
+        StringAssert.StartsWith(ChronicleCheatReport.FormatOpen("hornburg", dryRun: false, acted, "why"), prefix);
     }
 }

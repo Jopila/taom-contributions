@@ -202,9 +202,10 @@ enabled it to add gold has not consented to an irreversible mutation of persiste
 
 Known Tier C territory: settlement culture conversion (`ICultureConversionStore` persists and
 re-applies on load), hero race change (`RacePersistenceService`; `CharacterObject.Race` accepts
-arbitrary integers and `GetRaceNameFromId` coerces unknown ids to `"human"`), career set/switch, and
-anything removing roster entries. `taom.add_special_resources` is explicitly **not** Tier C — it is
-clamped to the XML cap, floored at 0, and reversible with a negative amount.
+arbitrary integers and `GetRaceNameFromId` coerces unknown ids to `"human"`), career set/switch,
+opening a chronicle event (`taom.chronicle_open`), and anything removing roster entries.
+`taom.add_special_resources` is explicitly **not** Tier C: it is clamped to the XML cap, floored at 0,
+and reversible with a negative amount.
 
 **Not built, deliberately:** a `trigger_fatal_crash` equivalent (TOR ships one). In a publicly
 released mod it would generate crash reports indistinguishable from real ones and pollute
@@ -298,7 +299,7 @@ answer is conclusive and fails open in every path.
 | `taom.rally_status` | A | campaign | Per kingdom: fortification points, baseline, share lost, stored rally tier (0 to 2) and eligibility, plus whether the rally is on. Reads the tier the last daily tick left |
 | `taom.print_war_ledger` | A | campaign | Waiting a day for the log. Prints the `[WarLedger]` lines the daily tick would write now; logs and changes nothing |
 | `taom.chronicle_status` | A | campaign | Nothing else shows the War Chronicle's event chain: every event with its state (Pending, Active, Occurred, Held, Fell, Lapsed, Skipped), its open, close or resolution day, whether an Active siege was assaulted, and the army focus the open windows set. See [war-chronicle.md](war-chronicle.md) |
-| `taom.chronicle_open <id>` | B | campaign | Waiting for an event's day. Opens a Pending chronicle event now, still checking its preconditions. A narrative occurs at once and applies its effects. A siege needs the Full War; it then opens its window when the defender holds the target and is at war with a live attacker, or resolves Fell at once, paying its Fell outcome, when an attacker already holds the target. A failed check leaves the event Pending and says why. Refused on a co-op client, while the chronicle is off in MCM, and after the War of the Ring has ended |
+| `taom.chronicle_open <id> [confirm]` | C | campaign | Waiting for an event's day. Without `confirm` it is a dry run: it runs the same checks, says what would happen (occurs, opens its window, resolves Fell, or why it stays Pending) and changes nothing. With the literal `confirm` it opens a Pending chronicle event now, still checking its preconditions; a resolved event's row, effects and momentum award are saved and nothing undoes them. A narrative occurs at once and applies its effects. A siege needs the Full War; it then opens its window when the defender holds the target and is at war with a live attacker, or resolves Fell at once, paying its Fell outcome, when an attacker already holds the target. A failed check leaves the event Pending and says why. Refused on a co-op client, while the chronicle is off in MCM, and after the War of the Ring has ended |
 | `taom.print_party_size` | A | campaign | The #337 weight-deflation chain, invisible in-game. Distinguishes a light party from a degenerate base limit, and since #545 prints the ENFORCED frame (`raw/deflated`) beside the DISPLAYED one (`weighted/true-base`) so the two can be compared in one line |
 | `taom.print_ai_food_relief [count]` | A | campaign | Nothing else shows it: each AI party's daily food consumption as a fraction of the vanilla members/20 rate, split by whether the party is eligible for the AI food relief; the count caps the per-party table (default 25), and the summary covers every party. See [ai-party-size.md](ai-party-size.md) |
 | `taom.tactic_status` | A | mission | Turning Culture Doctrine Debug on and reading the log: every team AI's current tactic and each formation's active behaviour and arrangement; works in Custom Battle. See [culture-doctrine.md](culture-doctrine.md) |

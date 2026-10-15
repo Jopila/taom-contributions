@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -8,7 +9,7 @@ namespace TAOM.Features.WarChronicle.Cheats;
 
 /// <summary>
 /// The pure half of the chronicle's console commands (#765): the text of <c>taom.chronicle_status</c> and
-/// the argument check of <c>taom.chronicle_open</c>. Invariant culture throughout.
+/// the argument check and result line of <c>taom.chronicle_open</c>. Invariant culture throughout.
 /// </summary>
 internal static class ChronicleCheatReport
 {
@@ -18,22 +19,43 @@ internal static class ChronicleCheatReport
         + "its days, and the army focus the open siege windows set. Read-only.";
 
     internal const string OpenUsage =
-        "Format is \"taom.chronicle_open <id>\".\n"
-        + "Opens a Pending chronicle event now, ignoring its day but still checking its preconditions: a narrative "
-        + "event occurs, a siege window opens. Ids are listed by taom.chronicle_status.";
+        "Format is \"taom.chronicle_open <id> [confirm]\".\n"
+        + "Without 'confirm' it only reports what would happen and changes nothing. With 'confirm' it opens a "
+        + "Pending chronicle event now, ignoring its day but still checking its preconditions: a narrative event "
+        + "occurs and applies its effects; a siege opens its window, or resolves Fell at once when an attacker "
+        + "already holds the target. Nothing undoes it. Ids are listed by taom.chronicle_status.";
 
-    internal static bool TryReadOpenArgs(IReadOnlyList<string> args, out string id, out string error)
+    /// <summary>
+    /// An id alone is a dry run; the id then exactly the literal <c>confirm</c> (ordinal) acts; anything else
+    /// is refused with the usage, before any lookup.
+    /// </summary>
+    internal static bool TryReadOpenArgs(IReadOnlyList<string> args, out string id, out bool confirmed, out string error)
     {
         id = string.Empty;
+        confirmed = false;
         error = string.Empty;
-        if (args == null || args.Count != 1 || string.IsNullOrWhiteSpace(args[0]))
+        if (args == null || args.Count < 1 || args.Count > 2 || string.IsNullOrWhiteSpace(args[0])
+            || (args.Count == 2 && !string.Equals(args[1], "confirm", StringComparison.Ordinal)))
         {
             error = OpenUsage;
             return false;
         }
 
         id = args[0].Trim();
+        confirmed = args.Count == 2;
         return true;
+    }
+
+    /// <summary>
+    /// The console line for an open: a dry run says nothing changed and, when it would act, how to confirm.
+    /// </summary>
+    internal static string FormatOpen(string id, bool dryRun, bool acted, string reason)
+    {
+        if (!dryRun)
+            return (acted ? "[WarChronicle] Opened: " : "[WarChronicle] Not opened: ") + reason;
+
+        var text = "[WarChronicle] Dry run, nothing changed: " + reason;
+        return acted ? text + $"\nRun \"taom.chronicle_open {id} confirm\" to do it." : text;
     }
 
     internal static string FormatStatus(

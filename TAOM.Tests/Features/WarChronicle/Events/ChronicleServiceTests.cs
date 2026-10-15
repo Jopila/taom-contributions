@@ -1152,7 +1152,7 @@ public class ChronicleServiceTests
         Launch(0);
         _f.World.Day = 3;
 
-        Assert.IsTrue(_sut.OpenChronicleEventNow("hornburg", out var reason), reason);
+        Assert.IsTrue(_sut.OpenChronicleEventNow("hornburg", dryRun: false, out var reason), reason);
 
         Assert.AreEqual(ChronicleEventState.Active, _f.StateOf("hornburg"));
         Assert.AreEqual(23d, _f.Store.Get("hornburg")!.CloseDay);
@@ -1165,7 +1165,7 @@ public class ChronicleServiceTests
         Launch(0);
         _f.World.Owners["town_V2"] = "rivendell";
 
-        Assert.IsFalse(_sut.OpenChronicleEventNow("hornburg", out var reason));
+        Assert.IsFalse(_sut.OpenChronicleEventNow("hornburg", dryRun: false, out var reason));
 
         Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("hornburg"));
         StringAssert.Contains(reason, "vlandia");
@@ -1179,7 +1179,7 @@ public class ChronicleServiceTests
         _f.World.Owners["town_V2"] = "isengard";
         _f.World.Day = 3;
 
-        Assert.IsTrue(_sut.OpenChronicleEventNow("hornburg", out var reason), reason);
+        Assert.IsTrue(_sut.OpenChronicleEventNow("hornburg", dryRun: false, out var reason), reason);
 
         Assert.AreEqual(ChronicleEventState.Fell, _f.StateOf("hornburg"));
         StringAssert.Contains(reason, "Fell");
@@ -1192,7 +1192,7 @@ public class ChronicleServiceTests
         Launch(0);
         Day(20);
 
-        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", out var reason));
+        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: false, out var reason));
         StringAssert.Contains(reason, "Occurred");
     }
 
@@ -1204,7 +1204,7 @@ public class ChronicleServiceTests
         _f.Events.Add(Narrative("fellowship"));
         Launch(0);
 
-        Assert.IsFalse(_sut.OpenChronicleEventNow(id, out var reason));
+        Assert.IsFalse(_sut.OpenChronicleEventNow(id, dryRun: false, out var reason));
         Assert.IsFalse(string.IsNullOrEmpty(reason));
     }
 
@@ -1215,8 +1215,107 @@ public class ChronicleServiceTests
         Launch(0);
         _f.Settings.ChronicleEnabled.Returns(false);
 
-        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", out _));
+        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: false, out _));
         Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("fellowship"));
+    }
+
+    // ---- Console: the dry run (Tier C: nothing changes without 'confirm') ----------------------------
+
+    [TestMethod]
+    public void OpenChronicleEventNow_DryRunOnAPendingSiege_ReportsTheWindowAndChangesNothing()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        _f.World.Day = 3;
+
+        Assert.IsTrue(_sut.OpenChronicleEventNow("hornburg", dryRun: true, out var reason), reason);
+
+        StringAssert.Contains(reason, "would open its window until day 23");
+        var record = _f.Store.Get("hornburg")!;
+        Assert.AreEqual(ChronicleEventState.Pending, record.State);
+        Assert.IsNull(record.OpenDay);
+        Assert.IsNull(record.CloseDay);
+        Assert.AreEqual(0, _f.Queue.Count);
+        Assert.IsTrue(_f.Focus.IsEmpty);
+    }
+
+    [TestMethod]
+    public void OpenChronicleEventNow_DryRunOnATargetAnAttackerHolds_ReportsFellAndPaysNothing()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        _f.World.Owners["town_V2"] = "isengard";
+        _f.World.Day = 3;
+
+        Assert.IsTrue(_sut.OpenChronicleEventNow("hornburg", dryRun: true, out var reason), reason);
+
+        StringAssert.Contains(reason, "would resolve Fell");
+        StringAssert.Contains(reason, "isengard");
+        Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("hornburg"));
+        _f.Momentum.DidNotReceiveWithAnyArgs().TryAwardScripted(default, default, default!, default);
+        Assert.AreEqual(0, _f.Queue.Count);
+    }
+
+    [TestMethod]
+    public void OpenChronicleEventNow_DryRunOnANarrative_ReportsItWouldOccurAndAppliesNoEffect()
+    {
+        _f.Events.Add(Narrative("fellowship", offset: 20, effects: Effect("rivendell", WarEffectKind.VolunteerRate, 0.10f, 20)));
+        Launch(0);
+
+        Assert.IsTrue(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason), reason);
+
+        StringAssert.Contains(reason, "would occur");
+        Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("fellowship"));
+        Assert.AreEqual(0, _f.Effects.Snapshot().Count);
+        Assert.AreEqual(0, _f.Queue.Count);
+        Assert.AreEqual(0, _f.LedgerLines.Count());
+    }
+
+    [TestMethod]
+    public void OpenChronicleEventNow_DryRunWithAFailedPrecondition_SaysItStaysPendingAndWhy()
+    {
+        _f.Events.Add(SiegeDef());
+        Launch(0);
+        _f.World.Owners["town_V2"] = "rivendell";
+
+        Assert.IsFalse(_sut.OpenChronicleEventNow("hornburg", dryRun: true, out var reason));
+
+        StringAssert.Contains(reason, "would stay Pending");
+        StringAssert.Contains(reason, "vlandia");
+        Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("hornburg"));
+    }
+
+    [TestMethod]
+    public void OpenChronicleEventNow_DryRunOnAResolvedEvent_IsRefusedAsBefore()
+    {
+        _f.Events.Add(Narrative("fellowship"));
+        Launch(0);
+        Day(20);
+
+        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason));
+        StringAssert.Contains(reason, "only a Pending event can be opened");
+    }
+
+    [TestMethod]
+    public void OpenChronicleEventNow_DryRunWithTheChronicleOff_IsRefusedAsBefore()
+    {
+        _f.Events.Add(Narrative("fellowship"));
+        Launch(0);
+        _f.Settings.ChronicleEnabled.Returns(false);
+
+        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason));
+        StringAssert.Contains(reason, "The War Chronicle is off");
+    }
+
+    [TestMethod]
+    public void OpenChronicleEventNow_DryRunAfterTheWarEnded_IsRefusedAsBefore()
+    {
+        _f.Events.Add(Narrative("fellowship"));
+        Launch(0);
+        _f.Phase = WarPhase.WarEnded;
+
+        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason));
+        StringAssert.Contains(reason, "the chronicle is closed");
     }
 
     [TestMethod]

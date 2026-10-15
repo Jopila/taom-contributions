@@ -107,7 +107,7 @@ Vanilla's value already includes its low-fief boost (see **Why This Exists**), s
 
 - **Adoption (decision D5):** at session launch, and at the start of every daily step, each configured event with no saved row gets one. When its open day is already past, or its anchor was Skipped, it becomes Skipped with no retroactive effect. A campaign started before this feature therefore gets no chronicle events once their days have passed; the rally and the ledger still work. A saved Pending row is not re-adopted: it opens on the next daily step even if late.
 - **World check at session launch:** a Pending or Active event that names a settlement or kingdom the campaign does not have (`SettlementExists`, `KingdomExists`, also for effect targets that are kingdom ids) is Skipped with a warning.
-- **Open day:** `CampaignStart` is day 0; `Event` is the anchor event's resolution day. `Phase1` and `Phase2` count only once the phase has been reached, from the later of two days: `IWarOfTheRingService.GetEffectivePhaseDay(IsengardWar or FullWar)`, the clamped trigger pair the phase machine itself compares against, and the day before the chronicle first saw the phase reached. The day before, because the chronicle's daily listener runs before the phase machine's ("Tick order" above): a phase entered on day N's tick is first seen on day N + 1, so a campaign on schedule opens on its configured days exactly as before. A phase entered late (the War of the Ring switched on late, a phase day lowered below today, Test Mode switched on mid-campaign) opens its events from that day plus their offsets, one by one, instead of every overdue event on one step. Raising a phase day after the phase began still postpones its Pending events. Each step that runs (session launch, the daily step, `taom.chronicle_open`) records the first day it sees each phase; the day is saved ("The save payload"), and a save without it records the day of its first step after the load. Adoption still judges a missing row by the configured day alone, so decision D5 is unchanged. Decided by the maintainer 2026-10-14. The offset is added in days. An event anchored on a Skipped event is Skipped; one whose `requiresOutcome` the anchor did not reach is Skipped.
+- **Open day:** `CampaignStart` is day 0; `Event` is the anchor event's resolution day. `Phase1` and `Phase2` count only once the phase has been reached, from the later of two days: `IWarOfTheRingService.GetEffectivePhaseDay(IsengardWar or FullWar)`, the clamped trigger pair the phase machine itself compares against, and the day before the chronicle first saw the phase reached. The day before, because the chronicle's daily listener runs before the phase machine's ("Tick order" above): a phase entered on day N's tick is first seen on day N + 1, so a campaign on schedule opens on its configured days exactly as before. A phase entered late (the War of the Ring switched on late, a phase day lowered below today, Test Mode switched on mid-campaign) opens its events from that day plus their offsets, one by one, instead of every overdue event on one step. Raising a phase day after the phase began still postpones its Pending events. Each step that runs (session launch, the daily step, a confirmed `taom.chronicle_open`; its dry run records nothing) records the first day it sees each phase; the day is saved ("The save payload"), and a save without it records the day of its first step after the load. Adoption still judges a missing row by the configured day alone, so decision D5 is unchanged. Decided by the maintainer 2026-10-14. The offset is added in days. An event anchored on a Skipped event is Skipped; one whose `requiresOutcome` the anchor did not reach is Skipped.
 - **Preconditions at open:** the required anchor outcome; for a siege also the Full War (decision D2: peace between Hostile pairs is blocked only then), the defender alive, at least one attacker alive, the target owned by the defender, and the defender at war (`IAllianceAdapter.AreAtWar`) with at least one live attacker. A failure Skips the event, logged with the reason. One exception, decided by the maintainer 2026-10-14: when an attacker already owns the target as a siege opens (in the Full War, with any required anchor outcome met), the event resolves Fell at once instead of Skipped, whether or not the defender survives or anyone is at war. It pays its Fell effects and momentum award as configured and announces its normal fell line, with no window, opening line or army focus, so its Event-anchored children still open (`gondor` after `osgiliath`; `blackgate`, which needs `gondor` Held, is then Skipped). A target owned by a third kingdom, or by no kingdom, still Skips the siege and its children.
 - **Narrative:** Occurred at once; its effects are written and it is announced.
 - **Siege:** unless an attacker already owns the target (Fell, above), Active, with `open` = today and `close` = today + `windowDays`, both stored; the army focus is pushed and the opening line is announced. If an attacker already besieges the target, the window counts as assaulted.
@@ -279,7 +279,7 @@ Registered in `Main/Features/WarChronicle/Cheats/WarChronicleCheats.cs` and `Chr
 | `taom.rally_status` | Per kingdom: points, baseline, loss, stored tier and eligibility, plus whether the rally is on |
 | `taom.print_war_ledger` | Prints the ledger lines today's tick would write; logs and changes nothing |
 | `taom.chronicle_status` | Every chronicle event with its state, its open, close or resolution day (an Active window past its close day reads "overtime: an attacker still besieges it"), whether an Active siege was assaulted, and the army focus, marked inactive when AI Strategic Intelligence is off. Read-only |
-| `taom.chronicle_open <id>` | Opens a Pending event now, ignoring its day but still checking its preconditions: a narrative occurs at once; a siege opens its window, or resolves Fell at once when an attacker already holds the target. A failed check leaves it Pending and says why. Refused on a co-op client, while the chronicle is off and after the War of the Ring has ended |
+| `taom.chronicle_open <id> [confirm]` | Tier C. Without `confirm` a dry run: the same checks, a report of what would happen, and no change. With the literal `confirm` it opens a Pending event now, ignoring its day but still checking its preconditions: a narrative occurs at once; a siege opens its window, or resolves Fell at once when an attacker already holds the target. A failed check leaves it Pending and says why. Refused on a co-op client, while the chronicle is off and after the War of the Ring has ended |
 
 ## How to measure
 
@@ -297,10 +297,10 @@ The analyzer's tests are `tools/tests/test_analyze_war_ledger.py` (run `python -
 Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new campaign, with cheat mode on. Watch `taom_debug_*.log` for `[WarChronicle]` and `[WarLedger] ... ev=chronicle` lines.
 
 1. **Narratives:** on day 1 or 2 "The Breaking of the Fellowship" and on day 8 or 9 "Théoden King" pop up on the map (one at a time, never over a menu or a battle). `taom.war_effects` lists `chronicle:breaking:Occurred:0` on isengard.
-2. **A siege opens:** on day 8 the Hornburg window opens (Phase 2 + 5). `taom.chronicle_status` shows it Active with its close day and the focus line `town_V2 x1.40`. Or open one at once: `taom.chronicle_open osgiliath`.
+2. **A siege opens:** on day 8 the Hornburg window opens (Phase 2 + 5). `taom.chronicle_status` shows it Active with its close day and the focus line `town_V2 x1.40`. Or open one at once: `taom.chronicle_open osgiliath` reports what would happen, then `taom.chronicle_open osgiliath confirm` opens it.
 3. **Held:** let an Isengard or Dunland army besiege Helm's Deep and fail (or, as a vassal of Isengard, besiege it yourself and lift the siege); at the close the event is Held, vlandia shows volunteers x1.15 and isengard and empire escape x1.20 in `taom.war_effects`, and the momentum breakdown gains a "Chronicle Events" row for the Free side.
 4. **Fell:** take a target town for an attacker (join Isengard and capture Helm's Deep). The window resolves Fell the moment the town changes hands. Check the double fire: in a kingdom of more than one clan the fief vote fires the owner change again when it resolves, and it must not log a second `ev=chronicle` line or a second popup.
-5. **Lapsed:** open a window early (`taom.chronicle_open north`) and watch that no Gundabad or Dunland army besieges Bree before the close: a Lapsed popup, no new effect. Repeat on another front if one does.
+5. **Lapsed:** open a window early (`taom.chronicle_open north confirm`) and watch that no Gundabad or Dunland army besieges Bree before the close: a Lapsed popup, no new effect. Repeat on another front if one does.
 6. **Save and reload mid-window:** save while a window is Active, reload: `taom.chronicle_status` shows the same close day and the focus line again, and the window resolves on its old close day unless an attacker still besieges the target.
 7. **New campaign after a resolved chain:** exit to the menu and start a new campaign in the same process: every event is Pending again.
 8. **Old save:** load a campaign past day 60 that was started before this feature: the events whose day has passed are Skipped (silently, one `outcome=Skipped` ledger line each); later events still open.
@@ -350,7 +350,7 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 
 ## Tests
 
-Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute lines (2026-10-14); they exclude `[DataRow]` expansions. The 552 under `TAOM.Tests/Features/WarChronicle/` plus 77 in the eight outside files below make 629 C# tests, of which 105 are `[DataTestMethod]`. The once-per-day gate has its own class (`WarChronicleDailyGateTests`) and a test each in the tick, chronicle, codec, state and behavior classes; the load marker has a golden line, a line in the shared fixture, two `LogLoad` tests and three behavior tests. An unreadable clock has three tick tests, a `LogLoad` test, a behavior test, the adapter's `TryFloorElapsedDays` cases and a chronicle case per invalid value. `MomentumConfigProviderTests` also gained 2 for the `chronicle` duration.
+Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute lines (2026-10-14); they exclude `[DataRow]` expansions. The 564 under `TAOM.Tests/Features/WarChronicle/` plus 77 in the eight outside files below make 641 C# tests, of which 107 are `[DataTestMethod]`. The once-per-day gate has its own class (`WarChronicleDailyGateTests`) and a test each in the tick, chronicle, codec, state and behavior classes; the load marker has a golden line, a line in the shared fixture, two `LogLoad` tests and three behavior tests. An unreadable clock has three tick tests, a `LogLoad` test, a behavior test, the adapter's `TryFloorElapsedDays` cases and a chronicle case per invalid value. `MomentumConfigProviderTests` also gained 2 for the `chronicle` duration.
 
 | Class | File | Tests |
 |---|---|---|
@@ -375,7 +375,7 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 | `WarChronicleWiringTests` | same | 5 |
 | `VolunteerProductionServiceTests` | `TAOM.Tests/Features/TroopProgression/` | 21 |
 | `VolunteerProductionWiringTests` | same | 1 |
-| `ChronicleServiceTests` | `.../WarChronicle/Events/` | 79 |
+| `ChronicleServiceTests` | `.../WarChronicle/Events/` | 86 |
 | `ChronicleConfigValidatorTests` | same | 55 |
 | `ChronicleConfigProviderTests` | same | 5 |
 | `ChronicleAnnouncementQueueTests` | same | 12 |
@@ -384,7 +384,7 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 | `ChroniclePersistenceTests` | same | 5 |
 | `ChroniclePhaseAnchorTests` | same | 10 |
 | `WarChronicleEventsWiringTests` | same | 5 |
-| `ChronicleCheatReportTests` | `.../WarChronicle/Cheats/` | 8 |
+| `ChronicleCheatReportTests` | `.../WarChronicle/Cheats/` | 13 |
 | `WarChronicleEventSettingsTests` | `.../WarChronicle/` | 5 |
 | `ArmyTargetFocusRegistryTests` | `TAOM.Tests/Features/ArmyTargeting/` | 19 |
 | `ArmyTargetFocusScoringTests` | same | 7 |
@@ -432,6 +432,7 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
   - each game load writes a `t=load` ledger line, and the analyzer rewinds to it;
   - an unreadable clock skips the day and writes no load marker;
   - the chunk loop moved to `SyncDataChunker.SyncChunks` in `Main/Core/Persistence`, shared with momentum.
+- 2026-10-14: `taom.chronicle_open` is Tier C: without the literal `confirm` it is a dry run that reports what would happen and changes nothing.
 
 ## GitHub Issue
 
