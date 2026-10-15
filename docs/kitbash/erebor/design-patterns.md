@@ -1,245 +1,197 @@
 # Erebor design patterns
 
-Composition rules, confirmed conventions, and ready-to-use templates for
-assembling erebor buildings from the kitbash by writing prefab XML directly.
+How the Erebor kit pieces join, measured on 2026-10-15 and proved against the buildings the
+original authors made with them. Per-piece sizes, pivots and openings are in
+[meshes.md](meshes.md). Everything here is in the **Blender import frame** unless a line says
+"engine frame".
 
-## Confirmed conventions (calibrated 2026-04-23)
+**Evidence base:**
 
-From iteration 1 of `test_erebor_hut.xml`, a 6-piece 3m × 3m hut that
-assembled correctly on the first draft.
+- **Pieces:** `tools/oneoff/blender_catalog_erebor.py` (bounds, pivots, slopes, openings).
+- **Authored joins:** `tools/oneoff/mine_erebor_prefab_joins.py` read 25,332 kit placements in
+  324 TAOM_Map prefabs. The richest are `taom_erebor_kitbash.xml` (`dwarf_house_a`,
+  `dwarf_house_b`, `dwarf_barracks`, `dwarf_castle_wall_c`, `dwarf_tower_ramp_a`) and the
+  Soisson, Shogun and Fink housing prefabs.
+- **Rebuilds:** `tools/oneoff/blender_render_erebor_prefab.py` rebuilt those prefabs from the
+  source FBX (renders in `E:\LOTRAOMAssets\_export\erebor\prefab_renders\`).
+- **Join tests:** `tools/oneoff/blender_test_erebor_joins.py` placed every join below and measured
+  it (renders and `joins.json` in `E:\LOTRAOMAssets\_export\erebor\joins\`).
 
-| Convention | Confirmed value |
+## The frame rule (verified)
+
+**The engine sees every Erebor source FBX rotated 180 degrees about Z relative to Blender's FBX
+import.** A point at (x, y, z) in Blender is at (-x, -y, z) in the piece's engine frame.
+
+| Rebuilt prefab | Pieces | Size with the rule | Size without it |
+|---|---|---|---|
+| `dwarf_house_a` | 72 | 12.79 x 6.99 m, a closed gable house | 12.79 x 12.05 m, roof panels splayed outward |
+| `dwarf_house_b` | 156 | 15.79 x 9.99 m, a closed hipped hall | 21.05 x 15.05 m, panels and corners apart |
+| `dwarf_barracks` | 378 | 16.49 x 22.49 m | 21.28 x 27.05 m |
+
+Two independent checks agree: the 1.5 m hip corner (`Roof_Cor_Out_B1`) only rises toward its
+panel row with the rule, and the `Castle_Tower_B1` bastion only lands on the merlon face with it.
+
+**How to use it:**
+
+- **An offset read from a prefab** converts as (x, y, z, yaw) to (-x, -y, z, yaw); a full matrix
+  M converts as C M C with C = Rz(180).
+- **A building assembled and exported in Blender** keeps its joins and arrives in the game turned
+  180 degrees as a whole, which only changes its heading. Verified at the file level:
+  `tools/oneoff/fbx_frame_compare.py` shows an exported piece stored with the same bounds and axis
+  header as in its kit source file ([erebor-buildings.md](../erebor-buildings.md)). The first Kit
+  import is the editor-side confirmation.
+- **The prefab euler order** is the engine's `ApplyEulerAngles`: about Z, then X, then Y, so
+  R = Rz Rx Ry. Almost every kit placement is Z-only.
+
+## Measured conventions
+
+| Convention | Value |
 |---|---|
-| Coordinate system | Z-up, world units = metres |
-| Rotation unit | Radians |
-| Z rotation direction | Positive = CCW looking down +Z |
-| `sm_dw_ground_3m_a1` pivot | Tile centre, top surface at local Z = 0 |
-| `sm_dw_wall_3m_*` pivot | Base-centre — bottom of wall at local Z = 0 |
-| `sm_dw_wall_3m_*` footprint | 3m along the wall's local X axis |
-| `sm_dw_wall_3m_*` default facing | Outer face points to +Y at rotation 0 |
-| `sm_dw_wall_3m_*` height | 3m (top at local Z = 3) |
-| `sm_dw_roof_top_a1` | Ridge cap strip (not a flat square) — sits along roof apex |
+| Units, axes | metres, Z up |
+| Plan grid | 3 m. Wall pivots sit on grid lines; a footprint is a whole number of 3 m bays between wall centrelines |
+| Storey | 3.0 m: walls 0 to 3, the next storey's walls and floor at z 3 |
+| Wall thickness | 0.50 (`_A`), 0.54 (`_B`, `_C`), 0.60 to 0.62 for door and window frames; both faces identical |
+| Floor | `Ground_3m_*` top of slab at z 0.10 to 0.12 above its pivot |
+| Roof pitch | 26.57 degrees (1.5 m over 3 m), every panel |
+| Eave | `Roof_Str` pivot on the wall centreline at the wall top: **no overhang** |
+| Ridge or deck | eave + 1.5 m (3 m set), eave + 0.75 m (1.5 m set) |
+| Castle module | 20 m long, 6.2 m thick, walk at z 6, outer face -Y |
 
-## Texture-family rule
+## Join matrix (tested)
 
-Letter suffix (`_a`, `_b`, `_c`) = material family. Within one building,
-every piece must share the same letter or produce visible texture breaks.
-Valid example (A-family): `sm_dw_ground_3m_a1` + `sm_dw_wall_3m_a` +
-`sm_dw_wall_3m_door_a1` + `sm_dw_roof_str_a1`.
+Measured in Blender with each join placed as written. **Z-fight** is shared surface with both
+normals the same way, the in-game flicker risk. **Butt** is shared surface back to back, a hidden
+joint. **Intersecting** counts triangle pairs that cut each other (designed overlaps show here).
 
-Across buildings: different letters for different structures is fine — the
-texture break reads as "these are two separate buildings".
+| Join | Rule (Blender frame) | Evidence | Z-fight m2 | Butt m2 | Intersecting |
+|---|---|---|---|---|---|
+| Wall run | next wall at x + 3 | `dwarf_house_a` | 0 | 1.52 | 26 |
+| 90 degree corner | walls end on the corner point (x 1.5, y 0), second wall yaw 90 at (1.5, 1.5); `Clmn_3m_C` on the corner, `Clmn_Top_D` x1.1/1.1/1.2 at z 3 | `dwarf_house_a` | 0.74 | 0 | 318 |
+| Chamfer corner | `Corn` at (1.5, 3) yaw 270 after a wall at the origin; next wall yaw 90 at (4.5, 4.5); `Ground_3m_A1_Corner` at (3, 1.5) | `dwarf_house_b` | 2.30 | 1.58 | 37 |
+| Storey stack | same wall at z + 3 | `dwarf_barracks` | 0 | 1.50 | 2 |
+| Beam courses | `Beam_3m_B` at z 0 and `Beam_3m_C` (or `_A`) at z 3, on the wall pivot | `dwarf_house_a`, `_b` | 0.27 | 0 | 56 |
+| Pilaster | `Clmn_3m_A` x1.5/1.5/1 on a wall seam, `Clmn_Top_F` x1.5/1.5/1.2 at z 0 and z 3 | `dwarf_house_a` | 0.91 | 1.52 | 477 |
+| Eave on wall | `Roof_Str_*1` at (0, 0, 3) on a wall at the origin, rising inward | `dwarf_house_a` | 0 | 0 | 9 |
+| Panel row | next panel at x + 3 | `dwarf_house_a` | 0 | 0.17 | 0 |
+| 6 m gable | panels at y 0 yaw 0 and y 6 yaw 180; `Roof_Side_Str_A1` yaw 90 at (0, 3, 4.5); end walls yaw 90 at x - 1.5; `Roof_Side_A1` on them at z 3, yaw 0 at y 1.5 and yaw 180 at y 4.5 | `dwarf_house_a` | 0.02 | 5.43 | 235 |
+| Flat deck | `Roof_Top_A1` at (0, 4.5, 4.5) behind a panel at the origin; `Roof_Side_Str_A1` yaw 90 at (0, 3, 4.5) frames it; `Roof_Side_Cor_Out_A1` at (1.5, 0, 3) is the rib on the panel seam | `dwarf_house_b` | 0.02 | 0 | 80 |
+| Chamfer roof | `Roof_Cor_Tri_A1` on the `Corn` pivot at z 3, yaw = `Corn` yaw + 90 | `dwarf_house_b` | 0 | 0.06 | 62 |
+| 1.5 m hip corner | `Roof_Cor_Out_B1` at (1.5, 0) beside a `Str_A2` at the origin; the side panel is `Str_A2` yaw 90 at (1.5, 3.0) | Soisson and Shogun housing, 1,692 placements | 0 | 0 | 39 |
+| Floor | tiles every 3 m; `Ground_Trim_3m_A1` on the seam (x 1.5) | `dwarf_house_b` | 0.04 | 0.30 | 286 |
+| Plinth | two `Ground_6m_A1` 6 m apart under the walls | `dwarf_house_a` | 0 | 19.18 | 735 |
+| Castle run | next `Castle_Wall_A1_Str` at x + 20 | module length | 0.17 | 72.48 | 13 |
+| Castle gate | `_Gate` at x + 20 | module length | 0 | 72.49 | 29 |
+| Castle ramp | `_Ramp` at x + 20 continues a wall at its low end | module length | 0.33 | 72.50 | 21 |
+| Bastion | `Castle_Tower_B1` at (1, -3, 0) | `dwarf_castle_wall_c` | 2.45 | 70.00 | 197 |
+| Wall stairs | `Castle_Wall_Stairs_A1` yaw 180 at (8.5, 4.5, 0) | `dwarf_castle_wall_c` | 0 | 107.75 | 957 |
+| Tower and ramps | `_Ramp` at (-14, 0.5) yaw 0 and (14, 0.5) yaw 180, both rising to the tower | `dwarf_tower_ramp_a` | 11.00 | 77.65 | 703 |
+| Terrace row | `Platform_6m_A2` yaw 90 every 6 m | `dwarf_platform_b` | 0 | 6.97 | 940 |
 
-## Rotation cheat sheet (Z-axis only)
+**Merlons and bastion merlons** always take their parent's exact transform (they share its pivot).
 
-| Rotation (radians) | Result for a wall that defaults facing +Y |
+**The z-fight rows are authored and accepted:**
+
+- **Chamfer, 2.30 m2:** the downward bottom faces of the floor triangle and the chamfer wall coincide at grade, where nothing sees them.
+- **Corner, 0.74 m2, and pilaster, 0.91 m2:** the column's faces sit on the wall faces it covers.
+- **Bastion, 2.45 m2, and tower, 11.0 m2:** the bastion and the ramps run into the wall and the tower.
+
+A merged building should still delete faces that are fully buried.
+
+## Recipes from the authored buildings
+
+Placements below are the authored ones converted to the Blender frame.
+
+### Gable house, 12 x 6 m, one storey (`dwarf_house_a`, 72 pieces)
+
+- **Plinth:** `Ground_6m_A1` at (-1.5, 3, 0) and (4.5, 3, 0).
+- **Walls** (`_C` dressed block):
+  - Long sides at y 0 and y 6, pivots x -3, 0, 3, 6.
+  - Ends at x -4.5 and x 7.5, yaw 90, pivots y 1.5 and 4.5.
+  - One `Door_C1` per long side; `Win_C3` and `Win_C2` in the other bays.
+- **Corners:** `Clmn_3m_C` with a `Clmn_Top_D` cap (x1.1/1.1/1.2) at z 3.
+- **Door bays:** `Clmn_3m_A` pilasters with `Clmn_Top_F` base and cap.
+- **Courses:** `Beam_3m_B` on every wall at z 0, `Beam_3m_C` at z 3.
+- **Roof:**
+  - `Roof_Str_B1` (stone) at z 3 along y 0 (yaw 0) and y 6 (yaw 180).
+  - `Roof_Side_Str_A1` yaw 90 along the ridge at (x, 3, 4.5).
+  - `Roof_Side_A1` gable wedges on both end walls.
+
+### Chamfered hipped hall, 15 x 9 m, one storey (`dwarf_house_b`, 156 pieces)
+
+- **Walls** (`_A` brick):
+  - Long sides at y 0 and y 9 over x -4.5 to 4.5.
+  - Ends at x -7.5 and 7.5 over y 3 to 6.
+  - Four chamfer corners: `Corn_A` at (-4.5, 3) yaw 180 and (4.5, 3) yaw 270; `Corn_Win_A` at (-4.5, 6) yaw 90 and (4.5, 6) yaw 0.
+  - Doors at both ends and mid-front; `Win2_A1` and `Win_A3` in the other bays.
+- **Floor:** `Ground_3m_A2` on the 3 m grid, `Ground_3m_A1_Corner` in the four chamfer cells, trims on every seam.
+- **Roof:**
+  - `Roof_Str_A1` (slate) at z 3 on every straight wall.
+  - `Roof_Cor_Tri_A1` on each chamfer.
+  - Flat `Roof_Top_A1` deck at z 4.5 down the centre line y 4.5.
+  - `Roof_Side_Str_A1` frames the deck.
+  - `Roof_Side_Cor_Out_A1` ribs on every panel seam.
+  - `Ground_Trim_Corner_A1` studs at the rib heads (z 4.4) and on the floor seam crossings (z 0).
+- **Courses:** `Beam_3m_C` at z 0 and `Beam_3m_A` at z 3, scaled 1.5 along X and turned 45 degrees across the chamfers.
+- **Seams:** `Clmn_3m_B` pilasters on the wall seams.
+
+### Two storeys (`dwarf_barracks`, 378 pieces)
+
+The hall pattern stacked:
+
+- **Walls** at z 0 and z 3.
+- **Floor tiles** at z 0 and z 3.
+- **Eave** at z 6, deck at z 7.5, studs at z 7.4.
+
+### Castle wall section (`dwarf_castle_wall_c`)
+
+- **Wall:** `Castle_Wall_A1_Str` at the origin with all ten `Str_Mrln_*` on the same transform.
+- **Bastion:** `Castle_Tower_B1` with its seven merlons at (1, -3, 0).
+- **Stairs:** `Castle_Wall_Stairs_A1` yaw 180 at (8.5, 4.5, 0) on the inner face.
+
+Further sections join every 20 m.
+
+### Tower with ramps (`dwarf_tower_ramp_a`)
+
+- **Tower:** `Castle_Tower_A1` and `_A1_int` at the origin.
+- **Ramps:** a `Castle_Wall_A1_Ramp` (and merlons) at (-14, 0.5, 0) yaw 0 and (14, 0.5, 0) yaw 180. Each climbs from the walk height 6 m to 18 m at the tower.
+
+## Lond Cirion rules, checked against this kit
+
+| Rule (lond-cirion-buildings.md) | Applies here? |
 |---|---|
-| 0 | Faces +Y (north) |
-| −π/2 = −1.5708 | Faces +X (east) — 90° CW looking down |
-| +π/2 = +1.5708 | Faces −X (west) — 90° CCW looking down |
-| π = 3.14159 | Faces −Y (south) — 180° |
+| A part is a prefix of sub-objects | No: each Erebor piece is one object. Merlons are separate objects that share the parent pivot |
+| Decal trap | No decal objects in any of the 12 files |
+| Bare `.lod` trap | None found |
+| Origin-anchored parts | **Yes, kit-wide.** Roof panels pivot on the eave edge (3 m set) or eave corner (1.5 m set); corner, chamfer and triangle pieces on a corner; the bastion on its back face; merlons outside the mesh. Place by pivot only |
+| Gable seating on the infill plate | Different: `Roof_Side_A1` sits on the end wall at the eave height, pivot at its base centre |
+| Trims straddle, they do not hang | **Yes.** Beams are centred on the wall line; ground trims are centred on a tile seam |
+| Grip the structural body | No sub-objects, so not needed |
+| Material `.NNN` duplicates | **Will apply** when an assembler joins pieces from several FBX files: remap before joining |
 
-## Template: single-room dwarven hut, 3m × 3m
+## Unit-size props
 
-Working pattern from `test_erebor_hut.xml`.
+The five props have no authored placement. Building scale, decided 2026-10-15 and checked in a
+render beside a wall and a door (`joins_props/props_scale.png`): **x3** for the Moria column, the
+broken column and both statues, **x3.06** for `kys_dw_wall_001` so it fills a 3 m bay. Statues
+face +X and pivot at their centre: pivot z = 1.44 (`_A`) or 1.47 (`_B`) above the floor, yaw 270
+to face -Y. Full sizes are in [meshes.md](meshes.md).
 
-```
-Floor:        sm_dw_ground_3m_a1        (0, 0, 0)      rot (0, 0, 0)
-North wall:   sm_dw_wall_3m_a           (0, +1.5, 0)   rot (0, 0, 0)
-East wall:    sm_dw_wall_3m_b           (+1.5, 0, 0)   rot (0, 0, -π/2)
-South wall:   sm_dw_wall_3m_door_a1     (0, -1.5, 0)   rot (0, 0, π)
-West wall:    sm_dw_wall_3m_c           (-1.5, 0, 0)   rot (0, 0, +π/2)
-Roof (flat):  sm_dw_roof_top_a1         (0, 0, 3.0)    rot (0, 0, 0)
-```
+## Our buildings
 
-Known issues: walls are A/B/C mixed (texture break at corners), roof is a
-ridge cap used as a flat square (reads okay but not architecturally correct).
+Buildings assembled from these rules, their export and their probe results are in
+[erebor-buildings.md](../erebor-buildings.md). **Grade:** a building sits with the underside of
+its floor slab on the terrain (z 0); no below-grade skirt (Mike, 2026-10-15).
 
-## Template: single-room hut, A-family unified, corner walls, pitched roof
+## Open questions for Mike
 
-Upgraded version. Uses matching A-family textures, corner-cleat walls at
-joints, and a proper pitched-roof composition.
-
-```
-Floor:
-  sm_dw_ground_3m_a1                    (0, 0, 0)        rot (0, 0, 0)
-
-Trim border (optional, adds framed edge):
-  sm_dw_ground_trim_3m_a1               (0, +1.5, 0)     rot (0, 0, 0)
-  sm_dw_ground_trim_3m_a1               (+1.5, 0, 0)     rot (0, 0, -π/2)
-  sm_dw_ground_trim_3m_a1               (0, -1.5, 0)     rot (0, 0, π)
-  sm_dw_ground_trim_3m_a1               (-1.5, 0, 0)     rot (0, 0, +π/2)
-  sm_dw_ground_trim_corner_a1           (+1.5, +1.5, 0)  rot (0, 0, 0)       [NE corner]
-  sm_dw_ground_trim_corner_a1           (+1.5, -1.5, 0)  rot (0, 0, -π/2)    [SE corner]
-  sm_dw_ground_trim_corner_a1           (-1.5, -1.5, 0)  rot (0, 0, π)       [SW corner]
-  sm_dw_ground_trim_corner_a1           (-1.5, +1.5, 0)  rot (0, 0, +π/2)    [NW corner]
-
-Walls (corner-cleat variants for clean joints):
-  sm_dw_wall_3m_corn_a  (NW corner)     (-1.5, +1.5, 0)  rot (0, 0, 0)
-  sm_dw_wall_3m_corn_a  (NE corner)     (+1.5, +1.5, 0)  rot (0, 0, -π/2)
-  sm_dw_wall_3m_corn_a  (SE corner)     (+1.5, -1.5, 0)  rot (0, 0, π)
-  sm_dw_wall_3m_corn_a  (SW corner)     (-1.5, -1.5, 0)  rot (0, 0, +π/2)
-  — OR replace one side with —
-  sm_dw_wall_3m_door_a1  (south face)   (0, -1.5, 0)     rot (0, 0, π)
-  — AND/OR add windows —
-  sm_dw_wall_3m_win_a1   (window face)  e.g. (0, +1.5, 0) rot (0, 0, 0)
-
-Pitched roof (ridge running east-west):
-  sm_dw_roof_str_a1   (N panel sloping down to north)
-                                        (0, +0.75, 3.0)  rot (±pitch, 0, 0)
-  sm_dw_roof_str_a1   (S panel sloping down to south)
-                                        (0, -0.75, 3.0)  rot (∓pitch, 0, 0)
-  sm_dw_roof_top_a1   (ridge cap at apex)
-                                        (0, 0, 3.0 + peak_h)  rot (0, 0, 0)
-  sm_dw_roof_side_a1  (E gable edge)    (+1.5, 0, 3.0)   rot (0, 0, -π/2)
-  sm_dw_roof_side_a1  (W gable edge)    (-1.5, 0, 3.0)   rot (0, 0, +π/2)
-```
-
-**Unknowns to resolve in iteration 2** of the pitched-roof upgrade:
-- Is `sm_dw_roof_str_a1` authored pre-pitched (sits flat but angled geometry)
-  or horizontal (needs a rotation to create the pitch)?
-- Exact ridge apex height — where does the ridge cap sit relative to
-  wall-top (Z=3)?
-- Whether corner walls need a specific orientation convention different from
-  plain walls.
-
-## Template: 6m × 6m keep (2-storey) — not yet built
-
-Sketch for the next build up from the hut. Validates corner walls at 90°
-and introduces the platform system.
-
-- Ground floor (A-family): 4× `sm_dw_ground_6m_a1` tiles or a 2×2 grid of
-  `sm_dw_ground_3m_a1`
-- Wall course 1 (base, 0–3m): 2× `sm_dw_wall_3m_*` per side + 4× `sm_dw_wall_3m_corn_a` at corners. One wall slot for `_door_a1`.
-- Platform (mid-floor, Z=3): 4× `sm_dw_platform_6m_a1` or a 2×2 grid
-- Wall course 2 (upper, 3–6m): same layout as course 1, but with `_win_a*` for windows
-- Roof (Z=6): pitched roof system, 4-sided hip roof using `_cor_tri_*` at corners + `_top_a1` along ridges
-
-## Template: castle wall section with tower
-
-Sketch for fortifications. Validates the merlon-on-top pattern.
-
-- Anchor tower: `sm_dw_castle_tower_a1` at (0, 0, 0)
-- Wall extending east: 3× `sm_dw_castle_wall_a1_str` at (+3, 0, 0), (+6, 0, 0), (+9, 0, 0) — assuming 3m wall width
-- Merlons on top of each wall: `sm_dw_castle_wall_a1_str_mrln_01..10` (pick varied) at Z = wall-top
-- Gate in the middle: replace one `_str` with `sm_dw_castle_wall_a1_gate`
-- Access: `sm_dw_castle_wall_stairs_a1` on interior face
-- Ramp up to tower: `sm_dw_castle_wall_a1_ramp` approaching tower base
-
-Unknowns: tower and wall height (3m each? or taller?), exact wall-module
-width (3m assumed, needs confirmation).
-
-## Calibration notes — roof system (from 4x8 house iteration 1)
-
-Findings from studying `dwarf_house_a` / `dwarf_house_b` and building
-`test_erebor_house_4x8.xml`:
-
-### Roof piece roles (corrected)
-
-| Mesh | Actual role | DON'T use it for |
-|---|---|---|
-| `sm_dw_roof_str_a1` | Pitched slope panel, 3m wide × 3m deep. Use along all 4 eaves. | — |
-| `sm_dw_roof_top_a1` | Ridge cap, 3m long. Sits along the apex at Z = WALL_H + 1.5. | — |
-| `sm_dw_roof_side_str_a1` | Under-ridge strip that alternates with `roof_top_a1` to form a continuous ridge. | — |
-| `sm_dw_roof_side_cor_out_a1` | **Eave trim** — placed at Z=WALL_H along the wall-top edges | — |
-| `sm_dw_roof_cor_tri_a1` | **Interior valley fill** — where two roof slopes meet at an inner 90° corner | ❌ NOT for outer hip corners of a simple rectangular roof |
-| `sm_dw_roof_cor_in_*` | **Inside corner** — roof valley fold | — |
-| `sm_dw_roof_cor_out_*` | **Outside corner panel** for L-shaped buildings | — |
-
-### Simple rectangular hip roof (the 4x8 pattern)
-
-For a `W × L` tile rectangle with long axis = Y:
-
-1. **Long-side slopes (E + W)**: `sm_dw_roof_str_a1` at Z=WALL_H, every 3m along Y,
-   placed at X = ±half_w, rotations ±π/2.
-2. **Short-end hip slopes (N + S)**: `sm_dw_roof_str_a1` at Z=WALL_H, every 3m along X,
-   placed at Y = ±half_l, rotations 0 and π.
-3. **Ridge cap** along long axis: `sm_dw_roof_top_a1` at Z=WALL_H+1.5, X=0,
-   spanning the inner length (Y from -(half_l − TILE) to +(half_l − TILE)) —
-   **ridge is shorter than the building by one tile on each end** to leave
-   room for the short-end hip slopes.
-4. **NO `roof_cor_tri_a1` at outer building corners** — this is for interior valley
-   corners (like an L-shaped roof plan), not outer hips.
-5. **Eave trim** (optional): `roof_side_cor_out_a1` along long-side eaves.
-
-### Hip-roof overhang
-
-Placing `roof_str_a1` AT the wall line (X = ±half_w for E/W) produces a
-roughly 1.5m overhang past the wall, because the panel's pivot sits at its
-centre. This matches `dwarf_house_b`'s authored roof and is intentional.
-
-### Decorative conventions from `dwarf_house_b`
-
-- Base beams `_wall_beam_3m_b` at Z=0 along the outside of each wall.
-- Top beams `_wall_beam_3m_c` at Z=3 along the outside of each wall.
-- Column tops (`_wall_clmn_top_*`) with scale `1.1, 1.1, 1.1` or `1.5, 1.5, 1.2`
-  at 0.524 rad (30°) rotations at corners.
-- `_trim_corner_a1` at Z=4.4 is used INSIDE a roof valley, not along outer eaves.
-
-## Calibration notes — corner pieces, trim studs, roof decoration
-
-From close-up interior + exterior + roof shots of `dwarf_house_b`:
-
-### `sm_dw_wall_3m_corn_a` = DIAGONAL bevel wall, not a 90° corner reinforcement
-
-This is a **45°-rotated wall panel** meant to span a **chamfered corner**.
-Using it at a 90° outer corner produces wrong geometry (the diagonal panel
-sticks out past the orthogonal walls).
-
-**Correct usage:** replace the last 1.5m of one wall AND the first 1.5m of
-the perpendicular wall with a single `corn_a` piece at 45°, creating an
-octagonal footprint. The matching floor tile `sm_dw_ground_3m_a1_corner`
-fills the chamfered floor area.
-
-**For a purely rectangular building:** do NOT use `corn_a` at all. Let plain
-`sm_dw_wall_3m_a/b/c` walls butt up directly at the 90° corners. This is
-what the calibration hut used and it worked.
-
-**For an octagonal (chamfered-rectangle) building:** the 4 outer corners
-each get a `corn_a` diagonal wall + a `_ground_3m_a1_corner` floor tile.
-Rotations appear to follow 0 / -π/2 / π / +π/2 going CW (verify per build).
-
-### `sm_dw_ground_trim_corner_a1` = decorative STUD, not an L-corner tile
-
-Small square capstone / nub. Sits at the grid intersection where two trim
-strips cross. **Place at tile-boundary intersections** (at X = multiples of
-TILE and Y = multiples of TILE, starting from the floor centre), NOT at
-outer corners.
-
-Also used on roofs: appears as the capstone where two decorative roof
-strips meet at a roof edge corner. Z should match whatever roof surface
-level you're decorating — e.g., Z=3 for eave-level, Z=4.5 for ridge-level,
-not the fixed 4.4 I was using.
-
-### Roof decoration system (from close-ups of `dwarf_house_b`'s roof)
-
-The roof isn't just `roof_str_*` tiles — it has an overlay decoration:
-
-1. **Base roof**: `sm_dw_roof_str_*` (pitched slate panels) laid over the building.
-2. **Vertical rib strips**: `sm_dw_wall_clmn_3m_*` pieces laid ON the sloped
-   roof, running from eave up to ridge. They divide the slope into bays —
-   3 strips per slope (one per 3m bay if the slope is 9m wide). Rotations
-   follow the slope angle.
-3. **Horizontal edge strips**: `sm_dw_wall_beam_3m_*` along the eave line
-   (wall-top height), and along the ridge.
-4. **Corner capstones**: `sm_dw_ground_trim_corner_a1` studs where strips
-   meet at corners (top of each rib, where eave + rib meet, where ridge +
-   rib meet).
-
-This is what gives the roof its ribbed / framed look in the close-ups.
-
-### `sm_dw_wall_3m_door_a1` = full door wall with built-in arch
-
-The door mesh includes a carved arched doorframe — don't try to compose an
-arch from separate pieces. Just drop the door wall at any wall slot and the
-door geometry is built in.
+- **Confirm the round trip on the first Kit import:** the building should land turned 180 degrees as a whole and otherwise intact.
 
 ## Update rule
 
-Each time a build iteration reveals something new — a pivot quirk, a
-surprising rotation, a mesh whose shape doesn't match the inference — add
-the correction to this file. This doc is the persistent playbook that
-shortens every future build.
+When a build or a Kit import shows something new (a pivot quirk, a rotation, a join that fails),
+add it here with the measurement or render that proves it. Re-run
+`tools/oneoff/blender_catalog_erebor.py` and `tools/oneoff/erebor_catalog_to_md.py` if the kit
+FBX files change.
 
 ---
 

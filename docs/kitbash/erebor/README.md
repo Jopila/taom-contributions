@@ -10,44 +10,53 @@ Reference for the erebor dwarven kit under
 |---|---|
 | [textures.md](textures.md) | Raw `t_dw_*` textures (diffuse/normal/specular/height maps) |
 | [materials.md](materials.md) | `m_dw_*` materials — what textures each one binds and what it's used for |
-| [meshes.md](meshes.md) | `sm_dw_*` meshes — every piece with shape, intended use, and family membership |
-| [design-patterns.md](design-patterns.md) | Composition rules, confirmed calibration data, and ready-to-use building templates |
+| [meshes.md](meshes.md) | Every piece measured: size, pivot, slope, openings, LODs, collision body |
+| [design-patterns.md](design-patterns.md) | The frame rule, the tested join matrix and recipes from the authored buildings |
 | [runes.md](runes.md) | Dwarven rune pieces — carved wall/trim meshes and their texture pipeline |
+| [blender-build-prompt.md](blender-build-prompt.md) | Claude Code prompt: measure every piece in Blender, then assemble buildings, with review gates |
 
-## Quick-reference: the A1 / B1 / C1 system
+## Quick reference
 
-The letter suffix on any mesh (`_a1`, `_b1`, `_c1`) is a **material family**.
-The digit is either a shape variant (`_win_a1` / `_a2` / `_a3` = three window
-shapes in A texture) or just an identifier when only one shape exists
-(`_door_a1` is the only A-family door).
+- **Measured, not guessed.** Sizes, pivots, slopes and openings come from headless Blender
+  (2026-10-15); the joins come from the authored TAOM_Map prefabs and were re-tested in Blender.
+- **The frame rule.** The engine sees each Erebor FBX turned 180 degrees about Z from Blender's
+  import. Convert a prefab offset (x, y, z, yaw) to (-x, -y, z, yaw) before using it in Blender.
+  See [design-patterns.md](design-patterns.md).
+- **Letters are per family, not kit-wide.** Wall `_A` is brown brick, `_B` brick with trim, `_C`
+  dressed block with trim; roof letters and digits mean material or size depending on the
+  sub-family. The full table is in [meshes.md](meshes.md) "Material letters". Within one
+  building, keep one wall letter.
+- **Grid and heights.** 3 m plan grid, 3 m storeys, roof pitch 26.57 degrees, eave on the wall
+  centreline at the wall top, castle modules 20 m.
 
-- `_a*` — primary dwarven stonework (clean grey, used on most Erebor builds)
-- `_b*` — weathered brick (rougher, good for older or ruined structures)
-- `_c*` — tertiary variant
+## Kit scope
 
-**Within a single building, stick to one letter** for visual consistency.
-Mixing across letters produces visible texture breaks mid-wall.
-
-## Kit scope — what's in it
-
-| Family | Count | Notes |
+| Family | Pieces | Notes |
 |---|---|---|
-| Ground tiles + trim | ~10 | Floor stonework with raised perimeter trim |
-| Pillars | 4 | Decorative columns, different heights and ornamentation |
-| Wall beams / columns / capitals | ~12 | Decorative overlays for wall faces |
-| Walls (3m modular) | ~30 | Plain / corner / door / window variants in A, B, C textures |
-| Platform (6m) | ~14 | Raised floors with corners, extensions, middles, stairs |
-| Roof | ~30 | Pitched roof system — panels, ridges, side edges, inside/outside corners |
-| Castle tower | ~11 | Defensive tower with crenellations |
-| Castle wall (straight / gate / ramp / stairs) | ~47 | Fortification wall system with merlon toppers |
-| Decoration | 1 | Pile of gold (Smaug's hoard) |
-| Nature (cliffs) | ~24 | Shared nature pieces added for mountainside carving |
-| **Total** | **~164** | Matches `taom_erebor_kitbash.xml` |
+| Ground tiles and floor trim | 10 | 3 m tiles, chamfer half tile, 6 m plinth block, seam trims, studs |
+| Pillars | 4 | Hall scale, 11 to 46 m tall |
+| Platforms | 14 | Terrace blocks: top at z 0, foundations to z -12 |
+| Roof | 28 | Panels, flat deck plates, hip and valley corners, chamfer facets, gable wedges, strips |
+| Wall overlays | 12 | Beams, columns, capitals |
+| Walls | 24 | 3 m plain, chamfer corner, door and window walls in A, B, C |
+| Decoration | 1 | Gold pile |
+| Castle | 47 | Straight wall, gate, ramp, wall stairs, two towers, tower interior, bastion, 39 merlons |
+| Unit-size props | 5 | Moria pillar, broken pillar, wall fragment, two statues; never placed in a prefab |
+| **Total** | **145** | In the 12 source FBX files. `taom_erebor_kitbash.xml` also places shared `sm_nat_*` cliffs |
 
 ## Related files
 
-- Kitbash prefab: `Modules/TAOM_Map/Prefabs/taom_erebor_kitbash.xml` (164 entries)
-- Source FBX: `Modules/TAOM_Map/AssetSources/Scenes/erebor/{meshes,walls}/*.fbx`
-- Packaged meshes: `Modules/TAOM_Map/Assets/Scenes/erebor/{meshes,walls}/*_geo.tpac`
-- Build tool: `tools/build_erebor_kitbash.py`
+- Kitbash prefab: `Modules/TAOM_Map/Prefabs/taom_erebor_kitbash.xml`: 184 entries, of which
+  164 are single pieces (140 `sm_dw_*`, 24 `sm_nat_*`) and 20 are composed buildings such as
+  `dwarf_house_a`, `dwarf_house_b`, `dwarf_barracks` and `dwarf_castle_wall_c`
+- Source FBX: `Modules/TAOM_Map/AssetSources/Scenes/erebor/{meshes,walls,statues}/*.fbx`
+- Packaged meshes: `Modules/TAOM_Map/Assets/Scenes/erebor/{meshes,walls,statues}/*_geo.tpac`
+- Measure the kit: `tools/oneoff/blender_catalog_erebor.py`, then `tools/oneoff/erebor_catalog_to_md.py`
+- Mine the authored joins: `tools/oneoff/mine_erebor_prefab_joins.py`
+- Rebuild an authored prefab in Blender: `tools/oneoff/blender_render_erebor_prefab.py`
+- Test join rules: `tools/oneoff/blender_test_erebor_joins.py`
+- Assemble, export and probe whole buildings: `tools/oneoff/blender_assemble_erebor_buildings.py`,
+  `tools/oneoff/blender_probe_erebor_building.py`, `tools/oneoff/fbx_frame_compare.py`; see
+  [erebor-buildings.md](../erebor-buildings.md)
+- Exported buildings: `Modules/TAOM_Map/AssetSources/Scenes/erebor/buildings/*.fbx`
 - FBX mesh lister: `tools/list_fbx_objects_all.py`

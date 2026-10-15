@@ -9,7 +9,8 @@ outside the editor without re-learning the asset layout every time.
 
 | Kit | Location | Coverage |
 |---|---|---|
-| Erebor (dwarven) | [erebor/](erebor/) | Full — textures, materials, meshes, design patterns |
+| Erebor (dwarven) | [erebor/](erebor/) | Full, measured 2026-10-15: every one of the 145 pieces (size, pivot, slope, openings, LODs, collision body), the frame rule (the engine reads each Erebor FBX turned 180 degrees about Z from Blender's import), the join matrix tested in Blender and recipes taken from the authored prefabs |
+| Erebor buildings | [erebor-buildings.md](erebor-buildings.md) | Whole buildings assembled from the Erebor kit and exported as one FBX each (base, `.lod3`, `.lod6`, `bo_`), #797: the pipeline, the export proof for the frame rule, the probe stack. First building `erebor_dwarf_house_01` exported 2026-10-15 |
 | Mirkwood (elven) | — | Not catalogued yet (referenced in `taom_mirkwood_kitbash.xml`) |
 | Gondor | — | Not catalogued yet (referenced in `taom_gondor_kitbash.xml`). 2026-07-28: added harbor ships `sm_gondor_ship_{cog,longship,war}_001` (Tripo AI sources, 1.9M→40k decimation + chart re-UV + high-to-low rebake) + `t_gondor_ship_<name>_{d,n,s}` under `Scenes/Gondor/ships/{,textures/}` — pipeline: [ue-to-bannerlord-asset-pipeline.md](../reference/ue-to-bannerlord-asset-pipeline.md) § Single-prop path. |
 | Lond Cirion walls | [lond-cirion-walls.md](lond-cirion-walls.md) | Full — 8 ploppable sections (L, gatehouse straight, straight, kinks, gate court, sweep, the assembled ring with open siege frontage) composed programmatically from the Gondor castle L3 pieces; registration facts, the three composition laws, assembler workflow. |

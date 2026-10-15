@@ -3680,3 +3680,28 @@ frame and none at the stance, and the elk walk-back's front hooves likewise.
 - **Prevent:** `plant_start` keeps only contacts at least half as long as the hoof's longest and takes the
   earliest of those, the loop read as a circle.
 - **Source:** [rca-wildmesh-mounts-2026-10-15.md](../rca-wildmesh-mounts-2026-10-15.md) row 11.
+
+### A kit catalog written from thumbnails is a hypothesis: measure it before building on it (#797, 2026-10-15)
+`docs/kitbash/erebor/` described the Erebor kit from rendered thumbnails. Measured in Blender, 14 of its claims were
+wrong in ways that break a building: the castle wall module is 20 m, not 3 m; the castle tower is square, not round;
+`Roof_Top` is a flat deck plate, not a ridge cap; `Roof_Cor_Tri` is the facet over a chamfered corner, not a valley
+fill; the wall letters are not one material family across the kit; `Pillar_A` is 46 m tall, not short.
+- **Why missed:** a thumbnail shows shape but not size, pivot, slope or which way a piece rises, and the catalog was
+  never checked against the authored buildings that use the pieces.
+- **Prevent:** before composing from a kit, measure every piece (`tools/oneoff/blender_catalog_erebor.py`: bounds,
+  pivot, slopes, openings by ray grid) and mark each catalog claim measured or inferred.
+- **Source:** issue #797; `docs/kitbash/erebor/meshes.md` "What the old catalog got wrong".
+
+### Prove a kit's import frame against authored placements before reusing their offsets (#797, 2026-10-15)
+The engine reads every Erebor source FBX turned 180 degrees about Z from Blender's FBX import. Offsets read from the
+TAOM_Map prefabs and used as-is in Blender splay the roof panels outward: `dwarf_house_b` rebuilt at 21.1 x 15.1 m
+instead of a closed 15.8 x 10.0 m hall. The 1.5 m hip corner rising toward its panel row and the bastion landing on
+the merlon face only work with the rotation.
+- **Why missed:** a single piece looks right in any frame; only a join between two asymmetric pieces shows the error,
+  and nobody had rebuilt an authored building outside the editor.
+- **Prevent:** rebuild one or two authored prefabs in Blender under each frame reading
+  (`tools/oneoff/blender_render_erebor_prefab.py --mode both`) and keep the one that closes. For an export, compare
+  its raw storage with the kit source (`tools/oneoff/fbx_frame_compare.py`: axis header, node transform, vertex
+  bounds) so the engine is known to read both the same way.
+- **Source:** issue #797; `docs/kitbash/erebor/design-patterns.md` "The frame rule",
+  `docs/kitbash/erebor-buildings.md`.
