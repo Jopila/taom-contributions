@@ -1116,6 +1116,43 @@ class ValidationTests(unittest.TestCase):
                 {"type": "TroopTraining", "magnitude": 15, "troop_class": "Infantry"}]
         self.assertFalse(has(self.errors(mutate), "troop_class"))
 
+    def class_errors(self, slot, classes, archetype="infantry", where="fork"):
+        def mutate(s):
+            s["careers"][0]["archetype"] = archetype
+            effects = [{"type": "TroopDamage", "magnitude": 0.08, "troop_class": classes}]
+            if where == "root":
+                s["careers"][0]["root"]["effects"] = effects
+            else:
+                s["careers"][0]["forks"][slot - 1]["options"][0]["effects"] = effects
+        return [e for e in self.errors(mutate) if "troop_class" in e and "archetype" in e]
+
+    def test_rule3_a_class_effect_in_slot_1_5_or_6_must_name_the_archetypes_class(self):
+        for slot in (1, 5, 6):
+            with self.subTest(slot=slot):
+                errs = self.class_errors(slot, "Ranged")
+                self.assertTrue(has(errs, f"slot {slot}", "Ranged", "infantry"), errs)
+
+    def test_rule3_a_class_list_that_adds_another_class_is_refused_in_the_locked_slots(self):
+        self.assertTrue(self.class_errors(1, "Infantry,Ranged"))
+
+    def test_rule3_the_archetypes_own_class_passes_in_the_locked_slots(self):
+        for archetype, cls in (("infantry", "Infantry"), ("ranged", "Ranged"), ("cavalry", "Cavalry")):
+            for slot in (1, 5, 6):
+                with self.subTest(archetype=archetype, slot=slot):
+                    self.assertEqual(self.class_errors(slot, cls, archetype), [])
+
+    def test_rule3_a_ranged_career_is_refused_an_infantry_class_in_slot_1(self):
+        self.assertTrue(self.class_errors(1, "Infantry", "ranged"))
+
+    def test_rule3_slots_2_to_4_and_the_root_take_any_class(self):
+        for slot in (2, 3, 4):
+            with self.subTest(slot=slot):
+                self.assertEqual(self.class_errors(slot, "Ranged"), [])
+        self.assertEqual(self.class_errors(1, "Ranged", where="root"), [])
+
+    def test_rule3_naming_every_class_is_not_a_class_filter(self):
+        self.assertEqual(self.class_errors(1, "Infantry,Ranged,Cavalry"), [])
+
     def test_rule3_types_added_to_the_enum_later_are_picked_up(self):
         root = Path(tempfile.mkdtemp(prefix="gcf-system-"))
         self.addCleanup(lambda: __import__("shutil").rmtree(root, ignore_errors=True))
@@ -1632,12 +1669,13 @@ class TreeVersionGateTests(unittest.TestCase):
         return spec
 
     def class_spec(self, classes, magnitude):
-        """Fork 5 option a is a TroopTraining pip: 15 narrowed to one class, or 10 for every class, is 5 VU."""
+        """Fork 3 option a is a TroopTraining pip: 12 narrowed to one class, or 8 for every class, is 4 VU (fork 3
+        takes any class; forks 1, 5 and 6 must name the archetype's own)."""
         spec = good_spec()
         effect = {"type": "TroopTraining", "magnitude": magnitude}
         if classes is not None:
             effect["troop_class"] = classes
-        spec["careers"][0]["forks"][4]["options"][0]["effects"] = [effect]
+        spec["careers"][0]["forks"][2]["options"][0]["effects"] = [effect]
         return spec
 
     def test_g1_a_mask_change_at_the_same_tree_version_is_refused(self):
@@ -1653,9 +1691,9 @@ class TreeVersionGateTests(unittest.TestCase):
                 self.assertEqual(fix.snapshot(), before)
 
     def test_g1_a_class_change_at_the_same_tree_version_is_refused(self):
-        for (old, old_mag), (new, new_mag) in (((None, 10), ("Infantry", 15)), (("Infantry", 15), ("Cavalry", 15)),
-                                               (("Infantry", 15), ("Infantry,Ranged", 15)),
-                                               (("Infantry", 15), (None, 10))):
+        for (old, old_mag), (new, new_mag) in (((None, 8), ("Infantry", 12)), (("Infantry", 12), ("Cavalry", 12)),
+                                               (("Infantry", 12), ("Infantry,Ranged", 12)),
+                                               (("Infantry", 12), (None, 8))):
             with self.subTest(old=old, new=new):
                 fix = self.applied(self.class_spec(old, old_mag))
                 before = fix.snapshot()
@@ -1684,9 +1722,9 @@ class TreeVersionGateTests(unittest.TestCase):
                 self.assertIn('tree_version="2"', fix.lf(fix.careers_path))
 
     def test_g1_respelling_a_class_is_not_structural(self):
-        for (old, old_mag), (new, new_mag) in (((None, 10), ("Infantry,Ranged,Cavalry", 10)),
-                                               (("Infantry,Ranged,Cavalry", 10), ("cavalry | ranged, infantry", 10)),
-                                               (("Infantry,Cavalry", 15), ("cavalry, infantry", 15))):
+        for (old, old_mag), (new, new_mag) in (((None, 8), ("Infantry,Ranged,Cavalry", 8)),
+                                               (("Infantry,Ranged,Cavalry", 8), ("cavalry | ranged, infantry", 8)),
+                                               (("Infantry,Cavalry", 12), ("cavalry, infantry", 12))):
             with self.subTest(old=old, new=new):
                 fix = self.applied(self.class_spec(old, old_mag))
                 fix.write_spec(self.class_spec(new, new_mag))

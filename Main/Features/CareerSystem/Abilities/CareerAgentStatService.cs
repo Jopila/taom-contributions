@@ -382,8 +382,8 @@ public class CareerAgentStatService : ICareerAgentStatService
         // TroopDamage — the attacker is a non-hero troop whose party leader took the passive. The
         // exact mirror of TroopResistance on the reduction path, and mutually exclusive with the
         // hero Damage above (the boundary returns null here for a hero attacker). Gated on the hit's
-        // mask and the troop's class (#769 E9); the shipped pips carry neither attack_type_mask nor
-        // troop_class, so today it is still a flat army-wide multiplier.
+        // mask and the troop's class (#769 E9): the Gondor fork pips name a class, and a pip that carries
+        // neither attack_type_mask nor troop_class is still a flat army-wide multiplier.
         //
         // #395 — before this, TroopDamage's only consumer was TaomRaidModel.CalculateHitDamage,
         // i.e. how fast a village burns, so 105 pips promising "+N% troop damage" were inert in

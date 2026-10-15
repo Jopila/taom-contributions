@@ -226,14 +226,16 @@ public class CareerChoicesIntegrationTests
     [TestMethod]
     public void RealChoicesXml_EveryTroopClass_ParsesAndSitsOnAClassFilteredType()
     {
-        // #769 E9. Vacuous today (no shipped pip carries troop_class), and meant to stay so until one does:
-        // an unparseable troop_class DROPS its passive at load (fail closed), and a troop_class on a type
-        // no consumer passes a class for is ignored, so a typo or a misplaced attribute must fail here
-        // instead of shipping a pip that silently does nothing or widens to the whole army.
+        // #769 E9, live since the Gondor pilot (C2). An unparseable troop_class DROPS its passive at load
+        // (fail closed), and a troop_class on a type no consumer passes a class for is ignored, so a typo or
+        // a misplaced attribute must fail here instead of shipping a pip that silently does nothing or
+        // widens to the whole army. The classed count guards the scan against going stale.
         var xml = XDocument.Load(Path.Combine(ModuleDataPath, "career_system", "taom_career_choices.xml"));
         var problems = new System.Collections.Generic.List<string>();
+        var classed = 0;
         foreach (var el in xml.Descendants("PassiveEffect").Where(e => e.Attribute("troop_class") != null))
         {
+            classed++;
             var id = (string?)el.Ancestors("Choice").FirstOrDefault()?.Attribute("id") ?? "(unknown)";
             if (!TroopClassMapper.TryParse((string?)el.Attribute("troop_class"), out _))
                 problems.Add($"{id}: troop_class '{(string?)el.Attribute("troop_class")}' does not parse (passive dropped)");
@@ -242,6 +244,7 @@ public class CareerChoicesIntegrationTests
                 problems.Add($"{id}: troop_class on a type that reads no class ({(string?)el.Attribute("type")})");
         }
 
+        Assert.IsTrue(classed > 0, "no shipped pip carries a troop_class: the scan found nothing to check, so it is stale");
         Assert.AreEqual(0, problems.Count, string.Join("; ", problems));
     }
 

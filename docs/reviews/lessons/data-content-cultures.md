@@ -1967,3 +1967,14 @@ Arthedain's Arnor armour is tagged Gondor and its Númenórean blades untagged, 
 - **Why missed:** `FactionRosterAdapter` documented `NotableTemplates` as the spawn pool, so the vanilla templates looked unreachable; and the vanilla templates silently filled gaps (two cultures, all women) that no test measured.
 - **Prevent:** `VanillaWandererTemplateTransformTests` pins the retag and that `lords` registers ahead of every TAOM wanderer file; `tools/tests/test_complete_lords_xslt.py` keeps the generator emitting it; `RenamedCultureWandererListTests` checks the XSLT cultures list their wanderers. Before removing vanilla content from a pool, count what each culture keeps without it.
 - **Source:** #758, #761, #762; `docs/reviews/rca-vanilla-wanderers-2026-10-08.md`.
+
+### A generated option's text is checked against its consumer, not only its numbers (#769 C2, 2026-10-15)
+The career forks generator prices every option and validates its types, but the text a player reads came
+from the plan's drafting language. In the Gondor pilot one option promised knockdown resistance against
+charges that Combat Mechanics decides before any resistance is read, two named Castar where the resource
+follows the player's kingdom, and one said "shields" where weapon parries count too.
+- **Why missed:** the balance gate checks magnitudes and types; nothing reads the words.
+- **Prevent:** before a kingdom's review table is approved, read each option's description against its
+  effect type's line in `CareerPerkConsumerMap.Describe` and the traps in `docs/features/career-system.md`
+  (forced and heavy-charge knockdowns, the kingdom-first resource, influence outside a kingdom).
+- **Source:** `docs/reviews/rca-career-gondor-pilot-2026-10-15.md` pattern.

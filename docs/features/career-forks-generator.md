@@ -154,7 +154,7 @@ Every error is listed; nothing is written if any exist.
 |---|---|
 | 1 | Schema: required fields and types, six forks, slots once each, 2 or 3 options, at most 2 effects, a root with one or two effects, keystone mutations from the rules' property list with a value above 0, an explicit `vu` on a keystone |
 | 2 | The career exists in `taom_careers.xml` and the spec's `culture_ids` equal its `EligibleCultures` (any order); ids and lists are type-checked |
-| 3 | The type is in `PassiveEffectType.cs`, is `Consumed`, and is not banned; `attack_type_mask` names exist, sit only on mask-gated types, and on `TroopDamage` and `TroopResistance` (the rules' `mask_forbidden`) may only be `All`, because `CareerChoicesIntegrationTests` bans a narrower mask there until the Active Effects panel can show masks; `troop_class` is valid and only on class-filtered types; no effect is a penalty |
+| 3 | The type is in `PassiveEffectType.cs`, is `Consumed`, and is not banned; `attack_type_mask` names exist, sit only on mask-gated types, and on `TroopDamage` and `TroopResistance` (the rules' `mask_forbidden`) may only be `All`, because `CareerChoicesIntegrationTests` bans a narrower mask there until the Active Effects panel can show masks; `troop_class` is valid and only on class-filtered types; in fork slots 1, 5 and 6 a class-filtered effect may name only the career's own archetype class (infantry: Infantry, ranged: Ranged, cavalry: Cavalry), while slots 2 to 4 and the root take any class; no effect is a penalty |
 | 4 | A `SpecialResource*` type needs a resource derived from the data; `SpecialResourceUpkeepModifier` also needs an upkeep troop of the career's own cultures (see "Upkeep troops") |
 | 5 | `point_levels` has one entry per fork, strictly ascending and positive; `tree_version` is at least 2 |
 | 6 | Balance: option value units (VU) within `budget_tolerance` of the tier budget, options of one fork within `fork_spread_tolerance` of each other |
@@ -223,7 +223,7 @@ fix the cache, check the override files).
 |---|---|
 | `tools/generate_career_forks.py` | the generator; its docstring is the CLI reference |
 | `tools/career_design/_rules.json` | balance numbers, bans, caps, the sign list |
-| `tools/career_design/<spec-name>.json` | one kingdom's spec (first real spec is a later step) |
+| `tools/career_design/<spec-name>.json` | one kingdom's spec (`gondor.json` is the first, since C2) |
 | `tools/tests/test_generate_career_forks.py` | unittest suite on temporary fixtures and a synthetic CareerSystem folder |
 | `tools/tests/test_translate_seed_only.py` | the `--seed-only` translator mode builds no client |
 | `Main/_Module/ModuleData/career_system/taom_careers.xml`, `taom_career_choices.xml` | the generated files |
@@ -242,7 +242,7 @@ input that must produce errors and not exceptions, and the plan's worked example
 Read-only classes check the shipped rules against the real C# (every consumed type has a unit,
 flat units are counts, the rules name no unknown type) and run `--check` for every spec in
 `tools/career_design/` against the shipped XML, plus: every marker career id belongs to a spec and
-no career is in two specs (skipped with a message while no spec exists). Run
+no career is in two specs (these run on `gondor.json` since C2). Run
 `python -m unittest discover -s tools/tests -t .`.
 
 ## How to write a kingdom
@@ -261,6 +261,8 @@ no career is in two specs (skipped with a message while no spec exists). Run
 `avanc_luth_raider`, `watchman_of_stangard`) replaces those pips, so update that test in the same
 batch.
 
+**Left in place until C5.** C2 replaces the three Gondor careers' choice text with `taom_cf_*` keys, but the 111 old Gondor keys stay: 93 descriptions in `taom_career_strings.xml`, 18 group names in `taom_module_strings.xml`, their rows in the 24 language files (`std_taom_career_strings_*.xml` and `std_taom_module_strings_*.xml`), the translation caches and `tools/career_group_names.json`. C5 must remove the English registrations first, then the language rows, the caches and the JSON entries. Deleting the language rows while the English remains turns `LanguageFileCoverageTests` red, and `--seed-only` re-creates them.
+
 ## Changelog
 
 - 2026-10-14: first version (C1 of the #769 career redesign), tests only, no kingdom spec yet.
@@ -270,6 +272,9 @@ batch.
   versioned (`v2-`), the marker hash covers the recorded attributes, upkeep troops are counted by
   NPCCharacter culture, the second rename rolls back, `IsFlat` has a strict grammar, duplicate resource
   ids are refused, upgrade-cost caps (0.5), and next steps that work in both shells.
+- 2026-10-15: C2, the Gondor pilot (`tools/career_design/gondor.json`, the first spec), and the archetype class rule for
+  fork slots 1, 5 and 6. Text edits after the review keep `tree_version`; the 15 changed keys were substituted by
+  hand in the 12 language files, which still held the old English seed.
 
 ## GitHub Issue
 

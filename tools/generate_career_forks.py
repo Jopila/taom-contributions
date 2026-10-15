@@ -111,7 +111,10 @@ is the worst build; attack_type_mask and troop_class are not discounted. The upg
 (TroopUpgradeCost, SpecialResourceUpgradeCostModifier) are capped at 0.5 of benefit: TroopUpgradeCost has no
 runtime floor, so a cut past -1 would give a negative upgrade price.
 
-The first real kingdom spec is written by a later step; the tests use temporary fixtures only.
+A class-filtered effect in fork slots 1, 5 and 6 may name only the career's own archetype class (infantry ->
+Infantry, ranged -> Ranged, cavalry -> Cavalry); slots 2 to 4 and the root take any class.
+
+tools/career_design/gondor.json is the first real spec; the tests use temporary fixtures.
 """
 import argparse
 import hashlib
@@ -143,6 +146,9 @@ TEMP_SUFFIX = ".gcf-new"
 # a real edit of the tree.
 SHAPE_VERSION = "v2"
 DEFAULT_TROOP_CLASSES = ("Infantry", "Ranged", "Cavalry")
+# Fork slots whose class-filtered effects must name only the career's own archetype class (infantry ->
+# Infantry, ranged -> Ranged, cavalry -> Cavalry). Slots 2 to 4 and the root take any class.
+ARCHETYPE_CLASS_SLOTS = (1, 5, 6)
 GUIDE = "docs/localization/TRANSLATOR_GUIDE.md"
 # The twelve language folders under Languages/, as translate_with_claude.LANGUAGES keys it (a test pins this).
 TRANSLATOR_LANGS = ["BR", "CNs", "CNt", "DE", "FR", "IT", "JP", "KO", "PL", "RU", "SP", "TR"]
@@ -722,6 +728,18 @@ def check_option(option, where, rules, cs, ctx, errors):
     return len(errors) == start
 
 
+def check_archetype_class(option, slot, archetype, where, rules, errors):
+    """Slots 1, 5 and 6 may narrow an effect to the career's own class only."""
+    if slot not in ARCHETYPE_CLASS_SLOTS or not isinstance(archetype, str):
+        return
+    for i, effect in enumerate(option.get("effects", []), 1):
+        if narrowed(effect, rules) and {t.lower() for t in split_tokens(effect["troop_class"])} != {archetype}:
+            errors.append(f"{where} effect {i}: troop_class '{effect['troop_class']}' in slot {slot} must be "
+                          f"only the career's archetype class ({archetype}); slots "
+                          f"{', '.join(str(n) for n in range(1, 7) if n not in ARCHETYPE_CLASS_SLOTS)} "
+                          f"and the root take any class")
+
+
 def check_budget(vu, tier, where, rules, errors):
     budget = rules["tier_budget"][str(tier)]
     tolerance = rules["budget_tolerance"]
@@ -804,6 +822,8 @@ def validate_career(career, spec_cultures, rules, careers, cs, data, errors):
             wo = f"{wf} option {LETTERS[i]}"
             ok = check_option(option, wo, rules, cs, ctx, errors)
             all_options_ok = all_options_ok and ok
+            if ok:
+                check_archetype_class(option, slot, career.get("archetype"), wo, rules, errors)
             if not ok or expected_tier is None:
                 continue
             try:
