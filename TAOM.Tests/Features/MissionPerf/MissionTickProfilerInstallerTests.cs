@@ -45,7 +45,7 @@ public class MissionTickProfilerInstallerTests
     // so these cases exercise the success path rather than the probe installer's catch (review 041).
     private static Func<string, bool> Apply(bool result, int onTickSites, int onPreTickSites) => category =>
     {
-        if (category == HitchProbeInstaller.Category)
+        if (category == HitchProbeInstaller.Category || category == HitchProbeInstaller.CameraCategory)
             return true;
         Assert.AreEqual(MissionTickProfilerInstaller.Category, category);
         MissionTickProfilerHooks.OnTickSites = onTickSites;

@@ -4,11 +4,11 @@ using System.Diagnostics;
 namespace TAOM.Features.MissionPerf.Hooks;
 
 /// <summary>
-/// The Patch98 hitch probe's brackets (plan 041): a prefix and a finalizer around five whole engine methods
+/// The Patch98 hitch probe's brackets (plan 041): a prefix and a finalizer around six whole engine methods
 /// feed the open frame of <see cref="MissionTickProfilerHooks.Profiler"/>; thin (ADR-002). Each bracket reads
 /// the profiler once and returns when there is none or it is not measuring; an open bracket is a <c>bool</c>,
 /// never a 0 stamp. A fault turns that part off for the process with one ERROR line and never throws into the
-/// engine. Pre-tick, wait and on-tick run on the main thread; spawn checks its thread (.Spawn.cs); script
+/// engine. Pre-tick, wait, on-tick and camera run on the main thread; spawn checks its thread (.Spawn.cs); script
 /// runs from any thread (.Script.cs). Every enter hands its own call a <see cref="ProbeState"/> first and every
 /// exit reads it, so a finalizer that runs without its prefix is told apart from one whose prefix returned early,
 /// whichever thread or nesting level it runs on (.Diagnostics.cs).
@@ -142,6 +142,7 @@ public static partial class HitchProbeHooks
         _preTickStart = _waitStart = _onTickStart = 0;
         _waitUnseenFrames = 0;
         ResetDiagnosticsForTests();
+        ResetCameraForTests();
         ResetSpawnForTests();
         ResetScriptForTests();
     }

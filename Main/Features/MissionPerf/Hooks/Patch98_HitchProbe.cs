@@ -2,6 +2,7 @@ using HarmonyLib;
 using TaleWorlds.Core;
 using TaleWorlds.Engine;
 using TaleWorlds.MountAndBlade;
+using TaleWorlds.MountAndBlade.View.Screens;
 
 namespace TAOM.Features.MissionPerf.Hooks;
 
@@ -10,9 +11,10 @@ namespace TAOM.Features.MissionPerf.Hooks;
 // brackets only, no transpiler: each class is a void prefix at Priority.First and a void finalizer at
 // Priority.Last, each taking only Harmony's __state (out on the prefix, ref on the finalizer), so the bracket
 // encloses every other patch on the method (Patch23 on SpawnAgent, Patch97 on OnTick) and still closes when the
-// method throws (its void finalizer leaves the exception alone; on the three shielded targets PatchShield's
+// method throws (its void finalizer leaves the exception alone; on the four shielded targets PatchShield's
 // value-returning finalizer makes Harmony throw, and RethrowStackPreserver keeps the trace). Verified on the
-// installed v1.5.3, none of them virtual:
+// installed v1.5.3, none of them virtual (the sixth, below, is a sealed explicit interface implementation,
+// verified on v1.5.5):
 //   private void Mission.WaitTickCompletion(): `while (!tickCompleted) Thread.Sleep(1);`, called first in
 //     OnPreTick; 17 bytes with a loop, so the JIT may inline it into OnPreTick, which the probe detects.
 //   [MBCallback] internal void Mission.OnPreTick(float dt): raised by native from Mission.Tick on the main
@@ -24,9 +26,16 @@ namespace TAOM.Features.MissionPerf.Hooks;
 //     is native's choice and is logged at run time (HitchProbeHooks.Script.cs).
 //   public Agent Mission.SpawnAgent(AgentBuildData, bool, Equipment, ItemObject): the only overload; the main
 //     thread per .claude/rules/harmony-patches.md, checked at run time; calls nest through OnAgentBuild.
+//   void MissionScreen.IMissionSystemHandler.UpdateCamera(Mission, float): main thread, called from Mission.OnTick;
+//     CameraTick, then the native MBWindowManager.PreDisplay(). A private final virtual explicit implementation,
+//     so it is named with its interface prefix and a sealed one cannot be bypassed by an override (a mod that
+//     re-implements the interface is not bracketed). It is its own category (Patch98_HitchProbe_Camera),
+//     applied by HitchProbeInstaller only after Patch98 applies, so a failure of it costs only cameraMs (the
+//     category apply logs `[PatchApply] ... FAILED` and joins the game-initialization notice, a red chat line).
 // PatchShield (decision D13, 2026-10-03): WaitTickCompletion and TickComponents stay on
 // PatchShieldPolicy.ExcludedTargetMethods; OnPreTick, OnTick and SpawnAgent are shielded again (HitchProbeBindingTests
-// walks all five). The shield strips a shielded owner's prefixes after a missing-API exception and never its
+// walks all six). UpdateCamera was never excluded: its shielding is the decision of 2026-10-15 (#809).
+// The shield strips a shielded owner's prefixes after a missing-API exception and never its
 // finalizers, so a finalizer here can run with no prefix before it. Each call therefore carries its own
 // ProbeState through __state (Harmony starts it at PrefixMissing in every call, each prefix sets Entered before any
 // code that can throw (OnPreTick's runs the frame boundary first, which catches its own faults), the finalizer
@@ -101,4 +110,17 @@ public static class Mission_SpawnAgent_HitchProbe_Patch
     [HarmonyFinalizer]
     [HarmonyPriority(Priority.Last)]
     public static void Finalizer(ref ProbeState __state) => HitchProbeHooks.OnSpawnExit(ref __state);
+}
+
+[HarmonyPatch(typeof(MissionScreen), "TaleWorlds.MountAndBlade.IMissionSystemHandler.UpdateCamera", new[] { typeof(Mission), typeof(float) })]
+[HarmonyPatchCategory("Patch98_HitchProbe_Camera")]
+public static class MissionScreen_UpdateCamera_HitchProbe_Patch
+{
+    [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
+    public static void Prefix(out ProbeState __state) => HitchProbeHooks.OnCameraEnter(out __state);
+
+    [HarmonyFinalizer]
+    [HarmonyPriority(Priority.Last)]
+    public static void Finalizer(ref ProbeState __state) => HitchProbeHooks.OnCameraExit(ref __state);
 }

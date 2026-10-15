@@ -9,16 +9,18 @@ using NSubstitute;
 using TAOM.Core.Logging;
 using TAOM.Features.MissionPerf;
 using TAOM.Features.MissionPerf.Hooks;
+using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.MissionPerf;
 
 /// <summary>
-/// One simulated battle frame through all five REAL Patch98 classes, attached by Harmony to dummy methods that
-/// stand in for the engine's: the pre-tick with the wait inside it, the on-tick, the script tick and two spawns.
+/// One simulated battle frame through all six REAL Patch98 classes, attached by Harmony to dummy methods that
+/// stand in for the engine's: the pre-tick with the wait inside it, the on-tick, the script tick, two spawns and,
+/// in its own test, the camera call inside an on-tick.
 /// Each dummy burns a known time on the probe's own clock, so each bracket's own column must read at least that,
 /// the counts must be exact, and the frame must write no warning and no error. This is the default-run check of
 /// which hook each class calls: <c>HitchProbeHooksTests</c> calls every hook by hand, <c>HitchProbePrefixGuardTests</c>
-/// attaches only the on-tick and spawn classes, and the overhead benchmark, the one other place that attaches the
+/// attaches only the on-tick, spawn and camera classes, and the overhead benchmark, the one other place that attaches the
 /// wait, pre-tick and script classes, is opt-in. Without this test, a class that called the wrong hook (the script
 /// finalizer calling the spawn exit, say) would pass every default test.
 /// </summary>
@@ -34,6 +36,7 @@ public class HitchProbeSimulatedFrameTests
     private const int OnTickMs = 3;
     private const int ScriptMs = 4;
     private const int SpawnMs = 5;
+    private const int CameraMs = 6;
 
     private IModLogger _logger = null!;
     private Harmony _harmony = null!;
@@ -63,6 +66,17 @@ public class HitchProbeSimulatedFrameTests
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void DummySpawn() => Burn(SpawnMs);
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void DummyCamera() => Burn(CameraMs);
+
+    // The on-tick with the camera call inside it, the way Mission.OnTick calls UpdateCamera.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void DummyOnTickWithCamera()
+    {
+        Burn(OnTickMs);
+        DummyCamera();
+    }
 
     [TestInitialize]
     public void Setup()
@@ -126,6 +140,31 @@ public class HitchProbeSimulatedFrameTests
         Assert.IsTrue(window.ScriptTickMs >= ScriptMs, "script bracket, scriptTickMs: " + window.ScriptTickMs);
         Assert.AreEqual(2, window.Spawns, "spawn bracket, spawns");
         Assert.IsTrue(window.SpawnMs >= 2 * SpawnMs, "spawn bracket, spawnMs: " + window.SpawnMs);
+        var problems = Lines(nameof(IModLogger.LogWarning)).Concat(Lines(nameof(IModLogger.LogError))).ToArray();
+        Assert.AreEqual(0, problems.Length, string.Join("\n", problems));
+    }
+
+    [TestMethod]
+    public void OneSimulatedFrame_CameraInsideOnTick_FillsCameraMs_AndLeavesMissionTickTheRest()
+    {
+        // Harmony reads the camera class's HarmonyPatch attribute, which names a TaleWorlds.MountAndBlade.View type
+        // that the test bin does not carry: load the game assemblies first, as the binding tests do.
+        if (!GameAssemblies.EnsureLoaded()) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
+
+        Attach(nameof(DummyOnTickWithCamera), typeof(Mission_OnTick_HitchProbe_Patch));
+        Attach(nameof(DummyCamera), typeof(MissionScreen_UpdateCamera_HitchProbe_Patch));
+
+        MissionTickProfilerHooks.OnFrameBoundary();
+        var wall = Stopwatch.StartNew();
+        DummyOnTickWithCamera();
+        var wallMs = wall.Elapsed.TotalMilliseconds;
+        MissionTickProfilerHooks.OnFrameBoundary();
+
+        var w = Profiler.TakeWindow(8);
+        Assert.AreEqual(1, w.Frames);
+        Assert.IsTrue(w.CameraMs >= CameraMs, "camera bracket, cameraMs: " + w.CameraMs);
+        Assert.IsTrue(w.MissionTickMs >= OnTickMs && w.MissionTickMs <= wallMs - w.CameraMs + 0.5d,
+            "probe-mode missionTickMs is the on-tick without the camera: " + w.MissionTickMs + " of " + wallMs);
         var problems = Lines(nameof(IModLogger.LogWarning)).Concat(Lines(nameof(IModLogger.LogError))).ToArray();
         Assert.AreEqual(0, problems.Length, string.Join("\n", problems));
     }

@@ -29,7 +29,7 @@ public enum TickPhase
 /// Modes (Patch98, plan 041): with <see cref="BehaviorTiming"/> on ("full"), the phase columns are the
 /// timed behaviour sums; off ("probe"), no behaviour call is timed and <see cref="CloseFrame"/> derives them
 /// from the whole-method brackets: preDisplay 0, missionTick = onTick minus the agent tick that ran on the
-/// main thread, preTick = the whole OnPreTick minus the wait. Each hitch frame also carries a
+/// main thread and the camera bracket, preTick = the whole OnPreTick minus the wait. Each hitch frame also carries a
 /// <see cref="HitchDetailFrame"/> with the raw brackets and the spawn, script and clip-loading share.
 /// </summary>
 public sealed class MissionTickProfiler
@@ -61,6 +61,7 @@ public sealed class MissionTickProfiler
     // Patch98 open-frame brackets. Main thread: on-tick, pre-tick, spawns, the clip-loading mark.
     // Any thread (Interlocked, exchanged at CloseFrame): script tick, its calls, the two block kinds, off-main spawns.
     private long _frameOnTick;
+    private long _frameCamera;
     private long _framePreTickAll;
     private int _frameSpawns;
     private long _frameSpawnTicks;
@@ -193,6 +194,10 @@ public sealed class MissionTickProfiler
     /// <summary>The whole <c>Mission.OnTick</c> bracket. Main thread.</summary>
     public void AddOnTick(long elapsedTicks) => _frameOnTick += elapsedTicks;
 
+    /// <summary>The <c>IMissionSystemHandler.UpdateCamera</c> bracket (camera tick and native PreDisplay), inside
+    /// <c>Mission.OnTick</c>. Main thread.</summary>
+    public void AddCamera(long elapsedTicks) => _frameCamera += elapsedTicks;
+
     /// <summary>The whole <c>Mission.OnPreTick</c> bracket (the wait included). Main thread.</summary>
     public void AddPreTickAll(long elapsedTicks) => _framePreTickAll += elapsedTicks;
 
@@ -251,13 +256,14 @@ public sealed class MissionTickProfiler
         var preTickMs = ToMs(_framePreTick);
         var waitMs = ToMs(_frameWait);
         var agentMs = ToMs(agent);
+        var cameraMs = ToMs(frame.Camera);
         if (!BehaviorTiming)
         {
             preDisplayMs = 0d;
-            missionTickMs = Math.Max(0d, ToMs(frame.OnTick - agentMain));
+            missionTickMs = Math.Max(0d, ToMs(frame.OnTick - agentMain) - cameraMs);
             preTickMs = Math.Max(0d, ToMs(frame.PreTickAll - _frameWait));
         }
-        var otherMs = Math.Max(0d, frameMs - preDisplayMs - missionTickMs - preTickMs - waitMs - ToMs(agentMain));
+        var otherMs = Math.Max(0d, frameMs - preDisplayMs - cameraMs - missionTickMs - preTickMs - waitMs - ToMs(agentMain));
         var allocBytes = allocBytesNow - _lastAlloc;
         var loading = AnimSampling && frame.AnimLoading;
 
@@ -268,7 +274,7 @@ public sealed class MissionTickProfiler
             if (loading)
                 _extrasMission.HitchesWithAnimLoading++;
             if (_hitches <= MaxHitchLinesPerMission)
-                hitch = new HitchFrame(frameMs, preDisplayMs, missionTickMs, preTickMs, waitMs, agentMs, otherMs,
+                hitch = new HitchFrame(frameMs, preDisplayMs, cameraMs, missionTickMs, preTickMs, waitMs, agentMs, otherMs,
                     gc0 - _lastGc0, gc1 - _lastGc1, gc2 - _lastGc2, allocBytes, Behaviors.FrameTop(3, _ticksPerSecond))
                 {
                     Detail = BuildDetail(in frame),
@@ -285,8 +291,8 @@ public sealed class MissionTickProfiler
         Behaviors.FoldFrame();
         SpawnBuilds.FoldFrame();
         ScriptComponents.FoldFrame();
-        _window.Add(frameMs, preDisplayMs, missionTickMs, preTickMs, waitMs, agentMs, otherMs, allocBytes);
-        _mission.Add(frameMs, preDisplayMs, missionTickMs, preTickMs, waitMs, agentMs, otherMs, allocBytes);
+        _window.Add(frameMs, preDisplayMs, cameraMs, missionTickMs, preTickMs, waitMs, agentMs, otherMs, allocBytes);
+        _mission.Add(frameMs, preDisplayMs, cameraMs, missionTickMs, preTickMs, waitMs, agentMs, otherMs, allocBytes);
         _extrasWindow.Add(in frame, loading);
         _extrasMission.Add(in frame, loading);
         if (AnimSampling)
@@ -337,6 +343,7 @@ public sealed class MissionTickProfiler
         var f = new ProbeFrame
         {
             OnTick = _frameOnTick,
+            Camera = _frameCamera,
             PreTickAll = _framePreTickAll,
             Spawns = _frameSpawns,
             SpawnTicks = _frameSpawnTicks,
@@ -348,6 +355,7 @@ public sealed class MissionTickProfiler
             OffMainSpawns = (int)Interlocked.Exchange(ref _frameOffMainSpawns, 0),
         };
         _frameOnTick = 0;
+        _frameCamera = 0;
         _framePreTickAll = 0;
         _frameSpawns = 0;
         _frameSpawnTicks = 0;
@@ -368,7 +376,7 @@ public sealed class MissionTickProfiler
     public TickWindow TakeWindow(int topN)
     {
         var w = _window;
-        var window = new TickWindow(w.Frames, w.WallMs, w.PreDisplayMs, w.MissionTickMs, w.PreTickMs, w.WaitMs,
+        var window = new TickWindow(w.Frames, w.WallMs, w.PreDisplayMs, w.CameraMs, w.MissionTickMs, w.PreTickMs, w.WaitMs,
             w.AgentMs, w.OtherMs, w.AllocBytes, Behaviors.WindowTop(topN, _ticksPerSecond));
         _window = default;
         Behaviors.ResetWindow();
@@ -379,7 +387,7 @@ public sealed class MissionTickProfiler
     public TickSummary Summarize(int topN)
     {
         var m = _mission;
-        return new TickSummary(m.Frames, m.WallMs, m.PreDisplayMs, m.MissionTickMs, m.PreTickMs, m.WaitMs,
+        return new TickSummary(m.Frames, m.WallMs, m.PreDisplayMs, m.CameraMs, m.MissionTickMs, m.PreTickMs, m.WaitMs,
             m.AgentMs, m.OtherMs, m.AllocBytes, _hitches, _worstHitchMs, _worstHitchTSeconds,
             Behaviors.MissionTop(topN, _ticksPerSecond));
     }
@@ -408,6 +416,7 @@ public sealed class MissionTickProfiler
         public int Frames;
         public double WallMs;
         public double PreDisplayMs;
+        public double CameraMs;
         public double MissionTickMs;
         public double PreTickMs;
         public double WaitMs;
@@ -415,12 +424,13 @@ public sealed class MissionTickProfiler
         public double OtherMs;
         public long AllocBytes;
 
-        public void Add(double frameMs, double preDisplayMs, double missionTickMs, double preTickMs, double waitMs,
+        public void Add(double frameMs, double preDisplayMs, double cameraMs, double missionTickMs, double preTickMs, double waitMs,
             double agentMs, double otherMs, long allocBytes)
         {
             Frames++;
             WallMs += frameMs;
             PreDisplayMs += preDisplayMs;
+            CameraMs += cameraMs;
             MissionTickMs += missionTickMs;
             PreTickMs += preTickMs;
             WaitMs += waitMs;
@@ -434,6 +444,7 @@ public sealed class MissionTickProfiler
     private struct ProbeFrame
     {
         public long OnTick;
+        public long Camera;
         public long PreTickAll;
         public int Spawns;
         public long SpawnTicks;
@@ -484,12 +495,13 @@ public sealed class MissionTickProfiler
 /// <summary>The closed frames of one <c>[TickProfile]</c> window, fields in line order.</summary>
 public sealed class TickWindow
 {
-    public TickWindow(int frames, double wallMs, double preDisplayMs, double missionTickMs, double preTickMs,
+    public TickWindow(int frames, double wallMs, double preDisplayMs, double cameraMs, double missionTickMs, double preTickMs,
         double waitTickMs, double agentTickMs, double otherMs, long allocBytes, IReadOnlyList<BehaviorTotal> top)
     {
         Frames = frames;
         WallMs = wallMs;
         PreDisplayMs = preDisplayMs;
+        CameraMs = cameraMs;
         MissionTickMs = missionTickMs;
         PreTickMs = preTickMs;
         WaitTickMs = waitTickMs;
@@ -502,6 +514,7 @@ public sealed class TickWindow
     public int Frames { get; }
     public double WallMs { get; }
     public double PreDisplayMs { get; }
+    public double CameraMs { get; }
     public double MissionTickMs { get; }
     public double PreTickMs { get; }
     public double WaitTickMs { get; }
@@ -514,11 +527,12 @@ public sealed class TickWindow
 /// <summary>One frame at or above the hitch threshold, fields in <c>[Hitch]</c> line order.</summary>
 public sealed class HitchFrame
 {
-    public HitchFrame(double frameMs, double preDisplayMs, double missionTickMs, double preTickMs, double waitTickMs,
+    public HitchFrame(double frameMs, double preDisplayMs, double cameraMs, double missionTickMs, double preTickMs, double waitTickMs,
         double agentTickMs, double otherMs, int gc0, int gc1, int gc2, long allocBytes, IReadOnlyList<BehaviorTotal> top)
     {
         FrameMs = frameMs;
         PreDisplayMs = preDisplayMs;
+        CameraMs = cameraMs;
         MissionTickMs = missionTickMs;
         PreTickMs = preTickMs;
         WaitTickMs = waitTickMs;
@@ -533,6 +547,7 @@ public sealed class HitchFrame
 
     public double FrameMs { get; }
     public double PreDisplayMs { get; }
+    public double CameraMs { get; }
     public double MissionTickMs { get; }
     public double PreTickMs { get; }
     public double WaitTickMs { get; }
@@ -551,13 +566,14 @@ public sealed class HitchFrame
 /// <summary>Every closed frame of a mission, fields in <c>[TickSummary]</c> line order.</summary>
 public sealed class TickSummary
 {
-    public TickSummary(int frames, double wallMs, double preDisplayMs, double missionTickMs, double preTickMs,
+    public TickSummary(int frames, double wallMs, double preDisplayMs, double cameraMs, double missionTickMs, double preTickMs,
         double waitTickMs, double agentTickMs, double otherMs, long allocBytes, int hitches, double worstHitchMs,
         double worstHitchTSeconds, IReadOnlyList<BehaviorTotal> top)
     {
         Frames = frames;
         WallMs = wallMs;
         PreDisplayMs = preDisplayMs;
+        CameraMs = cameraMs;
         MissionTickMs = missionTickMs;
         PreTickMs = preTickMs;
         WaitTickMs = waitTickMs;
@@ -573,6 +589,7 @@ public sealed class TickSummary
     public int Frames { get; }
     public double WallMs { get; }
     public double PreDisplayMs { get; }
+    public double CameraMs { get; }
     public double MissionTickMs { get; }
     public double PreTickMs { get; }
     public double WaitTickMs { get; }

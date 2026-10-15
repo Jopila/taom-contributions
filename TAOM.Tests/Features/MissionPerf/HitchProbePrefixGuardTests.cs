@@ -10,6 +10,7 @@ using NSubstitute;
 using TAOM.Core.Logging;
 using TAOM.Features.MissionPerf;
 using TAOM.Features.MissionPerf.Hooks;
+using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.MissionPerf;
 
@@ -43,6 +44,22 @@ public class HitchProbePrefixGuardTests
     {
         _sink++;
         Thread.Sleep(5);
+    }
+
+    internal interface ICameraHandler
+    {
+        void UpdateCamera(object mission, float dt);
+    }
+
+    private sealed class CameraHandler : ICameraHandler
+    {
+        public int Calls;
+
+        void ICameraHandler.UpdateCamera(object mission, float dt)
+        {
+            Calls++;
+            Thread.Sleep(5);
+        }
     }
 
     private static void ThrowingFinalizer() => throw new InvalidOperationException("a finalizer after the probe's");
@@ -204,5 +221,28 @@ public class HitchProbePrefixGuardTests
         Assert.ThrowsException<InvalidOperationException>(() => DummyOnTick());
 
         Assert.AreEqual(HitchProbeLines.OnTickPrefixMissingLine, Warnings().Single());
+    }
+
+    [TestMethod]
+    public void ExplicitInterfaceMethod_VoidPrefixAndFinalizer_BothRunThroughRealHarmony()
+    {
+        // Harmony reads the camera class's HarmonyPatch attribute, which names a TaleWorlds.MountAndBlade.View type
+        // that the test bin does not carry: load the game assemblies first, as the binding tests do.
+        if (!GameAssemblies.EnsureLoaded()) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
+
+        var target = typeof(CameraHandler).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+            .Single(m => m.Name.EndsWith(".UpdateCamera", StringComparison.Ordinal));
+        _harmony.Patch(target, prefix: Fix(typeof(MissionScreen_UpdateCamera_HitchProbe_Patch), "Prefix"),
+            finalizer: Fix(typeof(MissionScreen_UpdateCamera_HitchProbe_Patch), "Finalizer"));
+        var handler = new CameraHandler();
+
+        Boundary();
+        ((ICameraHandler)handler).UpdateCamera(null!, 0.016f);
+        Boundary();
+
+        Assert.AreEqual(1, handler.Calls, "The original ran through the interface.");
+        Assert.IsTrue(Profiler.TakeWindow(8).CameraMs >= 4d, "The bracket around the explicit implementation measured the call.");
+        Assert.AreEqual(0, _logger.ReceivedCalls().Count(), "The finalizer found its prefix's state.");
+        Assert.IsNull(HitchProbeHooks.TakePrefixMissingCalls());
     }
 }

@@ -77,7 +77,7 @@ public sealed class BattleLoadDiagnosticsSettings : AttributeGlobalSettings<Batt
 
     [SettingPropertyGroup("Mission Performance")]
     [SettingPropertyBool("Enable Hitch Probe", Order = 4, RequireRestart = true,
-        HintText = "On by default. Times the parts of every mission frame TAOM can see (the wait for the agent tick, the mission tick, scene scripts, agent spawns) and checks whether an animation clip is loading from disk, so each frame slower than the hitch threshold writes a hitch line and a detail line saying where the time went. Its measured cost is written to the TAOM debug log. Installed once at game start: turning it on takes effect after a restart; turning it off stops measuring from the next mission while 'Enable Tick Profiler' is off (the profiler measures through the probe's patches).")]
+        HintText = "On by default. Times the parts of every mission frame TAOM can see (the wait for the agent tick, the mission tick, the camera and render preparation, scene scripts, agent spawns) and checks whether an animation clip is loading from disk, so each frame slower than the hitch threshold writes a hitch line and a detail line saying where the time went. Its measured cost is written to the TAOM debug log. Installed once at game start: turning it on takes effect after a restart; turning it off stops measuring from the next mission while 'Enable Tick Profiler' is off (the profiler measures through the probe's patches).")]
     public bool EnableHitchProbe { get; set; } = true;
 
     [SettingPropertyGroup("Mission Performance")]

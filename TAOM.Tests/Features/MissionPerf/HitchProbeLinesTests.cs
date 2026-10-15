@@ -103,8 +103,20 @@ public class HitchProbeLinesTests
     [TestMethod]
     public void BuildProbeInstallLine_Applied_MatchesThePinnedLiteral()
         => Assert.AreEqual(
-            "[TickProfiler] probe install: category applied, enabled by hitch probe, targets Mission.OnPreTick,Mission.WaitTickCompletion,Mission.OnTick,ManagedScriptHolder.TickComponents,Mission.SpawnAgent, bookkeeping 1.25 us per frame (0.01% of a 10 ms frame, target 0.50%)",
-            HitchProbeLines.BuildProbeInstallLine(true, "hitch probe", 1.25));
+            "[TickProfiler] probe install: category applied, enabled by hitch probe, targets Mission.OnPreTick,Mission.WaitTickCompletion,Mission.OnTick,ManagedScriptHolder.TickComponents,Mission.SpawnAgent,MissionScreen.UpdateCamera, bookkeeping 1.25 us per frame (0.01% of a 10 ms frame, target 0.50%)",
+            HitchProbeLines.BuildProbeInstallLine(true, "hitch probe", 1.25, cameraApplied: true));
+
+    [TestMethod]
+    public void BuildProbeInstallLine_CameraCategoryFailed_OmitsTheCameraTarget()
+        => Assert.AreEqual(
+            "[TickProfiler] probe install: category applied, enabled by both, targets Mission.OnPreTick,Mission.WaitTickCompletion,Mission.OnTick,ManagedScriptHolder.TickComponents,Mission.SpawnAgent, bookkeeping 1.25 us per frame (0.01% of a 10 ms frame, target 0.50%)",
+            HitchProbeLines.BuildProbeInstallLine(true, "both", 1.25, cameraApplied: false));
+
+    [TestMethod]
+    public void CameraNotInstalledLine_MatchesThePinnedLiteral()
+        => Assert.AreEqual(
+            "[TickProfiler] camera bracket not installed: cameraMs reads 0 and that time stays in missionTickMs (probe) or otherMs (full); the rest of the probe is unaffected (see [PatchApply])",
+            HitchProbeLines.CameraNotInstalledLine);
 
     [TestMethod]
     public void BuildAttributionInstallLine_AllSitesFound_MatchesThePinnedLiteral()
@@ -135,7 +147,7 @@ public class HitchProbeLinesTests
             Assert.AreEqual(PinnedScriptProfileFull, HitchProbeLines.BuildScriptProfile(65.2, ScriptWindow(full: true)));
             Assert.AreEqual(PinnedHitchDetailFull, HitchProbeLines.BuildHitchDetail(72.4, FullDetail()));
             Assert.AreEqual(PinnedSummaryExtraFull, HitchProbeLines.BuildTickSummaryExtra(FullMission()));
-            StringAssert.Contains(HitchProbeLines.BuildProbeInstallLine(true, "both", 1.25), "bookkeeping 1.25 us per frame (0.01% ");
+            StringAssert.Contains(HitchProbeLines.BuildProbeInstallLine(true, "both", 1.25, true), "bookkeeping 1.25 us per frame (0.01% ");
             StringAssert.Contains(HitchProbeLines.BuildAnimCostLine(3.2, 32, 20, true), "median 3.20 us");
         }
         finally
@@ -159,8 +171,11 @@ public class HitchProbeLinesTests
             HitchProbeLines.OnTickPrefixMissingLine,
             HitchProbeLines.ScriptPrefixMissingLine,
             HitchProbeLines.SpawnPrefixMissingLine,
-            HitchProbeLines.BuildProbeInstallLine(true, "hitch probe", 1.25),
-            HitchProbeLines.BuildProbeInstallLine(false, "both", 0),
+            HitchProbeLines.CameraPrefixMissingLine,
+            HitchProbeLines.CameraNotInstalledLine,
+            HitchProbeLines.BuildProbeInstallLine(true, "hitch probe", 1.25, true),
+            HitchProbeLines.BuildProbeInstallLine(true, "hitch probe", 1.25, false),
+            HitchProbeLines.BuildProbeInstallLine(false, "both", 0, false),
             HitchProbeLines.BuildAttributionInstallLine(2, 5, 5, true),
             HitchProbeLines.BuildAttributionInstallLine(0, 3, 4, false),
             HitchProbeLines.BuildMissionHeader(1, "off", 250, false, false, false),
@@ -235,6 +250,8 @@ public class HitchProbeLinesTests
                 "[TickProfiler] ManagedScriptHolder.TickComponents: the hitch probe bracket's prefix did not run before its finalizer (it was removed, or an earlier prefix threw): that call is not measured, and while the prefix stays gone scriptTickMs and calls read 0; this line is written once per process, each measured mission's end counts these calls"),
             (HitchProbeLines.SpawnPrefixMissingLine,
                 "[TickProfiler] Mission.SpawnAgent: the hitch probe bracket's prefix did not run before its finalizer (it was removed, or an earlier prefix threw): that call is not measured, and while the prefix stays gone spawns and spawnMs read 0; this line is written once per process, each measured mission's end counts these calls"),
+            (HitchProbeLines.CameraPrefixMissingLine,
+                "[TickProfiler] MissionScreen.UpdateCamera: the hitch probe bracket's prefix did not run before its finalizer (it was removed, or an earlier prefix threw): that call is not measured, and while the prefix stays gone cameraMs reads 0 and that time stays in missionTickMs (probe mode) or otherMs (full mode); this line is written once per process, each measured mission's end counts these calls"),
         };
         foreach (var (actual, expected) in pins)
             Assert.AreEqual(expected, actual);
@@ -247,12 +264,15 @@ public class HitchProbeLinesTests
     {
         Assert.AreEqual(
             "[TickProfiler] mission end for generation 4: hitch probe finalizers ran without their prefix since the last such line (or game start), so these calls were not measured: Mission.OnTick 1204, Mission.SpawnAgent 17",
-            HitchProbeLines.BuildPrefixMissingCounts(4, new[] { 0, 0, 1204, 0, 17 }));
+            HitchProbeLines.BuildPrefixMissingCounts(4, new[] { 0, 0, 1204, 0, 17, 0 }));
         Assert.AreEqual(
             "[TickProfiler] mission end for generation 1: hitch probe finalizers ran without their prefix since the last such line (or game start), so these calls were not measured: Mission.OnPreTick 1, Mission.WaitTickCompletion 2, Mission.OnTick 3, ManagedScriptHolder.TickComponents 4, Mission.SpawnAgent 5",
-            HitchProbeLines.BuildPrefixMissingCounts(1, new[] { 1, 2, 3, 4, 5 }));
+            HitchProbeLines.BuildPrefixMissingCounts(1, new[] { 1, 2, 3, 4, 5, 0 }));
+        Assert.AreEqual(
+            "[TickProfiler] mission end for generation 2: hitch probe finalizers ran without their prefix since the last such line (or game start), so these calls were not measured: MissionScreen.UpdateCamera 9",
+            HitchProbeLines.BuildPrefixMissingCounts(2, new[] { 0, 0, 0, 0, 0, 9 }));
         foreach (var tag in DataTags)
-            Assert.IsFalse(HitchProbeLines.BuildPrefixMissingCounts(1, new[] { 1, 2, 3, 4, 5 }).Contains(tag), "A status line never quotes " + tag);
+            Assert.IsFalse(HitchProbeLines.BuildPrefixMissingCounts(1, new[] { 1, 2, 3, 4, 5, 6 }).Contains(tag), "A status line never quotes " + tag);
     }
 
     [TestMethod]

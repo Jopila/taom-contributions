@@ -19,8 +19,8 @@ namespace TAOM.Features.MissionPerf.Hooks;
 /// </summary>
 public static partial class HitchProbeHooks
 {
-    // Last bracket is Spawn: the arrays below are indexed by ProbeBracket.
-    private const int BracketCount = (int)ProbeBracket.Spawn + 1;
+    // Last bracket is Camera: the arrays below are indexed by ProbeBracket.
+    private const int BracketCount = (int)ProbeBracket.Camera + 1;
 
     // Finalizer calls that had no prefix before them, per bracket (every one, the first included), and the
     // once-per-process latches for each bracket's missing-prefix line.

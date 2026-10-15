@@ -56,17 +56,18 @@ public class HitchProbeWiringTests
     [TestMethod]
     public void ProbeBrackets_HaveFirstPrefixAndLastFinalizer()
     {
-        // The five classes by name: enumerating the assembly's types would load the game's view assemblies,
+        // The six classes by name: enumerating the assembly's types would load the game's view assemblies,
         // which this no-game test does not have. HitchProbeBindingTests counts the category's classes.
         var classes = new[]
         {
             typeof(Mission_WaitTickCompletion_HitchProbe_Patch), typeof(Mission_OnPreTick_HitchProbe_Patch),
             typeof(Mission_OnTick_HitchProbe_Patch), typeof(ManagedScriptHolder_TickComponents_HitchProbe_Patch),
-            typeof(Mission_SpawnAgent_HitchProbe_Patch),
+            typeof(Mission_SpawnAgent_HitchProbe_Patch), typeof(MissionScreen_UpdateCamera_HitchProbe_Patch),
         };
         foreach (var patch in classes)
         {
-            Assert.IsTrue(patch.GetCustomAttributes<HarmonyPatchCategory>().Any(c => c.info.category == HitchProbeInstaller.Category), patch.Name);
+            var category = patch == typeof(MissionScreen_UpdateCamera_HitchProbe_Patch) ? HitchProbeInstaller.CameraCategory : HitchProbeInstaller.Category;
+            Assert.IsTrue(patch.GetCustomAttributes<HarmonyPatchCategory>().Any(c => c.info.category == category), patch.Name);
             var prefix = patch.GetMethod("Prefix");
             var finalizer = patch.GetMethod("Finalizer");
             Assert.IsNotNull(prefix, patch.Name);
@@ -87,7 +88,7 @@ public class HitchProbeWiringTests
         {
             typeof(Mission_WaitTickCompletion_HitchProbe_Patch), typeof(Mission_OnPreTick_HitchProbe_Patch),
             typeof(Mission_OnTick_HitchProbe_Patch), typeof(ManagedScriptHolder_TickComponents_HitchProbe_Patch),
-            typeof(Mission_SpawnAgent_HitchProbe_Patch),
+            typeof(Mission_SpawnAgent_HitchProbe_Patch), typeof(MissionScreen_UpdateCamera_HitchProbe_Patch),
         };
         foreach (var patch in classes)
         {
@@ -102,5 +103,22 @@ public class HitchProbeWiringTests
             Assert.AreEqual(typeof(ProbeState).MakeByRefType(), prefix[0].ParameterType, patch.Name + ".Prefix");
             Assert.AreEqual(typeof(ProbeState).MakeByRefType(), finalizer[0].ParameterType, patch.Name + ".Finalizer");
         }
+    }
+
+    [TestMethod]
+    public void CameraClass_IsItsOwnCategory_AndTheOtherFiveAreNot()
+    {
+        // The camera bracket applies only after Patch98 applies, and its failure costs only cameraMs.
+        Assert.AreNotEqual(HitchProbeInstaller.Category, HitchProbeInstaller.CameraCategory);
+        CollectionAssert.AreEqual(new[] { HitchProbeInstaller.CameraCategory },
+            typeof(MissionScreen_UpdateCamera_HitchProbe_Patch).GetCustomAttributes<HarmonyPatchCategory>().Select(c => c.info.category).ToArray());
+        foreach (var patch in new[]
+                 {
+                     typeof(Mission_WaitTickCompletion_HitchProbe_Patch), typeof(Mission_OnPreTick_HitchProbe_Patch),
+                     typeof(Mission_OnTick_HitchProbe_Patch), typeof(ManagedScriptHolder_TickComponents_HitchProbe_Patch),
+                     typeof(Mission_SpawnAgent_HitchProbe_Patch),
+                 })
+            CollectionAssert.AreEqual(new[] { HitchProbeInstaller.Category },
+                patch.GetCustomAttributes<HarmonyPatchCategory>().Select(c => c.info.category).ToArray(), patch.Name);
     }
 }

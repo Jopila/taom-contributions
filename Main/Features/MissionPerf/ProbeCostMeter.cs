@@ -7,7 +7,7 @@ namespace TAOM.Features.MissionPerf;
 /// Measures, at game start, what the Patch98 hooks' profiler bookkeeping costs per frame: on a scratch
 /// <see cref="MissionTickProfiler"/> in probe mode (never the live one), it replays the calls the hooks make in
 /// one frame (the frame boundary with its allocation and GC reads, the clip-loading mark, the wait, pre-tick,
-/// on-tick, agent-tick and script-tick brackets, two spawns) with each bracket's two timestamps, and returns
+/// on-tick, camera, agent-tick and script-tick brackets, two spawns) with each bracket's two timestamps, and returns
 /// the average microseconds per frame. Harmony's own call overhead is not in it; the overhead benchmark
 /// (<c>HitchProbeOverheadBenchmarkTests</c>) measures that. Pure: no engine type.
 /// </summary>
@@ -39,6 +39,7 @@ public static class ProbeCostMeter
         p.AddWait(Bracket());
         p.AddPreTickAll(Bracket());
         p.AddOnTick(Bracket());
+        p.AddCamera(Bracket());
         p.AddAgentTick(Bracket(), false);
         p.AddScriptTick(Bracket());
         p.CountSpawn();

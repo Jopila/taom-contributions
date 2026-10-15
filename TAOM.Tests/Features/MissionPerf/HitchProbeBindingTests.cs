@@ -17,9 +17,9 @@ namespace TAOM.Tests.Features.MissionPerf;
 
 /// <summary>
 /// Drift guard for Patch98 and the two attribution transpilers. Every probe target resolves in the installed
-/// engine and is not virtual (a bracket on a base virtual never runs for an override), and the PatchShield split
+/// engine and is not overridable (a bracket on a base virtual never runs for an override; the camera target is a sealed explicit implementation), and the PatchShield split
 /// of maintainer decision D13 (2026-10-03) holds: WaitTickCompletion and TickComponents stay on PatchShield's
-/// hot-method exclusion list, while OnPreTick, OnTick and SpawnAgent are off it and the shield wraps them again.
+/// hot-method exclusion list, while OnPreTick, OnTick, SpawnAgent and the camera's UpdateCamera are off it and the shield wraps them again.
 /// </summary>
 [TestClass]
 public class HitchProbeBindingTests
@@ -36,7 +36,8 @@ public class HitchProbeBindingTests
         AccessTools.GetTypesFromAssembly(typeof(HitchProbeHooks).Assembly)
             .Where(t => t.GetCustomAttributes<HarmonyPatchCategory>().Any(c => c.info.category == category));
 
-    private static IEnumerable<Type> ProbeClasses() => PatchClasses("Patch98_HitchProbe");
+    private static IEnumerable<Type> ProbeClasses() =>
+        PatchClasses(HitchProbeInstaller.Category).Concat(PatchClasses(HitchProbeInstaller.CameraCategory));
 
     // CreatureBanditsWiringTests.TargetOf, with the argument types.
     private static MethodBase TargetOf(Type patch)
@@ -55,12 +56,12 @@ public class HitchProbeBindingTests
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
 
         var classes = ProbeClasses().ToList();
-        Assert.AreEqual(5, classes.Count, "Patch98 holds five bracket classes.");
+        Assert.AreEqual(6, classes.Count, "Patch98 holds six bracket classes.");
         foreach (var patch in classes)
         {
             var target = TargetOf(patch);
             Assert.IsNotNull(target, patch.Name + " has no resolvable target.");
-            Assert.IsFalse(target.IsVirtual, $"{patch.Name}: {target.DeclaringType?.Name}.{target.Name} is virtual.");
+            Assert.IsFalse(target.IsVirtual && !target.IsFinal, $"{patch.Name}: {target.DeclaringType?.Name}.{target.Name} is virtual and overridable.");
         }
     }
 
@@ -85,6 +86,9 @@ public class HitchProbeBindingTests
             Assert.AreEqual(kept, PatchShieldPolicy.IsExcludedTargetMethod(target.DeclaringType?.FullName, target.Name),
                 $"{target.DeclaringType?.FullName}.{target.Name} " + (kept ? "must stay in" : "must not be in")
                 + " PatchShieldPolicy.ExcludedTargetMethods");
+            if (!kept)
+                Assert.IsFalse(PatchShieldPolicy.IsExcludedTargetNamespace(target.DeclaringType?.Namespace),
+                    $"{target.DeclaringType?.FullName}'s namespace must not be on the namespace exclusion list: the shield wraps {target.Name}.");
         }
     }
 
@@ -132,5 +136,38 @@ public class HitchProbeBindingTests
             nameof(MissionAttributionHooks.TimedParallelBlock), nameof(MissionAttributionHooks.TimedOccasionalBlock),
         }, blocks);
         Assert.AreEqual(1, rewritten.Count(ci => ci.operand is MethodInfo m && m.Name == nameof(MissionAttributionHooks.TimedScriptTick)));
+    }
+
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    public void CameraTarget_IsMissionScreensSealedExplicitUpdateCamera()
+    {
+        if (!_gameLoaded) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
+
+        var target = TargetOf(typeof(MissionScreen_UpdateCamera_HitchProbe_Patch));
+        Assert.IsNotNull(target, "The camera target did not resolve.");
+        Assert.AreEqual("MissionScreen", target.DeclaringType?.Name);
+        var map = target.DeclaringType!.GetInterfaceMap(typeof(IMissionSystemHandler));
+        var slot = Array.IndexOf(map.InterfaceMethods, typeof(IMissionSystemHandler).GetMethod("UpdateCamera"));
+        Assert.IsTrue(slot >= 0, "IMissionSystemHandler.UpdateCamera is not on the interface.");
+        Assert.AreEqual(map.TargetMethods[slot], target, "The patch must hit the method MissionScreen maps the interface slot to.");
+        Assert.IsTrue(target.IsFinal && target.IsPrivate, "An explicit implementation is private final virtual.");
+        CollectionAssert.AreEqual(new[] { typeof(Mission), typeof(float) }, target.GetParameters().Select(p => p.ParameterType).ToArray());
+    }
+
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
+    public void MissionOnTick_CallsHandlerUpdateCamera_Once_InInstalledEngine()
+    {
+        if (!_gameLoaded) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
+
+        var onTick = AccessTools.Method(typeof(Mission), nameof(Mission.OnTick), new[] { typeof(float), typeof(float), typeof(bool), typeof(bool) });
+        Assert.IsNotNull(onTick, "Mission.OnTick did not resolve.");
+        var handlerCall = typeof(IMissionSystemHandler).GetMethod("UpdateCamera");
+
+        var calls = PatchProcessor.GetOriginalInstructions(onTick).Count(ci => ci.operand is MethodInfo m && m == handlerCall);
+
+        Assert.AreEqual(1, calls, "Mission.OnTick must call IMissionSystemHandler.UpdateCamera exactly once.");
     }
 }

@@ -39,7 +39,7 @@ public static class TickProfileLines
         var sb = new StringBuilder(256);
         sb.Append("[TickProfile] t=+").Append(Seconds(tSeconds)).Append("s frames=").Append(Int(window.Frames));
         sb.Append(" wallMs=").Append(Num(window.WallMs));
-        AppendPhases(sb, window.PreDisplayMs, window.MissionTickMs, window.PreTickMs, window.WaitTickMs, window.AgentTickMs, window.OtherMs);
+        AppendPhases(sb, window.PreDisplayMs, window.CameraMs, window.MissionTickMs, window.PreTickMs, window.WaitTickMs, window.AgentTickMs, window.OtherMs);
         sb.Append(" allocKB=").Append(Kb(window.AllocBytes, allocAvailable));
         AppendFullTop(sb, window.Top, allocAvailable);
         return sb.ToString();
@@ -49,7 +49,7 @@ public static class TickProfileLines
     {
         var sb = new StringBuilder(256);
         sb.Append("[Hitch] t=+").Append(Seconds(tSeconds)).Append("s frameMs=").Append(Num(frame.FrameMs));
-        AppendPhases(sb, frame.PreDisplayMs, frame.MissionTickMs, frame.PreTickMs, frame.WaitTickMs, frame.AgentTickMs, frame.OtherMs);
+        AppendPhases(sb, frame.PreDisplayMs, frame.CameraMs, frame.MissionTickMs, frame.PreTickMs, frame.WaitTickMs, frame.AgentTickMs, frame.OtherMs);
         sb.Append(" gc0=").Append(Int(frame.Gc0)).Append(" gc1=").Append(Int(frame.Gc1)).Append(" gc2=").Append(Int(frame.Gc2));
         sb.Append(" allocKB=").Append(Kb(frame.AllocBytes, allocAvailable));
         sb.Append(" top=");
@@ -77,7 +77,7 @@ public static class TickProfileLines
         var sb = new StringBuilder(256);
         sb.Append("[TickSummary] frames=").Append(Int(summary.Frames));
         sb.Append(" wallMs=").Append(Num(summary.WallMs));
-        AppendPhases(sb, summary.PreDisplayMs, summary.MissionTickMs, summary.PreTickMs, summary.WaitTickMs, summary.AgentTickMs, summary.OtherMs);
+        AppendPhases(sb, summary.PreDisplayMs, summary.CameraMs, summary.MissionTickMs, summary.PreTickMs, summary.WaitTickMs, summary.AgentTickMs, summary.OtherMs);
         sb.Append(" allocKB=").Append(Kb(summary.AllocBytes, allocAvailable));
         sb.Append(" hitches=").Append(Int(summary.Hitches));
         sb.Append(" worstHitchMs=").Append(Num(summary.WorstHitchMs));
@@ -213,10 +213,11 @@ public static class TickProfileLines
             "{0} mission end for generation {1} ignored: generation {2} is current and keeps measuring",
             StatusTag, generation, currentGeneration);
 
-    private static void AppendPhases(StringBuilder sb, double preDisplay, double missionTick, double preTick,
+    private static void AppendPhases(StringBuilder sb, double preDisplay, double camera, double missionTick, double preTick,
         double wait, double agent, double other)
     {
         sb.Append(" preDisplayMs=").Append(Num(preDisplay));
+        sb.Append(" cameraMs=").Append(Num(camera));
         sb.Append(" missionTickMs=").Append(Num(missionTick));
         sb.Append(" preTickMs=").Append(Num(preTick));
         sb.Append(" waitTickMs=").Append(Num(wait));

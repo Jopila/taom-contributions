@@ -1,6 +1,6 @@
 namespace TAOM.Features.MissionPerf;
 
-/// <summary>The five Patch98 brackets, in the order their missing-prefix counts and lines are reported.</summary>
+/// <summary>The six Patch98 brackets, in the order their missing-prefix counts and lines are reported.</summary>
 internal enum ProbeBracket
 {
     PreTick = 0,
@@ -8,6 +8,7 @@ internal enum ProbeBracket
     OnTick = 2,
     Script = 3,
     Spawn = 4,
+    Camera = 5,
 }
 
 /// <summary>

@@ -335,7 +335,7 @@ public class HitchProbeHooksTests
 
     // --- A finalizer that runs with no prefix before it. PatchShield strips an owner's prefixes, postfixes and
     // transpilers after a missing-API exception and never its finalizers, and a prefix before ours that throws
-    // stops ours from running, so the five exits can run on their own (D13 shields Mission.OnTick, OnPreTick and
+    // stops ours from running, so the six exits can run on their own (D13 shields Mission.OnTick, OnPreTick and
     // SpawnAgent again, and `com.taom.mod` is not a protected owner). The exit tells by the state its call's
     // enter left, which Harmony starts at PrefixMissing in every call. ------------------------------------------
 
@@ -349,6 +349,7 @@ public class HitchProbeHooksTests
         HitchProbeHooks.OnTickExit(ref none);
         HitchProbeHooks.OnScriptTickExit(ref none);
         HitchProbeHooks.OnSpawnExit(ref none);
+        HitchProbeHooks.OnCameraExit(ref none);
     }
 
     private static int _sink;
@@ -369,8 +370,21 @@ public class HitchProbeHooksTests
         Assert.AreEqual(0d, m.ScriptTickMs, "script tick");
         Assert.AreEqual(0d, m.SpawnMs, "spawn time");
         Assert.AreEqual(0, m.Spawns, "spawn count");
-        Assert.AreEqual(0d, Profiler.TakeWindow(8).WaitTickMs, "wait");
+        var window = Profiler.TakeWindow(8);
+        Assert.AreEqual(0d, window.WaitTickMs, "wait");
+        Assert.AreEqual(0d, window.CameraMs, "camera");
         Assert.AreEqual(0, Profiler.TakeExtrasWindow(8).ScriptCalls, "script calls");
+    }
+
+    [TestMethod]
+    public void LoneCameraExit_RecordsNothing()
+    {
+        Boundary();
+        var none = ProbeState.PrefixMissing;
+        HitchProbeHooks.OnCameraExit(ref none);
+        Boundary();
+
+        Assert.AreEqual(0d, Profiler.TakeWindow(8).CameraMs);
     }
 
     [TestMethod]
@@ -383,6 +397,7 @@ public class HitchProbeHooksTests
             (HitchProbeHooks.OnTickExit, HitchProbeLines.OnTickPrefixMissingLine),
             (HitchProbeHooks.OnScriptTickExit, HitchProbeLines.ScriptPrefixMissingLine),
             (HitchProbeHooks.OnSpawnExit, HitchProbeLines.SpawnPrefixMissingLine),
+            (HitchProbeHooks.OnCameraExit, HitchProbeLines.CameraPrefixMissingLine),
         };
 
         foreach (var (exit, _) in exitsAndLines)
@@ -395,7 +410,7 @@ public class HitchProbeHooksTests
 
         // In call order, so a line wired to the wrong exit fails here.
         CollectionAssert.AreEqual(exitsAndLines.Select(e => e.Line).ToArray(), Lines(nameof(IModLogger.LogWarning)));
-        Assert.AreEqual(exitsAndLines.Length, _logger.ReceivedCalls().Count(), "Only the five warnings, no other level.");
+        Assert.AreEqual(exitsAndLines.Length, _logger.ReceivedCalls().Count(), "Only the six warnings, no other level.");
     }
 
     [TestMethod]
@@ -408,7 +423,7 @@ public class HitchProbeHooksTests
         for (var i = 0; i < 2; i++)
             HitchProbeHooks.OnSpawnExit(ref none);
 
-        CollectionAssert.AreEqual(new[] { 0, 3, 1, 0, 2 }, HitchProbeHooks.TakePrefixMissingCalls(),
+        CollectionAssert.AreEqual(new[] { 0, 3, 1, 0, 2, 0 }, HitchProbeHooks.TakePrefixMissingCalls(),
             "Every lone exit is counted, the first one that warns included, in bracket order.");
         Assert.IsNull(HitchProbeHooks.TakePrefixMissingCalls(), "Taking the counts drains them.");
     }
@@ -467,10 +482,12 @@ public class HitchProbeHooksTests
         HitchProbeHooks.OnTickEnter(out var onTick);
         HitchProbeHooks.OnScriptTickEnter(out var script);
         HitchProbeHooks.OnSpawnEnter(out var spawn);
+        HitchProbeHooks.OnCameraEnter(out var camera);
         Profiler.BeginMission(Stopwatch.GetTimestamp(), Environment.CurrentManagedThreadId, measuring: true,
             hitchThresholdMs: 1000, behaviorTiming: false);
         Boundary();
 
+        HitchProbeHooks.OnCameraExit(ref camera);
         HitchProbeHooks.OnSpawnExit(ref spawn);
         HitchProbeHooks.OnScriptTickExit(ref script);
         HitchProbeHooks.OnTickExit(ref onTick);
@@ -483,7 +500,9 @@ public class HitchProbeHooksTests
         Assert.AreEqual(0d, m.OnTickMs, "on-tick");
         Assert.AreEqual(0d, m.ScriptTickMs, "script tick");
         Assert.AreEqual(0, m.Spawns, "spawn count");
-        Assert.AreEqual(0d, Profiler.TakeWindow(8).WaitTickMs, "wait");
+        var window = Profiler.TakeWindow(8);
+        Assert.AreEqual(0d, window.WaitTickMs, "wait");
+        Assert.AreEqual(0d, window.CameraMs, "camera");
         Assert.AreEqual(0, _logger.ReceivedCalls().Count(), "Every exit had its enter: no warning.");
         Assert.IsNull(HitchProbeHooks.TakePrefixMissingCalls());
     }
@@ -576,12 +595,71 @@ public class HitchProbeHooksTests
             Assert.AreEqual(timedOnce, Profiler.SummarizeExtras(8).OnTickMs, "The finalizer alone adds no duration.");
             Assert.AreEqual(HitchProbeLines.OnTickPrefixMissingLine, Lines(nameof(IModLogger.LogWarning)).Single());
             Assert.AreEqual(1, _logger.ReceivedCalls().Count());
-            CollectionAssert.AreEqual(new[] { 0, 0, 2, 0, 0 }, HitchProbeHooks.TakePrefixMissingCalls(),
+            CollectionAssert.AreEqual(new[] { 0, 0, 2, 0, 0, 0 }, HitchProbeHooks.TakePrefixMissingCalls(),
                 "Both calls with no prefix are counted, though only the first one warns.");
         }
         finally
         {
             harmony.UnpatchAll(id);
         }
+    }
+
+    [TestMethod]
+    public void OnCameraExit_AfterEnter_AddsElapsedToOpenFrame()
+    {
+        Boundary();
+        HitchProbeHooks.OnCameraEnter(out var camera);
+        Thread.Sleep(10);
+        HitchProbeHooks.OnCameraExit(ref camera);
+        Boundary();
+
+        Assert.IsTrue(Profiler.TakeWindow(8).CameraMs >= 8d);
+        Assert.AreEqual(0, _logger.ReceivedCalls().Count());
+    }
+
+    [TestMethod]
+    public void OnCameraExit_NotMeasuring_RecordsNothing()
+    {
+        Profiler.BeginMission(Stopwatch.GetTimestamp(), Environment.CurrentManagedThreadId, measuring: false,
+            hitchThresholdMs: 1000, behaviorTiming: false);
+        Boundary();
+        HitchProbeHooks.OnCameraEnter(out var camera);
+        Thread.Sleep(5);
+        HitchProbeHooks.OnCameraExit(ref camera);
+        Boundary();
+
+        Assert.AreEqual(0d, Profiler.TakeWindow(8).CameraMs);
+        Assert.AreEqual(0, _logger.ReceivedCalls().Count());
+        Assert.IsNull(HitchProbeHooks.TakePrefixMissingCalls());
+    }
+
+    [TestMethod]
+    public void OnCameraExit_WithoutPrefix_CountsAndWarnsOnce()
+    {
+        var none = ProbeState.PrefixMissing;
+        HitchProbeHooks.OnCameraExit(ref none);
+        HitchProbeHooks.OnCameraExit(ref none);
+
+        Assert.AreEqual(HitchProbeLines.CameraPrefixMissingLine, Lines(nameof(IModLogger.LogWarning)).Single());
+        CollectionAssert.AreEqual(new[] { 0, 0, 0, 0, 0, 2 }, HitchProbeHooks.TakePrefixMissingCalls());
+    }
+
+    [TestMethod]
+    public void OnCameraExit_RerunAfterClose_RecordsNothing()
+    {
+        Boundary();
+        var wall = Stopwatch.StartNew();
+        HitchProbeHooks.OnCameraEnter(out var camera);
+        Thread.Sleep(10);
+        HitchProbeHooks.OnCameraExit(ref camera);
+        var firstCall = wall.Elapsed.TotalMilliseconds;
+        Thread.Sleep(30);
+        HitchProbeHooks.OnCameraExit(ref camera);
+        Boundary();
+
+        var ms = Profiler.TakeWindow(8).CameraMs;
+        Assert.IsTrue(ms >= 8d && ms <= firstCall + 0.5d, "Recorded once, up to the first exit: " + ms + " ms of " + firstCall);
+        Assert.AreEqual(0, _logger.ReceivedCalls().Count());
+        Assert.IsNull(HitchProbeHooks.TakePrefixMissingCalls());
     }
 }

@@ -255,7 +255,7 @@ public class HitchProbeMissionFlowTests
 
         MissionTickProfilerHooks.WriteSummaryExtra(older, 8);
 
-        CollectionAssert.AreEqual(new[] { 0, 0, 1, 0, 0 }, HitchProbeHooks.TakePrefixMissingCalls(),
+        CollectionAssert.AreEqual(new[] { 0, 0, 1, 0, 0, 0 }, HitchProbeHooks.TakePrefixMissingCalls(),
             "A stale end writes and takes nothing: the current mission's end reports the calls.");
     }
 

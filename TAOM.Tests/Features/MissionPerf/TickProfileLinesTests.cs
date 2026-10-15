@@ -17,23 +17,23 @@ namespace TAOM.Tests.Features.MissionPerf;
 public class TickProfileLinesTests
 {
     private const string PinnedTickProfile =
-        "[TickProfile] t=+65s frames=300 wallMs=5000.00 preDisplayMs=12.50 missionTickMs=812.40 preTickMs=40.10 waitTickMs=95.00 agentTickMs=1500.00 otherMs=4040.00 allocKB=2048 top=BehaviorTreeMissionLogic:410.20/300/3.10/512,AdvancedCombatBehavior:120.00/900/1.50/64";
+        "[TickProfile] t=+65s frames=300 wallMs=5000.00 preDisplayMs=12.50 cameraMs=20.50 missionTickMs=812.40 preTickMs=40.10 waitTickMs=95.00 agentTickMs=1500.00 otherMs=4019.50 allocKB=2048 top=BehaviorTreeMissionLogic:410.20/300/3.10/512,AdvancedCombatBehavior:120.00/900/1.50/64";
 
     private const string PinnedHitch =
-        "[Hitch] t=+72s frameMs=812.35 preDisplayMs=0.40 missionTickMs=5.20 preTickMs=0.30 waitTickMs=790.00 agentTickMs=795.10 otherMs=16.45 gc0=1 gc1=1 gc2=0 allocKB=96 top=BehaviorTreeMissionLogic:2.10,AdvancedCombatBehavior:1.30,MissionPerfHeartbeatBehavior:0.05";
+        "[Hitch] t=+72s frameMs=812.35 preDisplayMs=0.40 cameraMs=3.25 missionTickMs=5.20 preTickMs=0.30 waitTickMs=790.00 agentTickMs=795.10 otherMs=13.20 gc0=1 gc1=1 gc2=0 allocKB=96 top=BehaviorTreeMissionLogic:2.10,AdvancedCombatBehavior:1.30,MissionPerfHeartbeatBehavior:0.05";
 
     private const string PinnedPerfContext =
         "[PerfContext] build=Debug jitOptimized=false clr=4.0.30319.42000 serverGC=false latency=Interactive missionInProcess=1 scene=battle_terrain_029 agents=0 textureQuality=1 shadowQuality=2 particleDetail=1 ragdolls=3 memLoad=61 availPhysMB=12034 tickProfiler=on diag=battleLoad,stallWatchdog,stallBundle,exitSampler,freezeSampler,memSampler,missionPerf";
 
     // The mission-end summary added by the plan's 2026-10-03 amendment; inputs below.
     private const string PinnedTickSummary =
-        "[TickSummary] frames=4500 wallMs=75000.00 preDisplayMs=187.50 missionTickMs=12186.00 preTickMs=601.50 waitTickMs=1425.00 agentTickMs=22500.00 otherMs=60600.00 allocKB=30720 hitches=3 worstHitchMs=1104.20 worstHitchT=+72s top=BehaviorTreeMissionLogic:6153.00/4500/3.10/7680,AdvancedCombatBehavior:1800.00/13500/1.50/960";
+        "[TickSummary] frames=4500 wallMs=75000.00 preDisplayMs=187.50 cameraMs=310.25 missionTickMs=12186.00 preTickMs=601.50 waitTickMs=1425.00 agentTickMs=22500.00 otherMs=60289.75 allocKB=30720 hitches=3 worstHitchMs=1104.20 worstHitchT=+72s top=BehaviorTreeMissionLogic:6153.00/4500/3.10/7680,AdvancedCombatBehavior:1800.00/13500/1.50/960";
 
     private const string PinnedInstallLine =
         "[TickProfiler] install: category applied, Mission.OnTick sites 2/2, Mission.OnPreTick sites 2/2, allocation counter available";
 
     private static TickWindow SampleWindow(IReadOnlyList<BehaviorTotal>? top = null) => new TickWindow(
-        300, 5000, 12.5, 812.4, 40.1, 95, 1500, 4040, 2_097_152,
+        300, 5000, 12.5, 20.5, 812.4, 40.1, 95, 1500, 4019.5, 2_097_152,
         top ?? new[]
         {
             new BehaviorTotal("BehaviorTreeMissionLogic", 410.2, 300, 3.1, 524_288),
@@ -41,7 +41,7 @@ public class TickProfileLinesTests
         });
 
     private static HitchFrame SampleHitch(IReadOnlyList<BehaviorTotal>? top = null) => new HitchFrame(
-        812.35, 0.4, 5.2, 0.3, 790, 795.1, 16.45, 1, 1, 0, 98_304,
+        812.35, 0.4, 3.25, 5.2, 0.3, 790, 795.1, 13.2, 1, 1, 0, 98_304,
         top ?? new[]
         {
             new BehaviorTotal("BehaviorTreeMissionLogic", 2.1, 1, 2.1, 0),
@@ -50,7 +50,7 @@ public class TickProfileLinesTests
         });
 
     private static TickSummary SampleSummary(int hitches = 3) => new TickSummary(
-        4500, 75000, 187.5, 12186, 601.5, 1425, 22500, 60600, 31_457_280, hitches, hitches > 0 ? 1104.2 : 0,
+        4500, 75000, 187.5, 310.25, 12186, 601.5, 1425, 22500, 60289.75, 31_457_280, hitches, hitches > 0 ? 1104.2 : 0,
         hitches > 0 ? 72.4 : 0,
         new[]
         {

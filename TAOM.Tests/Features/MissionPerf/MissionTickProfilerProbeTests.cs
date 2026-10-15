@@ -346,4 +346,48 @@ public class MissionTickProfilerProbeTests
         p.CloseFrame(10, 0, 0, 0, 0);
         Assert.AreEqual("full", p.SummarizeExtras(8).Mode);
     }
+
+    [TestMethod]
+    public void CloseFrame_ProbeModeWithCamera_SubtractsCameraFromMissionTick()
+    {
+        var p = Probe(hitchMs: 1000);
+        p.CloseFrame(100, 0, 0, 0, 0);
+        ProbeBrackets(p);
+        p.AddCamera(12);
+        p.CloseFrame(300, 0, 0, 0, 0);
+
+        var w = p.TakeWindow(8);
+        Assert.AreEqual(12d, w.CameraMs);
+        Assert.AreEqual(38d, w.MissionTickMs, "OnTick 60 minus agent 10 minus camera 12.");
+        Assert.AreEqual(100d, w.OtherMs, "The camera moves out of missionTick, not out of other.");
+        Assert.AreEqual(12d, p.Summarize(8).CameraMs);
+    }
+
+    [TestMethod]
+    public void CloseFrame_ProbeModeCameraOverOnTick_ClampsMissionTickAtZero()
+    {
+        var p = Probe(hitchMs: 1000);
+        p.CloseFrame(100, 0, 0, 0, 0);
+        p.AddOnTick(20);
+        p.AddCamera(35);
+        p.CloseFrame(300, 0, 0, 0, 0);
+
+        var w = p.TakeWindow(8);
+        Assert.AreEqual(0d, w.MissionTickMs);
+        Assert.AreEqual(35d, w.CameraMs);
+        Assert.AreEqual(165d, w.OtherMs);
+    }
+
+    [TestMethod]
+    public void CloseFrame_ProbeModeNoCameraBracket_MissionTickKeepsWholeOnTick()
+    {
+        var p = Probe(hitchMs: 1000);
+        p.CloseFrame(100, 0, 0, 0, 0);
+        ProbeBrackets(p);
+        p.CloseFrame(300, 0, 0, 0, 0);
+
+        var w = p.TakeWindow(8);
+        Assert.AreEqual(0d, w.CameraMs);
+        Assert.AreEqual(50d, w.MissionTickMs);
+    }
 }

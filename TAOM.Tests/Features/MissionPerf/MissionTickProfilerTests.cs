@@ -333,4 +333,102 @@ public class MissionTickProfilerTests
         Assert.IsNotNull(p.CloseFrame(10, 0, 0, 0, 0));
         Assert.IsFalse(p.HitchCapReachedThisFrame);
     }
+
+    [TestMethod]
+    public void CloseFrame_FullModeWithCamera_SubtractsCameraFromOther()
+    {
+        var p = Started(out var s);
+        p.CloseFrame(0, 0, 0, 0, 0);
+        p.Record(TickPhase.MissionTick, s, 10, 0);
+        p.AddCamera(8);
+        p.CloseFrame(50, 0, 0, 0, 0);
+
+        var w = p.TakeWindow(8);
+        Assert.AreEqual(8d, w.CameraMs);
+        Assert.AreEqual(32d, w.OtherMs);
+    }
+
+    [TestMethod]
+    public void CloseFrame_FullModeWithCamera_MissionTickStaysTheBehaviourSum()
+    {
+        var p = Started(out var s);
+        p.CloseFrame(0, 0, 0, 0, 0);
+        p.Record(TickPhase.MissionTick, s, 10, 0);
+        p.AddOnTick(40);
+        p.AddCamera(8);
+        p.CloseFrame(50, 0, 0, 0, 0);
+
+        Assert.AreEqual(10d, p.TakeWindow(8).MissionTickMs);
+    }
+
+    [TestMethod]
+    public void CloseFrame_FirstBoundary_DiscardsCameraBeforeIt()
+    {
+        var p = Started(out _);
+        p.AddCamera(500);
+        p.CloseFrame(100, 0, 0, 0, 0);
+        p.CloseFrame(150, 0, 0, 0, 0);
+
+        var w = p.TakeWindow(8);
+        Assert.AreEqual(0d, w.CameraMs);
+        Assert.AreEqual(50d, w.OtherMs);
+    }
+
+    [TestMethod]
+    public void CloseFrame_HitchFrame_CarriesCameraMs()
+    {
+        var p = Started(out _, hitchMs: 1);
+        p.CloseFrame(0, 0, 0, 0, 0);
+        p.AddCamera(7);
+
+        var hitch = p.CloseFrame(50, 0, 0, 0, 0);
+
+        Assert.IsNotNull(hitch);
+        Assert.AreEqual(7d, hitch.CameraMs);
+        Assert.AreEqual(43d, hitch.OtherMs);
+    }
+
+    [TestMethod]
+    public void TakeWindow_Camera_SumsClosedFramesOnly()
+    {
+        var p = Started(out _);
+        p.CloseFrame(0, 0, 0, 0, 0);
+        p.AddCamera(3);
+        p.CloseFrame(10, 0, 0, 0, 0);
+        p.AddCamera(4);
+        p.CloseFrame(20, 0, 0, 0, 0);
+        p.AddCamera(100);
+
+        Assert.AreEqual(7d, p.TakeWindow(8).CameraMs);
+        Assert.AreEqual(0d, p.TakeWindow(8).CameraMs, "The window resets.");
+        p.CloseFrame(30, 0, 0, 0, 0);
+        Assert.AreEqual(100d, p.TakeWindow(8).CameraMs, "The open frame's camera lands in the next window.");
+    }
+
+    [TestMethod]
+    public void Summarize_Camera_SumsEveryClosedFrame()
+    {
+        var p = Started(out _);
+        p.CloseFrame(0, 0, 0, 0, 0);
+        p.AddCamera(3);
+        p.CloseFrame(10, 0, 0, 0, 0);
+        p.TakeWindow(8);
+        p.AddCamera(4);
+        p.CloseFrame(20, 0, 0, 0, 0);
+
+        Assert.AreEqual(7d, p.Summarize(8).CameraMs);
+    }
+
+    [TestMethod]
+    public void BeginMission_OpenCamera_IsDiscarded()
+    {
+        var p = Started(out _);
+        p.CloseFrame(0, 0, 0, 0, 0);
+        p.AddCamera(50);
+        p.BeginMission(1000, Thread.CurrentThread.ManagedThreadId, measuring: true, hitchThresholdMs: NoHitch);
+        p.CloseFrame(1000, 0, 0, 0, 0);
+        p.CloseFrame(1010, 0, 0, 0, 0);
+
+        Assert.AreEqual(0d, p.TakeWindow(8).CameraMs);
+    }
 }

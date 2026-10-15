@@ -9,6 +9,7 @@ Pure stdlib with synthetic taom_debug logs built in the REAL line formats: the F
 """
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -30,14 +31,14 @@ PINNED_MISSION_PERF = ("[MissionPerf] t=+65s frames=300 fps=60.0 avgMs=16.67 p95
 # The mission tick profiler's four data lines. Cross-language twin pin: TickProfileLinesTests.
 # BuildTickProfile_SampleWindow_, BuildHitch_SampleFrame_, BuildPerfContext_SampleContext_ and
 # BuildTickSummary_SampleMission_MatchesThePinnedLiteral assert the C# lines are EXACTLY these
-# literals. Change both or neither.
+# literals. Change both or neither. Logs from before the cameraMs column lack it: _no_camera().
 PINNED_TICK_PROFILE = ("[TickProfile] t=+65s frames=300 wallMs=5000.00 preDisplayMs=12.50 "
-                       "missionTickMs=812.40 preTickMs=40.10 waitTickMs=95.00 "
-                       "agentTickMs=1500.00 otherMs=4040.00 allocKB=2048 "
+                       "cameraMs=20.50 missionTickMs=812.40 preTickMs=40.10 waitTickMs=95.00 "
+                       "agentTickMs=1500.00 otherMs=4019.50 allocKB=2048 "
                        "top=BehaviorTreeMissionLogic:410.20/300/3.10/512,"
                        "AdvancedCombatBehavior:120.00/900/1.50/64")
-PINNED_HITCH = ("[Hitch] t=+72s frameMs=812.35 preDisplayMs=0.40 missionTickMs=5.20 "
-                "preTickMs=0.30 waitTickMs=790.00 agentTickMs=795.10 otherMs=16.45 gc0=1 gc1=1 "
+PINNED_HITCH = ("[Hitch] t=+72s frameMs=812.35 preDisplayMs=0.40 cameraMs=3.25 missionTickMs=5.20 "
+                "preTickMs=0.30 waitTickMs=790.00 agentTickMs=795.10 otherMs=13.20 gc0=1 gc1=1 "
                 "gc2=0 allocKB=96 top=BehaviorTreeMissionLogic:2.10,AdvancedCombatBehavior:1.30,"
                 "MissionPerfHeartbeatBehavior:0.05")
 PINNED_PERF_CONTEXT = ("[PerfContext] build=Debug jitOptimized=false clr=4.0.30319.42000 "
@@ -47,11 +48,18 @@ PINNED_PERF_CONTEXT = ("[PerfContext] build=Debug jitOptimized=false clr=4.0.303
                        "availPhysMB=12034 tickProfiler=on diag=battleLoad,stallWatchdog,"
                        "stallBundle,exitSampler,freezeSampler,memSampler,missionPerf")
 PINNED_TICK_SUMMARY = ("[TickSummary] frames=4500 wallMs=75000.00 preDisplayMs=187.50 "
-                       "missionTickMs=12186.00 preTickMs=601.50 waitTickMs=1425.00 "
-                       "agentTickMs=22500.00 otherMs=60600.00 allocKB=30720 hitches=3 "
+                       "cameraMs=310.25 missionTickMs=12186.00 preTickMs=601.50 waitTickMs=1425.00 "
+                       "agentTickMs=22500.00 otherMs=60289.75 allocKB=30720 hitches=3 "
                        "worstHitchMs=1104.20 worstHitchT=+72s "
                        "top=BehaviorTreeMissionLogic:6153.00/4500/3.10/7680,"
                        "AdvancedCombatBehavior:1800.00/13500/1.50/960")
+
+
+def _no_camera(text):
+    """The line as a build from before the cameraMs column wrote it."""
+    return re.sub(r" cameraMs=\S+", "", text)
+
+
 DEFAULT_DIAG = ("battleLoad", "stallWatchdog", "stallBundle", "exitSampler", "freezeSampler",
                 "memSampler", "missionPerf")
 
@@ -133,7 +141,8 @@ class PinnedLineTests(unittest.TestCase):
         self.assertEqual((t["t"], t["frames"]), (65, 300))
         self.assertAlmostEqual(t["wallMs"], 5000.0)
         self.assertAlmostEqual(t["missionTickMs"], 812.4)
-        self.assertAlmostEqual(t["otherMs"], 4040.0)
+        self.assertAlmostEqual(t["cameraMs"], 20.5)
+        self.assertAlmostEqual(t["otherMs"], 4019.5)
         self.assertAlmostEqual(t["allocKB"], 2048.0)
         self.assertEqual([b["type"] for b in t["top"]],
                          ["BehaviorTreeMissionLogic", "AdvancedCombatBehavior"])
@@ -539,9 +548,9 @@ class ExtraTagTests(unittest.TestCase):
         self.assertEqual(r["extra_tags"][0], {
             "tag": "TickSummary", "timestamp": _at(60),
             "fields": {"frames": "4500", "wallMs": "75000.00", "preDisplayMs": "187.50",
-                       "missionTickMs": "12186.00", "preTickMs": "601.50",
+                       "cameraMs": "310.25", "missionTickMs": "12186.00", "preTickMs": "601.50",
                        "waitTickMs": "1425.00", "agentTickMs": "22500.00",
-                       "otherMs": "60600.00", "allocKB": "30720", "hitches": "3",
+                       "otherMs": "60289.75", "allocKB": "30720", "hitches": "3",
                        "worstHitchMs": "1104.20", "worstHitchT": "+72s",
                        "top": "BehaviorTreeMissionLogic:6153.00/4500/3.10/7680,"
                               "AdvancedCombatBehavior:1800.00/13500/1.50/960"}})
@@ -1667,6 +1676,70 @@ class GameBoundaryTests(unittest.TestCase):
         rows, info = pr.scan_log("\n".join(lines), "x.log")
         self.assertEqual((len(rows), rows[0]["extra_tags"]), (1, []))
         self.assertEqual(_tags(info["extra_tags"]), ["LoadXml"])
+
+
+class CameraColumnTests(unittest.TestCase):
+    def test_parse_hitch_reads_camera_ms(self):
+        h = pr.parse_hitch(_line(PINNED_HITCH))
+        self.assertAlmostEqual(h["cameraMs"], 3.25)
+
+    def test_parse_hitch_without_camera_ms_still_parses(self):
+        h = pr.parse_hitch(_line(_no_camera(PINNED_HITCH)))
+        self.assertIsNotNone(h)
+        self.assertIsNone(h["cameraMs"])
+        self.assertEqual(h["phase"], "agentTickMs")
+
+    def test_parse_tick_profile_without_camera_ms_still_parses(self):
+        t = pr.parse_tick_profile(_line(_no_camera(PINNED_TICK_PROFILE)))
+        self.assertIsNotNone(t)
+        self.assertIsNone(t["cameraMs"])
+        self.assertAlmostEqual(t["missionTickMs"], 812.4)
+
+    def test_camera_ms_that_is_not_a_number_makes_the_line_unparsed(self):
+        self.assertIsNone(pr.parse_hitch(PINNED_HITCH.replace("cameraMs=3.25", "cameraMs=NaN")))
+        self.assertIsNone(pr.parse_tick_profile(PINNED_TICK_PROFILE.replace("cameraMs=20.50", "cameraMs=x")))
+
+    def test_hitch_phase_names_camera_when_largest(self):
+        camera_heavy = PINNED_HITCH.replace("cameraMs=3.25", "cameraMs=900.00")
+        h = pr.parse_hitch(_line(camera_heavy))
+        self.assertEqual(h["phase"], "cameraMs")
+        lines = _mission(0, _steady()) + [_line(camera_heavy, 72), _line(PINNED_HITCH, 77)]
+        self.assertEqual(_rows(lines)[0]["hitches"]["by_phase"], {"cameraMs": 1, "agentTickMs": 1})
+
+    def test_aggregate_reports_camera_rate_when_every_tick_has_it(self):
+        lines = _mission(0, _steady()) + [_line(PINNED_TICK_PROFILE, 66),
+                                          _line(PINNED_TICK_PROFILE.replace("t=+65s", "t=+70s"), 71)]
+        tick = _rows(lines)[0]["tick_profile"]
+        # 2 x 20.50 ms over 10 s of wall clock.
+        self.assertAlmostEqual(tick["phase_ms_per_s"]["cameraMs"], 4.1)
+        self.assertIn("  tick ms/s: preDisplayMs=2.5 cameraMs=4.1 missionTickMs=162.5 preTickMs=8.0 "
+                      "waitTickMs=19.0 agentTickMs=300.0 otherMs=803.9", pr.format_rows(_rows(lines), 0).splitlines())
+
+    def test_aggregate_mixed_old_and_new_ticks_omits_camera_rate(self):
+        lines = _mission(0, _steady()) + [_line(PINNED_TICK_PROFILE, 66),
+                                          _line(_no_camera(PINNED_TICK_PROFILE).replace("t=+65s", "t=+70s"), 71)]
+        tick = _rows(lines)[0]["tick_profile"]
+        self.assertNotIn("cameraMs", tick["phase_ms_per_s"])
+        self.assertAlmostEqual(tick["phase_ms_per_s"]["missionTickMs"], 162.48)
+
+    def test_aggregate_old_ticks_have_no_camera_rate(self):
+        lines = _mission(0, _steady()) + [_line(_no_camera(PINNED_TICK_PROFILE), 66)]
+        self.assertNotIn("cameraMs", _rows(lines)[0]["tick_profile"]["phase_ms_per_s"])
+
+    def test_compare_accepts_rows_with_and_without_camera_ms(self):
+        # compare reads no tick-phase column, so a camera-less log and a camera log are comparable.
+        new = _rows(_mission(0, _steady()) + [_line(PINNED_TICK_PROFILE, 66)])
+        old = _rows(_mission(100, _steady()) + [_line(_no_camera(PINNED_TICK_PROFILE), 166)])
+        result = pr.compare_rows(old, new)
+        self.assertEqual([m["metric"] for m in result["metrics"]], list(pr.METRICS))
+        self.assertEqual(pr.compare_rows(new, old)["a"]["rows"], 1)
+
+    def test_hitch_phase_ties_go_to_the_earlier_column_of_the_line(self):
+        low = PINNED_HITCH.replace("waitTickMs=790.00", "waitTickMs=1.00").replace("agentTickMs=795.10", "agentTickMs=1.00")
+        tie_pre = low.replace("preDisplayMs=0.40", "preDisplayMs=400.00").replace("cameraMs=3.25", "cameraMs=400.00")
+        tie_tick = low.replace("cameraMs=3.25", "cameraMs=400.00").replace("missionTickMs=5.20", "missionTickMs=400.00")
+        self.assertEqual(pr.parse_hitch(tie_pre)["phase"], "preDisplayMs")
+        self.assertEqual(pr.parse_hitch(tie_tick)["phase"], "cameraMs")
 
 
 if __name__ == "__main__":

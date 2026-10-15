@@ -22,9 +22,6 @@ public static class HitchProbeLines
 {
     private const string Tag = TickProfileLines.StatusTag;
 
-    private const string ProbeTargets =
-        "Mission.OnPreTick,Mission.WaitTickCompletion,Mission.OnTick,ManagedScriptHolder.TickComponents,Mission.SpawnAgent";
-
     public const string ProbeOffLine =
         Tag + " probe off: 'Enable Hitch Probe' and 'Enable Tick Profiler' are off at game start (or MCM was not ready); no probe patches installed, no hitch lines this session";
 
@@ -99,9 +96,18 @@ public static class HitchProbeLines
     public const string SpawnPrefixMissingLine =
         Tag + " Mission.SpawnAgent:" + PrefixMissingCause + "spawns and spawnMs read 0" + PrefixMissingTail;
 
+    public const string CameraPrefixMissingLine =
+        Tag + " MissionScreen.UpdateCamera:" + PrefixMissingCause + "cameraMs reads 0 and that time stays in missionTickMs (probe mode) or otherMs (full mode)" + PrefixMissingTail;
+
+    /// <summary>Written once when the probe applied but the camera category did not: cameraMs stays 0.00 (a
+    /// non-number would drop the line from perf_runs) and must not be read as zero camera time.</summary>
+    public const string CameraNotInstalledLine =
+        Tag + " camera bracket not installed: cameraMs reads 0 and that time stays in missionTickMs (probe) or otherMs (full); the rest of the probe is unaffected (see [PatchApply])";
+
     private static readonly string[] BracketMethods =
     {
         "Mission.OnPreTick", "Mission.WaitTickCompletion", "Mission.OnTick", "ManagedScriptHolder.TickComponents", "Mission.SpawnAgent",
+        "MissionScreen.UpdateCamera",
     };
 
     /// <summary>The mission-end total of finalizer calls that had no prefix before them since the last such line
@@ -182,11 +188,14 @@ public static class HitchProbeLines
     }
 
     /// <summary>The game-start line: whether Patch98 applied, which toggle asked for it, and the measured
-    /// bookkeeping cost per simulated frame against the 0.5% target.</summary>
-    public static string BuildProbeInstallLine(bool applied, string enabledBy, double bookkeepingUs) =>
+    /// bookkeeping cost per simulated frame against the 0.5% target. The targets list names the camera bracket
+    /// only when its own category applied.</summary>
+    public static string BuildProbeInstallLine(bool applied, string enabledBy, double bookkeepingUs, bool cameraApplied) =>
         string.Format(CultureInfo.InvariantCulture,
             "{0} probe install: category {1}, enabled by {2}, targets {3}, bookkeeping {4:0.00} us per frame ({5:0.00}% of a 10 ms frame, target 0.50%)",
-            Tag, applied ? "applied" : "failed", enabledBy, ProbeTargets, bookkeepingUs, bookkeepingUs / 10000d * 100d);
+            Tag, applied ? "applied" : "failed", enabledBy,
+            string.Join(",", BracketMethods, 0, cameraApplied ? BracketMethods.Length : BracketMethods.Length - 1),
+            bookkeepingUs, bookkeepingUs / 10000d * 100d);
 
     public static string BuildAttributionInstallLine(int spawnSites, int scriptSites, int scriptExpected, bool scriptDelegateBound) =>
         string.Format(CultureInfo.InvariantCulture,

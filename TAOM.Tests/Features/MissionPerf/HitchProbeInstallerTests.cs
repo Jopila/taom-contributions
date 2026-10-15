@@ -43,7 +43,7 @@ public class HitchProbeInstallerTests
         MissionAttributionInstaller.ResetForTests();
     }
 
-    private Func<string, bool> Recorder(bool patch97 = true, bool patch98 = true, Action? onPatch97 = null) => category =>
+    private Func<string, bool> Recorder(bool patch97 = true, bool patch98 = true, Action? onPatch97 = null, bool camera = true) => category =>
     {
         _applied.Add(category);
         if (category == MissionTickProfilerInstaller.Category)
@@ -57,6 +57,8 @@ public class HitchProbeInstallerTests
             }
             return patch97;
         }
+        if (category == HitchProbeInstaller.CameraCategory)
+            return camera;
         return patch98;
     };
 
@@ -84,9 +86,10 @@ public class HitchProbeInstallerTests
 
         MissionTickProfilerInstaller.InstallIfEnabled(_settings, _logger, Recorder());
 
-        CollectionAssert.AreEqual(new[] { "Patch98_HitchProbe" }, _applied);
+        CollectionAssert.AreEqual(new[] { "Patch98_HitchProbe", "Patch98_HitchProbe_Camera" }, _applied);
         Assert.AreEqual(1, Lines(nameof(IModLogger.LogInfo))
-            .Count(l => l.StartsWith("[TickProfiler] probe install: category applied, enabled by hitch probe,")));
+            .Count(l => l.StartsWith("[TickProfiler] probe install: category applied, enabled by hitch probe,")
+                && l.Contains("Mission.SpawnAgent,MissionScreen.UpdateCamera,")));
         Assert.IsTrue(HitchProbeInstaller.ProbeInstalled);
         Assert.IsFalse(HitchProbeHooks.WaitSwapActive);
         Assert.IsFalse(MissionTickProfilerHooks.Installed);
@@ -104,7 +107,7 @@ public class HitchProbeInstallerTests
 
         MissionTickProfilerInstaller.InstallIfEnabled(_settings, _logger, Recorder());
 
-        CollectionAssert.AreEqual(new[] { "Patch97_MissionTickProfiler", "Patch98_HitchProbe" }, _applied);
+        CollectionAssert.AreEqual(new[] { "Patch97_MissionTickProfiler", "Patch98_HitchProbe", "Patch98_HitchProbe_Camera" }, _applied);
         Assert.AreEqual(1, Lines(nameof(IModLogger.LogInfo))
             .Count(l => l.StartsWith("[TickProfiler] probe install: category applied, enabled by both,")));
         Assert.IsTrue(MissionTickProfilerHooks.Installed);
@@ -123,6 +126,35 @@ public class HitchProbeInstallerTests
             .Count(l => l.StartsWith("[TickProfiler] probe install: category failed, enabled by both,")));
         Assert.IsFalse(HitchProbeInstaller.ProbeInstalled);
         Assert.IsFalse(MissionTickProfilerHooks.Installed, "Without Patch98 there is no frame boundary, so Patch97 measures nothing.");
+    }
+
+    [TestMethod]
+    public void Install_ProbeCategoryFails_NeverTriesTheCameraCategory()
+    {
+        _settings.HitchProbeEnabled.Returns(true);
+
+        MissionTickProfilerInstaller.InstallIfEnabled(_settings, _logger, Recorder(patch98: false));
+
+        CollectionAssert.AreEqual(new[] { "Patch98_HitchProbe" }, _applied);
+        Assert.AreEqual(0, Lines(nameof(IModLogger.LogWarning)).Count(l => l == HitchProbeLines.CameraNotInstalledLine));
+    }
+
+    [TestMethod]
+    public void Install_CameraCategoryFails_LeavesTheProbeAndTheProfilerInstalled()
+    {
+        _settings.HitchProbeEnabled.Returns(true);
+        _settings.TickProfilerEnabled.Returns(true);
+
+        MissionTickProfilerInstaller.InstallIfEnabled(_settings, _logger, Recorder(camera: false));
+
+        CollectionAssert.AreEqual(new[] { "Patch97_MissionTickProfiler", "Patch98_HitchProbe", "Patch98_HitchProbe_Camera" }, _applied);
+        Assert.IsTrue(HitchProbeInstaller.ProbeInstalled, "The camera bracket is its own category; its failure never turns the probe off.");
+        Assert.IsTrue(MissionTickProfilerHooks.Installed, "Nor does it turn the profiler off.");
+        var install = Lines(nameof(IModLogger.LogInfo)).Single(l => l.StartsWith("[TickProfiler] probe install: category applied,"));
+        StringAssert.Contains(install, "Mission.SpawnAgent, bookkeeping");
+        Assert.IsFalse(install.Contains("UpdateCamera"), "The install line never lists a bracket that did not apply.");
+        Assert.AreEqual(1, Lines(nameof(IModLogger.LogWarning)).Count(l => l == HitchProbeLines.CameraNotInstalledLine));
+        Assert.AreEqual(0, Lines(nameof(IModLogger.LogError)).Length);
     }
 
     [TestMethod]

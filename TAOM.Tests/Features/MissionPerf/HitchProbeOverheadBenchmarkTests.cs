@@ -7,13 +7,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Adapters;
 using TAOM.Features.MissionPerf;
 using TAOM.Features.MissionPerf.Hooks;
+using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.MissionPerf;
 
 /// <summary>
-/// The always-on cost of the Patch98 hitch probe, measured: five dummy methods stand in for the patched engine
-/// methods, a simulated frame calls them the way a battle frame does (pre-tick with the wait inside it, on-tick,
-/// the script tick, the agent-tick pair, two spawns), and the same frames run first unpatched and then with the
+/// The always-on cost of the Patch98 hitch probe, measured: six dummy methods stand in for the patched engine
+/// methods, a simulated frame calls them the way a battle frame does (pre-tick with the wait inside it, on-tick
+/// with the camera call inside it, the script tick, the agent-tick pair, two spawns), and the same frames run first unpatched and then with the
 /// REAL Patch98 prefixes and finalizers attached by Harmony, on a probe-mode profiler with clip sampling on
 /// (the unpatched arm has no profiler, as a default player had before the probe). The native clip-loading
 /// call is a stub here; its own median is the <c>anim-loading sample</c> line at the first measured mission.
@@ -40,7 +41,14 @@ public class HitchProbeOverheadBenchmarkTests
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void DummyOnTick() => _sink++;
+    private static void DummyUpdateCamera() => _sink++;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void DummyOnTick()
+    {
+        DummyUpdateCamera();
+        _sink++;
+    }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void DummyTickComponents() => _sink++;
@@ -90,6 +98,9 @@ public class HitchProbeOverheadBenchmarkTests
     public void HitchProbe_SimulatedFrame_CostsUnderHalfAPercentOfTenMilliseconds()
     {
         if (Environment.GetEnvironmentVariable("TAOM_RUN_BENCHMARKS") != "1") Assert.Inconclusive("Benchmark: set TAOM_RUN_BENCHMARKS=1");
+        // Harmony reads the camera class's HarmonyPatch attribute, which names a TaleWorlds.MountAndBlade.View type
+        // that the test bin does not carry: load the game assemblies first, as the binding tests do.
+        if (!GameAssemblies.EnsureLoaded()) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
 
         var harmony = new Harmony("taom.tests.hitchprobe.bench");
         try
@@ -117,10 +128,12 @@ public class HitchProbeOverheadBenchmarkTests
             Attach(harmony, nameof(DummyOnTick), typeof(Mission_OnTick_HitchProbe_Patch));
             Attach(harmony, nameof(DummyTickComponents), typeof(ManagedScriptHolder_TickComponents_HitchProbe_Patch));
             Attach(harmony, nameof(DummySpawn), typeof(Mission_SpawnAgent_HitchProbe_Patch));
+            Attach(harmony, nameof(DummyUpdateCamera), typeof(MissionScreen_UpdateCamera_HitchProbe_Patch));
             var patched = BestOfThreeTicks();
 
             var window = profiler.TakeExtrasWindow(8);
             Assert.IsTrue(window.Frames > 0 && window.Spawns > 0 && window.ScriptCalls > 0, "The brackets ran.");
+            Assert.IsTrue(profiler.TakeWindow(8).CameraMs > 0d, "The camera bracket ran.");
             var usPerFrame = (patched - unpatched) * 1_000_000d / Stopwatch.Frequency / Frames;
             Console.WriteLine("HitchProbe overhead: {0:0.000} us per simulated frame (unpatched {1:0.000} us, patched {2:0.000} us, target < {3} us)",
                 usPerFrame, unpatched * 1_000_000d / Stopwatch.Frequency / Frames, patched * 1_000_000d / Stopwatch.Frequency / Frames, TargetUs);

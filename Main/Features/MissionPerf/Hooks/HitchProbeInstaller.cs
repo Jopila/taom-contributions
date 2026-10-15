@@ -12,11 +12,13 @@ namespace TAOM.Features.MissionPerf.Hooks;
 /// once-per-process guard is SubModule's game-init block. Patch98 holds the frame boundary for both modes, so it
 /// installs when either toggle is on. The clip-loading sampler is built here over the stateless engine adapter
 /// (the hooks are static, outside the container, like the profiler's logger); its cost is measured later, at the
-/// first measured mission. Logs one line either way; contains its own failures.
+/// first measured mission. Logs the install line either way, plus one WARNING when Patch98 applied and the camera
+/// category did not; contains its own failures.
 /// </summary>
 internal static class HitchProbeInstaller
 {
     internal const string Category = "Patch98_HitchProbe";
+    internal const string CameraCategory = "Patch98_HitchProbe_Camera";
     private const int CostMeterFrames = 2000;
 
     /// <summary>Patch98 applied at game start.</summary>
@@ -47,10 +49,14 @@ internal static class HitchProbeInstaller
             HitchProbeHooks.Sampler = new AnimLoadingSampler(new AnimationLoadingAdapter(), Stopwatch.GetTimestamp, Stopwatch.Frequency);
             var bookkeepingUs = ProbeCostMeter.MeasureBookkeepingMicroseconds(CostMeterFrames);
             ProbeInstalled = tryPatchCategory(Category);
+            // The camera bracket is its own category: its failure costs only cameraMs, never the probe or the profiler.
+            var cameraInstalled = ProbeInstalled && tryPatchCategory(CameraCategory);
             HitchProbeHooks.WaitSwapActive = waitSwapLive;
             MissionTickProfilerHooks.Installed = MissionTickProfilerHooks.Installed && ProbeInstalled;
             logger.LogInfo(HitchProbeLines.BuildProbeInstallLine(ProbeInstalled,
-                probeOn && profilerRequested ? "both" : probeOn ? "hitch probe" : "tick profiler", bookkeepingUs));
+                probeOn && profilerRequested ? "both" : probeOn ? "hitch probe" : "tick profiler", bookkeepingUs, cameraInstalled));
+            if (ProbeInstalled && !cameraInstalled)
+                logger.LogWarning(HitchProbeLines.CameraNotInstalledLine);
         }
         catch (Exception ex)
         {

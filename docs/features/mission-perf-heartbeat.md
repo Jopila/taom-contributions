@@ -67,17 +67,18 @@ runs several mission ticks per rendered frame, so several profiler frames). Per 
 | Field | What it is |
 |---|---|
 | `preDisplayMs` | Sum of every behaviour's `OnPreDisplayMissionTick` (timed at its call site in `Mission.OnTick`) |
+| `cameraMs` | `MissionScreen`'s `IMissionSystemHandler.UpdateCamera`, which `Mission.OnTick` calls between the `OnPreDisplayMissionTick` loop and the `OnMissionTick` loop (v1.5.5 `Mission.cs` 3741-3753): `CameraTick`, then the native `MBWindowManager.PreDisplay()` (culling, posing and render-item preparation `[yotthani, MithrilForge docs/engine/perf.md, measured in game, v1.5.3 and v1.5.4]`; TAOM's own decompile shows only that `pre_display` builds the frame's render context and calls each active view). Timed by Patch98's camera bracket in both modes. Logs from before the column lack it |
 | `missionTickMs` | Sum of every behaviour's `OnMissionTick` (same loop shape, also in `Mission.OnTick`); every millisecond here delays the start of the parallel agent tick |
 | `preTickMs` | Sum of every behaviour's `OnPreMissionTick` (in `Mission.OnPreTick`) |
 | `waitTickMs` | `Mission.WaitTickCompletion()`: the main thread waiting for the previous frame's agent tick (`Thread.Sleep(1)` loop, about 1 to 2 ms granularity) |
 | `agentTickMs` | Wall time of every `Mission.TickAgentsAndTeamsImp` that finished since the previous boundary, read from Patch91's bracket. It includes `AfterAsyncTickTick`, which runs after `tickCompleted` is set, so it can overlap the next frame |
-| `otherMs` | `frameMs` minus the three behaviour sums, the wait, and the agent tick only when it ran ON the main thread (fast-forward or a synchronous AI tick); clamped at 0. An agent tick on the asynchronous thread overlaps main-thread work and is not subtracted |
+| `otherMs` | `frameMs` minus the three behaviour sums, `cameraMs`, the wait, and the agent tick only when it ran ON the main thread (fast-forward or a synchronous AI tick); clamped at 0. An agent tick on the asynchronous thread overlaps main-thread work and is not subtracted |
 | `allocKB` | Main-thread allocation between boundaries (`GC.GetAllocatedBytesForCurrentThread`, bound by reflection; `na` when absent). The counter is per thread, so agent-tick allocation on the AI thread and the workers is not in it |
 
 `otherMs` is everything managed code does not see from these hooks: the native `Mission.Tick`
 (physics, scene) and the managed callbacks it raises on the main thread (agent hit, missile, agent
 removed, and every behaviour's handlers for them, TAOM's included), the parts of `Mission.OnTick`
-outside the two behaviour loops (tick actions, the mission-end check, the camera, spawned items),
+outside the two behaviour loops and the camera bracket (tick actions, the mission-end check, spawned items),
 views and UI (`OnMissionScreenTick`), rendering, streaming, shader compiles, the PatchShield
 finalizers on the frame's shielded methods (see PatchShield below),
 plus the profiler's own bookkeeping, including the write of the previous frame's `[Hitch]` line. Not covered: view ticks (`MissionScreen.OnFrameTick` ticks
@@ -130,7 +131,7 @@ occasionally fall between them and the two then differ by a frame), booleans low
 total ms as `<Type>:<ms>/<calls>/<maxMs>/<KB>`:
 
 ```
-[TickProfile] t=+65s frames=300 wallMs=5000.00 preDisplayMs=12.50 missionTickMs=812.40 preTickMs=40.10 waitTickMs=95.00 agentTickMs=1500.00 otherMs=4040.00 allocKB=2048 top=BehaviorTreeMissionLogic:410.20/300/3.10/512,AdvancedCombatBehavior:120.00/900/1.50/64
+[TickProfile] t=+65s frames=300 wallMs=5000.00 preDisplayMs=12.50 cameraMs=20.50 missionTickMs=812.40 preTickMs=40.10 waitTickMs=95.00 agentTickMs=1500.00 otherMs=4019.50 allocKB=2048 top=BehaviorTreeMissionLogic:410.20/300/3.10/512,AdvancedCombatBehavior:120.00/900/1.50/64
 ```
 
 **`[Hitch]`**, INFO, one per frame at or above the hitch threshold, from the frame boundary, for the
@@ -142,7 +143,7 @@ its GC collection deltas, its main-thread allocation and its three slowest behav
 `<Type>:<ms>`:
 
 ```
-[Hitch] t=+72s frameMs=812.35 preDisplayMs=0.40 missionTickMs=5.20 preTickMs=0.30 waitTickMs=790.00 agentTickMs=795.10 otherMs=16.45 gc0=1 gc1=1 gc2=0 allocKB=96 top=BehaviorTreeMissionLogic:2.10,AdvancedCombatBehavior:1.30,MissionPerfHeartbeatBehavior:0.05
+[Hitch] t=+72s frameMs=812.35 preDisplayMs=0.40 cameraMs=3.25 missionTickMs=5.20 preTickMs=0.30 waitTickMs=790.00 agentTickMs=795.10 otherMs=13.20 gc0=1 gc1=1 gc2=0 allocKB=96 top=BehaviorTreeMissionLogic:2.10,AdvancedCombatBehavior:1.30,MissionPerfHeartbeatBehavior:0.05
 ```
 
 **`[PerfContext]`**, INFO, once per mission at its first tick, profiler on or off. `build` is
@@ -165,7 +166,7 @@ last partial one), the hitch count, the worst hitch and its `t` (`na` with no hi
 behaviours over the whole mission:
 
 ```
-[TickSummary] frames=4500 wallMs=75000.00 preDisplayMs=187.50 missionTickMs=12186.00 preTickMs=601.50 waitTickMs=1425.00 agentTickMs=22500.00 otherMs=60600.00 allocKB=30720 hitches=3 worstHitchMs=1104.20 worstHitchT=+72s top=BehaviorTreeMissionLogic:6153.00/4500/3.10/7680,AdvancedCombatBehavior:1800.00/13500/1.50/960
+[TickSummary] frames=4500 wallMs=75000.00 preDisplayMs=187.50 cameraMs=310.25 missionTickMs=12186.00 preTickMs=601.50 waitTickMs=1425.00 agentTickMs=22500.00 otherMs=60289.75 allocKB=30720 hitches=3 worstHitchMs=1104.20 worstHitchT=+72s top=BehaviorTreeMissionLogic:6153.00/4500/3.10/7680,AdvancedCombatBehavior:1800.00/13500/1.50/960
 ```
 
 The literal is pinned by `TickProfileLinesTests.BuildTickSummary_SampleMission_MatchesThePinnedLiteral`;
@@ -390,7 +391,7 @@ and pins the split.
 
 On by default for every player (plan 041). Battles show single frames of 0.6 to 1.1 s every 30 to 70 s,
 the worst in the spawn wave; the probe makes every player's own `taom_debug.log` say where each such
-frame went, with no setting changed. It brackets five whole engine methods (no transpiler), so it
+frame went, with no setting changed. It brackets six whole engine methods (no transpiler), so it
 cannot name a behaviour or a component; the per-type attribution stays behind `Enable Tick Profiler`,
 because it needs transpilers.
 
@@ -402,8 +403,8 @@ Decided once per process at the first game init, by the same installer call as P
 | `Enable Hitch Probe` | `Enable Tick Profiler` | Installed | Mode |
 |---|---|---|---|
 | off | off | nothing | `off` |
-| on (default) | off (default) | `Patch98_HitchProbe` | `probe` |
-| any | on | `Patch97_MissionTickProfiler` (plan 028's transpilers plus the two attribution transpilers), then `Patch98_HitchProbe` | `full` |
+| on (default) | off (default) | `Patch98_HitchProbe`, then `Patch98_HitchProbe_Camera` | `probe` |
+| any | on | `Patch97_MissionTickProfiler` (plan 028's transpilers plus the two attribution transpilers), then `Patch98_HitchProbe`, then `Patch98_HitchProbe_Camera` | `full` |
 
 Patch98 holds the frame boundary for both modes: the `Mission.OnPreTick` prefix moved out of Patch97,
 so the profiler needs Patch98 to measure anything: a failed Patch98 leaves Patch97's transpilers applied
@@ -427,6 +428,7 @@ method throws:
 | `Mission.OnTick(float, float, bool, bool)` | main | `onTickMs` |
 | `ManagedScriptHolder.TickComponents(float)` | native's choice, logged | `scriptTickMs`, `calls` |
 | `Mission.SpawnAgent(AgentBuildData, bool, Equipment, ItemObject)` | main, checked | `spawnMs`, `spawns` |
+| `MissionScreen.IMissionSystemHandler.UpdateCamera(Mission, float)` (explicit implementation, `private final virtual`) | main | `cameraMs` |
 
 The agent tick keeps Patch91's bracket. Every hook body is in `try`/`catch`: a fault turns that part
 off for the process with one ERROR line and never throws into the engine.
@@ -454,11 +456,34 @@ line, the first one included, so a reader can tell every call since a strip from
 the prefix stays gone the matching columns read 0, and those counts are the only record of the calls
 they missed.
 
+**The camera bracket.** `Mission.OnTick` has one call site of `IMissionSystemHandler.UpdateCamera` (pinned by
+`HitchProbeBindingTests.MissionOnTick_CallsHandlerUpdateCamera_Once_InInstalledEngine`). The call is made when
+the mission is Continuing, not on a dedicated server, and only when `Mission.OnTick`'s `updateCamera` argument is
+true (`MissionState.cs` 171-219): fast-forward passes false on its extra sub-ticks, so only the last mission tick
+of a rendered frame carries `cameraMs`. `MissionScreen` implements the method explicitly: a private, final method named `TaleWorlds.MountAndBlade.IMissionSystemHandler.UpdateCamera`,
+which Patch98 names with that prefix (`CameraTarget_IsMissionScreensSealedExplicitUpdateCamera` pins that it is
+the slot the interface maps to). It is the first explicit interface method TAOM patches;
+`HitchProbePrefixGuardTests` runs a test-local explicit implementation through real Harmony. The bracket costs one Harmony prefix and one finalizer per call, plus PatchShield's finalizer (the target is shielded), around two `Stopwatch.GetTimestamp()` calls. The Cost section measures the probe's own prefix and finalizer
+only; the figures for PatchShield's finalizer are in `PatchShieldPolicy`'s `ExcludedTargetNamespacePrefixes`
+comment. Another mod's patch on
+the same method is inside the bracket and counts as camera time. A mod that re-implements
+`IMissionSystemHandler` on its own screen class bypasses the bracket, and its camera time stays in
+`missionTickMs` (probe) or `otherMs` (full). The camera bracket is its own category, `Patch98_HitchProbe_Camera`,
+applied only after `Patch98_HitchProbe` applies, so a failure of it costs only `cameraMs`: the category apply logs
+`[PatchApply] ... FAILED` and joins the game-initialization notice (a red chat line naming
+`Patch98_HitchProbe_Camera`), a `camera bracket not installed`
+WARNING says `cameraMs` reads 0.00 and that time stays in `missionTickMs` (probe) or `otherMs` (full), and the install
+line leaves `MissionScreen.UpdateCamera` out of its targets. Decision (2026-10-15): the target stays shielded by PatchShield, like
+`Mission.OnTick` under D13; a swallowed missing-API exception there skips that frame's `PreDisplay()`.
+`cameraMs` moves time out of `missionTickMs` (probe) and `otherMs` (full), so those two columns differ between logs
+with and without it; `tools/perf_runs.py compare` reads no tick-phase column, so its metrics are unaffected.
+
 **Phase columns per mode.** `[TickProfile]`, `[Hitch]` and `[TickSummary]` keep plan 028's format
-byte for byte. In `full` mode their phase columns are the behaviour sums above. In `probe` mode no
+with one column added, `cameraMs`, right after `preDisplayMs`. In `full` mode their phase columns are the
+behaviour sums above and `cameraMs` comes out of `otherMs`. In `probe` mode no
 behaviour call is timed, so they come from the brackets: `preDisplayMs` is 0, `missionTickMs` is the
-whole `Mission.OnTick` minus the agent tick that ran on the main thread (both behaviour loops, the
-camera, dynamic entities, spawned items), `preTickMs` is the whole `Mission.OnPreTick` minus the wait
+whole `Mission.OnTick` minus the agent tick that ran on the main thread and minus `cameraMs` (both
+behaviour loops, dynamic entities, spawned items; clamped at 0), `preTickMs` is the whole `Mission.OnPreTick` minus the wait
 (the `OnPreMissionTick` loop, since `TickDebugAgents` is empty), and `otherMs` follows plan 028's
 formula; `top=none`. `[HitchDetail]` carries `mode=` and the raw brackets (`onTickMs`,
 `preTickAllMs`), so a reader always knows which definition a line used. Spawn and script time are
@@ -513,13 +538,15 @@ method stays vanilla with one warning; the `attribution install` line reports th
 ### Cost
 
 Target: the always-on part costs under 0.5% of a 10 ms frame (50 us). `HitchProbeOverheadBenchmarkTests`
-patches five dummy methods with the real Patch98 prefixes and finalizers and times a simulated frame
-(the four per-frame brackets with the wait inside the pre-tick, the agent-tick pair, two spawns, the
-frame boundary, clip sampling on through a stub adapter) against the unpatched dummies with no
-profiler, as a default player had before the probe (so the agent-tick pair's measuring counts): 0.50
-us per frame on the desktop on 2026-10-03 (three runs, 0.492, 0.496 and 0.506 us, with the per-call
-state and the missing-prefix counts; the counts-only guard before it read 0.512, 0.514 and 0.514 us,
-and 0.476, 0.479 and 0.488 us before any guard), about 0.005% of a 10 ms frame. That is the managed
+patches six dummy methods with the real Patch98 prefixes and finalizers and times a simulated frame
+(the pre-tick with the wait inside it, the on-tick with the camera call inside it, the script tick, the
+agent-tick pair, two spawns, the frame boundary, clip sampling on through a stub adapter) against the
+unpatched dummies with no profiler, as a default player had before the probe (so the agent-tick pair's
+measuring counts): 0.70 to 0.75 us per frame on the desktop on 2026-10-15 with the camera bracket (four
+runs: 0.695, 0.750, 0.752 and 0.751 us), about 0.01% of a 10 ms frame. Before the camera bracket it read
+0.50 us on 2026-10-03 (three runs, 0.492, 0.496 and 0.506 us, with the per-call state and the
+missing-prefix counts; the counts-only guard before it read 0.512, 0.514 and 0.514 us, and 0.476, 0.479
+and 0.488 us before any guard). That is the managed
 part only: a claim about the managed brackets, not about the native call, which is a stub there. Two
 things about the native clip-loading call are not established:
 
@@ -626,26 +653,27 @@ tops:
 | Line | Level | When |
 |---|---|---|
 | `[TickProfiler] probe off: 'Enable Hitch Probe' and 'Enable Tick Profiler' are off at game start (or MCM was not ready); no probe patches installed, no hitch lines this session` | INFO | Once per process, both toggles off |
-| `[TickProfiler] probe install: category applied, enabled by hitch probe, targets Mission.OnPreTick,Mission.WaitTickCompletion,Mission.OnTick,ManagedScriptHolder.TickComponents,Mission.SpawnAgent, bookkeeping 1.25 us per frame (0.01% of a 10 ms frame, target 0.50%)` | INFO | Once per process, either toggle on: `applied` or `failed`, `hitch probe`, `tick profiler` or `both`, the measured bookkeeping |
+| `[TickProfiler] probe install: category applied, enabled by hitch probe, targets Mission.OnPreTick,Mission.WaitTickCompletion,Mission.OnTick,ManagedScriptHolder.TickComponents,Mission.SpawnAgent,MissionScreen.UpdateCamera, bookkeeping 1.25 us per frame (0.01% of a 10 ms frame, target 0.50%)` | INFO | Once per process, either toggle on: `applied` or `failed`, `hitch probe`, `tick profiler` or `both`, the measured bookkeeping; the targets list names `MissionScreen.UpdateCamera` only when the camera category applied |
+| `[TickProfiler] camera bracket not installed: cameraMs reads 0 and that time stays in missionTickMs (probe) or otherMs (full); the rest of the probe is unaffected (see [PatchApply])` | WARNING | Once per process, Patch98 applied but `Patch98_HitchProbe_Camera` did not. `cameraMs` stays `0.00` (a non-number would drop the line from `perf_runs.py`), so read it as unmeasured, not as zero camera time. The category failure also appears by name in the game-initialization notice, a red chat line |
 | `[TickProfiler] attribution install: Mission.SpawnAgent sites 2/2, ManagedScriptHolder.TickComponents sites 5/5, script tick delegate bound` | INFO | Once per process, profiler on: the sites the two attribution rewrites swapped (the `TickComponents` denominator is 4 when the delegate did not bind) |
 | `[TickProfiler] ScriptComponentBehavior.OnTick could not be bound; per-component script attribution is off, the script totals stay` | WARNING | At install, profiler on, the delegate did not bind |
 | `[TickProfiler] probe on in MCM but its patches are not installed: it was off at game start (restart the game to measure) or its install failed (see the probe install line and [PatchApply])` | WARNING | Once per mission, probe toggle on but Patch98 not installed |
 | `[TickProfiler] mission 3: not measuring, 'Enable Hitch Probe' and 'Enable Tick Profiler' are off in MCM; the probe's patches stay installed and only call through until a restart` | INFO | Once per mission at its first tick, Patch98 installed (the profiler not) but both toggles switched off since game start |
 | `[TickProfiler] mission 1: mode probe, hitch threshold 250 ms, spawn attribution off, script attribution off, anim-loading sample on` | INFO | Once per mission at its first tick, unless both toggles are off; mode `off` when a toggle is on but nothing is installed |
 | `[TickProfiler] probe: Mission.WaitTickCompletion's bracket did not run inside Mission.OnPreTick in the first 30 frames (inlined by the JIT, or skipped by another patch); waitTickMs reads 0 and preTickMs includes the wait` | WARNING | Once per process, the wait self-check failed |
-| `[TickProfiler] Mission.OnTick: the hitch probe bracket's prefix did not run before its finalizer (it was removed, or an earlier prefix threw): that call is not measured, and while the prefix stays gone onTickMs reads 0 and, in probe mode, so does missionTickMs; this line is written once per process, each measured mission's end counts these calls` | WARNING | Once per method per process, at the first finalizer that ran with no prefix before it in its own call (PatchShield strips prefixes, never finalizers; a prefix before ours that throws keeps ours from running). One line per bracket, each saying what it reads while the prefix stays gone: `Mission.OnPreTick` (no frame boundary runs, no frame closes and no hitch is detected), `Mission.WaitTickCompletion` (in probe mode `waitTickMs` reads 0 and `preTickMs` includes the wait), `ManagedScriptHolder.TickComponents` (`scriptTickMs` and `calls` read 0), `Mission.SpawnAgent` (`spawns` and `spawnMs` read 0) |
-| `[TickProfiler] mission end for generation 4: hitch probe finalizers ran without their prefix since the last such line (or game start), so these calls were not measured: Mission.OnTick 1204, Mission.SpawnAgent 17` | WARNING | At a measured mission's end, after `[TickSummary]` and `[TickSummaryExtra]` (or the no-summary line), only when some finalizer ran with no prefix since the last such line: every such call per method, the one that wrote the once-per-process line included, in the order `Mission.OnPreTick`, `Mission.WaitTickCompletion`, `Mission.OnTick`, `ManagedScriptHolder.TickComponents`, `Mission.SpawnAgent`. An older mission's end writes none and takes none |
+| `[TickProfiler] Mission.OnTick: the hitch probe bracket's prefix did not run before its finalizer (it was removed, or an earlier prefix threw): that call is not measured, and while the prefix stays gone onTickMs reads 0 and, in probe mode, so does missionTickMs; this line is written once per process, each measured mission's end counts these calls` | WARNING | Once per method per process, at the first finalizer that ran with no prefix before it in its own call (PatchShield strips prefixes, never finalizers; a prefix before ours that throws keeps ours from running). One line per bracket, each saying what it reads while the prefix stays gone: `Mission.OnPreTick` (no frame boundary runs, no frame closes and no hitch is detected), `Mission.WaitTickCompletion` (in probe mode `waitTickMs` reads 0 and `preTickMs` includes the wait), `ManagedScriptHolder.TickComponents` (`scriptTickMs` and `calls` read 0), `Mission.SpawnAgent` (`spawns` and `spawnMs` read 0), `MissionScreen.UpdateCamera` (`cameraMs` reads 0 and that time stays in `missionTickMs` in probe mode or `otherMs` in full mode) |
+| `[TickProfiler] mission end for generation 4: hitch probe finalizers ran without their prefix since the last such line (or game start), so these calls were not measured: Mission.OnTick 1204, Mission.SpawnAgent 17` | WARNING | At a measured mission's end, after `[TickSummary]` and `[TickSummaryExtra]` (or the no-summary line), only when some finalizer ran with no prefix since the last such line: every such call per method, the one that wrote the once-per-process line included, in the order `Mission.OnPreTick`, `Mission.WaitTickCompletion`, `Mission.OnTick`, `ManagedScriptHolder.TickComponents`, `Mission.SpawnAgent`, `MissionScreen.UpdateCamera`. An older mission's end writes none and takes none |
 | `[TickProfiler] script tick runs on the main thread (managed thread 1, main 1)` | INFO | Once per process, the first measured script tick |
 | `[TickProfiler] script tick runs on another thread (managed thread 7, main 1); per-component script attribution is off for this process, the totals stay` | WARNING | Instead of the line above, when that call was off the main thread |
 | `[TickProfiler] Mission.SpawnAgent ran off the main thread (managed thread 7); off-main spawns are counted in the mission summary but not timed` | WARNING | Once per process, the first off-main spawn |
 | `[TickProfiler] anim-loading sample: MBAnimation.IsAnyAnimationLoadingFromDisk median 3.20 us over 32 calls (budget 20.00 us); sampling every frame` | INFO | Once per process, the first measured mission; over budget it ends `over budget, sampling is off for this process` |
 | `[TickProfiler] anim-loading sample failed, sampling is off for this process: InvalidOperationException: ...` | WARNING | Once, the native call threw |
-| `[TickProfiler] spawn hook failed, its timing is off for this process: InvalidOperationException: ...` | ERROR | Once per part, a fault in `pre-tick (with the anim-loading sample, which samples there)`, `wait`, `on-tick`, `script`, `spawn` or `probe install`. In `probe` mode a pre-tick or on-tick fault moves that time into `otherMs` and a wait fault moves it into `preTickMs`; a pre-tick fault also turns the clip sample off, so `animLoading` reads `na` |
+| `[TickProfiler] spawn hook failed, its timing is off for this process: InvalidOperationException: ...` | ERROR | Once per part, a fault in `pre-tick (with the anim-loading sample, which samples there)`, `wait`, `on-tick`, `camera`, `script`, `spawn` or `probe install`. A camera fault moves that time back into `missionTickMs` (probe) or `otherMs` (full). In `probe` mode a pre-tick or on-tick fault moves that time into `otherMs` and a wait fault moves it into `preTickMs`; a pre-tick fault also turns the clip sample off, so `animLoading` reads `na` |
 | `[TickProfiler] agent build hook failed, all per-type attribution (spawn callbacks, script components, script blocks) is off for this process: InvalidOperationException: ...` | ERROR | Once per process, a fault in an attribution helper's own bookkeeping (`agent build`, `script attribution` or `parallel block`); later missions configure no attribution, so their tops read `none` and the block columns `na` |
 
 ### PatchShield on the probe's targets
 
-Two of the five targets stay on `PatchShieldPolicy.ExcludedTargetMethods` for every player.
+Two of the six targets stay on `PatchShieldPolicy.ExcludedTargetMethods` for every player.
 `Mission.WaitTickCompletion` runs once per frame on the main thread, and a swallow there would skip the
 wait loop, letting `OnPreMissionTick` overlap the running agent tick. `ManagedScriptHolder.TickComponents`
 runs once per ticking scene per frame, on the thread native picks, and stays as built (decision D13). For
@@ -655,9 +683,9 @@ exception and its strip of the offending patch are given up.
 `Mission.OnPreTick`, `Mission.OnTick` and `Mission.SpawnAgent` are shielded like any other patched
 method: plan 028 had excluded the first two and plan 041 the third, for cost, and maintainer decision
 D13 (2026-10-03) took them off once plan 034 had made PatchShield's finalizer cheap (the figures are in `PatchShieldPolicy`'s `ExcludedTargetNamespacePrefixes` comment), at
-two calls per frame and one per spawn. A shield
-finalizer runs inside those three brackets like every other patch on the method (the bracket's prefix is
-`Priority.First` and its finalizer `Priority.Last`).
+two calls per frame and one per spawn. `MissionScreen.UpdateCamera` was never on the exclusion list: it is
+shielded by the decision of 2026-10-15 (#809). A shield finalizer runs inside those four brackets like every
+other patch on the method (the bracket's prefix is `Priority.First` and its finalizer `Priority.Last`).
 
 What that gives, and what it costs. A MissingMethod, MissingField or TypeLoad exception that escapes
 `SpawnAgent` is swallowed, whether it came from Patch23, another mod's patch or a foreign behaviour's
@@ -674,7 +702,7 @@ method only, and their callers are shielded (`Mission.OnTick` runs the agent tic
 no such caller: native reaches it through a shim in the `ManagedCallbacks` namespace, which PatchShield
 excludes.
 `HitchProbeBindingTests.ProbeAndAttributionTargets_OnlyTheWaitAndTheScriptTickAreOnPatchShieldsExclusionList`
-walks the real targets of the five Patch98 classes and the two attribution transpilers and pins the split.
+walks the real targets of the six Patch98 classes and the two attribution transpilers and pins the split.
 
 ### Not covered
 
@@ -825,8 +853,8 @@ only while frames are shorter than a second.
 | `Main/Features/MissionPerf/AnimLoadingSampler.cs` | The clip-loading sampler and its cost gate |
 | `Main/Features/MissionPerf/ProbeCostMeter.cs` | The start-up bookkeeping measurement |
 | `Main/Features/MissionPerf/ProbeWindowWriter.cs` | The window, header and mission-end lines |
-| `Main/Features/MissionPerf/Hooks/Patch98_HitchProbe.cs` | The five bracket classes |
-| `Main/Features/MissionPerf/Hooks/HitchProbeHooks.cs` (`.Spawn.cs`, `.Script.cs`, `.Diagnostics.cs`) | The brackets, the wait self-check, the thread lines, the fault line, the per-call missing-prefix guard and its counts |
+| `Main/Features/MissionPerf/Hooks/Patch98_HitchProbe.cs` | The six bracket classes |
+| `Main/Features/MissionPerf/Hooks/HitchProbeHooks.cs` (`.Spawn.cs`, `.Script.cs`, `.Camera.cs`, `.Diagnostics.cs`) | The brackets, the wait self-check, the thread lines, the fault line, the per-call missing-prefix guard and its counts |
 | `Main/Features/MissionPerf/ProbeBracket.cs` | `ProbeState` (the per-call state Harmony carries from a prefix to its finalizer) and `ProbeBracket` |
 | `Main/Features/MissionPerf/Hooks/HitchProbeInstaller.cs` | The once-per-process Patch98 install |
 | `Main/Features/MissionPerf/Hooks/Patch97_MissionAttribution.cs` | The two attribution transpilers |
@@ -889,7 +917,7 @@ calls, a lone exit on one thread beside an open call on another),
 `HitchProbePrefixGuardTests` (the real Patch98 pairs on dummy methods under real Harmony: a prefix
 stripped while an outer spawn is in flight, finalizers rerun for a call and for a nested call, and a
 prefix before ours that throws or returns false), `HitchProbeSimulatedFrameTests` (one frame through
-all five real Patch98 classes on dummy methods: each bracket's own column, exact counts, no warning),
+the five real Patch98 classes on dummy methods: each bracket's own column, exact counts, no warning, plus a camera inside an on-tick),
 `HitchProbeInstallerTests` (the three modes through `InstallIfEnabled`), `HitchProbeMissionFlowTests` (the per-mission
 decisions without a mission: attribution flags, the first-tick header and reason lines, `[HitchDetail]` beside
 `[Hitch]`, the mission-end extras, and every branch of the profiler's status at a mission's creation,
@@ -901,8 +929,8 @@ decisions without a mission: attribution flags, the first-tick header and reason
 
 `TAOM.Tests/Features/MissionPerf/AnimMemory/`: `ClipBudgetSignatureTests` (parse, scan, rip targets
 of the two real encodings, resolve on the real 50 bytes), `PeSectionTableTests` (parse and every
-reject, bounds), `ClipBudgetSignatureInstalledBinaryTests` (LiveInstall: the signature on the
-installed `TaleWorlds.Native.dll`, and each verified build's RVAs, keyed by file length), `AnimMemLineTests` (every line literally),
+reject, bounds), `ClipBudgetSignatureInstalledBinaryTests` (`LiveInstall` and `BindingVerification`: the signature on the
+installed `TaleWorlds.Native.dll`, and each verified build's RVAs, keyed by file length, v1.5.5 included), `AnimMemLineTests` (every line literally),
 `AnimMemoryProbeTests` (header, scan once, every disable reason, NaN budget, negative counter at
 arming and after it, exception, disable latch, read before arming, reads), `AnimMemorySessionTests`
 (start line, cadence, 5 s line, drops in and across windows, loading count, the 90% boundary, the

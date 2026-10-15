@@ -13,7 +13,8 @@ that prefix or at the start of a line that has none, so a message that names one
   [MissionPerf]  MissionPerfLine.Build, the twin pin is PINNED_MISSION_PERF in
                  tools/tests/test_perf_runs.py and FrameStatsTests.BuildLine_FormatsEveryFieldInvariantly
   [TickProfile], [Hitch], [PerfContext]
-                 the mission tick profiler's lines (plan 028); optional, a log without them parses
+                 the mission tick profiler's lines (plan 028); optional, a log without them parses,
+                 and a line from before the cameraMs column parses without it
   [BattleLoad], [MemSample]
                  read through triage_battle_load.py's own parser, never re-implemented here
   [BuildStamp]   the startup build identity line (Main/Core/Diagnostics/BuildStampReport.cs)
@@ -204,6 +205,12 @@ _GAME_STATE_RE = re.compile(
 
 PHASES = ("preDisplayMs", "missionTickMs", "preTickMs", "waitTickMs", "agentTickMs", "otherMs")
 _MANAGED_PHASES = ("preDisplayMs", "missionTickMs", "preTickMs")
+# The column a newer build writes and an older one does not (None when a line lacks it): the time in
+# MissionScreen's UpdateCamera (inside Mission.OnTick), written after preDisplayMs. It comes out of
+# missionTickMs (probe mode) or otherMs (full mode); only those two shift, and compare reads no
+# tick-phase column, so its metrics are unaffected.
+CAMERA = "cameraMs"
+PHASES_WITH_CAMERA = PHASES[:1] + (CAMERA,) + PHASES[1:]
 _CONTEXT_KEYS = ("build", "jitOptimized", "clr", "serverGC", "latency", "missionInProcess",
                  "scene", "agents", "textureQuality", "shadowQuality", "particleDetail",
                  "ragdolls", "memLoad", "availPhysMB", "tickProfiler", "diag")
@@ -282,6 +289,7 @@ def parse_tick_profile(line: str) -> dict | None:
                "allocKB": _number_or_na(f["allocKB"]), "top": []}
         for key in PHASES:
             out[key] = _num(f[key])
+        out[CAMERA] = _num(f[CAMERA]) if CAMERA in f else None
         for item in f["top"].split(","):
             if not item or item == "none":
                 continue
@@ -304,6 +312,7 @@ def parse_hitch(line: str) -> dict | None:
                "allocKB": _number_or_na(f["allocKB"]), "top": []}
         for key in PHASES:
             out[key] = _num(f[key])
+        out[CAMERA] = _num(f[CAMERA]) if CAMERA in f else None
         for item in f["top"].split(","):
             if not item or item == "none":
                 continue
@@ -313,8 +322,10 @@ def parse_hitch(line: str) -> dict | None:
             out["top"].append({"type": name, "ms": _num(ms)})
     except (KeyError, ValueError):
         return None
-    # The phase that held the most ms; ties go to the earlier phase in PHASES.
-    out["phase"] = max(PHASES, key=lambda k: (out[k], -PHASES.index(k)))
+    # The phase that held the most ms; ties go to the earlier phase in the line's column order
+    # (PHASES, with cameraMs after preDisplayMs when the line carries it).
+    columns = PHASES_WITH_CAMERA if out[CAMERA] is not None else PHASES
+    out["phase"] = max(columns, key=lambda k: (out[k], -columns.index(k)))
     return out
 
 
@@ -625,6 +636,9 @@ def aggregate_ticks(ticks: list) -> dict | None:
     if not ticks or wall <= 0:
         return None
     managed = sum(t[k] for t in ticks for k in _MANAGED_PHASES)
+    # The camera rate is reported only when every window carries the column.
+    with_camera = all(t[CAMERA] is not None for t in ticks)
+    columns = PHASES_WITH_CAMERA if with_camera else PHASES
     by_type: dict = {}
     for t in ticks:
         for b in t["top"]:
@@ -641,7 +655,7 @@ def aggregate_ticks(ticks: list) -> dict | None:
                   for name, e in by_type.items()]
     behaviours.sort(key=lambda b: (-b["ms_per_s"], b["type"]))
     return {"windows": len(ticks), "wall_ms": wall,
-            "phase_ms_per_s": {k: sum(t[k] for t in ticks) * 1000.0 / wall for k in PHASES},
+            "phase_ms_per_s": {k: sum(t[k] for t in ticks) * 1000.0 / wall for k in columns},
             "behaviours": behaviours}
 
 
