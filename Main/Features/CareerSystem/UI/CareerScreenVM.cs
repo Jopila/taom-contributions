@@ -31,6 +31,7 @@ public class CareerScreenVM : ViewModel
     private string _doneLbl;
     private string _careerName;
     private string _careerDescription;
+    private string _rootPerkDescription = "";
     private string _careerPortraitSprite;
     private string _abilityName;
     private string _abilitySpriteName;
@@ -247,8 +248,11 @@ public class CareerScreenVM : ViewModel
 
     // Issue #388 — publish the Active Effects panel from the taken choices RebuildChoiceGroups
     // already walked. Keystone lines are the taken keystones' own descriptions (what changes
-    // about the ability); passive lines are every taken passive SUMMED per effect type, so two
-    // +5% Damage picks read as one "+10% damage" rather than two lines the player adds up.
+    // about the ability); passive lines are the passives of the career's root choice and of every
+    // stored choice, keystones included, SUMMED per effect type and troop class, so two +5% Damage
+    // picks read as one "+10% damage" rather than two lines the player adds up. The passive lines
+    // follow the rule CareerPassiveService.RefreshCache applies: each stored choice id the registry
+    // resolves once, plus the root when it is not stored.
     //
     // Fed by the existing group walk rather than a second pass of its own: the screen rebuilds
     // on every click, and a duplicate registry walk per rebuild is pure waste (it also broke
@@ -279,6 +283,20 @@ public class CareerScreenVM : ViewModel
         => _questService != null
             ? _questService.IsTierUnlocked(_heroLevel, tier, _heroStringId)
             : _registry.IsTierAvailable(_heroLevel, tier);
+
+    // Keyed by class too (#769 E9): "+10% troop damage for infantry" and an unfiltered "+5% troop
+    // damage" are different promises and must not read as one "+15%".
+    private static void AddPassives(
+        Dictionary<(Domain.PassiveEffectType Type, Domain.TroopClassMask TroopClass), float> totals,
+        IReadOnlyList<Domain.PassiveEffect> passives)
+    {
+        foreach (var passive in passives)
+        {
+            var key = (passive.EffectType, passive.TroopClass);
+            totals.TryGetValue(key, out var running);
+            totals[key] = running + passive.Magnitude;
+        }
+    }
 
     private void RebuildChoiceGroups(CareerDefinition career)
     {
@@ -312,26 +330,10 @@ public class CareerScreenVM : ViewModel
                 var heroData = _dataService.GetOrCreateData(_heroStringId);
                 var isTaken = heroData.HasChoice(choice.Id);
 
-                // Issue #388 — accumulate the Active Effects panel from this same walk.
-                if (isTaken)
-                {
-                    if (choice.Type == Domain.ChoiceType.Keystone)
-                    {
-                        if (!string.IsNullOrEmpty(choice.Description))
-                            takenKeystoneDescriptions.Add(choice.Description);
-                    }
-                    else
-                    {
-                        // Keyed by class too (#769 E9): "+10% troop damage for infantry" and an unfiltered
-                        // "+5% troop damage" are different promises and must not read as one "+15%".
-                        foreach (var passive in choice.Passives)
-                        {
-                            var key = (passive.EffectType, passive.TroopClass);
-                            takenPassiveTotals.TryGetValue(key, out var running);
-                            takenPassiveTotals[key] = running + passive.Magnitude;
-                        }
-                    }
-                }
+                // Issue #388 — a taken keystone's description joins the Active Effects panel from this
+                // same walk; the passive totals come from the hero's stored choices after the walk.
+                if (isTaken && choice.Type == Domain.ChoiceType.Keystone && !string.IsNullOrEmpty(choice.Description))
+                    takenKeystoneDescriptions.Add(choice.Description);
                 // Issue #381 — a choice the rule refuses (tier, fork, keystone, points) dims and
                 // says why, instead of silently rejecting the click at select time. The same
                 // rule gates the click itself (TrySelectChoice / TryDeselectChoice).
@@ -351,6 +353,24 @@ public class CareerScreenVM : ViewModel
                 case 3: _choiceGroupsTier3.Add(groupVM); break;
             }
         }
+
+        // The passive totals follow CareerPassiveService.RefreshCache: every stored choice id once (a
+        // group the career lists twice cannot double a pick), keystones included, then the root when
+        // it is not stored. The root sits in no group, so it is read through the registry, and its
+        // text is shown as the career's identity perk.
+        var heldChoices = _dataService.GetOrCreateData(_heroStringId);
+        foreach (var heldId in heldChoices.ChoiceIds)
+        {
+            var held = _registry.GetChoice(heldId);
+            if (held != null)
+                AddPassives(takenPassiveTotals, held.Passives);
+        }
+        var rootChoice = string.IsNullOrEmpty(career.RootChoiceId) ? null : _registry.GetChoice(career.RootChoiceId);
+        if (rootChoice != null && !heldChoices.HasChoice(rootChoice.Id))
+            AddPassives(takenPassiveTotals, rootChoice.Passives);
+        RootPerkDescription = rootChoice != null && !string.IsNullOrEmpty(rootChoice.Description)
+            ? new TextObject(rootChoice.Description).ToString()
+            : "";
 
         PublishActiveEffects(takenKeystoneDescriptions, takenPassiveTotals);
 
@@ -454,6 +474,25 @@ public class CareerScreenVM : ViewModel
         get => _careerDescription;
         set { if (_careerDescription != value) { _careerDescription = value; OnPropertyChangedWithValue(value, nameof(CareerDescription)); } }
     }
+
+    /// <summary>The career's root choice text (its always-held identity perk), shown in the header bar.</summary>
+    [DataSourceProperty]
+    public string RootPerkDescription
+    {
+        get => _rootPerkDescription;
+        set
+        {
+            if (_rootPerkDescription != value)
+            {
+                _rootPerkDescription = value;
+                OnPropertyChangedWithValue(value, nameof(RootPerkDescription));
+                OnPropertyChanged(nameof(HasRootPerk));
+            }
+        }
+    }
+
+    [DataSourceProperty]
+    public bool HasRootPerk => _rootPerkDescription.Length > 0;
 
     [DataSourceProperty]
     public string CareerPortraitSprite
@@ -633,7 +672,7 @@ public class CareerScreenVM : ViewModel
         }
     }
 
-    /// <summary>Issue #388 — taken passives summed per effect type, e.g. "+20% damage".</summary>
+    /// <summary>Issue #388 — the passives of the root and of every stored choice, summed per effect type and troop class, e.g. "+20% damage".</summary>
     [DataSourceProperty]
     public MBBindingList<CareerAbilityEffectVM> PassiveEffectLines
     {
