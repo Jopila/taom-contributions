@@ -28,7 +28,7 @@ public enum ChronicleAnchor
 }
 
 /// <summary>
-/// One validated event of <c>war_chronicle/war_chronicle.json</c> (docs/features/war-chronicle.md "Events").
+/// One validated event of <c>war_chronicle/war_chronicle.json</c> (docs/features/war-chronicle.md "The event chain").
 /// Built only by <see cref="ChronicleConfigValidator"/>, so every field holds a checked value.
 /// </summary>
 public sealed class ChronicleEventDefinition

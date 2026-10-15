@@ -1,9 +1,10 @@
 namespace TAOM.Features.WarChronicle.Rally;
 
 /// <summary>
-/// <c>war_chronicle/rally.json</c> (docs/features/war-chronicle.md, Part C). The property initialisers
-/// are the compiled defaults, which the provider falls back to field by field. Mutable only because
-/// Newtonsoft fills it; <see cref="RallyConfigProvider"/> hands out one validated instance.
+/// <c>war_chronicle/rally.json</c> (docs/features/war-chronicle.md, "Config file:
+/// Main/_Module/ModuleData/war_chronicle/rally.json"). The property initialisers are the compiled defaults,
+/// which the provider falls back to field by field. Mutable only because Newtonsoft fills it;
+/// <see cref="RallyConfigProvider"/> hands out one validated instance.
 /// </summary>
 public sealed class RallyConfig
 {

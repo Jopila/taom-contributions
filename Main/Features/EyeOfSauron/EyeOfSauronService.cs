@@ -234,8 +234,8 @@ public sealed class EyeOfSauronService : IEyeOfSauronHook
 
     /// <summary>
     /// Starts a hunt when every gate holds and returns a one-line verdict. The console passes
-    /// <paramref name="ignoreScoreAndCooldown"/>; the switch, the single-player gate, the kingdom and the war gate
-    /// hold either way. The hunters are tried in order: one who cannot ride today is passed over for the next, and
+    /// <paramref name="ignoreScoreAndCooldown"/>; the switch, the single-player gate, the kingdom gate, the war gate
+    /// and the E17 army deferral hold either way. The hunters are tried in order: one who cannot ride today is passed over for the next, and
     /// the hunt waits only when none can. A <paramref name="dryRun"/> returns the plan and changes nothing.
     /// </summary>
     public string TryStartHunt(bool ignoreScoreAndCooldown, bool dryRun = false)

@@ -13,7 +13,8 @@ public interface IEyeOfSauronHook
 {
     /// <summary>
     /// Raises <paramref name="result"/> to the hunter's speed floor (the player's speed times the MCM multiplier) while
-    /// the hunter is within the player's sight. Any other party, or the hunter out of sight, is left untouched.
+    /// the hunter is within the floor's band (1.5 of the player's seeing ranges). Any other party, or the hunter
+    /// outside that band, is left untouched.
     /// </summary>
     void ApplyHunterSpeedFloor(string? partyId, ref ExplainedNumber result);
 

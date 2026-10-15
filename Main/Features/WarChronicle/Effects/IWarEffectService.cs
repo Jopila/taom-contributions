@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace TAOM.Features.WarChronicle.Effects;
 
 /// <summary>
-/// The shared registry of timed War of the Ring effects (docs/features/war-chronicle.md, Part A).
+/// The shared registry of timed War of the Ring effects (docs/features/war-chronicle.md, "The timed-effect registry").
 /// Producers (the chronicle, the rally, the console) write; consumers (the volunteer model, the
 /// escape pass) read one multiplier per kingdom and kind.
 /// </summary>

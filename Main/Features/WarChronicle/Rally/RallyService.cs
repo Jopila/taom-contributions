@@ -10,7 +10,7 @@ using TAOM.Features.WarChronicle.Ledger;
 namespace TAOM.Features.WarChronicle.Rally;
 
 /// <summary>
-/// The rally (docs/features/war-chronicle.md, Part C): a small, temporary catch-up for AI kingdoms that
+/// The rally (docs/features/war-chronicle.md, "The rally"): a small, temporary catch-up for AI kingdoms that
 /// have lost a large share of their fortification points. Each day, for every kingdom: loss is measured
 /// against its baseline, the hysteresis machine moves its tier, and a kingdom that is AI-ruled, at war and
 /// not excluded as Neutral gets that tier's volunteer and escape effects as source

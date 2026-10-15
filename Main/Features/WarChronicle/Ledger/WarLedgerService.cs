@@ -9,7 +9,7 @@ using TAOM.Features.WarChronicle.Rally;
 namespace TAOM.Features.WarChronicle.Ledger;
 
 /// <summary>
-/// The daily war ledger (docs/features/war-chronicle.md, Part D): one <c>[WarLedger]</c> line per
+/// The daily war ledger (docs/features/war-chronicle.md, "The war ledger"): one <c>[WarLedger]</c> line per
 /// kingdom per day, three side lines, a Free-share line, and one-off event lines. The lines go to the
 /// TAOM debug log through <see cref="IModLogger.LogInfo"/> (INFO reaches the file and is flushed at
 /// once, <c>FileLogger.Enqueue</c>), where <c>tools/analyze_war_ledger.py</c> reads them. Stateless:

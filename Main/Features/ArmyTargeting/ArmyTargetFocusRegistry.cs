@@ -15,7 +15,8 @@ namespace TAOM.Features.ArmyTargeting;
 ///
 /// <para><b>Validated on write.</b> An entry is kept only with a settlement id, at least one attacker or a
 /// defender, and a finite multiplier above 1, clamped to <see cref="MaxMultiplier"/>. So a stored focus
-/// can only raise a positive score; a zero (vanilla's distance veto) stays zero.</para>
+/// can only raise a positive score; a zero (the strength gate in <c>DefaultTargetScoreCalculatingModel</c>) stays
+/// zero; vanilla's distance veto returns before the model is called (<c>AiMilitaryBehavior</c>).</para>
 ///
 /// <para><b>Not saved.</b> It is derived state: the chronicle pushes its Active windows again at session
 /// launch, and clears the set when a window resolves, when the war ends and when the chronicle is switched

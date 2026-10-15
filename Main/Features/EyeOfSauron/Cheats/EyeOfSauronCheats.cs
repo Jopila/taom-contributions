@@ -16,8 +16,9 @@ namespace TAOM.Features.EyeOfSauron.Cheats;
 /// command is a dry run through the same decision path; only the literal <c>confirm</c> starts the hunt, and its
 /// arguments are validated before any lookup. Entity states: the hunter's are the service's gates (alive, free, not a
 /// prisoner, at war, his party not busy). The player's: refused when he has no kingdom or a Neutral one, and when he
-/// is a prisoner or enlisted (the engage needs an active main party). In a settlement, a siege or another lord's army
-/// the start is allowed: the hunter rides, and his out-of-sight steps pause until the player is on the open map.
+/// is a prisoner or enlisted (the engage needs an active main party). In a settlement or a siege the start is
+/// allowed: the hunter rides, and his out-of-sight steps pause until the player is on the open map. In another lord's
+/// army the start is refused, the dry run included (E17).
 /// </para>
 /// Every body runs through <see cref="TaomConsole.RunInCampaign"/>; the service keeps the single-player and war gates.
 /// </summary>
@@ -37,7 +38,8 @@ public static class EyeOfSauronCheats
     private const string StartUsage =
         "Format is \"taom.start_eye_hunt [confirm]\". Without 'confirm' it only reports who would ride, whether his\n"
         + "party is re-tasked or a new one spawned, and the top-up. With 'confirm' it starts the hunt now, ignoring the\n"
-        + "score and the cooldown; your kingdom must still be at war with the hunter's, and the game single-player.\n"
+        + "score and the cooldown; your kingdom must still be at war with the hunter's, the game single-player, and you\n"
+        + "not riding in another lord's army.\n"
         + "The party, its troops and grain, and a lost governorship remain after taom.clear_eye_hunt.";
 
     private const string EndUsage = "Format is \"taom.clear_eye_hunt\". Ends the running hunt and releases the hunter.";

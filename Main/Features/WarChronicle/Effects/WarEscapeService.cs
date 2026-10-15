@@ -6,8 +6,9 @@ namespace TAOM.Features.WarChronicle.Effects;
 
 /// <summary>
 /// The extra escape roll for the captured lords of a kingdom with a <see cref="WarEffectKind.PrisonerEscape"/>
-/// boost (docs/features/war-chronicle.md, Part A). Vanilla's daily roll is private and has no model, so
-/// this mirrors its chance: <c>p = 0.04 x (a mobile captor in the field ? 5 - min(81, healthy)^0.25 : 1)
+/// boost (docs/features/war-chronicle.md, "Consumer 2: prisoner escape"). Vanilla's daily roll is private and
+/// has no model, so this mirrors its chance:
+/// <c>p = 0.04 x (a mobile captor in the field ? 5 - min(81, healthy)^0.25 : 1)
 /// x (player-held ? 0.5 : 1) x perk factor</c> (v1.5.4 PrisonerReleaseCampaignBehavior.cs:213-245), and the
 /// boost adds a second roll at <c>p x (multiplier - 1)</c>. The perk factor is vanilla's relative terms
 /// (the captor's anti-escape perks, the captive's Fleet Footed, the captor leader's Valor) as one number

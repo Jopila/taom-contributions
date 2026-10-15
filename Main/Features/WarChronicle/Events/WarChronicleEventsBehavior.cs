@@ -7,7 +7,7 @@ using TAOM.Features.CoopInterop;
 namespace TAOM.Features.WarChronicle.Events;
 
 /// <summary>
-/// Thin router for the War Chronicle's event chain (docs/features/war-chronicle.md "Events", #765): it turns
+/// Thin router for the War Chronicle's event chain (docs/features/war-chronicle.md "The event chain", #765): it turns
 /// campaign events into calls on <see cref="ChronicleService"/> and drains the announcement queue. It holds
 /// no state and saves nothing: <c>WarChronicleBehavior</c> is the one SyncData owner, and the chronicle's
 /// rows travel in its payload. Built fresh in every campaign's OnGameStart (WarChronicleModule, pinned by

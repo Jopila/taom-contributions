@@ -11,7 +11,7 @@ using TAOM.Features.Diplomacy.Models;
 namespace TAOM.Features.WarChronicle.Events;
 
 /// <summary>
-/// The War Chronicle's event chain (docs/features/war-chronicle.md "Events", #765 M3): the state machine
+/// The War Chronicle's event chain (docs/features/war-chronicle.md "The event chain", #765 M3): the state machine
 /// over <see cref="ChronicleStateStore"/>. Times are whole campaign days: the floor of
 /// <see cref="IChronicleWorldAdapter.GetElapsedDays"/>, the same day as the ledger's <c>day=</c>.
 ///

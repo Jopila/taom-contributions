@@ -337,7 +337,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("War of the Ring/Eye of Sauron")]
     [SettingPropertyFloatingInteger("Hunter Speed Multiplier", EyeOfSauron.EyeOfSauronSettingsProvider.MinSpeedMultiplier, EyeOfSauron.EyeOfSauronSettingsProvider.MaxSpeedMultiplier, "#0.00", Order = 5, RequireRestart = false,
-        HintText = "Once the hunter is within your sight, it moves at least this many times your speed. Default 1.3.")]
+        HintText = "Once the hunter is within one and a half times your seeing range, it moves at least this many times your speed. Default 1.3.")]
     public float HunterSpeedMultiplier { get; set; } = EyeOfSauron.EyeOfSauronSettingsProvider.DefaultSpeedMultiplier;
 
     [SettingPropertyGroup("War of the Ring/Eye of Sauron")]

@@ -41,8 +41,9 @@ public class TaomPartySpeedModel : DefaultPartySpeedCalculatingModel
         _feats.ApplyTerrainSpeedFeats(culture, terrain, isNight, ref result);
         _feats.ApplyRohanInfantryPenalty(culture, mountedCount, totalCount, ref result);
         _careerPassives.ApplyFactor(mobileParty.LeaderHero?.StringId, ref result, PassiveEffectType.PartyMovementSpeed);
-        // #765 M8: the Eye of Sauron hunter outpaces the player once in sight. LAST, so the floor is compared against
-        // every other line; it reads only the main-thread snapshot, because this runs on the parallel party tick.
+        // #765 M8: the Eye of Sauron hunter outpaces the player within 1.5 of the player's seeing ranges. LAST, so
+        // the floor is compared against every other line; it reads only the main-thread snapshot, because this runs
+        // on the parallel party tick.
         _eyeOfSauron.ApplyHunterSpeedFloor(mobileParty.StringId, ref result);
 
         return result;

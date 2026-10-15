@@ -6,7 +6,7 @@ using TAOM.Core.Logging;
 namespace TAOM.Features.WarChronicle.Effects;
 
 /// <summary>
-/// The daily extra escape roll (docs/features/war-chronicle.md, Part A): for every kingdom whose
+/// The daily extra escape roll (docs/features/war-chronicle.md, "Consumer 2: prisoner escape"): for every kingdom whose
 /// <see cref="WarEffectKind.PrisonerEscape"/> multiplier is above one, each captured lord that is eligible
 /// takes one extra roll and may escape. Host only; <c>WarChronicleTickService</c> calls it after the
 /// effects were expired and re-baked. A throwing engine read or a throwing escape is logged and skipped,

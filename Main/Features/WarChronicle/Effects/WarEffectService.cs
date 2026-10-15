@@ -7,7 +7,7 @@ using TAOM.Core.Validation;
 namespace TAOM.Features.WarChronicle.Effects;
 
 /// <summary>
-/// The timed-effect registry (docs/features/war-chronicle.md, Part A). The rows are the source of
+/// The timed-effect registry (docs/features/war-chronicle.md, "The timed-effect registry"). The rows are the source of
 /// truth; every multiplier is baked from them with the MCM strength on Apply, RemoveSource, Expire and
 /// Restore, and swapped in as one new dictionary, so <see cref="GetMultiplier"/> is a
 /// lock-free dictionary lookup and an array read on a map that never changes under a reader.

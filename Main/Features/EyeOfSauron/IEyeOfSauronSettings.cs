@@ -15,7 +15,10 @@ public interface IEyeOfSauronSettings
 
     int HuntTimeoutDays { get; }
 
-    /// <summary>The hunter's speed floor in sight, as a multiple of the player's speed.</summary>
+    /// <summary>
+    /// The hunter's speed floor within 1.5 of the player's seeing ranges, as a multiple of the
+    /// player's speed.
+    /// </summary>
     float HunterSpeedMultiplier { get; }
 
     /// <summary>The host's target strength, as a multiple of the player's.</summary>

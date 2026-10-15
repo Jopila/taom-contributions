@@ -9,7 +9,7 @@ namespace TAOM.Features.WarChronicle;
 /// <summary>
 /// The War Chronicle as a feature module (docs/features/war-chronicle.md, issue #765): the timed-effect
 /// registry, the baselines, the rally, the war ledger and the chronicle's event chain with its army-focus
-/// windows; the Eye of Sauron hunt comes in a later milestone.
+/// windows. The Eye of Sauron hunt is a separate module (<c>EyeOfSauronModule</c>).
 /// Both campaign behaviors are built fresh for each campaign (a lambda body, not a container singleton)
 /// because their constructors reset the per-campaign singletons; WarChronicleWiringTests pins the shape.
 /// </summary>
@@ -35,8 +35,8 @@ internal sealed class WarChronicleModule : TaomFeatureModule
     public override string Id => "WarChronicle";
 
     /// <summary>
-    /// <c>WarChronicleBehavior</c> persists the effects, baselines, rally tiers and chronicle rows in SyncData;
-    /// the events behavior saves nothing.
+    /// <c>WarChronicleBehavior</c> persists the effects, baselines, rally tiers, chronicle rows, first-seen
+    /// phase days and the daily gate's days in SyncData; the events behavior saves nothing.
     /// </summary>
     public override bool OwnsSaveData => true;
 

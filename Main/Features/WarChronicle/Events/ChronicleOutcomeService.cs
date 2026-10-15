@@ -10,7 +10,7 @@ using TAOM.Features.WarOfTheRingMomentum;
 namespace TAOM.Features.WarChronicle.Events;
 
 /// <summary>
-/// What a chronicle resolution writes (docs/features/war-chronicle.md "Events"): the outcome's timed
+/// What a chronicle resolution writes (docs/features/war-chronicle.md "The event chain"): the outcome's timed
 /// effects into the shared registry, its optional momentum award, and one <c>[WarLedger] ev=chronicle</c>
 /// line. Lapsed and Skipped write the ledger line only.
 ///
