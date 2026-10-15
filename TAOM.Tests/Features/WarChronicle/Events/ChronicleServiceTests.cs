@@ -1319,6 +1319,79 @@ public class ChronicleServiceTests
     }
 
     [TestMethod]
+    public void OpenChronicleEventNow_DryRunBeforeAnyLaunch_CreatesNoRow()
+    {
+        _f.Events.Add(Narrative("fellowship"));
+        _f.World.Day = 3;
+
+        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason));
+
+        StringAssert.Contains(reason, "no saved row");
+        Assert.IsNull(_f.Store.Get("fellowship"), "a dry run must not adopt the row");
+    }
+
+    [TestMethod]
+    public void OpenChronicleEventNow_DryRunAfterFullWarBegins_RecordsNoPhaseDay()
+    {
+        _f.Phase = WarPhase.IsengardWar;
+        _f.Events.Add(Narrative("fellowship"));
+        Launch(0);
+        _f.Phase = WarPhase.FullWar;
+        _f.World.Day = 10;
+
+        _sut.OpenChronicleEventNow("fellowship", dryRun: true, out _);
+
+        Assert.IsNull(_f.Store.GetPhaseSeenDay(WarPhase.FullWar), "a dry run must not note the first Full War day");
+    }
+
+    /// <summary>
+    /// Parity: the dry run and the confirmed open on the same fixture agree on whether the open acts, and the
+    /// dry run's predicted outcome is the state the confirmed open leaves.
+    /// </summary>
+    [DataTestMethod]
+    [DataRow("narrative", "would occur", ChronicleEventState.Occurred, DisplayName = "narrative occurs")]
+    [DataRow("siege-open", "would open its window", ChronicleEventState.Active, DisplayName = "siege opens")]
+    [DataRow("siege-fell", "would resolve Fell", ChronicleEventState.Fell, DisplayName = "siege Fell at open")]
+    [DataRow("precondition", "would stay Pending", ChronicleEventState.Pending, DisplayName = "precondition fails")]
+    public void OpenChronicleEventNow_DryRunThenConfirm_AgreeOnTheOutcome(string shape, string predicted, ChronicleEventState endState)
+    {
+        string id;
+        switch (shape)
+        {
+            case "narrative":
+                id = "fellowship";
+                _f.Events.Add(Narrative(id, effects: Effect("rivendell")));
+                Launch(0);
+                break;
+            case "siege-open":
+                id = "hornburg";
+                _f.Events.Add(SiegeDef());
+                Launch(0);
+                break;
+            case "siege-fell":
+                id = "hornburg";
+                _f.Events.Add(SiegeDef());
+                Launch(0);
+                _f.World.Owners["town_V2"] = "isengard";
+                break;
+            default:
+                id = "hornburg";
+                _f.Events.Add(SiegeDef());
+                Launch(0);
+                _f.World.Owners["town_V2"] = "rivendell";
+                break;
+        }
+        _f.World.Day = 3;
+
+        var dryActed = _sut.OpenChronicleEventNow(id, dryRun: true, out var dryReason);
+        var acted = _sut.OpenChronicleEventNow(id, dryRun: false, out var reason);
+
+        Assert.AreEqual(acted, dryActed, $"dry run: {dryReason} / confirmed: {reason}");
+        StringAssert.Contains(dryReason, predicted);
+        Assert.AreEqual(endState, _f.StateOf(id), $"dry run predicted '{dryReason}'");
+    }
+
+    [TestMethod]
     public void Status_ListsEveryEventWithItsStateAndDays()
     {
         _f.Events.Add(Narrative("fellowship"));
