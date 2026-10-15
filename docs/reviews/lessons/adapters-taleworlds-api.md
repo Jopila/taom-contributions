@@ -1028,6 +1028,10 @@ presenter's map check mirrors it.
   `== null` and missed the hunt's `!= null` (Codex #792 F2).
 - **Prevent:** check `Campaign.Current?.MainParty`. `MainPartyNullCheckScanTests` rejects both polarities, the
   reversed and `is` forms and, since 2026-10-14, a `PartyBase.MainParty?.` read; the seven such reads in
-  `EncounterAdapter` and `PartyItemRosterAdapter` now read `Campaign.Current?.MainParty?.Party`.
+  `EncounterAdapter` and `PartyItemRosterAdapter` now read `Campaign.Current?.MainParty?.Party`. It catches the
+  getter written directly or in its own parentheses, and `??` on it (Codex F1 found the parenthesised form). It
+  cannot see a check through a local alias: `PlayerEquipmentAdapter`, `TroopWeightDisplayHook` and
+  `EnlistmentBattleBehavior.IsMainPartyIn` each null-checked a local copy, are converted, and are pinned by
+  name in the same test class.
 - **Source:** `docs/reviews/rca-review-followups-2026-10-14.md`; `docs/reviews/rca-war-chronicle-events-2026-10-14.md`
   C08.
