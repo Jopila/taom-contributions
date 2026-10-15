@@ -3705,3 +3705,14 @@ the merlon face only work with the rotation.
   bounds) so the engine is known to read both the same way.
 - **Source:** issue #797; `docs/kitbash/erebor/design-patterns.md` "The frame rule",
   `docs/kitbash/erebor-buildings.md`.
+
+### A gate that runs only inside Claude Code does not gate a plain-git commit (Harad repair, 2026-10-15)
+`08b30bfc4` replaced the Harad troop tree with plain git and `776054c0c` followed it; the commit hooks fire only in
+Claude Code and CI was removed on 2026-10-05 (`c8d69a0dc`), so neither commit met a gate. The first Claude commit after
+them was refused for 7 skill regressions and 6 career-kit drifts, with 6 C# tests red as well. The eye-of-Sauron and
+WildMesh RCAs of 2026-10-14 and 2026-10-15 record the same red trunk.
+- **Why missed:** each gate was written and tested for Claude-driven commits; nothing checks a commit made elsewhere.
+- **Prevent:** when a session meets a red gate on a file it did not touch, `git log` that file first: a commit from
+  outside Claude Code is the usual source, and the repair starts from its diff. A gate for every committer (a
+  repository git hook, a required check on the GitHub remote, or CI) is Mike's decision and owed as an issue.
+- **Source:** [rca-harad-repair-2026-10-15.md](../rca-harad-repair-2026-10-15.md) pattern A.

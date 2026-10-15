@@ -974,3 +974,15 @@ there by hand during review, so the recipe the new writer was cloned from still 
   step), and its parity test checks the row; then the coverage gate shows the 12 languages as owed. A gate that
   also counts inline Armory keys with no root row is a follow-up.
 - **Source:** [rca-wildmesh-mounts-2026-10-15.md](../rca-wildmesh-mounts-2026-10-15.md) row 5.
+
+### A name generator that globs a folder registers whatever lands in it (Harad repair, 2026-10-15)
+`generate_name_localization_strings.py` reads every `characters/*.xml` for its `character_name` category. `08b30bfc4`
+added `taom_vanilla_troop_obsolete_overrides.xml`, 40 retired vanilla troops under their vanilla `{=KEY}` names, so
+the generator wanted to register 40 vanilla keys as TAOM rows, which would load later and replace vanilla's own
+translations, and its shipped-tree test went red.
+- **Why missed:** the category excluded the files other categories own by name, and nothing asked whether a new file
+  in the folder carries vanilla keys.
+- **Prevent:** exclude a file that keeps vanilla `{=KEY}` names from every TAOM name category, with a test naming it
+  (`test_CharacterNameSources_ExcludeFilesOtherCategoriesOwn`). Before an `--apply`, read what it adds: a key without
+  the `aom_`/`taom_` shape is a vanilla key.
+- **Source:** [rca-harad-repair-2026-10-15.md](../rca-harad-repair-2026-10-15.md) finding 11.

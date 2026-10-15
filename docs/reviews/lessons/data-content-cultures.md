@@ -1985,3 +1985,16 @@ Arthedain's Arnor armour is tagged Gondor and its Númenórean blades untagged, 
 - **Why missed:** the wiring tool and `StarterKitCoverageTests` counted a culture as covered when the culture-default file defined its rosters, without asking whether those rosters win the merge. The entry above ("belongs on the element the schema keys") covers where the flag goes, not that a new same-id roster needs it.
 - **Prevent:** `wire_starter_kit_rosters.py` gives the flag to every culture-default roster whose id vanilla defines and refuses it on any roster vanilla lacks (that one would merge into the first roster of the document). `StarterKitCoverageTests` counts a vanilla culture with its own rosters only when each youth roster carries the flag, and the wiring tests check the committed file against vanilla's ids. Before adding a roster under a vanilla id anywhere, read which roster the consumer takes first.
 - **Source:** `docs/reviews/rca-orc-goblin-locomotion-2026-10-14.md` finding W1-1; #795.
+
+### A player kit copied from a troop inherits its launcher's difficulty: cap it (Harad enlistment, 2026-10-15)
+The enlistment generator gave the new Shaghana and Abanissa archer kits, and a hand copy gave the Aserai archer
+sergeant, the Harad ladder bows their donor troops carry. Every Harad ladder bow is `difficulty="100"`, inherited from
+the donor bow, and the quartermaster puts the kit in the inventory, so `CharacterHelper.CanUseItem` refused it to any
+enlistee under Bow 100. An NPC troop never meets that check; a player does.
+- **Why missed:** `generate_career_kits.py` keeps the lowest-difficulty launcher and `generate_starter_kit.py` forces 0,
+  but `generate_enlistment_rosters.py` has no rule, and no gate reads launcher difficulty (`RANGED_DAMAGE_CEILING`
+  reads damage). The validator, the career check and the full suite passed with the bug present.
+- **Prevent:** a kit a player equips by hand takes a launcher he can equip at that rank: check `difficulty` against
+  what the rank can have, never only the donor's kit. `EnlistmentArcherLauncherDataTests` pins the Harad-sphere
+  chains; a generator cap and a validator check over every player-applied roster are owed (18 older kits).
+- **Source:** [rca-harad-repair-2026-10-15.md](../rca-harad-repair-2026-10-15.md) findings 1 and 2.
