@@ -465,35 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[Гундабад] Бледный урук — пиконосец-разбойник" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[Гундабад] Бледный урук-пехотинец" />
     <string id="aom_gundabad_warg_tamer_name" text="[Гундабад] Бледный урук — волчий всадник" />
-    <string id="aom_harad_archer_name" text="[Харад] Пустынный лучник" />
-    <string id="aom_harad_bronzefang_name" text="[Харад] Бронзовый клык" />
-    <string id="aom_harad_camel_lancer_name" text="[Харад] Верблюжий улан" />
-    <string id="aom_harad_camelrider_name" text="[Харад] Верблюжий всадник" />
-    <string id="aom_harad_camelscout_name" text="[Харад] Верблюжий разведчик" />
-    <string id="aom_harad_champion_name" text="[Харад] Поборник" />
-    <string id="aom_harad_fangking_name" text="[Харад] Клык короля" />
-    <string id="aom_harad_footman_name" text="[Харад] Пехотинец" />
-    <string id="aom_harad_gildedfang_name" text="[Харад] Воин Золочёного клыка" />
-    <string id="aom_harad_horsearcher_name" text="[Харад] Всадник Золотой завесы" />
-    <string id="aom_harad_levy_name" text="[Харад] Призывник" />
-    <string id="aom_harad_marksman_name" text="[Харад] Стрелок" />
     <string id="aom_harad_militia_archer_name" text="[Харад] Лучник-ополченец" />
-    <string id="aom_harad_militia_name" text="[Харад] Ополченец" />
     <string id="aom_harad_militia_spearman_name" text="[Харад] Копейщик-ополченец" />
     <string id="aom_harad_militia_vet_arch_name" text="[Харад] Опытный лучник-ополченец" />
     <string id="aom_harad_militia_vet_spear_name" text="[Харад] Опытный копейщик-ополченец" />
-    <string id="aom_harad_noble_name" text="[Харад] Юнец Змея" />
-    <string id="aom_harad_sandblade_name" text="[Харад] Послушник Песчаных Клинков" />
-    <string id="aom_harad_serpent_eye_name" text="[Харад] Змеиные Очи" />
-    <string id="aom_harad_serpentguard_name" text="[Харад] Змеиный гвардеец" />
-    <string id="aom_harad_serpenthorsearcher_name" text="[Харад] Змеиный лучник" />
-    <string id="aom_harad_skirmisher_name" text="[Харад] Застрельщик" />
-    <string id="aom_harad_spearfighter_name" text="[Харад] Боец с копьём" />
-    <string id="aom_harad_spearguard_name" text="[Харад] Копейная стража" />
-    <string id="aom_harad_sunlance_name" text="[Харад] Солнечное копьё" />
-    <string id="aom_harad_swordfighter_name" text="[Харад] Боец с мечом" />
-    <string id="aom_harad_vipereye_name" text="[Харад] Гадюка" />
-    <string id="aom_harad_warlance_name" text="[Харад] Боевое копьё" />
     <string id="aom_imladris_archer_name" text="[Ривенделл] Лучник Имладриса" />
     <string id="aom_lindon_imladris_archer_name" text="[Линдон] Лучник Митлонда" />
     <string id="aom_imladris_blademaster_name" text="[Ривенделл] Мастер клинка Имладриса" />
@@ -600,7 +575,6 @@
     <string id="aom_merc_gondor_loss_lumberman_name" text="[Гондор] Наёмный дровосек Лоссарнаха" />
     <string id="aom_merc_gundabad_fighter_name" text="[Гундабад] Наёмный бледный урук-налётчик" />
     <string id="aom_merc_gundabad_scout_name" text="[Гундабад] Наёмный разведчик" />
-    <string id="aom_merc_harad_noble_name" text="[Харад] Наёмный юнец Змея" />
     <string id="aom_merc_imladris_bowman_name" text="[Ривенделл] Наёмный стрелок Имладриса" />
     <string id="aom_lindon_imladris_bowman_merc_name" text="[Линдон] Наёмный лучник Митлонда" />
     <string id="aom_merc_lindon_noble_name" text="[Линдон] Наёмный знатный воин" />

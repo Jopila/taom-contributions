@@ -159,7 +159,7 @@ T1–T4 troops only (vanilla bandits never field elite kingdom troops):
 |---|---|---|---|---|
 | `dunland_raiders` | `dunland_peasant` (L6) | `dunland_raider`, `dunland_hunter` (L11) | `dunland_clan_warrior` (L16) | `dunland_raiders_boss` (L21) |
 | `rhun_raiders` | `balcoth_volunteer` (L11) | `balcoth_footman`, `kharaghul_rider` (L16) | `balcoth_archer` (L21) | `rhun_raiders_boss` (L21) |
-| `harad_raiders` | `harad_levy` (L6) | `harad_archer`, `harad_camelscout` (L16) | `harad_footman` (L21) | `harad_raiders_boss` (L21) |
+| `harad_raiders` | `harad_reg_levy` (L6) | `harad_reg_bowman` (L16) | `harad_reg_footman` (L21) | `harad_raiders_boss` (L21) |
 | `gundabad_raiders` | `gundabad_snaga`, `gundabad_hunter` (L11) | `gundabad_grunt`, `gundabad_lurker` (L16) | `gundabad_scout` (L21) | `gundabad_raiders_boss` (L26) |
 | `umbar_corsairs` | `aux_basic` (L6) | `umbar_elite`, `umbar_elite_root1` (L11-16) | `umbar_elite_root0` (L16) | `umbar_corsairs_boss` (L21) |
 

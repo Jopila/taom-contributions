@@ -16,9 +16,10 @@ namespace TAOM.Tests.Features.Enlistment;
 ///
 /// <para>The hazard is #431. A culture with no roster of its own does not fail, log or crash: the
 /// resolver walks out to <c>enlist_default_*</c>, which is tagged <c>Culture.neutral_culture</c>
-/// while being Rohan militia in Dunland boots. So <c>abanissa</c> and <c>shaghana</c>, 17 lord
-/// clans between them, quietly dress their soldiers as Rohan. Since #525 that kit carries weapons
-/// too, so the same gap now hands out the wrong faction's arms as well as its armour.</para>
+/// while being Rohan militia in Dunland boots. Until 2026-10-15 <c>abanissa</c> and
+/// <c>shaghana</c> (17 lord clans between them) quietly dressed their soldiers as Rohan; both
+/// now have kits, and this class keeps any main culture from sliding back. Since #525 that kit
+/// carries weapons too, so such a gap hands out the wrong faction's arms as well as its armour.</para>
 ///
 /// <para>These assert on what the resolver RETURNS, not on which ids exist. Under
 /// <c>enlist_{culture}_{assignment}_{rank}</c> a cell is legitimately absent whenever the
@@ -66,11 +67,8 @@ public class EnlistmentRosterCultureCoverageTests
     private static readonly HashSet<string> DocumentedExceptions =
         new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            // #431 — 8 abanissa and 9 shaghana lord clans whose soldiers are dressed as Rohan
-            // militia by the fallback. Blocked on a decision: author the rosters, or make the
-            // fallback genuinely culture-neutral so no future culture inherits the same answer.
-            "abanissa",
-            "shaghana",
+            // Empty since 2026-10-15: #431's last two cultures (shaghana, abanissa) got kits.
+            // Adding an entry still requires an issue.
         };
 
     private static readonly Regex CultureElement = new Regex(@"<Culture\b([^>]*?)/?>", RegexOptions.Compiled | RegexOptions.Singleline);
@@ -150,8 +148,8 @@ public class EnlistmentRosterCultureCoverageTests
 
     /// <summary>
     /// Every runtime culture a player can actually enlist under, derived from the TROOP DATA:
-    /// the culture of every non-hero Soldier in <c>troops_*.xml</c>, plus the two tree-borrowers
-    /// that own no troop file but bind to another culture's tree.
+    /// the culture of every non-hero Soldier in <c>troops_*.xml</c>, plus the three tree-borrowers
+    /// that own no troop of their own but bind to another culture's tree.
     ///
     /// <para>Derived from the troop data and NOT from the roster file, which is the whole point.
     /// An earlier version of this test parsed its culture list out of the very ids it was
@@ -184,6 +182,8 @@ public class EnlistmentRosterCultureCoverageTests
         // (taom_spcultures.xml / spcultures.xslt), so they ship rosters and are enlistable.
         cultures.Add("lothlorien");
         cultures.Add("battania");
+        // abanissa borrows the aserai tree; its basic and elite troops are harad_reg_levy and harad_serp_noble.
+        cultures.Add("abanissa");
 
         Assert.IsTrue(cultures.Count >= 20,
             $"Only {cultures.Count} enlistable cultures parsed from the troop data; the parse is "

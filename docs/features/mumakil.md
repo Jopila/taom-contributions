@@ -10,7 +10,7 @@
 The Mûmakil (the Oliphaunt) is a giant ridden Harad mount. Mechanically it is the War Elephant at **3× scale** with
 a distinct mesh + war-platform: it reuses the elephant rig (`elephant_skeleton`), the `as_elephant` action set, and
 **every** elephant animation clip — including the `act_elephant_attack_*` trample/tusk clips its behavior tree plays.
-It is recruitable only from Ayerikkä (`clan_aserai_1`).
+It is not a volunteer: players buy it from the Elite Emissary at Korb Taskral (`town_A1`) for War Drums (2800 each). Since 2026-10-15 it is in no recruitment pool and no party template, so no AI party fields it either (Mike, 2026-10-15: nobody recruits it).
 
 ## Why this exists — and why it was cheap to build
 
@@ -110,7 +110,7 @@ unification (#305) the formerly-cloned internals are SHARED:** `MumakilAttackSer
 | `lotr_monster_mumakil.xml` (LOTRLOME_Armory) | Monster `id="taom_mumakil"`, `action_set="as_elephant"`, `monster_usage="elephant"`, enlarged `<body_capsule>`. Registered in `LOTRLOME_Armory/SubModule.xml`. |
 | `LOTRAOM_horses.xml` (LOTRLOME_Armory) | Horse item `taom_mumakil`: mesh `sk_mumakil_basemesh_a1`, platform via `<AdditionalMeshes>`, **`body_length="300"`** (= 3.0×), no HorseHarness. |
 | `troops_harad.xml` | `harad_mumakil_rider` — `Cavalry`, spear + sword, Horse=`Item.taom_mumakil`, no HorseHarness. |
-| `VolunteerRecruitmentService.InitializeHaradClans` (in [`RecruitmentPools/VolunteerRecruitmentService.Harad.cs`](../../Main/Features/TroopProgression/RecruitmentPools/VolunteerRecruitmentService.Harad.cs) since the 2026-07-01 pool split, #308) | `harad_mumakil_rider` in `clan_aserai_1` (weight 1 of 12). |
+| `special_resources/troop_resource_costs.xml` and `elite_emissary/elite_emissary_config.xml` | `harad_mumakil_rider` costs War Drums: `merchant_cost="2800"` at the Elite Emissary (its `recruit_cost` 2000 times the elephant's 70/50 ratio), `recruit_cost="2000"` only for a captured rider recruited from prisoners, `daily_upkeep="500"`. The rider is in no pool ([`RecruitmentPools/VolunteerRecruitmentService.Harad.cs`](../../Main/Features/TroopProgression/RecruitmentPools/VolunteerRecruitmentService.Harad.cs)); it was `clan_aserai_1`'s weight 1 of 12 until 2026-10-15. |
 
 > **The Monster XML, Horse item, mesh, and SubModule.xml registration live in the external `LOTRLOME_Armory` module
 > (the game install), NOT this repo** — same as the elephant. They are not version-controlled here.
@@ -141,7 +141,7 @@ The mûmakil stays mount-locked, so a player only rides one they spawned on.
 
 - `MumakilAttackServiceTests` — 24 tests (IsCreatureMonster, ShouldEngage, IsOffCooldown, ComputeInflictedDamage),
   mirroring the elephant's. BT elements + mission behavior are tested via game (warg/elephant/ADR-008 precedent).
-- `VolunteerRecruitmentServiceTests` — the `clan_aserai_1` pool tests cover the new Mûmakil bucket (`Next(12)`).
+- `VolunteerRecruitmentServiceTests.AllPooledTroopIds_HaradCreatureRiders_AreNeverPooled`: pins that the Mûmakil rider (and the elephant rider) are in no pool; the reachability exemption is `EmissaryOnlyCreatureRiders`.
 
 ## How-to
 

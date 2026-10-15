@@ -29,9 +29,9 @@ MERC_SUFFIX = "_merc"
 
 # culture id -> [(source troop id, troop file stem, hired display name)]
 # Sources are the weight-1 entries of each culture's CultureMap pool in
-# Main/Features/TroopProgression/RecruitmentPools/ (weight 2 for Lothlorien, 3 for Umbar/Harad --
-# those pools have no weight-1 entry). Excluded by rule: creature mounts (taom_spider_creature)
-# and level-51 legendaries (rivendell_knight_golden_flower).
+# Main/Features/TroopProgression/RecruitmentPools/ (weight 2 for Lothlorien and Abanissa, 3 for
+# Umbar and Shaghana: those pools have no weight-1 entry). Excluded by rule: creature mounts
+# (taom_spider_creature) and level-51 legendaries (rivendell_knight_golden_flower).
 PICKS: dict[str, list[tuple[str, str, str]]] = {
     "mordor": [
         ("mordor_uruk_grunt", "mordor", "[Mordor] Hired Black Uruk Grunt"),
@@ -58,13 +58,14 @@ PICKS: dict[str, list[tuple[str, str, str]]] = {
         ("gundabad_scout", "gundabad", "[Gundabad] Hired Scout"),
     ],
     "goblin": [("goblin_fighter", "goblin", "[Goblin] Hired Goblin Raider")],
-    "mistymountainorcs": [
-        ("mistymountainorcs_fighter", "mistymountainorcs", "[Misty Mountains] Hired Orc Raider"),
-    ],
+    # troops_mistymountainorcs.xml is gone (f577bd547): the culture fields the goblin tree and
+    # taom_spcultures.xml binds its tavern to goblin_fighter_merc, the same copy goblin uses.
+    "mistymountainorcs": [("goblin_fighter", "goblin", "[Goblin] Hired Goblin Raider")],
     "dolguldur": [("dg_orc_scout", "dolguldur", "[Dol Guldur] Hired Orc Scout")],
     "umbar": [("umbar_elite", "umbar", "[Umbar] Hired Adûnaim Recruits")],
-    "shaghana": [("harad_noble", "harad", "[Harad] Hired Youngblood of the Serpent")],
-    "abanissa": [("harad_noble", "harad", "[Harad] Hired Youngblood of the Serpent")],
+    # Since the 2026-10-10 Harad rework each culture copies its own rarest pool entry.
+    "shaghana": [("harad_redserp_noble", "harad", "[Harad] Hired Red Serpent Noble")],
+    "abanissa": [("harad_pz_levy", "harad", "[Harad] Hired Pezarsan Levy")],
 }
 
 BANNER = (

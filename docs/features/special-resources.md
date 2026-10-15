@@ -119,8 +119,9 @@ Multiple `<Kingdom>` and `<Culture>` child elements map to the same resource (ma
 ```xml
 <!-- Upgrade target: charged on the party-screen upgrade (Patch26) -->
 <Troop id="mordor_uruk_darkblade" resource_id="war_spoils" upgrade_cost="2" daily_upkeep="0.1" />
-<!-- Recruitable volunteer: charged at recruitment (Patch51), not upgrade -->
-<Troop id="harad_elephant_rider" resource_id="war_drums" recruit_cost="50" daily_upkeep="10" />
+<!-- Charged at recruitment (Patch51), not upgrade. The elephant rider is in no pool since 2026-10-15:
+     merchant_cost is the Elite Emissary price, recruit_cost only a captured rider recruited from prisoners -->
+<Troop id="harad_elephant_rider" resource_id="war_drums" recruit_cost="50" daily_upkeep="10" merchant_cost="70" />
 <Troop id="taom_spider_creature" resource_id="war_spoils" recruit_cost="5" daily_upkeep="1" />
 <!-- Its upgrade rungs (#616): the climb costs War Spoils, the upkeep stays the creature rate -->
 <Troop id="taom_spider_rider_brown" resource_id="war_spoils" upgrade_cost="2" daily_upkeep="1" />
@@ -134,7 +135,7 @@ Three cost fields, any combination allowed per troop:
 | `recruit_cost` | Recruited as a volunteer (one-time) | Patch51 gate + `OnUnitRecruitedEvent` charge |
 | `daily_upkeep` | Every daily tick the troop is in the party | `OnDailyTickHero` → `GetDailyUpkeep` |
 
-`recruit_cost` exists because the elephant/spider are **volunteer recruits, not upgrade targets** — nothing
+`recruit_cost` exists because the spider (a Dol Guldur volunteer) and the Harad riders are **recruits, not upgrade targets**: nothing
 upgrades into them, so `upgrade_cost` would never fire. It is kept distinct from `upgrade_cost` so a troop
 that is both can't be double-charged. The **charged resource is always the player's resolved resource**
 (`ResolveResource(kingdom, culture)`); the `resource_id` attribute is documentation only. Fully data-driven:

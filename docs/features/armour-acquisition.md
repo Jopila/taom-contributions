@@ -526,6 +526,7 @@ The lord's gear ladder: #693. The base feature: none yet (see Owed).
 
 ## Changelog
 
+- 2026-10-15: the Harad Armourer's Commission rewards followed the 2026-10-10 Harad armour. `lotr_armourer_commission_harad` now rewards `sk_hr_st_chest_inf_chest_heavy_a` and `lotr_armourer_commission_shaghana` rewards `sk_sg_st_chest_inf_chest_heavy_a`; both paid the vanilla `aserai_scale_armor_on_chain` before.
 - 2026-10-14: the class generator now classes a piece by the item's own `Type`, not by its file. Harad's
   art drop filed four camel bardings (`Type="HorseHarness"`) in `body_armors.xml`, and classed by file they
   entered the class table as body armour, with 12 heavy Harad and Shaghana chests upgrading into the elite

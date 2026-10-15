@@ -99,8 +99,8 @@ cultures are **auto-composed**: a per-culture lore base colour with deterministi
 variation (each clan distinct, in-family), and archetype-rotated rosters. This is the only feasible way to
 reach ~190 clans; refine any clan by editing its spec JSON and re-running the generator.
 
-**Troopless cultures.** shaghana + abanissa field **Harad (aserai)** rosters (their culture config points
-there); Lothlorien fields **Rivendell**; **Khand (battania)** has no TAOM troop pool → **colours only**
+**Troopless cultures.** abanissa fields **Harad (aserai)** rosters (its culture config points
+there; shaghana owns its own troop lines since the 2026-10-10 Harad rework); Lothlorien fields **Rivendell**; **Khand (battania)** has no TAOM troop pool → **colours only**
 (no per-clan template, keeps its existing fallback) — authoring a Khand troop tree is a future task.
 
 ## Configuration

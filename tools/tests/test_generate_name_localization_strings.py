@@ -227,6 +227,9 @@ class DataTextCategoriesTests(unittest.TestCase):
         self.assertTrue(any(n.startswith("npcs_") for n in names))
         for owned in ("lords.xml", "clans.xml", "heroes.xml"):
             self.assertNotIn(owned, names)
+        # Retired vanilla troops keep their vanilla {=KEY} names, which vanilla's own language
+        # files translate; a TAOM row would load later and replace that translation.
+        self.assertNotIn("taom_vanilla_troop_obsolete_overrides.xml", names)
 
     def test_CategorySources_NeverIncludeUnloadedSettlementFiles(self):
         # settlements.xml in the repo shadows TAOM_Map's live file; custom_settlements.xml is

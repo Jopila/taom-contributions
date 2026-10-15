@@ -177,5 +177,13 @@ class ParseTroopsMountTests(unittest.TestCase):
                          'an equipmentType="Civilian" roster is not a battle set')
 
 
+class SeedMarkerTests(unittest.TestCase):
+    def test_the_seed_marker_is_a_legal_xml_comment(self):
+        # XML forbids "--" inside a comment, and the marker once named the flag, so every
+        # --seed-missing run refused its own output as malformed (2026-10-15).
+        import xml.etree.ElementTree as ET
+        ET.fromstring(f'<EquipmentRosters>\n    {ger.SEED_MARKER}\n</EquipmentRosters>')
+
+
 if __name__ == '__main__':
     unittest.main()

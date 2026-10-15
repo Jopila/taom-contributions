@@ -62,7 +62,7 @@ originals flipped to `Mercenary`. Occupation is not cosmetic: `TaomPartyWageMode
 [`TroopCostService`](../../Main/Features/TroopProgression/TroopCostService.cs) for a **×2 recruitment
 cost and ×1.5 wage** (`MercenaryRecruitMultiplier` / `MercenaryWageMultiplier`, lines 6-7). Flipping a
 shared line troop would have repriced it in notable recruitment and in every AI party and garrison
-fielding it — `harad_noble` alone appears in 14 party templates. The copies keep the originals at
+fielding it (the pre-2026-10-10 `harad_noble` alone appeared in 14 party templates). The copies keep the originals at
 `Soldier` and confine the mercenary economics to the tavern.
 
 **Leaf copies.** The `_merc` entries carry no `<upgrade_targets>`. Because the engine walks upgrades
@@ -106,10 +106,10 @@ One `<basic_mercenary_troops>` block per culture:
 </basic_mercenary_troops>
 ```
 
-### Current picks (21 troops, 14 cultures)
+### Current picks (24 `_merc` troops defined, 23 offered by 17 culture blocks)
 
 Sources are weight-1 pool entries unless noted; Lothlórien, Umbar and the two Harad cultures have no
-weight-1 entry, so they take their pool's minimum.
+weight-1 entry, so they take their pool's minimum. Shaghana and Abanissa each own a copy since 2026-10-15, after the 2026-10-10 Harad rework deleted the troop they shared.
 
 | Culture | Source troops → `_merc` copies | Weight |
 |---------|-------------------------------|--------|
@@ -122,10 +122,13 @@ weight-1 entry, so they take their pool's minimum.
 | `mirkwood` | `mirkwood_recruit` | 1 (pool's only entry) |
 | `dolguldur` | `dg_orc_scout` | 1 |
 | `goblin` | `goblin_fighter` | 1 |
-| `mistymountainorcs` | `mistymountainorcs_fighter` | 1 |
+| `mistymountainorcs` | `goblin_fighter` (the goblin tree's copy, since `troops_mistymountainorcs.xml` was removed) | 1 |
 | `lothlorien` | `imladris_bowman` | 2 |
 | `umbar` | `umbar_elite` | 3 |
-| `shaghana`, `abanissa` | `harad_noble` (shared Harad pool; one copy, two references) | 3 |
+| `shaghana` | `harad_redserp_noble` (copy of its rarest pool entry) | 3 |
+| `abanissa` | `harad_pz_levy` (the Pezarsan camel line root) | 2 |
+
+The blocks added later (not in the table above; their weights are not audited here): `lindon` (`lindon_noble_merc`; `lindon_imladris_bowman_merc` is defined but no block offers it), `arthedain` (`arthedain_dunadan_youth_merc`) and `bluecraig` (`goblin_fighter_merc`).
 
 Excluded by rule: creature mounts (`taom_spider_creature`, Dol Guldur weight 1) and level-51
 legendaries (`rivendell_knight_golden_flower`, Rivendell weight 1) — neither reads as a tavern hire.
@@ -148,8 +151,8 @@ verbatim, so a hired troop is mechanically identical to its source.
 
 | File | Purpose |
 |------|---------|
-| `Main/_Module/ModuleData/taom_spcultures.xml` | 14 `<basic_mercenary_troops>` blocks |
-| `Main/_Module/ModuleData/troops/troops_<culture>.xml` | the 21 `_merc` troops, in a `TAVERN MERCENARIES` section at the end of each file |
+| `Main/_Module/ModuleData/taom_spcultures.xml` | 17 `<basic_mercenary_troops>` blocks |
+| `Main/_Module/ModuleData/troops/troops_<culture>.xml` | the 24 `_merc` troops, in a `TAVERN MERCENARIES` section at the end of each file |
 | `tools/oneoff/generate_tavern_mercenaries.py` | idempotent generator; `PICKS` table is the source of truth for selection |
 | `Main/Features/TroopProgression/RecruitmentPools/*.cs` | `VolunteerChance` weights that decide which troops are "rarest" |
 | `Main/Features/TroopProgression/TroopCostService.cs` | the ×2 recruit / ×1.5 wage mercenary multipliers |
@@ -171,7 +174,7 @@ mercenary path.
 - `TAOM.Tests/Features/TroopProgression/VolunteerRecruitmentServiceTests.cs` —
   `AllNonMilitiaNonBossTroops_AreReachableFromARecruitmentPoolRoot` exempts `*_merc` alongside
   `*_militia_*` and `*_boss`: mercenaries are bought for gold, not volunteered. Without the exemption
-  the 21 copies read as orphaned troops.
+  the copies read as orphaned troops.
 
 ## How to add tavern mercenaries for a new culture
 
@@ -203,6 +206,7 @@ mercenary path.
 | Date | Change |
 |------|--------|
 | 2026-07-26 | Feature created. 21 `_merc` troops, 14 culture blocks repointed off vanilla's Calradian list. Player report: "Hired Pike" in Minas Morgul. |
+| 2026-10-15 | Harad rework follow-up. `harad_noble_merc` is deleted with the old tree; Shaghana now offers `harad_redserp_noble_merc` (weight 3) and Abanissa `harad_pz_levy_merc` (weight 2). Counts re-taken from the files: 24 `_merc` troops, 17 culture blocks. |
 
 ---
 

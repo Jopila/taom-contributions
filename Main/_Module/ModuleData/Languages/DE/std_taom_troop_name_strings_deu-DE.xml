@@ -465,35 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[Gundabad] Bleicher Uruk-Pikenräuber" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[Gundabad] Bleiche Uruk-Infanterie" />
     <string id="aom_gundabad_warg_tamer_name" text="[Gundabad] Bleicher Uruk-Wolfsreiter" />
-    <string id="aom_harad_archer_name" text="[Harad] Wüstenbogenschütze" />
-    <string id="aom_harad_bronzefang_name" text="[Harad] Bronzezahn" />
-    <string id="aom_harad_camel_lancer_name" text="[Harad] Kamellanzenreiter" />
-    <string id="aom_harad_camelrider_name" text="[Harad] Kamelreiter" />
-    <string id="aom_harad_camelscout_name" text="[Harad] Kamelkundschafter" />
-    <string id="aom_harad_champion_name" text="[Harad] Vorkämpfer" />
-    <string id="aom_harad_fangking_name" text="[Harad] Zahn des Königs" />
-    <string id="aom_harad_footman_name" text="[Harad] Fußsoldat" />
-    <string id="aom_harad_gildedfang_name" text="[Harad] Krieger des Goldenen Zahns" />
-    <string id="aom_harad_horsearcher_name" text="[Harad] Reiter des Goldenen Schleiers" />
-    <string id="aom_harad_levy_name" text="[Harad] Aufgebot" />
-    <string id="aom_harad_marksman_name" text="[Harad] Schütze" />
     <string id="aom_harad_militia_archer_name" text="[Harad] Miliz-Bogenschütze" />
-    <string id="aom_harad_militia_name" text="[Harad] Miliz" />
     <string id="aom_harad_militia_spearman_name" text="[Harad] Miliz-Speerträger" />
     <string id="aom_harad_militia_vet_arch_name" text="[Harad] Miliz-Veteranenbogenschütze" />
     <string id="aom_harad_militia_vet_spear_name" text="[Harad] Miliz-Veteranenspeerträger" />
-    <string id="aom_harad_noble_name" text="[Harad] Jungblut der Schlange" />
-    <string id="aom_harad_sandblade_name" text="[Harad] Novize der Sandklingen" />
-    <string id="aom_harad_serpent_eye_name" text="[Harad] Schlangenaugen" />
-    <string id="aom_harad_serpentguard_name" text="[Harad] Schlangenwache" />
-    <string id="aom_harad_serpenthorsearcher_name" text="[Harad] Schlangenbogenschütze" />
-    <string id="aom_harad_skirmisher_name" text="[Harad] Plänkler" />
-    <string id="aom_harad_spearfighter_name" text="[Harad] Speerkämpfer" />
-    <string id="aom_harad_spearguard_name" text="[Harad] Speerwache" />
-    <string id="aom_harad_sunlance_name" text="[Harad] Sonnenlanze" />
-    <string id="aom_harad_swordfighter_name" text="[Harad] Schwertkämpfer" />
-    <string id="aom_harad_vipereye_name" text="[Harad] Viper" />
-    <string id="aom_harad_warlance_name" text="[Harad] Kriegslanze" />
     <string id="aom_imladris_archer_name" text="[Bruchtal] Imladris-Bogenschütze" />
     <string id="aom_lindon_imladris_archer_name" text="[Lindon] Mithlond-Bogenschütze" />
     <string id="aom_imladris_blademaster_name" text="[Bruchtal] Imladris-Klingenmeister" />
@@ -600,7 +575,6 @@
     <string id="aom_merc_gondor_loss_lumberman_name" text="[Gondor] Angeheuerter Lossarnach-Holzfäller" />
     <string id="aom_merc_gundabad_fighter_name" text="[Gundabad] Angeheuerter Bleicher Uruk-Plünderer" />
     <string id="aom_merc_gundabad_scout_name" text="[Gundabad] Angeheuerter Späher" />
-    <string id="aom_merc_harad_noble_name" text="[Harad] Angeheuerter Jungspross der Schlange" />
     <string id="aom_merc_imladris_bowman_name" text="[Bruchtal] Angeheuerter Imladris-Schütze" />
     <string id="aom_lindon_imladris_bowman_merc_name" text="[Lindon] Angeheuerter Mithlond-Bogenschütze" />
     <string id="aom_merc_lindon_noble_name" text="[Lindon] Angeheuerter Edelmann" />

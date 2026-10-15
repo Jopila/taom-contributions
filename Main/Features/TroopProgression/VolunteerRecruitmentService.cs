@@ -56,7 +56,6 @@ public partial class VolunteerRecruitmentService : IVolunteerRecruitmentService
         InitializeRohanClans();
         InitializeRohanCulture();
         InitializeHaradCulture();
-        InitializeHaradClans();
         InitializeIsengardCulture();
         InitializeDunlandCulture();
         InitializeDunlandClans();

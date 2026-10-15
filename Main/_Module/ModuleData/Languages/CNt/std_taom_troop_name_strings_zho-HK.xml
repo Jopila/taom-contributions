@@ -465,35 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[剛達巴德] 白化強獸人長矛劫掠兵" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[剛達巴德] 白化強獸人步兵" />
     <string id="aom_gundabad_warg_tamer_name" text="[剛達巴德] 白化強獸人狼騎兵" />
-    <string id="aom_harad_archer_name" text="[哈拉德] 沙漠弓箭手" />
-    <string id="aom_harad_bronzefang_name" text="[哈拉德] 青銅獠牙" />
-    <string id="aom_harad_camel_lancer_name" text="[哈拉德] 駱駝槍騎兵" />
-    <string id="aom_harad_camelrider_name" text="[哈拉德] 駱駝騎兵" />
-    <string id="aom_harad_camelscout_name" text="[哈拉德] 駱駝斥候" />
-    <string id="aom_harad_champion_name" text="[哈拉德] 勇士" />
-    <string id="aom_harad_fangking_name" text="[哈拉德] 王之獠牙" />
-    <string id="aom_harad_footman_name" text="[哈拉德] 步兵" />
-    <string id="aom_harad_gildedfang_name" text="[哈拉德] 鎏金獠牙戰士" />
-    <string id="aom_harad_horsearcher_name" text="[哈拉德] 金紗騎手" />
-    <string id="aom_harad_levy_name" text="[哈拉德] 徵召兵" />
-    <string id="aom_harad_marksman_name" text="[哈拉德] 神射手" />
     <string id="aom_harad_militia_archer_name" text="[哈拉德] 民兵弓箭手" />
-    <string id="aom_harad_militia_name" text="[哈拉德] 民兵" />
     <string id="aom_harad_militia_spearman_name" text="[哈拉德] 民兵長矛兵" />
     <string id="aom_harad_militia_vet_arch_name" text="[哈拉德] 民兵老兵弓箭手" />
     <string id="aom_harad_militia_vet_spear_name" text="[哈拉德] 民兵老兵長矛兵" />
-    <string id="aom_harad_noble_name" text="[哈拉德] 毒蛇之裔新血" />
-    <string id="aom_harad_sandblade_name" text="[哈拉德] 沙刃見習者" />
-    <string id="aom_harad_serpent_eye_name" text="[哈拉德] 蛇眼" />
-    <string id="aom_harad_serpentguard_name" text="[哈拉德] 毒蛇衛隊" />
-    <string id="aom_harad_serpenthorsearcher_name" text="[哈拉德] 毒蛇弓騎手" />
-    <string id="aom_harad_skirmisher_name" text="[哈拉德] 散兵" />
-    <string id="aom_harad_spearfighter_name" text="[哈拉德] 長矛戰士" />
-    <string id="aom_harad_spearguard_name" text="[哈拉德] 長矛衛兵" />
-    <string id="aom_harad_sunlance_name" text="[哈拉德] 烈日槍騎" />
-    <string id="aom_harad_swordfighter_name" text="[哈拉德] 劍士" />
-    <string id="aom_harad_vipereye_name" text="[哈拉德] 蝮蛇" />
-    <string id="aom_harad_warlance_name" text="[哈拉德] 戰槍騎兵" />
     <string id="aom_imladris_archer_name" text="[瑞文戴爾] 伊姆拉崔弓手" />
     <string id="aom_lindon_imladris_archer_name" text="[林頓] 密斯隆德弓箭手" />
     <string id="aom_imladris_blademaster_name" text="[瑞文戴爾] 伊姆拉崔劍術大師" />
@@ -600,7 +575,6 @@
     <string id="aom_merc_gondor_loss_lumberman_name" text="[剛鐸] 僱傭羅薩那赫伐木人" />
     <string id="aom_merc_gundabad_fighter_name" text="[剛達巴德] 僱傭蒼白烏魯克掠襲者" />
     <string id="aom_merc_gundabad_scout_name" text="[剛達巴德] 僱傭斥候" />
-    <string id="aom_merc_harad_noble_name" text="[哈拉德] 僱傭毒蛇新血" />
     <string id="aom_merc_imladris_bowman_name" text="[瑞文戴爾] 受雇的伊姆拉崔射手" />
     <string id="aom_lindon_imladris_bowman_merc_name" text="[林頓] 僱傭米斯隆德弓手" />
     <string id="aom_merc_lindon_noble_name" text="[林頓] 僱傭貴族" />

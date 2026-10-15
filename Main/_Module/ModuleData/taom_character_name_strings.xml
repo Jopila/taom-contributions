@@ -653,6 +653,9 @@
 	<string id="aom_gondor_lord_2" text="{=aom_gondor_lord_2}Cautious Gondorian lord" />
 	<string id="aom_gundabad_lord_1" text="{=aom_gundabad_lord_1}Bold Gundabad captain" />
 	<string id="aom_gundabad_lord_2" text="{=aom_gundabad_lord_2}Cautious Gundabad captain" />
+	<string id="aom_harad_lord_archer_name" text="{=aom_harad_lord_archer_name}Lord of Harwan (Archer)" />
+	<string id="aom_harad_lord_cavalry_name" text="{=aom_harad_lord_cavalry_name}Lord of Harwan (Cavalry)" />
+	<string id="aom_harad_lord_infantry_name" text="{=aom_harad_lord_infantry_name}Lord of Harwan (Infantry)" />
 	<string id="aom_hd_arena" text="{=aom_hd_arena}Arena Master" />
 	<string id="aom_hd_armed_trader" text="{=aom_hd_armed_trader}Harad Armed Trader" />
 	<string id="aom_hd_armorer" text="{=aom_hd_armorer}Armorer" />
@@ -1333,6 +1336,9 @@
 	<string id="aom_rv_weaponsmith" text="{=aom_rv_weaponsmith}Weaponsmith" />
 	<string id="aom_shaghana_lord_1" text="{=aom_shaghana_lord_1}Bold Shaghana chieftain" />
 	<string id="aom_shaghana_lord_2" text="{=aom_shaghana_lord_2}Cautious Shaghana chieftain" />
+	<string id="aom_shaghana_lord_archer_name" text="{=aom_shaghana_lord_archer_name}Lord of Shaghana (Archer)" />
+	<string id="aom_shaghana_lord_cavalry_name" text="{=aom_shaghana_lord_cavalry_name}Lord of Shaghana (Cavalry)" />
+	<string id="aom_shaghana_lord_infantry_name" text="{=aom_shaghana_lord_infantry_name}Lord of Shaghana (Infantry)" />
 	<string id="aom_spc_wanderer_ab_0_name" text="{=aom_spc_wanderer_ab_0_name}{FIRSTNAME} Phaxar-dal" />
 	<string id="aom_spc_wanderer_ab_1_name" text="{=aom_spc_wanderer_ab_1_name}{FIRSTNAME} Hoshed-van" />
 	<string id="aom_spc_wanderer_ab_2_name" text="{=aom_spc_wanderer_ab_2_name}{FIRSTNAME} Vasnar-tal" />

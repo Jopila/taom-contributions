@@ -64,8 +64,8 @@ SOURCES_FOR = {
     # never had careers at all — they sat in CareerCultureCoverageTests' documentedExceptions from
     # Review #24 until 2026-08-11. Aserai is the nearest peer on the evidence: Shaghâna's own NPC
     # file says it "uses harad face templates and aserai civilian equipment", both cultures carry
-    # a *DesertSpeedFeat, and VolunteerRecruitmentService already routes shaghana volunteers to
-    # harad_levy. Roles stay faithful to the source trio — infantry, javelineer, beast-rider.
+    # a *DesertSpeedFeat, and VolunteerRecruitmentService then routed shaghana volunteers to the
+    # Harad levy. Roles stay faithful to the source trio — infantry, javelineer, beast-rider.
     "shaghana": [("tribesman_of_jelut", "toj"), ("pezarsani_javelineer", "pj"),
                  ("mahud_beast_rider", "mbr")],
     "abanissa": [("tribesman_of_jelut", "toj"), ("pezarsani_javelineer", "pj"),

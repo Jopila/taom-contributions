@@ -98,9 +98,9 @@ co-op refusal was added 2026-08-03 from field testing.
   enemy. Affordability still self-gates the normal case (you only hold a faction's resource if you fight for it).
 - **Purchases are not party-size-capped.** `GrantTroop` adds the bought troops regardless of
   `PartySizeLimit` (like quest/ransom troop rewards). Buying over the cap is allowed; the player chose to.
-- **Creature troops** (`taom_spider_creature`, `harad_elephant_rider`) were already player-recruitable as
-  volunteers before this feature, so selling them via the emissary reaches no new command path — their
-  native-crash mitigations already cover player-party instances. (Smoke-test that a bought spider mounts
+- **Creature troops** (`taom_spider_creature`, `harad_elephant_rider`, `harad_mumakil_rider`): the spider is
+  still a Dol Guldur volunteer and the elephant rider was a volunteer before this feature, so selling them via
+  the emissary reaches no new command path; their native-crash mitigations already cover player-party instances. (Smoke-test that a bought spider mounts
   correctly, since the emissary is a new ownership entry point.)
 - **Greeting-flag lifecycle is hardened.** `_pendingEmissaryHeroId` (which gates the emissary greeting so it
   only fires for the menu-launched conversation, never a normal notable chat) is cleared in both
@@ -149,7 +149,9 @@ co-op refusal was added 2026-08-03 from field testing.
 | rivendell | Rivendell (`town_R1`) | Elven Wine | high_captain, knight_golden_flower, glorfindel_guard |
 | vlandia (Rohan) | Edoras (`town_V1`) | Marks | golden_hall_supreme_rider, kings_own_* |
 | khuzait (Rhun) | Mistrand (`town_RU1`) | War Banners | dragon_wrath_obsidian_*, warlord_chariot |
-| aserai (Harad) | Korb Taskral (`town_A1`) | War Drums | elephant_rider |
+| aserai (Harad) | Korb Taskral (`town_A1`) | War Drums | elephant_rider (70), mumakil_rider (2800) |
+
+Since 2026-10-15 the two Harad riders are Emissary-only: neither is in any volunteer pool, so this is the only way a player gets one. Their `recruit_cost` (50 and 2000) charges only a captured rider recruited from prisoners.
 
 Omitted (no L36+ elites): Dale (sturgia), Dunland (empire), Umbar, Khand (battania), Lothlorien.
 Omitted (no special-resource mapping): goblin, mistymountainorcs.

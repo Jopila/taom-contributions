@@ -3662,7 +3662,7 @@
       <template name="NPCCharacter.tournament_template_aserai_four_participant_set_v3" />
     </tournament_team_templates_four_participant>
     <basic_mercenary_troops>
-      <template name="NPCCharacter.harad_noble_merc" />
+      <template name="NPCCharacter.harad_redserp_noble_merc" />
     </basic_mercenary_troops>
   </Culture>
 
@@ -3918,7 +3918,7 @@
       <template name="NPCCharacter.tournament_template_aserai_four_participant_set_v3" />
     </tournament_team_templates_four_participant>
     <basic_mercenary_troops>
-      <template name="NPCCharacter.harad_noble_merc" />
+      <template name="NPCCharacter.harad_pz_levy_merc" />
     </basic_mercenary_troops>
   </Culture>
 

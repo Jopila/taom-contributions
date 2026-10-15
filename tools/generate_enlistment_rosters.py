@@ -91,6 +91,10 @@ DEFAULT_GAME_ROOT = r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord"
 
 RANKS = ['recruit', 'soldier', 'veteran', 'sergeant']
 
+# The marker --seed-missing writes above the rosters it appends. XML forbids a double hyphen
+# inside a comment, so it must not spell the flag.
+SEED_MARKER = '<!-- seeded by generate_enlistment_rosters.py (seed-missing) -->'
+
 # Mirrors TAOM.Features.Enlistment.Content.Domain.ServiceAssignment. The order here is this
 # file's output order and carries no meaning; the C# enum's ordinals are what persist.
 ASSIGNMENTS = ['infantry', 'archer', 'cavalry', 'support']
@@ -318,10 +322,15 @@ DEFAULT_CULTURE = 'neutral_culture'
 #                             NOT in taom_spcultures.xml): basic_troop=NPCCharacter.loke_rim_initiate,
 #                             elite_basic_troop=NPCCharacter.loke_rim_cavalry
 #                             -- identical to the Culture[@id='khuzait'] template's Rhun bindings.
-# If either culture ever ships its own troops file, its real tree wins and the alias is dropped.
+#   abanissa   -> aserai      taom_spcultures.xml Culture id="abanissa": basic_troop=
+#                             NPCCharacter.harad_reg_levy, elite_basic_troop=NPCCharacter.harad_serp_noble,
+#                             the same as spcultures.xslt Culture[@id='aserai'] (verified 2026-10-15;
+#                             the troops carry Culture.aserai, so abanissa owns none of its own).
+# If any of them ever ships its own troops file, its real tree wins and the alias is dropped.
 TREE_ALIASES = {
     'lothlorien': 'rivendell',
     'battania': 'khuzait',
+    'abanissa': 'aserai',
 }
 
 
@@ -767,13 +776,14 @@ def file_header():
         '  vlandia=Rohan, empire=Dunland, aserai=Harad, khuzait=Rhun, sturgia=Dale,\n'
         '  battania=Khand, lothlorien=Galadhrim.\n'
         '\n'
-        '  lothlorien and battania define no troops_*.xml file of their OWN, but both bind\n'
+        '  lothlorien, battania and abanissa define no troops_*.xml file of their OWN, but each binds\n'
         "  to another culture's tree, so they are NOT rosterless: taom_spcultures.xml gives\n"
         '  lothlorien basic_troop=imladris_recruit / elite_basic_troop=imladris_infantry,\n'
         '  i.e. the same Rivendell tree rivendell itself uses; spcultures.xslt gives\n'
         '  battania (Variag/Khand) basic_troop=loke_rim_initiate /\n'
-        "  elite_basic_troop=loke_rim_cavalry, i.e. khuzait's Rhun tree. Their rosters\n"
-        "  therefore mirror rivendell and khuzait rank-for-rank (the generator's\n"
+        "  elite_basic_troop=loke_rim_cavalry, i.e. khuzait's Rhun tree. abanissa binds\n"
+        "  harad_reg_levy / harad_serp_noble, aserai's Harad tree. Their rosters therefore\n"
+        "  mirror rivendell, khuzait and aserai rank-for-rank (the generator's\n"
         '  TREE_ALIASES map reproduces them).\n'
         '\n'
         '  A cell is ABSENT when its group pool has no donor within one band of the rank. That is\n'
@@ -1002,7 +1012,7 @@ def main():
         if not new_blocks:
             print('\n--seed-missing: nothing to add (all roster ids already present).')
             return
-        insert = ('\n    <!-- seeded by generate_enlistment_rosters.py --seed-missing -->\n'
+        insert = (f'\n    {SEED_MARKER}\n'
                   + '\n'.join(new_blocks) + '\n\n</EquipmentRosters>')
         updated = existing.replace('</EquipmentRosters>', insert, 1)
         parse_written(updated)

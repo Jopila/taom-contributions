@@ -68,29 +68,13 @@ public class VolunteerRecruitmentServiceTests
         Assert.IsNull(result);
     }
 
-    // --- Harad elephant + mûmakil riders: recruitable ONLY by clan_aserai_1 (Ayerikkä) ---
-    // Clan pool [harad_levy:7, harad_noble:3, harad_elephant_rider:1, harad_mumakil_rider:1] (total 12):
-    // cumulative [7,10,11,12] → roll 10 = elephant rider, roll 11 = mûmakil rider.
-    // Per troops.md, the clan pool SHADOWS the aserai culture fallback, so it copies levy/noble too.
+    // --- Harad creature riders are Elite Emissary purchases, never volunteers (maintainer, 2026-10-15) ---
+    // clan_aserai_1 (Ayerikka) has no clan pool: it falls to the aserai culture pool like every other Harad clan.
 
     [TestMethod]
-    public void GetVolunteerTroopId_ClanAserai1_ElephantBucket_RollsElephantRider()
+    public void GetVolunteerTroopId_ClanAserai1_NoClanPool_ResolvesThroughAseraiCulturePool()
     {
-        _random.Next(12).Returns(10);
-        var context = new VolunteerContext(
-            settlementId: null,
-            boundSettlementId: null,
-            ownerClanId: "clan_aserai_1",
-            cultureId: "aserai");
-
-        var result = _sut.GetVolunteerTroopId(context);
-
-        Assert.AreEqual("harad_elephant_rider", result);
-    }
-
-    [TestMethod]
-    public void GetVolunteerTroopId_ClanAserai1_TopBucket_RollsMumakilRider()
-    {
+        // Culture pool [reg_levy:7, serp_noble:3, pz_levy:2] (total 12): roll 11 is the Pezarsan levy.
         _random.Next(12).Returns(11);
         var context = new VolunteerContext(
             settlementId: null,
@@ -100,29 +84,24 @@ public class VolunteerRecruitmentServiceTests
 
         var result = _sut.GetVolunteerTroopId(context);
 
-        Assert.AreEqual("harad_mumakil_rider", result);
+        Assert.AreEqual("harad_pz_levy", result);
     }
 
     [TestMethod]
-    public void GetVolunteerTroopId_ClanAserai1_LowBucket_StillRollsNormalHaradLevy()
+    public void AllPooledTroopIds_HaradCreatureRiders_AreNeverPooled()
     {
-        _random.Next(12).Returns(0);
-        var context = new VolunteerContext(
-            settlementId: null,
-            boundSettlementId: null,
-            ownerClanId: "clan_aserai_1",
-            cultureId: "aserai");
+        var pooled = new HashSet<string>(VolunteerRecruitmentService.AllPooledTroopIds());
 
-        var result = _sut.GetVolunteerTroopId(context);
-
-        Assert.AreEqual("harad_levy", result);
+        Assert.IsFalse(pooled.Contains("harad_elephant_rider"), "the War Elephant Rider is Emissary-only");
+        Assert.IsFalse(pooled.Contains("harad_mumakil_rider"), "the Mumakil Rider is Emissary-only");
     }
 
     [TestMethod]
     public void GetVolunteerTroopId_AseraiCulture_NoClanPool_NeverRollsElephantRider()
     {
-        // Culture fallback pool [levy:7, noble:3] (total 10): top bucket (roll 9) is noble, NOT the rider.
-        _random.Next(10).Returns(9);
+        // Culture fallback pool [reg_levy:7, serp_noble:3, pz_levy:2] (total 12): top bucket (roll 11) is the
+        // Pezarsan levy, NOT the rider.
+        _random.Next(12).Returns(11);
         var context = new VolunteerContext(
             settlementId: null,
             boundSettlementId: null,
@@ -131,14 +110,29 @@ public class VolunteerRecruitmentServiceTests
 
         var result = _sut.GetVolunteerTroopId(context);
 
-        Assert.AreEqual("harad_noble", result);
+        Assert.AreEqual("harad_pz_levy", result);
+    }
+
+    [TestMethod]
+    public void GetVolunteerTroopId_AseraiCulture_NobleBucket_RollsSerpentNoble()
+    {
+        _random.Next(12).Returns(9);
+        var context = new VolunteerContext(
+            settlementId: null,
+            boundSettlementId: null,
+            ownerClanId: null,
+            cultureId: "aserai");
+
+        var result = _sut.GetVolunteerTroopId(context);
+
+        Assert.AreEqual("harad_serp_noble", result);
     }
 
     [TestMethod]
     public void GetVolunteerTroopId_OtherAseraiClan_FallsToCulture_NeverRollsElephantRider()
     {
         // A different aserai clan has no clan pool -> falls to the culture fallback -> no rider available.
-        _random.Next(10).Returns(9);
+        _random.Next(12).Returns(11);
         var context = new VolunteerContext(
             settlementId: null,
             boundSettlementId: null,
@@ -147,7 +141,7 @@ public class VolunteerRecruitmentServiceTests
 
         var result = _sut.GetVolunteerTroopId(context);
 
-        Assert.AreEqual("harad_noble", result);
+        Assert.AreEqual("harad_pz_levy", result);
     }
 
     [TestMethod]
@@ -856,7 +850,7 @@ public class VolunteerRecruitmentServiceTests
     // --- Shaghâna culture fallback ---
 
     [TestMethod]
-    public void GetVolunteerTroopId_ShaghânaCulture_ReturnsHaradLevy()
+    public void GetVolunteerTroopId_ShaghânaCulture_ReturnsSouthronLevy()
     {
         _random.Next(Arg.Any<int>()).Returns(0);
         var context = new VolunteerContext(
@@ -867,13 +861,13 @@ public class VolunteerRecruitmentServiceTests
 
         var result = _sut.GetVolunteerTroopId(context);
 
-        Assert.AreEqual("harad_levy", result);
+        Assert.AreEqual("harad_sreg_levy", result);
     }
 
     [TestMethod]
-    public void GetVolunteerTroopId_ShaghânaCulture_HighRoll_ReturnsHaradNoble()
+    public void GetVolunteerTroopId_ShaghânaCulture_HighRoll_ReturnsRedSerpentNoble()
     {
-        // Culture pool: harad_levy(7) + harad_noble(3) = total 10
+        // Culture pool: harad_sreg_levy(7) + harad_redserp_noble(3) = total 10
         _random.Next(10).Returns(7);
         var context = new VolunteerContext(
             settlementId: null,
@@ -883,20 +877,20 @@ public class VolunteerRecruitmentServiceTests
 
         var result = _sut.GetVolunteerTroopId(context);
 
-        Assert.AreEqual("harad_noble", result);
+        Assert.AreEqual("harad_redserp_noble", result);
     }
 
     [TestMethod]
-    [DataRow("clan_shaghana_1", "harad_levy")]
-    [DataRow("clan_shaghana_2", "harad_levy")]
-    [DataRow("clan_shaghana_3", "harad_levy")]
-    [DataRow("clan_shaghana_4", "harad_levy")]
-    [DataRow("clan_shaghana_5", "harad_levy")]
-    [DataRow("clan_shaghana_6", "harad_levy")]
-    [DataRow("clan_shaghana_7", "harad_levy")]
-    [DataRow("clan_shaghana_8", "harad_levy")]
-    [DataRow("clan_shaghana_9", "harad_levy")]
-    public void GetVolunteerTroopId_ShaghânaClans_ReturnHaradLevy(string clanId, string expectedTroopId)
+    [DataRow("clan_shaghana_1", "harad_sreg_levy")]
+    [DataRow("clan_shaghana_2", "harad_sreg_levy")]
+    [DataRow("clan_shaghana_3", "harad_sreg_levy")]
+    [DataRow("clan_shaghana_4", "harad_sreg_levy")]
+    [DataRow("clan_shaghana_5", "harad_sreg_levy")]
+    [DataRow("clan_shaghana_6", "harad_sreg_levy")]
+    [DataRow("clan_shaghana_7", "harad_sreg_levy")]
+    [DataRow("clan_shaghana_8", "harad_sreg_levy")]
+    [DataRow("clan_shaghana_9", "harad_sreg_levy")]
+    public void GetVolunteerTroopId_ShaghânaClans_ReturnSouthronLevy(string clanId, string expectedTroopId)
     {
         _random.Next(Arg.Any<int>()).Returns(0);
         var context = new VolunteerContext(
@@ -913,7 +907,7 @@ public class VolunteerRecruitmentServiceTests
     // --- Âbanissa culture fallback ---
 
     [TestMethod]
-    public void GetVolunteerTroopId_AbanissaCulture_ReturnsHaradLevy()
+    public void GetVolunteerTroopId_AbanissaCulture_ReturnsRegularLevy()
     {
         _random.Next(Arg.Any<int>()).Returns(0);
         var context = new VolunteerContext(
@@ -924,14 +918,14 @@ public class VolunteerRecruitmentServiceTests
 
         var result = _sut.GetVolunteerTroopId(context);
 
-        Assert.AreEqual("harad_levy", result);
+        Assert.AreEqual("harad_reg_levy", result);
     }
 
     [TestMethod]
-    public void GetVolunteerTroopId_AbanissaCulture_HighRoll_ReturnsHaradNoble()
+    public void GetVolunteerTroopId_AbanissaCulture_NobleBucket_ReturnsSerpentNoble()
     {
-        // Culture pool: harad_levy(7) + harad_noble(3) = total 10
-        _random.Next(10).Returns(7);
+        // Culture pool: harad_reg_levy(7) + harad_serp_noble(3) + harad_pz_levy(2) = total 12
+        _random.Next(12).Returns(7);
         var context = new VolunteerContext(
             settlementId: null,
             boundSettlementId: null,
@@ -940,19 +934,34 @@ public class VolunteerRecruitmentServiceTests
 
         var result = _sut.GetVolunteerTroopId(context);
 
-        Assert.AreEqual("harad_noble", result);
+        Assert.AreEqual("harad_serp_noble", result);
     }
 
     [TestMethod]
-    [DataRow("clan_abanissa_1", "harad_levy")]
-    [DataRow("clan_abanissa_2", "harad_levy")]
-    [DataRow("clan_abanissa_3", "harad_levy")]
-    [DataRow("clan_abanissa_4", "harad_levy")]
-    [DataRow("clan_abanissa_5", "harad_levy")]
-    [DataRow("clan_abanissa_6", "harad_levy")]
-    [DataRow("clan_abanissa_7", "harad_levy")]
-    [DataRow("clan_abanissa_8", "harad_levy")]
-    public void GetVolunteerTroopId_AbanissaClans_ReturnHaradLevy(string clanId, string expectedTroopId)
+    public void GetVolunteerTroopId_AbanissaCulture_TopBucket_ReturnsPezarsanLevy()
+    {
+        _random.Next(12).Returns(11);
+        var context = new VolunteerContext(
+            settlementId: null,
+            boundSettlementId: null,
+            ownerClanId: null,
+            cultureId: "abanissa");
+
+        var result = _sut.GetVolunteerTroopId(context);
+
+        Assert.AreEqual("harad_pz_levy", result);
+    }
+
+    [TestMethod]
+    [DataRow("clan_abanissa_1", "harad_reg_levy")]
+    [DataRow("clan_abanissa_2", "harad_reg_levy")]
+    [DataRow("clan_abanissa_3", "harad_reg_levy")]
+    [DataRow("clan_abanissa_4", "harad_reg_levy")]
+    [DataRow("clan_abanissa_5", "harad_reg_levy")]
+    [DataRow("clan_abanissa_6", "harad_reg_levy")]
+    [DataRow("clan_abanissa_7", "harad_reg_levy")]
+    [DataRow("clan_abanissa_8", "harad_reg_levy")]
+    public void GetVolunteerTroopId_AbanissaClans_ReturnRegularLevy(string clanId, string expectedTroopId)
     {
         _random.Next(Arg.Any<int>()).Returns(0);
         var context = new VolunteerContext(
@@ -964,6 +973,55 @@ public class VolunteerRecruitmentServiceTests
         var result = _sut.GetVolunteerTroopId(context);
 
         Assert.AreEqual(expectedTroopId, result);
+    }
+
+    [TestMethod]
+    [DataRow("clan_abanissa_1")]
+    [DataRow("clan_abanissa_2")]
+    [DataRow("clan_abanissa_3")]
+    [DataRow("clan_abanissa_4")]
+    [DataRow("clan_abanissa_5")]
+    [DataRow("clan_abanissa_6")]
+    [DataRow("clan_abanissa_7")]
+    [DataRow("clan_abanissa_8")]
+    public void GetVolunteerTroopId_AbanissaClans_TopBucket_ReturnsPezarsanLevy(string clanId)
+    {
+        // Clan pool [reg_levy:7, serp_noble:3, pz_levy:2] (total 12): roll 11 is the Pezarsan levy.
+        _random.Next(12).Returns(11);
+        var context = new VolunteerContext(
+            settlementId: null,
+            boundSettlementId: null,
+            ownerClanId: clanId,
+            cultureId: "abanissa");
+
+        var result = _sut.GetVolunteerTroopId(context);
+
+        Assert.AreEqual("harad_pz_levy", result);
+    }
+
+    [TestMethod]
+    [DataRow("clan_shaghana_1")]
+    [DataRow("clan_shaghana_2")]
+    [DataRow("clan_shaghana_3")]
+    [DataRow("clan_shaghana_4")]
+    [DataRow("clan_shaghana_5")]
+    [DataRow("clan_shaghana_6")]
+    [DataRow("clan_shaghana_7")]
+    [DataRow("clan_shaghana_8")]
+    [DataRow("clan_shaghana_9")]
+    public void GetVolunteerTroopId_ShaghânaClans_TopBucket_ReturnsRedSerpentNoble(string clanId)
+    {
+        // Clan pool [sreg_levy:7, redserp_noble:3] (total 10): roll 9 is the Red Serpent noble.
+        _random.Next(10).Returns(9);
+        var context = new VolunteerContext(
+            settlementId: null,
+            boundSettlementId: null,
+            ownerClanId: clanId,
+            cultureId: "shaghana");
+
+        var result = _sut.GetVolunteerTroopId(context);
+
+        Assert.AreEqual("harad_redserp_noble", result);
     }
 
     // --- Lothlorien settlement verifications (temporarily borrows Rivendell troops) ---
@@ -2952,7 +3010,17 @@ public class VolunteerRecruitmentServiceTests
            // enter a party roster: no pool offers them and no troop upgrades into them (#627).
            || troopId == ElephantConfig.HowdahCrewCharacterId
            || BorrowedCultureCapstones.Contains(troopId)
+           || EmissaryOnlyCreatureRiders.Contains(troopId)
            || BlackNumenoreanLine.Contains(troopId);
+
+    // Bought from the Elite Emissary for War Drums (special resources), never volunteered
+    // (maintainer, 2026-10-15). An EXPLICIT SET, not a prefix, for the reason under BlackNumenoreanLine.
+    private static readonly System.Collections.Generic.HashSet<string> EmissaryOnlyCreatureRiders =
+        new System.Collections.Generic.HashSet<string>
+        {
+            "harad_elephant_rider",
+            "harad_mumakil_rider",
+        };
 
     // Blue Craig and the Misty Mountain Orcs field the shared goblin tree. Each kept exactly one
     // bespoke top-tier troop so its elite slot stays its own, the same shape Umbar keeps umbar_elite

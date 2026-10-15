@@ -20,7 +20,7 @@
 		</Equipments>
 	</NPCCharacter>
 
-	<!-- Villager (upgrades to harad_levy) -->
+	<!-- Villager (upgrades to harad_reg_levy) -->
 	<NPCCharacter id="villager_harad" default_group="Infantry" level="1" name="{=aom_hd_villager}Villager" occupation="Villager" culture="Culture.aserai">
 		<face><face_key_template value="BodyProperty.fighter_haradrim" /></face>
 		<skills>

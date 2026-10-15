@@ -88,7 +88,7 @@ public class VolunteerRecruitmentConversionTests
 
     [TestMethod]
     [DataRow("vlandia", "rohan_wold_recruit")]
-    [DataRow("aserai", "harad_levy")]
+    [DataRow("aserai", "harad_reg_levy")]
     public void GetVolunteerTroopId_ConvertedToNewlyPooledCulture_ResolvesItsTroop(string cultureId, string expectedTroop)
     {
         var context = new VolunteerContext(

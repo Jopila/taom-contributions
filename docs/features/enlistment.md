@@ -958,8 +958,9 @@ Known and accepted: a save made mid-duty under the old model may leave its spawn
 the map with nothing to destroy it. They are ordinary bandit parties the engine already manages.
 
 **Equipment.** `enlist_{runtimeCultureId}_{assignment}_{rank}` rosters in
-`equipmentsets/taom_enlistment_equipment.xml` (268: 252 culture cells out of a possible 320, over
-20 cultures × 4 assignments × 4 ranks, plus 16 culture-neutral defaults), seeded from each
+`equipmentsets/taom_enlistment_equipment.xml` (312: 296 culture cells out of a possible 368, over
+23 cultures × 4 assignments × 4 ranks, plus 16 culture-neutral defaults, counts from
+`tools/audit_enlistment_roster_coverage.py` on 2026-10-15), seeded from each
 culture's own troop tree by `tools/generate_enlistment_rosters.py`, so kit is race-correct by
 construction. Drawn from the quartermaster once per rank into party inventory (not
 auto-equipped).
@@ -980,7 +981,7 @@ the wrong role at the right rank. (An earlier draft justified the ordering as a 
 invariant. It is not: the roster is keyed on the commander's culture, so it cannot know the
 player's race under either ordering. See the known limitation below.)
 
-**68 of the 320 cells are absent by design.** A cell is omitted when its donor pool holds nothing
+**72 of the 368 cells are absent by design.** A cell is omitted when its donor pool holds nothing
 within one band of the rank, when the resulting kit would repeat one the player already drew at a
 lower rank, or when it would give less protection than he is already wearing, measured per hit
 zone rather than by a single stat (a body piece contributes body AND leg armour, a cape body AND
@@ -990,6 +991,15 @@ sort key: filtering donors by
 Mirkwood cavalry recruit drew a level-41 kit. Where a culture would otherwise own no roster at a
 rank at all (bluecraig and mistymountainorcs each ship a single level-36 troop), the cap yields
 rather than let the player fall out to human militia gear.
+
+**Shaghana and Abanissa have their own kits (2026-10-15).** They were #431's last two documented
+exceptions, falling out to the neutral default; shaghana gained 14 generated kits and abanissa 15,
+abanissa through the `TREE_ALIASES` entry `'abanissa': 'aserai'` in the generator (it owns no troops,
+its tree is the aserai one). `DocumentedExceptions` in `EnlistmentRosterCultureCoverageTests` is now
+empty. The Harad-sphere archer kits (aserai sergeant, the shaghana and abanissa chains) carry the
+vanilla steppe bows (`composite_bow` 30/51, `steppe_heavy_bow` 30/52, `composite_steppe_bow` 30/52,
+`steppe_war_bow` 50/54 as difficulty/damage), because every Harad ladder bow needs Bow 100 and the
+player equips the kit by hand; `EnlistmentArcherLauncherDataTests` pins it.
 
 **A cell is never emitted weaponless.** That is not a nicety: the resolver probes *existence*, so
 an armour-only roster would end the fallback walk and shadow the armed kit the player would

@@ -146,7 +146,7 @@ Required attributes:
 | `color` | `0xffRRGGBB` | Primary culture color (hex ARGB) |
 | `color2` | `0xffRRGGBB` | Secondary color |
 | `can_have_settlement` | `true` | Required |
-| `basic_troop` | `NPCCharacter.harad_levy` | Reuse a TAOM culture's, never a vanilla one |
+| `basic_troop` | `NPCCharacter.harad_reg_levy` | Reuse a TAOM culture's, never a vanilla one |
 | `elite_basic_troop` | `NPCCharacter.{id}_elite` | Culture-specific, or inherited from a TAOM culture |
 | `melee_militia_troop` | `NPCCharacter.harad_militia_spearman` | Reuse a TAOM culture's |
 | `ranged_militia_troop` | `NPCCharacter.harad_militia_archer` | Reuse a TAOM culture's |
@@ -506,7 +506,7 @@ town-owning cultures shipped fielding Calradians (fixed 2026-08-12).
 
 | Resource | Inherit from | How |
 |----------|-------------|-----|
-| Basic troop | The nearest TAOM culture | `basic_troop="NPCCharacter.harad_levy"` in culture |
+| Basic troop | The nearest TAOM culture | `basic_troop="NPCCharacter.harad_reg_levy"` in culture |
 | Militia troops | The nearest TAOM culture | `melee_militia_troop="NPCCharacter.harad_militia_spearman"` |
 | Party templates | Another TAOM culture's twelve | `default_party_template="PartyTemplate.kingdom_hero_party_harad_template"`, and bind ALL of them: see the [party-template binding contract](culture-playability-wiring.md) |
 | Crowd NPCs | The nearest TAOM culture | `guard="NPCCharacter.guard_harad"` etc. in culture attributes |

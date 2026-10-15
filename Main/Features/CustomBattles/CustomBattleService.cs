@@ -132,7 +132,7 @@ public class CustomBattleService : ICustomBattleService
 
             // With no vanilla pick, a non-fitting troop is still better than null: the slot list ignores it either way,
             // but CustomBattleHelper.PopulateListsWithDefaults spawns the default unchecked when the slot is empty
-            // (a culture with no soldiers of its own, Abanissa and Shaghana), and a null default for slots 0-2 throws
+            // (a culture with no soldiers of its own, such as Abanissa), and a null default for slots 0-2 throws
             // at Start once that slot has troops to spawn (a null horse-archer default is redistributed instead).
             return candidates.FirstOrDefault(id => IsEligibleForSlot(id, culture.Id, formationIndex))
                 ?? (vanillaHasPick ? null : candidates.FirstOrDefault(CharacterExists));

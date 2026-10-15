@@ -125,7 +125,9 @@
     </Culture>
 
     <Culture id="aserai">
+      <!-- The only way a player gets either rider: neither is a volunteer (Mike, 2026-10-15). -->
       <Troop id="harad_elephant_rider" />
+      <Troop id="harad_mumakil_rider" />
     </Culture>
   </CultureOffers>
 </EliteEmissary>

@@ -487,36 +487,56 @@
 	<string id="aom_gundabad_veteran_spear_warrior_name" text="{=aom_gundabad_veteran_spear_warrior_name}[Gundabad] Pale Uruk Pike-Reaver" />
 	<string id="aom_gundabad_veteran_sword_warrior_name" text="{=aom_gundabad_veteran_sword_warrior_name}[Gundabad] Pale Uruk Infantry" />
 	<string id="aom_gundabad_warg_tamer_name" text="{=aom_gundabad_warg_tamer_name}[Gundabad] Pale Uruk Wolf Rider" />
-	<string id="aom_harad_archer_name" text="{=aom_harad_archer_name}[Harad] Desert Archer" />
-	<string id="aom_harad_bronzefang_name" text="{=aom_harad_bronzefang_name}[Harad] Bronze Fang" />
-	<string id="aom_harad_camel_lancer_name" text="{=aom_harad_camel_lancer_name}[Harad] Camel Lancer" />
-	<string id="aom_harad_camelrider_name" text="{=aom_harad_camelrider_name}[Harad] Camel Rider" />
-	<string id="aom_harad_camelscout_name" text="{=aom_harad_camelscout_name}[Harad] Camel Scout" />
-	<string id="aom_harad_champion_name" text="{=aom_harad_champion_name}[Harad] Champion" />
-	<string id="aom_harad_fangking_name" text="{=aom_harad_fangking_name}[Harad] Fang of the King" />
-	<string id="aom_harad_footman_name" text="{=aom_harad_footman_name}[Harad] Footman" />
-	<string id="aom_harad_gildedfang_name" text="{=aom_harad_gildedfang_name}[Harad] Warrior of the Gilded Fang" />
-	<string id="aom_harad_horsearcher_name" text="{=aom_harad_horsearcher_name}[Harad] Rider of the Golden Veil" />
 	<string id="aom_harad_howdah_crew_name" text="{=aom_harad_howdah_crew_name}[Harad] Howdah Archer" />
-	<string id="aom_harad_levy_name" text="{=aom_harad_levy_name}[Harad] Levy" />
-	<string id="aom_harad_marksman_name" text="{=aom_harad_marksman_name}[Harad] Marksman" />
 	<string id="aom_harad_militia_archer_name" text="{=aom_harad_militia_archer_name}[Harad] Militia Archer" />
-	<string id="aom_harad_militia_name" text="{=aom_harad_militia_name}[Harad] Militia" />
 	<string id="aom_harad_militia_spearman_name" text="{=aom_harad_militia_spearman_name}[Harad] Militia Spearman" />
 	<string id="aom_harad_militia_vet_arch_name" text="{=aom_harad_militia_vet_arch_name}[Harad] Militia Veteran Archer" />
 	<string id="aom_harad_militia_vet_spear_name" text="{=aom_harad_militia_vet_spear_name}[Harad] Militia Veteran Spearman" />
-	<string id="aom_harad_noble_name" text="{=aom_harad_noble_name}[Harad] Youngblood of the Serpent" />
-	<string id="aom_harad_sandblade_name" text="{=aom_harad_sandblade_name}[Harad] Initiate of the Sand Blades" />
-	<string id="aom_harad_serpent_eye_name" text="{=aom_harad_serpent_eye_name}[Harad] Serpent Eyes" />
-	<string id="aom_harad_serpentguard_name" text="{=aom_harad_serpentguard_name}[Harad] Serpent Guard" />
-	<string id="aom_harad_serpenthorsearcher_name" text="{=aom_harad_serpenthorsearcher_name}[Harad] Serpent Archer" />
-	<string id="aom_harad_skirmisher_name" text="{=aom_harad_skirmisher_name}[Harad] Skirmisher" />
-	<string id="aom_harad_spearfighter_name" text="{=aom_harad_spearfighter_name}[Harad] Spear Fighter" />
-	<string id="aom_harad_spearguard_name" text="{=aom_harad_spearguard_name}[Harad] Spear Guard" />
-	<string id="aom_harad_sunlance_name" text="{=aom_harad_sunlance_name}[Harad] Sunlance" />
-	<string id="aom_harad_swordfighter_name" text="{=aom_harad_swordfighter_name}[Harad] Sword Fighter" />
-	<string id="aom_harad_vipereye_name" text="{=aom_harad_vipereye_name}[Harad] Viper" />
-	<string id="aom_harad_warlance_name" text="{=aom_harad_warlance_name}[Harad] Warlance" />
+	<string id="aom_harad_pz_camel_lancer_name" text="{=aom_harad_pz_camel_lancer_name}[Harad] Pezarsan Camel Lancer" />
+	<string id="aom_harad_pz_camel_marauder_name" text="{=aom_harad_pz_camel_marauder_name}[Harad] Pezarsan Camel Marauder" />
+	<string id="aom_harad_pz_camel_rider_name" text="{=aom_harad_pz_camel_rider_name}[Harad] Pezarsan Camel Rider" />
+	<string id="aom_harad_pz_dune_cataphract_name" text="{=aom_harad_pz_dune_cataphract_name}[Harad] Pezarsan Dune Cataphract" />
+	<string id="aom_harad_pz_levy_name" text="{=aom_harad_pz_levy_name}[Harad] Pezarsan Levy" />
+	<string id="aom_harad_redserp_archer_name" text="{=aom_harad_redserp_archer_name}[Harad] Red Serpent Archer" />
+	<string id="aom_harad_redserp_bowman_name" text="{=aom_harad_redserp_bowman_name}[Harad] Red Serpent Bowman" />
+	<string id="aom_harad_redserp_cavalry_name" text="{=aom_harad_redserp_cavalry_name}[Harad] Red Serpent Cavalry" />
+	<string id="aom_harad_redserp_footman_name" text="{=aom_harad_redserp_footman_name}[Harad] Red Serpent Footman" />
+	<string id="aom_harad_redserp_guard_name" text="{=aom_harad_redserp_guard_name}[Harad] Red Serpent Guard" />
+	<string id="aom_harad_redserp_infantry_name" text="{=aom_harad_redserp_infantry_name}[Harad] Red Serpent Infantry" />
+	<string id="aom_harad_redserp_lancer_name" text="{=aom_harad_redserp_lancer_name}[Harad] Red Serpent Lancer" />
+	<string id="aom_harad_redserp_marksman_name" text="{=aom_harad_redserp_marksman_name}[Harad] Red Serpent Marksman" />
+	<string id="aom_harad_redserp_noble_name" text="{=aom_harad_redserp_noble_name}[Harad] Red Serpent Noble" />
+	<string id="aom_harad_reg_archer_name" text="{=aom_harad_reg_archer_name}[Harad] Harad Archer" />
+	<string id="aom_harad_reg_bowman_name" text="{=aom_harad_reg_bowman_name}[Harad] Harad Bowman" />
+	<string id="aom_harad_reg_cavalry_name" text="{=aom_harad_reg_cavalry_name}[Harad] Harad Cavalry" />
+	<string id="aom_harad_reg_footman_name" text="{=aom_harad_reg_footman_name}[Harad] Harad Footman" />
+	<string id="aom_harad_reg_horseman_name" text="{=aom_harad_reg_horseman_name}[Harad] Harad Horseman" />
+	<string id="aom_harad_reg_infantry_name" text="{=aom_harad_reg_infantry_name}[Harad] Harad Infantry" />
+	<string id="aom_harad_reg_levy_name" text="{=aom_harad_reg_levy_name}[Harad] Harad Levy" />
+	<string id="aom_harad_reg_militia_name" text="{=aom_harad_reg_militia_name}[Harad] Harad Militia" />
+	<string id="aom_harad_reg_scout_arc_name" text="{=aom_harad_reg_scout_arc_name}[Harad] Harad Scout" />
+	<string id="aom_harad_reg_scout_cav_name" text="{=aom_harad_reg_scout_cav_name}[Harad] Harad Scout" />
+	<string id="aom_harad_reg_warrior_name" text="{=aom_harad_reg_warrior_name}[Harad] Harad Warrior" />
+	<string id="aom_harad_serp_archer_name" text="{=aom_harad_serp_archer_name}[Harad] Serpent Archer" />
+	<string id="aom_harad_serp_bowman_name" text="{=aom_harad_serp_bowman_name}[Harad] Serpent Bowman" />
+	<string id="aom_harad_serp_cavalry_name" text="{=aom_harad_serp_cavalry_name}[Harad] Serpent Cavalry" />
+	<string id="aom_harad_serp_footman_name" text="{=aom_harad_serp_footman_name}[Harad] Serpent Footman" />
+	<string id="aom_harad_serp_guard_name" text="{=aom_harad_serp_guard_name}[Harad] Serpent Guard" />
+	<string id="aom_harad_serp_infantry_name" text="{=aom_harad_serp_infantry_name}[Harad] Serpent Infantry" />
+	<string id="aom_harad_serp_lancer_name" text="{=aom_harad_serp_lancer_name}[Harad] Serpent Lancer" />
+	<string id="aom_harad_serp_marksman_name" text="{=aom_harad_serp_marksman_name}[Harad] Serpent Marksman" />
+	<string id="aom_harad_serp_noble_name" text="{=aom_harad_serp_noble_name}[Harad] Serpent Noble" />
+	<string id="aom_harad_sreg_archer_name" text="{=aom_harad_sreg_archer_name}[Harad] Southron Archer" />
+	<string id="aom_harad_sreg_bowman_name" text="{=aom_harad_sreg_bowman_name}[Harad] Southron Bowman" />
+	<string id="aom_harad_sreg_cavalry_name" text="{=aom_harad_sreg_cavalry_name}[Harad] Southron Cavalry" />
+	<string id="aom_harad_sreg_footman_name" text="{=aom_harad_sreg_footman_name}[Harad] Southron Footman" />
+	<string id="aom_harad_sreg_horseman_name" text="{=aom_harad_sreg_horseman_name}[Harad] Southron Horseman" />
+	<string id="aom_harad_sreg_infantry_name" text="{=aom_harad_sreg_infantry_name}[Harad] Southron Infantry" />
+	<string id="aom_harad_sreg_levy_name" text="{=aom_harad_sreg_levy_name}[Harad] Southron Levy" />
+	<string id="aom_harad_sreg_militia_name" text="{=aom_harad_sreg_militia_name}[Harad] Southron Militia" />
+	<string id="aom_harad_sreg_scout_arc_name" text="{=aom_harad_sreg_scout_arc_name}[Harad] Southron Scout" />
+	<string id="aom_harad_sreg_scout_cav_name" text="{=aom_harad_sreg_scout_cav_name}[Harad] Southron Scout" />
+	<string id="aom_harad_sreg_warrior_name" text="{=aom_harad_sreg_warrior_name}[Harad] Southron Warrior" />
 	<string id="aom_hill_troll_name" text="{=aom_hill_troll_name}[AMordor] Hill Troll" />
 	<string id="aom_imladris_archer_name" text="{=aom_imladris_archer_name}[Rivendell] Imladris Archer" />
 	<string id="aom_imladris_blademaster_name" text="{=aom_imladris_blademaster_name}[Rivendell] Imladris Blademaster" />
@@ -632,7 +652,8 @@
 	<string id="aom_merc_gondor_loss_lumberman_name" text="{=aom_merc_gondor_loss_lumberman_name}[Gondor] Hired Lossarnach Lumberman" />
 	<string id="aom_merc_gundabad_fighter_name" text="{=aom_merc_gundabad_fighter_name}[Gundabad] Hired Pale Uruk Raider" />
 	<string id="aom_merc_gundabad_scout_name" text="{=aom_merc_gundabad_scout_name}[Gundabad] Hired Scout" />
-	<string id="aom_merc_harad_noble_name" text="{=aom_merc_harad_noble_name}[Harad] Hired Youngblood of the Serpent" />
+	<string id="aom_merc_harad_pz_levy_name" text="{=aom_merc_harad_pz_levy_name}[Harad] Hired Pezarsan Levy" />
+	<string id="aom_merc_harad_redserp_noble_name" text="{=aom_merc_harad_redserp_noble_name}[Harad] Hired Red Serpent Noble" />
 	<string id="aom_merc_imladris_bowman_name" text="{=aom_merc_imladris_bowman_name}[Rivendell] Hired Imladris Bowman" />
 	<string id="aom_merc_lindon_noble_name" text="{=aom_merc_lindon_noble_name}[Lindon] Hired Noble" />
 	<string id="aom_merc_mirkwood_recruit_name" text="{=aom_merc_mirkwood_recruit_name}[Mirkwood] Hired Silvan Levy" />

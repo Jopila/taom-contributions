@@ -529,90 +529,6 @@
     </NPCCharacter>
 
 
-    <!-- ===== TAVERN MERCENARIES =====
-         Dedicated Mercenary-occupation copies of this culture's rarest recruitment-pool
-         troops, referenced from <basic_mercenary_troops> in taom_spcultures.xml. Leaves by
-         design: RecruitmentCampaignBehavior walks UpgradeTargets when picking a town's offer.
-         Do NOT add upgrade_targets here. -->
-
-    <NPCCharacter
-        id="harad_noble_merc"
-        default_group="Cavalry"
-        level="11"
-        name="{=aom_merc_harad_noble_name}[Harad] Hired Youngblood of the Serpent"
-        occupation="Mercenary"
-        is_basic_troop="true"
-        culture="Culture.aserai">
-        <face>
-            <face_key_template
-                value="BodyProperty.fighter_haradrim" />
-        </face>
-        <skills>
-            <skill
-                id="Athletics"
-                value="60" />
-            <skill
-                id="Riding"
-                value="80" />
-            <skill
-                id="OneHanded"
-                value="60" />
-            <skill
-                id="TwoHanded"
-                value="25" />
-            <skill
-                id="Polearm"
-                value="55" />
-            <skill
-                id="Bow"
-                value="20" />
-            <skill
-                id="Crossbow"
-                value="5" />
-            <skill
-                id="Throwing"
-                value="15" />
-        </skills>
-        <Equipments>
-            <EquipmentRoster>
-                <equipment
-                    slot="Item0"
-                    id="Item.aserai_lance_1_t5" />
-                <equipment
-                    slot="Item1"
-                    id="Item.ornate_adarga" />
-                <equipment
-                    slot="Item2"
-                    id="Item.eastern_javelin_3_t4" />
-                <equipment
-                    slot="Head"
-                    id="Item.sk_hr_st_helmet_light_a" />
-                <equipment
-                    slot="Body"
-                    id="Item.sk_hr_st_chest_cav_light_a" />
-                <equipment
-                    slot="Gloves"
-                    id="Item.sk_hr_st_bracer_light_a" />
-                <equipment
-                    slot="Leg"
-                    id="Item.sk_hr_st_grvs_light_a" />
-                <equipment
-                    slot="Cape"
-                    id="Item.sk_hr_st_pauld_cav_light_a" />
-            </EquipmentRoster>
-            <EquipmentSet
-                id="aserai_troop_civilian_template_t3"
-                equipmentType="Civilian" />
-            <equipment
-                slot="Horse"
-                id="Item.t2_khuzait_horse" />
-            <equipment
-                slot="HorseHarness"
-                id="Item.desert_cloth_harness" />
-        </Equipments>
-    </NPCCharacter>
-
-
     <NPCCharacter
         id="harad_serp_noble"
         default_group="Infantry"
@@ -771,7 +687,7 @@
                 value="30" />
             <skill
                 id="OneHanded"
-                value="80" />
+                value="85" />
             <skill
                 id="TwoHanded"
                 value="55" />
@@ -906,7 +822,7 @@
         <skills>
             <skill
                 id="Athletics"
-                value="70" />
+                value="80" />
             <skill
                 id="Riding"
                 value="120" />
@@ -915,13 +831,13 @@
                 value="85" />
             <skill
                 id="TwoHanded"
-                value="45" />
+                value="55" />
             <skill
                 id="Polearm"
                 value="90" />
             <skill
                 id="Bow"
-                value="20" />
+                value="25" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -980,7 +896,7 @@
         <skills>
             <skill
                 id="Athletics"
-                value="75" />
+                value="80" />
             <skill
                 id="Riding"
                 value="150" />
@@ -989,13 +905,13 @@
                 value="90" />
             <skill
                 id="TwoHanded"
-                value="50" />
+                value="55" />
             <skill
                 id="Polearm"
                 value="110" />
             <skill
                 id="Bow"
-                value="20" />
+                value="25" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -1057,13 +973,13 @@
                 value="30" />
             <skill
                 id="OneHanded"
-                value="50" />
+                value="85" />
             <skill
                 id="TwoHanded"
-                value="20" />
+                value="50" />
             <skill
                 id="Polearm"
-                value="20" />
+                value="55" />
             <skill
                 id="Bow"
                 value="90" />
@@ -1128,13 +1044,13 @@
                 value="30" />
             <skill
                 id="OneHanded"
-                value="55" />
+                value="85" />
             <skill
                 id="TwoHanded"
-                value="20" />
+                value="50" />
             <skill
                 id="Polearm"
-                value="20" />
+                value="55" />
             <skill
                 id="Bow"
                 value="110" />
@@ -1202,13 +1118,13 @@
                 value="30" />
             <skill
                 id="OneHanded"
-                value="60" />
+                value="85" />
             <skill
                 id="TwoHanded"
-                value="20" />
+                value="50" />
             <skill
                 id="Polearm"
-                value="20" />
+                value="55" />
             <skill
                 id="Bow"
                 value="125" />
@@ -1411,7 +1327,7 @@
                 value="30" />
             <skill
                 id="OneHanded"
-                value="80" />
+                value="85" />
             <skill
                 id="TwoHanded"
                 value="55" />
@@ -1546,7 +1462,7 @@
         <skills>
             <skill
                 id="Athletics"
-                value="70" />
+                value="80" />
             <skill
                 id="Riding"
                 value="120" />
@@ -1555,13 +1471,13 @@
                 value="85" />
             <skill
                 id="TwoHanded"
-                value="45" />
+                value="55" />
             <skill
                 id="Polearm"
                 value="90" />
             <skill
                 id="Bow"
-                value="20" />
+                value="25" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -1620,7 +1536,7 @@
         <skills>
             <skill
                 id="Athletics"
-                value="75" />
+                value="80" />
             <skill
                 id="Riding"
                 value="150" />
@@ -1629,13 +1545,13 @@
                 value="90" />
             <skill
                 id="TwoHanded"
-                value="50" />
+                value="55" />
             <skill
                 id="Polearm"
                 value="110" />
             <skill
                 id="Bow"
-                value="20" />
+                value="25" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -1697,13 +1613,13 @@
                 value="30" />
             <skill
                 id="OneHanded"
-                value="50" />
+                value="85" />
             <skill
                 id="TwoHanded"
-                value="20" />
+                value="50" />
             <skill
                 id="Polearm"
-                value="20" />
+                value="55" />
             <skill
                 id="Bow"
                 value="90" />
@@ -1768,13 +1684,13 @@
                 value="30" />
             <skill
                 id="OneHanded"
-                value="55" />
+                value="85" />
             <skill
                 id="TwoHanded"
-                value="20" />
+                value="50" />
             <skill
                 id="Polearm"
-                value="20" />
+                value="55" />
             <skill
                 id="Bow"
                 value="110" />
@@ -1842,13 +1758,13 @@
                 value="30" />
             <skill
                 id="OneHanded"
-                value="60" />
+                value="85" />
             <skill
                 id="TwoHanded"
-                value="20" />
+                value="50" />
             <skill
                 id="Polearm"
-                value="20" />
+                value="55" />
             <skill
                 id="Bow"
                 value="125" />
@@ -1932,7 +1848,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets>
             <upgrade_target
@@ -1994,7 +1910,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets>
             <upgrade_target
@@ -2115,7 +2031,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets>
             <upgrade_target
@@ -2215,7 +2131,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets>
             <upgrade_target
@@ -2315,7 +2231,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets>
             <upgrade_target
@@ -2415,7 +2331,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets>
             <upgrade_target
@@ -2515,7 +2431,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets>
             <upgrade_target
@@ -2621,7 +2537,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets>
             <upgrade_target
@@ -2727,7 +2643,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets />
         <Equipments>
@@ -2824,7 +2740,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets />
         <Equipments>
@@ -2927,7 +2843,7 @@
                 value="0" />
             <skill
                 id="Throwing"
-                value="15" />
+                value="20" />
         </skills>
         <upgrade_targets />
         <Equipments>
@@ -4542,6 +4458,147 @@
             <equipment
                 slot="HorseHarness"
                 id="Item.sk_hr_pz_camel_bard_elite_a" />
+        </Equipments>
+    </NPCCharacter>
+
+
+    <!-- ===== TAVERN MERCENARIES =====
+         Dedicated Mercenary-occupation copies of this culture's rarest recruitment-pool
+         troops, referenced from <basic_mercenary_troops> in taom_spcultures.xml. Leaves by
+         design: RecruitmentCampaignBehavior walks UpgradeTargets when picking a town's offer.
+         Do NOT add upgrade_targets here. -->
+
+    <NPCCharacter
+        id="harad_redserp_noble_merc"
+        default_group="Infantry"
+        level="16"
+        name="{=aom_merc_harad_redserp_noble_name}[Harad] Hired Red Serpent Noble"
+        occupation="Mercenary"
+        culture="Culture.shaghana">
+        <face>
+            <face_key_template
+                value="BodyProperty.fighter_haradrim" />
+        </face>
+        <skills>
+            <skill
+                id="Athletics"
+                value="60" />
+            <skill
+                id="Riding"
+                value="30" />
+            <skill
+                id="OneHanded"
+                value="70" />
+            <skill
+                id="TwoHanded"
+                value="40" />
+            <skill
+                id="Polearm"
+                value="50" />
+            <skill
+                id="Bow"
+                value="20" />
+            <skill
+                id="Crossbow"
+                value="0" />
+            <skill
+                id="Throwing"
+                value="20" />
+        </skills>
+        <Equipments>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Item1"
+                    id="Item.desert_round_shield" />
+                <equipment
+                    slot="Head"
+                    id="Item.brass_aserai_helmet_b_open" />
+                <equipment
+                    slot="Body"
+                    id="Item.aserai_scale_armor_on_chain" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.rough_tied_bracers" />
+                <equipment
+                    slot="Leg"
+                    id="Item.strapped_mail_chausses" />
+            </EquipmentRoster>
+            <EquipmentSet
+                id="aserai_troop_civilian_template_t3"
+                equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+
+    <NPCCharacter
+        id="harad_pz_levy_merc"
+        default_group="Cavalry"
+        level="16"
+        name="{=aom_merc_harad_pz_levy_name}[Harad] Hired Pezarsan Levy"
+        occupation="Mercenary"
+        culture="Culture.aserai">
+        <face>
+            <face_key_template
+                value="BodyProperty.fighter_haradrim" />
+        </face>
+        <skills>
+            <skill
+                id="Athletics"
+                value="70" />
+            <skill
+                id="Riding"
+                value="124" />
+            <skill
+                id="OneHanded"
+                value="70" />
+            <skill
+                id="TwoHanded"
+                value="35" />
+            <skill
+                id="Polearm"
+                value="76" />
+            <skill
+                id="Bow"
+                value="10" />
+            <skill
+                id="Crossbow"
+                value="0" />
+            <skill
+                id="Throwing"
+                value="49" />
+        </skills>
+        <Equipments>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.southern_spear_3_t3" />
+                <equipment
+                    slot="Item1"
+                    id="Item.desert_round_shield" />
+                <equipment
+                    slot="Head"
+                    id="Item.brass_aserai_helmet_b_open" />
+                <equipment
+                    slot="Body"
+                    id="Item.aserai_scale_armor_on_chain" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.rough_tied_bracers" />
+                <equipment
+                    slot="Leg"
+                    id="Item.strapped_mail_chausses" />
+            </EquipmentRoster>
+            <EquipmentSet
+                id="aserai_troop_civilian_template_t3"
+                equipmentType="Civilian" />
+            <equipment
+                slot="Horse"
+                id="Item.war_camel" />
+            <equipment
+                slot="HorseHarness"
+                id="Item.sk_hr_pz_camel_bard_light_a" />
         </Equipments>
     </NPCCharacter>
 

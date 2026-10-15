@@ -465,35 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[Gundabad] Blady uruk — pikinier-łupieżca" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[Gundabad] Blady uruk — piechota" />
     <string id="aom_gundabad_warg_tamer_name" text="[Gundabad] Blady uruk — jeździec wilków" />
-    <string id="aom_harad_archer_name" text="[Harad] Łucznik pustynny" />
-    <string id="aom_harad_bronzefang_name" text="[Harad] Brązowy Kieł" />
-    <string id="aom_harad_camel_lancer_name" text="[Harad] Kopijnik na wielbłądzie" />
-    <string id="aom_harad_camelrider_name" text="[Harad] Jeździec na wielbłądzie" />
-    <string id="aom_harad_camelscout_name" text="[Harad] Zwiadowca na wielbłądzie" />
-    <string id="aom_harad_champion_name" text="[Harad] Czempion" />
-    <string id="aom_harad_fangking_name" text="[Harad] Kieł Króla" />
-    <string id="aom_harad_footman_name" text="[Harad] Piechur" />
-    <string id="aom_harad_gildedfang_name" text="[Harad] Wojownik Złoconego Kła" />
-    <string id="aom_harad_horsearcher_name" text="[Harad] Jeździec Złotej Zasłony" />
-    <string id="aom_harad_levy_name" text="[Harad] Rekrut" />
-    <string id="aom_harad_marksman_name" text="[Harad] Strzelec wyborowy" />
     <string id="aom_harad_militia_archer_name" text="[Harad] Łucznik milicji" />
-    <string id="aom_harad_militia_name" text="[Harad] Milicja" />
     <string id="aom_harad_militia_spearman_name" text="[Harad] Włócznik milicji" />
     <string id="aom_harad_militia_vet_arch_name" text="[Harad] Doświadczony łucznik milicji" />
     <string id="aom_harad_militia_vet_spear_name" text="[Harad] Doświadczony włócznik milicji" />
-    <string id="aom_harad_noble_name" text="[Harad] Młody potomek Węża" />
-    <string id="aom_harad_sandblade_name" text="[Harad] Adept Piaskowych Ostrzy" />
-    <string id="aom_harad_serpent_eye_name" text="[Harad] Oczy Węża" />
-    <string id="aom_harad_serpentguard_name" text="[Harad] Gwardia Węża" />
-    <string id="aom_harad_serpenthorsearcher_name" text="[Harad] Łucznik Węża" />
-    <string id="aom_harad_skirmisher_name" text="[Harad] Harcownik" />
-    <string id="aom_harad_spearfighter_name" text="[Harad] Wojownik z włócznią" />
-    <string id="aom_harad_spearguard_name" text="[Harad] Gwardzista z włócznią" />
-    <string id="aom_harad_sunlance_name" text="[Harad] Słoneczna Kopia" />
-    <string id="aom_harad_swordfighter_name" text="[Harad] Wojownik z mieczem" />
-    <string id="aom_harad_vipereye_name" text="[Harad] Żmija" />
-    <string id="aom_harad_warlance_name" text="[Harad] Kopia Wojenna" />
     <string id="aom_imladris_archer_name" text="[Rivendell] Łucznik z Imladris" />
     <string id="aom_lindon_imladris_archer_name" text="[Lindon] Łucznik z Mithlondu" />
     <string id="aom_imladris_blademaster_name" text="[Rivendell] Mistrz miecza z Imladris" />
@@ -600,7 +575,6 @@
     <string id="aom_merc_gondor_loss_lumberman_name" text="[Gondor] Najemny drwal z Lossarnach" />
     <string id="aom_merc_gundabad_fighter_name" text="[Gundabad] Najemny blady uruk łupieżca" />
     <string id="aom_merc_gundabad_scout_name" text="[Gundabad] Najemny zwiadowca" />
-    <string id="aom_merc_harad_noble_name" text="[Harad] Najemny młodzik Węża" />
     <string id="aom_merc_imladris_bowman_name" text="[Rivendell] Najemny strzelec z Imladris" />
     <string id="aom_lindon_imladris_bowman_merc_name" text="[Lindon] Najemny strzelec z Mithlondu" />
     <string id="aom_merc_lindon_noble_name" text="[Lindon] Najemny szlachcic" />

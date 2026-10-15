@@ -465,35 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[グンダバド] 蒼白のウルク 掠奪槍兵" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[グンダバド] 蒼白のウルク 歩兵" />
     <string id="aom_gundabad_warg_tamer_name" text="[グンダバド] 蒼白のウルク 狼騎兵" />
-    <string id="aom_harad_archer_name" text="[ハラド] 砂漠の射手" />
-    <string id="aom_harad_bronzefang_name" text="[ハラド] 青銅の牙" />
-    <string id="aom_harad_camel_lancer_name" text="[ハラド] 駱駝槍騎兵" />
-    <string id="aom_harad_camelrider_name" text="[ハラド] 駱駝騎兵" />
-    <string id="aom_harad_camelscout_name" text="[ハラド] 駱駝斥候" />
-    <string id="aom_harad_champion_name" text="[ハラド] 勇士" />
-    <string id="aom_harad_fangking_name" text="[ハラド] 王の牙" />
-    <string id="aom_harad_footman_name" text="[ハラド] 歩兵" />
-    <string id="aom_harad_gildedfang_name" text="[ハラド] 金箔の牙の戦士" />
-    <string id="aom_harad_horsearcher_name" text="[ハラド] 黄金の帳の騎手" />
-    <string id="aom_harad_levy_name" text="[ハラド] 徴集兵" />
-    <string id="aom_harad_marksman_name" text="[ハラド] 射手" />
     <string id="aom_harad_militia_archer_name" text="[ハラド] 民兵弓兵" />
-    <string id="aom_harad_militia_name" text="[ハラド] 民兵" />
     <string id="aom_harad_militia_spearman_name" text="[ハラド] 民兵槍兵" />
     <string id="aom_harad_militia_vet_arch_name" text="[ハラド] 熟練民兵弓兵" />
     <string id="aom_harad_militia_vet_spear_name" text="[ハラド] 熟練民兵槍兵" />
-    <string id="aom_harad_noble_name" text="[ハラド] 蛇の若き血" />
-    <string id="aom_harad_sandblade_name" text="[ハラド] 砂剣の新参者" />
-    <string id="aom_harad_serpent_eye_name" text="[ハラド] 蛇の眼" />
-    <string id="aom_harad_serpentguard_name" text="[ハラド] 蛇の衛兵" />
-    <string id="aom_harad_serpenthorsearcher_name" text="[ハラド] 蛇の弓兵" />
-    <string id="aom_harad_skirmisher_name" text="[ハラド] 散兵" />
-    <string id="aom_harad_spearfighter_name" text="[ハラド] 槍の戦士" />
-    <string id="aom_harad_spearguard_name" text="[ハラド] 槍の衛兵" />
-    <string id="aom_harad_sunlance_name" text="[ハラド] 陽の槍騎兵" />
-    <string id="aom_harad_swordfighter_name" text="[ハラド] 剣の戦士" />
-    <string id="aom_harad_vipereye_name" text="[ハラド] 毒蛇" />
-    <string id="aom_harad_warlance_name" text="[ハラド] 戦槍騎兵" />
     <string id="aom_imladris_archer_name" text="[裂け谷] イムラドリスの射手" />
     <string id="aom_lindon_imladris_archer_name" text="[リンドン] ミスロンドの弓兵" />
     <string id="aom_imladris_blademaster_name" text="[裂け谷] イムラドリスの剣匠" />
@@ -600,7 +575,6 @@
     <string id="aom_merc_gondor_loss_lumberman_name" text="[ゴンドール] 雇われロッサールナハの樵" />
     <string id="aom_merc_gundabad_fighter_name" text="[グンダバド] 雇われ青白きウルク襲撃者" />
     <string id="aom_merc_gundabad_scout_name" text="[グンダバド] 雇われ斥候" />
-    <string id="aom_merc_harad_noble_name" text="[ハラド] 雇われ蛇の若獅子" />
     <string id="aom_merc_imladris_bowman_name" text="[裂け谷] 雇われイムラドリス弓兵" />
     <string id="aom_lindon_imladris_bowman_merc_name" text="[リンドン] 雇われミスロンドの弓兵" />
     <string id="aom_merc_lindon_noble_name" text="[リンドン] 雇われ貴族" />

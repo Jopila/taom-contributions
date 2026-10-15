@@ -202,7 +202,7 @@ public class LotrIssueServiceTests
     //
     // Regression cover for the "Hands for the Mines" report (2026-07-30): the quest counted only
     // prisoners with Occupation.Bandit, but TAOM declares that occupation on just 8 hideout-boss
-    // troops — every bandit-culture rank-and-file (dunland_peasant, balcoth_volunteer, harad_levy)
+    // troops — every bandit-culture rank-and-file (dunland_peasant, balcoth_volunteer, harad_reg_levy)
     // is occupation="Soldier". A full prison roster therefore counted as zero. The rule is now
     // "any non-hero prisoner", expressed here with no troop-type input at all.
 

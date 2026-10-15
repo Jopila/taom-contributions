@@ -110,7 +110,10 @@ CATEGORIES: dict[str, dict] = {
     "character_name": {
         "sources": lambda: sorted(
             p for p in (MODULE_DATA / "characters").glob("*.xml")
-            if p.name not in ("lords.xml", "clans.xml", "heroes.xml")
+            # taom_vanilla_troop_obsolete_overrides.xml retires vanilla troops under their
+            # vanilla {=KEY} names, which vanilla's own language files already translate.
+            if p.name not in ("lords.xml", "clans.xml", "heroes.xml",
+                              "taom_vanilla_troop_obsolete_overrides.xml")
         ) + [MODULE_DATA / "taom_wanderers.xml",
              MODULE_DATA / "named_companions" / "named_companions.xml"],
         "output": MODULE_DATA / "taom_character_name_strings.xml",

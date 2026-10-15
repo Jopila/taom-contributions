@@ -465,35 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[군다바드] 창백한 우루크 창 약탈병" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[군다바드] 창백한 우루크 보병" />
     <string id="aom_gundabad_warg_tamer_name" text="[군다바드] 창백한 우루크 늑대 기수" />
-    <string id="aom_harad_archer_name" text="[하라드] 사막 궁수" />
-    <string id="aom_harad_bronzefang_name" text="[하라드] 청동 송곳니" />
-    <string id="aom_harad_camel_lancer_name" text="[하라드] 낙타 창기병" />
-    <string id="aom_harad_camelrider_name" text="[하라드] 낙타 기수" />
-    <string id="aom_harad_camelscout_name" text="[하라드] 낙타 정찰병" />
-    <string id="aom_harad_champion_name" text="[하라드] 용사" />
-    <string id="aom_harad_fangking_name" text="[하라드] 왕의 송곳니" />
-    <string id="aom_harad_footman_name" text="[하라드] 보병" />
-    <string id="aom_harad_gildedfang_name" text="[하라드] 황금 송곳니의 전사" />
-    <string id="aom_harad_horsearcher_name" text="[하라드] 황금 장막의 기수" />
-    <string id="aom_harad_levy_name" text="[하라드] 징집병" />
-    <string id="aom_harad_marksman_name" text="[하라드] 명사수" />
     <string id="aom_harad_militia_archer_name" text="[하라드] 민병 궁수" />
-    <string id="aom_harad_militia_name" text="[하라드] 민병" />
     <string id="aom_harad_militia_spearman_name" text="[하라드] 민병 창병" />
     <string id="aom_harad_militia_vet_arch_name" text="[하라드] 민병 역전의 궁수" />
     <string id="aom_harad_militia_vet_spear_name" text="[하라드] 민병 역전의 창병" />
-    <string id="aom_harad_noble_name" text="[하라드] 뱀의 젊은 피" />
-    <string id="aom_harad_sandblade_name" text="[하라드] 모래검의 입문자" />
-    <string id="aom_harad_serpent_eye_name" text="[하라드] 뱀의 눈" />
-    <string id="aom_harad_serpentguard_name" text="[하라드] 뱀 근위병" />
-    <string id="aom_harad_serpenthorsearcher_name" text="[하라드] 뱀 궁수" />
-    <string id="aom_harad_skirmisher_name" text="[하라드] 척후병" />
-    <string id="aom_harad_spearfighter_name" text="[하라드] 창 전사" />
-    <string id="aom_harad_spearguard_name" text="[하라드] 창 근위병" />
-    <string id="aom_harad_sunlance_name" text="[하라드] 태양창기병" />
-    <string id="aom_harad_swordfighter_name" text="[하라드] 검 전사" />
-    <string id="aom_harad_vipereye_name" text="[하라드] 독사" />
-    <string id="aom_harad_warlance_name" text="[하라드] 전투창기병" />
     <string id="aom_imladris_archer_name" text="[깊은골] 임라드리스 궁수" />
     <string id="aom_lindon_imladris_archer_name" text="[린돈] 미슬론드 궁수" />
     <string id="aom_imladris_blademaster_name" text="[깊은골] 임라드리스 검술사범" />
@@ -600,7 +575,6 @@
     <string id="aom_merc_gondor_loss_lumberman_name" text="[곤도르] 고용된 로사르나크 나무꾼" />
     <string id="aom_merc_gundabad_fighter_name" text="[군다바드] 고용된 창백한 우루크 약탈자" />
     <string id="aom_merc_gundabad_scout_name" text="[군다바드] 고용된 정찰병" />
-    <string id="aom_merc_harad_noble_name" text="[하라드] 고용된 뱀의 젊은 귀공자" />
     <string id="aom_merc_imladris_bowman_name" text="[깊은골] 고용된 임라드리스 활잡이" />
     <string id="aom_lindon_imladris_bowman_merc_name" text="[린돈] 고용된 미슬론드 활잡이" />
     <string id="aom_merc_lindon_noble_name" text="[린돈] 고용된 귀족" />

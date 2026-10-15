@@ -465,35 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[Gundabad] Pique-Saqueador Uruk Pálido" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[Gundabad] Infantaria Uruk Pálida" />
     <string id="aom_gundabad_warg_tamer_name" text="[Gundabad] Cavaleiro de Lobo Uruk Pálido" />
-    <string id="aom_harad_archer_name" text="[Harad] Arqueiro do Deserto" />
-    <string id="aom_harad_bronzefang_name" text="[Harad] Presa de Bronze" />
-    <string id="aom_harad_camel_lancer_name" text="[Harad] Lanceiro de Camelo" />
-    <string id="aom_harad_camelrider_name" text="[Harad] Cavaleiro de Camelo" />
-    <string id="aom_harad_camelscout_name" text="[Harad] Batedor de Camelo" />
-    <string id="aom_harad_champion_name" text="[Harad] Campeão" />
-    <string id="aom_harad_fangking_name" text="[Harad] Presa do Rei" />
-    <string id="aom_harad_footman_name" text="[Harad] Soldado de Infantaria" />
-    <string id="aom_harad_gildedfang_name" text="[Harad] Guerreiro da Presa Dourada" />
-    <string id="aom_harad_horsearcher_name" text="[Harad] Cavaleiro do Véu Dourado" />
-    <string id="aom_harad_levy_name" text="[Harad] Recruta" />
-    <string id="aom_harad_marksman_name" text="[Harad] Atirador" />
     <string id="aom_harad_militia_archer_name" text="[Harad] Arqueiro da Milícia" />
-    <string id="aom_harad_militia_name" text="[Harad] Milícia" />
     <string id="aom_harad_militia_spearman_name" text="[Harad] Lanceiro da Milícia" />
     <string id="aom_harad_militia_vet_arch_name" text="[Harad] Arqueiro Veterano da Milícia" />
     <string id="aom_harad_militia_vet_spear_name" text="[Harad] Lanceiro Veterano da Milícia" />
-    <string id="aom_harad_noble_name" text="[Harad] Jovem Sangue da Serpente" />
-    <string id="aom_harad_sandblade_name" text="[Harad] Iniciado das Lâminas de Areia" />
-    <string id="aom_harad_serpent_eye_name" text="[Harad] Olhos da Serpente" />
-    <string id="aom_harad_serpentguard_name" text="[Harad] Guarda da Serpente" />
-    <string id="aom_harad_serpenthorsearcher_name" text="[Harad] Arqueiro da Serpente" />
-    <string id="aom_harad_skirmisher_name" text="[Harad] Escaramuçador" />
-    <string id="aom_harad_spearfighter_name" text="[Harad] Combatente de Lança" />
-    <string id="aom_harad_spearguard_name" text="[Harad] Guarda de Lança" />
-    <string id="aom_harad_sunlance_name" text="[Harad] Lança do Sol" />
-    <string id="aom_harad_swordfighter_name" text="[Harad] Combatente de Espada" />
-    <string id="aom_harad_vipereye_name" text="[Harad] Víbora" />
-    <string id="aom_harad_warlance_name" text="[Harad] Lança de Guerra" />
     <string id="aom_imladris_archer_name" text="[Valfenda] Arqueiro de Imladris" />
     <string id="aom_lindon_imladris_archer_name" text="[Lindon] Arqueiro de Mithlond" />
     <string id="aom_imladris_blademaster_name" text="[Valfenda] Mestre de Lâminas de Imladris" />
@@ -600,7 +575,6 @@
     <string id="aom_merc_gondor_loss_lumberman_name" text="[Gondor] Lenhador de Lossarnach Contratado" />
     <string id="aom_merc_gundabad_fighter_name" text="[Gundabad] Saqueador Uruk Pálido Contratado" />
     <string id="aom_merc_gundabad_scout_name" text="[Gundabad] Batedor Contratado" />
-    <string id="aom_merc_harad_noble_name" text="[Harad] Jovem Sangue da Serpente Contratado" />
     <string id="aom_merc_imladris_bowman_name" text="[Valfenda] Besteiro Contratado de Imladris" />
     <string id="aom_lindon_imladris_bowman_merc_name" text="[Lindon] Arqueiro de Mithlond Contratado" />
     <string id="aom_merc_lindon_noble_name" text="[Lindon] Nobre Contratado" />

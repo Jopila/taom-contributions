@@ -465,35 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[Gundabad] Solgun Uruk Kargı Çapulcusu" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[Gundabad] Solgun Uruk Piyadesi" />
     <string id="aom_gundabad_warg_tamer_name" text="[Gundabad] Solgun Uruk Kurt Binicisi" />
-    <string id="aom_harad_archer_name" text="[Harad] Çöl Okçusu" />
-    <string id="aom_harad_bronzefang_name" text="[Harad] Tunç Diş" />
-    <string id="aom_harad_camel_lancer_name" text="[Harad] Deve Süvarisi" />
-    <string id="aom_harad_camelrider_name" text="[Harad] Deve Binicisi" />
-    <string id="aom_harad_camelscout_name" text="[Harad] Develi İzci" />
-    <string id="aom_harad_champion_name" text="[Harad] Şampiyonu" />
-    <string id="aom_harad_fangking_name" text="[Harad] Kralın Dişi" />
-    <string id="aom_harad_footman_name" text="[Harad] Piyadesi" />
-    <string id="aom_harad_gildedfang_name" text="[Harad] Yalı Diş Savaşçısı" />
-    <string id="aom_harad_horsearcher_name" text="[Harad] Altın Örtü Binicisi" />
-    <string id="aom_harad_levy_name" text="[Harad] Acemisi" />
-    <string id="aom_harad_marksman_name" text="[Harad] Keskin Nişancı" />
     <string id="aom_harad_militia_archer_name" text="[Harad] Milis Okçu" />
-    <string id="aom_harad_militia_name" text="[Harad] Milis" />
     <string id="aom_harad_militia_spearman_name" text="[Harad] Milis Mızrakçı" />
     <string id="aom_harad_militia_vet_arch_name" text="[Harad] Kıdemli Milis Okçu" />
     <string id="aom_harad_militia_vet_spear_name" text="[Harad] Kıdemli Milis Mızrakçı" />
-    <string id="aom_harad_noble_name" text="[Harad] Yılanın Genç Kanı" />
-    <string id="aom_harad_sandblade_name" text="[Harad] Kum Kılıçları Çırağı" />
-    <string id="aom_harad_serpent_eye_name" text="[Harad] Yılan Gözleri" />
-    <string id="aom_harad_serpentguard_name" text="[Harad] Yılan Muhafızı" />
-    <string id="aom_harad_serpenthorsearcher_name" text="[Harad] Yılan Okçusu" />
-    <string id="aom_harad_skirmisher_name" text="[Harad] Avcı Er" />
-    <string id="aom_harad_spearfighter_name" text="[Harad] Mızrak Savaşçısı" />
-    <string id="aom_harad_spearguard_name" text="[Harad] Mızraklı Muhafız" />
-    <string id="aom_harad_sunlance_name" text="[Harad] Güneş Süngüsü" />
-    <string id="aom_harad_swordfighter_name" text="[Harad] Kılıç Savaşçısı" />
-    <string id="aom_harad_vipereye_name" text="[Harad] Engerek" />
-    <string id="aom_harad_warlance_name" text="[Harad] Savaş Süngüsü" />
     <string id="aom_imladris_archer_name" text="[Ayrıkvadi] Imladris Okçusu" />
     <string id="aom_lindon_imladris_archer_name" text="[Lindon] Mithlond Okçusu" />
     <string id="aom_imladris_blademaster_name" text="[Ayrıkvadi] Imladris Kılıç Ustası" />
@@ -600,7 +575,6 @@
     <string id="aom_merc_gondor_loss_lumberman_name" text="[Gondor] Paralı Lossarnach Oduncusu" />
     <string id="aom_merc_gundabad_fighter_name" text="[Gundabad] Paralı Solgun Uruk Akıncısı" />
     <string id="aom_merc_gundabad_scout_name" text="[Gundabad] Paralı İzci" />
-    <string id="aom_merc_harad_noble_name" text="[Harad] Paralı Yılan'ın Genç Kanı" />
     <string id="aom_merc_imladris_bowman_name" text="[Ayrıkvadi] Kiralık Imladris Yaycısı" />
     <string id="aom_lindon_imladris_bowman_merc_name" text="[Lindon] Paralı Mithlond Yaycısı" />
     <string id="aom_merc_lindon_noble_name" text="[Lindon] Paralı Soylu" />

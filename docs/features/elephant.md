@@ -757,7 +757,7 @@ files are data/assets:
 | Item XML | `…/LOTRLOME_Armory/ModuleData/LOTRLOME_items/LOTRAOM_horses.xml`: Horse item `taom_war_elephant` (mesh `sk_elephant_basemesh_a` since 2026-09-29, `elephant_mesh` before) and the six HorseHarness items in the table at the top | **deployed** (2026-06-06; art swapped 2026-09-29) |
 | Action set | `…/LOTRLOME_Armory/ModuleData/action_sets.xml` (`as_elephant` block appended; uses ADOD_Beasts ids + clip names — pending rename to `as_war_elephant`) | **deployed** (2026-06-08); confirmed in-game |
 | Animation clips | `LOTRLOME_Armory/Assets/creature/elephant/animations/` (35 ADOD_Beasts tpacs — working; TAOM-authored clips pending) | **copied** (2026-06-06); animates in-game |
-| Recruitment | `Main/Features/TroopProgression/RecruitmentPools/VolunteerRecruitmentService.Harad.cs` (Ayerikkä's clan pool, `harad_elephant_rider` at weight 1 of 11) and the Elite Emissary (`elite_emissary_config.xml`, 70 War Drums in `troop_resource_costs.xml`) | **done** (clan pool 2026-06-10) |
+| Recruitment | The Elite Emissary at Korb Taskral (`elite_emissary_config.xml`; `merchant_cost` 70 War Drums in `troop_resource_costs.xml`). `recruit_cost` 50 now charges only a captured rider recruited from prisoners. Not in any volunteer pool (`VolunteerRecruitmentService.Harad.cs`) | **done** (Emissary-only since 2026-10-15; Ayerikkä's clan pool 2026-06-10 to 2026-10-15) |
 
 ## Reference: ADOD_Beasts
 
@@ -901,7 +901,7 @@ and walk-into test is owed on the new body, and a refit would re-run `tools/skel
 - [x] Revert the **TEMP** `Horse`-slot entry in `Main/_Module/ModuleData/troops/troops_harad.xml`: gone (the dedicated `harad_elephant_rider` replaced it on 2026-06-10; no `TEMP-ELEPHANT-TEST` marker remains, checked 2026-09-29).
 - [ ] Author a **TAOM-owned action-set** `as_war_elephant` (rename from `as_elephant`, bind TAOM-authored clip names) to make the action-set fully TAOM-authored (currently uses ADOD_Beasts ids / clip names verbatim).
 - [ ] **Build the elephant animations on our FBX** (Blender → Modding-Kit compile) — TAOM-owned, NOT ADOD_Beasts's 1.2.12 clips. Gating seam for the rename to `as_war_elephant`.
-- [x] Author the Harad rider troop + recruitment — DONE (2026-06-10). `harad_elephant_rider` (level 51, `Culture.aserai`, `HorseArcher`) recruitable ONLY by `clan_aserai_1` (Ayerikkä) via `VolunteerRecruitmentService.InitializeHaradClans` (clan pool copies the levy/noble fallback + adds the rider at weight 1). The TEMP `harad_militia` Horse-slot test entry was replaced by this dedicated troop. Remaining rider polish: not yet in any party template (AI Ayerikkä lords field it only when recruited); rider skills left at pre-level-51 values; recruitment weight is a rarity knob. Update `factions.json` if the war elephant becomes a Harad identity element.
+- [x] Author the Harad rider troop + recruitment: DONE (2026-06-10). `harad_elephant_rider` (level 51, `Culture.aserai`, `default_group="Cavalry"`) was recruitable ONLY by `clan_aserai_1` (Ayerikkä) at weight 1. Since 2026-10-15 the rider is in no pool and no party template: players buy it from the Elite Emissary, and no AI party fields it (Mike, 2026-10-15: nobody recruits it). The TEMP `harad_militia` Horse-slot test entry was replaced by this dedicated troop. Remaining rider polish: rider skills left at pre-level-51 values. Update `factions.json` if the war elephant becomes a Harad identity element.
 - [x] Tune damage after in-game testing — DONE (2026-06-15): replaced ADOD_Beasts's fixed ~20 with TAOM per-kind randomized bands (trample 50-100, tusk 50-75, ×0.25 on shield block); gates unchanged. Also swapped the rider's primary spear (`eastern_spear_4_t4`) for a 2nd `bodkin_arrows_b` quiver so the mounted archer fires at ground targets instead of melee-swinging into air.
 - [x] **Re-enable howdah crew (slide source #1): ON since 2026-09-19 (#627, Mike)**, for the howdah harness only
       (since 2026-09-29, all three howdahs: `ElephantConfig.HowdahHarnessStringIds`),
@@ -1159,6 +1159,7 @@ terrain reads 0 as well, and face id 0 is walkable.
 - 2026-06-13 — Idle ear-fan authored + canter/gallop rebuilt as faster ambles from the refined walk (Blender-MCP).
 - 2026-06-12 — Walk/run refined + full TAOM-owned locomotion set (trot/walk_backwards/turns/idle) authored on `elephant_skeleton` (Blender-MCP, source-side).
 - 2026-06-10 — Behavior-tree-driven AI trample (warg pattern, phase 1) → cooldown-driven attack sequencing with directional tusk swings (BT phase 1.5); slide root-cause isolation; `TaomHowdahMachine._liveTicking` CS0414 fix.
+- 2026-10-15: War-elephant rider removed from Ayerikka's clan pool (`clan_aserai_1` has no pool now); players buy it from the Elite Emissary for War Drums.
 - 2026-06-10 — War-elephant rider troop raised to level 51, recruitable only by `clan_aserai_1` (Ayerikkä).
 - 2026-06-09 — Sealed-package howdah (force-spawned crew, 4 seats, dedicated rider); fixed howdah ground-level archers, ignored commands, and end-of-battle freeze.
 - 2026-06-08 — Harad war elephant confirmed in-game; action-sets made self-contained in `LOTRLOME_Armory`; functional howdah seat via vanilla detachment.
