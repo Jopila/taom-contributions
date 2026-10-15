@@ -42,6 +42,21 @@ VERDICT: CLEAN / ISSUES FOUND
 ### Lessons From Prior Reviews (87 reviews, 193+ bugs found), distilled
 
 **What Codex does especially well (2026-09-01 memory-diagnostics review: 4/4 HIGH real, 0 false positives).**
+- **Follows an engine cache to the version key it actually reads** (2026-10-14, Eye of Sauron hunt #765
+  M8, 4 of 4 findings real): the hunt's end bumped only the party's speed version and its start relied
+  on the top-up growing the roster, but `PartyBase.PartySizeLimit` keys on `MemberRoster.VersionNo`, so a
+  stale size limit survived both whenever the roster did not change. It
+  also compiled the service in memory and caught 7 of 8 mutations. For a fix that "invalidates" a
+  cached engine value, ask which counter the getter compares.
+- **Sends every entry point of a state machine through its terminal-state rule** (2026-10-14, War
+  Chronicle events #765 Batch B, 1 of 1 MEDIUM real): War Ended was checked on launch and on the daily
+  step, but the owner-change and siege-start callbacks could still resolve and pay a window; it drove
+  the production services in memory from War Ended to a paid Fell. For a scheduled guard, ask which
+  callbacks mutate the same rows between two steps.
+- **Runs the verdict function on input that should fail it** (2026-10-09, War Chronicle Batch A #765,
+  3 of 3 findings real): it fed the production analyzer crafted ledgers and printed a PASS for a capital
+  already lost on the first row and for one kingdom's gap hidden by another's complete days. For a
+  coverage verdict, ask which dimension the coverage set drops.
 - **Deletes and reorders a call the unit tests cannot reach** (2026-10-08, War of the Ring Phase 2 wars
   #772, 3 of 3 findings real): handed a host-only handler that reads `Campaign.Current`, it ran the real
   fixtures in memory, then removed `ReconcileDeclaredWars()` and moved it after the phase check; both
@@ -187,6 +202,10 @@ archive the 6th-oldest, harvest durable patterns into `docs/reviews/lessons/<cat
 - **A ratchet or suppression list with no multiplicity.** Keyed on `(owner, item)` alone, 10 entries were suppressing 13 occurrences, so an already-listed roster gaining a SECOND copy of the same bad item filed as old debt.
 - **What the deserializer assembles, not the XML's shape** (2026-09-30, KEYforce art: a Codex miss that three scoped Claude lenses caught in the fix review). Codex's fix for a first-roster-only mount read named every battle roster and battle `EquipmentSet` references, but not the `<equipment>` written directly under `<Equipments>`, which `MBEquipmentRoster.AddOverriddenEquipments` writes over its slot in every set; 88 troops mount that way. When a finding models what a troop carries, list every path `BasicCharacterObject.Deserialize` takes.
 
+- **Every syntax that guards a throwing getter** (2026-10-14, review follow-ups #792: a Codex miss a
+  later Claude docs audit caught). Codex showed the `PartyBase.MainParty` scan missed `!= null`, the
+  reversed and the `is` forms, but not `?.`; seven `PartyBase.MainParty?.` reads in two adapters
+  stayed. When a scan bans a guard on a getter that throws, list `?.` and `??` among the forms.
 - **State that one screen event sets and another clears** (2026-10-08, yotthani adoption: a Codex miss that a convergence lens caught). A pending map-view release keyed on a layer reference survived Save/Load (itself a cover) into the next campaign's new map screen. Name as suspects the paths that replace the object without the clearing event (load, exit to menu, new campaign), and check ordering claims about Harmony priorities against equal priorities and `HarmonyBefore`.
 
 **False positives to NOT repeat + the Evidence Calibration Rule above** (downgrade a claim you cannot back with quoted decompiled vanilla): full list in the track record. When two agents disagree on a TaleWorlds API, re-run `ilspycmd` rather than siding with confidence.
