@@ -127,6 +127,18 @@ public class CareerTroopHooksWiringTests
         Assert.IsFalse(source.Contains("ResolveStats"), "the lookup helper is gone");
     }
 
+    [TestMethod]
+    public void TheCrushHoldRoll_UsesItsOwnLockedGenerator_NeverTheEngineOne()
+    {
+        // DecideCrushedThrough is reached from Mission.GetDefendCollisionResults, [MBCallback(null, true)]: it may run
+        // on several threads at once. MBRandom.RandomFloat mutates Game.Current.RandomGenerator's XorShift state with
+        // no lock, so two concurrent rolls corrupt the shared game stream (Codex, 2026-10-15, reproduced on v1.5.5).
+        var source = ReadSource("Main/Features/CareerSystem/Hooks/CareerTroopHooks.cs", stripComments: true);
+
+        Assert.IsFalse(source.Contains("MBRandom"), "the crush hold must not draw the engine's shared generator");
+        StringAssert.Contains(Squash(source), "lock (RollGate)", "the hold's own generator is drawn under its lock");
+    }
+
     [DataTestMethod]
     [DataRow("Main/Features/DreadAura/Hooks/DreadPulseRunner.cs", "CareerTroopHooks.ScaleFearDrain(_careerStats, target,")]
     [DataRow("Main/Features/SignatureStrikes/Hooks/SignatureStrikeRunner.cs", "CareerTroopHooks.ScaleFearDrain(_careerStats, victim,")]

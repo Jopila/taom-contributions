@@ -119,10 +119,12 @@ main thread. The whole crush path (race-ability verdict, `CrushThroughService`, 
 only the race-ability telemetry (`RaceAbilityTelemetry.Add`, `Interlocked`) and, from the career hold, the troop counter tally and the hook fault set under a lock; it logs nothing per call but a first hook fault; keep it that way (the thread table in
 `.claude/rules/harmony-patches.md`). It is not read-only: `CombatMechanicsHooks` draws `MBRandom.RandomFloat`
 (`Game.Current.RandomGenerator`, unsynchronized) for the skill roll on this multi-threaded callback. That is the
-campaign model's long-standing behaviour and, since #788, Custom Battle's too; the consequence of concurrent
-draws is unverified. The campaign model adds a second `MBRandom.RandomFloat` draw at the end of the chain
-(`CareerTroopHooks.ApplyCrushHold`, #769 E10), made only when the verdict is a crush-through and the defending
-troop's leader holds a `TroopCrushHold` pip for its class. On a hold it also counts the hold in the stat service's
+campaign model's long-standing behaviour and, since #788, Custom Battle's too. Two concurrent draws corrupt the
+generator's XorShift state (reproduced against the installed v1.5.5 DLL, 2026-10-15); how often native runs two
+crush checks at once is unverified, and moving this draw to a locked generator is a follow-up. The campaign
+model's career hold at the end of the chain (`CareerTroopHooks.ApplyCrushHold`, #769 E10) draws its own
+`System.Random` under its own lock, never `MBRandom`, and only when the verdict is a crush-through and the
+defending troop's leader holds a `TroopCrushHold` pip for its class. On a hold it also counts the hold in the stat service's
 troop counter tally under a lock, and a first fault logs once; those, with the race-ability telemetry, are the only TAOM writes on this path.
 
 **Existing players keep their own MCM value.** MCM merges over JSON per read

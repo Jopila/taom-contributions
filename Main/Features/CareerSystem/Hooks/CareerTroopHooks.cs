@@ -30,9 +30,10 @@ namespace TAOM.Features.CareerSystem.Hooks;
 /// main thread: on a crush-through verdict it reads the defender's map-event party (<c>Origin.BattleCombatant</c>,
 /// a lookup into a table the main thread fills) and takes the passive-cache lock. A counter that takes effect
 /// writes its tally, and a first fault its entry in the fault set, under the service's own lock. The random draw
-/// (<c>MBRandom.RandomFloat</c>, the engine's unsynchronized generator, as <c>CombatMechanicsHooks.CrushThrough</c>
-/// already does on the same path) happens only when the leader holds a pip for that class. Nothing is deferred: the
-/// callback needs the verdict now.
+/// happens only when the leader holds a pip for that class, and it uses the hold's own generator under its own lock,
+/// never <c>MBRandom</c>: the engine's generator is <c>Game.Current.RandomGenerator</c>, whose XorShift state two
+/// concurrent draws corrupt (Codex, 2026-10-15, reproduced against the installed v1.5.5 DLL). Nothing is deferred:
+/// the callback needs the verdict now.
 ///
 /// <b>Fail open.</b> Whatever is missing (no service, no agent, a hero, no party, no leader) hands the input
 /// back. So does a thrown exception: the engine's answer stands, and the first fault of each hook is reported
@@ -42,7 +43,12 @@ namespace TAOM.Features.CareerSystem.Hooks;
 /// </summary>
 public static class CareerTroopHooks
 {
-    private static readonly Func<float> RandomRoll = () => MBRandom.RandomFloat;
+    private static readonly object RollGate = new object();
+    private static readonly Random HoldRandom = new Random();
+    private static readonly Func<float> RandomRoll = () =>
+    {
+        lock (RollGate) return (float)HoldRandom.NextDouble();
+    };
 
     /// <summary>The enemy's fear drain on <paramref name="victim"/>, shrunk by its leader's TroopFearResistance.</summary>
     public static float ScaleFearDrain(ICareerAgentStatService? stats, Agent? victim, float drain)

@@ -6,6 +6,7 @@ Running scorecard of all reviews. **Reviews 1-99, 2026-04-05 to 2026-09-12.** 93
 
 | # | Date | Feature | Codex Verdict | Claude Verdict | Real Bugs | False Positives | Missed Bugs | Prompt Version |
 |---|------|---------|--------------|----------------|-----------|-----------------|-------------|----------------|
+| career-e8e10 | 2026-10-15 | Career forks engine #769 E8 to E10 and E13 (two-effect options, troop class filter, fear, knockdown and crush-hold troop counters, localized effect lines) | issues-found (0 P1, 1 P2, 0 P3; 5 of 6 suspects disputed) | agree (P2 reproduced against the installed MBFastRandom, fixed) | 1 P2 (the crush hold drew the shared MBRandom generator on a multi-thread callback) | 0 | 0 | review-codex skill prompt, xhigh |
 | career-e4e7 | 2026-10-14 | Career forks engine #769 E4 to E7 and E12, plus the merge of trunk a9437a492 (one choice rule, forks, point levels, lock on leave, paid retrain, switch cost, tree-version migration) | issues-found (0 P1, 1 P2, 0 P3; 5 of 6 suspects disputed); pass 2 on the fix: none | agree (P2 confirmed in the source, fixed in 59c1803d2) | 1 P2 (the tree migration ran for the main hero only) | 0 | 0 | review-codex skill prompt, max; pass 2 high |
 | career-e1e3 | 2026-10-09 | Career fixes #766, #767, #768, #770, #771 (choice group link, resource gain on every source, party-size cache and leader-only scope, raid battle credit, party-screen handler) | issues-found (0 P1, 1 P2, 0 P3; 4 of 5 suspects disputed) | agree (P2 confirmed in the v1.5.5 decompile, fixed as #790) | 1 P2 (hideout send-troops paid twice, pre-existing) | 0 | 0 | review-codex skill prompt, xhigh |
 | (at merge) | 2026-10-08 | yotthani adoption, items 1 to 4: mission-start guard (Patch103), skeleton-buffer guard and watch (two native jumps), nameplate cull (Patch104), map-view release (layer event) | issues-found (0 HIGH, 1 MEDIUM conditional, 2 LOW) | agree (all three confirmed and fixed) | 3 | 0 | 4 LOW, found by two convergence lenses on the same tree (a due release across a campaign change, the closer's tick order, an unpinned engine order, a Priority.First overclaim) | gpt-6-astra, ultra; RCA `docs/reviews/rca-yotthani-adoption-2026-10-08.md` findings 34 to 37 |
@@ -5262,6 +5263,23 @@ Report `docs/reviews/deep-review-031-settings-reads-off-hot-paths-2026-10-02.md`
   2 LOW (the "capstones" label; a stale example in the clamp comment) and 3 NIT, all comment or doc
   text, all fixed (RCA C1 to C3).
 - **RCA:** `docs/reviews/rca-uruk-hai-skirt-body-2026-10-04.md`.
+
+## Review (number assigned at merge): Career forks engine, steps E8 to E10 and E13 (#769), 8-lens deep review + convergence + Codex gpt-6-astra xhigh (2026-10-14 to 10-15)
+
+- **Scope:** two-effect options, the troop class filter, three troop counters through `CareerTroopHooks`
+  (fear at four sites, knockdown, crush hold) and the diagnostics; committed as `bce566059`.
+- **Deep review:** eight lenses in two waves of four, two refuters per MEDIUM defect: 66 findings, 5
+  MEDIUM, none CRITICAL or HIGH. A fix round, a documentation sweep with a critic pass, and a
+  four-reviewer convergence review (fix verification, regressions, engine and threading, docs and RCA
+  accuracy) followed; the convergence found 1 MEDIUM doc regression (the career-screen opening path
+  reversed by the sweep) and LOW items, all fixed. Suite: 17,467 pass, the 9 known trunk failures.
+- **Codex:** `xhigh` on `bce566059`: 1 P2, five of six suspects disputed with evidence. The P2: the
+  crush hold drew `MBRandom.RandomFloat` (`Game.Current.RandomGenerator`, unsynchronized XorShift) on
+  `GetDefendCollisionResults`, a multi-thread callback; Codex reproduced the state corruption with two
+  threads on the installed `MBFastRandom`. Fixed: the hold draws its own `System.Random` under its own
+  lock, pinned by `TheCrushHoldRoll_UsesItsOwnLockedGenerator_NeverTheEngineOne`. The older
+  `CombatMechanicsHooks` draw on the same path is a follow-up (RCA X1).
+- **RCA:** `docs/reviews/rca-career-e8e10-2026-10-14.md`.
 
 ## Review (number assigned at merge): Career forks engine, steps E4 to E7 and E12 (#769), 7-lens deep review + convergence (2026-10-14)
 
