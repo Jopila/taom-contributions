@@ -677,8 +677,13 @@ public class SubModule : MBSubModuleBase
     protected override void OnBeforeInitialModuleScreenSetAsRoot()
     {
         base.OnBeforeInitialModuleScreenSetAsRoot();
+        // Only sets a volatile flag, so it cannot throw.
         Features.ShaderCompileNotice.ShaderCompileNoticeEntry.Stop();
-        IoC.Resolve<IMainMenuCustomizerService>().CustomizeMenu();
+        // The engine calls this hook for every module with no try, and calls it again on every tick while
+        // no state is active; Patch37 can swallow the throw, so one throw would re-run every module's hook
+        // each tick (#807). CustomizeMenu goes through LifecycleStep.Run (one WARNING, never rethrows) and is
+        // safe to repeat. SubModuleMainMenuHookTests pins this shape.
+        LifecycleStep.Run("menu customization", () => IoC.Resolve<IMainMenuCustomizerService>().CustomizeMenu(), MainMenuLogger);
 
         // Patch55_BasicTableauRaceGuard — MUST be applied HERE, not in OnGameInitializationFinished.
         // The Save/Load hero preview (BasicCharacterTableau) renders on the COLD main menu, before any
@@ -796,6 +801,8 @@ public class SubModule : MBSubModuleBase
         //         isHidden:            () => !(Features.TaomSettings.Instance?.EnableShaderPrecompilation ?? true)));
         // }
     }
+
+    private static IModLogger? MainMenuLogger() => IoC.Resolve<IModLogger>();
 
     public override void OnGameEnd(Game game)
     {
