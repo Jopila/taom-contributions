@@ -27,21 +27,29 @@ Inputs
         Domain/PassiveEffectConsumers.cs     Consumed, ClassFilteredTypes, MaskGatedTypes
         Diagnostics/CareerPerkConsumerMap.cs IsFlat (a count, not a factor); its body must be a chain of
                                              `type == PassiveEffectType.X` joined by `||`, else exit 2
+        CareerSystemIoC.cs                   BuildCareerArchetypeMap, careerId -> archetype, the map the ability
+                                             executor registry reads; it must be nothing but one returned
+                                             `new Dictionary<string, CareerArchetype> { ["id"] = CareerArchetype.X, }`
+                                             (no statement after it, no call chained on it), else exit 2
     Main/_Module/ModuleData/special_resources/   special_resources_config.xml, troop_resource_costs.xml
     Main/_Module/ModuleData/troops/, characters/ the NPCCharacter culture of each upkeep troop
+    Main/_Module/ModuleData/Languages/*/std_taom_*.xml  the existing translation rows, read only to warn about
+                                         an added key that already has one; the folder must hold a
+                                         std_taom_career_data_strings_*.xml, else exit 2
 
 Spec schema (one kingdom)
 -------------------------
     kingdom         display name
     culture_ids     the kingdom's culture ids; must equal each career's EligibleCultures
-    careers[]       id (a career in taom_careers.xml), archetype (infantry|ranged|cavalry),
-                    tree_version, point_levels (6 ascending positive ints),
-                    root {description, effects[1..2]}, forks[6]
+    careers[]       id (a career in taom_careers.xml), archetype (infantry|ranged|cavalry, and it must equal
+                    the one CareerSystemIoC.cs maps the career to), tree_version, point_levels (6 ascending
+                    positive ints), root {description, effects[1..2]}, forks[6]
     fork            slot 1-6, name, max_picks (default 1), options[2..3]; the tier follows the slot
     option          name, description, and either effects[0..2] (a Passive choice) or
                     mutations[1..2] plus an explicit vu (a Keystone choice)
-    effect          type, magnitude, attack_type_mask?, troop_class?
-    mutation        property, calculator, value (> 0), operation (target is the career's ability template)
+    effect          type, magnitude, attack_type_mask?, troop_class? (a class list, or All for every class)
+    mutation        property, calculator, value (> 0), operation? (target is the career's ability template;
+                    the loader defaults operation to Add, so it is written only when the spec states it)
 
 The special resource a career may use, and whether it has upkeep troops, are NOT spec fields: they
 come from the two special_resources files (kingdom row first, then culture row, as
@@ -67,8 +75,11 @@ Ids and keys: group <career>_f<slot>, choice <career>_f<slot>_<a|b|c>, the root 
 root_choice_id; descriptions {=taom_cf_<choice id>}text, group names
 {=taom_career_grp_<career>_f<slot>}name. The headline effect of an option goes first: the career
 screen draws the icon of an option's first effect (a keystone uses keystone_icon). The option "name"
-is for the review table only. No icon_sprite, operation, is_percentage or root group_id is written:
-the loader never reads them.
+is for the review table only. No icon_sprite, is_percentage, PassiveEffect operation or root group_id is
+written: the loader never reads them. A Mutation's operation is parsed into MutationDefinition.Operation (default
+Add) and nothing consumes it: the calculator decides the arithmetic (flat adds the value), so the attribute is
+inert either way. It is written exactly when the spec states it, so a new spec may omit it and gondor.json keeps
+stating it only so its shipped regions stay byte-identical.
 
 First adoption (no markers yet) replaces the career's existing root choice and its existing groups
 (ids from taom_careers.xml), which must form one contiguous span separated only by whitespace and
@@ -89,9 +100,10 @@ written, both files go to a .gcf-new temp file first (not .xml: the localization
 career_system/*.xml) and are then renamed into place; when the second rename fails the first file is
 written back to its original bytes (exit 2).
 
-After an apply the tool prints the next steps: when the run added loc keys the strings tool and the free
---seed-only translator pass (one command per language), then the Python and C# tests. On an update it lists every key whose English changed, because the
-translation pipeline never re-translates a row under a changed English.
+After an apply the tool prints the next steps: the strings tool when the run added, re-worded or removed a loc
+key (the English source goes stale otherwise), the free --seed-only translator pass (one command per language)
+when an added key has no language row yet, then the Python and C# tests. On an update it lists every key whose
+English changed, because the translation pipeline never re-translates a row under a changed English.
 
 Validation (rules in _rules.json)
 ---------------------------------
@@ -99,20 +111,34 @@ Validation (rules in _rules.json)
  5 point levels and tree version   6 balance (value units per tier)   7 caps over every build
  8 generated ids and keys unique against both files
 
-Balance: _rules.json "vu_unit" gives the benefit worth one value unit (VU). The benefit of an effect
+Balance: _rules.json "vu_unit" gives the benefit worth one value unit (VU); check_rules refuses a priced type
+that belongs to no cap group, so no passive pip can stack without limit (keystone mutations are outside every
+group; only CooldownReduction has a runtime floor, min_cooldown_seconds). The benefit of an effect
 is its magnitude, except for the "lower_is_better" cost types (TroopWages, RecruitCost, ...), whose
 runtime multiplies by (1 + magnitude), so the benefit is the NEGATIVE magnitude; an effect with a
 benefit below 0 is a penalty and is refused. An effect narrowed by troop_class is worth 1/class_bonus
 as much per unit, so class-only effects may be 50% larger. An option is the sum of benefit / unit over
 its effects (a keystone carries an explicit "vu"), must sit within budget_tolerance of its tier budget,
-and the options of one fork within fork_spread_tolerance of each other. Caps sum the benefit per cap
+and the options of one fork within fork_spread_tolerance of each other. The root pip is priced the same way and
+is refused above root_budget plus budget_tolerance (an upper bound only; the review table shows the root's VU). Caps sum the benefit per cap
 group over the root plus, per fork, the best max_picks positive options (a fork may stay empty), which
 is the worst build; attack_type_mask and troop_class are not discounted. The upgrade-cost types
 (TroopUpgradeCost, SpecialResourceUpgradeCostModifier) are capped at 0.5 of benefit: TroopUpgradeCost has no
 runtime floor, so a cut past -1 would give a negative upgrade price.
 
 A class-filtered effect in fork slots 1, 5 and 6 may name only the career's own archetype class (infantry ->
-Infantry, ranged -> Ranged, cavalry -> Cavalry); slots 2 to 4 and the root take any class.
+Infantry, ranged -> Ranged, cavalry -> Cavalry); slots 2 to 4 and the root take any class. troop_class "All"
+reads as every class, the same as omitting it (it is not narrowed, and it is written as All).
+
+Warnings, printed after the summary and never blocking: an update lists every key whose English changed; every
+option whose effects changed in meaning while its description (key and English) did not, because the tooltip may
+state an old number (a respelled mask or class and a reordered effect list are no change; a first adoption has
+nothing to compare, but a re-adoption over a generated tree, after its markers were deleted, warns like an
+update); and every key the run ADDS that already has a row in a std_taom_*.xml file of a language (a removed
+option letter that comes back would otherwise revive its old translation, since seeding fills only missing ids,
+and the translator skips a key a sibling std_taom file carries), naming the file when it is not the career data
+file, with the reset step from docs/localization/TRANSLATOR_GUIDE.md. A commented-out row is not a row. A missing
+Languages folder is an error only when a key was added.
 
 tools/career_design/gondor.json is the first real spec; the tests use temporary fixtures.
 """
@@ -134,6 +160,7 @@ CAREER_DIR = ROOT / "Main" / "_Module" / "ModuleData" / "career_system"
 RESOURCE_DIR = ROOT / "Main" / "_Module" / "ModuleData" / "special_resources"
 DESIGN_DIR = ROOT / "tools" / "career_design"
 SYSTEM_DIR = ROOT / "Main" / "Features" / "CareerSystem"
+LANGUAGES_DIR = ROOT / "Main" / "_Module" / "ModuleData" / "Languages"
 
 CAREERS_NAME = "taom_careers.xml"
 CHOICES_NAME = "taom_career_choices.xml"
@@ -154,9 +181,9 @@ GUIDE = "docs/localization/TRANSLATOR_GUIDE.md"
 TRANSLATOR_LANGS = ["BR", "CNs", "CNt", "DE", "FR", "IT", "JP", "KO", "PL", "RU", "SP", "TR"]
 
 CareerInfo = namedtuple("CareerInfo", "id ability root_choice cultures groups")
-CsSets = namedtuple("CsSets", "effect_types attack_masks consumed class_filtered mask_gated flat")
+CsSets = namedtuple("CsSets", "effect_types attack_masks consumed class_filtered mask_gated flat archetypes")
 CareerCtx = namedtuple("CareerCtx", "resource upkeep problem cultures")
-Splice = namedtuple("Splice", "status detail changed added", defaults=([],))
+Splice = namedtuple("Splice", "status detail changed added stale removed", defaults=([], [], []))
 
 
 class GeneratorError(Exception):
@@ -171,7 +198,7 @@ class Refusal(GeneratorError):
 # Rules                                                                        #
 # --------------------------------------------------------------------------- #
 REQUIRED_RULE_KEYS = ["banned", "archetypes", "slot_tiers", "tier_budget", "budget_tolerance",
-                      "fork_spread_tolerance", "class_bonus", "troop_classes", "lower_is_better",
+                      "fork_spread_tolerance", "class_bonus", "root_budget", "troop_classes", "lower_is_better",
                       "mask_forbidden", "resource_types", "upkeep_types", "mutation_properties",
                       "mutation_calculators", "mutation_operations", "vu_unit", "caps"]
 STRING_LIST_KEYS = ["archetypes", "troop_classes", "lower_is_better", "mask_forbidden", "resource_types",
@@ -223,6 +250,8 @@ def check_rules(rules):
             problems.append(f"{key} must be a number of 0 or more")
     if not (is_number(rules["class_bonus"]) and rules["class_bonus"] >= 1):
         problems.append("class_bonus must be a number of 1 or more")
+    if not (is_number(rules["root_budget"]) and rules["root_budget"] > 0):
+        problems.append("root_budget must be a positive number")
     units = rules["vu_unit"]
     if not isinstance(units, dict):
         problems.append("vu_unit must be an object")
@@ -239,6 +268,13 @@ def check_rules(rules):
                 problems.append(f"cap '{name}' needs types[] (a non-empty list of effect types) and limit")
             elif not (is_number(cap.get("limit")) and cap["limit"] > 0):
                 problems.append(f"cap '{name}': limit must be a positive number")
+    if isinstance(units, dict) and isinstance(caps, dict):
+        capped = {t for cap in caps.values() if isinstance(cap, dict) and isinstance(cap.get("types"), list)
+                  for t in cap["types"]}
+        uncapped = sorted(name for name in units if name not in capped)
+        if uncapped:
+            problems.append(f"vu_unit prices {', '.join(uncapped)}, which belongs to no cap group: an uncapped type "
+                            f"can stack without limit, so give it a cap group in caps")
     if problems:
         raise GeneratorError("_rules.json: " + "; ".join(problems))
 
@@ -347,6 +383,53 @@ def parse_is_flat(cs_text, source):
     return set(re.findall(test, body))
 
 
+ARCHETYPE_ENTRY = re.compile(r'\[\s*"([^"]+)"\s*\]\s*=\s*CareerArchetype\s*\.\s*(\w+)')
+
+
+def parse_archetype_map(cs_text, source):
+    """careerId -> archetype name (lower case) from the dictionary initialiser BuildCareerArchetypeMap returns, the
+    one source the ability executor registry and ICareerArchetypeService both read. The body must be nothing but
+    `["id"] = CareerArchetype.X,` entries (comments are stripped first, so a disabled entry is absent, as it is at
+    run time); anything else is an error, because a map the generator half-reads would approve a wrong archetype.
+    The initialiser must be the whole body, as in parse_is_flat: an expression body (`=> new Dictionary<...> {...};`)
+    or a block holding one `return new Dictionary<...> {...};`. A statement after it, a call chained on it, or a
+    builder that delegates elsewhere would make the run time map differ from the initialiser, so each is an error."""
+    m = re.search(r"\bBuildCareerArchetypeMap\s*\(\s*\)\s*(=>|\{)", cs_text)
+    if not m:
+        raise GeneratorError(f"{source}: the method BuildCareerArchetypeMap() was not found (the generator reads the "
+                             f"career archetype map there)")
+    expression = m.group(1) == "=>"
+    start = re.compile((r"\s*" if expression else r"\s*return\s+")
+                       + r"new\s+Dictionary\s*<\s*string\s*,\s*CareerArchetype\s*>\s*(?:\(\s*\)\s*)?\{").match(
+        cs_text, m.end())
+    if not start:
+        raise GeneratorError(f"{source}: BuildCareerArchetypeMap must be nothing but "
+                             f"`{'=>' if expression else '{ return'} new Dictionary<string, CareerArchetype> "
+                             f"{{ ... }};`; the generator reads nothing else")
+    depth, i = 1, start.end()
+    while i < len(cs_text) and depth:
+        depth += {"{": 1, "}": -1}.get(cs_text[i], 0)
+        i += 1
+    if not re.compile(r"\s*;" if expression else r"\s*;\s*\}").match(cs_text, i):
+        raise GeneratorError(f"{source}: BuildCareerArchetypeMap does more than return its initialiser; the "
+                             f"generator reads nothing else")
+    body = cs_text[start.end():i - 1]
+    entries = ARCHETYPE_ENTRY.findall(body)
+    leftover = " ".join(re.sub(r"[\s,]+", " ", ARCHETYPE_ENTRY.sub("", body)).split())
+    if leftover:
+        raise GeneratorError(f"{source}: BuildCareerArchetypeMap holds something other than "
+                             f"`[\"id\"] = CareerArchetype.X,` entries; the generator reads nothing else. "
+                             f"Found: {leftover[:90]!r}")
+    if not entries:
+        raise GeneratorError(f"{source}: BuildCareerArchetypeMap lists no career")
+    ids = [cid for cid, _ in entries]
+    duplicated = sorted({cid for cid in ids if ids.count(cid) > 1})
+    if duplicated:
+        raise GeneratorError(f"{source}: BuildCareerArchetypeMap lists {', '.join(duplicated)} more than once "
+                             f"(the index initialiser keeps the last one at run time, silently)")
+    return {cid: name.lower() for cid, name in entries}
+
+
 def load_cs_sets(system_dir):
     system_dir = Path(system_dir)
     domain, diagnostics = system_dir / "Domain", system_dir / "Diagnostics"
@@ -356,12 +439,13 @@ def load_cs_sets(system_dir):
     sets = {name: parse_type_set(consumers, name, "PassiveEffectConsumers.cs")
             for name in ("Consumed", "ClassFilteredTypes", "MaskGatedTypes")}
     sets["IsFlat"] = parse_is_flat(read_cs(diagnostics / "CareerPerkConsumerMap.cs"), "CareerPerkConsumerMap.cs")
+    archetypes = parse_archetype_map(read_cs(system_dir / "CareerSystemIoC.cs"), "CareerSystemIoC.cs")
     for name, members in sets.items():
         unknown = sorted(members - effect_types)
         if unknown:
             raise GeneratorError(f"{name} names {', '.join(unknown)}, which PassiveEffectType.cs does not declare")
     return CsSets(effect_types, attack_masks, sets["Consumed"], sets["ClassFilteredTypes"],
-                  sets["MaskGatedTypes"], sets["IsFlat"])
+                  sets["MaskGatedTypes"], sets["IsFlat"], archetypes)
 
 
 # --------------------------------------------------------------------------- #
@@ -504,12 +588,15 @@ def benefit(effect, rules):
 
 
 def narrowed(effect, rules):
-    """True when troop_class limits an effect to fewer than every class."""
+    """True when troop_class limits an effect to fewer than every class. All names every class, so it never narrows."""
     classes = effect.get("troop_class")
     if not classes:
         return False
+    every = {c.lower() for c in rules["troop_classes"]}
     named = {t.lower() for t in split_tokens(classes)}
-    return named != {c.lower() for c in rules["troop_classes"]}
+    if "all" in named:
+        named = (named - {"all"}) | every
+    return named != every
 
 
 def effect_vu(effect, rules):
@@ -649,9 +736,9 @@ def check_effect(effect, where, rules, cs, ctx, errors):
         if not tokens:
             errors.append(f"{where}: troop_class must be a comma list of names")
         for tok in tokens:
-            if tok.lower() not in {c.lower() for c in rules["troop_classes"]}:
+            if tok.lower() not in {c.lower() for c in rules["troop_classes"]} | {"all"}:
                 errors.append(f"{where}: troop_class '{tok}' is not valid "
-                              f"(use {', '.join(rules['troop_classes'])})")
+                              f"(use {', '.join(rules['troop_classes'])}, All)")
         if isinstance(etype, str) and etype in cs.effect_types and etype not in cs.class_filtered:
             errors.append(f"{where}: troop_class is only allowed on class-filtered types "
                           f"({', '.join(sorted(cs.class_filtered))}), not '{etype}'")
@@ -687,7 +774,7 @@ def check_effects(effects, where, rules, cs, ctx, errors, at_least_one=False):
 
 def check_mutation(mutation, where, rules, errors):
     start = len(errors)
-    if not check_keys(mutation, where, ["property", "calculator", "value", "operation"], [], errors):
+    if not check_keys(mutation, where, ["property", "calculator", "value"], ["operation"], errors):
         return False
     for key, valid, label in (("property", rules["mutation_properties"], "property"),
                               ("calculator", rules["mutation_calculators"], "calculator"),
@@ -747,6 +834,33 @@ def check_budget(vu, tier, where, rules, errors):
         errors.append(f"{where}: {vu:.2f} VU is outside the tier {tier} budget of {budget} +/- {tolerance}")
 
 
+def check_root_budget(root, where, rules, errors):
+    """The root pip is priced like an option and may not pass root_budget plus the tolerance."""
+    try:
+        vu = option_vu(root, rules)
+    except GeneratorError as exc:
+        errors.append(f"{where} root: {exc}")
+        return
+    budget, tolerance = rules["root_budget"], rules["budget_tolerance"]
+    if vu > budget + tolerance + EPS:
+        errors.append(f"{where} root: {vu:.2f} VU is above the root limit of {budget + tolerance:g} "
+                      f"(root_budget {budget:g} plus budget_tolerance {tolerance:g})")
+
+
+def check_archetype_source(archetype, cid, where, rules, cs, errors):
+    """The spec's archetype must be the one CareerSystemIoC.cs maps the career to (its ability executor)."""
+    mapped = cs.archetypes.get(cid)
+    if mapped is None:
+        errors.append(f"{where}: CareerSystemIoC.cs maps no archetype for this career, so it has no ability "
+                      f"executor; add it to BuildCareerArchetypeMap first")
+    elif mapped not in rules["archetypes"]:
+        errors.append(f"{where}: CareerSystemIoC.cs maps this career to '{mapped}', which is not one of "
+                      f"{', '.join(rules['archetypes'])}")
+    elif mapped != archetype:
+        errors.append(f"{where}: archetype '{archetype}' disagrees with CareerSystemIoC.cs, which maps this career "
+                      f"to '{mapped}' (the ability executor it gets)")
+
+
 def validate_career(career, spec_cultures, rules, careers, cs, data, errors):
     cid = career.get("id") if isinstance(career, dict) else None
     where = f"career '{cid}'"
@@ -759,6 +873,8 @@ def validate_career(career, spec_cultures, rules, careers, cs, data, errors):
     if career.get("archetype") not in rules["archetypes"]:
         errors.append(f"{where}: archetype '{career.get('archetype')}' is not one of "
                       f"{', '.join(rules['archetypes'])}")
+    else:
+        check_archetype_source(career["archetype"], cid, where, rules, cs, errors)
     info = careers.get(cid)
     if info is None:
         errors.append(f"{where}: not in taom_careers.xml")
@@ -785,7 +901,8 @@ def validate_career(career, spec_cultures, rules, careers, cs, data, errors):
         if "description" in root:
             check_text(root["description"], f"{where} root", "description", errors)
         if "effects" in root:
-            check_effects(root["effects"], f"{where} root", rules, cs, ctx, errors, at_least_one=True)
+            if check_effects(root["effects"], f"{where} root", rules, cs, ctx, errors, at_least_one=True):
+                check_root_budget(root, where, rules, errors)
 
     forks = career.get("forks")
     if "forks" not in career:
@@ -897,7 +1014,9 @@ def effect_xml(effect, rules, cs):
     if "attack_type_mask" in effect:
         parts.append(f'attack_type_mask="{",".join(canonical(split_tokens(effect["attack_type_mask"]), cs.attack_masks))}"')
     if "troop_class" in effect:
-        parts.append(f'troop_class="{",".join(canonical(split_tokens(effect["troop_class"]), rules["troop_classes"]))}"')
+        tokens = split_tokens(effect["troop_class"])
+        names = "All" if any(t.lower() == "all" for t in tokens) else ",".join(canonical(tokens, rules["troop_classes"]))
+        parts.append(f'troop_class="{names}"')
     return "<PassiveEffect " + " ".join(parts) + " />"
 
 
@@ -927,9 +1046,9 @@ def render_choices_body(career, info, rules, cs, ind):
             if "mutations" in option:
                 kids = [f"{inner}  <Mutations>\n"]
                 for m in option["mutations"]:
+                    operation = f' operation="{m["operation"]}"' if "operation" in m else ""
                     kids.append(f'{inner}    <Mutation target_id="{info.ability}" property="{m["property"]}" '
-                                f'calculator="{m["calculator"]}" value="{fmt(m["value"])}" '
-                                f'operation="{m["operation"]}" />\n')
+                                f'calculator="{m["calculator"]}" value="{fmt(m["value"])}"{operation} />\n')
                 kids.append(f"{inner}  </Mutations>\n")
                 out.append(choice_xml(inner, choice_id, "Keystone", option["description"], kids))
             else:
@@ -1293,6 +1412,52 @@ def loc_keys(text):
     return {key for key, _ in LOC_PAIR.findall(strip_xml_comments(text))}
 
 
+def number_text(text):
+    """A numeric attribute spelled one way (0.050 and 0.05 agree); anything that is not a number stays as written."""
+    try:
+        return repr(float(text))
+    except (TypeError, ValueError):
+        return text or ""
+
+
+def choice_effects(text):
+    """choice id -> (raw description attribute, readable effect list, meaning) for every <Choice> in a generated
+    span. The list keeps the written order and spelling for printing; the meaning is the sorted multiset the
+    effects amount to (mask and class normalised, so a respelling or a reorder is no change). A mutation's
+    operation is left out: it is parsed and never consumed, so respelling it changes nothing. Its calculator is
+    in, because the calculator decides the arithmetic."""
+    try:
+        root = ET.fromstring(f"<r>{text}</r>".encode("utf-8"))
+    except ET.ParseError as exc:
+        raise GeneratorError(f"a generated region does not parse as XML ({exc})")
+    found = {}
+    for choice in root.iter("Choice"):
+        effects, meaning = [], []
+        for el in choice.iter():
+            if el.tag == "PassiveEffect":
+                label = f"{el.get('type')} {el.get('magnitude')}"
+                extras = [el.get(a) for a in ("attack_type_mask", "troop_class") if el.get(a)]
+                effects.append(label + (f" ({', '.join(extras)})" if extras else ""))
+                meaning.append(("effect", el.get("type") or "", number_text(el.get("magnitude")),
+                                normalise_mask(el.get("attack_type_mask")), normalise_classes(el.get("troop_class"))))
+            elif el.tag == "Mutation":
+                effects.append(f"{el.get('property')} {el.get('calculator')} {el.get('value')}")
+                meaning.append(("mutation", el.get("property") or "", el.get("calculator") or "",
+                                number_text(el.get("value")), ""))
+        found[choice.get("id")] = (choice.get("description"), effects, sorted(meaning))
+    return found
+
+
+def stale_tooltips(old_text, new_text):
+    """(choice id, old effects, new effects, description) for each option present in both whose effects changed
+    in meaning while its description attribute (key and English) stayed the same: the tooltip may state an old
+    number. Needing the same id and the same description is what keeps a first adoption quiet: the old tree
+    keeps neither, while a re-adoption over a generated tree keeps both."""
+    old, new = choice_effects(strip_xml_comments(old_text)), choice_effects(strip_xml_comments(new_text))
+    return [(cid, old[cid][1], new[cid][1], new[cid][0]) for cid in new
+            if cid in old and old[cid][2] != new[cid][2] and old[cid][0] == new[cid][0]]
+
+
 def describe_tree(status, counts):
     groups, choices = counts
     return f"root + {groups} {'forks' if status == 'update' else 'groups'} ({choices} choices)"
@@ -1335,7 +1500,8 @@ def splice_choices(cf, career, info, old_groups, rules, cs):
     detail = (f"{describe_tree(status, tree_counts(old_text))} -> "
               f"{describe_tree('update', tree_counts(new_body))}")
     return Splice(status, detail, english_changes(old_text, new_body),
-                  sorted(loc_keys(new_body) - loc_keys(old_text)))
+                  sorted(loc_keys(new_body) - loc_keys(old_text)), stale_tooltips(old_text, new_body),
+                  sorted(loc_keys(old_text) - loc_keys(new_body)))
 
 
 def strip_regions(text, cids):
@@ -1444,7 +1610,10 @@ def render_table(spec, rules, analyses, spec_name, flat):
         out += [f"## {career['id']} ({career['archetype']})", "",
                 f"Tree version {career['tree_version']}, a point at levels {levels_text(career).replace(',', ', ')}.",
                 "", f"**Root:** {career['root']['description']} "
-                    f"({'; '.join(effect_words(e, flat) for e in career['root'].get('effects', [])) or 'no effects'})",
+                    f"({'; '.join(effect_words(e, flat) for e in career['root'].get('effects', [])) or 'no effects'}), "
+                    f"{option_vu(career['root'], rules):.1f} VU of at most "
+                    f"{fmt(rules['root_budget'] + rules['budget_tolerance'])} "
+                    f"(root_budget {fmt(rules['root_budget'])} plus budget_tolerance {fmt(rules['budget_tolerance'])})",
                 "", "| Fork | Tier | Option | Effects | VU | Description |", "|---|---|---|---|---|---|"]
         for fk in sorted(career["forks"], key=lambda f: f["slot"]):
             for i, option in enumerate(fk["options"]):
@@ -1498,30 +1667,84 @@ def print_english_changes(results):
         print(f"  {cid}: {key}: \"{old}\" -> \"{new}\"")
 
 
+def print_stale_tooltips(results):
+    stale = [(cid, option, old, new, text) for cid, _, sp in results for option, old, new, text in sp.stale]
+    if not stale:
+        return
+    print("warning: these options changed their effects but their description reads unchanged, so the tooltip may "
+          "state an old number; edit the text, or confirm it is still true:")
+    for cid, option, old, new, text in stale:
+        print(f"  {cid}: {option}: {'; '.join(old)} -> {'; '.join(new)}; description {text!r}")
+
+
+CAREER_DATA_PREFIX = "std_taom_career_data_strings_"
+
+
+def language_rows(languages_dir, keys):
+    """key -> sorted places that already hold a translation row for it: a language folder (its career data file)
+    or "<lang> in <file>" (another std_taom_*.xml of that language). The seeding step fills only missing ids, and
+    translate_with_claude skips any key a sibling std_taom file carries, so a row that survives a removal revives
+    its old translation. A commented-out row is not a row (the seeder reads the XML)."""
+    folder = Path(languages_dir)
+    if not folder.is_dir():
+        raise GeneratorError(f"Languages folder not found: {folder} (needed to check the added loc keys against "
+                             f"the existing translation rows)")
+    files = sorted(folder.glob("*/std_taom_*.xml"))
+    if not any(path.name.startswith(CAREER_DATA_PREFIX) for path in files):
+        raise GeneratorError(f"no {CAREER_DATA_PREFIX}*.xml under {folder}: the added loc keys cannot be "
+                             f"checked against the existing translation rows")
+    found = {}
+    for path in files:
+        try:
+            text = strip_xml_comments(path.read_text(encoding="utf-8-sig"))
+        except UnicodeDecodeError as exc:
+            raise GeneratorError(f"{path.name}: not valid UTF-8: {exc}")
+        place = path.parent.name if path.name.startswith(CAREER_DATA_PREFIX) else f"{path.parent.name} in {path.name}"
+        for key in set(keys) & set(re.findall(r'<string\s+id="([^"]*)"', text)):
+            found.setdefault(key, []).append(place)
+    return {key: sorted(places) for key, places in found.items()}
+
+
+def print_revived_rows(revived):
+    if not revived:
+        return
+    print("warning: these added loc keys already have a row in the language files (any std_taom_*.xml of a "
+          "language). The seeding step fills only missing ids, so each row keeps its old translation (a removed "
+          "option letter that comes back revives the old wording). Reset the rows before seeding, as the checklist in "
+          f"{GUIDE} (\"The checklist when you edit an existing English string\") says: write the new English into "
+          "every listed row, drop the key from tools/translation_cache/<lang>.json, and check "
+          "tools/translation_overrides/<lang>.json:")
+    for key, langs in sorted(revived.items()):
+        print(f"  {key} ({', '.join(langs)})")
+
+
 CSHARP_TESTS = ["CareerChoicesIntegrationTests", "CareerChoiceIntegrityTests", "CareerConfigProviderTests",
                 "LanguageFileCoverageTests"]
 CSHARP_TEST_FILTER = '--filter "' + "|".join(f"FullyQualifiedName~{name}" for name in CSHARP_TESTS) + '"'
 
 
-def print_next_steps(results):
-    """The localization steps, in commands that run unchanged in bash and PowerShell. The language files only
-    need new rows when the run added a loc key; a run that edited numbers or English under existing keys
-    prints the tests step alone (print_english_changes covers the changed English)."""
+def print_next_steps(results, revived):
+    """The localization steps, in commands that run unchanged in bash and PowerShell. The English source needs the
+    strings tool whenever a loc key was added, re-worded or removed (rows reset to new English would otherwise
+    differ from a stale source and read as translated). The language files only need new rows for an added key
+    that has none yet: `revived` holds the added keys that do, which print_revived_rows covers. A run that edited
+    numbers alone prints the tests step (print_english_changes covers the changed English)."""
     added = sorted({key for _, _, sp in results for key in sp.added})
+    fresh = [key for key in added if key not in revived]
+    touched = bool(added) or any(sp.changed or sp.removed for _, _, sp in results)
     steps = []
-    if added:
-        print(f"Next steps ({len(added)} new loc keys exist in no language file yet):")
+    print(f"Next steps ({len(fresh)} new loc keys exist in no language file yet):" if fresh else "Next steps:")
+    if touched:
         steps.append("python tools/generate_name_localization_strings.py --apply --category career_data")
+    if fresh:
         steps.append("seed the English rows into every language file, one command each (free: it writes "
                      "English rows only and never builds an API client; a paid translation run needs the "
                      "maintainer's word):\n"
                      + "\n".join(f"       python tools/translate_with_claude.py --lang {lang} --module TAOM --seed-only"
                                  for lang in TRANSLATOR_LANGS))
-    else:
-        print("Next steps:")
     steps.append("python -m unittest discover -s tools/tests -t .")
     steps.append("dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId= " + CSHARP_TEST_FILTER
-                 + (" (LanguageFileCoverageTests stays red until the seeding step)" if added else ""))
+                 + (" (LanguageFileCoverageTests stays red until the seeding step)" if fresh else ""))
     for number, step in enumerate(steps, 1):
         print(f"  {number}. {step}")
 
@@ -1566,6 +1789,9 @@ def run(args):
         print(f"{len(problems)} problem(s); nothing written", file=sys.stderr)
         return 2
 
+    added = sorted({key for _, _, sp in results for key in sp.added})
+    revived = language_rows(args.languages_dir, added) if added else {}
+
     analyses = {c["id"]: analyze_caps(c, rules) for c in spec["careers"]}
     print(f"spec {args.spec}: {spec['kingdom']}, {len(spec['careers'])} career(s)")
     for cid, name, sp in results:
@@ -1575,6 +1801,8 @@ def run(args):
                             if r["max"] > 0)
         print(f"  {career['id']}: caps {reached or 'none reached'}")
     print_english_changes(results)
+    print_stale_tooltips(results)
+    print_revived_rows(revived)
 
     if args.table:
         table_path = Path(args.table)
@@ -1604,7 +1832,7 @@ def run(args):
         return 0
     write_atomically(changed)
     print("applied: " + ", ".join(cf.name for cf in changed))
-    print_next_steps(results)
+    print_next_steps(results, revived)
     return 0
 
 
@@ -1618,6 +1846,7 @@ def build_parser():
     ap.add_argument("--design-dir", default=str(DESIGN_DIR), help=argparse.SUPPRESS)
     ap.add_argument("--system-dir", default=str(SYSTEM_DIR), help=argparse.SUPPRESS)
     ap.add_argument("--resources-dir", default=str(RESOURCE_DIR), help=argparse.SUPPRESS)
+    ap.add_argument("--languages-dir", default=str(LANGUAGES_DIR), help=argparse.SUPPRESS)
     return ap
 
 

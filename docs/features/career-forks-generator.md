@@ -76,6 +76,18 @@ or `is_percentage` on a `PassiveEffect` (parsed in an older loader, never read),
 `keystone_icon` for a keystone), or the root's empty `group_id`. The career screen therefore shows
 an option's icon from its **first effect**, so write the headline effect first.
 
+A `<Mutation>` is a half case: the loader parses its `operation` into `MutationDefinition.Operation`
+and defaults it to `Add` (`CareerConfigProvider`, `ParseEnum<OperationType>(mutEl, "operation",
+OperationType.Add)`), but no code in `Main` reads `.Operation`. `MutationService.ApplyMutation` takes the
+calculator's result as final, and the calculator decides the arithmetic (flat adds the value), so the
+attribute is inert either way. The spec field is optional and is written exactly when the spec states
+it. **Trade-off:** dropping the attribute everywhere would rewrite the three shipped Gondor regions, and a
+regeneration of shipped XML is not wanted for a cosmetic gain, so `gondor.json` keeps stating
+`"operation": "Add"` only so the shipped XML stays byte-identical; a new spec may leave it out, and either
+spelling reads the same (the shape ignores it, so switching is not a structural change). The stale-tooltip
+comparison ignores `operation` and tracks `calculator`, the real lever if `mutation_calculators` ever
+grows. A C# follow-up should delete or wire `MutationDefinition.Operation`.
+
 ### Ids and keys written
 
 | Item | Pattern |
@@ -97,6 +109,8 @@ The option `name` appears in the review table only. A description, name or kingd
 | `Domain/AttackTypeMask.cs` | the `attack_type_mask` names |
 | `Domain/PassiveEffectConsumers.cs` | `Consumed`, `ClassFilteredTypes`, `MaskGatedTypes` |
 | `Diagnostics/CareerPerkConsumerMap.cs` | `IsFlat` (a count, shown as "+6", not "+600%"); its body must be a chain of `type == PassiveEffectType.X` joined by `\|\|` (an expression body, or one `return` of that chain), anything else is an error rather than a guess |
+| `CareerSystemIoC.cs` | `BuildCareerArchetypeMap`, the careerId to archetype map that the ability executor registry and `ICareerArchetypeService` both read; comments are stripped first, so a disabled entry is absent as at run time. The method must be nothing but one returned `new Dictionary<string, CareerArchetype> { ["id"] = CareerArchetype.X, }` (an expression body, or a block holding one `return` of it), anchored like `IsFlat`: a statement after the initialiser, a call chained on it, a builder that delegates elsewhere or a dictionary in another method is an error, because it would make the run time map differ from the one read. No entries, a duplicate id (the index initialiser keeps the last one at run time, silently) or any other content in the initialiser is an error too, and the file or method missing is exit 2 |
+| `Languages/*/std_taom_*.xml` | only the string ids (comments stripped), to warn about an added key that already has a row (see "After an apply"); the folder must hold a `std_taom_career_data_strings_*.xml` or the run exits 2 |
 | `special_resources/special_resources_config.xml` | the resource a career's `EligibleCultures` resolve to: kingdom rows first, then culture rows, as `SpecialResourceService.ResolveResource` does; a duplicate resource id is an error (the game reads the rows last-wins) |
 | `special_resources/troop_resource_costs.xml` | the rows with a `daily_upkeep` above 0 |
 | `troops/*.xml`, `characters/*.xml` | the `NPCCharacter` culture of each upkeep row's troop |
@@ -135,13 +149,14 @@ Exit codes: 0 clean, 1 drift, 2 error. The summary prints counts per career, for
 
 ```
 kingdom, culture_ids[]
-careers[]: id, archetype (infantry|ranged|cavalry), tree_version, point_levels[6],
-           root {description, effects[1..2]}, forks[6]
+careers[]: id, archetype (infantry|ranged|cavalry; must equal CareerSystemIoC.cs), tree_version,
+           point_levels[6], root {description, effects[1..2]}, forks[6]
 fork:      slot 1-6, name, max_picks (default 1), options[2..3]     (the tier follows the slot)
 option:    name, description, effects[0..2]            (a Passive choice)
         or name, description, vu, mutations[1..2]      (a Keystone choice)
-effect:    type, magnitude, attack_type_mask?, troop_class?
-mutation:  property, calculator, value (> 0), operation   (target is the career's ability template)
+effect:    type, magnitude, attack_type_mask?, troop_class? (a class list, or All)
+mutation:  property, calculator, value (> 0), operation?  (target is the career's ability template;
+           operation defaults to Add in the loader, so it is optional)
 ```
 
 Unknown keys are errors, so a typo cannot pass silently, and so are the retired fields.
@@ -153,11 +168,11 @@ Every error is listed; nothing is written if any exist.
 | # | Rule |
 |---|---|
 | 1 | Schema: required fields and types, six forks, slots once each, 2 or 3 options, at most 2 effects, a root with one or two effects, keystone mutations from the rules' property list with a value above 0, an explicit `vu` on a keystone |
-| 2 | The career exists in `taom_careers.xml` and the spec's `culture_ids` equal its `EligibleCultures` (any order); ids and lists are type-checked |
-| 3 | The type is in `PassiveEffectType.cs`, is `Consumed`, and is not banned; `attack_type_mask` names exist, sit only on mask-gated types, and on `TroopDamage` and `TroopResistance` (the rules' `mask_forbidden`) may only be `All`, because `CareerChoicesIntegrationTests` bans a narrower mask there until the Active Effects panel can show masks; `troop_class` is valid and only on class-filtered types; in fork slots 1, 5 and 6 a class-filtered effect may name only the career's own archetype class (infantry: Infantry, ranged: Ranged, cavalry: Cavalry), while slots 2 to 4 and the root take any class; no effect is a penalty |
+| 2 | The career exists in `taom_careers.xml` and the spec's `culture_ids` equal its `EligibleCultures` (any order); ids and lists are type-checked; the career's `archetype` equals the one `CareerSystemIoC.cs` maps it to (case-blind), and a career the map lacks is refused because it has no ability executor |
+| 3 | The type is in `PassiveEffectType.cs`, is `Consumed`, and is not banned; `attack_type_mask` names exist, sit only on mask-gated types, and on `TroopDamage` and `TroopResistance` (the rules' `mask_forbidden`) may only be `All`, because `CareerChoicesIntegrationTests` bans a narrower mask there until the Active Effects panel can show masks; `troop_class` is a class list or `All` (every class, the same as omitting it) and only on class-filtered types; in fork slots 1, 5 and 6 a class-filtered effect may name only the career's own archetype class (infantry: Infantry, ranged: Ranged, cavalry: Cavalry), while slots 2 to 4 and the root take any class; no effect is a penalty |
 | 4 | A `SpecialResource*` type needs a resource derived from the data; `SpecialResourceUpkeepModifier` also needs an upkeep troop of the career's own cultures (see "Upkeep troops") |
 | 5 | `point_levels` has one entry per fork, strictly ascending and positive; `tree_version` is at least 2 |
-| 6 | Balance: option value units (VU) within `budget_tolerance` of the tier budget, options of one fork within `fork_spread_tolerance` of each other |
+| 6 | Balance: option value units (VU) within `budget_tolerance` of the tier budget, options of one fork within `fork_spread_tolerance` of each other; the root pip priced the same way and no higher than `root_budget` plus `budget_tolerance` |
 | 7 | Caps over every build stay under each cap group |
 | 8 | Generated ids and loc keys are unique and collide with nothing else in the two files (comments ignored) |
 
@@ -172,6 +187,20 @@ is refused as a penalty. VU and the caps are both priced on the benefit.
 classes is worth `1 / class_bonus` (1.5) as much per unit, so class-only effects may be 50% larger.
 A keystone carries an explicit `vu`.
 
+**Root budget.** The root had no limit before. It is priced with the same `option_vu` as an option and
+refused above `root_budget` (1.5 VU) plus `budget_tolerance` (0.5), so 2.0 VU. Only the upper bound is
+checked. The reviewer's case, a root of +100% `MovementSpeed` and +300 `Health`, prices at about 63 VU and is
+refused. The shipped Gondor roots are one +5% damage pip, 1.0 VU, and the review table prints each root's VU
+against the limit.
+
+**Cavalry roots.** Priced with the shipped rules, 63 of the 70 existing roots fit. The other seven are
+`MountChargeDamage` 0.10 (3.03 VU, over 2): `eotheod_windrider`, `clanguard_rider`, `chariot_warlord`,
+`mahud_beast_rider`, `balchoth_kan`, `shaghana_beast_rider` and `abanissa_ivory_rider`, so a straight port is
+refused. Decided on 2026-10-15 under the maintainer's delegation: when a batch regenerates one of them, its
+root shrinks to `MountChargeDamage` 0.05 (1.5 VU), because the root stays a small identity perk. The
+maintainer can still re-price the unit or raise `root_budget` instead (noted on `MountChargeDamage` in
+`_rules.json`).
+
 **Caps.** Forks are independent and picks are voluntary (a fork may stay empty), so the worst build
 is the root plus each fork's top `max_picks` options with a positive benefit. The report names that
 build. Masks and class filters are not discounted: a melee and a ranged damage pip both count.
@@ -179,9 +208,27 @@ build. Masks and class filters are not discounted: a melee and a ranged damage p
 benefit (the negative of the cut): `TroopUpgradeCost` has no runtime floor, so a total cut past -1
 would give a negative upgrade price.
 
+**Every priced type is capped.** `check_rules` refuses a `vu_unit` type that no cap group lists, so a
+new unit cannot ship without a limit. Nine types had a unit and no group; they now have one each, all
+benefit-signed drafts noted in `cap_notes`: `Ammo` 0.5, `Health` 50, `HeroHealing` 1.0,
+`MountChargeDamage` 0.45, `MountHealth` 0.5, `MovementSpeed` 0.15, `PartyMovementSpeed` 0.15,
+`PartySpottingRange` 0.5 and `SwingSpeed` 0.15. Of these only `MountChargeDamage` is used in the Gondor spec (0.1 for the knight).
+
+The coverage rule limits **passive** pips only. Keystone mutations sit outside every cap group and add
+per pick (`MutationService` applies every chosen keystone, and the flat calculator adds to the running
+base), so `Duration` and `Radius` keystones in several forks accumulate; only `CooldownReduction` has a
+runtime floor (`min_cooldown_seconds`). Gondor uses one keystone per career. A `mutation_caps` group in
+`_rules.json`, summed over the worst build like `analyze_caps`, would close this if a spec ever needs it.
+
+A cap's size in VU is its limit over the type's unit, and that decides which options can pass. `SwingSpeed`
+0.15 is only 3 VU at its 0.05 unit, so one tier 1 pick fits and a `SwingSpeed`-only option can never pass
+in slots 3 to 6; every other new cap is 5 VU or more (`MovementSpeed` and `PartyMovementSpeed` 0.15 are
+5 VU at 0.03). Raising `SwingSpeed` to 0.25 would match them; it is noted in `cap_notes` for the
+maintainer.
+
 ### Current values
 
-`tools/career_design/_rules.json` holds the bans, tier budgets 3, 4 and 5, tolerances 0.5, the
+`tools/career_design/_rules.json` holds the bans, tier budgets 3, 4 and 5, the root budget 1.5, tolerances 0.5, the
 `lower_is_better` and `mask_forbidden` lists, a `vu_unit` per type with a note, and the cap groups
 (the full list is in the file; `Damage` and `ArmorPenetration` share one cap because armour
 penetration is a second damage multiplier). **Every number is a draft** the maintainer approves
@@ -194,9 +241,12 @@ through the review table. The 2026-10-15 balance decisions changed `TroopMorale`
 
 ## After an apply: localization
 
-When the run added loc keys, the generator prints these steps after `--apply` under the header
-"new loc keys" (an update that adds none, such as a numbers-only edit, prints the tests steps alone).
-Every command runs unchanged in bash and PowerShell:
+After `--apply` the generator prints these steps. Step 1 appears when the run added, re-worded or
+removed a loc key: the English source `taom_career_data_strings.xml` goes stale otherwise, and rows
+reset to the new English would then read as translated and never be sent. Step 2 appears, under the
+header "new loc keys", only for added keys that have no language row yet (the count leaves out the keys
+the revived-row warning lists). A numbers-only edit prints the tests steps alone. Every command runs
+unchanged in bash and PowerShell:
 
 1. `python tools/generate_name_localization_strings.py --apply --category career_data` (the tools
    test for that file fails until it runs).
@@ -217,6 +267,35 @@ lists every key whose English changed and points to
 [the translator guide's checklist](../localization/TRANSLATOR_GUIDE.md) (substitute the 12 rows,
 fix the cache, check the override files).
 
+Two more warnings print after the summary, in every mode (dry run, `--apply`, `--check`), and never
+block:
+
+- **An option whose effects changed under an unchanged description.** For each option or root present
+  before and after, the generator compares the effects (type, magnitude, mask and class; a
+  keystone's property, calculator and value) and the description attribute (key and English). The
+  comparison is on meaning: mask and class are normalised as the shape does and the effects are
+  compared as a sorted list, so a respelled mask (`Melee,Ranged` to `All`), a class list written as
+  `All`, or a reordered effect list does not warn. When the effects differ in meaning and the description
+  does not, it names the option with the old and new effects (in written order) and the text, because
+  the tooltip may still state the old number. A first adoption cannot warn: the old tree keeps neither
+  the choice ids nor the description keys. A re-adoption can, because deleting both markers (the
+  recovery both refusals prescribe) leaves a previously generated tree whose ids and descriptions the
+  new text keeps.
+- **An added key that already has a row.** Seeding fills only missing ids, and the translator skips
+  every key another `std_taom_*.xml` file of the same language carries, so a key that comes back (a
+  removed option letter returning under a higher `tree_version`) would keep its old translation.
+  When a run adds a key that has a row in any `Languages/*/std_taom_*.xml` (comments stripped), it
+  lists the key with the languages holding the row, naming the file when it is not the career data
+  file, and names the reset step from the translator guide: write the new English into each listed
+  row, drop the key from `tools/translation_cache/<lang>.json`, and check
+  `tools/translation_overrides/<lang>.json`. The Languages folder is read only when a key was added;
+  if it, or a `std_taom_career_data_strings_*.xml` in it, is missing, the run exits 2 with nothing
+  written. **Not covered:** a removed key's row is dropped by `generate_translation_template.py --apply`
+  while its cache entry survives, so a key that returns later has no row to warn about and the
+  translator serves the cached translation of the old English. Reading the caches would need two more
+  directory flags and 26 MB of JSON, and no cache holds a career-fork key today; if a paid run changes
+  that, check `tools/translation_cache/<lang>.json` for a returning key by hand.
+
 ## Key Files
 
 | File | Purpose |
@@ -235,7 +314,9 @@ with and without a BOM, a synthetic `CareerSystem` folder of tiny `.cs` files an
 `special_resources` folder) and never touches the shipped XML. It pins the byte-exact splice, the
 no-op second run, each refusal, the tree version gate, the atomic write, `--check`, one test per
 validation rule, the sign, a brute-force check of the cap search with empty forks allowed, the
-review table, the shape's mask and class normalisation, the signed marker hash, the rollback of a
+review table, the root budget and the cap-group coverage of every priced type, the archetype map read
+from `CareerSystemIoC.cs`, the two warnings above, the optional mutation `operation`, `troop_class`
+`All`, the shape's mask and class normalisation, the signed marker hash, the rollback of a
 failed second rename, the upkeep count by culture, the `IsFlat` grammar, the printed next steps, junk
 input that must produce errors and not exceptions, and the plan's worked example
 (`captain_of_osgiliath`, priced with the shipped rules, the real C# and the real resource data).
@@ -275,6 +356,18 @@ batch.
 - 2026-10-15: C2, the Gondor pilot (`tools/career_design/gondor.json`, the first spec), and the archetype class rule for
   fork slots 1, 5 and 6. Text edits after the review keep `tree_version`; the 15 changed keys were substituted by
   hand in the 12 language files, which still held the old English seed.
+- 2026-10-15: late review fixes (H1, H3, H4, H5 and a nit): a root budget (1.5 VU), a cap group for all
+  nine priced types that had none and a rule that every priced type has one, each spec archetype
+  checked against `CareerSystemIoC.cs`, warnings for an added key that already has a language row and
+  for effects that changed under an unchanged description, an optional mutation `operation`
+  (`gondor.json` keeps it, so the shipped XML is byte-identical), and `troop_class` `All`.
+- 2026-10-15: review of those fixes: the archetype reader is anchored to the builder's body (a trailing
+  statement, a chained call or a dictionary elsewhere is an error), the stale-tooltip warning compares
+  meaning (no warning for a respelling or a reorder) and also fires on a re-adoption, the revived-row
+  warning reads every `std_taom_*.xml` and ignores comments, the strings-tool step prints after any
+  added, re-worded or removed key, the table shows the root's VU, a `CsSets` without the archetype map
+  is a `TypeError`, and the notes now state that keystones are uncapped, that `SwingSpeed` is 3 VU and
+  which 7 cavalry roots the root limit refuses.
 
 ## GitHub Issue
 

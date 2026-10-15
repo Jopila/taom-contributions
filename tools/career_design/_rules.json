@@ -1,5 +1,5 @@
 {
-  "_comment": "Draft balance rules for tools/generate_career_forks.py. Every number is a draft the maintainer approves through the review table (--table). Change a number here, never in the generator. The C# sets (consumed, class-filtered, mask-gated, flat) are read from Main/Features/CareerSystem at run time and are not repeated here. One value unit (VU) is about one median shipped pip.",
+  "_comment": "Draft balance rules for tools/generate_career_forks.py. Every number is a draft the maintainer approves through the review table (--table). Change a number here, never in the generator. The C# sets (consumed, class-filtered, mask-gated, flat) are read from Main/Features/CareerSystem at run time and are not repeated here. One value unit (VU) is about one median shipped pip. Every effect type with a vu_unit must sit in a cap group, and the root pip may not pass root_budget plus budget_tolerance.",
 
   "banned": {
     "StealthBonus": "no consumer worth a pip; the fork trees do not use it",
@@ -18,6 +18,7 @@
   "budget_tolerance": 0.5,
   "fork_spread_tolerance": 0.5,
   "class_bonus": 1.5,
+  "root_budget": 1.5,
 
   "troop_classes": ["Infantry", "Ranged", "Cavalry"],
 
@@ -97,7 +98,7 @@
     "ArmorPenetration": "draft, by analogy with Damage; it shares the Damage cap because it is a second damage multiplier after armour",
     "Ammo": "draft, from the shipped 0.10 to 0.15 range",
     "MountHealth": "draft, from the shipped 0.10 to 0.13 range",
-    "MountChargeDamage": "draft, from the shipped 0.10 to 0.15 range",
+    "MountChargeDamage": "draft, from the shipped 0.10 to 0.15 range. OPEN: a root of 0.10 is 3.03 VU, above the root limit of 2 (root_budget plus budget_tolerance), and 7 shipped cavalry roots carry exactly that (eotheod_windrider, clanguard_rider, chariot_warlord, mahud_beast_rider, balchoth_kan, shaghana_beast_rider, abanissa_ivory_rider). Decided 2026-10-15 under the maintainer's delegation: when a batch regenerates one of them, its root shrinks to 0.05 (1.5 VU), because the plan keeps the root a small identity perk; the maintainer can still re-price this unit or raise root_budget instead",
     "PartyMovementSpeed": "draft, by analogy with MovementSpeed",
     "PartySpottingRange": "draft",
     "TroopUpgradeCost": "a cost type; draft",
@@ -138,7 +139,16 @@
     "PrisonerConversion": {"types": ["PrisonerConversion"], "limit": 1.0},
     "TroopSurvival": {"types": ["TroopSurvival"], "limit": 0.5},
     "TroopUpgradeCost": {"types": ["TroopUpgradeCost"], "limit": 0.5},
-    "SpecialResourceUpgradeCostModifier": {"types": ["SpecialResourceUpgradeCostModifier"], "limit": 0.5}
+    "SpecialResourceUpgradeCostModifier": {"types": ["SpecialResourceUpgradeCostModifier"], "limit": 0.5},
+    "Ammo": {"types": ["Ammo"], "limit": 0.5},
+    "Health": {"types": ["Health"], "limit": 50},
+    "HeroHealing": {"types": ["HeroHealing"], "limit": 1.0},
+    "MountChargeDamage": {"types": ["MountChargeDamage"], "limit": 0.45},
+    "MountHealth": {"types": ["MountHealth"], "limit": 0.5},
+    "MovementSpeed": {"types": ["MovementSpeed"], "limit": 0.15},
+    "PartyMovementSpeed": {"types": ["PartyMovementSpeed"], "limit": 0.15},
+    "PartySpottingRange": {"types": ["PartySpottingRange"], "limit": 0.5},
+    "SwingSpeed": {"types": ["SwingSpeed"], "limit": 0.15}
   },
 
   "cap_notes": {
@@ -147,6 +157,15 @@
     "RaidLoot": "the item chance 0.5 x the multiplier stays below certainty",
     "TradePrices": "past -1 the runtime must keep the floor, not drop the bonus",
     "TroopUpgradeCost": "benefit-signed; the runtime has no floor, so a total cut past -1 would give a negative upgrade price",
-    "SpecialResourceUpgradeCostModifier": "benefit-signed; capped like TroopUpgradeCost, the same kind of price cut"
+    "SpecialResourceUpgradeCostModifier": "benefit-signed; capped like TroopUpgradeCost, the same kind of price cut",
+    "Ammo": "benefit-signed draft, set from the shipped 0.10 to 0.15 pips",
+    "Health": "benefit-signed draft; a flat count, 50 is the largest total any build may reach",
+    "HeroHealing": "benefit-signed draft",
+    "MountChargeDamage": "benefit-signed draft, held at the Damage+ArmorPenetration limit",
+    "MountHealth": "benefit-signed draft",
+    "MovementSpeed": "benefit-signed draft; the same limit as PartyMovementSpeed, which is 5 VU for both at their 0.03 unit",
+    "PartyMovementSpeed": "benefit-signed draft; the same limit as MovementSpeed, a gain of the same kind on the map",
+    "PartySpottingRange": "benefit-signed draft",
+    "SwingSpeed": "benefit-signed draft; 0.15 is only 3 VU at the 0.05 unit (every other new cap is 5 VU or more), so one tier 1 pick fits and a SwingSpeed-only option cannot pass in fork slots 3 to 6; raise it to 0.25 for 5 VU if that is not wanted"
   }
 }

@@ -22,6 +22,7 @@ import json
 import os
 import random
 import re
+import shutil
 import sys
 import tempfile
 import unittest
@@ -50,6 +51,7 @@ TEST_RULES = {
     "budget_tolerance": 0.5,
     "fork_spread_tolerance": 0.5,
     "class_bonus": 1.5,
+    "root_budget": 1.5,
     "troop_classes": ["Infantry", "Ranged", "Cavalry"],
     "lower_is_better": ["TroopWages", "RecruitCost", "SpecialResourceUpkeepModifier",
                         "SpecialResourceUpgradeCostModifier"],
@@ -72,6 +74,17 @@ TEST_RULES = {
         "PartySize": {"types": ["PartySize"], "limit": 75},
         "SpecialResourceGain": {"types": ["SpecialResourceGain"], "limit": 1.0},
         "RecruitCost": {"types": ["RecruitCost"], "limit": 0.5},
+        # every priced type needs a group (check_rules); these limits are far out of the tests' way
+        "Health": {"types": ["Health"], "limit": 1000},
+        "RenownGain": {"types": ["RenownGain"], "limit": 100},
+        "SpecialResourceUpkeepModifier": {"types": ["SpecialResourceUpkeepModifier"], "limit": 100},
+        "SpecialResourceUpgradeCostModifier": {"types": ["SpecialResourceUpgradeCostModifier"], "limit": 100},
+        "Resistance": {"types": ["Resistance"], "limit": 100},
+        "TroopWages": {"types": ["TroopWages"], "limit": 100},
+        "TroopFearResistance": {"types": ["TroopFearResistance"], "limit": 100},
+        "TroopMorale": {"types": ["TroopMorale"], "limit": 100},
+        "DailyGold": {"types": ["DailyGold"], "limit": 10000},
+        "TroopTraining": {"types": ["TroopTraining"], "limit": 1000},
     },
 }
 
@@ -175,13 +188,34 @@ def map_cs(flat=None, block_body=False, skip=False):
             + '    public static string Describe(PassiveEffectType type) => "a // inside /* a string */";\n}\n')
 
 
-def write_system_dir(root, enum_cs=ENUM_CS, mask_cs=MASK_CS, consumers=None, flat_cs=None, drop=()):
+DEFAULT_ARCHETYPES = {"alpha_career": "Infantry", "beta_career": "Ranged", "gamma_career": "Infantry"}
+
+
+def ioc_cs(archetypes=None, body=None):
+    """A CareerSystemIoC.cs shaped like the real one: a static field, a getter, and the expression-bodied
+    BuildCareerArchetypeMap with a dictionary initialiser, comments, and a disabled (commented-out) entry."""
+    archetypes = DEFAULT_ARCHETYPES if archetypes is None else archetypes
+    if body is None:
+        rows = "".join(f'        ["{cid}"]   = CareerArchetype.{name},\n' for cid, name in archetypes.items())
+        body = ("        // === ALPHA === CareerArchetype.Cavalry named in prose\n" + rows
+                + '        // DISABLED: ["far_halftroll"] = CareerArchetype.Infantry,\n')
+    return ("using System.Collections.Generic;\n\npublic static class CareerSystemIoC\n{\n"
+            "    private static readonly IReadOnlyDictionary<string, CareerArchetype> CareerArchetypeMap = "
+            "BuildCareerArchetypeMap();\n\n"
+            "    internal static IReadOnlyDictionary<string, CareerArchetype> GetCareerArchetypeMap() => "
+            "CareerArchetypeMap;\n\n"
+            "    private static IReadOnlyDictionary<string, CareerArchetype> BuildCareerArchetypeMap() => "
+            "new Dictionary<string, CareerArchetype>\n    {\n" + body + "    };\n}\n")
+
+
+def write_system_dir(root, enum_cs=ENUM_CS, mask_cs=MASK_CS, consumers=None, flat_cs=None, drop=(), ioc=None):
     root = Path(root)
     (root / "Domain").mkdir(parents=True, exist_ok=True)
     (root / "Diagnostics").mkdir(parents=True, exist_ok=True)
     files = {"Domain/PassiveEffectType.cs": enum_cs, "Domain/AttackTypeMask.cs": mask_cs,
              "Domain/PassiveEffectConsumers.cs": consumers_cs() if consumers is None else consumers,
-             "Diagnostics/CareerPerkConsumerMap.cs": map_cs() if flat_cs is None else flat_cs}
+             "Diagnostics/CareerPerkConsumerMap.cs": map_cs() if flat_cs is None else flat_cs,
+             "CareerSystemIoC.cs": ioc_cs() if ioc is None else ioc}
     for rel, text in files.items():
         if rel not in drop:
             (root / rel).write_text(text, encoding="utf-8")
@@ -276,9 +310,11 @@ class FixtureFiles:
         self.resource_dir = self.root / "special_resources"
         self.troops_dir = self.root / "troops"
         self.characters_dir = self.root / "characters"
+        self.languages_dir = self.root / "Languages"
         for d in (self.career_dir, self.design_dir, self.resource_dir, self.troops_dir, self.characters_dir):
             d.mkdir()
         write_system_dir(self.system_dir)
+        self.write_language_rows({"FR": [], "DE": []})
         self.careers_path = self.career_dir / "taom_careers.xml"
         self.choices_path = self.career_dir / "taom_career_choices.xml"
         self.out = self.root / "table.md"
@@ -315,6 +351,17 @@ class FixtureFiles:
 
     def write_json(self, path, obj):
         path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
+
+    def write_language_rows(self, rows_by_language):
+        """Languages/<lang>/std_taom_career_data_strings_<lang>.xml, one file per language, holding the given
+        string ids. A language of [] gets a file with no row."""
+        for lang, keys in rows_by_language.items():
+            folder = self.languages_dir / lang
+            folder.mkdir(parents=True, exist_ok=True)
+            rows = "".join(f'    <string id="{k}" text="old {k}" />\n' for k in keys)
+            (folder / f"std_taom_career_data_strings_{lang}.xml").write_text(
+                '<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="string">\n  <strings>\n'
+                f'{rows}  </strings>\n</base>\n', encoding="utf-8")
 
     def write_spec(self, spec, name="alpha"):
         self.write_json(self.design_dir / f"{name}.json", spec)
@@ -360,7 +407,8 @@ class FixtureFiles:
 
     def args(self, *extra, name="alpha"):
         return [name, "--career-dir", str(self.career_dir), "--design-dir", str(self.design_dir),
-                "--system-dir", str(self.system_dir), "--resources-dir", str(self.resource_dir), *extra]
+                "--system-dir", str(self.system_dir), "--resources-dir", str(self.resource_dir),
+                "--languages-dir", str(self.languages_dir), *extra]
 
     def run(self, *extra, name="alpha"):
         out, err = io.StringIO(), io.StringIO()
@@ -2011,6 +2059,13 @@ class TableTests(unittest.TestCase):
         self.assertNotIn("—", text)
         self.assertNotIn("–", text)
 
+    def test_the_root_line_shows_its_value_units_against_the_root_limit(self):
+        fix = FixtureFiles(self)
+        fix.write_spec(good_spec())
+        self.assertEqual(fix.run("--table", str(fix.out))[0], 0)
+        root = next(l for l in fix.out.read_text(encoding="utf-8").splitlines() if l.startswith("**Root:**"))
+        self.assertIn("1.0 VU of at most 2 (root_budget 1.5 plus budget_tolerance 0.5)", root)
+
     def test_the_table_is_not_written_for_an_invalid_spec(self):
         fix = FixtureFiles(self)
         spec = good_spec()
@@ -2048,7 +2103,10 @@ class ShippedRulesTests(unittest.TestCase):
                     "TradePrices": 0.75, "RaidLoot": 0.8, "LootGold": 1.0, "InfluenceGain": 1.0,
                     "RenownGain": 1.0, "DailyGold": 250, "TroopTraining": 25, "WoundRecovery": 1.0,
                     "PrisonerConversion": 1.0, "TroopSurvival": 0.5,
-                    "TroopUpgradeCost": 0.5, "SpecialResourceUpgradeCostModifier": 0.5}
+                    "TroopUpgradeCost": 0.5, "SpecialResourceUpgradeCostModifier": 0.5,
+                    "Ammo": 0.5, "Health": 50, "HeroHealing": 1.0, "MountChargeDamage": 0.45, "MountHealth": 0.5,
+                    "MovementSpeed": 0.15, "PartyMovementSpeed": 0.15, "PartySpottingRange": 0.5,
+                    "SwingSpeed": 0.15}
         self.assertEqual(caps, expected)
         for name in ("Damage+ArmorPenetration", "TroopDamage+TroopResistance"):
             self.assertEqual(len(self.rules["caps"][name]["types"]), 2)
@@ -2608,6 +2666,731 @@ class WorkedExampleTests(unittest.TestCase):
         spec["careers"][0]["forks"][4]["options"][1]["effects"][1]["magnitude"] = 0.30
         errors = gcf.validate_spec(spec, self.rules, self.infos, self.cs, self.data)
         self.assertTrue(has(errors, "RecruitCost", "penalty"), errors)
+
+
+# --------------------------------------------------------------------------- #
+# Late review findings: root budget, cap coverage, archetype source, warnings   #
+# --------------------------------------------------------------------------- #
+class RootBudgetTests(unittest.TestCase):
+    """H1: a root perk is priced like an option and refused above root_budget plus the tolerance."""
+
+    def setUp(self):
+        self.fix = FixtureFiles(self)
+
+    def root_errors(self, effects):
+        spec = good_spec()
+        spec["careers"][0]["root"]["effects"] = effects
+        return errors_for(self.fix, spec)
+
+    def test_a_root_at_the_budget_plus_the_tolerance_passes(self):
+        # 0.10 / 0.05 = 2.0 VU = root_budget 1.5 + budget_tolerance 0.5
+        self.assertEqual(self.root_errors([effect("Damage", 0.10, attack_type_mask="Melee")]), [])
+
+    def test_a_root_just_above_the_limit_is_refused(self):
+        errs = self.root_errors([effect("Damage", 0.11, attack_type_mask="Melee")])
+        self.assertTrue(has(errs, "alpha_career", "root", "2.20 VU", "root limit of 2", "root_budget 1.5 plus budget_tolerance 0.5"), errs)
+
+    def test_a_big_root_is_refused_before_the_caps_are_summed(self):
+        # 10 VU, and on its own 0.5 plus fork 1's 0.15 Damage option is 0.65 against the 0.45 cap
+        errs = self.root_errors([effect("Damage", 0.5, attack_type_mask="Melee")])
+        self.assertEqual(sum("root limit" in e for e in errs), 1, errs)
+        self.assertFalse(has(errs, "cap '"), errs)
+
+    def test_the_root_is_priced_with_the_class_bonus(self):
+        # TroopDamage 0.12 / 0.05 = 2.4 VU, narrowed to one class: 1.6 VU, inside the budget
+        self.assertEqual(self.root_errors([effect("TroopDamage", 0.12, troop_class="Infantry")]), [])
+        errs = self.root_errors([effect("TroopDamage", 0.12)])
+        self.assertTrue(has(errs, "root limit"), errs)
+
+    def test_the_budget_follows_the_rules_file(self):
+        rules = copy.deepcopy(TEST_RULES)
+        rules["root_budget"] = 3.0
+        spec = good_spec()
+        spec["careers"][0]["root"]["effects"] = [effect("Damage", 0.15, attack_type_mask="Melee")]
+        self.assertEqual(errors_for(self.fix, spec, rules), [])
+        self.assertTrue(has(errors_for(self.fix, spec), "root limit"))
+
+    def test_check_rules_needs_a_positive_root_budget(self):
+        broken = copy.deepcopy(TEST_RULES)
+        del broken["root_budget"]
+        with self.assertRaises(gcf.GeneratorError) as ctx:
+            gcf.check_rules(broken)
+        self.assertIn("root_budget", str(ctx.exception))
+        for bad in (0, -1, "1.5", None, True):
+            with self.subTest(value=bad):
+                rules = {**copy.deepcopy(TEST_RULES), "root_budget": bad}
+                with self.assertRaises(gcf.GeneratorError) as ctx:
+                    gcf.check_rules(rules)
+                self.assertIn("root_budget", str(ctx.exception))
+
+
+class RootBudgetShippedTests(unittest.TestCase):
+    """The reviewer's h_root_huge against the shipped rules and the real C# sets."""
+
+    def setUp(self):
+        self.rules = json.loads((TOOLS / "career_design" / "_rules.json").read_text(encoding="utf-8"))
+        self.cs = gcf.load_cs_sets(REAL_SYSTEM_DIR)
+        self.data = gcf.load_resource_data(REAL_RESOURCE_DIR)
+        self.infos = {"captain_of_osgiliath": gcf.CareerInfo(
+            "captain_of_osgiliath", "captain_of_osgiliath_ability", "captain_of_osgiliath_root",
+            ["gondor", "empire_w"], [])}
+
+    def test_a_root_of_double_speed_and_three_hundred_health_is_refused(self):
+        spec = osgiliath_spec()
+        spec["careers"][0]["root"]["effects"] = [effect("MovementSpeed", 1.0), effect("Health", 300)]
+        errors = gcf.validate_spec(spec, self.rules, self.infos, self.cs, self.data)
+        self.assertTrue(has(errors, "captain_of_osgiliath", "root", "root limit"), errors)
+
+    def test_the_shipped_root_budget_is_one_and_a_half(self):
+        self.assertEqual(self.rules["root_budget"], 1.5)
+
+
+class CapCoverageTests(unittest.TestCase):
+    """H1: every priced type belongs to a cap group, so no passive pip can stack without limit. Keystone mutations are
+    outside every group (only CooldownReduction has a runtime floor, min_cooldown_seconds)."""
+
+    NEW_CAPS = {"Ammo": 0.5, "Health": 50, "HeroHealing": 1.0, "MountChargeDamage": 0.45, "MountHealth": 0.5,
+                "MovementSpeed": 0.15, "PartyMovementSpeed": 0.15, "PartySpottingRange": 0.5, "SwingSpeed": 0.15}
+
+    def setUp(self):
+        self.rules = json.loads((TOOLS / "career_design" / "_rules.json").read_text(encoding="utf-8"))
+
+    def test_check_rules_refuses_a_priced_type_in_no_cap_group(self):
+        rules = copy.deepcopy(TEST_RULES)
+        rules["vu_unit"]["Ammo"] = 0.1
+        with self.assertRaises(gcf.GeneratorError) as ctx:
+            gcf.check_rules(rules)
+        self.assertIn("Ammo", str(ctx.exception))
+        self.assertIn("cap group", str(ctx.exception))
+
+    def test_check_rules_lists_every_uncapped_type(self):
+        rules = copy.deepcopy(TEST_RULES)
+        rules["vu_unit"].update({"Ammo": 0.1, "SwingSpeed": 0.05})
+        with self.assertRaises(gcf.GeneratorError) as ctx:
+            gcf.check_rules(rules)
+        self.assertIn("Ammo", str(ctx.exception))
+        self.assertIn("SwingSpeed", str(ctx.exception))
+
+    def test_a_cap_group_holding_the_type_satisfies_the_check(self):
+        rules = copy.deepcopy(TEST_RULES)
+        rules["vu_unit"]["Ammo"] = 0.1
+        rules["caps"]["Ammo"] = {"types": ["Ammo"], "limit": 0.5}
+        gcf.check_rules(rules)
+
+    def test_a_type_inside_a_shared_group_counts_as_capped(self):
+        rules = copy.deepcopy(TEST_RULES)
+        rules["vu_unit"]["Ammo"] = 0.1
+        rules["caps"]["Damage+ArmorPenetration"]["types"].append("Ammo")
+        gcf.check_rules(rules)
+
+    def test_every_shipped_priced_type_is_in_a_cap_group(self):
+        capped = {t for cap in self.rules["caps"].values() for t in cap["types"]}
+        self.assertEqual(sorted(set(self.rules["vu_unit"]) - capped), [])
+
+    def test_the_nine_new_groups_carry_the_agreed_limits_and_a_note(self):
+        for etype, limit in self.NEW_CAPS.items():
+            with self.subTest(type=etype):
+                self.assertEqual(self.rules["caps"][etype], {"types": [etype], "limit": limit})
+                self.assertIn(etype, self.rules["cap_notes"])
+
+    def test_two_forks_that_stack_movement_speed_trip_the_new_cap(self):
+        # one 0.15 pip is 3 VU, a tier 1 pick that passes every budget; two of them reach 0.30 against a 0.15 cap
+        fix = FixtureFiles(self)
+        spec = good_spec()
+        career = spec["careers"][0]
+        rules = copy.deepcopy(TEST_RULES)
+        rules["vu_unit"]["MovementSpeed"] = 0.05
+        rules["caps"]["MovementSpeed"] = {"types": ["MovementSpeed"], "limit": 0.15}
+        cs = gcf.load_cs_sets(fix.system_dir)
+        cs = cs._replace(effect_types=cs.effect_types | {"MovementSpeed"}, consumed=cs.consumed | {"MovementSpeed"})
+        for slot in (1, 2):
+            career["forks"][slot - 1]["options"][0] = {"name": "Swift", "description": "Faster.",
+                                                       "effects": [effect("MovementSpeed", 0.15)]}
+        errors = gcf.validate_spec(spec, rules, career_infos(fix), cs, gcf.load_resource_data(fix.resource_dir))
+        self.assertTrue(has(errors, "cap 'MovementSpeed' exceeded"), errors)
+
+
+class ArchetypeSourceTests(unittest.TestCase):
+    """H3: a spec career's archetype must equal the one the ability executors use."""
+
+    def system(self, **kw):
+        root = Path(tempfile.mkdtemp(prefix="gcf-ioc-"))
+        self.addCleanup(lambda: __import__("shutil").rmtree(root, ignore_errors=True))
+        return write_system_dir(root, **kw)
+
+    def test_the_map_is_read_from_the_ioc_file(self):
+        self.assertEqual(gcf.load_cs_sets(self.system()).archetypes,
+                         {"alpha_career": "infantry", "beta_career": "ranged", "gamma_career": "infantry"})
+
+    def test_a_commented_out_entry_and_prose_do_not_count(self):
+        archetypes = gcf.load_cs_sets(self.system()).archetypes
+        self.assertNotIn("far_halftroll", archetypes)
+        self.assertEqual(len(archetypes), 3)
+
+    def test_a_changed_map_is_followed(self):
+        cs = gcf.load_cs_sets(self.system(ioc=ioc_cs({"alpha_career": "Cavalry"})))
+        self.assertEqual(cs.archetypes, {"alpha_career": "cavalry"})
+
+    def test_a_block_bodied_builder_is_read_too(self):
+        text = ioc_cs().replace("BuildCareerArchetypeMap() => new", "BuildCareerArchetypeMap() { return new")
+        text = text.replace("    };\n}\n", "    }; }\n}\n")
+        self.assertEqual(gcf.load_cs_sets(self.system(ioc=text)).archetypes["beta_career"], "ranged")
+
+    def test_a_missing_file_is_an_error(self):
+        root = self.system(drop=("CareerSystemIoC.cs",))
+        with self.assertRaises(gcf.GeneratorError) as ctx:
+            gcf.load_cs_sets(root)
+        self.assertIn("CareerSystemIoC.cs", str(ctx.exception))
+
+    def test_a_missing_builder_is_an_error(self):
+        with self.assertRaises(gcf.GeneratorError) as ctx:
+            gcf.load_cs_sets(self.system(ioc="public static class CareerSystemIoC { }\n"))
+        self.assertIn("BuildCareerArchetypeMap", str(ctx.exception))
+
+    def test_an_empty_map_is_an_error(self):
+        with self.assertRaises(gcf.GeneratorError) as ctx:
+            gcf.load_cs_sets(self.system(ioc=ioc_cs(body="        // nothing enabled\n")))
+        self.assertIn("no career", str(ctx.exception))
+
+    def test_an_entry_the_reader_cannot_parse_is_an_error(self):
+        body = '        ["alpha_career"] = CareerArchetype.Infantry,\n        ["beta_career"] = Pick("ranged"),\n'
+        with self.assertRaises(gcf.GeneratorError) as ctx:
+            gcf.load_cs_sets(self.system(ioc=ioc_cs(body=body)))
+        self.assertIn("Pick", str(ctx.exception))
+
+    def test_a_duplicate_key_is_an_error(self):
+        body = ('        ["alpha_career"] = CareerArchetype.Infantry,\n'
+                '        ["alpha_career"] = CareerArchetype.Ranged,\n')
+        with self.assertRaises(gcf.GeneratorError) as ctx:
+            gcf.load_cs_sets(self.system(ioc=ioc_cs(body=body)))
+        self.assertIn("alpha_career", str(ctx.exception))
+
+    def test_a_hand_built_cs_sets_must_carry_the_archetype_map(self):
+        # a missing map must fail loudly, not switch the archetype rule off
+        with self.assertRaises(TypeError):
+            gcf.CsSets(set(), set(), set(), set(), set(), set())
+
+    def test_a_statement_after_the_initialiser_is_an_error(self):
+        # the run time map differs from the initialiser: alpha_career ends up Cavalry
+        block = ioc_cs().replace("BuildCareerArchetypeMap() => new", "BuildCareerArchetypeMap() { var map = new")
+        written_after = block.replace(
+            "    };\n}\n", '    };\n        map["alpha_career"] = CareerArchetype.Cavalry;\n        return map; }\n}\n')
+        trailing_work = ioc_cs().replace(
+            "BuildCareerArchetypeMap() => new", "BuildCareerArchetypeMap() { return new").replace(
+            "    };\n}\n", '    };\n        Register(); }\n}\n')
+        for label, text in (("written after", written_after), ("work after the return", trailing_work)):
+            with self.subTest(shape=label):
+                with self.assertRaises(gcf.GeneratorError) as ctx:
+                    gcf.load_cs_sets(self.system(ioc=text))
+                self.assertIn("BuildCareerArchetypeMap", str(ctx.exception))
+
+    def test_a_call_chained_on_the_initialiser_is_an_error(self):
+        # the run time map lacks alpha_career, the initialiser lists it
+        text = ioc_cs().replace(
+            "    };\n}\n", '    }.Where(p => p.Key != "alpha_career").ToDictionary(p => p.Key, p => p.Value);\n}\n')
+        with self.assertRaises(gcf.GeneratorError) as ctx:
+            gcf.load_cs_sets(self.system(ioc=text))
+        self.assertIn("BuildCareerArchetypeMap", str(ctx.exception))
+
+    def test_a_dictionary_outside_the_builder_is_not_read(self):
+        text = ("public static class CareerSystemIoC\n{\n"
+                "    private static IReadOnlyDictionary<string, CareerArchetype> BuildCareerArchetypeMap() => LoadFromXml();\n\n"
+                "    private static Dictionary<string, CareerArchetype> Legacy() => new Dictionary<string, CareerArchetype>\n"
+                '    {\n        ["alpha_career"] = CareerArchetype.Infantry,\n    };\n}\n')
+        with self.assertRaises(gcf.GeneratorError) as ctx:
+            gcf.load_cs_sets(self.system(ioc=text))
+        self.assertIn("BuildCareerArchetypeMap", str(ctx.exception))
+
+    def test_an_archetype_outside_the_rules_is_an_error(self):
+        cs = gcf.load_cs_sets(self.system(ioc=ioc_cs({"alpha_career": "Healer"})))
+        fix = FixtureFiles(self)
+        errs = gcf.validate_spec(good_spec(), TEST_RULES, career_infos(fix), cs, gcf.load_resource_data(fix.resource_dir))
+        self.assertTrue(has(errs, "alpha_career", "healer", "not one of"), errs)
+
+    def test_a_career_whose_archetype_disagrees_is_refused(self):
+        fix = FixtureFiles(self)
+        spec = good_spec()
+        spec["careers"][0]["archetype"] = "ranged"
+        errs = errors_for(fix, spec)
+        self.assertTrue(has(errs, "alpha_career", "archetype", "ranged", "infantry", "CareerSystemIoC.cs"), errs)
+
+    def test_agreement_is_case_blind(self):
+        fix = FixtureFiles(self)
+        spec = good_spec()
+        spec["careers"][0]["archetype"] = "infantry"
+        self.assertEqual(errors_for(fix, spec), [])
+
+    def test_a_career_missing_from_the_map_is_refused(self):
+        fix = FixtureFiles(self)
+        write_system_dir(fix.system_dir, ioc=ioc_cs({"beta_career": "Ranged"}))
+        errs = errors_for(fix, good_spec())
+        self.assertTrue(has(errs, "alpha_career", "CareerSystemIoC.cs", "no archetype"), errs)
+
+    def test_the_command_line_exits_2_when_the_map_cannot_be_found(self):
+        fix = FixtureFiles(self)
+        (fix.system_dir / "CareerSystemIoC.cs").unlink()
+        fix.write_spec(good_spec())
+        before = fix.snapshot()
+        code, out = fix.run("--apply")
+        self.assertEqual(code, 2, out)
+        self.assertIn("CareerSystemIoC.cs", out)
+        self.assertEqual(fix.snapshot(), before)
+
+    def test_the_command_line_exits_2_for_a_disagreeing_archetype_and_writes_nothing(self):
+        fix = FixtureFiles(self)
+        spec = good_spec()
+        spec["careers"][0]["archetype"] = "cavalry"
+        fix.write_spec(spec)
+        before = fix.snapshot()
+        code, out = fix.run("--apply")
+        self.assertEqual(code, 2, out)
+        self.assertIn("archetype", out)
+        self.assertEqual(fix.snapshot(), before)
+
+
+class ArchetypeShippedTests(unittest.TestCase):
+    """Read-only against the real CareerSystemIoC.cs and the shipped Gondor spec."""
+
+    def test_the_real_map_is_read_in_full(self):
+        text = gcf.read_cs(REAL_SYSTEM_DIR / "CareerSystemIoC.cs")
+        entries = re.findall(r'\[\s*"[^"]+"\s*\]\s*=\s*CareerArchetype\s*\.\s*\w+', text)
+        archetypes = gcf.load_cs_sets(REAL_SYSTEM_DIR).archetypes
+        self.assertGreater(len(entries), 40)
+        self.assertEqual(len(archetypes), len(entries))
+
+    def test_the_gondor_careers_agree_with_the_runtime_map(self):
+        archetypes = gcf.load_cs_sets(REAL_SYSTEM_DIR).archetypes
+        spec = json.loads((TOOLS / "career_design" / "gondor.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(spec["careers"]), 3)
+        for career in spec["careers"]:
+            self.assertEqual(archetypes[career["id"]], career["archetype"], career["id"])
+
+
+class LanguageRowWarningTests(unittest.TestCase):
+    """H4: seeding only fills missing ids, so an added key that already has a row revives its old translation."""
+
+    def setUp(self):
+        self.fix = FixtureFiles(self)
+        self.fix.write_spec(good_spec())
+
+    def test_an_added_key_with_a_row_is_named_with_its_languages_and_the_reset_step(self):
+        self.fix.write_language_rows({"FR": ["taom_cf_alpha_career_f1_c"],
+                                      "DE": ["taom_cf_alpha_career_f1_c", "taom_cf_alpha_career_f2_a"]})
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        warning = out[out.index("warning"):]
+        self.assertIn("taom_cf_alpha_career_f1_c (DE, FR)", warning)
+        self.assertIn("taom_cf_alpha_career_f2_a (DE)", warning)
+        self.assertIn(gcf.GUIDE, warning)
+        self.assertIn("translation_cache", warning)
+        self.assertNotIn("taom_cf_alpha_career_f1_a", warning)
+
+    def test_no_row_means_no_warning(self):
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("already has a row", out)
+        self.assertNotIn("warning", out)
+
+    def test_a_dry_run_warns_too(self):
+        self.fix.write_language_rows({"FR": ["taom_cf_alpha_career_f1_c"]})
+        code, out = self.fix.run()
+        self.assertEqual(code, 0, out)
+        self.assertIn("taom_cf_alpha_career_f1_c (FR)", out)
+
+    def test_an_update_that_adds_no_key_stays_quiet_even_when_rows_exist(self):
+        self.assertEqual(self.fix.run("--apply")[0], 0)
+        self.fix.write_language_rows({"FR": ["taom_cf_alpha_career_f1_a"]})
+        spec = good_spec()
+        spec["careers"][0]["forks"][2]["options"][0]["effects"][0]["magnitude"] = 44
+        spec["careers"][0]["forks"][2]["options"][0]["description"] = "+44 max health."
+        self.fix.write_spec(spec)
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("warning", out)
+
+    def test_a_removed_option_letter_coming_back_is_caught_on_an_update(self):
+        self.assertEqual(self.fix.run("--apply")[0], 0)
+        smaller = good_spec()
+        smaller["careers"][0]["tree_version"] = 3
+        smaller["careers"][0]["forks"][0]["options"].pop()
+        self.fix.write_spec(smaller)
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("warning", out)
+        self.fix.write_language_rows({"FR": ["taom_cf_alpha_career_f1_c"]})
+        bigger = good_spec()
+        bigger["careers"][0]["tree_version"] = 4
+        self.fix.write_spec(bigger)
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertIn("taom_cf_alpha_career_f1_c (FR)", out)
+
+    def test_a_row_in_a_sibling_std_taom_file_is_reported_with_its_file(self):
+        # the translator skips every key another std_taom file of the language carries, and the engine
+        # reads the sibling row, so it revives an old translation just the same
+        folder = self.fix.languages_dir / "FR"
+        (folder / "std_taom_other_strings_FR.xml").write_text(
+            '<base><strings><string id="taom_cf_alpha_career_f1_c" text="x" /></strings></base>', encoding="utf-8")
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertIn("taom_cf_alpha_career_f1_c (FR in std_taom_other_strings_FR.xml)", out)
+
+    def test_a_file_that_is_not_a_std_taom_file_is_not_read(self):
+        (self.fix.languages_dir / "FR" / "language_data.xml").write_text(
+            '<base><strings><string id="taom_cf_alpha_career_f1_c" text="x" /></strings></base>', encoding="utf-8")
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("warning", out)
+
+    def test_a_commented_out_row_is_not_a_row(self):
+        (self.fix.languages_dir / "FR" / "std_taom_career_data_strings_FR.xml").write_text(
+            '<base><strings><!-- <string id="taom_cf_alpha_career_f1_c" text="x" /> --></strings></base>',
+            encoding="utf-8")
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("warning", out)
+
+    def test_the_next_steps_count_only_the_keys_without_a_row(self):
+        self.fix.write_language_rows({"FR": ["taom_cf_alpha_career_f1_c"],
+                                      "DE": ["taom_cf_alpha_career_f1_c", "taom_cf_alpha_career_f2_a"]})
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        # 21 generated keys (root, 6 groups, 14 options), two of them already have a row
+        self.assertIn("Next steps (19 new loc keys exist in no language file yet)", out)
+
+    def test_a_languages_folder_with_no_career_data_file_is_an_error(self):
+        shutil.rmtree(self.fix.languages_dir)
+        (self.fix.languages_dir / "FR").mkdir(parents=True)
+        (self.fix.languages_dir / "FR" / "std_taom_other_strings_FR.xml").write_text("<base/>", encoding="utf-8")
+        before = self.fix.snapshot()
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 2, out)
+        self.assertIn("std_taom_career_data_strings_", out)
+        self.assertEqual(self.fix.snapshot(), before)
+
+    def test_a_run_that_adds_no_key_never_reads_the_languages_folder(self):
+        self.assertEqual(self.fix.run("--apply")[0], 0)
+        shutil.rmtree(self.fix.languages_dir)
+        self.assertEqual(self.fix.run("--check")[0], 0)
+
+    def test_a_missing_languages_folder_is_an_error_when_a_key_was_added(self):
+        import shutil
+        shutil.rmtree(self.fix.languages_dir)
+        before = self.fix.snapshot()
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 2, out)
+        self.assertIn("Languages", out)
+        self.assertEqual(self.fix.snapshot(), before)
+
+
+class StaleTooltipWarningTests(unittest.TestCase):
+    """H5: on an update, an option whose effects changed but whose description did not may state an old number."""
+
+    def setUp(self):
+        self.fix = FixtureFiles(self)
+        self.fix.write_spec(good_spec())
+        self.assertEqual(self.fix.run("--apply")[0], 0)
+
+    def update(self, mutate):
+        spec = good_spec()
+        mutate(spec["careers"][0])
+        self.fix.write_spec(spec)
+        return self.fix.run("--apply")
+
+    def test_a_magnitude_change_under_the_same_text_warns_with_both_values(self):
+        code, out = self.update(lambda c: c["forks"][2]["options"][0]["effects"][0].__setitem__("magnitude", 44))
+        self.assertEqual(code, 0, out)
+        line = next(l for l in out.splitlines() if "alpha_career_f3_a" in l and "description" in l)
+        self.assertIn("Health 40", line)
+        self.assertIn("Health 44", line)
+        self.assertIn("+40 max health.", line)
+
+    def test_a_changed_description_clears_the_warning(self):
+        def mutate(c):
+            option = c["forks"][2]["options"][0]
+            option["effects"][0]["magnitude"] = 44
+            option["description"] = "+44 max health."
+        code, out = self.update(mutate)
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("description reads unchanged", out)
+
+    def test_a_text_only_change_does_not_warn(self):
+        code, out = self.update(lambda c: c["forks"][2]["options"][0].__setitem__("description", "Bigger body."))
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("description reads unchanged", out)
+
+    def test_a_keystone_value_change_warns(self):
+        code, out = self.update(lambda c: c["forks"][1]["options"][2]["mutations"][0].__setitem__("value", 4))
+        self.assertEqual(code, 0, out)
+        line = next(l for l in out.splitlines() if "alpha_career_f2_c" in l and "description" in l)
+        self.assertIn("Radius flat 3", line)
+        self.assertIn("Radius flat 4", line)
+
+    def test_every_stale_option_is_listed(self):
+        def mutate(c):
+            c["forks"][2]["options"][0]["effects"][0]["magnitude"] = 44
+            c["forks"][2]["options"][1]["effects"][0]["magnitude"] = 0.43
+        code, out = self.update(mutate)
+        self.assertEqual(code, 0, out)
+        self.assertIn("alpha_career_f3_a", out)
+        self.assertIn("alpha_career_f3_b", out)
+
+    def test_an_unchanged_spec_does_not_warn(self):
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("description reads unchanged", out)
+
+    def test_a_first_adoption_has_nothing_to_compare_and_does_not_warn(self):
+        fix = FixtureFiles(self)
+        fix.write_spec(good_spec())
+        code, out = fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("description reads unchanged", out)
+
+    def test_a_re_adoption_warns_like_an_update(self):
+        # the recovery path the refusals prescribe: delete both markers, raise tree_version, run again
+        for path in (self.fix.careers_path, self.fix.choices_path):
+            text = re.sub(r"^[ \t]*<!-- career-forks:(?:begin|end) [^\n]*-->[ \t]*\n", "", self.fix.lf(path),
+                          flags=re.M)
+            self.assertNotIn("career-forks:", text)
+            path.write_bytes(self.fix.encode(text))
+        spec = good_spec()
+        spec["careers"][0]["tree_version"] = 3
+        spec["careers"][0]["forks"][2]["options"][0]["effects"][0]["magnitude"] = 44
+        self.fix.write_spec(spec)
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertIn("taom_career_choices.xml adopt", out)
+        line = next(l for l in out.splitlines() if "alpha_career_f3_a" in l and "description" in l)
+        self.assertIn("Health 40", line)
+        self.assertIn("Health 44", line)
+
+    def test_a_respelled_mask_or_class_does_not_warn(self):
+        def spec(mask, classes):
+            s = good_spec()
+            s["careers"][0]["root"]["effects"][0]["attack_type_mask"] = mask
+            s["careers"][0]["forks"][2]["options"][0]["effects"] = [
+                {"type": "TroopTraining", "magnitude": 8, "troop_class": classes}]
+            return s
+        fix = FixtureFiles(self)
+        fix.write_spec(spec("Melee,Ranged", "Infantry,Ranged,Cavalry"))
+        self.assertEqual(fix.run("--apply")[0], 0)
+        fix.write_spec(spec("All", "All"))
+        code, out = fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertIn("applied", out)           # the respelling is written, it is only not a change of meaning
+        self.assertNotIn("description reads unchanged", out)
+
+    def test_reordered_effects_do_not_warn(self):
+        def spec(effects):
+            s = good_spec()
+            s["careers"][0]["root"]["effects"] = effects
+            return s
+        melee, health = effect("Damage", 0.03, attack_type_mask="Melee"), effect("Health", 5)
+        fix = FixtureFiles(self)
+        fix.write_spec(spec([melee, health]))
+        self.assertEqual(fix.run("--apply")[0], 0)
+        fix.write_spec(spec([health, melee]))
+        code, out = fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertIn("applied", out)
+        self.assertNotIn("description reads unchanged", out)
+
+    def test_a_changed_mutation_calculator_warns_and_a_changed_operation_does_not(self):
+        def tree(calculator, operation):
+            return ('<Choice id="c_f2_c" type="Keystone" description="{=taom_cf_c_f2_c}Radius up.">'
+                    f'<Mutations><Mutation target_id="t" property="Radius" calculator="{calculator}" value="3" '
+                    f'operation="{operation}" /></Mutations></Choice>')
+        stale = gcf.stale_tooltips(tree("flat", "Add"), tree("multiply", "Add"))
+        self.assertEqual([(cid, old, new) for cid, old, new, _ in stale],
+                         [("c_f2_c", ["Radius flat 3"], ["Radius multiply 3"])])
+        self.assertEqual(gcf.stale_tooltips(tree("flat", "Add"), tree("flat", "Replace")), [])
+
+    def test_a_changed_magnitude_in_a_reordered_pair_still_warns(self):
+        def spec(effects):
+            s = good_spec()
+            s["careers"][0]["root"]["effects"] = effects
+            return s
+        fix = FixtureFiles(self)
+        fix.write_spec(spec([effect("Damage", 0.03, attack_type_mask="Melee"), effect("Health", 5)]))
+        self.assertEqual(fix.run("--apply")[0], 0)
+        fix.write_spec(spec([effect("Health", 5), effect("Damage", 0.04, attack_type_mask="Melee")]))
+        code, out = fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertIn("alpha_career_root", out)
+        self.assertIn("description reads unchanged", out)
+
+    def test_the_warning_prints_in_check_mode_too(self):
+        spec = good_spec()
+        spec["careers"][0]["forks"][2]["options"][0]["effects"][0]["magnitude"] = 44
+        self.fix.write_spec(spec)
+        code, out = self.fix.run("--check")
+        self.assertEqual(code, 1, out)
+        self.assertIn("alpha_career_f3_a", out)
+
+    def test_the_root_is_covered(self):
+        code, out = self.update(lambda c: c["root"]["effects"][0].__setitem__("magnitude", 0.06))
+        self.assertEqual(code, 0, out)
+        self.assertIn("alpha_career_root", out)
+
+
+class StringsToolStepTests(unittest.TestCase):
+    """The English source (taom_career_data_strings.xml) is regenerated by the strings tool; a run that edits or
+    removes a loc key leaves it stale, and rows reset to the new English would then read as translated."""
+
+    STRINGS_STEP = "generate_name_localization_strings.py --apply --category career_data"
+
+    def setUp(self):
+        self.fix = FixtureFiles(self)
+        self.fix.write_spec(good_spec())
+        self.assertEqual(self.fix.run("--apply")[0], 0)
+
+    def test_an_english_only_edit_prints_the_strings_step_but_no_seeding(self):
+        spec = good_spec()
+        spec["careers"][0]["forks"][2]["options"][0]["description"] = "Bigger body."
+        self.fix.write_spec(spec)
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertIn(self.STRINGS_STEP, out)
+        self.assertNotIn("--seed-only", out)
+        self.assertNotIn("new loc keys", out)
+
+    def test_a_removal_only_run_prints_the_strings_step_but_no_seeding(self):
+        spec = good_spec()
+        spec["careers"][0]["tree_version"] = 3
+        spec["careers"][0]["forks"][0]["options"].pop()
+        self.fix.write_spec(spec)
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertIn(self.STRINGS_STEP, out)
+        self.assertNotIn("--seed-only", out)
+
+    def test_a_numbers_only_edit_prints_no_strings_step(self):
+        spec = good_spec()
+        spec["careers"][0]["forks"][2]["options"][0]["effects"][0]["magnitude"] = 41
+        self.fix.write_spec(spec)
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn(self.STRINGS_STEP, out)
+
+    def test_a_run_whose_every_added_key_already_has_a_row_still_prints_the_strings_step(self):
+        smaller = good_spec()
+        smaller["careers"][0]["tree_version"] = 3
+        smaller["careers"][0]["forks"][0]["options"].pop()
+        self.fix.write_spec(smaller)
+        self.assertEqual(self.fix.run("--apply")[0], 0)
+        self.fix.write_language_rows({"FR": ["taom_cf_alpha_career_f1_c"]})
+        bigger = good_spec()
+        bigger["careers"][0]["tree_version"] = 4
+        self.fix.write_spec(bigger)
+        code, out = self.fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertIn(self.STRINGS_STEP, out)
+        self.assertNotIn("--seed-only", out)
+        self.assertNotIn("exist in no language file yet", out)
+
+
+class MutationOperationTests(unittest.TestCase):
+    """NIT: the loader defaults a mutation's operation to Add (CareerConfigProvider), so the spec may omit it."""
+
+    def keystone_without_operation(self):
+        spec = good_spec()
+        spec["careers"][0]["forks"][1]["options"][2]["mutations"][0].pop("operation")
+        return spec
+
+    def test_a_mutation_without_operation_validates(self):
+        fix = FixtureFiles(self)
+        self.assertEqual(errors_for(fix, self.keystone_without_operation()), [])
+
+    def test_the_output_omits_operation_when_the_spec_does(self):
+        fix = FixtureFiles(self)
+        fix.write_spec(self.keystone_without_operation())
+        self.assertEqual(fix.run("--apply")[0], 0)
+        mutation = re.search(r"<Mutation [^>]*>", fix.lf(fix.choices_path)).group(0)
+        self.assertNotIn("operation", mutation)
+        self.assertIn('property="Radius"', mutation)
+
+    def test_the_output_keeps_operation_when_the_spec_states_it(self):
+        fix = FixtureFiles(self)
+        fix.write_spec(good_spec())
+        self.assertEqual(fix.run("--apply")[0], 0)
+        self.assertIn('value="3" operation="Add" />', fix.lf(fix.choices_path))
+
+    def test_a_stated_operation_is_still_checked(self):
+        fix = FixtureFiles(self)
+        spec = good_spec()
+        spec["careers"][0]["forks"][1]["options"][2]["mutations"][0]["operation"] = "Multiply"
+        self.assertTrue(has(errors_for(fix, spec), "operation", "Multiply"))
+
+    def test_the_other_mutation_fields_stay_required(self):
+        fix = FixtureFiles(self)
+        for key in ("property", "calculator", "value"):
+            with self.subTest(key=key):
+                spec = good_spec()
+                spec["careers"][0]["forks"][1]["options"][2]["mutations"][0].pop(key)
+                self.assertTrue(has(errors_for(fix, spec), key, "required"))
+
+    def test_the_two_spellings_are_not_a_structural_change(self):
+        fix = FixtureFiles(self)
+        fix.write_spec(good_spec())
+        self.assertEqual(fix.run("--apply")[0], 0)
+        fix.write_spec(self.keystone_without_operation())
+        code, out = fix.run("--apply")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("operation", re.search(r"<Mutation [^>]*>", fix.lf(fix.choices_path)).group(0))
+        self.assertNotIn("description reads unchanged", out)
+
+
+class TroopClassAllTests(unittest.TestCase):
+    """NIT: troop_class "All" means every class, the same as omitting it, and the C# parser accepts it."""
+
+    def spec_with(self, troop_class):
+        spec = good_spec()
+        effect_ = {"type": "TroopTraining", "magnitude": 8}
+        if troop_class is not None:
+            effect_["troop_class"] = troop_class
+        spec["careers"][0]["forks"][2]["options"][0]["effects"] = [effect_]
+        return spec
+
+    def test_all_validates_in_any_case(self):
+        fix = FixtureFiles(self)
+        for spelling in ("All", "all", "ALL"):
+            with self.subTest(spelling=spelling):
+                self.assertEqual(errors_for(fix, self.spec_with(spelling)), [])
+
+    def test_all_is_priced_like_an_omitted_class(self):
+        option = self.spec_with("All")["careers"][0]["forks"][2]["options"][0]
+        omitted = self.spec_with(None)["careers"][0]["forks"][2]["options"][0]
+        self.assertEqual(gcf.option_vu(option, TEST_RULES), gcf.option_vu(omitted, TEST_RULES))
+        self.assertEqual(gcf.option_vu(option, TEST_RULES), 4.0)
+
+    def test_all_next_to_a_class_is_all_classes(self):
+        effect_ = {"type": "TroopTraining", "magnitude": 8, "troop_class": "Infantry, All"}
+        self.assertFalse(gcf.narrowed(effect_, TEST_RULES))
+
+    def test_all_is_not_narrowed_in_the_archetype_locked_slots(self):
+        fix = FixtureFiles(self)
+        spec = good_spec()
+        spec["careers"][0]["archetype"] = "infantry"
+        spec["careers"][0]["forks"][0]["options"][0]["effects"] = [
+            {"type": "TroopTraining", "magnitude": 6, "troop_class": "All"}]
+        self.assertEqual([e for e in errors_for(fix, spec) if "archetype" in e], [])
+
+    def test_all_is_written_as_all(self):
+        fix = FixtureFiles(self)
+        fix.write_spec(self.spec_with("all"))
+        self.assertEqual(fix.run("--apply")[0], 0)
+        self.assertIn('<PassiveEffect type="TroopTraining" magnitude="8" troop_class="All" />',
+                      fix.lf(fix.choices_path))
+
+    def test_all_keeps_the_shape_of_an_omitted_class(self):
+        every = {"type": "TroopTraining", "magnitude": 8}
+        self.assertEqual(gcf.effect_shape({**every, "troop_class": "All"}), gcf.effect_shape(every))
+
+    def test_a_bad_name_is_still_refused(self):
+        fix = FixtureFiles(self)
+        self.assertTrue(has(errors_for(fix, self.spec_with("Navy")), "Navy", "troop_class"))
+        self.assertTrue(has(errors_for(fix, self.spec_with("Allies")), "Allies", "troop_class"))
 
 
 if __name__ == "__main__":
