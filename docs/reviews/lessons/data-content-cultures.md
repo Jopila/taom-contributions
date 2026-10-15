@@ -1998,3 +1998,16 @@ enlistee under Bow 100. An NPC troop never meets that check; a player does.
   what the rank can have, never only the donor's kit. `EnlistmentArcherLauncherDataTests` pins the Harad-sphere
   chains; a generator cap and a validator check over every player-applied roster are owed (18 older kits).
 - **Source:** [rca-harad-repair-2026-10-15.md](../rca-harad-repair-2026-10-15.md) findings 1 and 2.
+
+### A port that touches troop files diffs the whole warning set against HEAD, not only the errors (#805, 2026-10-15)
+Porting KEYforce's Harad weapons, the first bow fix put six regular archers on their tier's ladder cell. The validator
+reported 0 errors and the port moved on, while its warnings showed the Serpent archers one tier up now out-shot by the
+regulars, and the in-line Harad inversions rose. The same port left the 29 Shaghana and Abanissa enlistment kits on
+their old donors' weapons, because the enlistment generator has no `--verify` and the commit hook never runs it.
+- **Why missed:** the commit hook surfaces only errors, every ladder rule is a warning, and the property ("no lower
+  tier beats a higher one in the line") was not measured; the previous port's lesson above says the same.
+- **Prevent:** before committing any troop change, run `python tools/validate_moduledata.py` on HEAD and on the
+  working tree and diff the warning lists for every troop file touched; a new warning is the change's to fix or to
+  record. Then dry-run every generator that derives from troops, the ones without `--verify` included
+  (`generate_enlistment_rosters.py --culture <c>`), and read what it would change.
+- **Source:** [rca-keyforce-harad-port-2026-10-15.md](../rca-keyforce-harad-port-2026-10-15.md) findings 1 and 5.
