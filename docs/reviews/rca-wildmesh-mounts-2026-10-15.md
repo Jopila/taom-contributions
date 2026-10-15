@@ -49,7 +49,7 @@ Merged across lenses. "Repeat" marks a pattern a lesson already recorded.
 | 8 | MED | The live `action_sets.xml` holds 15 `as_wildmesh_*` sets; the repo snapshot `docs/reference/lotrlome-armory-snapshot/action_sets.xml` is byte-identical to the pre-change backup and holds none, so the README's restore recipe drops them while the Monsters still name them | Completeness | **repeat**: snapshot not refreshed (#646 row 2) | The lesson ("A hand edit to live data is done when its replay script, snapshot and ledger say the same") is phrased for a hand edit; this was a script edit | Snapshot refreshed; the parity test also checks that the snapshot carries the writer's block, so a later drift fails a test |
 | 9 | MED | The new test file did not port four sibling cases (a Monsters file missing a Monster, a missing `_map` twin, a wrong root exits 2, a dry run never asks whether the game runs); `test_each_override_keeps_the_vanilla_attributes` checks one action's `alternative_group` | Tooling (writer) | **repeat** (as row 1) | As row 1 | Ported; the override test compares every override with the native fixture |
 | 10 | MED | `export_blend_pack.py:82` steps by `src/dst` from `s` and clamps at `e`: when the length is not a whole number of output frames, the last sample misses the source's closing pose. 5 of 17 gaits end 2.6 to 7.7 degrees off their first pose (vanilla: under 1.9) | Tooling (pipeline), Step 2c | fixed step on a closed interval | The round-trip check compares rest-pose heads only; the "pose within 0.07 degrees" figure in the lesson came from exact-length clips | Per D-P6; the round trip gains a last-frame check; the #794 lesson is corrected |
-| 11 | MED | `measure_animalia_clips.py:110-111` takes the first threshold crossing as the plant, so a 2 to 4 frame toe scuff before the stance wins: boar `WalkMedium_F` RF 0.6 (stance at 0.9714), elk `Loco_WalkBack` LF and RF | Tooling (pipeline) | first match taken as the event | `Get-MeasureProblem` counts plants and never checks their spacing | Per D-P6 (the plant fix changes three StepPoints) |
+| 11 | MED | `measure_animalia_clips.py:110-111` takes the first threshold crossing as the plant, so a 2 to 4 frame toe scuff before the stance wins: boar `WalkMedium_F` RF 0.6 (stance at 0.9714), elk `Loco_WalkBack` LF and RF | Tooling (pipeline) | first match taken as the event | `Get-MeasureProblem` counts plants and never checks their spacing | `plant_start` (D5). The boar walk's clip is regenerated with it (RF 0.9714); the elk walk-back's two front values are NOT applied: the same re-measure records that source at 60 fps, so the new fps guard refuses the clip, and its plants wait for the Animalia follow-up (convergence finding 1) |
 | 12 | MED | `export_blend_pack.py:224-252`: a stale `.DONE` "ok" survives a crash; `spec.split` and argparse errors leave no `.DONE`; a `--clips-regex` matching nothing writes "ok"; the round-trip numbers are never judged; the report is written twice (`:249-250`) | Tooling (pipeline), Efficiency | **repeat**: detached-run handling not copied | Its same-commit siblings (`restyle_human_clip.py:514-520`, `retarget_mannequin_to_human.py:1150-1176`) have it; the exporter was written for one run | Copied: stale verdict cleared, errors caught into `.DONE`, empty selection fails, `failed` recorded in the report |
 | 13 | LOW | Parse failures and missing inputs show as raw tracebacks at exit 1, the code for a data refusal (`apply_wildmesh_armory.py:306, 321, 338, 359-360`) | Tooling (writer) | exit-code contract | Inherited from the shared helper | `PARSE FAILED: <file>` into problems; missing inputs exit 2 |
 | 14 | LOW | The SubModule presence check is a bare substring (`:307`), and its anchor has no count check (`:311`) | Tooling (writer) | substring containment | The `/WARG` anchor beside it has one; this one was written first | Exact `path="..."` token; anchor count 1 |
@@ -171,8 +171,9 @@ After the fixes and the regeneration (this tree): `dotnet test TAOM.Tests -p:Dis
 `wire_anim_master_skeletons.ps1` census ok=74; `check_rdc_entries.py --under creature/creatures` 0 without an entry;
 `audit_action_set_parity.py` exit 0; `validate_moduledata.py` 7 errors (Harad, unchanged), 1,602 warnings, none naming
 a WildMesh id or test rider; `validate_xml_schemas.py` on the rider file and `SubModule.xml` pass.
-`check_external_loc_coverage.py` now exits 1: +5 untranslated per language, the item names it could not see before;
-the translations are owed (paid, Mike's word). The installed TAOM module carries the moved rider file (a 10:24 build
+`check_external_loc_coverage.py` reported +5 untranslated per language, the item names it could not see before; the
+baseline was updated in the convergence fix commit (Armory counts only) and the translations are owed (paid, Mike's
+word). The installed TAOM module carries the moved rider file (a 10:24 build
 deployed the tree) and the old installed copy is deleted. Not yet run: anything in game.
 
 **Committed with the ModuleData commit gate overridden, at Mike's word (2026-10-15, "Just commit anyways and dont
@@ -182,6 +183,21 @@ errors in `troops/troops_harad.xml` and 6 Harad career-kit drifts (`generate_car
 `08b30bfc4` and untouched here; this change adds no validator error. The commits ran from a script by path, with the
 staged list checked against this change's files. **The convergence pass** (Step 4.6) was still running at commit
 time; its findings land in a follow-up commit.
+
+**Convergence pass (one `deep-reviewer` on the fix diff, after the commits): 2 MED, 5 LOW, no regression.** It
+confirmed the writer's pristine-tree output byte-identical but for the header comment, the validator's 1,609 issues
+unchanged between HEAD and the tree, both packs' `-Verify` counts, the 17 regenerated gait clips against the new
+measures, the exact-times patch points in the installed exporter, and the rider move. Dispositions:
+
+| # | Sev | Finding | Disposition |
+|---|---|---|---|
+| C1 | MED | The elk `Loco_WalkBack` plant fix was not carried into `animalia_elk_clip_measure.json` | NOT APPLIED, pushed back with evidence: the same re-measure records that clip at 60 fps, so committing it makes the new fps guard refuse the clip; row 11 now says so |
+| C2 | MED | The loc step turned `check_external_loc_coverage.py` red (+5 untranslated per language) | Re-baselined (`--update-baseline`): only the Armory counts move, +5 in each of the 12 languages, the five owed item names |
+| C3 | LOW | `taom_schema.py:187` said "all five Monsters"; the five items are four Monsters | Fixed |
+| C4 | LOW | The clip generator's header did not describe SHORT, the new BAD MEASURE conditions or the new exit 2 | Fixed |
+| C5 | LOW | A malformed measure file made `-Verify` exit 1, not 2 | Fixed with a test |
+| C6 | LOW | The writer's "only the forward and in-place rows are rebound" sentence ignored the stands, idles and hit reactions it also rebinds | Fixed |
+| C7 | LOW | The exporter's stale-verdict clearing missed an abbreviated `--ou` | `allow_abbrev=False`, with a test |
 
 Baseline during the review, before any fix: `dotnet test TAOM.Tests` 17,376 passed, 7 failed, 6 skipped (the seven:
 `EveryUpgradeTarget_HasNoSkillLowerThanTheTroopItUpgradesFrom`, `AllNonMilitiaNonBossTroops_AreReachableFromARecruitmentPoolRoot`,

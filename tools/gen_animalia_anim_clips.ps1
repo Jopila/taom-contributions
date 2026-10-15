@@ -55,12 +55,14 @@ code. Open the Kit once afterwards so it writes the clips' RuntimeDataCache entr
 pairs Get-AnimaliaClipPlan derives for generation) against what is actually on disk beside its master and
 reports NO MASTER (the master itself is gone), ORPHAN (the clip file is missing, the clip inside it is named
 otherwise, or its Animation GUID names a different master than the plan's), STALE (Source2 != master frames - 1),
-and a stale item checksum in any clip folder (tpac_fix_item_checksums.py dry run); exits 1 on any. -Apply runs the
+SHORT (a measured clip's master lacks the measured frames plus the rest frame, $FRAME_EXEMPT excepted), and a
+stale item checksum in any clip folder (tpac_fix_item_checksums.py dry run, this pack's master folders only); exits 1 on any. -Apply runs the
 same check afterwards over every clip, folding any failure into the exit code.
 
 A gait or death clip is generated only from a sound measurement (Get-MeasureProblem): a clip the measure run
 recorded as an error, a loop that covers no ground, too few hoof plants or a fall fraction outside (0, 1) is
-reported BAD MEASURE and counted as an error, never written with zeros.
+reported BAD MEASURE and counted as an error, never written with zeros. BAD MEASURE also covers a measure
+recorded at another rate than 30 fps and a master frame count off the measure.
 
 -Pack picks the pack (default animalia, the elk and moose above). wildmesh is the WildMesh3D boar, warthog,
 mountain goat, deer and moose (#794): masters under Assets\creature\creatures\animations, named
@@ -72,7 +74,7 @@ of their own: the action set binds the lender's clip, which already carries the 
 on the same horse joints. Falls, rear, kick and walking backwards stay vanilla for that pack.
 
 Exit 2 when it cannot run (game or Kit open, not Windows PowerShell, a tool path missing, -Apply and -Verify
-together). Windows PowerShell 5.1 (TolerantTpacLoader.cs is .NET Framework):
+together, a measure file missing or unreadable). Windows PowerShell 5.1 (TolerantTpacLoader.cs is .NET Framework):
   powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools\gen_animalia_anim_clips.ps1 [-Pack wildmesh] [-Apply | -Verify]
 #>
 $ErrorActionPreference = 'Stop'
@@ -228,11 +230,23 @@ Write-Output ("masters: {0}   not on horse_skeleton: {1}" -f $master.Count, $bad
 if ($badSkel.Count -gt 0) { Write-Output ("run tools\wire_anim_master_skeletons.ps1 first: " + ($badSkel -join ', ')); exit 1 }
 
 # ---- measures, loaded for -Verify too (its SHORT check compares a master with what was measured)
+function Read-MeasureFile($path) {
+  # The clips object, or a reason string when the file is missing or unreadable (malformed JSON). A throw
+  # here would exit 1, which the contract reserves for findings.
+  if (-not (Test-Path $path)) { return 'not found' }
+  try { return (Get-Content $path -Raw | ConvertFrom-Json).clips }
+  catch { return [string]$_.Exception.Message }
+}
 $meas = @{}
 foreach ($animal in $PLAN.Keys) {
   $mf = "$PSScriptRoot\blender\${Pack}_${animal}_clip_measure.json"
-  if (-not (Test-Path $mf)) { Write-Output "ERROR: cannot run, measure file not found: $mf"; exit 2 }
-  $meas[$animal] = (Get-Content $mf -Raw | ConvertFrom-Json).clips
+  $loaded = Read-MeasureFile $mf
+  if ($loaded -is [string]) {
+    if ($loaded -eq 'not found') { Write-Output "ERROR: cannot run, measure file not found: $mf" }
+    else { Write-Output "ERROR: cannot run, measure file unreadable: ${mf}: $loaded" }
+    exit 2
+  }
+  $meas[$animal] = $loaded
 }
 
 function Test-AnimaliaClips {

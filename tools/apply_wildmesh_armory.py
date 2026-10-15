@@ -27,9 +27,10 @@ refused, naming the missing ids; an animal absent from one file and present in a
      the missing animals' sets just before the /WILDMESH3D MOUNTS end marker. Each override copies the vanilla
      as_horse action's attributes and changes only the clip (tools/gen_animalia_anim_clips.ps1 -Pack wildmesh
      wrote them). The warthog's canter and gallop bind the boar's clips and the goat's gallop the deer's (the
-     pack's own versions do not loop or curve sideways). Only the forward and in-place rows at paces 1 to 5 are
-     rebound; everything else stays the horse's: falls, rear, kick, walking backwards, strafes, turns, quick
-     stops, jumps and the head-turn additives. No attack yet (stage 12).
+     pack's own versions do not loop or curve sideways). Rebound: the forward and in-place gait rows at paces 1
+     to 5, the standing pace, the stands, idles and riderless idles, and the two hit reactions. Everything else stays
+     the horse's: falls, rear, kick, walking backwards, strafes, turns, quick stops, jumps and the head-turn
+     additives. No attack yet (stage 12).
   4. ModuleData/LOTRLOME_items/LOTRAOM_horses.xml: taom_wildmesh_<animal>_a, the body_length="100" placeholder
      Items.xsd requires (TAOM copies the Monster's size in at game init), not merchandise while only the Custom
      Battle test riders ride them. Missing items go after the last taom_wildmesh_*_a item, the first run after
@@ -248,9 +249,10 @@ SETS_HEADER = [
     "\t     by TAOM tools/gen_animalia_anim_clips.ps1 -Pack wildmesh beside the masters in",
     "\t     Assets/creature/creatures/animations). Each action copies the vanilla as_horse action's attributes",
     "\t     and changes only the clip; the warthog's canter and gallop are the boar's clips, the goat's gallop",
-    "\t     the deer's. Only the forward and in-place rows at paces 1 to 5 are rebound; everything else stays the",
-    "\t     horse's: falls, rear, kick, walking backwards, strafes, turns, quick stops, jumps and the head-turn",
-    "\t     additives. The _map twin is required (MobilePartyVisual looks up ActionSetCode + \"_map\"). Written by",
+    "\t     the deer's. Rebound: the forward and in-place gait rows at paces 1 to 5, the standing pace, the",
+    "\t     stands, idles and riderless idles, and the two hit reactions. Everything else stays the horse's: falls,",
+    "\t     rear, kick, walking backwards, strafes, turns, quick stops, jumps and the head-turn additives. The",
+    "\t     _map twin is required (MobilePartyVisual looks up ActionSetCode + \"_map\"). Written by",
     "\t     tools/apply_wildmesh_armory.py. -->"]
 SETS_END = "\t<!-- ============================== /WILDMESH3D MOUNTS ============================== -->"
 SETS_WARG = "\t<!-- ============================== /WARG ============================== -->"

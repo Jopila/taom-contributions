@@ -184,8 +184,9 @@ def _lineno(text: str, pos: int) -> int:
 
 
 # The mounts a dwarf may ride: the Dwarven war ram (#515) and the three WildMesh3D dwarf mounts (#794, the
-# War Boar, Bristleback Boar and Iron Hills Goat). All five Monsters inherit the vanilla horse's seat
-# (rider_sit_bone and the rider adders, through base_monster="horse"); what makes them dwarf mounts is their
+# War Boar, Bristleback Boar and Iron Hills Goat). All four Monsters (the war ram's, which both ram items
+# share, and the three WildMesh ones) inherit the vanilla horse's seat (rider_sit_bone and the rider
+# adders, through base_monster="horse"); what makes them dwarf mounts is their
 # size and the ram bardings that carry the seat mesh, so each seat is an in-game check, and if that check
 # fails the three WildMesh ids come out. Every other mount stays a hard MOUNTED_DWARF error. The ids are
 # pinned rather than prefix-matched, so a later mount has to be reviewed and added here on purpose instead

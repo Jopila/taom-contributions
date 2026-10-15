@@ -196,6 +196,14 @@ class DetachedRunTests(unittest.TestCase):
             self._run(["--out", d])   # no --pack
             self.assertTrue(self._done(d).startswith("fail: "), self._done(d))
 
+    def test_an_abbreviated_option_is_an_error_not_taken_as_out(self):
+        with tempfile.TemporaryDirectory() as d:
+            other = os.path.join(d, "other")
+            with mock.patch.object(ebp, "export_pack", lambda *a, **k: None):
+                self._run(["--pack", "boar=x.blend", "--out", d, "--ou", other])
+            self.assertTrue(self._done(d).startswith("fail: "), self._done(d))
+            self.assertFalse(os.path.exists(other), "--ou must not redirect the output folder")
+
     def test_a_failed_pack_is_recorded_in_the_report_and_the_verdict(self):
         with tempfile.TemporaryDirectory() as d:
             def boom(key, *a, **k):

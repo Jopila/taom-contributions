@@ -127,5 +127,58 @@ class MeasureProblemTests(unittest.TestCase):
         self.assertEqual(self._p("exempt_other"), "master has 42 frames, measured 42 + rest")
 
 
+READ_HARNESS = r"""
+param([string]$Script, [string]$Dir)
+$ErrorActionPreference = 'Stop'
+$ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
+$fn = @($ast.FindAll({ param($a) $a -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+    $a.Name -eq 'Read-MeasureFile' }, $true))
+if ($fn.Count -ne 1) { '{"found":0}'; exit 0 }
+. ([scriptblock]::Create($fn[0].Extent.Text))
+[IO.File]::WriteAllText("$Dir\bad.json", '{"clips": {oops')
+[IO.File]::WriteAllText("$Dir\good.json", '{"clips": {"walk": {"n": 36}}}')
+$missing = Read-MeasureFile "$Dir\nope.json"
+$bad = Read-MeasureFile "$Dir\bad.json"
+$good = Read-MeasureFile "$Dir\good.json"
+[ordered]@{
+  found = 1
+  missing_is_string = ($missing -is [string])
+  bad_is_string = ($bad -is [string])
+  bad_text = [string]$bad
+  good_is_string = ($good -is [string])
+  good_n = [int]$good.walk.n
+} | ConvertTo-Json -Compress
+"""
+
+
+@unittest.skipUnless(SHELL, "no PowerShell on PATH: the Read-MeasureFile tests need powershell.exe or pwsh")
+class ReadMeasureFileTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        with tempfile.TemporaryDirectory() as d:
+            harness = os.path.join(d, "harness.ps1")
+            with open(harness, "w", encoding="ascii") as f:
+                f.write(READ_HARNESS)
+            p = subprocess.run([SHELL, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", harness,
+                                "-Script", SCRIPT, "-Dir", d], capture_output=True, text=True, timeout=180)
+        if p.returncode != 0:
+            raise AssertionError("harness failed (%d): %s %s" % (p.returncode, p.stdout, p.stderr))
+        cls.r = json.loads(p.stdout.strip().splitlines()[-1])
+
+    def test_the_loader_is_a_function_in_the_script(self):
+        self.assertEqual(self.r["found"], 1)
+
+    def test_a_missing_file_returns_a_reason(self):
+        self.assertTrue(self.r["missing_is_string"])
+
+    def test_a_malformed_file_returns_a_reason_instead_of_throwing(self):
+        self.assertTrue(self.r["bad_is_string"])
+        self.assertTrue(self.r["bad_text"])
+
+    def test_a_good_file_returns_its_clips(self):
+        self.assertFalse(self.r["good_is_string"])
+        self.assertEqual(self.r["good_n"], 36)
+
+
 if __name__ == "__main__":
     unittest.main()

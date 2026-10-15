@@ -340,7 +340,7 @@ def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     out = out_dir_from_argv(argv)
     clear_stale_verdict(out)
-    ap = _Parser()
+    ap = _Parser(allow_abbrev=False)   # out_dir_from_argv knows only the full --out, so `--ou X` must be an error
     ap.add_argument("--pack", action="append", required=True, help="key=path/to/file.blend")
     ap.add_argument("--out", required=True)
     ap.add_argument("--clips-regex", default=".")
