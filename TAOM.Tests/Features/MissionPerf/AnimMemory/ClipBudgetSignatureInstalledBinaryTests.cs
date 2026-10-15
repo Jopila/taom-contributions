@@ -13,6 +13,7 @@ namespace TAOM.Tests.Features.MissionPerf.AnimMemory;
 /// </summary>
 [TestClass]
 [TestCategory("LiveInstall")]
+[TestCategory("BindingVerification")]
 public class ClipBudgetSignatureInstalledBinaryTests
 {
     /// <summary>Verified targets per client build, keyed by TaleWorlds.Native.dll file length. Add a row

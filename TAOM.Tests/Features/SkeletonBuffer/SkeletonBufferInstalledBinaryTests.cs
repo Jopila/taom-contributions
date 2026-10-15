@@ -16,6 +16,7 @@ namespace TAOM.Tests.Features.SkeletonBuffer;
 /// </summary>
 [TestClass]
 [TestCategory("LiveInstall")]
+[TestCategory("BindingVerification")]
 public class SkeletonBufferInstalledBinaryTests
 {
     /// <summary>Verified targets per client build, keyed by TaleWorlds.Native.dll file length. Add a row
@@ -24,6 +25,7 @@ public class SkeletonBufferInstalledBinaryTests
         new Dictionary<long, (string, int, int, int, int, int)>
         {
             [14209888] = ("v1.5.4", 0x69CE1, 0xD9D160, 0x69D14, 0x69AD5, 0x6AF50),
+            [14212960] = ("v1.5.5", 0x6A1A1, 0xD9E160, 0x6A1D4, 0x69F95, 0x6B410),
         };
 
     private static readonly byte[] OriginalSite =

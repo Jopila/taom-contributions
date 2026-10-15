@@ -205,11 +205,13 @@ abstract method resolves by name. A row it cannot resolve is a failure, not a pa
      red as soon as the engine moves (`DefaultChangeSet` is compiled in), whatever the pin says, and
      stays red until BUTR publishes. No CI uses the reference assemblies since the workflows were
      removed (`c8d69a0dc`).
-   - The per-build native address pins, which SKIP rather than fail on an unknown build: the
-     `KnownBuilds` tables in `ClipBudgetSignatureInstalledBinaryTests` and
-     `SkeletonBufferInstalledBinaryTests`, `PINS` in
-     `tools/tests/test_native_decompile.py` and the `pins` table in
-     `tools/tests/test_native_engine_methods.py` (run those two with `TAOM_GHIDRA_IT=1`). Add a row
+   - The per-build native address pins. The two C# `KnownBuilds` tables, in
+     `ClipBudgetSignatureInstalledBinaryTests` and `SkeletonBufferInstalledBinaryTests`, skip in the
+     default suite and FAIL in the binding gate (item 1) on a build with no row; `NativePinGateTests`
+     holds both to that and to this list. The binding gate will therefore fail until this item adds
+     the rows, which is expected. `PINS` in `tools/tests/test_native_decompile.py` and the `pins`
+     table in `tools/tests/test_native_engine_methods.py` still SKIP on an unknown build and run only
+     with `TAOM_GHIDRA_IT=1`, so read their skip count. Add a row
      per build; derive engine methods with `native_engine_methods.load_or_build`. The engine-method map
      counts are version-keyed and the `ProcessPreloadQueue` thunk target is a per-row `thunk_target`
      key. The latest numbers are in `docs/migration/v<ver>-impact.md`.

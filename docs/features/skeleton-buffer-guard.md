@@ -198,9 +198,10 @@ instrumentation: neither changes what is simulated.
   through a thunk: a reservation that fits returns the old fill, one ending exactly at the capacity is granted, one past
   it is taken back, counted and given slot 0, and a smaller one still fits after a refusal; for pool 2 also that `r15`
   is saved to `[rsp+20h]` and `rcx` and `edx` are unchanged.
-- `SkeletonBufferInstalledBinaryTests` (2, `LiveInstall`): the patterns against the installed `TaleWorlds.Native.dll`
-  file, exactly one match each (pool 1's site at RVA `0x69D14`, pool 2's at `0x6AF50`, the pool-2 load at `0x69AD5`),
-  no foreign shape, and the global at RVA `0xD9D160`.
+- `SkeletonBufferInstalledBinaryTests` (2, `LiveInstall` and `BindingVerification`): the patterns against the
+  installed `TaleWorlds.Native.dll` file, exactly one match each (v1.5.4: pool 1's site at RVA `0x69D14`, pool 2's at
+  `0x6AF50`, the pool-2 load at `0x69AD5`; the v1.5.5 row has `0x6A1D4`, `0x6B410` and `0x69F95`), no foreign shape,
+  and the global at RVA `0xD9D160` (`0xD9E160` on v1.5.5).
 - `SkeletonBufferWiringTests` (13): module list, behavior shape, settings, and that native write calls exist in one file
   only (with a floor: the scan must match the adapter itself).
 
@@ -212,8 +213,9 @@ declaration-only stubs first (68 of 226 failing), and seven mutations of its cod
 ## After an engine bump
 
 `SkeletonBufferInstalledBinaryTests` goes Inconclusive for a build missing from its `KnownBuilds` table (a test-only
-pin; the game itself scans by pattern). Read the `[SkeletonBuffer] guard` lines of the first start: `guard ON pool 1`
-and `guard ON pool 2` mean both patterns still match exactly once; `guard OFF` with a pattern reason means players lost
+pin; the game itself scans by pattern). That is a skip in the default suite and a failure in the binding gate, because
+`NativePinGateTests` keeps the class tagged `BindingVerification`. Read the `[SkeletonBuffer] guard` lines of the
+first start: `guard ON pool 1` and `guard ON pool 2` mean both patterns still match exactly once; `guard OFF` with a pattern reason means players lost
 the freeze protection for that pool with this build. Re-derive with `python tools/native_decompile.py --rva 0x69D1C` and
 `--rva 0x6AF58` (the reservations' addresses in v1.5.4) and check section 10 of the engine doc still holds (layout,
 entries per skeleton, 32 blocks, both pools), then add the build's file length and RVAs to `KnownBuilds`. Do not use
