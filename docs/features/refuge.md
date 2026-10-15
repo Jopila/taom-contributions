@@ -75,7 +75,10 @@ clan screen + click-to-manage: Patch75 (registry entry has the co-op disposition
 - **Session reset.** `RefugeCampaignBehavior` marks the session synced only when SyncData runs in
   loading mode; `OnSessionLaunched` calls `RefugeService.ResetForNewSession()` when it did not
   (fresh campaign, or a pre-feature save), so the process-lifetime singleton cannot leak campaign
-  A's book into campaign B. `LoadFrom` also scrubs null rows and clears every transient.
+  A's book into campaign B. `LoadFrom` also scrubs null rows and clears every transient. This is the latch shape
+  that the amended session-reset rule (`.claude/rules/csharp-architecture.md`, "Singleton Services Holding
+  Per-Campaign State", `9ab3952a7`) no longer prescribes for persisted state. Refuge keeps it until its visuals
+  reset is checked safe at `OnGameStart` (#773; `docs/reviews/rca-wotr-session-reset-2026-10-08.md`, Follow-ups).
 - **Orphans get an exit.** A party adopted on load without a book row (`Established=false`,
   `Building=false`) is dismantlable (menu + encounter open for it, everything else greyed), so it
   cannot eat a refuge-cap slot forever.

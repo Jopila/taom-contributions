@@ -20,7 +20,7 @@ Keep the two version numbers apart when reading anything sourced from that repor
 
 | Requirement | Details |
 |-------------|---------|
-| Bannerlord version | **v1.5.2**: TAOM's pin as of 2026-09-14 (Steam beta branch). BT a0.5.3.2's declared dependency version for Native/SandBoxCore/Sandbox/StoryMode/CustomBattle was v1.4.7 when this table was written and has **not been re-checked since the 1.4.8 or the 1.5.2 bump**; BT is not installed on the dev machine, so verify against BT's own `SubModule.xml` before relying on this row |
+| Bannerlord version | **v1.5.5**: TAOM's pin (`.claude/pinned-game-version.txt`, set by `4f9985852`). BT a0.5.3.2's declared dependency version for Native/SandBoxCore/Sandbox/StoryMode/CustomBattle was v1.4.7 when this table was written and has **not been re-checked since**; BT is not installed on the dev machine, so verify against BT's own `SubModule.xml` before relying on this row |
 | BannerlordTogether | a0.5.3.2 (the reviewed build) |
 | TAOM version | **Same version on every client — not enforced.** The `TAOM_Build` stamp in save metadata records which build wrote a save and is logged on load, which makes a mismatch diagnosable after the fact, not preventable |
 | All players | Must have TAOM installed and enabled, with matching MCM settings |
@@ -74,6 +74,7 @@ does today.
 | Harmony census | Not written | Written at the end of `OnGameInitializationFinished` |
 | TAOM diplomacy veto (war / peace / alliance-end) | Enforced | **Off** — host is authoritative (see "Diplomacy ordering") |
 | TAOM time-acceleration UI (`MapBar` extra fast-forward + 4 layout patches + `MapTimeControlVM` mixin) | Registered | **Not registered** — BT owns `Campaign.TimeControlMode` |
+| Eye of Sauron hunt ([eye-of-sauron.md](eye-of-sauron.md)) | Runs | **Off under BannerlordTogether, for a solo player too.** TAOM cannot read BT's host or client role, so `ShouldDeferToHost` holds on every peer: no hunt starts and a running one ends (the maintainer's call, E08). Under BannerlordCoop the hunt runs until a session goes live |
 
 **Why the shield is skipped outright (2026-08-02).** This is a **performance** decision, not a
 safety one. Until plan 034 the shield finalizer took `__originalMethod`, so Harmony's generated wrapper
@@ -124,7 +125,8 @@ It reports:
   revision was never sourced);
 - **contested** methods patched by more than one distinct owner where at least one isn't TAOM;
 - **TRANSPILER CONFLICT** rows where two owners both rewrite the same method's IL — the highest-risk
-  Harmony conflict class, and TAOM brings 7 transpilers of its own;
+  Harmony conflict class, and TAOM brings its own (`grep -rl 'IEnumerable<CodeInstruction> Transpiler(' Main` lists
+  them: 18 methods in 16 files on 2026-10-14);
 - how many `0Harmony` assemblies are loaded, with paths and versions.
 
 That last line is the one to read first. **If BT's owner id never appears while the game plainly
@@ -253,8 +255,8 @@ NavalTravel and NativeSkinFixes to be disabled at the wiring level instead.
 D1 survived for months because nothing forced anyone to ask the question. `CoopVetoClassificationTests`
 now does, at build time: it scans `Main/` for every class declaring a bool-returning Harmony prefix
 and requires each to carry a disposition — `GatedForCoop`, `ReviewedSafe`, or `Parked` — with a
-written reason. Adding a prefix without classifying it fails the build. 32 classes are currently
-classified; three are gated.
+written reason. Adding a prefix without classifying it fails the build. 61 classes are classified
+(2026-10-14: 57 ReviewedSafe, 3 GatedForCoop, 1 Parked); three are gated.
 
 The classification question is: **can this skip a campaign-state mutation the co-op host replicates,
 AND can its condition evaluate differently on two peers?** Both halves matter — `TraitLevelingHelper`
@@ -294,7 +296,7 @@ An override that fully replaces a vanilla body silently deletes any BT patch on 
 | **Settings parity is reported, not exchanged** | TAOM's 372 MCM settings live in a per-user file outside the save; **234 are simulation-relevant** (traced per setting to the consuming feature, see [coop-interop.md](coop-interop.md) "What is NOT done"). Two players with different values still simulate differently (battle autocalc, bandit spawn density, AI army targeting, desertion rates) and nothing on the wire corrects it | `SettingsFingerprint` writes one code per MCM group to each peer's log under the co-op gate, so the manual comparison is a few short strings rather than 234 values. Exchanging them through save metadata and warning on join is the remaining step and needs two machines to verify |
 | **Detection reflects what the player enabled, not what constructed** | `CoopPresence` reads the launcher's active-module list. If the co-op mod's SubModule constructor throws, `SubModuleConstructionGuard` swallows it and the module still reads as active — so TAOM spends the session in co-op mode (PatchShield withholding its rescue, SaveShield rethrowing save-load faults) for a co-op layer that never came up | Check the log for the co-op mod's own init lines. Closing this needs the construction guard to map a failing assembly back to its module id plus a suppression set that survives re-probing |
 | **PatchShield still swallows the missing-API trinity everywhere it shields** | The co-op SAVE-LOAD rethrow covers SaveShield's own targets (PatchShield now skips those), but on any other method a `MissingMethod`/`MissingField`/`TypeLoad` exception is still swallowed | Intended: that swallow is what keeps a stale third-party mod from killing the session |
-| **TAOM state that mutates mid-session is join-time-only** | War of the Ring momentum, culture-conversion progress, messenger fleet, career progression and caravan memory reach the client through the host's save at join and then drift. BT has no schema for these fields, so its replication cannot correct them | None yet. Needs an "am I the simulation authority" signal from BT. One exception: the character-creation package (race, culture gold, career, resource seed) is re-applied on **detection** rather than replicated, so a joiner keeps it even though nothing syncs it |
+| **TAOM state that mutates mid-session is join-time-only** | War of the Ring momentum, War Chronicle effects, event rows and rally tiers, culture-conversion progress, messenger fleet, career progression and caravan memory reach the client through the host's save at join and then drift. BT has no schema for these fields, so its replication cannot correct them. Under BannerlordTogether every peer also runs the War Chronicle itself, since `IsAuthority` fails open there. | None yet. Needs an "am I the simulation authority" signal from BT. One exception: the character-creation package (race, culture gold, career, resource seed) is re-applied on **detection** rather than replicated, so a joiner keeps it even though nothing syncs it |
 | Siege defense rewards fire on the host only | Client players don't trigger `SiegeDefenseBehavior` rewards | Host handles siege events; client still fights |
 | Race data is host-save-authoritative | Joining client loads races from the host's save | **Two mechanisms, both needed.** A TAOM-less or one-race host would ship a degenerate race map that force-set every hero on a full client to human — `CaptureHeroRaces` now refuses a table below two races ([hero-race.md](hero-race.md)). Separately the joining player's OWN character-creation race is discarded with the hero at the hand-off, and `PlayerPossession` re-applies it ([player-possession.md](player-possession.md)) |
 | BattleLink battles need the separate MP window | Both players need BT's BattleLinkMPClient enabled | Follow BT's battle-server setup |
