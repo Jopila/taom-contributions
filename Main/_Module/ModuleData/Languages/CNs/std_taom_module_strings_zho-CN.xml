@@ -2957,5 +2957,46 @@
   <string id="taom_career_retrain_body" text="Refund every career choice except your first for {GOLD} gold? You keep your career and the tiers you unlocked." />
   <string id="taom_career_retrain_confirm" text="Retrain" />
   <string id="taom_career_retrain_no_gold" text="You need {GOLD} gold to retrain." />
+  <string id="taom_career_effect_special" text="{VALUE} special" />
+  <string id="taom_career_effect_health" text="{VALUE} max health" />
+  <string id="taom_career_effect_damage" text="{VALUE} damage" />
+  <string id="taom_career_effect_resistance" text="{VALUE} resistance" />
+  <string id="taom_career_effect_armor_penetration" text="{VALUE} armor penetration" />
+  <string id="taom_career_effect_swing_speed" text="{VALUE} swing speed" />
+  <string id="taom_career_effect_movement_speed" text="{VALUE} movement speed" />
+  <string id="taom_career_effect_ammo" text="{VALUE} ammo" />
+  <string id="taom_career_effect_shrug_off" text="{VALUE} shrug off" />
+  <string id="taom_career_effect_stealth_bonus" text="{VALUE} stealth bonus" />
+  <string id="taom_career_effect_buff_duration" text="{VALUE} buff duration" />
+  <string id="taom_career_effect_mount_health" text="{VALUE} mount health" />
+  <string id="taom_career_effect_mount_charge_damage" text="{VALUE} mount charge damage" />
+  <string id="taom_career_effect_party_movement_speed" text="{VALUE} party speed" />
+  <string id="taom_career_effect_party_spotting_range" text="{VALUE} party spotting range" />
+  <string id="taom_career_effect_party_size" text="{VALUE} party size" />
+  <string id="taom_career_effect_companion_limit" text="{VALUE} companion limit" />
+  <string id="taom_career_effect_inventory_capacity" text="{VALUE} inventory capacity" />
+  <string id="taom_career_effect_troop_damage" text="{VALUE} troop damage" />
+  <string id="taom_career_effect_troop_resistance" text="{VALUE} troop resistance" />
+  <string id="taom_career_effect_troop_morale" text="{VALUE} troop morale" />
+  <string id="taom_career_effect_troop_wages" text="{VALUE} troop wages" />
+  <string id="taom_career_effect_troop_upgrade_cost" text="{VALUE} troop upgrade cost" />
+  <string id="taom_career_effect_troop_survival" text="{VALUE} troop survival" />
+  <string id="taom_career_effect_troop_fear_resistance" text="{VALUE} troop fear resistance" />
+  <string id="taom_career_effect_troop_knockdown_resistance" text="{VALUE} troop knockdown resistance" />
+  <string id="taom_career_effect_troop_crush_hold" text="{VALUE} troop crush hold" />
+  <string id="taom_career_effect_hero_healing" text="{VALUE} healing" />
+  <string id="taom_career_effect_renown_gain" text="{VALUE} battle renown gain" />
+  <string id="taom_career_effect_smithing_cost_reduction" text="{VALUE} smithing cost" />
+  <string id="taom_career_effect_special_resource_gain" text="{VALUE} resource gain" />
+  <string id="taom_career_effect_special_resource_upkeep_modifier" text="{VALUE} resource upkeep" />
+  <string id="taom_career_effect_special_resource_upgrade_cost_modifier" text="{VALUE} resource upgrade cost" />
+  <string id="taom_career_class_line_infantry" text="{EFFECT} for infantry" />
+  <string id="taom_career_class_line_ranged" text="{EFFECT} for ranged troops" />
+  <string id="taom_career_class_line_cavalry" text="{EFFECT} for cavalry" />
+  <string id="taom_career_class_line_infantry_ranged" text="{EFFECT} for infantry and ranged troops" />
+  <string id="taom_career_class_line_infantry_cavalry" text="{EFFECT} for infantry and cavalry" />
+  <string id="taom_career_class_line_ranged_cavalry" text="{EFFECT} for ranged troops and cavalry" />
+  <string id="taom_career_value_percent" text="{NUMBER}%" />
+  <string id="taom_career_value_flat" text="{NUMBER}" />
   </strings>
 </base>

@@ -27,7 +27,8 @@ public class TaomRaidModel : DefaultRaidModel
         // FromOrNull(PartyBase). Replaces the prior Owner-only inline that skipped LeaderHero.Culture
         // (Codex review 43). The careerPassives call below keys on the owning Hero's StringId (a
         // per-hero passive, not a culture feat) — owner-first via CareerPassiveHero, never the
-        // throwing PartyBase.get_Owner (crash 0b462fd8).
+        // throwing PartyBase.get_Owner (crash 0b462fd8). TroopDamage is class-filtered (#769 E9), and a raid has no
+        // troop class, so ApplyFactor reads the army-wide pips only: a class-only pip never speeds a raid.
         _feats.ApplyRaidDamageFeats(
             CultureFeatAdapter.FromOrNull(attackerSide?.LeaderParty),
             ref result);

@@ -18,14 +18,18 @@ public class CareerPassiveService : ICareerPassiveService
     // a stable reference, then operate on the (immutable from their POV) snapshot lock-free.
     // Several callers can fire from AI worker threads (party-desertion model, party-size model).
     private readonly object _lock = new object();
+    // The UNFILTERED per-type total: every passive of the type summed, whatever its attack_type_mask or
+    // troop_class. This is what every non-combat consumer reads (party size, wages, speed...).
     private Dictionary<string, Dictionary<PassiveEffectType, float>> _cache
         = new Dictionary<string, Dictionary<PassiveEffectType, float>>();
 
-    // Per-(type, authored-mask) breakdown, populated alongside _cache. Lets the damage path honor
-    // attack_type_mask (a "+X% ranged damage" pip only fires on ranged hits) while _cache keeps the
-    // mask-agnostic per-type total every other consumer reads. Swapped under the same lock as _cache.
-    private Dictionary<string, Dictionary<PassiveEffectType, Dictionary<AttackTypeMask, float>>> _maskedCache
-        = new Dictionary<string, Dictionary<PassiveEffectType, Dictionary<AttackTypeMask, float>>>();
+    // Per-(type, authored-mask, authored-troop-class) breakdown, populated alongside _cache. Lets the
+    // damage path honor attack_type_mask (a "+X% ranged damage" pip only fires on ranged hits) and
+    // troop_class (a "+X% infantry damage" pip only reaches infantry) while _cache keeps the total
+    // every other consumer reads. Swapped under the same lock as _cache. The buckets are walked with the
+    // Dictionary's struct enumerator, so a read allocates nothing.
+    private Dictionary<string, Dictionary<PassiveEffectType, Dictionary<(AttackTypeMask Mask, TroopClassMask TroopClass), float>>> _maskedCache
+        = new Dictionary<string, Dictionary<PassiveEffectType, Dictionary<(AttackTypeMask Mask, TroopClassMask TroopClass), float>>>();
 
     // Phase 9b #173 — cached localization string for the ApplyFactor/Flat methods. Was duplicated
     // in CareerPassiveHelper; consolidated here so deletion of the helper doesn't leak the text.
@@ -47,7 +51,7 @@ public class CareerPassiveService : ICareerPassiveService
         // Phase 9b #173 F2 — build the new dicts OUTSIDE the lock, then swap under the lock.
         // Reads can briefly capture the OLD reference and finish their work without contention.
         var nextCache = new Dictionary<string, Dictionary<PassiveEffectType, float>>();
-        var nextMaskedCache = new Dictionary<string, Dictionary<PassiveEffectType, Dictionary<AttackTypeMask, float>>>();
+        var nextMaskedCache = new Dictionary<string, Dictionary<PassiveEffectType, Dictionary<(AttackTypeMask Mask, TroopClassMask TroopClass), float>>>();
 
         var allData = dataService.GetAllData();
         _logger.LogInfo($"CareerSystem: Refreshing passive cache for {allData.Count} heroes");
@@ -58,13 +62,13 @@ public class CareerPassiveService : ICareerPassiveService
             if (string.IsNullOrEmpty(heroData.CareerStringId)) continue;
 
             var effectMap = new Dictionary<PassiveEffectType, float>();
-            var maskedMap = new Dictionary<PassiveEffectType, Dictionary<AttackTypeMask, float>>();
+            var maskedMap = new Dictionary<PassiveEffectType, Dictionary<(AttackTypeMask Mask, TroopClassMask TroopClass), float>>();
 
             foreach (var choiceId in heroData.ChoiceIds)
             {
                 var choice = registry.GetChoice(choiceId);
-                if (choice?.Passive != null)
-                    Accumulate(effectMap, maskedMap, choice.Passive);
+                if (choice != null)
+                    Accumulate(effectMap, maskedMap, choice.Passives);
             }
 
             // Root choice passive is always active even if not in ChoiceIds.
@@ -72,8 +76,8 @@ public class CareerPassiveService : ICareerPassiveService
             if (career != null)
             {
                 var rootChoice = registry.GetChoice(career.RootChoiceId);
-                if (rootChoice?.Passive != null && !heroData.HasChoice(career.RootChoiceId))
-                    Accumulate(effectMap, maskedMap, rootChoice.Passive);
+                if (rootChoice != null && !heroData.HasChoice(career.RootChoiceId))
+                    Accumulate(effectMap, maskedMap, rootChoice.Passives);
             }
 
             if (effectMap.Count > 0)
@@ -109,22 +113,26 @@ public class CareerPassiveService : ICareerPassiveService
         }
     }
 
-    // Accumulates one passive into both the mask-agnostic per-type total and the per-(type, mask)
-    // breakdown. Shared by the choice loop + the root-choice path so the two stay in sync.
+    // Accumulates a choice's passives (one or two, #769 E8) into both the unfiltered per-type total and
+    // the per-(type, mask, class) breakdown. Shared by the choice loop + the root-choice path so the two
+    // stay in sync.
     private static void Accumulate(
         Dictionary<PassiveEffectType, float> effectMap,
-        Dictionary<PassiveEffectType, Dictionary<AttackTypeMask, float>> maskedMap,
-        PassiveEffect passive)
+        Dictionary<PassiveEffectType, Dictionary<(AttackTypeMask Mask, TroopClassMask TroopClass), float>> maskedMap,
+        IReadOnlyList<PassiveEffect> passives)
     {
-        var type = passive.EffectType;
-        effectMap[type] = effectMap.TryGetValue(type, out var existing)
-            ? existing + passive.Magnitude
-            : passive.Magnitude;
+        foreach (var passive in passives)
+        {
+            var type = passive.EffectType;
+            effectMap[type] = effectMap.TryGetValue(type, out var existing)
+                ? existing + passive.Magnitude
+                : passive.Magnitude;
 
-        if (!maskedMap.TryGetValue(type, out var byMask))
-            maskedMap[type] = byMask = new Dictionary<AttackTypeMask, float>();
-        var mask = passive.AttackTypeMask;
-        byMask[mask] = byMask.TryGetValue(mask, out var m) ? m + passive.Magnitude : passive.Magnitude;
+            if (!maskedMap.TryGetValue(type, out var byBucket))
+                maskedMap[type] = byBucket = new Dictionary<(AttackTypeMask Mask, TroopClassMask TroopClass), float>();
+            var bucket = (passive.AttackTypeMask, passive.TroopClass);
+            byBucket[bucket] = byBucket.TryGetValue(bucket, out var m) ? m + passive.Magnitude : passive.Magnitude;
+        }
     }
 
     public float GetPassiveMagnitude(string heroStringId, PassiveEffectType type)
@@ -152,22 +160,34 @@ public class CareerPassiveService : ICareerPassiveService
         return magnitude;
     }
 
+    // Every authored-mask bucket the hit matches (All-masked entries carry both bits, so they apply to any
+    // hit), whatever its troop class: the troop reading with all three classes, so the two walks cannot drift.
     public float GetMaskedMagnitude(string heroStringId, PassiveEffectType type, AttackTypeMask hitMask)
+        => GetTroopMagnitude(heroStringId, type, TroopClassMask.All, hitMask);
+
+    public float GetTroopMagnitude(string heroStringId, PassiveEffectType type, TroopClassMask troopClass, AttackTypeMask? hitMask = null)
     {
         if (string.IsNullOrEmpty(heroStringId)) return 0f;
 
-        Dictionary<string, Dictionary<PassiveEffectType, Dictionary<AttackTypeMask, float>>> snapshot;
+        Dictionary<string, Dictionary<PassiveEffectType, Dictionary<(AttackTypeMask Mask, TroopClassMask TroopClass), float>>> snapshot;
         lock (_lock) { snapshot = _maskedCache; }
 
         if (!snapshot.TryGetValue(heroStringId, out var typeMap)) return 0f;
-        if (!typeMap.TryGetValue(type, out var byMask)) return 0f;
+        if (!typeMap.TryGetValue(type, out var byBucket)) return 0f;
 
-        // Sum every authored-mask bucket whose delivery type intersects the hit (All-masked
-        // entries carry both bits, so they apply to any hit).
+        // A bucket counts when its mask matches the hit (no hit mask: any mask but None, the loader's
+        // sentinel for an unparseable one, which no hit matches either) AND its class is All or shares a
+        // bit with the troop's. A troop of class None shares no bit, so it still gets the All-class
+        // buckets and nothing narrower. Hot path (per blow, per non-hero troop): no logging, and the
+        // struct enumerator allocates nothing.
         var total = 0f;
-        foreach (var entry in byMask)
-            if (AttackTypeMaskMatch.Matches(entry.Key, hitMask))
-                total += entry.Value;
+        foreach (var entry in byBucket)
+        {
+            var bucket = entry.Key;
+            if (hitMask.HasValue ? !AttackTypeMaskMatch.Matches(bucket.Mask, hitMask.Value) : bucket.Mask == AttackTypeMask.None) continue;
+            if (bucket.TroopClass != TroopClassMask.All && (bucket.TroopClass & troopClass) == TroopClassMask.None) continue;
+            total += entry.Value;
+        }
         return total;
     }
 
@@ -180,13 +200,22 @@ public class CareerPassiveService : ICareerPassiveService
             && effectMap.ContainsKey(type);
     }
 
+    // What a reader with no troop and no hit takes for a type: the unfiltered total, except for a class-filtered
+    // type (#769 E9), where a class-only pip ("+10% infantry damage") would otherwise count at full magnitude for a
+    // consumer that has no class. Those read the army-wide pips: a troop of class None gets the All-class buckets
+    // and nothing narrower. The raid speed (TaomRaidModel) is the one such reader of TroopDamage.
+    private float ArmyWideMagnitude(string heroStringId, PassiveEffectType type)
+        => PassiveEffectConsumers.IsClassFiltered(type)
+            ? GetTroopMagnitude(heroStringId, type, TroopClassMask.None)
+            : GetPassiveMagnitude(heroStringId, type);
+
     // Phase 9b #173 — instance methods replacing the static CareerPassiveHelper.ApplyFactor /
     // ApplyFlat. Per ADR-007 accept primitive `string heroStringId` (boundary GameModels extract
     // `hero?.StringId` at the call site). Null/empty/zero-magnitude all short-circuit.
     public void ApplyFactor(string heroStringId, ref ExplainedNumber result, PassiveEffectType type)
     {
         if (string.IsNullOrEmpty(heroStringId)) return;
-        var magnitude = GetPassiveMagnitude(heroStringId, type);
+        var magnitude = ArmyWideMagnitude(heroStringId, type);
         if (magnitude != 0f)
         {
             var before = result.ResultNumber;
@@ -202,7 +231,7 @@ public class CareerPassiveService : ICareerPassiveService
     public void ApplyFlat(string heroStringId, ref ExplainedNumber result, PassiveEffectType type)
     {
         if (string.IsNullOrEmpty(heroStringId)) return;
-        var magnitude = GetPassiveMagnitude(heroStringId, type);
+        var magnitude = ArmyWideMagnitude(heroStringId, type);
         if (magnitude == 0f) return;
 
         // A flat passive is authored as a COUNT and the career screen shows it as one ("+4 party

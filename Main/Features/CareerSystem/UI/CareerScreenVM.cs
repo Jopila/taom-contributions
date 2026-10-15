@@ -256,7 +256,7 @@ public class CareerScreenVM : ViewModel
     // one rebuild ran).
     private void PublishActiveEffects(
         List<string> keystoneDescriptions,
-        Dictionary<Domain.PassiveEffectType, float> passiveTotals)
+        Dictionary<(Domain.PassiveEffectType Type, Domain.TroopClassMask TroopClass), float> passiveTotals)
     {
         _keystoneEffectLines.Clear();
         _passiveEffectLines.Clear();
@@ -266,7 +266,7 @@ public class CareerScreenVM : ViewModel
 
         foreach (var kvp in passiveTotals)
         {
-            var line = CareerEffectDisplayMap.Format(kvp.Key, kvp.Value);
+            var line = CareerEffectDisplayMap.Format(kvp.Key.Type, kvp.Value, kvp.Key.TroopClass);
             if (!string.IsNullOrEmpty(line))
                 _passiveEffectLines.Add(new CareerAbilityEffectVM(line));
         }
@@ -284,7 +284,7 @@ public class CareerScreenVM : ViewModel
     {
         // Issue #388 — filled by the choice walk below, published once at the end.
         var takenKeystoneDescriptions = new List<string>();
-        var takenPassiveTotals = new Dictionary<Domain.PassiveEffectType, float>();
+        var takenPassiveTotals = new Dictionary<(Domain.PassiveEffectType Type, Domain.TroopClassMask TroopClass), float>();
 
         // #769 E7: the retrain button, read off the same walk. It shows for any career with a fork and
         // is enabled only while a fork pick from an earlier visit stands (LockedIn); a pick taken this
@@ -320,10 +320,16 @@ public class CareerScreenVM : ViewModel
                         if (!string.IsNullOrEmpty(choice.Description))
                             takenKeystoneDescriptions.Add(choice.Description);
                     }
-                    else if (choice.Passive != null)
+                    else
                     {
-                        takenPassiveTotals.TryGetValue(choice.Passive.EffectType, out var running);
-                        takenPassiveTotals[choice.Passive.EffectType] = running + choice.Passive.Magnitude;
+                        // Keyed by class too (#769 E9): "+10% troop damage for infantry" and an unfiltered
+                        // "+5% troop damage" are different promises and must not read as one "+15%".
+                        foreach (var passive in choice.Passives)
+                        {
+                            var key = (passive.EffectType, passive.TroopClass);
+                            takenPassiveTotals.TryGetValue(key, out var running);
+                            takenPassiveTotals[key] = running + passive.Magnitude;
+                        }
                     }
                 }
                 // Issue #381 — a choice the rule refuses (tier, fork, keystone, points) dims and

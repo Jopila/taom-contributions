@@ -193,9 +193,9 @@ Per-kingdom resource gating + transactional spending
 
 ## Patch27_CareerSystem
 
-**Target:** `ViewModel.ExecuteCommand`, `AgentStatCalculateModel.UpdateAgentStats`
+**Target:** `ViewModel.ExecuteCommand`
 
-Career screen opening + ability V-key activation (3 archetypes: Infantry/Ranged/Cavalry, 50 careers, XML-tunable)
+Career screen opening path: the only live one. A postfix that, for the `ExecuteOpenCareerScreen` command on `CharacterDeveloperVM`, closes the character developer and opens the career screen. `CharacterDeveloperCareerMixin.ExecuteOpenCareerScreen` has no `[DataSourceMethod]` attribute, so UIExtenderEx never registers it and it is unreachable
 
 ## Patch28_SettlementGuards
 

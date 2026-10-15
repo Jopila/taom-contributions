@@ -47,5 +47,11 @@ public enum PassiveEffectType
     // Special resources (SpecialResources feature)
     SpecialResourceGain,
     SpecialResourceUpkeepModifier,
-    SpecialResourceUpgradeCostModifier
+    SpecialResourceUpgradeCostModifier,
+
+    // Troop counters (#769 E10): what the leader's non-hero troops resist of the enemy's fear, knockdown
+    // and crush-through. Class-filtered; read through CareerTroopHooks at the morale, stat and combat seams.
+    TroopFearResistance,
+    TroopKnockdownResistance,
+    TroopCrushHold
 }

@@ -238,7 +238,7 @@ The six vanilla-wrapped cultures get their terrain feat appended to their `<cult
 | `Main/Features/CulturalFeats/Models/TaomPartyMoraleModel.cs` | Party morale feats |
 | `Main/Features/CulturalFeats/Models/TaomSmithingModel.cs` | Smithing energy cost feats |
 | `Main/Features/CulturalFeats/Models/TaomClanFinanceModel.cs` | Tariff income feats |
-| `Main/Features/CulturalFeats/Models/TaomRaidModel.cs` | Raid damage feats |
+| `Main/Features/CulturalFeats/Models/TaomRaidModel.cs` | Raid damage feats; the raid speed also applies the leader's career `TroopDamage` through `ApplyFactor`, which reads only the army-wide (All-class) pips of that class-filtered type (#769) |
 | `Main/Features/TroopProgression/Models/TaomPartyWageModel.cs` | Wage/garrison feat checks (extended) |
 | `Main/Features/Diplomacy/Models/TaomDiplomacyModel.cs` | Decision penalty feat (extended) |
 | `Main/_Module/ModuleData/taom_spcultures.xml` | Culture feat XML assignments (custom cultures) |

@@ -45,7 +45,7 @@ public class TaomFooModel : DefaultFooModel
 
 | Model | Base | Feature |
 |-------|------|---------|
-| `TaomAgentStatCalculateModel` | `SandboxAgentStatCalculateModel` (SandBox) | `CareerSystem` (+ the CultureDoctrine aggression post-pass + the CombatMechanics mount charge multiplier #610 + the career mount bonuses #611 + the RaceAbilities post-pass and resistances + the CreatureSiegeRole detachment cost, read on the async AI thread; mount-side rules key on `RiderAgent`, a mount's own `Character` is null) |
+| `TaomAgentStatCalculateModel` | `SandboxAgentStatCalculateModel` (SandBox) | `CareerSystem` (+ the career troop knockdown counter at the end of `GetKnockDownResistance`, campaign only, #769 E10; + the CultureDoctrine aggression post-pass + the CombatMechanics mount charge multiplier #610 + the career mount bonuses #611 + the RaceAbilities post-pass and resistances + the CreatureSiegeRole detachment cost, read on the async AI thread; mount-side rules key on `RiderAgent`, a mount's own `Character` is null) |
 | `TaomBattleMoraleModel` | `SandboxBattleMoraleModel` (SandBox) | `CultureDoctrine` (+ the RaceAbilities panic gate) |
 | `TaomCustomBattleMoraleModel` | `CustomBattleMoraleModel` | `CultureDoctrine` (Custom Battle; + the RaceAbilities panic gate) |
 | `TaomCustomBattleDamageModel` | `CustomAgentApplyDamageModel` | `CombatMechanics` (Custom Battle only, hand-wired in `SubModule.RegisterCustomBattleModels`, never declared by a module: the twin of `TaomCombatMechanicsModel`: the same base and hook calls in the same order as the campaign model (`CustomBattleDamageModelTests` pins it); includes the creature bandits' damage-taken step, the RaceAbilities hooks and the CreatureSiegeRole gate blow; no career passives, no Refuge) |
@@ -92,7 +92,7 @@ public class TaomFooModel : DefaultFooModel
 | `TaomKingdomDecisionPermissionModel` | `DefaultKingdomDecisionPermissionModel` | `Diplomacy` |
 | `TaomDiplomacyModel` | `DefaultDiplomacyModel` | `Diplomacy` |
 | `TaomInformationRestrictionModel` | `DefaultInformationRestrictionModel` | `Encyclopedia` |
-| `TaomCombatMechanicsModel` | `TaomAgentApplyDamageModel` (CareerSystem, **abstract**: career passives via inheritance; ultimately `SandboxAgentApplyDamageModel`) | `CombatMechanics` (+ the RaceAbilities damage, crush-through and shrug-off hooks + the CreatureSiegeRole gate blow in `ApplyDamageScaling`); campaign only, because the SandBox base throws on a mounted hit outside a campaign: Custom Battle runs `TaomCustomBattleDamageModel` |
+| `TaomCombatMechanicsModel` | `TaomAgentApplyDamageModel` (CareerSystem, **abstract**: career passives via inheritance; ultimately `SandboxAgentApplyDamageModel`) | `CombatMechanics` (+ the RaceAbilities damage, crush-through and shrug-off hooks + the career crush hold ending `DecideCrushedThrough`, #769 E10 + the CreatureSiegeRole gate blow in `ApplyDamageScaling`); campaign only, because the SandBox base throws on a mounted hit outside a campaign: Custom Battle runs `TaomCustomBattleDamageModel` |
 | `TaomPrisonerRecruitmentCalculationModel` | `DefaultPrisonerRecruitmentCalculationModel` | `PrisonerRecruitment` |
 | `TaomBattleBannerBearersModel` | `SandboxBattleBannerBearersModel` (SandBox) | `BannerBearers` |
 | `TaomCustomBattleBannerBearersModel` | `CustomBattleBannerBearersModel` | `BannerBearers` (Custom Battle) |

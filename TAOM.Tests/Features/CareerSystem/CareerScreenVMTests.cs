@@ -36,12 +36,12 @@ public class CareerScreenVMTests
 
     private static readonly CareerChoiceDefinition KeystoneChoice = new CareerChoiceDefinition(
         id: "wb_brut_key", groupId: "wb_brutality", type: ChoiceType.Keystone,
-        description: "Keystone", iconSprite: "icon", passive: null, mutations: null);
+        description: "Keystone", iconSprite: "icon", passives: null, mutations: null);
 
     private static readonly CareerChoiceDefinition PassiveChoice = new CareerChoiceDefinition(
         id: "wb_brut_p1", groupId: "wb_brutality", type: ChoiceType.Passive,
         description: "Passive", iconSprite: "icon",
-        passive: new PassiveEffect(PassiveEffectType.Damage, 0.1f),
+        passives: new[] { new PassiveEffect(PassiveEffectType.Damage, 0.1f) },
         mutations: null);
 
     [TestInitialize]
@@ -174,7 +174,7 @@ public class CareerScreenVMTests
             choiceIds: new List<string> { "wb_dom_key" });
         var dominionKeystone = new CareerChoiceDefinition(
             id: "wb_dom_key", groupId: "wb_dominion", type: ChoiceType.Keystone,
-            description: "Dominion keystone", iconSprite: "icon", passive: null, mutations: null);
+            description: "Dominion keystone", iconSprite: "icon", passives: null, mutations: null);
 
         // Expand career to have both groups
         var expandedCareer = new CareerDefinition(
@@ -400,7 +400,7 @@ public class CareerScreenVMTests
         var second = new CareerChoiceDefinition(
             id: "wb_brut_p2", groupId: "wb_brutality", type: ChoiceType.Passive,
             description: "Passive2", iconSprite: "icon",
-            passive: new PassiveEffect(PassiveEffectType.Damage, 0.1f), mutations: null);
+            passives: new[] { new PassiveEffect(PassiveEffectType.Damage, 0.1f) }, mutations: null);
         _registry.GetChoice("wb_brut_p2").Returns(second);
         _registry.GetChoicesForGroup("wb_brutality").Returns(
             new List<CareerChoiceDefinition> { KeystoneChoice, PassiveChoice, second });
@@ -414,6 +414,74 @@ public class CareerScreenVMTests
 
         Assert.AreEqual(1, vm.PassiveEffectLines.Count);
         Assert.AreEqual("+20% damage", vm.PassiveEffectLines[0].LineText);
+    }
+
+    private void GivenExtraChoices(params CareerChoiceDefinition[] extra)
+    {
+        foreach (var choice in extra)
+            _registry.GetChoice(choice.Id).Returns(choice);
+        var all = new List<CareerChoiceDefinition> { KeystoneChoice, PassiveChoice };
+        all.AddRange(extra);
+        _registry.GetChoicesForGroup("wb_brutality").Returns(all);
+    }
+
+    private static CareerChoiceDefinition Passives(string id, params PassiveEffect[] passives) => new CareerChoiceDefinition(
+        id: id, groupId: "wb_brutality", type: ChoiceType.Passive, description: id, iconSprite: "icon",
+        passives: passives, mutations: null);
+
+    [TestMethod]
+    public void ActiveEffects_ChoiceWithTwoPassives_ListsEachEffect()
+    {
+        // #769 E8: both effects of one option read in the panel, not just the first.
+        GivenExtraChoices(Passives("wb_two",
+            new PassiveEffect(PassiveEffectType.Health, 25f),
+            new PassiveEffect(PassiveEffectType.Resistance, 0.05f)));
+        SetupHeroWithCareer();
+        StubMaxChoices(10);
+        var vm = CreateVM();
+
+        Take(vm, "wb_two");
+
+        CollectionAssert.AreEquivalent(
+            new[] { "+25 max health", "+5% resistance" },
+            vm.PassiveEffectLines.Select(l => l.LineText).ToList());
+    }
+
+    [TestMethod]
+    public void ActiveEffects_ClassFilteredAndUnfilteredOfOneType_StayOnSeparateLines()
+    {
+        // "+10% troop damage for infantry" and an All-class "+5% troop damage" are different promises: one
+        // summed line would tell the player the whole army gets +15%.
+        GivenExtraChoices(
+            Passives("wb_inf", new PassiveEffect(PassiveEffectType.TroopDamage, 0.10f, troopClass: TroopClassMask.Infantry)),
+            Passives("wb_all", new PassiveEffect(PassiveEffectType.TroopDamage, 0.05f)));
+        SetupHeroWithCareer();
+        StubMaxChoices(10);
+        var vm = CreateVM();
+
+        Take(vm, "wb_inf");
+        Take(vm, "wb_all");
+
+        CollectionAssert.AreEquivalent(
+            new[] { "+10% troop damage for infantry", "+5% troop damage" },
+            vm.PassiveEffectLines.Select(l => l.LineText).ToList());
+    }
+
+    [TestMethod]
+    public void ActiveEffects_TwoPicksOfTheSameClassAndType_SumIntoOneLine()
+    {
+        GivenExtraChoices(
+            Passives("wb_inf1", new PassiveEffect(PassiveEffectType.TroopDamage, 0.10f, troopClass: TroopClassMask.Infantry)),
+            Passives("wb_inf2", new PassiveEffect(PassiveEffectType.TroopDamage, 0.05f, troopClass: TroopClassMask.Infantry)));
+        SetupHeroWithCareer();
+        StubMaxChoices(10);
+        var vm = CreateVM();
+
+        Take(vm, "wb_inf1");
+        Take(vm, "wb_inf2");
+
+        Assert.AreEqual(1, vm.PassiveEffectLines.Count);
+        Assert.AreEqual("+15% troop damage for infantry", vm.PassiveEffectLines[0].LineText);
     }
 
     [TestMethod]
@@ -856,7 +924,7 @@ public class CareerScreenVMTests
 
     private static CareerChoiceDefinition Passive(string id, string groupId)
         => new CareerChoiceDefinition(id, groupId, ChoiceType.Passive, "Passive", "icon",
-            new PassiveEffect(PassiveEffectType.Damage, 0.1f), null);
+            new[] { new PassiveEffect(PassiveEffectType.Damage, 0.1f) }, null);
 
     private readonly List<string> _extraGroupIds = new List<string>();
 

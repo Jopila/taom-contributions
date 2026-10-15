@@ -3260,5 +3260,48 @@
 	<!-- FiefManagement -->
 	<string id="taom_fief_nav_disabled" text="{=taom_fief_nav_disabled}Fief management is turned off in the mod options." />
 	<string id="taom_fief_nav_busy" text="{=taom_fief_nav_busy}The fief hub cannot be opened right now." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- CareerSystem -->
+	<string id="taom_career_effect_special" text="{=taom_career_effect_special}{VALUE} special" />
+	<string id="taom_career_effect_health" text="{=taom_career_effect_health}{VALUE} max health" />
+	<string id="taom_career_effect_damage" text="{=taom_career_effect_damage}{VALUE} damage" />
+	<string id="taom_career_effect_resistance" text="{=taom_career_effect_resistance}{VALUE} resistance" />
+	<string id="taom_career_effect_armor_penetration" text="{=taom_career_effect_armor_penetration}{VALUE} armor penetration" />
+	<string id="taom_career_effect_swing_speed" text="{=taom_career_effect_swing_speed}{VALUE} swing speed" />
+	<string id="taom_career_effect_movement_speed" text="{=taom_career_effect_movement_speed}{VALUE} movement speed" />
+	<string id="taom_career_effect_ammo" text="{=taom_career_effect_ammo}{VALUE} ammo" />
+	<string id="taom_career_effect_shrug_off" text="{=taom_career_effect_shrug_off}{VALUE} shrug off" />
+	<string id="taom_career_effect_stealth_bonus" text="{=taom_career_effect_stealth_bonus}{VALUE} stealth bonus" />
+	<string id="taom_career_effect_buff_duration" text="{=taom_career_effect_buff_duration}{VALUE} buff duration" />
+	<string id="taom_career_effect_mount_health" text="{=taom_career_effect_mount_health}{VALUE} mount health" />
+	<string id="taom_career_effect_mount_charge_damage" text="{=taom_career_effect_mount_charge_damage}{VALUE} mount charge damage" />
+	<string id="taom_career_effect_party_movement_speed" text="{=taom_career_effect_party_movement_speed}{VALUE} party speed" />
+	<string id="taom_career_effect_party_spotting_range" text="{=taom_career_effect_party_spotting_range}{VALUE} party spotting range" />
+	<string id="taom_career_effect_party_size" text="{=taom_career_effect_party_size}{VALUE} party size" />
+	<string id="taom_career_effect_companion_limit" text="{=taom_career_effect_companion_limit}{VALUE} companion limit" />
+	<string id="taom_career_effect_inventory_capacity" text="{=taom_career_effect_inventory_capacity}{VALUE} inventory capacity" />
+	<string id="taom_career_effect_troop_damage" text="{=taom_career_effect_troop_damage}{VALUE} troop damage" />
+	<string id="taom_career_effect_troop_resistance" text="{=taom_career_effect_troop_resistance}{VALUE} troop resistance" />
+	<string id="taom_career_effect_troop_morale" text="{=taom_career_effect_troop_morale}{VALUE} troop morale" />
+	<string id="taom_career_effect_troop_wages" text="{=taom_career_effect_troop_wages}{VALUE} troop wages" />
+	<string id="taom_career_effect_troop_upgrade_cost" text="{=taom_career_effect_troop_upgrade_cost}{VALUE} troop upgrade cost" />
+	<string id="taom_career_effect_troop_survival" text="{=taom_career_effect_troop_survival}{VALUE} troop survival" />
+	<string id="taom_career_effect_troop_fear_resistance" text="{=taom_career_effect_troop_fear_resistance}{VALUE} troop fear resistance" />
+	<string id="taom_career_effect_troop_knockdown_resistance" text="{=taom_career_effect_troop_knockdown_resistance}{VALUE} troop knockdown resistance" />
+	<string id="taom_career_effect_troop_crush_hold" text="{=taom_career_effect_troop_crush_hold}{VALUE} troop crush hold" />
+	<string id="taom_career_effect_hero_healing" text="{=taom_career_effect_hero_healing}{VALUE} healing" />
+	<string id="taom_career_effect_renown_gain" text="{=taom_career_effect_renown_gain}{VALUE} battle renown gain" />
+	<string id="taom_career_effect_smithing_cost_reduction" text="{=taom_career_effect_smithing_cost_reduction}{VALUE} smithing cost" />
+	<string id="taom_career_effect_special_resource_gain" text="{=taom_career_effect_special_resource_gain}{VALUE} resource gain" />
+	<string id="taom_career_effect_special_resource_upkeep_modifier" text="{=taom_career_effect_special_resource_upkeep_modifier}{VALUE} resource upkeep" />
+	<string id="taom_career_effect_special_resource_upgrade_cost_modifier" text="{=taom_career_effect_special_resource_upgrade_cost_modifier}{VALUE} resource upgrade cost" />
+	<string id="taom_career_value_percent" text="{=taom_career_value_percent}{NUMBER}%" />
+	<string id="taom_career_value_flat" text="{=taom_career_value_flat}{NUMBER}" />
+	<string id="taom_career_class_line_infantry" text="{=taom_career_class_line_infantry}{EFFECT} for infantry" />
+	<string id="taom_career_class_line_ranged" text="{=taom_career_class_line_ranged}{EFFECT} for ranged troops" />
+	<string id="taom_career_class_line_cavalry" text="{=taom_career_class_line_cavalry}{EFFECT} for cavalry" />
+	<string id="taom_career_class_line_infantry_ranged" text="{=taom_career_class_line_infantry_ranged}{EFFECT} for infantry and ranged troops" />
+	<string id="taom_career_class_line_infantry_cavalry" text="{=taom_career_class_line_infantry_cavalry}{EFFECT} for infantry and cavalry" />
+	<string id="taom_career_class_line_ranged_cavalry" text="{=taom_career_class_line_ranged_cavalry}{EFFECT} for ranged troops and cavalry" />
 
 </strings>
