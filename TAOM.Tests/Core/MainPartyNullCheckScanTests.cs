@@ -15,18 +15,23 @@ namespace TAOM.Tests.Core;
 /// check (both fixed in v2.0.34); the stored <c>Campaign.Current?.MainParty</c> is the safe test. The scan
 /// covers both polarities, the reversed forms, the <c>is</c> patterns, <c>??</c> and <c>?.</c>, which guards only
 /// the no-campaign case (read <c>Campaign.Current?.MainParty?.Party</c> instead), on the getter written directly
-/// or in its own parentheses. A check through a local alias is not caught. Comments are blanked first, string
-/// literals are not (<see cref="RepoPaths.StripComments"/>).
+/// or inside any number of its own parentheses. A check through a local alias is not caught. Comments are blanked
+/// first, string literals are not, so a string holding the check is reported (<see cref="RepoPaths.StripComments"/>).
 /// </summary>
 [TestClass]
 public class MainPartyNullCheckScanTests
 {
-    // The getter, bare or in its own parentheses. The lookbehind keeps a call argument such as
-    // `Find(PartyBase.MainParty)?.X` out: there the check is on the call's result, not the getter.
+    // The getter, bare or inside balanced parentheses of its own (the balancing group `p` makes every opening
+    // paren close before the operator). The lookbehind keeps a call argument such as
+    // `Find (PartyBase.MainParty)?.X` out, whitespace or a generic argument list before the paren included: there
+    // the check is on the call's result, not the getter. A keyword before the paren (`return (`) and a lambda
+    // arrow (`=> (`) are not calls, so they stay in.
     private static readonly Regex NullCheck = new(
-        @"(?:\bPartyBase\s*\.\s*MainParty|(?<![\w\])>])\(\s*PartyBase\s*\.\s*MainParty\s*\))"
+        @"(?:\bPartyBase\s*\.\s*MainParty"
+        + @"|(?<!(?:[\])]|(?<!=)>|\b(?!(?:return|await|throw|case|when|else|in|is|and|or|not)\b)\w+)\s*)"
+        + @"(?:(?<p>\()\s*)+PartyBase\s*\.\s*MainParty(?:\s*(?<-p>\)))+(?(p)(?!)))"
         + @"\s*(?:[!=]=\s*null\b|is\s+(?:not\s+)?null\b|\?\.|\?\?)"
-        + @"|\bnull\s*[!=]=\s*(?:\(\s*)?PartyBase\s*\.\s*MainParty\b",
+        + @"|\bnull\s*[!=]=\s*(?:\(\s*)*PartyBase\s*\.\s*MainParty\b",
         RegexOptions.Compiled);
 
     [DataTestMethod]
@@ -48,6 +53,16 @@ public class MainPartyNullCheckScanTests
     [DataRow("if (null == (PartyBase.MainParty)) return;")]
     [DataRow("var party = PartyBase.MainParty ?? fallback;")]
     [DataRow("var party = (PartyBase.MainParty) ?? fallback;")]
+    [DataRow("if (((PartyBase.MainParty)) == null) return;")]
+    [DataRow("((PartyBase.MainParty)) != null && x")]
+    [DataRow("if (null == ((PartyBase.MainParty))) return;")]
+    [DataRow("null != ( ( PartyBase.MainParty ) ) && x")]
+    [DataRow("if (((PartyBase.MainParty)) is null) return;")]
+    [DataRow("var party = ((PartyBase.MainParty)) ?? fallback;")]
+    [DataRow("var roster = ((PartyBase.MainParty))?.ItemRoster;")]
+    [DataRow("return (PartyBase.MainParty)?.MapEvent;")]
+    [DataRow("return ((PartyBase.MainParty)) == null;")]
+    [DataRow("Func<bool> missing = () => (PartyBase.MainParty) == null;")]
     public void NullCheck_EveryFormOfTheComputedGetterCheck_IsCaught(string source)
     {
         Assert.IsTrue(NullCheck.IsMatch(RepoPaths.StripComments(source)), source);
@@ -65,6 +80,11 @@ public class MainPartyNullCheckScanTests
     [DataRow("if (Describe(PartyBase.MainParty) == null) return;")]
     [DataRow("var roster = Find(PartyBase.MainParty)?.ItemRoster;")]
     [DataRow("var party = (PartyBase.MainParty);")]
+    [DataRow("var roster = Find (PartyBase.MainParty)?.ItemRoster;")]
+    [DataRow("var roster = Find((PartyBase.MainParty))?.ItemRoster;")]
+    [DataRow("if (Describe ((PartyBase.MainParty)) == null) return;")]
+    [DataRow("var roster = Find<Party> (PartyBase.MainParty)?.ItemRoster;")]
+    [DataRow("var roster = Find\n    (PartyBase.MainParty) ?? fallback;")]
     public void NullCheck_TheStoredPartyOrACommentOrAPlainRead_IsNotCaught(string source)
     {
         Assert.IsFalse(NullCheck.IsMatch(RepoPaths.StripComments(source)), source);
