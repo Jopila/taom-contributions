@@ -122,9 +122,10 @@ its old wording across `docs/features/`, comments and the RCAs, not only the fil
 - **F22:** measure the Phase 2 burst on the map with the map profiler before touching the declaration
   loop.
 - **F24 and the issue body:** at close-out, with Mike's word, update #772 (past-tense Solution with the
-  phase-first order, three Files Changed rows, the Testing section).
-- **F25 and F26, for Mike:** whether allies are called to war at Phase 2, and whether a repaired save
-  replays the declaration at the load day or is repaired silently. Both are documented as accepted.
+  phase-first order, three Files Changed rows, the Testing section). Done: the #772 body has the past-tense
+  Solution with the phase first, the Files Changed rows and the Testing section, and the issue is closed.
+- **F25 and F26:** decided by the maintainer on 2026-10-14, both kept as built
+  (`docs/features/war-of-the-ring.md`, Phase 2; `rca-war-chronicle-events-2026-10-14.md`, Decisions).
 
 ## Lessons recorded
 

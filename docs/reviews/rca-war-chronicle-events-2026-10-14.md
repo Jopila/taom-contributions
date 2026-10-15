@@ -35,7 +35,7 @@ claim and the fix.
 | C15 | LOW | A doc cell said 357 and 225 but still ended "rather than 222 values". | Stale count | Half-edited cell. | Cell corrected. |
 | C16 | LOW | `TryAwardScripted` was absent from `DivergenceProneMutators`; the scan skips files ending in `Service`, so no call site was checked. | Gate gap | The new mutator was not added to the list. | Entry and a classification test row (`CoopVetoClassificationTests`). |
 | C17 | LOW | A misspelled key in `war_chronicle.json` (`momentum`, `outcomes`, `effects`) was dropped silently. | Silent data loss | The validator read known keys and ignored the rest. | Unknown keys warn; a `_` prefix is an author's note. |
-| C18 | LOW | `TryEnum` accepted `"+1"` and `" 1"` on this .NET Framework, so a number loaded as a kind, anchor or outcome. | Parser leniency | The guard rejected only a leading digit or minus. | Names only, trimmed, any case; a number, sign or comma list never parses. |
+| C18 | LOW | `TryEnum` accepted `"+1"` and `" 1"` on this .NET Framework, so a number loaded as a kind, anchor or outcome. | Parser leniency | The guard rejected only a leading digit or minus. A repeat, the third (after SignatureStrikes and BannerBearer): `lessons/gamemodels-services.md` "`Enum.TryParse` is not a name check" prescribes the shared `EnumNames.TryParse`, which the fix now calls; `84f5e63a9` wrote a private `TryEnum` (`ChronicleConfigValidator.cs:379`). | Names only, trimmed, any case; a number, sign or comma list never parses. |
 | C19 | LOW | `ChronicleConfigProvider` had no test: path, missing file, read failure. | Missing test | The shipped-content test read the file by its own path. | `ChronicleConfigProviderTests` (5). |
 | C20 | LOW | Two of `Close()`'s four outcomes had no test: Fell at the close and Lapsed "lost to another". | Skip-guard exhaustion | Tests followed the happy window. | Both added to `ChronicleServiceTests`. |
 | C21 | LOW | The analyzer's outcome count dropped an exact repeat and left it where first read, so `[Held 69, Fell 60, Held 69]` counted Fell. | Over-claim | The dedupe rule was written for order, not for "last line read". | `chronicle_last` keeps the last line read, repeats included; three Python tests. |
@@ -71,7 +71,7 @@ Taken on the orchestrator's recommendation; the code changes are in `bad32ad08`.
   children still open. A target owned by a third kingdom or by nobody still Skips.
 - **Kept:** the Batch A fix choices; #772 F25 and F26; the `taom_wc_siege_lost` text.
 
-## Codex review (gpt-6-astra, on `ac0a3e0c0..bad32ad08`)
+## Codex review (gpt-6-astra at max, on `ac0a3e0c0..bad32ad08`)
 
 Raw output `docs/reviews/raw/codex-adversarial-war-chronicle-events-2026-10-14.md` (gitignored). 0 CRITICAL,
 0 HIGH, 1 MEDIUM, 0 LOW, 0 false positives. Codex did not run the full build or suite (a no-file-write
@@ -108,10 +108,24 @@ version.
 **Words that outrun the code.** C10, C14, C15 and several INFO docs: a hint, a count or a "pinned by" claim
 written from intent. The fix is mechanical (recount, reread the test), the gate is the review.
 
+## Why each agent missed it, or caught it
+
+- The eight lenses (Standards, Engine compatibility, Efficiency, Completeness, Data flow run twice on the
+  chronicle and on the army focus, Design, XML and ModuleData, Tooling correctness) reviewed `84f5e63a9` only.
+- F1 was already in that commit. The launch and the daily step skipped events at War Ended
+  (`ChronicleService.cs:81`, `:89` at `84f5e63a9`), and `OnTargetOwnerChanged` and `OnTargetBesieged`
+  (`:99-129`) did not. Data flow (chronicle) raised C01 and C02 on the same file but followed the daily path,
+  not each callback after the terminal state.
+- No lens re-read `7e8451555` or `bad32ad08`, so Codex was the only reviewer of the fixes and decisions. It
+  found F1 by replaying the production service across War Ended.
+
 ## Follow-ups (outside this change; issues on Mike's word)
 
 - C52: the ledger analyzer's capital verdict reports PASS for a campaign with no kingdom lines (a chronicle-only
-  log from an old save loaded and closed). Needs a "no kingdom lines" UNKNOWN.
+  log from an old save loaded and closed). Needs a "no kingdom lines" UNKNOWN. Refuted 2026-10-14:
+  `_capital_verdict` returns NO DATA ("no kingdom line carries cap=0 or 1") when no kingdom line exists
+  (`tools/analyze_war_ledger.py:280-281`; a NO DATA branch for this case has existed since `d340a725c`), and a chronicle-only ledger
+  parsed in memory gives NO DATA, not PASS. No change needed.
 - C53: `RepoPaths.StripComments` over all `Main` files in three wiring tests; same one-place fix as Batch A's
   B31 and B44, cost never timed. Done by the tests branch (#792).
 - C54: Bree (`town_AN3`) and every Arthedain town exist only in the live `TAOM_Map`; the packaged TAOM_Map in
@@ -119,6 +133,8 @@ written from intent. The fix is mechanical (recount, reread the test), the gate 
   2026-10-14 as a release check: `docs/reference/release-process.md` says the next release must ship a
   TAOM_Map package with `town_AN1` to `town_AN3`, and `/release` points to it.
 - C55: issue #765 still names Dale and Fornost as siege targets; the data targets Eldby (`town_S3`) and Bree.
+  Done 2026-10-14: the #765 body names Eldby in Dale and Bree in Arthedain, and says Dale's own town and
+  Fornost were dropped.
 - C56: `check_external_loc_coverage.py` fails on live-install drift (+38 TAOM_Map rows and +5 Armory rows per
   language, from 2026-10-07 edits), not on this diff. Done 2026-10-14: the TAOM_Map coverage baseline was
   re-taken for the new place names.
@@ -129,3 +145,6 @@ written from intent. The fix is mechanical (recount, reread the test), the gate 
 
 `docs/reviews/lessons/state-lifecycle-save.md`: every engine callback path re-checks the terminal state, not
 only the daily tick.
+`docs/reviews/lessons/campaign-mechanics.md`: a clan that changes kingdom moves its fiefs with no owner-change
+event (C02). `docs/reviews/lessons/adapters-taleworlds-api.md`: never null-check `PartyBase.MainParty` (C08).
+`docs/reviews/lessons/gamemodels-services.md`: C18 recorded as a recurrence of the `Enum.TryParse` lesson.

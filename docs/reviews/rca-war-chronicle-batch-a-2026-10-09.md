@@ -15,47 +15,49 @@ alone when the tier did not change (F3). All three are fixed here, each with a t
 The highest severity was B01 (HIGH). Every confirmed finding below was fixed in Batch A unless listed
 under "Not applied".
 
-| # | Sev | Bug | Category |
-|---|---|---|---|
-| B01 | HIGH | Capital target (b) and `--compare` said PASS with no evidence: a drifted key, a log from day 150 or one day of data all passed, and `--compare` never showed malformed lines. | False pass |
-| B02 | MEDIUM | The extra escape roll dropped vanilla's relative perk and trait factors from `DailyHeroTick`. | Parity gap |
-| B03 | MEDIUM | The volunteer multiplier reached towns and villages only; castles never call the engine probability. | Wrong reach |
-| B04 | MEDIUM | The MCM hint said the rally never applies to the player's kingdom, but only a player-ruled one was excluded. | Over-claim |
-| B05 | MEDIUM | The mid-campaign baseline path for an old save never ran: `SyncData` is not called when the save has no record. | Lifecycle |
-| B06 | MEDIUM | Nothing checked that the C# ledger format and the Python analyzer agree. | Missing contract test |
-| B07 | MEDIUM | The analyzer's tests left guards and error paths unpinned. | Weak test |
-| B08 | MEDIUM | The NaN check moved into the new volunteer service had no NaN test. | Missing test |
-| B09 | MEDIUM | `IVolunteerProductionService` had one implementation and no fake. | Unearned interface |
-| B10 | LOW | The daily tick ran escapes before the rally refreshed its effects. | Ordering |
-| B11 | LOW | The player-clan-maps-to-no-kingdom rule sat in a static adapter helper with no unit test. | Missing test |
-| B12 | LOW | The rally status command re-derived the rally-is-on rule in the entry point. | Logic in entry point |
-| B13 | LOW | Nullable annotations contradicted the documented null handling. | Contract drift |
-| B15 | LOW | The analyzer read `BANNERLORD_GAME_DIR` raw instead of through `tools/_gamedir.py`. | Shared helper skipped |
-| B16 | LOW | The analyzer double-counted across a save reload and let argument order pick the winning copy of a day. | Over-claim |
-| B17 | LOW | A huge `version` integer in the save threw `OverflowException` out of `Parse`. | Missing validation |
-| B18 | LOW | A bad side `base` crashed the analyzer with a traceback; the exit-code contract was narrower than the code. | Missing validation |
-| B19 | LOW | `--compare` ignored `--csv`, `--cid` and log paths without saying so. | Silent option |
-| B20 | LOW | `open(path, "w").write(...)` relied on reference counting and the locale encoding. | Python hygiene |
-| B21 | LOW | Two skip branches (a null kingdom in the list) had no test. | Skip-guard exhaustion |
-| B22 | LOW | Several pure-code branches were untested (`FormatAdded`, the unknown phase, save-codec branches). | Missing test |
-| B23 | LOW | A test named for a null key asserted only the returned value; its stub answered any key. | Vacuous test |
-| B24 | LOW | `war_ledger_dump` broke the console naming rule (verb first, `print_` for read-only). | Naming |
-| B27 | LOW | The rally loss was derived twice, in the rally and in the ledger formatter. | Duplication |
-| B28 | LOW | `IRallyTierSource` existed for one fake a real store serves as well. | Unearned interface |
-| B29 | LOW | No container test resolved the volunteer production service. | Missing wiring test |
-| B30 | LOW | The kingdom snapshot adapter had no no-campaign test. | Missing test |
-| B32 | LOW | `--compare` read one file per side, so a run spanning a restart could not be compared. | Tooling gap |
-| B33 | LOW | A `SubModule.cs` comment still described the removed `ICulturalFeatsService` parameter. | Stale text |
-| B34 | LOW | `bannerlord-together-compat.md` said 223 and 222 in one row. | Stale text |
-| B35 | LOW | A snapshot comment called two fields inputs of vanilla's daily tick; they are not. | Over-claim |
-| B36 | LOW | The MCM hint and doc missed that the volunteer roll also raises volunteer tier upgrades. | Over-claim |
-| B37 | LOW | The doc said nothing in Bannerlord pulls a losing kingdom back; the volunteer base rises under 46 fief points. | Over-claim |
-| B38 | LOW | "Co-op is host-only" lacked the BannerlordTogether caveat (no session probe, every peer is authority). | Over-claim |
-| B39 | LOW | The gamemodel registry row still said the volunteer override applies the culture respawn feats. | Stale text |
-| B40 | LOW | The feature doc had no Dependencies section and missed the new TroopProgression dependency. | Missing doc |
-| B41 | LOW | A class summary said the rally comes in later milestones; it ships in this batch. | Stale text |
-| B42 | LOW | The doc gave `python -m pytest`; the runner is `unittest`. | Wrong command |
-| B43 | LOW | The doc said 130 excluded settings where 354 - 223 is 131. | Stale count |
+| # | Sev | Bug | Category | Why missed | Preventive action |
+|---|---|---|---|---|---|
+| B01 | HIGH | Capital target (b) and `--compare` said PASS with no evidence: a drifted key, a log from day 150 or one day of data all passed, and `--compare` never showed malformed lines. | False pass | PASS was what remained when no row contradicted it, and the fixtures held only passing data. | Four verdicts (FAIL, PASS, NO DATA, UNKNOWN), PASS only with capital data on every day 1 to 119, a fixture per gap. |
+| B02 | MEDIUM | The extra escape roll dropped vanilla's relative perk and trait factors from `DailyHeroTick`. | Parity gap | The roll was written from the base chance, not from every factor `DailyHeroTick` adds. | The extra roll mirrors vanilla's factors term by term. The adapter reads the perk and Valor terms, and `WarEscapeServiceTests` tests the combined factor; no test covers each factor (the adapter's tests cover no campaign and an empty id). |
+| B03 | MEDIUM | The volunteer multiplier reached towns and villages only; castles never call the engine probability. | Wrong reach | The engine probability was taken to be the only volunteer path; castles use TAOM's own slot curve. | One volunteer production service that both the town model and the castle curve call. |
+| B04 | MEDIUM | The MCM hint said the rally never applies to the player's kingdom, but only a player-ruled one was excluded. | Over-claim | The hint was written from the intent, not from the exclusion the code makes. | The hint states the rule the code applies, and a test pins that rule. |
+| B05 | MEDIUM | The mid-campaign baseline path for an old save never ran: `SyncData` is not called when the save has no record. | Lifecycle | The old-save path was placed in `SyncData`, which the engine skips when the save has no record. | Baselines start on the first daily tick after the load, with a warning, and a test loads with no record. |
+| B06 | MEDIUM | Nothing checked that the C# ledger format and the Python analyzer agree. | Missing contract test | The writer and the reader were built in two languages with no shared fixture. | A contract test: the C# formatter's lines are the fixture the Python tests parse (`WarLedgerFormatterTests`, `test_fixture_lines_parse_to_their_values`). |
+| B07 | MEDIUM | The analyzer's tests left guards and error paths unpinned. | Weak test | The tests followed the report's happy path. | A test for each guard and error path, exit codes included. |
+| B08 | MEDIUM | The NaN check moved into the new volunteer service had no NaN test. | Missing test | The check moved files and its test did not move with it. | A NaN test on the new service. |
+| B09 | MEDIUM | `IVolunteerProductionService` had one implementation and no fake. | Unearned interface | An interface was added by habit, with no second implementation or fake. | The interface is gone; callers take the class (simplicity criterion). |
+| B10 | LOW | The daily tick ran escapes before the rally refreshed its effects. | Ordering | The daily order was not treated as a contract. | The rally refreshes before the escape pass, and a test pins the order. |
+| B11 | LOW | The player-clan-maps-to-no-kingdom rule sat in a static adapter helper with no unit test. | Missing test | A rule placed in a static adapter helper sits outside the unit tests. | The rule moved into the service, with a test. |
+| B12 | LOW | The rally status command re-derived the rally-is-on rule in the entry point. | Logic in entry point | The command was written where its inputs were, against ADR-002. | The entry point calls the service's rule. |
+| B13 | LOW | Nullable annotations contradicted the documented null handling. | Contract drift | Annotations were written before the null handling was settled. | The annotations match the documented handling. |
+| B15 | LOW | The analyzer read `BANNERLORD_GAME_DIR` raw instead of through `tools/_gamedir.py`. | Shared helper skipped | The shared helper was not known to the author. | The analyzer reads the game folder through `tools/_gamedir.py`. |
+| B16 | LOW | The analyzer double-counted across a save reload and let argument order pick the winning copy of a day. | Over-claim | A log was assumed to hold one continuous run. | Logs are read oldest first; the reload marker came later (Follow-ups). |
+| B17 | LOW | A huge `version` integer in the save threw `OverflowException` out of `Parse`. | Missing validation | The parser was tested with well-formed saves only. | The version is read with a pattern that cannot throw, with a test for an oversized value. |
+| B18 | LOW | A bad side `base` crashed the analyzer with a traceback; the exit-code contract was narrower than the code. | Missing validation | Bad input was not part of the exit-code contract. | Bad input exits with a message, not a traceback; the contract and the code agree. |
+| B19 | LOW | `--compare` ignored `--csv`, `--cid` and log paths without saying so. | Silent option | `--compare` was added after the other options and never checked against them. | `--compare` refuses `--csv`, `--cid` and log paths with a message. |
+| B20 | LOW | `open(path, "w").write(...)` relied on reference counting and the locale encoding. | Python hygiene | A one-line idiom from CPython habit. | A `with open(..., encoding='utf-8')` block. |
+| B21 | LOW | Two skip branches (a null kingdom in the list) had no test. | Skip-guard exhaustion | The tests built only well-formed kingdom lists. | A test per skip branch. |
+| B22 | LOW | Several pure-code branches were untested (`FormatAdded`, the unknown phase, save-codec branches). | Missing test | Branch coverage was not checked. | A test per listed branch. |
+| B23 | LOW | A test named for a null key asserted only the returned value; its stub answered any key. | Vacuous test | The stub answered any key, so the test could not fail. | The stub answers only the expected key, and the test asserts the key it received. |
+| B24 | LOW | `war_ledger_dump` broke the console naming rule (verb first, `print_` for read-only). | Naming | The command was named from its job, not from the naming table. | Renamed `taom.print_war_ledger`. |
+| B27 | LOW | The rally loss was derived twice, in the rally and in the ledger formatter. | Duplication | Two consumers each computed the value they needed. | One derivation, read by both. |
+| B28 | LOW | `IRallyTierSource` existed for one fake a real store serves as well. | Unearned interface | An interface added for one fake. | The interface is gone; tests use the real store. |
+| B29 | LOW | No container test resolved the volunteer production service. | Missing wiring test | Wiring tests were not part of the batch's plan. | A container test resolves the service with its modules registered. |
+| B30 | LOW | The kingdom snapshot adapter had no no-campaign test. | Missing test | Adapter tests ran only with a campaign. | A no-campaign test. |
+| B32 | LOW | `--compare` read one file per side, so a run spanning a restart could not be compared. | Tooling gap | `--compare` was designed for one file per run. | `--compare` still takes one file per side; the docstring tells the user to concatenate a run's logs, oldest first. |
+| B33 | LOW | A `SubModule.cs` comment still described the removed `ICulturalFeatsService` parameter. | Stale text | The parameter was removed and its comment left. | Comment updated. |
+| B34 | LOW | `bannerlord-together-compat.md` said 223 and 222 in one row. | Stale text | A count was half-edited. | Row corrected. |
+| B35 | LOW | A snapshot comment called two fields inputs of vanilla's daily tick; they are not. | Over-claim | The comment was written from memory of the engine. | Comment corrected against the engine source. |
+| B36 | LOW | The MCM hint and doc missed that the volunteer roll also raises volunteer tier upgrades. | Over-claim | The doc described the obvious effect only. | Hint and doc name the tier-upgrade effect too. |
+| B37 | LOW | The doc said nothing in Bannerlord pulls a losing kingdom back; the volunteer base rises under 46 fief points. | Over-claim | The vanilla volunteer model was not read. | Doc corrected with the vanilla behaviour. |
+| B38 | LOW | "Co-op is host-only" lacked the BannerlordTogether caveat (no session probe, every peer is authority). | Over-claim | The co-op claim was written for BannerlordCoop only. | Doc carries the BannerlordTogether caveat. |
+| B39 | LOW | The gamemodel registry row still said the volunteer override applies the culture respawn feats. | Stale text | The registry row was not part of the change's doc sweep. | Row corrected. |
+| B40 | LOW | The feature doc had no Dependencies section and missed the new TroopProgression dependency. | Missing doc | The doc was written before the dependency existed. | A Dependencies section. |
+| B41 | LOW | A class summary said the rally comes in later milestones; it ships in this batch. | Stale text | The summary predates the batch's final scope. | Summary corrected. |
+| B42 | LOW | The doc gave `python -m pytest`; the runner is `unittest`. | Wrong command | The command was typed from habit. | Doc gives the `unittest` command. |
+| B43 | LOW | The doc said 130 excluded settings where 354 - 223 is 131. | Stale count | The subtraction was not redone after a count changed. | Count corrected. |
+
+The last two columns were reconstructed on 2026-10-14 from the finding text and the code.
 
 ## Refuted and not applied
 
@@ -79,7 +81,7 @@ under "Not applied".
   alone (Follow-ups).
 - **B46 to B53:** eight NIT and INFO items were never verified and stay notes.
 
-## Codex review (gpt-6-astra, after the deep-review fixes)
+## Codex review (gpt-6-astra at max, after the deep-review fixes)
 
 Raw output `docs/reviews/raw/codex-adversarial-war-chronicle-batch-a-2026-10-09.md` (gitignored).
 0 CRITICAL, 0 HIGH, 2 MEDIUM, 1 LOW, 0 false positives. Codex ran 40 existing Python tests and probed the
@@ -114,6 +116,12 @@ a transition, not on every refresh. Rebuild the whole owned set and the question
 **A verdict that can say PASS must name what would make it say something else.** B01 and F2 were both
 PASS reached by omission. Each verdict needs a fixture for the "unknown" cases, one entity at a time.
 
+## Why each agent missed it, or caught it
+
+The eight lenses reviewed `d340a725c`; no per-lens record survives. Codex F1 and F2 sit in the B01 fix and F3
+in the tier-drop fix, both written after the lenses ran, and the RCA records no review pass over the fixes
+before Codex.
+
 ## Follow-ups (outside this change; issues on Mike's word)
 
 - B16: done 2026-10-14 with a load marker, not the planned `h=` field. `WarChronicleBehavior` writes
@@ -132,3 +140,5 @@ PASS reached by omission. Each verdict needs a fixture for the "unknown" cases, 
 ## Lessons recorded
 
 `docs/reviews/lessons/testing-qa.md`: a coverage check must be per entity.
+`docs/reviews/lessons/state-lifecycle-save.md`: rebuild a feature's owned effects from the current state on
+every refresh (F3, added 2026-10-14).

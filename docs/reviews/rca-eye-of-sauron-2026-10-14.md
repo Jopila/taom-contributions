@@ -5,10 +5,11 @@ Evil-side player, after a player whose deeds draw the Eye: it re-tasks or spawns
 of sight, raises his speed once he is in sight, and tops up his host. A deep review of 49 findings (E01 to E49;
 workflow journal `wf_1cd286bb-3fa`) had verifiers confirm 16 (E01 to E15 and E41: 2 HIGH, 14 MEDIUM) and refute
 none; the other 33 were LOW, INFO and KEEP-style proposals that nobody verified. The review fixes landed in
-`ac0a3e0c0`. The maintainer then decided three findings on 2026-10-14 (E06, E09, E17; `26718988b`, with the
-stand-off made real in `33582471a`) and kept three more as built (E08, E38, E48). Codex found 2 MEDIUM and
-2 LOW the review had missed, all in the resume, cache and boundary seams the fixes and decisions had just
-created (F1 to F4, fixed in `2d17ceba3`).
+`ac0a3e0c0`. The maintainer then decided three findings on 2026-10-14 (E06, E09, E17; `cbacbf1f0`, with the
+stand-off made real in `7ab91767e`) and kept three more as built (E08, E38, E48). Codex found 2 MEDIUM and
+2 LOW the review had missed: three (F1, F3, F4) in the resume and boundary seams the decisions had just
+created, and one (F2, the size cache) in the start and end paths of `34b0e25a9`, which the seven lenses had
+read. All four were fixed in `2d17ceba3`.
 
 ## Findings (deep review)
 
@@ -17,7 +18,7 @@ The highest severity was E01 and E02 (HIGH). The rows below are the confirmed fi
 
 | # | Sev | Bug | Category | Why missed | Preventive action |
 |---|---|---|---|---|---|
-| E01 | HIGH | A player-founded kingdom was never hunted: the engine gives it the runtime id `new_kingdom`, which `alignment.json` does not know. | Id assumed static | The data was read for the shipped kingdoms; a runtime-created kingdom was not imagined. | The player's own kingdom is sided by id, else by its culture (`ResolveSide`); the console shows the same side. |
+| E01 | HIGH | A player-founded kingdom was never hunted: the engine gives it the runtime id `new_kingdom`, which `alignment.json` does not know. | Id assumed static | The data was read for the shipped kingdoms; a runtime-created kingdom was not imagined. A repeat: WotR momentum #327 shipped the same gap (`lessons/data-content-cultures.md` "Porting a classification with a CHANGED lookup key must re-audit the inputs the new key drops"), and `IAlignmentService.ResolveSide`, the culture fallback it produced, already existed; `34b0e25a9` called `GetKingdomSide` for the player's kingdom (`EyeOfSauronService.cs:238`). | The player's own kingdom is sided by id, else by its culture (`ResolveSide`); the console shows the same side. |
 | E02 | HIGH | `ReadSight` ran `FindParty` (a linear string-compare walk over 2,039 to 3,226 parties) on every campaign frame of a hunt. | Hot path | A per-frame read was written like an hourly one. | The locator grid around the player, within seeing range; the reading is a value type; IL pins for the frame read. |
 | E03 | MEDIUM | The hourly tick re-issued the engage with no war, kingdom, switch or timeout gate; those ran only daily, so a peace left a forced encounter for a day. | Gate on one path | The gates were written for the daily tick. | The end gates also run hourly, before the re-engage. |
 | E04 | MEDIUM | `taom.eye_start_hunt` was Tier B but mutated persisted state that the end command never reversed (governor removed, a party spawned, up to 1000 troops added). | Wrong console tier | The command was tiered by its name, not its writes. | Tier C: the bare command is a dry run, only the literal `confirm` starts a hunt. |
@@ -55,23 +56,23 @@ The highest severity was E01 and E02 (HIGH). The rows below are the confirmed fi
 
 Taken on the orchestrator's recommendation.
 
-- **E06, a flee keeps the hunt (changed, `26718988b`).** A battle ends the hunt only when the hunter took part
+- **E06, a flee keeps the hunt (changed, `cbacbf1f0`).** A battle ends the hunt only when the hunter took part
   and someone won it, or when the hunter's side was defeated. A player who gets away is picked up again within
   the hour; a fight the hunter wins elsewhere does not end it.
-- **E09, speed floor from 1.5 S (changed, `26718988b`).** The in-sight floor applies from 1.5 times the
+- **E09, speed floor from 1.5 S (changed, `cbacbf1f0`).** The in-sight floor applies from 1.5 times the
   player's seeing range inward, the same margin the steps keep, so a moving player cannot be shadowed between
   S and 1.5 S.
-- **E17, stand-off in another lord's army (changed, `26718988b`, then `33582471a`).** No hunt starts while the
+- **E17, stand-off in another lord's army (changed, `cbacbf1f0`, then `7ab91767e`).** No hunt starts while the
   player rides in another lord's army, and a running one holds off: the hunter drops his order and pin, loses
   the floor, and is pinned again within the hour after the player leaves. The hunt's days still count and no
-  cooldown starts. The first version only paused the service; `33582471a` made the stand-off real in the
+  cooldown starts. The first version only paused the service; `7ab91767e` made the stand-off real in the
   engine order and the save.
 - **E08 (kept).** Bannerlord Together loaded means no hunt, because TAOM cannot probe it.
 - **E38 (kept).** The Dol Guldur kingdom rule: a hunter's host follows his live kingdom, so the Nine placed in
   `clan_dolguldur_1` by `heroes.xslt` (Khamul and the three `lord_1_48_*`) lead Dol Guldur troops.
 - **E48 (kept).** `EyeOfSauronEnabled` defaults to on.
 
-## Codex review (gpt-6-astra, on the fixes and decisions)
+## Codex review (gpt-6-astra at max, on the fixes and decisions)
 
 Raw output `docs/reviews/raw/codex-adversarial-eye-of-sauron-2026-10-14.md` (gitignored). 0 CRITICAL, 0 HIGH,
 2 MEDIUM, 2 LOW, 0 false positives. Codex ran no build or `dotnet test` (a no-file-write constraint); it
@@ -115,6 +116,17 @@ efficiency, and it found all three.
 **A decision that changes a rule changes its neighbours.** E06, E09 and E17 each produced a Codex finding
 (F1, F3, F4) within the area the decision touched. Re-run the lenses on the decision commits.
 
+## Why each agent missed it, or caught it
+
+- The seven lenses (Standards, Engine, Efficiency, Completeness, Data flow run twice on lifecycle and movement,
+  Design, XML) reviewed `34b0e25a9`.
+- F1, F3 and F4 sit in code that the decision commits `cbacbf1f0` and `7ab91767e` wrote after the review (the
+  resume path, the stand-off pin, E09's 1.5 S edge). No lens re-read them.
+- F2 was in `34b0e25a9`. `EndHunt` invalidated only the speed (`EyeOfSauronService.cs:527` at that commit) and
+  `ClearHunt` (`:537-544`) nothing, and the start relied on the top-up growing the roster (`:286`). Efficiency, which
+  found E02, E11 and E12 on these paths, and Engine did not read the key of `PartyBase.PartySizeLimit`'s cache
+  (`MemberRoster.VersionNo`, v1.5.5 `PartyBase.cs:356-366`).
+
 ## Follow-ups (outside this change; issues on Mike's word)
 
 - E41: done; issue #765's body has an M8 section (2026-10-14).
@@ -137,3 +149,4 @@ efficiency, and it found all three.
 `docs/reviews/lessons/campaign-mechanics.md`: a resume path must reuse the start path's availability checks.
 `docs/reviews/lessons/adapters-taleworlds-api.md`: an engine cache keyed on a different version counter than the
 one you bump; a broad-phase search radius must exceed the exact filter's edge.
+`docs/reviews/lessons/data-content-cultures.md`: E01 recorded as a recurrence of the changed-lookup-key lesson.

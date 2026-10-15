@@ -62,14 +62,16 @@ mid-campaign path to `OnGameStart`); S3 and S4 confirmed; S6 confirmed as a pre-
   state in the constructor of a behavior built with `new` per campaign; never in `OnSessionLaunched`,
   `OnNewGameCreated` or `RegisterEvents`. The 2026-09-24 RCA
   (`rca-cross-campaign-singleton-resets-2026-09-24.md`) deferred a similar amendment once already.
+  Done in `9ab3952a7` (2026-10-08): `.claude/rules/csharp-architecture.md` "Singleton Services Holding
+  Per-Campaign State".
 - The momentum store resets only on `OnNewGameCreated`, so a save with no momentum record (written
   before #327) keeps the previous campaign's momentum, and with victory on its `OnSessionLaunched` can
   call `EndWar` with the old victor. The behavior is a container singleton, so the fix makes it
-  per-campaign with a constructor reset.
+  per-campaign with a constructor reset. Filed as #773 (open).
 - FiefGranting, SupplyLines, FieldCamp and Refuge keep the latch shape. FiefGranting converts as a pure
   deletion; the other three first need a check that their visuals reset is safe at `OnGameStart`.
   TournamentRewards and Enlistment also reset in `OnSessionLaunched`; whether anything reads them
-  earlier is unchecked.
+  earlier is unchecked. Filed as #773 (open).
 - Phase 2 never declared the Hostile-pair wars (Codex S6 above, confirmed): filed as #772 and fixed as milestone M0b of #765; see `rca-wotr-phase2-wars-2026-10-08.md`.
 
 ## Lesson recorded

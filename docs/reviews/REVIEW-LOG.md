@@ -6,6 +6,12 @@ Running scorecard of all reviews. **Reviews 1-99, 2026-04-05 to 2026-09-12.** 93
 
 | # | Date | Feature | Codex Verdict | Claude Verdict | Real Bugs | False Positives | Missed Bugs | Prompt Version |
 |---|------|---------|--------------|----------------|-----------|-----------------|-------------|----------------|
+| (at merge) | 2026-10-14 | War Chronicle and Eye of Sauron review follow-ups #792 (EngineDataStore, once-per-day gate #793, `t=load` marker, `SyncDataChunker.SyncChunks`, main party guards and scan) | issues-found (0 MEDIUM or above, 4 LOW) | agree (all fixed: 5ba8d6c82, dc1c37031, d371745c7, a66b5754a) | 4 LOW | 0 | 0 | gpt-6-astra, xhigh; RCA `rca-review-followups-2026-10-14.md` |
+| (at merge) | 2026-10-14 | Eye of Sauron hunt #765 M8: review fixes `ac0a3e0c0` and decisions E06, E09, E17 | issues-found (0 HIGH, 2 MEDIUM, 2 LOW) | agree (all fixed in 2d17ceba3) | 2 MEDIUM, 2 LOW | 0 | 0 | gpt-6-astra, max; RCA `rca-eye-of-sauron-2026-10-14.md` F1 to F4 |
+| (at merge) | 2026-10-14 | War Chronicle Batch B #765: event chain, army focus, momentum award, decisions C04 and C07 | issues-found (0 HIGH, 1 MEDIUM) | agree (fixed in 8f2c9e458) | 1 MEDIUM | 0 | 0 | gpt-6-astra, max; RCA `rca-war-chronicle-events-2026-10-14.md` F1 |
+| (at merge) | 2026-10-09 | War Chronicle Batch A #765: war ledger and analyzer, timed war effects, rally | issues-found (0 HIGH, 2 MEDIUM, 1 LOW) | agree (all fixed in 2ee36e1fa) | 2 MEDIUM, 1 LOW | 0 | 0 | gpt-6-astra, max; RCA `rca-war-chronicle-batch-a-2026-10-09.md` F1 to F3 |
+| (at merge) | 2026-10-08 | War of the Ring Phase 2 wars #772 (M0b of #765): stored-stance guard, phase first, `ReconcileDeclaredWars` | issues-found (0 HIGH, 2 MEDIUM, 1 LOW) | agree (R2 and R3 fixed; R1 mechanism confirmed and documented, no code change) | 2 MEDIUM, 1 LOW | 0 | 0 | gpt-6-astra, xhigh; RCA `rca-wotr-phase2-wars-2026-10-08.md` R1 to R3 |
+| (at merge) | 2026-10-08 | War of the Ring session reset #764 (M0 of #765): constructor reset | issues-found (0 HIGH, 1 MEDIUM; S6 a pre-existing HIGH outside the diff) | agree (MEDIUM fixed; S6 filed as #772) | 1 MEDIUM + 1 pre-existing HIGH | 0 | 0 | gpt-6-astra, max; RCA `rca-wotr-session-reset-2026-10-08.md` C1, S6 |
 | career-e4e7 | 2026-10-14 | Career forks engine #769 E4 to E7 and E12, plus the merge of trunk a9437a492 (one choice rule, forks, point levels, lock on leave, paid retrain, switch cost, tree-version migration) | issues-found (0 P1, 1 P2, 0 P3; 5 of 6 suspects disputed); pass 2 on the fix: none | agree (P2 confirmed in the source, fixed in 59c1803d2) | 1 P2 (the tree migration ran for the main hero only) | 0 | 0 | review-codex skill prompt, max; pass 2 high |
 | career-e1e3 | 2026-10-09 | Career fixes #766, #767, #768, #770, #771 (choice group link, resource gain on every source, party-size cache and leader-only scope, raid battle credit, party-screen handler) | issues-found (0 P1, 1 P2, 0 P3; 4 of 5 suspects disputed) | agree (P2 confirmed in the v1.5.5 decompile, fixed as #790) | 1 P2 (hideout send-troops paid twice, pre-existing) | 0 | 0 | review-codex skill prompt, xhigh |
 | (at merge) | 2026-10-08 | yotthani adoption, items 1 to 4: mission-start guard (Patch103), skeleton-buffer guard and watch (two native jumps), nameplate cull (Patch104), map-view release (layer event) | issues-found (0 HIGH, 1 MEDIUM conditional, 2 LOW) | agree (all three confirmed and fixed) | 3 | 0 | 4 LOW, found by two convergence lenses on the same tree (a due release across a campaign change, the closer's tick order, an unpinned engine order, a Priority.First overclaim) | gpt-6-astra, ultra; RCA `docs/reviews/rca-yotthani-adoption-2026-10-08.md` findings 34 to 37 |
@@ -5308,29 +5314,54 @@ Report `docs/reviews/deep-review-031-settings-reads-off-hot-paths-2026-10-02.md`
 - **Final suite:** filtered run (Diplomacy, WarOfTheRing, CoopVeto, CoopAuthorityGate) 375 passed, 0 failed.
 - Raw output `docs/reviews/raw/codex-adversarial-wotr-phase2-wars-2026-10-08.md` (gitignored), prompt `docs/reviews/codex-adversarial-wotr-phase2-wars-2026-10-08.prompt.md`.
 
-## Review (number assigned at merge): War Chronicle Batch A (#765), deep review + Codex gpt-6-astra (2026-10-09)
+## Review (number assigned at merge): War Chronicle Batch A (#765), 8-lens deep review + Codex gpt-6-astra max (2026-10-09)
 
-- **Scope:** `d340a725c` on `bannerlord-1.5.x`: the war ledger and `tools/analyze_war_ledger.py`, the war-effect registry, the extra prisoner-escape roll, the rally layer and the shared volunteer production service. Codex fixes uncommitted: the analyzer's capital verdict, `RallyService`, tests, `war-chronicle.md`, the RCA and one lesson.
+- **Scope:** `d340a725c` on `bannerlord-1.5.x`: the war ledger and `tools/analyze_war_ledger.py`, the war-effect registry, the extra prisoner-escape roll, the rally layer and the shared volunteer production service. Codex fixes in `2ee36e1fa` (the analyzer's capital verdict, `RallyService`, tests, `war-chronicle.md`, the RCA); the lesson and this entry in `fb79abe8c`.
 - **Claude:** 53 findings: 1 HIGH, 8 MEDIUM, 33 LOW confirmed, 3 refuted (B14, B25, B26), 8 NIT and INFO unverified. 39 applied in the batch. Not applied: B31 and B44 (comment-stripping cost, fix belongs in the shared `RepoPaths.cs`), B45 (shared chunk-sync guard, when momentum is next touched); B16's load marker is open for a format decision. RCA `docs/reviews/rca-war-chronicle-batch-a-2026-10-09.md`.
 - **Codex:** 0 CRITICAL, 0 HIGH, 2 MEDIUM, 1 LOW, 0 false positives. F1 MEDIUM: a capital unheld in the first row was ignored; any `cap=0` before day 120 now fails, "lost by day N" when no earlier held state exists. F2 MEDIUM: capital coverage was per day across kingdoms; now per kingdom, with `cap=na`, late and destroyed kingdoms handled. F3 LOW: a saved rally effect survived a same-tier refresh after its configured magnitude became 0; the source is now rebuilt on every eligible refresh. Each fix has a test seen failing first.
 - **Final suite:** `FullyQualifiedName~Rally` 221 passed, 0 failed; `tools.tests.test_analyze_war_ledger` 74 tests OK.
 - Raw output `docs/reviews/raw/codex-adversarial-war-chronicle-batch-a-2026-10-09.md` (gitignored).
+- **Update 2026-10-14 (#792):** B16 closed with the `t=load` marker; B31, B44 and B45 done (RCA, Follow-ups).
 
-## Review (number assigned at merge): War Chronicle Batch B (#765), event chain, army focus and momentum award, deep review + Codex gpt-6-astra (2026-10-14)
+## Review (number assigned at merge): War Chronicle Batch B (#765), event chain, army focus and momentum award, 8-lens deep review + Codex gpt-6-astra max (2026-10-14)
 
 - **Scope:** `84f5e63a9` on `bannerlord-1.5.x`: the scripted event chain (13 lore events, 7 siege windows), the army focus and the momentum award. Review fixes `7e8451555`; maintainer decisions `bad32ad08`; Codex fix `8f2c9e458`.
-- **Claude:** 56 findings: 1 MEDIUM and 20 LOW confirmed by verifiers (C01 to C21), 0 refuted, 35 INFO, NIT and proposal items unverified. The confirmed ones were applied in `7e8451555` (C04 and C07 by the maintainer's decision instead); of the unverified, most were applied or answered in docs, six stay notes (C27, C28, C36, C43, C44, C45), and C52 to C56 are follow-ups. RCA `docs/reviews/rca-war-chronicle-events-2026-10-14.md`.
+- **Claude:** 56 findings: 1 MEDIUM and 20 LOW confirmed by verifiers (C01 to C21), 0 refuted, 35 INFO, NIT and proposal items unverified. The confirmed ones were applied in `7e8451555` (C04 and C07 by the maintainer's decision instead); of the 35 unverified, 26 were applied (C36 and C43 among them), C27, C28 and C45 were rejected with a reason, C44 was moot, and C52 to C56 are follow-ups. RCA `docs/reviews/rca-war-chronicle-events-2026-10-14.md`.
 - **Decisions (2026-10-14):** C04 phase anchors count from the later of the configured day and the day the phase was first seen; C07 a siege whose target an attacker already owns resolves Fell, not Skipped. Kept: #772 F25 and F26, the Batch A fix choices, the `taom_wc_siege_lost` text.
 - **Codex:** 0 CRITICAL, 0 HIGH, 1 MEDIUM, 0 LOW, 0 false positives. F1 MEDIUM: the owner-change and siege-start callbacks skipped the War Ended check, so a conquest before the next daily step could pay an Active siege; the check now lives in the shared callback wrapper, with a test. Codex ran no full build or suite.
 - Raw output `docs/reviews/raw/codex-adversarial-war-chronicle-events-2026-10-14.md` (gitignored).
 
-## Review (number assigned at merge): Eye of Sauron hunt (#765 M8), deep review + Codex gpt-6-astra (2026-10-14)
+## Review (number assigned at merge): Eye of Sauron hunt (#765 M8), 7-lens deep review + Codex gpt-6-astra max (2026-10-14)
 
-- **Scope:** `34b0e25a9` on `bannerlord-1.5.x`: the hunt of a deed-drawing player by a Ringwraith (Glorfindel for an Evil-side player). Review fixes `ac0a3e0c0`; maintainer decisions `26718988b` and `33582471a`; Codex fixes `2d17ceba3`.
-- **Claude:** 49 findings: 2 HIGH and 14 MEDIUM confirmed by verifiers (E01 to E15, E41), 0 refuted, 33 LOW, INFO and proposal items unverified. The confirmed ones were applied in `ac0a3e0c0` (E06, E09, E17 by the maintainer's decision; E08 kept as built; E41 is a follow-up); the unverified ones were mostly applied, E16, E21, E25 to E27, E34, E36, E39 and E40 stay notes, and E42 to E47 are follow-ups. RCA `docs/reviews/rca-eye-of-sauron-2026-10-14.md`.
+- **Scope:** `34b0e25a9` on `bannerlord-1.5.x`: the hunt of a deed-drawing player by a Ringwraith (Glorfindel for an Evil-side player). Review fixes `ac0a3e0c0`; maintainer decisions `cbacbf1f0` and `7ab91767e`; Codex fixes `2d17ceba3`.
+- **Claude:** 49 findings: 2 HIGH and 14 MEDIUM confirmed by verifiers (E01 to E15, E41), 0 refuted, 33 LOW, INFO and proposal items unverified. The confirmed ones were applied in `ac0a3e0c0` (E06 and E09 by the maintainer's decision instead; E08 kept as built; E41, the #765 issue body, done 2026-10-14). Of the 33 unverified: 21 were applied (15 in `ac0a3e0c0`, plus E16, E21, E26, E34, E36 and E40, as recorded at `rca-eye-of-sauron-2026-10-14.md:47-52`), E17 was decided by the maintainer, E38 and E48 were kept, E27 was rejected, E25 was fixed in `ac0a3e0c0` with its tests added in the notes pass, E39 was done in the notes pass, and E42 to E47 were follow-ups, all closed 2026-10-14 (E43 rejected). RCA `docs/reviews/rca-eye-of-sauron-2026-10-14.md`.
 - **Decisions (2026-10-14):** E06 a flee keeps the hunt; E09 the speed floor applies from 1.5 S; E17 no hunt while in another lord's army and a running one holds off. Kept: E08 (Bannerlord Together means no hunt), E38 (the Dol Guldur kingdom rule), E48 (on by default).
 - **Codex:** 0 CRITICAL, 0 HIGH, 2 MEDIUM, 2 LOW, 0 false positives. F1 MEDIUM: resume claimed the pin for a hunter in an army. F2 MEDIUM: hunt start and end did not invalidate the `PartySizeLimit` cache, which keys on `MemberRoster.VersionNo`. F3 LOW: a stand-off save loaded into co-op released a pin the hunt no longer owned. F4 LOW: the locator search excluded the exact 1.5 S edge. All fixed in `2d17ceba3`. Codex ran no build or `dotnet test`; it compiled the service in memory (227 cases passed) and caught 7 of 8 mutations.
 - Raw output `docs/reviews/raw/codex-adversarial-eye-of-sauron-2026-10-14.md` (gitignored).
+
+## Review (number assigned at merge): War Chronicle and Eye of Sauron review follow-ups (#792), 4-lens deep review + Codex gpt-6-astra xhigh (2026-10-14)
+
+- **Scope:** `bc8c9f71b..a66b5754a` on `bannerlord-1.5.x`, 18 commits. Codex reviewed the first 14 (`bc8c9f71b..66053a9da`) in the worktree `E:/repos/taom-notes-ledger`. The changes:
+  - `EngineDataStore` (E42);
+  - raw-text wiring scans (B31, B44, C53);
+  - typed Eye wait tests (E25);
+  - the Refuge pin text (E44);
+  - the hunt popup and Messenger guards, with `MainPartyNullCheckScanTests`;
+  - the Eye docs and the E41 to E47 closes (E43 rejected);
+  - `SyncDataChunker.SyncChunks` (B45);
+  - `WarChronicleDailyGate` (#793);
+  - the `t=load` marker and the analyzer's rewind (B16);
+  - the Arthedain release check (C54) and the TAOM_Map coverage baseline (C56).
+- **Claude:** four lenses (standards, engine, data flow, completeness) on the first fixes; the lens reports and their counts were not kept. They found that the analyzer's reload rule assumed the first daily tick after a load is the next day, which v1.5.5 `Campaign.CreateCampaignEvents` does not guarantee. That finding led to #793, the daily gate and the load marker.
+- **Codex:** 0 CRITICAL, 0 HIGH, 0 MEDIUM, 4 LOW, 0 false positives.
+  - F1: an invalid clock reached the daily gate and the load marker as day 0 (`5ba8d6c82`).
+  - F2: the `PartyBase.MainParty` scan matched only `== null` and missed the hunt guard it followed (`dc1c37031`).
+  - F3: the E25 tests passed a `StartsWith("Waiting")` mutant (`d371745c7`).
+  - F4: "before midday" named the wrong boundary, because elapsed days start at 09:00 (`a66b5754a`).
+  - Suspects: S1 confirmed in part (F1); S2 and S4 disputed; S3 disputed for valid clocks; S5 and S6 confirmed.
+  - Codex ran 67 Python tests and compiled C# cases in memory (Eye 242, codec 82, gate 13, chunker 7). It ran no build and no `dotnet test`.
+- **RCA:** `docs/reviews/rca-review-followups-2026-10-14.md`.
+- Raw output `docs/reviews/raw/codex-adversarial-review-followups-2026-10-14.md` (gitignored). Prompt: `docs/reviews/codex-adversarial-review-followups-2026-10-14.prompt.md`.
 
 ## Review (number assigned at merge): orc and goblin locomotion (#791), TpacTool v0.5.1, armoury audit, Harad starter kits (#795), deep review (2026-10-14)
 
