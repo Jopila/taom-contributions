@@ -826,7 +826,7 @@ def sync_missing_ids(source_path: Path, target_path: Path, dry_run: bool = False
     lines[insert_at:insert_at] = block
     new_text = "".join(c + term for c, term in lines)
     try:
-        ET.fromstring(new_text.lstrip("﻿").encode("utf-8"))
+        ET.fromstring(new_text.encode("utf-8"))
     except ET.ParseError as exc:
         raise ValueError(f"{target_path}: seeding would leave a document that does not parse ({exc}); nothing written")
     target_path.write_text(new_text, encoding="utf-8", newline="")
@@ -897,7 +897,63 @@ def estimate_cost(entry_count: int, provider: dict = None) -> float:
             + out_tokens / 1_000_000 * provider["price_out"])
 
 
-def main():
+def seed_missing_ids(lang: str, locale: str, module: str, dry_run: bool) -> int:
+    """Seed every language file of `module` with the {=KEY} rows its English source declares
+    and it lacks (the --sync-ids pass). Returns the number of ids seeded, or that would be."""
+    seeded = 0
+    if module in ("TAOM", "all"):
+        taom_sources = english_source_files("TAOM")
+        owners = key_owners([s for _, s, _ in taom_sources])
+        for _, src, tpl in taom_sources:
+            target = TAOM_LANG_DIR / lang / tpl.format(locale=locale)
+            elsewhere = skip_ids_for(src, target, owners, TAOM_LANG_DIR / lang)
+            added = sync_missing_ids(src, target, dry_run=dry_run, skip_ids=elsewhere)
+            if added:
+                print(f"  +{len(added):>4} ids {'to seed' if dry_run else 'seeded'} into {target.name}")
+                seeded += len(added)
+    # Armory: the English source is Languages/loc_*.xml at the module root and each
+    # per-language folder mirrors it under the SAME filename. Until 2026-08-28 this
+    # block ran for TAOM only, so `--sync-ids --module Armory` seeded nothing: any key
+    # the language file lacked had nowhere for write_back to substitute into, and its
+    # translation was discarded after being paid for. Same failure write_back's own
+    # docstring warns about, one level up.
+    if module in ("Armory", "all"):
+        armory_root = armory_lang_dir()
+        target_dir = armory_root / lang
+        if target_dir.exists():
+            for src_file in sorted(armory_root.glob("loc_*.xml")):
+                added = sync_missing_ids(src_file, target_dir / src_file.name, dry_run=dry_run)
+                if added:
+                    print(f"  +{len(added):>4} ids {'to seed' if dry_run else 'seeded'} into {lang}/{src_file.name}")
+                    seeded += len(added)
+        else:
+            print(f"  WARNING: Armory sync skipped, not found: {target_dir}", file=sys.stderr)
+    print(f"  Ids {chr(0x77)}ould-be-seeded: {seeded}" if dry_run else f"  Ids seeded: {seeded}")
+    return seeded
+
+
+def seed_only(parser, args) -> int:
+    """`--seed-only`: the free half of --sync-ids --apply. Seeds the English rows and returns before
+    resolve_provider, require_key, any cache or override read, or any client exists."""
+    translating = [flag for flag, on in (
+        ("--apply", args.apply), ("--batch", args.batch), ("--max-entries", args.max_entries is not None),
+        ("--model", args.model is not None), ("--price-in", args.price_in is not None),
+        ("--price-out", args.price_out is not None), ("--provider", args.provider != DEFAULT_PROVIDER)) if on]
+    if translating:
+        parser.error(f"--seed-only only seeds English rows and never translates; drop {', '.join(translating)}")
+    if args.module == "TAOM_Map":
+        parser.error("--seed-only has no TAOM_Map pass; use --module TAOM, Armory or all")
+    if args.module in ("Armory", "all"):
+        ensure_exists(game_modules_root(), "the Bannerlord Modules folder")
+    locale, lang_name = LANGUAGES[args.lang]
+    print(f"\n[TAOM Translator] Seed only: {lang_name} ({args.lang} / {locale})")
+    print(f"  Module filter: {args.module}")
+    print(f"  Mode: {'DRY RUN' if args.dry_run else 'SEED'}")
+    seed_missing_ids(args.lang, locale, args.module, args.dry_run)
+    return 0
+
+
+def main(argv=None):
     p = argparse.ArgumentParser(description="TAOM AI Translation Tool")
     p.add_argument("--lang", required=True, choices=list(LANGUAGES.keys()),
                    help="Target language code")
@@ -908,6 +964,10 @@ def main():
     p.add_argument("--sync-ids", action="store_true",
                    help="Seed per-language TAOM files with any {=KEY} the English source declares "
                         "but they lack, so translations for those keys have somewhere to land")
+    p.add_argument("--seed-only", action="store_true",
+                   help="Run only the --sync-ids seeding (English rows into the language files, "
+                        "no translation) and exit before any provider, key or API client is touched. "
+                        "Free; refused together with any option that would translate")
     p.add_argument("--batch", action="store_true",
                    help="Submit via the Batches API at 50%% price (async, up to 24h; "
                         "worth it for bulk runs, not for a handful of entries)")
@@ -920,7 +980,10 @@ def main():
                    help="Override input price per Mtok, for the printed estimate only")
     p.add_argument("--price-out", type=float, default=None,
                    help="Override output price per Mtok, for the printed estimate only")
-    args = p.parse_args()
+    args = p.parse_args(argv)
+
+    if args.seed_only:
+        return seed_only(p, args)
 
     if not args.dry_run and not args.apply:
         p.error("Specify either --dry-run or --apply")
@@ -942,35 +1005,7 @@ def main():
     print(f"  Mode: {'DRY RUN' if args.dry_run else 'APPLY'}")
 
     if args.sync_ids:
-        seeded = 0
-        if args.module in ("TAOM", "all"):
-            taom_sources = english_source_files("TAOM")
-            owners = key_owners([s for _, s, _ in taom_sources])
-            for _, src, tpl in taom_sources:
-                target = TAOM_LANG_DIR / lang / tpl.format(locale=locale)
-                elsewhere = skip_ids_for(src, target, owners, TAOM_LANG_DIR / lang)
-                added = sync_missing_ids(src, target, dry_run=args.dry_run, skip_ids=elsewhere)
-                if added:
-                    print(f"  +{len(added):>4} ids {'to seed' if args.dry_run else 'seeded'} into {target.name}")
-                    seeded += len(added)
-        # Armory: the English source is Languages/loc_*.xml at the module root and each
-        # per-language folder mirrors it under the SAME filename. Until 2026-08-28 this
-        # block ran for TAOM only, so `--sync-ids --module Armory` seeded nothing: any key
-        # the language file lacked had nowhere for write_back to substitute into, and its
-        # translation was discarded after being paid for. Same failure write_back's own
-        # docstring warns about, one level up.
-        if args.module in ("Armory", "all"):
-            armory_root = armory_lang_dir()
-            target_dir = armory_root / lang
-            if target_dir.exists():
-                for src_file in sorted(armory_root.glob("loc_*.xml")):
-                    added = sync_missing_ids(src_file, target_dir / src_file.name, dry_run=args.dry_run)
-                    if added:
-                        print(f"  +{len(added):>4} ids {'to seed' if args.dry_run else 'seeded'} into {lang}/{src_file.name}")
-                        seeded += len(added)
-            else:
-                print(f"  WARNING: Armory sync skipped, not found: {target_dir}", file=sys.stderr)
-        print(f"  Ids {chr(0x77)}ould-be-seeded: {seeded}" if args.dry_run else f"  Ids seeded: {seeded}")
+        seed_missing_ids(lang, locale, args.module, args.dry_run)
 
     entries = discover_entries(lang, args.module)
     print(f"\n  Untranslated entries discovered: {len(entries)}")
