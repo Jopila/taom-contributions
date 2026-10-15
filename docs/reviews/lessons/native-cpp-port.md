@@ -71,6 +71,20 @@ The probe's summary said every address is proven inside a mapped section before 
 - **Recurrence (2026-10-08, fix round):** the cull's MCM hint gave yotthani's 1,002 settlements as TAOM's count (the
   live `TAOM_Map` file holds 1,040), and both map-view hints stated his measurements as fact. Player-facing text
   carries only counts TAOM took, with their basis, or attributes the figure (finding 26).
+- **Recurrence (2026-10-15):** the new `cameraMs` row in the frame-cost table gave yotthani's 1.1 to 3 ms PreDisplay
+  cost under the table's `[TAOM-verified]` tag. The implementer copied the figure from the issue body, which names
+  yotthani, and left the name behind. A figure copied into a TAOM doc takes its source tag with it, in the same edit
+  (`docs/reviews/rca-yotthani-review-2026-10-15.md` finding 5).
+
+### A native pin table fails the engine-bump gate on a build it does not list (2026-10-15)
+- **Why missed:** the v1.5.5 bump added a row to the clip-budget pin table and none to
+  `SkeletonBufferInstalledBinaryTests.KnownBuilds`. Both classes were tagged `LiveInstall` only, so a build with no row
+  returned Inconclusive, which the test run reports as skipped with exit code 0, and neither class ran in the binding
+  gate. The engine-bump skill named both tables; nothing could fail when one was missed.
+- **Prevent:** every `KnownBuilds` table is tagged `BindingVerification`, so the gate (`MapInconclusiveToFailed`)
+  fails on an unlisted build; `NativePinGateTests` keeps each table tagged and named in the skill. A Python pin table
+  still skips without `TAOM_GHIDRA_IT=1`: read its skip count, never its exit code.
+- **Source:** `docs/reviews/rca-engine-bump-v1.5.5-2026-10-14.md` F10; issue #806.
 
 ---
 

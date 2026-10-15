@@ -23,6 +23,7 @@ fixed in the follow-up commit. The theme: the bump's checks, and the tools writt
 | F7 | MED | `check_handbook_attributes.py` never compared a committed manifest with the dump in dump mode, so the v1.5.4 manifest (stale helper lists) passed | Gate blind spot | `MANIFEST_STALE` existed only in manifest-only mode | Dump mode now reports `MANIFEST_STALE`; a repo test ties `dump_root_name` to the default dump |
 | F8 | MED | The first body-diff run reported 509 of 521 rows changed: the installed Coop module bundles 40 v1.5.4 engine DLLs, and `decompile_bannerlord.ps1` decompiles every module's bin, so `_modules_build` held a second, stale copy of every engine type | Third-party engine copies | No tool distinguished a vanilla module from a mod that ships engine DLLs | The body diff reads engine assemblies only from vanilla modules; lesson appended; `taom-src` has the same exposure (follow-up below) |
 | F9 | LOW | Precision: per-version numbers copied into the skill; a hard-coded `if version == "v1.5.5"` in a pin test; impact-doc counts from before the snapshot regeneration (139/52 against 144/53); stale "v1.5.2"/"v1.5.3" labels in the snapshot README, the handbook tool and `.ai/review-reference.md`; "allied party" where the code says "not at war with the player" | Edit precision | First-pass text written from memory of the run, not re-read against the outputs | All corrected; per-version data lives in pin rows and the impact doc |
+| F10 | MED | Found 2026-10-15, after the bump shipped: `SkeletonBufferInstalledBinaryTests.KnownBuilds` got no v1.5.5 row, while the clip-budget table did. Both pin classes were tagged `LiveInstall` only, so a build with no row returned Inconclusive (reported as skipped, exit code 0) and neither ran in the binding gate. The runtime guard was not affected: it finds its sites by pattern, and the 2026-10-15 log shows `guard ON` for both pools | A gate that cannot fail on a missing input | The skill named both tables, but a missing row could only skip, so nothing failed | Row added; both classes tagged `BindingVerification`, so the gate's `MapInconclusiveToFailed` fails an unlisted build; `NativePinGateTests` keeps every table tagged and named in the skill (#806, [rca-yotthani-review-2026-10-15.md](rca-yotthani-review-2026-10-15.md)) |
 
 ## Root-cause pattern: a check that reports what it read, not what it was asked to read
 
@@ -31,6 +32,9 @@ reported success on those, while a missing, mistyped or stale input silently shr
 the same shape at run time: a guard's install log was read as proof that it worked. The fix in every
 case is to make the check fail on what it could not read or cannot reach, and to prove a guard by
 the path of the failure, not by its registration.
+
+F10, found the day after, has the same shape in a test: a pin table with no row for the build skipped
+instead of failing, so the gate counted it as clean.
 
 ## Why each lens caught what it did
 
@@ -59,4 +63,6 @@ the path of the failure, not by its registration.
 Three lessons appended to `docs/reviews/lessons/build-tooling-workflow.md`: engine types only from
 vanilla modules; "installed" is not "effective" for a guard; a check fails on inputs it could not
 read. No new rule file: `evidence-over-claims.md` already says to prove a result before claiming it,
-and the misses were in applying it to tools and guards.
+and the misses were in applying it to tools and guards. F10's lesson is in
+`docs/reviews/lessons/native-cpp-port.md` ("A native pin table fails the engine-bump gate on a build it
+does not list").

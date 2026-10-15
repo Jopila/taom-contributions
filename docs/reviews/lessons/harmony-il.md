@@ -1046,3 +1046,18 @@ yotthani's PerfProbe gave each timing probe its own closed generic class (`Slot<
   `MapFrameProfilerInstaller` precedent), or a `[HarmonyCleanup]` method resets a transpiler's count when the apply
   fails.
 - **Source:** `docs/reviews/rca-yotthani-adoption-2026-10-08.md` finding 22.
+- **Recurrence (2026-10-15):** once the camera bracket became its own category, the hitch probe's install line still
+  named `MissionScreen.UpdateCamera` when that category failed, and `cameraMs=0.00` read as zero camera time. The line
+  now names only the categories that applied, and `CameraNotInstalledLine` reports the gap
+  (`docs/reviews/rca-yotthani-review-2026-10-15.md` finding 2).
+
+### A patch category fails as one unit: read what its caller turns off before you add a class (2026-10-15)
+- **Why missed:** the camera bracket went in as the last class of `Patch98_HitchProbe`, on the reasoning that Harmony
+  keeps the classes it already patched. That is true, but `PatchCategoryIndex.Apply` throws at the first class that
+  fails, `SubModule.TryPatchCategory` returns false, and `HitchProbeInstaller` reads false as "no probe": it switches
+  off the probe and the full tick profiler for the session. The design traced Harmony, not the installer's flags.
+- **Prevent:** before you add a class to an existing category, read what the category's caller does with a failed
+  apply. An optional target that must not take the category down goes in a category of its own, applied after the one
+  it extends, with its own status line. The same check applies to a guard in a tool: list what it protects before it
+  ships (the same review's `perf_runs.py compare` refusal protected no metric that `compare` prints).
+- **Source:** `docs/reviews/rca-yotthani-review-2026-10-15.md` findings 1 and 3.
