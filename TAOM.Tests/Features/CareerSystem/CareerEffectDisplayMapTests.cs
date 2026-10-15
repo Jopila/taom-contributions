@@ -1,6 +1,10 @@
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Features.CareerSystem.Domain;
 using TAOM.Features.CareerSystem.UI;
+using static TAOM.Tests.Infrastructure.RepoPaths;
 
 namespace TAOM.Tests.Features.CareerSystem;
 
@@ -27,14 +31,22 @@ public class CareerEffectDisplayMapTests
     }
 
     [TestMethod]
-    public void IconFor_EveryEnumValue_HasAnIcon()
+    public void IconFor_EveryEnumValue_HasItsOwnIconRow()
     {
-        // A missing row renders a blank diamond with no error — pin the whole enum.
-        foreach (PassiveEffectType type in System.Enum.GetValues(typeof(PassiveEffectType)))
+        // IconFor answers the fallback for a type with no row, so asking it can never fail: read the Icons table
+        // itself, the way the Labels test does. A missing row renders the fallback glyph with no error.
+        var source = ReadSource("Main/Features/CareerSystem/UI/CareerEffectDisplayMap.cs", stripComments: true);
+        var rows = Regex.Matches(source, @"\[PassiveEffectType\.(\w+)\] = ""(\d+)""")
+            .Cast<Match>()
+            .Select(m => (PassiveEffectType)Enum.Parse(typeof(PassiveEffectType), m.Groups[1].Value))
+            .ToList();
+
+        foreach (PassiveEffectType type in Enum.GetValues(typeof(PassiveEffectType)))
         {
-            var icon = CareerEffectDisplayMap.IconFor(type);
-            Assert.IsFalse(string.IsNullOrEmpty(icon), $"{type} has no diamond icon mapped");
+            CollectionAssert.Contains(rows, type, $"{type} has no row in CareerEffectDisplayMap.Icons");
+            Assert.IsFalse(string.IsNullOrEmpty(CareerEffectDisplayMap.IconFor(type)), $"{type} has no diamond icon mapped");
         }
+        Assert.AreEqual(Enum.GetValues(typeof(PassiveEffectType)).Length, rows.Count, "one Icons row per enum value");
     }
 
     [TestMethod]
@@ -112,7 +124,7 @@ public class CareerEffectDisplayMapTests
     }
 
     [TestMethod]
-    public void TheCountEffects_AreExactlyHealthPartySizeAndCompanionLimit()
+    public void TheCountEffects_AreExactlyHealthPartySizeCompanionLimitDailyGoldAndTroopTraining()
     {
         // The panel and the diagnostic report read one table (CareerPerkConsumerMap.IsFlat): pin its members by name.
         var flat = new System.Collections.Generic.List<PassiveEffectType>();
@@ -122,7 +134,11 @@ public class CareerEffectDisplayMapTests
             if (!isPercent) flat.Add(type);
         }
         CollectionAssert.AreEquivalent(
-            new[] { PassiveEffectType.Health, PassiveEffectType.PartySize, PassiveEffectType.CompanionLimit }, flat);
+            new[]
+            {
+                PassiveEffectType.Health, PassiveEffectType.PartySize, PassiveEffectType.CompanionLimit,
+                PassiveEffectType.DailyGold, PassiveEffectType.TroopTraining,
+            }, flat);
     }
 
     [TestMethod]

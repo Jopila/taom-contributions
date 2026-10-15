@@ -77,15 +77,28 @@ public static class PassiveEffectConsumers
         PassiveEffectType.RenownGain,    // TaomBattleRewardModel
         PassiveEffectType.SmithingCostReduction, // TaomSmithingModel
 
+        // ── Campaign consumers (#769 E11): one GameModel override each ──
+        PassiveEffectType.InfluenceGain,       // TaomBattleRewardModel.CalculateInfluenceGain (a factor; 0 outside a kingdom stays 0)
+        PassiveEffectType.RecruitCost,         // TaomPartyWageModel.GetTroopRecruitmentCost, summed in WageModifierService before the 1-gold floor
+        PassiveEffectType.PrisonerConversion,  // TaomPrisonerRecruitmentCalculationModel.GetConformityChangePerHour
+        PassiveEffectType.FoodConsumption,     // TaomFoodConsumptionModel.CalculateDailyFoodConsumptionf (the number is negative)
+        PassiveEffectType.WoundRecovery,       // TaomPartyHealingModel.GetDailyHealingForRegulars (the leader's party; positive values, non-prisoner call only)
+        PassiveEffectType.DailyGold,           // TaomClanFinanceModel.CalculateClanGoldChange + CalculateClanIncome (a count, ApplyFlat)
+        PassiveEffectType.LootGold,            // TaomBattleRewardModel.GetLootGoldChances (the winner's own share, not renormalised)
+        PassiveEffectType.RaidLoot,            // TaomRaidModel.GetRaidLootMultiplier (village gold, drawn items at 0.5 x, village goods, common loot at 0.25 x)
+        PassiveEffectType.TroopTraining,       // TaomPartyTrainingModel.GetEffectiveDailyExperience (a count per troop, class-filtered)
+        PassiveEffectType.TradePrices,         // TaomPartyTradeModel.GetTradePenaltyFactor (the raw penalty, both directions)
+
         // ── Special resources (SpecialResourceService) ──
         PassiveEffectType.SpecialResourceGain,
         PassiveEffectType.SpecialResourceUpkeepModifier,
         PassiveEffectType.SpecialResourceUpgradeCostModifier,
     };
 
-    // The types whose consumer passes the hit's troop class (#769 E9, E10), so a troop_class attribute means
+    // The types whose consumer passes the hit's troop class (#769 E9, E10, E11), so a troop_class attribute means
     // something on them: CalculateDamageAmplification / CalculateDamageReduction resolve the struck or
-    // striking agent's class and read GetTroopMagnitude, and the three troop counters resolve the victim's.
+    // striking agent's class and read GetTroopMagnitude, the three troop counters resolve the victim's, and
+    // TaomPartyTrainingModel resolves the class of the roster element it is asked about (TroopTraining).
     // On any other type the attribute is ignored with a load warning, because honouring it would pretend to
     // restrict a pip that cannot be restricted.
     private static readonly HashSet<PassiveEffectType> ClassFilteredTypes = new HashSet<PassiveEffectType>
@@ -95,6 +108,7 @@ public static class PassiveEffectConsumers
         PassiveEffectType.TroopFearResistance,
         PassiveEffectType.TroopKnockdownResistance,
         PassiveEffectType.TroopCrushHold,
+        PassiveEffectType.TroopTraining,
     };
 
     // The types whose consumer passes the hit (#613, #769 E9), so an attack_type_mask means something on

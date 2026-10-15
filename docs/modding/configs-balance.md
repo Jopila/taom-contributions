@@ -261,7 +261,7 @@ The check is `bestSkill + max(0, trust) * 2 + rank * 4 + Next(0..50) >= difficul
 | `magnitude` | float | no | falls back to `value`, then 0 | The size of the effect | `CareerConfigProvider.ParsePassive` |
 | `value` | float | no | 0 | Alias for `magnitude`; `magnitude` wins when both are present | `CareerConfigProvider.ParsePassive` |
 | `attack_type_mask` | enum | no | `All` | Gates the four mask-gated types (`Damage`, `Resistance`, `TroopDamage`, `TroopResistance`) by hit kind (`Melee`, `Ranged`, or `Cut`, `Pierce`, `Blunt`, or `All`; comma or pipe separated). On any other type the loader warns and ignores it | `CareerConfigProvider.ParseAttackTypeMask` |
-| `troop_class` | string | no | `All` | Restricts the five class-filtered types (`TroopDamage`, `TroopResistance`, `TroopFearResistance`, `TroopKnockdownResistance`, `TroopCrushHold`) to `Infantry`, `Ranged`, `Cavalry` or `All`, separated by commas or pipes. On any other type the loader warns and ignores it; an unknown name on a class-filtered type drops the passive | `CareerConfigProvider.TryParseTroopClass` |
+| `troop_class` | string | no | `All` | Restricts the six class-filtered types (`TroopDamage`, `TroopResistance`, `TroopFearResistance`, `TroopKnockdownResistance`, `TroopCrushHold`, `TroopTraining`) to `Infantry`, `Ranged`, `Cavalry` or `All`, separated by commas or pipes. On any other type the loader warns and ignores it; an unknown name on a class-filtered type drops the passive | `CareerConfigProvider.TryParseTroopClass` |
 | `operation` | string | no | ignored | Read but has no effect. Removed from the parser 2026-06-25 | `CareerConfigProvider.ParsePassive` |
 | `is_percentage` | bool | no | ignored | Read but has no effect. Same removal | `CareerConfigProvider.ParsePassive` |
 

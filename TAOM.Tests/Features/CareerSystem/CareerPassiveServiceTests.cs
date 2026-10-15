@@ -836,4 +836,273 @@ public class CareerPassiveServiceTests
         Assert.AreEqual(0.15f, Troop(PassiveEffectType.TroopDamage, TroopClassMask.Infantry), 0.001f);
         Assert.AreEqual(0.05f, Troop(PassiveEffectType.TroopDamage, TroopClassMask.Cavalry), 0.001f);
     }
+
+    // ── #769 E11: the campaign consumers' service rules ──
+
+    private void GivenPassive(PassiveEffectType type, float magnitude, TroopClassMask troopClass = TroopClassMask.All)
+        => GivenChoice("wb_e11", new PassiveEffect(type, magnitude, troopClass: troopClass));
+
+    private int CareerPerkLines(string typeName)
+        => _logger.ReceivedCalls().Count(c => c.GetMethodInfo().Name == nameof(IModLogger.LogInfo)
+            && c.GetArguments()[0] is string text && text.StartsWith("[CareerPerks] " + typeName));
+
+    [DataTestMethod]
+    [DataRow(PassiveEffectType.LootGold, 0.20f, 0.5f, 0.6f)]
+    [DataRow(PassiveEffectType.RaidLoot, 0.50f, 1.0f, 1.5f)]
+    [DataRow(PassiveEffectType.TradePrices, -0.25f, 0.2f, 0.15f)]
+    public void ScaleByPassive_HeldPassive_ScalesTheValueByOnePlusTheMagnitude(PassiveEffectType type, float magnitude, float value, float expected)
+    {
+        GivenPassive(type, magnitude);
+
+        Assert.AreEqual(expected, _service.ScaleByPassive("hero1", value, type), 0.0001f);
+    }
+
+    [TestMethod]
+    public void ScaleByPassive_NoHeroNoPassiveOrAnotherType_ReturnsTheValueUntouched()
+    {
+        GivenPassive(PassiveEffectType.LootGold, 0.20f);
+
+        Assert.AreEqual(0.5f, _service.ScaleByPassive(null, 0.5f, PassiveEffectType.LootGold));
+        Assert.AreEqual(0.5f, _service.ScaleByPassive("", 0.5f, PassiveEffectType.LootGold));
+        Assert.AreEqual(0.5f, _service.ScaleByPassive("nobody", 0.5f, PassiveEffectType.LootGold));
+        Assert.AreEqual(0.5f, _service.ScaleByPassive("hero1", 0.5f, PassiveEffectType.RaidLoot));
+    }
+
+    [TestMethod]
+    public void ScaleByPassive_MagnitudeThatCancelsTheValue_ReturnsZeroNotANegative()
+    {
+        // -100% is the floor: a trade penalty or a loot share of exactly nothing, never a sign flip.
+        GivenPassive(PassiveEffectType.TradePrices, -1f);
+
+        Assert.AreEqual(0f, _service.ScaleByPassive("hero1", 0.2f, PassiveEffectType.TradePrices));
+    }
+
+    [DataTestMethod]
+    [DataRow(-1.01f)]
+    [DataRow(-1.5f)]
+    [DataRow(-3f)]
+    public void ScaleByPassive_MagnitudeBelowMinusOne_FloorsAtZeroNotADiscountBelowBase(float magnitude)
+    {
+        // A scale below zero would turn a trade penalty into a discount below the base price (buy under base,
+        // sell over it). There is no cliff at -1: a total of -1.01 is the same full cut as -1, never the full
+        // penalty back. The loader rejects a NaN or infinite magnitude (CareerConfigProviderTests), so the
+        // service never sees one.
+        GivenPassive(PassiveEffectType.TradePrices, magnitude);
+
+        var scaled = _service.ScaleByPassive("hero1", 0.2f, PassiveEffectType.TradePrices);
+
+        Assert.AreEqual(0f, scaled);
+    }
+
+    [TestMethod]
+    public void ScaleByPassive_EventScopedType_LogsOneLineWithTheValueBeforeAndAfter()
+    {
+        GivenPassive(PassiveEffectType.LootGold, 0.20f);
+
+        _service.ScaleByPassive("hero1", 0.5f, PassiveEffectType.LootGold);
+
+        _logger.Received(1).LogInfo(Arg.Is<string>(s => s.StartsWith("[CareerPerks] LootGold +20% for 'hero1': 0.5 -> 0.6")));
+    }
+
+    [TestMethod]
+    public void ScaleByPassive_ValueThatDoesNotMove_LogsNoZeroToZeroLine()
+    {
+        GivenPassive(PassiveEffectType.LootGold, 0.20f);
+
+        _service.ScaleByPassive("hero1", 0f, PassiveEffectType.LootGold);
+
+        Assert.AreEqual(0, CareerPerkLines("LootGold"));
+    }
+
+    [TestMethod]
+    public void ScaleByPassive_PerTickType_NeverLogs()
+    {
+        // The raid step and every price quote call this many times a second.
+        GivenPassive(PassiveEffectType.RaidLoot, 0.50f);
+        GivenChoice("wb_e11b", new PassiveEffect(PassiveEffectType.TradePrices, -0.20f));
+
+        _service.ScaleByPassive("hero1", 1f, PassiveEffectType.RaidLoot);
+        _service.ScaleByPassive("hero1", 0.2f, PassiveEffectType.TradePrices);
+
+        Assert.AreEqual(0, CareerPerkLines("RaidLoot"));
+        Assert.AreEqual(0, CareerPerkLines("TradePrices"));
+    }
+
+    [TestMethod]
+    public void ApplyFactor_EventScopedTypeOverAZeroBase_LogsNoZeroToZeroLine()
+    {
+        // Vanilla pays no influence outside a kingdom, so a factor on it moves nothing: no "0 -> 0" in the log.
+        GivenPassive(PassiveEffectType.InfluenceGain, 0.20f);
+
+        var none = new ExplainedNumber(0f);
+        _service.ApplyFactor("hero1", ref none, PassiveEffectType.InfluenceGain);
+
+        Assert.AreEqual(0f, none.ResultNumber);
+        Assert.AreEqual(0, CareerPerkLines("InfluenceGain"));
+    }
+
+    [TestMethod]
+    public void ApplyFactor_EventScopedTypeOverARealBase_LogsOneLine()
+    {
+        GivenPassive(PassiveEffectType.InfluenceGain, 0.20f);
+
+        var gain = new ExplainedNumber(5f);
+        _service.ApplyFactor("hero1", ref gain, PassiveEffectType.InfluenceGain);
+
+        Assert.AreEqual(6f, gain.ResultNumber, 0.001f);
+        Assert.AreEqual(1, CareerPerkLines("InfluenceGain"));
+    }
+
+    [TestMethod]
+    public void ApplyFlat_ClassPip_AddsOnlyForATroopOfThatClass()
+    {
+        GivenChoice("wb_train",
+            new PassiveEffect(PassiveEffectType.TroopTraining, 4f),
+            new PassiveEffect(PassiveEffectType.TroopTraining, 6f, troopClass: TroopClassMask.Infantry));
+
+        var infantry = new ExplainedNumber(0f);
+        _service.ApplyFlat("hero1", ref infantry, PassiveEffectType.TroopTraining, TroopClassMask.Infantry);
+        var cavalry = new ExplainedNumber(0f);
+        _service.ApplyFlat("hero1", ref cavalry, PassiveEffectType.TroopTraining, TroopClassMask.Cavalry);
+        var classless = new ExplainedNumber(0f);
+        _service.ApplyFlat("hero1", ref classless, PassiveEffectType.TroopTraining, TroopClassMask.None);
+
+        Assert.AreEqual(10f, infantry.ResultNumber, 0.001f, "the All pip plus the infantry pip");
+        Assert.AreEqual(4f, cavalry.ResultNumber, 0.001f, "only the All pip");
+        Assert.AreEqual(4f, classless.ResultNumber, 0.001f, "a troop with no class gets the All pip and nothing narrower");
+    }
+
+    [TestMethod]
+    public void ApplyFlat_ClassFilteredTypeAfterAFactor_IsStillWorthItsLiteralCount()
+    {
+        // Same frame rule as ApplyFlat: the vanilla training perks add factors, and a "+5 experience" pip is worth 5.
+        GivenPassive(PassiveEffectType.TroopTraining, 5f);
+        var result = new ExplainedNumber(10f);
+        result.AddFactor(1f);
+
+        _service.ApplyFlat("hero1", ref result, PassiveEffectType.TroopTraining, TroopClassMask.Infantry);
+
+        Assert.AreEqual(25f, result.ResultNumber, 0.001f);
+    }
+
+    [TestMethod]
+    public void ApplyFlat_ClassFilteredTypeForNoHeroNoPassiveOrAnotherHero_IsNoOp()
+    {
+        GivenPassive(PassiveEffectType.TroopTraining, 5f);
+        var result = new ExplainedNumber(3f);
+
+        _service.ApplyFlat(null, ref result, PassiveEffectType.TroopTraining, TroopClassMask.Infantry);
+        _service.ApplyFlat("", ref result, PassiveEffectType.TroopTraining, TroopClassMask.Infantry);
+        _service.ApplyFlat("nobody", ref result, PassiveEffectType.TroopTraining, TroopClassMask.Infantry);
+        _service.ApplyFlat("hero1", ref result, PassiveEffectType.DailyGold, TroopClassMask.Infantry);
+
+        Assert.AreEqual(3f, result.ResultNumber, 0.001f);
+    }
+
+    [TestMethod]
+    public void ApplyWoundRecovery_PositiveHealing_IsRaisedByTheFactor()
+    {
+        GivenPassive(PassiveEffectType.WoundRecovery, 0.25f);
+        var healing = new ExplainedNumber(20f);
+
+        _service.ApplyWoundRecovery("hero1", isPrisoner: false, ref healing);
+
+        Assert.AreEqual(25f, healing.ResultNumber, 0.001f);
+    }
+
+    [TestMethod]
+    public void ApplyWoundRecovery_StarvingOrRaftNegativeValue_IsNotMadeWorse()
+    {
+        // Vanilla returns a NEGATIVE value for a starving party (-regulars/4) and a raft; a plus factor on it
+        // would wound the troops faster. The factor only ever speeds up a recovery.
+        GivenPassive(PassiveEffectType.WoundRecovery, 0.25f);
+        var starving = new ExplainedNumber(0f);
+        starving.Add(-12f);
+        var zero = new ExplainedNumber(0f);
+
+        _service.ApplyWoundRecovery("hero1", isPrisoner: false, ref starving);
+        _service.ApplyWoundRecovery("hero1", isPrisoner: false, ref zero);
+
+        Assert.AreEqual(-12f, starving.ResultNumber, 0.001f);
+        Assert.AreEqual(0f, zero.ResultNumber, 0.001f);
+    }
+
+    [TestMethod]
+    public void ApplyWoundRecovery_PrisonerPath_IsNeverTouched()
+    {
+        // isPrisoner true is the CAPTOR healing its prisoners (vanilla's constant +1): not the hero's own troops.
+        GivenPassive(PassiveEffectType.WoundRecovery, 0.50f);
+        var healing = new ExplainedNumber(1f);
+
+        _service.ApplyWoundRecovery("hero1", isPrisoner: true, ref healing);
+
+        Assert.AreEqual(1f, healing.ResultNumber, 0.001f);
+    }
+
+    [TestMethod]
+    public void ApplyWoundRecovery_NoHeroOrNoPassive_IsNoOp()
+    {
+        GivenPassive(PassiveEffectType.WoundRecovery, 0.50f);
+        var healing = new ExplainedNumber(10f);
+
+        _service.ApplyWoundRecovery(null, isPrisoner: false, ref healing);
+        _service.ApplyWoundRecovery("nobody", isPrisoner: false, ref healing);
+
+        Assert.AreEqual(10f, healing.ResultNumber, 0.001f);
+    }
+
+    [DataTestMethod]
+    [DataRow(-1f, 0f)]
+    [DataRow(-1.5f, 0f)]
+    [DataRow(-3f, 0f)]
+    [DataRow(-0.5f, 10f)]
+    public void ApplyWoundRecovery_TotalOfMinusOneOrLess_NeverTurnsPositiveHealingNegative(float magnitude, float expected)
+    {
+        // A fraction total is not range-checked at the loader, and vanilla puts no lower limit on the number: a
+        // total below -1 would turn a positive recovery into a daily wound. The factor is floored at -1 (no recovery).
+        GivenPassive(PassiveEffectType.WoundRecovery, magnitude);
+        var healing = new ExplainedNumber(20f);
+
+        _service.ApplyWoundRecovery("hero1", isPrisoner: false, ref healing);
+
+        Assert.AreEqual(expected, healing.ResultNumber, 0.001f);
+    }
+
+    [TestMethod]
+    public void ApplyWoundRecovery_NaNHealing_AddsNoFactor()
+    {
+        // The gate is written positive so NaN fails it: a factor on a NaN base would only spread the NaN.
+        GivenPassive(PassiveEffectType.WoundRecovery, 0.50f);
+        var healing = new ExplainedNumber(float.NaN);
+
+        _service.ApplyWoundRecovery("hero1", isPrisoner: false, ref healing);
+
+        Assert.AreEqual(0f, healing.SumOfFactors);
+    }
+
+    [TestMethod]
+    public void ApplyFlat_ClassWithANaNFactorFrame_AddsNothing()
+    {
+        // The divisor 1 + SumOfFactors is NaN, which the positive gate rejects: the base is left as it was.
+        GivenPassive(PassiveEffectType.TroopTraining, 5f);
+        var result = new ExplainedNumber(10f);
+        result.AddFactor(float.NaN);
+
+        _service.ApplyFlat("hero1", ref result, PassiveEffectType.TroopTraining, TroopClassMask.Infantry);
+
+        Assert.AreEqual(10f, result.BaseNumber);
+    }
+
+    [TestMethod]
+    public void ApplyFlat_DailyGold_AddsTheCountAfterTheFactors()
+    {
+        // The clan finance models call ApplyFlat last, outside the enlistment wage line's applyWithdrawals return.
+        GivenPassive(PassiveEffectType.DailyGold, 50f);
+        var gold = new ExplainedNumber(100f);
+        gold.AddFactor(0.5f);
+
+        _service.ApplyFlat("hero1", ref gold, PassiveEffectType.DailyGold);
+
+        Assert.AreEqual(200f, gold.ResultNumber, 0.001f, "100 * 1.5 = 150, plus exactly 50");
+    }
 }

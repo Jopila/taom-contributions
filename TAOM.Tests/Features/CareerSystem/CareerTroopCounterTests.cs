@@ -387,7 +387,7 @@ public class CareerTroopCounterTests
     [TestMethod]
     public void TheThreeCounters_AreConsumedAndClassFiltered()
     {
-        // The set itself is pinned once, without the game, in CareerConfigProviderTests.ClassFiltered_IsTheFiveTroopTypesAndNoHeroType.
+        // The set itself is pinned once, without the game, in CareerConfigProviderTests.ClassFiltered_IsTheSixTroopTypesAndNoHeroType.
         foreach (var type in new[] { PassiveEffectType.TroopFearResistance, PassiveEffectType.TroopKnockdownResistance, PassiveEffectType.TroopCrushHold })
         {
             Assert.IsTrue(PassiveEffectConsumers.IsConsumed(type), $"{type} consumed");

@@ -103,6 +103,9 @@ public static class CareerPerkCheats
         Probe(snapshot, "wages", () => models.PartyWageModel.GetTotalWage(party, party.MemberRoster, true));
         Probe(snapshot, "inventory capacity", () => models.InventoryCapacityModel.CalculateInventoryCapacity(party, party.IsCurrentlyAtSea, true));
         Probe(snapshot, "hero daily healing", () => models.PartyHealingModel.GetDailyHealingHpForHeroes(party.Party, false, true));
+        Probe(snapshot, "daily food change", () => party.FoodChangeExplained);
+        Probe(snapshot, "regulars daily healing", () => party.Party.HealingRateForMemberRegularsExplained);
+        Probe(snapshot, "clan daily gold change", () => models.ClanFinanceModel.CalculateClanGoldChange(Clan.PlayerClan, true));
         try
         {
             snapshot.Probes.Add($"companion limit {models.ClanTierModel.GetCompanionLimit(Clan.PlayerClan)}");

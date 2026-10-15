@@ -70,16 +70,21 @@ public class TaomPartyHealingModel : DefaultPartyHealingModel
             }
         }
 
-        // Career passive: TroopSurvival increases survival chance. GetSurvivalChance returns a
-        // raw float (not ExplainedNumber), so the multiplicative apply stays inline here.
-        var heroId = CareerPassiveHero.ResolveId(party);
-        if (heroId != null)
-        {
-            float magnitude = _careerPassives.GetPassiveMagnitude(heroId, PassiveEffectType.TroopSurvival);
-            if (magnitude != 0f)
-                result = Math.Min(1f, result * (1f + magnitude));
-        }
+        // Career passive: TroopSurvival (owner-first key) raises the survival chance, capped at certain survival.
+        result = Math.Min(1f, _careerPassives.ScaleByPassive(CareerPassiveHero.ResolveId(party), result, PassiveEffectType.TroopSurvival));
+        return result;
+    }
 
+    // Career WoundRecovery (#769 E11): the daily healing of the party's regular troops. Additive, base first. The
+    // service applies the factor only to a positive value on the non-prisoner call: vanilla returns a NEGATIVE value
+    // while the party starves (or is a raft party whose -0.25 per regular outweighs its healing), and +1 when isPrisoners is true (the captor healing prisoners).
+    // Callers (v1.5.5): PartyBase.HealingRateForMemberRegulars with isPrisoners false (the main party hourly, other
+    // mobile parties four times a day, settlement parties daily, two tooltips), PartyHealCampaignBehavior.cs:165 with
+    // true. Keyed on the party's LeaderHero like the other E11 party types: owner-first would heal the player's garrisons too.
+    public override ExplainedNumber GetDailyHealingForRegulars(PartyBase party, bool isPrisoners, bool includeDescriptions = false)
+    {
+        var result = base.GetDailyHealingForRegulars(party, isPrisoners, includeDescriptions);
+        _careerPassives.ApplyWoundRecovery(party?.LeaderHero?.StringId, isPrisoners, ref result);
         return result;
     }
 

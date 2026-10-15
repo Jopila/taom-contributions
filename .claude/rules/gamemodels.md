@@ -6,7 +6,7 @@ paths:
 
 # GameModel Override Rules
 
-TAOM has 54 GameModel overrides, the parked and abstract ones included (`tools/lint_docs.py` checks the total). All follow the same pattern.
+TAOM has 56 GameModel overrides, the parked and abstract ones included (`tools/lint_docs.py` checks the total). All follow the same pattern.
 
 ## Pattern
 
@@ -41,7 +41,7 @@ public class TaomFooModel : DefaultFooModel
 8. **Tests** — Service logic is fully unit-tested. The model class itself is thin enough to not need direct tests.
 9. **Cross-entity propagation (MANDATORY when the override returns a per-entity capability/value)** — If your override returns a per-entity value (per party, per hero, per settlement) that the engine **propagates** to related entities or **recomputes per-entity**, you MUST decompile the engine *consumer* of your result and mirror that propagation — or related entities desync. Before overriding, answer two questions from the decompiled engine code: (a) **Propagation** — does the value get pushed onto attached/child entities (army attached parties, settlement bound villages, family members)? (b) **Recompute** — is it recomputed per-entity from a per-entity getter the engine drives across the group? If yes to either, the override is NOT a per-entity-isolated decision. Also encode **lifecycle**: an entity already mid-transition must retain the capability to *complete/exit* (e.g. a party already at sea keeps naval capability to reach land regardless of toggles; gates govern only new transitions). **Worked example (NavalTravel #296, the bug this rule prevents):** `PartyNavigationModel.HasNavalNavigationCapability` keyed only on `IsMainParty` stranded a player-led army's attached AI parties — the engine force-propagates `MobileParty.IsCurrentlyAtSea` down the attachment tree AND recomputes `NavigationCapability` per party (`MobileParty.cs:464-479,493-496`), so attached parties were dragged to sea with `Default`-only navigation. The donor model (NavalDLC's `NavalPartyNavigationModel`) encoded attached-to inheritance; the port dropped that limb when it rewrote the one method it changed. Caught by Codex, missed by all 5 deep-review agents (none opened `MobileParty`). Extract the full decision to a pure service method and pin it with a decision-matrix test. See `feedback_gamemodel_capability_engine_propagation` + `docs/reviews/rca-navaltravel-2026-06-24.md`. **Corollary:** when you keep N-1 limbs of a faithful engine-model port and rewrite limb N, re-audit limb N's *entire* behavior, not just the sub-change you intended.
 
-## Existing Overrides (54 total)
+## Existing Overrides (56 total)
 
 | Model | Base | Feature |
 |-------|------|---------|
@@ -52,6 +52,8 @@ public class TaomFooModel : DefaultFooModel
 | `TaomCustomBattleAgentStatCalculateModel` | `CustomBattleAgentStatCalculateModel` | `CultureDoctrine` (Custom Battle; + the CombatMechanics mount charge multiplier, from `InitializeAgentStats` because that base writes `MountChargeDamage` once; + the RaceAbilities post-pass and resistances + the CreatureSiegeRole detachment cost) |
 | `TaomClanTierModel` | `DefaultClanTierModel` | `CareerSystem` |
 | `TaomInventoryCapacityModel` | `DefaultInventoryCapacityModel` | `CareerSystem` |
+| `TaomPartyTrainingModel` | `DefaultPartyTrainingModel` | `CareerSystem` (`TroopTraining`, #769 E11) |
+| `TaomPartyTradeModel` | `DefaultPartyTradeModel` | `CareerSystem` (`TradePrices`, #769 E11) |
 | `TaomMapVisibilityModel` | `DefaultMapVisibilityModel` | `CareerSystem` |
 | `TaomBanditDensityModel` | `DefaultBanditDensityModel` | `BanditManagement` |
 | `TaomNotableSpawnModel` | `DefaultNotableSpawnModel` | `CulturalFeats` |
@@ -62,7 +64,7 @@ public class TaomFooModel : DefaultFooModel
 | `TaomTargetScoreModel` | `DefaultTargetScoreCalculatingModel` | `ArmyTargeting` |
 | `TaomPartyNavigationModel` | `DefaultPartyNavigationModel` | `NavalTravel` — **not registered**; the `AddModel` call in `SubModule.cs` is commented out, so these overrides do not run |
 | `TaomCharacterStatsModel` | `DefaultCharacterStatsModel` | `TroopProgression` |
-| `TaomPartyWageModel` | `DefaultPartyWageModel` | `CulturalFeats` |
+| `TaomPartyWageModel` | `DefaultPartyWageModel` | `CulturalFeats` (+ career `RecruitCost`, #769 E11) |
 | `TaomVolunteerModel` | `DefaultVolunteerModel` | `TroopProgression` |
 | `TaomArmyManagementModel` | `DefaultArmyManagementCalculationModel` | `CulturalFeats` |
 | `TaomPartySpeedModel` | `DefaultPartySpeedCalculatingModel` | `CulturalFeats` (+ the EyeOfSauron hunter speed floor, last, `IEyeOfSauronHook`; worker threads, snapshot only) |
@@ -71,18 +73,18 @@ public class TaomFooModel : DefaultFooModel
 | `TaomBuildingConstructionModel` | `DefaultBuildingConstructionModel` | `CulturalFeats` |
 | `TaomVillageProductionModel` | `DefaultVillageProductionCalculatorModel` | `CulturalFeats` |
 | `TaomCaravanModel` | `DefaultCaravanModel` | `CulturalFeats` + `CaravanTrade` |
-| `TaomBattleRewardModel` | `DefaultBattleRewardModel` | `CulturalFeats` |
+| `TaomBattleRewardModel` | `DefaultBattleRewardModel` | `CulturalFeats` (+ career `InfluenceGain`, `LootGold`, #769 E11) |
 | `TaomPartyTroopUpgradeModel` | `DefaultPartyTroopUpgradeModel` | `CulturalFeats` |
 | `TaomPartySizeModel` | `DefaultPartySizeLimitModel` | `CulturalFeats` (+ the EyeOfSauron host size bonus before the TroopWeight line, `IEyeOfSauronHook`) |
-| `TaomFoodConsumptionModel` | `DefaultMobilePartyFoodConsumptionModel` | `CulturalFeats` |
+| `TaomFoodConsumptionModel` | `DefaultMobilePartyFoodConsumptionModel` | `CulturalFeats` (+ career `FoodConsumption`, #769 E11) |
 | `TaomSettlementLoyaltyModel` | `DefaultSettlementLoyaltyModel` | `CulturalFeats` |
 | `TaomPartyMoraleModel` | `DefaultPartyMoraleModel` | `CulturalFeats` |
 | `TaomSmithingModel` | `DefaultSmithingModel` | `CulturalFeats` |
-| `TaomClanFinanceModel` | `DefaultClanFinanceModel` | `CulturalFeats` |
-| `TaomRaidModel` | `DefaultRaidModel` | `CulturalFeats` |
+| `TaomClanFinanceModel` | `DefaultClanFinanceModel` | `CulturalFeats` (+ career `DailyGold`, #769 E11) |
+| `TaomRaidModel` | `DefaultRaidModel` | `CulturalFeats` (+ career `RaidLoot`, #769 E11) |
 | `TaomMilitaryPowerModel` | `DefaultMilitaryPowerModel` | `BattleBalance` |
 | `TaomCombatSimulationModel` | `DefaultCombatSimulationModel` | `BattleBalance` |
-| `TaomPartyHealingModel` | `DefaultPartyHealingModel` | `Arena` |
+| `TaomPartyHealingModel` | `DefaultPartyHealingModel` | `Arena` (+ career `WoundRecovery`, #769 E11) |
 | `TaomTournamentModel` | `DefaultTournamentModel` | `Arena` (+ the TournamentRewards renown and influence) |
 | `TaomAgeModel` | `DefaultAgeModel` | `RaceAge` |
 | `TaomPregnancyModel` | `DefaultPregnancyModel` | `RaceAge` |
@@ -93,7 +95,7 @@ public class TaomFooModel : DefaultFooModel
 | `TaomDiplomacyModel` | `DefaultDiplomacyModel` | `Diplomacy` |
 | `TaomInformationRestrictionModel` | `DefaultInformationRestrictionModel` | `Encyclopedia` |
 | `TaomCombatMechanicsModel` | `TaomAgentApplyDamageModel` (CareerSystem, **abstract**: career passives via inheritance; ultimately `SandboxAgentApplyDamageModel`) | `CombatMechanics` (+ the RaceAbilities damage, crush-through and shrug-off hooks + the career crush hold ending `DecideCrushedThrough`, #769 E10 + the CreatureSiegeRole gate blow in `ApplyDamageScaling`); campaign only, because the SandBox base throws on a mounted hit outside a campaign: Custom Battle runs `TaomCustomBattleDamageModel` |
-| `TaomPrisonerRecruitmentCalculationModel` | `DefaultPrisonerRecruitmentCalculationModel` | `PrisonerRecruitment` |
+| `TaomPrisonerRecruitmentCalculationModel` | `DefaultPrisonerRecruitmentCalculationModel` | `PrisonerRecruitment` (+ career `PrisonerConversion`, #769 E11) |
 | `TaomBattleBannerBearersModel` | `SandboxBattleBannerBearersModel` (SandBox) | `BannerBearers` |
 | `TaomCustomBattleBannerBearersModel` | `CustomBattleBannerBearersModel` | `BannerBearers` (Custom Battle) |
 | `TaomBattleInitializationModel` | `SandboxBattleInitializationModel` (SandBox) | `Enlistment` |

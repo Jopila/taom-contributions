@@ -12,7 +12,7 @@ public sealed class PassiveEffect
     public AttackTypeMask AttackTypeMask { get; }
 
     // Troop-class gate for the army-wide passives (PassiveEffectConsumers.ClassFiltered: TroopDamage,
-    // TroopResistance and the three troop counters): "+X% damage" for the leader's infantry only. Defaults to
+    // TroopResistance, the three troop counters and TroopTraining): "+X% damage" for the leader's infantry only. Defaults to
     // All (every troop). A type outside ClassFiltered never reads it, so the parser keeps it at All there.
     public TroopClassMask TroopClass { get; }
 

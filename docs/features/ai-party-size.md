@@ -89,7 +89,9 @@ One service, `IAiPartySizeService`, consumed by three models that already existe
 - **Party size** is scaled in `TaomPartySizeModel`, gated to leader-run lord parties that are not the
   main party.
 - **Food and wage relief** are applied in `TaomFoodConsumptionModel` and `TaomPartyWageModel` behind
-  the same gate, closing the morale path.
+  the same gate, closing the morale path. The leader's career `FoodConsumption` factor (#769 E11) is
+  not behind that gate: it is applied in `TaomFoodConsumptionModel` only, for any party whose leader
+  holds the passive, just before the AI relief.
 - **Garrisons** scale through a `CalculateGarrisonPartySizeLimit` override, because lords fielding
   thousands would otherwise walk over garrisons still capped near vanilla's 200.
 - **Startup gold** was re-derived at `K = 100` back when the defaults raised AI lords toward ~1,000

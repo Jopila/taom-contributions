@@ -135,7 +135,7 @@ public class CareerPassiveService : ICareerPassiveService
         }
     }
 
-    public float GetPassiveMagnitude(string heroStringId, PassiveEffectType type)
+    public float GetPassiveMagnitude(string? heroStringId, PassiveEffectType type)
     {
         if (string.IsNullOrEmpty(heroStringId)) return 0f;
 
@@ -162,10 +162,10 @@ public class CareerPassiveService : ICareerPassiveService
 
     // Every authored-mask bucket the hit matches (All-masked entries carry both bits, so they apply to any
     // hit), whatever its troop class: the troop reading with all three classes, so the two walks cannot drift.
-    public float GetMaskedMagnitude(string heroStringId, PassiveEffectType type, AttackTypeMask hitMask)
+    public float GetMaskedMagnitude(string? heroStringId, PassiveEffectType type, AttackTypeMask hitMask)
         => GetTroopMagnitude(heroStringId, type, TroopClassMask.All, hitMask);
 
-    public float GetTroopMagnitude(string heroStringId, PassiveEffectType type, TroopClassMask troopClass, AttackTypeMask? hitMask = null)
+    public float GetTroopMagnitude(string? heroStringId, PassiveEffectType type, TroopClassMask troopClass, AttackTypeMask? hitMask = null)
     {
         if (string.IsNullOrEmpty(heroStringId)) return 0f;
 
@@ -191,7 +191,7 @@ public class CareerPassiveService : ICareerPassiveService
         return total;
     }
 
-    public bool HasActivePassive(string heroStringId, PassiveEffectType type)
+    public bool HasActivePassive(string? heroStringId, PassiveEffectType type)
     {
         if (string.IsNullOrEmpty(heroStringId)) return false;
         Dictionary<string, Dictionary<PassiveEffectType, float>> snapshot;
@@ -200,38 +200,76 @@ public class CareerPassiveService : ICareerPassiveService
             && effectMap.ContainsKey(type);
     }
 
-    // What a reader with no troop and no hit takes for a type: the unfiltered total, except for a class-filtered
-    // type (#769 E9), where a class-only pip ("+10% infantry damage") would otherwise count at full magnitude for a
-    // consumer that has no class. Those read the army-wide pips: a troop of class None gets the All-class buckets
-    // and nothing narrower. The raid speed (TaomRaidModel) is the one such reader of TroopDamage.
-    private float ArmyWideMagnitude(string heroStringId, PassiveEffectType type)
+    // What a reader takes for a type: the unfiltered total, except for a class-filtered type (#769 E9), where a
+    // class-only pip ("+10% infantry damage") would otherwise count at full magnitude for a consumer that has no
+    // class. Those read the pips that reach troopClass; left at None (a reader with no troop) a troop of class None
+    // gets the All-class buckets and nothing narrower, the army-wide pips. The raid speed (TaomRaidModel) is the one
+    // such reader of TroopDamage; the training model (TroopTraining) passes the roster element's class.
+    private float Magnitude(string? heroStringId, PassiveEffectType type, TroopClassMask troopClass = TroopClassMask.None)
         => PassiveEffectConsumers.IsClassFiltered(type)
-            ? GetTroopMagnitude(heroStringId, type, TroopClassMask.None)
+            ? GetTroopMagnitude(heroStringId, type, troopClass)
             : GetPassiveMagnitude(heroStringId, type);
 
     // Phase 9b #173 — instance methods replacing the static CareerPassiveHelper.ApplyFactor /
     // ApplyFlat. Per ADR-007 accept primitive `string heroStringId` (boundary GameModels extract
     // `hero?.StringId` at the call site). Null/empty/zero-magnitude all short-circuit.
-    public void ApplyFactor(string heroStringId, ref ExplainedNumber result, PassiveEffectType type)
+    public void ApplyFactor(string? heroStringId, ref ExplainedNumber result, PassiveEffectType type)
     {
         if (string.IsNullOrEmpty(heroStringId)) return;
-        var magnitude = ArmyWideMagnitude(heroStringId, type);
+        var magnitude = Magnitude(heroStringId, type);
         if (magnitude != 0f)
         {
             var before = result.ResultNumber;
             result.AddFactor(magnitude, CareerText);
-            // #613: the event-scoped types (a battle end, an upgrade, a daily tick) get a line; the
-            // per-tick ones (speed, morale, wages, range) are read off their ExplainedNumber by
-            // taom.career_perks instead, a line per tick would drown the log.
-            if (Diagnostics.CareerPerkLogPolicy.IsEventScoped(type))
-                _logger.LogInfo($"[CareerPerks] {type} {(magnitude >= 0f ? "+" : "")}{magnitude * 100f:0.#}% for '{heroStringId}': {before:0.##} -> {result.ResultNumber:0.##}");
+            LogEvent(type, heroStringId, magnitude, before, result.ResultNumber);
         }
     }
 
-    public void ApplyFlat(string heroStringId, ref ExplainedNumber result, PassiveEffectType type)
+    // #613: the event-scoped types (a battle end, an upgrade, a daily tick) get a line; the per-tick ones
+    // (speed, morale, wages, range) are read off their ExplainedNumber by taom.career_perks instead, a line per
+    // tick would drown the log. #769 E11: a line that records no change is skipped. Vanilla pays 0 influence
+    // outside a kingdom and a factor on 0 is 0, so "InfluenceGain +10% ...: 0 -> 0" would print after every
+    // minor battle and teach a tester to ignore the one line that matters.
+    private void LogEvent(PassiveEffectType type, string heroStringId, float magnitude, float before, float after)
+    {
+        if (!Diagnostics.CareerPerkLogPolicy.IsEventScoped(type) || before == after) return;
+        _logger.LogInfo($"[CareerPerks] {type} {(magnitude >= 0f ? "+" : "")}{magnitude * 100f:0.#}% for '{heroStringId}': {before:0.##} -> {after:0.##}");
+    }
+
+    public void ApplyFlat(string? heroStringId, ref ExplainedNumber result, PassiveEffectType type, TroopClassMask troopClass = TroopClassMask.None)
     {
         if (string.IsNullOrEmpty(heroStringId)) return;
-        var magnitude = ArmyWideMagnitude(heroStringId, type);
+        AddFlat(ref result, Magnitude(heroStringId, type, troopClass));
+    }
+
+    // #769 E11: a model method that returns a float (or one share of a list) has no ExplainedNumber to put a
+    // factor on, so the scale is applied directly. A scale below zero would flip a penalty into a discount under
+    // the base price, so it floors at zero: a magnitude of -1 or less is the full cut, with no cliff at -1. The
+    // loader keeps NaN and infinity out of the cache, so the scale is always a finite number.
+    public float ScaleByPassive(string? heroStringId, float value, PassiveEffectType type)
+    {
+        if (string.IsNullOrEmpty(heroStringId)) return value;
+        var magnitude = Magnitude(heroStringId, type);
+        if (magnitude == 0f) return value;
+
+        var scaled = value * System.Math.Max(0f, 1f + magnitude);
+        LogEvent(type, heroStringId, magnitude, value, scaled);
+        return scaled;
+    }
+
+    // #769 E11: vanilla's daily healing is negative for a starving party (-regulars/4) or a raft party whose -0.25 per regular outweighs its healing, and
+    // +1 on the isPrisoner call (the captor healing its prisoners). A plus factor on the first would wound the
+    // troops faster, and the second is not the leader's own troops: the factor only speeds a real recovery. A total
+    // below -1 would turn that recovery into a daily wound (vanilla sets no lower limit), so the factor stops at -1.
+    public void ApplyWoundRecovery(string? heroStringId, bool isPrisoner, ref ExplainedNumber result)
+    {
+        if (isPrisoner || !(result.ResultNumber > 0f) || string.IsNullOrEmpty(heroStringId)) return;
+        var magnitude = System.Math.Max(Magnitude(heroStringId, PassiveEffectType.WoundRecovery), -1f);
+        if (magnitude != 0f) result.AddFactor(magnitude, CareerText);
+    }
+
+    private static void AddFlat(ref ExplainedNumber result, float magnitude)
+    {
         if (magnitude == 0f) return;
 
         // A flat passive is authored as a COUNT and the career screen shows it as one ("+4 party

@@ -12,7 +12,8 @@ namespace TAOM.Features.CareerSystem.Diagnostics;
 public static class CareerPerkConsumerMap
 {
     public static bool IsFlat(PassiveEffectType type)
-        => type == PassiveEffectType.Health || type == PassiveEffectType.PartySize || type == PassiveEffectType.CompanionLimit;
+        => type == PassiveEffectType.Health || type == PassiveEffectType.PartySize || type == PassiveEffectType.CompanionLimit
+        || type == PassiveEffectType.DailyGold || type == PassiveEffectType.TroopTraining;
 
     public static string Describe(PassiveEffectType type)
     {
@@ -41,14 +42,24 @@ public static class CareerPerkConsumerMap
             case PassiveEffectType.TroopMorale: return "TaomPartyMoraleModel; probe below (Career line)";
             case PassiveEffectType.TroopWages: return "TaomPartyWageModel.GetTotalWage; probe below (Career line)";
             case PassiveEffectType.TroopUpgradeCost: return "TaomPartyTroopUpgradeModel at upgrade time; [CareerPerks] event line";
-            case PassiveEffectType.TroopSurvival: return "TaomPartyHealingModel.GetSurvivalChance at battle end; [CareerPerks] event line";
-            case PassiveEffectType.HeroHealing: return "TaomPartyHealingModel.GetDailyHealingHpForHeroes daily; probe below (Career line)";
+            case PassiveEffectType.TroopSurvival: return "TaomPartyHealingModel.GetSurvivalChance per casualty at battle end (ScaleByPassive, capped at 1); no runtime line; taom.career_perks shows the value";
+            case PassiveEffectType.HeroHealing: return "TaomPartyHealingModel.GetDailyHealingHpForHeroes daily; [CareerPerks] event line; probe below (Career line)";
             case PassiveEffectType.InventoryCapacity: return "TaomInventoryCapacityModel; probe below (Career line)";
             case PassiveEffectType.RenownGain: return "TaomBattleRewardModel.CalculateRenownGain at battle end; [CareerPerks] event line";
             case PassiveEffectType.SmithingCostReduction: return "TaomSmithingModel energy costs; [CareerPerks] event line";
             case PassiveEffectType.SpecialResourceGain: return "SpecialResourceService.ScaleEarned on every earning source (daily, battle, raid, siege, prisoners, tournament, hideout)";
             case PassiveEffectType.SpecialResourceUpkeepModifier: return "SpecialResourceService upkeep";
             case PassiveEffectType.SpecialResourceUpgradeCostModifier: return "SpecialResourceService upgrade cost";
+            case PassiveEffectType.InfluenceGain: return "TaomBattleRewardModel.CalculateInfluenceGain at battle end, kingdom members only (vanilla pays 0 outside a kingdom and the factor keeps 0); [CareerPerks] InfluenceGain event line, none while the gain is 0";
+            case PassiveEffectType.RecruitCost: return "TaomPartyWageModel.GetTroopRecruitmentCost: summed with the buyer perk discounts in WageModifierService before the 1-gold floor, so the recruit screen's price is the price charged; the player's garrison auto-recruit bill and the SupplyLines troop prices use the player as buyer and get the cut too; a null buyer (ransom value, upgrade price) gets none; no runtime line; taom.career_perks shows the value";
+            case PassiveEffectType.PrisonerConversion: return "TaomPrisonerRecruitmentCalculationModel.GetConformityChangePerHour: the recruiting party's prisoner experience per hour, one prisoner stack per hour; no runtime line; taom.career_perks shows the value";
+            case PassiveEffectType.FoodConsumption: return "TaomFoodConsumptionModel.CalculateDailyFoodConsumptionf on the party the leader leads (negative = eats less, the base's -0.01 ceiling stays); no runtime line; taom.career_perks shows the value";
+            case PassiveEffectType.WoundRecovery: return "TaomPartyHealingModel.GetDailyHealingForRegulars on the party the leader leads, positive healing on the non-prisoner call only (a starving party, a raft party whose -0.25 per regular outweighs its healing, and the captor's prisoner healing are untouched); no runtime line; taom.career_perks shows the value";
+            case PassiveEffectType.DailyGold: return "TaomClanFinanceModel.CalculateClanGoldChange (the daily payment when applyWithdrawals is true, and the tooltip) and CalculateClanIncome (the income tile), a flat count; no runtime line; taom.career_perks shows the value";
+            case PassiveEffectType.LootGold: return "TaomBattleRewardModel.GetLootGoldChances at battle end: the winner's own share of the plundered gold, not renormalised; [CareerPerks] LootGold event line (the share before -> after)";
+            case PassiveEffectType.RaidLoot: return "TaomRaidModel.GetRaidLootMultiplier, read four ways: the village gold, once per drawn item (kept with chance 0.5 x the multiplier, so a total of +100% makes every drawn item certain), the village production goods, and the common-loot roll (at 0.25 x the multiplier); no runtime line; taom.career_perks shows the value";
+            case PassiveEffectType.TroopTraining: return "TaomPartyTrainingModel.GetEffectiveDailyExperience: a flat count of experience per troop per day by troop class, added to each non-hero stack on the daily tick; no runtime line; taom.career_perks shows the value (army-wide and per class)";
+            case PassiveEffectType.TradePrices: return "TaomPartyTradeModel.GetTradePenaltyFactor: the raw trade penalty behind every buy and sell price of the party's leader (negative = a smaller penalty, better prices both ways); no runtime line; taom.career_perks shows the value";
             case PassiveEffectType.BuffDuration: return "reserved, deliberately unconsumed";
             default: return "no consumer (parse fallback)";
         }

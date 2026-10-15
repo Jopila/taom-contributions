@@ -509,6 +509,27 @@ public class CareerConfigProviderTests
         Assert.AreEqual(4f, choices[0].Passives[0].Magnitude, 0.001f, "magnitude= takes precedence over value=");
     }
 
+    [DataTestMethod]
+    [DataRow("NaN")]
+    [DataRow("Infinity")]
+    [DataRow("-Infinity")]
+    public void LoadChoices_NonFiniteMagnitude_LoadsAsZero(string authored)
+    {
+        // ScaleByPassive (#769 E11) floors a scale at zero and relies on the loader to keep a NaN or an infinity
+        // out of the cache: Math.Max(0, 1 + NaN) is NaN, which would poison every price it scales.
+        WriteCareersXml(@"<?xml version='1.0'?><Careers max_perk_points=""30""></Careers>");
+        WriteChoicesXml(@"<?xml version='1.0'?>
+<CareerChoices>
+  <Choice id=""c1"" type=""Passive"" description=""test"" icon_sprite=""icon"">
+    <PassiveEffect type=""TradePrices"" magnitude=""" + authored + @""" />
+  </Choice>
+</CareerChoices>");
+
+        var choices = _provider.LoadChoices();
+
+        Assert.AreEqual(0f, choices[0].Passives[0].Magnitude);
+    }
+
     [TestMethod]
     public void LoadChoices_DirectPassiveWithMagnitude_StillParses()
     {
@@ -739,13 +760,14 @@ public class CareerConfigProviderTests
     }
 
     [TestMethod]
-    public void ClassFiltered_IsTheFiveTroopTypesAndNoHeroType()
+    public void ClassFiltered_IsTheSixTroopTypesAndNoHeroType()
     {
         CollectionAssert.AreEquivalent(
             new[]
             {
                 PassiveEffectType.TroopDamage, PassiveEffectType.TroopResistance,
                 PassiveEffectType.TroopFearResistance, PassiveEffectType.TroopKnockdownResistance, PassiveEffectType.TroopCrushHold,
+                PassiveEffectType.TroopTraining,
             },
             PassiveEffectConsumers.ClassFiltered.ToArray());
         Assert.IsTrue(PassiveEffectConsumers.IsClassFiltered(PassiveEffectType.TroopDamage));

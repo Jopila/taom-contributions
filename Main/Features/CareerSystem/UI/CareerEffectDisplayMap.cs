@@ -68,6 +68,16 @@ public static class CareerEffectDisplayMap
         [PassiveEffectType.SpecialResourceGain] = "22113",
         [PassiveEffectType.SpecialResourceUpkeepModifier] = "22113",
         [PassiveEffectType.SpecialResourceUpgradeCostModifier] = "22113",
+        [PassiveEffectType.InfluenceGain] = "27500",
+        [PassiveEffectType.RecruitCost] = "24021",
+        [PassiveEffectType.PrisonerConversion] = "24006",
+        [PassiveEffectType.FoodConsumption] = "26107",
+        [PassiveEffectType.WoundRecovery] = "27001",
+        [PassiveEffectType.DailyGold] = "24009",
+        [PassiveEffectType.LootGold] = "24009",
+        [PassiveEffectType.RaidLoot] = "22105",
+        [PassiveEffectType.TroopTraining] = "10020",
+        [PassiveEffectType.TradePrices] = "24009",
     };
 
     private static readonly Dictionary<PassiveEffectType, string> Labels = new Dictionary<PassiveEffectType, string>
@@ -105,6 +115,16 @@ public static class CareerEffectDisplayMap
         [PassiveEffectType.SpecialResourceGain] = "{=taom_career_effect_special_resource_gain}{VALUE} resource gain",
         [PassiveEffectType.SpecialResourceUpkeepModifier] = "{=taom_career_effect_special_resource_upkeep_modifier}{VALUE} resource upkeep",
         [PassiveEffectType.SpecialResourceUpgradeCostModifier] = "{=taom_career_effect_special_resource_upgrade_cost_modifier}{VALUE} resource upgrade cost",
+        [PassiveEffectType.InfluenceGain] = "{=taom_career_effect_influence_gain}{VALUE} battle influence gain",
+        [PassiveEffectType.RecruitCost] = "{=taom_career_effect_recruit_cost}{VALUE} recruit cost",
+        [PassiveEffectType.PrisonerConversion] = "{=taom_career_effect_prisoner_conversion}{VALUE} prisoner conversion speed",
+        [PassiveEffectType.FoodConsumption] = "{=taom_career_effect_food_consumption}{VALUE} food consumption",
+        [PassiveEffectType.WoundRecovery] = "{=taom_career_effect_wound_recovery}{VALUE} troop wound recovery",
+        [PassiveEffectType.DailyGold] = "{=taom_career_effect_daily_gold}{VALUE} gold per day",
+        [PassiveEffectType.LootGold] = "{=taom_career_effect_loot_gold}{VALUE} battle loot gold",
+        [PassiveEffectType.RaidLoot] = "{=taom_career_effect_raid_loot}{VALUE} raid loot",
+        [PassiveEffectType.TroopTraining] = "{=taom_career_effect_troop_training}{VALUE} experience per troop per day",
+        [PassiveEffectType.TradePrices] = "{=taom_career_effect_trade_prices}{VALUE} trade penalty",
     };
 
     public static string IconFor(PassiveEffectType type)

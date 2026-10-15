@@ -97,6 +97,25 @@ public class CareerPerkReportTests
         StringAssert.Contains(CareerPerkConsumerMap.Describe(type), "CareerTroopHooks");
     }
 
+    [TestMethod]
+    public void Render_ClassFilteredCountType_ShowsTheCountPerClassWithNoPercentSign()
+    {
+        // #769 E11: TroopTraining is a flat count AND class-filtered (+4 for everyone, +6 more for infantry), so its
+        // per-class row prints counts ("+10"), not percents ("+1000%"), and names the training model that reads it.
+        var snapshot = new CareerPerkSnapshot
+        {
+            HeroId = "h1", HasCareer = true, CareerId = "c",
+            Rows = { new CareerPerkRow(PassiveEffectType.TroopTraining, 4f, null, CareerPerkReport.ByClass(4f, 10f, 4f, 4f, 4f)) },
+        };
+
+        var text = string.Join("\n", CareerPerkReport.Render(snapshot));
+
+        StringAssert.Contains(text, "TroopTraining +4 classes [army-wide +4, Infantry +10, Ranged +4, Cavalry +4, Ranged+Cavalry +4]");
+        Assert.IsFalse(text.Contains("%"), text);
+        StringAssert.Contains(text, CareerPerkConsumerMap.Describe(PassiveEffectType.TroopTraining));
+        StringAssert.Contains(text, "TaomPartyTrainingModel");
+    }
+
     [DataTestMethod]
     [DataRow(PassiveEffectType.TroopFearResistance)]
     [DataRow(PassiveEffectType.TroopKnockdownResistance)]
