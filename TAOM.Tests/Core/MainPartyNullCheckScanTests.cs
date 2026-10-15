@@ -13,14 +13,15 @@ namespace TAOM.Tests.Core;
 /// while <c>Campaign.MainParty</c> is null: the check throws in the one case it is written for, whichever way
 /// round it is written. The messenger popup (<c>== null</c>) and the hunt popup (<c>!= null</c>) shipped that
 /// check (both fixed in v2.0.34); the stored <c>Campaign.Current?.MainParty</c> is the safe test. The scan
-/// covers both polarities, the reversed forms and the <c>is</c> patterns; comments are blanked first, string
+/// covers both polarities, the reversed forms, the <c>is</c> patterns and <c>?.</c>, which guards only the
+/// no-campaign case (read <c>Campaign.Current?.MainParty?.Party</c> instead); comments are blanked first, string
 /// literals are not (<see cref="RepoPaths.StripComments"/>).
 /// </summary>
 [TestClass]
 public class MainPartyNullCheckScanTests
 {
     private static readonly Regex NullCheck = new(
-        @"\bPartyBase\s*\.\s*MainParty\s*(?:[!=]=\s*null\b|is\s+(?:not\s+)?null\b)"
+        @"\bPartyBase\s*\.\s*MainParty\s*(?:[!=]=\s*null\b|is\s+(?:not\s+)?null\b|\?\.)"
         + @"|\bnull\s*[!=]=\s*PartyBase\s*\.\s*MainParty\b",
         RegexOptions.Compiled);
 
@@ -32,6 +33,9 @@ public class MainPartyNullCheckScanTests
     [DataRow("if (PartyBase.MainParty is null) return;")]
     [DataRow("PartyBase.MainParty is not null && x")]
     [DataRow("PartyBase . MainParty!=null")]
+    [DataRow("return PartyBase.MainParty?.MapEvent != null;")]
+    [DataRow("var roster = PartyBase.MainParty?.ItemRoster;")]
+    [DataRow("PartyBase . MainParty ?. ItemRoster")]
     public void NullCheck_EveryFormOfTheComputedGetterCheck_IsCaught(string source)
     {
         Assert.IsTrue(NullCheck.IsMatch(RepoPaths.StripComments(source)), source);
@@ -45,6 +49,7 @@ public class MainPartyNullCheckScanTests
     [DataRow("// PartyBase.MainParty != null")]
     [DataRow("/* null == PartyBase.MainParty */ x")]
     [DataRow("x = y; // if (PartyBase.MainParty is not null)")]
+    [DataRow("var roster = Campaign.Current?.MainParty?.Party?.ItemRoster;")]
     public void NullCheck_TheStoredPartyOrACommentOrAPlainRead_IsNotCaught(string source)
     {
         Assert.IsFalse(NullCheck.IsMatch(RepoPaths.StripComments(source)), source);

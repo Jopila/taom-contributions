@@ -1026,7 +1026,8 @@ presenter's map check mirrors it.
 - **Why missed:** the computed-statics paragraph in `.claude/rules/adapters.md` named `Hero.MainHero` and
   `MobileParty.MainParty`, not this getter, whose failure is the reverse. The first source scan matched only
   `== null` and missed the hunt's `!= null` (Codex #792 F2).
-- **Prevent:** check `Campaign.Current?.MainParty`. `MainPartyNullCheckScanTests` rejects both polarities and the
-  reversed and `is` forms; it does not see a `PartyBase.MainParty?.` read.
+- **Prevent:** check `Campaign.Current?.MainParty`. `MainPartyNullCheckScanTests` rejects both polarities, the
+  reversed and `is` forms and, since 2026-10-14, a `PartyBase.MainParty?.` read; the seven such reads in
+  `EncounterAdapter` and `PartyItemRosterAdapter` now read `Campaign.Current?.MainParty?.Party`.
 - **Source:** `docs/reviews/rca-review-followups-2026-10-14.md`; `docs/reviews/rca-war-chronicle-events-2026-10-14.md`
   C08.
