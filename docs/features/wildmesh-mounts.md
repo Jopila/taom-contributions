@@ -8,10 +8,17 @@ second variant beside the existing mounts (the war ram, the great elk, the Anima
 is replaced. The route is the one the Animalia elk and moose proved (#646):
 [quadruped-pack-to-horse-skeleton-workflow.md](../ai-includes/quadruped-pack-to-horse-skeleton-workflow.md).
 
-**Status (2026-10-14):** stages 1 to 8 are done. The meshes (LOD0 to LOD5), 1K textures, 74 clip masters and 96
-clips are in the live Armory and the masters name `horse_skeleton`. Still owed: one Kit open and close for
-the clips' RuntimeDataCache entries (stage 9), then the Armory data, test riders, attacks and the in-game
-checks (stages 10 to 13). No player can ride one yet.
+**Status (2026-10-14):** stages 1 to 11 are done. The meshes (LOD0 to LOD5), 1K textures, 74 clip masters and 96
+clips are in the live Armory with their RuntimeDataCache entries; the Monsters, action sets and Horse items are
+written (`tools/apply_wildmesh_armory.py`, ledger [lotrlome-wildmesh-changes.md](../reference/lotrlome-wildmesh-changes.md));
+five Custom Battle test riders ride them. Still owed: the in-game checks, the attacks (stage 12), the sizes after
+the first battle, and the campaign riders. No campaign troop rides one yet.
+
+**In-game test (Custom Battle, cheat mode, console):**
+`taom.spawn_troops taom_test_wildmesh_<animal>_rider 5 ally` for `boar`, `warthog`, `mountaingoat`, `deer`, `moose`.
+Check the gaits (hoof slide at each speed), idles, grazing, hits, vanilla falls, the dwarf's seat on the boars and
+the goat (light and heavy ram bardings alternate across the riders' rosters), the elk saddle on the stag and
+moose, and the sizes.
 
 ## Why This Exists
 
@@ -96,7 +103,26 @@ warthog 1.69, 2.03, then the boar's; goat 1.84, 2.37, 4.09, then the deer's 7.46
 
 ## Configuration
 
-No TAOM config yet. The data so far lives in the external, unversioned `LOTRLOME_Armory`:
+### Armory data (Mike's decisions, 2026-10-14)
+
+| Item | Name | Monster size | Harness | Stats from |
+|---|---|---|---|---|
+| `taom_wildmesh_boar_a` | War Boar | 100 | ram bardings | the war ram |
+| `taom_wildmesh_warthog_a` | Bristleback Boar | 100 | ram bardings | the war ram |
+| `taom_wildmesh_mountaingoat_a` | Iron Hills Goat | 100 | ram bardings | the war ram |
+| `taom_wildmesh_deer_a` | Mirkwood Stag | 100 | `taom_elk_saddle_a` | the Animalia elk |
+| `taom_wildmesh_moose_a` | Greenwood Moose | 150 | `taom_elk_saddle_a` | the Animalia moose |
+
+The three dwarf mounts are in `WAR_RAM_MOUNT_IDS` (`tools/taom_schema.py`), so `MOUNTED_DWARF` allows a dwarf on
+them; their Monsters keep the horse's rider seat, as the war ram does, until the in-game seat check. Monsters
+`taom_wildmesh_<animal>`, action sets `as_wildmesh_<animal>` (children of `as_horse`, with `_town_and_village` and
+`_map` twins). Test riders: `Main/_Module/ModuleData/troops/troops_wildmesh_test.xml`, CustomGame only, clones of
+`ironpass_ram_rider` and `mirkwood_rochenlas`; their names are not in `taom_troop_name_strings.xml` yet, because
+that generated file is stale on the branch for other troops and a regeneration would also drop 25 Harad keys.
+
+### Live files
+
+The data lives in the external, unversioned `LOTRLOME_Armory`:
 
 - Sources: `AssetSources/creature/creatures/` (5 mesh FBX, `animations/<animal>/`, `textures/`).
 - Kit packages: `Assets/creature/creatures/`: `wildmesh_<animal>_geo.tpac`, ten materials
@@ -114,6 +140,9 @@ No TAOM config yet. The data so far lives in the external, unversioned `LOTRLOME
 | `tools/blender/wildmesh_<animal>_clip_measure.json` | Measured travel and hoof plants of each animal's gaits |
 | `tools/gen_animalia_anim_clips.ps1` | `-Pack wildmesh` plan: the 96 clips |
 | `tools/blender/measure_animalia_clips.py` | Stride travel for in-place clips |
+| `tools/apply_wildmesh_armory.py` | Monsters, action sets and Horse items in the live Armory (tests: `tools/tests/test_apply_wildmesh_armory.py`) |
+| `Main/_Module/ModuleData/troops/troops_wildmesh_test.xml` | The five Custom Battle test riders |
+| `docs/reference/lotrlome-wildmesh-changes.md` | Ledger of every change outside the repo, replay and removal |
 
 ## Dependencies
 
@@ -141,6 +170,8 @@ Clips: `gen_animalia_anim_clips.ps1 -Pack wildmesh -Verify` ok=96; the Animalia 
 
 ## Changelog
 
+- 2026-10-14: stages 9 to 11: RuntimeDataCache entries, the Armory data (`tools/apply_wildmesh_armory.py`) and
+  five Custom Battle test riders.
 - 2026-10-14: stages 1 to 8 for the boar, warthog, mountain goat, deer and moose (#794): exporter, map, LODs,
   textures, 30 fps clips, stride measurement, 74 masters wired, 96 clips generated.
 

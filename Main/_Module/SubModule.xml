@@ -266,6 +266,13 @@
         <GameType value = "EditorGame"/>
       </IncludedGameTypes>
     </XmlNode>
+    <!-- #794 test riders for the WildMesh3D mounts: CustomGame only, remove with the file -->
+    <XmlNode>
+      <XmlName id="NPCCharacters" path="troops/troops_wildmesh_test"/>
+      <IncludedGameTypes>
+        <GameType value = "CustomGame"/>
+      </IncludedGameTypes>
+    </XmlNode>
     <XmlNode>
       <XmlName id="NPCCharacters" path="troops/troops_mordor"/>
       <IncludedGameTypes>

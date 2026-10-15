@@ -183,12 +183,17 @@ def _lineno(text: str, pos: int) -> int:
     return text.count("\n", 0, pos) + 1
 
 
-# The Dwarven war ram (issue #515) is the one mount a dwarf may ride: it is
-# built for the dwarf skeleton, so the rider bone lines up and he does not spawn
-# inside the mesh. Every other mount stays a hard MOUNTED_DWARF error. The ids
-# are pinned rather than prefix-matched, so a later `taom_war_ram_c` has to be
-# reviewed and added here on purpose instead of arriving by name alone.
-WAR_RAM_MOUNT_IDS = frozenset({"taom_war_ram_a", "taom_war_ram_b"})
+# The mounts a dwarf may ride: the Dwarven war ram (issue #515), built for the dwarf
+# skeleton so the rider bone lines up and he does not spawn inside the mesh, and the
+# WildMesh3D dwarf mounts (#794, Mike 2026-10-14: the War Boar, Bristleback Boar and
+# Iron Hills Goat, horse-skeleton reskins at the ram's seat height under the ram
+# bardings; their seat is checked in game). Every other mount stays a hard
+# MOUNTED_DWARF error. The ids are pinned rather than prefix-matched, so a later
+# mount has to be reviewed and added here on purpose instead of arriving by name alone.
+WAR_RAM_MOUNT_IDS = frozenset({
+    "taom_war_ram_a", "taom_war_ram_b",
+    "taom_wildmesh_boar_a", "taom_wildmesh_warthog_a", "taom_wildmesh_mountaingoat_a",
+})
 
 
 def _is_war_ram(mount_id: str) -> bool:
@@ -1553,6 +1558,13 @@ class Validator:
         "harad_elephant_rider": "bespoke mount rider at level 51 in light kit (rebalance_troops.SKIP_TROOP_IDS)",
         "harad_mumakil_rider": "bespoke mount rider at level 51 in light kit (rebalance_troops.SKIP_TROOP_IDS)",
         "gondor_ithilien_ranger": "tier-10 light ranger kit by design (docs/features/gondor-ithilien-ranger.md)",
+        # #794 test riders (troops/troops_wildmesh_test.xml, CustomGame only): without this their file is
+        # grouped as a kingdom ('wildmesh_test') and shifts every other culture's field median. Remove with the file.
+        "taom_test_wildmesh_boar_rider": "#794 Custom Battle test rider, not a kingdom's troop (troops_wildmesh_test.xml)",
+        "taom_test_wildmesh_warthog_rider": "#794 Custom Battle test rider, not a kingdom's troop (troops_wildmesh_test.xml)",
+        "taom_test_wildmesh_mountaingoat_rider": "#794 Custom Battle test rider, not a kingdom's troop (troops_wildmesh_test.xml)",
+        "taom_test_wildmesh_deer_rider": "#794 Custom Battle test rider, not a kingdom's troop (troops_wildmesh_test.xml)",
+        "taom_test_wildmesh_moose_rider": "#794 Custom Battle test rider, not a kingdom's troop (troops_wildmesh_test.xml)",
     }
     # Gondor noble lines at engine tier 2 to 7 (level 11 to 36), from the "<Region> Noble" troop
     # trees of KEYforce's spec (lotraom-assets tools/gondor_armors_and_troops.md). Mike, 2026-09-25:
