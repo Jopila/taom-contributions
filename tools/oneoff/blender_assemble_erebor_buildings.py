@@ -57,9 +57,11 @@ BO_NONE = {"sm_dw_roof_side_str_a1", "sm_dw_roof_side_str_a2",
 
 # --------------------------------------------------------------- building specs
 
-def P(piece, loc, yaw=0, scale=(1, 1, 1), role=""):
+def P(piece, loc, yaw=0, scale=(1, 1, 1), role="", base_lod=None):
+    """One placement. base_lod (e.g. "2") makes that authored LOD the piece's base tier,
+    and no lower tier uses a more detailed one: a triangle-budget cut per placement."""
     return {"piece": piece.lower(), "loc": tuple(float(v) for v in loc), "yaw": float(yaw),
-            "scale": tuple(float(v) for v in scale), "role": role}
+            "scale": tuple(float(v) for v in scale), "role": role, "base_lod": base_lod}
 
 
 def wall_line(piece_by_bay, start, axis, z=0.0, role="wall"):
@@ -88,11 +90,13 @@ def dwarf_house_01():
     s += wall_line(back, (-3, 3), "x")
     s += wall_line(west, (-4.5, -1.5), "y")
     s += wall_line(east, (4.5, -1.5), "y")
-    # corners: column + capital (dwarf_house_a)
+    # corners: column with the square Clmn_Top_D as cap (dwarf_house_a) and as base
+    # (Mike, 2026-10-15, after the first Kit import)
     for x in (-4.5, 4.5):
         for y in (-3, 3):
             s.append(P("sm_dw_wall_clmn_3m_c", (x, y, 0), role="corner"))
-            s.append(P("sm_dw_wall_clmn_top_d", (x, y, 3), scale=(1.1, 1.1, 1.2), role="corner"))
+            for z in (0, 3):
+                s.append(P("sm_dw_wall_clmn_top_d", (x, y, z), scale=(1.1, 1.1, 1.2), role="corner"))
     # door pilasters on the front wall seams
     for x in (-1.5, 1.5):
         s.append(P("sm_dw_wall_clmn_3m_a", (x, -3, 0), scale=(1.5, 1.5, 1.0), role="pilaster"))
@@ -110,14 +114,112 @@ def dwarf_house_01():
     for x in (-4.5, 4.5):
         s.append(P("sm_dw_roof_side_a1", (x, -1.5, 3), 0, role="gable"))
         s.append(P("sm_dw_roof_side_a1", (x, 1.5, 3), 180, role="gable"))
-    # floor
+    # floor: carved stone (Ground_3m_A2, as dwarf_house_b); the C1 pavement reads as roof
+    # tiles in game (Mike, 2026-10-15)
     for x in (-3, 0, 3):
         for y in (-1.5, 1.5):
-            s.append(P("sm_dw_ground_3m_c1", (x, y, 0), role="floor"))
+            s.append(P("sm_dw_ground_3m_a2", (x, y, 0), role="floor"))
     return s
 
 
-BUILDINGS = {"erebor_dwarf_house_01": dwarf_house_01}
+CORN_YAW = {(-1, -1): 180, (1, -1): 270, (-1, 1): 90, (1, 1): 0}  # chamfer wall per corner (dwarf_house_b)
+
+
+def great_hall_01():
+    """21 x 12 m two-storey hall (front 5 bays, 3 m chamfered corners), dressed block (_C),
+    hipped slate roof rising 1.5 m to a flat deck, door flanked by double-height pilasters
+    and two plain bays. No statues (Mike, 2026-10-15). Floor on the terrain. Centred on the
+    origin; front = -Y."""
+    hx, hy, c = 10.5, 6.0, 3.0           # half length, half width, chamfer
+    ix, iy = hx - c, hy - c              # inner corner of each chamfer cell (7.5, 3)
+    xs = [-6.0, -3.0, 0.0, 3.0, 6.0]     # long-wall bay pivots, span -7.5..7.5
+    ys = [-1.5, 1.5]                     # end-wall bay pivots, span -3..3
+    s = []
+    walls = {
+        (-hy, 0): ["win_c3", "c", "door_c1", "c", "win_c3"],
+        (-hy, 3): ["win_c2", "win2_c1", "win_c2", "win2_c1", "win_c2"],
+        (hy, 0): ["c", "win_c1", "c", "win_c1", "c"],
+        (hy, 3): ["c", "win_c2", "c", "win_c2", "c"],
+    }
+    for (y, z), row in walls.items():
+        s += wall_line([f"sm_dw_wall_3m_{w}" for w in row], (xs[0], y), "x", z=z)
+    for x in (-hx, hx):
+        for z, w in ((0, "win_c1"), (3, "win_c2")):
+            s += wall_line([f"sm_dw_wall_3m_{w}"] * 2, (x, ys[0]), "y", z=z)
+    corners = [(sx, sy) for sx in (-1, 1) for sy in (-1, 1)]
+    for sx, sy in corners:
+        yaw = CORN_YAW[(sx, sy)]
+        s.append(P("sm_dw_wall_3m_corn_c", (sx * ix, sy * iy, 0), yaw, role="chamfer"))
+        s.append(P("sm_dw_wall_3m_corn_win_c", (sx * ix, sy * iy, 3), yaw, role="chamfer"))
+        # junction columns where the chamfer meets the long wall and the end wall
+        for jx, jy in ((sx * ix, sy * hy), (sx * hx, sy * iy)):
+            for z in (0, 3):
+                s.append(P("sm_dw_wall_clmn_3m_c", (jx, jy, z), role="column"))
+            for z in (0, 6):
+                s.append(P("sm_dw_wall_clmn_top_d", (jx, jy, z), scale=(1.1, 1.1, 1.2), role="column"))
+        # floor half tile in the chamfer cell, roof facet over it
+        s.append(P("sm_dw_ground_3m_a1_corner", (sx * (hx - 1.5), sy * (hy - 1.5), 0), yaw + 90, role="floor"))
+        s.append(P("sm_dw_roof_cor_tri_a1", (sx * ix, sy * iy, 6), yaw + 90, role="roof"))
+    # door pilasters, double height
+    for x in (-1.5, 1.5):
+        for z in (0, 3):
+            s.append(P("sm_dw_wall_clmn_3m_a", (x, -hy, z), scale=(1.5, 1.5, 1.0), role="pilaster"))
+        for z in (0, 3, 6):
+            s.append(P("sm_dw_wall_clmn_top_f", (x, -hy, z), scale=(1.5, 1.5, 1.2), role="pilaster"))
+    # courses: base, string (between storeys) and eave, on every wall bay and across the chamfers
+    for z, beam, sy_ in ((0, "sm_dw_wall_beam_3m_b", 1.0), (3, "sm_dw_wall_beam_3m_a", 1.1),
+                         (6, "sm_dw_wall_beam_3m_c", 1.0)):
+        for w in [p for p in s if p["role"] == "wall" and p["loc"][2] == 0]:
+            s.append(P(beam, (w["loc"][0], w["loc"][1], z), w["yaw"], (1, sy_, 1), role="course"))
+        for sx, sy in corners:
+            yaw = math.degrees(math.atan2(-sy, sx))
+            s.append(P(beam, (sx * (hx - 1.5), sy * (hy - 1.5), z), yaw, (1.5, sy_, 1), role="course"))
+    # hipped roof: panels on every straight wall rise 1.5 m to the deck edge
+    for x in xs:
+        s.append(P("sm_dw_roof_str_a1", (x, -hy, 6), 0, role="roof"))
+        s.append(P("sm_dw_roof_str_a1", (x, hy, 6), 180, role="roof"))
+    for y in ys:
+        s.append(P("sm_dw_roof_str_a1", (-hx, y, 6), 270, role="roof"))
+        s.append(P("sm_dw_roof_str_a1", (hx, y, 6), 90, role="roof"))
+    # flat deck at eave + 1.5, framed by strips on every tile edge, studs at the rib heads
+    deck_z = 7.5
+    for x in xs:
+        for y in ys:
+            s.append(P("sm_dw_roof_top_a1", (x, y, deck_z), role="deck"))
+        for y in (-iy, 0.0, iy):
+            s.append(P("sm_dw_roof_side_str_a1", (x, y, deck_z), 90, role="deck"))
+    for x in (-7.5, -4.5, -1.5, 1.5, 4.5, 7.5):
+        for y in ys:
+            s.append(P("sm_dw_roof_side_str_a1", (x, y, deck_z), 0, role="deck"))
+        # ribs on the panel seams, eave to deck
+        s.append(P("sm_dw_roof_side_cor_out_a1", (x, -hy, 6), 0, role="rib"))
+        s.append(P("sm_dw_roof_side_cor_out_a1", (x, hy, 6), 180, role="rib"))
+        for y in (-iy, iy):
+            s.append(P("sm_dw_ground_trim_corner_a1", (x, y, deck_z - 0.1), role="stud"))
+    for y in (-iy, 0.0, iy):
+        s.append(P("sm_dw_roof_side_cor_out_a1", (-hx, y, 6), 270, role="rib"))
+        s.append(P("sm_dw_roof_side_cor_out_a1", (hx, y, 6), 90, role="rib"))
+    for x in (-ix, ix):
+        s.append(P("sm_dw_ground_trim_corner_a1", (x, 0.0, deck_z - 0.1), role="stud"))
+    # floor: carved stone A1 (its chamfer half tile only exists in A1), at its flat 12-tri
+    # .lod2: seen only through the door and windows (budget cut, 2026-10-15)
+    for x in xs:
+        for y in (-4.5, -1.5, 1.5, 4.5):
+            s.append(P("sm_dw_ground_3m_a1", (x, y, 0), role="floor", base_lod="2"))
+    for x in (-(hx - 1.5), hx - 1.5):
+        for y in ys:
+            s.append(P("sm_dw_ground_3m_a1", (x, y, 0), role="floor", base_lod="2"))
+    return s
+
+
+BUILDINGS = {"erebor_dwarf_house_01": dwarf_house_01, "erebor_great_hall_01": great_hall_01}
+
+# What the probe needs to know about each building beyond its placements.
+LAYOUT = {
+    "erebor_dwarf_house_01": {"eave": 3.0, "roof": "gable", "ridge_axis": "x",
+                              "half": [4.5, 3.0], "chamfer": 0.0},
+    "erebor_great_hall_01": {"eave": 6.0, "roof": "hip", "half": [10.5, 6.0], "chamfer": 3.0},
+}
 
 
 # --------------------------------------------------------------- kit loading
@@ -187,11 +289,15 @@ def load_kit():
     return kit
 
 
-def tier_mesh(entry, piece, tier):
+def tier_mesh(entry, piece, tier, base_lod=None):
     if piece.startswith(PROPS):
         ladder = {"base": ["2"], "lod3": ["3", "2"], "lod6": ["4", "3", "2"]}[tier]
     else:
         ladder = TIER_LADDER[tier]
+    if base_lod is not None:
+        if base_lod not in entry["lods"]:
+            raise ValueError(f"{piece}: no .lod{base_lod} for base_lod")
+        ladder = [base_lod] if tier == "base" else [n for n in ladder if int(n) >= int(base_lod)] or [base_lod]
     for n in ladder:
         if n in entry["lods"]:
             return entry["lods"][n], f"lod{n}"
@@ -287,14 +393,14 @@ def preview(name, spec, kit, out):
     for p in spec:
         e = kit[p["piece"]]
         for tier in TIER_LADDER:
-            me, src = tier_mesh(e, p["piece"], tier)
+            me, src = tier_mesh(e, p["piece"], tier, p["base_lod"])
             tier_tris[tier] += tris(me)
             tier_src[(tier, src)] += 1
         bme, how = bo_mesh(kit, p["piece"])
         bo_status[how.split(" from ")[0]] += 1
         if bme is not None:
             bo_tris += tris(bme)
-        me, _ = tier_mesh(e, p["piece"], "base")
+        me, _ = tier_mesh(e, p["piece"], "base", p["base_lod"])
         o = bpy.data.objects.new(p["piece"], me)
         o.matrix_world = matrix(p)
         scene.collection.objects.link(o)
@@ -341,7 +447,7 @@ def join_tier(name, spec, kit, tier):
             if me is None:
                 continue
         else:
-            me, _ = tier_mesh(kit[p["piece"]], p["piece"], tier)
+            me, _ = tier_mesh(kit[p["piece"]], p["piece"], tier, p["base_lod"])
         expect += tris(me)
         o = bpy.data.objects.new("part", me.copy())
         o.matrix_world = matrix(p)
@@ -406,7 +512,7 @@ def export(name, spec, kit, out):
         bpy.context.scene.collection.objects.link(o)
         probe.append(o)
     export_fbx(probe, os.path.join(out, "frame_probe.fbx"))
-    expected = planned_openings(spec)
+    expected = probe_layout(name, spec)
     with open(os.path.join(out, f"{name}_expected.json"), "w", encoding="utf-8") as f:
         json.dump(expected, f, indent=1)
     write_import_note(name, path, stats, spec)
@@ -447,9 +553,42 @@ def planned_openings(spec):
     return out
 
 
+def probe_layout(name, spec):
+    """LAYOUT plus the planned openings, every straight wall line (span and height) and every
+    chamfer wall, for blender_probe_erebor_building.py."""
+    out = dict(LAYOUT[name])
+    out["openings"] = planned_openings(spec)
+    lines = {}
+    for p in spec:
+        if p["role"] != "wall":
+            continue
+        yaw = round(p["yaw"]) % 180
+        axis, plane, u = ("x", p["loc"][1], p["loc"][0]) if yaw == 0 else ("y", p["loc"][0], p["loc"][1])
+        w = lines.setdefault((axis, plane), {"runs_along": axis, "plane": plane, "u_min": u - 1.5,
+                                             "u_max": u + 1.5, "z_min": p["loc"][2], "z_max": p["loc"][2] + 3})
+        w["u_min"], w["u_max"] = min(w["u_min"], u - 1.5), max(w["u_max"], u + 1.5)
+        w["z_min"], w["z_max"] = min(w["z_min"], p["loc"][2]), max(w["z_max"], p["loc"][2] + 3)
+    out["walls"] = sorted(lines.values(), key=lambda w: (w["runs_along"], w["plane"]))
+    out["chamfers"] = [{"piece": p["piece"], "pivot": list(p["loc"]), "yaw": p["yaw"], "z": p["loc"][2],
+                        "window": "_win" in p["piece"]} for p in spec if p["role"] == "chamfer"]
+    return out
+
+
+ASSETS = r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TAOM_Map\Assets"
+
+
+def unpackaged_materials(names):
+    """Materials with no <name>_mtl.tpac anywhere under TAOM_Map/Assets: the Kit may not bind them."""
+    have = set()
+    for _, _, files in os.walk(ASSETS):
+        have.update(f.lower()[:-len("_mtl.tpac")] for f in files if f.lower().endswith("_mtl.tpac"))
+    return [n for n in names if n.lower() not in have]
+
+
 def write_import_note(name, fbx, stats, spec):
     base = stats[name]
     mats = base["materials"]
+    missing = unpackaged_materials(mats)
     lines = [
         f"# {name}: Modding Kit import note",
         "",
@@ -467,11 +606,18 @@ def write_import_note(name, fbx, stats, spec):
         "",
         "Bounds are in the Blender frame (Z up, front of the building facing -Y).",
         "",
-        "## Materials to bind (exact names, all existing Erebor materials)",
+        "## Materials to bind (exact names)",
         "",
-    ] + [f"- `{m}`" for m in mats] + [
+    ] + [f"- `{m}`" + (" **(no `_mtl.tpac` found in TAOM_Map)**" if m in missing else "") for m in mats] + [
         "- `bo_` body: `stone` (the physics material the kit bodies use)",
         "",
+    ] + ([
+        "**Unpackaged materials.** The names marked above come from a source FBX and no material",
+        "package with that name exists under `TAOM_Map/Assets`. In the Kit, bind those faces to the",
+        "material the shipped piece uses (open its metamesh, for example `sd_dw_ih_statue_a`), or",
+        "report the name so the export can carry it.",
+        "",
+    ] if missing else []) + [
         "## Placement",
         "",
         "- Origin: the centre of the footprint at grade. Wall bases and the underside of the",

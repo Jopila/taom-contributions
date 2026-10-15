@@ -74,7 +74,9 @@ plain walls, plain corner walls and pillars have **no LODs**.
 0.10 to 0.12 m thick above it). `Ground_3m_A1_Corner` is a half tile cut on the diagonal: it
 fills the floor of a chamfered corner cell (`Wall_3m_Corn_*`). `Ground_6m_A1` is not a big tile:
 it is a 6 x 6 m **plinth block** with a 2.9 m skirt below grade and its top at 0.10 to 0.18, used
-to raise a house (`dwarf_house_a` stands on two of them). Trim strips run along Y and sit
+to raise a house (`dwarf_house_a` stands on two of them). **For a floor, use the stone tiles
+(`_A1`, `_A2`, `_B1`):** the `_C1` pavement is a plain grid of rectangular blocks that reads as the
+slate roof in game (Mike, first Kit import of `erebor_dwarf_house_01`, 2026-10-15). Trim strips run along Y and sit
 **centred on a tile seam**; `Ground_Trim_Corner_*` is a small stud for seam crossings and roof
 corners, not an L-piece.
 

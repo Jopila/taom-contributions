@@ -32,7 +32,7 @@ import sys
 import traceback
 
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 
 LOG = []
@@ -66,16 +66,15 @@ def frange(a, b, step):
     return [a + (i + 0.5) * (b - a) / n for i in range(n)]
 
 
-def facade_rays(bvh, line, openings, x_rng, y_rng, step=0.05):
-    """line = ('x', plane_y) for a wall running along X, ('y', plane_x) along Y."""
-    axis, plane = line
-    lo, hi = (x_rng if axis == "x" else y_rng)
+def facade_rays(bvh, wall, openings, centre, step=0.05):
+    """wall = {runs_along: 'x' (a wall at y = plane) or 'y' (at x = plane), plane, u_min,
+    u_max, z_min, z_max}; centre = the building centre on the other axis."""
+    axis, plane = wall["runs_along"], wall["plane"]
     mine = [o for o in openings if o["runs_along"] == axis and abs(o["plane"] - plane) < 0.01]
-    centre = (y_rng[0] + y_rng[1]) / 2 if axis == "x" else (x_rng[0] + x_rng[1]) / 2
     outward = -1.0 if plane < centre else 1.0
     stray, edge, inside, cells, through = [], [], {i: [0, 0] for i in range(len(mine))}, 0, 0
-    for u in frange(lo + 0.35, hi - 0.35, step):
-        for z in frange(0.05, 2.95, step):
+    for u in frange(wall["u_min"] + 0.35, wall["u_max"] - 0.35, step):
+        for z in frange(wall["z_min"] + 0.05, wall["z_max"] - 0.05, step):
             if axis == "x":
                 o = Vector((u, plane + outward * 6.0, z))
                 d = Vector((0, -outward, 0))
@@ -100,11 +99,42 @@ def facade_rays(bvh, line, openings, x_rng, y_rng, step=0.05):
                 (edge if near else stray).append((round(u, 2), round(z, 2)))
             through += 1 if passed else 0
     per_opening = [{"piece": mine[i]["piece"], "u": [mine[i]["u_min"], mine[i]["u_max"]],
+                    "z": [mine[i]["z_min"], mine[i]["z_max"]],
                     "open_fraction": round(v[1] / v[0], 3) if v[0] else None}
                    for i, v in inside.items()]
-    return {"line": f"{axis}-wall at {plane}", "cells": cells, "through": through,
-            "stray_open_cells": len(stray), "stray_sample": stray[:10],
+    return {"line": f"{axis}-wall at {plane}, z {wall['z_min']} to {wall['z_max']}", "cells": cells,
+            "through": through, "stray_open_cells": len(stray), "stray_sample": stray[:10],
             "edge_open_cells": len(edge), "openings": per_opening}
+
+
+def chamfer_rays(bvh, ch, step=0.05):
+    """Rays along the outward normal of a chamfer wall (Wall_3m_Corn_*: the wall crosses its
+    3 m cell from local (0, 3) to (3, 0), pivot on the inner corner). Counts rays that pass."""
+    rot = Matrix.Rotation(math.radians(ch["yaw"]), 3, "Z")
+    pivot = Vector(ch["pivot"])
+    n = rot @ Vector((1, 1, 0)).normalized()
+    cells = through = 0
+    for t in frange(0.35, 2.65, step):
+        base = pivot + rot @ Vector((t, 3.0 - t, 0))
+        for z in frange(ch["z"] + 0.05, ch["z"] + 2.95, step):
+            o = Vector((base.x, base.y, z)) - n * 1.5
+            hit = bvh.ray_cast(o, n, 4.0)
+            cells += 1
+            through += 1 if (hit[0] is None or hit[3] > 2.0) else 0
+    return {"piece": ch["piece"], "pivot": ch["pivot"], "z": ch["z"], "window": ch["window"],
+            "cells": cells, "through": through,
+            "ok": (through > 0) if ch["window"] else (through == 0)}
+
+
+def inside_plan(x, y, hx, hy, c, margin):
+    """Inside the footprint (a rectangle with c-metre chamfered corners), margin metres in."""
+    if abs(x) > hx - margin or abs(y) > hy - margin:
+        return False
+    if c > 0:
+        dx, dy = abs(x) - (hx - c), abs(y) - (hy - c)
+        if dx > 0 and dy > 0 and dx + dy > c - margin * 1.42:
+            return False
+    return True
 
 
 def coincident(verts, tris):
@@ -202,59 +232,71 @@ def main():
         res["size"] = [round(v, 3) for v in (mx - mn)]
         res["footprint_ok"] = all(abs(a - b) <= 0.01 for a, b in zip(res["size"][:2], brief["size"][:2]))
 
-        lines = sorted({(o["runs_along"], o["plane"]) for o in expected})
-        # wall lines with no planned opening are probed too: take them from the bounds
-        walls_x = sorted({o["plane"] for o in expected if o["runs_along"] == "x"})
-        walls_y = sorted({o["plane"] for o in expected if o["runs_along"] == "y"})
-        x_rng = (min(walls_y), max(walls_y)) if walls_y else (mn.x, mx.x)
-        y_rng = (min(walls_x), max(walls_x)) if walls_x else (mn.y, mx.y)
-        for p in (x_rng[0], x_rng[1]):
-            lines.append(("y", p))
-        for p in (y_rng[0], y_rng[1]):
-            lines.append(("x", p))
-        lines = sorted(set(lines))
-        res["facades"] = [facade_rays(bvh, ln, expected, x_rng, y_rng) for ln in lines]
+        # layout from the assembler; a bare list is the older openings-only file
+        layout = expected if isinstance(expected, dict) else {"openings": expected}
+        openings = layout["openings"]
+        eave = layout.get("eave", args.eave)
+        roof_kind = layout.get("roof", "gable")
+        ridge_axis = layout.get("ridge_axis", args.ridge_axis)
+        chamfer = layout.get("chamfer", 0.0)
+        if "half" in layout:
+            hx, hy = layout["half"]
+        else:
+            px = [o["plane"] for o in openings if o["runs_along"] == "y"]
+            py = [o["plane"] for o in openings if o["runs_along"] == "x"]
+            hx = max(abs(v) for v in px) if px else max(abs(mn.x), abs(mx.x))
+            hy = max(abs(v) for v in py) if py else max(abs(mn.y), abs(mx.y))
+        walls = layout.get("walls") or (
+            [{"runs_along": "x", "plane": p, "u_min": -hx, "u_max": hx, "z_min": 0.0, "z_max": eave}
+             for p in (-hy, hy)]
+            + [{"runs_along": "y", "plane": p, "u_min": -hy, "u_max": hy, "z_min": 0.0, "z_max": eave}
+               for p in (-hx, hx)])
+        res["layout"] = {"eave": eave, "roof": roof_kind, "chamfer": chamfer, "half": [hx, hy],
+                         "walls": len(walls), "chamfer_walls": len(layout.get("chamfers", []))}
+        res["facades"] = [facade_rays(bvh, w, openings, 0.0) for w in walls]
         if bo_bvh is not None:
-            res["bo_facades"] = [facade_rays(bo_bvh, ln, expected, x_rng, y_rng, step=0.1) for ln in lines]
+            res["bo_facades"] = [facade_rays(bo_bvh, w, openings, 0.0, step=0.1) for w in walls]
+        res["chamfers"] = [chamfer_rays(bvh, ch) for ch in layout.get("chamfers", [])]
 
         # gables: rays along the ridge axis through the triangle above the eave
-        half = (y_rng[1] - y_rng[0]) / 2 if args.ridge_axis == "x" else (x_rng[1] - x_rng[0]) / 2
-        mid = (y_rng[0] + y_rng[1]) / 2 if args.ridge_axis == "x" else (x_rng[0] + x_rng[1]) / 2
         gable = {"rays": 0, "open": 0, "sample": []}
-        for end, sign in ((x_rng[0], -1), (x_rng[1], 1)) if args.ridge_axis == "x" else ((y_rng[0], -1), (y_rng[1], 1)):
-            for w in frange(mid - half + 0.2, mid + half - 0.2, 0.1):
-                top = args.eave + 1.5 * (1 - abs(w - mid) / half) - 0.12
-                for z in frange(args.eave + 0.05, max(args.eave + 0.06, top), 0.1):
-                    if z > top:
-                        continue
-                    if args.ridge_axis == "x":
-                        o, d = Vector((end + sign * 6, w, z)), Vector((-sign, 0, 0))
-                    else:
-                        o, d = Vector((w, end + sign * 6, z)), Vector((0, -sign, 0))
-                    hit = bvh.ray_cast(o, d, 12.0)
-                    gable["rays"] += 1
-                    if hit[0] is None or hit[3] > 6.0 + 0.5:
-                        gable["open"] += 1
-                        gable["sample"].append((round(w, 2), round(z, 2)))
+        if roof_kind == "gable":
+            half = hy if ridge_axis == "x" else hx
+            for end, sign in ((-hx, -1), (hx, 1)) if ridge_axis == "x" else ((-hy, -1), (hy, 1)):
+                for w in frange(-half + 0.2, half - 0.2, 0.1):
+                    top = eave + 1.5 * (1 - abs(w) / half) - 0.12
+                    for z in frange(eave + 0.05, max(eave + 0.06, top), 0.1):
+                        if z > top:
+                            continue
+                        if ridge_axis == "x":
+                            o, d = Vector((end + sign * 6, w, z)), Vector((-sign, 0, 0))
+                        else:
+                            o, d = Vector((w, end + sign * 6, z)), Vector((0, -sign, 0))
+                        hit = bvh.ray_cast(o, d, 12.0)
+                        gable["rays"] += 1
+                        if hit[0] is None or hit[3] > 6.0 + 0.5:
+                            gable["open"] += 1
+                            gable["sample"].append((round(w, 2), round(z, 2)))
         gable["sample"] = gable["sample"][:10]
         res["gables"] = gable
 
-        # roof and floor
+        # roof and floor, inside the footprint only
         roof = {"rays": 0, "below_eave": 0, "bo_miss": 0}
         floor = {"rays": 0, "miss": 0, "z": []}
-        for x in frange(x_rng[0] + 0.1, x_rng[1] - 0.1, 0.25):
-            for y in frange(y_rng[0] + 0.1, y_rng[1] - 0.1, 0.25):
-                hit = bvh.ray_cast(Vector((x, y, 20)), Vector((0, 0, -1)), 40)
+        for x in frange(-hx + 0.1, hx - 0.1, 0.25):
+            for y in frange(-hy + 0.1, hy - 0.1, 0.25):
+                if not inside_plan(x, y, hx, hy, chamfer, 0.1):
+                    continue
+                hit = bvh.ray_cast(Vector((x, y, 40)), Vector((0, 0, -1)), 60)
                 roof["rays"] += 1
-                if hit[0] is None or hit[0].z < args.eave - 0.05:
+                if hit[0] is None or hit[0].z < eave - 0.05:
                     roof["below_eave"] += 1
                 if bo_bvh is not None:
-                    bh = bo_bvh.ray_cast(Vector((x, y, 20)), Vector((0, 0, -1)), 40)
-                    if bh[0] is None or bh[0].z < args.eave - 0.05:
+                    bh = bo_bvh.ray_cast(Vector((x, y, 40)), Vector((0, 0, -1)), 60)
+                    if bh[0] is None or bh[0].z < eave - 0.05:
                         roof["bo_miss"] += 1
-                inner = (x_rng[0] + 0.4 < x < x_rng[1] - 0.4) and (y_rng[0] + 0.4 < y < y_rng[1] - 0.4)
-                if inner:
-                    fh = bvh.ray_cast(Vector((x, y, args.eave - 0.2)), Vector((0, 0, -1)), 10)
+                if inside_plan(x, y, hx, hy, chamfer, 0.7):
+                    fh = bvh.ray_cast(Vector((x, y, eave - 0.2)), Vector((0, 0, -1)), eave + 4)
                     floor["rays"] += 1
                     if fh[0] is None or fh[0].z < -0.05:
                         floor["miss"] += 1
