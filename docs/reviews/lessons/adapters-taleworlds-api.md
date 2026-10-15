@@ -1015,3 +1015,18 @@ by a maintainer decision (E09) and the adapter's radius was copied from it (Code
   the service. When a decision moves an edge, grep every search radius that feeds the old one. Pin the radius with
   an IL or boundary test.
 - **Source:** `docs/reviews/rca-eye-of-sauron-2026-10-14.md` F4 (Codex), fixed in `2d17ceba3`.
+
+### Never null-check `PartyBase.MainParty`: with a campaign, its getter dereferences the stored main party (2026-10-14)
+`PartyBase.MainParty` returns null only when there is no campaign. With one, it returns
+`Campaign.Current.MainParty.Party` (v1.5.5 `PartyBase.cs:209-219`), so a null check on it throws in exactly the
+state it was written for. Three copies were found in one week: the chronicle presenter (#765 Batch B C08), the
+hunt popup's `HunterPartyAdapter.IsMapFree` (`5f80f95c9`) and `MessengerCampaignBehavior.IsPlayerAvailable`
+(`91f369984`). The last is the oldest, from the Messenger port (`03a41b624`, 2026-05-06), and the chronicle
+presenter's map check mirrors it.
+- **Why missed:** the computed-statics paragraph in `.claude/rules/adapters.md` named `Hero.MainHero` and
+  `MobileParty.MainParty`, not this getter, whose failure is the reverse. The first source scan matched only
+  `== null` and missed the hunt's `!= null` (Codex #792 F2).
+- **Prevent:** check `Campaign.Current?.MainParty`. `MainPartyNullCheckScanTests` rejects both polarities and the
+  reversed and `is` forms; it does not see a `PartyBase.MainParty?.` read.
+- **Source:** `docs/reviews/rca-review-followups-2026-10-14.md`; `docs/reviews/rca-war-chronicle-events-2026-10-14.md`
+  C08.

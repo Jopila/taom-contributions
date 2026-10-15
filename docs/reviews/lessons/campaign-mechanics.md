@@ -592,3 +592,14 @@ longer owned.
   one method, not a copy. A release reads the live engine flag (the pin) before acting, not a flag the feature
   set earlier. After a maintainer decision adds a transition, re-run the lens that reads state transitions.
 - **Source:** `docs/reviews/rca-eye-of-sauron-2026-10-14.md` F1 and F3 (Codex), fixed in `2d17ceba3`.
+
+### A clan that changes kingdom moves its fiefs with no owner-change event (2026-10-14)
+`ChangeKingdomAction` join, defection (`JoinKingdomByDefection`) and create set `clan.Kingdom` (v1.5.5
+`ChangeKingdomAction.cs:65`), and rebellion (`LeaveWithRebellion`) sets it to null (`:76`). The clan keeps its
+settlements, so each fief's map faction changes without `OnSettlementOwnerChangedEvent`. Only a plain
+`LeaveKingdom` hands the fiefs over through `ChangeOwnerOfSettlementAction` (`:95-98`). The chronicle's open
+siege windows noticed such a change only at their close (C02).
+- **Why missed:** the design took one engine event as the ownership signal.
+- **Prevent:** treat the owner event as a fast path, and re-check the owner of every watched settlement in the
+  daily step, or also listen to `OnClanChangedKingdom`.
+- **Source:** `docs/reviews/rca-war-chronicle-events-2026-10-14.md` C02, fixed in `7e8451555`.

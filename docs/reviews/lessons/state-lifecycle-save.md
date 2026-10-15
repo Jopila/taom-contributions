@@ -7,7 +7,7 @@ A DryIoc `Reuse.Singleton` service is created once in `OnSubModuleLoad` and live
 - **Why missed:** the design reasoned about the *within-campaign* rebuild and the *save-load one-hop* cost, but never enumerated the *new/loaded campaign in the SAME process* state. Two deep-review agents (Completeness, Data Flow) both read "no SyncData — ephemeral" and accepted it; the data-flow "Lifecycle State Matrix" check lists entity states (alive/killed/removed/session-end) for entity mutations but doesn't name "process-singleton survives a campaign switch" as a state to enumerate for a shared cache.
 - **Prevent:** any behavior fronting a process-singleton runtime cache subscribes `CampaignEvents.OnSessionLaunchedEvent` (fires on both new game and load) → `ClearAll()`, so no state leaks from campaign A into campaign B. Whenever a cache is a `Reuse.Singleton` keyed by a campaign-reused id (`*.StringId`), enumerate the cross-campaign-same-process state, not only the within-campaign and save-load states. Distinct from the `OnGameLoaded` entity-mutation matrix — this is about a shared cache outliving the campaign, not about mutating a loaded entity. **Carve-out — cross-campaign hand-off is a legitimate use:** the rule targets caches keyed on a campaign-reused `StringId`, not every singleton. `PlayerPossession` registers both its services `Reuse.Singleton` precisely so the character-creation choices survive into the campaign that REPLACES the one that recorded them (a multiplayer join discards the CC hero), and its `ResetForNewCampaign` deliberately clears the baseline hero id while keeping `_choices`. Before applying the clear-on-session-launch reflex, ask whether the state is a per-campaign cache or a payload the next campaign is meant to consume.
 - **Source:** docs/reviews/rca-caravan-trade-recency-2026-07-11.md (#335; Codex adversarial pass).
-- **Update 2026-10-08 (#764):** an `OnSessionLaunched` reset is safe only when nothing reads the singleton before your listener runs, and listeners run newest-first. For persisted per-campaign state, use the constructor reset in the last lesson of this file.
+- **Update 2026-10-08 (#764):** an `OnSessionLaunched` reset is safe only when nothing reads the singleton before your listener runs, and listeners run newest-first. For persisted per-campaign state, use the constructor reset in "Reset a per-campaign singleton in the constructor of a behavior built per campaign, not in a campaign event" (#764) near the end of this file.
 
 ### An engine bump can regress a feature whose managed bindings are unchanged — behavior-only changes in an engine method the feature drives unusually
 Binding-test-green (`ilspycmd` confirms the method still exists with the same signature) does NOT mean the method's *body* is unchanged. 1.4.7 added an **unconditional** `Mission.InitialPlayerAgent` deref inside `DeploymentMissionController.SetupTeams()`/`FinishDeployment()` — invisible to binding tests, invisible to the category-tree decompile ("unaffected"), and harmless to every *normal* battle (which always has a player-controlled agent → non-null). It only NREs TAOM's **headless** shader-precompile battle, the one place that opens a battle with no human. The bump had dispositioned shader-precompile "unaffected" on the strength of the passing binding tests; the regression was invisible until the feature ran in-game.
@@ -258,7 +258,7 @@ what lets the previous campaign's state through. Naming the split in code (TAOM 
 
 **Source:** `docs/reviews/rca-field-commission-2026-08-07.md` findings 2 and 14.
 
-**Update 2026-10-08 (#764):** "clear it at the session boundary" must still come before every reader. For persisted per-campaign state, use the constructor reset in the last lesson of this file.
+**Update 2026-10-08 (#764):** "clear it at the session boundary" must still come before every reader. For persisted per-campaign state, use the constructor reset in "Reset a per-campaign singleton in the constructor of a behavior built per campaign, not in a campaign event" (#764) near the end of this file.
 
 ### A hand-back that reads only the OTHER actor's position will strand the player (Enlistment, 2026-08-08)
 
@@ -475,8 +475,7 @@ and a load-with-same-ids.
 by the unbiased round-A review and Codex).
 
 **Update 2026-10-08 (#764):** the `OnSessionLaunched` reset above ran too late for the War of the Ring
-service, because a behavior added later read the singleton first. See the constructor reset in the
-last lesson of this file.
+service, because a behavior added later read the singleton first. See "Reset a per-campaign singleton in the constructor of a behavior built per campaign, not in a campaign event" (#764) near the end of this file.
 
 ### A redirect list is a MASK over an invalid state, and every mask is one un-masking away from the crash
 
@@ -862,7 +861,7 @@ guard, keeps the previous campaign's balances, and its `Contains`-gated legacy s
   `OnSessionLaunched`: `Campaign.cs:1685-1686` raises `OnGameLoaded` before `OnSessionStart`, so a
   later reset would wipe the seed.
 - **Source:** `docs/reviews/rca-cross-campaign-singleton-resets-2026-09-24.md` F1, F2.
-- **Update 2026-10-08 (#764):** the `_syncedThisSession` latch answers "did a record load", but not "who read the singleton first". Prefer the constructor reset in the last lesson of this file, which needs no latch.
+- **Update 2026-10-08 (#764):** the `_syncedThisSession` latch answers "did a record load", but not "who read the singleton first". Prefer the constructor reset in "Reset a per-campaign singleton in the constructor of a behavior built per campaign, not in a campaign event" (#764) near the end of this file, which needs no latch.
 
 ### "No save data" means no TAOM save data; say what vanilla persists of what the feature changed (plan 022, 2026-09-24)
 `companion-tactics.md` said OOB Auto-Assign changes "nothing campaign-side or save-backed" and used that as the reason
@@ -1046,3 +1045,27 @@ such a hero kept its old-tree picks after a tree update.
 - **Prevent:** before writing a load-time migration, list where the records come from (`SyncData` restores the whole
   dictionary) and migrate each one; tell only the player. Test it with two records, the player and another.
 - **Source:** `docs/reviews/rca-career-e4e7-2026-10-14.md` X1 (Codex), fixed in `59c1803d2`.
+
+### After a load, the daily tick can repeat the save's own day: guard once-a-day work by day (#793, 2026-10-14)
+On every load, v1.5.5 `Campaign.CreateCampaignEvents` (`Campaign.cs:1022-1030`) sets the daily event's first wait
+to the part of the current day already elapsed, and `MBCampaignEvent` schedules it at now plus that wait
+(`MBCampaignEvent.cs:32`). A save made a fraction f into elapsed day S next ticks at S + 2f. So a save in the
+first half of an elapsed day (09:00 to 21:00 on vanilla's calendar clock, since elapsed days start at
+`CampaignStartTime`) runs day S's daily handlers twice, and repeated reloads can skip a day.
+- **Why missed:** `rca-wotr-phase-ordering-2026-07-30.md`, checked against v1.4.7, said the event re-aligns on
+  load (corrected 2026-10-14). The #792 review found the war ledger's reload rule resting on that premise.
+- **Prevent:** a daily handler that must not run twice records the last day it ran, saves it with its state and
+  skips a repeat (`WarChronicleDailyGate`). Describe the boundary in elapsed days, never in calendar hours.
+  TAOM's other daily listeners are not audited yet (#793).
+- **Source:** #793; `docs/reviews/rca-review-followups-2026-10-14.md`; `docs/features/war-chronicle.md` "Once
+  per day".
+
+### Rebuild a feature's owned effects from the current state on every refresh, not only on a transition (2026-10-09)
+The rally removed a kingdom's war effects only when its tier changed. A saved effect whose kind `rally.json` now
+sets to 0 survived a same-tier refresh, because `Apply` skips a zero magnitude and the kept source was never
+rebuilt (Codex F3). The tier-drop fix in the same batch had the same shape.
+- **Why missed:** cleanup was tied to the change the author pictured, so a same-tier refresh after a config
+  change or a reload looked covered.
+- **Prevent:** on every eligible refresh, remove everything the feature owns, then apply the current state's
+  nonzero entries. Test a same-state refresh after the config changes under a loaded save.
+- **Source:** `docs/reviews/rca-war-chronicle-batch-a-2026-10-09.md` F3, fixed in `2ee36e1fa`.
