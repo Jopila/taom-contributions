@@ -1,4 +1,8 @@
+using System;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Features.ArmyTargeting;
@@ -1228,7 +1232,7 @@ public class ChronicleServiceTests
         Launch(0);
         _f.World.Day = 3;
 
-        Assert.IsTrue(_sut.OpenChronicleEventNow("hornburg", dryRun: true, out var reason), reason);
+        Assert.IsTrue(DryRun("hornburg", out var reason), reason);
 
         StringAssert.Contains(reason, "would open its window until day 23");
         var record = _f.Store.Get("hornburg")!;
@@ -1247,7 +1251,7 @@ public class ChronicleServiceTests
         _f.World.Owners["town_V2"] = "isengard";
         _f.World.Day = 3;
 
-        Assert.IsTrue(_sut.OpenChronicleEventNow("hornburg", dryRun: true, out var reason), reason);
+        Assert.IsTrue(DryRun("hornburg", out var reason), reason);
 
         StringAssert.Contains(reason, "would resolve Fell");
         StringAssert.Contains(reason, "apply its Fell outcome, if it defines one");
@@ -1263,7 +1267,7 @@ public class ChronicleServiceTests
         _f.Events.Add(Narrative("fellowship", offset: 20, effects: Effect("rivendell", WarEffectKind.VolunteerRate, 0.10f, 20)));
         Launch(0);
 
-        Assert.IsTrue(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason), reason);
+        Assert.IsTrue(DryRun("fellowship", out var reason), reason);
 
         StringAssert.Contains(reason, "would occur");
         Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("fellowship"));
@@ -1279,7 +1283,7 @@ public class ChronicleServiceTests
         Launch(0);
         _f.World.Owners["town_V2"] = "rivendell";
 
-        Assert.IsFalse(_sut.OpenChronicleEventNow("hornburg", dryRun: true, out var reason));
+        Assert.IsFalse(DryRun("hornburg", out var reason));
 
         StringAssert.Contains(reason, "would stay Pending");
         StringAssert.Contains(reason, "vlandia");
@@ -1293,7 +1297,7 @@ public class ChronicleServiceTests
         Launch(0);
         Day(20);
 
-        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason));
+        Assert.IsFalse(DryRun("fellowship", out var reason));
         StringAssert.Contains(reason, "only a Pending event can be opened");
     }
 
@@ -1304,7 +1308,7 @@ public class ChronicleServiceTests
         Launch(0);
         _f.Settings.ChronicleEnabled.Returns(false);
 
-        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason));
+        Assert.IsFalse(DryRun("fellowship", out var reason));
         StringAssert.Contains(reason, "The War Chronicle is off");
     }
 
@@ -1315,7 +1319,7 @@ public class ChronicleServiceTests
         Launch(0);
         _f.Phase = WarPhase.WarEnded;
 
-        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason));
+        Assert.IsFalse(DryRun("fellowship", out var reason));
         StringAssert.Contains(reason, "the chronicle is closed");
     }
 
@@ -1325,7 +1329,7 @@ public class ChronicleServiceTests
         _f.Events.Add(Narrative("fellowship"));
         _f.World.Day = 3;
 
-        Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason));
+        Assert.IsFalse(DryRun("fellowship", out var reason));
 
         StringAssert.Contains(reason, "no saved row");
         StringAssert.Contains(reason, "its anchor fails", "adoption also skips an event whose anchor failed");
@@ -1342,14 +1346,16 @@ public class ChronicleServiceTests
         _f.Phase = WarPhase.FullWar;
         _f.World.Day = 10;
 
-        _sut.OpenChronicleEventNow("fellowship", dryRun: true, out _);
+        DryRun("fellowship", out _);
 
         Assert.IsNull(_f.Store.GetPhaseSeenDay(WarPhase.FullWar), "a dry run must not note the first Full War day");
     }
 
     /// <summary>
-    /// Parity: the dry run and the confirmed open on the same fixture agree on whether the open acts, and the
-    /// dry run's predicted outcome is the state the confirmed open leaves.
+    /// Parity: the dry run and the confirmed open agree on whether the open acts, and the dry run's predicted
+    /// outcome is the state the confirmed open leaves. The confirmed open runs on its own, equivalent fixture,
+    /// so a preview that changed saved state cannot be hidden by a confirmation that overwrites the same field
+    /// (a siege's open resets <c>Assaulted</c>).
     /// </summary>
     [DataTestMethod]
     [DataRow("narrative", "would occur", ChronicleEventState.Occurred, DisplayName = "narrative occurs")]
@@ -1358,41 +1364,82 @@ public class ChronicleServiceTests
     [DataRow("precondition", "would stay Pending", ChronicleEventState.Pending, DisplayName = "precondition fails")]
     public void OpenChronicleEventNow_DryRunThenConfirm_AgreeOnTheOutcome(string shape, string predicted, ChronicleEventState endState)
     {
-        string id;
-        switch (shape)
-        {
-            case "narrative":
-                id = "fellowship";
-                _f.Events.Add(Narrative(id, effects: Effect("rivendell")));
-                Launch(0);
-                break;
-            case "siege-open":
-                id = "hornburg";
-                _f.Events.Add(SiegeDef());
-                Launch(0);
-                break;
-            case "siege-fell":
-                id = "hornburg";
-                _f.Events.Add(SiegeDef());
-                Launch(0);
-                _f.World.Owners["town_V2"] = "isengard";
-                break;
-            default:
-                id = "hornburg";
-                _f.Events.Add(SiegeDef());
-                Launch(0);
-                _f.World.Owners["town_V2"] = "rivendell";
-                break;
-        }
-        _f.World.Day = 3;
+        var preview = new ChronicleFixture();
+        var previewSut = preview.CreateService();
+        var id = ArrangeParityShape(preview, previewSut, shape);
+        ArrangeParityShape(_f, _sut, shape);
+        Assert.AreEqual(DeepState(_f.Store), DeepState(preview.Store), "the two fixtures must start equal");
 
-        var dryActed = _sut.OpenChronicleEventNow(id, dryRun: true, out var dryReason);
+        var dryActed = DryRun(preview, previewSut, id, out var dryReason);
         var acted = _sut.OpenChronicleEventNow(id, dryRun: false, out var reason);
 
         Assert.AreEqual(acted, dryActed, $"dry run: {dryReason} / confirmed: {reason}");
         StringAssert.Contains(dryReason, predicted);
         Assert.AreEqual(endState, _f.StateOf(id), $"dry run predicted '{dryReason}'");
     }
+
+    private static string ArrangeParityShape(ChronicleFixture f, ChronicleService sut, string shape)
+    {
+        var id = shape == "narrative" ? "fellowship" : "hornburg";
+        f.Events.Add(shape == "narrative" ? Narrative(id, effects: Effect("rivendell")) : SiegeDef());
+        f.World.Day = 0;
+        sut.LaunchChronicle();
+        if (shape == "siege-fell")
+            f.World.Owners["town_V2"] = "isengard";
+        else if (shape == "precondition")
+            f.World.Owners["town_V2"] = "rivendell";
+        f.World.Day = 3;
+        return id;
+    }
+
+    // ---- Dry-run guard: a deep value snapshot of the saved chronicle state ----------------------------
+
+    /// <summary>What the save codec writes for a row. <see cref="DeepState"/> reads every public property, so
+    /// this only proves the reflection still sees them all.</summary>
+    private static readonly string[] SavedRecordFields = { "Id", "State", "OpenDay", "CloseDay", "Assaulted", "ResolvedDay" };
+
+    private bool DryRun(string id, out string reason) => DryRun(_f, _sut, id, out reason);
+
+    /// <summary>Runs the dry run and fails unless every saved record field and phase-seen day is unchanged.</summary>
+    private static bool DryRun(ChronicleFixture f, ChronicleService sut, string id, out string reason)
+    {
+        var before = DeepState(f.Store);
+        var acted = sut.OpenChronicleEventNow(id, dryRun: true, out reason);
+        Assert.AreEqual(before, DeepState(f.Store), "a dry run must change no saved chronicle field or phase day: " + reason);
+        return acted;
+    }
+
+    /// <summary>
+    /// Every public property of every record by value, in id order, then every phase-seen day.
+    /// <see cref="ChronicleStateStore.Snapshot"/> is no baseline on its own: it copies the list but shares the
+    /// mutable records, so a field changed in place would read the same before and after.
+    /// </summary>
+    private static string DeepState(ChronicleStateStore store)
+    {
+        var properties = typeof(ChronicleEventRecord).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .OrderBy(p => p.Name, StringComparer.Ordinal)
+            .ToList();
+        CollectionAssert.IsSubsetOf(SavedRecordFields, properties.Select(p => p.Name).ToList(),
+            "the snapshot no longer reads every saved record field");
+
+        var text = new StringBuilder();
+        foreach (var record in store.Records.Values.OrderBy(r => r.Id, StringComparer.Ordinal))
+        {
+            foreach (var property in properties)
+                text.Append(property.Name).Append('=').Append(Format(property.GetValue(record))).Append(';');
+            text.Append('\n');
+        }
+        foreach (var pair in store.PhaseSeenSnapshot().OrderBy(p => p.Key))
+            text.Append("phase ").Append(pair.Key).Append('=').Append(Format(pair.Value)).Append('\n');
+        return text.ToString();
+    }
+
+    private static string Format(object? value) => value switch
+    {
+        null => "null",
+        double d => d.ToString("R", CultureInfo.InvariantCulture),
+        _ => Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty,
+    };
 
     [TestMethod]
     public void Status_ListsEveryEventWithItsStateAndDays()
