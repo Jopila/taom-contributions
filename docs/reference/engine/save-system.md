@@ -68,6 +68,11 @@ space (Phase 5) is because `MBObjectBase` objects are referenced by `MBGUID` (th
 - **A `SaveableTypeDefiner` is only needed for a custom class/struct/enum** you must serialize directly. Then: unique
   base (≥100 past the last), `[SaveableField(n)]` on each field, localIds inside the window. **Collision = crash at
   Module.Initialize**, not a soft failure.
+- **One `SyncData` string over 32,763 UTF-8 bytes corrupts the save at write time.** v1.5.5
+  `SaveContext.SaveStringTo` writes the entry length as `(short)(4 + UTF-8 bytes)`, so a longer string wraps and the
+  save no longer loads (the v2.0.9 momentum incident, `docs/reviews/rca-momentum-save-corruption-2026-07-07.md`).
+  Sync any payload that can grow through `SyncDataChunker.SyncChunks` (`Main/Core/Persistence`), as the momentum
+  and War Chronicle behaviors do. Lesson: `docs/reviews/lessons/gamemodels-services.md`.
 - **The elephant needs no SaveDefiner** (it's battle-only state) — confirmed in the [ADOD_Beasts comparison](../adod-beasts-architecture-and-taom-port.md); ADOD_Beasts's SaveDefiner persists the *wolf* (`_acquiredWolfId`). A creature-*troop* with no campaign state needs nothing here.
 - `OnGameLoaded`/`SyncData` mutations on heroes/settlements must follow the entity-state-matrix rule
   (`.claude/rules/csharp-architecture.md`) — load-path mutation is destructive; guard it.

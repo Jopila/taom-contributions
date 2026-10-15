@@ -61,7 +61,7 @@ RealTick → MapTimeTracker advances CampaignTime (at TimeControlMode speed)
 
 Scaling a single `MapTimeTracker` by `TimeControlMode` lets the *same* simulation run at any speed (and pause) without
 changing the logic — periodic events fire on **clock-boundary crossings** (once per campaign day, regardless of frame
-rate or fast-forward), so behavior is deterministic in game-time, not wall-time. Staggering party-AI ticks
+rate or fast-forward; a load can repeat a day, see the gotchas below), so behavior is deterministic in game-time, not wall-time. Staggering party-AI ticks
 (`TickPartialHourlyAi`) spreads the cost of thousands of parties across frames. `AiBehavior` + `DefaultBehaviorNeedsUpdate`
 is a lazy recompute: parties only re-decide when something changed, not every frame.
 
@@ -75,8 +75,20 @@ is a lazy recompute: parties only re-decide when something changed, not every fr
 - **`CampaignTime` is the unit for all TAOM deadlines**: Messengers travel days, Siege-defense deadline,
   CultureConversion `RequiredHoldDays`. Build with `CampaignTime.Now + CampaignTime.Days(n)`, compare via operators —
   **never raw `_numTicks`**. It's a `struct` (cheap by-value).
-- **Periodic events fire on game-time boundaries, not real-time** — a `DailyTickEvent` handler runs once per campaign
-  day even at FastForward; don't assume frame cadence.
+- **Periodic events fire on game-time boundaries, not real-time**: a `DailyTickEvent` handler runs once per elapsed
+  campaign day even at FastForward, but not across a load. On every load `Campaign.CreateCampaignEvents` (v1.5.5
+  `Campaign.cs:1022-1030`, run from `OnDataLoadFinished`) gives the daily event an initial wait equal to the part of
+  the day already elapsed, and `MBCampaignEvent` schedules it at `Now + InitialWait` (`MBCampaignEvent.cs:32`). A save
+  made at fraction f of elapsed day S therefore next ticks at S + 2f. Day S runs again when f is under a half (09:00
+  to 21:00 on the game clock, since elapsed days count from `CampaignStartTime`, 09:00), later ticks keep that offset,
+  and repeated reloads can skip a day. Only the hourly event follows that S + 2f shape, on the hour
+  (`:1032-1037`). The quarter-hourly event (`:1039-1045`) takes the elapsed fraction g of the current quarter but
+  counts it in hours, so its first wait is 4g quarters, up to four periods: it next fires at Q + 5g quarters, runs
+  quarter Q again only when g is under a fifth, and can skip up to four ticks. With no remainder (a save exactly on
+  a boundary) the hourly and quarter-hourly first waits are half a period (0.5 and 0.125 hours), while the daily
+  wait is a full day. Key once-a-day work
+  on a saved last-run day, as `WarChronicleDailyGate` does ([war-chronicle.md](../../features/war-chronicle.md) "Once
+  per day"). This is read from the managed source; the in-game check is owed (#793).
 - **Party-AI ticks are staggered** (`TickPartialHourlyAi`) — not every party every frame; a behavior that scans "all
   parties" each frame is wrong/expensive. React to the per-party tick instead.
 - **Don't fight `DefaultBehaviorNeedsUpdate`** — setting `DefaultBehavior`/`TargetSettlement` every frame thrashes the

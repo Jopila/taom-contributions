@@ -59,11 +59,11 @@ public class TaomFooModel : DefaultFooModel
 | `TaomSettlementEconomyModel` | `DefaultSettlementEconomyModel` | `SettlementEconomy` |
 | `TaomSettlementFoodModel` | `DefaultSettlementFoodModel` | `SettlementFood` |
 | `TaomSiegeEventModel` | `DefaultSiegeEventModel` | `Siege` |
-| `TaomTargetScoreModel` | `DefaultTargetScoreCalculatingModel` | `ArmyTargeting` |
+| `TaomTargetScoreModel` | `DefaultTargetScoreCalculatingModel` | `ArmyTargeting` (+ the WarChronicle army focus during a siege window, through `ArmyTargetFocusRegistry`) |
 | `TaomPartyNavigationModel` | `DefaultPartyNavigationModel` | `NavalTravel` — **not registered**; the `AddModel` call in `SubModule.cs` is commented out, so these overrides do not run |
 | `TaomCharacterStatsModel` | `DefaultCharacterStatsModel` | `TroopProgression` |
 | `TaomPartyWageModel` | `DefaultPartyWageModel` | `CulturalFeats` |
-| `TaomVolunteerModel` | `DefaultVolunteerModel` | `TroopProgression` |
+| `TaomVolunteerModel` | `DefaultVolunteerModel` | `TroopProgression` (+ the WarChronicle `VolunteerRate` multiplier through `VolunteerProductionService`; none for the player's own clan) |
 | `TaomArmyManagementModel` | `DefaultArmyManagementCalculationModel` | `CulturalFeats` |
 | `TaomPartySpeedModel` | `DefaultPartySpeedCalculatingModel` | `CulturalFeats` (+ the EyeOfSauron hunter speed floor, last, `IEyeOfSauronHook`; worker threads, snapshot only) |
 | `TaomSettlementProsperityModel` | `DefaultSettlementProsperityModel` | `CulturalFeats` |
