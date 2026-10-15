@@ -92,7 +92,7 @@ Patch42_CastleRecruitment (AI):
 
 `TAOM.Tests/Features/CastleRecruitment/`:
 - `CastleRecruitmentServiceTests` (20): occupation distribution (0/1/3/4/5/negative), slot-probability curve (monotonic / clamp / negative), the War Chronicle multiplier on the curve (scaled, none without a kingdom, none for the player's clan), master+AI toggle gating, RuralNotable absence.
-- `CastleRecruitmentConfigProviderTests` (8) — `NotablesPerCastle` validation (zero/negative/too-high), missing file, malformed JSON, empty object, caching.
+- `CastleRecruitmentConfigProviderTests` (9): `NotablesPerCastle` validation (zero/negative/too-high), valid values logging info, missing file, malformed JSON, empty object, caching.
 
 Boundary classes (`CastleRecruitmentBehavior`, `CastleNotableMaintainer`, the `Patch42` hooks) are game-tested by convention (Harmony/CampaignBehavior).
 
@@ -119,6 +119,7 @@ Boundary classes (`CastleRecruitmentBehavior`, `CastleNotableMaintainer`, the `P
 
 ## Changelog
 
+- 2026-10-09: The castle slot curve goes through `VolunteerProductionService`, so the War Chronicle `VolunteerRate` multiplier of the castle owner's kingdom scales it (never for a castle of the player's own clan). Castles get no culture respawn feats, which the maintainer kept on 2026-10-14 (#765).
 - 2026-07-07 — Missing-template guard: per-occupation `NotableTemplates` pre-check + per-castle fail-safe try/catch in `CastleNotableMaintainer` (new-game infinite-loading-loop crash on a stale-data install); maintainer takes `IModLogger`.
 - 2026-05-31 — Recruit troops from castles (player + AI): new `CastleRecruitment` module (Patch42) — castle "Recruit troops" menu, AI scoring/travel/drain via two transpilers + `HourlyTickParty` postfix, `HeroCreator.CreateNotable` castle notables with castle-safe occupations and daily volunteer fill, issue/quest suppression, MCM "Castle Recruitment" group + `castle_recruitment_config.json` (master/AI toggles, notables-per-castle 1-5 default 3).
 

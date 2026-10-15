@@ -225,7 +225,7 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 
 ## Known gaps
 
-- Every new string has an English placeholder in the 12 language files; the translator run is #754.
+- The 334 Arthedain lines carry AI first-draft translations in all 12 languages (`a9437a492`, 2026-10-14).
 - Arthedain shares Gondor's five cultural feats, whose code names are Gondorian. Character creation
   shows only the feats' descriptions (`CharacterCreationCultureVM`), never the names.
 - The faction screen has no painted portraits or special characters for Arthedain (art owed).
@@ -260,6 +260,6 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 
 ## GitHub Issue
 
-- **Issue:** #753; follow-ups #754 (translations, backlog), #755 (donor-culture market weapons),
+- **Issue:** #753; follow-ups #754 (translations, done in `a9437a492`; the issue is still open), #755 (donor-culture market weapons),
   #756 (policy ids no kingdom can use), both resolved 2026-10-08.
 - **Status:** built and verified in data; in-game check owed (#753 checklist).

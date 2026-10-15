@@ -76,7 +76,7 @@ and skips the folder when the file is absent (`ModuleHelper.cs:319-331`). It the
 `ModuleInfo.LoadWithFullPath`, which parses exactly the elements in the first table. There is no
 branch for `<DependedModuleMetadatas>`: a search for `DependedModuleMetadata` across the whole v1.4.8
 managed decompile returns nothing. That element is vocabulary for the BUTR/BLSE launchers only, and
-both TAOM manifests say so in their comments (`Main/_Module/SubModule.xml:20-22, 32-37`).
+both TAOM manifests say so in their comments (`Main/_Module/SubModule.xml:17-18, 36-39`).
 
 <!-- engine-table type="TaleWorlds.ModuleManager.ModuleInfo" file="Platform/TaleWorlds.ModuleManager/TaleWorlds.ModuleManager/ModuleInfo.cs" method="LoadWithFullPath" inert="RequiredBaseVersion" -->
 
@@ -136,7 +136,7 @@ decompile tree, so that half is cited from [dr3-maintenance.md](../migration/dr3
 Issue #371 is the release that shipped bind-posed characters. `Main/TAOM.csproj:89-91` resolves
 Harmony and UIExtenderEx through `TAOM.Dependencies.dll`, so a new `TAOM.dll` run against a stale
 `TAOM.Dependencies.dll` fails at the member level while patches apply, the HeroRace preview patches
-never attach, and every character renders in bind pose (`Main/_Module/SubModule.xml:15-22`,
+never attach, and every character renders in bind pose (`Main/_Module/SubModule.xml:11-20`,
 [release-process.md](../reference/release-process.md) lines 53-57). The root cause was that both
 assemblies carried a frozen `AssemblyVersion` on every build (`TAOM 2.0.0.0`,
 `TAOM.Dependencies 0.1.0.0`), so .NET bound any pair without complaint (`Directory.Build.props:8-16`).
@@ -153,29 +153,17 @@ three fields:
 | `Dependencies/_Module/SubModule.xml` | `<Version value="v2.0.Y" />` | only when the Dependencies assembly changed |
 | `Main/_Module/SubModule.xml` | `<DependedModuleMetadata id="TAOM.Dependencies" ... version="v2.0.Y" />` | must equal the line above |
 
-**The third field is not in the file today.** `rg -n 'TAOM.Dependencies' Main/_Module/SubModule.xml`
-returns one hit, line 15, inside a comment. <!-- measured: rg -n 'TAOM.Dependencies' Main/_Module/SubModule.xml 2026-09-05 -->
-`git show cc1713eb -- Main/_Module/SubModule.xml` shows that commit (2026-08-11, a cultures commit
-whose message does not mention it) removed these two lines:
+**All three fields are in the files.** `cc1713eb` (2026-08-11, a cultures commit) removed
+`<DependedModule Id="TAOM.Dependencies" />` and its `<DependedModuleMetadata>` mirror, and `95085de30`
+(2026-09-14) restored both. The element is at `Main/_Module/SubModule.xml:21`, first in `<DependedModules>`
+under the #371 comment at lines 11-20, and the mirror is at line 31 with `version="v2.0.34"`, the value
+the `/release` gate (`.claude/skills/release/SKILL.md`) reads.
+<!-- measured: rg -n 'TAOM.Dependencies' Main/_Module/SubModule.xml 2026-10-14 -->
 
-```xml
-    <DependedModule Id="TAOM.Dependencies" />
-    <DependedModuleMetadata id="TAOM.Dependencies" order="LoadBeforeThis" version="v2.0.6" />
-```
-
-The #371 comment that introduced them survives at `Main/_Module/SubModule.xml:15-22` and still says
-"`<DependedModule>` is the engine-honoured element ... so this is what actually blocks a broken
-pairing", describing an element that is no longer below it. The `/release` skill's gate
-(`.claude/skills/release/SKILL.md:51-57`) greps for `id="TAOM.Dependencies"[^>]*version=` in that file
-and so matches nothing. As shipped, neither manifest blocks a mismatched TAOM and TAOM.Dependencies
-pair. Whether the deletion was intended is an open question for the orchestrator (recorded at the end
-of this chapter); a modder following the release rule should restore both lines, then cut the release
-with `/release`, which is the named tool for the bump and is not run from this chapter.
-
-Two facts about the numbers. The Dependencies `<Version>` is `v2.0.6` (`Dependencies/_Module/SubModule.xml:6`)
-while Main's is `v2.0.28` (`Main/_Module/SubModule.xml:6`); the two are not meant to match, and
-`v2.0.6` is not a phantom Main version ([release-process.md](../reference/release-process.md) line
-152). The engine target is pinned separately: `NativeConstraint_MatchesPinnedGameVersion` asserts that
+Two facts about the numbers. Both `<Version>` values read `v2.0.34` today
+(`Dependencies/_Module/SubModule.xml:6`, `Main/_Module/SubModule.xml:6`); the Dependencies one moves only
+when its assembly changes, so the two are not required to match
+([release-process.md](../reference/release-process.md) line 152). The engine target is pinned separately: `NativeConstraint_MatchesPinnedGameVersion` asserts that
 Main's `<DependedModuleMetadata id="Native" version="v1.5.5.*" />` equals
 `.claude/pinned-game-version.txt` plus `.*`
 (`TAOM.Tests/Infrastructure/Dependencies/BundledDependencyManifestTests.cs:200-224`); the pin file
@@ -337,7 +325,7 @@ Lines 1-10, the header:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
 	<Id value="TAOM.Dependencies" />
 	<Name value="TAOM Dependencies" />
-	<Version value="v2.0.6" />
+	<Version value="v2.0.34" />
 	<DefaultModule value="false" />
 	<ModuleCategory value="Singleplayer" />
 	<ModuleType value="Community" />
@@ -346,7 +334,7 @@ Lines 1-10, the header:
 
 1. `<Id value="TAOM.Dependencies" />` (line 4) must equal the folder name under `Modules/`; every
    other manifest's `<DependedModule Id>` matches on this string, lowercased (`ModuleHelper.cs:37`).
-2. `<Version value="v2.0.6" />` (line 6) is the Dependencies half of the #371 pairing; bump it only
+2. `<Version value="v2.0.34" />` (line 6) is the Dependencies half of the #371 pairing; bump it only
    when the assembly changes, and only through `/release`.
 3. `<DependedModules />` (line 10) is empty on purpose. This module must be able to construct before
    `Native`; listing `Native` here would pull it below the vanilla stack and defeat the static
@@ -560,21 +548,22 @@ and file sets only. A rename upstream would be a silent no-op at load
 upstream `SubModule.xml` when a major version lands).
 
 <!-- example file="Main/_Module/SubModule.xml" id="TAOM" -->
-The `<DependedModules>` block of the main module's manifest, lines 10-14. Line 23 closes the element;
-lines 15-22 are the #371 comment quoted in the pairing section above, not reproduced because line 15
-carries a forbidden character:
+The `<DependedModules>` block of the main module's manifest, lines 10-26. Lines 11-20 are the #371
+comment quoted in the pairing section above, not reproduced because line 11 carries a forbidden character:
 
 ```xml
   <DependedModules>
+    <DependedModule Id="TAOM.Dependencies" />
     <DependedModule Id="Native" />
     <DependedModule Id="SandBoxCore" />
     <DependedModule Id="Sandbox" />
     <DependedModule Id="CustomBattle" />
+  </DependedModules>
 ```
 
-6. These 4 rows are the vanilla stack TAOM needs. <!-- measured: rg -c '<DependedModule ' Main/_Module/SubModule.xml 2026-09-05 -->
-   The row the #371 comment describes, `<DependedModule Id="TAOM.Dependencies" />`, sat between line
-   14 and the comment until `cc1713eb` removed it.
+6. These 5 rows are TAOM.Dependencies, listed first for the #371 pairing, and the vanilla stack TAOM
+   needs. <!-- measured: rg -c '<DependedModule ' Main/_Module/SubModule.xml 2026-10-14 -->
+   `cc1713eb` removed the TAOM.Dependencies row and `95085de30` restored it.
 
 <!-- example file="Stubs/Bannerlord.Harmony/_Module/SubModule.xml" id="Bannerlord.Harmony" -->
 The Harmony alias stub, lines 40-73 (its 39-line header comment is summarised in the stub section):
@@ -762,7 +751,7 @@ Code: Code changes required in `Dependencies/SubModule.cs` and `Dependencies/TAO
    The `/engine-bump` skill is the named workflow for this and is not run from this chapter.
 4. Update `Dependencies/_Module/THIRD-PARTY-LICENSES.txt` so every heading names the version now
    shipped.
-5. If the Dependencies assembly changed, bump `Dependencies/_Module/SubModule.xml:6` and restore and
+5. If the Dependencies assembly changed, bump `Dependencies/_Module/SubModule.xml:6` and
    bump the matching `<DependedModule Id="TAOM.Dependencies" />` and
    `<DependedModuleMetadata id="TAOM.Dependencies" ... version="v2.0.Y" />` rows in
    `Main/_Module/SubModule.xml`, then cut the release with `/release`.
@@ -805,10 +794,6 @@ Code: No code changes needed
 
 ## Gotchas: what fails silently and what crashes
 
-- **The #371 pin is absent from `Main/_Module/SubModule.xml`.** Both rows were deleted by
-  `cc1713eb` on 2026-08-11 while the comment describing them stayed; the `/release` grep for the
-  metadata row matches nothing. Nothing in either manifest blocks a mismatched pair today
-  (`git show cc1713eb -- Main/_Module/SubModule.xml`; `.claude/skills/release/SKILL.md:51-57`).
 - **The four alias stubs deploy to `Modules/<Id>/_Module/SubModule.xml`, one level too deep for the
   engine**, which requires `Modules/<Id>/SubModule.xml` and skips the folder otherwise. On the vanilla
   launcher the stubs are invisible (`ModuleHelper.cs:327-331`; `Dependencies/TAOM.Dependencies.csproj:99-101`;
@@ -854,7 +839,7 @@ Code: No code changes needed
 - **Under a co-op module two shields go quiet with no flag file involved.** PatchShield skips install
   and SaveShield rethrows the save-load category; "the shield did not run" is then expected, and the
   skip reason is logged in `Modules/TAOM.Dependencies/diag.log`
-  ([coop-interop.md](../features/coop-interop.md) lines 400-435; [dr3-maintenance.md](../migration/dr3-maintenance.md) line 270).
+  ([coop-interop.md](../features/coop-interop.md#patchshield-is-skipped-under-co-op) "PatchShield is skipped under co-op"; [dr3-maintenance.md](../migration/dr3-maintenance.md) line 270).
 - **`diag.log` is append-only and never rotated**: 3,150,674 bytes on this machine.
   <!-- measured: ls -la "<game>/Modules/TAOM.Dependencies" 2026-09-05 -->
   It is the first file to read for any incident ([dr3-maintenance.md](../migration/dr3-maintenance.md) line 255).
@@ -879,8 +864,8 @@ except the two MCM FileVersion values (`5.12.3.0`), which were re-read on 2026-1
 | 35 | `<Module Id>` rows in its `<ModulesToLoadAfterThis>` | `sed -n '21,77p' Dependencies/_Module/SubModule.xml \| rg -c '<Module Id='` |
 | 5 | `<DependedModuleMetadata>` rows in the Dependencies manifest | `rg -c '<DependedModuleMetadata ' Dependencies/_Module/SubModule.xml` |
 | 4 | `<Assembly>` rows under the ButterLib entry | `sed -n '176,181p' Dependencies/_Module/SubModule.xml \| rg -c '<Assembly '` |
-| 4 | `<DependedModule>` rows in `Main/_Module/SubModule.xml` | `rg -c '<DependedModule ' Main/_Module/SubModule.xml` |
-| 1 (line 15, a comment) | mentions of `TAOM.Dependencies` in `Main/_Module/SubModule.xml` | `rg -n 'TAOM.Dependencies' Main/_Module/SubModule.xml` |
+| 5 | `<DependedModule>` rows in `Main/_Module/SubModule.xml` | `rg -c '<DependedModule ' Main/_Module/SubModule.xml` |
+| 4 (lines 11, 19, 21, 31) | mentions of `TAOM.Dependencies` in `Main/_Module/SubModule.xml` | `rg -n 'TAOM.Dependencies' Main/_Module/SubModule.xml` |
 | 3 | ids in the `[modules]` section of `coop-modules.txt` | `awk '/^\[modules\]/{f=1;next} /^\[/{f=0} f && !/^#/ && NF' Dependencies/_Module/coop-modules.txt` |
 | 4 | stub module folders | `ls -d Stubs/*/ \| wc -l` |
 | v2.4.99.0, v2.13.99.0, v2.11.99.0, v5.12.99.0 | stub versions (Harmony, UIExtenderEx, ButterLib, MBOptionScreen) | `rg -n '<Version value=' Stubs/*/_Module/SubModule.xml` |
@@ -900,7 +885,7 @@ except the two MCM FileVersion values (`5.12.3.0`), which were re-read on 2026-1
 | 3,150,674 | bytes in the live `diag.log` | `ls -la "<game>/Modules/TAOM.Dependencies"` |
 | 19 | folders under the live `Modules/` | `ls "<game>/Modules" \| wc -l` |
 | v1.5.5 | pinned engine version | `cat .claude/pinned-game-version.txt` |
-| 2026-08-11 | date of `cc1713eb`, the commit that removed the #371 rows | `git log -1 --format='%h %ad' --date=short cc1713eb` |
+| 2026-08-11 | date of `cc1713eb`, the commit that removed the #371 rows; `95085de30` (2026-09-14) restored them | `git log -1 --format='%h %ad' --date=short cc1713eb` |
 | 0 | hits for `DependedModuleMetadata` in the v1.4.8 managed decompile | `rg -n DependedModuleMetadata <decompile root>` |
 
 ## Read next
