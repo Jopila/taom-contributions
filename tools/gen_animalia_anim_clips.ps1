@@ -172,18 +172,32 @@ $PLANS = @{
  }
 }
 $PLAN = $PLANS[$Pack]
-function Get-MeasureProblem($ms, [string]$role) {
+# Masters allowed to differ from the measured frames + rest (Get-FrameProblem), keyed by master name.
+$FRAME_EXEMPT = @{
+  'animalia_moose_loco_walk' = 'its source holds the closing pose twice and the Kit dropped the redundant copy, so the master matches vanilla''s single closing pose (Step 2c measurement, 2026-10-15); revisit with the doubled-frame follow-up'
+}
+function Get-FrameProblem($ms, [string]$mname, [int]$frames) {
+  # A master holds the frames the measure read plus the rest frame (frame 0). The Kit drops a last key that lands a
+  # tick short of its frame (#794: three WildMesh gait masters came out one frame short and every other gate passed).
+  if ($null -eq $ms -or $ms.PSObject.Properties['error'] -or $null -eq $ms.n) { return $null }
+  if ($FRAME_EXEMPT.ContainsKey($mname)) { return $null }
+  if ($frames -ne [int]$ms.n + 1) { return "master has $frames frames, measured $([int]$ms.n) + rest" }
+  return $null
+}
+function Get-MeasureProblem($ms, [string]$role, [string]$mname, [int]$frames) {
   # $null when the measurement can drive a clip, else why not. The measure run stores a failed clip as
   # {"error": ...}, and PowerShell reads its missing fields as $null, which [float] turns into 0.
   if ($null -eq $ms -or $ms.PSObject.Properties['error']) { return 'missing or failed in the measure run' }
   if ($role -in @('fallL', 'fallR')) {
     if (-not ([double]$ms.fall_fraction -gt 0 -and [double]$ms.fall_fraction -lt 1)) { return 'fall_fraction outside (0, 1)' }
-    return $null
+  } else {
+    if (-not ([double]$ms.loop_displacement_m -gt 0)) { return 'loop_displacement_m is not above 0' }
+    $need = $(if ($role -in @('canter', 'gallop')) { 1 } else { 4 })
+    if (@($ms.plants_sorted | Where-Object { $null -ne $_ }).Count -lt $need) { return "fewer than $need hoof plants" }
   }
-  if (-not ([double]$ms.loop_displacement_m -gt 0)) { return 'loop_displacement_m is not above 0' }
-  $need = $(if ($role -in @('canter', 'gallop')) { 1 } else { 4 })
-  if (@($ms.plants_sorted | Where-Object { $null -ne $_ }).Count -lt $need) { return "fewer than $need hoof plants" }
-  return $null
+  # Duration is frames / 30, so a clip measured at another rate would play fast or slow.
+  if ($null -ne $ms.fps -and [double]$ms.fps -ne $FPS) { return "measured at $([double]$ms.fps) fps" }
+  return (Get-FrameProblem $ms $mname $frames)
 }
 
 function Get-AnimaliaClipPlan([string]$animal, [string]$stem, [string]$mname) {
@@ -202,21 +216,29 @@ function Get-AnimaliaClipPlan([string]$animal, [string]$stem, [string]$mname) {
   }
 }
 
-# ---- masters (recursive), all must name horse_skeleton
+# ---- masters (recursive), all of this pack's must name horse_skeleton. The creatures folder is shared by packs.
 $master = @{}
 foreach ($f in (Get-ChildItem -Path $Masters -Recurse -Filter '*_geo.tpac')) {
   foreach ($it in (Load $f.FullName).Package.Items) {
-    if ($it.GetType().Name -eq 'SkeletalAnimation') { $master[$it.Name] = @{ guid = $it.Guid; frames = [int]$it.Duration; skel = $it.Skeleton; dir = $f.DirectoryName } }
+    if ($it.GetType().Name -eq 'SkeletalAnimation' -and $it.Name.StartsWith("${Pack}_", [StringComparison]::OrdinalIgnoreCase)) { $master[$it.Name] = @{ guid = $it.Guid; frames = [int]$it.Duration; skel = $it.Skeleton; dir = $f.DirectoryName } }
   }
 }
 $badSkel = @($master.Keys | Where-Object { $master[$_].skel -ne $HORSE })
 Write-Output ("masters: {0}   not on horse_skeleton: {1}" -f $master.Count, $badSkel.Count)
 if ($badSkel.Count -gt 0) { Write-Output ("run tools\wire_anim_master_skeletons.ps1 first: " + ($badSkel -join ', ')); exit 1 }
 
+# ---- measures, loaded for -Verify too (its SHORT check compares a master with what was measured)
+$meas = @{}
+foreach ($animal in $PLAN.Keys) {
+  $mf = "$PSScriptRoot\blender\${Pack}_${animal}_clip_measure.json"
+  if (-not (Test-Path $mf)) { Write-Output "ERROR: cannot run, measure file not found: $mf"; exit 2 }
+  $meas[$animal] = (Get-Content $mf -Raw | ConvertFrom-Json).clips
+}
+
 function Test-AnimaliaClips {
-  # NO MASTER / ORPHAN / STALE over every planned clip (read-only). Shared by -Verify and by the
+  # NO MASTER / ORPHAN / SHORT / STALE over every planned clip (read-only). Shared by -Verify and by the
   # post--Apply re-check, so both read the same thing off disk the same way.
-  $ok = 0; $stale = 0; $orphan = 0; $noMaster = 0
+  $ok = 0; $stale = 0; $orphan = 0; $noMaster = 0; $short = 0
   foreach ($animal in $PLAN.Keys) {
     foreach ($stem in $PLAN[$animal].Keys) {
       $mname = "${Pack}_${animal}_$stem"
@@ -227,7 +249,9 @@ function Test-AnimaliaClips {
         continue
       }
       $m = $master[$mname]
+      $shortWhy = Get-FrameProblem $meas[$animal].$stem $mname $m.frames
       foreach ($slot in $plans) {
+        if ($shortWhy) { $short++; Write-Host ("SHORT  {0,-44} -> {1}" -f $slot.ClipName, $shortWhy); continue }
         $out = Join-Path $m.dir ($slot.ClipName + '_anm.tpac')
         if (-not (Test-Path $out)) { $orphan++; Write-Host ("ORPHAN {0,-44} -> file missing" -f $slot.ClipName); continue }
         $cl = @((Load $out).Package.Items | Where-Object { $_.GetType().Name -eq 'AnimationClip' })[0]
@@ -257,18 +281,13 @@ function Test-AnimaliaClips {
       $stale++; Write-Host ("CHECKSUM {0} -> {1}" -f $d, $last)
     }
   }
-  Write-Host ("verify: clips ok={0} stale={1} orphan={2} no-master={3}" -f $ok, $stale, $orphan, $noMaster)
-  return @{ ok = $ok; stale = $stale; orphan = $orphan; noMaster = $noMaster }
+  Write-Host ("verify: clips ok={0} stale={1} orphan={2} no-master={3} short={4}" -f $ok, $stale, $orphan, $noMaster, $short)
+  return @{ ok = $ok; stale = $stale; orphan = $orphan; noMaster = $noMaster; short = $short }
 }
 
 if ($Verify) {
   $result = Test-AnimaliaClips
-  if ($result.stale + $result.orphan + $result.noMaster -gt 0) { exit 1 } else { exit 0 }
-}
-
-$meas = @{}
-foreach ($animal in $PLAN.Keys) {
-  $meas[$animal] = (Get-Content "$PSScriptRoot\blender\${Pack}_${animal}_clip_measure.json" -Raw | ConvertFrom-Json).clips
+  if ($result.stale + $result.orphan + $result.noMaster + $result.short -gt 0) { exit 1 } else { exit 0 }
 }
 
 # ---- templates + snapshots
@@ -317,7 +336,7 @@ foreach ($animal in $PLAN.Keys) {
       # measure file has no entry for (every idle/eat/attack/hit stem), same as the old lookup table.
       $ms = $meas[$animal].$stem
       if ($clipRole -in @('walk', 'trot', 'canter', 'gallop', 'back')) {
-        $why = Get-MeasureProblem $ms $clipRole
+        $why = Get-MeasureProblem $ms $clipRole $mname $m.frames
         if ($why) { $errors++; Write-Output ("BAD MEASURE {0}: {1}" -f $mname, $why); continue }
         $p = @($ms.plants_sorted)
         if ($clipRole -in @('canter', 'gallop')) { $c.StepPoints = V4 $p[0] -1 -1 -1 } else { $c.StepPoints = V4 $p[0] $p[1] $p[2] $p[3] }
@@ -327,7 +346,7 @@ foreach ($animal in $PLAN.Keys) {
       } elseif ($clipRole -eq 'antler') {
         $c.CombatParameterId = ''; $c.SoundCode = ''; $c.StepPoints = V4 -1 -1 -1 -1
       } elseif ($clipRole -in @('fallL', 'fallR')) {
-        $why = Get-MeasureProblem $ms $clipRole
+        $why = Get-MeasureProblem $ms $clipRole $mname $m.frames
         if ($why) { $errors++; Write-Output ("BAD MEASURE {0}: {1}" -f $mname, $why); continue }
         $s0 = $c.StepPoints; $c.StepPoints = V4 $s0.X $s0.Y $ms.fall_fraction $s0.W; $note = "fall=$($ms.fall_fraction)"
       }
@@ -366,6 +385,6 @@ if ($Apply) {
 # exist but went stale after a Kit re-import must not exit 0.
 if ($Apply) {
   $post = Test-AnimaliaClips
-  if ($post.stale + $post.orphan + $post.noMaster -gt 0) { $errors++ }
+  if ($post.stale + $post.orphan + $post.noMaster + $post.short -gt 0) { $errors++ }
 }
 if ($errors -gt 0) { exit 1 } else { exit 0 }

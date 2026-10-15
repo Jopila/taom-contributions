@@ -89,9 +89,9 @@
    "fit_scale": 0.8018,
    "travel_mode": "stride",
    "fps": 30.0,
-   "travel_source_m": 6.2194,
-   "loop_displacement_m": 4.9867,
-   "speed_mps_at_30fps": 9.35,
+   "travel_source_m": 6.277,
+   "loop_displacement_m": 5.0329,
+   "speed_mps_at_30fps": 9.437,
    "plants": {
     "LF": 0.125,
     "RF": 0.875,

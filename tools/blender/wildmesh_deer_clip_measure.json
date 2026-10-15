@@ -11,9 +11,9 @@
    "fit_scale": 1.234,
    "travel_mode": "stride",
    "fps": 30.0,
-   "travel_source_m": 1.2663,
-   "loop_displacement_m": 1.5626,
-   "speed_mps_at_30fps": 0.837,
+   "travel_source_m": 1.2718,
+   "loop_displacement_m": 1.5694,
+   "speed_mps_at_30fps": 0.841,
    "plants": {
     "LF": 0.6607,
     "RF": 0.1607,
@@ -37,20 +37,20 @@
    "fit_scale": 1.234,
    "travel_mode": "stride",
    "fps": 30.0,
-   "travel_source_m": 4.1167,
-   "loop_displacement_m": 5.0799,
-   "speed_mps_at_30fps": 6.927,
+   "travel_source_m": 4.2114,
+   "loop_displacement_m": 5.1968,
+   "speed_mps_at_30fps": 7.087,
    "plants": {
-    "LF": 0.5909,
-    "RF": 0.0909,
+    "LF": 0.5455,
+    "RF": 0.0455,
     "LB": 0.0455,
-    "RB": 0.5455
+    "RB": 0.5
    },
    "plants_sorted": [
     0.0455,
-    0.0909,
-    0.5455,
-    0.5909
+    0.0455,
+    0.5,
+    0.5455
    ]
   },
   "RunSlow_F": {

@@ -266,9 +266,10 @@
         <GameType value = "EditorGame"/>
       </IncludedGameTypes>
     </XmlNode>
-    <!-- #794 test riders for the WildMesh3D mounts: CustomGame only, remove with the file -->
+    <!-- #794 test riders for the WildMesh3D mounts: CustomGame only. The Custom Battle picker lists them;
+         /release step 5 blocks a player release while the file exists, so delete both before one -->
     <XmlNode>
-      <XmlName id="NPCCharacters" path="troops/troops_wildmesh_test"/>
+      <XmlName id="NPCCharacters" path="test_riders/wildmesh"/>
       <IncludedGameTypes>
         <GameType value = "CustomGame"/>
       </IncludedGameTypes>

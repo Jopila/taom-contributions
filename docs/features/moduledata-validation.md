@@ -231,20 +231,23 @@ same invariant, so a troop revamp or a copy-pasted roster cannot reintroduce the
 So `default_group="Infantry"` on a lord holding a horse buys nothing — the mount alone spawns him
 mounted. Checking only the enum would have missed exactly that case.
 
-### The war-ram carve-out (`WAR_RAM_MOUNT_IDS`, #515)
+### The dwarf-mount carve-out (`DWARF_MOUNT_IDS`, #515, #794)
 
-The [Dwarven war ram](./war-ram.md) is the one mount a dwarf may ride: it is built for the dwarf
-skeleton, so the rider bone lines up and he does not spawn inside the mesh. The allowlist is exactly
-two ids, pinned in `tools/taom_schema.py`:
-
-```python
-WAR_RAM_MOUNT_IDS = frozenset({"taom_war_ram_a", "taom_war_ram_b"})
-```
+The mounts a dwarf may ride are the [Dwarven war ram](./war-ram.md) (#515) and the three WildMesh3D
+dwarf mounts, the War Boar, Bristleback Boar and Iron Hills Goat (#794,
+[wildmesh-mounts.md](./wildmesh-mounts.md)). The set is pinned by id in `DWARF_MOUNT_IDS` in
+`tools/taom_schema.py`, not matched by prefix; read it there, because a copy here goes stale. All five
+Monsters inherit the vanilla horse's seat (`rider_sit_bone` and the rider adders, through
+`base_monster="horse"`). What makes them dwarf mounts is their size and the ram bardings that carry
+the seat mesh, so each seat is an in-game check, and if that check fails the three WildMesh ids come
+out. The deer and moose stay refused.
 
 A dwarf who carries one is legal, and **the group rule relaxes with it**: `default_group="Cavalry"`
-and `"HorseArcher"` both pass for a ram rider, because a ram rider genuinely is cavalry. The relaxation
+and `"HorseArcher"` both pass for a rider of one, because he genuinely is cavalry. The relaxation
 is per character, not global. Every other mount that character can reach is still reported, and a
-dwarf with a cavalry `default_group` and no ram is still an error.
+dwarf with a cavalry `default_group` and none of these mounts is still an error. The gate reads every
+`*.xml` under the module's `ModuleData`, so the CustomGame test riders in `test_riders/` are covered
+(`MountedDwarfTests`).
 
 Two implementation properties matter when reading a result:
 
@@ -297,7 +300,7 @@ dwarf anywhere in TAOM's ModuleData reaching a non-ram mount.
 ### A harness is required, not optional (`MOUNT_WITHOUT_HARNESS`)
 
 Every `slot="Horse"` entry must have a `slot="HorseHarness"` entry beside it in the same equipment
-set. This is a different question from the carve-out above: `WAR_RAM_MOUNT_IDS` asks *may a dwarf
+set. This is a different question from the carve-out above: `DWARF_MOUNT_IDS` asks *may a dwarf
 ride this*, and this rule asks *does the rider have something to sit on*.
 
 The rule is universal because **the data cannot answer the question it depends on.** Whether a
@@ -933,7 +936,8 @@ NPC duplicate-id + enum coverage spans `troops/`, `characters/`, `named_companio
   resolved against the live install, after seven of them were found writing 67 retired or
   never-defined ids. Standalone CLI `check_generator_item_refs.py` and a unittest gate carry the same
   check.
-- 2026-08-28: `MOUNTED_DWARF` gained the war-ram carve-out (`WAR_RAM_MOUNT_IDS`, #515): a dwarf
+- 2026-08-28: `MOUNTED_DWARF` gained the war-ram carve-out (`WAR_RAM_MOUNT_IDS`, #515; renamed
+  `DWARF_MOUNT_IDS` when #794 added three more ids): a dwarf
   carrying `taom_war_ram_a`/`_b` is legal, cavalry `default_group` included, and every other mount he
   can reach still errors. The work also closed a latent hole in the pre-existing code: mount
   resolution was first-wins, so once an allowlist existed a ram listed ahead of a horse would have

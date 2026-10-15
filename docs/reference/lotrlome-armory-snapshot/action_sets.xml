@@ -66554,6 +66554,159 @@
 	<action_set id="as_animalia_moose_town_and_village" skeleton="horse_skeleton" base_set="as_horse_town_and_village" />
 	<action_set id="as_animalia_moose_map" skeleton="horse_skeleton" base_set="as_horse_map" />
 	<!-- ============================== /ANIMALIA ============================== -->
+	<!-- ============================== WILDMESH3D MOUNTS (#794, 2026-10-14) ============================== -->
+	<!-- Horse-skeleton reskins of the WildMesh3D animals playing their own clips (anim_wildmesh_*, written
+	     by TAOM tools/gen_animalia_anim_clips.ps1 -Pack wildmesh beside the masters in
+	     Assets/creature/creatures/animations). Each action copies the vanilla as_horse action's attributes
+	     and changes only the clip; the warthog's canter and gallop are the boar's clips, the goat's gallop
+	     the deer's. Falls, rear, kick, walking backwards, turns and jumps stay the horse's. The _map twin
+	     is required (MobilePartyVisual looks up ActionSetCode + "_map"). Written by
+	     tools/apply_wildmesh_armory.py. -->
+	<action_set id="as_wildmesh_boar" skeleton="horse_skeleton" base_set="as_horse">
+		<action type="act_horse_forward_walk" animation="anim_wildmesh_boar_walkmedium_f" />
+		<action type="act_horse_forward_walk_stand" animation="anim_wildmesh_boar_walkmedium_f_stand" />
+		<action type="act_horse_forward_trot" animation="anim_wildmesh_boar_trotfast_f" />
+		<action type="act_horse_forward_trot_stand" animation="anim_wildmesh_boar_trotfast_f_stand" />
+		<action type="act_horse_forward_canter" animation="anim_wildmesh_boar_runslow_f" />
+		<action type="act_horse_forward_canter_stand" animation="anim_wildmesh_boar_runslow_f_stand" />
+		<action type="act_horse_forward_gallop_right_foot" animation="anim_wildmesh_boar_runfast_f" />
+		<action type="act_horse_forward_gallop_right_foot_stand" animation="anim_wildmesh_boar_runfast_f_stand" />
+		<action type="act_horse_forward_gallop_left_foot" animation="anim_wildmesh_boar_runfast_f" />
+		<action type="act_horse_forward_gallop_left_foot_stand" animation="anim_wildmesh_boar_runfast_f_stand" />
+		<action type="act_horse_stand_for_movement_data" animation="anim_wildmesh_boar_idle_breathing_movement" />
+		<action type="act_horse_stand_1" animation="anim_wildmesh_boar_idle_breathing" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_2" animation="anim_wildmesh_boar_idle" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_3" animation="anim_wildmesh_boar_idle_secondarymovecalm_2" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_4" animation="anim_wildmesh_boar_idle_secondarymovecalm_3" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_idle_1" animation="anim_wildmesh_boar_idle_breathing" alternative_group="idle_horse" />
+		<action type="act_horse_idle_2" animation="anim_wildmesh_boar_idle_secondarymovecalm_4" alternative_group="idle_horse" />
+		<action type="act_horse_idle_3" animation="anim_wildmesh_boar_idle_secondarymovecalm_5" alternative_group="idle_horse" />
+		<action type="act_horse_idle_4" animation="anim_wildmesh_boar_idle" alternative_group="idle_horse" />
+		<action type="act_horse_riderless_idle_1" animation="anim_wildmesh_boar_grazingonspota_1" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_2" animation="anim_wildmesh_boar_grazingonspota_2" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_3" animation="anim_wildmesh_boar_grazingonspotb_1" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_4" animation="anim_wildmesh_boar_grazingonspotb_2" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_strike_front" animation="anim_wildmesh_boar_hitlegfl2runslow_f" />
+		<action type="act_horse_strike_back" animation="anim_wildmesh_boar_hitlegbl2runslow_f" />
+	</action_set>
+	<action_set id="as_wildmesh_boar_town_and_village" skeleton="horse_skeleton" base_set="as_horse_town_and_village" />
+	<action_set id="as_wildmesh_boar_map" skeleton="horse_skeleton" base_set="as_horse_map" />
+	<action_set id="as_wildmesh_warthog" skeleton="horse_skeleton" base_set="as_horse">
+		<action type="act_horse_forward_walk" animation="anim_wildmesh_warthog_walkmedium_f" />
+		<action type="act_horse_forward_walk_stand" animation="anim_wildmesh_warthog_walkmedium_f_stand" />
+		<action type="act_horse_forward_trot" animation="anim_wildmesh_warthog_trotfast_f_2" />
+		<action type="act_horse_forward_trot_stand" animation="anim_wildmesh_warthog_trotfast_f_2_stand" />
+		<action type="act_horse_forward_canter" animation="anim_wildmesh_boar_runslow_f" />
+		<action type="act_horse_forward_canter_stand" animation="anim_wildmesh_boar_runslow_f_stand" />
+		<action type="act_horse_forward_gallop_right_foot" animation="anim_wildmesh_boar_runfast_f" />
+		<action type="act_horse_forward_gallop_right_foot_stand" animation="anim_wildmesh_boar_runfast_f_stand" />
+		<action type="act_horse_forward_gallop_left_foot" animation="anim_wildmesh_boar_runfast_f" />
+		<action type="act_horse_forward_gallop_left_foot_stand" animation="anim_wildmesh_boar_runfast_f_stand" />
+		<action type="act_horse_stand_for_movement_data" animation="anim_wildmesh_warthog_idle_breathing_movement" />
+		<action type="act_horse_stand_1" animation="anim_wildmesh_warthog_idle_breathing" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_2" animation="anim_wildmesh_warthog_idle" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_3" animation="anim_wildmesh_warthog_idle_secondarymovecalm_2" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_4" animation="anim_wildmesh_warthog_idle_secondarymovecalm_3" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_idle_1" animation="anim_wildmesh_warthog_idle_breathing" alternative_group="idle_horse" />
+		<action type="act_horse_idle_2" animation="anim_wildmesh_warthog_idle_secondarymovecalm_4" alternative_group="idle_horse" />
+		<action type="act_horse_idle_3" animation="anim_wildmesh_warthog_idle_secondarymovecalm_5" alternative_group="idle_horse" />
+		<action type="act_horse_idle_4" animation="anim_wildmesh_warthog_idle" alternative_group="idle_horse" />
+		<action type="act_horse_riderless_idle_1" animation="anim_wildmesh_warthog_grazingonspota_1" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_2" animation="anim_wildmesh_warthog_grazingonspota_2" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_3" animation="anim_wildmesh_warthog_grazingonspotb_1" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_4" animation="anim_wildmesh_warthog_grazingonspotb_2" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_strike_front" animation="anim_wildmesh_warthog_hitlegfl2runslow_f" />
+		<action type="act_horse_strike_back" animation="anim_wildmesh_warthog_hitlegbl2runslow_f" />
+	</action_set>
+	<action_set id="as_wildmesh_warthog_town_and_village" skeleton="horse_skeleton" base_set="as_horse_town_and_village" />
+	<action_set id="as_wildmesh_warthog_map" skeleton="horse_skeleton" base_set="as_horse_map" />
+	<action_set id="as_wildmesh_mountaingoat" skeleton="horse_skeleton" base_set="as_horse">
+		<action type="act_horse_forward_walk" animation="anim_wildmesh_mountaingoat_walkmedium_f" />
+		<action type="act_horse_forward_walk_stand" animation="anim_wildmesh_mountaingoat_walkmedium_f_stand" />
+		<action type="act_horse_forward_trot" animation="anim_wildmesh_mountaingoat_trotslow_f_2" />
+		<action type="act_horse_forward_trot_stand" animation="anim_wildmesh_mountaingoat_trotslow_f_2_stand" />
+		<action type="act_horse_forward_canter" animation="anim_wildmesh_mountaingoat_hoppingslow_f" />
+		<action type="act_horse_forward_canter_stand" animation="anim_wildmesh_mountaingoat_hoppingslow_f_stand" />
+		<action type="act_horse_forward_gallop_right_foot" animation="anim_wildmesh_deer_runfast_f" />
+		<action type="act_horse_forward_gallop_right_foot_stand" animation="anim_wildmesh_deer_runfast_f_stand" />
+		<action type="act_horse_forward_gallop_left_foot" animation="anim_wildmesh_deer_runfast_f" />
+		<action type="act_horse_forward_gallop_left_foot_stand" animation="anim_wildmesh_deer_runfast_f_stand" />
+		<action type="act_horse_stand_for_movement_data" animation="anim_wildmesh_mountaingoat_idle_breathing_movement" />
+		<action type="act_horse_stand_1" animation="anim_wildmesh_mountaingoat_idle_breathing" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_2" animation="anim_wildmesh_mountaingoat_idle_secondarymovecalm_1" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_3" animation="anim_wildmesh_mountaingoat_idle_secondarymovecalm_2" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_4" animation="anim_wildmesh_mountaingoat_idle_secondarymovecalm_3" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_idle_1" animation="anim_wildmesh_mountaingoat_idle_breathing" alternative_group="idle_horse" />
+		<action type="act_horse_idle_2" animation="anim_wildmesh_mountaingoat_idle_secondarymovecalm_4" alternative_group="idle_horse" />
+		<action type="act_horse_idle_3" animation="anim_wildmesh_mountaingoat_idle_secondarymovecalm_5" alternative_group="idle_horse" />
+		<action type="act_horse_idle_4" animation="anim_wildmesh_mountaingoat_cue_bleat" alternative_group="idle_horse" />
+		<action type="act_horse_riderless_idle_1" animation="anim_wildmesh_mountaingoat_grazingonspota_1" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_2" animation="anim_wildmesh_mountaingoat_grazingonspota_2" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_3" animation="anim_wildmesh_mountaingoat_grazingonspotb_1" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_4" animation="anim_wildmesh_mountaingoat_grazingonspotb_2" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_strike_front" animation="anim_wildmesh_mountaingoat_hitinrunhead_f" />
+	</action_set>
+	<action_set id="as_wildmesh_mountaingoat_town_and_village" skeleton="horse_skeleton" base_set="as_horse_town_and_village" />
+	<action_set id="as_wildmesh_mountaingoat_map" skeleton="horse_skeleton" base_set="as_horse_map" />
+	<action_set id="as_wildmesh_deer" skeleton="horse_skeleton" base_set="as_horse">
+		<action type="act_horse_forward_walk" animation="anim_wildmesh_deer_walkmedium_f" />
+		<action type="act_horse_forward_walk_stand" animation="anim_wildmesh_deer_walkmedium_f_stand" />
+		<action type="act_horse_forward_trot" animation="anim_wildmesh_deer_trotfast_f" />
+		<action type="act_horse_forward_trot_stand" animation="anim_wildmesh_deer_trotfast_f_stand" />
+		<action type="act_horse_forward_canter" animation="anim_wildmesh_deer_runslow_f" />
+		<action type="act_horse_forward_canter_stand" animation="anim_wildmesh_deer_runslow_f_stand" />
+		<action type="act_horse_forward_gallop_right_foot" animation="anim_wildmesh_deer_runfast_f" />
+		<action type="act_horse_forward_gallop_right_foot_stand" animation="anim_wildmesh_deer_runfast_f_stand" />
+		<action type="act_horse_forward_gallop_left_foot" animation="anim_wildmesh_deer_runfast_f" />
+		<action type="act_horse_forward_gallop_left_foot_stand" animation="anim_wildmesh_deer_runfast_f_stand" />
+		<action type="act_horse_stand_for_movement_data" animation="anim_wildmesh_deer_idle_breathing_movement" />
+		<action type="act_horse_stand_1" animation="anim_wildmesh_deer_idle_breathing" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_2" animation="anim_wildmesh_deer_idle_1" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_3" animation="anim_wildmesh_deer_idle_3" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_4" animation="anim_wildmesh_deer_idle_4" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_idle_1" animation="anim_wildmesh_deer_idle_breathing" alternative_group="idle_horse" />
+		<action type="act_horse_idle_2" animation="anim_wildmesh_deer_idle" alternative_group="idle_horse" />
+		<action type="act_horse_idle_3" animation="anim_wildmesh_deer_idle_2" alternative_group="idle_horse" />
+		<action type="act_horse_idle_4" animation="anim_wildmesh_deer_idle_1" alternative_group="idle_horse" />
+		<action type="act_horse_riderless_idle_1" animation="anim_wildmesh_deer_grazingonspotb_1" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_2" animation="anim_wildmesh_deer_grazingonspotb_2" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_3" animation="anim_wildmesh_deer_grazingonspotb_3" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_4" animation="anim_wildmesh_deer_grazingsteps" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_strike_front" animation="anim_wildmesh_deer_hitinrunhead_f" />
+		<action type="act_horse_strike_back" animation="anim_wildmesh_deer_hitlegbl2runslow_f" />
+	</action_set>
+	<action_set id="as_wildmesh_deer_town_and_village" skeleton="horse_skeleton" base_set="as_horse_town_and_village" />
+	<action_set id="as_wildmesh_deer_map" skeleton="horse_skeleton" base_set="as_horse_map" />
+	<action_set id="as_wildmesh_moose" skeleton="horse_skeleton" base_set="as_horse">
+		<action type="act_horse_forward_walk" animation="anim_wildmesh_moose_walkmedium_f" />
+		<action type="act_horse_forward_walk_stand" animation="anim_wildmesh_moose_walkmedium_f_stand" />
+		<action type="act_horse_forward_trot" animation="anim_wildmesh_moose_trotslow_f" />
+		<action type="act_horse_forward_trot_stand" animation="anim_wildmesh_moose_trotslow_f_stand" />
+		<action type="act_horse_forward_canter" animation="anim_wildmesh_moose_runslow_f" />
+		<action type="act_horse_forward_canter_stand" animation="anim_wildmesh_moose_runslow_f_stand" />
+		<action type="act_horse_forward_gallop_right_foot" animation="anim_wildmesh_moose_runfast_f" />
+		<action type="act_horse_forward_gallop_right_foot_stand" animation="anim_wildmesh_moose_runfast_f_stand" />
+		<action type="act_horse_forward_gallop_left_foot" animation="anim_wildmesh_moose_runfast_f" />
+		<action type="act_horse_forward_gallop_left_foot_stand" animation="anim_wildmesh_moose_runfast_f_stand" />
+		<action type="act_horse_stand_for_movement_data" animation="anim_wildmesh_moose_idle_breathing_movement" />
+		<action type="act_horse_stand_1" animation="anim_wildmesh_moose_idle_breathing" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_2" animation="anim_wildmesh_moose_idle" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_3" animation="anim_wildmesh_moose_grazingstepslookat" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_stand_4" animation="anim_wildmesh_moose_idle_breathing" alternative_group="horse_stand_alternative_group" />
+		<action type="act_horse_idle_1" animation="anim_wildmesh_moose_idle_breathing" alternative_group="idle_horse" />
+		<action type="act_horse_idle_2" animation="anim_wildmesh_moose_idle" alternative_group="idle_horse" />
+		<action type="act_horse_idle_3" animation="anim_wildmesh_moose_grazingstepslookat" alternative_group="idle_horse" />
+		<action type="act_horse_idle_4" animation="anim_wildmesh_moose_idle" alternative_group="idle_horse" />
+		<action type="act_horse_riderless_idle_1" animation="anim_wildmesh_moose_grazingonspota_1" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_2" animation="anim_wildmesh_moose_grazingonspota_2" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_3" animation="anim_wildmesh_moose_grazingonspotb_1" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_riderless_idle_4" animation="anim_wildmesh_moose_grazingonspotb_2" alternative_group="riderless_idle_alternative_group" />
+		<action type="act_horse_strike_front" animation="anim_wildmesh_moose_hitlegfl2runslow_f" />
+		<action type="act_horse_strike_back" animation="anim_wildmesh_moose_hitlegbl2runslow_f" />
+	</action_set>
+	<action_set id="as_wildmesh_moose_town_and_village" skeleton="horse_skeleton" base_set="as_horse_town_and_village" />
+	<action_set id="as_wildmesh_moose_map" skeleton="horse_skeleton" base_set="as_horse_map" />
+	<!-- ============================== /WILDMESH3D MOUNTS ============================== -->
 	<!-- ============================== /WARG ============================== -->
 
 	<!-- TAOM-CIVILIAN-COVERAGE:START (generated by tools/generate_race_civilian_action_sets.py) -->

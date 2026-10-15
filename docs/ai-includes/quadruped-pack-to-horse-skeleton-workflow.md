@@ -34,8 +34,8 @@ legs or spine are far off (a spider, an elephant) needs its own skeleton instead
 | 7 | Point the masters at `horse_skeleton` | Claude, Kit closed | `tools/wire_anim_master_skeletons.ps1` | 16-byte patch per master | census ok = every master |
 | 8 | Clip resources | Claude, Kit closed | `tools/gen_animalia_anim_clips.ps1` | one `anim_<master>_anm.tpac` per clip | independent re-read clean, checksums 0 stale |
 | 9 | Register the clips | Mike | open the Kit once, close it | RuntimeDataCache entries | `python tools/check_rdc_entries.py --under <folder>`: 0 without an entry |
-| 10 | Armory data | Claude, Kit closed | `tools/apply_animalia_armory.py` | Monsters (with `taom_body_length`), action sets, action types, items | wiring tests, `audit_action_set_parity.py`, `validate_moduledata.py`, `validate_xml_schemas.py --live` |
-| 11 | Test riders | Claude | a `troops_*_test.xml` (CustomGame only) | spawnable troops | full test suite |
+| 10 | Armory data | Claude, Kit closed | `tools/apply_animalia_armory.py` (Animalia), `tools/apply_wildmesh_armory.py` (WildMesh3D) | Monsters (with `taom_body_length`), action sets, action types, items, English loc rows | wiring tests (WildMesh: the writer's `LiveRecipeParityTests`), `audit_action_set_parity.py`, `validate_moduledata.py`, `validate_xml_schemas.py --live` |
+| 11 | Test riders | Claude | `ModuleData/test_riders/<pack>.xml` (CustomGame only) | spawnable troops | full test suite |
 | 12 | The attack | Claude | a small feature on the elephant-like engine | `Main/Features/<Name>/` | tests, then a build and deploy |
 | 13 | In game, then size | Mike, then Claude | Custom Battle + console | verdicts, the Monster's `taom_body_length` | logs clean, Mike's eye |
 
@@ -62,8 +62,10 @@ A pack shipped as `.blend` files (WildMesh3D, #794: [wildmesh-mounts.md](../feat
 Unreal: `tools/blender/export_blend_pack.py --pack <key>=<file.blend> --out <dir> --fps 30` writes the same
 layout (one FBX per mesh part, one per clip). It skins bone-parented parts (antlers, tusks) onto their bone at
 weight 1 in the rest pose, since the reskin moves an unweighted vertex with the global fit only, and resamples
-clips to 30 fps. Before picking a gait, check its loop per mapped bone and its Root bone path: a vendor's
-`_F` name does not prove a straight, looping clip (gotchas).
+clips to 30 fps on evenly spaced source times from the first frame to the closing pose (`sample_times`). Its
+`.DONE` says "ok" only when every pack's round trip passed (bones, fps, frame range). Before picking a gait, check its
+loop per mapped bone and its Root bone path: a vendor's `_F` name does not prove a straight, looping clip
+(gotchas). Export every clip you will use in one run with one regex, so the report records it.
 
 **2. Reskin.** One run per animal; a variant is a set of parts joined per LOD (body + antler set).
 ```
@@ -86,7 +88,10 @@ blender-launcher.exe -b -P tools/blender/retarget_animalia_to_horse.py -- --temp
 ```
 The retarget carries each bone's motion through the rotation the mesh was bent by, so a clip's rest frame is the
 horse rest. Pilot three clips (a walk, an idle, an attack) with `--only` and read the side-by-side renders
-(retarget left, the pack's own mesh right) before the full run.
+(retarget left, the pack's own mesh right) before the full run. Blender's FBX exporter truncates frame times to
+ticks, and for some clip lengths the last key lands one tick short, so the Kit compiled that master one frame short;
+the retarget exports inside `tools/blender/fbx_exact_times.py`'s `exact_fbx_times()`, and its report records
+`ktime_fixed` for each clip it saved.
 
 **4. Textures** at 1K (Mike's rule for these packs): `convert_tripo_prop_textures.py --src <export>\textures\Textures
 --match <set prefix> --stem <kit material name> --dst <dir> --max-size 1024`. Name each set exactly as the FBX
@@ -111,14 +116,22 @@ messages should be the seven `*_nub_notused` "ignored joint" lines: the template
 rig needs `-BoneNum`); an EMPTY master with another bone count in the same folder is reported WRONG RIG and left
 alone. The count is a rig check only between rigs whose counts differ: the horse's 32 is unique in the Armory, but
 the chariot and the elephant both have 60.
-Rerun the census, and the clip generator's `-Verify` (stage 8), after any clip re-import.
+Rerun the census, and the clip generator's `-Verify` (stage 8), after any clip re-import. A RE-import of an existing
+master (the same FBX name replaced under `AssetSources`) kept both its `horse_skeleton` reference and its GUID
+(2026-10-15, 74 WildMesh masters), so its clips still name it; only a master whose length changed needs new clips.
 
 **8. Clip resources.** `powershell.exe -File tools\gen_animalia_anim_clips.ps1` (dry run), then `-Apply`. Each clip
 is the vanilla horse clip `as_horse` binds to the same action, cloned (flags, priority, blends, sounds and usages
 verbatim), with the measured travel and step points. Gaits get a `_stand` twin; the standing pace gets a
 `_movement` clip; turns and jumps are left to the horse (see gotchas). `-Pack` picks the pack (`animalia` by
 default, `wildmesh`); a new pack is an entry in `$PLANS`. A gait one animal borrows from another gets no clip:
-the action set binds the lender's.
+the action set binds the lender's. A measured clip's master must hold the measured frames plus the rest frame:
+`-Verify` reports a short one as SHORT and exits 1, and the dry run refuses it (`$FRAME_EXEMPT` names the one
+master allowed to differ, with its reason). A measure recorded at another frame rate than 30 is refused too.
+**To regenerate a clip** (a re-measure, a master that changed length): the generator never overwrites, so move the
+clip files out of the Armory first (to a backup folder outside `Modules`; 2026-10-15 used
+`E:\LOTRAOMAssets\_clip_backup\<pack>_r1_<date>`), run `-Apply`, and open and close the Kit once for their cache
+entries (stage 9).
 
 **9. Register the clips (Mike):** open the Kit once and close it. A clip package without a RuntimeDataCache entry
 does not load in game; masters never get one and play anyway.
@@ -129,19 +142,26 @@ does not load in game; masters never get one and play anyway.
 `_map` twin the campaign map requires (`MobilePartyVisual` looks up `ActionSetCode + "_map"` and throws on a
 miss) and the `_town_and_village` twin that only mirrors vanilla), the attack action declared `actt_kick` and bound, the
 Horse items with `body_length="100"`, the placeholder `Items.xsd` requires (the size is the Monster's
-`taom_body_length`, stage 13). The dry run must print
+`taom_body_length`, stage 13), and the items' English names in the Armory's root
+`Languages/loc_LOTRAOM_horses.xml` (the 12 languages follow through `/localize`). The dry run must print
 all five steps; nothing is written unless every step can succeed. Every edit is a byte-faithful insert with a write-once `.bak-*` beside it; record it in a ledger
-([lotrlome-animalia-changes.md](../reference/lotrlome-animalia-changes.md)).
+([lotrlome-animalia-changes.md](../reference/lotrlome-animalia-changes.md),
+[lotrlome-wildmesh-changes.md](../reference/lotrlome-wildmesh-changes.md)). The WildMesh writer works per animal:
+a new animal is a row in its tables (`MONSTERS`, `OVERRIDES`, `ITEM_STATS`) and one `--apply` inserts only that
+animal; an animal partly present in a file is refused. Refresh `docs/reference/lotrlome-armory-snapshot/action_sets.xml`
+from the live file in the same change; the WildMesh parity test fails when the snapshot lacks the writer's sets.
 
-**11. Test riders.** Clone a culture's cavalry troop into `troops/troops_<name>_test.xml`, registered in
-`Main/_Module/SubModule.xml` for **CustomGame only**, ids starting `taom_test_`, every Horse slot with a harness.
-Exempt the riders from the armour and melee ladders (`tools/taom_schema.py` `_ARMOUR_LADDER_EXEMPT`,
-`tools/melee_ladders.json`), or the validator groups their file as a kingdom and skews every culture's median;
-and add the `taom_test_` prefix to the recruitment-reachability test's exemptions (`VolunteerRecruitmentServiceTests`,
-removed with the #646 riders for v2.0.31). The riders show in every Custom
-Battle's picker for their culture, in English in every language: delete the file and its exemptions before a
-player release (or set `is_obsolete="true"` to hide them; `taom.spawn_troops` still finds them). Deploy the two repo files by copy
-(the deployed `SubModule.xml` is otherwise identical to the repo's) rather than a build that ships every
+**11. Test riders.** Clone a culture's cavalry troop into `ModuleData/test_riders/<pack>.xml`, registered in
+`Main/_Module/SubModule.xml` for **CustomGame only**, ids starting `taom_test_`, every Horse slot with a harness. The
+folder is outside `troops/`, so the tools and tests that read `troops/troops_*.xml` (ladders, generators, the
+recruitment-reachability test) never see the riders and no exemption is needed; the dwarf-mount, harness, reference
+and face gates read every ModuleData file and still check them, and `taom_npccharacter.json` lists the folder. Strip
+the donor's `<upgrade_targets>` and keep one roster per harness variant. Copy this header into the file, filled in,
+because every sentence of it must stay true: "Registered for CustomGame only, so no campaign or save loads them.
+They are NOT hidden from the Custom Battle army picker, which lists every Soldier of a culture. `/release` step 5
+blocks a player release while this file exists; delete it and its SubModule.xml block before one." (Or set
+`is_obsolete="true"` to hide them; `taom.spawn_troops` still finds them.) Deploy the two repo files by copy, and
+delete a moved file's old installed copy by hand (deployment only adds files), rather than a build that ships every
 session's uncommitted code.
 
 **12. The attack.** A small feature on the shared elephant-like engine (the ram's and great elk's tree): config
@@ -154,10 +174,11 @@ the horse usage set fires that itself. [animalia-elk-moose.md](../features/anima
 
 **13. In game, then size.** Custom Battle with cheat mode, console:
 ```
-taom.spawn_troops taom_test_<animal>_rider 5 ally
-taom.spawn_troops taom_test_<animal>_rider 5 enemy
+taom.spawn_troops <test rider id> 5 ally
+taom.spawn_troops <test rider id> 5 enemy
 ```
-Read the TAOM log (`<game>\bin\Win64_Shipping_Client\Logs\taom_debug_*.log`) for `[MonsterSize]` (the sizes
+The rider ids are the stage 11 file's (the Animalia riders were `taom_test_<animal>_rider`, the WildMesh ones
+`taom_test_wildmesh_<animal>_rider`). Read the TAOM log (`<game>\bin\Win64_Shipping_Client\Logs\taom_debug_*.log`) for `[MonsterSize]` (the sizes
 applied), `[MissionDiag] ActionSet '...' used by ... monster=...` and the feature's own `[Animalia]` lines, and the
 engine's `rgl_log_*.txt` (one expected "taom_body_length ... not declared" line per sized Monster; the engine
 prints it through the same call as the loader's `opening` lines, which land there).
@@ -181,7 +202,10 @@ changing it (withers and total height); a resize is one XML edit and a new Custo
 | A looping turn would double the turn | the retarget folds a turn clip's yaw into the pose, and the engine turns the agent too | leave turns to the horse, or re-export the turns with the yaw dropped |
 | A jump would fly twice as high | the pack's jumps lift the pelvis about 2 m, and the engine flies a mount's jump | leave jumps to the horse until they are cut into start / loop / end with the lift removed |
 | A slow-looking trot | the pack's trot covers 6.3 m per loop, so at horse trot speeds the legs play slower | correct (no slide); tune Duration or LoopDisplacement if it reads wrong |
-| The validator reported a new "kingdom" | a `troops_*.xml` file is grouped by name | exempt the test riders (stage 11) |
+| The validator reported a new "kingdom" | a `troops_*.xml` file is grouped by name | test riders go in `test_riders/` (stage 11) |
+| A loop that pops once per cycle, and every gate green (WildMesh) | the Kit compiled the master one frame short: Blender's exporter truncated its last key time | `exact_fbx_times()` in the retarget; `-Verify` SHORT (stage 8) |
+| A loop seam of several degrees after the 30 fps resample (WildMesh) | fixed-rate steps from the first frame ended short of the closing pose | `sample_times` spreads the samples to the closing pose (stage 1) |
+| Two footsteps on one hoof, none at its stance | a 2 to 4 frame toe scuff was taken as the plant | `plant_start` keeps only contacts at least half the hoof's longest (stage 5) |
 | A neck stretched 2 to 3.8 times (WildMesh) | every WildMesh neck is far shorter than the horse's | `--profile keepneck` |
 | A `_F` gait that pops at its loop or drifts sideways (WildMesh goat, warthog) | the vendor mislabeled turns and shipped clips that never loop | check each gait per mapped bone and Root path; borrow a clean `horse_skeleton` clip |
 | A gait measured at 0 m (WildMesh) | the clip plays in place: no root travel | stride travel (stage 5) |
@@ -194,7 +218,8 @@ What is pack-specific lives mainly in four tables: the bone map
 (`tools/blender/animalia_to_horse_map.json`: `joints`, `chains`, `weights`, `hoof_split`, `profiles`, and an
 optional `measure`; the WildMesh one is `wildmesh_to_horse_map.json`), the clip plan (`$PLANS.<pack>` in
 `tools/gen_animalia_anim_clips.ps1`, with the pack's `-Pack` value and `-Masters` default), the action overrides
-(`OVERRIDES` in `tools/apply_animalia_armory.py`), and the measured stems (`--gaits` / `--deaths` of
+(`OVERRIDES` in `tools/apply_animalia_armory.py`, or in `tools/apply_wildmesh_armory.py` for a WildMesh3D animal),
+and the measured stems (`--gaits` / `--deaths` of
 `measure_animalia_clips.py`, written to `<pack>_<animal>_clip_measure.json`). Still hard-coded, and to change for a
 new pack: in `tools/apply_animalia_armory.py` the Monster file and its path, `SUBMODULE_BLOCK`, `ITEMS`, `ANTLER`,
 the id tuples, the clip folder and the `as_animalia_` / `anim_animalia_` prefixes; and the two animals built into

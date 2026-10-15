@@ -2,16 +2,22 @@
 <!--
   TEST RIDERS for the WildMesh3D mounts (#794, docs/features/wildmesh-mounts.md), 2026-10-14.
 
-  Clones that ride the five horse-skeleton reskins, so their retargeted clips can be watched in a Custom Battle:
-      taom.spawn_troops taom_test_wildmesh_boar_rider 5 ally
-  The boar, warthog and goat riders are ironpass_ram_rider (Erebor, race dwarf), alternating the light and the
-  heavy ram barding across their rosters (Mike, 2026-10-14: ram harnesses for the dwarf mounts); the deer and
-  moose riders are mirkwood_rochenlas with the elk saddle. Every Horse slot has its harness
-  (MOUNT_WITHOUT_HARNESS), and the three dwarf mounts are in WAR_RAM_MOUNT_IDS (MOUNTED_DWARF).
-  Registered for CustomGame ONLY (Main/_Module/SubModule.xml), so no campaign, save or culture roster ever sees
-  them; nothing upgrades into or out of them. Remove this file, its SubModule block and the riders' exemptions
-  (tools/taom_schema.py _ARMOUR_LADDER_EXEMPT, tools/melee_ladders.json exempt_troops; the taom_test_ prefix in
-  VolunteerRecruitmentServiceTests) before the next player release.
+  Clones that ride the five horse-skeleton reskins, so their retargeted clips can be watched in a Custom Battle.
+  Spawn one with:
+      taom.spawn_troops taom_test_wildmesh_<animal>_rider 5 ally
+  where <animal> is boar, warthog, mountaingoat, deer or moose.
+  The boar, warthog and goat riders are ironpass_ram_rider (Erebor, race dwarf), with the light ram barding on
+  roster 1 and the heavy one on roster 2 (Mike, 2026-10-14: ram harnesses for the dwarf mounts); the deer and
+  moose riders are mirkwood_rochenlas with the elk saddle. Every Horse slot has its harness (MOUNT_WITHOUT_HARNESS),
+  and the three dwarf mounts are in DWARF_MOUNT_IDS (MOUNTED_DWARF).
+
+  Registered for CustomGame ONLY (Main/_Module/SubModule.xml), so no campaign or save loads them. They are NOT
+  hidden from the Custom Battle army picker: it lists them under the Erebor and Mirkwood cavalry, because they
+  are Soldiers (ArmyCompositionGroupVM lists every IsSoldier and not IsObsolete character).
+  The file sits in test_riders/, not troops/, so tools that glob troops/troops_*.xml do not read it.
+
+  RELEASE: /release step 5 (git grep -l taom_test_, run over Main/_Module) blocks a player release while this
+  file exists. Delete this file and its SubModule.xml block before one.
 -->
 
 <NPCCharacters>
@@ -53,75 +59,7 @@
                 id="Throwing"
                 value="45" />
         </skills>
-        <upgrade_targets>
-            <upgrade_target
-                id="NPCCharacter.ironpass_goat_charger" />
-        </upgrade_targets>
         <Equipments>
-            <EquipmentRoster>
-                <equipment
-                    slot="Item0"
-                    id="Item.sm_dwarf_erebor_spear_a" />
-                <equipment
-                    slot="Item1"
-                    id="Item.sm_dwarf_erebor_shield_metal_a" />
-                <equipment
-                    slot="Item2"
-                    id="Item.sm_dwarf_iron_axe_a" />
-                <equipment
-                    slot="Head"
-                    id="Item.sk_dwarf_iron_helmet_med_c2" />
-                <equipment
-                    slot="Body"
-                    id="Item.sk_dwarf_iron_chest_heavy_c" />
-                <equipment
-                    slot="Cape"
-                    id="Item.sk_dwarf_iron_pauldron_medium_b" />
-                <equipment
-                    slot="Gloves"
-                    id="Item.sk_dwarf_iron_bracer_med_b1" />
-                <equipment
-                    slot="Leg"
-                    id="Item.sk_dwarf_iron_boots_med_b1" />
-                <equipment
-                    slot="Horse"
-                    id="Item.taom_wildmesh_boar_a" />
-                <equipment
-                    slot="HorseHarness"
-                    id="Item.taom_ram_barding_light_a" />
-            </EquipmentRoster>
-            <EquipmentRoster>
-                <equipment
-                    slot="Item0"
-                    id="Item.sm_dwarf_erebor_spear_a" />
-                <equipment
-                    slot="Item1"
-                    id="Item.sm_dwarf_erebor_shield_metal_a2" />
-                <equipment
-                    slot="Item2"
-                    id="Item.sm_dwarf_iron_axe_a" />
-                <equipment
-                    slot="Head"
-                    id="Item.sk_dwarf_iron_helmet_med_c2" />
-                <equipment
-                    slot="Body"
-                    id="Item.sk_dwarf_iron_chest_heavy_c" />
-                <equipment
-                    slot="Cape"
-                    id="Item.sk_dwarf_iron_pauldron_medium_d" />
-                <equipment
-                    slot="Gloves"
-                    id="Item.sk_dwarf_iron_bracer_med_a1" />
-                <equipment
-                    slot="Leg"
-                    id="Item.sk_dwarf_iron_boots_med_b1" />
-                <equipment
-                    slot="Horse"
-                    id="Item.taom_wildmesh_boar_a" />
-                <equipment
-                    slot="HorseHarness"
-                    id="Item.taom_ram_barding_heavy_a" />
-            </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
@@ -226,75 +164,7 @@
                 id="Throwing"
                 value="45" />
         </skills>
-        <upgrade_targets>
-            <upgrade_target
-                id="NPCCharacter.ironpass_goat_charger" />
-        </upgrade_targets>
         <Equipments>
-            <EquipmentRoster>
-                <equipment
-                    slot="Item0"
-                    id="Item.sm_dwarf_erebor_spear_a" />
-                <equipment
-                    slot="Item1"
-                    id="Item.sm_dwarf_erebor_shield_metal_a" />
-                <equipment
-                    slot="Item2"
-                    id="Item.sm_dwarf_iron_axe_a" />
-                <equipment
-                    slot="Head"
-                    id="Item.sk_dwarf_iron_helmet_med_c2" />
-                <equipment
-                    slot="Body"
-                    id="Item.sk_dwarf_iron_chest_heavy_c" />
-                <equipment
-                    slot="Cape"
-                    id="Item.sk_dwarf_iron_pauldron_medium_b" />
-                <equipment
-                    slot="Gloves"
-                    id="Item.sk_dwarf_iron_bracer_med_b1" />
-                <equipment
-                    slot="Leg"
-                    id="Item.sk_dwarf_iron_boots_med_b1" />
-                <equipment
-                    slot="Horse"
-                    id="Item.taom_wildmesh_warthog_a" />
-                <equipment
-                    slot="HorseHarness"
-                    id="Item.taom_ram_barding_light_a" />
-            </EquipmentRoster>
-            <EquipmentRoster>
-                <equipment
-                    slot="Item0"
-                    id="Item.sm_dwarf_erebor_spear_a" />
-                <equipment
-                    slot="Item1"
-                    id="Item.sm_dwarf_erebor_shield_metal_a2" />
-                <equipment
-                    slot="Item2"
-                    id="Item.sm_dwarf_iron_axe_a" />
-                <equipment
-                    slot="Head"
-                    id="Item.sk_dwarf_iron_helmet_med_c2" />
-                <equipment
-                    slot="Body"
-                    id="Item.sk_dwarf_iron_chest_heavy_c" />
-                <equipment
-                    slot="Cape"
-                    id="Item.sk_dwarf_iron_pauldron_medium_d" />
-                <equipment
-                    slot="Gloves"
-                    id="Item.sk_dwarf_iron_bracer_med_a1" />
-                <equipment
-                    slot="Leg"
-                    id="Item.sk_dwarf_iron_boots_med_b1" />
-                <equipment
-                    slot="Horse"
-                    id="Item.taom_wildmesh_warthog_a" />
-                <equipment
-                    slot="HorseHarness"
-                    id="Item.taom_ram_barding_heavy_a" />
-            </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
@@ -399,75 +269,7 @@
                 id="Throwing"
                 value="45" />
         </skills>
-        <upgrade_targets>
-            <upgrade_target
-                id="NPCCharacter.ironpass_goat_charger" />
-        </upgrade_targets>
         <Equipments>
-            <EquipmentRoster>
-                <equipment
-                    slot="Item0"
-                    id="Item.sm_dwarf_erebor_spear_a" />
-                <equipment
-                    slot="Item1"
-                    id="Item.sm_dwarf_erebor_shield_metal_a" />
-                <equipment
-                    slot="Item2"
-                    id="Item.sm_dwarf_iron_axe_a" />
-                <equipment
-                    slot="Head"
-                    id="Item.sk_dwarf_iron_helmet_med_c2" />
-                <equipment
-                    slot="Body"
-                    id="Item.sk_dwarf_iron_chest_heavy_c" />
-                <equipment
-                    slot="Cape"
-                    id="Item.sk_dwarf_iron_pauldron_medium_b" />
-                <equipment
-                    slot="Gloves"
-                    id="Item.sk_dwarf_iron_bracer_med_b1" />
-                <equipment
-                    slot="Leg"
-                    id="Item.sk_dwarf_iron_boots_med_b1" />
-                <equipment
-                    slot="Horse"
-                    id="Item.taom_wildmesh_mountaingoat_a" />
-                <equipment
-                    slot="HorseHarness"
-                    id="Item.taom_ram_barding_light_a" />
-            </EquipmentRoster>
-            <EquipmentRoster>
-                <equipment
-                    slot="Item0"
-                    id="Item.sm_dwarf_erebor_spear_a" />
-                <equipment
-                    slot="Item1"
-                    id="Item.sm_dwarf_erebor_shield_metal_a2" />
-                <equipment
-                    slot="Item2"
-                    id="Item.sm_dwarf_iron_axe_a" />
-                <equipment
-                    slot="Head"
-                    id="Item.sk_dwarf_iron_helmet_med_c2" />
-                <equipment
-                    slot="Body"
-                    id="Item.sk_dwarf_iron_chest_heavy_c" />
-                <equipment
-                    slot="Cape"
-                    id="Item.sk_dwarf_iron_pauldron_medium_d" />
-                <equipment
-                    slot="Gloves"
-                    id="Item.sk_dwarf_iron_bracer_med_a1" />
-                <equipment
-                    slot="Leg"
-                    id="Item.sk_dwarf_iron_boots_med_b1" />
-                <equipment
-                    slot="Horse"
-                    id="Item.taom_wildmesh_mountaingoat_a" />
-                <equipment
-                    slot="HorseHarness"
-                    id="Item.taom_ram_barding_heavy_a" />
-            </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
@@ -572,10 +374,6 @@
                 id="Throwing"
                 value="140" />
         </skills>
-        <upgrade_targets>
-            <upgrade_target
-                id="NPCCharacter.mirkwood_beleglas" />
-        </upgrade_targets>
         <Equipments>
             <EquipmentRoster>
                 <equipment
@@ -652,10 +450,6 @@
                 id="Throwing"
                 value="140" />
         </skills>
-        <upgrade_targets>
-            <upgrade_target
-                id="NPCCharacter.mirkwood_beleglas" />
-        </upgrade_targets>
         <Equipments>
             <EquipmentRoster>
                 <equipment

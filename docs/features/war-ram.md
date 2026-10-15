@@ -264,7 +264,7 @@ The head-butt fires under ANY rider, the player included, as the warg's bite doe
 | `Main/_Module/ModuleData/special_resources/troop_resource_costs.xml` | The Gems gate at 31+ |
 | `Main/_Module/ModuleData/elite_emissary/elite_emissary_config.xml` | Erebor emissary offers for the three gated tiers |
 | `Main/_Module/ModuleData/TroopWeights/troop_weights.xml` | 2.0 for the armoured rungs, herder left at the 1.0 default |
-| `tools/taom_schema.py` | `WAR_RAM_MOUNT_IDS` allowlist for `MOUNTED_DWARF` |
+| `tools/taom_schema.py` | `DWARF_MOUNT_IDS` allowlist for `MOUNTED_DWARF` (the ram and the WildMesh3D dwarf mounts) |
 | **`docs/reference/lotrlome-war-ram-changes.md`** | **The external-module ledger. `LOTRLOME_Armory` is not tracked by this repo and a reinstall reverts it** |
 
 ## Troop tree

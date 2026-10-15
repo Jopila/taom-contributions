@@ -137,7 +137,7 @@ Exported from `E:\LOTRAOMAssets\Troll_Animation_5_4` (UE 5.4.4) on 2026-09-23 wi
 | | Elk | Moose |
 |---|---|---|
 | Skeleton | `Elk_M_Skeleton`, 41 tracks (`RigRoot` becomes the armature object, 40 bones) | `Moose_M_Skeleton`, 44 tracks (43 bones) |
-| Clips | 173 at 30 fps: 99 root-motion (23 additive `Add_*`) and 74 in-place `-IP` copies | 97: 57 root-motion and 40 `-IP` |
+| Clips | 173 at 30 fps: 99 root-motion (23 additive `Add_*`) and 74 in-place `-IP` copies. Not all of the exported FBX are 30 fps: `Loco_WalkBack` carries 60 fps (re-measure, 2026-10-15), and the retarget keys source frames one to one at 30, so the shipped walk-back [Likely] plays at half speed (a follow-up in `docs/reviews/rca-wildmesh-mounts-2026-10-15.md`) | 97: 57 root-motion and 40 `-IP`. The `Death_L` / `Death_R` FBX declare no frame rate and Blender reads them as 25 fps, so the deaths [Likely] play about 14 per cent fast (the pipeline lens, 2026-10-15; same follow-up) |
 | Meshes | body, four antler sets (`04`, `06`, `08`, `Spike`), LOD1 to LOD4 as separate assets | body, `AntlersBig`, `AntlersSmall`, LODs |
 | Textures | body and antler sets (BaseColor, Normal, Roughness, AO), 4K | one set for body and antlers (no AO), 4K |
 | Not used | GFur fur (needs the GFur plugin; nothing in Bannerlord renders it), blend spaces, the demo map | same |

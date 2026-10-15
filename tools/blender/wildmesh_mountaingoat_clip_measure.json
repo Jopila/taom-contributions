@@ -11,18 +11,18 @@
    "fit_scale": 1.3818,
    "travel_mode": "stride",
    "fps": 30.0,
-   "travel_source_m": 1.3296,
-   "loop_displacement_m": 1.8372,
-   "speed_mps_at_30fps": 1.253,
+   "travel_source_m": 1.3244,
+   "loop_displacement_m": 1.8301,
+   "speed_mps_at_30fps": 1.248,
    "plants": {
-    "LF": 0.4773,
+    "LF": 0.5,
     "RF": 0.9773,
     "LB": 0.2273,
     "RB": 0.7273
    },
    "plants_sorted": [
     0.2273,
-    0.4773,
+    0.5,
     0.7273,
     0.9773
    ]
@@ -37,9 +37,9 @@
    "fit_scale": 1.3818,
    "travel_mode": "stride",
    "fps": 30.0,
-   "travel_source_m": 1.7153,
-   "loop_displacement_m": 2.3702,
-   "speed_mps_at_30fps": 2.735,
+   "travel_source_m": 1.733,
+   "loop_displacement_m": 2.3947,
+   "speed_mps_at_30fps": 2.763,
    "plants": {
     "LF": 0.5385,
     "RF": 0.0,
@@ -63,20 +63,20 @@
    "fit_scale": 1.3818,
    "travel_mode": "stride",
    "fps": 30.0,
-   "travel_source_m": 2.9623,
-   "loop_displacement_m": 4.0933,
-   "speed_mps_at_30fps": 5.848,
+   "travel_source_m": 3.0084,
+   "loop_displacement_m": 4.157,
+   "speed_mps_at_30fps": 5.939,
    "plants": {
     "LF": 0.5238,
     "RF": 0.0,
-    "LB": 0.0,
+    "LB": 0.9524,
     "RB": 0.4762
    },
    "plants_sorted": [
     0.0,
-    0.0,
     0.4762,
-    0.5238
+    0.5238,
+    0.9524
    ]
   }
  }

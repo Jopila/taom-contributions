@@ -379,7 +379,7 @@ Code: No code changes needed
 5. Put `<equipment slot="Horse" id="Item.<your item id>" />` in every battle `EquipmentRoster` of
    every troop that rides it, under `Main/_Module/ModuleData/troops/` and `.../equipmentsets/`. A
    troop with the mount in one set and not another spawns mounted only some of the time.
-6. If the riders are dwarves, add the item id to `WAR_RAM_MOUNT_IDS` in `tools/taom_schema.py:186`.
+6. If the riders are dwarves, add the item id to `DWARF_MOUNT_IDS` in `tools/taom_schema.py`.
    Every other mount handed to a dwarf is a `MOUNTED_DWARF` error on purpose, and the list is pinned
    by id rather than by prefix so a new one gets looked at.
 7. Restart the game fully and check the mount spawns WITH its rider. A riderless mount means the
@@ -394,7 +394,7 @@ Code: No code changes needed for a reskin. A bespoke creature needs a behaviour 
 **Resize a mount.**
 
 0. First look at the item's Monster (`monster="Monster.<id>"`). If that `<Monster>` carries `taom_body_length`
-   (the great elk and the Animalia elk and moose do), the size lives THERE: TAOM copies it into the item at every
+   (the great elk, the Animalia elk and moose, and the five WildMesh3D mounts do), the size lives THERE: TAOM copies it into the item at every
    game init, so an edit to the item is undone in game, and the data tests pin such items at the placeholder 100.
    Change `taom_body_length` on the Monster instead ([monster-size.md](../features/monster-size.md)). Otherwise:
 1. On-screen size is `body_length / 100` of the authored mesh, and `body_length` is on the
@@ -454,7 +454,7 @@ Code: No code changes needed
 3. Remove the `Type="Horse"` `<Item>` and its bardings from `LOTRAOM_horses.xml`.
 4. Only now remove the `<Monster>` file and its `<XmlName id="Monsters">` row in
    `LOTRLOME_Armory/SubModule.xml`. If the rider was a dwarf, take the id back out of
-   `WAR_RAM_MOUNT_IDS` in `tools/taom_schema.py`.
+   `DWARF_MOUNT_IDS` in `tools/taom_schema.py`.
 5. Sweep for what you missed. A deletion that leaves references behind is a failure TAOM has already
    shipped: a seven-commit Armory reorganisation broke 212 item references across 159 consumers and
    was caught from a screenshot rather than from a gate

@@ -13,6 +13,8 @@ Feature: [wildmesh-mounts.md](../features/wildmesh-mounts.md).
 | Masters' skeleton reference set to `horse_skeleton` (74, write-once `.bak-preskel` beside each) | `Assets/creature/creatures/animations/<animal>/` | `tools/wire_anim_master_skeletons.ps1 -Apply` |
 | 96 clips `anim_wildmesh_<animal>_<stem>[_stand\|_movement]_anm.tpac` | beside their masters | `tools/gen_animalia_anim_clips.ps1 -Pack wildmesh -Apply` |
 | RuntimeDataCache entries for the clips | `RuntimeDataCache/` | one Kit open and close (Mike) |
+| 2026-10-15, round 2: the 74 clip FBX replaced in place (uniform resample, exact FBX times; staged in `E:\LOTRAOMAssets\_kit_ready\wildmesh_r2`, the round-1 FBX stay in `_kit_ready\wildmesh`) | `AssetSources/creature/creatures/animations/<animal>/` | Claude (copy), then Mike's Kit re-import of the 74 masters (GUIDs kept) |
+| 2026-10-15: 37 clips regenerated (the 34 gait clips and three deer idles); the round-1 files moved to `E:\LOTRAOMAssets\_clip_backup\wildmesh_r1_20261015` | beside their masters | `gen_animalia_anim_clips.ps1 -Pack wildmesh -Apply`, then one Kit open and close |
 
 ## Data (2026-10-14, `tools/apply_wildmesh_armory.py --apply`, backups `*.bak-wildmesh-20261014`)
 
@@ -23,12 +25,23 @@ Feature: [wildmesh-mounts.md](../features/wildmesh-mounts.md).
 | `ModuleData/action_sets.xml` | `as_wildmesh_<animal>` (children of `as_horse`, 24 or 25 overrides each) with `_town_and_village` and `_map` twins, before the `/WARG` marker |
 | `ModuleData/LOTRLOME_items/LOTRAOM_horses.xml` | `taom_wildmesh_<animal>_a` after `taom_animalia_moose_a`: War Boar, Bristleback Boar, Iron Hills Goat (Erebor, the war ram's stats), Mirkwood Stag, Greenwood Moose (Mirkwood, the Animalia elk's and moose's stats); not merchandise |
 
-## Installed TAOM module (2026-10-14, test riders only)
+## Data (2026-10-15, review fixes, backups `*.bak-wildmesh-20261015-082540`)
 
-The installed `Modules/TAOM/SubModule.xml` was an older build than the repo's, so it was not replaced: the
-test riders' registration block alone was inserted after `troops_mirkwood` (backup
-`SubModule.xml.bak-wildmesh-20261014`), and `ModuleData/troops/troops_wildmesh_test.xml` was copied from the
-repo. A normal build and deploy carries both from the repo afterwards.
+| File | Change |
+|---|---|
+| `ModuleData/Languages/loc_LOTRAOM_horses.xml` | The five English rows `taom_wildmesh_<animal>_a` after `taom_animalia_moose_a`, with the items' own default names. The 12 language folders are owed (`/localize`, paid, Mike's word); until then `check_external_loc_coverage.py` reports +5 untranslated per language |
+
+Since 2026-10-15 the writer works per animal: each step inserts only the animals its file lacks, and each run backs
+up under its own stamp, `*.bak-wildmesh-<YYYYMMDD-HHMMSS>`.
+
+## Installed TAOM module
+
+On 2026-10-14 the test riders' block was first inserted by hand into an older installed `SubModule.xml` (backup
+`SubModule.xml.bak-wildmesh-20261014`). A full build and deploy at 20:56 the same day then replaced the whole file with
+the repo's, so that backup is an older build's (`DependedModuleMetadata ... v1.5.4.*`): **do not restore it**; the
+release sweep (`tools/sweep_module_backups.ps1`) removes it. The riders moved to `ModuleData/test_riders/wildmesh.xml`
+on 2026-10-15; deployment only adds files, so the old installed `ModuleData/troops/troops_wildmesh_test.xml` is
+deleted by hand when the new file is deployed.
 
 ## Replay after a reinstall
 
@@ -43,8 +56,6 @@ repo. A normal build and deploy carries both from the repo afterwards.
 
 ## Removing the test riders
 
-Delete `Main/_Module/ModuleData/troops/troops_wildmesh_test.xml` and its block in `Main/_Module/SubModule.xml`,
-the five `taom_test_wildmesh_*` entries in `tools/taom_schema.py` (`_ARMOUR_LADDER_EXEMPT`) and
-`tools/melee_ladders.json` (`exempt_troops`), and the `taom_test_` prefix in `VolunteerRecruitmentServiceTests`
-when no other test rider remains. The three dwarf mounts stay in `WAR_RAM_MOUNT_IDS` once real dwarf troops
-ride them.
+Delete `Main/_Module/ModuleData/test_riders/wildmesh.xml` and its block in `Main/_Module/SubModule.xml`. The riders
+carry no ladder or recruitment exemptions any more (the file sits outside `troops/`). The three dwarf mounts stay
+in `DWARF_MOUNT_IDS` once real dwarf troops ride them.

@@ -19,8 +19,10 @@ clip plays Source1 = 1 .. Source2 = master Duration - 1, so ONE LOOP = n - 1 fra
               plays in place (root travel under IN_PLACE_M, every WildMesh3D gait, #794) has no root speed, so its
               speed is the median horizontal speed of a planted hoof instead: in place, a hoof on the ground
               slides back at the ground speed the animal would cover ("travel_mode": "stride").
-  plants      per hoof (the map's 'measure' hooves, else the Animalia ankle joints), the first frame of each
-              ground contact (height falls below its minimum + 2 cm) as a fraction of the loop, in [0, 1)
+  plants      per hoof (the map's 'measure' hooves, else the Animalia ankle joints), the first frame of its
+              stance (a ground contact: height within its minimum + 2 cm) as a fraction of the loop, in [0, 1).
+              A brief scuff before the stance is not a plant: only contacts at least half as long as the hoof's
+              longest count (plant_start)
   fall        deaths: the fraction of the clip at which the pelvis first comes within 5 cm of its final height
 The bone names come from the map's optional "measure": {"pelvis": ..., "hooves": {"LF", "RF", "LB", "RB"}}.
 """
@@ -40,15 +42,48 @@ import reskin_animalia_to_horse as rk  # noqa: E402
 DEFAULT_MEASURE = {"pelvis": "RigPelvis",
                    "hooves": {"LF": "RigLFLegAnkle", "RF": "RigRFLegAnkle", "LB": "RigLBLegAnkle", "RB": "RigRBLegAnkle"}}
 IN_PLACE_M = 0.05   # root travel below this over the whole clip: the clip plays in place
+CONTACT_M = 0.02    # a hoof is on the ground within this of its lowest point in the loop
+
+
+def on_ground(zs, loop):
+    """Per frame: is the hoof within CONTACT_M of its lowest point over the loop frames (0..loop-1)."""
+    lo = min(zs[:loop]) + CONTACT_M
+    return [z <= lo for z in zs]
+
+
+def plant_start(zs, loop):
+    """The loop fraction at which a hoof's stance starts, else None.
+
+    Frames 0..loop-1 are a circle (frame `loop` repeats frame 0), so a contact that starts on frame 0 or runs across
+    the wrap is one contact. A toe scuff of a few frames before the stance would win a first-crossing rule (boar
+    WalkMedium_F RF 0.6 for a stance at 0.9714), so only contacts at least half as long as this hoof's longest count;
+    the earliest of those starts. None when the hoof is always on the ground (or never is): no plant to place."""
+    ground = on_ground(zs, loop)[:loop]
+    if all(ground) or not any(ground):
+        return None
+    first_air = ground.index(False)
+    contacts = []   # (start frame, length), walking the circle from just after an airborne frame
+    start, length = None, 0
+    for k in range(1, loop + 1):
+        i = (first_air + k) % loop
+        if ground[i]:
+            if length == 0:
+                start = i
+            length += 1
+        elif length:
+            contacts.append((start, length))
+            length = 0
+    longest = max(n for _, n in contacts)
+    return round(min(s for s, n in contacts if 2 * n >= longest) / loop, 4)
 
 
 def stride_speed(pos, loop):
-    """Median horizontal speed per frame of a hoof while it stays within 2 cm of its lowest point."""
+    """Median horizontal speed per frame of a hoof while it stays within CONTACT_M of its lowest point."""
     speeds = []
     for ps in pos.values():
-        lo = min(p.z for p in ps[:loop]) + 0.02
+        ground = on_ground([p.z for p in ps], loop)
         for i in range(1, loop + 1):
-            if ps[i].z <= lo and ps[i - 1].z <= lo:
+            if ground[i] and ground[i - 1]:
                 dv = ps[i] - ps[i - 1]
                 speeds.append(math.hypot(dv.x, dv.y))
     speeds.sort()
@@ -104,11 +139,7 @@ def measure(path, template_heads, spec, is_death):
            "speed_mps_at_30fps": round(speed_per_frame * 30.0 * fit["scale"], 3)}
     plants = {}
     for k, zs in z.items():
-        lo = min(zs[:loop]) + 0.02
-        # the frame before frame 0 is loop - 1: frame `loop` closes the loop by repeating frame 0, so zs[-1] would
-        # miss a contact that starts on frame 0 (3 plants for 4 hooves on the WildMesh trots, #794)
-        hits = [i for i in range(loop) if zs[i] <= lo and zs[(i - 1) % loop] > lo]
-        plants[k] = round(hits[0] / loop, 4) if hits else None
+        plants[k] = plant_start(zs, loop)
     out["plants"] = plants
     out["plants_sorted"] = sorted(v for v in plants.values() if v is not None)
     if is_death:

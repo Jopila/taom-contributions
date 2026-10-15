@@ -5,8 +5,8 @@
 A mount's size is authored on its **Monster**, as the TAOM attribute `taom_body_length`, instead of on each Horse
 item. TAOM copies it into the `body_length` of every Horse item that names the Monster at game init, so the engine
 builds the mount at that size, and the antler reach of the creatures that opt in follows the live size. A resize is
-one edit in the Monster file: no C# constant, no rebuild. In use on the great elk (110), the Animalia elk (100) and
-the Animalia moose (150).
+one edit in the Monster file: no C# constant, no rebuild. In use on the great elk (110), the Animalia elk (100), the
+Animalia moose (150), and the five WildMesh3D mounts (100, the moose 150; #794).
 
 ## Why This Exists
 
@@ -67,8 +67,8 @@ path, and that dictionary is filled only from the game's own `XmlSchemas` folder
 after Native's. **Accepted cost:** the engine validates the Armory's Monster files against its own `Monsters.xsd`,
 which does not declare `taom_body_length`, so it prints one red "The 'taom_body_length' attribute is not declared"
 line per sized Monster at load. `MBObjectManager.ValidationEventHandler` only prints (`MBObjectManager.cs:1320-1337`)
-and the file loads. The Modding Kit shows the same lines as warnings every time it opens (three today: 110, 100,
-150); Mike saw them on 2026-09-24 and chose to leave them rather than move the sizes into a TAOM-owned file or
+and the file loads. The Modding Kit shows the same lines as warnings every time it opens (one per sized Monster in the
+table below); Mike saw them on 2026-09-24 and chose to leave them rather than move the sizes into a TAOM-owned file or
 patch the message away. TAOM's `tools/validate_xml_schemas.py` accepts the attribute through an explicit allowlist.
 
 ### Component Diagram
@@ -111,6 +111,8 @@ the placeholder 100** when you size its Monster (the schema requires the attribu
 | `taom_elk` (great elk, #636) | `lotr_monster_elk.xml` | 110 | 1.72 m |
 | `taom_animalia_elk` (#646) | `lotr_monster_animalia.xml` | 100 | 1.68 m |
 | `taom_animalia_moose` (#646) | `lotr_monster_animalia.xml` | 150 | 2.74 m |
+| `taom_wildmesh_boar`, `_warthog`, `_mountaingoat`, `_deer` (#794) | `lotr_monster_wildmesh.xml` | 100 | owed (first battle) |
+| `taom_wildmesh_moose` (#794) | `lotr_monster_wildmesh.xml` | 150 | owed (first battle) |
 
 Every other mount keeps its item's `body_length` (the war ram 100, the elephant 130, the mumakil 300). **Never size
 the elephant or the mumakil here:** their howdah and tower prefabs are baked in metres for the item's size, so a
@@ -172,8 +174,9 @@ until its profile also sets `reachScalesWithBody`.
    `[MonsterSize] N Monster size(s), M Horse item(s) resized: <item>=<size>, ...`.
 3. Look: the mount's size, the saddle on it, the rider's seat and camera, and the reach of its attack if it has one.
 4. Record the new value in the creature's ledger, in its replay recipe (`MONSTER_FILE` in
-   `tools/apply_animalia_armory.py` and its test for the Animalia animals; the elk ledger's section 1 for the great
-   elk), and in the table above, or a reinstall's redo reverts it (`LiveRecipeParityTests` fails for the Animalia
+   `tools/apply_animalia_armory.py` and its test for the Animalia animals; `MONSTERS` in
+   `tools/apply_wildmesh_armory.py` for the WildMesh3D animals; the elk ledger's section 1 for the great elk), and in
+   the table above, or a reinstall's redo reverts it (`LiveRecipeParityTests` fails for the Animalia and WildMesh3D
    animals until the recipe says the same).
 
 **In-game checks owed (2026-09-23, after a deploy: the installed 14:45 `TAOM.dll` has no size pass):** the TAOM log shows `[MonsterSize] 3 Monster size(s), 2 Horse item(s) resized: taom_elk_a=110 (was 100), taom_animalia_moose_a=150 (was 100)` (the Animalia elk is 100 on its Monster and its placeholder alike, so it needs no write); the rgl log shows one "The

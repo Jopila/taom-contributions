@@ -29,7 +29,7 @@ lessons/testing-qa.md describes as "a comment is a claim".
 
 NO MOUNTS. Horse and HorseHarness fail here for every assignment, cavalry included, and so does
 Item4, which the installed engine calls ExtraWeaponSlot (a banner is one eligible occupant, not
-the slot's name); GetBattleSetItemIds reads slots 0..11, so anything there would be issued. If a mount is ever wanted, the decision belongs with taom_schema.WAR_RAM_MOUNT_IDS and
+the slot's name); GetBattleSetItemIds reads slots 0..11, so anything there would be issued. If a mount is ever wanted, the decision belongs with taom_schema.DWARF_MOUNT_IDS and
 the MOUNTED_DWARF rule in .claude/rules/moduledata-validation.md, not with a quiet edit here:
 the roster is keyed on the COMMANDER's culture, so it cannot know the player's race.
 

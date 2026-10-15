@@ -25,8 +25,13 @@ What it changes on the way out, and why:
      refused rather than exported.
   3. Clips are resampled to --fps (30) before export. The pack runs at 24 or 25 fps, and everything downstream
      counts 30: gen_animalia_anim_clips.ps1 sets a clip's Duration to its frames / 30, and the Animalia clips
-     the Kit took were 30 fps. Each new frame samples the source at its own time (subframes), so a clip keeps
-     its length in seconds. Then one key per frame, no simplification.
+     the Kit took were 30 fps. Each new frame samples the source at its own time (subframes), spread evenly from
+     the first source frame to the last (sample_times), so a clip keeps its length in seconds and ends on the
+     source's own closing pose. Then one key per frame, no simplification.
+
+The verdict: <out>/export_report.json.DONE says "ok", or "fail: <packs or reason>". A previous run's verdict is
+cleared first, a bad argument or --pack spec writes "fail", a pack fails on an uncaught error, a --clips-regex that
+matches no action, two names that map to one file name, or a round trip that does not match (roundtrip_verdict).
 """
 import argparse
 import json
@@ -45,6 +50,44 @@ EXPORT_COMMON = dict(use_selection=True, object_types={"ARMATURE", "MESH"}, add_
 
 def _safe(name):
     return re.sub(r"[^A-Za-z0-9_]+", "_", name).strip("_")
+
+
+def find_collision(names):
+    """The first two names that _safe() maps to one file name (compared case-insensitively: the disk is), else None."""
+    seen = {}
+    for name in names:
+        key = _safe(name).lower()
+        if key in seen:
+            return seen[key], name
+        seen[key] = name
+    return None
+
+
+def collision_message(kind, pair):
+    return "two %s names map to one file name: %r and %r (both become %r)" % (kind, pair[0], pair[1], _safe(pair[0]))
+
+
+def select_actions(names, clips_regex):
+    """The action names to export, sorted. Baked leftovers (`...fps`) are skipped; a regex that matches nothing, or two
+    matches that share a file name, fail the pack instead of exporting nothing or overwriting a clip."""
+    picked = sorted(n for n in names if re.search(clips_regex, n) and not n.endswith("fps"))
+    if not picked:
+        raise RuntimeError("no action matched --clips-regex %r (%d actions in the file)" % (clips_regex, len(names)))
+    hit = find_collision(picked)
+    if hit:
+        raise RuntimeError(collision_message("action", hit))
+    return picked
+
+
+def sample_times(s, e, src_fps, dst_fps):
+    """Source-frame times for the resample: n = round((e - s) * dst / src) + 1 samples spread evenly over s..e, so the
+    first is the source's first frame and the last its closing pose. A fixed source-rate step from s ends 0.2 to 0.4
+    source frames short whenever the length is not a whole number of output frames (a 7 degree loop seam on 5 of the
+    17 WildMesh gaits); where it is, the times equal the fixed-step ones."""
+    n = int(round((e - s) * dst_fps / src_fps)) + 1
+    if n <= 1:
+        return [float(s)]
+    return [s + (e - s) * i / (n - 1) for i in range(n)]
 
 
 def _select_only(objs, active):
@@ -73,13 +116,13 @@ def _assign(arm, act):
 def resample(arm, act, s, e, src_fps, dst_fps):
     """Bake `act` (frames s..e at src_fps) into a new action keyed at frames 1..n at dst_fps. Returns (action, n)."""
     scn = bpy.context.scene
-    n = int(round((e - s) * dst_fps / src_fps)) + 1
+    times = sample_times(s, e, src_fps, dst_fps)
+    n = len(times)
     _assign(arm, act)
     bones = [pb.name for pb in arm.pose.bones]
     samples = {b: ([], [], []) for b in bones}
     prev = {}
-    for i in range(n):
-        t = min(s + i * src_fps / dst_fps, float(e))
+    for t in times:
         fi = int(math.floor(t + 1e-6))
         scn.frame_set(fi, subframe=max(0.0, t - fi))
         for pb in arm.pose.bones:
@@ -151,6 +194,9 @@ def export_pack(key, blend, out, clips_regex, do_clips, entry, dst_fps):
     bpy.context.view_layer.update()
     skinned = [o for o in meshes if any(m.type == "ARMATURE" and m.object is arm for m in o.modifiers)]
     body = max(skinned, key=lambda o: len(o.data.vertices))
+    hit = find_collision([ob.name for ob in meshes])
+    if hit:
+        raise RuntimeError(collision_message("mesh object", hit))
     os.makedirs(os.path.join(out, "meshes"), exist_ok=True)
     for ob in meshes:
         part = "%s_%s" % (key, _safe(ob.name))
@@ -163,14 +209,14 @@ def export_pack(key, blend, out, clips_regex, do_clips, entry, dst_fps):
                                 "path": path}
     entry["rest_heads"] = {n: list(v) for n, v in _heads(arm).items()}
     if do_clips:
+        picked = select_actions([a.name for a in bpy.data.actions], clips_regex)
         arm.data.pose_position = "POSE"
         cdir = os.path.join(out, "clips", key)
         os.makedirs(cdir, exist_ok=True)
         src_fps = scn.render.fps / scn.render.fps_base
         modes = {pb.name: pb.rotation_mode for pb in arm.pose.bones}
-        for act in sorted(bpy.data.actions, key=lambda a: a.name):
-            if not re.search(clips_regex, act.name) or act.name.endswith("fps"):
-                continue
+        for act_name in picked:
+            act = bpy.data.actions[act_name]
             s, e = (int(round(v)) for v in act.frame_range)
             scn.render.fps, scn.render.fps_base = int(round(src_fps)), 1.0
             baked, n = resample(arm, act, s, e, src_fps, dst_fps)
@@ -218,39 +264,124 @@ def roundtrip_check(entry):
                          "has_action": bool(ad and ad.action),
                          "fps_after_import": scn.render.fps / scn.render.fps_base,
                          "frame_range": list(ad.action.frame_range) if ad and ad.action else None}
+        if label == "clip":
+            # keys 1..n import at 2..n+1 under the importer's default one-frame offset
+            checks[label]["want_frame_range"] = [2, next(iter(entry["clips"].values()))["frames"][1] + 1]
     return checks
+
+
+def roundtrip_verdict(checks, dst_fps):
+    """Why a round trip does not match, as a list of messages (empty = it does). The rest-pose heads must land where
+    the .blend had them, every bone must come back, and a clip must keep --fps and its frame range."""
+    problems = []
+    for label, c in checks.items():
+        if c.get("missing_bones"):
+            problems.append("%s: bones missing after the round trip: %s" % (label, ", ".join(c["missing_bones"])))
+        drift = c.get("head_drift_max_m")
+        if drift is None:
+            problems.append("%s: no bone head could be compared" % label)
+        elif drift > 1e-4:
+            problems.append("%s: rest heads drift %.5f m (limit 0.0001)" % (label, drift))
+        if label != "clip":
+            continue
+        if not c.get("has_action"):
+            problems.append("clip: re-imported without an action")
+        if abs(c.get("fps_after_import", 0.0) - dst_fps) > 1e-3:
+            problems.append("clip: fps %s after import, want %s" % (c.get("fps_after_import"), dst_fps))
+        got, want = c.get("frame_range"), c.get("want_frame_range")
+        if want is not None and (got is None or any(abs(a - b) > 1e-3 for a, b in zip(got, want))):
+            problems.append("clip: frame range %s after import, want %s" % (got, want))
+    return problems
+
+
+def out_dir_from_argv(argv):
+    """The --out folder named in argv (`--out X` or `--out=X`), else the current directory. Never raises."""
+    out = None
+    for i, a in enumerate(argv):
+        if a == "--out":
+            out = argv[i + 1] if i + 1 < len(argv) else None
+        elif a.startswith("--out="):
+            out = a[len("--out="):]
+    return out or os.getcwd()
+
+
+def clear_stale_verdict(out):
+    """Remove the previous run's .DONE: the launcher detaches, so a crash would otherwise leave an old "ok" in place."""
+    path = os.path.join(out, "export_report.json.DONE")
+    if os.path.exists(path):
+        os.remove(path)
+
+
+def write_verdict(out, text):
+    os.makedirs(out, exist_ok=True)
+    with open(os.path.join(out, "export_report.json.DONE"), "w") as fh:
+        fh.write(text)
+
+
+def parse_pack_specs(specs):
+    """[(key, blend)] from `key=path` specs; a spec without a key, a path or an `=`, or a repeated key, is an error."""
+    packs = []
+    for spec in specs:
+        key, sep, blend = spec.partition("=")
+        if not sep or not key or not blend:
+            raise ValueError("--pack %r is not key=path/to/file.blend" % spec)
+        if any(k == key for k, _ in packs):
+            raise ValueError("--pack key %r is given twice" % key)
+        packs.append((key, blend))
+    return packs
+
+
+class _Parser(argparse.ArgumentParser):
+    def error(self, message):
+        raise ValueError(message)   # the default prints and exits, and a detached run would never say why
 
 
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    ap = argparse.ArgumentParser()
+    out = out_dir_from_argv(argv)
+    clear_stale_verdict(out)
+    ap = _Parser()
     ap.add_argument("--pack", action="append", required=True, help="key=path/to/file.blend")
     ap.add_argument("--out", required=True)
     ap.add_argument("--clips-regex", default=".")
     ap.add_argument("--no-clips", action="store_true")
     ap.add_argument("--fps", type=int, default=30, help="clip frame rate after the resample (the pipeline's 30)")
-    args = ap.parse_args(argv)
+    try:
+        args = ap.parse_args(argv)
+        packs = parse_pack_specs(args.pack)
+    except ValueError as exc:
+        write_verdict(out, "fail: %s" % exc)
+        return
     os.makedirs(args.out, exist_ok=True)
     out_json = os.path.join(args.out, "export_report.json")
     report = {"args": vars(args), "packs": {}}
-    for spec in args.pack:
-        key, blend = spec.split("=", 1)
+    for key, blend in packs:
         entry = {}
         try:
             export_pack(key, blend, args.out, args.clips_regex, not args.no_clips, entry, args.fps)
             entry["roundtrip"] = roundtrip_check(entry)
+            problems = roundtrip_verdict(entry["roundtrip"], args.fps)
+            if problems:
+                entry["error"] = "round trip does not match: " + "; ".join(problems)
         except Exception:
             entry["error"] = traceback.format_exc()
         entry.pop("rest_heads", None)
         report["packs"][key] = entry
         with open(out_json, "w") as fh:
             json.dump(report, fh, indent=1, default=str)
-    failed = [k for k, e in report["packs"].items() if "error" in e]
+    report["failed"] = [k for k, e in report["packs"].items() if "error" in e]
     with open(out_json, "w") as fh:
         json.dump(report, fh, indent=1, default=str)
-    with open(out_json + ".DONE", "w") as fh:
-        fh.write("error: " + ", ".join(failed) if failed else "ok")
+    write_verdict(args.out, "fail: " + ", ".join(report["failed"]) if report["failed"] else "ok")
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except BaseException as exc:
+        if isinstance(exc, SystemExit) and not exc.code:
+            raise
+        # anything uncaught (a bpy failure outside a pack's try) must not leave the detached caller waiting
+        write_verdict(out_dir_from_argv(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []),
+                      "fail: %s" % traceback.format_exc().strip().splitlines()[-1])
+        raise

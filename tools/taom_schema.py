@@ -183,24 +183,24 @@ def _lineno(text: str, pos: int) -> int:
     return text.count("\n", 0, pos) + 1
 
 
-# The mounts a dwarf may ride: the Dwarven war ram (issue #515), built for the dwarf
-# skeleton so the rider bone lines up and he does not spawn inside the mesh, and the
-# WildMesh3D dwarf mounts (#794, Mike 2026-10-14: the War Boar, Bristleback Boar and
-# Iron Hills Goat, horse-skeleton reskins at the ram's seat height under the ram
-# bardings; their seat is checked in game). Every other mount stays a hard
-# MOUNTED_DWARF error. The ids are pinned rather than prefix-matched, so a later
-# mount has to be reviewed and added here on purpose instead of arriving by name alone.
-WAR_RAM_MOUNT_IDS = frozenset({
+# The mounts a dwarf may ride: the Dwarven war ram (#515) and the three WildMesh3D dwarf mounts (#794, the
+# War Boar, Bristleback Boar and Iron Hills Goat). All five Monsters inherit the vanilla horse's seat
+# (rider_sit_bone and the rider adders, through base_monster="horse"); what makes them dwarf mounts is their
+# size and the ram bardings that carry the seat mesh, so each seat is an in-game check, and if that check
+# fails the three WildMesh ids come out. Every other mount stays a hard MOUNTED_DWARF error. The ids are
+# pinned rather than prefix-matched, so a later mount has to be reviewed and added here on purpose instead
+# of arriving by name alone.
+DWARF_MOUNT_IDS = frozenset({
     "taom_war_ram_a", "taom_war_ram_b",
     "taom_wildmesh_boar_a", "taom_wildmesh_warthog_a", "taom_wildmesh_mountaingoat_a",
 })
 
 
-def _is_war_ram(mount_id: str) -> bool:
+def _is_dwarf_mount(mount_id: str) -> bool:
     """Allowlist test that tolerates the `Item.` prefix. _mounts_in strips it
     (via _ITEM_REF_ATTR_RE), but a caller reading the raw attribute would not."""
     bare = mount_id[len("Item."):] if mount_id.startswith("Item.") else mount_id
-    return bare in WAR_RAM_MOUNT_IDS
+    return bare in DWARF_MOUNT_IDS
 
 
 # --------------------------------------------------------------------------- #
@@ -976,10 +976,11 @@ class Validator:
     # creation, career starters) are deliberately out of scope -- no NPCCharacter
     # references them, and every culture ships the same sumpter-horse template.
     #
-    # The one carve-out is the war ram (WAR_RAM_MOUNT_IDS, issue #515). A dwarf on
-    # a ram is legal and is genuinely Cavalry, so the group rule relaxes too -- but
-    # only for a character who actually carries one, and only for the ram itself:
-    # every OTHER mount he can reach is still reported.
+    # The carve-out is the set DWARF_MOUNT_IDS (the war ram, issue #515, and the three
+    # WildMesh3D dwarf mounts, #794). A dwarf on one of them is legal and is genuinely
+    # Cavalry, so the group rule relaxes too -- but only for a character who actually
+    # carries one, and only for the ids in that set: every OTHER mount he can reach is
+    # still reported.
     _DWARF_RACE = "dwarf"
     _MOUNTED_GROUPS = ("Cavalry", "HorseArcher")
     _NPC_BLOCK_RE = re.compile(r"<NPCCharacter\b([^>]*?)(?:/>|>(.*?)</NPCCharacter>)", re.S)
@@ -1558,13 +1559,6 @@ class Validator:
         "harad_elephant_rider": "bespoke mount rider at level 51 in light kit (rebalance_troops.SKIP_TROOP_IDS)",
         "harad_mumakil_rider": "bespoke mount rider at level 51 in light kit (rebalance_troops.SKIP_TROOP_IDS)",
         "gondor_ithilien_ranger": "tier-10 light ranger kit by design (docs/features/gondor-ithilien-ranger.md)",
-        # #794 test riders (troops/troops_wildmesh_test.xml, CustomGame only): without this their file is
-        # grouped as a kingdom ('wildmesh_test') and shifts every other culture's field median. Remove with the file.
-        "taom_test_wildmesh_boar_rider": "#794 Custom Battle test rider, not a kingdom's troop (troops_wildmesh_test.xml)",
-        "taom_test_wildmesh_warthog_rider": "#794 Custom Battle test rider, not a kingdom's troop (troops_wildmesh_test.xml)",
-        "taom_test_wildmesh_mountaingoat_rider": "#794 Custom Battle test rider, not a kingdom's troop (troops_wildmesh_test.xml)",
-        "taom_test_wildmesh_deer_rider": "#794 Custom Battle test rider, not a kingdom's troop (troops_wildmesh_test.xml)",
-        "taom_test_wildmesh_moose_rider": "#794 Custom Battle test rider, not a kingdom's troop (troops_wildmesh_test.xml)",
     }
     # Gondor noble lines at engine tier 2 to 7 (level 11 to 36), from the "<Region> Noble" troop
     # trees of KEYforce's spec (lotraom-assets tools/gondor_armors_and_troops.md). Mike, 2026-09-25:
@@ -1773,11 +1767,11 @@ class Validator:
                 for ref in self._EQSET_REF_RE.findall(body):
                     reachable += [(mid, f'roster "{ref}"')
                                   for mid in mounted_rosters.get(ref, ())]
-                rides_a_war_ram = any(_is_war_ram(mid) for mid, _ in reachable)
+                rides_a_dwarf_mount = any(_is_dwarf_mount(mid) for mid, _ in reachable)
 
                 group = self._GROUP_ATTR_RE.search(attrs)
                 if (group and group.group(1) in self._MOUNTED_GROUPS
-                        and not rides_a_war_ram):
+                        and not rides_a_dwarf_mount):
                     issues.append(Issue(
                         severity=Severity.ERROR, code="MOUNTED_DWARF",
                         file=rel, line=line, entry_id=entry_id,
@@ -1792,7 +1786,7 @@ class Validator:
                 # One issue per character, naming the first mount the allowlist
                 # does not cover. Reporting the ram as well would bury the defect.
                 offender = next(((mid, src) for mid, src in reachable
-                                 if not _is_war_ram(mid)), None)
+                                 if not _is_dwarf_mount(mid)), None)
                 if offender is not None:
                     mount, source = offender
                     issues.append(Issue(

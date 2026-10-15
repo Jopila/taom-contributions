@@ -43,7 +43,7 @@ Inside `ModuleData/`, the files that matter most:
 | `crafting_templates.xslt`, `weapon_descriptions.xslt` | XSLT with no `.xml` sibling: pure additive overrides of vanilla's crafting tables. |
 | `skins.xml` | 14 `<race>` blocks, 220,975 lines. The race registry. |
 | `monsters.xml` | 70 `<Monster>`, which is the 14 races times five rows each (base, `_child`, `_settlement`, `_settlement_slow`, `_settlement_fast`). |
-| `Monsters/LOTR/` | 10 creature monsters in 9 files: spider, elephant, mumakil, chariot, warg, fell warg, war ram, great elk, and the Animalia elk and moose (`lotr_monster_animalia.xml`). Three carry TAOM's `taom_body_length` ([monster-size](../features/monster-size.md)). |
+| `Monsters/LOTR/` | Creature monsters, one file per creature family: spider, elephant, mumakil, chariot, warg, fell warg, war ram, great elk, the Animalia elk and moose (`lotr_monster_animalia.xml`), and the WildMesh3D boar, warthog, mountain goat, deer and moose (`lotr_monster_wildmesh.xml`, #794). The great elk's, the Animalia and the WildMesh3D Monsters carry TAOM's `taom_body_length` ([monster-size](../features/monster-size.md)). |
 | `action_sets.xml` | 1,229 `<action_set>`, 0 root-level `<action>`, 26 facegen sets, 6 standalone sets. |
 | `action_types.xml` | 251 `<action>` declarations. |
 | `monster_usage_sets.xml` | 4 sets: spider, elephant, chariot, warg. |

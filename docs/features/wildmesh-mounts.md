@@ -8,17 +8,23 @@ second variant beside the existing mounts (the war ram, the great elk, the Anima
 is replaced. The route is the one the Animalia elk and moose proved (#646):
 [quadruped-pack-to-horse-skeleton-workflow.md](../ai-includes/quadruped-pack-to-horse-skeleton-workflow.md).
 
-**Status (2026-10-14):** stages 1 to 11 are done. The meshes (LOD0 to LOD5), 1K textures, 74 clip masters and 96
-clips are in the live Armory with their RuntimeDataCache entries; the Monsters, action sets and Horse items are
-written (`tools/apply_wildmesh_armory.py`, ledger [lotrlome-wildmesh-changes.md](../reference/lotrlome-wildmesh-changes.md));
-five Custom Battle test riders ride them. Still owed: the in-game checks, the attacks (stage 12), the sizes after
-the first battle, and the campaign riders. No campaign troop rides one yet.
+**Status (2026-10-15):** stages 1 to 11 are done and deep-reviewed
+([rca-wildmesh-mounts-2026-10-15.md](../reviews/rca-wildmesh-mounts-2026-10-15.md)). The meshes (LOD0 to LOD5), 1K
+textures, 74 clip masters and 96 clips are in the live Armory with their RuntimeDataCache entries; the 74 masters
+were re-exported, re-imported and 37 clips regenerated after the review (round 2, below). The Monsters, action sets,
+Horse items and English item names are written (`tools/apply_wildmesh_armory.py`, ledger
+[lotrlome-wildmesh-changes.md](../reference/lotrlome-wildmesh-changes.md)); five Custom Battle test riders ride them.
+Still owed: the in-game checks, the 12 translations of the item names, the attacks (stage 12), the sizes after the
+first battle, and the campaign riders. No campaign troop rides one yet.
 
 **In-game test (Custom Battle, cheat mode, console):**
 `taom.spawn_troops taom_test_wildmesh_<animal>_rider 5 ally` for `boar`, `warthog`, `mountaingoat`, `deer`, `moose`.
-Check the gaits (hoof slide at each speed), idles, grazing, hits, vanilla falls, the dwarf's seat on the boars and
-the goat (light and heavy ram bardings alternate across the riders' rosters), the elk saddle on the stag and
-moose, and the sizes.
+Check the gaits (hoof slide at each speed, and turning at each gait, where a vanilla strafe or turn clip blends
+with the pack's forward clip), idles, grazing, hits, vanilla falls, the dwarf's seat on the boars and the goat
+(light and heavy ram bardings across the riders' two rosters), the elk saddle on the stag and moose, the elf's
+size and camera on the 150 moose, and the sizes. **If the dwarf seat fails,** take the three ids out of
+`DWARF_MOUNT_IDS` before any campaign dwarf rides one. The riders also appear in the Custom Battle army picker under
+the Erebor and Mirkwood cavalry, a second way in.
 
 ## Why This Exists
 
@@ -76,7 +82,7 @@ behind the head, a throat crease in strong bends), and these tool changes:
 | Idles | Idle, Idle_SecondaryMoveCalm_2 to 5 | Idle, Idle_SecondaryMoveCalm_2 to 5 | Idle_SecondaryMoveCalm_1 to 5, Cue_Bleat | Idle, Idle_1 to 4 | Idle, GrazingStepsLookat |
 | Riderless idles | GrazingOnSpotA_1, A_2, B_1, B_2 | same | same | GrazingOnSpotB_1 to 3, GrazingSteps | GrazingOnSpotA_1, A_2, B_1, B_2 |
 | Hit front, back | HitLegFL2RunSlow_F, HitLegBL2RunSlow_F | same | HitInRunHead_F, vanilla | HitInRunHead_F, HitLegBL2RunSlow_F | HitLegFL2RunSlow_F, HitLegBL2RunSlow_F |
-| Falls, rear, kick, walk back | vanilla horse | vanilla horse | vanilla horse | vanilla horse | vanilla horse |
+| Falls, rear, kick, walk back, strafes, turns, quick stops, jumps, head turns | vanilla horse | vanilla horse | vanilla horse | vanilla horse | vanilla horse |
 | Attack (stage 12) | war ram head-butt | war ram head-butt | war ram head-butt | Animalia elk antler | Animalia moose head |
 
 A borrowed gait gets no clip of its own: the action set binds the lender's clip, which already carries the
@@ -113,12 +119,15 @@ warthog 1.69, 2.03, then the boar's; goat 1.84, 2.37, 4.09, then the deer's 7.46
 | `taom_wildmesh_deer_a` | Mirkwood Stag | 100 | `taom_elk_saddle_a` | the Animalia elk |
 | `taom_wildmesh_moose_a` | Greenwood Moose | 150 | `taom_elk_saddle_a` | the Animalia moose |
 
-The three dwarf mounts are in `WAR_RAM_MOUNT_IDS` (`tools/taom_schema.py`), so `MOUNTED_DWARF` allows a dwarf on
+The three dwarf mounts are in `DWARF_MOUNT_IDS` (`tools/taom_schema.py`), so `MOUNTED_DWARF` allows a dwarf on
 them; their Monsters keep the horse's rider seat, as the war ram does, until the in-game seat check. Monsters
 `taom_wildmesh_<animal>`, action sets `as_wildmesh_<animal>` (children of `as_horse`, with `_town_and_village` and
-`_map` twins). Test riders: `Main/_Module/ModuleData/troops/troops_wildmesh_test.xml`, CustomGame only, clones of
-`ironpass_ram_rider` and `mirkwood_rochenlas`; their names are not in `taom_troop_name_strings.xml` yet, because
-that generated file is stale on the branch for other troops and a regeneration would also drop 25 Harad keys.
+`_map` twins). Test riders: `Main/_Module/ModuleData/test_riders/wildmesh.xml`, CustomGame only, clones of
+`ironpass_ram_rider` and `mirkwood_rochenlas` with their upgrade edges removed. The folder sits outside `troops/`,
+so the ladders, the troop generators and the recruitment test never read the riders and need no exemption, and
+their `[Test]` names stay English (the name-string generator reads `troops/` only). `/release` step 5 blocks a
+release while the file exists. The item names have English rows in the Armory's
+`Languages/loc_LOTRAOM_horses.xml`; the 12 languages are owed.
 
 ### Live files
 
@@ -135,13 +144,15 @@ The data lives in the external, unversioned `LOTRLOME_Armory`:
 
 | File | Purpose |
 |---|---|
-| `tools/blender/export_blend_pack.py` | `.blend` pack to part and clip FBX, bone-parented parts skinned, clips at 30 fps |
+| `tools/blender/export_blend_pack.py` | `.blend` pack to part and clip FBX, bone-parented parts skinned, clips at 30 fps on evenly spaced source times (`sample_times`); a verdict per pack (tests: `tools/tests/test_export_blend_pack.py`) |
+| `tools/blender/fbx_exact_times.py` | Exact FBX tick times around Blender's truncating exporter, used by the retarget (tests: `tools/tests/test_fbx_exact_times.py`) |
 | `tools/blender/wildmesh_to_horse_map.json` | Joints, chains, weights, `keepneck` profile and `measure` bone names for the shared WildMesh rig |
 | `tools/blender/wildmesh_<animal>_clip_measure.json` | Measured travel and hoof plants of each animal's gaits |
-| `tools/gen_animalia_anim_clips.ps1` | `-Pack wildmesh` plan: the 96 clips |
-| `tools/blender/measure_animalia_clips.py` | Stride travel for in-place clips |
-| `tools/apply_wildmesh_armory.py` | Monsters, action sets and Horse items in the live Armory (tests: `tools/tests/test_apply_wildmesh_armory.py`) |
-| `Main/_Module/ModuleData/troops/troops_wildmesh_test.xml` | The five Custom Battle test riders |
+| `tools/gen_animalia_anim_clips.ps1` | `-Pack wildmesh` plan: the 96 clips; SHORT when a master lacks a measured frame (tests: `tools/tests/test_gen_animalia_anim_clips.py`) |
+| `tools/blender/measure_animalia_clips.py` | Stride travel for in-place clips; hoof plants from `plant_start` (tests: `tools/tests/test_measure_animalia_clips.py`) |
+| `tools/apply_wildmesh_armory.py` | Monsters, action sets, Horse items and English loc rows in the live Armory, per animal (tests: `tools/tests/test_apply_wildmesh_armory.py`, its `LiveRecipeParityTests` the reinstall gate) |
+| `tools/taom_schema.py` `DWARF_MOUNT_IDS` | The three dwarf mounts beside the war ram (`MOUNTED_DWARF`) |
+| `Main/_Module/ModuleData/test_riders/wildmesh.xml`, its `Main/_Module/SubModule.xml` block | The five Custom Battle test riders (tests: `tools/tests/test_wildmesh_test_riders.py`) |
 | `docs/reference/lotrlome-wildmesh-changes.md` | Ledger of every change outside the repo, replay and removal |
 
 ## Dependencies
@@ -153,11 +164,26 @@ The data lives in the external, unversioned `LOTRLOME_Armory`:
 
 ## Tests
 
-No unit tests: the stages are gated by their own reports. Export round trip: bone drift 0. Reskin: no
-unweighted vertex, at most four influences, re-import drift 0.00001 m, bend checks near the Animalia elk
-except the tail lift (p99 2.4 to 3.2 against 1.3). Retarget: 155 of 155 candidate clips export with the engine
-bone order and frame 0 at rest. Resample: length kept, pose within 0.07 deg. Masters: census ok=74.
-Clips: `gen_animalia_anim_clips.ps1 -Pack wildmesh -Verify` ok=96; the Animalia default still ok=54.
+Unit tests: `tools/tests/test_apply_wildmesh_armory.py` (the writer, and its `LiveRecipeParityTests` against the
+live Armory and the repo snapshot), `test_wildmesh_test_riders.py` (each rider on its own animal and harness, the
+registration), `test_export_blend_pack.py`, `test_measure_animalia_clips.py`, `test_fbx_exact_times.py`,
+`test_gen_animalia_anim_clips.py`, and the three WildMesh cases in `MountedDwarfTests`.
+
+Stage reports, round 1 (2026-10-14): export bone drift 0; reskin with no unweighted vertex, at most four influences,
+re-import drift 0.00001 m, bend checks near the Animalia elk except the tail lift (p99 2.4 to 3.2 against 1.3);
+retarget 155 of 155 candidate clips with the engine bone order and frame 0 at rest.
+
+**Round 2 (2026-10-15, after the review):** the five packs re-exported with `sample_times` into
+`E:\LOTRAOMAssets\_export\wildmesh_r2` (one run, the `_2` trots included: regex `Trot(Slow|Fast)_F(_2)?`), every
+round trip at drift 0, 30 fps and the expected frame range; the 74 shipped clips retargeted with exact FBX times into
+`_retarget_out\wildmesh_r2` (all on whole frames, six of them one tick short in round 1); the gaits re-measured
+(four measure files changed); Mike's Kit re-import of the 74 masters; 37 clips regenerated (the 34 gait clips, 17 measured gaits
+and their `_stand` twins, and the three deer idles whose masters gained their closing frame; the round-1 clips are in
+`E:\LOTRAOMAssets\_clip_backup\wildmesh_r1_20261015`); one Kit open and close for their cache entries. Gates after:
+census ok=74; `-Pack wildmesh -Verify` ok=96, short=0; the Animalia default ok=54; `check_rdc_entries.py` 0 without
+an entry. On the engine-loaded masters, 16 of 17 gaits now end on a copy of their first pose within 0.06 to 0.84
+degrees (vanilla: at most 1.86); the deer `WalkMedium_F` still closes 2.95 degrees off on one bone (3.42 in round 1),
+an in-game check.
 
 ## How to add another WildMesh animal
 
@@ -166,10 +192,17 @@ Clips: `gen_animalia_anim_clips.ps1 -Pack wildmesh -Verify` ok=96; the Animalia 
    `horse_skeleton` clip where the pack's is broken.
 3. Reskin and retarget with `--profile keepneck`, add LODs, convert the textures, measure the gaits.
 4. After the Kit import: `wire_anim_master_skeletons.ps1`, then add the animal to `$PLANS.wildmesh` in
-   `gen_animalia_anim_clips.ps1` and run `-Pack wildmesh -Apply`.
+   `gen_animalia_anim_clips.ps1` and run `-Pack wildmesh -Apply`; one Kit open and close.
+5. Add the animal's rows to `MONSTERS`, `OVERRIDES` and `ITEM_STATS` in `tools/apply_wildmesh_armory.py` and run it
+   (dry run, then `--apply`, Kit and game closed): it inserts only the new animal. Refresh the snapshot, add a
+   ledger row, and give the new item name to `/localize`.
 
 ## Changelog
 
+- 2026-10-15: deep review fixes: the writer works per animal and refuses an empty Monsters file, writes the English
+  item names, and its parity test is the reinstall gate; the test riders moved to `test_riders/` with no exemptions;
+  `DWARF_MOUNT_IDS`; the clip pipeline's resample, exact FBX times, plant rule and SHORT guard, then a regeneration
+  round (above).
 - 2026-10-14: stages 9 to 11: RuntimeDataCache entries, the Armory data (`tools/apply_wildmesh_armory.py`) and
   five Custom Battle test riders.
 - 2026-10-14: stages 1 to 8 for the boar, warthog, mountain goat, deer and moose (#794): exporter, map, LODs,

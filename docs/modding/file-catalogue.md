@@ -95,6 +95,7 @@ All 17 files are `SubModule.xml` rows with id `NPCCharacters`, read as `Characte
 | `troops/troops_dale.xml` | `SubModule.xml:208` | `tools/generate_dale_troops.py` |
 | `troops/troops_rivendell.xml` | `SubModule.xml:217` | `tools/oneoff/add_race_attribute.py`, `tools/promote_borrowed_cultures.py` |
 | `troops/troops_mirkwood.xml` | `SubModule.xml:226` | `tools/oneoff/add_race_attribute.py`, `tools/oneoff/Add-RosterVariants.ps1` |
+| `test_riders/wildmesh.xml` | `SubModule.xml:272` (CustomGame only) | hand; five Custom Battle test riders for #794, outside `troops/` so no `troops_*.xml` tool reads them; `/release` step 5 blocks a release while it exists |
 | `troops/troops_mordor.xml` | `SubModule.xml:235` | `tools/apply_mordor_troop_revamp.py`, `tools/apply_black_numenorean_troops.py`, `tools/mordor_armor_remap.py` |
 | `troops/troops_isengard.xml` | `SubModule.xml:244` | `tools/apply_isengard_troop_revamp.py` |
 | `troops/troops_dolguldur.xml` | `SubModule.xml:253` | `tools/apply_dolguldur_troop_revamp.py`, `tools/apply_black_numenorean_troops.py`, `tools/mordor_armor_remap.py`; a `.bak-fellwarg-20260831` sibling sits beside it |
@@ -234,6 +235,7 @@ The file-to-slot rule is one file per item `Type`: `arm_armors.xml` is `HandArmo
 | `Monsters/LOTR/lotr_monster_war_ram.xml` | `LOTRLOME_Armory/SubModule.xml:295` | `Monster` | the war ram, a horse-skeleton reskin ([lotrlome-war-ram-changes](../reference/lotrlome-war-ram-changes.md)) | hand | live |
 | `Monsters/LOTR/lotr_monster_elk.xml` | `LOTRLOME_Armory/SubModule.xml:307` | `Monster` | the great elk, a horse-skeleton reskin on the war ram's action set ([lotrlome-elk-changes](../reference/lotrlome-elk-changes.md)) | hand | live |
 | `Monsters/LOTR/lotr_monster_animalia.xml` | `LOTRLOME_Armory/SubModule.xml:319` | `Monster` | the Animalia elk and moose, horse-skeleton reskins with their own action sets; each carries TAOM's `taom_body_length` ([lotrlome-animalia-changes](../reference/lotrlome-animalia-changes.md)) | `tools/apply_animalia_armory.py` | live |
+| `Monsters/LOTR/lotr_monster_wildmesh.xml` | `LOTRLOME_Armory/SubModule.xml:330` | `Monster` | the WildMesh3D boar, warthog, mountain goat, deer and moose, horse-skeleton reskins with their own action sets; each carries `taom_body_length` ([lotrlome-wildmesh-changes](../reference/lotrlome-wildmesh-changes.md)) | `tools/apply_wildmesh_armory.py` | live |
 | `CollisionInfos/LOTR/collision_infos_warg.xml` | `project.mbproj`, id `soln_collision_infos` | native collision and sound-effect table | the warg's impact sounds and particles per surface | hand | live |
 | `Animations/action_sets.xslt` | none: a sidecar in a subfolder with no matching registered XML | nothing | an identity transform that injects nothing | hand | dead |
 | `Animations/action_sets_elephant.xml` | none, on purpose: a second `soln_action_sets` row would take the merge path behind the elephant Crash #3 | nothing | a reference copy of the elephant action sets; the live block is appended inside the root `action_sets.xml` | hand | dead, reference |

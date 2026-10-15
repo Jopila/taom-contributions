@@ -48,6 +48,7 @@ sys.path.insert(0, TOOLS)
 import retarget_mannequin_to_human as rm  # noqa: E402  engine rig, export, helpers
 import transfer_clip_to_engine_rig as tc  # noqa: E402  file-order export rig, rekey, re-import check
 import reskin_animalia_to_horse as rk  # noqa: E402  the fit the meshes were built with
+import fbx_exact_times as fx  # noqa: E402  exact FBX ticks around Blender's truncating exporter
 
 DEFAULT_EXCLUDE = r"^(Add_|Sitting|Sleeping|Swimming|Loco_Swim|Trans_Sitting|Trans_Sleeping|Trans_Stand_to_Sitting)"
 TURN_CLIPS = r"Turn"
@@ -188,7 +189,16 @@ def export(tgt, spec, act, action_name, n, out_path, entry):
     exp.arm = exp_arm
     tgt.arm.name = spec["skeleton"] + "_notused_engine"
     exp_arm.name = spec["skeleton"] + "_notused"
-    entry["export"] = rm.export_clip(exp, exp_act, out_path)
+    # Blender's exporter truncates frame to tick conversions; ktime_fixed records that this clip's last frame
+    # (frame 0 is the rest, poses run 1..n) would have come out one tick short without the exact-time patch.
+    last = n
+    would_truncate = int(last / 30 * fx.FBX_KTIME) < last * (fx.FBX_KTIME // 30)
+    with fx.exact_fbx_times() as times:
+        entry["export"] = rm.export_clip(exp, exp_act, out_path)
+    entry["export"]["ktime_fixed"] = bool(would_truncate and times.patched)
+    entry["export"]["ktime_patched"] = times.patched
+    if not times.patched:
+        entry["export"]["ktime_note"] = times.reason
     if entry["export"]["ok"]:
         entry["engine_check"] = tc.check_export_order_and_locals(out_path, spec, fparent)
     rm._delete_objects([exp_arm])

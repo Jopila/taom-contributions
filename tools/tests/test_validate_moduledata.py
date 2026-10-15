@@ -1379,6 +1379,36 @@ class MountedDwarfTests(unittest.TestCase):
                          body=self._inline("taom_war_ram_a"))
         self.assertEqual(self._mounted(), [])
 
+    # -- the gate sees the test_riders folder, and the WildMesh set (#794) ------------ #
+    def test_dwarf_in_the_test_riders_folder_on_a_horse_is_reported(self):
+        # The #794 riders moved out of troops/ into test_riders/; the gate must still read them.
+        _write(self.md / "test_riders" / "x.xml",
+               '<?xml version="1.0"?>\n<NPCCharacters>\n'
+               '  <NPCCharacter id="taom_test_x_rider" race="dwarf" culture="Culture.erebor" '
+               'default_group="Infantry">\n' + self._inline("saddle_horse") +
+               '  </NPCCharacter>\n</NPCCharacters>\n')
+        found = self._mounted()
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0].file, "test_riders/x.xml")
+        self.assertIn("saddle_horse", found[0].message)
+
+    def test_dwarf_on_a_wildmesh_boar_with_a_ram_barding_is_clean(self):
+        self._write_lord(group="Cavalry", body=(
+            '    <Equipments>\n'
+            '      <EquipmentRoster>\n'
+            '        <equipment slot="Horse" id="Item.taom_wildmesh_boar_a" />\n'
+            '        <equipment slot="HorseHarness" id="Item.taom_ram_barding_light_a" />\n'
+            '      </EquipmentRoster>\n'
+            '    </Equipments>\n'))
+        self.assertEqual(self._mounted(), [])
+
+    def test_dwarf_on_a_wildmesh_deer_is_reported(self):
+        # Only the three dwarf-sized WildMesh mounts are allowlisted; the deer and moose stay refused.
+        self._write_lord(group="Cavalry", body=self._inline("taom_wildmesh_deer_a"))
+        found = self._mounted()
+        self.assertEqual(len(found), 2)
+        self.assertTrue(any("taom_wildmesh_deer_a" in i.message for i in found))
+
 
 class SettlementEconomyRegistryTests(unittest.TestCase):
     """build_settlement_economy (2026-08-14). It feeds SETTLEMENT_ECONOMY_FLOOR, which guards an
