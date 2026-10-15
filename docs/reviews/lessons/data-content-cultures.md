@@ -1594,6 +1594,13 @@ said the engine requires or derives both twins, hours after this lesson recorded
 lesson in a category file does not reach text written without opening that file. The fact now sits in
 `/new-creature-mount` Phase 4, the place creature work starts.
 
+**Recurred 2026-10-15 (#794), inside an edit:** widening the dwarf-mount allowlist rewrote its comment and its rule
+row, and both kept their old claims: the ram is "built for the dwarf skeleton so the rider bone lines up" (every one
+of the five Monsters inherits the horse's `rider_sit_bone`, `Monster.cs:228-236`) and `Patch46` "enforces the same
+invariant at runtime" (it strips every dwarf's horse in tournaments only). A sentence you edit is a sentence you
+assert: re-verify what it still claims, not only the part you changed
+([rca](../rca-wildmesh-mounts-2026-10-15.md) row 16).
+
 ### A new reference into the unversioned Armory lands with a gate that reads the live file (#644, 2026-09-23)
 
 `race="nazghul"` names a race only the live `LOTRLOME_Armory/ModuleData/skins.xml` registers, and
@@ -1618,6 +1625,10 @@ both appeared in every player's Mirkwood cavalry picker, in English in every lan
 - **Prevent:** a test troop is either `is_obsolete="true"` (hidden from the picker, still spawnable by
   `taom.spawn_troops`) or on the release checklist to delete; say which in the file's header.
 - **Source:** `docs/reviews/rca-animalia-2026-09-23.md` row 3.
+- **Recurred 2026-10-15 (#794):** the WildMesh riders' header said "no campaign, save or culture roster ever sees
+  them" while the workflow's own stage 11 said the picker lists them; the header was written from intent. The header
+  text now sits in stage 11 of the quadruped workflow to copy, and test riders live in `ModuleData/test_riders/`
+  ([rca](../rca-wildmesh-mounts-2026-10-15.md) row 6).
 
 ### Trace an availability claim through TAOM's own market, and quote Mike before calling it his decision (#646, 2026-09-23)
 Six texts said "the moose is not sold" because the item is `is_merchandise="false"`. TAOM's CultureMarketplace never

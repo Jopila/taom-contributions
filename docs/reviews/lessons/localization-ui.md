@@ -962,3 +962,15 @@ localization key. The old code interpolated the name raw, so the localization pa
   a template, or keep that text out of the template.
 - **Source:** `docs/reviews/rca-formation-presets-2026-10-09.md` finding 7; `TextObject.cs:149-151, 319-381` and
   `TextProcessingContext.GetVariableValue` (v1.5.4).
+
+### A tool that writes a named Armory item writes its English loc row too (#794, 2026-10-15)
+`apply_wildmesh_armory.py` wrote five Horse items with `{=taom_wildmesh_<animal>_a}<name>` and no row in the Armory's
+`Languages/loc_LOTRAOM_horses.xml`. The same gap shipped with the Animalia elk and moose (#646 row 20) and was fixed
+there by hand during review, so the recipe the new writer was cloned from still had no loc step.
+`check_external_loc_coverage.py` passed both times, because it counts only rows that already exist in the root file.
+- **Why missed:** a fix made by hand at review time never reached the tool, and the gate cannot see a key that has
+  no row at all.
+- **Prevent:** a writer that adds a named item writes its English row in the same run (the WildMesh writer's loc
+  step), and its parity test checks the row; then the coverage gate shows the 12 languages as owed. A gate that
+  also counts inline Armory keys with no root row is a follow-up.
+- **Source:** [rca-wildmesh-mounts-2026-10-15.md](../rca-wildmesh-mounts-2026-10-15.md) row 5.

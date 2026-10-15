@@ -2341,6 +2341,10 @@ in-repo snapshot whose README is the restore path.
   it, the ledger's redo steps (with a test filter that covers the edited value) and, for a file under
   `docs/reference/lotrlome-armory-snapshot/`, the snapshot copy.
 - **Source:** `docs/reviews/rca-animalia-2026-09-23.md` rows 1 and 2.
+- **Recurred 2026-10-15 (#794), from a script rather than a hand edit:** the WildMesh writer added 15 sets to the
+  live `action_sets.xml` and the snapshot stayed byte-identical to the pre-change backup. The writer's parity test
+  now fails when the snapshot lacks the writer's sets, so the next drift is a red test, not a review finding
+  ([rca](../rca-wildmesh-mounts-2026-10-15.md) row 8).
 
 ### A new live-data writer copies the newest sibling's guards and ships a synthetic-tree test (#646, 2026-09-23)
 `apply_animalia_armory.py`, `gen_animalia_anim_clips.ps1` and `wire_anim_master_skeletons.ps1` all wrote the live
@@ -2355,6 +2359,10 @@ existed in a sibling (`skeleton_hit_capsules.py`, `gen_troll_anim_clips.ps1 -Ver
   synthetic-tree test of its dry run and its refusal paths; the repo has no PowerShell test harness, so a PowerShell
   writer's refusal paths are proven by runs on a scratch copy, recorded in its review.
 - **Source:** `docs/reviews/rca-animalia-2026-09-23.md` rows 7 to 11.
+- **Recurred 2026-10-15 (#794):** the WildMesh writer had the guard and a synthetic-tree test, but not the sibling's
+  refusal cases, and one of them was a HIGH; see "Port the sibling tool's refusal tests before writing its code"
+  below. Since 2026-10-15 the repo has PowerShell function tests too: `test_gen_animalia_anim_clips.py` lifts a
+  function out with the AST, as `test_gen_troll_anim_clips.py` does.
 
 ### A fix that removes a parameter removes what it rejected: name the rejection first (#646, 2026-09-23)
 The first review's tooling round removed `wire_anim_master_skeletons.ps1`'s `-BoneCount` parameter as a nuisance
@@ -3617,3 +3625,58 @@ clip would have played up to 25 per cent fast in game, and every gait measured 0
   (length kept, pose within 0.07 degrees); the measure takes the planted hoof's slide when the root does not
   move (`"travel_mode": "stride"`).
 - **Source:** #794.
+- **Corrected 2026-10-15:** "pose within 0.07 degrees" held only for clips whose length is a whole number of output
+  frames. The fixed-rate steps stopped 0.2 to 0.4 source frames short of the closing pose on the others, a 2.6 to
+  7.7 degree loop seam on 5 of 17 gaits; `sample_times` now spreads the samples from the first frame to the last
+  ([rca](../rca-wildmesh-mounts-2026-10-15.md) row 10).
+
+### Port the sibling tool's refusal tests before writing its code (#794, 2026-10-15)
+`apply_wildmesh_armory.py` was written from `apply_animalia_armory.py` with a fresh test file. Its Monsters step was
+re-typed around a new three-state helper, where "none of the ids present" meant "insert", and for a file the tool
+creates whole that turned an empty or self-closing `lotr_monster_wildmesh.xml` into "nothing to do": `--apply` would
+have written five Horse items naming undefined Monsters. The sibling refuses that case, and its test for it
+(`test_a_monsters_file_missing_one_monster_is_refused`) was one of four never ported. The same week the WildMesh
+exporter skipped the detached-run handling its two same-commit Blender siblings carry.
+- **Why missed:** the #646 lesson below asks for "a synthetic-tree test of its dry run and its refusal paths", and
+  the new tool had one; but its refusal paths were the new code's, so the test proved what was written, not what
+  the sibling had learned to refuse.
+- **Prevent:** when a tool clones a sibling, copy the sibling's test file first and adapt every case to the new
+  tool, RED, before writing its code; a case you drop gets a one-line reason in the test file. A tool that creates a
+  file whole treats that file existing without its content as corruption, never as "already done".
+- **Source:** [rca-wildmesh-mounts-2026-10-15.md](../rca-wildmesh-mounts-2026-10-15.md) rows 1, 9 and 12.
+
+### A gate checks the artefact against its source, never against itself (#794, 2026-10-15)
+Three WildMesh gates passed exactly the broken input they existed for. `gen_animalia_anim_clips.ps1 -Verify` compared
+each clip's `Source2` with its own master, so three masters the Kit had compiled one frame short read ok=96; the
+writer's parity test skipped when the Monsters file was missing, which is what a reinstall leaves; and the exporter's
+round trip compared rest poses, so a loop seam left by the resample never showed.
+- **Why missed:** each check was written to confirm the stage's own output was well formed, and none named the
+  upstream fact the output had to match.
+- **Prevent:** for each gate, write down the fact upstream of the artefact (the measured frames, the recipe, the
+  source's closing pose) and assert against it: `-Verify` now reports SHORT when a master lacks a measured frame,
+  and the parity test fails, not skips, whenever the Armory is installed. A gate skips only when the thing it reads
+  is absent from the machine, never when the artefact it guards is missing.
+- **Source:** [rca-wildmesh-mounts-2026-10-15.md](../rca-wildmesh-mounts-2026-10-15.md) rows 2, 3 and 10.
+
+### Blender's FBX exporter truncates time, so the Kit can drop a clip's last frame (#794, 2026-10-15)
+Blender 5.2.2 writes key times as `(frames / fps * FBX_KTIME).astype(np.int64)` and take stops as
+`int(convert_sec_to_ktime(...))` (`io_scene_fbx/export_fbx_bin.py:2328`, `:2064`, `:3480`). For some frame counts
+the float product lands just under the exact tick: the last key sits one tick short of its frame, and the Kit
+compiled 11 of 153 checked masters one frame short (6 WildMesh, 5 Animalia), each loop then jumping a whole frame
+step at its wrap.
+- **Why missed:** the clip and its master looked complete to every check; only the frame count against the
+  measure showed the loss.
+- **Prevent:** the horse-skeleton retarget exports inside `tools/blender/fbx_exact_times.py`'s `exact_fbx_times()`,
+  which rounds both conversions to the exact frame tick, and records `ktime_fixed` per clip. Any other Blender
+  pipeline that feeds the Kit (`retarget_mannequin_to_human.export_clip`, the troll and human clips) has the same
+  exposure until it does the same: a follow-up.
+- **Source:** [rca-wildmesh-mounts-2026-10-15.md](../rca-wildmesh-mounts-2026-10-15.md) row 2.
+
+### A hoof plant is the start of a full stance, not the first touch (#794, 2026-10-15)
+`measure_animalia_clips.py` took the first frame a hoof came within 2 cm of its lowest point, so a 2 to 4 frame toe
+scuff before the stance won: the boar walk's right fore planted at 0.6 instead of 0.9714, two footsteps on one
+frame and none at the stance, and the elk walk-back's front hooves likewise.
+- **Why missed:** `Get-MeasureProblem` counted the plants and never looked at their spacing.
+- **Prevent:** `plant_start` keeps only contacts at least half as long as the hoof's longest and takes the
+  earliest of those, the loop read as a circle.
+- **Source:** [rca-wildmesh-mounts-2026-10-15.md](../rca-wildmesh-mounts-2026-10-15.md) row 11.
