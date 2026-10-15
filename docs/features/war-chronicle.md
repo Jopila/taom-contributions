@@ -14,17 +14,17 @@ The Eye of Sauron hunt (#765 M8) is built as its own module, see [eye-of-sauron.
   2. **Small effects only.** Increased recruitment and faster lord prisoner escapes, not combat power.
   3. **Catch-up for losing AI kingdoms.** A kingdom that has lost significantly gets a small, temporary lift.
   4. **No bonus for the player.** No effect is keyed to the player's own clan: its settlements get no volunteer change and its lords no extra escape roll. The rally skips a kingdom the player rules; a kingdom the player serves as vassal or mercenary can still rally (the indirect paths are under Known limitations).
-- **Without this feature:** no way to tell a stalemate from a runaway except by watching the map, and no shared place for later War of the Ring mechanics (events, the Ring) to hang timed effects.
+- **Without this feature:** no way to tell a stalemate from a runaway except by watching the map, and no shared place for War of the Ring mechanics (the chronicle's events, and later the Ring) to hang timed effects.
 
 ## Architecture
 
 ### Module and per-campaign behavior
 
-`WarChronicleModule` (`Main/Features/WarChronicle/WarChronicleModule.cs`) is a `TaomFeatureModule`, appended in `Main/Composition/FeatureModules.cs`. It declares one campaign behavior, `WarChronicleBehavior`, and `OwnsSaveData` is true. The behavior is always registered, so the save payload survives a toggle.
+`WarChronicleModule` (`Main/Features/WarChronicle/WarChronicleModule.cs`) is a `TaomFeatureModule`, appended in `Main/Composition/FeatureModules.cs`. It declares two campaign behaviors: `WarChronicleBehavior`, the one `SyncData` owner, and `WarChronicleEventsBehavior`, the event chain's router, which saves nothing ("The event chain" below). `OwnsSaveData` is true, and both are always registered, so the save payload survives a toggle.
 
-The module builds the behavior with `CampaignBehaviorDecl.Of(r => new WarChronicleBehavior(...))`, a lambda body rather than a container singleton, so a new instance is made in every campaign's `OnGameStart`. The behavior's constructor calls `WarChronicleStateService.ResetForNewSession()`, which empties the effect registry, the baselines and the rally tiers. `OnGameStart` runs before any campaign event and before `SyncData` on a load, so a load restores its saved record over the reset and a save with no record stays reset. There is no latch and no reset from `OnSessionLaunched` (the rule and its history: `.claude/rules/csharp-architecture.md`, "Singleton Services Holding Per-Campaign State"). `WarChronicleWiringTests` pins the `new` shape.
+The module builds the behavior with `CampaignBehaviorDecl.Of(r => new WarChronicleBehavior(...))`, a lambda body rather than a container singleton, so a new instance is made in every campaign's `OnGameStart`. The behavior's constructor calls `WarChronicleStateService.ResetForNewSession()`, which empties the effect registry, the baselines, the rally tiers, the chronicle's event rows and first-seen phase days (`ChronicleStateStore`) and the once-per-day gate (`WarChronicleDailyGate`). The router is built the same way, and its constructor clears the announcement queue and the army focus. `OnGameStart` runs before any campaign event and before `SyncData` on a load, so a load restores its saved record over the reset and a save with no record stays reset. There is no latch and no reset from `OnSessionLaunched` (the rule and its history: `.claude/rules/csharp-architecture.md`, "Singleton Services Holding Per-Campaign State"). `WarChronicleWiringTests` pins the `new` shape.
 
-The behavior listens to `DailyTickEvent` and `KingdomDestroyedEvent`. The daily handler returns unless `ICoopSessionProvider.IsAuthority` and `CoopSessionPolicy.MayWriteSaveBackedState` both hold, then calls `WarChronicleTickService.RunDaily()`. The kingdom-destroyed handler needs only `IsAuthority` and writes the `ev=destroyed` ledger line.
+`WarChronicleBehavior` listens to `DailyTickEvent`, `KingdomDestroyedEvent` and `OnGameLoadedEvent`. The daily handler returns unless `ICoopSessionProvider.IsAuthority` and `CoopSessionPolicy.MayWriteSaveBackedState` both hold, then calls `WarChronicleTickService.RunDaily()`. The kingdom-destroyed and game-loaded handlers need only `IsAuthority`; they write the `ev=destroyed` line and the `t=load` marker (`WarLedgerService.LogLoad`).
 
 ### Tick order
 
@@ -40,7 +40,7 @@ The whole body is wrapped in one try/catch that logs a warning and skips the res
 
 The event chain does not run inside this tick. It has its own router behavior, `WarChronicleEventsBehavior` (`Events/WarChronicleEventsBehavior.cs`), whose daily listener calls `ChronicleService.RunChronicleDay()`; see "The event chain" below. The engine calls daily listeners newest first (`MbEvent.AddNonSerializedListener` prepends), and feature-module behaviors are added after every hand-wired one, `WarOfTheRingBehavior` included, so the chronicle steps first: an effect it writes is baked at once and already counts in that day's escape roll and ledger line.
 
-**Once per day.** Both daily listeners run at most once per campaign day (whole days, floored, like the ledger's `day=`). On a load the engine waits only the elapsed part of the day before the next daily tick (`Campaign.CreateCampaignEvents`, v1.5.5 `Campaign.cs:1024-1030`; `MBCampaignEvent` sets `NextTriggerTime` from that wait), so a save made at fraction f of day S next ticks at S + 2f: day S a second time when f is under a half. These are elapsed campaign days, counted from `CampaignStartTime` (09:00 on vanilla's calendar clock, `DefaultCampaignTimeModel`), so the repeat follows a save in the first half of the elapsed day (about 09:00 to 21:00 on the calendar clock), not one made before midday. `WarChronicleDailyGate` keeps the last day each listener ran in its own lane (`tick` for `RunDaily`, `chronicle` for `ChronicleService.RunChronicleDay`), claimed before any work; the days are saved in the payload's `daily` section, so the reloaded run skips the repeat. A save without the section (an older build) holds no day, so its first tick runs, and a new campaign's constructor reset clears it. A day that is not a finite number in range claims nothing, and an unreadable engine clock (no campaign, NaN, infinite or negative) never becomes day 0: `IKingdomWarSnapshotAdapter.TryGetElapsedDay` reports it, so `RunDaily` skips the day with one warning and `LogLoad` writes no load marker.
+**Once per day.** Both daily listeners run at most once per campaign day (whole days, floored, like the ledger's `day=`). On a load the engine waits only the elapsed part of the day before the next daily tick (`Campaign.CreateCampaignEvents`, v1.5.5 `Campaign.cs:1024-1030`; `MBCampaignEvent` sets `NextTriggerTime` from that wait), so a save made at fraction f of day S next ticks at S + 2f: day S a second time when f is under a half (#793, open: read from the managed engine source, not yet seen in game). These are elapsed campaign days, counted from `CampaignStartTime` (09:00 on vanilla's calendar clock, `DefaultCampaignTimeModel`), so the repeat follows a save in the first half of the elapsed day (about 09:00 to 21:00 on the calendar clock), not one made before midday. `WarChronicleDailyGate` keeps the last day each listener ran in its own lane (`tick` for `RunDaily`, `chronicle` for `ChronicleService.RunChronicleDay`), claimed before any work; the days are saved in the payload's `daily` section, so the reloaded run skips the repeat. A save without the section (an older build) holds no day, so its first tick runs, and a new campaign's constructor reset clears it. A day that is not a finite number in range claims nothing, and an unreadable engine clock (no campaign, NaN, infinite or negative) never becomes day 0: `IKingdomWarSnapshotAdapter.TryGetElapsedDay` reports it, so `RunDaily` skips the day with one warning and `LogLoad` writes no load marker.
 
 **Line order.** One daily tick writes the chronicle's `ev=chronicle` lines first (its listener runs first), then the rally's `ev=tier` lines (`RunDaily` runs the rally before `WriteDaily`), then the kingdom, side and share lines. `ev=destroyed` lines and the resolutions of an owner change or a siege land mid-day, between two ticks. A load writes `t=load` before the reloaded run's first tick.
 
@@ -69,7 +69,7 @@ Vanilla's value already includes its low-fief boost (see **Why This Exists**), s
 
 `WarEscapeDailyPass` (`Effects/WarEscapeDailyPass.cs`) finds every kingdom whose `PrisonerEscape` multiplier is above 1, asks `IPrisonerEscapeAdapter` (`Main/Adapters/PrisonerEscapeAdapter.cs`) for the captured lords of those kingdoms' clans, and gives each eligible lord one extra roll. `WarEscapeService` (`Effects/WarEscapeService.cs`) decides:
 
-- **Chance:** the extra chance is `p x (multiplier - 1)`. `p` starts at 0.04, is multiplied by `5 - min(81, healthy members)^0.25` when the captor is a mobile party that is not in a settlement, by 0.5 when the player holds the prisoner (the captor is the main party, or a settlement or the current settlement owned by the player clan), and by the perk factor. This mirrors vanilla's private daily roll in `PrisonerReleaseCampaignBehavior` (v1.5.4 :201-245). The perk factor is vanilla's relative terms, which the adapter reads with vanilla's own calls under vanilla's conditions: the governor's Sweet Talker, Dungeon Architect and Mounted Patrols for a town or castle captor; for a mobile captor the captive's Fleet Footed, the party's Mounted Patrols, Ransom Broker and Keen Sight, and the Valor of the party's or its army's leader. It is `1 + the sum of those factors`; at or below 0 vanilla's chance is 0, and so is the extra one, so a captor's anti-escape perks hold for the boost too. Using vanilla's perk and Valor factor for the extra roll was decided by the maintainer 2026-10-14: keep.
+- **Chance:** the extra chance is `p x (multiplier - 1)`. `p` starts at 0.04, is multiplied by `5 - min(81, healthy members)^0.25` when the captor is a mobile party that is not in a settlement, by 0.5 when the player holds the prisoner (the captor is the main party, or a settlement or the current settlement owned by the player clan), and by the perk factor. This mirrors vanilla's private daily roll in `PrisonerReleaseCampaignBehavior` (v1.5.5 :201-250, unchanged from v1.5.4). The perk factor is vanilla's relative terms, which the adapter reads with vanilla's own calls under vanilla's conditions: the governor's Sweet Talker, Dungeon Architect and Mounted Patrols for a town or castle captor; for a mobile captor the captive's Fleet Footed, the party's Mounted Patrols, Ransom Broker and Keen Sight, and the Valor of the party's or its army's leader. It is `1 + the sum of those factors`; at or below 0 vanilla's chance is 0, and so is the extra one, so a captor's anti-escape perks hold for the boost too. Using vanilla's perk and Valor factor for the extra roll was decided by the maintainer 2026-10-14: keep.
 - **Exclusions:** a lord is skipped when not alive, not a prisoner, the main hero, or in the player clan; when the captor is in a map event or a siege (these two are TAOM's own exclusions, stricter than vanilla); when vanilla's `CanHeroBeReleased` veto says no (the adapter fails closed if there is no event dispatcher); when the perk factor is not above 0; and when the multiplier is not finite or not above 1. Eliminated kingdoms are not scanned.
 - **Effect:** `IPrisonerEscapeAdapter.Escape` re-finds the hero and calls `EndCaptivityAction.ApplyByEscape`. A throwing read or escape is logged and skipped.
 
@@ -82,7 +82,7 @@ Vanilla's value already includes its low-fief boost (see **Why This Exists**), s
 - **Tiers and hysteresis:** `RallyTierMachine.Next` (`Rally/RallyTierMachine.cs`). With defaults: tier 2 at 50% lost (a jump from tier 0 is allowed), tier 1 at 25% lost; tier 2 falls to 1 below 40%; any tier falls to 0 below 15%. Between an exit and its enter the tier holds. A non-finite loss gives tier 0. A kingdom with no loss to measure has tier 0.
 - **Tracked always, applied conditionally:** the tier is stored (`RallyTierStore`) for every kingdom with a baseline, whether the rally is on or the kingdom is eligible, so a control run's ledger shows what would have fired. A tier change writes an `ev=tier` ledger line.
 - **Eligibility:** AI-ruled (not `IsPlayerRuled`), at war with at least one other non-eliminated kingdom, and either `includeNeutral` or an alignment side other than Neutral. The rally is active only when both the `enabled` field in `rally.json` and the MCM `Enable Rally` are true.
-- **Writing:** for an eligible kingdom at tier 1 or 2, two effects with source `rally:<kingdomId>`: `VolunteerRate` and `PrisonerEscape`, with the tier's magnitudes (a zero magnitude is skipped), ending `effectTtlHours` from now. They are refreshed daily. On a tier change the source is removed first. Any `rally:` source not kept this tick is removed, so a tier drop, the end of a war, a destroyed kingdom or the switch turned off all clear the effects the same way. A kingdom that left the map has its tier row dropped.
+- **Writing:** for an eligible kingdom at tier 1 or 2, two effects with source `rally:<kingdomId>`: `VolunteerRate` and `PrisonerEscape`, with the tier's magnitudes (a zero magnitude is skipped), ending `effectTtlHours` from now. They are refreshed daily, and every refresh removes the source and writes it whole again, so a saved kind whose magnitude `rally.json` now sets to zero does not survive the next refresh (Batch A Codex F3, `2ee36e1fa`). Any `rally:` source not kept this tick is removed, so a tier drop, the end of a war, a destroyed kingdom or the switch turned off all clear the effects the same way. A kingdom that left the map has its tier row dropped.
 - **Guards:** an empty snapshot list is ignored (it would wipe every tier), and a non-finite clock skips the day.
 
 ### The war ledger
@@ -252,7 +252,7 @@ Both sit in the group `War of the Ring/Rally`, with `RequireRestart = false`.
 | Setting | Property | Default | Notes |
 |---|---|---|---|
 | Enable Rally | `WarRallyEnabled` | true | Takes effect at the next daily tick; off removes every rally effect |
-| War Effect Strength | `WarEffectStrength` | 1.0 | Slider 0 to 2; scales every effect, so it applies to a future event chain as well. 0 turns effects off |
+| War Effect Strength | `WarEffectStrength` | 1.0 | Slider 0 to 2; scales every effect, the rally's and the chronicle events' alike. 0 turns effects off |
 
 The group `War of the Ring/War Chronicle`, also `RequireRestart = false`:
 
@@ -279,7 +279,7 @@ Registered in `Main/Features/WarChronicle/Cheats/WarChronicleCheats.cs` and `Chr
 | `taom.rally_status` | Per kingdom: points, baseline, loss, stored tier and eligibility, plus whether the rally is on |
 | `taom.print_war_ledger` | Prints the ledger lines today's tick would write; logs and changes nothing |
 | `taom.chronicle_status` | Every chronicle event with its state, its open, close or resolution day (an Active window past its close day reads "overtime: an attacker still besieges it"), whether an Active siege was assaulted, and the army focus, marked inactive when AI Strategic Intelligence is off. Read-only |
-| `taom.chronicle_open <id>` | Opens a Pending event now, ignoring its day but still checking its preconditions; a failure leaves it Pending and says why. Refused on a co-op client and while the chronicle is off |
+| `taom.chronicle_open <id>` | Opens a Pending event now, ignoring its day but still checking its preconditions: a narrative occurs at once; a siege opens its window, or resolves Fell at once when an attacker already holds the target. A failed check leaves it Pending and says why. Refused on a co-op client, while the chronicle is off and after the War of the Ring has ended |
 
 ## How to measure
 
@@ -305,12 +305,13 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 7. **New campaign after a resolved chain:** exit to the menu and start a new campaign in the same process: every event is Pending again.
 8. **Old save:** load a campaign past day 60 that was started before this feature: the events whose day has passed are Skipped (silently, one `outcome=Skipped` ledger line each); later events still open.
 9. **Late phase:** in a new campaign, switch the War of the Ring off, play past day 60, switch it on: the next daily tick enters both phases, and the Phase 1 and Phase 2 events then open one by one from that day plus their offsets, not together.
+10. **Once per day after a load:** save at about 12:00 on the game clock (an eighth into elapsed day S, since elapsed days start at 09:00) and load it. The log shows `[WarLedger] v=1 t=load cid=<cid> day=S`, and no second set of day-S `t=kingdom` lines and no second chronicle step follow before day S + 1. The gate skips a repeat without a log line; whether the engine ticked day S again at about 15:00 is #793's own check.
 
 ## Key files
 
 | File | Purpose |
 |---|---|
-| `Main/Features/WarChronicle/WarChronicleModule.cs` | Feature module, behavior declaration |
+| `Main/Features/WarChronicle/WarChronicleModule.cs` | Feature module, both behavior declarations |
 | `Main/Features/WarChronicle/WarChronicleBehavior.cs` | Per-campaign behavior: daily tick, destroyed and load lines, SyncData |
 | `Main/Features/WarChronicle/WarChronicleTickService.cs` | Tick order |
 | `Main/Features/WarChronicle/WarChronicleDailyGate.cs` | Once-per-day guard for both daily listeners |
@@ -323,7 +324,7 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 | `Main/Adapters/ChronicleWorldAdapter.cs`, `IChronicleWorldAdapter.cs` | Clock, settlement and kingdom ids, target owner and besieger |
 | `Main/Features/ArmyTargeting/ArmyTargetFocusRegistry.cs`, `ArmyTargetFocus.cs` | The army focus windows read by `ArmyTargetingService` |
 | `Main/Features/WarOfTheRingMomentum/MomentumAwardService.cs` | The `Chronicle` momentum award |
-| `Main/_Module/ModuleData/war_chronicle/war_chronicle.json`, `taom_wotr_strings.xml` | Event data and its English text |
+| `Main/_Module/ModuleData/war_chronicle/war_chronicle.json`, `Main/_Module/ModuleData/taom_wotr_strings.xml` | Event data and its English text |
 | `Main/Features/WarChronicle/WarChronicleIoC.cs`, `WarChronicleSettingsProvider.cs` | Registrations, MCM provider |
 | `Main/Adapters/KingdomWarSnapshotAdapter.cs`, `KingdomWarSnapshot.cs` | Kingdom read model |
 | `Main/Adapters/PrisonerEscapeAdapter.cs`, `PrisonerEscapeSnapshot.cs` | Captured-lord read model and the escape call |
@@ -334,12 +335,15 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 
 ## Dependencies
 
-- `IWarOfTheRingService` (Diplomacy): the current phase, for the ledger's `phase` key.
-- `IAlignmentService` (Execution): `ResolveSide`, for the ledger's `side` key and the rally's Neutral eligibility check.
-- `ICoopSessionProvider` and `CoopSessionPolicy` (CoopInterop): the authority and save-write gates in the daily tick and in `taom.war_effect_add`.
+- `IWarOfTheRingService` (Diplomacy): the current phase, for the ledger's `phase` key, the War Ended check and the siege's Full War precondition; `GetEffectivePhaseDay`, for the Phase 1 and Phase 2 anchors.
+- `IAlignmentService` (Execution): `ResolveSide`, for the ledger's `side` key, the rally's Neutral eligibility check and the chronicle's `free` and `evil` effect targets.
+- `ICoopSessionProvider` and `CoopSessionPolicy` (CoopInterop): the authority and save-write gates in the daily tick, the chronicle router, `taom.war_effect_add` and `taom.chronicle_open`; the authority check alone for the `ev=destroyed` and `t=load` lines and the announcement queue.
 - `SyncDataChunker` (Core/Persistence): SyncData chunking and the count-and-chunks pass, shared with the momentum behavior.
-- `TaomConsole` (DevConsole): the four commands.
-- `IKingdomWarSnapshotAdapter` and `IPrisonerEscapeAdapter` (Adapters, registered by this feature): kingdom fiefs and strength; captured lords, their escape factors and `EndCaptivityAction.ApplyByEscape`.
+- `TaomConsole` (DevConsole): the six commands.
+- `IKingdomWarSnapshotAdapter`, `IPrisonerEscapeAdapter` and `IChronicleWorldAdapter` (Adapters, registered by this feature): kingdom fiefs, strength and the elapsed day; captured lords, their escape factors and `EndCaptivityAction.ApplyByEscape`; the clock, settlement and kingdom ids, and a target's owner and besieger.
+- `IAllianceAdapter` and `ITextLocalizerAdapter` (shared adapters): live kingdoms, kingdom cultures and wars for a siege's preconditions and the effect targets; the award's description.
+- `ArmyTargetFocusRegistry` and `IArmyTargetingSettingsProvider` (ArmyTargeting): the focus windows, and the AI Strategic Intelligence flag that `taom.chronicle_status` reports.
+- `IMomentumAwardService` (WarOfTheRingMomentum): the `Chronicle` award.
 - `IPathService` and `IModLogger` (Core), and `TaomSettings` through `WarChronicleSettingsProvider` (MCM).
 
 **Used by:** `TaomVolunteerModel` (TroopProgression) and `CastleRecruitmentService` (CastleRecruitment) read `IWarEffectService` through `VolunteerProductionService`. Only `WarChronicleIoC` registers that service, so `WarChronicleModule` must stay in `FeatureModules.All`, or resolving `VolunteerProductionService` in SubModule fails. `VolunteerProductionWiringTests` validates the graph.
@@ -359,12 +363,12 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 | `RallyTierStoreTests` | same | 10 |
 | `WarBaselineServiceTests` | same | 16 |
 | `WarLedgerFormatterTests` | `.../Ledger/` | 20 |
-| `WarLedgerServiceTests` | same | 17 |
+| `WarLedgerServiceTests` | same | 18 |
 | `WarChronicleCheatReportTests` | `.../Cheats/` | 19 |
 | `WarChronicleSaveCodecTests` | `.../WarChronicle/` | 32 |
 | `WarChronicleStateServiceTests` | same | 13 |
-| `WarChronicleTickServiceTests` | same | 18 |
-| `WarChronicleBehaviorTests` | same | 10 |
+| `WarChronicleTickServiceTests` | same | 21 |
+| `WarChronicleBehaviorTests` | same | 11 |
 | `WarChronicleDailyGateTests` | same | 9 |
 | `WarChronicleSettingsProviderTests` | same | 7 |
 | `WarChronicleIoCTests` | same | 5 |
@@ -408,7 +412,7 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 - **The chronicle runs one day behind a phase change.** The chronicle's daily listener always runs before the phase machine's, so a `Phase1 + 0` event opens one daily tick after the phase changes; it is never skipped.
 - **The army focus needs AI Strategic Intelligence.** With that MCM switch off, TAOM's army scoring, the focus included, is vanilla's.
 - **Co-op clients see no announcements** and run no chronicle step; they take the host's chronicle state through the save.
-- **The 12 languages show English** for the chronicle's text until the paid translation run.
+- **Translations are AI first drafts.** The 48 `taom_wc_*` lines are translated in all 12 languages (`a9437a492`). A correction goes in `tools/translation_overrides/<lang>.json`, and a reworded English line needs its 12 rows reset ([TRANSLATOR_GUIDE.md](../localization/TRANSLATOR_GUIDE.md)).
 - **Phase anchors count from the day the chronicle first saw the phase.** A phase that begins late no longer opens every overdue event on one step (decided by the maintainer 2026-10-14; "Open day" above). What remains: raising a phase day, or turning Test Mode off, after the phase began postpones its Pending events; a phase first seen while the chronicle was switched off counts from the day it is switched back on, less one; and switching the chronicle off and on after the phase was seen still opens on one step whatever came due in between.
 - **A siege whose target an attacker already holds falls at once.** It pays its Fell outcome on the day it would have opened, with no window to fight over (decided by the maintainer 2026-10-14).
 - **Test Mode inverts the lore order.** With Phase 1 before day 20 (Test Mode puts it on day 1), `breaking` (Phase 1 + 0) fires before `fellowship` (day 20) and `khazaddum` (day 26).
@@ -419,9 +423,17 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 
 - 2026-10-08: first slice (#765): the timed-effect registry with its volunteer and escape consumers, the rally, the war ledger and analyzer, the save payload and four console commands.
 - 2026-10-08: the event chain (M3: 13 events, siege windows, adoption, announcements, `taom.chronicle_status`, `taom.chronicle_open`), the army focus (M4) and the `Chronicle` momentum award (M6), with the MCM group `War of the Ring/War Chronicle` (#765).
+- 2026-10-09: Codex review fixes (#765, `2ee36e1fa`): the analyzer judges the capital target per kingdom and fails a capital already lost in its first row ("lost by day N"); the rally rebuilds its effects on every refresh.
 - 2026-10-14: the maintainer's decisions (#765): phase anchors count from the later of the configured day and the day the phase was first seen (saved as `phases`); a siege whose target an attacker already owns resolves Fell, not Skipped; escape factor, castle feats, rally hint wording and `taom_wc_siege_lost` kept as they are.
+- 2026-10-14: no chronicle payout after the War of the Ring ends. The War Ended check sits in the shared callback wrapper, so an owner-change or siege-start callback cannot resolve or pay a window (#765, `8f2c9e458`).
+- 2026-10-14: the chronicle's 48 lines are translated into the 12 languages (`a9437a492`).
+- 2026-10-14: review follow-ups (#792):
+  - both daily listeners run at most once per elapsed campaign day (`WarChronicleDailyGate`, saved as the payload's `daily` section), because a load can repeat the save's day (#793);
+  - each game load writes a `t=load` ledger line, and the analyzer rewinds to it;
+  - an unreadable clock skips the day and writes no load marker;
+  - the chunk loop moved to `SyncDataChunker.SyncChunks` in `Main/Core/Persistence`, shared with momentum.
 
 ## GitHub Issue
 
-- **Issue:** #765
+- **Issue:** #765 (closed with `triage-needs-ingame`: the checks under "How to test the chronicle in game" are owed). Review follow-ups: #792 (closed). The repeated daily tick after a load: #793 (open; this feature's two daily listeners are guarded, and TAOM's other daily listeners are not audited yet).
 - **Status:** Closed (the Eye of Sauron hunt is in [eye-of-sauron.md](eye-of-sauron.md))

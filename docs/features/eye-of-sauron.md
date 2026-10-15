@@ -74,10 +74,8 @@ be left pinned.
 | Busy hunter | His party is re-tasked only when it is not in a battle, an army, a siege or a settlement, not disbanding and not pinned by anyone else; a free hunter must be able to lead a party. A busy or unfit hunter is passed over for the next in order; the hunt waits for tomorrow only when none can ride. A busy hunter never gets a second party. |
 | Free hunter | Spawned with `MobilePartyHelper.SpawnLordParty` at a reachable point 1.6 to 2.5 of the player's sight away (straight line beyond 1.5; the service passes the ring), after removing him as governor and re-checking that he belongs to no party. A failed search is not retried that day (the engine has already tried 250 points), and a refused spawn stops the day's search and is logged. |
 | Order | Host and grain first, then `SetPartyAiAction.GetActionForEngagingParty(hunter, MainParty)`, `CheckPartyNeedsUpdate`, `SetDoNotMakeNewDecisions(true)`. Re-issued hourly only when lost, since every call resets the party's movement state. |
-| Host | Registered as the hunter's party first, and its cached size limit invalidated (`MemberRoster.UpdateVersion`: `PartySizeLimit` is cached per roster version, which `MobileParty.UpdateVersionNo` does not touch), even when the top-up adds nobody; then topped up to `HunterStrengthRatio` times the player's strength (his army's when he leads one) with the host's troops, `ceil(deficit * share / power)` each, capped at `HunterMaxTroops` men. Troops and three days of grain are topped up again every day, never during a battle. |
-| Steps (hourly) | First the end gates; then, while the player is in another lord's army, the hunter stands off (his pin released once, no re-engage, no step; the last step reads "player in another lord's army"); after a stand-off the first free hour re-pins and re-engages him once, whatever his own AI chose; while his AI has
-left him busy (the start's busy test: a battle, an army he leads or is attached to, a siege, a settlement, disbanding,
-another order's pin) the resume claims no pin, does not step, and retries the next hour. Out of sight only. The service judges the adapter's raw step state: the hunter active, not in a battle, siege, army, settlement or at sea, not visible, engaging the player; the player active, on the open map (no battle, siege, settlement, encounter or sea), no true sight, same island. Then, only beyond 1.5 S in a straight line, it rebuilds the path, walks `min(pathGap - 1.5 S - 3, StepCap)` along it, accepts the point only on the player's island with no enemy of the hunter within 3 and at least 1.5 S from the player, and moves the party. S is the player's seeing range, re-read each hour. `taom.print_eye_of_sauron` shows the last step's outcome. |
+| Host | Registered as the hunter's party first, and its cached size limit invalidated (`MemberRoster.UpdateVersion`: `PartySizeLimit` is cached per roster version, which `MobileParty.UpdateVersionNo` does not touch), even when the top-up adds nobody; then topped up to `HunterStrengthRatio` times the player's strength (his army's when he leads one) with the host's troops, `ceil(deficit * share / power)` each, capped at `HunterMaxTroops` men. Every day the troops are topped up again (never during a battle), and the grain is brought back to three days (during a battle too). |
+| Steps (hourly) | First the end gates; then, while the player is in another lord's army, the hunter stands off (his pin released once, no re-engage, no step; the last step reads "player in another lord's army"); after a stand-off the first free hour re-pins and re-engages him once, whatever his own AI chose; while his AI has left him busy (the start's busy test: a battle, an army he leads or is attached to, a siege, a settlement, disbanding, another order's pin) the resume claims no pin, does not step, and retries the next hour. Out of sight only. The service judges the adapter's raw step state: the hunter active, not in a battle, siege, army, settlement or at sea, not visible, engaging the player; the player active, on the open map (no battle, siege, settlement, encounter or sea), no true sight, same island. Then, only beyond 1.5 S in a straight line, it rebuilds the path, walks `min(pathGap - 1.5 S - 3, StepCap)` along it, accepts the point only on the player's island with no enemy of the hunter within 3 and at least 1.5 S from the player, and moves the party. S is the player's seeing range, re-read each hour. `taom.print_eye_of_sauron` shows the last step's outcome. |
 | Speed | A main-thread frame tick finds the hunter with the locator search around the player (radius 1% beyond 1.5 S, the service's `SightMargin`, since the engine's locator skips a party at exactly its radius; no allocation) and publishes `{hunter party, in band, player speed, multiplier}`; the hunter is in band at a straight-line distance of at most 1.5 S (a NaN distance or S is out). The frame tick also stands the hunter off the moment the player is in another lord's army, and publishes him out of band whenever the hunt does not hold his pin (standing off, or not yet re-pinned). `TaomPartySpeedModel` raises the hunter to `player speed * HunterSpeedMultiplier` (never under 1) while in band, reading only that snapshot on the worker threads. The hunter's speed cache is refreshed when the in-band state flips or the player's speed moves more than 5%. |
 | Size | `TaomPartySizeModel` lifts the hunter's limit to the larger of its raw and weighted head count, before the TroopWeight line, so the size sheds (the TroopWeight shed and vanilla's size rule) never trim the host. It does not stop vanilla's wage-limit desertion (up to 20 men a day once the clan leader holds 90,000 gold or less); the daily top-up replaces those men. |
 | End | The first of: a battle the hunter's side lost, or the player's battle against the hunter that someone won (`HuntBattleReader` reads the winner and the hunter's side at `MapEventEnded`; a flee, with no winner, never ends the hunt); the party destroyed, missing or under another leader; the hunter dead, captured or a fugitive; the war ending; the player kingdomless; a co-op session, an unprobeable co-op mod or a server; `HuntTimeoutDays`; the switch off; `taom.clear_eye_hunt`. The gates run at the hunter's hourly tick as well as daily, so a peace or a kingdom change ends the hunt within the hour. Every end releases the pin (dropping an engage order on the player and having the party rethink next hour) unless a stand-off already released it, clears the snapshot, refreshes the size limit and the speed and starts the cooldown. A start refused after the host was registered clears it and refreshes the size limit too. |
@@ -145,7 +143,7 @@ provider reverts a non-finite float to its default before clamping it into the s
 | `EyeHalfLifeDays` | 30 | 1 to 365 | Days for a score to halve |
 | `EyeCooldownDays` | 60 | 0 to 365 | Days after a hunt ends before another can start |
 | `HuntTimeoutDays` | 20 | 1 to 120 | Days before the hunter gives up |
-| `HunterSpeedMultiplier` | 1.3 | 1.1 to 2.0 | In sight, the hunter moves at least this many times the player's speed |
+| `HunterSpeedMultiplier` | 1.3 | 1.1 to 2.0 | Within 1.5 of the player's seeing ranges (decision 8), the hunter moves at least this many times the player's speed |
 | `HunterStrengthRatio` | 1.3 | 0.5 to 3.0 | Host strength as a multiple of the player's |
 | `HunterMaxTroops` | 250 | 20 to 1000 | Most men in the hunter's party after the top-up |
 | `HunterStepCap` | 15 | 1 to 50 | Longest single out-of-sight step, in map units |
@@ -199,7 +197,7 @@ and that `dolguldur` is the kingdom Khamûl rules.
 |---|---|---|
 | `taom.print_eye_of_sauron` | A | Scores, threshold, cooldown, the player's kingdom and side, and the running hunt (hunter, party, live pin and engage state, day, in sight, speeds, last hourly step) |
 | `taom.add_eye_score <evil\|free> <n>` | B | Adds `n` (between -1000 and 1000) to the score against Evil or against Free; never below zero |
-| `taom.start_eye_hunt [confirm]` | C | Dry run without `confirm`: who would ride, re-task or spawn, a governorship given up, the top-up. With `confirm` it starts a hunt now, ignoring the score and the cooldown; the switch, single-player, kingdom and war gates still hold. The party, its troops and grain, and a lost governorship remain after the hunt |
+| `taom.start_eye_hunt [confirm]` | C | Dry run without `confirm`: who would ride, re-task or spawn, a governorship given up, the top-up. With `confirm` it starts a hunt now, ignoring the score and the cooldown; the switch, single-player, kingdom and war gates still hold, and it starts nothing while you ride in another lord's army (the dry run says so too). The party, its troops and grain, and a lost governorship remain after the hunt |
 | `taom.clear_eye_hunt` | B | Ends the hunt and releases the hunter; a spawned hunter stays on the map as an ordinary lord party |
 
 ## Key Files
@@ -257,7 +255,7 @@ and that `dolguldur` is the kingdom Khamûl rules.
 
 ## In-game test checklist
 
-Owed before the issue closes (`triage-needs-ingame`). Use a Free kingdom (Gondor) unless stated.
+Owed in game: #765 closed on 2026-10-14 with the `triage-needs-ingame` label, which comes off once these pass. Use a Free kingdom (Gondor) unless stated.
 
 1. **Won:** `taom.add_eye_score evil 20`, wait a day. The start popup names the hunter. Find and beat him; the
    "is beaten" line shows and `taom.print_eye_of_sauron` reports no hunt and a cooldown.
@@ -304,8 +302,10 @@ Owed before the issue closes (`triage-needs-ingame`). Use a Free kingdom (Gondor
 - 2026-10-14: Codex review fixes: the resume waits while the hunter's own AI left him busy (an army above all); every
   hunt membership change refreshes the cached size limit; session launch reads the live pin before any end; the
   locator search reaches just past 1.5 S.
+- 2026-10-14: review follow-ups (#792): the hunt popup's map-free check reads the stored `Campaign.Current?.MainParty`;
+  the computed `PartyBase.MainParty` throws while it is null.
 
 ## GitHub Issue
 
-- **Issue:** #765 (War Chronicle), milestone M8
+- **Issue:** #765 (War Chronicle), milestone M8; follow-ups #792 (closed)
 - **Status:** Closed
