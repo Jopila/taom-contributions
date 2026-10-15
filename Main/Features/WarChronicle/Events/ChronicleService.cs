@@ -216,8 +216,9 @@ public sealed class ChronicleService
         var record = _store.Get(definition.Id);
         if (record == null)
         {
-            reason = $"'{definition.Id}' has no saved row yet; 'confirm' adopts it first (Skipped when its day "
-                     + "has passed), then opens it if it is still Pending.";
+            reason = $"'{definition.Id}' has no saved row yet, so there is nothing to preview. Adoption adds it "
+                     + "as Pending, or as Skipped when its day has passed or its anchor fails; only a Pending "
+                     + "event can be opened.";
             return false;
         }
 
@@ -237,7 +238,7 @@ public sealed class ChronicleService
             reason = $"'{definition.Id}' would occur now and apply its effects.";
         else if (takenBy != null)
             reason = $"'{definition.Id}' would resolve Fell at once ({takenBy} already holds "
-                     + $"{definition.TargetSettlementId}) and pay its Fell outcome.";
+                     + $"{definition.TargetSettlementId}) and apply its Fell outcome, if it defines one.";
         else
             reason = $"'{definition.Id}' would open its window until day {Day(now + definition.WindowDays)}.";
         return true;

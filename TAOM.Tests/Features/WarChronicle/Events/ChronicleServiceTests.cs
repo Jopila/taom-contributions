@@ -1250,6 +1250,7 @@ public class ChronicleServiceTests
         Assert.IsTrue(_sut.OpenChronicleEventNow("hornburg", dryRun: true, out var reason), reason);
 
         StringAssert.Contains(reason, "would resolve Fell");
+        StringAssert.Contains(reason, "apply its Fell outcome, if it defines one");
         StringAssert.Contains(reason, "isengard");
         Assert.AreEqual(ChronicleEventState.Pending, _f.StateOf("hornburg"));
         _f.Momentum.DidNotReceiveWithAnyArgs().TryAwardScripted(default, default, default!, default);
@@ -1327,6 +1328,8 @@ public class ChronicleServiceTests
         Assert.IsFalse(_sut.OpenChronicleEventNow("fellowship", dryRun: true, out var reason));
 
         StringAssert.Contains(reason, "no saved row");
+        StringAssert.Contains(reason, "its anchor fails", "adoption also skips an event whose anchor failed");
+        Assert.IsFalse(reason.Contains("then opens"), "the dry run cannot promise what a confirmed open does: " + reason);
         Assert.IsNull(_f.Store.Get("fellowship"), "a dry run must not adopt the row");
     }
 
