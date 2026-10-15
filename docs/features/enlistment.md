@@ -1187,8 +1187,8 @@ Two paths still detach with an open encounter, both pre-existing, both recorded 
 than fixed here: the MCM master switch turned off mid-battle runs the discharge (RestorePresence,
 LeaveArmy, ClearArmyAttachment) before the ownership policy closes the encounter, by the documented
 "discharge outranks ownership" rule; and a failed join's rollback can leave the encounter open
-under R1b while `ReassertServiceMenu` re-inits the wait menu, whose init parks unconditionally on
-`EnlistedAttached`.
+under R1b (once #796 turns it on; dormant until then) while `ReassertServiceMenu` re-inits the wait
+menu, whose init parks unconditionally on `EnlistedAttached`.
 
 Why x64 exposed it: `Campaign.TickMapTime` yields 1080 x multiplier campaign seconds per real
 second, so at 64 a campaign hour is about 52 ms of wall clock, `MBCampaignEvent.CheckUpdate` fires
@@ -1537,14 +1537,37 @@ and `PlayerEncounter.Finish` additionally forces `TimeControlMode.Stop` and `Gam
 
 The replacement names the real condition instead of proxying it: `EncounterOwnershipSnapshot`
 gained **`IsBattleEncounter`** (`PlayerEncounter.Battle != null || Current.IsJoinedBattle`) and the
-policy gained **R1b**, which defers for every intent. A battle encounter is now protected in every
-state rather than only while the state happens to read `EnlistedAttached`.
+policy gained **R1b**, which defers for every intent. By design that protects a battle encounter in
+every state rather than only while the state happens to read `EnlistedAttached`; in production it
+protects nothing yet.
+
+**R1b is dormant in production (#796).** `EncounterAdapter.GetOwnership` computes
+`isBattleEncounter` and does not pass it to the `EncounterOwnershipSnapshot` constructor, whose
+parameter defaults to false. No live snapshot has reported a battle encounter since the rule landed
+in `b54f845cb`, so R1b and the load normalizer's mid-battle check (`EnlistmentLoadNormalizer`) run
+only in tests. Passing the flag is one line, and it waits until two cleanup paths keep their
+obligation when R1b defers (Codex adversarial review, 2026-10-15, both HIGH):
+
+- **Rollback (`ServiceBattleService`):** a failed join's rollback finishes the encounter only on a
+  `Finish` verdict but moves to `EnlistedAttached` either way, so a deferred battle encounter stays
+  open in a state where the stale-latch recovery, which requires `EnlistedBattle`, never runs.
+- **Discharge (`DischargeService`):** discharge logs R1b's deferral, then resets the record and
+  returns success, so nothing enlisted remains to retry the cleanup and the open encounter blocks
+  every later main-party encounter.
+
+**The #551 latch never needed R1b.** In that crash the policy was not the guard that held: the
+sweep returned on `commanderInMapEvent` and `TryBreakBattleLatch` on `HasPlayerEncounter` before
+either asked it. In a joined field battle the encountered party is the opposing side's leader
+(v1.5.5 `PlayerEncounter.cs:910`), never the commander, so a sweep or rollback call without R1b
+skips at R2 (a conversation) or R4 (`SkipNotOurs`); a `Discharge` call finishes it unless a
+conversation is running. The stale-latch recovery passes through R1c, which sits above R1b, so it does not depend
+on R1b either.
 
 ### The rules that changed
 
 | Rule | Change |
 |---|---|
-| **R1b** (new, universal) | An encounter belonging to a battle is never finished, by any intent including `Discharge`. Handing the player back is urgent; deleting the battle result they are reading is worse, and every caller retries. |
+| **R1b** (new, universal; dormant until #796) | An encounter belonging to a battle is never finished, by any intent including `Discharge`. Handing the player back is urgent; deleting the battle result they are reading is worse, and every caller retries. The adapter never sets the flag, so the rule has not run in a real game. |
 | **R2c** (new) | `StrandedOutsideSettlement` inverts R3 the way `ShoreLeaveEnd` does, but from the other direction: the encounter outlived the settlement. It requires `!PlayerInsideSettlement` **itself**, read fresh by the adapter, rather than trusting the caller. |
 | `ShoreLeaveEnd` | No longer the only intent that treats a settlement-shaped encounter as ours. Its doc said so and is corrected. |
 
@@ -1687,12 +1710,13 @@ live `PlayerEncounter` and the commander still fighting. Nothing in the feature 
 |---|---|
 | `TryBreakBattleLatch` returns on `HasPlayerEncounter` or `commander.PartyIsInMapEvent` | Both true |
 | `SweepStrandedEncounter` returns on `commanderInMapEvent` | The commander was still fighting |
-| R1b defers for every intent, `Discharge` included | `PlayerEncounter.Battle != null`, so it reads as the player's own loot screen |
+| R1b defers for every intent, `Discharge` included | Designed to, since `PlayerEncounter.Battle != null` reads as the player's own loot screen; in production it never fired, because the adapter drops the flag (#796), and the two guards above returned before the policy was asked |
 | `ServiceBattleService.TryJoin` refuses every rejoin | The state is not `EnlistedAttached` |
 
 **#538's fix does not cover this shape.** Its sweep is gated on `!commanderInMapEvent`, which is
-exactly the leg this crash sets, and R1b, added by that same fix, is what makes the encounter
-untouchable. Four correct guards with no exit between them.
+exactly the leg this crash sets, and R1b, added by that same fix, was meant to make the encounter
+untouchable but is dormant until #796. Three live guards, a fourth on paper, and no exit between
+them.
 
 The discriminator is **time**, and only time: R1b justifies itself on the loot window being short and
 every caller retrying. `EnlistmentReconciler.BreakStaleBattleLatch` times one continuous episode of
