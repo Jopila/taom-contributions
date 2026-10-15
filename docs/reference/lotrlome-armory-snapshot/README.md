@@ -25,7 +25,7 @@ Any future Steam-Workshop or manual update of `LOTRLOME_Armory` will overwrite o
 | `project.mbproj` | The native-side registration manifest. **Added 2026-08-28** because the warg's three new `<file>` rows live only here. | ~3.6 KB |
 | `Prefabs/taom_howdah_platform.xml` | The war elephant's howdah platform (renamed from `taom_howdah_agent.xml` 2026-09-19, #627, so a stale copy of the old name in an installed TAOM module can never compete): a floor fitted to the elite howdah's deck, four `bo_barrier` rails and four crew frames, every body `moveable`. `ElephantMissionBehavior` instantiates it by name. **Added 2026-09-18**, when it moved here from the TAOM module; the Armory loads `Prefabs/` with no SubModule row. The live copy lives at `LOTRLOME_Armory/Prefabs/`, not `ModuleData/`, and `HowdahPrefabTests` fails if it differs from this one. | ~10 KB |
 | `Prefabs/taom_mumakil_platform.xml` | The mumakil war tower's crew platform (#627 phase 2): three floor bodies (`moveable` + `barrier`) at the measured deck heights and eight crew frames, every entity `visible_only_when_editing` because the tower the player sees is `sk_mumakil_platform_a1` on the Horse item. Authored MOUNT-LOCAL, 1:1 with the FBX; `TaomMumakilPlatform` applies the 3.0x from `Agent.AgentScale` at runtime, so nothing here may be pre-multiplied. `MumakilCrewSpawner` instantiates it by name, and the platform attaches `Modules/TAOM/NavMeshPrefabs/taom_mumakil_platform_navmesh.bin` (face group 1) without which the crew fall to the ground: physics is what they stand on, navmesh is what makes it valid, and the tower needs both. Authored at FINAL in-game size since 2026-09-21; nothing scales it at runtime. **Added 2026-09-20.** `MumakilPlatformTests` fails if the live copy differs from this one. | ~11 KB |
-| `weapon_descriptions.xslt` | The Armory's additive override of Native's `<AvailablePieces>` lists: which crafting pieces each `WeaponDescription` accepts, and therefore which usages a crafted weapon resolves to. **Carries the one-handed-polearm registration** for the Dale spears and the Black Numenorean lance (see APPLIED EDIT below). Refreshed from the live file on 2026-09-25, after KEYforce's Lamedon drop replaced the `wm_swan_knight_spear_*` pieces with `wm_gondor_spear_flag_*` and `wm_gondor_light_spear_*`; the copy had last been taken on 2026-08-20 and lagged every Armory change since. Refreshed again on 2026-09-26 for the hill troll war hammer's two `TwoHandedMace` registrations (`wm_hill_troll_2h_hammer_head`, `wm_hill_troll_2h_hammer_handle`, after the cave troll mace's; [lotrlome-hill-troll-changes.md](../lotrlome-hill-troll-changes.md)). | ~83 KB |
+| `weapon_descriptions.xslt` | The Armory's additive override of Native's `<AvailablePieces>` lists: which crafting pieces each `WeaponDescription` accepts, and therefore which usages a crafted weapon resolves to. **Carries the one-handed-polearm registration** for the Dale spears and the Black Numenorean lance (see APPLIED EDIT below). Refreshed from the live file on 2026-09-25, after KEYforce's Lamedon drop replaced the `wm_swan_knight_spear_*` pieces with `wm_gondor_spear_flag_*` and `wm_gondor_light_spear_*`; the copy had last been taken on 2026-08-20 and lagged every Armory change since. Refreshed again on 2026-09-26 for the hill troll war hammer's two `TwoHandedMace` registrations (`wm_hill_troll_2h_hammer_head`, `wm_hill_troll_2h_hammer_handle`, after the cave troll mace's; [lotrlome-hill-troll-changes.md](../lotrlome-hill-troll-changes.md)), and on 2026-10-15 for KEYforce's Harad sword and spear pieces, couchable since that install (#805). | ~86 KB |
 
 > The first three are race-defining XML and are auto-loaded from every module root. `weapon_descriptions.xslt` is neither — it is here because it now carries an applied edit, and unlike the other three the live copy is already CRLF, so live and snapshot are byte-identical rather than differing by line ending.
 
@@ -421,6 +421,32 @@ wrong at a glance and neither should be "fixed":
 These are defects in the dependency module's **binary assets**, which this snapshot does not cover —
 it holds XML only. Recorded so a future session does not re-derive them.
 
+### ⚠️ APPLIED EDIT: KEYforce's Harad regular weapons (#805, 2026-10-15)
+
+KEYforce's lotraom-assets commit `db981663` added Harad and Shaghana regular weapons. TAOM installed its ModuleData
+half with three edits his files do not carry. **Live edits his next drop or an Armory reinstall WILL revert:**
+
+| File | Edit |
+|---|---|
+| `ModuleData/LOTRLOME_items/harad/weapons.xml` | new file from his commit; `is_merchandise="false"` on `hr_st_longbow_light`, `_med`, `_heavy` (they need Bow 80, 100 and 120; his file sells them) |
+| `ModuleData/weapon_descriptions.xslt` | his `[Harad] regular weapons` rows, plus the 11 Harad spear pieces in `TwoHandedPolearm_Couchable` inside `TAOM-HARAD-COUCH:START`/`END` markers (his commit registered them in the other three polearm descriptions only, so the spears could not couch) |
+| `ModuleData/LOTRLOME_crafting_pieces.xml`, `ModuleData/crafting_templates.xslt` | his files as committed (15 new pieces; additions only) |
+| `ModuleData/Languages/loc_harad.xml`, `loc_LOTRLOME_crafting_pieces.xml` | English rows for his 35 item and 15 piece names (his files register none); the 12 translations are owed |
+| `ModuleData/LOTRLOME_items/harad/ranged_ladder.xml`, `Languages/loc_harad.xml` and its 12 translations | `ladder_harad_bow_t7` (#803), written by `generate_ranged_ladder_items.py`; its translated names copied from tier 6 with the numeral VII |
+
+- **Gate:** `HaradWeaponsLiveEditTests` (LiveInstall) derives the spear pieces from his crafted items and checks they are
+  in Couchable, checks the three longbows are not merchandise, and checks every Harad item and piece name has an
+  English row. Run against his committed files, all three fail (11 pieces, a longbow on sale, 50 names).
+- **Backups** beside each file: `*.bak-keyforce-harad-20261015-140734` (pieces, both XSLTs),
+  `*.bak-keyforce-harad-20261015-141050` (the two loc files), `weapon_descriptions.xslt.bak-harad-couchmark-*`,
+  `*.bak-harad-t7-*`. `harad/weapons.xml` had no predecessor, so reverting it means deleting it; the
+  `harad/weapons.xml.bak` beside it is KEYforce's own earlier version, synced from the mirror, not a TAOM backup.
+- **Not installed from `db981663`:** his five Gondor armour files (they re-stat 49 Anorien pieces below TAOM's
+  kingdom-cap curve) and his runtime logs. His art, shaders and runtime caches were already live, byte-identical to his
+  commit; Mike kept the shader-switched bow materials as they are.
+- **Replay after a drop:** take his new files through a three-way merge, then re-add the three edits by hand (no tool
+  writes them) until KEYforce carries them upstream; the gate names whatever is missing.
+
 ### ⚠️ APPLIED EDIT: shield-compatible polearms registered under `OneHandedPolearm` (2026-08-10, extended 2026-08-20)
 
 **This is a live edit to `ModuleData/weapon_descriptions.xslt` that a future Armory update WILL
@@ -677,7 +703,13 @@ damage out of the cache, so a replay cannot bring it back.
 
 ## Snapshot date
 
-2026-10-15: `action_sets.xml` refreshed by a byte copy of the live file after the WildMesh3D sets (#794): the
+2026-10-15 (later): `weapon_descriptions.xslt` refreshed by a byte copy of the live file after KEYforce's Harad
+regular weapons were installed (#805, lotraom-assets `db981663`): his `[Harad] regular weapons` block of 4 sword pieces
+in the one-handed sword description and 11 spear pieces in three polearm descriptions, plus the same 11 spear pieces
+added to `TwoHandedPolearm_Couchable`, which his commit left out. The previous copy was byte-identical to the live
+`weapon_descriptions.xslt.bak-keyforce-harad-20261015-140734`.
+
+Earlier on 2026-10-15: `action_sets.xml` refreshed by a byte copy of the live file after the WildMesh3D sets (#794): the
 previous copy was byte-identical to the live `action_sets.xml.bak-wildmesh-20261014`, and the live file differed from
 that backup by one insertion of 16,919 bytes holding the 15 `as_wildmesh_*` sets (now 4,461,693 bytes). The writer's
 `LiveRecipeParityTests` fail when this copy lacks those sets. The other files are as below.

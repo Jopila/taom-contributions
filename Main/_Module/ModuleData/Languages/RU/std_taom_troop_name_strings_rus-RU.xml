@@ -465,10 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[Гундабад] Бледный урук — пиконосец-разбойник" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[Гундабад] Бледный урук-пехотинец" />
     <string id="aom_gundabad_warg_tamer_name" text="[Гундабад] Бледный урук — волчий всадник" />
-    <string id="aom_harad_militia_archer_name" text="[Харад] Лучник-ополченец" />
-    <string id="aom_harad_militia_spearman_name" text="[Харад] Копейщик-ополченец" />
-    <string id="aom_harad_militia_vet_arch_name" text="[Харад] Опытный лучник-ополченец" />
-    <string id="aom_harad_militia_vet_spear_name" text="[Харад] Опытный копейщик-ополченец" />
+    <string id="aom_harad_militia_archer_name" text="[Харван] Лучник-ополченец" />
+    <string id="aom_harad_militia_spearman_name" text="[Харван] Копейщик-ополченец" />
+    <string id="aom_harad_militia_vet_arch_name" text="[Харван] Опытный лучник-ополченец" />
+    <string id="aom_harad_militia_vet_spear_name" text="[Харван] Опытный копейщик-ополченец" />
     <string id="aom_imladris_archer_name" text="[Ривенделл] Лучник Имладриса" />
     <string id="aom_lindon_imladris_archer_name" text="[Линдон] Лучник Митлонда" />
     <string id="aom_imladris_blademaster_name" text="[Ривенделл] Мастер клинка Имладриса" />
@@ -840,7 +840,7 @@
     <string id="aom_gondor_loss_noble_sergeant_name" text="[Гондор] Секирный стражник Лоссарнаха" />
     <string id="aom_gondor_loss_noble_veteran_name" text="[Гондор] Секироносец Лоссарнаха" />
     <string id="aom_gondor_loss_noble_warden_name" text="[Гондор] Страж-секироносец Лоссарнаха" />
-    <string id="aom_harad_howdah_crew_name" text="[Харад] Лучник хауды" />
+    <string id="aom_harad_howdah_crew_name" text="[Харван] Лучник хауды" />
     <string id="aom_arthedain_citadel_guard_name" text="[Артедайн] Страж цитадели" />
     <string id="aom_arthedain_dunadan_youth_merc_name" text="[Артедайн] Дунаданский наёмник" />
     <string id="aom_arthedain_dunadan_youth_name" text="[Артедайн] Дунаданский юноша" />

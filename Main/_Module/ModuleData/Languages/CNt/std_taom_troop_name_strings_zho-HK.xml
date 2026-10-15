@@ -465,10 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[剛達巴德] 白化強獸人長矛劫掠兵" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[剛達巴德] 白化強獸人步兵" />
     <string id="aom_gundabad_warg_tamer_name" text="[剛達巴德] 白化強獸人狼騎兵" />
-    <string id="aom_harad_militia_archer_name" text="[哈拉德] 民兵弓箭手" />
-    <string id="aom_harad_militia_spearman_name" text="[哈拉德] 民兵長矛兵" />
-    <string id="aom_harad_militia_vet_arch_name" text="[哈拉德] 民兵老兵弓箭手" />
-    <string id="aom_harad_militia_vet_spear_name" text="[哈拉德] 民兵老兵長矛兵" />
+    <string id="aom_harad_militia_archer_name" text="[哈爾萬] 民兵弓箭手" />
+    <string id="aom_harad_militia_spearman_name" text="[哈爾萬] 民兵長矛兵" />
+    <string id="aom_harad_militia_vet_arch_name" text="[哈爾萬] 民兵老兵弓箭手" />
+    <string id="aom_harad_militia_vet_spear_name" text="[哈爾萬] 民兵老兵長矛兵" />
     <string id="aom_imladris_archer_name" text="[瑞文戴爾] 伊姆拉崔弓手" />
     <string id="aom_lindon_imladris_archer_name" text="[林頓] 密斯隆德弓箭手" />
     <string id="aom_imladris_blademaster_name" text="[瑞文戴爾] 伊姆拉崔劍術大師" />
@@ -840,7 +840,7 @@
     <string id="aom_gondor_loss_noble_sergeant_name" text="[剛鐸] 洛薩那赫斧衛兵" />
     <string id="aom_gondor_loss_noble_veteran_name" text="[剛鐸] 洛薩那赫斧兵" />
     <string id="aom_gondor_loss_noble_warden_name" text="[剛鐸] 洛薩那赫斧衛長" />
-    <string id="aom_harad_howdah_crew_name" text="[哈拉德] 象轎弓箭手" />
+    <string id="aom_harad_howdah_crew_name" text="[哈爾萬] 象轎弓箭手" />
     <string id="aom_arthedain_citadel_guard_name" text="[雅西頓] 王城衛兵" />
     <string id="aom_arthedain_dunadan_youth_merc_name" text="[雅西頓] 杜尼丹傭兵" />
     <string id="aom_arthedain_dunadan_youth_name" text="[雅西頓] 杜尼丹青年" />

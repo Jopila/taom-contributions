@@ -1899,12 +1899,12 @@
   <Item id="sk_hr_st_helmet_heavy_b" class="heavy" />
   <Item id="sk_hr_st_helmet_heavy_c" class="heavy" />
   <Item id="sk_hr_st_helmet_heavy_d" class="heavy" />
-  <Item id="sk_hr_st_helmet_light_a" class="light" next="sk_hr_st_helmet_med_b" />
-  <Item id="sk_hr_st_helmet_light_b" class="light" next="sk_hr_st_helmet_med_b" />
+  <Item id="sk_hr_st_helmet_light_a" class="light" next="sk_hr_st_helmet_med_c" />
+  <Item id="sk_hr_st_helmet_light_b" class="light" next="sk_hr_st_helmet_med_c" />
   <Item id="sk_hr_st_helmet_light_c" class="light" next="sk_hr_st_helmet_med_c" />
   <Item id="sk_hr_st_helmet_light_d" class="light" next="sk_hr_st_helmet_med_d" />
-  <Item id="sk_hr_st_helmet_med_a" class="light" next="sk_hr_st_helmet_med_b" />
-  <Item id="sk_hr_st_helmet_med_b" class="medium" next="sk_hr_st_helmet_heavy_b" />
+  <Item id="sk_hr_st_helmet_med_a" class="light" next="sk_hr_st_helmet_med_c" />
+  <Item id="sk_hr_st_helmet_med_b" class="light" next="sk_hr_st_helmet_med_c" />
   <Item id="sk_hr_st_helmet_med_c" class="medium" next="sk_hr_st_helmet_heavy_c" />
   <Item id="sk_hr_st_helmet_med_d" class="medium" next="sk_hr_st_helmet_heavy_d" />
   <Item id="sk_hr_st_pauld_arc_elite_a" class="elite" />

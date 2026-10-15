@@ -465,10 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[군다바드] 창백한 우루크 창 약탈병" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[군다바드] 창백한 우루크 보병" />
     <string id="aom_gundabad_warg_tamer_name" text="[군다바드] 창백한 우루크 늑대 기수" />
-    <string id="aom_harad_militia_archer_name" text="[하라드] 민병 궁수" />
-    <string id="aom_harad_militia_spearman_name" text="[하라드] 민병 창병" />
-    <string id="aom_harad_militia_vet_arch_name" text="[하라드] 민병 역전의 궁수" />
-    <string id="aom_harad_militia_vet_spear_name" text="[하라드] 민병 역전의 창병" />
+    <string id="aom_harad_militia_archer_name" text="[하르완] 민병 궁수" />
+    <string id="aom_harad_militia_spearman_name" text="[하르완] 민병 창병" />
+    <string id="aom_harad_militia_vet_arch_name" text="[하르완] 민병 역전의 궁수" />
+    <string id="aom_harad_militia_vet_spear_name" text="[하르완] 민병 역전의 창병" />
     <string id="aom_imladris_archer_name" text="[깊은골] 임라드리스 궁수" />
     <string id="aom_lindon_imladris_archer_name" text="[린돈] 미슬론드 궁수" />
     <string id="aom_imladris_blademaster_name" text="[깊은골] 임라드리스 검술사범" />
@@ -840,7 +840,7 @@
     <string id="aom_gondor_loss_noble_sergeant_name" text="[곤도르] 로사르나크 도끼호위대" />
     <string id="aom_gondor_loss_noble_veteran_name" text="[곤도르] 로사르나크 도끼병" />
     <string id="aom_gondor_loss_noble_warden_name" text="[곤도르] 로사르나크 도끼수호대" />
-    <string id="aom_harad_howdah_crew_name" text="[하라드] 하우다 궁수" />
+    <string id="aom_harad_howdah_crew_name" text="[하르완] 하우다 궁수" />
     <string id="aom_arthedain_citadel_guard_name" text="[아르세다인] 성채 수비병" />
     <string id="aom_arthedain_dunadan_youth_merc_name" text="[아르세다인] 두네다인 용병" />
     <string id="aom_arthedain_dunadan_youth_name" text="[아르세다인] 두네다인 청년" />

@@ -291,6 +291,11 @@
 			<AvailablePiece id="sm_md_num_sword_1h_handle_b" />
 			<AvailablePiece id="sm_md_num_sword_1h_pommel_a" />
 			<AvailablePiece id="sm_md_num_sword_1h_pommel_b" />
+			<!--[Harad] regular weapons-->
+			<AvailablePiece id="sk_hr_st_sword_blade_a" />
+			<AvailablePiece id="sk_hr_st_sword_guard_a" />
+			<AvailablePiece id="sk_hr_st_sword_handle_a" />
+			<AvailablePiece id="sk_hr_st_sword_pommel_a" />
 			<xsl:apply-templates select="@*|node()"/>
 			<!-- TAOM-STARTER-KIT:START -->
 			<AvailablePiece id="starter_wm_gondor_sword_a01_blade"/>
@@ -591,6 +596,18 @@
 			<AvailablePiece id="sm_ro_rohan_spear_blade_b" />
 			<AvailablePiece id="sm_ro_rohan_spear_handle_a" />
 			<AvailablePiece id="sm_ro_rohan_spear_handle_b" />
+			<!--[Harad] regular weapons-->
+			<AvailablePiece id="sm_hr_st_spear_blade_light_a" />
+			<AvailablePiece id="sm_hr_st_spear_blade_light_b" />
+			<AvailablePiece id="sm_hr_st_spear_blade_med_a" />
+			<AvailablePiece id="sm_hr_st_spear_blade_heavy_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_light_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_light_b" />
+			<AvailablePiece id="sm_hr_st_spear_handle_med_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_med_b" />
+			<AvailablePiece id="sm_hr_st_spear_handle_heavy_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_heavy_b" />
+			<AvailablePiece id="sm_hr_st_spear_pommel_a" />
 			<xsl:apply-templates select="@*|node()"/>
 			<!-- TAOM-STARTER-KIT:START -->
 			<AvailablePiece id="starter_wm_gondor_light_spear_blade"/>
@@ -732,6 +749,18 @@
 			<AvailablePiece id="sm_ro_rohan_spear_blade_b" />
 			<AvailablePiece id="sm_ro_rohan_spear_handle_a" />
 			<AvailablePiece id="sm_ro_rohan_spear_handle_b" />
+			<!--[Harad] regular weapons-->
+			<AvailablePiece id="sm_hr_st_spear_blade_light_a" />
+			<AvailablePiece id="sm_hr_st_spear_blade_light_b" />
+			<AvailablePiece id="sm_hr_st_spear_blade_med_a" />
+			<AvailablePiece id="sm_hr_st_spear_blade_heavy_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_light_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_light_b" />
+			<AvailablePiece id="sm_hr_st_spear_handle_med_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_med_b" />
+			<AvailablePiece id="sm_hr_st_spear_handle_heavy_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_heavy_b" />
+			<AvailablePiece id="sm_hr_st_spear_pommel_a" />
 			<xsl:apply-templates select="@*|node()"/>
 			<!-- TAOM-1H-POLEARM:START -->
 			<AvailablePiece id="wm_dale_ws_spear_a01_blade"/>
@@ -899,6 +928,19 @@
 			<AvailablePiece id="sm_ro_rohan_spear_blade_b" />
 			<AvailablePiece id="sm_ro_rohan_spear_handle_a" />
 			<AvailablePiece id="sm_ro_rohan_spear_handle_b" />
+			<!-- TAOM-HARAD-COUCH:START (#805: KEYforce's db981663 left the Harad spears out of Couchable) -->
+			<AvailablePiece id="sm_hr_st_spear_blade_light_a" />
+			<AvailablePiece id="sm_hr_st_spear_blade_light_b" />
+			<AvailablePiece id="sm_hr_st_spear_blade_med_a" />
+			<AvailablePiece id="sm_hr_st_spear_blade_heavy_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_light_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_light_b" />
+			<AvailablePiece id="sm_hr_st_spear_handle_med_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_med_b" />
+			<AvailablePiece id="sm_hr_st_spear_handle_heavy_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_heavy_b" />
+			<AvailablePiece id="sm_hr_st_spear_pommel_a" />
+			<!-- TAOM-HARAD-COUCH:END -->
 			<xsl:apply-templates select="@*|node()"/>
 			<!-- TAOM-STARTER-KIT:START -->
 			<AvailablePiece id="starter_wm_gondor_light_spear_blade"/>
@@ -1149,6 +1191,18 @@
 			<AvailablePiece id="sm_ro_rohan_spear_blade_b" />
 			<AvailablePiece id="sm_ro_rohan_spear_handle_a" />
 			<AvailablePiece id="sm_ro_rohan_spear_handle_b" />
+			<!--[Harad] regular weapons-->
+			<AvailablePiece id="sm_hr_st_spear_blade_light_a" />
+			<AvailablePiece id="sm_hr_st_spear_blade_light_b" />
+			<AvailablePiece id="sm_hr_st_spear_blade_med_a" />
+			<AvailablePiece id="sm_hr_st_spear_blade_heavy_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_light_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_light_b" />
+			<AvailablePiece id="sm_hr_st_spear_handle_med_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_med_b" />
+			<AvailablePiece id="sm_hr_st_spear_handle_heavy_a" />
+			<AvailablePiece id="sm_hr_st_spear_handle_heavy_b" />
+			<AvailablePiece id="sm_hr_st_spear_pommel_a" />
 			<xsl:apply-templates select="@*|node()"/>
 			<!-- TAOM-STARTER-KIT:START -->
 			<AvailablePiece id="starter_wm_gondor_light_spear_blade"/>

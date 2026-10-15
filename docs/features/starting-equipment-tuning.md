@@ -323,6 +323,7 @@ an item folder loads as a duplicate item id.
   above). Committed in `776054c0c`; the tool's single roster-id reader and its comment skip followed in
   `2952ccc54` ([RCA](../reviews/rca-orc-goblin-locomotion-2026-10-14.md)).
 - 2026-10-15: the aserai career kits wear `sk_hr_st_tunic_a` as Body, the generator rule (the lowest Harad troop, `harad_reg_levy` at level 6, wears it). The cavalry and infantry careers' lance became `khuzait_lance_1_t3`, the lance the level-11 Harad militia spearmen carry, once `harad_noble_merc` (the only low troop with `aserai_lance_1_t5`) was deleted ([RCA](../reviews/rca-harad-repair-2026-10-15.md)).
+- 2026-10-15, later (#805): KEYforce's Harad regular weapons put non-vanilla gear on Harad troops at or below the rule's level cap (21; the shield first at level 11, the spear at 16, the sword at 21), and the rule prefers non-vanilla items there, so all six aserai careers now carry his `sm_hr_st_shield_cav_light_b` and `hr_st_sword_a`, and the cavalry and infantry careers his `hr_st_spear_light_a` in place of the militia lance (16 slots).
 
 ## Related docs
 

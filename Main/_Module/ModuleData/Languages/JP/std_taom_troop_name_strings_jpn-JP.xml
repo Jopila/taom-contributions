@@ -465,10 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[グンダバド] 蒼白のウルク 掠奪槍兵" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[グンダバド] 蒼白のウルク 歩兵" />
     <string id="aom_gundabad_warg_tamer_name" text="[グンダバド] 蒼白のウルク 狼騎兵" />
-    <string id="aom_harad_militia_archer_name" text="[ハラド] 民兵弓兵" />
-    <string id="aom_harad_militia_spearman_name" text="[ハラド] 民兵槍兵" />
-    <string id="aom_harad_militia_vet_arch_name" text="[ハラド] 熟練民兵弓兵" />
-    <string id="aom_harad_militia_vet_spear_name" text="[ハラド] 熟練民兵槍兵" />
+    <string id="aom_harad_militia_archer_name" text="[ハルワン] 民兵弓兵" />
+    <string id="aom_harad_militia_spearman_name" text="[ハルワン] 民兵槍兵" />
+    <string id="aom_harad_militia_vet_arch_name" text="[ハルワン] 熟練民兵弓兵" />
+    <string id="aom_harad_militia_vet_spear_name" text="[ハルワン] 熟練民兵槍兵" />
     <string id="aom_imladris_archer_name" text="[裂け谷] イムラドリスの射手" />
     <string id="aom_lindon_imladris_archer_name" text="[リンドン] ミスロンドの弓兵" />
     <string id="aom_imladris_blademaster_name" text="[裂け谷] イムラドリスの剣匠" />
@@ -840,7 +840,7 @@
     <string id="aom_gondor_loss_noble_sergeant_name" text="[ゴンドール] ロッサールナッハの斧衛兵" />
     <string id="aom_gondor_loss_noble_veteran_name" text="[ゴンドール] ロッサールナッハの斧兵" />
     <string id="aom_gondor_loss_noble_warden_name" text="[ゴンドール] ロッサールナッハの斧衛長" />
-    <string id="aom_harad_howdah_crew_name" text="[ハラド] 象輿の射手" />
+    <string id="aom_harad_howdah_crew_name" text="[ハルワン] 象輿の射手" />
     <string id="aom_arthedain_citadel_guard_name" text="[アルセダイン] 城塞の衛兵" />
     <string id="aom_arthedain_dunadan_youth_merc_name" text="[アルセダイン] ドゥーナダンの傭兵" />
     <string id="aom_arthedain_dunadan_youth_name" text="[アルセダイン] ドゥーナダンの若者" />

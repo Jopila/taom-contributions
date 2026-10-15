@@ -194,7 +194,7 @@ Nine `.bak*` files sit inside registered folders: five `equipmentsets/taom_enlis
 
 ### LOTRLOME_items/
 
-All 104 files here are `Items` rows, read as `ItemObject` (`Game.cs:309`, loaded `Campaign.cs:1471`), and all are `live`. The 18 culture folders are registered as folders (`LOTRLOME_Armory/SubModule.xml:23-185` and `:345` for `dol_guldur`), so a new `.xml` dropped into an existing folder loads with no manifest edit, a new folder needs a new row, and a `.xml` backup left in a folder loads too. [Items: armour](items-armor.md) is the chapter for their contents and [armory-guide](../reference/armory-guide.md) has the canonical-folder table.
+All 133 files here (counted 2026-10-15) are `Items` rows, read as `ItemObject` (`Game.cs:309`, loaded `Campaign.cs:1471`), and all are `live`. The 18 culture folders are registered as folders (`LOTRLOME_Armory/SubModule.xml:23-185` and `:345` for `dol_guldur`), so a new `.xml` dropped into an existing folder loads with no manifest edit, a new folder needs a new row, and a `.xml` backup left in a folder loads too. [Items: armour](items-armor.md) is the chapter for their contents and [armory-guide](../reference/armory-guide.md) has the canonical-folder table.
 
 | File or folder | Row | What it is for | Tools |
 |---|---|---|---|
@@ -208,7 +208,7 @@ All 104 files here are `Items` rows, read as `ItemObject` (`Game.cs:309`, loaded
 | `LOTRLOME_items/erebor/` (7 files) | `:83` | Erebor armour | `tools/generate_erebor_armor.py`; starters by `tools/generate_starter_armor.py`; player starter twins in `starter_kit.xml` by `tools/generate_starter_kit.py` |
 | `LOTRLOME_items/gondor/` (7 files) | `:23`, the first row in the manifest | Gondor armour, the reference input for the starter generator | `tools/generate_gondor_armor.py`, `tools/generate_gondor_armor_phase2.py`; `tools/apply_dead_mesh_item_swaps.py` touched `body_armors`; a `body_armors.xml.bak-deadmesh-20260901130757` sibling; player starter twins in `starter_kit.xml` by `tools/generate_starter_kit.py` |
 | `LOTRLOME_items/gundabad/` (7 files) | `:165` | Gundabad armour | hand; starters by `tools/generate_starter_armor.py`; player starter twins in `starter_kit.xml` by `tools/generate_starter_kit.py` |
-| `LOTRLOME_items/harad/` (7 files) | `:63` | Harad armour | hand; starters by `tools/generate_starter_armor.py`; player starter twins in `starter_kit.xml` by `tools/generate_starter_kit.py` |
+| `LOTRLOME_items/harad/` (9 files) | `:63` | Harad and Shaghana armour, the Harad ladder bows (`ranged_ladder.xml`) and, since 2026-10-15, KEYforce's regular weapons (`weapons.xml`, #805, the only culture folder with a `weapons.xml`) | hand; starters by `tools/generate_starter_armor.py`; player starter twins in `starter_kit.xml` by `tools/generate_starter_kit.py` |
 | `LOTRLOME_items/iron_hills/` (5 files, no starters) | `:145` | Iron Hills armour | hand |
 | `LOTRLOME_items/isengard/` (7 files) | `:124` | Isengard armour | `tools/generate_isengard_armor.py` (head); starters by `tools/generate_starter_armor.py`; otherwise hand; player starter twins in `starter_kit.xml` by `tools/generate_starter_kit.py` |
 | `LOTRLOME_items/mercenary/` (6 files: five slots plus `starter_kit`) | `:185` | mercenary armour | hand; `tools/apply_dead_mesh_item_swaps.py` touched `body_armors`; two `body_armors.xml.bak-*` siblings; player starter twins in `starter_kit.xml` by `tools/generate_starter_kit.py` |

@@ -64,8 +64,8 @@ PICKS: dict[str, list[tuple[str, str, str]]] = {
     "dolguldur": [("dg_orc_scout", "dolguldur", "[Dol Guldur] Hired Orc Scout")],
     "umbar": [("umbar_elite", "umbar", "[Umbar] Hired Adûnaim Recruits")],
     # Since the 2026-10-10 Harad rework each culture copies its own rarest pool entry.
-    "shaghana": [("harad_redserp_noble", "harad", "[Harad] Hired Red Serpent Noble")],
-    "abanissa": [("harad_pz_levy", "harad", "[Harad] Hired Pezarsan Levy")],
+    "shaghana": [("harad_redserp_noble", "harad", "[Shaghana] Hired Red Serpent Noble")],
+    "abanissa": [("harad_pz_levy", "harad", "[Harwan] Hired Pezarsan Levy")],
 }
 
 BANNER = (

@@ -248,7 +248,7 @@
         id="harad_militia_spearman"
         default_group="Infantry"
         level="11"
-        name="{=aom_harad_militia_spearman_name}[Harad] Militia Spearman"
+        name="{=aom_harad_militia_spearman_name}[Harwan] Militia Spearman"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -323,7 +323,7 @@
         id="harad_militia_archer"
         default_group="Ranged"
         level="11"
-        name="{=aom_harad_militia_archer_name}[Harad] Militia Archer"
+        name="{=aom_harad_militia_archer_name}[Harwan] Militia Archer"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -399,7 +399,7 @@
         id="harad_militia_veteran_spearman"
         default_group="Infantry"
         level="16"
-        name="{=aom_harad_militia_vet_spear_name}[Harad] Militia Veteran Spearman"
+        name="{=aom_harad_militia_vet_spear_name}[Harwan] Militia Veteran Spearman"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -465,7 +465,7 @@
         id="harad_militia_veteran_archer"
         default_group="Ranged"
         level="16"
-        name="{=aom_harad_militia_vet_arch_name}[Harad] Militia Veteran Archer"
+        name="{=aom_harad_militia_vet_arch_name}[Harwan] Militia Veteran Archer"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -533,7 +533,7 @@
         id="harad_serp_noble"
         default_group="Infantry"
         level="16"
-        name="{=aom_harad_serp_noble_name}[Harad] Serpent Noble"
+        name="{=aom_harad_serp_noble_name}[Harwan] Serpent Noble"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -601,7 +601,7 @@
         id="harad_serp_footman"
         default_group="Infantry"
         level="21"
-        name="{=aom_harad_serp_footman_name}[Harad] Serpent Footman"
+        name="{=aom_harad_serp_footman_name}[Harwan] Serpent Footman"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -671,7 +671,7 @@
         id="harad_serp_infantry"
         default_group="Infantry"
         level="26"
-        name="{=aom_harad_serp_infantry_name}[Harad] Serpent Infantry"
+        name="{=aom_harad_serp_infantry_name}[Harwan] Serpent Infantry"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -744,7 +744,7 @@
         id="harad_serp_guard"
         default_group="Infantry"
         level="31"
-        name="{=aom_harad_serp_guard_name}[Harad] Serpent Guard"
+        name="{=aom_harad_serp_guard_name}[Harwan] Serpent Guard"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -812,7 +812,7 @@
         id="harad_serp_cavalry"
         default_group="Cavalry"
         level="31"
-        name="{=aom_harad_serp_cavalry_name}[Harad] Serpent Cavalry"
+        name="{=aom_harad_serp_cavalry_name}[Harwan] Serpent Cavalry"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -886,7 +886,7 @@
         id="harad_serp_lancer"
         default_group="Cavalry"
         level="36"
-        name="{=aom_harad_serp_lancer_name}[Harad] Serpent Lancer"
+        name="{=aom_harad_serp_lancer_name}[Harwan] Serpent Lancer"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -957,7 +957,7 @@
         id="harad_serp_bowman"
         default_group="Ranged"
         level="26"
-        name="{=aom_harad_serp_bowman_name}[Harad] Serpent Bowman"
+        name="{=aom_harad_serp_bowman_name}[Harwan] Serpent Bowman"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -982,7 +982,7 @@
                 value="55" />
             <skill
                 id="Bow"
-                value="90" />
+                value="180" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -998,7 +998,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t3" />
+                    id="Item.ladder_harad_bow_t5" />
                 <equipment
                     slot="Item1"
                     id="Item.bodkin_arrows_b" />
@@ -1028,7 +1028,7 @@
         id="harad_serp_archer"
         default_group="Ranged"
         level="31"
-        name="{=aom_harad_serp_archer_name}[Harad] Serpent Archer"
+        name="{=aom_harad_serp_archer_name}[Harwan] Serpent Archer"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -1053,7 +1053,7 @@
                 value="55" />
             <skill
                 id="Bow"
-                value="110" />
+                value="215" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -1069,7 +1069,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t4" />
+                    id="Item.ladder_harad_bow_t6" />
                 <equipment
                     slot="Item1"
                     id="Item.bodkin_arrows_b" />
@@ -1102,7 +1102,7 @@
         id="harad_serp_marksman"
         default_group="Ranged"
         level="36"
-        name="{=aom_harad_serp_marksman_name}[Harad] Serpent Marksman"
+        name="{=aom_harad_serp_marksman_name}[Harwan] Serpent Marksman"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -1127,7 +1127,7 @@
                 value="55" />
             <skill
                 id="Bow"
-                value="125" />
+                value="260" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -1140,7 +1140,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t5" />
+                    id="Item.ladder_harad_bow_t7" />
                 <equipment
                     slot="Item1"
                     id="Item.piercing_arrows" />
@@ -1173,7 +1173,7 @@
         id="harad_redserp_noble"
         default_group="Infantry"
         level="16"
-        name="{=aom_harad_redserp_noble_name}[Harad] Red Serpent Noble"
+        name="{=aom_harad_redserp_noble_name}[Shaghana] Red Serpent Noble"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -1241,7 +1241,7 @@
         id="harad_redserp_footman"
         default_group="Infantry"
         level="21"
-        name="{=aom_harad_redserp_footman_name}[Harad] Red Serpent Footman"
+        name="{=aom_harad_redserp_footman_name}[Shaghana] Red Serpent Footman"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -1311,7 +1311,7 @@
         id="harad_redserp_infantry"
         default_group="Infantry"
         level="26"
-        name="{=aom_harad_redserp_infantry_name}[Harad] Red Serpent Infantry"
+        name="{=aom_harad_redserp_infantry_name}[Shaghana] Red Serpent Infantry"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -1384,7 +1384,7 @@
         id="harad_redserp_guard"
         default_group="Infantry"
         level="31"
-        name="{=aom_harad_redserp_guard_name}[Harad] Red Serpent Guard"
+        name="{=aom_harad_redserp_guard_name}[Shaghana] Red Serpent Guard"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -1452,7 +1452,7 @@
         id="harad_redserp_cavalry"
         default_group="Cavalry"
         level="31"
-        name="{=aom_harad_redserp_cavalry_name}[Harad] Red Serpent Cavalry"
+        name="{=aom_harad_redserp_cavalry_name}[Shaghana] Red Serpent Cavalry"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -1526,7 +1526,7 @@
         id="harad_redserp_lancer"
         default_group="Cavalry"
         level="36"
-        name="{=aom_harad_redserp_lancer_name}[Harad] Red Serpent Lancer"
+        name="{=aom_harad_redserp_lancer_name}[Shaghana] Red Serpent Lancer"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -1597,7 +1597,7 @@
         id="harad_redserp_bowman"
         default_group="Ranged"
         level="26"
-        name="{=aom_harad_redserp_bowman_name}[Harad] Red Serpent Bowman"
+        name="{=aom_harad_redserp_bowman_name}[Shaghana] Red Serpent Bowman"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -1622,7 +1622,7 @@
                 value="55" />
             <skill
                 id="Bow"
-                value="90" />
+                value="180" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -1638,7 +1638,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t3" />
+                    id="Item.ladder_harad_bow_t5" />
                 <equipment
                     slot="Item1"
                     id="Item.bodkin_arrows_b" />
@@ -1668,7 +1668,7 @@
         id="harad_redserp_archer"
         default_group="Ranged"
         level="31"
-        name="{=aom_harad_redserp_archer_name}[Harad] Red Serpent Archer"
+        name="{=aom_harad_redserp_archer_name}[Shaghana] Red Serpent Archer"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -1693,7 +1693,7 @@
                 value="55" />
             <skill
                 id="Bow"
-                value="110" />
+                value="215" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -1709,7 +1709,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t4" />
+                    id="Item.ladder_harad_bow_t6" />
                 <equipment
                     slot="Item1"
                     id="Item.bodkin_arrows_b" />
@@ -1742,7 +1742,7 @@
         id="harad_redserp_marksman"
         default_group="Ranged"
         level="36"
-        name="{=aom_harad_redserp_marksman_name}[Harad] Red Serpent Marksman"
+        name="{=aom_harad_redserp_marksman_name}[Shaghana] Red Serpent Marksman"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -1767,7 +1767,7 @@
                 value="55" />
             <skill
                 id="Bow"
-                value="125" />
+                value="260" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -1780,7 +1780,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t5" />
+                    id="Item.ladder_harad_bow_t7" />
                 <equipment
                     slot="Item1"
                     id="Item.piercing_arrows" />
@@ -1816,7 +1816,7 @@
         id="harad_reg_levy"
         default_group="Infantry"
         level="6"
-        name="{=aom_harad_reg_levy_name}[Harad] Harad Levy"
+        name="{=aom_harad_reg_levy_name}[Harwan] Harad Levy"
         occupation="Soldier"
         is_basic_troop="true"
         culture="Culture.aserai">
@@ -1869,6 +1869,48 @@
                     slot="Leg"
                     id="Item.eastern_leather_boots" />
             </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_light_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_tunic_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.eastern_leather_boots" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_light_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_tunic_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.eastern_leather_boots" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_light_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_tunic_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.eastern_leather_boots" />
+            </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
                 equipmentType="Civilian" />
@@ -1879,7 +1921,7 @@
         id="harad_reg_militia"
         default_group="Infantry"
         level="11"
-        name="{=aom_harad_reg_militia_name}[Harad] Harad Militia"
+        name="{=aom_harad_reg_militia_name}[Harwan] Harad Militia"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -1927,7 +1969,7 @@
                     id="Item.aserai_sword_3_t3" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_hr_st_shield_large_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -1939,10 +1981,10 @@
                     id="Item.sk_hr_st_pauld_inf_light_a" />
                 <equipment
                     slot="Gloves"
-                    id="Item.sk_hr_st_bracer_light_a" />
+                    id="Item.sk_hr_st_bracer_light_b" />
                 <equipment
                     slot="Leg"
-                    id="Item.sk_hr_st_grvs_light_a" />
+                    id="Item.sk_hr_st_grvs_light_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -1950,13 +1992,13 @@
                     id="Item.aserai_sword_3_t3" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_hr_st_shield_cav_light_b" />
                 <equipment
                     slot="Head"
-                    id="Item.sk_hr_st_helmet_med_a" />
+                    id="Item.sk_hr_st_helmet_med_b" />
                 <equipment
                     slot="Body"
-                    id="Item.sk_hr_st_chest_cav_light_a" />
+                    id="Item.sk_hr_st_chest_cav_light_b" />
                 <equipment
                     slot="Cape"
                     id="Item.sk_hr_st_pauld_cav_light_a" />
@@ -1973,22 +2015,45 @@
                     id="Item.aserai_sword_3_t3" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_hr_st_shield_large_light_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
                 <equipment
                     slot="Body"
-                    id="Item.sk_hr_st_chest_arc_light_a" />
+                    id="Item.sk_hr_st_chest_arc_light_b" />
                 <equipment
                     slot="Cape"
                     id="Item.sk_hr_st_pauld_arc_light_a" />
                 <equipment
                     slot="Gloves"
-                    id="Item.sk_hr_st_bracer_light_a" />
+                    id="Item.sk_hr_st_bracer_light_b" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_light_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_large_light_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_inf_chest_light_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_inf_light_a" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_light_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_light_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -2000,7 +2065,7 @@
         id="harad_reg_warrior"
         default_group="Infantry"
         level="16"
-        name="{=aom_harad_reg_warrior_name}[Harad] Harad Warrior"
+        name="{=aom_harad_reg_warrior_name}[Harwan] Harad Warrior"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -2041,10 +2106,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_light_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_hr_st_shield_large_light_a" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_3_t3" />
@@ -2059,18 +2124,18 @@
                     id="Item.sk_hr_st_pauld_inf_med_a" />
                 <equipment
                     slot="Gloves"
-                    id="Item.sk_hr_st_bracer_med_a" />
+                    id="Item.sk_hr_st_bracer_med_b" />
                 <equipment
                     slot="Leg"
-                    id="Item.sk_hr_st_grvs_med_a" />
+                    id="Item.sk_hr_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_light_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_hr_st_shield_cav_light_b" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_3_t3" />
@@ -2082,10 +2147,62 @@
                     id="Item.sk_hr_st_chest_inf_chest_med_b" />
                 <equipment
                     slot="Cape"
+                    id="Item.sk_hr_st_pauld_inf_med_a" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_light_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_large_light_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_inf_chest_med_b" />
+                <equipment
+                    slot="Cape"
                     id="Item.sk_hr_st_pauld_inf_med_b" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_hr_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_light_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_large_light_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_inf_chest_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_inf_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_b" />
@@ -2100,7 +2217,7 @@
         id="harad_reg_horseman"
         default_group="Cavalry"
         level="16"
-        name="{=aom_harad_reg_horseman_name}[Harad] Harad Horseman"
+        name="{=aom_harad_reg_horseman_name}[Harwan] Harad Horseman"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -2141,10 +2258,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_light_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_hr_st_shield_cav_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2164,10 +2281,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_light_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_hr_st_shield_cav_light_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -2176,13 +2293,59 @@
                     id="Item.sk_hr_st_chest_cav_med_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_hr_st_pauld_cav_med_b" />
+                    id="Item.sk_hr_st_pauld_cav_med_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_hr_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_light_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_cav_light_b" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_cav_med_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_cav_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_light_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_cav_light_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_cav_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_cav_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -2200,7 +2363,7 @@
         id="harad_reg_bowman"
         default_group="Ranged"
         level="16"
-        name="{=aom_harad_reg_bowman_name}[Harad] Harad Bowman"
+        name="{=aom_harad_reg_bowman_name}[Harwan] Harad Bowman"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -2225,7 +2388,7 @@
                 value="61" />
             <skill
                 id="Bow"
-                value="94" />
+                value="95" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -2241,10 +2404,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t2" />
+                    id="Item.ladder_harad_bow_t3" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_3_t3" />
@@ -2267,10 +2430,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t2" />
+                    id="Item.ladder_harad_bow_t3" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_3_t3" />
@@ -2282,13 +2445,65 @@
                     id="Item.sk_hr_st_chest_arc_med_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_hr_st_pauld_arc_med_b" />
+                    id="Item.sk_hr_st_pauld_arc_med_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_hr_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t3" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_arc_med_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_arc_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t3" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_arc_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_arc_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -2300,7 +2515,7 @@
         id="harad_reg_footman"
         default_group="Infantry"
         level="21"
-        name="{=aom_harad_reg_footman_name}[Harad] Harad Footman"
+        name="{=aom_harad_reg_footman_name}[Harwan] Harad Footman"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -2341,10 +2556,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_med_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_hr_st_shield_large_med_a" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_5_t4" />
@@ -2359,18 +2574,18 @@
                     id="Item.sk_hr_st_pauld_inf_med_a" />
                 <equipment
                     slot="Gloves"
-                    id="Item.sk_hr_st_bracer_med_a" />
+                    id="Item.sk_hr_st_bracer_med_b" />
                 <equipment
                     slot="Leg"
-                    id="Item.sk_hr_st_grvs_med_a" />
+                    id="Item.sk_hr_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_med_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_hr_st_shield_cav_med_b" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_5_t4" />
@@ -2382,10 +2597,62 @@
                     id="Item.sk_hr_st_chest_inf_chest_med_b" />
                 <equipment
                     slot="Cape"
+                    id="Item.sk_hr_st_pauld_inf_med_a" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_med_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_large_med_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_5_t4" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_inf_chest_med_b" />
+                <equipment
+                    slot="Cape"
                     id="Item.sk_hr_st_pauld_inf_med_b" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_hr_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_med_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_large_med_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_5_t4" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_inf_chest_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_inf_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_b" />
@@ -2400,7 +2667,7 @@
         id="harad_reg_scout_cav"
         default_group="Cavalry"
         level="21"
-        name="{=aom_harad_reg_scout_cav_name}[Harad] Harad Scout"
+        name="{=aom_harad_reg_scout_cav_name}[Harwan] Harad Scout"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -2441,13 +2708,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_med_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_hr_st_shield_cav_med_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2467,13 +2734,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_med_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_hr_st_shield_cav_med_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -2482,13 +2749,65 @@
                     id="Item.sk_hr_st_chest_cav_med_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_hr_st_pauld_cav_med_b" />
+                    id="Item.sk_hr_st_pauld_cav_med_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_hr_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_med_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_cav_med_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_cav_med_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_cav_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_med_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_cav_med_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_cav_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_cav_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -2506,7 +2825,7 @@
         id="harad_reg_scout_arc"
         default_group="Ranged"
         level="21"
-        name="{=aom_harad_reg_scout_arc_name}[Harad] Harad Scout"
+        name="{=aom_harad_reg_scout_arc_name}[Harwan] Harad Scout"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -2531,7 +2850,7 @@
                 value="73" />
             <skill
                 id="Bow"
-                value="112" />
+                value="140" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -2547,13 +2866,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t2" />
+                    id="Item.ladder_harad_bow_t4" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
                     id="Item.aserai_sword_3_t3" />
@@ -2576,13 +2895,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t2" />
+                    id="Item.ladder_harad_bow_t4" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
                     id="Item.aserai_sword_3_t3" />
@@ -2594,13 +2913,71 @@
                     id="Item.sk_hr_st_chest_arc_med_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_hr_st_pauld_arc_med_b" />
+                    id="Item.sk_hr_st_pauld_arc_med_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_hr_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t4" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_arc_med_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_arc_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t4" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_arc_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_arc_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -2612,7 +2989,7 @@
         id="harad_reg_infantry"
         default_group="Infantry"
         level="26"
-        name="{=aom_harad_reg_infantry_name}[Harad] Harad Infantry"
+        name="{=aom_harad_reg_infantry_name}[Harwan] Harad Infantry"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -2650,10 +3027,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t4" />
+                    id="Item.hr_st_spear_heavy_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_hr_st_shield_large_heavy_a" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_5_t4" />
@@ -2668,18 +3045,18 @@
                     id="Item.sk_hr_st_pauld_inf_heavy_a" />
                 <equipment
                     slot="Gloves"
-                    id="Item.sk_hr_st_bracer_heavy_a" />
+                    id="Item.sk_hr_st_bracer_heavy_b" />
                 <equipment
                     slot="Leg"
-                    id="Item.sk_hr_st_grvs_heavy_a" />
+                    id="Item.sk_hr_st_grvs_heavy_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t4" />
+                    id="Item.hr_st_spear_heavy_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_hr_st_shield_cav_heavy_b" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_5_t4" />
@@ -2691,10 +3068,62 @@
                     id="Item.sk_hr_st_chest_inf_chest_heavy_b" />
                 <equipment
                     slot="Cape"
+                    id="Item.sk_hr_st_pauld_inf_heavy_a" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_heavy_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_heavy_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_large_heavy_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_5_t4" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_heavy_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_inf_chest_heavy_b" />
+                <equipment
+                    slot="Cape"
                     id="Item.sk_hr_st_pauld_inf_heavy_b" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_hr_st_bracer_heavy_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_heavy_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_large_heavy_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_5_t4" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_heavy_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_inf_chest_heavy_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_inf_heavy_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_heavy_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_heavy_b" />
@@ -2709,7 +3138,7 @@
         id="harad_reg_cavalry"
         default_group="Cavalry"
         level="26"
-        name="{=aom_harad_reg_cavalry_name}[Harad] Harad Cavalry"
+        name="{=aom_harad_reg_cavalry_name}[Harwan] Harad Cavalry"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -2747,13 +3176,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t4" />
+                    id="Item.hr_st_spear_heavy_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_hr_st_shield_cav_heavy_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_heavy_a" />
@@ -2773,13 +3202,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t4" />
+                    id="Item.hr_st_spear_heavy_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_hr_st_shield_cav_heavy_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_heavy_b" />
@@ -2788,13 +3217,65 @@
                     id="Item.sk_hr_st_chest_cav_heavy_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_hr_st_pauld_cav_heavy_b" />
+                    id="Item.sk_hr_st_pauld_cav_heavy_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_hr_st_bracer_heavy_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_heavy_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_cav_heavy_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_heavy_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_cav_heavy_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_cav_heavy_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_heavy_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_heavy_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_hr_st_shield_cav_heavy_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_heavy_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_cav_heavy_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_cav_heavy_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_heavy_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_heavy_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -2812,7 +3293,7 @@
         id="harad_reg_archer"
         default_group="Ranged"
         level="26"
-        name="{=aom_harad_reg_archer_name}[Harad] Harad Archer"
+        name="{=aom_harad_reg_archer_name}[Harwan] Harad Archer"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -2837,7 +3318,7 @@
                 value="85" />
             <skill
                 id="Bow"
-                value="130" />
+                value="180" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -2850,13 +3331,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t3" />
+                    id="Item.ladder_harad_bow_t5" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
                     id="Item.aserai_sword_3_t3" />
@@ -2879,13 +3360,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t3" />
+                    id="Item.ladder_harad_bow_t5" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
                     id="Item.aserai_sword_3_t3" />
@@ -2897,13 +3378,71 @@
                     id="Item.sk_hr_st_chest_arc_heavy_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_hr_st_pauld_arc_heavy_b" />
+                    id="Item.sk_hr_st_pauld_arc_heavy_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_hr_st_bracer_heavy_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t5" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_heavy_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_arc_heavy_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_arc_heavy_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_heavy_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t5" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_heavy_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_chest_arc_heavy_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_hr_st_pauld_arc_heavy_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_hr_st_bracer_heavy_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_hr_st_grvs_heavy_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -2915,7 +3454,7 @@
         id="harad_sreg_levy"
         default_group="Infantry"
         level="6"
-        name="{=aom_harad_sreg_levy_name}[Harad] Southron Levy"
+        name="{=aom_harad_sreg_levy_name}[Shaghana] Southron Levy"
         occupation="Soldier"
         is_basic_troop="true"
         culture="Culture.shaghana">
@@ -2968,6 +3507,48 @@
                     slot="Leg"
                     id="Item.eastern_leather_boots" />
             </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_light_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_tunic_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.eastern_leather_boots" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_light_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_tunic_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.eastern_leather_boots" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_light_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_hr_st_tunic_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.eastern_leather_boots" />
+            </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
                 equipmentType="Civilian" />
@@ -2978,7 +3559,7 @@
         id="harad_sreg_militia"
         default_group="Infantry"
         level="11"
-        name="{=aom_harad_sreg_militia_name}[Harad] Southron Militia"
+        name="{=aom_harad_sreg_militia_name}[Shaghana] Southron Militia"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -3026,7 +3607,7 @@
                     id="Item.aserai_sword_3_t3" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_sg_st_shield_large_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -3038,10 +3619,10 @@
                     id="Item.sk_sg_st_pauld_inf_light_a" />
                 <equipment
                     slot="Gloves"
-                    id="Item.sk_sg_st_bracer_light_a" />
+                    id="Item.sk_sg_st_bracer_light_b" />
                 <equipment
                     slot="Leg"
-                    id="Item.sk_sg_st_grvs_light_a" />
+                    id="Item.sk_sg_st_grvs_light_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -3049,13 +3630,13 @@
                     id="Item.aserai_sword_3_t3" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_sg_st_shield_cav_light_b" />
                 <equipment
                     slot="Head"
-                    id="Item.sk_hr_st_helmet_med_a" />
+                    id="Item.sk_hr_st_helmet_med_b" />
                 <equipment
                     slot="Body"
-                    id="Item.sk_sg_st_chest_cav_light_a" />
+                    id="Item.sk_sg_st_chest_cav_light_b" />
                 <equipment
                     slot="Cape"
                     id="Item.sk_sg_st_pauld_cav_light_a" />
@@ -3072,22 +3653,45 @@
                     id="Item.aserai_sword_3_t3" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_sg_st_shield_large_light_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
                 <equipment
                     slot="Body"
-                    id="Item.sk_sg_st_chest_arc_light_a" />
+                    id="Item.sk_sg_st_chest_arc_light_b" />
                 <equipment
                     slot="Cape"
                     id="Item.sk_sg_st_pauld_arc_light_a" />
                 <equipment
                     slot="Gloves"
-                    id="Item.sk_sg_st_bracer_light_a" />
+                    id="Item.sk_sg_st_bracer_light_b" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_light_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_large_light_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_inf_chest_light_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_inf_light_a" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_light_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_light_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -3099,7 +3703,7 @@
         id="harad_sreg_warrior"
         default_group="Infantry"
         level="16"
-        name="{=aom_harad_sreg_warrior_name}[Harad] Southron Warrior"
+        name="{=aom_harad_sreg_warrior_name}[Shaghana] Southron Warrior"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -3140,10 +3744,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_light_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_sg_st_shield_large_light_a" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_3_t3" />
@@ -3158,18 +3762,18 @@
                     id="Item.sk_sg_st_pauld_inf_med_a" />
                 <equipment
                     slot="Gloves"
-                    id="Item.sk_sg_st_bracer_med_a" />
+                    id="Item.sk_sg_st_bracer_med_b" />
                 <equipment
                     slot="Leg"
-                    id="Item.sk_sg_st_grvs_med_a" />
+                    id="Item.sk_sg_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_light_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_sg_st_shield_cav_light_b" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_3_t3" />
@@ -3181,10 +3785,62 @@
                     id="Item.sk_sg_st_chest_inf_chest_med_b" />
                 <equipment
                     slot="Cape"
+                    id="Item.sk_sg_st_pauld_inf_med_a" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_light_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_large_light_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_inf_chest_med_b" />
+                <equipment
+                    slot="Cape"
                     id="Item.sk_sg_st_pauld_inf_med_b" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_sg_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_light_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_large_light_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_inf_chest_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_inf_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_b" />
@@ -3199,7 +3855,7 @@
         id="harad_sreg_horseman"
         default_group="Cavalry"
         level="16"
-        name="{=aom_harad_sreg_horseman_name}[Harad] Southron Horseman"
+        name="{=aom_harad_sreg_horseman_name}[Shaghana] Southron Horseman"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -3240,10 +3896,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_light_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_sg_st_shield_cav_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -3263,10 +3919,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_light_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.desert_round_shield" />
+                    id="Item.sm_sg_st_shield_cav_light_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -3275,13 +3931,59 @@
                     id="Item.sk_sg_st_chest_cav_med_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_sg_st_pauld_cav_med_b" />
+                    id="Item.sk_sg_st_pauld_cav_med_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_sg_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_light_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_cav_light_b" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_cav_med_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_cav_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_light_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_cav_light_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_cav_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_cav_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -3299,7 +4001,7 @@
         id="harad_sreg_bowman"
         default_group="Ranged"
         level="16"
-        name="{=aom_harad_sreg_bowman_name}[Harad] Southron Bowman"
+        name="{=aom_harad_sreg_bowman_name}[Shaghana] Southron Bowman"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -3324,7 +4026,7 @@
                 value="61" />
             <skill
                 id="Bow"
-                value="94" />
+                value="95" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -3340,10 +4042,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t2" />
+                    id="Item.ladder_harad_bow_t3" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_3_t3" />
@@ -3366,10 +4068,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t2" />
+                    id="Item.ladder_harad_bow_t3" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_3_t3" />
@@ -3381,13 +4083,65 @@
                     id="Item.sk_sg_st_chest_arc_med_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_sg_st_pauld_arc_med_b" />
+                    id="Item.sk_sg_st_pauld_arc_med_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_sg_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t3" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_arc_med_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_arc_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t3" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_arc_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_arc_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -3399,7 +4153,7 @@
         id="harad_sreg_footman"
         default_group="Infantry"
         level="21"
-        name="{=aom_harad_sreg_footman_name}[Harad] Southron Footman"
+        name="{=aom_harad_sreg_footman_name}[Shaghana] Southron Footman"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -3440,10 +4194,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_med_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_sg_st_shield_large_med_a" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_5_t4" />
@@ -3458,18 +4212,18 @@
                     id="Item.sk_sg_st_pauld_inf_med_a" />
                 <equipment
                     slot="Gloves"
-                    id="Item.sk_sg_st_bracer_med_a" />
+                    id="Item.sk_sg_st_bracer_med_b" />
                 <equipment
                     slot="Leg"
-                    id="Item.sk_sg_st_grvs_med_a" />
+                    id="Item.sk_sg_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_med_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_sg_st_shield_cav_med_b" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_5_t4" />
@@ -3481,10 +4235,62 @@
                     id="Item.sk_sg_st_chest_inf_chest_med_b" />
                 <equipment
                     slot="Cape"
+                    id="Item.sk_sg_st_pauld_inf_med_a" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_med_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_large_med_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_5_t4" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_inf_chest_med_b" />
+                <equipment
+                    slot="Cape"
                     id="Item.sk_sg_st_pauld_inf_med_b" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_sg_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_med_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_large_med_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_5_t4" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_inf_chest_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_inf_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_b" />
@@ -3499,7 +4305,7 @@
         id="harad_sreg_scout_cav"
         default_group="Cavalry"
         level="21"
-        name="{=aom_harad_sreg_scout_cav_name}[Harad] Southron Scout"
+        name="{=aom_harad_sreg_scout_cav_name}[Shaghana] Southron Scout"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -3540,13 +4346,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_med_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_sg_st_shield_cav_med_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -3566,13 +4372,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t3" />
+                    id="Item.hr_st_spear_med_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_sg_st_shield_cav_med_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -3581,13 +4387,65 @@
                     id="Item.sk_sg_st_chest_cav_med_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_sg_st_pauld_cav_med_b" />
+                    id="Item.sk_sg_st_pauld_cav_med_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_sg_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_med_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_cav_med_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_cav_med_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_cav_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_med_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_cav_med_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_cav_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_cav_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -3605,7 +4463,7 @@
         id="harad_sreg_scout_arc"
         default_group="Ranged"
         level="21"
-        name="{=aom_harad_sreg_scout_arc_name}[Harad] Southron Scout"
+        name="{=aom_harad_sreg_scout_arc_name}[Shaghana] Southron Scout"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -3630,7 +4488,7 @@
                 value="73" />
             <skill
                 id="Bow"
-                value="112" />
+                value="140" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -3646,13 +4504,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t2" />
+                    id="Item.ladder_harad_bow_t4" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
                     id="Item.aserai_sword_3_t3" />
@@ -3675,13 +4533,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t2" />
+                    id="Item.ladder_harad_bow_t4" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
                     id="Item.aserai_sword_3_t3" />
@@ -3693,13 +4551,71 @@
                     id="Item.sk_sg_st_chest_arc_med_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_sg_st_pauld_arc_med_b" />
+                    id="Item.sk_sg_st_pauld_arc_med_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_sg_st_bracer_med_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t4" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_arc_med_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_arc_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t4" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_hr_st_helmet_med_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_arc_med_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_arc_med_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_med_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_med_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -3711,7 +4627,7 @@
         id="harad_sreg_infantry"
         default_group="Infantry"
         level="26"
-        name="{=aom_harad_sreg_infantry_name}[Harad] Southron Infantry"
+        name="{=aom_harad_sreg_infantry_name}[Shaghana] Southron Infantry"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -3749,10 +4665,10 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t4" />
+                    id="Item.hr_st_spear_heavy_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_sg_st_shield_large_heavy_a" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_5_t4" />
@@ -3767,18 +4683,18 @@
                     id="Item.sk_sg_st_pauld_inf_heavy_a" />
                 <equipment
                     slot="Gloves"
-                    id="Item.sk_sg_st_bracer_heavy_a" />
+                    id="Item.sk_sg_st_bracer_heavy_b" />
                 <equipment
                     slot="Leg"
-                    id="Item.sk_sg_st_grvs_heavy_a" />
+                    id="Item.sk_sg_st_grvs_heavy_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t4" />
+                    id="Item.hr_st_spear_heavy_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_sg_st_shield_cav_heavy_b" />
                 <equipment
                     slot="Item2"
                     id="Item.aserai_sword_5_t4" />
@@ -3790,10 +4706,62 @@
                     id="Item.sk_sg_st_chest_inf_chest_heavy_b" />
                 <equipment
                     slot="Cape"
+                    id="Item.sk_sg_st_pauld_inf_heavy_a" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_heavy_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_heavy_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_large_heavy_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_5_t4" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_sg_st_helmet_heavy_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_inf_chest_heavy_b" />
+                <equipment
+                    slot="Cape"
                     id="Item.sk_sg_st_pauld_inf_heavy_b" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_sg_st_bracer_heavy_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_heavy_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_large_heavy_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.aserai_sword_5_t4" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_sg_st_helmet_heavy_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_inf_chest_heavy_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_inf_heavy_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_heavy_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_heavy_b" />
@@ -3808,7 +4776,7 @@
         id="harad_sreg_cavalry"
         default_group="Cavalry"
         level="26"
-        name="{=aom_harad_sreg_cavalry_name}[Harad] Southron Cavalry"
+        name="{=aom_harad_sreg_cavalry_name}[Shaghana] Southron Cavalry"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -3846,13 +4814,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t4" />
+                    id="Item.hr_st_spear_heavy_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_sg_st_shield_cav_heavy_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_sg_st_helmet_heavy_a" />
@@ -3872,13 +4840,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.southern_spear_3_t4" />
+                    id="Item.hr_st_spear_heavy_b" />
                 <equipment
                     slot="Item1"
-                    id="Item.ornate_adarga" />
+                    id="Item.sm_sg_st_shield_cav_heavy_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_sg_st_helmet_heavy_b" />
@@ -3887,13 +4855,65 @@
                     id="Item.sk_sg_st_chest_cav_heavy_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_sg_st_pauld_cav_heavy_b" />
+                    id="Item.sk_sg_st_pauld_cav_heavy_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_sg_st_bracer_heavy_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_heavy_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_cav_heavy_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_sg_st_helmet_heavy_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_cav_heavy_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_cav_heavy_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_heavy_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.hr_st_spear_heavy_a" />
+                <equipment
+                    slot="Item1"
+                    id="Item.sm_sg_st_shield_cav_heavy_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_sg_st_helmet_heavy_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_cav_heavy_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_cav_heavy_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_heavy_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_heavy_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -3911,7 +4931,7 @@
         id="harad_sreg_archer"
         default_group="Ranged"
         level="26"
-        name="{=aom_harad_sreg_archer_name}[Harad] Southron Archer"
+        name="{=aom_harad_sreg_archer_name}[Shaghana] Southron Archer"
         occupation="Soldier"
         culture="Culture.shaghana">
         <face>
@@ -3936,7 +4956,7 @@
                 value="85" />
             <skill
                 id="Bow"
-                value="130" />
+                value="180" />
             <skill
                 id="Crossbow"
                 value="0" />
@@ -3949,13 +4969,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t3" />
+                    id="Item.ladder_harad_bow_t5" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
                     id="Item.aserai_sword_3_t3" />
@@ -3978,13 +4998,13 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.ladder_harad_bow_t3" />
+                    id="Item.ladder_harad_bow_t5" />
                 <equipment
                     slot="Item1"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.bodkin_arrows_b" />
+                    id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
                     id="Item.aserai_sword_3_t3" />
@@ -3996,13 +5016,71 @@
                     id="Item.sk_sg_st_chest_arc_heavy_b" />
                 <equipment
                     slot="Cape"
-                    id="Item.sk_sg_st_pauld_arc_heavy_b" />
+                    id="Item.sk_sg_st_pauld_arc_heavy_a" />
                 <equipment
                     slot="Gloves"
                     id="Item.sk_sg_st_bracer_heavy_a" />
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t5" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_sg_st_helmet_heavy_a" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_arc_heavy_b" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_arc_heavy_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_heavy_b" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_heavy_a" />
+            </EquipmentRoster>
+            <EquipmentRoster>
+                <equipment
+                    slot="Item0"
+                    id="Item.ladder_harad_bow_t5" />
+                <equipment
+                    slot="Item1"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_arrows_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.aserai_sword_3_t3" />
+                <equipment
+                    slot="Head"
+                    id="Item.sk_sg_st_helmet_heavy_b" />
+                <equipment
+                    slot="Body"
+                    id="Item.sk_sg_st_chest_arc_heavy_a" />
+                <equipment
+                    slot="Cape"
+                    id="Item.sk_sg_st_pauld_arc_heavy_b" />
+                <equipment
+                    slot="Gloves"
+                    id="Item.sk_sg_st_bracer_heavy_a" />
+                <equipment
+                    slot="Leg"
+                    id="Item.sk_sg_st_grvs_heavy_b" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -4015,7 +5093,7 @@
         is_hidden_encyclopedia="true"
         default_group="Ranged"
         level="16"
-        name="{=aom_harad_howdah_crew_name}[Harad] Howdah Archer"
+        name="{=aom_harad_howdah_crew_name}[Harwan] Howdah Archer"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -4083,7 +5161,7 @@
         id="harad_pz_levy"
         default_group="Cavalry"
         level="16"
-        name="{=aom_harad_pz_levy_name}[Harad] Pezarsan Levy"
+        name="{=aom_harad_pz_levy_name}[Harwan] Pezarsan Levy"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -4157,7 +5235,7 @@
         id="harad_pz_camel_rider"
         default_group="Cavalry"
         level="21"
-        name="{=aom_harad_pz_camel_rider_name}[Harad] Pezarsan Camel Rider"
+        name="{=aom_harad_pz_camel_rider_name}[Harwan] Pezarsan Camel Rider"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -4234,7 +5312,7 @@
         id="harad_pz_camel_marauder"
         default_group="Cavalry"
         level="26"
-        name="{=aom_harad_pz_camel_marauder_name}[Harad] Pezarsan Camel Marauder"
+        name="{=aom_harad_pz_camel_marauder_name}[Harwan] Pezarsan Camel Marauder"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -4314,7 +5392,7 @@
         id="harad_pz_camel_lancer"
         default_group="Cavalry"
         level="31"
-        name="{=aom_harad_pz_camel_lancer_name}[Harad] Pezarsan Camel Lancer"
+        name="{=aom_harad_pz_camel_lancer_name}[Harwan] Pezarsan Camel Lancer"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -4391,7 +5469,7 @@
         id="harad_pz_dune_cataphract"
         default_group="Cavalry"
         level="36"
-        name="{=aom_harad_pz_dune_cataphract_name}[Harad] Pezarsan Dune Cataphract"
+        name="{=aom_harad_pz_dune_cataphract_name}[Harwan] Pezarsan Dune Cataphract"
         occupation="Soldier"
         culture="Culture.aserai">
         <face>
@@ -4472,7 +5550,7 @@
         id="harad_redserp_noble_merc"
         default_group="Infantry"
         level="16"
-        name="{=aom_merc_harad_redserp_noble_name}[Harad] Hired Red Serpent Noble"
+        name="{=aom_merc_harad_redserp_noble_name}[Shaghana] Hired Red Serpent Noble"
         occupation="Mercenary"
         culture="Culture.shaghana">
         <face>
@@ -4536,7 +5614,7 @@
         id="harad_pz_levy_merc"
         default_group="Cavalry"
         level="16"
-        name="{=aom_merc_harad_pz_levy_name}[Harad] Hired Pezarsan Levy"
+        name="{=aom_merc_harad_pz_levy_name}[Harwan] Hired Pezarsan Levy"
         occupation="Mercenary"
         culture="Culture.aserai">
         <face>

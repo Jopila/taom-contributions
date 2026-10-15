@@ -465,10 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[Gundabad] Predone di picche uruk pallido" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[Gundabad] Fante uruk pallido" />
     <string id="aom_gundabad_warg_tamer_name" text="[Gundabad] Cavalcalupi uruk pallido" />
-    <string id="aom_harad_militia_archer_name" text="[Harad] Arciere della milizia" />
-    <string id="aom_harad_militia_spearman_name" text="[Harad] Lanciere della milizia" />
-    <string id="aom_harad_militia_vet_arch_name" text="[Harad] Arciere veterano della milizia" />
-    <string id="aom_harad_militia_vet_spear_name" text="[Harad] Lanciere veterano della milizia" />
+    <string id="aom_harad_militia_archer_name" text="[Harwan] Arciere della milizia" />
+    <string id="aom_harad_militia_spearman_name" text="[Harwan] Lanciere della milizia" />
+    <string id="aom_harad_militia_vet_arch_name" text="[Harwan] Arciere veterano della milizia" />
+    <string id="aom_harad_militia_vet_spear_name" text="[Harwan] Lanciere veterano della milizia" />
     <string id="aom_imladris_archer_name" text="[Gran Burrone] Arciere di Imladris" />
     <string id="aom_lindon_imladris_archer_name" text="[Lindon] Arciere di Mithlond" />
     <string id="aom_imladris_blademaster_name" text="[Gran Burrone] Maestro di Lama di Imladris" />
@@ -840,7 +840,7 @@
     <string id="aom_gondor_loss_noble_sergeant_name" text="[Gondor] Guardia d'Ascia di Lossarnach" />
     <string id="aom_gondor_loss_noble_veteran_name" text="[Gondor] Asciere di Lossarnach" />
     <string id="aom_gondor_loss_noble_warden_name" text="[Gondor] Custode dell'Ascia di Lossarnach" />
-    <string id="aom_harad_howdah_crew_name" text="[Harad] Arciere da Howdah" />
+    <string id="aom_harad_howdah_crew_name" text="[Harwan] Arciere da Howdah" />
     <string id="aom_arthedain_citadel_guard_name" text="[Arthedain] Guardia della Cittadella" />
     <string id="aom_arthedain_dunadan_youth_merc_name" text="[Arthedain] Spada mercenaria Dúnadan" />
     <string id="aom_arthedain_dunadan_youth_name" text="[Arthedain] Giovane Dúnadan" />

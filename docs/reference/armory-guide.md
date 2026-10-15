@@ -7,7 +7,7 @@
 |------|---------|
 | **Armory dependency** | `LOTRLOME_Armory` (NOT `Armory_2` — it will be deleted) |
 | **Item definitions** | `E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\LOTRLOME_Armory\ModuleData\LOTRLOME_items\<folder>\` |
-| **Item files per folder** | `body_armors.xml`, `head_armors.xml`, `leg_armors.xml`, `shoulder_armors.xml`, `arm_armors.xml` |
+| **Item files per folder** | `body_armors.xml`, `head_armors.xml`, `leg_armors.xml`, `shoulder_armors.xml`, `arm_armors.xml`; `harad/` also holds `weapons.xml` (KEYforce's Harad regular weapons, #805) |
 | **Global items** | `LOTRLOME_items\LOTRAOM_weapons.xml`, `LOTRAOM_shields.xml`, `LOTRAOM_horses.xml` |
 | **Shield rule** | `item_usage="hand_shield"` (centre-grip) MUST pair with `ForceAttachOffHandPrimaryItemBone="true"`; `item_usage="shield"` (forearm-strapped) with `ForceAttachOffHandSecondaryItemBone="true"`. Never both. `body_name` is the `bo_cap_*` capsule, `shield_body_name` the full `bo_*` body. Two entries look mistyped and must NOT be corrected — see [armory-shield-audit.md](armory-shield-audit.md) |
 | **Harness rule** | Every `Type="HorseHarness"` MUST carry `<Armor family_type="N">` matching its mount's `Monster.family_type` (1 horse/warg/spider/war ram, 4 chariot, 10 elephant/mûmakil). A missing attribute deserializes to **0 = human**, and the inventory screen then refuses the harness on every mount **with no error message** (`SPInventoryVM.IsItemEquipmentPossible`, v1.4.7 `:4112`) while stripping any pre-placed one on the next transfer (`:3923`). Mount-side authority is the monsters XML only, and `family_type` on `<Horse>` is never parsed. Enforced by `python tools/validate_moduledata.py` (`MISSING_HARNESS_FAMILY_TYPE` / `HARNESS_FAMILY_MISMATCH`). Separately, **every `Horse` slot REQUIRES a `HorseHarness` slot in the same set** (`MOUNT_WITHOUT_HARNESS`). The harness is not always armour: on the war ram it is the saddle, since `sk_eb_goat_a`/`_b` are bare pelts, so an empty slot spawns the rider on bare hide. No attribute records which mounts carry their own seat, so exceptions are argued in `_HARNESSLESS_BY_DESIGN` rather than assumed. |
@@ -28,6 +28,7 @@
 | `sk_dg_uruk_*`, `sk_dg_orc_*` | `dol_guldur/` | |
 | `sk_dg_khml_*` (Khamul) | `rhun/` | Cross-faction with Dol Guldur — lives in `rhun/` |
 | `sk_gb_uruk_*` | `gundabad/` | |
+| `sk_hr_st_*`, `sk_sg_st_*` (armour); `hr_st_*`, `sm_hr_st_*`, `sm_sg_st_*` (weapons, shields) | `harad/` | Harwan (Harad) and Shaghana. The weapons sit in `harad/weapons.xml` (#805), the only culture folder with a `weapons.xml`; the other cultures' troop weapons are in the global files (the ladder launchers sit in each folder's `ranged_ladder.xml`, the player starter weapons in `starter_kit.xml`) |
 | `sk_dwarf_erebor_*` | `erebor/` | Core dwarven set |
 | `sk_dwarf_iron_*` | **`iron_hills/`** | NOT `erebor/` — caught in #211 deep-review (RCA: `docs/reviews/rca-multi-culture-armor-revamp-2026-05-22.md`) |
 | `sk_dwarf_dain_*` | `erebor/` | Dain's set |

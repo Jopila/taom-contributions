@@ -465,10 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[Gundabad] Bleicher Uruk-Pikenräuber" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[Gundabad] Bleiche Uruk-Infanterie" />
     <string id="aom_gundabad_warg_tamer_name" text="[Gundabad] Bleicher Uruk-Wolfsreiter" />
-    <string id="aom_harad_militia_archer_name" text="[Harad] Miliz-Bogenschütze" />
-    <string id="aom_harad_militia_spearman_name" text="[Harad] Miliz-Speerträger" />
-    <string id="aom_harad_militia_vet_arch_name" text="[Harad] Miliz-Veteranenbogenschütze" />
-    <string id="aom_harad_militia_vet_spear_name" text="[Harad] Miliz-Veteranenspeerträger" />
+    <string id="aom_harad_militia_archer_name" text="[Harwan] Miliz-Bogenschütze" />
+    <string id="aom_harad_militia_spearman_name" text="[Harwan] Miliz-Speerträger" />
+    <string id="aom_harad_militia_vet_arch_name" text="[Harwan] Miliz-Veteranenbogenschütze" />
+    <string id="aom_harad_militia_vet_spear_name" text="[Harwan] Miliz-Veteranenspeerträger" />
     <string id="aom_imladris_archer_name" text="[Bruchtal] Imladris-Bogenschütze" />
     <string id="aom_lindon_imladris_archer_name" text="[Lindon] Mithlond-Bogenschütze" />
     <string id="aom_imladris_blademaster_name" text="[Bruchtal] Imladris-Klingenmeister" />
@@ -840,7 +840,7 @@
     <string id="aom_gondor_loss_noble_sergeant_name" text="[Gondor] Axtwache von Lossarnach" />
     <string id="aom_gondor_loss_noble_veteran_name" text="[Gondor] Axtkämpfer von Lossarnach" />
     <string id="aom_gondor_loss_noble_warden_name" text="[Gondor] Axtwart von Lossarnach" />
-    <string id="aom_harad_howdah_crew_name" text="[Harad] Howdah-Bogenschütze" />
+    <string id="aom_harad_howdah_crew_name" text="[Harwan] Howdah-Bogenschütze" />
     <string id="aom_arthedain_citadel_guard_name" text="[Arthedain] Wache der Zitadelle" />
     <string id="aom_arthedain_dunadan_youth_merc_name" text="[Arthedain] Dúnadan-Söldner" />
     <string id="aom_arthedain_dunadan_youth_name" text="[Arthedain] Dúnadan-Jüngling" />

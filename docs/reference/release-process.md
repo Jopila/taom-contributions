@@ -145,7 +145,16 @@ Use `/release`. It runs the sequence below and fails closed on the #371 pairing 
 the TAOM build instantiates `taom_howdah_platform` from `LOTRLOME_Armory/Prefabs`; a TAOM build released without an Armory
 package carrying it logs `not found` and spawns no howdah platform. Since the same issue the Harad elephant rider
 (`troops_harad.xml`) wears `sk_elephant_armor_howdah_elite`, an item only the Armory defines (`LOTRAOM_horses.xml`):
-without it the rider's elephant spawns with no harness, no howdah and no crew.
+without it the rider's elephant spawns with no harness, no howdah and no crew. Since #805 (2026-10-15) 20 Harad and
+Shaghana troops, the six Aserai career kits and 19 Shaghana and Abanissa enlistment rosters name KEYforce's Harad
+weapons, which only the Armory's new
+`LOTRLOME_items/harad/weapons.xml` defines (with 15 pieces in `LOTRLOME_crafting_pieces.xml`, the Harad rows in
+`crafting_templates.xslt` and `weapon_descriptions.xslt`, and the `harad_weapons/regular` packages with their
+`RuntimeDataCache` entries); an Armory package without them spawns those troops unarmed. The next Armory package must
+also carry `ladder_harad_bow_t7` (`harad/ranged_ladder.xml`), the Serpent and Red Serpent marksmen's bow. Check each
+channel before publishing:
+`python tools/validate_moduledata.py --game-modules E:/LOTRAOM_Releases/<channel>/Modules --code BROKEN_ITEM_REF | grep -E "Item\.(hr_st_|sm_hr_st_|sm_sg_st_|ladder_harad_bow_t7)"`
+must print nothing.
 
 **TAOM_Map ships in the same release when TAOM data names a settlement its package lacks.** Arthedain's towns (`town_AN1` to `town_AN3`) exist only in the live `TAOM_Map`; the `TAOM_Map` in all three release channels had none of them on 2026-10-14. The War Chronicle's `north` event is the smallest dependent: it targets Bree (`town_AN3`) and is Skipped with a logged warning without it. The kingdom itself also needs them: `clans.xml:2175-2176` gives `clan_arthedain_3` the home `Settlement.town_AN3`, `taom_spkingdoms.xml` gives the kingdom the home `Settlement.town_AN2`, and `cultures.json` starts the culture at `town_AN2`. [arthedain.md](../features/arthedain.md) notes that several of a new kingdom's surfaces crash rather than fail quietly, a culture that owns no settlement (#374) among them. The next release must ship a `TAOM_Map` package that contains `town_AN1` to `town_AN3`. Check each channel before publishing: `for t in town_AN1 town_AN2 town_AN3; do grep -c "id=\"$t\"" E:/LOTRAOM_Releases/<channel>/Modules/TAOM_Map/ModuleData/settlements.xml; done` prints 1 three times.
 

@@ -157,7 +157,7 @@
       "files": ["harad"],
       "ranks": {"overall": 6, "damage": 6, "accuracy": 3},
       "tiers": {
-        "Bow": [2, 3, 4, 5, 6]
+        "Bow": [2, 3, 4, 5, 6, 7]
       },
       "donor": {"Bow": "wm_harad_bow_a01"},
       "donor_by_band": {

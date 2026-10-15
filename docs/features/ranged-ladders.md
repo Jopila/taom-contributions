@@ -453,6 +453,14 @@ character files for hero kit.
   restat and sync validate the spec; `enlist_*` rosters under the hero ceiling; a templated ladder
   troop takes its cell (1.5.3 semantics); one militia regex and one class predicate across the
   writers and the gate. `docs/reviews/rca-ranged-rebalance-second-review-2026-09-18.md`.
+- 2026-10-15: KEYforce's Harad regular archers (lotraom-assets `db981663`) arrived carrying raw
+  `hr_st_longbow_light/med/heavy` launchers; on their tiers a regular out-shot the tier-7 Serpent
+  marksman. The port (#805) added tier 7 to the `harad` line (#803; `ladder_harad_bow_t7`, its
+  translated names copied from tier 6), and `rebalance_ranged_ladders.py` put every Harad archer on its
+  tier's cell: the six regulars on `_t3`/`_t4`/`_t5`, the Serpent and Red Serpent bowmen, archers and
+  marksmen on `_t5`/`_t6`/`_t7`, with their Bow skill raised to the cells (12 values, Mike's choice).
+  Inversions 398 to 0; no `RANGED_LADDER_INVERSION` remains in any culture. His three longbows ship as
+  non-merchandise Armory items, waiting to become the line's `donor` art.
 
 ## GitHub Issue
 

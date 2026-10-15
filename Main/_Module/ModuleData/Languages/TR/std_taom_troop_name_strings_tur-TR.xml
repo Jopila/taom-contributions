@@ -465,10 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[Gundabad] Solgun Uruk Kargı Çapulcusu" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[Gundabad] Solgun Uruk Piyadesi" />
     <string id="aom_gundabad_warg_tamer_name" text="[Gundabad] Solgun Uruk Kurt Binicisi" />
-    <string id="aom_harad_militia_archer_name" text="[Harad] Milis Okçu" />
-    <string id="aom_harad_militia_spearman_name" text="[Harad] Milis Mızrakçı" />
-    <string id="aom_harad_militia_vet_arch_name" text="[Harad] Kıdemli Milis Okçu" />
-    <string id="aom_harad_militia_vet_spear_name" text="[Harad] Kıdemli Milis Mızrakçı" />
+    <string id="aom_harad_militia_archer_name" text="[Harwan] Milis Okçu" />
+    <string id="aom_harad_militia_spearman_name" text="[Harwan] Milis Mızrakçı" />
+    <string id="aom_harad_militia_vet_arch_name" text="[Harwan] Kıdemli Milis Okçu" />
+    <string id="aom_harad_militia_vet_spear_name" text="[Harwan] Kıdemli Milis Mızrakçı" />
     <string id="aom_imladris_archer_name" text="[Ayrıkvadi] Imladris Okçusu" />
     <string id="aom_lindon_imladris_archer_name" text="[Lindon] Mithlond Okçusu" />
     <string id="aom_imladris_blademaster_name" text="[Ayrıkvadi] Imladris Kılıç Ustası" />
@@ -840,7 +840,7 @@
     <string id="aom_gondor_loss_noble_sergeant_name" text="[Gondor] Lossarnach Balta Koruyucusu" />
     <string id="aom_gondor_loss_noble_veteran_name" text="[Gondor] Lossarnach Baltacısı" />
     <string id="aom_gondor_loss_noble_warden_name" text="[Gondor] Lossarnach Balta Muhafızı" />
-    <string id="aom_harad_howdah_crew_name" text="[Harad] Howdah Okçusu" />
+    <string id="aom_harad_howdah_crew_name" text="[Harwan] Howdah Okçusu" />
     <string id="aom_arthedain_citadel_guard_name" text="[Arthedain] Kale Muhafızı" />
     <string id="aom_arthedain_dunadan_youth_merc_name" text="[Arthedain] Dúnadan Paralı Asker" />
     <string id="aom_arthedain_dunadan_youth_name" text="[Arthedain] Dúnadan Genci" />

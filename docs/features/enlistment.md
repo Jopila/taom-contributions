@@ -999,7 +999,11 @@ its tree is the aserai one). `DocumentedExceptions` in `EnlistmentRosterCultureC
 empty. The Harad-sphere archer kits (aserai sergeant, the shaghana and abanissa chains) carry the
 vanilla steppe bows (`composite_bow` 30/51, `steppe_heavy_bow` 30/52, `composite_steppe_bow` 30/52,
 `steppe_war_bow` 50/54 as difficulty/damage), because every Harad ladder bow needs Bow 100 and the
-player equips the kit by hand; `EnlistmentArcherLauncherDataTests` pins it.
+player equips the kit by hand; `EnlistmentArcherLauncherDataTests` pins it. The same day KEYforce's
+Harad regular weapons (#805) changed their donor troops, so the 29 shaghana and abanissa kits were
+removed and reseeded with `--seed-missing` (they now issue his spears, sword, shields and arrows), and
+the steppe bows were put back on their archer chains. The generator has no `--verify`, so a later
+donor change goes unnoticed until someone reseeds.
 
 **A cell is never emitted weaponless.** That is not a nicety: the resolver probes *existence*, so
 an armour-only roster would end the fallback walk and shadow the armed kit the player would

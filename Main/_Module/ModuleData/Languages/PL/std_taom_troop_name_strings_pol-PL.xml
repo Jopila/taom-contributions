@@ -465,10 +465,10 @@
     <string id="aom_gundabad_veteran_spear_warrior_name" text="[Gundabad] Blady uruk — pikinier-łupieżca" />
     <string id="aom_gundabad_veteran_sword_warrior_name" text="[Gundabad] Blady uruk — piechota" />
     <string id="aom_gundabad_warg_tamer_name" text="[Gundabad] Blady uruk — jeździec wilków" />
-    <string id="aom_harad_militia_archer_name" text="[Harad] Łucznik milicji" />
-    <string id="aom_harad_militia_spearman_name" text="[Harad] Włócznik milicji" />
-    <string id="aom_harad_militia_vet_arch_name" text="[Harad] Doświadczony łucznik milicji" />
-    <string id="aom_harad_militia_vet_spear_name" text="[Harad] Doświadczony włócznik milicji" />
+    <string id="aom_harad_militia_archer_name" text="[Harwan] Łucznik milicji" />
+    <string id="aom_harad_militia_spearman_name" text="[Harwan] Włócznik milicji" />
+    <string id="aom_harad_militia_vet_arch_name" text="[Harwan] Doświadczony łucznik milicji" />
+    <string id="aom_harad_militia_vet_spear_name" text="[Harwan] Doświadczony włócznik milicji" />
     <string id="aom_imladris_archer_name" text="[Rivendell] Łucznik z Imladris" />
     <string id="aom_lindon_imladris_archer_name" text="[Lindon] Łucznik z Mithlondu" />
     <string id="aom_imladris_blademaster_name" text="[Rivendell] Mistrz miecza z Imladris" />
@@ -840,7 +840,7 @@
     <string id="aom_gondor_loss_noble_sergeant_name" text="[Gondor] Gwardzista Topora z Lossarnach" />
     <string id="aom_gondor_loss_noble_veteran_name" text="[Gondor] Topornik z Lossarnach" />
     <string id="aom_gondor_loss_noble_warden_name" text="[Gondor] Strażnik Topora z Lossarnach" />
-    <string id="aom_harad_howdah_crew_name" text="[Harad] Łucznik z howdah" />
+    <string id="aom_harad_howdah_crew_name" text="[Harwan] Łucznik z howdah" />
     <string id="aom_arthedain_citadel_guard_name" text="[Arthedain] Strażnik Cytadeli" />
     <string id="aom_arthedain_dunadan_youth_merc_name" text="[Arthedain] Dúnadański najemnik" />
     <string id="aom_arthedain_dunadan_youth_name" text="[Arthedain] Dúnadański młodzieniec" />
