@@ -52,6 +52,25 @@ public class CareerChoicesIntegrationTests
     // protection; a data invariant here would either miss the case or fail on valid data.
 
     [TestMethod]
+    public void RealChoicesXml_NoPassiveMagnitudeExceedsTheLoaderBound()
+    {
+        // The loader drops a pip above the bound; a shipped one would silently vanish, so read the raw file.
+        var doc = XDocument.Load(Path.Combine(ModuleDataPath, "career_system", "taom_career_choices.xml"));
+        var pips = doc.Descendants("PassiveEffect").ToList();
+        Assert.IsTrue(pips.Count > 100, "expected the shipped pips");
+
+        var over = pips
+            .Select(e => new { E = e, Raw = (string?)e.Attribute("magnitude") ?? (string?)e.Attribute("value") })
+            .Where(x => x.Raw != null
+                && float.TryParse(x.Raw, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var v)
+                && Math.Abs(v) > CareerConfigProvider.MaxPassiveMagnitude)
+            .Select(x => x.E.ToString())
+            .ToList();
+
+        Assert.AreEqual(0, over.Count, string.Join("; ", over));
+    }
+
+    [TestMethod]
     public void RealChoicesXml_EveryGroupedChoice_CarriesItsGroupsId()
     {
         // #766: group choices carry no group_id attribute, so GroupId was "" for all of them and the

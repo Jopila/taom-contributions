@@ -21,6 +21,13 @@ public class CareerConfigProvider : ICareerConfigProvider
     // #769 E8: effects one option may carry. A third and later element is warned about and ignored.
     public const int MaxPassivesPerChoice = 2;
 
+    /// <summary>
+    /// Largest |magnitude| a passive may carry (#769 E11). Far above every shipped value (party size 50, daily gold
+    /// 250); it exists so two accepted pips cannot sum to Infinity and a finite one cannot overflow the engine's later
+    /// float-to-int conversions (loot, raid gold). A larger one is dropped with a warning, like an unknown troop_class.
+    /// </summary>
+    public const float MaxPassiveMagnitude = 10000f;
+
     private const int DefaultRetrainGoldBase = 1000;
     private const int DefaultRetrainGoldPerLevel = 250;
     private int _maxPerkPoints = 30;
@@ -349,7 +356,7 @@ public class CareerConfigProvider : ICareerConfigProvider
         }
     }
 
-    // One <PassiveEffect>, or null when its troop_class cannot be read (the passive is dropped).
+    // One <PassiveEffect>, or null when its troop_class cannot be read or its magnitude is out of bounds (the passive is dropped).
     private PassiveEffect? ParsePassive(XElement passiveEl, string? choiceId)
     {
         // An unrecognized type= must surface loudly, not silently coerce to Special (inert).
@@ -365,11 +372,20 @@ public class CareerConfigProvider : ICareerConfigProvider
         if (!TryParseTroopClass(passiveEl, type, choiceId, out var troopClass))
             return null;
 
+        // Accept value= as an alias for magnitude= (the wrapper schema uses value=).
+        // magnitude= takes precedence when both are present.
+        var magnitude = ParseFloat(passiveEl, "magnitude", ParseFloat(passiveEl, "value", 0f));
+        if (Math.Abs(magnitude) > MaxPassiveMagnitude)
+        {
+            _logger.LogWarning(
+                $"CareerConfig: choice '{choiceId}' has a {type} passive with magnitude '{passiveEl.Attribute("magnitude")?.Value ?? passiveEl.Attribute("value")?.Value}', " +
+                $"beyond the bound of {MaxPassiveMagnitude.ToString(CultureInfo.InvariantCulture)}; the passive is dropped.");
+            return null;
+        }
+
         return new PassiveEffect(
             effectType: type,
-            // Accept value= as an alias for magnitude= (the wrapper schema uses value=).
-            // magnitude= takes precedence when both are present.
-            magnitude: ParseFloat(passiveEl, "magnitude", ParseFloat(passiveEl, "value", 0f)),
+            magnitude: magnitude,
             // operation= / is_percentage= were parsed-but-never-read (the consumer chooses
             // additive vs multiplicative per type); dropped. attack_type_mask IS consumed.
             attackTypeMask: ParseAttackTypeMask(passiveEl, type, choiceId),

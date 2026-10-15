@@ -6,6 +6,7 @@ Running scorecard of all reviews. **Reviews 1-99, 2026-04-05 to 2026-09-12.** 93
 
 | # | Date | Feature | Codex Verdict | Claude Verdict | Real Bugs | False Positives | Missed Bugs | Prompt Version |
 |---|------|---------|--------------|----------------|-----------|-----------------|-------------|----------------|
+| career-e11 | 2026-10-15 | Career forks engine #769 E11 and E11b (ten campaign passives, TaomPartyTrainingModel, TaomPartyTradeModel) | issues-found (0 P1, 0 P2, 3 P3) | agree (all three verified; X3 overturned a Claude lens claim) | 3 P3 (overflow past the NaN gate, three weak wiring pins, a wrong "no daily gold message" correction) | 0 | 0 | review-codex skill prompt, xhigh |
 | career-e8e10 | 2026-10-15 | Career forks engine #769 E8 to E10 and E13 (two-effect options, troop class filter, fear, knockdown and crush-hold troop counters, localized effect lines) | issues-found (0 P1, 1 P2, 0 P3; 5 of 6 suspects disputed) | agree (P2 reproduced against the installed MBFastRandom, fixed) | 1 P2 (the crush hold drew the shared MBRandom generator on a multi-thread callback) | 0 | 0 | review-codex skill prompt, xhigh |
 | career-e4e7 | 2026-10-14 | Career forks engine #769 E4 to E7 and E12, plus the merge of trunk a9437a492 (one choice rule, forks, point levels, lock on leave, paid retrain, switch cost, tree-version migration) | issues-found (0 P1, 1 P2, 0 P3; 5 of 6 suspects disputed); pass 2 on the fix: none | agree (P2 confirmed in the source, fixed in 59c1803d2) | 1 P2 (the tree migration ran for the main hero only) | 0 | 0 | review-codex skill prompt, max; pass 2 high |
 | career-e1e3 | 2026-10-09 | Career fixes #766, #767, #768, #770, #771 (choice group link, resource gain on every source, party-size cache and leader-only scope, raid battle credit, party-screen handler) | issues-found (0 P1, 1 P2, 0 P3; 4 of 5 suspects disputed) | agree (P2 confirmed in the v1.5.5 decompile, fixed as #790) | 1 P2 (hideout send-troops paid twice, pre-existing) | 0 | 0 | review-codex skill prompt, xhigh |
@@ -5263,6 +5264,18 @@ Report `docs/reviews/deep-review-031-settings-reads-off-hot-paths-2026-10-02.md`
   2 LOW (the "capstones" label; a stale example in the clamp comment) and 3 NIT, all comment or doc
   text, all fixed (RCA C1 to C3).
 - **RCA:** `docs/reviews/rca-uruk-hai-skirt-body-2026-10-04.md`.
+
+## Review (number assigned at merge): Career forks engine, step E11 and E11b (#769), 6-lens deep review + convergence + Codex gpt-6-astra xhigh (2026-10-15)
+
+- **Scope:** ten campaign career passives, two new model slots (`TaomPartyTrainingModel`,
+  `TaomPartyTradeModel`); committed as `e91660cc9`.
+- **Deep review:** six lenses (data flow, engine, standards, completeness, design, XML): 2 MEDIUM
+  (`ScaleByPassive` cliff past -100%, the healing model over 150 lines), no CRITICAL or HIGH; a fix round
+  of 23 items and a convergence review followed. The builder brief carried named lessons for the first
+  time, and none repeated.
+- **Codex:** `xhigh` on `e91660cc9`: 0 P1, 0 P2, 3 P3, all fixed (RCA X1 to X3). X3 overturned a Claude
+  engine lens that said vanilla shows no daily gold message.
+- **RCA:** `docs/reviews/rca-career-e11-2026-10-15.md`.
 
 ## Review (number assigned at merge): Career forks engine, steps E8 to E10 and E13 (#769), 8-lens deep review + convergence + Codex gpt-6-astra xhigh (2026-10-14 to 10-15)
 

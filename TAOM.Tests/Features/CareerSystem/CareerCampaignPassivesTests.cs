@@ -239,8 +239,9 @@ public class CareerCampaignPassivesTests
         }),
         new Pin(WageModel, "public override ExplainedNumber GetTroopRecruitmentCost(", new[]
         {
-            "ResolveBuyerRecruitmentPerks(buyerHero, troop, _careerPassives.GetPassiveMagnitude(buyerHero?.StringId, PassiveEffectType.RecruitCost))",
+            "var buyerPerks = ResolveBuyerRecruitmentPerks(buyerHero, troop, _careerPassives.GetPassiveMagnitude(buyerHero?.StringId, PassiveEffectType.RecruitCost))",
             "_wageModifiers.CalculateRecruitmentCost(",
+            "buyerPerks);",
             "return new ExplainedNumber(cost, includeDescriptions: false);",
         }),
         new Pin(WageModel, "private static RecruitmentPerkInputs ResolveBuyerRecruitmentPerks(", new[]
@@ -295,6 +296,7 @@ public class CareerCampaignPassivesTests
         {
             "base.GetEffectiveDailyExperience(mobileParty, troop)",
             "_careerPassives.ApplyFlat(mobileParty?.LeaderHero?.StringId, ref result, PassiveEffectType.TroopTraining, TroopClassMapper.FromCharacter(troop.Character));",
+            "return result;",
         }),
         new Pin(TradeModel, "public override float GetTradePenaltyFactor(", new[]
         {
@@ -373,6 +375,24 @@ public class CareerCampaignPassivesTests
                 Assert.IsFalse(HasInOrder(swapped, pin.InOrder), $"{pin}: swapping '{a}' and '{b}' kept the pin green");
             }
         }
+    }
+
+    [TestMethod]
+    public void EachFinanceProjection_AddsTheCareerDailyGoldExactlyOnce()
+    {
+        foreach (var signature in new[] { "public override ExplainedNumber CalculateClanGoldChange(", "public override ExplainedNumber CalculateClanIncome(" })
+        {
+            var member = MemberText(Source(FinanceModel), signature);
+            Assert.AreEqual(1, CountOf(member, "AddCareerDailyGold(clan, ref result);"), signature);
+        }
+    }
+
+    private static int CountOf(string text, string fragment)
+    {
+        var count = 0;
+        for (var at = text.IndexOf(fragment, StringComparison.Ordinal); at >= 0; at = text.IndexOf(fragment, at + fragment.Length, StringComparison.Ordinal))
+            count++;
+        return count;
     }
 
     [TestMethod]

@@ -582,6 +582,41 @@ public class CareerConfigProviderTests
         return _provider.LoadChoices().Single().Passives;
     }
 
+    // ── F1: a magnitude is bounded, so two accepted pips cannot sum to Infinity ──
+
+    [TestMethod]
+    [DataRow("3e38")]
+    [DataRow("-3e38")]
+    [DataRow("1e5")]
+    [DataRow("10000.5")]
+    public void LoadChoices_PassiveMagnitudeAboveTheBound_IsDroppedWithAWarning(string magnitude)
+    {
+        var passives = LoadPassivesOf(@"<PassiveEffect type=""DailyGold"" magnitude=""" + magnitude + @""" />");
+
+        Assert.AreEqual(0, passives.Count);
+        _logger.Received(1).LogWarning(Arg.Is<string>(s => s.Contains("c1") && s.Contains("DailyGold") && s.Contains(magnitude.TrimStart('-'))));
+    }
+
+    [TestMethod]
+    [DataRow("10000", 10000f)]
+    [DataRow("-10000", -10000f)]
+    public void LoadChoices_PassiveMagnitudeAtTheBound_Loads(string magnitude, float expected)
+    {
+        var passives = LoadPassivesOf(@"<PassiveEffect type=""DailyGold"" magnitude=""" + magnitude + @""" />");
+
+        Assert.AreEqual(1, passives.Count);
+        Assert.AreEqual(expected, passives[0].Magnitude);
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("magnitude")));
+    }
+
+    [TestMethod]
+    public void LoadChoices_ValueAliasAboveTheBound_IsDroppedToo()
+    {
+        var passives = LoadPassivesOf(@"<PassiveEffects><PassiveEffect type=""DailyGold"" value=""3e38"" /></PassiveEffects>");
+
+        Assert.AreEqual(0, passives.Count);
+    }
+
     [TestMethod]
     public void LoadChoices_NoPassive_YieldsAnEmptyListNeverNull()
     {
