@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "repos": [
+    {
+      "repo": "yotthani/bannerlord",
+      "reviewed": "2ff002be3013acbaff20a881ee7c1480fad9fa0e",
+      "reviewed_on": "2026-10-16",
+      "record": "docs/reviews/adopt-yotthani-2026-10-16.md",
+      "feature_paths": [
+        "HoN/Armory",
+        "HoN/Armory.Sim",
+        "HoN/Armory.Tests",
+        "HoN/Armory_TAOM",
+        "HoN/DualWield",
+        "HoN/DualWield.Tests",
+        "RealmUI",
+        "docs/realm-ui",
+        "docs/balance-sim"
+      ]
+    },
+    {
+      "repo": "yotthani/MithrilForge",
+      "reviewed": "ae7834aa32f33e54fef05580fc69579c19e3d836",
+      "reviewed_on": "2026-10-16",
+      "record": "docs/reviews/adopt-yotthani-2026-10-16.md",
+      "feature_paths": []
+    }
+  ]
+}

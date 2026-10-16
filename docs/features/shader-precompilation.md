@@ -209,6 +209,21 @@ The pure core is unit-tested (the runner / game manager / guard / patch are engi
 
 `TAOM.Tests/Migration/ReflectionSiteBindingTests.cs` pins `Mission._initialPlayerAgent` against the installed engine; `SettingsFingerprintTests` pins the settable-property count the rename must not move; `SettingRequireRestartPostureTests` requires `RequireRestart = false` on both attributes once they are uncommented (while parked it cannot see them).
 
+## Unattended game runs: two leftovers after a kill (yotthani)
+
+A cold walk takes 20 to 70 minutes, so anyone who drives it from a script (the cold-cache protocol below) may
+kill a hung game. Yotthani learned two consequences while running probe games unattended (in game;
+`RealmUI/Probe/run_probe.ps1`@2ff002be lines 124-151 and `docs/realm-ui/feasibility.md`@2ff002be lines 206-214;
+on the night of 2026-10-03/04, on Bannerlord 1.5.3 (`feasibility.md` line 3); TAOM has not
+reproduced either):
+
+- A killed game leaves TaleWorlds' `Watchdog.exe` behind, which keeps the dead process in the task list, so a
+  "is the game running" check keeps answering yes. The script ends the watchdog whose command line carries the
+  killed process id.
+- A killed game leaves `safely_exited = 0` in `Documents\Mount and Blade II Bannerlord\Configs\engine_config.txt`,
+  and the next start stops at a Safe Mode window, where an unattended run waits until its timeout. The script
+  puts the flag back to 1 when it had to kill the game (or the game crashed).
+
 ## Verification owed
 
 Boundary code proves itself only in-game. The cold walk on 1.4.8 has not run since #560. The protocol: force a cold cache by changing the module list (1.4.8 deletes the local cache on that; `Missing shader from sack` lines in `rgl_log` during batch 1 prove it was cold); confirm on a `TAOM.json` that still holds `"EnableScenePassPrecompilation": true` that the new toggle shows OFF and the `Begin` line says scene passes are off; run the walk and read the log lines listed under "Roster batching" (no `FALLBACK:` and no `WALK STOPPED` line may appear); hold Ctrl+Shift+K mid-batch on a second walk and confirm a clean cancel and a clean third start; then fight a campaign battle against a culture not yet fought and read `rgl_log` for `Missing shader from sack` (near zero for `pbr_metallic`; `pbr_terrain` misses are expected with scenes off) and the `WaitingForRender shaders=` series (short or absent, against 305 s in b18f3441). Race body and skin materials come from agents that spawn, not from the item preload, so that battle is also the check for them.

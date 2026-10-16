@@ -95,8 +95,8 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | Khuzdul vocabulary (J.R.R. Tolkien) | `Khuzdul` `Khazad` `Baruk` `khuzdul-lexicon` | UNKNOWN | verbatim-port | `docs/audio/khuzdul-lexicon.html` `docs/audio/vo-script-dwarves.html` | uncleared |
 | Cave Troll Lightweight (Fab) | `Cave Troll Lightweight` `cave_troll_lightweight` | purchased-asset, code terms informal | data-port | `tools/oneoff/ue_export_cave_troll.py` `tools/blender/retarget_mannequin_to_human.py`; the retargeted `anim_troll_*` clips in `LOTRLOME_Armory` (live, outside the repo) | cleared |
 | Animalia - Elk (male), Animalia - Moose (male) (Fab) | `Animalia` `Elk_M` `Moose_M` `animalia_elk` `animalia_moose` | purchased-asset, code terms informal | data-port | `tools/blender/reskin_animalia_to_horse.py` `tools/blender/retarget_animalia_to_horse.py` `tools/blender/animalia_to_horse_map.json` `tools/blender/measure_animalia_clips.py` `tools/blender/animalia_elk_clip_measure.json` `tools/blender/animalia_moose_clip_measure.json` `tools/gen_animalia_anim_clips.ps1` `docs/features/animalia-elk-moose.md`; meshes, clips and textures in `LOTRLOME_Armory/AssetSources/creature/elk/` and their Kit packages in `LOTRLOME_Armory/Assets/creature/elk/` (live, outside the repo) | cleared |
-| Yotthani DualWield handoff, MithrilForge | `MithrilForge` `DualWield` `Bannerlord_Animation_Handoff` `TpacTool-bannerlord` | MIT (MithrilForge); the handoff document was shared with the maintainer by its author, no licence stated | comparison-only | (none; restated facts in `docs/reference/tpac-static-prop-authoring.md`, the animation reference docs, `docs/features/orc-goblin-locomotion.md` and `docs/reference/engine/mission-frame-threads-and-native-costs.md`; the measurement cited in `docs/features/butter-lib-distance-matrix.md`; from the 2026-10-15 pass also `docs/reference/engine/{campaign-tick-time-and-party-ai,save-system,gauntletui-viewmodel-screen,formations-and-team-ai}.md`, `docs/features/{skeleton-buffer-guard,diplomacy,mission-perf-heartbeat,culture-doctrine,race-abilities,melee-damage-model,signature-strikes}.md`, `docs/reference/bannerlord-animation-{system-map,clip-flags}.md`, `docs/reference/armory-guide.md`, `docs/ai-includes/creature-mount-authoring.md`, `docs/kitbash/erebor/runes.md`, `docs/reviews/audit-gondor-armory-2026-08-04.md` and `tools/README.md`) | cleared |
-| Yotthani `bannerlord` repository (DualWield, FaceLearner) | `yotthani/bannerlord` `HoN/DualWield` `FaceLearner` `FaceLearner.HeadExtract` | MIT, (c) 2026 yotthani (the maintainer's statement of 2026-10-09; no root `LICENSE` yet, asked for; shared with the maintainer by its author) | comparison-only | (none; restated facts in `docs/reference/scripted-melee-strikes.md`, `docs/reference/head-mesh-and-groom-authoring.md`, `docs/features/orc-goblin-locomotion.md` and `docs/reference/engine/mission-frame-threads-and-native-costs.md`; from the 2026-10-15 pass also `docs/features/{nameplate-cull,map-view-release,mission-start-guard,skeleton-buffer-guard,shader-compile-notice}.md`, `docs/modding/{submodule-and-registration,load-order-and-dependencies}.md`, `docs/reference/engine/{agent-spawn-and-render-pipeline,animation-binding-and-playback}.md`, `docs/reference/tpac-static-prop-authoring.md`, `docs/reviews/lessons/{animation-skeleton,misc}.md`) | cleared |
+| Yotthani DualWield handoff, MithrilForge | `MithrilForge` `DualWield` `Bannerlord_Animation_Handoff` `TpacTool-bannerlord` | MIT (MithrilForge); the handoff document was shared with the maintainer by its author, no licence stated | comparison-only | (none; restated facts in `docs/reference/tpac-static-prop-authoring.md`, the animation reference docs, `docs/features/orc-goblin-locomotion.md` and `docs/reference/engine/mission-frame-threads-and-native-costs.md`; the measurement cited in `docs/features/butter-lib-distance-matrix.md`; from the 2026-10-15 pass also `docs/reference/engine/{campaign-tick-time-and-party-ai,save-system,gauntletui-viewmodel-screen,formations-and-team-ai}.md`, `docs/features/{skeleton-buffer-guard,diplomacy,mission-perf-heartbeat,culture-doctrine,race-abilities,melee-damage-model,signature-strikes}.md`, `docs/reference/bannerlord-animation-{system-map,clip-flags}.md`, `docs/reference/armory-guide.md`, `docs/ai-includes/creature-mount-authoring.md`, `docs/kitbash/erebor/runes.md`, `docs/reviews/audit-gondor-armory-2026-08-04.md` and `tools/README.md`; from the 2026-10-16 pass, facts added to `docs/reference/engine/formations-and-team-ai.md`) | cleared |
+| Yotthani `bannerlord` repository (DualWield, FaceLearner) | `yotthani/bannerlord` `HoN/DualWield` `FaceLearner` `FaceLearner.HeadExtract` | MIT, (c) 2026 yotthani (the maintainer's statement of 2026-10-09; no root `LICENSE` yet, asked for; shared with the maintainer by its author) | comparison-only | (none; restated facts in `docs/reference/scripted-melee-strikes.md`, `docs/reference/head-mesh-and-groom-authoring.md`, `docs/features/orc-goblin-locomotion.md` and `docs/reference/engine/mission-frame-threads-and-native-costs.md`; from the 2026-10-15 pass also `docs/features/{nameplate-cull,map-view-release,mission-start-guard,skeleton-buffer-guard,shader-compile-notice}.md`, `docs/modding/{submodule-and-registration,load-order-and-dependencies}.md`, `docs/reference/engine/{agent-spawn-and-render-pipeline,animation-binding-and-playback}.md`, `docs/reference/tpac-static-prop-authoring.md`, `docs/reviews/lessons/{animation-skeleton,misc}.md`; from the 2026-10-16 pass also `docs/features/{fief-granting,gui-sprite-system,shader-precompilation}.md` and `docs/reference/engine/settlement-economy-food-prosperity.md`, plus facts added to `docs/features/map-view-release.md` and `docs/reference/engine/{gauntletui-viewmodel-screen,formations-and-team-ai}.md`) | cleared |
 | Yotthani VanillaTuning | `VanillaTuning` `HoN/VanillaTuning` `ShaderCompileNotice` | MIT, (c) 2026 yotthani (`HoN/VanillaTuning/LICENSE`, since `1b9ce3ba`, 2026-10-07) | verbatim-port | `Main/Features/ShaderCompileNotice/**` `Main/Features/MissionStartGuard/**` `Main/Features/SkeletonBuffer/**` `Main/Features/NameplateCull/**` `Main/Features/MapViewRelease/**`; their adapters `Main/Adapters/{I,}{MissionStartGuard,SkeletonBufferMemory,SkeletonBufferEngine,NameplateCull,MapViewRelease}Adapter.cs`; their tests `TAOM.Tests/Features/{MissionStartGuard,SkeletonBuffer,NameplateCull,MapViewRelease}/**` | cleared |
 | Yotthani ShaderCacheKeeper | `ShaderCacheKeeper` `yotthani/bannerlord` `HoN/ShaderCacheKeeper` `xinput9_1_0.dll` | MIT, (c) 2026 yotthani (its own `LICENSE`) | verbatim-port | `Native/ShaderCacheKeeper/**`; the built `bin/Win64_Shipping_Client/xinput9_1_0.dll` shipped through the launcher manifest | cleared |
 | Ghidra | `Ghidra` `NationalSecurityAgency/ghidra` `pyghidra` | Apache-2.0 | interop-only | `tools/native_decompile.py` runs the installed tool (see detail) | cleared |
@@ -334,6 +334,12 @@ the commit, the evidence kind and the engine version, and the battle-behaviour f
 2.0.34 loaded. The docs that carry restated facts are listed in the Covers column of the row above. Review:
 [`docs/reviews/adopt-yotthani-2026-10-15.md`](../reviews/adopt-yotthani-2026-10-15.md).
 
+Seventh pass on 2026-10-16 at `ae7834aa` (`0a2f4761..ae7834aa`, two commits, one document): `docs/engine/battle-behaviour-measured.md`
+removed its claim that a choke point's own `HoldChokePoint` weight guides placement better than its type, after a second
+test (the best-rated choke point, 1 win of 11). TAOM's `docs/reference/engine/formations-and-team-ai.md` now carries the
+second test with its hedge. Comparison only: nothing was copied. Review:
+[`docs/reviews/adopt-yotthani-2026-10-16.md`](../reviews/adopt-yotthani-2026-10-16.md).
+
 ### Yotthani `bannerlord` repository (DualWield, FaceLearner)
 
 yotthani's private monorepo `yotthani/bannerlord`, shared with the maintainer by its author (the same collaborator as
@@ -366,6 +372,17 @@ Fourth pass on 2026-10-15 at `784fef93` (`1ad701bd..784fef93`, 453 commits): the
 what it could on v1.5.5. The docs that carry them are listed in the Covers column of the row above. Review:
 [`docs/reviews/adopt-yotthani-2026-10-15.md`](../reviews/adopt-yotthani-2026-10-15.md).
 
+Fifth pass on 2026-10-16 at `2ff002be` (`784fef93..2ff002be`, 295 commits): the campaign probe and its balance-sim
+documents (`docs/balance-sim/campaign.md`, `docs/superpowers/specs/2026-10-14-sim-campaign-design.md`,
+`HoN/CampaignProbe/README.md`), the RealmUI feasibility and engine notes (`docs/realm-ui/feasibility.md`,
+`docs/realm-ui/research/engine-2d-gauntlet.md`, `RealmUI/Game/Theme/PictureReader.cs`, `RealmUI/Game/Flow/FlowController.cs`,
+`RealmUI/Game/Map/MapCam.cs`, `RealmUI/Probe/run_probe.ps1`) and `HoN/PerfProbe/Integration/BehaviourRecorder.cs`. The
+clone was blobless and read-only; nothing was built or run. Comparison only: nothing was copied. The facts TAOM restated
+(siege map-event outcomes, lord party sizes, the choke-point scoring comparison, map-scene and texture timings, the
+unattended-run leftovers) are tagged with yotthani, the file at the commit and lines, the evidence kind and the engine
+version, and TAOM verified what it could on v1.5.5. The docs that carry them are listed in the Covers column of the
+row above. Review: [`docs/reviews/adopt-yotthani-2026-10-16.md`](../reviews/adopt-yotthani-2026-10-16.md).
+
 ### Yotthani VanillaTuning
 
 `HoN/VanillaTuning/Integration/ShaderCompileNotice.cs` (with its wiring in `VanillaTuningSubModule.cs`,
@@ -380,21 +397,22 @@ The whole folder was read again on 2026-10-08 at `1ad701bd` to port more of it
 ([review](../reviews/adopt-yotthani-2026-10-08.md)).
 
 `Main/Features/MissionStartGuard/**` (2026-10-08) adapts its `mission-start-guard`: the idea (a start method that
-throws no longer leaves the mission loading for ever) and the finalizer's report are his; TAOM wraps the six start
+throws no longer leaves the mission loading for ever) and the finalizer's report are yotthani's; TAOM wraps the six start
 calls of `Mission.AfterStart` with one transpiler instead of patching each behaviour type, so the code is TAOM's own
 in structure. The MIT notice is in `Main/_Module/THIRD-PARTY-LICENSES.txt`.
 
 `Main/Features/SkeletonBuffer/**` (2026-10-08) adapts its `frame-buffer-guard` and `frame-buffer-watch`. The
-43-byte machine code block in `SkeletonBufferCave.cs` is his, byte for byte except the counter's displacement (TAOM
+43-byte machine code block in `SkeletonBufferCave.cs` is yotthani's, byte for byte except the counter's displacement (TAOM
 keeps the counter on a second page so the code page can be read-execute), which makes the row `verbatim-port`; the
 signature scan, the install order, the adapter and the watch are TAOM's. The second pool's 42-byte block
 (`BuildPool2Cave`), its site pattern and the check that the site lies in the function the pool's load calls are
-TAOM's own, written on his block's shape. The engine facts were re-derived on the
+TAOM's own, written on the shape of yotthani's block. The engine facts were re-derived on the
 v1.5.4 binary ([engine doc](engine/mission-frame-threads-and-native-costs.md) section 10).
 
 `Main/Features/NameplateCull/**` and `Main/Features/MapViewRelease/**` (2026-10-08) adapt its `nameplate-cull` and
-`map-view-release`: his skip rule and replacement update loop, and his release of the map's scene view every Nth
-cover (TAOM listens to the engine's `ScreenLayer.OnLayerActiveStateChanged` where he patched `SceneLayer.OnDeactivate`). TAOM's code is its own in structure (service, adapter, settings) and adds two skip conditions
+`map-view-release`: yotthani's skip rule and replacement update loop, and yotthani's release of the map's scene view
+every Nth cover (TAOM listens to the engine's `ScreenLayer.OnLayerActiveStateChanged` where yotthani patched
+`SceneLayer.OnDeactivate`). TAOM's code is its own in structure (service, adapter, settings) and adds two skip conditions
 (a plate not yet parked off screen, a plate the tutorial targets) and the campaign check before `MapScreen` is
 touched.
 
@@ -409,8 +427,8 @@ Review: [`docs/reviews/adopt-yotthani-2026-10-15.md`](../reviews/adopt-yotthani-
 
 `HoN/ShaderCacheKeeper` in the same repository carries its own MIT licence file ((c) 2026 yotthani), one of the two
 folders of the repository that has one, so its row is separate and `cleared`. Read in full on 2026-10-06 at commit `1bbdc17d`, and vendored
-as code: `keeper.c`, `keeper.rc`, `build.py`, `LICENSE` and `test/host.c` are his files with TAOM's changes (listed at
-the top of `keeper.c`); `test/run_tests.ps1` is his test reworked to run hermetically; `keeper.def`, `README.md` and
+as code: `keeper.c`, `keeper.rc`, `build.py`, `LICENSE` and `test/host.c` are yotthani's files with TAOM's changes (listed at
+the top of `keeper.c`); `test/run_tests.ps1` is yotthani's test reworked to run hermetically; `keeper.def`, `README.md` and
 `test/parse_tests.c` are TAOM's. The built DLL ships in the game's `bin` folder, outside every module, and its MIT
 notice is in `Main/_Module/THIRD-PARTY-LICENSES.txt`. Review:
 [`docs/reviews/adopt-yotthani-shadercachekeeper-2026-10-06.md`](../reviews/adopt-yotthani-shadercachekeeper-2026-10-06.md).
@@ -468,11 +486,11 @@ SiegeDismount, MixedFormations, SmartCavalryAI, FiefManagement, QuickActions, Eq
 CompanionTactics. Planning record: [`docs/archive/feature-port-prompts/README.md`](../archive/feature-port-prompts/README.md).
 
 **Identified on 2026-10-08 as yotthani's "Heir of Numenor" (HoN) mods** in `yotthani/bannerlord` (folder `HoN/`), the
-same collaborator as the commissioned modules above. Evidence: his `EquipPresets` and `FormationPresets` use the
+same collaborator as the commissioned modules above. Evidence: yotthani's `EquipPresets` and `FormationPresets` use the
 SaveSystem ids TAOM carries (726900501 with classes 101 and 102, 726900601 with class 101), with the same class and
-field names, and each of his definers says TAOM defines the same ids; his `MixedFormations`, `SmartCavalryAI` and
-`CompanionTactics` hold the same algorithms and thresholds; his 2026-09-30 commits restore each module's source from
-his 2026-04-29 release, a week before TAOM's 2026-05-07 ports. The drop folder no longer exists, so this is a fit,
+field names, and each of those definers says TAOM defines the same ids; the HoN `MixedFormations`, `SmartCavalryAI`
+and `CompanionTactics` hold the same algorithms and thresholds; yotthani's 2026-09-30 commits restore each module's
+source from the 2026-04-29 release, a week before TAOM's 2026-05-07 ports. The drop folder no longer exists, so this is a fit,
 not a byte comparison. `FiefManagement` may instead come from LOTRAOM: TAOM's port commit `1cad3a7e0` calls it
 "port LOTRAOM remote-fief manage screen". Review:
 [`docs/reviews/adopt-yotthani-2026-10-08.md`](../reviews/adopt-yotthani-2026-10-08.md).

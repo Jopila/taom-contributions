@@ -360,6 +360,50 @@ deliveries from 2.78 avg bound villages/town), which pinned towns at ~0 gold —
 constants as knobs, shipping base 25000. See
 [docs/features/settlement-economy.md](../../features/settlement-economy.md).
 
+## Clan wage payment and garrison recruitment
+
+TAOM-verified on the v1.5.5 source [code reading, never run]. Found while reading yotthani's
+campaign measurements (below); the rules are vanilla's.
+
+**Wage payment** (`DefaultClanFinanceModel`). The thresholds are 10000 (`PartyGoldIncomeThreshold`),
+8000 for a garrison and 4000 for other clan parties (`:86-90`), and `PartyGoldLowerThreshold` is 5000
+(`:106`). A war party or caravan not led by the clan leader hands in a tenth of its gold above 10000 (the loop at
+`:648-680`, garrisons are not in it; `:691-699`);
+the leader's own party uses 2000 (`:811-824`). In `AddPartyExpense`, when the clan's gold after the
+day's change is under the threshold and withdrawals apply (AI clans only, never the player's), the
+budget is `LeaderHero != null && PartyTradeGold < 500 ? Min(num, 250) : 0` (`:826-838`): a party
+with a leader and almost no gold of its own gets at most 250, any other party gets nothing. The wage
+paid is `Min(totalWage, budget)` (`:943-953`) and the refill of the party's gold is capped by the same
+budget (`:848-861`, the cap at `:857`). Payment is one `GiveGoldAction` (`ClanVariablesCampaignBehavior.cs:413-414`)
+and, for an AI clan in a kingdom, the daily clan tick then switches garrison auto-recruitment back on for
+each of its fortifications that has a garrison (`:435-439`, `:443-456`). `CalculateClanGoldChange(...,
+applyWithdrawals: false, ...)` only projects and writes nothing.
+
+**Garrison recruitment.** `DefaultSettlementGarrisonModel.cs:20-25` gives a daily cap of 1 plus the
+building effect `GarrisonAutoRecruitment`. The recruit loop cuts the wage room to
+`PaymentLimit - TotalWage - 5` (`MobileParty.cs:1660-1663`) and takes the cheapest volunteers first
+(`GarrisonRecruitmentCampaignBehavior.cs:169-184`); the room check reads `PartySizeLimit` (`:185`),
+and a food change at or under 0 stops it (`:225-227`).
+
+**TAOM.** `TaomPartyWageModel` overrides `GetTotalWage` (which `MobileParty.TotalWage` reads, `MobileParty.cs:1098`) and raises
+`MaxWagePaymentLimit` from vanilla's 10000 (`DefaultPartyWageModel.cs:21`) to 20000 (`TaomPartyWageModel.cs:37`). That limit is
+the default `PaymentLimit` (`MobileParty.cs:328`), the ceiling of each fief's garrison wage limit
+(`ClanVariablesCampaignBehavior.cs:472`) and the value `HasLimitedWage` treats as unlimited (`MobileParty.cs:1657`), so it feeds
+the wage room above and the wage desertion count (`DefaultPartyDesertionModel.cs:57-61`). `TaomClanFinanceModel` (`:84-90`)
+raises tariff income for the Umbar, Erebor, Dale and Khand cultural feats (`CulturalFeatsService.cs:455-467`). Neither changes
+the payment formulas themselves.
+
+**Yotthani's measured result (hedged).** In `docs/balance-sim/campaign.md`@2ff002be (yotthani's `yotthani/bannerlord`, lines
+291-297), against six CampaignProbe runs (unattended 150-day game campaigns on v1.5.5 with TAOM 2.0.34; run 1's module list,
+which includes VanillaTuning, is at `docs/superpowers/specs/2026-10-14-sim-campaign-design.md`@2ff002be line 277), AI lord
+parties at days 50, 100 and 150 held on average 119, 110 and 103 men in the free block, 130, 121 and 120 in the evil block,
+and 131, 127 and 123 in the neutral block. Yotthani's reading (spec line 277) is that the real parties did not shrink the way
+the simulator's `game` mode had them shrink (25 to 60 men by day 100 to 200); the measured means still fall by 8 to 16 men
+from day 50 to day 150, and the source gives no cause for that fall. An earlier reading from run 3, that the lords paid only
+about 0.56 to 0.87 of the party wage level (a regression estimate, spec line 325; `campaign.md` line 239), came before run 4's
+split of the clan finance, which books the lord wages due as equal to those paid (spec line 346) and puts the gap in the
+inputs, not the rules (`campaign.md` line 243).
+
 ## See also
 
 - [campaign-tick-time-and-party-ai.md](campaign-tick-time-and-party-ai.md) — the DailyTick heartbeat
