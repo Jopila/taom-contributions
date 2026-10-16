@@ -2011,3 +2011,32 @@ their old donors' weapons, because the enlistment generator has no `--verify` an
   record. Then dry-run every generator that derives from troops, the ones without `--verify` included
   (`generate_enlistment_rosters.py --culture <c>`), and read what it would change.
 - **Source:** [rca-keyforce-harad-port-2026-10-15.md](../rca-keyforce-harad-port-2026-10-15.md) findings 1 and 5.
+
+### A baseline run proves it read the baseline; check one value you know changed (03320a65, 2026-10-16)
+Porting KEYforce's javelins and maces, the "before" warning set came from `validate_moduledata.py --moduledata` on an
+export of the commit before his. The melee pass ignores that flag and reads the repo's troops, so the "before" was the
+new troops priced on the old Armory; the reported delta was wrong and hid two horsemen that flipped to over-armed.
+- **Why missed:** the #805 lesson above says to diff the warning set, and the diff was run; nothing checked that each
+  pass read the tree it was given. The scratch diff cut paths down to file names, which erased the only clue: the melee
+  rows alone carried absolute repo paths.
+- **Prevent:** before trusting a baseline, find one troop the change is known to alter and confirm its warning differs
+  between the two runs; when a tool takes a data-root flag, read where each pass loads its input. Until #812 lands,
+  run each tree's validator from its own checkout, or recompute the melee findings with the pass's functions on both
+  troop trees (the RCA's method).
+- **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) finding 2.
+
+### Read the decision record before calling data hand-authored, generated or stale (03320a65, 2026-10-16)
+The port's doc called the ten Aserai enlistment kits "hand-authored, not generated" from how they looked. Git says the
+generator wrote them on 2026-09-01 and Erkam rewrote them on 2026-10-10; two reviewers then proposed reseeding them,
+missing that Mike had kept them by decision D3 the day before.
+- **Why missed:** the builder skipped `git log` (`evidence-over-claims.md` C1); the reviewers read the issue that
+  cited the decision, not the RCA decision table that holds it.
+- **Prevent:** before writing who made a data block or whether it should be regenerated, run `git log -S'<id>' --
+  <file>` and grep `docs/reviews/rca-*.md` decision tables for the file; cite the decision in the doc and in the file.
+- **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) finding 3.
+
+### Check the first import before reading clothing as a sex signal (Erebor dwarf dresses, 2026-10-16)
+The 2026-03-05 Erebor import handed `sk_dwarf_dress_normal_*` out round-robin to nearly every NPC: the blacksmith, the barber, the headmen and the townsman wore dresses as much as the townswomen did. Clothing therefore looked like intent about sex when it was an import artefact, and male dwarves stayed in dresses for seven months.
+- **Why missed:** every reference resolved and `is_female` was consistent, so no gate had a reason to look at the body slot.
+- **Prevent:** before reading what an NPC wears as a signal about who it is, check how the first import assigned gear (`git log -S` on the item id). On 2026-10-16 the 24 male NPCs, the civilian sets of 29 troops and 3 male child templates moved to tunics, with no `is_female` change; `DwarfDressWearerTests` now gates it.
+- **Source:** `TAOM.Tests/Core/DwarfDressWearerTests.cs`.

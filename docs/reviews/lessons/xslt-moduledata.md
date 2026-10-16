@@ -457,3 +457,15 @@ Armory's own `action_sets.xml` defines the set. A module that loads after the Ar
   `bind_*_action_set.py` binders do this, with a `--check` gate for reinstalls).
 - **Source:** `docs/reviews/rca-orc-goblin-locomotion-2026-10-14.md` finding W1-4; `docs/features/orc-goblin-locomotion.md`
   "Design Challenge".
+
+### An artist's rows inside a TAOM tool's marker block belong to the tool; check who owns the region a merge lands in (03320a65, 2026-10-16)
+KEYforce added his javelin pieces inside `OneHandedPolearm_JavelinAlternative`, a template `generate_starter_kit.py`
+had created and wrapped whole in `TAOM-STARTER-KIT` markers. The three-way merge kept them, every gate passed, and the
+tool's next `--apply` would have rewritten the block to its own three rows (`--revert` deletes it), leaving the javelins
+throw-only while its `--verify` stayed green.
+- **Why missed:** a merge is checked for "his additions plus our edits present", which says nothing about which tool
+  rewrites that text later; a presence-only `--verify` cannot fail on a row it never wrote.
+- **Prevent:** after merging an artist's XSLT, list the TAOM marker blocks (`TAOM-*:START`) his hunks fall inside. Move
+  the markers so they fence only the tool's own rows (the tool then takes its in-template path and reports `noop`),
+  and gate the artist's rows with the tool's blocks set aside (`HaradWeaponsLiveEditTests`).
+- **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) finding 1.
