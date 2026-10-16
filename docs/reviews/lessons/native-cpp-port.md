@@ -75,6 +75,10 @@ The probe's summary said every address is proven inside a mapped section before 
   cost under the table's `[TAOM-verified]` tag. The implementer copied the figure from the issue body, which names
   yotthani, and left the name behind. A figure copied into a TAOM doc takes its source tag with it, in the same edit
   (`docs/reviews/rca-yotthani-review-2026-10-15.md` finding 5).
+- **Recurrence (2026-10-15, the fix of that finding):** the corrected clause added TAOM's own v1.5.5 address
+  (`pre_display` 0x6FCDB0) to a table whose legend pins every native offset to v1.5.3 (0x6FC5F0 there). Before a
+  figure or an address goes into a reference doc, read that doc's tag legend and name the build in the clause (same
+  RCA, second review S3).
 
 ### A native pin table fails the engine-bump gate on a build it does not list (2026-10-15)
 - **Why missed:** the v1.5.5 bump added a row to the clip-budget pin table and none to

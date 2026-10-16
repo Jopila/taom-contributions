@@ -1048,8 +1048,13 @@ yotthani's PerfProbe gave each timing probe its own closed generic class (`Slot<
 - **Source:** `docs/reviews/rca-yotthani-adoption-2026-10-08.md` finding 22.
 - **Recurrence (2026-10-15):** once the camera bracket became its own category, the hitch probe's install line still
   named `MissionScreen.UpdateCamera` when that category failed, and `cameraMs=0.00` read as zero camera time. The line
-  now names only the categories that applied, and `CameraNotInstalledLine` reports the gap
+  now leaves the camera target out when its category did not apply, and `CameraNotInstalledLine` reports the gap
   (`docs/reviews/rca-yotthani-review-2026-10-15.md` finding 2).
+- **Second instance (2026-10-15, the second review):** "applied" is not "patched" either. `PatchCategoryIndex` skips a
+  class whose attributes cannot be read (a `typeof` the engine no longer has), and a category left with no class
+  applies nothing and returns true, so the line still named the camera. Before an ON line trusts a category's
+  result, check whether the category can be empty (same RCA, second review S7; documented, since the skip writes its
+  own ERROR into the startup notice).
 
 ### A patch category fails as one unit: read what its caller turns off before you add a class (2026-10-15)
 - **Why missed:** the camera bracket went in as the last class of `Patch98_HitchProbe`, on the reasoning that Harmony
