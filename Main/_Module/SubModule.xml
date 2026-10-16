@@ -148,6 +148,13 @@
         <GameType value="EditorGame"/>
       </IncludedGameTypes>
     </XmlNode>
+    <!-- Custom Battle only: show Culture.aserai as "Harwan" in the faction list (custom_battle_cultures.xslt). -->
+    <XmlNode>
+      <XmlName id="SPCultures" path="custom_battle/custom_battle_cultures"/>
+      <IncludedGameTypes>
+        <GameType value="CustomGame"/>
+      </IncludedGameTypes>
+    </XmlNode>
 
     <!-- TAOM custom kingdoms -->
     <XmlNode>
@@ -895,6 +902,14 @@
       <IncludedGameTypes>
         <GameType value="Campaign"/>
         <GameType value="CampaignStoryMode"/>
+      </IncludedGameTypes>
+    </XmlNode>
+    <!-- Custom Battle only, after every NPCCharacters node: hide non-army Aserai/Shaghana characters (Jawwal,
+         Beni Zilal, militia, caravan guards, practice dummies...) so only the harad_* troops are offered. -->
+    <XmlNode>
+      <XmlName id="NPCCharacters" path="custom_battle/custom_battle_harad_troop_filter"/>
+      <IncludedGameTypes>
+        <GameType value="CustomGame"/>
       </IncludedGameTypes>
     </XmlNode>
     <XmlNode>

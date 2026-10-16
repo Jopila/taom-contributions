@@ -1858,7 +1858,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_light_a" />
@@ -1872,7 +1872,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_light_b" />
@@ -1886,7 +1886,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_light_a" />
@@ -1900,7 +1900,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_light_b" />
@@ -1966,7 +1966,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Item1"
                     id="Item.sm_hr_st_shield_large_light_a" />
@@ -1989,7 +1989,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Item1"
                     id="Item.sm_hr_st_shield_cav_light_b" />
@@ -2012,7 +2012,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Item1"
                     id="Item.sm_hr_st_shield_large_light_b" />
@@ -2035,7 +2035,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Item1"
                     id="Item.sm_hr_st_shield_large_light_a" />
@@ -2112,7 +2112,7 @@
                     id="Item.sm_hr_st_shield_large_light_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2138,7 +2138,7 @@
                     id="Item.sm_hr_st_shield_cav_light_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -2164,7 +2164,7 @@
                     id="Item.sm_hr_st_shield_large_light_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2190,7 +2190,7 @@
                     id="Item.sm_hr_st_shield_large_light_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -2263,6 +2263,9 @@
                     slot="Item1"
                     id="Item.sm_hr_st_shield_cav_light_a" />
                 <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
                 <equipment
@@ -2277,6 +2280,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_light_a" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -2286,6 +2292,9 @@
                     slot="Item1"
                     id="Item.sm_hr_st_shield_cav_light_b" />
                 <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
                 <equipment
@@ -2300,6 +2309,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_light_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -2308,6 +2320,9 @@
                 <equipment
                     slot="Item1"
                     id="Item.sm_hr_st_shield_cav_light_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2323,6 +2338,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_light_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -2331,6 +2349,9 @@
                 <equipment
                     slot="Item1"
                     id="Item.sm_hr_st_shield_cav_light_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -2346,6 +2367,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_light_a" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -2353,9 +2377,6 @@
             <equipment
                 slot="Horse"
                 id="Item.t2_khuzait_horse" />
-            <equipment
-                slot="HorseHarness"
-                id="Item.desert_cloth_harness" />
         </Equipments>
     </NPCCharacter>
 
@@ -2410,7 +2431,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2436,7 +2457,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -2462,7 +2483,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2488,7 +2509,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -2562,7 +2583,7 @@
                     id="Item.sm_hr_st_shield_large_med_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2588,7 +2609,7 @@
                     id="Item.sm_hr_st_shield_cav_med_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -2614,7 +2635,7 @@
                     id="Item.sm_hr_st_shield_large_med_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2640,7 +2661,7 @@
                     id="Item.sm_hr_st_shield_large_med_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -2730,6 +2751,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_med_a" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -2756,6 +2780,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_med_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -2782,6 +2809,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_med_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -2808,6 +2838,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_med_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_med_a" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -2815,9 +2848,6 @@
             <equipment
                 slot="Horse"
                 id="Item.t2_khuzait_horse" />
-            <equipment
-                slot="HorseHarness"
-                id="Item.desert_cloth_harness" />
         </Equipments>
     </NPCCharacter>
 
@@ -2875,7 +2905,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2904,7 +2934,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -2933,7 +2963,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -2962,7 +2992,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -3033,7 +3063,7 @@
                     id="Item.sm_hr_st_shield_large_heavy_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_heavy_a" />
@@ -3059,7 +3089,7 @@
                     id="Item.sm_hr_st_shield_cav_heavy_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_heavy_b" />
@@ -3085,7 +3115,7 @@
                     id="Item.sm_hr_st_shield_large_heavy_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_heavy_a" />
@@ -3111,7 +3141,7 @@
                     id="Item.sm_hr_st_shield_large_heavy_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_heavy_b" />
@@ -3198,6 +3228,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_heavy_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_heavy_a" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -3224,6 +3257,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_heavy_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_heavy_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -3250,6 +3286,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_heavy_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_heavy_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -3276,6 +3315,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_hr_st_grvs_heavy_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_hr_st_bard_cav_heavy_a" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -3283,9 +3325,6 @@
             <equipment
                 slot="Horse"
                 id="Item.t2_khuzait_horse" />
-            <equipment
-                slot="HorseHarness"
-                id="Item.desert_cloth_harness" />
         </Equipments>
     </NPCCharacter>
 
@@ -3340,7 +3379,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_heavy_a" />
@@ -3369,7 +3408,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_heavy_b" />
@@ -3398,7 +3437,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_heavy_a" />
@@ -3427,7 +3466,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_heavy_b" />
@@ -3496,7 +3535,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_light_a" />
@@ -3510,7 +3549,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_light_b" />
@@ -3524,7 +3563,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_light_a" />
@@ -3538,7 +3577,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_light_b" />
@@ -3604,7 +3643,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Item1"
                     id="Item.sm_sg_st_shield_large_light_a" />
@@ -3627,7 +3666,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Item1"
                     id="Item.sm_sg_st_shield_cav_light_b" />
@@ -3650,7 +3689,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Item1"
                     id="Item.sm_sg_st_shield_large_light_b" />
@@ -3673,7 +3712,7 @@
             <EquipmentRoster>
                 <equipment
                     slot="Item0"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_light_a" />
                 <equipment
                     slot="Item1"
                     id="Item.sm_sg_st_shield_large_light_a" />
@@ -3750,7 +3789,10 @@
                     id="Item.sm_sg_st_shield_large_light_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -3776,7 +3818,10 @@
                     id="Item.sm_sg_st_shield_cav_light_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -3802,7 +3847,10 @@
                     id="Item.sm_sg_st_shield_large_light_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -3828,7 +3876,10 @@
                     id="Item.sm_sg_st_shield_large_light_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_light_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -3901,6 +3952,9 @@
                     slot="Item1"
                     id="Item.sm_sg_st_shield_cav_light_a" />
                 <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
                 <equipment
@@ -3915,6 +3969,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_light_a" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -3924,6 +3981,9 @@
                     slot="Item1"
                     id="Item.sm_sg_st_shield_cav_light_b" />
                 <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
+                <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
                 <equipment
@@ -3938,6 +3998,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_light_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -3946,6 +4009,9 @@
                 <equipment
                     slot="Item1"
                     id="Item.sm_sg_st_shield_cav_light_b" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -3961,6 +4027,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_light_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -3969,6 +4038,9 @@
                 <equipment
                     slot="Item1"
                     id="Item.sm_sg_st_shield_cav_light_a" />
+                <equipment
+                    slot="Item2"
+                    id="Item.hr_st_sword_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -3984,6 +4056,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_light_a" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -3991,9 +4066,6 @@
             <equipment
                 slot="Horse"
                 id="Item.t2_khuzait_horse" />
-            <equipment
-                slot="HorseHarness"
-                id="Item.desert_cloth_harness" />
         </Equipments>
     </NPCCharacter>
 
@@ -4048,7 +4120,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -4074,7 +4146,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -4100,7 +4172,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -4126,7 +4198,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -4200,7 +4272,10 @@
                     id="Item.sm_sg_st_shield_large_med_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -4226,7 +4301,10 @@
                     id="Item.sm_sg_st_shield_cav_med_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_b" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -4252,7 +4330,10 @@
                     id="Item.sm_sg_st_shield_large_med_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -4278,7 +4359,10 @@
                     id="Item.sm_sg_st_shield_large_med_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_b" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -4368,6 +4452,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_med_a" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -4394,6 +4481,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_med_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -4420,6 +4510,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_med_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -4446,6 +4539,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_med_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_med_a" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -4453,9 +4549,6 @@
             <equipment
                 slot="Horse"
                 id="Item.t2_khuzait_horse" />
-            <equipment
-                slot="HorseHarness"
-                id="Item.desert_cloth_harness" />
         </Equipments>
     </NPCCharacter>
 
@@ -4513,7 +4606,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -4542,7 +4635,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -4571,7 +4664,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_a" />
@@ -4600,7 +4693,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_hr_st_helmet_med_b" />
@@ -4671,7 +4764,10 @@
                     id="Item.sm_sg_st_shield_large_heavy_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_sg_st_helmet_heavy_a" />
@@ -4697,7 +4793,10 @@
                     id="Item.sm_sg_st_shield_cav_heavy_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_b" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_sg_st_helmet_heavy_b" />
@@ -4723,7 +4822,10 @@
                     id="Item.sm_sg_st_shield_large_heavy_b" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_a" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_sg_st_helmet_heavy_a" />
@@ -4749,7 +4851,10 @@
                     id="Item.sm_sg_st_shield_large_heavy_a" />
                 <equipment
                     slot="Item2"
-                    id="Item.aserai_sword_5_t4" />
+                    id="Item.hr_st_mace_med_b" />
+                <equipment
+                    slot="Item3"
+                    id="Item.sg_st_javelin_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_sg_st_helmet_heavy_b" />
@@ -4836,6 +4941,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_heavy_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_heavy_a" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -4862,6 +4970,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_heavy_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_heavy_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -4888,6 +4999,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_heavy_a" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_heavy_b" />
             </EquipmentRoster>
             <EquipmentRoster>
                 <equipment
@@ -4914,6 +5028,9 @@
                 <equipment
                     slot="Leg"
                     id="Item.sk_sg_st_grvs_heavy_b" />
+                <equipment
+                    slot="HorseHarness"
+                    id="Item.sk_sg_st_bard_cav_heavy_a" />
             </EquipmentRoster>
             <EquipmentSet
                 id="aserai_troop_civilian_template_t3"
@@ -4921,9 +5038,6 @@
             <equipment
                 slot="Horse"
                 id="Item.t2_khuzait_horse" />
-            <equipment
-                slot="HorseHarness"
-                id="Item.desert_cloth_harness" />
         </Equipments>
     </NPCCharacter>
 
@@ -4978,7 +5092,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_sg_st_helmet_heavy_a" />
@@ -5007,7 +5121,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_sg_st_helmet_heavy_b" />
@@ -5036,7 +5150,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_a" />
                 <equipment
                     slot="Head"
                     id="Item.sk_sg_st_helmet_heavy_a" />
@@ -5065,7 +5179,7 @@
                     id="Item.hr_st_arrows_a" />
                 <equipment
                     slot="Item3"
-                    id="Item.aserai_sword_3_t3" />
+                    id="Item.hr_st_mace_med_b" />
                 <equipment
                     slot="Head"
                     id="Item.sk_sg_st_helmet_heavy_b" />

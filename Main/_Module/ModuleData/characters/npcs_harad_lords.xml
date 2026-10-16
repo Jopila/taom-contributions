@@ -21,8 +21,9 @@
 		</Traits>
 		<Equipments>
 			<EquipmentRoster>
-				<equipment slot="Item0" id="Item.aserai_sword_5_t4" />
-				<equipment slot="Item1" id="Item.desert_round_shield" />
+				<equipment slot="Item0" id="Item.hr_st_spear_heavy_a" />
+				<equipment slot="Item1" id="Item.sm_hr_st_shield_large_heavy_a" />
+				<equipment slot="Item2" id="Item.hr_st_mace_med_a" />
 				<equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_c" />
 				<equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_heavy_a" />
 				<equipment slot="Gloves" id="Item.sk_hr_st_bracer_heavy_a" />
@@ -50,15 +51,16 @@
 		</Traits>
 		<Equipments>
 			<EquipmentRoster>
-				<equipment slot="Item0" id="Item.aserai_sword_5_t4" />
-				<equipment slot="Item1" id="Item.eastern_spear_4_t4" />
+				<equipment slot="Item0" id="Item.hr_st_spear_heavy_a" />
+				<equipment slot="Item1" id="Item.sm_hr_st_shield_cav_heavy_a" />
+				<equipment slot="Item2" id="Item.hr_st_sword_a" />
 				<equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_c" />
 				<equipment slot="Body" id="Item.sk_hr_st_chest_cav_heavy_a" />
 				<equipment slot="Gloves" id="Item.sk_hr_st_bracer_heavy_a" />
 				<equipment slot="Leg" id="Item.sk_hr_st_grvs_heavy_a" />
 				<equipment slot="Cape" id="Item.sk_hr_st_pauld_cav_elite_a" />
 				<equipment slot="Horse" id="Item.t3_aserai_horse" />
-				<equipment slot="HorseHarness" id="Item.desert_cloth_harness" />
+				<equipment slot="HorseHarness" id="Item.sk_hr_st_bard_cav_heavy_a" />
 			</EquipmentRoster>
 		</Equipments>
 	</NPCCharacter>
@@ -81,10 +83,10 @@
 		</Traits>
 		<Equipments>
 			<EquipmentRoster>
-				<equipment slot="Item0" id="Item.ladder_harad_bow_t5" />
-				<equipment slot="Item1" id="Item.piercing_arrows" />
-				<equipment slot="Item2" id="Item.piercing_arrows" />
-				<equipment slot="Item3" id="Item.aserai_sword_5_t4" />
+				<equipment slot="Item0" id="Item.hr_st_longbow_heavy" />
+				<equipment slot="Item1" id="Item.hr_st_arrows_a" />
+				<equipment slot="Item2" id="Item.hr_st_arrows_a" />
+				<equipment slot="Item3" id="Item.hr_st_mace_med_a" />
 				<equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_c" />
 				<equipment slot="Body" id="Item.sk_hr_st_chest_arc_heavy_a" />
 				<equipment slot="Gloves" id="Item.sk_hr_st_bracer_heavy_a" />
@@ -114,8 +116,10 @@
 		</Traits>
 		<Equipments>
 			<EquipmentRoster>
-				<equipment slot="Item0" id="Item.aserai_sword_5_t4" />
-				<equipment slot="Item1" id="Item.desert_round_shield" />
+				<equipment slot="Item0" id="Item.hr_st_spear_heavy_a" />
+				<equipment slot="Item1" id="Item.sm_sg_st_shield_large_heavy_a" />
+				<equipment slot="Item2" id="Item.hr_st_mace_med_a" />
+				<equipment slot="Item3" id="Item.sg_st_javelin_med_a" />
 				<equipment slot="Head" id="Item.sk_sg_st_helmet_heavy_c" />
 				<equipment slot="Body" id="Item.sk_sg_st_chest_inf_chest_heavy_a" />
 				<equipment slot="Gloves" id="Item.sk_sg_st_bracer_heavy_a" />
@@ -143,15 +147,16 @@
 		</Traits>
 		<Equipments>
 			<EquipmentRoster>
-				<equipment slot="Item0" id="Item.aserai_sword_5_t4" />
-				<equipment slot="Item1" id="Item.eastern_spear_4_t4" />
+				<equipment slot="Item0" id="Item.hr_st_spear_heavy_a" />
+				<equipment slot="Item1" id="Item.sm_sg_st_shield_cav_heavy_a" />
+				<equipment slot="Item2" id="Item.hr_st_sword_a" />
 				<equipment slot="Head" id="Item.sk_sg_st_helmet_heavy_c" />
 				<equipment slot="Body" id="Item.sk_sg_st_chest_cav_heavy_a" />
 				<equipment slot="Gloves" id="Item.sk_sg_st_bracer_heavy_a" />
 				<equipment slot="Leg" id="Item.sk_sg_st_grvs_heavy_a" />
 				<equipment slot="Cape" id="Item.sk_sg_st_pauld_cav_elite_a" />
 				<equipment slot="Horse" id="Item.t3_aserai_horse" />
-				<equipment slot="HorseHarness" id="Item.desert_cloth_harness" />
+				<equipment slot="HorseHarness" id="Item.sk_sg_st_bard_cav_heavy_a" />
 			</EquipmentRoster>
 		</Equipments>
 	</NPCCharacter>
@@ -174,10 +179,10 @@
 		</Traits>
 		<Equipments>
 			<EquipmentRoster>
-				<equipment slot="Item0" id="Item.ladder_harad_bow_t5" />
-				<equipment slot="Item1" id="Item.piercing_arrows" />
-				<equipment slot="Item2" id="Item.piercing_arrows" />
-				<equipment slot="Item3" id="Item.aserai_sword_5_t4" />
+				<equipment slot="Item0" id="Item.hr_st_longbow_heavy" />
+				<equipment slot="Item1" id="Item.hr_st_arrows_a" />
+				<equipment slot="Item2" id="Item.hr_st_arrows_a" />
+				<equipment slot="Item3" id="Item.hr_st_mace_med_a" />
 				<equipment slot="Head" id="Item.sk_sg_st_helmet_heavy_c" />
 				<equipment slot="Body" id="Item.sk_sg_st_chest_arc_heavy_a" />
 				<equipment slot="Gloves" id="Item.sk_sg_st_bracer_heavy_a" />
