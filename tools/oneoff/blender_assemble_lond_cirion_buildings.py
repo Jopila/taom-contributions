@@ -695,4 +695,6 @@ def main():
     log(f"[done] {summary['status']}")
 
 
-main()
+# guarded so blender_assemble_gondor_buildings.py can import the part-family helpers
+if __name__ == "__main__":
+    main()

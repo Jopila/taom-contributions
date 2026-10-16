@@ -149,6 +149,14 @@ preview colour** — and if a render looks wrong, check the material fallback be
   would need per-corner rotation plus an origin anchor — 4.3× the tris for a blockout.
 * The parts catalog covers 15 of the 24 mesh families. `gondor_ground_straight_a` (floors) had to be
   added to the assembler directly; re-running the catalog pass with the other nine would close it.
+  The full Gondor catalog (2026-10-15) is [gondor/meshes.md](gondor/meshes.md).
+* **The barracks' buttresses are probably inside its walls** (inferred 2026-10-15, not probed here).
+  `build_barracks` places them with `wall()`, which turns a part by `detail_side()`; the buttress
+  lies wholly on one side of its mounting plane, and the same call put every buttress of the Gondor
+  buildings inside its wall ([gondor-buildings.md](gondor-buildings.md) "Deliberate choices").
+* The "identity/metres" note under "Deliberate deviations" describes 29 objects of the shipped
+  `buildings/` files, not the kit parts, which store metre-valued vertices under a node rotation
+  X -90 and scale 100 ([gondor/design-patterns.md](gondor/design-patterns.md) "The frame rule").
 
 ---
 

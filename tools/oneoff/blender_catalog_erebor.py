@@ -13,15 +13,24 @@ Geometry is measured in WORLD space (node transform applied), because the
 Bannerlord importer bakes the node transform (lond-cirion-buildings.md,
 "The export's non-identity node transform is not a bug").
 
-Output: E:\\LOTRAOMAssets\\_export\\erebor\\catalog\\
-    erebor_catalog.json
+Kits (tools/oneoff/kitbash_kits.py): --kit erebor (default) or --kit gondor. Erebor
+pieces are single objects. A Gondor piece is a part family (objects sharing a
+prefix, one sub-object per surface): its non-decal sub-objects are duplicated and
+joined into one temporary object that goes through the same measurement, and the
+entry gains subs, structural, decals, bare_lod and warnings fields.
+
+Output: E:\\LOTRAOMAssets\\_export\\<kit>\\catalog\\
+    <kit>_catalog.json
     sheets\\<file>_p<n>.png      numbered contact sheets (3/4 view)
     views\\<piece>.png           front(-Y) / back(+Y) / side(+X) / top, 1 m grid,
                                  red dot = pivot
-    _report\\DONE.txt + log.txt  (MS-Store launcher detaches; log(), not print)
+    _report\\DONE.txt + log.txt  (MS-Store launcher detaches; log(), not print). A --folder
+                                 or --only run writes <catalog stem>_DONE.txt and
+                                 <catalog stem>_log.txt instead (kk.report_prefix)
 
     "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\blender-launcher.exe" -b ^
-        -P tools/oneoff/blender_catalog_erebor.py [-- --only <substring>] [--no-render]
+        -P tools/oneoff/blender_catalog_erebor.py [-- --kit erebor|gondor] [--folder <name>]
+        [--only <substring>] [--no-render]
 """
 
 import colorsys
@@ -29,32 +38,33 @@ import hashlib
 import json
 import math
 import os
-import re
 import sys
 import time
 import traceback
-from collections import Counter, defaultdict, deque
+from collections import Counter, deque
 
 import bpy
 from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 
-SRC = r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TAOM_Map\AssetSources\Scenes\erebor"
-FOLDERS = ["meshes", "walls", "statues"]
-OUT = r"E:\LOTRAOMAssets\_export\erebor\catalog"
-PAGE = 36  # pieces per contact sheet (6x6)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import kitbash_kits as kk  # noqa: E402
 
-LOD_RE = re.compile(r"^(?P<base>.+?)[._]lod(?P<n>\d*)$", re.IGNORECASE)
+SRC = None  # set from KITS in main()
+OUT = None
+CFG = None
+PAGE = 36  # pieces per contact sheet (6x6)
 
 LOG_LINES = []
 REPORT_DIR = None
+REPORT_PREFIX = ""  # kk.report_prefix: per-folder and --only runs get their own DONE and log
 
 
 def log(msg):
     LOG_LINES.append(str(msg))
     print(msg)
     if REPORT_DIR:
-        with open(os.path.join(REPORT_DIR, "log.txt"), "w", encoding="utf-8") as f:
+        with open(os.path.join(REPORT_DIR, REPORT_PREFIX + "log.txt"), "w", encoding="utf-8") as f:
             f.write("\n".join(LOG_LINES))
 
 
@@ -64,18 +74,6 @@ def r3(v):
 
 def vec3(v):
     return [r3(x) for x in v]
-
-
-# --------------------------------------------------------------- naming
-
-def split_name(name):
-    """-> (kind, base, lod) with kind in base|lod|bo."""
-    if name.lower().startswith("bo_"):
-        return "bo", name[3:], None
-    m = LOD_RE.match(name)
-    if m:
-        return "lod", m.group("base"), m.group("n")  # "" = bare .lod
-    return "base", name, None
 
 
 # --------------------------------------------------------------- geometry
@@ -458,25 +456,116 @@ def import_fbx(path):
     bpy.context.view_layer.update()
 
 
+def lod_ladder(lod_objs, mn, mx):
+    """LOD ladder entries for [(n, object)], measured against the base bbox mn..mx."""
+    lods = []
+    for n, lo in sorted(lod_objs, key=lambda t: int(t[0]) if t[0] else -1):
+        lo.data.calc_loop_triangles()
+        lmn2, lmx2 = bbox([lo.matrix_world @ v.co for v in lo.data.vertices]) \
+            if lo.data.vertices else (mn, mx)
+        lods.append({"name": lo.name, "n": n, "tris": len(lo.data.loop_triangles),
+                     "size": vec3(lmx2 - lmn2),
+                     "bbox_delta": r3(max((lmn2 - mn).length, (lmx2 - mx).length))})
+    return lods
+
+
+def measure_piece(base, lod_objs, bo_obj, folder, family, name=None):
+    """Measure one object (with its LODs and bo_ body). -> (piece, world mesh) or None when
+    the object has no vertices. `name` overrides the piece name (part families)."""
+    verts, polys, tris, mats = world_geometry(base)
+    if not verts:
+        return None
+    mn, mx = bbox(verts)
+    size = mx - mn
+    mw = base.matrix_world
+    loc, rot, scl = mw.decompose()
+    identity = (loc.length < 1e-4 and rot.angle < 1e-4
+                and all(abs(s - 1.0) < 1e-4 for s in scl))
+    lmn, lmx = bbox([v.co for v in base.data.vertices])
+    bvh = BVHTree.FromPolygons(verts, polys)
+    buckets, slopes, split, area = normal_stats(verts, tris)
+    top = down_rays(bvh, mn, mx)
+    holes = apertures(bvh, mn, mx, "Y") + apertures(bvh, mn, mx, "X")
+    lods = lod_ladder(lod_objs, mn, mx)
+    bo = None
+    if bo_obj is not None:
+        bo_v, bo_p, bo_t, bo_m = world_geometry(bo_obj)
+        bmn, bmx = bbox(bo_v) if bo_v else (mn, mx)
+        bo = {"name": bo_obj.name, "tris": len(bo_t), "min": vec3(bmn), "max": vec3(bmx),
+              "materials": bo_m}
+        if bo_v and holes:
+            bo_bvh = BVHTree.FromPolygons(bo_v, bo_p)
+            bo["apertures"] = apertures(bo_bvh, mn, mx, "Y") + apertures(bo_bvh, mn, mx, "X")
+    piece = {
+        "name": name or base.name, "file": family, "folder": folder,
+        "node": {"identity": identity, "loc": vec3(loc),
+                 "rot_deg": vec3([math.degrees(a) for a in rot.to_euler("XYZ")]),
+                 "scale": vec3(scl)},
+        "min": vec3(mn), "max": vec3(mx), "size": vec3(size),
+        "local_min": vec3(lmn), "local_max": vec3(lmx),
+        "pivot": pivot_class(mn, mx, loc),
+        "tris": len(tris), "materials": mats,
+        "normal_area": buckets, "surface_area": area, "slopes": slopes,
+        "tri_split": split, "top": top, "apertures": holes,
+        "grid_fit": grid_fit(size),
+        "lods": lods, "bo": bo,
+    }
+    me = bpy.data.meshes.new(f"w_{name or base.name}")
+    me.from_pydata(verts, [], polys)  # from_pydata flattens Vectors and tuples itself
+    me.update()
+    for m in base.data.materials:
+        me.materials.append(m)
+    for i, p in enumerate(me.polygons):
+        p.material_index = base.data.polygons[i].material_index
+    piece["_mn"], piece["_mx"] = mn, mx
+    return piece, me
+
+
+def sub_info(sub, base, lod_objs):
+    """Per-sub-object record of a part family, in world space."""
+    verts, _polys, tris, _mats = world_geometry(base)
+    if not verts:
+        return None
+    mn, mx = bbox(verts)
+    return {"sub": sub, "name": base.name, "tris": len(tris),
+            "bbox": {"min": vec3(mn), "max": vec3(mx)},
+            "lods": lod_ladder(lod_objs, mn, mx)}
+
+
+def join_copies(prefix, base_objs, active):
+    """Duplicate the base objects (world transforms kept) and join the copies into one
+    temporary object. `active` is the object whose node transform the result takes."""
+    scene = bpy.context.scene
+    copies = []
+    for o in base_objs:
+        c = o.copy()
+        c.data = o.data.copy()
+        mw = o.matrix_world.copy()
+        scene.collection.objects.link(c)
+        c.parent = None
+        c.matrix_world = mw
+        copies.append(c)
+    act = copies[base_objs.index(active)]
+    if len(copies) > 1:
+        bpy.ops.object.select_all(action="DESELECT")
+        for c in copies:
+            c.select_set(True)
+        bpy.context.view_layer.objects.active = act
+        bpy.ops.object.join()
+    act.name = f"_tmp_{prefix}"
+    bpy.context.view_layer.update()
+    return act
+
+
 def measure_file(folder, fname, args, catalog, sheet_meta):
     path = os.path.join(SRC, folder, fname)
     family = os.path.splitext(fname)[0]
+    group_by = CFG["group_by"]
     import_fbx(path)
     objs = [o for o in bpy.context.scene.objects if o.type == "MESH"]
     non_mesh = [f"{o.type}:{o.name}" for o in bpy.context.scene.objects if o.type != "MESH"]
-    groups = defaultdict(lambda: {"base": None, "lods": [], "bo": None})
-    lower_map = {}
-    for o in objs:
-        kind, base, n = split_name(o.name)
-        key = base.lower()
-        lower_map.setdefault(key, base)
-        g = groups[key]
-        if kind == "base":
-            g["base"] = o
-        elif kind == "lod":
-            g["lods"].append((n, o))
-        else:
-            g["bo"] = o
+    by_name = {o.name: o for o in objs}
+    groups = kk.group_parts([o.name for o in objs], group_by)
     for o_mat in bpy.data.materials:
         o_mat.diffuse_color = mat_color(o_mat.name)
     dot_me = bpy.data.meshes.get("_dot")
@@ -493,74 +582,64 @@ def measure_file(folder, fname, args, catalog, sheet_meta):
     pieces = []
     world_meshes = {}
     orphan_bo = []
+    file_warnings = []
     for key, g in sorted(groups.items()):
-        base = g["base"]
-        if base is None:
-            if g["bo"] is not None and not g["lods"]:
-                orphan_bo.append(g["bo"].name)
+        for w in g["warnings"]:
+            log(f"[warn] {family}: {w}")
+            file_warnings.append(w)
+        bo_obj = by_name[g["bo"]] if g["bo"] else None
+        if group_by == "object":
+            sub = g["subs"][""]
+            if sub["base"] is None:
+                orphan_bo.append(g["bo"])
                 continue
-            if g["lods"]:
-                # bare .lod only, or LODs with no base: promote the first LOD
-                g["lods"].sort(key=lambda t: t[0] or "0")
-                n0, base = g["lods"].pop(0)
-                log(f"[warn] {family}: {key} has no base object; using {base.name}")
-        if args.get("only") and args["only"].lower() not in base.name.lower():
+            base = by_name[sub["base"]]
+            if args.get("only") and args["only"].lower() not in base.name.lower():
+                continue
+            lod_objs = [(n, by_name[nm]) for n, nm in sub["lod_pairs"]]
+            res = measure_piece(base, lod_objs, bo_obj, folder, family)
+            if res is None:
+                continue
+            piece, me = res
+            pieces.append(piece)
+            world_meshes[base.name] = me
             continue
-        verts, polys, tris, mats = world_geometry(base)
-        if not verts:
+        # part family: duplicate the non-decal base sub-objects, join them, measure the join
+        if not g["subs"]:
+            if g["bo"]:
+                orphan_bo.append(g["bo"])
             continue
-        mn, mx = bbox(verts)
-        size = mx - mn
-        mw = base.matrix_world
-        loc, rot, scl = mw.decompose()
-        identity = (loc.length < 1e-4 and rot.angle < 1e-4
-                    and all(abs(s - 1.0) < 1e-4 for s in scl))
-        lmn, lmx = bbox([v.co for v in base.data.vertices])
-        bvh = BVHTree.FromPolygons(verts, polys)
-        buckets, slopes, split, area = normal_stats(verts, tris)
-        top = down_rays(bvh, mn, mx)
-        holes = apertures(bvh, mn, mx, "Y") + apertures(bvh, mn, mx, "X")
-        lods = []
-        for n, lo in sorted(g["lods"], key=lambda t: int(t[0]) if t[0] else -1):
-            lo.data.calc_loop_triangles()
-            lmn2, lmx2 = bbox([lo.matrix_world @ v.co for v in lo.data.vertices]) \
-                if lo.data.vertices else (mn, mx)
-            lods.append({"name": lo.name, "n": n, "tris": len(lo.data.loop_triangles),
-                         "size": vec3(lmx2 - lmn2),
-                         "bbox_delta": r3(max((lmn2 - mn).length, (lmx2 - mx).length))})
-        bo = None
-        if g["bo"] is not None:
-            bo_v, bo_p, bo_t, bo_m = world_geometry(g["bo"])
-            bmn, bmx = bbox(bo_v) if bo_v else (mn, mx)
-            bo = {"name": g["bo"].name, "tris": len(bo_t), "min": vec3(bmn), "max": vec3(bmx),
-                  "materials": bo_m}
-            if bo_v and holes:
-                bo_bvh = BVHTree.FromPolygons(bo_v, bo_p)
-                bo["apertures"] = apertures(bo_bvh, mn, mx, "Y") + apertures(bo_bvh, mn, mx, "X")
-        piece = {
-            "name": base.name, "file": family, "folder": folder,
-            "node": {"identity": identity, "loc": vec3(loc),
-                     "rot_deg": vec3([math.degrees(a) for a in rot.to_euler("XYZ")]),
-                     "scale": vec3(scl)},
-            "min": vec3(mn), "max": vec3(mx), "size": vec3(size),
-            "local_min": vec3(lmn), "local_max": vec3(lmx),
-            "pivot": pivot_class(mn, mx, loc),
-            "tris": len(tris), "materials": mats,
-            "normal_area": buckets, "surface_area": area, "slopes": slopes,
-            "tri_split": split, "top": top, "apertures": holes,
-            "grid_fit": grid_fit(size),
-            "lods": lods, "bo": bo,
-        }
+        if args.get("only") and args["only"].lower() not in key:
+            continue
+        sub_list = [(sn, s) for sn, s in sorted(g["subs"].items()) if s["base"]]
+        infos = []
+        for sn, s in sub_list:
+            info = sub_info(sn, by_name[s["base"]],
+                            [(n, by_name[nm]) for n, nm in s["lod_pairs"]])
+            if info is not None:
+                infos.append(info)
+        if not infos:
+            continue
+        structural = kk.pick_structural(infos)
+        base_objs = [by_name[i["name"]] for i in infos]
+        prefix = by_name[structural["name"]].name.split(".")[0]
+        tmp = join_copies(prefix, base_objs, by_name[structural["name"]])
+        res = measure_piece(tmp, [], bo_obj, folder, family, name=prefix)
+        tmp_data = tmp.data
+        bpy.data.objects.remove(tmp, do_unlink=True)
+        if tmp_data.users == 0:
+            bpy.data.meshes.remove(tmp_data)
+        if res is None:
+            continue
+        piece, me = res
+        piece["lods"] = structural["lods"]
+        piece["subs"] = infos
+        piece["structural"] = {"name": structural["name"], "bbox": structural["bbox"]}
+        piece["decals"] = g["decals"]
+        piece["bare_lod"] = g["bare_lod"]
+        piece["warnings"] = g["warnings"]
         pieces.append(piece)
-        me = bpy.data.meshes.new(f"w_{base.name}")
-        me.from_pydata([tuple(v) for v in verts], [], [list(p) for p in polys])
-        me.update()
-        for m in base.data.materials:
-            me.materials.append(m)
-        for i, p in enumerate(me.polygons):
-            p.material_index = base.data.polygons[i].material_index
-        world_meshes[base.name] = me
-        piece["_mn"], piece["_mx"] = mn, mx
+        world_meshes[prefix] = me
 
     for o in objs:
         o.hide_render = True
@@ -586,36 +665,60 @@ def measure_file(folder, fname, args, catalog, sheet_meta):
         catalog.append(p)
     log(f"[catalog] {family}: {len(pieces)} pieces, {len(objs)} mesh objects, "
         f"orphan bo {orphan_bo}, non-mesh {non_mesh}")
-    return {"file": family, "folder": folder, "mesh_objects": len(objs),
-            "pieces": len(pieces), "orphan_bo": orphan_bo, "non_mesh": non_mesh}
+    entry = {"file": family, "folder": folder, "mesh_objects": len(objs),
+             "pieces": len(pieces), "orphan_bo": orphan_bo, "non_mesh": non_mesh}
+    if group_by == "prefix":
+        entry["warnings"] = file_warnings
+    return entry
+
+
+def parse_args(argv):
+    args = {"only": None, "no_render": "--no-render" in argv, "kit": "erebor", "folder": None}
+    for flag in ("only", "kit", "folder"):
+        if f"--{flag}" in argv:
+            args[flag] = argv[argv.index(f"--{flag}") + 1]
+    return args
 
 
 def main():
-    global REPORT_DIR
+    global REPORT_DIR, REPORT_PREFIX, SRC, OUT, CFG
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    args = {"only": None, "no_render": "--no-render" in argv}
-    if "--only" in argv:
-        args["only"] = argv[argv.index("--only") + 1]
+    args = parse_args(argv)
+    args["kit"] = args["kit"].lower()
+    CFG = kk.get_kit(args["kit"])
+    SRC, OUT = CFG["src"], CFG["catalog_dir"]
     os.makedirs(OUT, exist_ok=True)
     REPORT_DIR = os.path.join(OUT, "_report")
     os.makedirs(REPORT_DIR, exist_ok=True)
-    done = os.path.join(REPORT_DIR, "DONE.txt")
-    if os.path.exists(done):
+    REPORT_PREFIX = kk.report_prefix(CFG, args["kit"], args["folder"], args["only"])
+    done = os.path.join(REPORT_DIR, REPORT_PREFIX + "DONE.txt")
+    if os.path.exists(done):  # before any check, so a failed start never leaves an old "ok"
         os.remove(done)
+    folders = CFG["folders"]
+    if args["folder"]:
+        folders = [f for f in folders if f.lower() == args["folder"].lower()]
+        if not folders:
+            log(f"[fail] --folder {args['folder']!r} is not one of {CFG['folders']}")
+            with open(done, "w", encoding="utf-8") as f:
+                json.dump({"status": "failed", "pieces": 0, "seconds": 0}, f)
+            return
     t0 = time.time()
     catalog, files, sheets = [], [], []
     status = "ok"
-    for folder in FOLDERS:
+    for folder in folders:
         d = os.path.join(SRC, folder)
         for fname in sorted(os.listdir(d)):
             if not fname.lower().endswith(".fbx"):
+                continue
+            if kk.is_excluded(CFG, folder, fname):
+                log(f"[skip] {folder}\\{fname}: excluded from the kit")
                 continue
             try:
                 files.append(measure_file(folder, fname, args, catalog, sheets))
             except Exception:
                 log(traceback.format_exc())
                 status = "partial"
-    name = "erebor_catalog.json" if not args["only"] else f"erebor_catalog_only_{args['only']}.json"
+    name = kk.catalog_name(CFG, args["kit"], args["folder"], args["only"])
     with open(os.path.join(OUT, name), "w", encoding="utf-8") as f:
         json.dump({"source": SRC, "files": files, "sheets": sheets, "pieces": catalog}, f, indent=1)
     with open(done, "w", encoding="utf-8") as f:

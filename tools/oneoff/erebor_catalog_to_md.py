@@ -3,25 +3,18 @@ Render the measured Erebor catalog (blender_catalog_erebor.py output) as the
 per-family markdown tables used in docs/kitbash/erebor/meshes.md. Prints to
 stdout; paste the tables over the old ones when the kit is re-measured.
 
-    python tools/oneoff/erebor_catalog_to_md.py [--json E:\\LOTRAOMAssets\\_export\\erebor\\catalog\\erebor_catalog.json]
+    python tools/oneoff/erebor_catalog_to_md.py [--kit erebor|gondor] [--json <catalog json>]
+
+--kit picks the family table and the default JSON from tools/oneoff/kitbash_kits.py. A part
+family catalog (Gondor) gets one more column: the sub-object count and each sub's LOD ladder.
 """
 
 import argparse
 import json
+import os
 import re
 
-FAMILIES = [
-    ("Ground tiles and floor trim", r"^SM_DW_Ground_"),
-    ("Pillars", r"^SM_DW_Pillar_"),
-    ("Platforms (terrace blocks)", r"^SM_DW_Platform_"),
-    ("Roof", r"^SM_DW_Roof_"),
-    ("Wall overlays (beams, columns, capitals)", r"^SM_DW_Wall_(Beam|Clmn)"),
-    ("Walls (3 m modules)", r"^SM_DW_Wall_3m_"),
-    ("Decoration", r"^SM_DW_Pile_"),
-    ("Castle", r"^SM_DW_Castle_(?!.*Mrln)"),
-    ("Castle merlons", r"^SM_DW_Castle_.*Mrln"),
-    ("Props (unit size, unplaced)", r"^(kys_|dw_pillar|SD_DW)"),
-]
+import kitbash_kits as kk
 
 AXIS = {"min": "min", "max": "max", "mid": "mid"}
 
@@ -69,23 +62,53 @@ def row(p):
             f"{p['tris']} | {lods} | {notes(p)} |")
 
 
+def subs_cell(p):
+    subs = p["subs"]
+    parts = []
+    for s in subs:
+        ladder = "/".join(f"lod{l['n']}" if l["n"] else "lod" for l in s["lods"]) or "-"
+        parts.append(f"{s['sub'] or '(base)'} [{ladder}]")
+    return f"{len(subs)}: " + ", ".join(parts)
+
+
+def family_target(p, family_on):
+    if family_on == "folder_file":
+        return f"{p['folder']}/{p['file']}"
+    return p["name"]
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--json", default=r"E:\LOTRAOMAssets\_export\erebor\catalog\erebor_catalog.json")
+    ap.add_argument("--kit", default="erebor", choices=sorted(kk.KITS))
+    ap.add_argument("--json", default=None)
     args = ap.parse_args()
-    pieces = json.load(open(args.json, encoding="utf-8"))["pieces"]
+    cfg = kk.KITS[args.kit]
+    path = args.json or cfg["catalog_json"]
+    if not os.path.exists(path):
+        # a per-folder run writes <kit>_catalog_<folder>.json, never the whole-kit file
+        raise SystemExit(f"{path} does not exist: run the catalog without --folder, or pass --json "
+                         f"<kit>_catalog_<folder>.json")
+    pieces = json.load(open(path, encoding="utf-8"))["pieces"]
+    with_subs = any("subs" in p for p in pieces)
     seen = set()
-    for title, pat in FAMILIES:
+    for title, pat in cfg["families"]:
         rx = re.compile(pat, re.IGNORECASE)
-        rows = [p for p in pieces if rx.search(p["name"]) and p["idx"] not in seen]
+        rows = [p for p in pieces
+                if rx.search(family_target(p, cfg["family_on"])) and p["idx"] not in seen]
         if not rows:
             continue
         print(f"### {title}\n")
-        print("| # | Piece | Size X x Y x Z (m) | Z range | Pivot X/Y/Z | Top z | Tris | LODs | Measured notes |")
-        print("|---|---|---|---|---|---|---|---|---|")
+        head = "| # | Piece | Size X x Y x Z (m) | Z range | Pivot X/Y/Z | Top z | Tris | LODs | Measured notes |"
+        sep = "|---|---|---|---|---|---|---|---|---|"
+        if with_subs:
+            head += " Sub-objects [LODs] |"
+            sep += "---|"
+        print(head)
+        print(sep)
         for p in rows:
             seen.add(p["idx"])
-            print(row(p))
+            print(row(p) + (f" {subs_cell(p)} |" if with_subs and "subs" in p else
+                            " |" if with_subs else ""))
         print()
     left = [p["name"] for p in pieces if p["idx"] not in seen]
     if left:

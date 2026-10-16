@@ -187,10 +187,12 @@ def main():
                     help="planned lowest z; default the brief's bounds_min z")
     ap.add_argument("--eave", type=float, default=3.0)
     ap.add_argument("--ridge-axis", default="x")
+    ap.add_argument("--name", default=None,
+                    help="building to probe in a multi-building FBX; default the file name")
     args = ap.parse_args(argv)
     OUT = args.out
     os.makedirs(OUT, exist_ok=True)
-    name = os.path.splitext(os.path.basename(args.fbx))[0]
+    name = args.name or os.path.splitext(os.path.basename(args.fbx))[0]
     done = os.path.join(OUT, "probe_DONE.txt")
     if os.path.exists(done):
         os.remove(done)
@@ -262,9 +264,15 @@ def main():
         gable = {"rays": 0, "open": 0, "sample": []}
         if roof_kind == "gable":
             half = hy if ridge_axis == "x" else hx
+            # a layout that states its ridge height (the Gondor assembler) sets the pitch, so a
+            # 45 degree gable is probed up to its apex, not only to the 26.57 degree line
+            pitch = (layout["ridge_z"] - eave) / half if "ridge_z" in layout else None
+            gable["pitch"] = pitch
             for end, sign in ((-hx, -1), (hx, 1)) if ridge_axis == "x" else ((-hy, -1), (hy, 1)):
                 for w in frange(-half + 0.2, half - 0.2, 0.1):
                     top = eave + 1.5 * (1 - abs(w) / half) - 0.12
+                    if pitch is not None:
+                        top = eave + pitch * (half - abs(w)) - 0.12
                     for z in frange(eave + 0.05, max(eave + 0.06, top), 0.1):
                         if z > top:
                             continue

@@ -10,13 +10,15 @@ and to show Mike what the authored buildings are.
 --mode identity  the engine frame used as-is
 --mode both      render both, side by side files
 
-Only kit pieces (sm_dw_*, kys_dw_*, dw_pillar_*, sd_dw_*) are drawn; other
-meshes in the prefab are counted and skipped.
+Only kit pieces are drawn (--kit erebor: sm_dw_*, kys_dw_*, dw_pillar_*, sd_dw_*;
+--kit gondor: every part family found in the kit FBX files); other meshes in the
+prefab are counted and skipped. A Gondor part is every non-decal, non-LOD, non-bo_
+object sharing the prefab's meta_mesh_component name, and each one is placed.
 
     "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\blender-launcher.exe" -b ^
         -P tools/oneoff/blender_render_erebor_prefab.py -- ^
         --file taom_erebor_kitbash.xml --entities "dwarf_house_a;dwarf_house_b" ^
-        --mode both --out E:\\LOTRAOMAssets\\_export\\erebor\\prefab_renders
+        --mode both --out E:\\LOTRAOMAssets\\_export\\erebor\\prefab_renders [--kit gondor]
 """
 
 import argparse
@@ -33,10 +35,10 @@ import xml.etree.ElementTree as ET
 import bpy
 from mathutils import Matrix, Vector
 
-SRC = r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TAOM_Map\AssetSources\Scenes\erebor"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import kitbash_kits as kk  # noqa: E402
+
 PREFABS = r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TAOM_Map\Prefabs"
-KIT_RE = re.compile(r"^(sm_dw_|kys_dw_|dw_pillar_|sd_dw_)", re.IGNORECASE)
-LOD_RE = re.compile(r"[._]lod\d*$", re.IGNORECASE)
 C = Matrix.Rotation(math.pi, 4, "Z")
 
 LOG = []
@@ -57,14 +59,16 @@ def mat_color(name):
     return (r, g, b, 1.0)
 
 
-def load_kit():
-    """Import every kit FBX; return {lower piece name: world-space mesh}."""
+def load_kit(cfg):
+    """Import every kit FBX; return {part key: [world-space meshes]}: each part's base objects
+    (kk.base_names, so a bare .lod or LOD-only sub-object counts; decals, bo_ bodies, LODs and .NNN
+    copies do not). An object kit has one mesh per key, a prefix kit one per sub-object."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     meshes = {}
-    for folder in ("meshes", "walls", "statues"):
-        d = os.path.join(SRC, folder)
+    for folder in cfg["kit_folders"]:
+        d = os.path.join(cfg["src"], folder)
         for fn in sorted(os.listdir(d)):
-            if not fn.lower().endswith(".fbx"):
+            if not fn.lower().endswith(".fbx") or kk.is_excluded(cfg, folder, fn):
                 continue
             before = set(bpy.data.objects)
             try:
@@ -72,15 +76,17 @@ def load_kit():
             except Exception:
                 bpy.ops.import_scene.fbx(filepath=os.path.join(d, fn))
             new = [o for o in bpy.data.objects if o not in before]
+            # one rule set with the catalog: a bare .lod or LOD-only sub-object is a base too
+            keep = kk.base_names([o.name for o in new if o.type == "MESH"], cfg["group_by"])
             for o in new:
-                if o.type != "MESH" or o.name.lower().startswith("bo_") or LOD_RE.search(o.name):
+                if o.type != "MESH" or o.name not in keep:
                     continue
                 me = o.data.copy()
                 me.transform(o.matrix_world)
                 me.name = "k_" + o.name
-                meshes[o.name.lower()] = me
-            for o in new:
-                bpy.data.objects.remove(o, do_unlink=True)
+                key = kk.part_key(o.name, cfg["group_by"])
+                meshes.setdefault(key, []).append(me)
+            bpy.data.batch_remove(new)
     for m in bpy.data.materials:
         m.diffuse_color = mat_color(m.name)
     return meshes
@@ -96,7 +102,7 @@ def vec(s, d):
     return [float(x) for x in s.split(",")] if s else list(d)
 
 
-def walk(el, parent, out, skipped):
+def walk(el, parent, out, skipped, is_kit):
     tr = el.find("transform")
     m = Matrix.Identity(4)
     if tr is not None:
@@ -110,14 +116,14 @@ def walk(el, parent, out, skipped):
     if comps is not None:
         for mm in comps.findall("meta_mesh_component"):
             name = (mm.get("name") or "").lower()
-            if KIT_RE.match(name):
+            if is_kit(name):
                 out.append((name, world.copy()))
             elif name:
                 skipped[name] = skipped.get(name, 0) + 1
     ch = el.find("children")
     if ch is not None:
         for c in ch.findall("game_entity"):
-            walk(c, world, out, skipped)
+            walk(c, world, out, skipped, is_kit)
 
 
 def find_entity(root, name):
@@ -186,7 +192,9 @@ def main():
     ap.add_argument("--entities", required=True)
     ap.add_argument("--mode", default="both", choices=["conj", "identity", "both"])
     ap.add_argument("--out", required=True)
+    ap.add_argument("--kit", default="erebor", choices=sorted(kk.KITS))
     args = ap.parse_args(argv)
+    cfg = kk.KITS[args.kit]
     OUT = args.out
     os.makedirs(OUT, exist_ok=True)
     done = os.path.join(OUT, "DONE.txt")
@@ -195,9 +203,11 @@ def main():
     status = "ok"
     summary = []
     try:
-        meshes = load_kit()
+        meshes = load_kit(cfg)
         log(f"[kit] {len(meshes)} pieces loaded")
         scene, cam = setup_scene()
+        kit_re = cfg["kit_re"]
+        is_kit = kit_re.match if kit_re is not None else (lambda n: n in meshes)
         root = ET.parse(os.path.join(PREFABS, args.file)).getroot()
         modes = ["conj", "identity"] if args.mode == "both" else [args.mode]
         for ent_name in [e for e in args.entities.split(";") if e]:
@@ -207,18 +217,16 @@ def main():
                 status = "partial"
                 continue
             placements, skipped = [], {}
-            walk(ent, Matrix.Identity(4), placements, skipped)
+            walk(ent, Matrix.Identity(4), placements, skipped, is_kit)
             missing = sorted({n for n, _ in placements if n not in meshes})
             for mode in modes:
                 objs = []
                 for name, m in placements:
-                    me = meshes.get(name)
-                    if me is None:
-                        continue
-                    o = bpy.data.objects.new(name, me)
-                    o.matrix_world = (C @ m @ C) if mode == "conj" else m
-                    scene.collection.objects.link(o)
-                    objs.append(o)
+                    for me in meshes.get(name, ()):
+                        o = bpy.data.objects.new(name, me)
+                        o.matrix_world = (C @ m @ C) if mode == "conj" else m
+                        scene.collection.objects.link(o)
+                        objs.append(o)
                 if not objs:
                     continue
                 safe = re.sub(r"[^A-Za-z0-9_]+", "_", ent_name)

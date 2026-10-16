@@ -20,19 +20,26 @@ Placements with a non-Z rotation are counted and flagged, because almost
 every kit placement is Z-only.
 
     python tools/oneoff/mine_erebor_prefab_joins.py --out E:\\LOTRAOMAssets\\_export\\erebor\\prefab_joins.json
+
+--kit gondor mines the Gondor part families instead: a meta_mesh_component counts as a kit piece
+when its name is the prefix of a part in the kit's FBX files (kitbash_kits.kit_part_names).
+--prefabs <glob> limits the run to prefab files whose name matches (case-insensitive).
 """
 
 import argparse
+import fnmatch
 import json
 import math
 import os
-import re
 import sys
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import kitbash_kits as kk  # noqa: E402
+
 PREFABS = r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TAOM_Map\Prefabs"
-KIT_RE = re.compile(r"^(sm_dw_|kys_dw_|dw_pillar_|sd_dw_)", re.IGNORECASE)
+KIT_RE = kk.KITS["erebor"]["kit_re"]
 
 
 def mat_mul(a, b):
@@ -85,14 +92,18 @@ def local_frame(el):
     return Frame(m, pos), tuple(eul), tuple(scl)
 
 
-def walk(el, parent, prefab, out, path):
+def walk(el, parent, prefab, out, path, is_kit=None):
+    """Collect kit placements under el. is_kit: predicate on the lowercase component name
+    (default: the Erebor KIT_RE)."""
+    if is_kit is None:
+        is_kit = KIT_RE.match
     frame_l, eul, scl = local_frame(el)
     frame = parent.compose(frame_l)
     comps = el.find("components")
     if comps is not None:
         for mm in comps.findall("meta_mesh_component"):
             name = (mm.get("name") or "").lower()
-            if not KIT_RE.match(name):
+            if not is_kit(name):
                 continue
             mats = [m.get("material") for m in mm.findall("mesh") if m.get("material")]
             # world Z rotation of the piece's +X axis
@@ -106,7 +117,7 @@ def walk(el, parent, prefab, out, path):
     ch = el.find("children")
     if ch is not None:
         for c in ch.findall("game_entity"):
-            walk(c, frame, prefab, out, path + "/" + (c.get("name") or "?"))
+            walk(c, frame, prefab, out, path + "/" + (c.get("name") or "?"), is_kit)
 
 
 def to_local(a, b):
@@ -123,11 +134,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
     ap.add_argument("--radius", type=float, default=4.5)
+    ap.add_argument("--kit", default="erebor", choices=sorted(kk.KITS))
+    ap.add_argument("--prefabs", default=None, help="glob on prefab file names")
     args = ap.parse_args()
+    is_kit = kk.kit_matcher(args.kit)
 
     placements = []
     for fn in sorted(os.listdir(PREFABS)):
         if not fn.lower().endswith(".xml"):
+            continue
+        if args.prefabs and not fnmatch.fnmatch(fn.lower(), args.prefabs.lower()):
             continue
         try:
             root = ET.parse(os.path.join(PREFABS, fn)).getroot()
@@ -137,7 +153,7 @@ def main():
         tops = [root] if root.tag == "game_entity" else root.findall("game_entity")
         for top in tops:
             before = len(placements)
-            walk(top, Frame(), f"{fn}:{top.get('name')}", placements, top.get("name") or "?")
+            walk(top, Frame(), f"{fn}:{top.get('name')}", placements, top.get("name") or "?", is_kit)
             if len(placements) == before:
                 continue
 

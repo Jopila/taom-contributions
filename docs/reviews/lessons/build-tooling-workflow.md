@@ -3765,3 +3765,62 @@ WildMesh RCAs of 2026-10-14 and 2026-10-15 record the same red trunk.
   outside Claude Code is the usual source, and the repair starts from its diff. A gate for every committer (a
   repository git hook, a required check on the GitHub remote, or CI) is Mike's decision and owed as an issue.
 - **Source:** [rca-harad-repair-2026-10-15.md](../rca-harad-repair-2026-10-15.md) pattern A.
+
+### A join test for part families must count only faces between placements (Gondor kit, 2026-10-15)
+The Erebor join test placed one mesh per piece and counted every shared face as a join defect. Run on the Gondor kit,
+where a part is several sub-objects (`.wall`, `.stonebrick`, `.window`), it reported z-fight on a plain 3 m wall run
+(0.375 m2) that came from the faces one part's own `.wall` and `.stonebrick` share by design.
+- **Why missed:** the tool's unit of geometry (one object) stopped matching the kit's unit of placement (one prefix).
+- **Prevent:** tag each placed mesh with its placement index and report pairs inside one placement apart
+  (`intra_part`); `tools/oneoff/blender_test_erebor_joins.py` does this now. After the split the wall run reads 0 m2
+  and the real defect stands out: the authored 90 degree corner, 3.38 m2 of outward-facing coplanar end caps.
+- **Source:** `docs/kitbash/gondor/design-patterns.md` "Join matrix (tested)".
+
+### A side heuristic cannot orient a part that sits wholly on one side of its origin (Gondor buildings, 2026-10-15)
+`gondor_buttress_a_clean` hangs in local -Y from its mounting plane. Placed with the Lond Cirion `wall()` helper, which
+turns a part by `detail_side()` (the side with more vertices), every buttress went inside its wall: none showed in the
+render, and the probe found about 6 m2 of same-facing faces per buttress on the wall planes (46.8 m2 on one barracks
+face).
+- **Why missed:** the Lond Cirion barracks used the same call and was judged by renders of the facade, where an absent
+  buttress looks like a plain wall.
+- **Prevent:** orient a one-sided, origin-anchored part from its measured bounds (the side its bbox centre lies on
+  faces out: `buttress()` in `blender_assemble_gondor_buildings.py`), never from a vertex-count heuristic; read the
+  z-fight per plane with `tools/oneoff/blender_zfight_attribution.py`, which names the two materials of each shared
+  plane and whether a ray along its normal leaves the building.
+- **Source:** `docs/kitbash/gondor-buildings.md` "Deliberate choices" and "Known open".
+
+### A Blender loader that filters names itself drops what the shared part rules keep (Gondor kit review, 2026-10-15)
+The prefab renderer and the join tester each kept their own name filter ("base unless it parses as a LOD") while the
+catalog used `kitbash_kits.group_parts`. The filter dropped a bare `.lod` and a LOD-only sub-object, so the 45 degree
+gable was tested and rebuilt without its infill plate, the exact Lond Cirion trap the shared rules exist for; two
+documented verdicts (rule 5 holds, the gable join is clean) rested on that test.
+- **Why missed:** the generalisation added `--kit` to each tool but left two copies of the rule set beside the
+  tested one; "A tool kept in two places drifts" (2026-09-29) already named the class.
+- **Prevent:** a loader takes its object list from the shared rules (`kitbash_kits.base_names`), never from a local
+  regex; an assembler that selects geometry another way asserts that both agree on every placed part.
+- **Source:** [rca-gondor-kitbash-2026-10-15.md](../rca-gondor-kitbash-2026-10-15.md) F1.
+
+### A probe must read every layout fact the builder writes (Gondor kit review, 2026-10-15)
+The Gondor assembler wrote `ridge_z` into each layout file; the probe never read it and kept a fixed 26.57 degree band,
+so the top half of both 45 degree gables was never ray-tested while the doc reported "0 open rays".
+- **Why missed:** the field was added for the probe, but no check looked for a written field without a reader.
+- **Prevent:** when a builder adds a field to a probe's input, change the probe in the same step and record the
+  coverage it buys (here 732 to 1,624 rays per 45 degree gable building); a coverage number in a doc names its band.
+- **Source:** [rca-gondor-kitbash-2026-10-15.md](../rca-gondor-kitbash-2026-10-15.md) F2.
+
+### A trim's top is a moulding: measure its cover before calling it flush (Gondor buildings, 2026-10-15)
+"Top flush with the storey line" left the wall top coplanar with the trim. A fixed 1 cm lift still left 8.2 m2 of the
+hall's wall top open to the sky: the 6 m trim's top slopes up to 2 cm below its bbox top over the wall line, and the 3 m
+trim has V-grooves between its blocks that a sparse sample missed.
+- **Why missed:** the bbox top was taken for the top surface, and z-fight was read as an area, not as visibility.
+- **Prevent:** measure the cover by down-rays every 2 cm over the wall band and raise the trim by its deepest dip plus
+  5 mm (`trim_lift()`); judge coincident faces by a ray along each face's normal (exposed, covered, below grade).
+- **Source:** `docs/kitbash/gondor-buildings.md` "Deliberate choices".
+
+### Sort what a parallel importer creates before grouping it (Gondor kit review, 2026-10-15)
+Blender's native FBX importer creates objects in a varying order: two catalog runs of the same folder listed one
+part's decals in a different order, and "the first base wins" would have picked a different base on a collision.
+- **Why missed:** the Erebor parity runs happened to be stable, so nothing showed that the order was not.
+- **Prevent:** a grouping function sorts its input names first (`group_parts` for prefix kits) and a test proves the
+  result is independent of the input order; diff two runs of the same input before trusting a parity check.
+- **Source:** `tools/tests/test_kitbash_kits.py` `test_prefix_grouping_does_not_depend_on_the_import_order`.
