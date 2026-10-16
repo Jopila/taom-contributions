@@ -176,7 +176,7 @@ Checked against the v1.5.3 decompile (`SandboxAgentStatCalculateModel`, `CustomB
 | `shrugOffBlows` | `DecideAgentShrugOffBlow` | on a weapon or missile hit: no flinch, no knockdown, knock-back or dismount, and the attacker's weapon bounces, as vanilla's shrug-off does. A horse charge never asks, so it still knocks a Stand Fast dwarf back (his knockdown resistance keeps him on his feet), and a kick or shield bash still knocks back. It also spares the soldier Sauron's guaranteed slam knockdown |
 | `moraleFloor` | `CanPanicDueToMorale` false while live, plus a top-up every 0.5 s | exact for morale: the soldier cannot panic while it lasts. It does not stop a retreat order, or a retreat already under way |
 | `moraleOnEnd` | `ChangeMorale` when the active window ends | the orcs' frenzy burns out |
-| `healPerKill`, `fearOnKill*`, `fearAura*` | `Agent.Health`, `ChangeMorale` | fear is scaled through the registered morale model, as the Dread Aura and Signature Strikes do (in a campaign the victim's tier and hero resistance apply; Custom Battle's characters all resist alike), and only reaches live AI humans (`DreadAgentGate`); where several auras reach one enemy, only the strongest drains him. Unlike the Dread Aura, no per-race fear resistance applies |
+| `healPerKill`, `fearOnKill*`, `fearAura*` | `Agent.Health`, `ChangeMorale` | fear is scaled through the registered morale model, as the Dread Aura and Signature Strikes do (in a campaign the victim's tier and hero resistance apply; Custom Battle's characters all resist alike), and only reaches live AI humans (`DreadAgentGate`); where several auras reach one enemy, only the strongest drains him. Unlike the Dread Aura, no per-race fear resistance applies, and no morale floor: fear can rout, and each rout spreads a morale loss to up to 10 allies, from the whole formation when fewer stand within 4 m (kept by design, 2026-10-15) |
 
 **Never touched:** armour (`ArmorHead` and the rest) and `OffhandWeaponDefendSpeedMultiplier`. Custom Battle writes
 them only in `InitializeAgentStats`, so a post-pass would stack on every update. A tougher stance is damage
@@ -243,7 +243,13 @@ Trigger kinds: `Always` (a plain timer), `EnemyWithin` (range), `EnemiesWithin` 
 pass, about a second), `Mounted`, `KinFell` (range, seconds), `KinWithin` (range, count), `LandedKill` (seconds),
 `WoundedEnemyWithin` (range, fraction), `CavalryClosing` (range: a rider whose mount closes faster than 3 m/s),
 `RangedTargetWithin` (range, while wielding a ranged weapon). A kind is one name, any case; a number or a
-comma-separated list is rejected. Ranges are capped at 40 m and event windows at 30 s.
+comma-separated list is rejected. Ranges are capped at 40 m and event windows at 30 s. The radii (`rallyRadius`,
+`kinBonus.radius`, `fearOnKillRadius`, `fearAuraRadius`) and the `KinWithin` range are capped at 15 m since
+2026-10-16: native `IMBMission.GetNearbyAgentsAux` searches its proximity grid only up to 15 m (inclusive) and walks
+every agent in the mission beyond it. An enemy trigger range past 15 m pays that full walk on each pass, about once
+a second, until the ability fires. Five shipped profiles do: Stand Fast 20 m (every ready dwarf), Forth Eorlingas
+30 m (mounted), and Swiftness, Serpent's Venom and Bard's Aim at 30 to 40 m (holding any ranged weapon, javelins
+included). Accepted; the cost is unmeasured.
 
 ### Current Values
 
@@ -474,6 +480,10 @@ cry and the sparks still play.
 Dated, feature-sliced history (newest first). The commit bodies, which `/release` gathers into `CHANGELOG.md`, are
 the chronological log of record.
 
+- 2026-10-16: the four radii and the `KinWithin` range are capped at 15 m (were 30 m and 40 m), the engine's
+  proximity-grid limit. No shipped value changes (all 12 m or less). A custom value above 15 m is rejected with a
+  warning: a radius reverts to 0, a kin bonus is dropped, and a `KinWithin` trigger is skipped (a skipped `requires`
+  trigger no longer gates the ability).
 - 2026-10-05: checked against Bannerlord v1.5.4: no code change needed; three in-game checks owed, listed under
   "Bannerlord v1.5.4" above.
 - 2026-10-04: first in-game test on a v2.0.34 dev build (Mike): a success for now, tuning later; the findings are

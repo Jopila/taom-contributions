@@ -218,7 +218,7 @@ public class RaceAbilitiesConfigProviderTests
     [DataRow("spentSeconds", "NaN", 0f)]
     [DataRow("killExtensionSeconds", "31", 0f)]
     [DataRow("rallyRadius", "Infinity", 0f)]
-    [DataRow("rallyRadius", "31", 0f)]
+    [DataRow("rallyRadius", "15.5", 0f)]
     public void GetConfig_BadOptionalTiming_RevertsToZero(string field, string value, float expected)
     {
         WriteConfig(OneRace(ValidCore + ", \"" + field + "\": " + value));
@@ -232,6 +232,17 @@ public class RaceAbilitiesConfigProviderTests
         };
         Assert.AreEqual(expected, actual, 0.0001f);
         _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains(field)));
+    }
+
+    // 15 m exactly stays on the engine's proximity grid (native GetNearbyAgentsAux walks every
+    // agent only when the radius is above 15), so the cap is inclusive.
+    [TestMethod]
+    public void GetConfig_RallyRadiusAtTheGridLimit_IsAccepted()
+    {
+        WriteConfig(OneRace(ValidCore + ", \"rallyRadius\": 15"));
+
+        Assert.AreEqual(15f, _sut.GetConfig().Races["dwarf"].RallyRadius, 0.0001f);
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("rallyRadius")));
     }
 
     [TestMethod]
@@ -322,9 +333,9 @@ public class RaceAbilitiesConfigProviderTests
         new object[] { "moraleOnEnd", "-101" },
         new object[] { "moraleOnEnd", "NaN" },
         new object[] { "healPerKill", "-1" },
-        new object[] { "fearOnKillRadius", "31" },
+        new object[] { "fearOnKillRadius", "15.5" },
         new object[] { "fearOnKillMorale", "101" },
-        new object[] { "fearAuraRadius", "31" },
+        new object[] { "fearAuraRadius", "15.5" },
         new object[] { "fearAuraMoralePerSecond", "51" },
     };
 
@@ -520,7 +531,8 @@ public class RaceAbilitiesConfigProviderTests
 
     [DataTestMethod]
     [DataRow("{ \"radius\": 0, \"perKinPercent\": 3, \"maxKin\": 5 }")]
-    [DataRow("{ \"radius\": 31, \"perKinPercent\": 3, \"maxKin\": 5 }")]
+    [DataRow("{ \"radius\": 15.5, \"perKinPercent\": 3, \"maxKin\": 5 }")]
+    [DataRow("{ \"radius\": NaN, \"perKinPercent\": 3, \"maxKin\": 5 }")]
     [DataRow("{ \"radius\": 6, \"perKinPercent\": NaN, \"maxKin\": 5 }")]
     [DataRow("{ \"radius\": 6, \"perKinPercent\": 51, \"maxKin\": 5 }")]
     [DataRow("{ \"radius\": 6, \"perKinPercent\": 3, \"maxKin\": 0 }")]
@@ -598,6 +610,7 @@ public class RaceAbilitiesConfigProviderTests
     [DataRow("{ \"kind\": \"WoundedEnemyWithin\", \"range\": 41, \"fraction\": 0.5 }", "range")]
     [DataRow("{ \"kind\": \"RangedTargetWithin\", \"range\": 0 }", "range")]
     [DataRow("{ \"kind\": \"KinWithin\", \"range\": NaN, \"count\": 3 }", "range")]
+    [DataRow("{ \"kind\": \"KinWithin\", \"range\": 15.5, \"count\": 3 }", "range")]
     [DataRow("{ \"kind\": \"KinFell\", \"range\": 41, \"seconds\": 5 }", "range")]
     public void GetConfig_BadRangeOnEveryRangedKind_SkipsTheTrigger(string triggerJson, string field)
     {

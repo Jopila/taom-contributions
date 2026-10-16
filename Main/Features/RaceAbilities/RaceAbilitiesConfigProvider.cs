@@ -28,9 +28,14 @@ public class RaceAbilitiesConfigProvider : IRaceAbilitiesConfigProvider
     private static readonly string[] WarCries = { "", "Yell", "Charge", "Victory", "Grunt" };
     private static readonly string EmptyEffects = JsonConvert.SerializeObject(new RaceAbilityEffects());
 
-    // Proximity searches past this degrade towards a scan of every agent (the Dread Aura's 30 m cap,
-    // with room for an archer's sight line).
+    // Native IMBMission.GetNearbyAgentsAux searches its proximity grid only up to 15 m
+    // (ProximityMapMaxSearchRadius on v1.5.5) and walks every agent in the mission beyond it. Five
+    // shipped profiles sense enemies past 15 m: Stand Fast 20 m (every dwarf), Forth Eorlingas 30 m
+    // (mounted), and Swiftness, Serpent's Venom and Bard's Aim at 30 to 40 m (holding any ranged
+    // weapon, javelins included). Each such soldier pays one full walk a pass, about once a second,
+    // until his ability fires. Accepted, unmeasured. The four radii and KinWithin stay on the grid.
     private const float MaxRange = 40f;
+    private const float MaxRadius = 15f;
     private const float MaxEventSeconds = 30f;
 
     // Each outlined soldier costs the renderer extra draws of his meshes (unmeasured), so the cap is bounded.
@@ -237,7 +242,7 @@ public class RaceAbilitiesConfigProvider : IRaceAbilitiesConfigProvider
             CooldownSeconds = parsed.CooldownSeconds,
             SpentSeconds = Check(parsed.SpentSeconds, 0f, 60f, 0f, $"{field}.spentSeconds", ref rejected),
             KillExtensionSeconds = Check(parsed.KillExtensionSeconds, 0f, MaxEventSeconds, 0f, $"{field}.killExtensionSeconds", ref rejected),
-            RallyRadius = Check(parsed.RallyRadius, 0f, 30f, 0f, $"{field}.rallyRadius", ref rejected),
+            RallyRadius = Check(parsed.RallyRadius, 0f, MaxRadius, 0f, $"{field}.rallyRadius", ref rejected),
             WarCry = ValidateWarCry(parsed.WarCry, $"{field}.warCry", ref rejected),
             Glow = glow,
             GlowColor = glowColor,
@@ -315,12 +320,12 @@ public class RaceAbilitiesConfigProvider : IRaceAbilitiesConfigProvider
     {
         if (parsed == null)
             return null;
-        var valid = FiniteFloatValidator.IsFiniteAtMost(parsed.Radius, 30f) && parsed.Radius > 0f
+        var valid = FiniteFloatValidator.IsFiniteAtMost(parsed.Radius, MaxRadius) && parsed.Radius > 0f
             && FiniteFloatValidator.IsFiniteInRange(parsed.PerKinPercent, 0f, 50f)
             && parsed.MaxKin >= 1 && parsed.MaxKin <= 50;
         if (valid)
             return new RaceAbilityKinBonus { Radius = parsed.Radius, PerKinPercent = parsed.PerKinPercent, MaxKin = parsed.MaxKin };
-        Warn($"{field} needs radius in (0,30], perKinPercent in [0,50] and maxKin in [1,50]; dropped", ref rejected);
+        Warn($"{field} needs radius in (0,{MaxRadius}], perKinPercent in [0,50] and maxKin in [1,50]; dropped", ref rejected);
         return null;
     }
 
@@ -370,8 +375,10 @@ public class RaceAbilitiesConfigProvider : IRaceAbilitiesConfigProvider
             Count = parsed.Count,
         };
         var valid = true;
-        if (ReadsRange(kind) && !(FiniteFloatValidator.IsFiniteAtMost(parsed.Range, MaxRange) && parsed.Range > 0f))
-            valid = SkipTrigger($"{field}.range={parsed.Range} must be a finite value in (0,{MaxRange}]", ref rejected);
+        // KinWithin runs the same ally query as kinBonus.radius, on every pass: it stays on the grid.
+        var maxRange = kind == RaceAbilityTriggerKind.KinWithin ? MaxRadius : MaxRange;
+        if (ReadsRange(kind) && !(FiniteFloatValidator.IsFiniteAtMost(parsed.Range, maxRange) && parsed.Range > 0f))
+            valid = SkipTrigger($"{field}.range={parsed.Range} must be a finite value in (0,{maxRange}]", ref rejected);
         if (ReadsSeconds(kind) && !(FiniteFloatValidator.IsFiniteAtMost(parsed.Seconds, MaxEventSeconds) && parsed.Seconds > 0f))
             valid = SkipTrigger($"{field}.seconds={parsed.Seconds} must be a finite value in (0,{MaxEventSeconds}]", ref rejected);
         if (ReadsFraction(kind) && !(FiniteFloatValidator.IsFiniteAtMost(parsed.Fraction, 1f) && parsed.Fraction > 0f))
@@ -452,9 +459,9 @@ public class RaceAbilitiesConfigProvider : IRaceAbilitiesConfigProvider
             MoraleFloor = Check(parsed.MoraleFloor, 0f, 100f, 0f, $"{field}.moraleFloor", ref rejected),
             MoraleOnEnd = Check(parsed.MoraleOnEnd, -100f, 100f, 0f, $"{field}.moraleOnEnd", ref rejected),
             HealPerKill = Check(parsed.HealPerKill, 0f, 100f, 0f, $"{field}.healPerKill", ref rejected),
-            FearOnKillRadius = Check(parsed.FearOnKillRadius, 0f, 30f, 0f, $"{field}.fearOnKillRadius", ref rejected),
+            FearOnKillRadius = Check(parsed.FearOnKillRadius, 0f, MaxRadius, 0f, $"{field}.fearOnKillRadius", ref rejected),
             FearOnKillMorale = Check(parsed.FearOnKillMorale, 0f, 100f, 0f, $"{field}.fearOnKillMorale", ref rejected),
-            FearAuraRadius = Check(parsed.FearAuraRadius, 0f, 30f, 0f, $"{field}.fearAuraRadius", ref rejected),
+            FearAuraRadius = Check(parsed.FearAuraRadius, 0f, MaxRadius, 0f, $"{field}.fearAuraRadius", ref rejected),
             FearAuraMoralePerSecond = Check(parsed.FearAuraMoralePerSecond, 0f, 50f, 0f, $"{field}.fearAuraMoralePerSecond", ref rejected),
         };
     }
