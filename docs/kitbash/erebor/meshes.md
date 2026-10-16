@@ -13,8 +13,8 @@ not catalogued here.
 **Measured outputs** (desktop, not in git): `E:\LOTRAOMAssets\_export\erebor\catalog\`
 holds `erebor_catalog.json` (every number below plus normal-area buckets, down-ray profiles and
 `bo_` bounds), one four-view sheet per piece in `views\<piece>.png` (front -Y, back +Y, side +X,
-top, 1 m grid, red dot = pivot) and numbered contact sheets in `sheets\`. The `#` column is the
-number on those sheets.
+top, 1 m grid, 5 m when the view cell is over 16 m; red dot = pivot) and numbered contact sheets
+of up to 36 pieces in `sheets\`. The `#` column is the number on those sheets.
 
 ## Read this first
 
@@ -22,9 +22,10 @@ number on those sheets.
   files rotated 180 degrees about Z from that frame (verified, see
   [design-patterns.md](design-patterns.md) "The frame rule"). A building assembled and exported
   from Blender keeps its internal joins; it only lands turned 180 degrees as a whole.
-- **Node transforms are baked.** Twenty pieces carry a node rotation or scale in the FBX (the
-  "node ... (baked)" notes). The game applies it, so the sizes here are the world-space shapes.
-  Verified by the prefab rebuilds, which only line up with the node transform applied.
+- **Node transforms are baked.** Every piece stores its vertices at 1/100 of its size under a
+  node scale of 100, and the standard node also turns X -90. 18 pieces differ from that standard
+  node (the "node ... (baked)" notes). The sizes here are the shapes with the node applied:
+  without it no piece fits the 3 m grid of the authored prefabs.
 - **Place by pivot, never by bounding box.** Most roof, corner, castle and merlon pieces are
   authored with the pivot on an edge, a corner or outside the mesh (Pivot column: `min`, `max`,
   `mid` or the fraction along the axis; `outside` for merlons).
@@ -45,25 +46,28 @@ The letter in a name is **not** one shared texture family across the kit. Measur
 | `Ground_3m_A1`, `_A2`, `_B1` | letter and digit | `M_DW_Ground_Stone_A1`, `_A2`, `_B1` |
 | `Ground_3m_C1` | C | `M_DW_Ground_Pavement_A1` |
 | `Roof_Str_A*` / `Roof_Str_B*` | letter = material, digit = size | A slate, B stone; 1 = 3 m, 2 = 1.5 m |
-| `Roof_Cor_*`, `Roof_Top_*` | letter = size, digit = material | A 3 m, B 1.5 m (`Cor_Tri_C` 3 x 1.5 m); 1 slate, 2 stone |
+| `Roof_Cor_*`, `Roof_Top_*` | letter = size, digit = material | A 3 m, B 1.5 m (`Cor_Tri_C` 3 x 1.5 m); 1 slate, 2 stone, except `Cor_Tri_C1`, which is stone like `_C2` |
 | Beams, columns, capitals, ground trims | none | `M_DW_Trim_A1` |
 
-Every roof piece also carries `M_Wood_Planks_A_Old_Worn` on its underside. Window digits are
+Every roof piece except the gable wedges (`Roof_Side_A1`, `_A2`: brick and trim) also carries
+`M_Wood_Planks_A_Old_Worn` on its underside. Window digits are
 **shapes**: 1 = narrow slit 0.40 x 1.70 m, 2 = octagon 0.90 x 0.90 m, 3 = tall slit
 0.50 x 1.90 m; `Win2` = two narrow slits. Doors are 1.10 x 2.35 m in every letter.
 
 ## Collision bodies
 
-140 pieces have a `bo_` twin with the exact name. Sixteen do not: the stone-roof and 1.5 m roof
+129 pieces have a `bo_` twin with the exact name. Sixteen do not: the stone-roof and 1.5 m roof
 variants (`Roof_Cor_In_A2`, `_B2`, `Roof_Cor_Out_A2`, `_B2`, `Roof_Cor_Tri_A2`, `_B2`, `_C1`,
 `Roof_Str_B1`, `_B2`, `Roof_Top_A2`, `_B2`), the four roof trims (`Roof_Side_Cor_Out_A1`, `_A2`,
 `Roof_Side_Str_A1`, `_A2`) and `Castle_Wall_A1_Ramp_Mrln_01`, whose body is misnamed
 `bo_SM_DW_Castle_Wall_A1_Ramp_Mrln_0` (truncated). A slate and a stone variant of the same size
 share one shape, so a merged building can borrow the twin's body (for example
-`bo_SM_DW_Roof_Str_A1` under `Roof_Str_B1`).
+`bo_SM_DW_Roof_Str_A1` under `Roof_Str_B1`). The assembler's `BO_STANDIN` table maps every
+borrowed body, the truncated ramp merlon body included; `BO_NONE` names the trims that get none.
 
 No piece has a decal sub-object or a bare `.lod` name (the two Lond Cirion traps). LODs are
-`.lodN` siblings on the `SM_DW_*` pieces and `_lodN` on the five unit-size props; roof pieces,
+`.lodN` siblings on the `SM_DW_*` pieces and the two statues, and `_lodN` on the three Kysaro and
+Moria props; roof pieces,
 plain walls, plain corner walls and pillars have **no LODs**.
 
 ## Pieces by family
@@ -340,7 +344,9 @@ Each merlon is a separate object that shares its parent's pivot, so it is placed
 
 ### Props (unit size, unplaced)
 
-Five Tripo or hand-made props normalised to about 1 m, authored Y-up (node rotation X 90).
+Five Tripo or hand-made props normalised to about 1 m. The three Kysaro and Moria props are
+authored Y-up (node rotation X 90 against the kit's standard node); the two statues carry the
+standard node.
 **None is placed in any TAOM_Map prefab**, so there is no authored scale.
 
 **Building scale (decided 2026-10-15, render-checked beside a wall and a door):** x3 for all

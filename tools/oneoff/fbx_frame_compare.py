@@ -12,6 +12,11 @@ both the same way (docs/kitbash/erebor/design-patterns.md, "The frame rule").
 Each argument is a file, optionally followed by ':' and a model name (matched
 without case); without a name, every mesh model in the file is listed.
 Exit 0 always: this reports, it does not judge.
+
+The node transform modelled is Lcl Translation, Lcl Rotation (eEulerXYZ only),
+PreRotation and Lcl Scaling. A model that also sets a pivot, an offset,
+PostRotation, a geometric transform, or hangs under a parent model is listed
+with "unsupported": its node_bbox_m is then not what the engine reads.
 """
 
 import math
@@ -23,16 +28,22 @@ MAGIC = b"Kaydara FBX Binary  \x00"
 SCALARS = {b"Y": "<h", b"C": "<?", b"I": "<i", b"F": "<f", b"D": "<d", b"L": "<q"}
 ARRAYS = {b"f": ("f", 4), b"d": ("d", 8), b"l": ("q", 8), b"i": ("i", 4), b"b": ("?", 1)}
 KEEP = ("GlobalSettings", "Objects", "Connections")
+DECODE = ("Vertices",)  # the only array read; the rest (indices, normals, UVs) are skipped
+# Transform properties describe() does not model, with their FBX defaults.
+UNMODELLED = {"RotationOffset": (0, 0, 0), "RotationPivot": (0, 0, 0), "ScalingOffset": (0, 0, 0),
+              "ScalingPivot": (0, 0, 0), "PostRotation": (0, 0, 0), "GeometricTranslation": (0, 0, 0),
+              "GeometricRotation": (0, 0, 0), "GeometricScaling": (1, 1, 1)}
 
 
 def parse(path):
-    data = open(path, "rb").read()
+    with open(path, "rb") as f:
+        data = f.read()
     if not data.startswith(MAGIC):
         raise ValueError(f"{path}: not a binary FBX")
     wide = struct.unpack_from("<I", data, 23)[0] >= 7500
     null_len = 25 if wide else 13
 
-    def prop(off):
+    def prop(off, decode):
         t = data[off:off + 1]
         off += 1
         if t in SCALARS:
@@ -41,6 +52,8 @@ def parse(path):
         if t in ARRAYS:
             n, enc, clen = struct.unpack_from("<III", data, off)
             off += 12
+            if not decode:
+                return None, off + clen
             raw = data[off:off + clen]
             if enc:
                 raw = zlib.decompress(raw)
@@ -67,7 +80,7 @@ def parse(path):
             return (name, None, None), end
         props = []
         for _ in range(nprops):
-            v, off = prop(off)
+            v, off = prop(off, name in DECODE)
             props.append(v)
         kids = []
         while off < end - null_len:
@@ -121,12 +134,14 @@ def describe(path, want=None):
                                      "CoordAxis", "CoordAxisSign", "UnitScaleFactor") if k in gs}
     unit_m = header.get("UnitScaleFactor", 1.0) / 100.0
     objs = {o[1][0]: o for o in tree["Objects"][2] if o[1]}
-    geo_of = {}
+    geo_of, has_parent = {}, set()
     for c in tree["Connections"][2]:
         if c[1] and c[1][0] == b"OO":
             child, parent = c[1][1], c[1][2]
             if child in objs and objs[child][0] == "Geometry" and parent in objs:
                 geo_of[parent] = objs[child]
+            if child in objs and objs[child][0] == "Model" and parent in objs and objs[parent][0] == "Model":
+                has_parent.add(child)
     rows = []
     for oid, o in objs.items():
         if o[0] != "Model" or o[1][2] != b"Mesh":
@@ -140,6 +155,10 @@ def describe(path, want=None):
         s = list(props.get("Lcl Scaling", (1, 1, 1)))
         pre = list(props.get("PreRotation", (0, 0, 0)))
         order = props.get("RotationOrder", (0,))[0]
+        unsupported = [k for k, d in UNMODELLED.items()
+                       if k in props and any(abs(a - b) > 1e-9 for a, b in zip(props[k], d))]
+        if oid in has_parent:
+            unsupported.append("parent model")
         g = geo_of.get(oid)
         verts = next((k[1][0] for k in g[2] if k[0] == "Vertices"), ()) if g else ()
         pts = [verts[i:i + 3] for i in range(0, len(verts), 3)]
@@ -155,21 +174,30 @@ def describe(path, want=None):
                     [round(max(p[i] for p in ps) * unit_m, 3) for i in range(3)])
         rows.append({"model": name, "lcl_t": [round(v, 4) for v in t], "lcl_r": [round(v, 3) for v in r],
                      "pre_r": [round(v, 3) for v in pre], "lcl_s": [round(v, 5) for v in s],
-                     "raw_bbox_m": box(pts), "node_bbox_m": box(world)})
+                     "raw_bbox_m": box(pts), "node_bbox_m": box(world), "unsupported": unsupported})
     return header, rows
+
+
+def split_arg(arg):
+    """'A.fbx:Model' -> ('A.fbx', 'Model'); the '.fbx' match ignores case and is added when absent."""
+    i = arg.lower().find(".fbx:")
+    if i >= 0:
+        return arg[:i + 4], arg[i + 5:] or None
+    return (arg if arg.lower().endswith(".fbx") else arg + ".fbx"), None
 
 
 def main():
     for arg in sys.argv[1:]:
-        path, _, model = arg.partition(".fbx:")
-        path = path if path.lower().endswith(".fbx") else path + ".fbx"
-        header, rows = describe(path, model or None)
+        path, model = split_arg(arg)
+        header, rows = describe(path, model)
         print(f"== {path}")
         print(f"   header {header}")
         for r in rows:
             print(f"   {r['model']}: T {r['lcl_t']} R {r['lcl_r']} Pre {r['pre_r']} S {r['lcl_s']}")
             print(f"      raw  {r['raw_bbox_m']}")
             print(f"      node {r['node_bbox_m']}")
+            if r["unsupported"]:
+                print(f"      UNSUPPORTED {r['unsupported']}: node bbox is not what the engine reads")
 
 
 if __name__ == "__main__":

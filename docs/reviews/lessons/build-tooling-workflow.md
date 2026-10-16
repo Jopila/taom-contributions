@@ -3706,6 +3706,55 @@ the merlon face only work with the rotation.
 - **Source:** issue #797; `docs/kitbash/erebor/design-patterns.md` "The frame rule",
   `docs/kitbash/erebor-buildings.md`.
 
+### An export refuses on its own failed check, and never moves the live file first (#797, 2026-10-15)
+The Erebor building exporter moved the live FBX aside before it built anything, so a missing piece
+left the live folder with no FBX at all. Its own checks (tier triangles against the sum of the
+parts, `.NNN` material names) only logged a warning and the run still said "ok".
+- **Why missed:** the warn-only checks came with the Lond Cirion assembler it was adapted from; the
+  move-first backup was new in the adaptation (the source writes once, at the end, with no
+  backup). No run had failed, so nothing showed either.
+- **Prevent:** check inputs, build everything, and raise on any failed self-check before the first
+  live write; stage the output outside the live folder, back the old file up by copy, then copy the
+  new one in. Test the refusal with a stub `bpy`: the live bytes unchanged and no backup written
+  (`tools/tests/test_erebor_assembler.py` `ExportRefusalTests`).
+- **Source:** `docs/reviews/rca-erebor-kitbash-2026-10-15.md` A1, A2.
+
+### Clear a detached tool's DONE marker before parsing arguments, and delete it before launch (#797, 2026-10-15)
+The MS-Store Blender launcher returns at once. A script that deletes its old `DONE.txt` only after
+parsing arguments leaves the previous run's "ok" in place when an argument is rejected, and a
+caller that polls straight after launch reads that old verdict and its old JSON.
+- **Why missed:** second time in two days. The orc and goblin RCA (W2-3, 2026-10-14) fixed it per
+  tool in docstrings and README rows, so no rule reached the next tool written from another
+  template.
+- **Prevent:** the caller deletes the marker before every launch (say so in the docstring, the
+  `tools/README.md` row and any build prompt), and the script clears it before `argparse`.
+- **Source:** `docs/reviews/rca-erebor-kitbash-2026-10-15.md` A3;
+  `docs/reviews/rca-orc-goblin-locomotion-2026-10-14.md` W2-3.
+
+### Read a prefab transform the way the native reader does: matrix forms first, and keep the scale's sign (#797, 2026-10-15)
+The native prefab reader tries `rotation_mat`, then `non_orthogonal_rotation_mat`, then
+`rotation_euler`. The Erebor miner and the prefab rebuilder read only `rotation_euler`, so about
+1,500 kit placements counted as unrotated. The miner also took the scale from column lengths,
+which drops its sign, and the join test placed the mirrored second ramp of `dwarf_tower_ramp_a`
+(scale -1, 1, 1) at yaw 180, which puts its battlement on the wrong face.
+- **Why missed:** the reader was matched to the managed `ApplyEulerAngles`, and the first prefabs
+  read used neither matrix form.
+- **Prevent:** before a tool reads prefab transforms, list every attribute the native reader
+  accepts and test each, including a negative scale; flag a placement with a negative determinant
+  instead of folding it into a turn.
+- **Source:** `docs/reviews/rca-erebor-kitbash-2026-10-15.md` H1, H2.
+
+### Take a probe's test region from the layout the assembler writes, never from a constant tuned on the first building (#797, 2026-10-15)
+The building probe tested each gable up to eave + 1.5 m, the house's rise. On the barracks (3 m
+rise) it stopped at z 7.3 of a gable that reaches z 9, and on the Gondor 45 degree roofs it covered
+about 4 of 9 m2, while both reported the gables closed.
+- **Why missed:** the constant was right for the building it was written against, and a ray that
+  is never cast cannot fail.
+- **Prevent:** the assembler writes every dimension the probe needs into the layout file (eave
+  and half sizes derived from the placements, `ridge_z` as the eave plus the declared rise), and
+  the probe reads them; a test asserts the values for every building.
+- **Source:** `docs/reviews/rca-erebor-kitbash-2026-10-15.md` G2, A6.
+
 ### A gate that runs only inside Claude Code does not gate a plain-git commit (Harad repair, 2026-10-15)
 `08b30bfc4` replaced the Harad troop tree with plain git and `776054c0c` followed it; the commit hooks fire only in
 Claude Code and CI was removed on 2026-10-05 (`c8d69a0dc`), so neither commit met a gate. The first Claude commit after

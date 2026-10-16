@@ -58,5 +58,6 @@ Reference for the erebor dwarven kit under
 - Assemble, export and probe whole buildings: `tools/oneoff/blender_assemble_erebor_buildings.py`,
   `tools/oneoff/blender_probe_erebor_building.py`, `tools/oneoff/fbx_frame_compare.py`; see
   [erebor-buildings.md](../erebor-buildings.md)
-- Exported buildings: `Modules/TAOM_Map/AssetSources/Scenes/erebor/buildings/*.fbx`
+- Exported buildings: `Modules/TAOM_Map/AssetSources/Scenes/erebor/buildings/*.fbx`, packaged
+  by the Modding Kit to `Modules/TAOM_Map/Assets/Scenes/erebor/buildings/*_geo.tpac`
 - FBX mesh lister: `tools/list_fbx_objects_all.py`

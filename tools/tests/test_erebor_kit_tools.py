@@ -3,11 +3,13 @@ fbx_frame_compare.py (binary FBX reader and node transform), mine_erebor_prefab_
 (prefab transform walk and relative offsets) and erebor_catalog_to_md.py (table text)."""
 import math
 import os
+import shutil
 import struct
 import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+import zlib
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "oneoff"))
 import erebor_catalog_to_md as cat  # noqa: E402
@@ -29,6 +31,9 @@ def _prop(v):
     if isinstance(v, list):
         raw = struct.pack("<%dd" % len(v), *v)
         return b"d" + struct.pack("<III", len(v), 0, len(raw)) + raw
+    if isinstance(v, tuple) and v[0] == "dz":  # a zlib-compressed double array, as Blender writes
+        raw = zlib.compress(struct.pack("<%dd" % len(v[1]), *v[1]))
+        return b"d" + struct.pack("<III", len(v[1]), 1, len(raw)) + raw
     raise TypeError(v)
 
 
@@ -48,16 +53,23 @@ def _p(name, kind, *values):
     return ("P", [name.encode(), kind.encode(), b"", b"A"] + list(values), [])
 
 
-def write_fbx(path, model_props, vertices, unit=1.0):
+def write_fbx(path, model_props, vertices, unit=1.0, compressed=False, parent=False):
+    """parent=True hangs the mesh model under a null model, as a nested kit scene does."""
+    objects = [
+        ("Model", [10, b"Piece\x00\x01Model", b"Mesh"], [("Properties70", [], model_props)]),
+        ("Geometry", [20, b"Geo\x00\x01Geometry", b"Mesh"],
+         [("Vertices", [("dz", vertices) if compressed else vertices], [])]),
+    ]
+    links = [("C", [b"OO", 20, 10], [])]
+    if parent:
+        objects.append(("Model", [30, b"Root\x00\x01Model", b"Null"], [("Properties70", [], [])]))
+        links.append(("C", [b"OO", 10, 30], []))
     nodes = [
         ("GlobalSettings", [], [("Properties70", [], [
             _p("UpAxis", "int", ("I", 1)), _p("FrontAxis", "int", ("I", 2)),
             _p("CoordAxis", "int", ("I", 0)), _p("UnitScaleFactor", "double", unit)])]),
-        ("Objects", [], [
-            ("Model", [10, b"Piece\x00\x01Model", b"Mesh"], [("Properties70", [], model_props)]),
-            ("Geometry", [20, b"Geo\x00\x01Geometry", b"Mesh"], [("Vertices", [vertices], [])]),
-        ]),
-        ("Connections", [], [("C", [b"OO", 20, 10], [])]),
+        ("Objects", [], objects),
+        ("Connections", [], links),
     ]
     data = ffc.MAGIC + b"\x1a\x00" + struct.pack("<I", 7400)
     for n in nodes:
@@ -70,6 +82,7 @@ def write_fbx(path, model_props, vertices, unit=1.0):
 class FbxFrameCompareTests(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.dir, True)
 
     def test_kit_style_node_transform_matches_a_baked_export(self):
         # The kit stores 1.5 cm of data under a node rotation X -90 and scale 100;
@@ -100,6 +113,32 @@ class FbxFrameCompareTests(unittest.TestCase):
         r = ffc.rot((90, 0, 90))
         v = [sum(r[i][j] * (0, 1, 0)[j] for j in range(3)) for i in range(3)]
         self.assertEqual([round(x, 6) + 0.0 for x in v], [0.0, 0.0, 1.0])
+
+    def test_compressed_vertex_arrays_read_the_same(self):
+        """Blender writes Vertices zlib-compressed (encoding 1); frame_probe.fbx is one."""
+        plain, packed = os.path.join(self.dir, "plain.fbx"), os.path.join(self.dir, "packed.fbx")
+        verts = [0.0, 0.0, 0.0, 150.0, -100.0, 25.0]
+        write_fbx(plain, [], verts)
+        write_fbx(packed, [], verts, compressed=True)
+        self.assertEqual(ffc.describe(plain), ffc.describe(packed))
+
+    def test_transforms_it_does_not_model_are_flagged(self):
+        clean = os.path.join(self.dir, "clean.fbx")
+        write_fbx(clean, [], [0.0, 0.0, 0.0])
+        self.assertEqual(ffc.describe(clean)[1][0]["unsupported"], [])
+        odd = os.path.join(self.dir, "odd.fbx")
+        write_fbx(odd, [_p("GeometricTranslation", "Vector3D", 0.0, 5.0, 0.0),
+                        _p("RotationPivot", "Vector3D", 0.0, 0.0, 0.0)], [0.0, 0.0, 0.0], parent=True)
+        flags = ffc.describe(odd)[1][0]["unsupported"]
+        self.assertIn("GeometricTranslation", flags)
+        self.assertIn("parent model", flags)
+        self.assertNotIn("RotationPivot", flags)  # present but at its default
+
+    def test_model_argument_split_ignores_case(self):
+        self.assertEqual(ffc.split_arg(r"E:\k\SM_DW_Roof_3m_A.FBX:SM_DW_Roof_Str_A1"),
+                         (r"E:\k\SM_DW_Roof_3m_A.FBX", "SM_DW_Roof_Str_A1"))
+        self.assertEqual(ffc.split_arg(r"E:\k\probe.fbx"), (r"E:\k\probe.fbx", None))
+        self.assertEqual(ffc.split_arg(r"E:\k\probe"), (r"E:\k\probe.fbx", None))
 
     def test_refuses_a_text_file(self):
         path = os.path.join(self.dir, "ascii.fbx")
@@ -147,6 +186,11 @@ class PrefabJoinTests(unittest.TestCase):
         # Rz Rx: local +Z goes to +X after X 90 then Z 90
         col_z = [round(f.m[i][2], 6) + 0.0 for i in range(3)]
         self.assertEqual(col_z, [1.0, 0.0, 0.0])
+        # Y before X: under Rx Ry, local +X goes to -Z, then to +Y; Ry Rx would leave it at -Z
+        f, _, _ = mine.local_frame(ET.fromstring(
+            '<e><transform rotation_euler="1.5707963, 1.5707963, 0.0"/></e>'))
+        col_x = [round(f.m[i][0], 6) + 0.0 for i in range(3)]
+        self.assertEqual(col_x, [0.0, 1.0, 0.0])
 
 
 class CatalogTableTests(unittest.TestCase):

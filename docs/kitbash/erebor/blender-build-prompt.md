@@ -5,10 +5,20 @@ Paste everything below the line into a fresh Claude Code session in `E:\repos\TA
 **Status (2026-10-15, #797):** Phases 1 and 2 are done; their results are in
 [meshes.md](meshes.md) and [design-patterns.md](design-patterns.md), and the tools exist in
 `tools/oneoff/`. A new session resumes at Phase 3 for the next building and re-runs Phase 1 only
-if the kit FBX files change. Built so far: [erebor-buildings.md](../erebor-buildings.md).
-Settled since this prompt was written: the frame rule (the engine reads each Erebor FBX turned
-180 degrees about Z from Blender's import), the prop scale (x3) and **no below-grade skirt**: a
-building's floor slab sits on the terrain.
+if the kit FBX files change. Built so far, in this order: the dwarf house, the great hall and a
+two-storey barracks, which took the keep's place
+([erebor-buildings.md](../erebor-buildings.md), with the deviations from Phases 3 to 5).
+
+Settled since this prompt was written:
+
+- **Frame rule:** the engine reads each Erebor FBX turned 180 degrees about Z from Blender's
+  import.
+- **Props:** x3 building scale.
+- **Grade:** no below-grade skirt; a building's floor slab sits on the terrain.
+- **Materials:** one wall letter per building. Roofs, columns and trims may come from other
+  letters, because letters mean different things per family ([README.md](README.md)).
+- **Mirrors:** a negative prefab scale is a mirror, never a yaw 180
+  ([design-patterns.md](design-patterns.md) "The frame rule").
 
 ---
 
@@ -33,7 +43,9 @@ headless Blender. Work in phases. Stop at every GATE and wait for Mike's word.
 - Blender runs headless through the MS-Store launcher, which DETACHES:
   `"%LOCALAPPDATA%\Microsoft\WindowsApps\blender-launcher.exe" -b -P <script> -- <args>`.
   Each script writes `DONE.txt` and `log.txt` in its output folder; wait for `DONE.txt`, then read
-  the log. Use `log()`, not `print`.
+  the log. Use `log()`, not `print`. Delete the old `DONE.txt` (the probe's `probe_DONE.txt`)
+  before you launch: the launcher returns at once, and until the script starts, the file there
+  is the previous run's verdict.
 - New scripts go in `tools/oneoff/` (`blender_catalog_erebor.py`,
   `blender_assemble_erebor_buildings.py`, `blender_probe_erebor_building.py`). Write them with the
   Write tool, never a Bash heredoc. Use `python`, never `python3`.
@@ -92,9 +104,9 @@ place the old docs were wrong, and every piece you could not classify. Stop.
 
 Order: dwarf house, great hall, multi-storey keep, castle wall section with tower and gate,
 forge or market. For one building at a time, write a brief: purpose, footprint on the 3 m grid,
-storeys, roof form, the piece list with counts, one material family (A, B or C; never mixed
-within one building), elevations as simple text or blockout renders, the expected tri budget,
-and the risky joins. These are exterior shells for scene dressing: closed or blind doors are
+storeys, roof form, the piece list with counts, one wall letter (A, B or C) for the whole
+building, elevations as simple text or blockout renders, the expected tri budget, and the risky
+joins. These are exterior shells for scene dressing: closed or blind doors are
 acceptable, no interiors.
 
 **GATE 2 (per building).** Mike approves or changes the brief. Stop.

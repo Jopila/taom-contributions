@@ -7,16 +7,29 @@ the join rules of docs/kitbash/erebor/design-patterns.md. The engine sees the
 source FBX turned 180 deg about Z; an export from this frame keeps every join
 and only turns the whole building.
 
---preview   render blockout views and write the brief numbers (pieces, triangles
-            per LOD tier, bounds, collision coverage); exports nothing
---export    merge each LOD tier and the collision body into one object and export
-            AssetSources/Scenes/erebor/buildings/<name>.fbx (Lond Cirion export
-            settings); also writes <out>/frame_probe.fbx (two untouched kit pieces)
-            for the raw-FBX frame compare
+--preview      render blockout views and write the brief numbers (pieces, triangles
+               per LOD tier, bounds, collision coverage); the default mode
+--export       merge each LOD tier and the collision body into one object and export
+               AssetSources/Scenes/erebor/buildings/<name>.fbx (Lond Cirion export
+               settings), its import note and <out>/<name>_expected.json (probe layout).
+               Refuses before any live write when a piece or a collision body is
+               missing, a tier's triangles differ from its parts, or a material keeps
+               a Blender .NNN suffix. The FBX is staged in --out first; the previous
+               live FBX is kept as <name>.fbx.bak-<mtime> (a copy).
+               --preview --export runs both.
+--frame-probe  export two untouched kit pieces to <out>/frame_probe.fbx with the same
+               settings, for fbx_frame_compare.py against their source files
+--inspect      build <out>/<name>_inspect.blend from the EXPORTED FBX: one collection
+               per tier, only the base visible, flat viewport colours per material;
+               runs alone (beside --export it would read the previous live FBX)
 
 LOD tiers (Lond Cirion naming): base = each piece's LOD0; lod3 = each piece's
 .lod2, else .lod4, else LOD0; lod6 = .lod5, else .lod4, else .lod2, else LOD0.
-Unit-size props use their _lod2 as the base tier (their LOD0 is 28k to 52k tris).
+Unit-size props use their _lod2 as the base tier (their LOD0 is 28k to 52k tris);
+a placement's base_lod moves its base tier down (a budget cut).
+
+The MS-Store launcher detaches. Delete <out>\\DONE.txt before launching: the script
+removes it only once it runs, so until then the file there is the previous verdict.
 
     "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\blender-launcher.exe" -b ^
         -P tools/oneoff/blender_assemble_erebor_buildings.py -- ^
@@ -30,6 +43,7 @@ import json
 import math
 import os
 import re
+import shutil
 import sys
 import traceback
 from collections import Counter
@@ -49,6 +63,8 @@ BO_STANDIN = {
     "sm_dw_roof_cor_out_a2": "sm_dw_roof_cor_out_a1", "sm_dw_roof_cor_out_b2": "sm_dw_roof_cor_out_b1",
     "sm_dw_roof_cor_tri_a2": "sm_dw_roof_cor_tri_a1", "sm_dw_roof_cor_tri_b2": "sm_dw_roof_cor_tri_b1",
     "sm_dw_roof_cor_tri_c1": "sm_dw_roof_cor_tri_c2",
+    # its own body, under the truncated name bo_SM_DW_Castle_Wall_A1_Ramp_Mrln_0
+    "sm_dw_castle_wall_a1_ramp_mrln_01": "sm_dw_castle_wall_a1_ramp_mrln_0",
 }
 # Thin trims with no body and nothing to stand on: no collision by design.
 BO_NONE = {"sm_dw_roof_side_str_a1", "sm_dw_roof_side_str_a2",
@@ -77,6 +93,36 @@ def wall_line(piece_by_bay, start, axis, z=0.0, role="wall"):
     return out
 
 
+def column(x, y, storeys, role="column"):
+    """Clmn_3m_C on every storey with the square Clmn_Top_D at its foot and its head
+    (the foot after Mike's review of the first Kit import, 2026-10-15)."""
+    out = [P("sm_dw_wall_clmn_3m_c", (x, y, 3 * k), role=role) for k in range(storeys)]
+    out += [P("sm_dw_wall_clmn_top_d", (x, y, z), scale=(1.1, 1.1, 1.2), role=role) for z in (0, 3 * storeys)]
+    return out
+
+
+def pilaster(x, y, storeys):
+    """Clmn_3m_A (x1.5) on every storey with Clmn_Top_F on every storey line."""
+    out = [P("sm_dw_wall_clmn_3m_a", (x, y, 3 * k), scale=(1.5, 1.5, 1.0), role="pilaster")
+           for k in range(storeys)]
+    out += [P("sm_dw_wall_clmn_top_f", (x, y, 3 * k), scale=(1.5, 1.5, 1.2), role="pilaster")
+            for k in range(storeys + 1)]
+    return out
+
+
+# beam courses, one per storey line from the ground up: (piece, depth scale)
+COURSES_ONE_STOREY = [("sm_dw_wall_beam_3m_b", 1.0), ("sm_dw_wall_beam_3m_c", 1.0)]
+COURSES_TWO_STOREYS = [("sm_dw_wall_beam_3m_b", 1.0), ("sm_dw_wall_beam_3m_a", 1.1),
+                       ("sm_dw_wall_beam_3m_c", 1.0)]
+
+
+def courses(s, beams):
+    """A beam course on every storey line (z 0, 3, 6 ...) over every ground-floor wall bay."""
+    bays = [p for p in s if p["role"] == "wall" and p["loc"][2] == 0]
+    return [P(beam, (w["loc"][0], w["loc"][1], 3 * k), w["yaw"], (1, depth, 1), role="course")
+            for k, (beam, depth) in enumerate(beams) for w in bays]
+
+
 def dwarf_house_01():
     """9 x 6 m one-storey gable house, dressed block (_C), slate roof. The floor slab
     sits on the terrain (no below-grade skirt, Mike 2026-10-15). Footprint centred on
@@ -90,22 +136,12 @@ def dwarf_house_01():
     s += wall_line(back, (-3, 3), "x")
     s += wall_line(west, (-4.5, -1.5), "y")
     s += wall_line(east, (4.5, -1.5), "y")
-    # corners: column with the square Clmn_Top_D as cap (dwarf_house_a) and as base
-    # (Mike, 2026-10-15, after the first Kit import)
     for x in (-4.5, 4.5):
         for y in (-3, 3):
-            s.append(P("sm_dw_wall_clmn_3m_c", (x, y, 0), role="corner"))
-            for z in (0, 3):
-                s.append(P("sm_dw_wall_clmn_top_d", (x, y, z), scale=(1.1, 1.1, 1.2), role="corner"))
-    # door pilasters on the front wall seams
-    for x in (-1.5, 1.5):
-        s.append(P("sm_dw_wall_clmn_3m_a", (x, -3, 0), scale=(1.5, 1.5, 1.0), role="pilaster"))
-        s.append(P("sm_dw_wall_clmn_top_f", (x, -3, 0), scale=(1.5, 1.5, 1.2), role="pilaster"))
-        s.append(P("sm_dw_wall_clmn_top_f", (x, -3, 3), scale=(1.5, 1.5, 1.2), role="pilaster"))
-    # base and eave courses on every wall bay
-    for w in [p for p in s if p["role"] == "wall"]:
-        s.append(P("sm_dw_wall_beam_3m_b", (w["loc"][0], w["loc"][1], 0), w["yaw"], role="course"))
-        s.append(P("sm_dw_wall_beam_3m_c", (w["loc"][0], w["loc"][1], 3), w["yaw"], role="course"))
+            s += column(x, y, 1, role="corner")
+    for x in (-1.5, 1.5):  # door pilasters on the front wall seams
+        s += pilaster(x, -3, 1)
+    s += courses(s, COURSES_ONE_STOREY)
     # gable roof, ridge along X at y 0, z 4.5
     for x in (-3, 0, 3):
         s.append(P("sm_dw_roof_str_a1", (x, -3, 3), 0, role="roof"))
@@ -153,27 +189,19 @@ def great_hall_01():
         s.append(P("sm_dw_wall_3m_corn_win_c", (sx * ix, sy * iy, 3), yaw, role="chamfer"))
         # junction columns where the chamfer meets the long wall and the end wall
         for jx, jy in ((sx * ix, sy * hy), (sx * hx, sy * iy)):
-            for z in (0, 3):
-                s.append(P("sm_dw_wall_clmn_3m_c", (jx, jy, z), role="column"))
-            for z in (0, 6):
-                s.append(P("sm_dw_wall_clmn_top_d", (jx, jy, z), scale=(1.1, 1.1, 1.2), role="column"))
+            s += column(jx, jy, 2)
         # floor half tile in the chamfer cell, roof facet over it
         s.append(P("sm_dw_ground_3m_a1_corner", (sx * (hx - 1.5), sy * (hy - 1.5), 0), yaw + 90, role="floor"))
         s.append(P("sm_dw_roof_cor_tri_a1", (sx * ix, sy * iy, 6), yaw + 90, role="roof"))
-    # door pilasters, double height
-    for x in (-1.5, 1.5):
-        for z in (0, 3):
-            s.append(P("sm_dw_wall_clmn_3m_a", (x, -hy, z), scale=(1.5, 1.5, 1.0), role="pilaster"))
-        for z in (0, 3, 6):
-            s.append(P("sm_dw_wall_clmn_top_f", (x, -hy, z), scale=(1.5, 1.5, 1.2), role="pilaster"))
-    # courses: base, string (between storeys) and eave, on every wall bay and across the chamfers
-    for z, beam, sy_ in ((0, "sm_dw_wall_beam_3m_b", 1.0), (3, "sm_dw_wall_beam_3m_a", 1.1),
-                         (6, "sm_dw_wall_beam_3m_c", 1.0)):
-        for w in [p for p in s if p["role"] == "wall" and p["loc"][2] == 0]:
-            s.append(P(beam, (w["loc"][0], w["loc"][1], z), w["yaw"], (1, sy_, 1), role="course"))
+    for x in (-1.5, 1.5):  # door pilasters, double height
+        s += pilaster(x, -hy, 2)
+    # courses: base, string (between storeys) and eave, on every wall bay and across the
+    # chamfers (scaled 1.5 along the beam, turned 45 degrees, as in dwarf_house_b)
+    s += courses(s, COURSES_TWO_STOREYS)
+    for k, (beam, depth) in enumerate(COURSES_TWO_STOREYS):
         for sx, sy in corners:
             yaw = math.degrees(math.atan2(-sy, sx))
-            s.append(P(beam, (sx * (hx - 1.5), sy * (hy - 1.5), z), yaw, (1.5, sy_, 1), role="course"))
+            s.append(P(beam, (sx * (hx - 1.5), sy * (hy - 1.5), 3 * k), yaw, (1.5, depth, 1), role="course"))
     # hipped roof: panels on every straight wall rise 1.5 m to the deck edge
     for x in xs:
         s.append(P("sm_dw_roof_str_a1", (x, -hy, 6), 0, role="roof"))
@@ -212,13 +240,57 @@ def great_hall_01():
     return s
 
 
-BUILDINGS = {"erebor_dwarf_house_01": dwarf_house_01, "erebor_great_hall_01": great_hall_01}
+def barracks_01():
+    """24 x 12 m two-storey barracks (8 x 4 bays), dressed block (_C), 12 m gable roof in stone
+    (two rows of 3 m panels a side, ridge along X at z 9), two pilastered doors, dormitory
+    windows on the upper storey. Floor on the terrain. Centred on the origin; front = -Y."""
+    hx, hy = 12.0, 6.0
+    xs = [-10.5, -7.5, -4.5, -1.5, 1.5, 4.5, 7.5, 10.5]
+    ys = [-4.5, -1.5, 1.5, 4.5]
+    s = []
+    walls = {
+        (-hy, 0): ["win_c3", "door_c1", "win_c3", "win_c1", "win_c1", "win_c3", "door_c1", "win_c3"],
+        (-hy, 3): ["win2_c1"] * 8,
+        (hy, 0): ["c", "win_c1", "c", "win_c1", "win_c1", "c", "win_c1", "c"],
+        (hy, 3): ["win_c1", "c", "win_c1", "c", "c", "win_c1", "c", "win_c1"],
+    }
+    for (y, z), row in walls.items():
+        s += wall_line([f"sm_dw_wall_3m_{w}" for w in row], (xs[0], y), "x", z=z)
+    for x in (-hx, hx):
+        s += wall_line([f"sm_dw_wall_3m_{w}" for w in ("win_c1", "c", "c", "win_c1")], (x, ys[0]), "y", z=0)
+        s += wall_line([f"sm_dw_wall_3m_{w}" for w in ("win_c2", "win_c1", "win_c1", "win_c2")], (x, ys[0]), "y", z=3)
+    # corner columns and the centre pilaster of each long wall, two high
+    for cx, cy in [(sx * hx, sy * hy) for sx in (-1, 1) for sy in (-1, 1)] + [(0.0, -hy), (0.0, hy)]:
+        s += column(cx, cy, 2)
+    for x in (-9.0, -6.0, 6.0, 9.0):  # pilasters beside each door (doors at x -7.5 and 7.5)
+        s += pilaster(x, -hy, 1)
+    s += courses(s, COURSES_TWO_STOREYS)  # base, string between the storeys, eave
+    # 12 m gable: two rows of stone panels a side, ridge strip at z 9, A1 + A2 gable wedges
+    for x in xs:
+        for y, z, yaw in ((-hy, 6, 0), (-3.0, 7.5, 0), (hy, 6, 180), (3.0, 7.5, 180)):
+            s.append(P("sm_dw_roof_str_b1", (x, y, z), yaw, role="roof"))
+        s.append(P("sm_dw_roof_side_str_a1", (x, 0.0, 9.0), 90, role="ridge"))
+    for x in (-hx, hx):
+        s.append(P("sm_dw_roof_side_a1", (x, -4.5, 6), 0, role="gable"))
+        s.append(P("sm_dw_roof_side_a2", (x, -1.5, 6), 0, role="gable"))
+        s.append(P("sm_dw_roof_side_a2", (x, 1.5, 6), 180, role="gable"))
+        s.append(P("sm_dw_roof_side_a1", (x, 4.5, 6), 180, role="gable"))
+    # floor: carved stone A2 at its flat .lod2 (seen only through doors and windows)
+    for x in xs:
+        for y in ys:
+            s.append(P("sm_dw_ground_3m_a2", (x, y, 0), role="floor", base_lod="2"))
+    return s
 
-# What the probe needs to know about each building beyond its placements.
-LAYOUT = {
-    "erebor_dwarf_house_01": {"eave": 3.0, "roof": "gable", "ridge_axis": "x",
-                              "half": [4.5, 3.0], "chamfer": 0.0},
-    "erebor_great_hall_01": {"eave": 6.0, "roof": "hip", "half": [10.5, 6.0], "chamfer": 3.0},
+
+BUILDINGS = {"erebor_dwarf_house_01": dwarf_house_01, "erebor_great_hall_01": great_hall_01,
+             "erebor_barracks_01": barracks_01}
+
+# What the probe cannot read from the placements: the roof form, and for a gable its ridge
+# axis and its rise above the eave. Eave, half sizes and chamfer come from the walls.
+ROOF = {
+    "erebor_dwarf_house_01": {"roof": "gable", "ridge_axis": "x", "rise": 1.5},
+    "erebor_great_hall_01": {"roof": "hip"},
+    "erebor_barracks_01": {"roof": "gable", "ridge_axis": "x", "rise": 3.0},
 }
 
 
@@ -242,9 +314,24 @@ def mat_color(name):
     return (r, g, b, 1.0)
 
 
+def split_kit_name(name):
+    """A kit object name -> (kind, piece, lod): ("bo", piece, None) for bo_<piece>,
+    ("lod", piece, "N") for <piece>.lodN or <piece>_lodN, else ("base", piece, None).
+    A bare trailing .lod is a base object: an artist typo can make it the only copy of a
+    sub-object (lond-cirion-buildings.md rule 3: a gable plate named .wall.lod)."""
+    if name.startswith("bo_"):
+        return "bo", name[3:], None
+    m = LOD_RE.match(name)
+    if m and m.group("n"):
+        return "lod", m.group("base"), m.group("n")
+    if m:
+        return "base", m.group("base"), None
+    return "base", name, None
+
+
 def load_kit():
     """-> {piece: {"base": mesh, "lods": {n: mesh}, "bo": mesh|None}}, world-space meshes
-    (node transform baked), keyed by lower-case base name."""
+    (node transform baked; normals flipped when a node mirrors), keyed by lower-case name."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     kit = {}
     for folder in ("meshes", "walls", "statues"):
@@ -263,15 +350,16 @@ def load_kit():
                     continue
                 me = o.data.copy()
                 me.transform(o.matrix_world)
-                name = o.name.lower()
-                if name.startswith("bo_"):
-                    kit.setdefault(name[3:], {"base": None, "lods": {}, "bo": None})["bo"] = me
-                    continue
-                m = LOD_RE.match(name)
-                if m:
-                    kit.setdefault(m.group("base"), {"base": None, "lods": {}, "bo": None})["lods"][m.group("n")] = me
+                if o.matrix_world.determinant() < 0:  # a mirrored node turns the faces inside out
+                    me.flip_normals()
+                kind, piece, n = split_kit_name(o.name.lower())
+                e = kit.setdefault(piece, {"base": None, "lods": {}, "bo": None})
+                if kind == "bo":
+                    e["bo"] = me
+                elif kind == "lod":
+                    e["lods"][n] = me
                 else:
-                    kit.setdefault(name, {"base": None, "lods": {}, "bo": None})["base"] = me
+                    e["base"] = me
             for o in new:
                 bpy.data.objects.remove(o, do_unlink=True)
     # Blender renames a material met again in a later file to "<name>.NNN"; the
@@ -372,8 +460,7 @@ def render_views(objs, cam, prefix, ground_z=0.0):
     for name, (d, scale) in views.items():
         d = d.normalized()
         cam.location = centre + d * span * 3
-        up = "Y" if name != "top" else "Y"
-        cam.rotation_euler = (centre - cam.location).to_track_quat("-Z", up).to_euler()
+        cam.rotation_euler = (centre - cam.location).to_track_quat("-Z", "Y").to_euler()
         cam.data.ortho_scale = scale
         bpy.context.scene.render.filepath = f"{prefix}_{name}.png"
         bpy.ops.render.render(write_still=True)
@@ -437,17 +524,20 @@ def select_only(objs):
 
 
 def join_tier(name, spec, kit, tier):
-    """One merged object for a tier ('base', 'lod3', 'lod6' or 'bo'); -> (object, expected tris)."""
+    """One merged object for a tier ('base', 'lod3', 'lod6' or 'bo');
+    -> (object, expected tris, {source: placements})."""
     scene = bpy.context.scene
     parts = []
     expect = 0
+    sources = Counter()
     for p in spec:
         if tier == "bo":
-            me, _ = bo_mesh(kit, p["piece"])
+            me, src = bo_mesh(kit, p["piece"])
             if me is None:
                 continue
         else:
-            me, _ = tier_mesh(kit[p["piece"]], p["piece"], tier, p["base_lod"])
+            me, src = tier_mesh(kit[p["piece"]], p["piece"], tier, p["base_lod"])
+        sources[src.split(" from ")[0]] += 1
         expect += tris(me)
         o = bpy.data.objects.new("part", me.copy())
         o.matrix_world = matrix(p)
@@ -467,7 +557,7 @@ def join_tier(name, spec, kit, tier):
     if tier == "bo":
         joined.data.materials.clear()
         joined.data.materials.append(bpy.data.materials.get("stone") or bpy.data.materials.new("stone"))
-    return joined, expect
+    return joined, expect, dict(sources)
 
 
 def export_fbx(objs, path):
@@ -479,49 +569,109 @@ def export_fbx(objs, path):
                              add_leaf_bones=False, path_mode="AUTO")
 
 
+def export_problems(stats, missing_bodies):
+    """What must stop an export: a tier whose triangles differ from the sum of its parts
+    (a dropped part), a material with a Blender .NNN suffix (the Kit binds by exact name),
+    a piece whose collision body is missing."""
+    problems = []
+    for oname, s in stats.items():
+        if s["tris"] != s["expected_sum"]:
+            problems.append(f"{oname}: tris {s['tris']} != part sum {s['expected_sum']}")
+        dup = [m for m in s["materials"] if re.search(r"\.\d{3}$", m)]
+        if dup:
+            problems.append(f"{oname}: duplicate-suffixed materials {dup}")
+    if missing_bodies:
+        problems.append(f"no collision body for {sorted(set(missing_bodies))}")
+    return problems
+
+
 def export(name, spec, kit, out):
-    os.makedirs(EXPORT_DIR, exist_ok=True)
-    path = os.path.join(EXPORT_DIR, f"{name}.fbx")
-    if os.path.exists(path):
-        bak = path + ".bak-" + str(int(os.path.getmtime(path)))
-        os.replace(path, bak)
-        log(f"[export] previous file kept as {bak}")
-    stats, objs, warnings = {}, [], []
+    """Build every tier, refuse on any problem, then replace the live FBX. Nothing in the live
+    folder changes until the new FBX exists in full (staged in --out)."""
+    if os.path.normcase(os.path.abspath(out)) == os.path.normcase(os.path.abspath(EXPORT_DIR)):
+        raise RuntimeError(f"--out is the live folder {EXPORT_DIR}: stage the export elsewhere")
+    missing = sorted({p["piece"] for p in spec if p["piece"] not in kit or kit[p["piece"]]["base"] is None})
+    if missing:
+        raise RuntimeError(f"unknown pieces: {missing}")
+    expected = probe_layout(name, spec)  # ROOF and catalog errors surface before anything is built
+    missing_bodies = [p["piece"] for p in spec if bo_mesh(kit, p["piece"])[1] == "MISSING"]
+    stats, objs, tier_sources = {}, [], {}
     for tier in ("base", "lod3", "lod6", "bo"):
-        o, expect = join_tier(name, spec, kit, tier)
+        o, expect, sources = join_tier(name, spec, kit, tier)
         got = tris(o.data)
         mn = Vector(map(min, *[o.matrix_world @ Vector(c) for c in o.bound_box]))
         mx = Vector(map(max, *[o.matrix_world @ Vector(c) for c in o.bound_box]))
         stats[o.name] = {"tris": got, "expected_sum": expect,
                          "materials": [m.name for m in o.data.materials if m],
                          "min": [round(v, 3) for v in mn], "max": [round(v, 3) for v in mx]}
-        if got != expect:
-            warnings.append(f"{o.name}: tris {got} != part sum {expect}")
-        dup = [m.name for m in o.data.materials if m and re.search(r"\.\d{3}$", m.name)]
-        if dup:
-            warnings.append(f"{o.name}: duplicate-suffixed materials {dup}")
+        tier_sources[o.name] = sources
         objs.append(o)
         log(f"[export] {o.name}: {stats[o.name]}")
-    export_fbx(objs, path)
+    problems = export_problems(stats, missing_bodies)
+    if problems:
+        raise RuntimeError("export refused: " + "; ".join(problems))
+    staged = os.path.join(out, f"{name}.fbx")
+    export_fbx(objs, staged)
+    os.makedirs(EXPORT_DIR, exist_ok=True)
+    path = os.path.join(EXPORT_DIR, f"{name}.fbx")
+    if os.path.exists(path):
+        bak = path + ".bak-" + str(int(os.path.getmtime(path)))
+        shutil.copy2(path, bak)
+        log(f"[export] previous file kept as {bak}")
+    shutil.copy2(staged, path)
     log(f"[export] wrote {path}")
-    # frame probe: two asymmetric kit pieces exported untouched with the same settings,
-    # so a raw-FBX compare against their source files shows how the engine will read us
+    with open(os.path.join(out, f"{name}_expected.json"), "w", encoding="utf-8") as f:
+        json.dump(expected, f, indent=1)
+    write_import_note(name, path, stats, spec, tier_sources)
+    report = {"building": name, "fbx": path, "objects": stats, "tier_sources": tier_sources, "problems": []}
+    with open(os.path.join(out, f"{name}_export.json"), "w", encoding="utf-8") as f:
+        json.dump(report, f, indent=1)
+    return report
+
+
+FRAME_PROBE_PIECES = ("sm_dw_roof_str_a1", "sm_dw_wall_3m_corn_a")  # asymmetric in X and in Y
+
+
+def frame_probe(kit, out):
+    """Two untouched kit pieces exported with the building settings: fbx_frame_compare.py of
+    this file against their source FBX shows whether the engine reads an export like the kit."""
     probe = []
-    for piece in ("sm_dw_roof_str_a1", "sm_dw_wall_3m_corn_a"):
+    for piece in FRAME_PROBE_PIECES:
         o = bpy.data.objects.new(piece, kit[piece]["base"].copy())
         bpy.context.scene.collection.objects.link(o)
         probe.append(o)
-    export_fbx(probe, os.path.join(out, "frame_probe.fbx"))
-    expected = probe_layout(name, spec)
-    with open(os.path.join(out, f"{name}_expected.json"), "w", encoding="utf-8") as f:
-        json.dump(expected, f, indent=1)
-    write_import_note(name, path, stats, spec)
-    report = {"building": name, "fbx": path, "objects": stats, "warnings": warnings}
-    with open(os.path.join(out, f"{name}_export.json"), "w", encoding="utf-8") as f:
-        json.dump(report, f, indent=1)
-    for w in warnings:
-        log(f"[warn] {w}")
-    return report
+    path = os.path.join(out, "frame_probe.fbx")
+    export_fbx(probe, path)
+    log(f"[frame-probe] wrote {path}")
+
+
+def inspect(name, out):
+    """<out>/<name>_inspect.blend from the EXPORTED FBX: one collection per tier, only the
+    base tier visible, flat viewport colours per material (the textures do not resolve)."""
+    path = os.path.join(EXPORT_DIR, f"{name}.fbx")
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    try:
+        bpy.ops.wm.fbx_import(filepath=path)
+    except Exception:
+        bpy.ops.import_scene.fbx(filepath=path)
+    scene = bpy.context.scene
+    for label, oname in (("base", name), ("lod3", name + ".lod3"), ("lod6", name + ".lod6"),
+                         ("bo", "bo_" + name)):
+        obj = bpy.data.objects.get(oname)
+        if obj is None:
+            raise RuntimeError(f"{path}: no object {oname}")
+        col = bpy.data.collections.new(f"{label}  ({oname})")
+        scene.collection.children.link(col)
+        for c in list(obj.users_collection):
+            c.objects.unlink(obj)
+        col.objects.link(obj)
+        if label != "base":
+            bpy.context.view_layer.layer_collection.children[col.name].hide_viewport = True
+    for m in bpy.data.materials:
+        m.diffuse_color = mat_color(m.name)
+    blend = os.path.join(out, f"{name}_inspect.blend")
+    bpy.ops.wm.save_as_mainfile(filepath=blend)
+    log(f"[inspect] wrote {blend}")
 
 
 CATALOG = r"E:\LOTRAOMAssets\_export\erebor\catalog\erebor_catalog.json"
@@ -530,7 +680,8 @@ CATALOG = r"E:\LOTRAOMAssets\_export\erebor\catalog\erebor_catalog.json"
 def planned_openings(spec):
     """World-space rectangles of every see-through opening the plan places in a wall
     (catalog apertures through local Y, moved by the placement), for the probe."""
-    pieces = {p["name"].lower(): p for p in json.load(open(CATALOG, encoding="utf-8"))["pieces"]}
+    with open(CATALOG, encoding="utf-8") as f:
+        pieces = {p["name"].lower(): p for p in json.load(f)["pieces"]}
     out = []
     for p in spec:
         if p["role"] != "wall":
@@ -554,9 +705,12 @@ def planned_openings(spec):
 
 
 def probe_layout(name, spec):
-    """LAYOUT plus the planned openings, every straight wall line (span and height) and every
-    chamfer wall, for blender_probe_erebor_building.py."""
-    out = dict(LAYOUT[name])
+    """The probe's layout for blender_probe_erebor_building.py: the roof form (ROOF), the
+    planned openings, every straight wall line (span and height), every chamfer wall, and the
+    eave, half sizes, chamfer and gable ridge height derived from them."""
+    roof = dict(ROOF[name])
+    rise = roof.pop("rise", None)
+    out = dict(roof)
     out["openings"] = planned_openings(spec)
     lines = {}
     for p in spec:
@@ -571,6 +725,11 @@ def probe_layout(name, spec):
     out["walls"] = sorted(lines.values(), key=lambda w: (w["runs_along"], w["plane"]))
     out["chamfers"] = [{"piece": p["piece"], "pivot": list(p["loc"]), "yaw": p["yaw"], "z": p["loc"][2],
                         "window": "_win" in p["piece"]} for p in spec if p["role"] == "chamfer"]
+    out["eave"] = max(w["z_max"] for w in out["walls"])
+    out["half"] = [max(abs(w["plane"]) for w in out["walls"] if w["runs_along"] == axis) for axis in ("y", "x")]
+    out["chamfer"] = (out["half"][0] - abs(out["chamfers"][0]["pivot"][0])) if out["chamfers"] else 0.0
+    if rise is not None:
+        out["ridge_z"] = out["eave"] + rise
     return out
 
 
@@ -585,15 +744,15 @@ def unpackaged_materials(names):
     return [n for n in names if n.lower() not in have]
 
 
-def write_import_note(name, fbx, stats, spec):
+def write_import_note(name, fbx, stats, spec, tier_sources):
     base = stats[name]
     mats = base["materials"]
     missing = unpackaged_materials(mats)
     lines = [
         f"# {name}: Modding Kit import note",
         "",
-        f"Built by `tools/oneoff/blender_assemble_erebor_buildings.py` (issue #797) from the",
-        "Erebor kit pieces. Brief and evidence: `docs/kitbash/erebor/design-patterns.md`.",
+        "Built by `tools/oneoff/blender_assemble_erebor_buildings.py` (issue #797) from the",
+        "Erebor kit pieces. Recipe, brief and probe results: `docs/kitbash/erebor-buildings.md`.",
         "",
         "## Objects in the FBX",
         "",
@@ -623,16 +782,18 @@ def write_import_note(name, fbx, stats, spec):
         "- Origin: the centre of the footprint at grade. Wall bases and the underside of the",
         "  floor slab sit at z 0, so the floor sits on the terrain (top of slab 0.10 to 0.12 m).",
         f"  Lowest point z {base['min'][2]} (base beam and pilaster bases sink into the terrain).",
-        "- The engine reads Erebor FBX turned 180 degrees about Z from Blender, so the front",
-        "  (door side) faces +Y in the editor at rotation 0.",
+        "- Expected heading: the engine reads Erebor FBX turned 180 degrees about Z from Blender,",
+        "  so the front (door side) should face +Y in the editor at rotation 0. The frame rule",
+        "  predicts this; the editor has not yet confirmed it.",
         f"- {len(spec)} kit pieces merged into one entity: one prefab entity instead of {len(spec)}.",
         "",
         "## LOD tiers",
         "",
-        "`.lod3` uses each piece's `.lod2` (else `.lod4`, else LOD0); `.lod6` uses `.lod5`",
-        "(else `.lod4`, `.lod2`, LOD0). Roof pieces and plain walls have no authored LODs,",
-        "so they stay at full detail in every tier.",
-    ]
+        "Which authored level each tier takes, counted over the placements (`lod0` is a piece's",
+        "full-detail mesh; a piece with no lower level keeps it in every tier):",
+        "",
+    ] + [f"- `{oname}`: " + ", ".join(f"{n} {src}" for src, n in sorted(src_counts.items()))
+         for oname, src_counts in tier_sources.items()]
     with open(os.path.splitext(fbx)[0] + "_import.md", "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
 
@@ -640,25 +801,39 @@ def write_import_note(name, fbx, stats, spec):
 def main():
     global OUT
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    # clear the previous verdict before anything can fail, argument errors included
+    if "--out" in argv and argv.index("--out") + 1 < len(argv):
+        stale = os.path.join(argv[argv.index("--out") + 1], "DONE.txt")
+        if os.path.exists(stale):
+            os.remove(stale)
     ap = argparse.ArgumentParser()
     ap.add_argument("--building", required=True, choices=sorted(BUILDINGS))
     ap.add_argument("--preview", action="store_true")
     ap.add_argument("--export", action="store_true")
+    ap.add_argument("--frame-probe", action="store_true")
+    ap.add_argument("--inspect", action="store_true")
     ap.add_argument("--out", required=True)
     args = ap.parse_args(argv)
     OUT = args.out
     os.makedirs(OUT, exist_ok=True)
     done = os.path.join(OUT, "DONE.txt")
-    if os.path.exists(done):
+    if os.path.exists(done):  # --out=<dir> is not caught by the early clear
         os.remove(done)
     status = "ok"
     try:
-        spec = BUILDINGS[args.building]()
-        kit = load_kit()
-        if args.export:
-            export(args.building, spec, kit, OUT)
+        if args.inspect and (args.preview or args.export or args.frame_probe):
+            raise RuntimeError("--inspect reads the live FBX and runs alone")
+        if args.inspect:
+            inspect(args.building, OUT)
         else:
-            preview(args.building, spec, kit, OUT)
+            spec = BUILDINGS[args.building]()
+            kit = load_kit()
+            if args.preview or not (args.export or args.frame_probe):
+                preview(args.building, spec, kit, OUT)
+            if args.export:
+                export(args.building, spec, kit, OUT)
+            if args.frame_probe:
+                frame_probe(kit, OUT)
     except Exception:
         log(traceback.format_exc())
         status = "failed"
@@ -667,4 +842,5 @@ def main():
     log(f"[done] {status}")
 
 
-main()
+if __name__ == "__main__":
+    main()

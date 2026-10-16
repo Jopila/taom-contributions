@@ -15,7 +15,9 @@ original authors made with them. Per-piece sizes, pivots and openings are in
 - **Rebuilds:** `tools/oneoff/blender_render_erebor_prefab.py` rebuilt those prefabs from the
   source FBX (renders in `E:\LOTRAOMAssets\_export\erebor\prefab_renders\`).
 - **Join tests:** `tools/oneoff/blender_test_erebor_joins.py` placed every join below and measured
-  it (renders and `joins.json` in `E:\LOTRAOMAssets\_export\erebor\joins\`).
+  it (renders and `joins.json` in `E:\LOTRAOMAssets\_export\erebor\joins\`; the 1.5 m hip corner
+  in `joins_hip\` and the prop scale in `joins_props\`, which supersede the `joins\` entries of the
+  same name).
 
 ## The frame rule (verified)
 
@@ -38,10 +40,19 @@ panel row with the rule, and the `Castle_Tower_B1` bastion only lands on the mer
 - **A building assembled and exported in Blender** keeps its joins and arrives in the game turned
   180 degrees as a whole, which only changes its heading. Verified at the file level:
   `tools/oneoff/fbx_frame_compare.py` shows an exported piece stored with the same bounds and axis
-  header as in its kit source file ([erebor-buildings.md](../erebor-buildings.md)). The first Kit
-  import is the editor-side confirmation.
+  header as in its kit source file ([erebor-buildings.md](../erebor-buildings.md)). The editor
+  heading check is still open: see "Known open" there.
 - **The prefab euler order** is the engine's `ApplyEulerAngles`: about Z, then X, then Y, so
-  R = Rz Rx Ry. Almost every kit placement is Z-only.
+  R = Rz Rx Ry. Walls, roof panels and floor tiles almost always turn about Z only (38 of 2,723
+  wall, 30 of 1,442 roof panel and 32 of 3,745 floor tile placements tilt). Trims do not:
+  `Ground_Trim_3m_A2` tilts in 2,631 of 4,527 placements and `Roof_Side_Str_A1` in 1,185 of 1,844.
+- **A mirror is not a turn.** A placement with a negative scale (`dwarf_tower_ramp_a` places its
+  second ramp at scale -1, 1, 1) stays a mirror in the Blender frame, since C M C leaves
+  diag(-1, 1, 1) unchanged. Place it with that scale, never as yaw 180.
+- **Known gap in the miner:** the engine reads `rotation_mat`, then `non_orthogonal_rotation_mat`,
+  then `rotation_euler`. `mine_erebor_prefab_joins.py` reads only `rotation_euler`, so about 1,500
+  kit placements in `shogun_dwarf_prefabs.xml` and `fink_dwarf_prefabs.xml` count as unrotated in
+  the statistics above. No rule on this page comes from those placements.
 
 ## Measured conventions
 
@@ -54,7 +65,7 @@ panel row with the rule, and the `Castle_Tower_B1` bastion only lands on the mer
 | Floor | `Ground_3m_*` top of slab at z 0.10 to 0.12 above its pivot |
 | Roof pitch | 26.57 degrees (1.5 m over 3 m), every panel |
 | Eave | `Roof_Str` pivot on the wall centreline at the wall top: **no overhang** |
-| Ridge or deck | eave + 1.5 m (3 m set), eave + 0.75 m (1.5 m set) |
+| Ridge or deck | 3 m set: 1.5 m rise per panel row, so eave + 1.5 m over a 6 m span and eave + 3 m over a 12 m span; 1.5 m set: eave + 0.75 m |
 | Castle module | 20 m long, 6.2 m thick, walk at z 6, outer face -Y |
 
 ## Join matrix (tested)
@@ -76,7 +87,7 @@ joint. **Intersecting** counts triangle pairs that cut each other (designed over
 | 6 m gable | panels at y 0 yaw 0 and y 6 yaw 180; `Roof_Side_Str_A1` yaw 90 at (0, 3, 4.5); end walls yaw 90 at x - 1.5; `Roof_Side_A1` on them at z 3, yaw 0 at y 1.5 and yaw 180 at y 4.5 | `dwarf_house_a` | 0.02 | 5.43 | 235 |
 | Flat deck | `Roof_Top_A1` at (0, 4.5, 4.5) behind a panel at the origin; `Roof_Side_Str_A1` yaw 90 at (0, 3, 4.5) frames it; `Roof_Side_Cor_Out_A1` at (1.5, 0, 3) is the rib on the panel seam | `dwarf_house_b` | 0.02 | 0 | 80 |
 | Chamfer roof | `Roof_Cor_Tri_A1` on the `Corn` pivot at z 3, yaw = `Corn` yaw + 90 | `dwarf_house_b` | 0 | 0.06 | 62 |
-| 1.5 m hip corner | `Roof_Cor_Out_B1` at (1.5, 0) beside a `Str_A2` at the origin; the side panel is `Str_A2` yaw 90 at (1.5, 3.0) | Soisson and Shogun housing, 1,692 placements | 0 | 0 | 39 |
+| 1.5 m hip corner | `Roof_Cor_Out_B1` at (1.5, 0) beside a `Str_A2` at the origin; the side panel is `Str_A2` yaw 90 at (1.5, 3.0) | Soisson and Shogun housing: 282 `Cor_Out_B1` placements, 1,692 pair observations with `Str_A2` in 6 prefabs | 0 | 0 | 39 |
 | Floor | tiles every 3 m; `Ground_Trim_3m_A1` on the seam (x 1.5) | `dwarf_house_b` | 0.04 | 0.30 | 286 |
 | Plinth | two `Ground_6m_A1` 6 m apart under the walls | `dwarf_house_a` | 0 | 19.18 | 735 |
 | Castle run | next `Castle_Wall_A1_Str` at x + 20 | module length | 0.17 | 72.48 | 13 |
@@ -84,7 +95,7 @@ joint. **Intersecting** counts triangle pairs that cut each other (designed over
 | Castle ramp | `_Ramp` at x + 20 continues a wall at its low end | module length | 0.33 | 72.50 | 21 |
 | Bastion | `Castle_Tower_B1` at (1, -3, 0) | `dwarf_castle_wall_c` | 2.45 | 70.00 | 197 |
 | Wall stairs | `Castle_Wall_Stairs_A1` yaw 180 at (8.5, 4.5, 0) | `dwarf_castle_wall_c` | 0 | 107.75 | 957 |
-| Tower and ramps | `_Ramp` at (-14, 0.5) yaw 0 and (14, 0.5) yaw 180, both rising to the tower | `dwarf_tower_ramp_a` | 11.00 | 77.65 | 703 |
+| Tower and ramps | `_Ramp` at (-14, 0.5) yaw 0, and at (14, 0.5) mirrored across X (scale -1, 1, 1), both rising to the tower | `dwarf_tower_ramp_a` | 11.00 (yaw 180 test, re-test) | 77.65 (yaw 180 test) | 703 (yaw 180 test) |
 | Terrace row | `Platform_6m_A2` yaw 90 every 6 m | `dwarf_platform_b` | 0 | 6.97 | 940 |
 
 **Merlons and bastion merlons** always take their parent's exact transform (they share its pivot).
@@ -153,7 +164,8 @@ Further sections join every 20 m.
 ### Tower with ramps (`dwarf_tower_ramp_a`)
 
 - **Tower:** `Castle_Tower_A1` and `_A1_int` at the origin.
-- **Ramps:** a `Castle_Wall_A1_Ramp` (and merlons) at (-14, 0.5, 0) yaw 0 and (14, 0.5, 0) yaw 180. Each climbs from the walk height 6 m to 18 m at the tower.
+- **Ramps:** a `Castle_Wall_A1_Ramp` (and merlons) at (-14, 0.5, 0) yaw 0, and a second at (14, 0.5, 0) mirrored across X (scale -1, 1, 1, no turn). Each climbs from the walk height 6 m to 18 m at the tower. A yaw 180 copy is wrong: it also flips local Y and puts the battlement on the inner face.
+- **Join tests:** the "Tower and ramps" row above was measured with the yaw 180 reading, so its numbers are for the wrong placement. Re-test before the castle section is built.
 
 ## Lond Cirion rules, checked against this kit
 
@@ -182,9 +194,19 @@ Buildings assembled from these rules, their export and their probe results are i
 [erebor-buildings.md](../erebor-buildings.md). **Grade:** a building sits with the underside of
 its floor slab on the terrain (z 0); no below-grade skirt (Mike, 2026-10-15).
 
-## Open questions for Mike
+### Our 12 m gable (`erebor_barracks_01`)
 
-- **Confirm the round trip on the first Kit import:** the building should land turned 180 degrees as a whole and otherwise intact.
+No authored prefab has a gable this wide; the barracks proved it with the probe (0 open gable
+rays of 3,250).
+
+- **Panels:** two rows of 3 m `Roof_Str_B1` a side, the first at the eave (z 6, on the wall line
+  y -6 yaw 0 and y 6 yaw 180), the second at z 7.5 on y -3 and y 3.
+- **Ridge:** `Roof_Side_Str_A1` yaw 90 at (x, 0, 9), eave + 3 m.
+- **Gable ends:** on each end wall at z 6, `Roof_Side_A1` at y -4.5 (yaw 0) and y 4.5 (yaw 180),
+  `Roof_Side_A2` at y -1.5 (yaw 0) and y 1.5 (yaw 180).
+
+Open items for the Kit and the editor are in [erebor-buildings.md](../erebor-buildings.md),
+"Known open".
 
 ## Update rule
 
