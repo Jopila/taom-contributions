@@ -1628,5 +1628,11 @@
     <string id="aom_spc_wanderer_khand_7_name" text="{FIRSTNAME}·歐斯特拉坎" />
     <string id="aom_spc_wanderer_khand_8_name" text="{FIRSTNAME}·祖爾加里德" />
     <string id="aom_spc_wanderer_khand_9_name" text="{FIRSTNAME}·巴爾馬汗" />
+    <string id="aom_harad_lord_archer_name" text="Lord of Harwan (Archer)" />
+    <string id="aom_harad_lord_cavalry_name" text="Lord of Harwan (Cavalry)" />
+    <string id="aom_harad_lord_infantry_name" text="Lord of Harwan (Infantry)" />
+    <string id="aom_shaghana_lord_archer_name" text="Lord of Shaghana (Archer)" />
+    <string id="aom_shaghana_lord_cavalry_name" text="Lord of Shaghana (Cavalry)" />
+    <string id="aom_shaghana_lord_infantry_name" text="Lord of Shaghana (Infantry)" />
   </strings>
 </base>

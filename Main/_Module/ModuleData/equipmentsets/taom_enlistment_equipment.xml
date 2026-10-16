@@ -25,9 +25,9 @@
   i.e. the same Rivendell tree rivendell itself uses; spcultures.xslt gives
   battania (Variag/Khand) basic_troop=loke_rim_initiate /
   elite_basic_troop=loke_rim_cavalry, i.e. khuzait's Rhun tree. abanissa binds
-  harad_reg_levy / harad_serp_noble, aserai's Harad tree. Their rosters therefore
-  mirror rivendell, khuzait and aserai rank-for-rank (the generator's
-  TREE_ALIASES map reproduces them).
+  harad_reg_levy / harad_serp_noble, aserai's Harad tree. The generator's TREE_ALIASES map
+  builds their rosters from those trees, so they mirror rivendell, khuzait and aserai
+  rank-for-rank. The Harad-sphere archer bows come from the generator's ISSUE_LAUNCHER table.
 
   A cell is ABSENT when its group pool has no donor within one band of the rank. That is
   deliberate: an infantry-seeded roster under a cavalry id would read as an authored
@@ -45,119 +45,6 @@
 
     <!-- ASERAI -->
 
-    <EquipmentRoster id="enlist_aserai_infantry_recruit" culture="Culture.aserai">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_3_t3" />
-            <Equipment slot="Item1" id="Item.desert_round_shield" />
-            <Equipment slot="Head" id="Item.sk_hr_st_helmet_light_a" />
-            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
-            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
-            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_light_a" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <EquipmentRoster id="enlist_aserai_archer_recruit" culture="Culture.aserai">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.composite_bow" />
-            <Equipment slot="Item1" id="Item.bodkin_arrows_b" />
-            <Equipment slot="Item2" id="Item.bodkin_arrows_b" />
-            <Equipment slot="Item3" id="Item.aserai_sword_3_t3" />
-            <Equipment slot="Head" id="Item.sk_hr_st_helmet_light_a" />
-            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
-            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
-            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_light_a" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <EquipmentRoster id="enlist_aserai_cavalry_recruit" culture="Culture.aserai">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_lance_1_t5" />
-            <Equipment slot="Item1" id="Item.ornate_adarga" />
-            <Equipment slot="Item2" id="Item.eastern_javelin_3_t4" />
-            <Equipment slot="Head" id="Item.brass_aserai_helmet_b_open" />
-            <Equipment slot="Body" id="Item.aserai_scale_armor_on_chain" />
-            <Equipment slot="Leg" id="Item.strapped_mail_chausses" />
-            <Equipment slot="Gloves" id="Item.rough_tied_bracers" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <EquipmentRoster id="enlist_aserai_support_recruit" culture="Culture.aserai">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_3_t3" />
-            <Equipment slot="Head" id="Item.sk_hr_st_helmet_light_a" />
-            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
-            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
-            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_light_a" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <EquipmentRoster id="enlist_aserai_infantry_soldier" culture="Culture.aserai">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_lance_1_t5" />
-            <Equipment slot="Item1" id="Item.ornate_adarga" />
-            <Equipment slot="Item2" id="Item.eastern_javelin_3_t4" />
-            <Equipment slot="Head" id="Item.brass_aserai_helmet_b_open" />
-            <Equipment slot="Body" id="Item.aserai_scale_armor_on_chain" />
-            <Equipment slot="Leg" id="Item.strapped_mail_chausses" />
-            <Equipment slot="Gloves" id="Item.rough_tied_bracers" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <EquipmentRoster id="enlist_aserai_archer_soldier" culture="Culture.aserai">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.steppe_heavy_bow" />
-            <Equipment slot="Item1" id="Item.bodkin_arrows_b" />
-            <Equipment slot="Item2" id="Item.bodkin_arrows_b" />
-            <Equipment slot="Item3" id="Item.aserai_sword_3_t3" />
-            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_b" />
-            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_med_b" />
-            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_a" />
-            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_med_b" />
-            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_inf_med_a" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <EquipmentRoster id="enlist_aserai_support_soldier" culture="Culture.aserai">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_lance_1_t5" />
-            <Equipment slot="Head" id="Item.brass_aserai_helmet_b_open" />
-            <Equipment slot="Body" id="Item.aserai_scale_armor_on_chain" />
-            <Equipment slot="Leg" id="Item.strapped_mail_chausses" />
-            <Equipment slot="Gloves" id="Item.rough_tied_bracers" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <EquipmentRoster id="enlist_aserai_archer_veteran" culture="Culture.aserai">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.composite_steppe_bow" />
-            <Equipment slot="Item1" id="Item.steppe_arrows" />
-            <Equipment slot="Item2" id="Item.steppe_arrows" />
-            <Equipment slot="Item3" id="Item.aserai_sword_5_t4" />
-            <Equipment slot="Head" id="Item.brass_aserai_helmet_b_open" />
-            <Equipment slot="Body" id="Item.aserai_scale_armor_on_chain" />
-            <Equipment slot="Leg" id="Item.strapped_mail_chausses" />
-            <Equipment slot="Gloves" id="Item.rough_tied_bracers" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <EquipmentRoster id="enlist_aserai_cavalry_veteran" culture="Culture.aserai">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.composite_steppe_bow" />
-            <Equipment slot="Item1" id="Item.steppe_arrows" />
-            <Equipment slot="Item2" id="Item.steppe_arrows" />
-            <Equipment slot="Item3" id="Item.aserai_sword_5_t4" />
-            <Equipment slot="Head" id="Item.brass_aserai_helmet_b_open" />
-            <Equipment slot="Body" id="Item.aserai_scale_armor_on_chain" />
-            <Equipment slot="Leg" id="Item.strapped_mail_chausses" />
-            <Equipment slot="Gloves" id="Item.rough_tied_bracers" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <!-- Hand-tuned bows (2026-10-15): every Harad launcher (ladder_harad_bow_*) needs Bow 100, which an enlistee cannot equip, so the archer chain uses the vanilla steppe ladder: composite_bow, steppe_heavy_bow, composite_steppe_bow, steppe_war_bow. EnlistmentArcherLauncherDataTests pins it. -->
-    <EquipmentRoster id="enlist_aserai_archer_sergeant" culture="Culture.aserai">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.steppe_war_bow" />
-            <Equipment slot="Item1" id="Item.bodkin_arrows_b" />
-            <Equipment slot="Item2" id="Item.bodkin_arrows_b" />
-            <Equipment slot="Item3" id="Item.aserai_sword_5_t4" />
-            <Equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_a" />
-            <Equipment slot="Body" id="Item.sk_hr_st_chest_arc_heavy_a" />
-            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_heavy_b" />
-            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_heavy_b" />
-            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_arc_heavy_a" />
-        </EquipmentSet>
-    </EquipmentRoster>
 
     <!-- BATTANIA -->
 
@@ -3249,7 +3136,7 @@
     <!-- seeded by generate_enlistment_rosters.py (seed-missing) -->
     <EquipmentRoster id="enlist_shaghana_infantry_recruit" culture="Culture.shaghana">
         <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item0" id="Item.hr_st_mace_light_a" />
             <Equipment slot="Item1" id="Item.sm_sg_st_shield_large_light_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_inf_chest_light_a" />
@@ -3262,7 +3149,8 @@
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.hr_st_spear_light_b" />
             <Equipment slot="Item1" id="Item.sm_sg_st_shield_large_light_a" />
-            <Equipment slot="Item2" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Item3" id="Item.sg_st_javelin_light_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_inf_chest_med_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_med_b" />
@@ -3274,7 +3162,8 @@
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.hr_st_spear_med_b" />
             <Equipment slot="Item1" id="Item.sm_sg_st_shield_large_med_a" />
-            <Equipment slot="Item2" id="Item.aserai_sword_5_t4" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Item3" id="Item.sg_st_javelin_med_b" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_inf_chest_med_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_med_b" />
@@ -3286,7 +3175,8 @@
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.hr_st_spear_heavy_b" />
             <Equipment slot="Item1" id="Item.sm_sg_st_shield_large_heavy_a" />
-            <Equipment slot="Item2" id="Item.aserai_sword_5_t4" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Item3" id="Item.sg_st_javelin_med_b" />
             <Equipment slot="Head" id="Item.sk_sg_st_helmet_heavy_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_inf_chest_heavy_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_heavy_b" />
@@ -3299,7 +3189,7 @@
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.composite_bow" />
             <Equipment slot="Item1" id="Item.hr_st_arrows_a" />
-            <Equipment slot="Item2" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_arc_med_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_med_b" />
@@ -3312,7 +3202,7 @@
             <Equipment slot="Item0" id="Item.composite_steppe_bow" />
             <Equipment slot="Item1" id="Item.hr_st_arrows_a" />
             <Equipment slot="Item2" id="Item.hr_st_arrows_a" />
-            <Equipment slot="Item3" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item3" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_arc_med_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_med_b" />
@@ -3325,7 +3215,7 @@
             <Equipment slot="Item0" id="Item.steppe_war_bow" />
             <Equipment slot="Item1" id="Item.hr_st_arrows_a" />
             <Equipment slot="Item2" id="Item.hr_st_arrows_a" />
-            <Equipment slot="Item3" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item3" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_sg_st_helmet_heavy_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_arc_heavy_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_heavy_b" />
@@ -3337,6 +3227,7 @@
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.hr_st_spear_light_b" />
             <Equipment slot="Item1" id="Item.sm_sg_st_shield_cav_light_a" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_cav_med_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_med_b" />
@@ -3370,7 +3261,7 @@
     </EquipmentRoster>
     <EquipmentRoster id="enlist_shaghana_support_recruit" culture="Culture.shaghana">
         <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item0" id="Item.hr_st_mace_light_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_inf_chest_light_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_light_b" />
@@ -3380,17 +3271,7 @@
     </EquipmentRoster>
     <EquipmentRoster id="enlist_shaghana_support_soldier" culture="Culture.shaghana">
         <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_3_t3" />
-            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
-            <Equipment slot="Body" id="Item.sk_sg_st_chest_inf_chest_med_a" />
-            <Equipment slot="Leg" id="Item.sk_sg_st_grvs_med_b" />
-            <Equipment slot="Gloves" id="Item.sk_sg_st_bracer_med_b" />
-            <Equipment slot="Cape" id="Item.sk_sg_st_pauld_inf_med_a" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <EquipmentRoster id="enlist_shaghana_support_veteran" culture="Culture.shaghana">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_5_t4" />
+            <Equipment slot="Item0" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_inf_chest_med_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_med_b" />
@@ -3400,7 +3281,7 @@
     </EquipmentRoster>
     <EquipmentRoster id="enlist_shaghana_support_sergeant" culture="Culture.shaghana">
         <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_5_t4" />
+            <Equipment slot="Item0" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_sg_st_helmet_heavy_a" />
             <Equipment slot="Body" id="Item.sk_sg_st_chest_inf_chest_heavy_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_heavy_b" />
@@ -3413,7 +3294,7 @@
     <!-- seeded by generate_enlistment_rosters.py (seed-missing) -->
     <EquipmentRoster id="enlist_abanissa_infantry_recruit" culture="Culture.abanissa">
         <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item0" id="Item.hr_st_mace_light_a" />
             <Equipment slot="Item1" id="Item.sm_hr_st_shield_large_light_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
@@ -3426,7 +3307,7 @@
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.hr_st_spear_light_b" />
             <Equipment slot="Item1" id="Item.sm_hr_st_shield_large_light_a" />
-            <Equipment slot="Item2" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_med_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
@@ -3438,7 +3319,7 @@
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.hr_st_spear_med_b" />
             <Equipment slot="Item1" id="Item.sm_hr_st_shield_large_med_a" />
-            <Equipment slot="Item2" id="Item.aserai_sword_5_t4" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_med_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
@@ -3450,7 +3331,7 @@
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.hr_st_spear_heavy_b" />
             <Equipment slot="Item1" id="Item.sm_hr_st_shield_large_heavy_a" />
-            <Equipment slot="Item2" id="Item.aserai_sword_5_t4" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_a" />
             <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_heavy_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_heavy_b" />
@@ -3486,7 +3367,7 @@
             <Equipment slot="Item0" id="Item.composite_steppe_bow" />
             <Equipment slot="Item1" id="Item.hr_st_arrows_a" />
             <Equipment slot="Item2" id="Item.hr_st_arrows_a" />
-            <Equipment slot="Item3" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item3" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_hr_st_chest_arc_med_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
@@ -3499,7 +3380,7 @@
             <Equipment slot="Item0" id="Item.steppe_war_bow" />
             <Equipment slot="Item1" id="Item.hr_st_arrows_a" />
             <Equipment slot="Item2" id="Item.hr_st_arrows_a" />
-            <Equipment slot="Item3" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item3" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_a" />
             <Equipment slot="Body" id="Item.sk_hr_st_chest_arc_heavy_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_heavy_b" />
@@ -3511,6 +3392,7 @@
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.hr_st_spear_light_b" />
             <Equipment slot="Item1" id="Item.sm_hr_st_shield_cav_light_a" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_hr_st_chest_cav_med_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
@@ -3544,7 +3426,7 @@
     </EquipmentRoster>
     <EquipmentRoster id="enlist_abanissa_support_recruit" culture="Culture.abanissa">
         <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Item0" id="Item.hr_st_mace_light_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_b" />
@@ -3554,17 +3436,7 @@
     </EquipmentRoster>
     <EquipmentRoster id="enlist_abanissa_support_soldier" culture="Culture.abanissa">
         <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_3_t3" />
-            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
-            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_med_a" />
-            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
-            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_med_b" />
-            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_inf_med_a" />
-        </EquipmentSet>
-    </EquipmentRoster>
-    <EquipmentRoster id="enlist_abanissa_support_veteran" culture="Culture.abanissa">
-        <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_5_t4" />
+            <Equipment slot="Item0" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
             <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_med_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
@@ -3574,7 +3446,171 @@
     </EquipmentRoster>
     <EquipmentRoster id="enlist_abanissa_support_sergeant" culture="Culture.abanissa">
         <EquipmentSet>
-            <Equipment slot="Item0" id="Item.aserai_sword_5_t4" />
+            <Equipment slot="Item0" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_heavy_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_heavy_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_heavy_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_inf_heavy_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+
+    <!-- seeded by generate_enlistment_rosters.py (seed-missing) -->
+    <EquipmentRoster id="enlist_aserai_infantry_recruit" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_mace_light_a" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_large_light_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_light_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_inf_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_infantry_soldier" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_spear_light_b" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_large_light_a" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_med_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_inf_med_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_infantry_veteran" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_spear_med_b" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_large_med_a" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_med_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_inf_med_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_infantry_sergeant" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_spear_heavy_b" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_large_heavy_a" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_heavy_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_heavy_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_heavy_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_inf_heavy_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_archer_recruit" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.composite_bow" />
+            <Equipment slot="Item1" id="Item.default_arrows" />
+            <Equipment slot="Item2" id="Item.aserai_sword_3_t3" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_arc_light_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_arc_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_archer_soldier" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.steppe_heavy_bow" />
+            <Equipment slot="Item1" id="Item.bodkin_arrows_b" />
+            <Equipment slot="Item2" id="Item.bodkin_arrows_b" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_arc_med_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_a" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_med_a" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_arc_med_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_archer_veteran" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.composite_steppe_bow" />
+            <Equipment slot="Item1" id="Item.hr_st_arrows_a" />
+            <Equipment slot="Item2" id="Item.hr_st_arrows_a" />
+            <Equipment slot="Item3" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_arc_med_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_med_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_arc_med_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_archer_sergeant" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.steppe_war_bow" />
+            <Equipment slot="Item1" id="Item.hr_st_arrows_a" />
+            <Equipment slot="Item2" id="Item.hr_st_arrows_a" />
+            <Equipment slot="Item3" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_arc_heavy_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_heavy_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_heavy_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_arc_heavy_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_cavalry_recruit" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_spear_light_b" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_cav_light_a" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_cav_med_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_med_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_cav_med_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_cavalry_veteran" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_spear_med_b" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_cav_med_a" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_cav_med_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_med_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_cav_med_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_cavalry_sergeant" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_spear_heavy_b" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_cav_heavy_a" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_cav_heavy_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_heavy_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_heavy_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_cav_heavy_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_support_recruit" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_mace_light_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_light_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_inf_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_support_soldier" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_med_b" />
+            <Equipment slot="Gloves" id="Item.sk_hr_st_bracer_med_b" />
+            <Equipment slot="Cape" id="Item.sk_hr_st_pauld_inf_med_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_aserai_support_sergeant" culture="Culture.aserai">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_heavy_a" />
             <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_heavy_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_heavy_b" />

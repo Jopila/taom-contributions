@@ -864,5 +864,52 @@
     <string id="aom_arthedain_veteran_citadel_guard_name" text="[阿尔塞丹] 老兵城堡卫士" />
     <string id="aom_arthedain_veteran_ranger_name" text="[阿尔塞丹] 老兵游侠" />
     <string id="aom_arthedain_warden_name" text="[阿尔塞丹] 佛诺斯特守护者" />
+    <string id="aom_harad_pz_camel_lancer_name" text="[Harwan] Pezarsan Camel Lancer" />
+    <string id="aom_harad_pz_camel_marauder_name" text="[Harwan] Pezarsan Camel Marauder" />
+    <string id="aom_harad_pz_camel_rider_name" text="[Harwan] Pezarsan Camel Rider" />
+    <string id="aom_harad_pz_dune_cataphract_name" text="[Harwan] Pezarsan Dune Cataphract" />
+    <string id="aom_harad_pz_levy_name" text="[Harwan] Pezarsan Levy" />
+    <string id="aom_harad_redserp_archer_name" text="[Shaghana] Red Serpent Archer" />
+    <string id="aom_harad_redserp_bowman_name" text="[Shaghana] Red Serpent Bowman" />
+    <string id="aom_harad_redserp_cavalry_name" text="[Shaghana] Red Serpent Cavalry" />
+    <string id="aom_harad_redserp_footman_name" text="[Shaghana] Red Serpent Footman" />
+    <string id="aom_harad_redserp_guard_name" text="[Shaghana] Red Serpent Guard" />
+    <string id="aom_harad_redserp_infantry_name" text="[Shaghana] Red Serpent Infantry" />
+    <string id="aom_harad_redserp_lancer_name" text="[Shaghana] Red Serpent Lancer" />
+    <string id="aom_harad_redserp_marksman_name" text="[Shaghana] Red Serpent Marksman" />
+    <string id="aom_harad_redserp_noble_name" text="[Shaghana] Red Serpent Noble" />
+    <string id="aom_harad_reg_archer_name" text="[Harwan] Harad Archer" />
+    <string id="aom_harad_reg_bowman_name" text="[Harwan] Harad Bowman" />
+    <string id="aom_harad_reg_cavalry_name" text="[Harwan] Harad Cavalry" />
+    <string id="aom_harad_reg_footman_name" text="[Harwan] Harad Footman" />
+    <string id="aom_harad_reg_horseman_name" text="[Harwan] Harad Horseman" />
+    <string id="aom_harad_reg_infantry_name" text="[Harwan] Harad Infantry" />
+    <string id="aom_harad_reg_levy_name" text="[Harwan] Harad Levy" />
+    <string id="aom_harad_reg_militia_name" text="[Harwan] Harad Militia" />
+    <string id="aom_harad_reg_scout_arc_name" text="[Harwan] Harad Scout" />
+    <string id="aom_harad_reg_scout_cav_name" text="[Harwan] Harad Scout" />
+    <string id="aom_harad_reg_warrior_name" text="[Harwan] Harad Warrior" />
+    <string id="aom_harad_serp_archer_name" text="[Harwan] Serpent Archer" />
+    <string id="aom_harad_serp_bowman_name" text="[Harwan] Serpent Bowman" />
+    <string id="aom_harad_serp_cavalry_name" text="[Harwan] Serpent Cavalry" />
+    <string id="aom_harad_serp_footman_name" text="[Harwan] Serpent Footman" />
+    <string id="aom_harad_serp_guard_name" text="[Harwan] Serpent Guard" />
+    <string id="aom_harad_serp_infantry_name" text="[Harwan] Serpent Infantry" />
+    <string id="aom_harad_serp_lancer_name" text="[Harwan] Serpent Lancer" />
+    <string id="aom_harad_serp_marksman_name" text="[Harwan] Serpent Marksman" />
+    <string id="aom_harad_serp_noble_name" text="[Harwan] Serpent Noble" />
+    <string id="aom_harad_sreg_archer_name" text="[Shaghana] Southron Archer" />
+    <string id="aom_harad_sreg_bowman_name" text="[Shaghana] Southron Bowman" />
+    <string id="aom_harad_sreg_cavalry_name" text="[Shaghana] Southron Cavalry" />
+    <string id="aom_harad_sreg_footman_name" text="[Shaghana] Southron Footman" />
+    <string id="aom_harad_sreg_horseman_name" text="[Shaghana] Southron Horseman" />
+    <string id="aom_harad_sreg_infantry_name" text="[Shaghana] Southron Infantry" />
+    <string id="aom_harad_sreg_levy_name" text="[Shaghana] Southron Levy" />
+    <string id="aom_harad_sreg_militia_name" text="[Shaghana] Southron Militia" />
+    <string id="aom_harad_sreg_scout_arc_name" text="[Shaghana] Southron Scout" />
+    <string id="aom_harad_sreg_scout_cav_name" text="[Shaghana] Southron Scout" />
+    <string id="aom_harad_sreg_warrior_name" text="[Shaghana] Southron Warrior" />
+    <string id="aom_merc_harad_pz_levy_name" text="[Harwan] Hired Pezarsan Levy" />
+    <string id="aom_merc_harad_redserp_noble_name" text="[Shaghana] Hired Red Serpent Noble" />
   </strings>
 </base>

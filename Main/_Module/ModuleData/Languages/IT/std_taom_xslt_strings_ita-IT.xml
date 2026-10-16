@@ -1478,5 +1478,6 @@
     <string id="TAOM_hero_SE9_s_bn" text="Pharazîn è una stregona númenóreana nera, e la vera autorità a Cirith Nargil ogni volta che il marito scende in campo. Il suo nome richiama l'ultimo Re di Númenor." />
     <string id="TAOM_hero_SE9_c1_bn" text="Zigûrbêl è l'erede di Cirith Nargil ed è addestrato nelle arti oscure. Il suo nome significa Amante dello Stregone, che è come Númenor chiamava Sauron prima di scoprire cosa fosse." />
     <string id="TAOM_hero_SE9_c2_bn" text="Zimrazîn è la seconda figlia del Signore della Spada e la più pericolosa dei due. Ha i talenti della madre e nulla della sua pazienza." />
+    <string id="aom_aserai_cb_name" text="Harwan" />
   </strings>
 </base>

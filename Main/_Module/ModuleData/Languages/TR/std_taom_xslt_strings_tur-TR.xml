@@ -1478,5 +1478,6 @@
     <string id="TAOM_hero_SE9_s_bn" text="Pharazîn bir Kara Númenorlu büyücüdür ve kocası sefere çıktığında Cirith Nargil'deki gerçek otoritedir. Adı, Númenor'un son Kralını anımsatır." />
     <string id="TAOM_hero_SE9_c1_bn" text="Zigûrbêl, Cirith Nargil'in varisidir ve kara sanatlarda eğitilmiştir. Adı Büyücü-Sever anlamına gelir; Númenor, onun ne olduğunu öğrenmeden önce Sauron'a böyle derdi." />
     <string id="TAOM_hero_SE9_c2_bn" text="Zimrazîn, Kılıç-Efendi'nin ikinci çocuğudur ve ikisinin daha tehlikeli olanıdır. Annesinin yeteneklerine sahiptir, sabrına ise hiç." />
+    <string id="aom_aserai_cb_name" text="Harwan" />
   </strings>
 </base>

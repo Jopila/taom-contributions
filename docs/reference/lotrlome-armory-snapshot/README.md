@@ -25,7 +25,7 @@ Any future Steam-Workshop or manual update of `LOTRLOME_Armory` will overwrite o
 | `project.mbproj` | The native-side registration manifest. **Added 2026-08-28** because the warg's three new `<file>` rows live only here. | ~3.6 KB |
 | `Prefabs/taom_howdah_platform.xml` | The war elephant's howdah platform (renamed from `taom_howdah_agent.xml` 2026-09-19, #627, so a stale copy of the old name in an installed TAOM module can never compete): a floor fitted to the elite howdah's deck, four `bo_barrier` rails and four crew frames, every body `moveable`. `ElephantMissionBehavior` instantiates it by name. **Added 2026-09-18**, when it moved here from the TAOM module; the Armory loads `Prefabs/` with no SubModule row. The live copy lives at `LOTRLOME_Armory/Prefabs/`, not `ModuleData/`, and `HowdahPrefabTests` fails if it differs from this one. | ~10 KB |
 | `Prefabs/taom_mumakil_platform.xml` | The mumakil war tower's crew platform (#627 phase 2): three floor bodies (`moveable` + `barrier`) at the measured deck heights and eight crew frames, every entity `visible_only_when_editing` because the tower the player sees is `sk_mumakil_platform_a1` on the Horse item. Authored MOUNT-LOCAL, 1:1 with the FBX; `TaomMumakilPlatform` applies the 3.0x from `Agent.AgentScale` at runtime, so nothing here may be pre-multiplied. `MumakilCrewSpawner` instantiates it by name, and the platform attaches `Modules/TAOM/NavMeshPrefabs/taom_mumakil_platform_navmesh.bin` (face group 1) without which the crew fall to the ground: physics is what they stand on, navmesh is what makes it valid, and the tower needs both. Authored at FINAL in-game size since 2026-09-21; nothing scales it at runtime. **Added 2026-09-20.** `MumakilPlatformTests` fails if the live copy differs from this one. | ~11 KB |
-| `weapon_descriptions.xslt` | The Armory's additive override of Native's `<AvailablePieces>` lists: which crafting pieces each `WeaponDescription` accepts, and therefore which usages a crafted weapon resolves to. **Carries the one-handed-polearm registration** for the Dale spears and the Black Numenorean lance (see APPLIED EDIT below). Refreshed from the live file on 2026-09-25, after KEYforce's Lamedon drop replaced the `wm_swan_knight_spear_*` pieces with `wm_gondor_spear_flag_*` and `wm_gondor_light_spear_*`; the copy had last been taken on 2026-08-20 and lagged every Armory change since. Refreshed again on 2026-09-26 for the hill troll war hammer's two `TwoHandedMace` registrations (`wm_hill_troll_2h_hammer_head`, `wm_hill_troll_2h_hammer_handle`, after the cave troll mace's; [lotrlome-hill-troll-changes.md](../lotrlome-hill-troll-changes.md)), and on 2026-10-15 for KEYforce's Harad sword and spear pieces, couchable since that install (#805). | ~86 KB |
+| `weapon_descriptions.xslt` | The Armory's additive override of Native's `<AvailablePieces>` lists: which crafting pieces each `WeaponDescription` accepts, and therefore which usages a crafted weapon resolves to. **Carries the one-handed-polearm registration** for the Dale spears and the Black Numenorean lance (see APPLIED EDIT below). Refreshed from the live file on 2026-09-25, after KEYforce's Lamedon drop replaced the `wm_swan_knight_spear_*` pieces with `wm_gondor_spear_flag_*` and `wm_gondor_light_spear_*`; the copy had last been taken on 2026-08-20 and lagged every Armory change since. Refreshed again on 2026-09-26 for the hill troll war hammer's two `TwoHandedMace` registrations (`wm_hill_troll_2h_hammer_head`, `wm_hill_troll_2h_hammer_handle`, after the cave troll mace's; [lotrlome-hill-troll-changes.md](../lotrlome-hill-troll-changes.md)), and on 2026-10-15 for KEYforce's Harad sword and spear pieces, couchable since that install (#805), and on 2026-10-16 for his javelin and mace pieces (lotraom-assets `03320a65`). | ~86 KB |
 
 > The first three are race-defining XML and are auto-loaded from every module root. `weapon_descriptions.xslt` is neither — it is here because it now carries an applied edit, and unlike the other three the live copy is already CRLF, so live and snapshot are byte-identical rather than differing by line ending.
 
@@ -447,6 +447,40 @@ half with three edits his files do not carry. **Live edits his next drop or an A
 - **Replay after a drop:** take his new files through a three-way merge, then re-add the three edits by hand (no tool
   writes them) until KEYforce carries them upstream; the gate names whatever is missing.
 
+**Merging an artist's live file.** The live file is CRLF and his mirror blobs are LF, so a raw `git merge-file` reports
+the whole file as one conflict. Use `python tools/merge_live_file.py <live> --base <rev>:<path> --theirs <rev>:<path>
+--repo E:/repos/lotraom-assets`: it merges on LF, restores live's terminator, BOM and final newline, refuses an XML
+result that does not parse, and is a dry run until `--apply` (which writes a `.bak-<tag>-<timestamp>` backup first).
+Conflicts exit 1 and write nothing. The base is the mirror revision with the smallest diff to his file, not his commit's
+parent: `--base-search <mirror-path> --theirs <rev>:<path>` ranks them.
+
+### ⚠️ APPLIED EDIT: KEYforce's Harad javelins, maces and bardings (lotraom-assets `03320a65`, 2026-10-16)
+
+His `03320a65` added Shaghana javelins, Harad one-handed maces and the regular-line bardings and saddles. He committed
+the TAOM half himself (`d94ee1631`), and his art and runtime caches were already live, byte-identical to his commit.
+TAOM installed the ModuleData half:
+
+| File | How |
+|---|---|
+| `ModuleData/LOTRLOME_crafting_pieces.xml`, `LOTRLOME_items/harad/body_armors.xml`, `crafting_templates.xslt` | his files verbatim (live equalled his parent revision) |
+| `ModuleData/LOTRLOME_items/harad/weapons.xml`, `weapon_descriptions.xslt` | three-way merge from his parent `85b201c17`: his additions plus the three #805 edits above (longbows off the shelves, the `TAOM-HARAD-COUCH` block). Live is CRLF and his blobs LF, so merge on LF and write CRLF, or the whole file reads as one conflict |
+| `Languages/loc_harad.xml` | English rows for his 6 weapon and 14 barding and saddle names, under a `TAOM: English rows for KEYforce's lotraom-assets 03320a65` comment |
+| `Languages/loc_LOTRLOME_crafting_pieces.xml` | English rows for his 12 javelin and mace pieces, under the same comment |
+| `ModuleData/weapon_descriptions.xslt`, `OneHandedPolearm_JavelinAlternative` | his six javelin rows sat inside a template that `generate_starter_kit.py` created and wraps in `TAOM-STARTER-KIT` markers; its `--apply` rewrites such a block to its own three rows and `--revert` deletes it, which would leave the javelins throw-only. The markers now fence only the three `starter_spear_blade_*` rows inside the list, so the template is the Armory's; the transform output is unchanged and the tool reports `noop` |
+
+- **Gate:** `HaradWeaponsLiveEditTests`. `LiveHaradWeapons_EveryPiece_IsListedInEveryNeededDescription_OutsideStarterKitBlocks`
+  checks every spear, javelin and mace piece against `TwoHandedPolearm_Couchable`, `Javelin`,
+  `OneHandedPolearm_JavelinAlternative` and `Mace` with the starter-kit blocks set aside (red with the wrapped template:
+  6 pieces). `LiveHaradWeaponPieceAndHarnessNames_HaveEnglishRows` also covers the regular-line bardings and saddles;
+  run against his committed files it names 82 keys (his 32 new ones and the 50 from #805).
+- **Backups** beside each file: `*.bak-keyforce-harad-20261016-120114` (the five ModuleData files and both loc files),
+  `weapon_descriptions.xslt.bak-harad-javalt-20261016-133303` (before the marker move).
+- **Not registered:** 138 Harad item names had no English row before this drop and still have none: 42 in
+  `body_armors.xml` (38 chest and tunic pieces, 4 Pezarsan camel bardings), 44 shoulder, 16 head, 12 arm, 12 leg and 12
+  `starter_kit.xml` names.
+- **Replay after a drop:** as for #805 above, then move the starter-kit markers in `OneHandedPolearm_JavelinAlternative`
+  again if his file still wraps the whole template; the first test names the six pieces until it is done.
+
 ### ⚠️ APPLIED EDIT: shield-compatible polearms registered under `OneHandedPolearm` (2026-08-10, extended 2026-08-20)
 
 **This is a live edit to `ModuleData/weapon_descriptions.xslt` that a future Armory update WILL
@@ -703,7 +737,13 @@ damage out of the cache, so a replay cannot bring it back.
 
 ## Snapshot date
 
-2026-10-15 (later): `weapon_descriptions.xslt` refreshed by a byte copy of the live file after KEYforce's Harad
+2026-10-16: `weapon_descriptions.xslt` refreshed by a byte copy of the live file after KEYforce's javelins and maces
+were installed (lotraom-assets `03320a65`): his six mace pieces in `Mace` and six javelin pieces in `Javelin` and
+`OneHandedPolearm_JavelinAlternative`, 21 lines, with the `TAOM-HARAD-COUCH` block kept. The previous copy was
+byte-identical to the live `weapon_descriptions.xslt.bak-keyforce-harad-20261016-120114`. Refreshed again at 13:33 after
+the `TAOM-STARTER-KIT` markers in `OneHandedPolearm_JavelinAlternative` moved inside the list (APPLIED EDIT above).
+
+Previous: 2026-10-15 (later): `weapon_descriptions.xslt` refreshed by a byte copy of the live file after KEYforce's Harad
 regular weapons were installed (#805, lotraom-assets `db981663`): his `[Harad] regular weapons` block of 4 sword pieces
 in the one-handed sword description and 11 spear pieces in three polearm descriptions, plus the same 11 spear pieces
 added to `TwoHandedPolearm_Couchable`, which his commit left out. The previous copy was byte-identical to the live

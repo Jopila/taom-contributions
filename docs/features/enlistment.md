@@ -1002,8 +1002,19 @@ vanilla steppe bows (`composite_bow` 30/51, `steppe_heavy_bow` 30/52, `composite
 player equips the kit by hand; `EnlistmentArcherLauncherDataTests` pins it. The same day KEYforce's
 Harad regular weapons (#805) changed their donor troops, so the 29 shaghana and abanissa kits were
 removed and reseeded with `--seed-missing` (they now issue his spears, sword, shields and arrows), and
-the steppe bows were put back on their archer chains. The generator has no `--verify`, so a later
-donor change goes unnoticed until someone reseeds.
+the steppe bows were put back on their archer chains. KEYforce's javelins and maces (lotraom-assets
+`03320a65`) changed the donors again on 2026-10-16, and the same reseed now issues 27 kits: his maces in
+place of the aserai swords (not on the abanissa archer recruit, whose donor `harad_militia_archer` still
+carries one), his javelins on the shaghana infantry from soldier up, and his sword on both cavalry
+recruits. Neither culture has a `support_veteran` kit any more: it would equal the soldier's, so the
+resolver descends to the soldier kit and `EnlistmentEquipmentService` issues it a second time at
+veteran (its ledger checks the requested rank, not the roster). The aserai kits, KEYforce's hand edits
+of 2026-10-10 kept by decision D3, were reseeded the same day on Mike's word (decision D5 in
+[rca-keyforce-harad-javelins-2026-10-16.md](../reviews/rca-keyforce-harad-javelins-2026-10-16.md)): 14 kits,
+identical to abanissa's, which share the tree. The steppe bows now come from the generator's
+`ISSUE_LAUNCHER` table, so a reseed is one command per culture:
+`python tools/generate_enlistment_rosters.py --apply --culture <c> --reseed`. The generator has no
+`--verify`, so a later donor change goes unnoticed until someone reseeds.
 
 **A cell is never emitted weaponless.** That is not a nicety: the resolver probes *existence*, so
 an armour-only roster would end the fallback walk and shadow the armed kit the player would

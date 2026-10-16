@@ -2948,6 +2948,15 @@
 	<string id="TAOM_liege_rhun_female" text="{=TAOM_liege_rhun_female}Loke-Kan of Rhun" />
 
 
+	<!-- ============================================== -->
+
+	<!-- CUSTOM BATTLE (custom_battle/custom_battle_cultures.xslt) -->
+
+	<!-- ============================================== -->
+
+	<string id="aom_aserai_cb_name" text="{=aom_aserai_cb_name}Harwan" />
+
+
 
 </strings>
 

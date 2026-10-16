@@ -1532,6 +1532,13 @@
 			<AvailablePiece id="sm_dg_khml_mace_blade_1h_c"/>
 			<AvailablePiece id="sm_dg_khml_axe_handle_c"/>
 			<AvailablePiece id="sm_dg_khml_axe_handle_d"/>
+			<!--[Harad] regular javelins / maces-->
+			<AvailablePiece id="sm_hr_st_mace_1h_blade_light_a" />
+			<AvailablePiece id="sm_hr_st_mace_1h_blade_med_a" />
+			<AvailablePiece id="sm_hr_st_mace_1h_blade_med_b" />
+			<AvailablePiece id="sm_hr_st_mace_1h_handle_light_a" />
+			<AvailablePiece id="sm_hr_st_mace_1h_handle_med_a" />
+			<AvailablePiece id="sm_hr_st_mace_1h_pommel_med_a" />
 			<xsl:apply-templates select="@*|node()"/>
 			<!-- TAOM-STARTER-KIT:START -->
 			<AvailablePiece id="starter_wm_dol_goldur_1h_mace_a01_blade"/>
@@ -1621,6 +1628,13 @@
 			<AvailablePiece id="wm_gundabad_javelin_a01_handle"/>
 			<AvailablePiece id="wm_gundabad_javelin_a02_blade"/>
 			<AvailablePiece id="wm_gundabad_javelin_a02_handle"/>
+			<!--[Harad] regular javelins / maces-->
+			<AvailablePiece id="sm_hr_st_jav_blade_light_a" />
+			<AvailablePiece id="sm_hr_st_jav_blade_med_a" />
+			<AvailablePiece id="sm_hr_st_jav_handle_light_a" />
+			<AvailablePiece id="sm_hr_st_jav_handle_med_a" />
+			<AvailablePiece id="sm_hr_st_jav_guard_med_a" />
+			<AvailablePiece id="sm_hr_st_jav_pommel_a" />
 			<xsl:apply-templates select="@*|node()"/>
 			<!-- TAOM-STARTER-KIT:START -->
 			<AvailablePiece id="starter_wm_gundabad_javelin_a01_blade"/>
@@ -1632,16 +1646,23 @@
 	</xsl:template>
 
 
-	<!-- TAOM-STARTER-KIT:START -->
 	<xsl:template match="WeaponDescription[@id='OneHandedPolearm_JavelinAlternative']/AvailablePieces">
 		<AvailablePieces>
+			<!-- TAOM-STARTER-KIT:START -->
 			<AvailablePiece id="starter_spear_blade_27"/>
 			<AvailablePiece id="starter_spear_blade_42"/>
 			<AvailablePiece id="starter_spear_blade_15"/>
+			<!-- TAOM-STARTER-KIT:END -->
+			<!--[Harad] regular javelins / maces-->
+			<AvailablePiece id="sm_hr_st_jav_blade_light_a" />
+			<AvailablePiece id="sm_hr_st_jav_blade_med_a" />
+			<AvailablePiece id="sm_hr_st_jav_handle_light_a" />
+			<AvailablePiece id="sm_hr_st_jav_handle_med_a" />
+			<AvailablePiece id="sm_hr_st_jav_guard_med_a" />
+			<AvailablePiece id="sm_hr_st_jav_pommel_a" />
 			<xsl:apply-templates select="@*|node()"/>
 		</AvailablePieces>
 	</xsl:template>
-	<!-- TAOM-STARTER-KIT:END -->
 	<!-- TAOM-STARTER-KIT:START -->
 	<xsl:template match="WeaponDescription[@id='TwoHandedPolearm_Thrown']/AvailablePieces">
 		<AvailablePieces>

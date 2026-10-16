@@ -1478,5 +1478,6 @@
     <string id="TAOM_hero_SE9_s_bn" text="Pharazîn ist eine schwarznúmenórische Zauberin und die wahre Herrin von Cirith Nargil, sooft ihr Gemahl zu Felde zieht. Ihr Name erinnert an den letzten König von Númenor." />
     <string id="TAOM_hero_SE9_c1_bn" text="Zigûrbêl ist der Erbe von Cirith Nargil und in den dunklen Künsten geschult. Sein Name bedeutet Liebhaber des Zauberers – so nannte Númenor Sauron, ehe es erkannte, was er war." />
     <string id="TAOM_hero_SE9_c2_bn" text="Zimrazîn ist das zweite Kind des Schwertherrn und die gefährlichere der beiden. Sie hat die Gaben ihrer Mutter und nichts von deren Geduld." />
+    <string id="aom_aserai_cb_name" text="Harwan" />
   </strings>
 </base>

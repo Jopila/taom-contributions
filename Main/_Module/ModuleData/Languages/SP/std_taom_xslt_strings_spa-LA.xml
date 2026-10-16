@@ -1478,5 +1478,6 @@
     <string id="TAOM_hero_SE9_s_bn" text="Pharazîn es una hechicera numenoreana negra, y la verdadera autoridad en Cirith Nargil siempre que su esposo sale a campaña. Su nombre recuerda al último Rey de Númenor." />
     <string id="TAOM_hero_SE9_c1_bn" text="Zigûrbêl es el heredero de Cirith Nargil y está instruido en las artes oscuras. Su nombre significa Amante del Hechicero, que es como Númenor llamaba a Sauron antes de saber lo que era." />
     <string id="TAOM_hero_SE9_c2_bn" text="Zimrazîn es la segunda hija del Señor de la Espada y la más peligrosa de los dos. Tiene los talentos de su madre y nada de su paciencia." />
+    <string id="aom_aserai_cb_name" text="Harwan" />
   </strings>
 </base>

@@ -28,7 +28,7 @@
 | `sk_dg_uruk_*`, `sk_dg_orc_*` | `dol_guldur/` | |
 | `sk_dg_khml_*` (Khamul) | `rhun/` | Cross-faction with Dol Guldur — lives in `rhun/` |
 | `sk_gb_uruk_*` | `gundabad/` | |
-| `sk_hr_st_*`, `sk_sg_st_*` (armour); `hr_st_*`, `sm_hr_st_*`, `sm_sg_st_*` (weapons, shields) | `harad/` | Harwan (Harad) and Shaghana. The weapons sit in `harad/weapons.xml` (#805), the only culture folder with a `weapons.xml`; the other cultures' troop weapons are in the global files (the ladder launchers sit in each folder's `ranged_ladder.xml`, the player starter weapons in `starter_kit.xml`) |
+| `sk_hr_st_*`, `sk_sg_st_*` (armour, bardings, saddles); `hr_st_*`, `sg_st_*`, `sm_hr_st_*`, `sm_sg_st_*` (weapons, shields) | `harad/` | Harwan (Harad) and Shaghana. The weapons sit in `harad/weapons.xml` (#805), the only culture folder with a `weapons.xml`; the other cultures' troop weapons are in the global files (the ladder launchers sit in each folder's `ranged_ladder.xml`, the player starter weapons in `starter_kit.xml`) |
 | `sk_dwarf_erebor_*` | `erebor/` | Core dwarven set |
 | `sk_dwarf_iron_*` | **`iron_hills/`** | NOT `erebor/` — caught in #211 deep-review (RCA: `docs/reviews/rca-multi-culture-armor-revamp-2026-05-22.md`) |
 | `sk_dwarf_dain_*` | `erebor/` | Dain's set |
@@ -93,6 +93,14 @@ the 07:36 packs do not hold it. A stale pack misleads only a tool that reads it:
 `PASS` is against the tree the game loads. The packs matter only for a module with no `Assets/`
 tree, which loads them instead (Native does). The 2026-08-28 case, from when the tools read the
 packs: [`docs/features/armoury-mesh-cleanup.md`](../features/armoury-mesh-cleanup.md).
+
+## Item and piece names need a Languages row
+
+An artist drop often ships `name="{=KEY}English"` with no `<string id=KEY>` row in the Armory's
+top-level `Languages/*.xml`, so the translator cannot see the name. `python tools/register_armory_names.py --check`
+fails on any such key outside `tools/armory-unregistered-names-baseline.txt` (a ratchet that only
+shrinks), and without a flag it lists the rows `--apply` would append to the right `loc_<folder>.xml`
+(`--prefix <regex>` limits it to an artist's new ids).
 
 ## Deleted on 2026-08-28 (do not re-reference)
 
