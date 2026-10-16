@@ -11,9 +11,9 @@ namespace TAOM.Features.MissionPerf.Hooks;
 // brackets only, no transpiler: each class is a void prefix at Priority.First and a void finalizer at
 // Priority.Last, each taking only Harmony's __state (out on the prefix, ref on the finalizer), so the bracket
 // encloses every other patch on the method (Patch23 on SpawnAgent, Patch97 on OnTick) and still closes when the
-// method throws (its void finalizer leaves the exception alone; on the four shielded targets (the camera from
-// the second game start) PatchShield's value-returning finalizer makes Harmony throw, and RethrowStackPreserver
-// keeps the trace). Verified on the
+// method throws (its void finalizer leaves the exception alone; on the four shielded targets, all four from a
+// process's second game start since Patch23 and both Patch98 categories apply after PatchShield's second pass,
+// PatchShield's value-returning finalizer makes Harmony throw, and RethrowStackPreserver keeps the trace). Verified on the
 // installed v1.5.3, none of them virtual (the sixth, below, is a sealed explicit interface implementation,
 // verified on v1.5.5):
 //   private void Mission.WaitTickCompletion(): `while (!tickCompleted) Thread.Sleep(1);`, called first in

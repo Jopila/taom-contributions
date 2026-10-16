@@ -638,7 +638,8 @@ def aggregate_ticks(ticks: list) -> dict | None:
     managed = sum(t[k] for t in ticks for k in _MANAGED_PHASES)
     # One log is one build, so its windows all carry cameraMs or none do; a row mixes them only in an
     # edited log. A window without the column keeps its camera time inside missionTickMs or otherMs, so
-    # it adds nothing here and the breakdown still sums to the wall clock.
+    # it adds nothing here and the breakdown still sums to the wall clock. In such a row the cameraMs rate
+    # is spread over the whole row's wall clock, so it is a lower bound, and the report does not say so.
     columns = PHASES_WITH_CAMERA if any(t[CAMERA] is not None for t in ticks) else PHASES
     by_type: dict = {}
     for t in ticks:

@@ -292,7 +292,7 @@ Seven mission targets carry patches the profiler or the hitch probe relies on. F
 | `Mission.TickAgentsAndTeamsImp` | Patch91's bracket (every player) | excluded: its body sets `tickCompleted` | none there; from the asynchronous agent tick the exception reaches native's job thread, from the inline one (fast-forward) it reaches `OnTick` |
 | `Mission.SpawnAgent` | Patch23's colour prefix (every player), Patch97's attribution transpiler (profiler on), Patch98's bracket | shielded (D13) | the spawn returns null in place of its agent; strips Patch23's prefix, Patch97's transpiler and Patch98's prefix |
 | `ManagedScriptHolder.TickComponents` | Patch97's attribution transpiler (profiler on), Patch98's bracket | excluded, as built | none there; native reaches it through a `ManagedCallbacks` shim, which PatchShield also excludes |
-| `MissionScreen.UpdateCamera` (the explicit `IMissionSystemHandler` method) | Patch98's camera bracket (own category) | shielded (2026-10-15, #809), from a process's second game start | cannot hang the wait: the camera call comes before `tickCompleted = false` (`Mission.cs` 3745-3749); costs that frame's camera update, and strips Patch98's camera prefix |
+| `MissionScreen.UpdateCamera` (the explicit `IMissionSystemHandler` method) | Patch98's camera bracket (own category) | shielded (2026-10-15, #809) | cannot hang the wait: the camera call comes before `tickCompleted = false` (`Mission.cs` 3745-3749); costs that frame's camera update, and strips Patch98's camera prefix |
 
 Finalizers are never stripped, so Patch91's and Patch98's stay. On an excluded target, for any owner's patch on it,
 PatchShield's swallow of a MissingMethod, MissingField or TypeLoad exception (every other exception is rethrown) and its
@@ -304,12 +304,11 @@ this way, naming the method, its patch owners and what is given up. The hitch pr
 `Mission.OnTick` and `Mission.OnPreTick` were on the list too (plan 028), for cost alone. Maintainer
 decision D13 (2026-10-03) took them off once plan 034 had made PatchShield's finalizer cheap (the figures are in `PatchShieldPolicy`'s `ExcludedTargetNamespacePrefixes` comment): two calls per frame and one per spawn were small even before that, and do not pay for the
 rescue the exclusion gave up. They are shielded like any other patched method again, from the pass that sees them. A foreign mod's load-time patch on either is covered from
-a process's first game (pass 1, or pass 2 for a patch applied after it); TAOM's own patches there
-(Patch97, Patch98) apply in the first game's late batch, after both passes, so they are
-covered from the second game start, when pass 2 attaches what was patched since the last pass. Patch98's camera
-category applies in the same game-initialization step, so the camera target is shielded from the second game
-start too; with a co-op module active PatchShield installs nothing at all. The
-finalizer then runs on both once per frame, alongside `Mission.Tick` (Patch37), `MissionState.TickMissionAux`
+a process's first game (pass 1, or pass 2 for a patch applied after it). TAOM's own patches on the four shielded
+targets (Patch23 on `SpawnAgent`, Patch97, and both Patch98 categories, the camera's included) apply in the first
+game's late batch, after both passes, so these targets are covered from the second game start, when pass 2
+attaches what was patched since the last pass; with a co-op module active PatchShield installs nothing at all. The
+finalizer then runs on `OnPreTick`, `OnTick` and the camera once per frame (and on `SpawnAgent` once per spawn), alongside `Mission.Tick` (Patch37), `MissionState.TickMissionAux`
 (Patch91) and `MissionState.OnTick` (Patch43), which already carried it.
 
 The rescue itself: PatchShield classifies by exception type only. Any MissingMethod, MissingField or
@@ -492,8 +491,9 @@ still lists `MissionScreen.UpdateCamera`. At an engine bump,
 `CameraTarget_IsMissionScreensSealedExplicitUpdateCamera` fails first. Decision (2026-10-15): the target stays
 shielded by PatchShield, from a process's second game start (see the PatchShield section), like `Mission.OnTick`
 under D13; a swallowed missing-API exception there skips the rest of `CameraTick` and the managed `PreDisplay()`
-call that frame; the engine's frame function calls the same once-per-frame pre-display before it displays (native
-0x344A0 calls 0x7D800, whose latch at +8 lets it run once per frame), so that work most likely moves to `otherMs`
+call that frame; the engine's frame function calls the same once-per-frame pre-display before it displays (on the
+v1.5.5 client, native 0x344A0 calls 0x7D800 in one of its branches, and 0x7D800's latch at +8, cleared by the
+display call 0x7DD60 that follows it, lets it run once per frame), so that work most likely moves to `otherMs`
 (UNVERIFIED in game).
 
 **Phase columns per mode.** `[TickProfile]`, `[Hitch]` and `[TickSummary]` keep plan 028's format
@@ -702,9 +702,9 @@ exception and its strip of the offending patch are given up.
 method: plan 028 had excluded the first two and plan 041 the third, for cost, and maintainer decision
 D13 (2026-10-03) took them off once plan 034 had made PatchShield's finalizer cheap (the figures are in `PatchShieldPolicy`'s `ExcludedTargetNamespacePrefixes` comment), at
 two calls per frame and one per spawn. `MissionScreen.UpdateCamera` was never on the exclusion list: it is
-shielded by the decision of 2026-10-15 (#809), from a process's second game start, since its category applies
-after PatchShield's second pass. A shield finalizer runs inside those four brackets like every
-other patch on the method (the bracket's prefix is `Priority.First` and its finalizer `Priority.Last`).
+shielded by the decision of 2026-10-15 (#809). All four are shielded from a process's second game start (TAOM
+applies their patches after PatchShield's second pass; see the PatchShield section). A shield finalizer runs
+inside those four brackets like every other patch on the method (the bracket's prefix is `Priority.First` and its finalizer `Priority.Last`).
 
 What that gives, and what it costs. A MissingMethod, MissingField or TypeLoad exception that escapes
 `SpawnAgent` is swallowed, whether it came from Patch23, another mod's patch or a foreign behaviour's

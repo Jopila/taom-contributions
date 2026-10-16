@@ -91,8 +91,8 @@ The one MEDIUM left was in the docs batch that ships in the same push.
 | S2 | LOW | `NativePinGateTests` still read raw text, so a commented-out `[TestCategory("BindingVerification")]` passed, and it took the class name from the file name | Codex F2; Lens 4 | Finding 10's fix anchored the regex to the class declaration but kept the text match | Reflection: the types that declare `KnownBuilds`, their compiled `TestCategory` attributes, both known tables pinned by name |
 | S3 | LOW | The frame table's PreDisplay clause put a v1.5.5 address (0x6FCDB0) under a table that pins native offsets to v1.5.3 (0x6FC5F0 there) | Lenses 1, 2 | Introduced by finding 5's fix, which read the decompile but not the doc's tag legend: the third instance of that class (2026-10-08 finding 26, finding 5) | Both builds named in the clause |
 | S4 | LOW | "CameraTick, then PreDisplay()" in five places: `MissionScreen` calls `PreDisplay()` only while the mission is Continuing and not `MissionEnded` (v1.5.5 `MissionScreen.cs:4159-4162`), so after a battle's result `cameraMs` times `CameraTick` alone | Lenses 1, 2; Codex S7 | Finding 6 corrected the caller's conditions and did not read the callee | One clause in the column row, the patch header, the camera hooks and the frame row |
-| S5 | LOW | "A swallowed missing-API exception skips that frame's PreDisplay()": native `pre_display` (0x7D800) is latched once per frame and the engine's frame function (0x344A0) calls it too, so the work most likely moves to `otherMs` | Lens 2 | Written from the managed call alone | Restated as UNVERIFIED in game, with the native evidence |
-| S6 | LOW | The camera target was called shielded without a condition; it applies in TAOM's game-init step, after PatchShield's pass 2, so it is shielded only from a process's second game start (never with co-op) | Lenses 2, 3, 5 | The doc already says this for Patch97 and Patch98; the new text did not read it | The PatchShield section gets the camera row and the timing |
+| S5 | LOW | "A swallowed missing-API exception skips that frame's PreDisplay()": on the v1.5.5 client, native `pre_display` (0x7D800) is latched once per frame and the engine's frame function (0x344A0) calls it too in one branch, so the work most likely moves to `otherMs` | Lens 2 | Written from the managed call alone | Restated as UNVERIFIED in game, with the native evidence |
+| S6 | LOW | The camera target was called shielded without a condition; it applies in TAOM's game-init step, after PatchShield's pass 2, so it is shielded only from a process's second game start (never with co-op) | Lenses 2, 3, 5 | The doc already says this for Patch97 and Patch98; the new text did not read it | The PatchShield section gets the camera row, and its timing paragraph covers all four shielded targets (Patch23 on `SpawnAgent` applies in the same late batch); the first fix wrote the timing for the camera alone, which the convergence pass corrected |
 | S7 | LOW | If `MissionScreen` cannot load, the index skips the camera class, its category applies nothing and returns true, so the install line still names the camera and no camera WARNING is written | Lenses 2, 5 | Finding 2's fix covered a category that throws, not one with no class | A doc clause (the skip writes its own ERROR into the startup notice); a code check was rejected (below) |
 | S8 | LOW | The Cost section set the new benchmark beside a five-bracket figure from 2026-10-03, implying the camera costs about 0.2 us | Lens 3 | Figures from different days on a machine whose timings drift by about 50% | A same-session A/B (five brackets 0.646, 0.665, 0.767 us; six brackets 0.836, 0.775, 0.715 us): the camera's cost is inside run noise |
 | S9 | LOW | The full-mode `[HitchDetail]` sample kept `onTickMs=6.30`, less than its `[Hitch]` partner's PreDisplay, camera and MissionTick time (8.85) | Lens 5 | Finding 7's re-derivation covered the three phase samples, not their detail partner | 9.55 in the doc and the pinned test |
@@ -113,6 +113,15 @@ The one MEDIUM left was in the docs batch that ships in the same push.
 - **A code check for S7** (Lens 2, Lens 5): the skip already writes an ERROR into the startup notice; a check would
   need a second way to resolve the camera type. Lens 6's idea that the index read a skipped class's category
   attribute on its own changes every category's result, so it needs the maintainer's decision.
+- **The install line's bookkeeping figure counts the camera bracket even when its category failed** (Lens 1):
+  `ProbeCostMeter` measures before either category applies, so the figure overstates a sub-microsecond cost by one
+  bracket pair in that rare case.
+- **`HitchProbeLines` drops the camera with `BracketMethods.Length - 1`** (Lens 1), which holds only while the camera
+  is last: `BuildProbeInstallLine_CameraCategoryFailed_OmitsTheCameraTarget` already fails on a reorder.
+- **Coverage labels for a mixed row in `perf_runs.py`** (focused Codex pass): no TAOM log produces a mixed row, so
+  the code comment states that its camera rate is a lower bound, and nothing more is added.
+- **Failing `NativePinGateTests` on any type that does not load** (focused Codex pass): it would break the no-game
+  runs Codex itself named; the two known tables are pinned by name, and the class summary states the limit.
 
 **A wave-1 note corrected:** Lens 5 said two of the four VanillaTuning stand-aside features have an MCM toggle. All
 four do (the mission-start guard's is "Survive Mission Start Failures"), so the docs batch's sentence about "one of
@@ -121,6 +130,22 @@ the four" was right as written.
 **Pattern:** the second review found the same root cause as the first, in two new forms. A fix was checked against
 its finding and not against its neighbours (S3, S9: finding 5's fix broke the doc's own tag rule; finding 7's missed
 the detail line). And text was written from the design, not the code that the review had changed (S12, S11).
+
+**Checks of the fix commits** (`382f5190a..b3f79a7be`): a convergence `deep-reviewer` and a focused Codex pass
+(`gpt-6-astra`, reasoning `high`, prompt in `docs/reviews/codex-adversarial-yotthani-review-fixes-2026-10-15.prompt.md`).
+Neither found a defect in the code or the tests; both confirmed the helper reproduces `caefaa1f3`'s three pins and
+that the engine claims hold on v1.5.5. They found five LOW items in comments, docs and this record:
+
+| # | Finding | Source | Fix |
+|---|---|---|---|
+| V1 | S6's fix gave the second-game-start timing to the camera alone; Patch23 on `SpawnAgent` and both Patch98 categories all apply in the same once-per-process game-init block, after PatchShield's pass 2 | Convergence | The PatchShield paragraph, the D13 paragraph and the patch header cover all four targets |
+| V2 | The native RVAs 0x344A0, 0x7D800 and 0x7DD60 were added without their build, and 0x344A0 calls 0x7D800 in one branch only | Convergence | "on the v1.5.5 client" and "in one of its branches" in the doc and the S5 row |
+| V3 | Two Lens 1 notes (the bookkeeping figure, `Length - 1`) were in no row | Convergence | Listed under "Rejected" with their reasons |
+| V4 | A mixed row's camera rate is spread over the whole row with no label | Codex | Comment only (rejected above) |
+| V5 | A pin table on a type that fails to load would escape the scan | Codex | Class summary states the limit (rejected above) |
+
+V1 and V2 are the same pattern again, in the fixes themselves: a statement about one member of a set (one target,
+one address) written without checking the set (all four targets, the doc's build rule).
 
 ## Engine bump
 

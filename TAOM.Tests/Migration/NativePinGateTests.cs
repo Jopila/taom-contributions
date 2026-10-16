@@ -16,7 +16,9 @@ namespace TAOM.Tests.Migration;
 /// LiveInstall; without <c>BindingVerification</c> an unlisted build reads Skipped and a bump ships without
 /// its row (the v1.5.5 SkeletonBuffer row was missed that way). The tables are found by reflection over the
 /// test assembly and the tags are read from the compiled class attributes, so comments, partial classes and
-/// file names cannot mislead it. Needs no game install, so it runs in every suite.
+/// file names cannot mislead it. Needs no game install, so it runs in every suite. Limit: a test type that fails
+/// to load is invisible to the scan (AccessTools.GetTypesFromAssembly drops it), so the two known tables are also
+/// pinned by name; a new table belongs in that list.
 /// </summary>
 [TestClass]
 public class NativePinGateTests
