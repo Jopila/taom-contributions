@@ -146,6 +146,13 @@ VILLAGES = [
     Village("village_GBC2_1", "Gash-nakh", "town_GBC2", "swine_farm",  "bluecraig", "sturgia_village_d", after="town_GBC2"),
     Village("village_GBC2_2", "Mok-bûr",   "town_GBC2", "cattle_farm", "bluecraig", "sturgia_village_k", after="town_GBC2"),
     Village("village_GBC2_3", "Zog-tang",  "town_GBC2", "silver_mine", "bluecraig", "sturgia_village_c", after="town_GBC2"),
+    # Gundabad's Carn Dûm (town_G3, tools/add_map_fortifications.py; Mike placed it 2026-10-15). The
+    # fief's shared stem is Dûm-, with Black Speech endings: -bosh this map's swine farms, lug tower,
+    # ghâsh fire, burzum darkness. Types by the orc per-fief rule (assign_orc_village_types.fief_types(4, "iron_mine")).
+    Village("village_G3_1", "Dûm-bosh",   "town_G3", "swine_farm",  "gundabad", "sturgia_village_c", after="town_G3"),
+    Village("village_G3_2", "Dûm-lug",    "town_G3", "cattle_farm", "gundabad", "sturgia_village_d", after="town_G3"),
+    Village("village_G3_3", "Dûm-ghâsh",  "town_G3", "iron_mine",   "gundabad", "sturgia_village_k", after="town_G3"),
+    Village("village_G3_4", "Dûm-burzum", "town_G3", "lumberjack",  "gundabad", "sturgia_village_l", after="town_G3"),
 ]
 INSERT_AFTER = "village_isengard_a"   # default anchor: last settlement of the Isengard block, and its last loc row
 

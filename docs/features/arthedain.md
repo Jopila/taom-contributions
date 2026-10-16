@@ -94,7 +94,7 @@ kingdom touches")
 | House of Arvedui (King Arvegil II) | 4 | Fornost Erain `town_AN2` (capital), Barad Forn `castle_AN9` |
 | House of Evendim | 3 | Annúminas `town_AN1`, Emyn Uial `castle_AN10` |
 | Wardens of Amon Sûl | 3 | Bree `town_AN3`, Amon Sûl `castle_AN4` |
-| House of the Baranduin | 2 | Weather Hills `castle_AN5`, Brandywine Bridge `castle_AN6` |
+| House of the Baranduin | 2 | Hoarwell Watch `castle_AN5`, Brandywine Bridge `castle_AN6` |
 | House of Emyn Beraid | 2 | Emyn Beraid `castle_AN8`, Forochel `castle_AN11` |
 
 Four lords per clan (two married couples), each with a distinct face taken from a shipped Gondor

@@ -63,7 +63,7 @@ FORTS = [
     Fort("castle_AN9", "Barad Forn", "clan_arthedain_1", "arthedain", "castle", "taom_gondor_castle_001_forceatmo", 800, "town_AN3"),
     Fort("castle_AN10", "Emyn Uial", "clan_arthedain_2", "arthedain", "castle", "taom_gondor_castle_002_forceatmo", 800, "castle_AN9"),
     Fort("castle_AN4", "Amon Sûl", "clan_arthedain_3", "arthedain", "castle", "taom_gondor_castle_003_forceatmo", 800, "castle_AN10"),
-    Fort("castle_AN5", "Weather Hills", "clan_arthedain_4", "arthedain", "castle", "taom_gondor_castle_001_forceatmo", 800, "castle_AN4"),
+    Fort("castle_AN5", "Hoarwell Watch", "clan_arthedain_4", "arthedain", "castle", "taom_gondor_castle_001_forceatmo", 800, "castle_AN4"),
     Fort("castle_AN6", "Brandywine Bridge", "clan_arthedain_4", "arthedain", "castle", "taom_gondor_castle_002_forceatmo", 800, "castle_AN5"),
     Fort("castle_AN8", "Emyn Beraid", "clan_arthedain_5", "arthedain", "castle", "taom_gondor_castle_003_forceatmo", 800, "castle_AN6"),
     Fort("castle_AN11", "Forochel", "clan_arthedain_5", "arthedain", "castle", "taom_gondor_castle_001_forceatmo", 800, "castle_AN8"),
@@ -71,6 +71,14 @@ FORTS = [
     # had only Krathol. Prosperity at the 4800 town floor Blue Craig sits on
     # (tools/settlement_economy_floor.json); sturgia_town_e is the one sturgia town scene unused.
     Fort("town_GBC2", "Luinkrag", "clan_bluecraig_2", "bluecraig", "town", "sturgia_town_e", 4800, "village_GBC1_3"),
+    # Gundabad's third town, Carn Dûm (Mike placed it 2026-10-15), held by Morzûg (tier 5), who had
+    # only Bagbûrz. Prosperity at the 4800 Gundabad town floor (tools/settlement_economy_floor.json);
+    # sturgia_town_a is the least used sturgia town scene.
+    Fort("town_G3", "Carn Dûm", "clan_gundabad_4", "gundabad", "town", "sturgia_town_a", 4800, "village_G2_4"),
+    # Gundabad's sixth castle (Mike placed it 2026-10-15), Lithur (Mike's name), the first fief of
+    # Grishûk (tier 3, landless until now). Prosperity at the 950 Gundabad castle floor;
+    # sturgia_castle_003 is the least used Gundabad castle scene.
+    Fort("castle_G6", "Lithur", "clan_gundabad_6", "gundabad", "castle", "sturgia_castle_003", 950, "town_G3"),
 ]
 
 # FORTS ids a release has shipped. The save-order check protects saves made BEFORE a batch, so once
@@ -136,6 +144,27 @@ STYLE = {
                           ("building_settlement_mason", 1), ("building_settlement_waterworks", 0),
                           ("building_settlement_courthouse", 0), ("building_settlement_roads_and_paths", 1)],
                       castle_buildings=CASTLE_BUILDINGS),
+    # Gundabad from its own town_G1 and castle_G1 (sturgia scenes and meshes, gate rotations, building levels).
+    "gundabad": dict(town_menu="gui_bg_town_sturgia", castle_menu="gui_bg_castle_sturgia", wait="wait_sturgia_town",
+                     gate_rotation={"town": "0.378", "castle": "0.908"},
+                     arena="arena_sturgia_a", tavern="sturgia_house_b_interior_tavern",
+                     keep=("sturgia_castle_keep_a_l2_interior", "sturgia_castle_keep_a_l2_interior",
+                           "sturgia_castle_keep_a_l3_interior"),
+                     dungeon="sturgia_dungeon_stealth", house="sturgia_town_house_d1_interior_b_house",
+                     town_buildings=[
+                         ("building_settlement_fortifications", 3), ("building_settlement_barracks", 3),
+                         ("building_settlement_training_fields", 3), ("building_settlement_guard_house", 2),
+                         ("building_settlement_siege_workshop", 3), ("building_settlement_tax_office", 2),
+                         ("building_settlement_marketplace", 2), ("building_settlement_warehouse", 3),
+                         ("building_settlement_mason", 3), ("building_settlement_waterworks", 2),
+                         ("building_settlement_courthouse", 2), ("building_settlement_roads_and_paths", 2)],
+                     castle_buildings=[
+                         ("building_castle_fortifications", 2), ("building_castle_barracks", 2),
+                         ("building_castle_training_fields", 1), ("building_castle_guard_house", 0),
+                         ("building_castle_siege_workshop", 2), ("building_castle_castallans_office", 1),
+                         ("building_castle_granary", 1), ("building_castle_craftmans_quarters", 0),
+                         ("building_castle_farmlands", 1), ("building_castle_mason", 0),
+                         ("building_castle_roads_and_paths", 1)]),
 }
 
 
