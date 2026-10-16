@@ -34,7 +34,7 @@ and the gate.
 | Unversioned modules | A fix in the live Armory or TAOM_Map reverts on reinstall; land an in-repo gate with it | [coverage](../features/moduledata-validation.md) |
 | Artist commit ports | His base is the mirror revision nearest his file, not his commit's parent; merge from it | [lesson](../reviews/lessons/data-content-cultures.md) |
 | Parked features | NavalTravel, ShaderPrecompilation: off in `SubModule.cs`; sweep every file the last toggle touched | [map](../reference/feature-map.md) |
-| Persisted MCM defaults | json2 keeps the old value, so rename a setting to change its default, never flip it | [shaders](../features/shader-precompilation.md) |
+| Persisted MCM defaults | json2 keeps the old value: rename a setting (comment why) to change its default, never flip it | [shaders](../features/shader-precompilation.md) |
 | Moving platforms | Agents need a navmesh riding the entity, plus physics; teleporting fails. Crew stand inside the deck | [mumakil](../features/mumakil.md) |
 | Vendored DLLs | `Main/_Module/bin/Win64_Shipping_Client/` ships no vendored binary (`TAOM.dll` is build output); never MCMv5 | [deps](../modding/module-dependencies.md) |
 | Mission logic | Logic `BehaviorType` needs `: MissionLogic`; keep `AfterStart` throw-safe | [lifecycle](../reference/engine/mission-and-missionbehavior-lifecycle.md) |
@@ -45,7 +45,6 @@ and the gate.
 | Console commands | Route through `TaomConsole`; a wrongly shaped command throws in unguarded startup discovery | [console](../features/dev-console.md) |
 | Landless cultures | A culture owning no settlement CTDs the daily clan tick: `Patch65`, `LANDLESS_CULTURE` | [spawn guard](../features/lord-spawn-guard.md) |
 | Culture ids | `empire` is Dunland, `battania` Khand; troops may carry another culture: read both from the data | [lesson](../reviews/lessons/data-content-cultures.md) |
-| Culture party templates | An XSLT culture block inherits vanilla for every attribute it omits; caravan lists union | [wiring](../features/culture-playability-wiring.md) |
 | NPCCharacter, no `<face>` | Renders as a toddler with no error: `CharacterFaceCoverageTests` | [body properties](../modding/body-properties.md) |
 | Enlisted service | Only `DischargeService` ends it; parked, or visible in the commander's settlement, is legitimate | [enlistment](../features/enlistment.md) |
 | Leaving a map event | Clearing `MainParty.AttachedTo` mid-event nulls the upgrade tracker; vanilla CTDs later | [guard](../features/map-event-guard.md) |
@@ -73,4 +72,5 @@ and the gate.
 | Stop order | `StandGround` never forms a line; shape a formation with a Move | [cavalry](../features/smart-cavalry-ai.md) |
 | Ladder queue | No climb gate: exclude faces per agent, at most 6 ids per scene (bits 0, 7 reserved), fixed order, never removed | [siege](../features/creature-siege-role.md) |
 | Agent slots, threads | Indices recycle and callbacks run off-thread: never key on `Agent.Index`, write via `RunOrDefer` | [rule](../../.claude/rules/csharp-architecture.md) |
+| Native branches | ILSpy hides them (`GetNearbyAgentsAux` past 15 m scans every agent): `native_decompile.py` first | [lesson](../reviews/lessons/adapters-taleworlds-api.md) |
 | Loc keys | An English edit stales 12 languages; a copied `{=KEY}` shows the original: reset rows and cache, one key per id | [guide](../localization/TRANSLATOR_GUIDE.md) |
