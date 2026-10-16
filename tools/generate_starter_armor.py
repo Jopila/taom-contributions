@@ -39,7 +39,7 @@ CULTURES = [
     ("mirkwood",  "mirkwood",   "mkwd_inf3_chest",                      "mirkwood_boots"),
     ("vlandia",   "rohan",      "rohan_militia_tunic_a",                "cts_rohan_boots3"),
     ("empire",    "dunland",    "dunland_caerdh_chainmail_light_a",     "dunland_caerdh_boots_light_a"),
-    ("aserai",    "harad",      "harad08_torso",                        "harad08_boots"),
+    ("aserai",    "harad",      "sk_hr_st_chest_inf_chest_light_a",      "sk_hr_st_grvs_light_a"),
     # 2026-09-13: easterling02_v1_boots left the Armory on 2026-08-28; the
     # shipped starter_*_khuzait_leg_a twins were re-meshed onto sk_rh_loke_boots_a
     # (apply_dead_mesh_item_swaps.py MESH_REPOINTS), so that is the donor now.

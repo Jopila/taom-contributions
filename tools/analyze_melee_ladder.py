@@ -38,6 +38,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tools"))
 
+from _gamedir import game_dir  # noqa: E402
 import melee_catalogue as mc  # noqa: E402
 import melee_damage as md  # noqa: E402
 from ranged_ladder import MAX_TIER, TIER_NUMERAL, TIER_NUMERAL_RE, engine_tier  # noqa: E402
@@ -52,7 +53,7 @@ try:
 except ImportError:
     LET = None
 
-GAME = Path(r"E:/Steam/steamapps/common/Mount & Blade II Bannerlord")
+GAME = Path(game_dir(r"E:/Steam/steamapps/common/Mount & Blade II Bannerlord"))
 MODULES = GAME / "Modules"
 TROOPS = REPO / "Main" / "_Module" / "ModuleData" / "troops"
 OUT_DIR = REPO / "tools" / "reports" / "melee-balance"

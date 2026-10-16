@@ -96,8 +96,8 @@ Three rules, pinned by `TAOM.Tests/Features/TroopProgression/TavernMercenaryData
 3. **No `<upgrade_targets>` on a `_merc` copy** — the engine's upgrade walk would otherwise drift the
    offer back onto a normal Soldier line troop.
 
-Generator: `python tools/oneoff/generate_tavern_mercenaries.py` (idempotent; add the culture's picks to
-its `PICKS` table).
+Generator: `python tools/oneoff/generate_tavern_mercenaries.py [--apply]` (dry run by default,
+idempotent; add the culture's picks to its `PICKS` table).
 
 ### 2. NPC Character File (REQUIRED)
 **File:** Create `Main/_Module/ModuleData/characters/npcs_{culture}.xml` (~900-1,300 lines)

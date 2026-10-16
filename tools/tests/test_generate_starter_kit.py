@@ -388,6 +388,84 @@ class TestStylesheets(unittest.TestCase):
         self.assertEqual(block.count("\n"), block.count("\r\n"))
 
 
+class TestForeignRows(unittest.TestCase):
+    """Another author's row inside a marker block is deleted by a wholesale replacement."""
+
+    @staticmethod
+    def _with_foreign(targets):
+        out, _ = gk.apply_xslt(WD_XSLT, "WeaponDescription", targets)
+        marker = out.index(gk.MARKER_END)
+        line_start = out.rfind("\n", 0, marker) + 1
+        return out[:line_start] + '\t\t\t<AvailablePiece id="sm_x"/>\n' + out[line_start:]
+
+    def test_foreign_rows_lists_non_starter_ids_of_both_row_kinds(self):
+        block = (f'{gk.MARKER_START}<AvailablePiece id="starter_a"/><AvailablePiece id="sm_x"/>'
+                 f'<UsablePiece piece_id="starter_b"/><UsablePiece piece_id="sm_y"/>{gk.MARKER_END}')
+        self.assertEqual(gk.foreign_rows(block), ["sm_x", "sm_y"])
+        self.assertEqual(gk.foreign_rows(f'{gk.MARKER_START}<AvailablePiece id="starter_a"/>{gk.MARKER_END}'), [])
+
+    def test_apply_refuses_to_replace_a_block_holding_a_foreign_row(self):
+        text = self._with_foreign({"OneHandedSword": ["starter_a"]})
+        with self.assertRaises(gk.StarterKitError) as ctx:
+            gk.apply_xslt(text, "WeaponDescription", {"OneHandedSword": ["starter_a", "starter_b"]})
+        self.assertIn("sm_x", str(ctx.exception))
+        self.assertIn("move the markers", str(ctx.exception))
+
+    def test_apply_refuses_even_when_the_starter_rows_are_unchanged(self):
+        text = self._with_foreign({"OneHandedSword": ["starter_a"]})
+        with self.assertRaises(gk.StarterKitError):
+            gk.apply_xslt(text, "WeaponDescription", {"OneHandedSword": ["starter_a"]})
+
+    def test_apply_refuses_to_replace_a_created_block_holding_a_foreign_row(self):
+        text = self._with_foreign({"TwoHandedSwordAlt": ["starter_a"]})
+        with self.assertRaises(gk.StarterKitError) as ctx:
+            gk.apply_xslt(text, "WeaponDescription", {"TwoHandedSwordAlt": ["starter_a", "starter_b"]})
+        self.assertIn("sm_x", str(ctx.exception))
+
+    def test_apply_refuses_to_drop_a_stale_created_block_holding_a_foreign_row(self):
+        text = self._with_foreign({"TwoHandedSwordAlt": ["starter_a"]})
+        # the Armory grew a template for the id since: the created block would be removed
+        grown = text.replace("</xsl:stylesheet>",
+                             "<xsl:template match=\"WeaponDescription[@id='TwoHandedSwordAlt']/AvailablePieces\">"
+                             "<AvailablePieces><xsl:apply-templates select=\"@*|node()\"/></AvailablePieces>"
+                             "</xsl:template></xsl:stylesheet>")
+        with self.assertRaises(gk.StarterKitError):
+            gk.apply_xslt(grown, "WeaponDescription", {"TwoHandedSwordAlt": ["starter_a"]})
+
+    def test_revert_refuses_a_block_holding_a_foreign_row(self):
+        text = self._with_foreign({"OneHandedSword": ["starter_a"]})
+        with self.assertRaises(gk.StarterKitError) as ctx:
+            gk.revert_xslt(text)
+        self.assertIn("sm_x", str(ctx.exception))
+
+    def test_verify_reports_a_block_holding_a_foreign_row(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            plan = _plan_in(tmp)
+            md = tmp / "LOTRLOME_Armory" / "ModuleData"
+            gk.apply_plan(plan, md, write=True)
+            self.assertEqual(gk.verify_plan(plan, md), [])
+            wd = md / "weapon_descriptions.xslt"
+            text = wd.read_text(encoding="utf-8")
+            marker = text.index(gk.MARKER_END)
+            wd.write_text(text[:marker] + '<AvailablePiece id="sm_x"/>' + text[marker:], encoding="utf-8")
+            drift = gk.verify_plan(plan, md)
+            self.assertTrue(any("sm_x" in d for d in drift), drift)
+
+
+class TestMissingArmory(unittest.TestCase):
+    def _main(self, *flags):
+        argv = ["generate_starter_kit.py", "--armory-path", str(Path(tempfile.gettempdir()) / "no_such_armory_xyz"), *flags]
+        with mock.patch.object(sys, "argv", argv), mock.patch("builtins.print"):
+            return gk.main()
+
+    def test_plain_run_still_skips_with_zero(self):
+        self.assertEqual(self._main(), 0)
+
+    def test_verify_with_no_armory_is_a_gate_that_checked_nothing(self):
+        self.assertEqual(self._main("--verify"), 2)
+
+
 class TestPiecesFile(unittest.TestCase):
     PIECES = "<CraftingPieces>\n    <CraftingPiece id=\"a\" piece_type=\"Blade\" />\n</CraftingPieces>\n"
 

@@ -162,7 +162,7 @@ def generator_item_ref_issues(items: set) -> list:
 ARMOUR_CLASS_CODE = "ARMOUR_CLASS_TABLE_DRIFT"
 
 
-def armour_class_table_issues(game_modules: Path) -> list:
+def armour_class_table_issues(game_modules: Path, moduledata: Path = None) -> list:
     """WARNING when the armour acquisition class table no longer matches the live Armory, or
     could not be verified against it this run.
 
@@ -188,6 +188,13 @@ def armour_class_table_issues(game_modules: Path) -> list:
     def unverified(why: str) -> list:
         return [ts.Issue(severity=ts.Severity.WARNING, code=ARMOUR_CLASS_CODE, file=table, line=0,
                          entry_id="", message=f"the class table was NOT verified this run: {why}")]
+
+    # The generator compares against, and reads rosters from, the repo's own module. A run
+    # pointed at another ModuleData says nothing about that tree, so it is not a pass.
+    if moduledata is not None and (os.path.normcase(os.path.abspath(str(moduledata)))
+                                   != os.path.normcase(os.path.abspath(str(MODULEDATA)))):
+        return unverified(f"the class table and rosters checked are the repo's {MODULEDATA}, "
+                          f"not {moduledata}")
 
     try:
         import generate_armour_classes as gac
@@ -704,7 +711,8 @@ def main() -> int:
 
     extra_roots = build_extra_ref_roots(game_modules)
 
-    validator = ts.Validator(moduledata, schemas, registries, extra_ref_roots=extra_roots)
+    validator = ts.Validator(moduledata, schemas, registries, extra_ref_roots=extra_roots,
+                            game_modules=game_modules if game_modules.exists() else None)
     for root in validator.extra_ref_roots:
         print(f"Also sweeping refs in: {root}", file=sys.stderr)
     # Never let a vanished root pass as a clean run. Silence here would revert the
@@ -725,7 +733,7 @@ def main() -> int:
         # A filtered run discards these issues right below (args.code), so a run that filters
         # them out must not pay to generate them: about 0.86s of every commit hook invocation.
         if not args.code or ARMOUR_CLASS_CODE in args.code:
-            issues += armour_class_table_issues(game_modules)
+            issues += armour_class_table_issues(game_modules, moduledata)
         issues += armour_acquisition_ref_issues(registries, moduledata)
         # Until #622 nothing called this pass, so MISSING_COLLISION_BODY never fired and the
         # commit hook's --code line for it blocked nothing.
@@ -744,6 +752,8 @@ def main() -> int:
               f"         against the live Armory.", file=sys.stderr)
         print(f"WARNING: {ARMOUR_REF_CODE} SKIPPED: the armour acquisition ids and cultures can only\n"
               f"         be checked against the live install's registry.", file=sys.stderr)
+        print(f"WARNING: MELEE_LADDER_INVERSION SKIPPED: weapon damage is simulated from the\n"
+              f"         Armory's crafting pieces, which only the live install has.", file=sys.stderr)
     issues.sort(key=lambda i: i.sort_key())
 
     if args.code:

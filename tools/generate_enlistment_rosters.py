@@ -62,6 +62,9 @@ Usage:
     python tools/generate_enlistment_rosters.py --culture vlandia  # restrict
     python tools/generate_enlistment_rosters.py --apply --seed-missing
         # append-only: adds ONLY rosters whose ids are absent (preserves hand edits)
+    python tools/generate_enlistment_rosters.py --apply --culture aserai --reseed
+        # replace ONE culture: drop its rosters, append fresh kits (needs --culture and --apply)
+    ... --out <path>   # edit another copy of the roster file (proof runs)
 
 XML I/O per tools/README.md "XML I/O convention": UTF-8 (BOM-preserving on
 rewrite; new file written without BOM, matching the equipmentsets siblings),
@@ -719,6 +722,39 @@ def rescue_rank(troops, rank, armory, universe, classes, zones=None):
                       zones=zones)[:2]
 
 
+# Archer launchers an enlistee can draw. Every ladder_harad_bow_* needs Bow 100, which a fresh
+# enlistee cannot equip, so the Harad-sphere archer chain uses the vanilla steppe ladder instead.
+# Decision recorded in docs/features/enlistment.md; pinned by TAOM.Tests
+# EnlistmentArcherLauncherDataTests.
+ISSUE_LAUNCHER = {
+    c: {'recruit': 'composite_bow', 'soldier': 'steppe_heavy_bow',
+        'veteran': 'composite_steppe_bow', 'sergeant': 'steppe_war_bow'}
+    for c in ('aserai', 'abanissa', 'shaghana')
+}
+
+
+def apply_issue_launcher(culture, assignment, rank, slots, classes):
+    """Replace the Bow-class slot of a listed culture's archer cell; a new dict, input untouched."""
+    bow = ISSUE_LAUNCHER.get(culture, {}).get(rank)
+    if assignment != 'archer' or bow is None:
+        return slots
+    return {s: (bow if classes.get(i) == 'Bow' else i) for s, i in slots.items()}
+
+
+def strip_culture_rosters(text, culture):
+    """(text without every enlist_<culture>_<assignment>_<rank> roster, count removed).
+
+    Exact-token id match, so enlist_aserai_ never matches enlist_aserai2_. A 'Hand-tuned bows'
+    comment directly above a removed roster goes with it; the reseed re-adds the kits under the
+    seed marker, and the doc cites the decision.
+    """
+    rid = (rf'enlist_{re.escape(culture)}_(?:{"|".join(ASSIGNMENTS)})_(?:{"|".join(RANKS)})')
+    comment = r'[ \t]*<!--(?:(?!-->).)*?Hand-tuned bows(?:(?!-->).)*?-->[ \t]*\r?\n[ \t]*'
+    pattern = re.compile(rf'(?:{comment})?[ \t]*<EquipmentRoster id="{rid}"[^>]*>.*?</EquipmentRoster>[ \t]*\r?\n?',
+                         re.S)
+    return pattern.subn('', text)
+
+
 # =============================================================================
 # XML emission
 # =============================================================================
@@ -876,7 +912,15 @@ def main():
     ap.add_argument('--culture', default='', help='restrict to one runtime culture id (e.g. vlandia)')
     ap.add_argument('--seed-missing', action='store_true',
                     help='append-only: add ONLY rosters whose ids are absent from the existing file')
+    ap.add_argument('--reseed', action='store_true',
+                    help='with --culture and --apply: drop that culture\'s existing rosters, then '
+                         'append its freshly generated kits like --seed-missing')
+    ap.add_argument('--out', default=OUT_XML,
+                    help='roster file to edit (default: the shipped file); for proof runs on a copy')
     args = ap.parse_args()
+    out_xml = args.out
+    if args.reseed and not (args.culture and args.apply):
+        raise SystemExit('ERROR: --reseed requires both --culture and --apply.')
 
     armory, universe, classes, zones = build_indexes()
 
@@ -929,6 +973,9 @@ def main():
                                   'DUPLICATE of a lower rank -- suppressed, resolver descends'))
                     continue
                 already.add(kit)
+                # AFTER duplicate suppression, so the emitted cell set is unchanged. Harad-sphere
+                # donors carry ladder_harad_bow_*, which need Bow 100 an enlistee cannot meet.
+                slots = apply_issue_launcher(culture, assignment, rank, slots, classes)
                 vec = armour_vector(slots, zones)
                 # Keep the STRONGER of the two per zone, so a waived floor at one rank cannot lower
                 # the bar for every rank above it.
@@ -986,9 +1033,16 @@ def main():
         print('\nDRY-RUN: no file written. Re-run with --apply.')
         return
 
-    if args.seed_missing and os.path.exists(OUT_XML):
-        raw = open(OUT_XML, 'rb').read()
+    if args.reseed and not os.path.exists(out_xml):
+        raise SystemExit(f'ERROR: --reseed needs an existing file to edit: {out_xml}')
+
+    if (args.seed_missing or args.reseed) and os.path.exists(out_xml):
+        raw = open(out_xml, 'rb').read()
         existing = raw.decode('utf-8-sig')
+        flag = '--reseed' if args.reseed else '--seed-missing'
+        if args.reseed:
+            existing, removed = strip_culture_rosters(existing, args.culture)
+            print(f'\n--reseed: removed {removed} existing {args.culture} roster(s).')
         present = set(re.findall(r'<EquipmentRoster id="([^"]+)"', existing))
         new_blocks = []
         # Reuses the slots already computed in `table`. The previous version called pick_donor a
@@ -1010,22 +1064,22 @@ def main():
                     new_blocks.append(roster_block(
                         rid, DEFAULT_CULTURE, dict(DEFAULT_ROSTER_ITEMS[(assignment, rank)])))
         if not new_blocks:
-            print('\n--seed-missing: nothing to add (all roster ids already present).')
+            print(f'\n{flag}: nothing to add (all roster ids already present).')
             return
         insert = (f'\n    {SEED_MARKER}\n'
                   + '\n'.join(new_blocks) + '\n\n</EquipmentRosters>')
         updated = existing.replace('</EquipmentRosters>', insert, 1)
         parse_written(updated)
-        write_xml(OUT_XML, updated)
-        print(f'\n--seed-missing: appended {len(new_blocks)} roster(s) to {OUT_XML}')
+        write_xml(out_xml, updated)
+        print(f'\n{flag}: appended {len(new_blocks)} roster(s) to {out_xml}')
         return
 
     if args.culture:
         raise SystemExit('ERROR: --apply with --culture would write a partial file; '
-                         'use --culture only for dry-run inspection, or --seed-missing.')
+                         'use --culture only for dry-run inspection, --seed-missing, or --reseed.')
 
-    write_xml(OUT_XML, content)
-    print(f'\nWROTE {OUT_XML}')
+    write_xml(out_xml, content)
+    print(f'\nWROTE {out_xml}')
     print('Next: python tools/audit_enlistment_roster_coverage.py '
           '&& python tools/validate_moduledata.py '
           '&& python tools/audit_polearm_shield_parity.py')

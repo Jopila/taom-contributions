@@ -442,6 +442,24 @@ def block_re() -> re.Pattern:
                       + r"[ \t]*(?:\r\n|\n)?", re.S)
 
 
+_ROW_ID_RE = re.compile(r'<(?:AvailablePiece|UsablePiece)\b[^>]*?\b(?:id|piece_id)="([^"]*)"')
+
+
+def foreign_rows(block: str) -> list[str]:
+    """Row ids inside a marker block that are not the tool's own `starter_` rows: another
+    author's rows the wholesale replacement or revert of the block would delete."""
+    return [i for i in _ROW_ID_RE.findall(block) if not i.startswith(STARTER_PREFIX)]
+
+
+def _refuse_foreign(what: str, block: str) -> None:
+    foreign = foreign_rows(block)
+    if foreign:
+        raise StarterKitError(
+            f"{what}: the {MARKER_START} block holds rows this tool does not own ({', '.join(foreign)}); "
+            "replacing or reverting it would delete them. Fix: move the markers inside the list so they "
+            "fence only the starter rows")
+
+
 def blocks_for_piece(piece_id: str, xslt_text: str, native_root: ET.Element | None, kind: str) -> list[str]:
     """Every description (or template) id the donor blade is registered under: the Armory's
     override blocks first, in file order, then Native's base file. De-duplicated, because a
@@ -518,6 +536,7 @@ def apply_xslt(text: str, kind: str, targets: dict[str, list[str]]) -> tuple[str
         if match:
             # a stale created block for the same id (the Armory grew a template since) is removed
             if created:
+                _refuse_foreign(f"{kind}[{target_id}]", created.group(0))
                 text = text[:created.start()] + text[created.end():]
                 match = _template_re(kind, target_id).search(text)
             head, body, tail = match.group(1), match.group(3), match.group(4)
@@ -526,6 +545,7 @@ def apply_xslt(text: str, kind: str, targets: dict[str, list[str]]) -> tuple[str
             wanted = f"{indent}{MARKER_START}{eol}" + _rows(kind, ids, indent, eol) + f"{indent}{MARKER_END}{eol}"
             existing = block_re().search(body)
             if existing:
+                _refuse_foreign(f"{kind}[{target_id}]", existing.group(0))
                 if existing.group(0) == wanted:
                     actions[target_id] = "noop"
                     continue
@@ -545,6 +565,7 @@ def apply_xslt(text: str, kind: str, targets: dict[str, list[str]]) -> tuple[str
         wanted = _created_block(kind, target_id, ids, indent, eol)
         existing = _find_created_block(text, kind, target_id)
         if existing:
+            _refuse_foreign(f"{kind}[{target_id}]", existing.group(0))
             if existing.group(0) == wanted:
                 actions[target_id] = "noop"
                 continue
@@ -561,6 +582,8 @@ def apply_xslt(text: str, kind: str, targets: dict[str, list[str]]) -> tuple[str
 
 
 def revert_xslt(text: str) -> tuple[str, int]:
+    for block in block_re().finditer(text):
+        _refuse_foreign("revert", block.group(0))
     return block_re().subn("", text)
 
 
@@ -1043,6 +1066,12 @@ def verify_plan(plan: Plan, md: Path) -> list[str]:
             drift.append(f"missing file {path}")
             continue
         text = read_xml(path)[0]
+        for block in block_re().finditer(text):
+            foreign = foreign_rows(block.group(0))
+            if foreign:
+                drift.append(f"{name}: a {MARKER_START} block holds rows the tool does not own "
+                             f"({', '.join(foreign)}); the next apply or revert refuses it. Move the "
+                             "markers inside the list so they fence only the starter rows")
         for target, rows in plan.registrations[kind].items():
             match = _template_re(kind, target).search(text)
             body = match.group(3) if match else ""
@@ -1147,7 +1176,8 @@ def main() -> int:
     sources = default_sources(args)
     if not Path(sources.armory).exists():
         print(f"SKIP: Armory not found at {sources.armory} (set BANNERLORD_GAME_DIR)")
-        return 0
+        # --verify with nothing to check is a gate that passed vacuously
+        return 2 if args.verify else 0
     try:
         plan = build_plan(sources)
     except StarterKitError as exc:

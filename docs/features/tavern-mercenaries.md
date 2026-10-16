@@ -183,7 +183,10 @@ mercenary path.
 2. Drop creature mounts and level-50+ legendaries from the candidates.
 3. Add a row to `PICKS` in `tools/oneoff/generate_tavern_mercenaries.py`:
    `"<culture>": [("<source_id>", "<troop file stem>", "[Culture] Hired <Role>")]`.
-4. Run `python tools/oneoff/generate_tavern_mercenaries.py` (idempotent — existing copies are skipped).
+4. Run `python tools/oneoff/generate_tavern_mercenaries.py` for a dry run that reports the copies it
+   would add, then `python tools/oneoff/generate_tavern_mercenaries.py --apply` to write. It parses
+   every new file before writing any, writes only files whose bytes changed, and is idempotent
+   (existing copies are skipped).
 5. `python tools/validate_moduledata.py` then `./build.ps1 -RunTests`; `TavernMercenaryDataTests`
    enforces all four invariants.
 

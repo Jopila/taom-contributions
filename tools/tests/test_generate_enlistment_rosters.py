@@ -15,6 +15,7 @@ import os
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -183,6 +184,77 @@ class SeedMarkerTests(unittest.TestCase):
         # --seed-missing run refused its own output as malformed (2026-10-15).
         import xml.etree.ElementTree as ET
         ET.fromstring(f'<EquipmentRosters>\n    {ger.SEED_MARKER}\n</EquipmentRosters>')
+
+
+CLASSES = {'composite_bow': 'Bow', 'ladder_harad_bow_x': 'Bow', 'arrows_a': 'Arrows', 'sword_a': 'OneHanded',
+           'ladder_other_bow': 'Bow'}
+
+
+class IssueLauncherTests(unittest.TestCase):
+    def test_a_listed_cultures_archer_cell_swaps_only_the_bow(self):
+        slots = {'Item0': 'ladder_harad_bow_x', 'Item1': 'arrows_a', 'Item2': 'sword_a', 'Body': 'b'}
+        out = ger.apply_issue_launcher('aserai', 'archer', 'soldier', slots, CLASSES)
+        self.assertEqual({'Item0': 'steppe_heavy_bow', 'Item1': 'arrows_a', 'Item2': 'sword_a', 'Body': 'b'}, out)
+        self.assertEqual('ladder_harad_bow_x', slots['Item0'], 'the input is not mutated')
+
+    def test_each_rank_has_its_own_bow_for_each_harad_culture(self):
+        for culture in ('aserai', 'abanissa', 'shaghana'):
+            got = [ger.apply_issue_launcher(culture, 'archer', r, {'Item0': 'ladder_harad_bow_x'}, CLASSES)['Item0']
+                   for r in ger.RANKS]
+            self.assertEqual(['composite_bow', 'steppe_heavy_bow', 'composite_steppe_bow', 'steppe_war_bow'], got)
+
+    def test_other_assignments_and_cultures_are_untouched(self):
+        slots = {'Item0': 'ladder_other_bow', 'Item1': 'arrows_a'}
+        self.assertEqual(slots, ger.apply_issue_launcher('aserai', 'cavalry', 'soldier', slots, CLASSES))
+        self.assertEqual(slots, ger.apply_issue_launcher('khuzait', 'archer', 'soldier', slots, CLASSES))
+
+    def test_a_listed_archer_cell_without_a_bow_is_left_alone(self):
+        slots = {'Item0': 'sword_a'}
+        self.assertEqual(slots, ger.apply_issue_launcher('aserai', 'archer', 'recruit', slots, CLASSES))
+
+
+def rosters_xml(*ids, comment_before=None):
+    parts = ['<?xml version="1.0"?>\r\n<EquipmentRosters>\r\n']
+    for rid in ids:
+        if comment_before == rid:
+            parts.append('    <!-- Hand-tuned bows (2026-10-15): keep -->\r\n')
+        parts.append(f'    <EquipmentRoster id="{rid}" culture="Culture.x">\r\n        <EquipmentSet>\r\n'
+                     f'            <Equipment slot="Item0" id="Item.a" />\r\n        </EquipmentSet>\r\n'
+                     f'    </EquipmentRoster>\r\n')
+    parts.append('</EquipmentRosters>')
+    return ''.join(parts)
+
+
+class ReseedTests(unittest.TestCase):
+    def test_strip_removes_only_the_exact_culture_and_its_hand_tuned_comment(self):
+        text = rosters_xml('enlist_aserai_archer_recruit', 'enlist_aserai2_archer_recruit',
+                           'enlist_aserai_archer_soldier', 'enlist_khuzait_archer_recruit',
+                           'enlist_default_archer_recruit', comment_before='enlist_aserai_archer_soldier')
+        out, removed = ger.strip_culture_rosters(text, 'aserai')
+        self.assertEqual(2, removed)
+        self.assertNotIn('"enlist_aserai_archer_recruit"', out)
+        self.assertNotIn('"enlist_aserai_archer_soldier"', out)
+        self.assertNotIn('Hand-tuned', out)
+        for keep in ('enlist_aserai2_archer_recruit', 'enlist_khuzait_archer_recruit', 'enlist_default_archer_recruit'):
+            self.assertIn(f'"{keep}"', out)
+        ET.fromstring(out)
+
+    def test_a_comment_above_a_kept_roster_survives(self):
+        text = rosters_xml('enlist_aserai_archer_recruit', 'enlist_khuzait_archer_recruit',
+                           comment_before='enlist_khuzait_archer_recruit')
+        out, _ = ger.strip_culture_rosters(text, 'aserai')
+        self.assertIn('Hand-tuned', out)
+
+    def run_main(self, argv):
+        with mock.patch.object(sys, 'argv', ['gen'] + argv), \
+                mock.patch.object(ger, 'build_indexes', side_effect=AssertionError('indexes built')):
+            return ger.main()
+
+    def test_reseed_refuses_without_culture_or_apply(self):
+        for argv in (['--reseed'], ['--reseed', '--apply'], ['--reseed', '--culture', 'aserai']):
+            with self.assertRaises(SystemExit) as cm:
+                self.run_main(argv)
+            self.assertIn('--reseed', str(cm.exception.code))
 
 
 if __name__ == '__main__':

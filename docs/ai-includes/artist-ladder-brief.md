@@ -164,6 +164,7 @@ python tools/generate_starter_kit.py --verify
 python tools/audit_armory_refs.py --report -         # meshes, collision bodies, dead item ids
 python tools/check_rdc_entries.py                    # a listed package needs a Modding Kit save
 python tools/check_external_loc_coverage.py          # after any name or language edit
+python tools/register_armory_names.py --check        # new {=KEY} names need a Languages row: fix with --apply --prefix <your ids>
 python tools/check_generator_item_refs.py
 python tools/validate_xml_schemas.py <files you touched>
 python tools/check_external_xslt.py                  # after any XSLT edit

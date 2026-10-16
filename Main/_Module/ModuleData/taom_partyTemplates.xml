@@ -4697,16 +4697,16 @@
 			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_sreg_levy" />
 			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_sreg_militia" />
 			<PartyTemplateStack min_value="1" max_value="15" troop="NPCCharacter.harad_sreg_warrior" />
-			<PartyTemplateStack min_value="1" max_value="15" troop="NPCCharacter.harad_serp_footman" />
+			<PartyTemplateStack min_value="1" max_value="15" troop="NPCCharacter.harad_redserp_footman" />
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_footman" />
 			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_sreg_bowman" />
 			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_militia_archer" />
 			<PartyTemplateStack min_value="1" max_value="15" troop="NPCCharacter.harad_sreg_bowman" />
 			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_serp_noble" />
+			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_redserp_noble" />
 			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_sreg_cavalry" />
 			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_serp_archer" />
+			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_redserp_archer" />
 		</stacks>
 	</MBPartyTemplate>
 
@@ -4716,16 +4716,16 @@
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_militia_spearman" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_warrior" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_levy" />
-			<PartyTemplateStack min_value="1" max_value="14" troop="NPCCharacter.harad_serp_footman" />
+			<PartyTemplateStack min_value="1" max_value="14" troop="NPCCharacter.harad_redserp_footman" />
 			<PartyTemplateStack min_value="1" max_value="14" troop="NPCCharacter.harad_militia_veteran_spearman" />
 			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_sreg_cavalry" />
 			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_sreg_infantry" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_militia_archer" />
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_archer" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_horseman" />
-			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_serp_guard" />
+			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_redserp_guard" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_serp_archer" />
+			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_redserp_archer" />
 		</stacks>
 	</MBPartyTemplate>
 
@@ -4741,10 +4741,10 @@
 			<PartyTemplateStack min_value="1" max_value="14" troop="NPCCharacter.harad_sreg_bowman" />
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_archer" />
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_serp_noble" />
-			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_serp_lancer" />
+			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_redserp_noble" />
+			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_redserp_lancer" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_serp_archer" />
+			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_redserp_archer" />
 		</stacks>
 	</MBPartyTemplate>
 
@@ -4757,19 +4757,19 @@
 			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_militia_archer" />
 			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_sreg_scout_arc" />
 			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_sreg_horseman" />
-			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_serp_noble" />
-			<PartyTemplateStack min_value="1" max_value="15" troop="NPCCharacter.harad_serp_infantry" />
+			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_redserp_noble" />
+			<PartyTemplateStack min_value="1" max_value="15" troop="NPCCharacter.harad_redserp_infantry" />
 			<PartyTemplateStack min_value="1" max_value="15" troop="NPCCharacter.harad_sreg_scout_cav" />
 			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_sreg_cavalry" />
 			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_serp_archer" />
+			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_redserp_archer" />
 		</stacks>
 	</MBPartyTemplate>
 
 	<MBPartyTemplate id="kingdom_hero_party_shaghana_shaghana_5_template">
 		<stacks>
 			<PartyTemplateStack min_value="1" max_value="17" troop="NPCCharacter.harad_sreg_warrior" />
-			<PartyTemplateStack min_value="1" max_value="17" troop="NPCCharacter.harad_serp_footman" />
+			<PartyTemplateStack min_value="1" max_value="17" troop="NPCCharacter.harad_redserp_footman" />
 			<PartyTemplateStack min_value="1" max_value="17" troop="NPCCharacter.harad_militia_veteran_spearman" />
 			<PartyTemplateStack min_value="0" max_value="16" troop="NPCCharacter.harad_sreg_infantry" />
 			<PartyTemplateStack min_value="0" max_value="16" troop="NPCCharacter.harad_sreg_footman" />
@@ -4777,9 +4777,9 @@
 			<PartyTemplateStack min_value="0" max_value="17" troop="NPCCharacter.harad_sreg_archer" />
 			<PartyTemplateStack min_value="0" max_value="17" troop="NPCCharacter.harad_sreg_archer" />
 			<PartyTemplateStack min_value="1" max_value="17" troop="NPCCharacter.harad_sreg_scout_cav" />
-			<PartyTemplateStack min_value="0" max_value="17" troop="NPCCharacter.harad_serp_guard" />
-			<PartyTemplateStack min_value="0" max_value="16" troop="NPCCharacter.harad_serp_lancer" />
-			<PartyTemplateStack min_value="0" max_value="16" troop="NPCCharacter.harad_serp_archer" />
+			<PartyTemplateStack min_value="0" max_value="17" troop="NPCCharacter.harad_redserp_guard" />
+			<PartyTemplateStack min_value="0" max_value="16" troop="NPCCharacter.harad_redserp_lancer" />
+			<PartyTemplateStack min_value="0" max_value="16" troop="NPCCharacter.harad_redserp_archer" />
 		</stacks>
 	</MBPartyTemplate>
 
@@ -4787,7 +4787,7 @@
 		<stacks>
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_militia" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_militia_spearman" />
-			<PartyTemplateStack min_value="1" max_value="14" troop="NPCCharacter.harad_serp_footman" />
+			<PartyTemplateStack min_value="1" max_value="14" troop="NPCCharacter.harad_redserp_footman" />
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_footman" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_militia_archer" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_bowman" />
@@ -4796,9 +4796,9 @@
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_archer" />
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_scout_arc" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_horseman" />
-			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_serp_lancer" />
+			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_redserp_lancer" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_serp_archer" />
+			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_redserp_archer" />
 		</stacks>
 	</MBPartyTemplate>
 
@@ -4813,10 +4813,10 @@
 			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_militia_archer" />
 			<PartyTemplateStack min_value="1" max_value="15" troop="NPCCharacter.harad_sreg_bowman" />
 			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_serp_noble" />
+			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_redserp_noble" />
 			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_sreg_cavalry" />
 			<PartyTemplateStack min_value="2" max_value="16" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_serp_archer" />
+			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.harad_redserp_archer" />
 		</stacks>
 	</MBPartyTemplate>
 
@@ -4833,9 +4833,9 @@
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_militia_archer" />
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_archer" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_horseman" />
-			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_serp_guard" />
+			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_redserp_guard" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_serp_archer" />
+			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_redserp_archer" />
 		</stacks>
 	</MBPartyTemplate>
 
@@ -4844,17 +4844,17 @@
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_levy" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_militia" />
 			<PartyTemplateStack min_value="1" max_value="14" troop="NPCCharacter.harad_sreg_warrior" />
-			<PartyTemplateStack min_value="1" max_value="14" troop="NPCCharacter.harad_serp_footman" />
+			<PartyTemplateStack min_value="1" max_value="14" troop="NPCCharacter.harad_redserp_footman" />
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_cavalry" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_bowman" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_militia_archer" />
 			<PartyTemplateStack min_value="1" max_value="14" troop="NPCCharacter.harad_sreg_bowman" />
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_archer" />
 			<PartyTemplateStack min_value="0" max_value="14" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_serp_noble" />
-			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_serp_lancer" />
+			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_redserp_noble" />
+			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_redserp_lancer" />
 			<PartyTemplateStack min_value="2" max_value="15" troop="NPCCharacter.harad_sreg_scout_arc" />
-			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_serp_archer" />
+			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.harad_redserp_archer" />
 		</stacks>
 	</MBPartyTemplate>
 

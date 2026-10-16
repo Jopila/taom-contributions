@@ -2684,6 +2684,63 @@ class ArmourClassTableDriftTests(unittest.TestCase):
         spy.assert_called_once()
 
 
+class FlagScopeTests(unittest.TestCase):
+    """--moduledata and --game-modules must steer MELEE_LADDER_INVERSION and
+    ARMOUR_CLASS_TABLE_DRIFT. Both used to read the repo's own tree and the default install
+    whatever the flags said, so a run on another tree reported the repo's findings (#812)."""
+
+    def _melee(self, md, game_modules=None):
+        return ts.Validator(md, [], ts.Registries(items=set(), item_def_files={},
+                            npccharacters=set(), cultures=set(), party_templates=set()),
+                            game_modules=game_modules)._melee_ladder_inversions()
+
+    def _need_install(self):
+        import analyze_melee_ladder as mr
+        if not mr.MODULES.is_dir() or mr.LET is None:
+            self.skipTest("needs the Bannerlord install and lxml")
+        return mr
+
+    def test_tree_without_troops_checks_nothing_and_says_so(self):
+        self._need_install()
+        with tempfile.TemporaryDirectory() as tmp:
+            issues = self._melee(Path(tmp))
+        self.assertEqual([i.code for i in issues], ["MELEE_LADDER_INVERSION"])
+        self.assertIn("checked nothing", issues[0].message)
+
+    def test_findings_name_the_given_trees_troop_file(self):
+        mr = self._need_install()
+        src = mr.TROOPS / "troops_dolguldur.xml"
+        with tempfile.TemporaryDirectory() as tmp:
+            md = Path(tmp)
+            _write(md / "troops" / "troops_x.xml", src.read_text(encoding="utf-8-sig"))
+            # Stale-exemption rows name the spec file, not a troop file; judge the rest.
+            issues = [i for i in self._melee(md) if i.file != "tools/melee_ladders.json"]
+        self.assertTrue(issues)
+        self.assertEqual({i.file for i in issues}, {"troops/troops_x.xml"})
+
+    def test_missing_game_modules_skips_the_melee_pass(self):
+        self._need_install()
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(self._melee(Path(tmp), Path(tmp) / "nope"), [])
+
+    def test_armour_class_table_not_verified_for_another_moduledata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "LOTRLOME_Armory").mkdir()
+            other = Path(tmp) / "ModuleData"
+            other.mkdir()
+            issues = vm.armour_class_table_issues(Path(tmp), other)
+        self.assertEqual([i.code for i in issues], [vm.ARMOUR_CLASS_CODE])
+        self.assertIn("NOT verified", issues[0].message)
+        self.assertIn(str(other), issues[0].message)
+
+    def test_missing_install_announces_the_melee_skip(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "ModuleData").mkdir()
+            _code, _out, err = _run_main("--moduledata", str(Path(tmp) / "ModuleData"),
+                                         "--game-modules", str(Path(tmp) / "nope"))
+        self.assertIn("MELEE_LADDER_INVERSION SKIPPED", err)
+
+
 class SchemaInvalidPassTests(unittest.TestCase):
     """The engine-XSD layer (validate_xml_schemas.py) as a validator pass, so the commit hook
     gates it: a file the repo module registers that breaks its engine schema is an ERROR at

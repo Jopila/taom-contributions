@@ -213,8 +213,12 @@ class Validator:
     # schema contracts (duplicate ids, civilian equipmentType, enums) describe
     # TAOM's own files, and applying them to a foreign module would report
     # defects against a repo this validator does not own.
-    def __init__(self, moduledata, schemas: list, registries: Registries, extra_ref_roots=None):
+    def __init__(self, moduledata, schemas: list, registries: Registries, extra_ref_roots=None,
+                 game_modules=None):
         self.moduledata = Path(moduledata)
+        # The install's Modules folder for the install-priced passes (MELEE_LADDER_INVERSION).
+        # None falls back to the tool's own default install.
+        self.game_modules = Path(game_modules) if game_modules else None
         self.schemas = schemas
         self.reg = registries
         requested = [Path(r) for r in (extra_ref_roots or [])]
@@ -278,7 +282,8 @@ class Validator:
                 message=(f"the melee ladder tools cannot be imported ({exc}), so no troop's melee "
                          "output was checked. Not checked is not clean."),
             )]
-        if not mr.MODULES.is_dir():
+        modules = self.game_modules or mr.MODULES
+        if not modules.is_dir():
             return []   # no install: skipped, and the caller already reports install-gated passes
         try:
             spec = ml.load_spec()
@@ -289,9 +294,12 @@ class Validator:
                          "was checked. Restore it from git rather than deleting the check."),
             )]
         try:
-            cat = mc.load(mr.MODULES, item_modules={mr.ARMORY_MODULE})
+            cat = mc.load(modules, item_modules={mr.ARMORY_MODULE})
             priced, _failures = mc.price_all(cat)
-            troops = mr.load_troops(mr.TROOPS)
+            # The troops of the tree being validated, never the repo's: a --moduledata run
+            # must report on its own files. A tree with no troops/ folder checks nothing.
+            troops_dir = self.moduledata / "troops"
+            troops = mr.load_troops(troops_dir) if troops_dir.is_dir() else []
         except (mc.CatalogueError, mr.AnalysisError, OSError) as exc:
             return [Issue(
                 severity=Severity.WARNING, code=code, file=spec_rel, line=0, entry_id="(install)",
