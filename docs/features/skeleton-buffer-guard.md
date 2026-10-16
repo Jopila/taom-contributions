@@ -245,8 +245,12 @@ until the peak line reports overflows above zero in either pool.
 
 - 2026-10-08: added, adapted from yotthani's VanillaTuning, with TAOM's two-page layout and the executed-code-block
   test; the second pool's guard added the same day (TAOM's own block, Mike's decision after the review found the pool).
+- 2026-10-15: v1.5.5 row added to `SkeletonBufferInstalledBinaryTests.KnownBuilds`, and both native pin classes
+  (this one and `ClipBudgetSignatureInstalledBinaryTests`) now sit in the engine-bump binding gate, checked by
+  `NativePinGateTests` (#806).
 
 ## GitHub Issue
 
 - **Issue:** #776 (draft item 2 in [adopt-yotthani-2026-10-08.md](../reviews/adopt-yotthani-2026-10-08.md)).
 - **Status:** built and unit-tested 2026-10-08; in-game check owed.
+- **Issue:** #806 (2026-10-15): the v1.5.5 `KnownBuilds` row and the binding gate for both native pin classes.

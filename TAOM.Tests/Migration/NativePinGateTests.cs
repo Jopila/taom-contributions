@@ -1,101 +1,79 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Reflection;
+using HarmonyLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using TAOM.Tests.Features.MissionPerf.AnimMemory;
+using TAOM.Tests.Features.SkeletonBuffer;
 using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Migration;
 
 /// <summary>
-/// Keeps every per-build native address table (a <c>KnownBuilds</c> dictionary) inside the engine-bump
-/// gate. The pin tests read the installed <c>TaleWorlds.Native.dll</c>, so they are LiveInstall; without
-/// <c>BindingVerification</c> an unlisted build reads Skipped and a bump ships without its row (the
-/// v1.5.5 SkeletonBuffer row was missed that way). Source-only, so it runs in every suite.
+/// Keeps every per-build native address table (a type that declares a static <c>KnownBuilds</c> member)
+/// inside the engine-bump gate. The pin tests read the installed <c>TaleWorlds.Native.dll</c>, so they are
+/// LiveInstall; without <c>BindingVerification</c> an unlisted build reads Skipped and a bump ships without
+/// its row (the v1.5.5 SkeletonBuffer row was missed that way). The tables are found by reflection over the
+/// test assembly and the tags are read from the compiled class attributes, so comments, partial classes and
+/// file names cannot mislead it. Needs no game install, so it runs in every suite.
 /// </summary>
 [TestClass]
 public class NativePinGateTests
 {
-    private static readonly Regex TableDeclaration =
-        new(@"static\s+readonly\s+[^;=]*\bKnownBuilds\s*=", RegexOptions.Compiled);
+    private static readonly Lazy<List<Type>> Tables = new(ScanPinTables);
 
-    private static readonly Lazy<List<(string Class, string Source)>> Classes = new(ScanPinTestClasses);
+    private static List<Type> ScanPinTables() =>
+        AccessTools.GetTypesFromAssembly(typeof(NativePinGateTests).Assembly)
+            .Where(t => t.GetMember("KnownBuilds",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly).Length > 0)
+            .ToList();
 
-    private static List<(string Class, string Source)> PinTestClasses() => Classes.Value;
+    /// <summary>Whether <paramref name="category"/> is on the class declaration of <paramref name="type"/>
+    /// itself, not on a method or a base class.</summary>
+    private static bool IsClassTagged(Type type, string category) =>
+        type.GetCustomAttributes<TestCategoryBaseAttribute>(false).Any(a => a.TestCategories.Contains(category));
 
-    /// <summary>Whether <paramref name="category"/> is on the declaration of class <paramref name="name"/>
-    /// itself, not on a method or another class in the same file.</summary>
-    private static bool IsClassTagged(string source, string name, string category) =>
-        Regex.IsMatch(source, @"\[TestCategory\(""" + Regex.Escape(category) + @"""\)\][^{]*\bclass\s+" + Regex.Escape(name) + @"\b");
-
-    private static List<(string Class, string Source)> ScanPinTestClasses()
+    [TestMethod]
+    public void KnownBuildsTables_IncludeTheKnownPinClasses()
     {
-        var root = RepoPaths.RepoPath("TAOM.Tests");
-        var found = new List<(string, string)>();
-        foreach (var path in Directory.EnumerateFiles(root, "*.cs", SearchOption.AllDirectories))
-        {
-            if (path.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar)
-                || path.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar))
-                continue;
-            var text = File.ReadAllText(path);
-            if (TableDeclaration.IsMatch(text))
-                found.Add((Path.GetFileNameWithoutExtension(path), text));
-        }
-        return found;
+        CollectionAssert.IsSubsetOf(
+            new[] { typeof(SkeletonBufferInstalledBinaryTests), typeof(ClipBudgetSignatureInstalledBinaryTests) },
+            Tables.Value);
     }
 
     [TestMethod]
     public void KnownBuildsTables_EachClass_IsTaggedBindingVerificationAndLiveInstall()
     {
-        var classes = PinTestClasses();
-        Assert.IsTrue(classes.Count >= 2, "Expected at least the ClipBudget and SkeletonBuffer tables, found " + classes.Count);
-
-        foreach (var (name, source) in classes)
+        foreach (var type in Tables.Value)
         {
-            Assert.IsTrue(IsClassTagged(source, name, "LiveInstall"), name + " must be tagged LiveInstall.");
-            Assert.IsTrue(IsClassTagged(source, name, "BindingVerification"),
-                name + " must be tagged BindingVerification, or an unlisted engine build skips instead of failing the gate.");
+            Assert.IsTrue(IsClassTagged(type, "LiveInstall"), type.Name + " must be tagged LiveInstall.");
+            Assert.IsTrue(IsClassTagged(type, "BindingVerification"),
+                type.Name + " must be tagged BindingVerification, or an unlisted engine build skips instead of failing the gate.");
         }
     }
 
     [TestMethod]
-    public void IsClassTagged_ATagOnAMethodOrAnotherClass_DoesNotCount()
+    public void IsClassTagged_ATagOnAMethodInsteadOfTheClass_DoesNotCount()
     {
-        const string tagged = @"[TestClass]
-[TestCategory(""BindingVerification"")]
-public class Pins
-{
-}
-";
-        const string methodOnly = @"[TestClass]
-public class Pins
-{
-    [TestMethod]
-    [TestCategory(""BindingVerification"")]
-    public void T() { }
-}
-";
-        const string otherClass = @"[TestCategory(""BindingVerification"")]
-public class Other
-{
-}
-[TestClass]
-public class Pins
-{
-}
-";
-
-        Assert.IsTrue(IsClassTagged(tagged, "Pins", "BindingVerification"));
-        Assert.IsFalse(IsClassTagged(methodOnly, "Pins", "BindingVerification"));
-        Assert.IsFalse(IsClassTagged(otherClass, "Pins", "BindingVerification"));
+        Assert.IsTrue(IsClassTagged(typeof(ClassTagged), "BindingVerification"));
+        Assert.IsFalse(IsClassTagged(typeof(MethodTagged), "BindingVerification"));
     }
 
     [TestMethod]
     public void KnownBuildsTables_EachClass_IsNamedInTheEngineBumpSkill()
     {
         var skill = RepoPaths.ReadSource(".claude/skills/engine-bump/SKILL.md");
-        foreach (var (name, _) in PinTestClasses())
-            Assert.IsTrue(skill.Contains(name), name + " holds a KnownBuilds table and must be listed in the engine-bump skill.");
+        foreach (var type in Tables.Value)
+            Assert.IsTrue(skill.Contains(type.Name), type.Name + " holds a KnownBuilds table and must be listed in the engine-bump skill.");
+    }
+
+    [TestCategory("BindingVerification")]
+    private sealed class ClassTagged { }
+
+    private sealed class MethodTagged
+    {
+        [TestCategory("BindingVerification")]
+        public void M() { }
     }
 }
