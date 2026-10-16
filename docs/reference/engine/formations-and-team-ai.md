@@ -75,6 +75,59 @@ their time source and ranged-hit members).
 
 TAOM's consumer: `docs/features/culture-doctrine.md` (#608).
 
+### Measured tactic behaviour (v1.5.5) [yotthani]
+
+What the default AI does in whole field battles. Source for every figure here: yotthani, MithrilForge
+`docs/engine/battle-behaviour-measured.md`@0a2f4761, measured with TAOM 2.0.34 loaded (plus Armory
+and DualWield), v1.5.5, custom battles, both sides AI (about 120 recorded battles of 100 to 1500
+soldiers, October 2026). Marks as upstream: **[M]** measured in recordings, **[C]** read in the
+decompiled code, **[I]** inference, not checked.
+
+| Fact | Mark, n | Where |
+|---|---|---|
+| The first decision is at 0.5 s and picks `FullScaleAttack` (weight about 1.0): every defensive tactic weighs 0 before its positions are evaluated. This is why the same defender sometimes holds and sometimes attacks | [M], no battle count given | upstream lines 79-81 |
+| From 5 s `HoldChokePoint` weighs 0 or 1.35 to 1.93 depending on the start layout, and takes over only above about 1.49 (1.5 x 0.99). `DefensiveEngagement` (0.77 to 1.12) never takes over. A fresh choice at 6 s without the 1.5 bonus picked the same tactic in 8 of 8 battles, so `FullScaleAttack` is the real maximum at that moment | [M], n=8 | upstream lines 81-83 |
+| The 1.5x bar: a switch needs the new weight above 1.5 x the current tactic's weight, and the current tactic also carries the 1.5 bonus in the `MaxBy`. Re-read on v1.5.5 by TAOM: `TeamAIComponent.cs:301` (`MaxBy`) and `:316-322` (the switch test) | [C], TAOM re-read | upstream lines 68-69 |
+| Start layout beats tactic. Distance from the defender's start to the nearest choke point against the outcome (scene `battle_terrain_biome_005`): within 70 m the defender won 7 of 14, 70 to 160 m 2 of 9, beyond 160 m 1 of 16, whether or not its tactic was forced. Forcing `HoldChokePoint` from a bad layout won 1 of 5 | [M], n=39 (14, 9, 16) | upstream lines 112-118 |
+| Teleporting the defender to a choke point (19 battles, 300 m radius) helped far less than the layout correlation suggests: 4 of 13 wins on the nearest choke point (4 of 9 when moved at most 150 m, 0 of 4 when moved 188 to 208 m, where the AI did not run `HoldChokePoint`), 1 of 6 on the nearest high ground as control, 3 of 13 unchanged. Individual choke points differ, and the AI's own `HoldChokePoint` weight of a position guides better than its type | [M], n=19 | upstream lines 120-135 |
+| Formation behaviour is re-chosen every 0.5 s; the running behaviour is weighted x2.0 for 5 s, then x1.2. Everything stands for 4 to 8 s, the attacker then advances as a closed body at 2.4 m/s, and the first formation charges when the centres are 13 to 17 m apart (10 to 23 m) | [C] and [M], no n given | upstream lines 74-78 |
+
+**Under Culture Doctrine** the same bar applies to a doctrine tactic, which would need to weigh more
+than 1.5 x the vanilla tactic holding the team. That is TAOM's inference from `TeamAIComponent.cs`,
+not something yotthani measured with doctrine on; TAOM's own edges already use 1.6x for this reason
+(`docs/features/culture-doctrine.md`, "Limitations and open items"). The A/B consequences are in
+that doc's "Verification: the A/B protocol".
+
+### Morale: casualty shock (v1.5.5)
+
+Re-derived by TAOM from the v1.5.5 source on 2026-10-15. Morale is per agent, never per formation.
+
+| Constant | Value | Source (v1.5.5) |
+|---|---|---|
+| Radius of the shock around a casualty or a panicking soldier | 4 m | `AgentMoraleInteractionLogic.cs:12` (`MoraleEffectRadius`), passed at `:53` and `:64` |
+| Soldiers that lose morale, and soldiers that gain it | at most 10 each | `:14-16`, applied at `:81` and `:92` |
+| Who loses | up to 10 random active AI-controlled friends of the casualty within the radius, topped up from the casualty's own formation when fewer than 10 | `:81-84` |
+| Who gains | the killer if AI-controlled and an enemy, then random enemies of the casualty within the radius, then the killer's allies near the killer (when more than 1.5 m from the casualty), then the killer's formation | `:86-106` |
+| Per-soldier change | the model's maximum divided by `max(1, MoraleResistance)` | `CustomBattleMoraleModel.cs:72-74` |
+| Weapon factor k for a kill | 0.75 melee, 0.5 bow, crossbow or throwing, 0.25 area-of-effect or multiple-penetration, then x1.25 (0.3125) with the Burning and MultiplePenetration flags | `CustomBattleMoraleModel.cs:20-36`; `SandboxBattleMoraleModel.cs:227-244` (same constants) |
+| Gain for the killer's side | `battleImportance * 3 * k` | `CustomBattleMoraleModel.cs:34`; `SandboxBattleMoraleModel.cs:242` |
+| Loss for the casualty's side | `battleImportance * 4 * k * casualtiesFactor` | `CustomBattleMoraleModel.cs:35`; `SandboxBattleMoraleModel.cs:244` |
+| `casualtiesFactor` | `1 + 2 * (share of the side already removed)` | `CustomBattleMoraleModel.cs:87-97` |
+| A panic | friends within 4 m lose `battleImportance * casualtiesFactor * 1.1`, enemies gain `battleImportance * 2` | `CustomBattleMoraleModel.cs:51-69`; radius `AgentMoraleInteractionLogic.cs:64` |
+
+The campaign model repeats the same weapon constants for a kill (the SandBox lines above); TAOM did not
+compare the rest of the two models. Upstream also reads, from the same files and not re-read by TAOM [C]: an
+agent starts at 35 plus a random 0 to 29, recovers 0.4 per second but only up to half its start
+value, and below 0.01 panics and runs to the border on its own; morale enters no tactic weight, so a
+whole side retreats only through `TacticCoordinatedRetreat` (attacker only; upstream lines 85-92).
+
+**The break cascade [M]** (yotthani, same source and setup, lines 94-95; no battle count given): a
+side starts to break at about 54 % of its strongest number (range 42 to 65 %), then goes from 50 %
+to 10 % in 3 to 14 s in small battles. It is a cascade of single panics, not formations turning.
+
+The Dread Aura's morale constants and the fear scaling are in
+[dread-aura.md](../../features/dread-aura.md); this section is the engine side of the same rules.
+
 ### Agent ↔ Formation ↔ Detachment (Agent.cs)
 **`Agent.Formation`** setter (Agent.cs:1098) (de)registers the agent with the formation + recomputes its
 **`Detachment`** (`IDetachment`, :1014 — the Phase 12 `UsableMachine` link: an agent's "use this machine" assignment

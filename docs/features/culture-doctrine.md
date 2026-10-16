@@ -587,9 +587,47 @@ on a slope inside 60 m it reached first), Rohan's cavalry shows `BehaviorCycleCh
 Square of archers, attacking Erebor's infantry shows `BehaviorBracedAdvance` and never
 `BehaviorCharge` or a `BehaviorFootCharge` at horse before contact.
 
+**Natural spread: a single pair of runs proves nothing.** yotthani ran 13 unchanged mirror battles
+(100 v 100 of the same troop, no value touched) and got an attacker-to-defender strike rate ratio
+of 0.96 to 1.72, with the attacker winning 10 of 13 on that map. A doctrine on-versus-off pair
+whose difference falls inside that band, on strikes per second or on the winner, is noise. Keep an
+OFF control arm, repeat the cell (the three runs above are the floor, not the proof), and compare
+medians against that spread. A start layout can swamp a tactic as well: on one scene the defender
+won 7 of 14 battles starting within 70 m of a choke point and 1 of 16 beyond 160 m, so match the
+start layout across arms, not just the troops
+([formations-and-team-ai.md](../reference/engine/formations-and-team-ai.md), "Measured tactic
+behaviour"). Source: yotthani, MithrilForge `docs/engine/battle-behaviour-measured.md`@0a2f4761
+lines 97-101 and 112-118, measured in recordings (n=13 and n=39), measured with TAOM 2.0.34 loaded
+(plus Armory and DualWield), v1.5.5, custom battles, both sides AI.
+
 ## Limitations and open items
 
 - Not smoke-tested in game as of 2026-09-17; the toggle ships off until the A/B passes.
+- **Measured behaviour of the default AI (yotthani, v1.5.5).** Source: MithrilForge
+  `docs/engine/battle-behaviour-measured.md`@0a2f4761, measured with TAOM 2.0.34 loaded (plus
+  Armory and DualWield), custom battles, both sides AI.
+  - The first team decision comes at 0.5 s and picks `FullScaleAttack`, because every defensive
+    tactic weighs 0 before its positions are evaluated (lines 79-83, [M] and [C]). A doctrine
+    tactic that wants to replace it has to clear the engine's 1.5x sticky factor
+    (`TeamAIComponent.cs:301, 316-322`, v1.5.5); the TwoLineWall and Envelop edges of 1.6x in the
+    review record below already do. That reading of the bar for a doctrine tactic is an inference from TAOM's code.
+  - Start layout decides more than tactic: the defender won 7 of 14 within 70 m of a choke point,
+    2 of 9 at 70 to 160 m, 1 of 16 beyond 160 m, whether or not its tactic was forced (n=39,
+    lines 112-118). Forcing `HoldChokePoint` from a bad layout won 1 of 5.
+  - AI value levers: the offensive and timing values move strikes by large factors, while more
+    aggression traded wounds both ways with no measurable win gain (lines 97-110).
+- **The `shield` profile is a live lever, with a cap.** `AgentAggressionApplier` scales
+  `AiDefendWithShieldDecisionChanceValue` (driven property 28). TAOM decompile of the installed
+  v1.5.5 client, 2026-10-15: the native melee AI reads it at 0x6A10A1, 0x6A10FF and 0x6A144C
+  (`FUN_1806a05a0`) through `min(0.95, value)` or `min(0.95, 0.5 * value)`, and uses the result
+  to enter the defend state. So lowering the value takes effect, while raising a value that is
+  already at the cap changes nothing. Whether the shipped profile multipliers push any soldier's
+  value past the cap depends on the base value, which was not measured here. yotthani's two
+  battles that zeroed this value together with five others and showed no visible effect (n=2,
+  line 107) remain **unexplained**: two of the seven places that set the defend state are not
+  gated by the six values, and the run may not have applied them. The same decompile found no
+  native reader for `AiAttackingShieldDefenseChance`, which TAOM does not write (the scan covered
+  93.4 % of `.text`, so "no read found", not "proven dead").
 - Review record for Phase C and D: six agents (standards, engine fidelity, performance and
   threads, logic and tests, lifecycle, and the systems analysis Mike asked for). Fixed before
   commit: the TwoLineWall and Envelop gates read the largest infantry formation, which their

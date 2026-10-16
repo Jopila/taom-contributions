@@ -70,7 +70,7 @@ every seam is an engine virtual.
 
 | Seam | What | Why |
 |---|---|---|
-| `MissionBehavior.OnMeleeHit(attacker, victim, isCanceled, collisionData)` | fires after every melee collision (`Mission.cs:5445-5447`), world hits included (`victim == null`, `CollisionResult == HitWorld`) | the trigger; carries `AttackDirection`, `CollisionResult`, `InflictedDamage`, `CollisionGlobalPosition` |
+| `MissionBehavior.OnMeleeHit(attacker, victim, isCanceled, collisionData)` | fires after every melee collision (`Mission.cs:5445-5447`), world hits included (`victim == null`, `CollisionResult == HitWorld`) | the trigger; carries `AttackDirection`, `CollisionResult`, `InflictedDamage`, `CollisionGlobalPosition`. `isCanceled` is true for: a weapon parry, a weapon block or a chamber block **without a shield**; any non-enemy victim (friendly fire, which also stuns the attacker); an invulnerable victim; and a swing with neither a victim nor an entity. A **shield block is not cancelled** (TAOM read of v1.5.5 `Mission.MeleeHitCallback`, `Mission.cs:5340-5377`; yotthani's recording notes agree, `MithrilForge docs/engine/battle-behaviour-measured.md`@0a2f4761 lines 30-32, code reading, v1.5.5) |
 | `AgentApplyDamageModel.DecideAgentKnockedDownByBlow` / `DecideAgentKnockedBackByBlow` on the already-registered `TaomCombatMechanicsModel` and, since #788, Custom Battle's `TaomCustomBattleDamageModel` | the primary-victim verdicts, asked from inside `CreateMeleeBlow` (`:5634-5641`) for an unmounted human | guaranteed knockdown on a slam, knock-back on a sweep or a scream, everything else `base` |
 | `CustomAttacksUtils.TakeDamage(victim, attacker, damage, magnitude, knockDown, extraFlags)` | the one synthetic-blow primitive every creature tree uses, extended with a trailing `BlowFlags extraFlags` so a sweep or a scream can set `KnockBack` | ring victims |
 | `Mission.GetNearbyEnemyAgents(Vec2, float, Team, MBList<Agent>)` | enemies only, filtered native-side | the ring; allies are never flattened |
@@ -124,7 +124,7 @@ Thrown item, so it is out; so are kicks and shield bashes (`IsAlternativeAttack`
 A missile hit never reaches `OnMeleeHit` at all.
 
 **What does nothing:** a parry, a chamber block, a weapon block, a canceled hit (invulnerable
-victim), a horse charge, a thrust, a zero-damage hit, any hit inside the cooldown, any mission
+victim, friendly fire, a swing that hit nothing), a horse charge, a thrust, a zero-damage hit, any hit inside the cooldown, any mission
 that is not `MissionCombatType.Combat` (arenas and tournaments out), any multiplayer session, the
 Combat Mechanics master toggle off, and everything for the rest of a mission in which the logic
 stood down on an exception (the stand-down clears the roster, so the model's verdicts stop with

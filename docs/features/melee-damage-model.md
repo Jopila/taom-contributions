@@ -185,6 +185,18 @@ using `GetModifiedSwingSpeedForCurrentUsage() / 4.5454545`, scaled by `SpeedGrap
 displayed number is that calculation at the plateau of the trapezoid, so it is the best case of
 a single blow, not an average.
 
+**Where the swings go in a crowd (measured, not TAOM's model).** yotthani recorded 14 battles
+(79,924 strike events) of the default AI and sorted how each strike ended: 38 % wounded an enemy,
+34.5 % hit a friend (cancelled, no damage), 18 % were taken by a shield, 3.3 % were warded off by a
+weapon and 1.3 % hit the world; 0.87 events per release. A strike that does reach a body does no
+damage in 4 to 23 % of cases (armour), and a soldier's strikes per second depend on the distance to
+the nearest enemy and on crowding (0.39 per second with fewer than 10 friends within 5 m, 0.19 with
+more than 55), not on troop or level. So sustained damage in a crowd sits well under the per-swing
+figure above (TAOM's inference from those shares; the recordings did not measure damage per weapon). Source: yotthani, MithrilForge `docs/engine/battle-behaviour-measured.md`@0a2f4761
+lines 42-62, measured in recordings (evidence kind [M], n as stated), measured with TAOM 2.0.34
+loaded (plus Armory and DualWield), v1.5.5, custom battles, both sides AI. The friend share
+includes the cancelled friendly-fire case described in `signature-strikes.md`.
+
 ## The report
 
 ```bash
