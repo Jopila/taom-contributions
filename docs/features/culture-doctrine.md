@@ -420,7 +420,7 @@ active behaviour and arrangement. Works in Custom Battle.
 [Doctrine] t=+65s team=1 side=Defender player=no tactic=TaomTacticShieldWall formations=[Infantry:210 BehaviorBracedDefend:ShieldWall/ShieldWall/FireAtWill, Ranged:60 BehaviorSkirmishLine/Scatter/HoldYourFire, Cavalry/Infantry:95 BehaviorFootCharge:Charging/Line/FireAtWill] taom=[TaomTacticShieldWall:Defend:Arrived]
 [Doctrine] off: vanilla tactics stay (status line on)
 [Doctrine] disabled for this mission after <exception>
-[MissionPerf] t=+65s frames=300 fps=60.0 avgMs=16.67 p95Ms=25.50 maxMs=40.3 agents=812 active=640 formations=9 gc0=12 gc1=3 gc2=1
+[MissionPerf] t=+65s frames=300 fps=60.0 avgMs=16.67 p95Ms=25.50 maxMs=40.3 agents=812 active=640 formations=9 gc0=12 gc1=3 gc2=1 mainMs=4.20 renderMs=6.10
 ```
 
 A TAOM tactic that throws on the AI thread reports `taom=[TaomTacticArcherRing:failed: ...]`

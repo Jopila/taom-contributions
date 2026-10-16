@@ -72,7 +72,7 @@ public class FrameStatsTests
     }
 
     [TestMethod]
-    public void Emit_NoFrames_ReportsZerosNotNaN()
+    public void Emit_NoFrames_ReportsZeros_MainMsNaN()
     {
         var sut = new FrameStats(intervalSeconds: 5.0);
         sut.ShouldEmit(0.0);
@@ -83,6 +83,7 @@ public class FrameStatsTests
         Assert.AreEqual(0.0, window.AverageMs);
         Assert.AreEqual(0.0, window.P95Ms);
         Assert.AreEqual(0.0, window.Fps);
+        Assert.IsTrue(double.IsNaN(window.MainMs), "MainMs is NaN by design: no sample means not measured.");
     }
 
     [TestMethod]
@@ -137,12 +138,51 @@ public class FrameStatsTests
     [TestMethod]
     public void BuildLine_FormatsEveryFieldInvariantly()
     {
-        var window = new FrameWindow(frames: 300, seconds: 5.0, averageMs: 16.6667, p95Ms: 25.5, maxMs: 40.25);
+        var window = new FrameWindow(frames: 300, seconds: 5.0, averageMs: 16.6667, p95Ms: 25.5, maxMs: 40.25, mainMs: 4.2);
 
-        var line = MissionPerfLine.Build(tSeconds: 65.0, window, agents: 812, activeAgents: 640, formations: 9, gc0: 12, gc1: 3, gc2: 1);
+        var line = MissionPerfLine.Build(tSeconds: 65.0, window, agents: 812, activeAgents: 640, formations: 9, gc0: 12, gc1: 3, gc2: 1, renderMs: 6.1);
 
         Assert.AreEqual(
-            "[MissionPerf] t=+65s frames=300 fps=60.0 avgMs=16.67 p95Ms=25.50 maxMs=40.3 agents=812 active=640 formations=9 gc0=12 gc1=3 gc2=1",
+            "[MissionPerf] t=+65s frames=300 fps=60.0 avgMs=16.67 p95Ms=25.50 maxMs=40.3 agents=812 active=640 formations=9 gc0=12 gc1=3 gc2=1 mainMs=4.20 renderMs=6.10",
             line);
+    }
+
+    [TestMethod]
+    public void BuildLine_NonFiniteBusyTimes_WriteNa()
+    {
+        var window = new FrameWindow(frames: 300, seconds: 5.0, averageMs: 16.6667, p95Ms: 25.5, maxMs: 40.25);
+
+        var line = MissionPerfLine.Build(65.0, window, 812, 640, 9, 12, 3, 1, renderMs: double.PositiveInfinity);
+
+        StringAssert.EndsWith(line, " gc2=1 mainMs=na renderMs=na");
+    }
+
+    [TestMethod]
+    public void Emit_MainMs_AveragesOnlyFinitePositiveSamples()
+    {
+        var sut = new FrameStats(intervalSeconds: 5.0);
+        sut.ShouldEmit(0.0);
+        sut.Record(10.0, 4.0);
+        sut.Record(10.0, double.PositiveInfinity);
+        sut.Record(10.0, double.NaN);
+        sut.Record(10.0, 0.0);
+        sut.Record(10.0, 6.0);
+
+        var window = sut.Emit(5.0);
+
+        Assert.AreEqual(5, window.Frames);
+        Assert.AreEqual(5.0, window.MainMs, 1e-9);
+    }
+
+    [TestMethod]
+    public void Emit_NoUsableMainSamples_ReportsNaN_AndTheNextWindowStartsEmpty()
+    {
+        var sut = new FrameStats(intervalSeconds: 5.0);
+        sut.ShouldEmit(0.0);
+        sut.Record(10.0, 4.0);
+        sut.Emit(5.0);
+        sut.Record(10.0, double.PositiveInfinity);
+
+        Assert.IsTrue(double.IsNaN(sut.Emit(10.0).MainMs));
     }
 }

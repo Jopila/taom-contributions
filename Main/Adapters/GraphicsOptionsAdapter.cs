@@ -19,11 +19,17 @@ public sealed class GraphicsOptionsAdapter : IGraphicsOptionsAdapter
     // A sanity bound that rejects garbage from the engine store, not the length of any options list.
     private const int MaxRawOptionIndex = 16;
 
+    private const int MaxFrameLimiterFps = 1000;
+
     public int RagdollOption => ToOptionIndex(NativeOptions.GetConfig(NativeOptions.NativeOptionsType.NumberOfRagDolls), MaxOptionIndex);
 
     public int CorpseOption => InRange(BannerlordConfig.NumberOfCorpses, MaxOptionIndex);
 
     public int BattleSizeOption => BannerlordConfig.BattleSize;
+
+    public int FrameLimiterFps => ToOptionIndex(NativeOptions.GetConfig(NativeOptions.NativeOptionsType.FrameLimiter), MaxFrameLimiterFps);
+
+    public int VSyncOption => ToOptionIndex(NativeOptions.GetConfig(NativeOptions.NativeOptionsType.VSync), MaxRawOptionIndex);
 
     public int TextureQualityOption => ToOptionIndex(NativeOptions.GetConfig(NativeOptions.NativeOptionsType.TextureQuality), MaxRawOptionIndex);
 

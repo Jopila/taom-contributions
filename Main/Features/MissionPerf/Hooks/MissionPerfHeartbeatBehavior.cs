@@ -2,22 +2,25 @@ using System;
 using System.Diagnostics;
 using TAOM.Core.Logging;
 using TAOM.Features.BattleLoadDiagnostics;
+using TaleWorlds.Engine;
 using TaleWorlds.MountAndBlade;
 
 namespace TAOM.Features.MissionPerf.Hooks;
 
 /// <summary>
 /// One <c>[MissionPerf]</c> line every five seconds of wall clock while a mission ticks: frames,
-/// fps, average / p95 / max frame ms, agent and formation counts, GC collections. Written for the
-/// culture-doctrine A/B (#608), where the question is whether a change to the team AI costs frame
-/// time, and kept for every mission because it is the only in-mission frame-time record TAOM has
-/// (<c>[MemSample]</c> has no frame counter, <c>[MapLoad]</c> is campaign-map only).
+/// fps, average / p95 / max frame ms, agent and formation counts, GC collections, and the engine's
+/// main and render thread busy ms (<c>mainMs</c>, <c>renderMs</c>). Written for the culture-doctrine
+/// A/B (#608), where the question is whether a change to the team AI costs frame time, and kept for
+/// every mission because it is the only in-mission frame-time record TAOM has (<c>[MemSample]</c>
+/// has no frame counter, <c>[MapLoad]</c> is campaign-map only).
 ///
 /// Thin entry point per ADR-002: the window maths is <see cref="FrameStats"/>, the format is
 /// <see cref="MissionPerfLine"/>. Frame time is wall clock between consecutive ticks, so the line
 /// measures what the player feels, including time scaling and the order menu. Everything is
-/// wrapped and the heartbeat self-disables for the mission after a single failure: a diagnostic
-/// must never become the thing that breaks the battle it was added to measure.
+/// wrapped and the heartbeat self-disables for the mission after a single failure, except the two
+/// busy-time reads, which give <c>na</c> on a throw instead: a diagnostic must never become the
+/// thing that breaks the battle it was added to measure.
 /// </summary>
 public sealed class MissionPerfHeartbeatBehavior : MissionLogic
 {
@@ -63,7 +66,7 @@ public sealed class MissionPerfHeartbeatBehavior : MissionLogic
                 return;
             }
             if (_lastTick != 0)
-                _stats.Record((now - _lastTick) * 1000d / Stopwatch.Frequency);
+                _stats.Record((now - _lastTick) * 1000d / Stopwatch.Frequency, MainBusyMs());
             _lastTick = now;
 
             if (!_stats.ShouldEmit(nowSeconds))
@@ -75,7 +78,7 @@ public sealed class MissionPerfHeartbeatBehavior : MissionLogic
             var gc2 = GC.CollectionCount(2);
             _logger.LogInfo(MissionPerfLine.Build(
                 nowSeconds, window, Mission.AllAgents.Count, Mission.Agents.Count, CountLiveFormations(),
-                gc0 - _gc0, gc1 - _gc1, gc2 - _gc2));
+                gc0 - _gc0, gc1 - _gc1, gc2 - _gc2, RenderBusyMs()));
             _gc0 = gc0;
             _gc1 = gc1;
             _gc2 = gc2;
@@ -89,6 +92,20 @@ public sealed class MissionPerfHeartbeatBehavior : MissionLogic
     }
 
     protected override void OnEndMission() => Reset();
+
+    // 1000 / fps for an engine busy-time rate; NaN when the read throws. A zero rate gives infinity,
+    // which the line and the window both treat as not measured.
+    private static double MainBusyMs()
+    {
+        try { return 1000.0 / Utilities.GetMainFps(); }
+        catch { return double.NaN; }
+    }
+
+    private static double RenderBusyMs()
+    {
+        try { return 1000.0 / Utilities.GetRendererFps(); }
+        catch { return double.NaN; }
+    }
 
     private int CountLiveFormations()
     {

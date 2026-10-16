@@ -164,6 +164,26 @@ public class MissionTickProfilerBehaviorTests
         Assert.AreEqual(1, info.Count(l => l.StartsWith("[TickProfiler] context read of scene failed")));
     }
 
+    // Every adapter property gets its own value, so a swapped pair of slots in the reader cannot pass.
+    [TestMethod]
+    public void OnMissionTick_PerfContext_PutsEachAdapterPropertyInItsOwnSlot()
+    {
+        _settings.TickProfilerEnabled.Returns(false);
+        _options.FrameLimiterFps.Returns(144);
+        _options.VSyncOption.Returns(2);
+        _options.TextureQualityOption.Returns(3);
+        _options.ShadowmapResolutionOption.Returns(4);
+        _options.ParticleDetailOption.Returns(5);
+        _options.RagdollOption.Returns(1);
+        var behavior = Create();
+        behavior.OnCreated();
+
+        behavior.OnMissionTick(0.016f);
+
+        var context = Lines(nameof(IModLogger.LogInfo)).Single(l => l.StartsWith("[PerfContext] "));
+        StringAssert.Contains(context, " frameLimiter=144 vsync=2 textureQuality=3 shadowQuality=4 particleDetail=5 ragdolls=1 ");
+    }
+
     [TestMethod]
     public void OnEndMission_MeasuredMission_WritesTheSummaryAndStopsMeasuring()
     {

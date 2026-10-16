@@ -23,7 +23,7 @@ public class TickProfileLinesTests
         "[Hitch] t=+72s frameMs=812.35 preDisplayMs=0.40 cameraMs=3.25 missionTickMs=5.20 preTickMs=0.30 waitTickMs=790.00 agentTickMs=795.10 otherMs=13.20 gc0=1 gc1=1 gc2=0 allocKB=96 top=BehaviorTreeMissionLogic:2.10,AdvancedCombatBehavior:1.30,MissionPerfHeartbeatBehavior:0.05";
 
     private const string PinnedPerfContext =
-        "[PerfContext] build=Debug jitOptimized=false clr=4.0.30319.42000 serverGC=false latency=Interactive missionInProcess=1 scene=battle_terrain_029 agents=0 textureQuality=1 shadowQuality=2 particleDetail=1 ragdolls=3 memLoad=61 availPhysMB=12034 tickProfiler=on diag=battleLoad,stallWatchdog,stallBundle,exitSampler,freezeSampler,memSampler,missionPerf";
+        "[PerfContext] build=Debug jitOptimized=false clr=4.0.30319.42000 serverGC=false latency=Interactive missionInProcess=1 scene=battle_terrain_029 agents=0 frameLimiter=60 vsync=0 textureQuality=1 shadowQuality=2 particleDetail=1 ragdolls=3 memLoad=61 availPhysMB=12034 tickProfiler=on diag=battleLoad,stallWatchdog,stallBundle,exitSampler,freezeSampler,memSampler,missionPerf";
 
     // The mission-end summary added by the plan's 2026-10-03 amendment; inputs below.
     private const string PinnedTickSummary =
@@ -59,8 +59,9 @@ public class TickProfileLinesTests
         });
 
     private static PerfContext SampleContext(int quality = 1, int ragdolls = 3, int memLoad = 61, long availPhysMb = 12034,
-        IReadOnlyList<string>? diag = null) => new PerfContext(
+        IReadOnlyList<string>? diag = null, int frameLimiter = 60, int vsync = 0) => new PerfContext(
         "Debug", false, "4.0.30319.42000", false, "Interactive", 1, "battle_terrain_029", 0,
+        frameLimiter, vsync,
         quality, quality == 1 ? 2 : quality, quality, ragdolls, memLoad, availPhysMb, true,
         diag ?? TickProfileLines.DiagTokens(true, true, true, true, true, true, true));
 
@@ -133,6 +134,13 @@ public class TickProfileLinesTests
         var line = TickProfileLines.BuildPerfContext(SampleContext(quality: -1, ragdolls: -1, memLoad: -1, availPhysMb: -1));
         StringAssert.Contains(line,
             " textureQuality=na shadowQuality=na particleDetail=na ragdolls=na memLoad=na availPhysMB=na tickProfiler=on ");
+    }
+
+    [TestMethod]
+    public void BuildPerfContext_UnreadableFrameSettings_WriteNa()
+    {
+        var line = TickProfileLines.BuildPerfContext(SampleContext(frameLimiter: -1, vsync: -1));
+        StringAssert.Contains(line, " agents=0 frameLimiter=na vsync=na textureQuality=1 ");
     }
 
     [TestMethod]

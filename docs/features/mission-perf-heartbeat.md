@@ -4,7 +4,8 @@
 
 One `[MissionPerf]` line in the TAOM debug log every five seconds of wall clock while a mission
 ticks: frames, fps, average / p95 / max frame time in milliseconds, agent and formation counts,
-garbage collections since the last line. It is the in-mission counterpart of `[MemSample]`
+garbage collections since the last line, and the engine's main-thread and render-thread busy
+times (`mainMs`, `renderMs`). It is the in-mission counterpart of `[MemSample]`
 and the measurement a battle-AI or content change is judged against. Written for the culture
 doctrine A/B (#608) and kept for every mission.
 
@@ -21,16 +22,25 @@ doctrine A/B (#608) and kept for every mission.
 `MissionPerfHeartbeatBehavior : MissionLogic` measures wall clock between consecutive
 `OnMissionTick` calls (`Stopwatch.GetTimestamp`, no allocation), feeds `FrameStats`, and every
 five seconds logs `MissionPerfLine.Build(...)` with `Mission.AllAgents.Count`,
-`Mission.Agents.Count` (active), the count of formations with units, and the `GC.CollectionCount`
-deltas. Wall clock, not mission time: mission time slows under time scaling and stops in the
-order menu, and the line is about what the player feels.
+`Mission.Agents.Count` (active), the count of formations with units, the `GC.CollectionCount`
+deltas, and the engine's main and render thread busy times (`Utilities` calls wrapped so a
+throw gives `na`, not a disabled heartbeat). Wall clock, not mission time: mission time slows
+under time scaling and stops in the order menu, and the line is about what the player feels.
 
 `FrameStats` is pure: count, average and max cover every frame; the percentile set is bounded
 to the newest 4,096 samples (nearest-rank p95 over a sorted copy once per window). It resets
 its clock at `OnCreated` and `OnEndMission`. The behavior self-disables for the mission after a
-single exception.
+single exception, except the two busy-time reads, which give `na` on a throw instead of
+disabling the heartbeat. The per-frame read has no latch: vanilla's own
+`PerformanceAnalyzer.Tick` (v1.5.5 `PerformanceAnalyzer.cs`, line 130) calls the same getters
+unguarded on every tick of a performance analysis (while `Start` has set its current object, lines
+94-103; the one caller in the installed modules is `BenchmarkScreen`, a test-automation screen, so this
+is precedent for the call, not for a call in every mission), the native getter only reads a field and
+divides, and both getters are registered on the client and the dedicated server.
 
-Cost: one timestamp per frame, one sort of at most 4,096 doubles per five seconds.
+Cost: one timestamp and one `Utilities.GetMainFps()` read per frame (a native field read behind
+one interop call, no allocation); one sort of at most 4,096 doubles and one `GetRendererFps()`
+read per five seconds.
 
 ## Configuration
 
@@ -43,12 +53,35 @@ probe below, also default on and read at each mission start.
 ## Log line
 
 ```
-[MissionPerf] t=+65s frames=300 fps=60.0 avgMs=16.67 p95Ms=25.50 maxMs=40.3 agents=812 active=640 formations=9 gc0=12 gc1=3 gc2=1
+[MissionPerf] t=+65s frames=300 fps=60.0 avgMs=16.67 p95Ms=25.50 maxMs=40.3 agents=812 active=640 formations=9 gc0=12 gc1=3 gc2=1 mainMs=4.20 renderMs=6.10
 ```
 
 `t` is wall seconds since the behavior's `OnCreated`. The first window opens at the first
 `OnMissionTick`, so the first line lands one interval after that tick: `t=+6s` in the custom and
 campaign battle logs of 2026-09-29 to 2026-10-02, `t=+7s` in a tournament.
+
+| Field | What it is |
+|---|---|
+| `mainMs` | Mean main-thread busy ms per frame: the window's mean of `1000 / Utilities.GetMainFps()`, read each tick. The native value is one frame's main-thread busy time, so it excludes the frame limiter's spin and includes any wait for the previous frame's render-prep job. Only finite positive samples count; `na` when there are none. Lines from before the field lack it |
+| `renderMs` | Render-thread busy ms: `1000 / Utilities.GetRendererFps()`, read once as the line is written. The native value is already windowed (frames over the summed render-thread busy spans, over a window of 1 s or more). The busy span includes `IDXGISwapChain::Present`, so vsync, a full GPU queue or a driver cap count as busy; `na` when not finite. Lines from before the field lack it |
+
+Reading `avgMs` against the two: both well under `avgMs` with fps at the `frameLimiter` value of
+`[PerfContext]` is the in-game limiter. `mainMs` close to `avgMs` with `renderMs` well under it is
+main-thread bound; `renderMs` close to `avgMs` is the render thread, either its own work for the
+frame or a wait inside Present, which GPU-bound, vsync and a driver cap (NVCP, RTSS) all look
+like. `vsync=` in `[PerfContext]` separates vsync only. Limits: UNVERIFIED where the main thread
+blocks when the render thread falls behind, and the native side writes the main-thread figure
+only on the frame loop's rendering branch, so `mainMs` would repeat the last rendered frame's
+value while rendering is toggled off (`Utilities.ToggleRender`, which neither vanilla nor TAOM
+calls). `renderMs` is the engine's last closed window of a second or more, not the line's five
+seconds. Native evidence, v1.5.5 client: `GetMainFps` (`0x513C50`) reads the double at `+0xf8`,
+`GetRendererFps` (`0x513BD0`) the double at `+0x1560`; the full account is in
+[section 1 of the engine page](../reference/engine/mission-frame-threads-and-native-costs.md#1-the-battle-frame). Never read
+`IUtil.GetFrameLimiterWithSleep`: it is a stub at `0x28F10` in the v1.5.5 client (real code only
+on the dedicated server) and returns false. `tools/perf_runs.py` parses both fields as optional
+(`Window.main_ms`, `Window.render_ms`, None when absent or `na`) and its row reports their steady
+medians as `main_ms_median` and `render_ms_median` (`mainMs`, `renderMs` in the text line, `-` for
+older logs).
 
 ## Tick profiler (Patch97)
 
@@ -148,7 +181,16 @@ its GC collection deltas, its main-thread allocation and its three slowest behav
 
 **`[PerfContext]`**, INFO, once per mission at its first tick, profiler on or off. `build` is
 `Debug` when TAOM's own `DebuggableAttribute.IsJITOptimizerDisabled` is true; `missionInProcess`
-counts missions this process; `scene` is `unknown` when unreadable and `agents` -1; the quality
+counts missions this process; `scene` is `unknown` when unreadable and `agents` -1;
+`frameLimiter` is the in-game frame limiter's fps (UI range 30 to 360) and `vsync` is 0 None, 1
+Full, 2 Half, both raw integers read from the config (`na` when unreadable). They are the
+configured values. Present reads its sync interval from the same `vsync` field every frame, and
+vanilla clears the unreadable force-vsync flag whenever a mission state is pushed, so in a mission
+`vsync` is the setting in effect unless another mod forces it. The cap in effect may differ from
+`frameLimiter`: native code also writes the limiter period directly (1/30 s and 0.1 s constants
+among other sites), UNVERIFIED which of them can run during a mission. The reads are
+`IConfig.GetRGLConfig` (v1.5.5 client `0x4A6840`, cases `0x19` and `0x1a` for `FrameLimiter` and
+`VSync`; see the [engine page](../reference/engine/mission-frame-threads-and-native-costs.md#1-the-battle-frame)). The quality
 fields are the raw engine option values (`na` when unreadable); `memLoad` and `availPhysMB` come
 from `GlobalMemoryStatusEx`; `diag` lists, in this order, `battleLoad`, `stallWatchdog`,
 `stallBundle`, `exitSampler`, `freezeSampler`, `memSampler`, `missionPerf` for each diagnostic that
@@ -156,7 +198,7 @@ will run, or `none`. `stallWatchdog` and `exitSampler` also need the master Batt
 toggle, and `stallBundle` needs the watchdog, as their consumers do; the other three stand alone:
 
 ```
-[PerfContext] build=Debug jitOptimized=false clr=4.0.30319.42000 serverGC=false latency=Interactive missionInProcess=1 scene=battle_terrain_029 agents=0 textureQuality=1 shadowQuality=2 particleDetail=1 ragdolls=3 memLoad=61 availPhysMB=12034 tickProfiler=on diag=battleLoad,stallWatchdog,stallBundle,exitSampler,freezeSampler,memSampler,missionPerf
+[PerfContext] build=Debug jitOptimized=false clr=4.0.30319.42000 serverGC=false latency=Interactive missionInProcess=1 scene=battle_terrain_029 agents=0 frameLimiter=60 vsync=0 textureQuality=1 shadowQuality=2 particleDetail=1 ragdolls=3 memLoad=61 availPhysMB=12034 tickProfiler=on diag=battleLoad,stallWatchdog,stallBundle,exitSampler,freezeSampler,memSampler,missionPerf
 ```
 
 **`[TickSummary]`**, INFO, once at the end of a measured mission that closed any frame, in `probe` or
@@ -245,7 +287,7 @@ not something to do on the clock of the measurement being taken.
 ### Cost
 
 **Off:** no Patch97 patch exists. Every player pays the one `[TickProfiler] off:` line per process,
-the `[PerfContext]` line per mission (one `GlobalMemoryStatusEx` read, about 84 us, four engine
+the `[PerfContext]` line per mission (one `GlobalMemoryStatusEx` read, about 84 us, six engine
 option reads and a few `GCSettings` reads, once), and two static null checks (enter and exit) per
 agent tick in Patch91's bracket, about one agent tick per mission frame. **Installed, then switched
 off in MCM:** the patches stay until a restart, so every behaviour call pays one static read and one
@@ -864,7 +906,7 @@ only while frames are shorter than a second.
 | `Main/Features/MissionPerf/Hooks/MissionTickProfilerBehavior.cs` | `[PerfContext]`, the `[TickProfile]` window, `[TickSummary]` |
 | `Main/Features/MissionPerf/Hooks/PerfContextReader.cs` | The `[PerfContext]` reads |
 | `Main/Features/BattleLoadDiagnostics/Hooks/Patch91_MissionTickStallProbes.cs` | The agent-tick bracket the profiler reads |
-| `Main/Adapters/GraphicsOptionsAdapter.cs` | The ragdoll and three quality option reads |
+| `Main/Adapters/GraphicsOptionsAdapter.cs` | The six option reads (ragdoll, frame limiter, VSync, three quality options) |
 | `Dependencies/Foundation/PatchShieldPolicy.cs` | The three MissionPerf PatchShield exclusions (agent tick, wait, script tick) and the diag.log skip line |
 | `Main/Features/MissionPerf/ProbeLineData.cs` | `HitchDetailFrame`, `ExtrasWindow`, `MissionExtras` |
 | `Main/Features/MissionPerf/ProbeDelegates.cs` | `ProbeDelegates` (the open-instance delegate binder) |
@@ -895,8 +937,13 @@ only while frames are shorter than a second.
 ## Tests
 
 `TAOM.Tests/Features/MissionPerf/FrameStatsTests.cs`: cadence, average, nearest-rank p95,
-single sample, empty window (zeros, not NaN), window reset, bounded sample set, clock reset,
-line format.
+single sample, empty window (zeros, `MainMs` NaN by design), window reset, bounded sample set,
+clock reset, the busy-time mean (finite positive samples only), line format.
+`MissionPerfHeartbeatBehaviorTests.cs` (RequiresGame): a throwing busy-time read does not log
+"heartbeat disabled". `MissionTickProfilerBehaviorTests.cs` pins which adapter property lands in
+which `[PerfContext]` slot. `tools/tests/test_perf_runs.py` covers the busy-time medians, the
+dash for older logs, damaged `mainMs`/`renderMs` values (line unparsed) and the FRAME_CAP settings
+note.
 The line-format test is a twin pin with `tools/tests/test_perf_runs.py` (`PINNED_MISSION_PERF`),
 which parses the same literal: change both or neither.
 
@@ -974,8 +1021,8 @@ python tools/perf_runs.py compare --a <logs with it off...> --b <logs with it on
 The first command prints one row per mission (a log may hold several). Each row reports the first
 window on its own as the spawn window, because `BattlePlayable` fires with `agents=0` and the spawn
 burst lands in that window, and steady-state numbers over the later windows from `t=+30s` with
-active agents: median fps, `avgMs` and `p95Ms`, the worst `maxMs`, and `gc0`, `gc1`, `gc2` per
-minute. The spawn window is never steady, even when a long render wait before the first tick puts
+active agents: median fps, `avgMs`, `p95Ms`, `mainMs` and `renderMs` (`-` for a log from before
+the two busy times), the worst `maxMs`, and `gc0`, `gc1`, `gc2` per minute. The spawn window is never steady, even when a long render wait before the first tick puts
 it past `t=+30s`. `compare` prints the median of each metric per group, the delta and the
 percentage, with N per group, and refuses groups whose `[PerfContext]` build (Debug or Release) or
 texture quality differ unless given `--allow-mixed`. It counts the rows it could not check (no
@@ -1087,7 +1134,7 @@ Read the flags before the numbers:
 
 | Flag | Meaning |
 |---|---|
-| `FRAME_CAP` | With four or more steady windows: at least half of them sit within 1 fps of one window's fps, or the windows with the most and the fewest active agents, 30% or more apart, ran within 1 fps of each other. A frame limiter (in game or in the driver) may have set the frame time; lift it and rerun |
+| `FRAME_CAP` | With four or more steady windows: at least half of them sit within 1 fps of one window's fps, or the windows with the most and the fewest active agents, 30% or more apart, ran within 1 fps of each other. A frame limiter (in game or in the driver) may have set the frame time; lift it and rerun. When the mission's `[PerfContext]` has `frameLimiter`, the evidence ends with `; [PerfContext] frameLimiter=<value> vsync=<value or na>`, printed as configured with no judgement whether it explains the plateau; older logs without the field get nothing |
 | `MEMORY_PRESSURE` | The mission's `[PerfContext]`, or a `[MemSample]` line written between the mission's start and the next mission's start or the next game's initialization (so the campaign map after a battle counts toward that battle), read `memLoad` of 80% or more |
 | `DIAG_ON` | `[PerfContext]` shows cost beyond the default diagnostics: `tickProfiler=on`, or a `diag=` token other than the seven that default on (`battleLoad`, `stallWatchdog`, `stallBundle`, `exitSampler`, `freezeSampler`, `memSampler`, `missionPerf`) |
 | `DIRTY_BUILD` | The `[BuildStamp]` TAOM stamp ends in `.dirty`: the build held uncommitted edits, so say what was measured |

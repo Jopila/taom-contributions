@@ -5,8 +5,8 @@ namespace TAOM.Adapters;
 /// (native, <c>engine_config.txt</c>), Number of Corpses and Battle Size (managed,
 /// <c>BannerlordConfig.txt</c>). Every value is the option INDEX the options screen shows, 0-5 for
 /// ragdolls and corpses, or -1 when the engine hands back something that is not one. Battle Size is
-/// passed through raw. It also reports the texture, shadow-map and particle quality options for the
-/// tick profiler's <c>[PerfContext]</c> line.
+/// passed through raw. It also reports the frame limiter, VSync, texture, shadow-map and particle
+/// quality options for the tick profiler's <c>[PerfContext]</c> line.
 /// </summary>
 public interface IGraphicsOptionsAdapter
 {
@@ -18,6 +18,12 @@ public interface IGraphicsOptionsAdapter
 
     /// <summary>The Battle Size option index, raw as stored (0-6), for the log line.</summary>
     int BattleSizeOption { get; }
+
+    /// <summary>The in-game frame limiter's fps (UI range 30 to 360); -1 when unreadable.</summary>
+    int FrameLimiterFps { get; }
+
+    /// <summary>VSync: 0 None, 1 Full, 2 Half; -1 when unreadable.</summary>
+    int VSyncOption { get; }
 
     /// <summary>Texture Quality: the raw option value the engine stores, rounded; -1 when unreadable.</summary>
     int TextureQualityOption { get; }

@@ -22,6 +22,8 @@ public sealed class FrameStats
     private int _sampleHead;
     private int _frames;
     private double _sumMs;
+    private double _mainSumMs;
+    private int _mainFrames;
     private double _maxMs;
     private double _windowStart;
     private bool _clockSet;
@@ -33,10 +35,18 @@ public sealed class FrameStats
         _samples = new List<double>(Math.Min(_maxSamples, 1024));
     }
 
-    public void Record(double frameMs)
+    /// <param name="frameMs">Wall clock between ticks.</param>
+    /// <param name="mainMs">The main thread's busy ms for the last completed frame (<c>1000 / GetMainFps</c>); only
+    /// finite positive values count toward the window's <see cref="FrameWindow.MainMs"/>.</param>
+    public void Record(double frameMs, double mainMs = double.NaN)
     {
         if (double.IsNaN(frameMs) || double.IsInfinity(frameMs) || frameMs < 0)
             return;
+        if (mainMs > 0 && !double.IsInfinity(mainMs))
+        {
+            _mainSumMs += mainMs;
+            _mainFrames++;
+        }
         _frames++;
         _sumMs += frameMs;
         if (frameMs > _maxMs)
@@ -69,11 +79,13 @@ public sealed class FrameStats
     {
         var seconds = _clockSet ? nowSeconds - _windowStart : 0.0;
         var average = _frames > 0 ? _sumMs / _frames : 0.0;
-        var fps = seconds > 0.0 ? _frames / seconds : 0.0;
-        var window = new FrameWindow(_frames, seconds, average, Percentile95(), _maxMs, fps);
+        var mainMs = _mainFrames > 0 ? _mainSumMs / _mainFrames : double.NaN;
+        var window = new FrameWindow(_frames, seconds, average, Percentile95(), _maxMs, mainMs);
 
         _frames = 0;
         _sumMs = 0.0;
+        _mainSumMs = 0.0;
+        _mainFrames = 0;
         _maxMs = 0.0;
         _samples.Clear();
         _sampleHead = 0;
@@ -107,19 +119,15 @@ public sealed class FrameStats
 /// <summary>One closed window of frame times.</summary>
 public readonly struct FrameWindow
 {
-    public FrameWindow(int frames, double seconds, double averageMs, double p95Ms, double maxMs)
-        : this(frames, seconds, averageMs, p95Ms, maxMs, seconds > 0.0 ? frames / seconds : 0.0)
-    {
-    }
-
-    internal FrameWindow(int frames, double seconds, double averageMs, double p95Ms, double maxMs, double fps)
+    public FrameWindow(int frames, double seconds, double averageMs, double p95Ms, double maxMs, double mainMs = double.NaN)
     {
         Frames = frames;
         Seconds = seconds;
         AverageMs = averageMs;
         P95Ms = p95Ms;
         MaxMs = maxMs;
-        Fps = fps;
+        MainMs = mainMs;
+        Fps = seconds > 0.0 ? frames / seconds : 0.0;
     }
 
     public int Frames { get; }
@@ -128,4 +136,7 @@ public readonly struct FrameWindow
     public double P95Ms { get; }
     public double MaxMs { get; }
     public double Fps { get; }
+
+    /// <summary>Mean main-thread busy ms over the finite positive samples; NaN when there were none.</summary>
+    public double MainMs { get; }
 }
