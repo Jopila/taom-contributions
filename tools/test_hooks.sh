@@ -192,6 +192,14 @@ PYEOF
     [[ "$REG" == "0" ]] && { ok "$hook not registered in settings.json, skipped"; continue; }
     # Accept fractional bounds (timeout -k 0.2 0.8) as well as integers.
     INNER=$(grep -oE 'timeout -k [0-9.]+ [0-9.]+' "$hookfile" 2>/dev/null | head -1 | awk '{print $4}')
+    # A bound counted from the hook's first command is a variable (timeout -k 0.5 "$UP_BUDGET"); the hook
+    # then declares its ceiling in microseconds as <VAR>_MAX_US=<n> (upstream-watch.sh, 2026-10-16).
+    if [[ -z "$INNER" ]]; then
+        VAR=$(grep -oE 'timeout -k [0-9.]+ "\$\{?[A-Za-z_]+\}?"' "$hookfile" 2>/dev/null | head -1 | sed -E 's/.*"\$\{?([A-Za-z_]+)\}?"/\1/')
+        CEIL_US=""
+        [[ -n "$VAR" ]] && CEIL_US=$(grep -oE "^[[:space:]]*${VAR}_MAX_US=[0-9]+" "$hookfile" 2>/dev/null | head -1 | sed -E 's/.*=//')
+        [[ -n "$CEIL_US" ]] && INNER=$("$HPY" -c "import sys; print(int(sys.argv[1]) / 1e6)" "$CEIL_US")
+    fi
     if [[ -z "$INNER" ]]; then
         bad "$hook invokes a tools/*.py but has NO inner timeout: a harness kill would be silent"
     elif "$HPY" -c "import sys; sys.exit(0 if float(sys.argv[1]) >= float(sys.argv[2]) else 1)" "$INNER" "$REG"; then
@@ -1401,6 +1409,19 @@ crd_is "$CFT_WT_TOP" "a heredoc message with an apostrophe" "$(printf "cd %s && 
 crd_is "$CFT_WT_TOP" "a PowerShell Set-Location" "Set-Location $CFT_WT_M; git commit -m x" "" PowerShell
 crd_is "$CFT_WT_TOP" "git add after a cd" "cd $CFT_WT_M && git add -A" "" Bash add
 crd_is "$CFT_REPO_TOP" "the project root when nothing names a directory" "git commit -m x" ""
+# Commits in more than one work tree: a gate judges one repository per command, so the resolver answers
+# nothing (rc 2) and the commit gates deny (Codex review 2026-10-16: an earlier commit went unchecked
+# behind a later one in another repository).
+[[ -z "$(crd "git -C $CFT_WT_M commit -m a; git -C $CFT_REPO_M commit -m b" "")" ]] \
+    && ok "taom_git_repo_dir: commits in two work trees answer nothing" \
+    || bad "taom_git_repo_dir picked one repository for a command that commits in two"
+crd_is "$CFT_WT_TOP" "two commits in one work tree are one repository" "git -C $CFT_WT_M commit -m a; git -C $CFT_WT_M/sub commit -m b" ""
+crd_is "$CFT_WT_TOP" "pushd then popd returns to the cwd" "pushd $CFT_REPO_M; popd; git commit -m x" "$CFT_WT_M"
+crd_is "$CFT_WT_TOP" "a cd inside ( ) closed by ');' ends there" "(cd $CFT_REPO_M && git status); git commit -m x" "$CFT_WT_M"
+OUT=$(cft_payload "git -C $CFT_WT_M commit -m a; git -C $CFT_REPO_M commit -m b" "")
+[[ "$(decision_of "$OUT")" == deny ]] && grep -q 'more than one repository' <<< "$OUT" \
+    && ok "check-claude-files-tracked denies a command that commits in two repositories" \
+    || bad "check-claude-files-tracked judged one repository of a two-repository command: $(printf '%s' "$OUT" | head -c 160)"
 for hook in check-claude-files-tracked.sh check-moduledata-validation.sh check-doc-config-drift.sh \
             check-commit-subject-version.sh block-broad-git-add.sh; do
     if grep -qF 'taom_git_repo_dir' "$REPO/.claude/hooks/$hook" \
@@ -1469,6 +1490,11 @@ OUT=$("$HPY" -c 'import json,sys; print(json.dumps({"tool_name":"Bash","tool_inp
 [[ "$(decision_of "$OUT")" == ask ]] && grep -q 'wtonly.txt' <<< "$OUT" \
     && ok "block-broad-git-add lists the worktree's files for a git add -A run there" \
     || bad "block-broad-git-add did not list the worktree's files: $(printf '%s' "$OUT" | head -c 160)"
+OUT=$("$HPY" -c 'import json,sys; print(json.dumps({"tool_name":"Bash","tool_input":{"command":"git -C " + sys.argv[1] + " add -A; git -C " + sys.argv[2] + " add x"},"hook_event_name":"PreToolUse"}))' "$CFT_WT_M" "$CFT_REPO_M" \
+    | CLAUDE_PROJECT_DIR="$CFT_REPO" timeout -k 2 10 bash "$REPO/.claude/hooks/block-broad-git-add.sh" 2>/dev/null)
+[[ "$(decision_of "$OUT")" == ask ]] && grep -q 'more than one repository' <<< "$OUT" \
+    && ok "block-broad-git-add says its list is incomplete when git add runs in two repositories" \
+    || bad "block-broad-git-add listed one repository for a two-repository add: $(printf '%s' "$OUT" | head -c 160)"
 git -C "$PRJ" worktree remove --force "$PRJ_WT" >/dev/null 2>&1
 rm -rf "$CFT_REPO/.claude/skills/other" "$CFT_REPO/sub" "$CFT_WT" "$PRJ" "$PRJ_WT" "$PRJ_FOREIGN" "$SUBJ_WT"
 
@@ -2676,21 +2702,18 @@ fi
 rm -rf "$PG"
 
 # ---------------------------------------------------------------------------
-head2 "7l. session-start's UPSTREAM block prints each outcome and stays inside the 10 s registration"
-# The real session-start.sh runs in a sandbox whose tools/upstream_watch.py exists only as a file
-# and whose interpreter is a stub (the FAKEPY pattern of 4c): no network, no real cache. The stub
-# answers the _pybin.sh probe, and for the tool it acts out the mode in UPFAKE_MODE.
+head2 "7l. upstream-watch.sh prints each outcome and stays inside its 10 s registration"
+# The real upstream-watch.sh (a SessionStart hook of its own since 2026-10-16) runs in a sandbox whose
+# tools/upstream_watch.py exists only as a file and whose interpreter is a stub (the FAKEPY pattern of 4c):
+# no network, no real cache. The stub answers the _pybin.sh probe, and for the tool it acts out the mode in
+# UPFAKE_MODE.
 UP="$SANDBOX/upstream"
 mkdir -p "$UP/.claude/hooks" "$UP/tools"
-cp .claude/hooks/session-start.sh .claude/hooks/_pybin.sh "$UP/.claude/hooks/"
+cp .claude/hooks/upstream-watch.sh .claude/hooks/_pybin.sh "$UP/.claude/hooks/"
 : > "$UP/tools/upstream_watch.py"
-: > "$UP/tools/graphify_taom.py"
 UPPY="$UP/fakepy"
 cat > "$UPPY" <<'FAKE'
 #!/bin/sh
-# A slow graphify sibling (UPFAKE_GRAPH_SLOW) spends most of its own 4 s bound, so the hang row proves
-# the UPSTREAM budget is counted from the hook's first command, not given 5 s whatever came before.
-if [ "$1" = "tools/graphify_taom.py" ]; then [ -n "$UPFAKE_GRAPH_SLOW" ] && sleep 3.9; exit 0; fi
 if [ "$1" != "tools/upstream_watch.py" ]; then printf taompy; exit 0; fi
 echo "$*" > "$UPFAKE_ARGS"
 case "$UPFAKE_MODE" in
@@ -2703,11 +2726,11 @@ esac
 exit 0
 FAKE
 chmod +x "$UPPY" 2>/dev/null
-up_run() {   # $1 mode, $2 non-empty for a slow graphify sibling; stdout in UP_OUT, whole seconds in UP_SECS
+up_run() {   # $1 mode, $2 the payload's source (startup); stdout in UP_OUT, whole seconds in UP_SECS
     local t0=$SECONDS
-    printf '{"source":"startup"}' | timeout -k 2 20 env CLAUDE_PROJECT_DIR="$UP" TAOM_PYBIN="$UPPY" \
-        UPFAKE_MODE="$1" UPFAKE_GRAPH_SLOW="${2:-}" UPFAKE_ARGS="$UP/args" TAOM_UPSTREAM_CACHE="$UP/scratch-cache.json" \
-        bash "$UP/.claude/hooks/session-start.sh" > "$UP/out" 2>/dev/null
+    printf '{"source":"%s"}' "${2:-startup}" | timeout -k 2 20 env CLAUDE_PROJECT_DIR="$UP" TAOM_PYBIN="$UPPY" \
+        UPFAKE_MODE="$1" UPFAKE_ARGS="$UP/args" TAOM_UPSTREAM_CACHE="$UP/scratch-cache.json" \
+        bash "$UP/.claude/hooks/upstream-watch.sh" > "$UP/out" 2>/dev/null
     UP_SECS=$((SECONDS - t0))
     UP_OUT=$(cat "$UP/out")
 }
@@ -2718,10 +2741,16 @@ else
     bad "ahead: the UPSTREAM line is missing or the tool got no --budget ($(cat "$UP/args" 2>/dev/null))"
 fi
 up_run current
-if grep -q 'upstream' <<< "$UP_OUT"; then
-    bad "current: printed something about upstream: $(grep upstream <<< "$UP_OUT" | head -1)"
+if [[ -n "$UP_OUT" ]]; then
+    bad "current: printed something: $(head -1 <<< "$UP_OUT")"
 else
     ok "current: nothing printed"
+fi
+up_run ahead resume
+if [[ -n "$UP_OUT" ]]; then
+    bad "a resume printed the upstream check; only a fresh startup runs it"
+else
+    ok "resume: nothing printed (startup only, as session-start.sh)"
 fi
 up_run rc2
 if grep -q 'upstream review drift UNCHECKED this session (the status call exited 2)' <<< "$UP_OUT"; then
@@ -2736,27 +2765,52 @@ else
     bad "crash rc 1: no 'exited 1' note"
 fi
 up_run hang
-if ! grep -qE 'upstream review drift UNCHECKED this session \((the status call overran|session-start time budget spent)' <<< "$UP_OUT"; then
-    bad "hang: neither the overran note nor the budget note"
+if ! grep -qE 'the status call overran its [0-8]\.[0-9]{2} s budget' <<< "$UP_OUT"; then
+    bad "hang: no overran note with a budget under 8.5 s: $(head -1 <<< "$UP_OUT")"
 elif (( UP_SECS >= 10 )); then
     bad "hang: the whole hook took ${UP_SECS} s, past the 10 s registration"
 else
-    ok "hang: the overran note, and the whole hook returned in ${UP_SECS} s"
-fi
-# The same hang after a graphify sibling that spends 3.9 s: the block must get what is left of 8.5 s
-# from the first command (under 5 s), run last, and the hook still return inside its registration.
-up_run hang slow
-UP_LAST=$(printf '%s\n' "$UP_OUT" | grep -v '^$' | tail -2 | head -1)
-if ! grep -qE 'the status call overran its [0-4]\.[0-9]{2} s budget' <<< "$UP_OUT"; then
-    bad "slow sibling + hang: the budget was not counted from the first command: $(grep -i 'upstream' <<< "$UP_OUT" | head -1)"
-elif (( UP_SECS >= 10 )); then
-    bad "slow sibling + hang: the whole hook took ${UP_SECS} s, past the 10 s registration"
-elif [[ "$UP_LAST" != *"upstream review drift UNCHECKED"* ]]; then
-    bad "slow sibling + hang: the UPSTREAM note is not the hook's last block (got: $UP_LAST)"
-else
-    ok "slow sibling + hang: a budget under 5 s from the first command, the note last, the hook back in ${UP_SECS} s"
+    ok "hang: the overran note, a budget under 8.5 s, and the whole hook returned in ${UP_SECS} s"
 fi
 rm -f "$UP/scratch-cache.json"
+# Registered on its own with a timeout, and session-start.sh no longer runs the check.
+if "$HPY" -c '
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+hooks = [h for g in d["hooks"]["SessionStart"] for h in g.get("hooks", [])]
+sys.exit(0 if any(h.get("command", "").endswith("/.claude/hooks/upstream-watch.sh") and h.get("timeout") == 10 for h in hooks) else 1)
+' .claude/settings.json; then
+    ok "settings.json registers upstream-watch.sh for SessionStart with a 10 s timeout"
+else
+    bad "settings.json does not register upstream-watch.sh for SessionStart with a 10 s timeout"
+fi
+if grep -q 'tools/upstream_watch.py' .claude/hooks/session-start.sh; then
+    bad "session-start.sh still runs the upstream check, so a session start would run it twice"
+else
+    ok "session-start.sh leaves the upstream check to upstream-watch.sh"
+fi
+# session-start.sh's two bounded probes share one deadline from its first command (Codex review
+# 2026-10-16): with the graphify probe hung, the hook still returns well inside its 10 s registration
+# and says the check was not made.
+cp .claude/hooks/session-start.sh "$UP/.claude/hooks/"
+: > "$UP/tools/graphify_taom.py"
+cat > "$UP/fakepy-graph" <<'FAKE'
+#!/bin/sh
+if [ "$1" = "tools/graphify_taom.py" ]; then exec sleep 30; fi
+printf taompy; exit 0
+FAKE
+chmod +x "$UP/fakepy-graph" 2>/dev/null
+SS_T0=$SECONDS
+SS_OUT=$(printf '{"source":"startup"}' | timeout -k 2 20 env CLAUDE_PROJECT_DIR="$UP" TAOM_PYBIN="$UP/fakepy-graph" \
+    bash "$UP/.claude/hooks/session-start.sh" 2>/dev/null)
+SS_SECS=$((SECONDS - SS_T0))
+if ! grep -q 'graphify code graph freshness UNCHECKED this session' <<< "$SS_OUT"; then
+    bad "session-start.sh with a hung graphify probe printed no UNCHECKED note"
+elif (( SS_SECS >= 9 )); then
+    bad "session-start.sh with a hung graphify probe took ${SS_SECS} s of its 10 s registration"
+else
+    ok "session-start.sh with a hung graphify probe: the UNCHECKED note, back in ${SS_SECS} s"
+fi
 
 # ---------------------------------------------------------------------------
 head2 "8. tools/context_budget_scan.sh runs under set -u and measures the launch load"

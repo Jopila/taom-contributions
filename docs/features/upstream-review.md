@@ -4,8 +4,8 @@
 
 TAOM adopts engine knowledge, fixes and measurements from yotthani's repos (`yotthani/bannerlord`,
 `yotthani/MithrilForge`), which change every day. This feature keeps each review to the delta: a tracked state file holds
-the last reviewed SHA of every watched repo, a tool reports how far each has moved and writes per-area briefs, the
-session-start hook prints `UPSTREAM AHEAD` when there is something new, and the `/upstream-review` skill runs the review
+the last reviewed SHA of every watched repo, a tool reports how far each has moved and writes per-area briefs, a
+SessionStart hook prints `UPSTREAM AHEAD` when there is something new, and the `/upstream-review` skill runs the review
 with every gate kept. Developer tooling only; players see nothing.
 
 ## Why This Exists
@@ -20,8 +20,8 @@ with every gate kept. Developer tooling only; players see nothing.
 
 ### Design Challenge
 
-The check needs the network, and the session-start hook shares one 10 s registration with the game-version and Armory
-drift checks: a timed-out hook loses all of its output. The review itself must never push, post or pay without the
+The check needs the network, and a timed-out hook loses all of its output. Inside `session-start.sh` it shared one 10 s
+registration with the game-version and Armory drift checks, so a slow GitHub could cost those banners. The review itself must never push, post or pay without the
 maintainer's word.
 
 ### Solution Approach
@@ -32,8 +32,9 @@ maintainer's word.
   the count without the file list). The answer is cached outside the repo for 20 hours, so a session start pays a live
   read at most once a day. `--brief` is the hook's mode: one `UPSTREAM AHEAD` line per repo with new commits, nothing when
   all are current, an `UNCHECKED` note when gh is missing, logged out, offline or slow.
-- The session-start hook gives the check only the time left of its own budget, counted from the hook's first command, so
-  a slow GitHub can cost the upstream line but never the drift banners.
+- `.claude/hooks/upstream-watch.sh` runs the check in a SessionStart registration of its own (10 s, the maintainer's
+  request of 2026-10-16; SessionStart hooks run in parallel), with a deadline of 8.5 s from its first command, so a slow
+  GitHub can cost the upstream line but never the drift banners.
 - `areas`: a blobless clone (no file contents, nothing checked out or run), the changed paths per area labelled `feature`
   or `in scope`, the commit subjects, and the full pinned head SHA that the review cites and later advances to.
 - `advance`: moves `reviewed` to the pinned head once the review's record lands (the record must be a file in the repo).
@@ -47,14 +48,15 @@ maintainer's word.
 |---|---|
 | `docs/reviews/upstream-watch.json` | The watched repos and their last reviewed SHAs |
 | `tools/upstream_watch.py` | `status`, `areas`, `advance` ([tools/README.md](../../tools/README.md)) |
-| `.claude/hooks/session-start.sh` | The `UPSTREAM AHEAD` block ([hooks catalog](../reference/hooks-catalog.md)) |
+| `.claude/hooks/upstream-watch.sh` | The `UPSTREAM AHEAD` SessionStart hook, registered in `.claude/settings.json` ([hooks catalog](../reference/hooks-catalog.md)) |
 | `.claude/skills/upstream-review/SKILL.md` | The review procedure and its gates |
 
 ## Tests
 
 - `tools/tests/test_upstream_watch.py`: the state file, the cache, the gh and git runners (injected), the brief, the
   advance validation and the fail-open paths.
-- `tools/test_hooks.sh`: the session-start block with a stub tool (ahead, current, a failing tool, a hang).
+- `tools/test_hooks.sh` 7l: `upstream-watch.sh` with a stub tool (ahead, current, a resume, a failing tool, a hang) and
+  its registration.
 
 ## How to Run a Review
 

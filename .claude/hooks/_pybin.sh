@@ -197,23 +197,43 @@ except Exception:
 # names the candidates (the call's own cd or -C joined onto the payload's cwd, then the cwd; hooks docs
 # "Common input fields": cwd "is the worktree root after Claude enters a worktree, and the new
 # directory after Claude runs `cd`"); each is resolved here to its top level, because every gate reads
-# root-relative paths and a subdirectory would let all of them pass in silence. A candidate that is
-# missing or in no work tree falls through to the next, and the last resort is $CLAUDE_PROJECT_DIR,
-# as every gate read it before. tools/test_hooks.sh 7b and tools/tests/test_shellwords.py.
+# root-relative paths and a subdirectory would let all of them pass in silence. When the calls reach
+# more than one work tree it prints nothing and returns 2: a gate judges one repository, and an earlier
+# commit in one repository went unchecked behind a later one in another (Codex review 2026-10-16); the
+# commit gates then deny with taom_deny_multi_repo. A call directory that is missing or in no work tree
+# is skipped; with no call resolved it tries the payload's cwd, and the last resort is
+# $CLAUDE_PROJECT_DIR, as every gate read it before. tools/test_hooks.sh 7b and
+# tools/tests/test_shellwords.py.
 taom_git_repo_dir() {
-    local out="" dir="" top=""
+    local out="" line="" top="" found="" after=0
+    local -a lines=() rest=()
     if [ -n "${PYBIN:-}" ]; then
         out=$(printf '%s' "$INPUT" | "$PYBIN" "$TAOM_HOOKS_DIR/_shellwords.py" git-repo "${1:-commit}" 2>/dev/null)
     fi
-    local -a dirs=()
-    set -f; IFS=$'\n'; dirs=($out); IFS=$' \t\n'; set +f
-    dirs+=("${CLAUDE_PROJECT_DIR:-$PWD}")
-    for dir in "${dirs[@]}"; do
-        [ -n "$dir" ] && [ -d "$dir" ] || continue
-        top=$(timeout -k 1 2 git -C "$dir" rev-parse --show-toplevel 2>/dev/null)
+    set -f; IFS=$'\n'; lines=($out); IFS=$' \t\n'; set +f
+    for line in "${lines[@]}"; do
+        if [ "$line" = "--" ]; then after=1; continue; fi
+        if [ $after -eq 1 ]; then rest+=("$line"); continue; fi
+        [ -n "$line" ] && [ -d "$line" ] || continue
+        top=$(timeout -k 1 2 git -C "$line" rev-parse --show-toplevel 2>/dev/null)
+        [ -n "$top" ] || continue
+        if [ -n "$found" ] && [ "$top" != "$found" ]; then return 2; fi
+        found=$top
+    done
+    [ -n "$found" ] && { printf '%s' "$found"; return 0; }
+    rest+=("${CLAUDE_PROJECT_DIR:-$PWD}")
+    for line in "${rest[@]}"; do
+        [ -n "$line" ] && [ -d "$line" ] || continue
+        top=$(timeout -k 1 2 git -C "$line" rev-parse --show-toplevel 2>/dev/null)
         [ -n "$top" ] && { printf '%s' "$top"; return 0; }
     done
     printf '%s' "${CLAUDE_PROJECT_DIR:-$PWD}"
+}
+
+# The deny a commit gate prints when taom_git_repo_dir returns 2. $1 is the gate's own fixed name, so
+# the JSON needs no escaping.
+taom_deny_multi_repo() {
+    printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"[%s] This command commits in more than one repository, and the gate judges one repository per command. Split it: one repository per command."}}\n' "$1"
 }
 
 # Whether directory $1 is a work tree of this project's repository (the same common git directory as

@@ -57,7 +57,8 @@ esac
 # The top level of the repository the commit runs in, not always the project root (_pybin.sh
 # taom_git_repo_dir): until 2026-10-16 another session's untracked skill in the main checkout denied
 # every worktree commit.
-cd "$(taom_git_repo_dir commit)" 2>/dev/null || { echo '{}'; exit 0; }
+COMMIT_REPO=$(taom_git_repo_dir commit) || { taom_deny_multi_repo check-claude-files-tracked; exit 0; }
+cd "$COMMIT_REPO" 2>/dev/null || { echo '{}'; exit 0; }
 
 # Two bulk queries answer for every protected file at once. Until #647 this asked git two or
 # three times per file (about 200 files), took 6 s against its 5 s registration, and the

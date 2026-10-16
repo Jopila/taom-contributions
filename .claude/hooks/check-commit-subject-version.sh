@@ -65,7 +65,8 @@ esac
 # The top level of the repository the commit runs in (_pybin.sh taom_git_repo_dir): its <Version> is
 # the one the label must name. Until 2026-10-16 this was the project root plus the command's own cd or
 # -C, so a commit in a worktree the session had entered was judged on the main checkout's version.
-cd "$(taom_git_repo_dir commit)" 2>/dev/null || { echo '{}'; exit 0; }
+COMMIT_REPO=$(taom_git_repo_dir commit) || { taom_deny_multi_repo check-commit-subject-version; exit 0; }
+cd "$COMMIT_REPO" 2>/dev/null || { echo '{}'; exit 0; }
 
 # The subject is parsed and judged in Python: heredoc bodies, quoted -m strings and -F
 # files are all easier there than in shell. Bounded well under the registered timeout so

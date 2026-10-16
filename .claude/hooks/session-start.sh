@@ -2,9 +2,23 @@
 # SessionStart hook: Print recent project context on fresh startup
 # Only fires on "startup" source — resume/compact/clear already have context
 
-# The time budget starts at the first command (the UPSTREAM block below spends what is left of it).
-# The digits of EPOCHREALTIME (bash 5.0 or later) are microseconds; it is empty in an older bash.
+# The two bounded probes below (the Armory tpac scan, the graphify status) share one deadline counted
+# from this first command, so together they leave the tail (git log, diff, ls-files, the TODO grep) about
+# 2 s of the 10 s registration: two 4 s probes, their kill grace and a slow tail could pass 10 s, and a
+# killed hook prints nothing (Codex review 2026-10-16). EPOCHREALTIME's digits are microseconds; it is
+# empty in a bash older than 5.0, and each probe then gets its full 4 s.
 T0=${EPOCHREALTIME//[!0-9]/}
+SS_DEADLINE_US=7500000
+SS_PROBE_BUDGET_MAX_US=4000000   # the ceiling of "$SS_PROBE_BUDGET"; tools/test_hooks.sh 3 reads it
+ss_probe_budget() {   # sets SS_PROBE_BUDGET (seconds) to what the next probe may spend; fails under 0.5 s
+  local left=$SS_PROBE_BUDGET_MAX_US
+  if [[ -n $T0 ]]; then
+    left=$(( SS_DEADLINE_US - ${EPOCHREALTIME//[!0-9]/} + T0 - 500000 ))
+    (( left > SS_PROBE_BUDGET_MAX_US )) && left=$SS_PROBE_BUDGET_MAX_US
+  fi
+  (( left >= 500000 )) || return 1
+  printf -v SS_PROBE_BUDGET '%d.%06d' $(( left / 1000000 )) $(( left % 1000000 ))
+}
 INPUT=$(cat)
 
 # Parse source from stdin JSON
@@ -123,12 +137,15 @@ ARMORY_ASSETS=""
 if [[ -z "$ARMORY_ASSETS" || ! -f "$CATALOGUE" ]]; then
   echo ""
   echo "NOTE: Armory art drift UNCHECKED this session (no LOTRLOME_Armory/Assets under the install, or no $CATALOGUE)."
+elif ! ss_probe_budget; then
+  echo ""
+  echo "NOTE: Armory art drift UNCHECKED this session (session-start time budget spent)."
 else
-  NEWER_TPAC=$(timeout -k 1 4 find "$ARMORY_ASSETS" -name '*_geo.tpac' -newer "$CATALOGUE" -print -quit 2>/dev/null)
+  NEWER_TPAC=$(timeout -k 0.5 "$SS_PROBE_BUDGET" find "$ARMORY_ASSETS" -name '*_geo.tpac' -newer "$CATALOGUE" -print -quit 2>/dev/null)
   FIND_RC=$?
-  if [[ $FIND_RC -eq 124 ]]; then
+  if [[ $FIND_RC -eq 124 || $FIND_RC -eq 137 ]]; then
     echo ""
-    echo "NOTE: Armory art drift UNCHECKED this session (the tpac scan overran 4 s)."
+    echo "NOTE: Armory art drift UNCHECKED this session (the tpac scan overran ${SS_PROBE_BUDGET%????} s)."
   elif [[ -n "$NEWER_TPAC" ]]; then
     echo ""
     echo "!!! ARMORY ART DRIFT: a tpac is newer than the committed catalogue !!!"
@@ -143,12 +160,15 @@ fi
 # that reads it runs `refresh --if-stale` first, but a session that queries it ad hoc would
 # answer from old code without knowing. One bounded status call (about 0.3 s); fail open, never
 # silent, so an overrun or a missing interpreter says "unchecked" rather than nothing.
-if [[ -n "${PYBIN:-}" && -f tools/graphify_taom.py ]]; then
-  GRAPH_STATUS=$(timeout -k 1 4 "$PYBIN" tools/graphify_taom.py status --brief 2>/dev/null)
+if [[ -n "${PYBIN:-}" && -f tools/graphify_taom.py ]] && ! ss_probe_budget; then
+  echo ""
+  echo "NOTE: graphify code graph freshness UNCHECKED this session (session-start time budget spent)."
+elif [[ -n "${PYBIN:-}" && -f tools/graphify_taom.py ]]; then
+  GRAPH_STATUS=$(timeout -k 0.5 "$SS_PROBE_BUDGET" "$PYBIN" tools/graphify_taom.py status --brief 2>/dev/null)
   GRAPH_RC=$?
   echo ""
   if [[ $GRAPH_RC -eq 124 || $GRAPH_RC -eq 137 || -z "$GRAPH_STATUS" ]]; then
-    echo "NOTE: graphify code graph freshness UNCHECKED this session (status overran 4 s or printed nothing)."
+    echo "NOTE: graphify code graph freshness UNCHECKED this session (status overran ${SS_PROBE_BUDGET%????} s or printed nothing)."
   else
     printf '%s\n' "$GRAPH_STATUS"
   fi
@@ -232,45 +252,8 @@ if [[ -d Main ]]; then
   echo "TODO/FIXME in Main/: ${TODO_COUNT}"
 fi
 
-# Upstream review drift (2026-10-16). yotthani's repos change every day (295 commits landed the night after the
-# 2026-10-15 review), and TAOM adopts from them. The last reviewed SHAs live in docs/reviews/upstream-watch.json. The
-# check needs the network: tools/upstream_watch.py makes one GitHub read per watched repo and caches a live answer for
-# 20 hours, so a session start pays the network at most once a day; a failure is not cached and is retried at the next
-# session start. Time budget: this hook is registered for 10 s (settings.json is config-protected, so the budget lives
-# here). This block runs last and never past 9 s from the script's first command: it gets what is left of 8.5 s,
-# capped at 5 s, plus the 0.5 s kill grace, and under 1 s left it is not run at all. The blocks before it carry their
-# own bounds (tools/test_hooks.sh 7l runs it after a slow graphify sibling). The tool gets what is left as `timeout`
-# and as `--budget`, so each gh call is shortened to fit.
-# Fail-open, never silent: gh missing, logged out, offline or slow, a crash or a spent budget prints an UNCHECKED note,
-# because silence would read as "nothing new". The tool itself prints the note for a missing state file.
-if [[ -n "${PYBIN:-}" && -f tools/upstream_watch.py ]]; then
-  UP_LEFT=5000000
-  if [[ -n $T0 ]]; then
-    UP_LEFT=$(( 8500000 - ${EPOCHREALTIME//[!0-9]/} + T0 ))
-    (( UP_LEFT > 5000000 )) && UP_LEFT=5000000
-  fi
-  if (( UP_LEFT < 1000000 )); then
-    echo ""
-    echo "NOTE: upstream review drift UNCHECKED this session (session-start time budget spent)."
-  else
-    printf -v UP_BUDGET '%d.%06d' $(( UP_LEFT / 1000000 )) $(( UP_LEFT % 1000000 ))
-    UPSTREAM_STATUS=$(timeout -k 0.5 "$UP_BUDGET" "$PYBIN" tools/upstream_watch.py status --brief --budget "$UP_BUDGET" 2>/dev/null)
-    UPSTREAM_RC=$?
-    if [[ $UPSTREAM_RC -eq 124 || $UPSTREAM_RC -eq 137 ]]; then
-      echo ""
-      echo "NOTE: upstream review drift UNCHECKED this session (the status call overran its ${UP_BUDGET%????} s budget)."
-    elif [[ $UPSTREAM_RC -ne 0 ]]; then
-      echo ""
-      echo "NOTE: upstream review drift UNCHECKED this session (the status call exited ${UPSTREAM_RC})."
-    elif [[ -n "$UPSTREAM_STATUS" ]]; then
-      echo ""
-      printf '%s\n' "$UPSTREAM_STATUS"
-    fi
-  fi
-else
-  echo ""
-  echo "NOTE: upstream review drift UNCHECKED this session (no safe python or no tools/upstream_watch.py)."
-fi
+# Upstream review drift is a SessionStart hook of its own, upstream-watch.sh (2026-10-16): its network check gets a
+# 10 s registration of its own instead of what this hook's other checks leave.
 
 echo "==========================="
 exit 0

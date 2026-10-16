@@ -1,0 +1,49 @@
+You are an adversarial reviewer for TAOM (a Lord of the Rings total conversion for Bannerlord v1.5.5, .NET Framework 4.7.2). Review the four commits pushed to bannerlord-1.5.x on 2026-10-16, in THIS worktree (E:\repos\taom-y1016): 685c6a1e0, c2449a306, 7e26d77fe and 8dd76ddb3. Read them with `git log -p 42693d9bd..8dd76ddb3` or `git diff 42693d9bd 8dd76ddb3`. Do not edit any file. Do not run git commands that change state (no checkout, reset, stash, add, commit, push). Do not run dotnet build or dotnet test; the maintainer's session ran them (C# 17470 passed, 0 failed; tools/test_hooks.sh 984 passed; the Python tool suite green but one live-install test). Return the full report as your FINAL MESSAGE; do NOT write it to a file yourself (the dispatcher redirects your stdout).
+
+The branch holds four changes made on 2026-10-16:
+-- I3: the mission heartbeat logs busy time. [MissionPerf] gains mainMs (the window's mean of 1000 / Utilities.GetMainFps(), read each tick) and renderMs (1000 / Utilities.GetRendererFps(), read once per line); [PerfContext] gains frameLimiter and vsync (NativeOptions.GetConfig); tools/perf_runs.py reads all four and still reads older logs.
+-- The upstream-review process: docs/reviews/upstream-watch.json (last reviewed SHAs), tools/upstream_watch.py (status, areas, advance), a session-start UPSTREAM AHEAD block with a time budget, the /upstream-review skill.
+-- A knowledge batch from yotthani's repositories (docs only), with its record docs/reviews/adopt-yotthani-2026-10-16.md.
+-- A fix round: (a) Main/Features/TroopWeight/TroopWeightPenaltyScope.cs: garrisons and patrol parties pay no troop-weight size penalty, read by TroopWeightService.ApplyPartySizeWeightPenalty and by TroopWeightDisplayHook's Frame and BuildLabel, because vanilla desertion trims a garrison to its PartySizeLimit by a quarter of the excess a day while lords refill to the unweighted limit, and nothing trims a patrol; (b) the subject gate's command parser moved into .claude/hooks/_shellwords.py (git_invocations, mode git-repo, REPO_SCAN_MAX), and _pybin.sh taom_git_repo_dir / taom_is_project_repo, used by check-claude-files-tracked, check-moduledata-validation, check-doc-config-drift, check-commit-subject-version and block-broad-git-add, so a git call in a worktree or a subdirectory is judged at its own work tree's top level ($CLAUDE_PROJECT_DIR stays at the session's start; the payload's cwd follows the worktree, per https://code.claude.com/docs/en/hooks "Common input fields").
+
+TAOM ID CHEATSHEET:
+Kingdom IDs: empire_w=Gondor, empire_s=Mordor, empire=Dunland, vlandia=Rohan, battania=Khand, aserai=Harad, khuzait=Easterlings, sturgia=Dale/North, erebor=Erebor, rivendell=Rivendell, lothlorien=Lothlorien, mirkwood=Mirkwood, isengard=Isengard, gundabad=Gundabad, dolguldur=DolGuldur, umbar=Umbar, shaghana=Shaghana, abanissa=Abanissa
+Culture IDs (custom): gondor, mordor, erebor, rivendell, lothlorien, mirkwood, isengard, gundabad, dolguldur, umbar
+Culture IDs (XSLT/vanilla): vlandia=Rohan, empire=Dunland, empire_w=Gondor, empire_s=Mordor, battania=Khand, aserai=Harad, khuzait=Easterlings, sturgia=Dale
+NOTE: "rohan" is NOT a valid ID. Rohan uses "vlandia". "dol_guldur" is NOT valid -- use "dolguldur".
+
+READ FIRST:
+-- AGENTS.md and .ai/review-reference.md (TAOM's review rules, severity and evidence format, known exceptions).
+-- docs/reviews/rca-upstream-review-i3-2026-10-16.md (findings 1 to 21 already found and fixed, and the section "Open after the push": items known and not yet fixed. Do not re-report either unless the fix or the analysis is wrong; a new consequence of an open item is a finding).
+-- docs/features/mission-perf-heartbeat.md (the I3 sections), docs/features/upstream-review.md, docs/features/troop-weight-system.md ("Scope: leader-run parties only"), docs/reference/hooks-catalog.md (the session-start and the three commit-gate rows).
+-- Engine source for v1.5.5: the decompiled cache C:\Users\mikew\.taom-src\v1.5.5\ (one file per type, for example TaleWorlds.CampaignSystem.GameComponents.DefaultPartySizeLimitModel.cs). The installed DLLs are the authority; E:\Decompiled_Bannerlord can lag the engine.
+
+KNOWN SUSPECTS (confirm or dispute each, with code):
+1. Garrison exemption: is `party.MobileParty?.IsGarrison ?? false` the right predicate for every party that DefaultPartySizeLimitModel.GetPartyMemberSizeLimit routes to CalculateGarrisonPartySizeLimit? Does another party kind (v1.5 patrol parties, CalculatePatrolPartySizeLimit; militia; villagers; caravans) have the same mismatch between a deflated limit that desertion enforces and a refill that ignores it? Does any TAOM reader expect a garrison entry in TroopWeightService._lastBaseLimit?
+2. taom_git_repo_dir and _shellwords.py git-repo: for each input shape, does each of the five gates read the repository the git call really runs in? Shapes: `cd "path with spaces" && git commit`, a relative cd chain, a cd inside ( ), `bash -c`, two commits in different repositories in one command, a PowerShell command as taom_hook_command hands it back, a payload without cwd, no Python, a candidate that exists but is in no work tree, a command past REPO_SCAN_MAX. Did the move of the subject gate's parser change any subject or attribution verdict (compare with `git show 42693d9bd:.claude/hooks/check-commit-subject-version.sh`)?
+3. session-start.sh: the UPSTREAM block now runs last; is the 10 s registration still safe on a cold, slow machine (T0 at the first command, 8.5 s deadline, 5 s cap, `timeout -k 0.5`)? Any output the block's move changed for a reader of the banner?
+4. FrameStats / MissionPerfLine / perf_runs: NaN and non-finite busy times end to end (Record ignores them, Emit gives NaN, the line writes na, perf_runs reads na as None, the medians skip None); a window with no usable sample; an older log without the fields.
+5. tools/upstream_watch.py: the state file it writes (advance) and the exit codes the hook and the skill branch on (status --brief always exits 0 and prints UNCHECKED on trouble; full mode 0/1/2/3); the 20-hour cache; a 404 on a private repo.
+6. Docs: the claims in docs/features/map-view-release.md ("What it means for this feature") and docs/features/troop-weight-system.md about vanilla's desertion, recruitment and transfers, checked against the v1.5.5 source they cite.
+
+FILES:
+-- C#: Main/Adapters/GraphicsOptionsAdapter.cs, Main/Adapters/IGraphicsOptionsAdapter.cs, Main/Features/BattleLoadDiagnostics/BattleLoadDiagnosticsSettings.cs, Main/Features/MissionPerf/FrameStats.cs, Main/Features/MissionPerf/MissionPerfLine.cs, Main/Features/MissionPerf/TickProfileLines.cs, Main/Features/MissionPerf/Hooks/MissionPerfHeartbeatBehavior.cs, Main/Features/MissionPerf/Hooks/PerfContextReader.cs, Main/Features/TroopWeight/TroopWeightService.cs, Main/Features/TroopWeight/TroopWeightPenaltyScope.cs (new), Main/Features/TroopWeight/ITroopWeightService.cs, Main/Features/TroopWeight/TroopWeightDisplay.cs, Main/Features/TroopWeight/Hooks/TroopWeightDisplayHook.cs
+-- C# tests: TAOM.Tests/Features/MissionPerf/FrameStatsTests.cs, MissionPerfHeartbeatBehaviorTests.cs (new), MissionTickProfilerBehaviorTests.cs, TickProfileLinesTests.cs; TAOM.Tests/Features/TroopWeight/DisplayFrameSourceTests.cs
+-- Scripts: tools/perf_runs.py, tools/upstream_watch.py (new), tools/test_hooks.sh; tests tools/tests/test_perf_runs.py, tools/tests/test_upstream_watch.py (new), tools/tests/test_graphify_taom.py
+-- Harness: .claude/hooks/_shellwords.py (the moved parser, mode git-repo; tests tools/tests/test_shellwords.py GitRepoTests), .claude/hooks/check-commit-subject-version.sh, .claude/hooks/block-broad-git-add.sh, .claude/hooks/_pybin.sh, .claude/hooks/check-claude-files-tracked.sh, .claude/hooks/check-moduledata-validation.sh, .claude/hooks/check-doc-config-drift.sh, .claude/hooks/session-start.sh, .claude/skills/upstream-review/SKILL.md (new), .claude/skills/adopt-external/SKILL.md, .claude/rules/harness-facts.md, CLAUDE.md
+-- State: docs/reviews/upstream-watch.json (new)
+-- Docs: the rest of `git status --short` (feature docs, engine reference docs, the provenance register, the record, the RCA, two lessons files).
+
+REQUIRED SECTIONS:
+1. VANILLA CODE: paste the v1.5.5 code you relied on, as code blocks: DefaultPartySizeLimitModel.GetPartyMemberSizeLimit; the garrison branch of DefaultPartyDesertionModel and the caller in DesertionCampaignBehavior; GarrisonRecruitmentCampaignBehavior near line 185; GarrisonTroopsCampaignBehavior near lines 492-494; Utilities.GetMainFps / GetRendererFps (managed side); NativeOptions.GetConfig for FrameLimiter and VSync.
+2. DEEP ANALYSIS: the six suspects, each CONFIRMED or DISPUTED with the line that proves it; then the garrison change's effect on a running campaign (an existing save whose garrisons are above the new, larger limit; the first day after load).
+3. CONFIG CROSS-REFERENCE: docs/reviews/upstream-watch.json against what tools/upstream_watch.py reads and validates; the BattleLoadDiagnosticsSettings hint against the fields the line now writes.
+4. FINDINGS: each with severity (HIGH, MED, LOW), file:line, the defect, a reproduction or proving code, and the fix. Mark what you could not verify UNVERIFIED.
+
+QUALITY GATES: every claim about TAOM code cites file:line you read; every claim about the engine cites the v1.5.5 source; a "missing" claim says what you searched for and where; do not flag code that matches vanilla's own behaviour as a bug without saying why vanilla's choice is wrong here.
+
+Prior review lessons:
+SUCCESSES: Config ID cross-ref caught rohan/dol_guldur mismatches. Vanilla decompilation caught missing gates. Lifecycle tracing caught stale caches.
+FAILURES: Codex assumed empire=Rohan (it is Dunland). Codex flagged vanilla-matching code as bugs. Codex skipped hard sections.
+
+Return the full report as your FINAL MESSAGE.

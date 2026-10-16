@@ -13,10 +13,9 @@ Usage: <python> _shellwords.py posix|segments|verdict [protected...]|git-repo [s
             line, block<TAB>target, warn<TAB>target or allow; _pushjudge.py judges the candidate
             lines (push_candidates). A payload that is no JSON object prints unread, which the hook
             answers from the raw text, never with a silent allow
-  git-repo  the directories to try, one per line, for the repository a `git <subcommand>` (default
-            commit) runs in: the last such call's own (a cd or -C before it, joined onto the
-            payload's cwd), then the payload's cwd (_pybin.sh taom_git_repo_dir resolves each to its
-            work tree's top level)
+  git-repo  the directory of every `git <subcommand>` (default commit) in the command, one per line
+            (a cd or -C before it joined onto the payload's cwd, or the cwd), then a line `--`, then
+            the payload's cwd (_pybin.sh taom_git_repo_dir resolves each to its work tree's top level)
 It writes UTF-8 with LF line ends and exits 0; an unknown mode exits 2. PowerShell text it cannot
 follow (an unclosed quote, here-string, block comment or ${) comes back unchanged, which is how
 every gate read a command before plan 027.
@@ -416,8 +415,12 @@ HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1[ \t]*\r?\n(.*?)\r?\n[ \t]*\2\b", r
 CMD_SEP = set(";|&\n()")
 GIT_OPTS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path",
                        "--config-env"}
-# Commands that change the shell's directory: bash's, and PowerShell's as to_posix() leaves them.
-CHDIR = {"cd", "pushd", "chdir", "set-location", "sl", "push-location"}
+# Commands that change the shell's directory: bash's, and PowerShell's as to_posix() leaves them. A push
+# saves the directory it leaves and a pop returns to it (Codex review 2026-10-16: a pushd with its popd
+# ignored judged the pushed directory).
+CHDIR = {"cd", "chdir", "set-location", "sl"}
+PUSHD = {"pushd", "push-location"}
+POPD = {"popd", "pop-location"}
 
 
 def strip_heredocs(cmd):
@@ -522,15 +525,19 @@ def git_invocations(text, bodies, subcommand="commit", base=None, partial=False,
     placeholder, so `-F -` reads it. Raises ValueError on quoting bash would reject, unless partial."""
     found = []
     group, prev, sep = [], [], ""
-    cwd, stack = base, []
+    cwd, stack, pushed = base, [], []
     for t in command_tokens(text, partial) + [";"]:
         if t and set(t) <= CMD_SEP:
             if group:
                 name = os.path.basename(group[0]).lower()
-                if name in CHDIR:
+                if name in CHDIR or name in PUSHD:
                     target = _chdir_target(group)
                     if target is not None:
+                        if name in PUSHD:
+                            pushed.append(cwd)
                         cwd = join_dir(cwd, target)
+                elif name in POPD and pushed:
+                    cwd = pushed.pop()
                 calls = _git_call(group, bodies, subcommand, cwd, partial, depth)
                 piped = piped_text(prev) if sep == "|" else None
                 if piped is not None:
@@ -538,10 +545,13 @@ def git_invocations(text, bodies, subcommand="commit", base=None, partial=False,
                     mark = ["<<", "__TAOM_HEREDOC_%d__" % (len(bodies) - 1)]
                     calls = [(mark + args, repo) for args, repo in calls]
                 found.extend(calls)
-            if t == "(":
-                stack.append(cwd)
-            elif t == ")" and stack:
-                cwd = stack.pop()
+            # shlex hands a run of punctuation back as one token (`);`, `)&&`, `))`), so every
+            # parenthesis in it opens or closes a subshell's directory scope (Codex review 2026-10-16).
+            for ch in t:
+                if ch == "(":
+                    stack.append(cwd)
+                elif ch == ")" and stack:
+                    cwd = stack.pop()
             prev, group, sep = group, [], t
         else:
             group.append(t)
@@ -579,19 +589,20 @@ def _git_call(g, bodies, subcommand, cwd, partial, depth):
 REPO_SCAN_MAX = 262144
 
 
-def git_repo_candidates(cmd, tool, cwd, subcommand="commit"):
-    """The directories to try, in order, for the repository a `git <subcommand>` in this tool call
-    runs in: the last such call's own directory (a cd or -C before it, joined onto the payload's
-    cwd), then the payload's cwd. The caller resolves each to its work tree's top level."""
+def git_call_dirs(cmd, tool, cwd, subcommand="commit"):
+    """The directory of every `git <subcommand>` in this tool call, in order and each once: the call's
+    own cd or -C joined onto the payload's cwd, or the cwd itself when it names none ("" when neither
+    is known). The caller resolves each to its work tree's top level; more than one work tree is a
+    command a gate cannot judge as one repository (Codex review 2026-10-16: an earlier commit in one
+    repository went unchecked behind a later one in another). Past REPO_SCAN_MAX no call is read."""
     text, bodies = strip_heredocs(to_posix(cmd, tool))
-    out = []
+    dirs = []
     if len(text) <= REPO_SCAN_MAX:
-        calls = git_invocations(decode_ansi_c(text), bodies, subcommand, cwd or None, partial=True)
-        if calls and calls[-1][1]:
-            out.append(calls[-1][1])
-    if cwd and cwd not in out:
-        out.append(cwd)
-    return out
+        for _args, repo in git_invocations(decode_ansi_c(text), bodies, subcommand, cwd or None, partial=True):
+            d = repo or ""
+            if d not in dirs:
+                dirs.append(d)
+    return dirs
 
 
 def read_payload(raw):
@@ -628,10 +639,10 @@ def main(argv):
     if mode == "git-repo":
         cwd = read_cwd(raw)
         try:
-            dirs = git_repo_candidates(cmd, tool, cwd, argv[2] if len(argv) > 2 else "commit")
+            dirs = git_call_dirs(cmd, tool, cwd, argv[2] if len(argv) > 2 else "commit")
         except Exception:                    # never worse than the cwd alone
-            dirs = [cwd] if cwd else []
-        text = "\n".join(d.replace("\n", "") for d in dirs)
+            dirs = []
+        text = "\n".join([d.replace("\n", "") for d in dirs] + ["--", cwd.replace("\n", "")])
     elif mode == "verdict" and payload is None:
         text = "unread"
     elif mode == "verdict":

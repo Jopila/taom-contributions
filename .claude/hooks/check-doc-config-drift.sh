@@ -64,7 +64,7 @@ esac
 # taom_git_repo_dir): until 2026-10-16 a worktree commit's staged docs and configs were never checked,
 # and the main checkout's were. A commit in another repository is not this gate's: its tools/*.py are
 # not TAOM's to run.
-COMMIT_REPO=$(taom_git_repo_dir commit)
+COMMIT_REPO=$(taom_git_repo_dir commit) || { taom_deny_multi_repo check-doc-config-drift; exit 0; }
 cd "$COMMIT_REPO" 2>/dev/null || { echo '{}'; exit 0; }
 taom_is_project_repo "$COMMIT_REPO" || { echo '{}'; exit 0; }
 

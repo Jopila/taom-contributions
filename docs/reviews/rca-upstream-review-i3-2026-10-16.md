@@ -45,6 +45,10 @@ two loads and a divide. The knowledge batch of the same day went through its own
 | 19 | LOW | The two tool gates would have run another repository's `tools/*.py` when the command named that repository (Tooling) | A gate executing code from a directory it does not own | Widening the repository a gate reads also widened the code it runs | `taom_is_project_repo` (the same git common directory as the project) before the tools run; 7b proves a foreign stub never runs |
 | 20 | LOW | 7l did not prove the time bound after the block moved (the sandbox's earlier blocks finish at once), and the comment said the block ends the hook by 9 s whatever came before (Tooling) | A test whose fixture cannot reach the hard case | The sandbox has no repository and no graphify tool | 7l adds a run after a graphify sibling that spends 3.9 s, asserting a budget under 5 s, the note last and the hook back inside 10 s; the comment states the block's own bound |
 | 21 | LOW | Smaller items: the lesson's party-kind list; "no hang" attributed to notes that do not say it, and the shipped default (every 20th cover) left out; two labels for the 20.6 k figure; the record's tense for a line this round corrected; the `PerformanceAnalyzer` caller; a test reading an index before its -1 check and an assertion that could not fail; a redundant `FrameWindow` constructor; the skill's exit 1 when one repo is ahead and another unchecked; "his" for yotthani in unchanged lines (Lenses 1, 2, Tooling) | Restatement drift and leftovers | Edits made from findings without re-reading the source line | Each fixed |
+| 22 | MED | Codex F1: a command that commits in two repositories had only the last one checked, so an earlier TAOM commit could pass its ModuleData and doc checks behind a later commit in another repository; the broad-add confirm listed the wrong repository | One answer per command where the command has several | The shared resolver kept the subject gate's "last named directory" rule, which was harmless for one version label and not for five gates | `git_call_dirs` returns every call's directory; `taom_git_repo_dir` returns 2 when they reach more than one work tree; the commit gates deny ("one repository per command") and the confirm says its list is incomplete; 7b and `test_shellwords.py` |
+| 23 | MED | Codex F2: a `)` in a punctuation run (`);`, `)&&`) did not close the subshell's directory scope, so `(cd X && git status); git commit` judged X | A tokenizer detail the scope logic did not model | The subshell test used `) &&` with a space | Every parenthesis in a punctuation token opens or closes a scope; tests for `);`, `)&&`, `))` |
+| 24 | MED | Codex F3: `pushd` moved the directory and `popd` was ignored, so `pushd X; popd; git commit` judged X; the old subject parser ignored both | Half of a paired construct modelled | `pushd` was added to the chdir names without its pop | One push stack for `pushd`/`Push-Location` and `popd`/`Pop-Location`; tests |
+| 25 | MED (half pre-existing) | Codex F4: `session-start.sh`'s two 4 s probes plus their kill grace and a slow git tail could pass the 10 s registration before the upstream block's deadline mattered | Bounds sized per probe, not for the registration | Findings 1 and 20 bounded the upstream block only; the probes before it predate this branch | The upstream check is its own SessionStart hook (`upstream-watch.sh`, its own 10 s, the maintainer's request); the two probes share one deadline of 7.5 s from the first command; 7l runs `session-start.sh` with a hung graphify probe |
 
 ## Root-cause pattern
 
@@ -86,10 +90,9 @@ open, each with what was found; none is HIGH (the subdirectory HIGH, finding 16,
   Add a RequiresGame behaviour test (the `RefugeDamageHooksTests` bare-party pattern) and assert the `!` in the display test.
 - **Lens 4 M2:** stale guidance that the gates judge the main checkout: `docs/ai-includes/git-and-commits.md:18-24` and
   `/improve` (`SKILL.md:41`, `references/execute-and-review.md:157-165`, `run-protocol.md:228`, `dispatch-rules.md:93-95`).
-- **Lens 4 M3:** the five changed gates are proven by `tools/test_hooks.sh` only; the harness runs the main checkout's
-  copies, so the live proof (a worktree commit allowed despite another session's untracked skill in the main checkout;
-  `cd <worktree>/Main && git commit -m "no label"` denied; both from the PowerShell tool too) is owed once the main
-  checkout carries this change.
+- **Lens 4 M3 (observed live):** after the main checkout took the pushed hooks, the harness ran `check-claude-files-tracked.sh` on a command from this worktree session and denied it for this worktree's own untracked `.claude/hooks/upstream-watch.sh`, naming `/e/repos/taom-y1016` in its message: the gate judged the worktree, not the main checkout. The `cd <worktree>/Main` and PowerShell cases are still unobserved.
+- **Codex (xhigh), 2026-10-16:** four MED findings, all fixed (rows 22 to 25); no defect in the garrison and patrol
+  exemption or the I3 logging.
 - **Lens 6 F1 and F2:** a wrapper before git (`env X=1`, `command`, `timeout 60`) hides a commit from the subject gate
   and an add from the broad-staging confirm; the confirm decides with a bash parser and lists with the shared one.
 - **Lens 6 A3:** one payload builder for the 7b tests. **Lens 3** findings 2 and 3: run `taom_is_project_repo` after
@@ -101,5 +104,5 @@ open, each with what was found; none is HIGH (the subdirectory HIGH, finding 16,
   today).
 - **Lens 3 (Efficiency)** measured the change's cost at 170 to 340 ms per commit (all gates in parallel) and accepted it.
 - **Not changed, by reason:** `docs/INDEX.md:277` and `Main/_Module/THIRD-PARTY-LICENSES.txt:10` still say "his" for
-  yotthani (INDEX.md has another session's uncommitted edits in the main checkout); the `.claude/settings.json`
-  SessionStart entry needs the maintainer's explicit request.
+  yotthani (INDEX.md has another session's uncommitted edits in the main checkout). The `.claude/settings.json` SessionStart entry
+  was made on the maintainer's request (finding 25).

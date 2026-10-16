@@ -610,7 +610,8 @@ and Armory drift banners included.
   first bound and never reached the new block.
 - **Prevent:** count a budget from the hook's first command and give each check what is left (the `validate-push.sh`
   form), and run that check last: a deadline bounds nothing that runs after it, and the kill grace counts too. Test the
-  block with a stub that hangs. A check that needs the network is better in a registration of its own.
+  block with a stub that hangs. A check that needs the network is better in a registration of its own (done the same
+  day: `upstream-watch.sh`, its own 10 s SessionStart registration).
 - **Source:** `docs/reviews/rca-upstream-review-i3-2026-10-16.md` findings 1 and 10.
 
 ### A tool that writes a tracked file validates every value it stores (2026-10-16)
