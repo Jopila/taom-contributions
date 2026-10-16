@@ -191,7 +191,9 @@ a single blow, not an average.
 weapon and 1.3 % hit the world; 0.87 events per release. A strike that does reach a body does no
 damage in 4 to 23 % of cases (armour), and a soldier's strikes per second depend on the distance to
 the nearest enemy and on crowding (0.39 per second with fewer than 10 friends within 5 m, 0.19 with
-more than 55), not on troop or level. So sustained damage in a crowd sits well under the per-swing
+more than 55); troop and level explain almost nothing beyond that (a
+per-troop factor of 0.65 to 1.4, mostly 0.8 to 1.2, which neither level nor any of the 53 AI values correlates with,
+|r| at most 0.28 over 37 troops). So sustained damage in a crowd sits well under the per-swing
 figure above (TAOM's inference from those shares; the recordings did not measure damage per weapon). Source: yotthani, MithrilForge `docs/engine/battle-behaviour-measured.md`@0a2f4761
 lines 42-62, measured in recordings (evidence kind [M], n as stated), measured with TAOM 2.0.34
 loaded (plus Armory and DualWield), v1.5.5, custom battles, both sides AI. The friend share
@@ -438,3 +440,5 @@ before anything automated keys on either.
   Steam path, and its `CURRENT_AVG_MELEE` constants are a frozen snapshot
 - `tools/BannerlordCraftingTool/MainWindow.xaml.cs:457-524`: an independent C# port of the
   same pivot-distance algorithm, which this model agrees with
+
+---

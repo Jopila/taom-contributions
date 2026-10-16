@@ -205,7 +205,7 @@ several candidates, because only the agent the engine had itself returned was co
 **DualWield finds both functions by whole body** since `yotthani/bannerlord` commit `5dcf9b24` (2026-10-09), whose
 message says they are the same in 1.5.5 as in 1.5.3 (265 and 225 bytes, one RIP-relative displacement differs) and
 sit elsewhere. `HoN/DualWield/Core/OneAgentLimbRay.cs`@784fef93 lines 33-34 (header comment), 105-106 (`FindUnique`)
-and 109 (log text "known from 1.5.3 to 1.5.5"); code read, v1.5.5. Its left-blade strike takes the route when the
+and 110 (log text "known from 1.5.3 to 1.5.5"); code read, v1.5.5. Its left-blade strike takes the route when the
 DualWield setting `LimbRayMode` is 2 and the functions were found (`HoN/DualWield/Core/LeftBladeStrike.cs`@784fef93
 lines 102 and 551); mode 1 only compares (line 564). The setting's default was not read.
 
@@ -345,10 +345,13 @@ TAOM-verified were re-derived by TAOM; the rest are not yet.
   them leaves the shape without a dynamic cook (`hasDynamic = 0`), which yotthani counts at 23 shapes of Native; an
   axis-aligned flat quad is blown up to a thin box and cooks (yotthani, MithrilForge `docs/engine/modding-kit.md`
   @0a2f4761 lines 1585-1594, Kit decompile 1.5.3 and shipped data).
-- **Anything built outside the Kit must carry all 8 mirror variants.** The dynamic cook holds 8 variants of every
-  convex mesh, one per sign combination of the entity's scale, and the client picks index
-  `4*(scale.x >= 0) + 2*(scale.y >= 0) + (scale.z >= 0)` (loader `0x180362f30` in the Kit's 1.5.3 build) because PhysX
-  cannot take a negative scale. They are re-cooked from mirrored points, not bit-flipped copies: 365 variant pairs
+- **A dynamic cook holds 8 mirror variants of every convex mesh.** The layout has no variant count: 8 variant
+  offsets, then 8 variants of every convex mesh, one per sign combination of the entity's scale, and the client picks
+  index `4*(scale.x >= 0) + 2*(scale.y >= 0) + (scale.z >= 0)` (the client's loader `0x180362f30`, in the 1.5.3 client
+  `TaleWorlds.Native.dll` that yotthani analysed beside the Kit; not re-checked on v1.5.5, where that address falls
+  inside another function) because PhysX cannot take a negative scale. A shape may also have no dynamic form at all
+  (`hasDynamic = 0`), so a tool that builds shapes outside the Kit writes either nothing or all 8 (TAOM's reading of
+  the layout). They are re-cooked from mirrored points, not bit-flipped copies: 365 variant pairs
   differ in size (`modding-kit.md`@0a2f4761 lines 1557-1573, Kit decompile 1.5.3, byte-exact on 3,240 shapes; Kit
   1.5.5: not re-checked).
 
@@ -462,10 +465,10 @@ the cost it removes" in [adapters-taleworlds-api.md](../../reviews/lessons/adapt
   7 s, are the slowest phase (51 to 57 FPS against 80 at 1,751 agents, about 1.6 times slower overall), which
   coincides with the buffer's highest fill; yotthani lists the native cause of the slow first seconds as open (line
   2114). Character Detail "very low" showed no peak at the clash in one run. Ragdolls and corpses, two separate
-  settings, did not move the field battle's peak.
+  settings, did not move the skeleton buffer's peak fill in the field battle.
 - [yotthani, `yotthani/bannerlord` `HoN/PerfProbe/Integration/CrowdProxy.cs`@784fef93 lines 418-421, commit `44d89f49`,
   seen in game 2026-10-12 with 2,000 soldiers, game 1.5.5 by the date, mod list not stated] Above 2,340 skeletons in
-  view, with only VanillaTuning's pool-1 guard in place, armour flickers and pieces of it hang in the air; the
+  view, with VanillaTuning's guard in place (the source says "the guard of VanillaTuning"; that guard patches the first pool only, `HoN/VanillaTuning/Integration/FrameBufferGuardPatch.cs`@784fef93 line 34; whether TAOM's second-pool guard also ran is not stated), armour flickers and pieces of it hang in the air; the
   guard only keeps the battle from freezing.
 
 TAOM consequence: battles above the menu's 1,000 soldiers (another mod's battle size) and large sieges with
@@ -486,3 +489,5 @@ melee near the camera can reach the limit. TAOM guards and watches the two skele
 | An import's callers | the IAT slot from `pefile`, then `python tools/native_sig_author.py xref <slot rva>` (it sweeps `.text` once with capstone and stops at the first byte it cannot decode, 2.8 % in on v1.5.4: treat a short list as incomplete) |
 | A class's vtable | `python tools/native_sig_author.py vtable rglAnimation_memory_manager_task` |
 | A managed body | `pwsh tools/taom-src.ps1 path TaleWorlds.MountAndBlade.Mission` |
+
+---

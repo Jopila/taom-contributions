@@ -43,8 +43,8 @@ Provenance: [provenance-register.md](../reference/provenance-register.md), adopt
 When the guard refuses a reservation, that skeleton is given its pool's first slots, which another skeleton of the same
 frame already owns. Every frame in which the battle stays above a limit refuses the skeletons that do not fit, so
 several figures can show wrong bones for as long as the battle stays that crowded (read from the decompile; the look in
-game is unverified). yotthani saw armour flicker and pieces of it hang in the air above the limit while only the
-pool-1 guard was active (seen in game 2026-10-12 with 2,000 soldiers; `yotthani/bannerlord`
+game is unverified). yotthani saw armour flicker and pieces of it hang in the air above the limit while VanillaTuning's guard, which covers the first pool only,
+was active (whether TAOM's second-pool guard also ran is not stated; seen in game 2026-10-12 with 2,000 soldiers; `yotthani/bannerlord`
 `HoN/PerfProbe/Integration/CrowdProxy.cs`@784fef93 lines 418-421, commit `44d89f49`; game 1.5.5 per the date, mod
 list not stated). TAOM's own in-game check of the look is still owed. This happens only where the battle would
 otherwise have frozen for good. Each refusal is counted
@@ -258,3 +258,5 @@ until the peak line reports overflows above zero in either pool.
 - **Issue:** #776 (draft item 2 in [adopt-yotthani-2026-10-08.md](../reviews/adopt-yotthani-2026-10-08.md)).
 - **Status:** built and unit-tested 2026-10-08; in-game check owed.
 - **Issue:** #806 (2026-10-15): the v1.5.5 `KnownBuilds` row and the binding gate for both native pin classes.
+
+---

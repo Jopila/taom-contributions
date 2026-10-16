@@ -563,13 +563,14 @@ memory of the ideas, not of the code.
 
 ### A presence-based stand-aside breaks when the other mod stands aside too (yotthani review, 2026-10-15)
 TAOM's shader-compile notice does not start when a module with the id `VanillaTuning` is active
-(`ShaderCompileProgress.ShouldStart`, `ShaderCompileProgress.cs:67-76`), because VanillaTuning shows the same notice.
+(`ShaderCompileProgress.ShouldStart`, `ShaderCompileProgress.cs:70-80`), because VanillaTuning shows the same notice.
 VanillaTuning v0.1.1 stands aside for TAOM on four class names (`HoN/VanillaTuning/Core/TaomOverlap.cs@784fef93`). If it
 adds a row for `TAOM.Features.ShaderCompileNotice.ShaderCompileNotice`, each mod yields to the other and nobody shows the
 notice. Both rules test that the other mod is present, not that it is doing the work; the same shape as the co-op
 predicates in `lessons/campaign-mechanics.md` ("Presence is not authority").
-- **Why missed:** TAOM wrote its stand-down on 2026-10-06, before VanillaTuning had any TAOM stand-aside (the `TaomOverlap`
-  comment dates its first rows to 2026-10-08). The other mod's next change needs no TAOM edit, so nothing in TAOM's
+- **Why missed:** TAOM wrote its stand-down on 2026-10-06, before VanillaTuning had any TAOM stand-aside (`TaomOverlap.cs` arrived in
+  `yotthani/bannerlord` commit `40396f3ee5` on 2026-10-15, VanillaTuning v0.1.1; its comment's date, 2026-10-08, is
+  when TAOM adapted the fixes). The other mod's next change needs no TAOM edit, so nothing in TAOM's
   tree signals that the pair now cancels.
 - **Prevent:** when a mod yields to another one, find out whether the other mod yields back before shipping either side,
   and swap the order in one release: the new owner ships the row, and the old stand-down is removed in the same release
@@ -586,3 +587,17 @@ had narrowed the guard to one call and deleted the control test as redundant.
 - **Prevent:** before a docs batch merges, grep it for every type, test and file name the code review changed or
   deleted, and re-read each sentence that names one against the committed code.
 - **Source:** `docs/reviews/rca-yotthani-review-2026-10-15.md`, second review S12 (Completeness lens).
+
+### Restate an upstream fact with its hedge and its evidence kind, in the same sentence (2026-10-15)
+The 2026-10-06 knowledge-base review found 17 findings, all one class: an upstream inference or hedge restated as a
+flat fact. The 2026-10-15 batch, written under a brief that said "an upstream hedge stays a hedge", still had six: "not
+on troop or level" for "explain almost nothing", "must carry all 8 variants" for a layout description, decision state 6
+named the defend state where the decompile says [Likely], a "pool-1 guard" the source never names, a mod-list setting
+inferred as observed, and "nothing ticks such a skeleton" from a lab that only ticked its own.
+- **Why missed:** the writer summarises the source's conclusion, and the qualifier sits in another sentence or in a
+  table footnote that the summary drops. A brief rule cannot see the dropped word; only a side-by-side read can.
+- **Prevent:** write each restated fact with the source's qualifier word for word ("almost", "likely", "in this run",
+  "not checked") and its evidence kind (measured, decompile, code reading, inference) inside the same sentence; when
+  TAOM adds its own reading, tag it "(TAOM's reading)". The fidelity finder of the doc review reads every restated
+  sentence beside its cited source line.
+- **Source:** `docs/reviews/adopt-yotthani-2026-10-15.md` "The doc review"; the 2026-10-06 review in `b5e1d0b3d`.

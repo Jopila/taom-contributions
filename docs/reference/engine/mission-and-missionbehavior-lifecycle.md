@@ -66,9 +66,10 @@ What follows from those two facts:
 
 - **Removing the behaviour that is ticking, or one at a higher index,** is safe for this loop: the elements it
   has not reached yet (lower indexes) do not move.
-- **Removing one at a lower index than the current one** shifts the current behaviour down into the slot the loop
-  is about to visit next, so its tick runs a second time in the same frame; the lower neighbour that slid up into
-  its place is never ticked.
+- **Removing one at a lower index than the current one** moves the current behaviour, and every behaviour between
+  the two, down one slot, so the next index the loop visits holds the current behaviour again and its tick runs a
+  second time in the same frame. Every other behaviour still ticks once; only the removed one misses its tick that
+  frame.
 - **Removing several** can leave the next index at or past the new `Count`, and `MissionBehaviors[num2]` then throws
   `ArgumentOutOfRangeException`. Whether a given sequence reaches that depends on which indexes go, so treat any
   removal other than the ticking behaviour's own as unsafe.

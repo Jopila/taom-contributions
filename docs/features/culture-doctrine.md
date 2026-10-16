@@ -134,9 +134,9 @@ forms a Circle sized around the archers' `BehaviorFireFromInfantryCover` Square,
 | Tactic | Cultures | Plan | Weight |
 |---|---|---|---|
 | `TaomTacticShieldWall` | `erebor`, `erebor_warriors`, `isengard`, `sturgia` (Dale) | Defender: infantry `BracedDefend` at the position the high-ground race picks (below) with a low `TacticalCharge`; cavalry `ProtectFlank` + `CavalryScreen` in both phases, never `Flank`. Attacker: infantry `BracedAdvance` with `TacticalCharge` 0.5 then 0.8; cavalry may take a flank once joined | `(Inf + Rng) * 1.2 * advantage / sqrt(RemainingPowerRatio)`, not gated on `IsDefenseApplicable` |
-| `TaomTacticTwoLineWall` | `erebor`, `erebor_warriors` (defender only) | 2/1/2/1 split: the front line as the wall, the second line `BracedDefend` twelve paces behind it (facing the enemy) until joined, then `TacticalCharge` 1 over `BracedDefend` 0.5, the reserve committing | the wall's weight times 1.05, 0 under 80 infantry |
+| `TaomTacticTwoLineWall` | `erebor`, `erebor_warriors` (defender only) | 2/1/2/1 split: the front line as the wall, the second line `BracedDefend` twelve paces behind it (facing the enemy) until joined, then `TacticalCharge` 1 over `BracedDefend` 0.5, the reserve committing | the wall's weight times 1.6 (`GatedEdge`), 0 under 80 infantry |
 | `TaomTacticInfantryMass` | `mordor`, `dolguldur`, `gundabad`, `gundabad_raiders`, `mistymountainorcs`, `goblin`, `dunland_raiders` (attacker) | Always engaged: infantry `Charge` 1.5 + `TacticalCharge` 1, archers `Skirmish`, cavalry `TacticalCharge` + `Flank` | `1.5 * Inf * clamp(members / enemies, 0.5, 2) * sqrt(RemainingPowerRatio)` |
-| `TaomTacticEnvelop` | the six orc cultures | 3/1/2/1 split, always engaged: centre `Advance` + `TacticalCharge`, left and right wings `EnvelopWing` (a deep line to a point beside the enemy body on its own side, then `ChargeToTarget`), archers `Skirmish`, cavalry `TacticalCharge` + `Flank` | the mass's weight times 1.1; 0 under 1.2x numbers or 60 infantry |
+| `TaomTacticEnvelop` | the six orc cultures | 3/1/2/1 split, always engaged: centre `Advance` + `TacticalCharge`, left and right wings `EnvelopWing` (a deep line to a point beside the enemy body on its own side, then `ChargeToTarget`), archers `Skirmish`, cavalry `TacticalCharge` + `Flank` | the mass's weight times 1.6 (`GatedEdge`); 0 under 1.2x numbers or 60 infantry |
 | `TaomTacticCavalryDominance` | `vlandia` (Rohan), `khuzait` (Rhun), `battania` (Khand) | 1/1/1/1 split, 7 s join threshold: cavalry `Advance` + `Vanguard`, then `CycleCharge` 1.2 + `TacticalCharge` 0.8 + `Flank` 0.8; infantry `Advance` behind | vanilla `FrontalCavalryCharge` formula times 1.3 |
 | `TaomTacticEoredScreen` | `vlandia` (defender only) | 1/1/2/1 split, 7 s join: both cavalry blocks `CavalryScreen` + `ProtectFlank`, infantry `Defend` where the race puts it; once joined the blocks `CycleCharge` 1.2 + `Flank` 0.8 + `ProtectFlank` 0.5 | `Cav * 1.6 * advantage / sqrt(RemainingPowerRatio)`, defender only |
 | `TaomTacticArcherRing` | `lindon`, `lothlorien`, `mirkwood`, `mirkwood_stalkers`, `rivendell` (defender only) | infantry `DefensiveRing` on a runtime `TacticalPosition` at the position the high-ground race picks (the archers' high ground, or where the infantry stands), facing the enemy; archers `FireFromInfantryCover` + `Skirmish` 0.5 under volley control; cavalry guards the flanks; the ring holds in both phases | vanilla `DefensiveRing` formula (`min(Inf, Rng) * 3 * advantage / sqrt(RemainingPowerRatio)`), 0 for an attacker, when out-shot (`IsDefenseApplicable`), or when the infantry cannot ring the archers' square (`RingGeometry.Fits`, vanilla's radius test) |
@@ -620,11 +620,12 @@ lines 97-101 and 112-118, measured in recordings (n=13 and n=39), measured with 
   `AiDefendWithShieldDecisionChanceValue` (driven property 28). TAOM decompile of the installed
   v1.5.5 client, 2026-10-15: the native melee AI reads it at 0x6A10A1, 0x6A10FF and 0x6A144C
   (`FUN_1806a05a0`) through `min(0.95, value)` or `min(0.95, 0.5 * value)`, and uses the result
-  to enter the defend state. So lowering the value takes effect, while raising a value that is
+  to enter decision state 6, which the decompile suggests is the defend state ([Likely]: the defend abilities lead
+  to it, `AIAttackOnDecideChance` leads to state 7). So lowering the value takes effect, while raising a value that is
   already at the cap changes nothing. Whether the shipped profile multipliers push any soldier's
   value past the cap depends on the base value, which was not measured here. yotthani's two
   battles that zeroed this value together with five others and showed no visible effect (n=2,
-  line 107) remain **unexplained**: two of the seven places that set the defend state are not
+  line 107) remain **unexplained**: two of the seven places that set state 6 are not
   gated by the six values, and the run may not have applied them. The same decompile found no
   native reader for `AiAttackingShieldDefenseChance`, which TAOM does not write (the scan covered
   93.4 % of `.text`, so "no read found", not "proven dead").
@@ -815,3 +816,5 @@ lower the rest, and give it its TAOM tactic at `minTactics` 0; add `morale`, `ag
 `formations` blocks when the culture differs from vanilla there (a never-rout culture drops its
 `CoordinatedRetreat` row). Restart the game; the `[Doctrine]` registration line shows what each
 side received and how its men hold.
+
+---

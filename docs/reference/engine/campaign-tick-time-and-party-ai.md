@@ -125,8 +125,10 @@ not re-checked; the version of TAOM loaded is not stated.
 - **Step sounds were refuted at the call site.** The first suspicion, `MapScreen.TickStepSounds` calling the native
   step sound for every visible party each frame, was read from code (lines 824-827) and then measured at about 0.2 ms
   a second (line 892). If the sound stutters, yotthani says the cause is native (FMOD) and only a profile would show it.
-- **The "before" numbers include ButterLib's rebuild, which TAOM removes.** The run above was taken with the full mod
-  list, ButterLib's Distance Matrix enabled. yotthani found the next day (2026-10-03) that the six worst
+- **The "before" numbers include ButterLib's rebuild, which TAOM removes.** The run above was taken with the user's full
+  load list (line 853), which includes ButterLib; that its Distance Matrix was on is TAOM's inference from the user
+  setting yotthani read the next day ("Distance Matrix Enabled" `true`, line 1211). In that later run (2026-10-03
+  23:39) yotthani found that the six worst
   `MapEventManager.Tick` frames (229 to 292 ms) were all siege ends running ButterLib's
   `GeopoliticsBehavior.UpdateOnSettlementOwnerChanged`: 13 calls, 2,250 ms, 173 ms on average, up to 281 ms in one
   frame (lines 1205-1208). TAOM switches that subsystem off, so figures taken with it running overstate what a TAOM

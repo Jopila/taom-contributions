@@ -49,7 +49,7 @@ no compile progress to managed code.
   `%COUNT%` and `%TOTAL%` placeholders and never touches the engine.
 - **Stands down** on a dedicated server (`IDedicatedServerProvider`) and when yotthani's VanillaTuning module is
   active, which shows the same notice.
-  **Mutual stand-aside risk (2026-10-15):** `ShaderCompileProgress.ShouldStart` (`ShaderCompileProgress.cs:67-76`)
+  **Mutual stand-aside risk (2026-10-15):** `ShaderCompileProgress.ShouldStart` (`ShaderCompileProgress.cs:70-80`)
   returns false whenever a module with the id `VanillaTuning` is active, whether or not VanillaTuning's own
   `shader-compile-notice` patch is on. VanillaTuning v0.1.1 stands aside for TAOM on four class names
   ([load-order-and-dependencies.md](../modding/load-order-and-dependencies.md) section G) and could add a
@@ -118,3 +118,5 @@ only; the translator run (`/localize`, paid) is owed.
 
 - **Issue:** [#752, feat: show shader compile progress while the game rebuilds its shaders](https://github.com/haterade22/TAOM/issues/752)
 - **Status:** Closed with `triage-needs-ingame` (the in-game check above is owed)
+
+---

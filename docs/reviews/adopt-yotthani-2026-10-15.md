@@ -2,7 +2,7 @@
 
 Written for: TAOM maintainers deciding what to take from yotthani's two repositories, and for yotthani (the
 "For yotthani" section is meant to be forwarded). Procedure: `/adopt-external`
-([external-repo-adoption.md](../ai-includes/external-repo-adoption.md)), seventh review of these sources, after
+([external-repo-adoption.md](../ai-includes/external-repo-adoption.md)), seventh review of these sources (the sixth of MithrilForge, the fourth of `yotthani/bannerlord`), after
 [adopt-yotthani-2026-10-08.md](adopt-yotthani-2026-10-08.md). Mike's request: review everything yotthani changed since
 the last review, with the focus on performance and engine optimization; DualWield and yotthani's other feature mods stay
 with yotthani. TAOM is on Bannerlord v1.5.5 and v2.0.34.
@@ -41,7 +41,7 @@ never pasted.
 | TAOM is on `v2.0.34` | `Main/_Module/SubModule.xml:6` |
 | VanillaTuning keys on four TAOM full names, five patch ids | `TaomOverlap.cs@784fef93:17-24`: `nameplate-cull`, `map-view-release`, `mission-start-guard`, and `frame-buffer-guard` plus `frame-buffer-watch` (both on `SkeletonBufferModule`). All four classes exist in `Main` |
 | VanillaTuning's stand-aside is a type-presence check, and TAOM's MCM toggle is the only switch | `Integration/VanillaTuningSubModule.cs@784fef93:23-38` (`LeaveToTaom`, run in its `OnSubModuleLoad`): it tests `taom.GetType(name, false) != null` and never reads a TAOM setting, so TAOM's toggle off leaves the site unguarded. Code reading |
-| Launcher order does not matter for that check | v1.5.5 `Module.cs`: assemblies are loaded and every submodule constructed (`:1091-1145`) before `InitializeSubModuleBases` (`:1162`), which calls `OnSubModuleLoad` (`:226-233`). Managed decompile |
+| Launcher order does not matter for that check | v1.5.5 `Module.cs`: assemblies are loaded and every submodule constructed (`:1091-1145`) before `InitializeSubModuleBases` (`:1168`), which calls `OnSubModuleLoad` (`:226-233`). Managed decompile |
 | TAOM logs "already guarded" at INFO, not a wrong-build report | `SkeletonBufferGuardService.cs:39` (`ForeignReason`), logged at `:158-161`. VanillaTuning's `TaomOverlap` comment predicts a "wrong game build" report instead |
 | A throw in a module's main-menu hook repeats every tick | v1.5.5 `Module.cs:538-549` (`SetInitialModuleScreenAsRootScreen` runs every tick while `ActiveState == null`) and `:796-799` (calls every submodule's callback). Managed decompile |
 | The tick loop counts down and a removal inside it is unsafe | v1.5.5 `Mission.cs:3750-3753` against `RemoveMissionBehavior` at `:4707-4724`. `DeploymentMissionController.FinishDeployment` ends with `RemoveMissionBehavior(this)` (`:41-80`). TAOM's parked `ShaderPrecompilePlayerAgentGuard` calls it from `OnMissionTick` (`:80-94`). Managed decompile and code reading, never run |
@@ -52,7 +52,7 @@ never pasted.
 | The FBX import dialog keeps its last choices | `HKCU\Software\TaleWorlds\RGL\fbx_import_settings` exists on the maintainer's desktop and holds `import_physics_shapes`, `convert_to_unit` and others (read-only `reg query`, 2026-10-15) |
 | TAOM's four camp tpacs are an older writer's output | their git blob hashes (`1e26222f`, `078dc719`, `4d9670eb`, `4453ec79`) equal those at `yotthani/bannerlord@2e14c22dfc`; `478587b482` differs on all four |
 | Nothing TAOM or the live Armory ships carries a rope flag | a byte scan of 5,506 Armory tpacs and TAOM's modules, 2026-10-15 |
-| The weapons with their own skeleton in vanilla 1.5.5 | `flail_skeleton` x5, `sling_skeleton` x6 and `shackle_skeleton` x2 across Native, SandBoxCore and MP item XML (upstream names only the flail) |
+| The weapons with their own skeleton in vanilla 1.5.5 | `flail_skeleton` x4, `sling_skeleton` x6 and `shackle_skeleton` x2 in the SandBoxCore and SandBoxCoreMP `items/weapons.xml`, half in each (TAOM grep of the installed v1.5.5 modules, 2026-10-15; upstream names only the flail) |
 | Upstream commits cited exist | `5dcf9b24`, `44d89f49`, `44afb243` ("measured: no gain"), `fc45bc48`, `8b852b25`, `35570dab` |
 | **I1: the native melee AI reads the block, parry and shield-defend properties** | decompile of the installed v1.5.5 client, 2026-10-15. `IMBAgent.UpdateDrivenProperties` (`0x6E1740`, thunk to `FUN_1805da1c0`) copies all 98 driven properties to `agent + 0x2E8 + 4 * index`. Consumed by the melee decision machine (reached from `IMBMission.Tick`, dispatcher `FUN_18069dee0`): block (index 5), parry on decide (6), parry on attack (11), parry on attacking continue (17), defend with shield (28); controls `AIAttackOnDecideChance` (36) and `AiShooterError` (41) pass. **No native read found** for `AiAttackingShieldDefenseChance` (20); the scan covered 93.4 % of `.text`, so that is "no read found", not "proven dead". The shield value is read through `min(0.95, value)` or `min(0.95, 0.5 * value)`: lowering it bites, raising one already at the cap changes nothing. [Likely] the block ability applies to a soldier holding an intact shield, the parry ability to one without. TAOM's race-ability block and parry percentages and Culture Doctrine's shield value are therefore live levers |
 | **I2: the three hitches of the 2026-10-15 session are not attributed** | Hitch 1 (13:20:05, 617 ms in `missionTickMs` at battle start, `spawnMs` 232) is inside `Mission.OnTick`; the `cameraMs` field of #809 will show the camera share. Hitches 2 and 3 (0.96 s and 0.89 s) are `otherMs`, outside `Mission.OnTick`, with the engine log silent and about 6 to 7 MB allocated in the frame. DualWield was loaded in that session, VanillaTuning was not. Cause unknown |
@@ -101,7 +101,7 @@ NativeCrashLog issue and its design; the Patch37 decision issue (`triage-blocked
 | The background-collection variant for the post-save GC call | yotthani's one run per variant moved a 311 ms freeze to 120 to 160 ms pauses about a minute later and recommends leaving it OFF, since the gain is small and the player gets less predictable pauses (`perf.md` lines 1397 to 1420, 2026-10-04, v1.5.3; the cause is plausible, not proven) |
 | The war-score cache | rejected by yotthani's measurement: `GetScoreOfDeclaringWar` takes 12 us per call (`perf.md` lines 1141 to 1142) |
 | Focus-ray throttle, BehaviorTree sensor cost, CultureConversion daily tick, the Black Gate physics-contact messages | measure first, in one TAOM-only in-game session after #809 is deployed |
-| The Black Gate ash content fix (#738) | parked for Kysaro on 2026-10-06; it is still the largest measured frame cost on TAOM content (21.0 ms down to about 11.6 ms with the fix, v1.5.3, in yotthani's profile and in-game run). `VanillaTuning_TAOM` swaps it at runtime for players who run that add-on |
+| The Black Gate ash content fix (#738) | parked for Kysaro on 2026-10-06; it is still the largest measured frame cost on TAOM content (21.0 ms down to 12.2 ms per frame in the main fight with the `VanillaTuning_TAOM` fix, which keeps the visible ash; the 11.6 ms was the 2 % emission proof run; v1.5.3, yotthani's in-game runs of 2026-10-02, `perf.md`@0a2f4761 lines 707 and 776). `VanillaTuning_TAOM` swaps it at runtime for players who run that add-on |
 | DualWield, Armory, Armory.Sim, the balance simulator, FaceLearner | yotthani's features and products; engine facts only. TAOM's installed DualWield v0.9.14 predates three crash fixes (v0.10.1 and v0.10.6); updating it is the maintainer's choice |
 | Tier 2 items 9, 10 and 11 of 2026-10-08 | no upstream change; they stay as decided |
 
@@ -112,9 +112,9 @@ NativeCrashLog issue and its design; the Patch37 decision issue (`triage-blocked
    owed since 2026-09-29 lands. yotthani's FieldCamp and Refuge modules, which ship the props through `AssetPackages` only,
    loaded the four props in game on 1.5.3.
 2. **I1's result needs an in-game owner.** The levers exist, but two zeroed mirror battles of yotthani's showed no change
-   (n=2, six properties together). Two of the seven places that set the defend state are not gated by these values, and
+   (n=2, six properties together). Two of the seven places that set decision state 6 (likely the defend state) are not gated by these values, and
    the run may not have applied them. The reason stays UNEXPLAINED; do not write that the levers are inert.
-3. **Armour flicker above 2,340 skeletons.** With only the pool-1 guard, yotthani saw armour flicker and float in game on
+3. **Armour flicker above 2,340 skeletons.** With VanillaTuning's first-pool guard (whether TAOM's second-pool guard also ran is not stated), yotthani saw armour flicker and float in game on
    2026-10-12 with 2,000 soldiers (`CrowdProxy.cs@784fef93:418-421`, commit `44d89f49`). TAOM guards both pools and has not
    looked: the check is owed.
 4. **A code comment is wrong.** `Main/Features/SignatureStrikes/Domain/StrikeContext.cs:15-17` omits friendly fire from
@@ -138,16 +138,38 @@ main-menu setup hook cannot loop every tick, C2), #808 (pin the four TAOM type n
 #809 (`cameraMs` split out of the hitch probe's frame columns, C4). Not filed:
 
 1. **check: armour flicker above 2,340 skeletons with both guards on.** A 2,000-plus soldier battle, looking for the
-   flicker yotthani saw with the pool-1 guard only. Labels: `triage-needs-ingame`.
+   flicker yotthani saw with VanillaTuning's first-pool guard. Labels: `triage-needs-ingame`.
 2. **fix: the parked precompile guard removes a behaviour inside `OnMissionTick`.** Move `FinishDeployment()` out of the
    tick before un-parking (flag, act next frame). Labels: bug (latent).
 3. **research: why zeroed block and parry properties showed no change in yotthani's battles.** I1 found native readers
    for five of the six properties and none for `AiAttackingShieldDefenseChance`; the open part is the two ungated
-   entries into the defend state and whether the run applied the values. Labels: `triage-blocked-decision`.
+   entries into state 6 and whether the run applied the values. Labels: `triage-blocked-decision`.
 
 ## The doc review
 
-Written when the find-and-verify review of this batch completes.
+The same find-and-verify review as on 2026-10-06, over the four docs commits of this batch: three finders (fidelity to
+source, consistency with TAOM code and docs, routing under ADR-011), then one verifier that re-read every cited source
+(upstream at the pinned refs, the v1.5.5 source and client, TAOM code, `reg query`, the installed modules) and tried to
+refute each finding.
+
+- **Result:** 29 findings after de-duplication. The verifier confirmed 26 (6 MEDIUM, 20 LOW), refuted 2 (the two
+  dynamic-shape counts are different populations; the "AI sleep mode" row cites the whole mode, not one method), and
+  kept the trap row of a third as it is (exactly 180 characters), moving its fix into `tools/README.md`. It found 3 new
+  LOW items while checking. All confirmed items are fixed.
+- **MEDIUM:** a registry path written with a form feed in place of `\f` (`RGL\fbx_import_settings`, two docs); the #738
+  row giving the 2 % proof run (11.6 ms) as the fix (12.2 ms); "not on troop or level" where the source says troop and
+  level "explain almost nothing"; a vanilla `flail_skeleton` count of 5 that included DualWield's items (4 in vanilla);
+  the effect of removing a behaviour at a lower index inside `OnMissionTick` (the current behaviour ticks twice, and no
+  other behaviour is skipped); decision state 6 called the defend state where TAOM's decompile says [Likely].
+- **The largest class, again:** six findings dropped an upstream hedge or stated a TAOM inference as the source's words,
+  the class of all 17 findings on 2026-10-06. It now has a lesson in `lessons/misc.md` ("Restate an upstream fact with
+  its hedge and its evidence kind, in the same sentence"). The form feed is a recurrence of
+  `lessons/build-tooling-workflow.md` "A heredoc is not a safe transport for source containing escape sequences": a
+  script wrote the path through a string that read `\f` as an escape.
+- **Also fixed:** wrong line anchors (four), a stale class name, a mistranslated "Höchststand", a loader address given
+  to the Kit's build instead of the client's, two stale doctrine table cells, the register's Covers columns and pass
+  counts, a duplicated restatement of the VanillaTuning contract in the register, and five smaller precision items
+  (the retry condition, the ungated writes, quoted translations, the rope path's first condition, a comment's date).
 
 ## For yotthani
 
@@ -179,3 +201,5 @@ we would ask, in case it helps:
    because VanillaTuning stays out of it once the class exists. We read this from your code and have not seen it in game.
 
 Thank you again.
+
+---

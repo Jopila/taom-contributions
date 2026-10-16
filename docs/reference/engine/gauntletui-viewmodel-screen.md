@@ -80,10 +80,11 @@ replacing whole screens (forward-compatible across patches, as long as the bound
 - **Generated UI prefabs are off with UIExtenderEx loaded; the cost shows per list item** [yotthani]. yotthani read
   `UIConfig.GetIsUsingGeneratedPrefabs()` as False, every movie a `GauntletMovie` (the XML path), and
   `Bannerlord.UIExtenderEx` loaded from TAOM.Dependencies (MithrilForge `docs/engine/perf.md`@0a2f4761 lines
-  1612-1613, menu runs of 2026-10-05, in game; engine version not stated). That UIExtenderEx is why the prefabs are
-  off, or that the cost is inherent to the XML path, is not in the source; read it as an inference. The figures are
-  "Movie loading: trade 400 ms (about 1 ms per item, `Inventory` twice)" (line 1611, 201 goods) and "at about 3000
-  entries 4.4 ms per entry" (line 1614, "uncritical for normal lists"). The 3000-entry case was the inventory with
+  1612-1613, menu run of 2026-10-05 11:45, in game; v1.5.3 by the date, since the game moved to 1.5.4 at 16:20 that
+  day, line 1736). That UIExtenderEx is why the prefabs are
+  off, or that the cost is inherent to the XML path, is not in the source; read it as an inference. The figures, in TAOM's translation:
+  loading the trade screen's movies took 400 ms (about 1 ms per item, `Inventory` loaded twice; line 1611, 201 goods),
+  and about 3000 entries cost 4.4 ms per entry (line 1614, which calls normal lists uncritical). The 3000-entry case was the inventory with
   `cheat_mode = 1`, which fills the left side with every `ItemObject` and took 13 s to open (lines 1590-1593), not a
   normal play state.
 - **First-use shader compiles can block one frame for 150 to 290 ms.** One observation, not a rule: yotthani's
