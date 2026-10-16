@@ -636,9 +636,10 @@ def aggregate_ticks(ticks: list) -> dict | None:
     if not ticks or wall <= 0:
         return None
     managed = sum(t[k] for t in ticks for k in _MANAGED_PHASES)
-    # The camera rate is reported only when every window carries the column.
-    with_camera = all(t[CAMERA] is not None for t in ticks)
-    columns = PHASES_WITH_CAMERA if with_camera else PHASES
+    # One log is one build, so its windows all carry cameraMs or none do; a row mixes them only in an
+    # edited log. A window without the column keeps its camera time inside missionTickMs or otherMs, so
+    # it adds nothing here and the breakdown still sums to the wall clock.
+    columns = PHASES_WITH_CAMERA if any(t[CAMERA] is not None for t in ticks) else PHASES
     by_type: dict = {}
     for t in ticks:
         for b in t["top"]:
@@ -655,7 +656,8 @@ def aggregate_ticks(ticks: list) -> dict | None:
                   for name, e in by_type.items()]
     behaviours.sort(key=lambda b: (-b["ms_per_s"], b["type"]))
     return {"windows": len(ticks), "wall_ms": wall,
-            "phase_ms_per_s": {k: sum(t[k] for t in ticks) * 1000.0 / wall for k in columns},
+            "phase_ms_per_s": {k: sum(t[k] for t in ticks if t[k] is not None) * 1000.0 / wall
+                               for k in columns},
             "behaviours": behaviours}
 
 

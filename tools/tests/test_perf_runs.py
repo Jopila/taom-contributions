@@ -56,8 +56,12 @@ PINNED_TICK_SUMMARY = ("[TickSummary] frames=4500 wallMs=75000.00 preDisplayMs=1
 
 
 def _no_camera(text):
-    """The line as a build from before the cameraMs column wrote it."""
-    return re.sub(r" cameraMs=\S+", "", text)
+    """The line as a build from before the cameraMs column wrote it: the camera's time back in
+    otherMs (the pinned lines are full mode, where the column came out of otherMs)."""
+    camera = float(re.search(r" cameraMs=(\S+)", text).group(1))
+    other = re.search(r" otherMs=(\S+)", text).group(1)
+    return (re.sub(r" cameraMs=\S+", "", text)
+            .replace(f" otherMs={other} ", f" otherMs={float(other) + camera:.2f} "))
 
 
 DEFAULT_DIAG = ("battleLoad", "stallWatchdog", "stallBundle", "exitSampler", "freezeSampler",
@@ -1715,12 +1719,18 @@ class CameraColumnTests(unittest.TestCase):
         self.assertIn("  tick ms/s: preDisplayMs=2.5 cameraMs=4.1 missionTickMs=162.5 preTickMs=8.0 "
                       "waitTickMs=19.0 agentTickMs=300.0 otherMs=803.9", pr.format_rows(_rows(lines), 0).splitlines())
 
-    def test_aggregate_mixed_old_and_new_ticks_omits_camera_rate(self):
+    def test_aggregate_mixed_old_and_new_ticks_keeps_the_measured_camera_time(self):
         lines = _mission(0, _steady()) + [_line(PINNED_TICK_PROFILE, 66),
                                           _line(_no_camera(PINNED_TICK_PROFILE).replace("t=+65s", "t=+70s"), 71)]
         tick = _rows(lines)[0]["tick_profile"]
-        self.assertNotIn("cameraMs", tick["phase_ms_per_s"])
+        # 20.50 ms of camera time, from the one window that carries the column, over 10 s.
+        self.assertAlmostEqual(tick["phase_ms_per_s"]["cameraMs"], 2.05)
         self.assertAlmostEqual(tick["phase_ms_per_s"]["missionTickMs"], 162.48)
+
+    def test_no_camera_helper_keeps_the_old_line_summing_to_its_wall_clock(self):
+        old = pr.parse_tick_profile(_no_camera(PINNED_TICK_PROFILE))
+        self.assertAlmostEqual(old["otherMs"], 4040.00)
+        self.assertAlmostEqual(sum(old[k] for k in pr.PHASES if k != "agentTickMs"), old["wallMs"])
 
     def test_aggregate_old_ticks_have_no_camera_rate(self):
         lines = _mission(0, _steady()) + [_line(_no_camera(PINNED_TICK_PROFILE), 66)]

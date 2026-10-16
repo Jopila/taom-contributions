@@ -14,10 +14,11 @@ namespace TAOM.Tests.Features.MissionPerf;
 /// <summary>
 /// The always-on cost of the Patch98 hitch probe, measured: six dummy methods stand in for the patched engine
 /// methods, a simulated frame calls them the way a battle frame does (pre-tick with the wait inside it, on-tick
-/// with the camera call inside it, the script tick, the agent-tick pair, two spawns), and the same frames run first unpatched and then with the
-/// REAL Patch98 prefixes and finalizers attached by Harmony, on a probe-mode profiler with clip sampling on
-/// (the unpatched arm has no profiler, as a default player had before the probe). The native clip-loading
-/// call is a stub here; its own median is the <c>anim-loading sample</c> line at the first measured mission.
+/// with the camera call inside it, the script tick, the agent-tick pair, two spawns), and the same frames
+/// run first unpatched and then with the REAL Patch98 prefixes and finalizers attached by Harmony, on a
+/// probe-mode profiler with clip sampling on (the unpatched arm has no profiler, as a default player had
+/// before the probe). The native clip-loading call is a stub here; its own median is the
+/// <c>anim-loading sample</c> line at the first measured mission.
 /// The difference per frame must stay under 0.5% of a 10 ms frame (50 us). Opt-in
 /// (<c>TAOM_RUN_BENCHMARKS=1</c>), so the default run and hosted CI never time a shared runner.
 /// </summary>

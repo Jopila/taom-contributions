@@ -17,9 +17,11 @@ namespace TAOM.Tests.Features.MissionPerf;
 
 /// <summary>
 /// Drift guard for Patch98 and the two attribution transpilers. Every probe target resolves in the installed
-/// engine and is not overridable (a bracket on a base virtual never runs for an override; the camera target is a sealed explicit implementation), and the PatchShield split
-/// of maintainer decision D13 (2026-10-03) holds: WaitTickCompletion and TickComponents stay on PatchShield's
-/// hot-method exclusion list, while OnPreTick, OnTick, SpawnAgent and the camera's UpdateCamera are off it and the shield wraps them again.
+/// engine and is not overridable (a bracket on a base virtual never runs for an override; the camera target
+/// is a sealed explicit implementation), and the PatchShield split of maintainer decision D13 (2026-10-03)
+/// holds: WaitTickCompletion and TickComponents stay on PatchShield's hot-method exclusion list, while
+/// OnPreTick, OnTick and SpawnAgent are off it and the shield wraps them again. UpdateCamera was never on
+/// the list; the maintainer's decision of 2026-10-15 (#809) shields it too.
 /// </summary>
 [TestClass]
 public class HitchProbeBindingTests
@@ -32,12 +34,10 @@ public class HitchProbeBindingTests
     [TestCleanup]
     public void Cleanup() => MissionAttributionInstaller.ResetForTests();
 
-    private static IEnumerable<Type> PatchClasses(string category) =>
-        AccessTools.GetTypesFromAssembly(typeof(HitchProbeHooks).Assembly)
-            .Where(t => t.GetCustomAttributes<HarmonyPatchCategory>().Any(c => c.info.category == category));
-
     private static IEnumerable<Type> ProbeClasses() =>
-        PatchClasses(HitchProbeInstaller.Category).Concat(PatchClasses(HitchProbeInstaller.CameraCategory));
+        AccessTools.GetTypesFromAssembly(typeof(HitchProbeHooks).Assembly)
+            .Where(t => t.GetCustomAttributes<HarmonyPatchCategory>().Any(c =>
+                c.info.category is HitchProbeInstaller.Category or HitchProbeInstaller.CameraCategory));
 
     // CreatureBanditsWiringTests.TargetOf, with the argument types.
     private static MethodBase TargetOf(Type patch)
@@ -56,7 +56,8 @@ public class HitchProbeBindingTests
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
 
         var classes = ProbeClasses().ToList();
-        Assert.AreEqual(6, classes.Count, "Patch98 holds six bracket classes.");
+        Assert.AreEqual(6, classes.Count,
+            "The Patch98_HitchProbe category holds five bracket classes, and the camera category one more.");
         foreach (var patch in classes)
         {
             var target = TargetOf(patch);

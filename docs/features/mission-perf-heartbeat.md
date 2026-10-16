@@ -66,8 +66,8 @@ runs several mission ticks per rendered frame, so several profiler frames). Per 
 
 | Field | What it is |
 |---|---|
-| `preDisplayMs` | Sum of every behaviour's `OnPreDisplayMissionTick` (timed at its call site in `Mission.OnTick`) |
-| `cameraMs` | `MissionScreen`'s `IMissionSystemHandler.UpdateCamera`, which `Mission.OnTick` calls between the `OnPreDisplayMissionTick` loop and the `OnMissionTick` loop (v1.5.5 `Mission.cs` 3741-3753): `CameraTick`, then the native `MBWindowManager.PreDisplay()` (culling, posing and render-item preparation `[yotthani, MithrilForge docs/engine/perf.md, measured in game, v1.5.3 and v1.5.4]`; TAOM's own decompile shows only that `pre_display` builds the frame's render context and calls each active view). Timed by Patch98's camera bracket in both modes. Logs from before the column lack it |
+| `preDisplayMs` | Sum of every behaviour's `OnPreDisplayMissionTick` (timed at its call site in `Mission.OnTick`); not the engine's `PreDisplay()`, which is inside `cameraMs` |
+| `cameraMs` | `MissionScreen`'s `IMissionSystemHandler.UpdateCamera`, which `Mission.OnTick` calls between the `OnPreDisplayMissionTick` loop and the `OnMissionTick` loop (v1.5.5 `Mission.cs` 3741-3753): `CameraTick`, then the native `MBWindowManager.PreDisplay()` (culling, posing and render-item preparation `[yotthani, MithrilForge docs/engine/perf.md, measured in game, v1.5.3 and v1.5.4]`; TAOM's own decompile shows only that `pre_display` builds the frame's render context and calls each active view). `MissionScreen` calls `PreDisplay()` only while the mission is Continuing and `!MissionEnded`, so from the battle's result until the mission closes the column times `CameraTick` alone. Timed by Patch98's camera bracket in both modes. Logs from before the column lack it |
 | `missionTickMs` | Sum of every behaviour's `OnMissionTick` (same loop shape, also in `Mission.OnTick`); every millisecond here delays the start of the parallel agent tick |
 | `preTickMs` | Sum of every behaviour's `OnPreMissionTick` (in `Mission.OnPreTick`) |
 | `waitTickMs` | `Mission.WaitTickCompletion()`: the main thread waiting for the previous frame's agent tick (`Thread.Sleep(1)` loop, about 1 to 2 ms granularity) |
@@ -281,7 +281,7 @@ per tick while measuring.
 
 ### PatchShield
 
-Six mission targets carry patches the profiler or the hitch probe relies on. Three are shielded, and three stay on
+Seven mission targets carry patches the profiler or the hitch probe relies on. Four are shielded, and three stay on
 `PatchShieldPolicy.ExcludedTargetMethods` for every player, profiler on or off:
 
 | Target | TAOM patches on it | PatchShield | A missing-API swallow there |
@@ -292,6 +292,7 @@ Six mission targets carry patches the profiler or the hitch probe relies on. Thr
 | `Mission.TickAgentsAndTeamsImp` | Patch91's bracket (every player) | excluded: its body sets `tickCompleted` | none there; from the asynchronous agent tick the exception reaches native's job thread, from the inline one (fast-forward) it reaches `OnTick` |
 | `Mission.SpawnAgent` | Patch23's colour prefix (every player), Patch97's attribution transpiler (profiler on), Patch98's bracket | shielded (D13) | the spawn returns null in place of its agent; strips Patch23's prefix, Patch97's transpiler and Patch98's prefix |
 | `ManagedScriptHolder.TickComponents` | Patch97's attribution transpiler (profiler on), Patch98's bracket | excluded, as built | none there; native reaches it through a `ManagedCallbacks` shim, which PatchShield also excludes |
+| `MissionScreen.UpdateCamera` (the explicit `IMissionSystemHandler` method) | Patch98's camera bracket (own category) | shielded (2026-10-15, #809), from a process's second game start | cannot hang the wait: the camera call comes before `tickCompleted = false` (`Mission.cs` 3745-3749); costs that frame's camera update, and strips Patch98's camera prefix |
 
 Finalizers are never stripped, so Patch91's and Patch98's stay. On an excluded target, for any owner's patch on it,
 PatchShield's swallow of a MissingMethod, MissingField or TypeLoad exception (every other exception is rethrown) and its
@@ -305,7 +306,9 @@ decision D13 (2026-10-03) took them off once plan 034 had made PatchShield's fin
 rescue the exclusion gave up. They are shielded like any other patched method again, from the pass that sees them. A foreign mod's load-time patch on either is covered from
 a process's first game (pass 1, or pass 2 for a patch applied after it); TAOM's own patches there
 (Patch97, Patch98) apply in the first game's late batch, after both passes, so they are
-covered from the second game start, when pass 2 attaches what was patched since the last pass. The
+covered from the second game start, when pass 2 attaches what was patched since the last pass. Patch98's camera
+category applies in the same game-initialization step, so the camera target is shielded from the second game
+start too; with a co-op module active PatchShield installs nothing at all. The
 finalizer then runs on both once per frame, alongside `Mission.Tick` (Patch37), `MissionState.TickMissionAux`
 (Patch91) and `MissionState.OnTick` (Patch43), which already carried it.
 
@@ -460,23 +463,38 @@ they missed.
 `HitchProbeBindingTests.MissionOnTick_CallsHandlerUpdateCamera_Once_InInstalledEngine`). The call is made when
 the mission is Continuing, not on a dedicated server, and only when `Mission.OnTick`'s `updateCamera` argument is
 true (`MissionState.cs` 171-219): fast-forward passes false on its extra sub-ticks, so only the last mission tick
-of a rendered frame carries `cameraMs`. `MissionScreen` implements the method explicitly: a private, final method named `TaleWorlds.MountAndBlade.IMissionSystemHandler.UpdateCamera`,
-which Patch98 names with that prefix (`CameraTarget_IsMissionScreensSealedExplicitUpdateCamera` pins that it is
-the slot the interface maps to). It is the first explicit interface method TAOM patches;
-`HitchProbePrefixGuardTests` runs a test-local explicit implementation through real Harmony. The bracket costs one Harmony prefix and one finalizer per call, plus PatchShield's finalizer (the target is shielded), around two `Stopwatch.GetTimestamp()` calls. The Cost section measures the probe's own prefix and finalizer
-only; the figures for PatchShield's finalizer are in `PatchShieldPolicy`'s `ExcludedTargetNamespacePrefixes`
-comment. Another mod's patch on
-the same method is inside the bracket and counts as camera time. A mod that re-implements
-`IMissionSystemHandler` on its own screen class bypasses the bracket, and its camera time stays in
-`missionTickMs` (probe) or `otherMs` (full). The camera bracket is its own category, `Patch98_HitchProbe_Camera`,
-applied only after `Patch98_HitchProbe` applies, so a failure of it costs only `cameraMs`: the category apply logs
-`[PatchApply] ... FAILED` and joins the game-initialization notice (a red chat line naming
-`Patch98_HitchProbe_Camera`), a `camera bracket not installed`
-WARNING says `cameraMs` reads 0.00 and that time stays in `missionTickMs` (probe) or `otherMs` (full), and the install
-line leaves `MissionScreen.UpdateCamera` out of its targets. Decision (2026-10-15): the target stays shielded by PatchShield, like
-`Mission.OnTick` under D13; a swallowed missing-API exception there skips that frame's `PreDisplay()`.
-`cameraMs` moves time out of `missionTickMs` (probe) and `otherMs` (full), so those two columns differ between logs
-with and without it; `tools/perf_runs.py compare` reads no tick-phase column, so its metrics are unaffected.
+of a rendered frame carries `cameraMs`. Inside it, `MissionScreen` calls `PreDisplay()` only while the mission is
+Continuing and `!MissionEnded` (`MissionScreen.cs` 4159-4162); `Mission.CheckMissionEnded` sets `MissionEnded`
+while the state stays Continuing, so from the battle's result until the mission closes `cameraMs` times
+`CameraTick` alone. `MissionScreen` implements the method explicitly: a private, final method named
+`TaleWorlds.MountAndBlade.IMissionSystemHandler.UpdateCamera`, which Patch98 names with that prefix
+(`CameraTarget_IsMissionScreensSealedExplicitUpdateCamera` pins that it is the slot the interface maps to). It is
+the first explicit interface method TAOM patches; `HitchProbePrefixGuardTests` runs a test-local explicit
+implementation through real Harmony.
+
+The bracket costs one Harmony prefix and one finalizer per call, plus PatchShield's finalizer (the target is
+shielded from a process's second game start, see the PatchShield section), around two `Stopwatch.GetTimestamp()`
+calls. The Cost section measures the probe's own prefix and finalizer only; the figures for PatchShield's
+finalizer are in `PatchShieldPolicy`'s `ExcludedTargetNamespacePrefixes` comment. Another mod's patch on the same
+method is inside the bracket and counts as camera time. A mod that re-implements `IMissionSystemHandler` on its
+own screen class bypasses the bracket, and its camera time stays in `missionTickMs` (probe) or `otherMs` (full).
+`cameraMs` moves time out of `missionTickMs` (probe) and `otherMs` (full), so those two columns differ between
+logs with and without it; `tools/perf_runs.py compare` reads no tick-phase column, so its metrics are unaffected.
+
+The camera bracket is its own category, `Patch98_HitchProbe_Camera`, applied only after `Patch98_HitchProbe`
+applies, so a failure of it costs only `cameraMs`: the category apply logs `[PatchApply] ... FAILED` and joins the
+game-initialization notice (a red chat line naming `Patch98_HitchProbe_Camera`), a `camera bracket not installed`
+WARNING says `cameraMs` reads 0.00 and that time stays in `missionTickMs` (probe) or `otherMs` (full), and the
+install line leaves `MissionScreen.UpdateCamera` out of its targets. If `MissionScreen` itself cannot be loaded,
+TAOM skips the camera class at load (a `[PatchApply] ... SKIPPED` ERROR, named in the startup notice). The camera
+category then applies nothing, so no `camera bracket not installed` WARNING is written and the install line
+still lists `MissionScreen.UpdateCamera`. At an engine bump,
+`CameraTarget_IsMissionScreensSealedExplicitUpdateCamera` fails first. Decision (2026-10-15): the target stays
+shielded by PatchShield, from a process's second game start (see the PatchShield section), like `Mission.OnTick`
+under D13; a swallowed missing-API exception there skips the rest of `CameraTick` and the managed `PreDisplay()`
+call that frame; the engine's frame function calls the same once-per-frame pre-display before it displays (native
+0x344A0 calls 0x7D800, whose latch at +8 lets it run once per frame), so that work most likely moves to `otherMs`
+(UNVERIFIED in game).
 
 **Phase columns per mode.** `[TickProfile]`, `[Hitch]` and `[TickSummary]` keep plan 028's format
 with one column added, `cameraMs`, right after `preDisplayMs`. In `full` mode their phase columns are the
@@ -543,10 +561,10 @@ patches six dummy methods with the real Patch98 prefixes and finalizers and time
 agent-tick pair, two spawns, the frame boundary, clip sampling on through a stub adapter) against the
 unpatched dummies with no profiler, as a default player had before the probe (so the agent-tick pair's
 measuring counts): 0.70 to 0.75 us per frame on the desktop on 2026-10-15 with the camera bracket (four
-runs: 0.695, 0.750, 0.752 and 0.751 us), about 0.01% of a 10 ms frame. Before the camera bracket it read
-0.50 us on 2026-10-03 (three runs, 0.492, 0.496 and 0.506 us, with the per-call state and the
-missing-prefix counts; the counts-only guard before it read 0.512, 0.514 and 0.514 us, and 0.476, 0.479
-and 0.488 us before any guard). That is the managed
+runs: 0.695, 0.750, 0.752 and 0.751 us), about 0.01% of a 10 ms frame. A same-session A/B on 2026-10-15
+(Debug, desktop, runs alternating) puts the camera bracket's own cost inside run-to-run noise: five brackets
+(the tree at `caefaa1f3`) read 0.646, 0.665 and 0.767 us, six brackets 0.836, 0.775 and 0.715 us. The ranges
+overlap, so the sixth bracket adds about 0.1 us or less. That is the managed
 part only: a claim about the managed brackets, not about the native call, which is a stub there. Two
 things about the native clip-loading call are not established:
 
@@ -631,7 +649,7 @@ first 100 slow frames per mission. `spawnMs`, `scriptTickMs`, `scriptParallelMs`
 `occasionalMs`, and the raw `onTickMs` and `preTickAllMs` brackets:
 
 ```
-[HitchDetail] t=+72s spawnMs=0.00 scriptTickMs=4.10 scriptParallelMs=1.25 animLoading=1 mode=full spawns=0 occasionalMs=0.30 onTickMs=6.30 preTickAllMs=790.60
+[HitchDetail] t=+72s spawnMs=0.00 scriptTickMs=4.10 scriptParallelMs=1.25 animLoading=1 mode=full spawns=0 occasionalMs=0.30 onTickMs=9.55 preTickAllMs=790.60
 [HitchDetail] t=+72s spawnMs=12.00 scriptTickMs=4.10 scriptParallelMs=na animLoading=na mode=probe spawns=3 occasionalMs=na onTickMs=20.50 preTickAllMs=790.60
 ```
 
@@ -654,7 +672,7 @@ tops:
 |---|---|---|
 | `[TickProfiler] probe off: 'Enable Hitch Probe' and 'Enable Tick Profiler' are off at game start (or MCM was not ready); no probe patches installed, no hitch lines this session` | INFO | Once per process, both toggles off |
 | `[TickProfiler] probe install: category applied, enabled by hitch probe, targets Mission.OnPreTick,Mission.WaitTickCompletion,Mission.OnTick,ManagedScriptHolder.TickComponents,Mission.SpawnAgent,MissionScreen.UpdateCamera, bookkeeping 1.25 us per frame (0.01% of a 10 ms frame, target 0.50%)` | INFO | Once per process, either toggle on: `applied` or `failed`, `hitch probe`, `tick profiler` or `both`, the measured bookkeeping; the targets list names `MissionScreen.UpdateCamera` only when the camera category applied |
-| `[TickProfiler] camera bracket not installed: cameraMs reads 0 and that time stays in missionTickMs (probe) or otherMs (full); the rest of the probe is unaffected (see [PatchApply])` | WARNING | Once per process, Patch98 applied but `Patch98_HitchProbe_Camera` did not. `cameraMs` stays `0.00` (a non-number would drop the line from `perf_runs.py`), so read it as unmeasured, not as zero camera time. The category failure also appears by name in the game-initialization notice, a red chat line |
+| `[TickProfiler] camera bracket not installed: cameraMs reads 0 and that time stays in missionTickMs (probe) or otherMs (full); the rest of the probe is unaffected (see [PatchApply])` | WARNING | Once per process, Patch98 applied but `Patch98_HitchProbe_Camera` did not. `cameraMs` stays `0.00` (a non-number would drop the line from `perf_runs.py`), so read it as unmeasured, not as zero camera time. The category failure also appears by name in the game-initialization notice, a red chat line. If `MissionScreen` itself cannot be loaded, TAOM skips the camera class at load (a `[PatchApply] ... SKIPPED` ERROR), the category applies nothing and this WARNING is not written; the install line then still lists `MissionScreen.UpdateCamera` |
 | `[TickProfiler] attribution install: Mission.SpawnAgent sites 2/2, ManagedScriptHolder.TickComponents sites 5/5, script tick delegate bound` | INFO | Once per process, profiler on: the sites the two attribution rewrites swapped (the `TickComponents` denominator is 4 when the delegate did not bind) |
 | `[TickProfiler] ScriptComponentBehavior.OnTick could not be bound; per-component script attribution is off, the script totals stay` | WARNING | At install, profiler on, the delegate did not bind |
 | `[TickProfiler] probe on in MCM but its patches are not installed: it was off at game start (restart the game to measure) or its install failed (see the probe install line and [PatchApply])` | WARNING | Once per mission, probe toggle on but Patch98 not installed |
@@ -684,7 +702,8 @@ exception and its strip of the offending patch are given up.
 method: plan 028 had excluded the first two and plan 041 the third, for cost, and maintainer decision
 D13 (2026-10-03) took them off once plan 034 had made PatchShield's finalizer cheap (the figures are in `PatchShieldPolicy`'s `ExcludedTargetNamespacePrefixes` comment), at
 two calls per frame and one per spawn. `MissionScreen.UpdateCamera` was never on the exclusion list: it is
-shielded by the decision of 2026-10-15 (#809). A shield finalizer runs inside those four brackets like every
+shielded by the decision of 2026-10-15 (#809), from a process's second game start, since its category applies
+after PatchShield's second pass. A shield finalizer runs inside those four brackets like every
 other patch on the method (the bracket's prefix is `Priority.First` and its finalizer `Priority.Last`).
 
 What that gives, and what it costs. A MissingMethod, MissingField or TypeLoad exception that escapes

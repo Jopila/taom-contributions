@@ -21,7 +21,7 @@ public class HitchProbeLinesTests
         "[ScriptProfile] t=+65s calls=300 scriptTickMs=310.50 scriptParallelMs=na occasionalMs=na top=none";
     private const string PinnedAnimLoad = "[AnimLoad] t=+65s loadingFrames=3 frames=300";
     private const string PinnedHitchDetailFull =
-        "[HitchDetail] t=+72s spawnMs=0.00 scriptTickMs=4.10 scriptParallelMs=1.25 animLoading=1 mode=full spawns=0 occasionalMs=0.30 onTickMs=6.30 preTickAllMs=790.60";
+        "[HitchDetail] t=+72s spawnMs=0.00 scriptTickMs=4.10 scriptParallelMs=1.25 animLoading=1 mode=full spawns=0 occasionalMs=0.30 onTickMs=9.55 preTickAllMs=790.60";
     private const string PinnedHitchDetailProbe =
         "[HitchDetail] t=+72s spawnMs=12.00 scriptTickMs=4.10 scriptParallelMs=na animLoading=na mode=probe spawns=3 occasionalMs=na onTickMs=20.50 preTickAllMs=790.60";
     private const string PinnedSummaryExtraFull =
@@ -48,7 +48,7 @@ public class HitchProbeLinesTests
             : Array.Empty<BehaviorTotal>(),
         300, 3, true);
 
-    private static HitchDetailFrame FullDetail() => new HitchDetailFrame(0, 4.1, 1.25, 1, "full", 0, 0.3, 6.3, 790.6);
+    private static HitchDetailFrame FullDetail() => new HitchDetailFrame(0, 4.1, 1.25, 1, "full", 0, 0.3, 9.55, 790.6);
 
     private static HitchDetailFrame ProbeDetail() => new HitchDetailFrame(12, 4.1, double.NaN, -1, "probe", 3, double.NaN, 20.5, 790.6);
 

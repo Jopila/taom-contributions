@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -20,6 +21,18 @@ namespace TAOM.Tests.Features.MissionPerf;
 public class HitchProbeWiringTests
 {
     private const string HooksDir = "Main/Features/MissionPerf/Hooks/";
+
+    // The classes by name: enumerating the assembly's types would load the game's view assemblies, which this
+    // no-game test does not have. HitchProbeBindingTests counts the classes of both categories.
+    private static readonly Type[] Patch98Classes =
+    {
+        typeof(Mission_WaitTickCompletion_HitchProbe_Patch), typeof(Mission_OnPreTick_HitchProbe_Patch),
+        typeof(Mission_OnTick_HitchProbe_Patch), typeof(ManagedScriptHolder_TickComponents_HitchProbe_Patch),
+        typeof(Mission_SpawnAgent_HitchProbe_Patch),
+    };
+
+    private static readonly Type[] BracketClasses =
+        Patch98Classes.Concat(new[] { typeof(MissionScreen_UpdateCamera_HitchProbe_Patch) }).ToArray();
 
     private static int Count(string text, string needle) => Regex.Matches(text, Regex.Escape(needle)).Count;
 
@@ -56,18 +69,8 @@ public class HitchProbeWiringTests
     [TestMethod]
     public void ProbeBrackets_HaveFirstPrefixAndLastFinalizer()
     {
-        // The six classes by name: enumerating the assembly's types would load the game's view assemblies,
-        // which this no-game test does not have. HitchProbeBindingTests counts the category's classes.
-        var classes = new[]
+        foreach (var patch in BracketClasses)
         {
-            typeof(Mission_WaitTickCompletion_HitchProbe_Patch), typeof(Mission_OnPreTick_HitchProbe_Patch),
-            typeof(Mission_OnTick_HitchProbe_Patch), typeof(ManagedScriptHolder_TickComponents_HitchProbe_Patch),
-            typeof(Mission_SpawnAgent_HitchProbe_Patch), typeof(MissionScreen_UpdateCamera_HitchProbe_Patch),
-        };
-        foreach (var patch in classes)
-        {
-            var category = patch == typeof(MissionScreen_UpdateCamera_HitchProbe_Patch) ? HitchProbeInstaller.CameraCategory : HitchProbeInstaller.Category;
-            Assert.IsTrue(patch.GetCustomAttributes<HarmonyPatchCategory>().Any(c => c.info.category == category), patch.Name);
             var prefix = patch.GetMethod("Prefix");
             var finalizer = patch.GetMethod("Finalizer");
             Assert.IsNotNull(prefix, patch.Name);
@@ -84,13 +87,7 @@ public class HitchProbeWiringTests
     {
         // The finalizer tells its own call's prefix from a stripped or skipped one by the state Harmony starts at 0
         // in every call; by ref, so the call it closed stays closed when Harmony reruns the finalizers.
-        var classes = new[]
-        {
-            typeof(Mission_WaitTickCompletion_HitchProbe_Patch), typeof(Mission_OnPreTick_HitchProbe_Patch),
-            typeof(Mission_OnTick_HitchProbe_Patch), typeof(ManagedScriptHolder_TickComponents_HitchProbe_Patch),
-            typeof(Mission_SpawnAgent_HitchProbe_Patch), typeof(MissionScreen_UpdateCamera_HitchProbe_Patch),
-        };
-        foreach (var patch in classes)
+        foreach (var patch in BracketClasses)
         {
             var prefix = patch.GetMethod("Prefix")!.GetParameters();
             var finalizer = patch.GetMethod("Finalizer")!.GetParameters();
@@ -112,12 +109,7 @@ public class HitchProbeWiringTests
         Assert.AreNotEqual(HitchProbeInstaller.Category, HitchProbeInstaller.CameraCategory);
         CollectionAssert.AreEqual(new[] { HitchProbeInstaller.CameraCategory },
             typeof(MissionScreen_UpdateCamera_HitchProbe_Patch).GetCustomAttributes<HarmonyPatchCategory>().Select(c => c.info.category).ToArray());
-        foreach (var patch in new[]
-                 {
-                     typeof(Mission_WaitTickCompletion_HitchProbe_Patch), typeof(Mission_OnPreTick_HitchProbe_Patch),
-                     typeof(Mission_OnTick_HitchProbe_Patch), typeof(ManagedScriptHolder_TickComponents_HitchProbe_Patch),
-                     typeof(Mission_SpawnAgent_HitchProbe_Patch),
-                 })
+        foreach (var patch in Patch98Classes)
             CollectionAssert.AreEqual(new[] { HitchProbeInstaller.Category },
                 patch.GetCustomAttributes<HarmonyPatchCategory>().Select(c => c.info.category).ToArray(), patch.Name);
     }

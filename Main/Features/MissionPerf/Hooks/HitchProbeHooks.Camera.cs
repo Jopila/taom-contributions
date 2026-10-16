@@ -5,9 +5,11 @@ namespace TAOM.Features.MissionPerf.Hooks;
 
 /// <summary>
 /// The camera bracket: <c>MissionScreen</c>'s explicit <c>IMissionSystemHandler.UpdateCamera</c>, which runs
-/// <c>CameraTick</c> and the native <c>MBWindowManager.PreDisplay()</c> inside <c>Mission.OnTick</c>. Main thread
-/// only, same shape as the on-tick bracket; the cost is one Harmony prefix and one finalizer per call, plus
-/// PatchShield's finalizer (the target is shielded), around two <see cref="Stopwatch.GetTimestamp"/> calls.
+/// <c>CameraTick</c> and the native <c>MBWindowManager.PreDisplay()</c> inside <c>Mission.OnTick</c>; the engine
+/// calls <c>PreDisplay()</c> only while the mission is Continuing and not MissionEnded, so after a battle's result
+/// the bracket times <c>CameraTick</c> alone. Main thread only, same shape as the on-tick bracket; the cost is
+/// one Harmony prefix and one finalizer per call, plus PatchShield's finalizer (the target is shielded from a
+/// process's second game start), around two <see cref="Stopwatch.GetTimestamp"/> calls.
 /// </summary>
 public static partial class HitchProbeHooks
 {

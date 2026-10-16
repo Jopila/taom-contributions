@@ -377,17 +377,6 @@ public class HitchProbeHooksTests
     }
 
     [TestMethod]
-    public void LoneCameraExit_RecordsNothing()
-    {
-        Boundary();
-        var none = ProbeState.PrefixMissing;
-        HitchProbeHooks.OnCameraExit(ref none);
-        Boundary();
-
-        Assert.AreEqual(0d, Profiler.TakeWindow(8).CameraMs);
-    }
-
-    [TestMethod]
     public void Exits_WithoutTheirPrefix_WarnOncePerMethodPerProcess_EachWithItsOwnLine()
     {
         var exitsAndLines = new (ExitHook Exit, string Line)[]

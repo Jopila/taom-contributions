@@ -45,6 +45,7 @@ public class MissionTickProfilerProbeTests
         Assert.AreEqual(1, w.Frames);
         Assert.AreEqual(200d, w.WallMs);
         Assert.AreEqual(0d, w.PreDisplayMs);
+        Assert.AreEqual(0d, w.CameraMs);
         Assert.AreEqual(50d, w.MissionTickMs);
         Assert.AreEqual(10d, w.PreTickMs);
         Assert.AreEqual(30d, w.WaitTickMs);
@@ -376,18 +377,5 @@ public class MissionTickProfilerProbeTests
         Assert.AreEqual(0d, w.MissionTickMs);
         Assert.AreEqual(35d, w.CameraMs);
         Assert.AreEqual(165d, w.OtherMs);
-    }
-
-    [TestMethod]
-    public void CloseFrame_ProbeModeNoCameraBracket_MissionTickKeepsWholeOnTick()
-    {
-        var p = Probe(hitchMs: 1000);
-        p.CloseFrame(100, 0, 0, 0, 0);
-        ProbeBrackets(p);
-        p.CloseFrame(300, 0, 0, 0, 0);
-
-        var w = p.TakeWindow(8);
-        Assert.AreEqual(0d, w.CameraMs);
-        Assert.AreEqual(50d, w.MissionTickMs);
     }
 }

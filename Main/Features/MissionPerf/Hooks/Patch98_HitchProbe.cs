@@ -11,8 +11,9 @@ namespace TAOM.Features.MissionPerf.Hooks;
 // brackets only, no transpiler: each class is a void prefix at Priority.First and a void finalizer at
 // Priority.Last, each taking only Harmony's __state (out on the prefix, ref on the finalizer), so the bracket
 // encloses every other patch on the method (Patch23 on SpawnAgent, Patch97 on OnTick) and still closes when the
-// method throws (its void finalizer leaves the exception alone; on the four shielded targets PatchShield's
-// value-returning finalizer makes Harmony throw, and RethrowStackPreserver keeps the trace). Verified on the
+// method throws (its void finalizer leaves the exception alone; on the four shielded targets (the camera from
+// the second game start) PatchShield's value-returning finalizer makes Harmony throw, and RethrowStackPreserver
+// keeps the trace). Verified on the
 // installed v1.5.3, none of them virtual (the sixth, below, is a sealed explicit interface implementation,
 // verified on v1.5.5):
 //   private void Mission.WaitTickCompletion(): `while (!tickCompleted) Thread.Sleep(1);`, called first in
@@ -27,7 +28,9 @@ namespace TAOM.Features.MissionPerf.Hooks;
 //   public Agent Mission.SpawnAgent(AgentBuildData, bool, Equipment, ItemObject): the only overload; the main
 //     thread per .claude/rules/harmony-patches.md, checked at run time; calls nest through OnAgentBuild.
 //   void MissionScreen.IMissionSystemHandler.UpdateCamera(Mission, float): main thread, called from Mission.OnTick;
-//     CameraTick, then the native MBWindowManager.PreDisplay(). A private final virtual explicit implementation,
+//     CameraTick, then the native MBWindowManager.PreDisplay(), which MissionScreen calls only while the mission
+//     is Continuing and not MissionEnded (after a battle's result cameraMs times CameraTick alone). A private
+//     final virtual explicit implementation,
 //     so it is named with its interface prefix and a sealed one cannot be bypassed by an override (a mod that
 //     re-implements the interface is not bracketed). It is its own category (Patch98_HitchProbe_Camera),
 //     applied by HitchProbeInstaller only after Patch98 applies, so a failure of it costs only cameraMs (the
