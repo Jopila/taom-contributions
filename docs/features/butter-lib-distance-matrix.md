@@ -13,14 +13,17 @@ ButterLib builds at every save load and new game. Nothing installed reads those 
   `Bannerlord.ButterLib.Implementation.1.5.1.dll`, the newest it has. Its `GeopoliticsBehavior` builds settlement, clan
   and kingdom distance tables at every new game and load, and rebuilds the clan table (and the kingdom table when the
   kingdoms differ) synchronously whenever a settlement changes clan. The settlement table counts towns, castles and
-  villages: 843 of TAOM_Map's 1,002 settlements, about 355,000 pairs.
+  villages: 843 of TAOM_Map's 1,002 settlements when counted on 2026-10-06, about 355,000 pairs (the live map
+  has grown since: 1,040 settlements on 2026-10-08).
 - **TAOM requirement:** nothing reads the tables. ButterLib calls the subsystem a "Mod Developer feature"; a scan of
   every module DLL on the desktop install, Workshop included, found no reader outside ButterLib itself, and no TAOM code
   reads them.
 - **Without this feature:** yotthani measured the owner-change rebuild on TAOM's campaign (Bannerlord v1.5.3): 173 ms per
   call on average, up to 281 ms in one frame, and the six worst campaign-map frames were all siege ends
   ([MithrilForge](../reference/provenance-register.md), `docs/engine/perf.md`, runs of 2026-10-03 and 2026-10-04). The
-  load-time build has not been measured.
+  load-time build has not been measured. The rest of yotthani's campaign-map figures, which were taken with this
+  rebuild running, are in the "Measured costs on TAOM's map" section of
+  [campaign-tick-time-and-party-ai.md](../reference/engine/campaign-tick-time-and-party-ai.md).
 
 ## Architecture
 

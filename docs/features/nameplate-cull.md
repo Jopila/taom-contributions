@@ -72,7 +72,11 @@ frame of vanilla, and the widget's alpha eases toward its target anyway.
 
 When another mod's bool prefix on `Update` runs first and replaces the update, Harmony 2.4.2 (the version TAOM.Dependencies
 ships) skips TAOM's prefix, and the other way round: its wrapper emits a `runOriginal` check before every bool prefix
-(`NameplateCullPrefixOrderTests` pins this), so the two never both run a culled update.
+(`NameplateCullPrefixOrderTests` pins this), so the two never both run a culled update. That paragraph covers
+VanillaTuning v0.1.0 and any other mod. VanillaTuning v0.1.1 does not rely on it: it switches its own `nameplate-cull`
+off when `TAOM.Features.NameplateCull.NameplateCullModule` is loaded, so TAOM's MCM toggle is the only switch (yotthani,
+`yotthani/bannerlord` `HoN/VanillaTuning/Core/TaomOverlap.cs`@784fef93 lines 19 and 27-33, version in
+`HoN/VanillaTuning/SubModule.xml`@784fef93 line 6; code read, VanillaTuning v0.1.1, game 1.5.5).
 
 The toggle is read every map frame through `NameplateCullSettingsProvider`, which caches the MCM settings reference;
 the provider is in the hot-path settings gate (`CampaignHotPathSettingsProvidersTests`), so a regression to a per-frame

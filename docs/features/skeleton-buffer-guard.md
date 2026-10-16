@@ -43,7 +43,11 @@ Provenance: [provenance-register.md](../reference/provenance-register.md), adopt
 When the guard refuses a reservation, that skeleton is given its pool's first slots, which another skeleton of the same
 frame already owns. Every frame in which the battle stays above a limit refuses the skeletons that do not fit, so
 several figures can show wrong bones for as long as the battle stays that crowded (read from the decompile; the look in
-game is unverified). This happens only where the battle would otherwise have frozen for good. Each refusal is counted
+game is unverified). yotthani saw armour flicker and pieces of it hang in the air above the limit while only the
+pool-1 guard was active (seen in game 2026-10-12 with 2,000 soldiers; `yotthani/bannerlord`
+`HoN/PerfProbe/Integration/CrowdProxy.cs`@784fef93 lines 418-421, commit `44d89f49`; game 1.5.5 per the date, mod
+list not stated). TAOM's own in-game check of the look is still owed. This happens only where the battle would
+otherwise have frozen for good. Each refusal is counted
 per pool, and the mission-end line reports the counts.
 
 Two more effects come with a refusal, both inside the pool and both only in a frame that overflows. A reservation that
@@ -89,7 +93,7 @@ line; each pool then installs or reports on its own, as `guard ON pool N: ...` o
 | Read the module's headers and its in-memory `.text` | the module is not loaded, or a read fails |
 | Find the watch pattern | it matches zero or two times; the watch is then off too |
 | The global it names | the target is not an aligned 8-byte slot inside `.data` |
-| Per pool: the site already holds `E9 rel32` plus eight NOPs | another module guards it, in practice yotthani's VanillaTuning for pool 1, which patches at `OnSubModuleLoad`, before TAOM's main-menu phase (reported as such, even with the setting off; TAOM still guards the other pool) |
+| Per pool: the site already holds `E9 rel32` plus eight NOPs | another module guards it; this was the VanillaTuning v0.1.0 case, yotthani's module guarding pool 1 at `OnSubModuleLoad`, before TAOM's main-menu phase (reported as such, even with the setting off; TAOM still guards the other pool). VanillaTuning v0.1.1 stands aside on `TAOM.Features.SkeletonBuffer.SkeletonBufferModule` for both its guard and its watch (`frame-buffer-guard`, `frame-buffer-watch`), so with v0.1.1 and TAOM loaded this row does not fire (yotthani, `yotthani/bannerlord` `HoN/VanillaTuning/Core/TaomOverlap.cs`@784fef93 lines 22-23 and 27-33; code read, VanillaTuning v0.1.1, game 1.5.5). VanillaTuning's comment there (lines 9-10) predicts that "the skeleton buffer's second patcher would find the bytes changed and report a wrong game build"; TAOM's second patcher does not say that: it logs `already guarded by another module` at INFO (`SkeletonBufferGuardService.cs:39` for the text, `:158-161` for the log call) |
 | MCM "Skeleton Buffer Guard" | the setting is off |
 | Pool 1: find its site pattern | zero or two matches, or it is not 1 to 128 bytes after the watch site (the same function) |
 | Pool 2: find its site pattern | zero or two matches, the pool-2 load is not resolved, or no `E8 rel32` within `0x80` bytes after the pool-2 load enters the function at most `0x80` bytes before the site |

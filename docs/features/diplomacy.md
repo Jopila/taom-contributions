@@ -102,6 +102,22 @@ of back-to-back ballots. Each yes vote declares its war synchronously, which can
 ballot in the same run. **If the number of votes is itself the complaint, the alliance cap is the
 knob, not this guard.**
 
+What a vote costs on the campaign map, measured by yotthani (MithrilForge `docs/engine/perf.md`@0a2f4761, in game,
+v1.5.3; v1.5.5: not re-checked; the TAOM version loaded is not stated):
+
+- **An election is cheap once ButterLib's rebuild is gone.** With the `butterlib-lazy-distance` patch on, an election
+  averaged 3.7 ms over 39 `KingdomElection.StartElection` calls; the 110 to 130 ms elections seen before were mostly
+  ButterLib's handler on the owner change (lines 1280-1282, runs of 2026-10-04). TAOM removes that handler's cost by
+  switching the subsystem off ([butter-lib-distance-matrix.md](butter-lib-distance-matrix.md)).
+- **A war declaration with alliances costs 17 to 35 ms a call**, and the outliers that remain are many rare events of
+  20 to 60 ms each (election plus declaration, battle simulation, single settlements' daily ticks), with no single hot
+  function (lines 1122 and 1143, MithrilForge `docs/perf-audit/k3-periodic-ticks.md`, 2026-10-03).
+- **Unlimited alliances multiply the call-to-war ballots.** yotthani's code reading, not a measurement: the
+  war and peace evaluation runs about 8 x N times in every election, mostly with the same arguments, and TAOM's
+  unlimited alliances multiply the call-to-war elections (lines 1124-1126).
+- **A war-score cache was rejected.** A shadow test found 78 % hits and no deviation, but `GetScoreOfDeclaringWar`
+  costs only 12 us a call, a saving of about 7 ms in four minutes; the patch stays off (lines 1141-1142).
+
 ```
 KingdomDecisionsVM.RefreshWith           -> Prefix: a stale ballot never builds a window
 KingdomDecisionsVM.HandleDecision        -> Postfix: re-arm the queue vanilla left switched off

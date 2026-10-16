@@ -89,10 +89,13 @@ takes no lock) decides and reports:
   and one WARNING says so. A null owner (a null behaviour that another module added) is reported as `<null>`.
 - **On screen:** at most 3 messages per mission, one sentence, localized (`taom_mission_start_guard_notice`, variables
   `MODULE` (the assembly name), `CALL` and `EXCEPTION` (the type name)). None on a dedicated server.
-- **VanillaTuning beside TAOM:** TAOM shows its message whether or not yotthani's VanillaTuning is loaded. VanillaTuning
+- **VanillaTuning beside TAOM:** with VanillaTuning v0.1.0, TAOM shows its message whether or not yotthani's VanillaTuning is loaded. VanillaTuning
   puts a finalizer on each behaviour type's own start methods, which runs inside the call, so any exception that reaches
   TAOM's wrap is one VanillaTuning did not catch and did not show (2026-10-08 review; an earlier build suppressed TAOM's
-  message when VanillaTuning was loaded, which left the player with none).
+  message when VanillaTuning was loaded, which left the player with none). VanillaTuning v0.1.1 stands aside on
+  `TAOM.Features.MissionStartGuard.MissionStartGuardModule`, so TAOM's wrap is then the only guard (yotthani,
+  `yotthani/bannerlord` `HoN/VanillaTuning/Core/TaomOverlap.cs`@784fef93 lines 21 and 27-33; code read, VanillaTuning
+  v0.1.1, game 1.5.5).
 - **Summary:** when a mission start caught anything, one WARNING at the end of `AfterStart` with the count and how many
   messages showed. Nothing is written for a mission that caught nothing.
 - **Install line:** `[MissionStartGuard] ON: 6 call sites wrapped in Mission.AfterStart (toggle on)`, or a WARNING

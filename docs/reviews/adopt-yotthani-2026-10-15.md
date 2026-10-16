@@ -85,7 +85,7 @@ stay on the maintainer's word.
 **Review of the code items.** A seven-lens `/deep-review`, its fix round and a convergence pass, then at the
 maintainer's request a fresh seven-lens review and a Codex review (`gpt-6-astra`, reasoning `max`), then a
 convergence pass and a focused Codex pass (`high`) on those fixes. No CRITICAL or HIGH finding in any pass. Every
-finding, its fix or its rejection is in `docs/reviews/rca-yotthani-review-2026-10-15.md`.
+finding, its fix or its rejection is in [rca-yotthani-review-2026-10-15.md](rca-yotthani-review-2026-10-15.md).
 
 **Owed, on the maintainer's word:** push and merge; sending "For yotthani"; an optional comment on #738; the
 NativeCrashLog issue and its design; the Patch37 decision issue (`triage-blocked-decision`); updating the bodies of

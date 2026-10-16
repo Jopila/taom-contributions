@@ -148,6 +148,10 @@ apply.
 - The engine event `ScreenLayer.OnLayerActiveStateChanged` (`TaleWorlds.ScreenSystem`).
 - `IMapViewReleaseSettingsProvider`: the toggle and the interval.
 - `IModLogger`: `taom_debug.log`.
+- yotthani's VanillaTuning v0.1.1 switches its own `map-view-release` off when
+  `TAOM.Features.MapViewRelease.MapViewReleaseModule` is loaded, so TAOM's MCM toggle is the only switch (yotthani,
+  `yotthani/bannerlord` `HoN/VanillaTuning/Core/TaomOverlap.cs`@784fef93 lines 20 and 27-33; code read, VanillaTuning
+  v0.1.1, game 1.5.5).
 
 ## Logging
 

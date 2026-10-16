@@ -10,6 +10,9 @@ Every claim carries a tag:
 - **[TAOM-verified]**: checked on 2026-10-02 against the installed v1.5.3 client (`TaleWorlds.Native.dll`,
   14,209,376 bytes, Ghidra project key `Win64_Shipping_Client-45be32c57c451f78`) with TAOM's own tools,
   or against the v1.5.3 managed decompile. The method is named so it can be re-run.
+- **[TAOM-verified, v1.5.5]**: checked on 2026-10-15 against the installed v1.5.5 client (`TaleWorlds.Native.dll`,
+  14,212,960 bytes, Ghidra project key `Win64_Shipping_Client-4c2054c56dfee496`). Each v1.5.5 item names its
+  build next to every native address; an unnamed offset on this page is v1.5.3.
 - **[yotthani]**: a finding from yotthani's MithrilForge or `bannerlord` repositories that TAOM has not
   re-derived. Native addresses he gives for 1.5.3 are RVAs on the same binary hash.
 
@@ -63,6 +66,26 @@ checked). (yotthani, MithrilForge `docs/perf-audit/particle-sim-wait.md`,
   ash that was about 2.7 ms of simulation plus about 7 ms of render data per frame. TAOM's case is #738.
   (yotthani, MithrilForge `docs/perf-audit/agent-render-items.md` sections 0 and 1.5, profile v1.5.3; v1.5.4:
   not re-checked.)
+- **One emitter is TAOM_Map's `lotr_falling_ashes` prefab.** In yotthani's Black Gate census the emitter labelled
+  `falling_leaves_b::leaves` held 64,800 particles after 30 s and about 100,000 from second 65, which is 96 to 97 %
+  of all particles; the other 280 to 380 emitters together held about 3,000. The source is the TAOM_Map prefab
+  `lotr_falling_ashes`, which overrides vanilla's `falling_leaves_b` effect: `emission_rate` 1000 per second,
+  `particle_life` 100 s and `emit_box_size` 500 x 500 x 6 m, so 1000 x 100 = 100,000 particles at steady state over
+  250,000 m2 (yotthani, MithrilForge `docs/engine/perf.md`@0a2f4761 lines 566-570 and 671-683, emitter census in
+  game and prefab read, v1.5.3; v1.5.5: not re-checked).
+- **About 88 % of that emitter's particles lie below the terrain.** The section heading says 88 % under the terrain.
+  Its sampled rows show a near-constant 10,600 to 12,650 particles above the terrain whether the emitter held 17,500
+  or 100,000, and at second 135 of the run 53,900 of 100,000 lay deeper than 20 m below it. yotthani reads that as
+  particles that spawn at the ground, drift for some seconds and sink through it, about 12 s visible and 88 s
+  invisible per particle, all of them still simulated and sorted (`perf.md` lines 725-741, sampled particle
+  positions in game, v1.5.3; v1.5.5: not re-checked).
+- **At 2 % emission the main fight went from 21.0 to 11.6 ms per frame (48 to 87 FPS).** Black Gate, the 700 to 899
+  agent phase, `Mission.Tick` 3.7 ms lower and the time outside the managed points 4.8 ms lower. One run per state,
+  and yotthani lists the caveats: a foreign load on one core at the start, and the reference run carried the limb-ray
+  shadow test (`perf.md` lines 693-716, in game, v1.5.3; v1.5.5: not re-checked).
+- **The engine lever is absent, so the fix is content.** One emitter's step runs on one thread, so chunking the
+  particle step cannot help; yotthani names stepping inside one emitter as a native rebuild and not planned, and puts
+  the lever in the TAOM_Map content (`perf.md` lines 571-576). TAOM's case is #738.
 - Which callbacks reach which thread, and how TAOM code must treat them, is the thread table in
   [`.claude/rules/harmony-patches.md`](../../../.claude/rules/harmony-patches.md) "Which thread runs your
   target". This page does not repeat it.
@@ -163,6 +186,35 @@ call (upstream did not isolate it, since DualWield catches every site in one han
 via native_decompile, except "vanilla never calls it", not re-checked.) Budget the cost per call before
 giving creature contact limb rays ([scripted-melee-strikes.md](../scripted-melee-strikes.md) section 9).
 
+**On v1.5.5** [TAOM-verified, 2026-10-15, decompile and whole-body byte scan of the 14,212,960-byte client]:
+`IMBMission.RayCastForClosestAgentsLimbs` is at `0x6F3520` (v1.5.5) and `IMBMission.RayCastForGivenAgentsLimbs` at
+`0x6F3360` (v1.5.5). The given-agents wrapper still never calls the capsule builder: its calls go to `0x5D0620` and
+`0x5C94A0` (v1.5.5), not to `0x681A00` (v1.5.5), the builder. The single-agent capsule test is `0x5C68A0` (v1.5.5).
+The builder body is 265 bytes and the test 225, the two sizes yotthani's commit message gives. Each of the four bodies
+is unique in the module, which is what lets a whole-body search find them on any build that keeps them.
+
+**The one-agent route, shadow-tested** (yotthani, MithrilForge `docs/engine/perf.md`@0a2f4761 lines 493-507, 601-618
+and 717-723; in game, Black Gate, v1.5.3): DualWield's shadow mode ran the single-agent route beside the engine's ray
+and compared bone and distance without applying anything. Of 2,725 engine hits, 2,725 matched in both (tolerance
+0.1 mm, largest deviation 0), at 5.8 us a call against about 78 us for the engine's search over all agents; the 5.8 us
+includes building the capsules on every call. A later run, without rebuilding the marshalling buffer on each call,
+measured about 1.1 us a cast, and 2,637 further hits on the same agent matched in bone and distance. yotthani's own
+list of what was not checked stands: the negative case (a ray against an agent it does not hit) and the choice among
+several candidates, because only the agent the engine had itself returned was compared.
+
+**DualWield finds both functions by whole body** since `yotthani/bannerlord` commit `5dcf9b24` (2026-10-09), whose
+message says they are the same in 1.5.5 as in 1.5.3 (265 and 225 bytes, one RIP-relative displacement differs) and
+sit elsewhere. `HoN/DualWield/Core/OneAgentLimbRay.cs`@784fef93 lines 33-34 (header comment), 105-106 (`FindUnique`)
+and 109 (log text "known from 1.5.3 to 1.5.5"); code read, v1.5.5. Its left-blade strike takes the route when the
+DualWield setting `LimbRayMode` is 2 and the functions were found (`HoN/DualWield/Core/LeftBladeStrike.cs`@784fef93
+lines 102 and 551); mode 1 only compares (line 564). The setting's default was not read.
+
+**The focus ray's measured cost is unexplained** [inference from two figures]. yotthani measured vanilla's focus ray
+at 218 to 296 us a call over three runs (`perf.md` line 67, v1.5.3) and about 390 us for the single focus ray (line
+408, v1.5.3). The no-early-exit finding above gives 65 to 78 us a call whatever the ray's length. yotthani's own line
+explains the larger figure by the focus ray reaching further (lines 408-409), which does not fit a loop with no early
+exit. No TAOM measurement settles it.
+
 ## 6. Animation clip residency: on-demand clips lock, block and get evicted
 
 [TAOM-verified, Ghidra, 2026-10-02] The whole chain, on the client binary:
@@ -182,9 +234,10 @@ What it means:
   data access, which means per bone sample, per clip, per agent, so every sampling worker in the parallel
   agent tick contends on the same cache line for a popular clip. Each acquire also writes the timestamp at
   `+0x84`, in the same 64-byte line (`+0x80` to `+0xBF`) as the data pointer at `+0x88`, so every
-  sampling worker invalidates the line the others read that pointer from; this cache-line cost is an
-  inference, not measured (yotthani, MithrilForge `docs/perf-audit/clip-reader-lock.md`, decompile
-  v1.5.3; v1.5.4: not re-checked).
+  sampling worker invalidates the line the others read that pointer from. That the line is shared is read from
+  the decompile (yotthani, MithrilForge `docs/perf-audit/clip-reader-lock.md`, decompile v1.5.3; v1.5.4: not
+  re-checked). The drop in sampler time with type 0 clips is measured (the type 0 bullet below); the cache line as the
+  cause of any excess over the lock itself is yotthani's reading, not a separate measurement.
 - The first sample after a clip is unloaded **blocks that worker** until the clip has loaded. The
   parallel agent tick then finishes late, and the next frame's `WaitTickCompletion` (section 1) holds the
   main thread: a load shows up as a frame spike, not as a worker-only cost.
@@ -198,6 +251,14 @@ What it means:
   `docs/perf-audit/clip-reader-lock.md`, decompile v1.5.3; v1.5.4: not re-checked). A second 45 s
   profile with a type 0 test pack, on another battle with the same troops, measured 0.14 s; its own
   author reads the two battles' totals as a direction only (MithrilForge `docs/engine/perf.md`).
+  **The drop itself is measured; its cause is yotthani's reading.** Between the two Very Sleepy profiles of 45 s in
+  the main fight (Black Gate, same troops, two battles, v1.5.3) the acquire function (`0x474140`) fell from 8.31 s
+  to 0.14 s exclusive, and the one-bone sampler (`0x473630`) from 11.94 s to 3.67 s inclusive, a fall of 8.3 s.
+  yotthani calls that more than the lock alone and attributes the excess to the shared timestamp and counter sitting
+  in the data pointer's cache line; the lock's own fall is 8.2 s, so the margin is thin and rests on the cache-line
+  reading. The FPS effect was not measured (profile runs without PerfProbe), and the busy-core and pose-evaluation
+  totals come from the two different battles and read as direction only (`perf.md`@0a2f4761 lines 579-597, Very
+  Sleepy, v1.5.3, direction only; v1.5.5: not re-checked).
 - **[yotthani, decompile-verified and seen in game]** Resident clip data is shared through a cache
   (`0x5927B0`, table `0xDABE50`) keyed on `AnimationGUID ^ min(Source1, end) ^ (mode == 1)`, so a
   resident clone that keeps its template's guid and window plays the template's motion. The mode bit
@@ -279,6 +340,17 @@ TAOM-verified were re-derived by TAOM; the rest are not yet.
   `PreloadTexture` (`TwoDimensionEngineResourceContext.cs:8-19`). A sheet's format is whatever its Kit
   texture asset says, so an uncompressed 4096 px sheet costs 64 MB pinned (85 MB with mips).
 - **The client never cooks package physics shapes**; it reads their stored cook data.
+- **A refused convex point set leaves no dynamic form.** The Kit cooks each convex mesh in all eight mirror variants;
+  a point set PhysX refuses (a single triangle, or a slanted flat quad: "points appear to be coplanar") in any one of
+  them leaves the shape without a dynamic cook (`hasDynamic = 0`), which yotthani counts at 23 shapes of Native; an
+  axis-aligned flat quad is blown up to a thin box and cooks (yotthani, MithrilForge `docs/engine/modding-kit.md`
+  @0a2f4761 lines 1585-1594, Kit decompile 1.5.3 and shipped data).
+- **Anything built outside the Kit must carry all 8 mirror variants.** The dynamic cook holds 8 variants of every
+  convex mesh, one per sign combination of the entity's scale, and the client picks index
+  `4*(scale.x >= 0) + 2*(scale.y >= 0) + (scale.z >= 0)` (loader `0x180362f30` in the Kit's 1.5.3 build) because PhysX
+  cannot take a negative scale. They are re-cooked from mirrored points, not bit-flipped copies: 365 variant pairs
+  differ in size (`modding-kit.md`@0a2f4761 lines 1557-1573, Kit decompile 1.5.3, byte-exact on 3,240 shapes; Kit
+  1.5.5: not re-checked).
 
 ## 8. Campaign map [yotthani]
 
@@ -307,6 +379,11 @@ managed decompile and profile; v1.5.4: not re-checked.)
 - **Where busy CPU goes** in that 500 against 500 battle (82 % of it native): about 60 % presentation (agent render items 18.6 %,
   render commands 15.2 %, skeleton and animation 15.1 %, particles 8.0 %, culling 2.8 %), against agent AI 4.2 %,
   movement and physics 6.4 % and the melee sweep 1.2 %. These are CPU shares, not frame-time shares.
+- **Pausing the AI of soldiers with no enemy nearby gave no frame gain.** yotthani's crowd-lab "sleep" mode pauses
+  (`SetIsAIPaused`) every AI soldier with no enemy in its own or a neighbouring cell, redone four times a second
+  (`yotthani/bannerlord` `HoN/PerfProbe/Integration/CrowdProxy.cs`@784fef93 lines 1163-1198); its commit `44afb243`
+  (2026-10-09) is titled "(measured: no gain)" and records no figures. Engine version 1.5.4 or 1.5.5 (the commit
+  date is the day TAOM moved to v1.5.5; the source does not say which); the mod list is not stated.
 
 The reverse case, a perf change costed by call names instead of bodies, is the lesson "A perf commit's win names
 the cost it removes" in [adapters-taleworlds-api.md](../../reviews/lessons/adapters-taleworlds-api.md).
@@ -374,6 +451,23 @@ the cost it removes" in [adapters-taleworlds-api.md](../../reviews/lessons/adapt
   another pool waits for a measurement (issue draft 9 of
   [adopt-yotthani-2026-10-08.md](../../reviews/adopt-yotthani-2026-10-08.md)).
 
+- **On v1.5.5** [TAOM-verified, 2026-10-15: the 14,212,960-byte client's row in
+  `SkeletonBufferInstalledBinaryTests.KnownBuilds` and TAOM's own first-start log]: watch load `0x6A1A1`, global
+  `0xD9E160`, pool-1 guard site `0x6A1D4`, pool-2 load `0x69F95` and pool-2 guard site `0x6B410`, all v1.5.5. The log
+  of that start (`taom_debug_2026-10-15_12-45-22.log` lines 40-41) reads `[SkeletonBuffer] guard ON pool 1:
+  site=0x6A1D4 resume=0x6A1E1 ... scanMs=174.3` and `guard ON pool 2: site=0x6B410 resume=0x6B41D ...`, so both
+  patterns matched exactly once on v1.5.5. The offsets in the table above are v1.5.4 and were not re-derived on v1.5.5.
+- [yotthani, MithrilForge `docs/engine/perf.md`@0a2f4761 lines 2090-2101, 2560 x 1080, V-Sync off, v1.5.4, measured
+  with TAOM's mod list ("TAOM-Liste"; the TAOM version is not stated there)] The first seconds after deployment, about
+  7 s, are the slowest phase (51 to 57 FPS against 80 at 1,751 agents, about 1.6 times slower overall), which
+  coincides with the buffer's highest fill; yotthani lists the native cause of the slow first seconds as open (line
+  2114). Character Detail "very low" showed no peak at the clash in one run. Ragdolls and corpses, two separate
+  settings, did not move the field battle's peak.
+- [yotthani, `yotthani/bannerlord` `HoN/PerfProbe/Integration/CrowdProxy.cs`@784fef93 lines 418-421, commit `44d89f49`,
+  seen in game 2026-10-12 with 2,000 soldiers, game 1.5.5 by the date, mod list not stated] Above 2,340 skeletons in
+  view, with only VanillaTuning's pool-1 guard in place, armour flickers and pieces of it hang in the air; the
+  guard only keeps the battle from freezing.
+
 TAOM consequence: battles above the menu's 1,000 soldiers (another mod's battle size) and large sieges with
 melee near the camera can reach the limit. TAOM guards and watches the two skeleton pools: see
 [skeleton-buffer-guard.md](../../features/skeleton-buffer-guard.md) (the decision is item 2 of
@@ -386,6 +480,9 @@ melee near the camera can reach the limit. TAOM guards and watches the two skele
 | A native method's body | `python tools/native_decompile.py --engine-method IMBMission.GetNearbyAgentsAux` |
 | A native function by address | `python tools/native_decompile.py --rva 0x27DAC --callers 1` |
 | The skeleton buffer's reservation (section 10) | `python tools/native_decompile.py --rva 0x69D1C`; the second pool's `--rva 0x6AF58`; any other pool's, `--rva` of its locked add in the table |
+| The limb-ray entries on v1.5.5 (section 5) | `python tools/native_decompile.py --engine-method IMBMission.RayCastForClosestAgentsLimbs`, and `...RayCastForGivenAgentsLimbs` (it calls `0x5D0620` and `0x5C94A0`, never `0x681A00`) |
+| The single-agent route's two functions on v1.5.5 (section 5) | `python tools/native_decompile.py --rva 0x681A00` (capsule builder, size `0x109`) and `--rva 0x5C68A0` (capsule test, size `0xE1`) |
+| The skeleton buffer's guard sites on v1.5.5 (section 10) | `python tools/native_decompile.py --rva 0x6A1D4` (pool 1) and `--rva 0x6B410` (pool 2), both v1.5.5 addresses |
 | An import's callers | the IAT slot from `pefile`, then `python tools/native_sig_author.py xref <slot rva>` (it sweeps `.text` once with capstone and stops at the first byte it cannot decode, 2.8 % in on v1.5.4: treat a short list as incomplete) |
 | A class's vtable | `python tools/native_sig_author.py vtable rglAnimation_memory_manager_task` |
 | A managed body | `pwsh tools/taom-src.ps1 path TaleWorlds.MountAndBlade.Mission` |

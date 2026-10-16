@@ -19,7 +19,7 @@ The items:
 | C3 | #808 | `VanillaTuningOverlapContractTests` pins the four TAOM type names VanillaTuning v0.1.1 stands aside for |
 | C4 | #809 | A `cameraMs` column: the camera and native PreDisplay time split out of `missionTickMs` and `otherMs` |
 
-Review record: `docs/reviews/adopt-yotthani-2026-10-15.md` (it lands with the knowledge-base batch).
+Review record: [adopt-yotthani-2026-10-15.md](adopt-yotthani-2026-10-15.md).
 
 ## Findings and root causes
 

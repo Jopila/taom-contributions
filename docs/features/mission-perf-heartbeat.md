@@ -984,6 +984,15 @@ sides are AI-controlled, and end each run at the same point: steady windows run 
 mission, routs included. Three runs per cell is the floor; AI battles vary. `gc2` should not climb
 faster with the change on.
 
+A run can imitate a smaller PC by pinning the game to N logical processors: yotthani's `run_scenario.ps1 -Cores N`
+(MithrilForge `tools/perf-audit/run_scenario.ps1`@35570dab lines 60-61 and 323-327; commits `8b852b25` and
+`35570dab`, 2026-10-14) sets the started process's `ProcessorAffinity` to a mask of the first N logical processors,
+for that process only. Three caveats. **Affinity set after launch may not resize the engine's worker pool**
+(**UNVERIFIED**): the engine creates its threads at start from the core count ([mission-frame-threads-and-native-costs.md](../reference/engine/mission-frame-threads-and-native-costs.md)
+section 1), and the script sets the mask right after `Start-Process`, which is after that start. **On an SMT CPU the
+first N logical processors are N/2 cores**, not N. And `35570dab` itself says which processors are performance cores
+and which are efficiency cores on the reference PC (a Core Ultra 7 265KF) is not checked. Code read, no measurement.
+
 The report names what it could not read. It opens with one line per log read (path, size in bytes,
 line count, missions found, and how many lines it could not parse: a `[MissionPerf]`,
 `[TickProfile]`, `[Hitch]` or `[PerfContext]` line that does not read, or a `[TickSummary]` whose

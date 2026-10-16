@@ -89,7 +89,14 @@ objects.
   0.5 s.
 - **Server GC brings a save to about 1.05 s** in game (8 heaps, at about 1.5 GB more RAM), but the GC mode is
   fixed at runtime start: it can be set only in the starting exe's `.exe.config` (for BLSE,
-  `Bannerlord.BLSE.Launcher.exe.config`), never by a mod.
+  `Bannerlord.BLSE.Launcher.exe.config`), never by a mod. In a large battle (Black Gate, 500 against 500, 03.10.,
+  measured in game) it cost no FPS (differences within plus or minus 4 %, inside the spread of hand-played runs) and
+  halved the GC stall (7.6 to 9.5 ms a second down to 3.8 to 5.2), with private RAM 1.4 to 1.7 GB higher
+  (`perf.md`@0a2f4761 lines 1090-1112; one run per state, v1.5.3).
+- **The workstation variants were no help.** The same save work under non-concurrent workstation GC took 2.8 to
+  4.4 s with pauses of 2.2 to 3.9 s (the longest 1.2 s), worse than the default concurrent mode's 2.3 to 3.5 s; only
+  server GC reached 0.5 to 0.95 s (`perf.md` lines 1026-1032, same save work with only the runtime configuration
+  changed, v1.5.3).
 - **The hitch after a save is vanilla's forced collection:** `Game.OnSaveCompleted` calls
   `Common.MemoryCleanupGC()`, a blocking collection: 313 and 286 ms about a second after the save under server
   GC; under workstation GC, Gen-2 collections of 835 and 872 ms came 5 to 6 s after an instrumented save, likely
