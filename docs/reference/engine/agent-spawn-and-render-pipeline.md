@@ -177,6 +177,24 @@ v1.5.4: the skeleton-name test confirmed via native_decompile `--string human_sh
 - [unverified in game] So a creature on its own skeleton may cast no far shadow at all, and a mount on
   `horse_skeleton` may cast a horse silhouette.
 
+## Agent-less figures [yotthani]
+
+A body with a skeleton and meshes but no `Agent` can be built and animated by hand. Everything below is code reading of yotthani, `yotthani/bannerlord` `HoN/PerfProbe/Integration/CrowdProxy.cs`@784fef93 (and `CrowdLab.cs` at the same commit) plus the dated notes in its comments, from yotthani's crowd lab (a separate proxy product that TAOM has not adopted). **Engine version:** not stated in the source (the module's `SubModule.xml` declares Native v1.5.3; the notes are dated 10 to 12 October 2026). **Mod list:** not stated. Each note is an observation by yotthani in game, not re-measured by TAOM.
+
+| Fact | Evidence |
+|---|---|
+| `GameEntity.CreateAgentSkeleton(skeletonName, isHumanoid: true, actionSet, usage, monster)` works on an empty entity made with `GameEntity.CreateEmpty(scene, false, false, false)`; no agent is needed | `CrowdProxy.cs` 908-911, 971 |
+| A mesh added to the skeleton after the body was handed over to the engine's visuals object was not drawn ("weapons fought in the air near the player, no bodies"), so every mesh goes on first | comment at 920-921, seen in game 10.10.2026 |
+| The engine's own way to move a body that is no agent is an `MBAgentVisuals` made with `CreateAgentVisuals`, then `SetEntity` and `SetSkeleton`, told the local speed and ticked (the campaign map's parties, the editor's `CharacterDebugSpawner`) | 949-955 and 1137-1145 |
+| Nothing ticks such a skeleton for you. The lab sets the action progress itself (a walk clip "may be driven by movement, which a plain skeleton does not have", a hedge in `CrowdLab.cs` 250-251), ticks the action channels while one action blends into the next (`CrowdProxy.cs` 1130-1136), and calls `TickAnimations` or `TickAnimationsAndForceUpdate` (1146-1147). A figure not ticked within 0.35 s of an action change stayed between the two actions | 1130-1148 |
+| A mesh cannot be added to a body the visuals object already holds, so adding one (a head) means giving the whole figure up with `Visuals.Reset()` and building it anew | comment at 966-967, code 968 |
+| Give a body held by a visuals object up through `Reset()`, never by removing its entity: removing the entity under it crashed the game some time later (10.10.2026, 23:45). The lab's teardown also detaches borrowed skeletons before removing entities, so an entity does not take a master's skeleton with it | `CrowdProxy.cs` 1776-1779; `CrowdLab.cs` 835-837 |
+| Five extra draw calls for the game's own weapon meshes cost 1.8 ms a frame with 2,000 figures (measured 10.10.2026). The figure is a proxy; this is not an agent cost | `CrowdProxy.cs` 683-685 |
+
+The gait step size is a separate finding and lives in [animation binding](animation-binding-and-playback.md) under `FillAnimationSystemData`.
+
+**TAOM's nearest code.** `Main/Features/HeroRace/CharacterSpawnerService.cs` (about 261-290) builds a mount for the character-screen tableau with `CreateAgentSkeleton`, `SetAgentActionChannel` at an explicit progress and one `TickAnimations(0.01f, ...)`. That is a posed still, not a running animation, so the no-self-tick fact above does not affect it. It does not show that TAOM's horse animates over time.
+
 ## Evidence (file:line, v1.4.5 shipping decompile)
 - `Mission.cs`: `SpawnAgent`:4074, `SpawnTroop`:4418, `SpawnMonster`:4394/4399-4416, `CreateHorseAgentFromRosterElements`:4525-4534 (CreateAgent FromHorseObj:4528, SetMountInitialValues:4533), `CreateAgent`:4040-4054, `BuildAgent`:4007-4038 (PreloadForRendering:4025).
 - `Agent.cs`: `EquipItemsFromSpawnEquipment`:4529-4567 (switch FromRoster/FromCharacterObj→AddSkinMeshes:4560; FromHorseObj falls through), `AddSkinMeshes`:5405-5411, `PreloadForRendering`:4923 → `PreloadForRenderingAux`:5189 (`MBAPI.IMBAgent.PreloadForRendering`).

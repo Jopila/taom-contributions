@@ -25,6 +25,8 @@ layout, and nothing is logged beyond the entity count.
   `TAOM/AssetPackages`. A module with a loose `Assets/` tree loads that tree instead of its packages
   ([armory-guide.md](armory-guide.md) "Two asset trees"); the native selection step is untraced.
 
+**Delivery evidence from the other side** (yotthani, `yotthani/bannerlord` commits `2e14c22dfc`, 2026-09-19, and `478587b482`, 2026-10-02; git trees and commit messages, read 2026-10-15): yotthani's own FieldCamp and Refuge modules load these four packages from an `AssetPackages/` folder at game start (the `2e14c22dfc` message), and their source folders hold no `Assets/` tree (git tree of `478587b482`); the `478587b482` message says the camps were seen visible and working in game on 1.5.3 on 2026-10-02. **TAOM:** the git blob hashes of TAOM's four tpacs (`1e26222f`, `078dc719`, `4d9670eb`, `4453ec79`) equal those at `2e14c22dfc`. All four differ at `478587b482`, which rewrote them to the version numbers game 1.5.3 itself uses (texture metadata 3, mesh entry 2, vertex stream segment 1) and changed nothing else per its message. `478587b482` is therefore the version to adopt when the delivery decision lands; TAOM has not diffed the bytes beyond the hashes.
+
 So every field camp and refuge shows the vanilla fallback. Where the packages should live so both deployments load
 them (a Kit import into `Assets/`, a release step that copies them, or a module with no loose tree) is an open
 decision; see [adopt-mithrilforge-2026-09-29.md](../reviews/adopt-mithrilforge-2026-09-29.md).
@@ -32,6 +34,8 @@ decision; see [adopt-mithrilforge-2026-09-29.md](../reviews/adopt-mithrilforge-2
 **How to tell in game:** `taom_debug_*.log` records `[FieldCamp] placed N ...` (`CampVisualService`) and
 `[Refuge] placed N ...` (`RefugeVisualService`). A Field camp standing as the prefab places one entity; the fallback
 places a command tent plus a ring of tents.
+
+**A hand-built prop can stay undrawn for a whole first session** with the package intact: the shader variants `pbr_main_map_gbuffer` and `pbr_main_map_shadowmap` are not in the shipped shader sack (`Missing shader from sack: ...` in `rgl_log`), the engine compiles them on first use into `ProgramData/Mount and Blade II Bannerlord/Shaders/CoreShaders`, and until the compile is stored the prop is not drawn. Before blaming a package, grep the log for that line and look at the cache's file dates. (yotthani, MithrilForge `docs/engine/modding-kit.md`@0a2f4761 lines 1081-1086, observed on 1.5.3; not re-measured by TAOM.)
 
 **Gate:** `tools/tests/test_prefab_asset_packages.py` keeps the source copies and the code in step: the prefab meshes
 the code passes to `PlaceCenteredPrefab` are exactly its table, each is a Metamesh in a package here, no item name or
@@ -121,6 +125,38 @@ have more than one submesh). A one-off prop can carry about 1,000 triangles; Mit
 above 8,000. TAOM's four props run from about 4,500 to 7,500 triangles each (the review's count), inside the cap and
 well above that guide. A 512x512 texture is enough for a building seen at map distance; TAOM's four each carry an
 uncompressed single-mip diffuse of 16 MB.
+
+## Collision: `bo_` nodes and prefab `<physics>`
+
+What the Modding Kit does with collision, for a prop that needs a body (the Limits section says the packages here have none). Source: yotthani, MithrilForge `docs/engine/modding-kit.md`@0a2f4761 lines 1630-1662, from reading TaleWorlds' glue around the FBX SDK in the Kit (1.5.3). Upstream marks one part of it as inferred where Ghidra lost operands (a sphere's centre and radius); TAOM has not re-read it.
+
+- **A node is a body when** its name starts with `bo_` or `Bo_` (case-sensitive), it has a mesh or is a `bo_composite_` node, no direct child is a skeleton, and `import_physics_shapes` is on (the default). A `bo_` node is never imported as a render mesh (1639-1643).
+- **The kind comes from the raw node name alone:** `bo_capsule...` a capsule, `bo_sphere...` a sphere, `bo_composite_...` a composite, anything else a triangle mesh. The geometry is not inspected, and `Bo_Sphere` is a triangle mesh named `bo_sphere` (1647-1650).
+- **The shape's name** is the node's name in lower case. With `remove_shape_type_names` (default off) a leading `bo_capsule`, `bo_sphere` or `bo_composite` becomes `bo`, so `bo_capsule_arm` becomes `bo_arm` (1644-1646).
+- **In a prefab** a body is named by `<physics shape="bo_..." mass="..."/>` inside the `game_entity`, optionally with `override_material` and `center_of_mass`, plus a `<body_flags>` list of `<body_flag name="..."/>` (1630-1635). **TAOM re-count** on the installed v1.5.5 `Native/Prefabs` (2026-10-15): 23,828 `game_entity` elements, 13,333 `<physics shape="bo_..."`, 2,961 with `override_material`, 280 with `center_of_mass`, 1,408 `occlusion_body_name` attributes. These match upstream's 1.5.3 counts.
+
+**`body_flag` names in shipped prefabs** (TAOM count of `<body_flag name=...>` in `Native/Prefabs/**/*.xml`, v1.5.5, 2026-10-15; the effect of each flag is not decompiled here and the names are the only evidence):
+
+| `body_flag` | Uses | Prefab files |
+|---|---|---|
+| `dynamic` | 556 | 18 |
+| `dynamic_convex_hull` | 437 | 12 |
+| `has_steps` | 291 | 32 |
+| `ignore_sound_occlusion` | 216 | 2 |
+| `agent_only` | 184 | 9 |
+| `barrier` | 143 | 6 |
+| `moveable` | 105 | 6 |
+| `disabled` | 71 | 4 |
+| `only_collide_with_raycast` | 45 | 8 |
+| `ladder` | 39 | 3 |
+| `dont_transfer_to_physics_engine` | 30 | 4 |
+| `exclude_path_snap` | 22 | 4 |
+| `ai_limiter` | 15 | 3 |
+| `missile_only` | 15 | 2 |
+| `stealth_box` | 1 | 1 |
+| `destructible_door` | 1 | 1 |
+
+This table is derived from shipped prefabs, not from the Kit's own `bf_` flag table, which TAOM has not compared. MithrilForge's prop writer can add a body to a package (`TpacPropWriter.CollisionCooker`, CLI `build ... --collision <material>`, lines 1627-1629 at the same commit); TAOM has not used it.
 
 ## Limits
 

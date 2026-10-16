@@ -160,6 +160,7 @@ at a time, and installs only what verifies.
   (`read_segment_data` in `tools/tpac_skeleton_dump.py`): the LZ4 bytes differ on every compile.
   On 2026-09-25 all five kept their capsule, body and ragdoll segment byte-for-byte, and the bone
   segment moved only by FBX round-off (under 1e-4), which is no reason to restore.
+- **Import dialog settings persist.** The Kit's FBX import dialog keeps its last choices in the Windows registry, `HKCU\Software\TaleWorlds\RGLbx_import_settings` (a `QSettings("TaleWorlds", "RGL")` group whose keys are the field names), so what a file gets depends on the previous import: check every flag before each import. First-run defaults there are unit `mm`, `convert_to_z_up` on, `as_vertex_anim`, all six import flags on and `remove_shape_type_names` off. (yotthani, MithrilForge `docs/engine/modding-kit.md`@0a2f4761 lines 109-118, Kit decompile 1.5.3. **TAOM:** the key exists on the desktop with `import_physics_shapes`, `convert_to_unit` and the other fields, `reg query` 2026-10-15; its values are the last import's, not the defaults.)
 - **Materials on a re-import.** The Kit keeps the material already bound to a mesh name it knows,
   so an old, hand-set binding survives. A NEW mesh name (every added LOD) binds to the material
   its FBX slot names, and when the Kit has no material by that name the level renders unbound

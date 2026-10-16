@@ -149,6 +149,7 @@ acts on it — see follow-ups.
 
 1. **Confirm the `clo_` convention** (decompile the cloth-mesh resolution path). If it mirrors
    `_slim`, add the same suppression to `reverse_audit()` and re-baseline the 549.
+   2026-10-15 note: yotthani's Modding Kit notes say the cloth link is an explicit field, not a name convention. A metamesh's metadata holds a `cloth simulation mesh` (a metamesh guid), set on 817 metameshes of the game, 783 of them named `clo_...` (`aserai_lord_helmet_a` points at `clo_aserai_lord_helmet_a`), and the `_converted`, `_slim` and `_converted_slim` variants are listed by guid in `variants` with a `variant source` back-reference (MithrilForge `docs/engine/modding-kit.md`@0a2f4761 lines 829-840, Kit 1.5.3 decompile, reading the metadata of all 29,754 game metameshes). That bears on the question above but TAOM has not re-checked it against the 549, so the follow-up stays open.
 2. **Home the 16 idle Gondor pieces** — chiefly the 10 pauldrons — via the variant-roster
    pattern already used for Lamedon/Lossarnach/Anfalas
    ([`gondor-armor-revamp.md`](../features/gondor-armor-revamp.md)). `/author-armor` owns this.

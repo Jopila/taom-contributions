@@ -15,6 +15,10 @@ solid rectangle with no error; TaleWorlds uses `deferred_decal` on `decal_mesh_f
 for textures outside the atlas (yotthani, MithrilForge `docs/engine/modding-kit.md`
 "Decals", Kit decompile v1.5.3, not tried in game; v1.5.4: not re-checked).
 
+Two more facts if a decal is ever tried through the script API (yotthani, MithrilForge `docs/engine/modding-kit.md`@0a2f4761, Kit and client decompile 1.5.3, not tried in game by yotthani or TAOM):
+- An unknown decal set name in `Scene.AddDecalInstance(decal, decalSetID, deletable)` is an access violation: the native lookup returns null for an unknown name and the add locks a mutex at the set's address without checking (lines 1765-1771). A scene without a decal renderer does the same.
+- Decal sets are loaded from every module that lists a file of `type="decal_set"` in its `project.mbproj`, and of two sets with one name the first wins (lines 1759-1764). Use a set name that exists in the game, or ship a set under a name no other module uses.
+
 ## Naming Convention
 
 ```
