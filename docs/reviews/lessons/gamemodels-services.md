@@ -1086,3 +1086,20 @@ removed.
   (`?? new XConfig().Field`), so one initializer holds the value. When a default moves, search the field name for
   `??` and for its old literal before calling the change done.
 - **Source:** `docs/reviews/rca-dread-aura-local-2026-10-15.md` F2.
+
+### A penalty on a shared engine limit reaches every party kind and every reader of that limit (garrisons, 2026-10-16)
+The troop-weight penalty deflated `GetPartyMemberSizeLimit` for every party, garrisons and patrols included. Vanilla
+desertion removes a quarter of a garrison's excess over that limit every day, its morale falls with the excess, and lords
+refill garrisons to the unweighted `CalculateGarrisonPartySizeLimit`, so elite garrisons deserted without end (yotthani's
+campaign run counted about 20.6 k deserters in the whole free block, 19.6 k of them in four elven realms; the cause is
+yotthani's reading). Patrols, which nothing trims, sat over their deflated limit under vanilla's speed penalty. TAOM's doc
+said vanilla never enforces the garrison limit; the shed's leaderless guard hid the gap. The first fix exempted the
+penalty only, and the capacity displays kept showing the weighted count over the now unweighted limit.
+- **Why missed:** the 2026-07-11 rework moved the penalty from the count to the limit and checked the readers TAOM
+  owns (the shed, the tooltips), not the engine's own readers of `PartySizeLimit` per party kind.
+- **Prevent:** before a model override changes a limit, list the party kinds its base branches on (in v1.5.5: garrison,
+  patrol, a leader with a clan, caravan, villager; the rest take the flat 20) and the engine readers of the result
+  (desertion, morale, recruitment room, AI transfers, speed), and exempt or test each kind. Put an exemption in one
+  predicate that enforcement and every display read (`TroopWeightPenaltyScope`). A guard that keeps TAOM's own code
+  away from a kind does not keep the engine away.
+- **Source:** `docs/reviews/adopt-yotthani-2026-10-16.md`; `docs/reviews/rca-upstream-review-i3-2026-10-16.md` findings 13 and 14.
