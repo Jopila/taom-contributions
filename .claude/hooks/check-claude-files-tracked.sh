@@ -54,7 +54,10 @@ esac
 # bug class this hook catches. Codex review 2026-04-26 caught this as
 # prevention-theater risk in the original implementation.
 
-cd "${CLAUDE_PROJECT_DIR:-$(pwd)}" 2>/dev/null || { echo '{}'; exit 0; }
+# The top level of the repository the commit runs in, not always the project root (_pybin.sh
+# taom_git_repo_dir): until 2026-10-16 another session's untracked skill in the main checkout denied
+# every worktree commit.
+cd "$(taom_git_repo_dir commit)" 2>/dev/null || { echo '{}'; exit 0; }
 
 # Two bulk queries answer for every protected file at once. Until #647 this asked git two or
 # three times per file (about 200 files), took 6 s against its 5 s registration, and the
@@ -87,7 +90,7 @@ if [[ -z "$PROBLEMS" ]]; then
     exit 0
 fi
 
-MSG="[check-claude-files-tracked] These files exist under .claude/ but will NOT be committed:
+MSG="[check-claude-files-tracked] These files exist under .claude/ in $(pwd) but will NOT be committed:
 ${PROBLEMS}
 
 A gitignored file silently breaks any skill or hook that depends on it (the original /freeze regression: bin/check-freeze.sh excluded by .gitignore's bin/ pattern). Either: (a) move the file out of the gitignored path with a descriptive directory name, (b) git add the untracked file, or (c) explicitly delete it if it's not meant to ship."

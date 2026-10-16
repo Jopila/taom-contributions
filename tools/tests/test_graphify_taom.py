@@ -48,7 +48,10 @@ class OutRootTests(unittest.TestCase):
         self.assertEqual(gt.out_root({"TAOM_GRAPHIFY_OUT": str(self.base / "g")}), self.base / "g")
 
     def test_default_is_on_the_e_drive(self):
-        self.assertEqual(gt.out_root({}), gt.DEFAULT_OUT)
+        # A main tree gets the shared root. Pinned on a temporary repo, so the test also passes when
+        # it runs from a linked worktree, whose own checkout rightly gets TAOM-wt-<name>.
+        _git(self.repo, "init", "-q")
+        self.assertEqual(gt.out_root({}, repo=self.repo), gt.DEFAULT_OUT)
         self.assertTrue(str(gt.DEFAULT_OUT).upper().startswith("E:"))
 
     def test_linked_worktree_gets_its_own_out_root(self):

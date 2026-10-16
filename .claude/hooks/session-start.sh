@@ -2,6 +2,9 @@
 # SessionStart hook: Print recent project context on fresh startup
 # Only fires on "startup" source — resume/compact/clear already have context
 
+# The time budget starts at the first command (the UPSTREAM block below spends what is left of it).
+# The digits of EPOCHREALTIME (bash 5.0 or later) are microseconds; it is empty in an older bash.
+T0=${EPOCHREALTIME//[!0-9]/}
 INPUT=$(cat)
 
 # Parse source from stdin JSON
@@ -227,6 +230,46 @@ echo "Uncommitted: ${STAGED} staged, ${UNSTAGED} unstaged, ${UNTRACKED} untracke
 if [[ -d Main ]]; then
   TODO_COUNT=$(grep -rE 'TODO|FIXME' Main/ --include='*.cs' 2>/dev/null | wc -l | tr -d ' ')
   echo "TODO/FIXME in Main/: ${TODO_COUNT}"
+fi
+
+# Upstream review drift (2026-10-16). yotthani's repos change every day (295 commits landed the night after the
+# 2026-10-15 review), and TAOM adopts from them. The last reviewed SHAs live in docs/reviews/upstream-watch.json. The
+# check needs the network: tools/upstream_watch.py makes one GitHub read per watched repo and caches a live answer for
+# 20 hours, so a session start pays the network at most once a day; a failure is not cached and is retried at the next
+# session start. Time budget: this hook is registered for 10 s (settings.json is config-protected, so the budget lives
+# here). This block runs last and never past 9 s from the script's first command: it gets what is left of 8.5 s,
+# capped at 5 s, plus the 0.5 s kill grace, and under 1 s left it is not run at all. The blocks before it carry their
+# own bounds (tools/test_hooks.sh 7l runs it after a slow graphify sibling). The tool gets what is left as `timeout`
+# and as `--budget`, so each gh call is shortened to fit.
+# Fail-open, never silent: gh missing, logged out, offline or slow, a crash or a spent budget prints an UNCHECKED note,
+# because silence would read as "nothing new". The tool itself prints the note for a missing state file.
+if [[ -n "${PYBIN:-}" && -f tools/upstream_watch.py ]]; then
+  UP_LEFT=5000000
+  if [[ -n $T0 ]]; then
+    UP_LEFT=$(( 8500000 - ${EPOCHREALTIME//[!0-9]/} + T0 ))
+    (( UP_LEFT > 5000000 )) && UP_LEFT=5000000
+  fi
+  if (( UP_LEFT < 1000000 )); then
+    echo ""
+    echo "NOTE: upstream review drift UNCHECKED this session (session-start time budget spent)."
+  else
+    printf -v UP_BUDGET '%d.%06d' $(( UP_LEFT / 1000000 )) $(( UP_LEFT % 1000000 ))
+    UPSTREAM_STATUS=$(timeout -k 0.5 "$UP_BUDGET" "$PYBIN" tools/upstream_watch.py status --brief --budget "$UP_BUDGET" 2>/dev/null)
+    UPSTREAM_RC=$?
+    if [[ $UPSTREAM_RC -eq 124 || $UPSTREAM_RC -eq 137 ]]; then
+      echo ""
+      echo "NOTE: upstream review drift UNCHECKED this session (the status call overran its ${UP_BUDGET%????} s budget)."
+    elif [[ $UPSTREAM_RC -ne 0 ]]; then
+      echo ""
+      echo "NOTE: upstream review drift UNCHECKED this session (the status call exited ${UPSTREAM_RC})."
+    elif [[ -n "$UPSTREAM_STATUS" ]]; then
+      echo ""
+      printf '%s\n' "$UPSTREAM_STATUS"
+    fi
+  fi
+else
+  echo ""
+  echo "NOTE: upstream review drift UNCHECKED this session (no safe python or no tools/upstream_watch.py)."
 fi
 
 echo "==========================="

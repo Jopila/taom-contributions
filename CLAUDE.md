@@ -66,7 +66,7 @@ instructions: follow its phases in order.
 | New player-facing text | `/localize` | always |
 | Patch, model or reflection bindings after an engine or patch change | the binding gate: `docs/reference/taleworlds-api-snapshot/README.md` | |
 | An architectural decision | `docs/adrs/000-template.md` | |
-| External repo, article or skill to adopt | `/adopt-external` | security-vet first |
+| External repo, article or skill to adopt; UPSTREAM AHEAD banner, "review yotthani" | `/adopt-external`; `/upstream-review` | security-vet first |
 | After editing hooks, settings, MCP config or CLAUDE.md | `/security-scan` | skip for routine feature edits |
 | Repo-wide audit, "what next", handoff plans; execute, review, merge or resume a plans backlog | `/improve` | merge, push, issues and paid calls only on the maintainer's word |
 | Offer, don't auto-invoke | `/freeze`, `/unfreeze` | |

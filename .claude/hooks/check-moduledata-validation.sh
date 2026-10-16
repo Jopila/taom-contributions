@@ -58,7 +58,13 @@ case "$COMMAND" in
     *) echo '{}'; exit 0 ;;
 esac
 
-cd "${CLAUDE_PROJECT_DIR:-$(pwd)}" 2>/dev/null || { echo '{}'; exit 0; }
+# The top level of the repository the commit runs in, not always the project root (_pybin.sh
+# taom_git_repo_dir): until 2026-10-16 a worktree commit's staged XML was never validated, and the main
+# checkout's was. A commit in another repository is not this gate's: it holds no TAOM ModuleData, and
+# its tools/*.py are not TAOM's to run.
+COMMIT_REPO=$(taom_git_repo_dir commit)
+cd "$COMMIT_REPO" 2>/dev/null || { echo '{}'; exit 0; }
+taom_is_project_repo "$COMMIT_REPO" || { echo '{}'; exit 0; }
 
 # Files in the commit. No blanket --amend skip (amend is commonly "oops, add a
 # file" -- exactly the case to catch); include HEAD's files on amend.
