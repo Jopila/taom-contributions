@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Composition;
 using TAOM.Tests.Features.LoadTimeStamps;
@@ -6,17 +7,17 @@ using TAOM.Tests.Features.LoadTimeStamps;
 namespace TAOM.Tests.Composition;
 
 [TestClass]
-public sealed class LifecycleStepTests
+public sealed class MainMenuStepTests
 {
     [TestInitialize]
-    public void Reset() => LifecycleStep.ResetForTests();
+    public void Reset() => MainMenuStep.ResetForTests();
 
     [TestMethod]
     public void Run_StepSucceeds_ReturnsTrueAndLogsNothing()
     {
         var log = new RecordingLogger();
 
-        var ok = LifecycleStep.Run("a", () => { }, () => log);
+        var ok = MainMenuStep.Run("a", () => { }, () => log);
 
         Assert.IsTrue(ok);
         Assert.AreEqual(0, log.Lines.Count);
@@ -27,7 +28,7 @@ public sealed class LifecycleStepTests
     {
         var log = new RecordingLogger();
 
-        var ok = LifecycleStep.Run("a", () => throw new InvalidOperationException("boom"), () => log);
+        var ok = MainMenuStep.Run("a", () => throw new InvalidOperationException("boom"), () => log);
 
         Assert.IsFalse(ok);
     }
@@ -37,7 +38,7 @@ public sealed class LifecycleStepTests
     {
         var log = new RecordingLogger();
 
-        LifecycleStep.Run("menu customization", () => throw new InvalidOperationException("boom"), () => log);
+        MainMenuStep.Run("menu customization", () => throw new InvalidOperationException("boom"), () => log);
 
         Assert.AreEqual(1, log.Lines.Count);
         StringAssert.StartsWith(log.Lines[0], "WARN ");
@@ -46,12 +47,26 @@ public sealed class LifecycleStepTests
     }
 
     [TestMethod]
+    public void Run_StepThrows_WarningCarriesTheFullExceptionWithItsStack()
+    {
+        var log = new RecordingLogger();
+
+        MainMenuStep.Run("menu customization", ThrowBoom, () => log);
+
+        StringAssert.Contains(log.Lines[0], "System.InvalidOperationException: boom");
+        StringAssert.Contains(log.Lines[0], nameof(ThrowBoom));
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void ThrowBoom() => throw new InvalidOperationException("boom");
+
+    [TestMethod]
     public void Run_SameStepThrowsTwice_LogsOnce()
     {
         var log = new RecordingLogger();
 
-        LifecycleStep.Run("a", () => throw new InvalidOperationException("1"), () => log);
-        LifecycleStep.Run("a", () => throw new InvalidOperationException("2"), () => log);
+        MainMenuStep.Run("a", () => throw new InvalidOperationException("1"), () => log);
+        MainMenuStep.Run("a", () => throw new InvalidOperationException("2"), () => log);
 
         Assert.AreEqual(1, log.Lines.Count);
     }
@@ -61,9 +76,9 @@ public sealed class LifecycleStepTests
     {
         var log = new RecordingLogger();
 
-        LifecycleStep.Run("a", () => throw new InvalidOperationException("1"), () => log);
-        LifecycleStep.Run("b", () => throw new InvalidOperationException("2"), () => log);
-        LifecycleStep.Run("a", () => throw new InvalidOperationException("3"), () => log);
+        MainMenuStep.Run("a", () => throw new InvalidOperationException("1"), () => log);
+        MainMenuStep.Run("b", () => throw new InvalidOperationException("2"), () => log);
+        MainMenuStep.Run("a", () => throw new InvalidOperationException("3"), () => log);
 
         Assert.AreEqual(2, log.Lines.Count);
     }
@@ -74,8 +89,8 @@ public sealed class LifecycleStepTests
         var log = new RecordingLogger();
         var calls = 0;
 
-        var first = LifecycleStep.Run("a", () => { calls++; throw new InvalidOperationException("x"); }, () => log);
-        var second = LifecycleStep.Run("a", () => calls++, () => log);
+        var first = MainMenuStep.Run("a", () => { calls++; throw new InvalidOperationException("x"); }, () => log);
+        var second = MainMenuStep.Run("a", () => calls++, () => log);
 
         Assert.IsFalse(first);
         Assert.IsTrue(second);
@@ -85,7 +100,7 @@ public sealed class LifecycleStepTests
     [TestMethod]
     public void Run_LoggerFactoryThrows_DoesNotRethrow()
     {
-        var ok = LifecycleStep.Run("a", () => throw new InvalidOperationException("x"),
+        var ok = MainMenuStep.Run("a", () => throw new InvalidOperationException("x"),
             () => throw new InvalidOperationException("no logger"));
 
         Assert.IsFalse(ok);
@@ -94,7 +109,7 @@ public sealed class LifecycleStepTests
     [TestMethod]
     public void Run_LoggerNull_DoesNotRethrow()
     {
-        var ok = LifecycleStep.Run("a", () => throw new InvalidOperationException("x"), () => null);
+        var ok = MainMenuStep.Run("a", () => throw new InvalidOperationException("x"), () => null);
 
         Assert.IsFalse(ok);
     }
@@ -104,7 +119,7 @@ public sealed class LifecycleStepTests
     {
         var log = new RecordingLogger { OnLog = _ => throw new InvalidOperationException("log failed") };
 
-        var ok = LifecycleStep.Run("a", () => throw new InvalidOperationException("x"), () => log);
+        var ok = MainMenuStep.Run("a", () => throw new InvalidOperationException("x"), () => log);
 
         Assert.IsFalse(ok);
     }

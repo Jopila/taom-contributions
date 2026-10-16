@@ -681,9 +681,9 @@ public class SubModule : MBSubModuleBase
         Features.ShaderCompileNotice.ShaderCompileNoticeEntry.Stop();
         // The engine calls this hook for every module with no try, and calls it again on every tick while
         // no state is active; Patch37 can swallow the throw, so one throw would re-run every module's hook
-        // each tick (#807). CustomizeMenu goes through LifecycleStep.Run (one WARNING, never rethrows) and is
+        // each tick (#807). CustomizeMenu goes through MainMenuStep.Run (one WARNING, never rethrows) and is
         // safe to repeat. SubModuleMainMenuHookTests pins this shape.
-        LifecycleStep.Run("menu customization", () => IoC.Resolve<IMainMenuCustomizerService>().CustomizeMenu(), MainMenuLogger);
+        MainMenuStep.Run("menu customization", () => IoC.Resolve<IMainMenuCustomizerService>().CustomizeMenu(), MainMenuLogger);
 
         // Patch55_BasicTableauRaceGuard — MUST be applied HERE, not in OnGameInitializationFinished.
         // The Save/Load hero preview (BasicCharacterTableau) renders on the COLD main menu, before any

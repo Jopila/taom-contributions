@@ -7,21 +7,21 @@ namespace TAOM.Tests.Composition;
 /// <summary>
 /// The engine calls OnBeforeInitialModuleScreenSetAsRoot with no try and again on every tick while no
 /// state is active, so the menu customization, the one TAOM call that can throw, must stay inside
-/// LifecycleStep.Run. ShaderCompileNoticeEntry.Stop only sets a volatile flag and is called directly.
+/// MainMenuStep.Run. ShaderCompileNoticeEntry.Stop only sets a volatile flag and is called directly.
 /// </summary>
 [TestClass]
 public sealed class SubModuleMainMenuHookTests
 {
     [TestMethod]
-    public void OnBeforeInitialModuleScreenSetAsRoot_MenuCustomization_RunsInsideALifecycleStep()
+    public void OnBeforeInitialModuleScreenSetAsRoot_MenuCustomization_RunsInsideAMainMenuStep()
     {
         var body = MethodBody(RepoPaths.ReadSource("Main/SubModule.cs", stripComments: true));
 
         Assert.AreEqual(1, Regex.Matches(body, @"\.CustomizeMenu\(\)").Count,
             "CustomizeMenu is called exactly once in the hook.");
         Assert.IsTrue(
-            Regex.IsMatch(body, @"LifecycleStep\.Run\(\s*""[^""]+""\s*,[^;]*CustomizeMenu\(\)"),
-            "CustomizeMenu must run through LifecycleStep.Run.");
+            Regex.IsMatch(body, @"MainMenuStep\.Run\(\s*""[^""]+""\s*,[^;]*CustomizeMenu\(\)"),
+            "CustomizeMenu must run through MainMenuStep.Run.");
     }
 
     private static string MethodBody(string source)

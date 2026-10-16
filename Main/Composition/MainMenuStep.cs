@@ -5,11 +5,13 @@ using TAOM.Core.Logging;
 namespace TAOM.Composition;
 
 /// <summary>
-/// Runs one step of an engine lifecycle hook that has no try of its own. Catches everything, logs one
-/// WARNING per step name per process, and never rethrows. The step is not latched: it runs again on
-/// the next call, so it must be safe to repeat. Engine-free and unit-tested.
+/// Runs one step of SubModule.OnBeforeInitialModuleScreenSetAsRoot. The engine calls that hook for every
+/// module with no try, and calls it again on every tick while a throw leaves no active state (v1.5.5
+/// Module.cs 540-549, 790-799), so a step must never throw into it (#807). Catches everything, logs one
+/// [MainMenuStep] WARNING with the full exception per step name per process, and never rethrows. The step
+/// is not latched: it runs again on the next call, so it must be safe to repeat. Engine-free and unit-tested.
 /// </summary>
-internal static class LifecycleStep
+internal static class MainMenuStep
 {
     private static readonly object Gate = new();
     private static readonly HashSet<string> Logged = new(StringComparer.Ordinal);
@@ -44,7 +46,7 @@ internal static class LifecycleStep
 
             logger()?.LogWarning(
                 $"[MainMenuStep] step '{name}' failed and was skipped; it runs again on the next call, " +
-                $"further failures are not logged: {ex.GetType().Name}: {ex.Message}");
+                $"further failures are not logged: {ex}");
         }
         catch
         {
