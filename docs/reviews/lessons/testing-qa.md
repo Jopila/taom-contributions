@@ -1768,3 +1768,16 @@ a catalogue row missing.
   member). A pointer that drifts a second time gets a gate, not a third hand edit.
 - **Source:** `docs/reviews/rca-formation-presets-2026-10-09.md` finding 8;
   `docs/reviews/rca-order-of-battle-auto-assign-2026-09-24.md` row 6.
+
+### A setting with an MCM default and a JSON default gets a test that the two are equal (Dread Aura, 2026-10-15)
+With MCM loaded, the MCM property's initializer is the value players get, and the JSON value is only the fallback.
+The Dread Aura's radius moved from 12 to 5 m in both, and the only tests pinned the JSON side
+(`ShippedConfig_BalanceValuesMatchTheDocumentedTable`) or overwrote the MCM value before asserting. A later edit to
+one initializer would have shipped a different aura from the one the docs and the balance tests describe.
+- **Why missed:** the change's tests covered the changed values, not the invariant between the two homes of one
+  default. `CombatMechanicsSettingsProviderTests` and `FieldCommissionSettingsProviderTests` already carry the
+  check; nothing names it as a convention.
+- **Prevent:** a settings provider that merges MCM over JSON gets one test comparing `new TaomSettings().<Knob>`
+  with the compiled config default for every knob both sides define
+  (`DreadAuraSettingsProviderTests.McmDefaults_MatchTheCompiledProfileDefaults`).
+- **Source:** `docs/reviews/rca-dread-aura-local-2026-10-15.md` F7.

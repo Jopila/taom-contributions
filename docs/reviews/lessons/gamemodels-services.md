@@ -1072,3 +1072,17 @@ loop knew which steps applied and returned only counts.
 - **Prevent:** when one stage's success gates the next, return the completed items from the first stage and give
   that set to the second; test the composition with a blocked and an unmappable step (`FormationPresetLayout.PlanLoad`).
 - **Source:** `docs/reviews/rca-formation-presets-2026-10-09.md` finding 1.
+
+### A fallback reads the compiled default, never restates its literal (Dread Aura, 2026-10-15)
+The Dread Aura's morale floor moved from 0 to 10 in the compiled `DreadProfileConfig`, the shipped JSON and the
+tests, and `DreadAuraService.ComputeDrain` still fell back to `_config.Profile?.MoraleFloor ?? 0f`: a third copy of
+the old default, and the one value that lets the aura rout troops by itself. The provider never returns a null
+profile today, so nothing failed; a future path that did would have silently restored the behaviour the change
+removed.
+- **Why missed:** the plan named the default's homes (the compiled initializer, the JSON, the MCM initializer) and
+  nobody searched for a literal fallback of the same field. The sibling getters in `DreadAuraSettingsProvider`
+  already read `new DreadProfileConfig().X`.
+- **Prevent:** a null-coalescing fallback for a config field reads the compiled default
+  (`?? new XConfig().Field`), so one initializer holds the value. When a default moves, search the field name for
+  `??` and for its old literal before calling the change done.
+- **Source:** `docs/reviews/rca-dread-aura-local-2026-10-15.md` F2.

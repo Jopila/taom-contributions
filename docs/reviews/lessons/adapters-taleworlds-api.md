@@ -1035,3 +1035,33 @@ presenter's map check mirrors it.
   name in the same test class.
 - **Source:** `docs/reviews/rca-review-followups-2026-10-14.md`; `docs/reviews/rca-war-chronicle-events-2026-10-14.md`
   C08.
+
+### A morale effect that routs a troop is not local (2026-10-15)
+
+A troop that routs raises `AgentMoraleInteractionLogic.OnAgentFleeing`, and vanilla gives the morale loss
+to up to 10 allies: those within 4 m first, then, for every slot still empty, random members of the fleeing
+agent's whole formation at any distance. So a rout in a thinned or loose formation reaches past any radius
+the effect was written with, and in a dense block it lowers the neighbours' morale, so they break sooner.
+- **Why missed:** the Dread Aura design welcomed the contagion ("vanilla's own contagion carries the rout
+  outward") without tracing how far it reaches. The formation fill was never read, and Mike then saw dread
+  act "across the whole battlefield".
+- **Prevent:** a TAOM effect meant to stay local lowers morale to a floor above 0.01 and leaves the rout to
+  combat, or it accepts the formation-wide spread in its doc. Before claiming a radius for any morale write,
+  read `ApplyMoraleEffectOnAgentIncapacitated` to its end.
+- **Source:** `docs/features/dread-aura.md` "Why the aura does not rout by itself"; v1.5.5
+  `AgentMoraleInteractionLogic.cs:57-84`.
+
+### Before stating an engine call has no limit or fallback, read its native side (2026-10-15)
+
+`Mission.GetNearbyEnemyAgents` decompiles to plain native paging, and the Dread Aura's design read that as "no
+proximity-map fallback". The branch is inside the native function: `IMBMission.GetNearbyAgentsAux` searches its
+proximity grid only up to `ProximityMapMaxSearchRadius` (15.0 on v1.5.5, `.rdata` RVA 0xB2E120) and walks every
+agent in the mission beyond it. A radius ceiling of 30 m let every pulse from 15 to 30 m scan the whole battle,
+and the claim lived in a code comment, the feature doc and the MCM hint for two months.
+- **Why missed:** an ILSpy decompile ends at the `[EngineMethod]` call, so the managed read looked complete. A later
+  rewrite of the hint kept the clause, and two review lenses sided with the code comment; the two that ran
+  `native_decompile.py` found the branch.
+- **Prevent:** a claim that an engine call has no limit, no fallback or no cost past some size needs
+  `python tools/native_decompile.py --engine-method <Interface.Method>` on the native side, quoted beside the claim.
+  A line rewritten for another reason re-asserts every engine fact it keeps: re-verify it or drop it.
+- **Source:** `docs/reviews/rca-dread-aura-local-2026-10-15.md` F1; `docs/features/dread-aura.md` "Rejected seams".
