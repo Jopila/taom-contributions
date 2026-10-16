@@ -1065,3 +1065,16 @@ and the claim lived in a code comment, the feature doc and the MCM hint for two 
   `python tools/native_decompile.py --engine-method <Interface.Method>` on the native side, quoted beside the claim.
   A line rewritten for another reason re-asserts every engine fact it keeps: re-verify it or drop it.
 - **Source:** `docs/reviews/rca-dread-aura-local-2026-10-15.md` F1; `docs/features/dread-aura.md` "Rejected seams".
+
+### Promote a rule from its lesson's Prevent line, every branch kept (2026-10-16)
+
+The morale lesson's Prevent has two branches: floor the morale, or say in the feature doc that its routs spread.
+The one-line rule promoted into `.claude/rules/csharp-patterns.md` kept only the first, so it read as condemning
+three shipped fear writes that the maintainer had chosen to keep unfloored. It was the second time in two days
+that a relay dropped a condition (the first was the contagion's "when fewer than 10 stand within 4 m").
+- **Why missed:** the line was copied from the RCA's proposal, a summary that had already lost the branch, not
+  from the lesson.
+- **Prevent:** write a promoted rule from the lesson's own Prevent text, keep every branch and condition, and
+  check the rule against the code it will load on: a rule that flags shipped, accepted code is wrong or the code
+  is.
+- **Source:** `docs/reviews/rca-dread-aura-local-2026-10-15.md` S1.

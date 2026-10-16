@@ -41,11 +41,12 @@ On a staggered pulse, for each dread source the logic calls
 `agent.ChangeMorale(-drain)` on each eligible target. That is byte-for-byte the shape of vanilla's
 own `AgentMoraleInteractionLogic`, which already runs in every campaign battle.
 
-**The aura writes morale and nothing else.** Panic, retreat, the formation flipping to `Flee` past
-30% retreating, and the morale contagion that spreads it are all the engine's, reached through the
-same `CommonAIComponent.Morale` field vanilla drives. Calling `Panic()` or `Retreat()` directly
-would bypass `MissionAgentPanicHandler`'s `OnBatchUnitRemovalStart/End` bracket and thrash
-formation arrangement.
+**The aura writes morale and nothing else.** Panic, retreat and the morale contagion that spreads
+it are all the engine's, reached through the same `CommonAIComponent.Morale` field vanilla drives.
+Calling `Retreat()` directly would bypass `MissionAgentPanicHandler`'s `OnBatchUnitRemovalStart/End`
+bracket and thrash formation arrangement; calling `Panic()` directly would skip `CanPanic()`: the
+morale model's `CanPanicDueToMorale` veto, and the rule that a siege attacker on a ladder or
+siege-weapon face cannot panic (`CommonAIComponent.cs:174-193`).
 
 ## Identifying a dread source: two axes, and why one is not enough
 
@@ -238,8 +239,9 @@ the aura at exact parity with how the engine scales kill-morale, and it means no
 recurse into itself.
 
 **`CanPanicDueToMorale`** (fearless undead) is out of v1, not asked for. Worth knowing before adding
-it: a fearless agent clamps at `0.01f`, and `BattleEndLogic` routs on `< 0.01f`, so fearless agents
-would never be counted as routed in campaign casualty accounting.
+it: a fearless agent clamps at `0.01f` and never panics, so if it leaves the field it leaves as an
+ordered retreat (see the roster section): it keeps its roster place, but `MapEventSide.OnTroopRouted`
+still counts it in `TroopCasualties` (v1.5.5 `:642-643`).
 
 **The radius clamp** was designed in, then removed after reading `Mission.GetNearbyAgentsAux`
 (v1.4.8 Mission.cs:2314), then restored on 2026-10-15 at 15 m. The managed side is pure native paging, but
@@ -374,7 +376,7 @@ Verified against v1.4.8:
 | Recovery ceiling | `_initialMorale * 0.5f` | `CommonAIComponent.cs:74` |
 | Morale regeneration | +0.4/sec, only below the ceiling | `CommonAIComponent.OnTickParallel` |
 | Panic threshold | `_morale < 0.01f`, tested **before** regeneration | `CommonAIComponent.OnTickParallel` |
-| Formation flee | above 30% of a formation retreating | `Formation.cs:1146`, `Mission.cs:5237` |
+| Formation flee (watched, not balanced against) | `Flee` above 30% of a formation retreating; its only reader, the order panel's view model, stores it in a property nothing reads, so it changes no behaviour (re-read on v1.5.5) | `Formation.GetMovementTypeOfUnits` (`Formation.cs:1266-1291`), `MissionOrderTroopControllerVM.cs:875`; `Mission.GetMovementTypeOfAgents` (`Mission.cs:5280`, no caller) |
 | Morale resistance | `(IsHero ? 1.5 : 1) * (0.5 * n + 1)`, `n` = tier, or `Level / 4 + 1` for a hero (re-read on v1.5.5) | `CharacterObject.GetMoraleResistance` |
 
 The panic-before-regeneration ordering is load-bearing and easy to get backwards: reversing it lets
@@ -387,23 +389,29 @@ This is the consequence a player most needs to understand, and it is inherited f
 than invented here: **a routed troop is not a scared troop, it is a lost one.** Since 2026-10-15
 the aura alone no longer routs anyone; the routs below come from combat on troops it has weakened.
 
-`BattleEndLogic.OnEndMission` calls `IAgentOriginBase.SetRouted` on every active agent whose morale
-is below 0.01. For ordinary campaign troops that reaches `MapEventParty.OnTroopRouted:316`, which
-does exactly this:
+A troop that panics and flees off the field leaves the mission neither killed nor wounded, so
+`BattleAgentLogic.OnAgentRemoved` calls `Origin.SetRouted(isOrderRetreat)` with `isOrderRetreat`
+true only when its morale is at or above 0.01 (v1.5.5 `BattleAgentLogic.cs:176-179`). When the
+enemy side retreats, `BattleEndLogic.OnEndMission` does the same for every agent of the player's
+enemy team still on the field (`BattleEndLogic.cs:224-235`). `PartyGroupAgentOrigin.SetRouted` (`:130-137`) passes it to
+`MapEventSide.OnTroopRouted` (`:633-644`), which, for a panicked troop, calls
+`MapEventParty.OnTroopRouted` (`:316-328`) and does exactly this:
 
 ```csharp
 Party.MemberRoster.AddToCounts(_roster[troopSeed].Troop, -1);   // gone from the party
 RoutedInBattle.AddToCounts(_roster[troopSeed].Troop, 1);        // feeds DesertersCampaignBehavior
 ```
 
-So a formation that routs removes those troops from their party's roster and seeds deserter
-parties on the map. Three carve-outs, all verified in the same method:
+So a formation that routs removes those troops from their party's roster and, on the defeated
+side, can seed deserter parties on the map (`DesertersCampaignBehavior.MapEventEnded`). Four
+carve-outs, each read on v1.5.5:
 
 | Case | Outcome |
 |---|---|
-| Heroes and companions | **Exempt.** Line 324 wounds them instead of removing them. |
-| Siege defenders | **Exempt.** Line 683 requires `MissionSide == Attacker` for a siege. |
-| `PartyAgentOrigin` (ungrouped) | **Exempt.** Its `SetRouted` is an empty method. |
+| Ordered retreat (morale at or above 0.01 as it leaves) | **Not lost.** `MapEventSide.cs:636` removes the troop only when `isOrderRetreat` is false, and `isOrderRetreat` is true when the troop's morale is at or above 0.01 as it leaves (`BattleAgentLogic.cs:178-179`). A troop the aura holds at its floor of 10 that leaves on a retreat order keeps its place, unless something else takes it below 0.01 first. It still counts in its side's casualty tally (`MapEventSide.cs:640-643`). |
+| Heroes and companions | **Exempt.** `MapEventParty.cs:324-327` wounds them instead of removing them. |
+| Siege defenders | **Exempt** in a siege assault: `MapEventSide.cs:636` requires `MissionSide == Attacker` only when the map event is `BattleTypes.Siege`. In a sally-out, routed troops on both sides are removed. |
+| `PartyAgentOrigin` (ungrouped) | **Exempt.** Its `SetRouted` is an empty method (`PartyAgentOrigin.cs:202-204`). |
 
 One consequence is worth being deliberate about: **`DreadAuraAffectsPlayerTroops` defaults to
 true**, so an enemy wraith weakens the player's troops and they rout sooner in combat, which can

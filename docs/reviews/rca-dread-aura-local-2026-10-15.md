@@ -82,9 +82,37 @@ line re-asserts every engine fact it keeps, so the rewrite is the moment to re-v
   `BattleAgentLogic.OnAgentRemoved` and `MapEventSide.OnTroopRouted`), and its "Line 683" is now
   `MapEventSide.cs:636`.
 - `docs/features/dread-aura.md:44-45` and the engine-constants row "Formation flee": the 30%
-  `GetMovementTypeOfUnits` result is only an order-panel icon (`MissionOrderTroopControllerVM`).
+  `GetMovementTypeOfUnits` result changes no behaviour; its only reader, the order panel's view model
+  (`MissionOrderTroopControllerVM`), stores it in a property nothing reads.
 - `Main/Features/RaceAbilities/RaceAbilitiesConfigProvider.cs:31-33` cites "the Dread Aura's 30 m
   cap" and allows race-ability ranges up to 40 m, past the engine's 15 m grid limit.
+
+**Status 2026-10-16 (Mike: fix all):** the first two are fixed in `dread-aura.md` from the v1.5.5
+decompile; the roster section now also records that an ordered retreat (morale at or above 0.01) loses
+no troop (`MapEventSide.cs:636`). For the third, the four race-ability radii (`rallyRadius`,
+`kinBonus.radius`, `fearOnKillRadius`, `fearAuraRadius`, shipped at 12 m or less) are capped at
+15 m, and so is the `KinWithin` trigger range (Mike, after the second review), because it runs the
+same ally query. The enemy trigger `range` cap stays at 40 m: five shipped profiles sense enemies
+past 15 m (Stand Fast 20 m for every ready dwarf, Forth Eorlingas 30 m when mounted, and Swiftness,
+Serpent's Venom and Bard's Aim at 30 to 40 m with any ranged weapon), and Mike kept Stand Fast at
+20 m until the full-walk cost is measured. Its comment now states that cost instead of the old 30 m
+cap.
+
+## Second review: the follow-up round (2026-10-16)
+
+A six-lens `/deep-review` of the follow-up round found no CRITICAL or HIGH, 1 MEDIUM and a set of
+LOW findings, all fixed in the same working tree. Mike decided two: cap `KinWithin` at 15 m, and
+keep Stand Fast at 20 m until the full-walk cost is measured.
+
+| # | Sev | Finding | Category | Why missed | Preventive action |
+|---|---|---|---|---|---|
+| S1 | MED | The new `csharp-patterns.md` anti-pattern kept only "floor the morale" from the lesson's two-branch Prevent, so it condemned three shipped unfloored fear writes Mike chose to keep. | Condition dropped in a relay (repeat of F3) | The line was written from proposal 3 of this RCA, which had already dropped the branch; nobody re-read the lesson. | Lesson appended to `lessons/adapters-taleworlds-api.md`: a promoted rule is copied from its lesson's Prevent, every branch kept. |
+| S2 | LOW | `dread-aura.md` said the 30% `Flee` value feeds the order panel's icon; the view model stores it in a property nothing reads. | Caller taken for a reader | The caller was found and the binding was not traced. | One-off; the doc row now names the caller and says nothing reads it. |
+| S3 | LOW | `dread-aura.md` said a direct `Panic()` bypasses the panic handler's bracket; only `Retreat()` does (`Panic()` skips `CanPanic()`). Pre-existing text on a rewritten line. | Engine fact kept on a rewritten line | The rewrite kept the clause without re-reading `CommonAIComponent`. | Covered by the F1 lesson ("a rewritten line re-asserts every engine fact it keeps"). |
+| S4 | LOW | "Five sight-line triggers" past 15 m was six triggers in five profiles, two of them melee (Stand Fast, Forth Eorlingas); javelins count as ranged. | Count not read | The planner counted from memory of the listing. | One-off; the comment and both docs list the five profiles. |
+| S5 | LOW | `KinWithin` still allowed 40 m, although it runs the same ally query as `kinBonus.radius`. | Sibling input missed | The caps were changed per field, not per engine query. | Fixed with a test row; no rule. |
+| S6 | LOW | The ordered-retreat row missed the casualty tally and that `isOrderRetreat` is the morale at exit; deserters come only from the defeated side; the siege exemption excludes sally-outs; the fearless-undead line still stated the old `BattleEndLogic` mechanism; a test comment still called the `Flee` value a balance constant. | Partial rewrite | The rewrite fixed the cited paragraph, not every sentence resting on the same mechanism. | One-off; the Completeness lens is the gate, and it caught them. |
+| S7 | LOW | Wrong date (2026-10-15 for a 2026-10-16 change), no changelog bullet, `.ai/scopes.md` not linking `csharp-patterns.md`, the native trap row naming no tool, redundant `31` rows and no exactly-15 test. | Hygiene | Written fast. | None. |
 
 ## Proposed preventive-rule updates (follow-up commit, Mike's call)
 
@@ -96,3 +124,10 @@ merge:
    (`GetNearbyAgentsAux` scans every agent past 15 m); read the native side before claiming no limit.
 3. A morale-write trap: a rout costs up to 10 allies morale, from the whole formation when 4 m holds
    fewer, so a local fear effect lowers morale to a floor and never routs.
+
+**Status 2026-10-16 (Mike: apply the best recommendation):** 1 applied. 2 applied, in the row freed
+by moving "Culture party templates" out of the index (`.claude/rules/xslt.md` already states both of
+its halves and loads on every `.xslt` file). 3 went into `.claude/rules/csharp-patterns.md`
+"Anti-Patterns" instead of the index, with the lesson's second branch kept ("or say in the feature
+doc that its routs spread"), and `.ai/scopes.md` now links that rule for other clients. The two
+unfloored fear writers say so in `race-abilities.md` and `signature-strikes.md`.
