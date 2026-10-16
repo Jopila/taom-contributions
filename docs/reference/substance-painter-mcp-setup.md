@@ -49,6 +49,48 @@ to it and returns JSON. The MCP server itself speaks stdio only (no listening so
    `api_version` back. Then drive it in prose: *"List my texture sets with their resolution and
    channel count."*
 
+## Scripted runs without the MCP server
+
+`tools/painter/painter_run.py` posts a Painter-side script straight to the bridge
+(`localhost:60041/run.json`), injects `ARGS` from `--arg key=value` and prints the script's `RESULT`.
+It needs only Painter launched with `--enable-remote-scripting`: no MCP server, no vendor package.
+The TAOM scripts beside it (`painter_new_project.py`, `painter_stack_stone_frost.py`,
+`painter_stack_angmar_fortress.py`, `painter_export.py`) are the
+[`/prep-tripo-prop`](../../.claude/skills/prep-tripo-prop/SKILL.md) workflow, and their docstrings
+carry the parameters. Prefer a committed script over a pasted `execute_python` snippet: it can be
+re-run and tuned.
+
+Painter cannot show you its viewport through the bridge: a Qt grab of the main window
+(`substance_painter.ui.get_main_window().grab()`) returns the panels with a black 3D view, because
+12.1.5 draws it with Vulkan. Check a result in Blender instead: `tools/blender/render_tiled_preview.py`
+for the lit look, and an emission-only render of the base colour, or a measurement of the exported
+PNG, for what was painted.
+
+## Painter 12.0.3 API traps (found 2026-10-16)
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Every `Color` refused: "Can't use a non legacy color space with a legacy color managed project" | A new project defaults to Legacy color management, and the Python API refuses every color there, whatever color space it carries (None, `""`, any `GenericColorSpace`; a `LegacyColorSpace` is refused as "Only GenericColorSpace ... allowed") | Create the project in OCIO: set the `OCIO` environment variable to `resources\ocio\substance\config.ocio` for the `project.create()` call only. Adobe's docs: the variable "will override and disable the settings in UI" |
+| No texture set right after `project.create()` | It returns before the mesh is loaded | Pump `QCoreApplication.processEvents()` until `textureset.all_texture_sets()` is non-empty |
+| `resource.search("stone_slate")` returns nothing | Plain-text search misses underscored names | `resource.search("u:material")` and filter on `identifier().name` |
+| `set_opacity` raises "a Channel Type must be specified" | Outside a mask stack the opacity is per channel | `layer.set_opacity(value, ChannelType.BaseColor)` per channel |
+| No "PBR Metallic Roughness" export preset | 12.0.3's predefined presets are 2D View, Document channels, Sketchfab, Stager, USDz and two glTF ones | Use "glTF PBR Metal Roughness": `occlusionRoughnessMetallic` packs R AO, G roughness, B metallic; `convert_tripo_prop_textures.py` reads it |
+| "This method is deprecated, use the property" in the Log | Getter calls such as `get_name()` | Harmless |
+
+### More traps, on a uniquely unwrapped icon (Painter 12.1.5, 2026-10-16)
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Every exported colour lighter than written (0.11 stone came out about 0.37) | A fill takes the raw numbers as working-space (linear) values whatever the `Color`'s tag: a 0.2 fill tagged sRGB, Raw or Working exported 0.486 each time, which is sRGB(0.2) | Convert sRGB to linear before `set_source` (the recipes' `rgb()`). A Substance material's colour parameter (`iron_color`) takes sRGB: pass it unconverted |
+| Normal map tilted on half the texels; the lit preview blotchy, the albedo flat | Height becomes normal per texel, so with a 55 m mesh in one 1K tile even 3% of `bricks_01` relief tilted a quarter of the texels; `set_material_source` also turns every output of the material back on, its normal and height included | No height layers on a large mesh; set `active_channels` again after `set_material_source` |
+| Normal bake tilted although the mesh baked against itself | `LowAsHigh` with averaged ray directions (`SmoothNormals`) and the default 1% ray distance (0.76 m on a 76 m mesh): rays from a face hit its 90-degree neighbour | For `low_as_high` skip the Normal baker (it can add nothing), set `SmoothNormals` false and `MaxHeight`/`MaxDepth` 0.001 (`painter_new_project.py` does) |
+| Whole walls dark under the soot or occlusion layers | AO `MaxDistance` 0.15 with `GroundPlane`: every wall lower than about 11 m counted as occluded | `MaxDistance` 0.05 |
+| Only the first texture set baked | `bake_async(texture_set)` bakes that set | `set_textureset_enabled(True)` on each set's `BakingParameters`, then `bake_selected_textures_async()` |
+| A mask fill paints the wrong half | `bricks_01` is white in its joints, so `invert=1` selects the blocks | Check a mask's polarity with a flat false-colour layer and one export |
+| A painted feature has no effect | Under 2 texels it vanishes: a 1.7 cm mortar gap at about 11 px/m covered 0.4% of the walls | Size features in texels: at least 2 (about 18 cm here) |
+| Export raises "padding algorithm could not be resolved" | `exportParameters` without `paddingAlgorithm` | Pass `"paddingAlgorithm": "infinite"` |
+| Triplanar hardness never changes | The field is `TriplanarProjectionParams.hardness`, not a nested `.triplanar` | Set `p.hardness` |
+
 ## Modes
 
 `--mode {minimal 25 | lite 74 | default 134 | full 179}`. We run **full** — the vendor's own
@@ -124,7 +166,10 @@ reverts a whole AI edit sequence (for scripted layer-level rollback of an AI bat
   → reports Python, mcp SDK, tool count (179/33), Painter reachability, configs.
 - **Tools never appear in Claude Code** → you didn't fully restart after the config edit; or the
   `.claude.json` entry was lost (the running session can re-serialize that file — re-add the
-  sibling block and restart).
+  sibling block and restart). Also check the project key's case: the servers sit under
+  `E:/repos/TAOM`, and a session opened as `e:\repos\TAOM` reads the lowercase key, which has none
+  (neither Painter nor Blender loaded on 2026-10-16). Open the folder as `E:\repos\TAOM`, or use
+  `tools/painter/painter_run.py`, which needs no MCP server.
 - **`ConnectionError: Cannot reach Painter`** → Painter not running, or launched without
   `--enable-remote-scripting` (use the `.bat`), or no project open.
 - **`ModuleNotFoundError: substance_painter`** → Painter too old (pre-11.0). N/A here (12.0.3).

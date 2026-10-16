@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Generate per-culture/per-assignment/per-rank enlistment service kits (#375 Phase 4, #525).
 
 Emits Main/_Module/ModuleData/equipmentsets/taom_enlistment_equipment.xml: one
@@ -63,7 +63,7 @@ Usage:
     python tools/generate_enlistment_rosters.py --apply --seed-missing
         # append-only: adds ONLY rosters whose ids are absent (preserves hand edits)
     python tools/generate_enlistment_rosters.py --apply --culture aserai --reseed
-        # replace ONE culture: drop its rosters, append fresh kits (needs --culture and --apply)
+        # replace ONE culture's rosters in place (needs --culture and --apply)
     ... --out <path>   # edit another copy of the roster file (proof runs)
 
 XML I/O per tools/README.md "XML I/O convention": UTF-8 (BOM-preserving on
@@ -741,18 +741,32 @@ def apply_issue_launcher(culture, assignment, rank, slots, classes):
     return {s: (bow if classes.get(i) == 'Bow' else i) for s, i in slots.items()}
 
 
+def check_issue_launchers(universe):
+    """Fail closed when an ISSUE_LAUNCHER id is not in the item universe (as default_blocks does for its table)."""
+    missing = sorted({i for ranks in ISSUE_LAUNCHER.values() for i in ranks.values()
+                      if i not in universe})
+    if missing:
+        raise SystemExit('ERROR: ISSUE_LAUNCHER items missing from the item universe: '
+                         f'{missing}. Refusing to emit a kit the player cannot be issued.')
+
+
 def strip_culture_rosters(text, culture):
-    """(text without every enlist_<culture>_<assignment>_<rank> roster, count removed).
+    """(text without every enlist_<culture>_<assignment>_<rank> roster, count removed, where).
+
+    `where` is the offset in the returned text at which the first removed roster stood (None when
+    nothing matched), so a reseed can put the fresh kits back under the culture's own section header.
 
     Exact-token id match, so enlist_aserai_ never matches enlist_aserai2_. A 'Hand-tuned bows'
-    comment directly above a removed roster goes with it; the reseed re-adds the kits under the
-    seed marker, and the doc cites the decision.
+    comment directly above a removed roster goes with it; the reseed re-adds the kits, and the doc
+    cites the decision. A self-closing roster ends at its own `/>`, never at a neighbour's close tag.
     """
     rid = (rf'enlist_{re.escape(culture)}_(?:{"|".join(ASSIGNMENTS)})_(?:{"|".join(RANKS)})')
     comment = r'[ \t]*<!--(?:(?!-->).)*?Hand-tuned bows(?:(?!-->).)*?-->[ \t]*\r?\n[ \t]*'
-    pattern = re.compile(rf'(?:{comment})?[ \t]*<EquipmentRoster id="{rid}"[^>]*>.*?</EquipmentRoster>[ \t]*\r?\n?',
-                         re.S)
-    return pattern.subn('', text)
+    pattern = re.compile(rf'(?:{comment})?[ \t]*<EquipmentRoster id="{rid}"'
+                         r'[^>]*?(?:/>|(?<!/)>.*?</EquipmentRoster>)[ \t]*\r?\n?', re.S)
+    first = next(pattern.finditer(text), None)
+    out, count = pattern.subn('', text)
+    return out, count, (first.start() if first else None)
 
 
 # =============================================================================
@@ -818,9 +832,9 @@ def file_header():
         '  i.e. the same Rivendell tree rivendell itself uses; spcultures.xslt gives\n'
         '  battania (Variag/Khand) basic_troop=loke_rim_initiate /\n'
         "  elite_basic_troop=loke_rim_cavalry, i.e. khuzait's Rhun tree. abanissa binds\n"
-        "  harad_reg_levy / harad_serp_noble, aserai's Harad tree. Their rosters therefore\n"
-        "  mirror rivendell, khuzait and aserai rank-for-rank (the generator's\n"
-        '  TREE_ALIASES map reproduces them).\n'
+        "  harad_reg_levy / harad_serp_noble, aserai's Harad tree. The generator's TREE_ALIASES map\n"
+        '  builds their rosters from those trees, so they mirror rivendell, khuzait and aserai\n'
+        "  rank-for-rank. The Harad-sphere archer bows come from the generator's ISSUE_LAUNCHER table.\n"
         '\n'
         '  A cell is ABSENT when its group pool has no donor within one band of the rank. That is\n'
         '  deliberate: an infantry-seeded roster under a cavalry id would read as an authored\n'
@@ -913,8 +927,9 @@ def main():
     ap.add_argument('--seed-missing', action='store_true',
                     help='append-only: add ONLY rosters whose ids are absent from the existing file')
     ap.add_argument('--reseed', action='store_true',
-                    help='with --culture and --apply: drop that culture\'s existing rosters, then '
-                         'append its freshly generated kits like --seed-missing')
+                    help='with --culture and --apply: replace that culture\'s rosters in place with '
+                         'its freshly generated kits (appended under the seed marker only when '
+                         'it had none)')
     ap.add_argument('--out', default=OUT_XML,
                     help='roster file to edit (default: the shipped file); for proof runs on a copy')
     args = ap.parse_args()
@@ -923,6 +938,7 @@ def main():
         raise SystemExit('ERROR: --reseed requires both --culture and --apply.')
 
     armory, universe, classes, zones = build_indexes()
+    check_issue_launchers(universe)
 
     by_culture = parse_troops()
     items_dir = os.path.join(game_modules(DEFAULT_GAME_ROOT), 'LOTRLOME_Armory', 'ModuleData', 'LOTRLOME_items')
@@ -965,6 +981,11 @@ def main():
                 if donor is None:
                     table.append((culture, assignment, rank, None, None, None, {}, why))
                     continue
+                # BEFORE duplicate suppression, so the check compares the kits actually issued.
+                # Harad-sphere donors carry ladder_harad_bow_*, which need Bow 100 an enlistee
+                # cannot meet; comparing the donor kits instead suppressed a soldier cell whose
+                # issued bow differs from the recruit's (shaghana archer, steppe_heavy_bow).
+                slots = apply_issue_launcher(culture, assignment, rank, slots, classes)
                 kit = frozenset(slots.items())
                 already = seen_kits.setdefault((culture, assignment), set())
                 if kit in already:
@@ -973,9 +994,6 @@ def main():
                                   'DUPLICATE of a lower rank -- suppressed, resolver descends'))
                     continue
                 already.add(kit)
-                # AFTER duplicate suppression, so the emitted cell set is unchanged. Harad-sphere
-                # donors carry ladder_harad_bow_*, which need Bow 100 an enlistee cannot meet.
-                slots = apply_issue_launcher(culture, assignment, rank, slots, classes)
                 vec = armour_vector(slots, zones)
                 # Keep the STRONGER of the two per zone, so a waived floor at one rank cannot lower
                 # the bar for every rank above it.
@@ -1040,8 +1058,9 @@ def main():
         raw = open(out_xml, 'rb').read()
         existing = raw.decode('utf-8-sig')
         flag = '--reseed' if args.reseed else '--seed-missing'
+        where = None
         if args.reseed:
-            existing, removed = strip_culture_rosters(existing, args.culture)
+            existing, removed, where = strip_culture_rosters(existing, args.culture)
             print(f'\n--reseed: removed {removed} existing {args.culture} roster(s).')
         present = set(re.findall(r'<EquipmentRoster id="([^"]+)"', existing))
         new_blocks = []
@@ -1060,15 +1079,21 @@ def main():
         for assignment in ASSIGNMENTS:
             for rank in RANKS:
                 rid = f'enlist_default_{assignment}_{rank}'
-                if rid not in present:
+                # A reseed replaces one culture and touches nothing else, the defaults included.
+                if rid not in present and not args.reseed:
                     new_blocks.append(roster_block(
                         rid, DEFAULT_CULTURE, dict(DEFAULT_ROSTER_ITEMS[(assignment, rank)])))
         if not new_blocks:
             print(f'\n{flag}: nothing to add (all roster ids already present).')
             return
-        insert = (f'\n    {SEED_MARKER}\n'
-                  + '\n'.join(new_blocks) + '\n\n</EquipmentRosters>')
-        updated = existing.replace('</EquipmentRosters>', insert, 1)
+        if where is not None:
+            # In place, under the culture's own section header: a second identical reseed strips
+            # exactly these blocks and puts them back, so the text is a fixed point.
+            updated = existing[:where] + '\n'.join(new_blocks) + '\n' + existing[where:]
+        else:
+            insert = (f'\n    {SEED_MARKER}\n'
+                      + '\n'.join(new_blocks) + '\n\n</EquipmentRosters>')
+            updated = existing.replace('</EquipmentRosters>', insert, 1)
         parse_written(updated)
         write_xml(out_xml, updated)
         print(f'\n{flag}: appended {len(new_blocks)} roster(s) to {out_xml}')

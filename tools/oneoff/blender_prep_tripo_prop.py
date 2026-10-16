@@ -16,6 +16,16 @@ normal map absorbs the lost geometric detail):
 Then a bo_ collision twin (decimated, physics slot 'stone' — Erebor
 precedent), one FBX to the kit dir, plain baked maps to the staging dir (they
 double as Substance Painter starting layers), and a Cycles preview render.
+--export-high also writes the scaled full-res source as <name>_high.fbx and
+the visual-only low as <name>_low.fbx, the pair for Painter's own mesh-map
+bakes (tools/painter/, the /prep-tripo-prop skill). With --skip-bakes the Blender
+rebake is skipped: use it when Painter retextures from scratch.
+
+UV methods (Carn Dum icon numbers, 1.86M -> 25k tris, 2026-10-16):
+chart_abf (region growing + angle-based unwrap) 186 islands, 44% use, texel
+density p95/p5 2.3; sharp_seams at 50 deg (seams on sharp edges, the lead
+artist's method) 3,992 islands, 7% use, p95/p5 1.24. Sharp seams win on a
+clean low poly; a decimated Tripo surface has sharp edges everywhere.
 Texture packing to t_<stem>_{d,n,s} is convert_tripo_prop_textures.py (also
 the Substance round-trip converter).
 
@@ -168,14 +178,18 @@ def decimate_to(obj, target_tris):
 
 
 def count_uv_islands(obj):
-    """UV-connectivity island count (faces connected where the shared edge's
-    loop UVs coincide)."""
+    return len(uv_island_faces(obj))
+
+
+def uv_island_faces(obj):
+    """UV-connectivity islands as face-index lists (faces connected where the
+    shared edge's loop UVs coincide)."""
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     uv = bm.loops.layers.uv.active
     if uv is None:
         bm.free()
-        return 0
+        return []
     bm.faces.ensure_lookup_table()
     parent = list(range(len(bm.faces)))
 
@@ -202,9 +216,52 @@ def count_uv_islands(obj):
                 abs(a[0] - b[0]) < eps and abs(a[1] - b[1]) < eps
                 for a, b in zip(uvs_a, uvs_b)):
             union(fa.index, fb.index)
-    islands = len({find(i) for i in range(len(bm.faces))})
+    groups = {}
+    for i in range(len(bm.faces)):
+        groups.setdefault(find(i), []).append(i)
     bm.free()
-    return islands
+    return list(groups.values())
+
+
+def uv_face_signed_areas(obj):
+    """(signed UV area, 3D area) per face, by face index."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    uv = bm.loops.layers.uv.active
+    out = []
+    for f in bm.faces:
+        lf = f.loops
+        signed = 0.0
+        for i in range(1, len(lf) - 1):
+            a, b, c = lf[0][uv].uv, lf[i][uv].uv, lf[i + 1][uv].uv
+            signed += ((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) / 2.0
+        out.append((signed, f.calc_area()))
+    bm.free()
+    return out
+
+
+def uv_flipped_faces(obj):
+    """Fold-over telemetry: per UV island, the minority sign of face UV area."""
+    areas = uv_face_signed_areas(obj)
+    flipped = 0
+    for island in uv_island_faces(obj):
+        pos = sum(1 for i in island if areas[i][0] >= 0)
+        flipped += min(pos, len(island) - pos)
+    return flipped
+
+
+def texel_density_spread(obj):
+    """Area-weighted p95/p5 of per-face texel density sqrt(uv_area / area_3d):
+    1.0 is perfectly uniform. Covers both island-to-island scale mismatch and
+    stretch inside an island."""
+    import numpy as np
+    areas = np.array([(abs(s), a) for s, a in uv_face_signed_areas(obj) if a > 1e-12])
+    dens = np.sqrt(areas[:, 0] / areas[:, 1])
+    order = np.argsort(dens)
+    cum = np.cumsum(areas[order, 1]) / areas[:, 1].sum()
+    p5 = dens[order][np.searchsorted(cum, 0.05)]
+    p95 = dens[order][np.searchsorted(cum, 0.95)]
+    return round(float(p95 / max(p5, 1e-12)), 3)
 
 
 def smart_uv(obj, island_margin, angle_deg):
@@ -219,25 +276,14 @@ def smart_uv(obj, island_margin, angle_deg):
     bpy.ops.object.mode_set(mode="OBJECT")
 
 
-def chart_uv(obj, spread_deg, margin, min_faces=20):
-    """xatlas-style charting: BFS region-growing over face connectivity gated
-    on angle to the chart's area-weighted average normal, small-fragment
-    absorption into the most-shared-boundary neighbor, planar projection per
-    chart, per-chart texel-density equalization, then pack. Smart UV Project
-    fragments dense organic triangulation; large-spread region growing +
-    fragment merging is what actually produces paintable islands there.
-    Returns (chart_count, uv_flipped_faces) — flipped faces are projection
-    fold-over telemetry (merged fragments may project through a neighbor's
-    basis; tiny counts are cosmetically invisible, big counts mean the spread
-    is too aggressive)."""
-    from mathutils import Vector
-    strip_uvs(obj)
-    bm = bmesh.new()
-    bm.from_mesh(obj.data)
-    bm.faces.ensure_lookup_table()
-    uv = bm.loops.layers.uv.new("UVMap")
-
+def build_charts(bm, spread_deg, min_faces=20, sharp_edges=False):
+    """BFS region-growing over face connectivity, then small-fragment
+    absorption into the most-shared-boundary neighbor. The gate is the angle
+    to the chart's area-weighted average normal, or with sharp_edges the
+    dihedral angle of the crossed edge (seams exactly on edges sharper than
+    spread_deg). Returns ([(faces, normal_sum)], chart_of)."""
     spread_cos = math.cos(math.radians(spread_deg))
+    sharp_limit = math.radians(spread_deg)
     visited = set()
     chart_of = {}
     charts = []       # chart id -> face list
@@ -255,8 +301,13 @@ def chart_uv(obj, spread_deg, margin, min_faces=20):
             cur = queue.pop()
             avg = normal_sum.normalized() if normal_sum.length > 1e-12 else cur.normal
             for e in cur.edges:
+                if sharp_edges and (len(e.link_faces) != 2
+                                    or e.calc_face_angle(0.0) > sharp_limit):
+                    continue
                 for nb in e.link_faces:
-                    if nb.index in visited or nb.normal.dot(avg) <= spread_cos:
+                    if nb.index in visited:
+                        continue
+                    if not sharp_edges and nb.normal.dot(avg) <= spread_cos:
                         continue
                     visited.add(nb.index)
                     chart_of[nb.index] = cid
@@ -290,8 +341,28 @@ def chart_uv(obj, spread_deg, margin, min_faces=20):
             normal_sums[target] += normal_sums[cid]
             charts[cid] = []
 
-    flipped_total = 0
     live = [(charts[c], normal_sums[c]) for c in range(len(charts)) if charts[c]]
+    return live, chart_of
+
+
+def chart_uv(obj, spread_deg, margin, min_faces=20):
+    """xatlas-style charting: build_charts, planar projection per chart,
+    per-chart texel-density equalization, then pack. Smart UV Project
+    fragments dense organic triangulation; large-spread region growing +
+    fragment merging is what actually produces paintable islands there.
+    Returns (chart_count, uv_flipped_faces) — flipped faces are projection
+    fold-over telemetry (merged fragments may project through a neighbor's
+    basis; tiny counts are cosmetically invisible, big counts mean the spread
+    is too aggressive)."""
+    from mathutils import Vector
+    strip_uvs(obj)
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.faces.ensure_lookup_table()
+    uv = bm.loops.layers.uv.new("UVMap")
+    live, _chart_of = build_charts(bm, spread_deg, min_faces)
+
+    flipped_total = 0
     for chart, nsum in live:
         n = nsum.normalized() if nsum.length > 1e-12 else chart[0].normal
         helper = Vector((0, 0, 1)) if abs(n.z) < 0.9 else Vector((1, 0, 0))
@@ -339,6 +410,64 @@ def chart_uv(obj, spread_deg, margin, min_faces=20):
         return len(live), flipped_total
     bpy.ops.object.mode_set(mode="OBJECT")
     return len(live), flipped_total
+
+
+def chart_abf_uv(obj, spread_deg, margin, min_faces=20, sharp_edges=False):
+    """build_charts, chart boundaries marked as seams, then Blender's
+    angle-based unwrap per island, one texel density, and pack. Planar
+    projection folds on a heavily decimated Tripo surface (Carn Dum icon,
+    2026-10-16: 11-16% of faces flipped at every spread); ABF solves each
+    island instead of projecting it. Returns (chart_count, uv_flipped_faces)."""
+    strip_uvs(obj)
+    obj.data.uv_layers.new(name="UVMap")
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.faces.ensure_lookup_table()
+    live, chart_of = build_charts(bm, spread_deg, min_faces, sharp_edges)
+    for e in bm.edges:
+        faces = e.link_faces
+        e.seam = len(faces) == 2 and chart_of[faces[0].index] != chart_of[faces[1].index]
+    chart_faces = [[f.index for f in chart] for chart, _nsum in live]
+    bm.to_mesh(obj.data)
+    bm.free()
+
+    select_only([obj])
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.unwrap(method="ANGLE_BASED", fill_holes=True, margin=margin)
+    bpy.ops.uv.average_islands_scale()  # one texel density across islands
+    bpy.ops.uv.pack_islands(margin=margin)
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+    # fold-over telemetry: per chart, the minority sign of UV face area
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.faces.ensure_lookup_table()
+    uv = bm.loops.layers.uv.active
+    flipped_total = 0
+    for chart in chart_faces:
+        pos = neg = 0
+        for fi in chart:
+            lf = bm.faces[fi].loops
+            signed = 0.0
+            for i in range(1, len(lf) - 1):
+                a, b, c = lf[0][uv].uv, lf[i][uv].uv, lf[i + 1][uv].uv
+                signed += (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)
+            if signed >= 0:
+                pos += 1
+            else:
+                neg += 1
+        flipped_total += min(pos, neg)
+    bm.free()
+    return len(chart_faces), flipped_total
+
+
+def sharp_seam_uv(obj, angle_deg, margin, min_faces=0):
+    """The artist method (Keyforce, 2026-10-16): a seam on every edge sharper
+    than angle_deg, angle-based unwrap, one texel density, pack. Pure, it cut
+    the decimated Carn Dum mesh into 3,992 islands at 50 deg (7% UV use);
+    min_faces merges smaller islands into their neighbor."""
+    return chart_abf_uv(obj, angle_deg, margin, min_faces, sharp_edges=True)
 
 
 def shelf_pack(obj, margin):
@@ -571,10 +700,13 @@ def build_preview_material(obj, staging):
     nt.links.new(base.outputs["Color"], mix.inputs[6])
     nt.links.new(ao.outputs["Color"], mix.inputs[7])
     nt.links.new(mix.outputs[2], bsdf.inputs["Base Color"])
-    rough = tex_node("roughness", "Non-Color")
-    nt.links.new(rough.outputs["Color"], bsdf.inputs["Roughness"])
-    metal = tex_node("metallic", "Non-Color")
-    nt.links.new(metal.outputs["Color"], bsdf.inputs["Metallic"])
+    # a basecolor-only Tripo source bakes no roughness/metallic
+    if os.path.exists(os.path.join(staging, "roughness.png")):
+        rough = tex_node("roughness", "Non-Color")
+        nt.links.new(rough.outputs["Color"], bsdf.inputs["Roughness"])
+    if os.path.exists(os.path.join(staging, "metallic.png")):
+        metal = tex_node("metallic", "Non-Color")
+        nt.links.new(metal.outputs["Color"], bsdf.inputs["Metallic"])
     normal = tex_node("normal", "Non-Color")
     nmap = nt.nodes.new("ShaderNodeNormalMap")
     nt.links.new(normal.outputs["Color"], nmap.inputs["Color"])
@@ -646,9 +778,18 @@ def main():
     ap.add_argument("--bake-size", type=int, default=2048)
     ap.add_argument("--island-margin", type=float, default=0.004)
     ap.add_argument("--angle", type=float, default=66.0)
-    ap.add_argument("--uv-method", default="chart", choices=["chart", "smart"])
+    ap.add_argument("--uv-method", default="chart",
+                    choices=["chart", "chart_abf", "sharp_seams", "smart"],
+                    help="chart_abf: chart seams + angle-based unwrap (no projection fold-over); "
+                         "sharp_seams: seams on edges sharper than --sharp-angle")
     ap.add_argument("--spread", type=float, default=75.0,
-                    help="chart method: max angle to the chart average normal")
+                    help="chart methods: max angle to the chart average normal")
+    ap.add_argument("--sharp-angle", type=float, default=50.0,
+                    help="sharp_seams: dihedral angle above which an edge becomes a seam")
+    ap.add_argument("--min-island-faces", type=int, default=0,
+                    help="sharp_seams: merge islands under N faces into their neighbor (0 = off)")
+    ap.add_argument("--skip-bakes", action="store_true",
+                    help="re-UV and export only (Painter bakes from the _high.fbx); no preview")
     ap.add_argument("--probe-angles", default="",
                     help="smart-project probe: comma-separated angle limits — "
                          "re-UV at each, report islands+utilization, no bake/export")
@@ -657,6 +798,9 @@ def main():
     ap.add_argument("--collision-tris", type=int, default=1500)
     ap.add_argument("--ao-samples", type=int, default=128)
     ap.add_argument("--skip-preview", action="store_true")
+    ap.add_argument("--export-high", action="store_true",
+                    help="also write the scaled full-res source to "
+                         "<staging>/<name>_high.fbx (Substance Painter bake source)")
     args = ap.parse_args(argv)
 
     os.makedirs(args.staging, exist_ok=True)
@@ -700,8 +844,14 @@ def main():
         # bake source keeps the Tripo atlas + full resolution
         bake_src = visual.copy()
         bake_src.data = visual.data.copy()
-        bake_src.name = "_bake_src"
+        bake_src.name = bake_src.data.name = f"{args.name}_high"
         bpy.context.scene.collection.objects.link(bake_src)
+        if args.export_high:
+            # Painter bakes its own curvature/thickness maps from this; same
+            # scale and pivot as the low, so no matching transform is needed
+            high_path = os.path.join(args.staging, f"{args.name}_high.fbx")
+            export_fbx(high_path, [bake_src])
+            log(f"[export] high source -> {high_path}")
 
         tris_visual = tris_source
         if args.decimate_tris and tris_source > args.decimate_tris:
@@ -721,13 +871,19 @@ def main():
                     "utilization": round(uv_utilization(visual), 4)}
                 log(f"[probe] {probe[f'smart_{ang:g}']}")
                 visual.data = pristine.copy()
+            # for sharp_seams the probed values are sharp-edge angles
+            chart_fn = {
+                "chart_abf": chart_abf_uv,
+                "sharp_seams": lambda o, a, m: sharp_seam_uv(o, a, m, args.min_island_faces),
+            }.get(args.uv_method, chart_uv)
             for spr in (float(a) for a in args.probe_spreads.split(",") if a):
-                charts, flipped = chart_uv(visual, spr, args.island_margin)
-                probe[f"chart_{spr:g}"] = {
+                charts, flipped = chart_fn(visual, spr, args.island_margin)
+                probe[f"{args.uv_method}_{spr:g}"] = {
                     "charts": charts, "flipped_faces": flipped,
                     "islands": count_uv_islands(visual),
-                    "utilization": round(uv_utilization(visual), 4)}
-                log(f"[probe] spread {spr:g}: {probe[f'chart_{spr:g}']}")
+                    "utilization": round(uv_utilization(visual), 4),
+                    "texel_p95_p5": texel_density_spread(visual)}
+                log(f"[probe] {spr:g}: {probe[f'{args.uv_method}_{spr:g}']}")
                 visual.data = pristine.copy()
             summary = {"status": "ok", "probe": probe}
             with open(done_path, "w", encoding="utf-8") as f:
@@ -738,13 +894,20 @@ def main():
         flipped = 0
         if args.uv_method == "chart":
             _charts, flipped = chart_uv(visual, args.spread, args.island_margin)
+        elif args.uv_method == "chart_abf":
+            _charts, flipped = chart_abf_uv(visual, args.spread, args.island_margin)
+        elif args.uv_method == "sharp_seams":
+            _islands, flipped = sharp_seam_uv(visual, args.sharp_angle, args.island_margin,
+                                              args.min_island_faces)
         else:
             smart_uv(visual, args.island_margin, args.angle)
         islands_after = count_uv_islands(visual)
-        log(f"[uv] islands {islands_before} -> {islands_after} (flipped faces: {flipped})")
+        texel_spread = texel_density_spread(visual)
+        log(f"[uv] islands {islands_before} -> {islands_after} (flipped faces: {flipped}, "
+            f"texel density p95/p5: {texel_spread})")
 
-        stats = run_bakes(bake_src, visual, maps, args.bake_size,
-                          args.staging, args.ao_samples)
+        stats = {} if args.skip_bakes else run_bakes(
+            bake_src, visual, maps, args.bake_size, args.staging, args.ao_samples)
         bpy.data.objects.remove(bake_src, do_unlink=True)
 
         # final material slot: name only — the editor binds by name at import
@@ -763,8 +926,13 @@ def main():
         out_path = os.path.join(args.dst, args.name + ".fbx")
         export_fbx(out_path, [visual, bo])
         log(f"[export] {out_path}")
+        if args.export_high:
+            # Painter's low: visual only, or the bo_ becomes a second texture set
+            low_path = os.path.join(args.staging, f"{args.name}_low.fbx")
+            export_fbx(low_path, [visual])
+            log(f"[export] Painter low -> {low_path}")
 
-        if not args.skip_preview:
+        if not (args.skip_preview or args.skip_bakes):
             bo.hide_render = True
             render_preview(visual, args.staging)
 
@@ -776,6 +944,7 @@ def main():
             "tris_bo": tri_count(bo),
             "uv_islands_before": islands_before, "uv_islands_after": islands_after,
             "uv_flipped_faces": flipped,
+            "texel_density_p95_p5": texel_spread,
             "bakes": stats,
         }
     except Exception:

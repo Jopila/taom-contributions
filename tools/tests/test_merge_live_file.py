@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Tests for tools/merge_live_file.py: a three-way merge of a live (CRLF, unversioned)
 file with an artist's LF versions.
 
@@ -183,6 +183,35 @@ class GitSpecTests(_Tmp):
         order = [i for r in (rev_theirs, rev_base, rev_far) for i, ln in enumerate(body) if ln.startswith(r[:9])]
         self.assertEqual(order, sorted(order), text)
         self.assertEqual(len(order), 3, text)
+
+
+class SafetyTests(_Tmp):
+    def test_mixed_line_endings_are_named_before_they_are_normalised(self):
+        live = self.put("live.xml", b"<Items>\r\n" + b'  <Item id="a" v="1"/>\n' + b'  <Item id="b" v="1"/>\r\n'
+                        b'  <Item id="c" v="1"/>\r\n</Items>\r\n')
+        theirs_lines = list(BASE)
+        theirs_lines[3] = '  <Item id="c" v="THEIRS"/>'
+        base = self.put("base.xml", _join(BASE, "\n"))
+        theirs = self.put("theirs.xml", _join(theirs_lines, "\n"))
+        code, text = self.run_tool(live, "--base", base, "--theirs", theirs, "--out", self.dir / "out.xml")
+        self.assertEqual(code, 0, text)
+        self.assertIn("NOTE: 1 line(s)", text)
+
+    def test_an_os_error_exits_2_not_the_conflict_code(self):
+        live = self.put("live.xml", _join(BASE, "\r\n"))
+        base = self.put("base.xml", _join(BASE, "\n"))
+        theirs = self.put("theirs.xml", _join(BASE, "\n"))
+
+        def no_git(*a, **k):
+            raise FileNotFoundError("git")
+
+        orig = merge_live_file.subprocess.run
+        merge_live_file.subprocess.run = no_git
+        try:
+            code, text = self.run_tool(live, "--base", base, "--theirs", theirs)
+        finally:
+            merge_live_file.subprocess.run = orig
+        self.assertEqual(code, 2, text)
 
 
 if __name__ == "__main__":

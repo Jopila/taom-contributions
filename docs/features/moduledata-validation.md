@@ -123,7 +123,10 @@ carries an inline `<BodyProperties key=>` instead, so a female body key worn by 
 nothing to check. `TAOM.Tests/Core/LordNameAndSexConsistencyTests.cs` owns this pair, asserting that
 every inline English name fallback matches `taom_xslt_strings.xml` and that no `is_female="true"` lord
 carries `<beard_tags>`. Same complementary split as above: the validator catches a bad id, the test
-catches a good id describing the wrong person.
+catches a good id describing the wrong person. Clothing that must follow sex is the same class:
+`TAOM.Tests/Core/DwarfDressWearerTests.cs` keeps every dwarf dress where only a woman draws it, after
+24 male Erebor NPCs, the civilian sets of 29 troops and 3 male child templates still wore one
+(2026-10-16).
 
 A fifth boundary is an element that is simply **absent**: `BROKEN_BODY_PROPERTY_REF` fires on a
 `BodyProperty.*` reference that resolves to nothing, so it has plenty to say about a typo'd
@@ -575,8 +578,8 @@ may hand out and what the armoury upgrades each into ([armour-acquisition.md](ar
 The table is generated from the unversioned Armory, so an art drop that adds, renames or retires pieces
 leaves it stale with nothing else noticing. The pass reruns `tools/generate_armour_classes.py` in memory
 and compares. It says so on stderr and adds nothing when `LOTRLOME_Armory` is absent, and reports the
-table as NOT verified, never passed, when the generator raises, finds no armour, or reads a different
-Armory than the one under `--game-modules`. Fix: `python tools/generate_armour_classes.py --apply`.
+table as NOT verified, never passed, when the generator raises, finds no armour, reads a different
+Armory than the one under `--game-modules`, or is run with a `--moduledata` other than the repo's. Fix: `python tools/generate_armour_classes.py --apply`.
 
 **`ARMOUR_ACQUISITION_REF` (ERROR).** Every reference the feature's data makes fails silently when it
 names nothing: a LotrIssue row's `cultures` token (the row never fires), `reward_item` (no chest

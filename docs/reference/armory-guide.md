@@ -99,8 +99,14 @@ packs: [`docs/features/armoury-mesh-cleanup.md`](../features/armoury-mesh-cleanu
 An artist drop often ships `name="{=KEY}English"` with no `<string id=KEY>` row in the Armory's
 top-level `Languages/*.xml`, so the translator cannot see the name. `python tools/register_armory_names.py --check`
 fails on any such key outside `tools/armory-unregistered-names-baseline.txt` (a ratchet that only
-shrinks), and without a flag it lists the rows `--apply` would append to the right `loc_<folder>.xml`
-(`--prefix <regex>` limits it to an artist's new ids).
+shrinks), and without a flag it lists the rows `--apply` would append to the right `loc_<folder>.xml`.
+By default that covers only keys outside the baseline (what `--check` flags); `--include-baselined`
+adds the backlog. `--prefix <regex>` matches a key or an element id, so an artist's new ids work.
+
+Run `--check` before `check_external_loc_coverage.py`. Every row `--apply` writes raises that gate's
+untranslated count by one per language, so run its `--update-baseline` in the same change; translating
+the rows is a separate paid run. Names minted by `generate_starter_kit.py` (the `starter_kit.xml`
+item files and the TAOM-STARTER-KIT block of the pieces file) are out of scope for this tool.
 
 ## Deleted on 2026-08-28 (do not re-reference)
 

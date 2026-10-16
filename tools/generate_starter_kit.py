@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Author the player's starter kit: a weak `starter_<donor>` twin of every item a player-start
 roster hands out, same meshes, stats floored to a per-class anchor.
 
@@ -442,12 +442,14 @@ def block_re() -> re.Pattern:
                       + r"[ \t]*(?:\r\n|\n)?", re.S)
 
 
-_ROW_ID_RE = re.compile(r'<(?:AvailablePiece|UsablePiece)\b[^>]*?\b(?:id|piece_id)="([^"]*)"')
+_ROW_ID_RE = re.compile(
+    r'<(?:Item|CraftedItem|CraftingPiece|AvailablePiece|UsablePiece)\b[^>]*?\b(?:id|piece_id)="([^"]*)"')
 
 
 def foreign_rows(block: str) -> list[str]:
     """Row ids inside a marker block that are not the tool's own `starter_` rows: another
-    author's rows the wholesale replacement or revert of the block would delete."""
+    author's rows the wholesale replacement or revert of the block would delete. The id may
+    sit on a later line than the tag name."""
     return [i for i in _ROW_ID_RE.findall(block) if not i.startswith(STARTER_PREFIX)]
 
 
@@ -613,6 +615,7 @@ def apply_pieces(text: str, pieces: list[ET.Element]) -> tuple[str, str]:
     wanted = render_pieces_block(pieces, eol)
     existing = block_re().search(text)
     if existing:
+        _refuse_foreign(PIECES_FILE, existing.group(0))
         if existing.group(0) == wanted:
             return text, "noop"
         return text[:existing.start()] + wanted + text[existing.end():], "updated"
@@ -624,6 +627,8 @@ def apply_pieces(text: str, pieces: list[ET.Element]) -> tuple[str, str]:
 
 
 def revert_pieces(text: str) -> tuple[str, bool]:
+    for block in block_re().finditer(text):
+        _refuse_foreign(PIECES_FILE, block.group(0))
     new_text, count = block_re().subn("", text)
     return new_text, bool(count)
 
@@ -958,11 +963,8 @@ def _items_path(md: Path, folder: str) -> Path:
     return md / "LOTRLOME_items" / folder / ITEMS_FILE_NAME
 
 
-_ID_RE = re.compile(r'<(?:Item|CraftedItem|CraftingPiece|AvailablePiece|UsablePiece)\b[^>]*?\b(?:id|piece_id)="(starter_[^"]+)"')
-
-
 def _starter_ids_in(text: str) -> set[str]:
-    return set(_ID_RE.findall(text))
+    return {i for i in _ROW_ID_RE.findall(text) if i.startswith(STARTER_PREFIX)}
 
 
 def _refuse_shrink(what: str, on_disk: set[str], planned: set[str], allow: bool) -> None:
@@ -1005,39 +1007,59 @@ def apply_plan(plan: Plan, md: Path, write: bool, backups: bool = True, allow_sh
                 _refuse_shrink(f"{path} {kind}[{target}]", _starter_ids_in(match.group(3)),
                                set(plan.registrations[kind].get(target, [])), allow_shrink)
 
+    # compute every new text first: a refusal in any file (a foreign row in a block) must leave
+    # the whole tree untouched, never a half-applied one
+    pending: list[tuple[Path, str, bool, bool]] = []   # (path, text, had_bom, backup)
     for folder, clones in planned_by_folder.items():
         path = _items_path(md, folder)
         text = render_items_file(clones, folder)
         if path.exists() and path.read_bytes() == text.encode("utf-8"):
             log.append(f"noop     {path} ({len(clones)} items)")
             continue
-        if write:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            err = checked_write(path, text, False, BACKUP_TAG, backup=False)
-            if err:
-                raise StarterKitError(err)
+        pending.append((path, text, False, False))
         log.append(f"{'wrote' if write else 'would write':8s} {path} ({len(clones)} items)")
 
     pieces_path = md / PIECES_FILE
     text, had_bom = read_xml(pieces_path)
     new_text, action = apply_pieces(text, plan.pieces)
-    if action != "noop" and write:
-        err = checked_write(pieces_path, new_text, had_bom, BACKUP_TAG, backup=backups)
-        if err:
-            raise StarterKitError(err)
+    if action != "noop":
+        pending.append((pieces_path, new_text, had_bom, backups))
     log.append(f"{action:8s} {pieces_path} ({len(plan.pieces)} starter blades)")
 
     for kind, name in XSLT_FILES.items():
         path = md / name
         text, had_bom = read_xml(path)
         new_text, actions = apply_xslt(text, kind, plan.registrations[kind])
-        if any(a != "noop" for a in actions.values()) and write:
-            err = checked_write(path, new_text, had_bom, BACKUP_TAG, backup=backups)
-            if err:
-                raise StarterKitError(err)
+        if any(a != "noop" for a in actions.values()):
+            pending.append((path, new_text, had_bom, backups))
         for target, action in actions.items():
             log.append(f"{action:8s} {path.name} {kind}[{target}] ({len(plan.registrations[kind][target])} rows)")
+    if write:
+        _write_all(pending)
     return log
+
+
+def _write_all(pending: list[tuple[Path, str, bool, bool]]) -> None:
+    """Parse every pending text before writing any, so one malformed result writes nothing."""
+    for path, text, _, _ in pending:
+        try:
+            ET.fromstring(text.encode("utf-8"))
+        except ET.ParseError as exc:
+            raise StarterKitError(f"refusing to write {path}: transform produced malformed XML: {exc}")
+    for path, text, had_bom, backup in pending:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        err = checked_write(path, text, had_bom, BACKUP_TAG, backup=backup)
+        if err:
+            raise StarterKitError(err)
+
+
+def _report_foreign(drift: list[str], name: str, text: str) -> None:
+    for block in block_re().finditer(text):
+        foreign = foreign_rows(block.group(0))
+        if foreign:
+            drift.append(f"{name}: a {MARKER_START} block holds rows the tool does not own "
+                         f"({', '.join(foreign)}); the next apply or revert refuses it. Move the "
+                         "markers inside the list so they fence only the starter rows")
 
 
 def verify_plan(plan: Plan, md: Path) -> list[str]:
@@ -1057,6 +1079,7 @@ def verify_plan(plan: Plan, md: Path) -> list[str]:
         drift.append(f"missing file {pieces_path}")
     else:
         text = read_xml(pieces_path)[0]
+        _report_foreign(drift, PIECES_FILE, text)
         for piece in plan.pieces:
             if f'id="{piece.get("id")}"' not in text:
                 drift.append(f"{PIECES_FILE}: piece {piece.get('id')} missing")
@@ -1066,12 +1089,7 @@ def verify_plan(plan: Plan, md: Path) -> list[str]:
             drift.append(f"missing file {path}")
             continue
         text = read_xml(path)[0]
-        for block in block_re().finditer(text):
-            foreign = foreign_rows(block.group(0))
-            if foreign:
-                drift.append(f"{name}: a {MARKER_START} block holds rows the tool does not own "
-                             f"({', '.join(foreign)}); the next apply or revert refuses it. Move the "
-                             "markers inside the list so they fence only the starter rows")
+        _report_foreign(drift, name, text)
         for target, rows in plan.registrations[kind].items():
             match = _template_re(kind, target).search(text)
             body = match.group(3) if match else ""
@@ -1083,20 +1101,13 @@ def verify_plan(plan: Plan, md: Path) -> list[str]:
 
 def revert_plan(plan: Plan, md: Path, write: bool, backups: bool = True) -> list[str]:
     log: list[str] = []
-    for folder in plan.by_folder():
-        path = _items_path(md, folder)
-        if path.exists():
-            if write:
-                path.unlink()
-            log.append(f"{'removed' if write else 'would remove':8s} {path}")
+    pending: list[tuple[Path, str, bool, bool]] = []
     pieces_path = md / PIECES_FILE
     if pieces_path.exists():
         text, had_bom = read_xml(pieces_path)
         new_text, removed = revert_pieces(text)
-        if removed and write:
-            err = checked_write(pieces_path, new_text, had_bom, BACKUP_TAG, backup=backups)
-            if err:
-                raise StarterKitError(err)
+        if removed:
+            pending.append((pieces_path, new_text, had_bom, backups))
         log.append(f"{'reverted' if removed else 'noop':8s} {pieces_path}")
     for name in XSLT_FILES.values():
         path = md / name
@@ -1104,11 +1115,18 @@ def revert_plan(plan: Plan, md: Path, write: bool, backups: bool = True) -> list
             continue
         text, had_bom = read_xml(path)
         new_text, count = revert_xslt(text)
-        if count and write:
-            err = checked_write(path, new_text, had_bom, BACKUP_TAG, backup=backups)
-            if err:
-                raise StarterKitError(err)
+        if count:
+            pending.append((path, new_text, had_bom, backups))
         log.append(f"{'reverted' if count else 'noop':8s} {path} ({count} blocks)")
+    # every refusal has fired by here; the item files go last, after the shared files are written
+    if write:
+        _write_all(pending)
+    for folder in plan.by_folder():
+        path = _items_path(md, folder)
+        if path.exists():
+            if write:
+                path.unlink()
+            log.insert(0, f"{'removed' if write else 'would remove':8s} {path}")
     return log
 
 
@@ -1180,7 +1198,7 @@ def main() -> int:
         return 2 if args.verify else 0
     try:
         plan = build_plan(sources)
-    except StarterKitError as exc:
+    except (StarterKitError, OSError, ET.ParseError) as exc:
         print(f"ERROR: {exc}")
         return 2
 
@@ -1211,7 +1229,8 @@ def main() -> int:
             else:
                 for line in apply_plan(plan, md, write=args.apply, backups=backups, allow_shrink=args.allow_shrink):
                     print(line)
-        except StarterKitError as exc:
+        except (StarterKitError, OSError, ET.ParseError) as exc:
+            # exit 1 means drift under --verify, so a crash never borrows it
             print(f"ERROR: {exc}")
             return 2
     if args.apply and not args.revert and not args.verify:

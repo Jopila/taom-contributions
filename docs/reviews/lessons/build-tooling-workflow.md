@@ -3824,3 +3824,114 @@ part's decals in a different order, and "the first base wins" would have picked 
 - **Prevent:** a grouping function sorts its input names first (`group_parts` for prefix kits) and a test proves the
   result is independent of the input order; diff two runs of the same input before trusting a parity check.
 - **Source:** `tools/tests/test_kitbash_kits.py` `test_prefix_grouping_does_not_depend_on_the_import_order`.
+
+### Measure texel density before choosing a UV method (Carn Dûm map icon, 2026-10-16)
+The Tripo prep picked its UV layout on island count, use and folded faces only; texel density was never measured, so
+nobody could tell that its 186-island layout put 2.3 times the pixels per metre on some faces as on others. The lead
+artist's method (seams on edges sharper than 50 degrees, one texel density) fixed density (1.24) but cut the decimated
+mesh into 3,992 islands at 7% use.
+- **Why missed:** the probe reported what the first throne pilot needed, and a method that is right on a clean low poly
+  was assumed right on a decimated one.
+- **Prevent:** every UV probe reports `texel_p95_p5` beside islands, use and folds, and a method is chosen against the
+  targets in `ue-to-bannerlord-asset-pipeline.md` (use at least 40%, density at most 2.5, folds under 1%), by numbers
+  on the mesh at hand.
+- **Source:** the Painter retexture variant in `docs/reference/ue-to-bannerlord-asset-pipeline.md`.
+
+### Painter refuses every scripted color in a Legacy project (Carn Dûm map icon, 2026-10-16)
+Eight color-space values (None, `""`, `sRGB`, `Linear`, every `GenericColorSpace`) all failed with "Can't use a non
+legacy color space with a legacy color managed project", for both a material parameter and a fill layer.
+- **Why missed:** Painter creates Legacy projects by default, and nothing in the Python docstrings says that mode
+  cannot take a color from Python.
+- **Prevent:** create scripted projects with `tools/painter/painter_new_project.py`, which sets `OCIO` for the create
+  call. When a native error repeats, probe every variant in one script before guessing a fourth time.
+- **Source:** `docs/reference/substance-painter-mcp-setup.md` "Painter 12.0.3 API traps".
+
+### Count the change before you call the cause (Carn Dûm map icon, 2026-10-16)
+A 47k-triangle candidate had 943 UV charts; the guess was split vertices on its Tripo seams (27,675 vertices against an
+expected 23,600), and a weld was added. It merged 0 of 27,675 vertices there and 24 of 930,709 on the other mesh.
+- **Why missed:** the vertex-to-triangle ratio of a single closed shell was applied to a mesh made of many shells.
+- **Prevent:** log the before and after count of any repair and remove it when it changes nothing; the weld was
+  deleted in the same session.
+- **Source:** the prep log lines `[weld] verts 27675 -> 27675` and `930709 -> 930685`.
+
+### A preview must not assume every optional bake exists (Carn Dûm map icon, 2026-10-16)
+`blender_prep_tripo_prop.py` crashed in its preview after a successful export, because a basecolor-only Tripo source
+skips the roughness and metallic bakes and the preview loaded them unconditionally.
+- **Why missed:** every earlier source shipped all four Tripo maps.
+- **Prevent:** a consumer of optional outputs checks each one exists; the preview now skips what was not baked.
+- **Source:** `build_preview_material` in `tools/oneoff/blender_prep_tripo_prop.py`.
+
+### Scratchpad scripts are not a workflow (Carn Dûm map icon, 2026-10-16)
+The first Painter pass ran from session-scratchpad scripts with one asset's paths written in, so nobody could repeat it.
+- **Why missed:** each script began as a probe and grew into a step.
+- **Prevent:** once a probe becomes a step, move it into `tools/` with its inputs as arguments, then re-run the whole
+  chain from the repo copies and diff the output against the scratch run (here a mean difference under 0.25 of 255).
+- **Source:** `tools/painter/`, `tools/blender/probe_fbx.py`, `render_pbr_preview.py`, `compare_prop_candidates.py`.
+
+### A renderer that draws back faces hides a mesh wound inside out (Carn Dûm map icon, 2026-10-16)
+Every box the icon builder made (houses, merlons, the gate block, the portcullis bars) had all six faces wound inward
+through nine versions. Blender's viewport and Cycles draw back faces, so every render looked right; the game culls
+them, so every box would have shown inside out on the map.
+- **Why missed:** each primitive was checked by eye in renders, and no step tested face orientation.
+- **Prevent:** test winding by geometry, not by render: `tools/blender/unwrap_texture_sets.py` reports a face that no
+  sky ray sees along its normal but rays see along the reversed one. It found 5,906 inverted faces before the fix and
+  175 crevice faces (0.7 m² in all) after.
+- **Source:** `tools/oneoff/blender_build_carn_dum_icon.py` `obox`; `unwrap_texture_sets.py` `visibility`.
+
+### Calibrate a scripted colour against its export (Carn Dûm map icon, 2026-10-16)
+Four paint rounds came out lighter than written. A Painter fill takes the numbers as linear values whatever the
+`Color`'s tag says, so 0.11 stone exported at about 0.37.
+- **Why missed:** the `Color` object reported a correct conversion, and Blender's tone mapping and a broken normal map
+  hid the albedo, so each round changed the recipe instead of testing the value.
+- **Prevent:** before tuning colours, export one flat fill of a known value and read the PNG (0.2 came back 0.486,
+  which is sRGB(0.2)). Judge paint by the exported albedo, measured or rendered emission-only, never by a lit render
+  alone. Label a measurement by its colour space: `image.pixels` of an 8-bit PNG is sRGB, not linear.
+- **Source:** `tools/painter/painter_stack_angmar_fortress.py` `rgb()`; the traps table in
+  `docs/reference/substance-painter-mcp-setup.md`.
+
+### False-colour a layer to see what it covers (Carn Dûm map icon, 2026-10-16)
+Three rounds of stronger mortar, streaks and block tone changed nothing visible. One export with each layer in a flat
+red, green or yellow showed why at once: `bricks_01` is white in its joints, so `invert=1` painted the blocks, and a
+soot layer driven by an AO baked 11 m deep covered whole walls.
+- **Why missed:** each round adjusted strengths and judged the lit render, which cannot show which layer covers what.
+- **Prevent:** when a layer seems to do nothing, give it a flat false colour through the recipe's ARGS, export the set
+  and look. Size every feature in texels too: under 2 texels (about 18 cm at 11 px/m) it vanishes.
+- **Source:** `painter_stack_angmar_fortress.py` (colours overridable by ARGS); `painter_new_project.py` `ao_distance`.
+
+### Margins, not distortion, limit a hard-surface UV layout (Carn Dûm map icon, 2026-10-16)
+Smart UV Project cut the icon's towers set into about 5,000 islands a few pixels wide; with their margins they covered
+5% of the tile. One island per part (a box as a cross, a spike as one strip) covered 51%.
+- **Why missed:** one run's stat counted the stacked hidden islands at full size and showed coverage above 1.0, which
+  read as overlap, not as margin waste.
+- **Prevent:** report visible islands and visible px/m per set, and read the layout image before tuning anything else.
+- **Source:** `tools/blender/unwrap_texture_sets.py` `net_seams`; the table in the pipeline doc's rebuild variant.
+
+### Stage a file two sessions append to by hunk, and read the staged diff before committing (2026-10-16)
+A port's lessons commit staged `docs/reviews/lessons/data-content-cultures.md` whole. A concurrent session had appended
+its own lesson (Erebor dresses) to the same file, so that lesson went to origin with a gate its session had not yet
+committed.
+- **Why missed:** `git add <file>` is right for a file only one session touches; lesson files, `tools/README.md` and
+  `docs/INDEX.md` are appended by every session. The staged diff was not read before `git commit`.
+- **Prevent:** for a shared file, stage only your hunks (build the index blob from `HEAD` plus your edit and
+  `git update-index --cacheinfo`, since `git add -p` is interactive), then read `git diff --cached` for every staged
+  file before committing. A heading that is not yours in that diff stops the commit.
+- **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) second review, finding 5.
+
+### A guard that refuses must run before the first write, and cover every block the tool rewrites (2026-10-16)
+`generate_starter_kit.py` gained a refusal for marker blocks holding another author's rows. It ran inside the
+stylesheet step, after the item files and the pieces block were already written (a refused revert had deleted both
+`starter_kit.xml` files), and it did not cover the pieces block at all.
+- **Why missed:** the guard was added where the reported block is rewritten, and only for the kind of block that
+  had gone wrong; the tool's older shrink guard, a pre-flight, was the pattern to follow.
+- **Prevent:** a tool that writes several files computes and parses every new text first and writes last; a new
+  refusal goes into that pre-flight. List every block the tool rewrites or deletes and test the guard on each, with
+  a byte snapshot of the whole tree after the refusal.
+- **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) second review, findings 1 and 2.
+
+### A cap of zero must be a cap, most of all on paid calls (2026-10-16)
+`translate_with_claude.py --max-entries 0` meant "no cap" (`if args.max_entries and ...`), and a negative value
+sliced all but one entry into the paid phase. Someone deferring translation would reach for exactly those values.
+- **Why missed:** a truthiness test on an int treats 0 as unset; no test covered the boundary.
+- **Prevent:** test a limit with `is not None`, reject negatives, and pin 0 and -1 with tests that patch the provider
+  call to raise. For "do the free half only", add a flag that returns before the paid phase (`--seed-only`).
+- **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) (D6 and the second review).

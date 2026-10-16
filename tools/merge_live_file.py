@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Three-way merge of a live (CRLF, unversioned) file with an artist's versions.
 
 Porting an artist's commit means merging the live Armory / TAOM_Map file (CRLF on disk) with
@@ -24,6 +24,7 @@ parent (docs/reviews/lessons/data-content-cultures.md).
 """
 import argparse
 import datetime
+import os
 import re
 import subprocess
 import sys
@@ -166,6 +167,9 @@ def do_merge(args):
         f"(approximate, by line); terminator {term}, BOM {'yes' if has_bom else 'no'}, "
         f"final newline {'yes' if final_nl else 'no'}."
     )
+    minority = live_raw.count(b"\n") - live_raw.count(terminator.encode("ascii"))
+    if minority > 0:
+        print(f"NOTE: {minority} line(s) in live do not end in {term}; the result writes every line with {term}.")
     if out_bytes == live_raw:
         print("Result equals live; nothing to change.")
         return 0
@@ -178,7 +182,9 @@ def do_merge(args):
         if bak.exists():
             raise MergeError(f"backup already exists: {bak}")
         bak.write_bytes(live_raw)
-        live_path.write_bytes(out_bytes)
+        tmp = live_path.with_name(f"{live_path.name}.merge-tmp")
+        tmp.write_bytes(out_bytes)
+        os.replace(tmp, live_path)  # a failed write leaves live whole, not truncated
         print(f"Backed up to {bak}\nWrote {live_path} ({len(out_bytes)} bytes).")
     else:
         print("Dry run; pass --apply to back up live and write.")
@@ -246,7 +252,7 @@ def main(argv=None):
         if not (args.live and args.base and args.theirs):
             ap.error("live, --base and --theirs are required")
         return do_merge(args)
-    except (MergeError, UnicodeDecodeError) as exc:
+    except (MergeError, UnicodeDecodeError, OSError) as exc:  # 1 means "conflicts", never a crash
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
 

@@ -1340,6 +1340,20 @@ which unchecked files it leaves exposed.
   closing the issue. One culture behaving correctly, as Rohan did here, reads as "the others need
   art" and hides the fact that one file got an attribute the other seventeen never did.
 - **Source:** docs/reviews/rca-townsfolk-sex-2026-09-06.md
+- **Recurred 2026-10-16, the clothing half (Erebor dwarf dresses):** the sweep above settled sex by
+  role id and notable template and left the earlier clothing pass alone. That pass, #56
+  (`d44b72886`, 2026-04-02), gave female-coded Erebor roles `sk_dwarf_dress_normal_e` to `_i`, male
+  roles tunics, and "neutral" roles one dress and one tunic; NPCs it did not touch kept the dresses
+  the March imports handed out (`244f5922f`, `9fd786050`). The engine has no neutral: a character
+  without `is_female` is a man, and each spawn draws its Body from a random set. So 24 male NPCs
+  (four of them notables #56 had coded female and the sweep kept male), the civilian sets of 29
+  troops and 3 male child templates still wore dresses, and "the clothing had already been made
+  female" above held only for the women. Mike's rule: `is_female` decides, and every other dwarf
+  wears a tunic. Prevent: when a sweep settles who is female, re-run every layer that encodes sex
+  (clothing, `IsFemaleTemplate`) against its result, not only the sibling files.
+  `TAOM.Tests/Core/DwarfDressWearerTests.cs` gates the dwarf clothing, and fails closed, because a
+  check that starts from known men misses runtime rosters no character names
+  ([rca-erebor-dwarf-dresses-2026-10-16](../rca-erebor-dwarf-dresses-2026-10-16.md)).
 ### Deleting a false positive is not the same as meeting the need it was faking
 `rebalance_troops.py` once fired its Bow/Crossbow swap on the name keyword `naffatun`. That was wrong,
 so #340 removed it, and the removal is recorded two entries above as part of a clean fix. Nothing
@@ -2020,9 +2034,9 @@ new troops priced on the old Armory; the reported delta was wrong and hid two ho
   pass read the tree it was given. The scratch diff cut paths down to file names, which erased the only clue: the melee
   rows alone carried absolute repo paths.
 - **Prevent:** before trusting a baseline, find one troop the change is known to alter and confirm its warning differs
-  between the two runs; when a tool takes a data-root flag, read where each pass loads its input. Until #812 lands,
-  run each tree's validator from its own checkout, or recompute the melee findings with the pass's functions on both
-  troop trees (the RCA's method).
+  between the two runs; when a tool takes a data-root flag, read where each pass loads its input. Since `a9f2d7eda`
+  the melee pass reads the given `--moduledata` troops and `--game-modules`; another pass that ignores the flag needs
+  the same proof.
 - **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) finding 2.
 
 ### Read the decision record before calling data hand-authored, generated or stale (03320a65, 2026-10-16)
@@ -2034,9 +2048,3 @@ missing that Mike had kept them by decision D3 the day before.
 - **Prevent:** before writing who made a data block or whether it should be regenerated, run `git log -S'<id>' --
   <file>` and grep `docs/reviews/rca-*.md` decision tables for the file; cite the decision in the doc and in the file.
 - **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) finding 3.
-
-### Check the first import before reading clothing as a sex signal (Erebor dwarf dresses, 2026-10-16)
-The 2026-03-05 Erebor import handed `sk_dwarf_dress_normal_*` out round-robin to nearly every NPC: the blacksmith, the barber, the headmen and the townsman wore dresses as much as the townswomen did. Clothing therefore looked like intent about sex when it was an import artefact, and male dwarves stayed in dresses for seven months.
-- **Why missed:** every reference resolved and `is_female` was consistent, so no gate had a reason to look at the body slot.
-- **Prevent:** before reading what an NPC wears as a signal about who it is, check how the first import assigned gear (`git log -S` on the item id). On 2026-10-16 the 24 male NPCs, the civilian sets of 29 troops and 3 male child templates moved to tunics, with no `is_female` change; `DwarfDressWearerTests` now gates it.
-- **Source:** `TAOM.Tests/Core/DwarfDressWearerTests.cs`.

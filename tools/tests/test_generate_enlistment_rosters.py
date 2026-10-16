@@ -11,6 +11,8 @@ draws each slot from any battle set), missing a Horse written directly under <Eq
 that slot in every set), letting the mount into the emitted slots, and matching a Monster by substring (the
 spider_statue row). Record: docs/reviews/rca-keyforce-art-wiring-2026-09-29.md, Codex pass C1 and fix review R1.
 """
+import contextlib
+import io
 import os
 import sys
 import tempfile
@@ -230,7 +232,7 @@ class ReseedTests(unittest.TestCase):
         text = rosters_xml('enlist_aserai_archer_recruit', 'enlist_aserai2_archer_recruit',
                            'enlist_aserai_archer_soldier', 'enlist_khuzait_archer_recruit',
                            'enlist_default_archer_recruit', comment_before='enlist_aserai_archer_soldier')
-        out, removed = ger.strip_culture_rosters(text, 'aserai')
+        out, removed, _where = ger.strip_culture_rosters(text, 'aserai')
         self.assertEqual(2, removed)
         self.assertNotIn('"enlist_aserai_archer_recruit"', out)
         self.assertNotIn('"enlist_aserai_archer_soldier"', out)
@@ -242,8 +244,34 @@ class ReseedTests(unittest.TestCase):
     def test_a_comment_above_a_kept_roster_survives(self):
         text = rosters_xml('enlist_aserai_archer_recruit', 'enlist_khuzait_archer_recruit',
                            comment_before='enlist_khuzait_archer_recruit')
-        out, _ = ger.strip_culture_rosters(text, 'aserai')
+        out, _, _where = ger.strip_culture_rosters(text, 'aserai')
         self.assertIn('Hand-tuned', out)
+
+    def test_strip_reports_where_the_first_removed_roster_stood(self):
+        text = rosters_xml('enlist_khuzait_archer_recruit', 'enlist_aserai_archer_recruit',
+                           'enlist_aserai_archer_soldier')
+        out, removed, where = ger.strip_culture_rosters(text, 'aserai')
+        self.assertEqual(2, removed)
+        self.assertEqual(text.index('    <EquipmentRoster id="enlist_aserai_archer_recruit"'), where)
+        self.assertTrue(out[where:].startswith('</EquipmentRosters>'))
+
+    def test_strip_reports_no_position_when_nothing_matched(self):
+        text = rosters_xml('enlist_khuzait_archer_recruit')
+        out, removed, where = ger.strip_culture_rosters(text, 'aserai')
+        self.assertEqual((text, 0, None), (out, removed, where))
+
+    def test_a_self_closing_roster_does_not_swallow_its_neighbour(self):
+        text = ('<EquipmentRosters>\r\n'
+                '    <EquipmentRoster id="enlist_aserai_archer_recruit" culture="Culture.x" />\r\n'
+                '    <EquipmentRoster id="enlist_khuzait_archer_recruit" culture="Culture.x">\r\n'
+                '        <EquipmentSet />\r\n'
+                '    </EquipmentRoster>\r\n'
+                '</EquipmentRosters>')
+        out, removed, _where = ger.strip_culture_rosters(text, 'aserai')
+        self.assertEqual(1, removed)
+        self.assertIn('"enlist_khuzait_archer_recruit"', out)
+        self.assertNotIn('enlist_aserai_archer_recruit', out)
+        ET.fromstring(out)
 
     def run_main(self, argv):
         with mock.patch.object(sys, 'argv', ['gen'] + argv), \
@@ -255,6 +283,116 @@ class ReseedTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as cm:
                 self.run_main(argv)
             self.assertIn('--reseed', str(cm.exception.code))
+
+
+class EverythingExists:
+    """A stand-in index that contains every id."""
+
+    def __contains__(self, _item):
+        return True
+
+
+PIPE_CLASSES = {'bow_x': 'Bow', 'arrows_a': 'Arrows', 'composite_bow': 'Bow', 'steppe_heavy_bow': 'Bow',
+                'composite_steppe_bow': 'Bow', 'steppe_war_bow': 'Bow'}
+ARCHER = {'id': 'archer_a', 'level': 10, 'group': 'Ranged', 'mounts': [],
+          'slots': {'Body': 'body_a', 'Item0': 'bow_x', 'Item1': 'arrows_a'}}
+
+OLD_FILE = (
+    '<?xml version="1.0" encoding="utf-8"?>\r\n<EquipmentRosters>\r\n'
+    '\r\n    <!-- KHUZAIT -->\r\n\r\n'
+    '    <EquipmentRoster id="enlist_khuzait_archer_recruit" culture="Culture.khuzait">\r\n'
+    '        <EquipmentSet>\r\n            <Equipment slot="Item0" id="Item.k" />\r\n        </EquipmentSet>\r\n'
+    '    </EquipmentRoster>\r\n'
+    '\r\n    <!-- SHAGHANA -->\r\n\r\n'
+    '    <EquipmentRoster id="enlist_shaghana_archer_recruit" culture="Culture.shaghana">\r\n'
+    '        <EquipmentSet>\r\n            <Equipment slot="Item0" id="Item.old" />\r\n        </EquipmentSet>\r\n'
+    '    </EquipmentRoster>\r\n'
+    '\r\n    <!-- NEXT -->\r\n\r\n'
+    '    <EquipmentRoster id="enlist_next_archer_recruit" culture="Culture.next">\r\n'
+    '        <EquipmentSet>\r\n            <Equipment slot="Item0" id="Item.n" />\r\n        </EquipmentSet>\r\n'
+    '    </EquipmentRoster>\r\n'
+    '\r\n</EquipmentRosters>\r\n'
+)
+
+
+class PipelineTests(unittest.TestCase):
+    def run_main(self, argv, troops=None):
+        troops = {'shaghana': [dict(ARCHER)]} if troops is None else troops
+        buf = io.StringIO()
+        with mock.patch.object(sys, 'argv', ['gen'] + argv), \
+                mock.patch.object(ger, 'build_indexes',
+                                  return_value=(EverythingExists(), EverythingExists(), PIPE_CLASSES, {})), \
+                mock.patch.object(ger, 'parse_troops', return_value=troops), \
+                mock.patch.object(ger, 'game_modules', return_value='nowhere'), \
+                mock.patch.object(ger, 'creature_mount_item_ids', return_value=set()), \
+                contextlib.redirect_stdout(buf):
+            ger.main()
+        return buf.getvalue()
+
+    def test_the_launcher_swap_precedes_duplicate_suppression(self):
+        # One donor serves every rank, so the donor kits are identical; only the issued launchers differ.
+        out = self.run_main(['--culture', 'shaghana'])
+        rows = [ln for ln in out.splitlines() if ln.strip().startswith('shaghana') and ' archer ' in ln]
+        self.assertEqual(4, len(rows))
+        self.assertFalse(any('SUPPRESSED' in ln for ln in rows), rows)
+        soldier = [ln for ln in rows if ' soldier ' in ln][0]
+        self.assertIn('Item0=steppe_heavy_bow', soldier)
+
+    def reseed(self, path):
+        return self.run_main(['--culture', 'shaghana', '--apply', '--reseed', '--out', path])
+
+    def test_reseed_replaces_in_place_and_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'rosters.xml')
+            with open(path, 'wb') as fh:
+                fh.write(OLD_FILE.encode('utf-8'))
+            self.reseed(path)
+            first = open(path, 'rb').read()
+            self.reseed(path)
+            second = open(path, 'rb').read()
+        self.assertEqual(first, second)
+        text = first.decode('utf-8')
+        self.assertNotIn('seed-missing', text)
+        self.assertNotIn('Item.old', text)
+        self.assertNotIn('enlist_default_', text, 'reseed does not run the defaults loop')
+        shaghana = text.index('id="enlist_shaghana_archer_recruit"')
+        self.assertGreater(shaghana, text.index('<!-- SHAGHANA -->'))
+        self.assertLess(shaghana, text.index('<!-- NEXT -->'))
+        self.assertIn('id="enlist_shaghana_archer_soldier"', text)
+        ET.fromstring(text)
+
+    def test_reseed_of_a_culture_with_no_rosters_falls_back_to_the_marker_append(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'rosters.xml')
+            bare = '<?xml version="1.0"?>\r\n<EquipmentRosters>\r\n</EquipmentRosters>\r\n'
+            with open(path, 'wb') as fh:
+                fh.write(bare.encode('utf-8'))
+            self.reseed(path)
+            text = open(path, 'rb').read().decode('utf-8')
+        self.assertIn(ger.SEED_MARKER, text)
+        self.assertIn('id="enlist_shaghana_archer_soldier"', text)
+        self.assertNotIn('enlist_default_', text)
+
+
+class LauncherIdCheckTests(unittest.TestCase):
+    def test_a_launcher_id_missing_from_the_universe_fails_closed(self):
+        universe = {i for ranks in ger.ISSUE_LAUNCHER.values() for i in ranks.values()}
+        universe.discard('steppe_war_bow')
+        with self.assertRaises(SystemExit) as cm:
+            ger.check_issue_launchers(universe)
+        self.assertIn('steppe_war_bow', str(cm.exception.code))
+
+    def test_every_launcher_present_passes(self):
+        ger.check_issue_launchers({i for ranks in ger.ISSUE_LAUNCHER.values() for i in ranks.values()})
+
+
+class FileHeaderTests(unittest.TestCase):
+    def test_header_carries_the_abanissa_and_launcher_sentences(self):
+        header = ger.file_header()
+        self.assertIn('ISSUE_LAUNCHER', header)
+        self.assertIn('abanissa binds', header)
+        self.assertIn('builds their rosters from those trees', header)
+        ET.fromstring(header + '</EquipmentRosters>')
 
 
 if __name__ == '__main__':

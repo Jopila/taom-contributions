@@ -218,7 +218,8 @@ Settlement names and equipment names are not TAOM's to register. They belong to 
 1. Settlement names: the key is written into `TAOM_Map/ModuleData/settlements.xml` as `name="{=Settlements.Settlement.name.<settlement id>}English Name"`. See [settlements](settlements.md) for the entry itself.
 2. Translate it by adding a matching `<string id="Settlements.Settlement.name.<settlement id>" text="..."/>` row to each of the twelve `TAOM_Map/ModuleData/Languages/<LANG>/loc_settlements.xml`. That is thirteen files for one name: the source plus twelve twins.
 3. Equipment names work the same way against `LOTRLOME_Armory/ModuleData/Languages/<LANG>/loc_<culture>.xml`, one file per culture rather than one file for everything.
-4. Because neither module is tracked here, run the in-repo ratchet afterwards so a reinstall that drops the English files back over your work is visible: `python tools/check_external_loc_coverage.py`.
+4. For Armory names, `python tools/register_armory_names.py --check` finds item and piece names with no English row and `--apply` writes them (add `--prefix <regex>` for one drop's ids). The translations are the paid translator run.
+5. Because neither module is tracked here, run the in-repo ratchet afterwards so a reinstall that drops the English files back over your work is visible: `python tools/check_external_loc_coverage.py`.
 
 Check: `python tools/check_external_loc_coverage.py`
 Takes effect: full game restart

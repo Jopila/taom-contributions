@@ -930,6 +930,8 @@ def main(argv=None):
         p.error("Specify either --dry-run or --apply")
     if args.seed_only and not args.sync_ids:
         p.error("--seed-only is only valid with --sync-ids")
+    if args.max_entries is not None and args.max_entries < 0:
+        p.error("--max-entries must be 0 or more")  # a negative slice would send all but one entry to the provider
 
     provider = resolve_provider(args.provider, args.model, args.price_in, args.price_out)
     if args.batch and not provider["batch"]:

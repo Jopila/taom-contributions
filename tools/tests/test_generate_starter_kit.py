@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Unit tests for tools/generate_starter_kit.py, on synthetic XML, no game install.
 
 Run:  python -m unittest tools.tests.test_generate_starter_kit
@@ -451,6 +451,121 @@ class TestForeignRows(unittest.TestCase):
             wd.write_text(text[:marker] + '<AvailablePiece id="sm_x"/>' + text[marker:], encoding="utf-8")
             drift = gk.verify_plan(plan, md)
             self.assertTrue(any("sm_x" in d for d in drift), drift)
+
+
+def _tree(root: Path) -> dict:
+    return {p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+
+
+class TestRefusalsWriteNothing(unittest.TestCase):
+    """A refusal that fires after the first write leaves a half-applied tree."""
+
+    FOREIGN_PIECE = '<CraftingPiece\n        id="sm_artist_blade" tier="2" piece_type="Blade" />\n    '
+
+    def _applied(self, tmp: Path):
+        plan = _plan_in(tmp)
+        md = tmp / "LOTRLOME_Armory" / "ModuleData"
+        gk.apply_plan(plan, md, write=True)
+        return plan, md
+
+    @staticmethod
+    def _inject_before_end(path: Path, snippet: str) -> None:
+        text = path.read_text(encoding="utf-8")
+        marker = text.index(gk.MARKER_END)
+        path.write_text(text[:marker] + snippet + text[marker:], encoding="utf-8")
+
+    def _stage(self, tmp: Path, foreign_in: str):
+        plan, md = self._applied(tmp)
+        # make every earlier write step want to change something, so a premature write shows
+        pieces = md / gk.PIECES_FILE
+        pieces.write_text(pieces.read_text(encoding="utf-8").replace('is_hidden="true"', 'is_hidden="false"'),
+                          encoding="utf-8")
+        (md / "LOTRLOME_items" / "gondor" / gk.ITEMS_FILE_NAME).unlink()
+        if foreign_in == "xslt":
+            self._inject_before_end(md / "crafting_templates.xslt", '<UsablePiece piece_id="sm_x"/>')
+        else:
+            self._inject_before_end(pieces, self.FOREIGN_PIECE)
+        return plan, md
+
+    def test_apply_with_foreign_xslt_row_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            plan, md = self._stage(tmp, "xslt")
+            before = _tree(tmp)
+            with self.assertRaises(gk.StarterKitError):
+                gk.apply_plan(plan, md, write=True)
+            self.assertEqual(_tree(tmp), before)
+            self.assertFalse((md / "LOTRLOME_items" / "gondor" / gk.ITEMS_FILE_NAME).exists())
+
+    def test_apply_with_foreign_pieces_row_refuses_and_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            plan, md = self._stage(tmp, "pieces")
+            before = _tree(tmp)
+            with self.assertRaises(gk.StarterKitError) as ctx:
+                gk.apply_plan(plan, md, write=True)
+            self.assertIn("sm_artist_blade", str(ctx.exception))
+            self.assertEqual(_tree(tmp), before)
+            self.assertFalse((md / "LOTRLOME_items" / "gondor" / gk.ITEMS_FILE_NAME).exists())
+
+    def test_revert_with_foreign_xslt_row_writes_and_removes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            plan, md = self._applied(tmp)
+            self._inject_before_end(md / "crafting_templates.xslt", '<UsablePiece piece_id="sm_x"/>')
+            before = _tree(tmp)
+            with self.assertRaises(gk.StarterKitError):
+                gk.revert_plan(plan, md, write=True)
+            self.assertEqual(_tree(tmp), before)
+
+    def test_revert_with_foreign_pieces_row_writes_and_removes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            plan, md = self._applied(tmp)
+            self._inject_before_end(md / gk.PIECES_FILE, self.FOREIGN_PIECE)
+            before = _tree(tmp)
+            with self.assertRaises(gk.StarterKitError) as ctx:
+                gk.revert_plan(plan, md, write=True)
+            self.assertIn("sm_artist_blade", str(ctx.exception))
+            self.assertEqual(_tree(tmp), before)
+
+    def test_apply_and_revert_pieces_refuse_a_foreign_crafting_piece(self):
+        text, _ = gk.apply_pieces("<CraftingPieces>\n</CraftingPieces>\n", [])
+        text = text.replace(gk.MARKER_END, self.FOREIGN_PIECE + gk.MARKER_END)
+        with self.assertRaises(gk.StarterKitError):
+            gk.apply_pieces(text, [])
+        with self.assertRaises(gk.StarterKitError):
+            gk.revert_pieces(text)
+
+    def test_foreign_rows_sees_every_row_kind_and_a_split_id(self):
+        block = (f'{gk.MARKER_START}<CraftingPiece\n id="sm_a"/><Item id="sm_b"/><CraftedItem id="sm_c"/>'
+                 f'<CraftingPiece id="starter_ok"/>{gk.MARKER_END}')
+        self.assertEqual(gk.foreign_rows(block), ["sm_a", "sm_b", "sm_c"])
+
+    def test_verify_reports_a_foreign_crafting_piece(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            plan, md = self._applied(tmp)
+            self.assertEqual(gk.verify_plan(plan, md), [])
+            self._inject_before_end(md / gk.PIECES_FILE, self.FOREIGN_PIECE)
+            drift = gk.verify_plan(plan, md)
+            self.assertTrue(any("sm_artist_blade" in d for d in drift), drift)
+
+
+class TestVerifyExitCodes(unittest.TestCase):
+    """--verify defines exit 1 as drift, so a crash must not borrow it."""
+
+    def _main(self, exc, *flags):
+        with tempfile.TemporaryDirectory() as tmp:
+            argv = ["generate_starter_kit.py", "--armory-path", tmp, "--no-asset-repo", "--quiet", *flags]
+            with mock.patch.object(sys, "argv", argv), mock.patch("builtins.print"), \
+                    mock.patch.object(gk, "build_plan", return_value=object()), \
+                    mock.patch.object(gk, "verify_plan", side_effect=exc):
+                return gk.main()
+
+    def test_verify_crash_returns_two_not_the_drift_code(self):
+        for exc in (gk.StarterKitError("x"), OSError("denied"), ET.ParseError("bad")):
+            self.assertEqual(self._main(exc, "--verify"), 2, repr(exc))
 
 
 class TestMissingArmory(unittest.TestCase):

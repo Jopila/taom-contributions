@@ -42,6 +42,11 @@ DEFAULT_SRC = r"E:\LOTRAOMAssets\_export\witchking_throne"
 DEFAULT_DST = (r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord"
                r"\Modules\TAOM_Map\AssetSources\Scenes\Mordor\textures")
 
+# Painter 12 ships no unpacked PBR preset; its glTF one packs AO/rough/metal
+# into one map. Matched first, so its name never claims the single-map roles.
+ORM_PATTERN = r"occlusion_?roughness_?metal|(^|[^a-z])orm([^a-z]|$)"
+ORM_CHANNELS = {"ao": 0, "rough": 1, "metal": 2}
+
 ROLE_PATTERNS = {
     "base": r"base_?colou?r|albedo|diffuse",
     "normal": r"normal",
@@ -74,6 +79,9 @@ def find_maps(src: Path, match: str = "") -> dict[str, Path]:
         stem = path.stem.lower()
         if match and match.lower() not in stem:
             continue
+        if re.search(ORM_PATTERN, stem):
+            found.setdefault("orm", path)
+            continue
         for role, pat in ROLE_PATTERNS.items():
             if re.search(pat, stem) and role not in found:
                 found[role] = path
@@ -93,6 +101,8 @@ def main():
                          "the Animalia elk's Elk_M_* body and Elk_Antlers_* maps)")
     opts = ap.parse_args()
 
+    if not opts.dry_run:
+        opts.dst.mkdir(parents=True, exist_ok=True)
     maps = find_maps(opts.src, opts.match)
     print(f"[convert] maps found: {({r: p.name for r, p in maps.items()})}")
     if "base" not in maps:
@@ -103,10 +113,13 @@ def main():
     h, w = albedo.shape[:2]
 
     def gray(role, default):
-        if role not in maps:
+        if role in maps:
+            arr = load(maps[role])[:, :, 0]
+        elif "orm" in maps:
+            arr = load(maps["orm"])[:, :, ORM_CHANNELS[role]]
+        else:
             print(f"[convert] no {role} map: using constant {default}")
             return np.full((h, w), default, dtype=np.float32)
-        arr = load(maps[role])[:, :, 0]
         if arr.shape != (h, w):
             arr = np.asarray(Image.fromarray((arr * 255).astype(np.uint8))
                              .resize((w, h), Image.BILINEAR)).astype(np.float32) / 255.0

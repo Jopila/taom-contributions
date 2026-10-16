@@ -204,8 +204,21 @@ def _is_dwarf_mount(mount_id: str) -> bool:
     return bare in DWARF_MOUNT_IDS
 
 
+@functools.lru_cache(maxsize=2)
+def _priced_armory(modules: Path) -> dict:
+    """The Armory's priced melee weapons, once per install path per process (~0.35 s each).
+    A raised error is never cached, so a broken Armory is reported on every call."""
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import melee_catalogue as mc
+    import analyze_melee_ladder as mr
+    cat = mc.load(modules, item_modules={mr.ARMORY_MODULE})
+    priced, _failures = mc.price_all(cat)
+    return priced
+
+
 # --------------------------------------------------------------------------- #
-# Validator                                                                    #
+# Validator                                                                 #
 # --------------------------------------------------------------------------- #
 class Validator:
     # extra_ref_roots: ModuleData folders of OTHER modules TAOM authors into
@@ -294,12 +307,12 @@ class Validator:
                          "was checked. Restore it from git rather than deleting the check."),
             )]
         try:
-            cat = mc.load(modules, item_modules={mr.ARMORY_MODULE})
-            priced, _failures = mc.price_all(cat)
             # The troops of the tree being validated, never the repo's: a --moduledata run
-            # must report on its own files. A tree with no troops/ folder checks nothing.
+            # must report on its own files. A tree with no troops/ folder checks nothing,
+            # and then the Armory is not priced at all.
             troops_dir = self.moduledata / "troops"
             troops = mr.load_troops(troops_dir) if troops_dir.is_dir() else []
+            priced = _priced_armory(modules) if troops else {}
         except (mc.CatalogueError, mr.AnalysisError, OSError) as exc:
             return [Issue(
                 severity=Severity.WARNING, code=code, file=spec_rel, line=0, entry_id="(install)",

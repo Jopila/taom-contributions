@@ -72,11 +72,11 @@
 	<!-- ==================== EREBOR ==================== -->
 	<EquipmentRoster id="child_template_erebor_noble_male" culture="Culture.erebor">
 		<EquipmentSet equipmentType="Civilian">
-			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_noble_a" />
 			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
 		</EquipmentSet>
 		<EquipmentSet equipmentType="Civilian">
-			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_b" />
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_noble_b" />
 			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
 		</EquipmentSet>
 		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
@@ -94,11 +94,11 @@
 	</EquipmentRoster>
 	<EquipmentRoster id="child_template_erebor_townsman_male" culture="Culture.erebor">
 		<EquipmentSet equipmentType="Civilian">
-			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_normal_a" />
 			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
 		</EquipmentSet>
 		<EquipmentSet equipmentType="Civilian">
-			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_b" />
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_normal_b" />
 			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
 		</EquipmentSet>
 		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
@@ -116,11 +116,11 @@
 	</EquipmentRoster>
 	<EquipmentRoster id="child_template_erebor_villager_male" culture="Culture.erebor">
 		<EquipmentSet equipmentType="Civilian">
-			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_normal_a" />
 			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
 		</EquipmentSet>
 		<EquipmentSet equipmentType="Civilian">
-			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_b" />
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_normal_b" />
 			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
 		</EquipmentSet>
 		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />

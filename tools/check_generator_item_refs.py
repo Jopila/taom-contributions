@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Every item id a data generator would write, checked against the items the game loads.
 
 WHY THIS EXISTS
@@ -86,6 +86,9 @@ GENERATORS = (
     GeneratorSpec("tools/extract_wanderers.py", "tables", ("KINGDOM_EQUIPMENT",)),
     GeneratorSpec("tools/generate_batch2_wanderers.py", "tables", ("KINGDOM_EQUIPMENT",)),
     GeneratorSpec("tools/generate_starter_armor.py", "tables", ("CULTURES",), tuple_from=2),
+    # tuple_from=1 skips the slot label of each (slot, id) row of DEFAULT_ROSTER_ITEMS.
+    GeneratorSpec("tools/generate_enlistment_rosters.py", "tables",
+                  ("ISSUE_LAUNCHER", "DEFAULT_ROSTER_ITEMS"), tuple_from=1),
 )
 
 

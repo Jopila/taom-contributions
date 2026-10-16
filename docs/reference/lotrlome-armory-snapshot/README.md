@@ -444,8 +444,10 @@ half with three edits his files do not carry. **Live edits his next drop or an A
 - **Not installed from `db981663`:** his five Gondor armour files (they re-stat 49 Anorien pieces below TAOM's
   kingdom-cap curve) and his runtime logs. His art, shaders and runtime caches were already live, byte-identical to his
   commit; Mike kept the shader-switched bow materials as they are.
-- **Replay after a drop:** take his new files through a three-way merge, then re-add the three edits by hand (no tool
-  writes them) until KEYforce carries them upstream; the gate names whatever is missing.
+- **Replay after a drop:** take his new files through a three-way merge, then write the English rows with
+  `python tools/register_armory_names.py --apply --prefix <his ids>` and do the merge with `tools/merge_live_file.py`; the
+  other two edits (the longbow `is_merchandise` flags and the Couchable spear pieces) stay by hand until KEYforce carries
+  them upstream. The gate names whatever is missing.
 
 **Merging an artist's live file.** The live file is CRLF and his mirror blobs are LF, so a raw `git merge-file` reports
 the whole file as one conflict. Use `python tools/merge_live_file.py <live> --base <rev>:<path> --theirs <rev>:<path>
@@ -478,7 +480,7 @@ TAOM installed the ModuleData half:
 - **Not registered:** 138 Harad item names had no English row before this drop and still have none: 42 in
   `body_armors.xml` (38 chest and tunic pieces, 4 Pezarsan camel bardings), 44 shoulder, 16 head, 12 arm, 12 leg and 12
   `starter_kit.xml` names.
-- **Replay after a drop:** as for #805 above, then move the starter-kit markers in `OneHandedPolearm_JavelinAlternative`
+- **Replay after a drop:** as for #805 above (the English rows by `register_armory_names.py --apply --prefix <his ids>`), then move the starter-kit markers in `OneHandedPolearm_JavelinAlternative`
   again if his file still wraps the whole template; the first test names the six pieces until it is done.
 
 ### ⚠️ APPLIED EDIT: shield-compatible polearms registered under `OneHandedPolearm` (2026-08-10, extended 2026-08-20)

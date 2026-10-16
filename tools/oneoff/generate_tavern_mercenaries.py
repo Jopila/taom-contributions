@@ -149,7 +149,8 @@ def plan_repoint(xml: str) -> tuple[str, int]:
     culture_pattern = re.compile(r'<Culture\s+id="(?P<id>[^"]+)"')
     changed = 0
 
-    for match in list(culture_pattern.finditer(xml)):
+    # Last to first: a replacement changes the text's length, so later match offsets would go stale.
+    for match in reversed(list(culture_pattern.finditer(xml))):
         culture_id = match.group("id")
         if culture_id not in PICKS:
             continue

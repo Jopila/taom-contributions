@@ -13,8 +13,17 @@ HaradWeaponsLiveEditTests.RegisteredKeys; the per-language subfolders do not cou
   python tools/register_armory_names.py --check            # read-only gate, exit 1 on drift
   python tools/register_armory_names.py                    # dry run: what --apply would add
   python tools/register_armory_names.py --apply            # append the rows (backs up each file)
-  python tools/register_armory_names.py --apply --prefix "^sm_hr_st_"   # only some keys
+  python tools/register_armory_names.py --apply --prefix "^sm_hr_st_"   # only some ids or keys
+  python tools/register_armory_names.py --apply --include-baselined   # also the baselined backlog
   python tools/register_armory_names.py --update-baseline  # rewrite the baseline from the install
+
+--apply and the dry run cover only keys NOT in the baseline (exactly what --check flags);
+--include-baselined adds the backlog. Each new English row raises check_external_loc_coverage.py's
+untranslated count by one per language, so run its --update-baseline in the same change.
+--prefix is a regex matched against the key OR the element id (no match: exit 1; bad regex: exit 2).
+Names are read with ElementTree, so a commented-out item is ignored and a file that does not parse
+exits 2. Out of scope: generate_starter_kit.py's names (`starter_kit.xml` item files and the
+TAOM-STARTER-KIT block of the pieces file); they are read from that generator.
 
 --check fails (exit 1) on an unregistered key missing from `tools/armory-unregistered-names-baseline.txt`
 and also on a baseline entry that is no longer unregistered, so the list only shrinks. Exit 2: the
@@ -31,7 +40,6 @@ Game dir: BANNERLORD_GAME_DIR via tools/_gamedir.py; `--modules <Modules folder>
 """
 import argparse
 import datetime
-import html
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -39,13 +47,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _gamedir import game_modules  # noqa: E402
+import generate_starter_kit  # noqa: E402
 
 DEFAULT_GAME = r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord"
 BASELINE = Path(__file__).resolve().parent / "armory-unregistered-names-baseline.txt"
 PIECES_FILE = "LOTRLOME_crafting_pieces.xml"
 PIECES_TARGET = "loc_LOTRLOME_crafting_pieces.xml"
-TAG_RE = re.compile(r"""<(?:Item|CraftedItem|CraftingPiece)\b(?:[^>"']|"[^"]*"|'[^']*')*>""")
-ATTR_NAME_RE = re.compile(r"""\bname\s*=\s*(?:"([^"]*)"|'([^']*)')""")
+NAMED_TAGS = ("Item", "CraftedItem", "CraftingPiece")
+# generate_starter_kit.py owns these names (item twins in starter_kit.xml per culture folder, blade
+# pieces inside a marker block): they are out of scope here. Read from the generator, never filtered
+# on the `starter_` prefix (generate_starter_armor.py's 78 registered keys share it).
+STARTER_ITEMS_FILE = generate_starter_kit.ITEMS_FILE_NAME
 NAME_RE = re.compile(r"^\{=([^}]+)\}(.*)$", re.S)
 STRING_ID_RE = re.compile(r"""<string\s+id\s*=\s*["']([^"']+)["']""")
 BOM = b"\xef\xbb\xbf"
@@ -55,32 +67,48 @@ def read_text(path):
     return Path(path).read_bytes().decode("utf-8-sig")
 
 
-def names_in(path):
-    """[(key, english)] for every inline `{=KEY}text` name in one file, in file order."""
+class SourceParseError(Exception):
+    pass
+
+
+def names_in(path, strip_starter_block=False):
+    """[(key, english, element id)] for every inline `{=KEY}text` name in one file, in file order.
+    Raises SourceParseError when the file is not well-formed XML."""
+    text = read_text(path)
+    if strip_starter_block:
+        text = generate_starter_kit.block_re().sub("", text)
+    try:
+        root = ET.fromstring(text.encode("utf-8"))
+    except ET.ParseError as exc:
+        raise SourceParseError("%s: %s" % (path, exc))
     out = []
-    for tag in TAG_RE.findall(read_text(path)):
-        m = ATTR_NAME_RE.search(tag)
-        if not m:
+    for el in root.iter():
+        if el.tag not in NAMED_TAGS:
             continue
-        n = NAME_RE.match(html.unescape(m.group(1) if m.group(1) is not None else m.group(2)))
+        n = NAME_RE.match(el.get("name") or "")
         if n:
-            out.append((n.group(1), n.group(2)))
+            out.append((n.group(1), n.group(2), el.get("id") or ""))
     return out
 
 
 def collect(md):
-    """{key: (english, target language file name)}; the first definition of a key wins."""
+    """{key: (english, target language file name, {element ids})}; the first definition of a
+    key wins its text and target."""
     found = {}
+
+    def add(path, target, strip=False):
+        for key, text, eid in names_in(path, strip):
+            found.setdefault(key, (text, target, set()))[2].add(eid)
+
     items = md / "LOTRLOME_items"
     for f in sorted(items.rglob("*.xml")):
+        if f.name == STARTER_ITEMS_FILE:
+            continue
         rel = f.relative_to(items)
-        target = "loc_%s.xml" % (rel.parts[0] if len(rel.parts) > 1 else f.stem)
-        for key, text in names_in(f):
-            found.setdefault(key, (text, target))
+        add(f, "loc_%s.xml" % (rel.parts[0] if len(rel.parts) > 1 else f.stem))
     pieces = md / PIECES_FILE
     if pieces.is_file():
-        for key, text in names_in(pieces):
-            found.setdefault(key, (text, PIECES_TARGET))
+        add(pieces, PIECES_TARGET, strip=True)
     return found
 
 
@@ -152,7 +180,7 @@ def do_apply(md, found, unreg, args):
     stamp = datetime.datetime.now()
     plan, skipped = {}, []
     for key in sorted(unreg):
-        text, target = found[key]
+        text, target, _ = found[key]
         if not (md / "Languages" / target).is_file():
             skipped.append((key, target))
         else:
@@ -167,6 +195,7 @@ def do_apply(md, found, unreg, args):
     if not args.apply:
         print("dry run; pass --apply to write")
         return 0
+    written = 0
     for target, rows in sorted(plan.items()):
         path = md / "Languages" / target
         raw = path.read_bytes()
@@ -183,7 +212,12 @@ def do_apply(md, found, unreg, args):
         if not bak.exists():
             bak.write_bytes(raw)
         path.write_bytes(new)
+        written += len(rows)
         print("wrote %s (backup %s)" % (target, bak.name))
+    if written:
+        print("check_external_loc_coverage.py now counts these %d row(s) as untranslated in each language "
+              "until the translation run; confirm that delta, then run it with --update-baseline in the "
+              "same change." % written)
     return status
 
 
@@ -195,11 +229,17 @@ def main(argv=None):
     mode.add_argument("--check", action="store_true", help="read-only gate against the baseline")
     mode.add_argument("--apply", action="store_true", help="append the English rows")
     mode.add_argument("--update-baseline", action="store_true", help="write the unregistered set to the baseline")
-    ap.add_argument("--prefix", help="regex: only keys matching it (dry run and --apply)")
+    ap.add_argument("--prefix", help="regex: only names whose key or element id matches it (dry run and --apply)")
+    ap.add_argument("--include-baselined", action="store_true",
+                    help="also write the baselined backlog (default: only keys --check would flag)")
     args = ap.parse_args(argv)
 
     md = resolve_md(args)
-    found = collect(md)
+    try:
+        found = collect(md)
+    except SourceParseError as exc:
+        print("ERROR: cannot parse %s; nothing was checked" % exc, file=sys.stderr)
+        return 2
     if not found:
         print("ERROR: the Armory yielded no {=KEY} names; nothing was checked", file=sys.stderr)
         return 2
@@ -212,8 +252,17 @@ def main(argv=None):
         print("wrote %d key(s) to %s" % (len(unreg), args.baseline))
         return 0
     if args.prefix:
-        rx = re.compile(args.prefix)
-        unreg = {k for k in unreg if rx.search(k)}
+        try:
+            rx = re.compile(args.prefix)
+        except re.error as exc:
+            print("ERROR: --prefix is not a valid regex: %s" % exc, file=sys.stderr)
+            return 2
+        if not any(rx.search(k) or any(rx.search(i) for i in found[k][2]) for k in found):
+            print("ERROR: --prefix %r matched no key or element id in the Armory" % args.prefix)
+            return 1
+        unreg = {k for k in unreg if rx.search(k) or any(rx.search(i) for i in found[k][2])}
+    if not args.include_baselined:
+        unreg -= read_baseline(args.baseline)
     return do_apply(md, found, unreg, args)
 
 

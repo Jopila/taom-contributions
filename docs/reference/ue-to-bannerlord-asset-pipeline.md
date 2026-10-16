@@ -89,7 +89,8 @@ Substance. The path (`tools/oneoff/blender_prep_tripo_prop.py` — named
 4. `convert_tripo_prop_textures.py` packs the plain maps into the `t_<stem>_{d,n,s}` triple —
    and is the **Substance round-trip**: paint on the prepped FBX, export plain PBR PNGs, re-run
    with `--src <export dir>`. Normal-map relief direction stays smoke-test-arbitrated
-   (`--flip-green`).
+   (`--flip-green`). Painter 12 has no plain PBR preset; its glTF export packs AO, roughness
+   and metallic into one `occlusionRoughnessMetallic` map, which the converter reads (R, G, B).
 
 **Multi-million-tri variant (Gondor harbor ships, 2026-07-28):** Tripo "detailed" exports run
 ~1.9M tris. `--decimate-tris 40000` decimates the visual AFTER the full-res bake source is
@@ -102,6 +103,77 @@ length-along-Y). Ship results at spread 75°: 108–171 islands, fold-over 3.5�
 in thin rigging/chain cylinders where mirrored texels are invisible; all three passed the
 preview-render check, so the flipped-face gate is a *prompt to look at the preview*, not an
 auto-fail.
+
+**Painter retexture variant (Carn Dûm map icon, 2026-10-16):** when Tripo's colors are not worth
+keeping, skip the Blender rebake and paint from geometry instead. The procedure is the
+[`/prep-tripo-prop`](../../.claude/skills/prep-tripo-prop/SKILL.md) skill; this section holds the
+data behind its choices.
+
+- `--skip-bakes --export-high` writes `<name>_low.fbx` (visual only) and `<name>_high.fbx` (the
+  scaled full-resolution source) next to the Kit FBX. Painter bakes Normal, World Space Normal, AO,
+  Curvature, Position and Thickness from that pair (`tools/painter/painter_new_project.py`; 1.86M
+  triangles bake in about 7 seconds at 2K), and a scripted layer stack paints from those maps
+  (`tools/painter/painter_stack_stone_frost.py`). Tripo's own textures are never read.
+- **Planar projection fails on a heavily decimated mesh.** `chart` folded 11 to 16% of faces at
+  every spread on the 25k-triangle Carn Dûm low (1.86M source, a 1.3% decimation ratio). The
+  `chart_abf` method keeps the same charts, marks their borders as seams and lets Blender's
+  angle-based unwrap solve each island: 2,686 folded faces became 204.
+- **Every chart method now averages island scale** (`uv.average_islands_scale`) before packing,
+  and every probe reports `texel_p95_p5`: the area-weighted density of the densest 5% of the
+  surface over the sparsest 5%, so 1.0 is uniform.
+- **Sharp-edge seams against charting, measured on the same mesh:**
+
+  | Method (25k triangles unless noted) | Islands | UV use | Texel p95/p5 | Folded faces |
+  |---|---|---|---|---|
+  | `sharp_seams` 40° | 5,707 | 3.9% | 1.03 | 4 |
+  | `sharp_seams` 50° | 3,992 | 7.2% | 1.24 | 20 |
+  | `sharp_seams` 60° | 2,586 | 14.8% | 34.9 | 71 |
+  | `sharp_seams` 50°, merge under 5 / 10 / 20 faces | 992 / 587 / 344 | 19 / 27 / 34% | 1.89 / 2.98 / 5.31 | 99 / 227 / 304 |
+  | `sharp_seams` 50°, 12k triangles | 1,613 | 17.8% | 1.20 | 20 |
+  | `chart_abf` 45° / 55° / 65° | 495 / 407 / 302 | 27 / 30 / 35% | 2.20 / 2.08 / 2.11 | 227 / 227 / 196 |
+  | `chart_abf` 75° (shipped) | 186 | 44.3% | 2.31 | 206 |
+  | `chart_abf` 75°, 12k triangles | 128 | 52.8% | 7.00 | 204 |
+
+  Seams on every edge sharper than about 50°, packed at one texel density, is the standard artist
+  method (KEYforce's advice for this icon) and the right one for a clean, hand-made low poly. A
+  decimated Tripo surface is lumpy everywhere, so the sharp edges cut it into thousands of slivers
+  and the padding between them wastes the texture. Merging small islands back trades density away
+  faster than it gains use. At 1K, `chart_abf` 75 gives about 1.6 times the average resolution of
+  the pure sharp-seam layout with 186 seams instead of 1,613; its sparsest areas match the
+  sharp-seam density. A retopologised low poly would let `sharp_seams` win on every metric.
+- **Targets for picking a method:** UV use at least 40%, texel p95/p5 at most 2.5, folded faces
+  under 1% of triangles.
+- **Map icon handoff:** the Kit takes `<name>_low.fbx` renamed `<name>.fbx` (no `bo_`; the
+  settlement entity has its own) plus the 1K textures. Conventions, the Gundabad budget table and
+  the registry of custom icons: [map-icons.md](../kitbash/map-icons.md).
+
+**Rebuild variant (Carn Dûm map icon, later 2026-10-16):** the retextured Tripo icon still read as
+melted wax in the Kit, at 25,000 and at 90,000 triangles: the sculpt's rounded geometry, not its
+texture, was the fault. The icon was rebuilt from clean solids by
+`tools/oneoff/blender_build_carn_dum_icon.py` and unwrapped by `tools/blender/unwrap_texture_sets.py`;
+the steps are in [map-icons.md](../kitbash/map-icons.md) "Rebuilding an icon from solids". The data
+behind the unwrap, measured on the 84,053-triangle rebuild:
+
+- **Visible area decides the texture budget.** Of 27,649 m² of stone, 10,121 m² can be seen from the
+  sky (rays from every face, 10 to 90 degrees up). Most of the rest is the inside of the terrace
+  rings. Hidden faces stacked in one square give the visible ones that space.
+- **Island count, not distortion, limits a hard-surface layout.** At 1K, a 2 px margin round a
+  6 px island takes half the space:
+
+  | Method (towers set, 28,072 faces) | Visible islands | UV use | Visible px/m |
+  |---|---|---|---|
+  | Smart UV Project 45°, 4 px margin | about 5,000 | 5% | 3.4 |
+  | Smart UV Project 66° plus angle-based re-unwrap, 2 px margin | about 4,200 | not measured | 7.8 |
+  | Nets (one island per part), 2 px margin | about 900 | 51% | 10.9 |
+
+  "Nets" joins each part's faces along a spanning tree, flattest neighbours first, and keeps a cut
+  only where it ends on a boundary or at a corner: a box unfolds as a cross, a spike or rib as one
+  strip with one seam. Long rings are cut into sectors by their perimeter, not their bounding box
+  (a 38 m wide ring unrolls to 119 m).
+- **What reads at 1K on a 55 m icon:** colour, broad tone and the baked occlusion. Features under
+  2 texels vanish; stone courses, worn edges, soot and streaks did not read and were removed at
+  Mike's word. The Painter traps found on the way are in
+  [substance-painter-mcp-setup.md](substance-painter-mcp-setup.md).
 
 ## Kit-composition path — new pieces from measured existing parts (2026-07-28/29)
 

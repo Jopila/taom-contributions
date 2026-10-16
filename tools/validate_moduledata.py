@@ -712,7 +712,7 @@ def main() -> int:
     extra_roots = build_extra_ref_roots(game_modules)
 
     validator = ts.Validator(moduledata, schemas, registries, extra_ref_roots=extra_roots,
-                            game_modules=game_modules if game_modules.exists() else None)
+                            game_modules=game_modules)
     for root in validator.extra_ref_roots:
         print(f"Also sweeping refs in: {root}", file=sys.stderr)
     # Never let a vanished root pass as a clean run. Silence here would revert the

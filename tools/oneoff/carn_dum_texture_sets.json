@@ -1,0 +1,11 @@
+{
+  "sets": [
+    {"name": "carn_dum_towers", "materials": ["carn_dum_stone"], "parts": ["towers", "central_tower"], "resolution": 1024},
+    {"name": "carn_dum_walls", "materials": ["carn_dum_stone"], "parts": ["outer_wall", "gate", "rear_tower", "inner_wall", "keep"], "resolution": 1024},
+    {"name": "carn_dum_town", "materials": ["carn_dum_stone"], "parts": ["terraces", "houses", "stairs", "turrets"], "resolution": 1024},
+    {"name": "carn_dum_paving", "materials": ["carn_dum_paving"], "resolution": 1024},
+    {"name": "carn_dum_roof", "materials": ["carn_dum_roof"], "resolution": 512},
+    {"name": "carn_dum_iron", "materials": ["carn_dum_iron"], "resolution": 256},
+    {"name": "carn_dum_dark", "materials": ["carn_dum_dark"], "resolution": 256}
+  ]
+}

@@ -64,7 +64,10 @@ public class HaradWeaponsLiveEditTests
     {
         string md = ArmoryModuleData();
         var crafted = HaradWeapons(md).Descendants("CraftedItem").ToList();
-        string xslt = StarterKitBlock.Replace(File.ReadAllText(Path.Combine(md, "weapon_descriptions.xslt")), "");
+        // Parsed, not regex-matched: a commented-out AvailablePiece must not count as listed.
+        var stylesheet = XDocument.Parse(
+            StarterKitBlock.Replace(File.ReadAllText(Path.Combine(md, "weapon_descriptions.xslt")), ""));
+        XNamespace xsl = "http://www.w3.org/1999/XSL/Transform";
 
         var missing = new List<string>();
         foreach (var (template, minPieces, description, why) in NeededDescriptions)
@@ -76,12 +79,13 @@ public class HaradWeaponsLiveEditTests
             Assert.IsTrue(pieces.Count >= minPieces,
                 $"only {pieces.Count} Harad {template} pieces found; the parse is broken, or a drop removed his {template} items");
 
-            var block = Regex.Match(xslt,
-                $@"WeaponDescription\[@id='{Regex.Escape(description)}'\]/AvailablePieces.*?</xsl:template>",
-                RegexOptions.Singleline);
-            var listed = new HashSet<string>(block.Success
-                ? Regex.Matches(block.Value, "<AvailablePiece id=\"([^\"]+)\"").Cast<Match>().Select(m => m.Groups[1].Value)
-                : Enumerable.Empty<string>());
+            string match = $"WeaponDescription[@id='{description}']/AvailablePieces";
+            var templates = stylesheet.Descendants(xsl + "template")
+                .Where(t => (string?)t.Attribute("match") == match).ToList();
+            Assert.IsTrue(templates.Count <= 1,
+                $"{templates.Count} templates match {match}; only one can apply, so reading any one proves nothing");
+            var listed = new HashSet<string>(templates
+                .SelectMany(t => t.Descendants("AvailablePiece").Select(p => (string?)p.Attribute("id") ?? "")));
             missing.AddRange(pieces.Where(p => !listed.Contains(p)).Select(p => $"{p} not in {description} ({why})"));
         }
 

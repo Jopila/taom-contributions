@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """tools/oneoff/generate_tavern_mercenaries.py: dry run by default, writes only changed files.
 
 Run:  python -m unittest discover -s tools/tests -p "test_generate_tavern_mercenaries.py"
@@ -140,6 +140,36 @@ class FailsBeforeWriting(_Tree):
             with self.assertRaises(SystemExit):
                 self.run_main(["--apply"])
         self.assertEqual(before, _snapshot(self.root))
+
+
+class RepointOffsets(unittest.TestCase):
+    """A replacement that grows one culture's block must not shift the next culture's offsets."""
+
+    def test_a_grown_first_block_still_repoints_the_second_culture(self):
+        xml = (
+            '<Cultures>\r\n'
+            '  <Culture id="one">\r\n'
+            '    <basic_mercenary_troops>\r\n'
+            '      <template name="NPCCharacter.vanilla_a" />\r\n'
+            '    </basic_mercenary_troops>\r\n'
+            '  </Culture>\r\n'
+            '  <Culture id="two">\r\n'
+            '    <basic_mercenary_troops>\r\n'
+            '      <template name="NPCCharacter.vanilla_b" />\r\n'
+            '    </basic_mercenary_troops>\r\n'
+            '  </Culture>\r\n'
+            '</Cultures>\r\n'
+        )
+        picks = {
+            "one": [("one_a", "troops_one", "A"), ("one_b", "troops_one", "B"), ("one_c", "troops_one", "C")],
+            "two": [("two_a", "troops_two", "A")],
+        }
+        with mock.patch.object(gtm, "PICKS", picks):
+            out, changed = gtm.plan_repoint(xml)
+        self.assertEqual(2, changed)
+        self.assertIn('NPCCharacter.two_a_merc', out)
+        self.assertNotIn('vanilla_b', out)
+        self.assertEqual(3, out.count('NPCCharacter.one_'))
 
 
 if __name__ == "__main__":

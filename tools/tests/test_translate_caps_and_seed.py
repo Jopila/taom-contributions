@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """--max-entries 0 is a real cap of zero, and --seed-only seeds ids without translating.
 
 Run:  python -m unittest discover -s tools/tests -p "test_translate_caps_and_seed.py"
@@ -79,6 +79,11 @@ class MaxEntriesZero(_Tree):
             code, out = _run(["--lang", "DE", "--module", "TAOM", "--apply", "--max-entries", "0"])
         self.assertEqual(0, code)
         self.assertIn("cap applied: 0/3", out)
+
+    def test_negative_cap_is_an_error_not_an_almost_unlimited_slice(self):
+        # need_llm[:-1] would send all but one entry to the paid provider.
+        code, _ = _run(["--lang", "DE", "--module", "TAOM", "--dry-run", "--max-entries", "-1"])
+        self.assertEqual(2, code)
 
     def test_no_cap_flag_leaves_the_list_alone(self):
         entries = [twc.Entry(self.target, f"k{i}", "English", "English") for i in range(3)]

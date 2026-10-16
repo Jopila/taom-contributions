@@ -1,6 +1,6 @@
 ---
 name: prep-tripo-prop
-description: Use when a Tripo AI FBX must become a Bannerlord prop or map icon, from decimation and UVs through a scripted Painter retexture to the Kit handoff.
+description: Use when a Tripo AI FBX must become a Bannerlord prop or map icon (decimate or rebuild from solids, UVs, scripted Painter texturing, Kit handoff).
 argument-hint: [<tripo fbx> ...]
 ---
 
@@ -35,8 +35,29 @@ Tool flags are in each script's docstring.
 3. Set the triangle budget from the reference asset. Map icon textures are 1K; prop textures are
    diffuse 2K and the rest 1K.
 4. Report triangles, textures and atlas state per candidate before changing anything.
+5. **Pick the route.** Decimate (Phase 2A) when the model has flat faces worth keeping. Rebuild
+   (Phase 2B) when it is a sculpt: rounded corners and dripping walls read as melted wax at any
+   triangle count in the Kit, and decimation cannot add the hard edges back. Show Mike the decimated
+   mesh beside the source in Blender before you decide.
 
-## Phase 2: Blender prep
+## Phase 2B: Rebuild from solids, then unique UVs
+
+Steps, numbers and the Carn Dûm example: [map-icons.md](../../../docs/kitbash/map-icons.md)
+"Rebuilding an icon from solids".
+
+1. Copy `tools/oneoff/blender_build_carn_dum_icon.py` as the pattern: a layout table measured from
+   the Tripo model, solids from primitives that wind every face outward, a material slot and a
+   `part` per face. `blender-launcher -b -P <builder> -- <out dir>`; read the renders. Show Mike the
+   shape in GUI Blender and iterate until he approves it. No texturing before that.
+2. Probe, then unwrap: `blender-launcher -b -P tools/blender/unwrap_texture_sets.py -- --blend <out>\<name>_blockout.blend --rules <rules.json> --out <dir>\uv --name <name> [--probe]`.
+   `suspect_inverted_faces` must be small in area (crevice noise); a large area is a winding bug in
+   the builder. Read every `uv_<set>.png` and the visible px/m per set.
+3. Painter: `painter_new_project.py` with `--args-json` holding `low`, `"low_as_high": true` and
+   `set_resolutions`, then `painter_stack_angmar_fortress.py` (or a copy for another look), then
+   `painter_export.py` without `size`, then `render_tiled_preview.py -- <fbx> <export dir> <out dir>`.
+4. Continue with Phase 4, one `t_*_{d,n,s}` triple per texture set and one Kit material per set.
+
+## Phase 2A: Blender prep
 
 1. Probe two UV methods on the decimated mesh, in parallel. Same arguments for both runs, then
    `--uv-method sharp_seams --probe-spreads 50` for one and `--uv-method chart_abf --probe-spreads 75`
@@ -60,8 +81,9 @@ Tool flags are in each script's docstring.
    `tools/painter/painter_stack_<look>.py` and keep it idempotent.
 3. `python tools/painter/painter_run.py tools/painter/painter_export.py --arg out_dir=<dir>\painter --arg spp=<dir>\<mesh>.spp`.
 4. `blender-launcher -b -P tools/blender/render_pbr_preview.py -- <dir>\<mesh>_low.fbx <dir>\painter\t_<mesh>_ <dir>\painter`.
-   Read both previews before you show them. If a layer looks wrong, read the exported `baseColor`
-   PNG: it shows which mask covers what.
+   Read both previews before you show them. A lit render can lie (tone mapping, a bad normal map):
+   measure the exported `baseColor` PNG, and to see what one layer covers, give it a flat false
+   colour through `--args-json` (`{"stone": [1, 0, 0]}`), export and look.
 5. Show Mike the previews and the `.spp`. Iterate with `--arg` until he approves.
 
 ## Phase 4: Convert and hand off
@@ -99,5 +121,10 @@ go to `docs/reviews/lessons/build-tooling-workflow.md`, a better default goes in
 | Painter refuses every color ("non legacy color space") | The project is Legacy: create it with `painter_new_project.py` (OCIO) |
 | Frost or another world-space mask covers every wall | Walls sit at 0.5 in that mask: raise `ws_balance` |
 | Blotches that break at UV island edges | Generator grunge runs in UV space: `Use_Triplanar=1` |
-| Thousands of islands, single-digit UV use | Sharp seams on a decimated mesh: use `chart_abf` |
+| Thousands of islands, single-digit UV use | Sharp seams on a decimated mesh: use `chart_abf`; on a rebuilt mesh, `unwrap_texture_sets.py` nets |
 | Converter finds no roughness or metallic | Painter 12 exports glTF ORM; the converter reads the packed map |
+| Every exported colour lighter than written | A fill takes numbers as linear: the recipes' `rgb()` converts sRGB first |
+| Blotchy lit preview, flat albedo | Height or a material's normal tilts the normal map: no relief; set `active_channels` after `set_material_source` |
+| A layer has no effect | Its feature is under 2 texels, or its mask polarity is wrong (`bricks_01` is white in the joints): false-colour it |
+| Whole walls dark | AO baked too deep with a ground plane: `ao_distance` 0.05 |
+| Boxes inside out in game, fine in Blender | Faces wound inward: Blender and Cycles draw back faces. `unwrap_texture_sets.py` reports them |

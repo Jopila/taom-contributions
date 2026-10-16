@@ -2736,9 +2736,11 @@ class FlagScopeTests(unittest.TestCase):
     def test_missing_install_announces_the_melee_skip(self):
         with tempfile.TemporaryDirectory() as tmp:
             (Path(tmp) / "ModuleData").mkdir()
-            _code, _out, err = _run_main("--moduledata", str(Path(tmp) / "ModuleData"),
-                                         "--game-modules", str(Path(tmp) / "nope"))
+            _code, out, err = _run_main("--moduledata", str(Path(tmp) / "ModuleData"),
+                                        "--game-modules", str(Path(tmp) / "nope"))
         self.assertIn("MELEE_LADDER_INVERSION SKIPPED", err)
+        # The skip must be real: no fallback to the default install's pricing.
+        self.assertNotIn("MELEE_LADDER_INVERSION", out)
 
 
 class SchemaInvalidPassTests(unittest.TestCase):

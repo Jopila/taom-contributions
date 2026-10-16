@@ -184,6 +184,74 @@ class ApplyTests(Armory):
         self.assertNotIn("k_new", self.harad.read_text(encoding="utf-8"))
         self.assertNotIn("k_piece", self.pieces.read_text(encoding="utf-8"))
 
+    def test_prefix_matches_element_id(self):
+        code, _ = self.run_tool("--apply", "--prefix", "^g$")
+        self.assertEqual(code, 0)
+        self.assertIn("k_gon", self.gondor.read_text(encoding="utf-8"))
+        self.assertNotIn("k_new", self.harad.read_text(encoding="utf-8"))
+
+    def test_prefix_with_zero_matches_exits_1(self):
+        code, out = self.run_tool("--apply", "--prefix", "^nothing_matches$")
+        self.assertEqual(code, 1)
+        self.assertIn("matched", out)
+        self.assertNotIn("k_new", self.harad.read_text(encoding="utf-8"))
+
+    def test_bad_regex_exits_2(self):
+        code, out = self.run_tool("--apply", "--prefix", "([")
+        self.assertEqual(code, 2)
+        self.assertIn("regex", out.lower())
+
+    def test_unparseable_source_file_exits_2(self):
+        (self.md / "LOTRLOME_items" / "gondor" / "broken.xml").write_text("<Items><Item", encoding="utf-8")
+        code, out = self.run_tool("--check")
+        self.assertEqual(code, 2)
+        self.assertIn("broken.xml", out)
+
+    def test_commented_out_item_is_not_counted(self):
+        (self.md / "LOTRLOME_items" / "gondor" / "armors.xml").write_text(
+            '<Items><Item id="g" name="{=k_gon}Gondor Helm"/><!-- <Item id="z" name="{=k_dead}Dead"/> --></Items>',
+            encoding="utf-8")
+        self.assertNotIn("k_dead", self.run_tool("--check")[1])
+
+    def test_apply_writes_only_non_baselined_keys_by_default(self):
+        self.baseline.write_text("k_gon\n", encoding="utf-8")
+        code, out = self.run_tool("--apply")
+        self.assertEqual(code, 0)
+        self.assertIn("k_new", self.harad.read_text(encoding="utf-8"))
+        self.assertIn("k_piece", self.pieces.read_text(encoding="utf-8"))
+        self.assertNotIn("k_gon", self.gondor.read_text(encoding="utf-8"))
+        self.assertIn("check_external_loc_coverage.py now counts these 2 row(s)", out)
+
+    def test_include_baselined_writes_the_backlog_too(self):
+        self.baseline.write_text("k_gon\n", encoding="utf-8")
+        self.run_tool("--apply", "--include-baselined")
+        self.assertIn("k_gon", self.gondor.read_text(encoding="utf-8"))
+        self.assertIn("k_new", self.harad.read_text(encoding="utf-8"))
+
+
+class StarterKitTests(Armory):
+    def setUp(self):
+        super().setUp()
+        (self.md / "LOTRLOME_items" / "gondor" / ran.STARTER_ITEMS_FILE).write_text(
+            '<Items><Item id="starter_x" name="{=k_starter_item}Starter X"/></Items>', encoding="utf-8")
+        (self.md / "LOTRLOME_crafting_pieces.xml").write_text(
+            '<Pieces><CraftingPiece id="p" name="{=k_piece}Guard"/>\n'
+            '<!-- TAOM-STARTER-KIT:START -->\n'
+            '<CraftingPiece id="sp" name="{=k_starter_piece}Starter Blade"/>\n'
+            '<!-- TAOM-STARTER-KIT:END -->\n</Pieces>', encoding="utf-8")
+
+    def test_check_ignores_starter_kit_names(self):
+        out = self.run_tool("--check")[1]
+        self.assertNotIn("k_starter_item", out)
+        self.assertNotIn("k_starter_piece", out)
+        self.assertIn("k_piece", out)
+
+    def test_apply_ignores_starter_kit_names(self):
+        self.run_tool("--apply", "--include-baselined")
+        self.assertNotIn("k_starter_item", self.gondor.read_text(encoding="utf-8"))
+        self.assertNotIn("k_starter_piece", self.pieces.read_text(encoding="utf-8"))
+        self.assertIn("k_piece", self.pieces.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

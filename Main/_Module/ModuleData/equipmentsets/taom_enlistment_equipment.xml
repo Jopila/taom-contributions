@@ -43,9 +43,6 @@
 -->
 <EquipmentRosters>
 
-    <!-- ASERAI -->
-
-
     <!-- BATTANIA -->
 
     <EquipmentRoster id="enlist_battania_infantry_recruit" culture="Culture.battania">
@@ -3184,10 +3181,21 @@
             <Equipment slot="Cape" id="Item.sk_sg_st_pauld_inf_heavy_a" />
         </EquipmentSet>
     </EquipmentRoster>
-    <!-- Hand-tuned bows (2026-10-15): every Harad launcher (ladder_harad_bow_*) needs Bow 100, which an enlistee cannot equip, so the archer chain uses the vanilla steppe ladder: composite_bow, steppe_heavy_bow, composite_steppe_bow, steppe_war_bow. EnlistmentArcherLauncherDataTests pins it. -->
     <EquipmentRoster id="enlist_shaghana_archer_recruit" culture="Culture.shaghana">
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.composite_bow" />
+            <Equipment slot="Item1" id="Item.hr_st_arrows_a" />
+            <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
+            <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
+            <Equipment slot="Body" id="Item.sk_sg_st_chest_arc_med_a" />
+            <Equipment slot="Leg" id="Item.sk_sg_st_grvs_med_b" />
+            <Equipment slot="Gloves" id="Item.sk_sg_st_bracer_med_b" />
+            <Equipment slot="Cape" id="Item.sk_sg_st_pauld_arc_med_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_shaghana_archer_soldier" culture="Culture.shaghana">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.steppe_heavy_bow" />
             <Equipment slot="Item1" id="Item.hr_st_arrows_a" />
             <Equipment slot="Item2" id="Item.hr_st_mace_med_a" />
             <Equipment slot="Head" id="Item.sk_hr_st_helmet_med_a" />
@@ -3339,7 +3347,6 @@
             <Equipment slot="Cape" id="Item.sk_hr_st_pauld_inf_heavy_a" />
         </EquipmentSet>
     </EquipmentRoster>
-    <!-- Hand-tuned bows (2026-10-15): every Harad launcher (ladder_harad_bow_*) needs Bow 100, which an enlistee cannot equip, so the archer chain uses the vanilla steppe ladder: composite_bow, steppe_heavy_bow, composite_steppe_bow, steppe_war_bow. EnlistmentArcherLauncherDataTests pins it. -->
     <EquipmentRoster id="enlist_abanissa_archer_recruit" culture="Culture.abanissa">
         <EquipmentSet>
             <Equipment slot="Item0" id="Item.composite_bow" />
