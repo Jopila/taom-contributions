@@ -306,6 +306,24 @@ All measured 2026-09-05. Paths under the game install are written module-relativ
 | 7 Erebor clans | `grep -nP 'id="clan_erebor'` on `characters/clans.xml` |
 | 36 Erebor lords in `lords.xml`, 36 Erebor heroes in `heroes.xml`, 0 `lord_E` templates in either stylesheet | `grep -cP '<NPCCharacter\b[^>]*culture="Culture.erebor"'`; `grep -cP 'faction="Faction.clan_erebor_'`; `grep -c "lord_E[0-9]"` on both `.xslt` files |
 
+## G. Another mod that stands aside for TAOM: VanillaTuning
+
+yotthani's VanillaTuning v0.1.1 switches five of its own patches off when TAOM carries the same fix (yotthani, `yotthani/bannerlord` `HoN/VanillaTuning/Core/TaomOverlap.cs@784fef93` and `Integration/VanillaTuningSubModule.cs@784fef93:23-38`, code read by TAOM on 2026-10-15, VanillaTuning v0.1.1, game v1.5.5). This section is the one place that states the contract; it is a name contract with another mod's code, so it is not a trap row (the test below is its gate).
+
+- **The ids and the four names.** The decision is a lookup of full type names in the loaded assembly named `TAOM`:
+
+  | VanillaTuning patch id | TAOM type it looks for |
+  |---|---|
+  | `nameplate-cull` | `TAOM.Features.NameplateCull.NameplateCullModule` |
+  | `map-view-release` | `TAOM.Features.MapViewRelease.MapViewReleaseModule` |
+  | `mission-start-guard` | `TAOM.Features.MissionStartGuard.MissionStartGuardModule` |
+  | `frame-buffer-guard`, `frame-buffer-watch` | `TAOM.Features.SkeletonBuffer.SkeletonBufferModule` (one type, two ids) |
+
+- **What it checks, and why load order does not matter.** `LeaveToTaom` runs in VanillaTuning's `OnSubModuleLoad` and asks only whether `taom.GetType(name, false)` is non-null; it reads no TAOM setting. Its source comment says TAOM "loads before us (SubModule.xml)", but the check does not depend on that: on v1.5.5 `Module.LoadSubModules` loads every module's assemblies and constructs every submodule (`Module.cs:1091-1145`) before the first `OnSubModuleLoad` (`:1162`, `:226-233`), so TAOM's types are present whichever way the launcher orders the two. See [submodule-and-registration](submodule-and-registration.md) (TAOM-verified, v1.5.5 managed decompile).
+- **TAOM's MCM toggle is then the only switch.** VanillaTuning stands aside because the class exists, not because the feature is on. A player who turns one of the four TAOM features off in MCM therefore has neither mod doing that work: VanillaTuning does not step back in. This is read from the code, not observed in game.
+- **Renaming or moving a class re-arms the duplicate.** If one of the four classes changes namespace or name, or leaves `FeatureModules.All`, the lookup fails and VanillaTuning patches the same site again (a second nameplate update per frame, a second map-view release, a second start guard, and a skeleton-buffer site TAOM sees as already guarded). Parking a module while its class stays loaded has the opposite effect: VanillaTuning stands aside and nobody does the work. The shader notice couples the other way round (TAOM stands down for VanillaTuning); see [shader-compile-notice](../features/shader-compile-notice.md) "Stands down".
+- **The gate.** `TAOM.Tests/Composition/VanillaTuningOverlapContractTests.cs` (#808) pins the assembly name `TAOM`, that each of the four full names resolves by `GetType`, and that each module is listed once in `FeatureModules.All` and not parked. Change a name only together with that test, and tell yotthani (the list is in yotthani's `TaomOverlap.cs`, not in TAOM).
+
 ## Read next
 
 - [object-system-mbobjectmanager](../reference/engine/object-system-mbobjectmanager.md): the engine reference this chapter's sections A to C distil (its line numbers are v1.4.5; the ones above are v1.4.8).

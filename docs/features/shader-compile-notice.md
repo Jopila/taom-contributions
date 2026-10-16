@@ -49,6 +49,15 @@ no compile progress to managed code.
   `%COUNT%` and `%TOTAL%` placeholders and never touches the engine.
 - **Stands down** on a dedicated server (`IDedicatedServerProvider`) and when yotthani's VanillaTuning module is
   active, which shows the same notice.
+  **Mutual stand-aside risk (2026-10-15):** `ShaderCompileProgress.ShouldStart` (`ShaderCompileProgress.cs:67-76`)
+  returns false whenever a module with the id `VanillaTuning` is active, whether or not VanillaTuning's own
+  `shader-compile-notice` patch is on. VanillaTuning v0.1.1 stands aside for TAOM on four class names
+  ([load-order-and-dependencies.md](../modding/load-order-and-dependencies.md) section G) and could add a
+  `shader-compile-notice` row for `TAOM.Features.ShaderCompileNotice.ShaderCompileNotice` the same way. If it did, both
+  sides would step back and nobody would show the notice. Until that is settled with yotthani, TAOM keeps its
+  stand-down (so no player gets two windows); when VanillaTuning ships the row, TAOM removes its own VanillaTuning
+  stand-down in the same release. This is a code-read inference about a change that has not been made. See
+  [the misc lessons](../reviews/lessons/misc.md) "A presence-based stand-aside breaks when the other mod stands aside too".
 
 ### Component Diagram
 

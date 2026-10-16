@@ -63,7 +63,7 @@ and the gate.
 | Mount size | A Monster with `taom_body_length` overrides every item's `body_length`: resize on the Monster | [monster size](../features/monster-size.md) |
 | Riderless creatures | Soldiers ignore a riderless `Mountable` agent; unmount only one built with a weapon state | [creature bandits](../features/creature-bandits.md) |
 | Animation | Engine skeleton: engine frames, rest pose at frame 0, list order; own skeleton: retarget the clips too | [skeleton](../reference/bannerlord-skeleton-authoring.md) |
-| Kit clip rename | Corrupts the clip: keep the name, close the Kit, run `rename_anim_clip_tpac.py` | [tools](../../tools/README.md) |
+| Kit clip rename | Corrupts the clip: keep the name, close the Kit, `rename_anim_clip_tpac.py`. A rope-flagged copy lacking `{clip}_weapon` CTDs | [tools](../../tools/README.md) |
 | New race rigs | LOD0 head/eye/mouth: 101 morphs, eyes following their sockets; release/blocked codes: vanilla or self-keyed clip. Else CTD | [troll](../features/troll-race.md) |
 | UE clip export | The root node carries pelvis height above bind; keep root height, drop only travel and yaw | [pipeline](../reference/ue-to-bannerlord-asset-pipeline.md) |
 | Kit FBX materials | Bound by name module-wide, reset on every re-import; a same-named older material wins silently | [troll](../features/troll-race.md) |

@@ -560,3 +560,29 @@ memory of the ideas, not of the code.
 - **Prevent:** before writing a `behavioural-port` row, diff the new files against the source (names, string literals,
   loop shapes, ids) and either rewrite each match from a TAOM spec or relabel it `verbatim-port`.
 - **Source:** `docs/reviews/rca-stuck-battle-guard-2026-10-06.md` row 6 (Completeness lens).
+
+### A presence-based stand-aside breaks when the other mod stands aside too (yotthani review, 2026-10-15)
+TAOM's shader-compile notice does not start when a module with the id `VanillaTuning` is active
+(`ShaderCompileProgress.ShouldStart`, `ShaderCompileProgress.cs:67-76`), because VanillaTuning shows the same notice.
+VanillaTuning v0.1.1 stands aside for TAOM on four class names (`HoN/VanillaTuning/Core/TaomOverlap.cs@784fef93`). If it
+adds a row for `TAOM.Features.ShaderCompileNotice.ShaderCompileNotice`, each mod yields to the other and nobody shows the
+notice. Both rules test that the other mod is present, not that it is doing the work; the same shape as the co-op
+predicates in `lessons/campaign-mechanics.md` ("Presence is not authority").
+- **Why missed:** TAOM wrote its stand-down on 2026-10-06, before VanillaTuning had any TAOM stand-aside (the `TaomOverlap`
+  comment dates its first rows to 2026-10-08). The other mod's next change needs no TAOM edit, so nothing in TAOM's
+  tree signals that the pair now cancels.
+- **Prevent:** when a mod yields to another one, find out whether the other mod yields back before shipping either side,
+  and swap the order in one release: the new owner ships the row, and the old stand-down is removed in the same release
+  (TAOM keeps its own until then, so no player gets two windows or none). Prefer detecting the other mod's effect over its
+  presence (the 2026-10-08 rule for the skeleton guard). Tell the other author in the same message.
+- **Source:** `docs/reviews/adopt-yotthani-2026-10-15.md` ("For yotthani"); `docs/features/shader-compile-notice.md`.
+
+### A doc batch written beside the code is re-read against the reviewed code before it ships (2026-10-15)
+The yotthani review's docs batch was written in its own worktree while the code items went through review. Two of its
+sentences described the designs: the lifecycle reference said every step of the main-menu hook runs through the guard
+and that a test pins that shape, and the coexistence section promised a control test for an unknown name. The review
+had narrowed the guard to one call and deleted the control test as redundant.
+- **Why missed:** the batch's sources were the design files, and nothing tied it to the review's fix list.
+- **Prevent:** before a docs batch merges, grep it for every type, test and file name the code review changed or
+  deleted, and re-read each sentence that names one against the committed code.
+- **Source:** `docs/reviews/rca-yotthani-review-2026-10-15.md`, second review S12 (Completeness lens).

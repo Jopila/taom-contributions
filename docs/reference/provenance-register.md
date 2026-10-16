@@ -95,8 +95,8 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | Khuzdul vocabulary (J.R.R. Tolkien) | `Khuzdul` `Khazad` `Baruk` `khuzdul-lexicon` | UNKNOWN | verbatim-port | `docs/audio/khuzdul-lexicon.html` `docs/audio/vo-script-dwarves.html` | uncleared |
 | Cave Troll Lightweight (Fab) | `Cave Troll Lightweight` `cave_troll_lightweight` | purchased-asset, code terms informal | data-port | `tools/oneoff/ue_export_cave_troll.py` `tools/blender/retarget_mannequin_to_human.py`; the retargeted `anim_troll_*` clips in `LOTRLOME_Armory` (live, outside the repo) | cleared |
 | Animalia - Elk (male), Animalia - Moose (male) (Fab) | `Animalia` `Elk_M` `Moose_M` `animalia_elk` `animalia_moose` | purchased-asset, code terms informal | data-port | `tools/blender/reskin_animalia_to_horse.py` `tools/blender/retarget_animalia_to_horse.py` `tools/blender/animalia_to_horse_map.json` `tools/blender/measure_animalia_clips.py` `tools/blender/animalia_elk_clip_measure.json` `tools/blender/animalia_moose_clip_measure.json` `tools/gen_animalia_anim_clips.ps1` `docs/features/animalia-elk-moose.md`; meshes, clips and textures in `LOTRLOME_Armory/AssetSources/creature/elk/` and their Kit packages in `LOTRLOME_Armory/Assets/creature/elk/` (live, outside the repo) | cleared |
-| Yotthani DualWield handoff, MithrilForge | `MithrilForge` `DualWield` `Bannerlord_Animation_Handoff` `TpacTool-bannerlord` | MIT (MithrilForge); the handoff document was shared with the maintainer by its author, no licence stated | comparison-only | (none; restated facts in `docs/reference/tpac-static-prop-authoring.md`, the animation reference docs, `docs/features/orc-goblin-locomotion.md` and `docs/reference/engine/mission-frame-threads-and-native-costs.md`; the measurement cited in `docs/features/butter-lib-distance-matrix.md`) | cleared |
-| Yotthani `bannerlord` repository (DualWield, FaceLearner) | `yotthani/bannerlord` `HoN/DualWield` `FaceLearner` `FaceLearner.HeadExtract` | MIT, (c) 2026 yotthani (the maintainer's statement of 2026-10-09; no root `LICENSE` yet, asked for; shared with the maintainer by its author) | comparison-only | (none; restated facts in `docs/reference/scripted-melee-strikes.md`, `docs/reference/head-mesh-and-groom-authoring.md`, `docs/features/orc-goblin-locomotion.md` and `docs/reference/engine/mission-frame-threads-and-native-costs.md`) | cleared |
+| Yotthani DualWield handoff, MithrilForge | `MithrilForge` `DualWield` `Bannerlord_Animation_Handoff` `TpacTool-bannerlord` | MIT (MithrilForge); the handoff document was shared with the maintainer by its author, no licence stated | comparison-only | (none; restated facts in `docs/reference/tpac-static-prop-authoring.md`, the animation reference docs, `docs/features/orc-goblin-locomotion.md` and `docs/reference/engine/mission-frame-threads-and-native-costs.md`; the measurement cited in `docs/features/butter-lib-distance-matrix.md`; from the 2026-10-15 pass also `docs/reference/engine/{campaign-tick-time-and-party-ai,save-system,gauntletui-viewmodel-screen,formations-and-team-ai}.md`, `docs/features/{skeleton-buffer-guard,diplomacy,mission-perf-heartbeat,culture-doctrine,race-abilities,melee-damage-model,signature-strikes}.md`, `docs/reference/bannerlord-animation-{system-map,clip-flags}.md`, `docs/reference/armory-guide.md`, `docs/ai-includes/creature-mount-authoring.md`, `docs/kitbash/erebor/runes.md` and `tools/README.md`) | cleared |
+| Yotthani `bannerlord` repository (DualWield, FaceLearner) | `yotthani/bannerlord` `HoN/DualWield` `FaceLearner` `FaceLearner.HeadExtract` | MIT, (c) 2026 yotthani (the maintainer's statement of 2026-10-09; no root `LICENSE` yet, asked for; shared with the maintainer by its author) | comparison-only | (none; restated facts in `docs/reference/scripted-melee-strikes.md`, `docs/reference/head-mesh-and-groom-authoring.md`, `docs/features/orc-goblin-locomotion.md` and `docs/reference/engine/mission-frame-threads-and-native-costs.md`; from the 2026-10-15 pass also `docs/features/{nameplate-cull,map-view-release,mission-start-guard,skeleton-buffer-guard,shader-compile-notice}.md`, `docs/modding/{submodule-and-registration,load-order-and-dependencies}.md`, `docs/reference/engine/{agent-spawn-and-render-pipeline,animation-binding-and-playback}.md`, `docs/reviews/lessons/{animation-skeleton,misc}.md`) | cleared |
 | Yotthani VanillaTuning | `VanillaTuning` `HoN/VanillaTuning` `ShaderCompileNotice` | MIT, (c) 2026 yotthani (`HoN/VanillaTuning/LICENSE`, since `1b9ce3ba`, 2026-10-07) | verbatim-port | `Main/Features/ShaderCompileNotice/**` `Main/Features/MissionStartGuard/**` `Main/Features/SkeletonBuffer/**` `Main/Features/NameplateCull/**` `Main/Features/MapViewRelease/**`; their adapters `Main/Adapters/{I,}{MissionStartGuard,SkeletonBufferMemory,SkeletonBufferEngine,NameplateCull,MapViewRelease}Adapter.cs`; their tests `TAOM.Tests/Features/{MissionStartGuard,SkeletonBuffer,NameplateCull,MapViewRelease}/**` | cleared |
 | Yotthani ShaderCacheKeeper | `ShaderCacheKeeper` `yotthani/bannerlord` `HoN/ShaderCacheKeeper` `xinput9_1_0.dll` | MIT, (c) 2026 yotthani (its own `LICENSE`) | verbatim-port | `Native/ShaderCacheKeeper/**`; the built `bin/Win64_Shipping_Client/xinput9_1_0.dll` shipped through the launcher manifest | cleared |
 | Ghidra | `Ghidra` `NationalSecurityAgency/ghidra` `pyghidra` | Apache-2.0 | interop-only | `tools/native_decompile.py` runs the installed tool (see detail) | cleared |
@@ -325,6 +325,15 @@ facts of `docs/engine/native.md` were re-derived on the v1.5.4 binary and restat
 [`engine/mission-frame-threads-and-native-costs.md`](engine/mission-frame-threads-and-native-costs.md) section 10.
 Nothing was copied. Review: [`docs/reviews/adopt-yotthani-2026-10-08.md`](../reviews/adopt-yotthani-2026-10-08.md).
 
+Sixth pass on 2026-10-15 at `0a2f4761` (nine commits since `4fab7e19`): `docs/engine/perf.md` (2,117 lines) and
+`docs/engine/modding-kit.md` (1,790 lines) read in full, which closes Tier 2 item 8 of the 2026-10-08 review, plus
+`docs/engine/battle-behaviour-measured.md`, `docs/engine/weapon-companion-clip.md` and the `-Cores` option of
+`tools/perf-audit/run_scenario.ps1`. Comparison only: nothing was copied, no code, data or asset was taken. `perf.md` is
+German; its figures and findings are restated in TAOM's words (translated, not pasted), each tagged with yotthani, the file,
+the commit, the evidence kind and the engine version, and the battle-behaviour figures say they were measured with TAOM
+2.0.34 loaded. The docs that carry restated facts are listed in the Covers column of the row above. Review:
+[`docs/reviews/adopt-yotthani-2026-10-15.md`](../reviews/adopt-yotthani-2026-10-15.md).
+
 ### Yotthani `bannerlord` repository (DualWield, FaceLearner)
 
 yotthani's private monorepo `yotthani/bannerlord`, shared with the maintainer by its author (the same collaborator as
@@ -348,6 +357,14 @@ Read again on 2026-10-08 at `1ad701bd`, the whole repository this time: `HoN/Van
 `HoN/PerfProbe` and `HoN/SaveBench` feature by feature (ideas only; they had no licence file then), the HoN features TAOM carries (their
 rows above and below), and the rest surveyed. Review:
 [`docs/reviews/adopt-yotthani-2026-10-08.md`](../reviews/adopt-yotthani-2026-10-08.md).
+
+Sixth pass on 2026-10-15 at `784fef93` (`1ad701bd..784fef93`, 453 commits): the performance and engine surface only
+(`HoN/VanillaTuning` v0.1.0 and v0.1.1 including `Core/TaomOverlap.cs`, the PerfProbe crowd proxy and crowd lab, the
+`HoN/DualWield` limb-ray route, `Core/OneAgentLimbRay.cs`). Comparison only: nothing was copied. The facts TAOM restated
+(the stand-aside lookups, the agent-less figure behaviour, the armour flicker above 2,340 skeletons, the
+`GetAnimationName(-1)` read) are tagged with yotthani, the file at the commit and the evidence kind, and TAOM verified
+what it could on v1.5.5. The docs that carry them are listed in the Covers column of the row above. Review:
+[`docs/reviews/adopt-yotthani-2026-10-15.md`](../reviews/adopt-yotthani-2026-10-15.md).
 
 ### Yotthani VanillaTuning
 
@@ -380,6 +397,14 @@ v1.5.4 binary ([engine doc](engine/mission-frame-threads-and-native-costs.md) se
 cover (TAOM listens to the engine's `ScreenLayer.OnLayerActiveStateChanged` where he patched `SceneLayer.OnDeactivate`). TAOM's code is its own in structure (service, adapter, settings) and adds two skip conditions
 (a plate not yet parked off screen, a plate the tutorial targets) and the campaign check before `MapScreen` is
 touched.
+
+**Class-name contract (2026-10-15).** VanillaTuning v0.1.1 (`HoN/VanillaTuning/Core/TaomOverlap.cs@784fef93`) switches off
+its own `nameplate-cull`, `map-view-release`, `mission-start-guard`, `frame-buffer-guard` and `frame-buffer-watch` when
+the assembly named `TAOM` holds `NameplateCullModule`, `MapViewReleaseModule`, `MissionStartGuardModule` or
+`SkeletonBufferModule`, looked up by full name. That makes four TAOM class names a contract with another mod; TAOM changed
+nothing for it and took nothing from it. `TAOM.Tests/Composition/VanillaTuningOverlapContractTests.cs` pins the names
+(#808); the full text is in [`load-order-and-dependencies.md`](../modding/load-order-and-dependencies.md) section G.
+Review: [`docs/reviews/adopt-yotthani-2026-10-15.md`](../reviews/adopt-yotthani-2026-10-15.md).
 
 ### Yotthani ShaderCacheKeeper
 

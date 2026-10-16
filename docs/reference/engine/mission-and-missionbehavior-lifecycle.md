@@ -52,6 +52,38 @@ The engine iterates `MissionBehaviors` (or the typed lists) and calls the releva
 `OnMissionTick` every frame, `OnAgentHit` on each blow, `OnEndMissionInternal`→`OnEndMission` + `OnRemoveBehavior`
 at teardown, and (for `MissionLogics`) `OnBattleEnded`/`MissionEnded`.
 
+### Removing a behaviour during `OnMissionTick` (v1.5.5)
+
+(TAOM-verified 2026-10-15 from the v1.5.5 managed decompile; engine behaviour read from the code, not run in game.)
+
+`Mission.Tick` ticks the behaviours with a loop that counts down by index over the live `MissionBehaviors` list:
+`for (int num2 = MissionBehaviors.Count - 1; num2 >= 0; num2--) MissionBehaviors[num2].OnMissionTick(dt);`
+(`Mission.cs:3750-3753`; the `OnPreDisplayMissionTick` loop just above it has the same shape). The count is read
+once, when the loop starts. `RemoveMissionBehavior` (`Mission.cs:4707-4724`) ends with `MissionBehaviors.Remove(...)`,
+a `List<T>` removal that shifts every later element down by one.
+
+What follows from those two facts:
+
+- **Removing the behaviour that is ticking, or one at a higher index,** is safe for this loop: the elements it
+  has not reached yet (lower indexes) do not move.
+- **Removing one at a lower index than the current one** shifts the current behaviour down into the slot the loop
+  is about to visit next, so its tick runs a second time in the same frame; the lower neighbour that slid up into
+  its place is never ticked.
+- **Removing several** can leave the next index at or past the new `Count`, and `MissionBehaviors[num2]` then throws
+  `ArgumentOutOfRangeException`. Whether a given sequence reaches that depends on which indexes go, so treat any
+  removal other than the ticking behaviour's own as unsafe.
+
+`DeploymentMissionController.FinishDeployment()` is such a removal: its last statement is
+`base.Mission.RemoveMissionBehavior(this)` (`DeploymentMissionController.cs:41-80`, re-checked on v1.5.5). Calling it
+from another behaviour's `OnMissionTick` removes the controller from inside the tick loop (TAOM's parked
+`ShaderPrecompilePlayerAgentGuard` does, see [shader-precompilation.md](../../features/shader-precompilation.md)).
+The engine's own call is the auto-finish at the end of `SetupTeams` (`:181-184`); which callback runs `SetupTeams` was
+not traced here, so whether that call sits inside the tick loop is open.
+
+**Rule:** never remove a behaviour from inside `OnMissionTick`. Set a flag there and act on it at the start of
+the next frame's tick (or from a callback that is not inside the behaviour loop). This is an inference from the
+loop and the list semantics above; no TAOM run has hit the repeated tick.
+
 ### Lifecycle order (typical)
 ```
 SubModule.OnMissionBehaviorInitialize(mission)   → mission.AddMissionBehavior(new XxxBehavior())  [OnCreated]

@@ -13,6 +13,10 @@ request: review all of it and bring in whatever is more effective, elegant, effi
 | `yotthani/MithrilForge` (private, MIT) | `4fab7e19` (2026-10-08 19:49) | the product code's project references and the new library, writer, physics, clip and cloth code since `91149e11`; the docs changed since `2e6fe979` |
 | Not read in full | | MithrilForge `docs/engine/perf.md` (about 2,100 lines) and `docs/engine/modding-kit.md` (1,790 lines): Tier 2 item 8 |
 
+Correction 2026-10-15: both files were read in full on 2026-10-15 (`perf.md` at `0a2f4761`, 2,117 lines;
+`modding-kit.md`, 1,790 lines), which closes the "Not read in full" row. See
+[adopt-yotthani-2026-10-15.md](adopt-yotthani-2026-10-15.md).
+
 Three read-only agents did the file-by-file reading through `gh api`; every claim this review relies on was
 checked against the files or the binary named below.
 
@@ -58,6 +62,9 @@ Mike approved the plan on 2026-10-08. Tier 1 is approved; Tier 2 waits for his w
 | 9 | Equipment-preset item locking | yotthani's `PresetManager.cs` (MIT since 2026-10-09) | Tier 2 |
 | 10 | Time and GC per save in SaveLoadDiagnostics | PerfProbe `SaveDiagnostics.cs` (MIT since 2026-10-09) | Tier 2 |
 | 11 | Auto-assign scoring extras; party-screen role icon | CompanionTactics (MIT since 2026-10-09) | Tier 2 |
+
+Correction 2026-10-15: item 8 is closed. `perf.md` and `modding-kit.md` were read against TAOM's engine docs on
+2026-10-15; what was taken, and what was not, is in [adopt-yotthani-2026-10-15.md](adopt-yotthani-2026-10-15.md).
 
 Where TAOM's version beats the upstream one (decided in the plan, built with each item):
 
@@ -106,6 +113,14 @@ Where TAOM's version beats the upstream one (decided in the plan, built with eac
 | SupplyLines reinforcement dialog | cut by Mike (`docs/features/supply-lines.md:176`) |
 | MixedFormations, SiegeDismount, FiefManagement, QuickActions, the camps | TAOM is ahead on every comparison (navmesh checks, slot reclaim, snapshot, siege detection, modal guards, locked-item skip, the camps' RCA fixes) |
 | DualWield, the Armory family (Armory, Armory_TAOM, Armory.Sim), RingSystem, TroopStatus, VirtualCaptains, LayeredArmor, ArmorCosmetics, SmithingExtended, BattlePresets, TAOM_UI, TAOM_RacePortraits, DynamicPOIs, FaceLearner, FactionMap, ThemeSwitcher, KoMModpack | separate mods, not optimisations of TAOM code; each would be its own product decision |
+
+Correction 2026-10-15: (1) The camp row above says only version numbers, checksums and bounds changed. TAOM's four
+`AssetPackages` tpacs have the same git blob hashes as `yotthani/bannerlord@2e14c22dfc` (`1e26222f`, `078dc719`,
+`4d9670eb`, `4453ec79`), and the rewritten versions at `478587b482` differ from TAOM's on all four. The delivery
+decision is still the gate; `478587b482` is the version to adopt when it lands. (2) The ash row quotes "21.0 to 12.2 ms".
+In the source (`perf.md` at `0a2f4761`) 11.6 ms is the 2 % emission proof run (line 707) and 12.2 ms is the later
+`VanillaTuning_TAOM` run with the emitter at about 30,000 particles (lines 772 to 776); both start from 21.0 ms. The
+ash fix is still content work (#738).
 
 ## Findings for Mike (no code here)
 
