@@ -119,6 +119,7 @@ for seg in "${SEG_LIST[@]}"; do
   fi
 
   if [[ "$rest" =~ ^add([[:space:]]|$) ]]; then
+    SUBCMD=add
     after="${rest#add}"
     # -A / --all / -u / --update anywhere in the args, or a bare `.` / `./` pathspec.
     if [[ "$after" =~ (^|[[:space:]])(-[a-zA-Z]*A[a-zA-Z]*|--all)([[:space:]]|$) ]]; then
@@ -129,6 +130,7 @@ for seg in "${SEG_LIST[@]}"; do
       REASON="git add . stages every change under the current directory"
     fi
   elif [[ "$rest" =~ ^commit([[:space:]]|$) ]]; then
+    SUBCMD=commit
     after="${rest#commit}"
     # -a / --all, including bundled short flags like -am. Exclude --amend, which is a
     # different thing entirely.
@@ -144,8 +146,10 @@ done
 [[ -z "$REASON" ]] && { echo '{}'; exit 0; }
 
 # Show what the sweep would actually take. The decision is "is every one of these mine",
-# which the caller cannot make from the flag alone.
-cd "${CLAUDE_PROJECT_DIR:-$(pwd)}" 2>/dev/null || { echo '{}'; exit 0; }
+# which the caller cannot make from the flag alone. Listed from the top level of the repository
+# the call runs in (_pybin.sh taom_git_repo_dir), not always the project root: in a worktree
+# session the main checkout's dirty files were listed until 2026-10-16.
+cd "$(taom_git_repo_dir "${SUBCMD:-add}")" 2>/dev/null || { echo '{}'; exit 0; }
 DIRTY=$(git status --porcelain 2>/dev/null | sed 's/^...//' | head -20)
 DIRTY_COUNT=$(git status --porcelain 2>/dev/null | grep -c . || true)
 STASH_COUNT=$(git stash list 2>/dev/null | grep -c . || true)

@@ -14,7 +14,7 @@ Every claim carries a tag:
   14,212,960 bytes, Ghidra project key `Win64_Shipping_Client-4c2054c56dfee496`). Each v1.5.5 item names its
   build next to every native address; an unnamed offset on this page is v1.5.3.
 - **[yotthani]**: a finding from yotthani's MithrilForge or `bannerlord` repositories that TAOM has not
-  re-derived. Native addresses he gives for 1.5.3 are RVAs on the same binary hash.
+  re-derived. Native addresses yotthani gives for 1.5.3 are RVAs on the same binary hash.
 
 Native offsets hold for this one binary only; re-verify after any engine bump (`/engine-bump`).
 
@@ -86,6 +86,23 @@ checked). (yotthani, MithrilForge `docs/perf-audit/particle-sim-wait.md`,
 - **The engine lever is absent, so the fix is content.** One emitter's step runs on one thread, so chunking the
   particle step cannot help; yotthani names stepping inside one emitter as a native rebuild and not planned, and puts
   the lever in the TAOM_Map content (`perf.md` lines 571-576). TAOM's case is #738.
+- **The three fps getters and the limiter and vsync reads.** [TAOM-verified, v1.5.5 client, 2026-10-16,
+  Ghidra, `python tools/native_decompile.py --engine-method`] `IUtil.GetMainFps` (`0x513C50`) returns
+  `DAT_180b2e020 / *(double *)(DAT_180d9a138 + 0xf8)`, one frame's main-thread busy seconds turned into a
+  rate; `IUtil.GetFps` (`0x513BB0`) does the same over the field at `+0x270`; `IUtil.GetRendererFps`
+  (`0x513BD0`) returns the double at `*(DAT_180d9e160 + 0x1560)` as is, an already windowed figure (frames
+  over the summed render-thread busy spans, closed once a window reaches a second or more). The `+0xf8`
+  writer is `FUN_18007dd60` (`0x7DD60`) and it stores the value only on the frame loop's rendering branch,
+  so a frame that does not render leaves the last value in place. The render-thread span covers the
+  per-view loop and `IDXGISwapChain::Present` (`FUN_1800909a0`, `0x909A0`), which is why vsync, a full GPU
+  queue and a driver cap all read as render-thread busy time. The frame limiter's spin sits outside both
+  spans, so neither figure includes it. `IConfig.GetRGLConfig` (`0x4A6840`) serves the options page's reads:
+  case `0x19` is `NativeOptionsType.FrameLimiter` and `0x1a` is `VSync`, both ints in the config object
+  (`DAT_180d9e1f0 + 0x1b90` and `+0x1ff0`); the limiter period is also written directly by other native code
+  (1/30 s and 0.1 s constants among other sites), UNVERIFIED which of those can run in a mission.
+  `IUtil.GetFrameLimiterWithSleep` is a three-byte stub at `0x28F10` in the client; the real code is in the
+  dedicated server build, where `GetRendererFps` returns 0. The consumer is TAOM's `mainMs` and `renderMs`
+  in [the heartbeat](../../features/mission-perf-heartbeat.md).
 - Which callbacks reach which thread, and how TAOM code must treat them, is the thread table in
   [`.claude/rules/harmony-patches.md`](../../../.claude/rules/harmony-patches.md) "Which thread runs your
   target". This page does not repeat it.
@@ -223,7 +240,7 @@ exit. No TAOM measurement settles it.
 |---|---|---|
 | Clip data record | initialiser `0x473090` | Stores the clip's Loading Type at `+0x194`. Type 0: the data pointer (`+0x88`) and size (`+0x80`) are set at once, no loader. Type 1: a short resident piece goes to `+0x90` and a loader callback (`+0x98`) is installed for the full data. Type 2: a loader callback is installed. Reader count `+0xD8`, state `+0xE0` (0 unloaded, 1 loading, 2 loaded; the initialiser stores 0 in both, so an on-demand clip starts unloaded), a mutex at `+0x130` and a condition variable at `+0xE8` |
 | Acquire | `0x474140` | Type 0: returns the data pointer, nothing else. Type 1 or 2: marks the clip used (`0x473250` writes a `QueryPerformanceCounter` timestamp to `+0x84`); spins while the reader count is `-1` (being evicted), then raises it with a compare-and-swap loop; if the state is 0 it swaps it to 1 and starts the loader (`0x474660`); a type 1 clip sampled inside its resident short piece returns that piece; otherwise the calling thread locks the clip's mutex and **waits on its condition variable until the data is loaded**. The one-bone sampler (`0x473630`) always calls it with header-only off, so the pair is paid per bone sample, per clip, per agent (yotthani, MithrilForge `docs/perf-audit/clip-reader-lock.md`, decompile v1.5.3; v1.5.4: not re-checked) |
-| Release | the accessors, for example `0x473320` and `0x4733A0` | Every read of a type 1 or 2 clip's data ends with an atomic decrement of the reader count; type 0 skips it. Atomic operations on `+0xD8` appear at 28 sites, among them one sampler function with eight (`0x49D960`). **Conflict, unresolved:** yotthani lists `0x473320` and `0x4733A0` as header-only reads (the bone count) that take no lock, which contradicts this row; his own address table adds "except mode 2" for them (MithrilForge `docs/perf-audit/clip-reader-lock.md`, decompile v1.5.3; v1.5.4: not re-checked) |
+| Release | the accessors, for example `0x473320` and `0x4733A0` | Every read of a type 1 or 2 clip's data ends with an atomic decrement of the reader count; type 0 skips it. Atomic operations on `+0xD8` appear at 28 sites, among them one sampler function with eight (`0x49D960`). **Conflict, unresolved:** yotthani lists `0x473320` and `0x4733A0` as header-only reads (the bone count) that take no lock, which contradicts this row; yotthani's own address table adds "except mode 2" for them (MithrilForge `docs/perf-audit/clip-reader-lock.md`, decompile v1.5.3; v1.5.4: not re-checked) |
 | Eviction | `0x21DEA0` | Drains a queue of loaded on-demand clips and sorts them. It measures the excess of the global loaded-bytes counter over **12,582,912 bytes (12 MiB, the float at `0xB2E2DC`, read by this function only)** once, at its start, then walks the sorted list from its end and frees clips in state 2 (loaded) whose reader count it can swap from 0 to `-1` (data freed, state back to 0, the counter lowered), until the bytes freed reach that excess or the list runs out. It never re-reads the counter, so clips in use and loads that land during the pass can leave the total above 12 MiB. Every return clears the pass flag `0xDABE44` |
 | Probe | `IMBAnimation.IsAnyAnimationLoadingFromDisk` (`0x6EAAE0`, managed `MBAnimation.IsAnyAnimationLoadingFromDisk()`) | Walks the record pointer list at `0xDB00C8` from its start and returns true at the first record in state 1 (loading); when none is loading it reads every entry. It takes no lock and checks no thread: it takes the count once at entry from the list's end and begin pointers (`0xDB00D0`, `0xDB00C8`) and re-reads the begin pointer for every entry. Whether the engine can grow that list or free a record while a mission thread calls this was not traced (**UNVERIFIED**) |
 | Load-time loaders | bulk `0x591390`, single `0x592400` | Read clip data at asset load ("Unable to read animation clip data for %s"); the bulk loader fans out jobs on the engine job manager and helps run them |

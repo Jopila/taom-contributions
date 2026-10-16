@@ -205,6 +205,36 @@ this game launch after an error (screens then leave the render targets behind, a
    A map conversation switches the map's view off and on without a layer event, so the feature does not count it. If the
    memory climbs with each conversation, record it here: conversations then leak too and are not covered.
 
+## A second scene view on the map scene (yotthani, 1.5.3)
+
+Yotthani's RealmUI feasibility study (`yotthani/bannerlord`, `docs/realm-ui/feasibility.md`@2ff002be)
+saw, [game] on Bannerlord 1.5.3 with vanilla modules, one run each, that a second **enabled** scene view
+on the campaign map scene leaves the map without terrain afterwards (lines 87-91 and 133-142: several
+variants all lost it, the control run did not). `SceneView.SetEnable(false)` on that view before the map
+screen takes the scene back left the terrain intact; switching it off and then calling
+`ClearAll(clearScene: false, removeTerrain: false)` on it hung the game on entering the map, in a
+terrain-shader compile loop (lines 175-183). Yotthani's rule from that run is to switch the view off before the map screen
+takes the scene and never to call `ClearAll` on a view that holds the map scene ("vanilla does call it for the character
+scene; on the map scene it kills the game", lines 181-183); for quiet mode, yotthani leaves the engine's global layers alone
+(lines 302-304). An orthographic camera draws no terrain (lines 155-163), and a camera about 2100 units up, the height
+needed to see all of Middle-earth, gets a picture washed out by the scene's distance haze (lines 298-301). Nothing here was
+run on 1.5.5.
+
+**What it means for this feature (TAOM-verified, v1.5.5 source and TAOM code, and yotthani's own in-game run of the
+same call).** `MapViewRelease` calls `ClearRuntimeGPUMemory(remove_terrain: false)` on the map's **own** scene layer
+(`MapViewReleaseAdapter.cs:26-30`), which is `SceneView.ClearAll(clearScene: false, removeTerrain: false)`
+(`SceneLayer.cs:145-148`): the same arguments as the call that hung, on a different view. Vanilla's `MapScreen.ClearGPUMemory`
+uses the same entry point on the same view with `remove_terrain: true` (`MapScreen.cs:504-508`). TAOM reads yotthani's rule
+as being about a second view, because the map's own view has taken this exact call in yotthani's own game.
+VanillaTuning's `map-view-release` (`HoN/VanillaTuning/Integration/MapViewReleasePatch.cs`@2ff002be line 70) calls
+`SceneView.ClearAll(false, false)` on the map screen's scene layer after `OnDeactivate`, and its notes record a run "with the
+call at every cover" on 2026-10-06 (lines 20-23): nothing left behind, the map's textures loaded again on return, a close of
+about 0.4 s instead of 0.08 s. The notes do not use the word hang; that the run did not hang is TAOM's reading of a run that
+completed 14 screens. It has been on by default since `a0befc68` (2026-10-06), at every 20th cover (lines 23-24). That run
+predates TAOM's v1.5.5 bump and the file names no engine version. TAOM's release runs on the map's return instead of on the cover, so the in-game check below still watches
+for a hang or a missing terrain on returning to the map. TAOM adds no scene view to the map: its map views add Gauntlet
+layers only (`FieldCampMapView.cs:47`, `RealmBordersMapView.cs:52`, `MomentumIndicatorMapView.cs:40`).
+
 ## Performance
 
 The handler adds a type test to each layer activation change (screen changes, layers added or removed); a deactivated

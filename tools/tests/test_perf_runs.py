@@ -26,7 +26,10 @@ TOOL = Path(__file__).resolve().parent.parent / "perf_runs.py"
 # The pinned [MissionPerf] contract. Cross-language twin pin: FrameStatsTests.
 # BuildLine_FormatsEveryFieldInvariantly asserts MissionPerfLine.Build emits EXACTLY this body.
 PINNED_MISSION_PERF = ("[MissionPerf] t=+65s frames=300 fps=60.0 avgMs=16.67 p95Ms=25.50 "
-                       "maxMs=40.3 agents=812 active=640 formations=9 gc0=12 gc1=3 gc2=1")
+                       "maxMs=40.3 agents=812 active=640 formations=9 gc0=12 gc1=3 gc2=1 "
+                       "mainMs=4.20 renderMs=6.10")
+# The same line from a build before mainMs and renderMs were written.
+OLD_MISSION_PERF = PINNED_MISSION_PERF.replace(" mainMs=4.20 renderMs=6.10", "")
 
 # The mission tick profiler's four data lines. Cross-language twin pin: TickProfileLinesTests.
 # BuildTickProfile_SampleWindow_, BuildHitch_SampleFrame_, BuildPerfContext_SampleContext_ and
@@ -43,7 +46,7 @@ PINNED_HITCH = ("[Hitch] t=+72s frameMs=812.35 preDisplayMs=0.40 cameraMs=3.25 m
                 "MissionPerfHeartbeatBehavior:0.05")
 PINNED_PERF_CONTEXT = ("[PerfContext] build=Debug jitOptimized=false clr=4.0.30319.42000 "
                        "serverGC=false latency=Interactive missionInProcess=1 "
-                       "scene=battle_terrain_029 agents=0 textureQuality=1 "
+                       "scene=battle_terrain_029 agents=0 frameLimiter=60 vsync=0 textureQuality=1 "
                        "shadowQuality=2 particleDetail=1 ragdolls=3 memLoad=61 "
                        "availPhysMB=12034 tickProfiler=on diag=battleLoad,stallWatchdog,"
                        "stallBundle,exitSampler,freezeSampler,memSampler,missionPerf")
@@ -81,12 +84,14 @@ def _line(payload, at=0, level="INFO"):
 
 
 def _perf(t, fps=117.0, avg=8.55, p95=9.20, mx=14.0, agents=100, active=None,
-          gc=(3, 0, 0), frames=None):
+          gc=(3, 0, 0), frames=None, busy=None):
+    """busy is the (mainMs, renderMs) text pair, each a number or 'na'; None writes the older line."""
     frames = int(round(fps * 5)) if frames is None else frames
     active = agents if active is None else active
+    tail = "" if busy is None else f" mainMs={busy[0]} renderMs={busy[1]}"
     return (f"[MissionPerf] t=+{t}s frames={frames} fps={fps:.1f} avgMs={avg:.2f} "
             f"p95Ms={p95:.2f} maxMs={mx:.1f} agents={agents} active={active} formations=2 "
-            f"gc0={gc[0]} gc1={gc[1]} gc2={gc[2]}")
+            f"gc0={gc[0]} gc1={gc[1]} gc2={gc[2]}{tail}")
 
 
 def _load(start, scene=SCENE, kind="CustomBattle"):
@@ -138,6 +143,22 @@ class PinnedLineTests(unittest.TestCase):
             self.assertAlmostEqual(w.avg_ms, 16.67)
             self.assertAlmostEqual(w.p95_ms, 25.50)
             self.assertAlmostEqual(w.max_ms, 40.3)
+            self.assertAlmostEqual(w.main_ms, 4.20)
+            self.assertAlmostEqual(w.render_ms, 6.10)
+
+    def test_mission_perf_from_before_busy_times_still_parses(self):
+        w = pr.parse_mission_perf(_line(OLD_MISSION_PERF))
+        self.assertIsNotNone(w)
+        self.assertEqual((w.frames, w.gc2), (300, 1))
+        self.assertIsNone(w.main_ms)
+        self.assertIsNone(w.render_ms)
+
+    def test_mission_perf_na_busy_times_parse_as_none(self):
+        w = pr.parse_mission_perf(PINNED_MISSION_PERF.replace("mainMs=4.20 renderMs=6.10",
+                                                              "mainMs=na renderMs=6.10"))
+        self.assertIsNotNone(w)
+        self.assertIsNone(w.main_ms)
+        self.assertAlmostEqual(w.render_ms, 6.10)
 
     def test_pinned_tick_profile_parses_to_its_numbers(self):
         t = pr.parse_tick_profile(_line(PINNED_TICK_PROFILE))
@@ -174,11 +195,20 @@ class PinnedLineTests(unittest.TestCase):
         self.assertEqual(c["missionInProcess"], 1)
         self.assertEqual(c["scene"], "battle_terrain_029")
         self.assertEqual(c["textureQuality"], "1")
+        self.assertEqual(c["frameLimiter"], "60")
+        self.assertEqual(c["vsync"], "0")
         self.assertEqual(c["tickProfiler"], "on")
         self.assertEqual(c["memLoad"], 61.0)
         self.assertEqual(c["diag"], list(DEFAULT_DIAG))
         no_mem = pr.parse_context(PINNED_PERF_CONTEXT.replace("memLoad=61", "memLoad=na"))
         self.assertIsNone(no_mem["memLoad"])
+
+    def test_context_from_before_frame_settings_still_parses(self):
+        old = PINNED_PERF_CONTEXT.replace(" frameLimiter=60 vsync=0", "")
+        c = pr.parse_context(_line(old))
+        self.assertIsNotNone(c)
+        self.assertIsNone(c.get("frameLimiter"))
+        self.assertIsNone(c.get("vsync"))
 
 
 class SegmentTests(unittest.TestCase):
@@ -739,6 +769,33 @@ class FlagEvidenceTests(unittest.TestCase):
                              "t=+41s fps=117.2 active=100, t=+46s fps=97.3 active=100, "
                              "t=+51s fps=117.1 active=100")
 
+    def _plateau_evidence(self, ctx):
+        specs = [dict(t=6)] + [dict(t=31 + 5 * i, fps=f)
+                               for i, f in enumerate([117.0, 116.8, 117.2, 97.3, 117.1])]
+        lines = _load(0) + ([_line(ctx, 3)] if ctx else []) + _windows(0, specs)
+        return self._row(lines)["flag_evidence"]["FRAME_CAP"]
+
+    def test_frame_cap_names_the_settings_without_judging_a_match(self):
+        for limiter in ("117", "60"):
+            ctx = PINNED_PERF_CONTEXT.replace("frameLimiter=60", f"frameLimiter={limiter}")
+            ev = self._plateau_evidence(ctx)
+            self.assertTrue(ev.endswith(f"; [PerfContext] frameLimiter={limiter} vsync=0"), ev)
+            self.assertNotIn("matches", ev)
+
+    def test_frame_cap_names_vsync_when_on(self):
+        ev = self._plateau_evidence(PINNED_PERF_CONTEXT.replace("vsync=0", "vsync=1"))
+        self.assertTrue(ev.endswith("; [PerfContext] frameLimiter=60 vsync=1"), ev)
+
+    def test_frame_cap_prints_unreadable_settings_as_na(self):
+        ev = self._plateau_evidence(PINNED_PERF_CONTEXT.replace("frameLimiter=60 vsync=0",
+                                                                "frameLimiter=na vsync=na"))
+        self.assertTrue(ev.endswith("; [PerfContext] frameLimiter=na vsync=na"), ev)
+
+    def test_frame_cap_evidence_without_frame_fields_is_unchanged(self):
+        old = PINNED_PERF_CONTEXT.replace(" frameLimiter=60 vsync=0", "")
+        self.assertEqual(self._plateau_evidence(old), self._plateau_evidence(None))
+        self.assertNotIn("[PerfContext]", self._plateau_evidence(old))
+
     def test_frame_cap_by_agent_spread_names_the_two_windows(self):
         fps = [117.0, 100.0, 90.0, 80.0, 116.6]
         active = [300, 260, 230, 200, 150]
@@ -972,6 +1029,7 @@ TICK_PROFILER_STATUS = (
 )
 UNREADABLE_CONTEXT = (PINNED_PERF_CONTEXT.replace("scene=battle_terrain_029", "scene=unknown")
                       .replace("agents=0", "agents=-1")
+                      .replace("frameLimiter=60 vsync=0", "frameLimiter=na vsync=na")
                       .replace("textureQuality=1 shadowQuality=2 particleDetail=1 ragdolls=3 "
                                "memLoad=61 availPhysMB=12034",
                                "textureQuality=na shadowQuality=na particleDetail=na ragdolls=na "
@@ -1055,6 +1113,36 @@ class UncheckedSettingsTests(unittest.TestCase):
                       "settings unchecked", pr.format_compare(result).splitlines())
 
 
+class BusyTimeTests(unittest.TestCase):
+    def test_row_reports_steady_busy_time_medians(self):
+        specs = [dict(t=6, busy=("90.00", "90.00"))] + [
+            dict(t=31 + 5 * i, busy=b)
+            for i, b in enumerate([("4.00", "6.00"), ("na", "na"), ("8.00", "na"), ("6.00", "10.00")])]
+        r = _rows(_mission(0, specs))[0]
+        self.assertAlmostEqual(r["main_ms_median"], 6.0)
+        self.assertAlmostEqual(r["render_ms_median"], 8.0)
+        line = pr.format_rows([r], 0).splitlines()[0]
+        self.assertIn(" p95Ms=9.20 mainMs=6.00 renderMs=8.00 maxMs=", line)
+
+    def test_row_from_before_busy_fields_prints_dashes(self):
+        r = _rows(_mission(0, [dict(t=6)] + _steady()))[0]
+        self.assertIsNone(r["main_ms_median"])
+        self.assertIsNone(r["render_ms_median"])
+        self.assertIn(" p95Ms=9.20 mainMs=- renderMs=- maxMs=", pr.format_rows([r], 0).splitlines()[0])
+
+    def test_damaged_busy_values_leave_the_line_unparsed(self):
+        for bad in ("abc", "nan", "-1.00", "1e5", "4."):
+            self.assertIsNone(pr.parse_mission_perf(
+                PINNED_MISSION_PERF.replace("mainMs=4.20", f"mainMs={bad}")), bad)
+            self.assertIsNone(pr.parse_mission_perf(
+                PINNED_MISSION_PERF.replace("renderMs=6.10", f"renderMs={bad}")), bad)
+
+    def test_render_na_alone_parses_as_none(self):
+        w = pr.parse_mission_perf(PINNED_MISSION_PERF.replace("renderMs=6.10", "renderMs=na"))
+        self.assertAlmostEqual(w.main_ms, 4.20)
+        self.assertIsNone(w.render_ms)
+
+
 class NonFiniteTests(unittest.TestCase):
     def test_nan_and_infinity_are_malformed_not_numbers(self):
         self.assertIsNone(pr.parse_tick_profile(PINNED_TICK_PROFILE.replace("wallMs=5000.00",
@@ -1082,7 +1170,10 @@ class ReportTextTests(unittest.TestCase):
         b = [_context_row(f, at=100 * i) for i, f in enumerate((90.0, 95.0, 100.0))]
         out = pr.format_compare(pr.compare_rows(a, b)).splitlines()
         self.assertEqual(out[0], "A: 3 rows   B: 3 rows")
-        self.assertIn("fps_median         3     110.00    3      95.00    -15.00   -13.6%", out)
+        self.assertIn("fps_median           3     110.00    3      95.00    -15.00   -13.6%", out)
+        # Every column lines up: the header and each metric row (the longest name included) are one width.
+        table = out[1:2 + len(pr.METRICS)]
+        self.assertEqual({len(line) for line in table}, {len(out[1])}, table)
 
     def test_compare_warns_when_rows_carry_no_context(self):
         rows = _rows(_mission(0, [dict(t=6)] + _steady()))

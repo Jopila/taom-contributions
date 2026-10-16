@@ -88,9 +88,10 @@ public static class TickProfileLines
 
     public static string BuildPerfContext(PerfContext c) => string.Format(
         CultureInfo.InvariantCulture,
-        "[PerfContext] build={0} jitOptimized={1} clr={2} serverGC={3} latency={4} missionInProcess={5} scene={6} agents={7} textureQuality={8} shadowQuality={9} particleDetail={10} ragdolls={11} memLoad={12} availPhysMB={13} tickProfiler={14} diag={15}",
+        "[PerfContext] build={0} jitOptimized={1} clr={2} serverGC={3} latency={4} missionInProcess={5} scene={6} agents={7} frameLimiter={8} vsync={9} textureQuality={10} shadowQuality={11} particleDetail={12} ragdolls={13} memLoad={14} availPhysMB={15} tickProfiler={16} diag={17}",
         c.Build, Bool(c.JitOptimized), c.Clr, Bool(c.ServerGc), c.Latency, Int(c.MissionInProcess),
         string.IsNullOrEmpty(c.Scene) ? "unknown" : c.Scene, Int(c.Agents),
+        OrNa(c.FrameLimiter), OrNa(c.VSync),
         OrNa(c.TextureQuality), OrNa(c.ShadowQuality), OrNa(c.ParticleDetail), OrNa(c.Ragdolls),
         OrNa(c.MemLoadPercent), c.AvailPhysMb < 0 ? "na" : c.AvailPhysMb.ToString(CultureInfo.InvariantCulture),
         c.TickProfiler ? "on" : "off", c.Diag.Count == 0 ? "none" : string.Join(",", c.Diag));
@@ -265,7 +266,7 @@ public static class TickProfileLines
 public sealed class PerfContext
 {
     public PerfContext(string build, bool jitOptimized, string clr, bool serverGc, string latency, int missionInProcess,
-        string scene, int agents, int textureQuality, int shadowQuality, int particleDetail, int ragdolls,
+        string scene, int agents, int frameLimiter, int vsync, int textureQuality, int shadowQuality, int particleDetail, int ragdolls,
         int memLoadPercent, long availPhysMb, bool tickProfiler, IReadOnlyList<string> diag)
     {
         Build = build;
@@ -276,6 +277,8 @@ public sealed class PerfContext
         MissionInProcess = missionInProcess;
         Scene = scene;
         Agents = agents;
+        FrameLimiter = frameLimiter;
+        VSync = vsync;
         TextureQuality = textureQuality;
         ShadowQuality = shadowQuality;
         ParticleDetail = particleDetail;
@@ -294,6 +297,8 @@ public sealed class PerfContext
     public int MissionInProcess { get; }
     public string Scene { get; }
     public int Agents { get; }
+    public int FrameLimiter { get; }
+    public int VSync { get; }
     public int TextureQuality { get; }
     public int ShadowQuality { get; }
     public int ParticleDetail { get; }

@@ -171,6 +171,36 @@ cleared (found in review). Each `MapEventParty` maps to `MobileParty.ActualClan`
 `MobileParty.Owner.Clan` (never `PartyBase.Owner`, a throwing computed getter that
 `PartyOwnerGetterBanTests` forbids assembly-wide). A clan fielding several parties is summed.
 
+**A siege map event changes its type (TAOM-verified, v1.5.5 source).** [code reading] An assault
+becomes `SiegeOutside` when a party that is outside the fort joins the defenders
+(`SiegeAssaultEventComponent.cs:263-269`), and `IsSiegeAssault` reads the live type
+(`MapEvent.cs:185, 203, 209`). A relief battle becomes `SallyOut` when the garrison joins its
+attacking side (`SiegeOutsideEventComponent.cs:73-80`); `SallyOutsCampaignBehavior.cs:44` runs the
+sally check every fourth hour, or at once in a `SiegeOutside` or a blockade, with a strength
+threshold of 1.5 or 2.0 (`:91`, `:96-108`). So read the event's component, not its start type or its
+sides. The siege also finalizes before the owner changes: `KingdomManager.SiegeCompleted` calls
+`RemoveAllSiegeParties` (`:258`), `BesiegerCamp` (`:242-245`) calls `SiegeEvent.FinalizeSiegeEvent`,
+which raises `OnSiegeEventEnded` (`SiegeEvent.cs:889`), and only then `ApplyBySiege` runs
+(`KingdomManager.cs:260`). A relief-joined assault therefore reaches `SiegeCompleted` as
+`SiegeOutside` and returns at its type gate (`:243`); this was read on the `KingdomManager` path only.
+TAOM fits both: `FiefSiegeCaptureRules.cs:22-28` returns `None` for `SiegeOutside`, and
+`SiegeDefenseBehavior.cs` listens to the siege event's start and end (`:37-38`, `:59-68`), not to the
+map event's type.
+
+**What yotthani measured (hedged).** In `docs/balance-sim/campaign.md`@2ff002be (yotthani's
+`yotthani/bannerlord`, lines 480-538 and 608-635), from two unattended 150-day game campaigns
+of 2026-10-16 (runs 7 and 8; measured in game by yotthani's CampaignProbe on v1.5.5 with TAOM 2.0.34,
+one run each, so small n; run 8 has "the same module list" as run 7, line 610), yotthani re-derived from `battles.csv`, by one rule for both runs
+(line 610), that of run 7's 143 events that
+started as `Siege`, 78 stayed pure assaults and 65 were assaults a relief party joined; that run 7 and
+run 8 each had 13 sallies (run 7's first count of 19 included 6 relief battles); relief battles
+outside the assault 57 and 51, inside it 65 and 53; and that 12 of run 7's 78 pure-assault rows and 3
+of run 8's 72 were walkovers on an emptied fortress. The probe's own files had faults: run 7's `sieges.csv`
+wrote every capture as `besiegers_left` (fixed in run 8, lines 610 and 698), and the `battles.csv` sally tag was wrong for 49 of 62
+rows of run 8 (lines 610 and 697), so only the re-derived figures are quoted. Vanilla's siege
+event ends before the owner changes, the same order as above, which is why yotthani's first
+`end_reason` was wrong.
+
 **Which clans.** Only clans that can appear on the ballot: `DetermineInitialCandidates` enumerates
 the capturing kingdom's clans and drops those under mercenary service, so the recorder keeps a clan
 only if its `MapFaction` is the winning side's leader-party faction (the one

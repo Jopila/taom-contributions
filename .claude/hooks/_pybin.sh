@@ -189,3 +189,40 @@ except Exception:
     pass
 ' 2>/dev/null
 }
+
+# The repository a git gate judges (2026-10-16): the top level of the work tree a `git <subcommand>`
+# (default commit) in the hook's $INPUT runs in. Registrations run the main checkout's hooks, and
+# $CLAUDE_PROJECT_DIR stays where the session started even after it enters a worktree, so a gate that
+# ran `cd "$CLAUDE_PROJECT_DIR"` judged the main checkout for a worktree commit. _shellwords.py git-repo
+# names the candidates (the call's own cd or -C joined onto the payload's cwd, then the cwd; hooks docs
+# "Common input fields": cwd "is the worktree root after Claude enters a worktree, and the new
+# directory after Claude runs `cd`"); each is resolved here to its top level, because every gate reads
+# root-relative paths and a subdirectory would let all of them pass in silence. A candidate that is
+# missing or in no work tree falls through to the next, and the last resort is $CLAUDE_PROJECT_DIR,
+# as every gate read it before. tools/test_hooks.sh 7b and tools/tests/test_shellwords.py.
+taom_git_repo_dir() {
+    local out="" dir="" top=""
+    if [ -n "${PYBIN:-}" ]; then
+        out=$(printf '%s' "$INPUT" | "$PYBIN" "$TAOM_HOOKS_DIR/_shellwords.py" git-repo "${1:-commit}" 2>/dev/null)
+    fi
+    local -a dirs=()
+    set -f; IFS=$'\n'; dirs=($out); IFS=$' \t\n'; set +f
+    dirs+=("${CLAUDE_PROJECT_DIR:-$PWD}")
+    for dir in "${dirs[@]}"; do
+        [ -n "$dir" ] && [ -d "$dir" ] || continue
+        top=$(timeout -k 1 2 git -C "$dir" rev-parse --show-toplevel 2>/dev/null)
+        [ -n "$top" ] && { printf '%s' "$top"; return 0; }
+    done
+    printf '%s' "${CLAUDE_PROJECT_DIR:-$PWD}"
+}
+
+# Whether directory $1 is a work tree of this project's repository (the same common git directory as
+# $CLAUDE_PROJECT_DIR: the main checkout or any of its worktrees). A gate that runs the repository's
+# own tools/*.py asks first, so a commit in another repository never runs that repository's code
+# (2026-10-16 review). Fails (returns 1) when either side cannot be read.
+taom_is_project_repo() {
+    local mine theirs
+    mine=$(timeout -k 1 2 git -C "${CLAUDE_PROJECT_DIR:-$PWD}" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+    theirs=$(timeout -k 1 2 git -C "$1" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+    [ -n "$mine" ] && [ "$mine" = "$theirs" ]
+}

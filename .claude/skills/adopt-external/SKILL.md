@@ -10,7 +10,7 @@ Evaluate an external repo or article and fold the genuinely-useful parts into TA
 
 ## Trigger
 
-User shares a repo/article "to see what we can adopt." One source at a time.
+User shares a repo/article "to see what we can adopt." One source at a time. A repo listed in `docs/reviews/upstream-watch.json` (yotthani's) goes through `/upstream-review` instead, which reviews only the delta and advances its reviewed SHA.
 
 ## The cycle
 

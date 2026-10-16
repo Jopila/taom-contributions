@@ -15,6 +15,9 @@ that prefix or at the start of a line that has none, so a message that names one
   [TickProfile], [Hitch], [PerfContext]
                  the mission tick profiler's lines (plan 028); optional, a log without them parses,
                  and a line from before the cameraMs column parses without it
+  Older lines still parse: a [MissionPerf] line without mainMs/renderMs, and a [PerfContext]
+  line without frameLimiter/vsync, give None for the missing values. The busy-time medians
+  print `-`; the FRAME_CAP note leaves out the limiter settings it does not have.
   [BattleLoad], [MemSample]
                  read through triage_battle_load.py's own parser, never re-implemented here
   [BuildStamp]   the startup build identity line (Main/Core/Diagnostics/BuildStampReport.cs)
@@ -148,7 +151,9 @@ _NUM = r"(\d+(?:\.\d+)?)"
 _PERF_RE = re.compile(
     r"\[MissionPerf\]\s+t=\+(\d+)s\s+frames=(\d+)\s+fps=" + _NUM + r"\s+avgMs=" + _NUM
     + r"\s+p95Ms=" + _NUM + r"\s+maxMs=" + _NUM + r"\s+agents=(\d+)\s+active=(\d+)\s+"
-    r"formations=(\d+)\s+gc0=(\d+)\s+gc1=(\d+)\s+gc2=(\d+)\s*$")
+    r"formations=(\d+)\s+gc0=(\d+)\s+gc1=(\d+)\s+gc2=(\d+)"
+    r"(?:\s+mainMs=" + _NUM + r"|\s+mainMs=na)?"
+    r"(?:\s+renderMs=" + _NUM + r"|\s+renderMs=na)?\s*$")
 # MissionPerfHeartbeatBehavior's one ERROR line: carries the tag, is not a window, not malformed.
 _PERF_DISABLED = "[MissionPerf] heartbeat disabled"
 _KV_RE = re.compile(r"(\w+)=(\S*)")
@@ -217,7 +222,8 @@ _CONTEXT_KEYS = ("build", "jitOptimized", "clr", "serverGC", "latency", "mission
 # The [PerfContext] settings compare refuses to mix; a row without them is counted unchecked.
 _COMPARED_KEYS = ("build", "textureQuality")
 
-METRICS = ("fps_median", "avg_ms_median", "p95_ms_median", "max_ms_max", "gc0_per_min",
+METRICS = ("fps_median", "avg_ms_median", "p95_ms_median", "main_ms_median", "render_ms_median",
+           "max_ms_max", "gc0_per_min",
            "gc1_per_min", "gc2_per_min", "spawn_max_ms", "spawn_gc0", "agents_max", "load_ms",
            "mem_load_max")
 
@@ -239,6 +245,8 @@ class Window:
     gc0: int
     gc1: int
     gc2: int
+    main_ms: float | None = None
+    render_ms: float | None = None
 
     @property
     def seconds(self) -> float | None:
@@ -252,7 +260,9 @@ def parse_mission_perf(line: str) -> Window | None:
     g = m.groups()
     return Window(t=int(g[0]), frames=int(g[1]), fps=float(g[2]), avg_ms=float(g[3]),
                   p95_ms=float(g[4]), max_ms=float(g[5]), agents=int(g[6]), active=int(g[7]),
-                  formations=int(g[8]), gc0=int(g[9]), gc1=int(g[10]), gc2=int(g[11]))
+                  formations=int(g[8]), gc0=int(g[9]), gc1=int(g[10]), gc2=int(g[11]),
+                  main_ms=None if g[12] is None else float(g[12]),
+                  render_ms=None if g[13] is None else float(g[13]))
 
 
 def _fields(line: str, tag: str) -> dict:
@@ -593,11 +603,12 @@ def _window_list(steady: list) -> str:
     return ", ".join(f"t=+{w.t}s fps={w.fps:.1f} active={w.active}" for w in steady)
 
 
-def frame_cap_evidence(steady: list) -> str | None:
+def frame_cap_evidence(steady: list, context: dict | None = None) -> str | None:
     """FRAME_CAP: fps that does not move with load, or None. Either at least half the steady
     windows sit within 1 fps of one window's fps (a plateau), or the windows with the most and the
     fewest active agents (30% or more apart) run within 1 fps of each other. The evidence names
-    the plateau's fps and its share, or the two windows; then every steady window."""
+    the plateau's fps and its share, or the two windows; then every steady window, then the
+    [PerfContext] frameLimiter and vsync as configured (no judgement whether they explain it)."""
     if len(steady) < FRAME_CAP_MIN_WINDOWS:
         return None
     near = [[g for g in steady if abs(g.fps - w.fps) <= FRAME_CAP_TOLERANCE_FPS] for w in steady]
@@ -613,7 +624,11 @@ def frame_cap_evidence(steady: list) -> str | None:
             return None
         why = (f"active={most.active} at t=+{most.t}s ran {most.fps:.1f} fps, "
                f"active={least.active} at t=+{least.t}s ran {least.fps:.1f} fps")
-    return f"{why}; windows: {_window_list(steady)}"
+    out = f"{why}; windows: {_window_list(steady)}"
+    limiter = context.get("frameLimiter") if context else None
+    if limiter is None:
+        return out
+    return f"{out}; [PerfContext] frameLimiter={limiter} vsync={context.get('vsync', 'na')}"
 
 
 def memory_pressure_evidence(lines: list, context: dict | None) -> str | None:
@@ -710,6 +725,8 @@ def summarize(seg: Segment, stamp: dict | None) -> dict:
         "fps_median": _median([w.fps for w in steady]),
         "avg_ms_median": _median([w.avg_ms for w in steady]),
         "p95_ms_median": _median([w.p95_ms for w in steady]),
+        "main_ms_median": _median([w.main_ms for w in steady if w.main_ms is not None]),
+        "render_ms_median": _median([w.render_ms for w in steady if w.render_ms is not None]),
         "max_ms_max": max((w.max_ms for w in steady), default=None),
         "gc0_per_min": _per_minute(steady, "gc0"),
         "gc1_per_min": _per_minute(steady, "gc1"),
@@ -727,7 +744,7 @@ def summarize(seg: Segment, stamp: dict | None) -> dict:
         "extra_tags": seg.extra_tags,
     }
     evidence: dict = {}
-    frame_cap = frame_cap_evidence(steady)
+    frame_cap = frame_cap_evidence(steady, context)
     if frame_cap is not None:
         evidence["FRAME_CAP"] = frame_cap
     if row["mem_load_max"] is not None and row["mem_load_max"] >= MEMORY_PRESSURE_PCT:
@@ -858,6 +875,7 @@ def format_rows(rows: list, malformed: int) -> str:
             f"{r['log']} #{r['mission_index']} {r['mission'] or '-'} {r['scene'] or '-'} "
             f"windows={r['windows']}/{r['steady_windows']} fps={_fmt(r['fps_median'], 1)} "
             f"avgMs={_fmt(r['avg_ms_median'])} p95Ms={_fmt(r['p95_ms_median'])} "
+            f"mainMs={_fmt(r['main_ms_median'])} renderMs={_fmt(r['render_ms_median'])} "
             f"maxMs={_fmt(r['max_ms_max'], 1)} gc0/min={_fmt(r['gc0_per_min'], 1)} "
             f"gc1/min={_fmt(r['gc1_per_min'], 1)} gc2/min={_fmt(r['gc2_per_min'], 1)} "
             f"agents={_fmt(r['agents_max'])} "
@@ -890,11 +908,11 @@ def format_rows(rows: list, malformed: int) -> str:
 
 def format_compare(result: dict) -> str:
     out = [f"A: {result['a']['rows']} rows   B: {result['b']['rows']} rows",
-           f"{'metric':<15}{'N(A)':>5}{'A':>11}{'N(B)':>5}{'B':>11}{'delta':>10}{'pct':>9}"]
+           f"{'metric':<17}{'N(A)':>5}{'A':>11}{'N(B)':>5}{'B':>11}{'delta':>10}{'pct':>9}"]
     for m in result["metrics"]:
         pct = f"{m['pct']:+.1f}%" if m["pct"] is not None else "-"
         delta = f"{m['delta']:+.2f}" if m["delta"] is not None else "-"
-        out.append(f"{m['metric']:<15}{m['n_a']:>5}{_fmt(m['a']):>11}{m['n_b']:>5}"
+        out.append(f"{m['metric']:<17}{m['n_a']:>5}{_fmt(m['a']):>11}{m['n_b']:>5}"
                    f"{_fmt(m['b']):>11}{delta:>10}{pct:>9}")
     for side in ("a", "b"):
         flags = ", ".join(f"{k} x{v}" for k, v in result["flags"][side].items()) or "none"

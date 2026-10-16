@@ -43,7 +43,7 @@ checked against the files or the binary named below.
 | One throw skips the mission's start | v1.5.4 `Mission.AfterStart` sets `CurrentState = State.Continuing` only after the submodule callbacks and every behaviour's `OnBehaviorInitialize`, `EarlyStart` and `AfterStart` loop (cache `Mission.cs:3815-3852`); every behaviour enters through `Mission.AddMissionBehavior` (`:4686`) |
 | TAOM's formation presets are half-built | `OOBButtonsVM.cs:149-153` (Load is a "Phase-1 stub") and `:185-193` (Save stores a name only) |
 | Custom Battle ran none of TAOM's Combat Mechanics damage rules (fixed by #788) | `Main/SubModule.cs:1350-1362` registered only the morale, stat and banner-bearer models off a `BasicGameStarter`, plus one creature damage model (yotthani's balance notes say the same) |
-| The `external developer drop` is yotthani's HoN code | identical SaveSystem ids (726900501 with classes 101 and 102 for equipment presets, 726900601 with class 101 for formation presets), identical class and field names, the same layout maths and minority thresholds, and his 2026-09-30 restore commits from his 2026-04-29 release, a week before TAOM's 2026-05-07 port. The drop folder itself no longer exists, so this is a fit, not a byte comparison |
+| The `external developer drop` is yotthani's HoN code | identical SaveSystem ids (726900501 with classes 101 and 102 for equipment presets, 726900601 with class 101 for formation presets), identical class and field names, the same layout maths and minority thresholds, and yotthani's 2026-09-30 restore commits from the 2026-04-29 release, a week before TAOM's 2026-05-07 port. The drop folder itself no longer exists, so this is a fit, not a byte comparison |
 
 ## Decisions
 
@@ -137,7 +137,7 @@ ash fix is still content work (#738).
    was meant for a "Fiefs (F6)" map-bar entry that was never built. Mike asked for the entry on 2026-10-09:
    #789, branch `feat/fief-nav-button`, which adds the button and deletes the unused view model.
 4. **Licence settled (2026-10-09):** Mike stated that yotthani made everything MIT. That clears the seven
-   features ported from his drop in May (QuickActions among them, which the register also lists under
+   features ported from yotthani's drop in May (QuickActions among them, which the register also lists under
    `TransferbuttonMenu`) and the `yotthani/bannerlord` row; their MIT notice is in
    `Main/_Module/THIRD-PARTY-LICENSES.txt`. The repository has no root licence file yet, so the ask to yotthani
    ("For yotthani", item 5) is now for that file.
@@ -158,7 +158,7 @@ ash fix is still content work (#738).
    the same missing bound, gets the same guard with a TAOM code block; the watch logs each battle's peak and
    refusals for both pools. Both ON by default (Mike, 2026-10-08). Labels: bug, perf, triage-needs-ingame.
 3. **perf: the campaign map skips hidden settlement nameplates (nameplate cull).** (#777) yotthani measured the
-   nameplate update at 4 ms of a 14 ms map frame in fast forward on TAOM's map (1,002 settlements in his count), and 5.5 to
+   nameplate update at 4 ms of a 14 ms map frame in fast forward on TAOM's map (1,002 settlements in yotthani's count), and 5.5 to
    2.3 ms per frame with the cull. Port of VanillaTuning's `nameplate-cull` (MIT). Default on now (Mike,
    2026-10-08); his MapPerf A/B runs before the next release, and if it shows no gain the default flips before
    that release (once a release ships the setting, a persisted MCM default cannot flip without renaming it).

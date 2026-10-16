@@ -66,7 +66,9 @@ the `FactionMap/` subfolder under it holds **loose runtime-loaded PNGs that neve
 `EngineTexture.LoadTextureFromPath(fileName, folder)`. Verified 2026-08-08: **zero** references to
 FactionMap in `TAOMSpriteData.xml`, and it is **not** declared in `SpriteParts/Config.xml`, so it is
 not a sprite category at all. `PolygonWidget` and `BannerWidget` load the same way (five
-`LoadTextureFromPath` sites in total).
+`LoadTextureFromPath` sites in total). Yotthani's measured cost of this call and the
+`Texture.CreateFromByteArray` pin caveat are in
+[gauntletui-viewmodel-screen.md](../reference/engine/gauntletui-viewmodel-screen.md).
 
 Consequences, all the opposite of the baked path:
 

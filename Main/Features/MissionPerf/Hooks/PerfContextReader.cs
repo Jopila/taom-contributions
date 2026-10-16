@@ -11,10 +11,10 @@ namespace TAOM.Features.MissionPerf.Hooks;
 /// <summary>
 /// Gathers the values of one <c>[PerfContext]</c> line at a mission's first tick: the build flavour (read at
 /// run time from TAOM's own <see cref="DebuggableAttribute"/>, ADR-005), the CLR and GC posture, the mission's
-/// scene and agent count, the player's quality options, memory headroom, and which diagnostics are on. Each
-/// engine read has its own try/catch, falling back to -1 (written <c>na</c>, or -1 for agents) or
-/// <c>unknown</c>, so one bad read costs one field, never the line; the first failure (a memory read that
-/// returns false included) comes back as one status line for the caller to log.
+/// scene and agent count, the player's frame limiter, vsync and quality options, memory headroom, and which
+/// diagnostics are on. Each engine read has its own try/catch, falling back to -1 (written <c>na</c>, or -1
+/// for agents) or <c>unknown</c>, so one bad read costs one field, never the line; the first failure (a memory
+/// read that returns false included) comes back as one status line for the caller to log.
 /// </summary>
 internal static class PerfContextReader
 {
@@ -55,6 +55,8 @@ internal static class PerfContextReader
             missionInProcess,
             Safe("scene", () => mission.SceneName, "unknown"),
             Safe("agents", () => mission.AllAgents.Count, -1),
+            Safe("frameLimiter", () => options.FrameLimiterFps, -1),
+            Safe("vsync", () => options.VSyncOption, -1),
             Safe("textureQuality", () => options.TextureQualityOption, -1),
             Safe("shadowQuality", () => options.ShadowmapResolutionOption, -1),
             Safe("particleDetail", () => options.ParticleDetailOption, -1),

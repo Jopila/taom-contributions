@@ -327,6 +327,94 @@ class PushCandidatesTests(unittest.TestCase):
                           "git commit -m push\x1fthe\x1fthing", "git push --force origin T"])
 
 
+class GitRepoTests(unittest.TestCase):
+    """git_invocations and git_repo_candidates (2026-10-16): the repository each git call runs in, read
+    once for every commit gate. _pybin.sh taom_git_repo_dir resolves each candidate to its top level."""
+
+    def cands(self, cmd, cwd="E:/w", tool="Bash", sub="commit"):
+        return sw.git_repo_candidates(cmd, tool, cwd, sub)
+
+    def test_plain_commit_runs_in_the_cwd(self):
+        self.assertEqual(self.cands("git commit -m x"), ["E:/w"])
+
+    def test_cd_before_the_commit_names_its_repo_first(self):
+        self.assertEqual(self.cands("cd /e/repos/x && git commit -m x"), ["E:/repos/x", "E:/w"])
+
+    def test_relative_cds_chain_onto_the_cwd(self):
+        self.assertEqual(self.cands("cd a && cd b && git commit -m x")[0], "E:/w/a/b")
+
+    def test_c_option_of_another_git_command_does_not_count(self):
+        self.assertEqual(self.cands("git -C /e/other status && git commit -m x"), ["E:/w"])
+
+    def test_c_option_after_another_option_counts(self):
+        self.assertEqual(self.cands("git -c user.name=x -C sub commit -m y")[0], "E:/w/sub")
+
+    def test_relative_c_option_joins_an_earlier_cd(self):
+        self.assertEqual(self.cands("cd /e/abs && git -C rel commit -m y")[0], "E:/abs/rel")
+
+    def test_cd_inside_a_subshell_ends_at_its_close(self):
+        self.assertEqual(self.cands("(cd a && ls) && git commit -m x"), ["E:/w"])
+
+    def test_cd_after_the_commit_does_not_count(self):
+        self.assertEqual(self.cands("git commit -m x && cd /e/elsewhere"), ["E:/w"])
+
+    def test_cd_minus_is_unknown_and_moves_nothing(self):
+        self.assertEqual(self.cands("cd - && git commit -m x"), ["E:/w"])
+
+    def test_bash_c_script_is_read(self):
+        self.assertEqual(self.cands('bash -c "cd /e/x && git commit -m y"')[0], "E:/x")
+
+    def test_heredoc_apostrophe_keeps_the_cd(self):
+        cmd = "cd /e/x && git commit -F - <<'EOF'\nfix: don't\nEOF"
+        self.assertEqual(self.cands(cmd)[0], "E:/x")
+
+    def test_unbalanced_quote_keeps_the_words_before_it(self):
+        self.assertEqual(self.cands('cd /e/x && git commit -m "oops')[0], "E:/x")
+
+    def test_last_commit_names_the_repo(self):
+        self.assertEqual(self.cands("git -C /e/a commit -m x; git -C /e/b commit -m y")[0], "E:/b")
+
+    def test_powershell_set_location_moves_the_commit(self):
+        self.assertEqual(self.cands("Set-Location -Path E:/x; git commit -m y", tool="PowerShell")[0], "E:/x")
+
+    def test_no_cwd_leaves_a_relative_cd_relative(self):
+        self.assertEqual(sw.git_repo_candidates("cd sub && git commit -m x", "Bash", "", "commit"), ["sub"])
+
+    def test_other_subcommand(self):
+        self.assertEqual(self.cands("cd /e/x && git add -A", sub="add")[0], "E:/x")
+        self.assertEqual(self.cands("cd /e/x && git add -A"), ["E:/w"])
+
+    def test_invocations_carry_the_args_and_a_piped_word(self):
+        text, bodies = sw.strip_heredocs("echo feat-x | git commit -F -")
+        calls = sw.git_invocations(text, bodies, "commit")
+        self.assertEqual(calls, [(["<<", "__TAOM_HEREDOC_0__", "-F", "-"], None)])
+        self.assertEqual(sw.expand_heredoc("__TAOM_HEREDOC_0__", bodies), "feat-x")
+
+    def test_strict_mode_still_raises_on_bad_quoting(self):
+        with self.assertRaises(ValueError):
+            sw.git_invocations('git commit -m "oops', [], "commit")
+
+    def test_command_past_the_scan_cap_falls_back_to_the_cwd_in_time(self):
+        # shlex builds each word one character at a time: a 1 MB quoted message took 6.5 s here and pushed
+        # three gates past their registrations, where a killed gate fails open (deep review 2026-10-16).
+        import time
+        big = "x" * (sw.REPO_SCAN_MAX + 1)
+        start = time.perf_counter()
+        got = self.cands('cd /e/x && git commit -m "' + big + '"')
+        self.assertEqual(got, ["E:/w"])
+        self.assertLess(time.perf_counter() - start, 1.0)
+
+    def test_a_long_heredoc_body_is_out_before_the_cap(self):
+        body = "y" * 400000
+        self.assertEqual(self.cands("cd /e/x && git commit -F - <<'EOF'\n" + body + "\nEOF")[0], "E:/x")
+
+    def test_cli_prints_one_candidate_per_line(self):
+        payload = json.dumps({"tool_name": "Bash", "cwd": "E:/w",
+                              "tool_input": {"command": "cd /e/x && git commit -m y"}})
+        r = run_cli("git-repo", payload.encode("ascii"))
+        self.assertEqual((r.returncode, r.stdout), (0, b"E:/x\nE:/w\n"))
+
+
 class CliTests(unittest.TestCase):
     def test_posix_mode_writes_utf8_with_lf_only(self):
         payload = json.dumps({"tool_name": "PowerShell",

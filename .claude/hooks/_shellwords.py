@@ -5,7 +5,7 @@ to_posix() rewrites it as the POSIX-shell (Bash) text of the same command, and e
 Bash logic. In both shells a git named by a path or in capitals (GIT, git.exe, a Windows path to
 git.exe) becomes `git` where it is the command.
 
-Usage: <python> _shellwords.py posix|segments|verdict [protected...] < the hook payload (JSON)
+Usage: <python> _shellwords.py posix|segments|verdict [protected...]|git-repo [subcommand] < the hook payload (JSON)
   posix     the command as POSIX-shell text
   segments  the posix text split at ; & | and newlines outside quotes, one segment per line, with a
             # comment dropped (mark-verification-run.sh)
@@ -13,6 +13,10 @@ Usage: <python> _shellwords.py posix|segments|verdict [protected...] < the hook 
             line, block<TAB>target, warn<TAB>target or allow; _pushjudge.py judges the candidate
             lines (push_candidates). A payload that is no JSON object prints unread, which the hook
             answers from the raw text, never with a silent allow
+  git-repo  the directories to try, one per line, for the repository a `git <subcommand>` (default
+            commit) runs in: the last such call's own (a cd or -C before it, joined onto the
+            payload's cwd), then the payload's cwd (_pybin.sh taom_git_repo_dir resolves each to its
+            work tree's top level)
 It writes UTF-8 with LF line ends and exits 0; an unknown mode exits 2. PowerShell text it cannot
 follow (an unclosed quote, here-string, block comment or ${) comes back unchanged, which is how
 every gate read a command before plan 027.
@@ -21,7 +25,9 @@ Not read, by design: a $(...) inside a double-quoted PowerShell string stays tex
 never expanded, and PowerShell's comma array syntax stays inside one word. A string or variable that
 opens a PowerShell statement is a value it prints, never a command, so it reads as `echo <value>`.
 """
+import codecs
 import json
+import os
 import re
 import shlex
 import sys
@@ -399,6 +405,195 @@ def push_candidates(cmd, tool):
     return keep
 
 
+# ---- git invocations and the repository each runs in (2026-10-16) -------------------------------
+# Moved here from check-commit-subject-version.sh, so every commit gate reads a command one way. The
+# command is read the way bash reads it, then each `git ... <subcommand>`'s own options are picked out.
+# A regex over the raw string took option-shaped prose inside a message for a real option, missed
+# $'...' quoting, attached -m"..." and concatenated words, and let a -c in a later command switch the
+# label check off (Codex review 2026-09-23, #647).
+
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1[ \t]*\r?\n(.*?)\r?\n[ \t]*\2\b", re.S)
+CMD_SEP = set(";|&\n()")
+GIT_OPTS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path",
+                       "--config-env"}
+# Commands that change the shell's directory: bash's, and PowerShell's as to_posix() leaves them.
+CHDIR = {"cd", "pushd", "chdir", "set-location", "sl", "push-location"}
+
+
+def strip_heredocs(cmd):
+    """(text, bodies): every heredoc body taken out and replaced by a placeholder. A body is the
+    message of `-F -` or of `-m "$(cat <<EOF ...)"`, and its apostrophes would otherwise unbalance
+    the tokenizer."""
+    bodies = []
+
+    def stash(m):
+        bodies.append(m.group(3))
+        return "<< __TAOM_HEREDOC_%d__" % (len(bodies) - 1)
+    return HEREDOC.sub(stash, cmd), bodies
+
+
+def decode_ansi_c(text):
+    """Bash ANSI-C quoting, $'...', decoded and re-quoted so the tokenizer sees what git gets."""
+    def one(m):
+        try:
+            s = codecs.decode(m.group(1).encode("latin-1", "backslashreplace"), "unicode_escape")
+        except Exception:
+            s = m.group(1)
+        return shlex.quote(s)
+    return re.sub(r"\$'((?:[^'\\]|\\.)*)'", one, text)
+
+
+def expand_heredoc(value, bodies):
+    """A value naming a heredoc placeholder is that heredoc's body (the $(cat <<EOF) form)."""
+    hm = re.search(r"__TAOM_HEREDOC_(\d+)__", value)
+    return bodies[int(hm.group(1))] if hm else value
+
+
+def command_tokens(s, partial=False):
+    """The words and separators of POSIX text; an unquoted newline separates commands, as in bash.
+    Quoting bash itself would reject raises ValueError, unless partial: then the words read before
+    the fault come back."""
+    lx = shlex.shlex(s, posix=True, punctuation_chars="();<>|&\n")
+    lx.whitespace = " \t\r"
+    lx.whitespace_split = True
+    if not partial:
+        return list(lx)
+    out = []
+    try:
+        for t in lx:
+            out.append(t)
+    except ValueError:
+        pass
+    return out
+
+
+def piped_text(group):
+    """What a command that only prints one literal word hands the next command through a pipe:
+    echo or Write-Output with one word (the reader writes a PowerShell string or here-string that
+    stands alone as `echo <word>`), or printf with the format %s or %s\\n and one word. None for
+    anything else, so the commit is judged as it was before plan 027: a lone word is a command
+    (pbpaste), a word holding $ is a variable nobody here can read, and any other printf format
+    changes the text (deep review of plan 027)."""
+    name = os.path.basename(group[0]).lower() if group else ""
+    if len(group) == 2 and name in ("echo", "write-output"):
+        word = group[1]
+    elif len(group) == 3 and name == "printf" and group[1] in ("%s", "%s\\n"):
+        word = group[2]
+    else:
+        return None
+    return None if "$" in word else word
+
+
+def native_path(p):
+    """A Git Bash drive path (/e/repos/x) as a Windows path this Python and bash both open (E:/repos/x)."""
+    m = re.match(r"^/([A-Za-z])(/|$)", p)
+    return (m.group(1).upper() + ":/" + p[m.end():]) if m else p
+
+
+def join_dir(base, p):
+    """p as the shell would reach it from base: an absolute p stands alone; a relative one joins
+    base with a forward slash, which Git Bash reads whatever separators base holds."""
+    p = native_path(p)
+    if os.path.isabs(p) or re.match(r"^[A-Za-z]:", p) or not base:
+        return p
+    return base.rstrip("/\\") + "/" + p
+
+
+def _chdir_target(group):
+    """The directory a cd, pushd or Set-Location group moves to, or None (no argument, or `cd -`,
+    the previous directory, which nothing here knows)."""
+    words = group[1:]
+    for i, word in enumerate(words):
+        if word == "-":
+            return None
+        if word == "--":
+            return words[i + 1] if i + 1 < len(words) else None
+        if not word.startswith("-"):      # -L, -P, -LiteralPath, -Path are skipped
+            return word
+    return None
+
+
+def git_invocations(text, bodies, subcommand="commit", base=None, partial=False, depth=0):
+    """[(args, repo)] for every `git ... <subcommand>` in POSIX text whose heredocs strip_heredocs
+    took out: args is the argument list after the subcommand, repo the directory the call runs in.
+    That is base, moved by each cd before the call (a cd inside ( ) ends at its ), and then by the
+    call's own -C. A commit whose stdin is piped from a command that only prints one word (a
+    PowerShell here-string piped to `git commit -F -`, plan 027) gets that word first as a heredoc
+    placeholder, so `-F -` reads it. Raises ValueError on quoting bash would reject, unless partial."""
+    found = []
+    group, prev, sep = [], [], ""
+    cwd, stack = base, []
+    for t in command_tokens(text, partial) + [";"]:
+        if t and set(t) <= CMD_SEP:
+            if group:
+                name = os.path.basename(group[0]).lower()
+                if name in CHDIR:
+                    target = _chdir_target(group)
+                    if target is not None:
+                        cwd = join_dir(cwd, target)
+                calls = _git_call(group, bodies, subcommand, cwd, partial, depth)
+                piped = piped_text(prev) if sep == "|" else None
+                if piped is not None:
+                    bodies.append(piped)
+                    mark = ["<<", "__TAOM_HEREDOC_%d__" % (len(bodies) - 1)]
+                    calls = [(mark + args, repo) for args, repo in calls]
+                found.extend(calls)
+            if t == "(":
+                stack.append(cwd)
+            elif t == ")" and stack:
+                cwd = stack.pop()
+            prev, group, sep = group, [], t
+        else:
+            group.append(t)
+    return found
+
+
+def _git_call(g, bodies, subcommand, cwd, partial, depth):
+    i = 0
+    while i < len(g) and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", g[i]):   # VAR=value prefixes
+        i += 1
+    if i >= len(g):
+        return []
+    word = os.path.basename(g[i]).lower()
+    if word in ("bash", "sh", "zsh", "bash.exe") and "-c" in g[i + 1:] and depth < 2:
+        k = g.index("-c", i + 1)
+        # The script's heredocs were taken out with the whole command, so its placeholders index bodies.
+        return git_invocations(g[k + 1], bodies, subcommand, cwd, partial, depth + 1) if k + 1 < len(g) else []
+    if word not in ("git", "git.exe"):
+        return []
+    i += 1
+    repo = cwd
+    while i < len(g) and g[i].startswith("-"):
+        if g[i] == "-C" and i + 1 < len(g):
+            repo = join_dir(repo, g[i + 1])
+        i += 2 if g[i] in GIT_OPTS_WITH_VALUE else 1
+    if i < len(g) and g[i] == subcommand:
+        return [(g[i + 1:], repo)]
+    return []
+
+
+# The longest command text (heredoc bodies already out) git_repo_candidates tokenizes. shlex builds
+# each word one character at a time, quadratic in its length: one 1 MB quoted message took 6.5 s and
+# pushed three gates past their registrations, and a killed gate fails open (deep review 2026-10-16).
+# About 0.4 s at the cap; a longer command is judged in the payload's cwd.
+REPO_SCAN_MAX = 262144
+
+
+def git_repo_candidates(cmd, tool, cwd, subcommand="commit"):
+    """The directories to try, in order, for the repository a `git <subcommand>` in this tool call
+    runs in: the last such call's own directory (a cd or -C before it, joined onto the payload's
+    cwd), then the payload's cwd. The caller resolves each to its work tree's top level."""
+    text, bodies = strip_heredocs(to_posix(cmd, tool))
+    out = []
+    if len(text) <= REPO_SCAN_MAX:
+        calls = git_invocations(decode_ansi_c(text), bodies, subcommand, cwd or None, partial=True)
+        if calls and calls[-1][1]:
+            out.append(calls[-1][1])
+    if cwd and cwd not in out:
+        out.append(cwd)
+    return out
+
+
 def read_payload(raw):
     """(tool_name, tool_input.command) of a hook payload, empty strings where it holds none; None when
     it is no JSON object."""
@@ -413,14 +608,31 @@ def read_payload(raw):
     return str(d.get("tool_name") or ""), cmd if isinstance(cmd, str) else ""
 
 
+def read_cwd(raw):
+    """The payload's cwd: the session's directory, the worktree root once it has entered one."""
+    try:
+        d = json.loads(raw)
+    except ValueError:
+        return ""
+    return str(d.get("cwd") or "") if isinstance(d, dict) else ""
+
+
 def main(argv):
     mode = argv[1] if len(argv) > 1 else ""
-    if mode not in ("posix", "segments", "verdict"):
-        sys.stderr.write("usage: _shellwords.py posix|segments|verdict [protected...] < payload.json\n")
+    if mode not in ("posix", "segments", "verdict", "git-repo"):
+        sys.stderr.write("usage: _shellwords.py posix|segments|verdict [protected...]|git-repo [subcommand] < payload.json\n")
         return 2
-    payload = read_payload(sys.stdin.buffer.read().decode("utf-8", "replace"))
+    raw = sys.stdin.buffer.read().decode("utf-8", "replace")
+    payload = read_payload(raw)
     tool, cmd = payload or ("", "")
-    if mode == "verdict" and payload is None:
+    if mode == "git-repo":
+        cwd = read_cwd(raw)
+        try:
+            dirs = git_repo_candidates(cmd, tool, cwd, argv[2] if len(argv) > 2 else "commit")
+        except Exception:                    # never worse than the cwd alone
+            dirs = [cwd] if cwd else []
+        text = "\n".join(d.replace("\n", "") for d in dirs)
+    elif mode == "verdict" and payload is None:
         text = "unread"
     elif mode == "verdict":
         sys.dont_write_bytecode = True       # no __pycache__ folder inside .claude/hooks

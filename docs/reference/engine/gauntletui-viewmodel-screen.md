@@ -93,6 +93,30 @@ replacing whole screens (forward-compatible across patches, as long as the bound
   been changed the same day; the run after had 12 compiles instead of about 2,500 (`perf.md` lines 2107-2109). Whether
   a cold cache compiles mid-battle and blocks the frame is still open in
   `plans/_audit/2026-10-02-perf/REPORT.md` lines 121-122, which this note leaves as it is.
+- **A second enabled scene view on the campaign map scene loses the map's terrain** [yotthani,
+  in game, 1.5.3]: the runs, yotthani's `ClearAll` rule and what they mean for TAOM's `MapViewRelease` are in
+  [map-view-release.md](../../features/map-view-release.md).
+- **`Texture.CreateFromByteArray` pins the pixels only for the call** (TAOM-verified, v1.5.5 managed).
+  `ManagedCallbacks.ScriptingInterfaceOfITexture.cs:260-266` builds the pinned array, makes the native call and
+  disposes the pin right after (`Texture.cs:125-128` is the public wrapper). Yotthani saw panels and map layers
+  show other pictures and read it as the engine uploading the pixels later, when the memory held something else
+  (`RealmUI/Game/Theme/PictureReader.cs`@2ff002be lines 29-32; in game, from screenshots the code comment cites; the native
+  side is unverified, so a late upload is a reading, not a finding). A grep of `Main` and `TAOM.Tests`
+  (2026-10-16) finds no `CreateFromByteArray` call in TAOM.
+- **Texture and first-draw costs** [yotthani; the engine version is not stated for the first two figures]:
+  making a texture from pixels stopped a frame for 35 to 120 ms (`RealmUI/Game/Flow/FlowController.cs`@2ff002be lines 162-164,
+  "(measured)", no machine stated). The first draw of RealmUI's own interface cost one frame of 1.5 s (measured 2026-10-08), which
+  yotthani pays up front by drawing it at alpha 0.02 for 14 frames while the picture stands (`RealmUI/Game/Map/MapCam.cs`@2ff002be
+  lines 457-466). A per-frame budget that a single item exceeds is no budget: a pump of "a few milliseconds a frame" read one picture
+  every frame and halved the frame rate for seconds (101 to 50, reported to yotthani on 2026-10-13); yotthani's code now reads one
+  picture every 0.3 s (`FlowController.cs` lines 195-203; no measurement of the change is given). Loading four 2048 px layers through `LoadTextureFromPath` took 129 ms on vanilla modules and
+  153 ms with TAOM's list (`feasibility.md`@2ff002be section 11, 2026-10-04, 1.5.3, one run each).
+- **Gauntlet 2D draw facts, read in the 1.5.3 decompile and not run** [yotthani,
+  `docs/realm-ui/research/engine-2d-gauntlet.md`@2ff002be lines 9-51]: culling and hit-testing use the widget's
+  layout rectangle only (`Widget.cs:2231-2256`, `:2158`), so a visual offset or scale is ignored; draw calls
+  batch only for consecutive draws with the same texture pair (`TwoDimensionEnginePlatform.cs:39-57`); and
+  pooled `SimpleMaterial`s keep the previous user's values, so set every field you rely on
+  (`SimpleMaterial.cs:8-50`). TAOM has not re-read these on v1.5.5.
 
 ### Map conversation + encyclopedia: two layers on one `MapScreen` (read 2026-09-22, #635)
 A conversation started from a settlement menu's character overlay, or from a map encounter, is a **map
