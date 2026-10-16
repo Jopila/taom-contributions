@@ -270,7 +270,8 @@ def main():
             gable["pitch"] = pitch
             for end, sign in ((-hx, -1), (hx, 1)) if ridge_axis == "x" else ((-hy, -1), (hy, 1)):
                 for w in frange(-half + 0.2, half - 0.2, 0.1):
-                    top = eave + 1.5 * (1 - abs(w) / half) - 0.12
+                    # the kit pitch rises 1 m per 2 m of run, for any span
+                    top = eave + 0.5 * (half - abs(w)) - 0.12
                     if pitch is not None:
                         top = eave + pitch * (half - abs(w)) - 0.12
                     for z in frange(eave + 0.05, max(eave + 0.06, top), 0.1):

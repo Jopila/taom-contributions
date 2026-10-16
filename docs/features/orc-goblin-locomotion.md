@@ -273,6 +273,9 @@ and LoopDisplacement (1.71 = 1.8 x 0.95).
 **Result (2026-10-14):** Mike checked the orcs and goblins in game after `/armory-audit` came back CLEAN:
 the animations look good. That check ran with the first 18 rows per set.
 
+**Result (2026-10-15), with all 42 rows per set:** Mike: the orc and goblin animations work in game, and no
+crash so far. The report does not name the weapon classes below, so their check stays open.
+
 **Owed in game for the 24 codes bound later that day:** an orc and a goblin with throwing weapons, with a
 dagger, with a hand shield and with a polearm and shield: walk and run in each; and the idle of a running
 formation that halts. Each plays a clip that already passed, so a fault would show as a wrong arm or shield
