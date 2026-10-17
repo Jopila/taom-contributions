@@ -19,15 +19,23 @@ taom_pybin_degraded "config-protection" "edits to settings.json / Directory.Buil
 # taken. Mirrors block-dangerous-git.sh.
 if command -v jq >/dev/null 2>&1; then
   FILE_PATH=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // .tool_input.file // empty' 2>/dev/null)
+  SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.session_id // empty' 2>/dev/null)
 else
-  FILE_PATH=$(printf '%s' "$INPUT" | "$PYBIN" -c '
+  PARSED=$(printf '%s' "$INPUT" | "$PYBIN" -c '
 import sys, json
 try:
-    ti = json.loads(sys.stdin.read()).get("tool_input", {})
-    print(ti.get("file_path") or ti.get("file") or "")
+    d = json.loads(sys.stdin.read())
+    ti = d.get("tool_input", {})
+    path = (ti.get("file_path") or ti.get("file") or "").replace("\n", "")
+    sid = str(d.get("session_id") or "").replace("\n", "")
+    sys.stdout.buffer.write((path + "\n" + sid).encode("utf-8"))   # LF only: Windows text mode writes CRLF
 except Exception:
     pass
 ' 2>/dev/null)
+  PARSED=${PARSED//$'\r'/}
+  FILE_PATH=${PARSED%%$'\n'*}
+  SESSION_ID=""
+  [[ "$PARSED" == *$'\n'* ]] && SESSION_ID=${PARSED#*$'\n'}
 fi
 
 # No file path = not a file edit, allow
@@ -36,9 +44,15 @@ if [[ -z "$FILE_PATH" ]]; then
   exit 0
 fi
 
-# Check for user-approved override (created manually or via explicit user request)
-OVERRIDE_FILE="/tmp/claude-config-override-${CLAUDE_SESSION_ID:-none}"
-if [[ -f "$OVERRIDE_FILE" ]]; then
+# A user-approved override (created manually or on an explicit user request) unlocks this session
+# only. Its name carries the session's id: the payload's session_id (every hook's input, hooks docs
+# "Common input fields"), else CLAUDE_CODE_SESSION_ID, else CLAUDE_SESSION_ID. Until 2026-10-16 it read
+# only CLAUDE_SESSION_ID, which the harness does not set, so the name was always ...-none and one
+# file unlocked every session (docs/reviews/adopt-ecc-2026-09-29.md). No id means no override, and
+# the id keeps only the characters a session id holds, so it cannot name another path.
+SESSION_ID=${SESSION_ID:-${CLAUDE_CODE_SESSION_ID:-${CLAUDE_SESSION_ID:-}}}
+SESSION_ID=${SESSION_ID//[^A-Za-z0-9_-]/}
+if [[ -n "$SESSION_ID" && -f "/tmp/claude-config-override-${SESSION_ID}" ]]; then
   echo "{}"
   exit 0
 fi

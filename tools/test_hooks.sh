@@ -2368,15 +2368,44 @@ CP_CASES=(
   '0|E:\repos\TAOM\docs\adrs\diagram.png'
   '0|E:\repos\TAOM\docs\reviews\adrs\summary.md'
 )
+cp_run() {   # $1 path, $2 the payload's session_id or "", then env assignments; returns the hook's rc
+    local path="$1" sid="$2" payload
+    shift 2
+    payload=$("$HPY" -c '
+import json, sys
+d = {"tool_name": "Edit", "tool_input": {"file_path": sys.argv[1]}, "hook_event_name": "PreToolUse"}
+if sys.argv[2]:
+    d["session_id"] = sys.argv[2]
+print(json.dumps(d))' "$path" "$sid")
+    printf '%s' "$payload" | timeout -k 2 10 env -u CLAUDE_CODE_SESSION_ID -u CLAUDE_SESSION_ID \
+        CLAUDE_PROJECT_DIR="$SANDBOX" "$@" bash .claude/hooks/config-protection.sh >/dev/null 2>&1
+}
 for entry in "${CP_CASES[@]}"; do
     want="${entry%%|*}"; path="${entry#*|}"
-    payload=$("$HPY" -c 'import json,sys; print(json.dumps({"tool_name":"Edit","tool_input":{"file_path":sys.argv[1]},"hook_event_name":"PreToolUse"}))' "$path")
-    printf '%s' "$payload" | timeout -k 2 10 env CLAUDE_PROJECT_DIR="$SANDBOX" CLAUDE_SESSION_ID="taom-hooktest-$$" \
-        bash .claude/hooks/config-protection.sh >/dev/null 2>&1
+    cp_run "$path" "taom-hooktest-$$"
     got=$?
     [[ "$got" == "$want" ]] && ok "config-protection rc=$got for: $path" \
         || bad "config-protection expected rc=$want, got $got for: $path"
 done
+# The override is per session (2026-10-16). Its name carries the payload's session_id (every hook's
+# input), else CLAUDE_CODE_SESSION_ID, else CLAUDE_SESSION_ID. Until then it read only CLAUDE_SESSION_ID,
+# which the harness does not set, so the name was always ...-none and one file unlocked every session.
+CP_SID="taom-hooktest-ovr-$$"
+CP_SETTINGS='E:\repos\TAOM\.claude\settings.json'
+: > "/tmp/claude-config-override-$CP_SID"
+cp_run "$CP_SETTINGS" "$CP_SID"; got=$?
+[[ $got -eq 0 ]] && ok "config-protection: this session's override (payload session_id) allows a settings.json edit" \
+    || bad "config-protection ignored the payload session_id's override (rc=$got)"
+cp_run "$CP_SETTINGS" "taom-hooktest-other-$$"; got=$?
+[[ $got -eq 2 ]] && ok "config-protection: another session's override does not unlock this session" \
+    || bad "config-protection let one session's override unlock another (rc=$got)"
+cp_run "$CP_SETTINGS" "" CLAUDE_CODE_SESSION_ID="$CP_SID"; got=$?
+[[ $got -eq 0 ]] && ok "config-protection: CLAUDE_CODE_SESSION_ID names the override when the payload has no id" \
+    || bad "config-protection ignored CLAUDE_CODE_SESSION_ID (rc=$got)"
+cp_run "$CP_SETTINGS" "x/../../tmp/claude-config-override-$CP_SID"; got=$?
+[[ $got -eq 2 ]] && ok "config-protection: a session id cannot walk to another override file" \
+    || bad "config-protection followed path characters in a session id to another file (rc=$got)"
+rm -f "/tmp/claude-config-override-$CP_SID"
 
 # ---------------------------------------------------------------------------
 # 7h. A payload in Git Bash's here-string hang window still gets its answer (#681).

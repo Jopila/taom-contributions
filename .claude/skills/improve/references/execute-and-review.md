@@ -18,9 +18,10 @@ the review loop with its stop rule, stopped plans, decisions, and reconciling th
   that plan first (RE-CUT below).
 - **Step 0 done.** A plan with a protected-file edit waits for the maintainer's Step 0, or runs to its
   Step 0 STOP and stops there. Collect every Step 0 of the plan set at plan time and ask once. If he
-  asks you to make the edits, the `config-protection.sh` override marker unlocks every session on the
-  machine while it exists (the hook sees no session id): only on his word for the named files, one Edit
-  per file, the marker removed at once, logged in PROGRESS.md. Never a scripted write to a protected
+  asks you to make the edits, the `config-protection.sh` override marker
+  (`/tmp/claude-config-override-<your session id>`, the payload's `session_id`; it unlocks your session only
+  since 2026-10-16): only on his word for the named files, one Edit per file, the marker removed at once,
+  logged in PROGRESS.md. Never a scripted write to a protected
   file.
 - **An issue exists** ([run-protocol.md](run-protocol.md) "Issues").
 - **The base's baseline is known**: baseline.md, or the executor records it before its first edit.
