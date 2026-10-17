@@ -39,27 +39,34 @@ Texturing: tools/blender/unwrap_texture_sets.py unwraps <out>/carn_dum_town_bloc
 with tools/oneoff/carn_dum_texture_sets.json, then Painter
 (docs/kitbash/map-icons.md "Rebuilding an icon from solids").
 
-Material slots for the tiling pass: carn_dum_stone (walls, towers, spikes),
-carn_dum_paving (terrace and wall tops), carn_dum_iron (portcullis),
-carn_dum_dark (window and gate openings), carn_dum_roof (house and turret roofs).
+Material slots name surface kinds, not texture sets: carn_dum_stone (walls, towers,
+spikes), carn_dum_paving (terrace and wall tops), carn_dum_iron (portcullis),
+carn_dum_dark (window and gate openings), carn_dum_roof (house and turret roofs). The
+unwrap turns material plus part into the texture sets.
+
+v11 (2026-10-16 review): no face reaches down into the solid that hides it (terrace
+risers seated on the step in front, the outer wall's faces started at the talus top and
+the terrace 0 step), both gable ends stone, the flying-buttress piers seated in the
+wall. The tiling route's box UVs and FBX are gone: the unwrap writes the Kit FBX.
 
     "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\blender-launcher.exe" -b -P tools/oneoff/blender_build_carn_dum_icon.py -- <out dir>
 
-Writes <out>/carn_dum_town.fbx (Kit export settings, kitbash_kits.FBX_EXPORT),
-carn_dum_town_blockout.blend, front/three-quarter/close/keep renders and
-_report/DONE.txt (triangle count and faces per material).
+Writes <out>/carn_dum_town_blockout.blend (the unwrap's input; open it in Blender to show
+the shape), front/three-quarter/close/keep renders and _report/DONE.txt (triangle count
+and faces per material; tools/blender/blender_job.py writes it on every exit).
 """
 
-import json
 import math
 import os
 import random
 import sys
-import traceback
 
 import bpy
 import bmesh
 from mathutils import Matrix, Vector
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "blender"))
+from blender_job import job, report_path, script_args  # noqa: E402
 
 UP = Vector((0.0, 0.0, 1.0))
 BASE = -1.0  # every wall, tower and terrace starts here, 1 m under the map ground
@@ -108,11 +115,8 @@ LAYOUT = {
     "sculpt": {
         "towers": {"rib_pitch_m": 1.05, "taper": 0.9},
         "central": {"ribs": 16, "r_top": 2.3, "crown_len": 4.4, "segs": 24},
-        "keep": {"crown": 28, "length": 1.7, "w": 0.18, "d": 0.45, "sides": 6, "segs": 7},
+        "keep": {"crown": 28, "length": 1.7, "d": 0.45, "sides": 6, "segs": 7},
     },
-    # world-scale box UVs: metres per texture repeat, per material slot
-    "uv_tile_m": {"carn_dum_stone": 3.0, "carn_dum_paving": 3.0, "carn_dum_iron": 1.5,
-                  "carn_dum_dark": 2.0, "carn_dum_roof": 2.0},
 }
 
 MATS = ["carn_dum_stone", "carn_dum_paving", "carn_dum_iron", "carn_dum_dark", "carn_dum_roof"]
@@ -152,15 +156,20 @@ class Builder:
             pts = list(reversed(pts))
         return self.face(pts, mat)
 
-    def prism_ring(self, r_in, r_out, z0, z1, segs, top_mat=PAVING, side_mat=STONE):
-        """Annular prism (outer and inner walls, flat top), or a solid cylinder when r_in is 0."""
+    def prism_ring(self, r_in, r_out, z0, z1, segs, top_mat=PAVING, side_mat=STONE, z0_in=None, outer=True):
+        """Annular prism (outer and inner walls, flat top), or a solid cylinder when r_in is 0.
+        z0_in starts the inner face at its own height and outer=False leaves the outer face out,
+        so no face reaches down into the solid that hides it: one face per segment spans its
+        whole height, and the unwrap keeps a face's full density when part of it shows (v11)."""
+        zi = z0 if z0_in is None else z0_in
         ring = [(math.cos(2 * math.pi * i / segs), math.sin(2 * math.pi * i / segs)) for i in range(segs)]
         for i in range(segs):
             (c0, s0), (c1, s1) = ring[i], ring[(i + 1) % segs]
-            self.face([(r_out * c0, r_out * s0, z0), (r_out * c1, r_out * s1, z0),
-                       (r_out * c1, r_out * s1, z1), (r_out * c0, r_out * s0, z1)], side_mat)
+            if outer:
+                self.face([(r_out * c0, r_out * s0, z0), (r_out * c1, r_out * s1, z0),
+                           (r_out * c1, r_out * s1, z1), (r_out * c0, r_out * s0, z1)], side_mat)
             if r_in > 0:
-                self.face([(r_in * c1, r_in * s1, z0), (r_in * c0, r_in * s0, z0),
+                self.face([(r_in * c1, r_in * s1, zi), (r_in * c0, r_in * s0, zi),
                            (r_in * c0, r_in * s0, z1), (r_in * c1, r_in * s1, z1)], side_mat)
                 self.face([(r_in * c0, r_in * s0, z1), (r_out * c0, r_out * s0, z1),
                            (r_out * c1, r_out * s1, z1), (r_in * c1, r_in * s1, z1)], top_mat)
@@ -227,8 +236,8 @@ class Builder:
         o = Vector((cx, cy, z0))
         p = [m @ Vector(v) + o for v in ((-sx, -sy, 0), (sx, -sy, 0), (sx, sy, 0), (-sx, sy, 0),
                                          (0, -sy, h), (0, sy, h))]
-        self.face([p[0], p[1], p[4]], mat)
-        self.face([p[2], p[3], p[5]], STONE)  # gable ends are masonry
+        self.face([p[0], p[1], p[4]], STONE)  # both gable ends are masonry (to v10 one was roof)
+        self.face([p[2], p[3], p[5]], STONE)
         self.face([p[1], p[2], p[5], p[4]], mat)
         self.face([p[3], p[0], p[4], p[5]], mat)
 
@@ -526,7 +535,7 @@ class Builder:
         rc, zc = (r0 + r1) / 2, (z0 + z1) / 2
         self.obox((rc * math.cos(a), rc * math.sin(a), zc), (math.hypot(dr, dz), w, h), m)
         px, py = r1 * math.cos(a), r1 * math.sin(a)
-        self.box((px, py, z1 + 0.6), (0.6, 0.6, 1.2), rot_z=a)
+        self.box((px, py, z1 + 0.525), (0.6, 0.6, 1.35), rot_z=a)  # 0.15 m down into the wall it stands on
         self.pyramid((px, py), (0.6, 0.6), z1 + 1.2, 0.9, rot_z=a)
 
     def blade_crown(self, x, y, r_face, z, n, tall, short, depth, lean_deg, sides, segs, extra_every=0,
@@ -584,22 +593,28 @@ def build():
     centres.append(-90.0)
     halfs.append(math.degrees(L["gate"]["block_half_x"] / ring_r) + 1)
 
-    # terraces: stacked rings from the buried base, each open under the next one so its top
-    # face is the visible step only (v10: a solid disc top was one face, mostly hidden, and
-    # the unique UV unwrap shrinks hidden faces, which would have blurred the visible rim)
+    # terraces: stacked rings, each open under the next one so its top face is the visible step
+    # only (v10: a solid disc top was one face, mostly hidden). Each riser is seated 0.3 m into
+    # the step in front of it, not in the ground (v11: a riser from BASE was 58 to 88% buried
+    # and the unwrap kept it at full density, a third of the town set's tile). Terrace 0 has no
+    # riser: it stood back to back with the outer wall's inner face.
     b.set_part("terraces")
     terr = L["terraces"]
     for i, (r, top) in enumerate(terr):
         r_in = terr[i + 1][0] - 0.3 if i + 1 < len(terr) else L["keep"]["r"] + 0.4
-        b.prism_ring(r_in, r, BASE, top, segs)
+        z0 = BASE if i == 0 else terr[i - 1][1] - 0.3
+        b.prism_ring(r_in, r, z0, top, segs, outer=i > 0)
 
     # walls are plain since v7 ("no one really cares about the wall", Mike): the outer wall
     # keeps its sloped foot and square merlons; buttresses, windows, string course and
     # machicolations went to the gate. Merlons inside a tower are skipped: on the rear tower
     # their tops (11.0 m) were coplanar with its crown top and rendered black (v6 check).
+    # The wall's outer face starts just under the talus top and its inner face just under the
+    # terrace 0 step: below those they were hidden bands at full texture density (v11).
     b.set_part("outer_wall")
-    b.prism_ring(ow["r_in"], ow["r_out"], BASE, ow["top"], segs)
-    b.frustum(0, 0, ow["r_out"] + 1.0, ow["r_out"], BASE, 2.6, segs)
+    talus_top = 2.6
+    b.prism_ring(ow["r_in"], ow["r_out"], talus_top - 0.3, ow["top"], segs, z0_in=terr[0][1] - 0.3)
+    b.frustum(0, 0, ow["r_out"] + 1.0, ow["r_out"], BASE, talus_top, segs)
     b.merlons_ring(ow["r_out"] - L["merlon"]["d"] / 2, ow["top"],
                    skip=lambda a: blocked(a, centres, [h - 1.5 for h in halfs]))
     b.set_part("inner_wall")
@@ -750,19 +765,6 @@ def build():
 
     bmesh.ops.remove_doubles(b.bm, verts=b.bm.verts, dist=1e-4)
 
-    # world-scale box UVs for the tiling materials: each face projects along its dominant
-    # normal axis, so a texture repeat is the same size in metres on every wall
-    b.bm.normal_update()
-    uv = b.bm.loops.layers.uv.new("UVMap")
-    tiles = [L["uv_tile_m"][m] for m in MATS]
-    for f in b.bm.faces:
-        axis = max(range(3), key=lambda i: abs(f.normal[i]))
-        s = tiles[f.material_index]
-        for loop in f.loops:
-            co = loop.vert.co
-            u, v = ((co.y, co.z), (co.x, co.z), (co.x, co.y))[axis]
-            loop[uv].uv = (u / s, v / s)
-
     mesh = bpy.data.meshes.new("carn_dum_town")
     b.bm.to_mesh(mesh)
     b.bm.free()
@@ -815,34 +817,20 @@ def render(obj, out_dir):
 
 
 def main():
-    out_dir = sys.argv[sys.argv.index("--") + 1]
-    report_dir = os.path.join(out_dir, "_report")
-    os.makedirs(report_dir, exist_ok=True)
-    done = os.path.join(report_dir, "DONE.txt")
-    if os.path.exists(done):
-        os.remove(done)
-    summary = {"status": "error"}
-    try:
+    out_dir = script_args()[0]
+    with job(report_path(out_dir)) as report:
+        os.makedirs(out_dir, exist_ok=True)
         bpy.ops.wm.read_factory_settings(use_empty=True)
         obj = build()
         obj.data.calc_loop_triangles()
         bpy.context.view_layer.update()
-        summary = {"status": "ok", "tris": len(obj.data.loop_triangles), "faces": len(obj.data.polygons),
-                   "dims_m": [round(v, 2) for v in obj.dimensions],
-                   "faces_per_material": {m.name: sum(1 for p in obj.data.polygons if p.material_index == i)
-                                          for i, m in enumerate(obj.data.materials)}}
-        bpy.ops.object.select_all(action="DESELECT")
-        obj.select_set(True)
-        bpy.context.view_layer.objects.active = obj
-        bpy.ops.export_scene.fbx(filepath=os.path.join(out_dir, "carn_dum_town.fbx"), use_selection=True,
-                                 object_types={"MESH"}, use_mesh_modifiers=True, bake_space_transform=True,
-                                 add_leaf_bones=False, path_mode="AUTO")
+        report.update({"tris": len(obj.data.loop_triangles), "faces": len(obj.data.polygons),
+                       "dims_m": [round(v, 2) for v in obj.dimensions],
+                       "faces_per_material": {m.name: sum(1 for p in obj.data.polygons if p.material_index == i)
+                                              for i, m in enumerate(obj.data.materials)}})
         bpy.ops.wm.save_as_mainfile(filepath=os.path.join(out_dir, "carn_dum_town_blockout.blend"))
         render(obj, out_dir)
-    except Exception:
-        summary["trace"] = traceback.format_exc()
-    with open(done, "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=1)
 
 
-main()
+if __name__ == "__main__":  # Blender runs a -P script as __main__
+    main()

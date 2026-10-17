@@ -6,43 +6,55 @@ packed on its own 0..1 tile at one texel density. Exports the Kit FBX with one m
 texture set (Painter makes one texture set per material).
 
 Why: a tiling material repeats the same pixels everywhere, so it cannot carry baked
-occlusion, worn edges on the spikes or snow only on the faces that point up. Those need a
-unique layout and Painter's mesh maps. Measured on the Carn Dum rebuild (2026-10-16).
+occlusion. That needs a unique layout and Painter's mesh maps. Measured on the Carn Dum
+rebuild (2026-10-16).
 
     "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\blender-launcher.exe" -b -P tools/blender/unwrap_texture_sets.py --
-        --blend <source .blend> --rules <rules.json> --out <dir> [--name <fbx stem>]
-        [--angle 66] [--resolution 1024] [--margin-px 2] [--hidden-scale 0.1] [--probe]
+        --blend <source .blend, one mesh> --rules <rules.json> --out <dir> [--name <fbx stem>]
+        [--resolution 1024] [--margin-px 2] [--soft-deg 75] [--anchor-deg 20]
+        [--max-island-frac 0.5] [--probe]
 
 rules.json: {"sets": [{"name": "carn_dum_towers", "materials": ["carn_dum_stone"],
 "parts": ["towers"], "resolution": 1024}, ...]}. The first matching rule wins; a rule with
 neither key takes every face left. "parts" reads the INT face attribute "part" and the
 object's "parts" property (comma-separated names), as tools/oneoff/blender_build_carn_dum_icon.py
 writes them. --probe writes only the area per material and part (total and visible, m2)
-and, with --rules, the expected texel density per set.
+and, with --rules, an upper bound of the texel density per set (partly visible faces cost
+full area, so the measured density comes out lower).
 
-Visibility: up to 13 sample points per face (the centre, and 40% and 80% of the way to up to
-6 corners). From each, rays go out along 64 directions 10 to 90 degrees above the horizon,
-because the map camera never looks from below. A sample below the ground (z < 0) or whose
-rays all hit the mesh is hidden. A UV island less than 30% visible shrinks with the square
-root of its visible share, down to --hidden-scale; islands under 2% visible (buried bases, box
-bottoms, faces inside other solids) are stacked in one small square that packs as one island.
+Visibility: up to 19 sample points per face (the centre, and 40%, 80% and 95% of the way to
+up to 6 corners). From each, rays go out along 64 directions 10 to 90 degrees above the
+horizon (MapCameraView, read in the decompile dump: untilted, the camera looks down about 26
+degrees; the lowest tilt a player can reach is about 10.5 degrees at the default distance and
+5.2 at full zoom, so the 10 degree floor covers the default view, and a face seen only from
+lower, at full zoom, counts as hidden). A sample below the ground (z < 0) or whose rays all hit the mesh is hidden.
+A UV island less than 30% visible shrinks with the square root of its visible share; islands
+under 2% visible (buried bases, box bottoms, faces inside other solids) are stacked in one
+small square that packs as one island. A face visible in part keeps its full area, so a
+builder should not run one face down into the solid that hides it (each set reports its
+hidden_kept_m2 by part, the area that still costs texels unseen).
 
 Inverted faces: a face no ray sees along its normal but rays see along the reversed one is
-reported in suspect_inverted_faces (count, area, samples). Blender's and Cycles' views draw
-back faces, the game culls them: this caught every box of the Carn Dum builder wound inward
-(5,906 faces). Tiny faces in crevices between overlapping open shells also land there (175
-faces, 0.4 m2 on Carn Dum v10); a real inversion shows as large area.
+reported in suspect_inverted_faces (count, area, samples), and the run fails when their area
+passes 0.1% of the mesh. A Bannerlord material culls back faces unless it carries
+two_sided (the Gundabad icon materials do not), while Blender's and Cycles' views draw them:
+this caught every box of the Carn Dum builder wound inward (5,906 faces). Tiny faces in
+crevices between overlapping open shells also land there (175 faces, 0.7 m2 on Carn Dum
+v10).
 
-Unwrap: Smart UV Project at --angle picks the islands, an angle-based unwrap along their
-edges flattens each without the squash of a planar projection, one texel density per set
-(average_islands_scale), then a concave pack with rotation and a margin of --margin-px at the
-set's resolution. Margins dominate when islands are a few pixels wide: on Carn Dum at 45
-degrees and 4 px, 7,109 tower islands covered 5% of their tile. The mesh is split into one object per set for
-this, because the UV operators act on every selected face, and joined again afterwards.
+Unwrap ("nets"): within each set, a spanning tree over each part's visible faces joins the
+flattest neighbours first; edges outside it are seams, and soft seams that dangle are joined
+back, so a box unfolds as a cross and a tube as one strip with one seam. Long rings are cut
+into sectors by perimeter. Then an angle-based unwrap, one texel density per set, and a
+concave pack with rotation and a margin of --margin-px at the set's resolution. Margins
+dominate when islands are a few pixels wide: Smart UV Project at 45 degrees and 4 px put
+7,109 tower islands in 5% of their tile, nets put about 900 in 51%. The mesh is split into
+one object per set, because the UV operators act on every selected face, and joined again.
 
-Writes <out>/<name>.fbx (Kit settings: bake_space_transform, mesh only, no leaf bones),
-<out>/<name>_uv.blend, <out>/uv_<set>.png layouts (white: visible faces, red: hidden ones)
-and <out>/_report/DONE.txt (per set: faces, islands, UV coverage, visible texel density).
+Writes <out>/<name>.fbx (the Kit settings, kitbash_kits.FBX_EXPORT), <out>/<name>_uv.blend,
+<out>/uv_<set>.png layouts (white: visible faces, red: hidden ones) and
+<out>/_report/DONE.txt (tools/blender/blender_job.py: written on every exit; per set: faces,
+islands, UV coverage, visible share, hidden_kept_m2, visible texel density).
 """
 
 import argparse
@@ -51,7 +63,6 @@ import math
 import os
 import sys
 import time
-import traceback
 
 import bmesh
 import bpy
@@ -60,25 +71,24 @@ from bpy_extras.bmesh_utils import bmesh_linked_uv_islands
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from blender_job import export_fbx, flag_value, job, report_path, script_args  # noqa: E402
+
 MIN_ELEV_DEG = 10.0
 N_DIRS = 64
 VISIBLE_SHARE = 0.3
 HIDDEN_SHARE = 0.02
+INVERTED_LIMIT = 0.001  # inverted faces above this share of the mesh area fail the run
 
 
-def parse_args():
-    argv = sys.argv[sys.argv.index("--") + 1:]
-    p = argparse.ArgumentParser()
+def parse_args(argv):
+    p = argparse.ArgumentParser(allow_abbrev=False)
     p.add_argument("--blend", required=True)
-    p.add_argument("--object")
     p.add_argument("--rules")
     p.add_argument("--out", required=True)
     p.add_argument("--name")
-    p.add_argument("--angle", type=float, default=66.0)
     p.add_argument("--resolution", type=int, default=1024)
     p.add_argument("--margin-px", type=float, default=2.0)
-    p.add_argument("--hidden-scale", type=float, default=0.1)
-    p.add_argument("--method", choices=("nets", "smart"), default="nets")
     p.add_argument("--soft-deg", type=float, default=75.0)
     p.add_argument("--anchor-deg", type=float, default=20.0)
     p.add_argument("--max-island-frac", type=float, default=0.5,
@@ -106,8 +116,7 @@ def face_samples(f):
     step = max(1, len(corners) // 6)
     pts = [c]
     for co in corners[::step][:6]:
-        pts.append(c.lerp(co, 0.4))
-        pts.append(c.lerp(co, 0.8))
+        pts += [c.lerp(co, 0.4), c.lerp(co, 0.8), c.lerp(co, 0.95)]  # 0.95: a face whose top edge shows
     return pts
 
 
@@ -191,7 +200,7 @@ def net_seams(obj, soft_deg, anchor_deg, max_len):
         return i
 
     tree = set()
-    for e in sorted(inter, key=ang.get):
+    for e in sorted(inter, key=lambda e: (ang[e], e.index)):  # ties (coplanar, 90 degrees) in a fixed order
         a, b = find(e.link_faces[0].index), find(e.link_faces[1].index)
         if a != b:
             parent[a] = b
@@ -275,24 +284,21 @@ def net_seams(obj, soft_deg, anchor_deg, max_len):
     return n_cut, len(extra), n_hidden
 
 
-def unwrap_set(obj, method, angle, margin, hidden_scale, soft_deg, anchor_deg, max_len):
-    """Islands from net_seams (default) or Smart UV Project, an angle-based unwrap along
-    them, one texel density. Islands under VISIBLE_SHARE shrink; fully hidden ones (under 2%)
-    are stacked in one small square, packed as one island (merge_overlap), so they cost no
-    margins."""
+def unwrap_set(obj, margin, soft_deg, anchor_deg, max_len):
+    """Islands from net_seams, an angle-based unwrap along them, one texel density. Islands
+    under VISIBLE_SHARE shrink; fully hidden ones (under 2%) are stacked in one small square,
+    packed as one island (merge_overlap), so they cost no margins."""
     # UV operators act on selected UVs; with sync on, the selected faces are the selected UVs
     bpy.context.scene.tool_settings.use_uv_select_sync = True
-    seams = net_seams(obj, soft_deg, anchor_deg, max_len) if method == "nets" else None
+    seams = net_seams(obj, soft_deg, anchor_deg, max_len)
     select_only(obj)
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")
-    if method != "nets":
-        bpy.ops.uv.smart_project(angle_limit=math.radians(angle), island_margin=0.0, correct_aspect=True,
-                                 scale_to_bounds=False)
-        bpy.ops.uv.seams_from_islands()
     bpy.ops.uv.unwrap(method="ANGLE_BASED", fill_holes=True, correct_aspect=True, margin=0.001)
     bpy.ops.uv.average_islands_scale()
-    bpy.ops.uv.pack_islands(rotate=False, margin=0.001)  # apart again before the edit below
+    # apart again before the shrink below; by bounding box, so an island shrunk toward its
+    # centre stays inside its own box and merge_overlap cannot freeze two kept islands together
+    bpy.ops.uv.pack_islands(rotate=False, margin=0.001, shape_method="AABB")
     bpy.ops.object.mode_set(mode="OBJECT")
 
     bm = bmesh.new()
@@ -311,7 +317,7 @@ def unwrap_set(obj, method, angle, margin, hidden_scale, soft_deg, anchor_deg, m
             hidden.append(loops)
             continue
         if share < VISIBLE_SHARE:
-            s = max(hidden_scale, math.sqrt(share / VISIBLE_SHARE))
+            s = math.sqrt(share / VISIBLE_SHARE)
             c = sum((l[uv].uv for l in loops), Vector((0.0, 0.0))) / len(loops)
             for l in loops:
                 l[uv].uv = c + (l[uv].uv - c) * s
@@ -337,19 +343,22 @@ def unwrap_set(obj, method, angle, margin, hidden_scale, soft_deg, anchor_deg, m
                             merge_overlap=True)
     bpy.ops.object.mode_set(mode="OBJECT")
     return {"islands": len(islands), "islands_shrunk": shrunk, "islands_hidden_stacked": len(hidden),
-            "cuts": seams[0] if seams else None, "length_cuts": seams[1] if seams else None}
+            "cuts": seams[0], "length_cuts": seams[1]}
 
 
-def set_stats(obj, res):
-    """UV coverage (kept islands plus the one square of stacked hidden ones), folded faces
-    (the minority winding inside an island) and the visible texel density."""
+def set_stats(obj, res, parts):
+    """UV coverage (kept islands plus the one square of stacked hidden ones), the share of the
+    kept UV area that faces show, the hidden area kept at full density by part (what still
+    costs texels unseen), folded faces (the minority winding inside an island) and the
+    visible texel density."""
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     bm.faces.ensure_lookup_table()
     uv = bm.loops.layers.uv.active
     vis = bm.faces.layers.float.get("vis")
-    cover, dens, weights, folded = 0.0, [], [], 0
-    stacked_uv = []
+    part = bm.faces.layers.int.get("part")
+    cover, cover_vis, dens, weights, folded = 0.0, 0.0, [], [], 0
+    stacked_uv, hidden_kept = [], {}
 
     def signed(f):
         uvs = [l[uv].uv for l in f.loops]
@@ -371,10 +380,15 @@ def set_stats(obj, res):
         folded += min(pos, len(s_areas) - pos)
         for f, s in zip(faces, s_areas):
             cover += abs(s)
+            cover_vis += abs(s) * f[vis]
             a3 = f.calc_area()
+            if part is not None and f[vis] < 1.0:
+                name = parts[f[part]] if f[part] < len(parts) else str(f[part])
+                hidden_kept[name] = hidden_kept.get(name, 0.0) + a3 * (1.0 - f[vis])
             if f[vis] >= 0.5 and a3 > 1e-6:
                 dens.append(math.sqrt(abs(s) / a3) * res)
                 weights.append(a3)
+    visible_share = cover_vis / max(cover, 1e-12)  # of the kept islands, before the hidden square
     if stacked_uv:
         cover += (max(p.x for p in stacked_uv) - min(p.x for p in stacked_uv)) * \
                  (max(p.y for p in stacked_uv) - min(p.y for p in stacked_uv))
@@ -387,7 +401,9 @@ def set_stats(obj, res):
         pct = {f"p{q}": round(float(d[np.searchsorted(cum, q / 100)]), 1) for q in (10, 50, 90)}
     else:
         pct = {}
-    return {"uv_coverage": round(cover, 3), "folded_faces": folded, "visible_px_per_m": pct}
+    return {"uv_coverage": round(cover, 3), "visible_share": round(visible_share, 3),
+            "hidden_kept_m2": {k: round(v, 1) for k, v in sorted(hidden_kept.items(), key=lambda kv: -kv[1])},
+            "folded_faces": folded, "visible_px_per_m": pct}
 
 
 def write_layout(obj, path, res):
@@ -426,140 +442,135 @@ def write_layout(obj, path, res):
 
 
 def main():
-    a = parse_args()
-    report_dir = os.path.join(a.out, "_report")
-    os.makedirs(report_dir, exist_ok=True)
-    done = os.path.join(report_dir, "DONE.txt")
-    if os.path.exists(done):
-        os.remove(done)
-    summary = {"status": "error"}
-    try:
-        bpy.ops.wm.open_mainfile(filepath=a.blend)
-        meshes = [o for o in bpy.data.objects if o.type == "MESH"]
-        obj = bpy.data.objects[a.object] if a.object else meshes[0]
-        if len(meshes) > 1 and not a.object:
-            raise RuntimeError(f"several meshes, pass --object: {[o.name for o in meshes]}")
-        name = a.name or obj.name
-        if obj.matrix_world != obj.matrix_world.Identity(4):
-            obj.data.transform(obj.matrix_world)
-            obj.matrix_world.identity()
-        me = obj.data
-        mats = [s.material.name if s.material else "" for s in obj.material_slots]
-        parts = obj.get("parts", "").split(",")
-        part_attr = me.attributes.get("part")
-        part_idx = np.zeros(len(me.polygons), dtype=np.int32)
-        if part_attr:
-            part_attr.data.foreach_get("value", part_idx)
+    args = script_args()
+    out = flag_value(args, "--out") or "."  # before argparse, so a bad argument still gets a fresh report
+    with job(report_path(out)) as report:
+        run(parse_args(args), report)
 
-        t0 = time.time()
-        bm = bmesh.new()
-        bm.from_mesh(me)
-        vis, inverted = visibility(bm)
-        areas = [f.calc_area() for f in bm.faces]
-        bm.free()
-        inv_by_key, inv_samples = {}, []
-        for i in inverted:
-            p = me.polygons[i]
-            pi = int(part_idx[i])
-            key = f"{mats[p.material_index]}/{parts[pi] if pi < len(parts) else pi}"
-            inv_by_key[key] = inv_by_key.get(key, 0) + 1
-            if len(inv_samples) < 12:
-                inv_samples.append({"face": i, "centre": [round(c, 2) for c in p.center],
-                                    "normal": [round(c, 2) for c in p.normal], "area": round(p.area, 4),
-                                    "verts": len(p.vertices)})
-        if "vis" in me.attributes:
-            me.attributes.remove(me.attributes["vis"])
-        me.attributes.new("vis", "FLOAT", "FACE").data.foreach_set("value", vis)
-        t_vis = round(time.time() - t0, 1)
 
-        by_mat_part = {}
-        for p, ar, v in zip(me.polygons, areas, vis):
-            pi = int(part_idx[p.index])
-            key = f"{mats[p.material_index]}/{parts[pi] if pi < len(parts) else pi}"
-            e = by_mat_part.setdefault(key, [0, 0.0, 0.0])
-            e[0] += 1
-            e[1] += ar
-            e[2] += ar * v
-        summary = {"status": "ok", "visibility_seconds": t_vis,
-                   "suspect_inverted_faces": {"total": len(inverted),
-                                              "area_m2": round(sum(areas[i] for i in inverted), 2),
+def run(a, report):
+    bpy.ops.wm.open_mainfile(filepath=a.blend)
+    meshes = [o for o in bpy.data.objects if o.type == "MESH"]
+    if len(meshes) != 1:
+        raise RuntimeError(f"the .blend must hold one mesh, not {[o.name for o in meshes]}")
+    obj = meshes[0]
+    name = a.name or obj.name
+    me = obj.data
+    if obj.matrix_world != obj.matrix_world.Identity(4):
+        mirrored = obj.matrix_world.determinant() < 0
+        me.transform(obj.matrix_world)
+        obj.matrix_world.identity()
+        if mirrored:  # a negative scale flips the winding when it is baked in
+            me.flip_normals()
+    mats = [s.material.name if s.material else "" for s in obj.material_slots]
+    parts = [p for p in obj.get("parts", "").split(",") if p]
+    part_attr = me.attributes.get("part")
+    if parts and part_attr is None:
+        raise RuntimeError('the object names parts but its mesh has no INT face attribute "part"')
+    part_idx = np.zeros(len(me.polygons), dtype=np.int32)
+    if part_attr:
+        part_attr.data.foreach_get("value", part_idx)
+
+    def part_name(i):
+        pi = int(part_idx[i])
+        return parts[pi] if pi < len(parts) else str(pi)
+
+    t0 = time.time()
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    vis, inverted = visibility(bm)
+    areas = [f.calc_area() for f in bm.faces]
+    bm.free()
+    inv_by_key, inv_samples = {}, []
+    for i in inverted:
+        p = me.polygons[i]
+        key = f"{mats[p.material_index]}/{part_name(i)}"
+        inv_by_key[key] = inv_by_key.get(key, 0) + 1
+        if len(inv_samples) < 12:
+            inv_samples.append({"face": i, "centre": [round(c, 2) for c in p.center],
+                                "normal": [round(c, 2) for c in p.normal], "area": round(p.area, 4),
+                                "verts": len(p.vertices)})
+    if "vis" in me.attributes:
+        me.attributes.remove(me.attributes["vis"])
+    me.attributes.new("vis", "FLOAT", "FACE").data.foreach_set("value", vis)
+
+    by_mat_part = {}
+    for p, ar, v in zip(me.polygons, areas, vis):
+        e = by_mat_part.setdefault(f"{mats[p.material_index]}/{part_name(p.index)}", [0, 0.0, 0.0])
+        e[0] += 1
+        e[1] += ar
+        e[2] += ar * v
+    inv_area = sum(areas[i] for i in inverted)
+    report.update({"visibility_seconds": round(time.time() - t0, 1),
+                   "suspect_inverted_faces": {"total": len(inverted), "area_m2": round(inv_area, 2),
                                               "by_material_part": inv_by_key, "samples": inv_samples},
                    "area_m2_total_visible": {k: [v[0], round(v[1], 1), round(v[2], 1)]
-                                             for k, v in sorted(by_mat_part.items())}}
+                                             for k, v in sorted(by_mat_part.items())}})
+    if inv_area > INVERTED_LIMIT * sum(areas):
+        raise RuntimeError(f"{inv_area:.1f} m2 of faces look inverted (over {INVERTED_LIMIT:.1%} of the mesh): "
+                           "fix the builder's winding; samples in suspect_inverted_faces")
 
-        rules = json.load(open(a.rules, encoding="utf-8"))["sets"] if a.rules else []
-        if rules:
-            assign = []
-            for p in me.polygons:
-                pi = int(part_idx[p.index])
-                assign.append(match_rule(rules, mats[p.material_index], parts[pi] if pi < len(parts) else ""))
-            if min(assign) < 0:
-                raise RuntimeError(f"{assign.count(-1)} faces match no rule")
-            est = {}
-            for r_i, r in enumerate(rules):
-                vis_a = sum(ar * v for ar, v, s in zip(areas, vis, assign) if s == r_i)
-                hid_a = sum(ar * (1 - v) for ar, v, s in zip(areas, vis, assign) if s == r_i)
-                res = r.get("resolution", a.resolution)
-                eff = vis_a + hid_a * a.hidden_scale ** 2
-                est[r["name"]] = {"faces": assign.count(r_i), "visible_m2": round(vis_a, 1),
-                                  "est_px_per_m_at_70pct": round(res * math.sqrt(0.7 / max(eff, 1e-6)), 1)}
-            summary["sets_estimate"] = est
-
-        if a.probe or not rules:
-            return
-
-        # one material per texture set, then one object per set for the UV operators
-        set_mats = [bpy.data.materials.get(r["name"]) or bpy.data.materials.new(r["name"]) for r in rules]
-        me.materials.clear()
-        for m in set_mats:
-            me.materials.append(m)
-        me.polygons.foreach_set("material_index", np.array(assign, dtype=np.int32))
-        for layer in list(me.uv_layers):
-            me.uv_layers.remove(layer)
-        me.uv_layers.new(name="UVMap")
-        select_only(obj)
-        bpy.ops.object.mode_set(mode="EDIT")
-        bpy.ops.mesh.select_all(action="SELECT")
-        bpy.ops.mesh.separate(type="MATERIAL")
-        bpy.ops.object.mode_set(mode="OBJECT")
-        pieces = [o for o in bpy.data.objects if o.type == "MESH"]
-        sets_out = {}
-        for o in pieces:
-            used = {p.material_index for p in o.data.polygons}
-            mat = o.material_slots[used.pop()].material.name
-            r = next(r for r in rules if r["name"] == mat)
+    rules = json.load(open(a.rules, encoding="utf-8"))["sets"] if a.rules else []
+    if rules:
+        assign = [match_rule(rules, mats[p.material_index], part_name(p.index) if parts else "")
+                  for p in me.polygons]
+        if min(assign) < 0:
+            raise RuntimeError(f"{assign.count(-1)} faces match no rule")
+        est = {}
+        for r_i, r in enumerate(rules):
+            vis_a = sum(ar * v for ar, v, s in zip(areas, vis, assign) if s == r_i)
             res = r.get("resolution", a.resolution)
-            max_len = a.max_island_frac * res / est[mat]["est_px_per_m_at_70pct"]
-            t1 = time.time()
-            info = unwrap_set(o, a.method, a.angle, a.margin_px / res, a.hidden_scale, a.soft_deg, a.anchor_deg,
-                              max_len)
-            st = set_stats(o, res)
-            write_layout(o, os.path.join(a.out, f"uv_{mat}.png"), res)
-            sets_out[mat] = {"faces": len(o.data.polygons), "resolution": res, "max_island_m": round(max_len, 1),
-                             **info, "seconds": round(time.time() - t1, 1), **st}
-        summary["sets"] = sets_out
+            est[r["name"]] = {"faces": assign.count(r_i), "visible_m2": round(vis_a, 1),
+                              "upper_px_per_m_at_70pct": round(res * math.sqrt(0.7 / max(vis_a, 1e-6)), 1)}
+        report["sets_estimate"] = est
 
-        bpy.ops.object.select_all(action="DESELECT")
-        for o in pieces:
-            o.select_set(True)
-        bpy.context.view_layer.objects.active = pieces[0]
-        bpy.ops.object.join()
-        joined = bpy.context.view_layer.objects.active
-        joined.name = joined.data.name = name
-        select_only(joined)
-        bpy.ops.export_scene.fbx(filepath=os.path.join(a.out, name + ".fbx"), use_selection=True,
-                                 object_types={"MESH"}, use_mesh_modifiers=True, bake_space_transform=True,
-                                 add_leaf_bones=False, path_mode="AUTO")
-        bpy.ops.wm.save_as_mainfile(filepath=os.path.join(a.out, name + "_uv.blend"))
-        joined.data.calc_loop_triangles()
-        summary["tris"] = len(joined.data.loop_triangles)
-        summary["materials"] = [m.name for m in joined.data.materials]
-    except Exception:
-        summary["status"] = "error"
-        summary["trace"] = traceback.format_exc()
-    finally:
-        with open(done, "w", encoding="utf-8") as f:
-            json.dump(summary, f, indent=1)
+    if a.probe or not rules:
+        return
+
+    # one material per texture set, then one object per set for the UV operators
+    set_mats = [bpy.data.materials.get(r["name"]) or bpy.data.materials.new(r["name"]) for r in rules]
+    me.materials.clear()
+    for m in set_mats:
+        me.materials.append(m)
+    me.polygons.foreach_set("material_index", np.array(assign, dtype=np.int32))
+    for layer in list(me.uv_layers):
+        me.uv_layers.remove(layer)
+    me.uv_layers.new(name="UVMap")
+    before = set(bpy.data.objects)
+    select_only(obj)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.separate(type="MATERIAL")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    pieces = [obj] + [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
+    sets_out = {}
+    for o in pieces:
+        used = {p.material_index for p in o.data.polygons}
+        mat = o.material_slots[used.pop()].material.name
+        r = next(r for r in rules if r["name"] == mat)
+        res = r.get("resolution", a.resolution)
+        max_len = a.max_island_frac * res / est[mat]["upper_px_per_m_at_70pct"]
+        t1 = time.time()
+        info = unwrap_set(o, a.margin_px / res, a.soft_deg, a.anchor_deg, max_len)
+        st = set_stats(o, res, parts)
+        write_layout(o, os.path.join(a.out, f"uv_{mat}.png"), res)
+        sets_out[mat] = {"faces": len(o.data.polygons), "resolution": res, "max_island_m": round(max_len, 1),
+                         **info, "seconds": round(time.time() - t1, 1), **st}
+    report["sets"] = sets_out
+
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in pieces:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = pieces[0]
+    bpy.ops.object.join()
+    joined = bpy.context.view_layer.objects.active
+    joined.name = joined.data.name = name
+    export_fbx(os.path.join(a.out, name + ".fbx"), [joined])
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(a.out, name + "_uv.blend"))
+    joined.data.calc_loop_triangles()
+    report["tris"] = len(joined.data.loop_triangles)
+    report["materials"] = [m.name for m in joined.data.materials]
 
 
-main()
+if __name__ == "__main__":  # Blender runs a -P script as __main__
+    main()

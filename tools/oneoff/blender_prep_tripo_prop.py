@@ -67,6 +67,9 @@ import traceback
 import bpy
 import bmesh
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "blender"))
+from blender_job import flag_value, report_path, script_args  # noqa: E402
+
 # .fbm map roles discovered by filename suffix. Tripo's packed "_rm" is
 # ignored: separate roughness/metallic JPEGs ship alongside it.
 MAP_PATTERNS = {
@@ -438,32 +441,14 @@ def chart_abf_uv(obj, spread_deg, margin, min_faces=20, sharp_edges=False):
     bpy.ops.uv.average_islands_scale()  # one texel density across islands
     bpy.ops.uv.pack_islands(margin=margin)
     bpy.ops.object.mode_set(mode="OBJECT")
-
-    # fold-over telemetry: per chart, the minority sign of UV face area
-    bm = bmesh.new()
-    bm.from_mesh(obj.data)
-    bm.faces.ensure_lookup_table()
-    uv = bm.loops.layers.uv.active
-    flipped_total = 0
-    for chart in chart_faces:
-        pos = neg = 0
-        for fi in chart:
-            lf = bm.faces[fi].loops
-            signed = 0.0
-            for i in range(1, len(lf) - 1):
-                a, b, c = lf[0][uv].uv, lf[i][uv].uv, lf[i + 1][uv].uv
-                signed += (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)
-            if signed >= 0:
-                pos += 1
-            else:
-                neg += 1
-        flipped_total += min(pos, neg)
-    bm.free()
-    return len(chart_faces), flipped_total
+    # the seams are the chart borders, so a chart unwraps as one UV island, except where it
+    # grew across a non-manifold edge (never seamed): there the island count, and so the
+    # flipped-face telemetry, can differ from the chart count
+    return len(chart_faces), uv_flipped_faces(obj)
 
 
 def sharp_seam_uv(obj, angle_deg, margin, min_faces=0):
-    """The artist method (Keyforce, 2026-10-16): a seam on every edge sharper
+    """The artist method (KEYforce, 2026-10-16): a seam on every edge sharper
     than angle_deg, angle-based unwrap, one texel density, pack. Pure, it cut
     the decimated Carn Dum mesh into 3,992 islands at 50 deg (7% UV use);
     min_faces merges smaller islands into their neighbor."""
@@ -761,8 +746,12 @@ def export_fbx(path, objs):
 
 def main():
     global REPORT_DIR
-    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    ap = argparse.ArgumentParser()
+    argv = script_args()
+    # clear the old verdict before argparse, so a rejected argument cannot leave a stale "ok"
+    staging = flag_value(argv, "--staging")
+    if staging and os.path.exists(report_path(staging)):
+        os.remove(report_path(staging))
+    ap = argparse.ArgumentParser(allow_abbrev=False)
     ap.add_argument("--src", required=True, help="Tripo FBX (sibling .fbm dir expected)")
     ap.add_argument("--dst", required=True, help="kit dir for the output FBX")
     ap.add_argument("--staging", required=True, help="bake maps + report dir")
