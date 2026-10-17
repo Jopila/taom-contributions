@@ -407,8 +407,9 @@ once per game init.
 
 ## Textures
 
-1K `_d` / `_n` / `_s` triples, made by `tools/oneoff/convert_tripo_prop_textures.py --match <set>
---max-size 1024`: `_d` = albedo times (1 - metallic), `_s` = R metallic, G gloss (255 - roughness), B AO,
+1K `_d` / `_n` / `_s` triples, made by `tools/oneoff/convert_tripo_prop_textures.py --src <folder>
+--dst <out> --match <set> --stem <set> --max-size 1024` (`--src` and `--dst` are required since
+2026-10-16): `_d` = albedo times (1 - metallic), `_s` = R metallic, G gloss (255 - roughness), B AO,
 the packing verified against the shipped kits. The packs have no metallic map (0); the elk antlers have no
 roughness map (0.7); the moose has no AO (1.0). Sets: `animalia_elk_body`, `animalia_elk_antlers`,
 `animalia_moose`, matching the FBX material names so the Kit binds them by name. Normal maps are copied as

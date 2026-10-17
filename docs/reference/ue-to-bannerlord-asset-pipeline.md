@@ -89,7 +89,7 @@ Substance. The path (`tools/oneoff/blender_prep_tripo_prop.py` — named
 4. `convert_tripo_prop_textures.py` packs the plain maps into the `t_<stem>_{d,n,s}` triple —
    and is the **Substance round-trip**: paint on the prepped FBX, export plain PBR PNGs, re-run
    with `--src <export dir>`. Normal-map relief direction stays smoke-test-arbitrated
-   (`--flip-green`). Painter 12 has no plain PBR preset; its glTF export packs AO, roughness
+   (`--flip-green`). Painter's script API lists no plain PBR preset; its glTF export packs AO, roughness
    and metallic into one `occlusionRoughnessMetallic` map, which the converter reads (R, G, B).
 
 **Multi-million-tri variant (Gondor harbor ships, 2026-07-28):** Tripo "detailed" exports run
@@ -113,11 +113,11 @@ data behind its choices.
   scaled full-resolution source) next to the Kit FBX. Painter bakes Normal, World Space Normal, AO,
   Curvature, Position and Thickness from that pair (`tools/painter/painter_new_project.py`; 1.86M
   triangles bake in about 7 seconds at 2K), and a scripted layer stack paints from those maps
-  (`tools/painter/painter_stack_stone_frost.py`). Tripo's own textures are never read.
+  (`tools/painter/painter_stacks.py`, recipe `frost_stone`). Tripo's own textures are never read.
 - **Planar projection fails on a heavily decimated mesh.** `chart` folded 11 to 16% of faces at
   every spread on the 25k-triangle Carn Dûm low (1.86M source, a 1.3% decimation ratio). The
   `chart_abf` method keeps the same charts, marks their borders as seams and lets Blender's
-  angle-based unwrap solve each island: 2,686 folded faces became 204.
+  angle-based unwrap solve each island: 206 folded faces of 25,000 (0.8%) on the shipped run.
 - **Every chart method now averages island scale** (`uv.average_islands_scale`) before packing,
   and every probe reports `texel_p95_p5`: the area-weighted density of the densest 5% of the
   surface over the sparsest 5%, so 1.0 is uniform.
@@ -492,7 +492,8 @@ next pack: [`quadruped-pack-to-horse-skeleton-workflow.md`](../ai-includes/quadr
   Export and checks reuse `transfer_clip_to_engine_rig.py` (file-order rig, frame 0 rest, Kit root yaw).
 - **Per-animal profiles** in `tools/blender/animalia_to_horse_map.json` for a body that must keep its own
   proportions (the moose's neck is half a horse's). Mesh and clips must use the same profile.
-- **Textures** at 1K through `convert_tripo_prop_textures.py --match <set>` (one folder, several sets).
+- **Textures** at 1K through `convert_tripo_prop_textures.py --src <folder> --dst <out> --match <set> --stem <set>`
+  (one folder, several sets; `--src` and `--dst` are required since 2026-10-16).
 
 ## Current state / open items
 

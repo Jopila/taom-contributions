@@ -3844,7 +3844,7 @@ legacy color space with a legacy color managed project", for both a material par
   cannot take a color from Python.
 - **Prevent:** create scripted projects with `tools/painter/painter_new_project.py`, which sets `OCIO` for the create
   call. When a native error repeats, probe every variant in one script before guessing a fourth time.
-- **Source:** `docs/reference/substance-painter-mcp-setup.md` "Painter 12.0.3 API traps".
+- **Source:** `docs/reference/substance-painter-mcp-setup.md` "Painter 12.1.5 API traps".
 
 ### Count the change before you call the cause (Carn Dûm map icon, 2026-10-16)
 A 47k-triangle candidate had 943 UV charts; the guess was split vertices on its Tripo seams (27,675 vertices against an
@@ -3866,12 +3866,13 @@ The first Painter pass ran from session-scratchpad scripts with one asset's path
 - **Why missed:** each script began as a probe and grew into a step.
 - **Prevent:** once a probe becomes a step, move it into `tools/` with its inputs as arguments, then re-run the whole
   chain from the repo copies and diff the output against the scratch run (here a mean difference under 0.25 of 255).
-- **Source:** `tools/painter/`, `tools/blender/probe_fbx.py`, `render_pbr_preview.py`, `compare_prop_candidates.py`.
+- **Source:** `tools/painter/`, `tools/blender/probe_fbx.py`, `render_painter_preview.py`, `compare_prop_candidates.py`.
 
 ### A renderer that draws back faces hides a mesh wound inside out (Carn Dûm map icon, 2026-10-16)
 Every box the icon builder made (houses, merlons, the gate block, the portcullis bars) had all six faces wound inward
-through nine versions. Blender's viewport and Cycles draw back faces, so every render looked right; the game culls
-them, so every box would have shown inside out on the map.
+through nine versions. Blender's viewport and Cycles draw back faces, so every render looked right; a Bannerlord
+material culls them unless it carries `two_sided` (the Gundabad icon materials do not), so every box would have shown
+inside out on the map.
 - **Why missed:** each primitive was checked by eye in renders, and no step tested face orientation.
 - **Prevent:** test winding by geometry, not by render: `tools/blender/unwrap_texture_sets.py` reports a face that no
   sky ray sees along its normal but rays see along the reversed one. It found 5,906 inverted faces before the fix and
@@ -3886,7 +3887,7 @@ Four paint rounds came out lighter than written. A Painter fill takes the number
 - **Prevent:** before tuning colours, export one flat fill of a known value and read the PNG (0.2 came back 0.486,
   which is sRGB(0.2)). Judge paint by the exported albedo, measured or rendered emission-only, never by a lit render
   alone. Label a measurement by its colour space: `image.pixels` of an 8-bit PNG is sRGB, not linear.
-- **Source:** `tools/painter/painter_stack_angmar_fortress.py` `rgb()`; the traps table in
+- **Source:** `tools/painter/painter_stacks.py` `rgb()`; the traps table in
   `docs/reference/substance-painter-mcp-setup.md`.
 
 ### False-colour a layer to see what it covers (Carn Dûm map icon, 2026-10-16)
@@ -3896,7 +3897,7 @@ soot layer driven by an AO baked 11 m deep covered whole walls.
 - **Why missed:** each round adjusted strengths and judged the lit render, which cannot show which layer covers what.
 - **Prevent:** when a layer seems to do nothing, give it a flat false colour through the recipe's ARGS, export the set
   and look. Size every feature in texels too: under 2 texels (about 18 cm at 11 px/m) it vanishes.
-- **Source:** `painter_stack_angmar_fortress.py` (colours overridable by ARGS); `painter_new_project.py` `ao_distance`.
+- **Source:** `tools/painter/painter_stacks.py` (colours overridable by ARGS); `painter_new_project.py` `ao_distance`.
 
 ### Margins, not distortion, limit a hard-surface UV layout (Carn Dûm map icon, 2026-10-16)
 Smart UV Project cut the icon's towers set into about 5,000 islands a few pixels wide; with their margins they covered
@@ -3905,6 +3906,55 @@ Smart UV Project cut the icon's towers set into about 5,000 islands a few pixels
   read as overlap, not as margin waste.
 - **Prevent:** report visible islands and visible px/m per set, and read the layout image before tuning anything else.
 - **Source:** `tools/blender/unwrap_texture_sets.py` `net_seams`; the table in the pipeline doc's rebuild variant.
+
+### Write a detached script's completion file from one shared wrapper, on every exit (Carn Dûm map icon, 2026-10-16)
+Third time in three days (after the orc and goblin RCA W2-3 and the Erebor kitbash RCA A3). Five Blender scripts each
+wrote their own `DONE.txt`: the icon builder wrote "ok" before its FBX export, three scripts wrote nothing on an
+exception and left the previous file, and the FBX probe never removed its old JSON. A caller that polls the detached
+Store launcher reads each of these as success.
+- **Why missed:** the two earlier lessons fixed the pattern per tool, and each new script started from another
+  template.
+- **Prevent:** a Blender script that a caller polls runs its body inside `tools/blender/blender_job.py` `job()`. It
+  removes the old report first, writes "ok" only when the block returns, and writes "error" with the trace on any
+  exception, `SystemExit` included. Read the output folder with `flag_value` before `argparse`.
+- **Source:** `docs/reviews/rca-carn-dum-icon-tooling-2026-10-16.md` #3; `tools/tests/test_blender_job.py`.
+
+### A tool's default output never points into a live module (Carn Dûm map icon, 2026-10-16)
+`convert_tripo_prop_textures.py` defaulted `--dst` to the live `TAOM_Map\AssetSources\Scenes\Mordor\textures` and
+replaced files there with no backup, so a run without `--dst` wrote into an unversioned module.
+- **Why missed:** the default came from the first prop's run, and the script was extended twice without a read of its
+  defaults.
+- **Prevent:** a path into the game install is a required argument, never a default, and an existing file is replaced
+  only with `--force`. Before you extend a script, read its argument defaults.
+- **Source:** `docs/reviews/rca-carn-dum-icon-tooling-2026-10-16.md` #1; `tools/tests/test_convert_tripo_prop_textures.py`.
+
+### A step written for one item refuses many (Carn Dûm map icon, 2026-10-16)
+The rebuild route exports 7 texture sets. The converter, written for one, took the alphabetically first set (the
+256 px openings) under the mesh's name, dropped the other six and exited 0.
+- **Why missed:** the converter and the skill's handoff predate the route that sends many sets into them.
+- **Prevent:** a step that takes one item from a folder counts its matches and fails on zero or several, unless it
+  handles each one. Here each set becomes `t_<set>`, and `--stem` must match exactly one set.
+- **Source:** `docs/reviews/rca-carn-dum-icon-tooling-2026-10-16.md` #2.
+
+### Label an estimate as an estimate, with its inputs (Carn Dûm map icon, 2026-10-16)
+The docs said 10 to 15 px per metre "is what the map shows at full zoom". By `MapCameraView` that density matches the
+default camera distance, and full zoom needs about 50. Two more engine claims (the `_s` AO, back-face culling) came
+from memory and were wrong.
+- **Why missed:** the density was arithmetic on a guessed camera distance, and nothing marked it as a guess.
+- **Prevent:** a number derived from assumptions says "estimate" and gives its inputs (here the camera constants and
+  the 0.15 icon scale), so the next reader can check it. An engine claim cites the code or the shader
+  (`evidence-over-claims.md`).
+- **Source:** `docs/reviews/rca-carn-dum-icon-tooling-2026-10-16.md` #6 to #8; `docs/kitbash/map-icons.md`.
+
+### Seat each builder face on what hides it (Carn Dûm map icon, 2026-10-16)
+Each terrace riser and the outer wall's faces ran from 1 m under the ground to their top in one quad. Most of each face
+was hidden, but the per-face visibility pass kept the whole face at full density.
+- **Why missed:** visibility is judged per face, and no report showed hidden area kept at density.
+- **Prevent:** start a face where the geometry that hides it ends (a riser on the terrace below, the wall on its talus),
+  and read `hidden_kept_m2` per part in the unwrap report. In v11 this raised the town set from 9.7 to 11.9 px/m and
+  the walls set from 11.8 to 12.9.
+- **Source:** `docs/reviews/rca-carn-dum-icon-tooling-2026-10-16.md` #5; `tools/blender/unwrap_texture_sets.py`
+  `set_stats`.
 
 ### Stage a file two sessions append to by hunk, and read the staged diff before committing (2026-10-16)
 A port's lessons commit staged `docs/reviews/lessons/data-content-cultures.md` whole. A concurrent session had appended

@@ -28,8 +28,10 @@ rebuilds an icon from it.
 
 ## Conventions for a new icon
 
-- **Mesh:** visual only, no `bo_` (the shipped `gundabad icons.fbx` has none). The prep script's
-  `<name>_low.fbx` is that file: copy it to the faction folder as `<name>.fbx`.
+- **Mesh:** visual only, no `bo_` (the shipped `gundabad icons.fbx` has none; every town entity
+  carries its own `bo_town`). On the decimate route the prep script's `<name>_low.fbx` is that file,
+  copied to the faction folder as `<name>.fbx`; on the rebuild route it is the unwrap's
+  `uv\<name>.fbx`.
 - **Budget:** measure the faction's existing icons first (`tools/blender/probe_fbx.py`). The
   Gundabad set, as a reference:
 
@@ -42,10 +44,15 @@ rebuilds an icon from it.
   | `gundabad_village_warg_pit` | 5,874 | 6.6 × 6.1 × 1.2 |
   | `gundabad_village_camp` | 4,711 | 5.4 × 5.0 × 1.5 |
 
-  The town entity draws its child at scale 0.1, so a 60 m model is the size of `gundabad_town`.
+  The icon child carries scale 0.1 and the three Gundabad town entities 1.5 (`scene.xscene`), so an
+  icon draws at 0.15 of its modelled size; a 60 m model is the size of `gundabad_town`.
 - **Textures:** 1K at most for a new icon (Mike, 2026-10-16), packed `t_<name>_{d,n,s}`; an icon
   with several texture sets gets one triple per set, and a small set (iron, openings) can be 256.
   The shipped faction sets use `<faction>_<set>_{d,h,n,s}` at 2K; a new icon does not need an `_h`.
+- **Materials:** one Kit material per FBX material, named exactly as it (the Kit binds by name
+  module-wide), with `use_specular` on: without it the shader never reads `_s`
+  (`standart.rsh`, `gbuffer_functions.rsh`). `_s` blue is ambient occlusion: it dims ambient light
+  and the sun's specular, not the sun's diffuse (`pbr_shading_functions.rsh`).
 - **Frame:** the FBX reads back in Blender at rotation X 90 degrees and scale 0.01 (centimetre mesh
   data); `carn_dum_town.fbx` probed that way on 2026-10-16. That is the Kit's proven Y-up format
   ([lond-cirion-buildings.md](lond-cirion-buildings.md), [gondor/design-patterns.md](gondor/design-patterns.md)):
@@ -58,20 +65,24 @@ triangles, the Carn Dûm model read as melted wax in the Kit, so it was rebuilt 
 (2026-10-16). The hand-made Gondor icons are box-modelled the same way (`minas_tirith`, 63,597
 triangles of flat planes and hard edges).
 
-1. **Measure the Tripo layout** (heights, radii, tower positions) and write it into a builder script's
-   layout table; `tools/oneoff/blender_build_carn_dum_icon.py` is the pattern. Every face carries a
-   material slot and a `part` attribute (towers, walls, keep and so on).
+1. **Measure the Tripo layout** with `tools/blender/measure_tripo_layout.py` (height profile, tower
+   peaks) and write it into a builder script's layout table; `tools/oneoff/blender_build_carn_dum_icon.py`
+   is the pattern. Every face carries a material slot and a `part` attribute (towers, walls, keep
+   and so on), and no face runs down into the solid that hides it.
 2. **Spend the budget where the map shows it.** The icon draws LOD0, so Mike set the whole 90,000
    triangles; walls stay plain, the towers, keep and gate carry the detail.
 3. **Unique UVs:** `tools/blender/unwrap_texture_sets.py` with a rules file
    (`tools/oneoff/carn_dum_texture_sets.json`) splits the faces into texture sets, gives hidden faces
-   almost no space and reports inverted faces. Carn Dûm: towers, walls, town and paving at 1K, roof
-   512, iron and dark 256; about 10 to 15 px per metre on visible faces, which is what the map shows
-   at full zoom.
-4. **Painter:** `painter_new_project.py` with `low_as_high` bakes AO, curvature, position, thickness
-   and world-space normals off the mesh itself; `painter_stack_angmar_fortress.py` paints each set;
-   `tools/blender/render_tiled_preview.py` renders the export.
-5. **Convert and hand off** as in the skill. The Kit needs one material per texture set.
+   almost no space and fails on inverted faces. Carn Dûm v11: towers, walls, town and paving at 1K
+   (10.9 to 15.2 px per model metre on visible faces), roof 512, iron and dark 256. An estimate from
+   the map camera's constants (`MapCameraView`: 40 degree vertical field of view, the icon at 0.15
+   scale), not measured in game: that matches a 1080p screen at the default camera distance (about
+   13 px per model metre) and is about four times coarser than full zoom (about 50).
+4. **Painter:** `painter_new_project.py` with `low_as_high` and the unwrap's report bakes AO,
+   curvature, position, thickness and world-space normals off the mesh itself;
+   `painter_stacks.py` paints each set; `tools/blender/render_painter_preview.py` renders the
+   export, lit or `--albedo`.
+5. **Convert and hand off** as in the skill: one triple and one Kit material per texture set.
 
 What 1K shows on a 55 m icon: features under 2 texels (about 18 cm) vanish, height relief tilts the
 normal map instead of adding detail, and worn edges, soot, streaks and stone courses do not read
@@ -81,4 +92,4 @@ normal map instead of adding detail, and worn edges, soot, streaks and stone cou
 
 | Icon | Settlement | Source | Kit files | Staging (source of truth) | State |
 |---|---|---|---|---|---|
-| `carn_dum_town` | `town_G3` Carn Dûm (Gundabad) | Rebuilt from solids (`blender_build_carn_dum_icon.py` v10) on the layout of Mike's Tripo model: 84,053 triangles, 54.8 × 55.9 × 40.8 m, 7 texture sets (unique UVs); Painter stone colour, tone and baked occlusion | Obsolete Tripo version still there: `Gundabad/carn_dum_town.fbx` (25,000 triangles) and `Gundabad/textures/t_carn_dum_town_{d,n,s}.png`, copied 2026-10-16 and imported by Mike the same day (`Assets/Campaign Map/Map Icons/Gundabad/carn_dum_town_geo.tpac`, material `t_carn_dum_town`), not placed: the map scene does not name it. The rebuild is not copied yet; its material names (`carn_dum_towers` and so on) do not collide with `t_carn_dum_town` | `E:\LOTRAOMAssets\_export\carn_dum_rebuild\v10\` (`uv\carn_dum_town.fbx` and `_uv.blend`, `carn_dum_fortress.spp`, Painter exports `paint_r14\`); the Tripo version in `carn_dum_icon_final\` | Texturing in progress (round 14 of the paint; the paving set still to repaint as stone). Then: conversion to `t_*_{d,n,s}`, the Kit copy (backup of the Tripo FBX), 7 materials, the `town_G3` child swap (`Gundabad`, now `gundabad_town`) and the in-game check |
+| `carn_dum_town` | `town_G3` Carn Dûm (Gundabad) | Rebuilt from solids (`blender_build_carn_dum_icon.py` v11) on the layout of Mike's Tripo model: 83,797 triangles, 54.8 × 55.9 × 40.8 m, 7 texture sets (unique UVs); Painter stone colour, tone and baked occlusion | Obsolete Tripo version still there: `Gundabad/carn_dum_town.fbx` (25,000 triangles) and `Gundabad/textures/t_carn_dum_town_{d,n,s}.png`, copied 2026-10-16 and imported by Mike the same day (five packages in `Assets/Campaign Map/Map Icons/Gundabad/`: `carn_dum_town_geo.tpac`, `textures/t_carn_dum_town_mtl.tpac` and `_{d,n,s}_tex.tpac`), not placed: the map scene does not name it. The rebuild is not copied yet | `E:\LOTRAOMAssets\_export\carn_dum_rebuild\v11\` (builder `.blend` and renders, `uv\carn_dum_town.fbx` and `_uv.blend`); the round 14 paint is on v10 (`v10\carn_dum_fortress.spp`, `v10\paint_r14\`); the Tripo version in `carn_dum_icon_final\` | Texturing in progress; Mike's look so far: stone colour, broad tone and occlusion, no snow, edges, soot, streaks or courses. Next: a Painter project from v11 (its unwrap gives the town set 11.9 px/m, v10 had 9.7), every set painted as stone (round 14 still had the paving lighter), conversion. Decisions owed first: the `carn_dum_town` set converts to `t_carn_dum_town_*`, the Tripo version's names (rename the set or replace the Tripo files); occlusion in the albedo or in `_s` blue, not both (`_s` dims ambient light again); whether 1K is enough, being about four times coarser than full zoom. Then the Kit copy (backup of the Tripo FBX), 7 materials with `use_specular`, the `town_G3` child swap (`Gundabad`, now `gundabad_town`) and the in-game check |
