@@ -154,8 +154,8 @@ weapons, which only the Armory's new
 also carry `ladder_harad_bow_t7` (`harad/ranged_ladder.xml`), the Serpent and Red Serpent marksmen's bow. Since
 2026-10-16 (`d94ee1631`, lotraom-assets `03320a65`) the 22 Harad and Shaghana regular troops and the six Custom Battle
 lords also name his maces and javelins (`harad/weapons.xml`, 12 more pieces) and his bardings (`harad/body_armors.xml`,
-the `harad_barding` packages), with four more `RuntimeDataCache` entries, and 37 of the 41 Aserai, Shaghana and
-Abanissa enlistment kits name his weapons or shields (28 of them a mace or javelin). Check each channel before publishing:
+the `harad_barding` packages), with four more `RuntimeDataCache` entries, and 38 of the 42 Aserai, Shaghana and
+Abanissa enlistment kits name his weapons or shields (29 of them a mace or javelin). Check each channel before publishing:
 `python tools/validate_moduledata.py --game-modules E:/LOTRAOM_Releases/<channel>/Modules --code BROKEN_ITEM_REF | grep -E "Item\.(hr_st_|sg_st_|sm_hr_st_|sm_sg_st_|sk_(hr|sg)_st_|sk_hr_pz_camel_bard|ladder_harad_bow_t7)"`
 must print nothing.
 

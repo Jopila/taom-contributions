@@ -92,7 +92,7 @@ in three generators; the Shaghana lord parties now field the Red Serpent line th
 Mike asked for the commit and push first, then the review, so these findings land in a fix commit. Eight lenses ran
 again (1, 2, 5, 7; then 3, 4, 6, Tooling). **No engine incompatibility** (22 claims verified against the v1.5.5
 DLLs, among them the Red Serpent stacks, the language loading the name tool relies on, and the Bow 100 claim). One
-HIGH, five MEDIUM.
+HIGH, six MEDIUM.
 
 ### Mike's decisions
 

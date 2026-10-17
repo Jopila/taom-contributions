@@ -458,8 +458,8 @@ def _refuse_foreign(what: str, block: str) -> None:
     if foreign:
         raise StarterKitError(
             f"{what}: the {MARKER_START} block holds rows this tool does not own ({', '.join(foreign)}); "
-            "replacing or reverting it would delete them. Fix: move the markers inside the list so they "
-            "fence only the starter rows")
+            "replacing or reverting it would delete them. Fix: in a stylesheet, move the markers inside the "
+            "list so they fence only the starter rows; in the pieces file, move the foreign piece out of the block")
 
 
 def blocks_for_piece(piece_id: str, xslt_text: str, native_root: ET.Element | None, kind: str) -> list[str]:
@@ -1058,8 +1058,9 @@ def _report_foreign(drift: list[str], name: str, text: str) -> None:
         foreign = foreign_rows(block.group(0))
         if foreign:
             drift.append(f"{name}: a {MARKER_START} block holds rows the tool does not own "
-                         f"({', '.join(foreign)}); the next apply or revert refuses it. Move the "
-                         "markers inside the list so they fence only the starter rows")
+                         f"({', '.join(foreign)}); the next apply or revert refuses it. In a stylesheet, "
+                         "move the markers inside the list so they fence only the starter rows; in the "
+                         "pieces file, move the foreign piece out of the block")
 
 
 def verify_plan(plan: Plan, md: Path) -> list[str]:
@@ -1121,12 +1122,14 @@ def revert_plan(plan: Plan, md: Path, write: bool, backups: bool = True) -> list
     # every refusal has fired by here; the item files go last, after the shared files are written
     if write:
         _write_all(pending)
+    removed = []
     for folder in plan.by_folder():
         path = _items_path(md, folder)
         if path.exists():
             if write:
                 path.unlink()
-            log.insert(0, f"{'removed' if write else 'would remove':8s} {path}")
+            removed.append(f"{'removed' if write else 'would remove':8s} {path}")
+    log[:0] = removed  # folder order, ahead of the block reverts, as before the reorder
     return log
 
 
@@ -1230,7 +1233,7 @@ def main() -> int:
                 for line in apply_plan(plan, md, write=args.apply, backups=backups, allow_shrink=args.allow_shrink):
                     print(line)
         except (StarterKitError, OSError, ET.ParseError) as exc:
-            # exit 1 means drift under --verify, so a crash never borrows it
+            # exit 1 means drift under --verify, so a refusal or a bad input never borrows it
             print(f"ERROR: {exc}")
             return 2
     if args.apply and not args.revert and not args.verify:

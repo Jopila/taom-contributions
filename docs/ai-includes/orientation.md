@@ -32,7 +32,7 @@ and the gate.
 | TAOM_Map settlements | Edit the live `TAOM_Map/ModuleData/settlements.xml`; the repo's copy is a stale shadow | [naming](../reference/taom-map-settlement-naming.md) |
 | Prefab entity cap | The 131,072 queue is global across modules; `check_prefab_budget.py` counts TAOM_Map only | [module map](../modding/module-map.md) |
 | Unversioned modules | A fix in the live Armory or TAOM_Map reverts on reinstall; land an in-repo gate with it | [coverage](../features/moduledata-validation.md) |
-| Artist commit ports | Base is the mirror revision nearest his file, not his parent: `merge_live_file.py --base-search` | [lesson](../reviews/lessons/data-content-cultures.md) |
+| Artist commit ports | Base is the mirror revision nearest his file, not his commit's parent: `merge_live_file.py --base-search` | [lesson](../reviews/lessons/data-content-cultures.md) |
 | Parked features | NavalTravel, ShaderPrecompilation: off in `SubModule.cs`; sweep every file the last toggle touched | [map](../reference/feature-map.md) |
 | Persisted MCM defaults | json2 keeps the old value: rename a setting (comment why) to change its default, never flip it | [shaders](../features/shader-precompilation.md) |
 | Moving platforms | Agents need a navmesh riding the entity, plus physics; teleporting fails. Crew stand inside the deck | [mumakil](../features/mumakil.md) |

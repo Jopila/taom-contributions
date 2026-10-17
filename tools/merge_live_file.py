@@ -43,14 +43,19 @@ class MergeError(Exception):
     pass
 
 
+def terminator_counts(data):
+    """Lines ending in each of CR CR LF, CRLF and bare LF (BOM ignored)."""
+    body = data[len(BOM):] if data.startswith(BOM) else data
+    triple = body.count(b"\r\r\n")
+    return {"\r\r\n": triple, "\r\n": body.count(b"\r\n") - triple, "\n": body.count(b"\n") - body.count(b"\r\n")}
+
+
 def detect_style(data):
     """Return (has_bom, terminator, ends_with_newline) for raw bytes. Terminator is dominant."""
     has_bom = data.startswith(BOM)
     body = data[len(BOM):] if has_bom else data
-    triple = body.count(b"\r\r\n")
-    crlf = body.count(b"\r\n") - triple
-    lf = body.count(b"\n") - body.count(b"\r\n")
-    best = max((triple, "\r\r\n"), (crlf, "\r\n"), (lf, "\n"), key=lambda t: t[0])
+    counts = terminator_counts(data)
+    best = max(((n, t) for t, n in counts.items()), key=lambda c: c[0])
     terminator = best[1] if best[0] else "\n"
     return has_bom, terminator, body.endswith(b"\n")
 
@@ -167,7 +172,8 @@ def do_merge(args):
         f"(approximate, by line); terminator {term}, BOM {'yes' if has_bom else 'no'}, "
         f"final newline {'yes' if final_nl else 'no'}."
     )
-    minority = live_raw.count(b"\n") - live_raw.count(terminator.encode("ascii"))
+    counts = terminator_counts(live_raw)
+    minority = sum(counts.values()) - counts[terminator]
     if minority > 0:
         print(f"NOTE: {minority} line(s) in live do not end in {term}; the result writes every line with {term}.")
     if out_bytes == live_raw:

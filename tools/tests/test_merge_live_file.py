@@ -197,6 +197,17 @@ class SafetyTests(_Tmp):
         self.assertEqual(code, 0, text)
         self.assertIn("NOTE: 1 line(s)", text)
 
+    def test_a_crlf_line_in_a_mostly_lf_file_is_named_too(self):
+        live = self.put("live.xml", b"<Items>\n" + b'  <Item id="a" v="1"/>\r\n' + b'  <Item id="b" v="1"/>\n'
+                        b'  <Item id="c" v="1"/>\n</Items>\n')
+        theirs_lines = list(BASE)
+        theirs_lines[3] = '  <Item id="c" v="THEIRS"/>'
+        base = self.put("base.xml", _join(BASE, "\n"))
+        theirs = self.put("theirs.xml", _join(theirs_lines, "\n"))
+        code, text = self.run_tool(live, "--base", base, "--theirs", theirs, "--out", self.dir / "out.xml")
+        self.assertEqual(code, 0, text)
+        self.assertIn("NOTE: 1 line(s)", text)
+
     def test_an_os_error_exits_2_not_the_conflict_code(self):
         live = self.put("live.xml", _join(BASE, "\r\n"))
         base = self.put("base.xml", _join(BASE, "\n"))

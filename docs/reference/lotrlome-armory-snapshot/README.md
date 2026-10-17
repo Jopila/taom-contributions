@@ -444,9 +444,8 @@ half with three edits his files do not carry. **Live edits his next drop or an A
 - **Not installed from `db981663`:** his five Gondor armour files (they re-stat 49 Anorien pieces below TAOM's
   kingdom-cap curve) and his runtime logs. His art, shaders and runtime caches were already live, byte-identical to his
   commit; Mike kept the shader-switched bow materials as they are.
-- **Replay after a drop:** take his new files through a three-way merge, then write the English rows with
-  `python tools/register_armory_names.py --apply --prefix <his ids>` and do the merge with `tools/merge_live_file.py`; the
-  other two edits (the longbow `is_merchandise` flags and the Couchable spear pieces) stay by hand until KEYforce carries
+- **Replay after a drop:** merge his new files three-way with `tools/merge_live_file.py`, then write the English rows
+  with `python tools/register_armory_names.py --apply --prefix <his ids>`; the other two edits (the longbow `is_merchandise` flags and the Couchable spear pieces) stay by hand until KEYforce carries
   them upstream. The gate names whatever is missing.
 
 **Merging an artist's live file.** The live file is CRLF and his mirror blobs are LF, so a raw `git merge-file` reports

@@ -996,17 +996,18 @@ rather than let the player fall out to human militia gear.
 exceptions, falling out to the neutral default; shaghana gained 14 generated kits and abanissa 15,
 abanissa through the `TREE_ALIASES` entry `'abanissa': 'aserai'` in the generator (it owns no troops,
 its tree is the aserai one). `DocumentedExceptions` in `EnlistmentRosterCultureCoverageTests` is now
-empty. The Harad-sphere archer kits (aserai sergeant, the shaghana and abanissa chains) carry the
+empty. The Harad-sphere archer kits (the aserai, shaghana and abanissa chains) carry the
 vanilla steppe bows (`composite_bow` 30/51, `steppe_heavy_bow` 30/52, `composite_steppe_bow` 30/52,
 `steppe_war_bow` 50/54 as difficulty/damage), because every Harad ladder bow needs Bow 100 and the
 player equips the kit by hand; `EnlistmentArcherLauncherDataTests` pins it. The same day KEYforce's
 Harad regular weapons (#805) changed their donor troops, so the 29 shaghana and abanissa kits were
 removed and reseeded with `--seed-missing` (they now issue his spears, sword, shields and arrows), and
 the steppe bows were put back on their archer chains. KEYforce's javelins and maces (lotraom-assets
-`03320a65`) changed the donors again on 2026-10-16, and the same reseed now issues 27 kits: his maces in
+`03320a65`) changed the donors again on 2026-10-16, and the same reseed now issues 28 kits: his maces in
 place of the aserai swords (not on the abanissa archer recruit, whose donor `harad_militia_archer` still
 carries one), his javelins on the shaghana infantry from soldier up, and his sword on both cavalry
-recruits. Neither culture has a `support_veteran` kit any more: it would equal the soldier's, so the
+recruits. Since the steppe bows are swapped in before duplicate suppression (decision D7), the shaghana
+archer soldier has its own kit with `steppe_heavy_bow` instead of re-drawing the recruit's. Neither culture has a `support_veteran` kit any more: it would equal the soldier's, so the
 resolver descends to the soldier kit and `EnlistmentEquipmentService` issues it a second time at
 veteran (its ledger checks the requested rank, not the roster). The aserai kits, KEYforce's hand edits
 of 2026-10-10 kept by decision D3, were reseeded the same day on Mike's word (decision D5 in
