@@ -1066,3 +1066,33 @@ yotthani's PerfProbe gave each timing probe its own closed generic class (`Slot<
   it extends, with its own status line. The same check applies to a guard in a tool: list what it protects before it
   ships (the same review's `perf_runs.py compare` refusal protected no metric that `compare` prints).
 - **Source:** `docs/reviews/rca-yotthani-review-2026-10-15.md` findings 1 and 3.
+
+### A check over a cached engine field sees only the writers that update the cache (2026-10-17)
+- **Why missed:** the main-roster loss watchdog compared `TroopRoster.TotalRegulars` to catch the writes that bypass
+  `AddToCountsAtIndex`. `TotalRegulars` reads `_totalRegulars`, which only `AddToCountsAtIndex` and the load-time
+  recompute write; `SetElementNumber` changes the slot and leaves the cache alone. The plan listed the bypassing
+  METHODS and never listed the writers of the FIELD it compared.
+- **Prevent:** before a diagnostic or gate claims to detect a write through a derived or cached value, list every
+  writer of the backing field (`stfld` in the installed IL, or a grep of the decompile for the field name) and check
+  that each one the claim covers updates it. Prefer patching the bypassing method itself.
+- **Source:** `docs/reviews/rca-main-roster-loss-diag-2026-10-17.md` finding 1.
+
+### An observe-only removal log on a live roster must expect rebuild in place (2026-10-17)
+- **Why missed:** the diagnostic raised LARGE LOSS when one campaign hour removed 10 regulars. Vanilla's party screen
+  binds the live main roster, and every Esc/Cancel runs `PartyScreenData.ResetUsing` (Clear, then re-add every row);
+  `PartyScreenLogic.UpgradeTroop` removes before it adds. Each produced "every regular removed, heroes kept", the
+  exact shape of the report, and campaign time is frozen on that screen, so the hourly latch could hide a real loss.
+- **Prevent:** before judging "loss" at removal time, read what vanilla does to the same object when nothing is lost
+  (screens that edit the live roster, upgrades, battles). Judge on the net change once it is known, or record facts
+  with their caller and leave the judgement to the reader with a list of the benign sources. Never filter a vanilla
+  rebuild by caller name: a rebuild from a stale snapshot is itself a candidate cause.
+- **Source:** `docs/reviews/rca-main-roster-loss-diag-2026-10-17.md` finding 3.
+
+### Caller-chain frames use `DeclaringType.FullName` (2026-10-17, second occurrence)
+- **Why missed:** the roster-loss diagnostic formatted frames as `DeclaringType.Name + "." + Name`, which drops the
+  namespace, so its `System.` filter never matched and the chain could not say whether TaleWorlds, TAOM or another mod
+  made the call. Its test fed namespaced strings production never produces. The same defect is recorded in
+  `SpawnOriginFormatter.cs` and the #372 changelog entry, but not in a lesson, so nothing loaded it.
+- **Prevent:** format a frame as `DeclaringType?.FullName + "." + Name` (fall back to `Name` when the type is null, as
+  for Harmony's replacement method), filter by namespace prefix, and feed tests the production shape.
+- **Source:** `docs/reviews/rca-main-roster-loss-diag-2026-10-17.md` finding 6.

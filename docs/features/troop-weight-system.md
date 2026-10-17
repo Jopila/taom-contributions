@@ -490,6 +490,10 @@ than a gap. Lindon, a clone of the Rivendell tree, has carried the same weights 
 the same position. Nobody has written down which. The 20% floor answers the opposing-bonus question for
 Mordor, Isengard, Dol Guldur and Gundabad; it does not answer this one.
 
+## Main-roster loss diagnostic (TEMPORARY, 2026-10-17)
+
+A player lost about 60 non-hero troops from the main party right after buying Elite Emissary troops, and no TAOM path found removes a whole roster at once. Until it is root-caused, two observe-only prefixes (`Patch_MainRosterLossDiag`, on `TroopRoster.AddToCountsAtIndex` and `TroopRoster.SetElementNumber`) write one DEBUG line per removal of non-hero troops from the main party roster to `Logs/taom_debug_<timestamp>.log`: `[RosterLoss] tick=N -K troop (row A -> B, regulars X -> Y) via <caller chain>`. `tick=` is `Campaign.CurrentTickCount`, so within one load, lines with the same value belong to one map frame, one party-screen session or one mission (the counter is not saved and restarts at 0 on every load). There is no toggle and no MCM switch, and nothing changes a roster. The read guide, the thread and PatchShield notes and the removal checklist are in [the registry entry](../reference/harmony-patch-registry.md#patch_mainrosterlossdiag).
+
 ## Configuration
 
 ### Config File: `Main/_Module/ModuleData/TroopWeights/troop_weights.xml`
@@ -563,7 +567,7 @@ that differs from its twin or has none.
 | `Main/Features/TroopWeight/Hooks/TroopWeightDisplayHook.cs` | The one hook implementation behind all five display surfaces |
 | `Main/Features/TroopWeight/Hooks/IOn*.cs` | 6 hook interfaces: shed-on-upgrade + the 5 display surfaces |
 | `Main/Features/TroopWeight/Hooks/*_Patch.cs` | 6 Harmony patches, all `Patch17_TroopWeight`: `UpgradeReadyTroops` + `PartyVM.RefreshPartyInformation` + `CampaignUIHelper.GetMainPartyHealthTooltip` + `ClanPartyItemWithPartyVM` / `ClanPartyItemWithHeroVM` `.UpdateProperties` + `RecruitmentVM.RefreshPartyProperties` + `PartyCharacterVM.RefreshValues` |
-| `Main/Features/TroopWeight/Diagnostics/` | TEMPORARY special-currency count diagnostic (separate investigation) |
+| `Main/Features/TroopWeight/Diagnostics/` | TEMPORARY diagnostics: the special-currency count diagnostic (separate investigation) and the main-roster loss diagnostic (`MainRosterLossDiagnostics` plus the two `TroopRoster_*_Patch` prefixes) |
 | `Main/_Module/ModuleData/TroopWeights/troop_weights.xml` | Weight definitions, **133 live rows: 59 at 2.0, 66 at 3.0, six at 4.0, one at 12.0, one at 20.0.** A raw grep returns one more because a `cave_troll` row sits inside a comment block. Unlisted troops weigh 1.0 <!-- measured: python -c "import xml.etree.ElementTree as ET,collections;r=ET.parse('Main/_Module/ModuleData/TroopWeights/troop_weights.xml').getroot();w=[x.get('weight') for x in r.findall('.//TroopWeight')];print(len(w),sorted(collections.Counter(w).items()))" 2026-10-06 --> |
 | `Main/_Module/ModuleData/taom_module_strings.xml` | `{=taom_troop_weight_size}` (enforcement label, no longer rendered) + `{=taom_troop_weight_tag}` (row `×N` tag) |
 | `Main/Features/TaomSettings.cs` | MCM toggle (`EnableTroopWeight`) |
@@ -587,6 +591,7 @@ that differs from its twin or has none.
 - `PartyUpgraderShedGuardTests.cs`: the shed hook's guard order (bails on leaderless and main parties before reading the roster)
 - `TroopWeightCheatsFormatTests.cs`, `taom.print_party_size` rendering, including the enforced-vs-displayed frame pair
 - `TroopCountDiagnosticsFormatterTests.cs`: the TEMPORARY special-currency diagnostic formatter
+- `MainRosterLossDiagnosticsTests.cs`: the TEMPORARY main-roster loss line formatter, caller-chain filter and `SubModule.cs` wiring
 
 ## How to Add a New Weighted Troop
 
