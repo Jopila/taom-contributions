@@ -61,7 +61,7 @@ instructions: follow its phases in order.
 | Armory sync or art drop, or the ARMORY ART DRIFT banner | `/armory-audit` | before any battle or tournament smoke |
 | New creature or mount; creature animation looks wrong | `creature-mount-authoring.md`; `creature-animation-blender-mcp-workflow.md` (`docs/ai-includes/`) | once told "do it", not while sketching |
 | Custom static prop (camp, landmark) without the Kit | `docs/reference/tpac-static-prop-authoring.md` | once told "do it" |
-| Tripo AI FBX to a prop or map icon (Blender re-UV, Painter retexture) | `/prep-tripo-prop` | once told "do it" |
+| Tripo AI FBX to a prop or map icon | `/prep-tripo-prop` | once told "do it" |
 | New feature | `/new-feature`, then offer `/freeze` | once told "do it" |
 | Culture, armor, lord skills | `new-culture-authoring.md`, `lord-skills-authoring.md` (`docs/ai-includes/`); `docs/features/troop-tree-revamp.md` | |
 | New player-facing text | `/localize` | always |
