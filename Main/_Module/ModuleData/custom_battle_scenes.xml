@@ -88,6 +88,16 @@
     terrain="Plain"
     is_siege_map="false" />
   <Scene
+    id="taom_gondor_battle_001_forceatmo"
+    name="{=aom_taom_gondor_battle_001_forceatmo_name}[Gondor] Ruined Outpost"
+    terrain="Plain"
+    is_siege_map="false" />
+  <Scene
+    id="taom_gondor_pelennor_fields_forceatmo"
+    name="{=aom_taom_gondor_pelennor_fields_forceatmo_name}[Gondor] Pelennor Fields"
+    terrain="Plain"
+    is_siege_map="false" />
+  <Scene
     id="taom_mordor_battle_dead_marshes_forceatmo"
     name="{=aom_taom_mordor_battle_dead_marshes_forceatmo_name}[Mordor] Dead Marshes"
     terrain="Plain"

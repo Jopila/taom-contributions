@@ -3985,3 +3985,12 @@ sliced all but one entry into the paid phase. Someone deferring translation woul
 - **Prevent:** test a limit with `is not None`, reject negatives, and pin 0 and -1 with tests that patch the provider
   call to raise. For "do the free half only", add a flag that returns before the paid phase (`--seed-only`).
 - **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) (D6 and the second review).
+
+### A generator's own header carries no count (Gondor scenes, 2026-10-17)
+The generated `sp_battle_scenes.xml` header said "The eight taom_* scenes" after two more joined, and the first
+rewording carried a new count and an unmeasured claim.
+- **Why missed:** `--check` compares the file with what the generator writes, so a stale sentence inside the
+  generator passes it; the CLAUDE.md ban on "counts nothing computes" covers tiers 2 and 3, not a tool's output.
+- **Prevent:** a generator's header names the class of what it writes and points to the doc that holds the history;
+  a number in it must be computed by the generator in the same run, or left out.
+- **Source:** [rca-gondor-field-scenes-2026-10-17.md](../rca-gondor-field-scenes-2026-10-17.md) finding 2.

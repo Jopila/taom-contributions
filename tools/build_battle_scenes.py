@@ -48,7 +48,10 @@ MOUNTAIN = [T + "O", T + "031"]
 
 REGIONS: list[tuple[str, list[int], list[str]]] = [
     # Gondor
-    ("Gondor: Pelennor and Anorien", [85, 86, 90, 91, 92], [T + "a", T + "n", T + "t", T + "023", T + "025"]),
+    ("Gondor: Pelennor and Anorien", [85, 86, 90, 91, 92],
+     [T + "a", T + "n", T + "t", T + "023", T + "025", "taom_gondor_battle_001_forceatmo"]),
+    # Its horizon shows Minas Tirith and Osgiliath, so it stays on their cell.
+    ("Gondor: Pelennor Fields", [85], ["taom_gondor_pelennor_fields_forceatmo"]),
     ("Gondor: Anduin crossings", [85, 93, 97], [T + "f", T + "s", T + "011"]),
     ("Gondor: Belfalas, Dol Amroth, Anfalas, Andrast coast", rng(100, 108),
      [T + "p", T + "021", T + "029", T + "030"]),
@@ -120,6 +123,8 @@ CUSTOM: dict[str, tuple[str, str | None]] = {
     "taom_mordor_battle_dead_marshes_forceatmo": ("Swamp", "Low"),
     "taom_rohan_battle_001_forceatmo": ("Plain", "Low"),
     "taom_rohan_battle_fords_of_isen_forceatmo": ("Plain", "Low"),
+    "taom_gondor_battle_001_forceatmo": ("Plain", "Low"),
+    "taom_gondor_pelennor_fields_forceatmo": ("Plain", "Low"),
     CATCH_ALL: ("Plain", None),
 }
 
@@ -129,8 +134,8 @@ HEADER = """<?xml version="1.0" encoding="utf-8"?>
 \t     Field-battle scenes per Middle-earth region; the cell to region table is in
 \t     docs/reference/worldmap-battle-scene-grid.md ("Region table"). A cell listed by several scenes
 \t     picks one with equal odds. Every index 0-255 is covered; cells no region claims fall to
-\t     battle_terrain_r. The eight taom_* scenes were re-enabled 2026-10-03 knowing their pbr_terrain
-\t     shader can crash some GPUs on scene load (disabled 2026-06-19 in ee2cb04b and 62470413; #287). -->
+\t     battle_terrain_r. The taom_* scenes are TAOM_Map terrains, the class whose pbr_terrain shader can
+\t     crash some GPUs on scene load (#287); their history is in docs/features/battle-scenes.md. -->
 """
 
 

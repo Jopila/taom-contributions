@@ -3,8 +3,8 @@
 > **Status: ENABLED.** `Patch0_BattleScenes` is applied at module load (`TryPatchCategory("Patch0_BattleScenes")`,
 > [Main/SubModule.cs:520](../../Main/SubModule.cs)), re-enabled 2026-06-01. Since 2026-10-03 the field-battle
 > scene list is generated per Middle-earth region by `tools/build_battle_scenes.py`, and TAOM's own Mordor and Rohan
-> field scenes are back in rotation, with the June `pbr_terrain` GPU crash risk accepted (#287). In-game checks
-> per region are owed (see "Verifying" below).
+> field scenes are back in rotation, with the June `pbr_terrain` GPU crash risk accepted (#287). Two Gondor field
+> scenes joined on 2026-10-17 before any in-game load. In-game checks per region are owed (see "Verifying" below).
 
 ## Overview
 
@@ -43,7 +43,8 @@ All three patches share `[HarmonyPatchCategory("Patch0_BattleScenes")]`, so the 
 is the `REGIONS` table in `tools/build_battle_scenes.py`: (region, grid cells, scene ids). A cell in several
 regions gets the union of their scenes; the engine picks among a cell's scenes with equal odds. Cells no region
 claims (0 and 181-254, which the grid never or almost never paints) fall to `battle_terrain_r`, so 0-255 is always
-covered. 93 scenes today: 85 native ones from SandBoxCore and TAOM's 8 from `TAOM_Map/SceneObj`.
+covered. The pool is SandBoxCore's native scenes plus TAOM's own `taom_*` scenes from `TAOM_Map/SceneObj`; the
+dry run prints the count.
 
 **Related systems that read the same scenes.** Custom Battle's picker (`custom_battle_scenes.xml`) lists TAOM's
 scenes separately. Scene ids containing `forceatmo` get the forced atmosphere
@@ -69,8 +70,8 @@ No service, no IoC registration, no adapters: the patches and the data are the w
 
 `tools/tests/test_build_battle_scenes.py` covers the generator: no empty or out-of-range cell, no scene written
 without cells, no `--` in a comment, unknown ids refused, 0-255 coverage, CRLF with no BOM and the root as the first
-element, `--check` / `--dry-run` / `--apply`, and the region regression that kept Mordor scenes off Harad and Khand
-cells, plus a CI check that the committed XML matches `REGIONS` and parses the way the engine parses it. The C#
+element, `--check` / `--dry-run` / `--apply`, and the region regressions that keep Mordor scenes off Harad and Khand
+cells and Pelennor Fields on cell 85, plus a CI check that the committed XML matches `REGIONS` and parses the way the engine parses it. The C#
 patches have no tests: they are static, IO-bound and need a live game.
 
 ## Verifying
@@ -87,6 +88,7 @@ The `MapScene_Load_DiagnosticPatch` prints to the engine log every time `MapScen
 
 ## Changelog
 
+- 2026-10-17: two new Gondor field scenes. `taom_gondor_battle_001_forceatmo` ("Ruined Outpost") joins the Pelennor and Anorien region (cells 85, 86, 90, 91, 92) and comes up in 1 battle of 6 there, 1 of 10 on cell 85. `taom_gondor_pelennor_fields_forceatmo` ("Pelennor Fields") shows Minas Tirith and Osgiliath on its horizon, so it gets its own region on their cell 85 only, at 1 in 10 (cell 85 also draws the Anduin crossings scenes). Both are in the Custom Battle picker for the load test, and their names await translation. Ruined Outpost is town-sized (about 22,600 entities against a vanilla field maximum near 1,300), so its load and frame cost are measured at that test.
 - 2026-10-03: `sp_battle_scenes.xml` generated per Middle-earth region by `tools/build_battle_scenes.py`, from cells measured against the live settlements (native scenes grouped by type: Plain to the green kingdoms, Desert to Harad and Umbar, Steppe to Rhûn, Khand and the Erebor/Dale plains, Swamp to the Dead Marshes). The 6 Mordor and 2 Rohan field scenes are back in rotation on corrected cells, accepting the June `pbr_terrain` GPU crash risk. Region table: [worldmap-battle-scene-grid.md](../reference/worldmap-battle-scene-grid.md#region-table-2026-10-03-live).
 - 2026-06-01 — Re-enabled `Patch0_BattleScenes` (`feat(battle-scenes)`): uncommented the `PatchCategory` gate so TAOM's full 0–255 `sp_battle_scenes` table loads; doc flipped DISABLED→ENABLED.
 - 2026-06-01 — Root-caused/resolved a campaign-load `AccessViolationException` (`fix(taom_map)+docs(battle-scenes)`) traced to a mis-imported `worldmap_battle_scene_grid` texture; fixed by a lossless re-import at the `Assets/world_map/` resource path.
@@ -96,8 +98,13 @@ The `MapScene_Load_DiagnosticPatch` prints to the engine log every time `MapScen
 
 ## GitHub Issue
 
-- **Issue:** None yet for the 2026-10-03 region remap (owed).
+- **Issue:** None yet for the 2026-10-03 region remap or the 2026-10-17 Gondor scenes (owed).
 - **Status:** Enabled; in-game region checks owed.
+- **Known limitation (2026-10-17):** no release gate checks that a channel's `TAOM_Map/SceneObj` holds every `taom_*`
+  scene that TAOM's `sp_battle_scenes.xml` and `custom_battle_scenes.xml` name; `--check` reads this machine only. On
+  2026-10-17 the patreon and public channels lacked both Gondor scenes and `taom_rohan_edoras_town_forceatmo`. Before
+  a release, test `E:/LOTRAOM_Releases/<channel>/Modules/TAOM_Map/SceneObj/<id>/scene.xscene` for every `taom_*` id
+  in those two files. The planned gate is a refusal in `tools/package_release.py`'s dry run.
 
 ---
 

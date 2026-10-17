@@ -33,5 +33,7 @@
     <string id="aom_taom_rohan_battle_fords_of_isen_forceatmo_name" text="[ローハン] アイゼンの浅瀬" />
     <string id="aom_taom_rohan_castle_helms_deep_forceatmo_name" text="[ローハン] ヘルム峡谷 - 夜の雨" />
     <string id="aom_taom_rohan_edoras_town_forceatmo_name" text="[ローハン] エドラス" />
+    <string id="aom_taom_gondor_battle_001_forceatmo_name" text="[Gondor] Ruined Outpost" />
+    <string id="aom_taom_gondor_pelennor_fields_forceatmo_name" text="[Gondor] Pelennor Fields" />
   </strings>
 </base>

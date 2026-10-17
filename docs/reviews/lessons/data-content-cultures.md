@@ -2048,3 +2048,14 @@ missing that Mike had kept them by decision D3 the day before.
 - **Prevent:** before writing who made a data block or whether it should be regenerated, run `git log -S'<id>' --
   <file>` and grep `docs/reviews/rca-*.md` decision tables for the file; cite the decision in the doc and in the file.
 - **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) finding 3.
+
+### Open a scene before choosing its cells or its name (Gondor scenes, 2026-10-17)
+A scene whose horizon shows Minas Tirith and Osgiliath went on five cells, one holding a Rohan castle near Edoras,
+and a dark scene of cliffs, caves and ruins was named "Gondor Plains" after its id pattern.
+- **Why missed:** the cell options came from region names and the grid table, and the name from the
+  `<region>_battle_001` to "<Region> Plains" habit; nobody read `scene.xscene` or `atmosphere.xml` first.
+- **Prevent:** before offering cells or a picker name, list the scene's landmark meshes and what lies inside its
+  `border_soft` area. A scene that shows a named place gets its own region row on that place's cell (Fords of Isen,
+  the Morannon, the Pelennor); only a generic scene takes a whole region. Settle the English name before the paid
+  translation run.
+- **Source:** [rca-gondor-field-scenes-2026-10-17.md](../rca-gondor-field-scenes-2026-10-17.md) finding 3 and 4.

@@ -4,9 +4,11 @@
 	<!-- Generated Custom Battle scene names: extracted from custom_battle_scenes.xml by tools/generate_name_localization_strings.py. Do not hand-edit; re-run the generator instead. -->
 	<string id="aom_taom_dale_castle_001_forceatmo_name" text="{=aom_taom_dale_castle_001_forceatmo_name}[Dale] Westoft Castle" />
 	<string id="aom_taom_dwarven_moria_w_forceatmo_name" text="{=aom_taom_dwarven_moria_w_forceatmo_name}[Misty Mountains] Western Moria" />
+	<string id="aom_taom_gondor_battle_001_forceatmo_name" text="{=aom_taom_gondor_battle_001_forceatmo_name}[Gondor] Ruined Outpost" />
 	<string id="aom_taom_gondor_castle_001_forceatmo_name" text="{=aom_taom_gondor_castle_001_forceatmo_name}[Gondor] Barad Faen Castle" />
 	<string id="aom_taom_gondor_castle_002_forceatmo_name" text="{=aom_taom_gondor_castle_002_forceatmo_name}[Gondor] Bergraw Castle" />
 	<string id="aom_taom_gondor_castle_003_forceatmo_name" text="{=aom_taom_gondor_castle_003_forceatmo_name}[Gondor] Melgobas Castle" />
+	<string id="aom_taom_gondor_pelennor_fields_forceatmo_name" text="{=aom_taom_gondor_pelennor_fields_forceatmo_name}[Gondor] Pelennor Fields" />
 	<string id="aom_taom_gondor_town_dolamroth_forceatmo_name" text="{=aom_taom_gondor_town_dolamroth_forceatmo_name}[Gondor] Dol Amroth" />
 	<string id="aom_taom_gondor_town_lossarnach_forceatmo_name" text="{=aom_taom_gondor_town_lossarnach_forceatmo_name}[Gondor] Lossarnach Town" />
 	<string id="aom_taom_gondor_town_minas_tirith_forceatmo_name" text="{=aom_taom_gondor_town_minas_tirith_forceatmo_name}[Gondor] Minas Tirith" />

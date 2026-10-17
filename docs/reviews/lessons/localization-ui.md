@@ -986,3 +986,15 @@ translations, and its shipped-tree test went red.
   (`test_CharacterNameSources_ExcludeFilesOtherCategoriesOwn`). Before an `--apply`, read what it adds: a key without
   the `aom_`/`taom_` shape is a vanilla key.
 - **Source:** [rca-harad-repair-2026-10-15.md](../rca-harad-repair-2026-10-15.md) finding 11.
+
+### Deferring the paid translation never defers the free seed (Gondor scenes, 2026-10-17)
+Two Custom Battle names were registered in English while the paid translation waited for Mike's word, and no row
+reached the 12 language files, so `LanguageFileCoverageTests` went red: the #434 "registered but never propagated"
+class again.
+- **Why missed:** the builder read "no paid run" as "skip `/localize`", and the test that would have shown it could
+  not run because the main checkout's test project did not compile (another session's work).
+- **Prevent:** after registering any key, run `python tools/translate_with_claude.py --lang <L> --module TAOM
+  --sync-ids --seed-only --apply` for all 12 languages (free; it returns before any provider call), dry-run first so
+  another session's keys are not seeded with yours. When the main checkout cannot build the tests, run the
+  `Infrastructure.Localization` filter in an isolated copy (`git archive HEAD` plus your files).
+- **Source:** [rca-gondor-field-scenes-2026-10-17.md](../rca-gondor-field-scenes-2026-10-17.md) finding 1.

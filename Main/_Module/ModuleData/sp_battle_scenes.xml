@@ -4,8 +4,8 @@
 	     Field-battle scenes per Middle-earth region; the cell to region table is in
 	     docs/reference/worldmap-battle-scene-grid.md ("Region table"). A cell listed by several scenes
 	     picks one with equal odds. Every index 0-255 is covered; cells no region claims fall to
-	     battle_terrain_r. The eight taom_* scenes were re-enabled 2026-10-03 knowing their pbr_terrain
-	     shader can crash some GPUs on scene load (disabled 2026-06-19 in ee2cb04b and 62470413; #287). -->
+	     battle_terrain_r. The taom_* scenes are TAOM_Map terrains, the class whose pbr_terrain shader can
+	     crash some GPUs on scene load (#287); their history is in docs/features/battle-scenes.md. -->
 	<!-- Gondor: Pelennor and Anorien; Eriador and Arnor -->
 	<Scene
 		id="battle_terrain_a"
@@ -32,6 +32,18 @@
 		id="battle_terrain_025"
 		terrain="Plain"
 		map_indices="85, 86, 90, 91, 92"></Scene>
+	<!-- Gondor: Pelennor and Anorien -->
+	<Scene
+		id="taom_gondor_battle_001_forceatmo"
+		terrain="Plain"
+		forest_density="Low"
+		map_indices="85, 86, 90, 91, 92"></Scene>
+	<!-- Gondor: Pelennor Fields -->
+	<Scene
+		id="taom_gondor_pelennor_fields_forceatmo"
+		terrain="Plain"
+		forest_density="Low"
+		map_indices="85"></Scene>
 	<!-- Gondor: Anduin crossings; Dale -->
 	<Scene
 		id="battle_terrain_f"

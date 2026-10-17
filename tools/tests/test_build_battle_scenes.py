@@ -223,6 +223,12 @@ class RegionTableTests(unittest.TestCase):
         for sid in bbs.MORDOR:
             self.assertFalse(cells_of[sid] & {85, 94, 109, 127, 128, 131, 152, 153}, sid)
 
+    def test_pelennor_scene_stays_on_its_landmark_cell(self):
+        # Review 2026-10-17: the scene's horizon shows Minas Tirith and Osgiliath, which stand on cell 85;
+        # cell 90 also holds a Rohan castle west of Edoras.
+        cells_of, _ = bbs.assign(bbs.REGIONS)
+        self.assertEqual(cells_of["taom_gondor_pelennor_fields_forceatmo"], {85})
+
     def test_committed_xml_matches_the_table_and_parses_like_the_engine(self):
         # --check needs the install for vanilla's attributes; the cell map does not, so CI holds "edit
         # REGIONS, never the XML". The engine int.Parses every token after Replace(" ", "").Split(','),

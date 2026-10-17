@@ -33,5 +33,7 @@
     <string id="aom_taom_rohan_battle_fords_of_isen_forceatmo_name" text="[洛汗] 艾森河渡口" />
     <string id="aom_taom_rohan_castle_helms_deep_forceatmo_name" text="[洛汗] 圣盔谷 - 夜雨" />
     <string id="aom_taom_rohan_edoras_town_forceatmo_name" text="[洛汗] 伊多拉斯" />
+    <string id="aom_taom_gondor_battle_001_forceatmo_name" text="[Gondor] Ruined Outpost" />
+    <string id="aom_taom_gondor_pelennor_fields_forceatmo_name" text="[Gondor] Pelennor Fields" />
   </strings>
 </base>
