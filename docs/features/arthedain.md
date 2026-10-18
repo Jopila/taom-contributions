@@ -6,7 +6,7 @@ The Kingdom of Arthedain is a playable what-if realm: the North-kingdom of Arnor
 line survived. It has its own culture (`arthedain`), a Dúnedain troop tree built on the Arnor armour
 in the Armory, ten fortifications and twenty-four villages in the north-west of the TAOM_Map main
 map, five clans under King Arvegil II at Fornost Erain, and full character-creation support. It is
-weak by design: few lords, small parties, poor towns, and at war with Gundabad (Angmar) from day one.
+weak by design: few lords, small parties, poor towns, and at war with Gundabad (Angmar) from day 44, when the War of the Ring reaches Full War.
 
 ## Why This Exists
 
@@ -116,10 +116,10 @@ troop carries it.
 
 | Where | Setting |
 |-------|---------|
-| `taom_spkingdoms.xml` | at war with `gundabad` from day one (`value="-1" isAtWar="true"`) |
+| `taom_spkingdoms.xml` | no start war: its `gundabad` row is `value="0"`, because a negative value declares war on day one (`ShippedKingdomDataTests`) |
 | `diplomacy/diplomacy.json` | Hostile with `gundabad`, `empire` (Dunland), `isengard`, and (Mike, 2026-10-07) every realm the seven core free realms are all Hostile to: `empire_s`, `dolguldur`, `khuzait`, `goblin`, `mistymountainorcs`, `bluecraig`, so Full War (day 44) declares them all and blocks their peace (`DiplomacyShippedConfigTests`); Natural with `rivendell`, `lindon`, `empire_w` |
-| `diplomacy/war_of_the_ring.json` | phase 1: Gundabad attacks Arthedain |
-| `configs/army_targeting.json` | theater `north`; Arthedain's three towns head Gundabad's and Dunland's priority lists |
+| `diplomacy/war_of_the_ring.json` | not listed in phase 1; the war with Gundabad starts on day 44 through the Hostile row |
+| `configs/army_targeting.json` | theater `north`; Arthedain's three towns follow Dale on Gundabad's priority list and close Dunland's |
 
 ### Tables keyed on culture or troop id
 
@@ -183,6 +183,7 @@ known-culture set in `CustomBattleCommandersProvider` (pinned to the playable cu
   `ShippedBattleBalanceConfigTests`, `ShippedCombatMechanicsConfigTests` and
   `ShippedBannerBearerConfigTests`, and `CustomBattleCommandersShippedDataTests` (the provider's
   culture set equals the playable cultures read from the data).
+- `ShippedKingdomDataTests` (#818) fails on any shipped relationship row that declares war, which is what keeps the day-one Gundabad war out.
 - Existing data gates covering Arthedain unchanged: `CulturePartyTemplateTests`,
   `TavernMercenaryDataTests`, `RealmPaletteTests`, `TaomStartOptionsProviderTests`,
   `PlayerStartCoverageTests`, `CareerCultureCoverageTests`, `NarrativeCultureCoverageTests`.
@@ -236,6 +237,7 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 
 ## Changelog
 
+- 2026-10-18 (#818): The lord party template's `max_value` sum went from 83 to 200, the figure the other men's realms use, because a 200-day balance simulation had Arthedain losing 66 % of its men, the most of any free realm. `tools/generate_arthedain_troops.py` owns those numbers, so change them there. The day-one Gundabad war was removed from `spkingdoms.xslt` and `taom_spkingdoms.xml` (every start relationship is now `value="0"`, `isAtWar="false"`); Gundabad and Arthedain meet on day 44 through their Hostile row. In `army_targeting.json` Arthedain stopped being the first target: Gundabad now aims at Mirkwood, Erebor and Dale before Arthedain's towns (`town_AN1` to `town_AN3`), and Dunland at Rohan's towns, then Gondor's, with Arthedain's last. Dol Guldur aims at Lothlorien, then Mirkwood and Dale, then Erebor.
 - 2026-10-07, Mike's calls after the review: Arthedain is Hostile to every evil realm, not only
   its three neighbours, so the War of the Ring's Full War reaches it like every other free realm.
   The cloned lord, ruler, heir and enlistment rosters wear the Arnor kit (the promoter's
@@ -260,6 +262,6 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 
 ## GitHub Issue
 
-- **Issue:** #753; follow-ups #754 (translations, done in `a9437a492`; the issue is still open), #755 (donor-culture market weapons),
+- **Issue:** #753; #818 (the 2026-10-18 balance and start-war change); follow-ups #754 (translations, done in `a9437a492`; the issue is still open), #755 (donor-culture market weapons),
   #756 (policy ids no kingdom can use), both resolved 2026-10-08.
 - **Status:** built and verified in data; in-game check owed (#753 checklist).

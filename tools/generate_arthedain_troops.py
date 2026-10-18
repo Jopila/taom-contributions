@@ -431,19 +431,22 @@ def build():
     return t
 
 
-# (id, [(troop, min, max), ...]). Small on purpose: Arthedain is the realm its neighbours carve up.
-# max_value is a spawn ceiling, not a party size (docs/reference/party-template-sizing.md). This
-# generator owns these numbers: tools/rebalance_party_template_maxes.py has no arthedain target, and
-# giving it one would set two writers on the TAOM-ARTHEDAIN-PT region.
+# (id, [(troop, min, max), ...]). The lord template's max sum is 200, the men's realms' target in
+# tools/rebalance_party_template_maxes.py. It shipped at 83 ("the realm its neighbours carve up") and was
+# raised on 2026-10-18 because a 200-day balance simulation had Arthedain losing 66 % of its men, the
+# most of any free realm; the mins are unchanged. max_value is a spawn ceiling, not a party size
+# (docs/reference/party-template-sizing.md). This generator owns these numbers:
+# rebalance_party_template_maxes.py has no arthedain target, and giving it one would set two writers on
+# the TAOM-ARTHEDAIN-PT region.
 def party_templates():
     p = "arthedain_"
     return [
         ("kingdom_hero_party_arthedain_template", [
-            (p + "levy", 3, 12), (p + "spearman", 2, 10), (p + "dunadan_youth", 1, 8),
-            (p + "footman", 1, 8), (p + "ranger_of_the_north", 1, 8), (p + "squire", 0, 5),
-            (p + "shieldman", 0, 6), (p + "ranger", 0, 6), (p + "outrider", 0, 5),
-            (p + "citadel_guard", 0, 4), (p + "fornost_guard", 0, 3), (p + "veteran_ranger", 0, 3),
-            (p + "lancer", 0, 3), (p + "veteran_citadel_guard", 0, 2)]),
+            (p + "levy", 3, 26), (p + "spearman", 2, 22), (p + "dunadan_youth", 1, 19),
+            (p + "footman", 1, 19), (p + "ranger_of_the_north", 1, 19), (p + "squire", 0, 13),
+            (p + "shieldman", 0, 15), (p + "ranger", 0, 15), (p + "outrider", 0, 13),
+            (p + "citadel_guard", 0, 10), (p + "fornost_guard", 0, 8), (p + "veteran_ranger", 0, 8),
+            (p + "lancer", 0, 8), (p + "veteran_citadel_guard", 0, 5)]),
         ("kingdom_hero_party_mercenary_arthedain_template", [
             (p + "spearman", 8, 16), (p + "ranger_of_the_north", 4, 8), (p + "shieldman", 4, 8),
             (p + "ranger", 2, 4), (p + "outrider", 2, 4)]),

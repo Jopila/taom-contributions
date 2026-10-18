@@ -143,7 +143,7 @@ scaling off the player's party rather than a constant). It is not part of the lo
 
 ## Current per-culture max-sum targets
 
-Set by `tools/rebalance_party_template_maxes.py` (`CULTURE_TARGETS`, lines 48-76) and applied to
+Set by `tools/rebalance_party_template_maxes.py` (`CULTURE_TARGETS`, lines 67-95) and applied to
 `Main/_Module/ModuleData/taom_partyTemplates.xml` on 2026-08-14. **193 templates** are in scope.
 "Old max" below is the culture-level template's max sum at `HEAD` before the 2026-08-14 pass; "min"
 is its min sum, which the tool never touches.
@@ -192,6 +192,13 @@ history: `kingdom_hero_party_erebor_template` was the only template in the whole
 went **down** (2350 to 2000), the biggest jump was goblin and Blue Craig at 600 to 4500, and Rhûn and
 Harad started from the two smallest templates in the set, 400 and 300. The 2026-09-01 retarget then
 brought every one of them into the band in the table above.
+
+**Arthedain is not in this script.** Its templates belong to `tools/generate_arthedain_troops.py`
+(`party_templates()`), which writes the `TAOM-ARTHEDAIN-PT` marker region, so a second writer here would
+fight it. The lord template shipped with a max sum of 83, a midpoint spawn of about 45 men against about
+105 for a 200-ceiling culture such as Gondor. On 2026-10-18 the generator raised it to 200, the men's
+target above, with the mins unchanged, after a 200-day balance simulation had Arthedain losing 66 % of
+its men. `python tools/generate_arthedain_troops.py --check` confirms the XML matches.
 
 `khand` is present in `CULTURE_TARGETS` and matches nothing: no `kingdom_hero_party_khand_*`
 template exists. Leaving the key costs nothing and documents the intent if one is ever authored.

@@ -173,8 +173,8 @@ feature caused, and it has its own issue.
 
 ### Current priority lists
 
-All 86 entries: the 80 as originally authored, plus Arthedain's three towns at the head of
-Gundabad's and Dunland's lists (2026-10-07). A 2026-08-21 pass pruned 26 of them as "inert"; that was
+All 86 entries: the 80 as originally authored, plus Arthedain's three towns on Gundabad's and
+Dunland's lists (added at the head 2026-10-07, moved 2026-10-18 to follow Dale on Gundabad's list and close Dunland's). A 2026-08-21 pass pruned 26 of them as "inert"; that was
 **reverted on 2026-08-22** after review showed the prune was wrong three ways. The straight-line
 tool disagreed with the engine's own path cache on `khuzait -> town_S2` and `empire_w -> town_A6`,
 both actually in range. It classified against STARTING ownership when reach is anchored on CURRENT
@@ -191,11 +191,11 @@ Tools rebuild (2026-08-26), which predates them.
 |---------|------------|------------------|
 | Mordor | `empire_s` | EW3 (E.Osgiliath) → EW2 (W.Osgiliath) → EW1 (Minas Tirith) → EW4 (Pelargir) |
 | Isengard | `isengard` | V2 (Helm's Deep) → V1 (Edoras) |
-| Gundabad | `gundabad` | AN2/AN1/AN3 (Arthedain) → M1/M2 (Mirkwood) → S1/S5/S4/S3/S2 (Dale) → E1/E2/E3/E4 (Erebor) → R1 (Rivendell) |
-| Dol Guldur | `dolguldur` | L1 (Lothlórien) → S1/S5/S4/S3/S2 (Dale) → M1/M2 (Mirkwood) → E1-E4 (Erebor) → R1 (Rivendell) |
+| Gundabad | `gundabad` | M1/M2 (Mirkwood) → E1/E2/E3/E4 (Erebor) → S1/S5/S4/S3/S2 (Dale) → AN2/AN1/AN3 (Arthedain) → R1 (Rivendell) |
+| Dol Guldur | `dolguldur` | L1 (Lothlórien) → M1/M2 (Mirkwood) → S1/S5/S4/S3/S2 (Dale) → E1-E4 (Erebor) → R1 (Rivendell) |
 | Rhûn / Easterlings | `khuzait` | E4/E3/E2/E1 (Erebor) → S5/S4/S3/S1/S2 (Dale) |
 | Gondor | `empire_w` | Interleaved ES (Mordor) + A (Harad): ES2→A1→ES3→A2→ES1→A3→ES4→A4→ES5→A5→ES6→A6 |
-| Dunland | `empire` | AN3/AN1/AN2 (Arthedain) → V7/V2/V5/V4/V1/V3/V6 (Rohan) → EW3/EW2/EW1/EW4 (Gondor) |
+| Dunland | `empire` | V7/V2/V5/V4/V1/V3/V6 (Rohan) → EW3/EW2/EW1/EW4 (Gondor) → AN3/AN1/AN2 (Arthedain) |
 | Dale / Barding | `sturgia` | RU7/RU2/RU1/RU4/RU3/RU5/RU6/RU8 (Rhûn) → DG1 (Dol Guldur) |
 | Erebor | `erebor` | RU7/RU2/RU1/RU4/RU3/RU5/RU6/RU8 (Rhûn) |
 

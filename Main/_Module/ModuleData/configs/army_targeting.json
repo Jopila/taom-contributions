@@ -33,31 +33,31 @@
     "empire_s": ["town_EW3", "town_EW2", "town_EW1", "town_EW4"],
     "isengard": ["town_V2", "town_V1"],
     "gundabad": [
-      "town_AN2",
-      "town_AN1",
-      "town_AN3",
       "town_M1",
       "town_M2",
-      "town_S1",
-      "town_S5",
-      "town_S4",
-      "town_S3",
-      "town_S2",
       "town_E1",
       "town_E2",
       "town_E3",
       "town_E4",
-      "town_R1"
-    ],
-    "dolguldur": [
-      "town_L1",
       "town_S1",
       "town_S5",
       "town_S4",
       "town_S3",
       "town_S2",
+      "town_AN2",
+      "town_AN1",
+      "town_AN3",
+      "town_R1"
+    ],
+    "dolguldur": [
+      "town_L1",
       "town_M1",
       "town_M2",
+      "town_S1",
+      "town_S5",
+      "town_S4",
+      "town_S3",
+      "town_S2",
       "town_E1",
       "town_E2",
       "town_E3",
@@ -90,9 +90,6 @@
       "town_A6"
     ],
     "empire": [
-      "town_AN3",
-      "town_AN1",
-      "town_AN2",
       "town_V7",
       "town_V2",
       "town_V5",
@@ -103,7 +100,10 @@
       "town_EW3",
       "town_EW2",
       "town_EW1",
-      "town_EW4"
+      "town_EW4",
+      "town_AN3",
+      "town_AN1",
+      "town_AN2"
     ],
     "sturgia": [
       "town_RU7",

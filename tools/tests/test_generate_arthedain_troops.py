@@ -75,6 +75,15 @@ class DesignTests(unittest.TestCase):
                 self.assertIn(troop, self.by_id, tid)
                 self.assertLessEqual(lo, hi, tid)
 
+    def test_the_lord_template_is_this_generators_alone_at_the_mens_target(self):
+        # One writer on TAOM-ARTHEDAIN-PT: the rebalancer must not claim the template, and the
+        # max sum tracks the men's realms' target there (raised from 83 on 2026-10-18, #818).
+        import rebalance_party_template_maxes as rb
+        tid = "kingdom_hero_party_arthedain_template"
+        self.assertEqual(rb.culture_for(tid), (None, None), "second writer on TAOM-ARTHEDAIN-PT")
+        stacks = dict(gat.party_templates())[tid]
+        self.assertEqual(sum(hi for _troop, _lo, hi in stacks), rb.CULTURE_TARGETS["gondor"])
+
 
 class OutputTests(unittest.TestCase):
     def test_the_troop_file_and_templates_parse(self):
