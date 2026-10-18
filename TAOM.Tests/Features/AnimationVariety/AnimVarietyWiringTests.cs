@@ -90,11 +90,13 @@ public class AnimVarietyWiringTests
             "the wrappers (and their Agent references) are dropped when the tick ends, not kept until the next one");
     }
 
+    // On by default while the swing alternatives are being tested (Mike, 2026-10-18). MCM persists each
+    // value in TAOM.json, so turning it off later means renaming the setting, not flipping this default.
     [TestMethod]
-    public void ProbeSettingsProvider_WithoutMcm_IsOffByDefault()
+    public void ProbeSettingsProvider_WithoutMcm_IsOnByDefault()
     {
-        Assert.IsFalse(new AnimVarietyProbeSettingsProvider().SwingAlternativeProbe);
-        Assert.IsFalse(new TaomSettings().EnableSwingAlternativeProbe);
+        Assert.IsTrue(new AnimVarietyProbeSettingsProvider().SwingAlternativeProbe);
+        Assert.IsTrue(new TaomSettings().EnableSwingAlternativeProbe);
     }
 
     [TestMethod]

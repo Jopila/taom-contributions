@@ -10,5 +10,6 @@ public sealed class AnimVarietyProbeSettingsProvider : IAnimVarietyProbeSettings
     private TaomSettings? _settings;
     private TaomSettings? Settings => _settings ??= TaomSettings.Instance;
 
-    public bool SwingAlternativeProbe => Settings?.EnableSwingAlternativeProbe ?? false;
+    // Without MCM the compiled default applies: on while the swing clips are being tested.
+    public bool SwingAlternativeProbe => Settings?.EnableSwingAlternativeProbe ?? true;
 }

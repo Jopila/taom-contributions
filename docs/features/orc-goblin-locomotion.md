@@ -20,9 +20,12 @@ upright uruk variant on approval).
 clamp and the validator's slide gate (see the RCA), so all 36 orc clips were re-exported on 2026-10-18 and pass the
 validator (16 main, 10 B, 10 C). A second Codex pass the same day found the validator and the generator still too
 trusting (see "Limp Variants" and the checklist), so the clips were exported once more. The new FBX are staged and were
-copied into the live Armory again on 2026-10-18 (stage 1: at 00:02, and after the second pass at about 00:51, backup
-stamp 00:51:47; all 36 match the staging folders by sha256), but **nothing is imported yet**: the game still plays the 2026-10-14 clips. The Kit
-import and everything after it is owed (see the Kit Import Checklist). Goblins are next.
+copied into the live Armory again on 2026-10-18 (at 00:02, at about 00:51 and, after a third pass, at 01:15, backup
+stamp 01:15:22; the 01:15 copy is the one imported). **On 2026-10-18 the 36 clips went into the game:** Mike
+imported the masters, the clips were generated and Kit-saved, and the binder wrote `as_orc_warrior_b` and
+`as_orc_warrior_c` beside the unchanged 42 rows of `as_orc_warrior` (Kit Import Checklist, steps 1 to 7). Mike's
+Custom Battle at 09:41 loaded both variant sets and split 125 orcs 38 main, 37 B and 50 C; his verdict on the look is
+owed. Goblins are next.
 
 ## Why This Exists
 
@@ -421,16 +424,36 @@ re-exported and copied again on 2026-10-18 at 00:02 (hash-verified); the backup
 review pass the clips were exported and copied once more (backup `...\orc_locomotion_20261018-005147`, stamp 00:51:47,
 holds the 16 superseded main FBX); all 36 live FBX match the staging folders by sha256. A third pass changed the
 validator and the provenance hash, so the clips were exported and copied once more (backup
-`...\orc_locomotion_20261018-011522`, stamp 01:15:22, holds the superseded main FBX). **The rollback to the
-clips the game plays today (2026-10-14) is still `...\orc_locomotion_20261017-224440`.** Nothing is imported: the game
-still plays the 2026-10-14 clips. **Owed**, in order:
+`...\orc_locomotion_20261018-011522`, stamp 01:15:22, holds the superseded main FBX); this 01:15 copy is the one
+imported. **Rollback to the clips of 2026-10-14**, with the game and the Kit closed:
 
-1. **Mike:** Kit REIMPORT of the 16 masters (same names, never rename), and an import of the 10 B and 10 C masters.
-   Save and close the Kit.
-2. `wire_anim_master_skeletons.ps1` on each of the three folders.
-3. Move the 16 old clip packages (`taom_orc_<clip>_anm.tpac`) aside, because `gen_troll_anim_clips.ps1 -Apply` never
-   overwrites.
-4. `gen_troll_anim_clips.ps1` per folder with `-CloneByName`, `-ClipPrefix` and
+1. Optional cleanup, while the packages are still in place (the entries are inert once their packages are gone): move
+   the 36 cache entries of today's clips out of `RuntimeDataCache`. Each is `<GUID>.rdc`, where the GUID is bytes 8 to
+   24 of a `taom_orc_*_anm.tpac` in the three folders (`check_rdc_entries.package_guid` reads it; the tool itself
+   prints GUIDs only for packages without an entry).
+2. Move `Assets\Race Test\Mordor\Orc\animations_b` and `animations_c`, and their `AssetSources` twins, out of the module.
+3. Restore `Assets\...\Orc\animations`, `AssetSources\...\Orc\animations` and the 16 cache entries from
+   `...\orc_locomotion_20261017-224440`. Take the entries from the backup: the Kit re-cooked one of them
+   (`7F28D977-1C2F-49C7-9715-C60F0FB2FEF4.rdc`, the old `run_forward_1h_left_stance`) at 08:28 against the re-imported
+   master, so the live copy no longer matches the old package.
+4. Run `python tools/bind_orc_goblin_locomotion.py --apply --allow-shrink`: it drops the variant block and keeps every
+   later edit of `action_sets.xml`. (Restoring `action_sets.xml.bak-orc-goblin-bind-20261018-092156` gives the same
+   bytes only while nothing else has written the file since 09:21:56.)
+
+The engine opens a cache entry only through the GUID of a package it registers (v1.5.5, 2026-10-18 review), so an
+entry whose package is gone is inert, but a restored package needs its own entry back.
+
+**Steps 1 to 7 done on 2026-10-18**; Mike's Custom Battle (step 8) ran at 09:41 and his verdict on the look is owed:
+
+1. **Mike (done 2026-10-18):** Kit REIMPORT of the 16 masters (same names, never rename), and an import of the 10 B
+   and 10 C masters. Save and close the Kit.
+2. **Done 2026-10-18:** `wire_anim_master_skeletons.ps1` on each of the three folders. The Kit left the 20 new masters
+   EMPTY; census after: ok=16, ok=10, ok=10.
+3. **Done 2026-10-18 08:33:** the 16 old clip packages (`taom_orc_<clip>_anm.tpac`) moved to
+   `E:\LOTRAOMAssets\backups\orc_locomotion_oldclips_20261018-083300`, each first matched by sha256 to its copy in the
+   2026-10-17 backup, because `gen_troll_anim_clips.ps1 -Apply` never overwrites.
+4. **Done 2026-10-18** (36 written; `-Verify` ok=16, 10, 10, step points checked 10 per folder):
+   `gen_troll_anim_clips.ps1` per folder with `-CloneByName`, `-ClipPrefix` and
    `-RestyleReport <staging>\restyle_report.json`; dry run, `-Apply`, `-Verify`. The report supplies `-TravelScale`
    (0.85 main, 1.0 B, 0.89 C); a typed value must match it within 0.001. The generator refuses a report that is stale
    or does not describe the clips: one whose `spec.clip_prefix` is not `-ClipPrefix`; that lacks an entry for a clip of
@@ -446,14 +469,22 @@ still plays the 2026-10-14 clips. **Owed**, in order:
    unchanged is not the same provenance. The 2026-10-14 orc report has none and is refused; regenerate, never edit. Numbers are checked as JSON numbers
    before conversion: a null, bool, string, NaN or Infinity is refused, the stride must be finite and above 0, a step
    point finite in [0, 1]. `-Verify` fails when it checked no step point.
-5. **Mike:** Kit save (writes the cache entries); then `check_rdc_entries.py` on the three folders.
-6. `bind_orc_goblin_locomotion.py --apply` (writes the variant sets), then `--check --require-variants` and
-   `audit_action_set_parity.py`.
-7. Refresh the snapshot, as on 2026-10-14: byte-copy the live `action_sets.xml` to
-   `docs/reference/lotrlome-armory-snapshot/`, run `audit_action_set_parity.py --live` on the copy, and update the
-   snapshot README row.
-8. In-game Custom Battle: orc formations march with mixed gaits, an attack from a walk with the over-cap spine, and
-   the shield and sword look.
+5. **Mike (done 2026-10-18):** Kit save (writes the cache entries); then `check_rdc_entries.py` on the three folders:
+   0 packages without an entry, and the cache grew by exactly 36. After the save the clips still pass `-Verify`, the
+   masters still read ok and no item checksum is stale. The Kit wrote one B master and its clip
+   (`run_forward_1h_left_stance`) once more at 09:21:20 to 09:21:22; `-Verify` re-run on all three folders later that
+   morning: ok=16, 10, 10.
+6. **Done 2026-10-18 09:21:** `bind_orc_goblin_locomotion.py --apply` (writes the variant sets, 24 rows each; the 42
+   rows per main set are unchanged), then `--check` with the variants required (0 problems) and
+   `audit_action_set_parity.py` (0 gaps), both exit 0.
+7. **Done 2026-10-18:** the snapshot refresh, as on 2026-10-14: a byte copy of the live `action_sets.xml` to
+   `docs/reference/lotrlome-armory-snapshot/`, `audit_action_set_parity.py --live` on the copy (exit 0), and the
+   snapshot README entry. Then `/armory-audit regen`: new masters make the catalogue stale, and the session-start
+   ARMORY ART DRIFT banner fires until it is regenerated.
+8. **Ran 2026-10-18 09:41 (Mike's Custom Battle):** the TAOM log shows `as_orc_warrior_b=present
+   as_orc_warrior_c=present` and 125 orcs split 38 main, 37 B and 50 C; the rgl log has no missing clip, missing set or
+   duplicate name. **Owed:** Mike's verdict on the look: mixed gaits in a marching formation, an attack from a walk with
+   the over-cap spine, and the shield and sword look.
 
 The 2026-10-14 steps below are the history of the first import.
 
@@ -519,8 +550,9 @@ binder writes the sets; the feature picks among them. Variant A is the existing 
   and `animations_c`, packages named `taom_orc_b_<clip>_anm.tpac` and `taom_orc_c_<clip>_anm.tpac`. The B and C FBX
   are in those AssetSources folders since 2026-10-17 (see Motion spec revision). Goblin variants
   (`Goblin\animations_b`, `as_goblin_warrior_b`) are one more table row each, not yet added.
-- **Skip rules.** A variant folder with none of the 10 packages is skipped with a note and never written (the state
-  today: the Kit import has not happened). One with only some is an error (exit 2) in the plan and `--apply`.
+- **Skip rules.** A variant folder with none of the 10 packages is skipped with a note and never written (none today:
+  the orc B and C folders are imported since 2026-10-18, and the goblin variants have no `VARIANTS` row yet). One with
+  only some is an error (exit 2) in the plan and `--apply`.
 
 Commands (the same tool; dry run by default):
 
@@ -529,12 +561,13 @@ Commands (the same tool; dry run by default):
     python tools/bind_orc_goblin_locomotion.py --check
     python tools/audit_action_set_parity.py
 
-`--check` passes while every variant is skipped and prints `no variant clips on disk yet`. It fails when a variant
-set is in the file but its clips are missing, its rows differ from the plan, it carries an idle or non-forward code or
-a row whose package is not on disk, a variant is defined before `as_orc_warrior` or a twin before its variant, or a
-twin has its own rows. `--check --require-variants` also fails a variant that is skipped and absent, which is what a
-reinstall leaves once the variants have been imported. `--apply` drops a variant's rows only with `--allow-shrink`, like
-the base sets.
+`--check` fails a variant that is skipped and absent (no clips and no set), which is what a reinstall leaves, unless
+`--allow-no-clips` (an install before the Kit import; it then prints `no variant clips on disk yet`). It also fails
+when a variant set is in the file but its clips are missing, its rows differ from the plan, it carries an idle or
+non-forward code or a row whose package is not on disk, a variant is defined before `as_orc_warrior` or a twin before
+its variant, or a twin has its own rows. Until 2026-10-18 an absent variant passed plain `--check` and needed
+`--require-variants`, which is gone. `--apply` writes only what is on disk, so its own re-check allows an absent
+variant, and it drops a variant's rows only with `--allow-shrink`, like the base sets.
 
 ## Testing
 
@@ -561,9 +594,8 @@ The checks, for this and the later items:
 - With DualWield active: its `_dw` sets keep DualWield's sidestep and backpedal clips but inherit the plain
   one-handed forward walk and run, because DualWield writes its forward clips only over vanilla ones.
 - `rgl_log`: no `Could not find animation:` for a `taom_orc_` or `taom_goblin_` clip.
-- The reinstall gate, after any Armory sync: `python tools/bind_orc_goblin_locomotion.py --check`, and once the orc
-  variants are imported `python tools/bind_orc_goblin_locomotion.py --check --require-variants` (plain `--check` passes
-  when the variants have vanished with their clips). The pytest alternative is
+- The reinstall gate, after any Armory sync: `python tools/bind_orc_goblin_locomotion.py --check`; it also fails
+  when the orc variants have vanished with their clips. The pytest alternative is
   `python -m pytest tools/tests/test_bind_orc_goblin_locomotion.py` (its live class). `--check` also fails
   when a race's clip folder is empty, which is what a reinstall leaves (no clips and no rows), unless
   `--allow-no-clips` is passed.
@@ -593,9 +625,10 @@ The checks, for this and the later items:
 
 ## Dependencies
 
-- **The live Armory, unversioned:** the 64 packages (32 masters, 32 clips) in
-  `Assets\Race Test\Mordor\{Orc,Goblin}\animations`, their FBX in the same folders under `AssetSources`, their
-  RuntimeDataCache entries, and the rows in `ModuleData\action_sets.xml`. A reinstall or an Armory sync from a
+- **The live Armory, unversioned:** the 104 packages: 32 masters and 32 clips in
+  `Assets\Race Test\Mordor\{Orc,Goblin}\animations`, and 20 masters and 20 clips in `Orc\animations_b` and
+  `animations_c`; their FBX in the same folders under `AssetSources`, their RuntimeDataCache entries, and the rows and
+  variant sets in `ModuleData\action_sets.xml`. A reinstall or an Armory sync from a
   copy without them removes them.
 - **Native's `as_human_warrior`:** the binder reads its code-to-clip map, so an engine update that rebinds a
   walk or run code changes the plan; `--check` then reports the difference.
@@ -605,9 +638,12 @@ The checks, for this and the later items:
 ## How to Restore the Rows After a Reinstall
 
 1. Run `python tools/bind_orc_goblin_locomotion.py --check`.
-2. If it reports a set with no restyled clip on disk, copy the 16 FBX per race back from
-   `E:\LOTRAOMAssets\troll_clips_to_import\orc_locomotion\{orc,goblin}\` and repeat steps 1 to 7 of the
-   Kit Import Checklist.
+2. If it reports a set or a variant with no restyled clip on disk, copy the FBX back from
+   `E:\LOTRAOMAssets\troll_clips_to_import\orc_locomotion\`: `orc_main` (16) into `AssetSources\...\Orc\animations`,
+   `orc_b` and `orc_c` (10 each) into `animations_b` and `animations_c`, and `goblin` (16) into
+   `...\Goblin\animations`. Then repeat steps 1 to 7 of the Kit Import Checklist; the orc folders take
+   `-RestyleReport` from their own staging folder (`orc\` holds the refused 2026-10-14 report), and the goblins keep the
+   2026-10-14 command (`-TravelScale 0.8`).
 3. If the clips are there but rows are missing, close the game and the Kit, then run
    `python tools/bind_orc_goblin_locomotion.py --apply`.
 4. Run `python tools/audit_action_set_parity.py`.
@@ -632,6 +668,12 @@ Found by the 2026-10-17/18 review and not fixed:
 
 ## Changelog
 
+- 2026-10-18: install review. Plain `--check` now fails an orc variant that is absent (a reinstall drops its clips and
+  set together) unless `--allow-no-clips`, so `/armory-audit` and the live test catch it; `--require-variants` is gone.
+  The rollback names every step, the restore names the current FBX sources, and the inventory counts 104 packages.
+- 2026-10-18: imported. Mike re-imported the 16 main masters and imported the 10 B and 10 C; masters wired, the 16 old
+  clips moved out, 36 clips generated, Kit-saved and bound (`as_orc_warrior_b`, `_c`); snapshot refreshed. Mike's
+  Custom Battle at 09:41 split 125 orcs 38 main, 37 B and 50 C.
 - 2026-10-18: third review pass. The validator checks coverage both ways and bounds an end frame's backward speed;
   its end-frame sideways reference follows the time map; the idle block is number-checked; the generator requires
   provenance on every entry, and the provenance hash covers the tool's code. All 36 orc clips re-exported and copied

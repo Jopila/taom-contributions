@@ -5,7 +5,8 @@ public interface IAnimVarietyProbeSettingsProvider
 {
     /// <summary>
     /// True when the probe should sweep a mission's agents. Read once per mission, at the probe's first tick.
-    /// Off by default: the sweep is a per-frame cost, and the probe only logs.
+    /// On by default while the swing clips are tested (<c>TaomSettings.EnableSwingAlternativeProbe</c>); the
+    /// sweep becomes a per-frame cost only once <c>act_taom_</c> codes are loaded, and the probe only logs.
     /// </summary>
     bool SwingAlternativeProbe { get; }
 }

@@ -2093,8 +2093,11 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Each orc and goblin warrior walks with one of several gait sets, picked at random and fixed for that soldier. A gait set that is not installed is skipped, so with none installed this does nothing. Applied when a soldier spawns, so it takes effect in the next battle.")]
     public bool EnableRandomGaitSet { get; set; } = true;
 
+    // On by default for the swing tests (Mike, 2026-10-18). MCM keeps each value in TAOM.json, so turning it
+    // off for players later means renaming this setting, never flipping the default (orientation.md
+    // "Persisted MCM defaults").
     [SettingPropertyGroup("Animation Variety")]
     [SettingPropertyBool("Swing alternative probe (diagnostic)", Order = 3, RequireRestart = false,
-        HintText = "Tests alternative swing clips: when a mission has act_taom_ swing codes loaded, it counts which clip each swing plays and where in the clip a hit lands, and only logs; it changes nothing in the game. While such codes exist it costs a per-frame sweep of the soldiers in every battle, so leave it off unless you are testing swing clips. Read at the start of each mission.")]
-    public bool EnableSwingAlternativeProbe { get; set; } = false;
+        HintText = "Tests alternative swing clips: when a mission has act_taom_ swing codes loaded, it counts which clip each swing plays and where in the clip a hit lands, and only logs; it changes nothing in the game. While such codes exist it costs a per-frame sweep of every person in every mission, towns included; with none loaded it writes one log line per mission. Read at the start of each mission.")]
+    public bool EnableSwingAlternativeProbe { get; set; } = true;
 }

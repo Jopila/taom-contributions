@@ -304,10 +304,11 @@ class VariantFixture(Fixture):
     def text(self):
         return self.live.read_bytes().decode("utf-8-sig")
 
-    def check_out(self, text=None):
-        """(problems, printed text) of check_variants."""
+    def check_out(self, text=None, allow_absent=True):
+        """(problems, printed text) of check_variants. An absent variant is allowed unless a test asks, so each test
+        counts only the problem it is about."""
         with mock.patch("builtins.print") as pr:
-            n = bo.check_variants(text or self.text(), self.vplan(), str(self.assets))
+            n = bo.check_variants(text or self.text(), self.vplan(), str(self.assets), allow_absent=allow_absent)
         return n, "\n".join(" ".join(map(str, c.args)) for c in pr.call_args_list)
 
     def ids(self, text=None):
@@ -460,13 +461,18 @@ class TestVariantCheck(VariantFixture):
         self.run_main("--apply")
         return self.text()
 
-    def test_every_variant_skipped_passes_with_the_explicit_line(self):
+    def test_every_variant_skipped_fails_unless_no_clips_are_allowed(self):
+        # a reinstall drops the variant clips and sets together, so an absent variant fails like a set with no clips
+        n, out = self.check_out(live_text(), allow_absent=False)
+        self.assertEqual(n, 2, "b and c are both absent")
+        self.assertIn("--allow-no-clips", out)
         n, out = self.check_out(live_text())
         self.assertEqual(n, 0)
         self.assertIn("no variant clips on disk yet", out)
         self.touch_all()
-        self.run_main("--apply")
-        self.assertEqual(self.run_main("--check"), 0)
+        self.assertEqual(self.run_main("--apply"), 0, "--apply writes what is on disk and does not require variants")
+        self.assertEqual(self.run_main("--check"), 1)
+        self.assertEqual(self.run_main("--check", "--allow-no-clips"), 0)
 
     def test_a_variant_in_the_file_whose_clips_are_missing_fails(self):
         text = self.applied()
@@ -580,29 +586,27 @@ class TestVariantCheck(VariantFixture):
         self.touch_all()
         self.assertEqual(self.run_main("--apply"), 2, "--apply refuses a partial variant too")
 
-    def test_require_variants_fails_while_a_variant_is_absent(self):
+    def test_one_absent_variant_fails_the_plain_check(self):
         self.touch_all()
-        self.run_main("--apply")
-        self.assertEqual(self.run_main("--check"), 0, "every variant skipped passes by default")
-        self.assertEqual(self.run_main("--check", "--require-variants"), 1)
-        n, out = self.check_out(self.text())
-        self.assertEqual(n, 0)
-        with mock.patch("builtins.print") as pr:
-            n = bo.check_variants(self.text(), self.vplan(), str(self.assets), require=True)
-        self.assertEqual(n, 2, "b and c are both absent")
-        self.assertIn("--require-variants", "\n".join(" ".join(map(str, c.args)) for c in pr.call_args_list))
+        self.clips(B_SUB, "taom_orc_b_")
+        self.assertEqual(self.run_main("--apply"), 0)
+        self.assertEqual(self.run_main("--check"), 1, "c has no clips and no set")
+        n, out = self.check_out(allow_absent=False)
+        self.assertEqual(n, 1)
+        self.assertIn("as_orc_warrior_c", out)
+        self.assertEqual(self.run_main("--check", "--allow-no-clips"), 0)
 
-    def test_require_variants_passes_once_every_variant_is_imported_and_bound(self):
+    def test_the_plain_check_passes_once_every_variant_is_imported_and_bound(self):
         self.touch_all()
         self.clips(B_SUB, "taom_orc_b_")
         self.clips(C_SUB, "taom_orc_c_")
         self.run_main("--apply")
-        self.assertEqual(self.run_main("--check", "--require-variants"), 0)
+        self.assertEqual(self.run_main("--check"), 0)
 
-    def test_require_variants_needs_check(self):
+    def test_the_old_require_variants_flag_is_gone(self):
         with self.assertRaises(SystemExit) as cm, mock.patch("sys.stderr"):
-            bo.main(["--live", str(self.live), "--require-variants"])
-        self.assertEqual(cm.exception.code, 2)
+            bo.main(["--live", str(self.live), "--check", "--require-variants"])
+        self.assertEqual(cm.exception.code, 2, "plain --check is the strict gate now")
 
 
 GOBLIN_SUB = os.path.join("Race Test", "Mordor", "Goblin", "animations_b")

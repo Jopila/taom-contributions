@@ -26,8 +26,8 @@ action_sets.xml.bak-orc-goblin-bind-<stamp> (never a .xml extension: the folder 
 with ElementTree before it is written, the body between each set's open and close tags REPLACED, so a re-run is
 idempotent. Dry run by default. --apply refuses (exit 2) while the game or the Kit runs
 (_gamedir.game_or_kit_running), and when it would drop a row the live sets carry (a clip package gone missing)
-unless --allow-shrink. --check exits 1 when the live sets differ from the plan, and also when a set has no restyled
-clip on disk at all, which is what a reinstall leaves (no clips and no rows), unless --allow-no-clips. Bad input (a
+unless --allow-shrink. --check exits 1 when the live sets differ from the plan, and also when a set or a gait variant
+has no restyled clip on disk at all, which is what a reinstall leaves (no clips and no rows), unless --allow-no-clips. Bad input (a
 missing file, a missing or self-closing set when planning or applying, XML that does not parse or is not UTF-8, a
 Native row with no type) exits 2; under --check a missing or self-closing set is a PROBLEM (exit 1).
 
@@ -50,12 +50,13 @@ like as_orc_female_warrior (self-closing, base_set = as_orc_warrior).
 
 A variant folder holding no *_anm.tpac at all is SKIPPED with a note and never written. Any package in it makes it a
 real input: all 10 of <prefix><clip> must be there, else it is PARTIAL (exit 2 on --apply, a PROBLEM on --check), so a
-folder of wrong-prefix clips is an error and never "no clips yet". --check passes while every variant is skipped (it
-prints "no variant clips on disk yet"), and fails when a variant set is in the file but its clips are missing, its rows
-differ from the plan, it carries an idle or non-forward code, it is defined before its base or its twin before it, or a
-row names a package that is not on disk. --check --require-variants also fails a variant that is skipped and absent: the
-reinstall gate passes it once the variants are imported, so a reinstall that drops them (clips and sets together) is
-caught.
+folder of wrong-prefix clips is an error and never "no clips yet". --check fails a variant that is skipped and absent (no
+clips and no set: what a reinstall leaves, since it drops both together), like a race set with no clips, unless
+--allow-no-clips (an install before the Kit import; it then prints "no variant clips on disk yet"). It also fails when
+a variant set is in the file but its clips are missing, its rows differ from the plan, it carries an idle or
+non-forward code, it is defined before its base or its twin before it, or a row names a package that is not on disk.
+--apply's own re-check allows an absent variant, because it writes only what is on disk. (Until 2026-10-18 an absent
+variant passed plain --check and needed --require-variants to fail; that flag is gone.)
 
 An id this tool owns (the race sets and the variant sets) must be defined once, and a variant only inside the generated
 block. The engine merges a repeated action_set into its FIRST definition, so an earlier copy with a wrong base_set
@@ -327,9 +328,11 @@ def check(text, planned, allow_no_clips=False):
     return problems
 
 
-def check_variants(text, vplans, assets, require=False):
-    """Prove the gait-variant sets. Returns the number of problems. A variant that is skipped and absent is fine,
-    unless require (--require-variants, the reinstall gate once the variants are imported): then it is a problem."""
+def check_variants(text, vplans, assets, allow_absent=False):
+    """Prove the gait-variant sets. Returns the number of problems. A variant that is skipped and absent (no clips
+    and no set: what a reinstall leaves) is a problem like a race set with no clips, unless allow_absent
+    (--allow-no-clips under --check, an install before the Kit import; --apply's own re-check, which writes only
+    what is on disk)."""
     root = ET.fromstring(text.encode("utf-8"))
     sets = list(root.iter("action_set"))
     pos = {s.get("id"): i for i, s in enumerate(sets)}
@@ -339,10 +342,11 @@ def check_variants(text, vplans, assets, require=False):
         folder = os.path.join(assets, v.sub)
         here = [x for x in (v.vid, v.fid) if x and x in by_id]
         if status == "skipped" and not here:
-            if require:
+            if not allow_absent:
                 problems += 1
-                print("PROBLEM %s: no variant clips in %s and no set in the file, but --require-variants wants the "
-                      "variants imported and bound" % (v.vid, v.sub))
+                print("PROBLEM %s: no variant clips in %s and no set in the file, which is what a reinstall leaves; "
+                      "import and generate the clips, then --apply (before the Kit import: --allow-no-clips)"
+                      % (v.vid, v.sub))
             else:
                 skipped += 1
                 print("skip %s: no variant clips in %s" % (v.vid, v.sub))
@@ -426,7 +430,7 @@ def run(args):
 
     if args.check:
         n = (check_definitions(text) + check(text, planned, args.allow_no_clips)
-             + check_variants(text, vplans, args.assets, args.require_variants))
+             + check_variants(text, vplans, args.assets, args.allow_no_clips))
         print("check: %d problem(s)" % n)
         return 1 if n else 0
 
@@ -486,7 +490,8 @@ def run(args):
     open(bak, "wb").write(raw)
     open(args.live, "wb").write((b"\xef\xbb\xbf" if bom else b"") + new_text.encode("utf-8"))
     after = open(args.live, "rb").read().decode("utf-8-sig")
-    n = check_definitions(after) + check(after, planned, args.allow_no_clips) + check_variants(after, vplans, args.assets)
+    n = (check_definitions(after) + check(after, planned, args.allow_no_clips)
+         + check_variants(after, vplans, args.assets, allow_absent=True))
     print("written; backup %s; check: %d problem(s)" % (os.path.basename(bak), n))
     return 1 if n else 0
 
@@ -496,18 +501,14 @@ def main(argv=None):
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--allow-no-clips", action="store_true",
-                    help="--check passes a set with no restyled clip on disk (an install before the Kit import)")
+                    help="--check passes a race set or a gait variant with no restyled clip on disk (an install "
+                         "before the Kit import)")
     ap.add_argument("--allow-shrink", action="store_true",
                     help="--apply may drop rows the live sets carry (a clip removed on purpose)")
-    ap.add_argument("--require-variants", action="store_true",
-                    help="--check also fails a variant that is skipped and absent: the reinstall gate once the variants "
-                         "are imported")
     ap.add_argument("--live", default=LIVE)
     ap.add_argument("--native", default=NATIVE)
     ap.add_argument("--assets", default=ASSETS, help="the Armory's Assets folder; each set's clips sit in its SETS folder")
     args = ap.parse_args(argv)
-    if args.require_variants and not args.check:
-        ap.error("--require-variants only means something with --check")
     try:
         return run(args)
     except (InputError, OSError, ET.ParseError, UnicodeDecodeError) as e:

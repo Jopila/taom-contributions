@@ -542,6 +542,12 @@ carry its own motion"), so this binds only an edit of a vanilla clip's payload.
   invisible", #616) [Likely]; the client's skip path is not traced (UNVERIFIED), and neither is what it does when the
   stamp and the checksum differ.
 - Masters never get an entry and play anyway (`check_rdc_entries.py` docstring and the same lesson).
+- **The client opens an entry only by a registered package's GUID** (v1.5.5, deep review of 2026-10-18). One function
+  (0x484CC0) formats `"%s%s/%s.%s"` from the module path, `RuntimeDataCache`, the package GUID and `rdc`; the opener
+  0x484F50 checks the `RDC0` magic; the GUID comes from the package registration (0x77610, 0x77860, via 0x27CF30). The
+  client never lists the folder, so an entry whose package is gone (742 in the Armory that day) is never read, and the
+  header holds item GUIDs and offsets, no clip name. Such an entry wakes again only if a package with its GUID returns.
+  `.rdc.rtemp` files are the editor's write-temp leftovers; `package_release.py` excludes them.
 - **The Kit watches `.rdc` files.** A path handler (Kit 0x796C0) raises "External .rdc file modification detected.
   RDC files cannot be updated outside the editor. Please restart the game" [Certain for the string and code; Likely
   that it is a file-watch callback]. `set_clip_balance_name.py` refuses to run while the Kit runs, which avoids it.
@@ -972,8 +978,8 @@ and other actions that go through the set-channel call; it never works for walk 
    swing crashes at `+0x659879`. Match each alternative's duration and blend-out to the base clip, because the combat
    timing is read from the base code's clip.
 5. **Name** an alternative `act_taom_<base name without act_>_<letter b..h>`, for example `act_taom_release_..._c`. A
-   diagnostic probe, `[AnimVariety]`, keys on this convention. It is built and off by default: turn on the MCM switch
-   `EnableSwingAlternativeProbe` ([animation-variety.md](../features/animation-variety.md)).
+   diagnostic probe, `[AnimVariety]`, keys on this convention. It is built and on by default while the swing clips are
+   tested; the MCM switch is `EnableSwingAlternativeProbe` ([animation-variety.md](../features/animation-variety.md)).
 6. **Idle variety** needs a cyclic clip in the group: the tick re-requests a cyclic replay, which re-rolls each loop.
 7. **Walk and run variety** is a different action set per agent, not a group (section 8).
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-One feature module, `AnimationVariety` (`Main/Features/AnimationVariety/`), holding two mission-time pieces that share the `[AnimVariety]` log tag. The **swing probe** is a logging-only experiment that asks whether the engine picks a random swing clip among alternative action codes; it is off by default. The **gait variety** feature changes the game: it gives each orc and goblin warrior in a battle its own step size and gait set, once, when the soldier spawns, so a marching line stops walking in lockstep.
+One feature module, `AnimationVariety` (`Main/Features/AnimationVariety/`), holding two mission-time pieces that share the `[AnimVariety]` log tag. The **swing probe** is a logging-only experiment that asks whether the engine picks a random swing clip among alternative action codes; it is on by default while the swing clips are tested (see "The swing probe"). The **gait variety** feature changes the game: it gives each orc and goblin warrior in a battle its own step size and gait set, once, when the soldier spawns, so a marching line stops walking in lockstep.
 
 ## Why This Exists
 
@@ -41,7 +41,7 @@ Only these three base sets are touched. There is no `as_orc_female_warrior` row:
 
 **Variants that do not exist.** `GaitVariantCatalog` asks the engine for one silent listing per process: `IGaitVarietyAdapter.LoadedActionSetNames()` loops `MBActionSet.GetNumberOfActionSets()` and `GetActionSetWithIndex(i).GetName()` (native: the count is 0x6DF8F0 and the name by index 0x6DF890, neither logs). It keeps the names in an ordinal `HashSet` and answers every variant question by membership, so no per-id lookup runs and the engine's "could not be found" line never appears. A missing variant is reported only by the `=missing` flag of the INFO variants line, once per mission; the catalog has no logger and never warns. With no variant installed, lever 2 draws only the base set and makes no engine call.
 
-**Interplay with later set swaps.** `Mission.SpawnTroopWithAgentBuildData` swaps a suffixed set (`specialActionSetSuffix`) after `SpawnAgent` returns, which is after `OnAgentBuild`; a caller that passes a suffix replaces the gait set chosen here. Battle spawns pass none. The SandBox settlement and disguise handlers do the same to every agent they build: `MissionAgentHandler.cs:888-889` replaces the set with the location character's action set, and `DisguiseMissionLogic.cs:494` and `:524` replace it with a suffixed set. All three run after `SpawnAgent`, so a town orc gets one wasted re-init here (its set and step size are then overwritten with vanilla's step size) and is still counted in the `n=` of the mission summary.
+**Interplay with later set swaps.** `Mission.SpawnTroopWithAgentBuildData` swaps a suffixed set (`specialActionSetSuffix`) after `SpawnAgent` returns, which is after `OnAgentBuild`; a caller that passes a suffix replaces the gait set chosen here. Battle spawns pass none. The SandBox settlement and disguise handlers do the same to every agent they build: `MissionAgentHandler.cs:888-889` replaces the set with the location character's action set, and `DisguiseMissionLogic.cs:494` and `:524` replace it with a suffixed set. All three run after `SpawnAgent`, so a town orc gets one wasted re-init here (its set and step size are then overwritten with vanilla's step size) and is still counted in the `n=` of the mission summary. In battle the DualWield mod does the same to its dual-wield troops: its `Mission.SpawnAgent` postfix runs after `OnAgentBuild` and sets the Monster's set plus `_dw` (`as_orc_warrior_dw`) with the troop's vanilla step size. DualWield_TAOM adds three such gait-race troops (`dw_mordor_orc_cutthroat`, `dw_dolguldur_goblin_cutter`, `dw_goblintown_twinblade`), so they keep the main gait and vanilla step size and still count in `n=` under the variant they drew. Accepted (Mike, 2026-10-18): only these few troops dual-wield; look again only if DualWield ever takes over the gaits of ordinary troops.
 
 **Failure.** The behavior catches every exception, logs one warning and stops for the rest of that mission (`[AnimVariety] gait OnAgentBuild failed, gait variety off for this mission: ...`); the battle goes on. An `OnAgentBuild` that arrives off the main thread (`MissionThreadGuard.NoteCall`) is skipped, never parked, because the soldier would already have played frames with the vanilla gait. The behavior builds its warning delegate once in its constructor.
 
@@ -92,7 +92,7 @@ MCM group **Animation Variety** (`TaomSettings`, all live):
 | Random step size per soldier | `EnableRandomStepSize` | on | bool | on every spawn |
 | Step size minimum factor | `GaitStepSizeMinFactor` | 0.92 | 0.80 to 1.00 | on every spawn |
 | Random gait set per soldier | `EnableRandomGaitSet` | on | bool | on every spawn |
-| Swing alternative probe (diagnostic) | `EnableSwingAlternativeProbe` | **off** | bool | once per mission, at the probe's first tick |
+| Swing alternative probe (diagnostic) | `EnableSwingAlternativeProbe` | **on** (for testing; see below) | bool | once per mission, at the probe's first tick |
 
 The first three apply to soldiers spawned after the change. The probe switch is read at the start of each mission, so a change waits for the next mission.
 
@@ -110,7 +110,7 @@ At the first eligible soldier of a mission, two lines:
 
 ```
 [AnimVariety] gait settings randomStepSize=True minFactor=0.920 randomGaitSet=True
-[AnimVariety] gait variants as_orc_warrior_b=missing as_orc_warrior_c=missing as_goblin_warrior_b=missing as_goblin_warrior_c=missing as_goblin_female_warrior_b=missing as_goblin_female_warrior_c=missing
+[AnimVariety] gait variants as_orc_warrior_b=present as_orc_warrior_c=present as_goblin_warrior_b=missing as_goblin_warrior_c=missing as_goblin_female_warrior_b=missing as_goblin_female_warrior_c=missing
 ```
 
 At mission end, only when a lever acted, one line per base set:
@@ -127,13 +127,13 @@ At mission end, only when a lever acted, one line per base set:
 [AnimVariety] gait vanilla step size NaN is not a usable number; soldiers that carry it are left alone
 ```
 
-### Variant sets not yet in the Armory
+### Variant sets in the Armory
 
-The `_b` and `_c` sets do not exist in the game yet. The gait sets now have content: the main orc gait and the orc B and C variants are restyled and validated (16, 10 and 10 clips), and their FBX sit in the live Armory's `AssetSources`. The variant sets still stay missing until Mike's Kit import and `bind_orc_goblin_locomotion.py --apply` ([orc-goblin-locomotion.md](orc-goblin-locomotion.md), "Motion spec revision (2026-10-17)" and its checklist). Goblin variants have no clips yet. Until the sets are installed only the step size lever acts, and every mission with an orc logs the `=missing` line above. Goblin variants come after the orc ones; the code needs no change when a set appears, it picks it up on the next game start (the listing is read once per process). Each variant must be a full copy of its base set's rows, because the soldier fights, rides and dies with that set.
+The orc sets `as_orc_warrior_b` and `as_orc_warrior_c` are in the live Armory since 2026-10-18: Mike imported the masters, the 36 clips (16 main, 10 B, 10 C) were generated and Kit-saved, and `bind_orc_goblin_locomotion.py --apply` wrote the two sets ([orc-goblin-locomotion.md](orc-goblin-locomotion.md), the Kit Import Checklist). Their in-game look is owed. In the variants line above, the two orc sets now read `=present`. Goblin variants have no clips yet, so the four goblin sets still read `=missing`, and only the step size lever acts on goblins. Goblin variants come after the orc ones; the code needs no change when a set appears, it picks it up on the next game start (the listing is read once per process). Each variant must be a full copy of its base set's rows, because the soldier fights, rides and dies with that set.
 
 ## The swing probe
 
-`AnimVarietyMissionBehavior` and `AnimVarietyService` test the action-set `alternative_group` attribute: does the engine play a random swing clip among alternative codes? It is **off by default**: with `EnableSwingAlternativeProbe` off, the first tick reads the switch and stops. No `ActionCodeExists` lookup runs, no agent is swept and no log line is written. Before the switch existed, any loaded `act_taom_*` code armed a per-frame sweep in every mission.
+`AnimVarietyMissionBehavior` and `AnimVarietyService` test the action-set `alternative_group` attribute: does the engine play a random swing clip among alternative codes? It is **on by default while the swing clips are being tested** (Mike, 2026-10-18; it shipped off in `d13e91658`, which no build ever deployed). On, with no `act_taom_*` code loaded, it makes 256 silent action-code lookups and writes one INFO line per mission; with such codes loaded it sweeps the soldiers every frame. With `EnableSwingAlternativeProbe` off, the first tick reads the switch and stops: no `ActionCodeExists` lookup runs, no agent is swept and no log line is written. **Turning it off for players later means renaming the setting** (and its `CoopSettingsRelevance` entry), not flipping the default: MCM writes `TAOM.json` when a player saves the Mod Options, and a saved value outlives a later default, so a player who saved them on such a build keeps `true` (orientation.md, "Persisted MCM defaults"). No saved `false` exists to worry about today: no build with the off default was deployed or released, and this machine's `TAOM.json` (2026-09-17) has no probe key. **Owed:** rename the setting with the default off before the next release or before any `act_taom_*` code reaches the Armory, whichever comes first. Before the switch existed, any loaded `act_taom_*` code armed a per-frame sweep in every mission.
 
 With the switch on, the service looks in each mission for the base codes `act_<family>_<direction>_1h` and `..._1h_left_stance` (families `release_`, `quick_release_`, `blocked_`, `quick_blocked_`; directions `overswing`, `slashleft`, `slashright`, `thrust`) and for alternatives named `act_taom_<base without "act_">_<b..h>`. With none it logs `[AnimVariety] no alternative groups found; swing tracking off` and stops. Otherwise, for each action set once, it logs a `group set=... base=... alt=...` line with `alternatives`, clip names, durations and blend-out starts, and warns about the setups that crash or mistime:
 
@@ -153,7 +153,7 @@ The probe counts which code each swing plays and where in the clip a hit lands, 
 ## Performance
 
 - **Gait variety:** one `SetActionSet` per orc or goblin spawn when a lever acts (the native animation init), plus a few dictionary lookups. A gait draw that picks the base set with the step lever off makes no engine call. The variant catalog lists the engine's action sets once per process.
-- **Swing probe:** off by default, and then one flag check per tick. When on and no alternative code is loaded, the first tick looks up the 32 base codes, plus seven alternatives for each base that exists, and switches itself off. When on with codes loaded, every tick builds a short-lived wrapper per human agent and sweeps them, which is the cost the switch exists to avoid.
+- **Swing probe:** on by default while the swing clips are tested; off, it is one flag check per tick. When on and no alternative code is loaded, the first tick looks up the 32 base codes, plus seven alternatives for each base that exists, and switches itself off. When on with codes loaded, every tick builds a short-lived wrapper per human agent and sweeps them, which is the cost the switch exists to avoid.
 
 ## Key Files
 
@@ -188,7 +188,7 @@ The probe counts which code each swing plays and where in the clip a hit lands, 
 - `TAOM.Tests/Features/AnimationVariety/GaitVarietyServiceTests.cs`: 77 tests; every skip condition, both levers, the factor range, the draw, every log line, invariant culture, NaN and out-of-range gates, no min factor warning with the step lever off.
 - `TAOM.Tests/Features/AnimationVariety/GaitVariantCatalogTests.cs`: 28 tests; the three base sets, the exact-name rule, one engine listing per process, never a per-id probe, never a warning.
 - `TAOM.Tests/Features/AnimationVariety/AnimVarietyServiceTests.cs`: 49 tests; the off switch, every group warning, the blend-out comparison, swing counting, hit recording including the missile and early or late hit cases, the summary clock.
-- `TAOM.Tests/Features/AnimationVariety/AnimVarietyWiringTests.cs`: 8 tests; module declaration, entry point size, the missile gate and the agent list clear (source order), probe default off, the hint, and `MBActionSet.GetActionSetWithIndex(7).GetHashCode() == 7` (tagged `RequiresGame`) because the probe keys action sets on that hash.
+- `TAOM.Tests/Features/AnimationVariety/AnimVarietyWiringTests.cs`: 9 tests; module declaration, entry point size, the missile gate and the agent list clear (source order), probe default on, the hint, and `MBActionSet.GetActionSetWithIndex(7).GetHashCode() == 7` (tagged `RequiresGame`) because the probe keys action sets on that hash.
 - `TAOM.Tests/Features/AnimationVariety/GaitVarietyWiringTests.cs`: 10 tests; module declaration, entry point under 150 lines, singleton catalog and container resolution, settings defaults and slider bounds, the step size hint, `EquipmentIndex.Horse`, the cached warning delegate.
 - `TAOM.Tests/Infrastructure/HotPathSettingsProvidersTests.cs`: both providers join the lazy-accessor, counting and container tests. `TAOM.Tests/Features/CoopInterop/SettingsFingerprintTests.cs`: the `TaomSettings` split is 346 reflected, 234 simulation-relevant.
 - Measured with coverlet (`--collect:"XPlat Code Coverage"`, 2026-10-18): 100% of lines and branches of `AnimVarietyService`, `GaitVarietyService` and `GaitVariantCatalog`.
@@ -198,15 +198,17 @@ The probe counts which code each swing plays and where in the clip a hit lands, 
 1. Custom Battle: pick an orc or goblin culture for one side with at least a few dozen infantry, start, let the line march at the enemy.
 2. Settings on (default): soldiers should step out of phase and the line should look uneven. `[AnimVariety] gait ...` lines appear in the TAOM log at the first spawn and at the end of the battle. Expect the spread to show while the line walks and to shrink at halts.
 3. Turn **Random step size per soldier** off, start a new battle and compare the same line: the lockstep returns. Turn it on again and set **Step size minimum factor** to 0.80 for a wider spread.
-4. Turn **Random gait set per soldier** off and on. Today it changes nothing (the `=missing` line says why). After the variants are installed, the summary line lists the three sets with about a third each.
+4. Turn **Random gait set per soldier** off and on. On, the orc summary line lists the three sets with about a third each; off, only `as_orc_warrior`. Goblins have no variants yet (their `=missing` entries).
 5. Check a mounted orc (warg rider), the player's own orc character and a human troop: none of them should log or change.
 6. Visit a town with an orc or goblin resident: the log may count them in `n=`, and they should look the same as before the feature.
 7. Look at the log of a normal battle: it must hold no `Action set "..." could not be found` line from the variant check.
-8. Leave **Swing alternative probe (diagnostic)** off and confirm no `[AnimVariety] group`, `swings` or `no alternative groups found` line appears. Turning it on without any `act_taom_` code should log `no alternative groups found; swing tracking off` once in the next mission.
+8. With **Swing alternative probe (diagnostic)** on (the default) and no `act_taom_` code loaded, each mission logs `no alternative groups found; swing tracking off` once. Turn it off and confirm no `[AnimVariety] group`, `swings` or `no alternative groups found` line appears.
+
+**Result, 2026-10-18 (Mike's Custom Battle at 09:41, `taom_debug_2026-10-18_09-27-38.log`):** `as_orc_warrior_b=present as_orc_warrior_c=present`; the mission summary `gait set=as_orc_warrior n=125 variants as_orc_warrior=38 as_orc_warrior_b=37 as_orc_warrior_c=50 step n=125 min=0.765 max=0.860 mean=0.814`; the probe's one line; no missing clip, missing set or duplicate name in the rgl log. Mike's verdict on the look is owed.
 
 ## Unverified
 
-- The in-game look of the step size spread; the numbers come from the native research, not from a run.
+- The in-game look of the step size spread. The numbers of one run are in How to Test ("Result, 2026-10-18"); the look is Mike's call.
 - Whether native `SetActionSet` on a freshly built agent drops a spawn-time action on channel 0 that matters. `BuildAgent` restarts the current channel-0 action if there is one (`Mission.cs:4056-4060`), and the native init clears it; vanilla's own suffix swap does the same, and battle spawns have no such action.
 - Rider safety, which is why riders are skipped.
 - Whether Coop's puppet spawner passes the owning peer's body seed.
@@ -221,10 +223,12 @@ The probe counts which code each swing plays and where in the clip a hit lands, 
 
 ## Changelog
 
+- 2026-10-18: the orc variant sets `as_orc_warrior_b` and `as_orc_warrior_c` are installed in the live Armory with the regenerated main orc clips; the in-game check is owed.
+- 2026-10-18: the swing probe is on by default for the swing tests (Mike); turning it off later needs a renamed setting.
 - 2026-10-18: review fixes. The variant catalog lists the engine's action sets once instead of probing each id (the probe made the engine log "could not be found"); `as_orc_female_warrior` left the base sets; the swing probe got an MCM off switch (`EnableSwingAlternativeProbe`, default off), skips missile hits, compares blend-out starts and words an alt code without a clip as a disabled group instead of a crash risk; the step size hint states the real range; no minimum factor warning while the step lever is off.
 - 2026-10-17: gait variety added (random step size, random gait set) beside the swing probe.
 - 2026-10-17: the orc gait sets got content (main, B, C), staged in the Armory; not imported, so the variants are still missing in game.
 
 ## GitHub Issue
 
-Not filed: Mike's decision, 2026-10-17. Owed checks are in Unverified and How to Test; the clip half is tracked in #791.
+#817, filed on 2026-10-18 at Mike's word (he had deferred it on 2026-10-17) and closed with the install, labelled `triage-needs-ingame` while his verdict on the look is owed. Owed checks are in Unverified and How to Test; the clip half is tracked in #791.

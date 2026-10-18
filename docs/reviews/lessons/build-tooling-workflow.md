@@ -4001,3 +4001,36 @@ rewording carried a new count and an unmeasured claim.
 - **Prevent:** a generator's header names the class of what it writes and points to the doc that holds the history;
   a number in it must be computed by the generator in the same run, or left out.
 - **Source:** [rca-gondor-field-scenes-2026-10-17.md](../rca-gondor-field-scenes-2026-10-17.md) finding 2.
+
+### An opt-in strict flag is a dead gate once the state it waits for arrives (repeat, 2026-10-18)
+`bind_orc_goblin_locomotion.py --check` passed when an orc gait variant had vanished with its clips; only
+`--check --require-variants` failed it, a flag added the day before for "once the variants are imported". The import
+happened the next morning, and `/armory-audit` and the live test still ran plain `--check`, so a reinstall could drop
+the per-soldier gaits with both gates green.
+- **Why missed:** the strict mode was correct, but it waited for a future state, and nothing tied that state to the
+  callers. Repeat of "The safe invocation is the default invocation" (2026-09-25).
+- **Prevent:** make the strict check the default and give the early state the opt-out (here `--allow-no-clips`, which
+  already meant "before the Kit import" for the race sets). A flag that must be added "once X happens" is a TODO with
+  no owner.
+- **Source:** [rca-orc-gait-install-2026-10-18.md](../rca-orc-gait-install-2026-10-18.md) finding 1.
+
+### A state change is a moved fact: grep the old state's phrases (repeat, 2026-10-18)
+The orc gait install and the probe default flip changed three facts (the variants exist, the probe is on, the in-game
+run happened). Eleven statements of the old facts survived the edit pass across `INDEX.md`, `feature-map.md`, two
+feature docs and an interface comment, and the rollback still described the state before the install.
+- **Why missed:** the pass edited the lines it remembered. Third application within a month of "When a fact moves,
+  grep every statement of it" and "A change's sweep has two halves".
+- **Prevent:** when an install, a flip or a run changes a state, grep the old state's own words ("off by default",
+  "not imported", "owed", the old count) across `docs/`, `.claude/` and `tools/README.md` before the review, and
+  re-read every procedure (rollback, restore) written before the change.
+- **Source:** [rca-orc-gait-install-2026-10-18.md](../rca-orc-gait-install-2026-10-18.md) findings 2, 3, 12 and 14.
+
+### A temporary default needs an exit the release reads (2026-10-18)
+The swing probe went on by default "while the swing clips are tested", with the exit only in a code comment. The
+setting is absent from the last release, so the next one would ship it on; `EnableEnlistmentDiagnostics` went on
+"temporarily" on 2026-08-28 and shipped on in v2.0.34.
+- **Why missed:** the flip was treated as a local test convenience, and no release step reads code comments.
+- **Prevent:** put the exit where a release looks: an **Owed** line in the feature doc and the commit body (which
+  `/release` turns into the changelog), with the trigger stated ("before the next release or before any `act_taom_*`
+  code reaches the Armory"), plus an issue when the maintainer wants one.
+- **Source:** [rca-orc-gait-install-2026-10-18.md](../rca-orc-gait-install-2026-10-18.md) finding 4.

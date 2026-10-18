@@ -1437,3 +1437,26 @@ UNVERIFIED; the Claude tooling lens found the slide by porting the sampler to nu
   coverage is checked both ways (every found frame is claimed, and every claimed frame lies on the found plateau or its
   end frames, `claimed_outside`).
 - **Source:** [rca-animation-variety-2026-10-17.md](../rca-animation-variety-2026-10-17.md) findings 2, 3, 42 and 57; `tools/blender/validate_locomotion_clips.py`.
+
+### A cache entry without its package is inert; a restored package needs its own entry back (2026-10-18)
+Moving 16 old clip packages out of the Armory left their 16 `RuntimeDataCache` entries behind, under the same clip
+names as the new clips. The v1.5.5 client builds an `.rdc` path only from a registered package's GUID (0x484CC0) and
+never lists the folder, so the leftovers are never read (742 such entries sat in the Armory that day). But the Kit
+re-cooked one of them at 08:28, while Mike re-imported its master, so a rollback that puts the old package back must
+also restore its entry from the backup.
+- **Why missed:** no tool reports which entries a Kit save rewrites, and the rollback was written before the import.
+- **Prevent:** back up the cache entries with any package you move; after a Kit session, compare entry dates with the
+  session window (`check_rdc_entries.package_guid` reads a package's GUID); a rollback restores packages and their entries
+  together. Orphan entries can be cleaned, but only after a GUID search finds no package anywhere under `Modules`.
+- **Source:** [rca-orc-gait-install-2026-10-18.md](../rca-orc-gait-install-2026-10-18.md) finding 2; `docs/reference/bannerlord-animation-system-map.md` section 6.
+
+### Count the whole clip family before writing a flag rule (repeat, 2026-10-18)
+The corrected `anf_cyclic` row said the flag is required on creature `quad_movement` gaits, generalised from the
+elephant table and four human clips. 94 of the 142 vanilla `quad_movement` clips carry no cyclic, the horse gaits
+among them, and they loop in every cavalry battle.
+- **Why missed:** the claim was written from the clips at hand, not from a count over the family. Repeat of the
+  2026-10-17 RCA pattern (d), "engine claims from a partial read", one day later.
+- **Prevent:** before writing "required" or "never" about a clip flag, count it over every vanilla clip of the same
+  usage type (TpacTool over `Native/AssetPackages/animation_clips.tpac`) and quote the count; name the code path that
+  reads the flag, or write "convention" instead of "required".
+- **Source:** [rca-orc-gait-install-2026-10-18.md](../rca-orc-gait-install-2026-10-18.md) finding 11.
