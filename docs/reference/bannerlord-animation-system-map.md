@@ -253,8 +253,9 @@ all belong to the four families `act_release_*`, `act_quick_release_*`, `act_blo
 5. The chosen clip's own fields are then read (for example `+0x1E8` at 0x682761).
 
 0x659030 is also reached from 0x655480 when the request's `+0x2C` byte is set: the blend factor becomes the balance and
-is then zeroed, so no runtime pair blend happens on that path. Managed `SetActionChannel` always writes 0 there. Which
-native callers set it (0x5F0900, 0x5F6080, 0x66CEB0, 0x66F060 and others) is UNVERIFIED, and so is a fourth caller of
+is then zeroed, so no runtime pair blend happens on that path. Managed `SetActionChannel` always writes 0 there. The
+release and blocked callers set it (v1.5.5: 0x682D80 and 0x683A50, section 8) [Certain]; whether other native callers
+do (0x5F0900, 0x5F6080, 0x66CEB0, 0x66F060 and others) is UNVERIFIED, and so is a fourth caller of
 0x659030, 0x6FE170 (R-Fields, R-Life). Not every release reaches the table: vanilla binds 280 `_balanced` codes and 42
 ranged-release codes to clips with no row, and humans do not crash [Certain for the counts; Likely for the
 inference] (R-Life).
@@ -395,7 +396,7 @@ with this map.
 | `use_left_hand_during_attack` | 22 (`0x400000`) | item | Tested at 0x5F7D88 | 26 | test [Certain], effect UNVERIFIED |
 | `lock_camera` | 23 (`0x800000`) | camera | Managed: camera bearing from the pose (`MissionScreen.cs:2288`), first-person look skipped (`:3175`); validator rule 1 | 247 | [Certain] |
 | `lock_movement` | 24 (`0x1000000`) | movement | On start the agent's movement target resets to its current value (0x5EDE59, 0x5EDEB3); managed bearing clamp (`MissionScreen.cs:4749`); seven more native tests UNVERIFIED | 721 | tests [Certain], freeze [Likely] |
-| `synch_with_movement` | 25 (`0x2000000`) | sync | Progress comes from the movement-phase provider (Human 0x640950, Horse 0x6426E0), the agent's own or another agent's (the mount [Likely]) (0x656B62, 0x656D03, 0x656DC9); resync mask | rider and head-turn overlays (65); 0 of 435 human gait clips | [Certain] code |
+| `synch_with_movement` | 25 (`0x2000000`) | sync | Progress comes from the movement-phase provider (Human 0x640950 in the v1.5.3 text, vtable +0x178 = 0x641110 on v1.5.5 [Likely for the address]; Horse 0x6426E0), the agent's own or another agent's (the mount [Likely]) (0x656B62, 0x656D03, 0x656DC9); resync mask | rider and head-turn overlays (65); 0 of 435 human gait clips | [Certain] code |
 | `enable_hand_spring_ik` | 26 (`0x4000000`) | IK | Tested at 0x66B9C9 | 278 | test [Certain], effect UNVERIFIED |
 | `enable_hand_blend_ik` | 27 (`0x8000000`) | IK | On start, captures the current hand-bone frames, gated by `enforce_all` or an empty channel 1 (0x5EDEF5); IK mask (0x63F8CD) | 200 | [Certain] tests |
 | `synch_with_ladder_movement` | 28 (`0x10000000`) | sync | Action speed forced to 0 (0x655629), progress from ladder position (0x656E87), auto-increment cleared; managed `AgentVictoryLogic.cs:204, :323`, `MissionScreen.cs:4749` | ladder clips (1) | [Certain] |
@@ -599,7 +600,7 @@ and resolve), logging "Unable to read animation clip data for %s" on failure [Ce
 
 | Attribute | Effect | On failure |
 |---|---|---|
-| `base_set` | Linear search (0x58FAC0); **copies the base's skeleton, movement system and every slot at parse time** | Logs `Action set "%s" could not be found, using default action set!` and uses set 0 (`as_human_warrior` in merged order [Likely]) |
+| `base_set` | Linear search (0x58FAC0 on v1.5.3); **copies the base's skeleton, movement system and every slot at parse time** | Logs `Action set "%s" could not be found, using default action set!` and uses set 0 (`as_human_warrior` in merged order [Likely]) |
 | `skeleton` | Skeleton model lookup (0xA0CA0) | Logs "Skeleton model could not be found: %s. Fetching a random skeleton model, animations may look wrong."; with no skeleton at all, "Skeleton model is empty for action_set: %s" |
 | `movement_system` | `bipedal` = 0, `quadrupedal` = 1 | Logs "Unexpected movement system name: %s" |
 | `<action type>` | Action-type map (0xDB02F0) | Logs "Trying to use undefined action ... Please define the action code in action_types.xml file!" and skips the action |
@@ -652,12 +653,17 @@ not measured by TAOM; review [adopt-mithrilforge-2026-09-29.md](../reviews/adopt
   `Agent.SetActionSet(ref AnimationSystemData)`, whose argument `Mission` builds with `FillAnimationSystemData`
   (`Mission.cs:4540-4541`).
 - **An unknown action set id returns a VALID set, set 0** [Certain, 2026-09-30; this corrects MithrilForge's "invalid
-  set"]. `MBActionSet.GetActionSet(id)` goes to native `get_index_with_id` (0x6DF010), which runs the same linear
-  search as `base_set` (0x58FAC0); on a miss that logs `Action set "%s" could not be found, using default action
+  set"]. `MBActionSet.GetActionSet(id)` goes to native `get_index_with_id` (0x6DF010 on v1.5.3; on v1.5.5
+  `GetIndexWithID` is 0x6DF7D0, which calls 0x590060), which runs the same linear search as `base_set` (0x58FAC0 on
+  v1.5.3); on a miss that logs `Action set "%s" could not be found, using default action
   set!` and returns 0. Index 0 passes `IsValid` (`Index >= 0`), so `MBGlobals.GetActionSet` does not throw on a
   missing id either. Set 0 is `as_human_warrior`, the first set Native declares [Likely]. yotthani's DualWield hit it
   in game: `as_elf_warrior_dw` did not exist, the lookup answered with `as_human_warrior`, and elves ran vanilla's
-  clips while the log said "found". **Compare `GetName()` with the id you asked for.** Build the name from the set the
+  clips while the log said "found". **Compare `GetName()` with the id you asked for.** To test whether a set exists
+  without the log line, list the sets: `MBActionSet.GetNumberOfActionSets` and `GetActionSetWithIndex(i).GetName()`
+  (v1.5.5: the count is 0x6DF8F0, the name by index 0x6DF890) log nothing; TAOM's `GaitVariantCatalog` does this once per process. The action
+  code lookup `IMBAnimation.GetActionCodeWithName` (0x6EAF80) is silent too: a miss returns -1 and logs nothing.
+  Build the name from the set the
   Monster plays (`Monster.ActionSetCode`, the monster XML's `action_set`), not the monster id: LOTRLOME's `elf`
   monster plays `as_human_warrior` (`LOTRLOME_Armory/ModuleData/monsters.xml`). More DualWield engine facts:
   [scripted-melee-strikes.md](scripted-melee-strikes.md).
@@ -671,15 +677,16 @@ not measured by TAOM; review [adopt-mithrilforge-2026-09-29.md](../reviews/adopt
 
 **Call chain** [Certain] (R-Fields, R-Flags): managed `Agent.SetActionChannel` (a native pass-through; binding id
 164) -> 0x6E1B40 -> the agent's 0x5EDDB0 -> the anim system's virtual slot 48 (`+0x180`). `Agent_anim_system` and
-`Horse_anim_system` put 0x655480 there directly; `Human_anim_system`'s 0x63EFA0 calls 0x655480 and then applies the
+`Horse_anim_system` put 0x655480 there directly (addresses in this section are v1.5.3; the v1.5.5 map is in section 13); `Human_anim_system`'s 0x63EFA0 calls 0x655480 and then applies the
 facial animation and the hand pose. So **facial animation and hand poses apply only to agents whose skeleton runs
 `Human_anim_system`**; which monsters get which system is UNVERIFIED. Managed defaults: `blendInPeriod` -0.2,
 `blendOutPeriodToNoAnim` 0.4, `blendOutPeriod` -0.2 (`Agent.cs:2402-2405`, R-Life).
 
 **The request struct** packed by 0x6E1B40 [Certain]: `+0` channel, `+4` action, `+8` additional flags, `+0x10` start
 progress, `+0x14` blend-with-next-action factor, `+0x18` speed, `+0x1C` blend in, `+0x20` blend out, `+0x24` blend out
-to no animation, `+0x28` ignore priority, `+0x29` linear smoothing, `+0x2B` force face morph restart, `+0x2C` melee-table
-lookup (always 0 from managed, 0x6E1BD0).
+to no animation, `+0x28` ignore priority, `+0x29` linear smoothing, `+0x2A` re-roll on replay (0 from managed; 1 from
+the tick's cyclic and continue-to requests), `+0x2B` force face morph restart, `+0x2C` melee-table lookup (always 0
+from managed, 0x6E1BD0; v1.5.5 `SetActionChannel` 0x6E2300 writes `+0x2A` = 0 and `+0x2C` = 0).
 
 **Channel state** [Certain]: channel c lives at anim system `+0x2470 + c x 0x48` (current action; clip pointer
 `+0x2480`; additional flags `+0x2490`; partner action `+0x2474`; partner clip `+0x2488`; look-slope factor
@@ -690,8 +697,10 @@ lookup (always 0 from managed, 0x6E1BD0).
    the action's `alternative_group`, summing each clip's `+0x1D0 >> 60`; a total of 0 keeps the requested action.
 2. **Melee table:** with request `+0x2C` set, 0x659030 picks the generated child by the factor, and the factor is
    zeroed (section 3).
-3. **Restart:** requesting the action already playing only updates the blend weight, unless the clip has `restart`
-   (0x6555B1).
+3. **Restart:** requesting the action already playing, or one in the same alternative group as the playing action,
+   only updates the blend weight (`+0x24AC`) and returns, unless the merged flags carry `restart` (0x8000) or the
+   request's byte `+0x2A` is set while the picked action differs from the playing one (0x6555B1 in v1.5.3; v1.5.5
+   0x655C40, "Alternative groups" below).
 4. **Ladder:** `synch_with_ladder_movement` forces the speed to 0 (0x655629).
 5. **`enforce_all`:** a channel-0 clip with it rejects channel-1 requests unless `ignorePriority` (0x655659); starting
    such a clip clears channel 1 (0x655A0F..0x655ABC).
@@ -707,9 +716,38 @@ lookup (always 0 from managed, 0x6E1BD0).
    request lower than the current priority is rejected; a tie wins; `ignorePriority` or an empty channel skips the
    check (0x658EAC..0x658F15).
 
+**Alternative groups** [Certain; addresses v1.5.5, native decompile 2026-10-17]:
+- **Parse:** the action set parser (0x590590) writes a slot `{clip, groupId}` only after the clip resolves. The per set
+  finalizer (0x591210) collects the action indices that share a group into a list at set `+0xB8`, and a group with ONE
+  member is disabled: its slot's group is reset to -1.
+- **Pick:** 0x655AD0 sums the clip weights (`+0x1D0 >> 60`) over the group list and returns an ACTION index, so every
+  alternative is its own action code in `action_types.xml`. Vanilla example: `act_idle_unarmed_1` to `_5` in group
+  `idle_unarmed` (Native `action_sets.xml:4679-4698`). The pick has exactly two callers: the set-channel call (0x655C40)
+  and the death path (0x5F9F90).
+- **Set-channel early-out (0x655C40):** the pick runs only when the request's additional flags have bit 31 clear. Then,
+  if request byte `+0x2A` is 0 (or the pick returned the playing action) and the merged flags lack `restart`, a
+  requested action equal to the playing one OR in the same group only updates the blend weight and returns. Repeat
+  requests therefore do not re-roll. The tick re-requests a cyclic replay and a continue-to action with `+0x2A` = 1, so
+  a cyclic clip in a group re-rolls each loop; that is vanilla idle variety.
+- **Locomotion never picks:** the human walk table is chosen in 0x6413F0, which resolves each of its 18 movement
+  codes through 0x61A300 and then 0x58FDE0. That returns the clip from the action-set slot table (`+0x78`, 8 bytes
+  per action), cached per action set in a list at `+0xD8`, with no call to the pick (0x655AD0 has only the two
+  callers above). So `alternative_group` on walk and run codes has no effect. Walk and run variety needs a different
+  action set per agent (vanilla `CommonTownsfolkCampaignBehavior` does this). 0x63D720 is NOT this table: it is the
+  rider-on-mount table (see "Human locomotion" below). Details and addresses: "Human locomotion: table, phase and
+  cadence (v1.5.5)".
+- **Swings:** release (0x682D80) and blocked (0x683A50) request through set-channel with flags 0, `+0x2A` = 0 and
+  `+0x2C` = 1. These are the callers that set `+0x2C` (section 3). The pick runs first, then the melee table (0x6597F0)
+  is read for the PICKED code's clip, so each alternative clip needs a melee-table row (self-keyed or a `_balanced`
+  twin) or the first swing crashes at `+0x659879`. The combat timing (`+0x1E8`, duration `+0x188`) comes from the
+  ORIGINAL code's clip and is stored in the combat state at `+0xB0`, so alternatives must match its duration and
+  blend-out. `GetCurrentActionStage` (0x6E21A0) reads the stage from the action-type record of the playing code, so an
+  alternative code must copy `type="actt_release_melee"`, `usage_direction` and `action_stage="as_attack_release"`
+  (Native `action_types.xml:5803-5806`). In-game confirmation is owed. Recipe: 10.4.
+
 **The tick, 0x655F90** [Certain unless tagged]:
-- **Progress:** auto-increment unless cleared; `synch_with_movement` takes it from the movement phase (Human 0x640950,
-  Horse 0x6426E0); `synch_with_horse` from the tick's 4th argument; ladder clips from the ladder position.
+- **Progress:** auto-increment unless cleared; `synch_with_movement` takes it from the movement phase (Human vtable +0x178,
+  0x641110 on v1.5.5; Horse 0x6426E0); `synch_with_horse` from the tick's 4th argument; ladder clips from the ladder position.
 - **Look slope:** a clip with `blends_according_to_look_slope` and a partner gets a per-tick factor from look pitch,
   through the combat parameter's `look_slope_blend_speed_factor` (0x657880), remapped so level look equals Param 1 and
   clamped by `look_slope_blend_factor_up_limit`/`_down_limit` (0x657470) (0x65697B..0x656A53).
@@ -754,17 +792,70 @@ anf_lock_movement` as additional flags: the priority byte 60 replaces the clip's
 and `enforce_all` triggers the channel-1 rules above [Certain] (R-Flags). See
 [troll-brute-force.md](../features/troll-brute-force.md).
 
+### Human locomotion: table, phase and cadence (v1.5.5)
+
+All [Certain] for the code (native decompile, 2026-10-17); the visual consequences are tagged.
+
+**Table.** The walk table is chosen in 0x6413F0. The key is the movement set's idle code (0x63D6B0, which calls
+0x61A300 for slot 0). Tables are cached per action set in a list at `+0xD8` under an SRW lock. Each entry holds 18
+clips, the 18 movement_set attributes (idle, 8 directions, rotate, 8 adders), each resolved by 0x61A300 and then the
+direct slot lookup 0x58FDE0. It never calls the alternatives pick 0x655AD0, so `alternative_group` does not touch walk
+or run. 0x746440 adds 4 speeds per clip from its `bip_mov_ik` loop displacement divided by its duration. The per agent
+pointer `+0x3A70` is re-selected on a weapon or usage change (0x6789C0), a global action reload (0x58A240), the visuals
+tick, `SetAgentLocalSpeed` and after `SetActionSet`. The mode byte `anim+0x346C` has 6 modes, plus 6 when the agent
+is in a left stance (`anim+0x3514`).
+
+**Rider table is a different function.** 0x63D720 reads the mount's movement-code hash, caches the result in the
+rider's action set at `+0x98`, and keeps the row at `anim+0x3C10`. Its callers are 0x603100 (mount), 0x641980
+(dismount reset) and `IMBAgentVisuals.Tick`. Earlier text on this page and in the lessons file named it the human
+walk table; that was wrong.
+
+**Phase and cadence.** The per agent phase is `anim+0x34F0`. Only 0x7496D0 advances it, from the human tick 0x639750,
+as the sum over layers of (layer weight x rate) x dt, wrapped at 1. The layer rate (0x74BF60) is
+|v_local / table speed| / the forward clip's duration / StepSize, times `node+0x58`, capped by a constant. StepSize is
+`node+4`, copied from `AnimationSystemData +0x14` at 0x63923F. `node+0x58` is `anim+0x3510`, set to 1.0 at init; the
+writer scan found no other float write to it on this object. v_local is the world velocity divided by `AgentScale`
+(0x5F6760). Init (0x6390D0) sets the phase to 0 and gives only the IDLE phase (`+0x34F4`) a random value. Nothing
+randomizes the walk phase. While an agent is fully idle, 0x7496D0 holds its walk phase at the forward clip's
+`bip_mov_ik` snapping start (decompile lines 352-367 and 715-720), so agents on one clip re-align at every halt
+[Certain for the code]. A transition pull also exists (lines 463-512); what triggers it is UNVERIFIED. Below a floor
+the layer rate is lifted toward the clip's own rate (0x74BF60, lines 49-51) [Likely]. While agents keep walking, no
+code was found that re-syncs the phase, so agents that start walking together at one speed stay in step [Likely for
+the visual], and a speed or StepSize difference builds a phase offset only for as long as they keep walking. Vanilla
+StepSize is `min(0.8 + 0.2 x Athletics / 300, 1)` (`BasicCharacterObject.GetStepSize`), identical within one troop
+type, and vanilla already plays StepSize values across 0.8 to 1.0.
+
+**Blending.** Directions blend by weight (0x7466C0) at one shared phase. Walk and run are separate tables; a mode
+change pushes a new layer (0x74C8C0, at most 4) and the layers cross-fade. Speed changes only the rate.
+
+**SetActionSet.** `IMBAgent.SetActionSet` (0x6E2440) calls 0x5FF080, which runs the full Human init 0x6390D0 (and
+0x654080): both channels are cleared (an attack is cut), the phase goes to 0, the idle phase is re-rolled, the layer
+count is 0, the table key is reset, StepSize is re-read and the rider link is re-attached (0x603100). It is cheap,
+but a mid-walk call likely pops [Likely]. The managed `Agent.SetActionSet` also broadcasts a network message.
+
+**Anim RNG.** One xorshift global (0xD0CA18). Animation users: 0x6390D0 (idle phase), 0x655AD0 (pick), 0x5E0730
+(idle timer) and 0x5F3600 (first idle timer). None touches locomotion.
+
+**Levers for walk and run variety:**
+
+| Lever | Effect |
+|---|---|
+| StepSize per agent (managed: the `stepSize` argument of `FillAnimationSystemData`, then `Agent.SetActionSet`) | Changes the cadence |
+| A different action set per agent | Changes the clips |
+| `AgentScale` | Changes cadence and size together |
+| Speed differences between agents | A phase offset that builds only while the agents keep walking at different speeds; a halt re-aligns idle agents on one clip (phase text above) |
+
 ## 9. Crash surfaces and gates
 
 | Symptom | Cause | Doc | Gate | Gap |
 |---|---|---|---|---|
-| AV at `+0x6590B9` reading 0x8 to 0x50 (0x8 observed) on the first swing or blocked recoil | A release or blocked clip with no melee-table row, or an action the set does not bind (-1) reaching 0x659030 through 0x6825C0 or 0x683290 [Certain] | Section 3; [troll-race.md](../features/troll-race.md) "The swing CTD"; lessons, "A melee release bound to a custom clip crashes the first swing" | `bind_hill_troll_action_set.py` rule 0 (`MELEE_TABLE`, unit tested); `wire_hill_troll_race.py --check`; `set_clip_balance_name.py --check` (all three in commit `30abf550`) | Covers `as_hill_troll_*` only, with no general gate. R-Life found the rule-0 and `--check` logic failing any `anim_*` clip on a release or blocked code; the versions edited at 14:11 and 14:12 read the packages (`set_clip_balance_name.keyed_clips`) and accept a self-keyed clip, and since the evening of 2026-09-26 only one whose RDC stamp also matches its checksum [Certain for the code; the gates' unit tests not run here]. Only `/armory-audit` lists the `--check` as a step after an Armory sync; nothing runs it automatically |
+| AV at `+0x6590B9` (v1.5.5: `+0x659879`) reading 0x8 to 0x50 (0x8 observed) on the first swing or blocked recoil | A release or blocked clip with no melee-table row, or an action the set does not bind (-1) reaching 0x659030 through 0x6825C0 or 0x683290 [Certain] | Section 3; [troll-race.md](../features/troll-race.md) "The swing CTD"; lessons, "A melee release bound to a custom clip crashes the first swing" | `bind_hill_troll_action_set.py` rule 0 (`MELEE_TABLE`, unit tested); `wire_hill_troll_race.py --check`; `set_clip_balance_name.py --check` (all three in commit `30abf550`) | Covers `as_hill_troll_*` only, with no general gate. R-Life found the rule-0 and `--check` logic failing any `anim_*` clip on a release or blocked code; the versions edited at 14:11 and 14:12 read the packages (`set_clip_balance_name.keyed_clips`) and accept a self-keyed clip, and since the evening of 2026-09-26 only one whose RDC stamp also matches its checksum [Certain for the code; the gates' unit tests not run here]. Only `/armory-audit` lists the `--check` as a step after an Armory sync; nothing runs it automatically |
 | AV at `+0x57070C` about a second into deployment | A race head, eye or mouth on LOD0 with no face morph channels: the Kit writes an empty morph record, and 0x570550's null check covers only the record pointer, not its buffer [Certain] | troll-race.md "Face morph channels"; [armory-guide.md](armory-guide.md) "Only LOD0 carries morphs" | `check_race_morph_channels.py` | Its spec covers only the hill troll and dwarf f1 FBX sources, not compiled tpacs |
 | Null read at `+0x18`, `+8` or `+0x2C` while a clip plays | A flag without its usage: `displace_position` without displacement (0x655E9C, 0x49DEF8); `align_with_ground` without blend (0x65868D); `spawn_particle` without particle (0x65658B or 0x6565AC); `switch_item_between_hands` without hand_switch (0x6C6230) [Certain from the code; not reproduced] | Section 5 | none; the installed clips pass a one-off scratch check | No committed gate |
 | AV in a mount context at `+8`, `+0xC` or `+0x10` | A horse movement-table clip without `quad_movement`: 10 unchecked sites, one reachable through `WalkingSpeedLimitOfMountable` (0x6E4C80, `+0x10`) [Certain for the sites] | [creature-mount-authoring.md](../ai-includes/creature-mount-authoring.md) Phase 1 and "The ways a re-export breaks a working mount" | `verify_mount_assets.py` CHECK 2 | Only the creatures in its config. The 1.5.3 crash offset has not been observed (R-Life) |
 | AV in human locomotion | A human locomotion-table clip without `bip_mov_ik`: 36 unchecked sites [Certain for the sites] | Section 5 | none | Not observed; vanilla-derived sets inherit valid clips |
 | Crash after a clip ends | Continue to action names an action the agent's set lacks: 0x58F840 logs "does not contain" and returns a negative index; the tick indexes `remap[-1]` (0x6561EB) and faults at 0x65621E when that entry is null [Likely]; the entry's content is UNVERIFIED | Section 8 | none; grep the rgl log | No gate |
-| Null read at 0x6553C8 | A clip missing from an alternatives group: when the remap entry is -1, 0x6553C6 zeroes the pointer and the weighted pick reads `[0 + 0x1D0]` [Certain for the read]; reachability UNVERIFIED | Section 8 | none | |
+| Null read at 0x6553C8 (v1.5.5: 0x655B88) | A clip missing from an alternatives group: when the remap entry is -1, 0x6553C6 zeroes the pointer and the weighted pick reads `[0 + 0x1D0]` [Certain for the read]; reachability UNVERIFIED | Section 8 | none | |
 | Delayed crash after "Could not find animation" | A phantom `animation=`: the slot keeps its inherited value or -1; a crash needs a later consumer that skips the -1 check [Certain] | creature-mount-authoring.md gotcha 7 (describes older behaviour) | `verify_mount_assets.py` CHECK 3 (creatures); the troll binders bind only clips on disk | No gate for humanoid sets; grep the rgl log |
 | Dedicated server dies on boot | A root-level `<action>`: `KeyNotFoundException` in `MergeElements` [Certain] | armory-guide.md "action_sets structure"; [module-armory.md](../modding/module-armory.md) | `audit_action_set_parity.py` (exits 1) | none |
 | A package's clips never appear | No `.rdc` entry: the package is skipped whole, silently [Likely] | lessons, "A hand-built tpac package is invisible" | `check_rdc_entries.py` | The client's skip path is UNVERIFIED |
@@ -853,7 +944,7 @@ Then launch the Kit or the game and search the newest `C:\ProgramData\Mount and 
 | `Loading packages %s...` | Which asset trees loaded |
 | `Could not find animation:` | An action set names a clip no package registered; the slot kept its old value |
 | `Trying to use undefined action` | An action type missing from `action_types.xml`; the action was skipped |
-| `could not be found, using default action set!` | A missing `base_set`; set 0 was used |
+| `could not be found, using default action set!` | A missing `base_set`, or any lookup of an unknown action set id (`MBActionSet.GetActionSet` to `IMBActionSet.GetIndexWithID` 0x6DF7D0 to 0x590060 on v1.5.5); set 0 was used. A mission that probes ids by `GetActionSet` writes this line for every miss, so list the sets instead (section 7) |
 | `Skeleton model could not be found` | A wrong `skeleton=` |
 | `does not contain` | A runtime lookup of an unbound action (0x58F840) |
 | `Combat parameter not found:` | A clip with no collision window |
@@ -864,6 +955,27 @@ Then launch the Kit or the game and search the newest `C:\ProgramData\Mount and 
 | `Please set hit_bone_index` | A combat parameter without a usable hit bone |
 | `not found for combat animation blending!` (Kit) | A missing `_balanced` twin on Save |
 | `get_monster_usage_set_index failed` | A `monster_usage` miss |
+
+### 10.4 Random clips per swing or idle
+
+[Certain for the code path, in-game test owed.] Mechanism: section 8 "Alternative groups". It works for swings, idles
+and other actions that go through the set-channel call; it never works for walk or run codes.
+
+1. **One action type per alternative** in the Armory `action_types.xml`. For a swing, copy the base type's `type`
+   (`actt_release_melee`), `usage_direction` and `action_stage` (`as_attack_release`; vanilla
+   `action_types.xml:5803-5806`), because the stage is read from the playing code's record.
+2. **Bind both rows in the race set** (the base code and each alternative) with the same `alternative_group` value. A
+   group with one member is disabled.
+3. **Randomization weight** 1..15 on every clip in the group (Kit field, section 2). A total of 0 plays the requested
+   action.
+4. **Swings only:** give each alternative clip a melee-table row (self-keyed, or a `_balanced` twin, 10.1), or the first
+   swing crashes at `+0x659879`. Match each alternative's duration and blend-out to the base clip, because the combat
+   timing is read from the base code's clip.
+5. **Name** an alternative `act_taom_<base name without act_>_<letter b..h>`, for example `act_taom_release_..._c`. A
+   diagnostic probe, `[AnimVariety]`, keys on this convention. It is built and off by default: turn on the MCM switch
+   `EnableSwingAlternativeProbe` ([animation-variety.md](../features/animation-variety.md)).
+6. **Idle variety** needs a cyclic clip in the group: the tick re-requests a cyclic replay, which re-rolls each loop.
+7. **Walk and run variety** is a different action set per agent, not a group (section 8).
 
 ## 11. Corrections owed to other docs
 
@@ -929,8 +1041,9 @@ Everything below is UNVERIFIED. Grouped by where it sits.
 
 **Runtime**
 - Which monsters run `Human_anim_system` (and so get facial animation and hand poses).
-- The native writers of the melee-table request byte `+0x2C`, and whether vanilla twin-keyed swings always take the
-  table path; the fourth table caller 0x6FE170.
+- The native writers of the melee-table request byte `+0x2C` other than release and blocked (those two are known,
+  section 8), and whether vanilla twin-keyed swings always take the table path; the fourth table caller 0x6FE170.
+- Whether a random swing alternative plays in game (10.4): the code path is read, no battle has run it.
 - The content of `remap[-1]` when a Continue to action is unbound (crash [Likely]).
 - The virtual path from `ISkeleton.tick_animations` (0x50C3B0) to the horse movement node slot 0x74C950.
 - Whether bone-count parity (28) is required when a set binds clips from another skeleton.
@@ -978,7 +1091,32 @@ null-check audit, doc audit), **R-Life** (import, packages, RDC, XML path, melee
 | 0x796C0 | External `.rdc` modification handler |
 | 0xD0890 | Hand pose table (asserts below 5) |
 
-**Client RVAs** (`Win64_Shipping_Client/TaleWorlds.Native.dll`):
+**v1.5.5 address map** [Certain] (native decompile of the v1.5.5 `TaleWorlds.Native.dll`, 2026-10-17). Every client
+address in this page is a v1.5.3 address unless it is written in the right-hand column below; the functions below moved
+and kept their shape. Add the delta to older addresses only for these functions, and re-derive the rest before citing.
+
+| Function | v1.5.3 | v1.5.5 |
+|---|---|---|
+| Set channel | 0x655480 | 0x655C40 |
+| Alternatives pick | 0x655310 | 0x655AD0 |
+| Melee table reader | 0x659030 | 0x6597F0 |
+| Swing CTD, melee table miss | +0x6590B9 | +0x659879 |
+| Release and blocked callers | 0x6825C0, 0x683290 | 0x682D80, 0x683A50 |
+| Channel tick | 0x655F90 | 0x656750 |
+| `SetActionChannel` binding chain | 0x6E1B40, 0x5EDDB0, 0x63EFA0 | 0x6E2300, 0x5EE490, 0x63F760 |
+| Alternatives null read | 0x6553C8 | 0x655B88 |
+| Human walk table select (key 0x63D6B0, list at action set `+0xD8`) | not recorded | 0x6413F0 |
+| Human table build (4 speeds from `bip_mov_ik`) | not recorded | 0x746440 |
+| Movement phase advance, layer rate | not recorded | 0x7496D0, 0x74BF60 |
+| Human movement phase getter (vtable `+0x178`) | 0x640950 (older text) | 0x641110 [Likely] |
+| Rider-on-mount table (NOT the human walk table) | not recorded | 0x63D720 |
+
+Functions read only on v1.5.5 (no v1.5.3 address was recorded): the action set parser 0x590590 (`alternative_group` is
+read there), the per set finalizer 0x591210, the human walk table select 0x6413F0, the table builder 0x746440, the rider table 0x63D720, the slot-to-clip lookup
+0x58FDE0,
+`GetCurrentActionStage` 0x6E21A0 and the death path 0x5F9F90.
+
+**Client RVAs** (`Win64_Shipping_Client/TaleWorlds.Native.dll`; v1.5.3 values, see the map above):
 
 | RVA | What |
 |---|---|

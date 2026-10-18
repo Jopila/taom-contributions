@@ -1,0 +1,82 @@
+{
+  "_comment": "Props for show_gait_variants.py --props. Each kind names an FBX under asset_root, the meshes to use, the engine bone it hangs on, and a transform in that bone's own frame (the bone head is the origin; rotation_deg is an XYZ Euler in degrees, offset_m is metres). A crafted weapon ('stack': true) lists its pieces butt first: the FBX keeps every piece centred on its own origin, so the viewer stacks them along +Z, puts the grip (centre of the piece named *handle*, or grip_m from the butt) at the origin, and overlap_m pulls a named piece down into the one below. A single mesh (shield, bow) keeps its authored placement. Bone frames, measured on the vanilla walk (the engine rig's bones are not Blender-style): r_finger0 has +X up, +Y out to the wearer's right, +Z forward. l_finger0 has +X in toward the body, +Y down, +Z forward. l_foretwist1 has +X along the forearm toward the hand (forward), +Y down, +Z out to the wearer's left. Engine bones, from Native monsters.xml: main_hand_item_bone r_finger0, off_hand_item_bone l_finger0, off_hand_item_secondary_bone l_foretwist1 (a strapped 'shield' item_usage hangs on l_foretwist1, ForceAttachOffHandSecondaryItemBone; a centre-grip 'hand_shield' on l_finger0). The in-game item rotation/position in the Armory XML is in the engine item frame and cannot be reused here, so each transform below was set by eye on a close-up render and checked in front and side views.",
+  "asset_root": "E:/Steam/steamapps/common/Mount & Blade II Bannerlord/Modules/LOTRLOME_Armory/AssetSources",
+  "kinds": {
+    "sword": {
+      "fbx": "mordor_props/orc_weapons/wm_mordor_set1.fbx",
+      "meshes": [
+        "wm_mordor_set1_sword_a01_pommel.lod0",
+        "wm_mordor_set1_sword_a01_handle.lod0",
+        "wm_mordor_set1_sword_a01_guard.lod0",
+        "wm_mordor_set1_sword_a01_blade.lod0"
+      ],
+      "stack": true,
+      "bone": "r_finger0",
+      "rotation_deg": [0, 30, 180],
+      "offset_m": [0, 0, 0],
+      "tint": [0.7, 0.72, 0.8],
+      "note": "Orc scimitar (Mordor set 1, sword_a01), 0.74 m blade. The blade runs along mesh +Z and curves toward mesh -X; the broad face is mesh Y. With identity the blade points along the bone's +Z, which is forward and about 10 deg down on the vanilla walk (wrist neutral). Rz 180 rolls the curve so the tip rises and the edge faces down (a sabre carried edge down); Ry 30 about the bone's sideways axis then pitches the blade 30 deg further down, so it points forward and down along a line about 40 deg under the horizontal. Grip is the centre of the handle piece, on the finger0 head, so the fist closes on the handle."
+    },
+    "axe": {
+      "fbx": "mordor_props/orc_weapons/wm_mordor_set1.fbx",
+      "meshes": [
+        "wm_mordor_set1_axe_a01_handle.lod0",
+        "wm_mordor_set1_axe_a01_blade.lod0"
+      ],
+      "stack": true,
+      "overlap_m": {"wm_mordor_set1_axe_a01_blade.lod0": 0.15},
+      "bone": "r_finger0",
+      "rotation_deg": [0, 30, 180],
+      "offset_m": [0, 0, 0],
+      "tint": [0.65, 0.6, 0.55],
+      "note": "Orc one-handed axe (Mordor set 1, axe_a01): 0.55 m haft, head stacked on top with 0.15 m overlap so it straddles the haft end. Same grip and carry as the sword: grip at the centre of the haft, rotation copied from the sword."
+    },
+    "shield": {
+      "fbx": "mordor_props/orc_weapons/SK_MD_Orc_Weapon_Shield_A.fbx",
+      "meshes": [
+        "SM_MD_Orc_Shield_Med_A"
+      ],
+      "bone": "l_foretwist1",
+      "rotation_deg": [0, 0, 0],
+      "offset_m": [0.1, 0, 0.05],
+      "tint": [0.45, 0.3, 0.15],
+      "note": "Medium orc shield, 0.54 x 0.82 m. The mesh lies in XY with the dome toward +Z; its x runs -0.38 to +0.16 and y -0.42 to +0.40 about the strap point. l_foretwist1 has +Z out to the wearer's left and +Y down, so identity already faces the dome outward with the long axis vertical. Offset +0.1 along the forearm centres the plate on the forearm instead of the elbow, +0.05 outward keeps the plate off the forearm (the mesh back face is at z = 0, the bone axis)."
+    },
+    "shield_large": {
+      "fbx": "gundabad_weapons/wm_gundabad_ws.fbx",
+      "meshes": [
+        "wm_gundabad_shield_a01.lod0"
+      ],
+      "bone": "l_foretwist1",
+      "rotation_deg": [0, 0, 180],
+      "offset_m": [0.05, 0, 0.05],
+      "tint": [0.35, 0.3, 0.28],
+      "note": "Tall Gundabad shield, 0.38 x 0.98 m. Mesh x is +-0.19, y -0.63 to +0.35, dome toward +Z. Identity put the long end (0.63 m) above the strap with the top at head height; Rz 180 turns it so the long end hangs down (top at the shoulder, point at the knee, as a kite shield is carried) and the wide, beaked end is up. Offset as for the medium shield."
+    },
+    "spear": {
+      "fbx": "gundabad_weapons/wm_gundabad_ws.fbx",
+      "meshes": [
+        "wm_gundabad_spear_a01_handle.lod0",
+        "wm_gundabad_spear_a01_blade.lod0"
+      ],
+      "stack": true,
+      "grip_m": 1.0,
+      "bone": "r_finger0",
+      "rotation_deg": [0, 60, 0],
+      "offset_m": [0, 0, 0],
+      "tint": [0.6, 0.5, 0.35],
+      "note": "Gundabad spear (spear_a01): 2.07 m haft plus a 0.47 m head, grip 1.0 m from the butt (about the balance). Not a 1h clip weapon in game; an attachment check only. Ry 60 tips the shaft from the bone's forward axis up toward the bone's +X (up), so it points up and forward like a spear carried at the trail."
+    },
+    "bow": {
+      "fbx": "mordor_props/morannon_weapons/SK_MD_Mor_Weapon_Bow_A.fbx",
+      "meshes": [
+        "SM_MD_Mor_Bow_Med_A"
+      ],
+      "bone": "l_finger0",
+      "rotation_deg": [0, -62, 90],
+      "offset_m": [0, 0, 0.03],
+      "tint": [0.25, 0.2, 0.15],
+      "note": "Morannon orc bow (Bow_Med_A), 1.0 m tall; limbs run along mesh Z and bow out toward mesh -X, so the string side is -X and the target is +X. On l_finger0 (+X inward, +Y down, +Z forward) the matrix that sends mesh Z to bone -Y (up), mesh X to bone +Z (forward) and mesh Y to bone -X is the Euler (0, -90, 90): the bow stands upright in the fist with the belly forward and the string toward the body. Upright, the upper limb lay along the hanging forearm and cut 4.7 cm into it, so the top is tilted 28 deg forward (Ry -62) and the bow moved 3 cm forward. An attachment check only."
+    }
+  }
+}

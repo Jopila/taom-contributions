@@ -1295,8 +1295,13 @@ valid. yotthani's DualWield saw it in game: a missing `as_elf_warrior_dw` answer
 - **Why missed:** the managed guard read like the contract, and no one decompiled what the native side returns.
 - **Prevent:** before relying on a managed validity check around an engine lookup, read the native miss path
   (`python tools/native_decompile.py --engine-method <Interface.Method>`), and check a looked-up object by its name.
+- **Second instance (2026-10-18):** `GaitVariantCatalog` probed each variant id with `MBActionSet.GetActionSet`, so every
+  missing variant made the engine log `could not be found, using default action set!` (v1.5.5 `GetIndexWithID` 0x6DF7D0
+  to 0x590060), the line the map's triage row read as a broken `base_set`. List the sets instead
+  (`GetNumberOfActionSets`, `GetActionSetWithIndex(i).GetName()`, both silent); `IMBAnimation.GetActionCodeWithName`
+  (0x6EAF80) returns -1 without logging. Read this lesson before designing a lookup around the API.
 - **Source:** `docs/reference/bannerlord-animation-system-map.md` section 7;
-  `docs/reviews/adopt-yotthani-bannerlord-2026-09-30.md`.
+  `docs/reviews/adopt-yotthani-bannerlord-2026-09-30.md`; [rca-animation-variety-2026-10-17.md](../rca-animation-variety-2026-10-17.md) finding 35.
 
 ### Measure the value the engine consumes, in the state the game shows (FaceLearner, 2026-07 to 2026-08)
 Three of yotthani's FaceLearner hunts measured the wrong quantity accurately: groom offsets derived from the head
@@ -1320,7 +1325,11 @@ nothing for `ManagedMeshEditOperations`, whose names are in `TaleWorlds.Engine.d
 - **Why missed:** a partial view was read as a complete one.
 - **Prevent:** say "does not exist" only after a full listing or a search of the DLL itself; when `taom-src` finds
   nothing, search the assembly's strings before concluding.
-- **Source:** `docs/reference/head-mesh-and-groom-authoring.md` section 6.
+- **Second instance (2026-10-18):** the system map and the AnimationVariety research said nothing re-syncs the walk
+  phase. They described the walking case of the native locomotion update (0x7496D0); the same function holds a fully idle
+  agent's phase at the forward clip's snapping start (decompile lines 352-367 and 715-720), so soldiers on one clip
+  re-align at every halt. Read the whole function, its idle branch included, before writing an absence claim.
+- **Source:** `docs/reference/head-mesh-and-groom-authoring.md` section 6; [rca-animation-variety-2026-10-17.md](../rca-animation-variety-2026-10-17.md) finding 34.
 
 ### An upper mesh with no skin weights ships silently; dump the weights before blaming morphs (2026-10-02)
 `SK_Dwarf_Beard_A_12` reached four dwarf skins with all 15,344 vertices unweighted in every LOD, while beards 01 to
@@ -1335,3 +1344,96 @@ head-to-chest fade would have followed distance from the neck skin rather than t
   from finished siblings in the same FBX when they exist, and from the head only when they do not.
 - **Source:** `docs/reference/race-face-and-hand-morphs.md` "Hair, beards and eyebrows";
   `docs/reference/lotrlome-armory-snapshot/README.md` "skin weights on the dwarf beard".
+
+### `alternative_group` randomizes swings and idles but never locomotion (2026-10-17)
+A plan for random walk, run and swing clips per agent assumed one `alternative_group` mechanism for every action. The
+v1.5.5 native decompile shows three paths. The pick (0x655AD0) has exactly two callers, the set-channel call (0x655C40)
+and the death path (0x5F9F90), so it only affects actions requested through `SetActionChannel`, release and blocked
+swings and idles among them. The human walk table select (0x6413F0) resolves the 18 walk and run codes straight from the
+action-set slot table through 0x61A300 and 0x58FDE0 and caches the result per action set (list at `+0xD8`), so a group
+on a locomotion code does nothing. 0x63D720 is the rider-on-mount table, not this one. For a swing the pick runs first, the melee table (0x6597F0) is then read for the PICKED code, and the combat
+timing still comes from the original code's clip, so each alternative needs its own melee-table row, the base clip's
+duration and blend-out, and an action type that copies `actt_release_melee`, its usage direction and
+`as_attack_release`. A group with one member is disabled by the per set finalizer (0x591210). Repeat requests for the
+playing action, or one in its group, return early, so only a cyclic clip re-rolls (the tick sets request byte `+0x2A`).
+- **Why missed:** the v1.5.3 map described the pick but not who calls it, and an XML attribute looks the same on every
+  action code.
+- **Also missed:** a function that calls the slot lookup (0x63D720) was taken for the human table without reading
+  its callers (mount, dismount reset and the visuals tick); the human table is chosen in 0x6413F0.
+- **Prevent:** before adding an `alternative_group`, name the code path that requests the action. Locomotion variety
+  is a different action set per agent. For swings, bind a melee-table row for every alternative, or the first swing
+  crashes at `+0x659879`. The in-game swing test is still owed.
+- **Source:** `docs/reference/bannerlord-animation-system-map.md` section 8 "Alternative groups" and 10.4; v1.5.5
+  address map in section 13.
+
+
+### A piecewise-linear time warp kinks every bone's velocity (2026-10-17)
+The limp restyle first moved the weak foot's contact with a piecewise-linear time map. The map's slope jumps at each
+knot, so every bone's velocity jumps there too, and the validator's loop check failed on orc B's run arm. The tool now
+uses a smooth phase modulation with a continuous derivative across both contacts and the loop seam.
+- **Why missed:** the warp was judged by the planted-foot speed it was built for; the knot kinks in the other bones
+  surfaced only when the validator's loop check ran on the finished clip.
+- **Prevent:** warp time with a C1 map, never a piecewise-linear one. Run the validator's loop and velocity checks on
+  the arms, not only on the feet.
+- **Source:** `docs/features/orc-goblin-locomotion.md` "Limp Variants"; `tools/blender/restyle_human_clip.py`.
+
+### "Turn the bone toward FWD" is undefined when the bone already points along FWD (2026-10-17)
+The neck and head turn was written as a rotation that takes the bone toward the body's forward axis. With the neck
+nearly horizontal (the orc spec) it already points along FWD, so the rotation axis is degenerate and the head flipped 63
+degrees in one frame.
+- **Why missed:** the earlier orc spec's neck flex was -6 degrees, so the neck stayed far from FWD and the turn was well defined.
+- **Prevent:** pitch the neck and head about the body's side axis, a fixed axis that does not depend on where the bone
+  points. Treat any "rotate A toward B" built from a cross product as a bug when A can be parallel to B.
+- **Source:** `docs/features/orc-goblin-locomotion.md` "Tools changed".
+
+### Skinning a body onto a Kit-exported rig deforms it when the rests differ (2026-10-17)
+Binding a body mesh to a rig exported by the Kit, whose rest pose differs from the body's bind pose, pulled the arms
+out like a T-pose in the preview although every bone was in the right place.
+- **Why missed:** the bones and the clip were correct, so checking the animation data showed nothing wrong; only the
+  skinned mesh was.
+- **Prevent:** bind the body to the engine rig (`tools/blender/human_skeleton_engine.json` rest frames) and copy the
+  world transforms from the Kit-exported rig onto it.
+- **Source:** `tools/blender/show_gait_variants.py`; `docs/features/orc-goblin-locomotion.md`.
+
+### A viewer that never looks at its own render shows the user a broken scene (2026-10-17)
+The gait viewer opened its window on a broken scene twice, so Mike saw a broken scene before the author did.
+- **Why missed:** the viewer never inspected its own output; only the user's eyes did.
+- **Prevent:** render a snapshot first and read it, then open the window. Treat "ran without error" as no evidence for
+  anything visual.
+- **Source:** `tools/blender/show_gait_variants.py`.
+
+### A clamp measured from the quantity it protects moves with it (2026-10-18)
+The limp restyle's `min_track_half_m` keeps each planted ankle a minimum distance from the pelvis centreline. It measured
+from the current frame's pelvis x, and `weight_over_foot` and the sway move the pelvis toward the stance foot, so the
+clamp moved with it and pushed planted ankles sideways: the main orc walk's right foot moved sideways at 1.42 cm per frame
+against 0.31 in the source. The fix measures from the clip's mean pelvis line (`track_centre_x_m` in the report), and the
+achieved metric and the validator gate read the same value.
+- **Why missed:** the clamp, the achieved metric and the validator gate did not share one reference, and the validator's
+  slide gate was too loose to see the result (next entry).
+- **Prevent:** measure a bound from a reference the pass does not move, and give the clamp, the metric and the gate that
+  one reference. After any change to a planted-foot rule, compare the planted ankle's lateral and vertical speed with the
+  source's.
+- **Source:** [rca-animation-variety-2026-10-17.md](../rca-animation-variety-2026-10-17.md) finding 1; `tools/blender/restyle_human_clip.py`.
+
+### A gate that reads the producer's own intervals cannot fail the producer (2026-10-18)
+The validator's limp slide check compared the clip's contact plateau frames with the source's whole contact (heel strike
+and toe-off included), about twice too loose, on intervals the restyle itself reported. All 36 clips passed with the
+sideways slide above in them, and the validator had no tests. Codex noted the shared intervals but left skating
+UNVERIFIED; the Claude tooling lens found the slide by porting the sampler to numpy.
+- **Why missed:** the gate and the producer shared their definitions and their frames, and no test or second
+  implementation compared them. The first fix compared like with like (plateau with plateau) but still read the frames
+  from the report; a second Codex pass beat it with a clip that reported two quiet frames, had six grounded and slid 1.5 cm
+  per frame in the omitted ones. The validator now finds each foot's grounded plateau itself, on the exported poses and
+  on the source poses, and requires the report's frames to cover it.
+- **Prevent:** a validator derives its intervals itself, from the artifact and not from the producer's report, and
+  compares like with like (the same frames in the clip and the source); the producer's report is only checked against
+  what the validator found. It has its own tests, and a review re-measures one produced clip with independent code and
+  compares the number with the validator's. Landing and take-off frames, where the foot is still arriving, get their own
+  gates against the source rather than being dropped: sideways speed against the source where the time map plays that
+  frame, and backward speed no faster than the planted speed times (1 + the stride tolerance) plus 0.5 cm.
+- **Third pass (2026-10-18):** the second fix narrowed the gate to the plateau the validator found, which by definition
+  leaves out the frames a foot stalls, skids or lifts on. A claim of frames 6 and 7 skating 10 cm per frame passed
+  there and failed in round 1. A fix that narrows what a gate judges must keep judging everything the producer claims:
+  coverage is checked both ways (every found frame is claimed, and every claimed frame lies on the found plateau or its
+  end frames, `claimed_outside`).
+- **Source:** [rca-animation-variety-2026-10-17.md](../rca-animation-variety-2026-10-17.md) findings 2, 3, 42 and 57; `tools/blender/validate_locomotion_clips.py`.

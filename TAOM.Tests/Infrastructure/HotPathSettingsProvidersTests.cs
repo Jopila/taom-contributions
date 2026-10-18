@@ -9,6 +9,7 @@ using MCM.Abstractions.Base.Global;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Features;
+using TAOM.Features.AnimationVariety;
 using TAOM.Features.BattleLoadDiagnostics;
 using TAOM.Features.BlowDiagnostics;
 using TAOM.Features.CombatMechanics;
@@ -69,6 +70,8 @@ public class HotPathSettingsProvidersTests
     [DataRow(typeof(RaceAbilitySettingsProvider))]
     [DataRow(typeof(RefugeSettingsProvider))]
     [DataRow(typeof(SignatureStrikesSettingsProvider))]
+    [DataRow(typeof(GaitVarietySettingsProvider))]
+    [DataRow(typeof(AnimVarietyProbeSettingsProvider))]
     // #746: static, read per hit against a creature bandit. It has no instance to construct, so the counting
     // test below cannot take it: CreatureBanditTuningLiveTests runs the same CountingMcm check on it.
     [DataRow(typeof(CreatureBanditTuning))]
@@ -116,6 +119,8 @@ public class HotPathSettingsProvidersTests
     [DataRow(typeof(RaceAbilitySettingsProvider), typeof(RaceAbilitySettingsProvider))]
     [DataRow(typeof(IRefugeSettingsProvider), typeof(RefugeSettingsProvider))]
     [DataRow(typeof(ISignatureStrikesSettingsProvider), typeof(SignatureStrikesSettingsProvider))]
+    [DataRow(typeof(IGaitVarietySettingsProvider), typeof(GaitVarietySettingsProvider))]
+    [DataRow(typeof(IAnimVarietyProbeSettingsProvider), typeof(AnimVarietyProbeSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -178,6 +183,12 @@ public class HotPathSettingsProvidersTests
         // #746: read on every melee hit a signature hero lands.
         [typeof(SignatureStrikesSettingsProvider)] = (() => new SignatureStrikesSettingsProvider(SignatureConfig()),
             nameof(ISignatureStrikesSettingsProvider.IsEnabled), nameof(TaomSettings.EnableSignatureStrikes), () => new TaomSettings()),
+        // Read on every orc and goblin warrior spawn (gait variety).
+        [typeof(GaitVarietySettingsProvider)] = (() => new GaitVarietySettingsProvider(),
+            nameof(IGaitVarietySettingsProvider.RandomGaitSet), nameof(TaomSettings.EnableRandomGaitSet), () => new TaomSettings()),
+        // Read once per mission by the swing alternative probe (a lazy accessor like the rest, whatever the cadence).
+        [typeof(AnimVarietyProbeSettingsProvider)] = (() => new AnimVarietyProbeSettingsProvider(),
+            nameof(IAnimVarietyProbeSettingsProvider.SwingAlternativeProbe), nameof(TaomSettings.EnableSwingAlternativeProbe), () => new TaomSettings()),
     };
 
     // The IL rule above proves WHERE MCM is resolved, not THAT the result is kept: an accessor written
@@ -199,6 +210,8 @@ public class HotPathSettingsProvidersTests
     [DataRow(typeof(RaceAbilitySettingsProvider))]
     [DataRow(typeof(RefugeSettingsProvider))]
     [DataRow(typeof(SignatureStrikesSettingsProvider))]
+    [DataRow(typeof(GaitVarietySettingsProvider))]
+    [DataRow(typeof(AnimVarietyProbeSettingsProvider))]
     public void Provider_AsksMcmUntilItHasTheSettings_ThenNeverAgain_AndReadsThrough(Type provider)
     {
         var probe = Probes[provider];

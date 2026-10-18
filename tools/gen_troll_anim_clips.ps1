@@ -14,7 +14,10 @@ param(
   [string]$ClipsIndex = '',
   [string]$Renames = '',
   # the retarget run's retarget_report.json: -TravelScale is read from its one pelvis_scale value
-  [string]$RetargetReport = ''
+  [string]$RetargetReport = '',
+  # -CloneByName only: the restyle run's restyle_report.json (tools/blender/restyle_human_clip.py). Its stride_scale sets
+  # -TravelScale and each gait clip's step_points set its StepPoints X and Y; the report is checked first (Read-StepPoints)
+  [string]$RestyleReport = ''
 )
 <#
 Author the anim_troll_* AnimationClip tpacs for the Fab cave troll set (2026-09-17).
@@ -103,6 +106,31 @@ folder other than the default only when -SkeletonGuid is passed explicitly, and 
 lists each EMPTY master the index needs as UNWIRED, refuses to write, and fails -Verify; run
 wire_anim_master_skeletons.ps1 -SkeletonGuid <rig> -BoneNum 28 first. After -Apply the written clips are re-read and the item checksums fixed; any failure there, a wiring
 failure or python missing exits 1.
+-RestyleReport <restyle_report.json> (2026-10-17, the orc and goblin gaits; named -StepPointsFrom until the review): refused
+without -CloneByName. The restyle run's report holds what the clips need, so nothing is typed by hand. Its stride_scale
+sets -TravelScale (a gait's LoopDisplacement is the vanilla clip's x the stride: a hand-typed 1.377 once skated the troll's
+feet 12%), and a typed -TravelScale that differs by more than 0.001 is refused, as -RetargetReport does. A clone normally
+keeps its vanilla clip's StepPoints, the foot-plant progress points (vanilla walk and run: 0.4 and 0.898); a restyle plays
+the cycle through a time map, so the report's step_points holds the vanilla X and Y mapped through it, and each gait clip
+gets StepPoints X and Y from it in the report's order (Z and W stay vanilla's; the dry-run row shows them). The report is
+checked before anything is written (Read-StepPoints), because a report that matches nothing used to give 0 clips and a
+green -Verify: it must hold clips, its spec.clip_prefix must equal -ClipPrefix, EVERY entry needs no error and a good
+export (the restyle drops a failed clip from clips_index.json but keeps its entry, so an index-only check let a failed run
+through and -Verify counted its old tpac as another pipeline's), a gait is a clip NAMED walk_ or run_ (an entry whose
+kind disagrees is refused, so a run labelled idle cannot skip the stride and STEP/LOOP checks), every gait entry needs two
+step points (a step_points_gap entry, or the stale 2026-10-14 orc report cut before --vanilla-step-points existed, is
+refused), and the gait entries must agree on one stride_scale (to 4 places; an idle entry's 1.0 is not a gait's).
+Provenance: the report must carry a top-level spec_sha (the whole loaded spec's sha256), and EVERY entry (idles
+included) a loaded_spec_sha equal to it plus a spec_sha of its own (the spec merged for that clip, so a walk and a run may differ; it is
+required, not compared), because a partial run keeps older entries beside new ones; a report without them predates
+provenance and must be regenerated, not edited. Numbers are
+checked as JSON numbers before any conversion: a stride must be finite and above 0, a step point finite and in [0, 1]
+(the restyle rounds to 5 places, so a phase of 0.999996 is written 1.0), and a null, bool, string, list, NaN or Infinity
+is refused. Get-LoopFault, Get-StepFault and Resolve-TravelScale fail closed on a NaN, which compares false against
+every limit. -Verify fails a clip as STEP when its StepPoints X or Y is off the report's by more than 0.002, as LOOP when
+its LoopDisplacement is not the vanilla clip's x the stride (0.1%, at least 0.002), and fails the run when it checked no
+step point at all (Get-StepCoverageFault). How the engine uses step points beyond the footstep
+sounds under make_walk_sound is UNVERIFIED, and the Kit may store them in a coarser unit than a float.
 The melee attack table key (2026-09-26): a release or blocked action on a clip with no row in the engine's melee attack
 table crashes (TaleWorlds.Native.dll +0x6590B9). A clip gets a row only when its Kit "Blends with animation" box
 (TpacTool BlendWithAnimation, called UnknownClipName before ShortJake's v0.5.1; engine +0xD8) holds its own name, or
@@ -125,12 +153,115 @@ python tools/check_rdc_entries.py --under "Race Test/Mordor/Trolls". Tests: tool
 (the rule's functions, lifted out of this file by the PowerShell parser).
 #>
 $ErrorActionPreference = 'Stop'
+if ($RestyleReport -and -not $CloneByName) { throw "-RestyleReport needs -CloneByName: it sizes the cloned human clips, and the Fab path has no restyle" }
 Add-Type -Path "$TpacBin\TpacTool.Lib.dll"
 Add-Type -Path $Loader -ReferencedAssemblies @("$TpacBin\TpacTool.Lib.dll", 'System.dll', 'System.Core.dll')
 function Load($p) { [ChariotExtract.TolerantTpacLoader]::Load($p) }
 $EMPTY = '00000000-0000-0000-0000-000000000000'
 $SKEL = [Guid]$SkeletonGuid
 $FPS = 30.0
+
+# ---- the report switches' rules. Pure functions, lifted out of this file by tools/tests/test_gen_troll_anim_clips.py.
+# The scale a clone's travel is multiplied by: the report's, unless a typed -TravelScale differs by more than 0.001
+function Resolve-TravelScale([double]$Typed, [double]$FromReport, [string]$What) {
+  $inv = [Globalization.CultureInfo]::InvariantCulture
+  # a NaN compares false against every limit, so the disagreement test below would wave it through
+  if ([double]::IsNaN($Typed) -or [double]::IsInfinity($Typed)) { throw ("-TravelScale {0} is not a finite number" -f $Typed.ToString($inv)) }
+  if ([double]::IsNaN($FromReport) -or [double]::IsInfinity($FromReport) -or $FromReport -le 0) {
+    throw ("{0} {1} is not a finite number above 0" -f $What, $FromReport.ToString($inv))
+  }
+  if ($Typed -gt 0 -and [math]::Abs($Typed - $FromReport) -gt 0.001) {
+    throw ("-TravelScale {0} disagrees with {1} {2}" -f $Typed.ToString($inv), $What, $FromReport.ToString($inv))
+  }
+  return $FromReport
+}
+# Reads a restyle_human_clip.py report for the clips in $IndexClips; throws on anything that would write nothing or the
+# wrong thing. Returns @{ Points = clip -> @(X, Y) in the report's order; Stride = the gait clips' one stride_scale;
+# Gait = clip -> $true }. A step_points entry is kept for any clip that has two, a gait clip must.
+# The whole report is judged, not only the index: the restyle drops a failed clip from clips_index.json but keeps its
+# entry, and a partial run keeps older entries beside new ones. A gait is a clip NAMED walk_ or run_ (the restyle's own
+# rule), never what an entry's kind claims. A number is checked as a JSON number before it is converted: a null, bool,
+# string, list, NaN or Infinity is refused, never cast.
+function Read-StepPoints([string]$Path, [string]$Prefix, [string[]]$IndexClips) {
+  function Test-Finite($v) {
+    return (($v -is [int] -or $v -is [long] -or $v -is [double] -or $v -is [decimal] -or $v -is [single]) -and
+            -not ([double]::IsNaN([double]$v) -or [double]::IsInfinity([double]$v)))
+  }
+  $rep = Get-Content $Path -Raw | ConvertFrom-Json
+  if ($null -eq $rep.clips -or @($rep.clips.PSObject.Properties).Count -eq 0) { throw ("-RestyleReport {0} has no clips" -f $Path) }
+  if ("$($rep.spec.clip_prefix)" -cne $Prefix) {
+    throw ("-RestyleReport {0}: spec.clip_prefix is '{1}', not -ClipPrefix '{2}' (a report of another variant)" -f $Path, $rep.spec.clip_prefix, $Prefix)
+  }
+  $predates = "the report predates provenance (restyle_human_clip.py now writes spec_sha) and must be regenerated"
+  $sha = $rep.spec_sha
+  if ($sha -isnot [string] -or $sha -eq '') { throw ("-RestyleReport {0} has no top-level spec_sha: {1}" -f $Path, $predates) }
+  foreach ($prop in $rep.clips.PSObject.Properties) {
+    $name = $prop.Name; $e = $prop.Value
+    if ($null -ne $e.PSObject.Properties['error']) { throw ("-RestyleReport {0}: clip {1} carries an error entry" -f $Path, $name) }
+    if ($null -eq $e.export -or $e.export.ok -isnot [bool] -or $e.export.ok -ne $true) { throw ("-RestyleReport {0}: clip {1}: the export did not succeed" -f $Path, $name) }
+    $named = $name -cmatch '^(walk|run)_'
+    if ($named -ne ("$($e.kind)" -ceq 'gait')) {
+      throw ("-RestyleReport {0}: clip {1} is named like a {2} but its kind is '{3}'; a gait is a walk_ or run_ clip" -f $Path, $name, $(if ($named) { 'gait' } else { 'non-gait clip' }), $e.kind)
+    }
+    # EVERY entry, idles included (an --only gait re-run after a spec change would otherwise leave old-spec idle FBX in the
+    # batch). spec_sha is the fingerprint of the spec merged for THIS clip (a walk and a run differ when the spec has a run
+    # override), so it is only required; loaded_spec_sha is the whole loaded spec's and must be the report's
+    if ($e.spec_sha -isnot [string] -or $e.spec_sha -eq '') { throw ("-RestyleReport {0}: clip {1} has no spec_sha: {2}" -f $Path, $name, $predates) }
+    if ($e.loaded_spec_sha -isnot [string] -or $e.loaded_spec_sha -eq '') { throw ("-RestyleReport {0}: clip {1} has no loaded_spec_sha: {2}" -f $Path, $name, $predates) }
+    if ($e.loaded_spec_sha -cne $sha) {
+      throw ("-RestyleReport {0}: clip {1} has loaded_spec_sha '{2}', not the report's spec_sha '{3}' (a partial run kept an older record); regenerate the whole report" -f $Path, $name, $e.loaded_spec_sha, $sha)
+    }
+  }
+  $points = @{}; $gait = @{}
+  $strides = New-Object 'System.Collections.Generic.HashSet[double]'
+  foreach ($name in $IndexClips) {
+    $prop = $rep.clips.PSObject.Properties[$name]
+    if ($null -eq $prop) { throw ("-RestyleReport {0} has no entry for clip {1}" -f $Path, $name) }
+    $e = $prop.Value
+    $sp = if ($null -ne $e.step_points) { @($e.step_points) } else { @() }
+    foreach ($v in $sp) {
+      if (-not (Test-Finite $v) -or $v -lt 0 -or $v -gt 1) {
+        throw ("-RestyleReport {0}: clip {1}: step point '{2}' is not a finite number in [0, 1]" -f $Path, $name, $v)
+      }
+    }
+    if ($name -cmatch '^(walk|run)_') {
+      if ($sp.Count -lt 2) {
+        throw ("-RestyleReport {0}: gait clip {1} needs two step points, has {2}; cut it again with restyle_human_clip.py --vanilla-step-points {3}" -f $Path, $name, $sp.Count, $e.step_points_gap)
+      }
+      if (-not (Test-Finite $e.stride_scale) -or $e.stride_scale -le 0) {
+        throw ("-RestyleReport {0}: gait clip {1}: stride_scale '{2}' is not a finite number above 0" -f $Path, $name, $e.stride_scale)
+      }
+      [void]$strides.Add([math]::Round([double]$e.stride_scale, 4))
+      $gait[$name] = $true
+    }
+    if ($sp.Count -ge 2) { $points[$name] = @([double]$sp[0], [double]$sp[1]) }
+  }
+  if ($gait.Count -eq 0) { throw ("-RestyleReport {0} has no gait clip among the {1} index clips" -f $Path, @($IndexClips).Count) }
+  if ($strides.Count -gt 1) { throw ("-RestyleReport {0}: the gait clips disagree on stride_scale ({1}); one -TravelScale cannot fit them" -f $Path, (@($strides | Sort-Object) -join ', ')) }
+  return @{ Points = $points; Stride = @($strides)[0]; Gait = $gait }
+}
+# '' when a gait clip's loop travel is the vanilla clip's x the stride (0.1%, at least 0.002), else what is off
+function Get-LoopFault([double]$Vanilla, [double]$Stride, [double]$Actual) {
+  $want = $Vanilla * $Stride
+  # "not within", so a NaN or an Infinity (which compare false against any limit) is a fault, never a pass
+  if (-not ([math]::Abs($Actual - $want) -le [math]::Max(0.002, 0.001 * [math]::Abs($want)))) {
+    return ("LoopDisplacement {0}, want {1} (vanilla {2} x stride {3})" -f $Actual, $want, $Vanilla, $Stride)
+  }
+  return ''
+}
+# '' when a clip's StepPoints X and Y are within 0.002 of the report's, else what is off. Written as "not within", so a NaN
+# (which compares false against any limit) is a fault, never a pass
+function Get-StepFault([double]$X, [double]$Y, [double[]]$Want) {
+  if (-not ([math]::Abs($X - $Want[0]) -le 0.002 -and [math]::Abs($Y - $Want[1]) -le 0.002)) {
+    return ("StepPoints X={0} Y={1}, want X={2} Y={3}" -f $X, $Y, $Want[0], $Want[1])
+  }
+  return ''
+}
+# '' unless a -RestyleReport -Verify checked no clip's StepPoints: that run proved nothing
+function Get-StepCoverageFault([bool]$RestyleOn, [int]$Checked) {
+  if ($RestyleOn -and $Checked -eq 0) { return 'no clip had its StepPoints checked against the report; a run that checks nothing cannot pass' }
+  return ''
+}
 
 if ($RetargetReport) {
   $scales = New-Object 'System.Collections.Generic.HashSet[double]'   # doubles, not strings: a de-DE '1,8504' parses as 18504
@@ -143,9 +274,7 @@ if ($RetargetReport) {
   }
   Find-PelvisScale (Get-Content $RetargetReport -Raw | ConvertFrom-Json)
   if ($scales.Count -ne 1) { throw ("-RetargetReport {0} holds {1} pelvis_scale values ({2}); want exactly one" -f $RetargetReport, $scales.Count, (@($scales) -join ', ')) }
-  $fromReport = @($scales)[0]
-  if ($TravelScale -gt 0 -and [math]::Abs($TravelScale - $fromReport) -gt 0.001) { throw ("-TravelScale {0} disagrees with the report's pelvis_scale {1}" -f $TravelScale, $fromReport) }
-  $TravelScale = $fromReport
+  $TravelScale = Resolve-TravelScale $TravelScale @($scales)[0] "the report's pelvis_scale"
   Write-Output ("travel scale {0} from {1}" -f $TravelScale, $RetargetReport)
 }
 
@@ -261,6 +390,19 @@ if ($CloneByName) {
   if (-not $ClipsIndex) { throw "-CloneByName needs -ClipsIndex <clips_index.json written by read_anim_keyframes_tpac.ps1 -ByClip>" }
   $index = @{}
   (Get-Content $ClipsIndex -Raw | ConvertFrom-Json).PSObject.Properties | ForEach-Object { $index[$_.Name] = $_.Value }
+  $stepFrom = @{}   # vanilla clip name -> @(X, Y) from the restyle report, in its order
+  $restyle = $null
+  if ($RestyleReport) {
+    $restyle = Read-StepPoints $RestyleReport $ClipPrefix @($index.Keys)
+    $TravelScale = Resolve-TravelScale $TravelScale $restyle.Stride "the restyle report's stride_scale"
+    $stepFrom = $restyle.Points
+    Write-Output ("restyle report {0}: {1} gait clip(s), stride {2}, travel scale {3}, step points for {4} clip(s)" -f $RestyleReport, $restyle.Gait.Count, $restyle.Stride, $TravelScale, $stepFrom.Count)
+  }
+  # a clip's loop travel, or $null when it has no BipMovIkUsage
+  function Get-LoopDisplacement($clip) {
+    foreach ($u in $clip.ClipUsages) { if ($u.GetType().Name -eq 'BipMovIkUsage') { return [double]$u.LoopDisplacement } }
+    return $null
+  }
   $ourMasterOf = @{}
   foreach ($clipName in $index.Keys) { $ourMasterOf[$clipName] = $ClipPrefix + ("$($index[$clipName].master)" -replace '^anim_', '') }
   # An AnimationClip's Name is a fixed-size(64) string in the engine: 63 usable characters. The Kit warned "Could not
@@ -284,7 +426,7 @@ if ($CloneByName) {
   foreach ($u in $unwired) { Write-Output ("UNWIRED {0}: EMPTY skeleton; run wire_anim_master_skeletons.ps1 -SkeletonGuid {1} -BoneNum 28 first" -f $u, $SKEL) }
   if ($unwired.Count -gt 0 -and -not $Verify) { Write-Output "REFUSED: masters are not wired to a skeleton"; exit 1 }
   if ($Verify) {
-    $ok = 0; $bad = 0; $other = 0; $selfKeyed = 0; $byGuid = @{}; $seen = @{}
+    $ok = 0; $bad = 0; $other = 0; $selfKeyed = 0; $stepOk = 0; $loopOk = 0; $byGuid = @{}; $seen = @{}
     foreach ($mm in $masterMap.Values) { $byGuid["$($mm.guid)"] = $mm }
     foreach ($f in ([IO.Directory]::GetFiles($Masters, ($ClipPrefix + '*_anm.tpac')) | Sort-Object)) {
       $cl = (Load $f).Package.Items | Where-Object { $_.GetType().Name -eq 'AnimationClip' } | Select-Object -First 1
@@ -303,14 +445,30 @@ if ($CloneByName) {
       $keyed = [bool]$vkeyed[$clipName]
       $why = Get-ClipKeyFault $cl $keyed
       if ($why) { $bad++; Write-Output ("KEY    {0} -> {1}" -f $cl.Name, $why); continue }
+      if ($stepFrom.ContainsKey($clipName)) {
+        $why = Get-StepFault ([double]$cl.StepPoints.X) ([double]$cl.StepPoints.Y) $stepFrom[$clipName]
+        if ($why) { $bad++; Write-Output ("STEP   {0} -> {1}" -f $cl.Name, $why); continue }
+        $stepOk++
+      }
+      if ($null -ne $restyle -and $restyle.Gait.ContainsKey($clipName)) {
+        $vl = Get-LoopDisplacement $vclips[$clipName]
+        if ($null -ne $vl) {
+          $al = Get-LoopDisplacement $cl
+          $why = if ($null -eq $al) { 'no BipMovIkUsage, but the vanilla clip has one' } else { Get-LoopFault $vl $restyle.Stride $al }
+          if ($why) { $bad++; Write-Output ("LOOP   {0} -> {1}" -f $cl.Name, $why); continue }
+          $loopOk++
+        }
+      }
       if ($keyed) { $selfKeyed++ }
       $ok++
     }
     $refused = @($index.Keys | Where-Object { -not $seen.ContainsKey($_) -and (IsRefusedByDesign $_) } | Sort-Object)
     foreach ($r in $refused) { Write-Output ("REFUSED BY DESIGN {0}: its vanilla range runs past master {1}" -f $r, $ourMasterOf[$r]) }
     $absent = $index.Count - $ok - $bad - $refused.Count
-    Write-Output ("verify (clone-by-name): clips ok={0} (self-keyed={7}) bad={1} missing={2} refused-by-design={3} unwired masters={4} of index {5}   other pipeline's clips skipped={6}" -f $ok, $bad, $absent, $refused.Count, $unwired.Count, $index.Count, $other, $selfKeyed)
-    if ($bad + $noAnim + $unwired.Count -gt 0 -or $absent -gt 0) { exit 1 } else { exit 0 }
+    $stepFault = Get-StepCoverageFault ([bool]$RestyleReport) $stepOk
+    if ($stepFault) { Write-Output ("STEP   {0}" -f $stepFault) }
+    Write-Output ("verify (clone-by-name): clips ok={0} (self-keyed={7}) bad={1} missing={2} refused-by-design={3} unwired masters={4} of index {5}   other pipeline's clips skipped={6}   step points checked={8}   loop displacements checked={9}" -f $ok, $bad, $absent, $refused.Count, $unwired.Count, $index.Count, $other, $selfKeyed, $stepOk, $loopOk)
+    if ($bad + $noAnim + $unwired.Count -gt 0 -or $absent -gt 0 -or $stepFault) { exit 1 } else { exit 0 }
   }
   $rows = @(); $written = 0; $skipped = 0; $missing = 0; $refusedByDesign = 0; $keyedPlanned = 0
   foreach ($clipName in ($index.Keys | Sort-Object)) {
@@ -345,6 +503,11 @@ if ($CloneByName) {
           $usageNote = ('disp={0}' -f $u.DisplacementVector)
         }
       }
+    }
+    if ($stepFrom.ContainsKey($clipName)) {
+      $v = $c.StepPoints   # Z and W stay as the vanilla clip has them
+      $c.StepPoints = New-Object System.Numerics.Vector4 -ArgumentList @([float]$stepFrom[$clipName][0], [float]$stepFrom[$clipName][1], [float]$v.Z, [float]$v.W)
+      $usageNote += (' step=<{0:0.####},{1:0.####}>' -f $c.StepPoints.X, $c.StepPoints.Y)
     }
     $flags = ($c.Flags | ForEach-Object { "$_" }) -join ','
     $rows += ("{0,-44} <- {1,-44} s={2}..{3} dur={4,-5} pri={5,-3} {6} flags=[{7}]{8}" -f $newName, $ourMaster, $c.Source1, $c.Source2, $c.Duration, $c.Priority, $usageNote, $flags, $(if ($keyed) { ' KEYED' } else { '' }))

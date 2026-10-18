@@ -35,5 +35,6 @@ internal static class FeatureModules
         new Features.NameplateCull.NameplateCullModule(),
         new Features.MapViewRelease.MapViewReleaseModule(),
         new Features.EyeOfSauron.EyeOfSauronModule(),
+        new Features.AnimationVariety.AnimationVarietyModule(),
     };
 }

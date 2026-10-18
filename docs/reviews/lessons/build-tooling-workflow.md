@@ -1205,6 +1205,13 @@ captured. The lesson does not depend on it: a guard with any silent-failure mode
   mattpocock vet "passed" that way. The first fix read a fixed list of plugin folders, and the deep
   review of it found the same shape one level down: a hook script in `lib/` or `bin/` scanned 0 times
   with exit 0. The vet now reads the whole foreign tree.
+- 2026-10-18, the orc gait review: `gen_troll_anim_clips.ps1 -StepPointsFrom` given a stale report matched no clip,
+  wrote no step point, and `-Verify` passed with `step points checked=0`; the binder's `--check` passed after a
+  reinstall removed the variant clips and sets together, because a skipped variant and an absent one looked alike; and
+  the stage-1 copy script's own game and Kit process guard failed open. A run that checked zero items now fails
+  (`-Verify` fails when it checked no step point; `--check --require-variants` fails an absent variant once the
+  variants are imported), and a script that writes the live Armory imports `_gamedir.game_or_kit_running` instead of
+  writing its own guard. RCA [rca-animation-variety-2026-10-17.md](../rca-animation-variety-2026-10-17.md) findings 5, 14 and 19.
 
 - **Why missed:** the guard was written and verified in the one environment where the variable
   resolved, and its skipped path and its clean path emit the same thing — nothing. A gate whose pass

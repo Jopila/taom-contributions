@@ -42,6 +42,17 @@ VERDICT: CLEAN / ISSUES FOUND
 ### Lessons From Prior Reviews (87 reviews, 193+ bugs found), distilled
 
 **What Codex does especially well (2026-09-01 memory-diagnostics review: 4/4 HIGH real, 0 false positives).**
+- **Reproduces the engine's own merge on the live file, and follows a shared callback to every caller** (2026-10-18,
+  animation variety, 3 of 3 findings real): it re-created the engine's `MergeElements` duplicate handling in memory
+  (`Module.cs:1472` folds a repeated `action_set` into its first definition) against the live `action_sets.xml` and
+  showed the binder's outside-definition guard was off whenever a generated block existed. It read the missile path
+  through `OnAgentHit` and found the probe sampled a projectile hit against whatever swing the attacker was playing, and
+  it disputed the recycled-slot suspect correctly (the closure holds captured values and a reference-keyed map). For a
+  guard, ask which state of the file turns it off; for a callback shared by two hit kinds, ask which kinds reach it.
+  On the second pass over the fixes it executed counterexamples against them in memory (a clip with two reported
+  frames and six grounded slid 1.5 cm per frame and passed the validator; a duplicate id kept the foreign set alive)
+  and read the compiled IL to show the missile fix still allocated a closure on every hit: 4 MEDIUM and 2 LOW in the
+  fixes themselves. For a fix, ask for the input that beats it.
 - **Follows an engine cache to the version key it actually reads** (2026-10-14, Eye of Sauron hunt #765
   M8, 4 of 4 findings real): the hunt's end bumped only the party's speed version and its start relied
   on the top-up growing the roster, but `PartyBase.PartySizeLimit` keys on `MemberRoster.VersionNo`, so a
@@ -202,6 +213,12 @@ archive the 6th-oldest, harvest durable patterns into `docs/reviews/lessons/<cat
 - **A ratchet or suppression list with no multiplicity.** Keyed on `(owner, item)` alone, 10 entries were suppressing 13 occurrences, so an already-listed roster gaining a SECOND copy of the same bad item filed as old debt.
 - **What the deserializer assembles, not the XML's shape** (2026-09-30, KEYforce art: a Codex miss that three scoped Claude lenses caught in the fix review). Codex's fix for a first-roster-only mount read named every battle roster and battle `EquipmentSet` references, but not the `<equipment>` written directly under `<Equipments>`, which `MBEquipmentRoster.AddOverriddenEquipments` writes over its slot in every set; 88 troops mount that way. When a finding models what a troop carries, list every path `BasicCharacterObject.Deserialize` takes.
 
+- **A validator that shares its producer's intervals** (2026-10-18, animation variety: a Codex miss that the Claude
+  tooling lens caught). Codex missed the HIGH, a restyle clamp measured from a pelvis the pass moves, so planted ankles
+  slid sideways, and the validator's slide gate that let 36 clips through by comparing the clip's plateau frames with the
+  source's whole contact. It noted that the validator "shares producer intervals" and left skating UNVERIFIED; the
+  tooling lens ported the sampler to numpy and measured it. For any gate that judges a produced artifact, ask the reviewer
+  to re-sample one artifact with independent code and compare its number with the gate's. No new false-positive pattern.
 - **Every syntax that guards a throwing getter** (2026-10-14, review follow-ups #792: a Codex miss a
   later Claude docs audit caught). Codex showed the `PartyBase.MainParty` scan missed `!= null`, the
   reversed and the `is` forms, but not `?.`; seven `PartyBase.MainParty?.` reads in two adapters

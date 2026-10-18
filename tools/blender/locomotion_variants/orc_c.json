@@ -1,0 +1,55 @@
+{
+ "_doc": "Orc gait variant C, the MIDDLE orc (Mike 2026-10-17: lower than B, higher than the main orc; 'very good'). Every posture value sits about halfway between orc_b.json and orc.json; the spine is at the 30 deg cap. stride_scale 0.89: 0.92 and 0.95 gave a calf hitch at the run's loop seam in the non-limp path. Limp between B's and the main orc's, MIRRORED (mirror_sides: weak RIGHT leg, strong LEFT leg, low leading left shoulder) so it differs from the other two. Walk and run only; the idles stay the main orc's (as_orc_warrior_c derives from as_orc_warrior). Clips taom_orc_c_* on as_orc_warrior_c. Read by tools/blender/restyle_human_clip.py. Angles in degrees, distances in metres.",
+ "clip_prefix": "taom_orc_c_",
+ "mirror_sides": true,
+ "trunk_flex_deg": {
+  "spine": 7.0,
+  "spine1": 11.0,
+  "spine2": 12.0
+ },
+ "neck_head_flex_deg": {
+  "neck": 18.0,
+  "head": -45.0
+ },
+ "pelvis_tilt_deg": 10.0,
+ "clavicle_drop_deg": 8.0,
+ "clavicle_protract_deg": 9.0,
+ "upperarm_hang_deg": -12.0,
+ "elbow_bend_deg": 18.0,
+ "arm_swing_scale": 1.15,
+ "knee_bend_deg": 21.0,
+ "stance_width_m": 0.08,
+ "foot_splay_deg": 25.0,
+ "stride_scale": 0.89,
+ "bob_scale": 1.3,
+ "sway_scale": 2.0,
+ "hand_clearance_m": 0.08,
+ "shield_arm_clearance_m": 0.15,
+ "limp": {
+  "strong_side": "r",
+  "timing_split": 0.58,
+  "weak_lift_max_m": 0.04,
+  "weak_toe_down_deg": 12.0,
+  "weak_swing_out_m": 0.04,
+  "weak_trail_m": 0.04,
+  "weak_hip_hike_m": 0.035,
+  "strong_drop_m": 0.04,
+  "weak_drop_m": 0.008,
+  "strong_lean_deg": 3.5,
+  "lead_shoulder_yaw_deg": 10.0,
+  "low_shoulder_deg": 2.0,
+  "low_shoulder_lean_deg": 2.5,
+  "low_arm_swing_scale": 1.55,
+  "knee_bow_m": 0.065,
+  "knee_max_deg": 162.0,
+  "weight_over_foot": 0.32,
+  "foot_outer_edge_deg": 6.0,
+  "arm_forward_deg": 8.0,
+  "min_track_half_m": 0.14
+ },
+ "run": {
+  "stance_width_m": 0.1,
+  "timing_split": 0.6,
+  "weak_trail_m": 0.12
+ }
+}

@@ -88,6 +88,9 @@ public static class CoopSettingsRelevance
         "EnableAnimMemoryProbe",
         // The war elephant howdah's [Howdah] diagnostics lines (#627); gates logging, never the platform.
         "EnableHowdahDiagnostics",
+        // The [AnimVariety] swing alternative probe (docs/features/animation-variety.md): counts swings and hit timing, logs
+        // them, changes nothing in the game.
+        "EnableSwingAlternativeProbe",
     };
 
     /// <summary>
@@ -163,6 +166,10 @@ public static class CoopSettingsRelevance
         // The skeleton buffer guard: where the engine writes a frame's skeleton data when a pool is full. A peer that differs
         // either draws a few wrong-looking skeletons or, with the guard off, freezes; neither makes two running simulations differ.
         "SkeletonBufferGuard",
+        // Animation Variety (docs/features/animation-variety.md): the step size and gait set an orc or goblin warrior walks
+        // with. The walk phase is the only thing they change, so a peer that differs draws different footfalls, never a different
+        // fight. Applied per peer at spawn, with a draw seeded by the troop and its body seed.
+        "EnableRandomStepSize", "GaitStepSizeMinFactor", "EnableRandomGaitSet",
         "RealmColourGondor", "RealmColourRohan", "RealmColourDunland", "RealmColourIsengard", "RealmColourMordor", "RealmColourHarad", "RealmColourUmbar", "RealmColourShaghana", "RealmColourAbanissa", "RealmColourKhand", "RealmColourRhun", "RealmColourDale", "RealmColourErebor", "RealmColourRivendell", "RealmColourLothlorien", "RealmColourMirkwood", "RealmColourLindon", "RealmColourDolGuldur", "RealmColourGundabad", "RealmColourMistyMountainOrcs", "RealmColourGoblins", "RealmColourBlueCraig", "RealmColourArthedain", "RealmColourYourRealm",
     };
 

@@ -15,6 +15,15 @@ shield; both stances) is in the live Armory for both races: 32 masters imported 
 Next: items 2 to 6 of #791 (directional walks, the other weapon classes, idle fidgets, town idles, an
 upright uruk variant on approval).
 
+**Status (2026-10-18):** Mike's review (2026-10-17) replaced the orc gait with a new motion (see "Motion spec revision
+(2026-10-17)") and added two per-soldier orc variants. The review of 2026-10-17/18 then fixed the restyle's planted-foot
+clamp and the validator's slide gate (see the RCA), so all 36 orc clips were re-exported on 2026-10-18 and pass the
+validator (16 main, 10 B, 10 C). A second Codex pass the same day found the validator and the generator still too
+trusting (see "Limp Variants" and the checklist), so the clips were exported once more. The new FBX are staged and were
+copied into the live Armory again on 2026-10-18 (stage 1: at 00:02, and after the second pass at about 00:51, backup
+stamp 00:51:47; all 36 match the staging folders by sha256), but **nothing is imported yet**: the game still plays the 2026-10-14 clips. The Kit
+import and everything after it is owed (see the Kit Import Checklist). Goblins are next.
+
 ## Why This Exists
 
 - **Vanilla behavior:** a race on `human_skeleton` uses `as_human_warrior` clips unless its own
@@ -164,6 +173,9 @@ by one for the rest frame. With prefixes `taom_orc_` and `taom_goblin_`, the lon
 
 ## Motion Spec (approved 2026-10-14)
 
+This table now describes the superseded orc A; the orc column no longer matches `orc.json`. The goblin column is
+current. The orc values in force are under "Motion spec revision (2026-10-17)".
+
 Mike approved these values; the previews confirmed them before export, and the in-game check passed.
 
 | Parameter | Orc | Goblin |
@@ -231,9 +243,219 @@ side, restyle side, vanilla front, restyle front; columns at 0, 25, 50 and 75 pe
 **Staging:** `E:\LOTRAOMAssets\troll_clips_to_import\orc_locomotion\{orc,goblin}\`: 16 FBX each, plus
 `clips_index.json` (for the clip generator), `restyle_report.json` and `validate_report.json`.
 
+## Limp Variants (restyle tool extension, 2026-10-17)
+
+`restyle_human_clip.py` takes two optional spec blocks. A spec without them restyles exactly as before (orc.json: 79 of
+the 80 report numbers checked against the staged report match, and every report key matches an unmodified tool's run).
+
+- **`limp`**: an asymmetric gait, a heavy slightly injured brawler. Static posture: `lead_shoulder_side` (defaults to
+  `strong_side`; that shoulder is the leading and the low one), `lead_shoulder_yaw_deg` (upper trunk yawed 40/60 over
+  spine1 and spine2, neck and head turned back so the face keeps its direction), `low_shoulder_deg`,
+  `low_shoulder_lean_deg`, `lead_shoulder_protract_deg`, `low_arm_forward_deg`, `low_arm_swing_scale`,
+  `arm_forward_deg`, `knee_bow_deg` or the metric `knee_bow_m`, `knee_max_deg`, `min_track_half_m`. Cycle:
+  `strong_side`, `timing_split`, `strong_lift_scale`, `weak_lift_scale`, `weak_lift_max_m`, `weak_toe_down_deg`,
+  `weak_swing_out_m`, `weak_trail_m`, `weak_hip_hike_deg` or `weak_hip_hike_m`, `strong_drop_m`, `weak_drop_m`,
+  `strong_lean_deg`, `shoulder_roll_deg`, `weight_over_foot`, `foot_outer_edge_deg`. Every key, its meaning and its
+  default is in `LIMP_DEFAULTS`.
+- **Idles get only `arm_forward_deg`.** A gait clip gets the whole limp; a stand clip gets that one key and the
+  `LIMP_DEFAULTS` for the rest (`limp_for_kind`). The stride and stomp keys mean nothing to a standing clip, and a spec
+  that mirrors the low shoulder (orc C) would flip the shoulder at every halt, because B and C inherit the main orc's
+  idles. The consequence is visible: a B or C soldier changes posture when it halts, from its own gait to the main
+  orc's idle.
+- **`min_track_half_m` is measured from a fixed line.** The clamp keeps each planted ankle at least that far from the
+  clip's MEAN pelvis line (the report's `track_centre_x_m`), and the validator and the achieved metric measure against
+  the same line. The first version measured from the current frame's pelvis, which `weight_over_foot` and the sway move
+  toward the stance foot, so the clamp pushed planted ankles sideways: the main orc walk's right foot moved sideways at
+  1.42 cm per frame against 0.31 in the source. After the fix it moves at 0.18.
+- **`run`**: keys that override the top level (and the limp keys) for `run_*` clips. It may not change `stride_scale`,
+  because `gen_troll_anim_clips.ps1` applies one `-TravelScale` per variant. The 30 degree trunk flex cap, the clavicle
+  cap (per side, drop plus `low_shoulder_deg`, protract plus `lead_shoulder_protract_deg`), a 20 degree cap on
+  `lead_shoulder_yaw_deg` and an 8 degree cap on trunk lateral bend (`low_shoulder_lean_deg` plus `strong_lean_deg`)
+  are checked on the base spec and on the merged run spec; `--allow-over-cap` lifts them for both. `mirror_sides`
+  swaps the strong side and an explicit lead side.
+
+**Uneven timing without foot slide.** The engine moves the agent at a constant speed, so a planted foot must fall back
+at a constant rate V in every frame. A time warp alone makes it slide. The tool finds each foot's contact in the source
+(the validator's definition), keeps the strong contact at its source phase and moves the weak one to `timing_split`
+(frame count and period are unchanged, so LoopDisplacement is too), samples the source at fractional frames (slerp and
+lerp of the local transforms), and rebuilds each ankle's forward path: exactly V per frame over the contact plateau (V is
+the median planted speed times `stride_scale`), and the source swing profile, read at the source position the time map
+plays, between plateaus. The time map is a smooth phase modulation (continuous derivative across both contacts and
+the loop seam, so no bone's velocity jumps where the pace changes). A source that misses closure by 1 to under 6
+degrees (three vanilla run clips: 1.1, 1.54, 5.21) is closed first over its last 6 frames and the report says so
+(`loop_closure`); a worse one is refused. Keeping the strong contact at its phase limits the misalignment against the vanilla side and
+back clips, which the engine blends at one shared phase in diagonal movement.
+
+**Report.** Each limp clip's `restyle_report.json` entry lists the contact intervals (frames and phases), `timing_split`,
+the planted speed, `step_points` (the vanilla StepPoints mapped through the warp; the vanilla values are in
+`tools/blender/vanilla_locomotion_step_points.json`) and an `achieved` block with the measured value of every metric
+target. Each step point is mapped in place (X stays the image of vanilla X, Y of vanilla Y, even when the warp
+plays one past the loop seam), and the entry carries `step_points_wrapped` when one wrapped. `gen_troll_anim_clips.ps1 -CloneByName -RestyleReport <restyle_report.json>` writes those step
+points into the cloned clips (X and Y; Z and W stay) and `-Verify` checks them; the flag was named `-StepPointsFrom`
+until the review. The report also sets `-TravelScale` (its `stride_scale`), and a typed value must match it within
+0.001 or the run is refused: a hand-typed 1.377 once skated the troll's feet by 12%. The generator refuses a stale
+report (see the checklist).
+
+**The validator finds the contact itself.** It judges a limp clip against the warped source, and for each foot it finds
+the grounded plateau again, independently, on the exported poses and on the source poses (the restyle's own contact
+definitions: `contact_indices`, the longest stance, `plateau_window`). It never takes the frames from the report: the
+report's `frames` must cover the plateau found (all but 1 frame), and the gates run over the independent plateau. A
+first version compared the clip's reported plateau with the source's whole contact (heel strike and toe-off included),
+about twice too loose; the second still believed the report's frames, and a counterexample with two reported quiet
+frames and six grounded ones slid 1.5 cm per frame in the omitted frames and passed. Over the plateau it gates the
+steady back-rate and its residual, lateral and vertical speed against the source's plateau, and the metrics it can measure
+on the clip itself. Coverage is checked both ways: every frame found must be claimed (all but 1), and every frame the
+report claims must lie on the plateau found or on one of its two end frames, or the foot fails (`claimed_outside`). A
+version that judged only the plateau it found passed a claim of frames 6 and 7 skating 10 cm per frame, because a
+foot that stalls, skids or lifts drops out of the found plateau by definition. The landing and take-off frame of a plateau
+of 4 or more frames are left out of the plateau gates on both clips and judged by their own two gates: the clip's
+sideways speed there may exceed the source's largest, read where the time map plays that frame, by at most 1.0 cm per
+frame, and the frame may not move back faster than the planted speed times (1 + the stride tolerance) plus 0.5 cm
+(`end_frame_back_cm`). Over the 36 clips the largest sideways excess is 0.21 cm per frame (0.64 before the reference followed the time map)
+and the tightest back margin is 0.62 cm per frame (the main walk's right foot: 4.18 against a limit of 4.80). The validator
+also applies `limp_for_kind`, so an idle is checked against the arm hang only. Its pure parts are tested in
+`tools/tests/test_validate_locomotion_clips_pure.py`.
+
+**Hand clearance.** `hand_clearance_m` (top level, 0 = off) keeps each forearm and hand that far from the thighs, calves
+and torso: per frame the tool swings the upper arm outward about world forward (then back, to 20 degrees, if 45 degrees
+outward is not enough) by the smallest angle that gives the gap, smooths the correction in time (running max, then
+[1 2 1] passes, wrapping at a closed loop's seam) and re-checks. The body is five capsules of fixed radii (thigh 0.085,
+calf 0.06, torso 0.14, hand 0.05, forearm 0.04 m) that approximate the male body; they are not measured from the mesh.
+`shield_arm_clearance_m` is the larger gap for the shield arm, the LEFT arm in every `with_shield` clip (left stance too:
+all four vanilla shield clips raise the left hand 0.2 to 0.45 m against their plain clip). The report row
+`hand_clearance` has the min gap per arm before and after and the largest correction; the validator's `clearance` check
+fails any frame under the clearance less 0.5 cm.
+
+**Limits found while building it.**
+
+- A longer strong stance needs a longer step, and the leg has to reach it: a run at `stride_scale` 1.0 with
+  `timing_split` 0.58 overreached by 4.6 cm. The orc C base (0.85) does not. Use `knee_max_deg`, `strong_drop_m` or a
+  smaller stride when a run overreaches; `ik_max_unreached_m` and the achieved block say by how much.
+- `weak_trail_m` 0.15 in a run passes at 0.10 on a plain base and trails the weak leg to straight at its swing end; the
+  IK clamps it at its reach.
+- Step points: every vanilla walk and run clip reads 0.4 and 0.898039 (229/255), the same in the run as in the walk, so
+  they are not tied to the run's foot plants. How the engine uses them beyond footstep sounds is UNVERIFIED.
+
+## Motion spec revision (2026-10-17)
+
+Mike's review session replaced the orc gait and added two per-soldier variants. `orc.json` now holds the working
+"orc C" motion (the main orc gait, `as_orc_warrior`, 16 clips); `orc_b.json` and `orc_c.json` are the variants (10
+clips each: five walks and five runs). The 2026-10-14 orc spec (the Motion Spec table above) is now orc
+A and lives only in git history. The goblin spec is unchanged.
+
+| Value | Main orc (`orc.json`) | B (`orc_b.json`) | C (`orc_c.json`) |
+|---|---|---|---|
+| Clip prefix, action set | `taom_orc_`, `as_orc_warrior` | `taom_orc_b_`, `as_orc_warrior_b` | `taom_orc_c_`, `as_orc_warrior_c` |
+| Posture | lowest, most hunched | highest | the middle |
+| Spine flex (spine, spine1, spine2) | 9, 14, 17 = 40° | 6, 8, 9 = 23° | 7, 11, 12 = 30° |
+| Neck, head flex | 25°, -60° | 12°, -30° | 18°, -45° |
+| Pelvis tilt | 12° | 8° | 10° |
+| Knee bend add | 30° | 13° | 21° |
+| Elbow bend add | 25° | 12° | 18° |
+| Arm swing scale | 1.0 | 1.3 | 1.15 |
+| Stance width per foot, foot splay | +8 cm, 25° | +8 cm, 25° | +8 cm, 25° |
+| Stride scale (`-TravelScale`) | 0.85 | 1.0 | 0.89 |
+| Bob scale, sway scale | 1.1, 2.0 | 1.5, 2.0 | 1.3, 2.0 |
+| Weak leg, strong leg | left, right | left, right | right, left (`mirror_sides`) |
+| Timing split, walk / run | 0.60 / 0.62 | 0.55 / 0.57 | 0.58 / 0.60 |
+| Weak-leg trail in the run | 0.15 m | 0.08 m | 0.12 m |
+| Idles | the 2026-10-14 idle block | inherited from the main orc | inherited from the main orc |
+
+Decisions:
+
+- **Main orc.** Mike's metric orc spec: wide tracks of about 1.5 times the hip width, toe-out
+  25°, a crouch, the neck nearly horizontal with the head tilted up so the eyes look forward, and a limp with a weak
+  LEFT leg, a strong RIGHT leg, a low leading right shoulder and 60/40 timing. The run is a lope with a trailing weak
+  leg. Arms hang 12° out from the body, plus the hand clearance rule (`hand_clearance_m` 0.08, `shield_arm_clearance_m`
+  0.15). Its 6 stand clips keep the 2026-10-14 idle block.
+- **Over the combat caps, on Mike's request.** The main orc's spine is 40° (cap 30°) and its clavicle drop plus
+  `low_shoulder_deg` is 12° (cap 10°); the clips were restyled with `--allow-over-cap`. The attack blend from a walk
+  is owed an in-game look, because attack clips start from the stance pose.
+- **Variants.** B is the high orc with the mildest limp (bigger orcs drag less). C is the middle posture with a
+  mirrored limp, so the three read differently in a line. C's stride is 0.89 because 0.92 and 0.95 gave a loop-seam
+  hitch in the run's non-limp path. Strides are one per variant for walk and run (`gen_troll_anim_clips.ps1
+  -TravelScale`).
+- **Weapons.** Reviewed in the viewer `tools/blender/show_gait_variants.py --props` with
+  `tools/blender/gait_props.json` (the Armory orc scimitar, axe, shields, spear and bow). No weapon or shield
+  penetrates the body. The sword tip reaches the floor in the hunched orcs, up to about 12 cm below it in the main
+  orc's walk and run (vanilla stays above); Mike accepted this ("this is fine, excellent"). The sword attach angle in
+  the viewer is set by eye, not from engine data.
+- **Out of scope today.** Bows, crossbows, two-handed weapons and polearms without a shield keep the vanilla walk and
+  run clips, so orcs walk like humans with them. Goblins are next.
+
+**Validation (2026-10-18, after the second review pass; first passed 2026-10-17):** every restyled clip passes
+`validate_locomotion_clips.py`: 16 of 16 main, 10 of 10 B and 10 of 10 C (`validate_report.json` beside each
+`restyle_report.json`, re-read 2026-10-18). The main orc's report lists four cap violations (trunk flex 40.0° over 30,
+clavicle 12.0° over 10, each for the base spec and for the run).
+
+**Staging:** `E:\LOTRAOMAssets\troll_clips_to_import\orc_locomotion\orc_main` (16 FBX), `orc_b` (10) and `orc_c`
+(10), each with `clips_index.json`, `restyle_report.json` and `validate_report.json`. The 2026-10-14 FBX stay in
+`...\orc` as the fallback.
+
+**Tools changed:**
+
+- `restyle_human_clip.py`: the limp, the `run` override, `mirror_sides`, metric targets, loop closure for near-closed
+  sources, a smooth (C1) time warp, hand clearance (also on idles), and a pitch of the neck and head about the body's
+  side axis (a near-horizontal neck made the FWD-based turn flip 63° in one frame).
+- `validate_locomotion_clips.py`: counts declared posture turns in the joints limit, adds the clearance check and the
+  warped-source checks; since the review the slide check finds each foot's plateau itself on both clips, gates lateral
+  and vertical speed, judges the landing and take-off frames separately, applies `limp_for_kind`, and has pure tests.
+- `gen_troll_anim_clips.ps1`: `-RestyleReport` (named `-StepPointsFrom` until the review): step points from the
+  report, `-TravelScale` from the report's `stride_scale`, full record validation before anything is written, and a
+  `-Verify` that checks STEP (StepPoints) and LOOP (LoopDisplacement) and fails when it checked no step point at all.
+  `restyle_human_clip.py` writes the provenance the generator checks (below).
+- `bind_orc_goblin_locomotion.py`: the variant sets (see Gait variants).
+- `show_gait_variants.py`: the viewer.
+
 ## Kit Import Checklist
 
 Steps for Mike are marked **Mike**; the rest run with the Kit and the game closed.
+
+**Revision of 2026-10-17, stage 1 done at 22:44 and repeated at 00:02 on 2026-10-18.** Backup
+`E:\LOTRAOMAssets\backups\orc_locomotion_20261017-224440`: both orc animation folders, the 16 clip cache entries,
+`rdc_names_before.txt` and `manifest.json` (sha256). Then the 16 main FBX were copied over
+`AssetSources\Race Test\Mordor\Orc\animations` (same names), and the B and C FBX into the new folders
+`...\Orc\animations_b` and `...\Orc\animations_c`, all hash-verified. After the review fixes the three sets were
+re-exported and copied again on 2026-10-18 at 00:02 (hash-verified); the backup
+`E:\LOTRAOMAssets\backups\orc_locomotion_20261018-000215` holds the superseded pre-fix main FBX. After the second
+review pass the clips were exported and copied once more (backup `...\orc_locomotion_20261018-005147`, stamp 00:51:47,
+holds the 16 superseded main FBX); all 36 live FBX match the staging folders by sha256. A third pass changed the
+validator and the provenance hash, so the clips were exported and copied once more (backup
+`...\orc_locomotion_20261018-011522`, stamp 01:15:22, holds the superseded main FBX). **The rollback to the
+clips the game plays today (2026-10-14) is still `...\orc_locomotion_20261017-224440`.** Nothing is imported: the game
+still plays the 2026-10-14 clips. **Owed**, in order:
+
+1. **Mike:** Kit REIMPORT of the 16 masters (same names, never rename), and an import of the 10 B and 10 C masters.
+   Save and close the Kit.
+2. `wire_anim_master_skeletons.ps1` on each of the three folders.
+3. Move the 16 old clip packages (`taom_orc_<clip>_anm.tpac`) aside, because `gen_troll_anim_clips.ps1 -Apply` never
+   overwrites.
+4. `gen_troll_anim_clips.ps1` per folder with `-CloneByName`, `-ClipPrefix` and
+   `-RestyleReport <staging>\restyle_report.json`; dry run, `-Apply`, `-Verify`. The report supplies `-TravelScale`
+   (0.85 main, 1.0 B, 0.89 C); a typed value must match it within 0.001. The generator refuses a report that is stale
+   or does not describe the clips: one whose `spec.clip_prefix` is not `-ClipPrefix`; that lacks an entry for a clip of
+   the index; that holds ANY entry with an error or a failed export (the restyle drops a failed clip from
+   `clips_index.json` but keeps its entry, so checking the index alone let it through); that has a gait (a clip named
+   `walk_*` or `run_*`; an entry whose `kind` disagrees is refused) without two step points; whose gait clips disagree on
+   `stride_scale`; or that carries no provenance. Provenance is a top-level `spec_sha` (the whole loaded spec) and, on each
+   entry, its own `spec_sha` (the spec merged for that clip plus its kind) and `loaded_spec_sha`; every gait entry's
+   `loaded_spec_sha` must equal the top-level `spec_sha`, so a partial run that kept older entries beside new ones is
+   refused, and so is an idle entry without provenance. The hash behind the top-level `spec_sha` and every entry's
+   `loaded_spec_sha` covers the loaded spec plus the sha256 of `restyle_human_clip.py` and
+   `retarget_mannequin_to_human.py` (the report lists them as `code_shas`), so a change to the tool with the spec file
+   unchanged is not the same provenance. The 2026-10-14 orc report has none and is refused; regenerate, never edit. Numbers are checked as JSON numbers
+   before conversion: a null, bool, string, NaN or Infinity is refused, the stride must be finite and above 0, a step
+   point finite in [0, 1]. `-Verify` fails when it checked no step point.
+5. **Mike:** Kit save (writes the cache entries); then `check_rdc_entries.py` on the three folders.
+6. `bind_orc_goblin_locomotion.py --apply` (writes the variant sets), then `--check --require-variants` and
+   `audit_action_set_parity.py`.
+7. Refresh the snapshot, as on 2026-10-14: byte-copy the live `action_sets.xml` to
+   `docs/reference/lotrlome-armory-snapshot/`, run `audit_action_set_parity.py --live` on the copy, and update the
+   snapshot README row.
+8. In-game Custom Battle: orc formations march with mixed gaits, an attack from a walk with the over-cap spine, and
+   the shield and sword look.
+
+The 2026-10-14 steps below are the history of the first import.
 
 Folders (Mike's choice): orc clips in `Race Test\Mordor\Orc\animations`, goblin clips in
 `Race Test\Mordor\Goblin\animations`, under the Armory's `AssetSources` (FBX) and `Assets` (compiled).
@@ -268,6 +490,52 @@ scratchpad: the generator's `-CloneByName` dry run, `-Apply` and `-Verify` exit 
 master, and the written clip matches vanilla `walk_forward_unarmed` in every field except the range, the name
 and LoopDisplacement (1.71 = 1.8 x 0.95).
 
+## Gait variants (per soldier)
+
+The C# AnimationVariety feature gives each orc one of several gaits by swapping its action set at spawn. The
+binder writes the sets; the feature picks among them. Variant A is the existing `as_orc_warrior`.
+
+| Set | `base_set` | Holds |
+|---|---|---|
+| `as_orc_warrior_b`, `as_orc_warrior_c` | `as_orc_warrior` | 24 rows each: every `act_walk_forward_*` and `act_run_forward_*` code whose Native clip is one of the 10 clips below, bound to `taom_orc_b_<clip>` or `taom_orc_c_<clip>` |
+
+- **The 10 clips:** `walk_forward_unarmed`, `_1h`, `_1h_left_stance`, `_1h_with_shield`, `_1h_with_shield_left_stance`, and
+  the same five for `run_forward_`. Each plays on several codes, as the second table under Discovery explains, and all
+  of them are bound.
+- **No orc female twins.** The Armory `orc` Monster declares no `female_action_set` (`monsters.xml:419-420`), so a
+  female orc spawns on `as_orc_warrior` and an `as_orc_female_warrior_b` would be unreachable; the review removed them.
+  The goblin Monster does declare one (`monsters.xml:1392`), so the binder keeps the twin mechanism for the goblin
+  variants: a self-closing set whose `base_set` is its variant, like `as_orc_female_warrior`.
+- **No idle codes.** A variant never overrides an `act_walk_idle_*` or `act_run_idle_*` code, so it inherits variant A's
+  idles through `base_set`.
+- **Order matters.** `base_set` copies at parse time, so the generated block sits right after `as_orc_warrior` (and
+  therefore after its rows). The block is wrapped in `BEGIN/END gait variants of as_orc_warrior` comments that the tool
+  owns. The engine merges a repeated `action_set` id into its FIRST definition (`Module.cs:1472`), so an earlier copy
+  with a wrong `base_set` would survive while a later one passed the check. The binder therefore refuses every mode
+  (exit 2, bytes unchanged) on a repeated owned id, a variant outside the block or a second block, whether or not a
+  block already exists, and a rewrite of the block refuses to delete a set between the markers that the tool does not
+  own.
+- **Folders** (the `VARIANTS` table in the binder), under the Armory `Assets`: `Race Test\Mordor\Orc\animations_b`
+  and `animations_c`, packages named `taom_orc_b_<clip>_anm.tpac` and `taom_orc_c_<clip>_anm.tpac`. The B and C FBX
+  are in those AssetSources folders since 2026-10-17 (see Motion spec revision). Goblin variants
+  (`Goblin\animations_b`, `as_goblin_warrior_b`) are one more table row each, not yet added.
+- **Skip rules.** A variant folder with none of the 10 packages is skipped with a note and never written (the state
+  today: the Kit import has not happened). One with only some is an error (exit 2) in the plan and `--apply`.
+
+Commands (the same tool; dry run by default):
+
+    python tools/bind_orc_goblin_locomotion.py            # lists the variant sets and rows, or why one is skipped
+    python tools/bind_orc_goblin_locomotion.py --apply    # backup action_sets.xml.bak-orc-goblin-bind-<stamp>
+    python tools/bind_orc_goblin_locomotion.py --check
+    python tools/audit_action_set_parity.py
+
+`--check` passes while every variant is skipped and prints `no variant clips on disk yet`. It fails when a variant
+set is in the file but its clips are missing, its rows differ from the plan, it carries an idle or non-forward code or
+a row whose package is not on disk, a variant is defined before `as_orc_warrior` or a twin before its variant, or a
+twin has its own rows. `--check --require-variants` also fails a variant that is skipped and absent, which is what a
+reinstall leaves once the variants have been imported. `--apply` drops a variant's rows only with `--allow-shrink`, like
+the base sets.
+
 ## Testing
 
 **Result (2026-10-14):** Mike checked the orcs and goblins in game after `/armory-audit` came back CLEAN:
@@ -293,7 +561,9 @@ The checks, for this and the later items:
 - With DualWield active: its `_dw` sets keep DualWield's sidestep and backpedal clips but inherit the plain
   one-handed forward walk and run, because DualWield writes its forward clips only over vanilla ones.
 - `rgl_log`: no `Could not find animation:` for a `taom_orc_` or `taom_goblin_` clip.
-- The reinstall gate, after any Armory sync: `python tools/bind_orc_goblin_locomotion.py --check`, or
+- The reinstall gate, after any Armory sync: `python tools/bind_orc_goblin_locomotion.py --check`, and once the orc
+  variants are imported `python tools/bind_orc_goblin_locomotion.py --check --require-variants` (plain `--check` passes
+  when the variants have vanished with their clips). The pytest alternative is
   `python -m pytest tools/tests/test_bind_orc_goblin_locomotion.py` (its live class). `--check` also fails
   when a race's clip folder is empty, which is what a reinstall leaves (no clips and no rows), unless
   `--allow-no-clips` is passed.
@@ -303,15 +573,19 @@ The checks, for this and the later items:
 | File | Purpose |
 |---|---|
 | `tools/blender/restyle_human_clip.py` | Restyles vanilla clips per variant; exports Kit-ready FBX, `clips_index.json`, contact sheets |
-| `tools/blender/locomotion_variants/orc.json`, `goblin.json` | The approved motion spec per variant |
+| `tools/blender/locomotion_variants/orc.json`, `goblin.json` | The motion spec per race (`orc.json` is the main orc gait since 2026-10-17; `goblin.json` is the 2026-10-14 spec) |
+| `tools/blender/locomotion_variants/orc_b.json`, `orc_c.json` | The two per-soldier orc gaits (`taom_orc_b_`, `taom_orc_c_`) |
+| `tools/blender/show_gait_variants.py`, `tools/blender/gait_props.json` | The gait viewer; `--props` loads the Armory weapons and shields listed in the JSON |
+| `tools/blender/vanilla_locomotion_step_points.json` | Vanilla StepPoints of the walk and run clips (read from the installed tpac), mapped through a limp's warp |
 | `tools/blender/validate_locomotion_clips.py` | Re-imports each FBX and checks it against its vanilla source |
+| `tools/tests/test_validate_locomotion_clips_pure.py` | The validator's pure parts (contact stats, plateau slide, lateral and vertical speed) |
 | `tools/bind_orc_goblin_locomotion.py` | Writes, and with `--check` proves, the rows in the two Armory sets |
 | `tools/tests/test_bind_orc_goblin_locomotion.py` | The binder's tests, and the live reinstall gate |
 | `tools/read_anim_keyframes_tpac.ps1` | Dumps the vanilla source masters and `clips_index.json` |
 | `tools/blender/human_skeleton_engine.json` | Engine rest frames of `human_skeleton` |
 | `tools/blender/retarget_mannequin_to_human.py` | Engine-frame rig, Kit-ready exporter and export check (reused); `json_pose_sampler` and `two_bone_ik` are shared with the restyle |
 | `tools/tests/test_restyle_human_clip_pure.py` | The restyle's pure parts (spec loading, caps, clip kinds, stale markers) with `bpy` stubbed |
-| `tools/gen_troll_anim_clips.ps1` | Clones vanilla clip recipes onto the new masters |
+| `tools/gen_troll_anim_clips.ps1` | Clones vanilla clip recipes onto the new masters; `-RestyleReport` writes a limp's step points and sets the travel scale |
 | `tools/wire_anim_master_skeletons.ps1` | Wires Kit-imported masters to the skeleton |
 | `tools/check_rdc_entries.py` | Confirms each clip package has its RuntimeDataCache entry |
 | `tools/audit_action_set_parity.py` | Gates the Armory `action_sets.xml` structure |
@@ -338,8 +612,45 @@ The checks, for this and the later items:
    `python tools/bind_orc_goblin_locomotion.py --apply`.
 4. Run `python tools/audit_action_set_parity.py`.
 
+## Known Follow-ups
+
+Found by the 2026-10-17/18 review and not fixed:
+
+- **Knee-limit pelvis drop.** With `knee_max_deg` set, the pelvis drop that keeps a leg inside its limit can jump near
+  full reach. Replace it with a smooth cap and add a pelvis-height step check to the validator.
+- **Swing foot drops with the hips.** In the crouched specs the crouch (`knee_bend_deg` 30 in `orc.json`) and the knee
+  limit (`knee_max_deg` 160) each lower the swing foot with the pelvis, so the clip's foot touches down about two frames
+  before the source's. At the landing frame of the main orc's `run_forward_1h` strong foot the sideways speed is 1.86 cm
+  per frame against the source's 1.80 at the same frame. That is not a skid; it is inherent to the approved crouch, and
+  the validator's end-frame gate passes it. A cap on how far a swing foot may drop with the hips (for example never
+  below half its source clearance) would change every crouched spec's swing path, so it needs its own change and a re-run
+  of all 36 clips.
+- **Stage-2 scripts need the shared guard.** The stage-1 copy script (a scratch script) had a process guard that failed
+  open. Any script that writes the live Armory in stage 2 must import `_gamedir.game_or_kit_running` instead of its own.
+- **Sword tip on the floor.** The sword tip reaches the floor in the hunched orcs (up to about 12 cm below it in the main
+  orc's walk and run). Mike accepted this on 2026-10-17; it is a record, not an open defect.
+
 ## Changelog
 
+- 2026-10-18: third review pass. The validator checks coverage both ways and bounds an end frame's backward speed;
+  its end-frame sideways reference follows the time map; the idle block is number-checked; the generator requires
+  provenance on every entry, and the provenance hash covers the tool's code. All 36 orc clips re-exported and copied
+  again (backup stamp 01:15:22). Still not imported.
+- 2026-10-18: second review pass. The validator finds each foot's plateau itself and judges landing and take-off frames
+  with their own gate; `low_arm_swing_scale` and other numbers refuse bools and non-finite values; the binder refuses
+  any foreign set inside the generated region; the generator checks every report entry, classifies gaits by name and
+  requires provenance (`spec_sha`, `loaded_spec_sha`); the restyle's clamp has a test that fails with the old
+  reference. All 36 orc clips re-exported and copied again (about 00:51). Still not imported.
+- 2026-10-18: review fixes. The restyle's `min_track_half_m` clamp measures from the clip's mean pelvis line, so planted
+  ankles no longer slide sideways; the validator compares plateau with plateau and gates lateral and vertical speed (new
+  tests); idle clips get only `arm_forward_deg` from the limp; step points are mapped in place. `-StepPointsFrom` became
+  `-RestyleReport`, takes `-TravelScale` from the report and refuses a stale one. The binder guards duplicates, a
+  second block and a foreign set between the markers, gained `--check --require-variants`, and lost the orc female
+  twins. All 36 orc clips re-exported (16, 10, 10 pass) and re-copied to the live Armory `AssetSources` at 00:02 (backup
+  `orc_locomotion_20261018-000215`). Still not imported.
+- 2026-10-17: Mike's review replaced the main orc gait (`orc.json`) and added the B and C variants (36 clips, all pass
+  the validator). Restyle, validator, clip generator and binder extended, viewer added. Stage 1 of the Armory copy
+  done (backup, FBX in place, hash-verified); the Kit import and binding are owed.
 - 2026-10-14: the binder binds every walk and run code that plays one of the 16 clips (42 per race, was 18);
   it reads Native with ElementTree (a commented-out row is never read), refuses to drop a bound row without
   `--allow-shrink`, fails `--check` on an empty clip folder, checks every link of each derived chain, and
@@ -354,5 +665,5 @@ The checks, for this and the later items:
 ## GitHub Issue
 
 - **Issue:** #791, [Orc and goblin walk, run and idle animations](https://github.com/haterade22/TAOM/issues/791)
-- **Status:** Open (items 2 to 6 remain; the in-game check of the 24 codes bound later on 2026-10-14 is owed)
+- **Status:** Open (items 2 to 6 remain; the in-game check of the 24 codes bound later on 2026-10-14 is owed, and so is the whole 2026-10-17 revision from the Kit import on)
 - **Review:** [rca-orc-goblin-locomotion-2026-10-14.md](../reviews/rca-orc-goblin-locomotion-2026-10-14.md)

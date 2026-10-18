@@ -147,6 +147,14 @@ Three test gates shipped in the 2026-07-27 Gondor review (unfiltered JSON id che
 - **Why missed:** a green new test feels like evidence. It is only evidence that the code is currently in the state the test encodes; it says nothing about whether the test can detect leaving that state. Guards written after the fix never pass through a natural RED phase, which is exactly when TDD would have proven them.
 - **Prevent:** for any guard added post-fix (not TDD-first), inject the failure once and read the assertion message before accepting it. Especially when the guard validates work the same author just did.
 - **Source:** docs/reviews/rca-gondor-recruitment-2026-07-27.md ("Preventive actions taken").
+- **Recurred 2026-10-18 (animation variety, second Codex pass F6 and convergence D1):** the unit test for the
+  planted-ankle clamp fix never passed the pelvis x the old bug depended on, so it could not fail with the old
+  reference; and the missile early-return fix kept a source-order test green while the compiler allocated a closure at
+  method entry (proven from the IL). Both were shown red only after a reviewer built the counterexample. Run a fix's
+  test with the fix reverted, on the input the bug needs; a test about allocation reads the compiled body
+  (`OnAgentHit_CompiledBody_AllocatesNoClosure`, red before with 2 display classes), and the clamp now has a pure
+  `foot_goal_x` helper with no frame-pelvis input plus a source-text test proven to fail with the old reference.
+  [rca-animation-variety-2026-10-17.md](../rca-animation-variety-2026-10-17.md) rows 48 and 50.
 - **Recurred 2026-10-14 (#792 Codex F2, F3):** the `PartyBase.MainParty` scan (`91f369984`) was never run against the `!= null` guard it followed, and the E25 tests stayed green on a `StartsWith("Waiting")` mutant; both were proved red only after Codex (`dc1c37031`, `d371745c7`).
 
 ### When a method returns a report as well as a state change, test the report, not just the mutation

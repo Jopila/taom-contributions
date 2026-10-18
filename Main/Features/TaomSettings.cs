@@ -2075,4 +2075,26 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyText("Your Realm", Order = 23, RequireRestart = false,
         HintText = "The colour of your realm when it is none of the kingdoms above: your clan's land while it serves no kingdom, then a kingdom you found. Written #RRGGBB. Blank gives it a free colour. In one of the kingdoms above, that kingdom's own field applies.")]
     public string RealmColourYourRealm { get; set; } = string.Empty;
+
+    // --- Animation Variety (orc and goblin gait, docs/features/animation-variety.md) ---
+
+    [SettingPropertyGroup("Animation Variety", GroupOrder = 9)]
+    [SettingPropertyBool("Random step size per soldier", Order = 0, RequireRestart = false,
+        HintText = "Orc and goblin warriors in a battle line no longer walk in lockstep: each soldier's step size is scaled by a random factor between the minimum below and 1.0, fixed for that soldier. Applied when a soldier spawns, so it takes effect in the next battle.")]
+    public bool EnableRandomStepSize { get; set; } = true;
+
+    [SettingPropertyGroup("Animation Variety")]
+    [SettingPropertyFloatingInteger("Step size minimum factor", 0.80f, 1.00f, "0.00", Order = 1, RequireRestart = false,
+        HintText = "Each soldier's step size is vanilla's step size times a random factor between this value and 1.00. Vanilla's own step size is 0.80 at Athletics 0 and rises to 1.00 at Athletics 300, so the factor is not the final step size: at 0.92 an Athletics 0 soldier ends at 0.74 to 0.80 and an Athletics 300 soldier at 0.92 to 1.00, and at 0.80 the lowest step size is 0.64. 1.00 turns the spread off. A value outside 0.80 to 1.00 falls back to 0.92.")]
+    public float GaitStepSizeMinFactor { get; set; } = 0.92f;
+
+    [SettingPropertyGroup("Animation Variety")]
+    [SettingPropertyBool("Random gait set per soldier", Order = 2, RequireRestart = false,
+        HintText = "Each orc and goblin warrior walks with one of several gait sets, picked at random and fixed for that soldier. A gait set that is not installed is skipped, so with none installed this does nothing. Applied when a soldier spawns, so it takes effect in the next battle.")]
+    public bool EnableRandomGaitSet { get; set; } = true;
+
+    [SettingPropertyGroup("Animation Variety")]
+    [SettingPropertyBool("Swing alternative probe (diagnostic)", Order = 3, RequireRestart = false,
+        HintText = "Tests alternative swing clips: when a mission has act_taom_ swing codes loaded, it counts which clip each swing plays and where in the clip a hit lands, and only logs; it changes nothing in the game. While such codes exist it costs a per-frame sweep of the soldiers in every battle, so leave it off unless you are testing swing clips. Read at the start of each mission.")]
+    public bool EnableSwingAlternativeProbe { get; set; } = false;
 }

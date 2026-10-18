@@ -1,0 +1,63 @@
+{
+ "_doc": "Vanilla StepPoints (x, y, z, w; clip progress 0..1, -1 unused) of the walk and run clips the orc and goblin locomotion restyles, read from Native AssetPackages/animation_clips.tpac (Bannerlord v1.5.5) with TpacTool v0.5.1 via the loader tools/gen_troll_anim_clips.ps1 uses (AnimationClip.StepPoints). Every walk and run clip reads 0.4 and 0.898039 (= 229/255, so the stored value looks like a byte over 255; UNVERIFIED). Read by restyle_human_clip.py --vanilla-step-points: a limp clip maps x and y through its time warp.",
+ "run_forward_1h": [
+  0.400000006,
+  0.898039222,
+  -1,
+  -1
+ ],
+ "run_forward_1h_left_stance": [
+  0.400000006,
+  0.898039222,
+  -1,
+  -1
+ ],
+ "run_forward_1h_with_shield": [
+  0.400000006,
+  0.898039222,
+  -1,
+  -1
+ ],
+ "run_forward_1h_with_shield_left_stance": [
+  0.400000006,
+  0.898039222,
+  -1,
+  -1
+ ],
+ "run_forward_unarmed": [
+  0.400000006,
+  0.898039222,
+  -1,
+  -1
+ ],
+ "walk_forward_1h": [
+  0.400000006,
+  0.898039222,
+  -1,
+  -1
+ ],
+ "walk_forward_1h_left_stance": [
+  0.400000006,
+  0.898039222,
+  -1,
+  -1
+ ],
+ "walk_forward_1h_with_shield": [
+  0.400000006,
+  0.898039222,
+  -1,
+  -1
+ ],
+ "walk_forward_1h_with_shield_left_stance": [
+  0.400000006,
+  0.898039222,
+  -1,
+  -1
+ ],
+ "walk_forward_unarmed": [
+  0.400000006,
+  0.898039222,
+  -1,
+  -1
+ ]
+}

@@ -469,3 +469,22 @@ throw-only while its `--verify` stayed green.
   the markers so they fence only the tool's own rows (the tool then takes its in-template path and reports `noop`),
   and gate the artist's rows with the tool's blocks set aside (`HaradWeaponsLiveEditTests`).
 - **Source:** [rca-keyforce-harad-javelins-2026-10-16.md](../rca-keyforce-harad-javelins-2026-10-16.md) finding 1.
+
+### A tool that owns a region of a shared file checks the whole file on every run (binder, 2026-10-18)
+`bind_orc_goblin_locomotion.py` writes its variant sets between `BEGIN/END` comments in the Armory's `action_sets.xml`.
+Two holes: rewriting the block silently deleted any set someone had put between the markers, and the "defined outside the
+block" guard ran only when no block existed, so with a block present an earlier hand-kept `as_orc_warrior_b` survived
+beside the generated one. The engine merges a repeated `action_set` id into its FIRST definition (`Module.cs:1472`), so
+the earlier copy's wrong `base_set` won while the checker read the later copy and passed. Codex reproduced it in memory
+against the live file.
+- **Why missed:** the guard sat on the first-insertion path, and the checker built its id map with a dict comprehension,
+  which keeps the last duplicate.
+- **Prevent:** a tool that owns a marker region refuses before it deletes an element it does not own, and on every mode,
+  with or without an existing block, checks the whole file for a repeated owned id, an owned id outside the region and a
+  second region. A checker that indexes by id fails on a repeat. See also "An artist's rows inside a TAOM tool's marker
+  block belong to the tool".
+- **Second pass (2026-10-18):** the first fix for the deletion compared sets of ids, so a foreign definition inside the
+  region still vanished on rewrite when another definition with the same id survived elsewhere (the engine keeps the
+  FIRST, `Module.cs:1467-1490`). Compare definitions, not ids: any element the tool does not own inside the replaced
+  region is refused, with a `Counter` of ids before and after as a backstop.
+- **Source:** [rca-animation-variety-2026-10-17.md](../rca-animation-variety-2026-10-17.md) findings 15, 16 and 45; `tools/bind_orc_goblin_locomotion.py`.
