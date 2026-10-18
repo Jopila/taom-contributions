@@ -462,6 +462,9 @@ visible.
   when a field report says a bonus "does nothing", look for a second writer before doubting the bonus.
 - **Open, deliberately:** whether the elite tax should apply at all to a culture whose entire roster
   is heavy is a design question rather than a defect, and it is unanswered as of 2026-08-14.
+- **Status 2026-10-18 (#818):** the 20% floor was removed on purpose. The evil party-size feats are
+  capped at 10% (orc realms +5%), so on a heavy orc roster the tax can cancel the bonus entirely. A
+  report that the orc bonus "does nothing" is now expected behaviour, not a regression.
 - **Source:** 2026-08-14 culture balance pass (Mordor party-size feat 0.10 to 0.20, new Blue Craig
   feat at 0.40). Companion lesson: "A ModuleData field's NAME is not its semantics" in
   [campaign-mechanics.md](./campaign-mechanics.md).

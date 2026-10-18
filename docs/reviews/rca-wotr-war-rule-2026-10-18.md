@@ -115,3 +115,23 @@ only adds a war.
 - Old saves only: a call-to-war agreement made before this change can outlive the peace the sweep makes.
 - The two sibling overrides in `TaomKingdomDecisionPermissionModel` still branch (pre-existing rule-4 debt).
 - The MCM hints for the phase days do not say that no kingdom may declare war before the phase 1 day.
+
+## Second change: evil party-size feats capped at 10% (item 2 of #818)
+
+Mike approved "5 and 10 percent (max)": Goblin-town, Blue Craig and Misty Mountain Orcs from +40/+40/+30%
+to +10%, Mordor, Isengard, Gundabad and Dol Guldur from +20% to +5%. Built test-first; the seven feat
+descriptions changed only their number, edited in place in English, 12 language rows and 12 caches.
+`/deep-review` ran lenses 1, 4, 5 and 7 in one wave; 2, 3 and 6 were not run for a value-only change
+(lens 4 agreed).
+
+| # | Sev | Bug | Found by | Category | Why missed | Preventive action |
+|---|---|---|---|---|---|---|
+| S1 | HIGH | The character-creation culture stage and the faction screen read their party-size lines from `factionmap/factions.json`, and 13 of them (English, 12 languages, 12 caches) still said +40/+30/+20%. Mordor's card had said +10% since its feat moved to 20% on 2026-08-14. The feat descriptions that were edited are never displayed by TAOM | XML, Data flow, Completeness | data, completeness | **Repeat (third)** of the lesson "Touching cultural identity means also updating the CC faction-map page"; the change followed the feat's own strings and never asked where a player reads the number | 13 keys fixed by hand (the harvester would revert 5 Lindon strings); `make_new_factions_playable.py` literals fixed; a shipped-data test now compares every card's party-size percentage with the production `EffectBonus`; lesson marked gated |
+| S2 | MED | The new production pin used an unanchored `Contains`, so `-0.05f` or `10.05f` passed; the Wave 1 pin had the same gap | Standards, Completeness | test | The expected tail was written without its left boundary | Anchored with `", "` in a shared helper, proven red on mutants |
+| S3 | LOW | The two "band" tests in `CulturalFeatsServiceTests` read the hand mirror table and could never fail on a production change | Standards | test | Pre-existing design: the fixture sets `EffectBonus` by reflection from a copy | Deleted; replaced by a production test that every party-size feat is above 0 and at most 10% |
+| S4 | MED | The feats also set evil garrison and patrol limits (a Goblin-town town garrison about 560 to 440, a Mordor town about 480 to 420); nothing said so | Data flow | docs | The change was framed as "party size" only | Documented in `cultural-feats.md`; whether party-size feats should reach garrisons is a follow-up for Mike |
+| S5 | LOW | Docs kept the removed 20% floor in present tense and numbers derived from the old values (AI party-size table, the 40-203 band, the translator guide's examples) | Completeness, Data flow | docs | Derived numbers were not traced to their inputs | Updated or reworded |
+
+Existing saves: the new values apply on load. Evil AI lords above the new limit are trimmed by the
+TroopWeight shed on the first daily tick; a goblin or orc player's own party and garrisons lose a
+quarter of their excess per day to vanilla desertion.
