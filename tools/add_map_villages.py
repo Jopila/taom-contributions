@@ -153,6 +153,12 @@ VILLAGES = [
     Village("village_G3_2", "Dûm-lug",    "town_G3", "cattle_farm", "gundabad", "sturgia_village_d", after="town_G3"),
     Village("village_G3_3", "Dûm-ghâsh",  "town_G3", "iron_mine",   "gundabad", "sturgia_village_k", after="town_G3"),
     Village("village_G3_4", "Dûm-burzum", "town_G3", "lumberjack",  "gundabad", "sturgia_village_l", after="town_G3"),
+    # Lithur (castle_G6, Mike named it; placed 2026-10-15, its villages saved 2026-10-17). Stem Lith-, with
+    # this map's Gundabad endings: -bosh swine farm (Gundbosh), -mauz cattle farm (Gund-mauz), -mîr silver
+    # mine (Gram-mîr). Types by the orc per-fief rule, fief_types(3, "silver_mine"): Carn Dûm has the iron.
+    Village("castle_village_G6_1", "Lith-bosh", "castle_G6", "swine_farm",  "gundabad", "sturgia_village_b", after="castle_G6"),
+    Village("castle_village_G6_2", "Lith-mauz", "castle_G6", "cattle_farm", "gundabad", "sturgia_village_h", after="castle_G6"),
+    Village("castle_village_G6_3", "Lith-mîr",  "castle_G6", "silver_mine", "gundabad", "sturgia_village_d", after="castle_G6"),
 ]
 INSERT_AFTER = "village_isengard_a"   # default anchor: last settlement of the Isengard block, and its last loc row
 
