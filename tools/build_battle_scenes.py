@@ -60,7 +60,7 @@ REGIONS: list[tuple[str, list[int], list[str]]] = [
     # Rohan, Dunland, Isengard
     ("Rohan", [80, 81, 87, 88, 89],
      [T + "z", T + "003", T + "026", T + "028", T + "032", T + "biome_012", T + "biome_030",
-      "taom_rohan_battle_001_forceatmo"]),
+      "taom_rohan_battle_001_forceatmo", "taom_rohan_battle_002_forceatmo"]),
     ("Rohan: Fords of Isen", [62, 88, 89], ["taom_rohan_battle_fords_of_isen_forceatmo"]),
     ("Dunland and Enedwaith", [52, 57, 58, 59, 60, 61, 62],
      [T + "J", T + "L", T + "biome_022", T + "biome_058", T + "biome_085", T + "biome_088", T + "031"]),
@@ -122,6 +122,7 @@ CUSTOM: dict[str, tuple[str, str | None]] = {
     "taom_mordor_battle_black_gates_forceatmo": ("Swamp", "Low"),
     "taom_mordor_battle_dead_marshes_forceatmo": ("Swamp", "Low"),
     "taom_rohan_battle_001_forceatmo": ("Plain", "Low"),
+    "taom_rohan_battle_002_forceatmo": ("Plain", "Low"),
     "taom_rohan_battle_fords_of_isen_forceatmo": ("Plain", "Low"),
     "taom_gondor_battle_001_forceatmo": ("Plain", "Low"),
     "taom_gondor_pelennor_fields_forceatmo": ("Plain", "Low"),

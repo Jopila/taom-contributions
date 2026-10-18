@@ -76,6 +76,26 @@
     name="{=aom_taom_dwarven_moria_w_forceatmo_name}[Misty Mountains] Western Moria"
     terrain="Plain"
     is_siege_map="true" />
+  <Scene
+    id="taom_dwarven_moria_e_forceatmo"
+    name="{=aom_taom_dwarven_moria_e_forceatmo_name}[Misty Mountains] Eastern Moria"
+    terrain="Plain"
+    is_siege_map="true" />
+  <Scene
+    id="taom_gondor_town_pelargir_forceatmo"
+    name="{=aom_taom_gondor_town_pelargir_forceatmo_name}[Gondor] Pelargir"
+    terrain="Plain"
+    is_siege_map="true" />
+  <Scene
+    id="taom_gondor_town_serelond_forceatmo"
+    name="{=aom_taom_gondor_town_serelond_forceatmo_name}[Gondor] Serelond"
+    terrain="Plain"
+    is_siege_map="true" />
+  <Scene
+    id="taom_mordor_town_01_forceatmo"
+    name="{=aom_taom_mordor_town_01_forceatmo_name}[Mordor] Mordor Town"
+    terrain="Plain"
+    is_siege_map="true" />
   <!--Battle Scenes-->
   <Scene
     id="taom_rohan_battle_fords_of_isen_forceatmo"
@@ -85,6 +105,11 @@
   <Scene
     id="taom_rohan_battle_001_forceatmo"
     name="{=aom_taom_rohan_battle_001_forceatmo_name}[Rohan] Rohan Plains"
+    terrain="Plain"
+    is_siege_map="false" />
+  <Scene
+    id="taom_rohan_battle_002_forceatmo"
+    name="{=aom_taom_rohan_battle_002_forceatmo_name}[Rohan] Rohan Plains II"
     terrain="Plain"
     is_siege_map="false" />
   <Scene
@@ -149,6 +174,16 @@
   <Scene
     id="taom_gondor_village_004_forceatmo"
     name="{=aom_taom_gondor_village_004_forceatmo_name}[Gondor] Mereham Village"
+    terrain="Plain"
+    is_village_map="true" />
+  <Scene
+    id="taom_gondor_village_amongelin_forceatmo"
+    name="{=aom_taom_gondor_village_amongelin_forceatmo_name}[Gondor] Amon Gelin Village"
+    terrain="Plain"
+    is_village_map="true" />
+  <Scene
+    id="taom_gondor_village_lothgobel_forceatmo"
+    name="{=aom_taom_gondor_village_lothgobel_forceatmo_name}[Gondor] Lothgobel Village"
     terrain="Plain"
     is_village_map="true" />
 </CustomBattleScenes>

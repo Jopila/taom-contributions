@@ -2059,3 +2059,15 @@ and a dark scene of cliffs, caves and ruins was named "Gondor Plains" after its 
   the Morannon, the Pelennor); only a generic scene takes a whole region. Settle the English name before the paid
   translation run.
 - **Source:** [rca-gondor-field-scenes-2026-10-17.md](../rca-gondor-field-scenes-2026-10-17.md) finding 3 and 4.
+
+### Audit a delivered scene's contents before wiring it to a settlement (Kysaro's drop, 2026-10-17)
+Five Mordor towns, the start town among them, were pointed at a town scene with no `sp_player`, and four settlements
+at scenes placing prefabs no loaded module defines; both passed every gate, because the gates check only that a
+scene's folder exists and that a siege row declares its levels.
+- **Why missed:** the scenes were wired from their names, their folders and the artist's "siege and civilian
+  working", which was true on his install, whose Kit loads prefabs the shipped `Prefabs/` folder parked.
+- **Prevent:** before wiring a delivered scene into `settlements.xml`, expand its prefabs against the loaded
+  `Prefabs/` folders (`tools/audit_map_scene_memory.py --scene <dir> --loose-assets` lists the unresolved ones) and,
+  for a town center, confirm an `sp_player`; then land an in-repo pin for the live edit
+  (`SettlementSceneLiveDataTests`). State odds per cell from the dry run's shared-cell lines, never from a region's size.
+- **Source:** [rca-kysaro-scene-drop-2026-10-17.md](../rca-kysaro-scene-drop-2026-10-17.md) findings 1, 2, 5 and 6.

@@ -231,6 +231,12 @@
 		terrain="Plain"
 		forest_density="Low"
 		map_indices="80, 81, 87, 88, 89"></Scene>
+	<!-- Rohan -->
+	<Scene
+		id="taom_rohan_battle_002_forceatmo"
+		terrain="Plain"
+		forest_density="Low"
+		map_indices="80, 81, 87, 88, 89"></Scene>
 	<!-- Rohan: Fords of Isen -->
 	<Scene
 		id="taom_rohan_battle_fords_of_isen_forceatmo"

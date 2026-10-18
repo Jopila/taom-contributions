@@ -74,6 +74,10 @@ element, `--check` / `--dry-run` / `--apply`, and the region regressions that ke
 cells and Pelennor Fields on cell 85, plus a CI check that the committed XML matches `REGIONS` and parses the way the engine parses it. The C#
 patches have no tests: they are static, IO-bound and need a live game.
 
+`SettlementSceneLiveDataTests` (`LiveInstall`, inconclusive without `TAOM_Map`) pins the 11 hand-wired `Location`
+rows in the live `TAOM_Map` `settlements.xml` and checks that every `taom_*` scene that file names has its
+`scene.xscene`.
+
 ## Verifying
 
 1. `python tools/build_battle_scenes.py --check` exits 0 (the file is current and every scene has a `SceneObj`).
@@ -88,6 +92,7 @@ The `MapScene_Load_DiagnosticPatch` prints to the engine log every time `MapScen
 
 ## Changelog
 
+- 2026-10-17 (later): Kysaro's `taom_rohan_battle_002_forceatmo` ("Rohan Plains II", lotraom-assets `db387f23f`) joins the Rohan region (cells 80, 81, 87, 88, 89) and the Custom Battle picker. Rohan Plains and Rohan Plains II each come up in 1 battle of 9 on cells 81 and 87, 1 of 10 on cells 88 and 89 (which also draw Fords of Isen) and 1 of 12 on cell 80 (shared with the three Lothlorien scenes). The same drop's town, arena and village scenes are wired to Pelargir, Serelond (town and arena), Amon Gelin, Lothgobel, Eastern Moria and five Mordor towns in the live `TAOM_Map/ModuleData/settlements.xml` (the repo's copy of that file is a stale shadow that never loads). Minas Morgul keeps its own scene, and Calembel waits until Kysaro finishes its scene. `SettlementSceneLiveDataTests` holds the list and fails on a revert. The town and village scenes are in the picker too, the 7 new picker names await translation, and none of the new scenes has been loaded in game yet.
 - 2026-10-17: two new Gondor field scenes. `taom_gondor_battle_001_forceatmo` ("Ruined Outpost") joins the Pelennor and Anorien region (cells 85, 86, 90, 91, 92) and comes up in 1 battle of 6 there, 1 of 10 on cell 85. `taom_gondor_pelennor_fields_forceatmo` ("Pelennor Fields") shows Minas Tirith and Osgiliath on its horizon, so it gets its own region on their cell 85 only, at 1 in 10 (cell 85 also draws the Anduin crossings scenes). Both are in the Custom Battle picker for the load test, and their names await translation. Ruined Outpost is town-sized (about 22,600 entities against a vanilla field maximum near 1,300), so its load and frame cost are measured at that test.
 - 2026-10-03: `sp_battle_scenes.xml` generated per Middle-earth region by `tools/build_battle_scenes.py`, from cells measured against the live settlements (native scenes grouped by type: Plain to the green kingdoms, Desert to Harad and Umbar, Steppe to Rhûn, Khand and the Erebor/Dale plains, Swamp to the Dead Marshes). The 6 Mordor and 2 Rohan field scenes are back in rotation on corrected cells, accepting the June `pbr_terrain` GPU crash risk. Region table: [worldmap-battle-scene-grid.md](../reference/worldmap-battle-scene-grid.md#region-table-2026-10-03-live).
 - 2026-06-01 — Re-enabled `Patch0_BattleScenes` (`feat(battle-scenes)`): uncommented the `PatchCategory` gate so TAOM's full 0–255 `sp_battle_scenes` table loads; doc flipped DISABLED→ENABLED.
@@ -98,13 +103,32 @@ The `MapScene_Load_DiagnosticPatch` prints to the engine log every time `MapScen
 
 ## GitHub Issue
 
-- **Issue:** None yet for the 2026-10-03 region remap or the 2026-10-17 Gondor scenes (owed).
+- **Issue:** None yet for the 2026-10-03 region remap, the 2026-10-17 Gondor scenes or Kysaro's 2026-10-17 drop and
+  its known issues below (owed, on Mike's word).
 - **Status:** Enabled; in-game region checks owed.
 - **Known limitation (2026-10-17):** no release gate checks that a channel's `TAOM_Map/SceneObj` holds every `taom_*`
   scene that TAOM's `sp_battle_scenes.xml` and `custom_battle_scenes.xml` name; `--check` reads this machine only. On
-  2026-10-17 the patreon and public channels lacked both Gondor scenes and `taom_rohan_edoras_town_forceatmo`. Before
-  a release, test `E:/LOTRAOM_Releases/<channel>/Modules/TAOM_Map/SceneObj/<id>/scene.xscene` for every `taom_*` id
-  in those two files. The planned gate is a refusal in `tools/package_release.py`'s dry run.
+  2026-10-17 the patreon and public channels lacked both Gondor scenes and `taom_rohan_edoras_town_forceatmo`, and
+  no channel (testing included) held any of the 8 scenes from Kysaro's drop (lotraom-assets `db387f23f`) or its
+  `settlements.xml` wiring. Before a release, after an ordinary test build, run `BANNERLORD_GAME_DIR=E:/LOTRAOM_Releases/<channel>
+  dotnet test TAOM.Tests --no-build -p:DisableModuleCopy=true -p:ModuleId= --filter
+  "FullyQualifiedName~CustomBattleSceneLiveDataTests|FullyQualifiedName~SettlementSceneLiveDataTests" --
+  MSTest.MapInconclusiveToFailed=true` (`--no-build` because the build reads that variable as its game folder; the
+  last argument makes a channel without `TAOM_Map` fail instead of passing as inconclusive). Every `taom_*` field scene is also a picker row, so the
+  two classes cover both files and the settlement wiring; on 2026-10-17 the patreon channel failed both. The planned
+  gate is a refusal in `tools/package_release.py`'s dry run.
+- **Known issues in Kysaro's 2026-10-17 scenes (wired as delivered on Mike's word, fixes requested from Kysaro):**
+  `taom_mordor_town_01_forceatmo`, now the center of five Mordor towns including the Mordor start town Barad-dûr, has
+  no `sp_player`, so a night walk, a second walk in one stay or a disguised entry spawns the player at the world
+  origin, outside the walk area, and the mission retreats after 10 s. Pelargir, Serelond (town and arena) and
+  Lothgobel place `Lotraom_comprehend_*` prefabs no loaded module defines (`Decoration_014` to `_016` exist nowhere;
+  `House_12` and `House_50` sit only in `TAOM_Map/Prefabs_Unused`), so those pieces load empty. Serelond's town has
+  no usable siege rock piles (`audit_siege_props.py`) and its arena no tournament fight set. Load cost, unmeasured
+  in game: Pelargir (about 33,300 entities) and Serelond (about 29,400) are Dol Amroth-sized against vanilla towns
+  near 12,000; their guard points spawn about 180 to 200 guards per visit at their starting prosperity and about 280 to 300 once
+  prosperous, which Battle Size does not cap; the
+  Serelond arena carries the whole town terrain and flora; Lothgobel holds about 13,000 rock-pile entities and 198
+  sheep.
 
 ---
 
