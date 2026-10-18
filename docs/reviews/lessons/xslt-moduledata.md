@@ -488,3 +488,25 @@ against the live file.
   FIRST, `Module.cs:1467-1490`). Compare definitions, not ids: any element the tool does not own inside the replaced
   region is refused, with a `Counter` of ids before and after as a backstop.
 - **Source:** [rca-animation-variety-2026-10-17.md](../rca-animation-variety-2026-10-17.md) findings 15, 16 and 45; `tools/bind_orc_goblin_locomotion.py`.
+
+### A negative relationship `value` declares war whatever `isAtWar` says (#818, 2026-10-18)
+To remove the start wars, five kingdom rows were set to `isAtWar="false"` and kept `value="-1"`. `Kingdom.Deserialize`
+(v1.5.5 `Kingdom.cs:780-791`) calls `DeclareWar` for any `value` below 0 and reads `isAtWar` only to add a war, so a new
+game still opened with five wars. `Clan.Deserialize` does the same for clan rows.
+- **Why missed:** the attribute name was read as its meaning; `docs/modding/kingdoms.md` already said `isAtWar="false"`
+  does nothing.
+- **Prevent:** read the deserializer before editing an attribute whose effect you infer from its name.
+  `ShippedKingdomDataTests` now fails on a negative `value` or `isAtWar="true"` in any ModuleData file and on the
+  `spkingdoms.xslt` output.
+- **Source:** `docs/reviews/rca-wotr-war-rule-2026-10-18.md` finding 1.
+
+### The region-owner check is a gate now, because the manual step failed three times in three days (#818, 2026-10-18)
+After the two lessons above, a hand retarget of `kingdom_hero_party_arthedain_template` landed inside the
+`TAOM-ARTHEDAIN-PT` region `generate_arthedain_troops.py` owns, and the start-war fix left
+`generate_new_faction_kingdoms.py` still writing the old row. Both generators' next `--apply` would have reverted the
+data with every gate green.
+- **Why missed:** "check who owns the region" was a step to remember, and the edit looked like plain data.
+- **Prevent:** `tools/tests/test_generator_regions_in_sync.py` runs every region owner's `--check` in `/verify`. When a
+  generator gains a passing `--check`, add it to `OWNERS`; `promote_borrowed_cultures.py` joins once its block position
+  and the Arthedain start point are fixed.
+- **Source:** `docs/reviews/rca-wotr-war-rule-2026-10-18.md` findings 2 and 3.

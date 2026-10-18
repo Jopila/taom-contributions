@@ -603,3 +603,16 @@ siege windows noticed such a change only at their close (C02).
 - **Prevent:** treat the owner event as a fast path, and re-check the owner of every watched settlement in the
   daily step, or also listen to `OnClanChangedKingdom`.
 - **Source:** `docs/reviews/rca-war-chronicle-events-2026-10-14.md` C02, fixed in `7e8451555`.
+
+### A war veto gates where the engine prices or offers the war, not only where it declares it (#818, 2026-10-18)
+The War of the Ring phase rule first sat only on `DeclareWarAction.ApplyInternal`. The engine charges before that:
+`Kingdom.AddDecision` takes 200 influence from an AI proposer before `IsAllowed` cancels the decision, a declined
+call-to-war offer costs 50 relation, a one-clan player kingdom gets a map notice without `IsAllowed`, and
+`ChangeCrimeRatingAction` takes 10 relation before each refused declaration, every day the rating stays high. The war
+never started, and every cost was still paid.
+- **Why missed:** the design traced where wars start, not what each path costs before the start.
+- **Prevent:** when you add a veto on an engine action, walk back from the action to every stage that charges a cost or
+  shows the action to the player, and gate the earliest one: the score model for AI proposals
+  (`GetScoreOfDeclaringWar`), `IsAllowed` for decisions, the notice itself for direct offers. Keep the action prefix as
+  the backstop.
+- **Source:** `docs/reviews/rca-wotr-war-rule-2026-10-18.md` findings 4 to 6 and 9.

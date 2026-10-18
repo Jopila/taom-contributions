@@ -1069,3 +1069,14 @@ rebuilt (Codex F3). The tier-drop fix in the same batch had the same shape.
 - **Prevent:** on every eligible refresh, remove everything the feature owns, then apply the current state's
   nonzero entries. Test a same-state refresh after the config changes under a loaded save.
 - **Source:** `docs/reviews/rca-war-chronicle-batch-a-2026-10-09.md` F3, fixed in `2ee36e1fa`.
+
+### Do not make peace or war in `OnSessionLaunched` on a load (#818, 2026-10-18)
+The first version of the War of the Ring sweep made peace from `OnSessionLaunched`. On a load that event runs before
+`MapEventManager.OnAfterLoad` and `SiegeEventManager.OnAfterLoad` (`Campaign.cs:754` against `:765-766`), and each peace
+raises `OnMapEventContinuityNeedsUpdate`, which can pull parties out of battles and sieges and open a menu its own
+behavior has not registered yet.
+- **Why missed:** session launch was chosen to act early on new games; the load order of the map event managers was not
+  traced.
+- **Prevent:** run stance changes on the first daily tick, or from an event that fires after the managers are restored.
+  `EnforcePermanentAlliances` has the same shape and rarely acts.
+- **Source:** `docs/reviews/rca-wotr-war-rule-2026-10-18.md` finding 8.
