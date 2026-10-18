@@ -2,6 +2,7 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.Localization;
 using TAOM.Features.CoopInterop;
+using TAOM.Features.Diplomacy.Hooks;
 
 namespace TAOM.Features.Diplomacy.Models;
 
@@ -20,15 +21,18 @@ public class TaomKingdomDecisionPermissionModel : DefaultKingdomDecisionPermissi
 {
     private readonly IDiplomacyService _diplomacyService;
     private readonly IWarOfTheRingService _wotrService;
+    private readonly IOnAllianceAction _allianceHook;
     private readonly ICoopSessionProvider _coop;
 
     public TaomKingdomDecisionPermissionModel(
         IDiplomacyService diplomacyService,
         IWarOfTheRingService wotrService,
+        IOnAllianceAction allianceHook,
         ICoopSessionProvider coop)
     {
         _diplomacyService = diplomacyService;
         _wotrService = wotrService;
+        _allianceHook = allianceHook;
         _coop = coop;
     }
 
@@ -53,10 +57,10 @@ public class TaomKingdomDecisionPermissionModel : DefaultKingdomDecisionPermissi
     public override bool IsWarDecisionAllowedBetweenKingdoms(
         Kingdom kingdom1, Kingdom kingdom2, out TextObject reason)
     {
-        if (!_coop.ShouldDeferToHost
-            && !_diplomacyService.IsWarAllowed(kingdom1.StringId, kingdom2.StringId))
+        var refusal = _allianceHook.GetWarRefusalText(kingdom1.StringId, kingdom2.StringId);
+        if (refusal != null)
         {
-            reason = new TextObject("{=taom_war_blocked}These kingdoms are bound by an unbreakable alliance.");
+            reason = new TextObject(refusal);
             return false;
         }
 

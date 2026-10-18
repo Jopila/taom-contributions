@@ -700,8 +700,8 @@
     <relationships>
             <relationship
                 kingdom="Kingdom.empire_w"
-                value="-1"
-                isAtWar="true" />
+                value="0"
+                isAtWar="false" />
             <relationship
                 kingdom="Kingdom.aserai"
                 value="1"
@@ -791,8 +791,8 @@
         <relationships>
             <relationship
                 kingdom="Kingdom.empire_w"
-                value="-1"
-                isAtWar="true" />
+                value="0"
+                isAtWar="false" />
             <relationship
                 kingdom="Kingdom.aserai"
                 value="1"
@@ -1280,8 +1280,8 @@
         <relationships>
             <relationship
                 kingdom="Kingdom.gundabad"
-                value="-1"
-                isAtWar="true" />
+                value="0"
+                isAtWar="false" />
             <relationship
                 kingdom="Kingdom.empire"
                 value="0"

@@ -1178,8 +1178,9 @@ public class SubModule : MBSubModuleBase
         campaignStarter.AddBehavior(new DiplomacyBehavior(diplomacyService, diplomacyLogger, coopSession));
         campaignStarter.AddBehavior(new PlayerAllianceProposalBehavior(diplomacyService, diplomacyLogger));
         campaignStarter.AddModel(new TaomAllianceModel(diplomacyService));
-        campaignStarter.AddModel(new TaomKingdomDecisionPermissionModel(diplomacyService, wotrService, coopSession));
-        campaignStarter.AddModel(new TaomDiplomacyModel(wotrService, coopSession));
+        campaignStarter.AddModel(new TaomKingdomDecisionPermissionModel(diplomacyService, wotrService,
+            IoC.Resolve<IOnAllianceAction>(), coopSession));
+        campaignStarter.AddModel(new TaomDiplomacyModel(wotrService, coopSession, IoC.Resolve<IOnAllianceAction>()));
 
         var wotrLogger = IoC.Resolve<IModLogger>();
         // #764: must stay `new` per campaign. Its constructor resets the process-lifetime WotR service;

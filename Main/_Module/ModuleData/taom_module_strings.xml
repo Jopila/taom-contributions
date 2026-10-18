@@ -3260,5 +3260,10 @@
 	<!-- FiefManagement -->
 	<string id="taom_fief_nav_disabled" text="{=taom_fief_nav_disabled}Fief management is turned off in the mod options." />
 	<string id="taom_fief_nav_busy" text="{=taom_fief_nav_busy}The fief hub cannot be opened right now." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- Diplomacy -->
+	<string id="taom_war_blocked_alignment" text="{=taom_war_blocked_alignment}These kingdoms stand on the same side of the War of the Ring." />
+	<string id="taom_war_blocked_peace" text="{=taom_war_blocked_peace}The War of the Ring has not yet begun. No kingdom may declare war." />
+	<string id="taom_war_blocked_unscripted" text="{=taom_war_blocked_unscripted}Only the first wars of the age may be declared now." />
 
 </strings>

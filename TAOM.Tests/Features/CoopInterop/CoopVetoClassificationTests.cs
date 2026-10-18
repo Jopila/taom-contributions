@@ -66,6 +66,19 @@ public class CoopVetoClassificationTests
             "This is the confirmed divergence, not a hypothetical one."),
         ["AllianceCampaignBehavior_EndAlliance_Patch"] = new(CoopVeto.GatedForCoop,
             "Skips an alliance end. Static-config condition, same peer-mismatch exposure as war."),
+        ["AllianceCampaignBehavior_StartCallToWarAgreement_Patch"] = new(CoopVeto.GatedForCoop,
+            "Skips a call-to-war agreement whose war the phase forbids. Delegates to ShouldPreventWarDeclaration, " +
+            "which defers to the host under co-op; the condition reads WarOfTheRingService.CurrentPhase, the " +
+            "same unreplicated SyncData as the peace veto."),
+        ["AllianceCampaignBehavior_OnCallToWarAgreementProposedByPlayerKingdom_Patch"] = new(CoopVeto.GatedForCoop,
+            "Skips the player kingdom's call-to-war offer (a map notice for a one-clan kingdom) for a war the " +
+            "rule refuses. Delegates to ShouldPreventWarDeclaration, which defers to the host under co-op; " +
+            "the same unreplicated WarOfTheRingService.CurrentPhase."),
+        ["ProposeCallToWarAgreementDecision_IsAllowed_Patch"] = new(CoopVeto.GatedForCoop,
+            "Cancels a call-to-war ballot for a war the rule refuses. Delegates to ShouldPreventWarDeclaration, " +
+            "which defers to the host under co-op; the same unreplicated WarOfTheRingService.CurrentPhase."),
+        ["AcceptCallToWarAgreementDecision_IsAllowed_Patch"] = new(CoopVeto.GatedForCoop,
+            "The called kingdom's side of the same ballot; same hook, same host deferral."),
 
         // --- Reviewed, safe to keep enforcing ------------------------------------------------
         ["SupplyCaravanEncounterPatch"] = new(CoopVeto.ReviewedSafe,
@@ -468,6 +481,8 @@ public class CoopVetoClassificationTests
     private static readonly string[] DivergenceProneRules =
     {
         "IsWarAllowed",
+        "GetWarVeto",
+        "GetDeclareWarScorePenalty",
         "ShouldBlockPeace",
         "IsAllianceDecisionAllowed",
     };
@@ -485,6 +500,7 @@ public class CoopVetoClassificationTests
         "EstablishInitialAlliances",
         "ReconcileDeclaredWars",
         "CheckPhaseTransition",
+        "EndWarsForbiddenByPhase",
         // #765: the War Chronicle's world-writing entry points (effects, focus, momentum, saved event rows).
         "LaunchChronicle",
         "RunChronicleDay",
@@ -562,7 +578,7 @@ public class CoopVetoClassificationTests
     }
 
     [TestMethod]
-    public void GatedVetoes_AreExactlyTheDiplomacyThree()
+    public void GatedVetoes_AreExactlyTheDiplomacySeven()
     {
         // Pins the D1 fix. If a gate is removed, this fails rather than the divergence silently
         // returning — the failure mode is a corrupted co-op save, which no other test can catch.
@@ -575,9 +591,13 @@ public class CoopVetoClassificationTests
         CollectionAssert.AreEqual(
             new[]
             {
+                "AcceptCallToWarAgreementDecision_IsAllowed_Patch",
                 "AllianceCampaignBehavior_EndAlliance_Patch",
+                "AllianceCampaignBehavior_OnCallToWarAgreementProposedByPlayerKingdom_Patch",
+                "AllianceCampaignBehavior_StartCallToWarAgreement_Patch",
                 "DeclareWarAction_ApplyInternal_Patch",
                 "MakePeaceAction_ApplyInternal_Patch",
+                "ProposeCallToWarAgreementDecision_IsAllowed_Patch",
             },
             gated.ToArray());
     }

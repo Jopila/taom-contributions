@@ -86,7 +86,8 @@ Welcome testers! Work through each section below and report any **crashes, visua
 - Attempting to end a permanent alliance via kingdom decisions = blocked
 
 **3b. War of the Ring Phases**
-- **Phase 1** (early game): Isengard + Dunland declare war on Rohan
+- **Peace** (before Phase 1): the AI declares no war. If your kingdom attacks another kingdom's party, caravan or settlement, a real war starts (except against a Permanent ally or a same-side kingdom)
+- **Phase 1** (early game): Isengard + Dunland declare war on Rohan; only those wars may exist until Phase 2
 - **Phase 2** (shortly after): All hostile pairs from config go to war
 - After Phase 2: peace proposals between hostile factions are **blocked**
 - Kingdom decision menu does NOT show "Make Peace" for locked pairs

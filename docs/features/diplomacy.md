@@ -21,7 +21,7 @@ Two problems exist:
 **Diplomacy subsystem:**
 - `DiplomacyService` (implements `IDiplomacyService`) loads `diplomacy.json` at startup via `IDiplomacyConfigProvider` and builds an in-memory dictionary of `(kingdomA, kingdomB) -> AllianceTier` using a canonical key (alphabetical order).
 - `AllianceActionHook` (implements `IOnAllianceAction`) consults `DiplomacyService` to decide whether to block alliance-end and war-declaration events.
-- `Patch11_Diplomacy` uses Harmony Prefix patches on `AllianceCampaignBehavior.EndAlliance` and `DeclareWarAction.ApplyInternal`, delegating to `IOnAllianceAction`.
+- `Patch11_Diplomacy` uses Harmony Prefix patches on `AllianceCampaignBehavior.EndAlliance`, `DeclareWarAction.ApplyInternal` and `AllianceCampaignBehavior.StartCallToWarAgreement` and `OnCallToWarAgreementProposedByPlayerKingdom`, plus `IsAllowed` on `ProposeCallToWarAgreementDecision` and `AcceptCallToWarAgreementDecision`, delegating to `IOnAllianceAction`. The war prefixes ask `IWarOfTheRingService.GetWarVeto`, which checks Permanent first, then `WarEnded`, then the same-alignment rule, and only then the phase rule ([war-of-the-ring.md](war-of-the-ring.md)); a same-side pair therefore reads the alignment text in every phase before `WarEnded`, and the phase text reaches only opposed or neutral pairs. The `DeclareWarAction` prefix reads `declareWarDetail`: a player-caused war (`CausedByPlayerHostility`, `CausedByCrimeRatingChange`, `CausedByKingdomCreation`) skips the two phase vetoes only. `TaomDiplomacyModel.GetScoreOfDeclaringWar` subtracts a 10,000,000 (phase veto) or 100,000,000 (Permanent, same-alignment) penalty so the AI does not propose a war the rule would cancel, and `TaomKingdomDecisionPermissionModel` takes its refusal text from `AllianceActionHook.GetWarRefusalText`.
 - `TaomAllianceModel` overrides `DefaultAllianceModel.GetScoreOfStartingAlliance` to add a score modifier (+1000 for Permanent, +500 for Natural, -10000 for Hostile) so the AI naturally favors or avoids alliances matching lore.
 - `DiplomacyBehavior` (`CampaignBehaviorBase`) establishes initial permanent alliances on new game creation and re-enforces them on every session load.
 
@@ -42,6 +42,7 @@ A player who founds their own kingdom could not form alliances. This is **not** 
 - Phase 1 (`IsengardWar`): declares specific wars from `phase1.wars` in `war_of_the_ring.json`.
 - Phase 2 (`FullWar`): the phase turns first, then it declares the `phase2.wars` list and, if `autoWarBetweenHostileTiers` is true, every hostile-tier pair whose stored stance is not already War (`IAllianceAdapter.HasDeclaredWar`, not the model-aware `AreAtWar`, which reports every Hostile pair at war in Full War; #772). Each host session launch re-runs those declarations through `ReconcileDeclaredWars`.
 - `PeaceActionHook` (implements `IOnPeaceAction`) blocks `MakePeaceAction.ApplyInternal` when `FullWar` is active and the two factions are in a hostile-tier relationship.
+- Two edges are decided: a vassal who enlists under a lord of another kingdom during days 30 to 44 has the enlistment war mirror declare that lord's wars for the player's liege kingdom as a player-caused war, which can pull the liege into the Rohan war early ([enlistment.md](enlistment.md)); and the lord-dialogue "sponsor a call to war" option is not silent (a known gap): vanilla's call-to-war cost (`DefaultAllianceModel.GetCallToWarCostForCalledKingdom`) subtracts `GetScoreOfDeclaringWar`, so for a vetoed pair the option shows a cost in the millions and is greyed out, and only an ally with no fiefs or a player holding millions reaches the `StartCallToWarAgreement` backstop, which then does nothing.
 - Phase day thresholds are overridable via MCM (`ITaomSettingsProvider` wraps `TaomSettings`); a test-mode with short day counts is available in the config.
 
 ### Component Diagram
@@ -58,13 +59,17 @@ CampaignEvents.DailyTickEvent, CampaignEvents.OnSessionLaunchedEvent (host only)
         |
 WarOfTheRingBehavior --> IWarOfTheRingService.CheckPhaseTransition (both events)
                      --> IWarOfTheRingService.ReconcileDeclaredWars (session launch only, runs only in FullWar, idempotent, #772)
+                     --> IWarOfTheRingService.EndWarsForbiddenByPhase (after CheckPhaseTransition, daily tick only, authority only, skips the player kingdom's phase-vetoed wars)
                                   |
                             IAllianceAdapter (HasDeclaredWar, DeclareWar, GetAllKingdomIds)
                             IDiplomacyService.GetRelationshipTier
 
 Harmony Patch11_Diplomacy
   AllianceCampaignBehavior.EndAlliance [Prefix] -> IOnAllianceAction.ShouldPreventAllianceEnd  (+ [diag] log)
-  DeclareWarAction.ApplyInternal       [Prefix] -> IOnAllianceAction.ShouldPreventWarDeclaration -> IsWarAllowed (Permanent + same-alignment only)
+  DeclareWarAction.ApplyInternal       [Prefix] -> IOnAllianceAction.ShouldPreventWarDeclaration -> IWarOfTheRingService.GetWarVeto (Permanent first, then WarEnded, then the same-side rule, then the phase rule; a player-caused war skips the phase rule)
+  AllianceCampaignBehavior.StartCallToWarAgreement [Prefix] -> IOnAllianceAction.ShouldPreventWarDeclaration (same veto, before any gold moves)
+  AllianceCampaignBehavior.OnCallToWarAgreementProposedByPlayerKingdom [Prefix] -> same veto, so a one-clan player kingdom gets no map notice for a refused war
+  ProposeCallToWarAgreementDecision.IsAllowed / AcceptCallToWarAgreementDecision.IsAllowed [Prefix] -> same veto, result false, so vanilla cancels the ballot before the player sees it
   MakePeaceAction.ApplyInternal        [Prefix] -> IOnPeaceAction.ShouldPreventPeace
   AllianceCampaignBehavior.StartAlliance [Postfix] -> [diag] log (TEMPORARY, player-involved)
 
@@ -183,7 +188,7 @@ Controls the scripted war escalation:
   "testMode": { "enabled": false, "phase1Day": 1, "phase2Day": 3 }
 }
 ```
-Phase 1 (Isengard and Dunland attack Rohan, Gundabad attacks Arthedain) triggers on day 30; Phase 2 (the full War of the Ring) on day 44. MCM overrides `phase1TriggerDay` and `phase2TriggerDay` at runtime and carries the same defaults.
+Phase 1 (Isengard and Dunland attack Rohan) triggers on day 30; Phase 2 (the full War of the Ring) on day 44. MCM overrides `phase1TriggerDay` and `phase2TriggerDay` at runtime and carries the same defaults.
 
 ### MCM Settings (`TaomSettings`)
 | Setting | Default | Description |
@@ -210,7 +215,11 @@ Phase 1 (Isengard and Dunland attack Rohan, Gundabad attacks Arthedain) triggers
 | `Main/Features/Diplomacy/Hooks/PeaceActionHook.cs` | `IOnPeaceAction` — decides whether to block peace during full war |
 | `Main/Features/Diplomacy/Hooks/AllianceCampaignBehavior_EndAlliance_Patch.cs` | Harmony Prefix — calls `IOnAllianceAction.ShouldPreventAllianceEnd` (+ temporary `[diag]` log of player-involved end attempts) |
 | `Main/Features/Diplomacy/Hooks/AllianceCampaignBehavior_StartAlliance_Patch.cs` | Harmony Postfix — **TEMPORARY diagnostic** (`Patch11_Diplomacy`): logs `[Diplomacy][diag] Player alliance FORMED` on any path (kingdom-screen button + dialog). Strip after in-game durability sign-off. |
-| `Main/Features/Diplomacy/Hooks/DeclareWarAction_ApplyInternal_Patch.cs` | Harmony Prefix — calls `IOnAllianceAction.ShouldPreventWarDeclaration` (→ `IsWarAllowed`: blocks war on Permanent allies + same-alignment pairs) |
+| `Main/Features/Diplomacy/Hooks/DeclareWarAction_ApplyInternal_Patch.cs` | Harmony Prefix: calls `IOnAllianceAction.ShouldPreventWarDeclaration` (→ `GetWarVeto`: Permanent pairs always, then `WarEnded`, then same-alignment pairs, then the War of the Ring phase rule) |
+| `Main/Features/Diplomacy/Hooks/AllianceCampaignBehavior_StartCallToWarAgreement_Patch.cs` | Harmony Prefix: the same veto, so a call-to-war agreement for a refused war moves no gold |
+| `Main/Features/Diplomacy/Hooks/AllianceCampaignBehavior_OnCallToWarAgreementProposedByPlayerKingdom_Patch.cs` | Harmony Prefix: the same veto for a player kingdom's call-to-war notice, which vanilla posts without reading `IsAllowed` |
+| `Main/Features/Diplomacy/Hooks/ProposeCallToWarAgreementDecision_IsAllowed_Patch.cs` | Harmony Prefix: the propose decision is not allowed when the war is vetoed |
+| `Main/Features/Diplomacy/Hooks/AcceptCallToWarAgreementDecision_IsAllowed_Patch.cs` | Harmony Prefix: the accept decision is not allowed when the war is vetoed |
 | `Main/Features/Diplomacy/Hooks/MakePeaceAction_ApplyInternal_Patch.cs` | Harmony Prefix — calls `IOnPeaceAction.ShouldPreventPeace` |
 | `Main/Features/Diplomacy/IKingdomVoteDeadlockService.cs` | Service interface: is this ballot stale, and has the player been told |
 | `Main/Features/Diplomacy/KingdomVoteDeadlockService.cs` | Implementation: staleness verdict + one announce per ballot, bounded dedupe |
@@ -223,7 +232,7 @@ Phase 1 (Isengard and Dunland attack Rohan, Gundabad attacks Arthedain) triggers
 | `Main/Adapters/KingdomBallotAdapter.cs` | ADR-007 boundary over one `KingdomDecision` (staleness, identity, title) |
 | `Main/Features/Diplomacy/Models/TaomAllianceModel.cs` | `DefaultAllianceModel` override: adds lore score modifier to alliance scoring |
 | `Main/Features/Diplomacy/Models/TaomKingdomDecisionPermissionModel.cs` | `DefaultKingdomDecisionPermissionModel` override: blocks lore-Hostile alliance decisions (AI pairs) but allows any decision involving the player's kingdom (full freedom); also blocks war on permanent allies + peace during full War of the Ring |
-| `Main/Features/Diplomacy/Models/TaomDiplomacyModel.cs` | Additional diplomacy model override |
+| `Main/Features/Diplomacy/Models/TaomDiplomacyModel.cs` | `DefaultDiplomacyModel` override: `IsAtConstantWar` for the peace block, and `GetScoreOfDeclaringWar` minus the veto penalty |
 | `Main/Features/Diplomacy/Models/AllianceTier.cs` | Enum: `Permanent`, `Natural`, `Neutral`, `Hostile` |
 | `Main/Features/Diplomacy/Models/KingdomRelationship.cs` | POCO: kingdom pair + tier |
 | `Main/Features/Diplomacy/Models/DiplomacyConfig.cs` | POCO: list of `KingdomRelationship` |
@@ -250,7 +259,14 @@ Phase 1 (Isengard and Dunland attack Rohan, Gundabad attacks Arthedain) triggers
 | `TAOM.Tests/Features/Diplomacy/WarOfTheRingWiringTests.cs` | SubModule builds `WarOfTheRingBehavior` inline, once (#764) |
 | `TAOM.Tests/Features/Diplomacy/WarOfTheRingPhaseDayTests.cs` | `GetEffectivePhaseDay` (#765) |
 | `TAOM.Tests/Features/Diplomacy/DiplomacyConfigProviderTests.cs` | JSON parsing, missing file handling |
-| `TAOM.Tests/Features/Diplomacy/AllianceActionHookTests.cs` | `ShouldPreventAllianceEnd` and `ShouldPreventWarDeclaration` for permanent vs non-permanent tiers |
+| `TAOM.Tests/Features/Diplomacy/AllianceActionHookTests.cs` | `ShouldPreventAllianceEnd` for permanent vs non-permanent tiers; `ShouldPreventWarDeclaration` follows whatever `GetWarVeto` returns (any veto blocks, the player-caused flag is passed through, co-op defers to the host without asking the service); `GetWarRefusalText` returns the veto's text, null for none, null under co-op, and logs nothing |
+| `TAOM.Tests/Features/Diplomacy/WarOfTheRingWarVetoTests.cs` | `GetWarVeto` in every phase (side before phase, player-caused wars), the score penalties, `IsEnabled`, and `EndWarsForbiddenByPhase` |
+| `TAOM.Tests/Features/Diplomacy/WarOfTheRingBehaviorPhaseWarsTests.cs` | The sweep runs on the daily tick after the phase check, authority only, not on session launch (`RequiresGame`) |
+| `TAOM.Tests/Features/Diplomacy/WarVetoReasonsTests.cs` | Every veto has its own keyed inline text; `Permanent` keeps `taom_war_blocked` |
+| `TAOM.Tests/Features/Diplomacy/ShippedKingdomDataTests.cs` | No `<relationship>` row in any shipped ModuleData xml or xslt declares war; a `LiveInstall` check of the transformed `spkingdoms.xslt` output |
+| `TAOM.Tests/Features/Diplomacy/DeclareWarActionPatchTests.cs` | Which `DeclareWarDetail` values count as player-caused (`RequiresGame`) |
+| `TAOM.Tests/Features/Diplomacy/DiplomacyWarPrefixBindingTests.cs` | `BindingVerification`: the war prefixes' parameter names and the decision fields they read, against the installed engine |
+| `TAOM.Tests/Features/Diplomacy/WarOfTheRingShippedConfigTests.cs` | The shipped `war_of_the_ring.json`: days, ordering, test mode off, and the exact phase 1 list (`isengard->vlandia`, `empire->vlandia`) |
 | `TAOM.Tests/Features/Diplomacy/PeaceActionHookTests.cs` | `ShouldPreventPeace` during active vs inactive War of the Ring |
 | `TAOM.Tests/Features/Diplomacy/KingdomVoteDeadlockServiceTests.cs` | Patch80 staleness verdict, null ballot, throwing staleness check (suppresses, does not defer), announce path, per-ballot dedupe, throwing presenter, bounded dedupe set |
 | `TAOM.Tests/Features/Diplomacy/Patch80KingdomVoteDeadlockBindingTests.cs` | Patch80 engine drift: the three patch targets and their parameter NAMES (Harmony binds by name), the five members reached by reflection (`ExecuteDone` for seam D), the public members the bodies read, `StartElection` still calling `ReadyToAiChoose` (seam D's premise), the category literal on all five seams, `SubModule` applying and initializing them, seam E's target name, and IL call-presence guards for the service calls, the listener clear, the fault-path withdraw, seam D's `ExecuteDone` invoke and seam E's two state reads |
@@ -270,7 +286,10 @@ Phase 1 (Isengard and Dunland attack Rohan, Gundabad attacks Arthedain) triggers
 
 ## Changelog
 
+- 2026-10-18: Doc pass for the war rule: the side is checked before the phase, `CausedByKingdomCreation` counts as player-caused, a seventh prefix (`OnCallToWarAgreementProposedByPlayerKingdom`) keeps vetoed call-to-war notices off a player kingdom's map, and the enlistment edge and the lord-dialogue sponsor gap are recorded (#818).
 - 2026-10-08: A new campaign no longer inherits the previous campaign's War of the Ring phase and outcome: `WarOfTheRingBehavior`'s constructor resets the service (#764).
+- 2026-10-18: War rule follow-up: player-caused wars lift the phase vetoes, the AI war score carries the veto penalty, two `IsAllowed` prefixes hide impossible call-to-war offers, and the daily sweep spares the player kingdom's phase-vetoed wars (#818). Open: #819, #820.
+- 2026-10-18: War rule by phase (`GetWarVeto`): no war in Peace, only the phase 1 wars in Isengard War, the old rule in Full War. New `StartCallToWarAgreement` prefix; kingdom decision refusals gain three texts. Details in [war-of-the-ring.md](war-of-the-ring.md).
 - 2026-10-08: Phase 2 really declares the Hostile-pair wars. The phase turns first and the guard reads the stored stance (`HasDeclaredWar`); at each host session launch, `ReconcileDeclaredWars` declares the wars that a Full War save still stores as neutral (#772).
 - 2026-09-15: Patch80 seams D and E (#550). A window built on an election that concluded inside the view model's constructor (the player is not their clan's leader, so `Supporter.IsPlayer` is false) is closed at once through vanilla `ExecuteDone` (D), and `ExecuteDone` itself runs only on an active, concluded window (E, from Codex review 113: the widget timer outlives a seam D close). The four earlier reflection sites plus `ExecuteDone` are now in the reflection-site catalogue. The Player Switcher route into that state is closed at the source in the same change.
 - 2026-09-06: `Patch80_KingdomVoteDeadlock` (#547), three seams so a vanilla kingdom decision popup can never become unclosable. Deep review found and fixed two HIGH defects in the first cut (a leaked `KingdomDecisionConcluded` listener, and a fault path that deferred to a vanilla branch which throws); RCA at [rca-kingdom-vote-deadlock-2026-09-06.md](../reviews/rca-kingdom-vote-deadlock-2026-09-06.md). Vote VOLUME is unchanged: `TaomAllianceModel.MaxNumberOfAlliances` is what turns one war declaration into a run of ballots.
@@ -290,6 +309,7 @@ Phase 1 (Isengard and Dunland attack Rohan, Gundabad attacks Arthedain) triggers
 - **Issue:** Unknown for the original feature (commits reference `16f7f4e` for initial implementation; no issue number in messages)
 - **Kingdom vote deadlock guard (Patch80):** [#547](https://github.com/haterade22/TAOM/issues/547)
 - **Seam D + the Player Switcher root fix:** [#550](https://github.com/haterade22/TAOM/issues/550), the second mechanism behind the same symptom. See [player-switcher.md](player-switcher.md) "Clan leadership follows the player".
+- **War rule by phase:** #818 (open follow-ups #819, #820)
 - **War of the Ring fixes:** #764 and #772 (closed with `triage-needs-ingame`; [war-of-the-ring.md](war-of-the-ring.md) "How to Test In-Game" steps 6 and 7)
 - **Status:** Active
 

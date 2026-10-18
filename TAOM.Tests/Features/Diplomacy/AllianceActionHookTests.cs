@@ -12,6 +12,7 @@ namespace TAOM.Tests.Features.Diplomacy;
 public class AllianceActionHookTests
 {
     private IDiplomacyService _diplomacyService;
+    private IWarOfTheRingService _wotr;
     private IModLogger _logger;
     private ICoopSessionProvider _coop;
     private AllianceActionHook _sut;
@@ -20,10 +21,11 @@ public class AllianceActionHookTests
     public void Setup()
     {
         _diplomacyService = Substitute.For<IDiplomacyService>();
+        _wotr = Substitute.For<IWarOfTheRingService>();
         _logger = Substitute.For<IModLogger>();
         _coop = Substitute.For<ICoopSessionProvider>();
         _coop.ShouldDeferToHost.Returns(false);
-        _sut = new AllianceActionHook(_diplomacyService, _logger, _coop);
+        _sut = new AllianceActionHook(_diplomacyService, _wotr, _logger, _coop);
     }
 
     [TestMethod]
@@ -53,28 +55,94 @@ public class AllianceActionHookTests
         Assert.IsFalse(_sut.ShouldPreventAllianceEnd("battania", "aserai"));
     }
 
-    [TestMethod]
-    public void ShouldPreventWarDeclaration_WarBlocked_ReturnsTrue()
+    [DataTestMethod]
+    [DataRow(WarVeto.Permanent)]
+    [DataRow(WarVeto.SameAlignment)]
+    [DataRow(WarVeto.PhasePeace)]
+    [DataRow(WarVeto.PhaseNotScripted)]
+    public void ShouldPreventWarDeclaration_AnyVeto_ReturnsTrue(WarVeto veto)
     {
-        _diplomacyService.IsWarAllowed("empire_w", "vlandia").Returns(false);
+        _wotr.GetWarVeto("isengard", "rohan", false).Returns(veto);
 
-        Assert.IsTrue(_sut.ShouldPreventWarDeclaration("empire_w", "vlandia"));
+        Assert.IsTrue(_sut.ShouldPreventWarDeclaration("isengard", "rohan"));
     }
 
     [TestMethod]
-    public void ShouldPreventWarDeclaration_WarAllowed_ReturnsFalse()
+    public void ShouldPreventWarDeclaration_NoVeto_ReturnsFalse()
     {
-        _diplomacyService.IsWarAllowed("empire_w", "empire_s").Returns(true);
+        _wotr.GetWarVeto("isengard", "rohan", false).Returns(WarVeto.None);
 
-        Assert.IsFalse(_sut.ShouldPreventWarDeclaration("empire_w", "empire_s"));
+        Assert.IsFalse(_sut.ShouldPreventWarDeclaration("isengard", "rohan"));
     }
 
     [TestMethod]
-    public void ShouldPreventWarDeclaration_NeutralKingdoms_ReturnsFalse()
+    public void ShouldPreventWarDeclaration_PlayerCaused_AsksTheServiceForThePlayerVeto()
     {
-        _diplomacyService.IsWarAllowed("battania", "aserai").Returns(true);
+        _wotr.GetWarVeto("gondor", "isengard", false).Returns(WarVeto.PhasePeace);
+        _wotr.GetWarVeto("gondor", "isengard", true).Returns(WarVeto.None);
 
-        Assert.IsFalse(_sut.ShouldPreventWarDeclaration("battania", "aserai"));
+        Assert.IsFalse(_sut.ShouldPreventWarDeclaration("gondor", "isengard", causedByPlayer: true));
+        Assert.IsTrue(_sut.ShouldPreventWarDeclaration("gondor", "isengard", causedByPlayer: false));
+    }
+
+    [TestMethod]
+    public void ShouldPreventWarDeclaration_PlayerCausedLoreVeto_ReturnsTrue()
+    {
+        _wotr.GetWarVeto("rivendell", "lothlorien", true).Returns(WarVeto.Permanent);
+
+        Assert.IsTrue(_sut.ShouldPreventWarDeclaration("rivendell", "lothlorien", causedByPlayer: true));
+    }
+
+    [TestMethod]
+    public void ShouldPreventWarDeclaration_PlayerCausedCoopDefer_ReturnsFalseWithoutConsultingTheService()
+    {
+        _coop.ShouldDeferToHost.Returns(true);
+
+        Assert.IsFalse(_sut.ShouldPreventWarDeclaration("rivendell", "lothlorien", causedByPlayer: true));
+        _wotr.DidNotReceive().GetWarVeto(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>());
+    }
+
+    // --- GetWarRefusalText: the permission model's single call ---------------------------------
+
+    [DataTestMethod]
+    [DataRow(WarVeto.Permanent)]
+    [DataRow(WarVeto.SameAlignment)]
+    [DataRow(WarVeto.PhasePeace)]
+    [DataRow(WarVeto.PhaseNotScripted)]
+    public void GetWarRefusalText_AnyVeto_ReturnsThatVetosText(WarVeto veto)
+    {
+        _wotr.GetWarVeto("isengard", "rohan", false).Returns(veto);
+
+        Assert.AreEqual(WarVetoReasons.Text(veto), _sut.GetWarRefusalText("isengard", "rohan"));
+    }
+
+    [TestMethod]
+    public void GetWarRefusalText_NoVeto_ReturnsNull()
+    {
+        _wotr.GetWarVeto("isengard", "rohan", false).Returns(WarVeto.None);
+
+        Assert.IsNull(_sut.GetWarRefusalText("isengard", "rohan"));
+    }
+
+    [TestMethod]
+    public void GetWarRefusalText_CoopDefer_ReturnsNullWithoutConsultingTheService()
+    {
+        _coop.ShouldDeferToHost.Returns(true);
+        _wotr.GetWarVeto("isengard", "rohan", false).Returns(WarVeto.PhasePeace);
+
+        Assert.IsNull(_sut.GetWarRefusalText("isengard", "rohan"));
+        _wotr.DidNotReceive().GetWarVeto(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>());
+    }
+
+    [TestMethod]
+    public void GetWarRefusalText_Vetoed_LogsNothingAtInfo()
+    {
+        // The engine asks for every AI proposal; an Info line per ask would flood the log.
+        _wotr.GetWarVeto("isengard", "rohan", false).Returns(WarVeto.PhasePeace);
+
+        _sut.GetWarRefusalText("isengard", "rohan");
+
+        _logger.DidNotReceive().LogInfo(Arg.Any<string>());
     }
 
     // --- Co-op interop (#370) -------------------------------------------------------------
@@ -88,7 +156,7 @@ public class AllianceActionHookTests
     {
         // Arrange
         _coop.ShouldDeferToHost.Returns(true);
-        _diplomacyService.IsWarAllowed("empire_w", "vlandia").Returns(false);
+        _wotr.GetWarVeto("empire_w", "vlandia", false).Returns(WarVeto.Permanent);
 
         // Act
         var result = _sut.ShouldPreventWarDeclaration("empire_w", "vlandia");
@@ -113,15 +181,41 @@ public class AllianceActionHookTests
     }
 
     [TestMethod]
-    public void ShouldPreventWarDeclaration_CoopActive_DoesNotConsultDiplomacyService()
+    public void ShouldPreventWarDeclaration_CoopActive_DoesNotConsultWarOfTheRing()
     {
-        // Arrange — the veto is skipped outright, not computed and discarded.
+        // The veto is skipped outright, not computed and discarded.
         _coop.ShouldDeferToHost.Returns(true);
 
-        // Act
         _sut.ShouldPreventWarDeclaration("empire_w", "vlandia");
 
-        // Assert
-        _diplomacyService.DidNotReceive().IsWarAllowed(Arg.Any<string>(), Arg.Any<string>());
+        _wotr.DidNotReceive().GetWarVeto(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>());
+    }
+
+    [TestMethod]
+    public void GetDeclareWarScorePenalty_CoopDefersToHost_ReturnsZero()
+    {
+        _coop.ShouldDeferToHost.Returns(true);
+        _wotr.GetDeclareWarScorePenalty("gondor", "rohan").Returns(5000f);
+
+        Assert.AreEqual(0f, _sut.GetDeclareWarScorePenalty("gondor", true, "rohan", true));
+    }
+
+    [DataTestMethod]
+    [DataRow(false, true)]
+    [DataRow(true, false)]
+    [DataRow(false, false)]
+    public void GetDeclareWarScorePenalty_EitherSideNotKingdom_ReturnsZero(bool aIsKingdom, bool bIsKingdom)
+    {
+        _wotr.GetDeclareWarScorePenalty("gondor", "rohan").Returns(5000f);
+
+        Assert.AreEqual(0f, _sut.GetDeclareWarScorePenalty("gondor", aIsKingdom, "rohan", bIsKingdom));
+    }
+
+    [TestMethod]
+    public void GetDeclareWarScorePenalty_TwoKingdoms_ReturnsServiceValue()
+    {
+        _wotr.GetDeclareWarScorePenalty("gondor", "rohan").Returns(5000f);
+
+        Assert.AreEqual(5000f, _sut.GetDeclareWarScorePenalty("gondor", true, "rohan", true));
     }
 }

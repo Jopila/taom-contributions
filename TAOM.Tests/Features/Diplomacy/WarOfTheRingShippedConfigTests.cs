@@ -94,11 +94,11 @@ public class WarOfTheRingShippedConfigTests
         var config = LoadShippedConfig();
         if (config == null) return;
 
-        // vlandia == Rohan, empire == Dunland (XSLT cultures keep vanilla engine ids).
-        CollectionAssert.Contains(
-            config.Phase1.Wars.ConvertAll(w => $"{w.Attacker}->{w.Defender}"), "isengard->vlandia");
-        CollectionAssert.Contains(
-            config.Phase1.Wars.ConvertAll(w => $"{w.Attacker}->{w.Defender}"), "empire->vlandia");
+        // vlandia == Rohan, empire == Dunland (XSLT cultures keep vanilla engine ids). Exactly these
+        // two: a third scripted war would open the campaign in a way nobody reviewed.
+        CollectionAssert.AreEquivalent(
+            new[] { "isengard->vlandia", "empire->vlandia" },
+            config.Phase1.Wars.ConvertAll(w => $"{w.Attacker}->{w.Defender}"));
     }
 
     [TestMethod]

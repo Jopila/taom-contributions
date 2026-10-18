@@ -28,6 +28,10 @@ public static class DiplomacyIoC
     {
         AllianceCampaignBehavior_EndAlliance_Patch.Initialize(allianceHook);
         DeclareWarAction_ApplyInternal_Patch.Initialize(allianceHook);
+        AllianceCampaignBehavior_StartCallToWarAgreement_Patch.Initialize(allianceHook);
+        AllianceCampaignBehavior_OnCallToWarAgreementProposedByPlayerKingdom_Patch.Initialize(allianceHook);
+        ProposeCallToWarAgreementDecision_IsAllowed_Patch.Initialize(allianceHook);
+        AcceptCallToWarAgreementDecision_IsAllowed_Patch.Initialize(allianceHook);
         MakePeaceAction_ApplyInternal_Patch.Initialize(peaceHook);
     }
 }

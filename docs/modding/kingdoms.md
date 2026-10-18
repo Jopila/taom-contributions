@@ -129,10 +129,10 @@ The three you change first:
 
 ### Add
 
-**Add a relationship row (declare a war or a peace at day one).**
+**Add a relationship row (a peace at day one; TAOM ships no start war).**
 
 1. Open [`Main/_Module/ModuleData/taom_spkingdoms.xml`](../../Main/_Module/ModuleData/taom_spkingdoms.xml) and find the `<relationships>` block of the kingdom you want to change.
-2. Add one row. War: `<relationship kingdom="Kingdom.empire_w" value="-1" isAtWar="true" />`. Peace: the same row with `value="0" isAtWar="false"`.
+2. Add one row: `<relationship kingdom="Kingdom.empire_w" value="0" isAtWar="false" />`. A negative `value` (with `isAtWar="true"`) would declare war on day one, but TAOM ships no start war: the War of the Ring phase rule decides when wars begin, and `ShippedKingdomDataTests` fails on any shipped row with a negative value or `isAtWar="true"`. No data file can open the campaign at war: `phase1.wars` of `war_of_the_ring.json` fires on day 30, and a Hostile row in `diplomacy.json` goes to war on day 44.
 3. Write the target as `Kingdom.<id>` with the dot. Without it the load throws `MBInvalidReferenceException` (`MBObjectManager.cs:1524-1533`).
 4. Add the row on one side only. The engine writes a single shared stance link for the pair, so the mirror row is redundant (`FactionManager.cs:119-140`). If you write both and they disagree, the kingdom that appears later in the file wins.
 5. Keep XML comments outside the `<relationships>` block. The loop walks every child node and reads attributes off it, and a comment node has none, so it throws (`Kingdom.cs:781-784`). Nothing shows you the throw: `LoadXML` swallows it (`MBObjectManager.cs:790-796`), leaving that kingdom half-built and every kingdom after it in the merged file unloaded.
@@ -177,7 +177,7 @@ Code: No code changes needed
 
 **Retire a kingdom, do not delete it.** Deleting a `<Kingdom>` entry orphans every clan whose `super_faction` names it, every lord in those clans and every config row keyed on the id, and none of that reports an error at load.
 
-1. For one of TAOM's 14: leave the entry in place and empty its `<relationships>` block, so it starts at peace with everyone and never joins a war.
+1. For one of TAOM's 14: leave the entry in place and empty its `<relationships>` block, so it starts at peace with everyone. It is still a kingdom for the War of the Ring: a Hostile tier in `diplomacy.json` declares its war on day 44 whatever its relationships block says.
 2. Strip its settlements instead, and give it an `initial_home_settlement` anyway, so `FactionHelper.GetMidSettlementOfFaction` has something to return (`FactionHelper.cs:497-506`). A faction whose culture owns nothing is the #374 daily-tick crash, which is what the `LANDLESS_CULTURE` gate exists to catch.
 3. Deleting an `<xsl:template match="Kingdom[@id='...']">` block from `spkingdoms.xslt` is safe and different: it does not remove a kingdom, it restores the vanilla one under its vanilla name and colours.
 4. Whatever you do, remove the id from `configs/army_targeting.json` in the same edit or `WarTheaterConfigInvariantsTests` fails: it reads the kingdom list out of `taom_spkingdoms.xml` and `spkingdoms.xslt` rather than a hardcoded list.
@@ -222,8 +222,8 @@ All measured 2026-09-05, from the repo at `bannerlord-1.4.5`.
 - **16** attributes on every entry, of which **14** are read and **2** are dead: `python -c "import xml.etree.ElementTree as ET;print(len(ET.parse('Main/_Module/ModuleData/taom_spkingdoms.xml').getroot()[0].attrib))"` <!-- measured 2026-09-05 -->
 - **90** numbers in Erebor's `banner_key`, which is 9 layers of 10: `python -c "import xml.etree.ElementTree as ET;print(len(ET.parse('Main/_Module/ModuleData/taom_spkingdoms.xml').getroot()[0].get('banner_key').split('.')))"` <!-- measured 2026-09-05 -->
 - **226** `<relationship>` rows and **30** `<policy>` rows in `taom_spkingdoms.xml`: `rg -c '<relationship\b' <file>` and `rg -c '<policy\b' <file>` <!-- measured 2026-10-08 -->
-- **2** rows in `taom_spkingdoms.xml` declare war, both on `empire_w`: `rg -c 'value="-1"' Main/_Module/ModuleData/taom_spkingdoms.xml` <!-- measured 2026-09-05 -->
-- **8** relationship rows in the XSLT, forming **4** mutual pairs: `rg -c '<relationship$' Main/_Module/ModuleData/spkingdoms.xslt` plus a per-template extraction. <!-- measured 2026-09-05 -->
+- **0** rows in `taom_spkingdoms.xml` or `spkingdoms.xslt` declare war (every row is `value >= 0`, so no start war), pinned by `ShippedKingdomDataTests`: `rg -c 'value="-' Main/_Module/ModuleData/taom_spkingdoms.xml` <!-- measured 2026-10-18 -->
+- **2** relationship rows in the XSLT, forming **1** mutual pair (Gondor and Khand, both `value="0"`): `rg -c '<relationship$' Main/_Module/ModuleData/spkingdoms.xslt`. <!-- measured 2026-10-18 -->
 - **14** ids that are both a kingdom id and a culture id: a set intersection of the kingdom ids with the `<Culture id=>` ids in `taom_spcultures.xml`. <!-- measured: python over taom_spkingdoms.xml, spkingdoms.xslt, taom_spcultures.xml 2026-09-05 -->
 - **70** inline `{=key}` strings on the 14 entries, **60** with no `<string>` row: a python sweep of `Main/_Module/ModuleData/**/*.xml` outside `Languages/`. <!-- measured 2026-09-05 -->
 - **0** hits for `settlement_banner_mesh` or `flag_mesh` in the v1.4.8 managed decompile: `rg -l 'settlement_banner_mesh|flag_mesh' -g '*.cs' .` run in the decompile root. <!-- measured 2026-09-05 -->

@@ -29,7 +29,8 @@ public static class DeclareWarAction_ApplyInternal_Patch
 
     [HarmonyPriority(Priority.High)]
     [HarmonyPrefix]
-    public static bool Prefix(IFaction faction1, IFaction faction2)
+    public static bool Prefix(
+        IFaction faction1, IFaction faction2, DeclareWarAction.DeclareWarDetail declareWarDetail)
     {
         if (_hook == null)
         {
@@ -40,7 +41,8 @@ public static class DeclareWarAction_ApplyInternal_Patch
         if (!faction1.IsKingdomFaction || !faction2.IsKingdomFaction)
             return true;
 
-        if (_hook.ShouldPreventWarDeclaration(faction1.StringId, faction2.StringId))
+        if (_hook.ShouldPreventWarDeclaration(
+                faction1.StringId, faction2.StringId, IsCausedByPlayer(declareWarDetail)))
         {
             // Phase 9b #153 — Prefix returns false to skip vanilla ApplyInternal. Vanilla then
             // skips its CampaignEventDispatcher.OnWarDeclared event dispatch (line 54 of v1.4
@@ -58,5 +60,17 @@ public static class DeclareWarAction_ApplyInternal_Patch
         }
 
         return true;
+    }
+
+    // The player's own acts: the war may start before the script allows. A crime-rating war
+    // matters most: with the war allowed, ChangeCrimeRatingAction latches once instead of re-applying
+    // a relation loss every day. Founding a kingdom is the player's act too: in v1.5.5 only the player
+    // reaches KingdomManager.CreateKingdom (the governor menu and the cheat; United Empire, the third
+    // caller, is removed from the start options), and the founding carries the founder clan's wars over to it.
+    internal static bool IsCausedByPlayer(DeclareWarAction.DeclareWarDetail detail)
+    {
+        return detail == DeclareWarAction.DeclareWarDetail.CausedByPlayerHostility
+            || detail == DeclareWarAction.DeclareWarDetail.CausedByCrimeRatingChange
+            || detail == DeclareWarAction.DeclareWarDetail.CausedByKingdomCreation;
     }
 }

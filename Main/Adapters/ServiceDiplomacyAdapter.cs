@@ -72,8 +72,12 @@ public sealed class ServiceDiplomacyAdapter : IServiceDiplomacyAdapter
                 return false;
 
             DeclareWarAction.ApplyByPlayerHostility(us, them);
-            _logger?.LogInfo($"[Enlistment] mirrored the commander's war with '{factionId}'");
-            return true;
+            // A prefix (TAOM's Permanent or same-side veto, or another mod's) can skip the action, so
+            // report only a war that exists: the service records what actually landed.
+            var landed = us.IsAtWarWith(them);
+            if (landed)
+                _logger?.LogInfo($"[Enlistment] mirrored the commander's war with '{factionId}'");
+            return landed;
         }
         catch (Exception ex)
         {

@@ -1,5 +1,7 @@
+using System;
 using SandBox.AdvancedStartOptions;
 using TaleWorlds.Localization;
+using TAOM.Features.Diplomacy;
 
 namespace TAOM.Features.AdvancedStartOptions;
 
@@ -43,10 +45,30 @@ public static class TaomStartOptionsProvider
         "TwoFactionWarFaction2Id",
     };
 
+    // The world scenarios that declare wars when the campaign starts (vanilla ids, read from
+    // SandBoxStartOptionsProvider). While the War of the Ring is on, the phase rule decides when wars
+    // begin, so these are hidden.
+    internal const string NordInvasionScenarioId = "nordinvasion";
+
+    internal static readonly string[] WarScenarioIds =
+    {
+        "LastStand", "twofactionwar", "InvasionId", "alternativecalradia",
+        // NavalDLC's scenario (NavalDLCStartOptionsProvider): the base game's
+        // AdvancedStartWorldOptionsCampaignBehavior declares wars for it. Removing an absent id is a
+        // no-op, so this is safe without NavalDLC.
+        NordInvasionScenarioId,
+    };
+
+    // Whether the War of the Ring is on, read from the same MCM-or-JSON answer the diplomacy rule uses.
+    // The menu runs before any campaign, but IoC.Configure ran in OnSubModuleLoad. A seam for tests.
+    internal static Func<bool> WarOfTheRingEnabled =
+        () => IoC.Resolve<IWarOfTheRingService>().IsEnabled;
+
     [StartOptionsProvider]
     private static void AddStartOptions(SandBox.AdvancedStartOptions.AdvancedStartOptions options)
     {
         RemoveUnitedEmpireScenario(options);
+        RemoveWarScenarios(options);
         AddTaomKingdomsToFactionPickers(options);
     }
 
@@ -66,6 +88,15 @@ public static class TaomStartOptionsProvider
     {
         if (options.GetOption("Scenario") is ListAdvancedStartOption scenarios)
             scenarios.RemoveItem("unitedempire");
+    }
+
+    private static void RemoveWarScenarios(SandBox.AdvancedStartOptions.AdvancedStartOptions options)
+    {
+        if (!WarOfTheRingEnabled()) return;
+        if (!(options.GetOption("Scenario") is ListAdvancedStartOption scenarios)) return;
+
+        foreach (var id in WarScenarioIds)
+            scenarios.RemoveItem(id);
     }
 
     private static void AddTaomKingdomsToFactionPickers(SandBox.AdvancedStartOptions.AdvancedStartOptions options)

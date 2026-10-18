@@ -314,26 +314,26 @@ and the half it missed is the dangerous one:
   agree there is no war. This is the case the ordering does handle, and it is fine.
 - **Client applies a war the host already committed.** BT's `SuppressClientDeclareWarPatch` lets the
   re-application through via its `KingdomSyncBehavior.IsApplyingSync` guard — but TAOM's prefix runs
-  *ahead* of BT's and re-evaluates `IsWarAllowed` locally. If the client's answer differs, it returns
+  *ahead* of BT's and re-evaluates the war veto (`GetWarVeto`) locally. If the client's answer differs, it returns
   false and the vanilla body never runs: **host at war, client at peace.** No crash, no log, two
   saves that disagree.
 
-**How much the client's answer can differ depends on which veto**, and the three are not alike. The
+**How much the client's answer can differ depends on which veto**, and they are not alike. The
 criterion is what the condition reads:
 
 | Veto | Condition reads | Can peers disagree? |
 |---|---|---|
 | `ShouldPreventPeace` | `IsWarOfTheRingActive` → `WarOfTheRingService.CurrentPhase`, persisted as the `WarOfTheRing_CurrentPhase` **`SyncData` key** | **Yes — genuinely.** TAOM campaign-behavior state that BT knows nothing about and never replicates. This is the "join-time-only state, then drifts" limitation below, wired into a gate on a vanilla state change. |
-| `ShouldPreventWarDeclaration` | `GetRelationshipTier` (static `_permanentRelationships` config) + `AreSameAlignment` (static alignment table) | Only on **peer mismatch** — different TAOM versions, or edited diplomacy config. Identical installs compute identical answers. |
+| `ShouldPreventWarDeclaration` | `GetWarVeto`: `GetRelationshipTier` (static `_permanentRelationships` config) + `AreSameAlignment` (static alignment table) + `WarOfTheRingService.CurrentPhase` (the same `SyncData` key as the peace veto) | **Yes**, since the war rule by phase: the phase is campaign-behavior state BT never replicates, so it drifts like the peace veto. Called from five prefixes: `DeclareWarAction.ApplyInternal`, `AllianceCampaignBehavior.StartCallToWarAgreement`, `AllianceCampaignBehavior.OnCallToWarAgreementProposedByPlayerKingdom` and the `IsAllowed` prefixes of `ProposeCallToWarAgreementDecision` and `AcceptCallToWarAgreementDecision`. The phase transitions that feed it are gated on `IsAuthority` alone, so they run on every peer (#820). |
 | `ShouldPreventAllianceEnd` | `GetRelationshipTier` — static config | Same as above. |
 
-So the peace veto is a confirmed divergence; the war and alliance-end vetoes are a narrower
-config-mismatch risk. All three are gated anyway: peers running mismatched TAOM builds or edited
+So the peace and war vetoes are confirmed divergences; the alliance-end veto is a narrower
+config-mismatch risk. All of them, and the seven prefix sites that call them (`CoopVetoClassificationTests.GatedVetoes_AreExactlyTheDiplomacySeven`), are gated anyway: peers running mismatched TAOM builds or edited
 configs is an ordinary co-op scenario, not an exotic one, and a veto that silently applies on one
 machine and not the other is the same failure whatever made the answers differ.
 
 **Resolution (2026-08-01):** under co-op, TAOM defers. `AllianceActionHook.ShouldPreventWarDeclaration`
-/ `.ShouldPreventAllianceEnd` and `PeaceActionHook.ShouldPreventPeace` return false immediately when
+(behind the `DeclareWarAction`, `StartCallToWarAgreement`, `OnCallToWarAgreementProposedByPlayerKingdom` and both `IsAllowed` prefixes) / `.ShouldPreventAllianceEnd` and `PeaceActionHook.ShouldPreventPeace` return false immediately when
 `ICoopPresenceProvider.IsCoopActive`, logging `[Diplomacy][coop] … veto skipped … host is
 authoritative`. One peer's ruleset has to win and TAOM cannot know which peer the session agreed on,
 so it yields the whole decision rather than applying a rule to half of it.

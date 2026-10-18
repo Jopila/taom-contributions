@@ -1,7 +1,9 @@
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
+using TaleWorlds.Localization;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.CulturalFeats;
+using TAOM.Features.Diplomacy.Hooks;
 
 namespace TAOM.Features.Diplomacy.Models;
 
@@ -9,11 +11,14 @@ public class TaomDiplomacyModel : DefaultDiplomacyModel
 {
     private readonly IWarOfTheRingService _wotrService;
     private readonly ICoopSessionProvider _coop;
+    private readonly IOnAllianceAction _allianceHook;
 
-    public TaomDiplomacyModel(IWarOfTheRingService wotrService, ICoopSessionProvider coop)
+    public TaomDiplomacyModel(
+        IWarOfTheRingService wotrService, ICoopSessionProvider coop, IOnAllianceAction allianceHook)
     {
         _wotrService = wotrService;
         _coop = coop;
+        _allianceHook = allianceHook;
     }
 
     /// <summary>
@@ -33,6 +38,24 @@ public class TaomDiplomacyModel : DefaultDiplomacyModel
         }
 
         return base.IsAtConstantWar(faction1, faction2);
+    }
+
+    /// <summary>
+    /// The AI pays 200 influence per war proposal, and a proposal the permission model refuses is then
+    /// cancelled, so a forbidden war must never score well enough to be proposed. The penalty is a
+    /// constant per veto class (see <see cref="IWarOfTheRingService.GetDeclareWarScorePenalty"/>), so
+    /// the order among equally vetoed neighbours survives, which the Mercenary start uses to pick its
+    /// enemy. Kingdom against kingdom only, and off under co-op; the hook owns both conditions.
+    /// </summary>
+    public override float GetScoreOfDeclaringWar(
+        IFaction factionDeclaresWar, IFaction factionDeclaredWar, Clan evaluatingClan,
+        out TextObject reason, bool includeReason = false)
+    {
+        return base.GetScoreOfDeclaringWar(
+                factionDeclaresWar, factionDeclaredWar, evaluatingClan, out reason, includeReason)
+            - _allianceHook.GetDeclareWarScorePenalty(
+                factionDeclaresWar.StringId, factionDeclaresWar.IsKingdomFaction,
+                factionDeclaredWar.StringId, factionDeclaredWar.IsKingdomFaction);
     }
 
     public override int GetRelationChangeAfterVotingInSettlementOwnerPreliminaryDecision(

@@ -5,7 +5,7 @@ Bannerlord v1.5.2 on 2026-09-14. In-game check 2026-09-15 on v1.5.3 found the me
 file (#604, fixed the same day, see section 3); the picker and the Escape-menu summary smoke are owed again.
 **Code:** [`Main/Features/AdvancedStartOptions/TaomStartOptionsProvider.cs`](../../Main/Features/AdvancedStartOptions/TaomStartOptionsProvider.cs) ·
 [`Main/Features/LocalizationOverride/GlobalStringsOverrides.cs`](../../Main/Features/LocalizationOverride/GlobalStringsOverrides.cs)
-**Tests:** `TaomStartOptionsProviderTests` (the kingdom list matches `taom_spkingdoms.xml`; the provider binds the
+**Tests:** `TaomStartOptionsProviderTests` (the four war scenarios are removed only while the War of the Ring is enabled, and each id is a vanilla scenario; the kingdom list matches `taom_spkingdoms.xml`; the provider binds the
 way `AdvancedStartOptionsManager.Initialize` binds it, on the installed engine; each string family sits in the
 file its reader loads) · `GlobalStringsOverridesTests` (the append-first-wins fact and the replace, on the installed engine).
 **Related:** [`rca-v1.5.2-compile-2026-09-14.md`](../reviews/rca-v1.5.2-compile-2026-09-14.md) · the v1.5.2 entries in `CHANGELOG.md` · #604
@@ -56,6 +56,17 @@ Two independent reasons, either sufficient:
   `empire_s` the `mordor` culture. Picking Gondor or Mordor as unifier therefore skips both the
   deactivation and the redirect, leaving the player ruling an empty, fief-less shell beside the real
   merged kingdom.
+
+### 1b. The war scenarios are hidden while the War of the Ring is on
+
+`LastStand`, `twofactionwar`, `InvasionId` and `alternativecalradia` declare wars when the campaign
+starts. With the War of the Ring enabled, the phase rule decides when wars begin, and a start war would
+be ended by `EndWarsForbiddenByPhase` on the first daily tick, so the provider removes the four
+scenarios from the list (`TaomStartOptionsProvider.WarScenarioIds`, the ids read from
+`SandBoxStartOptionsProvider`). `WarOfTheRingEnabled` reads `IWarOfTheRingService.IsEnabled`, the same
+MCM-or-JSON answer the diplomacy rule uses; `IoC.Configure` has already run when the menu opens. With
+the War of the Ring off, the four scenarios stay. See [war-of-the-ring.md](war-of-the-ring.md) for the
+phase rule.
 
 ### 2. TAOM's fourteen kingdoms are added to every faction picker
 
@@ -173,7 +184,9 @@ block, so the pairing is refused rather than left to chance.
 - In-game (owed again after #604): open the ASO screen, pick Last Stand, and confirm the Last Standing
   Faction list reads Dunland / Gondor / Mordor / Dale / Harad / Rohan / Khand / Rhun then Erebor through
   Goblins of Blue Craig with no ERROR row, the description names the chosen kingdom, the Invasion and
-  Randomized texts say Middle-earth, and United Empire is absent. Then start that campaign and open the
+  Randomized texts say Middle-earth, and United Empire is absent. With the War of the Ring on, Last Stand,
+  2 Faction War, Invasion and the alternative Calradia scenario are absent too, so pick Last Stand only
+  with the War of the Ring switched off. Then start that campaign and open the
   Escape menu's starting-options summary to confirm the in-game value names still resolve.
 - A translator run for the 49 new string rows (they exist in all 12 languages as English fallback; parked
   with the other pending runs in #579).

@@ -7,13 +7,16 @@ namespace TAOM.Features.Diplomacy.Hooks;
 public class AllianceActionHook : IOnAllianceAction
 {
     private readonly IDiplomacyService _diplomacyService;
+    private readonly IWarOfTheRingService _wotrService;
     private readonly IModLogger _logger;
     private readonly ICoopSessionProvider _coop;
 
     public AllianceActionHook(
-        IDiplomacyService diplomacyService, IModLogger logger, ICoopSessionProvider coop)
+        IDiplomacyService diplomacyService, IWarOfTheRingService wotrService, IModLogger logger,
+        ICoopSessionProvider coop)
     {
         _diplomacyService = diplomacyService;
+        _wotrService = wotrService;
         _logger = logger;
         _coop = coop;
     }
@@ -28,14 +31,30 @@ public class AllianceActionHook : IOnAllianceAction
         return isPermanent;
     }
 
-    public bool ShouldPreventWarDeclaration(string factionAId, string factionBId)
+    public bool ShouldPreventWarDeclaration(string factionAId, string factionBId, bool causedByPlayer = false)
     {
         if (DeferToHost("war declaration", factionAId, factionBId)) return false;
 
-        var blocked = !_diplomacyService.IsWarAllowed(factionAId, factionBId);
-        if (blocked)
-            _logger.LogInfo($"[Diplomacy] War declaration blocked: {factionAId} <-> {factionBId}");
-        return blocked;
+        var veto = _wotrService.GetWarVeto(factionAId, factionBId, causedByPlayer);
+        if (veto != WarVeto.None)
+            _logger.LogInfo($"[Diplomacy] War declaration blocked: {factionAId} <-> {factionBId} ({veto})");
+        return veto != WarVeto.None;
+    }
+
+    public string GetWarRefusalText(string kingdomAId, string kingdomBId)
+    {
+        if (_coop.ShouldDeferToHost) return null;
+
+        var veto = _wotrService.GetWarVeto(kingdomAId, kingdomBId, causedByPlayer: false);
+        return veto == WarVeto.None ? null : WarVetoReasons.Text(veto);
+    }
+
+    public float GetDeclareWarScorePenalty(
+        string factionAId, bool factionAIsKingdom, string factionBId, bool factionBIsKingdom)
+    {
+        if (_coop.ShouldDeferToHost || !factionAIsKingdom || !factionBIsKingdom) return 0f;
+
+        return _wotrService.GetDeclareWarScorePenalty(factionAId, factionBId);
     }
 
     /// <summary>

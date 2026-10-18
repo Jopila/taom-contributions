@@ -172,6 +172,7 @@ Models: 53. Regenerate after any engine bump: `pwsh tools/snapshot_api_surface.p
 `Base: TaleWorlds.CampaignSystem.GameComponents.DefaultDiplomacyModel`
 
 - `Int32 GetRelationChangeAfterVotingInSettlementOwnerPreliminaryDecision(Hero supporter, Boolean hasHeroVotedAgainstOwner)`
+- `Single GetScoreOfDeclaringWar(IFaction factionDeclaresWar, IFaction factionDeclaredWar, Clan evaluatingClan, ref TextObject reason, Boolean includeReason)`
 - `Boolean IsAtConstantWar(IFaction faction1, IFaction faction2)`
 
 ## TaomEquipmentSelectionModel : DefaultEquipmentSelectionModel

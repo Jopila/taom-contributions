@@ -18,6 +18,7 @@ public class WarOfTheRingService : IWarOfTheRingService
     public WarPhase CurrentPhase { get; private set; } = WarPhase.Peace;
     public bool IsWarOfTheRingActive => CurrentPhase == WarPhase.FullWar;
     public WarOutcome Outcome { get; private set; } = WarOutcome.None;
+    public bool IsEnabled => GetEffectiveEnabled();
 
     // WotR Momentum #327 — terminal transition. First non-None outcome wins; the phase flip
     // to WarEnded is what lifts all three peace-block layers (they key off FullWar via
@@ -76,6 +77,103 @@ public class WarOfTheRingService : IWarOfTheRingService
         if (!_config.Phase2.BlockPeaceBetweenHostileTiers) return false;
 
         return _diplomacyService.GetRelationshipTier(kingdomAId, kingdomBId) == AllianceTier.Hostile;
+    }
+
+    // Score offsets for TaomDiplomacyModel.GetScoreOfDeclaringWar. The phase offset is vanilla's own
+    // "never declare" value (DefaultDiplomacyModel.GetScoreOfDeclaringWar returns -10000000 for a
+    // faction too weak to fight), so no settlement-value benefit outweighs it. Subtracting keeps the
+    // order among phase-vetoed neighbours, which the Mercenary start uses to pick its enemy; the lore
+    // offset is ten times larger so a Permanent or same-side pair always ranks below them, in every
+    // phase: a same-side pair reads SameAlignment before Full War too (GetWarVeto checks it first).
+    public const float PhaseVetoScorePenalty = 10000000f;
+    public const float LoreVetoScorePenalty = 100000000f;
+
+    // Order: Permanent, then (War of the Ring on and WarEnded) None, then the same-side rule, then the
+    // phase vetoes. A same-side pair is refused in every phase before WarEnded, so the phase only
+    // refuses pairs the lore rule allows. A player-caused war skips the phase vetoes but keeps the
+    // Permanent and same-side ones, and WarEnded lifts the same-side rule for it as for the AI.
+    public WarVeto GetWarVeto(string kingdomAId, string kingdomBId, bool causedByPlayer = false)
+    {
+        if (_diplomacyService.GetRelationshipTier(kingdomAId, kingdomBId) == AllianceTier.Permanent)
+            return WarVeto.Permanent;
+
+        var enabled = GetEffectiveEnabled();
+        if (enabled && CurrentPhase == WarPhase.WarEnded) return WarVeto.None;
+
+        if (!_diplomacyService.IsWarAllowed(kingdomAId, kingdomBId)) return WarVeto.SameAlignment;
+
+        if (!enabled || causedByPlayer) return WarVeto.None;
+
+        switch (CurrentPhase)
+        {
+            case WarPhase.Peace:
+                return WarVeto.PhasePeace;
+            case WarPhase.IsengardWar:
+                return IsScriptedPhase1War(kingdomAId, kingdomBId) ? WarVeto.None : WarVeto.PhaseNotScripted;
+            default:
+                return WarVeto.None;
+        }
+    }
+
+    public float GetDeclareWarScorePenalty(string kingdomAId, string kingdomBId)
+    {
+        switch (GetWarVeto(kingdomAId, kingdomBId))
+        {
+            case WarVeto.None:
+                return 0f;
+            case WarVeto.PhasePeace:
+            case WarVeto.PhaseNotScripted:
+                return PhaseVetoScorePenalty;
+            default:
+                return LoreVetoScorePenalty;
+        }
+    }
+
+    private bool IsScriptedPhase1War(string kingdomAId, string kingdomBId)
+    {
+        foreach (var war in _config.Phase1.Wars)
+        {
+            if ((war.Attacker == kingdomAId && war.Defender == kingdomBId)
+                || (war.Attacker == kingdomBId && war.Defender == kingdomAId))
+                return true;
+        }
+        return false;
+    }
+
+    // Peace is blocked only in FullWar (PeaceActionHook), so MakePeace works in both phases handled here.
+    // AreAtWar is the model-aware check, which differs from the stored stance only in FullWar.
+    // A war involving the player's kingdom is judged as the player's own (causedByPlayer), so one that
+    // only a phase veto forbids is kept: it comes from the player's own hostile act, the Mercenary
+    // start or an old save, and the lore vetoes still end it.
+    public int EndWarsForbiddenByPhase()
+    {
+        if (!GetEffectiveEnabled()) return 0;
+        if (CurrentPhase != WarPhase.Peace && CurrentPhase != WarPhase.IsengardWar) return 0;
+
+        int ended = 0;
+        var playerKingdom = _allianceAdapter.GetPlayerKingdomId();
+        var kingdoms = _allianceAdapter.GetAllKingdomIds();
+        for (int i = 0; i < kingdoms.Count; i++)
+        {
+            for (int j = i + 1; j < kingdoms.Count; j++)
+            {
+                var a = kingdoms[i];
+                var b = kingdoms[j];
+                if (!_allianceAdapter.AreAtWar(a, b)) continue;
+
+                var involvesPlayer = playerKingdom != null && (a == playerKingdom || b == playerKingdom);
+                if (GetWarVeto(a, b, causedByPlayer: involvesPlayer) == WarVeto.None) continue;
+
+                _allianceAdapter.MakePeace(a, b);
+                if (!_allianceAdapter.AreAtWar(a, b)) ended++;
+            }
+        }
+
+        if (ended > 0)
+        {
+            _logger.LogInfo($"War of the Ring: {CurrentPhase} ended {ended} wars the phase forbids");
+        }
+        return ended;
     }
 
     public void CheckPhaseTransition(float elapsedDays)
@@ -252,7 +350,7 @@ public class WarOfTheRingService : IWarOfTheRingService
     }
 
     // Counts only a war the stance confirms after the call: DeclareWar does nothing for an unknown
-    // kingdom, and TAOM's own DeclareWarAction veto (IsWarAllowed) can refuse a pair.
+    // kingdom, and TAOM's own DeclareWarAction veto (GetWarVeto) can refuse a pair.
     private bool TryDeclareWar(string a, string b, string suffix)
     {
         _allianceAdapter.DeclareWar(a, b);
@@ -261,7 +359,7 @@ public class WarOfTheRingService : IWarOfTheRingService
             _logger.LogInfo($"War of the Ring: {a} declares war on {b}{suffix}");
             return true;
         }
-        _logger.LogWarning($"War of the Ring: war {a} -> {b} had no effect (unknown kingdom, or vetoed by IsWarAllowed)");
+        _logger.LogWarning($"War of the Ring: war {a} -> {b} had no effect (unknown kingdom, or vetoed by GetWarVeto)");
         return false;
     }
 }

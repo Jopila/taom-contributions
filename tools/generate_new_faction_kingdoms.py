@@ -94,9 +94,10 @@ KINGDOMS = {
         kingdom_icon=11000, clan_icons=[11000, 11001, 11002, 11003, 11004],
         clan_colors=[("FF4870B8", "FFC8CCD8"), ("FF3A6298", "FFC8CCD8"), ("FF5960A8", "FFD2D6D5"),
                      ("FF2E4A78", "FFCACCCB"), ("FF4E75BC", "FFEAEEEF")],
-        # Day-one stances (Mike approved the diplomacy). value < 0 or isAtWar declares war at load
-        # (Kingdom.Deserialize, Kingdom.cs:780-790); the rest of the stance lives in diplomacy.json.
-        relationships={"gundabad": (-1, True), "empire": (0, False), "isengard": (0, False),
+        # Day-one stances. value < 0 or isAtWar declares war at load (Kingdom.Deserialize,
+        # Kingdom.cs:780-791), and every campaign starts with no war (Mike, 2026-10-18): Gundabad
+        # attacks on day 44 through its Hostile row in diplomacy.json, where the rest of the stance lives.
+        relationships={"gundabad": (0, False), "empire": (0, False), "isengard": (0, False),
                        "rivendell": (1, False), "lindon": (1, False), "empire_w": (1, False)},
         # Each lord takes the <face> of a different shipped lord of this culture and sex, in file
         # order, instead of the template's: otherwise all ten men share one face and all ten women

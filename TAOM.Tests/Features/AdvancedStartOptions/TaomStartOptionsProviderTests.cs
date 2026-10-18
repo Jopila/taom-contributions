@@ -93,21 +93,9 @@ public class TaomStartOptionsProviderTests
     public void MergedOptions_VanillaThenTaom_CarryEveryTaomKingdomAndNoUnitedEmpire()
     {
         RequireGame();
-        var optionsType = AccessTools.TypeByName("SandBox.AdvancedStartOptions.AdvancedStartOptions");
-        var vanillaProvider = AccessTools.TypeByName("SandBox.View.AdvancedStartOptions.SandBoxStartOptionsProvider");
-        var attribute = AccessTools.TypeByName("SandBox.AdvancedStartOptions.StartOptionsProviderAttribute");
-        Assert.IsNotNull(optionsType, "SandBox.AdvancedStartOptions.AdvancedStartOptions did not resolve.");
-        Assert.IsNotNull(vanillaProvider, "SandBox.View.AdvancedStartOptions.SandBoxStartOptionsProvider did not resolve; the vanilla provider moved.");
-        Assert.IsNotNull(attribute, "StartOptionsProviderAttribute did not resolve.");
+        var (optionsType, options) = BuildMergedOptions(warOfTheRingEnabled: true);
 
-        // The engine runs every provider in assembly load order against one AdvancedStartOptions;
-        // SandBox loads before TAOM, so vanilla's pickers exist when TAOM's provider asks for them.
-        var options = Activator.CreateInstance(optionsType!);
-        InvokeProvider(vanillaProvider!, attribute!, options);
-        InvokeProvider(typeof(TaomStartOptionsProvider), attribute!, options);
-
-        var getOption = optionsType.GetMethods()
-            .Single(m => m.Name == "GetOption" && !m.IsGenericMethod && m.GetParameters().Length == 1);
+        var getOption = GetOptionMethod(optionsType);
         foreach (var key in new[] { "KingdomId", "LastStandKingdomId", "InvasionScenarioFactionId", "TwoFactionWarFaction1Id", "TwoFactionWarFaction2Id" })
         {
             var picker = getOption.Invoke(options, new object[] { key });
@@ -122,6 +110,83 @@ public class TaomStartOptionsProviderTests
         var scenarios = ItemIds(scenario!);
         CollectionAssert.DoesNotContain(scenarios, "unitedempire", "United Empire is still selectable.");
         CollectionAssert.Contains(scenarios, "none", "The default scenario should survive the removal.");
+    }
+
+    [DataTestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    [TestCategory("RequiresGameIL")]
+    [TestCategory("BindingVerification")]
+    public void MergedOptions_WarOfTheRingToggle_HidesTheWarScenariosOnlyWhileOn(bool enabled)
+    {
+        RequireGame();
+        var (optionsType, options) = BuildMergedOptions(enabled);
+
+        var scenario = GetOptionMethod(optionsType).Invoke(options, new object[] { "Scenario" });
+        Assert.IsNotNull(scenario, "The Scenario option is gone; the scenario key drifted.");
+        var scenarios = ItemIds(scenario!);
+
+        foreach (var id in TaomStartOptionsProvider.WarScenarioIds)
+        {
+            // NavalDLC's provider is not run here, so its id is never in the list to begin with.
+            if (id == TaomStartOptionsProvider.NordInvasionScenarioId) continue;
+            if (enabled)
+                CollectionAssert.DoesNotContain(scenarios, id, id + " is still selectable with the War of the Ring on.");
+            else
+                CollectionAssert.Contains(scenarios, id, id + " was removed with the War of the Ring off.");
+        }
+        CollectionAssert.Contains(scenarios, "none", "The default scenario should survive either way.");
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGameIL")]
+    [TestCategory("BindingVerification")]
+    public void WarScenarioIds_AreAllVanillaScenarios()
+    {
+        RequireGame();
+        var (optionsType, options) = BuildMergedOptions(warOfTheRingEnabled: false);
+
+        var scenario = GetOptionMethod(optionsType).Invoke(options, new object[] { "Scenario" });
+        var scenarios = ItemIds(scenario!);
+
+        foreach (var id in TaomStartOptionsProvider.WarScenarioIds)
+        {
+            // Added by NavalDLC's provider, which this test does not run; its id was read from that DLL.
+            if (id == TaomStartOptionsProvider.NordInvasionScenarioId) continue;
+            CollectionAssert.Contains(scenarios, id, id + " is not a vanilla scenario id; the list drifted.");
+        }
+    }
+
+    private static MethodInfo GetOptionMethod(Type optionsType) => optionsType.GetMethods()
+        .Single(m => m.Name == "GetOption" && !m.IsGenericMethod && m.GetParameters().Length == 1);
+
+    // Runs vanilla's provider, then TAOM's, against one AdvancedStartOptions, with the War of the Ring
+    // switch pinned for the call.
+    private static (Type OptionsType, object Options) BuildMergedOptions(bool warOfTheRingEnabled)
+    {
+        var optionsType = AccessTools.TypeByName("SandBox.AdvancedStartOptions.AdvancedStartOptions");
+        var vanillaProvider = AccessTools.TypeByName("SandBox.View.AdvancedStartOptions.SandBoxStartOptionsProvider");
+        var attribute = AccessTools.TypeByName("SandBox.AdvancedStartOptions.StartOptionsProviderAttribute");
+        Assert.IsNotNull(optionsType, "SandBox.AdvancedStartOptions.AdvancedStartOptions did not resolve.");
+        Assert.IsNotNull(vanillaProvider, "SandBox.View.AdvancedStartOptions.SandBoxStartOptionsProvider did not resolve; the vanilla provider moved.");
+        Assert.IsNotNull(attribute, "StartOptionsProviderAttribute did not resolve.");
+
+        // The engine runs every provider in assembly load order against one AdvancedStartOptions;
+        // SandBox loads before TAOM, so vanilla's pickers exist when TAOM's provider asks for them.
+        var options = Activator.CreateInstance(optionsType!)!;
+        InvokeProvider(vanillaProvider!, attribute!, options);
+
+        var previous = TaomStartOptionsProvider.WarOfTheRingEnabled;
+        TaomStartOptionsProvider.WarOfTheRingEnabled = () => warOfTheRingEnabled;
+        try
+        {
+            InvokeProvider(typeof(TaomStartOptionsProvider), attribute!, options);
+        }
+        finally
+        {
+            TaomStartOptionsProvider.WarOfTheRingEnabled = previous;
+        }
+        return (optionsType!, options);
     }
 
     // ---- where the string rows live, which is the whole bug of #604 ----

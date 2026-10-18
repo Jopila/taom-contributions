@@ -13,6 +13,12 @@ public interface IAllianceAdapter
     /// </summary>
     string GetKingdomCultureId(string kingdomId);
 
+    /// <summary>
+    /// The StringId of the kingdom the player's clan belongs to (as ruler, vassal or mercenary), or
+    /// null when the player's clan has no kingdom.
+    /// </summary>
+    string GetPlayerKingdomId();
+
     bool AreAllied(string kingdomAId, string kingdomBId);
     void StartAlliance(string kingdomAId, string kingdomBId);
     /// <summary>

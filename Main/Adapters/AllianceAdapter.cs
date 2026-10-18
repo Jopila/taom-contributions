@@ -90,6 +90,11 @@ public class AllianceAdapter : IAllianceAdapter
         return FindKingdom(kingdomId)?.Culture?.StringId;
     }
 
+    public string GetPlayerKingdomId()
+    {
+        return Clan.PlayerClan?.Kingdom?.StringId;
+    }
+
     private static Kingdom FindKingdom(string stringId)
     {
         return Kingdom.All.FirstOrDefault(k => k.StringId == stringId);

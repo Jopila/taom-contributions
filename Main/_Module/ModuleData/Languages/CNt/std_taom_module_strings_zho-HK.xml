@@ -2957,5 +2957,8 @@
   <string id="taom_career_retrain_body" text="Refund every career choice except your first for {GOLD} gold? You keep your career and the tiers you unlocked." />
   <string id="taom_career_retrain_confirm" text="Retrain" />
   <string id="taom_career_retrain_no_gold" text="You need {GOLD} gold to retrain." />
+  <string id="taom_war_blocked_alignment" text="These kingdoms stand on the same side of the War of the Ring." />
+  <string id="taom_war_blocked_peace" text="The War of the Ring has not yet begun. No kingdom may declare war." />
+  <string id="taom_war_blocked_unscripted" text="Only the first wars of the age may be declared now." />
   </strings>
 </base>

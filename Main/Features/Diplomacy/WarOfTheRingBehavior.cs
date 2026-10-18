@@ -95,6 +95,9 @@ public class WarOfTheRingBehavior : CampaignBehaviorBase
         var elapsedDays = _elapsedDays();
         _wotrService.CheckPhaseTransition(elapsedDays);
         _logger.LogInfo($"[WarOfTheRing] Session launched — phase restored at day {elapsedDays:F0}");
+        // EndForbiddenWars is deliberately NOT called here: on a load this runs before
+        // MapEventManager/SiegeEventManager.OnAfterLoad, and a MakePeace then can disturb live sieges
+        // and battles. The first daily tick reconciles.
     }
 
     // internal for TAOM.Tests (InternalsVisibleTo) — lets the co-op authority gate be asserted directly.
@@ -107,5 +110,19 @@ public class WarOfTheRingBehavior : CampaignBehaviorBase
         if (!_coopSession.IsAuthority) return;
 
         _wotrService.CheckPhaseTransition(_elapsedDays());
+
+        EndForbiddenWars();
+    }
+
+    // Ends wars the current phase forbids (a save or install from before the phase rule). Daily tick
+    // only, never session launch (see OnSessionLaunched). Always AFTER
+    // CheckPhaseTransition: a mid-campaign install loads in Peace and jumps to FullWar inside it, and
+    // reconciling first would end every war. ShouldDeferToHost as well as IsAuthority, because
+    // IsAuthority alone reports true on both peers under BannerlordTogether.
+    private void EndForbiddenWars()
+    {
+        if (_coopSession.ShouldDeferToHost) return;
+
+        _wotrService.EndWarsForbiddenByPhase();
     }
 }

@@ -1326,6 +1326,8 @@ of a pure function proves nothing about the values that reach it. Bands now pay 
 base of 2 (win) / 1 (loss); `Renown` is in `IsValidBandLadder`'s non-negative set because it is
 directional; and a test reads the shipped `enlistment_config.json` rather than the compiled defaults.
 
+**Enlisting during days 30 to 44 can pull the liege into a war early (decided: allowed).** The war mirror declares the commander's wars for `Hero.MainHero.MapFaction` through `DeclareWarAction.ApplyByPlayerHostility`, and the War of the Ring rule treats that as a player-caused war, which lifts the phase vetoes. A vassal who enlists under a lord of another kingdom between the Isengard War day and Full War therefore declares those wars for the player's liege kingdom, which can bring it into the Rohan war before the script would. The daily sweep keeps the war, because it belongs to the player's kingdom. A Permanent or same-side pair is still refused, and the adapter then reports no war landed, so the service records nothing to unwind ([war-of-the-ring.md](war-of-the-ring.md), "Player-caused wars").
+
 **The war mirror declares as one faction and could make peace as another.** `Hero.MapFaction` is
 `Clan.Kingdom ?? Clan` (verified 1.4.8) and the enlist gate deliberately admits a player whose clan
 is already a vassal, so the identity is not stable across a term of service. A player independent
