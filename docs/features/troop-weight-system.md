@@ -446,10 +446,10 @@ layers three TAOM modifiers onto the single `ExplainedNumber` vanilla hands back
 
 So the elite tax **competes** with a culture bonus on the same number, and the two can cancel. On a
 Mordor, Isengard, Dol Guldur or Gundabad party the weight-2.0 uruks, wargs and black guards can make
-the surplus subtract more than a small percentage bonus adds, which is why those cultures' party-size
-feats now carry a 20% floor, pinned by `ApplyPartySizeFeats_EvilCultures_WithinTwentyToFiftyPercent`.
-Rationale and the excluded cultures: [cultural-feats.md](./cultural-feats.md) "Evil-culture party-size
-floor". For how this limit relates to the roster a party is handed at spawn (a separate model that the
+the surplus subtract more than a small percentage bonus adds. Those cultures' party-size feats carried
+a 20% floor for that reason until 2026-10-18 (#818), when a balance pass capped them at 10% (orc realms
++5%) and accepted that the tax can cancel the bonus. Rationale and the excluded cultures:
+[cultural-feats.md](./cultural-feats.md) "Evil-culture party-size cap". For how this limit relates to the roster a party is handed at spawn (a separate model that the
 limit does not cap), see [party-template-sizing.md](../reference/party-template-sizing.md).
 
 Two things about that interaction read backwards if you assume weight tracks alignment. Both counted
@@ -487,8 +487,9 @@ the counts above that lands on Rivendell and Mirkwood, and neither culture appea
 `ApplyPartySizeFeats`, so nothing offsets it. The Overview also names that exact
 case ("100+ Rivendell blademasters") as the thing to prevent, so the flat cut may be the intent rather
 than a gap. Lindon, a clone of the Rivendell tree, has carried the same weights since #749 and is in
-the same position. Nobody has written down which. The 20% floor answers the opposing-bonus question for
-Mordor, Isengard, Dol Guldur and Gundabad; it does not answer this one.
+the same position. Nobody has written down which. The evil party-size cap of 2026-10-18 (#818) answers
+the opposing-bonus question for Mordor, Isengard, Dol Guldur and Gundabad by accepting it; it does not
+answer this one.
 
 ## Main-roster loss diagnostic (TEMPORARY, 2026-10-17)
 

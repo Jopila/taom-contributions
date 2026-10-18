@@ -314,21 +314,21 @@ correct. A targeted per-row substitution is exact, costs nothing, and keeps each
 phrasing, which a fresh LLM pass would rewrite.
 
 The numeral is not written the same way everywhere, so the substitution has to survive all of these.
-Real values from `taom_feat_mor_ps_desc` after the 2026-08-14 edit:
+Real values from `taom_feat_mor_ps_desc` after the 2026-10-18 edit (#818, 20 to 5):
 
 | Form | Languages | Example |
 |------|-----------|---------|
-| `20%`, sign straight after the digits | BR, CNs, IT, JP, KO, PL, RU, SP | `Предел размера отряда увеличен на 20%.` |
-| Percent sign FIRST | TR | `Müfreze büyüklüğü sınırı %20 arttı.` |
-| Space before the percent sign | DE, FR | `Limite de taille du groupe augmentée de 20 %.` |
-| Space before the NUMBER | CNt | `部隊規模上限增加 20%。` |
+| `20%`, sign straight after the digits | BR, CNs, IT, JP, KO, PL, RU, SP | `Предел размера отряда увеличен на 5%.` |
+| Percent sign FIRST | TR | `Müfreze büyüklüğü sınırı %5 arttı.` |
+| Space before the percent sign | DE, FR | `Limite de taille du groupe augmentée de 5 %.` |
+| Space before the NUMBER | CNt | `部隊規模上限增加 5%。` |
 
 The form also varies row to row inside one language, not just language to language: German writes
-`20 %` on `taom_feat_mor_ps_desc` and `40%` on `taom_feat_bcg_ps_desc`. Anchor on the digits, keep
+`5 %` on `taom_feat_mor_ps_desc` and `10%` on `taom_feat_bcg_ps_desc`. Anchor on the digits, keep
 whatever surrounds them, and never assume one pattern covers a whole language file.
 
 **2. A new key whose English is verbatim identical to an existing key, so copy the rows.**
-`taom_feat_bcg_ps_desc` is "Party size limit increased by 40%.", character for character the same
+`taom_feat_bcg_ps_desc` is "Party size limit increased by 10%.", character for character the same
 English as `taom_feat_gob_ps_desc`. Copying that key's 12 existing translations is free and better
 than paying for a pass that would produce twelve slightly different renderings of one sentence.
 

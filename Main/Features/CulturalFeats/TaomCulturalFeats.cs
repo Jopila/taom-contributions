@@ -648,8 +648,8 @@ public class TaomCulturalFeats
             0.25f, isPositiveEffect: false, FeatObject.AdditionType.AddFactor);
         _isengardPartySize.Initialize(
             "{=taom_feat_isen_ps}Uruk-hai Legions",
-            "{=taom_feat_isen_ps_desc}Party size limit increased by 20%.",
-            0.2f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
+            "{=taom_feat_isen_ps_desc}Party size limit increased by 5%.",
+            0.05f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
         _isengardConstructionSpeed.Initialize(
             "{=taom_feat_isen_cs}Industrial Might",
             "{=taom_feat_isen_cs_desc}Construction speed increased by 15%.",
@@ -704,8 +704,8 @@ public class TaomCulturalFeats
             0.1f, isPositiveEffect: false, FeatObject.AdditionType.AddFactor);
         _gundabadPartySize.Initialize(
             "{=taom_feat_gun_ps}Mountain Swarm",
-            "{=taom_feat_gun_ps_desc}Party size limit increased by 20%.",
-            0.2f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
+            "{=taom_feat_gun_ps_desc}Party size limit increased by 5%.",
+            0.05f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
         _gundabadRaidDamage.Initialize(
             "{=taom_feat_gun_rd}Orc Pillagers",
             "{=taom_feat_gun_rd_desc}Raid damage increased by 25%.",
@@ -734,8 +734,8 @@ public class TaomCulturalFeats
         // Goblins — vast weak swarms that breed endlessly and eat everything
         _goblinPartySize.Initialize(
             "{=taom_feat_gob_ps}Goblin Swarm",
-            "{=taom_feat_gob_ps_desc}Party size limit increased by 40%.",
-            0.4f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
+            "{=taom_feat_gob_ps_desc}Party size limit increased by 10%.",
+            0.1f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
         _goblinVolunteerRate.Initialize(
             "{=taom_feat_gob_vr}Endless Spawn",
             "{=taom_feat_gob_vr_desc}Village volunteer respawn rate increased by 25%.",
@@ -757,12 +757,13 @@ public class TaomCulturalFeats
             "{=taom_feat_gob_rd_desc}Raid damage increased by 10%.",
             0.1f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
         // Blue Craig — split off Goblin-town's feat 2026-08-14 at the same 40%, so this is a
-        // tunability split rather than a balance change. Only the party-size feat is split;
+        // tunability split rather than a balance change; both went to 10% on 2026-10-18 (#818,
+        // evil party-size feats capped at 10%). Only the party-size feat is split;
         // the other five goblin feats stay shared between the two realms.
         _bluecraigPartySize.Initialize(
             "{=taom_feat_bcg_ps}Blue Craig Swarm",
-            "{=taom_feat_bcg_ps_desc}Party size limit increased by 40%.",
-            0.4f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
+            "{=taom_feat_bcg_ps_desc}Party size limit increased by 10%.",
+            0.1f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
         // Misty Mountain Orcs — large weak war-host, cheap to muster, hungry on the march
         _mistyMountainOrcsArmyInfluenceCost.Initialize(
             "{=taom_feat_mmo_aic}Orc Horde",
@@ -770,8 +771,8 @@ public class TaomCulturalFeats
             -0.4f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
         _mistyMountainOrcsPartySize.Initialize(
             "{=taom_feat_mmo_ps}Mountain Host",
-            "{=taom_feat_mmo_ps_desc}Party size limit increased by 30%.",
-            0.3f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
+            "{=taom_feat_mmo_ps_desc}Party size limit increased by 10%.",
+            0.1f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
         _mistyMountainOrcsSnowSpeed.Initialize(
             "{=taom_feat_mmo_ss}Mountain-Bred",
             "{=taom_feat_mmo_ss_desc}Party movement speed increased by 10% in snow.",
@@ -838,8 +839,8 @@ public class TaomCulturalFeats
             -0.2f, isPositiveEffect: false, FeatObject.AdditionType.AddFactor);
         _dolguldurPartySize.Initialize(
             "{=taom_feat_dg_ps}Dark Legions",
-            "{=taom_feat_dg_ps_desc}Party size limit increased by 20%.",
-            0.2f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
+            "{=taom_feat_dg_ps_desc}Party size limit increased by 5%.",
+            0.05f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
         _dolguldurFoodConsumption.Initialize(
             "{=taom_feat_dg_fc}Voracious Hordes",
             "{=taom_feat_dg_fc_desc}Party food consumption increased by 10%.",
@@ -911,8 +912,8 @@ public class TaomCulturalFeats
             0.2f, isPositiveEffect: false, FeatObject.AdditionType.AddFactor);
         _mordorPartySize.Initialize(
             "{=taom_feat_mor_ps}Sauron's Hordes",
-            "{=taom_feat_mor_ps_desc}Party size limit increased by 20%.",
-            0.2f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
+            "{=taom_feat_mor_ps_desc}Party size limit increased by 5%.",
+            0.05f, isPositiveEffect: true, FeatObject.AdditionType.AddFactor);
         _mordorRaidDamage.Initialize(
             "{=taom_feat_mor_rd}Sauron's Wrath",
             "{=taom_feat_mor_rd_desc}Raid damage increased by 25%.",

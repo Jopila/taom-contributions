@@ -1321,7 +1321,7 @@
     <string id="taom_faction_clans_of_forochel_name" text="Clan di Forochel" />
     <string id="taom_faction_clans_of_forochel_trait_0" text="Predoni della Baia di Ghiaccio" />
     <string id="taom_faction_clans_of_forochel_trait_1" text="Orchi del Nord Gelato" />
-    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+20% limite dimensione gruppo (Legioni Uruk-hai)" />
+    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+5% limite dimensione gruppo (Legioni Uruk-hai)" />
     <string id="taom_faction_dominion_of_isengard_bonus_1" text="+15% velocità costruzione edifici (Potenza Industriale)" />
     <string id="taom_faction_dominion_of_isengard_bonus_2" text="-20% costo energia forgiatura (Fucine Industriali)" />
     <string id="taom_faction_dominion_of_isengard_bonus_3" text="-15% costo reclutamento e miglioramento montati (Warg da Guerra)" />
@@ -1333,7 +1333,7 @@
     <string id="taom_faction_dominion_of_isengard_bonus_9" text="+25% penalità relazioni (Presa di Saruman)" />
     <string id="taom_faction_dominion_of_isengard_desc" text="La fortezza industriale di Saruman a Orthanc. L'Anello di Isengard opera giorno e notte — legioni Uruk-hai, balestre da catena di montaggio, warg da guerra. L'unica città di Isengard raggiunge venti notabili: un centro di reclutamento pari a molte città di Rohan. La Presa di Saruman aliena ogni vicino." />
     <string id="taom_faction_dominion_of_isengard_name" text="Dominio di Isengard" />
-    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+20% limite dimensione gruppo e +10% velocità di marcia su pianura e palude." />
+    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+5% limite dimensione gruppo e +10% velocità di marcia su pianura e palude." />
     <string id="taom_faction_dominion_of_isengard_perk_0_name" text="Legioni Uruk-hai" />
     <string id="taom_faction_dominion_of_isengard_perk_1_desc" text="+15% costruzione, -20% energia di forgiatura, -15% costo reclutamento montato." />
     <string id="taom_faction_dominion_of_isengard_perk_1_name" text="Potenza Industriale" />
@@ -1357,7 +1357,7 @@
     <string id="taom_faction_dominion_of_isengard_weakness_1" text="Unico insediamento collo di bottiglia" />
     <string id="taom_faction_dominion_of_isengard_weakness_2" text="Circondato da Rohan e Fangorn" />
     <string id="taom_faction_dominion_of_mordor_bonus_0" text="-60% costo influenza armata (La Volontà del Signore Oscuro)" />
-    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+10% limite dimensione gruppo (Le Orde di Sauron)" />
+    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+5% limite dimensione gruppo (Le Orde di Sauron)" />
     <string id="taom_faction_dominion_of_mordor_bonus_10" text="+15% efficienza forgiatura (Forgiatura Oscura)" />
     <string id="taom_faction_dominion_of_mordor_bonus_2" text="+20% produzione di grano di Nurn (Terre Coltivate di Nurn)" />
     <string id="taom_faction_dominion_of_mordor_bonus_3" text="+25% danno da razzia (L'Ira di Sauron)" />
@@ -1397,7 +1397,7 @@
     <string id="taom_faction_eregion_name" text="Eregion" />
     <string id="taom_faction_fangorn_forest_desc" text="La Foresta di Fangorn." />
     <string id="taom_faction_fangorn_forest_name" text="Foresta di Fangorn" />
-    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+40% limite dimensione gruppo (Sciame di Goblin)" />
+    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+10% limite dimensione gruppo (Sciame di Goblin)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_1" text="+25% tasso rigenerazione volontari dei villaggi (Progenie Infinita)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_2" text="+10% velocità gruppo sulla neve (Corridori dei Tunnel)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_3" text="+20% consumo cibo del gruppo (Sciame Vorace)" />
@@ -1405,7 +1405,7 @@
     <string id="taom_faction_goblins_of_blue_craig_bonus_5" text="+10% danni da razzia (Imboscata Goblin)" />
     <string id="taom_faction_goblins_of_blue_craig_desc" text="Una distinta orda di goblin dei Monti Azzurri (Ered Luin) nell'estremo occidente, a ridosso dei Rifugi Oscuri del Lindon — un reame separato dai loro cugini dei Monti Nebbiosi di Città dei Goblin. Le stesse moltitudini innumerevoli e mal armate: deboli da soli, travolgenti in massa e voraci in marcia. Tormentano gli Elfi della costa occidentale." />
     <string id="taom_faction_goblins_of_blue_craig_name" text="Goblin del Colle Azzurro" />
-    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+40% dimensione gruppo e +25% rigenerazione volontari dei villaggi — deboli ma innumerevoli." />
+    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+10% dimensione gruppo e +25% rigenerazione volontari dei villaggi — deboli ma innumerevoli." />
     <string id="taom_faction_goblins_of_blue_craig_perk_0_name" text="Sciame di Goblin" />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_desc" text="+10% velocità gruppo sulla neve — i goblin conoscono ogni picco e tunnel." />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_name" text="Corridori dei Tunnel" />
@@ -1428,7 +1428,7 @@
     <string id="taom_faction_goblins_of_blue_craig_weakness_0" text="Truppe individualmente deboli" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_1" text="Voraci — mettono a dura prova ogni linea di rifornimento" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_2" text="Odiati da tutti i Popoli Liberi" />
-    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+40% limite dimensione gruppo (Sciame di Goblin)" />
+    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+10% limite dimensione gruppo (Sciame di Goblin)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_1" text="+25% tasso rigenerazione volontari dei villaggi (Progenie Infinita)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_2" text="+10% velocità gruppo sulla neve (Corridori dei Tunnel)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_3" text="+20% consumo cibo del gruppo (Sciame Vorace)" />
@@ -1436,7 +1436,7 @@
     <string id="taom_faction_goblins_of_goblin_town_bonus_5" text="+10% danni da razzia (Imboscata Goblin)" />
     <string id="taom_faction_goblins_of_goblin_town_desc" text="I brulicanti cunicoli goblin sotto il Passo Alto dei Monti Nebbiosi. Dalla caduta del Grande Goblin le tribù si sono moltiplicate senza numero — vaste orde mal armate che vincono per pura massa e si riproducono più in fretta di quanto qualsiasi nemico possa falciarle. Corrono velocissime sulle nevi delle loro montagne, ma tali orde sono sempre affamate." />
     <string id="taom_faction_goblins_of_goblin_town_name" text="Goblin di Goblin Town" />
-    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+40% dimensione gruppo e +25% rigenerazione volontari dei villaggi — i goblin sono deboli ma innumerevoli." />
+    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+10% dimensione gruppo e +25% rigenerazione volontari dei villaggi — i goblin sono deboli ma innumerevoli." />
     <string id="taom_faction_goblins_of_goblin_town_perk_0_name" text="Sciame di Goblin" />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_desc" text="+10% velocità gruppo sulla neve — i goblin conoscono ogni passo e tunnel delle Montagne Nebbiose." />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_name" text="Corridori dei Tunnel" />
@@ -1771,7 +1771,7 @@
     <string id="taom_faction_kingdom_of_lothlorien_weakness_1" text="Esercito permanente minuscolo" />
     <string id="taom_faction_kingdom_of_lothlorien_weakness_2" text="Potere declinante — nessuna crescita" />
     <string id="taom_faction_kingdom_of_moria_bonus_0" text="-40% costo influenza armata (Orda degli Orchi)" />
-    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+30% limite dimensione compagnia (Armata della Montagna)" />
+    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+10% limite dimensione compagnia (Armata della Montagna)" />
     <string id="taom_faction_kingdom_of_moria_bonus_2" text="+10% velocità compagnia sulla neve (Nati tra le Montagne)" />
     <string id="taom_faction_kingdom_of_moria_bonus_3" text="+15% consumo di cibo della compagnia (Armata Famelica)" />
     <string id="taom_faction_kingdom_of_moria_bonus_4" text="+15% efficienza fucina (Fucine Saccheggiate)" />
@@ -1781,7 +1781,7 @@
     <string id="taom_faction_kingdom_of_moria_name" text="Orchi dei Monti Nebbiosi" />
     <string id="taom_faction_kingdom_of_moria_perk_0_desc" text="Il reclutamento dell'armata costa il 40% di influenza in meno — l'orda orchesca non ha bisogno di consenso per marciare." />
     <string id="taom_faction_kingdom_of_moria_perk_0_name" text="Orda degli Orchi" />
-    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+30% dimensione compagnia e +10% velocità sulla neve — grandi armate da guerra nate tra le vette gelide." />
+    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+10% dimensione compagnia e +10% velocità sulla neve — grandi armate da guerra nate tra le vette gelide." />
     <string id="taom_faction_kingdom_of_moria_perk_1_name" text="Armata della Montagna" />
     <string id="taom_faction_kingdom_of_moria_perk_2_desc" text="Un'armata da guerra di queste dimensioni mangia avidamente — +15% consumo di cibo della compagnia." />
     <string id="taom_faction_kingdom_of_moria_perk_2_name" text="Armata Famelica" />
@@ -1851,7 +1851,7 @@
     <string id="taom_faction_nurunkhizdin_desc" text="I Nurunkhizdin." />
     <string id="taom_faction_nurunkhizdin_name" text="Nurunkhizdin" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_0" text="-50% costo influenza armata (Comando dell'Ombra)" />
-    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="+20% limite dimensione gruppo (Legioni Oscure)" />
+    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="+5% limite dimensione gruppo (Legioni Oscure)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_2" text="+20% velocità rigenerazione volontari villaggio (Coscritti Oscuri)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_3" text="+20% probabilità veterano milizia (Coscrizione Oscura)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_4" text="+1 Mercante + 1 Artigiano + 13 Capo Banda notabili nella città di Dol Guldur (20 totali)" />
@@ -1862,7 +1862,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_name" text="Signoria di Dol Guldur" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_desc" text="Costo d'influenza dell'armata ridotto del 50% — il terrore impone obbedienza." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_name" text="Comando d'Ombra" />
-    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="+20% dimensione gruppo e +20% tasso di rigenerazione volontari." />
+    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="+5% dimensione gruppo e +20% tasso di rigenerazione volontari." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_1_name" text="Legioni Oscure" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_desc" text="L'unica città di Dol Guldur dispone di 20 notabili — un centro di reclutamento con 15 Capi Banda." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_name" text="Capitani d'Ombra" />
@@ -1884,7 +1884,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_1" text="Il degrado industriale rallenta le mura" />
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_2" text="Circondata da foreste ostili" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_0" text="-40% costo d'influenza armata (Orda Orchesca)" />
-    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="+20% limite dimensione gruppo (Sciame di Montagna)" />
+    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="+5% limite dimensione gruppo (Sciame di Montagna)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_2" text="+25% danno da razzia (Saccheggiatori Orcheschi)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_3" text="+10% velocità gruppo sulla neve (Predoni di Montagna)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_4" text="+20% tasso di rigenerazione volontari dei villaggi" />
@@ -1896,7 +1896,7 @@
     <string id="taom_faction_overlordship_of_gundabad_name" text="Signoria di Gundabad" />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_desc" text="Costo d'influenza dell'armata ridotto del 40% — il terrore impone obbedienza." />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_name" text="Orda Orchesca" />
-    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="+20% limite dimensione gruppo e +10% velocità gruppo sulla neve." />
+    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="+5% limite dimensione gruppo e +10% velocità gruppo sulla neve." />
     <string id="taom_faction_overlordship_of_gundabad_perk_1_name" text="Sciame di Montagna" />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_desc" text="+3 Capo Banda e +1 notabile Artigiano per città — il reclutamento si gonfia di predoni." />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_name" text="Capitribù delle Bande Pallide" />
@@ -2147,7 +2147,7 @@
     <string id="taom_feat_isen_dp" text="La Morsa di Saruman" />
     <string id="taom_feat_isen_dp_desc" text="Penalità di relazione per le decisioni del regno aumentate del 25%." />
     <string id="taom_feat_isen_ps" text="Legioni Uruk-hai" />
-    <string id="taom_feat_isen_ps_desc" text="Limite di dimensione del gruppo aumentato del 20%." />
+    <string id="taom_feat_isen_ps_desc" text="Limite di dimensione del gruppo aumentato del 5%." />
     <string id="taom_feat_isen_cs" text="Potenza Industriale" />
     <string id="taom_feat_isen_cs_desc" text="Velocità di costruzione aumentata del 15%." />
     <string id="taom_feat_isen_sm" text="Fucine Industriali" />
@@ -2173,7 +2173,7 @@
     <string id="taom_feat_gun_w" text="Richieste di saccheggio" />
     <string id="taom_feat_gun_w_desc" text="Paghe della compagnia aumentate del 10%." />
     <string id="taom_feat_gun_ps" text="Sciame della montagna" />
-    <string id="taom_feat_gun_ps_desc" text="Limite di dimensione della compagnia aumentato del 20%." />
+    <string id="taom_feat_gun_ps_desc" text="Limite di dimensione della compagnia aumentato del 5%." />
     <string id="taom_feat_gun_rd" text="Predoni orcheschi" />
     <string id="taom_feat_gun_rd_desc" text="Danni da razzia aumentati del 25%." />
     <string id="taom_feat_gun_ss" text="Saccheggiatori della montagna" />
@@ -2187,7 +2187,7 @@
     <string id="taom_feat_gun_ncv" text="Accampamenti d'ossa" />
     <string id="taom_feat_gun_ncv_desc" text="Numero di notabili nei villaggi aumentato del 10%." />
     <string id="taom_feat_gob_ps" text="Sciame di goblin" />
-    <string id="taom_feat_gob_ps_desc" text="Limite di dimensione della compagnia aumentato del 40%." />
+    <string id="taom_feat_gob_ps_desc" text="Limite di dimensione della compagnia aumentato del 10%." />
     <string id="taom_feat_gob_vr" text="Progenie infinita" />
     <string id="taom_feat_gob_vr_desc" text="Tasso di ricomparsa dei volontari nei villaggi aumentato del 25%." />
     <string id="taom_feat_gob_ss" text="Corridori dei tunnel" />
@@ -2199,11 +2199,11 @@
     <string id="taom_feat_gob_rd" text="Imboscata dei goblin" />
     <string id="taom_feat_gob_rd_desc" text="Danni da razzia aumentati del 10%." />
     <string id="taom_feat_bcg_ps" text="Sciame di Blue Craig" />
-    <string id="taom_feat_bcg_ps_desc" text="Limite di dimensione della compagnia aumentato del 40%." />
+    <string id="taom_feat_bcg_ps_desc" text="Limite di dimensione della compagnia aumentato del 10%." />
     <string id="taom_feat_mmo_aic" text="Orda di orchi" />
     <string id="taom_feat_mmo_aic_desc" text="Il reclutamento dell'esercito costa il 40% di influenza in meno." />
     <string id="taom_feat_mmo_ps" text="Schiera della montagna" />
-    <string id="taom_feat_mmo_ps_desc" text="Limite di dimensione della compagnia aumentato del 30%." />
+    <string id="taom_feat_mmo_ps_desc" text="Limite di dimensione della compagnia aumentato del 10%." />
     <string id="taom_feat_mmo_ss" text="Nati nella montagna" />
     <string id="taom_feat_mmo_ss_desc" text="Velocità di movimento della compagnia aumentata del 10% sulla neve." />
     <string id="taom_feat_mmo_fc" text="Schiera affamata" />
@@ -2235,7 +2235,7 @@
     <string id="taom_feat_dg_cs" text="Opere rovinose" />
     <string id="taom_feat_dg_cs_desc" text="Velocità di costruzione ridotta del 20%." />
     <string id="taom_feat_dg_ps" text="Legioni oscure" />
-    <string id="taom_feat_dg_ps_desc" text="Limite di dimensione del gruppo aumentato del 20%." />
+    <string id="taom_feat_dg_ps_desc" text="Limite di dimensione del gruppo aumentato del 5%." />
     <string id="taom_feat_dg_fc" text="Orde voraci" />
     <string id="taom_feat_dg_fc_desc" text="Consumo di cibo del gruppo aumentato del 10%." />
     <string id="taom_feat_dg_vr" text="Coscritti oscuri" />
@@ -2269,7 +2269,7 @@
     <string id="taom_feat_mor_w" text="Tributo oscuro" />
     <string id="taom_feat_mor_w_desc" text="Paghe del gruppo aumentate del 20%." />
     <string id="taom_feat_mor_ps" text="Le orde di Sauron" />
-    <string id="taom_feat_mor_ps_desc" text="Limite di dimensione del gruppo aumentato del 20%." />
+    <string id="taom_feat_mor_ps_desc" text="Limite di dimensione del gruppo aumentato del 5%." />
     <string id="taom_feat_mor_rd" text="L'ira di Sauron" />
     <string id="taom_feat_mor_rd_desc" text="Danni delle razzie aumentati del 25%." />
     <string id="taom_feat_mor_pls" text="Marcia d'ombra" />

@@ -1515,7 +1515,7 @@
 	<string id="taom_faction_clans_of_forochel_name" text="{=taom_faction_clans_of_forochel_name}Clans of Forochel" />
 	<string id="taom_faction_clans_of_forochel_trait_0" text="{=taom_faction_clans_of_forochel_trait_0}Ice Bay Raiders" />
 	<string id="taom_faction_clans_of_forochel_trait_1" text="{=taom_faction_clans_of_forochel_trait_1}Frozen North Orcs" />
-	<string id="taom_faction_dominion_of_isengard_bonus_0" text="{=taom_faction_dominion_of_isengard_bonus_0}+20% party size limit (Uruk-hai Legions)" />
+	<string id="taom_faction_dominion_of_isengard_bonus_0" text="{=taom_faction_dominion_of_isengard_bonus_0}+5% party size limit (Uruk-hai Legions)" />
 	<string id="taom_faction_dominion_of_isengard_bonus_1" text="{=taom_faction_dominion_of_isengard_bonus_1}+15% building construction speed (Industrial Might)" />
 	<string id="taom_faction_dominion_of_isengard_bonus_2" text="{=taom_faction_dominion_of_isengard_bonus_2}-20% smithing energy cost (Industrial Forges)" />
 	<string id="taom_faction_dominion_of_isengard_bonus_3" text="{=taom_faction_dominion_of_isengard_bonus_3}-15% mounted recruit and upgrade cost (War Wargs)" />
@@ -1527,7 +1527,7 @@
 	<string id="taom_faction_dominion_of_isengard_bonus_9" text="{=taom_faction_dominion_of_isengard_bonus_9}+25% relationship penalties (Saruman's Grip)" />
 	<string id="taom_faction_dominion_of_isengard_desc" text="{=taom_faction_dominion_of_isengard_desc}Saruman's industrial fortress at Orthanc. The Ring of Isengard runs day and night — Uruk-hai legions, forge-line crossbows, war wargs. Isengard's one town swells to twenty notables: a recruitment hub equal to many cities of Rohan. Saruman's Grip alienates every neighbor." />
 	<string id="taom_faction_dominion_of_isengard_name" text="{=taom_faction_dominion_of_isengard_name}Dominion of Isengard" />
-	<string id="taom_faction_dominion_of_isengard_perk_0_desc" text="{=taom_faction_dominion_of_isengard_perk_0_desc}+20% party size limit and +10% march speed on plain and swamp." />
+	<string id="taom_faction_dominion_of_isengard_perk_0_desc" text="{=taom_faction_dominion_of_isengard_perk_0_desc}+5% party size limit and +10% march speed on plain and swamp." />
 	<string id="taom_faction_dominion_of_isengard_perk_0_name" text="{=taom_faction_dominion_of_isengard_perk_0_name}Uruk-hai Legions" />
 	<string id="taom_faction_dominion_of_isengard_perk_1_desc" text="{=taom_faction_dominion_of_isengard_perk_1_desc}+15% construction, -20% smithing energy, -15% mounted recruitment cost." />
 	<string id="taom_faction_dominion_of_isengard_perk_1_name" text="{=taom_faction_dominion_of_isengard_perk_1_name}Industrial Might" />
@@ -1551,7 +1551,7 @@
 	<string id="taom_faction_dominion_of_isengard_weakness_1" text="{=taom_faction_dominion_of_isengard_weakness_1}Single chokepoint settlement" />
 	<string id="taom_faction_dominion_of_isengard_weakness_2" text="{=taom_faction_dominion_of_isengard_weakness_2}Surrounded by Rohan and Fangorn" />
 	<string id="taom_faction_dominion_of_mordor_bonus_0" text="{=taom_faction_dominion_of_mordor_bonus_0}-60% army influence cost (The Dark Lord's Will)" />
-	<string id="taom_faction_dominion_of_mordor_bonus_1" text="{=taom_faction_dominion_of_mordor_bonus_1}+10% party size limit (Sauron's Hordes)" />
+	<string id="taom_faction_dominion_of_mordor_bonus_1" text="{=taom_faction_dominion_of_mordor_bonus_1}+5% party size limit (Sauron's Hordes)" />
 	<string id="taom_faction_dominion_of_mordor_bonus_10" text="{=taom_faction_dominion_of_mordor_bonus_10}+15% smithing efficiency (Dark Smithing)" />
 	<string id="taom_faction_dominion_of_mordor_bonus_2" text="{=taom_faction_dominion_of_mordor_bonus_2}+20% Nurn grain production (Nurn Farmlands)" />
 	<string id="taom_faction_dominion_of_mordor_bonus_3" text="{=taom_faction_dominion_of_mordor_bonus_3}+25% raid damage (Sauron's Wrath)" />
@@ -1591,7 +1591,7 @@
 	<string id="taom_faction_eregion_name" text="{=taom_faction_eregion_name}Eregion" />
 	<string id="taom_faction_fangorn_forest_desc" text="{=taom_faction_fangorn_forest_desc}The Fangorn Forest." />
 	<string id="taom_faction_fangorn_forest_name" text="{=taom_faction_fangorn_forest_name}Fangorn Forest" />
-	<string id="taom_faction_goblins_of_blue_craig_bonus_0" text="{=taom_faction_goblins_of_blue_craig_bonus_0}+40% party size limit (Goblin Swarm)" />
+	<string id="taom_faction_goblins_of_blue_craig_bonus_0" text="{=taom_faction_goblins_of_blue_craig_bonus_0}+10% party size limit (Goblin Swarm)" />
 	<string id="taom_faction_goblins_of_blue_craig_bonus_1" text="{=taom_faction_goblins_of_blue_craig_bonus_1}+25% village volunteer respawn rate (Endless Spawn)" />
 	<string id="taom_faction_goblins_of_blue_craig_bonus_2" text="{=taom_faction_goblins_of_blue_craig_bonus_2}+10% party speed on snow (Tunnel-Runners)" />
 	<string id="taom_faction_goblins_of_blue_craig_bonus_3" text="{=taom_faction_goblins_of_blue_craig_bonus_3}+20% party food consumption (Ravenous Swarm)" />
@@ -1599,7 +1599,7 @@
 	<string id="taom_faction_goblins_of_blue_craig_bonus_5" text="{=taom_faction_goblins_of_blue_craig_bonus_5}+10% raid damage (Goblin Ambush)" />
 	<string id="taom_faction_goblins_of_blue_craig_desc" text="{=taom_faction_goblins_of_blue_craig_desc}A distinct goblin host of the Blue Mountains (Ered Luin) in the far west, hard by the Grey Havens of Lindon — a realm apart from their Misty Mountains cousins of Goblin Town. Same numberless, ill-armed swarms: weak alone, overwhelming in the mass, and ravenous on the march. They trouble the Elves of the western shore." />
 	<string id="taom_faction_goblins_of_blue_craig_name" text="{=taom_faction_goblins_of_blue_craig_name}Goblins of Blue Craig" />
-	<string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="{=taom_faction_goblins_of_blue_craig_perk_0_desc}+40% party size and +25% village volunteer respawn — weak but numberless." />
+	<string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="{=taom_faction_goblins_of_blue_craig_perk_0_desc}+10% party size and +25% village volunteer respawn — weak but numberless." />
 	<string id="taom_faction_goblins_of_blue_craig_perk_0_name" text="{=taom_faction_goblins_of_blue_craig_perk_0_name}Goblin Swarm" />
 	<string id="taom_faction_goblins_of_blue_craig_perk_1_desc" text="{=taom_faction_goblins_of_blue_craig_perk_1_desc}+10% party speed on snow — goblins know every crag and tunnel." />
 	<string id="taom_faction_goblins_of_blue_craig_perk_1_name" text="{=taom_faction_goblins_of_blue_craig_perk_1_name}Tunnel-Runners" />
@@ -1622,7 +1622,7 @@
 	<string id="taom_faction_goblins_of_blue_craig_weakness_0" text="{=taom_faction_goblins_of_blue_craig_weakness_0}Individually weak troops" />
 	<string id="taom_faction_goblins_of_blue_craig_weakness_1" text="{=taom_faction_goblins_of_blue_craig_weakness_1}Ravenous — strains every supply line" />
 	<string id="taom_faction_goblins_of_blue_craig_weakness_2" text="{=taom_faction_goblins_of_blue_craig_weakness_2}Hated by all Free Peoples" />
-	<string id="taom_faction_goblins_of_goblin_town_bonus_0" text="{=taom_faction_goblins_of_goblin_town_bonus_0}+40% party size limit (Goblin Swarm)" />
+	<string id="taom_faction_goblins_of_goblin_town_bonus_0" text="{=taom_faction_goblins_of_goblin_town_bonus_0}+10% party size limit (Goblin Swarm)" />
 	<string id="taom_faction_goblins_of_goblin_town_bonus_1" text="{=taom_faction_goblins_of_goblin_town_bonus_1}+25% village volunteer respawn rate (Endless Spawn)" />
 	<string id="taom_faction_goblins_of_goblin_town_bonus_2" text="{=taom_faction_goblins_of_goblin_town_bonus_2}+10% party speed on snow (Tunnel-Runners)" />
 	<string id="taom_faction_goblins_of_goblin_town_bonus_3" text="{=taom_faction_goblins_of_goblin_town_bonus_3}+20% party food consumption (Ravenous Swarm)" />
@@ -1630,7 +1630,7 @@
 	<string id="taom_faction_goblins_of_goblin_town_bonus_5" text="{=taom_faction_goblins_of_goblin_town_bonus_5}+10% raid damage (Goblin Ambush)" />
 	<string id="taom_faction_goblins_of_goblin_town_desc" text="{=taom_faction_goblins_of_goblin_town_desc}The teeming goblin-warrens beneath the High Pass of the Misty Mountains. Since the fall of the Great Goblin the tribes have multiplied without number — vast, ill-armed swarms that win by sheer weight and breed faster than any foe can cull them. They run swiftest over the snows of their mountain home, but such hordes are ever ravenous." />
 	<string id="taom_faction_goblins_of_goblin_town_name" text="{=taom_faction_goblins_of_goblin_town_name}Goblins of Goblin Town" />
-	<string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="{=taom_faction_goblins_of_goblin_town_perk_0_desc}+40% party size and +25% village volunteer respawn — goblins are weak but numberless." />
+	<string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="{=taom_faction_goblins_of_goblin_town_perk_0_desc}+10% party size and +25% village volunteer respawn — goblins are weak but numberless." />
 	<string id="taom_faction_goblins_of_goblin_town_perk_0_name" text="{=taom_faction_goblins_of_goblin_town_perk_0_name}Goblin Swarm" />
 	<string id="taom_faction_goblins_of_goblin_town_perk_1_desc" text="{=taom_faction_goblins_of_goblin_town_perk_1_desc}+10% party speed on snow — goblins know every pass and tunnel of the Misty Mountains." />
 	<string id="taom_faction_goblins_of_goblin_town_perk_1_name" text="{=taom_faction_goblins_of_goblin_town_perk_1_name}Tunnel-Runners" />
@@ -1988,7 +1988,7 @@
 	<string id="taom_faction_kingdom_of_lothlorien_weakness_1" text="{=taom_faction_kingdom_of_lothlorien_weakness_1}Tiny standing army" />
 	<string id="taom_faction_kingdom_of_lothlorien_weakness_2" text="{=taom_faction_kingdom_of_lothlorien_weakness_2}Fading power — no growth" />
 	<string id="taom_faction_kingdom_of_moria_bonus_0" text="{=taom_faction_kingdom_of_moria_bonus_0}-40% army influence cost (Orc Horde)" />
-	<string id="taom_faction_kingdom_of_moria_bonus_1" text="{=taom_faction_kingdom_of_moria_bonus_1}+30% party size limit (Mountain Host)" />
+	<string id="taom_faction_kingdom_of_moria_bonus_1" text="{=taom_faction_kingdom_of_moria_bonus_1}+10% party size limit (Mountain Host)" />
 	<string id="taom_faction_kingdom_of_moria_bonus_2" text="{=taom_faction_kingdom_of_moria_bonus_2}+10% party speed on snow (Mountain-Bred)" />
 	<string id="taom_faction_kingdom_of_moria_bonus_3" text="{=taom_faction_kingdom_of_moria_bonus_3}+15% party food consumption (Hungry Host)" />
 	<string id="taom_faction_kingdom_of_moria_bonus_4" text="{=taom_faction_kingdom_of_moria_bonus_4}+15% smithing efficiency (Looted Forges)" />
@@ -1998,7 +1998,7 @@
 	<string id="taom_faction_kingdom_of_moria_name" text="{=taom_faction_kingdom_of_moria_name}Orcs of the Misty Mountains" />
 	<string id="taom_faction_kingdom_of_moria_perk_0_desc" text="{=taom_faction_kingdom_of_moria_perk_0_desc}Army recruitment costs 40% less influence — the orc-host needs no consensus to march." />
 	<string id="taom_faction_kingdom_of_moria_perk_0_name" text="{=taom_faction_kingdom_of_moria_perk_0_name}Orc Horde" />
-	<string id="taom_faction_kingdom_of_moria_perk_1_desc" text="{=taom_faction_kingdom_of_moria_perk_1_desc}+30% party size and +10% speed on snow — large war-hosts bred to the cold peaks." />
+	<string id="taom_faction_kingdom_of_moria_perk_1_desc" text="{=taom_faction_kingdom_of_moria_perk_1_desc}+10% party size and +10% speed on snow — large war-hosts bred to the cold peaks." />
 	<string id="taom_faction_kingdom_of_moria_perk_1_name" text="{=taom_faction_kingdom_of_moria_perk_1_name}Mountain Host" />
 	<string id="taom_faction_kingdom_of_moria_perk_2_desc" text="{=taom_faction_kingdom_of_moria_perk_2_desc}A war-host of this size eats greedily — +15% party food consumption." />
 	<string id="taom_faction_kingdom_of_moria_perk_2_name" text="{=taom_faction_kingdom_of_moria_perk_2_name}Hungry Host" />
@@ -2068,7 +2068,7 @@
 	<string id="taom_faction_nurunkhizdin_desc" text="{=taom_faction_nurunkhizdin_desc}The Nurunkhizdin." />
 	<string id="taom_faction_nurunkhizdin_name" text="{=taom_faction_nurunkhizdin_name}Nurunkhizdin" />
 	<string id="taom_faction_overlordship_of_dol_guldur_bonus_0" text="{=taom_faction_overlordship_of_dol_guldur_bonus_0}-50% army influence cost (Shadow Command)" />
-	<string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="{=taom_faction_overlordship_of_dol_guldur_bonus_1}+20% party size limit (Dark Legions)" />
+	<string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="{=taom_faction_overlordship_of_dol_guldur_bonus_1}+5% party size limit (Dark Legions)" />
 	<string id="taom_faction_overlordship_of_dol_guldur_bonus_2" text="{=taom_faction_overlordship_of_dol_guldur_bonus_2}+20% village volunteer respawn rate (Dark Conscripts)" />
 	<string id="taom_faction_overlordship_of_dol_guldur_bonus_3" text="{=taom_faction_overlordship_of_dol_guldur_bonus_3}+20% militia veteran chance (Dark Conscription)" />
 	<string id="taom_faction_overlordship_of_dol_guldur_bonus_4" text="{=taom_faction_overlordship_of_dol_guldur_bonus_4}+1 Merchant + 1 Artisan + 13 Gang Leader notables in Dol Guldur town (20 total)" />
@@ -2079,7 +2079,7 @@
 	<string id="taom_faction_overlordship_of_dol_guldur_name" text="{=taom_faction_overlordship_of_dol_guldur_name}Overlordship of Dol Guldur" />
 	<string id="taom_faction_overlordship_of_dol_guldur_perk_0_desc" text="{=taom_faction_overlordship_of_dol_guldur_perk_0_desc}Army influence cost reduced by 50% — dread compels obedience." />
 	<string id="taom_faction_overlordship_of_dol_guldur_perk_0_name" text="{=taom_faction_overlordship_of_dol_guldur_perk_0_name}Shadow Command" />
-	<string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="{=taom_faction_overlordship_of_dol_guldur_perk_1_desc}+20% party size and +20% volunteer respawn rate." />
+	<string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="{=taom_faction_overlordship_of_dol_guldur_perk_1_desc}+5% party size and +20% volunteer respawn rate." />
 	<string id="taom_faction_overlordship_of_dol_guldur_perk_1_name" text="{=taom_faction_overlordship_of_dol_guldur_perk_1_name}Dark Legions" />
 	<string id="taom_faction_overlordship_of_dol_guldur_perk_2_desc" text="{=taom_faction_overlordship_of_dol_guldur_perk_2_desc}Dol Guldur's single town fields 20 notables — a 15 Gang Leader recruitment hub." />
 	<string id="taom_faction_overlordship_of_dol_guldur_perk_2_name" text="{=taom_faction_overlordship_of_dol_guldur_perk_2_name}Shadow Captains" />
@@ -2101,7 +2101,7 @@
 	<string id="taom_faction_overlordship_of_dol_guldur_weakness_1" text="{=taom_faction_overlordship_of_dol_guldur_weakness_1}Industrial decay slows walls" />
 	<string id="taom_faction_overlordship_of_dol_guldur_weakness_2" text="{=taom_faction_overlordship_of_dol_guldur_weakness_2}Surrounded by hostile forests" />
 	<string id="taom_faction_overlordship_of_gundabad_bonus_0" text="{=taom_faction_overlordship_of_gundabad_bonus_0}-40% army influence cost (Orc Horde)" />
-	<string id="taom_faction_overlordship_of_gundabad_bonus_1" text="{=taom_faction_overlordship_of_gundabad_bonus_1}+20% party size limit (Mountain Swarm)" />
+	<string id="taom_faction_overlordship_of_gundabad_bonus_1" text="{=taom_faction_overlordship_of_gundabad_bonus_1}+5% party size limit (Mountain Swarm)" />
 	<string id="taom_faction_overlordship_of_gundabad_bonus_2" text="{=taom_faction_overlordship_of_gundabad_bonus_2}+25% raid damage (Orc Pillagers)" />
 	<string id="taom_faction_overlordship_of_gundabad_bonus_3" text="{=taom_faction_overlordship_of_gundabad_bonus_3}+10% party speed on snow (Mountain Marauders)" />
 	<string id="taom_faction_overlordship_of_gundabad_bonus_4" text="{=taom_faction_overlordship_of_gundabad_bonus_4}+20% village volunteer respawn rate" />
@@ -2113,7 +2113,7 @@
 	<string id="taom_faction_overlordship_of_gundabad_name" text="{=taom_faction_overlordship_of_gundabad_name}Overlordship of Gundabad" />
 	<string id="taom_faction_overlordship_of_gundabad_perk_0_desc" text="{=taom_faction_overlordship_of_gundabad_perk_0_desc}Army influence cost reduced by 40% — dread compels obedience." />
 	<string id="taom_faction_overlordship_of_gundabad_perk_0_name" text="{=taom_faction_overlordship_of_gundabad_perk_0_name}Orc Horde" />
-	<string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="{=taom_faction_overlordship_of_gundabad_perk_1_desc}+20% party size limit and +10% party speed on snow." />
+	<string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="{=taom_faction_overlordship_of_gundabad_perk_1_desc}+5% party size limit and +10% party speed on snow." />
 	<string id="taom_faction_overlordship_of_gundabad_perk_1_name" text="{=taom_faction_overlordship_of_gundabad_perk_1_name}Mountain Swarm" />
 	<string id="taom_faction_overlordship_of_gundabad_perk_2_desc" text="{=taom_faction_overlordship_of_gundabad_perk_2_desc}+3 Gang Leader and +1 Artisan notable per town — recruitment swells with raiders." />
 	<string id="taom_faction_overlordship_of_gundabad_perk_2_name" text="{=taom_faction_overlordship_of_gundabad_perk_2_name}Pale Warband Chieftains" />
@@ -2395,7 +2395,7 @@
 	<string id="taom_feat_isen_dp" text="{=taom_feat_isen_dp}Saruman's Grip" />
 	<string id="taom_feat_isen_dp_desc" text="{=taom_feat_isen_dp_desc}Kingdom decision relationship penalties increased by 25%." />
 	<string id="taom_feat_isen_ps" text="{=taom_feat_isen_ps}Uruk-hai Legions" />
-	<string id="taom_feat_isen_ps_desc" text="{=taom_feat_isen_ps_desc}Party size limit increased by 20%." />
+	<string id="taom_feat_isen_ps_desc" text="{=taom_feat_isen_ps_desc}Party size limit increased by 5%." />
 	<string id="taom_feat_isen_cs" text="{=taom_feat_isen_cs}Industrial Might" />
 	<string id="taom_feat_isen_cs_desc" text="{=taom_feat_isen_cs_desc}Construction speed increased by 15%." />
 	<string id="taom_feat_isen_sm" text="{=taom_feat_isen_sm}Industrial Forges" />
@@ -2421,7 +2421,7 @@
 	<string id="taom_feat_gun_w" text="{=taom_feat_gun_w}Plunder Demands" />
 	<string id="taom_feat_gun_w_desc" text="{=taom_feat_gun_w_desc}Party wages increased by 10%." />
 	<string id="taom_feat_gun_ps" text="{=taom_feat_gun_ps}Mountain Swarm" />
-	<string id="taom_feat_gun_ps_desc" text="{=taom_feat_gun_ps_desc}Party size limit increased by 20%." />
+	<string id="taom_feat_gun_ps_desc" text="{=taom_feat_gun_ps_desc}Party size limit increased by 5%." />
 	<string id="taom_feat_gun_rd" text="{=taom_feat_gun_rd}Orc Pillagers" />
 	<string id="taom_feat_gun_rd_desc" text="{=taom_feat_gun_rd_desc}Raid damage increased by 25%." />
 	<string id="taom_feat_gun_ss" text="{=taom_feat_gun_ss}Mountain Marauders" />
@@ -2435,7 +2435,7 @@
 	<string id="taom_feat_gun_ncv" text="{=taom_feat_gun_ncv}Bone Camps" />
 	<string id="taom_feat_gun_ncv_desc" text="{=taom_feat_gun_ncv_desc}Notable count in villages increased by 10%." />
 	<string id="taom_feat_gob_ps" text="{=taom_feat_gob_ps}Goblin Swarm" />
-	<string id="taom_feat_gob_ps_desc" text="{=taom_feat_gob_ps_desc}Party size limit increased by 40%." />
+	<string id="taom_feat_gob_ps_desc" text="{=taom_feat_gob_ps_desc}Party size limit increased by 10%." />
 	<string id="taom_feat_gob_vr" text="{=taom_feat_gob_vr}Endless Spawn" />
 	<string id="taom_feat_gob_vr_desc" text="{=taom_feat_gob_vr_desc}Village volunteer respawn rate increased by 25%." />
 	<string id="taom_feat_gob_ss" text="{=taom_feat_gob_ss}Tunnel-Runners" />
@@ -2447,11 +2447,11 @@
 	<string id="taom_feat_gob_rd" text="{=taom_feat_gob_rd}Goblin Ambush" />
 	<string id="taom_feat_gob_rd_desc" text="{=taom_feat_gob_rd_desc}Raid damage increased by 10%." />
 	<string id="taom_feat_bcg_ps" text="{=taom_feat_bcg_ps}Blue Craig Swarm" />
-	<string id="taom_feat_bcg_ps_desc" text="{=taom_feat_bcg_ps_desc}Party size limit increased by 40%." />
+	<string id="taom_feat_bcg_ps_desc" text="{=taom_feat_bcg_ps_desc}Party size limit increased by 10%." />
 	<string id="taom_feat_mmo_aic" text="{=taom_feat_mmo_aic}Orc Horde" />
 	<string id="taom_feat_mmo_aic_desc" text="{=taom_feat_mmo_aic_desc}Army recruitment costs 40% less influence." />
 	<string id="taom_feat_mmo_ps" text="{=taom_feat_mmo_ps}Mountain Host" />
-	<string id="taom_feat_mmo_ps_desc" text="{=taom_feat_mmo_ps_desc}Party size limit increased by 30%." />
+	<string id="taom_feat_mmo_ps_desc" text="{=taom_feat_mmo_ps_desc}Party size limit increased by 10%." />
 	<string id="taom_feat_mmo_ss" text="{=taom_feat_mmo_ss}Mountain-Bred" />
 	<string id="taom_feat_mmo_ss_desc" text="{=taom_feat_mmo_ss_desc}Party movement speed increased by 10% in snow." />
 	<string id="taom_feat_mmo_fc" text="{=taom_feat_mmo_fc}Hungry Host" />
@@ -2483,7 +2483,7 @@
 	<string id="taom_feat_dg_cs" text="{=taom_feat_dg_cs}Ruinous Works" />
 	<string id="taom_feat_dg_cs_desc" text="{=taom_feat_dg_cs_desc}Construction speed reduced by 20%." />
 	<string id="taom_feat_dg_ps" text="{=taom_feat_dg_ps}Dark Legions" />
-	<string id="taom_feat_dg_ps_desc" text="{=taom_feat_dg_ps_desc}Party size limit increased by 20%." />
+	<string id="taom_feat_dg_ps_desc" text="{=taom_feat_dg_ps_desc}Party size limit increased by 5%." />
 	<string id="taom_feat_dg_fc" text="{=taom_feat_dg_fc}Voracious Hordes" />
 	<string id="taom_feat_dg_fc_desc" text="{=taom_feat_dg_fc_desc}Party food consumption increased by 10%." />
 	<string id="taom_feat_dg_vr" text="{=taom_feat_dg_vr}Dark Conscripts" />
@@ -2517,7 +2517,7 @@
 	<string id="taom_feat_mor_w" text="{=taom_feat_mor_w}Dark Tribute" />
 	<string id="taom_feat_mor_w_desc" text="{=taom_feat_mor_w_desc}Party wages increased by 20%." />
 	<string id="taom_feat_mor_ps" text="{=taom_feat_mor_ps}Sauron's Hordes" />
-	<string id="taom_feat_mor_ps_desc" text="{=taom_feat_mor_ps_desc}Party size limit increased by 20%." />
+	<string id="taom_feat_mor_ps_desc" text="{=taom_feat_mor_ps_desc}Party size limit increased by 5%." />
 	<string id="taom_feat_mor_rd" text="{=taom_feat_mor_rd}Sauron's Wrath" />
 	<string id="taom_feat_mor_rd_desc" text="{=taom_feat_mor_rd_desc}Raid damage increased by 25%." />
 	<string id="taom_feat_mor_pls" text="{=taom_feat_mor_pls}Shadow March" />

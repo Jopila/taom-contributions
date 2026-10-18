@@ -117,7 +117,7 @@ is what goes stale:** recompute K as `targetPartySize x (1 - wageRelief)`. See
 
 **It has already gone stale, and was not recomputed.** The AI Party Size defaults went neutral on
 2026-09-01: multiplier 1.0, flat bonus 0, and both relief knobs 0. So N is now the vanilla
-`PartySizeLimit` (40 to 203) and the relief term is 1.0, which makes the correct K simply the target
+`PartySizeLimit` (40 to about 160) and the relief term is 1.0, which makes the correct K simply the target
 party size. `K = 100` sits inside that band, so it is far closer than it was, but it is not a
 measurement: the original 52.5437 was population-weighted across every lord template, and low-tier
 lords far outnumber tier-4 clan leaders, so 100 is probably still biased high. A proper re-derivation

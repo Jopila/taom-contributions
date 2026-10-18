@@ -99,14 +99,14 @@ Each culture has a `<cultural_feats>` block with 3 feat IDs:
 | Isengard | `taom_isengard_cheaper_recruits` | -15% mounted recruit cost | -0.15 | Yes |
 | Isengard | `taom_isengard_garrison_wage` | -20% garrison wage | -0.2 | Yes |
 | Isengard | `taom_isengard_decision_penalty` | +25% decision penalty | 0.25 | No |
-| Isengard | `taom_isengard_party_size` | +20% party size | 0.2 | Yes |
+| Isengard | `taom_isengard_party_size` | +5% party size (was +20%, capped 2026-10-18, #818) | 0.05 | Yes |
 | Isengard | `taom_isengard_construction_speed` | +15% construction speed | 0.15 | Yes |
 | Isengard | `taom_isengard_smithing` | -20% smithing energy cost | -0.2 | Yes |
 | Isengard | `taom_isengard_raid_damage` | +20% raid damage | 0.2 | Yes |
 | Gundabad | `taom_gundabad_army_influence_cost` | -40% army influence cost | -0.4 | Yes |
 | Gundabad | `taom_gundabad_grain_production` | +15% grain production | 0.15 | Yes |
 | Gundabad | `taom_gundabad_wage` | +10% party wages | 0.1 | No |
-| Gundabad | `taom_gundabad_party_size` | +20% party size (retuned 2026-05-31; was +30%) | 0.2 | Yes |
+| Gundabad | `taom_gundabad_party_size` | +5% party size (was +30%, +20% from 2026-05-31, capped 2026-10-18, #818) | 0.05 | Yes |
 | Gundabad | `taom_gundabad_raid_damage` | +25% raid damage | 0.25 | Yes |
 | Umbar | `taom_umbar_cheaper_caravans` | -25% caravan cost | 0.75 | Yes |
 | Umbar | `taom_umbar_renown` | +8% renown from battles | 0.08 | Yes |
@@ -115,7 +115,7 @@ Each culture has a `<cultural_feats>` block with 3 feat IDs:
 | Dol Guldur | `taom_dolguldur_army_influence_cost` | -50% army influence cost | -0.5 | Yes |
 | Dol Guldur | `taom_dolguldur_militia_production` | +20% veteran militia chance | 0.2 | Yes |
 | Dol Guldur | `taom_dolguldur_construction_speed` | -20% construction speed | -0.2 | No |
-| Dol Guldur | `taom_dolguldur_party_size` | +20% party size (retuned 2026-05-31; was +25%) | 0.2 | Yes |
+| Dol Guldur | `taom_dolguldur_party_size` | +5% party size (was +25%, +20% from 2026-05-31, capped 2026-10-18, #818) | 0.05 | Yes |
 | Dol Guldur | `taom_dolguldur_food_consumption` | +10% food consumption | 0.1 | No |
 | Gondor | `taom_gondor_garrison_wage` | -20% garrison wage | -0.2 | Yes |
 | Gondor | `taom_gondor_army_influence` | +30% army influence award | 0.3 | Yes |
@@ -126,7 +126,7 @@ Each culture has a `<cultural_feats>` block with 3 feat IDs:
 | Mordor | `taom_mordor_army_influence_cost` | -60% army influence cost | -0.6 | Yes |
 | Mordor | `taom_mordor_grain_production` | +20% grain production | 0.2 | Yes |
 | Mordor | `taom_mordor_wage` | +20% party wages | 0.2 | No |
-| Mordor | `taom_mordor_party_size` | +20% party size (was +30%, cut to +10% 2026-05-31, restored to +20% 2026-08-14) | 0.2 | Yes |
+| Mordor | `taom_mordor_party_size` | +5% party size (was +30%, cut to +10% 2026-05-31, restored to +20% 2026-08-14, capped 2026-10-18, #818) | 0.05 | Yes |
 | Mordor | `taom_mordor_raid_damage` | +25% raid damage | 0.25 | Yes |
 | Rohan | `taom_rohan_mounted_cost` | -15% mounted recruit/upgrade cost | -0.15 | Yes |
 | Rohan | `taom_rohan_mounted_wage` | -15% mounted troop wages | -0.15 | Yes |
@@ -296,33 +296,48 @@ Not a Wave 1 feat: it is the 130th, added on its own.
 
 | Culture | Feat ID | Effect | Bonus | Positive | Service method |
 |---------|---------|--------|-------|----------|----------------|
-| Blue Craig | `taom_bluecraig_party_size` | +40% party size limit | 0.4 | Yes | ApplyPartySizeFeats |
+| Blue Craig | `taom_bluecraig_party_size` | +10% party size limit (was +40%, capped 2026-10-18, #818) | 0.1 | Yes | ApplyPartySizeFeats |
 
 Blue Craig is a special case worth knowing before you retune it. It shares Goblin-town's other
 five feats verbatim (volunteer rate, snow speed, food consumption, smithing, raid damage) and
 owns only its party size, split off `taom_goblin_party_size` on 2026-08-14 at the identical 40%
-so the split changed no behaviour. Both realms are still wired to the shared five in
+so the split changed no behaviour; both went to 10% on 2026-10-18 (#818). Both realms are still wired to the shared five in
 `taom_spcultures.xml`, so editing a goblin feat moves both.
 
-### Evil-culture party-size floor
+### Evil-culture party-size cap
 
-`ApplyPartySizeFeats_EvilCultures_WithinTwentyToFiftyPercent` pins Mordor, Isengard, Gundabad,
-Dol Guldur, Goblin, Blue Craig and Misty Mountain Orcs to a bonus in `[0.20, 0.50]`. Individual
-values are free to move inside that band; leaving it is a test failure. The other five party-size
-feats sit outside the band by design: Dunland, Khand, Harad and Rhûn at +5%, Gondor at +2.5%.
-Umbar has no party-size feat at all.
+Since 2026-10-18 (#818) the evil party-size feats are capped at 10%: Goblin-town, Blue Craig and
+Misty Mountain Orcs at +10%, Mordor, Isengard, Gundabad and Dol Guldur at +5%. In a 200-day balance
+simulation the free side lost ground while the evil party-size bonuses stood at 20 to 40% (Gondor's
++2.5% was the only party-size bonus on the free side), and the cap replaced the 20% to 50% floor of
+2026-08-14. At +5% the TroopWeight elite tax on an orc roster can cancel the bonus
+([troop-weight-system.md](./troop-weight-system.md)), which is accepted.
+`EvilPartySizeFeats_BonusAndDescription_MatchSpec` (TaomCulturalFeatsDefinitionTests) pins the
+production values and the number in each description, and
+`PartySizeFeats_ProductionBonus_PositiveAndAtMostTenPercent` holds all twelve party-size feats to
+the 10% maximum (no floor was approved). The faction cards quote the same numbers from
+`factions.json`; `FactionMapDataTests.FactionCard_PartySizePercent_MatchesProductionFeat` ties
+each card to its feat. The other five party-size feats were not raised: Dunland, Khand, Harad and
+Rhûn at +5%, Gondor at +2.5%. Umbar has no party-size feat at all.
 
-The floor exists because a small bonus can be swallowed whole. `TaomPartySizeModel` applies the
-culture feat and the TroopWeight elite tax to the same `ExplainedNumber`, and an orc roster's
-weight surplus (weight-2.0 uruks, wargs and black guards) can subtract more than a small
+The 2026-08-14 floor existed because a small bonus can be swallowed whole. `TaomPartySizeModel`
+applies the culture feat and the TroopWeight elite tax to the same `ExplainedNumber`, and an orc
+roster's weight surplus (weight-2.0 uruks, wargs and black guards) can subtract more than a small
 percentage bonus adds. Mordor sat at +10% from the 2026-05-31 retune until 2026-08-14, the only
-in-scope culture under the floor.
+in-scope culture under the floor. The cap reverses that trade on purpose.
+
+**Garrisons shrink too.** `TaomPartySizeModel.GetPartyMemberSizeLimit` applies the feats to every
+party, and vanilla returns the garrison limit (or the patrol limit) for a garrison or patrol party,
+so party-size feats also apply to garrison and patrol limits. Evil town garrisons shrank with the
+cap: a Goblin-town town goes from about 560 to 440 (200 base plus 200 town bonus, times 1.4 then
+1.1) and a Mordor town from about 480 to 420 (times 1.2 then 1.05), before leadership and buildings.
 
 ## Tests
 
 | File | Coverage |
 |------|----------|
-| `TAOM.Tests/Features/CulturalFeats/TaomCulturalFeatsDefinitionTests.cs` | Feat property count (130), uniqueness, culture distribution, field structure, **Wave 1 production-metadata pin** (`Wave1Feats_ProductionMetadata_MatchesSpec`, which source-parses `Initialize(...)` so a production sign-flip can't pass; see Codex review 2026-06-07 MEDIUM) |
+| `TAOM.Tests/Features/CulturalFeats/TaomCulturalFeatsDefinitionTests.cs` | Feat property count (130), uniqueness, culture distribution, field structure, **Wave 1 production-metadata pin** (`Wave1Feats_ProductionMetadata_MatchesSpec`, which source-parses `Initialize(...)` so a production sign-flip can't pass; see Codex review 2026-06-07 MEDIUM), **party-size pins** (`EvilPartySizeFeats_BonusAndDescription_MatchSpec` for the seven evil feats, `PartySizeFeats_ProductionBonus_PositiveAndAtMostTenPercent` for all twelve; both read production source) |
+| `TAOM.Tests/Features/FactionMap/FactionMapDataTests.cs` | `FactionCard_PartySizePercent_MatchesProductionFeat`: every "+N% party size" on the twelve faction cards in `factions.json` equals the production feat's EffectBonus |
 | `TAOM.Tests/Features/CulturalFeats/CulturalFeatsServiceTests.cs` | Per-feat dispatch incl. terrain-speed (per-terrain match, Mordor 5% vs 10%, night, null/wrong-terrain no-ops) and one dispatch test per (culture, axis) cell for the Wave 1 feats (per `feedback_per_branch_dispatch_test_enumeration`); `NeedsMountedCount`, which the Rohan infantry penalty now shares as its own gate, so the speed model counts a party's mounts only for a culture with that feat |
 | `TAOM.Tests/Features/CulturalFeats/TaomPartySpeedModelTests.cs` | `RequiresGame`: the mount-count helper reads the roster only when asked to, and `CalculateFinalSpeed` asks the service before counting (IL order) |
 
@@ -372,6 +387,14 @@ GameModel overrides are thin entry points (delegate to `base` + apply feat modif
 <!-- backlinks-end -->
 ## Changelog
 
+- 2026-10-18 (#818): Evil party-size feats capped at 10%. Goblin-town and Blue Craig went from +40%
+  to +10%, Misty Mountain Orcs from +30% to +10%, and Mordor, Isengard, Gundabad and Dol Guldur from
+  +20% to +5%. The band test read the service tests' mirror table and never production, so it was
+  deleted; `EvilPartySizeFeats_BonusAndDescription_MatchSpec`,
+  `PartySizeFeats_ProductionBonus_PositiveAndAtMostTenPercent` and
+  `FactionCard_PartySizePercent_MatchesProductionFeat` pin production and the cards instead. The
+  seven descriptions changed only their number, so the number was changed in place in all 12
+  language rows and translation caches; the 13 `taom_faction_*` card rows got the same per-row edit.
 - 2026-08-14: Evil-culture party-size pass. Mordor's `taom_mordor_party_size` went back to +20%,
   reversing the 2026-05-31 cut to +10% recorded in the row below (it was the only in-scope culture
   under the floor). Blue Craig stopped borrowing `taom_goblin_party_size` and got its own

@@ -1321,7 +1321,7 @@
     <string id="taom_faction_clans_of_forochel_name" text="Кланы Форохеля" />
     <string id="taom_faction_clans_of_forochel_trait_0" text="Налётчики Ледяного залива" />
     <string id="taom_faction_clans_of_forochel_trait_1" text="Орки замёрзшего севера" />
-    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+20% к пределу размера отряда (Легионы урук-хай)" />
+    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+5% к пределу размера отряда (Легионы урук-хай)" />
     <string id="taom_faction_dominion_of_isengard_bonus_1" text="+15% к скорости строительства зданий (Промышленная мощь)" />
     <string id="taom_faction_dominion_of_isengard_bonus_2" text="-20% к затратам энергии при ковке (промышленные кузницы)" />
     <string id="taom_faction_dominion_of_isengard_bonus_3" text="-15% к стоимости найма и улучшения конных войск (боевые варги)" />
@@ -1333,7 +1333,7 @@
     <string id="taom_faction_dominion_of_isengard_bonus_9" text="+25% к штрафам отношений (Власть Сарумана)" />
     <string id="taom_faction_dominion_of_isengard_desc" text="Промышленная крепость Сарумана у Ортханка. Кольцо Изенгарда работает днём и ночью — легионы урук-хай, конвейерные арбалеты, боевые варги. Единственный город Изенгарда разрастается до двадцати знатных особ: центр набора, равный многим городам Рохана. Власть Сарумана настраивает против него всех соседей." />
     <string id="taom_faction_dominion_of_isengard_name" text="Владычество Изенгарда" />
-    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+20% к пределу размера отряда и +10% к скорости марша на равнинах и болотах." />
+    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+5% к пределу размера отряда и +10% к скорости марша на равнинах и болотах." />
     <string id="taom_faction_dominion_of_isengard_perk_0_name" text="Легионы урук-хай" />
     <string id="taom_faction_dominion_of_isengard_perk_1_desc" text="+15% к строительству, -20% к энергии ковки, -15% к стоимости найма конных войск." />
     <string id="taom_faction_dominion_of_isengard_perk_1_name" text="Промышленная мощь" />
@@ -1357,7 +1357,7 @@
     <string id="taom_faction_dominion_of_isengard_weakness_1" text="Единственное поселение в узком месте" />
     <string id="taom_faction_dominion_of_isengard_weakness_2" text="Окружен Роханом и Фангорном" />
     <string id="taom_faction_dominion_of_mordor_bonus_0" text="-60% к затратам влияния на армию (воля Темного Властелина)" />
-    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+10% к лимиту размера отряда (Орды Саурона)" />
+    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+5% к лимиту размера отряда (Орды Саурона)" />
     <string id="taom_faction_dominion_of_mordor_bonus_10" text="+15% эффективность кузнечного дела (Темная Ковка)" />
     <string id="taom_faction_dominion_of_mordor_bonus_2" text="+20% к производству зерна в Нурне (Нурнские фермы)" />
     <string id="taom_faction_dominion_of_mordor_bonus_3" text="+25% к урону от набегов (Гнев Саурона)" />
@@ -1397,7 +1397,7 @@
     <string id="taom_faction_eregion_name" text="Эрегион" />
     <string id="taom_faction_fangorn_forest_desc" text="Лес Фангорн." />
     <string id="taom_faction_fangorn_forest_name" text="Лес Фангорн" />
-    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+40% лимит размера отряда (Гоблинская Орда)" />
+    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+10% лимит размера отряда (Гоблинская Орда)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_1" text="+25% скорость восполнения добровольцев в деревнях (Бесконечное Порождение)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_2" text="+10% скорость отряда на снегу (Знатоки Туннелей)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_3" text="+20% потребление пищи отрядом (Прожорливая Орда)" />
@@ -1405,7 +1405,7 @@
     <string id="taom_faction_goblins_of_blue_craig_bonus_5" text="+10% урон от разграбления (Гоблинская Засада)" />
     <string id="taom_faction_goblins_of_blue_craig_desc" text="Особое гоблинское воинство Синих гор (Эред Луин) на дальнем западе, у самых Серых Гаваней Линдона — держава, обособленная от их сородичей из Гоблинского города в Мглистых горах. Те же бесчисленные, дурно вооружённые полчища: слабые поодиночке, неодолимые в массе и прожорливые в походе. Они тревожат эльфов западного побережья." />
     <string id="taom_faction_goblins_of_blue_craig_name" text="Гоблины Синих Скал" />
-    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+40% размер отряда и +25% восполнение добровольцев в деревнях — слабые, но бесчисленные." />
+    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+10% размер отряда и +25% восполнение добровольцев в деревнях — слабые, но бесчисленные." />
     <string id="taom_faction_goblins_of_blue_craig_perk_0_name" text="Гоблинская Орда" />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_desc" text="+10% скорость отряда на снегу — гоблины знают каждую скалу и туннель." />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_name" text="Знатоки Туннелей" />
@@ -1428,7 +1428,7 @@
     <string id="taom_faction_goblins_of_blue_craig_weakness_0" text="Индивидуально слабые войска" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_1" text="Прожорливые — истощают все линии снабжения" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_2" text="Ненавидимы всеми Свободными Народами" />
-    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+40% лимит размера отряда (Гоблинская Орда)" />
+    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+10% лимит размера отряда (Гоблинская Орда)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_1" text="+25% скорость восполнения добровольцев в деревнях (Бесконечное Порождение)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_2" text="+10% скорость отряда на снегу (Знатоки Туннелей)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_3" text="+20% потребление пищи отрядом (Прожорливая Орда)" />
@@ -1436,7 +1436,7 @@
     <string id="taom_faction_goblins_of_goblin_town_bonus_5" text="+10% урон от разграбления (Гоблинская Засада)" />
     <string id="taom_faction_goblins_of_goblin_town_desc" text="Кишащие гоблинские норы под Высоким перевалом Мглистых гор. Со времён гибели Великого гоблина племена расплодились без числа — огромные, дурно вооружённые орды, побеждающие одной лишь массой и плодящиеся быстрее, чем любой враг успевает их истреблять. Быстрее всего они бегут по снегам родных гор, но такие полчища вечно голодны." />
     <string id="taom_faction_goblins_of_goblin_town_name" text="Гоблины Гоблинграда" />
-    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+40% размер отряда и +25% восполнение добровольцев в деревнях — гоблины слабы, но бесчисленны." />
+    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+10% размер отряда и +25% восполнение добровольцев в деревнях — гоблины слабы, но бесчисленны." />
     <string id="taom_faction_goblins_of_goblin_town_perk_0_name" text="Гоблинская Орда" />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_desc" text="+10% скорость отряда на снегу — гоблины знают каждый проход и туннель Мглистых Гор." />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_name" text="Знатоки Туннелей" />
@@ -1771,7 +1771,7 @@
     <string id="taom_faction_kingdom_of_lothlorien_weakness_1" text="Крошечная постоянная армия" />
     <string id="taom_faction_kingdom_of_lothlorien_weakness_2" text="Угасающая сила — нет роста" />
     <string id="taom_faction_kingdom_of_moria_bonus_0" text="-40% к стоимости армии влиянием (Орочья орда)" />
-    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+30% к лимиту размера отряда (Горное войско)" />
+    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+10% к лимиту размера отряда (Горное войско)" />
     <string id="taom_faction_kingdom_of_moria_bonus_2" text="+10% к скорости отряда на снегу (Горная порода)" />
     <string id="taom_faction_kingdom_of_moria_bonus_3" text="+15% к потреблению пищи отрядом (Голодное войско)" />
     <string id="taom_faction_kingdom_of_moria_bonus_4" text="+15% к эффективности кузнечного дела (Захваченные кузни)" />
@@ -1781,7 +1781,7 @@
     <string id="taom_faction_kingdom_of_moria_name" text="Орки Мглистых гор" />
     <string id="taom_faction_kingdom_of_moria_perk_0_desc" text="Набор армии стоит на 40% меньше влияния — орочье войско не нуждается в согласии для похода." />
     <string id="taom_faction_kingdom_of_moria_perk_0_name" text="Орочья орда" />
-    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+30% к размеру отряда и +10% к скорости на снегу — огромные военные орды, выращенные на холодных вершинах." />
+    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+10% к размеру отряда и +10% к скорости на снегу — огромные военные орды, выращенные на холодных вершинах." />
     <string id="taom_faction_kingdom_of_moria_perk_1_name" text="Горное войско" />
     <string id="taom_faction_kingdom_of_moria_perk_2_desc" text="Военное войско такого размера ест жадно — +15% к потреблению пищи отрядом." />
     <string id="taom_faction_kingdom_of_moria_perk_2_name" text="Голодное войско" />
@@ -1851,7 +1851,7 @@
     <string id="taom_faction_nurunkhizdin_desc" text="Нурунхиздин." />
     <string id="taom_faction_nurunkhizdin_name" text="Нурунхиздин" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_0" text="-50% к стоимости армии во влиянии (Командование Тени)" />
-    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="+20% к лимиту размера отряда (Тёмные Легионы)" />
+    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="+5% к лимиту размера отряда (Тёмные Легионы)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_2" text="+20% к скорости появления добровольцев в деревнях (Тёмные Призывники)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_3" text="+20% к шансу ополченцев стать ветеранами (Тёмный Призыв)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_4" text="+1 Торговец + 1 Ремесленник + 13 Главарей банд в городе Дол Гулдур (всего 20)" />
@@ -1862,7 +1862,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_name" text="Владычество Дол Гулдура" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_desc" text="Стоимость влияния для армии снижена на 50% — страх принуждает к повиновению." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_name" text="Теневое Командование" />
-    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="+20% к размеру отряда и +20% к скорости восполнения добровольцев." />
+    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="+5% к размеру отряда и +20% к скорости восполнения добровольцев." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_1_name" text="Темные Легионы" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_desc" text="Единственный город Дол Гулдура имеет 20 знатных — центр найма 15 главарей банд." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_name" text="Теневые Капитаны" />
@@ -1884,7 +1884,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_1" text="Промышленный упадок замедляет строительство стен" />
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_2" text="Окружены враждебными лесами" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_0" text="-40% к стоимости армии во влиянии (Орочья Орда)" />
-    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="+20% к лимиту размера отряда (Горный Рой)" />
+    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="+5% к лимиту размера отряда (Горный Рой)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_2" text="+25% к урону от набегов (Орки-Мародёры)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_3" text="+10% к скорости отряда на снегу (Горные Мародёры)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_4" text="+20% к скорости восполнения добровольцев в деревнях" />
@@ -1896,7 +1896,7 @@
     <string id="taom_faction_overlordship_of_gundabad_name" text="Владычество Гундабада" />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_desc" text="Стоимость влияния для армии снижена на 40% — страх принуждает к повиновению." />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_name" text="Орочья Орда" />
-    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="+20% к лимиту размера отряда и +10% к скорости отряда на снегу." />
+    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="+5% к лимиту размера отряда и +10% к скорости отряда на снегу." />
     <string id="taom_faction_overlordship_of_gundabad_perk_1_name" text="Горный Рой" />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_desc" text="+3 Главаря банд и +1 Ремесленник на город — рекрутинг растёт с налётчиками." />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_name" text="Вожди бледных отрядов" />
@@ -2147,7 +2147,7 @@
     <string id="taom_feat_isen_dp" text="Хватка Сарумана" />
     <string id="taom_feat_isen_dp_desc" text="Штрафы к отношениям от решений королевства увеличены на 25%." />
     <string id="taom_feat_isen_ps" text="Легионы урук-хай" />
-    <string id="taom_feat_isen_ps_desc" text="Предел размера отряда увеличен на 20%." />
+    <string id="taom_feat_isen_ps_desc" text="Предел размера отряда увеличен на 5%." />
     <string id="taom_feat_isen_cs" text="Промышленная мощь" />
     <string id="taom_feat_isen_cs_desc" text="Скорость строительства увеличена на 15%." />
     <string id="taom_feat_isen_sm" text="Промышленные горны" />
@@ -2173,7 +2173,7 @@
     <string id="taom_feat_gun_w" text="Требования добычи" />
     <string id="taom_feat_gun_w_desc" text="Жалование отряда увеличено на 10%." />
     <string id="taom_feat_gun_ps" text="Горная орда" />
-    <string id="taom_feat_gun_ps_desc" text="Предел размера отряда увеличен на 20%." />
+    <string id="taom_feat_gun_ps_desc" text="Предел размера отряда увеличен на 5%." />
     <string id="taom_feat_gun_rd" text="Орки-грабители" />
     <string id="taom_feat_gun_rd_desc" text="Урон от набегов увеличен на 25%." />
     <string id="taom_feat_gun_ss" text="Горные мародёры" />
@@ -2187,7 +2187,7 @@
     <string id="taom_feat_gun_ncv" text="Костяные лагеря" />
     <string id="taom_feat_gun_ncv_desc" text="Количество знати в деревнях увеличено на 10%." />
     <string id="taom_feat_gob_ps" text="Гоблинская орда" />
-    <string id="taom_feat_gob_ps_desc" text="Предел размера отряда увеличен на 40%." />
+    <string id="taom_feat_gob_ps_desc" text="Предел размера отряда увеличен на 10%." />
     <string id="taom_feat_gob_vr" text="Бесконечный выводок" />
     <string id="taom_feat_gob_vr_desc" text="Скорость восстановления добровольцев в деревнях увеличена на 25%." />
     <string id="taom_feat_gob_ss" text="Бегуны по туннелям" />
@@ -2199,11 +2199,11 @@
     <string id="taom_feat_gob_rd" text="Гоблинская засада" />
     <string id="taom_feat_gob_rd_desc" text="Урон от набегов увеличен на 10%." />
     <string id="taom_feat_bcg_ps" text="Орда Синей Скалы" />
-    <string id="taom_feat_bcg_ps_desc" text="Предел размера отряда увеличен на 40%." />
+    <string id="taom_feat_bcg_ps_desc" text="Предел размера отряда увеличен на 10%." />
     <string id="taom_feat_mmo_aic" text="Орочья орда" />
     <string id="taom_feat_mmo_aic_desc" text="Набор армии стоит на 40% меньше влияния." />
     <string id="taom_feat_mmo_ps" text="Горное войско" />
-    <string id="taom_feat_mmo_ps_desc" text="Предел размера отряда увеличен на 30%." />
+    <string id="taom_feat_mmo_ps_desc" text="Предел размера отряда увеличен на 10%." />
     <string id="taom_feat_mmo_ss" text="Рождённые в горах" />
     <string id="taom_feat_mmo_ss_desc" text="Скорость передвижения отряда по снегу увеличена на 10%." />
     <string id="taom_feat_mmo_fc" text="Голодное войско" />
@@ -2235,7 +2235,7 @@
     <string id="taom_feat_dg_cs" text="Разрушительные работы" />
     <string id="taom_feat_dg_cs_desc" text="Скорость строительства снижена на 20%." />
     <string id="taom_feat_dg_ps" text="Тёмные легионы" />
-    <string id="taom_feat_dg_ps_desc" text="Предел размера отряда увеличен на 20%." />
+    <string id="taom_feat_dg_ps_desc" text="Предел размера отряда увеличен на 5%." />
     <string id="taom_feat_dg_fc" text="Ненасытные орды" />
     <string id="taom_feat_dg_fc_desc" text="Потребление еды отрядом увеличено на 10%." />
     <string id="taom_feat_dg_vr" text="Тёмные новобранцы" />
@@ -2269,7 +2269,7 @@
     <string id="taom_feat_mor_w" text="Тёмная дань" />
     <string id="taom_feat_mor_w_desc" text="Жалование отряда увеличено на 20%." />
     <string id="taom_feat_mor_ps" text="Орды Саурона" />
-    <string id="taom_feat_mor_ps_desc" text="Предел размера отряда увеличен на 20%." />
+    <string id="taom_feat_mor_ps_desc" text="Предел размера отряда увеличен на 5%." />
     <string id="taom_feat_mor_rd" text="Гнев Саурона" />
     <string id="taom_feat_mor_rd_desc" text="Урон от набегов увеличен на 25%." />
     <string id="taom_feat_mor_pls" text="Марш теней" />

@@ -102,8 +102,9 @@ registered at `Main/SubModule.cs:827`). It layers three things onto the same `Ex
 
 Item 3 is why a small culture bonus can read as absent in play: evil rosters are precisely the
 weight-2.0 ones, so the tax can subtract more than a small percentage adds. That interaction is the
-reason the evil-culture party-size feats now carry a 20% floor. See
-[cultural-feats.md](../features/cultural-feats.md) "Evil-culture party-size floor" and
+reason the evil-culture party-size feats carried a 20% floor until 2026-10-18 (#818), when a balance
+pass capped them at 10% and accepted the cancellation. See
+[cultural-feats.md](../features/cultural-feats.md) "Evil-culture party-size cap" and
 [troop-weight-system.md](../features/troop-weight-system.md).
 
 ## The new-game top-up, and the second thing the template controls
@@ -152,7 +153,7 @@ is its min sum, which the tool never touches.
 values shown. Those larger numbers were sized for the 10x AI party size cap that shipped alongside
 them; that cap is neutral by default now, so a 3500 template made a Mordor lord spawn about 2,400 men
 and lose all but ~150 on the first daily tick. The band ordering is preserved and compressed, because
-a 4.5:1 spread is meaningless once every culture is trimmed to the same 40-203 cap.
+a 4.5:1 spread is meaningless once every culture is trimmed to the same 40-160 cap.
 
 **Use the mean, not the worked example.** At `r = 0.69`, the ratio behind the 2423-man Mordor lord
 that triggered this pass, the culture-default templates land near goblin 237, orc 184, dwarf 156,
@@ -335,7 +336,8 @@ at those counts.
 
 **Whether the TroopWeight elite tax should apply at all to a culture whose entire roster is heavy**
 is unanswered. Today an orc culture is taxed for fielding orcs, which is the only thing it can
-field. The 20% feat floor is a workaround for the symptom, not an answer to that question.
+field. The 20% feat floor of 2026-08-14 was a workaround for the symptom, not an answer to that
+question, and #818 replaced it with a 10% cap, so the tax can again cancel an orc realm's +5%.
 
 **Composition drift is real and untested.** The retarget scales every stack's spread by one factor
 but leaves `min_value` alone, and the spawn formula fills a stack to `min + spread * r`. Only the
@@ -350,7 +352,7 @@ min sum (47) and the 3500 target have not.
 ## Related
 
 - [cultural-feats.md](../features/cultural-feats.md): the culture party-size feats and the
-  evil-culture floor that share `TaomPartySizeModel` with this
+  evil-culture cap that share `TaomPartySizeModel` with this
 - [troop-weight-system.md](../features/troop-weight-system.md): the elite tax
 - [culture-playability-wiring.md](../features/culture-playability-wiring.md): the eight engine-read
   party-template attributes on a culture, and why an XSLT block silently inherits Calradia for

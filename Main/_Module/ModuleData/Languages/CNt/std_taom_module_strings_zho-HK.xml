@@ -1321,7 +1321,7 @@
     <string id="taom_faction_clans_of_forochel_name" text="佛洛謝爾氏族" />
     <string id="taom_faction_clans_of_forochel_trait_0" text="冰灣掠奪者" />
     <string id="taom_faction_clans_of_forochel_trait_1" text="冰凍北方半獸人" />
-    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+20% 隊伍規模上限(強獸人軍團)" />
+    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+5% 隊伍規模上限(強獸人軍團)" />
     <string id="taom_faction_dominion_of_isengard_bonus_1" text="+15% 建築建造速度(工業威力)" />
     <string id="taom_faction_dominion_of_isengard_bonus_2" text="-20% 鍛造能量消耗(工業熔爐)" />
     <string id="taom_faction_dominion_of_isengard_bonus_3" text="-15% 騎乘兵種徵募與升級費用(戰爭座狼)" />
@@ -1333,7 +1333,7 @@
     <string id="taom_faction_dominion_of_isengard_bonus_9" text="+25% 關係懲罰(薩魯曼的掌控)" />
     <string id="taom_faction_dominion_of_isengard_desc" text="薩魯曼在歐散克塔的工業堡壘。艾辛格之環日夜運轉 — 強獸人軍團、流水線弩炮、戰爭座狼。艾辛格的獨一城鎮擁有二十位名流:招募中心堪比洛汗的許多城市。薩魯曼的掌控疏遠了每一個鄰居。" />
     <string id="taom_faction_dominion_of_isengard_name" text="艾辛格領地" />
-    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+20% 隊伍規模上限與 +10% 平原與沼澤行軍速度。" />
+    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+5% 隊伍規模上限與 +10% 平原與沼澤行軍速度。" />
     <string id="taom_faction_dominion_of_isengard_perk_0_name" text="強獸人軍團" />
     <string id="taom_faction_dominion_of_isengard_perk_1_desc" text="+15% 建造速度,-20% 鍛造精力,-15% 騎兵招募成本。" />
     <string id="taom_faction_dominion_of_isengard_perk_1_name" text="工業力量" />
@@ -1357,7 +1357,7 @@
     <string id="taom_faction_dominion_of_isengard_weakness_1" text="單一要塞定居點" />
     <string id="taom_faction_dominion_of_isengard_weakness_2" text="被洛汗與法貢森林包圍" />
     <string id="taom_faction_dominion_of_mordor_bonus_0" text="-60% 軍隊影響力成本(黑暗魔君的意志)" />
-    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+10% 隊伍規模上限(索倫的部落)" />
+    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+5% 隊伍規模上限(索倫的部落)" />
     <string id="taom_faction_dominion_of_mordor_bonus_10" text="+15% 鍛造效率(黑暗鍛造)" />
     <string id="taom_faction_dominion_of_mordor_bonus_2" text="+20% 努恩穀物產量(努恩農地)" />
     <string id="taom_faction_dominion_of_mordor_bonus_3" text="+25% 劫掠傷害(索倫之怒)" />
@@ -1397,7 +1397,7 @@
     <string id="taom_faction_eregion_name" text="伊瑞詹" />
     <string id="taom_faction_fangorn_forest_desc" text="法貢森林。" />
     <string id="taom_faction_fangorn_forest_name" text="法貢森林" />
-    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+40% 隊伍規模上限(哥布林蟲群)" />
+    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+10% 隊伍規模上限(哥布林蟲群)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_1" text="+25% 村莊志願兵重生速度(無盡繁衍)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_2" text="+10% 雪地隊伍移動速度(坑道奔行者)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_3" text="+20% 隊伍糧食消耗(貪食蟲群)" />
@@ -1405,7 +1405,7 @@
     <string id="taom_faction_goblins_of_blue_craig_bonus_5" text="+10% 掠奪傷害(哥布林伏擊)" />
     <string id="taom_faction_goblins_of_blue_craig_desc" text="遠西藍色山脈（埃瑞德隆恩）中一支獨立的半獸人（哥布林）大軍，緊鄰林頓的灰港岸。他們與迷霧山脈哥布林鎮的同族分屬兩個國度。同樣是數不清、裝備低劣的成群蟲豸：單打獨鬥孱弱不堪，聚眾成勢卻勢不可擋，行軍途中永遠飢腸轆轆。他們騷擾著西岸的精靈。" />
     <string id="taom_faction_goblins_of_blue_craig_name" text="藍崖哥布林" />
-    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+40% 隊伍規模和 +25% 村莊志願兵重生速度——弱小但無窮無盡。" />
+    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+10% 隊伍規模和 +25% 村莊志願兵重生速度——弱小但無窮無盡。" />
     <string id="taom_faction_goblins_of_blue_craig_perk_0_name" text="哥布林蟲群" />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_desc" text="+10% 雪地隊伍移動速度——哥布林熟知每一處峭壁與坑道。" />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_name" text="坑道奔行者" />
@@ -1428,7 +1428,7 @@
     <string id="taom_faction_goblins_of_blue_craig_weakness_0" text="個體兵力弱小" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_1" text="貪食——耗盡所有補給線" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_2" text="被所有自由民族憎恨" />
-    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+40% 隊伍規模上限(哥布林蟲群)" />
+    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+10% 隊伍規模上限(哥布林蟲群)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_1" text="+25% 村莊志願兵重生速度(無盡繁衍)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_2" text="+10% 雪地隊伍移動速度(坑道奔行者)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_3" text="+20% 隊伍糧食消耗(貪食蟲群)" />
@@ -1436,7 +1436,7 @@
     <string id="taom_faction_goblins_of_goblin_town_bonus_5" text="+10% 掠奪傷害(哥布林伏擊)" />
     <string id="taom_faction_goblins_of_goblin_town_desc" text="迷霧山脈高隘口之下密密麻麻的哥布林巢穴。自大哥布林覆亡以來，各部落繁衍無數——龐大而裝備低劣的蟲群，僅憑數量取勝，繁殖速度快過任何敵人所能剿滅。他們在山鄉的雪地上奔行最速，但這般大軍永遠飢餓難填。" />
     <string id="taom_faction_goblins_of_goblin_town_name" text="哥布林鎮的哥布林" />
-    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+40% 隊伍規模和 +25% 村莊志願兵重生速度——哥布林弱小但無窮無盡。" />
+    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+10% 隊伍規模和 +25% 村莊志願兵重生速度——哥布林弱小但無窮無盡。" />
     <string id="taom_faction_goblins_of_goblin_town_perk_0_name" text="哥布林蟲群" />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_desc" text="+10% 雪地隊伍移動速度——哥布林熟知迷霧山脈的每一處山道與坑道。" />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_name" text="坑道奔行者" />
@@ -1771,7 +1771,7 @@
     <string id="taom_faction_kingdom_of_lothlorien_weakness_1" text="極小的常備軍" />
     <string id="taom_faction_kingdom_of_lothlorien_weakness_2" text="消逝的力量 — 無法成長" />
     <string id="taom_faction_kingdom_of_moria_bonus_0" text="-40% 軍隊影響力成本(獸人部落)" />
-    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+30% 隊伍規模上限(山地大軍)" />
+    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+10% 隊伍規模上限(山地大軍)" />
     <string id="taom_faction_kingdom_of_moria_bonus_2" text="+10% 雪地隊伍速度(山地土生)" />
     <string id="taom_faction_kingdom_of_moria_bonus_3" text="+15% 隊伍食物消耗(飢餓大軍)" />
     <string id="taom_faction_kingdom_of_moria_bonus_4" text="+15% 鍛造效率(掠奪的熔爐)" />
@@ -1781,7 +1781,7 @@
     <string id="taom_faction_kingdom_of_moria_name" text="迷霧山脈半獸人" />
     <string id="taom_faction_kingdom_of_moria_perk_0_desc" text="軍隊招募消耗影響力減少40%——獸人大軍不需共識即可開拔。" />
     <string id="taom_faction_kingdom_of_moria_perk_0_name" text="獸人部落" />
-    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+30% 隊伍規模與 +10% 雪地速度——在寒冷山峰中孕育的龐大戰爭大軍。" />
+    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+10% 隊伍規模與 +10% 雪地速度——在寒冷山峰中孕育的龐大戰爭大軍。" />
     <string id="taom_faction_kingdom_of_moria_perk_1_name" text="山地大軍" />
     <string id="taom_faction_kingdom_of_moria_perk_2_desc" text="如此規模的戰爭大軍食量驚人——+15% 隊伍食物消耗。" />
     <string id="taom_faction_kingdom_of_moria_perk_2_name" text="飢餓大軍" />
@@ -1851,7 +1851,7 @@
     <string id="taom_faction_nurunkhizdin_desc" text="努倫齊茲丁。" />
     <string id="taom_faction_nurunkhizdin_name" text="Nurunkhizdin" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_0" text="軍隊影響力成本-50%(暗影指揮)" />
-    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="隊伍規模上限+20%(黑暗軍團)" />
+    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="隊伍規模上限+5%(黑暗軍團)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_2" text="村莊志願兵重生速度+20%(黑暗徵召)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_3" text="民兵成為老兵機率+20%(黑暗徵兵)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_4" text="多爾哥多城鎮中+1商人+1工匠+13幫派首領名士(總計20)" />
@@ -1862,7 +1862,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_name" text="多爾哥多霸權" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_desc" text="軍隊影響力消耗減少50% —— 恐懼強迫服從。" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_name" text="暗影指揮" />
-    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="隊伍規模+20%且志願兵重生速度+20%。" />
+    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="隊伍規模+5%且志願兵重生速度+20%。" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_1_name" text="黑暗軍團" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_desc" text="多爾哥多的單一城鎮擁有20名顯貴 —— 一個15名幫派首領的招募中心。" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_name" text="暗影隊長" />
@@ -1884,7 +1884,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_1" text="工業衰退減緩城牆建設" />
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_2" text="被敵對森林包圍" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_0" text="軍隊影響力消耗-40%(半獸人部落)" />
-    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="隊伍規模上限+20%(山地群聚)" />
+    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="隊伍規模上限+5%(山地群聚)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_2" text="劫掠傷害+25%(半獸人掠奪者)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_3" text="雪地隊伍速度+10%(山地掠奪者)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_4" text="村莊志願兵重生速度+20%" />
@@ -1896,7 +1896,7 @@
     <string id="taom_faction_overlordship_of_gundabad_name" text="剛達巴德霸權" />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_desc" text="軍隊影響力消耗減少40% —— 恐懼強迫服從。" />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_name" text="半獸人部落" />
-    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="在雪地上隊伍規模上限+20%,隊伍速度+10%。" />
+    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="在雪地上隊伍規模上限+5%,隊伍速度+10%。" />
     <string id="taom_faction_overlordship_of_gundabad_perk_1_name" text="山嶺蜂擁" />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_desc" text="每座城鎮+3名幫派首領和+1名工匠名士——招募隨掠奪者而膨脹。" />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_name" text="蒼白戰幫酋長" />
@@ -2147,7 +2147,7 @@
     <string id="taom_feat_isen_dp" text="薩魯曼的掌控" />
     <string id="taom_feat_isen_dp_desc" text="王國決議的關係懲罰增加25%。" />
     <string id="taom_feat_isen_ps" text="半獸人軍團" />
-    <string id="taom_feat_isen_ps_desc" text="部隊規模上限提升20%。" />
+    <string id="taom_feat_isen_ps_desc" text="部隊規模上限提升5%。" />
     <string id="taom_feat_isen_cs" text="工業之力" />
     <string id="taom_feat_isen_cs_desc" text="建造速度提升15%。" />
     <string id="taom_feat_isen_sm" text="工業熔爐" />
@@ -2173,7 +2173,7 @@
     <string id="taom_feat_gun_w" text="掠奪索求" />
     <string id="taom_feat_gun_w_desc" text="隊伍薪資增加10%。" />
     <string id="taom_feat_gun_ps" text="山中蜂群" />
-    <string id="taom_feat_gun_ps_desc" text="隊伍規模上限增加20%。" />
+    <string id="taom_feat_gun_ps_desc" text="隊伍規模上限增加5%。" />
     <string id="taom_feat_gun_rd" text="半獸人劫掠者" />
     <string id="taom_feat_gun_rd_desc" text="劫掠傷害增加25%。" />
     <string id="taom_feat_gun_ss" text="山中掠奪者" />
@@ -2187,7 +2187,7 @@
     <string id="taom_feat_gun_ncv" text="骨營" />
     <string id="taom_feat_gun_ncv_desc" text="村莊顯要人物數量增加10%。" />
     <string id="taom_feat_gob_ps" text="半獸人蜂群" />
-    <string id="taom_feat_gob_ps_desc" text="隊伍規模上限增加40%。" />
+    <string id="taom_feat_gob_ps_desc" text="隊伍規模上限增加10%。" />
     <string id="taom_feat_gob_vr" text="無盡繁衍" />
     <string id="taom_feat_gob_vr_desc" text="村莊志願兵補充速度增加25%。" />
     <string id="taom_feat_gob_ss" text="隧道疾行者" />
@@ -2199,11 +2199,11 @@
     <string id="taom_feat_gob_rd" text="半獸人伏擊" />
     <string id="taom_feat_gob_rd_desc" text="劫掠傷害增加10%。" />
     <string id="taom_feat_bcg_ps" text="藍崖蜂擁" />
-    <string id="taom_feat_bcg_ps_desc" text="隊伍規模上限增加40%。" />
+    <string id="taom_feat_bcg_ps_desc" text="隊伍規模上限增加10%。" />
     <string id="taom_feat_mmo_aic" text="半獸人大軍" />
     <string id="taom_feat_mmo_aic_desc" text="組建軍隊所需影響力減少40%。" />
     <string id="taom_feat_mmo_ps" text="山中大軍" />
-    <string id="taom_feat_mmo_ps_desc" text="隊伍規模上限增加30%。" />
+    <string id="taom_feat_mmo_ps_desc" text="隊伍規模上限增加10%。" />
     <string id="taom_feat_mmo_ss" text="山中所生" />
     <string id="taom_feat_mmo_ss_desc" text="隊伍在雪地中的移動速度增加10%。" />
     <string id="taom_feat_mmo_fc" text="飢餓之軍" />
@@ -2235,7 +2235,7 @@
     <string id="taom_feat_dg_cs" text="廢墟工事" />
     <string id="taom_feat_dg_cs_desc" text="建造速度降低20%。" />
     <string id="taom_feat_dg_ps" text="黑暗軍團" />
-    <string id="taom_feat_dg_ps_desc" text="隊伍人數上限增加20%。" />
+    <string id="taom_feat_dg_ps_desc" text="隊伍人數上限增加5%。" />
     <string id="taom_feat_dg_fc" text="貪食群獸" />
     <string id="taom_feat_dg_fc_desc" text="隊伍食物消耗增加10%。" />
     <string id="taom_feat_dg_vr" text="黑暗徵召兵" />
@@ -2269,7 +2269,7 @@
     <string id="taom_feat_mor_w" text="黑暗貢賦" />
     <string id="taom_feat_mor_w_desc" text="部隊薪資增加 20%。" />
     <string id="taom_feat_mor_ps" text="索倫的大軍" />
-    <string id="taom_feat_mor_ps_desc" text="部隊規模上限增加 20%。" />
+    <string id="taom_feat_mor_ps_desc" text="部隊規模上限增加 5%。" />
     <string id="taom_feat_mor_rd" text="索倫之怒" />
     <string id="taom_feat_mor_rd_desc" text="劫掠傷害增加 25%。" />
     <string id="taom_feat_mor_pls" text="暗影行軍" />

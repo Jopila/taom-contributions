@@ -40,7 +40,7 @@ ENTRIES = {
                    K("goblins_of_goblin_town", "trait_2", "Mountain-pass Ambushers"),
                    K("goblins_of_goblin_town", "trait_3", "Numberless Swarms")],
         "bonuses": [
-            bonus("goblins_of_goblin_town", 0, "+40% party size limit (Goblin Swarm)", True),
+            bonus("goblins_of_goblin_town", 0, "+10% party size limit (Goblin Swarm)", True),
             bonus("goblins_of_goblin_town", 1, "+25% village volunteer respawn rate (Endless Spawn)", True),
             bonus("goblins_of_goblin_town", 2, "+10% party speed on snow (Tunnel-Runners)", True),
             bonus("goblins_of_goblin_town", 3, "+20% party food consumption (Ravenous Swarm)", False)],
@@ -49,7 +49,7 @@ ENTRIES = {
             named("goblins_of_goblin_town", "su", 1, "Cave-goblin Skirmisher", "Numberless bow-armed rabble of the tunnels."),
             named("goblins_of_goblin_town", "su", 2, "Goblin Brute", "Heavier shock-goblin of the deep warrens.")],
         "perks": [
-            named("goblins_of_goblin_town", "perk", 0, "Goblin Swarm", "+40% party size and +25% village volunteer respawn — goblins are weak but numberless."),
+            named("goblins_of_goblin_town", "perk", 0, "Goblin Swarm", "+10% party size and +25% village volunteer respawn — goblins are weak but numberless."),
             named("goblins_of_goblin_town", "perk", 1, "Tunnel-Runners", "+10% party speed on snow — goblins know every pass and tunnel of the Misty Mountains."),
             named("goblins_of_goblin_town", "perk", 2, "Ravenous Swarm", "Such a horde devours everything — +20% party food consumption.")],
         "strengths": [K("goblins_of_goblin_town", "strength_0", "Overwhelming numbers"),
@@ -72,7 +72,7 @@ ENTRIES = {
                    K("goblins_of_blue_craig", "trait_2", "Bane of the Grey Havens"),
                    K("goblins_of_blue_craig", "trait_3", "Numberless Swarms")],
         "bonuses": [
-            bonus("goblins_of_blue_craig", 0, "+40% party size limit (Goblin Swarm)", True),
+            bonus("goblins_of_blue_craig", 0, "+10% party size limit (Goblin Swarm)", True),
             bonus("goblins_of_blue_craig", 1, "+25% village volunteer respawn rate (Endless Spawn)", True),
             bonus("goblins_of_blue_craig", 2, "+10% party speed on snow (Tunnel-Runners)", True),
             bonus("goblins_of_blue_craig", 3, "+20% party food consumption (Ravenous Swarm)", False)],
@@ -81,7 +81,7 @@ ENTRIES = {
             named("goblins_of_blue_craig", "su", 1, "Blue Craig Brute", "Heavier shock-goblin of the warrens."),
             named("goblins_of_blue_craig", "su", 2, "Goblin Spear-thrall", "Cheap massed spear-fodder.")],
         "perks": [
-            named("goblins_of_blue_craig", "perk", 0, "Goblin Swarm", "+40% party size and +25% village volunteer respawn — weak but numberless."),
+            named("goblins_of_blue_craig", "perk", 0, "Goblin Swarm", "+10% party size and +25% village volunteer respawn — weak but numberless."),
             named("goblins_of_blue_craig", "perk", 1, "Tunnel-Runners", "+10% party speed on snow — goblins know every crag and tunnel."),
             named("goblins_of_blue_craig", "perk", 2, "Ravenous Swarm", "The horde devours everything — +20% party food consumption.")],
         "strengths": [K("goblins_of_blue_craig", "strength_0", "Overwhelming numbers"),
@@ -105,7 +105,7 @@ ENTRIES = {
                    K("kingdom_of_moria", "trait_3", "Cold-peak War-host")],
         "bonuses": [
             bonus("kingdom_of_moria", 0, "-40% army influence cost (Orc Horde)", True),
-            bonus("kingdom_of_moria", 1, "+30% party size limit (Mountain Host)", True),
+            bonus("kingdom_of_moria", 1, "+10% party size limit (Mountain Host)", True),
             bonus("kingdom_of_moria", 2, "+10% party speed on snow (Mountain-Bred)", True),
             bonus("kingdom_of_moria", 3, "+15% party food consumption (Hungry Host)", False)],
         "special_units": [
@@ -114,7 +114,7 @@ ENTRIES = {
             named("kingdom_of_moria", "su", 2, "Black Pit Marauder", "Raider bred in the dark of Khazad-dûm.")],
         "perks": [
             named("kingdom_of_moria", "perk", 0, "Orc Horde", "Army recruitment costs 40% less influence — the orc-host needs no consensus to march."),
-            named("kingdom_of_moria", "perk", 1, "Mountain Host", "+30% party size and +10% speed on snow — large war-hosts bred to the cold peaks."),
+            named("kingdom_of_moria", "perk", 1, "Mountain Host", "+10% party size and +10% speed on snow — large war-hosts bred to the cold peaks."),
             named("kingdom_of_moria", "perk", 2, "Hungry Host", "A war-host of this size eats greedily — +15% party food consumption.")],
         "strengths": [K("kingdom_of_moria", "strength_0", "Vast cheap war-hosts"),
                       K("kingdom_of_moria", "strength_1", "Almost no influence to muster armies"),

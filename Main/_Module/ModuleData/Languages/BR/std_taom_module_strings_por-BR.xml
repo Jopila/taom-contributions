@@ -1321,7 +1321,7 @@
     <string id="taom_faction_clans_of_forochel_name" text="Clãs de Forochel" />
     <string id="taom_faction_clans_of_forochel_trait_0" text="Saqueadores da Baía do Gelo" />
     <string id="taom_faction_clans_of_forochel_trait_1" text="Orcs do Norte Congelado" />
-    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+20% no limite de tamanho de grupo (Legiões Uruk-hai)" />
+    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+5% no limite de tamanho de grupo (Legiões Uruk-hai)" />
     <string id="taom_faction_dominion_of_isengard_bonus_1" text="+15% na velocidade de construção de edifícios (Poderio Industrial)" />
     <string id="taom_faction_dominion_of_isengard_bonus_2" text="-20% no custo de energia de ferraria (Forjas Industriais)" />
     <string id="taom_faction_dominion_of_isengard_bonus_3" text="-15% no custo de recrutamento e melhoria montada (Wargs de Guerra)" />
@@ -1333,7 +1333,7 @@
     <string id="taom_faction_dominion_of_isengard_bonus_9" text="+25% de penalidades de relacionamento (Controle de Saruman)" />
     <string id="taom_faction_dominion_of_isengard_desc" text="A fortaleza industrial de Saruman em Orthanc. O Círculo de Isengard funciona dia e noite — legiões Uruk-hai, bestas de linha de forja, wargs de guerra. A única cidade de Isengard incha para vinte notáveis: um centro de recrutamento equivalente a muitas cidades de Rohan. O Controle de Saruman aliena todos os vizinhos." />
     <string id="taom_faction_dominion_of_isengard_name" text="Domínio de Isengard" />
-    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+20% no limite de tamanho de grupo e +10% na velocidade de marcha em planície e pântano." />
+    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+5% no limite de tamanho de grupo e +10% na velocidade de marcha em planície e pântano." />
     <string id="taom_faction_dominion_of_isengard_perk_0_name" text="Legiões Uruk-hai" />
     <string id="taom_faction_dominion_of_isengard_perk_1_desc" text="+15% de construção, -20% de energia de ferraria, -15% de custo de recrutamento montado." />
     <string id="taom_faction_dominion_of_isengard_perk_1_name" text="Poderio Industrial" />
@@ -1357,7 +1357,7 @@
     <string id="taom_faction_dominion_of_isengard_weakness_1" text="Assentamento em ponto de estrangulamento único" />
     <string id="taom_faction_dominion_of_isengard_weakness_2" text="Cercado por Rohan e Fangorn" />
     <string id="taom_faction_dominion_of_mordor_bonus_0" text="-60% custo de influência de exército (A Vontade do Senhor das Trevas)" />
-    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+10% limite de tamanho de grupo (As Hordas de Sauron)" />
+    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+5% limite de tamanho de grupo (As Hordas de Sauron)" />
     <string id="taom_faction_dominion_of_mordor_bonus_10" text="+15% eficiência de forja (Forja Sombria)" />
     <string id="taom_faction_dominion_of_mordor_bonus_2" text="+20% produção de grãos de Nurn (Terras Agrícolas de Nurn)" />
     <string id="taom_faction_dominion_of_mordor_bonus_3" text="+25% dano de saques (A Ira de Sauron)" />
@@ -1397,7 +1397,7 @@
     <string id="taom_faction_eregion_name" text="Eregion" />
     <string id="taom_faction_fangorn_forest_desc" text="A Floresta de Fangorn." />
     <string id="taom_faction_fangorn_forest_name" text="Floresta de Fangorn" />
-    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+40% limite de tamanho de grupo (Enxame Goblin)" />
+    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+10% limite de tamanho de grupo (Enxame Goblin)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_1" text="+25% taxa de regeneração de voluntários de vila (Surgimento Sem Fim)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_2" text="+10% velocidade de grupo na neve (Corredores de Túnel)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_3" text="+20% consumo de comida do grupo (Enxame Voraz)" />
@@ -1405,7 +1405,7 @@
     <string id="taom_faction_goblins_of_blue_craig_bonus_5" text="+10% dano de saque (Emboscada Goblin)" />
     <string id="taom_faction_goblins_of_blue_craig_desc" text="Uma hoste distinta de gobelins das Montanhas Azuis (Ered Luin), no extremo oeste, bem perto dos Portos Cinzentos de Lindon — um reino à parte de seus primos das Montanhas Sombrias de Goblin Town. Os mesmos enxames incontáveis e mal armados: fracos sozinhos, avassaladores em massa e vorazes em marcha. Atormentam os Elfos da costa ocidental." />
     <string id="taom_faction_goblins_of_blue_craig_name" text="Goblins de Blue Craig" />
-    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+40% tamanho de grupo e +25% regeneração de voluntários de vila — fracos, mas incontáveis." />
+    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+10% tamanho de grupo e +25% regeneração de voluntários de vila — fracos, mas incontáveis." />
     <string id="taom_faction_goblins_of_blue_craig_perk_0_name" text="Enxame Goblin" />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_desc" text="+10% velocidade de grupo na neve — goblins conhecem cada penhasco e túnel." />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_name" text="Corredores de Túnel" />
@@ -1428,7 +1428,7 @@
     <string id="taom_faction_goblins_of_blue_craig_weakness_0" text="Tropas individualmente fracas" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_1" text="Vorazes — sobrecarrega todas as linhas de suprimento" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_2" text="Odiados por todos os Povos Livres" />
-    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+40% no limite de tamanho do grupo (Enxame Goblin)" />
+    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+10% no limite de tamanho do grupo (Enxame Goblin)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_1" text="+25% na taxa de reaparecimento de voluntários da vila (Desova Infinita)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_2" text="+10% de velocidade do grupo na neve (Corredores de Túnel)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_3" text="+20% no consumo de alimentos do grupo (Enxame Voraz)" />
@@ -1436,7 +1436,7 @@
     <string id="taom_faction_goblins_of_goblin_town_bonus_5" text="+10% de dano em saques (Emboscada Goblin)" />
     <string id="taom_faction_goblins_of_goblin_town_desc" text="Os fervilhantes túneis de gobelins sob o Passo Alto das Montanhas Sombrias. Desde a queda do Grande Gobelin, as tribos se multiplicaram sem conta — vastos enxames mal armados que vencem pelo puro peso e se reproduzem mais rápido do que qualquer inimigo consegue abater. Correm velozes sobre as neves de seu lar montanhês, mas tais hordas são sempre vorazes." />
     <string id="taom_faction_goblins_of_goblin_town_name" text="Goblins da Cidade Goblin" />
-    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+40% no tamanho do grupo e +25% no reaparecimento de voluntários da vila — goblins são fracos, mas incontáveis." />
+    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+10% no tamanho do grupo e +25% no reaparecimento de voluntários da vila — goblins são fracos, mas incontáveis." />
     <string id="taom_faction_goblins_of_goblin_town_perk_0_name" text="Enxame Goblin" />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_desc" text="+10% de velocidade do grupo na neve — goblins conhecem cada passagem e túnel das Montanhas Sombrias." />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_name" text="Corredores de Túnel" />
@@ -1771,7 +1771,7 @@
     <string id="taom_faction_kingdom_of_lothlorien_weakness_1" text="Exército permanente minúsculo" />
     <string id="taom_faction_kingdom_of_lothlorien_weakness_2" text="Poder em declínio — sem crescimento" />
     <string id="taom_faction_kingdom_of_moria_bonus_0" text="-40% custo de influência do exército (Horda Orc)" />
-    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+30% limite de tamanho do grupo (Hoste da Montanha)" />
+    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+10% limite de tamanho do grupo (Hoste da Montanha)" />
     <string id="taom_faction_kingdom_of_moria_bonus_2" text="+10% velocidade do grupo na neve (Criado nas Montanhas)" />
     <string id="taom_faction_kingdom_of_moria_bonus_3" text="+15% consumo de comida do grupo (Hoste Faminta)" />
     <string id="taom_faction_kingdom_of_moria_bonus_4" text="+15% eficiência de forja (Forjas Saqueadas)" />
@@ -1781,7 +1781,7 @@
     <string id="taom_faction_kingdom_of_moria_name" text="Orcs das Montanhas Sombrias" />
     <string id="taom_faction_kingdom_of_moria_perk_0_desc" text="Recrutamento do exército custa 40% menos influência — a hoste orc não precisa de consenso para marchar." />
     <string id="taom_faction_kingdom_of_moria_perk_0_name" text="Horda Orc" />
-    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+30% tamanho do grupo e +10% velocidade na neve — grandes hostes de guerra criadas para os picos gelados." />
+    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+10% tamanho do grupo e +10% velocidade na neve — grandes hostes de guerra criadas para os picos gelados." />
     <string id="taom_faction_kingdom_of_moria_perk_1_name" text="Hoste da Montanha" />
     <string id="taom_faction_kingdom_of_moria_perk_2_desc" text="Uma hoste de guerra deste tamanho come vorazmente — +15% consumo de comida do grupo." />
     <string id="taom_faction_kingdom_of_moria_perk_2_name" text="Hoste Faminta" />
@@ -1851,7 +1851,7 @@
     <string id="taom_faction_nurunkhizdin_desc" text="Os Nurunkhizdin." />
     <string id="taom_faction_nurunkhizdin_name" text="Nurunkhizdin" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_0" text="-50% custo de influência de exército (Comando Sombrio)" />
-    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="+20% limite de tamanho de grupo (Legiões Sombrias)" />
+    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="+5% limite de tamanho de grupo (Legiões Sombrias)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_2" text="+20% taxa de reaparecimento de voluntários da vila (Conscritos Sombrios)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_3" text="+20% chance de milícia veterana (Conscrição Sombria)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_4" text="+1 Mercador + 1 Artesão + 13 Líder de Gangue notáveis na cidade de Dol Guldur (20 no total)" />
@@ -1862,7 +1862,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_name" text="Senhorio de Dol Guldur" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_desc" text="Custo de influência de exército reduzido em 50% — o pavor obriga a obediência." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_name" text="Comando Sombrio" />
-    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="+20% tamanho de grupo e +20% taxa de reaparecimento de voluntários." />
+    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="+5% tamanho de grupo e +20% taxa de reaparecimento de voluntários." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_1_name" text="Legiões Sombrias" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_desc" text="A única cidade de Dol Guldur conta com 20 notáveis — um centro de recrutamento com 15 Líderes de Gangue." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_name" text="Capitães Sombrios" />
@@ -1884,7 +1884,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_1" text="Decadência industrial retarda muralhas" />
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_2" text="Cercado por florestas hostis" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_0" text="-40% custo de influência de exército (Horda Orc)" />
-    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="+20% limite de tamanho de grupo (Enxame da Montanha)" />
+    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="+5% limite de tamanho de grupo (Enxame da Montanha)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_2" text="+25% dano de saqueio (Saqueadores Orcs)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_3" text="+10% velocidade de grupo na neve (Saqueadores da Montanha)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_4" text="+20% taxa de reaparecimento de voluntários da vila" />
@@ -1896,7 +1896,7 @@
     <string id="taom_faction_overlordship_of_gundabad_name" text="Senhorio de Gundabad" />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_desc" text="Custo de influência de exército reduzido em 40% — o pavor compele obediência." />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_name" text="Horda Orc" />
-    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="+20% limite de tamanho de grupo e +10% velocidade de grupo na neve." />
+    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="+5% limite de tamanho de grupo e +10% velocidade de grupo na neve." />
     <string id="taom_faction_overlordship_of_gundabad_perk_1_name" text="Enxame da Montanha" />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_desc" text="+3 notáveis Líder de Gangue e +1 Artesão por cidade — o recrutamento incha com invasores." />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_name" text="Chefes de Bandos Pálidos" />
@@ -2147,7 +2147,7 @@
     <string id="taom_feat_isen_dp" text="Punho de Saruman" />
     <string id="taom_feat_isen_dp_desc" text="Penalidades de relação por decisões do reino aumentadas em 25%." />
     <string id="taom_feat_isen_ps" text="Legiões Uruk-hai" />
-    <string id="taom_feat_isen_ps_desc" text="Limite de tamanho do grupo aumentado em 20%." />
+    <string id="taom_feat_isen_ps_desc" text="Limite de tamanho do grupo aumentado em 5%." />
     <string id="taom_feat_isen_cs" text="Poder Industrial" />
     <string id="taom_feat_isen_cs_desc" text="Velocidade de construção aumentada em 15%." />
     <string id="taom_feat_isen_sm" text="Forjas Industriais" />
@@ -2173,7 +2173,7 @@
     <string id="taom_feat_gun_w" text="Exigências de Pilhagem" />
     <string id="taom_feat_gun_w_desc" text="Soldos do grupo aumentados em 10%." />
     <string id="taom_feat_gun_ps" text="Enxame da Montanha" />
-    <string id="taom_feat_gun_ps_desc" text="Limite de tamanho do grupo aumentado em 20%." />
+    <string id="taom_feat_gun_ps_desc" text="Limite de tamanho do grupo aumentado em 5%." />
     <string id="taom_feat_gun_rd" text="Pilhadores Orcs" />
     <string id="taom_feat_gun_rd_desc" text="Dano de pilhagem aumentado em 25%." />
     <string id="taom_feat_gun_ss" text="Saqueadores da Montanha" />
@@ -2187,7 +2187,7 @@
     <string id="taom_feat_gun_ncv" text="Acampamentos de Ossos" />
     <string id="taom_feat_gun_ncv_desc" text="Número de notáveis nas aldeias aumentado em 10%." />
     <string id="taom_feat_gob_ps" text="Enxame de Gobelins" />
-    <string id="taom_feat_gob_ps_desc" text="Limite de tamanho do grupo aumentado em 40%." />
+    <string id="taom_feat_gob_ps_desc" text="Limite de tamanho do grupo aumentado em 10%." />
     <string id="taom_feat_gob_vr" text="Ninhada Sem Fim" />
     <string id="taom_feat_gob_vr_desc" text="Taxa de reposição de voluntários nas aldeias aumentada em 25%." />
     <string id="taom_feat_gob_ss" text="Corredores de Túneis" />
@@ -2199,11 +2199,11 @@
     <string id="taom_feat_gob_rd" text="Emboscada de Gobelins" />
     <string id="taom_feat_gob_rd_desc" text="Dano de pilhagem aumentado em 10%." />
     <string id="taom_feat_bcg_ps" text="Enxame de Blue Craig" />
-    <string id="taom_feat_bcg_ps_desc" text="Limite de tamanho do grupo aumentado em 40%." />
+    <string id="taom_feat_bcg_ps_desc" text="Limite de tamanho do grupo aumentado em 10%." />
     <string id="taom_feat_mmo_aic" text="Horda de Orcs" />
     <string id="taom_feat_mmo_aic_desc" text="Recrutamento de exércitos custa 40% menos influência." />
     <string id="taom_feat_mmo_ps" text="Hoste da Montanha" />
-    <string id="taom_feat_mmo_ps_desc" text="Limite de tamanho do grupo aumentado em 30%." />
+    <string id="taom_feat_mmo_ps_desc" text="Limite de tamanho do grupo aumentado em 10%." />
     <string id="taom_feat_mmo_ss" text="Criados na Montanha" />
     <string id="taom_feat_mmo_ss_desc" text="Velocidade de movimento do grupo aumentada em 10% na neve." />
     <string id="taom_feat_mmo_fc" text="Hoste Faminta" />
@@ -2235,7 +2235,7 @@
     <string id="taom_feat_dg_cs" text="Obras Ruinosas" />
     <string id="taom_feat_dg_cs_desc" text="Velocidade de construção reduzida em 20%." />
     <string id="taom_feat_dg_ps" text="Legiões Sombrias" />
-    <string id="taom_feat_dg_ps_desc" text="Limite de tamanho do grupo aumentado em 20%." />
+    <string id="taom_feat_dg_ps_desc" text="Limite de tamanho do grupo aumentado em 5%." />
     <string id="taom_feat_dg_fc" text="Hordas Voraz es" />
     <string id="taom_feat_dg_fc_desc" text="Consumo de comida do grupo aumentado em 10%." />
     <string id="taom_feat_dg_vr" text="Conscritos Sombrios" />
@@ -2269,7 +2269,7 @@
     <string id="taom_feat_mor_w" text="Tributo Sombrio" />
     <string id="taom_feat_mor_w_desc" text="Soldos do grupo aumentados em 20%." />
     <string id="taom_feat_mor_ps" text="Hordas de Sauron" />
-    <string id="taom_feat_mor_ps_desc" text="Limite de tamanho do grupo aumentado em 20%." />
+    <string id="taom_feat_mor_ps_desc" text="Limite de tamanho do grupo aumentado em 5%." />
     <string id="taom_feat_mor_rd" text="Ira de Sauron" />
     <string id="taom_feat_mor_rd_desc" text="Dano de pilhagem aumentado em 25%." />
     <string id="taom_feat_mor_pls" text="Marcha das Sombras" />

@@ -57,7 +57,7 @@ public class AiPartySizeScalingTests
     [TestMethod]
     public void ApplyPartySizeScaling_FlatBonusOnTopOfACultureFeat_StillCostsExactlyItsOwnValue()
     {
-        // Mordor's +20% party-size feat is already in the factor frame when this runs.
+        // A culture party-size feat (the 0.20 factor below) is already in the factor frame when this runs.
         var limit = new ExplainedNumber(105f);
         limit.AddFactor(0.20f);
         Assert.AreEqual(126f, limit.ResultNumber, Tolerance, "precondition: the feat frame is as expected");
@@ -638,16 +638,16 @@ public class AiPartySizeShippedDefaultsTests
 
     // Pins the shipped pair end to end rather than the two numbers separately, because the flat
     // bonus is deliberately kept out of the factor frame and halving one knob alone lands at 60%,
-    // not 50%. 126 is the tier-4 lord base docs/features/ai-party-size.md works from: that row read
-    // 1560 until the 2026-09-01 halving.
+    // not 50%. 110.25 is the tier-4 Mordor lord base docs/features/ai-party-size.md works from (126 before
+    // the 2026-10-18 feat cap): that row read 1560 until the 2026-09-01 halving.
     [TestMethod]
     public void ShippedDefaults_ProduceTheDocumentedTierFourLimit()
     {
-        var limit = new ExplainedNumber(126f);
+        var limit = new ExplainedNumber(110.25f);
 
         AiPartySizeService.ApplyPartySizeScaling(
             ref limit, AiPartySizeService.DefaultLordFactor, AiPartySizeService.DefaultLordFlatBonus);
 
-        Assert.AreEqual(126f, limit.ResultNumber, Tolerance);
+        Assert.AreEqual(110.25f, limit.ResultNumber, Tolerance);
     }
 }

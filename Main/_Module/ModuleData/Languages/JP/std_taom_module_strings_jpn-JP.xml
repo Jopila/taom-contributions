@@ -1321,7 +1321,7 @@
     <string id="taom_faction_clans_of_forochel_name" text="フォロヘルの氏族" />
     <string id="taom_faction_clans_of_forochel_trait_0" text="氷の湾の襲撃者" />
     <string id="taom_faction_clans_of_forochel_trait_1" text="凍てつく北方のオーク" />
-    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+20% 部隊規模上限(ウルク=ハイ軍団)" />
+    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+5% 部隊規模上限(ウルク=ハイ軍団)" />
     <string id="taom_faction_dominion_of_isengard_bonus_1" text="+15% 建設速度(工業力)" />
     <string id="taom_faction_dominion_of_isengard_bonus_2" text="-20% 鍛冶エネルギー消費(工業炉)" />
     <string id="taom_faction_dominion_of_isengard_bonus_3" text="-15% 騎乗兵の徴募と昇格コスト(戦狼)" />
@@ -1333,7 +1333,7 @@
     <string id="taom_faction_dominion_of_isengard_bonus_9" text="+25% 関係悪化ペナルティ(サルマンの支配)" />
     <string id="taom_faction_dominion_of_isengard_desc" text="オルサンクにあるサルマンの工業要塞。アイゼンガルドの環は昼夜を問わず稼働 — ウルク=ハイの軍団、工場生産の弩、戦狼。アイゼンガルドの一つの町は有力者20名にまで膨れ上がる:ローハンの多くの都市に匹敵する徴募拠点。サルマンの支配はあらゆる隣国を疎遠にする。" />
     <string id="taom_faction_dominion_of_isengard_name" text="アイゼンガルドの支配領" />
-    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+20% 部隊規模上限、平原と湿地での行軍速度+10%。" />
+    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+5% 部隊規模上限、平原と湿地での行軍速度+10%。" />
     <string id="taom_faction_dominion_of_isengard_perk_0_name" text="ウルク=ハイ軍団" />
     <string id="taom_faction_dominion_of_isengard_perk_1_desc" text="建設+15%、鍛冶エネルギー-20%、騎兵募集コスト-15%。" />
     <string id="taom_faction_dominion_of_isengard_perk_1_name" text="産業力" />
@@ -1357,7 +1357,7 @@
     <string id="taom_faction_dominion_of_isengard_weakness_1" text="単一の要衝拠点" />
     <string id="taom_faction_dominion_of_isengard_weakness_2" text="ローハンとファンゴルンに囲まれている" />
     <string id="taom_faction_dominion_of_mordor_bonus_0" text="軍隊影響力コスト-60%(冥王の意志)" />
-    <string id="taom_faction_dominion_of_mordor_bonus_1" text="部隊規模上限+10%(サウロンの大軍)" />
+    <string id="taom_faction_dominion_of_mordor_bonus_1" text="部隊規模上限+5%(サウロンの大軍)" />
     <string id="taom_faction_dominion_of_mordor_bonus_10" text="+15% 鍛冶効率(闇の鍛冶)" />
     <string id="taom_faction_dominion_of_mordor_bonus_2" text="ヌアンの穀物生産+20%(ヌアンの農地)" />
     <string id="taom_faction_dominion_of_mordor_bonus_3" text="略奪ダメージ+25%(サウロンの怒り)" />
@@ -1397,7 +1397,7 @@
     <string id="taom_faction_eregion_name" text="エレギオン" />
     <string id="taom_faction_fangorn_forest_desc" text="ファンゴルンの森。" />
     <string id="taom_faction_fangorn_forest_name" text="ファンゴルンの森" />
-    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+40% 部隊規模上限(ゴブリンの群れ)" />
+    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+10% 部隊規模上限(ゴブリンの群れ)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_1" text="+25% 村の志願兵再出現率(無限湧き)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_2" text="+10% 雪上での部隊速度(坑道を駆ける者)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_3" text="+20% 部隊食糧消費(貪欲なる群れ)" />
@@ -1405,7 +1405,7 @@
     <string id="taom_faction_goblins_of_blue_craig_bonus_5" text="+10% 略奪ダメージ(ゴブリンの奇襲)" />
     <string id="taom_faction_goblins_of_blue_craig_desc" text="遥か西方、リンドンの灰色港にほど近い青の山脈（エレド・ルイン）に巣食う独立したゴブリンの軍勢。霧ふり山脈のゴブリン町の同族とは別の勢力である。同じく数知れぬ、粗末な武装の群れ——単体では弱いが、群がれば圧倒的で、行軍中は飢えに貪欲だ。彼らは西の岸辺のエルフたちを悩ませている。" />
     <string id="taom_faction_goblins_of_blue_craig_name" text="青い岩山のゴブリン" />
-    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+40% 部隊規模と+25% 村の志願兵再出現率 — 弱いが無数。" />
+    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+10% 部隊規模と+25% 村の志願兵再出現率 — 弱いが無数。" />
     <string id="taom_faction_goblins_of_blue_craig_perk_0_name" text="ゴブリンの群れ" />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_desc" text="+10% 雪上での部隊速度 — ゴブリンはあらゆる岩山と坑道を知り尽くしている。" />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_name" text="坑道を駆ける者" />
@@ -1428,7 +1428,7 @@
     <string id="taom_faction_goblins_of_blue_craig_weakness_0" text="個々の兵は弱い" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_1" text="貪欲 — あらゆる補給線を圧迫" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_2" text="すべての自由の民に憎まれている" />
-    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+40% 部隊規模上限(ゴブリンの群れ)" />
+    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+10% 部隊規模上限(ゴブリンの群れ)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_1" text="+25% 村の志願兵再出現率(無限湧き)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_2" text="+10% 雪上での部隊速度(坑道を駆ける者)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_3" text="+20% 部隊食糧消費(貪欲なる群れ)" />
@@ -1436,7 +1436,7 @@
     <string id="taom_faction_goblins_of_goblin_town_bonus_5" text="+10% 略奪ダメージ(ゴブリンの奇襲)" />
     <string id="taom_faction_goblins_of_goblin_town_desc" text="霧ふり山脈の高い峠の下に群がるゴブリンの巣穴。大ゴブリンの滅び以来、諸部族は数え切れぬほど増え広がった——粗末な武装ながら膨大な群れで、ただ数の重みによって勝ち、いかなる敵が間引くよりも速く増える。山の故郷の雪の上を最も速く駆けるが、かような大群は常に飢えている。" />
     <string id="taom_faction_goblins_of_goblin_town_name" text="ゴブリン街のゴブリン" />
-    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+40% 部隊規模と+25% 村の志願兵再出現率 — ゴブリンは弱いが無数。" />
+    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+10% 部隊規模と+25% 村の志願兵再出現率 — ゴブリンは弱いが無数。" />
     <string id="taom_faction_goblins_of_goblin_town_perk_0_name" text="ゴブリンの群れ" />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_desc" text="+10% 雪上での部隊速度 — ゴブリンは霧ふり山脈のあらゆる峠と坑道を知り尽くしている。" />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_name" text="坑道疾走者" />
@@ -1771,7 +1771,7 @@
     <string id="taom_faction_kingdom_of_lothlorien_weakness_1" text="極小の常備軍" />
     <string id="taom_faction_kingdom_of_lothlorien_weakness_2" text="衰退する力 — 成長なし" />
     <string id="taom_faction_kingdom_of_moria_bonus_0" text="-40% 軍隊影響力コスト(オークの大群)" />
-    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+30% 部隊サイズ上限(山岳軍勢)" />
+    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+10% 部隊サイズ上限(山岳軍勢)" />
     <string id="taom_faction_kingdom_of_moria_bonus_2" text="+10% 雪上部隊速度(山岳育ち)" />
     <string id="taom_faction_kingdom_of_moria_bonus_3" text="+15% 部隊食糧消費(飢えた軍勢)" />
     <string id="taom_faction_kingdom_of_moria_bonus_4" text="+15% 鍛冶効率(略奪した鍛冶場)" />
@@ -1781,7 +1781,7 @@
     <string id="taom_faction_kingdom_of_moria_name" text="霧ふり山脈のオーク" />
     <string id="taom_faction_kingdom_of_moria_perk_0_desc" text="軍隊招集コストが影響力40%減 — オークの大群は行軍に合意を必要としない。" />
     <string id="taom_faction_kingdom_of_moria_perk_0_name" text="オークの大群" />
-    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+30% 部隊サイズと雪上+10%速度 — 冷たい峰々で育った大戦軍勢。" />
+    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+10% 部隊サイズと雪上+10%速度 — 冷たい峰々で育った大戦軍勢。" />
     <string id="taom_faction_kingdom_of_moria_perk_1_name" text="山岳軍勢" />
     <string id="taom_faction_kingdom_of_moria_perk_2_desc" text="このサイズの戦軍勢は貪欲に食い尽くす — +15% 部隊食糧消費。" />
     <string id="taom_faction_kingdom_of_moria_perk_2_name" text="飢えた軍勢" />
@@ -1851,7 +1851,7 @@
     <string id="taom_faction_nurunkhizdin_desc" text="ヌルンキズディン。" />
     <string id="taom_faction_nurunkhizdin_name" text="ヌルンキズディン" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_0" text="軍団影響力コスト-50%(影の指令)" />
-    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="部隊規模上限+20%(暗黒の軍団)" />
+    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="部隊規模上限+5%(暗黒の軍団)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_2" text="村の志願兵再生率+20%(暗黒の徴募兵)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_3" text="民兵の熟練確率+20%(暗黒の徴兵)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_4" text="ドル・グルドゥアの町に商人+1、職人+1、ギャング長+13(合計20)" />
@@ -1862,7 +1862,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_name" text="ドル・グルドゥア支配領" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_desc" text="軍隊の影響力コストが50%減少 — 恐怖が服従を強いる。" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_name" text="影の指揮" />
-    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="部隊サイズ+20%、志願兵再出現率+20%。" />
+    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="部隊サイズ+5%、志願兵再出現率+20%。" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_1_name" text="闇の軍団" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_desc" text="ドル・グルドゥアの唯一の町は20人の有力者を擁する — 15人の盗賊団長を募集できる拠点。" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_name" text="影の隊長" />
@@ -1884,7 +1884,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_1" text="産業の衰退が城壁建設を遅らせる" />
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_2" text="敵対的な森に囲まれている" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_0" text="軍隊の影響力コスト-40%(オークの大群)" />
-    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="部隊サイズ上限+20%(山岳の群れ)" />
+    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="部隊サイズ上限+5%(山岳の群れ)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_2" text="略奪ダメージ+25%(オークの略奪者)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_3" text="雪上での部隊速度+10%(山岳の略奪者)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_4" text="村の志願兵再出現率+20%" />
@@ -1896,7 +1896,7 @@
     <string id="taom_faction_overlordship_of_gundabad_name" text="グンダバド支配領" />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_desc" text="軍隊の影響力コストが40%減少 — 恐怖が服従を強いる。" />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_name" text="オークの大群" />
-    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="部隊サイズ上限+20%、雪上での部隊速度+10%。" />
+    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="部隊サイズ上限+5%、雪上での部隊速度+10%。" />
     <string id="taom_faction_overlordship_of_gundabad_perk_1_name" text="山岳の群れ" />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_desc" text="各街に盗賊団長+3と職人+1 — 略奪者による徴兵が急増する。" />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_name" text="蒼白の戦団長" />
@@ -2147,7 +2147,7 @@
     <string id="taom_feat_isen_dp" text="サルマンの支配" />
     <string id="taom_feat_isen_dp_desc" text="王国の決定による関係悪化が25%増加する。" />
     <string id="taom_feat_isen_ps" text="ウルク=ハイ軍団" />
-    <string id="taom_feat_isen_ps_desc" text="部隊の人数上限が20%増加する。" />
+    <string id="taom_feat_isen_ps_desc" text="部隊の人数上限が5%増加する。" />
     <string id="taom_feat_isen_cs" text="産業の力" />
     <string id="taom_feat_isen_cs_desc" text="建設速度が15%上昇する。" />
     <string id="taom_feat_isen_sm" text="産業の炉" />
@@ -2173,7 +2173,7 @@
     <string id="taom_feat_gun_w" text="略奪の要求" />
     <string id="taom_feat_gun_w_desc" text="部隊の給料が10%増加。" />
     <string id="taom_feat_gun_ps" text="山の群れ" />
-    <string id="taom_feat_gun_ps_desc" text="部隊の人数上限が20%増加。" />
+    <string id="taom_feat_gun_ps_desc" text="部隊の人数上限が5%増加。" />
     <string id="taom_feat_gun_rd" text="オークの掠奪者" />
     <string id="taom_feat_gun_rd_desc" text="襲撃による被害が25%増加。" />
     <string id="taom_feat_gun_ss" text="山の襲撃者" />
@@ -2187,7 +2187,7 @@
     <string id="taom_feat_gun_ncv" text="骨の野営地" />
     <string id="taom_feat_gun_ncv_desc" text="村の有力者の数が10%増加。" />
     <string id="taom_feat_gob_ps" text="ゴブリンの群れ" />
-    <string id="taom_feat_gob_ps_desc" text="部隊の人数上限が40%増加。" />
+    <string id="taom_feat_gob_ps_desc" text="部隊の人数上限が10%増加。" />
     <string id="taom_feat_gob_vr" text="尽きぬ湧き出し" />
     <string id="taom_feat_gob_vr_desc" text="村の志願兵の回復速度が25%増加。" />
     <string id="taom_feat_gob_ss" text="坑道走り" />
@@ -2199,11 +2199,11 @@
     <string id="taom_feat_gob_rd" text="ゴブリンの奇襲" />
     <string id="taom_feat_gob_rd_desc" text="襲撃による被害が10%増加。" />
     <string id="taom_feat_bcg_ps" text="青き岩山の群れ" />
-    <string id="taom_feat_bcg_ps_desc" text="部隊の人数上限が40%増加。" />
+    <string id="taom_feat_bcg_ps_desc" text="部隊の人数上限が10%増加。" />
     <string id="taom_feat_mmo_aic" text="オークの大群" />
     <string id="taom_feat_mmo_aic_desc" text="軍の招集に必要な影響力が40%減少。" />
     <string id="taom_feat_mmo_ps" text="山の軍勢" />
-    <string id="taom_feat_mmo_ps_desc" text="部隊の人数上限が30%増加。" />
+    <string id="taom_feat_mmo_ps_desc" text="部隊の人数上限が10%増加。" />
     <string id="taom_feat_mmo_ss" text="山に育まれし者" />
     <string id="taom_feat_mmo_ss_desc" text="雪原での部隊の移動速度が10%増加。" />
     <string id="taom_feat_mmo_fc" text="飢えた軍勢" />
@@ -2235,7 +2235,7 @@
     <string id="taom_feat_dg_cs" text="荒廃した工事" />
     <string id="taom_feat_dg_cs_desc" text="建設速度が20%減少する。" />
     <string id="taom_feat_dg_ps" text="暗黒の軍団" />
-    <string id="taom_feat_dg_ps_desc" text="部隊の人数上限が20%増加する。" />
+    <string id="taom_feat_dg_ps_desc" text="部隊の人数上限が5%増加する。" />
     <string id="taom_feat_dg_fc" text="貪欲なる大群" />
     <string id="taom_feat_dg_fc_desc" text="部隊の食料消費が10%増加する。" />
     <string id="taom_feat_dg_vr" text="暗黒の徴集兵" />
@@ -2269,7 +2269,7 @@
     <string id="taom_feat_mor_w" text="暗黒の貢納" />
     <string id="taom_feat_mor_w_desc" text="部隊の賃金が20%増加する。" />
     <string id="taom_feat_mor_ps" text="サウロンの大軍" />
-    <string id="taom_feat_mor_ps_desc" text="部隊の人数上限が20%増加する。" />
+    <string id="taom_feat_mor_ps_desc" text="部隊の人数上限が5%増加する。" />
     <string id="taom_feat_mor_rd" text="サウロンの怒り" />
     <string id="taom_feat_mor_rd_desc" text="襲撃による被害が25%増加する。" />
     <string id="taom_feat_mor_pls" text="影の行軍" />

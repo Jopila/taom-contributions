@@ -16,7 +16,7 @@ goblin 320, orc and uruk 260, Erebor 220, men 200, elves 150.
 
 The ratio `r` is `party.RandomFloat()`, drawn once per party and uniform on (0, 1], so a spawn is a
 distribution rather than a number. **Mean** spawn now runs about 78 to 187 by band (elf 78-104, men
-102-128, dwarf 113-161, orc 132-176, goblin 162-187) against a 40-203 cap. An individual lord can
+102-128, dwarf 113-161, orc 132-176, goblin 162-187) against a 40-160 cap. An individual lord can
 land anywhere between his template's `sum(min)` and `sum(max)`, so 3 to 320 across all cultures.
 
 **Raising the multiplier still produces large parties at world generation**, and not through the
@@ -95,7 +95,7 @@ One service, `IAiPartySizeService`, consumed by three models that already existe
 - **Startup gold** was re-derived at `K = 100` back when the defaults raised AI lords toward ~1,000
   men with 90% wage relief: `targetPartySize x (1 - wageRelief) = 1000 x 0.10`. Since the knobs went
   neutral that derivation no longer describes the shipped state. `K = 100` was left alone rather than
-  re-derived, and is probably still biased high: it sits inside the vanilla 40-203 band, but the
+  re-derived, and is probably still biased high: it sits inside the 40-160 band, but the
   original `K = 52.5437` was a population-weighted measurement across every lord template, and
   low-tier lords vastly outnumber tier-4 clan leaders. A proper re-derivation is still owed.
 
@@ -306,22 +306,25 @@ Resulting size limit from the two lord knobs alone, `base x multiplier + flat bo
 |---|---|---|---|
 | Tier-1 non-leader, Steward 20 | 40 | 700 | 40 |
 | Tier-3 clan leader, Steward 60 | 110 | 1400 | 110 |
-| Tier-4 Mordor non-leader, Steward 100 | 126 | 1560 | 126 |
-| Tier-4 Goblin clan leader, Steward 100 | 203 | 2330 | 203 |
+| Tier-4 Mordor non-leader, Steward 100 | 110.25 | 1560 | 110.25 |
+| Tier-4 Goblin clan leader, Steward 100 | 159.5 | 2330 | 159.5 |
 
 The tier-4 Mordor row is pinned by
 `AiPartySizeShippedDefaultsTests.ShippedDefaults_ProduceTheDocumentedTierFourLimit`.
 
-Two caveats on reading that table. It is the knob arithmetic only, so a culture party-size feat in the
-same `ExplainedNumber` frame pushes the real number up, and the TroopWeight elite tax pushes it back
-down where the roster is heavy. Before the 2026-09-01 cut this table's last two rows carried 1371
+Two caveats on reading that table. The Vanilla and Shipped columns already include the row's
+culture party-size feat (Mordor +5%, Goblin-town +10% since 2026-10-18; a tier-4 non-leader without
+a feat is 105 and a tier-4 clan leader 145: base 20, plus 15 or 25 per clan tier, plus 0.25 per
+Steward point), and the TroopWeight elite tax pushes the real number back down where the roster is
+heavy. The Original column keeps the 2026-09 figures, which were computed from the earlier Mordor
++20% and Goblin-town +40% (bases of 126 and 203). Before the 2026-09-01 cut this table's last two rows carried 1371
 and 1808 instead of 1560 and 2330, which are measurements with the elite tax already in the frame, not
 knob arithmetic; the derivation was never recorded and could not be reproduced, so they are quoted
 here as history rather than restated.
 
 **Stale, re-measure owed.** The retention table below was measured against those 1371 / 1808 limits.
 All seven retained percentages are stale, not just the two 100% rows. At the neutral shipped defaults
-every culture's cap is the vanilla per-lord limit (40-203), far below every Expected spawn figure in
+every culture's cap is the vanilla per-lord limit (40-160), far below every Expected spawn figure in
 the table (530-2277), so real retention is a small fraction of what is shown. The qualitative finding underneath it (average troop weight is far lower than an orc or elf
 roster looks) is unaffected and still holds. Re-measure from `taom_partyTemplates.xml` and
 `troop_weights.xml` before leaning on these numbers for another balance pass.

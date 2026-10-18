@@ -108,7 +108,7 @@
     ],
     "bonuses": [
       {
-        "text": "{=taom_faction_goblins_of_blue_craig_bonus_0}+40% party size limit (Goblin Swarm)",
+        "text": "{=taom_faction_goblins_of_blue_craig_bonus_0}+10% party size limit (Goblin Swarm)",
         "positive": true
       },
       {
@@ -149,7 +149,7 @@
     "perks": [
       {
         "name": "{=taom_faction_goblins_of_blue_craig_perk_0_name}Goblin Swarm",
-        "description": "{=taom_faction_goblins_of_blue_craig_perk_0_desc}+40% party size and +25% village volunteer respawn — weak but numberless."
+        "description": "{=taom_faction_goblins_of_blue_craig_perk_0_desc}+10% party size and +25% village volunteer respawn — weak but numberless."
       },
       {
         "name": "{=taom_faction_goblins_of_blue_craig_perk_1_name}Tunnel-Runners",
@@ -332,7 +332,7 @@
     ],
     "bonuses": [
       {
-        "text": "{=taom_faction_goblins_of_goblin_town_bonus_0}+40% party size limit (Goblin Swarm)",
+        "text": "{=taom_faction_goblins_of_goblin_town_bonus_0}+10% party size limit (Goblin Swarm)",
         "positive": true
       },
       {
@@ -373,7 +373,7 @@
     "perks": [
       {
         "name": "{=taom_faction_goblins_of_goblin_town_perk_0_name}Goblin Swarm",
-        "description": "{=taom_faction_goblins_of_goblin_town_perk_0_desc}+40% party size and +25% village volunteer respawn — goblins are weak but numberless."
+        "description": "{=taom_faction_goblins_of_goblin_town_perk_0_desc}+10% party size and +25% village volunteer respawn — goblins are weak but numberless."
       },
       {
         "name": "{=taom_faction_goblins_of_goblin_town_perk_1_name}Tunnel-Runners",
@@ -413,7 +413,7 @@
     ],
     "bonuses": [
       {"text": "{=taom_faction_overlordship_of_gundabad_bonus_0}-40% army influence cost (Orc Horde)", "positive": true},
-      {"text": "{=taom_faction_overlordship_of_gundabad_bonus_1}+20% party size limit (Mountain Swarm)", "positive": true},
+      {"text": "{=taom_faction_overlordship_of_gundabad_bonus_1}+5% party size limit (Mountain Swarm)", "positive": true},
       {"text": "{=taom_faction_overlordship_of_gundabad_bonus_2}+25% raid damage (Orc Pillagers)", "positive": true},
       {"text": "{=taom_faction_overlordship_of_gundabad_bonus_3}+10% party speed on snow (Mountain Marauders)", "positive": true},
       {"text": "{=taom_faction_overlordship_of_gundabad_bonus_4}+20% village volunteer respawn rate", "positive": true},
@@ -429,7 +429,7 @@
     ],
     "perks": [
       {"name": "{=taom_faction_overlordship_of_gundabad_perk_0_name}Orc Horde", "description": "{=taom_faction_overlordship_of_gundabad_perk_0_desc}Army influence cost reduced by 40% — dread compels obedience."},
-      {"name": "{=taom_faction_overlordship_of_gundabad_perk_1_name}Mountain Swarm", "description": "{=taom_faction_overlordship_of_gundabad_perk_1_desc}+20% party size limit and +10% party speed on snow."},
+      {"name": "{=taom_faction_overlordship_of_gundabad_perk_1_name}Mountain Swarm", "description": "{=taom_faction_overlordship_of_gundabad_perk_1_desc}+5% party size limit and +10% party speed on snow."},
       {"name": "{=taom_faction_overlordship_of_gundabad_perk_2_name}Pale Warband Chieftains", "description": "{=taom_faction_overlordship_of_gundabad_perk_2_desc}+3 Gang Leader and +1 Artisan notable per town — recruitment swells with raiders."}
     ],
     "strengths": [
@@ -509,7 +509,7 @@
         "positive": true
       },
       {
-        "text": "{=taom_faction_kingdom_of_moria_bonus_1}+30% party size limit (Mountain Host)",
+        "text": "{=taom_faction_kingdom_of_moria_bonus_1}+10% party size limit (Mountain Host)",
         "positive": true
       },
       {
@@ -554,7 +554,7 @@
       },
       {
         "name": "{=taom_faction_kingdom_of_moria_perk_1_name}Mountain Host",
-        "description": "{=taom_faction_kingdom_of_moria_perk_1_desc}+30% party size and +10% speed on snow — large war-hosts bred to the cold peaks."
+        "description": "{=taom_faction_kingdom_of_moria_perk_1_desc}+10% party size and +10% speed on snow — large war-hosts bred to the cold peaks."
       },
       {
         "name": "{=taom_faction_kingdom_of_moria_perk_2_name}Hungry Host",
@@ -708,7 +708,7 @@
       "{=taom_faction_dominion_of_isengard_trait_3}The White Hand"
     ],
     "bonuses": [
-      {"text": "{=taom_faction_dominion_of_isengard_bonus_0}+20% party size limit (Uruk-hai Legions)", "positive": true},
+      {"text": "{=taom_faction_dominion_of_isengard_bonus_0}+5% party size limit (Uruk-hai Legions)", "positive": true},
       {"text": "{=taom_faction_dominion_of_isengard_bonus_1}+15% building construction speed (Industrial Might)", "positive": true},
       {"text": "{=taom_faction_dominion_of_isengard_bonus_2}-20% smithing energy cost (Industrial Forges)", "positive": true},
       {"text": "{=taom_faction_dominion_of_isengard_bonus_3}-15% mounted recruit and upgrade cost (War Wargs)", "positive": true},
@@ -725,7 +725,7 @@
       {"name": "{=taom_faction_dominion_of_isengard_su_2_name}Warg Rider", "description": "{=taom_faction_dominion_of_isengard_su_2_desc}Fast hit-and-run cavalry of the White Hand."}
     ],
     "perks": [
-      {"name": "{=taom_faction_dominion_of_isengard_perk_0_name}Uruk-hai Legions", "description": "{=taom_faction_dominion_of_isengard_perk_0_desc}+20% party size limit and +10% march speed on plain and swamp."},
+      {"name": "{=taom_faction_dominion_of_isengard_perk_0_name}Uruk-hai Legions", "description": "{=taom_faction_dominion_of_isengard_perk_0_desc}+5% party size limit and +10% march speed on plain and swamp."},
       {"name": "{=taom_faction_dominion_of_isengard_perk_1_name}Industrial Might", "description": "{=taom_faction_dominion_of_isengard_perk_1_desc}+15% construction, -20% smithing energy, -15% mounted recruitment cost."},
       {"name": "{=taom_faction_dominion_of_isengard_perk_2_name}Orthanc Quartermasters", "description": "{=taom_faction_dominion_of_isengard_perk_2_desc}Isengard's single town swells to 20 notables — 4 Merchant, 2 Artisan, 14 Gang Leader."}
     ],
@@ -920,7 +920,7 @@
     ],
     "bonuses": [
       {"text": "{=taom_faction_overlordship_of_dol_guldur_bonus_0}-50% army influence cost (Shadow Command)", "positive": true},
-      {"text": "{=taom_faction_overlordship_of_dol_guldur_bonus_1}+20% party size limit (Dark Legions)", "positive": true},
+      {"text": "{=taom_faction_overlordship_of_dol_guldur_bonus_1}+5% party size limit (Dark Legions)", "positive": true},
       {"text": "{=taom_faction_overlordship_of_dol_guldur_bonus_2}+20% village volunteer respawn rate (Dark Conscripts)", "positive": true},
       {"text": "{=taom_faction_overlordship_of_dol_guldur_bonus_3}+20% militia veteran chance (Dark Conscription)", "positive": true},
       {"text": "{=taom_faction_overlordship_of_dol_guldur_bonus_4}+1 Merchant + 1 Artisan + 13 Gang Leader notables in Dol Guldur town (20 total)", "positive": true},
@@ -935,7 +935,7 @@
     ],
     "perks": [
       {"name": "{=taom_faction_overlordship_of_dol_guldur_perk_0_name}Shadow Command", "description": "{=taom_faction_overlordship_of_dol_guldur_perk_0_desc}Army influence cost reduced by 50% — dread compels obedience."},
-      {"name": "{=taom_faction_overlordship_of_dol_guldur_perk_1_name}Dark Legions", "description": "{=taom_faction_overlordship_of_dol_guldur_perk_1_desc}+20% party size and +20% volunteer respawn rate."},
+      {"name": "{=taom_faction_overlordship_of_dol_guldur_perk_1_name}Dark Legions", "description": "{=taom_faction_overlordship_of_dol_guldur_perk_1_desc}+5% party size and +20% volunteer respawn rate."},
       {"name": "{=taom_faction_overlordship_of_dol_guldur_perk_2_name}Shadow Captains", "description": "{=taom_faction_overlordship_of_dol_guldur_perk_2_desc}Dol Guldur's single town fields 20 notables — a 15 Gang Leader recruitment hub."}
     ],
     "strengths": [
@@ -1103,7 +1103,7 @@
     ],
     "bonuses": [
       {"text": "{=taom_faction_dominion_of_mordor_bonus_0}-60% army influence cost (The Dark Lord's Will)", "positive": true},
-      {"text": "{=taom_faction_dominion_of_mordor_bonus_1}+10% party size limit (Sauron's Hordes)", "positive": true},
+      {"text": "{=taom_faction_dominion_of_mordor_bonus_1}+5% party size limit (Sauron's Hordes)", "positive": true},
       {"text": "{=taom_faction_dominion_of_mordor_bonus_2}+20% Nurn grain production (Nurn Farmlands)", "positive": true},
       {"text": "{=taom_faction_dominion_of_mordor_bonus_3}+25% raid damage (Sauron's Wrath)", "positive": true},
       {"text": "{=taom_faction_dominion_of_mordor_bonus_4}+10% party speed at night (Creatures of the Dark)", "positive": true},

@@ -5537,7 +5537,7 @@
       <name name="{=aom_bluecraig_clan_14}Blacktooth Clan" />
       <name name="{=aom_bluecraig_clan_15}Blue Mountains Scourge" />
     </clan_names>
-        <!-- Party size is Blue Craig's own feat (split off Goblin-town 2026-08-14, same 40%);
+        <!-- Party size is Blue Craig's own feat (split off Goblin-town 2026-08-14 at the same value; both are 10% since #818);
              the remaining five stay shared with the goblin culture. -->
         <cultural_feats>
             <feat id="taom_bluecraig_party_size" />

@@ -1321,7 +1321,7 @@
     <string id="taom_faction_clans_of_forochel_name" text="Clans von Forochel" />
     <string id="taom_faction_clans_of_forochel_trait_0" text="Eisbucht-Räuber" />
     <string id="taom_faction_clans_of_forochel_trait_1" text="Gefrorener-Norden-Orks" />
-    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+20% Truppgrößenlimit (Uruk-hai-Legionen)" />
+    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+5% Truppgrößenlimit (Uruk-hai-Legionen)" />
     <string id="taom_faction_dominion_of_isengard_bonus_1" text="+15% Gebäudebaugeschwindigkeit (Industrielle Macht)" />
     <string id="taom_faction_dominion_of_isengard_bonus_2" text="-20% Schmiedeenergiekosten (Industrieschmieden)" />
     <string id="taom_faction_dominion_of_isengard_bonus_3" text="-15% Kosten für berittene Rekrutierung und Aufwertung (Kriegswarge)" />
@@ -1333,7 +1333,7 @@
     <string id="taom_faction_dominion_of_isengard_bonus_9" text="+25% Beziehungsstrafen (Sarumans Griff)" />
     <string id="taom_faction_dominion_of_isengard_desc" text="Sarumans industrielle Festung in Orthanc. Der Ring von Isengard läuft Tag und Nacht — Uruk-hai-Legionen, Fließband-Armbrüste, Kriegswarge. Isengrads eine Stadt schwillt auf zwanzig Notabeln an: ein Rekrutierungszentrum, das vielen Städten Rohans ebenbürtig ist. Sarumans Griff entfremdet jeden Nachbarn." />
     <string id="taom_faction_dominion_of_isengard_name" text="Herrschaft von Isengard" />
-    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+20% Gruppengröße und +10% Marschgeschwindigkeit auf Ebenen und Sümpfen." />
+    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+5% Gruppengröße und +10% Marschgeschwindigkeit auf Ebenen und Sümpfen." />
     <string id="taom_faction_dominion_of_isengard_perk_0_name" text="Uruk-hai-Legionen" />
     <string id="taom_faction_dominion_of_isengard_perk_1_desc" text="+15% Baugeschwindigkeit, -20% Schmiedeenergie, -15% Kosten für berittene Rekrutierung." />
     <string id="taom_faction_dominion_of_isengard_perk_1_name" text="Industrielle Macht" />
@@ -1357,7 +1357,7 @@
     <string id="taom_faction_dominion_of_isengard_weakness_1" text="Einzelne Siedlung als Engpass" />
     <string id="taom_faction_dominion_of_isengard_weakness_2" text="Umgeben von Rohan und Fangorn" />
     <string id="taom_faction_dominion_of_mordor_bonus_0" text="-60% Einflusskosten für Armeen (Der Wille des Dunklen Herrschers)" />
-    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+10% Gruppengröße (Saurons Horden)" />
+    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+5% Gruppengröße (Saurons Horden)" />
     <string id="taom_faction_dominion_of_mordor_bonus_10" text="+15% Schmiedeeffizienz (Dunkle Schmiedekunst)" />
     <string id="taom_faction_dominion_of_mordor_bonus_2" text="+20% Getreideproduktion in Nurn (Ackerland von Nurn)" />
     <string id="taom_faction_dominion_of_mordor_bonus_3" text="+25% Plünderungsschaden (Saurons Zorn)" />
@@ -1397,7 +1397,7 @@
     <string id="taom_faction_eregion_name" text="Eregion" />
     <string id="taom_faction_fangorn_forest_desc" text="Der Fangornwald." />
     <string id="taom_faction_fangorn_forest_name" text="Fangornwald" />
-    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+40% Gruppengröße (Goblinschwarm)" />
+    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+10% Gruppengröße (Goblinschwarm)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_1" text="+25% Wiederauferstehungsrate der Dorffreiwilligen (Endlose Brut)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_2" text="+10% Gruppengeschwindigkeit auf Schnee (Tunnelläufer)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_3" text="+20% Nahrungsverbrauch der Gruppe (Gefräßiger Schwarm)" />
@@ -1405,7 +1405,7 @@
     <string id="taom_faction_goblins_of_blue_craig_bonus_5" text="+10% Plünderungsschaden (Goblinhinterhalt)" />
     <string id="taom_faction_goblins_of_blue_craig_desc" text="Ein eigenständiges Orkheer der Blauen Berge (Ered Luin) im fernen Westen, dicht bei den Grauen Anfurten von Lindon — ein Reich fern ihrer Vettern aus der Orkstadt im Nebelgebirge. Dieselben zahllosen, schlecht bewaffneten Schwärme: allein schwach, in der Masse überwältigend und auf dem Marsch unersättlich. Sie plagen die Elben der Westküste." />
     <string id="taom_faction_goblins_of_blue_craig_name" text="Goblins vom Blauen Fels" />
-    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+40% Gruppengröße und +25% Wiederauferstehungsrate der Dorffreiwilligen — schwach, aber zahllos." />
+    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+10% Gruppengröße und +25% Wiederauferstehungsrate der Dorffreiwilligen — schwach, aber zahllos." />
     <string id="taom_faction_goblins_of_blue_craig_perk_0_name" text="Goblinschwarm" />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_desc" text="+10% Gruppengeschwindigkeit auf Schnee — Goblins kennen jede Klippe und jeden Tunnel." />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_name" text="Tunnelläufer" />
@@ -1428,7 +1428,7 @@
     <string id="taom_faction_goblins_of_blue_craig_weakness_0" text="Einzeln schwache Truppen" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_1" text="Gefräßig — belastet jede Versorgungslinie" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_2" text="Von allen Freien Völkern gehasst" />
-    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+40% Gruppengröße (Goblinschwarm)" />
+    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+10% Gruppengröße (Goblinschwarm)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_1" text="+25% Wiederauferstehungsrate der Dorffreiwilligen (Endlose Brut)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_2" text="+10% Gruppengeschwindigkeit auf Schnee (Tunnelläufer)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_3" text="+20% Nahrungsverbrauch der Gruppe (Gefräßiger Schwarm)" />
@@ -1436,7 +1436,7 @@
     <string id="taom_faction_goblins_of_goblin_town_bonus_5" text="+10% Plünderungsschaden (Goblinhinterhalt)" />
     <string id="taom_faction_goblins_of_goblin_town_desc" text="Die wimmelnden Orkhöhlen unter dem Hohen Pass des Nebelgebirges. Seit dem Fall des Großen Orks haben sich die Stämme ohne Zahl vermehrt — riesige, schlecht bewaffnete Schwärme, die allein durch ihr Gewicht siegen und schneller brüten, als ein Feind sie dezimieren kann. Über die Schneefelder ihrer Bergheimat laufen sie am schnellsten, doch solche Horden sind stets unersättlich." />
     <string id="taom_faction_goblins_of_goblin_town_name" text="Goblins von Goblinstadt" />
-    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+40% Gruppengröße und +25% Wiederauferstehungsrate der Dorffreiwilligen — Goblins sind schwach, aber zahllos." />
+    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+10% Gruppengröße und +25% Wiederauferstehungsrate der Dorffreiwilligen — Goblins sind schwach, aber zahllos." />
     <string id="taom_faction_goblins_of_goblin_town_perk_0_name" text="Goblinschwarm" />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_desc" text="+10% Gruppentempo auf Schnee — Goblins kennen jeden Pass und Tunnel des Nebelgebirges." />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_name" text="Tunnelläufer" />
@@ -1771,7 +1771,7 @@
     <string id="taom_faction_kingdom_of_lothlorien_weakness_1" text="Winziges stehendes Heer" />
     <string id="taom_faction_kingdom_of_lothlorien_weakness_2" text="Schwindende Macht — kein Wachstum" />
     <string id="taom_faction_kingdom_of_moria_bonus_0" text="-40% Armeeeinflusskosten (Orkhorde)" />
-    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+30% Gruppengrößenlimit (Bergheer)" />
+    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+10% Gruppengrößenlimit (Bergheer)" />
     <string id="taom_faction_kingdom_of_moria_bonus_2" text="+10% Gruppengeschwindigkeit auf Schnee (Berggeboren)" />
     <string id="taom_faction_kingdom_of_moria_bonus_3" text="+15% Nahrungsverbrauch der Gruppe (Hungriges Heer)" />
     <string id="taom_faction_kingdom_of_moria_bonus_4" text="+15% Schmiedeeffizienz (Geplünderte Schmieden)" />
@@ -1781,7 +1781,7 @@
     <string id="taom_faction_kingdom_of_moria_name" text="Orks des Nebelgebirges" />
     <string id="taom_faction_kingdom_of_moria_perk_0_desc" text="Armeerekrutierung kostet 40% weniger Einfluss — das Orkheer braucht keinen Konsens zum Marschieren." />
     <string id="taom_faction_kingdom_of_moria_perk_0_name" text="Orkhorde" />
-    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+30% Gruppengröße und +10% Geschwindigkeit auf Schnee — große Kriegsheere, an die kalten Gipfel gewöhnt." />
+    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+10% Gruppengröße und +10% Geschwindigkeit auf Schnee — große Kriegsheere, an die kalten Gipfel gewöhnt." />
     <string id="taom_faction_kingdom_of_moria_perk_1_name" text="Bergheer" />
     <string id="taom_faction_kingdom_of_moria_perk_2_desc" text="Ein Kriegsheer dieser Größe frisst gierig — +15% Nahrungsverbrauch der Gruppe." />
     <string id="taom_faction_kingdom_of_moria_perk_2_name" text="Hungriges Heer" />
@@ -1851,7 +1851,7 @@
     <string id="taom_faction_nurunkhizdin_desc" text="Die Nurunkhizdin." />
     <string id="taom_faction_nurunkhizdin_name" text="Nurunkhizdin" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_0" text="-50% Einflusskosten für Armee (Schattenkommando)" />
-    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="+20% Truppengrößenlimit (Dunkle Legionen)" />
+    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="+5% Truppengrößenlimit (Dunkle Legionen)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_2" text="+20% Erneuerungsrate für Dorffreiwillige (Dunkle Zwangsrekruten)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_3" text="+20% Veteranenchance für Miliz (Dunkle Wehrpflicht)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_4" text="+1 Händler + 1 Handwerker + 13 Bandenführer-Notabeln in der Stadt Dol Guldur (20 insgesamt)" />
@@ -1862,7 +1862,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_name" text="Oberherrschaft von Dol Guldur" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_desc" text="Einflusskosten für Armeen um 50% reduziert — Schrecken erzwingt Gehorsam." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_name" text="Schattenbefehl" />
-    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="+20% Truppengröße und +20% Freiwilligen-Respawnrate." />
+    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="+5% Truppengröße und +20% Freiwilligen-Respawnrate." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_1_name" text="Dunkle Legionen" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_desc" text="Dol Guldurs einzige Stadt stellt 20 Notabeln — ein Rekrutierungszentrum mit 15 Bandenführern." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_name" text="Schattenhauptmänner" />
@@ -1884,7 +1884,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_1" text="Industrieverfall verlangsamt Mauerbau" />
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_2" text="Umgeben von feindlichen Wäldern" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_0" text="-40% Einflusskosten für Armeen (Orkhorde)" />
-    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="+20% Truppengröße (Gebirgsschwarm)" />
+    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="+5% Truppengröße (Gebirgsschwarm)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_2" text="+25% Raubzugschaden (Orkplünderer)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_3" text="+10% Truppengeschwindigkeit auf Schnee (Gebirgsmarodeure)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_4" text="+20% Dorf-Freiwilligen-Respawnrate" />
@@ -1896,7 +1896,7 @@
     <string id="taom_faction_overlordship_of_gundabad_name" text="Oberherrschaft von Gundabad" />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_desc" text="Einflusskosten für Armeen um 40% reduziert — Schrecken erzwingt Gehorsam." />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_name" text="Orkhorde" />
-    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="+20% Truppenlimit und +10% Truppengeschwindigkeit im Schnee." />
+    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="+5% Truppenlimit und +10% Truppengeschwindigkeit im Schnee." />
     <string id="taom_faction_overlordship_of_gundabad_perk_1_name" text="Bergesschwarm" />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_desc" text="+3 Bandenführer und +1 Handwerker-Notabel pro Stadt — Rekrutierung schwillt mit Plünderern an." />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_name" text="Bleiche Kriegerbanden-Häuptlinge" />
@@ -2147,7 +2147,7 @@
     <string id="taom_feat_isen_dp" text="Sarumans Griff" />
     <string id="taom_feat_isen_dp_desc" text="Beziehungsstrafen bei Reichsentscheidungen um 25 % erhöht." />
     <string id="taom_feat_isen_ps" text="Uruk-hai-Legionen" />
-    <string id="taom_feat_isen_ps_desc" text="Maximale Gruppengröße um 20 % erhöht." />
+    <string id="taom_feat_isen_ps_desc" text="Maximale Gruppengröße um 5 % erhöht." />
     <string id="taom_feat_isen_cs" text="Industrielle Macht" />
     <string id="taom_feat_isen_cs_desc" text="Baugeschwindigkeit um 15 % erhöht." />
     <string id="taom_feat_isen_sm" text="Industrielle Schmieden" />
@@ -2173,7 +2173,7 @@
     <string id="taom_feat_gun_w" text="Plünderforderungen" />
     <string id="taom_feat_gun_w_desc" text="Truppenlöhne um 10% erhöht." />
     <string id="taom_feat_gun_ps" text="Bergschwarm" />
-    <string id="taom_feat_gun_ps_desc" text="Maximale Truppengröße um 20% erhöht." />
+    <string id="taom_feat_gun_ps_desc" text="Maximale Truppengröße um 5% erhöht." />
     <string id="taom_feat_gun_rd" text="Orkische Plünderer" />
     <string id="taom_feat_gun_rd_desc" text="Plünderschaden um 25% erhöht." />
     <string id="taom_feat_gun_ss" text="Bergmarodeure" />
@@ -2187,7 +2187,7 @@
     <string id="taom_feat_gun_ncv" text="Knochenlager" />
     <string id="taom_feat_gun_ncv_desc" text="Anzahl der Notabeln in Dörfern um 10% erhöht." />
     <string id="taom_feat_gob_ps" text="Orkschwarm" />
-    <string id="taom_feat_gob_ps_desc" text="Maximale Truppengröße um 40% erhöht." />
+    <string id="taom_feat_gob_ps_desc" text="Maximale Truppengröße um 10% erhöht." />
     <string id="taom_feat_gob_vr" text="Endlose Brut" />
     <string id="taom_feat_gob_vr_desc" text="Nachwuchsrate freiwilliger Dorfbewohner um 25% erhöht." />
     <string id="taom_feat_gob_ss" text="Tunnelläufer" />
@@ -2199,11 +2199,11 @@
     <string id="taom_feat_gob_rd" text="Orkhinterhalt" />
     <string id="taom_feat_gob_rd_desc" text="Plünderschaden um 10% erhöht." />
     <string id="taom_feat_bcg_ps" text="Schwarm von Blue Craig" />
-    <string id="taom_feat_bcg_ps_desc" text="Maximale Truppengröße um 40% erhöht." />
+    <string id="taom_feat_bcg_ps_desc" text="Maximale Truppengröße um 10% erhöht." />
     <string id="taom_feat_mmo_aic" text="Orkhorde" />
     <string id="taom_feat_mmo_aic_desc" text="Armeerekrutierung kostet 40% weniger Einfluss." />
     <string id="taom_feat_mmo_ps" text="Bergheer" />
-    <string id="taom_feat_mmo_ps_desc" text="Maximale Truppengröße um 30% erhöht." />
+    <string id="taom_feat_mmo_ps_desc" text="Maximale Truppengröße um 10% erhöht." />
     <string id="taom_feat_mmo_ss" text="In den Bergen gezüchtet" />
     <string id="taom_feat_mmo_ss_desc" text="Bewegungsgeschwindigkeit der Truppe im Schnee um 10% erhöht." />
     <string id="taom_feat_mmo_fc" text="Hungriges Heer" />
@@ -2235,7 +2235,7 @@
     <string id="taom_feat_dg_cs" text="Verderbliche Werke" />
     <string id="taom_feat_dg_cs_desc" text="Baugeschwindigkeit um 20 % verringert." />
     <string id="taom_feat_dg_ps" text="Dunkle Legionen" />
-    <string id="taom_feat_dg_ps_desc" text="Gruppengrößenbegrenzung um 20 % erhöht." />
+    <string id="taom_feat_dg_ps_desc" text="Gruppengrößenbegrenzung um 5 % erhöht." />
     <string id="taom_feat_dg_fc" text="Gefräßige Horden" />
     <string id="taom_feat_dg_fc_desc" text="Nahrungsverbrauch der Gruppe um 10 % erhöht." />
     <string id="taom_feat_dg_vr" text="Dunkle Rekruten" />
@@ -2269,7 +2269,7 @@
     <string id="taom_feat_mor_w" text="Dunkler Tribut" />
     <string id="taom_feat_mor_w_desc" text="Gruppenlöhne um 20 % erhöht." />
     <string id="taom_feat_mor_ps" text="Saurons Horden" />
-    <string id="taom_feat_mor_ps_desc" text="Obergrenze der Gruppengröße um 20 % erhöht." />
+    <string id="taom_feat_mor_ps_desc" text="Obergrenze der Gruppengröße um 5 % erhöht." />
     <string id="taom_feat_mor_rd" text="Saurons Zorn" />
     <string id="taom_feat_mor_rd_desc" text="Plünderungsschaden um 25 % erhöht." />
     <string id="taom_feat_mor_pls" text="Schattenmarsch" />

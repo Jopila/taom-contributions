@@ -133,6 +133,7 @@ Welcome testers! Work through each section below and report any **crashes, visua
 - Cave trolls (4x weight) — count +4 per unit
 - Legendary commanders (3x) — count +3 per unit
 - Party screen shows weighted count, not raw unit count
+- Culture-stage card and party tooltip agree: goblin and Misty Mountain swarms show +10% party size, Mordor, Isengard, Gundabad and Dol Guldur +5%
 
 **5b. UI Accuracy**
 - Party management screen shows correct weighted party size

@@ -127,11 +127,11 @@ Both orc cultures have authored feats (`Main/Features/CulturalFeats/TaomCultural
 
 | Culture | Feats |
 |---|---|
-| **goblin** | +40% party size (Goblin Swarm), +25% volunteer respawn (Endless Spawn), +10% snow speed (Tunnel-Runners), **+20% food consumption** (Ravenous Swarm, penalty) |
-| **mistymountainorcs** | −40% army influence cost (Orc Horde), +30% party size (Mountain Host), +10% snow speed (Mountain-Bred), **+15% food consumption** (Hungry Host, penalty) |
+| **goblin** | +10% party size (Goblin Swarm; +40% until 2026-10-18, #818), +25% volunteer respawn (Endless Spawn), +10% snow speed (Tunnel-Runners), **+20% food consumption** (Ravenous Swarm, penalty) |
+| **mistymountainorcs** | −40% army influence cost (Orc Horde), +10% party size (Mountain Host; +30% until 2026-10-18, #818), +10% snow speed (Mountain-Bred), **+15% food consumption** (Hungry Host, penalty) |
 
-Big party-size bonuses offset weaker troops; the food-consumption penalty is the cost of the
-horde. Snow-speed reflects their snow-navmesh mountain home. Lindon inherits Rivendell's 6
+The 10% party-size bonuses (the cap since #818) only partly offset weaker troops; the
+food-consumption penalty is the cost of the horde. Snow-speed reflects their snow-navmesh mountain home. Lindon inherits Rivendell's 6
 feats automatically (shared culture). Feat string-ids in XML exactly match the C# `Register()`
 ids (verified); all 8 are dispatched in `CulturalFeatsService`.
 
@@ -139,7 +139,8 @@ ids (verified); all 8 are dispatched in `CulturalFeatsService`.
 
 All 3 are `playable=true` in `factions.json` (`goblins_of_goblin_town`→goblin,
 `kingdom_of_moria`→mistymountainorcs, `high_kingdom_of_lindon`→rivendell) with bonuses/perks
-that match the authored feats. Lindon's card mirrors Imladris (same Rivendell culture/feats).
+that match the authored feats (the party-size percentages are checked by
+`FactionMapDataTests.FactionCard_PartySizePercent_MatchesProductionFeat`). Lindon's card mirrors Imladris (same Rivendell culture/feats).
 Strings registered via `tools/harvest_factionmap_strings.py`. Added to `cultures.json` (CC
 culture list) and `CareerCultureCoverageTests` documentedExceptions (careers are a follow-up).
 

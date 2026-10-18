@@ -324,7 +324,7 @@ public class CareerPassiveServiceTests
     [TestMethod]
     public void ApplyFlat_UnderACultureFactor_IsStillWorthItsLiteralCount()
     {
-        // Mordor's +20% party-size feat is already in the frame when the career passive lands.
+        // A culture party-size feat is already in the frame when the career passive lands.
         GivenPartySizePassive(2f);
         var result = new ExplainedNumber(100f);
         result.AddFactor(0.20f);

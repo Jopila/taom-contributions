@@ -1321,7 +1321,7 @@
     <string id="taom_faction_clans_of_forochel_name" text="Forochel Kabileleri" />
     <string id="taom_faction_clans_of_forochel_trait_0" text="Buz Körfezi Akıncıları" />
     <string id="taom_faction_clans_of_forochel_trait_1" text="Donmuş Kuzey Orkları" />
-    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+20% grup boyutu limiti (Uruk-hai Lejyonları)" />
+    <string id="taom_faction_dominion_of_isengard_bonus_0" text="+5% grup boyutu limiti (Uruk-hai Lejyonları)" />
     <string id="taom_faction_dominion_of_isengard_bonus_1" text="+15% bina inşaat hızı (Endüstriyel Kudret)" />
     <string id="taom_faction_dominion_of_isengard_bonus_2" text="-20% demircilik enerji maliyeti (Endüstriyel Demirhaneler)" />
     <string id="taom_faction_dominion_of_isengard_bonus_3" text="-15% atlı asker istihdamı ve yükseltme maliyeti (Savaş Warg'ları)" />
@@ -1333,7 +1333,7 @@
     <string id="taom_faction_dominion_of_isengard_bonus_9" text="+25% ilişki cezaları (Saruman'ın Tutuşu)" />
     <string id="taom_faction_dominion_of_isengard_desc" text="Saruman'ın Orthanc'taki endüstriyel kalesi. Isengard Halkası gece gündüz çalışır — Uruk-hai lejyonları, seri üretim tatar yayları, savaş vargları. Isengard'ın tek kasabası yirmi ileri gelene ulaşır: Rohan'ın birçok şehrine denk bir asker toplama merkezi. Saruman'ın Tutuşu her komşuyu yabancılaştırır." />
     <string id="taom_faction_dominion_of_isengard_name" text="Isengard Egemenliği" />
-    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+20% birlik boyutu sınırı ve ova ile bataklıkta +10% yürüyüş hızı." />
+    <string id="taom_faction_dominion_of_isengard_perk_0_desc" text="+5% birlik boyutu sınırı ve ova ile bataklıkta +10% yürüyüş hızı." />
     <string id="taom_faction_dominion_of_isengard_perk_0_name" text="Uruk-hai Lejyonları" />
     <string id="taom_faction_dominion_of_isengard_perk_1_desc" text="+15% inşaat, -20% demircilik enerjisi, -15% atlı asker toplama maliyeti." />
     <string id="taom_faction_dominion_of_isengard_perk_1_name" text="Endüstriyel Güç" />
@@ -1357,7 +1357,7 @@
     <string id="taom_faction_dominion_of_isengard_weakness_1" text="Tek dar geçit yerleşimi" />
     <string id="taom_faction_dominion_of_isengard_weakness_2" text="Rohan ve Fangorn tarafından kuşatılmış" />
     <string id="taom_faction_dominion_of_mordor_bonus_0" text="-60% ordu etki maliyeti (Kara Efendi'nin İradesi)" />
-    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+%10 birlik boyutu sınırı (Sauron'un Orduları)" />
+    <string id="taom_faction_dominion_of_mordor_bonus_1" text="+%5 birlik boyutu sınırı (Sauron'un Orduları)" />
     <string id="taom_faction_dominion_of_mordor_bonus_10" text="+15% demircilik verimliliği (Karanlık Demircilik)" />
     <string id="taom_faction_dominion_of_mordor_bonus_2" text="+%20 Nurn tahıl üretimi (Nurn Tarlaları)" />
     <string id="taom_faction_dominion_of_mordor_bonus_3" text="+%25 baskın hasarı (Sauron'un Gazabı)" />
@@ -1397,7 +1397,7 @@
     <string id="taom_faction_eregion_name" text="Eregion" />
     <string id="taom_faction_fangorn_forest_desc" text="Fangorn Ormanı." />
     <string id="taom_faction_fangorn_forest_name" text="Fangorn Ormanı" />
-    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+%40 birlik büyüklüğü sınırı (Goblin Sürüsü)" />
+    <string id="taom_faction_goblins_of_blue_craig_bonus_0" text="+%10 birlik büyüklüğü sınırı (Goblin Sürüsü)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_1" text="+%25 köy gönüllüsü yeniden doğma oranı (Sonsuz Doğuş)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_2" text="+%10 kar üzerinde birlik hızı (Tünel Koşucuları)" />
     <string id="taom_faction_goblins_of_blue_craig_bonus_3" text="+%20 birlik yiyecek tüketimi (Açgözlü Sürü)" />
@@ -1405,7 +1405,7 @@
     <string id="taom_faction_goblins_of_blue_craig_bonus_5" text="+%10 yağma hasarı (Goblin Baskını)" />
     <string id="taom_faction_goblins_of_blue_craig_desc" text="Uzak batıda, Lindon'un Gri Limanları'nın hemen yanında, Mavi Dağlar'ın (Ered Luin) kendine özgü bir goblin ordusu — Goblin Kasabası'ndaki Puslu Dağlar kuzenlerinden ayrı bir diyar. Aynı sayısız, kötü silahlanmış sürüler: tek başına zayıf, kitle halinde ezici ve yürüyüşte doymak bilmez. Batı kıyısının Elfleri'ni rahatsız ederler." />
     <string id="taom_faction_goblins_of_blue_craig_name" text="Mavi Kaya Goblinleri" />
-    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+%40 birlik büyüklüğü ve +%25 köy gönüllüsü yeniden doğma oranı — zayıf ama sayısız." />
+    <string id="taom_faction_goblins_of_blue_craig_perk_0_desc" text="+%10 birlik büyüklüğü ve +%25 köy gönüllüsü yeniden doğma oranı — zayıf ama sayısız." />
     <string id="taom_faction_goblins_of_blue_craig_perk_0_name" text="Goblin Sürüsü" />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_desc" text="+%10 kar üzerinde birlik hızı — goblinler her kayalığı ve tüneli bilir." />
     <string id="taom_faction_goblins_of_blue_craig_perk_1_name" text="Tünel Koşucuları" />
@@ -1428,7 +1428,7 @@
     <string id="taom_faction_goblins_of_blue_craig_weakness_0" text="Bireysel olarak zayıf birlikler" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_1" text="Açgözlü — tüm ikmal hatlarını zorlar" />
     <string id="taom_faction_goblins_of_blue_craig_weakness_2" text="Tüm Hür Halklar tarafından nefret edilen" />
-    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+%40 birlik büyüklüğü sınırı (Goblin Sürüsü)" />
+    <string id="taom_faction_goblins_of_goblin_town_bonus_0" text="+%10 birlik büyüklüğü sınırı (Goblin Sürüsü)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_1" text="+%25 köy gönüllüsü yeniden doğma oranı (Sonsuz Doğuş)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_2" text="+%10 kar üzerinde birlik hızı (Tünel Koşucuları)" />
     <string id="taom_faction_goblins_of_goblin_town_bonus_3" text="+%20 birlik yiyecek tüketimi (Açgözlü Sürü)" />
@@ -1436,7 +1436,7 @@
     <string id="taom_faction_goblins_of_goblin_town_bonus_5" text="+%10 yağma hasarı (Goblin Baskını)" />
     <string id="taom_faction_goblins_of_goblin_town_desc" text="Puslu Dağlar'ın Yüce Geçit'inin altındaki kaynaşan goblin inleri. Büyük Goblin'in düşüşünden beri kabileler sayısızca çoğaldı — kötü silahlanmış devasa sürüler, sırf ağırlıklarıyla kazanır ve hiçbir düşmanın kırabileceğinden daha hızlı ürerler. Dağ yurtlarının karları üzerinde en hızlı koşarlar, ama böyle orduların açlığı hiç dinmez." />
     <string id="taom_faction_goblins_of_goblin_town_name" text="Goblin Kasabası Goblinleri" />
-    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+%40 birlik büyüklüğü ve +%25 köy gönüllüsü yeniden doğma oranı — goblinler zayıf ama sayısızdır." />
+    <string id="taom_faction_goblins_of_goblin_town_perk_0_desc" text="+%10 birlik büyüklüğü ve +%25 köy gönüllüsü yeniden doğma oranı — goblinler zayıf ama sayısızdır." />
     <string id="taom_faction_goblins_of_goblin_town_perk_0_name" text="Goblin Sürüsü" />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_desc" text="Karda +10% grup hızı — gobleynler Sisli Dağlar'ın her geçidini ve tünelini bilir." />
     <string id="taom_faction_goblins_of_goblin_town_perk_1_name" text="Tünel Koşucuları" />
@@ -1771,7 +1771,7 @@
     <string id="taom_faction_kingdom_of_lothlorien_weakness_1" text="Minik daimi ordu" />
     <string id="taom_faction_kingdom_of_lothlorien_weakness_2" text="Sönen güç — büyüme yok" />
     <string id="taom_faction_kingdom_of_moria_bonus_0" text="-40% ordu nüfuz maliyeti (Ork Ordusu)" />
-    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+30% müfreze boyutu sınırı (Dağ Ordusu)" />
+    <string id="taom_faction_kingdom_of_moria_bonus_1" text="+10% müfreze boyutu sınırı (Dağ Ordusu)" />
     <string id="taom_faction_kingdom_of_moria_bonus_2" text="+10% kar üzerinde müfreze hızı (Dağ Doğumlu)" />
     <string id="taom_faction_kingdom_of_moria_bonus_3" text="+15% müfreze yiyecek tüketimi (Aç Ordu)" />
     <string id="taom_faction_kingdom_of_moria_bonus_4" text="+15% demircilik verimliliği (Yağmalanmış Demirhaneler)" />
@@ -1781,7 +1781,7 @@
     <string id="taom_faction_kingdom_of_moria_name" text="Puslu Dağlar Orkları" />
     <string id="taom_faction_kingdom_of_moria_perk_0_desc" text="Ordu toplama %40 daha az nüfuz maliyeti — ork ordusunun yürümek için mutabakata ihtiyacı yoktur." />
     <string id="taom_faction_kingdom_of_moria_perk_0_name" text="Ork Ordusu" />
-    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+30% müfreze boyutu ve kar üzerinde +10% hız — soğuk zirvelere alışık büyük savaş orduları." />
+    <string id="taom_faction_kingdom_of_moria_perk_1_desc" text="+10% müfreze boyutu ve kar üzerinde +10% hız — soğuk zirvelere alışık büyük savaş orduları." />
     <string id="taom_faction_kingdom_of_moria_perk_1_name" text="Dağ Ordusu" />
     <string id="taom_faction_kingdom_of_moria_perk_2_desc" text="Bu boyuttaki bir savaş ordusu açgözlülükle yer — +15% müfreze yiyecek tüketimi." />
     <string id="taom_faction_kingdom_of_moria_perk_2_name" text="Aç Ordu" />
@@ -1851,7 +1851,7 @@
     <string id="taom_faction_nurunkhizdin_desc" text="Nurunkhizdin." />
     <string id="taom_faction_nurunkhizdin_name" text="Nurunkhizdin" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_0" text="-50% ordu nüfuz maliyeti (Gölge Komutası)" />
-    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="+20% grup boyutu sınırı (Karanlık Lejyonlar)" />
+    <string id="taom_faction_overlordship_of_dol_guldur_bonus_1" text="+5% grup boyutu sınırı (Karanlık Lejyonlar)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_2" text="+20% köy gönüllü yeniden doğma hızı (Karanlık Mükellefler)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_3" text="+%20 milis veteran şansı (Karanlık Zorunlu Askerlik)" />
     <string id="taom_faction_overlordship_of_dol_guldur_bonus_4" text="Dol Guldur kasabasında +1 Tüccar + 1 Zanaatkar + 13 Çete Lideri eşrafı (toplam 20)" />
@@ -1862,7 +1862,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_name" text="Dol Guldur Üst Yönetimi" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_desc" text="Ordu etki maliyeti %50 azaltıldı — korku itaati zorlar." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_0_name" text="Gölge Komutası" />
-    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="+%20 birlik boyutu ve +%20 gönüllü yeniden doğuş hızı." />
+    <string id="taom_faction_overlordship_of_dol_guldur_perk_1_desc" text="+%5 birlik boyutu ve +%20 gönüllü yeniden doğuş hızı." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_1_name" text="Karanlık Lejyonlar" />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_desc" text="Dol Guldur'un tek kasabası 20 eşraf barındırır — 15 Çete Lideri toplanma merkezi." />
     <string id="taom_faction_overlordship_of_dol_guldur_perk_2_name" text="Gölge Kaptanları" />
@@ -1884,7 +1884,7 @@
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_1" text="Endüstriyel çöküş surları yavaşlatır" />
     <string id="taom_faction_overlordship_of_dol_guldur_weakness_2" text="Düşman ormanlarla çevrili" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_0" text="-40% ordu nüfuz maliyeti (Ork Ordusu)" />
-    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="+%20 birlik boyutu limiti (Dağ Sürüsü)" />
+    <string id="taom_faction_overlordship_of_gundabad_bonus_1" text="+%5 birlik boyutu limiti (Dağ Sürüsü)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_2" text="+%25 baskın hasarı (Ork Yağmacıları)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_3" text="+%10 birlik hızı karda (Dağ Akıncıları)" />
     <string id="taom_faction_overlordship_of_gundabad_bonus_4" text="+%20 köy gönüllü yeniden doğuş hızı" />
@@ -1896,7 +1896,7 @@
     <string id="taom_faction_overlordship_of_gundabad_name" text="Gundabad Üst Yönetimi" />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_desc" text="Ordu etki maliyeti %40 azaltıldı — korku itaati zorlar." />
     <string id="taom_faction_overlordship_of_gundabad_perk_0_name" text="Ork Hordası" />
-    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="Karda +%20 grup boyutu sınırı ve +%10 grup hızı." />
+    <string id="taom_faction_overlordship_of_gundabad_perk_1_desc" text="Karda +%5 grup boyutu sınırı ve +%10 grup hızı." />
     <string id="taom_faction_overlordship_of_gundabad_perk_1_name" text="Dağ Sürüsü" />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_desc" text="Kasaba başına +3 Çete Lideri ve +1 Zanaatkar soylusu — akıncılarla birlikte asker toplama artar." />
     <string id="taom_faction_overlordship_of_gundabad_perk_2_name" text="Soluk Savaş Çetesi Beyleri" />
@@ -2147,7 +2147,7 @@
     <string id="taom_feat_isen_dp" text="Saruman'ın Pençesi" />
     <string id="taom_feat_isen_dp_desc" text="Krallık kararlarının ilişki cezaları %25 artar." />
     <string id="taom_feat_isen_ps" text="Uruk-hai Lejyonları" />
-    <string id="taom_feat_isen_ps_desc" text="Müfreze büyüklüğü sınırı %20 artar." />
+    <string id="taom_feat_isen_ps_desc" text="Müfreze büyüklüğü sınırı %5 artar." />
     <string id="taom_feat_isen_cs" text="Sanayi Gücü" />
     <string id="taom_feat_isen_cs_desc" text="İnşaat hızı %15 artar." />
     <string id="taom_feat_isen_sm" text="Sanayi Ocakları" />
@@ -2173,7 +2173,7 @@
     <string id="taom_feat_gun_w" text="Yağma Talepleri" />
     <string id="taom_feat_gun_w_desc" text="Müfreze ücretleri %10 arttı." />
     <string id="taom_feat_gun_ps" text="Dağ Sürüsü" />
-    <string id="taom_feat_gun_ps_desc" text="Müfreze büyüklüğü sınırı %20 arttı." />
+    <string id="taom_feat_gun_ps_desc" text="Müfreze büyüklüğü sınırı %5 arttı." />
     <string id="taom_feat_gun_rd" text="Ork Talancılar" />
     <string id="taom_feat_gun_rd_desc" text="Yağma hasarı %25 arttı." />
     <string id="taom_feat_gun_ss" text="Dağ Çapulcuları" />
@@ -2187,7 +2187,7 @@
     <string id="taom_feat_gun_ncv" text="Kemik Kampları" />
     <string id="taom_feat_gun_ncv_desc" text="Köylerdeki ileri gelen sayısı %10 arttı." />
     <string id="taom_feat_gob_ps" text="Goblin Sürüsü" />
-    <string id="taom_feat_gob_ps_desc" text="Müfreze büyüklüğü sınırı %40 arttı." />
+    <string id="taom_feat_gob_ps_desc" text="Müfreze büyüklüğü sınırı %10 arttı." />
     <string id="taom_feat_gob_vr" text="Bitmeyen Üreme" />
     <string id="taom_feat_gob_vr_desc" text="Köy gönüllülerinin yenilenme hızı %25 arttı." />
     <string id="taom_feat_gob_ss" text="Tünel Koşucuları" />
@@ -2199,11 +2199,11 @@
     <string id="taom_feat_gob_rd" text="Goblin Pususu" />
     <string id="taom_feat_gob_rd_desc" text="Yağma hasarı %10 arttı." />
     <string id="taom_feat_bcg_ps" text="Mavi Kaya Sürüsü" />
-    <string id="taom_feat_bcg_ps_desc" text="Müfreze büyüklüğü sınırı %40 arttı." />
+    <string id="taom_feat_bcg_ps_desc" text="Müfreze büyüklüğü sınırı %10 arttı." />
     <string id="taom_feat_mmo_aic" text="Ork Ordusu" />
     <string id="taom_feat_mmo_aic_desc" text="Ordu toplama %40 daha az nüfuza mal olur." />
     <string id="taom_feat_mmo_ps" text="Dağ Ordusu" />
-    <string id="taom_feat_mmo_ps_desc" text="Müfreze büyüklüğü sınırı %30 arttı." />
+    <string id="taom_feat_mmo_ps_desc" text="Müfreze büyüklüğü sınırı %10 arttı." />
     <string id="taom_feat_mmo_ss" text="Dağ Doğumlu" />
     <string id="taom_feat_mmo_ss_desc" text="Karda müfreze hareket hızı %10 artar." />
     <string id="taom_feat_mmo_fc" text="Aç Kalabalık" />
@@ -2235,7 +2235,7 @@
     <string id="taom_feat_dg_cs" text="Yıkıcı İşler" />
     <string id="taom_feat_dg_cs_desc" text="İnşaat hızı %20 azalır." />
     <string id="taom_feat_dg_ps" text="Karanlık Lejyonlar" />
-    <string id="taom_feat_dg_ps_desc" text="Müfreze büyüklüğü sınırı %20 artar." />
+    <string id="taom_feat_dg_ps_desc" text="Müfreze büyüklüğü sınırı %5 artar." />
     <string id="taom_feat_dg_fc" text="Doymak Bilmez Sürüler" />
     <string id="taom_feat_dg_fc_desc" text="Müfreze yemek tüketimi %10 artar." />
     <string id="taom_feat_dg_vr" text="Karanlık Devşirmeler" />
@@ -2269,7 +2269,7 @@
     <string id="taom_feat_mor_w" text="Karanlık Haraç" />
     <string id="taom_feat_mor_w_desc" text="Müfreze ücretleri %20 arttı." />
     <string id="taom_feat_mor_ps" text="Sauron'un Orduları" />
-    <string id="taom_feat_mor_ps_desc" text="Müfreze büyüklüğü sınırı %20 arttı." />
+    <string id="taom_feat_mor_ps_desc" text="Müfreze büyüklüğü sınırı %5 arttı." />
     <string id="taom_feat_mor_rd" text="Sauron'un Gazabı" />
     <string id="taom_feat_mor_rd_desc" text="Yağma hasarı %25 arttı." />
     <string id="taom_feat_mor_pls" text="Gölge Yürüyüşü" />

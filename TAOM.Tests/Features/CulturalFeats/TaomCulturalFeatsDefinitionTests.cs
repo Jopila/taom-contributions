@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -346,19 +346,124 @@ public class TaomCulturalFeatsDefinitionTests
                 continue;
             }
 
-            var body = initMatch.Groups["body"].Value;
-            var expectedTail =
-                $"{bonus}, isPositiveEffect: {positive.ToString().ToLowerInvariant()}, FeatObject.AdditionType.{addType}";
-            var normalized = Regex.Replace(body, @"\s+", " ");
-            if (!normalized.Contains(expectedTail))
-                failures.Add($"{field}: Initialize metadata != expected \"{expectedTail}\" (got: ...{normalized.Substring(System.Math.Max(0, normalized.Length - 80))})");
+            var normalized = NormalizeWhitespace(initMatch.Groups["body"].Value);
+            if (!HasMetadata(normalized, bonus, positive, addType))
+                failures.Add($"{field}: Initialize metadata != expected \"{MetadataTail(bonus, positive, addType)}\" (got: ...{normalized.Substring(System.Math.Max(0, normalized.Length - 80))})");
         }
 
         Assert.AreEqual(0, failures.Count,
             "Wave 1 production feat metadata drifted from spec:\n" + string.Join("\n", failures));
     }
 
-    private static string LocateSource(string relPath)
+    /// <summary>
+    /// #818: the evil party-size feats are capped at 10 % (Mike, 2026-10-18): the swarms at 10 %, the
+    /// orc realms at 5 %, down from 40 / 30 / 20 %. In a 200-day balance simulation the free side lost
+    /// ground while the evil party-size bonuses stood at 20 to 40 %. Pins the bonus and the number the
+    /// player reads in the description, so the two cannot drift apart.
+    /// </summary>
+    [TestMethod]
+    public void EvilPartySizeFeats_BonusAndDescription_MatchSpec()
+    {
+        var spec = new (string field, string bonus, string percent)[]
+        {
+            ("_goblinPartySize", "0.1f", "10%"),
+            ("_bluecraigPartySize", "0.1f", "10%"),
+            ("_mistyMountainOrcsPartySize", "0.1f", "10%"),
+            ("_mordorPartySize", "0.05f", "5%"),
+            ("_isengardPartySize", "0.05f", "5%"),
+            ("_gundabadPartySize", "0.05f", "5%"),
+            ("_dolguldurPartySize", "0.05f", "5%"),
+        };
+
+        var source = File.ReadAllText(LocateSource("Main/Features/CulturalFeats/TaomCulturalFeats.cs"));
+        var failures = new List<string>();
+
+        foreach (var (field, bonus, percent) in spec)
+        {
+            var body = ReadInitializeArgs(source, field);
+            if (body == null)
+            {
+                failures.Add($"{field}: no Initialize(...) call found");
+                continue;
+            }
+
+            if (!body.Contains($"Party size limit increased by {percent}."))
+                failures.Add($"{field}: description does not say {percent}");
+            if (!HasMetadata(body, bonus, positive: true, "AddFactor"))
+                failures.Add($"{field}: bonus is not {bonus}");
+        }
+
+        Assert.AreEqual(0, failures.Count, string.Join("\n", failures));
+    }
+
+    /// <summary>
+    /// Mike's 10 % maximum for a party-size feat (#818), over all twelve production feats. No floor
+    /// was approved, so the lower bound only rules out zero and a sign flip. The field list is
+    /// checked against every <c>_xxxPartySize</c> field in the source, so a thirteenth feat cannot
+    /// slip past the cap.
+    /// </summary>
+    [TestMethod]
+    public void PartySizeFeats_ProductionBonus_PositiveAndAtMostTenPercent()
+    {
+        var all = PartySizeFeatFields;
+        var source = File.ReadAllText(LocateSource("Main/Features/CulturalFeats/TaomCulturalFeats.cs"));
+        var declared = Regex.Matches(source, @"private FeatObject (_\w+PartySize);")
+            .Cast<Match>().Select(m => m.Groups[1].Value).OrderBy(x => x).ToList();
+        CollectionAssert.AreEqual(all.OrderBy(x => x).ToList(), declared,
+            "PartySizeFeatFields must list every _xxxPartySize field in TaomCulturalFeats.cs");
+
+        var failures = new List<string>();
+        foreach (var field in all)
+        {
+            var bonus = ProductionEffectBonus(field);
+            if (!(bonus > 0m && bonus <= 0.10m))
+                failures.Add($"{field}: EffectBonus {bonus} is outside (0, 0.10]");
+        }
+
+        Assert.AreEqual(0, failures.Count, string.Join("\n", failures));
+    }
+
+    /// <summary>Every party-size feat field in <c>TaomCulturalFeats</c>.</summary>
+    internal static readonly string[] PartySizeFeatFields =
+    {
+        "_goblinPartySize", "_bluecraigPartySize", "_mistyMountainOrcsPartySize", "_mordorPartySize",
+        "_isengardPartySize", "_gundabadPartySize", "_dolguldurPartySize", "_gondorPartySize",
+        "_khandPartySize", "_rhunPartySize", "_haradPartySize", "_dunlandPartySize",
+    };
+
+    /// <summary>
+    /// The EffectBonus literal of <c>field.Initialize(...)</c> in the production source, as a decimal
+    /// (0.05 for <c>0.05f</c>). The unit harness cannot run InitializeAll, so the source is the record.
+    /// </summary>
+    internal static decimal ProductionEffectBonus(string field)
+    {
+        var source = File.ReadAllText(LocateSource("Main/Features/CulturalFeats/TaomCulturalFeats.cs"));
+        var body = ReadInitializeArgs(source, field);
+        Assert.IsNotNull(body, $"{field}: no Initialize(...) call found");
+        var m = Regex.Match(body, @", (?<v>-?\d+(?:\.\d+)?)f, isPositiveEffect:");
+        Assert.IsTrue(m.Success, $"{field}: no EffectBonus literal in Initialize(...)");
+        return decimal.Parse(m.Groups["v"].Value, System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    private static string NormalizeWhitespace(string s) => Regex.Replace(s, @"\s+", " ");
+
+    /// <summary>The whitespace-collapsed argument list of <c>field.Initialize(...)</c>, or null.</summary>
+    private static string ReadInitializeArgs(string source, string field)
+    {
+        var m = Regex.Match(
+            source, Regex.Escape(field) + @"\.Initialize\((?<body>.*?)\);", RegexOptions.Singleline);
+        return m.Success ? NormalizeWhitespace(m.Groups["body"].Value) : null;
+    }
+
+    // The leading ", " anchors the number to a whole argument, so "-0.05f" and "10.05f" cannot
+    // satisfy an expected "0.05f".
+    private static string MetadataTail(string bonus, bool positive, string addType) =>
+        $", {bonus}, isPositiveEffect: {positive.ToString().ToLowerInvariant()}, FeatObject.AdditionType.{addType}";
+
+    private static bool HasMetadata(string normalizedArgs, string bonus, bool positive, string addType) =>
+        normalizedArgs.Contains(MetadataTail(bonus, positive, addType));
+
+    internal static string LocateSource(string relPath)
     {
         var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
         while (dir != null)
