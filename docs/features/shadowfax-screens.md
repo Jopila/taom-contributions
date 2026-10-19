@@ -4,7 +4,15 @@
 
 The clan, kingdom, character, career, inventory, party and quest screens open at once. Their panels
 no longer slide in, and the rows in the inventory and party lists no longer animate when they expand
-or change state. Nothing else about the screens changes. The feature is always on.
+or change state. The instant transitions are always on.
+
+The screen open speed work then cuts repeated work while four screens build: the clan screen builds
+its parties list once instead of three times, the inventory and trade screens skip a name sort they
+replace a moment later, the party screen builds each troop portrait code once per screen, and the
+quest log builds a finished quest's stages only when the player selects it. Each has a switch in the
+"Screen Performance" MCM group (on by default), and "Log Screen Open Times" (off by default) writes
+one timing line per open so the switches can be compared off against on. What the screens show is
+unchanged.
 
 ## Why This Exists
 
@@ -369,6 +377,14 @@ page. None of its rows needs a restart; each is read on every screen open.
 
 | File | Purpose |
 |------|---------|
+| `Main/Features/ShadowfaxScreens/ShadowfaxScreensModule.cs` | The feature module: four patch categories at GameInit, registrations, static wiring, the clan install line and the quest log bind |
+| `Main/Features/ShadowfaxScreens/IShadowfaxScreensSettingsProvider.cs`, `ShadowfaxScreensSettingsProvider.cs` | The five Screen Performance switches; never throws, an unreadable switch returns its shipped default |
+| `Main/Features/ShadowfaxScreens/Diagnostics/` | `ScreenOpenTimer`, `ScreenOpenWindow` and the `ScreenOpenTiming` facade: one `[ScreenOpen]` line per open |
+| `Main/Features/ShadowfaxScreens/Clan/` | `ClanScreenFastPathService`, `ClanFastOpenCalls`, and the hooks: the `RefreshValues` call swap, the build counter and the `ClanManagementVM` timer |
+| `Main/Features/ShadowfaxScreens/Party/` | `PartyScreenFastPathService` (the per-screen portrait code cache), `PartyFastOpenCalls`, `PartyPhase` and six hooks |
+| `Main/Features/ShadowfaxScreens/Quests/` | `QuestLogDeferService`, `QuestLogDeferCalls`, `QuestOpenCall` and six hooks |
+| `Main/Adapters/IQuestJournalAdapter.cs`, `QuestJournalAdapter.cs` | The quest log's engine reads: the private `PopulateQuestLog` replay, the unexamined-log check, and the four-patch attachment check |
+| `Main/Features/BattleLoadDiagnostics/BattleLoadDiagnosticsSettings.cs` | The "Screen Performance" MCM rows |
 | `Main/Features/ShadowfaxScreens/Inventory/InventoryOpenFastPathService.cs` | Toggle gate, install line, per-open counters and detail (no TaleWorlds types) |
 | `Main/Features/ShadowfaxScreens/Inventory/NameSortRewrite.cs` | Pure IL rewrite for the two sort-call swaps |
 | `Main/Features/ShadowfaxScreens/Inventory/ShadowfaxInventoryCalls.cs` | The category constant, the sort helper the rewrite calls and the static wiring the hooks reach |
@@ -381,6 +397,10 @@ page. None of its rows needs a restart; each is read on every screen open.
 ## Dependencies
 
 - Bannerlord.UIExtenderEx 2.13.3 (through TAOM.Dependencies): `Prefabs.CustomPatch<XmlDocument>`.
+- MCM, through `BattleLoadDiagnosticsSettings` ("Screen Performance" group).
+- `IStampClock` (registered by `LoadTimeStampsModule`) for the open timer and the phase timings.
+- `ICoopPresenceProvider` (CoopInterop) for the clan fast path, which is off while a co-op module is loaded.
+- `TickProfilerTranspiler` (MissionPerf) for the clan call swap.
 
 ## Tests
 
@@ -392,6 +412,23 @@ page. None of its rows needs a restart; each is read on every screen open.
   duration (needs the game install); and checks TAOM's four prefabs are already instant.
 - `TAOM.Tests/Migration/PrefabExtensionBindingTests.cs`: every `[PrefabExtension]` movie name,
   including these nine, must exist in the installed game with the exact case of its file name.
+- `TAOM.Tests/Features/ShadowfaxScreens/ShadowfaxScreensModuleTests.cs`: registrations, all five
+  facades wired and reset, the GameInit install and bind, the declared categories, every Shadowfax
+  hook class in a declared category and every hook file under 150 lines.
+- `ShadowfaxScreensSettingsProviderTests.cs` (the five shipped defaults) and `ScreenOpenTimerTests.cs`
+  (one line per window, off reads no clock, never throws).
+- `Clan/`: `ClanScreenFastPathServiceTests`, `ClanFastOpenHookTests` (real Harmony: a postfix on the
+  list build runs only for real builds, soft-fail on a wrong site count), `ClanFastOpenBindingTests`
+  (the installed IL: one call site, the three-build chain, the header tail, JIT acceptance).
+- `Inventory/`: `NameSortRewriteTests`, `InventoryOpenFastPathServiceTests`,
+  `ShadowfaxInventoryCallsTests`, `InventoryOpenPatchShapeTests`, `InventoryBindingTests` (both sort
+  sites, the re-sort after every build, JIT acceptance).
+- `Party/`: `PartyScreenFastPathServiceTests`, `PartyFastOpenPatchShapeTests` (real Harmony pairs),
+  `PartyFastOpenBindingTests` (signatures, and that the three `CharacterCode` consumers read only
+  `Code`).
+- `Quests/`: `QuestLogDeferServiceTests`, `QuestLogDeferCallsTests`, `QuestLogPatchTests` (real
+  Harmony, incl. the `int` sort parameter), `QuestJournalAdapterTests` (the attachment check),
+  `QuestLogFastOpenBindingTests` (the installed IL and the `JournalLogIndex` values).
 
 ## How to make another screen instant
 
@@ -404,9 +441,15 @@ page. None of its rows needs a restart; each is read on every screen open.
 
 ## Changelog
 
-- 2026-10-18: first version.
+- 2026-10-19: screen open speed for the clan, inventory and trade, party and quest screens, the
+  "Screen Performance" switches and the open timer. Not yet measured in game: each screen's change is
+  kept only if the A/B shows a median saving of at least 16 ms.
+- 2026-10-18: first version (instant transitions).
 
 ## GitHub Issue
 
-- **Issue:** #850: [Instant UI: management screens open without slide animations](https://github.com/haterade22/TAOM/issues/850)
-- **Status:** Open
+- **Issue:** #850: [Instant UI: management screens open without slide animations](https://github.com/haterade22/TAOM/issues/850). **Status:** Open (merged, in-game check owed).
+- **Issue:** #851: clan screen fast open. **Status:** Open.
+- **Issue:** #852: inventory and trade screen fast open. **Status:** Open.
+- **Issue:** #853: party screen fast open. **Status:** Open.
+- **Issue:** #854: quest log fast open. **Status:** Open.
