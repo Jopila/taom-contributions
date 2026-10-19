@@ -3,22 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TaleWorlds.CampaignSystem.ViewModelCollection.ClanManagement;
 using TaleWorlds.CampaignSystem.ViewModelCollection.ClanManagement.Categories;
 using TaleWorlds.Core;
+using TAOM.Features.MissionPerf;
+using TAOM.Features.ShadowfaxScreens.Clan;
 using TAOM.Features.ShadowfaxScreens.Clan.Hooks;
 using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.ShadowfaxScreens.Clan;
 
 /// <summary>
-/// Pins what Clan fast open depends on in the installed engine (v1.5.5 when written): the two <c>ClanPartiesVM</c> targets and
-/// their patch parameters, the vanilla call chain that builds the party lists three times per open (the reason skipping the
-/// inner build is safe and worth it), the header tail of the list build that the RefreshValues finalizer re-renders, and the
-/// explicit <c>IGameStateListener.OnActivate</c> the timer binds through the interface map. The IL tests carry
-/// <c>RequiresGameIL</c>; a red one after an engine update means the skip must be re-proven before it ships again.
+/// Pins what Clan fast open depends on in the installed engine (v1.5.5 when written): the two <c>ClanPartiesVM</c> targets,
+/// the vanilla call chain that builds the party lists three times per open (the reason skipping the inner build is safe and
+/// worth it), the single <c>RefreshPartiesList()</c> call the transpiler swaps, the header tail of the list build that the
+/// swap helper re-renders, the one <c>ClanManagementVM</c> constructor the timer binds, and that the patched
+/// <c>RefreshValues</c> compiles. The IL tests carry <c>RequiresGameIL</c>; a red one after an engine update means the skip
+/// must be re-proven before it ships again.
 /// </summary>
 [TestClass]
 [TestCategory("RequiresGame")]
@@ -78,17 +82,17 @@ public class ClanFastOpenBindingTests
 
         var values = typeof(ClanPartiesVM_RefreshValues_ClanFastOpen_Patch);
         var list = typeof(ClanPartiesVM_RefreshPartiesList_ClanFastOpen_Patch);
-        var activate = typeof(GauntletClanScreen_OnActivate_ClanFastOpen_Patch);
+        var ctor = typeof(ClanManagementVM_Ctor_ClanFastOpen_Patch);
 
-        Assert.AreEqual("__instance:Object,__state:Object&", Describe(values.GetMethod("Prefix")!));
-        Assert.AreEqual("__instance:Object,__exception:Exception,__state:Object", Describe(values.GetMethod("Finalizer")!));
-        Assert.AreEqual(typeof(bool), list.GetMethod("Prefix")!.ReturnType, "the list prefix is the one that may skip");
-        Assert.AreEqual("__instance:Object,__state:Int64&", Describe(list.GetMethod("Prefix")!));
+        Assert.AreEqual("instructions:IEnumerable`1", Describe(values.GetMethod("Transpiler")!));
+        Assert.AreEqual("ex:Exception", Describe(values.GetMethod("Cleanup")!));
+        Assert.AreEqual(typeof(void), list.GetMethod("Prefix")!.ReturnType, "the list prefix only counts; the skip is the transpiler's");
+        Assert.AreEqual("__state:Int64&", Describe(list.GetMethod("Prefix")!));
         Assert.AreEqual("__state:Int64", Describe(list.GetMethod("Finalizer")!));
-        Assert.AreEqual("__state:ScreenOpenWindow&", Describe(activate.GetMethod("Prefix")!));
-        Assert.AreEqual("__exception:Exception,__state:ScreenOpenWindow", Describe(activate.GetMethod("Finalizer")!));
-        foreach (var m in new[] { values, list, activate }.SelectMany(t => new[] { t.GetMethod("Finalizer")! }))
-            Assert.AreEqual(typeof(void), m.ReturnType, "a finalizer is void so Harmony keeps rethrow");
+        Assert.AreEqual("__state:ScreenOpenWindow&", Describe(ctor.GetMethod("Prefix")!));
+        Assert.AreEqual("__exception:Exception,__state:ScreenOpenWindow", Describe(ctor.GetMethod("Finalizer")!));
+        foreach (var t in new[] { list, ctor })
+            Assert.AreEqual(typeof(void), t.GetMethod("Finalizer")!.ReturnType, "a finalizer is void so Harmony keeps rethrow");
     }
 
     private static string Describe(MethodInfo m) =>
@@ -216,33 +220,61 @@ public class ClanFastOpenBindingTests
     [TestMethod]
     [TestCategory("BindingVerification")]
     [TestCategory("RequiresGame")]
-    public void OnActivate_ResolvesThroughTheInterfaceMap_ToAnExplicitInstanceMethodOfGauntletClanScreen()
+    public void ClanManagementVM_HasOneConstructor_TheTimerPatchResolves()
     {
         RequireGame();
 
-        var target = GauntletClanScreen_OnActivate_ClanFastOpen_Patch.TargetMethod();
+        var only = typeof(ClanManagementVM).GetConstructors(Any).Single();
+        var attribute = typeof(ClanManagementVM_Ctor_ClanFastOpen_Patch).GetCustomAttributes<HarmonyPatch>().Single();
 
-        Assert.IsNotNull(target, "IGameStateListener.OnActivate is not mapped on GauntletClanScreen");
-        Assert.AreEqual(AccessTools.TypeByName("SandBox.GauntletUI.GauntletClanScreen"), target!.DeclaringType);
-        Assert.IsFalse(target.IsStatic);
-        Assert.IsTrue(target.IsPrivate, "an explicit implementation is private, which is why the name string cannot find it");
-        Assert.AreEqual(0, target.GetParameters().Length);
-        Assert.AreEqual(typeof(void), ((MethodInfo)target).ReturnType);
+        Assert.AreEqual(typeof(ClanManagementVM), attribute.info.declaringType);
+        Assert.AreEqual(MethodType.Constructor, attribute.info.methodType);
+        var resolved = AccessTools.Constructor(typeof(ClanManagementVM), attribute.info.argumentTypes);
+        Assert.AreEqual(only, resolved, "the patch's argument types must name the only constructor");
+        Assert.IsFalse(only.IsStatic);
     }
 
     [TestMethod]
     [TestCategory("BindingVerification")]
     [TestCategory("RequiresGameIL")]
-    public void OnActivate_BuildsTheDataSource_ThenLoadsTheClanMovie()
+    public void RefreshValues_RewrittenAgainstTheRealIl_SwapsExactlyTheOneListBuildCall()
     {
         RequireGame();
+        var method = PartiesMethod("RefreshValues");
 
-        var target = GauntletClanScreen_OnActivate_ClanFastOpen_Patch.TargetMethod()!;
-        var calls = CallSequence(target);
+        var result = TickProfilerTranspiler.Rewrite(Il(method), ClanFastOpenCalls.BuildSwaps(), "ClanPartiesVM.RefreshValues", null, out var swapped);
 
-        var create = IndexOf(calls, "GauntletClanScreen.CreateDataSource");
-        var load = IndexOf(calls, "GauntletLayer.LoadMovie");
-        Assert.IsTrue(create >= 0 && load > create, "the open window should span the VM build and the movie load: " + string.Join(" > ", calls));
-        Assert.IsTrue(Literals(target).Contains("ClanScreen"));
+        Assert.AreEqual(1, swapped);
+        Assert.AreEqual(1, result.Count(ci => ci.operand is MethodInfo m && m.DeclaringType == typeof(ClanFastOpenCalls)));
+        Assert.AreEqual(0, result.Count(ci => ci.operand is MethodInfo m && m.Name == "RefreshPartiesList"));
+    }
+
+    // The rewrite is checked as IL above. This applies the real patch class, so Harmony builds the replacement and the JIT
+    // compiles it (an InvalidProgramException from a mis-shaped swap would surface here), then takes it off again. The
+    // method is never run: a ClanPartiesVM cannot be built in a test host.
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
+    public void RefreshValuesPatch_AppliedToTheInstalledEngine_BuildsAReplacementTheJitAccepts()
+    {
+        RequireGame();
+        const string id = "taom.tests.clanfastopen.jit";
+        var harmony = new Harmony(id);
+        var method = PartiesMethod("RefreshValues");
+        try
+        {
+            ClanFastOpenCalls.LastSwapped = 0;
+
+            harmony.CreateClassProcessor(typeof(ClanPartiesVM_RefreshValues_ClanFastOpen_Patch)).Patch();
+
+            Assert.IsTrue(Harmony.GetPatchInfo(method).Transpilers.Any(p => p.owner == id), "the transpiler is attached");
+            Assert.AreEqual(1, ClanFastOpenCalls.LastSwapped, "the transpiler swapped the call when Harmony ran it");
+            RuntimeHelpers.PrepareMethod(method.MethodHandle);
+        }
+        finally
+        {
+            harmony.UnpatchAll(id);
+            ClanFastOpenCalls.LastSwapped = 0;
+        }
     }
 }

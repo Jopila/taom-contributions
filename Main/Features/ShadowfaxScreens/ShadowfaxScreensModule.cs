@@ -21,7 +21,7 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
 {
     private static readonly PatchCategoryDecl[] Categories =
     {
-        new("PatchXXX_ShadowfaxClan", ApplyPhase.GameInit),
+        new(ClanFastOpenCalls.PatchCategory, ApplyPhase.GameInit),
         new(InventoryPatchCategory.Name, ApplyPhase.GameInit),
         new("PatchXXX_ShadowfaxParty", ApplyPhase.GameInit),
         new("PatchXXX_ShadowfaxQuests", ApplyPhase.GameInit),
@@ -69,8 +69,12 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
 
     public override void OnPhase(ApplyPhase phase, IResolver resolver)
     {
+        if (phase != ApplyPhase.GameInit) return;
+
+        // The Clan category has just applied: report whether its transpiler found the one call site.
+        resolver.Resolve<ClanScreenFastPathService>().LogInstall(ClanFastOpenCalls.LastSwapped);
+
         // The Quest log's category has just applied: bind the adapter, which checks its four patches are attached.
-        if (phase == ApplyPhase.GameInit)
-            resolver.Resolve<QuestLogDeferService>().Install();
+        resolver.Resolve<QuestLogDeferService>().Install();
     }
 }

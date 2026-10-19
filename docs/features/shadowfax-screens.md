@@ -86,37 +86,58 @@ clan. Vanilla runs it three times in one open, all for the same instance:
 
 Builds 2 and 3 rebuild lists that build 1 just filled with nothing in between to change them.
 
-**What is skipped:** only a `RefreshPartiesList` call made inside the same instance's own
-`RefreshValues`. A prefix on `RefreshValues` opens a refresh scope (a token held in a thread-static
-and handed to the finalizer through Harmony's `__state`); the bool prefix on `RefreshPartiesList`
-returns false only when the innermost scope belongs to that exact instance. Direct callers always
-build: `ClanManagementVM.RefreshCategoryValues` (after a fief, member or income change) and any
-co-op handler are never inside a scope. A thrown exception, a later finalizer that throws, or a
-stripped prefix cannot leave a scope open, because the finalizer closes it from the token and a null
-token does nothing.
+**What is skipped:** only the `RefreshPartiesList()` call inside `ClanPartiesVM.RefreshValues`, which is by
+construction that instance's own call. One transpiler on `RefreshValues` swaps that single call for
+`ClanFastOpenCalls.RefreshPartiesListInRefresh(vm)`. With the fast path on (the switch on and co-op off) the
+helper renders the two headers and returns; otherwise it calls `vm.RefreshPartiesList()` as vanilla does. The
+rewrite is the soft-failing `TickProfilerTranspiler.Rewrite`: a call count other than one leaves the whole method
+vanilla, and one line at game init says which happened (`[Shadowfax] Clan fast open installed: ...` or `not
+installed: ...`). Direct callers are never touched, because the swap is at one call site, not on the callee:
+`ClanManagementVM.RefreshCategoryValues` (after a fief, member or income change) and any co-op handler call
+`RefreshPartiesList` itself and always build.
 
-**Headers:** vanilla sets the "Caravans (N)" and "Garrisons (N)" header texts only at the end of
-`RefreshPartiesList` (`ClanPartiesVM.cs:500-503`), while `RefreshValues` first resets them to the
-bare text. After a skip the `RefreshValues` finalizer re-renders both headers from the current
-lists, with the same `GameTexts` calls vanilla makes. The Parties header is not touched by
-`RefreshValues`, so it keeps the text build 1 gave it.
+**Harmony fact that shaped this:** a prefix that returns false does not stop postfixes. An earlier design skipped
+through a bool prefix, so every postfix of `RefreshPartiesList` (Refuge's, for one) still ran for the skipped call.
+With the call-site swap the skipped call never reaches the method, so its postfixes run only for real builds.
+`ClanFastOpenHookTests.APostfixOnTheListBuild_RunsOncePerRealBuild_NotForTheSkippedCall` pins it.
+
+**Headers:** vanilla sets the "Caravans (N)" and "Garrisons (N)" header texts at the end of
+`RefreshPartiesList` (`ClanPartiesVM.cs:500-503`), while `RefreshValues` first resets them to the stale text of the
+previous build (not the bare text). After a skip the helper renders both headers from the current lists, with the
+same `GameTexts` calls vanilla makes; if that throws, it falls back to the full build. The Parties header is not
+touched by `RefreshValues`, so it keeps the text build 1 gave it.
 
 **Interplay:**
-- **Refuge** (`RefugeClanScreenPatch`, a postfix on `RefreshPartiesList`) still runs after every
-  build that runs, so its refuge rows are added once, in the first build, and stay. The header
-  re-render counts them, as vanilla's did after Refuge's own re-render.
-- **TroopWeight** patches the row's `UpdateProperties`, not the list build. `RefreshValues` still
-  refreshes every party row after the skipped build, so it runs as before.
-- **Timer:** `GauntletClanScreen`'s explicit `IGameStateListener.OnActivate` (found through the
-  interface map, never a name string) is wrapped by the shared timer. With "Log Screen Open Times"
-  on, one line covers the VM build and the movie load, with the list-build counts as its detail:
-  `[ScreenOpen] Clan open: 212.4 ms (fast open on; list builds: 1 run, 2 skipped, 38.1 ms)`.
-  The build milliseconds are the real build only; with the switch off the detail reads
-  `fast open off; list builds: 3 run, 0 skipped, ...`.
+- **Refuge** (`RefugeClanScreenPatch`, a postfix on `RefreshPartiesList`) runs after every build that runs, so its
+  refuge rows are added once, in the first build, and stay. The header render counts them, as vanilla's did.
+- **TroopWeight** patches the row's `UpdateProperties`, not the list build. `RefreshValues` still refreshes every
+  party row after the skipped build, so it runs as before.
+- **Timer:** the `ClanManagementVM` constructor `(Action, Action<Hero>, Action<Hero>, Action)`, its only
+  constructor, is wrapped by the shared timer. All three list builds happen inside it, so with "Log Screen Open
+  Times" on, one line covers the VM build and not the movie load that follows in `GauntletClanScreen`, with the
+  list-build counts as its detail:
+  `[ScreenOpen] Clan open: 140.2 ms (fast open on; list builds: 2 run, 1 skipped, 38.1 ms)`.
+  The detail starts `fast open on;` or `fast open off;`, the path the open ran with (off under co-op). The build
+  milliseconds are the real builds only; a build the screen makes after the constructor (the category refresh
+  that `OnActivate` runs) is outside the window.
 
-**Known limit:** with the switch on, a `RefreshValues` call after the screen is open refreshes the
-existing rows without rebuilding the lists. The one place vanilla pairs a list change with it
-(`ClanManagementVM.cs:1389-1390`) calls `RefreshCategoryValues` first, which still rebuilds.
+**Callers that rebuild and then call `RefreshValues`:** two places pair a list rebuild with a `RefreshValues` in
+the same breath, and the skip keeps both correct because the rebuild is a direct `RefreshCategoryValues` call that
+still builds: `OnChangeClanNameDone` (`ClanManagementVM.cs:1389-1390`) and `GauntletClanScreen`'s protected
+`OnActivate` (`GauntletClanScreen.cs:226-239`, `RefreshCategoryValues` then `UpdateBannerVisuals`, which reaches
+`RefreshValues`). After party changes (a disband, a new leader) `ClanPartiesVM` calls `_onRefresh`, which the
+constructor wires to `RefreshCategoryValues`, so those also rebuild.
+
+**Known limit:** with the switch on, a `RefreshValues` call that has no rebuild in front of it refreshes the
+existing rows without rebuilding the lists. None of the vanilla callers listed above is such a call.
+
+**Co-op:** the switch is off while `ICoopPresenceProvider.IsCoopActive`, so under co-op the helper always builds and
+the screen is vanilla. The skip itself writes only this client's view-model lists and header texts.
+
+**In-game checklist:** (1) Open Clan with the switch on: Parties, Caravans and Garrisons headers show their
+counts, refuge rows appear once. (2) Disband a party or change a leader: the lists update. (3) Rename the clan:
+the lists and headers update. (4) Close and reopen the screen three times: no stale rows. (5) With "Log Screen
+Open Times" on, the open line reads `list builds: 2 run, 1 skipped`. (6) Switch off, reopen: `3 run, 0 skipped`.
 
 **How to measure:** turn "Log Screen Open Times" on in the Battle Load Diagnostics page, open the
 Clan screen six times with "Clan Fast Open" off, then six times with it on, on a large save. Drop
@@ -124,22 +145,28 @@ the first open of each arm and compare the medians of the `[ScreenOpen] Clan ope
 `taom_debug.log`. Keep the change only if the median drops by at least 16 ms (one 60 fps frame) and
 by more than the off arm's spread; otherwise delete it and keep the timer.
 
+**Removal checklist:** delete `ClanScreenFastPathService.cs`, `ClanFastOpenCalls.cs` and the three
+`Clan/Hooks` files; in `ShadowfaxScreensModule.cs` delete the Clan category line, the service registration, the
+`ClanFastOpenCalls.Initialize` line and the `LogInstall` line in `OnPhase`; delete the Clan tests; delete the
+"Clan Fast Open" setting in `BattleLoadDiagnosticsSettings` and its provider property and interface member; delete
+the Clan sections of this page and of `harmony-patch-registry.md`, and the `feature-map.md` clause.
+
 **Files:**
 
 | File | Purpose |
 |------|---------|
-| `Main/Features/ShadowfaxScreens/Clan/ClanScreenFastPathService.cs` | Refresh scopes, the skip decision, the open window's counts |
-| `Main/Features/ShadowfaxScreens/Clan/ClanFastOpenCalls.cs` | Static facade the hooks reach, and the patch category name |
-| `Main/Features/ShadowfaxScreens/Clan/Hooks/ClanPartiesVM_RefreshValues_ClanFastOpen_Patch.cs` | Opens and closes the scope; re-renders the headers after a skip |
-| `Main/Features/ShadowfaxScreens/Clan/Hooks/ClanPartiesVM_RefreshPartiesList_ClanFastOpen_Patch.cs` | The skip, and the build count and timing |
-| `Main/Features/ShadowfaxScreens/Clan/Hooks/GauntletClanScreen_OnActivate_ClanFastOpen_Patch.cs` | The `[ScreenOpen] Clan open` window |
+| `Main/Features/ShadowfaxScreens/Clan/ClanScreenFastPathService.cs` | The skip decision, the open window's counts, the install line |
+| `Main/Features/ShadowfaxScreens/Clan/ClanFastOpenCalls.cs` | Static facade, the patch category name, the swap and its helper |
+| `Main/Features/ShadowfaxScreens/Clan/Hooks/ClanPartiesVM_RefreshValues_ClanFastOpen_Patch.cs` | The transpiler that swaps the one list-build call |
+| `Main/Features/ShadowfaxScreens/Clan/Hooks/ClanPartiesVM_RefreshPartiesList_ClanFastOpen_Patch.cs` | Counts and times the builds that really run |
+| `Main/Features/ShadowfaxScreens/Clan/Hooks/ClanManagementVM_Ctor_ClanFastOpen_Patch.cs` | The `[ScreenOpen] Clan open` window |
 
-**Tests** (`TAOM.Tests/Features/ShadowfaxScreens/Clan/`): `ClanScreenFastPathServiceTests` (off,
-co-op, provider throw, owner-only skip, nesting, null token, counting window, detail format);
-`ClanFastOpenHookTests` (real Harmony on dummy classes: inner call skipped and direct call not, a
-throwing later finalizer, a stripped prefix, the open line); `ClanFastOpenBindingTests` (both
-targets, the three-build chain in the installed IL, the header tail, the interface-map target);
-`ClanFastOpenWiringTests` (registration, the facade, the category).
+**Tests** (`TAOM.Tests/Features/ShadowfaxScreens/Clan/`): `ClanScreenFastPathServiceTests` (off, co-op, co-op probe
+throw, counting window, detail format, install line); `ClanFastOpenHookTests` (real Harmony on dummy classes:
+inner call swapped and a direct call not, a postfix runs once per real build, the soft-fail cases, the open line);
+`ClanFastOpenBindingTests` (both targets, the three-build chain in the installed IL, the single swapped call, the
+header tail, the one constructor, and a JIT-acceptance test that applies the transpiler to the real method). The
+module wiring is in `ShadowfaxScreensModuleTests`.
 
 ## Inventory and trade fast open
 

@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
+using TAOM.Features.MissionPerf;
 using TAOM.Features.ShadowfaxScreens;
 using TAOM.Features.ShadowfaxScreens.Clan;
 using TAOM.Features.ShadowfaxScreens.Clan.Hooks;
@@ -16,16 +19,21 @@ using TAOM.Tests.Migration;
 namespace TAOM.Tests.Features.ShadowfaxScreens.Clan;
 
 /// <summary>
-/// The three Clan fast open hooks against real Harmony 2.4.2 on dummy classes of vanilla's shape: a RefreshValues that calls
-/// RefreshPartiesList, and an OnActivate that builds the VM. The hooks take <c>object __instance</c> so the dummy binds.
+/// The Clan fast open hooks against real Harmony 2.4.2 on dummy classes of vanilla's shape: a RefreshValues that calls
+/// RefreshPartiesList, and a screen constructor that builds the VM. The real transpiler cannot name a dummy, so these
+/// tests swap the dummy's call with <see cref="SkipOrBuild"/>, which makes the same decision as
+/// <see cref="ClanFastOpenCalls.RefreshPartiesListInRefresh"/> through the same service; the swap itself is checked
+/// against the real IL in ClanFastOpenBindingTests.
 /// </summary>
 [TestClass]
 [TestCategory("RequiresGame")]
 public class ClanFastOpenHookTests
 {
     private const string HarmonyId = "taom.tests.clanfastopen.hooks";
+    private const BindingFlags Static = BindingFlags.NonPublic | BindingFlags.Static;
 
     private static bool _gameLoaded;
+    private static int _postfixRuns;
 
     private IShadowfaxScreensSettingsProvider _settings = null!;
     private FakeStampClock _clock = null!;
@@ -59,17 +67,36 @@ public class ClanFastOpenHookTests
 
     private sealed class DummyScreen
     {
-        public DummyParties Parties = new DummyParties();
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public void OnActivate()
+        public DummyScreen()
         {
-            Parties.RefreshValues();
-            Parties.RefreshPartiesList();
+            var parties = new DummyParties();
+            parties.RefreshPartiesList();
+            parties.RefreshValues();
+            parties.RefreshPartiesList();
         }
     }
 
-    private static void ThrowingFinalizer() => throw new InvalidOperationException("a finalizer after the fast path");
+    // Stands in for ClanFastOpenCalls.RefreshPartiesListInRefresh: the same service decision, over the dummy.
+    private static void SkipOrBuild(DummyParties parties)
+    {
+        if (ClanFastOpenCalls.Service?.ShouldSkipListBuild() == true) return;
+        parties.RefreshPartiesList();
+    }
+
+    private static MethodInfo SkipOrBuildMethod => typeof(ClanFastOpenHookTests).GetMethod(nameof(SkipOrBuild), Static)!;
+
+    private static IEnumerable<CodeInstruction> SwapTranspiler(IEnumerable<CodeInstruction> instructions) =>
+        TickProfilerTranspiler.Rewrite(instructions,
+            new[] { new CallSwap(typeof(DummyParties).GetMethod(nameof(DummyParties.RefreshPartiesList))!, SkipOrBuildMethod) },
+            "Dummy.RefreshValues", null, out _);
+
+    // Two helpers for the one occurrence: the site count does not match, so the rewrite bails.
+    private static IEnumerable<CodeInstruction> MismatchedTranspiler(IEnumerable<CodeInstruction> instructions) =>
+        TickProfilerTranspiler.Rewrite(instructions,
+            new[] { new CallSwap(typeof(DummyParties).GetMethod(nameof(DummyParties.RefreshPartiesList))!, new[] { SkipOrBuildMethod, SkipOrBuildMethod }) },
+            "Dummy.RefreshValues", null, out _);
+
+    private static void CountingPostfix() => _postfixRuns++;
 
     [TestInitialize]
     public void Setup()
@@ -81,7 +108,7 @@ public class ClanFastOpenHookTests
         var coop = Substitute.For<ICoopPresenceProvider>();
         _clock = new FakeStampClock { Frequency = 10000, Now = 5000 };
         _logger = new RecordingLogger();
-        _service = new ClanScreenFastPathService(_settings, coop, _clock);
+        _service = new ClanScreenFastPathService(_settings, coop, _clock, Substitute.For<IModLogger>());
         ClanFastOpenCalls.Initialize(_service);
         ScreenOpenTiming.Initialize(new ScreenOpenTimer(_clock, _logger, _settings));
         _harmony = new Harmony(HarmonyId);
@@ -97,20 +124,36 @@ public class ClanFastOpenHookTests
 
     private static HarmonyMethod Fix(Type hook, string name) => new HarmonyMethod(hook.GetMethod(name));
 
-    private void PatchRefreshValues(bool prefix = true) => _harmony.Patch(
+    private void PatchRefreshValues(string transpiler = nameof(SwapTranspiler)) => _harmony.Patch(
         typeof(DummyParties).GetMethod(nameof(DummyParties.RefreshValues)),
-        prefix: prefix ? Fix(typeof(ClanPartiesVM_RefreshValues_ClanFastOpen_Patch), "Prefix") : null,
-        finalizer: Fix(typeof(ClanPartiesVM_RefreshValues_ClanFastOpen_Patch), "Finalizer"));
+        transpiler: new HarmonyMethod(typeof(ClanFastOpenHookTests).GetMethod(transpiler, Static)));
 
     private void PatchRefreshPartiesList() => _harmony.Patch(
         typeof(DummyParties).GetMethod(nameof(DummyParties.RefreshPartiesList)),
         prefix: Fix(typeof(ClanPartiesVM_RefreshPartiesList_ClanFastOpen_Patch), "Prefix"),
         finalizer: Fix(typeof(ClanPartiesVM_RefreshPartiesList_ClanFastOpen_Patch), "Finalizer"));
 
-    private void PatchOnActivate(bool prefix = true) => _harmony.Patch(
-        typeof(DummyScreen).GetMethod(nameof(DummyScreen.OnActivate)),
-        prefix: prefix ? Fix(typeof(GauntletClanScreen_OnActivate_ClanFastOpen_Patch), "Prefix") : null,
-        finalizer: Fix(typeof(GauntletClanScreen_OnActivate_ClanFastOpen_Patch), "Finalizer"));
+    private void PatchCtor(bool prefix = true) => _harmony.Patch(
+        typeof(DummyScreen).GetConstructor(Type.EmptyTypes),
+        prefix: prefix ? Fix(typeof(ClanManagementVM_Ctor_ClanFastOpen_Patch), "Prefix") : null,
+        finalizer: Fix(typeof(ClanManagementVM_Ctor_ClanFastOpen_Patch), "Finalizer"));
+
+    [TestMethod]
+    public void APostfixOnTheListBuild_RunsOncePerRealBuild_NotForTheSkippedCall()
+    {
+        _postfixRuns = 0;
+        PatchRefreshValues();
+        PatchRefreshPartiesList();
+        _harmony.Patch(typeof(DummyParties).GetMethod(nameof(DummyParties.RefreshPartiesList)),
+            postfix: new HarmonyMethod(typeof(ClanFastOpenHookTests).GetMethod(nameof(CountingPostfix), Static)));
+        var parties = new DummyParties();
+
+        parties.RefreshValues();
+        parties.RefreshPartiesList();
+
+        Assert.AreEqual(1, parties.Builds);
+        Assert.AreEqual(1, _postfixRuns, "the skip leaves the call site, so no postfix of the list build fires for it");
+    }
 
     [TestMethod]
     public void InnerBuildInsideRefreshValues_IsSkipped_ADirectCallStillBuilds()
@@ -121,6 +164,7 @@ public class ClanFastOpenHookTests
 
         parties.RefreshValues();
         Assert.AreEqual(0, parties.Builds, "the build inside RefreshValues is skipped");
+        Assert.AreEqual(1, parties.Refreshes);
 
         parties.RefreshPartiesList();
         Assert.AreEqual(1, parties.Builds, "a direct call builds");
@@ -140,84 +184,73 @@ public class ClanFastOpenHookTests
     }
 
     [TestMethod]
-    public void LaterFinalizerThatThrows_StillRestoresTheOwner()
+    public void TranspilerWithTheWrongSiteCount_LeavesRefreshValuesVanilla()
     {
-        PatchRefreshValues();
-        PatchRefreshPartiesList();
-        _harmony.Patch(typeof(DummyParties).GetMethod(nameof(DummyParties.RefreshValues)),
-            finalizer: new HarmonyMethod(typeof(ClanFastOpenHookTests)
-                .GetMethod(nameof(ThrowingFinalizer), BindingFlags.NonPublic | BindingFlags.Static)) { priority = Priority.Last });
-        var parties = new DummyParties();
-
-        Assert.ThrowsException<InvalidOperationException>(() => parties.RefreshValues());
-
-        parties.RefreshPartiesList();
-        Assert.AreEqual(1, parties.Builds, "the owner was restored, so a direct build runs");
-    }
-
-    [TestMethod]
-    public void PrefixStripped_TheFinalizerAloneChangesNothing()
-    {
-        PatchRefreshValues(prefix: false);
+        PatchRefreshValues(nameof(MismatchedTranspiler));
         PatchRefreshPartiesList();
         var parties = new DummyParties();
 
         parties.RefreshValues();
 
-        Assert.AreEqual(1, parties.Builds, "no token, so nothing skipped");
-        Assert.AreEqual(1, parties.Refreshes);
+        Assert.AreEqual(1, parties.Builds, "the soft-fail keeps vanilla's build");
     }
 
     [TestMethod]
-    public void DirectBuildThatThrows_PropagatesAsInVanilla_AndLeavesNoOwner()
+    public void TheRealSwap_FindingNoClanPartiesCall_LeavesTheMethodVanilla()
+    {
+        var il = PatchProcessor.GetOriginalInstructions(typeof(DummyParties).GetMethod(nameof(DummyParties.RefreshValues))).ToList();
+
+        var result = TickProfilerTranspiler.Rewrite(il, ClanFastOpenCalls.BuildSwaps(), "Dummy", null, out var swapped);
+
+        Assert.AreEqual(0, swapped, "the real swap targets ClanPartiesVM, which the dummy never calls");
+        Assert.AreEqual(il.Count, result.Count);
+    }
+
+    [TestMethod]
+    public void ListBuildThatThrows_PropagatesAsInVanilla()
     {
         PatchRefreshValues();
         PatchRefreshPartiesList();
         var parties = new DummyParties { ThrowInBuild = true };
-        var other = new DummyParties();
 
-        // The inner build is skipped, so no throw happens inside RefreshValues; a direct call throws as vanilla does.
         parties.RefreshValues();
         Assert.ThrowsException<InvalidOperationException>(() => parties.RefreshPartiesList());
-
-        other.RefreshPartiesList();
-        Assert.AreEqual(1, other.Builds);
     }
 
     [TestMethod]
-    public void OnActivate_WritesOneOpenLine_WithTheBuildCounts()
+    public void Ctor_WritesOneOpenLine_WithTheBuildCounts()
     {
         PatchRefreshValues();
         PatchRefreshPartiesList();
-        PatchOnActivate();
+        PatchCtor();
 
-        new DummyScreen().OnActivate();
+        new DummyScreen();
 
         var line = _logger.Lines.Single(l => l.Contains("[ScreenOpen]"));
         StringAssert.Contains(line, "[ScreenOpen] Clan open: ");
-        StringAssert.EndsWith(line, "(fast open on; list builds: 1 run, 1 skipped, 0.0 ms)");
+        StringAssert.EndsWith(line, "(fast open on; list builds: 2 run, 1 skipped, 0.0 ms)");
     }
 
     [TestMethod]
-    public void OnActivate_TimerOff_WritesNothing_AndOpensNoCountWindow()
+    public void Ctor_TimerOff_WritesNothing_AndOpensNoCountWindow()
     {
         _settings.LogScreenOpenTimes.Returns(false);
         PatchRefreshValues();
         PatchRefreshPartiesList();
-        PatchOnActivate();
+        PatchCtor();
 
-        new DummyScreen().OnActivate();
+        new DummyScreen();
 
         Assert.AreEqual(0, _logger.Lines.Count);
         Assert.AreEqual("", _service.EndOpen(), "no window was opened");
     }
 
     [TestMethod]
-    public void OnActivate_FinalizerWithoutItsPrefix_WritesNothing()
+    public void Ctor_FinalizerWithoutItsPrefix_WritesNothing()
     {
-        PatchOnActivate(prefix: false);
+        PatchCtor(prefix: false);
 
-        new DummyScreen().OnActivate();
+        new DummyScreen();
 
         Assert.AreEqual(0, _logger.Lines.Count);
     }

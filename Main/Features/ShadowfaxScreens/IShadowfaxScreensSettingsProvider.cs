@@ -3,6 +3,8 @@ namespace TAOM.Features.ShadowfaxScreens;
 /// <summary>
 /// The "Screen Performance" group of the Battle Load Diagnostics MCM page. Every getter is read per screen open,
 /// so a switch applies to the next open without a restart.
+/// Contract: no getter ever throws. An unreadable switch (no MCM instance, a faulting read) returns its shipped default,
+/// fast opens on and the timer off, so a caller needs no try/catch around a read.
 /// </summary>
 public interface IShadowfaxScreensSettingsProvider
 {

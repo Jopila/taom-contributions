@@ -20,6 +20,18 @@ public class ShadowfaxScreensSettingsProviderTests
     }
 
     [TestMethod]
+    public void TheMcmPage_ShipsTheFastOpenSwitchesOn_AndTheTimerOff()
+    {
+        var settings = new BattleLoadDiagnosticsSettings();
+
+        Assert.IsFalse(settings.LogScreenOpenTimes);
+        Assert.IsTrue(settings.ClanFastOpen);
+        Assert.IsTrue(settings.InventoryFastOpen);
+        Assert.IsTrue(settings.PartyFastOpen);
+        Assert.IsTrue(settings.QuestLogFastOpen);
+    }
+
+    [TestMethod]
     public void ReadsThroughTheCachedSettings()
     {
         var settings = new BattleLoadDiagnosticsSettings();

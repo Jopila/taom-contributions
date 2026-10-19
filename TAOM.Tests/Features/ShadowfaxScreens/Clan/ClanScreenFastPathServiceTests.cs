@@ -2,6 +2,7 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.ShadowfaxScreens;
 using TAOM.Features.ShadowfaxScreens.Clan;
@@ -16,8 +17,7 @@ public class ClanScreenFastPathServiceTests
     private ICoopPresenceProvider _coop = null!;
     private FakeStampClock _clock = null!;
     private ClanScreenFastPathService _sut = null!;
-    private readonly object _a = new object();
-    private readonly object _b = new object();
+    private IModLogger _logger = null!;
 
     [TestInitialize]
     public void Setup()
@@ -27,127 +27,65 @@ public class ClanScreenFastPathServiceTests
         _coop = Substitute.For<ICoopPresenceProvider>();
         _coop.IsCoopActive.Returns(false);
         _clock = new FakeStampClock { Frequency = 10000, Now = 5000 };
-        _sut = new ClanScreenFastPathService(_settings, _coop, _clock);
+        _logger = Substitute.For<IModLogger>();
+        _sut = new ClanScreenFastPathService(_settings, _coop, _clock, _logger);
     }
 
     [TestMethod]
-    public void ShouldSkipListBuild_TheOwnerInsideItsRefresh_IsTrue()
+    public void ShouldSkipListBuild_FastPathOn_IsTrue()
     {
-        var token = _sut.EnterRefresh(_a);
-
-        Assert.IsNotNull(token);
-        Assert.IsTrue(_sut.ShouldSkipListBuild(_a));
-        Assert.IsTrue(_sut.ExitRefresh(token));
+        Assert.IsTrue(_sut.ShouldSkipListBuild());
     }
 
     [TestMethod]
-    public void EnterRefresh_ToggleOff_NoTokenAndNothingSkips()
+    public void ShouldSkipListBuild_ToggleOff_IsFalse()
     {
         _settings.ClanFastOpen.Returns(false);
 
-        Assert.IsNull(_sut.EnterRefresh(_a));
-        Assert.IsFalse(_sut.ShouldSkipListBuild(_a));
+        Assert.IsFalse(_sut.ShouldSkipListBuild());
     }
 
     [TestMethod]
-    public void EnterRefresh_CoopActive_NoTokenAndNothingSkips()
+    public void ShouldSkipListBuild_CoopActive_IsFalse()
     {
         _coop.IsCoopActive.Returns(true);
 
-        Assert.IsNull(_sut.EnterRefresh(_a));
-        Assert.IsFalse(_sut.ShouldSkipListBuild(_a));
+        Assert.IsFalse(_sut.ShouldSkipListBuild());
     }
 
     [TestMethod]
-    public void EnterRefresh_SettingsProviderThrows_CountsAsOff()
-    {
-        _settings.ClanFastOpen.Throws(new InvalidOperationException("mcm gone"));
-
-        Assert.IsNull(_sut.EnterRefresh(_a));
-        Assert.IsFalse(_sut.ShouldSkipListBuild(_a));
-    }
-
-    [TestMethod]
-    public void EnterRefresh_CoopProviderThrows_CountsAsOff()
+    public void ShouldSkipListBuild_CoopProviderThrows_CountsAsOff()
     {
         _coop.IsCoopActive.Throws(new InvalidOperationException("coop probe gone"));
 
-        Assert.IsNull(_sut.EnterRefresh(_a));
+        Assert.IsFalse(_sut.ShouldSkipListBuild());
     }
 
     [TestMethod]
-    public void ShouldSkipListBuild_AnotherInstance_IsFalseAndDoesNotMarkASkip()
+    public void LogInstall_OneSite_LogsInfo()
     {
-        var token = _sut.EnterRefresh(_a);
+        _sut.LogInstall(1);
 
-        Assert.IsFalse(_sut.ShouldSkipListBuild(_b));
-        Assert.IsFalse(_sut.ExitRefresh(token), "no skip happened for the owner");
+        _logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains("Clan fast open installed")));
+        _logger.DidNotReceiveWithAnyArgs().LogWarning(default!);
     }
 
     [TestMethod]
-    public void ShouldSkipListBuild_NoRefreshInProgress_IsFalse()
+    [DataRow(0)]
+    [DataRow(2)]
+    public void LogInstall_AnyOtherCount_LogsOneWarningNamingTheCount(int swapped)
     {
-        Assert.IsFalse(_sut.ShouldSkipListBuild(_a));
-    }
+        _sut.LogInstall(swapped);
 
-    [TestMethod]
-    public void ShouldSkipListBuild_AfterTheRefreshExited_IsFalse()
-    {
-        _sut.ExitRefresh(_sut.EnterRefresh(_a));
-
-        Assert.IsFalse(_sut.ShouldSkipListBuild(_a), "a direct RefreshPartiesList after the refresh must build");
-    }
-
-    [TestMethod]
-    public void ExitRefresh_NoSkipHappened_ReturnsFalse()
-    {
-        Assert.IsFalse(_sut.ExitRefresh(_sut.EnterRefresh(_a)));
-    }
-
-    [TestMethod]
-    public void ExitRefresh_NestedEnter_RestoresThePreviousOwner()
-    {
-        var outer = _sut.EnterRefresh(_a);
-        var inner = _sut.EnterRefresh(_b);
-        Assert.IsTrue(_sut.ShouldSkipListBuild(_b));
-        Assert.IsFalse(_sut.ShouldSkipListBuild(_a), "the inner owner is current");
-
-        Assert.IsTrue(_sut.ExitRefresh(inner));
-
-        Assert.IsTrue(_sut.ShouldSkipListBuild(_a), "the outer owner is current again");
-        Assert.IsFalse(_sut.ShouldSkipListBuild(_b));
-        Assert.IsTrue(_sut.ExitRefresh(outer));
-        Assert.IsFalse(_sut.ShouldSkipListBuild(_a));
-    }
-
-    [TestMethod]
-    public void ExitRefresh_NullToken_LeavesAnotherOwnerAlone()
-    {
-        var token = _sut.EnterRefresh(_a);
-
-        Assert.IsFalse(_sut.ExitRefresh(null));
-
-        Assert.IsTrue(_sut.ShouldSkipListBuild(_a));
-        _sut.ExitRefresh(token);
-    }
-
-    [TestMethod]
-    public void ExitRefresh_CalledTwiceForOneToken_StillLeavesNoOwner()
-    {
-        var token = _sut.EnterRefresh(_a);
-        _sut.ExitRefresh(token);
-        _sut.ExitRefresh(token);
-
-        Assert.IsFalse(_sut.ShouldSkipListBuild(_a));
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("not installed") && m.Contains("swapped " + swapped)));
+        _logger.DidNotReceiveWithAnyArgs().LogInfo(default!);
     }
 
     [TestMethod]
     public void Counting_OutsideAnOpenWindow_RecordsNothing()
     {
-        var token = _sut.EnterRefresh(_a);
-        _sut.ShouldSkipListBuild(_a);
+        _sut.ShouldSkipListBuild();
         _sut.EndBuild(_sut.BeginBuild());
-        _sut.ExitRefresh(token);
 
         _sut.BeginOpen();
 
@@ -166,13 +104,11 @@ public class ClanScreenFastPathServiceTests
     public void EndOpen_AfterOneRunAndTwoSkippedBuilds_PinsTheDetailFormat()
     {
         _sut.BeginOpen();
-        var token = _sut.EnterRefresh(_a);
-        _sut.ShouldSkipListBuild(_a);
-        _sut.ShouldSkipListBuild(_a);
+        _sut.ShouldSkipListBuild();
+        _sut.ShouldSkipListBuild();
         var start = _sut.BeginBuild();
         _clock.Advance(381);
         _sut.EndBuild(start);
-        _sut.ExitRefresh(token);
 
         Assert.AreEqual("fast open on; list builds: 1 run, 2 skipped, 38.1 ms", _sut.EndOpen());
     }
@@ -184,7 +120,7 @@ public class ClanScreenFastPathServiceTests
         _sut.BeginOpen();
         for (var i = 0; i < 3; i++)
         {
-            _sut.ShouldSkipListBuild(_a);
+            _sut.ShouldSkipListBuild();
             var start = _sut.BeginBuild();
             _clock.Advance(100);
             _sut.EndBuild(start);

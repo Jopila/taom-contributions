@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using TAOM.Core.Diagnostics;
+using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.LoadTimeStamps;
 
@@ -9,18 +10,17 @@ namespace TAOM.Features.ShadowfaxScreens.Clan;
 /// <summary>
 /// Clan fast open (docs/features/shadowfax-screens.md "Clan fast open"). Vanilla builds the clan screen's party lists
 /// three times per open; the second and third builds are the ones <c>ClanPartiesVM.RefreshValues</c> triggers for the
-/// same instance a moment after the first. This service decides which build to skip: only the one made inside that
-/// instance's own <c>RefreshValues</c>. A direct call to the list builder (the screen's category refresh, a co-op
-/// handler) is never inside a token, so it always builds. No TaleWorlds types: the hooks pass the view model as an object.
-/// The owner is thread-static and every call runs on the UI main thread.
+/// same instance a moment after the first. A transpiler swaps the one <c>RefreshPartiesList()</c> call inside
+/// <c>RefreshValues</c> for <see cref="ClanFastOpenCalls.RefreshPartiesListInRefresh"/>, which asks this service whether to
+/// skip; any other caller of the list builder (the screen's category refresh, a co-op handler) is untouched and always
+/// builds. No TaleWorlds types. Every call runs on the UI main thread.
 /// </summary>
 internal sealed class ClanScreenFastPathService
 {
-    [ThreadStatic] private static RefreshToken? _current;
-
     private readonly IShadowfaxScreensSettingsProvider _settings;
     private readonly ICoopPresenceProvider _coop;
     private readonly IStampClock _clock;
+    private readonly IModLogger _logger;
 
     private bool _windowOpen;
     private bool _windowFastOn;
@@ -28,38 +28,32 @@ internal sealed class ClanScreenFastPathService
     private int _skipped;
     private long _runTicks;
 
-    public ClanScreenFastPathService(IShadowfaxScreensSettingsProvider settings, ICoopPresenceProvider coop, IStampClock clock)
+    public ClanScreenFastPathService(IShadowfaxScreensSettingsProvider settings, ICoopPresenceProvider coop, IStampClock clock, IModLogger logger)
     {
         _settings = settings;
         _coop = coop;
         _clock = clock;
+        _logger = logger;
     }
 
-    /// <summary>Opens a refresh scope for <paramref name="partiesVm"/>, or returns null when the fast path is off.</summary>
-    public object? EnterRefresh(object partiesVm)
+    /// <summary>True when the build at the swapped call site should be skipped (fast path on); counts the skip inside an open window.</summary>
+    public bool ShouldSkipListBuild()
     {
-        if (!FastPathOn()) return null;
-        var token = new RefreshToken(partiesVm, _current);
-        _current = token;
-        return token;
-    }
-
-    /// <summary>True only for the instance whose refresh scope is the innermost one; the build is then skipped.</summary>
-    public bool ShouldSkipListBuild(object partiesVm)
-    {
-        var token = _current;
-        if (token == null || !ReferenceEquals(token.Owner, partiesVm)) return false;
-        token.Skipped = true;
+        if (!FastPathOn()) return false;
         if (_windowOpen) _skipped++;
         return true;
     }
 
-    /// <summary>Closes the scope the token opened and returns whether a build was skipped inside it. A null token does nothing.</summary>
-    public bool ExitRefresh(object? token)
+    /// <summary>Writes the one install line: the swapped-site count the transpiler stored, or a warning that the screen stays vanilla.</summary>
+    public void LogInstall(int swappedSites)
     {
-        if (token is not RefreshToken scope) return false;
-        _current = scope.Previous;
-        return scope.Skipped;
+        try
+        {
+            if (swappedSites == 1) _logger.LogInfo("[Shadowfax] Clan fast open installed: 1 list build site swapped in ClanPartiesVM.RefreshValues");
+            else _logger.LogWarning("[Shadowfax] Clan fast open not installed: expected exactly 1 RefreshPartiesList call in ClanPartiesVM.RefreshValues, swapped " +
+                swappedSites + "; the Clan screen builds as vanilla does");
+        }
+        catch { /* a log line must never break startup */ }
     }
 
     /// <summary>Starts counting list builds for one screen open.</summary>
@@ -96,18 +90,5 @@ internal sealed class ClanScreenFastPathService
     {
         try { return _settings.ClanFastOpen && !_coop.IsCoopActive; }
         catch { return false; }
-    }
-
-    private sealed class RefreshToken
-    {
-        public RefreshToken(object owner, RefreshToken? previous)
-        {
-            Owner = owner;
-            Previous = previous;
-        }
-
-        public object Owner { get; }
-        public RefreshToken? Previous { get; }
-        public bool Skipped { get; set; }
     }
 }

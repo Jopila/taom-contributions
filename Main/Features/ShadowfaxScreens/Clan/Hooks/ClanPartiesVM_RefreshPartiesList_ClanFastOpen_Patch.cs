@@ -5,12 +5,11 @@ using TaleWorlds.CampaignSystem.ViewModelCollection.ClanManagement.Categories;
 namespace TAOM.Features.ShadowfaxScreens.Clan.Hooks;
 
 /// <summary>
-/// Clan fast open (docs/reference/harmony-patch-registry.md "PatchXXX_ShadowfaxClan"). A bool prefix that returns false only
-/// when <see cref="ClanScreenFastPathService.ShouldSkipListBuild"/> says this call is the one inside the same instance's
-/// <c>RefreshValues</c>; every other call (the constructor's, the screen's category refresh, a co-op handler) builds. When it
-/// builds it passes its start stamp to the void finalizer through <c>__state</c> (0 means "not timed"), which adds the
-/// build to the open window's count. The Refuge and TroopWeight postfixes on this method are Harmony postfixes: they run
-/// only for a build that runs, which is the build whose rows they decorate. Void finalizer, <c>First</c>.
+/// Clan fast open (docs/reference/harmony-patch-registry.md "PatchXXX_ShadowfaxClan"). A void prefix and finalizer that only
+/// time the builds that REALLY run: the skipped call never reaches this method (the <c>RefreshValues</c> transpiler took it
+/// out of the call site), so every execution here is a build, and its start stamp rides in <c>__state</c> (0 means "not
+/// timed"). The Refuge postfix on this method therefore runs only for a real build. Void
+/// finalizer, <c>First</c>.
 /// </summary>
 [HarmonyPatch(typeof(ClanPartiesVM), nameof(ClanPartiesVM.RefreshPartiesList))]
 [HarmonyPatchCategory(ClanFastOpenCalls.PatchCategory)]
@@ -18,18 +17,11 @@ public static class ClanPartiesVM_RefreshPartiesList_ClanFastOpen_Patch
 {
     [HarmonyPrefix]
     [HarmonyPriority(Priority.First)]
-    public static bool Prefix(object __instance, out long __state)
+    public static void Prefix(out long __state)
     {
         __state = 0;
-        try
-        {
-            var service = ClanFastOpenCalls.Service;
-            if (service == null) return true;
-            if (service.ShouldSkipListBuild(__instance)) return false;
-            __state = service.BeginBuild();
-        }
-        catch { /* a fault here lets vanilla build */ }
-        return true;
+        try { __state = ClanFastOpenCalls.Service?.BeginBuild() ?? 0; }
+        catch { /* a count must never change the engine's outcome */ }
     }
 
     [HarmonyFinalizer]
