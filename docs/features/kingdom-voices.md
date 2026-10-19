@@ -276,9 +276,7 @@ and map conversations through `MapConversationTableau.PlayConversationSoundEvent
 Rhubarb `.xml` loads next to the `.ogg`. So custom-race heads (elf, dwarf, orc) already get lip-synced
 vanilla voices whenever a voiced vanilla line fires.
 
-Fixing the voices is a `VoiceOverModel` override, ordinary GameModel work per
-`.claude/rules/gamemodels.md`. It can map TAOM cultures to fitting vanilla accents, return `""` from
-`GetSoundPathForCharacter` to keep them silent, or point at TAOM-recorded lines.
+This is fixed by #821: a `VoiceOverModel` override maps each TAOM culture to a fitting vanilla accent and keeps orcs and creatures silent. See [voice-accents.md](voice-accents.md).
 
 ## Key Files
 
@@ -464,6 +462,7 @@ by `DreadAuraConfig.FearVoiceChancePerPulse` (default 0.02). `Fear` is bound onl
 
 ## Changelog
 
+- 2026-10-18: dialogue voice-over is now handled by `TaomVoiceOverModel` (#821), see [voice-accents.md](voice-accents.md).
 - 2026-08-25: corrected the race-to-voice table against the live `skins.xml`. The dilution defect was
   a miscount across the ten per-maturity skins and does not exist; every bound race is fully custom on
   the adult male skin. Corrected the type count from 68 to 62, recorded `DreadPulseRunner` as a live
@@ -474,7 +473,7 @@ by `DreadAuraConfig.FearVoiceChancePerPulse` (default 0.02). `Fear` is bound onl
 
 ## GitHub Issue
 
-None filed. The dangling mbproj entry, the unbound adult female skins, and the asset provenance each
+#821 covers the dialogue voices (random vanilla voice for TAOM cultures). Otherwise none filed. The dangling mbproj entry, the unbound adult female skins, and the asset provenance each
 warrant one.
 
 ---

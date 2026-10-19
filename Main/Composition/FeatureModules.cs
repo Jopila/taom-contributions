@@ -40,5 +40,6 @@ internal static class FeatureModules
         new Features.WatchfulHolds.WatchfulHoldsModule(),
         new Features.ShaderSourceInstall.ShaderSourceInstallModule(),
         new Features.HostReview.HostReviewModule(),
+        new Features.VoiceAccents.VoiceAccentsModule(),
     };
 }

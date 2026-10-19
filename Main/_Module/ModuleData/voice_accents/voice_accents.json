@@ -1,0 +1,43 @@
+{
+  "cultures": {
+    "gondor": "imperial",
+    "gondor_soldiers": "imperial",
+    "arthedain": "imperial",
+    "neutral_culture": "imperial",
+    "rivendell": "imperial",
+    "lothlorien": "imperial",
+    "mirkwood": "imperial",
+    "lindon": "imperial",
+    "erebor": "imperial",
+    "erebor_warriors": "imperial",
+    "umbar": "imperial",
+    "abanissa": "imperial",
+    "shaghana": "imperial",
+    "darshi": "imperial",
+    "battania": "khuzait",
+    "nord": "sturgian",
+    "vakken": "sturgian",
+    "mordor": "silent",
+    "isengard": "silent",
+    "gundabad": "silent",
+    "dolguldur": "silent",
+    "goblin": "silent",
+    "bluecraig": "silent",
+    "mistymountainorcs": "silent",
+    "gundabad_raiders": "silent",
+    "wild_trolls": "silent",
+    "mirkwood_spiders": "silent",
+    "dunland_raiders": "looters",
+    "mirkwood_stalkers": "looters",
+    "rhun_raiders": "steppe_bandits",
+    "harad_raiders": "desert_bandits",
+    "umbar_corsairs": "sea_raiders"
+  },
+  "races": {
+    "nazghul": "silent",
+    "cave_troll": "silent",
+    "hill_troll": "silent",
+    "sauron": "silent",
+    "saruman": "imperial"
+  }
+}

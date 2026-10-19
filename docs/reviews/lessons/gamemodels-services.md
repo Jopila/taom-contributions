@@ -1106,3 +1106,19 @@ penalty only, and the capacity displays kept showing the weighted count over the
   predicate that enforcement and every display read (`TroopWeightPenaltyScope`). A guard that keeps TAOM's own code
   away from a kind does not keep the engine away.
 - **Source:** `docs/reviews/adopt-yotthani-2026-10-16.md`; `docs/reviews/rca-upstream-review-i3-2026-10-16.md` findings 13 and 14.
+
+### Map TAOM ids onto vanilla data by measuring the data, and find every engine switch on the same id (Voice Accents, 2026-10-18)
+The first voice accent map gave Dunland `battanian`, the dwarves `sturgian`, Umbar `aserai` and the orcs
+`mountain_bandits`, chosen by what each accent is called. `GetAccentClass` was the only engine method read. But
+`ConversationTagHelper.TribalVoiceGroup`, a second switch on the same culture id, picks the text variant, and vanilla
+recorded the high and low register variants almost only in the imperial accents: Dunland would have dropped from 63
+voiced variants to 3. `mountain_bandits` has recordings for 5 of SandBox's 226 voiced lines and `forest_bandits` for
+none, so the orcs would have been silent while the doc promised a voice. Every unit test passed.
+- **Why missed:** research stopped at the model being overridden. Nobody searched the engine for other readers of the
+  culture id on the same path, and nobody counted the vanilla data behind each mapped value.
+- **Prevent:** before mapping TAOM ids onto vanilla data (accents, voice groups, scene sets, templates), grep the engine
+  for every switch on that id along the consumer path, and measure what each mapped value reaches in the shipped vanilla
+  files. Pin the measured constraint in a shipped-data test, because the next row will not repeat the measurement
+  (`ShippedVoiceAccentsConfigTests`: no tribal accent on a non-tribal culture, no imperial on a tribal one, no row on an
+  accent with almost no recordings).
+- **Source:** `docs/reviews/rca-voice-accents-2026-10-18.md` F1, F2.

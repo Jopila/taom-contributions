@@ -119,7 +119,7 @@ Both are Monster naming mistakes, and both are invisible until a settlement scen
 
 **Check:** `python tools/audit_action_set_parity.py` (exits non-zero on a short humanoid set or a root-level `<action>`), then `python tools/validate_mesh_refs.py --no-rgl-log` (it covers the eight skins.xml mesh attributes), then `python tools/validate_moduledata.py`.
 **Takes effect:** full game restart. Whether an existing save survives a race integer moving was never tested (see below), so smoke a save that predates the edit as well as a new campaign.
-**Code:** No code changes needed. One exception: `<voice_types>` binds per `<skin>`, so two cultures sharing a race share one voice pool, and splitting them is not a data edit. TAOM has not written down how.
+**Code:** No code changes needed. One exception: `<voice_types>` binds per `<skin>`, so two cultures sharing a race share one voice pool, and splitting them is not a data edit. TAOM has not written down how. A creature race also needs a `silent` race row in `voice_accents/voice_accents.json` and in `VoiceAccentMap.Default()`, or it speaks with a human voice in a speaking culture (`ShippedConfig_EqualsTheBuiltInDefault` fails if the two differ).
 
 ### Add a creature by reskinning an existing skeleton
 

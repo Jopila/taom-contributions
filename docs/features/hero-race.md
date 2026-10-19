@@ -248,7 +248,9 @@ written up in
 - The conversation played a voiced line with Rhubarb lip-sync on the elf head. That is **not rare**:
   an empty TAOM accent class falls through to any vanilla voice
   ([kingdom-voices.md](kingdom-voices.md)), so custom-race heads are lip-synced routinely in keeps
-  and map encounters. On its own it is a weak suspect.
+  and map encounters. On its own it is a weak suspect. Since #821 ([voice-accents.md](voice-accents.md))
+  only elves, dwarves and other speaking cultures get vanilla lip-synced voices; orcs and creatures are
+  silent, so a #635-style repro needs an elf or dwarf wanderer.
 - What stands out is the combination: a conversation started from a menu, a voice clip ending, and the
   encyclopedia's map-state idle and return.
 
