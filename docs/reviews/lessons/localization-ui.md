@@ -998,3 +998,14 @@ class again.
   another session's keys are not seeded with yours. When the main checkout cannot build the tests, run the
   `Infrastructure.Localization` filter in an isolated copy (`git archive HEAD` plus your files).
 - **Source:** [rca-gondor-field-scenes-2026-10-17.md](../rca-gondor-field-scenes-2026-10-17.md) finding 1.
+
+### A timing or effect claim about prefab XML comes from the engine method that reads it (Shadowfax Screens, 2026-10-18)
+The feature's comment, doc and issue said the character screen's top extension "waits 0.7 s and then slides for
+0.3 s, about 1 s". The values were read correctly from the installed prefab, but `Widget.UpdateVisualDefinitions`
+counts `DelayOnBegin` inside `TransitionDuration` and snaps at the duration, so that definition could never slide,
+and no widget uses it. The same assumption kept dead `DelayOnBegin` handling in the code.
+- **Why missed:** reading attribute values felt like verification; the method that interprets them was not read.
+- **Prevent:** before writing what a GUI attribute does (a duration, a delay, an alignment), read its consumer in the
+  installed DLL (`pwsh tools/taom-src.ps1 path Widget`) and grep for a widget that uses the definition; state the
+  engine version and the method in the doc.
+- **Source:** `docs/reviews/rca-shadowfax-screens-2026-10-18.md` F2, F6.

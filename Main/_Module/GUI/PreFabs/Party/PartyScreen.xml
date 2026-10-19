@@ -69,30 +69,30 @@
   <Variables>
   </Variables>
   <VisualDefinitions>
-    <VisualDefinition Name="LeftMenu" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0.45">
+    <VisualDefinition Name="LeftMenu" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0">
       <VisualState PositionXOffset="-5" State="Default" />
     </VisualDefinition>
-    <VisualDefinition Name="RightMenu" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0.45">
+    <VisualDefinition Name="RightMenu" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0">
       <VisualState PositionXOffset="5" State="Default" />
     </VisualDefinition>
-    <VisualDefinition Name="TopMenu" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0.45">
+    <VisualDefinition Name="TopMenu" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0">
       <VisualState PositionYOffset="-6" State="Default" />
     </VisualDefinition>
-    <VisualDefinition Name="BottomMenu" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0.45">
+    <VisualDefinition Name="BottomMenu" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0">
       <VisualState PositionYOffset="6" State="Default" />
       <VisualState PositionYOffset="100" State="Opened" />
     </VisualDefinition>
-    <VisualDefinition Name="FormationListPanel" TransitionDuration="0.2">
+    <VisualDefinition Name="FormationListPanel" TransitionDuration="0">
       <VisualState PositionYOffset="!FormationListPanel.NegativeHeight" State="Default" />
       <VisualState PositionYOffset="!FormationListPanel.NegativeHeight" State="Closed" />
       <VisualState PositionYOffset="0" State="Opened" />
     </VisualDefinition>
-    <VisualDefinition Name="FormationSeperator" TransitionDuration="0.01">
+    <VisualDefinition Name="FormationSeperator" TransitionDuration="0">
       <VisualState SuggestedWidth="0" State="Default" />
       <VisualState SuggestedWidth="26" State="Closed" />
       <VisualState SuggestedWidth="!Party.Formation.Seperator.Width" State="Opened" />
     </VisualDefinition>
-    <VisualDefinition Name="Toggle" TransitionDuration="0.045">
+    <VisualDefinition Name="Toggle" TransitionDuration="0">
       <VisualState SuggestedWidth="!PartyToggle.Width" State="Default" />
       <VisualState SuggestedWidth="!PartyToggle.Pressed.Width" State="Pressed" />
       <VisualState SuggestedWidth="!PartyToggle.Width" State="Selected" />

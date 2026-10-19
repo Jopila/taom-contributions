@@ -1789,3 +1789,16 @@ one initializer would have shipped a different aura from the one the docs and th
   with the compiled config default for every knob both sides define
   (`DreadAuraSettingsProviderTests.McmDefaults_MatchTheCompiledProfileDefaults`).
 - **Source:** `docs/reviews/rca-dread-aura-local-2026-10-15.md` F7.
+
+### The first extension of a new shape gets the gate read for a skip on that shape (Shadowfax Screens, 2026-10-18)
+`PrefabExtensionBindingTests` skipped any `[PrefabExtension]` without an XPath before it looked the movie up. No TAOM
+extension had a null XPath, so the skip never fired, and the gate's docstring still claimed every extension was
+checked. The first whole-document patch (nine movie names) went straight through it; a renamed movie would have
+left that screen animating with no error, because UIExtenderEx files such a patch by name and silently matches
+nothing.
+- **Why missed:** the author wrote a hand-copied name list for the new class and never read the existing gate for
+  the new shape. This repeats the class in `rca-binding-gate-no-silent-skips-2026-09-24.md`.
+- **Prevent:** when a change adds the first instance of a shape a gate branches on (no XPath, a new patch base type,
+  a new attribute form), read the gate's `continue` and `skip` lines for that shape and make the shape pass through
+  the checks that still apply. Prove it with a mutant of the new instance (`ClanScreen` to `Clanscreen`).
+- **Source:** `docs/reviews/rca-shadowfax-screens-2026-10-18.md` F1.

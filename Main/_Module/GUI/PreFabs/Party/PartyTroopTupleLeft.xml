@@ -40,21 +40,21 @@
     <Constant Name="IconAlpha" Value="0.7" />
   </Constants>
   <VisualDefinitions>
-    <VisualDefinition Name="Container" TransitionDuration="0.075">
+    <VisualDefinition Name="Container" TransitionDuration="0">
       <VisualState SuggestedWidth="!Toggle.Width" State="Default" />
       <VisualState SuggestedWidth="!Toggle.Pressed.Width" State="Pressed" />
       <VisualState SuggestedWidth="!Toggle.Width" State="Selected" />
       <VisualState SuggestedWidth="!Toggle.Width" State="Hovered" />
       <VisualState SuggestedWidth="!Toggle.Width" State="Disabled" />
     </VisualDefinition>
-    <VisualDefinition Name="Extension" TransitionDuration="0.15">
+    <VisualDefinition Name="Extension" TransitionDuration="0">
       <VisualState SuggestedHeight="!Extension.Hidden.Height" MarginTop="!Extension.Hidden.MarginTop" State="Default" />
       <VisualState SuggestedHeight="!Extension.Hidden.Height" MarginTop="!Extension.Hidden.MarginTop" State="Pressed" />
       <VisualState SuggestedHeight="!Extension.Height" MarginTop="!Extension.Selected.MarginTop" State="Selected" />
       <VisualState SuggestedHeight="!Extension.Hidden.Height" MarginTop="!Extension.Hidden.MarginTop" State="Hovered" />
       <VisualState SuggestedHeight="!Extension.Hidden.Height" MarginTop="!Extension.Hidden.MarginTop" State="Disabled" />
     </VisualDefinition>
-    <VisualDefinition Name="Main" TransitionDuration="0.075">
+    <VisualDefinition Name="Main" TransitionDuration="0">
       <VisualState SuggestedWidth="!Toggle.Width" State="Default" />
       <VisualState SuggestedWidth="!Toggle.Pressed.Width" State="Pressed" />
       <VisualState SuggestedWidth="!Toggle.Width" State="Selected" />

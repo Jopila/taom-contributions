@@ -69,14 +69,23 @@ public class PrefabExtensionBindingTests
         {
             foreach (var attr in type.GetCustomAttributes<PrefabExtensionAttribute>(inherit: false))
             {
-                if (string.IsNullOrEmpty(attr.XPath)) continue; // whole-movie extension, nothing to resolve
-                checkedCount++;
-
+                // The movie is checked first, so a whole-movie extension (no XPath) is gated too: an
+                // unknown movie name is a silent no-op in UIExtenderEx, with no error at all.
                 if (!index.TryGetValue(attr.Movie, out var path))
                 {
                     failures.AppendLine($"{type.Name}: movie '{attr.Movie}' not found in any module.");
                     continue;
                 }
+
+                // The index ignores case, but Gauntlet and UIExtenderEx match the file name exactly.
+                if (!string.Equals(Path.GetFileNameWithoutExtension(path), attr.Movie, StringComparison.Ordinal))
+                {
+                    failures.AppendLine($"{type.Name}: movie '{attr.Movie}' differs in case from {path}.");
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(attr.XPath)) continue; // whole-movie extension: no node to resolve
+                checkedCount++;
 
                 int matches;
                 try
@@ -99,10 +108,11 @@ public class PrefabExtensionBindingTests
             }
         }
 
-        Assert.IsTrue(checkedCount > 0, "No [PrefabExtension] attributes with an XPath were discovered.");
+        // Failures first: a missing movie now stops an extension before it is counted.
         Assert.AreEqual(0, failures.Length,
             $"UIExtenderEx prefab extensions that no longer resolve (each is a SILENT no-op in game):"
             + Environment.NewLine + failures);
+        Assert.IsTrue(checkedCount > 0, "No [PrefabExtension] attributes with an XPath were discovered.");
     }
 
     // Splits the XPath into progressive prefixes and reports the first step whose match count hits

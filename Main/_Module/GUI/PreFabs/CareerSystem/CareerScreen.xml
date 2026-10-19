@@ -2,10 +2,10 @@
   <Constants>
   </Constants>
   <VisualDefinitions>
-    <VisualDefinition Name="CareerFooterSlide" TransitionDuration="0.35">
+    <VisualDefinition Name="CareerFooterSlide" TransitionDuration="0">
       <VisualState PositionYOffset="8" State="Default" />
     </VisualDefinition>
-    <VisualDefinition Name="CareerHeaderSlide" TransitionDuration="0.35">
+    <VisualDefinition Name="CareerHeaderSlide" TransitionDuration="0">
       <VisualState PositionYOffset="-8" State="Default" />
     </VisualDefinition>
   </VisualDefinitions>
