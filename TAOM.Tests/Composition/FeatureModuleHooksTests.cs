@@ -126,6 +126,31 @@ public class FeatureModuleHooksTests
     }
 
     [TestMethod]
+    public void RegisterCampaignObjects_RunsBeforeBehaviors_CampaignOnly()
+    {
+        var log = new List<string>();
+        var module = new ProbeModule("A", "A1") { Log = log };
+
+        FeatureModuleHooks.AddGameStartContent(Runner(module), _container, new BasicGameStarter());
+        CollectionAssert.AreEqual(new string[0], log, "a Custom Battle starter registers no campaign objects");
+
+        FeatureModuleHooks.AddGameStartContent(Runner(module), _container, new CampaignGameStarter(null, null));
+        CollectionAssert.AreEqual(new[] { "register", "behavior A1" }, log);
+    }
+
+    [TestMethod]
+    public void SaveOwningThrow_FailsClosed()
+    {
+        var starter = new CampaignGameStarter(null, null);
+        var owner = new ProbeModule("A", "A1") { Owns = true, RegisterThrows = true };
+        var runner = Runner(owner, new ProbeModule("B", "B1"));
+
+        Assert.ThrowsException<InvalidOperationException>(
+            () => FeatureModuleHooks.AddGameStartContent(runner, _container, starter));
+        Assert.AreEqual(0, starter.CampaignBehaviors.Count, "no behavior is added once registration failed");
+    }
+
+    [TestMethod]
     public void NoRunnerOrNoResolver_IsANoOp()
     {
         var starter = new CampaignGameStarter(null, null);
@@ -165,6 +190,8 @@ public class FeatureModuleHooksTests
         internal string? ThrowOn;
         internal bool Owns;
         internal bool PhaseThrows;
+        internal bool RegisterThrows;
+        internal List<string>? Log;
         internal bool MissionThrows;
         internal int MissionBehaviorCount;
 
@@ -174,7 +201,19 @@ public class FeatureModuleHooksTests
 
         public override IReadOnlyList<CampaignBehaviorDecl> CampaignBehaviors =>
             _behaviorNames.Select(name => CampaignBehaviorDecl.Of(_ =>
-                name == ThrowOn ? throw new InvalidOperationException(name + " broke") : new ProbeBehavior(name))).ToList();
+                name == ThrowOn ? throw new InvalidOperationException(name + " broke") : Record(name))).ToList();
+
+        public override void RegisterCampaignObjects(IResolver resolver)
+        {
+            if (RegisterThrows) throw new InvalidOperationException(_id + " could not register");
+            Log?.Add("register");
+        }
+
+        private ProbeBehavior Record(string name)
+        {
+            Log?.Add("behavior " + name);
+            return new ProbeBehavior(name);
+        }
 
         public override IReadOnlyList<MissionBehaviorDecl> MissionBehaviors => MissionThrows
             ? new[] { MissionBehaviorDecl.Of<ProbeMissionBehavior>((_, _) => throw new InvalidOperationException("mission broke")) }

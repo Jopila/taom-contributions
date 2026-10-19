@@ -1135,3 +1135,16 @@ clan succession.
 - **Prevent:** engage the rule only after the migration has run on this save, re-arm the migration whenever the feature
   is seen off, and trace the migrated values through every later engine writer of the same store.
 - **Source:** `docs/reviews/rca-personal-relations-2026-10-19.md` findings 2 and 4.
+
+### A code-registered object id that a save references is a save contract
+
+A building TAOM registers in code (`RegisterPresumedObject(new BuildingType(id))`) is saved with each town
+by id, though no `SaveableTypeDefiner` is involved. On load, an id TAOM no longer initializes stays not
+ready, and `Town.AfterLoad` removes the building and clears the town's whole build queue, vanilla projects
+included, with only an engine `Debug.Print` as a trace. Parking the registering module has the same effect.
+- **Why missed:** with no definer and no `SyncData`, nothing about the ids looked like save data, so they
+  were not pinned and the module's `OwnsSaveData` reason was not written down.
+- **Prevent:** pin every shipped code-registered id in a test that lists them literally (add new ids, never
+  rename or remove one), warn on the definition and on the module's `OwnsSaveData`, and never park such a
+  module.
+- **Source:** `docs/reviews/rca-postern-gate-2026-10-18.md` finding 6.

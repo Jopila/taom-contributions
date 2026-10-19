@@ -45,5 +45,7 @@ internal static class FeatureModules
         new Features.LordBanners.LordBannersModule(),
         new Features.BondsOfBattle.BondsOfBattleModule(),
         new Features.Relations.RelationsModule(),
+        new Features.TaomBuildings.TaomBuildingsModule(),
+        new Features.PosternGate.PosternGateModule(),
     };
 }

@@ -19,6 +19,7 @@ using TAOM.Features.HiddenHosts;
 using TAOM.Features.FieldCommission.Domain;
 using TAOM.Features.NameplateCull;
 using TAOM.Features.PartyIconScale;
+using TAOM.Features.PosternGate;
 using TAOM.Features.QuickActions;
 using TAOM.Features.Relations;
 using TAOM.Features.RealmBorders;
@@ -80,6 +81,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(HiddenHostsSettingsProvider))]
     // #862: the master switch is read on every relation read (main thread).
     [DataRow(typeof(PersonalRelationSettingsProvider))]
+    // The defender's siege wait menu re-checks the break-out options every frame, and each check asks the Postern Gate model.
+    [DataRow(typeof(PosternGateSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -115,6 +118,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IWatchfulHoldsSettings), typeof(WatchfulHoldsSettingsProvider))]
     [DataRow(typeof(IHiddenHostsSettings), typeof(HiddenHostsSettingsProvider))]
     [DataRow(typeof(IPersonalRelationSettingsProvider), typeof(PersonalRelationSettingsProvider))]
+    [DataRow(typeof(IPosternGateSettingsProvider), typeof(PosternGateSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -347,6 +351,18 @@ public class CampaignHotPathSettingsProvidersTests
         mcm.HiddenHostsEnabled = false;
 
         Assert.IsFalse(sut.Enabled);
+    }
+
+    [TestMethod]
+    public void PosternGate_ReadsThroughTheCachedSettings()
+    {
+        var settings = new TaomSettings();
+        var sut = new PosternGateSettingsProvider(settings);
+        Assert.IsTrue(sut.CutEnabled);
+
+        settings.EnablePosternGate = false;
+
+        Assert.IsFalse(sut.CutEnabled);
     }
 
     // No-MCM pins: TaomSettings.Instance is null in the test host (MCM is never initialised), so these

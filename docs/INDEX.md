@@ -114,6 +114,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [siege-trebuchets](features/siege-trebuchets.md) — TaomSiegeEventModel: defender Trebuchet option
 - [siege-dismount](features/siege-dismount.md) — player dismount on siege entry; modifier-preserving horse storage
 - [siege-forces](features/siege-forces.md): choose which troops fight a wall battle on vanilla's Manage Troops screen; trolls start unticked (Patch102, #734)
+- [postern-gate](features/postern-gate.md): a military building that cuts the troops lost breaking into or out of a siege at its fief, 50, 67 and 75 percent by level, named by culture (campaign model plus Patch108, #855)
 - [creature-siege-role](features/creature-siege-role.md): trolls skip ladders, towers and siege machines, break the gates and hold the ground behind them (no patch, #735)
 
 ### Economy, settlements, resources
@@ -121,6 +122,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [elite-emissary](features/elite-emissary.md) — buy a faction's elite troops at its capital for that faction's special resource; the sale is declined before charging on a non-authoritative co-op peer, where the resource charge would persist but the purchased troops would not survive the next resync
 - [culture-marketplace](features/culture-marketplace.md) — daily LOTRLOME item injection by owner culture
 - [armour-acquisition](features/armour-acquisition.md): loot and workshops hand out light and medium armour only; heavy, elite and lord pieces are sold where the town's Barracks level allows, lord kit is also forged, found after a battle or earned slot by slot on the lord's gear ladder (the hero's own kills or lord's materials, #693), the armoury upgrades a piece for metals (KEYforce's design, 2026-09-27)
+- [taom-buildings](features/taom-buildings.md): the shared pipeline for buildings TAOM adds to towns and castles: type registration, new-game variant, seeding into old saves, town-screen sprite and effect line (Patch108, #855)
 - [settlement-guards](features/settlement-guards.md) — per-settlement guard pools, clan/culture fallback (Patch28)
 - [settlement-nameplate-fade](features/settlement-nameplate-fade.md) — distance-based nameplate fade (Patch38)
 - [settlement-nameplate-relation](features/settlement-nameplate-relation.md): relation colour on the bar, name text and diamond frame; bar and frame follow vanilla's plate alpha; enemy and allied plates at 50% (#591, custom container widget, no patch)

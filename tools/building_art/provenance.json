@@ -1,0 +1,10 @@
+{
+  "taom_building_postern_gate.png": {
+    "source": "ImagineArt generate_image",
+    "model": "nano-banana-pro",
+    "asset_id": "9126c585-ce6e-4e26-bae8-8c4b1feee1ca",
+    "date": "2026-10-18",
+    "prompt": "Square painted game UI building illustration in the style of Mount and Blade II Bannerlord town management project cards: muted earthy oil painting, soft painterly brushwork, warm desaturated palette, subtle vignette fading to dark edges. Subject: a small hidden postern gate in the foot of a massive grey stone fortress wall, a narrow arched wooden door with iron studs half-hidden by ivy and shadow, a worn stone path leading to it, a lantern glow inside the opening. Medieval Middle-earth fortress feel. Centered composition, building fills the frame, no people, no text, no border, no logo.",
+    "postprocess": "Lanczos resize from 1024x1024 to 193x193; the _t variant to 110x110 (vanilla building icon sizes)"
+  }
+}

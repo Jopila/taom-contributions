@@ -1217,3 +1217,20 @@ every eligible lord gets one as the save finishes loading, prisoners included.
 - **Prevent:** before writing when or how often a vanilla behavior does something, read its `RegisterEvents` and list
   every event that reaches the method.
 - **Source:** `docs/reviews/rca-lord-banners-2026-10-19.md` F3.
+
+### Read a campaign collection's fill site before trusting its name: `Town.AllTowns` holds no castles
+
+`Town.AllTowns` is `Campaign.Current.AllTowns`, which `Campaign.OnDataLoadFinished` fills with `IsTown`
+settlements only; castles go to `AllCastles`, and `Town.AllFiefs` yields both. Postern Gate's seeding
+walked `AllTowns` under a comment that said "every town and castle", so no castle in an existing save got
+the building (151 of the live map's 234 fortifications), while new games were fine because the engine's
+own pass walks `Settlement.All`.
+- **Why missed:** the loop was copied from `ArmouryTownAdapter.AllTownIds`, which is towns-only on purpose,
+  and the copy changed the stated intent without reading where the list is filled. The service tests fed
+  fiefs through a fake adapter, so the enumeration itself was never exercised. This is the third
+  castle-omission in a month (War Chronicle B03's volunteer path, the `castle_village_*` filters): "town"
+  in a name was read as "fortification" each time.
+- **Prevent:** before iterating an engine collection, read the line that fills it, not its name. For towns
+  and castles together use `Town.AllFiefs` (or `Settlement.All` filtered by `IsFortification`). Pin the
+  choice with a source test when the adapter cannot be unit-tested, and put a castle in the in-game check.
+- **Source:** `docs/reviews/rca-postern-gate-2026-10-18.md` finding 1.

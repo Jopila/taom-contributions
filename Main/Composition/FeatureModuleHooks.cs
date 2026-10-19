@@ -30,9 +30,10 @@ internal enum FaultNotice
 /// notice a player can see at that point (<see cref="NoticeFor"/>; the startup inquiry rule in
 /// docs/reviews/lessons/localization-ui.md): faults from IoC.Configure and OnSubModuleLoad wait for
 /// the main-menu inquiry, in-game faults get a red line. Nothing here throws, except the runner's
-/// deliberate fail-closed throw for a save-owning module at campaign start. Every factory runs
-/// before anything is handed to the engine, so a module whose factory throws adds nothing. The
-/// public entry points read IoC; the overloads that take the runner and resolver are the tested seam.
+/// deliberate fail-closed throw for a save-owning module at campaign start. At campaign start,
+/// campaign objects register first; every behavior and model factory then runs before any is added,
+/// so a factory throw adds no behavior or model; a module whose save holds its objects owns save
+/// data, so that throw fails closed. The public entry points read IoC; the overloads that take the runner and resolver are the tested seam.
 /// </summary>
 internal static class FeatureModuleHooks
 {
@@ -64,7 +65,10 @@ internal static class FeatureModuleHooks
 
     /// <summary>
     /// OnGameStart: campaign behaviors and campaign models on a CampaignGameStarter; Custom Battle
-    /// models on a BasicGameStarter (the same split RegisterCustomBattleModels makes).
+    /// models on a BasicGameStarter (the same split RegisterCustomBattleModels makes). Per module on a
+    /// campaign: campaign objects register first; every behavior and model factory then runs before any is
+    /// added, so a factory throw adds no behavior or model; a module whose save holds its objects owns
+    /// save data, so that throw fails closed.
     /// </summary>
     internal static void AddGameStartContent(IGameStarter gameStarter) =>
         AddGameStartContent(IoC.Modules, IoC.Resolver, gameStarter);
@@ -77,6 +81,7 @@ internal static class FeatureModuleHooks
         {
             runner.RunCampaignStart(module =>
             {
+                module.RegisterCampaignObjects(resolver);
                 var behaviors = new List<CampaignBehaviorBase>();
                 foreach (var decl in module.CampaignBehaviors)
                     behaviors.Add(decl.Create(resolver));

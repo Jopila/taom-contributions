@@ -794,6 +794,12 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Write diagnostic [FiefManagement] messages to the TAOM file log. Off = silent.")]
     public bool FiefManagementDebug { get; set; } = false;
 
+    // The group's first property carries GroupOrder; 0 sorts it above the parent's own settings (MCM ignores a GroupOrder on a later one).
+    [SettingPropertyGroup("Fief Management/Postern Gate", GroupOrder = 0)]
+    [SettingPropertyBool("Postern Gate Cuts Siege Losses", Order = 0, RequireRestart = false,
+        HintText = "A Postern Gate (a Hidden Door, Culvert, Sally Port, Hidden Way or Bolt-Hole, by culture) in a besieged fief cuts the troops lost breaking into or out of the siege there: by default 50, 67 and 75 percent by building level (postern_gate.json). When off, the building still exists but the cut does not apply. Takes effect at the next break-in or break-out. Default: on.")]
+    public bool EnablePosternGate { get; set; } = true;
+
     // --- Inventory / Quick Actions ---
 
     [SettingPropertyGroup("Inventory/Quick Actions", GroupOrder = 30)]

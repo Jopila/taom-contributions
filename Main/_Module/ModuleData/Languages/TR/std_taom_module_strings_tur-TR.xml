@@ -5968,6 +5968,19 @@
     <string id="taom_hhost_unknown_party" text="Unknown party" />
 
     <string id="taom_hq_relations_hurt" text="Your deed has hurt your relations with {COUNT} {?IS_PLURAL}clans{?}clan{\?}." />
+  <string id="taom_postern_name" text="Postern Gate" />
+  <string id="taom_postern_desc" text="A small gate in the curtain wall, kept shut and known to few. In a siege, parties slip into or out of this fief with fewer losses." />
+  <string id="taom_postern_dwarf_name" text="Hidden Door" />
+  <string id="taom_postern_dwarf_desc" text="A door cut into the living stone, its seam hidden from any eye that does not know the rune. In a siege, parties slip into or out of this fief with fewer losses." />
+  <string id="taom_postern_rohan_name" text="Culvert" />
+  <string id="taom_postern_rohan_desc" text="A drain under the earthen wall, wide enough for a rider who leads his horse. In a siege, parties slip into or out of this fief with fewer losses." />
+  <string id="taom_postern_gondor_name" text="Sally Port" />
+  <string id="taom_postern_gondor_desc" text="A stout gate low in the wall, where a company can march out under the eyes of the watch. In a siege, parties slip into or out of this fief with fewer losses." />
+  <string id="taom_postern_elf_name" text="Hidden Way" />
+  <string id="taom_postern_elf_desc" text="A path through roots and rock that only the Elves can follow. In a siege, parties slip into or out of this fief with fewer losses." />
+  <string id="taom_postern_orc_name" text="Bolt-Hole" />
+  <string id="taom_postern_orc_desc" text="A crawl-tunnel dug in the dark and shored with scrap, used by whoever is quick enough to squeeze through. In a siege, parties slip into or out of this fief with fewer losses." />
+  <string id="taom_postern_effect" text="{PERCENT}% fewer troops lost breaking into or out of a siege here" />
 
     <string id="taom_bonds_together" text="You fought together with {LORD}." />
 

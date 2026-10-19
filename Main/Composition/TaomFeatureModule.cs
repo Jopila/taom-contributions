@@ -26,7 +26,8 @@ internal enum ApplyPhase
 /// overrides only the dimensions it has. The runner visits modules in <see cref="FeatureModules.All"/>
 /// order: <see cref="RegisterServices"/> for every module (parked ones included), then
 /// <see cref="InitializeStatics"/> after every registration, then per lifecycle phase its categories,
-/// <see cref="OnPhase"/>, behaviors, models and mission behaviors.
+/// <see cref="OnPhase"/>, campaign objects (<see cref="RegisterCampaignObjects"/>), behaviors, models and
+/// mission behaviors.
 /// </summary>
 internal abstract class TaomFeatureModule
 {
@@ -39,7 +40,10 @@ internal abstract class TaomFeatureModule
     /// </summary>
     public virtual string? ParkedReason => null;
 
-    /// <summary>True when any of the module's behaviors persists data in SyncData; such a module fails closed.</summary>
+    /// <summary>
+    /// True when the module's state must survive a save: a behavior persists SyncData, or RegisterCampaignObjects
+    /// registers objects a save references. Such a module fails closed.
+    /// </summary>
     public virtual bool OwnsSaveData => false;
 
     /// <summary>Container registrations only. IRegistrator has no Resolve, so an eager resolve does not compile.</summary>
@@ -47,6 +51,14 @@ internal abstract class TaomFeatureModule
 
     /// <summary>Patch-static handshakes, after every module and hand-wired feature has registered.</summary>
     public virtual void InitializeStatics(IResolver resolver) { }
+
+    /// <summary>
+    /// Registers engine objects the campaign must know before it builds its lists (building types). Runs in
+    /// campaign start, for a CampaignGameStarter only: campaign objects register first; every behavior and model
+    /// factory then runs before any is added, so a factory throw adds no behavior or model; a module whose save
+    /// holds its objects owns save data, so that throw fails closed.
+    /// </summary>
+    public virtual void RegisterCampaignObjects(IResolver resolver) { }
 
     public virtual IReadOnlyList<PatchCategoryDecl> PatchCategories => Array.Empty<PatchCategoryDecl>();
 

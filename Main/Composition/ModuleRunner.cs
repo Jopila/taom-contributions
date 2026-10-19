@@ -8,10 +8,10 @@ namespace TAOM.Composition;
 /// <summary>
 /// Runs one lifecycle step over every feature module in list order, isolating each module. A module
 /// that throws is logged, marked faulted and skipped in every later step of the session (half-wired
-/// is worse than absent), and the next module still runs. A module that owns save data fails CLOSED
-/// instead in the steps that decide whether its SyncData runs (service registration, static
-/// initialisation, campaign start): the throw propagates, because a campaign that runs without the
-/// behavior persisting its data can lose that data on the next save. That holds for a save owner
+/// is worse than absent), and the next module still runs. A module that owns save data (its state must survive a save: a behavior persists SyncData, or
+/// RegisterCampaignObjects registers objects a save references) fails CLOSED instead in the steps that
+/// decide whether that state is kept (service registration, static initialisation, campaign start): the
+/// throw propagates, because a campaign that runs without it can lose that data on the next save. That holds for a save owner
 /// that faulted in an earlier, fail-open step too: a fail-closed step throws for it instead of
 /// skipping it. A parked module never fails closed, since its behavior never runs. Parked modules
 /// get only their service registration. Engine-free and unit-tested; the engine-facing loops are in
@@ -38,7 +38,7 @@ internal sealed class ModuleRunner
     internal void InitializeStatics(IResolver resolver) =>
         Run("static initialisation", includeParked: false, failClosed: true, m => m.InitializeStatics(resolver));
 
-    /// <summary>The campaign-start step: fail-closed, because it decides whether a behavior's SyncData runs.</summary>
+    /// <summary>The campaign-start step: fail-closed for a save-owning module, because it decides whether that module's saved state is kept.</summary>
     internal void RunCampaignStart(Action<TaomFeatureModule> addContent) =>
         Run("campaign start", includeParked: false, failClosed: true, addContent);
 
