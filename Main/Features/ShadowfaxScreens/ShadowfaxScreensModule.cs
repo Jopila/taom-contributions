@@ -6,6 +6,7 @@ using TAOM.Core.Logging;
 using TAOM.Features.ShadowfaxScreens.Clan;
 using TAOM.Features.ShadowfaxScreens.Diagnostics;
 using TAOM.Features.ShadowfaxScreens.Inventory;
+using TAOM.Features.ShadowfaxScreens.Party;
 
 namespace TAOM.Features.ShadowfaxScreens;
 
@@ -40,6 +41,9 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
         // Inventory fast open.
         registrator.Register<IInventoryOpenAdapter, InventoryOpenAdapter>(Reuse.Singleton);
         registrator.Register<InventoryOpenFastPathService>(Reuse.Singleton);
+
+        // Party fast open.
+        registrator.Register<PartyScreenFastPathService>(Reuse.Singleton);
     }
 
     public override void InitializeStatics(IResolver resolver)
@@ -50,5 +54,8 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
         // Inventory fast open.
         ShadowfaxInventoryCalls.Initialize(resolver.Resolve<InventoryOpenFastPathService>(),
             resolver.Resolve<IInventoryOpenAdapter>(), resolver.Resolve<IModLogger>());
+
+        // Party fast open.
+        PartyFastOpenCalls.Initialize(resolver.Resolve<PartyScreenFastPathService>());
     }
 }

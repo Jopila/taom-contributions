@@ -249,6 +249,47 @@ at least 16 ms and by more than the off arm's spread; otherwise delete it and ke
 4. Otherwise add `[PrefabExtension("<Movie>", null)]` to `ShadowfaxScreensPrefab` and the name to
    `PatchedMovies` in the tests.
 
+## Party fast open
+
+Issue #853. The party screen builds one `PartyCharacterVM` row per troop and per prisoner, on both sides, and
+vanilla repeats two lookups for each row. "Party Fast Open" (MCM, Screen Performance, default on) caches them for the
+life of one screen. Off restores vanilla's build exactly.
+
+**The two caches** (`PartyScreenFastPathService`, no TaleWorlds types, keys compared by reference):
+
+- **Character code:** `PartyCharacterVM.GetCharacterCode(character, type, side)` calls `CharacterCode.CreateFrom`, which
+  computes an equipment code and body properties. The same character appears in several rows and in every rebuild.
+  The cache is keyed by (character, troop type, side) and lives from the `PartyVM` constructor to `OnFinalize`.
+- **Category count:** `PartyCharacterVM.GetNumOfCategoryItemPartyHas(items, itemCategory)` walks the whole item roster
+  for every row, a null category included. The cache is keyed by (roster, category) and lives only inside one
+  `PartyVM.InitializeTroopLists` or `PartyVM.RefreshTroopsUpgradeable` call, where the roster cannot change.
+
+**Why this is safe next to BannerColorPersistence.** That feature's `PartyCharacterVM.GetCharacterCode` postfix writes
+`Color1` and `Color2` on the returned code. `CharacterImageIdentifier`'s constructor reads only `CharacterCode.Code`,
+which has a private setter and is built inside `CreateFrom` with the colours already in it, so those writes never
+change what a row renders and rows can share one code object. `PartyFastOpenBindingTests` reads the constructor's IL and
+fails if it ever touches another member. Side finding, not changed here: for the same reason the clan colours that
+feature intends on party rows probably never show on v1.5.5; that needs an in-game look.
+
+**Toggle and sessions.** The toggle is read once, when the `PartyVM` constructor starts. Off at that point means every
+lookup misses and every store is ignored, but the session and window transitions still run. The constructor patch
+ends the session if the constructor throws; `OnFinalize` ends it otherwise.
+
+**Left out on purpose:** the `InitializePartyList` loop fix (tens of microseconds), deferring the trade rows, a
+`TransferAll` rewrite, pre-sorting the rosters, and skipping `RefreshValues` or property-change notifications.
+
+**How to measure.** Turn "Log Screen Open Times" on. Use a large army with many prisoners, plus a garrison at a big town.
+Open the party screen six times with Party Fast Open off, then six times on, and drop the first open of each arm. Compare
+the medians of the `[ScreenOpen] Party open` lines in `taom_debug.log`; the detail in parentheses lists rows built, code and
+count hits and misses, and the time in `InitializeTroopLists` and the final `RefreshValues`. Press Transfer All in the
+same save and compare the `[ScreenOpen] Party transfer all` lines the same way. Keep the change only if the median drops
+by at least 16 ms and by more than the off arm's spread.
+
+**Files:** `Main/Features/ShadowfaxScreens/Party/` (`PartyScreenFastPathService`, `PartyFastOpenCalls`, `Hooks/`).
+**Tests:** `TAOM.Tests/Features/ShadowfaxScreens/Party/` (`PartyScreenFastPathServiceTests`, `PartyFastOpenPatchShapeTests`,
+`PartyFastOpenBindingTests`, `PartyFastOpenWiringTests`).
+
+
 ## Changelog
 
 - 2026-10-18: first version.

@@ -1312,6 +1312,19 @@ A culprit is a same-tick run that drives `regulars` toward the surviving count w
 
 **Tests:** `MainRosterLossDiagnosticsTests` (formatter, caller-chain filter, `SubModule.cs` wiring and the category on both patch files).
 
+## PatchXXX_ShadowfaxParty
+
+**Target (number assigned at rebase; `PatchXXX` is a placeholder):** eight classes in `Main/Features/ShadowfaxScreens/Party/Hooks/`, category `PatchXXX_ShadowfaxParty`, applied at GameInit through `ShadowfaxScreensModule`. All v1.5.5 `TaleWorlds.CampaignSystem.ViewModelCollection.Party`: `PartyVM(PartyScreenLogic)` constructor (prefix and finalizer), `PartyVM.OnFinalize` (prefix), private `PartyVM.InitializeTroopLists()` and `RefreshTroopsUpgradeable()` (prefix and finalizer each), `PartyVM.RefreshValues()` (prefix and finalizer, timing only), private `PartyVM.TransferAllTroops(PartyScreenLogic.PartyCommand)` (prefix and finalizer, timing only), private `PartyCharacterVM.GetCharacterCode(CharacterObject character, TroopType type, PartyRosterSide side)` and public `PartyCharacterVM.GetNumOfCategoryItemPartyHas(ItemRoster items, ItemCategory itemCategory)` (a bool prefix that sets `__result` on a hit, plus a postfix that stores on a miss).
+
+Party Fast Open (#853, [shadowfax-screens.md](../features/shadowfax-screens.md) "Party fast open"). The constructor prefix opens a `PartyScreenFastPathService` session and a `[ScreenOpen] Party open` timer window; `OnFinalize` ends the session. Two caches serve the row builds: a character-code cache for the whole session and a category-count cache inside one `InitializeTroopLists` or `RefreshTroopsUpgradeable` call. Every prefix and finalizer pair is linked only through `__state` (a window flag and a phase clock start in `PartyPhaseState`), so a stripped prefix leaves its finalizer a no-op; every hook catches everything and falls through to vanilla. The two cache prefixes return false only on a hit.
+
+**Callers.** `GetCharacterCode` has two call sites, both in `PartyCharacterVM.cs` (lines 175 and 183 in v1.5.5), each passing the instance's own `Type` and `Side`; only `PartyVM` constructs `PartyCharacterVM`. `InitializeTroopLists` is called by the constructor, `Reset` and `TransferAllTroops`.
+
+**Interplay.** BannerColorPersistence (`Patch23`) postfixes the same `GetCharacterCode`; the cache stores the result before or after its colour writes, which `CharacterImageIdentifier` never reads. `PartyFastOpenBindingTests` pins that premise. PatchShield wraps these targets from a process's second game start and swallows only missing-API exceptions; none of the targets is on its exclusion lists.
+
+**Tests:** `PartyScreenFastPathServiceTests`, `PartyFastOpenPatchShapeTests` (real Harmony around stand-ins), `PartyFastOpenBindingTests`, `PartyFastOpenWiringTests`. **Not yet measured or smoked in game.**
+
+
 <!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
 
 ## Referenced by

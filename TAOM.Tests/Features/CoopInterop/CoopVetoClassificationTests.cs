@@ -142,6 +142,14 @@ public class CoopVetoClassificationTests
             "writes nothing to campaign state. It is also gated for co-op anyway: ClanScreenFastPathService issues no " +
             "refresh token while ICoopPresenceProvider.IsCoopActive, so under co-op the prefix always returns true and " +
             "vanilla builds all three times. Presentation in CoopSettingsRelevance."),
+        ["PartyCharacterVM_GetCharacterCode_ShadowfaxParty_Patch"] = new(CoopVeto.ReviewedSafe,
+            "PatchXXX_ShadowfaxParty: client-side UI. Returns false only on a per-screen cache hit, handing back the " +
+            "CharacterCode vanilla built earlier for the same character, troop type and side; the code feeds a portrait " +
+            "image id and mutates no campaign state, so there is nothing replicated to skip. The toggle is presentation."),
+        ["PartyCharacterVM_GetNumOfCategoryItemPartyHas_ShadowfaxParty_Patch"] = new(CoopVeto.ReviewedSafe,
+            "PatchXXX_ShadowfaxParty: client-side UI. Returns false only on a hit inside one InitializeTroopLists or " +
+            "RefreshTroopsUpgradeable call, handing back the count vanilla computed for the same roster and category; " +
+            "a read-only count for a row's upgrade state, no campaign mutation. The toggle is presentation."),
         ["Patch86_HideoutAssaultBossFight"] = new(CoopVeto.ReviewedSafe,
             "Replaces MapEventHelper.GetPriorityListForHideoutMission, a pure roster-ORDERING " +
             "function for the local hideout mission: it decides which troops spawn in phase 1 and " +
