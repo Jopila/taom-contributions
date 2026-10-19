@@ -1093,6 +1093,9 @@ silent. Slow compile and wedge cannot be told apart from that log.
   the frozen case when the gap to the watchdog line is 30 s or more
   (`RENDER_WAIT_SILENCE_THRESHOLD_S`), and names the next evidence: `compile_shader` lines in the full
   `rgl_log_<pid>.txt`, then a hang dump.
+- **Outcome:** it was a wedge. The player found that every large battle loaded again once their hero's Warg
+  mount was swapped for a horse (elf hero, public 1.4.8 build, 2026-10-19). The old verdict would have sent them to
+  wait out a shader compile that was not the cause.
 - **Source:** player bundle `taom_crash_20261018_184529_b18f3441`; fix in `tools/triage_battle_load.py`.
 
 ### A feature that reads another feature's computed state gates on that feature's toggle, not on its state machine (#822, 2026-10-18)
