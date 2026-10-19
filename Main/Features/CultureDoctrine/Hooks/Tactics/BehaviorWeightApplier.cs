@@ -61,7 +61,13 @@ public static class BehaviorWeightApplier
                 case BehaviorKind.Stop: ai.SetBehaviorWeight<BehaviorStop>(w); break;
                 case BehaviorKind.BracedDefend:
                     Ensure(formation, f => new BehaviorBracedDefend(f), owner);
-                    ai.SetBehaviorWeight<BehaviorBracedDefend>(w).DefensePosition = PositionFor(plan.Role, owner);
+                    var bracedDefend = ai.SetBehaviorWeight<BehaviorBracedDefend>(w);
+                    bracedDefend.DefensePosition = PositionFor(plan.Role, owner);
+                    // A held choke is faced and filled as vanilla's BehaviorDefend does; the second line
+                    // only faces it (it stands behind the gap, not in it).
+                    bracedDefend.DefenseFacing = owner.DefenseFacing;
+                    bracedDefend.DefenseLookAtEnemy = owner.DefenseLookAtEnemy;
+                    bracedDefend.DefenseWidth = plan.Role == FormationRole.SecondInfantry ? 0f : owner.DefenseWidth;
                     break;
                 case BehaviorKind.BracedAdvance:
                     Ensure(formation, f => new BehaviorBracedAdvance(f), owner);

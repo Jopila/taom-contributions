@@ -1234,3 +1234,48 @@ own pass walks `Settlement.All`.
   and castles together use `Town.AllFiefs` (or `Settlement.All` filtered by `IsFortification`). Pin the
   choice with a source test when the adapter cannot be unit-tested, and put a castle in the in-game check.
 - **Source:** `docs/reviews/rca-postern-gate-2026-10-18.md` finding 1.
+
+### A formation order a tactic issues is released by that tactic, on every formation that may have inherited it (horse stand, 2026-10-19)
+The horse stand ordered Dismount on its wall and cavalry formations and never took it back. A formation passes its
+riding order to every unit that joins (`Formation.cs:2322`), the merge empties the old cavalry formation, and
+reinforcements prefer an emptied formation, so later cavalry dismounted on arrival for the rest of the battle.
+- **Why missed:** the plan called the dismount "one way" and reasoned about the riders present, not about the
+  formations that keep the order or the units that join them later.
+- **Prevent:** for every lasting order a TAOM tactic or behaviour sets (riding, firing, arrangement), name the event
+  that ends its authority (`OnCancel` for a tactic) and release the order there, sweeping every formation of the team
+  that still holds it, not only the seats the tactic used. `VolleyControl.Release` is the model. Repeat of
+  `rca-culture-doctrine-phase-c-2026-09-17.md` row 7.
+- **Source:** `docs/reviews/rca-horse-stand-2026-10-19.md` rows 1 and 37.
+
+### Port a vanilla mechanic as one unit: what it picks, where it stands, how it faces, what it re-issues each tick (horse stand, 2026-10-19)
+The horse stand ported vanilla's choke eligibility test and held the chosen choke like any point. Vanilla's
+`BehaviorDefend` also faces the choke's direction (the live enemy for an insurmountable one), holds an insurmountable
+choke half a width toward the enemy, and re-issues `FormOrderCustom(width)` every tick, because an arrangement change
+makes the engine recompute a custom width (`Formation.cs:758-761`). Each fix ported one more part, and the
+convergence pass found the next one missing.
+- **Why missed:** the port started from the tactic that picks the ground (`TacticHoldChokePoint`) and never read the
+  behaviour that holds it.
+- **Prevent:** before porting a vanilla mechanic, list every vanilla type that touches it (the tactic that chooses,
+  the behaviour that holds, any per-tick re-issue) and port them together, or name each part left out in the doc.
+  When the chosen point and the held point differ, every check (cap, race, re-check) uses the held point.
+- **Source:** `docs/reviews/rca-horse-stand-2026-10-19.md` rows 2, 16 and 33 to 35.
+
+### A decision that commits troops to ground latches; a phase flip never re-decides it under another rule (horse stand, 2026-10-19)
+The horse stand held only in the Defend phase, and each change of verdict reset the ground anchor, so at every contact
+the ordinary race (which ignores horse) picked the ground again and could march the wall out of its choke as the
+horse arrived. The gate also had no release band.
+- **Why missed:** "dismount now" (a Defend-phase action) and "this is our ground" (a battle-long decision) were driven
+  by one flag.
+- **Prevent:** split per-phase actions from battle-long decisions. A decision that moves troops to ground latches
+  when it starts and ends only at the event that ends the tactic. Repeat of
+  `rca-culture-doctrine-engagement-2026-09-17.md` row 1 and phase C row 2 (edges and gates without the engine's
+  hysteresis).
+- **Source:** `docs/reviews/rca-horse-stand-2026-10-19.md` rows 4 and 37.
+
+### `TeamQuerySystem.MemberCount` is one team; compare a side with `AllyUnitCount` (horse stand, 2026-10-19)
+The horse stand's "outnumbered" gate compared `MemberCount` (this team only) with `EnemyUnitCount` (every enemy
+team), so the player's AI ally team read as outnumbered when the player's whole side was not.
+- **Why missed:** the two properties sit side by side and read as a pair.
+- **Prevent:** a side-against-side comparison uses `AllyUnitCount` (it includes this team,
+  `TeamQuerySystem.cs:240-249`) against `EnemyUnitCount`. Use `MemberCount` only for a question about this team alone.
+- **Source:** `docs/reviews/rca-horse-stand-2026-10-19.md` row 13.

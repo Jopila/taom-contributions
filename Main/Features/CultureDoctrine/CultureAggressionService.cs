@@ -15,4 +15,7 @@ public sealed class CultureAggressionService : ICultureAggressionService
 
     public CultureAggression Profile(string? cultureId) =>
         _settings.IsAggressionEnabled ? _config.GetCatalog().Resolve(cultureId).Aggression : CultureAggression.Vanilla;
+
+    public float StandPolearmFavor =>
+        _settings.IsHorseStandEnabled ? _config.GetCatalog().HorseStand.PolearmFavor : 1f;
 }

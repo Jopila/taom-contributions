@@ -37,6 +37,17 @@ public readonly struct TeamQuerySnapshot
         float rangedCavalryRatio, float remainingPowerRatio, float notEngagingAdvantage,
         bool hasInfantry, bool hasArchers, bool hasCavalry, bool isDefenseApplicable, bool ringFits, bool isDefender,
         int infantryCount, float throwingRatio, bool hasVanguard, int infantryTotal)
+        : this(memberCount, enemyUnitCount, infantryRatio, rangedRatio, cavalryRatio, rangedCavalryRatio, remainingPowerRatio,
+            notEngagingAdvantage, hasInfantry, hasArchers, hasCavalry, isDefenseApplicable, ringFits, isDefender,
+            infantryCount, throwingRatio, hasVanguard, infantryTotal, enemyCavalryRatio: 0f, allyUnitCount: memberCount)
+    {
+    }
+
+    public TeamQuerySnapshot(
+        int memberCount, int enemyUnitCount, float infantryRatio, float rangedRatio, float cavalryRatio,
+        float rangedCavalryRatio, float remainingPowerRatio, float notEngagingAdvantage,
+        bool hasInfantry, bool hasArchers, bool hasCavalry, bool isDefenseApplicable, bool ringFits, bool isDefender,
+        int infantryCount, float throwingRatio, bool hasVanguard, int infantryTotal, float enemyCavalryRatio, int allyUnitCount)
     {
         MemberCount = memberCount;
         EnemyUnitCount = enemyUnitCount;
@@ -56,6 +67,8 @@ public readonly struct TeamQuerySnapshot
         ThrowingRatio = throwingRatio;
         HasVanguard = hasVanguard;
         InfantryTotal = infantryTotal;
+        EnemyCavalryRatio = enemyCavalryRatio;
+        AllyUnitCount = allyUnitCount;
     }
 
     public int MemberCount { get; }
@@ -96,6 +109,16 @@ public readonly struct TeamQuerySnapshot
 
     /// <summary>The team's HeavyCavalry formation holds troops (a routed vanguard).</summary>
     public bool HasVanguard { get; }
+
+    /// <summary><c>TeamQuerySystem.EnemyCavalryRatio</c>: the enemy teams' melee cavalry share,
+    /// weighted by member count, cached by the engine for 15 s. Ranged cavalry is not in it.
+    /// 0 when the snapshot was built without it.</summary>
+    public float EnemyCavalryRatio { get; }
+
+    /// <summary><c>TeamQuerySystem.AllyUnitCount</c>: the whole side, this team included
+    /// (`TeamQuerySystem.cs:240-249`), so the horse stand compares side with side. The older
+    /// overloads pass <see cref="MemberCount"/>.</summary>
+    public int AllyUnitCount { get; }
 }
 
 /// <summary>

@@ -259,6 +259,17 @@ agents temporarily leave the grid (skirmish, man a siege engine) without leaving
   `body_capsule radius="0.37"` (UnitDiameter ≈ 0.74), and `docs/features/troll-race.md` records it "confirmed working
   in battle". It is a formation-capable humanoid, not a riderless non-humanoid — a different profile from the spider.
   The still-open sub-question is the *live external* capsule in `LOTRLOME_Armory`, which the repo cannot see.
+- **Riding orders follow the unit and the formation** (v1.5.5, read for the horse stand, #892). A unit
+  added to a formation takes that formation's riding order (`unit.SetRidingOrder(RidingOrder.OrderEnum)`,
+  `Formation.cs:2322`), so a dismount order on a formation reaches every later joiner, an emptied
+  cavalry formation included. A transfer into an EMPTY formation first copies the source's orders,
+  riding order among them, through `CopyOrdersFrom` (`Formation.cs:2709-2714`, called at `:2171` and
+  `:2673`). A formation reset sets `RidingOrderFree` (`ResetAux`, `:2889`). Vanilla's only
+  `RidingOrderDismount` setter is the player's Dismount order (`OrderController.cs:327`); its
+  counterpart `RidingOrderMount` is set at `:337`. The AI seeks a loose mount only when the unit has
+  none, is not retreating and its riding order is Mount, enum value 1 (`HumanAIComponent.cs:267`). So
+  a Free order never remounts anyone, and a Dismount order left on an emptied formation keeps
+  dismounting whoever is placed in it.
 - **Self-friend invariant:** `IsFriendOf` is just `!IsEnemyOf`, so **`team.IsFriendOf(team) == true`** — add an explicit
   `if (team == myTeam) continue;` belt-and-braces around friend checks in multi-team scenarios
   (`feedback_taleworlds_invariant_check_explicit`).

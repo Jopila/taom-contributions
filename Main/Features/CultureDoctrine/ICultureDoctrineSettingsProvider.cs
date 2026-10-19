@@ -21,4 +21,10 @@ public interface ICultureDoctrineSettingsProvider
     /// <summary><see cref="IsEnabled"/> and the aggression sub-toggle. Read per agent property
     /// refresh from the agent-stat model, on the main thread.</summary>
     bool IsAggressionEnabled { get; }
+
+    /// <summary><see cref="IsEnabled"/> and the horse-stand sub-toggle. Read once per team when the
+    /// tactics are installed (main thread), and on every agent property refresh from the agent-stat
+    /// models (the polearm favour), on whichever thread refreshes. The read goes through the
+    /// settings object each time, so a flip between missions takes effect without a restart.</summary>
+    bool IsHorseStandEnabled { get; }
 }

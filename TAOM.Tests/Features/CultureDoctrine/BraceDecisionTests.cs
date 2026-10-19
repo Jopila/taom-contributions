@@ -10,6 +10,31 @@ public class BraceDecisionTests
         => new WallSituation(atPosition, hasShield, charge, underFire, armsLength, shieldBand);
 
     [TestMethod]
+    public void Defend_HoldingAChokeUnderCharge_KeepsTheShieldWallNotTheSquare()
+    {
+        Assert.AreEqual(WallStance.ShieldWall, BraceDecision.Defend(Situation(charge: true), bracedRecently: true, holdingChoke: true));
+    }
+
+    [TestMethod]
+    public void Defend_HoldingAChokeWithoutShieldsUnderCharge_KeepsTheLine()
+    {
+        Assert.AreEqual(WallStance.Line, BraceDecision.Defend(Situation(hasShield: false, charge: true), bracedRecently: true, holdingChoke: true));
+    }
+
+    [TestMethod]
+    public void Defend_HoldingAChokeStillMarchingUnderCharge_IsLoose()
+    {
+        Assert.AreEqual(WallStance.Loose, BraceDecision.Defend(Situation(atPosition: false, charge: true), bracedRecently: false, holdingChoke: true));
+    }
+
+    [TestMethod]
+    public void Defend_NotHoldingAChoke_StillSquaresOnTheCharge()
+    {
+        Assert.AreEqual(WallStance.Square, BraceDecision.Defend(Situation(charge: true), bracedRecently: false, holdingChoke: false));
+        Assert.AreEqual(WallStance.Square, BraceDecision.Defend(Situation(), bracedRecently: true, holdingChoke: false));
+    }
+
+    [TestMethod]
     public void Defend_ChargeInbound_IsSquare_WhetherOrNotAtPosition()
     {
         Assert.AreEqual(WallStance.Square, BraceDecision.Defend(Situation(charge: true), bracedRecently: false));

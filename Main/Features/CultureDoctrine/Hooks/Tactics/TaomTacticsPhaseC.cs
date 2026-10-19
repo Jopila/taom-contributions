@@ -23,14 +23,17 @@ public sealed class TaomTacticTwoLineWall : TaomTacticBase
     {
     }
 
-    protected override float Weigh(in TeamQuerySnapshot snapshot) => DoctrineWeights.TwoLineWall(in snapshot);
+    protected override float Weigh(in TeamQuerySnapshot snapshot) => DoctrineWeights.TwoLineWall(in snapshot) * StandEdge(in snapshot);
 
     protected override string StatusSuffix => _anchor.Suffix;
 
     // The front line races to the high ground as the single wall does; the second line stands a
-    // gap behind it on the side away from the enemy.
+    // gap behind it on the side away from the enemy. The horse stand works as in TaomTacticShieldWall.
     protected override void BeforeApply(TacticPhase phase)
     {
+        RefreshStand(phase);
+        if (Standing)
+            _anchor.Stand();
         var infantry = MainInfantry;
         if (infantry == null)
         {
@@ -40,6 +43,9 @@ public sealed class TaomTacticTwoLineWall : TaomTacticBase
         }
         var front = _anchor.Resolve(infantry, infantry, Archers, Team, Plan.Race, Engagement);
         DefensePosition = front;
+        DefenseFacing = _anchor.Facing;
+        DefenseWidth = _anchor.Width;
+        DefenseLookAtEnemy = _anchor.LookAtEnemy;
         var toEnemy = Team.QuerySystem.AverageEnemyPosition - front.AsVec2;
         var facing = toEnemy.LengthSquared > 1e-4f ? toEnemy.Normalized() : infantry.Direction;
         var second = front;
@@ -47,8 +53,12 @@ public sealed class TaomTacticTwoLineWall : TaomTacticBase
         SecondLinePosition = second;
     }
 
+    protected override void OnStandEnded() => _anchor.EndStand();
+
     protected override bool OnPhaseTick(TacticPhase phase)
     {
+        if (RefreshStand(phase))
+            return true;
         var infantry = MainInfantry;
         return phase == TacticPhase.Defend && infantry != null && _anchor.Tick(infantry, Team, Plan.Race, Engagement);
     }

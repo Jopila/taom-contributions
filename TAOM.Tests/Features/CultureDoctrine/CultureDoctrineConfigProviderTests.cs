@@ -467,4 +467,168 @@ public class CultureDoctrineConfigProviderTests
         _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("engagement.holdWhenEnemyWithinMetres")));
         _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("contained invalid values")));
     }
+
+    private void WriteWithHorseStand(string globalBlock, string cultureBlock = "") =>
+        WriteConfig("{ \"enabled\": true, " + globalBlock + " \"doctrines\": { " + ValidDefault + ", \"erebor\": { \"tactics\": [ { \"id\": \"Charge\" } ]" + cultureBlock + " } } }");
+
+    [TestMethod]
+    public void GetCatalog_NoHorseStandBlock_UsesTheDefaultsAndNoCultureStands()
+    {
+        WriteWithHorseStand("");
+
+        var catalog = _sut.GetCatalog();
+
+        Assert.AreEqual(HorseStandTunables.Default.EnemyCavalryShare, catalog.HorseStand.EnemyCavalryShare);
+        Assert.AreEqual(HorseStandTunables.Default.OutnumberedRatio, catalog.HorseStand.OutnumberedRatio);
+        Assert.AreEqual(HorseStandTunables.Default.PolearmFavor, catalog.HorseStand.PolearmFavor);
+        Assert.IsNull(catalog.Resolve("erebor").HorseStand);
+        Assert.IsNull(catalog.Default.HorseStand);
+        _logger.DidNotReceive().LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void GetCatalog_HorseStandBlock_IsRead()
+    {
+        WriteWithHorseStand("\"horseStand\": { \"enemyCavalryShare\": 0.3, \"outnumberedRatio\": 2, \"polearmFavor\": 3 },");
+
+        var t = _sut.GetCatalog().HorseStand;
+
+        Assert.AreEqual(0.3f, t.EnemyCavalryShare);
+        Assert.AreEqual(2f, t.OutnumberedRatio);
+        Assert.AreEqual(3f, t.PolearmFavor);
+        _logger.DidNotReceive().LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void GetCatalog_HorseStandRangeEdges_AreKept()
+    {
+        WriteWithHorseStand("\"horseStand\": { \"enemyCavalryShare\": 0.05, \"outnumberedRatio\": 5, \"polearmFavor\": 1 },");
+
+        var t = _sut.GetCatalog().HorseStand;
+
+        Assert.AreEqual(0.05f, t.EnemyCavalryShare);
+        Assert.AreEqual(5f, t.OutnumberedRatio);
+        Assert.AreEqual(1f, t.PolearmFavor);
+        _logger.DidNotReceive().LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void GetCatalog_HorseStandEnemyCavalryShareBelowRange_RevertsAndWarns()
+    {
+        WriteWithHorseStand("\"horseStand\": { \"enemyCavalryShare\": 0.01 },");
+
+        Assert.AreEqual(HorseStandTunables.Default.EnemyCavalryShare, _sut.GetCatalog().HorseStand.EnemyCavalryShare);
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.enemyCavalryShare")));
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("contained invalid values")));
+    }
+
+    [TestMethod]
+    public void GetCatalog_HorseStandEnemyCavalryShareAboveOne_RevertsAndWarns()
+    {
+        WriteWithHorseStand("\"horseStand\": { \"enemyCavalryShare\": 1.5 },");
+
+        Assert.AreEqual(HorseStandTunables.Default.EnemyCavalryShare, _sut.GetCatalog().HorseStand.EnemyCavalryShare);
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.enemyCavalryShare")));
+    }
+
+    [TestMethod]
+    public void GetCatalog_HorseStandOutnumberedRatioAboveRange_RevertsAndWarns()
+    {
+        WriteWithHorseStand("\"horseStand\": { \"outnumberedRatio\": 9 },");
+
+        Assert.AreEqual(HorseStandTunables.Default.OutnumberedRatio, _sut.GetCatalog().HorseStand.OutnumberedRatio);
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.outnumberedRatio")));
+    }
+
+    [TestMethod]
+    public void GetCatalog_HorseStandOutnumberedRatioBelowHalf_RevertsAndWarns()
+    {
+        WriteWithHorseStand("\"horseStand\": { \"outnumberedRatio\": 0.4 },");
+
+        Assert.AreEqual(HorseStandTunables.Default.OutnumberedRatio, _sut.GetCatalog().HorseStand.OutnumberedRatio);
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.outnumberedRatio")));
+    }
+
+    [TestMethod]
+    public void GetCatalog_HorseStandPolearmFavorBelowOne_IsRejected()
+    {
+        WriteWithHorseStand("\"horseStand\": { \"polearmFavor\": 0.5 },");
+
+        Assert.AreEqual(HorseStandTunables.Default.PolearmFavor, _sut.GetCatalog().HorseStand.PolearmFavor);
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.polearmFavor")));
+    }
+
+    [TestMethod]
+    public void GetCatalog_HorseStandPolearmFavorAboveFour_RevertsAndWarns()
+    {
+        WriteWithHorseStand("\"horseStand\": { \"polearmFavor\": 4.5 },");
+
+        Assert.AreEqual(HorseStandTunables.Default.PolearmFavor, _sut.GetCatalog().HorseStand.PolearmFavor);
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.polearmFavor")));
+    }
+
+    [TestMethod]
+    public void GetCatalog_HorseStandNaN_RevertsEveryFieldAndWarnsOnce()
+    {
+        WriteWithHorseStand("\"horseStand\": { \"enemyCavalryShare\": NaN, \"outnumberedRatio\": NaN, \"polearmFavor\": NaN },");
+
+        var t = _sut.GetCatalog().HorseStand;
+
+        Assert.AreEqual(HorseStandTunables.Default.EnemyCavalryShare, t.EnemyCavalryShare);
+        Assert.AreEqual(HorseStandTunables.Default.OutnumberedRatio, t.OutnumberedRatio);
+        Assert.AreEqual(HorseStandTunables.Default.PolearmFavor, t.PolearmFavor);
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.enemyCavalryShare")));
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.outnumberedRatio")));
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.polearmFavor")));
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("contained invalid values")));
+    }
+
+    [TestMethod]
+    public void GetCatalog_HorseStandInfinity_RevertsAndWarns()
+    {
+        WriteWithHorseStand("\"horseStand\": { \"polearmFavor\": Infinity, \"outnumberedRatio\": -Infinity },");
+
+        var t = _sut.GetCatalog().HorseStand;
+
+        Assert.AreEqual(HorseStandTunables.Default.PolearmFavor, t.PolearmFavor);
+        Assert.AreEqual(HorseStandTunables.Default.OutnumberedRatio, t.OutnumberedRatio);
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.polearmFavor")));
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("horseStand.outnumberedRatio")));
+    }
+
+    [TestMethod]
+    public void GetCatalog_CultureHorseStandBlock_OptsTheCultureInWithItsDismountFlag()
+    {
+        WriteWithHorseStand("", ", \"horseStand\": { \"dismount\": true }");
+
+        var catalog = _sut.GetCatalog();
+        var stand = catalog.Resolve("erebor").HorseStand;
+
+        Assert.IsNotNull(stand);
+        Assert.IsTrue(stand!.Dismount);
+        Assert.IsNull(catalog.Default.HorseStand, "the default doctrine carries no block");
+        _logger.DidNotReceive().LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void GetCatalog_CultureHorseStandDismountFalse_StillOptsIn()
+    {
+        WriteWithHorseStand("", ", \"horseStand\": { \"dismount\": false }");
+
+        var stand = _sut.GetCatalog().Resolve("erebor").HorseStand;
+
+        Assert.IsNotNull(stand);
+        Assert.IsFalse(stand!.Dismount);
+    }
+
+    [TestMethod]
+    public void GetCatalog_CultureHorseStandEmptyBlock_OptsInWithoutDismounting()
+    {
+        WriteWithHorseStand("", ", \"horseStand\": { }");
+
+        var stand = _sut.GetCatalog().Resolve("erebor").HorseStand;
+
+        Assert.IsNotNull(stand);
+        Assert.IsFalse(stand!.Dismount);
+    }
 }

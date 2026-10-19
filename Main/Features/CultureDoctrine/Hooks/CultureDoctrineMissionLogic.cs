@@ -116,7 +116,7 @@ public sealed class CultureDoctrineMissionLogic : MissionLogic
             var team = teams[i];
             if (!team.HasTeamAi || team.Side == BattleSideEnum.None)
                 continue;
-            _logger.LogInfo(TeamDoctrineInstaller.Install(Mission, team, catalog, combatants, _taomTactics));
+            _logger.LogInfo(TeamDoctrineInstaller.Install(Mission, team, catalog, combatants, _taomTactics, _settings.IsHorseStandEnabled));
         }
         if (_routing.IsSubscribed)
             _logger.LogInfo("[Doctrine] formation routing subscribed (GetAgentTroopClass_Override)");

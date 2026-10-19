@@ -161,4 +161,83 @@ public class ShippedDoctrineOrderingTests
             Assert.IsTrue(VanillaTacticWeightReference.TaomWeight(taom.Tactic, in snapshot) * taom.Multiplier > 0f, $"{culture} {side} {taom.Tactic}");
         }
     }
+
+    /// <summary>The A/B's stand army (Erebor 200 against Rohirrim 300 mostly horse): the tactic's
+    /// canonical shape, the enemy 1.5 times our number with 60% melee cavalry. The gate passes, so
+    /// the wall's weight carries <see cref="HorseStand.StandEdge"/>.</summary>
+    private static TeamQuerySnapshot StandArmy(DoctrineTactic wall)
+    {
+        var c = Canonical(wall, defender: true);
+        return new TeamQuerySnapshot(
+            c.MemberCount, c.MemberCount * 3 / 2, c.InfantryRatio, c.RangedRatio, c.CavalryRatio,
+            c.RangedCavalryRatio, c.RemainingPowerRatio, c.NotEngagingAdvantage,
+            c.HasInfantry, c.HasArchers, c.HasCavalry, c.IsDefenseApplicable, c.RingFits, c.IsDefender,
+            c.InfantryCount, c.ThrowingRatio, c.HasVanguard, c.InfantryTotal, enemyCavalryRatio: 0.6f, allyUnitCount: c.MemberCount);
+    }
+
+    /// <summary>The stand is wasted if another row keeps the team off the wall: Dale's own
+    /// disciplined line, or vanilla's choke hold on a map with a placed choke. Every culture that
+    /// stands must have its strongest adopting wall beat every other row it carries by the sticky
+    /// factor at the stand army, so the wall both wins the decision and keeps it. The 1.5x enemy
+    /// count is the A/B's; vanilla's own choke hold climbs with the enemy count (clamped at 3x), so
+    /// a far more lopsided battle on a map with a placed choke can still go to it.</summary>
+    [TestMethod]
+    public void EveryStandingCulture_AdoptingWallBeatsEveryOtherRowByTheStickyFactor_AtTheStandArmy()
+    {
+        var catalog = LoadShipped();
+        var tunables = catalog.HorseStand;
+        var failures = new List<string>();
+        foreach (var culture in catalog.CultureIds.OrderBy(c => c, StringComparer.Ordinal))
+        {
+            var doctrine = catalog.Resolve(culture);
+            if (doctrine.HorseStand == null)
+                continue;
+            var rows = TacticRoster.Build(doctrine, tacticsSkill: 300, DoctrineSide.Defender);
+            var wallWeight = 0f;
+            var wallTactic = DoctrineTactic.ShieldWall;
+            var adopters = 0;
+            foreach (var row in rows)
+            {
+                if (row.Tactic != DoctrineTactic.ShieldWall && row.Tactic != DoctrineTactic.TwoLineWall)
+                    continue;
+                adopters++;
+                var s = StandArmy(row.Tactic);
+                Assert.IsTrue(HorseStand.Applies(in s, in tunables), $"{culture}: the stand army must pass the gate");
+                var weight = VanillaTacticWeightReference.TaomWeight(row.Tactic, in s) * HorseStand.WeightFactor(in s, in tunables) * row.Multiplier;
+                if (weight > wallWeight)
+                {
+                    wallWeight = weight;
+                    wallTactic = row.Tactic;
+                }
+            }
+            Assert.IsTrue(adopters > 0, $"{culture} has no adopting row");
+
+            var army = StandArmy(wallTactic);
+            foreach (var row in rows)
+            {
+                if (row.Tactic == DoctrineTactic.ShieldWall || row.Tactic == DoctrineTactic.TwoLineWall)
+                    continue;
+                var other = (DoctrineTacticIds.IsVanilla(row.Tactic)
+                    ? VanillaTacticWeightReference.Weight(row.Tactic, in army, sceneScore: 1f)
+                    : VanillaTacticWeightReference.TaomWeight(row.Tactic, in army)) * row.Multiplier;
+                if (wallWeight <= other * StickyFactor)
+                    failures.Add($"{culture}: {wallTactic} {wallWeight:0.000} does not beat {row.Tactic}*{row.Multiplier} = {other:0.000} x {StickyFactor}");
+            }
+        }
+        Assert.AreEqual(0, failures.Count, string.Join(Environment.NewLine, failures));
+    }
+
+    [TestMethod]
+    public void WeightFactor_GatePassingVersusQuietEnemyCavalry_IsStandEdgeVersusOne()
+    {
+        var tunables = LoadShipped().HorseStand;
+        var army = StandArmy(DoctrineTactic.ShieldWall);
+        var quiet = new TeamQuerySnapshot(
+            army.MemberCount, army.EnemyUnitCount, army.InfantryRatio, army.RangedRatio, army.CavalryRatio, army.RangedCavalryRatio,
+            army.RemainingPowerRatio, army.NotEngagingAdvantage, army.HasInfantry, army.HasArchers, army.HasCavalry, army.IsDefenseApplicable,
+            army.RingFits, army.IsDefender, army.InfantryCount, army.ThrowingRatio, army.HasVanguard, army.InfantryTotal, enemyCavalryRatio: 0.1f, allyUnitCount: army.MemberCount);
+
+        Assert.AreEqual(HorseStand.StandEdge, HorseStand.WeightFactor(in army, in tunables));
+        Assert.AreEqual(1f, HorseStand.WeightFactor(in quiet, in tunables));
+    }
 }

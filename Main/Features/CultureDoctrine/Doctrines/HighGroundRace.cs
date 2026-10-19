@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TAOM.Core.Validation;
 using TAOM.Features.CultureDoctrine.Domain;
+using TaleWorlds.Library;
 
 namespace TAOM.Features.CultureDoctrine.Doctrines;
 
@@ -47,6 +48,23 @@ public static class HighGroundRace
         if (!(highGroundDistance <= tunables.HighGroundMaxMetres))
             return false;
         return closestEnemyFootDistance > tunables.HoldWhenEnemyWithinMetres;
+    }
+
+    /// <summary>Can the formation take this ground? It is worth the march (<see cref="WorthGoing"/>)
+    /// and the race against every mover is won (<see cref="Decide"/>). <paramref name="ourDistance"/>
+    /// is the straight line to <paramref name="target"/>; <paramref name="scratch"/> is the caller's
+    /// reusable ETA list, so nothing allocates. The one composition shared by the stand's picker and
+    /// the anchor's once-a-second re-check.</summary>
+    public static bool CanTake(
+        float ourDistance, float closestEnemyFootDistance, float ourSpeed, int ourUnits, in EngagementTunables engagement,
+        in RaceTunables race, Vec2 target, IReadOnlyList<EnemyMover> movers, List<float> scratch)
+    {
+        if (!WorthGoing(ourDistance, closestEnemyFootDistance, in engagement))
+            return false;
+        scratch.Clear();
+        for (var i = 0; i < movers.Count; i++)
+            scratch.Add(Eta(movers[i].Position.Distance(target), movers[i].Speed));
+        return Decide(ourDistance, ourSpeed, ourUnits, in race, scratch);
     }
 
     /// <summary>Seconds for a formation to cover <paramref name="distance"/> at

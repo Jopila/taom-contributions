@@ -20,7 +20,8 @@ namespace TAOM.Features.CareerSystem.Models;
 // lives in ICareerAgentStatService. This file extracts primitives from the sealed Agent
 // at the boundary and delegates. Closes deferred audit-issue #142 inline-logic P2.
 //
-// This one AgentStatCalculateModel slot carries the career, mount-lock, culture aggression, cavalry charge, race ability
+// This one AgentStatCalculateModel slot carries the career, mount-lock, culture aggression, the #892 horse-stand polearm
+// favour (a post-pass right after the aggression one), cavalry charge, race ability
 // and creature siege detachment rules; their order and history are in the TaomAgentStatCalculateModel row of
 // docs/reference/gamemodel-registry.md. The Rhun war chariot has no mount-lock (upstream-chariot-pack parity, #279).
 public class TaomAgentStatCalculateModel : SandboxAgentStatCalculateModel
@@ -118,7 +119,10 @@ public class TaomAgentStatCalculateModel : SandboxAgentStatCalculateModel
                     : agentDrivenProperties.MountDifficulty;
 
         if (_aggression != null)
+        {
             AgentAggressionApplier.Apply(agentDrivenProperties, _aggression.Profile(AgentAggressionApplier.CultureOf(agent)));
+            StandWeaponFavor.Apply(agent, agentDrivenProperties, _aggression.StandPolearmFavor);
+        }
 
         // Race Abilities: a live ability's speeds and AI temperament, after the aggression pass so it scales
         // the culture's values; inert unless the soldier's ability is running.

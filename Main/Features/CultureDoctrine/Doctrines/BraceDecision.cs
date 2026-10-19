@@ -59,10 +59,12 @@ public static class BraceDecision
     /// <summary>Seconds the square is kept after the charge signal last read true.</summary>
     public const float BraceHoldSeconds = 3f;
 
-    /// <summary>A wall holding a position (the Dwarven, Dale and Uruk defence).</summary>
-    public static WallStance Defend(in WallSituation s, bool bracedRecently)
+    /// <summary>A wall holding a position (the Dwarven, Dale and Uruk defence). A wall that holds a
+    /// choke (<paramref name="holdingChoke"/>) never goes Square: it fills the gap edge to edge
+    /// as vanilla's <c>BehaviorDefend</c> does, and a square would open it.</summary>
+    public static WallStance Defend(in WallSituation s, bool bracedRecently, bool holdingChoke = false)
     {
-        if (s.CavalryChargeInbound || bracedRecently)
+        if (!holdingChoke && (s.CavalryChargeInbound || bracedRecently))
             return WallStance.Square;
         if (!s.AtPosition)
             return WallStance.Loose;

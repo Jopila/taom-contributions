@@ -34,6 +34,7 @@ public class CultureDoctrineSettingsProviderTests
         Assert.IsFalse(sut.IsDebug, nameof(sut.IsDebug));
         Assert.IsFalse(sut.IsMoraleEnabled, nameof(sut.IsMoraleEnabled));
         Assert.IsFalse(sut.IsAggressionEnabled, nameof(sut.IsAggressionEnabled));
+        Assert.IsFalse(sut.IsHorseStandEnabled, nameof(sut.IsHorseStandEnabled));
     }
 
     // Read THROUGH the cached reference: edits made after every getter has been read once must reach
@@ -48,6 +49,10 @@ public class CultureDoctrineSettingsProviderTests
             (true, s => s.EnableCultureDoctrine = true, p => p.IsAggressionEnabled, true, "IsAggressionEnabled"),
             (true, s => { s.EnableCultureDoctrine = true; s.CultureDoctrineMorale = false; }, p => p.IsMoraleEnabled, false, "IsMoraleEnabled, morale off"),
             (true, s => { s.EnableCultureDoctrine = true; s.CultureDoctrineAggression = false; }, p => p.IsAggressionEnabled, false, "IsAggressionEnabled, aggression off"),
+            (true, s => s.EnableCultureDoctrine = true, p => p.IsHorseStandEnabled, true, "IsHorseStandEnabled"),
+            (true, s => { s.EnableCultureDoctrine = true; s.CultureDoctrineHorseStand = false; }, p => p.IsHorseStandEnabled, false, "IsHorseStandEnabled, horse stand off"),
+            (true, s => s.CultureDoctrineHorseStand = true, p => p.IsHorseStandEnabled, false, "IsHorseStandEnabled, doctrine off"),
+            (false, s => s.EnableCultureDoctrine = true, p => p.IsHorseStandEnabled, false, "IsHorseStandEnabled, catalog disabled"),
             (true, s => s.CultureDoctrineDebug = true, p => p.IsDebug, true, "IsDebug"),
             (false, s => s.EnableCultureDoctrine = true, p => p.IsEnabled, false, "IsEnabled, catalog disabled"),
         };

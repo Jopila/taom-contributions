@@ -23,6 +23,14 @@ namespace TAOM.Features.CultureDoctrine.Hooks.Tactics;
 /// `BehaviorHoldHighGround.cs:35-46`), the position is locked for good. One instance per tactic,
 /// touched only from that tactic's tick (the team-AI tick); the ETA list is reused, so a tick
 /// allocates nothing.
+///
+/// <para>
+/// Stand mode (<see cref="Stand"/>, the horse stand of <c>HorseStand</c>) swaps the ground
+/// and the race: the wall takes the best of the scene's chokes, its forests, the slope point and
+/// its own ground (<see cref="StandGround"/>, candidates copied once by
+/// <see cref="StandGroundScan"/>), and enemy melee cavalry races it like foot does. It is off
+/// for every other user of this class, which keeps the foot-and-archer race above untouched.
+/// </para>
 /// </summary>
 public sealed class HighGroundAnchor
 {
@@ -41,7 +49,29 @@ public sealed class HighGroundAnchor
     private static readonly string[] StatusNames = { "Undecided", "Marching", "Holding", "Arrived" };
     private static readonly string[] Suffixes = { ":Undecided", ":Marching", ":Holding", ":Arrived" };
 
-    private readonly List<float> _enemyEtas = new List<float>(8);
+    // ":Stand:<kind>:<state>", indexed kind * 4 + state; built once so the status line allocates nothing.
+    private static readonly string[] StandSuffixes = BuildStandSuffixes();
+
+    private static string[] BuildStandSuffixes()
+    {
+        var kinds = new[] { GroundKind.Here, GroundKind.Choke, GroundKind.Forest, GroundKind.Hill };
+        var all = new string[kinds.Length * StatusNames.Length];
+        for (var k = 0; k < kinds.Length; k++)
+            for (var s = 0; s < StatusNames.Length; s++)
+                all[(int)kinds[k] * StatusNames.Length + s] = ":Stand:" + kinds[k] + ":" + StatusNames[s];
+        return all;
+    }
+
+    // One enemy team holds 10 formations (Team.cs:279); FillMovers walks every enemy team, so the lists
+    // can pass 10 when the enemy side has several, and then simply grow.
+    private readonly List<float> _enemyEtas = new List<float>(10);
+    private readonly List<EnemyMover> _movers = new List<EnemyMover>(10);
+    private GroundCandidate[]? _candidates;
+    private bool _standing;
+    private GroundKind _kind;
+    private Vec2 _facing;
+    private float _width;
+    private bool _lookAtEnemy;
     private State _state;
     private Formation? _for;
     private WorldPosition _position = WorldPosition.Invalid;
@@ -50,8 +80,45 @@ public sealed class HighGroundAnchor
     /// reference once a second to see whether the tactic's line needs rebuilding.</summary>
     public string Status => StatusNames[(int)_state];
 
-    /// <summary>The same with the colon, for the tactic's status line.</summary>
-    public string Suffix => Suffixes[(int)_state];
+    /// <summary>The same with the colon, for the tactic's status line; in stand mode
+    /// <c>:Stand:Choke|Forest|Hill|Here:&lt;state&gt;</c>.</summary>
+    public string Suffix => _standing ? StandSuffixes[(int)_kind * StatusNames.Length + (int)_state] : Suffixes[(int)_state];
+
+    /// <summary>Which way the held ground must be faced, for a choke only: the wall's own facing
+    /// toward the enemy is kept when this is zero.</summary>
+    public Vec2 Facing => _facing;
+
+    /// <summary>The frontage to fill, for a choke only; zero keeps the wall's own.</summary>
+    public float Width => _width;
+
+    /// <summary>True when the held ground is an insurmountable choke, which vanilla faces with
+    /// <c>FacingOrderLookAtEnemy</c> (it tracks the live enemy) rather than a fixed direction.</summary>
+    public bool LookAtEnemy => _lookAtEnemy;
+
+    /// <summary>Switches stand mode on. The tactic latches its stand, so the gate's flicker never
+    /// switches it back; only <see cref="EndStand"/>, at the tactic's cancel, does. The first call
+    /// forgets the decision so the next <see cref="Resolve"/> picks the ground again under the
+    /// stand's rules.</summary>
+    public void Stand()
+    {
+        if (_standing)
+            return;
+        _standing = true;
+        _state = State.Undecided;
+        _kind = GroundKind.Here;
+    }
+
+    /// <summary>Leaves stand mode when the tactic is cancelled, so a later pick starts clean: the
+    /// non-stand ground rules, state Undecided, kind Here, no facing and no width.</summary>
+    public void EndStand()
+    {
+        _standing = false;
+        _state = State.Undecided;
+        _kind = GroundKind.Here;
+        _facing = Vec2.Zero;
+        _width = 0f;
+        _lookAtEnemy = false;
+    }
 
     /// <summary>The position to defend, decided or re-checked at a phase apply.
     /// <paramref name="anchor"/> is the formation whose high ground is meant (the archers for a
@@ -67,12 +134,12 @@ public sealed class HighGroundAnchor
         switch (_state)
         {
             case State.Undecided:
-                Decide(infantry, HighGroundOf(anchor, in engagement), team, in race, in engagement);
+                DecideGround(infantry, anchor, team, in race, in engagement);
                 break;
             case State.Marching:
                 // Still tracking the high ground while the enemy is far, as BehaviorHoldHighGround does.
                 if (EnemyBeyondLockRadius(infantry, archers))
-                    Decide(infantry, HighGroundOf(anchor, in engagement), team, in race, in engagement);
+                    DecideGround(infantry, anchor, team, in race, in engagement);
                 break;
         }
         return _position;
@@ -89,35 +156,87 @@ public sealed class HighGroundAnchor
             _state = State.Arrived;
             return false;
         }
-        if (Worth(infantry, _position.AsVec2, in engagement) && RaceWinnable(infantry, _position.AsVec2, team, in race))
+        if (CanTake(infantry, _position.AsVec2, team, in race, in engagement))
             return false;
-        _state = State.Holding;
-        _position = Here(infantry);
+        HoldHere(infantry);
         return true;
+    }
+
+    private void DecideGround(Formation infantry, Formation anchor, Team team, in RaceTunables race, in EngagementTunables engagement)
+    {
+        if (_standing)
+            DecideStand(infantry, anchor, team, in race, in engagement);
+        else
+            Decide(infantry, HighGroundOf(anchor, in engagement), team, in race, in engagement);
+    }
+
+    // Stand mode: the best ground by StandGround's order, the race counting enemy melee cavalry.
+    private void DecideStand(Formation infantry, Formation anchor, Team team, in RaceTunables race, in EngagementTunables engagement)
+    {
+        var candidates = _candidates ??= StandGroundScan.Copy(team);
+        var hill = HighGroundOf(anchor, in engagement);
+        FillMovers(team);
+        var enemyCentre = team.QuerySystem.AverageEnemyPosition;
+        var situation = new StandSituation(
+            infantry.CachedAveragePosition, infantry.QuerySystem.MovementSpeedMaximum, infantry.CountOfUnits, infantry.MaximumWidth,
+            enemyCentre, hill.AsVec2, EnemyScan.ClosestFootDistance(infantry));
+        var picked = StandGround.Pick(candidates, in situation, in engagement, in race, _movers, _enemyEtas);
+        if (picked.Kind == GroundKind.Here)
+        {
+            HoldHere(infantry);
+            return;
+        }
+        var hold = StandGround.HoldOf(in picked, enemyCentre);
+        _kind = picked.Kind;
+        _facing = hold.Facing;
+        _width = hold.Width;
+        _lookAtEnemy = picked.Insurmountable;
+        _state = State.Marching;
+        _position = infantry.CachedMedianPosition;
+        _position.SetVec2(hold.Position);
     }
 
     private void Decide(Formation infantry, WorldPosition ground, Team team, in RaceTunables race, in EngagementTunables engagement)
     {
-        if (Worth(infantry, ground.AsVec2, in engagement) && RaceWinnable(infantry, ground.AsVec2, team, in race))
+        _facing = Vec2.Zero;
+        _width = 0f;
+        _lookAtEnemy = false;
+        if (CanTake(infantry, ground.AsVec2, team, in race, in engagement))
         {
             _state = State.Marching;
             _position = ground;
         }
         else
         {
-            _state = State.Holding;
-            _position = Here(infantry);
+            HoldHere(infantry);
         }
     }
 
-    // The ground is inside the cap and no enemy foot is on us yet.
-    private static bool Worth(Formation infantry, Vec2 target, in EngagementTunables engagement) =>
-        HighGroundRace.WorthGoing(infantry.CachedAveragePosition.Distance(target), EnemyScan.ClosestFootDistance(infantry), in engagement);
-
-    // Every enemy foot and archer formation's time to the target against ours plus form-up.
-    private bool RaceWinnable(Formation infantry, Vec2 target, Team team, in RaceTunables race)
+    private void HoldHere(Formation infantry)
     {
-        _enemyEtas.Clear();
+        _state = State.Holding;
+        _kind = GroundKind.Here;
+        _facing = Vec2.Zero;
+        _width = 0f;
+        _lookAtEnemy = false;
+        _position = Here(infantry);
+    }
+
+    // The ground is worth the march and the race against every mover is won: one composition for
+    // the stand's picker and this re-check.
+    private bool CanTake(Formation infantry, Vec2 target, Team team, in RaceTunables race, in EngagementTunables engagement)
+    {
+        FillMovers(team);
+        return HighGroundRace.CanTake(
+            infantry.CachedAveragePosition.Distance(target), EnemyScan.ClosestFootDistance(infantry),
+            infantry.QuerySystem.MovementSpeedMaximum, infantry.CountOfUnits, in engagement, in race, target, _movers, _enemyEtas);
+    }
+
+    // Every enemy foot and archer formation (in stand mode, melee cavalry too) with where it is and
+    // how fast it goes; horse archers wheel at range and never race for ground.
+    private void FillMovers(Team team)
+    {
+        _movers.Clear();
         var teams = team.Mission.Teams;
         for (var t = 0; t < teams.Count; t++)
         {
@@ -131,13 +250,11 @@ public sealed class HighGroundAnchor
                 if (f.CountOfUnits <= 0)
                     continue;
                 var q = f.QuerySystem;
-                if (!q.IsInfantryFormation && !q.IsRangedFormation)
+                if (!q.IsInfantryFormation && !q.IsRangedFormation && !(_standing && q.IsCavalryFormation))
                     continue;
-                _enemyEtas.Add(HighGroundRace.Eta(f.CachedMedianPosition.AsVec2.Distance(target), q.MovementSpeedMaximum));
+                _movers.Add(new EnemyMover(f.CachedMedianPosition.AsVec2, q.MovementSpeedMaximum));
             }
         }
-        var ourDistance = infantry.CachedAveragePosition.Distance(target);
-        return HighGroundRace.Decide(ourDistance, infantry.QuerySystem.MovementSpeedMaximum, infantry.CountOfUnits, in race, _enemyEtas);
     }
 
     private static bool EnemyBeyondLockRadius(Formation infantry, Formation? archers)

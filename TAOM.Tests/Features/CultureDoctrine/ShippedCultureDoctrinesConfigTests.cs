@@ -189,4 +189,54 @@ public class ShippedCultureDoctrinesConfigTests
             foreach (var entry in catalog.Resolve(id).Tactics.Where(t => !DoctrineTacticIds.IsVanilla(t.Tactic)))
                 Assert.AreEqual(0, entry.MinTactics, $"{id}: {entry.Tactic} has a skill floor");
     }
+
+    /// <summary>The cultures Mike opted in, and whether their cavalry get off. Erebor rides war
+    /// rams, Isengard wargs; Dale rides ordinary horses.</summary>
+    [TestMethod]
+    public void ShippedConfig_HorseStandCultures_AreTheFourOptedIn_WithTheirDismountFlags()
+    {
+        var catalog = _sut.GetCatalog();
+
+        var standing = catalog.CultureIds.Where(c => catalog.Resolve(c).HorseStand != null).OrderBy(c => c).ToArray();
+
+        CollectionAssert.AreEqual(new[] { "erebor", "erebor_warriors", "isengard", "sturgia" }, standing);
+        Assert.IsFalse(catalog.Resolve("erebor").HorseStand!.Dismount, "erebor: its mounted troops ride war rams");
+        Assert.IsFalse(catalog.Resolve("erebor_warriors").HorseStand!.Dismount, "erebor_warriors: no mounted troops");
+        Assert.IsFalse(catalog.Resolve("isengard").HorseStand!.Dismount, "isengard: its mounted troops ride wargs");
+        Assert.IsTrue(catalog.Resolve("sturgia").HorseStand!.Dismount, "sturgia: Dale rides ordinary horses");
+    }
+
+    [TestMethod]
+    public void ShippedConfig_TheDefaultDoctrine_NeverStands()
+    {
+        var catalog = _sut.GetCatalog();
+
+        Assert.IsNull(catalog.Default.HorseStand, "a culture without a row (the looters included) resolves to default; erebor_warriors is a bandit culture with its own row");
+        Assert.IsNull(catalog.Resolve("looters").HorseStand);
+    }
+
+    [TestMethod]
+    public void ShippedConfig_EveryHorseStandCulture_CarriesADefenderRowThatAdoptsTheStand()
+    {
+        var catalog = _sut.GetCatalog();
+
+        foreach (var culture in catalog.CultureIds.Where(c => catalog.Resolve(c).HorseStand != null))
+        {
+            var adopts = catalog.Resolve(culture).Tactics.Any(t =>
+                (t.Tactic == DoctrineTactic.ShieldWall || t.Tactic == DoctrineTactic.TwoLineWall)
+                && t.Multiplier > 0f
+                && (t.Side == DoctrineSide.Any || t.Side == DoctrineSide.Defender));
+            Assert.IsTrue(adopts, $"{culture} opts into the horse stand but has no ShieldWall or TwoLineWall row for a defender");
+        }
+    }
+
+    [TestMethod]
+    public void ShippedConfig_HorseStandNumbers_AreTheCompiledDefaults()
+    {
+        var t = _sut.GetCatalog().HorseStand;
+
+        Assert.AreEqual(HorseStandTunables.Default.EnemyCavalryShare, t.EnemyCavalryShare);
+        Assert.AreEqual(HorseStandTunables.Default.OutnumberedRatio, t.OutnumberedRatio);
+        Assert.AreEqual(HorseStandTunables.Default.PolearmFavor, t.PolearmFavor);
+    }
 }

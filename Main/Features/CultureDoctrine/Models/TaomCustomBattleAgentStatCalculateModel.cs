@@ -14,7 +14,8 @@ namespace TAOM.Features.CultureDoctrine.Models;
 /// <c>CustomBattleAgentStatCalculateModel.UpdateAgentStats</c>. The campaign's slot is
 /// <c>TaomAgentStatCalculateModel</c> (CareerSystem), which carries the same post-pass beside
 /// the career and creature rules; this one exists so the Custom Battle A/B measures the melee
-/// tier too. It also carries the per-culture mount charge multiplier (#610), so a Custom Battle
+/// tier too. The #892 horse-stand polearm favour is a second post-pass here, right after the
+/// aggression one, for the same reason. It also carries the per-culture mount charge multiplier (#610), so a Custom Battle
 /// cavalry smoke sees the same numbers a campaign battle does.
 ///
 /// The multiplier rides <c>InitializeAgentStats</c>, not <c>UpdateAgentStats</c>: the Custom
@@ -47,6 +48,7 @@ public class TaomCustomBattleAgentStatCalculateModel : CustomBattleAgentStatCalc
     {
         base.UpdateAgentStats(agent, agentDrivenProperties);
         AgentAggressionApplier.Apply(agentDrivenProperties, _aggression.Profile(AgentAggressionApplier.CultureOf(agent)));
+        StandWeaponFavor.Apply(agent, agentDrivenProperties, _aggression.StandPolearmFavor);
         // Race Abilities: the same post-pass as the campaign slot, so a Custom Battle shows the live ability.
         RaceAbilityHooks.ApplyStats(agent, agentDrivenProperties);
     }

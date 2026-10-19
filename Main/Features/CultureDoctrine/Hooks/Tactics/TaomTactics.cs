@@ -23,23 +23,34 @@ public sealed class TaomTacticShieldWall : TaomTacticBase
         _defender = team.Side == BattleSideEnum.Defender;
     }
 
-    protected override float Weigh(in TeamQuerySnapshot snapshot) => DoctrineWeights.ShieldWall(in snapshot);
+    protected override float Weigh(in TeamQuerySnapshot snapshot) => DoctrineWeights.ShieldWall(in snapshot) * StandEdge(in snapshot);
 
     protected override string StatusSuffix => _defender ? _anchor.Suffix : "";
 
     // The defender's wall stands on the navmesh high ground if the foot can get there and form
     // before the enemy's foot does, otherwise where it stands (HighGroundAnchor); the attacker's
-    // plan uses BehaviorAdvance, which needs no position.
+    // plan uses BehaviorAdvance, which needs no position. Against an outnumbering army of horse
+    // (the horse stand, RefreshStand) the anchor picks chokes and forest first and races the cavalry.
     protected override void BeforeApply(TacticPhase phase)
     {
+        RefreshStand(phase);
+        if (Standing)
+            _anchor.Stand();
         var infantry = MainInfantry;
         DefensePosition = _defender && infantry != null
             ? _anchor.Resolve(infantry, infantry, Archers, Team, Plan.Race, Engagement)
             : WorldPosition.Invalid;
+        DefenseFacing = _anchor.Facing;
+        DefenseWidth = _anchor.Width;
+        DefenseLookAtEnemy = _anchor.LookAtEnemy;
     }
+
+    protected override void OnStandEnded() => _anchor.EndStand();
 
     protected override bool OnPhaseTick(TacticPhase phase)
     {
+        if (RefreshStand(phase))
+            return true;
         var infantry = MainInfantry;
         return phase == TacticPhase.Defend && _defender && infantry != null && _anchor.Tick(infantry, Team, Plan.Race, Engagement);
     }

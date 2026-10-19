@@ -260,4 +260,102 @@ public class CultureDoctrinePhaseCBindingTests
         var strings = PatchProcessor.ReadMethodBody(method).Select(i => i.Value as string).Where(s => s != null).ToList();
         CollectionAssert.Contains(strings, "str_formation_ai_sergeant_instruction_behavior_text");
     }
+
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    public void HorseStand_TheRidingOrderAndSceneSurface_StillExists()
+    {
+        RequireGame();
+
+        var formation = Mb("Formation");
+        var ridingOrder = Mb("RidingOrder");
+        var setter = AccessTools.Method(formation, "SetRidingOrder", new[] { ridingOrder });
+        Assert.IsTrue(setter != null && setter.IsPublic, "Formation.SetRidingOrder(RidingOrder) is gone or not public.");
+        Assert.AreEqual(ridingOrder, MemberType(formation, "RidingOrder"), "Formation.RidingOrder changed type.");
+        var dismount = AccessTools.Field(ridingOrder, "RidingOrderDismount");
+        Assert.IsTrue(dismount != null && dismount.IsStatic && dismount.FieldType == ridingOrder, "RidingOrder.RidingOrderDismount is gone.");
+        Assert.IsNotNull(AccessTools.Method(ridingOrder, "op_Equality", new[] { ridingOrder, ridingOrder }), "RidingOrder lost its == operator.");
+        Assert.AreEqual(typeof(float), MemberType(formation, "MaximumWidth"), "Formation.MaximumWidth is gone.");
+        Assert.AreEqual(typeof(float), MemberType(Mb("FormationQuerySystem"), "MovementSpeedMaximum"), "FormationQuerySystem.MovementSpeedMaximum is gone.");
+
+        // The gate's input: melee cavalry only, cached by the engine (TeamQuerySystem.cs:114, 421-435).
+        Assert.AreEqual(typeof(float), MemberType(Mb("TeamQuerySystem"), "EnemyCavalryRatio"), "TeamQuerySystem.EnemyCavalryRatio is gone.");
+
+        var ai = Mb("TeamAIComponent");
+        var positions = AccessTools.Field(ai, "TacticalPositions");
+        var regions = AccessTools.Field(ai, "TacticalRegions");
+        Assert.IsTrue(positions != null && positions.IsPublic && positions.FieldType == typeof(System.Collections.Generic.List<>).MakeGenericType(Mb("TacticalPosition")), "TeamAIComponent.TacticalPositions is gone.");
+        Assert.IsTrue(regions != null && regions.IsPublic && regions.FieldType == typeof(System.Collections.Generic.List<>).MakeGenericType(Mb("TacticalRegion")), "TeamAIComponent.TacticalRegions is gone.");
+
+        var position = Mb("TacticalPosition");
+        foreach (var name in new[] { "Position", "Direction", "Width", "IsInsurmountable", "TacticalPositionType", "LinkedTacticalPositions" })
+            Assert.IsNotNull(MemberType(position, name), "TacticalPosition." + name + " is gone.");
+        Assert.IsNotNull(AccessTools.Inner(position, "TacticalPositionTypeEnum"), "TacticalPosition.TacticalPositionTypeEnum is gone.");
+        Assert.IsTrue(Enum.IsDefined(AccessTools.Inner(position, "TacticalPositionTypeEnum"), "ChokePoint"), "TacticalPositionTypeEnum.ChokePoint is gone.");
+        var region = Mb("TacticalRegion");
+        foreach (var name in new[] { "Position", "tacticalRegionType", "LinkedTacticalPositions" })
+            Assert.IsNotNull(MemberType(region, name), "TacticalRegion." + name + " is gone.");
+        var regionType = AccessTools.Inner(region, "TacticalRegionTypeEnum");
+        Assert.IsTrue(regionType != null && Enum.IsDefined(regionType, "Forest"), "TacticalRegionTypeEnum.Forest is gone.");
+    }
+
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    public void HorseStand_ThePolearmFavourSetterAndTheAgentReads_StillExist()
+    {
+        RequireGame();
+
+        var properties = Mb("AgentDrivenProperties");
+        var favour = AccessTools.Property(properties, "AiWeaponFavorMultiplierPolearm");
+        Assert.IsTrue(favour != null && favour.PropertyType == typeof(float) && favour.SetMethod != null && favour.SetMethod.IsPublic, "AgentDrivenProperties.AiWeaponFavorMultiplierPolearm lost its public float setter.");
+        var agent = Mb("Agent");
+        Assert.AreEqual(Mb("Formation"), MemberType(agent, "Formation"), "Agent.Formation changed type.");
+        Assert.AreEqual(Mb("Team"), MemberType(agent, "Team"), "Agent.Team changed type.");
+        Assert.AreEqual(typeof(bool), MemberType(agent, "IsHuman"), "Agent.IsHuman is gone.");
+        Assert.AreEqual(typeof(bool), MemberType(Mb("Team"), "IsPlayerTeam"), "Team.IsPlayerTeam is gone.");
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGameIL")]
+    [TestCategory("BindingVerification")]
+    public void HorseStand_TheBaseStatModelResetsThePolearmFavourOnEveryUpdate()
+    {
+        RequireGame();
+
+        // The post-pass cannot compound only while SetAiRelatedProperties writes the property back
+        // to 1 on every update (AgentStatCalculateModel.cs:226-228), and the Custom Battle base
+        // reaches it from UpdateAgentStats through UpdateHumanStats (the Sandbox base, which the
+        // campaign model extends, calls it directly at SandboxAgentStatCalculateModel.cs:1153).
+        var model = Mb("AgentStatCalculateModel");
+        var method = AccessTools.Method(model, "SetAiRelatedProperties");
+        Assert.IsNotNull(method, "AgentStatCalculateModel.SetAiRelatedProperties is gone.");
+        var calls = PatchProcessor.ReadMethodBody(method).Select(i => i.Value as MethodInfo).Where(m => m != null).Select(m => m!.Name).ToList();
+        CollectionAssert.Contains(calls, "set_AiWeaponFavorMultiplierPolearm");
+        var customBattle = Mb("CustomBattleAgentStatCalculateModel");
+        var update = AccessTools.Method(customBattle, "UpdateHumanStats");
+        Assert.IsNotNull(update, "CustomBattleAgentStatCalculateModel.UpdateHumanStats is gone.");
+        var updateCalls = PatchProcessor.ReadMethodBody(update).Select(i => i.Value as MethodInfo).Where(m => m != null).Select(m => m!.Name).ToList();
+        CollectionAssert.Contains(updateCalls, "SetAiRelatedProperties");
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGameIL")]
+    [TestCategory("BindingVerification")]
+    public void HorseStand_TheCampaignModelReachesThePolearmResetOnEveryUpdate()
+    {
+        RequireGame();
+
+        // The campaign slot extends the Sandbox model: UpdateAgentStats -> UpdateHumanStats ->
+        // AgentStatCalculateModel.SetAiRelatedProperties (SandboxAgentStatCalculateModel.cs:229, 1153), the
+        // reset the Custom Battle chain above pins. Without this link the favour could compound on the campaign.
+        var sandbox = Resolve("SandBox.GameComponents.SandboxAgentStatCalculateModel");
+        var updateAgent = AccessTools.Method(sandbox, "UpdateAgentStats");
+        Assert.IsNotNull(updateAgent, "SandboxAgentStatCalculateModel.UpdateAgentStats is gone.");
+        var agentCalls = PatchProcessor.ReadMethodBody(updateAgent).Select(i => i.Value as MethodInfo).Where(m => m != null).Select(m => m!.Name).ToList();
+        CollectionAssert.Contains(agentCalls, "UpdateHumanStats");
+        var updateHuman = AccessTools.Method(sandbox, "UpdateHumanStats");
+        Assert.IsNotNull(updateHuman, "SandboxAgentStatCalculateModel.UpdateHumanStats is gone.");
+        var humanCalls = PatchProcessor.ReadMethodBody(updateHuman).Select(i => i.Value as MethodInfo).Where(m => m != null).Select(m => m!.Name).ToList();
+        CollectionAssert.Contains(humanCalls, "SetAiRelatedProperties");
+    }
 }

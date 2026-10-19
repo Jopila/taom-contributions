@@ -961,6 +961,11 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Each culture's soldiers fight the melee their own way: orcs attack on sight and rarely cover with a shield, Dwarves and Gondor raise shields and hold, Elves shoot straighter, Rohan commits to a charge from further out. Multiplies the engine's per-soldier AI decision values after skill has set them. Needs Enable Culture Doctrine. Applies to soldiers spawned from the next battle; tuning in culture_doctrines.json.")]
     public bool CultureDoctrineAggression { get; set; } = true;
 
+    [SettingPropertyGroup("Battle Tactics/Culture Doctrine")]
+    [SettingPropertyBool("Horse Stand", Order = 4, RequireRestart = false,
+        HintText = "Dwarves, Isengard and Dale, defending outnumbered against an army of mostly horse, stand where horse cannot ride them down: a choke point, a forest, a slope, or where they are. Where the riders sit on ordinary horses, the cavalry dismount and join the shield wall with polearms ready. The AI sides only; your own army is never touched. Needs Enable Culture Doctrine. Applies from the next battle; tuning in culture_doctrines.json.")]
+    public bool CultureDoctrineHorseStand { get; set; } = true;
+
     // --- Performance / Dead Mount Cleanup ---
     // GroupOrder 49: 10, 15, 20-48 and 100 were taken as of 2026-09-03.
 

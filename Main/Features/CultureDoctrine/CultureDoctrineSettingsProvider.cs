@@ -25,4 +25,6 @@ public sealed class CultureDoctrineSettingsProvider : ICultureDoctrineSettingsPr
     public bool IsMoraleEnabled => IsEnabled && (Settings?.CultureDoctrineMorale ?? false);
 
     public bool IsAggressionEnabled => IsEnabled && (Settings?.CultureDoctrineAggression ?? false);
+
+    public bool IsHorseStandEnabled => IsEnabled && (Settings?.CultureDoctrineHorseStand ?? false);
 }

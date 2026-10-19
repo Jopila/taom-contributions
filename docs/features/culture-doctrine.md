@@ -367,6 +367,228 @@ delegates (F6 clears the flag, `Team.cs:479-485`). The handler is removed at mis
   horse-heavy enemy, `TacticDefensiveLine.cs:266-296`); Mirkwood and Dunland raise its
   multiplier instead.
 
+## Horse stand
+
+Issue #892. A defending AI army that is outnumbered by an army of mostly horse stops marching
+for a hill the horse will beat it to, stands on ground that breaks a charge, and, where its
+riders have ordinary horses, takes them off their mounts and into the shield wall. It is not a
+new tactic, a Harmony patch or an adapter: the shield wall and the two-line wall (the only
+tactics already built on `BracedDefend`) read a gate, `HighGroundAnchor` gets a stand mode, and
+the base tactic issues one order. `BracedDefend` already goes Square while horse ride at it and
+ShieldWall otherwise, and it needs no mount and no shield to brace (a shieldless unit takes the
+Line), so the infantry row is unchanged.
+
+**Who stands.** A culture opts in with a `horseStand` block of its own. A culture with no row at
+all resolves to `default`, which has no block, so it never stands (the looters, for one); a culture
+with a row but no `horseStand` block uses its own row and never stands. A bandit culture can
+still opt in: `erebor_warriors` is one, with its own row and stand block. Shipped:
+
+| Culture | `dismount` | Why |
+|---|---|---|
+| `erebor` | false | every mounted troop rides a war ram |
+| `erebor_warriors` | false | no mounted troops |
+| `isengard` | false | every mounted troop rides a warg |
+| `sturgia` (Dale) | true | ordinary horses |
+
+Gondor and the Elven ring do not adopt it. The stand is armed at install by the pure
+`HorseStand.PolicyFor(enabled, culture, isDefender, isPlayerTeam)`: the MCM switch on, the team
+defending and not the player's own (`Team.IsPlayerTeam`), else no policy. The player's AI ally team
+stands; the player's own team never does, so Enlistment and sergeant mode never stand either.
+
+**The gate** (`Doctrines/HorseStand.Applies`, pure): the side defends, has infantry, the enemy's
+melee cavalry share is at least `enemyCavalryShare`, and the enemy has more men than our whole
+side times `outnumberedRatio`. The comparison is side against side: `AllyUnitCount` is
+`TeamQuerySystem.AllyUnitCount`, which includes this team (`TeamQuerySystem.cs:240-249`), against
+`EnemyUnitCount`, so an AI team of 50 with 250 allies against 200 enemies is not outnumbered. The
+share is `TeamQuerySystem.EnemyCavalryRatio`, which counts melee cavalry only and which the engine
+caches for 15 s, so a verdict can lag a charge by that long (the cavalry share lags up to 15 s
+behind the field). It is checked at every phase apply and once a second in `OnPhaseTick`. Every
+comparison is a positive requirement, so a NaN or infinite ratio fails the gate. Only the Defend
+phase starts a stand.
+
+**The latch.** The first Defend apply in which the gate passes starts the stand
+(`TaomTacticBase.RefreshStand`), and from then on it holds: neither the gate flickering nor the
+Defend/Engage flip ends it (the Engage phase issues no further dismount order, but the order given
+stays and the anchor keeps its ground). Without the latch the anchor reset at every flip and the
+foot-only race re-picked ground at contact. The stand ends only when the tactic is cancelled
+(`OnCancel`, another tactic takes the team). The weight edge below stays gate-driven, so the wall
+still yields the moment the gate fails and the engine's decision can hand the team to another
+tactic; that cancel is what releases the stand.
+
+**The release.** At cancel the team's formations are swept (`Team.FormationsIncludingEmpty`, the
+eight regular formations, empty ones included): every AI-controlled formation still holding
+`RidingOrderDismount` is set to `RidingOrderFree`, and the anchor leaves stand mode (`EndStand`),
+so a re-picked wall starts clean and evaluates the gate again. Free never remounts anyone (the AI
+seeks a loose mount only under a Mount order, `HumanAIComponent.cs:267`). The sweep covers empty
+formations because an emptied cavalry formation would keep the order and hand it to reinforcements
+joining it (a unit added to a formation takes its riding order, `Formation.cs:2322`). The result
+for the player: cavalry that arrive during the stand dismount into it; cavalry that arrive after it
+ride. A formation that is not AI-controlled (a remote co-op human) is skipped by both the dismount
+and the release.
+
+**Weight.** The stand army (the A/B's: 200 men, the enemy at 1.5 times that with 60% melee
+cavalry) is pinned in `ShippedDoctrineOrderingTests`. Without an edge the wall lost it: Dale's
+disciplined line weighs 1.35 against the wall's 1.08, vanilla's choke hold 0.88 (Isengard) to
+1.05 (Dale), and the wall must beat the best of them by the 1.5 that `TeamAIComponent.MakeDecision`
+grants the current tactic. `HorseStand.StandEdge` (2.0) multiplies the wall's weight while the gate
+passes and drops with it, so the wall yields the moment the gate fails. At 2.0 the wall has a 6%
+margin on Dale's disciplined line and 20% or more on the rest. Vanilla's choke hold grows with the
+enemy count (clamped at 3 times), so a far more lopsided battle on a map with a placed choke can
+still go to it; that is vanilla also holding a choke, and it is left alone.
+
+**Ground** (`Doctrines/StandGround.Pick`, pure; scan in `Hooks/Tactics/StandGroundScan.cs`).
+Candidates in preference order: a choke point, forest, the existing slope point, where the wall
+is. The nearest candidate of the first kind that qualifies wins. A candidate qualifies when it is
+inside `engagement.highGroundMaxMetres`, no enemy foot is inside
+`engagement.holdWhenEnemyWithinMetres` (the existing `HighGroundRace.WorthGoing`), and the wall
+can reach it and form up before any enemy formation (`HighGroundRace.Decide`). Unlike the other
+users of the anchor, the race counts enemy melee cavalry; horse archers never race for ground.
+Reach time is the straight line over top speed, optimistic for the horse on a winding path, so a
+march that wins on paper can still be contested; path distance is left out. The race itself is
+one pure composition, `HighGroundRace.CanTake`, used by the picker and by the anchor's once-a-second
+re-check while marching.
+
+- Chokes: `TeamAI.TacticalPositions` of type `ChokePoint`. Every tactical position of the scene,
+  region children included, is in that list (`TeamAIComponent.cs:96`, registered in
+  `MissionObject.cs:121-143`), so there is no second walk over regions. Eligibility keeps vanilla's
+  width and facing tests (`TacticHoldChokePoint.cs:145-154`) made pure: the facing dot with the
+  enemy at least 0.5 (its absolute value when the position is insurmountable) and a width no
+  greater than the infantry's `MaximumWidth`. Vanilla's distance gate (`:139-144`) is replaced by
+  the march cap and the race.
+- **Choke hold, vanilla's way.** `Pick` returns the chosen candidate and the pure
+  `StandGround.HoldOf` gives how to hold it, from `BehaviorDefend.cs:20-34, 65-78`: a choke that can
+  be crossed is held at its point, facing its own direction, with the frontage set to its width; an
+  insurmountable one is held half a width toward the enemy, with the frontage set to its width, and
+  faces the live enemy (`FacingOrderLookAtEnemy`, as vanilla does). Deliberate departure from
+  vanilla: the hold point is fixed at decision time, where vanilla recomputes it every tick from the
+  enemy centre; a wall that kept sliding toward the enemy would leave the gap. `Pick` qualifies each
+  choke (cap and race) at that same hold point, which the anchor's once-a-second re-check also
+  races. The anchor exposes `Facing`, `Width` and `LookAtEnemy` (zero or false for anything but a
+  choke), the two wall tactics copy them into `DefenseFacing`, `DefenseWidth` and `DefenseLookAtEnemy` in `BeforeApply`,
+  and `BehaviorWeightApplier` hands them to `BehaviorBracedDefend` (the second line gets the facing
+  only, width 0: it stands behind the gap, not in it). The behaviour faces `DefenseFacing` (or the live enemy), issues
+  `FormOrder.FormOrderCustom(width)` every tick while it is at its position (as `BehaviorDefend`
+  does, because a later arrangement change makes the engine rewrite a custom width), and never goes Square while the
+  width is above zero (`BraceDecision.Defend(..., holdingChoke)`): a square would open the gap, so it
+  keeps ShieldWall, or Line without shields. A held choke also keeps its position on a brace
+  instead of taking a brace point where the wall stands. Every other ground leaves facing and width
+  at zero, so those walls behave as before.
+- Forests: `TeamAI.TacticalRegions` of type `Forest`; the wall stands at the region's position
+  only, with no facing and no width, so the forest is held at its centre.
+- Hill: `HighGroundAnchor.HighGroundOf`, the best slope toward the enemy inside the cap. When it
+  answers the formation's own ground (no enemy in view) the answer is `Here`.
+- The candidates are copied once per anchor, lazily, into an immutable array on the first stand
+  decision (the team-AI tick). After that, scoring is allocation-free. The installer counts the
+  kinds in the array `StandGroundScan.Copy` returns for the registration line, so the log and the
+  picker see one classification.
+- Stand mode is off for every other user of the anchor (`ArcherRing`, `DisciplinedLine`,
+  `EoredScreen`), so their behaviour is unchanged. `Stand()` is one way: the first call forgets the
+  decision and picks again under the stand's rules, and only `EndStand()` (at the tactic's cancel)
+  switches it back. The anchor also forgets its decision when the main infantry formation changes.
+
+**Dismount** (`TaomTacticBase`, only for a culture with `dismount: true`). Once the stand has
+started, every Defend apply orders `RidingOrderDismount` through `Formation.SetRidingOrder` on the
+left, right and single cavalry seats and on the main and second infantry (a unit added to a
+formation takes its riding order, `Formation.cs:2322`), skipping a formation that is not
+AI-controlled. The order is idempotent and nothing ever orders a Mount, so it is one-way: horses
+stay on the field and are not remounted (the AI only seeks a loose mount under a Mount riding
+order). Riders without a horse count as infantry in the engine's class flags (5 s cache), the
+cavalry seat's `Holds()` check fails, the recount runs and vanilla's merge folds them into the
+wall; no transfer is issued by TAOM. Never dismounted: horse archers (their seat is not in the
+list) and the player's team. The 1/1/2/1 and 2/1/2/1 splits both pass `vanguard: null`, so a routed
+HeavyCavalry formation is no separate seat there: seated as cavalry, it is dismounted with the
+rest. A mixed side dismounts by the majority culture's policy, and a formation order cannot skip a
+creature rider (documented, not fixed).
+
+**Polearm favour** (`Hooks/StandWeaponFavor.cs`). An AI human in a formation whose riding order is
+Dismount gets `AiWeaponFavorMultiplierPolearm = polearmFavor` as a post-pass in both agent-stat
+models, one line each, through `ICultureAggressionService.StandPolearmFavor`. For a `dismount: true`
+team that is the whole standing wall (the infantry and the riders who got off), not the riders
+alone; a team that never dismounts never holds the order and gets no favour. The base model writes
+the property back to 1 on every update, so the post-pass cannot compound (the Custom Battle chain
+and the campaign chain to that reset are pinned by binding tests). It is 1 when the MCM switch or
+the doctrine is off. The stat update that follows a dismount can run off the main thread, so the
+post-pass reads one team reference, one formation reference and an enum, and the value comes from
+the immutable catalog. Men already in the infantry formation take the favour at their next stat
+update, not at the order.
+
+**Shield carriers never brace.** `Agent.CanPerformBrace` is true only for an agent with no mount,
+no shield and a weapon with the brace usage flags (`Agent.cs:5066-5074`), so a shield carrier never
+braces a spear against the charge, and the polearm favour is a weapon-choice weight, not a brace.
+
+**Config** (all in `culture_doctrines.json`, validated in `CultureDoctrineConfigProvider`: NaN and
+infinity first, then range; a bad value reverts to its default with a warning plus the summary
+warning):
+
+| Key | Range | Default | Meaning |
+|---|---|---|---|
+| `horseStand.enemyCavalryShare` | 0.05 to 1 | 0.5 | enemy melee cavalry share that triggers the stand |
+| `horseStand.outnumberedRatio` | 0.5 to 5 | 1.0 | the enemy must exceed our whole side (us and allies) times this |
+| `horseStand.polearmFavor` | 1 to 4 | 2.0 | polearm favour of the whole standing wall of a dismount:true team; below 1 is rejected |
+| `doctrines.<cultureId>.horseStand.dismount` | bool | false | opts the culture in; true also dismounts its cavalry |
+
+MCM: `Horse Stand` (default on, beside Culture Morale and Culture Aggression; needs Enable
+Culture Doctrine). The tactics read it once per team at install, and the polearm favour reads it
+again on every stat update, so the A/B arms switch without a restart but a battle already
+installed keeps its stand. The sentence in its tooltip is plain English like its neighbours, not a
+`{=KEY}` string.
+
+**Left out of this slice.** Fords and the map edge as ground; path distance (the race is the
+straight line over top speed, as the other anchors use); archer target priorities; a forced
+re-wield (the favour only weights the engine's own weapon choice); shield-direction patches (no
+Harmony patch is added); remounting when the stand ends; dismounting horse archers. Gondor and the
+Elven ring do not adopt the stand. Whether standing at a forest's centre is good ground is
+untested in game. Known and not fixed: a mixed side dismounts by the majority culture; the
+abandoned horses can remount the enemy's unhorsed riders (the player's formations hold Mount);
+the stand has not been smoke-tested.
+
+**A/B** (Custom Battle, debug on, three runs per arm, 300 against 300 style, OFF control per the
+protocol below). In every step the player plays the OTHER side (the Rohirrim attacker, F6 pressed
+on the first frame), so the AI defender is armed: the stand never arms the player's own team. The
+registration line reads `horseStand=on chokes=N forests=M dismount=yes|no` for the armed team and
+`horseStand=off` for the player's; the status line ends in `:Stand:Choke|Forest|Hill|Here:<state>`.
+
+Scenes by ground kind (counted 2026-10-19 from the live `TAOM_Map/SceneObj/<id>_forceatmo/scene.xscene`
+files; the registration line's `chokes=` and `forests=` counts confirm them in game):
+
+| Ground | Scene |
+|---|---|
+| Choke | `taom_rohan_battle_001` (2 chokes, one insurmountable), `taom_rohan_battle_fords_of_isen` (2), `taom_mordor_battle_003` (16) |
+| Forest | `taom_gondor_village_001` (2 untyped regions, which read as Forest), `_002` (3), `_004` (2); these also hold 4 to 6 chokes, which the stand prefers. UNVERIFIED whether Custom Battle's village type opens them as a field battle |
+| Hill or Here | a scene with neither, `taom_rohan_battle_002` |
+
+1. Erebor 200 defending against Rohirrim 300, mostly cavalry, on a choke scene: the line reads
+   `dismount=no`, the wall's suffix goes `:Stand:Choke:Marching` then `:Arrived`, and then holds.
+2. Dale (`sturgia`) defending with horse of its own against the same Rohirrim: the cavalry seat
+   reads `/Infantry` within a few seconds of the first stand apply, then merges into the wall
+   within about 10 s, and the dismounted men hold spears (`AiWeaponFavorMultiplierPolearm`).
+3. Erebor against Mordor: no stand (enemy cavalry share under 0.5).
+4. Erebor 300 against Rohan 200: no stand (not outnumbered).
+5. Player-team check: play Dale defending against outnumbering, mostly-horse AI Rohirrim. The
+   player's line reads `player=yes ... horseStand=off` and the cavalry seat never reads
+   `/Infantry`. If Custom Battle cannot put the player on the defending side, run this one in the
+   campaign.
+6. Looters and `erebor_warriors`: Custom Battle drops bandit cultures (`CustomBattleService.cs:41`),
+   so move these to the campaign, or accept that `ShippedCultureDoctrinesConfigTests` is their
+   only coverage (looters resolve to `default`: no stand; `erebor_warriors`: stand, `dismount=no`).
+7. Ally team: a campaign cell, the player defending beside an allied Dale lord. The ally's line
+   reads `player=no ... horseStand=on`.
+8. Polearm favour arm: Dale as in step 2 with `"polearmFavor": 1.0` against the default 2.0, and
+   count polearm wielders at contact.
+9. OFF arm for the stand: MCM `Horse Stand` off with Culture Doctrine on. The other arms keep it on.
+
+Watch items:
+
+- The suffix stays `:Stand:<kind>:<state>` through contact (the latch: no re-pick at the first
+  blow, no flip back at Engage).
+- Reinforcements that arrive after the wall yields ride (the release at cancel); those that arrive
+  during the stand dismount.
+- A choke is filled edge to edge and does not open into a Square when the horse come in.
+- A stand marching while horse are inside the race, and a mid-battle re-merge sending the wall
+  marching again (the anchor resets when the main infantry formation changes).
+- Rohan's unhorsed riders taking Dale's abandoned horses (the player's formations hold Mount).
+- A cavalry seat on Stop still dismounting: UNVERIFIED native behaviour.
+
 ## Configuration
 
 ### Config File: `Main/_Module/ModuleData/culture_doctrine/culture_doctrines.json`
@@ -386,6 +608,8 @@ Reloads on game restart only (`Reuse.Singleton` provider).
 | `side` | string | `any` (default), `attacker` or `defender`; reverts to `any` with a warning |
 | `doctrines.<cultureId>.morale` | object | `neverRout` (bool) and `bravery` (float, -30 to 30, added to every soldier's starting morale; reverts to 0 with a warning). Absent means vanilla |
 | `doctrines.<cultureId>.aggression` | object | `attack`, `shield`, `shooterError`, `chargeDistance`: multipliers 0.25 to 4 on the engine's per-soldier AI values; each reverts to 1 with a warning. Absent means vanilla |
+| `horseStand.enemyCavalryShare`, `.outnumberedRatio`, `.polearmFavor` | float | The horse stand's numbers, 0.05 to 1 (default 0.5), 0.5 to 5 (default 1.0) and 1 to 4 (default 2.0); each reverts with a warning. See [Horse stand](#horse-stand) |
+| `doctrines.<cultureId>.horseStand` | object | Opts the culture into the horse stand; `dismount` (bool, default false) also dismounts its cavalry. Absent means the culture never stands |
 | `doctrines.<cultureId>.formations` | object | troop StringId to formation class name (`Infantry`, `Ranged`, `Cavalry`, `HorseArcher`, `Skirmisher`, `HeavyInfantry`, `LightCavalry`, `HeavyCavalry`); an unknown class or an empty id drops the row with a warning. Absent means the engine's own class |
 
 Culture keys are StringIds, and TAOM re-skins six vanilla cultures without changing their ids:
@@ -404,6 +628,7 @@ one summary warning.
 | `CultureDoctrineDebug` | off | The `[Doctrine]` status line every 5 s of mission time |
 | `CultureDoctrineMorale` | on | The never-rout and bravery tier; needs the master toggle. A/B knob |
 | `CultureDoctrineAggression` | on | The per-soldier aggression post-pass; needs the master toggle. A/B knob |
+| `CultureDoctrineHorseStand` | on | The horse stand (`Horse Stand` in MCM); needs the master toggle. Read once per team at install for the tactics, and on every stat update for the favour. A/B knob |
 
 The `[MissionPerf]` heartbeat lives on the Battle Load Diagnostics page (`EnableMissionPerfHeartbeat`, on).
 
@@ -415,7 +640,7 @@ active behaviour and arrangement. Works in Custom Battle.
 ## Log lines
 
 ```
-[Doctrine] team=1 side=Defender player=no culture=erebor doctrine=erebor troops=300 tacticsSkill=0 morale=never-rout/bravery +15 registered=[ShieldWall*1.00, TwoLineWall*1.00, Charge*0.30, ...]
+[Doctrine] team=1 side=Defender player=no culture=erebor doctrine=erebor troops=300 tacticsSkill=0 morale=never-rout/bravery +15 horseStand=on chokes=2 forests=1 dismount=no registered=[ShieldWall*1.00, TwoLineWall*1.00, Charge*0.30, ...]
 [Doctrine] formation routing subscribed (GetAgentTroopClass_Override)
 [Doctrine] t=+65s team=1 side=Defender player=no tactic=TaomTacticShieldWall formations=[Infantry:210 BehaviorBracedDefend:ShieldWall/ShieldWall/FireAtWill, Ranged:60 BehaviorSkirmishLine/Scatter/HoldYourFire, Cavalry/Infantry:95 BehaviorFootCharge:Charging/Line/FireAtWill] taom=[TaomTacticShieldWall:Defend:Arrived]
 [Doctrine] off: vanilla tactics stay (status line on)
@@ -430,7 +655,8 @@ stage or stance after its name (`BehaviorCycleCharge:Reforming`, `BehaviorBraced
 `failed: ...`), then the arrangement and the firing order; an Elven tactic under volley control
 ends its status with `:Hold` or `:Loose`; a wall or ring tactic ends with `:Marching`,
 `:Holding` or `:Arrived` (the high-ground race, refreshed the second the anchor moves, not only
-at the next apply). A formation prints as `slot:count[seat]`, or `slot/class:count[seat]` when
+at the next apply), and while the horse stand holds it ends `:Stand:Choke|Forest|Hill|Here:<state>`
+instead. A formation prints as `slot:count[seat]`, or `slot/class:count[seat]` when
 the engine's class ratios disagree with the slot, where the seat is the one the current TAOM
 tactic gave it at its last recount (`M` main infantry, `S` second line, `L`/`R` wings, `A`
 archers, `LC`/`RC`/`C` cavalry, `HA` horse archers, `V` vanguard, `-` none: an unseated
@@ -463,6 +689,7 @@ foot.
 | `Main/Features/CultureDoctrine/Doctrines/DoctrinePlan.cs`, `DoctrinePlans.cs`, `DoctrineWeights.cs`, `TacticPhaseMachine.cs` | Pure plans, weights, ring geometry, phase machine |
 | `Main/Features/CultureDoctrine/Doctrines/TargetSelection.cs`, `ChargeWeight.cs`, `ArcherFlankGeometry.cs`, `Domain/EngagementTunables.cs`, `Hooks/Behaviors/EnemyScan.cs`, `BehaviorFootCharge.cs` | The foot-first target rule, the engagement distances from the `engagement` block, and the enemy-formation walk that feeds them |
 | `Main/Features/CultureDoctrine/Doctrines/BraceDecision.cs`, `CavalryThreat.cs`, `CycleChargeMachine.cs`, `InfantrySkirmishMachine.cs`, `EnvelopGeometry.cs`, `VolleyDecision.cs` | The pure cores the behaviours and the volley control step |
+| `Main/Features/CultureDoctrine/Domain/HorseStandTunables.cs`, `Doctrines/HorseStand.cs`, `Doctrines/StandGround.cs`, `Hooks/Tactics/StandGroundScan.cs`, `Hooks/StandWeaponFavor.cs` | The horse stand: its numbers and per-culture policy, the gate and weight edge, the ground picker, the scene scan, the polearm post-pass |
 | `Main/Features/CultureDoctrine/Domain/CultureMorale.cs`, `CultureAggression.cs`, `FormationRouting.cs`, `FormationRoutingRule.cs` | The three per-culture blocks below the tactics, and the routing rule |
 | `Main/Features/CultureDoctrine/CultureMoraleService.cs`, `CultureAggressionService.cs` | The two services the models read (catalog lookups behind the sub-toggles) |
 | `Main/Features/CultureDoctrine/Models/TaomBattleMoraleModel.cs`, `TaomCustomBattleMoraleModel.cs`, `TaomCustomBattleAgentStatCalculateModel.cs` | The morale seams (campaign, Custom Battle) and the Custom Battle aggression post-pass; the campaign post-pass is in `CareerSystem/Models/TaomAgentStatCalculateModel.cs` |
@@ -515,6 +742,18 @@ foot.
   public team and combatant methods; the protected `TacticComponent` surface the base builds
   on; the behaviour parameter fields; the `TacticalPosition` runtime constructor; the query
   members the snapshot reads
+- `HorseStandTests` (each gate input, equality at the edges, NaN and infinite ratio), `StandGroundTests`
+  (preference order, choke facing and insurmountable, choke width, the cap, the hold distance, a
+  race lost to horse that a foot-only race would win, NaN speeds, empty input),
+  `StandWeaponFavorTests` (the predicate and the service's switch); `ShippedDoctrineOrderingTests` also
+  pins the stand army and `StandEdge`, and `ShippedCultureDoctrinesConfigTests` the four opted-in cultures
+  and their `dismount` flags. `HorseStandTests` also pins the side-vs-side outnumbered rule and
+  `PolicyFor` (switch off, player team, attacker, AI defender); `StandGroundTests` pins `HoldOf`;
+  `BraceDecisionTests` pins no Square while holding a choke. The stand's binding tests
+  (`BindingVerification`, in `CultureDoctrinePhaseCBindingTests`) pin the riding-order and scene
+  surface, the polearm setter and the agent reads, and the reset of the polearm favour on every
+  update in both chains: Custom Battle's, and the campaign's (`SandboxAgentStatCalculateModel`
+  reaching `AgentStatCalculateModel`'s reset)
 - `FrameStatsTests`
 
 Engine wiring (the `EarlyStart` swap, the tactics on the AI thread, the ring position) is
@@ -585,7 +824,11 @@ side's current tactic is in its preferred set for at least 70 percent of samples
 on a slope inside 60 m it reached first), Rohan's cavalry shows `BehaviorCycleCharge` once joined
 (`BehaviorTacticalCharge` or `BehaviorFlank` before), Lindon's infantry is a Circle around a
 Square of archers, attacking Erebor's infantry shows `BehaviorBracedAdvance` and never
-`BehaviorCharge` or a `BehaviorFootCharge` at horse before contact.
+`BehaviorCharge` or a `BehaviorFootCharge` at horse before contact. The horse stand passes when,
+in the armed arm, the suffix reads `:Stand:...` from the first apply through contact without
+changing kind, a `dismount=yes` team's cavalry seat reads `/Infantry` and its men hold polearms at
+contact, and the wall that fills a choke keeps its ShieldWall or Line (never `:Square`) while it
+holds the gap; the OFF arm shows none of it.
 
 **Natural spread: a single pair of runs proves nothing.** yotthani ran 13 unchanged mirror battles
 (100 v 100 of the same troop, no value touched) and got an attacker-to-defender strike rate ratio
@@ -602,7 +845,8 @@ lines 97-101 and 112-118, measured in recordings (n=13 and n=39), measured with 
 
 ## Limitations and open items
 
-- Not smoke-tested in game as of 2026-09-17; the toggle ships off until the A/B passes.
+- Not smoke-tested in game as of 2026-09-17; the toggle ships off until the A/B passes. The horse
+  stand (#892) is new and has no in-game run at all, the Horse Stand switch included.
 - **Measured behaviour of the default AI (yotthani, v1.5.5).** Source: MithrilForge
   `docs/engine/battle-behaviour-measured.md`@0a2f4761, measured with TAOM 2.0.34 loaded (plus
   Armory and DualWield), custom battles, both sides AI.
@@ -757,7 +1001,7 @@ What each culture carries after Phase C and D (2026-09-17), with the Phase B sta
 
 | Culture | Phase B | Now |
 |---|---|---|
-| Erebor (Dwarves) | ShieldWall, race | ShieldWall on `BracedDefend`/`BracedAdvance` (the anti-cavalry square), TwoLineWall as defender; never rout, bravery +15; shield 1.5, attack 0.9 |
+| Erebor (Dwarves) | ShieldWall, race | ShieldWall on `BracedDefend`/`BracedAdvance` (the anti-cavalry square), TwoLineWall as defender; never rout, bravery +15; shield 1.5, attack 0.9; horse stand with `dismount: false` (war rams) |
 | Lindon, Rivendell, Lothlorien, Mirkwood (Elves) | ArcherRing (defender), weighted `RangedHarrassmentOffensive` (attacker) | ArcherRing and ArcherAdvance, both under volley control; Mirkwood `DefensiveLine` 0.8 (the forest bias vanilla's scoring already carries); never rout, bravery +10; shooterError 0.5 |
 | Rohan (`vlandia`) | CavalryDominance | CavalryDominance with `CycleCharge` once joined, EoredScreen as defender; routs, bravery +5; attack 1.2, chargeDistance 1.3 |
 | Rhun (`khuzait`) | default | CavalryDominance and DisciplinedLine (heavy cavalry like Rohan, better foot and bow, few horse archers: Mike, 2026-09-16); routs; attack 1.1, shield 1.2, chargeDistance 1.2 |
@@ -765,11 +1009,11 @@ What each culture carries after Phase C and D (2026-09-17), with the Phase B sta
 | Mordor, Dol Guldur | InfantryMass | InfantryMass and Envelop; Mordor routs, Dol Guldur never; attack 1.5, shield 0.7, shooterError 1.3 |
 | Gundabad, Gundabad raiders | InfantryMass | InfantryMass and Envelop; never rout; attack 1.4, shield 0.7, shooterError 1.3 |
 | Goblins, Misty Mountains | InfantryMass | InfantryMass and Envelop, `HoldChokePoint` 0.6 (the most the ordering allows: with the numbers they swarm, outnumbered they hold the pass); rout, bravery -10 and -5 |
-| Isengard (Uruk-hai) | InfantryMass | ShieldWall both sides (the braced wall is the pike hedge: Line without shields, Square under horse); never rout; attack 1.3 |
+| Isengard (Uruk-hai) | InfantryMass | ShieldWall both sides (the braced wall is the pike hedge: Line without shields, Square under horse); never rout; attack 1.3; horse stand with `dismount: false` (wargs) |
 | Dunland (`empire`) | weighted vanilla | HitAndRun as attacker on `InfantrySkirmish`; high ground, choke points and retreat as defender; routs, bravery -5; attack 1.3, shield 0.8 |
 | Dunland raiders | weighted vanilla | HitAndRun and InfantryMass as attacker (a big mob swarms, a small band throws and runs: the numbers term decides); routs |
 | Gondor | weighted vanilla | DisciplinedLine; routs, bravery +5; shield 1.3 |
-| Dale (`sturgia`) | default | ShieldWall and DisciplinedLine; routs; shield 1.2 |
+| Dale (`sturgia`) | default | ShieldWall and DisciplinedLine; routs; shield 1.2; horse stand with `dismount: true` (ordinary horses) |
 | Harad (`aserai`) | default | MumakVanguard as attacker with `harad_mumakil_rider` routed to `HeavyCavalry`, `RangedHarrassmentOffensive` 1.5; routs; shooterError 0.8, attack 1.1 |
 | Umbar | default | Data only: harassment and retreat up; routs; shooterError 0.9, attack 1.1 |
 
@@ -807,6 +1051,13 @@ What each culture carries after Phase C and D (2026-09-17), with the Phase B sta
 5. Reference it from `culture_doctrines.json`; `ShippedCultureDoctrinesConfigTests` reads the file,
    and `ShippedDoctrineOrderingTests` needs a canonical army for the new id so the ordering
    against the culture's vanilla rows is checked.
+6. A wall built on `BracedDefend` that should take the horse stand calls `RefreshStand(phase)` in
+   `BeforeApply` and `OnPhaseTick`, calls the anchor's `Stand()` while `Standing`, overrides
+   `OnStandEnded` to call `EndStand()`, copies the anchor's `Facing` and `Width` into
+   `DefenseFacing` and `DefenseWidth`, and multiplies its weight by `StandEdge`. Two tests
+   hard-code `ShieldWall || TwoLineWall` as the stand-capable set (the stand-weight ordering test
+   in `ShippedDoctrineOrderingTests` and the adopting-row test in
+   `ShippedCultureDoctrinesConfigTests`), so a third wall means editing both.
 
 ## How to give a culture a doctrine
 
@@ -816,5 +1067,13 @@ lower the rest, and give it its TAOM tactic at `minTactics` 0; add `morale`, `ag
 `formations` blocks when the culture differs from vanilla there (a never-rout culture drops its
 `CoordinatedRetreat` row). Restart the game; the `[Doctrine]` registration line shows what each
 side received and how its men hold.
+
+To opt the culture into the horse stand, add `"horseStand": { "dismount": <bool> }` to its row
+(`true` only when its riders sit on ordinary horses; a culture whose mounts are rams, wargs or other
+creatures says `false`). The row must also carry a `ShieldWall` or `TwoLineWall` entry with a
+multiplier above 0 for the defender side, or the block does nothing, and
+`ShippedCultureDoctrinesConfigTests` fails if an opted-in culture lacks one. The set of opted-in cultures is pinned there by id (today `erebor`,
+`erebor_warriors`, `isengard`, `sturgia`), so a new one is added to that test too. A culture with no
+row resolves to `default`; one with a row but no block uses its own row and never stands.
 
 ---

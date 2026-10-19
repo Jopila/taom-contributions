@@ -32,7 +32,9 @@ public static class TeamQuerySnapshotFactory
             infantryCount: infantry?.CountOfUnits ?? 0,
             throwingRatio: infantry?.QuerySystem.HasThrowingUnitRatio ?? 0f,
             hasVanguard: FormationSlots.VanguardOf(formations) != null,
-            infantryTotal: infantryTotal);
+            infantryTotal: infantryTotal,
+            enemyCavalryRatio: q.EnemyCavalryRatio,
+            allyUnitCount: q.AllyUnitCount);
     }
 
     // The largest formation of the class and the class's total; one pass, no allocation.

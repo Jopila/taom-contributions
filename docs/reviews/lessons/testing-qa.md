@@ -1876,3 +1876,14 @@ party. The adapter that maps a real `MapEvent` into those flags had no test, and
   test per engine shape the decompile shows (hideout, siege, raid, army).
 - **Source:** `docs/reviews/rca-bonds-of-battle-2026-10-18.md` finding 1.
 )
+
+### Every A/B step names the side the tester plays and the scene, and is checked runnable before it ships (horse stand, 2026-10-19)
+The horse stand's first A/B did not say which side to play, though the player's team never stands; its player-team
+step passed even with the rule deleted; it named no scene, and no Custom Battle field scene has a forest without
+chokes; and its looters step cannot run in Custom Battle, which drops bandit cultures. Fourth time on file
+(entries near lines 324, 1102 and 1187 of this file).
+- **Why missed:** the steps were written from the feature's view, not the tester's.
+- **Prevent:** each A/B step states the side the tester plays, the scene (with the fact that makes it fit, read from
+  the scene file), the line to read and the input that makes the step fail if the rule is broken. A step Custom Battle
+  cannot produce (bandit cultures, ally teams) goes to a campaign cell.
+- **Source:** `docs/reviews/rca-horse-stand-2026-10-19.md` rows 5, 6, 21 and 22.

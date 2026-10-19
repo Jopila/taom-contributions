@@ -21,6 +21,9 @@ public class CultureDoctrineConfig
     /// <summary>Absent means <see cref="EngagementTunables.Default"/>.</summary>
     public EngagementConfig? Engagement { get; set; }
 
+    /// <summary>Absent means <see cref="HorseStandTunables.Default"/>.</summary>
+    public HorseStandConfig? HorseStand { get; set; }
+
     public Dictionary<string, DoctrineConfig> Doctrines { get; set; } = new Dictionary<string, DoctrineConfig>();
 }
 
@@ -30,6 +33,22 @@ public class EngagementConfig
     public float CavalryMattersMetres { get; set; } = EngagementTunables.Default.CavalryMattersMetres;
     public float HighGroundMaxMetres { get; set; } = EngagementTunables.Default.HighGroundMaxMetres;
     public float HoldWhenEnemyWithinMetres { get; set; } = EngagementTunables.Default.HoldWhenEnemyWithinMetres;
+}
+
+/// <summary>The numbers of <see cref="HorseStandTunables"/>, one block for every culture.</summary>
+public class HorseStandConfig
+{
+    public float EnemyCavalryShare { get; set; } = HorseStandTunables.Default.EnemyCavalryShare;
+    public float OutnumberedRatio { get; set; } = HorseStandTunables.Default.OutnumberedRatio;
+    public float PolearmFavor { get; set; } = HorseStandTunables.Default.PolearmFavor;
+}
+
+/// <summary>A culture's own <c>horseStand</c> block: its presence opts the culture in.</summary>
+public class HorseStandCultureConfig
+{
+    /// <summary>The culture's cavalry get off their mounts to join the wall. Leave false for a
+    /// culture whose riders sit on creatures or war rams.</summary>
+    public bool Dismount { get; set; }
 }
 
 public class DoctrineConfig
@@ -46,6 +65,9 @@ public class DoctrineConfig
     /// <c>Cavalry</c>, <c>HorseArcher</c>, <c>Skirmisher</c>, <c>HeavyInfantry</c>,
     /// <c>LightCavalry</c>, <c>HeavyCavalry</c>). Absent means the engine's own class.</summary>
     public Dictionary<string, string>? Formations { get; set; }
+
+    /// <summary>Absent means this culture never stands against horse.</summary>
+    public HorseStandCultureConfig? HorseStand { get; set; }
 }
 
 public class MoraleConfig

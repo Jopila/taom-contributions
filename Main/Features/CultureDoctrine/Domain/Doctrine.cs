@@ -34,6 +34,11 @@ public sealed class Doctrine
     }
 
     public Doctrine(string cultureId, IReadOnlyList<TacticEntry> tactics, bool isDefault, CultureMorale morale, CultureAggression aggression, FormationRouting formations)
+        : this(cultureId, tactics, isDefault, morale, aggression, formations, horseStand: null)
+    {
+    }
+
+    public Doctrine(string cultureId, IReadOnlyList<TacticEntry> tactics, bool isDefault, CultureMorale morale, CultureAggression aggression, FormationRouting formations, HorseStandPolicy? horseStand)
     {
         CultureId = cultureId ?? throw new ArgumentNullException(nameof(cultureId));
         Tactics = tactics ?? throw new ArgumentNullException(nameof(tactics));
@@ -41,6 +46,7 @@ public sealed class Doctrine
         Morale = morale ?? throw new ArgumentNullException(nameof(morale));
         Aggression = aggression ?? throw new ArgumentNullException(nameof(aggression));
         Formations = formations ?? throw new ArgumentNullException(nameof(formations));
+        HorseStand = horseStand;
     }
 
     public string CultureId { get; }
@@ -52,4 +58,7 @@ public sealed class Doctrine
     public CultureMorale Morale { get; }
     public CultureAggression Aggression { get; }
     public FormationRouting Formations { get; }
+
+    /// <summary>Null: this culture never stands against horse.</summary>
+    public HorseStandPolicy? HorseStand { get; }
 }

@@ -4,6 +4,7 @@ using TAOM.Features.CultureDoctrine.Domain;
 using TAOM.Features.CultureDoctrine.Hooks.Behaviors;
 using TaleWorlds.Core;
 using TaleWorlds.Engine;
+using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 
 namespace TAOM.Features.CultureDoctrine.Hooks.Tactics;
@@ -32,10 +33,13 @@ namespace TAOM.Features.CultureDoctrine.Hooks.Tactics;
 ///
 /// <para>
 /// Over ADR-002's 150 lines: this is the one place the vanilla tactic lifecycle exists in TAOM
-/// (vanilla's are 180 to 370 lines each) and the eleven tactics on top are 15 to 45 lines. The
+/// (vanilla's are 180 to 370 lines each) and the eleven tactics on top are 9 to 50 lines. The
 /// split code writes <c>TacticComponent</c>'s protected fields and cannot leave the class; the
 /// decisions are in <see cref="TacticPhaseMachine"/>, <see cref="DoctrineWeights"/>,
 /// <see cref="FormationSlots"/>, <see cref="VolleyControl"/> and <see cref="BehaviorWeightApplier"/>.
+/// The horse stand's dismount order and its release (<see cref="RefreshStand"/>, <see cref="OnCancel"/>)
+/// live here too, because they need the private formation seats and the snapshot; they are inert for
+/// the tactics that never stand (<see cref="StandPolicy"/> stays null).
 /// </para>
 /// </summary>
 public abstract class TaomTacticBase : TacticComponent
@@ -50,6 +54,7 @@ public abstract class TaomTacticBase : TacticComponent
     private Formation? _rightWing;
     private Formation? _vanguard;
     private bool _joined;
+    private bool _standing;
     private volatile bool _failed;
     private volatile string _status = "idle";
     private string _statusSuffix = "";
@@ -70,6 +75,19 @@ public abstract class TaomTacticBase : TacticComponent
     /// handed to every TAOM behaviour this tactic applies.</summary>
     public EngagementTunables Engagement { get; internal set; } = EngagementTunables.Default;
 
+    /// <summary>Set once by the installer, on the main thread in <c>EarlyStart</c> before the team
+    /// ticks, for an AI team whose culture opts into the horse stand with the switch on; null means
+    /// this tactic never stands. Only the tactics on <c>BracedDefend</c> read it.</summary>
+    internal HorseStandPolicy? StandPolicy { get; set; }
+
+    /// <summary>The stand's numbers, written with <see cref="StandPolicy"/>.</summary>
+    internal HorseStandTunables StandTunables { get; set; } = HorseStandTunables.Default;
+
+    /// <summary>True from the first Defend phase in which the gate passed until the tactic is
+    /// cancelled (<see cref="RefreshStand"/> latches it; <see cref="OnCancel"/> ends it in full).
+    /// Team-AI tick only.</summary>
+    protected bool Standing => _standing;
+
     internal Formation? MainInfantry => _mainInfantry;
     internal Formation? SecondInfantry => _secondInfantry;
     internal Formation? Archers => _archers;
@@ -78,6 +96,18 @@ public abstract class TaomTacticBase : TacticComponent
     /// <summary>Set in <see cref="BeforeApply"/> by a tactic whose infantry holds a position.</summary>
     internal WorldPosition DefensePosition { get; set; } = WorldPosition.Invalid;
 
+    /// <summary>Set in <see cref="BeforeApply"/> by a wall holding a choke: the direction to face
+    /// there. Zero (the default) keeps the wall facing its enemy.</summary>
+    internal Vec2 DefenseFacing { get; set; }
+
+    /// <summary>Set in <see cref="BeforeApply"/> by a wall holding an insurmountable choke: face the
+    /// live enemy (vanilla's <c>FacingOrderLookAtEnemy</c>) instead of <see cref="DefenseFacing"/>.</summary>
+    internal bool DefenseLookAtEnemy { get; set; }
+
+    /// <summary>Set in <see cref="BeforeApply"/> by a wall holding a choke: the frontage to fill.
+    /// Zero (the default) keeps the wall's own frontage.</summary>
+    internal float DefenseWidth { get; set; }
+
     /// <summary>Set in <see cref="BeforeApply"/> by a tactic with a second infantry line.</summary>
     internal WorldPosition SecondLinePosition { get; set; } = WorldPosition.Invalid;
 
@@ -85,6 +115,78 @@ public abstract class TaomTacticBase : TacticComponent
     internal TacticalPosition? RingPosition { get; set; }
 
     protected abstract float Weigh(in TeamQuerySnapshot snapshot);
+
+    /// <summary>The factor a stand-capable wall puts on its weight (<see cref="HorseStand.StandEdge"/>
+    /// while the gate passes), 1 for a team that never stands.</summary>
+    protected float StandEdge(in TeamQuerySnapshot snapshot) =>
+        StandPolicy == null ? 1f : HorseStand.WeightFactor(in snapshot, StandTunables);
+
+    /// <summary>Starts the horse stand the first time the gate passes in a Defend phase and, once
+    /// started, keeps the dismount ordered through Defend. The stand is a latch: the gate's flicker
+    /// and the Defend/Engage flip do not end it, only <see cref="OnCancel"/> does. Returns true on
+    /// the call that started it, so a tick can ask for a re-apply. Team-AI tick only.</summary>
+    protected bool RefreshStand(TacticPhase phase)
+    {
+        var started = !_standing && phase == TacticPhase.Defend && StandPolicy != null
+            && HorseStand.Applies(TakeSnapshot(), StandTunables);
+        _standing |= started;
+        if (_standing && phase == TacticPhase.Defend)
+            DismountForStand();
+        return started;
+    }
+
+    // One way: nothing here ever orders a Mount, so riders who got off stay off, and the horses stay on
+    // the field (the AI only seeks a loose mount under a Mount riding order, HumanAIComponent.cs:267).
+    // Idempotent: a formation ignores a riding order it already holds, so a repeat costs one compare per
+    // seat. `Formation.SetRidingOrder` is what vanilla's SetFiringOrder is, an order setter called from
+    // the AI tick (BehaviorGeneral.cs:90). Riders without a horse read as infantry
+    // (`FormationQuerySystem.cs:440-445`, 5 s cache), so the seat's Holds() check fails, the recount
+    // runs and vanilla's merge folds them into the wall (`TacticComponent.cs:347+`). Never the horse
+    // archers (their seat is not in the list), and never a team that is the player's. The wall splits
+    // (1/1/2/1 and 2/1/2/1) pass vanguard null, so a routed HeavyCavalry formation is no separate seat
+    // here: seated as cavalry it is dismounted with the rest.
+    private void DismountForStand()
+    {
+        if (StandPolicy == null || !StandPolicy.Dismount || Team.IsPlayerTeam)
+            return;
+        Dismount(_leftCavalry);
+        Dismount(_rightCavalry);
+        Dismount(_cavalry);
+        // A unit added to a formation takes its riding order (Formation.cs:2322), so the wall that
+        // absorbs the dismounted riders must hold the order too.
+        Dismount(_mainInfantry);
+        Dismount(_secondInfantry);
+    }
+
+    // A remote co-op human's formation is not AI-controlled and keeps the orders its owner gave it.
+    private static void Dismount(Formation? formation)
+    {
+        if (formation != null && formation.IsAIControlled)
+            formation.SetRidingOrder(RidingOrder.RidingOrderDismount);
+    }
+
+    // The stand is over: every formation of the team still ordered to dismount, empty ones included,
+    // goes back to Free. An emptied cavalry formation would otherwise keep the order and hand it to
+    // reinforcements who join it (Formation.cs:2322). Free never remounts anyone: the AI seeks a
+    // loose mount only under a Mount order (HumanAIComponent.cs:267).
+    private void ReleaseDismount()
+    {
+        if (!_standing || StandPolicy == null || !StandPolicy.Dismount)
+            return;
+        var formations = FormationsIncludingEmpty;
+        for (var i = 0; i < formations.Count; i++)
+        {
+            var formation = formations[i];
+            if (formation.RidingOrder == RidingOrder.RidingOrderDismount && formation.IsAIControlled)
+                formation.SetRidingOrder(RidingOrder.RidingOrderFree);
+        }
+    }
+
+    /// <summary>Called from <see cref="OnCancel"/> when a started stand ends, so a tactic that holds
+    /// stand state of its own (the wall's anchor) resets it. Team-AI tick only.</summary>
+    protected virtual void OnStandEnded()
+    {
+    }
 
     /// <summary>Compute positions the phase table needs; called before every apply.</summary>
     protected virtual void BeforeApply(TacticPhase phase)
@@ -130,12 +232,20 @@ public abstract class TaomTacticBase : TacticComponent
         base.TickOccasionally();
     }
 
-    // Another tactic takes the team: the archers get their firing order back.
+    // Another tactic takes the team: the archers get their firing order back, and a stand that
+    // ordered a dismount lets go of it, and a started stand ends in full (OnStandEnded resets the
+    // anchor too), so a later pick starts clean and evaluates the gate again.
     protected override void OnCancel()
     {
         try
         {
             _volley.Release();
+            ReleaseDismount();
+            if (_standing)
+            {
+                OnStandEnded();
+                _standing = false;
+            }
         }
         catch (Exception ex)
         {

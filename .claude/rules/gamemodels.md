@@ -45,11 +45,11 @@ public class TaomFooModel : DefaultFooModel
 
 | Model | Base | Feature |
 |-------|------|---------|
-| `TaomAgentStatCalculateModel` | `SandboxAgentStatCalculateModel` (SandBox) | `CareerSystem` (+ the CultureDoctrine aggression post-pass + the CombatMechanics mount charge multiplier #610 + the career mount bonuses #611 + the RaceAbilities post-pass and resistances + the CreatureSiegeRole detachment cost, read on the async AI thread; mount-side rules key on `RiderAgent`, a mount's own `Character` is null) |
+| `TaomAgentStatCalculateModel` | `SandboxAgentStatCalculateModel` (SandBox) | `CareerSystem` (+ the CultureDoctrine aggression post-pass + the #892 horse-stand polearm favour post-pass, right after it + the CombatMechanics mount charge multiplier #610 + the career mount bonuses #611 + the RaceAbilities post-pass and resistances + the CreatureSiegeRole detachment cost, read on the async AI thread; mount-side rules key on `RiderAgent`, a mount's own `Character` is null) |
 | `TaomBattleMoraleModel` | `SandboxBattleMoraleModel` (SandBox) | `CultureDoctrine` (+ the RaceAbilities panic gate) |
 | `TaomCustomBattleMoraleModel` | `CustomBattleMoraleModel` | `CultureDoctrine` (Custom Battle; + the RaceAbilities panic gate) |
 | `TaomCustomBattleDamageModel` | `CustomAgentApplyDamageModel` | `CombatMechanics` (Custom Battle only, hand-wired in `SubModule.RegisterCustomBattleModels`, never declared by a module: the twin of `TaomCombatMechanicsModel`: the same base and hook calls in the same order as the campaign model (`CustomBattleDamageModelTests` pins it); includes the creature bandits' damage-taken step, the RaceAbilities hooks and the CreatureSiegeRole gate blow; no career passives, no Refuge) |
-| `TaomCustomBattleAgentStatCalculateModel` | `CustomBattleAgentStatCalculateModel` | `CultureDoctrine` (Custom Battle; + the CombatMechanics mount charge multiplier, from `InitializeAgentStats` because that base writes `MountChargeDamage` once; + the RaceAbilities post-pass and resistances + the CreatureSiegeRole detachment cost) |
+| `TaomCustomBattleAgentStatCalculateModel` | `CustomBattleAgentStatCalculateModel` | `CultureDoctrine` (Custom Battle; + the #892 horse-stand polearm favour post-pass; + the CombatMechanics mount charge multiplier, from `InitializeAgentStats` because that base writes `MountChargeDamage` once; + the RaceAbilities post-pass and resistances + the CreatureSiegeRole detachment cost) |
 | `TaomClanTierModel` | `DefaultClanTierModel` | `CareerSystem` |
 | `TaomInventoryCapacityModel` | `DefaultInventoryCapacityModel` | `CareerSystem` |
 | `TaomMapVisibilityModel` | `DefaultMapVisibilityModel` | `CareerSystem` |

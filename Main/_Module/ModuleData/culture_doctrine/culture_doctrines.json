@@ -9,6 +9,12 @@
     "highGroundMaxMetres": 60,
     "holdWhenEnemyWithinMetres": 50
   },
+  "_comment_horse_stand": "The horse stand (issue 892, MCM 'Horse Stand'). A culture opts in with a 'horseStand' block of its own; one without it never stands. The gate, checked at every phase apply and once a second: the side defends, has infantry, the enemy's MELEE cavalry share (TeamQuerySystem.EnemyCavalryRatio, cached by the engine for 15 s) is at least enemyCavalryShare (0.05 to 1), and the enemy has more men than our whole side (us and allies) times outnumberedRatio (0.5 to 5). Once it has passed in a Defend phase the stand is latched until the wall tactic is cancelled: the ground holds, and only the weight edge follows the gate. While it holds, the shield wall and the two-line wall (the only tactics that adopt it) pick their ground in the order choke point, forest, the high-ground slope point, where they stand, with the enemy cavalry counted in the race to it, and weigh StandEdge higher so a vanilla row cannot take the team off the wall. 'dismount': true also orders that team's cavalry (never horse archers) to dismount into the wall, so false for a culture whose riders sit on creatures or war rams. polearmFavor (1 to 4): every AI soldier in a formation holding the dismount order, the whole standing wall of a dismount:true team and not the riders alone, favours the polearm that many times over the sword. Never the player's own army. A bad value reverts to its default with a warning.",
+  "horseStand": {
+    "enemyCavalryShare": 0.5,
+    "outnumberedRatio": 1.0,
+    "polearmFavor": 2.0
+  },
   "doctrines": {
     "default": {
       "tactics": [
@@ -38,7 +44,8 @@
         { "id": "FrontalCavalryCharge", "multiplier": 0.2 }
       ],
       "morale": { "neverRout": true, "bravery": 15 },
-      "aggression": { "attack": 0.9, "shield": 1.5, "shooterError": 1.0, "chargeDistance": 1.0 }
+      "aggression": { "attack": 0.9, "shield": 1.5, "shooterError": 1.0, "chargeDistance": 1.0 },
+      "horseStand": { "dismount": false }
     },
     "erebor_warriors": {
       "tactics": [
@@ -54,7 +61,8 @@
         { "id": "FrontalCavalryCharge", "multiplier": 0.2 }
       ],
       "morale": { "neverRout": true, "bravery": 15 },
-      "aggression": { "attack": 0.9, "shield": 1.5, "shooterError": 1.0, "chargeDistance": 1.0 }
+      "aggression": { "attack": 0.9, "shield": 1.5, "shooterError": 1.0, "chargeDistance": 1.0 },
+      "horseStand": { "dismount": false }
     },
 
     "lindon": {
@@ -286,7 +294,8 @@
         { "id": "HoldChokePoint", "multiplier": 0.5, "side": "defender" }
       ],
       "morale": { "neverRout": true, "bravery": 0 },
-      "aggression": { "attack": 1.3, "shield": 1.0, "shooterError": 1.1, "chargeDistance": 1.0 }
+      "aggression": { "attack": 1.3, "shield": 1.0, "shooterError": 1.1, "chargeDistance": 1.0 },
+      "horseStand": { "dismount": false }
     },
 
     "empire": {
@@ -367,7 +376,8 @@
         { "id": "CoordinatedRetreat", "multiplier": 1.0, "minTactics": 50, "side": "attacker" }
       ],
       "morale": { "neverRout": false, "bravery": 0 },
-      "aggression": { "attack": 1.0, "shield": 1.2, "shooterError": 1.0, "chargeDistance": 1.0 }
+      "aggression": { "attack": 1.0, "shield": 1.2, "shooterError": 1.0, "chargeDistance": 1.0 },
+      "horseStand": { "dismount": true }
     },
 
     "aserai": {

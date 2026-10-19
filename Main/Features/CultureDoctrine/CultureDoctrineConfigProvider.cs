@@ -79,6 +79,7 @@ public sealed class CultureDoctrineConfigProvider : ICultureDoctrineConfigProvid
         }
 
         var engagement = ValidateEngagement(parsed.Engagement, ref rejected);
+        var horseStand = ValidateHorseStand(parsed.HorseStand, ref rejected);
         Doctrine? fallback = null;
         var cultures = new List<Doctrine>();
         foreach (var pair in parsed.Doctrines)
@@ -101,7 +102,8 @@ public sealed class CultureDoctrineConfigProvider : ICultureDoctrineConfigProvid
             var doctrine = new Doctrine(key!, ValidateRows(key!, pair.Value.Tactics, ref rejected), isDefault,
                 ValidateMorale(key!, pair.Value.Morale, ref rejected),
                 ValidateAggression(key!, pair.Value.Aggression, ref rejected),
-                ValidateFormations(key!, pair.Value.Formations, ref rejected));
+                ValidateFormations(key!, pair.Value.Formations, ref rejected),
+                pair.Value.HorseStand == null ? null : new HorseStandPolicy(pair.Value.HorseStand.Dismount));
             if (isDefault)
                 fallback = doctrine;
             else
@@ -120,7 +122,7 @@ public sealed class CultureDoctrineConfigProvider : ICultureDoctrineConfigProvid
         else
             _logger.LogInfo($"CultureDoctrineConfigProvider: Loaded culture_doctrines.json ({cultures.Count} culture doctrine(s) plus default)");
 
-        return new DoctrineCatalog(parsed.Enabled, fallback, cultures, engagement);
+        return new DoctrineCatalog(parsed.Enabled, fallback, cultures, engagement, horseStand);
     }
 
     private EngagementTunables ValidateEngagement(EngagementConfig? engagement, ref bool rejected)
@@ -132,6 +134,27 @@ public sealed class CultureDoctrineConfigProvider : ICultureDoctrineConfigProvid
             Metres("cavalryMattersMetres", engagement.CavalryMattersMetres, d.CavalryMattersMetres, ref rejected),
             Metres("highGroundMaxMetres", engagement.HighGroundMaxMetres, d.HighGroundMaxMetres, ref rejected),
             Metres("holdWhenEnemyWithinMetres", engagement.HoldWhenEnemyWithinMetres, d.HoldWhenEnemyWithinMetres, ref rejected));
+    }
+
+    private HorseStandTunables ValidateHorseStand(HorseStandConfig? stand, ref bool rejected)
+    {
+        if (stand == null)
+            return HorseStandTunables.Default;
+        var d = HorseStandTunables.Default;
+        return new HorseStandTunables(
+            StandField("enemyCavalryShare", stand.EnemyCavalryShare, HorseStandTunables.MinCavalryShare, HorseStandTunables.MaxCavalryShare, d.EnemyCavalryShare, ref rejected),
+            StandField("outnumberedRatio", stand.OutnumberedRatio, HorseStandTunables.MinOutnumberedRatio, HorseStandTunables.MaxOutnumberedRatio, d.OutnumberedRatio, ref rejected),
+            StandField("polearmFavor", stand.PolearmFavor, HorseStandTunables.MinPolearmFavor, HorseStandTunables.MaxPolearmFavor, d.PolearmFavor, ref rejected));
+    }
+
+    // FiniteFloatValidator FIRST (inside IsFiniteInRange): a bare range check is false for NaN and would pass it.
+    private float StandField(string name, float value, float min, float max, float fallback, ref bool rejected)
+    {
+        if (FiniteFloatValidator.IsFiniteInRange(value, min, max))
+            return value;
+        _logger.LogWarning($"CultureDoctrineConfigProvider: horseStand.{name} = {value} is not a finite value in [{min}, {max}], reverting to {fallback}");
+        rejected = true;
+        return fallback;
     }
 
     private float Metres(string name, float value, float fallback, ref bool rejected)
