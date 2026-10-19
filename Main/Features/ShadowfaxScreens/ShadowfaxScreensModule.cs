@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using DryIoc;
+using TAOM.Adapters;
 using TAOM.Composition;
+using TAOM.Core.Logging;
 using TAOM.Features.ShadowfaxScreens.Clan;
 using TAOM.Features.ShadowfaxScreens.Diagnostics;
+using TAOM.Features.ShadowfaxScreens.Inventory;
 
 namespace TAOM.Features.ShadowfaxScreens;
 
@@ -17,7 +20,7 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
     private static readonly PatchCategoryDecl[] Categories =
     {
         new("PatchXXX_ShadowfaxClan", ApplyPhase.GameInit),
-        new("PatchXXX_ShadowfaxInventory", ApplyPhase.GameInit),
+        new(InventoryPatchCategory.Name, ApplyPhase.GameInit),
         new("PatchXXX_ShadowfaxParty", ApplyPhase.GameInit),
         new("PatchXXX_ShadowfaxQuests", ApplyPhase.GameInit),
     };
@@ -33,11 +36,19 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
 
         // Clan fast open (Clan/): needs ICoopPresenceProvider (CoopInteropIoC) and IStampClock, both registered elsewhere.
         registrator.Register<ClanScreenFastPathService>(Reuse.Singleton);
+
+        // Inventory fast open.
+        registrator.Register<IInventoryOpenAdapter, InventoryOpenAdapter>(Reuse.Singleton);
+        registrator.Register<InventoryOpenFastPathService>(Reuse.Singleton);
     }
 
     public override void InitializeStatics(IResolver resolver)
     {
         ScreenOpenTiming.Initialize(resolver.Resolve<ScreenOpenTimer>());
         ClanFastOpenCalls.Initialize(resolver.Resolve<ClanScreenFastPathService>());
+
+        // Inventory fast open.
+        ShadowfaxInventoryCalls.Initialize(resolver.Resolve<InventoryOpenFastPathService>(),
+            resolver.Resolve<IInventoryOpenAdapter>(), resolver.Resolve<IModLogger>());
     }
 }
