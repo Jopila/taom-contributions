@@ -15,6 +15,7 @@ using TAOM.Features.CastleRecruitment;
 using TAOM.Features.EyeOfSauron;
 using TAOM.Features.FieldCommission;
 using TAOM.Features.FiefManagement;
+using TAOM.Features.HiddenHosts;
 using TAOM.Features.FieldCommission.Domain;
 using TAOM.Features.NameplateCull;
 using TAOM.Features.PartyIconScale;
@@ -74,6 +75,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(EyeOfSauronSettingsProvider))]
     // #822: both switches are read for every party on every hourly tick.
     [DataRow(typeof(WatchfulHoldsSettingsProvider))]
+    // #846: the nameplate toggle is read for every visible party nameplate every map frame.
+    [DataRow(typeof(HiddenHostsSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -107,6 +110,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IFiefManagementSettingsProvider), typeof(FiefManagementSettingsProvider))]
     [DataRow(typeof(IEyeOfSauronSettings), typeof(EyeOfSauronSettingsProvider))]
     [DataRow(typeof(IWatchfulHoldsSettings), typeof(WatchfulHoldsSettingsProvider))]
+    [DataRow(typeof(IHiddenHostsSettings), typeof(HiddenHostsSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -315,6 +319,18 @@ public class CampaignHotPathSettingsProvidersTests
         settings.CullHiddenNameplates = false;
 
         Assert.IsFalse(sut.CullEnabled);
+    }
+
+    [TestMethod]
+    public void HiddenHosts_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new HiddenHostsSettingsProvider(mcm);
+        Assert.IsTrue(sut.Enabled);
+
+        mcm.HiddenHostsEnabled = false;
+
+        Assert.IsFalse(sut.Enabled);
     }
 
     // No-MCM pins: TaomSettings.Instance is null in the test host (MCM is never initialised), so these

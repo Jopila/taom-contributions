@@ -1418,6 +1418,13 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Size of party-icon figures and their mounts on the campaign map. Vanilla = 0.30; default 0.15 = half (makes parties feel smaller relative to settlements). Applies on the next icon rebuild after changing.")]
     public float MapFigureScale { get; set; } = 0.15f;
 
+    // --- Map UI / Hidden Hosts ---
+
+    [SettingPropertyGroup("Map UI/Hidden Hosts", GroupOrder = 42)]
+    [SettingPropertyBool("Hide Exact Troop Counts", Order = 0, RequireRestart = false,
+        HintText = "Another party's troop count on the campaign map blurs with its distance from you: '1??', '12?', then exact as you close in, and '...' at the very edge of sight. Standing closer, a higher Scouting skill and hosts of your own realm all sharpen it. Wounded and prisoner counts show only when the count is exact. Display only: AI lords still see true numbers. Off = vanilla counts. Applies immediately. Default: on.")]
+    public bool HiddenHostsEnabled { get; set; } = true;
+
     // --- Kingdom Politics / Fief Grants ---
     //
     // #458, #565. When a kingdom takes a town or castle it holds an election for the new owner.

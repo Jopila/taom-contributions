@@ -1109,3 +1109,24 @@ castles there. The scan's slot count mirrors a private estimate that was never t
   flipping the assertion once.
 - **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` finding 2;
   `TAOM.Tests/Migration/CastleRecruitmentEngineMirrorTests.cs`.
+
+### To show a different value for one engine call, save and restore around that call
+
+Hidden Hosts phase 1 first masked a nameplate count by writing the mask into `PartyNameplateVM`'s
+bind fields and leaving it there between frames. Vanilla rewrites those fields only when the number
+behind them changes, so the mask had to be lifted by hand later, and the code detected vanilla's own
+writes by comparing the field's text with the last mask. That state machine needed a sentinel no
+vanilla value could equal (a one-digit "?" mask equalled vanilla's info-hidden "?"), left a mask on
+screen when the hook threw, and kept running per plate per frame with the feature off. The engine had
+one reader of those fields, `RefreshBinding`, so the mask only ever needed to exist during that call:
+a prefix now saves the three values in Harmony's `__state`, lays the mask, and a `[HarmonyFinalizer]`
+puts them back. Property setters that return early on an equal value keep it free of extra
+notifications.
+- **Why missed:** the plan reasoned from "vanilla will not rewrite the field" to "the hook must
+  remember and restore", without asking how long the mask had to live. The save-and-restore shape
+  already existed in Patch88 and Patch92.
+- **Prevent:** before keeping TAOM state inside an engine object between calls, find every reader of
+  that state (`taom-src`, grep the decompile). When one call reads it, lay the change in a prefix and
+  undo it in a finalizer, so a fault, a toggle or a skipped original can never leave it behind. Pin
+  the single-reader fact with an IL test (`HiddenHostsBindingTests`).
+- **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 6.
