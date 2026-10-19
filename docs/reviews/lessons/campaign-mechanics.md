@@ -699,6 +699,7 @@ expected the service menu after a load in a town, but the load-time discharge's 
   menu, an opened menu, or the map with no live encounter. Write an in-game check only after tracing what the load
   path does to the saved menu id for that exact save shape.
 - **Source:** `docs/reviews/rca-enlistment-discharged-menu-2026-10-19.md` F1 to F5.
+
 ### Before adding a reward for an engine event, list what vanilla already pays at that event (#861, 2026-10-18)
 Bonds of Battle paid relation after battles without reading what vanilla pays there. Vanilla's thank-you conversation
 after a win already pays the side leader the player came to help (`PlayerEncounter.DoPlayerVictory`,
@@ -744,3 +745,21 @@ Keeping the player's relations personal broke three engine paths that use the cl
   to `ChangeRelationAction`, `SetPersonalRelation` and `GetRelationChangeAfterClanLeaderIsDead`, and decide each one:
   override, document, or follow up.
 - **Source:** `docs/reviews/rca-personal-relations-2026-10-19.md` findings 2 and 5.
+
+### Leave a wait menu inside a settlement through the engine's state menu, never with a bare ExitToLast
+
+`GameMenu.ExitToLast` closes the menu context only. Inside a settlement the party keeps `CurrentSettlement`
+and its player encounter, so it cannot move or start a new encounter, and `Campaign.Tick`'s "no menu open"
+safety net asks `EncounterGameMenuModel.GetGenericStateMenu()`, which has no case for a village: the party is
+stranded, and a save keeps the state. In a besieged town or castle, landing on the plain `town` or `castle`
+menu is the opposite fault: its Leave has no siege check, so the party walks out without a break-out.
+Vanilla's own settlement wait menus route through `GetGenericStateMenu()` every tick
+(`PlayerTownVisitCampaignBehavior.SwitchToMenuIfThereIsAnInterrupt`).
+- **Why missed:** From the Ashes copied FieldCamp's exits. FieldCamp's `ExitToLast` is safe because a camp
+  menu has no settlement behind it; the brief named the shape and not that condition. Second feature in two
+  days where a copied pattern lost the reason it was safe (`rca-postern-gate-2026-10-18.md`).
+- **Prevent:** a TAOM wait menu inside a settlement leaves through one helper: `GetGenericStateMenu()` when it
+  names a menu, else the settlement's own menu, else `IEncounterAdapter.Finish(forcePlayerOutFromSettlement:
+  true)`; `ExitToLast` only when the party is in no settlement. Pin it with a source test. When a brief names
+  a pattern to copy, it names the condition that makes the pattern safe.
+- **Source:** `docs/reviews/rca-from-the-ashes-2026-10-19.md` findings 1 and 2.

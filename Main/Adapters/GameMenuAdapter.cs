@@ -100,6 +100,22 @@ public sealed class GameMenuAdapter : IGameMenuAdapter
         }
     }
 
+    public string GenericStateMenuId
+    {
+        get
+        {
+            try
+            {
+                return Campaign.Current?.Models?.EncounterGameMenuModel?.GetGenericStateMenu();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError($"[Enlistment] GenericStateMenuId failed: {ex.Message}");
+                return null;
+            }
+        }
+    }
+
     public bool ExitToLast()
     {
         try

@@ -800,6 +800,12 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "A Postern Gate (a Hidden Door, Culvert, Sally Port, Hidden Way or Bolt-Hole, by culture) in a besieged fief cuts the troops lost breaking into or out of the siege there: by default 50, 67 and 75 percent by building level (postern_gate.json). When off, the building still exists but the cut does not apply. Takes effect at the next break-in or break-out. Default: on.")]
     public bool EnablePosternGate { get; set; } = true;
 
+    // GroupOrder 1 sorts it just after the Postern Gate group; the group's first property carries it.
+    [SettingPropertyGroup("Fief Management/From the Ashes", GroupOrder = 1)]
+    [SettingPropertyBool("From the Ashes", Order = 0, RequireRestart = false,
+        HintText = "Lets your company rebuild a looted village of your own realm from the village menu, and lend its labour to a construction project in a fief you own from the keep menu (from_the_ashes.json holds the hours, labour and materials). When off, those two options are hidden; a job already under way still finishes or stops normally. Single-player only. Default: on.")]
+    public bool EnableFromTheAshes { get; set; } = true;
+
     // --- Inventory / Quick Actions ---
 
     [SettingPropertyGroup("Inventory/Quick Actions", GroupOrder = 30)]

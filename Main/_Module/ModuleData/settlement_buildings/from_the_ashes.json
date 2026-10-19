@@ -1,0 +1,37 @@
+{
+  "rebuild": {
+    "hours": 24,
+    "labour": 20,
+    "hardwood": 40,
+    "clay": 0,
+    "tools": 0,
+    "iron": 0,
+    "notableRelation": 3,
+    "ownerRelation": 5,
+    "athleticsXp": 200,
+    "stopPenalty": -1
+  },
+  "thralls": {
+    "hours": 24,
+    "labour": 20,
+    "hardwood": 40,
+    "clay": 0,
+    "tools": 0,
+    "iron": 0,
+    "notableRelation": 0,
+    "ownerRelation": 5,
+    "athleticsXp": 200,
+    "stopPenalty": 0
+  },
+  "project": {
+    "hours": 20,
+    "labour": 40,
+    "hardwood": 30,
+    "clay": 10,
+    "tools": 5,
+    "iron": 5,
+    "notableRelation": 1,
+    "athleticsXp": 150,
+    "constructionPerHour": 15
+  }
+}

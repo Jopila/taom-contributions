@@ -40,4 +40,14 @@ public interface IGameMenuAdapter
     /// more durable than a switch on settlement flags at the call site.
     /// </summary>
     string CurrentSettlementMenuId { get; }
+
+    /// <summary>
+    /// The menu the engine itself would show the main party right now: the encounter model's
+    /// <c>GetGenericStateMenu()</c>, the answer vanilla's <c>SwitchToMenuIfThereIsAnInterrupt</c> acts on. Null or empty
+    /// when the model has no opinion (a village has no case in its settlement branch) or the read fails.
+    ///
+    /// Exists so a feature that ends its own wait menu can land where the engine would put the player (a besieged fief's
+    /// siege menu, an encounter) before it falls back to <see cref="CurrentSettlementMenuId"/>.
+    /// </summary>
+    string GenericStateMenuId { get; }
 }

@@ -3325,5 +3325,31 @@
 	<string id="taom_postern_orc_name" text="{=taom_postern_orc_name}Bolt-Hole" />
 	<string id="taom_postern_orc_desc" text="{=taom_postern_orc_desc}A crawl-tunnel dug in the dark and shored with scrap, used by whoever is quick enough to squeeze through. In a siege, parties slip into or out of this fief with fewer losses." />
 	<string id="taom_postern_effect" text="{=taom_postern_effect}{PERCENT}% fewer troops lost breaking into or out of a siege here" />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- FromTheAshes -->
+	<string id="taom_ashes_opt_rebuild" text="{=taom_ashes_opt_rebuild}Help raise the village from its ashes" />
+	<string id="taom_ashes_opt_thralls" text="{=taom_ashes_opt_thralls}Set your thralls to rebuild the village" />
+	<string id="taom_ashes_opt_project" text="{=taom_ashes_opt_project}Lend your company to the works" />
+	<string id="taom_ashes_opt_stop" text="{=taom_ashes_opt_stop}Lay down your tools" />
+	<string id="taom_ashes_wait_thralls" text="{=taom_ashes_wait_thralls}Your thralls clear the burnt timbers of {SETTLEMENT} under the lash." />
+	<string id="taom_ashes_wait_project" text="{=taom_ashes_wait_project}Your company labours on the {BUILDING} of {SETTLEMENT}." />
+	<string id="taom_ashes_wait_rebuild" text="{=taom_ashes_wait_rebuild}Your company clears the burnt timbers of {SETTLEMENT} and raises new walls." />
+	<string id="taom_ashes_coop" text="{=taom_ashes_coop}Not available in a shared campaign." />
+	<string id="taom_ashes_not_yours" text="{=taom_ashes_not_yours}Only the realm that holds this village may rebuild it." />
+	<string id="taom_ashes_no_project" text="{=taom_ashes_no_project}No construction is under way here." />
+	<string id="taom_ashes_enlisted" text="{=taom_ashes_enlisted}You cannot do this while serving in another lord's army." />
+	<string id="taom_ashes_need_thralls" text="{=taom_ashes_need_thralls}You need {COUNT} captives to labour." />
+	<string id="taom_ashes_need_troops" text="{=taom_ashes_need_troops}You need {COUNT} healthy men to labour." />
+	<string id="taom_ashes_done_project" text="{=taom_ashes_done_project}Your company's labour hastens the {BUILDING}." />
+	<string id="taom_ashes_done_rebuild" text="{=taom_ashes_done_rebuild}{SETTLEMENT} rises from its ashes. Its people will not forget who helped." />
+	<string id="taom_ashes_cancel_recovered" text="{=taom_ashes_cancel_recovered}The villagers finished the work without you." />
+	<string id="taom_ashes_cancel_generic" text="{=taom_ashes_cancel_generic}The work is abandoned." />
+	<string id="taom_ashes_need_items" text="{=taom_ashes_need_items}You need {ITEMS}." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- FromTheAshes -->
+	<string id="taom_ashes_done_thralls" text="{=taom_ashes_done_thralls}{SETTLEMENT} stands again, raised by your thralls." />
+	<string id="taom_ashes_short_rebuild" text="{=taom_ashes_short_rebuild}The work on {SETTLEMENT} stops short: you need {ITEMS}." />
+
+
 
 </strings>

@@ -16,6 +16,7 @@ using TAOM.Features.EyeOfSauron;
 using TAOM.Features.FieldCommission;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HiddenHosts;
+using TAOM.Features.FromTheAshes;
 using TAOM.Features.FieldCommission.Domain;
 using TAOM.Features.NameplateCull;
 using TAOM.Features.PartyIconScale;
@@ -83,6 +84,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(PersonalRelationSettingsProvider))]
     // The defender's siege wait menu re-checks the break-out options every frame, and each check asks the Postern Gate model.
     [DataRow(typeof(PosternGateSettingsProvider))]
+    // The host menus are plain menus, so the start conditions run when a menu opens or refreshes; the accessor still takes the settings once.
+    [DataRow(typeof(FromTheAshesSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -119,6 +122,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IHiddenHostsSettings), typeof(HiddenHostsSettingsProvider))]
     [DataRow(typeof(IPersonalRelationSettingsProvider), typeof(PersonalRelationSettingsProvider))]
     [DataRow(typeof(IPosternGateSettingsProvider), typeof(PosternGateSettingsProvider))]
+    [DataRow(typeof(IFromTheAshesSettingsProvider), typeof(FromTheAshesSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -363,6 +367,18 @@ public class CampaignHotPathSettingsProvidersTests
         settings.EnablePosternGate = false;
 
         Assert.IsFalse(sut.CutEnabled);
+    }
+
+    [TestMethod]
+    public void FromTheAshes_ReadsThroughTheCachedSettings()
+    {
+        var settings = new TaomSettings();
+        var sut = new FromTheAshesSettingsProvider(settings);
+        Assert.IsTrue(sut.Enabled);
+
+        settings.EnableFromTheAshes = false;
+
+        Assert.IsFalse(sut.Enabled);
     }
 
     // No-MCM pins: TaomSettings.Instance is null in the test host (MCM is never initialised), so these

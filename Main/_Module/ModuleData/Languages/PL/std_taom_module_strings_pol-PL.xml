@@ -5981,6 +5981,26 @@
   <string id="taom_postern_orc_name" text="Bolt-Hole" />
   <string id="taom_postern_orc_desc" text="A crawl-tunnel dug in the dark and shored with scrap, used by whoever is quick enough to squeeze through. In a siege, parties slip into or out of this fief with fewer losses." />
   <string id="taom_postern_effect" text="{PERCENT}% fewer troops lost breaking into or out of a siege here" />
+  <string id="taom_ashes_opt_rebuild" text="Help raise the village from its ashes" />
+  <string id="taom_ashes_opt_thralls" text="Set your thralls to rebuild the village" />
+  <string id="taom_ashes_opt_project" text="Lend your company to the works" />
+  <string id="taom_ashes_opt_stop" text="Lay down your tools" />
+  <string id="taom_ashes_wait_thralls" text="Your thralls clear the burnt timbers of {SETTLEMENT} under the lash." />
+  <string id="taom_ashes_wait_project" text="Your company labours on the {BUILDING} of {SETTLEMENT}." />
+  <string id="taom_ashes_wait_rebuild" text="Your company clears the burnt timbers of {SETTLEMENT} and raises new walls." />
+  <string id="taom_ashes_coop" text="Not available in a shared campaign." />
+  <string id="taom_ashes_not_yours" text="Only the realm that holds this village may rebuild it." />
+  <string id="taom_ashes_no_project" text="No construction is under way here." />
+  <string id="taom_ashes_enlisted" text="You cannot do this while serving in another lord's army." />
+  <string id="taom_ashes_need_thralls" text="You need {COUNT} captives to labour." />
+  <string id="taom_ashes_need_troops" text="You need {COUNT} healthy men to labour." />
+  <string id="taom_ashes_done_project" text="Your company's labour hastens the {BUILDING}." />
+  <string id="taom_ashes_done_rebuild" text="{SETTLEMENT} rises from its ashes. Its people will not forget who helped." />
+  <string id="taom_ashes_cancel_recovered" text="The villagers finished the work without you." />
+  <string id="taom_ashes_cancel_generic" text="The work is abandoned." />
+  <string id="taom_ashes_need_items" text="You need {ITEMS}." />
+  <string id="taom_ashes_done_thralls" text="{SETTLEMENT} stands again, raised by your thralls." />
+  <string id="taom_ashes_short_rebuild" text="The work on {SETTLEMENT} stops short: you need {ITEMS}." />
 
     <string id="taom_bonds_together" text="You fought together with {LORD}." />
 
