@@ -171,46 +171,49 @@ module wiring is in `ShadowfaxScreensModuleTests`.
 ## Inventory and trade fast open
 
 One screen covers both inventory and trade: `GauntletInventoryScreen.OnReady` builds `SPInventoryVM` and
-loads the `Inventory` movie, and a merchant's stock is the same screen with a larger left list. Two
-changes sit behind "Inventory Fast Open" (default on, read per open, no restart), both IL call-site swaps
-under the category `PatchXXX_ShadowfaxInventory` (the patch number is assigned at rebase).
+loads the `Inventory` movie, and a merchant's stock is the same screen with a larger left list. One
+change sits behind "Inventory Fast Open" (default on, read per open, no restart): an IL call-site swap
+under the category `PatchXXX_ShadowfaxInventory` (the patch number is assigned at rebase), named by
+`ShadowfaxInventoryCalls.PatchCategory`, which the module and every inventory hook share.
 
-**1. Name-sort skip.** `SPInventoryVM.InitializeInventory` sorts each side by item name with
+**Name-sort skip.** `SPInventoryVM.InitializeInventory` sorts each side by item name with
 `OrderBy<ItemRosterElement,string>` straight into `ToArray<ItemRosterElement>` before building one
 `SPItemVM` per row. With the toggle on, `NameSortRewrite` swaps both `OrderBy` calls for
 `ShadowfaxInventoryCalls.SortByNameOrPassThrough`, which hands the source on unsorted; off, or with no
 service, it calls `OrderBy` as vanilla does. The rewrite applies only when the method holds exactly two
 such sites, each immediately followed by `ToArray<ItemRosterElement>`; any other shape returns the IL
-unmodified with one warning (so a re-applied category, whose second pass finds no `OrderBy`, is a no-op).
+unmodified and names the reason (`out string? problem`), which the service writes as the one install or bail
+line (so a re-applied category, whose second pass finds no `OrderBy`, is a no-op and logs once).
 
-**Why the order the player sees is unchanged.** `InitializeInventory` has two callers, the 3-argument
-`SPInventoryVM` constructor and `AfterReset`, and both build the two sort controllers and call
-`SortByDefaultState` (then the saved sort preference) right after it. Every comparer falls back to
-`ItemDescription` on a tie (`ItemComparer.ResolveEquality`), so the final order depends on the rows, not on
-the order they were inserted in. `InventoryBindingTests` pins all three facts against the installed DLLs:
-the caller list, the sort after the call, and the tie-break.
+**Why the order the player sees is unchanged, and where it can differ.** `InitializeInventory` has two
+callers, the 3-argument `SPInventoryVM` constructor and `AfterReset`, and both build the two sort controllers
+and call `SortByDefaultState` (then the saved sort preference) right after it. Every comparer falls back to
+`ItemDescription` on a tie (`ItemComparer.ResolveEquality`), so rows land where vanilla puts them unless they tie
+on every key the active comparer reads. `MBBindingList.Sort` uses the unstable `List<T>.Sort`, so fully tied
+rows (same name, type and value) can appear in a different relative order than with the pre-sort. In loot mode
+the other side is sorted by cost, not name; the skip does not change that. `InventoryBindingTests` pins the
+caller list, the sort after the call and the tie-break against the installed DLLs.
 
-**2. Concept lookup memo.** The 8-argument `SPItemVM` constructor reads `Concept.All` (the cached
-`Campaign.Current.Concepts` list) and calls `SingleOrDefault<Concept>` twice per row, into two fields that only
-`ExecuteConcept` reads. `ConceptLookupRewrite` swaps those two calls for `CachedConcept0` and `CachedConcept1`,
-which keep one result per call site and per source list (the list is held weakly; a new campaign has a new
-list and recomputes). A null result is cached; an exception (a duplicate concept id) is thrown exactly as
-vanilla throws it and is never cached. The rewrite needs exactly two sites, each preceded by
-`Concept::get_All` within 24 instructions and after the previous site. There is no patch on `Concept.All`
-itself. The expected gain is small, because `Concept.All` is already a cached list and the cost is the
-linear scan with its delegate.
+**Dropped: the concept lookup memo.** An earlier build also swapped the two `SingleOrDefault<Concept>` calls in
+the 8-argument `SPItemVM` constructor for a per-site memo. It is gone: the saving measured about 0.7 us per row,
+too small to justify a second transpiler, a weak-keyed memo and their tests (`simplicity-criterion.md`).
 
-**Timing.** With "Log Screen Open Times" on, the `OnReady` prefix starts the `Inventory open` window only when
-`_gauntletLayer` is null (a repeat `OnReady` returns early in vanilla and is not an open), and a void finalizer
-ends it, also when `OnReady` throws. `InitializeInventory` is timed by the service as a phase inside that
-window (a Reset re-runs it outside an open and logs nothing). The line looks like:
+**Timing.** With "Log Screen Open Times" on, a prefix and void finalizer on the one `SPInventoryVM` constructor
+`(InventoryLogic, bool, Func<WeaponComponentData, ItemObject.ItemUsageSetFlags>)` open the `Inventory open`
+window and end it, also when the constructor throws. The span is the view-model build (including
+`InitializeInventory`); the `Inventory` movie load that follows in `GauntletInventoryScreen.OnReady` is not in
+it. `InitializeInventory` is timed by the service as a phase inside that window (a Reset re-runs it outside an
+open and logs nothing). The finalizer reads the mode from the private `_usageType` field (the real
+`InventoryScreenHelper.InventoryMode`, not `IsTrading`) and the side counts from the constructor's
+`inventoryLogic` argument, so no adapter and no active-state lookup exist. The service closes its open latch
+first, then formats. The line looks like:
 
-`[ScreenOpen] Inventory open: 212.4 ms (mode=trade, left=312, right=88, fast=on, rows=118.0 ms, sorts skipped=2, concepts cached=598/600)`
+`[ScreenOpen] Inventory open: 212.4 ms (fast open on; mode=Trade, left=312, right=88, rows=118.0 ms, sorts skipped=2)`
 
-`mode` is `trade` or `inventory` (from `InventoryLogic.IsTrading`; the private inventory mode is not read, to
-avoid reflection), `left` and `right` are the other party's and the player's element counts, `rows` is the
-`InitializeInventory` time, `sorts skipped` counts the pass-throughs and `concepts cached` is hits over lookups.
-The install line is one per site in `taom_debug.log`: `[ShadowfaxInventory] name sort: swapped 2 of 2 call sites`.
+`fast open on` or `fast open off` is the fast path the open started with, `mode` is the `InventoryMode` name,
+`left` and `right` are the other party's and the player's element counts (`n/a` when unreadable), `rows` is the
+`InitializeInventory` time and `sorts skipped` counts the pass-throughs. The install line is one per site in
+`taom_debug.log`: `[ShadowfaxInventory] name sort: swapped 2 of 2 call sites`.
 
 **Left out, and why.** Trade-data and button-hint deferral (the ensure paths are unproven, and the
 `ThisStock` setter can apply a transaction), a banner cache, and widget cost are not built. If the rows stay
@@ -220,6 +223,26 @@ slow after this, the next target is `FindItemFromSide`'s linear lookup.
 "Inventory Fast Open" off and then on, open the trade screen 6 times each, drop the first open of each arm,
 and compare the medians of the `[ScreenOpen] Inventory open` lines. Keep the change only if the median drops by
 at least 16 ms and by more than the off arm's spread; otherwise delete it and keep the timer points.
+
+**In-game correctness checklist.** With the switch on: open a merchant and sort by each column, then reopen and
+confirm the saved sort holds; trade an item and confirm the list stays in order; open a loot screen and a stash
+and check the rows are sorted; use the character switch arrows and a Reset (rows must stay sorted); open from a
+cold start and confirm nothing about the screen differs from the switch off.
+
+**Removal checklist** (if the A/B misses the 16 ms rule): delete `NameSortRewrite.cs`,
+`ShadowfaxInventoryCalls.cs` (keep or fold the `ScreenOpenTiming` calls if the timer stays),
+`InventoryOpenFastPathService.cs` and the two files in `Inventory/Hooks/`; delete the five
+`TAOM.Tests/Features/ShadowfaxScreens/Inventory/` test files; in `ShadowfaxScreensModule.cs` delete the
+inventory category line, the `InventoryOpenFastPathService` registration and the `ShadowfaxInventoryCalls.Initialize`
+line (plus its `using`); drop the `InventoryFastOpen` member of `IShadowfaxScreensSettingsProvider`, its
+provider property and the MCM setting; delete the
+`PatchXXX_ShadowfaxInventory` section of `harmony-patch-registry.md`, this section and its Key Files rows, and
+the inventory clause of the `feature-map.md` row.
+
+**Co-op.** BannerlordCoop's `GameInterface` module carries an `SPInventoryVMPatches` class that names
+`SPInventoryVM`; which members it patches was not read, so overlap with the constructor or `InitializeInventory`
+is UNVERIFIED. These hooks only observe the constructor and rewrite two calls inside `InitializeInventory`; they
+write nothing to the network or the save.
 
 ## Party fast open
 
@@ -314,11 +337,10 @@ page. None of its rows needs a restart; each is read on every screen open.
 
 | File | Purpose |
 |------|---------|
-| `Main/Features/ShadowfaxScreens/Inventory/InventoryOpenFastPathService.cs` | Toggle gate, install lines, concept memo, per-open counters and detail (no TaleWorlds types) |
-| `Main/Features/ShadowfaxScreens/Inventory/NameSortRewrite.cs`, `ConceptLookupRewrite.cs` | Pure IL rewrites for the two call-site swaps |
-| `Main/Features/ShadowfaxScreens/Inventory/ShadowfaxInventoryCalls.cs`, `SourceScopedMemo.cs` | The static helpers the rewrites call; the weak one-slot memo |
-| `Main/Features/ShadowfaxScreens/Inventory/Hooks/` | `OnReady` timing bracket, `InitializeInventory` transpiler and phase, `SPItemVM` constructor transpiler |
-| `Main/Adapters/IInventoryOpenAdapter.cs`, `InventoryOpenAdapter.cs` | Mode and side counts of the active inventory state, for the timer detail |
+| `Main/Features/ShadowfaxScreens/Inventory/InventoryOpenFastPathService.cs` | Toggle gate, install line, per-open counters and detail (no TaleWorlds types) |
+| `Main/Features/ShadowfaxScreens/Inventory/NameSortRewrite.cs` | Pure IL rewrite for the two sort-call swaps |
+| `Main/Features/ShadowfaxScreens/Inventory/ShadowfaxInventoryCalls.cs` | The category constant, the sort helper the rewrite calls and the static wiring the hooks reach |
+| `Main/Features/ShadowfaxScreens/Inventory/Hooks/` | `SPInventoryVM` constructor timing bracket, `InitializeInventory` transpiler and phase |
 | `Main/Features/ShadowfaxScreens/InstantTransitionRewriter.cs` | Pure XML transform: zero every VisualDefinition's duration |
 | `Main/Features/ShadowfaxScreens/UI/ShadowfaxScreensPrefab.cs` | UIExtenderEx patch on the nine vanilla movies |
 | `Main/_Module/GUI/PreFabs/Party/PartyScreen.xml`, `PartyTroopTuple.xml`, `PartyTroopTupleLeft.xml` | Party screen and troop rows, zero durations |

@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using TaleWorlds.CampaignSystem.Inventory;
 using TaleWorlds.CampaignSystem.ViewModelCollection.Inventory;
 using TaleWorlds.Core;
-using TaleWorlds.Engine.GauntletUI;
-using TAOM.Core.Logging;
 using TAOM.Features.ShadowfaxScreens.Inventory;
 using TAOM.Features.ShadowfaxScreens.Inventory.Hooks;
 using TAOM.Tests.Migration;
@@ -19,9 +17,9 @@ using TAOM.Tests.Migration;
 namespace TAOM.Tests.Features.ShadowfaxScreens.Inventory;
 
 /// <summary>
-/// Drift guard for the Inventory fast open. Both transpilers soft-fail (a changed shape leaves vanilla with one
+/// Drift guard for the Inventory fast open. The transpiler soft-fails (a changed shape leaves vanilla with one
 /// warning), so an engine bump would silently drop the speed-up; these feed the REAL installed IL through the
-/// production rewrites, resolve every target and engine member the patches touch, and pin the facts the name-sort
+/// production rewrite, resolve every target and engine member the patches touch, and pin the facts the name-sort
 /// skip relies on: the constructor and AfterReset sort the rows after InitializeInventory, with ItemDescription as
 /// the tie-break.
 /// </summary>
@@ -44,13 +42,6 @@ public class InventoryBindingTests
         AccessTools.Method(typeof(SPInventoryVM), "InitializeInventory", Type.EmptyTypes)
         ?? throw new AssertFailedException("SPInventoryVM.InitializeInventory() did not resolve.");
 
-    private static ConstructorInfo ItemCtor() =>
-        AccessTools.Constructor(typeof(SPItemVM), new[]
-        {
-            typeof(InventoryLogic), typeof(bool), typeof(bool), typeof(InventoryScreenHelper.InventoryMode),
-            typeof(ItemRosterElement), typeof(InventoryLogic.InventorySide), typeof(int), typeof(EquipmentIndex?),
-        }) ?? throw new AssertFailedException("The 8-argument SPItemVM constructor did not resolve.");
-
     private static ConstructorInfo InventoryCtor() =>
         AccessTools.Constructor(typeof(SPInventoryVM), new[]
         {
@@ -65,11 +56,10 @@ public class InventoryBindingTests
     public void NameSortRewrite_SwapsBothSortSites_InTheInstalledEngine()
     {
         RequireGame();
-        var logger = Substitute.For<IModLogger>();
 
-        var rewritten = NameSortRewrite.Rewrite(Il(InitializeInventory()), logger, out var swapped);
+        var rewritten = NameSortRewrite.Rewrite(Il(InitializeInventory()), out var swapped, out var problem);
 
-        logger.DidNotReceive().LogWarning(Arg.Any<string>());
+        Assert.IsNull(problem);
         Assert.AreEqual(2, swapped);
         Assert.AreEqual(2, rewritten.Count(c => c.operand is MethodInfo m && m == ShadowfaxInventoryCalls.SortByNameMethod));
         Assert.AreEqual(0, rewritten.Count(c => c.Calls(NameSortRewrite.OrderByTarget)));
@@ -78,38 +68,15 @@ public class InventoryBindingTests
     [TestMethod]
     [TestCategory("BindingVerification")]
     [TestCategory("RequiresGameIL")]
-    public void ConceptLookupRewrite_SwapsBothLookups_InTheInstalledEngine()
-    {
-        RequireGame();
-        var logger = Substitute.For<IModLogger>();
-
-        var rewritten = ConceptLookupRewrite.Rewrite(Il(ItemCtor()), logger, out var swapped);
-
-        logger.DidNotReceive().LogWarning(Arg.Any<string>());
-        Assert.AreEqual(2, swapped);
-        CollectionAssert.AreEqual(ShadowfaxInventoryCalls.ConceptMethods.ToList(),
-            rewritten.Where(c => c.operand is MethodInfo m && m.DeclaringType == typeof(ShadowfaxInventoryCalls))
-                .Select(c => (MethodInfo)c.operand).ToList());
-        Assert.AreEqual(0, rewritten.Count(c => c.Calls(ConceptLookupRewrite.SingleTarget)));
-    }
-
-    [TestMethod]
-    [TestCategory("BindingVerification")]
-    [TestCategory("RequiresGameIL")]
     public void SecondPassOverTheRealIl_BailsWithoutThrowing()
     {
         RequireGame();
-        var logger = Substitute.For<IModLogger>();
-        var sort = NameSortRewrite.Rewrite(Il(InitializeInventory()), logger, out _);
-        var concept = ConceptLookupRewrite.Rewrite(Il(ItemCtor()), logger, out _);
-        logger.ClearReceivedCalls();
+        var sort = NameSortRewrite.Rewrite(Il(InitializeInventory()), out _, out _);
 
-        NameSortRewrite.Rewrite(sort, logger, out var sortAgain);
-        ConceptLookupRewrite.Rewrite(concept, logger, out var conceptAgain);
+        NameSortRewrite.Rewrite(sort, out var sortAgain, out var problem);
 
         Assert.AreEqual(0, sortAgain);
-        Assert.AreEqual(0, conceptAgain);
-        logger.Received(2).LogWarning(Arg.Any<string>());
+        Assert.IsNotNull(problem);
     }
 
     [TestMethod]
@@ -125,14 +92,33 @@ public class InventoryBindingTests
         var toArrayParameter = NameSortRewrite.ToArrayTarget.GetParameters().Single().ParameterType;
         Assert.IsTrue(toArrayParameter.IsAssignableFrom(sort.ReturnType),
             "The sort helper's result must be accepted where ToArray<ItemRosterElement> reads its source.");
+    }
 
-        var single = ConceptLookupRewrite.SingleTarget;
-        foreach (var helper in ShadowfaxInventoryCalls.ConceptMethods)
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    public void InventoryVm_HasExactlyOneConstructor_TheOneTheHookPatches()
+    {
+        RequireGame();
+        Assert.AreEqual(1, typeof(SPInventoryVM).GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length);
+        Assert.IsNotNull(InventoryCtor());
+    }
+
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
+    public void NameSortTranspiler_ProducesIlTheJitAccepts_OnTheRealInitializeInventory()
+    {
+        RequireGame();
+        const string id = "taom.tests.inventory.jit";
+        var harmony = new Harmony(id);
+        try
         {
-            CollectionAssert.AreEqual(single.GetParameters().Select(p => p.ParameterType).ToList(),
-                helper.GetParameters().Select(p => p.ParameterType).ToList(), helper.Name);
-            Assert.AreEqual(single.ReturnType, helper.ReturnType, helper.Name);
-            Assert.IsTrue(helper.IsStatic);
+            harmony.CreateClassProcessor(typeof(SPInventoryVM_InitializeInventory_ShadowfaxPatch)).Patch();
+            RuntimeHelpers.PrepareMethod(((MethodInfo)InitializeInventory()).MethodHandle);
+        }
+        finally
+        {
+            harmony.UnpatchAll(id);
         }
     }
 
@@ -141,18 +127,17 @@ public class InventoryBindingTests
     public void PatchTargets_ResolveWithTheParameterNamesTheHooksInject()
     {
         RequireGame();
-        var screen = AccessTools.TypeByName("SandBox.GauntletUI.GauntletInventoryScreen");
-        Assert.IsNotNull(screen, "GauntletInventoryScreen did not resolve.");
-        var onReady = AccessTools.Method(screen, "OnReady");
-        Assert.IsNotNull(onReady, "GauntletInventoryScreen.OnReady did not resolve.");
-        var layer = AccessTools.Field(screen, "_gauntletLayer");
-        Assert.IsNotNull(layer, "GauntletInventoryScreen._gauntletLayer did not resolve.");
-        Assert.AreEqual(typeof(GauntletLayer), layer.FieldType);
-
-        var prefix = typeof(GauntletInventoryScreen_OnReady_ShadowfaxPatch).GetMethod("Prefix")!;
-        CollectionAssert.AreEqual(new[] { "____gauntletLayer", "__state" }, prefix.GetParameters().Select(p => p.Name).ToList());
-        var finalizer = typeof(GauntletInventoryScreen_OnReady_ShadowfaxPatch).GetMethod("Finalizer")!;
-        CollectionAssert.AreEqual(new[] { "__exception", "__state" }, finalizer.GetParameters().Select(p => p.Name).ToList());
+        var prefix = typeof(SPInventoryVM_Ctor_ShadowfaxPatch).GetMethod("Prefix")!;
+        CollectionAssert.AreEqual(new[] { "__state" }, prefix.GetParameters().Select(p => p.Name).ToList());
+        var finalizer = typeof(SPInventoryVM_Ctor_ShadowfaxPatch).GetMethod("Finalizer")!;
+        CollectionAssert.AreEqual(new[] { "inventoryLogic", "____usageType", "__exception", "__state" },
+            finalizer.GetParameters().Select(p => p.Name).ToList());
+        var usageType = AccessTools.Field(typeof(SPInventoryVM), "_usageType");
+        Assert.IsNotNull(usageType, "SPInventoryVM._usageType did not resolve.");
+        Assert.AreEqual(typeof(InventoryScreenHelper.InventoryMode), usageType.FieldType);
+        var logicParameter = InventoryCtor().GetParameters()[0];
+        Assert.AreEqual("inventoryLogic", logicParameter.Name);
+        Assert.AreEqual(typeof(InventoryLogic), logicParameter.ParameterType);
 
         var rowsPrefix = typeof(SPInventoryVM_InitializeInventory_ShadowfaxPatch).GetMethod("Prefix")!;
         CollectionAssert.AreEqual(new[] { "__state" }, rowsPrefix.GetParameters().Select(p => p.Name).ToList());
@@ -160,7 +145,6 @@ public class InventoryBindingTests
         CollectionAssert.AreEqual(new[] { "__state" }, rowsFinalizer.GetParameters().Select(p => p.Name).ToList());
 
         Assert.IsNotNull(InitializeInventory());
-        Assert.IsNotNull(ItemCtor());
         Assert.IsNotNull(InventoryCtor());
     }
 

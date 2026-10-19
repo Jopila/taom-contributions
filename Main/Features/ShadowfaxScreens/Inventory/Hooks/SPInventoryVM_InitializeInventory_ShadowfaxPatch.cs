@@ -14,14 +14,14 @@ namespace TAOM.Features.ShadowfaxScreens.Inventory.Hooks;
 // linked by a nullable `__state` so a stripped prefix leaves a finalizer that does nothing.
 
 [HarmonyPatch(typeof(SPInventoryVM), "InitializeInventory")]
-[HarmonyPatchCategory(InventoryPatchCategory.Name)]
+[HarmonyPatchCategory(ShadowfaxInventoryCalls.PatchCategory)]
 public static class SPInventoryVM_InitializeInventory_ShadowfaxPatch
 {
     [HarmonyTranspiler]
     public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
-        var result = NameSortRewrite.Rewrite(instructions.ToList(), ShadowfaxInventoryCalls.Logger, out var swapped);
-        ShadowfaxInventoryCalls.Service?.ReportSite("name sort", swapped, NameSortRewrite.ExpectedSites);
+        var result = NameSortRewrite.Rewrite(instructions.ToList(), out var swapped, out var problem);
+        ShadowfaxInventoryCalls.Service?.ReportSite("name sort", swapped, NameSortRewrite.ExpectedSites, problem);
         return result;
     }
 

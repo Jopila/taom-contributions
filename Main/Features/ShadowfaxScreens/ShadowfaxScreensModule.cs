@@ -22,7 +22,7 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
     private static readonly PatchCategoryDecl[] Categories =
     {
         new(ClanFastOpenCalls.PatchCategory, ApplyPhase.GameInit),
-        new(InventoryPatchCategory.Name, ApplyPhase.GameInit),
+        new(ShadowfaxInventoryCalls.PatchCategory, ApplyPhase.GameInit),
         new("PatchXXX_ShadowfaxParty", ApplyPhase.GameInit),
         new("PatchXXX_ShadowfaxQuests", ApplyPhase.GameInit),
     };
@@ -40,7 +40,6 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
         registrator.Register<ClanScreenFastPathService>(Reuse.Singleton);
 
         // Inventory fast open.
-        registrator.Register<IInventoryOpenAdapter, InventoryOpenAdapter>(Reuse.Singleton);
         registrator.Register<InventoryOpenFastPathService>(Reuse.Singleton);
 
         // Party fast open.
@@ -57,8 +56,7 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
         ClanFastOpenCalls.Initialize(resolver.Resolve<ClanScreenFastPathService>());
 
         // Inventory fast open.
-        ShadowfaxInventoryCalls.Initialize(resolver.Resolve<InventoryOpenFastPathService>(),
-            resolver.Resolve<IInventoryOpenAdapter>(), resolver.Resolve<IModLogger>());
+        ShadowfaxInventoryCalls.Initialize(resolver.Resolve<InventoryOpenFastPathService>());
 
         // Party fast open.
         PartyFastOpenCalls.Initialize(resolver.Resolve<PartyScreenFastPathService>());

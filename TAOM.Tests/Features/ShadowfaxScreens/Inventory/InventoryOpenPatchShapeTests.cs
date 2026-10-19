@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
+using Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using TaleWorlds.Engine.GauntletUI;
-using TAOM.Adapters;
+using TaleWorlds.CampaignSystem.Inventory;
 using TAOM.Features.ShadowfaxScreens;
 using TAOM.Features.ShadowfaxScreens.Diagnostics;
 using TAOM.Features.ShadowfaxScreens.Inventory;
@@ -16,10 +15,10 @@ using TAOM.Tests.Features.LoadTimeStamps;
 namespace TAOM.Tests.Features.ShadowfaxScreens.Inventory;
 
 /// <summary>
-/// The OnReady bracket and the InitializeInventory phase, applied with real Harmony around stand-ins that carry the
-/// engine's parameter and field names. A stripped prefix leaves the finalizer a no-op, a throw still ends the
-/// window and reaches the caller with its throw site, and a repeat OnReady (layer already built) is not an open.
-/// RequiresGame because the hook classes' attributes and field type name engine types.
+/// The SPInventoryVM constructor bracket and the InitializeInventory phase, applied with real Harmony around
+/// stand-ins that carry the engine's parameter and field names. A stripped prefix leaves the finalizer a no-op and
+/// a throw still ends the window and reaches the caller with its throw site. RequiresGame because the hook classes'
+/// attributes name engine types.
 /// </summary>
 [TestClass]
 [TestCategory("RequiresGame")]
@@ -31,25 +30,24 @@ public class InventoryOpenPatchShapeTests
     private RecordingLogger _logger = null!;
     private InventoryOpenFastPathService _service = null!;
 
-    public sealed class FakeScreen
-    {
-        public GauntletLayer? _gauntletLayer;
-        public bool Throws;
-
-        public void OnReady()
-        {
-            if (Throws) Thrower();
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void Thrower() => throw new InvalidOperationException("movie failed");
-    }
-
-    public sealed class FakeViewModel
+    public sealed class FakeInventoryVm
     {
         public static Action? Work;
 
+        public InventoryScreenHelper.InventoryMode _usageType = InventoryScreenHelper.InventoryMode.Default;
+        public bool Throws;
+
+        public FakeInventoryVm(InventoryLogic? inventoryLogic, bool isInCivilianModeByDefault, Func<int, int>? getItemUsageSetFlags)
+        {
+            _usageType = InventoryScreenHelper.InventoryMode.Trade;
+            Work?.Invoke();
+            if (inventoryLogic == null && isInCivilianModeByDefault) Thrower();
+        }
+
         public void InitializeInventory() => Work?.Invoke();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void Thrower() => throw new InvalidOperationException("ctor failed");
     }
 
     [TestInitialize]
@@ -61,91 +59,72 @@ public class InventoryOpenPatchShapeTests
         settings.LogScreenOpenTimes.Returns(true);
         settings.InventoryFastOpen.Returns(true);
         _service = new InventoryOpenFastPathService(settings, _clock, _logger);
-        var adapter = Substitute.For<IInventoryOpenAdapter>();
-        adapter.TryRead(out Arg.Any<string>(), out Arg.Any<int>(), out Arg.Any<int>()).Returns(call =>
-        {
-            call[0] = "trade";
-            call[1] = 312;
-            call[2] = 88;
-            return true;
-        });
         ScreenOpenTiming.Initialize(new ScreenOpenTimer(_clock, _logger, settings));
-        ShadowfaxInventoryCalls.Initialize(_service, adapter, _logger);
+        ShadowfaxInventoryCalls.Initialize(_service);
     }
 
     [TestCleanup]
     public void Cleanup()
     {
         new Harmony(HarmonyId).UnpatchAll(HarmonyId);
-        FakeViewModel.Work = null;
+        FakeInventoryVm.Work = null;
         ScreenOpenTiming.Initialize(null);
-        ShadowfaxInventoryCalls.Initialize(null, null, null);
+        ShadowfaxInventoryCalls.Initialize(null);
     }
 
-    private static void PatchOnReady(bool withPrefix)
+    private static void PatchCtor(bool withPrefix)
     {
-        new Harmony(HarmonyId).Patch(AccessTools.Method(typeof(FakeScreen), nameof(FakeScreen.OnReady)),
-            prefix: withPrefix ? new HarmonyMethod(typeof(GauntletInventoryScreen_OnReady_ShadowfaxPatch).GetMethod("Prefix")) : null,
-            finalizer: new HarmonyMethod(typeof(GauntletInventoryScreen_OnReady_ShadowfaxPatch).GetMethod("Finalizer")));
+        var ctor = AccessTools.Constructor(typeof(FakeInventoryVm), new[] { typeof(InventoryLogic), typeof(bool), typeof(Func<int, int>) });
+        new Harmony(HarmonyId).Patch(ctor,
+            prefix: withPrefix ? new HarmonyMethod(typeof(SPInventoryVM_Ctor_ShadowfaxPatch).GetMethod("Prefix")) : null,
+            finalizer: new HarmonyMethod(typeof(SPInventoryVM_Ctor_ShadowfaxPatch).GetMethod("Finalizer")));
     }
 
     [TestMethod]
-    public void OnReady_FirstCall_LogsOneOpenLineWithModeCountsAndRows()
+    public void Ctor_LogsOneOpenLine_WithTheModeTheVmRead_AndUnknownCountsForANullLogic()
     {
-        PatchOnReady(withPrefix: true);
+        PatchCtor(withPrefix: true);
 
-        new FakeScreen().OnReady();
+        _ = new FakeInventoryVm(null, false, null);
 
-        Assert.AreEqual(1, _logger.Lines.Count);
-        Assert.AreEqual("INFO [ScreenOpen] Inventory open: 0.0 ms (mode=trade, left=312, right=88, fast=on, rows=0.0 ms, sorts skipped=0, concepts cached=0/0)",
+        Assert.AreEqual("INFO [ScreenOpen] Inventory open: 0.0 ms (fast open on; mode=Trade, left=n/a, right=n/a, rows=0.0 ms, sorts skipped=0)",
             _logger.Lines.Single());
-    }
-
-    [TestMethod]
-    public void OnReady_WithAnExistingLayer_IsNotAnOpen()
-    {
-        PatchOnReady(withPrefix: true);
-        var screen = new FakeScreen { _gauntletLayer = (GauntletLayer)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(GauntletLayer)) };
-
-        screen.OnReady();
-
-        Assert.AreEqual(0, _logger.Lines.Count);
         Assert.IsFalse(_service.OpenActive);
     }
 
     [TestMethod]
-    public void OnReady_Throws_StillEndsTheWindow_AndRethrowsWithTheThrowSite()
+    public void Ctor_Throws_StillEndsTheWindow_AndRethrowsWithTheThrowSite()
     {
-        PatchOnReady(withPrefix: true);
+        PatchCtor(withPrefix: true);
 
-        var thrown = Assert.ThrowsException<InvalidOperationException>(() => new FakeScreen { Throws = true }.OnReady());
+        var thrown = Assert.ThrowsException<InvalidOperationException>(() => new FakeInventoryVm(null, true, null));
 
-        Assert.AreEqual("movie failed", thrown.Message);
+        Assert.AreEqual("ctor failed", thrown.Message);
         StringAssert.Contains(thrown.StackTrace, "Thrower");
-        StringAssert.Contains(_logger.Lines.Single(), "Inventory open: 0.0 ms, threw InvalidOperationException (mode=trade");
+        StringAssert.Contains(_logger.Lines.Single(), "Inventory open: 0.0 ms, threw InvalidOperationException (fast open on; mode=Trade");
         Assert.IsFalse(_service.OpenActive);
     }
 
     [TestMethod]
-    public void OnReady_WithThePrefixStripped_TheFinalizerDoesNothing()
+    public void Ctor_WithThePrefixStripped_TheFinalizerDoesNothing()
     {
-        PatchOnReady(withPrefix: false);
+        PatchCtor(withPrefix: false);
 
-        new FakeScreen().OnReady();
-        Assert.ThrowsException<InvalidOperationException>(() => new FakeScreen { Throws = true }.OnReady());
+        _ = new FakeInventoryVm(null, false, null);
+        Assert.ThrowsException<InvalidOperationException>(() => new FakeInventoryVm(null, true, null));
 
         Assert.AreEqual(0, _logger.Lines.Count);
     }
 
     [TestMethod]
-    public void OnReady_TimerOff_LogsNothing_AndTheServiceStaysClosed()
+    public void Ctor_TimerOff_LogsNothing_AndTheServiceStaysClosed()
     {
         var off = Substitute.For<IShadowfaxScreensSettingsProvider>();
         off.LogScreenOpenTimes.Returns(false);
         ScreenOpenTiming.Initialize(new ScreenOpenTimer(_clock, _logger, off));
-        PatchOnReady(withPrefix: true);
+        PatchCtor(withPrefix: true);
 
-        new FakeScreen().OnReady();
+        _ = new FakeInventoryVm(null, false, null);
 
         Assert.AreEqual(0, _logger.Lines.Count);
         Assert.IsFalse(_service.OpenActive);
@@ -155,17 +134,18 @@ public class InventoryOpenPatchShapeTests
     public void RowsPhase_InsideAnOpen_IsReportedOnTheOpenLine_AndOutsideOneIsNot()
     {
         var harmony = new Harmony(HarmonyId);
-        harmony.Patch(AccessTools.Method(typeof(FakeViewModel), nameof(FakeViewModel.InitializeInventory)),
+        harmony.Patch(AccessTools.Method(typeof(FakeInventoryVm), nameof(FakeInventoryVm.InitializeInventory)),
             prefix: new HarmonyMethod(typeof(SPInventoryVM_InitializeInventory_ShadowfaxPatch).GetMethod("Prefix")),
             finalizer: new HarmonyMethod(typeof(SPInventoryVM_InitializeInventory_ShadowfaxPatch).GetMethod("Finalizer")));
+        var vm = new FakeInventoryVm(null, false, null);
 
-        new FakeViewModel().InitializeInventory();
+        vm.InitializeInventory();
         Assert.AreEqual(0, _logger.Lines.Count, "A Reset outside an open logs nothing.");
 
         var window = ShadowfaxInventoryCalls.BeginOpen();
-        FakeViewModel.Work = () => _clock.Advance(7);
-        new FakeViewModel().InitializeInventory();
-        ShadowfaxInventoryCalls.EndOpen(window, null);
+        FakeInventoryVm.Work = () => _clock.Advance(7);
+        vm.InitializeInventory();
+        ShadowfaxInventoryCalls.EndOpen(window, null, "Trade", 1, 2);
 
         Assert.AreEqual(1, _logger.Lines.Count);
         StringAssert.Contains(_logger.Lines.Single(), "Inventory open: 7.0 ms");

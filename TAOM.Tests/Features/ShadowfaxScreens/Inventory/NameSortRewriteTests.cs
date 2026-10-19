@@ -5,9 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using TaleWorlds.Core;
-using TAOM.Core.Logging;
 using TAOM.Features.ShadowfaxScreens.Inventory;
 
 namespace TAOM.Tests.Features.ShadowfaxScreens.Inventory;
@@ -25,11 +23,6 @@ public class NameSortRewriteTests
 
     private static readonly MethodInfo Helper =
         typeof(ShadowfaxInventoryCalls).GetMethod(nameof(ShadowfaxInventoryCalls.SortByNameOrPassThrough))!;
-
-    private IModLogger _logger = null!;
-
-    [TestInitialize]
-    public void Setup() => _logger = Substitute.For<IModLogger>();
 
     private static List<CodeInstruction> Statement(Label? label = null)
     {
@@ -58,14 +51,14 @@ public class NameSortRewriteTests
     {
         var list = Method(2);
 
-        var result = NameSortRewrite.Rewrite(list, _logger, out var swapped);
+        var result = NameSortRewrite.Rewrite(list, out var swapped, out var problem);
 
         Assert.AreEqual(2, swapped);
         Assert.AreEqual(list.Count, result.Count);
         Assert.AreEqual(2, result.Count(c => c.operand is MethodInfo m && m == Helper));
         Assert.AreEqual(0, result.Count(c => c.operand is MethodInfo m && m == OrderBy));
         Assert.AreEqual(2, result.Count(c => c.operand is MethodInfo m && m == ToArray));
-        _logger.DidNotReceive().LogWarning(Arg.Any<string>());
+        Assert.IsNull(problem);
     }
 
     [TestMethod]
@@ -78,7 +71,7 @@ public class NameSortRewriteTests
         list.Add(new CodeInstruction(OpCodes.Ret));
         list[2].labels.Add(generator.DefineLabel());
 
-        var result = NameSortRewrite.Rewrite(list, _logger, out var swapped);
+        var result = NameSortRewrite.Rewrite(list, out var swapped, out var problem);
 
         Assert.AreEqual(2, swapped);
         CollectionAssert.AreEqual(new[] { label }, result[0].labels);
@@ -90,16 +83,16 @@ public class NameSortRewriteTests
     [DataRow(0)]
     [DataRow(1)]
     [DataRow(3)]
-    public void Rewrite_WrongSiteCount_ReturnsTheIlUnmodified_WithOneWarning(int sites)
+    public void Rewrite_WrongSiteCount_ReturnsTheIlUnmodified_WithOneProblem(int sites)
     {
         var list = Method(sites);
 
-        var result = NameSortRewrite.Rewrite(list, _logger, out var swapped);
+        var result = NameSortRewrite.Rewrite(list, out var swapped, out var problem);
 
         Assert.AreEqual(0, swapped);
         Assert.AreEqual(sites, result.Count(c => c.operand is MethodInfo m && m == OrderBy));
         Assert.AreEqual(0, result.Count(c => c.operand is MethodInfo m && m == Helper));
-        _logger.Received(1).LogWarning(Arg.Any<string>());
+        Assert.IsNotNull(problem);
     }
 
     [TestMethod]
@@ -108,32 +101,22 @@ public class NameSortRewriteTests
         var list = Method(2);
         list[3] = new CodeInstruction(OpCodes.Pop);
 
-        var result = NameSortRewrite.Rewrite(list, _logger, out var swapped);
+        var result = NameSortRewrite.Rewrite(list, out var swapped, out var problem);
 
         Assert.AreEqual(0, swapped);
         Assert.AreEqual(2, result.Count(c => c.operand is MethodInfo m && m == OrderBy));
-        _logger.Received(1).LogWarning(Arg.Any<string>());
+        Assert.IsNotNull(problem);
     }
 
     [TestMethod]
     public void Rewrite_SecondPass_BailsWithoutThrowing_AndChangesNothing()
     {
-        var first = NameSortRewrite.Rewrite(Method(2), _logger, out _);
-        _logger.ClearReceivedCalls();
+        var first = NameSortRewrite.Rewrite(Method(2), out _, out _);
 
-        var second = NameSortRewrite.Rewrite(first, _logger, out var swapped);
+        var second = NameSortRewrite.Rewrite(first, out var swapped, out var problem);
 
         Assert.AreEqual(0, swapped);
         Assert.AreEqual(2, second.Count(c => c.operand is MethodInfo m && m == Helper));
-        _logger.Received(1).LogWarning(Arg.Any<string>());
-    }
-
-    [TestMethod]
-    public void Rewrite_NullLogger_StillBailsCleanly()
-    {
-        var result = NameSortRewrite.Rewrite(Method(1), null, out var swapped);
-
-        Assert.AreEqual(0, swapped);
-        Assert.AreEqual(Method(1).Count, result.Count);
+        Assert.IsNotNull(problem);
     }
 }
