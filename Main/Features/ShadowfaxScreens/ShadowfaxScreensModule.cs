@@ -7,6 +7,7 @@ using TAOM.Features.ShadowfaxScreens.Clan;
 using TAOM.Features.ShadowfaxScreens.Diagnostics;
 using TAOM.Features.ShadowfaxScreens.Inventory;
 using TAOM.Features.ShadowfaxScreens.Party;
+using TAOM.Features.ShadowfaxScreens.Quests;
 
 namespace TAOM.Features.ShadowfaxScreens;
 
@@ -44,6 +45,10 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
 
         // Party fast open.
         registrator.Register<PartyScreenFastPathService>(Reuse.Singleton);
+
+        // Quest log fast open.
+        registrator.Register<IQuestJournalAdapter, QuestJournalAdapter>(Reuse.Singleton);
+        registrator.Register<QuestLogDeferService>(Reuse.Singleton);
     }
 
     public override void InitializeStatics(IResolver resolver)
@@ -57,5 +62,15 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
 
         // Party fast open.
         PartyFastOpenCalls.Initialize(resolver.Resolve<PartyScreenFastPathService>());
+
+        // Quest log fast open.
+        QuestLogDeferCalls.Initialize(resolver.Resolve<QuestLogDeferService>());
+    }
+
+    public override void OnPhase(ApplyPhase phase, IResolver resolver)
+    {
+        // The Quest log's category has just applied: bind the adapter, which checks its four patches are attached.
+        if (phase == ApplyPhase.GameInit)
+            resolver.Resolve<QuestLogDeferService>().Install();
     }
 }

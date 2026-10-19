@@ -183,6 +183,9 @@ public class ReflectionSiteBindingTests
     // A miss logs one warning per session launch and the hourly in-castle top-up stops; lords still recruit
     // on entry through vanilla's OnBeforeSettlementEntered.
     [DataRow("TaleWorlds.CampaignSystem.CampaignBehaviors.RecruitmentCampaignBehavior", "RecruitmentCampaignBehavior", "CheckRecruiting", "Method", "CastleAiRecruitDispatcher.cs:34")]
+    // --- Quest Log Fast Open (#854): the replay of the private PopulateQuestLog for a finished quest built on demand.
+    // A miss makes Bind return a reason, the quest log is never deferred and vanilla builds every quest at open.
+    [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.Quests.QuestItemVM", "QuestItemVM", "PopulateQuestLog", "Method", "QuestJournalAdapter.cs:29")]
     public void ReflectionSite_ResolvesAgainstInstalledEngine(string fullName, string simpleName, string member, string kind, string source)
     {
         if (!_gameLoaded)

@@ -125,6 +125,7 @@ Reflection against engine members performed *outside* a patch's target resolutio
 | `TaleWorlds.MountAndBlade.MissionBehavior` | `AfterStart` | method (public virtual) | `MissionStartGuardSwaps.cs:27` | MissionStartGuard. As above |
 | `TaleWorlds.MountAndBlade.MissionObject` | `AfterMissionStart` | method (public virtual) | `MissionStartGuardSwaps.cs:28` | MissionStartGuard. As above |
 | `TaleWorlds.CampaignSystem.CampaignBehaviors.RecruitmentCampaignBehavior` | `CheckRecruiting` | method (private) | `CastleAiRecruitDispatcher.cs:34` | CastleRecruitment (#886). Bound once per campaign to a closed delegate; an AI lord in a castle recruits hourly through vanilla's own logic (caravans never recruit in a castle). Missing: one warning per session launch and the hourly in-castle top-up stops; lords still recruit on entry through vanilla's OnBeforeSettlementEntered |
+| `TaleWorlds.CampaignSystem.ViewModelCollection.Quests.QuestItemVM` | `PopulateQuestLog` | method (private) | `QuestJournalAdapter.cs:29` | Quest Log Fast Open (#854). Cached once at `Bind` and replayed per journal entry to build a deferred finished quest when it is selected. Missing: `Bind` returns a reason, the install line is a warning, and vanilla builds every quest at open |
 
 Status (2026-10-18): HiddenHosts (Patch105) adds four rows (protected bind fields of `PartyNameplateVM`, bound with `AccessTools.FieldRefAccess`); they resolve against installed v1.5.5 (`ReflectionSiteBindingTests`).
 

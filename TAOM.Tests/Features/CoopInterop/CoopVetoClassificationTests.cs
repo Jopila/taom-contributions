@@ -150,6 +150,12 @@ public class CoopVetoClassificationTests
             "PatchXXX_ShadowfaxParty: client-side UI. Returns false only on a hit inside one InitializeTroopLists or " +
             "RefreshTroopsUpgradeable call, handing back the count vanilla computed for the same roster and category; " +
             "a read-only count for a row's upgrade state, no campaign mutation. The toggle is presentation."),
+        ["QuestItemVM_PopulateQuestLog_QuestLogPatch"] = new(CoopVeto.ReviewedSafe,
+            "Quest Log Fast Open (#854): client-side UI. The prefix skips QuestItemVM.PopulateQuestLog, which only adds " +
+            "QuestStageVM view models to a finished quest's list inside the QuestsVM constructor; it reads journal logs and " +
+            "writes no campaign state, so there is no replicated mutation to skip. A skipped item is built when it is " +
+            "selected, and every other outcome (toggle off, adapter unbound, replay, disarmed) returns true and runs vanilla. " +
+            "The toggle is presentation in CoopSettingsRelevance."),
         ["Patch86_HideoutAssaultBossFight"] = new(CoopVeto.ReviewedSafe,
             "Replaces MapEventHelper.GetPriorityListForHideoutMission, a pure roster-ORDERING " +
             "function for the local hideout mission: it decides which troops spawn in phase 1 and " +

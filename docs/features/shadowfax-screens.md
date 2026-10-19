@@ -141,23 +141,6 @@ throwing later finalizer, a stripped prefix, the open line); `ClanFastOpenBindin
 targets, the three-build chain in the installed IL, the header tail, the interface-map target);
 `ClanFastOpenWiringTests` (registration, the facade, the category).
 
-## Configuration
-
-The instant screen transitions are always on and have no setting. TAOM's four prefabs carry their
-zeros in the XML, so a setting would first need them moved onto the patch (UIExtenderEx patches
-TAOM's own prefabs by file name too).
-
-The screen open speed work adds a "Screen Performance" group to the Battle Load Diagnostics MCM
-page. None of its rows needs a restart; each is read on every screen open.
-
-| Row | Default | What it does |
-|---|---|---|
-| Log Screen Open Times | Off | Writes one `[ScreenOpen]` line per screen open to `taom_debug.log`: the screen, the phase and the milliseconds. Use it to compare a fast-open switch off against on. |
-| Clan Fast Open | On | Builds the Clan screen's parties list once instead of three times. Off restores vanilla's build. |
-| Inventory Fast Open | On | Skips work the Inventory and trade screen repeats. Off restores vanilla's build. |
-| Party Fast Open | On | Caches lookups the Party screen repeats for each troop. Off restores vanilla's build. |
-| Quest Log Fast Open | On | Builds finished quests only when they are selected. Off restores vanilla's build. |
-
 ## Inventory and trade fast open
 
 One screen covers both inventory and trade: `GauntletInventoryScreen.OnReady` builds `SPInventoryVM` and
@@ -211,44 +194,6 @@ slow after this, the next target is `FindItemFromSide`'s linear lookup.
 and compare the medians of the `[ScreenOpen] Inventory open` lines. Keep the change only if the median drops by
 at least 16 ms and by more than the off arm's spread; otherwise delete it and keep the timer points.
 
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `Main/Features/ShadowfaxScreens/Inventory/InventoryOpenFastPathService.cs` | Toggle gate, install lines, concept memo, per-open counters and detail (no TaleWorlds types) |
-| `Main/Features/ShadowfaxScreens/Inventory/NameSortRewrite.cs`, `ConceptLookupRewrite.cs` | Pure IL rewrites for the two call-site swaps |
-| `Main/Features/ShadowfaxScreens/Inventory/ShadowfaxInventoryCalls.cs`, `SourceScopedMemo.cs` | The static helpers the rewrites call; the weak one-slot memo |
-| `Main/Features/ShadowfaxScreens/Inventory/Hooks/` | `OnReady` timing bracket, `InitializeInventory` transpiler and phase, `SPItemVM` constructor transpiler |
-| `Main/Adapters/IInventoryOpenAdapter.cs`, `InventoryOpenAdapter.cs` | Mode and side counts of the active inventory state, for the timer detail |
-| `Main/Features/ShadowfaxScreens/InstantTransitionRewriter.cs` | Pure XML transform: zero every VisualDefinition's duration |
-| `Main/Features/ShadowfaxScreens/UI/ShadowfaxScreensPrefab.cs` | UIExtenderEx patch on the nine vanilla movies |
-| `Main/_Module/GUI/PreFabs/Party/PartyScreen.xml`, `PartyTroopTuple.xml`, `PartyTroopTupleLeft.xml` | Party screen and troop rows, zero durations |
-| `Main/_Module/GUI/PreFabs/CareerSystem/CareerScreen.xml` | Career screen header and footer, zero durations |
-
-## Dependencies
-
-- Bannerlord.UIExtenderEx 2.13.3 (through TAOM.Dependencies): `Prefabs.CustomPatch<XmlDocument>`.
-
-## Tests
-
-- `TAOM.Tests/Features/ShadowfaxScreens/InstantTransitionRewriterTests.cs`: durations zeroed, a
-  missing duration added, ease and states kept, idempotent, definitions outside the block left
-  alone, no-op without definitions, null document.
-- `TAOM.Tests/Features/ShadowfaxScreens/ShadowfaxScreensPrefabTests.cs`: pins the nine movie names;
-  checks each installed vanilla movie still has a definition to zero and no VisualState with its own
-  duration (needs the game install); and checks TAOM's four prefabs are already instant.
-- `TAOM.Tests/Migration/PrefabExtensionBindingTests.cs`: every `[PrefabExtension]` movie name,
-  including these nine, must exist in the installed game with the exact case of its file name.
-
-## How to make another screen instant
-
-1. Find the movie name: the prefab file name under `Modules/<Module>/GUI/Prefabs`.
-2. Confirm that every `VisualDefinition` in it is an animation you want to remove.
-3. If TAOM ships its own copy of the prefab, set `TransitionDuration="0"` in that XML and add the
-   file to `TaomPrefab_AlreadyInstant_RewriterChangesNothing`.
-4. Otherwise add `[PrefabExtension("<Movie>", null)]` to `ShadowfaxScreensPrefab` and the name to
-   `PatchedMovies` in the tests.
-
 ## Party fast open
 
 Issue #853. The party screen builds one `PartyCharacterVM` row per troop and per prisoner, on both sides, and
@@ -289,6 +234,92 @@ by at least 16 ms and by more than the off arm's spread.
 **Tests:** `TAOM.Tests/Features/ShadowfaxScreens/Party/` (`PartyScreenFastPathServiceTests`, `PartyFastOpenPatchShapeTests`,
 `PartyFastOpenBindingTests`, `PartyFastOpenWiringTests`).
 
+## Quest log fast open
+
+Opening the Quest log builds a `QuestItemVM` for every finished quest, and each builds one stage view model per
+journal entry, for rows nobody reads until a quest is selected. With "Quest Log Fast Open" on, a finished quest built
+during the open skips its stages and builds them when it is selected. Active quests and issues are untouched.
+
+- **What is deferred:** only `QuestItemVM.PopulateQuestLog` for an item made by the journal constructor, inside the
+  `QuestsVM` constructor. The quest giver's portrait stays vanilla's real `HeroVM`, so there is no placeholder and no
+  change to the right-hand panel.
+- **Building on demand:** a prefix on `QuestsVM.SetSelectedItem` replays `PopulateQuestLog` for each journal entry,
+  then `UpdateIsUpdated` and `RefreshValues`, before vanilla copies the stages into the panel. It builds whatever the
+  switch says at that moment, so turning the switch off mid-open never strands an empty quest.
+- **The updated dot:** vanilla sets a finished quest's dot from its stages. For a deferred item a postfix on
+  `UpdateIsUpdated` sets it from the same data the stages read, whether any journal entry is still unexamined.
+- **Sorting by date:** vanilla reads a finished quest's date from its first or last stage and treats an item with no
+  stages as undated. A postfix on the sort's `GetJournalLogAt` supplies the first or last journal entry, only when
+  vanilla returned nothing and only for a deferred item.
+- **Fail closed:** nothing defers unless the adapter bound at game start, which needs the private method and all four
+  patches attached (the log says `[QuestLog] fast open installed` or `unavailable (reason)`). The switch and the bound
+  state are read once when the screen opens. If an on-demand build ever throws, it is logged once, deferral is off until
+  the game restarts, the other unbuilt quests still build when selected, and that quest keeps sorting by date.
+- **How to measure:** turn "Log Screen Open Times" on, load the longest campaign, and open the Quest log six times
+  with the switch off and six with it on, dropping the first open of each run. Compare the medians of the
+  `[ScreenOpen] Quests open` lines in `taom_debug.log`. The line ends with the open's counts: finished quests built
+  (`old`), items and journal entries deferred, how many show the updated dot, the switch state, and the milliseconds
+  the journal constructors took (timed only while the timer is on). Keep the change only if the median drops by at
+  least 16 ms and by more than the off runs' spread.
+
+Code: `Main/Features/ShadowfaxScreens/Quests/` (`QuestLogDeferService`, the `QuestLogDeferCalls` facade and six patches
+in `Hooks/`), `Main/Adapters/QuestJournalAdapter.cs`. Patch details: the `PatchXXX_ShadowfaxQuests` entry in
+[harmony-patch-registry.md](../reference/harmony-patch-registry.md). Tests: `TAOM.Tests/Features/ShadowfaxScreens/Quests/`.
+
+## Configuration
+
+The instant screen transitions are always on and have no setting. TAOM's four prefabs carry their
+zeros in the XML, so a setting would first need them moved onto the patch (UIExtenderEx patches
+TAOM's own prefabs by file name too).
+
+The screen open speed work adds a "Screen Performance" group to the Battle Load Diagnostics MCM
+page. None of its rows needs a restart; each is read on every screen open.
+
+| Row | Default | What it does |
+|---|---|---|
+| Log Screen Open Times | Off | Writes one `[ScreenOpen]` line per screen open to `taom_debug.log`: the screen, the phase and the milliseconds. Use it to compare a fast-open switch off against on. |
+| Clan Fast Open | On | Builds the Clan screen's parties list once instead of three times. Off restores vanilla's build. |
+| Inventory Fast Open | On | Skips work the Inventory and trade screen repeats. Off restores vanilla's build. |
+| Party Fast Open | On | Caches lookups the Party screen repeats for each troop. Off restores vanilla's build. |
+| Quest Log Fast Open | On | Builds finished quests only when they are selected. Off restores vanilla's build. |
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `Main/Features/ShadowfaxScreens/Inventory/InventoryOpenFastPathService.cs` | Toggle gate, install lines, concept memo, per-open counters and detail (no TaleWorlds types) |
+| `Main/Features/ShadowfaxScreens/Inventory/NameSortRewrite.cs`, `ConceptLookupRewrite.cs` | Pure IL rewrites for the two call-site swaps |
+| `Main/Features/ShadowfaxScreens/Inventory/ShadowfaxInventoryCalls.cs`, `SourceScopedMemo.cs` | The static helpers the rewrites call; the weak one-slot memo |
+| `Main/Features/ShadowfaxScreens/Inventory/Hooks/` | `OnReady` timing bracket, `InitializeInventory` transpiler and phase, `SPItemVM` constructor transpiler |
+| `Main/Adapters/IInventoryOpenAdapter.cs`, `InventoryOpenAdapter.cs` | Mode and side counts of the active inventory state, for the timer detail |
+| `Main/Features/ShadowfaxScreens/InstantTransitionRewriter.cs` | Pure XML transform: zero every VisualDefinition's duration |
+| `Main/Features/ShadowfaxScreens/UI/ShadowfaxScreensPrefab.cs` | UIExtenderEx patch on the nine vanilla movies |
+| `Main/_Module/GUI/PreFabs/Party/PartyScreen.xml`, `PartyTroopTuple.xml`, `PartyTroopTupleLeft.xml` | Party screen and troop rows, zero durations |
+| `Main/_Module/GUI/PreFabs/CareerSystem/CareerScreen.xml` | Career screen header and footer, zero durations |
+
+## Dependencies
+
+- Bannerlord.UIExtenderEx 2.13.3 (through TAOM.Dependencies): `Prefabs.CustomPatch<XmlDocument>`.
+
+## Tests
+
+- `TAOM.Tests/Features/ShadowfaxScreens/InstantTransitionRewriterTests.cs`: durations zeroed, a
+  missing duration added, ease and states kept, idempotent, definitions outside the block left
+  alone, no-op without definitions, null document.
+- `TAOM.Tests/Features/ShadowfaxScreens/ShadowfaxScreensPrefabTests.cs`: pins the nine movie names;
+  checks each installed vanilla movie still has a definition to zero and no VisualState with its own
+  duration (needs the game install); and checks TAOM's four prefabs are already instant.
+- `TAOM.Tests/Migration/PrefabExtensionBindingTests.cs`: every `[PrefabExtension]` movie name,
+  including these nine, must exist in the installed game with the exact case of its file name.
+
+## How to make another screen instant
+
+1. Find the movie name: the prefab file name under `Modules/<Module>/GUI/Prefabs`.
+2. Confirm that every `VisualDefinition` in it is an animation you want to remove.
+3. If TAOM ships its own copy of the prefab, set `TransitionDuration="0"` in that XML and add the
+   file to `TaomPrefab_AlreadyInstant_RewriterChangesNothing`.
+4. Otherwise add `[PrefabExtension("<Movie>", null)]` to `ShadowfaxScreensPrefab` and the name to
+   `PatchedMovies` in the tests.
 
 ## Changelog
 
