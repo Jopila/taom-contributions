@@ -56,6 +56,8 @@ The **original** native CTD (not the fix) was missed by the feature's own review
 - Verification: `dotnet test TAOM.Tests` → **4410 passed, 0 failed, 2 skipped**.
 - Owed: **in-game siege smoke at Stranding** (the fix is not yet game-verified — the native precondition is confirmed by decompile, not by a live repro run), then close #349.
 
+- Correction 2026-10-19: vanilla's `GeneralsAndCaptainsAssignmentLogic` banners AI teams' captained formations too, not only player-team Order-of-Battle formations. Since #823 TAOM lords reach that unguarded path; `ShippedHeraldryBannerKeyTests` pins the heraldry it relies on.
+
 ---
 
 <!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->

@@ -11,8 +11,8 @@ namespace TAOM.Features.BannerBearers.Hooks;
 //
 // BannerBearerLogic already ships in every field battle, sally-out and siege, but a formation
 // only receives a banner from GeneralsAndCaptainsAssignmentLogic, and only when it has a hero
-// captain whose FormationBanner is non-null. TAOM's lords carry no banner items, so no
-// formation ever gets one and no bearers appear. One SetFormationBanner call per formation is
+// captain whose FormationBanner is non-null. Lord Banners (#823) lets TAOM lords carry one; every
+// formation still without one is handled here. One SetFormationBanner call per formation is
 // the whole feature — the engine then handles promotion, drops, ground pickup, and
 // reinforcement bearers (MissionAgentSpawnLogic re-checks GetMissingBannerCount per spawned
 // troop and calls SpawnBannerBearer) on its own. No tick loop needed.
@@ -91,8 +91,8 @@ public sealed class BannerBearerAssignmentMissionLogic : MissionLogic
         // that renders the bearer's heraldry (agent.Origin.Banner); a custom-faction troop whose origin
         // Banner is null or has an empty BannerDataList makes it access-violate (0xC0000005 @
         // TaleWorlds.Native.dll+0x28ac0e — the 100%-repro siege OrderOfBattle CTD at sturgia_town_c;
-        // rca-banner-bearers-siege-ctd-2026-07-23). Vanilla only banners player-team OoB formations
-        // (always heraldry-backed); TAOM banners every team's, so it confirms every candidate first.
+        // rca-banner-bearers-siege-ctd-2026-07-23). Vanilla banners a formation only through a captain's banner
+        // or an Order of Battle pick; TAOM banners every other one, so it confirms each candidate first.
         FormationBannerHeraldry.CollectCandidateBannerDataCounts(formation, _bannerDataScratch);
         if (!_service.HasRenderableHeraldry(_bannerDataScratch)) return;
 

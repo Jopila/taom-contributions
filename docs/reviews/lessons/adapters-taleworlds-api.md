@@ -134,6 +134,7 @@ Vanilla runs an engine method only where a precondition holds by construction. W
 - **Why missed:** the feature's reviews (`rca-banner-bearers-2026-07-16.md`) considered a native crash and concluded "the real risk is the MixedFormations interaction, not a native crash" — reasoning about field battles and the player team, never a siege with a custom-faction defender garrison where the null-heraldry precondition first bites. Static review cannot see a native precondition that only a specific data shape (a party with no clan/kingdom banner) violates. The mirror of the twin RCA's lesson: gating a feature *off* requires enumerating every path to an engine write; gating it *on* for a wider entity set requires enumerating every precondition the engine's own callers relied on, and re-proving each for the wider set.
 - **Prevent:** before driving an engine method on entities vanilla never applied it to, decompile vanilla's OWN callers, list what they guaranteed about the target (here: player-side + heraldry-backed + hero-captained), and re-establish each guarantee — checking the engine's *actual* selection, not a proxy. The guard's first cut checked slot 0; the engine picks the bearer by priority across ALL candidates (`FindBannerBearableAgents`), so a mixed-origin formation could pass slot-0 and still render a null-banner bearer — **the exact repeat of the "`GetFirstUnit()` is a sample, not a representative" lesson above** (same feature, one week apart). A sample is only valid on a homogeneous collection; a safety guard over a set the engine filters/ranks must cover the whole set. Fixed by sampling every candidate and requiring all renderable; the per-troop read is exception-safe because `PartyAgentOrigin.Banner` is a computed getter that can throw (see the computed-getter rule).
 - **Source:** `docs/reviews/rca-banner-bearers-siege-ctd-2026-07-23.md` (root cause + finding #1); resolves the offset `rca-siege-guards-2026-07-16.md` was blocked on.
+- **Correction 2026-10-19:** vanilla's `GeneralsAndCaptainsAssignmentLogic` banners AI teams' captained formations too, not only player-team Order-of-Battle formations. Since #823 TAOM lords reach that unguarded path; `ShippedHeraldryBannerKeyTests` pins the banner keys it relies on.
 ### Grep `_shipping_build`, not the dump root, when deciding what vanilla already ships
 `E:\Decompiled_Bannerlord\` holds a dual `{_shipping_build,_editor_build}` pair, so a grep across the tree returns editor-only APIs that do not exist in the game TAOM ships against. CLAUDE.md already warns about the *strip* direction — "absent from the dump != doesn't exist" — but the **inverse is equally wrong and easier to act on**: present in the tree != present in shipping. DevConsole Phase 0 inventoried vanilla's console commands with a tree-wide grep and wrote `mission.list_agent_ids` into the feature doc's "already exists, do not reimplement" list; it has **zero** occurrences in `_shipping_build/TaleWorlds.MountAndBlade.cs`. The same grep undercounted the `mission.*` group as 6 when the shipping build has 10.
 - **Why missed:** the inventory was a single `grep -r` over the dump root, and the result *looked* authoritative because it was real decompiled source. Nothing in the output distinguishes an editor-only command from a shipping one — the build is encoded in the path, and the path was not read. The count was then written into prose from a glance rather than from a counted command.
@@ -1194,3 +1195,25 @@ transfer route with no panel refresh).
   inventory transfers, call `IInventoryVMAdapter.RefreshDisplay()`, which runs the pair through
   cached delegates pinned by `ReflectionSiteBindingTests`. EquipPresets still needs the same (follow-up).
 - **Source:** `docs/reviews/rca-quickactions-unequip-2026-10-19.md` row 1.
+### A guard on TAOM's call does not guard the engine's call: pin its precondition in data (Lord Banners, 2026-10-19)
+TAOM checks every formation's heraldry before its own `SetFormationBanner`, because the native banner-tableau rebuild
+crashed on a troop with an empty heraldry banner (`rca-banner-bearers-siege-ctd-2026-07-23.md`). Lord Banners (#823)
+gave TAOM lords banner items, so vanilla's `GeneralsAndCaptainsAssignmentLogic` now banners their formations first,
+AI teams included, and TAOM's guarded path skips them. Nothing failed: every clan and kingdom `banner_key` parses to
+at least one layer. But nothing pinned that, so one malformed key would have reopened the crash with no guard in
+front.
+- **Why missed:** the plan traced the overridden model's reader, not where the value it produces is consumed
+  downstream, and so not which TAOM guard sat on the old consumer.
+- **Prevent:** when a change routes data onto another path to an engine call that TAOM guards only at its own call
+  site, the guard no longer applies there: make its precondition hold in the shipped data and pin that with a test
+  (`ShippedHeraldryBannerKeyTests`). Search the TAOM code for guards on the engine method the new path reaches.
+- **Source:** `docs/reviews/rca-lord-banners-2026-10-19.md` F1.
+
+### Read a campaign behavior's RegisterEvents before stating when it acts (Lord Banners, 2026-10-19)
+The Lord Banners doc said existing saves would get banners over several days through the daily tick.
+`BannerCampaignBehavior` registers `GiveBannersToHeroes` on `OnGameLoadFinishedEvent` as well as on new game, so
+every eligible lord gets one as the save finishes loading, prisoners included.
+- **Why missed:** research read the give methods and inferred their triggers instead of reading `RegisterEvents`.
+- **Prevent:** before writing when or how often a vanilla behavior does something, read its `RegisterEvents` and list
+  every event that reaches the method.
+- **Source:** `docs/reviews/rca-lord-banners-2026-10-19.md` F3.

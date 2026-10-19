@@ -49,9 +49,10 @@ public sealed class BannerBearerConfig
         "sauron",
     };
 
-    // Culture StringId -> banner ItemObject id. Vanilla's banner items are
-    // culture="Culture.neutral_culture" and using_tableau="true", so the cloth renders the
-    // party's own heraldry regardless of which mesh family we pick — the item choice is a
+    // Culture StringId -> banner ItemObject id. Vanilla ships 6 banner items each for empire, aserai,
+    // vlandia, khuzait, sturgia and battania and 9 for neutral_culture; the item culture decides which
+    // lords may receive one, not what a bearer may carry. All use using_tableau="true", so the cloth
+    // renders the party's own heraldry regardless of which mesh family we pick: the item choice is a
     // pole/cloth silhouette AND a BannerComponent effect tier, not a faction lock.
     //
     // KEYS ARE StringIds, NOT display names. TAOM re-skins the six vanilla cultures through

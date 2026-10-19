@@ -11,7 +11,7 @@ The feature is thin on purpose. Bannerlord already ships a complete banner-beare
 ## Why This Exists
 
 - **Vanilla behavior:** `BannerBearerLogic` is added to every battle, but a formation only receives a banner from `GeneralsAndCaptainsAssignmentLogic.cs:264`, and only when it has a hero **captain** whose `FormationBanner` is non-null (or via the player's Order-of-Battle screen, `OrderOfBattleFormationItemVM.cs:1258`). Those are the *only* two gameplay callers of `SetFormationBanner`.
-- **TAOM requirement:** TAOM's lords carry no banner items, so no formation ever gets one and no bearer ever appears. Middle-earth armies should march under standards.
+- **TAOM requirement:** Lords of TAOM's own cultures carried no banner items, so their formations never got one and no bearer ever appeared. Since #823 ([lord-banners.md](lord-banners.md)) every lord can carry a vanilla banner; this feature now covers the formations whose captain carries none: no hero captain, a player-clan hero or companion, or a lord not given one yet. Middle-earth armies should march under standards.
 - **Without this feature:** every TAOM battle line is bannerless, and the engine's banner morale/damage effects — already implemented and paid for — are dead code.
 
 ### Why not port "Raise your Banner"
@@ -48,7 +48,7 @@ Three engine constraints shape the whole feature.
 
 ### Siege safety — the heraldry guard (native CTD, #349)
 
-Broadening `SetFormationBanner` from vanilla's player-side, hero-captained formations to **every team's** formations re-opened a precondition vanilla never had to check: the bearer's heraldry must exist. The native tableau rebuilt by `UpdateSpawnEquipmentAndRefreshVisuals` renders the bearer's heraldry `Banner`, seeded at spawn from `agent.Origin.Banner` (`Mission.cs:4434`). A custom-faction garrison/militia party whose clan/kingdom has no heraldry gives its agents a null `Banner` (or an empty `BannerDataList`); the native builder dereferences it and access-violates (`0xC0000005 @ TaleWorlds.Native.dll+0x28ac0e`) — a 100%-repro CTD on siege OrderOfBattle at `sturgia_town_c`, invisible to BUTR because it is a native AV, not a managed exception.
+Vanilla banners every team's formations whose hero captain carries a banner (`GeneralsAndCaptainsAssignmentLogic.OnCaptainAssignedToFormation`) plus the player's Order-of-Battle picks. Extending `SetFormationBanner` to formations without one re-opened a precondition vanilla never had to check: the bearer's heraldry must exist. The native tableau rebuilt by `UpdateSpawnEquipmentAndRefreshVisuals` renders the bearer's heraldry `Banner`, seeded at spawn from `agent.Origin.Banner` (`Mission.cs:4434`). A custom-faction garrison/militia party whose clan/kingdom has no heraldry gives its agents a null `Banner` (or an empty `BannerDataList`); the native builder dereferences it and access-violates (`0xC0000005 @ TaleWorlds.Native.dll+0x28ac0e`) (a 100%-repro CTD on siege OrderOfBattle at `sturgia_town_c`, invisible to BUTR because it is a native AV, not a managed exception). `ShippedHeraldryBannerKeyTests` pins the shipped clan and kingdom `banner_key` values the engine's own captain path relies on.
 
 `TryAssignBanner` guards against it: it skips `SetFormationBanner` unless **every** bearer-candidate carries renderable heraldry. Two subtleties, both from the `/deep-review` of the fix (RCA below):
 
@@ -152,7 +152,7 @@ There is **no** culture with id `rohan`, `dunland`, `harad`, `rhun`, `dale` or `
 
 ### Banner art
 
-Vanilla ships 45 banner items over 18 meshes (`SandBoxCore/ModuleData/items/banners.xml`). They are `culture="Culture.neutral_culture"` with `using_tableau="true"`, so **the cloth renders the party's own heraldry** regardless of which mesh family is chosen — the item id picks a pole/cloth silhouette *and* a `BannerComponent` effect tier, it does not lock the faction.
+Vanilla ships 45 banner items over 18 meshes (`SandBoxCore/ModuleData/items/banners.xml`). Six belong to each of `empire`, `aserai`, `vlandia`, `khuzait`, `sturgia` and `battania`, and nine to `neutral_culture`; the item culture decides which lords may receive the banner (see [lord-banners.md](lord-banners.md)), not what a bearer may carry. They use `using_tableau="true"`, so **the cloth renders the party's own heraldry** regardless of which mesh family is chosen: the item id picks a pole/cloth silhouette *and* a `BannerComponent` effect tier, and it does not lock the faction.
 
 TAOM ships zero banner items of its own; custom LOTR meshes can be added later and swapped in by editing `CultureBanners`, with **no code change**.
 
@@ -163,6 +163,8 @@ TAOM ships zero banner items of its own; custom LOTR meshes can be added later a
 ### Race gate
 
 `cave_troll`, `hill_troll`, `nazghul`, `saruman`, `sauron` never carry a standard. Trolls are beasts; the named races are heroes anyway (`!IsHero` already excludes them) and are listed belt-and-braces. This mirrors the cave-troll guard exclusion in [#346](https://github.com/haterade22/TAOM/issues/346).
+
+With `"Enabled": false` the race gate falls back to vanilla's humanoid check, so since #823 a troll can carry a Mordor lord's banner in that configuration (cosmetic).
 
 The gate holds in Custom Battle too. `TaomBattleBannerBearersModel` goes on the campaign starter only, and Custom Battle builds `CustomBattleBannerBearersModel` off a `BasicGameStarter`, so until 2026-09-25 the vanilla gate alone ran there and hill trolls raised standards in the troll smoke. `TaomCustomBattleBannerBearersModel` (registered in `SubModule.RegisterCustomBattleModels`) adds only this race gate over Custom Battle's own model; its bearer count, tiers and formation rules stay vanilla.
 

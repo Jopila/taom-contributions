@@ -42,5 +42,6 @@ internal static class FeatureModules
         new Features.HostReview.HostReviewModule(),
         new Features.VoiceAccents.VoiceAccentsModule(),
         new Features.HiddenHosts.HiddenHostsModule(),
+        new Features.LordBanners.LordBannersModule(),
     };
 }

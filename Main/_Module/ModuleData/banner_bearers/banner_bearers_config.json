@@ -28,7 +28,7 @@
     "sauron"
   ],
 
-  "_comment_CultureBanners": "Culture StringId -> banner ItemObject id. Vanilla banner items are neutral-culture with using_tableau=true, so the cloth always renders the party's own heraldry — the item picks a pole/cloth silhouette and a BannerComponent effect tier, it does NOT lock the faction. Map a culture to \"\" to give it no banner. Custom LOTR banner meshes can be swapped in later by changing ids here, with no code change.",
+  "_comment_CultureBanners": "Culture StringId -> banner ItemObject id. Vanilla ships 6 banner items each for empire, aserai, vlandia, khuzait, sturgia and battania and 9 for neutral_culture (the item culture decides which lords may receive one, not what a bearer may carry), all with using_tableau=true, so the cloth always renders the party's own heraldry: the item picks a pole/cloth silhouette and a BannerComponent effect tier, and it does NOT lock the faction. Map a culture to \"\" to give it no banner. Custom LOTR banner meshes can be swapped in later by changing ids here, with no code change.",
   "_comment_CultureBanners_ids": "KEYS ARE StringIds, NOT display names. TAOM re-skins the six vanilla cultures via spcultures.xslt, which overrides <name> but NEVER the id — so Rohirrim = 'vlandia', Dunlendings = 'empire', Haradrim = 'aserai', Easterlings/Rhun = 'khuzait', Barding/Dale = 'sturgia', Variag/Khand = 'battania'. Using the LOTR name as a key silently gives that faction the default banner instead.",
   "CultureBanners": {
     "gondor": "standard_of_duty_t1",
