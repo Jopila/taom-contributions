@@ -10,16 +10,17 @@ using TAOM.Features.ShadowfaxScreens.Quests.Hooks;
 namespace TAOM.Adapters;
 
 /// <summary>
-/// Boundary implementation of <see cref="IQuestJournalAdapter"/> (docs/features/shadowfax-screens.md). The one reflection site
-/// is the private <c>QuestItemVM.PopulateQuestLog(JournalLog, bool)</c>, cached once at <see cref="Bind"/>; the rest is public
+/// Boundary implementation of <see cref="IQuestJournalAdapter"/> (docs/features/shadowfax-screens.md). The reflection sites
+/// are the private <c>QuestItemVM.PopulateQuestLog(JournalLog, bool)</c>, cached once at <see cref="Bind"/>; the rest is public
 /// API (<c>JournalLogEntry.GetEntries</c>, <c>IViewDataTracker.UnExaminedQuestLogs</c>). The replay goes through the
 /// <see cref="MethodInfo"/> so every other patch on PopulateQuestLog still runs.
 /// </summary>
 public class QuestJournalAdapter : IQuestJournalAdapter
 {
     private MethodInfo? _populateQuestLog;
+    private (MethodBase? Target, Type PatchType, bool Prefix)[] _guards = Array.Empty<(MethodBase?, Type, bool)>();
 
-    public bool IsBound => _populateQuestLog != null;
+    public bool IsBound => _populateQuestLog != null && MissingGuards().Count == 0;
 
     public string? Bind()
     {
@@ -32,13 +33,14 @@ public class QuestJournalAdapter : IQuestJournalAdapter
 
             // The module runner ignores whether a category attached. A skipped PopulateQuestLog with no on-demand build, no
             // updated dot or no sort fallback would leave quests empty or undated, so deferral needs all four patches.
-            var missing = new[]
+            _guards = new (MethodBase?, Type, bool)[]
             {
-                Attached(populate, typeof(QuestItemVM_PopulateQuestLog_QuestLogPatch), prefix: true),
-                Attached(AccessTools.Method(typeof(QuestsVM), "SetSelectedItem"), typeof(QuestsVM_SetSelectedItem_QuestLogPatch), prefix: true),
-                Attached(AccessTools.Method(typeof(QuestItemVM), nameof(QuestItemVM.UpdateIsUpdated)), typeof(QuestItemVM_UpdateIsUpdated_QuestLogPatch), prefix: false),
-                Attached(QuestItemComparerBase_GetJournalLogAt_QuestLogPatch.TargetMethod(), typeof(QuestItemComparerBase_GetJournalLogAt_QuestLogPatch), prefix: false),
-            }.Where(name => name != null).ToList();
+                (populate, typeof(QuestItemVM_PopulateQuestLog_QuestLogPatch), true),
+                (AccessTools.Method(typeof(QuestsVM), "SetSelectedItem"), typeof(QuestsVM_SetSelectedItem_QuestLogPatch), true),
+                (AccessTools.Method(typeof(QuestItemVM), nameof(QuestItemVM.UpdateIsUpdated)), typeof(QuestItemVM_UpdateIsUpdated_QuestLogPatch), false),
+                (QuestItemComparerBase_GetJournalLogAt_QuestLogPatch.TargetMethod(), typeof(QuestItemComparerBase_GetJournalLogAt_QuestLogPatch), false),
+            };
+            var missing = MissingGuards();
             if (missing.Count > 0)
                 return "not attached: " + string.Join(", ", missing);
 
@@ -64,13 +66,6 @@ public class QuestJournalAdapter : IQuestJournalAdapter
         vm.RefreshValues();
     }
 
-    public object? FirstOrLastEntry(object item, bool last)
-    {
-        var entries = ((QuestItemVM)item).QuestLogEntry?.GetEntries();
-        if (entries == null) return null;
-        return last ? entries.LastOrDefault() : entries.FirstOrDefault();
-    }
-
     public bool AnyUnexamined(object item)
     {
         var entry = ((QuestItemVM)item).QuestLogEntry;
@@ -91,11 +86,14 @@ public class QuestJournalAdapter : IQuestJournalAdapter
         }
     }
 
-    // Returns the patch's name when it is NOT attached, else null.
-    private static string? Attached(MethodBase? target, Type patchType, bool prefix)
+    // The names of the guard patches that are NOT attached to their target right now.
+    private System.Collections.Generic.List<string> MissingGuards() =>
+        _guards.Where(g => !Attached(g.Target, g.PatchType, g.Prefix)).Select(g => g.PatchType.Name).ToList();
+
+    private static bool Attached(MethodBase? target, Type patchType, bool prefix)
     {
         var info = target == null ? null : Harmony.GetPatchInfo(target);
         var patches = prefix ? info?.Prefixes : info?.Postfixes;
-        return patches != null && patches.Any(p => p.PatchMethod?.DeclaringType == patchType) ? null : patchType.Name;
+        return patches != null && patches.Any(p => p.PatchMethod?.DeclaringType == patchType);
     }
 }

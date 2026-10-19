@@ -24,7 +24,7 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
         new(ClanFastOpenCalls.PatchCategory, ApplyPhase.GameInit),
         new(ShadowfaxInventoryCalls.PatchCategory, ApplyPhase.GameInit),
         new(PartyFastOpenCalls.PatchCategory, ApplyPhase.GameInit),
-        new("PatchXXX_ShadowfaxQuests", ApplyPhase.GameInit),
+        new(QuestLogDeferCalls.Category, ApplyPhase.GameInit),
     };
 
     public override string Id => "ShadowfaxScreens";

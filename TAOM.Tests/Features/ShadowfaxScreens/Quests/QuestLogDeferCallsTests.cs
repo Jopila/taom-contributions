@@ -50,7 +50,7 @@ public class QuestLogDeferCallsTests
         var item = new object();
 
         var call = QuestLogDeferCalls.BeginOpen();
-        Assert.IsFalse(QuestLogDeferCalls.ShouldSkipPopulate(item, true));
+        Assert.IsFalse(QuestLogDeferCalls.ShouldSkipPopulate(item, true, null));
         QuestLogDeferCalls.EndItem(QuestLogDeferCalls.BeginItem());
         QuestLogDeferCalls.EnsureBuilt(item);
         Assert.IsNull(QuestLogDeferCalls.UpdatedFor(item));
@@ -66,8 +66,8 @@ public class QuestLogDeferCallsTests
         QuestLogDeferCalls.EndOpen(call, null);
 
         var line = _logger.Lines.Single();
-        StringAssert.StartsWith(line, "INFO [ScreenOpen] Quests open: 25.0 ms (old=0, deferred=0, entries=0");
-        StringAssert.Contains(line, "fast open on, bound");
+        StringAssert.StartsWith(line, "INFO [ScreenOpen] Quests open: 25.0 ms (fast open on; old=0, deferred=0, entries=0");
+        StringAssert.Contains(line, "bound, journal items");
     }
 
     [TestMethod]
@@ -88,7 +88,7 @@ public class QuestLogDeferCallsTests
         QuestLogDeferCalls.EndOpen(null, null);
 
         Assert.AreEqual(0, _logger.Lines.Count);
-        Assert.IsTrue(QuestLogDeferCalls.ShouldSkipPopulate(new object(), true), "the prefix's scope is still open");
+        Assert.IsTrue(QuestLogDeferCalls.ShouldSkipPopulate(new object(), true, null), "the prefix's scope is still open");
     }
 
     [TestMethod]
@@ -97,7 +97,7 @@ public class QuestLogDeferCallsTests
         var call = QuestLogDeferCalls.BeginOpen();
         QuestLogDeferCalls.EndOpen(call, null);
 
-        Assert.IsFalse(QuestLogDeferCalls.ShouldSkipPopulate(new object(), true));
+        Assert.IsFalse(QuestLogDeferCalls.ShouldSkipPopulate(new object(), true, null));
     }
 
     [TestMethod]
@@ -105,7 +105,7 @@ public class QuestLogDeferCallsTests
     {
         _settings.LogScreenOpenTimes.Returns(false);
         var call = QuestLogDeferCalls.BeginOpen();
-        var skipped = QuestLogDeferCalls.ShouldSkipPopulate(new object(), true);
+        var skipped = QuestLogDeferCalls.ShouldSkipPopulate(new object(), true, null);
         QuestLogDeferCalls.EndOpen(call, null);
 
         Assert.IsTrue(skipped);
@@ -118,10 +118,9 @@ public class QuestLogDeferCallsTests
         var item = new object();
         var entry = new object();
         _adapter.AnyUnexamined(item).Returns(true);
-        _adapter.FirstOrLastEntry(item, true).Returns(entry);
         var call = QuestLogDeferCalls.BeginOpen();
 
-        Assert.IsTrue(QuestLogDeferCalls.ShouldSkipPopulate(item, true));
+        Assert.IsTrue(QuestLogDeferCalls.ShouldSkipPopulate(item, true, entry));
         Assert.AreEqual(true, QuestLogDeferCalls.UpdatedFor(item));
         Assert.AreSame(entry, QuestLogDeferCalls.SortFallback(item, true));
         QuestLogDeferCalls.EnsureBuilt(item);

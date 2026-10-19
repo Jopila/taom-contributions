@@ -7,7 +7,10 @@ namespace TAOM.Adapters;
 /// </summary>
 public interface IQuestJournalAdapter
 {
-    /// <summary>True once <see cref="Bind"/> found every member and every guard patch is attached.</summary>
+    /// <summary>
+    /// True when <see cref="Bind"/> found every member and every guard patch is attached right now. The patches are checked
+    /// again on every read (a cheap Harmony lookup, once per open), so a patch removed after the install stops deferral.
+    /// </summary>
     bool IsBound { get; }
 
     /// <summary>
@@ -22,9 +25,6 @@ public interface IQuestJournalAdapter
     /// <c>RefreshValues</c>. Throws if the item or the binding is wrong.
     /// </summary>
     void Rebuild(object item);
-
-    /// <summary>The item's first or last journal entry (a <c>JournalLog</c>), or null when it has none.</summary>
-    object? FirstOrLastEntry(object item, bool last);
 
     /// <summary>True when any of the item's journal entries is still in the campaign's unexamined quest logs.</summary>
     bool AnyUnexamined(object item);

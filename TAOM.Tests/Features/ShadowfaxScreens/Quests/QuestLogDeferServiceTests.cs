@@ -131,15 +131,6 @@ public class QuestLogDeferServiceTests
     }
 
     [TestMethod]
-    public void TryDefer_SettingsThrow_FailsClosedToNoDeferral()
-    {
-        _settings.QuestLogFastOpen.Throws(new InvalidOperationException("mcm gone"));
-        _sut.BeginOpen();
-
-        Assert.IsFalse(_sut.TryDefer(Item(), true));
-    }
-
-    [TestMethod]
     public void TryDefer_Disarmed_DoesNotDefer()
     {
         var bad = Item();
@@ -324,25 +315,37 @@ public class QuestLogDeferServiceTests
     }
 
     [TestMethod]
-    public void SortFallback_DeferredItem_ReturnsTheFirstOrLastEntry()
+    public void SortFallback_DeferredItem_ReturnsTheFirstAndLastLogTheDeferralsSaw()
     {
         var item = Item();
         var first = new object();
+        var middle = new object();
         var last = new object();
         _sut.BeginOpen();
-        _sut.TryDefer(item, true);
-        _adapter.FirstOrLastEntry(item, false).Returns(first);
-        _adapter.FirstOrLastEntry(item, true).Returns(last);
+        _sut.TryDefer(item, true, first);
+        _sut.TryDefer(item, true, middle);
+        _sut.TryDefer(item, true, last);
 
         Assert.AreSame(first, _sut.SortFallback(item, false));
         Assert.AreSame(last, _sut.SortFallback(item, true));
     }
 
     [TestMethod]
-    public void SortFallback_UnmarkedItem_IsNullAndNeverAsksTheAdapter()
+    public void SortFallback_ASingleEntry_IsBothTheFirstAndTheLast()
+    {
+        var item = Item();
+        var only = new object();
+        _sut.BeginOpen();
+        _sut.TryDefer(item, true, only);
+
+        Assert.AreSame(only, _sut.SortFallback(item, false));
+        Assert.AreSame(only, _sut.SortFallback(item, true));
+    }
+
+    [TestMethod]
+    public void SortFallback_UnmarkedItem_IsNull()
     {
         Assert.IsNull(_sut.SortFallback(Item(), false));
-        _adapter.DidNotReceive().FirstOrLastEntry(Arg.Any<object>(), Arg.Any<bool>());
     }
 
     [TestMethod]
@@ -354,17 +357,6 @@ public class QuestLogDeferServiceTests
         _sut.EnsureBuilt(item);
 
         Assert.IsNull(_sut.SortFallback(item, true));
-    }
-
-    [TestMethod]
-    public void SortFallback_AdapterThrows_IsNull()
-    {
-        var item = Item();
-        _sut.BeginOpen();
-        _sut.TryDefer(item, true);
-        _adapter.FirstOrLastEntry(item, false).Throws(new InvalidOperationException("x"));
-
-        Assert.IsNull(_sut.SortFallback(item, false));
     }
 
     // ---- The open's detail ----
@@ -391,7 +383,7 @@ public class QuestLogDeferServiceTests
 
         var detail = _sut.EndOpen();
 
-        Assert.AreEqual("old=2, deferred=2, entries=4, updated=1, fast open on, bound, journal items 10.0 ms", detail);
+        Assert.AreEqual("fast open on; old=2, deferred=2, entries=4, updated=1, bound, journal items 10.0 ms", detail);
     }
 
     [TestMethod]
@@ -404,7 +396,7 @@ public class QuestLogDeferServiceTests
 
         var detail = _sut.EndOpen();
 
-        Assert.AreEqual("old=1, deferred=0, entries=0, updated=0, fast open off, unbound, journal items 0.0 ms", detail);
+        Assert.AreEqual("fast open off; old=1, deferred=0, entries=0, updated=0, unbound, journal items 0.0 ms", detail);
     }
 
     [TestMethod]
@@ -444,7 +436,7 @@ public class QuestLogDeferServiceTests
         _sut.EndOpen();
         _sut.BeginOpen();
 
-        StringAssert.StartsWith(_sut.EndOpen(), "old=0, deferred=0, entries=0");
+        StringAssert.StartsWith(_sut.EndOpen(), "fast open on; old=0, deferred=0, entries=0");
     }
 
     [TestMethod]
@@ -454,7 +446,7 @@ public class QuestLogDeferServiceTests
         _sut.EndItem(start);
         _sut.BeginOpen();
 
-        StringAssert.StartsWith(_sut.EndOpen(), "old=0");
+        StringAssert.StartsWith(_sut.EndOpen(), "fast open on; old=0");
     }
 
     [TestMethod]
@@ -467,15 +459,54 @@ public class QuestLogDeferServiceTests
     }
 
     [TestMethod]
-    public void EndItem_ClockThrows_StillReturnsADetailAtEndOpen()
+    public void EndOpen_ADisarmedProcess_SaysFastOpenOffEvenWithTheToggleOnAndBound()
     {
-        _settings.LogScreenOpenTimes.Returns(true);
+        var bad = Item();
         _sut.BeginOpen();
-        var start = _sut.BeginItem();
-        _clock.ThrowOnRead = 2;
-        _sut.EndItem(start);
+        _sut.TryDefer(bad, true);
+        _adapter.When(a => a.Rebuild(bad)).Do(_ => throw new InvalidOperationException("boom"));
+        _sut.EnsureBuilt(bad);
+        _sut.EndOpen();
 
-        Assert.IsNotNull(_sut.EndOpen());
+        _sut.BeginOpen();
+
+        StringAssert.StartsWith(_sut.EndOpen(), "fast open off; ");
+    }
+
+    [TestMethod]
+    public void EndOpen_ToggleOnButUnbound_SaysFastOpenOff()
+    {
+        _adapter.IsBound.Returns(false);
+        _sut.BeginOpen();
+
+        StringAssert.StartsWith(_sut.EndOpen(), "fast open off; ");
+    }
+
+    [TestMethod]
+    public void UpdatedFor_DuringTheReplay_IsNotCountedInTheOpensUpdatedTotal()
+    {
+        var item = Item();
+        _sut.BeginOpen();
+        _sut.TryDefer(item, true);
+        _adapter.AnyUnexamined(item).Returns(true);
+        _adapter.When(a => a.Rebuild(item)).Do(_ => _sut.UpdatedFor(item));
+
+        _sut.EnsureBuilt(item);
+
+        StringAssert.Contains(_sut.EndOpen(), "updated=0");
+    }
+
+    [TestMethod]
+    public void BeginOpen_AdapterNoLongerBound_TheNextOpenDoesNotDefer()
+    {
+        _sut.BeginOpen();
+        Assert.IsTrue(_sut.TryDefer(Item(), true));
+        _sut.EndOpen();
+        _adapter.IsBound.Returns(false);
+
+        _sut.BeginOpen();
+
+        Assert.IsFalse(_sut.TryDefer(Item(), true));
     }
 
     // ---- Install ----

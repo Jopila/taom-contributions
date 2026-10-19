@@ -87,6 +87,7 @@ public class QuestLogFastOpenBindingTests
 
     [TestMethod]
     [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
     public void PopulateQuestLog_IsCalledOnlyFromTheThreeQuestItemConstructors()
     {
         RequireGame();
@@ -99,6 +100,18 @@ public class QuestLogFastOpenBindingTests
 
         Assert.AreEqual(3, callers.Count, "callers: " + string.Join(", ", callers.Select(c => c.Name)));
         Assert.IsTrue(callers.All(c => c.IsConstructor), "a non-constructor caller would build stages outside the open's scope");
+    }
+
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    public void PopulateQuestLog_TakesTheLogAsItsFirstParameterNamedLog()
+    {
+        RequireGame();
+
+        var parameters = PopulateQuestLog().GetParameters();
+
+        Assert.AreEqual("log", parameters[0].Name, "the prefix injects its parameter by this name");
+        Assert.AreEqual(typeof(JournalLog), parameters[0].ParameterType);
     }
 
     [TestMethod]
@@ -142,7 +155,9 @@ public class QuestLogFastOpenBindingTests
         var indexType = ComparerBase().GetNestedType("JournalLogIndex", BindingFlags.NonPublic | BindingFlags.Public);
         Assert.IsNotNull(indexType, "QuestItemComparerBase.JournalLogIndex did not resolve.");
 
-        // the sort patch reads the parameter as object and treats 1 as Last
+        // the sort patch reads the parameter as an int and treats 1 as Last
+        Assert.AreEqual(typeof(int), Enum.GetUnderlyingType(indexType), "the postfix declares logIndex as int, which Harmony passes without boxing");
+        Assert.IsTrue(indexType.IsNestedFamily, "protected in a private type: the postfix cannot name it");
         Assert.AreEqual(0, Convert.ToInt32(Enum.Parse(indexType, "First")));
         Assert.AreEqual(1, Convert.ToInt32(Enum.Parse(indexType, "Last")));
         Assert.AreEqual(2, Enum.GetNames(indexType).Length);
@@ -170,6 +185,7 @@ public class QuestLogFastOpenBindingTests
 
     [TestMethod]
     [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
     public void JournalCtor_CallsPopulateQuestLogUpdateIsUpdatedAndBuildsTheGiverHeroVM()
     {
         RequireGame();
@@ -183,6 +199,7 @@ public class QuestLogFastOpenBindingTests
 
     [TestMethod]
     [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
     public void QuestsVMCtor_BuildsTheJournalItemsAndTheSortSelector()
     {
         RequireGame();
@@ -198,6 +215,7 @@ public class QuestLogFastOpenBindingTests
 
     [TestMethod]
     [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
     public void GetJournalLogAt_ReadsStagesForAnItemWithoutAQuest()
     {
         RequireGame();

@@ -13,8 +13,8 @@ namespace TAOM.Features.ShadowfaxScreens.Quests;
 /// inside the QuestsVM constructor, builds them when one is selected, and keeps the updated dot and the date sort right
 /// for the ones still unbuilt. Items are opaque keys (a <c>QuestItemVM</c> behind <see cref="IQuestJournalAdapter"/>), so
 /// the service holds no TaleWorlds type. The open's scope, its snapshot of the toggle and of the adapter's bound state, and
-/// the replay flag are per thread: the UI thread opens the screen, and nothing else may defer. Every public member answers
-/// "do nothing" on a failure rather than throw.
+/// the replay flag are per thread: the UI thread opens the screen, and nothing else may defer. The settings provider never
+/// throws (its contract), so reads of it are not wrapped; only the adapter, which touches the engine, is.
 /// </summary>
 public sealed class QuestLogDeferService
 {
@@ -53,7 +53,7 @@ public sealed class QuestLogDeferService
         try
         {
             if (problem == null)
-                _logger.LogInfo("[QuestLog] fast open installed; finished quests build when selected (fast open " + (ToggleOn() ? "on" : "off") + ").");
+                _logger.LogInfo("[QuestLog] fast open installed; finished quests build when selected (fast open " + (_settings.QuestLogFastOpen ? "on" : "off") + ").");
             else
                 _logger.LogWarning("[QuestLog] fast open unavailable (" + problem + "); vanilla builds the quest log.");
         }
@@ -71,18 +71,10 @@ public sealed class QuestLogDeferService
         var scope = _scope.Value!;
         if (scope.Depth++ > 0) return;
         scope.Reset();
-        try
-        {
-            scope.Timing = _settings.LogScreenOpenTimes;
-            scope.FastOpen = _settings.QuestLogFastOpen;
-            scope.Bound = _adapter.IsBound;
-        }
-        catch
-        {
-            scope.Timing = false;
-            scope.FastOpen = false;
-            scope.Bound = false;
-        }
+        scope.Timing = _settings.LogScreenOpenTimes;
+        scope.FastOpen = _settings.QuestLogFastOpen;
+        scope.Bound = _adapter.IsBound;
+        scope.FastPath = scope.FastOpen && scope.Bound && !Disarmed;
     }
 
     /// <summary>Closes the scope. The outermost close returns the detail for the open line; a nested close or one without a begin returns null.</summary>
@@ -97,10 +89,11 @@ public sealed class QuestLogDeferService
 
         if (--scope.Depth > 0) return null;
         return string.Format(System.Globalization.CultureInfo.InvariantCulture,
-            "old={0}, deferred={1}, entries={2}, updated={3}, fast open {4}, {5}, journal items {6:0.0} ms",
+            "fast open {0}; old={1}, deferred={2}, entries={3}, updated={4}, {5}, journal items {6:0.0} ms",
+            scope.FastPath ? "on" : "off",
             scope.OldItems, scope.DeferredItems, scope.DeferredEntries, scope.Updated,
-            scope.FastOpen ? "on" : "off", scope.Bound ? "bound" : "unbound",
-            LoadTimeStampLines.ToMs(scope.ItemTicks, SafeFrequency()));
+            scope.Bound ? "bound" : "unbound",
+            LoadTimeStampLines.ToMs(scope.ItemTicks, _clock.Frequency));
     }
 
     /// <summary>Counts one journal item built in this open; returns its start tick, or 0 when the timer is off or the clock fails.</summary>
@@ -110,14 +103,7 @@ public sealed class QuestLogDeferService
         if (scope.Depth <= 0) return 0;
         scope.OldItems++;
         if (!scope.Timing) return 0;
-        try
-        {
-            return Math.Max(_clock.Now, 1);
-        }
-        catch
-        {
-            return 0;
-        }
+        return Math.Max(_clock.Now, 1);
     }
 
     /// <summary>Adds the item's elapsed time to the open's total. A zero start (no prefix ran, or the timer is off) adds nothing.</summary>
@@ -125,32 +111,28 @@ public sealed class QuestLogDeferService
     {
         var scope = _scope.Value!;
         if (start <= 0 || scope.Depth <= 0) return;
-        try
-        {
-            scope.ItemTicks += _clock.Now - start;
-        }
-        catch
-        {
-            // The measurement must never break the screen.
-        }
+        scope.ItemTicks += _clock.Now - start;
     }
 
     /// <summary>
     /// True when PopulateQuestLog should be skipped for this item's entry; the item is then marked as deferred. Only inside an
     /// open whose snapshot had the toggle on and the adapter bound, for an item with a journal entry, outside a replay, and
-    /// while armed.
+    /// while armed. The first call for an item records its first journal entry on the mark and every call its last, because the
+    /// journal constructor feeds <c>GetEntries()</c> in order; <see cref="SortFallback"/> reads them.
     /// </summary>
-    public bool TryDefer(object item, bool hasJournalEntry)
+    public bool TryDefer(object item, bool hasJournalEntry, object? log = null)
     {
         var scope = _scope.Value!;
         if (scope.Depth <= 0 || scope.Replaying || !scope.FastOpen || !scope.Bound || !hasJournalEntry || Disarmed)
             return false;
-        if (!_marks.TryGetValue(item, out _))
+        if (!_marks.TryGetValue(item, out var mark))
         {
-            _marks.Add(item, new Mark());
+            mark = new Mark { First = log };
+            _marks.Add(item, mark);
             scope.DeferredItems++;
         }
 
+        mark.Last = log;
         scope.DeferredEntries++;
         return true;
     }
@@ -191,7 +173,7 @@ public sealed class QuestLogDeferService
         {
             var updated = _adapter.AnyUnexamined(item);
             var scope = _scope.Value!;
-            if (updated && scope.Depth > 0) scope.Updated++;
+            if (updated && scope.Depth > 0 && !scope.Replaying) scope.Updated++;
             return updated;
         }
         catch
@@ -200,18 +182,10 @@ public sealed class QuestLogDeferService
         }
     }
 
-    /// <summary>The journal entry vanilla's sort would read from a built item's stages: the first or last. Null for any item that is not deferred.</summary>
+    /// <summary>The journal entry vanilla's sort would read from a built item's stages: the first or last recorded on its mark. Null for any item that is not deferred.</summary>
     public object? SortFallback(object item, bool last)
     {
-        if (!IsDeferred(item)) return null;
-        try
-        {
-            return _adapter.FirstOrLastEntry(item, last);
-        }
-        catch
-        {
-            return null;
-        }
+        return _marks.TryGetValue(item, out var mark) ? (last ? mark.Last : mark.First) : null;
     }
 
     private void Disarm(Exception ex)
@@ -228,21 +202,11 @@ public sealed class QuestLogDeferService
         }
     }
 
-    private bool ToggleOn()
-    {
-        try { return _settings.QuestLogFastOpen; }
-        catch { return false; }
-    }
-
-    private long SafeFrequency()
-    {
-        try { return _clock.Frequency; }
-        catch { return 0; }
-    }
-
     private sealed class Mark
     {
         public bool Failed;
+        public object? First;
+        public object? Last;
     }
 
     private sealed class OpenScope
@@ -251,6 +215,7 @@ public sealed class QuestLogDeferService
         public bool Timing;
         public bool FastOpen;
         public bool Bound;
+        public bool FastPath;
         public bool Replaying;
         public int OldItems;
         public int DeferredItems;

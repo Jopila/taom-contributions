@@ -185,7 +185,9 @@ public class ReflectionSiteBindingTests
     [DataRow("TaleWorlds.CampaignSystem.CampaignBehaviors.RecruitmentCampaignBehavior", "RecruitmentCampaignBehavior", "CheckRecruiting", "Method", "CastleAiRecruitDispatcher.cs:34")]
     // --- Quest Log Fast Open (#854): the replay of the private PopulateQuestLog for a finished quest built on demand.
     // A miss makes Bind return a reason, the quest log is never deferred and vanilla builds every quest at open.
-    [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.Quests.QuestItemVM", "QuestItemVM", "PopulateQuestLog", "Method", "QuestJournalAdapter.cs:29")]
+    [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.Quests.QuestItemVM", "QuestItemVM", "PopulateQuestLog", "Method", "QuestJournalAdapter.cs:30")]
+    // The guard check resolves QuestsVM.SetSelectedItem by name too; a miss reads as the SetSelectedItem patch not attached.
+    [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.Quests.QuestsVM", "QuestsVM", "SetSelectedItem", "Method", "QuestJournalAdapter.cs:39")]
     public void ReflectionSite_ResolvesAgainstInstalledEngine(string fullName, string simpleName, string member, string kind, string source)
     {
         if (!_gameLoaded)

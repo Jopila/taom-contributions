@@ -57,9 +57,9 @@ internal static class QuestLogDeferCalls
         catch { /* timing only */ }
     }
 
-    internal static bool ShouldSkipPopulate(object item, bool hasJournalEntry)
+    internal static bool ShouldSkipPopulate(object item, bool hasJournalEntry, object? log)
     {
-        try { return Service?.TryDefer(item, hasJournalEntry) ?? false; }
+        try { return Service?.TryDefer(item, hasJournalEntry, log) ?? false; }
         catch { return false; }
     }
 
@@ -80,18 +80,4 @@ internal static class QuestLogDeferCalls
         try { return Service?.SortFallback(item, last); }
         catch { return null; }
     }
-}
-
-/// <summary>The QuestsVM constructor's Harmony state: the service whose scope the prefix opened, and the timer window.</summary>
-public sealed class QuestOpenCall
-{
-    internal QuestOpenCall(QuestLogDeferService? service, ScreenOpenWindow? window)
-    {
-        Service = service;
-        Window = window;
-    }
-
-    public QuestLogDeferService? Service { get; }
-
-    public ScreenOpenWindow? Window { get; }
 }

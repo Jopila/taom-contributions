@@ -321,12 +321,22 @@ during the open skips its stages and builds them when it is selected. Active que
 - **The updated dot:** vanilla sets a finished quest's dot from its stages. For a deferred item a postfix on
   `UpdateIsUpdated` sets it from the same data the stages read, whether any journal entry is still unexamined.
 - **Sorting by date:** vanilla reads a finished quest's date from its first or last stage and treats an item with no
-  stages as undated. A postfix on the sort's `GetJournalLogAt` supplies the first or last journal entry, only when
-  vanilla returned nothing and only for a deferred item.
-- **Fail closed:** nothing defers unless the adapter bound at game start, which needs the private method and all four
-  patches attached (the log says `[QuestLog] fast open installed` or `unavailable (reason)`). The switch and the bound
-  state are read once when the screen opens. If an on-demand build ever throws, it is logged once, deferral is off until
-  the game restarts, the other unbuilt quests still build when selected, and that quest keeps sorting by date.
+  stages as undated. The `PopulateQuestLog` prefix passes the service each journal log (the parameter `log`), which
+  records the first and the last one on the item's mark, because the journal constructor feeds `GetEntries()` in order.
+  A postfix on the sort's `GetJournalLogAt` supplies that first or last log, only when vanilla returned nothing and only
+  for a deferred item. The postfix reads the sort's `logIndex` as an `int`: the enum (`First` 0, `Last` 1) is
+  `protected` (nested family) in a private type, so it cannot be named, and its underlying type is `int`.
+- **Fail closed:** nothing defers unless the adapter is bound, which needs the private method and all four patches
+  attached (the log says `[QuestLog] fast open installed` or `unavailable (reason)` at game start). The patches are
+  checked again on every open, so one removed after the install (another mod, PatchShield) stops deferral from the next
+  open. The switch and the bound state are read once when the screen opens. If an on-demand build ever throws, it is
+  logged once, deferral is off until the game restarts, the other unbuilt quests still build when selected, and that
+  quest keeps sorting by date.
+  The partial-stage case: a rebuild that throws part way can leave some stages added, and the item stays marked and is
+  never retried; the updated dot postfix answers for any marked item, so a later `UpdateIsUpdated` call (a stage's
+  examination callback) derives the dot from the journal entries' unexamined logs, not from the partial stages.
+- **Co-op:** no co-op reference to the quest view models and nothing is written to campaign state; the switch is
+  presentation.
 - **How to measure:** turn "Log Screen Open Times" on, load the longest campaign, and open the Quest log six times
   with the switch off and six with it on, dropping the first open of each run. Compare the medians of the
   `[ScreenOpen] Quests open` lines in `taom_debug.log`. The line ends with the open's counts: finished quests built

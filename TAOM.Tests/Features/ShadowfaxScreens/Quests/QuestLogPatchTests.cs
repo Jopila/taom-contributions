@@ -92,7 +92,7 @@ public class QuestLogPatchTests
         var item = BareItem(true);
         _service.BeginOpen();
 
-        var runOriginal = QuestItemVM_PopulateQuestLog_QuestLogPatch.Prefix(item);
+        var runOriginal = QuestItemVM_PopulateQuestLog_QuestLogPatch.Prefix(item, BareLog());
 
         Assert.IsFalse(runOriginal);
         Assert.IsTrue(_service.IsDeferred(item));
@@ -104,14 +104,14 @@ public class QuestLogPatchTests
         var item = BareItem(false);
         _service.BeginOpen();
 
-        Assert.IsTrue(QuestItemVM_PopulateQuestLog_QuestLogPatch.Prefix(item));
+        Assert.IsTrue(QuestItemVM_PopulateQuestLog_QuestLogPatch.Prefix(item, BareLog()));
         Assert.IsFalse(_service.IsDeferred(item));
     }
 
     [TestMethod]
     public void PopulateQuestLogPrefix_OutOfScope_RunsTheOriginal()
     {
-        Assert.IsTrue(QuestItemVM_PopulateQuestLog_QuestLogPatch.Prefix(BareItem(true)));
+        Assert.IsTrue(QuestItemVM_PopulateQuestLog_QuestLogPatch.Prefix(BareItem(true), BareLog()));
     }
 
     [TestMethod]
@@ -119,7 +119,7 @@ public class QuestLogPatchTests
     {
         QuestLogDeferCalls.Initialize(null);
 
-        Assert.IsTrue(QuestItemVM_PopulateQuestLog_QuestLogPatch.Prefix(BareItem(true)));
+        Assert.IsTrue(QuestItemVM_PopulateQuestLog_QuestLogPatch.Prefix(BareItem(true), BareLog()));
     }
 
     // ---- UpdateIsUpdated ----
@@ -195,7 +195,7 @@ public class QuestLogPatchTests
         _clock.Advance(7);
         QuestItemVM_JournalCtor_QuestLogPatch.Finalizer(state);
 
-        StringAssert.StartsWith(_service.EndOpen(), "old=1,");
+        StringAssert.StartsWith(_service.EndOpen(), "fast open on; old=1,");
     }
 
     [TestMethod]
@@ -214,7 +214,7 @@ public class QuestLogPatchTests
 
     public static void OpenTarget(Action closeQuestsScreen)
     {
-        SeenDuringTarget = QuestLogDeferCalls.ShouldSkipPopulate(new object(), true) ? "deferring" : "vanilla";
+        SeenDuringTarget = QuestLogDeferCalls.ShouldSkipPopulate(new object(), true, null) ? "deferring" : "vanilla";
         if (closeQuestsScreen != null)
             closeQuestsScreen();
     }
@@ -236,8 +236,8 @@ public class QuestLogPatchTests
         OpenTarget(() => _clock.Advance(30));
 
         Assert.AreEqual("deferring", SeenDuringTarget);
-        StringAssert.StartsWith(_logger.Lines.Single(), "INFO [ScreenOpen] Quests open: 30.0 ms (old=0, deferred=1,");
-        Assert.IsFalse(QuestLogDeferCalls.ShouldSkipPopulate(new object(), true), "the finalizer closed the scope");
+        StringAssert.StartsWith(_logger.Lines.Single(), "INFO [ScreenOpen] Quests open: 30.0 ms (fast open on; old=0, deferred=1,");
+        Assert.IsFalse(QuestLogDeferCalls.ShouldSkipPopulate(new object(), true, null), "the finalizer closed the scope");
     }
 
     [TestMethod]
@@ -250,7 +250,7 @@ public class QuestLogPatchTests
         Assert.AreEqual("vm failed", thrown.Message);
         StringAssert.Contains(thrown.StackTrace, nameof(Thrower));
         StringAssert.Contains(_logger.Lines.Single(), ", threw InvalidOperationException");
-        Assert.IsFalse(QuestLogDeferCalls.ShouldSkipPopulate(new object(), true));
+        Assert.IsFalse(QuestLogDeferCalls.ShouldSkipPopulate(new object(), true, null));
     }
 
     [TestMethod]
@@ -264,13 +264,51 @@ public class QuestLogPatchTests
 
         Assert.AreEqual("deferring", SeenDuringTarget, "the scope belongs to the caller who opened it");
         Assert.AreEqual(0, _logger.Lines.Count);
-        Assert.IsTrue(QuestLogDeferCalls.ShouldSkipPopulate(new object(), true), "a finalizer without its prefix must not close another scope");
+        Assert.IsTrue(QuestLogDeferCalls.ShouldSkipPopulate(new object(), true, null), "a finalizer without its prefix must not close another scope");
+    }
+
+    // ---- the journal constructor's pair, through real Harmony ----
+
+    public static void JournalCtorTarget(Action advance) => advance();
+
+    private void PatchJournalCtorTarget()
+    {
+        new Harmony(HarmonyId).Patch(
+            AccessTools.Method(typeof(QuestLogPatchTests), nameof(JournalCtorTarget)),
+            prefix: new HarmonyMethod(AccessTools.Method(typeof(QuestItemVM_JournalCtor_QuestLogPatch), "Prefix")),
+            finalizer: new HarmonyMethod(AccessTools.Method(typeof(QuestItemVM_JournalCtor_QuestLogPatch), "Finalizer")));
+    }
+
+    [TestMethod]
+    public void JournalCtorPair_ThroughHarmony_CountsEachItemAndTotalsItsTime()
+    {
+        PatchJournalCtorTarget();
+        _service.BeginOpen();
+
+        JournalCtorTarget(() => _clock.Advance(4));
+        JournalCtorTarget(() => _clock.Advance(6));
+
+        var detail = _service.EndOpen();
+        StringAssert.Contains(detail, "old=2,");
+        StringAssert.EndsWith(detail, "journal items 10.0 ms");
+    }
+
+    [TestMethod]
+    public void JournalCtorPair_ThroughHarmony_TargetThrows_StillClosesTheItemAndRethrows()
+    {
+        PatchJournalCtorTarget();
+        _service.BeginOpen();
+
+        Assert.ThrowsException<InvalidOperationException>(() => JournalCtorTarget(Thrower));
+
+        var detail = _service.EndOpen();
+        StringAssert.Contains(detail, "old=1,");
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void Thrower() => throw new InvalidOperationException("vm failed");
 
-    // ---- GetJournalLogAt postfix, through real Harmony (the enum parameter is declared as object) ----
+    // ---- GetJournalLogAt postfix, through real Harmony (the engine's enum parameter is read as an int) ----
 
     public JournalLog? StandInResult;
 
@@ -293,26 +331,24 @@ public class QuestLogPatchTests
         var first = BareLog();
         var last = BareLog();
         _service.BeginOpen();
-        _service.TryDefer(item, true);
-        _adapter.FirstOrLastEntry(item, false).Returns(first);
-        _adapter.FirstOrLastEntry(item, true).Returns(last);
+        _service.TryDefer(item, true, first);
+        _service.TryDefer(item, true, last);
 
         Assert.AreSame(first, GetJournalLogAt(item, StandInIndex.First));
         Assert.AreSame(last, GetJournalLogAt(item, StandInIndex.Last));
     }
 
     [TestMethod]
-    public void SortPostfix_VanillaReturnedAnEntry_IsLeftAlone_AndTheAdapterIsNotAsked()
+    public void SortPostfix_VanillaReturnedAnEntry_IsLeftAlone()
     {
         PatchSortPostfix();
         var item = BareItem(true);
         var vanilla = BareLog();
         StandInResult = vanilla;
         _service.BeginOpen();
-        _service.TryDefer(item, true);
+        _service.TryDefer(item, true, BareLog());
 
         Assert.AreSame(vanilla, GetJournalLogAt(item, StandInIndex.Last));
-        _adapter.DidNotReceive().FirstOrLastEntry(Arg.Any<object>(), Arg.Any<bool>());
     }
 
     [TestMethod]
@@ -329,8 +365,7 @@ public class QuestLogPatchTests
         PatchSortPostfix();
         var item = BareItem(true);
         _service.BeginOpen();
-        _service.TryDefer(item, true);
-        _adapter.FirstOrLastEntry(item, false).Returns("not a log");
+        _service.TryDefer(item, true, "not a log");
 
         Assert.IsNull(GetJournalLogAt(item, StandInIndex.First));
     }
