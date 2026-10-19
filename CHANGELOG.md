@@ -10,6 +10,4558 @@
 > [`docs/changelog-archive/CHANGELOG-2026-H2-handwritten.md`](docs/changelog-archive/CHANGELOG-2026-H2-handwritten.md);
 > older ones are in [`docs/changelog-archive/CHANGELOG-2026-H1.md`](docs/changelog-archive/CHANGELOG-2026-H1.md).
 
+## v2.0.35 (2026-10-19)
+
+Commits since v2.0.34: 193 (181 with the version label, 12 without).
+
+### Features
+
+#### feat(balance): v2.0.34 - cap evil party-size feats at 10%
+
+`e166d8c8`
+
+Every party-size bonus of any weight sat on the evil side, and a
+200-day balance simulation had the free peoples falling from 47 to 41
+men per 100 evil men. The evil cultures' party-size feats are now
+capped at 10%:
+
+- Goblin-town and Blue Craig: +40% to +10%
+- Misty Mountain Orcs: +30% to +10%
+- Mordor, Isengard, Gundabad and Dol Guldur: +20% to +5%
+
+The men's realms keep their +5% and Gondor its +2.5%.
+
+The feats also set garrison and patrol limits, so evil garrisons
+shrink too: a Goblin-town town garrison goes from about 560 to about
+440, a Mordor town from about 480 to about 420, before leadership and
+buildings. On an orc roster heavy with weighted troops, the elite tax
+can now cancel the +5% entirely; that is accepted.
+
+Existing saves pick up the new limits on load. Evil AI lords over the
+limit are trimmed on the first day; a goblin or orc player's own
+party and garrisons lose a quarter of the excess each day.
+
+The character-creation culture cards and the faction screen show the
+new numbers in every language; Mordor's card had still said +10% from
+before its last retune. A test now fails when a card's party-size
+number differs from the feat.
+
+Refs #818.
+
+#### feat(balance): v2.0.34 - larger Arthedain hosts and new army targets
+
+`039e30f4`
+
+A 200-day balance simulation (ArmorySim, yotthani's standalone tool)
+had Arthedain losing 66 % of its men, the most of any free realm. Its
+lords spawned from a template capped at 83 men, against 200 for the
+other realms of men. Arthedain lords now spawn from the same 200 cap,
+so a new lord party starts with about 100 men instead of about 45.
+
+Armies now pick their siege targets in a different order:
+
+- Dunland goes for Rohan first, then Gondor. Arthedain comes last.
+- Gundabad goes for Mirkwood and Erebor first, then Dale. Arthedain
+  is now a target of opportunity.
+- Dol Guldur goes for Lothlorien first, then Mirkwood and Dale, then
+  Erebor.
+- Rhun already went for Erebor first and then Dale, and is unchanged.
+
+The Arthedain troop generator owns the template, so the new numbers
+live there and a regeneration keeps them.
+
+Refs #818.
+
+#### feat(diplomacy): v2.0.34 - no wars before the War of the Ring
+
+`2410aec5`
+
+Campaigns now open in peace. The years before the War of the Ring are
+a build-up: from day 0 to day 30 no kingdom is at war and the AI
+cannot declare one. On day 30 Isengard and Dunland attack Rohan, and
+that is the only war until the full War of the Ring begins on day 44.
+Gundabad's war on Arthedain now starts on day 44 as well.
+
+Every war declaration between two kingdoms follows the War of the
+Ring phase. Permanent allies never fight. Realms on the same side
+cannot fight while the war runs, but may after it ends. With the War
+of the Ring switched off, the old rule applies.
+
+- No start wars in the data. Dale against Rohan, Dunland against Rhun
+  and Mordor against Harad were vanilla leftovers; Gondor against
+  Khand, Shaghana and Abanissa and Arthedain against Gundabad are
+  gone too. A negative relation value declares war at load whatever
+  isAtWar says, so every row is now 0, and a test fails on any
+  future war row.
+- A war you cause yourself still happens before day 44: attacking a
+  kingdom's party or caravan, a crime rating high enough for war,
+  founding a kingdom with the wars your clan already has, and
+  enlisting under a lord of another kingdom.
+- The AI no longer proposes a war the rule would cancel, so clans
+  stop losing influence on proposals that cannot pass.
+- Call-to-war offers that can never lead to a war are cancelled
+  before you see them, so declining one no longer costs relation.
+- A daily check ends any war the phase forbids. An old save made
+  before day 44 loses its start wars on the first day after loading;
+  your own kingdom's wars are kept.
+- The Advanced Start scenarios that open with a war (Two Faction War,
+  Last Stand, Invasion, Alternative Calradia, Nord Invasion) are
+  hidden while the War of the Ring is on.
+- The kingdom screen explains a refused war: an unbreakable alliance,
+  the same side of the war, the war not begun yet, or only the first
+  wars of the age allowed.
+
+The three new refusal texts are English in every language until the
+next translation run.
+
+Refs #818. Follow-ups: #819, #820.
+
+#### feat(animation): v2.0.34 - per-soldier orc gait variety and limp gaits
+
+`d13e9165`
+
+Orc and goblin warriors no longer march in perfect lockstep. Each
+soldier now gets its own step size when it spawns: its normal step
+size times a random factor between a minimum (0.92 by default) and
+1.0, fixed for that soldier. The spread builds up while a line keeps
+walking; the engine snaps every soldier back to the same step phase
+when it stands fully still, so it starts again after each halt. A new
+MCM group, Animation Variety, has the switches: random step size per
+soldier (on), the minimum factor, random gait set per soldier (on),
+and a swing alternative probe (off, a diagnostic that only logs).
+Riders, mounts and the player are left alone.
+
+The same feature can also give each orc one of three walk and run
+styles, but those styles are not in the game yet. They need a
+Modding Kit import first (see below), so for now the gait set switch
+finds nothing and changes nothing.
+
+The new orc walk and run, reviewed by eye with Mike in Blender:
+- The main orc is a small Mordor or Moria scuttler: a deep hunch with
+  the head pushed forward and the eyes level, a crouch, feet on wide
+  separate tracks with the toes turned out, arms held out from the
+  body, and a limp: the left leg drags, the right leg takes the
+  weight, and the right shoulder sits low and leads. The run is a
+  forward-falling lope with the weak leg trailing.
+- Variant B is a bigger, more upright brawler with the mildest limp.
+- Variant C sits between the two, with the limp mirrored.
+The orc idles take the main orc's posture. The spine bend of the main
+orc (about 40 degrees) is over the 30 degree limit kept for blending
+into attacks, at Mike's request, so an attack from a walk may show
+the upper body straightening; that look is owed an in-game check.
+
+Animation tooling (tools/blender): the restyle tool gained the limp
+(strong and dragged leg, uneven 60/40 timing on a smooth time map,
+rebuilt foot paths so planted feet move at ground speed), a run
+override, mirrored variants, hand clearance against the thighs,
+calves and torso (with a wider gap for the shield arm), and spec and
+code fingerprints in its report. The validator now finds planted
+frames on its own, judges every frame the report claims as planted,
+and checks clearance.
+A new viewer, show_gait_variants.py, plays variants side by side with
+Armory weapons on the hands. The clip generator takes the stride and
+footstep points from the restyle report (-RestyleReport) and refuses
+a stale or failed report. The binder writes the variant action sets
+and refuses to touch any set it does not own.
+
+Live Armory: the 36 new FBX are copied into
+AssetSources\Race Test\Mordor\Orc\animations, animations_b and
+animations_c. Nothing is imported, so the game still plays the
+2026-10-14 orc clips. Backup and rollback:
+E:\LOTRAOMAssets\backups\orc_locomotion_20261017-224440. A reinstall
+of the Armory removes the copies.
+
+Still owed, in order: Mike reimports the 16 main orc masters (same
+names) and imports B and C in the Kit; wire the masters; move the old
+clip packages aside; generate the clips with -RestyleReport; save in
+the Kit; check the cache entries; bind the variant sets, then run
+--check --require-variants and the parity audit; refresh the Armory
+snapshot; then a Custom Battle with mixed orc formations. Testable
+today after a deploy: the step size switch, on and off.
+
+Known limitation: in the hunched orcs the sword tip can touch the
+floor (accepted by Mike). The swing foot of a crouched gait touches
+down about two frames early; capping how far it drops is a follow-up.
+The knee-limit pelvis lowering can step near full leg reach; also a
+follow-up. Bows, crossbows, two-handed weapons and polearms without a
+shield still use the vanilla walk and run.
+
+No GitHub issue, by Mike's decision of 2026-10-17; the clip half is
+tracked in #791. Reviewed by /deep-review (eight lenses), two Codex
+passes and two convergence passes over three fix rounds; every
+finding, fix and follow-up is in
+docs/reviews/rca-animation-variety-2026-10-17.md.
+
+#### feat(scenes): v2.0.34 - wire Kysaro's town, village and Rohan scenes
+
+`4bd4f3e5`
+
+Kysaro's scene drop (lotraom-assets db387f23f) is wired into the game.
+
+Settlements, in TAOM_Map's settlements.xml: Pelargir and Serelond get
+their own town scenes, Serelond its own arena, Amon Gelin and Lothgobel
+their own village scenes, and Eastern Moria the eastern Moria scene.
+Barad-dur, Durthang, Seregost, Thaurband and Naerband share the new
+Mordor town scene for now; Minas Morgul keeps its own. Calembel waits
+until its scene is finished.
+
+Custom Battle gains Eastern Moria, Pelargir, Serelond and Mordor Town as
+siege maps, Rohan Plains II as a field map, and Amon Gelin and
+Lothgobel as village maps. Rohan Plains II also joins Rohan campaign
+battles: 1 in 9 on cells 81 and 87, 1 in 10 on 88 and 89, 1 in 12 on
+80. The 7 new names are seeded in English in all 12 languages; their
+translation is still owed.
+
+TAOM_Map is not versioned, so a new LiveInstall test pins the 11
+settlement scenes and fails if a reinstall or copy-port reverts them.
+
+Not yet checked in game: none of these scenes has been loaded.
+
+Known limitation: the Mordor town scene has no player spawn point, so a
+night walk, a second walk or a disguised entry in those five towns
+puts the player outside the walls. Pelargir, Serelond and Lothgobel use
+building prefabs the game does not load, so some houses and decorations
+are missing. Both stay as delivered by decision; fixes are requested
+from Kysaro.
+
+Known limitation: no release channel carries these scenes or this
+wiring yet. A release needs a TAOM_Map package that holds them.
+
+Deep review: docs/reviews/rca-kysaro-scene-drop-2026-10-17.md
+
+#### feat(map): v2.0.34 - Lithur gets its three villages
+
+`d8c09626`
+
+Lithur, Gundabad's new castle in the far north, now has villages of
+its own: Lith-bosh (swine), Lith-mauz (cattle) and Lith-mîr (a silver
+mine). Without them the castle had no village trade, no villager
+parties and no rural notables. New campaigns only: an existing save
+keeps the map it started with.
+
+The rows live in the unversioned TAOM_Map install; this commit carries
+the village table that writes them (add_map_villages.py), so a
+reinstall can restore them and its --check fails if they drift from
+the map scene. The names show in English in every language until the
+next translation run.
+
+#### feat(scenes): v2.0.34 - two new Gondor field-battle scenes
+
+`0e0387e0`
+
+Two new Gondor battle maps join campaign field battles and the Custom
+Battle picker.
+
+Ruined Outpost (taom_gondor_battle_001_forceatmo) is a dark scene of
+cliffs, caves, river bridges and a ruined tower. It joins the Pelennor
+and Anorien cells (85, 86, 90, 91, 92) and comes up in 1 battle of 6
+there, 1 of 10 on cell 85.
+
+Pelennor Fields (taom_gondor_pelennor_fields_forceatmo) shows Minas
+Tirith and Osgiliath on its horizon, so it gets its own region on their
+cell 85 only, at 1 in 10. A test pins it there.
+
+Both names are registered in English and seeded into all 12 language
+files; the translation is still owed. The generated header of
+sp_battle_scenes.xml no longer carries a hand-kept scene count.
+
+Not yet checked in game: neither scene has been loaded in Custom Battle
+or a campaign battle. Ruined Outpost is town-sized (about 22,600
+entities), so its load and frame cost are measured at that test.
+
+Known limitation: no release gate checks that a channel's TAOM_Map
+holds every taom_* scene TAOM names. On 2026-10-17 the patreon and
+public channels lacked both new scenes and the Edoras siege scene, so a
+TAOM release there needs a TAOM_Map package carrying them.
+
+Deep review: docs/reviews/rca-gondor-field-scenes-2026-10-17.md
+
+#### feat(troopweight): v2.0.34 - trace main-party troop removals
+
+`36d4dda1`
+
+A player lost about 60 troops from their party right after buying
+elite units from the faction emissary. The heroes and the newly bought
+troops stayed. No code path in TAOM removes a whole party at once, so
+this release adds a temporary diagnostic to find out what did.
+
+Every time regular (non-hero) troops leave the player's party, the
+TAOM debug log now gets one [RosterLoss] line naming the troop, how
+many left, the party's regular count and the chain of code that
+removed them. Players see nothing in game, and nothing about the party
+changes. If you lose troops without a reason, send us your
+taom_debug log from that session.
+
+For developers: two observe-only prefixes, Patch_MainRosterLossDiag,
+on TroopRoster.AddToCountsAtIndex (the funnel for AddToCounts, Clear,
+RemoveIf, RemoveTroop and Add) and TroopRoster.SetElementNumber (the
+one public write that skips it). Lines are DEBUG and grouped by
+tick=, Campaign.CurrentTickCount. The registry entry lists the benign
+sources (battles, party-screen upgrades, transfers and Esc, desertion)
+and the removal checklist.
+
+Deep review: an earlier watchdog and burst warning were removed. The
+watchdog could not see SetElementNumber, and the warning fired on
+every party-screen Esc in the exact shape of the report. RCA:
+docs/reviews/rca-main-roster-loss-diag-2026-10-17.md
+
+#### feat(harness): v2.0.34 - upstream review; gates judge the right repo
+
+`7e26d77f`
+
+TAOM now tracks yotthani's bannerlord and MithrilForge repositories
+between adoption reviews. tools/upstream_watch.py reports how far each
+repository has moved since its last reviewed commit (status), writes
+per-area briefs from a blobless clone (areas), and moves the reviewed
+commit forward once a review record exists (advance). The session-start
+hook prints an UPSTREAM AHEAD line with the commit count; the check
+runs last, gets what is left of the hook's time budget (at most
+5 seconds) and reuses a 20-hour cache, so a slow or offline GitHub
+cannot hold a session for long. /upstream-review runs the whole cycle
+with every gate kept. A daily unattended run is described in the skill
+but is not set up.
+
+The git gates now judge the repository a commit or an add really runs
+in. They used to judge the main checkout even when the session worked
+in a worktree, so another session's untracked skill there blocked every
+worktree commit, and the ModuleData, doc-drift and version-label checks
+read the wrong tree. One shared reader in .claude/hooks/_shellwords.py
+(the version gate's parser, moved there) takes the directory from a cd
+or git -C before the call, then the session's working directory, and
+_pybin.sh resolves it to the work tree's top level, so a commit from a
+subdirectory is judged as the whole repository. The two gates that run
+the repository's own tools skip a commit in another repository.
+
+The shared reader reads at most 256 KB of command text, so a very long
+message cannot push a gate past its time limit. Open from the review
+(docs/reviews/rca-upstream-review-i3-2026-10-16.md "Open after the
+push"): a wrapper word before git (env, command, timeout) still hides
+the call from two gates.
+
+#### feat(harad): v2.0.34 - KEYforce's javelins, maces and bardings installed
+
+`f6b5bc7f`
+
+The Harad and Shaghana troops from d94ee1631 now find their new gear:
+KEYforce's Shaghana javelins, Harad one-handed maces and the regular
+cavalry bardings and saddles are installed in the live Armory, so none
+of those slots spawns empty.
+
+- Enlisting under an Aserai, Shaghana or Abanissa lord now issues his
+  maces, spears, shields and Harad armour; Shaghana infantry get his
+  javelins from soldier up, and archers keep the steppe bows a new
+  soldier can draw. The ten older Aserai kits are replaced by 14 kits
+  from the Harad tree, identical to Abanissa's.
+- His javelins keep their one-handed melee mode: their pieces sit
+  outside the starter-kit block that generate_starter_kit.py rewrites.
+- Custom Battle shows Aserai as "Harwan" with only the Harad army in
+  its troop slots (his d94ee1631 filter, now documented).
+- English names for his 32 new items and pieces; the other languages
+  show English until the translation run (#810).
+
+Live Armory files this changes (unversioned; backups beside each as
+*.bak-keyforce-harad-20261016-120114 and
+weapon_descriptions.xslt.bak-harad-javalt-20261016-133303):
+LOTRLOME_crafting_pieces.xml, harad/body_armors.xml and
+crafting_templates.xslt (his files), harad/weapons.xml and
+weapon_descriptions.xslt (three-way merged, TAOM's #805 edits kept),
+Languages/loc_harad.xml and loc_LOTRLOME_crafting_pieces.xml.
+
+Known limitation: six Harad troops sit outside their melee damage band
+(Mace II at 49 DPS on the tier 5 infantry and archers, his cavalry
+sword at 69 on the tier 3 horsemen); left as they are for now (#812).
+Release channels need an Armory package with harad/weapons.xml and the
+new bardings before this ships (docs/reference/release-process.md).
+
+Refs #805, #810, #811
+
+#### feat(skills): v2.0.34 - prep-tripo-prop skill for Tripo props and icons
+
+`71cc4c6d`
+
+Adds the /prep-tripo-prop skill: the phases that turn a Tripo AI FBX
+into a Bannerlord prop or map icon (probe, Blender decimation and UV
+prep, a scripted Substance Painter retexture, texture conversion, the
+Modding Kit hand-off and the records).
+
+Committed on its own so other commits can pass the hook that refuses a
+commit while a skill file is untracked. The scripts and docs it names
+(tools/blender, tools/painter, docs/kitbash/map-icons.md and the
+pipeline doc edits) are still uncommitted work of the session that
+wrote it.
+
+#### feat(mission-perf): v2.0.34 - time the camera and PreDisplay per frame
+
+`0273e2ea`
+
+The hitch probe and the tick profiler now report a cameraMs column in
+[TickProfile], [Hitch] and [TickSummary]. It times MissionScreen's
+UpdateCamera, which runs the camera tick and the engine's native
+PreDisplay (render preparation) inside Mission.OnTick. That time was
+booked in missionTickMs (probe mode) or otherMs (full mode) and is now
+taken out of that column, so a long frame at battle start can be split
+between behaviours and render preparation. yotthani measured the native
+PreDisplay at 1.1 to 3 ms a frame (MithrilForge docs/engine/perf.md).
+
+- A void prefix and finalizer on MissionScreen's explicit
+  IMissionSystemHandler.UpdateCamera, shielded by PatchShield. It is a
+  Harmony category of its own, Patch98_HitchProbe_Camera, applied only
+  after the probe. If it fails, the probe and the profiler stay on, the
+  install line leaves the camera out, and a WARNING says cameraMs reads
+  0.00 as unmeasured.
+- The engine calls UpdateCamera only while the mission is Continuing,
+  not on a dedicated server, and only when Mission.OnTick updates the
+  camera: fast-forward sub-ticks carry no cameraMs.
+- tools/perf_runs.py reads the column when present and still reads
+  older logs. compare is unchanged: it reads no tick-phase column.
+- Measured cost of the probe's managed brackets with the camera: 0.70
+  to 0.75 us per simulated frame (four runs), about 0.01% of a 10 ms
+  frame.
+- The "Enable Hitch Probe" hint names the camera and render
+  preparation.
+- The heartbeat doc's pin-class line for #806 is in this commit.
+
+Refs #809.
+
+#### feat(harad): v2.0.34 - KEYforce's javelins, maces, bardings, Custom Battle cleanup
+
+`d94ee163`
+
+The Harad and Shaghana regular troops get KEYforce's new kit on top of the
+tree rework (ladder bows unchanged):
+
+- One-handed maces replace the native aserai swords on every infantry and
+  archer troop: light mace at T1-T2, Mace I/II at T3-T5 (A/B per battle kit).
+- Southron infantry carry his javelins: light at T3, Javelin I/II at T4-T5.
+- Every cavalry tier carries his cavalry sword (the T3 Horseman was missing it).
+- Cavalry ride his bardings per battle kit, light/med/heavy A+B for the
+  Horseman, Scout and Cavalry, instead of the shared desert_cloth_harness.
+- The six Custom Battle lords use the Harad spears, shields, mace, sword,
+  javelin, longbow and heavy barding instead of native weapons.
+
+Custom Battle only (CustomGame nodes, campaigns never load them):
+- custom_battle_harad_troop_filter.xslt, after every NPCCharacters node, marks
+  non-hero Aserai/Shaghana characters obsolete unless their id starts with
+  harad_, so the Harwan and Shaghana slots stop offering Jawwal, Beni Zilal,
+  militia, caravan guards, practice dummies and town NPCs (53 troops remain).
+- custom_battle_cultures.xslt shows Culture.aserai as "Harwan" in the faction
+  list; the campaign keeps "Haradrim".
+
+This build needs the matching Armory (lotraom-assets 03320a65): the javelin
+and mace crafting pieces, harad/weapons.xml and the bardings in
+harad/body_armors.xml.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+#### feat(map): v2.0.34 - Gundabad gains Carn Dûm and Lithur
+
+`7245b0f3`
+
+Gundabad gets a third town and a sixth castle in the far north, and an
+Arthedain castle gets a new name. New campaigns only: an existing save
+keeps the map it started with.
+
+- Carn Dûm (town_G3), the old seat of Angmar, held by the Morzûg clan,
+  with four villages: Dûm-bosh, Dûm-lug, Dûm-ghâsh (an iron mine) and
+  Dûm-burzum. It starts as rich and as well built as Mount Gundabad.
+- Lithur (castle_G6), the first fief of the Grishûk clan. Its three
+  villages follow once they are placed on the map.
+- Arthedain's castle_AN5 is now Hoarwell Watch, a post on the
+  Mitheithel. The old name, Weather Hills, belongs to the broken
+  country around Weathertop that the Rangers still walk.
+
+The settlement rows live in the unversioned TAOM_Map install. This
+commit carries the tables that write them (add_map_fortifications.py,
+add_map_villages.py, now with a Gundabad style copied from Mount
+Gundabad and Bagbûrz), so a reinstall can restore them, and their
+--check fails if the rows drift from the map scene.
+
+The new names show in English in every language until the next
+translation run.
+
+#### feat(kitbash): v2.0.34 - Gondor kit catalog and six buildings in one FBX
+
+`434b8271`
+
+The Gondor kitbash kit is now measured and documented, and six new
+Gondor buildings are ready for the Modding Kit in one file:
+Scenes/Gondor/buildings_taom/gondor_buildings_a.fbx (a town house, a
+two storey townhouse, a watch tower, a barracks, a hall and a market
+arcade). Each building has a full mesh, .lod3, .lod6 and a collision
+body; all six were ray-probed (no see-through walls, closed gables and
+roofs, floors at grade) and their triangle counts match their parts.
+
+The Erebor kitbash tools take --kit erebor|gondor through one shared
+kit table and one tested set of part rules
+(tools/oneoff/kitbash_kits.py).
+A Gondor piece is a part family: sub-objects with their own LODs and
+one collision body, decals left out, a bare .lod kept as a base and a
+Blender .NNN copy never taken over its plain name. Erebor output is
+unchanged: its catalog, tables and prefab mining match the old tools
+byte for byte.
+
+Measured and written up in docs/kitbash/gondor/ and
+docs/kitbash/gondor-buildings.md: 330 kit parts and 166 props, the
+frame rule (the engine reads the kit turned 180 degrees about Z,
+proved by prefab rebuilds and a raw FBX compare), 15 joins mined from
+51,491 prefab placements and tested in Blender, and the Lond Cirion
+placement rules re-checked.
+
+Building the six found three traps, now handled and documented: trim
+tops are mouldings, so each trim is lifted by its measured cover
+(14.9 mm and 25 mm); buttresses are turned by their bounds, not a
+vertex count; corner columns are 2 % wider so the 6 m trim faces do not
+share their plane. New tools: blender_assemble_gondor_buildings.py,
+blender_kit_frame_probe.py and blender_zfight_attribution.py, which
+names the materials of every shared plane and tests whether it is
+visible. The probe gains --name for a multi-building file and probes
+a gable up to the ridge height the layout states.
+
+Not yet checked in game: the six buildings await their Modding Kit
+import. The old Lond Cirion barracks probably has its buttresses inside
+its walls (same placement call); see the known-open list.
+
+Deep review and RCA: docs/reviews/rca-gondor-kitbash-2026-10-15.md
+
+#### feat(kitbash): v2.0.34 - Erebor barracks, deep-review fixes and RCA
+
+`581144d3`
+
+Erebor kitbash buildings (#797): a third merged building and the fixes
+from a six-lens deep review of the Blender tools and their docs.
+
+New building: erebor_barracks_01, a 24 x 12 m two-storey barracks with
+a 12 m stone gable (two panel rows a side, ridge at z 9), two
+pilastered doors and dormitory windows. Exported with LOD tiers and a
+bo_ body, probed closed, and imported in the Modding Kit.
+
+Assembler fixes:
+- A failed export no longer deletes the live FBX. The export checks
+  every piece, builds every tier and refuses on a triangle mismatch,
+  a .NNN material or a missing collision body before any live write;
+  it stages the FBX, copies the old live file to .bak-<mtime>, then
+  copies the new one in.
+- The old DONE.txt is cleared before arguments are parsed, so a
+  rejected run cannot read as the previous verdict.
+- The probe layout (eave, half sizes, chamfer, ridge_z) is derived
+  from the placements instead of a hand-kept table.
+- New --inspect and --frame-probe modes; --preview and --export run
+  together; a bare .lod name is a base object; mirrored nodes flip
+  their normals; spec helpers for columns, pilasters and courses.
+- fbx_frame_compare.py flags pivots, offsets, geometric transforms
+  and parent models it does not model, and decodes only vertices.
+
+Docs: the buildings record gets one probe section per building and
+the Kit status; design-patterns.md gets the 12 m gable rule and the
+mirrored tower ramp (a negative prefab scale is a mirror, never a
+yaw 180); meshes.md counts corrected from the catalog.
+
+All three buildings were re-exported with the fixed assembler: same
+placements, triangle counts and bounds, so the Kit packages stay
+valid. Tests: tools/tests/test_erebor_assembler.py (21) and
+test_erebor_kit_tools.py (12).
+
+RCA: docs/reviews/rca-erebor-kitbash-2026-10-15.md. Findings in the
+tools the Gondor kit work now shares (prefab transform reader, probe
+verdict) are handed off there.
+
+#### feat(harad): v2.0.34 - KEYforce's Harad weapons and names, tier-7 bows
+
+`659d0fda`
+
+The Harad and Shaghana regular troops now carry KEYforce's own spears,
+sword, shields and arrows, in four battle kits per troop, and use his
+[Harwan] and [Shaghana] names. His spears can be couched from
+horseback. The Aserai careers start with his cavalry shield and sword
+(and his light spear for cavalry and infantry), and the Shaghana and
+Abanissa enlistment kits now come from the new troops; their archers
+keep the steppe bows an enlistee can draw.
+
+Harad archers get a tier-7 ladder bow for the Serpent and Red Serpent
+marksmen, every Harad archer moves to its tier's bow, and twelve Bow
+skills rise to match (the Serpent marksman goes from 125 to 260). No
+Harad archer now out-shoots a higher tier.
+
+This build needs the matching Armory: harad/weapons.xml, its crafting
+pieces and ladder_harad_bow_t7. Without them 20 Harad troops, the six
+Aserai careers and 19 enlistment kits spawn unarmed
+(docs/reference/release-process.md has the channel check).
+
+Known limitations: his three longbows are not sold and nothing hands
+them out yet. Troops shared by Shaghana, Abanissa, Umbar and the
+Haradrim Raiders read [Harwan]. New Harad names and 50 new item names
+show in English in other languages until the translation run (#810).
+His bow materials use three shaders no release ships yet (#811), and
+8 melee-band warnings on his spears stay open (#812).
+
+Refs #805, #803
+
+#### feat(kitbash): v2.0.34 - Erebor great hall, house review fixes
+
+`83b946e5`
+
+The second Erebor building, erebor_great_hall_01, is exported and
+passes the probe of the exported file (#797). It is a 21 x 12 m
+two-storey hall with 3 m chamfered corners, a hipped slate roof that
+rises to a flat deck at 7.5 m, and a door between double-height
+pilasters: 247 kit pieces merged into one entity with 25,590 triangles
+at full detail. Its floor tiles use their flat LOD as the base tier,
+since the floor is seen only through the door and windows; the two
+statues of the first draft were removed on review.
+
+erebor_dwarf_house_01 was imported in the Modding Kit and approved after
+two review fixes: the paving floor read as roof tiles in game, so the
+floor is now the carved stone tile, and the corner columns now carry the
+square capital at their foot as well as their head.
+
+The assembler can now lower the base LOD of a single placement, and its
+import note marks any material that has no material package in
+TAOM_Map. The probe now checks every storey of a wall, the chamfered
+corner walls (closed when plain, open when they carry a window) and a
+chamfered footprint, so it covers buildings like the hall.
+
+#### feat(kitbash): v2.0.34 - measured Erebor kit and merged buildings
+
+`fe06128e`
+
+The Erebor dwarven kitbash is now measured piece by piece, and whole
+buildings can be assembled from it in Blender and exported as one FBX
+each, so a building costs one prefab entity instead of one per piece
+(#797).
+
+The old catalog in docs/kitbash/erebor was written from thumbnails and
+had 14 wrong claims: the castle wall module is 20 m, not 3 m; the castle
+tower is square, not round; Roof_Top is a flat deck plate, not a ridge
+cap. meshes.md now holds the measured size, pivot, slope, openings, LODs
+and collision body of all 145 pieces. design-patterns.md holds the join
+rules, taken from 25,332 placements in the authored TAOM_Map prefabs and
+tested in Blender, and the frame rule: the engine reads each Erebor FBX
+turned 180 degrees about Z from Blender's import, so a prefab offset
+(x, y, z, yaw) is (-x, -y, z, yaw) in Blender.
+
+The first building, erebor_dwarf_house_01, is a 9 x 6 m gable house of
+63 kit pieces merged into one entity with two LOD tiers and a collision
+body. Its floor sits on the terrain. It is exported to TAOM_Map's
+AssetSources and passes a probe of the exported file (closed walls,
+gables and roof, planned openings only, triangle counts as briefed). Its
+first Modding Kit import is still owed.
+
+New one-off tools: the kit catalog, the prefab join miner and rebuild
+renderer, the join tester, the building assembler and its probe, and a
+Blender-free FBX frame compare, with tests for the pure Python ones.
+docs/kitbash/erebor/blender-build-prompt.md drives the work and
+docs/kitbash/erebor-buildings.md records each building.
+
+#### feat(war): v2.0.34 - chronicle_open is a dry run without confirm
+
+`629dcd08`
+
+taom.chronicle_open was rated Tier B, but an opened event saves its
+row, applies its effects and pays its momentum award, and no command
+reverts them: Tier C by the console's own definition. Decision D33,
+the recommended action:
+
+- taom.chronicle_open <id> now runs the same checks and prints what
+  a confirmed open would do: the narrative occurs, the siege opens
+  its window until day N, it resolves Fell at once because an
+  attacker already holds the target, or it stays Pending and why.
+  It adopts nothing, notes no phase day and changes no row.
+- taom.chronicle_open <id> confirm acts as before. Any other second
+  word is refused with the usage, before any lookup.
+- The refusals are unchanged: a co-op client, the chronicle off in
+  MCM, after the War of the Ring has ended, an unknown id and an
+  event that is no longer Pending.
+
+Tests first: seven service tests (a siege, a held target, a
+narrative, a failed precondition and three refusals, all as dry
+runs) and parser and output tests; with the dry run ignored, four of
+the service tests fail. dev-console.md and war-chronicle.md rate the
+command C, the in-game steps add confirm, and the test counts are
+recounted.
+
+Refs #765, #792.
+
+#### feat(tools): v2.0.34 - WildMesh3D mounts onto horse_skeleton (#794)
+
+`ba6eb1d4`
+
+Five animals from the WildMesh3D "Realistic Animals" pack are on their
+way in as horse-skeleton mounts with their own animation: a boar, a
+warthog and a mountain goat for the Dwarves, a deer and a moose for the
+Elves. Each is a second variant beside the war ram, the great elk and
+the Animalia elk and moose; nothing is replaced. Stages 1 to 8 of the
+quadruped-pack workflow are done: the meshes (LOD0 to LOD5), 1K
+textures, 74 clip masters wired to horse_skeleton and 96 clips are in
+the live Armory. The Armory data that makes them rideable comes next,
+so no player can ride one yet.
+
+The pack ships .blend files, so tools/blender/export_blend_pack.py
+(committed in 776054c0c with the bone map and the first measurements)
+replaces the Unreal export, and resamples the pack's 24 and 25 fps
+clips to the 30 fps the clip generator counts. Every WildMesh neck is
+far shorter than a horse's, so all five use a keep-neck profile; the
+boar and warthog come out leggier than the source.
+
+This commit finishes the tooling:
+- gen_animalia_anim_clips.ps1 takes -Pack wildmesh beside the Animalia
+  default, which still verifies all 54 of its clips.
+- measure_animalia_clips.py compared a hoof touching down on frame 0
+  with the closing frame, which repeats frame 0, so four walks and
+  trots measured three plants for four hooves. It now looks at the
+  frame before the wrap; the Animalia elk values are unchanged.
+- The re-measured gaits of the boar, deer, mountain goat and warthog.
+
+Several goat and warthog gaits in the pack do not loop, or curve
+sideways under forward names, so the warthog canters and gallops on
+the boar's clips and the goat gallops on the deer's. Docs: a feature
+page, the workflow's stage notes and gotchas, the tools catalogue, the
+feature map, the index and three lessons.
+
+#### feat(careers): v2.0.34 - one choice rule, forks, retrain, tree versions
+
+`b9a36f41`
+
+Career choices now go through one rule. The career screen used to
+restate its take check three times and had no refund check at all; a
+single rule now decides both the click and how each diamond is drawn,
+and a dimmed diamond says why in its tooltip ("Requires Level 10",
+"You took another keystone in this tier.", "No free career points.").
+That reason line is the only change players see on today's careers.
+
+The rest is engine work for the career redesign (#769), inert until a
+kingdom's careers are regenerated with the new attributes:
+
+- Forks: a choice group with max_picks holds at most that many picks;
+  the others dim with their own red rim. A fork pick can be refunded
+  freely only while the screen is still open; after that it is locked
+  in. Groups without max_picks keep today's rules, keystone limit
+  included.
+- Point schedule: point_levels on a career gives career points at those
+  levels only ("Next point at level N" under Free Points). Careers
+  without it keep one point per level.
+- Retrain: refunds every choice except the career's first for
+  1,000 gold plus 250 per level (retrain_gold_base and
+  retrain_gold_per_level on <Careers>). It keeps the career, its
+  unlocked tiers and its flags. Confirm is disabled when the player
+  cannot pay. Leaving a career that holds fork picks costs the same;
+  leaving one without them stays free.
+- Tree versions: tree_version on a career refunds a hero's choices once
+  when a save meets a newer tree, only when the new tree loaded, and
+  tells the player only when something was refunded. Character
+  creation and a career switch stamp the version, so a new player's
+  picks are never refunded.
+
+The group +/- and hover commands, bound by no screen since #388, are
+gone with their three tests. ICareerSwitchService is gone: nothing
+faked it (ADR-002). Two deliberate departures from the plan: there is
+no separate choice service, because the screen is the only caller that
+takes or refunds a choice; and a career switch costs gold only when the
+old career holds fork picks, so old trees still switch free.
+
+Review: /deep-review, seven lenses, 0 critical, 0 high, 2 medium (a
+price that wrapped negative on absurd config and made a switch free;
+a feature doc the change had made wrong), both fixed, plus a
+convergence pass. RCA docs/reviews/rca-career-e4e7-2026-10-14.md.
+Translation of the 15 new strings is owed (English until then).
+
+Checks: dotnet 15,285 passed, 6 skipped, 2 failed (the pinned game
+build, and language coverage with 32 older missing keys and none of
+these). validate_moduledata.py reports 1,867 errors, all broken item
+refs in the Harad, Umbar, Abanissa and Shaghana files after the live
+Armory's Harad items were rewritten the same morning; none is in a
+file this change touches.
+
+Not tested in game. On today's careers: load a save (no refund message,
+points unchanged); hover dimmed diamonds in each tier (the reason line
+fits); Retrain and "Next point" stay hidden; a career switch shows no
+cost. With a local test career (max_picks="1" on one group,
+tree_version="2"): the red rim and the fork and locked-in reasons;
+Retrain price, dimming, and Confirm greyed when short of gold; the
+switch cost prompt, Cancel staying in the picker; the one-time refund
+message on an old save.
+
+Refs #769.
+
+#### feat(war): v2.0.34 - hunt keeps going after a flee
+
+`cbacbf1f`
+
+Escaping the Eye of Sauron's hunter no longer ends the hunt. If you
+get away from his host, he picks up your trail again within the hour.
+Only a battle that someone wins against him, or a defeat of his side
+by anyone, ends it; a fight he wins elsewhere does not.
+
+Once he is within one and a half times your sight range he now rides
+faster than you, so you can no longer keep him just out of view by
+riding on.
+
+While you ride in another lord's army no hunt begins, and a hunter
+already on your trail holds back until you leave that army.
+
+#### feat(war): v2.0.34 - chronicle phase anchors and lost sieges
+
+`bad32ad0`
+
+War Chronicle events tied to a War of the Ring phase now count from
+the day the chronicle first saw that phase begin, when that is later
+than the configured phase day. Switching the War of the Ring on late,
+lowering a phase day, or turning on test mode mid-campaign no longer
+fires every overdue event and siege on the same day: they arrive one
+by one, as they would have on schedule. A campaign on schedule keeps
+its usual days, and the day is kept in the save.
+
+When a chronicle siege opens and one of its attackers already holds
+the town, the siege now counts as fallen: its fell rewards and
+momentum are paid, the usual fell message shows, and the events that
+follow it (Minas Tirith after Osgiliath) still happen. A town held by
+some other kingdom still skips the siege.
+
+#### feat(war): v2.0.34 - chronicle events, army focus, momentum award
+
+`84f5e63a`
+
+#### feat(war): v2.0.34 - the Eye of Sauron hunt
+
+`34b0e25a`
+
+Adds the Eye of Sauron hunt (#765 M8): a Ringwraith, or Glorfindel for an
+Evil-side player, hunts a player whose deeds draw the Eye. Single-player
+only in v1.
+
+#### feat(fiefs): v2.0.34 - a Fiefs button on the campaign map bar
+
+`ca248d1b`
+
+The campaign map bar now has a Fiefs button beside Kingdom (#789). A
+click opens the fief hub, as the F6 key does. When the hub cannot
+open, the button is greyed out and its tooltip says why: Fief
+Management is off in the mod options, you own no fief, or the map
+cannot open a menu now. The tooltip names the F6 key.
+
+F6 and the button share one opener and one map check, so they cannot
+behave differently. That check now also matches vanilla's own map
+rules: it refuses while the escape menu is open, while you are a
+prisoner or in an encounter, and in the first frame after a menu
+opens. The field camp's Make camp button uses the same check.
+
+The unused FiefManagementNavItemVM is deleted. Reviewed by a
+seven-lens deep review: docs/reviews/rca-fief-nav-button-2026-10-09.md.
+Built and tested on the installed v1.5.5; /engine-bump is still owed.
+The two new strings need the translation run (#782).
+
+#### feat(war): v2.0.34 - war ledger, timed war effects and rally
+
+`d340a725`
+
+Adds the first part of the War Chronicle (#765): a small catch-up layer
+that keeps the AI war of the Free Peoples and the Dark Powers closer to
+a stalemate, so the player decides the war.
+
+- Timed war effects: a kingdom can get a temporary bonus to volunteer
+  production (towns, villages and castles) or to its captured lords'
+  chance to escape. Effects are small and clamped; the MCM setting
+  "War Effect Strength" (0 to 2) scales them. The player's own clan
+  never gains or loses from them.
+- Rally: an AI-ruled kingdom at war that has lost 25% of its fortresses
+  since the start gets more volunteers and faster escapes; at 50% lost,
+  more of both. The bonus ends when it recovers past 15% and 40%. It
+  can be turned off in the MCM group "War of the Ring/Rally".
+- War ledger: one log line per kingdom per day records the balance of
+  the war, and tools/analyze_war_ledger.py turns a log into a stalemate
+  report or compares two runs.
+- Console: taom.war_effects, taom.war_effect_add, taom.rally_status and
+  taom.print_war_ledger.
+
+The escape roll mirrors vanilla's daily escape check, including its
+vetoes and perk factors. A save made before this change starts its
+rally baselines on the first day after the load, with a warning in the
+log. Under a co-op session the rally and escape rolls run on the host
+only.
+
+Reviewed by an eight-lens deep review with adversarial verification;
+all confirmed findings are fixed.
+
+Refs #765.
+
+#### feat(companion-tactics): v2.0.34 - formation presets save and load
+
+`1b9c2423`
+
+Formation presets in the Order of Battle screen now work (#779).
+Before, Save stored a name only and Load did nothing. Save now
+records the type, the captain and the hero troops of each formation.
+Load puts them back through the same steps that a player uses by
+hand, and checks each step.
+
+A formation type changes only when the game allows that by hand: a
+formation that is the only one of its type, while the battle has
+troops of that type, cannot change. A hero goes only into a
+formation whose saved type is in place. In a siege, saved cavalry and
+horse archer types become infantry and ranged types, as the game's
+own layout memory does. Heroes or formations that are not in the
+battle are skipped, and the message counts them. Only the general of
+the battle can use presets, and only in a campaign.
+
+A preset does not store troop shares or filters, and it cannot swap
+two formations that are each the only one of their type (#787). The
+feature stays off by default (MCM: "Enable Formation Presets") until
+it is checked in game. Every new string is localized; the
+translations are in #782.
+
+Reviews: a seven-lens deep review, a convergence lens and two Codex
+passes. Findings and fixes:
+docs/reviews/rca-formation-presets-2026-10-09.md. Save and Load
+follow the behaviour of yotthani's HoN FormationPresetManager; the
+code is TAOM's own.
+
+#### feat(stability): v2.0.34 - mission start, freeze and map guards
+
+`ecaa67d2`
+
+Four stability and performance fixes, adapted from yotthani's
+VanillaTuning (MIT; the notice is in THIRD-PARTY-LICENSES.txt).
+
+Mission start guard (#775). A battle whose start calls threw, from
+any module, loaded again in every frame, for ever. Now the guard logs
+a call that throws, with the type and module that own it. It shows
+one message, cuts that call short and lets the mission start. MCM:
+TAOM Crash Report, "Survive Mission Start Failures", on by default.
+
+Skeleton buffer guard and watch (#776). The engine reserves room for
+the skeletons that it draws in each frame. It does not check the
+limit, and one reservation too many freezes the game for good. The
+guard changes the engine code at the two reservation sites, so that
+an overflow reuses the first slots. A figure can then show wrong
+bones for one frame. The watch logs the peak fill of each mission. If
+nothing guards the buffer and a mission reaches 90 percent, one
+message tells the player to lower the battle size. MCM: TAOM Crash
+Report, "Skeleton Buffer Guard" (needs a restart) and "Skeleton
+Buffer Watch", both on by default.
+
+Settlement nameplate cull (#777). The campaign map updated about a
+thousand settlement nameplates in every frame, hidden ones included.
+Now the map skips a nameplate that is hidden and cannot become
+visible in that frame. This saves frame time on the map, most in fast
+forward. MCM: TAOM Battle Load Diagnostics, Map Performance, "Cull
+Hidden Settlement Nameplates", on by default. An A/B measurement is
+owed before release.
+
+Map view release (#778). In yotthani's measurement, each screen or
+menu over the campaign map left four render targets of the map view
+in GPU memory. They stayed until the next mission. Now every 20th
+cover releases them when the map returns, and that return shows the
+short loading screen. MCM: TAOM Battle Load Diagnostics, Map
+Performance, "Release Map View Memory" (on) and "Map View Release
+Interval" (1 to 1000).
+
+The BattleLoad loading window now also closes when TAOM's own mission
+setup throws. TAOM adds its closer in a finally around that setup.
+
+Reviews: two deep-review rounds, a final-state review with a critic,
+two convergence lenses and two Codex passes. Every finding is fixed
+or recorded in docs/reviews/rca-yotthani-adoption-2026-10-08.md.
+Follow-ups: #779 (formation presets) and #780 to #786. Owed: in-game
+checks for #775 to #778, and translations of the two new messages
+(#782).
+
+#### feat(tools): v2.0.34 - kitbash tools for new dwarf beards and hair
+
+`9bb78ae5`
+
+Tooling for #759: five new dwarf beards and five new hair styles, made
+by recombining the hair cards of the existing dwarf grooms. Nothing
+changes in game with this commit. The new grooms reach players after a
+Modding Kit import and an append to the Armory skins.xml.
+
+- tools/blender/groom_kitbash.py: pure Python, stdlib only, so Blender
+  can import it. Splits each groom into its loose hair cards, classes
+  each card by where it roots on the male dwarf head (moustache, chin,
+  cheek, sideburn and braid for beards; crown, back, side and braid for
+  hair), and validates and resolves recipes. 106 unit tests.
+- tools/blender/kitbash_grooms.py: Blender script with three modes.
+  inventory classes every card of the 22 existing grooms and renders
+  region views. preview renders recipe candidates on the head. build
+  joins the chosen cards, writes one UV layer per card, keeps only the
+  family's card and ring materials (the ring slot only when rings are
+  used), keeps or drops the 101 face-morph channels, exports, and
+  re-imports the file to check UVs, materials, weights and channels.
+- tools/groom_contact_sheet.py: labelled contact sheets of the renders.
+- tools/blender/specs/dwarf_grooms_kitbash.json: 19 candidates. The
+  picks are beards b03, b04, b05, b06 and b08 and hairs h01, h04, h07,
+  h08 and h09. The final map holds the pilot only: beard b04 twice,
+  with and without channels, for an in-game A/B, and hair h07 as
+  Dwarf_Hair_K.
+- tools/oneoff/append_dwarf_grooms.py: appends beards and hairs to the
+  four dwarf skins that carry grooms, and removes the temporary test
+  beards. It only appends, because a face key stores the groom as a
+  list position, and it refuses a removal that would shift a later
+  entry. Dry run by default; refuses to write the live file while the
+  game or the Kit runs. 44 unit tests.
+
+The pilot FBX files are built and installed in the live Armory, which
+git does not track: Race Test/Beards/SK_Dwarf_Beards_B.fbx and
+Race Test/Hair/Dwarf_Hairs_ThirdBatch.fbx. Still owed: the Kit import
+and save, the skins.xml append, the in-game A/B, then the other four
+beards and four hairs.
+
+Refs #759
+
+#### feat(markets): v2.0.34 - Arthedain and Lindon sell their own gear
+
+`685db7e4`
+
+Arthedain and Lindon towns now stock their own people's gear instead
+of only their donor culture's armour.
+
+- Arthedain's markets sell mostly the Arnor armour and the Numenorean
+  swords and poleaxes, about nine in ten draws. Gondor fills only
+  what the Arnor kit lacks: spears, lances, bows, shields, harness and
+  more swords.
+- Lindon's markets sell Rivendell's silver and silver-gold armour,
+  never the gold, the plain capes, leather and light pieces its troops
+  wear, and every Rivendell weapon.
+- The Arnor King's Crown is never sold, looted or given as a prize.
+  An Arthedain hero earns it as the first choice on the lord's gear
+  ladder's head rung, and King Arvegil II starts with it.
+
+Kingdoms no longer list two policies the game does not have (Lord's
+Prerogative and Religious Privilege, in all 15 TAOM kingdoms); the
+game already ignored them, so nothing changes in play. Gondor's own
+policy was misspelt the way vanilla misspells it, so Gondor started
+without it: new campaigns now start Gondor with Land Grants for
+Veterans (more veteran militia, 5 percent less village tax).
+Existing saves keep their policies.
+
+For modders: a culture's market config takes <Stock> rows (source
+culture, armour, weapons or everything but armour, an id pattern, a
+draw weight), and the lord's ladder takes <LadderPieces> to offer a
+named piece on an armour rung. The validator fails a Stock row or
+ladder piece that names nothing, and a test fails on any kingdom or
+culture policy id the game does not define.
+
+RCA: docs/reviews/rca-market-stock-and-policies-2026-10-08.md
+Closes #755
+Closes #756
+
+#### feat(arthedain): v2.0.34 - playable kingdom of Arthedain (Arnor)
+
+`b0246774`
+
+Arthedain, the North-kingdom of Arnor, is a new playable realm: a
+what-if in which Arvedui's line survived. King Arvegil II rules from
+Fornost Erain over five small clans and twenty lords, with three towns,
+seven castles and 24 villages in the north-west of the main map. It is
+weak by design, few lords and poor towns, and at war with Gundabad
+(Angmar) from the first day. At the War of the Ring's Full War every
+evil realm turns on it, as on every free realm.
+
+- A Dunedain troop tree of 23 troops in the Arnor armour: levies and
+  Fornost infantry, Rangers of the North with their own ranger bows,
+  the Citadel line up to the King's Guard of Fornost, and a short
+  cavalry branch. Lords, rulers and heirs wear the Arnor noble kit, and
+  the king wears the Arnor crown.
+- Arthedain can be picked at character creation, with its own
+  narrative, starting gear and three careers (Ranger of the North,
+  Warden of Fornost, Knight of Arthedain), and on the faction-select
+  map.
+- It shares Gondor's survival bonus, charge damage, banner bearers,
+  Citadel Guard rally and Castar costs, has its own Armourer's
+  Commission, and shares Gondor's Deep Seam quest.
+- Blue Craig gains a second town, Luinkrag, with three villages.
+
+The 18 careers of the six cultures promoted in August (goblin, Misty
+Mountains, Blue Craig, Lindon, Shaghana, Abanissa) now apply their
+battle abilities; before, they showed the activation and did nothing.
+
+A new campaign is needed to play Arthedain. Every new settlement sits
+at the end of the map's settlement list, so a save from before this
+change drops them and keeps all of its existing settlements.
+
+Translations of the new text are queued in #754. Follow-ups: #755
+(donor-culture market weapons) and #756 (two policy ids no kingdom can
+use).
+
+RCA: docs/reviews/rca-arthedain-2026-10-07.md
+Refs #753
+
+#### feat(shaders): v2.0.34 - show shader compile progress during rebuilds
+
+`82645b53`
+
+After a mod list change, a game update or a fresh install, the game
+rebuilds about 1,340 shaders before the main menu. Every core is busy
+and the loading symbol freezes for a minute or more, so the game looks
+hung.
+
+TAOM now shows a small window over the game while that runs: "Compiling
+shaders: 412 of about 1336", with a line saying the game is not frozen.
+It counts the shaders from the game's own log, remembers the last full
+total for the next time, never takes the focus, and closes at the main
+menu. While it is up the game runs at below-normal priority so the rest
+of the computer stays usable; the priority is restored afterwards.
+
+It stays off on a dedicated server and when yotthani's VanillaTuning is
+loaded, which shows the same notice. The idea is from VanillaTuning;
+the code is TAOM's own.
+
+The three new texts are in English for now; the translations follow
+with the next translator run.
+
+Not-tested: in game; the check is owed (#752,
+docs/features/shader-compile-notice.md).
+Review: the Opus deep-review lenses are still out on the weekly model
+limit; tests (16 new, full suite at its baseline) and a manual review.
+
+Refs #752
+
+#### feat(shaders): v2.0.34 - keep the shader cache across mod list changes
+
+`372773d1`
+
+Bannerlord throws away its compiled shaders whenever the list of active
+mods changes, even by a mod with no shaders of its own, and a TAOM start
+then spends about 40 seconds recompiling roughly 1,340 of them. The
+check runs before any mod loads, so no mod can stop it from inside.
+
+TAOM now ships yotthani's ShaderCacheKeeper (MIT), a small
+xinput9_1_0.dll placed beside the game's executable through the
+launcher. When the mods that bring their own shaders are unchanged, it
+updates the mod list stored with the cache and the game keeps its
+shaders. Changing TAOM, TAOM_Map or the Armory, or a game update, still
+rebuilds them as before. Gamepad calls pass through to Windows.
+
+Four problems in the original were fixed before it ships: the game could
+not start on a PC where Windows is not on C:, an updated shader mod
+could leave old shaders in use, a multiplayer start through the BLSE
+launcher could throw away a good cache, and with very many shader mods a
+change could go unnoticed. To switch it off, put an empty file named
+ShaderCacheKeeper.off beside the DLL.
+
+Source and tests are in Native/ShaderCacheKeeper (13 hermetic cases and
+4 parse tests, 0 failed; the fixed cases failed against the original
+first). The DLL is built and copied into each channel's bin folder at
+release time, testing channel first.
+
+Known limitation: the launcher never deletes this DLL, so retiring it
+later needs a do-nothing build or a launcher removal step.
+Not-tested: in game; the check is owed on the testing channel (#751).
+Review: the Opus deep-review lenses hit the weekly model limit; a
+manual pass found one test-fixture bug, fixed
+(docs/reviews/rca-shader-cache-keeper-2026-10-06.md).
+
+Refs #751
+
+#### feat(arena): v2.0.34 - tournaments keep Free and Evil apart
+
+`646846cb`
+
+Tournaments no longer seat the other side. A player found Mordor orcs
+competing at Minas Tirith: vanilla fills the sixteen slots from the
+lords, wanderers and garrison in town and never looks at culture or
+side.
+
+Now a tournament of the Free Peoples seats no lord, wanderer or troop
+of the Shadow, and a tournament of the Shadow seats none of the Free
+Peoples. Each one is replaced by one of the town's own troops, so the
+bracket stays full. A town's side is its owner's, so a captured town
+follows its conqueror, and a town held by Khand, Umbar, Shaghana or
+Abanissa bars nobody. Neutral lords and wanderers, the troops the town
+recruits, you and your clan always compete. Dunland counts as the
+Shadow. With fewer lords in the field the prize and the renown are
+smaller. Off-screen tournaments follow the same rule.
+
+Toggle: MCM, Tournaments, "Keep Enemy Sides Out" (on by default).
+
+Refs #744 (in-game check owed). Review and RCA:
+docs/reviews/rca-tournament-alignment-filter-2026-10-06.md
+
+#### feat(siege): v2.0.34 - siege troop picker and troll siege role
+
+`92839bc5`
+
+Two features for siege wall battles, so trolls stop standing idle at
+ladders they cannot climb (#734, #735).
+
+Siege troop picker (#734). Before every wall battle you fight, as
+attacker or defender, the vanilla Manage Troops screen opens, the same
+one hideouts and the lord's hall use. Cave and hill trolls start
+unticked; tick them to bring them. Troops you leave out stay in camp:
+they do not spawn, take no losses, and a lost wall battle with men
+still in camp continues the siege instead of ending in capture. The
+picker covers your party, your whole army when you lead it, and your
+own garrison when you defend your own fief. It never appears in
+sally-outs, relief-force battles, the lord's hall, co-op or on a
+dedicated server, and it is refused if its spawn-total patch did not
+load. MCM: Battle Tactics / Siege Forces. Engine seams: Patch102 (a
+prefix on PlayerSiege.StartSiegeMission and one on
+DefaultBattleMissionAgentSpawnLogic.InitWithSinglePhase) and a new
+TroopSupplierProbabilityModel override.
+
+Troll siege role (#735). In every wall battle, for every side and every
+army, AI-controlled trolls never use ladders, siege towers, rams, gate
+levers or siege engines. They stand clear while a ram works, then smash
+the outer gate and the inner gate, then hold the courtyard; defending
+trolls hold the gate at ground level instead of climbing the walls.
+Player orders are obeyed, except that Charge before the gates fall
+sends trolls to the gate. A troll's melee blow on a gate is multiplied
+by gateDamageMultiplier in ModuleData/siege/creature_siege_role.json,
+a provisional 2.0 until it is measured in game. No Harmony patches:
+the detachment cost and damage scaling overrides on the four shared
+models, per-agent navmesh exclusion of ladder and tower faces (at most
+6 ids per scene), and one mission behaviour. MCM: Battle Tactics /
+Creature Siege Role.
+
+The troll role is a behavioural port of The Old Realms' TOR_Core
+(GPL-3.0, read at commit 5ccd0b91): TAOM reproduces the behaviour on
+its own seams and copies no code, constants or identifiers. The
+provenance register row is updated to behavioural-port.
+
+Built against Bannerlord v1.5.4; every engine member used was checked
+on the installed DLLs. The API snapshot rows were hand-edited rather
+than regenerated. The orientation trap index merged its two Armory rows
+into one to make room for the ladder-queue row. Deep review, fixes and
+lessons: docs/reviews/rca-siege-forces-2026-10-05.md.
+
+Known limitation: the in-game checks are still owed (troll climbing
+spike, gate strike, defenders engaging, gate break timing to set the
+multiplier, the campaign checklists in docs/features/siege-forces.md
+and docs/features/creature-siege-role.md). With trolls unticked, the
+vanilla "room for more soldiers" prompt appears on most assaults.
+
+### Fixes
+
+#### fix(tools): v2.0.34 - release packager refuses Custom Battle test troops
+
+`a4b5d625`
+
+The release packager now refuses to package a module whose ModuleData
+defines a taom_test_ troop, in a dry run too, and names each file.
+The /release pre-flight already blocked test troops in the repo, but
+a channel package is made from the game install, where a deploy never
+deletes a file: the v2.0.35 testing package of 2026-10-18 shipped the
+five WildMesh test riders that way. A dry run against that package
+now exits 2 and names ModuleData/test_riders/wildmesh.xml.
+
+A name key alone ({=taom_test_x}) defines nothing and passes, as do
+files outside ModuleData and excluded backup sidecars. The release
+skill and release-process.md say the Phase 8 prune must remove such a
+leftover before the dry run passes.
+
+Review: docs/reviews/rca-wildmesh-rider-removal-2026-10-18.md
+finding 1.
+
+Tests: tools/tests/test_package_release.py, 147 passed (4 new).
+
+#### fix(tools): v2.0.34 - battle-load triage spots a frozen shader count
+
+`89374fc4`
+
+The battle-load triage tool no longer calls a render-wait hang a
+draining shader cache when the log went quiet long before the
+watchdog fired. A player bundle from 2026-10-18 showed two samples
+falling from 3128 to 3066, then nothing for about 290 seconds. The
+game writes that line once per second, and the watchdog fires only
+on a count unchanged for 60 seconds, so the count was frozen.
+
+When the gap between the last WaitingForRender line and the watchdog
+line is 30 seconds or more, the verdict now says the count is frozen,
+that the log alone cannot separate a slow compile from a main-thread
+wedge, and points at the compile_shader lines in the full rgl_log and
+a hang dump. The timing summary and next steps say the same.
+
+Tests: tools/tests/test_triage_battle_load.py, 158 passed.
+
+#### fix(animation): v2.0.34 - orc gaits installed, strict variant gate
+
+`a4f42f42`
+
+The per-soldier orc gaits are now in the game. Mike imported the 36
+orc animation masters into the Armory on 2026-10-18; the clips were
+generated, saved by the Modding Kit and bound, so each orc soldier
+walks and runs with one of three gaits (the main hunched limp, B or C)
+at its own step size. A first Custom Battle split 125 orcs 38, 37 and
+50 across the three gaits, with no missing clip, set or duplicate name
+in the game log.
+
+The swing alternative probe is on by default while the swing clips are
+tested (Mike). It only logs: with no act_taom_ code loaded it writes
+one line per mission. No saved value of the setting exists anywhere
+(no deployed or released build had it off, and the only TAOM.json
+predates it), so the rule that a changed default's tooltip mentions
+saved values does not apply. Owed: rename the setting with the default
+off before the next release or before any act_taom_ code reaches the
+Armory.
+
+The reinstall gate is stricter: bind_orc_goblin_locomotion.py --check
+now fails when an orc gait variant has vanished with its clips, which
+is what a reinstall leaves. --allow-no-clips covers an install before
+the Kit import, and --require-variants is gone.
+
+The docs record the install, the full rollback and restore steps, the
+probe default, the DualWield limit Mike accepted (its few dual-wield
+troops keep their own set) and the corrected anf_cyclic rule (not
+required on locomotion-table clips). Review and lessons:
+docs/reviews/rca-orc-gait-install-2026-10-18.md.
+
+Live LOTRLOME_Armory changes (unversioned): ModuleData/action_sets.xml
+(+55 lines, as_orc_warrior_b and _c; backup
+action_sets.xml.bak-orc-goblin-bind-20261018-092156), 72 packages in
+Assets/Race Test/Mordor/Orc/animations, animations_b and animations_c,
+and 36 RuntimeDataCache entries. The 2026-10-14 clips are in
+E:/LOTRAOMAssets/backups/orc_locomotion_20261017-224440.
+
+Issue #817; refs #791.
+
+#### fix(hooks): v2.0.34 - config override unlocks one session only
+
+`88e80545`
+
+config-protection.sh lets an edit to settings.json,
+Directory.Build.props or an ADR through only when an override file
+exists, created on the maintainer's explicit request. The hook built
+the file name from CLAUDE_SESSION_ID, which the harness never sets, so
+the name was always /tmp/claude-config-override-none, and that one
+file unlocked protected edits for every session on the machine while
+it existed. The hook now takes the session id from its input (the
+session_id field every hook receives), then from
+CLAUDE_CODE_SESSION_ID, so an override unlocks only the session that
+made it. With no id there is no override at all.
+
+#### fix(tools): v2.0.34 - map icon tooling review fixes and shared job file
+
+`041808e5`
+
+The Tripo-to-map-icon tooling first landed in 71fea53c8, whose message
+lists files rather than what they do. In short: a Blender builder that
+rebuilds the Carn Dum campaign map icon (town_G3) from clean solids,
+because the Tripo model looked like melted wax at any triangle count;
+an unwrap tool that gives each texture set its own unique UVs; and
+scripts that drive Substance Painter 12.1.5 over its remote-scripting
+port to bake, paint and export each set. The approved shape has no gate
+horns or sigil, tower ribs that run into the ground and half as many
+houses. That commit also carried other sessions' work: the Erebor
+dress fix (DwarfDressWearerTests), KEYforce Harad javelin follow-ups
+and a translate_with_claude.py change.
+
+This commit applies the deep review of that tooling:
+
+- Every Blender script that a caller polls now writes its completion
+  file through tools/blender/blender_job.py. The old report goes first,
+  "ok" is written only when the work returns, and any exception writes
+  "error" with its trace. Before, a failed export or a stale file could
+  read as success. The prep script clears its old report before it
+  parses arguments.
+- convert_tripo_prop_textures.py no longer defaults its output to the
+  live TAOM_Map textures folder: --src and --dst are required, and an
+  existing file is replaced only with --force. Without --stem it
+  converts every texture set to t_<set>; before, it took the first set
+  and silently dropped the other six.
+- painter_new_project.py refuses to close a project with unsaved work,
+  fails when the mesh load or the bake fails, and reads each set's
+  resolution from the unwrap report. painter_run.py tells a timeout
+  from an unreachable Painter. painter_export.py takes the exact preset
+  name and only power-of-two sizes.
+- unwrap_texture_sets.py breaks ties the same way on every run, flips
+  normals under a mirrored transform, fails when inverted faces exceed
+  0.1% of the area, and reports per part how much hidden area keeps
+  full density.
+- The builder (v11) starts each terrace riser and the outer wall where
+  the geometry that hides them ends. That raises the town set from 9.7
+  to 11.9 px/m and the walls set from 11.8 to 12.9.
+- One recipe file, tools/painter/painter_stacks.py, replaces the three
+  stack scripts. It refuses an unknown ARGS key, a set name that is not
+  in the project and a run that would paint nothing.
+  render_painter_preview.py (with --albedo for the unlit colour)
+  replaces both preview scripts. The tiling route is
+  retired. measure_tripo_layout.py measures a Tripo model's footprint
+  and heights for a rebuild.
+
+35 new tests cover the job file, the converter, painter_run and the
+unwrap rules. The icon's texturing is not finished; it continues in the
+next session.
+
+#### fix(hooks): v2.0.34 - upstream check in its own hook; Codex fixes
+
+`407570ec`
+
+The upstream review check now runs as its own SessionStart hook,
+.claude/hooks/upstream-watch.sh, registered in .claude/settings.json
+with a 10-second limit of its own (the maintainer's request). It no
+longer shares session-start.sh's limit with the game-version and
+Armory drift checks, so a slow GitHub cannot cost those banners. The
+two probes left in session-start.sh share one deadline counted from
+the hook's first command, so that hook ends inside its limit even
+when both probes are slow.
+
+The Codex review of the previous push found gaps in the shared
+repository reader that the git gates use, all fixed: a command that
+commits in two repositories had only the last one checked (the
+commit gates now deny it and ask for one repository per command, and
+the broad-add confirm says its list is incomplete); a cd inside
+parentheses leaked out when the closing parenthesis touched a
+semicolon; and pushd moved the directory while popd was ignored.
+Codex found no defect in the garrison and patrol fix or the busy-time
+logging.
+
+#### fix(troopweight): v2.0.34 - garrisons and patrols pay no size penalty
+
+`c2449a30`
+
+Garrisons deserted every day under the troop-weight penalty. The
+penalty shrank a garrison's size limit by the weight of its elite
+troops; vanilla desertion then removed a quarter of the excess each
+day and the garrison's morale fell with it, while lords kept refilling
+the garrison to its full, unweighted limit. Yotthani's campaign run
+counted about 20,600 deserters in the free block over 150 days,
+19,600 of them in the four elven realms (yotthani's reading of the
+cause; TAOM confirmed the mechanism by reading the code).
+
+Patrol parties had the same flaw in another form: nothing trims or
+refills a patrol to its reduced limit, so an elite patrol stayed over
+it for good and crawled under vanilla's over-limit speed penalty.
+
+Garrisons and patrols now pay no size penalty, and the party screen
+and the clan screen show their real counts against their real limits.
+Lord parties and caravans are unchanged.
+
+Not yet checked in game: an elven garrison over a month, and the
+speed of an elite patrol.
+
+#### fix(tools): v2.0.34 - safer port tools, artist name and merge helpers
+
+`a9f2d7ed`
+
+Shaghana lord parties now field Shaghana's own Red Serpent troops
+instead of the Harwan Serpent line, as their clan heraldry intends
+(27 stacks in nine party templates).
+
+Tools for porting an artist's drop into the live Armory:
+- register_armory_names.py finds item and piece names with no English
+  row. --check fails on a new one (a baseline of 611 existing names
+  can only shrink), --apply writes the rows. It is in the artist
+  brief's pre-commit checks.
+- merge_live_file.py three-way merges a live CRLF file with the
+  artist's versions from the mirror, writes nothing on a conflict and
+  refuses XML that does not parse. First slice of #813.
+- generate_enlistment_rosters.py: --reseed rebuilds one culture's
+  kits, and the Harad archer chains get their steppe bows from a table.
+
+Fixes:
+- generate_starter_kit.py refuses to rewrite or revert a marker block
+  that holds another author's rows; --verify reports such a block.
+- validate_moduledata.py: the melee ladder pass now reads the
+  --moduledata and --game-modules it is given, and the armour class
+  table check says "not verified" for another tree (#812, tool half).
+- translate_with_claude.py: --max-entries 0 is a cap of zero (it used
+  to mean no cap on paid calls); --sync-ids --seed-only seeds rows for
+  free.
+- generate_tavern_mercenaries.py is a dry run unless --apply.
+- Three generators no longer name the Harad armour retired on
+  2026-10-10 (#804).
+
+Refs #804, #812, #813
+
+#### fix(mission-perf): v2.0.34 - cameraMs review fixes in tools and docs
+
+`c7612577`
+
+Fixes from the second review of the cameraMs column (#809). The game
+code is unchanged apart from comments.
+
+- tools/perf_runs.py: a mission row whose windows mix logs with and
+  without cameraMs no longer drops the measured camera time; the column
+  shows when any window has it. No log TAOM writes produces such a row
+  (one log is one build), so real reports are unchanged.
+- The test helper for old-build lines now puts the camera time back in
+  otherMs, as an old build wrote it, and a test checks that such a line
+  sums to its wall clock.
+- The engine calls PreDisplay() only while the mission is Continuing
+  and its result is not decided, so after a battle's result cameraMs
+  times the camera tick alone. Comments and docs now say so.
+- The camera target is shielded by PatchShield only from a process's
+  second game start (the probe installs after PatchShield's game-init
+  pass); the PatchShield section has its row.
+- If MissionScreen cannot be loaded, the camera class is skipped at load
+  (an ERROR in the startup notice) and the install line still names the
+  camera: documented.
+- Cost: a same-session A/B on the desktop gave 0.646 to 0.767 us per
+  simulated frame without the camera bracket and 0.715 to 0.836 us with
+  it, so the bracket's own cost is inside run noise. The doc no longer
+  sets the new figure beside one from another day.
+- The full-mode [HitchDetail] sample's onTickMs includes the camera.
+- The v1.5.5 PreDisplay address in the frame table names its build.
+- Tests: one scan instead of two, one list per fact, two duplicate
+  tests removed.
+
+Refs #809.
+
+#### fix(main-menu): v2.0.34 - main-menu setup never throws into the engine
+
+`85c60896`
+
+Bannerlord calls every module's OnBeforeInitialModuleScreenSetAsRoot
+with no try, and calls the whole chain again on every tick while no
+game state is active (v1.5.5 Module.cs). TAOM's crash containment
+(Patch37) swallows a throw there, so one throw in TAOM's menu setup
+would re-run every module's hook on every tick instead of failing once.
+
+TAOM's main-menu customization now runs through LifecycleStep.Run. A
+throw is caught and logged once as a [MainMenuStep] WARNING that names
+the step, and the hook goes on without it. The step is not latched, so
+a later call can still succeed. The shader-notice stop beside it only
+sets a flag and stays a direct call.
+
+SubModuleMainMenuHookTests pins this shape. LifecycleStepTests covers
+the guard: success, a throw, one warning per step name, and a logger
+that is null or throws.
+
+Refs #807.
+
+#### fix(race-abilities): v2.0.34 - cap ability radii at the 15 m grid limit
+
+`b6f7ab36`
+
+Race-ability radii (rally, kin bonus, fear on kill, fear aura) and the
+KinWithin trigger range are now capped at 15 m, down from 30 m and
+40 m. Past 15 m the engine's nearby-agent search stops using its
+proximity grid and checks every agent on the field. No shipped value
+changes: every shipped radius is 12 m or less. A custom value above
+15 m is rejected with a warning: a radius reverts to 0, a kin bonus is
+dropped, and a KinWithin trigger is skipped.
+
+Enemy trigger ranges keep their 40 m cap, because five shipped
+abilities sense past 15 m (Stand Fast 20 m, Forth Eorlingas 30 m, and
+three ranged-weapon triggers at 30 to 40 m). Each such soldier pays
+one full search a second until his ability fires; the cost is not yet
+measured.
+
+The race-ability and signature-strike docs now say that their fear
+effects have no morale floor, so their routs spread to the formation.
+
+Tests: four redundant 31 m rows were replaced by 15.5 m rows; a 15 m
+edge test, a kin-bonus NaN row and a KinWithin row were added.
+
+Research: native IMBMission.GetNearbyAgentsAux (15 m grid limit)
+
+#### fix(dread): v2.0.34 - the dread aura weakens close troops, never routs
+
+`efa32184`
+
+The Aura of Dread of the Nazgul, the Witch-King and Sauron no longer
+reaches across the battlefield. It now touches only the enemy troops in
+contact with a wraith (5 m, full strength within 2 m; it was 12 m and
+4 m), and it weakens them instead of routing them: their morale drains
+down to 10 and stays there, and the fighting finishes them.
+
+Why it spread: the aura could drain morale to 0 and rout troops by
+itself, and every rout costs up to 10 allies morale. Vanilla takes
+those allies from within 4 m first, then from anywhere in the routing
+troop's formation, so once a line thinned, dread seemed to reach the
+whole field.
+
+The MCM "Dread Radius" setting is stored under a new name, so every
+settings file starts on the new 5 m default and an old saved 12 is
+ignored. The slider now stops at 15 m: past 15 m the engine's
+proximity search checks every agent on the field on every pulse.
+
+Known limitation: the Nazgul Scream, Sauron's Slam and race-ability
+fear have no floor, so they can still rout troops the aura has
+weakened, within 4 to 8 m of the source.
+
+Tests: three floor-0 race tests (elf 93 s, dwarf 113 s, elf hero) were
+deleted as redundant. Race resistance and floor 0 stay covered by other
+tests, and the floor-10 time-to-floor table replaces them.
+
+Deep review and RCA: docs/reviews/rca-dread-aura-local-2026-10-15.md
+
+Not-tested: in game (a campaign battle with a wraith)
+Research: AgentMoraleInteractionLogic, native GetNearbyAgentsAux
+Save-compat: none; MCM key DreadAuraRadius is now DreadAuraCloseRadius
+
+#### fix(data): v2.0.34 - Harad pools, kits and names after the tree rework
+
+`44e9edd4`
+
+Harad, Shaghana and Abanissa work again after the Harad troop tree was
+replaced on 2026-10-10.
+
+- Volunteers: Harad and Abanissa offer the Harad Levy, the Serpent
+  Noble and, more rarely, the Pezarsan camel levy. Shaghana offers its
+  own Southron Levy and Red Serpent Noble.
+- War elephant and Mumakil riders are no longer volunteers. Buy them
+  from the Elite Emissary at Korb Taskral for War Drums: 70 for an
+  elephant rider, 2800 for a Mumakil rider. AI lords no longer field
+  them.
+- Upgrading a Harad troop never lowers a skill any more.
+- Enlisting under a Shaghana or Abanissa lord issues Harad kits instead
+  of Rohan militia gear. Harad archer kits carry steppe bows a new
+  soldier can actually draw, and no rank's bow is weaker than the rank
+  below it.
+- Aserai careers start in the Harad tunic and carry the lance the Harad
+  militia carry.
+- The Harad and Shaghana armourer's commissions reward a heavy chest
+  of that culture's own line.
+- Shaghana and Abanissa taverns hire their own mercenaries.
+
+Known limitation: a v2.0.34 save that holds one of the 25 Harad troops
+replaced on 2026-10-10 is not supported (Mike's decision); start a new
+campaign for Harad.
+
+Known limitation: the new Harad troop names read in English in every
+language until the next translation run.
+
+Tooling: generate_enlistment_rosters.py --seed-missing works for the
+first time (its marker comment held a double hyphen, which XML forbids),
+generate_tavern_mercenaries.py can finish a run again, and the name
+generator no longer registers vanilla keys from the obsolete-troop
+overrides file.
+
+Refs #798
+
+#### fix(tools): v2.0.34 - WildMesh review convergence fixes
+
+`e6b8fd49`
+
+The convergence pass of the WildMesh3D mounts review (#794) found two
+MED and five LOW defects in the first fix round; this fixes them.
+
+The five new Armory item names (War Boar, Bristleback Boar, Iron Hills
+Goat, Mirkwood Stag, Greenwood Moose) now have English rows, so
+check_external_loc_coverage.py counted them as untranslated in all 12
+languages and failed. The baseline records them: only the Armory counts
+move, by five per language. Their translations are owed.
+
+gen_animalia_anim_clips.ps1 exits 2, not 1, when a measure file cannot
+be read, and its help text describes the SHORT check, the new BAD
+MEASURE conditions and the per-pack checksum scope.
+export_blend_pack.py refuses abbreviated options, so a stale verdict is
+always cleared in the real --out folder. Two comments now say what the
+code does: the dwarf mounts are four Monsters, not five, and the
+WildMesh action sets also rebind the stands, idles and hit reactions.
+
+The Animalia elk's walk-back plants were not re-measured into the
+repo: the same run records that clip at 60 fps, so the new fps guard
+refuses it until the Animalia follow-up fixes its frame rate.
+
+RCA: docs/reviews/rca-wildmesh-mounts-2026-10-15.md
+
+#### fix(tools): v2.0.34 - WildMesh mounts review fixes and clip regen
+
+`eaba9588`
+
+The deep review of the WildMesh3D mounts (#794) found two HIGH defects
+and a set of smaller ones; this fixes them and regenerates the clips.
+
+The live-Armory writer, tools/apply_wildmesh_armory.py, now works per
+animal: each step inserts only the animals its file lacks, so the next
+WildMesh animal is a row in its tables and one --apply. It refuses an
+empty or self-closing Monsters file instead of writing Horse items that
+name undefined Monsters (HIGH), refuses an animal partly present in a
+file, reports a malformed file as PARSE FAILED, exits 2 on a missing
+input, and backs up under a per-run stamp. It also writes the five item
+names to the Armory's English loc file. Its LiveRecipeParityTests are
+now the reinstall gate: they fail, not skip, whenever the Armory is
+installed, and also check the sets, the registration, every bound clip,
+the loc rows and the repo snapshot of the action sets (refreshed).
+
+The Kit had compiled six WildMesh clip masters one frame short (the
+deer RunSlow_F, GrazingOnSpotB_1, GrazingSteps and Idle_1, the goat
+HoppingSlow_F, the warthog TrotFast_F_2), because Blender's FBX exporter
+truncates frame times to ticks (HIGH). The horse-skeleton retarget now
+exports inside tools/blender/fbx_exact_times.py, and the clip generator
+reports a master shorter than its measured clip as SHORT. The 30 fps
+resample in export_blend_pack.py now spreads its samples to the source's
+closing pose (five gaits had a 2.6 to 7.7 degree loop seam), and the
+measure no longer takes a toe scuff for a hoof plant. All 74 masters
+were re-exported and re-imported, and 37 clips regenerated: 16 of 17
+gaits now close within 0.84 degrees, like vanilla's.
+
+The five Custom Battle test riders moved to
+ModuleData/test_riders/wildmesh.xml, outside troops/, so no troops_*.xml
+tool reads them and their 11 exemption lines are gone; their dead
+upgrade edges and duplicate rosters are removed and their header now
+says they show in the Custom Battle picker. The dwarf-mount allowlist is
+DWARF_MOUNT_IDS, with tests for the WildMesh ids. The workflow doc,
+ledger, feature doc and catalogues are updated.
+
+Known limitation: the deer WalkMedium_F still closes 2.95 degrees off
+on one bone; the five item names are English in the 12 other languages
+until they are translated; nothing has been checked in game yet.
+
+Committed with the ModuleData commit gate overridden at Mike's request:
+the 7 Harad UPGRADE_SKILL_REGRESSION errors and 6 Harad career-kit
+drifts it reports predate this change (08b30bfc4).
+
+RCA: docs/reviews/rca-wildmesh-mounts-2026-10-15.md
+
+#### fix(war): v2.0.34 - honest chronicle_open dry-run texts, tidy-ups
+
+`74bdd5ef`
+
+The taom.chronicle_open dry run for an event the chronicle has not yet
+adopted no longer promises that 'confirm' will open it. It now says
+there is nothing to preview, that adoption adds the event as Pending or
+as Skipped when its day has passed or its anchor fails, and that only a
+Pending event opens. A siege that would fall at once now says it would
+apply its Fell outcome, if it defines one, instead of promising to pay
+one. Tests pin both texts.
+
+No behaviour change otherwise: an unused using goes from the party
+item roster adapter, and an over-long comment line in the Eye of
+Sauron service is wrapped.
+
+Refs #792.
+
+#### fix(adapters): v2.0.34 - three more main party reads via the campaign
+
+`2c09a414`
+
+Three more places read the player's party through the engine's
+computed PartyBase.MainParty and then checked a copy of it for null:
+stripping the player's gear into the inventory, the recruitment
+screen's weighted party size, and the enlistment check for whether the
+player's party is in a battle. That getter throws, rather than
+returning null, while the campaign has no main party, so each check
+could never do its job. They now read the stored main party through
+the campaign; nothing changes while a main party exists.
+
+The source scan that guards this now also catches the getter in its
+own parentheses and a ?? fallback on it (Codex finding F1), and pins
+the three converted files by name. It cannot see a check through a
+local copy; the adapters rule and the lesson now say exactly that.
+The Codex prompt for this review is committed alongside.
+
+Refs #792.
+
+#### fix(adapters): v2.0.34 - read the main party through the campaign
+
+`e9854bbd`
+
+PartyBase.MainParty returns null only without a campaign; with one
+it reads Campaign.Current.MainParty.Party (v1.5.5
+PartyBase.cs:209-219), so PartyBase.MainParty?. throws while the
+stored main party is null. Seven such reads, in EncounterAdapter's
+map event checks and PartyItemRosterAdapter's gear roster, now read
+Campaign.Current?.MainParty?.Party.
+
+With a main party the results are the same, so players see no
+change. Without one, these calls give their no-party answer instead
+of throwing into their catch and logging an error.
+
+MainPartyNullCheckScanTests now also fails on PartyBase.MainParty?.;
+run against the old adapters it failed naming both files. The
+adapters rule and the lesson name the ?. case.
+
+Refs #765, #792.
+
+#### fix(war): v2.0.34 - hunt hint and console text match the hunt rules
+
+`8fd7b2a6`
+
+What the player sees:
+
+- The Hunter Speed Multiplier hint in Mod Options said the floor
+  applies once the hunter is within your sight. It now says within
+  one and a half times your seeing range, which is where the code
+  applies it (decision E09).
+- The taom.start_eye_hunt usage text now says the start is refused
+  while you ride in another lord's army, the dry run included
+  (decision E17).
+
+No logic changes. The rest are comments: the Eye of Sauron service
+and hook summaries name the 1.5 S band and the E17 gate; the War
+Chronicle summaries say the hunt is its own module, the save holds
+the phase days and the daily gate, the focus registry names the
+strength gate as the zero it keeps, and doc pointers name sections
+that exist. Over-long comment lines are wrapped to each file's
+width.
+
+Refs #765, #792.
+
+#### fix(tools): v2.0.34 - bind 42 orc and goblin codes, review fixes
+
+`2952ccc5`
+
+Orcs and goblins now play their restyled walk, run and idle clips on
+every walk and run code that used the same vanilla clips: the running
+idles and the thrown, dagger, hand-shield and polearm-with-shield
+walks and runs (42 codes per race, was 18; #791). The live
+LOTRLOME_Armory action_sets.xml was rebound with
+tools/bind_orc_goblin_locomotion.py --apply (backup
+action_sets.xml.bak-orc-goblin-bind-20261014-170848), and the repo
+snapshot is a byte copy of it.
+
+Deep review fixes for 776054c0c:
+- The binder's --check now fails an Armory with no restyled clips,
+  which is what a reinstall leaves. --apply refuses to drop a bound
+  row unless --allow-shrink. It reads Native with ElementTree, checks
+  every link of each derived set chain, and exits 2 on bad input.
+- The armour index skips any item whose Type is not character armour,
+  so the camel bardings filed in Harad's body_armors.xml stay out of
+  the class table and the tier map.
+- wire_starter_kit_rosters.py reads roster ids in one place, checks
+  the override with the same vanilla rule as the culture file, and
+  skips commented-out rosters.
+- restyle_human_clip.py shares the leg IK and a JSON pose sampler
+  with retarget_mannequin_to_human.py (about 5 s per variant, was
+  31 s) and refuses unknown spec keys; both Blender tools clear their
+  old .DONE marker. Parity held on all 32 clips and on one retarget
+  clip.
+- A test fails any TpacTool Save call in tools/*.ps1 that does not
+  pass all three arguments.
+
+Docs: the feature doc (Dependencies, how to restore the rows after a
+reinstall), the tools README, the starter kit and armour docs, and
+three lessons. RCA: docs/reviews/rca-orc-goblin-locomotion-2026-10-14.md
+
+Still owed in game: the 24 new codes (#791), and the Harad starts
+after ./build.ps1 (#795).
+
+#### fix(war): v2.0.34 - skip the day and load marker on a broken clock
+
+`5ba8d6c8`
+
+A NaN, infinite or negative campaign clock used to reach the War
+Chronicle as day 0. The snapshot adapter floored it to 0, so the daily
+gate claimed day 0 on a fresh lane and the load marker wrote day=0,
+which makes the ledger analyzer drop every retained day after day 0.
+
+The snapshot adapter now reports validity: TryGetElapsedDay returns
+false for no campaign or an unreadable engine clock. The daily tick
+skips the day and logs one warning until a readable day returns, and
+the load marker is not written (a warning instead). GetElapsedDay
+keeps its 0 fallback for event line labels only.
+
+The chronicle's own day path needed no change: its world adapter
+passes the raw engine value through, and the finite check plus the
+gate's range check already skip the day. Its test now covers NaN,
+both infinities and negative days.
+
+Tests go through the adapter boundary: a substituted adapter reporting
+an invalid clock for the tick service, ledger and behavior, and the
+production adapter's floor helper for each invalid value.
+
+Refs #792.
+
+#### fix(messengers): v2.0.34 - check the stored main party, not its getter
+
+`91f36998`
+
+IsPlayerAvailable null-checked PartyBase.MainParty. That getter returns
+null without a campaign, but with one it reads
+Campaign.Current.MainParty.Party, so it throws while the stored main
+party is null: the check failed in the one case it was written for. It
+now checks Campaign.Current?.MainParty, as ChroniclePresenter does. No
+other behaviour changes.
+
+A source scan test now fails if any production file null-checks
+PartyBase.MainParty again.
+
+Refs #792.
+
+#### fix(war): v2.0.34 - war ledger marks each load, analyzer rewinds to it
+
+`5479109b`
+
+The war ledger analyzer kept the last line of a re-emitted day, but a
+reload of an older save left the abandoned run's later days in the
+report, and the day numbers alone cannot show a reload: the engine can
+tick the save's own day again.
+
+The ledger now writes a t=load line with the save's day on every game
+load, on the co-op authority only. The analyzer drops that campaign's
+lines, events and chronicle outcomes after that day and keeps the
+save's own day from both runs. Logs from earlier builds carry no marker
+and are not rewound, so a reload in such a log can keep an abandoned
+run's days.
+
+Refs #792.
+
+#### fix(war): v2.0.34 - War Chronicle daily work runs once per day
+
+`238f0033`
+
+After a load the engine waits only the elapsed part of the day before
+the next daily tick (Campaign.CreateCampaignEvents), so a save made
+before midday on day S ticked day S a second time. The War Chronicle
+then repeated that day's work: effect expiry, baselines, the rally, the
+extra prisoner escape rolls, the ledger lines and the chronicle's daily
+step.
+
+Each of its two daily listeners now records the last campaign day it
+ran and skips a repeat. The days are saved with the War Chronicle's
+other state. A save from an earlier build holds none, so its first tick
+runs as before, and a new campaign starts clean.
+
+Refs #792.
+Refs #793.
+
+#### fix(war): v2.0.34 - null-safe main party check for the hunt popup
+
+`5f80f95c`
+
+The hunt announcement chooses a popup over a banner when the map is
+free. That check read PartyBase.MainParty, a computed getter that
+returns Campaign.Current.MainParty.Party (v1.5.5 PartyBase.cs:209-219),
+so it throws instead of returning null while the campaign has no main
+party. It now asks Campaign.Current?.MainParty, as ChroniclePresenter
+does.
+
+Refs #792.
+
+#### fix(refuge): v2.0.34 - the engine saves the AI pin
+
+`63630e8a`
+
+E44: the load path's comment, the party component's summary and a test
+message said SetDoNotMakeNewDecisions is not persisted, so refuges could
+wander after a reload. The installed v1.5.5 engine saves it
+(MobilePartyAi.DoNotMakeNewDecisions is [SaveableProperty(11)]). A
+refuge is pinned at spawn and re-pinned on load; since the engine saves
+the pin, the load pin is a belt for a failed founding pin or an adopted
+orphan. Refuge never releases the pin, so nothing relied on the wrong
+claim. Comments, test message and the feature doc corrected.
+
+Refs #792.
+
+#### fix(careers): v2.0.34 - tree migration covers every saved hero
+
+`59c1803d`
+
+The career tree-version migration ran at session launch for the main
+hero only, while every saved hero keeps its career data. A co-op hero,
+or a hero the player takes over later, is never the main hero at
+launch, and nothing migrated it afterwards. After a tree update it
+would keep its old picks, its fork picks would read as locked in, and
+its player would pay to retrain what the migration owes for free.
+
+MigrateAllTreeVersions now migrates every hero that holds career data
+and returns only the player's refund count, so only the player is
+told. Found by the Codex review of the career forks range.
+
+Not tested in game: no shipped career has a tree_version yet.
+
+Refs #769. RCA docs/reviews/rca-career-e4e7-2026-10-14.md.
+
+#### fix(engine): v2.0.34 - v1.5.5 review fixes, dead mod guard removed
+
+`4e408e0e`
+
+Follow-up to the v1.5.5 engine bump after its deep review. Nothing
+changes for players: a fresh build, the binding gate and the member
+body diff were already clean, and they still are.
+
+The BUTR reference assemblies now point at 1.5.5.124170-beta, which
+BUTR published after the first commit (that commit said they stayed at
+1.5.4). A build against them has 0 errors and the pin test is green.
+
+TAOM.Dependencies' SubModuleConstructionGuard is deleted. It could never
+catch anything: Bannerlord's base SubModule constructor is empty, a
+mod's field initialisers run before it, and the guard installed only
+after the engine had constructed every SubModule. Since 2026-05-27 it
+logged 526 installs and no swallowed failure. On v1.5.5 the engine
+itself catches a SubModule constructor failure, names the module in a
+message box and closes the game, so players lose nothing.
+
+The two new bump tools now fail instead of reporting a false clean. The
+engine-reference checker exits 2 on a mistyped or empty folder, an
+engine assembly it could not read, a non-.NET file or a same-build
+baseline; it also checks type references, resolves generic types
+instead of skipping them, and takes wildcards. The body diff requires
+both builds, checks that they differ, fails on rows it could not
+compare, clears old output and runs about four times faster. The first
+v1.5.5 body diff reported 509 false changes because the installed Coop
+module bundles its own v1.5.4 engine DLLs; the tool now reads engine
+code only from vanilla modules. The handbook gate now reports a stale
+manifest. Both tool test suites run under the project's unittest
+runner.
+
+Two TAOM.Dependencies engine bindings by name are now rows in the
+reflection binding gate. Docs, the /engine-bump skill and the lessons
+are corrected.
+
+Write-up: docs/migration/v1.5.5-impact.md. Review and root cause:
+docs/reviews/rca-engine-bump-v1.5.5-2026-10-14.md.
+
+#### fix(war): v2.0.34 - Eye of Sauron Codex fixes
+
+`2d17ceba`
+
+The four findings of the Codex review of the hunt (#765).
+
+- A hunter whose own AI led or joined an army while he stood off, or
+  left him in a battle, siege, town or under another order, is no
+  longer claimed on resume: the hunt waits, unpinned, and retries
+  each hour.
+- Every change to the hunt's membership (a start, even one adding no
+  troops, an end, a refused start) refreshes the party's cached size
+  limit through MemberRoster.UpdateVersion.
+- Session launch reads the live pin before any end, so a stand-off
+  save loaded into co-op releases no pin the hunt no longer owns.
+- The per-frame locator search reaches 1% past 1.5 sights, so a
+  hunter exactly on the band's edge is found.
+
+#### fix(war): v2.0.34 - the hunter holds off while you ride in an army
+
+`7ab91767`
+
+When you join another lord's army, the Eye of Sauron's hunter now
+stops chasing you at once. He drops his order to ride you down, goes
+back to his own business and loses his extra speed. The hunt itself
+is not over: its days still count, and no cooldown starts.
+
+When you leave the army he takes up the chase again within the hour.
+A save made while he holds off loads the same way.
+
+#### fix(war): v2.0.34 - no chronicle payout after the war ends
+
+`8f2c9e45`
+
+The owner-change and siege-start callbacks skipped the War Ended check that launch and the daily step make, so a conquest between War Ended and the next daily step could resolve and pay an Active siege. The check now lives in the shared callback wrapper.
+
+#### fix(war): v2.0.34 - chronicle review fixes
+
+`7e845155`
+
+Fixes from the deep review of the War Chronicle event chain (#765).
+
+Siege windows now follow the map more closely. A window no longer
+closes Held while an attacker is still besieging the target: the
+close waits for the siege to end, for at most one more window, so a
+town taken a few days late resolves Fell. Each daily step also checks
+who owns the target, because a clan that defects or leaves with
+rebellion takes its towns along without an owner-changed event. A
+town lost to a third party now says it changed hands instead of
+"no assault came". Days are whole campaign days, so a window no
+longer slips a day when the daily tick lands after midnight.
+
+Announcements can no longer stall: the queue relies on the engine's
+open-inquiry check instead of a close callback that a hidden popup
+never runs. Switching the chronicle or its announcements off drops
+what is still queued. The map check runs before the co-op probe, and
+the presenter no longer reads PartyBase.MainParty, which throws with
+no main party.
+
+war_chronicle.json is checked harder: unknown keys warn instead of
+dropping a block silently, kinds, anchors and outcomes must be names
+(no "+1" or comma lists), and a momentum value that is not an object
+is dropped alone instead of disabling the whole file.
+
+The save carries the chronicle rows as typed records through the
+codec; a resolved row without its resolution day is skipped. The
+army focus registry gets a session reset, the focus slider and the
+momentum cap share one constant each with their consumers, and
+taom.chronicle_status flags an overtime window and a focus that AI
+Strategic Intelligence leaves inactive. The ledger analyzer keeps one
+resolution per event even when a reload repeats a line.
+
+Docs: the listener order, the defender focus waiting for an attack,
+the strength gate, the cohesion-boost side effect, the phase-day
+burst and the Test Mode lore order are written up; test counts are
+recomputed.
+
+#### fix(war): v2.0.34 - Eye of Sauron review fixes
+
+`ac0a3e0c`
+
+Applies the deep review of the Eye of Sauron hunt (#765 M8).
+
+- A player-founded kingdom is now hunted: the player's own kingdom is
+  sided by its id, else by the kingdom's own culture (ResolveSide), so a
+  new_kingdom of Gondor culture draws one of the Nine. The console shows
+  the same side.
+- The per-frame sight read no longer walks every party on the map. It
+  searches the locator grid around the player within his seeing range,
+  and the reading is a value type. One SeeingRange call per frame stays:
+  it is the search radius, and vanilla makes the same call each frame.
+  The locator walk grows with sight, so it is not a flat cost.
+- The end gates (peace, kingdomless, switch off, co-op, hunter down,
+  party lost, timeout) also run at the hunter's hourly tick, before the
+  re-engage, so a peace no longer brings a forced encounter for a day.
+- Releasing the pin drops an engage order on the player and has the
+  party rethink next hour; a pinned party never advanced its think
+  counter, so it could keep chasing for six hours.
+- A busy or unfit hunter is passed over for the next in order, as the
+  approved plan says; the hunt waits only when none can ride. A refused
+  spawn still stops the day's search, since the spawn ring depends only
+  on the player; tomorrow's tick retries.
+- The host is topped up daily (never in a battle), replacing the men
+  vanilla's wage-limit desertion takes. It is topped up before the
+  engage, since the engage can start the encounter at once.
+- The hunt stands down while Bannerlord Together is loaded, a co-op mod
+  TAOM cannot probe. A solo player with it enabled gets no hunt. A hunt
+  restored into a co-op session ends at launch; a co-op peer scores no
+  deed.
+- The step decisions moved from the adapter into the service, with one
+  test per gate, and the straight-line gate now runs before the path
+  rebuild. The last step's outcome shows in the status command.
+- A failed spawn search is no longer repeated 15 times in one frame.
+- The console commands follow the naming rules: print_eye_of_sauron,
+  add_eye_score, start_eye_hunt and clear_eye_hunt. start_eye_hunt is
+  tier C: the bare command is a dry run, and only the literal confirm
+  starts a hunt.
+- The size model builds its weighted-count delegate once instead of
+  allocating a closure on every party-size call.
+- The end line is side-neutral ("The hunt is over, for now."), so
+  Glorfindel's hunt no longer ends with the Eye turning away.
+- Simplified: the pin flag and its save key are gone (the hunt always
+  owns its pin), SyncData reads the saved record by field, the settings
+  use the shared clamp, the pure arithmetic moved to HuntMath, and the
+  boundary values have one file each.
+- Tests: field-by-field save round trips through an engine-faithful
+  store, the console refusals, the dry run, every step gate, and IL
+  pins for the frame read and the size model.
+
+#### fix(heroRace): v2.0.34 - dwarf portraits no longer sit too low
+
+`6c26f003`
+
+Dwarf faces in the small portraits (settlement notables, party and
+battle screens) sat at the bottom edge of the frame, showing little
+more than hair and eyes. The 2D portrait offset for dwarves was only
+half of what the shorter body needs.
+
+The dwarf entry in CharacterImagePatch.json goes from Vertical 0.15,
+Zoom -0.1 to Vertical 0.3, Zoom -0.2. These are the values that were
+tuned by eye in game and that the separate race portraits module
+applied until it stopped framing portraits. The 3D preview offsets in
+CharacterAvatarPatch.json are unchanged.
+
+#### fix(war): v2.0.34 - stricter capital verdict, rally refresh
+
+`2ee36e1f`
+
+Fixes the three findings of the Codex review of the war ledger, timed
+war effects and rally (#765):
+
+- The war ledger analyzer no longer passes the "no capital lost before
+  day 120" target on incomplete evidence: a capital already lost in
+  its first line now fails it ("lost by day N"), and coverage is
+  checked per kingdom, so one kingdom's complete log cannot hide
+  another kingdom's missing days.
+- The rally rebuilds a kingdom's effects on every daily refresh, so a
+  rally effect from a save no longer survives when rally.json sets
+  that effect to zero.
+
+Refs #765.
+RCA: docs/reviews/rca-war-chronicle-batch-a-2026-10-09.md
+
+#### fix(combat): v2.0.34 - Custom Battle runs TAOM's combat mechanics
+
+`b0154d86`
+
+TAOM's Combat Mechanics rules now apply in Custom Battle too (#788).
+Before, only the campaign ran them, so a Custom Battle used vanilla
+rules for skill crush-through, monster and orc shield crush-through,
+creature cleave and stagger immunity, the per-race stagger
+threshold, weight-driven charge knockdown, shield penetration and
+shield damage, Signature Strikes knockdown and knock-back, and the
+MCM horse charge penetration slider.
+
+One Custom Battle damage model now carries all of them beside the
+creature, race ability and siege rules it already had. It sits on
+vanilla's Custom Battle base, because the campaign model's base
+crashes on a mounted hit outside a campaign. Career passives and the
+Refuge reduction stay campaign only: they need heroes and parties. A
+fault in the creature bandits feature can no longer remove the
+model for the rest of a session.
+
+New tests fail when the campaign model gains a rule that the Custom
+Battle model lacks. Custom Battle results for the culture doctrine
+A/B, the Signature Strikes smoke and the Race Abilities runs change,
+so their baselines must be measured again.
+
+Reviewed by a six-lens deep review; findings and fixes:
+docs/reviews/rca-custom-battle-damage-2026-10-09.md. Built and
+tested on the installed v1.5.5; /engine-bump is still owed.
+
+#### fix(resources): v2.0.34 - hideout send-troops clear pays once (#790)
+
+`bc59806f`
+
+Clearing a bandit hideout with "send troops" paid the hideout's special
+resource reward twice: the game reports the clear once from the
+success menu and again when the fight is finalized. The reward is now
+paid only for the finalized clear, so it is paid once, also when the
+game is saved in the success menu and loaded.
+
+Not tested in game: one send-troops clear should write one
+[SpecRes] HIDEOUT: line.
+Refs #790. Found by the Codex review recorded in
+docs/reviews/rca-career-e1e3-2026-10-08.md
+
+#### fix(resources): v2.0.34 - one party-screen handler per session (#771)
+
+`c96a02a4`
+
+Each save load in one game session left another party-screen handler
+behind, so after a few loads opening the party screen started the
+special resource session and the troop count diagnostic several times.
+One handler now stays live per session. The lesson that recommended the
+old pattern is corrected.
+
+This commit also carries the special-resources.md updates for #767 and
+#770.
+
+Not tested in game: load a save three times, open the party screen
+once, expect one session line and one diagnostic dump.
+Refs #771. Review: docs/reviews/rca-career-e1e3-2026-10-08.md
+
+#### fix(resources): v2.0.34 - raids stop paying the battle credit (#770)
+
+`30cbcd46`
+
+Raiding a village paid the battle reward on top of the raid reward,
+and a raid where the militia fought first paid the raid reward twice.
+Rohan and the elves, which earn nothing from raids by design, earned
+from every raid.
+
+A raid now pays the raid reward once, when the game marks the village
+as looted, and only to the side that won. A battle inside a raid or an
+extortion pays the battle reward only when a real party (a lord's or
+another field party) was beaten, so defending your village from a
+lord's raid still pays; beating only the militia pays nothing extra.
+Tournament and hideout messages no longer claim an earning when nothing
+was credited.
+
+Not tested in game: a raid with a lord inside, defending a village,
+a militia-only raid.
+Refs #770. Review: docs/reviews/rca-career-e1e3-2026-10-08.md
+
+#### fix(careers): v2.0.34 - party size picks apply at once, own party only
+
+`c74ad5ae`
+
+A career choice that adds party size now changes the party limit at
+once, not after the next roster change (#768). The bonus now applies
+only to the party the career hero leads: garrisons, caravans, militia,
+villagers, patrols, supply caravans and refuges no longer receive it.
+On an existing save a caravan or garrison filled to its old limit may
+be over the new one, and vanilla desertion trims the excess over a few
+days. The flat bonus is now added after every percentage factor, so the
+AI lord party size setting no longer multiplies it.
+
+Rohan's "Garrison Commander" choice now reads "Your company swells with
+volunteers"; its 12 translations show the English until the next
+translation run. The taom.career_perks console report now prints the
+engine's cached party limit beside the model's value.
+
+This commit also carries the career-system.md updates for #766 and
+#767.
+
+Not tested in game: the instant limit change and the console lines.
+Refs #768. Review: docs/reviews/rca-career-e1e3-2026-10-08.md
+
+#### fix(resources): v2.0.34 - career gain scales every earning (#767)
+
+`01ca483e`
+
+A career choice that raises special resource income only applied to
+the daily town income, so a player without towns got nothing from it.
+It now also scales the battle, raid, siege, prisoner, tournament and
+hideout earnings, and the map bar tooltip shows the scaled per-event
+amounts.
+
+Elite troops whose daily upkeep a career choice reduced to zero no
+longer desert when the balance runs out. The daily upkeep is now worked
+out in one place for the tooltip, the daily tick and desertion, and an
+unusable upkeep modifier or configured upkeep falls back safely instead
+of wiping the day's income.
+
+Not tested in game: the scaled earnings and the tooltip rows.
+Refs #767. Review: docs/reviews/rca-career-e1e3-2026-10-08.md
+
+#### fix(careers): v2.0.34 - link each career choice to its group (#766)
+
+`259ae2cb`
+
+Career choices never knew which group they belonged to: the loader read
+the group from an attribute no choice carries. So the career screen's
+tier lock, the one-keystone-per-tier rule and the save repair for
+choices left over from another career never worked, and a level 1 hero
+could take a tier 3 choice.
+
+Each choice now takes its group from the group that contains it. The
+tier lock and the keystone rule now apply; keystones a save already
+holds stay taken. The repair pass can now remove a choice that provably
+belongs to another career, and a message tells the player how many
+choices were refunded. If two careers ever claim the same group, root
+or choice, the choice is kept rather than deleted, and a test fails on
+such data.
+
+Known limitation: completing a full tier 3 group still opens every
+keystone, and keystones taken that way stay after the group is refunded.
+The career redesign (#769) retires this rule.
+
+Not tested in game: the click refusals and the refund message.
+Refs #766. Review: docs/reviews/rca-career-e1e3-2026-10-08.md
+
+#### fix(wotr): v2.0.34 - declare the Full War wars for real
+
+`d1b9fd91`
+
+When the War of the Ring reaches the full war (day 44 by default), every
+pair of kingdoms set as Hostile now really goes to war: each war is
+declared, the war notice and the history entry appear, and each
+kingdom's list of enemies is rebuilt at once (#772). Before, no
+Hostile-pair war was ever declared. Peace stayed blocked, but the real
+stances stayed at peace, so there were no notices, and AI armies could
+miss the new enemies as siege or raid targets until the next load.
+
+The cause: each declaration first asked whether the two kingdoms were
+already at war, and that question went through TAOM's own diplomacy
+model, which answers "at war" for every Hostile pair once the full war
+starts. So every declaration was skipped. The declarations now check
+the stored stance instead. The phase still changes first, so vanilla's
+alliance logic does not call allies into wars that the same step is
+about to declare.
+
+Existing saves already in the full war are repaired when they load: on
+the host, every Hostile-pair or scripted Phase 2 war that is still at
+peace in its stored stance is declared once. Those wars get their
+history entries and map notices, dated at the load day, but no chat
+line. A pair that made peace while the full war allowed it is left
+alone. Scripted war lists in war_of_the_ring.json now drop empty and
+self pairs, and name an unknown kingdom id, with a warning.
+
+Known behaviour, unchanged by this fix: when the full war declares its
+wars, vanilla still asks each permanent ally that is not itself Hostile
+with the enemy to join (for example Harad into Mordor's wars).
+
+Reviewed by an eight-lens deep review with two adversarial verifiers
+per finding, then by Codex; its findings are fixed or documented.
+
+Refs #772.
+RCA: docs/reviews/rca-wotr-phase2-wars-2026-10-08.md
+
+#### fix(wotr): v2.0.34 - reset the War of the Ring per campaign
+
+`2719e59e`
+
+Starting a new campaign without restarting the game no longer carries
+the previous campaign's War of the Ring into it. Before, a campaign
+started after one that had reached the full war never declared the
+Isengard war or the full war, and after a war that had ended it never
+got a war at all (#764).
+
+The War of the Ring state lives for the whole game process. Its
+campaign behavior is now built fresh for every campaign and resets the
+state in its constructor, before any campaign event can read it; a
+loaded save then restores its own phase. An earlier version reset on
+session launch, which was too late: the momentum behavior runs first
+and would have started the momentum war on day 0 of the new campaign.
+
+Known limitation: a save already written by an affected campaign keeps
+the phase it saved.
+
+Tests pin the reset, a save-then-load round trip and the per-campaign
+construction in SubModule, including the shapes a cached instance would
+take. Reviewed by an eight-lens deep review in two waves and by Codex.
+
+Refs #764.
+RCA: docs/reviews/rca-wotr-session-reset-2026-10-08.md
+
+#### fix(wanderers): v2.0.34 - stop Calradian wanderers spawning in TAOM
+
+`546d1181`
+
+Calradian wanderers from the base game kept turning up in taverns, about
+a quarter of every campaign's wanderers, telling Calradian stories in
+Middle-earth. The game spawns every wanderer template any module
+defines, and nothing removed the base game's 67. They are now taken out
+of the pool, so new campaigns only spawn Middle-earth wanderers.
+
+Dale and Khand had no wanderers of their own, only the Calradian ones,
+so each gets ten: Bardings of Dale and Lake-town, and Variag warriors
+of Khand, each with their own story, gear (one bow set for the
+archers) and a place on the faction screen's Wanderer tab. Promoting a
+Dale or Khand soldier to Refuge warden now also gives a man of his own
+people again.
+
+Known limitation: a save started before this change keeps the
+Calradian wanderers it already has; they stay until recruited. Other
+languages show the new stories in English until the translation run.
+
+The rule now also comes from the lords.xslt generator, so regenerating
+that file cannot undo it, and tests pin the retag, the load order it
+relies on, and the Faction-tab lists. Follow-ups: #761 (no female
+wanderers remain), #762 (21 older wanderers missing from the tab).
+
+Refs #758.
+RCA: docs/reviews/rca-vanilla-wanderers-2026-10-08.md
+
+#### fix(wanderers): v2.0.34 - give 53 wanderers their own backstories
+
+`9dd2f594`
+
+Wanderers of the Goblin-town, Misty Mountain Orc, Blue Craig, Lindon
+and Arthedain cultures showed "ERROR: Text with id backstory_c doesn't
+exist!" instead of their introduction. Their templates were cloned
+from other cultures without the dialogue rows the conversation reads.
+
+All 53 now tell their own stories: goblins of the High Pass tunnels,
+orcs of Mount Gram and Moria, the coastal raiders of Blue Craig, the
+sea-elves of the Grey Havens, and the Dunedain holding Fornost against
+Angmar. Each story fits the wanderer's traits and best skill. The
+short line a later wanderer of the same kind gives is written about
+their trade and people rather than repeating the first one's tale.
+Other languages show the English text until the translation run.
+
+WandererBackstoryCoverageTests now fails on any wanderer missing a
+row, so a new culture cannot ship this gap again; #257 fixed the same
+bug by hand in May with no test, and it came back three times. The
+writing-system localization test now skips rows still equal to their
+English, the translator's own "not yet translated" marker, so it
+reports real translation damage again. The culture and kingdom recipes
+name the strings file.
+
+Refs #757.
+RCA: docs/reviews/rca-wanderer-backstory-strings-2026-10-08.md
+
+#### fix(battles): v2.0.34 - end AI battles stuck at N vs 0 (#748)
+
+`a913629c`
+
+An AI battle on the campaign map could freeze for good, for example at
+8000 against 0. Lords of the same faction kept joining it, the whole
+faction stood still, and the player could join neither side. A player
+traced the cause and sent a workaround module, Stuck Battle Guard; this
+fix is written from their diagnosis.
+
+The engine runs a battle round only while both sides have healthy
+troops, and picks a winner only inside a round. A side that drops to 0
+healthy troops between rounds therefore never loses. A party destroyed
+while still attached also makes the battle refuse every joiner.
+
+Once per in-game hour TAOM now checks every AI battle at least 12
+in-game hours old:
+
+- A destroyed party still attached is removed, as the engine does when
+  it destroys a party itself (a quest's party is left alone).
+- A side with no healthy troops loses: the other side wins, with the
+  usual prisoners and loot. When both sides have none, the defenders
+  hold.
+- The player's own battle, an enlisted player's commander's battle and
+  raids are never touched.
+
+The check stands down in co-op sessions for now, because Coop decides
+battles that hold a remote player's party. The console command
+taom.print_stuck_battles lists every running battle with what the check
+would do.
+
+Known limitation: while the player is enlisted, a stuck battle holding
+their commander is not resolved.
+
+Deep review: docs/reviews/rca-stuck-battle-guard-2026-10-06.md.
+Follow-up: #750 (alignment desertion removes troops from parties that
+are in a battle, the one known TAOM trigger).
+
+#### fix(balance): v2.0.34 - Lindon troops weigh and survive like Rivendell's
+
+`0e75ec50`
+
+Lindon's troops take party space and its soldiers survive battle the
+way Rivendell's do again. Both were lost when Lindon became its own
+culture in August (cc1713eb3): its new troop tree and culture id never
+reached the two tables keyed on Rivendell's. A player reported it.
+
+- Lindon's 22 elite troops now take the same party space as their
+  Rivendell twins: the 15 at level 41 and above count as three troops
+  each, the 7 from level 26 to 36 as two. Before, every Lindon troop
+  counted as one, so a party could hold three times as many Mithlond
+  Marchwardens as Imladris ones. Recruits, infantry, militia and
+  mercenaries stay at one, as Rivendell's do.
+- Parties and garrisons of the Lindon kingdom get Rivendell's survival
+  bonus: a soldier struck down in battle dies 40 percent less often.
+
+Existing saves pick both up on load. A Lindon AI party already holding
+many elites trims down to its limit on its next daily upgrade check,
+A player's party is never trimmed: one full of Lindon elites shows
+over its limit and moves slower until it has room again.
+
+A new test fails if any Lindon troop stops weighing the same as its
+Rivendell twin.
+
+RCA: docs/reviews/rca-lindon-balance-tables-2026-10-06.md
+Refs #749
+
+#### fix(lords): v2.0.34 - generated lords wear their culture's own kits
+
+`db805427`
+
+Lords the game creates during a campaign now dress like the lords of
+their culture and race. Before, a Dunland lord who came of age (one
+player met "Ulric") wore vanilla Empire armour, and Rohan, Harad,
+Easterling, Dale and Khand lords were just as likely to turn up in
+Calradian gear. The code and data shipped in bb68eeca3; this commit
+carries the review's last fixes and is the release note for both.
+
+- A lord who comes of age, a companion you make a lord, the lords of
+  a new companion clan, rebel leaders and a ruler stepping down now
+  get a kit that at least two of their culture's lords of the same
+  race and sex are defined with. Mordor's men get the Black
+  Numenorean kits and its uruks the uruk kits; one lord's unique gear
+  (Theoden's, the Mouth of Sauron's) never spreads.
+- When no such kit exists, they fall back to TAOM's lord template.
+  The vanilla Calradian templates no longer compete with it for the
+  six cultures built on vanilla ones; noble teens of those cultures
+  now wear the TAOM teen kit too.
+- Dale's fallback template is now Dale's mounted-noble armour instead
+  of vanilla Sturgian gear.
+- Minor factions (the Corsair Blades and the rest) and children keep
+  their usual gear. A new kingdom ruler keeps the ruler regalia.
+
+Known limitation: lords generated before this update keep the gear
+they already have, including in existing saves. Khand's children can
+still wear vanilla child clothes.
+
+Review: docs/reviews/rca-generated-lord-kits-2026-10-06.md
+
+#### fix(career): v2.0.34 - uruk careers start in uruk armour
+
+`90b1a260`
+
+Isengard and Mordor careers started in Mordor orc armour, the light orc
+tunic and boots their level-1 orcs wear, which does not fit an uruk
+player. They now start in their own uruk line: Isengard in Uruk-hai
+chainmail and shoes (sk_uruk_hai_chainmail_a1, sk_uruk_hai_shoes_a1),
+Mordor in uruk chainmail and boots (sk_uruk_mordor_chainmail_medium_a1,
+sk_uruk_mordor_boots_a). The career kit generator now requires that line
+for both cultures and stops with an error if a later art drop or troop
+change ever leaves it empty.
+
+Three ranged careers named for another weapon started with a bow. The
+Uruk Crossbow (Isengard) now starts with ladder_isengard_xbow_t2 and
+Isengard bolts, the Crossbow Master (Erebor) with ladder_erebor_xbow_t4
+and dwarven iron bolts, and the Pezarsani Javelineer (Harad) with
+javelins and a round shield, as do Harad's careerless hunter, skirmisher
+and bard starts. Erebor fields no lower crossbow, so its start is a
+tier-4 one (96 damage).
+
+Gondor careers start with wm_gondor_sword_a01 and wm_gondor_light_spear,
+the weakest Gondor troop weapons. A Gondor troop rework (998f054c) had
+left the career file off its rule since v2.0.31.
+
+Existing characters keep their kit: rosters are read at character
+creation only. The polearm audit's four stale Mordor career entries are
+gone, so that gate passes again. RCA:
+docs/reviews/rca-career-kits-uruk-2026-10-06.md.
+
+Owed in game: a new campaign per Isengard, Mordor, Erebor, Harad and
+Gondor career, including the uruk armour on an orc and a human player.
+
+Refs #743
+
+#### fix(arena): v2.0.34 - tournament fighters wear their own armour
+
+`ea229d82`
+
+Tournament fighters now fight in their own armour, as in vanilla,
+instead of their culture's practice kit (Mike's decision). That holds
+for skipped and simulated matches too (Skip, Skip All Rounds, Leave
+and every match after you are knocked out), so who wins a bracket now
+depends on the armour each fighter really owns. Arena practice fights
+are unchanged: every fighter still wears his own culture's practice
+kit, which keeps dwarves and other races out of armour made for
+another skeleton.
+
+How: TournamentService.ArmourDummyId returns no practice kit inside a
+tournament mission, and TaomTournamentModel then returns the fighter's
+own battle armour itself. It keys on the tournament mission rather
+than MissionMode.Tournament, because a skipped match never enters that
+mode and vanilla would hand its simulation the host faction's kit.
+ResolveDummyId, whose settlement fallback nothing reached, is folded
+into ArmourDummyId.
+
+Reviewed with /deep-review (six lenses and a convergence pass); its
+one defect, skipped matches still taking the host's kit through the
+base model, is fixed, and the RCA is
+docs/reviews/rca-tournament-own-armour-2026-10-05.md. Arena docs, the
+NPC handbook, the GameModel registry and the index updated; a lesson
+added. Full suite: 14,032 passed, 1 failed (the #731 translation
+rows), 5 skipped.
+
+Known limitation: bannerlord-1.4.5 still gives tournament fighters
+the culture practice kit.
+
+#### fix(hooks): v2.0.34 - commit-subject gate reads the target repo's version
+
+`12d96adc`
+
+check-commit-subject-version.sh always read Main/_Module/SubModule.xml
+from the project directory, so a commit run in another worktree (git
+-C <dir> commit, or cd <dir> && git commit) was judged against the
+wrong line's version: a correctly labelled bannerlord-1.4.5 commit
+(v2.0.28) was refused for not saying v2.0.34. The gate now reads the
+version, staged copy first as before, in the repository the commit
+runs in; a directory that does not exist falls back to the project.
+
+tools/test_hooks.sh gains five cases in section 6 against a stub
+worktree at v1.2.3 (its label allowed, this repo's label denied, for
+both git -C and cd, plus the missing-directory fallback): 946 passed,
+0 failed. The old hook denies the git -C case the new one allows.
+/security-scan: no CRITICAL; its HIGH and MED predate this change.
+
+#### fix(mordor): v2.0.34 - Mouth of Sauron's helm at 50; review fixes
+
+`5d90a6cf`
+
+The Mouth of Sauron wears his own helm in battle and in town, first
+shipped in the v2.0.33 testing build from 799e189e. Its head armour is
+now 50 (it was 55), and it is never sold, looted or won as a prize.
+Only campaigns started on v2.0.33 or later dress him in it.
+
+From the review (#733,
+docs/reviews/rca-mouth-of-sauron-gear-2026-10-04.md):
+- The armour class table lists the helm as named.
+- MouthOfSauronHelmDataTests pins the live helm's armour, flags and
+  class, so an Armory reinstall that brings back 55 fails a test.
+- tools/blender/strip_upper_mesh_channels.py now refuses hands, arms
+  and bodies (they need their hand-pose channels) and a run with
+  nothing to strip.
+- The Armory snapshot README records the helm, its gates and what
+  covers_head costs; its troll gear block names where the backups went
+  and which channels have the lock.
+- Docs: the armour handbook names the helm as the one covers_head
+  exception; the armour acquisition doc lists it as named, with its
+  test; the roster doc says no gate resolves roster ids yet; the Black
+  Numenorean doc, the morph doc and a roster comment are corrected.
+
+Known limitation: every release channel's Armory holds the helm at 55
+until the next Armory package from the dev install, and whether his
+hands grip under covers_head is owed in game (#733).
+
+#### fix(tournament-rewards): v2.0.34 - review fixes and Mike's decisions
+
+`b4decf22`
+
+Tournament Rewards went out in the v2.0.33 testing build, and is in
+the v2.0.34 tag, without a review. Its code came in 9e2a39f4, whose
+message does not name it, so this body is its changelog entry.
+Tournaments now pay more, and you choose how: bets have no cap by
+default (MCM Tournaments, Max Bet Per Round, 0 for none); a winner's
+renown and influence grow with the lords and heroes in the field and
+with the winner's culture; at Join you pick one of up to three prizes,
+then the combat skill the tournament trains, and every round you win
+trains it.
+
+From the review (#732,
+docs/reviews/rca-tournament-rewards-2026-10-04.md), with Mike's
+decisions:
+- Blue Craig, the third goblin kingdom, gets the orc factors (renown
+  1.5, skill experience 1.4), as Goblin-town and the Misty Mountain Orcs
+  have.
+- A new campaign's leaderboard, seeded with 500 past wins, keeps
+  vanilla's renown: the culture factors and the MCM multiplier no
+  longer reshape starting clan renown.
+- The prize dialog offers "a choice of prizes" (it can show two), and
+  the training message names the skill without a number, because the
+  game scales the experience by your learning rate.
+- An elite, lord or named prize, which an old save or vanilla's
+  fallback list can still advertise, now comes with heavy-band
+  alternatives.
+- MCM values are clamped to their sliders, and no reward can overflow
+  into a huge negative renown or influence.
+- The hero count now comes from the feature's own campaign event
+  instead of a Harmony patch on a private game method, and a fault in
+  it no longer skips vanilla's award.
+- Tests for the band rule, the wiring, the settings, the validation
+  rules and the overflow; the engine pins now run in the binding gate.
+- Doc fixes: what the engine really does with tournament experience,
+  influence and prizes; the Arena doc now lists the two reward
+  overrides, the new service members and the band rule.
+
+Troll gear (bc39f6e4): its owed convergence pass is recorded in
+docs/reviews/rca-troll-gear-tournament-prizes-2026-10-02.md,
+/armory-audit now runs the troll gear gate after an Armory update and
+names the release channels each Armory ships through, and the troll doc
+says which channels' Armories carry the lock.
+
+Known limitations: the patreon and public channels' Armories still let
+players buy, loot and forge troll gear until their next editor package
+from the dev install (Mike's decision, 2026-10-04). With no bet cap
+set, the tournament screen shows 50,000,000 as the most you can bet
+each round. The nine dialog strings stay English in every language
+until the translation run (#731).
+
+Verified on this commit's exact tree: against the installed Bannerlord
+v1.5.4, 14,040 of the 14,042 tests run pass; the two failures (the #731
+translation rows and the check that the pinned game version is
+installed) fail at HEAD too. On CI's v1.5.3 reference assemblies the
+unit tests show HEAD's same 13 failures and the binding gate passes 414
+of 414.
+
+### Performance
+
+#### perf(missionperf): v2.0.34 - log busy time, frame limiter and vsync
+
+`685c6a1e`
+
+The mission heartbeat can now tell a capped frame rate from a busy
+engine. Each [MissionPerf] line adds mainMs, the mean main-thread
+busy time per frame, and renderMs, the render thread's busy time over
+the engine's last window of a second or more. Both come from the
+engine's own counters (GetMainFps and GetRendererFps, decompiled on
+the v1.5.5 client), which measure work and leave out the frame
+limiter's wait. [PerfContext] adds frameLimiter and vsync from the
+graphics options.
+
+If fps sits at the frameLimiter value and both busy times are well
+under avgMs, the in-game limiter sets the rate, not the load.
+tools/perf_runs.py reads the new fields, still reads older logs and
+reports main_ms_median and render_ms_median. Its FRAME_CAP note now
+prints the limiter settings instead of guessing whether they match.
+
+Not yet checked in game: a 60 fps limiter with vsync off, a 30 fps
+limiter, and a GPU-heavy scene.
+
+#### perf(campaign): v2.0.34 - switch off ButterLib's Distance Matrix
+
+`1325c36e`
+
+The campaign map no longer stalls for a quarter second when a castle
+or town falls. ButterLib, which TAOM ships, keeps a "Distance Matrix"
+of every settlement, clan and kingdom. It rebuilt the clan and kingdom
+tables on the spot whenever a settlement passed to another clan, about
+170 ms on average and up to 281 ms in one frame on TAOM's map
+(measured by yotthani on v1.5.3; the six worst campaign-map frames
+were all siege ends). It also built the full settlement table, about
+355,000 pairs, at every save load and new game. Nothing installed
+reads these tables.
+
+TAOM now calls ButterLib's own Disable() on that subsystem at the
+first main menu, so ButterLib never adds its GeopoliticsBehavior. One
+[ButterLibDistance] line in taom_debug says whether it was switched
+off, was already off, or could not be (a warning with the reason).
+There is no opt-in: MCM's ButterLib page applies and rewrites its own
+key in the same Options.json before TAOM runs, so a TAOM opt-in could
+not hold. A mod that read the tables would get null; none is
+installed.
+
+A first design, a lazy rebuild through four patches on ButterLib's
+private code, was dropped in review before it shipped.
+
+Issue #740. Review: docs/reviews/rca-butterlib-distance-matrix-2026-10-06.md.
+Feature doc: docs/features/butter-lib-distance-matrix.md.
+
+### Refactoring
+
+#### refactor(main-menu): v2.0.34 - MainMenuStep logs the full exception
+
+`2afea887`
+
+The main-menu guard from #807 is renamed from LifecycleStep to
+MainMenuStep. It has one use, OnBeforeInitialModuleScreenSetAsRoot, and
+its old name shared a prefix with the Load-Time Stamps [Lifecycle]
+lines.
+
+Its one WARNING now carries the whole exception with its stack. Before
+#807 a throw there reached Patch37's crash report, which logged the
+stack; the first version of the guard kept only the type and message.
+A test throws from a named method and checks that the stack names it.
+
+docs/features/main-menu-customizer.md now shows the guard in the hook,
+the engine's per-tick retry as a design constraint, the warning, and
+the new tests.
+
+Refs #807.
+
+#### refactor(core): v2.0.34 - one guarded SyncData chunk loop for two saves
+
+`16a34027`
+
+The War of the Ring momentum and the War Chronicle each carried their
+own count-and-chunks SyncData loop. The momentum copy passed the saved
+count straight to new List<string>(count), so a corrupt save threw on
+load (a negative count) or ran out of memory (an absurd one).
+
+The chunker moves from WarOfTheRingMomentum to Core/Persistence as
+SyncDataChunker, with SyncChunks doing the whole pass: a count below 0
+or above 4,096 is ignored with a warning and the state loads fresh. Both
+behaviors call it. The saved keys are unchanged, so existing saves load
+as before, and a save from before the _v3 keys still loads fresh
+momentum without a warning.
+
+The comments now give the engine's real limit: one SyncData string may
+hold 32,763 UTF-8 bytes, because the engine writes a short length of 4
+plus the bytes (SaveContext.SaveStringTo).
+
+Refs #792.
+
+#### refactor(combat): v2.0.34 - damage model glue moves to feature hooks
+
+`f7e9bd0d`
+
+No change in game. The campaign's damage model, the one slot every
+combat feature shares, had grown to 286 lines against the 150 that
+ADR-002 allows an entry point (#737). It is now 129 lines: each
+override calls base, then one hook per feature, in the order that
+matters.
+
+The glue now lives in each feature's own Hooks folder, the pattern the
+race abilities and the creature siege role already follow.
+CombatMechanicsHooks holds the four combat services with their context
+builders and extractors; SignatureStrikeVerdicts holds the signature
+knockdown and knock-back verdicts; RefugeDamageHooks holds the refuge
+defender reduction. The two horse charge checks that routed knockdowns
+inside the model moved into the facade that owns each verdict. Both
+services already declined the other case, so every verdict is
+unchanged, a NaN charge velocity included. An unused config provider
+argument, dead since #610, is gone.
+
+Tests: a ceiling test keeps the model under 150 lines; source pins
+check which agent, origin and base result reach each seam; the facades
+have their own tests, with the charge gates written to fail first.
+Full suite: 14832 pass, 5 skipped; the one failure,
+EveryLanguage_DeclaresARowForEveryEnglishKey, predates this change.
+
+A deep review (six lenses and a convergence pass) found one medium and
+six low issues, all fixed. RCA:
+docs/reviews/rca-combat-mechanics-model-split-2026-10-05.md
+
+### Tests
+
+#### test(native-pins): v2.0.34 - pin gate reads compiled attributes
+
+`c286e239`
+
+NativePinGateTests now finds the native pin tables by reflection: the
+test types that declare a static KnownBuilds member. It reads their
+compiled TestCategory attributes. The first version matched the source
+text, so a commented-out [TestCategory("BindingVerification")] still
+passed, and it took the class name from the file name.
+
+Both known tables are pinned by name, so a table that stops being found
+fails the test. Checked by commenting out the skeleton-buffer class's
+BindingVerification tag: the new test fails, the old one passed.
+
+docs/features/skeleton-buffer-guard.md gets its 2026-10-15 changelog
+and issue lines.
+
+Players see no change. Refs #806.
+
+#### test(composition): v2.0.34 - pin the VanillaTuning stand-down names
+
+`0e02d923`
+
+VanillaTuning v0.1.1 switches off five of its own features when the
+assembly named TAOM holds four type names (its Core/TaomOverlap.cs):
+NameplateCullModule, MapViewReleaseModule, MissionStartGuardModule and
+SkeletonBufferModule (the last stands for both frame-buffer features).
+A rename on TAOM's side would bring back the double patching, and
+parking one of those modules would leave neither mod doing the work.
+
+VanillaTuningOverlapContractTests pins the assembly name and the four
+full type names, and checks that each module is listed once in
+FeatureModules.All and is not parked. It is a characterization pin: it
+passed on its first run.
+
+The provenance register line for this test lands with the knowledge
+base batch in the same push.
+
+Players see no change. Refs #808.
+
+#### test(skeleton-buffer): v2.0.34 - pin v1.5.5 targets, gate native pins
+
+`15e52d7a`
+
+The engine-bump gate now fails when a native address pin table has no
+row for the installed Bannerlord build. Before, the two pin classes
+(SkeletonBufferInstalledBinaryTests and
+ClipBudgetSignatureInstalledBinaryTests) were tagged LiveInstall only,
+so a missing row reported Inconclusive, which reads as a skip. That is
+how the v1.5.5 bump shipped without a skeleton-buffer row.
+
+- Add the v1.5.5 row (TaleWorlds.Native.dll, 14,212,960 bytes): watch
+  0x6A1A1, pool global 0xD9E160, pool 1 guard 0x6A1D4, pool 2 load
+  0x69F95, pool 2 guard 0x6B410. The game itself finds these sites by
+  pattern, and the 2026-10-15 log shows "guard ON" for both pools, so
+  players were never without the guard.
+- Tag both classes BindingVerification. The binding gate maps
+  Inconclusive to failed, so an unlisted build now fails the gate.
+- NativePinGateTests keeps every KnownBuilds table tagged at class
+  level and named in the engine-bump skill.
+- The engine-bump skill separates the C# pins (they fail in the gate)
+  from the Python pins (they skip unless TAOM_GHIDRA_IT=1, so read the
+  skip count).
+
+Players see no change. Refs #806.
+
+#### test(core): v2.0.34 - main party scan sees nested parens
+
+`4f27b3bd`
+
+MainPartyNullCheckScanTests guards against null-checking the computed
+PartyBase.MainParty getter. Its parenthesised form allowed only one
+pair of parentheses, so ((PartyBase.MainParty)) == null, the reversed
+null == ((PartyBase.MainParty)), is null, ?? and ?. on it all slipped
+through. Its call exclusion looked at one character only, so a call
+written with a space before the parenthesis, such as
+Find (PartyBase.MainParty)?.X, was flagged although the ?. guards the
+call's result.
+
+The regex now takes any depth of balanced parentheses around the
+getter, and the call exclusion skips whitespace and a generic argument
+list before the parenthesis. A keyword such as return, and a lambda
+arrow, still count as not a call, so return (PartyBase.MainParty)?.X
+stays caught. Fifteen new rows cover these shapes; eleven of them
+failed against the old regex. The production scan still finds no
+offender.
+
+The adapters rule now states the coverage and both limits: a check
+through a local alias is not seen, and strings are not blanked, so a
+string holding the check fails the scan.
+
+Refs #792.
+
+#### test(war): v2.0.34 - dry run checks every saved chronicle field
+
+`016ad47c`
+
+The chronicle_open dry-run tests checked the return value, the message
+and the final state, so a preview that changed a saved field in place
+still passed: with "if (record != null) record.Assaulted = true;"
+added to PreviewOpen, all 13 dry-run cases stayed green, because a
+siege's confirmed open resets Assaulted on the same fixture.
+
+Every dry run in the tests now goes through one helper that compares a
+deep value snapshot of the store before and after: every public
+property of every record (state, open, close and resolved days,
+Assaulted, read by reflection so a new field is covered) and every
+phase-seen day. The parity test now confirms on its own equivalent
+fixture and checks both fixtures start equal.
+
+With the same mutation 10 of the 13 cases fail; the other three are
+refused before the record lookup. No player-facing change.
+
+Refs #792.
+
+#### test(war): v2.0.34 - pin the chronicle_open dry run to change nothing
+
+`f0b5eddf`
+
+No player-facing change. Three test groups pin the console dry run of
+taom.chronicle_open. A dry run before the chronicle has launched
+creates no saved row. A dry run after Full War begins does not record
+the first Full War day. For a narrative, a siege that opens, a siege
+that falls at once and a failed precondition, the dry run followed by
+the confirmed open on the same campaign agree on whether the open
+acts, and the outcome the dry run predicts is the state the confirmed
+open leaves.
+
+Moving the phase and adoption step above the dry-run branch fails the
+first two, so they guard the read-only promise.
+
+Refs #792.
+
+#### test(war): v2.0.34 - pin the Eye wait log to no reason-text parsing
+
+`d371745c`
+
+The E25 tests check that a waiting hunter's reason is logged without
+asserting its wording, but every wait reason begins "Waiting:" today.
+A logging decision that went back to `firstWait.StartsWith("Waiting")`
+still passed all of them.
+
+A source-text test now reads TryStartHunt in EyeOfSauronService,
+comments blanked, and fails if the method inspects text at all
+(StartsWith, EndsWith, Contains, IndexOf, Equals, Substring, Split or
+Regex), while still requiring the wait to be logged. The wait is
+logged because WaitReason returned one, never because of its words.
+
+Proved red with the in-memory mutant
+`if (!dryRun && firstWait.StartsWith("Waiting"))`: the new test failed
+naming StartsWith while the other 242 passed. The service file was
+restored byte for byte.
+
+Refs #792.
+
+#### test(core): v2.0.34 - main party scan catches every null-check form
+
+`dc1c3703`
+
+The scan that bans null checks on the computed PartyBase.MainParty
+getter matched only `PartyBase.MainParty == null`. The hunt popup's
+own former guard, `PartyBase.MainParty != null`, slipped past it, so
+the scan could not stop that crash from coming back.
+
+It now matches both polarities, the reversed forms (`null ==`,
+`null !=`) and the `is null` and `is not null` patterns, with
+comments still blanked first. Data rows pin each detected form and
+the safe forms it must ignore: the stored Campaign.Current?.MainParty,
+a plain read, and the pattern inside a comment. A focused test pins
+that HunterPartyAdapter.IsMapFree checks the stored main party.
+
+Proved red against the trunk a9437a492 HunterPartyAdapter.cs and
+MessengerCampaignBehavior.cs: the scan flagged both files and the
+focused test failed; the two files were then restored byte for byte.
+
+Refs #792.
+
+#### test(war): v2.0.34 - pin the Eye of Sauron wait log to a typed check
+
+`3633b654`
+
+E25: the daily tick already decides a wait by WaitReason returning a
+reason (since ac0a3e0c0), not by reading the verdict's wording. Pin it:
+the daily tick logs a waiting hunter's reason, a refusal that is not a
+wait logs nothing, and a dry run logs nothing. The assertions name the
+hunter and party only, so rewording the message cannot break them. The
+busy-hunter test that called TryStartHunt now carries that name.
+
+Refs #792.
+
+#### test(infra): v2.0.34 - faster wiring scans, pin the comment scan
+
+`06252ae2`
+
+Six Main-wide wiring scans stripped comments from every source file.
+MentionsOutsideComments now reads the raw text first and strips only
+files that contain the name, so the offender sets are unchanged. Each
+scan dropped from about 0.5s to about 0.1s.
+
+RepoPathsTests gains rows for it: a needle only in a comment is
+false, one in code is true, whole-word rejects a longer identifier
+and the substring mode accepts it, and a missing file throws
+FileNotFoundException.
+
+Refs #792.
+
+#### test(infra): v2.0.34 - one engine-faithful data store fake
+
+`ea8f2ad5`
+
+Four private IDataStore fakes had drifted from the engine's
+BehaviorSaveData.SyncData: they skipped null on save and overwrote a
+duplicate key, so a test could pass where the engine would throw. The
+Eye of Sauron and SpecialResources fakes already followed the engine.
+
+EngineDataStore is now the single fake. It uses Add on save, so a
+duplicate key throws, and a missing key on load returns false and
+leaves the ref alone. Its summary names the one deliberate exception
+(RoundTripDataStore, which keys by type) and two engine behaviours it
+does not model: SyncData runs on load only when the save holds a
+record for the behavior, and a load returns the saved object rather
+than a deserialized copy.
+
+The career test that loads an empty store is renamed
+SyncData_LoadWithoutTheKeys_GracefullyLoadsEmpty, because it models
+"record present, key missing", not a save older than the feature.
+
+Refs #792.
+
+#### test(migration): v2.0.34 - pin reflection-site labels to their lines
+
+`ee19f105`
+
+The reflection-site catalogue labels each lookup as File.cs:N, in
+ReflectionSiteBindingTests and in reflection-sites.md. A label shows
+only in a failure message, so a wrong label stays wrong until someone
+follows it. Plan 022 fixed two drifted labels by hand. The formation
+presets review found them drifted again, and six labels that pointed
+at the wrong code, three of them since the commit that added them.
+
+Two tests now pin the labels, and neither needs the game.
+EveryLineLabel_PointsAtALineThatNamesItsMember checks that each
+labelled line spells its member, with comments blanked, and that a
+label with no line names a file that exists.
+EveryDataRow_HasAMatchingRowInTheCatalogue checks that
+reflection-sites.md has a row for each DataRow. The convention (label
+the line that spells the member) is written in both files. The labels
+that broke it are repointed, and the missing
+Mission._initialPlayerAgent row is added. Findings 8 and 18 of
+docs/reviews/rca-formation-presets-2026-10-09.md.
+
+### Documentation
+
+#### docs(reviews): v2.0.34 - RCA addendum for the party-size cap
+
+`6553b8c7`
+
+The review of the party-size cap found the culture cards still
+advertising the old bonuses, the third time a feat change has missed
+them. The RCA records it as the second change of
+rca-wotr-war-rule-2026-10-18.md, the faction-card lesson notes that a
+test now guards party size, and the elite-tax lesson records that the
+20% floor was removed on purpose.
+
+Refs #818.
+
+#### docs(reviews): v2.0.34 - RCA, lessons and generator region gate
+
+`3fe86e22`
+
+Root-cause analysis of the War of the Ring war rule review: 18
+findings, every one fixed or decided, recorded in
+docs/reviews/rca-wotr-war-rule-2026-10-18.md.
+
+Three lessons go to the lessons files: a war veto must also gate
+where the engine charges for or offers the war, a negative relation
+value declares war whatever isAtWar says, and peace must not be made
+from OnSessionLaunched on a load.
+
+A hand edit inside a region a generator owns has now slipped through
+three times in three days. tools/tests/test_generator_regions_in_sync
+runs each owner's --check, so such an edit fails /verify instead of
+being reverted silently by the next regeneration.
+
+Refs #818.
+
+#### docs(orientation): v2.0.34 - trim the artist-ports trap row to the cap
+
+`cd48cb8e`
+
+The trap row for artist commit ports grew to 187 characters in the
+previous terminology pass, past the 180-character cap that
+check-doc-config-drift enforces, which blocked every commit. Shortened
+to 179 with the same rule: base the merge on the mirror revision
+nearest the file, not on the commit's parent.
+
+#### docs(kitbash): v2.0.34 - Carn Dum icon RCA, lessons and workflow docs
+
+`0daece88`
+
+The deep review of the map icon tooling made 20 findings, each fixed or
+given an owner, and its convergence pass nine more, all fixed. The RCA groups them in five patterns: success that was
+self-reported, steps written for one item that took many, estimates
+stated as facts, defaults nobody re-read, and texture density spent on
+hidden geometry. Five new lessons in build-tooling-workflow.md carry
+the rules. RCA:
+docs/reviews/rca-carn-dum-icon-tooling-2026-10-16.md
+
+The docs now match the tools after the review:
+
+- docs/kitbash/map-icons.md records both routes (decimate a Tripo
+  model, or rebuild it from solids), the 0.15 draw scale, the Kit
+  material rule (names equal to the FBX materials, use_specular on) and
+  the icon's state: v11 built and unwrapped, texturing in progress. It
+  lists the decisions still owed: the new texture names collide with
+  the Tripo version's t_carn_dum_town_*, occlusion belongs in the
+  albedo or in the _s blue channel but not both, and whether 1K is
+  enough at full zoom.
+- The texture density figure (10 to 15 px per metre) is now labelled an
+  estimate for the default map camera; full zoom needs about 50.
+- The _s map's AO dims ambient light and the sun's specular, not the
+  sun's diffuse, and back-face culling is set per material (two_sided).
+- substance-painter-mcp-setup.md names Painter 12.1.5 and the new
+  script set. mcp-servers.md records that local MCP servers are keyed
+  by the folder's spelling, case included.
+- tools/README.md gets a section for the Tripo, Blender and Painter
+  tools. The converter commands in the pipeline doc and the Animalia
+  feature doc carry the now required --src and --dst.
+
+#### docs(reviews): v2.0.34 - adopt yotthani 2026-10-16, RCA and lessons
+
+`8dd76ddb`
+
+The daily review of yotthani's repositories (bannerlord 784fef93 to
+2ff002be, MithrilForge 0a2f4761 to ae7834aa). No code was taken; the
+engine facts are restated in TAOM's docs with source, evidence kind
+and engine version:
+
+- siege map events and the order of fief finalization (fief-granting)
+- clan wage payment, garrison recruitment and the measured lord party
+  sizes (settlement-economy-food-prosperity)
+- TacticHoldChokePoint's eligibility and score, and the choke-point
+  claim that yotthani removed upstream (formations-and-team-ai)
+- the map-scene view hang and what it means for MapViewRelease, plus
+  texture and first-draw costs (map-view-release,
+  gauntletui-viewmodel-screen, gui-sprite-system)
+
+The MapViewRelease risk the review raised is settled as far as a read
+can settle it: yotthani's own VanillaTuning makes the same call on the
+map's own view, on by default; the in-game check still watches for a
+hang on returning to the map. The record carries the doc review's
+results, a "For yotthani" note, and the reasons the issues were not
+filed. upstream-watch.json advances to the reviewed heads.
+
+The RCA of the two deep reviews and the convergence pass is
+docs/reviews/rca-upstream-review-i3-2026-10-16.md, with the items
+still open after the push. Lessons: three in lessons/misc.md, one in
+lessons/gamemodels-services.md. Older docs no longer say "he" or "his"
+for yotthani, whose pronouns are not stated.
+
+#### docs(reviews): v2.0.34 - KEYforce javelins port RCA and lessons
+
+`42693d9b`
+
+The deep review of the 03320a65 port (eight lenses and a convergence
+pass) found no engine incompatibility. Its two HIGH findings were the
+starter-kit block that would have stripped the javelins' melee mode
+(fixed in the data and the tool) and the validator's melee pass
+ignoring --moduledata (fixed). Two lessons: check which TAOM tool owns
+the region an artist's merged rows land in, and prove a baseline run
+read the baseline; a third repeats the rule to read the decision
+record before calling data hand-authored or stale.
+
+Refs #812
+
+#### docs(engine): v2.0.34 - doc review fixes for the yotthani batch
+
+`0bb1f3ca`
+
+A find-and-verify review of the four knowledge-base commits: three
+finders (fidelity to source, consistency with TAOM, routing) and one
+verifier that re-read every source. 26 of 29 findings were confirmed
+and are fixed; the record is in adopt-yotthani-2026-10-15.md, "The doc
+review". Players see no change.
+
+- The Modding Kit registry path had a form feed in place of "\f" in
+  two docs; it reads HKCU\Software\TaleWorlds\RGL\fbx_import_settings.
+- The Black Gate ash row now gives the fix's 12.2 ms, not the 2 %
+  proof run's 11.6 ms.
+- Upstream hedges restored: troop and level "explain almost nothing"
+  for strike rates; decision state 6 is likely the defend state; the
+  dynamic-cook layout is described, not stated as a rule; VanillaTuning's
+  guard named as the source names it.
+- Removing a behaviour at a lower index inside OnMissionTick ticks the
+  current behaviour twice and skips no other behaviour.
+- Corrected counts (vanilla flail_skeleton is 4), line anchors, a
+  translation, a loader address's binary, two doctrine table cells,
+  the register's Covers columns and pass counts, and a duplicated
+  statement of the VanillaTuning contract.
+- tools/README.md: the clip-rename row carries the rope-flag rule.
+- New lesson in lessons/misc.md: restate an upstream fact with its
+  hedge and its evidence kind, in the same sentence.
+
+#### docs(engine): v2.0.34 - 1.5.5 perf, native and coexistence findings
+
+`7eac3015`
+
+yotthani's newer measurements and TAOM's own v1.5.5 checks, restated and
+credited in the owning docs (MithrilForge docs/engine/perf.md and
+modding-kit.md at 0a2f4761, yotthani/bannerlord at 784fef93). Players
+see no change.
+
+- VanillaTuning v0.1.1 stands aside on four TAOM type names: the
+  nameplate cull, map-view release, mission-start guard and
+  skeleton-buffer docs say so, and why load order does not matter.
+- The frame-cost doc gains a v1.5.5 tag line and the v1.5.5 limb-ray
+  and skeleton-buffer addresses, each with its build; the Black Gate
+  ash emitter's share and the 21.0 to 11.6 ms proof run (v1.5.3); the
+  measured drop in clip residency, with its cause marked as yotthani's
+  reading; the AI pause that gave no gain; the armour flicker above
+  2,340 skeletons with one guard.
+- Campaign costs measured on a TAOM campaign (v1.5.3), election and
+  war-declaration costs after the ButterLib fix, the server GC figures
+  and the rejected non-concurrent variant, the UIExtenderEx inventory
+  figure in cheat mode and first-use shader compiles.
+- The A/B section gains the reference-PC core-count method and its
+  caveats.
+- The ButterLib doc dates its settlement count (2026-10-06); the RCA
+  and the adoption record link each other.
+
+#### docs(reviews): v2.0.34 - adopt yotthani 2026-10-15, traps and lessons
+
+`4d79eca8`
+
+The record of the 2026-10-15 review of yotthani's newer work
+(docs/reviews/adopt-yotthani-2026-10-15.md): what was read, what TAOM
+verified, the decisions, what was not taken and why, findings for the
+maintainer, issue drafts, and a note for yotthani. Players see no
+change.
+
+- Traps: the "Kit clip rename" row in the trap index now carries the
+  companion-clip rule. The lifecycle docs say never to remove a
+  behaviour inside OnMissionTick, and that the engine re-runs every
+  module's main-menu hook on every tick after a throw.
+- A coexistence section for VanillaTuning v0.1.1, which stands aside
+  for four TAOM features by type name, and why load order does not
+  matter.
+- The shader-precompilation unpark checklist gains the parked guard's
+  behaviour removal.
+- Lessons: a presence-based stand-aside breaks when the other mod
+  stands aside too; a doc batch written beside the code is re-read
+  against the reviewed code before it ships.
+- Dated correction notes in the 2026-10-08 record, the provenance
+  register's sixth pass, and the adoption history line.
+
+#### docs(battle): v2.0.34 - measured battle AI and morale constants
+
+`d690ff8d`
+
+yotthani's battle-behaviour measurements on v1.5.5, taken with TAOM
+2.0.34 loaded, restated and credited, plus TAOM's own decompile of the
+AI defence properties. Players see no change.
+
+- The first tactic decision, at 0.5 s, picks FullScaleAttack; the
+  start layout matters more than the tactic; the morale casualty-shock
+  constants from the v1.5.5 source; 34.5 % of AI strike events hit a
+  friend; 13 unchanged mirror battles show the natural spread, so a
+  single pair of runs proves nothing in an A/B.
+- TAOM's decompile of v1.5.5: the native melee AI reads the block and
+  parry abilities and the shield-defend value that TAOM's race
+  abilities and Culture Doctrine set, so those levers are live. No
+  native read was found for AiAttackingShieldDefenseChance. yotthani's
+  two zeroed battles that showed no change stay unexplained.
+
+#### docs(animation): v2.0.34 - companion clips, agent-less figures, Kit
+
+`2b8f5ff3`
+
+Engine and Modding Kit facts from yotthani's MithrilForge and bannerlord
+repositories (pinned commits), restated and credited in the owning
+docs. Players see no change.
+
+- A clip with a rope flag samples its "{clip}_weapon" companion with
+  no null check, so a renamed or cloned rope-flagged clip without its
+  companion is an access violation at wind-up (decompiled on v1.5.5).
+  It applies to every weapon with its own skeleton: flails, slings and
+  the shackle. TAOM ships no rope-flagged clip today.
+- Agent-less figures (yotthani's crowd lab): what the engine draws for
+  a figure that has no agent.
+- Modding Kit: the FBX import dialog remembers its flags, bo_ node
+  rules, prefab body-flag names, cook caveats, cloth links as GUIDs,
+  the decal-set crash, props left undrawn on a shader-sack miss, and
+  where TAOM's camp packages came from.
+- tools/README.md and the animation lessons gain the clip rules.
+
+#### docs(mission-perf): v2.0.34 - shield timing covers all four targets
+
+`fdee18f0`
+
+From the checks of the second review's fixes (a convergence pass and a
+focused Codex pass). Comments and docs only; no code changes.
+
+- The heartbeat doc and the Patch98 header gave the second-game-start
+  PatchShield timing to the camera target alone. TAOM applies its
+  patches on all four shielded targets (Patch23 on SpawnAgent and both
+  Patch98 categories) in the same once-per-process game-init block,
+  after PatchShield's second pass, so all four are shielded only from a
+  process's second game start.
+- The native addresses of the engine's pre-display path now name their
+  build (v1.5.5) and say the frame function calls it in one branch.
+- perf_runs.py: a comment says a mixed row's cameraMs rate is a lower
+  bound. NativePinGateTests: the summary says a type that fails to load
+  is invisible to the scan, which is why the known tables are pinned.
+- The RCA records both checks, and the Lens 1 notes and Codex items
+  left unchanged, with their reasons.
+
+Refs #809.
+
+#### docs(reviews): v2.0.34 - second review of the yotthani code items
+
+`b3fac302`
+
+At the maintainer's request, a fresh seven-lens deep review and a Codex
+review (gpt-6-astra, reasoning max) read the five commits of #806 to
+#809. Neither found a CRITICAL or HIGH defect. The RCA's new section
+lists each finding, its source, why the first review missed it, and its
+fix, plus the three proposals rejected with their reasons.
+
+- docs/reviews/rca-yotthani-review-2026-10-15.md: second review.
+- docs/reviews/codex-adversarial-yotthani-review-2026-10-15.prompt.md:
+  the Codex prompt.
+- lessons/harmony-il.md: an empty patch category still returns true.
+- lessons/native-cpp-port.md: read a reference doc's tag legend before
+  a figure or address goes in.
+
+#### docs(reviews): v2.0.34 - yotthani review code RCA and lessons
+
+`33253ea9`
+
+The deep review of #806 to #809 (seven lenses, then a convergence pass
+on the fixes) found no HIGH or CRITICAL defect. The RCA lists the five
+MEDIUM and the LOW findings with their fixes. Their common cause: a
+claim about another component, written without reading that component.
+
+- docs/reviews/rca-yotthani-review-2026-10-15.md: findings, the
+  convergence pass, follow-ups.
+- rca-engine-bump-v1.5.5-2026-10-14.md: F10, the missed v1.5.5
+  skeleton-buffer pin row.
+- lessons/harmony-il.md: a patch category fails as one unit, and a
+  recurrence on install lines that claim more than was checked.
+- lessons/native-cpp-port.md: a native pin table fails the gate on an
+  unlisted build, and a recurrence on figures copied without their
+  source tag.
+
+#### docs(dread): v2.0.34 - correct the rout chain from the v1.5.5 engine
+
+`f4f12a73`
+
+The Aura of Dread doc now describes how a routed troop really leaves a
+party, read from the v1.5.5 engine: only a panicked troop is lost; a
+troop that leaves on a retreat order keeps its place but still counts
+as a casualty; deserters come only from the defeated side; and siege
+defenders are exempt only in a siege assault, not in a sally-out.
+
+It also corrects three engine claims: the 30% formation "Flee" value
+changes no behaviour (nothing reads it), only a direct Retreat()
+bypasses the panic handler's bracket, and a direct Panic() skips the
+morale model's veto and the siege-ladder rule.
+
+The review RCA gains a second-review table, and the lessons file a
+rule on promoting a lesson with every branch kept.
+
+Review: docs/reviews/rca-dread-aura-local-2026-10-15.md
+
+#### docs(reviews): v2.0.34 - dread aura review RCA and lessons
+
+`0103a827`
+
+Root-cause analysis of the dread aura deep review, plus four lessons:
+a morale effect that routs a troop is not local; read an engine
+method's native side before claiming it has no limit or fallback; a
+fallback reads the compiled default and never restates its literal; a
+setting with an MCM default and a JSON default gets a test that the two
+are equal.
+
+The RCA also proposes three trap-index lines, left for a follow-up
+because the index is full (45 of 45 rows).
+
+#### docs(ai): v2.0.34 - ladder brief for the artist's assistant
+
+`9b11bd73`
+
+A brief for KEYforce's AI assistant: TAOM's skill, armour, melee and
+ranged ladders (kingdom armour caps, mesh tier names, DPS bands, ladder
+bow cells), which files are generated, and the gates to run before a
+commit, since TAOM's hooks do not run outside its own setup. Listed in
+docs/INDEX.md.
+
+Refs #811
+
+#### docs(reviews): v2.0.34 - KEYforce Harad port RCA and lesson
+
+`dde30a5b`
+
+The deep review of the #805 port found four MEDIUM and two HIGH
+findings; the port fixes each in its own data, and the scratch merge
+proof and the loc coverage gate go to #813 and #815. Every MEDIUM
+finding repeats a recorded lesson, so the new lesson asks a troop port
+to diff the whole validator warning set against HEAD, because the
+commit hook surfaces only errors.
+
+Refs #805
+
+#### docs(reviews): v2.0.34 - Harad repair RCA and lessons
+
+`caefaa1f`
+
+The deep review of the Harad repair (44e9edd48): eight lenses and a
+convergence pass, 15 findings with their causes, Mike's ten decisions,
+and the follow-ups. Three lessons: a player kit copied from a troop
+inherits its launcher's difficulty, a gate that runs only inside Claude
+Code does not gate a plain-git commit, and a name generator that globs a
+folder registers whatever lands in it.
+
+Refs #798
+
+#### docs(reviews): v2.0.34 - WildMesh mounts review RCA and lessons
+
+`d546054d`
+
+The root-cause record of the WildMesh3D mounts deep review (#794): 25
+findings, how each was missed and what now prevents it, Mike's
+decisions, the regeneration round and the follow-ups that predate the
+change (the Animalia masters' doubled and lost frames, the elk
+walk-back's 60 fps source, the human and troll exports' same exporter
+truncation, the market gate's fallback).
+
+Four findings repeated lessons recorded for #646 on 2026-09-23, so the
+lessons gain recurrence notes and five new entries: port a sibling
+tool's refusal tests before its code; check an artefact against its
+source, never against itself; Blender's FBX exporter truncates time;
+a hoof plant starts a full stance; a writer of named Armory items
+writes their English loc rows.
+
+#### docs(enlistment): v2.0.34 - R1b is dormant until #796
+
+`9563d5e8`
+
+The enlistment doc credited rule R1b (never close an encounter that
+belongs to a battle) with protecting the loot screen and holding the
+#551 latch. It has done neither in a real game: the encounter adapter
+works out the battle flag and never passes it on, so every live
+snapshot reads "no battle" and R1b runs only in tests.
+
+The doc now says so, names the two cleanup paths that must keep their
+obligation before the flag is passed (a failed join's rollback moves
+to EnlistedAttached, where the stale-latch recovery never runs; a
+discharge accepts the deferral, then clears the record, so nothing
+retries), and explains what held the #551 latch instead: the sweep and
+TryBreakBattleLatch returned before asking the policy, and R4 skips a
+joined battle's encounter because its encountered party is the enemy
+leader.
+
+The Codex prompt that found both paths is committed beside its
+siblings.
+
+Refs #796.
+
+#### docs(reviews): v2.0.34 - Codex lessons from #765 and #792 reviews
+
+`18615680`
+
+Adds the review-codex step 3h lessons for the four Codex reviews to
+.ai/review-reference.md, "Lessons From Prior Reviews":
+
+- does especially well: running the analyzer's verdict function on
+  ledgers that should fail it (Batch A), sending every callback of
+  the chronicle state machine through its War Ended rule (Batch B),
+  and following PartySizeLimit's cache to the roster version it
+  reads (M8);
+- look harder: the #792 scan check tried every comparison form of
+  the PartyBase.MainParty guard but not ?., and seven such reads
+  stayed until a later docs audit.
+
+Refs #765, #792.
+
+#### docs(features): v2.0.34 - volunteers, Arthedain, catalogues current
+
+`1a2da1e3`
+
+- troop-progression.md: TaomVolunteerModel's four overrides, the
+  VolunteerProductionService row and its two test classes, and a
+  changelog line for the War Chronicle step.
+- castle-recruitment.md: a changelog line for the War Chronicle
+  multiplier on the castle slot curve; the provider test count is 9.
+- arthedain.md: its lines are translated (a9437a492); #754 is open.
+- module-dependencies.md: the #371 pairing rows are back since
+  95085de30; versions, the worked example, the update step, the
+  gotcha and the numbers now say so; an anchor link replaces a
+  drifting line cite. The #371 comment is cited at lines 11-20, and
+  every other SubModule.xml line cite in the chapter was re-measured.
+- file-catalogue.md: rows for war_chronicle.json and rally.json.
+- tools/README.md: tier changes, not flaps; the wotr string count;
+  a row for check_external_loc_coverage.py.
+
+Refs #765, #792.
+
+#### docs(engine): v2.0.34 - daily tick on load, SyncData size, MainParty
+
+`ae1a6b55`
+
+Puts three engine facts found in the #765 and #792 work where an
+author reads first.
+
+- The tick and campaign-event concept docs say a load can repeat the
+  save's elapsed day, read from v1.5.5 Campaign.CreateCampaignEvents
+  (in-game check owed, #793). Only the hourly event shifts the same
+  way: the quarter-hourly first wait counts the quarter's elapsed
+  fraction in hours (Campaign.cs:1039-1045), so it repeats only in
+  the first fifth of a quarter and can skip up to four ticks, and
+  with no remainder the hourly and quarter-hourly waits are half a
+  period while the daily one is a full day.
+- save-system.md names the 32,763-byte SyncData string limit and the
+  shared SyncDataChunker.SyncChunks.
+- The adapters rule names PartyBase.MainParty and its scan test.
+- The gamemodels rule lists the War Chronicle's use of the volunteer
+  and target score models.
+- Trap index: a "Daily tick after load" row; the two skeleton rows
+  are merged to stay at 45.
+
+Refs #765, #792.
+
+#### docs(coop): v2.0.34 - chronicle gates, hunt under Together, counts
+
+`86d3a774`
+
+- coop-interop.md: the War of the Ring launch reconciles before its
+  phase check and only declares pairs the model still holds at war;
+  the chronicle's load marker handler; a gated row for the event
+  chain's router; the siege-defence split is pinned by two tests,
+  not three; the transpiler count is a grep, not 7.
+- bannerlord-together-compat.md: the Eye of Sauron hunt is off under
+  BannerlordTogether, the War Chronicle runs on every peer there,
+  TAOM's pin is v1.5.5, and the transpiler and veto counts are
+  current.
+- refuge.md: its session latch is the shape the amended reset rule
+  no longer prescribes, tracked in #773.
+
+Refs #765, #792.
+
+#### docs(wotr): v2.0.34 - #764 and #772 in diplomacy and momentum docs
+
+`cf7486cb`
+
+- diplomacy.md: the stored-stance guard and phase-first order in the
+  overview and the how-to, an accurate HasDeclaredWar line, the four
+  WarPhase values, the three new test files, and changelog and issue
+  lines for #764 and #772.
+- war-of-the-ring.md: the skipped unknown or eliminated scripted war
+  (#772 R3), the phase-day tests, a GitHub Issue section, and the
+  Gundabad and Arthedain pair in the Phase 1 table, list and test.
+- war-of-the-ring-momentum.md: an absent chunk count loads without a
+  warning, 73 string keys, 174 tests in 12 files, and the status no
+  longer says unmerged or untranslated.
+
+Refs #765, #792.
+
+#### docs(war): v2.0.34 - War Chronicle and Eye of Sauron docs current
+
+`2e2a422d`
+
+Brings the two feature docs and their catalogue rows up to the code
+after the Codex fixes, the decisions and #792.
+
+- war-chronicle.md: two behaviors, the full constructor reset, the
+  game-loaded marker, the rally rebuild on every refresh, the six
+  commands and the event chain's dependencies, the corrected test
+  counts, translations done, a once-per-day in-game check, and the
+  changelog (now in date order) and issue lines for the Codex
+  fixes, #792 and #793.
+- eye-of-sauron.md: the broken Steps row joined into one table row,
+  grain topped up during a battle, the console refusal in another
+  lord's army, the 1.5 S speed band, and #792 in the changelog.
+- feature-map, gamemodel registry and dev console rows match: the
+  real hunt command names, the speed band, chronicle_open after C07,
+  and four commands that had no row. The naming table now lists
+  every shipped exception among the 57 commands, fc_grant_merit and
+  the nudge_, save_, reload_ and rescue_ verbs included.
+
+Refs #765, #792.
+
+#### docs(lessons): v2.0.34 - daily tick after load, MainParty, recurrences
+
+`e8504a62`
+
+Adds the cross-feature lessons the #765 and #792 reviews produced.
+
+- After a load the daily tick can repeat the save's own day (#793):
+  guard once-a-day work on a saved day.
+- Never null-check PartyBase.MainParty; check
+  Campaign.Current?.MainParty, gated by MainPartyNullCheckScanTests.
+- A clan that changes kingdom moves its fiefs with no owner-change
+  event (Batch B C02).
+- Rebuild owned effects from the current state on every refresh
+  (Batch A F3).
+- Recurrence lines on four older lessons: the fallback lookup (#792
+  F1), the guard never seen red (F2, F3), the changed lookup key
+  (M8 E01) and Enum.TryParse (Batch B C18).
+- The SyncData size lesson now says 32,763 bytes, as its own Prevent
+  line already did, and the #764 pointers name the lesson they mean.
+
+Refs #765, #792.
+
+#### docs(reviews): v2.0.34 - #792 RCA, review log and track record
+
+`f479d96f`
+
+Records the review follow-ups of #792 and repairs the records of the
+War Chronicle, Eye of Sauron and War of the Ring reviews.
+
+- New RCA for #792: the scope, the reload finding behind #793 and
+  Codex F1 to F4 with their fixes. The four lens reports were not
+  kept, so only the recorded finding is tabled.
+- REVIEW-LOG: an entry for #792 (placed before the #791 entry, whose
+  work came later that day), six summary rows for #764, #772, Batch
+  A, Batch B, M8 and #792, and corrected dispositions for the Batch
+  A, Batch B and M8 entries; the M8 entry cites the RCA lines for
+  E16 to E40.
+- The M8 RCA and log cite the trunk decision commits cbacbf1f0 and
+  7ab91767e, not the pre-rebase SHAs, and say that F2 predates the
+  decisions. F2's cause reads as the code at 34b0e25a9 had it:
+  EndHunt invalidated only the speed and ClearHunt nothing.
+- Codex track record: four essays (Batch A, Batch B, M8, #792); the
+  four essays they displace move to the archive.
+- The #792 git ranges start at the parent bc8c9f71b, so git
+  rev-list --count gives the stated 14 and 18 commits.
+- Batch A RCA gains the Why missed and Preventive action columns,
+  marked as reconstructed on 2026-10-14; B02 and B32 say what the
+  code and tests hold. The Batch A, Batch B and M8 RCAs gain a "Why
+  each agent missed it" section and the Codex effort.
+- Repeat callouts for E01 and C18, the refuted C52, the done C55,
+  the #764 rule amendment, #773 and the #772 F24 to F26 follow-ups.
+
+Refs #765, #792.
+
+#### docs(git): v2.0.34 - commit with a pathspec, never a bare commit
+
+`385b7adf`
+
+`git add <paths> && git commit` commits the whole index, so files
+another session staged after the last `git status` go in too. On
+2026-10-14 a 12-path docs commit took 10 files a WildMesh session had
+staged; it was rebuilt from a temporary index before any push, and
+their work stayed staged. The new row in git-and-commits.md names the
+pathspec commit and, for a file that also holds another session's
+hunks, the temporary-index recipe.
+
+#### docs(tools): v2.0.34 - orc and goblin docs, review log, audit
+
+`a6b538c4`
+
+Documentation follow-up to 776054c0c and 2952ccc54 (#791, #795):
+
+- docs/INDEX.md lists the orc and goblin locomotion feature doc.
+- The review log has an entry for the 2026-10-14 deep review, and its
+  RCA points each fixed finding at the commit that holds it.
+- The feature doc links the RCA, names the shared retarget functions
+  and the restyle's pure tests, and its changelog cites both commits.
+  The starter kit and armour acquisition histories do the same.
+- /armory-audit's locomotion step and the tools README say that
+  --check also fails on an empty clip folder; the README names the
+  functions the retarget tool now shares with the restyle, and the
+  catalogue row count (5,038).
+- The hill troll ledger and two community guides give the clip box's
+  TpacTool v0.5.1 name, BlendWithAnimation, beside UnknownClipName.
+- docs/audits/armory-ref-audit.md regenerated at 2952ccc54: CLEAN. It
+  lists five new wildmesh_* meshes nothing uses yet (#794); the
+  catalogue is not regenerated here.
+
+#### docs(war): v2.0.34 - the day boundary is the elapsed day, not midday
+
+`a66b5754`
+
+Comments and docs said a save made "before midday" ticks its own day
+again after a load. The War Chronicle counts elapsed campaign days
+from CampaignStartTime, and vanilla's DefaultCampaignTimeModel puts
+that at 09:00 on the calendar clock. The repeat follows a save in the
+first half of the elapsed day, about 09:00 to 21:00 on the calendar
+clock: a calendar 18:00 save repeats its day, a 06:00 save does not.
+
+ChronicleService, the gate, tick and chronicle test comments, the
+feature doc, the analyzer docstring, its README row and three RCAs now
+say "first half of the elapsed campaign day" and keep elapsed days
+apart from calendar hours. The "past midnight" note on
+ChronicleService.Today now names the elapsed-day boundary. One
+analyzer test is renamed to match; behaviour is unchanged.
+
+The feature doc also records the unreadable-clock handling and the
+updated test counts (552 under the feature folder, 629 in all).
+
+The README row keeps its CRLF ending: the file's blob has carried
+CRLF on all 538 lines since before this branch, so the flagged
+"trailing whitespace" is that CR, and removing it means renormalizing
+the whole file.
+
+Also commits the Codex prompt for the follow-up review.
+
+Refs #792.
+Refs #793.
+
+#### docs(release): v2.0.34 - ship Arthedain's towns in the TAOM_Map package
+
+`612b3759`
+
+Arthedain's towns (town_AN1 to town_AN3) exist only in the live
+TAOM_Map: the TAOM_Map packaged in the patreon, public and testing
+channels has none of them (grep on 2026-10-14). The kingdom's clans,
+its home settlement and its culture's starting town name them, and so
+does the War Chronicle's north event.
+
+The release process now says the next release must ship a TAOM_Map
+package with those towns, with the grep that proves it per channel, and
+/release lists the check in its pre-flight.
+
+Refs #792.
+
+#### docs(war): v2.0.34 - War Chronicle docs and review follow-ups closed
+
+`573dc155`
+
+The War Chronicle doc now covers the once-per-day guard, the load
+marker, the order a daily tick writes its ledger lines, the analyzer's
+rewind and the new tests, and records that the north event is Skipped
+on a TAOM_Map package without Arthedain's towns.
+
+The two chronicle RCAs close their follow-ups; one proposed change to
+SyncChunks was rejected as more test churn than it saves. The War of
+the Ring phase-ordering RCA gets a dated correction: a load does not
+re-align the daily tick to the day boundary.
+
+Refs #792.
+
+#### docs(war): v2.0.34 - close the Eye of Sauron review follow-ups
+
+`49d1dc17`
+
+The RCA now accounts for E25 and E39 and closes E41 to E47. E43 is
+rejected: a per-culture ConditionalWeakTable cache for
+CultureFeatAdapter.FromOrNull was tried and reverted. On .NET Framework
+4.x ConditionalWeakTable.GetValue calls TryGetValue, which takes
+lock (_lock) on every read, and the speed, size and morale models call
+FromOrNull on the engine's parallel party tick
+(CampaignTickCacheDataStore, TWParallel.For). The cache put a
+process-wide lock on that path to save an unmeasured 24-byte
+allocation, and the simplicity criterion rejects it. If a profile ever
+shows the allocation matters, a lock-free map built on the main thread
+at session launch is the alternative.
+
+Refs #792.
+
+#### docs(war): v2.0.34 - Eye of Sauron key files, how-to, tests, risks
+
+`abd03e85`
+
+E39: the co-op table's EyeOfSauronBehavior row said the frame tick only
+reads the snapshot; it publishes it, and while a hunt runs it can stand
+the hunter off. The row now names the gated handlers and why the battle,
+party-destroyed and frame handlers stay ungated. The feature doc gains
+the missing key files and the four string ids, a step-by-step how-to
+(host troops, hunter order, settings), test claims matched to the tests
+that exist, and the open risks, including why the sea guards are
+unreachable (NavalDLC declared incompatible, naval travel parked). The
+module dependency reference now says TAOM's manifest lists NavalDLC as
+incompatible.
+
+The settings how-to follows the persisted MCM default rule: a default
+never flips, so rename the setting to change it. The doc no longer says
+the four hunt lines are English only (all 12 languages since
+a9437a492), and #765 is marked closed.
+
+Refs #792.
+
+#### docs(reviews): v2.0.34 - Codex review of the career forks engine
+
+`bc8c9f71`
+
+Codex gpt-6-astra at max reviewed the career forks engine commits and
+the trunk merge (4f5b412d7..1e6a97c6d). It disputed five of six
+suspects with probes of the production source and confirmed one P2:
+the tree-version migration ran for the main hero only, fixed in
+59c1803d2. A second pass at high on the fix found nothing.
+
+The RCA records the finding, why the Claude lenses missed it, and the
+second pass's three observations. A new lesson covers load-time
+migrations over saved records. The review log, the Codex track record
+and both prompts are updated.
+
+Refs #769. RCA docs/reviews/rca-career-e4e7-2026-10-14.md.
+
+#### docs(ai): v2.0.34 - builder template asks for docs, bounds, true text
+
+`8c1305e2`
+
+The career forks review traced most of its findings to builder briefs
+that described only the success path. The Feature Developer spawn
+template now asks the builder to update the feature doc as the code
+changes and grep docs/ for deleted or renamed members, to bound every
+config value and anything derived from it, to make a result message
+true on every branch, and to give a saved marker one writer that
+replaces the old one.
+
+Refs #769. RCA docs/reviews/rca-career-e4e7-2026-10-14.md.
+
+#### docs(reviews): v2.0.34 - RCA and lessons for the career forks review
+
+`f2d4fa0d`
+
+The /deep-review of the career forks engine change found nothing
+critical or high and two medium findings: a retrain price that wrapped
+negative on absurd config and made a paid switch free, and a feature
+doc the change had made wrong. Both are fixed in the change itself.
+
+Three patterns had shipped before: a result message that is false on
+one branch, living docs left behind by a change, and a destructive path
+that later data can switch on. The RCA records each finding, why it was
+missed and what now prevents it, plus the convergence pass. Five lesson
+entries cover the derived-value bound, the single writer for a saved
+version marker, Gauntlet's UpdateChildrenStates, the data-gated
+destructive path, and the recurrences.
+
+Refs #769. RCA docs/reviews/rca-career-e4e7-2026-10-14.md.
+
+#### docs(reviews): v2.0.34 - account for every finding in the two RCAs
+
+`b8988815`
+
+#### docs(reviews): v2.0.34 - RCAs for the chronicle events and the Eye of Sauron
+
+`0b08eeea`
+
+Review records for two finished #765 milestones. Each RCA lists the deep-review findings with their dispositions, the maintainer decisions of 2026-10-14 and the Codex findings with their fixes. Four lessons are added: re-check the terminal state on every callback path, a resume path reuses the start checks, invalidate an engine cache with the counter it keys on, and search a broad phase past the exact edge.
+
+#### docs(reviews): v2.0.34 - Codex prompt for the Eye of Sauron review
+
+`b3ddf8a1`
+
+#### docs(reviews): v2.0.34 - Codex prompt for the chronicle events review
+
+`ba0b77d6`
+
+#### docs(reviews): v2.0.34 - record the fixes for two adoption findings
+
+`46fe58b7`
+
+The Custom Battle damage-model finding is fixed by #788 and the unused
+FiefManagementNavItemVM finding by #789 (the map-bar Fiefs button);
+the adoption record now names both issues and their branches.
+
+#### docs(reviews): v2.0.34 - Codex review of the career fixes
+
+`4f5b412d`
+
+Records the Codex review of #766 to #771: four of five suspects
+disputed with decompiled evidence, one confirmed bug fixed as #790. The
+RCA, the campaign-mechanics lesson and the review log carry the result,
+and the review prompt is kept for reuse.
+
+#### docs(reviews): v2.0.34 - RCA and lessons for the career fixes review
+
+`86ef5c7a`
+
+Root cause analysis for the review of #766, #767 and #768 and the bugs
+it found (#770, #771, #774), plus three lessons: a rule that reads a
+parsed field needs a test over the shipped data, a map event with a
+winner is not always a battle, and a flat party size term goes after
+the last percentage factor.
+
+#### docs(provenance): v2.0.34 - yotthani's HoN code is MIT
+
+`eed20591`
+
+On 2026-10-09 the maintainer reported that yotthani has put all of
+his yotthani/bannerlord code under the MIT licence. TAOM carries
+code from his Heir of Numenor (HoN) mods: siege dismount, mixed
+formations, smart cavalry AI, fief management, quick actions,
+equipment presets and companion tactics.
+
+THIRD-PARTY-LICENSES.txt gains an MIT section for those portions,
+so the notice obligation is met, and the provenance register moves
+the HoN, TransferbuttonMenu and yotthani/bannerlord rows from
+UNKNOWN to MIT and cleared. His repository has licence files only
+in HoN/VanillaTuning and HoN/ShaderCacheKeeper so far; a root
+licence file has been asked for. The adoption record, the
+companion-tactics and shader-compile-notice docs and the adoption
+precedent are updated to match.
+
+#### docs(ai): v2.0.34 - pair Harmony prefix and finalizer via __state
+
+`83ad1eab`
+
+This adds the preventive rule of RCA finding 21 in
+docs/reviews/rca-yotthani-adoption-2026-10-08.md.
+
+The start guard's canary kept "this call's prefix ran" in a
+process-wide flag. A finalizer rerun would have faked a lost guard.
+The 2026-10-03 lesson in lessons/harmony-il.md already said to pair
+a prefix and a finalizer through Harmony's __state, but the builder
+brief did not carry it. The rule is now one line in
+.claude/rules/harmony-patches.md, which loads with every patch file.
+
+#### docs(rules): v2.0.34 - reset per-campaign state in the constructor
+
+`9ab3952a`
+
+The session-reset rule for process-lifetime singletons now says to
+reset in the constructor of a behavior built fresh for every campaign,
+never in OnSessionLaunched, OnNewGameCreated or RegisterEvents, and to
+pin the per-campaign construction with a source-text test. The
+OnSessionLaunched reset it used to prescribe ran too late for the War
+of the Ring service (#764), because campaign-event listeners run
+newest-first. The rule's first hole is also worded exactly now: the
+engine calls SyncData in loading mode only when a save record exists.
+
+RCA: docs/reviews/rca-wotr-session-reset-2026-10-08.md
+
+#### docs(ai): v2.0.34 - fix stale facts in skills, agents and rules
+
+`9e9f04df`
+
+A /doctor prompt-audit pass over the instruction files found text the
+repo contradicts and prompt idioms written for older models. Report:
+docs/reviews/prompt-audit-2026-10-08.md.
+
+- Skills no longer describe the removed GitHub CI, and agents no
+  longer pin engine v1.5.2 (the pin is v1.5.4).
+- taleworlds-researcher drops ILSpy MCP calls its tool list never
+  granted; feature-builder and /release verify without deploying.
+- /issue writes the body to a file, checks it with
+  check_public_text.py and passes --body-file instead of a heredoc.
+- /freeze, /unfreeze and /localize now agree with their own scripts,
+  and gamemodels, harmony-patches and provenance drop claims the repo
+  disproves.
+- "Think harder" prompts and generic method text the model follows
+  unprompted are gone from the agents and rules that carried them.
+
+#### docs(lords): v2.0.34 - lords in both files merge, not override
+
+`369eb030`
+
+The lord skills guide, the skill-sets page and the lord-skills skill
+said that a lord defined in both lords.xslt and characters/lords.xml
+uses only the lords.xml copy, so the XSLT copy was dead code. That is
+wrong. The engine merges the two: lords.xml wins each attribute and
+skill it redeclares, the XSLT copy supplies the rest, and differing
+equipment sets are both kept, so the hero picks one at random each
+campaign (lesson #644, the Nazgul kit coin flip).
+
+The docs now describe the merge and tell the reader to check both
+files for the id before editing a lord.
+
+#### docs(ai): v2.0.34 - give each specialist agent its own tier
+
+`d0e4bc94`
+
+The five older agents ran without an effort setting, and two of them
+on a model that did not fit their work. Each now sets model and effort
+in its definition:
+
+- error-detective and taleworlds-researcher: Opus, high. A wrong root
+  cause or a misread engine signature is expensive to get wrong.
+- feature-builder and debugger: Sonnet, high.
+- refactoring-specialist: Sonnet, medium (tests gate it both sides).
+
+An agent runs one model, so the rule now says refactors, new features
+and non-obvious debugging start with an architect plan that a Sonnet
+specialist then carries out.
+
+#### docs(ai): v2.0.34 - route subagents by model and effort tier
+
+`fdec324f`
+
+Sessions ran Opus 5.5 at high effort for every task, searches and test
+runs included. The main session now orchestrates and sends each task to
+the cheapest model and effort that does it well.
+
+- New always-loaded rule .claude/rules/model-effort-selection.md: the
+  routing table (Haiku/low, Sonnet/medium, Opus/high, Fable only after
+  Opus fails), one retry one tier up, and a one-line note before each
+  spawn naming the agent, model and effort.
+- Three tier agents: fast-reader (Haiku, low), implementer (Sonnet,
+  medium) and architect (Opus, high, read-only).
+- CLAUDE.md's "Model routing" becomes "Model & Effort Selection", a
+  pointer to the rule. The table lives in the rule because CLAUDE.md
+  with its imports sat 543 B under the lint_docs.py cap.
+- Catalog row and provenance entry for the rule.
+
+#### docs(lords): v2.0.34 - link the generated lord kits doc to #747
+
+`20c34f03`
+
+The feature doc now names its issue, #747, closed with the in-game
+checklist still owed.
+
+#### docs(engine): v2.0.34 - fold in MithrilForge's newer engine findings
+
+`b5e1d0b3`
+
+Knowledge-base update from yotthani's MithrilForge (MIT, commit
+2e6fe97). Each fact is credited, and tagged with the build it was
+read on: v1.5.3 unless TAOM's own native decompile confirmed it on
+v1.5.4.
+
+Corrections to pages that were wrong:
+- The per-agent limb ray crashes because its native wrapper never
+  builds the capsules, so hit, distance and bone are stack garbage.
+- The clip reader lock is paid per bone sample. The 8.3 s once pinned
+  on DualWield's clips was the whole function's time in one profile.
+- Loading Type 1 keeps the first 3 s resident; Types 0 and 1 share
+  data through a cache keyed on the Animation GUID and source window.
+- Look bend applies on channel 1, never channel 0.
+- A decal texture outside the atlas renders a solid rectangle.
+
+New facts: skeletons are posed only while visible (#739 tracks
+TAOM's own bone reads), agent LOD saves triangles not draw items,
+distant shadows use a stand-in mesh chosen by skeleton name,
+particle simulation has no visibility gate, the native melee
+pipeline and which agent reads cross into native code, save costs
+and the post-save GC hitch, the map-view GPU leak on menu close, a
+Harmony rule against patch methods on closed generic types, and the
+cost of ConditionalWeakTable's lock.
+
+The trap index row for mission logic now also warns that an
+exception in AfterStart reloads the mission forever.
+
+The thread table in the Harmony rules gains a row for engine
+callbacks marked multi-thread callable. DecideCrushedThrough is
+reached from one of them; an audit found the crush path read-only
+after construction, so no code change.
+
+Reviewed by an adversarial find-and-verify pass. Its 17 confirmed
+findings, mostly upstream hedges restated as fact, were fixed.
+
+#### docs(arena): v2.0.34 - Patch69 comment points to its registry entry
+
+`2b6f6216`
+
+Patch69_TournamentRosterGuard's class comment listed the callers of
+GetParticipantCharacters itself, and that copy kept drifting from the
+registry's (four, then three; there are six on v1.5.3 and v1.5.4).
+A rewrite with the six callers reached origin today inside commit
+75b7b666, which another session made from the shared working tree.
+The /deep-review of that rewrite (lenses 1 to 6) found every engine
+claim true but the copy incomplete again, so the comment is now a
+five-line claim plus a pointer to the registry entry, the one place
+the callers and consequences live.
+
+Also: the registry quotes the join menu's gossip line exactly, with
+its {=GuWWKgEm} key; the build-tooling lesson about counting call
+sites now says six; a harmony-il lesson records the rule. RCA:
+docs/reviews/rca-patch69-comment-2026-10-05.md. Comment and docs
+only; the file compiles. Patch issue: #407.
+
+#### docs(arena): v2.0.34 - vanilla tournament armour, v1.5.4 checks
+
+`fe661961`
+
+Two Arena docs said vanilla dresses every tournament fighter in the
+host culture's kit. It does that only in arena practice fights: in a
+tournament match DefaultTournamentModel.GetParticipantArmor returns the
+fighter's own RandomBattleEquipment, because TournamentBehavior sets
+MissionMode.Tournament before the armour is copied. arena.md and
+tournament-armor-assignment.md now say so, and what TAOM's override
+does in each: it fixes cross-race clipping in practice fights, and in
+tournament matches it swaps each fighter's own armour for his
+culture's practice kit. The second doc's override count (seven),
+registration line and dependencies are brought up to date, and the
+NPC handbook's line reference follows the code.
+
+Checked against Bannerlord v1.5.4, which Steam installed today:
+Tournament Rewards, Arena, Race Abilities, the Mouth of Sauron gear and
+the troll gear lock need no code change (a decompile diff of every
+engine member they use; the strict binding gate passes 464 of 464 on
+v1.5.4; both XML merge harnesses pass). The docs record it:
+- The Armory snapshot README: v1.5.4 builds the face object under a
+  covers_head helm and then hides it, so the cause given for the
+  Mouth of Sauron's frozen grips is gone; the in-game look (#733) is
+  still owed.
+- race-abilities.md: the native agent-visuals code that runs on build,
+  re-equip and death changed, so three in-game checks are listed.
+- The Patch69 registry entry: GetParticipantCharacters has six
+  callers, not three, and the substitution also reaches off-screen
+  tournaments and the TournamentFinished list (Tournament Rewards'
+  hero count included, as tournament-rewards.md now notes).
+- A lesson: describe a vanilla method from every branch, mode checks
+  included.
+
+#### docs(race-abilities): v2.0.34 - first in-game test, tuning later
+
+`5fb310c2`
+
+Mike ran two Custom Battles on a v2.0.34 dev build (Isengard against
+Dunland, and against Erebor and the Iron Hills) and called Race
+Abilities a success for now. That build also carried the working tree's
+uncommitted edits, none of them in Race Abilities. The feature doc
+records what the log showed: every trigger fired, kin rallied, no
+errors, and the abilities moved each fight by a few percent of its
+damage. It also records the tuning notes: the outline in a packed line,
+Hill-clan Fury's low hit rate, and the off-and-on balance runs still to
+do. The console doc and the doc index now mention the outline count
+and the glow and sparks. #730 is closed with triage-needs-ingame and
+triage-blocked-decision for the steps and decisions still open.
+
+#### docs(release): v2.0.34 - channel numbers, version bumps, hook gap
+
+`62157c7e`
+
+The release docs now match what the last releases did and what v2.0.34
+taught:
+- /release Phase 1 reads every release channel's version before a
+  number is chosen: the testing channel already carried an untagged
+  v2.0.33, so this release became v2.0.34.
+- The Dependencies version moves with every release, as it has since
+  v2.0.29, and the live TAOM_Map and LOTRLOME_Armory versions are set
+  by hand, so all four modules read the number the release note
+  promises.
+- release-process.md explains how to resolve a crash report that
+  quotes a number git never saw (v2.0.33 on testing, v2.0.29.5 on
+  patreon and public), says a later deploying build of a dirty tree
+  voids the stamp gate and that Mike packages in the editor, and lists
+  the pack0.tpac prune.
+- The commit-subject hook judges a commit in another worktree against
+  the main checkout's version; the hooks catalog and the git guide say
+  so, with the workaround.
+- deep-reviewer.md warns that audit_armory_refs.py rewrites a tracked
+  report unless given --report -.
+- The doc index lists the v2.0.34 release note.
+- Lessons: pick a release number no channel carries; check a memory
+  card's "uncommitted" against the release commit; a mesh tool's guard
+  lists what it may edit.
+
+### Chores
+
+#### chore(wildmesh): v2.0.34 - remove the Custom Battle test riders
+
+`7bfb2f94`
+
+The five WildMesh test riders, [Test] War Boar Rider, Bristleback
+Boar Rider, Iron Hills Goat Rider, Mirkwood Stag Rider and Greenwood
+Moose Rider, no longer appear in the Custom Battle troop picker. They
+were console test troops for the WildMesh3D mounts (#794) and were
+never meant to ship. No campaign troop rides those mounts yet.
+
+Removed: their troop file and its SubModule.xml node, and the tool
+test that pinned each rider to its animal and harness. Their names
+were never registered for translation, and their ladder and
+recruitment exemptions went on 2026-10-15. The feature doc now tells
+the in-game test to restore them into the game install only, never
+into the repo. The ledger, file catalogue, feature map, index,
+validation doc and the WildMesh writer's comment say so.
+
+Review: docs/reviews/rca-wildmesh-rider-removal-2026-10-18.md. The
+testing channel's v2.0.35 package of 2026-10-18 still ships the
+riders; it is replaced from the v2.0.35 tag build.
+
+Tests: Python tool suite 4,636 passed, 8 skipped; ModuleData
+validator 0 errors; the release step 5 grep prints nothing.
+
+#### chore(skills): v2.0.34 - prep-tripo-prop covers the rebuild route
+
+`a69cd39d`
+
+The /prep-tripo-prop skill now starts with a route choice: decimate the
+Tripo model, or rebuild it from solids when decimation leaves it
+looking melted. The rebuild route lists every command in order:
+measure the Tripo layout, build, unwrap into texture sets, create the
+Painter project from the unwrap report, paint with painter_stacks.py,
+export and render a preview. The handoff converts every set, checks
+names against the Kit's AssetSources and Assets folders too, and names
+the Kit materials after the FBX materials with use_specular on. The
+CLAUDE.md skills row is shorter.
+
+#### chore(ai): v2.0.34 - native-branch trap and morale-write rule
+
+`1e62adeb`
+
+The trap index gains a "Native branches" row (a managed decompile
+hides native branches; use native_decompile.py first), and the
+"Persisted MCM defaults" row now says to comment why a setting was
+renamed. "Culture party templates" leaves the index: .claude/rules/
+xslt.md states both halves and loads on every .xslt file.
+
+csharp-patterns.md gains one anti-pattern: a local fear effect that
+routs must floor the morale or say in its doc that its routs spread.
+.ai/scopes.md links that rule so other AI clients see it.
+
+#### chore(armory): v2.0.34 - catalogue the WildMesh3D mount meshes
+
+`e12789cc`
+
+The Armory reference audit after the WildMesh3D art drop (#794) is
+CLEAN: no broken mesh or collision body ref, no dead item id, and no
+deleted or renamed mesh that an item still names.
+
+The catalogue now carries the five new body meshes (wildmesh_boar,
+_deer, _moose, _mountaingoat and _warthog), so a later rename of one
+shows as a breaking RENAME instead of as new art. They are filed as
+creature bodies through override rows, as the great elk and the Animalia
+elk and moose are, because the parser's vocabulary has no creature
+names; each row names the Horse item that wears the mesh. The audit
+report no longer lists them as art nothing uses.
+
+The audit's one warning is the starter-kit drift for Rhun and Harad,
+which predates this change. No live Armory file changed in this step.
+
+#### chore(loc): v2.0.34 - re-baseline TAOM_Map coverage for new place names
+
+`66053a9d`
+
+check_external_loc_coverage.py reported 21 to 23 more untranslated
+TAOM_Map rows in BR, DE, FR, IT, PL, SP and TR. They are not a
+reinstall regression: every untranslated row is a settlement name kept
+identical to English on purpose, and the new ones came with the
+settlements added since the last baseline (Minas Morgul, Linhir, and
+Arthedain's Bree, Fornost Erain and Annuminas among them). The baseline
+records the current counts; the Armory counts and the other five
+languages are unchanged, and the check passes again.
+
+Refs #792.
+
+#### chore(loc): v2.0.34 - translate the backlog into all 12 languages
+
+`a9437a49`
+
+Translates every untranslated line in all 12 languages (BR, CNs, CNt,
+DE, FR, IT, JP, KO, PL, RU, SP, TR): the War Chronicle events and
+rally, the Eye of Sauron hunt, the race abilities (#731) and the rest
+of the backlog in TAOM, TAOM_Map and the Armory (about 1,190 lines per
+language). Six lines where the translation mixed in a word from
+another script (Chinese, Japanese and Korean) were corrected by hand,
+in the language file and the translation cache.
+
+Refs #765, #731.
+
+#### chore(engine): v2.0.34 - Bannerlord v1.5.5
+
+`4f998585`
+
+TAOM now targets Bannerlord v1.5.5 (Steam beta, 2026-10-09, build
+124170). A fresh build needed no code change, the strict binding gate
+passes against the new engine (494 passed, 0 skipped), and the released
+v2.0.34 testing build still resolves every engine member it calls, so
+players can take the update without a new TAOM build.
+
+What players will notice comes from vanilla fixes TAOM inherits: weak
+lords no longer attack an army that has just raided a village, a raid in
+peacetime applies the crime rating, the ransom broker's blood-feud
+options work with several feud clans, incidents no longer delete captive
+lords, and bandit voice-over plays (vanilla Calradian lines may now play
+on some TAOM characters; to be checked in game).
+
+One behaviour change: v1.5.5 ends the game with a message box naming the
+module when another mod's SubModule constructor throws. TAOM no longer
+swallows that failure; the constructor guard keeps only its base
+constructor site, because the engine now catches the rest itself.
+
+Engine pins moved: the pinned version, the Native constraint in TAOM's
+SubModule.xml (and in the live TAOM_Map and Armory manifests), the
+per-build native address pins in three tests, and the API snapshot. The
+BUTR reference assemblies stay at 1.5.4 until BUTR publishes 1.5.5.
+
+New bump tools: tools/check_engine_member_refs.ps1 resolves a shipped
+DLL's engine references against the installed engine in memory, and
+tools/engine_body_diff.py diffs the body of every engine member TAOM
+binds, counting every row. Both replace scratch scripts and close the
+follow-ups on #736. The /engine-bump skill and the version statements in
+README and the reference docs are updated.
+
+Write-up: docs/migration/v1.5.5-impact.md. Still owed: the body diff
+review (the first run hit a tool parsing fault), the v1.5.5 category
+tree, and the in-game checks.
+
+#### chore(harness): v2.0.34 - align the harness with Claude Code 2.1.292
+
+`b84dbaeb`
+
+Reviewed three months of Claude Code (2.1.198 to 2.1.294) and VS Code
+(1.127 to 1.141) releases against the harness; Mike approved each
+change one at a time. Record:
+docs/reviews/adopt-claude-code-2026-10-08.md.
+
+- harness-facts.md and CLAUDE.md now describe the installed 2.1.288
+  CLI and 2.1.292 extension: path rules also load when a file is
+  written or edited, hook additionalContext reaches Claude, and Stop
+  or Escape in the VS Code panel no longer kills background subagents.
+- /review-codex and /deep-review Step 0 give Codex a two hour
+  background timeout, the most an unattended run allows.
+- Subagents can no longer spawn subagents of their own
+  (CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1), and built-in agents carry
+  no tier, so every Explore or Plan spawn names its model.
+- Six plugins nobody used are switched off in the shared settings.
+- The VS Code "Run Tests" task no longer deploys into the game, and
+  the MCP example naming removed servers is gone.
+- powershell-tool.md and mcp-servers.md match the current docs.
+
+#### chore(skills): v2.0.34 - remove the last 14 unused skills
+
+`d6b53709`
+
+The second half of the skill usage audit. taom-src, research,
+build-fix, verify-bindings, xslt-check, commit-split, context-budget,
+author-armor, new-culture, lord-skills, new-adr, new-map-prop,
+refine-creature-anim and new-creature-mount wrapped scripts the model
+already runs, or pointed at authoring guides it already follows. The
+skill list is now the 17 that are invoked or hold their own protocol.
+
+What those skills held that nothing else did moved to its owning doc:
+- the compile-error retry budget to the agent operating manual;
+- the binding gate command, the "Skipped is never green" rule and the
+  failure table to the API snapshot README;
+- a corrected vanilla file map to the XSLT rule (the old one pointed
+  five stylesheets at SandBoxCore files that do not exist);
+- the commit grouping rules to git-and-commits;
+- the ADR index step to the ADR template, and the prefab test step to
+  the static prop guide.
+
+The context budget scanner moved to tools/context_budget_scan.sh, and
+CLAUDE.md now routes to the script or the guide directly.
+
+Evidence: docs/reviews/skill-usage-audit-2026-10-08.md.
+
+#### chore(skills): v2.0.34 - remove 14 skills the models never used
+
+`8b108312`
+
+Seven weeks of session transcripts showed 21 of the 45 Claude Code
+skills were never invoked. The model ran the scripts they wrap
+directly (taom-src.ps1 about 5,100 times, lint_docs.py about 2,100)
+and needed no rework, and the mistakes that did recur were caught by
+hooks, tests and the compiler rather than by skill text.
+
+This removes 14 of them: migration-status,
+agent-introspection-debugging, knowledge-compile, skill-stocktake,
+lint-cleanup-loop, finish-branch, context-save, context-restore,
+humanizer, doc-graph, lint-docs, codex-verify, deslop and scope-check.
+
+The few lines found only in those skills moved to the docs that own
+them: the safe-deletion rules to the refactoring-specialist agent, the
+"never drop part of a request silently" rule to think-before-coding,
+the merge and backlink rules to git-and-commits, and the research
+compile steps to docs/research/README.md. CLAUDE.md, the agents, the
+rules and the docs now point at the scripts directly.
+
+The evidence, and 14 more approved removals held until another
+session commits its edits to the files they touch, are in
+docs/reviews/skill-usage-audit-2026-10-08.md.
+
+#### chore(hooks): v2.0.34 - commit gate checks the career kits
+
+`985e0402`
+
+The career kit file is generated from the troop files, so a troop edit
+can leave it off its rule with nothing staged in it. A Gondor troop
+rework did exactly that, and the file sat adrift from v2.0.31 to v2.0.34
+because its --verify pin only ran by hand.
+
+The ModuleData commit hook now also runs
+tools/generate_career_kits.py --verify (about 0.8s, bounded at 10s inside
+the hook's 60s registration). Drift blocks the commit with the repair
+command; a missing install fails open, as the validator does. Tested with
+a stubbed verify for each exit code; security scan clean for the hook.
+
+Refs #743
+
+#### chore(ci): v2.0.34 - remove the GitHub Actions workflows
+
+`c8d69a0d`
+
+The four workflows (C# build and tests without the game, Python tool
+tests, Doc budget, and the 1.4.5 line's Build & Test) are deleted.
+Verification runs locally: /verify builds and runs the full C# suite
+against the installed game, which covers more than the hosted run could,
+and now also runs the Python tool tests (python -m unittest discover -s
+tools/tests -t ., about four minutes with the live install), which
+nothing else ran automatically. The doc checks still gate commits
+through check-doc-config-drift.sh, and tools/test_hooks.sh covers the
+hooks.
+
+The RefAsm build mode stays, so TAOM can still be built and unit-tested
+without a Bannerlord install; .ai/verification.md now lists its three
+commands instead of pointing at csharp.yml. References to the workflows
+in the rules, skills, tools and docs are updated; ADRs and review
+records keep theirs as history.
+
+Run history at removal (gh run list, bannerlord-1.5.x): C# 22 passed /
+46 failed, Python 17 / 16, Doc budget 72 / 0; Build & Test on
+bannerlord-1.4.5 57 / 129. Its last failures on this branch predate the
+v1.5.4 work: EveryLanguage_DeclaresARowForEveryEnglishKey (#731),
+Patch93/Patch94 binding counts, and the name-localization generated-file
+check.
+
+#### chore(hooks): v2.0.34 - retire the native DLL static-CRT commit hook
+
+`ad1992b5`
+
+check-native-dll-crt.sh blocked a commit when the vendored
+TAOM.NativeSkinFixes.dll linked a dynamic CRT. NativeSkinFixes and its
+DLL are gone (9c310bc2) and its settings.json registration was removed
+in 5b241c46, so the script had nothing left to guard. It is deleted,
+along with its entries in tools/test_hooks.sh, the python-only gate list
+in session-start.sh and the hooks catalog row; the catalog recount is
+now 27 files, 25 settings registrations, 30 in total.
+
+tools/test_hooks.sh: 941 passed, 0 failed. /security-scan: no CRITICAL;
+its one HIGH and one MED predate this change (the auditor's own test
+fixture and the push judge's git call). Refs #736.
+
+#### chore(engine): v2.0.34 - Bannerlord v1.5.4, NativeSkinFixes removed
+
+`9c310bc2`
+
+TAOM now targets Bannerlord v1.5.4 (Steam beta, 2026-10-05). A fresh
+build needed no code change: the kingdom formal-name rename in this
+hotfix touches nothing TAOM uses, and every Harmony, GameModel,
+reflection, prefab-clone and XML-merge gate passes against the new
+engine. Players on v1.5.4 need this build or later; the v2.0.33
+testing build calls a TooltipProperty constructor v1.5.4 removed.
+
+What players will notice:
+- Low-security towns lose loyalty a little faster. Vanilla raised its
+  security penalty and cut the garrison's security bonus, and TAOM
+  inherits both. TAOM keeps its own rebellion thresholds.
+- Lords now name realms by their own titles ("Kingdom of Erebor") in
+  two dialog lines.
+- The "Native Skin Fixes" MCM group is gone. It had done nothing since
+  July 2026; v1.5.4 says the engine now animates hands under a
+  covers_head helmet with full gloves. TAOM.NativeSkinFixes.dll and
+  MinHook.x64.dll no longer ship on this line.
+
+Engine pins moved: the pinned version, the Native constraint in TAOM's
+SubModule.xml (and in the live TAOM_Map and Armory manifests), BUTR's
+reference assemblies for CI (1.5.4.123627-beta), the per-build native
+address pins in three tests, and the handbook gate's decompile tree.
+
+NativeSkinFixes removal: the C# installer, the C++ hook project, both
+DLLs and MinHook's notice, the MCM toggle and its two strings in 12
+languages, its 11 tests and the CI static-CRT step. The license notice
+now covers the NuGet runtime libraries TAOM ships (DryIoc, Json.NET,
+Unsafe), and tools/package_release.py refuses retired binaries so a
+stale copy in the install cannot ship again. The bannerlord-1.4.5 line
+keeps the feature, parked. The check-native-dll-crt.sh commit hook
+retires in a follow-up once its settings.json entry is removed.
+
+Write-up: docs/migration/v1.5.4-impact.md. Review and root cause:
+docs/reviews/rca-engine-bump-v1.5.4-2026-10-05.md. Issue #736 tracks
+the in-game checks.
+
+### Commits without the version label
+
+#### fix(docs): update terminology and clarify instructions in various documentation files
+
+`7247797b`
+
+#### Add painter scripts and texture sets for Carn Dum project
+
+`71fea53c`
+
+- Introduced new JSON file for Carn Dum texture sets defining materials and parts.
+- Added painter_export.py for exporting texture sets with specified parameters.
+- Created painter_new_project.py to set up new projects and bake mesh maps.
+- Implemented painter_run.py to execute Python scripts within Substance Painter.
+- Developed painter_stack_angmar_fortress.py for Angmar fortress layer stacks with specific recipes.
+- Created painter_stack_stone_frost.py for "cold dark stone" layer stack with customizable parameters.
+- Added painter_tiling_angmar.py for tiling texture sets for Angmar fortress with detailed material definitions.
+
+#### feat(gondor): add Gondor kitbash build prompt and guidelines for Blender assembly fix(orc-goblin): update animation results for orcs and goblins in game fix(blender_probe): correct kit pitch calculation in building probe script
+
+`bc2bf40f`
+
+#### Add WildMesh3D mounts support to LOTRLOME_Armory
+
+`c3fa211d`
+
+- Introduced `apply_wildmesh_armory.py` script to manage the integration of WildMesh3D mounts into the Armory.
+- Created `lotrlome-wildmesh-changes.md` to document changes related to WildMesh3D mounts.
+- Updated `ModuleData/Monsters/LOTR/lotr_monster_wildmesh.xml` to define new mounts: War Boar, Bristleback Boar, Iron Hills Goat, Mirkwood Stag, and Greenwood Moose.
+- Modified `SubModule.xml` to register new monsters after the Animalia block.
+- Enhanced `ModuleData/action_sets.xml` with action sets for each WildMesh3D mount.
+- Updated `ModuleData/LOTRLOME_items/LOTRAOM_horses.xml` to include new horse items for the mounts.
+- Added unit tests in `test_apply_wildmesh_armory.py` to ensure functionality and integrity of the new mounts integration.
+
+#### Add clip measurement JSON files for various animals and implement tests for orc and goblin locomotion binding
+
+`776054c0`
+
+- Created JSON files for boar, deer, moose, mountain goat, and warthog clip measurements, detailing their animation properties and movement metrics.
+- Added a test suite for the `bind_orc_goblin_locomotion.py` script to ensure proper binding of locomotion clips and validate XML structure.
+- Included functionality to handle missing clips and ensure compatibility with the live Armory action sets.
+
+#### Some XML stuff which haterade will hate me for it 2
+
+`08b30bfc`
+
+#### feat(war): add war chronicle features including ledger, effects, and rally status
+
+`fb79abe8`
+
+#### fix(launchSettings): update commandLineArgs for singleplayer mode
+
+`a7cca2d5`
+
+style(MapBar): enhance icon alignment and fitting properties
+
+fix(mm_panel): update mm_panel.png for improved visuals
+
+#### fix(docs): update references to bannerlord-1.5.x in various documents
+
+`7cd4920e`
+
+#### Refactor and enhance various components of TAOM
+
+`bb68eeca`
+
+- Updated `adapters-taleworlds-api.md` to clarify the handling of mount cases in `AttackInformation` and added a new lesson on resolving an agent's party through `BattleCombatant`.
+- Revised `data-content-cultures.md` to reflect that XSLT cultures no longer inherit vanilla's lord templates, ensuring that generated lords wear appropriate gear.
+- Improved `harmony-il.md` by emphasizing the importance of enforcing invariants in pure rules rather than relying on fall-through prefixes.
+- Enhanced `misc.md` with a lesson on the completeness of provider lists and the necessity of deriving them rather than manually selecting.
+- Added a new section in `testing-qa.md` to stress the importance of checking the effect of wiring pins, not just their presence.
+- Documented findings from the combat mechanics model split review, addressing issues related to damage calculations and the handling of agent origins.
+- Created a new document for the deep review of generated lord kits, detailing findings and corrective actions taken.
+- Updated `rca-howdah-prefab-review-2026-09-19.md` to reflect the resolution of the refuge reduction issue for howdah and mumak crews.
+- Introduced a new document for the review of refuge reduction for crews and mounts, detailing the changes made to ensure correct damage calculations.
+- Added a new plan to investigate offscreen bone reads and ensure that poses are correctly updated for offscreen agents.
+
+#### refactor(hooks): remove redundant native DLL check command from settings
+
+`5b241c46`
+
+#### Refactor code structure and remove redundant sections for improved readability and maintainability
+
+`75b7b666`
+
 ## v2.0.33 (2026-10-04)
 
 Commits since v2.0.32: 74 (62 with the version label, 12 without).

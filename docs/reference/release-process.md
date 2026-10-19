@@ -205,9 +205,18 @@ report by its build stamp, never by the tag:
 - **v2.0.29.5 (patreon and public channels, Bannerlord 1.4.8).** No commit on any branch holds this
   number. The channels' `TAOM.dll` stamp names `8df90444` (branch `fix/public-armory-ids-145`), whose
   `<Version>` in git is v2.0.28.
+- **v2.0.35, first testing package (2026-10-18, manifest `2026-10-19-000838`).** Its `TAOM.dll` stamp
+  reads `build.20261018-232706Z+6553b8c7...` (clean) and its `TAOM.Dependencies.dll` stamp
+  `build.20261018-142454Z+d13e9165...dirty`; no file under `Dependencies/` differs between those
+  commits. The package registers five Custom Battle test riders (`taom_test_wildmesh_*`) that the
+  `v2.0.35` tag removed, and its `SubModule.xml` pins `TAOM.Dependencies` v2.0.34 against a
+  Dependencies module that reads v2.0.35. Mike kept the number for the tag anyway, overriding item 4b
+  ([rca-wildmesh-rider-removal-2026-10-18.md](../reviews/rca-wildmesh-rider-removal-2026-10-18.md)):
+  the code it ran is the tag's parent code plus the riders, and the package is replaced from the tag
+  build.
 
 `/release` Phase 1 item 4b reads every channel's `<Version>` before a number is chosen, so a new
-release cannot reuse one a channel already carries.
+release cannot reuse one a channel already carries, unless the maintainer overrides it as for v2.0.35.
 
 ## Historical record: the backfill (2026-08-08)
 
