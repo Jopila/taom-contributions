@@ -3286,5 +3286,7 @@
 	<string id="taom_hq_strip_yes" text="{=taom_hq_strip_yes}Strip him." />
 	<string id="taom_hq_strip_no" text="{=taom_hq_strip_no}Leave him be." />
 	<string id="taom_hq_strip_done" text="{=taom_hq_strip_done}Take it, then. The shame is yours, not mine." />
+	<!-- WatchfulHoldsNoticeAdapter -->
+	<string id="taom_watchful_holds_harried" text="{=taom_watchful_holds_harried}The garrison of {FORT} harries your march, slowing it: {KILLED} killed, {WOUNDED} wounded and {FOOD} food lost." />
 
 </strings>

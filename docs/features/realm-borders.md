@@ -368,6 +368,8 @@ its best colour again in every campaign.
 
 ## Dependencies
 
+**Used by:** Watchful Holds (province gate, [watchful-holds.md](watchful-holds.md)); it reads `RealmTerritoryService` and `IRealmBordersSettings.Enabled`.
+
 - `IAlignmentService` (Execution): the side of each realm in the Free Peoples mode.
 - `IDedicatedServerProvider` (CoopInterop): the dedicated-server gate.
 - `NameplateRelationPalette` (SettlementNameplateRelation): the allies and enemies mode's colours,

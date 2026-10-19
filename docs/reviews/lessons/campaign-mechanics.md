@@ -657,3 +657,18 @@ recruiting.
   the resource (grep the installed engine source for the field, for example `VolunteerTypes`), and either gate each one
   or word the promise to the paths actually gated.
 - **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` findings 4 and 5.
+
+### An hourly party handler filters on the party kind before any probe, timer or service call (#822, 2026-10-18)
+`HourlyTickPartyEvent` fires once per party per hour for all of `MobileParty.All`, 2,000 to 2,500 parties on a late
+save. Watchful Holds first called the co-op probe, a timer and its service for every one of them, then scanned 234
+forts with `foreach` over an `IReadOnlyList`, which boxes an enumerator per lord. Measured with the shipped Debug JIT,
+its own 1 ms hourly budget held only below about 110 to 160 eligible lords. The same build copied the `IsAuthority` gate
+of read-only siblings although it disorganizes other parties: the 2026-10-06 lesson above ("A sweep that decides other
+parties' outcomes") already said such a pass stands down while `IsSessionActive || ShouldDeferToHost`.
+- **Why missed:** the brief named the event and a budget but no measurement, and it took the co-op gate from sibling
+  hourly behaviors instead of from the lesson for passes that change other parties.
+- **Prevent:** in the behavior, return on the cheapest engine field (`IsLordParty || IsMainParty`) before anything
+  else; scan an array by index; cache per-campaign lists in the service's reset; measure a budget in the Debug JIT the
+  players run before writing it down. Choose the co-op gate by what the handler changes, and add the feature's row to
+  `coop-interop.md`'s gated table in the same change.
+- **Source:** `docs/reviews/rca-watchful-holds-2026-10-18.md` findings 1 and 5.

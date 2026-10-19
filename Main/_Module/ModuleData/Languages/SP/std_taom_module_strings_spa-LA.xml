@@ -2978,5 +2978,6 @@
   <string id="taom_hq_strip_yes" text="Strip him." />
   <string id="taom_hq_strip_no" text="Leave him be." />
   <string id="taom_hq_strip_done" text="Take it, then. The shame is yours, not mine." />
+  <string id="taom_watchful_holds_harried" text="The garrison of {FORT} harries your march, slowing it: {KILLED} killed, {WOUNDED} wounded and {FOOD} food lost." />
   </strings>
 </base>

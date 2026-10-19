@@ -1122,3 +1122,15 @@ the conversation comes back as a dead prisoner; loot added to the inventory disa
   `PartyScreenLogic.DoneLogic(true)`): `GameStateManager.Current?.LastOrDefault<PartyState>()?.PartyScreenLogic?.DoneLogic(true)`.
   Trap index row "Party-screen conversations".
 - **Source:** `docs/reviews/rca-hard-questions-2026-10-19.md` H4.
+
+### Before describing or lowering an engine state, read every engine consumer of it and its thresholds (#822, 2026-10-18)
+Watchful Holds sets the engine's disorganized state. The plan read the speed model (-0.4 on base speed) and the
+impairment model (6 hours) and the doc and MCM hint described it from those two, so they missed that
+`SandboxBattleMoraleModel` also gives the party's troops -0.2 starting battle morale. The same plan took 10 army
+cohesion per hit without reading `Army.CheckArmyDispersion`, which disbands a player army at 0.1 and disorganizes every
+party that leaves.
+- **Why missed:** the effect was described from the first readers found, and a meter was lowered without reading what
+  the engine does at its low end.
+- **Prevent:** grep the decompile for every reader of the flag or meter (`IsDisorganized`, `Cohesion`) before writing
+  player text about it or changing it, and read the threshold branches; a player-facing hint is a spec.
+- **Source:** `docs/reviews/rca-watchful-holds-2026-10-18.md` findings 3 and 4.

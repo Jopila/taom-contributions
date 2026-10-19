@@ -37,5 +37,6 @@ internal static class FeatureModules
         new Features.EyeOfSauron.EyeOfSauronModule(),
         new Features.AnimationVariety.AnimationVarietyModule(),
         new Features.HardQuestions.HardQuestionsModule(),
+        new Features.WatchfulHolds.WatchfulHoldsModule(),
     };
 }

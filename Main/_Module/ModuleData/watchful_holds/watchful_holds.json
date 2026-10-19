@@ -1,0 +1,32 @@
+{
+  "_comment": "Watchful Holds: an enemy castle or town harasses a lord party that marches close by. Every value is validated at load (NaN, Infinity, range, sign); a bad value reverts to its default with a warning in the TAOM log. Read once per game session: an edit needs a full restart of Bannerlord.",
+  "_comment_radius": "Map units from the fort inside which its garrison watches the road. Above 0, at most 50.",
+  "radius": 5.0,
+  "_comment_minimums": "The fewest garrison troops a fort needs to harass, and the fewest men a party needs to be harassed.",
+  "minGarrison": 30,
+  "minPartySize": 30,
+  "_comment_chance": "Chance per campaign hour, 0 to 1, for the player's party and for AI lords. The fort owner's culture multiplies it below; the result is clamped to 0..1.",
+  "playerChancePerHour": 0.30,
+  "aiChancePerHour": 0.15,
+  "_comment_losses": "The player's losses: fraction of the party's men plus a random 0..extra, wounded and killed. Both are capped at the healthy regulars; heroes are never hit. AI lords are only disorganized.",
+  "woundFraction": 0.02,
+  "woundExtraMax": 5,
+  "killFraction": 0.01,
+  "killExtraMax": 1,
+  "_comment_supplies": "Share of the party's food lost, and the morale and army cohesion lost per hit (0 to 100). cohesionFloor: a hit never takes army cohesion below it and never raises a cohesion already under it.",
+  "foodLossFraction": 0.05,
+  "moraleLoss": 10,
+  "cohesionLoss": 5,
+  "cohesionFloor": 10,
+  "_comment_horn": "Hours between two horn blasts for the player.",
+  "hornCooldownHours": 24,
+  "_comment_cultures": "Multipliers by the culture of the fort's OWNER (lowercase culture id). 'default' covers any culture without a row. chanceMultiplier scales the hourly chance; lossMultiplier scales the fraction part of the kill and wound counts, not the random extras. Each 0 to 5.",
+  "cultures": {
+    "default": { "chanceMultiplier": 1.0, "lossMultiplier": 1.0 },
+    "mordor": { "chanceMultiplier": 1.25, "lossMultiplier": 1.0 },
+    "dolguldur": { "chanceMultiplier": 1.25, "lossMultiplier": 1.0 },
+    "isengard": { "chanceMultiplier": 1.25, "lossMultiplier": 1.0 },
+    "lothlorien": { "chanceMultiplier": 1.25, "lossMultiplier": 1.0 },
+    "mirkwood": { "chanceMultiplier": 1.25, "lossMultiplier": 1.0 }
+  }
+}
