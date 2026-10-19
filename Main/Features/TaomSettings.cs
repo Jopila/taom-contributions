@@ -1154,6 +1154,14 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     public Dropdown<string> WandererAllegianceScope { get; set; } = new Dropdown<string>(
         new[] { "All wanderers (by culture)", "Named companions only" }, 0);
 
+    // --- World / Hard Questions ---
+
+    // GroupOrder 57: 9, 10, 15, 19-56 and 100 were taken as of 2026-10-18.
+    [SettingPropertyGroup("World/Hard Questions", GroupOrder = 57)]
+    [SettingPropertyBool("Enable Hard Questions", Order = 0, RequireRestart = false,
+        HintText = "When enabled, a lord held prisoner by your clan (in your party or in one of your settlements) can be questioned about his clan's or kingdom's lands, for a bribe or by force, and stripped of his arms and armour. Force and stripping cost relation, Honor and Mercy, and stripping costs renown. Each topic works once per captivity. When off, those conversation options do not appear.")]
+    public bool EnableHardQuestions { get; set; } = true;
+
     // --- Prisoner Recruitment ---
 
     [SettingPropertyGroup("World/Prisoner Recruitment", GroupOrder = 39)]

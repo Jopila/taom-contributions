@@ -148,6 +148,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [alignment-aware-execution](features/alignment-aware-execution.md) — race/alignment-aware execution penalties
 - [marriage-alignment](features/marriage-alignment.md): a Free-aligned hero cannot marry an Evil-aligned one (#542, Boromir wed a Misty Mountain orc). Blocks in `TaomMarriageModel.IsCoupleSuitableForMarriage`, the chokepoint every marriage path funnels through; `Patch81` narrows the AI partner draw so Free clans keep their marriage rate
 - [wanderer-allegiance](features/wanderer-allegiance.md): a wanderer refuses to be hired across the Free/Evil line (#575, Aragorn serving Mordor). Two NPC lines on vanilla's `companion_hire` token at priority 110, no Harmony patch; culture-keyed, symmetric, Neutral serves anyone
+- [hard-questions](features/hard-questions.md): a lord held by the player's clan can be asked about his clan's or kingdom's lands (bribe or force) and stripped of his kit (#896). Named items stay with him, a released lord gets a fresh kit; relation costs scale by Free/Evil side and land once per clan leader
 - [execution](features/execution.md): the alignment rule on the v1.5.x blood-feud seam, two `Patch14_Execution` patches (`TaomExecutionRelationModel` is gone with the engine's `ExecutionRelationModel`)
 - [banner-injection](features/banner-injection.md) — player banner persistence
 - [banner-color-persistence](features/banner-color-persistence.md) — clan colors everywhere (Patch23 + Patch24)

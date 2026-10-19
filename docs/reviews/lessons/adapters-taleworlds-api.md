@@ -1078,3 +1078,47 @@ that a relay dropped a condition (the first was the contagion's "when fewer than
   check the rule against the code it will load on: a rule that flags shipped, accepted code is wrong or the code
   is.
 - **Source:** `docs/reviews/rca-dread-aura-local-2026-10-15.md` S1.
+
+### Read the body of an engine action before a plan relies on what it does (2026-10-19)
+
+The Hard Questions plan named two engine helpers from their signatures alone. It read
+`ChangeRelationAction.ApplyPlayerRelation(Hero, int, bool affectRelatives = true, bool)` and wrote that the
+default "doubles family hits", and it read `EquipmentHelper.AssignHeroEquipmentFromEquipment(Hero, Equipment)`
+as "fill the lord with the kit". In v1.5.5 the first body never reads `affectRelatives`, and the second copies
+all 12 slots, empty kit slots included, so the release kit deleted the named pieces the strip had kept.
+`Hero.MakeWounded()` (clears an existing DeathMark) and `KillCharacterAction.ApplyByWounds` (returns early on a
+veto or a map event) had the same gap.
+- **Why missed:** the research rule sends a builder to the installed DLLs for signatures, and a signature reads
+  like a contract. Every one of these bodies is under 20 lines.
+- **Prevent:** for every engine action or helper a plan relies on for an effect (not only a type), read its body
+  in the `taom-src` decompile and write the effect into the plan with its file:line. A parameter name or a
+  caller's usage is not evidence of what the body does.
+- **Source:** `docs/reviews/rca-hard-questions-2026-10-19.md` H1, H2, L5.
+
+### The player's relation with a clan member lives on his clan leader (2026-10-19)
+
+`ChangeRelationAction.ApplyInternal` (v1.5.5 :13-24) writes every change to the pair returned by
+`DiplomacyModel.GetHeroesForEffectiveRelation` (`DefaultDiplomacyModel.cs:882-891`): each hero's clan leader,
+unless both map to the same leader or one is the player's companion. `Hero.GetRelation` reads through the same
+mapping. So a "-20 to each of his relatives" penalty sums on one number per clan and clamps at -100.
+- **Why missed:** the per-lord penalty list was deduped by hero id, and the fake adapter recorded per-hero calls,
+  so the tests agreed with the wrong model.
+- **Prevent:** a feature that charges relations to many heroes keys its dedupe on the relation owner the engine
+  uses (ask `GetHeroesForEffectiveRelation(Hero.MainHero, hero, ...)`), keeps the strongest delta per owner and
+  calls the action once per owner, as vanilla's execution loop charges one delta per clan leader.
+- **Source:** `docs/reviews/rca-hard-questions-2026-10-19.md` H2.
+
+### A roster write during a party-screen conversation is reverted by Escape (2026-10-19, second occurrence)
+
+A conversation opened from the party screen (`PartyVM.cs:3187-3194`) returns to that screen, which still holds
+its pre-conversation snapshot. Escape, Cancel or Reset runs `PartyScreenData.ResetUsing`, which clears the live
+prison, member and item rosters and re-adds every snapshot row (`PartyScreenData.cs:257-279`). A hero killed in
+the conversation comes back as a dead prisoner; loot added to the inventory disappears.
+- **Why missed:** the same `ResetUsing` behaviour was recorded on 2026-10-17 (`lessons/harmony-il.md`, the
+  roster-loss diagnostic), scoped to diagnostics, so nothing loaded it for a feature that writes rosters from a
+  dialog consequence.
+- **Prevent:** after any roster, inventory or hero-state write made from a conversation, commit an open party
+  screen the way vanilla does when a companion leaves (`GauntletPartyScreen.OnCompanionRemoved` calls
+  `PartyScreenLogic.DoneLogic(true)`): `GameStateManager.Current?.LastOrDefault<PartyState>()?.PartyScreenLogic?.DoneLogic(true)`.
+  Trap index row "Party-screen conversations".
+- **Source:** `docs/reviews/rca-hard-questions-2026-10-19.md` H4.

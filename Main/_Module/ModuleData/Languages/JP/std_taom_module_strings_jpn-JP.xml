@@ -2960,5 +2960,23 @@
   <string id="taom_war_blocked_alignment" text="These kingdoms stand on the same side of the War of the Ring." />
   <string id="taom_war_blocked_peace" text="The War of the Ring has not yet begun. No kingdom may declare war." />
   <string id="taom_war_blocked_unscripted" text="Only the first wars of the age may be declared now." />
+  <string id="taom_hq_reproach" text="{COMPANION} will not meet your eye after what was done to that lord." />
+  <string id="taom_hq_cannot_afford" text="You do not carry that much." />
+  <string id="taom_hq_ask_clan" text="Tell me where your kin hold their lands." />
+  <string id="taom_hq_refuse_clan" text="You ask me to sell my own blood. I will name no hall of my kin." />
+  <string id="taom_hq_ask_kingdom" text="Tell me where your realm keeps its strength." />
+  <string id="taom_hq_refuse_kingdom" text="You ask me to betray my whole people. I will name no fortress of my realm." />
+  <string id="taom_hq_pay" text="Everyone has a price. Name yours: {PRICE} gold." />
+  <string id="taom_hq_force" text="I am not asking. Speak, or I will make you." />
+  <string id="taom_hq_back" text="Never mind. Forget I asked." />
+  <string id="taom_hq_paid_calc" text="Coin is a tongue I speak well. Listen, then." />
+  <string id="taom_hq_paid_valor" text="I take no pride in this, but a captive's pride feeds no one. Listen, then." />
+  <string id="taom_hq_paid_plain" text="So be it. I will tell you what you want to know." />
+  <string id="taom_hq_forced" text="Then be damned, and take what you can tear from me." />
+  <string id="taom_hq_strip" text="Your arms and armour are mine now." />
+  <string id="taom_hq_strip_warn" text="You would leave a lord in rags, before his own people's eyes? Think what it will cost you." />
+  <string id="taom_hq_strip_yes" text="Strip him." />
+  <string id="taom_hq_strip_no" text="Leave him be." />
+  <string id="taom_hq_strip_done" text="Take it, then. The shame is yours, not mine." />
   </strings>
 </base>
