@@ -70,9 +70,20 @@ SandBox prefab XML (9 movies)           TAOM prefabs (party x3, career)
 
 ## Configuration
 
-None. The feature is always on and has no MCM setting. TAOM's four prefabs carry their zeros in the
-XML, so a setting would first need them moved onto the patch (UIExtenderEx patches TAOM's own
-prefabs by file name too).
+The instant screen transitions are always on and have no setting. TAOM's four prefabs carry their
+zeros in the XML, so a setting would first need them moved onto the patch (UIExtenderEx patches
+TAOM's own prefabs by file name too).
+
+The screen open speed work adds a "Screen Performance" group to the Battle Load Diagnostics MCM
+page. None of its rows needs a restart; each is read on every screen open.
+
+| Row | Default | What it does |
+|---|---|---|
+| Log Screen Open Times | Off | Writes one `[ScreenOpen]` line per screen open to `taom_debug.log`: the screen, the phase and the milliseconds. Use it to compare a fast-open switch off against on. |
+| Clan Fast Open | On | Builds the Clan screen's parties list once instead of three times. Off restores vanilla's build. |
+| Inventory Fast Open | On | Skips work the Inventory and trade screen repeats. Off restores vanilla's build. |
+| Party Fast Open | On | Caches lookups the Party screen repeats for each troop. Off restores vanilla's build. |
+| Quest Log Fast Open | On | Builds finished quests only when they are selected. Off restores vanilla's build. |
 
 ## Key Files
 
