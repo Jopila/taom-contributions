@@ -47,7 +47,8 @@ the report says so in one policy line. Scene sacks and the other files in Shader
 (shader_mapping.bin, shader_compile_report.log) still ship.
 
 Exit codes: 0 ok · 1 nothing to do · 2 bad input / unknown entries / non-empty destination / failed --require-build /
-            retired binaries in the source (RETIRED_BINARIES, dry runs included).
+            retired binaries in the source (RETIRED_BINARIES, dry runs included) / a shipped
+            ModuleData file defining a taom_test_ id (dry runs included).
 """
 from __future__ import annotations
 
@@ -406,6 +407,29 @@ def retired_binaries(plans) -> list:
     return [f"{p.name}/{rel}" for p in plans for rel, _size in p._copy_list
             if rel.split("/", 1)[0] == "bin"
             and PurePosixPath(rel).name.casefold() in RETIRED_BINARIES]
+
+
+# A Custom-Battle test troop (/release pre-flight 5) DEFINED by id; a {=taom_test_x} name key alone
+# defines nothing.
+_TEST_TROOP_ID_RE = re.compile(rb'\bid\s*=\s*"taom_test_')
+
+
+def test_troop_files(plans) -> list:
+    """<module>/<rel> of every shipped ModuleData .xml or .xslt that defines a taom_test_ id. Pre-flight 5
+    greps the repo only, but a channel package is cut from the install, where deploys never delete:
+    the v2.0.35 testing package shipped five test riders that way."""
+    found = []
+    for p in plans:
+        for rel, _size in p._copy_list:
+            if rel.split("/", 1)[0] != "ModuleData" or not rel.casefold().endswith((".xml", ".xslt")):
+                continue
+            try:
+                data = (p.root / rel).read_bytes()
+            except OSError:
+                continue
+            if _TEST_TROOP_ID_RE.search(data):
+                found.append(f"{p.name}/{rel}")
+    return found
 
 
 @dataclass(frozen=True)
@@ -865,6 +889,14 @@ def main(argv=None) -> int:
         print("\nERROR: retired binaries in the source; delete them there (install bin folders or "
               "the channel folder) and re-run:", file=sys.stderr)
         for rel in retired:
+            print(f"  {rel}", file=sys.stderr)
+        return 2
+
+    test_troops = test_troop_files(plans)
+    if test_troops:
+        print("\nERROR: Custom-Battle test troops (taom_test_ ids) in the source; delete these files "
+              "there (the install, or the channel folder) and redeploy before packaging:", file=sys.stderr)
+        for rel in test_troops:
             print(f"  {rel}", file=sys.stderr)
         return 2
 

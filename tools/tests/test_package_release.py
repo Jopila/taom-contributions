@@ -476,6 +476,61 @@ class TestRetiredBinaries(unittest.TestCase):
         self.assertFalse(tracked & pr.RETIRED_BINARIES, sorted(tracked & pr.RETIRED_BINARIES))
 
 
+def _write_text(root: Path, rel: str, text: str):
+    p = root / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(text, encoding="utf-8")
+
+
+_RIDER = ('<NPCCharacters>\n  <NPCCharacter\n      id="taom_test_wildmesh_boar_rider"\n'
+          '      name="{=taom_test_wildmesh_boar_rider}[Test] War Boar Rider" />\n</NPCCharacters>\n')
+
+
+class TestTestTroops(unittest.TestCase):
+    """Custom-Battle test troops (`taom_test_*`) leave the repo before a release (/release pre-flight 5),
+    but a channel package is cut from the install, where deploys never delete: the v2.0.35 testing
+    package shipped five WildMesh test riders that way (rca-wildmesh-rider-removal-2026-10-18.md).
+    The packager refuses them like a retired binary, in --dry-run too."""
+
+    def test_dry_run_refuses_a_test_troop_and_names_its_file(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write_text(src, "TAOM/ModuleData/test_riders/wildmesh.xml", _RIDER)
+            r = _run("--source", str(src), "--dest", str(Path(td) / "out"), "--modules", "TAOM",
+                     "--dry-run")
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("TAOM/ModuleData/test_riders/wildmesh.xml", r.stderr)
+
+    def test_real_run_refuses_before_writing(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write_text(src, "TAOM/ModuleData/test.xslt", '<x id = "taom_test_a"/>')
+            dest = Path(td) / "out"
+            r = _run("--source", str(src), "--dest", str(dest), "--modules", "TAOM",
+                     "--allow-unknown")
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("TAOM/ModuleData/test.xslt", r.stderr)
+            self.assertFalse(dest.exists(), "must fail before writing anything")
+
+    def test_only_a_shipped_moduledata_definition_counts(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            # a definition in a shipped ModuleData XML: refused
+            _write_text(src, "TAOM/ModuleData/test_riders/wildmesh.xml", _RIDER)
+            # a mention that defines nothing, a non-ModuleData file and an excluded backup: not refused
+            _write_text(src, "TAOM/ModuleData/strings.xml", '<string id="x" text="{=taom_test_a}A" />')
+            _write_text(src, "TAOM/GUI/Prefabs/p.xml", '<w id="taom_test_b" />')
+            _write_text(src, "TAOM/ModuleData/old.xml.bak-20261018", _RIDER)
+            plan = pr.plan_module(src / "TAOM")
+            self.assertEqual(pr.test_troop_files([plan]), ["TAOM/ModuleData/test_riders/wildmesh.xml"])
+
+    def test_the_repo_module_ships_none(self):
+        # Pre-flight 5's grep, held by the gate's own matcher on the shipped tree.
+        repo = Path(__file__).resolve().parents[2]
+        plan = pr.plan_module(repo / "Main" / "_Module")
+        self.assertEqual(pr.test_troop_files([plan]), [])
+
+
 class TestBuildStamp(unittest.TestCase):
     def _dll(self, td, stamp):
         p = Path(td) / "TAOM.dll"

@@ -175,6 +175,8 @@ Rebuild at the tag before anything ships.
      `RuntimeDataCache*` alone: the packager already excludes it unless `--keep-rdc` asks for it.
      `AssetPackages/pack0.tpac` is what packaging TAOM in the editor writes and is not needed:
      delete it. The other tpacs there are git-tracked (field camp and refuge prefabs) and stay.
+     A leftover test-troop file (a `taom_test_` id under `ModuleData/`) is one of these; the packager
+     refuses it, dry runs included, so the step 2 dry run fails until it is pruned.
    - **`<game>/Modules/TAOM.Dependencies/` outside `bin/`:** prune nothing. MCM's UI assets
      (`AssetPackages/`, `EmAssetPackages/`, `GUI/`, `ModuleData/Languages*/`) exist in the install
      only, and no build step recreates them
