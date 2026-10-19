@@ -1025,3 +1025,19 @@ bindings and `ControllerRRight` on a gamepad. Vanilla binds the name: `{leave_ke
   `HyperlinkTexts.GetKeyHyperlinkText(HotKeyManager.GetHotKeyId(<context>, <id>))` (uppercase, so the translator
   protects it), and show it with `MBInformationManager.AddQuickInformation`, which renders the key image.
 - **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 1.
+
+### One-time player text describes only what ships in the same build
+
+The Hidden Hosts help popup, shown once per campaign with its flag saved, explained a `~` symbol that
+only a later phase draws and claimed a horizon host "cannot even be named" while its tooltip still
+named it. A player who reads a save-flagged popup never sees a corrected one. The same text had
+already been seeded into all 12 language files, and a seed row whose English changes before the paid
+run is never re-queued (the translator picks rows that still equal the current English), so a late
+fix would have left the old sentence in 12 languages for good.
+- **Why missed:** the plan pre-announced a later phase to avoid a second popup.
+- **Prevent:** text shown once (a saved flag, a one-time inquiry, a tutorial) describes only behaviour
+  in the same build; a later phase adds its own key and flag. Fix English before the paid translation
+  run; after seeding, re-seed the changed rows (delete them, then `--sync-ids --seed-only`). Literal
+  glyphs the code also renders (`1??`, `...`) go in as `{VARIABLES}` filled from the code, so the
+  translator's placeholder gate protects them.
+- **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 1.

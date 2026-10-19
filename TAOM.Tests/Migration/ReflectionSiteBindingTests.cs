@@ -162,6 +162,12 @@ public class ReflectionSiteBindingTests
     [DataRow("SandBox.ViewModelCollection.Nameplate.SettlementNameplatesVM", "SettlementNameplatesVM", "_mapCamera", "Field", "NameplateCullAdapter.cs:49")]
     [DataRow("SandBox.ViewModelCollection.Nameplate.SettlementNameplateVM", "SettlementNameplateVM", "_bindIsVisibleOnMap", "Field", "NameplateCullAdapter.cs:50")]
     [DataRow("SandBox.ViewModelCollection.Nameplate.SettlementNameplateVM", "SettlementNameplateVM", "_worldPos", "Field", "NameplateCullAdapter.cs:51")]
+    // --- HiddenHosts (Patch105): four protected bind fields of the party nameplate, read and written through AccessTools.FieldRefAccess.
+    // A miss leaves the bind null: the nameplate prefix reports it once, does nothing, and vanilla counts show.
+    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_countBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:24")]
+    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_extraInfoTextBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:25")]
+    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_fullNameBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:26")]
+    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_isVisibleOnMapBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:27")]
     // --- MissionStartGuard (Patch103): the six start calls the transpiler swaps, found by AccessTools.Method at install.
     // A miss makes AccessTools.Method return null; Rewrite's fit check rejects the null target, so Mission.AfterStart stays vanilla.
     [DataRow("TaleWorlds.MountAndBlade.MBSubModuleBase", "MBSubModuleBase", "OnBeforeMissionBehaviorInitialize", "Method", "MissionStartGuardSwaps.cs:23")]

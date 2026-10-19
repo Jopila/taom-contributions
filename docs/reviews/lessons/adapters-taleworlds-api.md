@@ -1165,3 +1165,16 @@ first such class.
 - **Prevent:** the gate test over the TAOM assembly fails any static method on such a class that lacks `[ViewMethod]`;
   `.claude/rules/csharp-patterns.md` names it.
 - **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 15.
+
+### Read the caller of a patched handler before describing its trigger
+
+Hidden Hosts blocks `MobilePartyVisual.OnOpenEncyclopedia` for a party at the edge of sight. The
+plan, docs, a co-op classification reason and the in-game check all called it a map click, copied from
+a description of another implementation. The only caller is `MapScreen` (v1.5.5 lines 1649 to 1651):
+game key 67 `MapGoToEncylopedia`, pressed while a party is hovered, unbound on keyboard by default. A
+left click runs `OnMapClick` and engages or escorts. The planned in-game check could not have reached
+the block.
+- **Why missed:** the signature check read the patched member, not what calls it.
+- **Prevent:** for every patched handler, read its callers in the decompile and state the trigger
+  (input, event, tick) from them, with the line, in the registry entry and the in-game check.
+- **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 3.

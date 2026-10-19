@@ -1827,3 +1827,20 @@ callback that sets `DisableDying` and the launcher's behavior list had none, aga
   id, option id, index, isLeave, the callback a flag is set in, a list entry), as `RefugeWiringTests` does, and build
   the campaign behavior once in a RequiresGame factory test. Name these tests in the build brief.
 - **Source:** `docs/reviews/rca-host-review-2026-10-19.md` rows 2 and 17.
+
+### A hook test that passes a null instance proves only the null guard
+
+Every Hidden Hosts hook test called the prefixes with `__instance = null`. Both prefixes test
+`__instance == null` first, so the tests named "no service runs vanilla" and "setting off runs
+vanilla" stayed green with those guards deleted, and the one line of behaviour in the encyclopedia
+prefix could flip polarity unseen. The builder had judged that `PartyNameplateVM` and
+`MobilePartyVisual` "cannot be built in a test host"; 21 TAOM test files already build engine objects
+with `FormatterServices.GetUninitializedObject`, and both types worked that way.
+- **Why missed:** a reasonable-sounding limitation was written into the test file's comment and the
+  feature doc instead of being tried.
+- **Prevent:** a test for a branch must reach that branch: check that no earlier guard returns first
+  for the arguments you pass. Before declaring an engine type unbuildable, try
+  `FormatterServices.GetUninitializedObject` and set the members the code reads by reflection. When
+  RED-first was lost, prove the tests by mutation (this file, "run the suite once before the
+  implementation exists").
+- **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 2.

@@ -5961,6 +5961,12 @@
 
     <string id="taom_fcamp_review_wounded" text="You are too badly wounded to review the host." />
 
+    <string id="taom_hhost_hint_body" text="Troop counts on the map now blur with distance. A count such as {MASK_EXAMPLE} means you can read only its first digit. {HORIZON} marks a host at the very edge of sight, too far to count. Counts sharpen as you close in, and as your scout's Scouting grows. Hosts of your own realm are easier to count. AI lords always see the true numbers. The toggle is under Map UI in the mod options." />
+
+    <string id="taom_hhost_hint_title" text="Hidden Hosts" />
+
+    <string id="taom_hhost_unknown_party" text="Unknown party" />
+
   </strings>
 
 </base>

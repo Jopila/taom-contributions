@@ -122,6 +122,13 @@ public class CoopVetoClassificationTests
             "sync, and no TAOM SyncData or config. Replication is asynchronous, so this is a " +
             "same-integration-as-vanilla argument, not a claim of identical snapshots; two-peer " +
             "execution is UNVERIFIED (Codex review 98)."),
+        ["MobilePartyVisual_OnOpenEncyclopedia_HiddenHosts_Patch"] = new(CoopVeto.ReviewedSafe,
+            "Patch105 (#846): client-side UI. The prefix skips the encyclopedia hotkey (game key 67, pressed with the cursor on " +
+            "a party) that opens a lord party's leader page when the party is past nine tenths of its spotting reach. " +
+            "Opening an encyclopedia page mutates no campaign state, so there " +
+            "is no replicated mutation to skip, and a peer that sees the page open or not affects nothing the other " +
+            "simulates. Every other outcome (toggle off, not at the horizon, any error) returns true and vanilla runs. " +
+            "The toggle is classified as presentation in CoopSettingsRelevance."),
         ["SettlementNameplatesVM_Update_NameplateCull_Patch"] = new(CoopVeto.ReviewedSafe,
             "Patch104: client-side UI. The prefix replaces SettlementNameplatesVM.Update, the campaign map's per-frame " +
             "nameplate refresh, with the same update over the plates that are hidden-and-staying-hidden left out. The " +

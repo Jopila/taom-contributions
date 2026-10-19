@@ -130,6 +130,8 @@ public static class CoopSettingsRelevance
     private static readonly HashSet<string> Presentation = new HashSet<string>(StringComparer.Ordinal)
     {
         "ShowAllEncyclopediaCharacters", "EnableNameplateFade", "MapFigureScale",
+        // #846: display only, the AI and every campaign rule keep the true counts.
+        "HiddenHostsEnabled",
         "SupplyShowRouteVisual",
         "NameplateFadeFarDistance", "NameplateFadeNearDistance",
         "EnableNameplateRelationColors", "NameplateRelationTintStrength",

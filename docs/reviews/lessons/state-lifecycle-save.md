@@ -1107,3 +1107,22 @@ provinces Ready and the gate on, against the doc's "Realm Borders off, distance 
 - **Prevent:** when a feature consumes state another feature computes, read the owner's disable path, and gate on the
   owner's settings flag as well as on the state.
 - **Source:** `docs/reviews/rca-watchful-holds-2026-10-18.md` finding 2.
+
+### A time-bounded cache of an engine object still pins the campaign
+
+`PartyIntelAdapter`, a process singleton, cached the main party's `IFaction` for half a second of real
+time. The reasoning "a stale value self-heals within 0.5 s, and a load takes longer" was right about
+STALENESS and silent about RETENTION: nothing refreshes the cache until the next campaign's first
+nameplate read (or never, with the feature toggled off), so the finished campaign's kingdom and
+everything it lists stayed reachable through the main menu and the next load. The cache also saved
+nothing measurable, since `MapFaction` is two property reads. This is the same class as the
+marriage pool cache above ("what does it keep alive until it does?"), reached through a TTL instead of
+a reset.
+- **Why missed:** the existing lesson is phrased for a field that guards campaign identity; a cache
+  with an expiry looked self-cleaning. The plan said "plain data" for the service and nothing for the
+  adapter.
+- **Prevent:** a TTL bounds staleness, not retention. A singleton (adapter, service, static) caches
+  values (ids, numbers, strings), never TaleWorlds reference types, and a test pins it: reflect over
+  the instance fields and fail on any reference type from a TaleWorlds assembly
+  (`PartyIntelAdapterTests`).
+- **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 4.
