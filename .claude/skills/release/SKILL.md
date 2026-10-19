@@ -152,7 +152,7 @@ Rebuild at the tag before anything ships.
    clean worktree of the tag instead (`git worktree add ../taom-release-vX.Y.Z vX.Y.Z`, run
    `./build.ps1` there, then `git worktree remove ../taom-release-vX.Y.Z`). `build.ps1` compiles and
    deploys every file in the tree, committed or not.
-2. Gate the DLLs: `python tools/package_release.py --source "<game>/Modules" --dest <out> --require-build vX.Y.Z --dry-run`
+2. Gate the DLLs: `python tools/package_release.py --source "<game>/Modules" --dest <out> --game-root "<game>" --require-build vX.Y.Z --dry-run`
    must print `build stamp OK` and exit 0. It reads every `bin/<platform>/` copy of `TAOM.dll` and
    `TAOM.Dependencies.dll` and refuses one whose stamp says `.dirty` or `nogit`, or names a commit
    other than the tag's; a requested TAOM or TAOM.Dependencies missing from `--source`; and a tag whose
@@ -177,6 +177,12 @@ Rebuild at the tag before anything ships.
      delete it. The other tpacs there are git-tracked (field camp and refuge prefabs) and stay.
      A leftover test-troop file (a `taom_test_` id under `ModuleData/`) is one of these; the packager
      refuses it, dry runs included, so the step 2 dry run fails until it is pruned.
+   - **Shader sources:** the same dry run refuses a shader in a planned module's
+     `Shaders/D3D11/shader_compile_report.log` that has no complete source in the package (a `taom_`
+     shader needs all six `.rs` pass files under `TAOM/Shaders/Sources`, so deploy a build first), and
+     a report that is missing (the Armory must ship one: run the Modding Kit's module shader compile),
+     unreadable or short of its `Total variants` trailer. `--game-root` names the install holding
+     `Shaders/Sources`; a channel folder has no such parent, so always pass it.
    - **`<game>/Modules/TAOM.Dependencies/` outside `bin/`:** prune nothing. MCM's UI assets
      (`AssetPackages/`, `EmAssetPackages/`, `GUI/`, `ModuleData/Languages*/`) exist in the install
      only, and no build step recreates them
@@ -197,7 +203,7 @@ Rebuild at the tag before anything ships.
 3. Package: **Mike packages through the Modding Kit editor, not Claude** (2026-09-28). Stop after the
    prune and hand over; never write a package with the command above.
 4. Once his editor package exists (in `E:\LOTRAOM_Releases\<channel>\Modules\`), offer step 2's dry
-   run with `--source` pointing at that folder before he uploads it.
+   run with `--source` pointing at that folder (and `--game-root "<game>"`) before he uploads it.
 5. ShaderCacheKeeper, which ships beside the modules: at the tag, `python Native/ShaderCacheKeeper/build.py`
    and `pwsh -File Native/ShaderCacheKeeper/test/run_tests.ps1` both exit 0. Offer to copy
    `Native/ShaderCacheKeeper/out/xinput9_1_0.dll` to `E:\LOTRAOM_Releases\<channel>\bin\Win64_Shipping_Client\`

@@ -2077,3 +2077,16 @@ scene's folder exists and that a siege row declares its levels.
   for a town center, confirm an `sp_player`; then land an in-repo pin for the live edit
   (`SettlementSceneLiveDataTests`). State odds per cell from the dry run's shared-cell lines, never from a region's size.
 - **Source:** [rca-kysaro-scene-drop-2026-10-17.md](../rca-kysaro-scene-drop-2026-10-17.md) findings 1, 2, 5 and 6.
+
+### An art drop that adds a shader asset must bring its generated sources (#916, 2026-10-19)
+lotraom-assets `db981663` moved 12 bow materials (on the shipped shader report) to new `taom_deformer_*` shader assets. The engine compiles a
+shader only from `<Bannerlord>\Shaders\Sources`, and the Kit's "Generate Shader" had written the 18 `.rs` files on the
+author's machine only, so every bow on those materials made its holder invisible everywhere else. The review of that
+commit had flagged it HIGH; the materials went live anyway.
+- **Why missed:** a shader asset looks complete inside the module; its real code lives in the game folder, which no
+  module, mirror or gate covered.
+- **Prevent:** a new TAOM shader is named `taom_<what>`, and its six generated `.rs` files (and any own `.rsh`) go into
+  `Main/_Module/Shaders/Sources` in the same change that switches a material to it. `ShaderSourceInstall` copies them
+  at startup, and `tools/package_release.py` refuses a package whose shader report names a `taom_` shader it does not
+  ship. Never change a shipped `taom_` shader in place: ship a changed shader under a new name.
+- **Source:** [rca-bow-shader-invisible-2026-10-19.md](../rca-bow-shader-invisible-2026-10-19.md) finding 0.

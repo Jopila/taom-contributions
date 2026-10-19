@@ -66,6 +66,7 @@ XML"), which left files claimed by two clauses at once. It is now split by path.
 | `Main/_Module/GUI/FactionUI/RuntimeFonts/**` | **Third-party fonts** (Cinzel and EB Garamond under OFL-1.1, licence text beside each; Ringbearer). Not TAOM's to license |
 | `Main/_Module/AssetPackages/**` | **Commissioned art, redistributed as delivered.** The four Yotthani meshes (`fieldcamp_camp_a`, `fieldcamp_palisade_ring`, `refuge_camp_a`, `refuge_palisade_ring`). Cleared for TAOM's use; not TAOM's to sublicense onward |
 | `docs/reference/lotrlome-armory-snapshot/Prefabs/taom_howdah_platform.xml` (ships in `LOTRLOME_Armory/Prefabs`, not in the TAOM module, since 2026-09-18; renamed from `taom_howdah_agent` 2026-09-19) | **Purchased asset** (ADOD_Beasts), reworked by TAOM 2026-09-18. Cleared for TAOM's use; not TAOM's to sublicense onward |
+| `Main/_Module/Shaders/Sources/**` | **Derived from TaleWorlds shader sources** (18 files). Modding Kit "Generate Shader" output for TAOM's `taom_deformer_*` shader assets: each is the native `bow_deformer`, `longbow_deformer` or `crossbow_deformer` pass file with the metallic-workflow defines changed. Not TAOM's to license. TAOM.dll copies them into the game's `Shaders/Sources` at startup (#916) |
 | `Main/_Module/bin/**`, `Dependencies/**/*.dll` | Third-party binaries under their own licenses |
 
 Redistributed binaries: [THIRD-PARTY-LICENSES.txt](Main/_Module/THIRD-PARTY-LICENSES.txt).

@@ -1067,9 +1067,10 @@ class TestModuleShaderSackCli(unittest.TestCase):
             root = src / module
             _write(root, "SubModule.xml", 10)
             _write(root, "Shaders/D3D11/shader_mapping.bin", 5)
-            _write(root, "Shaders/D3D11/shader_compile_report.log", 6)
+            _write_text(root, "Shaders/D3D11/shader_compile_report.log", "Total variants: 0\n")
             _module_sack(root, size, fmt)
         _scene(src / "TAOM_Map", "Main_map", True, True)
+        (Path(td) / "Shaders" / "Sources").mkdir(parents=True)   # the shader gate's game folder
         return src
 
     def _run_all(self, src, td, dry_run=True):
@@ -1676,89 +1677,269 @@ class TestJitReportCli(unittest.TestCase):
             self.assertIn("no planned module ships TAOM.dll or TAOM.Dependencies.dll", r.stdout)
 
 
-_SHADER_REPORT = (
-    "Shader Compile Report -- Module: LOTRLOME_Armory\n"
-    "MetaMesh        Material        Shader        Variants\n"
-    "------------    ------------    ----------    --------\n"
-    "am_body         am_body         pbr_metallic                  1664\n"
-    "gondor_bow_a    gondor_bow_mat  taom_deformer_longbow         120\n"
-    "gondor_bow_b    gondor_bow_mat2   taom_deformer_longbow         120\n"
-)
+def _report_text(rows, trailer=True, total=None):
+    """A report in the live format: fixed columns, CRLF, a `Total variants` trailer."""
+    lines = ["Shader Compile Report -- Module: X",
+             f"{'MetaMesh':<60} {'Material':<40} {'Shader':<40} Variants",
+             f"{'-' * 60} {'-' * 40} {'-' * 40} --------"]
+    lines += [f"{mesh:<60} {mat:<40} {shader:<40} {variants}" for mesh, mat, shader, variants in rows]
+    if trailer:
+        lines += ["", f"Total variants: {sum(r[3] for r in rows) if total is None else total}"]
+    return "\r\n".join(lines) + "\r\n"
 
 
-class TestArmoryShaderSources(unittest.TestCase):
-    """A material that names a shader with no .rs source in the game's Shaders/Sources (or the TAOM
-    module's copy, which TAOM.dll installs at startup) renders invisible for every player, so the
-    packager refuses, in --dry-run too."""
+_SIX = [f"{{s}}{suffix}.rs" for suffix in pr.SHADER_PASSES]
+_ROWS = [("am_body", "am_body", "pbr_metallic", 1664),
+         ("gondor_bow_a", "gondor_bow_mat", "taom_deformer_longbow", 120),
+         ("gondor_bow_b", "gondor_bow_mat2", "taom_deformer_longbow", 120)]
 
-    def _armory(self, td, report=_SHADER_REPORT):
-        src = _fixture(Path(td))
-        _write(src, "LOTRLOME_Armory/SubModule.xml", 10)
-        if report is not None:
-            _write_text(src, "LOTRLOME_Armory/Shaders/D3D11/shader_compile_report.log", report)
+
+def _six(shader):
+    return [f.format(s=shader) for f in _SIX]
+
+
+class TestShaderSources(unittest.TestCase):
+    """What the package ships decides: a shader named in a planned module's shader report needs its
+    .rs files in the TAOM plan's Shaders/Sources (a taom_ shader needs all six), or, for a native
+    shader, in the game folder. Without a source the meshes render invisible for every player."""
+
+    def _world(self, td, report=_ROWS, taom_files=(), native=("pbr_metallic.rs",), report_text=None,
+               armory=True, layout="install"):
+        base = Path(td)
+        src = _fixture(base)
+        for f in taom_files:
+            _write(src, f"TAOM/Shaders/Sources/{f}", 1)
+        if native is not None:
+            (base / "Shaders" / "Sources").mkdir(parents=True, exist_ok=True)
+            for f in native:
+                _write(base, f"Shaders/Sources/{f}", 1)
+        if armory:
+            _write(src, "LOTRLOME_Armory/SubModule.xml", 10)
+            if report is not None or report_text is not None:
+                text = report_text if report_text is not None else _report_text(report)
+                p = src / "LOTRLOME_Armory" / pr.SHADER_REPORT
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_bytes(text.encode("utf-8"))
         return src
 
-    def _dry(self, td, src):
+    def _dry(self, td, src, *extra, modules=("TAOM", "LOTRLOME_Armory")):
         return _run("--source", str(src), "--dest", str(Path(td) / "out"),
-                    "--modules", "TAOM", "LOTRLOME_Armory", "--dry-run")
+                    "--modules", *modules, "--dry-run", *extra)
 
-    def test_parse_reads_the_shader_column_and_skips_header_and_dashes(self):
+    def test_taom_shader_with_all_six_passes_shipped_passes(self):
         with tempfile.TemporaryDirectory() as td:
-            report = Path(td) / "r.log"
-            report.write_text(_SHADER_REPORT, encoding="utf-8")
-            self.assertEqual(pr.armory_shader_usage(report),
-                             {"pbr_metallic": ["am_body"],
-                              "taom_deformer_longbow": ["gondor_bow_mat", "gondor_bow_mat2"]})
+            src = self._world(td, taom_files=_six("taom_deformer_longbow"))
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 0, r.stderr)
 
-    def test_native_shaders_pass(self):
+    def test_one_missing_pass_file_fails_and_names_it(self):
+        for suffix in pr.SHADER_PASSES:
+            with self.subTest(suffix=suffix), tempfile.TemporaryDirectory() as td:
+                gone = f"taom_deformer_longbow{suffix}.rs"
+                src = self._world(td, taom_files=[f for f in _six("taom_deformer_longbow") if f != gone])
+                r = self._dry(td, src)
+                self.assertEqual(r.returncode, 2, r.stdout)
+                self.assertIn(f"  taom_deformer_longbow: package ships no {gone}; used by "
+                              "gondor_bow_mat, gondor_bow_mat2\n", r.stderr)
+
+    def test_native_shader_needs_only_its_entry_file(self):
         with tempfile.TemporaryDirectory() as td:
-            src = self._armory(td)
-            _write(Path(td), "Shaders/Sources/pbr_metallic.rs", 1)
-            _write(src, "TAOM/Shaders/Sources/taom_deformer_longbow.rs", 1)
+            src = self._world(td, taom_files=_six("taom_deformer_longbow"))
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertNotIn("pbr_metallic", r.stderr)
+
+    def test_native_shader_with_no_source_anywhere_fails(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, taom_files=_six("taom_deformer_longbow"), native=())
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("  pbr_metallic: package ships no pbr_metallic.rs, ", r.stderr)
+
+    def test_non_taom_shader_sourced_only_from_taom_passes(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, taom_files=_six("taom_deformer_longbow") + _six("pbr_metallic"),
+                              native=())
             r = self._dry(td, src)
             self.assertEqual(r.returncode, 0, r.stderr)
 
     def test_taom_shader_only_in_the_game_folder_fails(self):
-        # TAOM.dll copies its sources into the game folder, so that cannot prove the package ships them.
         with tempfile.TemporaryDirectory() as td:
-            src = self._armory(td)
-            _write(Path(td), "Shaders/Sources/pbr_metallic.rs", 1)
-            _write(Path(td), "Shaders/Sources/taom_deformer_longbow.rs", 1)
+            src = self._world(td, native=["pbr_metallic.rs"] + _six("taom_deformer_longbow"))
             r = self._dry(td, src)
             self.assertEqual(r.returncode, 2, r.stdout)
-            self.assertIn("taom_deformer_longbow", r.stderr)
+            self.assertIn("  taom_deformer_longbow: package ships no taom_deformer_longbow.rs, ",
+                          r.stderr)
 
-    def test_taom_shader_sourced_in_the_taom_module_passes(self):
+    def test_taom_shader_fails_when_taom_is_not_packaged(self):
         with tempfile.TemporaryDirectory() as td:
-            src = self._armory(td)
-            _write(Path(td), "Shaders/Sources/pbr_metallic.rs", 1)
-            _write(src, "TAOM/Shaders/Sources/taom_deformer_longbow.rs", 1)
-            r = self._dry(td, src)
-            self.assertEqual(r.returncode, 0, r.stderr)
+            src = self._world(td, taom_files=_six("taom_deformer_longbow"))
+            r = self._dry(td, src, modules=("LOTRLOME_Armory",))
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("taom_deformer_longbow: package ships no", r.stderr)
 
-    def test_shader_with_no_source_fails_and_names_it_and_its_materials(self):
+    def test_uppercase_taom_prefix_counts_as_taom(self):
         with tempfile.TemporaryDirectory() as td:
-            src = self._armory(td)
-            _write(Path(td), "Shaders/Sources/pbr_metallic.rs", 1)
+            rows = [("m", "mat", "TAOM_Foo", 5)]
+            src = self._world(td, report=rows, native=["TAOM_Foo.rs"])
             r = self._dry(td, src)
             self.assertEqual(r.returncode, 2, r.stdout)
-            self.assertIn("taom_deformer_longbow", r.stderr)
-            self.assertIn("gondor_bow_mat", r.stderr)
-            self.assertNotIn("pbr_metallic", r.stderr)
+            self.assertIn("  TAOM_Foo: package ships no taom_foo.rs, ", r.stderr)
 
-    def test_missing_report_passes_with_a_note(self):
+    def test_taom_map_report_is_checked_too(self):
         with tempfile.TemporaryDirectory() as td:
-            src = self._armory(td, report=None)
+            src = self._world(td, armory=False)
+            _write(src, "TAOM_Map/SubModule.xml", 10)
+            p = src / "TAOM_Map" / pr.SHADER_REPORT
+            p.parent.mkdir(parents=True)
+            p.write_bytes(_report_text([("m", "mat", "taom_map_glow", 7)]).encode("utf-8"))
+            r = self._dry(td, src, modules=("TAOM", "TAOM_Map"))
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("  taom_map_glow: package ships no taom_map_glow.rs, ", r.stderr)
+
+    def test_lowercase_modules_name_is_still_checked(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td)
+            r = self._dry(td, src, modules=("TAOM", "lotrlome_armory"))
+            if (src / "lotrlome_armory").is_dir():  # case-insensitive filesystem
+                self.assertEqual(r.returncode, 2, r.stdout)
+                self.assertIn("taom_deformer_longbow", r.stderr)
+
+    def test_forty_char_material_and_spaced_metamesh_are_read(self):
+        with tempfile.TemporaryDirectory() as td:
+            rows = [("a mesh with spaces", "m" * 39, "taom_wide", 3), ("b", "n" * 40, "taom_wide", 4)]
+            src = self._world(td, report=rows, native=())
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("  taom_wide: package ships no taom_wide.rs, ", r.stderr)
+            self.assertIn("used by " + "m" * 39 + ", " + "n" * 40 + "\n", r.stderr)
+            self.assertNotIn("spaces", r.stderr)
+
+    def test_parse_reads_rows_and_ignores_header_and_dashes(self):
+        usage, why = pr.parse_shader_report(_report_text(_ROWS))
+        self.assertEqual(why, "")
+        self.assertEqual(usage, {"pbr_metallic": ["am_body"],
+                                 "taom_deformer_longbow": ["gondor_bow_mat", "gondor_bow_mat2"]})
+
+    def test_report_without_total_refuses(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, report_text=_report_text(_ROWS, trailer=False))
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("has no 'Total variants:' line", r.stderr)
+
+    def test_rows_that_do_not_add_up_refuse(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, report_text=_report_text(_ROWS, total=99999))
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("rows add up to 1904 variants but its trailer says 99999", r.stderr)
+
+    def test_zero_byte_report_refuses(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, report_text="")
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("has no 'Total variants:' line", r.stderr)
+
+    def test_valid_empty_report_passes(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, report=[])
             r = self._dry(td, src)
             self.assertEqual(r.returncode, 0, r.stderr)
-            self.assertIn("shader_compile_report.log", r.stdout)
+            self.assertIn("  LOTRLOME_Armory: 0 report rows, 0 shaders\n", r.stdout)
+
+    def test_armory_without_a_report_refuses(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, report=None)
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("shader compile", r.stderr)
+            self.assertIn("LOTRLOME_Armory ships no Shaders/D3D11/shader_compile_report.log", r.stderr)
+
+    def test_unreadable_report_exits_2_without_a_traceback(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, taom_files=_six("taom_deformer_longbow"))
+            real = Path.read_bytes
+
+            def deny(self, *a, **k):
+                if self.name == "shader_compile_report.log":
+                    raise PermissionError(13, "Permission denied")
+                return real(self, *a, **k)
+
+            err = io.StringIO()
+            with mock.patch.object(Path, "read_bytes", deny), contextlib.redirect_stderr(err), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                code = pr.main(["--source", str(src), "--dest", str(Path(td) / "out"),
+                                "--modules", "TAOM", "LOTRLOME_Armory", "--dry-run"])
+            self.assertEqual(code, 2)
+            self.assertIn("cannot read LOTRLOME_Armory/Shaders/D3D11/shader_compile_report.log: "
+                          "Permission denied", err.getvalue())
+            self.assertNotIn("Traceback", err.getvalue())
+
+    def test_channel_layout_without_a_game_folder_asks_for_game_root(self):
+        with tempfile.TemporaryDirectory() as td:
+            chan = Path(td) / "chan"
+            chan.mkdir()
+            src = self._world(chan, taom_files=_six("taom_deformer_longbow"), native=None)
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("--game-root", r.stderr)
+
+    def test_game_root_lets_a_channel_pass(self):
+        with tempfile.TemporaryDirectory() as td:
+            game = Path(td) / "game"
+            _write(game, "Shaders/Sources/pbr_metallic.rs", 1)
+            chan = Path(td) / "chan"
+            chan.mkdir()
+            src = self._world(chan, taom_files=_six("taom_deformer_longbow"), native=None)
+            r = self._dry(td, src, "--game-root", str(game))
+            self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_relative_dot_source_resolves(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, taom_files=_six("taom_deformer_longbow"))
+            r = subprocess.run([sys.executable, str(TOOL), "--source", ".", "--dest",
+                                str(Path(td) / "out"), "--modules", "TAOM", "LOTRLOME_Armory",
+                                "--dry-run"], capture_output=True, text=True, cwd=src)
+            self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_passing_run_prints_its_count_line(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, taom_files=_six("taom_deformer_longbow"))
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn("  LOTRLOME_Armory: 3 report rows, 2 shaders\n", r.stdout)
 
     def test_armory_not_planned_is_not_checked(self):
         with tempfile.TemporaryDirectory() as td:
-            src = self._armory(td)
-            r = _run("--source", str(src), "--dest", str(Path(td) / "out"), "--modules", "TAOM",
-                     "--dry-run")
+            src = self._world(td)
+            r = self._dry(td, src, modules=("TAOM",))
             self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_report_without_a_native_folder_names_game_root_in_one_line(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._world(td, native=None)
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertEqual(sum("--game-root" in ln for ln in r.stderr.splitlines()), 1)
+
+
+_LIVE_MODULES = Path(r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules")
+
+
+class TestLiveShaderReports(unittest.TestCase):
+    @unittest.skipUnless((_LIVE_MODULES / "LOTRLOME_Armory").is_dir(), "no game install")
+    def test_live_reports_parse_to_exactly_their_trailer_totals(self):
+        for module in ("LOTRLOME_Armory", "TAOM_Map"):
+            path = _LIVE_MODULES / module / pr.SHADER_REPORT
+            if not path.is_file():
+                continue
+            with self.subTest(module=module):
+                text = path.read_bytes().decode("utf-8-sig", errors="replace")
+                usage, why = pr.parse_shader_report(text)
+                self.assertEqual(why, "")
+                self.assertTrue(usage)
 
 
 if __name__ == "__main__":

@@ -5,14 +5,8 @@ namespace TAOM.Adapters;
 
 public sealed class ShaderSourceFileSystem : IShaderSourceFileSystem
 {
-    public IReadOnlyList<ShaderSourceFile> ListFiles(string folder)
-    {
-        var files = new List<ShaderSourceFile>();
-        if (!Directory.Exists(folder)) return files;
-        foreach (var path in Directory.GetFiles(folder))
-            files.Add(new ShaderSourceFile(Path.GetFileName(path), path));
-        return files;
-    }
+    public IReadOnlyList<string> ListFiles(string folder) =>
+        Directory.Exists(folder) ? Directory.GetFiles(folder) : new string[0];
 
     public byte[] ReadAllBytes(string path) => File.ReadAllBytes(path);
 

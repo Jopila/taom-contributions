@@ -4055,3 +4055,23 @@ classes but only one row, which also kept that target out of engine-bump body di
   before you discard it (grep the code for the class, `git log -S` for the commit). Take the generated content when it is
   right, and restore only what the generator does not own (for example the backlinks footer).
 - **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` finding 9.
+
+### A gate reads what its consumer reads, and proves it read all of it (#916, 2026-10-19)
+The first shader-source release gate checked `<shader>.rs` while the engine compiles the pass files, probed files on
+disk instead of the package's copy list, guessed the game folder as the parent of `--source`, and passed a report it
+could not parse. Each stand-in held on the machine it was written on, so the tests passed.
+- **Why missed:** the gate was specified from the plan, not from the engine log (`compile_shader` lines) or the
+  runbook (`/release` runs it on channel folders with no game folder).
+- **Prevent:** before writing a gate, read the consumer's real input: the log lines it compiles, the copy list it
+  ships, every layout the runbook passes. Make the gate read the same thing, cross-check a total the input states
+  (a trailer, a row count), print what it checked, and refuse an input it cannot read.
+- **Source:** [rca-bow-shader-invisible-2026-10-19.md](../rca-bow-shader-invisible-2026-10-19.md) findings 2, 3, 5 and 6.
+
+### Run the tests after a merge, before the push (#916, 2026-10-19)
+Merge `85cbd20c8` resolved a conflict where both parents appended rows before `</strings>` by taking one side, which
+dropped the 13 rows of a new localization key and turned `NoNewUnregisteredLocalizationKeys` red on trunk.
+- **Why missed:** the merge was pushed without a test run after it.
+- **Prevent:** after any merge that touches ModuleData strings (or any generated-append file), run
+  `dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId= --filter "FullyQualifiedName~Infrastructure.Localization"`
+  (or `/verify`) before `git push`. In such a conflict keep both sides' rows.
+- **Source:** [rca-bow-shader-invisible-2026-10-19.md](../rca-bow-shader-invisible-2026-10-19.md) finding 4.

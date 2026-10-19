@@ -31,6 +31,7 @@ Usage:
       --modules TAOM TAOM_Map LOTRLOME_Armory TAOM.Dependencies --allow-unknown
   python tools/package_release.py ... --exclude-candidate RACE_TEST --json manifest.json
   python tools/package_release.py --source "<game>/Modules" --dest D:/taom-release --require-build v2.0.31 --dry-run
+  python tools/package_release.py --source "<channel>/Modules" --game-root "<game>" --dest D:/x --dry-run
 
 Every run also reports, and never refuses over: what each shipped SceneObj/<scene> carries in
 ShaderCache/D3D11 (terrain shader header, compressed shader cache sack, the sack's format), with
@@ -48,8 +49,8 @@ the report says so in one policy line. Scene sacks and the other files in Shader
 
 Exit codes: 0 ok · 1 nothing to do · 2 bad input / unknown entries / non-empty destination / failed --require-build /
             retired binaries in the source (RETIRED_BINARIES, dry runs included) / a shipped
-            ModuleData file defining a taom_test_ id / an Armory shader with no .rs source (all dry
-            runs included).
+            ModuleData file defining a taom_test_ id / a shader with no complete source that ships, or
+            a shader report that is missing, unreadable or does not add up (all dry runs included).
 """
 from __future__ import annotations
 
@@ -434,44 +435,100 @@ def test_troop_files(plans) -> list:
 
 
 ARMORY_MODULE = "LOTRLOME_Armory"
-ARMORY_SHADER_REPORT = "Shaders/D3D11/shader_compile_report.log"
+SHADER_REPORT = "Shaders/D3D11/shader_compile_report.log"
+# The engine compiles a shader from these six files; a custom shader ships all of them.
+SHADER_PASSES = ("", "_gbuffer", "_shadowmap", "_pointlight", "_constant_output", "_overdraw")
+# `MetaMesh  Material  Shader  Variants`, fixed width but anchored from the right: a MetaMesh may
+# hold spaces and a Material can fill its 40-char column with one space left.
+_REPORT_ROW = re.compile(
+    r"^(?P<mesh>.*\S)\s+(?P<material>\S+)\s+(?P<shader>\S+)\s+(?P<variants>\d+)\s*$")
+_REPORT_TOTAL = re.compile(r"^Total variants:\s*(\d+)\s*$")
 
 
-def armory_shader_usage(report: Path) -> dict:
-    """{shader: sorted materials} from the Armory's shader_compile_report.log: a header, a dashed
-    line, then fixed-width rows `MetaMesh  Material  Shader  Variants`. Split on runs of 2+ spaces
-    so a column's width never matters; a row that does not have four columns is skipped."""
+def shipped_shader_sources(plans) -> set:
+    """Casefolded file names under Shaders/Sources in the TAOM plan's copy list: what the package
+    ships. Empty when TAOM is not planned."""
+    shipped = set()
+    for p in plans:
+        if p.name.casefold() != "taom":
+            continue
+        for rel, _size in p._copy_list:
+            parts = PurePosixPath(rel).parts
+            if len(parts) >= 3 and parts[0].casefold() == "shaders" and parts[1].casefold() == "sources":
+                shipped.add(parts[-1].casefold())
+    return shipped
+
+
+def parse_shader_report(text: str) -> tuple:
+    """(usage, problem): {shader: sorted materials} and "" when the report adds up, else {} and why
+    it does not. Needs the `Total variants: N` trailer and a parsed variant sum equal to it, so an
+    empty, truncated or reformatted report is refused instead of read as "no shaders"."""
     usage: dict = {}
-    for line in report.read_text(encoding="utf-8", errors="replace").splitlines():
-        cols = re.split(r"\s{2,}", line.strip())
-        if len(cols) != 4 or set(line.strip()) <= set("- "):
+    total = None
+    rows = variants = 0
+    for line in text.splitlines():
+        m = _REPORT_TOTAL.match(line.strip())
+        if m:
+            total = int(m.group(1))
             continue
-        if cols[0] == "MetaMesh" and cols[2] == "Shader":
-            continue
-        usage.setdefault(cols[2], set()).add(cols[1])
-    return {shader: sorted(mats) for shader, mats in usage.items()}
+        m = _REPORT_ROW.match(line)
+        if m:
+            usage.setdefault(m.group("shader"), set()).add(m.group("material"))
+            rows += 1
+            variants += int(m.group("variants"))
+    if total is None:
+        return {}, "has no 'Total variants:' line (empty, truncated or reformatted)"
+    if variants != total:
+        return {}, f"rows add up to {variants} variants but its trailer says {total}"
+    return {s: sorted(mats) for s, mats in usage.items()}, ""
 
 
-def missing_armory_shaders(src: Path, plans) -> tuple:
-    """(note, {shader: materials}): every shader the Armory's materials use that has no
-    Shaders/Sources/<shader>.rs that ships: <src>/TAOM/Shaders/Sources for a taom_ shader, that or
-    the game folder's (the parent of the Modules root `src`) for any other. The engine compiles a
-    shader only from the game folder's Shaders/Sources, which TAOM.dll fills from the TAOM module
-    at startup, so a shader with no source anywhere renders its meshes invisible for every player. note is set, and the dict empty, when the Armory is not
-    planned or its report is absent."""
-    if not any(p.name == ARMORY_MODULE for p in plans):
-        return "", {}
-    report = src / ARMORY_MODULE / ARMORY_SHADER_REPORT
-    if not report.is_file():
-        return f"note: no {ARMORY_MODULE}/{ARMORY_SHADER_REPORT} in the source; shader sources not checked", {}
-    native = src.parent / "Shaders" / "Sources"
-    taom = src / "TAOM" / "Shaders" / "Sources"
-    # TAOM.dll copies the TAOM sources INTO the game's Shaders/Sources at startup (and the dev machine
-    # holds them there by hand), so that folder cannot prove a taom_ shader ships: only the package's
-    # own TAOM/Shaders/Sources counts for it (#916). Any other shader may also be native.
-    return "", {shader: mats for shader, mats in armory_shader_usage(report).items()
-                if not any((d / f"{shader}.rs").is_file()
-                           for d in ((taom,) if shader.startswith("taom_") else (native, taom)))}
+def shader_source_check(plans, game_root: Path) -> tuple:
+    """(info, problems): judge what the package SHIPS. A shader named in any planned module's
+    shader_compile_report.log needs its six .rs files in the TAOM plan's Shaders/Sources if it is a
+    taom_ shader (TAOM.dll copies those into the game's Shaders/Sources at startup, so the game
+    folder cannot prove they ship, #916); any other shader also passes when
+    <game_root>/Shaders/Sources/<shader>.rs exists. Without a source the meshes on the shader
+    render their holder invisible for every player. The Armory must ship a report."""
+    info, problems = [], []
+    reports = [(p, rel) for p in plans for rel, _s in p._copy_list
+               if rel.casefold() == SHADER_REPORT.casefold()]
+    for p in plans:
+        if p.name.casefold() == ARMORY_MODULE.casefold() and not any(r[0] is p for r in reports):
+            problems.append(f"{p.name} ships no {SHADER_REPORT}, so its shaders cannot be checked; "
+                            "run the Modding Kit's module shader compile for it, then re-run")
+    if not reports:
+        return info, problems
+    native = game_root / "Shaders" / "Sources"
+    if not native.is_dir():
+        problems.append(f"{native} is not a directory; pass --game-root with the Bannerlord "
+                        "install folder (the one holding Modules and Shaders)")
+        return info, problems
+    shipped = shipped_shader_sources(plans)
+    for p, rel in reports:
+        where = f"{p.name}/{rel}"
+        try:
+            text = (p.root / rel).read_bytes().decode("utf-8-sig", errors="replace")
+        except OSError as e:
+            problems.append(f"cannot read {where}: {e.strerror or e}")
+            continue
+        usage, why = parse_shader_report(text)
+        if why:
+            problems.append(f"{where} {why}")
+            continue
+        info.append(f"  {p.name}: {sum(1 for ln in text.splitlines() if _REPORT_ROW.match(ln))} "
+                    f"report rows, {len(usage)} shaders")
+        for shader, mats in sorted(usage.items()):
+            low = shader.casefold()
+            files = [f"{low}{suffix}.rs" for suffix in SHADER_PASSES]
+            missing = [f for f in files if f not in shipped]
+            if not missing:
+                continue
+            if not low.startswith("taom_") and (native / f"{shader}.rs").is_file():
+                continue
+            shown = ", ".join(mats[:6]) + (f" (+{len(mats) - 6} more)" if len(mats) > 6 else "")
+            problems.append(f"{shader}: package ships no {', '.join(missing)}; used by {shown}")
+    return info, problems
 
 
 @dataclass(frozen=True)
@@ -873,6 +930,9 @@ def main(argv=None) -> int:
                     help="proceed even though unrecognised entries were found (they are still not copied)")
     ap.add_argument("--dry-run", action="store_true", help="report only; writes nothing")
     ap.add_argument("--json", metavar="PATH", help="write the manifest as JSON")
+    ap.add_argument("--game-root", metavar="DIR",
+                    help="Bannerlord install folder whose Shaders/Sources holds the native shader "
+                         "sources (default: the parent of --source)")
     ap.add_argument("--require-build", metavar="REV",
                     help="refuse unless TAOM.dll and TAOM.Dependencies.dll are clean builds of "
                          "this tag or commit (checked in --dry-run too)")
@@ -942,19 +1002,21 @@ def main(argv=None) -> int:
             print(f"  {rel}", file=sys.stderr)
         return 2
 
-    shader_note, shader_gaps = missing_armory_shaders(src, plans)
-    if shader_note:
-        print(f"\n{shader_note}")
-    if shader_gaps:
-        print("\nERROR: Armory materials use shaders with no .rs source that ships, so those meshes "
-              "render invisible. A taom_ shader needs its generated .rs files in "
+    game_root = Path(args.game_root) if args.game_root else src.resolve().parent
+    shader_info, shader_problems = shader_source_check(plans, game_root)
+    if shader_problems:
+        print("\nERROR: shader sources: a shader with no complete .rs source that ships renders its "
+              "meshes invisible. A taom_ shader needs all six of its .rs files in "
               "Main/_Module/Shaders/Sources, deployed (build) to TAOM/Shaders/Sources before "
-              "packaging; any other shader needs its .rs in the game's Shaders/Sources or "
-              "TAOM/Shaders/Sources:", file=sys.stderr)
-        for shader, mats in sorted(shader_gaps.items()):
-            print(f"  {shader}: {', '.join(mats[:6])}{f' (+{len(mats) - 6} more)' if len(mats) > 6 else ''}",
-                  file=sys.stderr)
+              "packaging; any other shader may instead have its .rs in the game's Shaders/Sources:",
+              file=sys.stderr)
+        for msg in shader_problems:
+            print(f"  {msg}", file=sys.stderr)
         return 2
+    if shader_info:
+        print("\nshader sources OK:")
+        for line in shader_info:
+            print(line)
 
     if args.require_build is not None:
         problems, checked = require_build(plans, args.require_build, names)

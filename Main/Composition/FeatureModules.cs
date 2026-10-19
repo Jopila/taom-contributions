@@ -38,5 +38,6 @@ internal static class FeatureModules
         new Features.AnimationVariety.AnimationVarietyModule(),
         new Features.HardQuestions.HardQuestionsModule(),
         new Features.WatchfulHolds.WatchfulHoldsModule(),
+        new Features.ShaderSourceInstall.ShaderSourceInstallModule(),
     };
 }

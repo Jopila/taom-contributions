@@ -688,6 +688,12 @@ The 49 Advanced Starting Options rows went into `taom_module_strings.xml` and th
 - **Why missed:** the plan took the existing green line as precedent and never asked who subscribes to the event, or when; `DisplayMessage` compiles and never throws, so nothing failed.
 - **Prevent:** a notice raised during startup waits for TAOM's `OnBeforeInitialModuleScreenSetAsRoot` (Native's runs first) and goes through `InformationManager.ShowInquiry`, which `GauntletQueryManager` queues and the initial screen does not clear (precedent: `StallReportNotifier`). Gate: `PatchCategoryApplierTests.SubModuleSource_OnSubModuleLoad_DoesNotReportPatchFailures`. For any on-screen notice, trace the event to its subscriber and to whatever clears it before the player looks.
 - **Source:** `docs/reviews/rca-guarded-patch-category-apply-2026-09-24.md` finding 1.
+- **Second instance (#916, 2026-10-19):** the shader-source copy warned with a red `DisplayMessage` from the main-menu
+  hook, so the initial screen cleared it. The cause was the brief, which said "show one InformationManager message",
+  and the gate above reads `SubModule.cs` only. A brief for any startup notice names `ShowInquiry`.
+  `ShaderSourceInstallWiringTests` pins the inquiry for that feature's two files only; a startup notice in
+  any other feature folder is still unchecked, so review for it.
+  Source: [rca-bow-shader-invisible-2026-10-19.md](../rca-bow-shader-invisible-2026-10-19.md) finding 1.
 
 ### Check a translated row where the engine reads it, not by its presence in the file (plan 009, 2026-09-24)
 `LocalizedTextManager.LoadLanguage` (v1.5.3) reads only `<string>` children of a `<strings>` child of the root, and skips any other `<string>` without a log line, so the player sees the English default. Plan 009 seeded five keys into the 12 `std_taom_module_strings_*.xml` files with `tools/translate_with_claude.py` `sync_missing_ids`, which wrote all 60 rows after `</strings>`: it detects CRLF because `"\r\n" in raw` is also true of these files' `\r\r\n` endings, their bare-LF tail rows and `</strings>` then split as one line, and the insert lands after it. The CHANGELOG said the notice was translated into 12 languages; in game it was translated into none.

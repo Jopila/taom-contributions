@@ -20,9 +20,13 @@ public class ShaderSourceInstallServiceTests
         public readonly HashSet<string> FailingWrites = new(StringComparer.OrdinalIgnoreCase);
         public readonly List<string> Writes = new();
 
-        public IReadOnlyList<ShaderSourceFile> ListFiles(string folder) =>
-            Files.Keys.Where(p => string.Equals(Path.GetDirectoryName(p), folder, StringComparison.OrdinalIgnoreCase))
-                .Select(p => new ShaderSourceFile(Path.GetFileName(p), p)).ToList();
+        public bool ListingThrows;
+
+        public IReadOnlyList<string> ListFiles(string folder)
+        {
+            if (ListingThrows) throw new IOException("listing denied");
+            return Files.Keys.Where(p => string.Equals(Path.GetDirectoryName(p), folder, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
 
         public byte[] ReadAllBytes(string path) => Files[path];
 
@@ -71,6 +75,8 @@ public class ShaderSourceInstallServiceTests
         var fs = new FakeFileSystem();
         fs.Files[M("a.rsh")] = new byte[] { 9 };
         fs.Files[G("a.rsh")] = new byte[] { 1 };
+        fs.Files[M("b.rs")] = new byte[] { 5 };
+        fs.Files[G("b.rs")] = new byte[] { 5 };
 
         var result = new ShaderSourceInstallService(fs).Install(Module, Game);
 
@@ -96,7 +102,7 @@ public class ShaderSourceInstallServiceTests
     }
 
     [TestMethod]
-    public void Install_EmptyOrMissingSourceFolder_DoesNothing()
+    public void Install_MissingSourceFolder_ReportsFailureAndCopiesNothing()
     {
         var fs = new FakeFileSystem();
 
@@ -104,21 +110,75 @@ public class ShaderSourceInstallServiceTests
 
         Assert.AreEqual(0, result.Copied.Count);
         Assert.AreEqual(0, result.UpToDate);
-        Assert.AreEqual(0, result.Failed.Count);
         Assert.AreEqual(0, fs.Writes.Count);
+        Assert.AreEqual(1, result.Failed.Count);
+        Assert.AreEqual(Module, result.Failed[0].Name);
+    }
+
+    [TestMethod]
+    public void Install_NoRsFile_ReportsFailure()
+    {
+        var fs = new FakeFileSystem();
+        fs.Files[M("common.rsh")] = new byte[] { 1 };
+        fs.Files[M("notes.txt")] = new byte[] { 1 };
+
+        var result = new ShaderSourceInstallService(fs).Install(Module, Game);
+
+        Assert.AreEqual(1, result.Failed.Count);
+        Assert.AreEqual(Module, result.Failed[0].Name);
+    }
+
+    [TestMethod]
+    public void Install_RsFilePresent_ReportsNoFailure()
+    {
+        var fs = new FakeFileSystem();
+        fs.Files[M("a.rs")] = new byte[] { 1 };
+
+        var result = new ShaderSourceInstallService(fs).Install(Module, Game);
+
+        Assert.AreEqual(0, result.Failed.Count);
+    }
+
+    [TestMethod]
+    public void Install_ListingThrows_ReportsTheFolderAndCopiesNothing()
+    {
+        var fs = new FakeFileSystem { ListingThrows = true };
+        fs.Files[M("a.rs")] = new byte[] { 1 };
+
+        var result = new ShaderSourceInstallService(fs).Install(Module, Game);
+
+        Assert.AreEqual(0, result.Copied.Count);
+        Assert.AreEqual(0, fs.Writes.Count);
+        Assert.AreEqual(1, result.Failed.Count);
+        Assert.AreEqual(Module, result.Failed[0].Name);
+        Assert.AreEqual("listing denied", result.Failed[0].Message);
+    }
+
+    [TestMethod]
+    public void Install_UpperCaseExtension_IsCopied()
+    {
+        var fs = new FakeFileSystem();
+        fs.Files[M("A.RS")] = new byte[] { 4 };
+
+        var result = new ShaderSourceInstallService(fs).Install(Module, Game);
+
+        CollectionAssert.AreEqual(new[] { "A.RS" }, result.Copied);
+        CollectionAssert.AreEqual(new byte[] { 4 }, fs.Files[G("A.RS")]);
+        Assert.AreEqual(0, result.Failed.Count);
     }
 
     [TestMethod]
     public void Install_OtherExtensions_AreIgnored()
     {
         var fs = new FakeFileSystem();
+        fs.Files[M("a.rs")] = new byte[] { 1 };
         fs.Files[M("notes.txt")] = new byte[] { 1 };
         fs.Files[M("a.rs.bak")] = new byte[] { 1 };
 
         var result = new ShaderSourceInstallService(fs).Install(Module, Game);
 
-        Assert.AreEqual(0, result.Copied.Count);
-        Assert.AreEqual(0, fs.Writes.Count);
+        CollectionAssert.AreEqual(new[] { "a.rs" }, result.Copied);
+        CollectionAssert.AreEqual(new[] { G("a.rs") }, fs.Writes);
     }
 
     [TestMethod]
