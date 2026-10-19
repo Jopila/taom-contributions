@@ -1132,3 +1132,12 @@ relation read paid it, with the feature off too.
   already final, and compare with `Hero.MainHero` instead of a patched property. Pin the call order with an
   `IlCallScanner` test.
 - **Source:** `docs/reviews/rca-personal-relations-2026-10-19.md` finding 3.
+
+### A score that predicts what a click does compares against the slot the click fills (Telchar's Mark, 2026-10-19)
+Telchar's Mark first compared a weapon with the weakest equipped weapon of its type. Vanilla's one-click equip fills the
+first empty weapon slot, else the first slot of the same item type (v1.5.5 `SPInventoryVM.cs:4053-4088`), and moves a
+shield onto the first equipped shield (`:4151-4166`), so a green row could replace the stronger weapon.
+- **Why missed:** the rule came from the design input; nobody read the vanilla code that runs when the player clicks.
+- **Prevent:** when a verdict tells the player "do this", derive its comparison from the vanilla action it predicts, cite
+  the lines, and test the case where the naive rule and vanilla's target disagree.
+- **Source:** `docs/reviews/rca-telchars-mark-2026-10-19.md` row 3.

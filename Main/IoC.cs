@@ -167,6 +167,7 @@ public static class IoC
         QuickActionsIoC.RegisterQuickActionsFeature(container);
         MessengerIoC.RegisterMessengerFeature(container);
         EquipPresetsIoC.RegisterEquipPresetsFeature(container);
+        Features.TelcharsMark.TelcharsMarkIoC.RegisterTelcharsMarkFeature(container);
         CompanionTacticsIoC.RegisterCompanionTacticsFeature(container);
         FiefManagementIoC.RegisterFiefManagementFeature(container);
         EditorCacheRebuildIoC.RegisterEditorCacheRebuildFeature(container);

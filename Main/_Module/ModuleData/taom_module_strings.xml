@@ -3349,7 +3349,13 @@
 	<!-- FromTheAshes -->
 	<string id="taom_ashes_done_thralls" text="{=taom_ashes_done_thralls}{SETTLEMENT} stands again, raised by your thralls." />
 	<string id="taom_ashes_short_rebuild" text="{=taom_ashes_short_rebuild}The work on {SETTLEMENT} stops short: you need {ITEMS}." />
-
-
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- TaomSettings.cs -->
+	<string id="taom_tm_mcm_enable" text="{=taom_tm_mcm_enable}Highlight better items" />
+	<string id="taom_tm_mcm_enable_hint" text="{=taom_tm_mcm_enable_hint}Tint inventory items that beat the selected character's gear: green for an upgrade, yellow for a sidegrade (more total armour, less in its own slot)." />
+	<string id="taom_tm_mcm_filter_default" text="{=taom_tm_mcm_filter_default}Show only better items by default" />
+	<string id="taom_tm_mcm_filter_default_hint" text="{=taom_tm_mcm_filter_default_hint}Tick &quot;Show only better items&quot; each time the inventory opens." />
+	<!-- TelcharsMark -->
+	<string id="taom_tm_toggle_hint" text="{=taom_tm_toggle_hint}Show only better items: upgrades (green) and sidegrades (yellow). The move-all buttons (Take, Give, Buy, Sell or Discard all) then move only the rows shown." />
 
 </strings>

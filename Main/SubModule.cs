@@ -1862,6 +1862,7 @@ public class SubModule : MBSubModuleBase
         TryPatchCategory("Patch44_CCNameAutofill");
         TryPatchCategory("Patch33_EquipPresets");
         TryPatchCategory("Patch34_QuickActions");
+        TryPatchCategory("Patch109_TelcharsMark");
         TryPatchCategory("Patch35_CompanionTactics");
         TryPatchCategory("Patch36_FiefManagement");
         SettlementNameplateWidget_DetermineTargetAlphaValue_Patch.Initialize(

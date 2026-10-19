@@ -43,6 +43,8 @@ public class ReflectionSiteBindingTests
     // --- QuickActions panel refresh after a batch transfer (InventoryVMAdapter.cs, #917) ---
     [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.Inventory.SPInventoryVM", "SPInventoryVM", "UpdateRightCharacter", "Method", "InventoryVMAdapter.cs:29")]
     [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.Inventory.SPInventoryVM", "SPInventoryVM", "RefreshInformationValues", "Method", "InventoryVMAdapter.cs:30")]
+    // --- Telchar's Mark filter re-run (InventoryUpgradeScreen.cs, #875) ---
+    [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.Inventory.SPInventoryVM", "SPInventoryVM", "UpdateFilteredStatusOfItem", "Method", "InventoryUpgradeScreen.cs:102")]
     // --- CompanionTactics formation-preset overlay (OOBOverlayService.cs) ---
     [DataRow("TaleWorlds.MountAndBlade.GauntletUI.Mission.Singleplayer.MissionGauntletOrderOfBattleUIHandler", "MissionGauntletOrderOfBattleUIHandler", "_isActive", "Field", "OOBOverlayService.cs:64")]
     [DataRow("TaleWorlds.MountAndBlade.GauntletUI.Mission.Singleplayer.MissionGauntletOrderOfBattleUIHandler", "MissionGauntletOrderOfBattleUIHandler", "_dataSource", "Field", "OOBOverlayService.cs:65")]

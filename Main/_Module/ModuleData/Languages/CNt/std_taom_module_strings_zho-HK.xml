@@ -6010,6 +6010,16 @@
 
     <string id="taom_bonds_handover" text="{LORD} thanks you for the troops you handed over." />
 
+    <string id="taom_tm_mcm_enable" text="Highlight better items" />
+
+    <string id="taom_tm_mcm_enable_hint" text="Tint inventory items that beat the selected character's gear: green for an upgrade, yellow for a sidegrade (more total armour, less in its own slot)." />
+
+    <string id="taom_tm_mcm_filter_default" text="Show only better items by default" />
+
+    <string id="taom_tm_mcm_filter_default_hint" text="Tick &quot;Show only better items&quot; each time the inventory opens." />
+
+    <string id="taom_tm_toggle_hint" text="Show only better items: upgrades (green) and sidegrades (yellow). The move-all buttons (Take, Give, Buy, Sell or Discard all) then move only the rows shown." />
+
   </strings>
 
 </base>

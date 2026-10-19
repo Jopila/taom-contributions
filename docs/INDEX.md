@@ -181,6 +181,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [lord-identity-reconciliation](features/lord-identity-reconciliation.md): the two halves of a named lord (`characters/lords.xml` + `lords.xslt` say who he is, `characters/heroes.xml` + `heroes.xslt` say what the encyclopedia tells the player) and how they drift. Load order, the localization tiers (lord NAMES interoperate across three tiers since 2026-09-17, hero BIOGRAPHIES since 2026-10-01), and the inherited-vanilla-attribute trap that married Gríma Wormtongue to Éowyn
 - [menu-link-colors](features/menu-link-colors.md) — game-menu hyperlinks recoloured by the linked object's culture (Patch64); 20 `Link.Taom.*` styles in `GameMenu.InfoText`, parchment contrast window pinned by test
 - [quick-actions](features/quick-actions.md) — inventory "Sell All" multi-action menu (Patch34)
+- [telchars-mark](features/telchars-mark.md): inventory tints for upgrades (green) and sidegrades (yellow), and a "Show only better items" checkbox (Patch109, #875)
 - [fief-management](features/fief-management.md) — custom GameState for fief management
 - [fief-granting](features/fief-granting.md): who gets a captured town or castle (Patch70 decision swap, siege participation record, ten MCM knobs; #458, #565)
 - [arena](features/arena.md): TaomTournamentModel with practice-fight culture armor + prize pools

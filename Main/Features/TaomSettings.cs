@@ -818,6 +818,16 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Inventory search box visibility; persists per save and reconciles to MCM each campaign frame.")]
     public bool EnableInventorySearch { get; set; } = true;
 
+    [SettingPropertyGroup("Inventory/Quick Actions")]
+    [SettingPropertyBool("{=taom_tm_mcm_enable}Highlight better items", Order = 2, RequireRestart = false,
+        HintText = "{=taom_tm_mcm_enable_hint}Tint inventory items that beat the selected character's gear: green for an upgrade, yellow for a sidegrade (more total armour, less in its own slot).")]
+    public bool EnableTelcharsMark { get; set; } = true;
+
+    [SettingPropertyGroup("Inventory/Quick Actions")]
+    [SettingPropertyBool("{=taom_tm_mcm_filter_default}Show only better items by default", Order = 3, RequireRestart = false,
+        HintText = "{=taom_tm_mcm_filter_default_hint}Tick \"Show only better items\" each time the inventory opens.")]
+    public bool TelcharsMarkShowOnlyUpgradesByDefault { get; set; } = false;
+
     [SettingPropertyGroup("Inventory/Quick Actions/Sell Damaged", GroupOrder = 30)]
     [SettingPropertyDropdown("Damage Threshold Preset", Order = 0, RequireRestart = false,
         HintText = "Items at or below this damage level are sold. Pristine = unused (sentinel). Default: Moderate (-20%).")]

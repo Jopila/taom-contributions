@@ -1041,3 +1041,13 @@ fix would have left the old sentence in 12 languages for good.
   glyphs the code also renders (`1??`, `...`) go in as `{VARIABLES}` filled from the code, so the
   translator's placeholder gate protects them.
 - **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 1.
+
+### UIExtenderEx InsertType.Child inserts before Index, which defaults to 0: set Index to append (Telchar's Mark, 2026-10-19)
+`PrefabExtensionInsertPatch.Index` is a virtual that defaults to 0, and `PrefabComponent.InsertAsChild` inserts before
+the child at that index, appending only when `index >= ChildNodes.Count` (UIExtenderEx 2.13.3). A `Child` insert with no
+override therefore lands FIRST and draws under every sibling. Telchar's Mark's checkbox went under the inventory's
+tab-bar art while its comment and doc said "last child". A Codex prompt had noted the default once (2026-08-05).
+- **Why missed:** "Child" was read as "append"; nobody opened `InsertAsChild`.
+- **Prevent:** every `InsertType.Child` patch states its position: `public override int Index => int.MaxValue;` to
+  append, or an explicit index with a comment naming the sibling it must precede. Pin it in the feature's wiring test.
+- **Source:** `docs/reviews/rca-telchars-mark-2026-10-19.md` row 1.

@@ -1277,6 +1277,22 @@ TAOM building dressing (#855, 2026-10-18). The sprite method maps a building typ
 
 **PatchShield:** neither target is on `PatchShieldPolicy.ExcludedTargetMethods`; the finalizer wraps both. The sprite method runs once per widget and sprite code on the main thread, `GetExplanationAtLevel` once per level line shown on the town screen. Applied at GameInit through `TaomBuildingsModule`. Not a bool prefix, so `CoopVetoClassificationTests` has no entry to take. Feature: [taom-buildings.md](../features/taom-buildings.md) (first user: [postern-gate.md](../features/postern-gate.md)). **ACTIVE**, not yet smoked in game.
 
+## Patch109_TelcharsMark
+
+**Targets (all v1.5.5, all private, all Postfix, no prefix, no finalizer):** `SPInventoryVM.RefreshInformationValues()` (`SPInventoryVM.cs:3968`), `SPInventoryVM.AfterTransfer(InventoryLogic, List<TransferCommandResult>)` (`:3838`) and `SPInventoryVM.UpdateFilteredStatusOfItem(SPItemVM item)` (`:5133`). Three classes in `Main/Features/TelcharsMark/Hooks/`, category `Patch109_TelcharsMark`, each a few lines that call the screen's `UpgradeScreenMixin` and log through `TelcharsMarkLog` (first failure per source and exception type, repeats suppressed).
+
+Inventory upgrade tint (see [telchars-mark.md](../features/telchars-mark.md)). The feature for one screen lives on `UpgradeScreenMixin`, which UIExtenderEx builds before the `SPInventoryVM` constructor returns and which runs the open-time rescore itself; during the constructor the mixin does not exist, so the postfixes find nothing. The two rescore postfixes call `UpgradeScreenMixin.Rescore`. The filter postfix runs after vanilla has set `IsFiltered` and sets it true for a list row vanilla left visible that has no verdict, when "show only better items" is on. The parameter must be named `item` (pinned by `Patch109WiringTests`). A private open delegate on the same method (`InventoryUpgradeScreen.cs`) re-runs the filters when the checkbox changes, so that call also reaches the postfix.
+
+**Callers.** `RefreshInformationValues`: `InitializeInventory` (`:4533`), the `EquipmentMode` setter (`:1647`), `UpdateCurrentCharacterIfPossible` (`:4315`), the equip, unequip, buy, sell, slaughter, donate and transfer-all handlers (`:3482-3727`, `:4838`), and since #917 Quick Actions' `InventoryVMAdapter.RefreshDisplay`. `AfterTransfer`: registered on `InventoryLogic.AfterTransfer` (`:3087`), raised once per transfer command; the postfix returns while `IsRefreshed` is false, which every vanilla handler sets around its commands, so it rescores only for transfers no vanilla handler follows: EquipPresets loads, Quick Actions Unequip All and `InventoryLogic.Reset`'s empty transfer (`InventoryLogic.cs:734-739`). `UpdateFilteredStatusOfItem`: `AfterTransfer` (`:3888`), `InitializeInventory` (`:4520`, `:4528`), `ProcessFilter` (`:5120`, `:5127`) and `OnSearchTextChanged` (`:5154`). None carries an actor the patch infers.
+
+**Timing.** The inventory screen opens long after `OnGameInitializationFinished`, so the category applies in the late batch beside `Patch34_QuickActions`. No parameter type has a Mission or Campaign dependent static initializer.
+
+**Hot path.** The filter postfix runs once per row per filter pass: a row vanilla already hid costs one field read, the box off costs one weak-table lookup, and it allocates nothing. Filter passes include every rescore while the box is ticked, and a Quick Actions batch sell rescores once per sold stack (each sell runs vanilla's own handler); cost not yet measured in game.
+
+**Threads.** Main thread: view model code reached from the inventory screen's construction and commands (screen tick and Gauntlet dispatch), with no Mission or asynchronous agent-tick caller in the list above.
+
+**Number.** Patch105 was taken on trunk by Hidden Hosts, and other uncommitted batch branches claim 105 to 107, so this category took 109; re-check at every rebase. **ACTIVE**, not yet checked in game.
+
 ## Patch_MainRosterLossDiag
 
 **Targets:** `TroopRoster.AddToCountsAtIndex(int, int, int, int, bool)` and `TroopRoster.SetElementNumber(int, int)` (both Prefix, observe-only, never skip the original). **ACTIVE, TEMPORARY diagnostic.** Code: `Main/Features/TroopWeight/Diagnostics/` (`TroopRoster_AddToCountsAtIndex_Patch`, `TroopRoster_SetElementNumber_Patch`, `MainRosterLossDiagnostics`).

@@ -1130,3 +1130,14 @@ notifications.
   undo it in a finalizer, so a fault, a toggle or a skipped original can never leave it behind. Pin
   the single-reader fact with an IL test (`HiddenHostsBindingTests`).
 - **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 6.
+
+### A postfix on SPInventoryVM.AfterTransfer runs once per transfer command: gate on IsRefreshed (Telchar's Mark, 2026-10-19)
+`InventoryLogic.AddTransferCommands` processes each command and raises `OnAfterTransfer` for it (v1.5.5
+`InventoryLogic.cs:849-871`), so Take all over N stacks raises `AfterTransfer` N times and a sell-all to a town once per
+unit. Every vanilla handler brackets its commands with `IsRefreshed = false ... RefreshInformationValues(); IsRefreshed =
+true` (`SPInventoryVM.cs:3480-3484`, `:4751-4840` and the other handlers). Telchar's Mark's postfix rescored the whole
+screen on each one.
+- **Why missed:** the event was treated as once per player action.
+- **Prevent:** count the callers of an engine event before doing per-call work in its postfix. For inventory work, put the
+  per-action work on `RefreshInformationValues` and return from the `AfterTransfer` postfix while `IsRefreshed` is false.
+- **Source:** `docs/reviews/rca-telchars-mark-2026-10-19.md` row 2.

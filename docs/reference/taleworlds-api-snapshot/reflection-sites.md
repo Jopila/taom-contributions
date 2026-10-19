@@ -36,6 +36,7 @@ Reflection against engine members performed *outside* a patch's target resolutio
 | `…ViewModelCollection.Inventory.SPInventoryVM` | `_inventoryLogic` | field | `InventoryScreenAdapter.cs:32` | EquipPresets transfer commands |
 | `…ViewModelCollection.Inventory.SPInventoryVM` | `UpdateRightCharacter` | method | `InventoryVMAdapter.cs:29` | QuickActions paper doll and stats after Unequip All |
 | `…ViewModelCollection.Inventory.SPInventoryVM` | `RefreshInformationValues` | method | `InventoryVMAdapter.cs:30` | QuickActions capacity and Done state after Unequip All |
+| `…ViewModelCollection.Inventory.SPInventoryVM` | `UpdateFilteredStatusOfItem` | method | `InventoryUpgradeScreen.cs:102` | Telchar's Mark "show only better items" filter re-run |
 | `…GauntletUI.Mission.Singleplayer.MissionGauntletOrderOfBattleUIHandler` | `_isActive` | field | `OOBOverlayService.cs:64` | CompanionTactics OOB overlay attach |
 | `…MissionGauntletOrderOfBattleUIHandler` | `_dataSource` | field | `OOBOverlayService.cs:65` | CompanionTactics OOB overlay data |
 | `…ViewModelCollection.Party.PartyCharacterVM` | `TypeIconData` | property | `RoleTooltipDecorator.cs:40` | Companion role tooltip |
