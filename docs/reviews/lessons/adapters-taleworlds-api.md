@@ -1134,3 +1134,34 @@ party that leaves.
 - **Prevent:** grep the decompile for every reader of the flag or meter (`IsDisorganized`, `Cohesion`) before writing
   player text about it or changing it, and read the threshold branches; a player-facing hint is a spec.
 - **Source:** `docs/reviews/rca-watchful-holds-2026-10-18.md` findings 3 and 4.
+
+### A mission list copied from vanilla is diffed against vanilla, entry by entry and argument by argument (Host Review, 2026-10-19)
+Host Review built its own `[ViewMethod]` list and behavior list from the vanilla field battle. Three differences went
+in unrecorded: the escape menu got `false` where vanilla passes `CampaignOptions.IsIronmanMode` (an ironman player
+could quit without saving), `MissionFaceCacheView` was dropped, and the comment listed five omitted views of nine (eight once the face cache view went back).
+- **Why missed:** the builder read vanilla for what to copy, and wrote down only the omissions it chose on purpose.
+- **Prevent:** when a TAOM mission copies a vanilla list, put the vanilla list beside it and account for every
+  dropped entry and every changed argument in the class comment, with the reason (for example `MissionPreloadView`
+  reads `MapEvent.PlayerMapEvent` unguarded).
+- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` rows 11 to 13.
+
+### Prove an engine effect can happen in this mission before writing code to stop it (Host Review, 2026-10-19)
+Host Review switched reinforcements off on the tick after deployment, because vanilla's deployment controller turns
+them on. Nothing could reinforce: the lineup was capped at the spawn logic's own battle size and the empty enemy side
+gave the player side all of it. The same build set a general for the empty side "to avoid a null read" that never
+happens.
+- **Why missed:** each guard answered a real engine line, read without the mission's configuration (no map event, an
+  empty side, a capped lineup).
+- **Prevent:** before adding code that suppresses or guards an engine effect, trace whether the effect can occur with
+  this mission's inputs. If it cannot, write that down instead of the guard.
+- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` rows 8 and 9.
+
+### A `[ViewCreatorModule]` class holds only `[ViewMethod]` static methods (Host Review, 2026-10-19)
+`ViewCreatorManager` reads `GetCustomAttributesSafe(typeof(ViewMethod))[0]` for every static method of a
+`[ViewCreatorModule]` type without a length check, inside its static constructor (v1.5.5 `ViewCreatorManager.cs:63-66`).
+One helper method in such a class throws there and breaks every mission view in the game. Host Review added TAOM's
+first such class.
+- **Why missed:** no TAOM code had used the attribute before.
+- **Prevent:** the gate test over the TAOM assembly fails any static method on such a class that lacks `[ViewMethod]`;
+  `.claude/rules/csharp-patterns.md` names it.
+- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 15.

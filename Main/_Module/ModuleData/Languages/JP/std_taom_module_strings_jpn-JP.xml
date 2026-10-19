@@ -5945,6 +5945,22 @@
 
     <string id="taom_shader_source_install_failed" text="TAOM could not install its bow shaders into {FOLDER}. Some bows may make their holder invisible. Run the game once as administrator; if that does not help, reinstall TAOM. The TAOM log names the cause." />
 
+    <string id="taom_fcamp_opt_review" text="Review the host" />
+
+    <string id="taom_fcamp_review_busy" text="You cannot review the host during an encounter." />
+
+    <string id="taom_fcamp_review_coop" text="You cannot review your troops in a co-op session." />
+
+    <string id="taom_fcamp_review_enlisted" text="You cannot review the host while serving in another lord's army." />
+
+    <string id="taom_fcamp_review_failed" text="The host could not be mustered here." />
+
+    <string id="taom_fcamp_review_few" text="You need at least 2 healthy men to review the host." />
+
+    <string id="taom_fcamp_review_start" text="Your host stands for review. No one can be hurt. Hold {LEAVE_KEY} to leave." />
+
+    <string id="taom_fcamp_review_wounded" text="You are too badly wounded to review the host." />
+
   </strings>
 
 </base>

@@ -1167,6 +1167,8 @@ state x side equals the shared policy, never true), `TaomBattleInitializationMod
 (the engine's gate stays non-virtual and cached, the Aux stays protected virtual) and
 `EnlistmentAfterDeploymentBindingTests`. Not yet seen in game; smoke items in "Testing".
 
+Host Review ([host-review.md](host-review.md)) relies on the `null` fall-through above: with no map event `EnlistmentDeploymentService` returns `null`, so the model defers to `SandboxBattleInitializationModel` and no Order of Battle screen opens.
+
 ### The presence hold: nothing moves the party while its battle encounter is open (#577)
 
 A player report at x64 campaign speed: the party attached and immediately detached during the

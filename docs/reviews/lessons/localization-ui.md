@@ -1015,3 +1015,13 @@ and no widget uses it. The same assumption kept dead `DelayOnBegin` handling in 
   installed DLL (`pwsh tools/taom-src.ps1 path Widget`) and grep for a widget that uses the definition; state the
   engine version and the method in the doc.
 - **Source:** `docs/reviews/rca-shadowfax-screens-2026-10-18.md` F2, F6.
+
+### Player text that names a key binds the key (Host Review, 2026-10-19)
+The Host Review start message said "Hold Tab to leave." Leaving is game key 4, Tab only on a keyboard with default
+bindings and `ControllerRRight` on a gamepad. Vanilla binds the name: `{leave_key}` in
+`Native/ModuleData/module_strings.xml`.
+- **Why missed:** the builder copied the default key from the engine code that reads it.
+- **Prevent:** never write a key name in player text. Use a `{UPPERCASE}` variable set from
+  `HyperlinkTexts.GetKeyHyperlinkText(HotKeyManager.GetHotKeyId(<context>, <id>))` (uppercase, so the translator
+  protects it), and show it with `MBInformationManager.AddQuickInformation`, which renders the key image.
+- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 1.

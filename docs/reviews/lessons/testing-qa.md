@@ -1817,3 +1817,13 @@ tested.
   faked engine value inside the range the engine can hold (trait levels -2..2, relations -100..100) and test the
   edges of that range.
 - **Source:** `docs/reviews/rca-hard-questions-2026-10-19.md` H3, M2.
+
+### Menu and mission hooks are tested with source pins, not left as "needs the game" (Host Review, 2026-10-19)
+Host Review's first build, reviewed before any commit, had tests for the service and the troop supplier only. The menu slot, the
+callback that sets `DisableDying` and the launcher's behavior list had none, against the 80% hook target in
+`.claude/rules/tests.md`.
+- **Why missed:** the build brief listed service tests, and the builder took "needs the game" as the end of it.
+- **Prevent:** for each hook that cannot run without the game, pin the decision it encodes from the source text (menu
+  id, option id, index, isLeave, the callback a flag is set in, a list entry), as `RefugeWiringTests` does, and build
+  the campaign behavior once in a RequiresGame factory test. Name these tests in the build brief.
+- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` rows 2 and 17.

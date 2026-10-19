@@ -4075,3 +4075,12 @@ dropped the 13 rows of a new localization key and turned `NoNewUnregisteredLocal
   `dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId= --filter "FullyQualifiedName~Infrastructure.Localization"`
   (or `/verify`) before `git push`. In such a conflict keep both sides' rows.
 - **Source:** [rca-bow-shader-invisible-2026-10-19.md](../rca-bow-shader-invisible-2026-10-19.md) finding 4.
+
+### When a plan approval changes the design, the issue body is updated in the same step (Host Review, 2026-10-19)
+Issue #891 was filed from the batch spec before the plan was approved. The approved plan dropped its MCM toggle, IoC
+lines, deployment subclass and bypass flag, and the issue kept describing all of them, with tests for a toggle that did
+not exist.
+- **Why missed:** the issue was filed by another session, and the plan step did not name it as an output.
+- **Prevent:** after Mike approves a plan that differs from the issue, post a progress comment (no ask needed) that
+  states the built design and the real test list before the build starts.
+- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 3.

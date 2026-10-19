@@ -672,3 +672,13 @@ parties' outcomes") already said such a pass stands down while `IsSessionActive 
   players run before writing it down. Choose the co-op gate by what the handler changes, and add the feature's row to
   `coop-interop.md`'s gated table in the same change.
 - **Source:** `docs/reviews/rca-watchful-holds-2026-10-18.md` findings 1 and 5.
+
+### An option inserted into another feature's menu registers after every session listener (Host Review, 2026-10-19)
+`GameMenu.AddOption` inserts at the live index, and `OnSessionLaunched` listeners run newest first, so a feature
+module's option is added before the hand-wired behaviors build the menu around it. Host Review's index 5 landed before
+Leave only because of that order; moving Refuge into the module list would have put it after Leave.
+- **Why missed:** both listener orders were walked and gave the right answer; nobody asked why.
+- **Prevent:** an option added to a menu that another feature owns registers from `CampaignEvents.OnAfterSessionLaunchedEvent`,
+  which runs after every session listener (`Campaign.cs:754-755`; vanilla `VillageHostileActionCampaignBehavior` does
+  the same).
+- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 7.

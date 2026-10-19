@@ -73,6 +73,10 @@ See `.claude/rules/gamemodels.md` for full GameModel rules.
 
 Transpilers iterate List<CodeInstruction> by hand; Harmony's CodeMatcher is available but unused here.
 
+## View creator modules
+
+A `[ViewCreatorModule]` class may hold only `[ViewMethod]` static methods: the engine reads attribute [0] of every static method unguarded, so a helper throws and breaks every mission view. The gate is `ViewCreatorModuleClasses_EveryStaticMethod_CarriesViewMethod` (`TAOM.Tests/Infrastructure/ViewCreatorModuleGateTests.cs`).
+
 ## Anti-Patterns
 
 - Business logic in Harmony patches (must delegate)

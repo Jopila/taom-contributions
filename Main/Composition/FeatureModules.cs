@@ -39,5 +39,6 @@ internal static class FeatureModules
         new Features.HardQuestions.HardQuestionsModule(),
         new Features.WatchfulHolds.WatchfulHoldsModule(),
         new Features.ShaderSourceInstall.ShaderSourceInstallModule(),
+        new Features.HostReview.HostReviewModule(),
     };
 }

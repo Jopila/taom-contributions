@@ -124,7 +124,7 @@ TAOM's loose `Assets/` tree instead of `AssetPackages/`. Where they should live 
 | `CampTerrainService.cs` / `CampAmbushService.cs` | Pure policy and odds |
 | `CampVisualService.cs` + `Visuals/CampLayoutBuilder.cs` | Entities, wind ticker (500 ms throttle), fallback chain |
 | `LookoutSpottingContributor.cs` | The sight bonus through the model seam |
-| `Hooks/FieldCampCampaignBehavior.cs` + `FieldCampMenuController.cs` | Events, SyncData, menus (index 4 on both menus reserved for Refuge) |
+| `Hooks/FieldCampCampaignBehavior.cs` + `FieldCampMenuController.cs` | Events, SyncData, menus (index 4 on both menus reserved for Refuge; index 5 on the camp sub-menu is Host Review, before Leave, see [host-review.md](host-review.md)) |
 | `Hooks/PartyNameplateCampIconPatch.cs` | Patch74 thin guarded body (registry entry has the never-throw contract) |
 | `Hooks/CampNameplateIconPresenter.cs` | Patch74's widget half: icon creation, sprite memo (same never-throw posture) |
 | `UI/FieldCampMapView.cs` + `FieldCampOverlayVM.cs` | Overlay button + status panel, 4 Hz refresh |
@@ -167,7 +167,7 @@ the lock, unpauses the engine and force-resumes time. Both live in
 
 ## Traps
 
-- The Refuge insertion point is **index 4 on BOTH menus**; do not take it.
+- The Refuge insertion point is **index 4 on BOTH menus**; do not take it. Host Review takes index 5 on the camp sub-menu, before Leave ([host-review.md](host-review.md)).
 - `CampVisualService` is a process-lifetime singleton: session teardown must call `ClearAll`
   (map-view finalize + game-over handler both do; both idempotent).
 - A hand-corrupted save with NaN `BuildHours` renders that camp permanently un-ready; the only

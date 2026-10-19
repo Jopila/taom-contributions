@@ -2822,6 +2822,7 @@
 	<string id="taom_fcamp_opt_leave" text="{=taom_fcamp_opt_leave}Leave" />
 	<string id="taom_fcamp_opt_lookout" text="{=taom_fcamp_opt_lookout}Create a lookout" />
 	<string id="taom_fcamp_opt_manage" text="{=taom_fcamp_opt_manage}Manage camp" />
+	<string id="taom_fcamp_opt_review" text="{=taom_fcamp_opt_review}Review the host" />
 	<string id="taom_fcamp_opt_supplies" text="{=taom_fcamp_opt_supplies}Order supplies" />
 	<string id="taom_fcamp_raising_ambush" text="{=taom_fcamp_raising_ambush}Setting up the ambush." />
 	<string id="taom_fcamp_raising_field" text="{=taom_fcamp_raising_field}Raising the field camp." />
@@ -2834,6 +2835,13 @@
 	<string id="taom_fcamp_reason_moving" text="{=taom_fcamp_reason_moving}Halt your party before making camp." />
 	<string id="taom_fcamp_reason_settlement" text="{=taom_fcamp_reason_settlement}You cannot pitch camp inside a settlement." />
 	<string id="taom_fcamp_reason_terrain" text="{=taom_fcamp_reason_terrain}The ground here does not suit this camp." />
+	<string id="taom_fcamp_review_busy" text="{=taom_fcamp_review_busy}You cannot review the host during an encounter." />
+	<string id="taom_fcamp_review_coop" text="{=taom_fcamp_review_coop}You cannot review your troops in a co-op session." />
+	<string id="taom_fcamp_review_enlisted" text="{=taom_fcamp_review_enlisted}You cannot review the host while serving in another lord's army." />
+	<string id="taom_fcamp_review_failed" text="{=taom_fcamp_review_failed}The host could not be mustered here." />
+	<string id="taom_fcamp_review_few" text="{=taom_fcamp_review_few}You need at least 2 healthy men to review the host." />
+	<string id="taom_fcamp_review_start" text="{=taom_fcamp_review_start}Your host stands for review. No one can be hurt. Hold {LEAVE_KEY} to leave." />
+	<string id="taom_fcamp_review_wounded" text="{=taom_fcamp_review_wounded}You are too badly wounded to review the host." />
 	<string id="taom_fcamp_state_ambush" text="{=taom_fcamp_state_ambush}Ambush ready" />
 	<string id="taom_fcamp_state_field" text="{=taom_fcamp_state_field}Field camp" />
 	<string id="taom_fcamp_state_fortified" text="{=taom_fcamp_state_fortified}Fortified camp" />
