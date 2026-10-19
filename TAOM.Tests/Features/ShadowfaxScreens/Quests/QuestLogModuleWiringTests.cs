@@ -6,8 +6,12 @@ using TAOM.Adapters;
 using TAOM.Composition;
 using TAOM.Core.Diagnostics;
 using TAOM.Core.Logging;
+using TAOM.Features.CoopInterop;
 using TAOM.Features.ShadowfaxScreens;
+using TAOM.Features.ShadowfaxScreens.Clan;
 using TAOM.Features.ShadowfaxScreens.Diagnostics;
+using TAOM.Features.ShadowfaxScreens.Inventory;
+using TAOM.Features.ShadowfaxScreens.Party;
 using TAOM.Features.ShadowfaxScreens.Quests;
 
 namespace TAOM.Tests.Features.ShadowfaxScreens.Quests;
@@ -28,6 +32,7 @@ public class QuestLogModuleWiringTests
         _container.RegisterInstance(Substitute.For<IStampClock>());
         _logger = Substitute.For<IModLogger>();
         _container.RegisterInstance(_logger);
+        _container.RegisterInstance(Substitute.For<ICoopPresenceProvider>());
         _sut.RegisterServices(_container);
         _adapter = Substitute.For<IQuestJournalAdapter>();
         _container.RegisterInstance(_adapter, IfAlreadyRegistered.Replace);
@@ -36,8 +41,12 @@ public class QuestLogModuleWiringTests
     [TestCleanup]
     public void Cleanup()
     {
-        QuestLogDeferCalls.Initialize(null);
+        // InitializeStatics wires every screen's facade, so every one is reset.
         ScreenOpenTiming.Initialize(null);
+        ClanFastOpenCalls.Initialize(null);
+        ShadowfaxInventoryCalls.Initialize(null, null, null);
+        PartyFastOpenCalls.Initialize(null);
+        QuestLogDeferCalls.Initialize(null);
         _container.Dispose();
     }
 

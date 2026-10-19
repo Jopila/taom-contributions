@@ -9,6 +9,9 @@ using TAOM.Features.CoopInterop;
 using TAOM.Features.ShadowfaxScreens;
 using TAOM.Features.ShadowfaxScreens.Clan;
 using TAOM.Features.ShadowfaxScreens.Diagnostics;
+using TAOM.Features.ShadowfaxScreens.Inventory;
+using TAOM.Features.ShadowfaxScreens.Party;
+using TAOM.Features.ShadowfaxScreens.Quests;
 
 namespace TAOM.Tests.Features.ShadowfaxScreens;
 
@@ -32,8 +35,12 @@ public class ShadowfaxScreensModuleTests
     [TestCleanup]
     public void Cleanup()
     {
+        // InitializeStatics wires every screen's facade, so every one is reset.
         ScreenOpenTiming.Initialize(null);
         ClanFastOpenCalls.Initialize(null);
+        ShadowfaxInventoryCalls.Initialize(null, null, null);
+        PartyFastOpenCalls.Initialize(null);
+        QuestLogDeferCalls.Initialize(null);
         _container.Dispose();
     }
 
