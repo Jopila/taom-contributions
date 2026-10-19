@@ -4034,3 +4034,14 @@ setting is absent from the last release, so the next one would ship it on; `Enab
   `/release` turns into the changelog), with the trigger stated ("before the next release or before any `act_taom_*`
   code reaches the Armory"), plus an issue when the maintainer wants one.
 - **Source:** [rca-orc-gait-install-2026-10-18.md](../rca-orc-gait-install-2026-10-18.md) finding 4.
+
+### Gate test data where packages are made, not only in the repo (repeat, 2026-10-18)
+The five WildMesh test riders were deleted from the repo to pass `/release` pre-flight 5, but the testing channel
+already carried a v2.0.35 package cut from the install two hours earlier, with the riders registered: testers could
+pick five `[Test]` troops in Custom Battle. Every channel package is made from the install, and deploys never delete.
+- **Why missed:** the #646 fix made the blocker a pre-flight line, and that line greps `Main/_Module`. A package made
+  outside `/release` passes no pre-flight at all. Second time test riders reached a player-facing surface.
+- **Prevent:** `tools/package_release.py` refuses a package whose shipped ModuleData defines a `taom_test_` id, dry
+  runs included, so the dry run on any channel folder catches it. Restore test data into the install only, and
+  deploy before anyone packages.
+- **Source:** [rca-wildmesh-rider-removal-2026-10-18.md](../rca-wildmesh-rider-removal-2026-10-18.md) finding 1.

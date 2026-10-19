@@ -13,18 +13,33 @@ is replaced. The route is the one the Animalia elk and moose proved (#646):
 textures, 74 clip masters and 96 clips are in the live Armory with their RuntimeDataCache entries; the 74 masters
 were re-exported, re-imported and 37 clips regenerated after the review (round 2, below). The Monsters, action sets,
 Horse items and English item names are written (`tools/apply_wildmesh_armory.py`, ledger
-[lotrlome-wildmesh-changes.md](../reference/lotrlome-wildmesh-changes.md)); five Custom Battle test riders ride them.
+[lotrlome-wildmesh-changes.md](../reference/lotrlome-wildmesh-changes.md)). The five Custom Battle test riders were
+removed for the v2.0.35 release (2026-10-18).
 Still owed: the in-game checks, the 12 translations of the item names, the attacks (stage 12), the sizes after the
 first battle, and the campaign riders. No campaign troop rides one yet.
 
-**In-game test (Custom Battle, cheat mode, console):**
-`taom.spawn_troops taom_test_wildmesh_<animal>_rider 5 ally` for `boar`, `warthog`, `mountaingoat`, `deer`, `moose`.
+**In-game test (Custom Battle, cheat mode, console):** the test riders are gone from the repo, so restore them into
+the install only, never into the repo:
+
+1. If `<game>/Modules/TAOM/SubModule.xml` lacks the `test_riders/wildmesh` block, paste the 8 lines from
+   `git show 6553b8c70:Main/_Module/SubModule.xml` inside its `<Xmls>`. Take no backup: the next deploy rewrites the
+   file. If the installed rider file is missing (the `/release` Phase 8 prune deletes it), put it back from inside the
+   repo (Git Bash):
+   `mkdir -p "<game>/Modules/TAOM/ModuleData/test_riders" && git show 6553b8c70:Main/_Module/ModuleData/test_riders/wildmesh.xml > "<game>/Modules/TAOM/ModuleData/test_riders/wildmesh.xml"`
+2. Restart the game: the engine reads XmlNodes only at launch.
+3. `taom.spawn_troops taom_test_wildmesh_<animal>_rider 5 ally` for `boar`, `warthog`, `mountaingoat`, `deer`,
+   `moose`.
+
+Nothing to undo: the next deploy rewrites the installed `SubModule.xml` without the block, which leaves the rider
+file inert until the prune. A build during the test does the same, so paste the block again after one. Deploy (or
+remove the block) before anyone packages a channel from the install, or the package ships the riders.
+
 Check the gaits (hoof slide at each speed, and turning at each gait, where a vanilla strafe or turn clip blends
 with the pack's forward clip), idles, grazing, hits, vanilla falls, the dwarf's seat on the boars and the goat
 (light and heavy ram bardings across the riders' two rosters), the elk saddle on the stag and moose, the elf's
 size and camera on the 150 moose, and the sizes. **If the dwarf seat fails,** take the three ids out of
-`DWARF_MOUNT_IDS` before any campaign dwarf rides one. The riders also appear in the Custom Battle army picker under
-the Erebor and Mirkwood cavalry, a second way in.
+`DWARF_MOUNT_IDS` before any campaign dwarf rides one. Restored locally, the riders also appear in the Custom Battle
+army picker under the Erebor and Mirkwood cavalry, a second way in.
 
 ## Why This Exists
 
@@ -122,11 +137,11 @@ warthog 1.69, 2.03, then the boar's; goat 1.84, 2.37, 4.09, then the deer's 7.46
 The three dwarf mounts are in `DWARF_MOUNT_IDS` (`tools/taom_schema.py`), so `MOUNTED_DWARF` allows a dwarf on
 them; their Monsters keep the horse's rider seat, as the war ram does, until the in-game seat check. Monsters
 `taom_wildmesh_<animal>`, action sets `as_wildmesh_<animal>` (children of `as_horse`, with `_town_and_village` and
-`_map` twins). Test riders: `Main/_Module/ModuleData/test_riders/wildmesh.xml`, CustomGame only, clones of
-`ironpass_ram_rider` and `mirkwood_rochenlas` with their upgrade edges removed. The folder sits outside `troops/`,
-so the ladders, the troop generators and the recruitment test never read the riders and need no exemption, and
-their `[Test]` names stay English (the name-string generator reads `troops/` only). `/release` step 5 blocks a
-release while the file exists. The item names have English rows in the Armory's
+`_map` twins). The test riders (removed for v2.0.35, restorable from `6553b8c70`) were
+`Main/_Module/ModuleData/test_riders/wildmesh.xml`, CustomGame only, clones of `ironpass_ram_rider` and
+`mirkwood_rochenlas` with their upgrade edges removed. The folder sat outside `troops/`, so the ladders, the troop
+generators and the recruitment test never read them and needed no exemption. `/release` step 5 blocks a release
+while the file exists. The item names have English rows in the Armory's
 `Languages/loc_LOTRAOM_horses.xml`; the 12 languages are owed.
 
 ### Live files
@@ -152,7 +167,6 @@ The data lives in the external, unversioned `LOTRLOME_Armory`:
 | `tools/blender/measure_animalia_clips.py` | Stride travel for in-place clips; hoof plants from `plant_start` (tests: `tools/tests/test_measure_animalia_clips.py`) |
 | `tools/apply_wildmesh_armory.py` | Monsters, action sets, Horse items and English loc rows in the live Armory, per animal (tests: `tools/tests/test_apply_wildmesh_armory.py`, its `LiveRecipeParityTests` the reinstall gate) |
 | `tools/taom_schema.py` `DWARF_MOUNT_IDS` | The three dwarf mounts beside the war ram (`MOUNTED_DWARF`) |
-| `Main/_Module/ModuleData/test_riders/wildmesh.xml`, its `Main/_Module/SubModule.xml` block | The five Custom Battle test riders (tests: `tools/tests/test_wildmesh_test_riders.py`) |
 | `docs/reference/lotrlome-wildmesh-changes.md` | Ledger of every change outside the repo, replay and removal |
 
 ## Dependencies
@@ -165,8 +179,7 @@ The data lives in the external, unversioned `LOTRLOME_Armory`:
 ## Tests
 
 Unit tests: `tools/tests/test_apply_wildmesh_armory.py` (the writer, and its `LiveRecipeParityTests` against the
-live Armory and the repo snapshot), `test_wildmesh_test_riders.py` (each rider on its own animal and harness, the
-registration), `test_export_blend_pack.py`, `test_measure_animalia_clips.py`, `test_fbx_exact_times.py`,
+live Armory and the repo snapshot), `test_export_blend_pack.py`, `test_measure_animalia_clips.py`, `test_fbx_exact_times.py`,
 `test_gen_animalia_anim_clips.py`, and the three WildMesh cases in `MountedDwarfTests`.
 
 Stage reports, round 1 (2026-10-14): export bone drift 0; reskin with no unweighted vertex, at most four influences,
@@ -199,6 +212,8 @@ an in-game check.
 
 ## Changelog
 
+- 2026-10-18: the five Custom Battle test riders and `test_wildmesh_test_riders.py` removed for the v2.0.35
+  release; the in-game test restores them locally.
 - 2026-10-15: deep review fixes: the writer works per animal and refuses an empty Monsters file, writes the English
   item names, and its parity test is the reinstall gate; the test riders moved to `test_riders/` with no exemptions;
   `DWARF_MOUNT_IDS`; the clip pipeline's resample, exact FBX times, plant rule and SHORT guard, then a regeneration

@@ -95,7 +95,6 @@ All 17 files are `SubModule.xml` rows with id `NPCCharacters`, read as `Characte
 | `troops/troops_dale.xml` | `SubModule.xml:208` | `tools/generate_dale_troops.py` |
 | `troops/troops_rivendell.xml` | `SubModule.xml:217` | `tools/oneoff/add_race_attribute.py`, `tools/promote_borrowed_cultures.py` |
 | `troops/troops_mirkwood.xml` | `SubModule.xml:226` | `tools/oneoff/add_race_attribute.py`, `tools/oneoff/Add-RosterVariants.ps1` |
-| `test_riders/wildmesh.xml` | `SubModule.xml:272` (CustomGame only) | hand; five Custom Battle test riders for #794, outside `troops/` so no `troops_*.xml` tool reads them; `/release` step 5 blocks a release while it exists |
 | `troops/troops_mordor.xml` | `SubModule.xml:235` | `tools/apply_mordor_troop_revamp.py`, `tools/apply_black_numenorean_troops.py`, `tools/mordor_armor_remap.py` |
 | `troops/troops_isengard.xml` | `SubModule.xml:244` | `tools/apply_isengard_troop_revamp.py` |
 | `troops/troops_dolguldur.xml` | `SubModule.xml:253` | `tools/apply_dolguldur_troop_revamp.py`, `tools/apply_black_numenorean_troops.py`, `tools/mordor_armor_remap.py`; a `.bak-fellwarg-20260831` sibling sits beside it |

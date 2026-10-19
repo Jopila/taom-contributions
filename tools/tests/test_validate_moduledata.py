@@ -1381,7 +1381,7 @@ class MountedDwarfTests(unittest.TestCase):
 
     # -- the gate sees the test_riders folder, and the WildMesh set (#794) ------------ #
     def test_dwarf_in_the_test_riders_folder_on_a_horse_is_reported(self):
-        # The #794 riders moved out of troops/ into test_riders/; the gate must still read them.
+        # A CustomGame test-rider file in test_riders/ (where the #794 riders lived) must still be read.
         _write(self.md / "test_riders" / "x.xml",
                '<?xml version="1.0"?>\n<NPCCharacters>\n'
                '  <NPCCharacter id="taom_test_x_rider" race="dwarf" culture="Culture.erebor" '

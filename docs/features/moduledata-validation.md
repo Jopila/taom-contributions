@@ -249,7 +249,7 @@ A dwarf who carries one is legal, and **the group rule relaxes with it**: `defau
 and `"HorseArcher"` both pass for a rider of one, because he genuinely is cavalry. The relaxation
 is per character, not global. Every other mount that character can reach is still reported, and a
 dwarf with a cavalry `default_group` and none of these mounts is still an error. The gate reads every
-`*.xml` under the module's `ModuleData`, so the CustomGame test riders in `test_riders/` are covered
+`*.xml` under the module's `ModuleData`, so a CustomGame test-rider file in `test_riders/` is covered
 (`MountedDwarfTests`).
 
 Two implementation properties matter when reading a result:

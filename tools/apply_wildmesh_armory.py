@@ -32,8 +32,8 @@ refused, naming the missing ids; an animal absent from one file and present in a
      the horse's: falls, rear, kick, walking backwards, strafes, turns, quick stops, jumps and the head-turn
      additives. No attack yet (stage 12).
   4. ModuleData/LOTRLOME_items/LOTRAOM_horses.xml: taom_wildmesh_<animal>_a, the body_length="100" placeholder
-     Items.xsd requires (TAOM copies the Monster's size in at game init), not merchandise while only the Custom
-     Battle test riders ride them. Missing items go after the last taom_wildmesh_*_a item, the first run after
+     Items.xsd requires (TAOM copies the Monster's size in at game init), not merchandise until a campaign troop
+     rides them. Missing items go after the last taom_wildmesh_*_a item, the first run after
      taom_animalia_moose_a with a block comment.
   5. ModuleData/Languages/loc_LOTRAOM_horses.xml (the root English file only; the 12 language folders are a
      paid translation run): one <string id="taom_wildmesh_<animal>_a" text="<name>"/> row per animal, the
@@ -239,7 +239,7 @@ ITEM_STATS = (
 ITEMS_COMMENT = """    <!-- #794 WildMesh3D mounts (docs/features/wildmesh-mounts.md): horse-skeleton reskins with their own clips.
          Size lives on their Monsters (lotr_monster_wildmesh.xml); body_length="100" is only the placeholder
          Items.xsd requires. The dwarf mounts take the war ram's stats, the deer and moose the Animalia elk's and
-         moose's. Not merchandise while only the Custom Battle test riders ride them. -->
+         moose's. Not merchandise until a campaign troop rides them. -->
 """
 ITEMS = ITEMS_COMMENT + "".join(_ITEM % s for s in ITEM_STATS)
 
