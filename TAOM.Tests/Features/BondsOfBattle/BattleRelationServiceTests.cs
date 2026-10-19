@@ -6,6 +6,7 @@ using TAOM.Adapters;
 using TAOM.Features.BondsOfBattle;
 using TAOM.Features.BondsOfBattle.Models;
 using TAOM.Features.Enlistment;
+using TAOM.Features.Execution;
 using TAOM.Features.InitialChildGeneration;
 using TAOM.Features.Relations;
 
@@ -20,6 +21,7 @@ public class BattleRelationServiceTests
     private IRandomSource _random = null!;
     private IRelationGrantService _grants = null!;
     private IBondsNoticeAdapter _notice = null!;
+    private IAlignmentService _alignment = null!;
     private BattleRelationService _sut = null!;
 
     [TestInitialize]
@@ -30,25 +32,33 @@ public class BattleRelationServiceTests
         _random = Substitute.For<IRandomSource>();
         _random.Next(Arg.Any<int>(), Arg.Any<int>()).Returns(0);
         _grants = Substitute.For<IRelationGrantService>();
-        _grants.Grant(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>()).Returns(true);
+        _grants.Grant(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>()).Returns(call => call.ArgAt<int>(1));
         _notice = Substitute.For<IBondsNoticeAdapter>();
-        _sut = new BattleRelationService(_enlistment, _random, _grants, _notice);
+        _alignment = Substitute.For<IAlignmentService>();
+        // free_f is Free, evil_f is Evil, anything else (or no id) is Neutral.
+        _alignment.ResolveSide(Arg.Any<string>(), Arg.Any<string>()).Returns(call =>
+            call.ArgAt<string>(0) == "free_f" ? FactionSide.Free : call.ArgAt<string>(0) == "evil_f" ? FactionSide.Evil : FactionSide.Neutral);
+        _sut = new BattleRelationService(_enlistment, _random, _grants, _notice, _alignment);
     }
 
     private static BattleParticipant Party(string? id, bool playerSide = true, bool clan = false,
-        bool army = false, bool bandit = false, bool lord = true) =>
-        new(id, id == null ? "" : "Name_" + id, playerSide, clan, army, bandit, lord);
+        bool inArmy = false, bool bandit = false, bool lord = true, string? recipient = null, bool sideLeader = false) =>
+        new(id, id == null ? "" : "Name_" + id, playerSide, clan, inArmy, bandit, lord, recipient, sideLeader);
 
     private static BattleSnapshot Battle(IEnumerable<BattleParticipant> parties, bool won = true, int enemyCasualties = 0,
-        IEnumerable<SettlementNotables>? notables = null, bool hideout = false) =>
-        new(parties.ToList(), won, enemyCasualties, (notables ?? Enumerable.Empty<SettlementNotables>()).ToList(), hideout);
+        IEnumerable<SettlementNotables>? notables = null, bool hideout = false, string? playerFaction = "free_f",
+        bool playerLeadsArmy = false, int thanks = 0, string? playerCulture = null) =>
+        new(parties.ToList(), won, enemyCasualties, (notables ?? Enumerable.Empty<SettlementNotables>()).ToList(), hideout,
+            playerFaction, playerCulture, playerLeadsArmy, thanks);
 
     /// <summary>A bandit-only win with a notable town in reach: it reaches the gratitude path, so a gate that skips it is visible.</summary>
     private static BattleSnapshot BanditWin() =>
         Battle(new[] { Party(null, playerSide: false, bandit: true) }, enemyCasualties: 80, notables: new[] { Town("t1", "n1") });
 
-    private static SettlementNotables Town(string id, params string[] notableIds) =>
-        new(id, "Town_" + id, notableIds.Select(n => new NotableInfo(n, "Notable_" + n)).ToList());
+    private static SettlementNotables Town(string id, params string[] notableIds) => TownOf(id, "free_f", notableIds);
+
+    private static SettlementNotables TownOf(string id, string? ownerFaction, params string[] notableIds) =>
+        new(id, "Town_" + id, notableIds.Select(n => new NotableInfo(n, "Notable_" + n)).ToList(), ownerFaction, null);
 
     // --- allies and enemies ---
 
@@ -161,9 +171,9 @@ public class BattleRelationServiceTests
     }
 
     [TestMethod]
-    public void ComputeGrants_APartyInThePlayersArmy_IsExcluded()
+    public void ComputeGrants_AMemberOfAnArmyThePlayerLeads_IsExcluded()
     {
-        Assert.AreEqual(0, _sut.ComputeGrants(Battle(new[] { Party("armyLord", army: true) }), Defaults).Count);
+        Assert.AreEqual(0, _sut.ComputeGrants(Battle(new[] { Party("armyLord", inArmy: true) }, playerLeadsArmy: true), Defaults).Count);
     }
 
     [TestMethod]
@@ -381,7 +391,225 @@ public class BattleRelationServiceTests
         Assert.AreEqual("n1", _sut.ComputeGrants(BanditWin(), Defaults).Single().HeroId);
     }
 
+    // --- item 1: an army the player joined ---
+
+    [TestMethod]
+    public void ComputeGrants_AMemberOfAnArmyThePlayerJoined_Earns()
+    {
+        // The player is in this army but does not lead it (PlayerLeadsArmy false): its members are ordinary allies.
+        var grants = _sut.ComputeGrants(
+            Battle(new[] { Party("armyLeader", inArmy: true), Party("armyMember", inArmy: true) }, playerLeadsArmy: false), Defaults);
+
+        CollectionAssert.AreEquivalent(new[] { "armyLeader", "armyMember" }, grants.Select(g => g.HeroId).ToList());
+    }
+
+    [TestMethod]
+    public void ComputeGrants_ALordOutsideTheArmyThePlayerLeads_StillEarns()
+    {
+        var grants = _sut.ComputeGrants(
+            Battle(new[] { Party("armyMember", inArmy: true), Party("outsider") }, playerLeadsArmy: true), Defaults);
+
+        Assert.AreEqual("outsider", grants.Single().HeroId);
+    }
+
+    // --- item 2: counted once per effective recipient ---
+
+    [TestMethod]
+    public void ComputeGrants_TwoLordsOfOneClanWithTheSameRecipient_GiveOneGrant_ToTheFirstWhoFought()
+    {
+        var grants = _sut.ComputeGrants(
+            Battle(new[] { Party("faramir", recipient: "denethor"), Party("boromir", recipient: "denethor") }), Defaults);
+
+        Assert.AreEqual(1, grants.Count);
+        Assert.AreEqual("faramir", grants[0].HeroId, "it still grants to and names the lord who fought");
+        Assert.AreEqual("Name_faramir", grants[0].HeroName);
+    }
+
+    [TestMethod]
+    public void ComputeGrants_TwoLordsWithTheirOwnRecipients_GiveTwoGrants()
+    {
+        var grants = _sut.ComputeGrants(
+            Battle(new[] { Party("faramir", recipient: "faramir"), Party("boromir", recipient: "boromir") }), Defaults);
+
+        CollectionAssert.AreEquivalent(new[] { "faramir", "boromir" }, grants.Select(g => g.HeroId).ToList());
+    }
+
+    [TestMethod]
+    public void ComputeGrants_NoRecipient_FallsBackToTheLeadersOwnId()
+    {
+        var grants = _sut.ComputeGrants(Battle(new[] { Party("a"), Party("b"), Party("a") }), Defaults);
+
+        CollectionAssert.AreEquivalent(new[] { "a", "b" }, grants.Select(g => g.HeroId).ToList());
+    }
+
+    [TestMethod]
+    public void ComputeGrants_TheEnemyPenalty_IsCountedOncePerRecipientToo()
+    {
+        var settings = Defaults with { EnemyPenaltyEnabled = true };
+
+        var grants = _sut.ComputeGrants(Battle(new[]
+        {
+            Party("foe1", playerSide: false, recipient: "chief"), Party("foe2", playerSide: false, recipient: "chief"),
+        }), settings);
+
+        Assert.AreEqual(1, grants.Count);
+        Assert.AreEqual(-5, grants[0].Delta);
+    }
+
+    [TestMethod]
+    public void ComputeGrants_AnAllyAndAnEnemyWithTheSameRecipient_AreCountedOnce()
+    {
+        // One recipient is paid once per battle, whichever side names him first.
+        var settings = Defaults with { EnemyPenaltyEnabled = true };
+
+        var grants = _sut.ComputeGrants(Battle(new[]
+        {
+            Party("ally", recipient: "chief"), Party("foe", playerSide: false, recipient: "chief"),
+        }), settings);
+
+        Assert.AreEqual(1, grants.Count, "one recipient is paid once per battle, whichever side first names him");
+    }
+
+    // --- item 4: a village in the other side's land does not thank ---
+
+    [DataTestMethod]
+    [DataRow("free_f", "evil_f", false)]
+    [DataRow("evil_f", "free_f", false)]
+    [DataRow("free_f", "free_f", true)]
+    [DataRow("evil_f", "evil_f", true)]
+    [DataRow("free_f", "neutral_f", true)]
+    [DataRow("evil_f", "neutral_f", true)]
+    [DataRow("neutral_f", "free_f", true)]
+    [DataRow("neutral_f", "evil_f", true)]
+    [DataRow("neutral_f", "neutral_f", true)]
+    public void ComputeGrants_BanditGratitude_SkipsASettlementOnlyWhenOneSideIsFreeAndTheOtherEvil(
+        string playerFaction, string ownerFaction, bool thanks)
+    {
+        var battle = Battle(new[] { Party(null, playerSide: false, bandit: true) }, enemyCasualties: 30,
+            notables: new[] { TownOf("t1", ownerFaction, "n1") }, playerFaction: playerFaction);
+
+        Assert.AreEqual(thanks ? 1 : 0, _sut.ComputeGrants(battle, Defaults).Count);
+    }
+
+    [TestMethod]
+    public void ComputeGrants_BanditGratitude_OneVillageInEnemyLandIsSkipped_TheNextOneStillThanks()
+    {
+        var battle = Battle(new[] { Party(null, playerSide: false, bandit: true) }, enemyCasualties: 30,
+            notables: new[] { TownOf("enemyLand", "evil_f", "e1"), TownOf("ownLand", "free_f", "o1") });
+
+        Assert.AreEqual("o1", _sut.ComputeGrants(battle, Defaults).Single().HeroId);
+    }
+
+    [TestMethod]
+    public void ComputeGrants_BanditGratitude_ASettlementWithNoOwnerFaction_IsNeutral_AndThanks()
+    {
+        var battle = Battle(new[] { Party(null, playerSide: false, bandit: true) }, enemyCasualties: 30,
+            notables: new[] { TownOf("t1", null, "n1") });
+
+        Assert.AreEqual(1, _sut.ComputeGrants(battle, Defaults).Count);
+    }
+
+    // --- item 5: the side leader vanilla already thanks ---
+
+    [TestMethod]
+    public void ComputeGrants_TheSideLeaderVanillaThanks_IsSkippedOnAWin()
+    {
+        var grants = _sut.ComputeGrants(Battle(new[] { Party("leader", sideLeader: true), Party("other") }, thanks: 5), Defaults);
+
+        Assert.AreEqual("other", grants.Single().HeroId);
+    }
+
+    [TestMethod]
+    public void ComputeGrants_TheSideLeaderVanillaThanks_IsGrantedOnALoss()
+    {
+        var grants = _sut.ComputeGrants(Battle(new[] { Party("leader", sideLeader: true) }, won: false, thanks: 5), Defaults);
+
+        Assert.AreEqual("leader", grants.Single().HeroId);
+    }
+
+    [TestMethod]
+    public void ComputeGrants_ASkippedLeadersRecipient_IsNotPaidThroughAKinsman()
+    {
+        var grants = _sut.ComputeGrants(Battle(new[]
+        {
+            Party("kinsman", recipient: "chief"),
+            Party("leader", sideLeader: true, recipient: "chief"),
+            Party("stranger", recipient: "other"),
+        }, thanks: 5), Defaults);
+
+        Assert.AreEqual("stranger", grants.Single().HeroId, "the kinsman, listed first, is not paid either");
+    }
+
+    [TestMethod]
+    public void ComputeGrants_TheSideLeader_WhenVanillaPaysNothing_EarnsOnAWin()
+    {
+        // A low-contribution win: vanilla's amount is 0, so there is no thank-you conversation and Bonds pays him.
+        var grants = _sut.ComputeGrants(Battle(new[] { Party("leader", sideLeader: true) }, thanks: 0), Defaults);
+
+        Assert.AreEqual("leader", grants.Single().HeroId);
+    }
+
+    [TestMethod]
+    public void ComputeGrants_TheSideLeaderOfAnArmyThePlayerJoined_EarnsOnAWin()
+    {
+        // Vanilla thanks no one who is in the player's army (PlayerEncounter.DoPlayerVictory), so Bonds pays him.
+        var grants = _sut.ComputeGrants(
+            Battle(new[] { Party("leader", sideLeader: true, inArmy: true) }, thanks: 5, playerLeadsArmy: false), Defaults);
+
+        Assert.AreEqual("leader", grants.Single().HeroId);
+    }
+
+    [TestMethod]
+    public void ComputeGrants_AThankedButNonBondableParty_StillReservesItsRecipient_SoItsKinsmanIsNotPaid()
+    {
+        // Vanilla's thank-you pays the side leader even when he is no lord Bonds would pay; his clan was thanked, so the
+        // kinsman is not paid through the back door.
+        var grants = _sut.ComputeGrants(Battle(new[]
+        {
+            Party("caravanLeader", sideLeader: true, lord: false, recipient: "chief"),
+            Party("kinsman", recipient: "chief"),
+        }, thanks: 5), Defaults);
+
+        Assert.AreEqual(0, grants.Count);
+    }
+
+    [TestMethod]
+    public void ComputeGrants_AnEnemySideLeader_DoesNotReserveItsRecipient()
+    {
+        var grants = _sut.ComputeGrants(Battle(new[]
+        {
+            Party("foeLeader", playerSide: false, sideLeader: true, recipient: "chief"),
+            Party("ally", recipient: "chief"),
+        }, thanks: 5), Defaults);
+
+        Assert.AreEqual("ally", grants.Single().HeroId);
+    }
+
+    // The alignment fake is keyed on BOTH ids: a service that handed the owner's faction with the player's culture (or the
+    // other way round) would read the wrong side.
+    [TestMethod]
+    public void ComputeGrants_BanditGratitude_ReadsEachSideWithItsOwnFactionAndCulture()
+    {
+        _alignment.ResolveSide("owner_f", "owner_c").Returns(FactionSide.Evil);
+        _alignment.ResolveSide("player_f", "player_c").Returns(FactionSide.Free);
+        var town = new SettlementNotables("t1", "Town_t1", new List<NotableInfo> { new("n1", "Notable_n1") }, "owner_f", "owner_c");
+        var battle = Battle(new[] { Party(null, playerSide: false, bandit: true) }, enemyCasualties: 30,
+            notables: new[] { town }, playerFaction: "player_f", playerCulture: "player_c");
+
+        Assert.AreEqual(0, _sut.ComputeGrants(battle, Defaults).Count, "Free player, Evil owner: skipped");
+    }
+
     // --- Apply ---
+
+    [TestMethod]
+    public void Apply_TheEngineLandsADifferentAmount_IsStillAnnounced()
+    {
+        _grants.Grant("ally", 1, Arg.Any<string>()).Returns(3);
+
+        _sut.Apply(Battle(new[] { Party("ally") }), Defaults);
+
+        _notice.Received(1).ShowFoughtTogether("Name_ally");
+    }
 
     [TestMethod]
     public void Apply_AGrantedLord_IsAppliedAndAnnounced()
@@ -416,7 +644,7 @@ public class BattleRelationServiceTests
     [TestMethod]
     public void Apply_WhenTheGrantIsRefused_NothingIsAnnounced()
     {
-        _grants.Grant(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>()).Returns(false);
+        _grants.Grant(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>()).Returns(0);
 
         _sut.Apply(Battle(new[] { Party("ally") }), Defaults);
 

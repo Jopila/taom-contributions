@@ -87,6 +87,7 @@ public class RelationsWiringTests
         var container = Container();
         new BondsOfBattleModule().RegisterServices(container);
         container.RegisterInstance(Substitute.For<IEnlistmentStateQuery>());
+        container.RegisterInstance(Substitute.For<TAOM.Features.Execution.IAlignmentService>());
 
         Assert.IsNotNull(container.Resolve<IRelationGrantService>());
         Assert.IsNotNull(container.Resolve<BattleRelationService>());

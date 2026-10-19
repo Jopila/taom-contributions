@@ -14,24 +14,27 @@ public sealed class HeroRelationAdapter : IHeroRelationAdapter
         _logger = logger;
     }
 
-    public bool ApplyPlayerRelation(string heroId, int delta)
+    public int ApplyPlayerRelation(string heroId, int delta)
     {
         if (delta == 0)
-            return false;
+            return 0;
         try
         {
+            var player = CharacterObject.PlayerCharacter?.HeroObject;
             var hero = FindHero(heroId);
-            if (hero == null || !hero.IsAlive || hero == CharacterObject.PlayerCharacter?.HeroObject)
-                return false;
+            if (player == null || hero == null || !hero.IsAlive || hero == player)
+                return 0;
 
-            // In v1.5.5 the call's affectRelatives argument is not forwarded to the change, so the default is passed.
+            // The relation the player sees: Hero.GetRelation, an int, through the diplomacy model's effective pair. In v1.5.5 the
+            // call's affectRelatives argument is not forwarded to the change, so the default is passed.
+            var before = player.GetRelation(hero);
             ChangeRelationAction.ApplyPlayerRelation(hero, delta, showQuickNotification: false);
-            return true;
+            return player.GetRelation(hero) - before;
         }
         catch (Exception ex)
         {
             _logger.LogError($"[Relations] ApplyPlayerRelation('{heroId}', {delta}) failed: {ex.Message}");
-            return false;
+            return 0;
         }
     }
 

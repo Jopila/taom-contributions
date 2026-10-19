@@ -33,6 +33,8 @@ public class BondsOfBattleBehaviorTests
     private IRelationGrantService _grants = null!;
     private IModLogger _logger = null!;
     private BondsOfBattleBehavior _sut = null!;
+    private TroopHandoverService _handover = null!;
+    private IRelationGrantService _handoverGrants = null!;
     private MapEvent _mapEvent = null!;
 
     [TestInitialize]
@@ -44,18 +46,26 @@ public class BondsOfBattleBehaviorTests
         _coop = Substitute.For<ICoopSessionProvider>();
         _coop.ShouldDeferToHost.Returns(false);
         _grants = Substitute.For<IRelationGrantService>();
-        _grants.Grant(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>()).Returns(true);
+        _grants.Grant(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>()).Returns(1);
         _logger = Substitute.For<IModLogger>();
         var enlistment = Substitute.For<IEnlistmentStateQuery>();
-        var service = new BattleRelationService(enlistment, Substitute.For<IRandomSource>(), _grants, Substitute.For<IBondsNoticeAdapter>());
-        _sut = new BondsOfBattleBehavior(service, _battles, _settings, _coop, _logger);
+        var service = new BattleRelationService(enlistment, Substitute.For<IRandomSource>(), _grants, Substitute.For<IBondsNoticeAdapter>(),
+            Substitute.For<TAOM.Features.Execution.IAlignmentService>());
+        _handoverGrants = Substitute.For<IRelationGrantService>();
+        _handoverGrants.Grant(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>()).Returns(call => call.ArgAt<int>(1));
+        _handover = NewHandover(_handoverGrants);
+        _sut = new BondsOfBattleBehavior(service, _handover, _battles, _settings, _coop, _logger);
         _mapEvent = (MapEvent)FormatterServices.GetUninitializedObject(typeof(MapEvent));
         _battles.Capture(Arg.Any<MapEvent>(), Arg.Any<float>()).Returns(AllyBattle());
     }
 
+    private TroopHandoverService NewHandover(IRelationGrantService grants) =>
+        new(grants, _settings, Substitute.For<IEnlistmentStateQuery>(), Substitute.For<IRandomSource>(),
+            Substitute.For<IBondsNoticeAdapter>(), _coop);
+
     private static BattleSnapshot AllyBattle() =>
-        new(new List<BattleParticipant> { new("ally", "Ally", true, false, false, false, true) },
-            true, 0, new List<SettlementNotables>(), false);
+        new(new List<BattleParticipant> { new("ally", "Ally", true, false, false, false, true, "ally", false) },
+            true, 0, new List<SettlementNotables>(), false, "free_f", null, false, 0);
 
     [TestMethod]
     public void OnPlayerBattleEnd_AnAllyBattle_GrantsTheAllyBonus()
@@ -63,6 +73,31 @@ public class BondsOfBattleBehaviorTests
         _sut.OnPlayerBattleEnd(_mapEvent);
 
         _grants.Received(1).Grant("ally", 1, Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void OnDailyTick_ClearsTheHandoverDay()
+    {
+        Assert.IsTrue(_handover.OnHandover("lord_1", "Lord One", 20, false, false, null));
+        Assert.IsFalse(_handover.OnHandover("lord_1", "Lord One", 20, false, false, null), "the day is full");
+
+        _sut.OnDailyTick();
+
+        Assert.IsTrue(_handover.OnHandover("lord_1", "Lord One", 20, false, false, null), "a new day pays again");
+    }
+
+    [TestMethod]
+    public void Construction_ResetsTheHandoverDay_SoANewCampaignStartsEmpty()
+    {
+        Assert.IsTrue(_handover.OnHandover("lord_1", "Lord One", 20, false, false, null));
+        Assert.IsFalse(_handover.OnHandover("lord_1", "Lord One", 20, false, false, null));
+
+        // The module builds the behavior again in the next campaign's OnGameStart, against the same process singleton.
+        var service = new BattleRelationService(Substitute.For<IEnlistmentStateQuery>(), Substitute.For<IRandomSource>(), _grants,
+            Substitute.For<IBondsNoticeAdapter>(), Substitute.For<TAOM.Features.Execution.IAlignmentService>());
+        _ = new BondsOfBattleBehavior(service, _handover, _battles, _settings, _coop, _logger);
+
+        Assert.IsTrue(_handover.OnHandover("lord_1", "Lord One", 20, false, false, null));
     }
 
     [TestMethod]

@@ -33,6 +33,7 @@ internal sealed class BondsOfBattleModule : TaomFeatureModule
     {
         CampaignBehaviorDecl.Of(r => new BondsOfBattleBehavior(
             r.Resolve<BattleRelationService>(),
+            r.Resolve<TroopHandoverService>(),
             r.Resolve<IBattleRelationAdapter>(),
             r.Resolve<IBondsOfBattleSettingsProvider>(),
             r.Resolve<ICoopSessionProvider>(),

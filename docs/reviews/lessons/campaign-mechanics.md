@@ -711,7 +711,7 @@ receives it himself), so one grant per lord stacks per clan, and `ChangeRelation
 - **Prevent:** before a new relation, gold or influence reward on a campaign event, grep the decompile for every
   `ChangeRelationAction`, `GiveGoldAction` or `GainKingdomInfluenceAction` call reached from that event and state in the
   feature doc which ones the new rule stacks with. Decide per feature whether a grant counts per hero named or per
-  effective recipient (`GetHeroesForEffectiveRelation`); for Bonds of Battle that choice is open on #861.
+  effective recipient (`GetHeroesForEffectiveRelation`); Bonds of Battle decided it on 2026-10-19: once per effective recipient (one per lord with Personal Relations engaged, one per clan without it).
 - **Source:** `docs/reviews/rca-bonds-of-battle-2026-10-18.md` finding 1 and the open design items.
 
 ### A settlement's own PartyBase sits in hideout, siege and raid map events (#861, 2026-10-18)

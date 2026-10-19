@@ -21,17 +21,16 @@ public sealed class RelationGrantService : IRelationGrantService
         _logger = logger;
     }
 
-    public bool Grant(string heroId, int delta, string reasonForLog)
+    public int Grant(string heroId, int delta, string reasonForLog)
     {
         // A dedicated server has no player to earn or lose relation with.
         if (string.IsNullOrWhiteSpace(heroId) || delta == 0 || _server.IsDedicatedServer)
-            return false;
+            return 0;
 
         var clamped = Math.Max(-MaxMagnitude, Math.Min(MaxMagnitude, delta));
-        if (!_relations.ApplyPlayerRelation(heroId, clamped))
-            return false;
-
-        _logger.LogInfo($"[Relations] {heroId} {(clamped > 0 ? "+" : "")}{clamped} ({reasonForLog}).");
-        return true;
+        var landed = _relations.ApplyPlayerRelation(heroId, clamped);
+        if (landed != 0)
+            _logger.LogInfo($"[Relations] {heroId} asked {clamped:+0;-0}, landed {landed:+0;-0} ({reasonForLog}).");
+        return landed;
     }
 }

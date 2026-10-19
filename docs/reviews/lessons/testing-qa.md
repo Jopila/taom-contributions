@@ -1887,3 +1887,11 @@ chokes; and its looters step cannot run in Custom Battle, which drops bandit cul
   the scene file), the line to read and the input that makes the step fail if the rule is broken. A step Custom Battle
   cannot produce (bandit cultures, ally teams) goes to a campaign cell.
 - **Source:** `docs/reviews/rca-horse-stand-2026-10-19.md` rows 5, 6, 21 and 22.
+### A test that pins the random source proves only the deterministic core: sum the result over every roll (#861, 2026-10-19)
+Bonds of Battle claimed that splitting a troop gift into small Dones never pays more. The property test fixed the
+-1 to +1 spread at 0, so it passed, while a floor of 1 at the lowest base made five small Dones average 6.7 points
+against 5 for one large Done.
+- **Why missed:** the random term was stubbed to its centre, so no test exercised the floor that only the low rolls hit.
+- **Prevent:** when a claim must hold for a random result, enumerate every value of the random seam in the test (sum or
+  check each roll), not one fixed value. A test that pins the seam is a test of the arithmetic, not of the claim.
+- **Source:** `docs/reviews/rca-bonds-of-battle-decisions-2026-10-19.md` finding 3.

@@ -2159,7 +2159,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     // --- Bonds of Battle (relations earned on campaign, docs/features/bonds-of-battle.md) ---
     //
     // Every value is read live where it is used (at a battle's end, a troop hand-over, a barter), so nothing is applied once
-    // at start-up and RequireRestart = false. GroupOrder 57 is unused; it is the group's first
+    // at start-up and RequireRestart = false. GroupOrder 59 is unused; it is the group's first
     // property, so it carries the order (MCM ignores a GroupOrder on any later one). Defaults live in
     // BondsOfBattleSettingsProvider so the fallback before MCM is up cannot drift from them.
 
@@ -2170,12 +2170,12 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Bonds of Battle")]
     [SettingPropertyInteger("Relation With Allied Lords", TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MinAllyBonus, TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MaxAllyBonus, Order = 1, RequireRestart = false,
-        HintText = "Relation gained with each lord who fought on your side in a battle, once per lord per battle. Your own clan, your army and lords leading no party earn nothing. 0 = none. Default: 1.")]
+        HintText = "Relation gained with each lord who fought on your side in a battle, once per lord per battle (once per clan when Personal Relations is off, because a clan then shares one relation). Your own clan, an army you lead and lords leading no party earn nothing; after a win, the side leader you came to help is thanked by vanilla's own conversation instead, but only when vanilla pays him something (a small contribution earns him this bonus). 0 = none. Default: 1.")]
     public int BondsAllyBonus { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultAllyBonus;
 
     [SettingPropertyGroup("Bonds of Battle")]
     [SettingPropertyBool("Lose Relation With Enemy Lords", Order = 2, RequireRestart = false,
-        HintText = "Each lord who fought against you in a battle thinks less of you, once per lord per battle. Bandits are never counted. Default: off.")]
+        HintText = "Each lord who fought against you in a battle thinks less of you, once per lord per battle (once per clan when Personal Relations is off, because a clan then shares one relation). Bandits are never counted. Default: off.")]
     public bool BondsEnemyPenaltyEnabled { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultEnemyPenaltyEnabled;
 
     [SettingPropertyGroup("Bonds of Battle")]
@@ -2185,7 +2185,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Bonds of Battle")]
     [SettingPropertyBool("Notables Thank You For Clearing Bandits", Order = 4, RequireRestart = false,
-        HintText = "In the field, against bandits alone (cleared hideouts are thanked by vanilla): after you win, one random notable in each settlement near the battle gains relation with you, one point for every ten bandits killed, wounded or routed, at least 1 and at most 10. Default: on.")]
+        HintText = "In the field, against bandits alone (cleared hideouts are thanked by vanilla): after you win, one random notable in each settlement near the battle gains relation with you, one point for every ten bandits killed, wounded or routed, at least 1 and at most 10. A village in the other side's land (Free against Evil) does not thank you. Default: on.")]
     public bool BondsBanditGratitudeEnabled { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultBanditGratitudeEnabled;
 
     [SettingPropertyGroup("Bonds of Battle")]
@@ -2195,7 +2195,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Bonds of Battle")]
     [SettingPropertyBool("Troop Gifts Win Lords' Favour", Order = 6, RequireRestart = false,
-        HintText = "When you hand troops to another lord on the Donate Troops screen, that lord gains relation with you: a tenth of the influence the gift is worth, at least 1 and at most 10, give or take one. Default: on.")]
+        HintText = "When you hand troops to another lord on the Donate Troops screen, that lord gains relation with you: half of the influence the gift is worth, at most 10, give or take one. A gift worth less than 2 earns nothing. Hand-overs stop paying a lord once 10 relation has landed with him that day; the Done that reaches 10 asks only for what is left, and Charm can raise it. A lord gains at most 10 a day from hand-overs, however the gift is split (Charm can raise the last Done). Default: on.")]
     public bool BondsTroopHandoverEnabled { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultTroopHandoverEnabled;
 
     [SettingPropertyGroup("Bonds of Battle")]
@@ -2207,7 +2207,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     //
     // The master switch is read on every relation read (it gates TaomDiplomacyModel.GetHeroesForEffectiveRelation, on the
     // main thread), through PersonalRelationSettingsProvider's one cached settings reference. The disband values are read
-    // when a disband costs relation. All RequireRestart = false: nothing is applied once at start-up. GroupOrder 58 is
+    // when a disband costs relation. All RequireRestart = false: nothing is applied once at start-up. GroupOrder 60 is
     // unused. Defaults live in PersonalRelationSettingsProvider so the fallback before MCM is up cannot drift from them.
 
     [SettingPropertyGroup("Personal Relations", GroupOrder = 60)]

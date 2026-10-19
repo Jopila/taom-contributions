@@ -1148,3 +1148,12 @@ included, with only an engine `Debug.Print` as a trace. Parking the registering 
   rename or remove one), warn on the definition and on the module's `OwnsSaveData`, and never park such a
   module.
 - **Source:** `docs/reviews/rca-postern-gate-2026-10-18.md` finding 6.
+### An in-memory map added to a singleton service needs its session reset in the same change (#861, 2026-10-19)
+A late fix gave the Bonds of Battle hand-over service a per-lord daily map. The service is a process-lifetime
+singleton, so a save reload on the same day kept the abandoned timeline's counts, and a new campaign inherited them;
+the code comment claimed "a load starts it empty". This repeats the session-reset rule in `csharp-architecture.md`.
+- **Why missed:** the map was added as a small follow-up, and the reset rule was checked only when the service was
+  first written.
+- **Prevent:** any new field that holds per-campaign state in a singleton gets `ResetForNewSession()` called from a
+  behavior built per campaign (its constructor), plus a session-reset test, in the same change.
+- **Source:** `docs/reviews/rca-bonds-of-battle-decisions-2026-10-19.md` finding 2.

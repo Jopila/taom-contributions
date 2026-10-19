@@ -2,6 +2,8 @@
 
 ## Top-line
 
+The six design decisions this review left open were resolved on 2026-10-19; see [rca-bonds-of-battle-decisions-2026-10-19.md](rca-bonds-of-battle-decisions-2026-10-19.md).
+
 The `/deep-review` of Bonds of Battle (#861) ran seven lenses in two waves on the uncommitted worktree
 `E:\repos\taom-relations-politics`: 1 Standards, 2 Engine compatibility, 5 Data flow and 7 XML, then 3 Efficiency,
 4 Completeness and 6 Design. Tooling was not in scope. It found one HIGH defect (bandit gratitude never fired after a

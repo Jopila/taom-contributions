@@ -19,7 +19,7 @@ public class RelationGrantServiceTests
     public void Setup()
     {
         _relations = Substitute.For<IHeroRelationAdapter>();
-        _relations.ApplyPlayerRelation(Arg.Any<string>(), Arg.Any<int>()).Returns(true);
+        _relations.ApplyPlayerRelation(Arg.Any<string>(), Arg.Any<int>()).Returns(call => call.ArgAt<int>(1));
         _server = Substitute.For<IDedicatedServerProvider>();
         _server.IsDedicatedServer.Returns(false);
         _logger = Substitute.For<IModLogger>();
@@ -27,11 +27,13 @@ public class RelationGrantServiceTests
     }
 
     [TestMethod]
-    public void Grant_AValidRequest_AppliesItAndReturnsTrue()
+    public void Grant_AValidRequest_ReturnsTheChangeTheAdapterReports()
     {
+        _relations.ApplyPlayerRelation("lord_1", 3).Returns(5);
+
         var result = _sut.Grant("lord_1", 3, "test");
 
-        Assert.IsTrue(result);
+        Assert.AreEqual(5, result, "what landed, not what was asked");
         _relations.Received(1).ApplyPlayerRelation("lord_1", 3);
     }
 
@@ -40,7 +42,7 @@ public class RelationGrantServiceTests
     {
         var result = _sut.Grant("lord_1", 0, "test");
 
-        Assert.IsFalse(result);
+        Assert.AreEqual(0, result);
         _relations.DidNotReceiveWithAnyArgs().ApplyPlayerRelation(default!, default);
     }
 
@@ -66,16 +68,16 @@ public class RelationGrantServiceTests
     {
         var result = _sut.Grant(heroId!, 5, "test");
 
-        Assert.IsFalse(result);
+        Assert.AreEqual(0, result);
         _relations.DidNotReceiveWithAnyArgs().ApplyPlayerRelation(default!, default);
     }
 
     [TestMethod]
-    public void Grant_UnknownOrDeadHero_ReturnsFalse()
+    public void Grant_UnknownOrDeadHero_ReturnsZero()
     {
-        _relations.ApplyPlayerRelation("ghost", Arg.Any<int>()).Returns(false);
+        _relations.ApplyPlayerRelation("ghost", Arg.Any<int>()).Returns(0);
 
-        Assert.IsFalse(_sut.Grant("ghost", 5, "test"));
+        Assert.AreEqual(0, _sut.Grant("ghost", 5, "test"));
     }
 
     [TestMethod]
@@ -85,26 +87,30 @@ public class RelationGrantServiceTests
 
         var result = _sut.Grant("lord_1", 3, "test");
 
-        Assert.IsFalse(result);
+        Assert.AreEqual(0, result);
         _relations.DidNotReceiveWithAnyArgs().ApplyPlayerRelation(default!, default);
         _logger.DidNotReceiveWithAnyArgs().LogInfo(default!);
     }
 
     [TestMethod]
-    public void Grant_Applied_LogsTheReasonAndTheAmount()
+    public void Grant_Applied_LogsTheReasonTheAskedAndTheLandedAmount()
     {
+        _relations.ApplyPlayerRelation("lord_1", 4).Returns(6);
+
         _sut.Grant("lord_1", 4, "fought together");
 
-        _logger.Received(1).LogInfo(Arg.Is<string>(s => s.Contains("lord_1") && s.Contains("+4") && s.Contains("fought together")));
+        _logger.Received(1).LogInfo(Arg.Is<string>(s =>
+            s.Contains("lord_1") && s.Contains("asked +4") && s.Contains("landed +6") && s.Contains("fought together")));
     }
 
     [TestMethod]
-    public void Grant_NotApplied_DoesNotClaimSuccessInTheLog()
+    public void Grant_AdapterAppliedNothing_ReturnsZeroAndLogsNothing()
     {
-        _relations.ApplyPlayerRelation("ghost", Arg.Any<int>()).Returns(false);
+        _relations.ApplyPlayerRelation("ghost", Arg.Any<int>()).Returns(0);
 
-        _sut.Grant("ghost", 4, "fought together");
+        var result = _sut.Grant("ghost", 4, "fought together");
 
+        Assert.AreEqual(0, result);
         _logger.DidNotReceiveWithAnyArgs().LogInfo(default!);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TaleWorlds.CampaignSystem;
+using TaleWorlds.CampaignSystem.Encounters;
 using TaleWorlds.CampaignSystem.MapEvents;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
@@ -41,7 +42,12 @@ public sealed class BattleRelationAdapter : IBattleRelationAdapter
             // side has no LeaderParty.
             var enemyCasualties = mapEvent.GetMapEventSide(enemySide)?.TroopCasualties ?? 0;
             var notables = notableRadius > 0f ? NotablesNear(mapEvent.Position, notableRadius) : new List<SettlementNotables>();
-            return new BattleSnapshot(participants, mapEvent.WinningSide == playerSide, enemyCasualties, notables, mapEvent.IsHideoutBattle);
+            // The player's side for the alignment test on a notable's settlement: his map faction (his kingdom, or his clan
+            // without one) and that faction's culture, the owner reading the tournament host uses.
+            var playerFaction = Clan.PlayerClan?.MapFaction;
+            return new BattleSnapshot(participants, mapEvent.WinningSide == playerSide, enemyCasualties, notables, mapEvent.IsHideoutBattle,
+                playerFaction?.StringId, playerFaction?.Culture?.StringId,
+                main.Army != null && main.Army.LeaderParty == main, VanillaThanksAmount(mapEvent, playerSide));
         }
         catch (Exception ex)
         {
@@ -58,6 +64,8 @@ public sealed class BattleRelationAdapter : IBattleRelationAdapter
             return;
 
         var playerClan = Clan.PlayerClan;
+        var player = CharacterObject.PlayerCharacter?.HeroObject;
+        var sideLeader = mapEvent.GetMapEventSide(side)?.LeaderParty;
         foreach (var eventParty in parties)
         {
             // A party with no MobileParty is a settlement's own PartyBase: it leads no one, and counting it would
@@ -74,8 +82,31 @@ public sealed class BattleRelationAdapter : IBattleRelationAdapter
                 playerClan != null && (leader?.Clan == playerClan || mobile.ActualClan == playerClan),
                 main.Army != null && mobile.Army == main.Army,
                 mobile.IsBandit,
-                leader != null && leader.IsLord));
+                leader != null && leader.IsLord,
+                RecipientOf(player, leader),
+                sideLeader != null && eventParty.Party == sideLeader));
         }
+    }
+
+    // What vanilla's own thank-you would pay the player side's leader, read once. The model is asked only inside a player
+    // encounter, as vanilla does; with none, or no leader hero, nobody is thanked.
+    private static int VanillaThanksAmount(MapEvent mapEvent, BattleSideEnum playerSide)
+    {
+        var leader = mapEvent.GetMapEventSide(playerSide)?.LeaderParty?.LeaderHero;
+        return PlayerEncounter.Current != null && leader != null
+            ? Campaign.Current.Models.BattleRewardModel.GetPlayerGainedRelationAmount(mapEvent, leader)
+            : 0;
+    }
+
+    // The hero the engine lands a player relation change on for this leader: the diplomacy model's effective hero (his clan
+    // leader under the vanilla pair rule, himself under personal relations).
+    private static string? RecipientOf(Hero? player, Hero? leader)
+    {
+        if (player == null || leader == null)
+            return null;
+
+        Campaign.Current.Models.DiplomacyModel.GetHeroesForEffectiveRelation(player, leader, out _, out var recipient);
+        return recipient?.StringId;
     }
 
     // A positive requirement on the distance: a NaN position fails the <= test and the settlement is left out.
@@ -92,6 +123,7 @@ public sealed class BattleRelationAdapter : IBattleRelationAdapter
             if (settlement == null || !(position.Distance(settlement.GatePosition) <= radius))
                 continue;
 
+            var owner = settlement.MapFaction;
             var living = new List<NotableInfo>();
             foreach (var notable in settlement.Notables)
             {
@@ -100,7 +132,8 @@ public sealed class BattleRelationAdapter : IBattleRelationAdapter
             }
 
             if (living.Count > 0)
-                found.Add(new SettlementNotables(settlement.StringId, settlement.Name?.ToString() ?? settlement.StringId, living));
+                found.Add(new SettlementNotables(settlement.StringId, settlement.Name?.ToString() ?? settlement.StringId, living,
+                    owner?.StringId, owner?.Culture?.StringId));
         }
 
         return found;

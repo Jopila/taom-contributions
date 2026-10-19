@@ -11,7 +11,7 @@ namespace TAOM.Features.BondsOfBattle.Hooks;
 /// What the prefix read before vanilla's Done reset it. The default value (no lord) means "do nothing". The two flags are
 /// facts about the lord; <see cref="TroopHandoverService"/> decides what they mean.
 /// </summary>
-public readonly record struct HandoverCapture(string? LordHeroId, string LordName, int Influence, bool LordIsPlayerClan, bool LordIsPlayerHero);
+public readonly record struct HandoverCapture(string? LordHeroId, string LordName, int Influence, bool LordIsPlayerClan, bool LordIsPlayerHero, string? RelationHeroId);
 
 /// <summary>
 /// Patch106, the troop hand-over (docs/features/bonds-of-battle.md). <c>PartyScreenLogic.DoneLogic(bool)</c> is public
@@ -71,14 +71,21 @@ public static class PartyScreenLogic_DoneLogic_Patch
         if (lord == null)
             return default;
 
+        // The hero the relation lands on (his clan leader without personal relations): the daily cap is keyed on him.
+        var player = CharacterObject.PlayerCharacter?.HeroObject;
+        Hero? effective = null;
+        if (player != null)
+            Campaign.Current.Models.DiplomacyModel.GetHeroesForEffectiveRelation(player, lord, out _, out effective);
+
         return new HandoverCapture(lord.StringId, lord.Name?.ToString() ?? string.Empty, influence,
-            lord.Clan == Clan.PlayerClan, lord == CharacterObject.PlayerCharacter?.HeroObject);
+            lord.Clan == Clan.PlayerClan, lord == player, (effective ?? lord).StringId);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void Apply(HandoverCapture capture) =>
         (_service ??= TAOM.IoC.Resolve<TroopHandoverService>()).OnHandover(
-            capture.LordHeroId, capture.LordName, capture.Influence, capture.LordIsPlayerClan, capture.LordIsPlayerHero);
+            capture.LordHeroId, capture.LordName, capture.Influence, capture.LordIsPlayerClan, capture.LordIsPlayerHero,
+            capture.RelationHeroId);
 
     private static void LogFault(string half, Exception ex)
     {

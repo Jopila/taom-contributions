@@ -90,6 +90,7 @@ public class BondsOfBattleWiringTests
         container.RegisterInstance(Substitute.For<IModLogger>());
         container.RegisterInstance(Substitute.For<IRandomSource>());
         container.RegisterInstance(Substitute.For<IEnlistmentStateQuery>());
+        container.RegisterInstance(Substitute.For<TAOM.Features.Execution.IAlignmentService>());
         container.RegisterInstance(Substitute.For<ICoopSessionProvider>());
         container.RegisterInstance(Substitute.For<IDedicatedServerProvider>());
 
@@ -97,6 +98,29 @@ public class BondsOfBattleWiringTests
         Assert.IsNotNull(container.Resolve<BattleRelationService>());
         Assert.IsNotNull(container.Resolve<TroopHandoverService>());
         Assert.IsNotNull(container.Resolve<BarterOverpayService>());
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void TheBehaviorDeclaration_BuildsAFreshBehaviorForEachCampaign()
+    {
+        var container = new Container();
+        var module = new BondsOfBattleModule();
+        module.RegisterServices(container);
+        new TAOM.Features.Relations.RelationsModule().RegisterServices(container); // owns the relation seam
+        container.RegisterInstance(Substitute.For<IModLogger>());
+        container.RegisterInstance(Substitute.For<IRandomSource>());
+        container.RegisterInstance(Substitute.For<IEnlistmentStateQuery>());
+        container.RegisterInstance(Substitute.For<TAOM.Features.Execution.IAlignmentService>());
+        container.RegisterInstance(Substitute.For<ICoopSessionProvider>());
+        container.RegisterInstance(Substitute.For<IDedicatedServerProvider>());
+        var decl = module.CampaignBehaviors[0];
+
+        var first = decl.Create(container);
+        var second = decl.Create(container);
+
+        Assert.IsInstanceOfType(first, typeof(TAOM.Features.BondsOfBattle.Hooks.BondsOfBattleBehavior));
+        Assert.AreNotSame(first, second, "its constructor resets the per-campaign hand-over ledger, so each campaign needs its own");
     }
 
     [TestMethod]
@@ -110,6 +134,7 @@ public class BondsOfBattleWiringTests
         container.RegisterInstance(Substitute.For<IModLogger>());
         container.RegisterInstance(Substitute.For<IRandomSource>());
         container.RegisterInstance(Substitute.For<IEnlistmentStateQuery>());
+        container.RegisterInstance(Substitute.For<TAOM.Features.Execution.IAlignmentService>());
         container.RegisterInstance(Substitute.For<ICoopSessionProvider>());
         container.RegisterInstance(Substitute.For<IDedicatedServerProvider>());
 
@@ -161,7 +186,7 @@ public class BondsOfBattleWiringTests
             Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
 
         // TAOM.IoC is not configured in a test host, so the resolve throws; the party screen must still close.
-        PartyScreenLogic_DoneLogic_Patch.Postfix(true, new HandoverCapture("lord_1", "Lord One", 50, false, false));
+        PartyScreenLogic_DoneLogic_Patch.Postfix(true, new HandoverCapture("lord_1", "Lord One", 50, false, false, "lord_1"));
     }
 
     // --- the barter model ------------------------------------------------------------------------------------------
