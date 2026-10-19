@@ -7,6 +7,7 @@ using NSubstitute;
 using TAOM.Core.Logging;
 using TAOM.Features.BannerColorPersistence;
 using TAOM.Features.BannerColorPersistence.Hooks;
+using TAOM.Features.CastleRecruitment.Hooks;
 using TAOM.Features.PartyIconScale;
 using TAOM.Features.PartyIconScale.Hooks;
 
@@ -112,5 +113,28 @@ public class TranspilerSiteBindingTests
         PartyIconScaleTranspiler.RewriteHumanVisualSite(il, getScale, logger);
 
         logger.DidNotReceive().LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGameIL")]
+    [TestCategory("BindingVerification")]
+    public void CastleRecruitment_AiHourlyTickGate_StillResolves_InInstalledEngine()
+    {
+        if (!_gameLoaded) Assert.Inconclusive("Game assemblies unavailable.");
+
+        var target = Patch42_AiHourlyTick_Transpiler.TargetMethod();
+        Assert.IsNotNull(target,
+            "AiVisitSettlementBehavior.AiHourlyTick did not resolve. AI lords no longer score castles for recruitment.");
+
+        var il = PatchProcessor.GetOriginalInstructions((MethodBase)target!).ToList();
+        var logger = Substitute.For<IModLogger>();
+
+        var rewritten = CastleAiTranspiler.SwapIsCastleGate(il, logger);
+
+        logger.DidNotReceive().LogWarning(Arg.Any<string>());
+
+        var toggle = AccessTools.Method(typeof(CastleAiToggle), nameof(CastleAiToggle.IsExcludedFromRecruitScoring));
+        Assert.AreEqual(1, rewritten.Count(ci => ci.operand is MethodInfo mi && mi == toggle),
+            "Expected exactly one IsCastle gate to be swapped for CastleAiToggle.IsExcludedFromRecruitScoring.");
     }
 }

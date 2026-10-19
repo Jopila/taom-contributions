@@ -4045,3 +4045,13 @@ pick five `[Test]` troops in Custom Battle. Every channel package is made from t
   runs included, so the dry run on any channel folder catches it. Restore test data into the install only, and
   deploy before anyone packages.
 - **Source:** [rca-wildmesh-rider-removal-2026-10-18.md](../rca-wildmesh-rider-removal-2026-10-18.md) finding 1.
+
+### Explain a generator's unexpected diff before you discard its output (#886, 2026-10-18)
+`tools/snapshot_api_surface.ps1` regenerated `patch-targets.md` with one row nobody expected, so its output was thrown
+away and the header was set by arithmetic. The row was a real omission: commit `2410aec51` added two Diplomacy patch
+classes but only one row, which also kept that target out of engine-bump body diffs.
+- **Why missed:** an unexpected line in generated output was read as generator noise.
+- **Prevent:** when a generator's output differs from what you expected, find the cause of each extra or missing line
+  before you discard it (grep the code for the class, `git log -S` for the commit). Take the generated content when it is
+  right, and restore only what the generator does not own (for example the backlinks footer).
+- **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` finding 9.

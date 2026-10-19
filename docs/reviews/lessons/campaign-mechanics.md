@@ -631,3 +631,29 @@ two greyed options, and the player's own map event advances only through that me
   stays enabled in each state the change can reach. If none is guaranteed, release the hidden option in the states
   where nothing else is enabled, and ask vanilla's own check rather than copy its conditions.
 - **Source:** `docs/reviews/rca-enlistment-battle-exit-2026-10-18.md` F1.
+
+### Read the raise path before you add a co-op authority gate; a per-entity periodic tick needs none (#886, 2026-10-18)
+The castle recruitment listener on `HourlyTickPartyEvent` was built with `ICoopSessionProvider.IsAuthority` as its
+first check, on a plan claim that the old `HourlyTickParty` postfix had run on co-op clients. The event is raised only
+from `CampaignPeriodicEventManager.TickPeriodicEvents`, which BannerlordCoop's `PartyTickPatch` skips on a client, so
+the gate was always true where it ran. Under an enabled co-op module it allocated and invoked by reflection for every
+party every in-game hour.
+- **Why missed:** the claim came from Harmony semantics (a postfix runs after a skipping prefix), not from the raise
+  site. The lesson above ("enumerate EVERY handler and gate it") has no counterweight for handlers a client never runs.
+- **Prevent:** before you add an authority gate, find the event's raise site in the installed engine and check what
+  the co-op mod skips on that path (`docs/research/bannerlordcoop-internals.md`, `docs/features/coop-interop.md`). A
+  per-entity periodic tick (`HourlyTickPartyEvent`, `DailyTickSettlementEvent` and their kind) gets no gate; say so in a
+  comment next to the sibling handlers' co-op note. On any hot path, put a needed authority check after the cheap guards.
+- **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` finding 1.
+
+### A toggle that says "AI stops doing X" must cover every engine consumer of the resource (#886, 2026-10-18)
+"AI Recruits From Castles" gates TAOM's scoring gate and hourly listener, but vanilla's `OnBeforeSettlementEntered`
+recruits from castle notables on every entry and `GarrisonRecruitmentCampaignBehavior` takes slot 0 daily, so AI keeps
+taking castle volunteers with the toggle off. New docs in the same change also claimed a bind miss stops AI castle
+recruiting.
+- **Why missed:** the 2026-05-31 design listed the vanilla gates that block castles, not every reader and writer of a
+  castle notable's `VolunteerTypes`. The model held only the path TAOM changed.
+- **Prevent:** before a toggle, a hint or a doc says what the AI does or stops doing, list every engine consumer of
+  the resource (grep the installed engine source for the field, for example `VolunteerTypes`), and either gate each one
+  or word the promise to the paths actually gated.
+- **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` findings 4 and 5.
