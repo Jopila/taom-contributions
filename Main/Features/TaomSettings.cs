@@ -2129,4 +2129,50 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Harass AI lords", Order = 1, RequireRestart = false,
         HintText = "When enabled (default), AI lords marching past an enemy fort are slowed (disorganized) too, at a lower chance than yours, and lose nothing else. Turn it off to protect the campaign pace: the effect then stays on your own party and the army you lead (AI lords marching with your army still take their share). Does nothing while Enable Watchful Holds is off.")]
     public bool WatchfulHoldsHarassAiLords { get; set; } = true;
+    // --- Bonds of Battle (relations earned on campaign, docs/features/bonds-of-battle.md) ---
+    //
+    // Every value is read live where it is used (at a battle's end, a troop hand-over, a barter), so nothing is applied once
+    // at start-up and RequireRestart = false. GroupOrder 57 is unused; it is the group's first
+    // property, so it carries the order (MCM ignores a GroupOrder on any later one). Defaults live in
+    // BondsOfBattleSettingsProvider so the fallback before MCM is up cannot drift from them.
+
+    [SettingPropertyGroup("Bonds of Battle", GroupOrder = 59)]
+    [SettingPropertyBool("Enable Bonds of Battle", Order = 0, RequireRestart = false,
+        HintText = "Relation with lords and notables is earned on campaign: fighting beside a lord, clearing bandits near a settlement, handing a lord troops, and overpaying in a barter. Off restores vanilla on all four. Does nothing while you are enlisted. Default: on.")]
+    public bool BondsOfBattleEnabled { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultEnabled;
+
+    [SettingPropertyGroup("Bonds of Battle")]
+    [SettingPropertyInteger("Relation With Allied Lords", TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MinAllyBonus, TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MaxAllyBonus, Order = 1, RequireRestart = false,
+        HintText = "Relation gained with each lord who fought on your side in a battle, once per lord per battle. Your own clan, your army and lords leading no party earn nothing. 0 = none. Default: 1.")]
+    public int BondsAllyBonus { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultAllyBonus;
+
+    [SettingPropertyGroup("Bonds of Battle")]
+    [SettingPropertyBool("Lose Relation With Enemy Lords", Order = 2, RequireRestart = false,
+        HintText = "Each lord who fought against you in a battle thinks less of you, once per lord per battle. Bandits are never counted. Default: off.")]
+    public bool BondsEnemyPenaltyEnabled { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultEnemyPenaltyEnabled;
+
+    [SettingPropertyGroup("Bonds of Battle")]
+    [SettingPropertyInteger("Relation Lost With Enemy Lords", TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MinEnemyPenalty, TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MaxEnemyPenalty, Order = 3, RequireRestart = false,
+        HintText = "How much relation each enemy lord loses when the option above is on. 0 = none. Default: 5.")]
+    public int BondsEnemyPenalty { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultEnemyPenalty;
+
+    [SettingPropertyGroup("Bonds of Battle")]
+    [SettingPropertyBool("Notables Thank You For Clearing Bandits", Order = 4, RequireRestart = false,
+        HintText = "In the field, against bandits alone (cleared hideouts are thanked by vanilla): after you win, one random notable in each settlement near the battle gains relation with you, one point for every ten bandits killed, wounded or routed, at least 1 and at most 10. Default: on.")]
+    public bool BondsBanditGratitudeEnabled { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultBanditGratitudeEnabled;
+
+    [SettingPropertyGroup("Bonds of Battle")]
+    [SettingPropertyFloatingInteger("Bandit Gratitude Distance", TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MinBanditGratitudeRadius, TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MaxBanditGratitudeRadius, "#0", Order = 5, RequireRestart = false,
+        HintText = "How far from the battle, in map units, a settlement still thanks you. A settlement is usually about 17 units from its nearest neighbour. Default: 25.")]
+    public float BondsBanditGratitudeRadius { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultBanditGratitudeRadius;
+
+    [SettingPropertyGroup("Bonds of Battle")]
+    [SettingPropertyBool("Troop Gifts Win Lords' Favour", Order = 6, RequireRestart = false,
+        HintText = "When you hand troops to another lord on the Donate Troops screen, that lord gains relation with you: a tenth of the influence the gift is worth, at least 1 and at most 10, give or take one. Default: on.")]
+    public bool BondsTroopHandoverEnabled { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultTroopHandoverEnabled;
+
+    [SettingPropertyGroup("Bonds of Battle")]
+    [SettingPropertyInteger("Most Relation From One Barter Overpay", TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MinOverpayRelationCap, TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MaxOverpayRelationCap, Order = 7, RequireRestart = false,
+        HintText = "The most relation one barter can buy by offering more than the goods are worth. The loop buys at most 3 points in vanilla (the setting here), before the Tribute perk (x1.2, rounded up) and the Charm relation bonus the engine adds when it applies the change. Points cost more the further relation is from 0, so only a large overpay reaches the cap. Default: 15.")]
+    public int BondsOverpayRelationCap { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultOverpayRelationCap;
 }

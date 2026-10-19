@@ -69,6 +69,7 @@ Patches: 305. Regenerate after any engine bump: `pwsh tools/snapshot_api_surface
 | `TAOM.Features.BlowDiagnostics.Hooks.Agent_Die_BlowDiag_Patch` | `TaleWorlds.MountAndBlade.Agent.Void Die(Blow b, KillInfo overrideKillInfo)` |
 | `TAOM.Features.BlowDiagnostics.Hooks.Agent_HandleBlowAux_BlowDiag_Patch` | `TaleWorlds.MountAndBlade.Agent.Void HandleBlowAux(ref Blow b)` |
 | `TAOM.Features.BlowDiagnostics.Hooks.RangedSiegeWeapon_ShootProjectileAux_BlowDiag_Patch` | `TaleWorlds.MountAndBlade.RangedSiegeWeapon.Missile ShootProjectileAux(ItemObject missileItem, Boolean randomizeMissileSpeed)` |
+| `TAOM.Features.BondsOfBattle.Hooks.PartyScreenLogic_DoneLogic_Patch` | `TaleWorlds.CampaignSystem.Party.PartyScreenLogic.Boolean DoneLogic(Boolean isForced)` |
 | `TAOM.Features.CaravanTrade.Hooks.CaravansCampaignBehavior_CalculateBudgetFactor_Patch` | `TaleWorlds.CampaignSystem.CampaignBehaviors.CaravansCampaignBehavior.Single CalculateBudgetFactor(MobileParty caravanParty)` |
 | `TAOM.Features.CaravanTrade.Hooks.CaravansCampaignBehavior_CanTradeWith_Patch` | `TaleWorlds.CampaignSystem.CampaignBehaviors.CaravansCampaignBehavior.Boolean CanTradeWith(IFaction caravanFaction, IFaction targetFaction)` |
 | `TAOM.Features.CaravanTrade.Hooks.CaravansCampaignBehavior_GetDistanceLimitVeryFar_Patch` | `TaleWorlds.CampaignSystem.CampaignBehaviors.CaravansCampaignBehavior.Single GetDistanceLimitVeryFarAsDaysForNavigationType(Boolean isNavalCaravan)` |

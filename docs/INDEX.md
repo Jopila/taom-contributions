@@ -137,6 +137,8 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 
 ### Faction, kingdom, & diplomacy
 - [diplomacy](features/diplomacy.md) — TaomDiplomacyModel for LOTR faction relationships
+- [bonds-of-battle](features/bonds-of-battle.md): relation earned on campaign (allied lords, bandit-clearing gratitude, troop gifts, a higher barter overpay cap), Patch105 and `TaomBarterModel`
+- [relations](features/relations.md): `IRelationGrantService`, the shared seam for new relation code
 - [kingdom-creation](features/kingdom-creation.md) — TAOM kingdom + clan + lord authoring
 - [lord-spawn-guard](features/lord-spawn-guard.md) — Patch65 + the Variag settlement retag: a landless culture CTDs the daily clan tick
 - [map-event-guard](features/map-event-guard.md): Patch82, restoring the `BattleObserver`/`TroopUpgradeTracker` pairing that four unguarded engine dereferences rely on; and the hourly sweep that ends AI battles stuck at N vs 0 (#748)

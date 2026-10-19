@@ -1865,3 +1865,14 @@ owners passed too.
 - **Prevent:** when a test claims a single call, assert `ReceivedWithAnyArgs(1)` beside the argument check; when a
   method counts or deduplicates, give the fixture inputs where the raw and the deduplicated counts differ.
 - **Source:** `docs/reviews/rca-hard-questions-2026-10-19.md` S3.
+### Flags an adapter derives from engine state need a test that reaches the derivation (#861, 2026-10-18)
+Bonds of Battle's service tests built `BattleSnapshot` records by hand, so every participant was a well-formed mobile
+party. The adapter that maps a real `MapEvent` into those flags had no test, and the hideout case (a settlement
+`PartyBase` on the defending side) passed a green suite of 161 cases.
+- **Why missed:** the service was fully tested and the adapter is "tested through the service" by convention, but
+  the service never saw an adapter-produced snapshot.
+- **Prevent:** when an adapter turns engine objects into eligibility flags, keep the decision in the service over raw
+  facts (`HasMobileParty`, `IsHideoutBattle`) so the service tests can feed the engine's odd shapes, and add one service
+  test per engine shape the decompile shows (hideout, siege, raid, army).
+- **Source:** `docs/reviews/rca-bonds-of-battle-2026-10-18.md` finding 1.
+)

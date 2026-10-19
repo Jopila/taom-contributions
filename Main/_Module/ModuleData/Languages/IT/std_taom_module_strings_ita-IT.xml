@@ -5969,6 +5969,14 @@
 
     <string id="taom_hq_relations_hurt" text="Your deed has hurt your relations with {COUNT} {?IS_PLURAL}clans{?}clan{\?}." />
 
+    <string id="taom_bonds_together" text="You fought together with {LORD}." />
+
+    <string id="taom_bonds_against" text="You fought against {LORD}." />
+
+    <string id="taom_bonds_bandits" text="{NOTABLE} of {SETTLEMENT} thanks you for clearing the bandits." />
+
+    <string id="taom_bonds_handover" text="{LORD} thanks you for the troops you handed over." />
+
   </strings>
 
 </base>

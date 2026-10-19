@@ -699,3 +699,25 @@ expected the service menu after a load in a town, but the load-time discharge's 
   menu, an opened menu, or the map with no live encounter. Write an in-game check only after tracing what the load
   path does to the saved menu id for that exact save shape.
 - **Source:** `docs/reviews/rca-enlistment-discharged-menu-2026-10-19.md` F1 to F5.
+### Before adding a reward for an engine event, list what vanilla already pays at that event (#861, 2026-10-18)
+Bonds of Battle paid relation after battles without reading what vanilla pays there. Vanilla's thank-you conversation
+after a win already pays the side leader the player came to help (`PlayerEncounter.DoPlayerVictory`,
+`BattleRewardModel.GetPlayerGainedRelationAmount`), and `HideoutCampaignBehavior.SetCleanHideoutRelations` pays +2 to
+one notable in each nearby village after a hideout. Player relation also does not necessarily land on the lord named: under
+`DefaultDiplomacyModel.GetHeroesForEffectiveRelation` it lands on both clan leaders (a clan leader, a clanless hero or a companion
+receives it himself), so one grant per lord stacks per clan, and `ChangeRelationAction.ApplyPlayerRelation` drops its `affectRelatives` argument.
+- **Why missed:** the design started from the event and the new rule, not from the engine's existing consumers.
+- **Prevent:** before a new relation, gold or influence reward on a campaign event, grep the decompile for every
+  `ChangeRelationAction`, `GiveGoldAction` or `GainKingdomInfluenceAction` call reached from that event and state in the
+  feature doc which ones the new rule stacks with. Decide per feature whether a grant counts per hero named or per
+  effective recipient (`GetHeroesForEffectiveRelation`); for Bonds of Battle that choice is open on #861.
+- **Source:** `docs/reviews/rca-bonds-of-battle-2026-10-18.md` finding 1 and the open design items.
+
+### A settlement's own PartyBase sits in hideout, siege and raid map events (#861, 2026-10-18)
+`MapEvent.Initialize` sets `defenderParty.MapEventSide = DefenderSide`, and a hideout battle's defender is
+`Settlement.CurrentSettlement.Party`, which has no `MobileParty` and no leader. A rule "every enemy party is a bandit"
+was therefore false in every hideout battle.
+- **Why missed:** the adapter assumed every party in `PartiesOnSide` is a mobile party.
+- **Prevent:** a predicate over `MapEvent.PartiesOnSide` skips parties whose `MobileParty` is null, or states why it
+  counts them; branch on `MapEvent.IsHideoutBattle`, `IsSiegeAssault` or `IsRaid` explicitly when the rule differs.
+- **Source:** `docs/reviews/rca-bonds-of-battle-2026-10-18.md` finding 1.
