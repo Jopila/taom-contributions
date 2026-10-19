@@ -2,7 +2,6 @@ using Helpers;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
 using TaleWorlds.CampaignSystem.Encounters;
-using TaleWorlds.CampaignSystem.GameState;
 using TaleWorlds.CampaignSystem.MapEvents;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.Core;
@@ -373,10 +372,10 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
         text.SetTextVariable("HUNTER", name);
         string message = text.ToString();
 
-        // Always a chat line; a one-button popup when the map is free (the Messenger feature's availability test),
-        // otherwise the banner. Never a scene notification: it NREs for custom races.
+        // Always a chat line; a one-button popup when the map is free (MapPopupGate), otherwise the banner.
+        // Never a scene notification: it NREs for custom races.
         InformationManager.DisplayMessage(new InformationMessage(message));
-        if (IsMapFree())
+        if (MapPopupGate.IsMapFree())
         {
             InformationManager.ShowInquiry(new InquiryData(name.ToString(), message, true, false,
                 GameTexts.FindText("str_ok").ToString(), string.Empty, null, null), pauseGameActiveState: true);
@@ -386,13 +385,6 @@ public sealed class HunterPartyAdapter : IHunterPartyAdapter
             MBInformationManager.AddQuickInformation(text, extraTimeInMs: 3000);
         }
     }
-
-    /// <summary>On the open map, no encounter, no menu, and no other popup open (no stacking).</summary>
-    private static bool IsMapFree() =>
-        Campaign.Current?.MainParty != null
-        && PlayerEncounter.Current == null
-        && GameStateManager.Current?.ActiveState is MapState { AtMenu: false }
-        && !InformationManager.IsAnyInquiryActive();
 
     public string HeroName(string heroId) => FindHero(heroId)?.Name?.ToString() ?? heroId;
 }

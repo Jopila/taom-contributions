@@ -16,7 +16,7 @@ namespace TAOM.Features.WarChronicle.Events;
 /// that throws drops the item.</item>
 /// <item><b>Switches re-checked at show time:</b> with the chronicle or its announcements switched off, what
 /// is still queued is dropped unshown.</item>
-/// <item><b>Map free, then authority:</b> the map test (the Messenger <c>IsPlayerAvailable</c> check) runs
+/// <item><b>Map free, then authority:</b> the map test (<c>MapPopupGate.IsMapFree</c>) runs
 /// before the co-op probe, which uses reflection. Only the co-op authority runs the chronicle, so only it
 /// announces (clients see nothing, as with the momentum meter).</item>
 /// <item><b>Per campaign:</b> <see cref="ResetForNewSession"/> runs from the events behavior's constructor.</item>

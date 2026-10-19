@@ -39,7 +39,7 @@ green again (227/227 filtered).
 | 14 | LOW (convergence pass) | The popup could still fire after the fault budget stopped the hooks, explaining a mask that is off; a popup fault was documented as "for the session" though its flag is saved; `ReportFault`'s return value was read only by tests; the Performance section understated the per-plate cost. | Follow-on from 5 and 12 | Introduced by the first round of fixes. | All fixed. |
 
 Not applied, with reasons: a shared "map is free for a popup" gate (it would edit HunterParty and
-WarChronicle code outside this change; a follow-up); mirroring the engine's siege and raid visibility
+WarChronicle code outside this change; done as #929); mirroring the engine's siege and raid visibility
 rule in the horizon test (display only, and the party really is far away; documented instead);
 reference comparison in `MaskedBindField` and moving the visibility check above the toggle (both made
 moot by 6).

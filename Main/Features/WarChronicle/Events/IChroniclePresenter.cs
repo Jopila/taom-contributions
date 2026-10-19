@@ -8,8 +8,7 @@ public interface IChroniclePresenter
 {
     /// <summary>
     /// The player is on the campaign map with no encounter, no open menu and no inquiry showing, this
-    /// chronicle's own included (the Messenger <c>IsPlayerAvailable</c> check plus
-    /// <c>InformationManager.IsAnyInquiryActive</c>). The queue relies on it to never stack popups.
+    /// chronicle's own included (<c>MapPopupGate.IsMapFree</c>). The queue relies on it to never stack popups.
     /// </summary>
     bool IsMapFree();
 

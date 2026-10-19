@@ -1,6 +1,3 @@
-using TaleWorlds.CampaignSystem;
-using TaleWorlds.CampaignSystem.Encounters;
-using TaleWorlds.CampaignSystem.GameState;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
@@ -9,11 +6,7 @@ namespace TAOM.Adapters;
 
 public sealed class HiddenHostsHintAdapter : IHiddenHostsHintAdapter
 {
-    public bool IsMapFree() =>
-        Campaign.Current?.MainParty != null
-        && PlayerEncounter.Current == null
-        && GameStateManager.Current?.ActiveState is MapState { AtMenu: false }
-        && !InformationManager.IsAnyInquiryActive();
+    public bool IsMapFree() => MapPopupGate.IsMapFree();
 
     public void ShowSymbolHint(string maskExample, string horizon)
     {

@@ -128,12 +128,12 @@ public class MainPartyNullCheckScanTests
     }
 
     [TestMethod]
-    public void HunterPartyAdapter_IsMapFree_ChecksTheStoredMainParty()
+    public void MapPopupGate_IsMapFree_ChecksTheStoredMainParty()
     {
         // The hunt popup's guard: `PartyBase.MainParty != null` threw while the main party was null.
-        var source = RepoPaths.ReadSource("Main/Adapters/HunterPartyAdapter.cs", stripComments: true);
+        var source = RepoPaths.ReadSource("Main/Adapters/MapPopupGate.cs", stripComments: true);
         var start = source.IndexOf("bool IsMapFree()", StringComparison.Ordinal);
-        Assert.IsTrue(start >= 0, "HunterPartyAdapter.IsMapFree() not found");
+        Assert.IsTrue(start >= 0, "MapPopupGate.IsMapFree() not found");
         var end = source.IndexOf(';', start);
         var body = source.Substring(start, end - start);
 
