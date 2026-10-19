@@ -31,3 +31,7 @@ docs/reference/lotrlome-armory-snapshot/Prefabs/*.xml text eol=lf
 # characters that would be hidden in the approval dialog"). Scoped to that folder, not *.js:
 # tracked tools/*.js files are CRLF in the worktree and would churn. test_improve_workflows.py.
 .claude/skills/improve/workflows/*.js text eol=lf
+
+# Engine shader sources the Modding Kit generated (CRLF). ShaderSourceInstall copies these bytes into
+# <Bannerlord>\Shaders\Sources and compares them byte for byte, so Git must never convert them (#916).
+Main/_Module/Shaders/Sources/* -text

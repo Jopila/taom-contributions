@@ -2960,5 +2960,6 @@
   <string id="taom_war_blocked_alignment" text="These kingdoms stand on the same side of the War of the Ring." />
   <string id="taom_war_blocked_peace" text="The War of the Ring has not yet begun. No kingdom may declare war." />
   <string id="taom_war_blocked_unscripted" text="Only the first wars of the age may be declared now." />
+  <string id="taom_shader_source_install_failed" text="TAOM could not copy its bow shaders into {FOLDER}. Some bows may make their holder invisible. Run the game once as administrator, or copy Modules\TAOM\Shaders\Sources into that folder." />
   </strings>
 </base>

@@ -55,6 +55,16 @@ untouched. For logs without [MemSample] lines the report text is byte-identical;
 the --json payload always carries a `memory` key (null when no samples), so JSON
 output for old logs differs by exactly that one key.
 
+The same samples also drive a "Post-load freeze check": after the LAST BattlePlayable, with no
+mission-end line (`CareerSystem: Mission ended`, `[WarRam] Mission end:`) and no later mission
+start, a log that ENDS on 3 or more periodic [MemSample] lines with identical heapMB means the
+game thread stopped while the sampler's timer thread kept writing (the #634 shape; see also
+#776). Same additive contract: the verdict stays COMPLETED and the exit code 0; a flagged log
+gets one report section and its COMPLETED "look elsewhere" next step is replaced by the
+freeze guidance; an unflagged log's report text is byte-identical; the --json payload always
+carries a `post_load_freeze` key (null when not flagged, else first_flat_ts,
+seconds_after_playable, heap_mb, samples), so JSON output for old logs gains exactly that key.
+
 The same log also carries `[MemStation]` screen-transition anchors (one line per screen
 open and close) when the memory sampler is on. They give a "Memory by station" report
 section and a `stations` JSON block (null when absent), naming WHICH screen a commit
@@ -193,6 +203,14 @@ _TS_ANY_RE = re.compile(r"\[(\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d)\]")
 # has no triage-side mirror). Keep these numerically identical to that class.
 MEM_WARN_HEADROOM_FLOOR_MB = 2048
 MEM_WARN_HEADROOM_PERCENT = 10
+
+# Mission-end lines seen in real logs (not [BattleLoad] phases). Either one after the last
+# BattlePlayable means the mission ended normally, so a flat heapMB tail is not a freeze.
+_MISSION_END_MARKERS = ("CareerSystem: Mission ended", "[WarRam] Mission end:")
+
+# A flat heapMB run this long at the end of the log reads as a stopped game thread. The
+# [MemSample] timer thread logs every 30 s regardless, so 3 samples is about 60 s of no change.
+POST_LOAD_FLAT_SAMPLES_MIN = 3
 
 NULL = "<null>"
 HANG_KINDS = {"EQUIPMENT", "EQUIPMENT_CONFIRMED", "SCENE", "PRE_SCENE", "POST_EQUIP",
@@ -336,6 +354,9 @@ class MemSample:
     avail_phys_mb: int
     mem_load: int
     warned: bool = False
+    # How many [BattleLoad] phase events preceded this line, so a sample can be ordered
+    # against a phase event (the second-resolution ts cannot).
+    n_events: int = 0
 
     @property
     def headroom_mb(self) -> int:
@@ -369,6 +390,9 @@ class Timeline:
     # readings and would corrupt the periodic trend's first/peak/last.
     mem_stations: list = field(default_factory=list)
     mem_station_resets: int = 0
+    # Phase-event count at each mission-end line (_MISSION_END_MARKERS), for the post-load
+    # freeze check. Kept apart from events: these lines are not [BattleLoad] phases.
+    mission_end_marks: list = field(default_factory=list)
 
 
 @dataclass
@@ -441,7 +465,8 @@ def parse_battle_load_log(text: str) -> Timeline:
                     priv_mb=int(m.group(2)), ws_mb=int(m.group(3)),
                     heap_mb=int(m.group(4)), commit_used_mb=int(m.group(5)),
                     commit_limit_mb=int(m.group(6)), avail_phys_mb=int(m.group(7)),
-                    mem_load=int(m.group(8)), warned=m.group(1) is not None)
+                    mem_load=int(m.group(8)), warned=m.group(1) is not None,
+                    n_events=len(tl.events))
                 tl.mem_samples.append(sample)
                 if sample.warned:
                     tl.mem_warned = True
@@ -450,6 +475,9 @@ def parse_battle_load_log(text: str) -> Timeline:
                 if m:
                     tl.mem_session = {"total_phys_mb": int(m.group(1)),
                                       "commit_limit_mb": int(m.group(2))}
+            continue
+        if any(marker in line for marker in _MISSION_END_MARKERS):
+            tl.mission_end_marks.append(len(tl.events))
             continue
         if _TAG not in line:
             continue
@@ -872,6 +900,55 @@ def classify_stations(tl: Timeline) -> dict | None:
     }
 
 
+def _seconds_between(start_ts: str | None, end_ts: str | None) -> int | None:
+    """Whole seconds from start_ts to end_ts, or None when either stamp is missing or
+    unparseable (unmeasured, never zero)."""
+    if not start_ts or not end_ts:
+        return None
+    try:
+        gap = (datetime.fromisoformat(end_ts.replace(" ", "T"))
+               - datetime.fromisoformat(start_ts.replace(" ", "T"))).total_seconds()
+    except ValueError:
+        return None
+    return int(gap)
+
+
+def classify_post_load_freeze(tl: Timeline) -> dict | None:
+    """Detect a game thread that stopped AFTER the battle loaded (#634 shape): the log has a
+    BattlePlayable, nothing ended the mission after it, and the log ends on a run of
+    POST_LOAD_FLAT_SAMPLES_MIN or more periodic [MemSample] lines with identical heapMB. The
+    sampler runs on a timer thread, so it keeps writing while the game thread is stopped and
+    the managed heap stops moving. None when not flagged. Additive decoration only: never
+    touches the verdict lattice, kinds, or exit codes."""
+    playable = None
+    for i, e in enumerate(tl.events):
+        if e.phase == "BattlePlayable":
+            playable = i
+    if playable is None:
+        return None
+    # A later mission start means the mission is over, whatever the samples say.
+    if any(e.phase in _MISSION_START_PHASES for e in tl.events[playable + 1:]):
+        return None
+    if any(n > playable for n in tl.mission_end_marks):
+        return None
+
+    after = [s for s in tl.mem_samples if s.n_events > playable]
+    run = 0
+    for s in reversed(after):
+        if s.heap_mb != after[-1].heap_mb:
+            break
+        run += 1
+    if run < POST_LOAD_FLAT_SAMPLES_MIN:
+        return None
+    first = after[-run]
+    return {
+        "first_flat_ts": first.ts,
+        "seconds_after_playable": _seconds_between(tl.events[playable].ts, first.ts),
+        "heap_mb": first.heap_mb,
+        "samples": run,
+    }
+
+
 def _last_mission_segment(events: list) -> list:
     """Events from the LAST MissionInitialize onward — the load actually being triaged.
 
@@ -1214,8 +1291,19 @@ def _format_timings(t: dict) -> list:
     return out
 
 
+_POST_LOAD_FREEZE_STEPS = [
+    "The freeze matches the #634 shape: the [MemSample] timer thread stayed alive while the "
+    "game thread stopped. See #634 and #776.",
+    "On v2.0.35 and later the log also carries [MissionStall] and [SkeletonBuffer] lines: "
+    "read them for the last thing the game thread did.",
+    "Ask the player for a memory dump of the frozen process (Task Manager, right-click the "
+    "game, Create memory dump file) before they close it.",
+]
+
+
 def format_report(verdict: Verdict, tl: Timeline, rgl, mem: dict | None = None,
-                  timings: dict | None = None, stations: dict | None = None) -> str:
+                  timings: dict | None = None, stations: dict | None = None,
+                  freeze: dict | None = None) -> str:
     out = []
     out.append("=== BATTLE LOAD TRIAGE ===")
     out.append("")
@@ -1326,6 +1414,17 @@ def format_report(verdict: Verdict, tl: Timeline, rgl, mem: dict | None = None,
                        "so construction cost is NOT included; a screen that allocates on open and "
                        "keeps it reads ~0, and one that frees on close reads negative.")
 
+    if freeze is None:
+        freeze = classify_post_load_freeze(tl)
+    if freeze:
+        after = (f" ({freeze['seconds_after_playable']} s after BattlePlayable)"
+                 if freeze["seconds_after_playable"] is not None else "")
+        out.append("")
+        out.append("Post-load freeze check:")
+        out.append(f"  game thread likely frozen from {freeze['first_flat_ts'] or '?'}{after}, "
+                   f"heapMB={freeze['heap_mb']} flat across {freeze['samples']} samples "
+                   "to the end of the log")
+
     if verdict.suspect_names:
         out.append("")
         out.append("Suspect assets (declared on the stuck agent): "
@@ -1343,7 +1442,9 @@ def format_report(verdict: Verdict, tl: Timeline, rgl, mem: dict | None = None,
 
     out.append("")
     out.append("Next steps:")
-    for s in _NEXT_STEPS.get(verdict.kind, []):
+    steps = (_POST_LOAD_FREEZE_STEPS if freeze and verdict.kind == "COMPLETED"
+             else _NEXT_STEPS.get(verdict.kind, []))
+    for s in steps:
         out.append(f"  - {s}")
 
     return "\n".join(out)
@@ -1460,8 +1561,9 @@ def main() -> int:
     mem = classify_memory(tl, floor_mb=floor_mb)
     timings = classify_phase_timings(tl)
     stations = classify_stations(tl)
+    freeze = classify_post_load_freeze(tl)
 
-    print(format_report(verdict, tl, rgl, mem, timings, stations))
+    print(format_report(verdict, tl, rgl, mem, timings, stations, freeze))
 
     if args.json_out:
         payload = {
@@ -1477,6 +1579,7 @@ def main() -> int:
             "memory": mem,
             "stations": stations,
             "timings": timings,
+            "post_load_freeze": freeze,
         }
         Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
         print(f"\nWrote verdict to {args.json_out}", file=sys.stderr)

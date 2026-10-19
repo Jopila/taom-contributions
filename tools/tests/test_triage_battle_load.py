@@ -1960,5 +1960,141 @@ class VerdictTimingsAgreementTests(unittest.TestCase):
         self.assertEqual(4000, b2["ms"])
 
 
+# --------------------------------------------------------------------------- #
+# Post-load freeze check: BattlePlayable, then a flat [MemSample] heapMB tail   #
+# --------------------------------------------------------------------------- #
+def _playable_at(ts):
+    return _line("INFO", "[BattleLoad] seq=99 t=+8000ms phase=BattlePlayable "
+                         "scene='battle_terrain_b' agents=120", ts=ts)
+
+
+def _mem_at(ts, heap):
+    return _mem(heap=heap, ts=ts)
+
+
+_MISSION_ENDED = "CareerSystem: Mission ended — clearing abilities"
+
+
+class PostLoadFreezeTests(unittest.TestCase):
+    def _flat_tail(self, k=3, heap=614):
+        return [_mem_at(f"2026-06-17 12:0{i}:00", heap) for i in range(1, k + 1)]
+
+    def _freeze(self, *lines):
+        return tb.classify_post_load_freeze(tb.parse_battle_load_log(_log(*lines)))
+
+    def test_flat_tail_after_playable_is_flagged(self):
+        f = self._freeze(_mem_session(), _mission_init(), _playable_at("2026-06-17 12:00:00"),
+                         _mem_at("2026-06-17 12:00:30", 500), *self._flat_tail(3))
+        self.assertIsNotNone(f)
+        self.assertEqual("2026-06-17 12:01:00", f["first_flat_ts"])
+        self.assertEqual(60, f["seconds_after_playable"])
+        self.assertEqual(614, f["heap_mb"])
+        self.assertEqual(3, f["samples"])
+
+    def test_non_sample_lines_inside_the_run_do_not_break_it(self):
+        flat = self._flat_tail(3)
+        f = self._freeze(_playable_at("2026-06-17 12:00:00"), flat[0],
+                         _line("INFO", "[Something] unrelated"), flat[1],
+                         _mem_session(), flat[2])
+        self.assertEqual(3, f["samples"])
+
+    def test_varying_tail_is_not_flagged(self):
+        self.assertIsNone(self._freeze(
+            _playable_at("2026-06-17 12:00:00"),
+            _mem_at("2026-06-17 12:01:00", 600), _mem_at("2026-06-17 12:02:00", 601),
+            _mem_at("2026-06-17 12:03:00", 602)))
+
+    def test_run_broken_by_a_different_last_sample_is_not_flagged(self):
+        self.assertIsNone(self._freeze(
+            _playable_at("2026-06-17 12:00:00"), *self._flat_tail(3),
+            _mem_at("2026-06-17 12:05:00", 700)))
+
+    def test_flat_samples_only_before_playable_are_not_flagged(self):
+        self.assertIsNone(self._freeze(
+            _mission_init(), *self._flat_tail(4), _playable_at("2026-06-17 12:10:00")))
+
+    def test_flat_run_must_start_after_playable(self):
+        # Two flat samples before BattlePlayable plus one after is 1 post-load sample, not 3.
+        before = self._flat_tail(2)
+        self.assertIsNone(self._freeze(
+            *before, _playable_at("2026-06-17 12:03:00"),
+            _mem_at("2026-06-17 12:04:00", 614)))
+
+    def test_mission_end_line_after_flat_run_is_not_flagged(self):
+        for end in (_line("INFO", _MISSION_ENDED, ts="2026-06-17 12:09:00"),
+                    _line("INFO", "[WarRam] Mission end: 0 rams", ts="2026-06-17 12:09:00")):
+            with self.subTest(end=end[:40]):
+                self.assertIsNone(self._freeze(
+                    _playable_at("2026-06-17 12:00:00"), *self._flat_tail(3), end))
+
+    def test_later_encounter_start_is_not_flagged(self):
+        self.assertIsNone(self._freeze(
+            _playable_at("2026-06-17 12:00:00"), *self._flat_tail(3), _encounter()))
+
+    def test_fewer_than_three_flat_samples_is_not_flagged(self):
+        self.assertIsNone(self._freeze(_playable_at("2026-06-17 12:00:00"),
+                                       *self._flat_tail(2)))
+
+    def test_uses_the_last_playable(self):
+        f = self._freeze(_playable_at("2026-06-17 11:00:00"), *self._flat_tail(3),
+                         _encounter(), _playable_at("2026-06-17 12:00:30"),
+                         _mem_at("2026-06-17 12:01:00", 700))
+        self.assertIsNone(f)
+
+    def test_report_replaces_the_completed_next_step_when_flagged(self):
+        text = _log(_mission_init(), _playable_at("2026-06-17 12:00:00"), *self._flat_tail(3))
+        tl = tb.parse_battle_load_log(text)
+        report = tb.format_report(tb.classify(tl), tl, None)
+        self.assertIn("Post-load freeze check:", report)
+        self.assertIn("game thread likely frozen from 2026-06-17 12:01:00 "
+                      "(60 s after BattlePlayable), heapMB=614 flat across 3 samples "
+                      "to the end of the log", report)
+        self.assertIn("#634", report)
+        self.assertIn("#776", report)
+        self.assertIn("[MissionStall]", report)
+        self.assertIn("[SkeletonBuffer]", report)
+        self.assertIn("memory dump", report)
+        self.assertNotIn("battle-load path is clean", report)
+
+    def test_report_is_unchanged_when_not_flagged(self):
+        text = _log(_mission_init(), _playable_at("2026-06-17 12:00:00"),
+                    _mem_at("2026-06-17 12:01:00", 600), _mem_at("2026-06-17 12:02:00", 601))
+        tl = tb.parse_battle_load_log(text)
+        report = tb.format_report(tb.classify(tl), tl, None)
+        self.assertNotIn("Post-load freeze check", report)
+        self.assertIn("The battle-load path is clean.", report)
+
+    def test_verdict_and_exit_code_stay_completed(self):
+        tl = tb.parse_battle_load_log(_log(
+            _playable_at("2026-06-17 12:00:00"), *self._flat_tail(3)))
+        self.assertEqual("COMPLETED", tb.classify(tl).kind)
+
+
+class PostLoadFreezeCliTests(unittest.TestCase):
+    def _json(self, *lines):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "taom_debug.log"
+            p.write_text(_log(*lines), encoding="utf-8")
+            out = Path(d) / "verdict.json"
+            r = subprocess.run([sys.executable, str(TOOL), str(p), "--json", str(out)],
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            return json.loads(out.read_text(encoding="utf-8"))
+
+    def test_json_key_is_null_when_not_flagged(self):
+        payload = self._json(_mission_init(), _playable())
+        self.assertIn("post_load_freeze", payload)
+        self.assertIsNone(payload["post_load_freeze"])
+
+    def test_json_carries_the_freeze_object_when_flagged(self):
+        payload = self._json(
+            _playable_at("2026-06-17 12:00:00"),
+            *[_mem_at(f"2026-06-17 12:0{i}:00", 614) for i in (1, 2, 3)])
+        self.assertEqual({"first_flat_ts": "2026-06-17 12:01:00",
+                          "seconds_after_playable": 60, "heap_mb": 614, "samples": 3},
+                         payload["post_load_freeze"])
+        self.assertEqual("COMPLETED", payload["kind"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

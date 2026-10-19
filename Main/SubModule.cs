@@ -123,6 +123,12 @@ public class SubModule : MBSubModuleBase
         try { Core.Logging.EarlyLogBridge.Connect(IoC.Resolve<IModLogger>()); }
         catch { /* the early-log flush must never stop the mod loading */ }
 
+        // #916: the engine compiles shaders only from <game>\Shaders\Sources, so TAOM's bow shader sources
+        // must be there before its compile pass starts, or every bow on a taom_deformer material makes its
+        // holder invisible.
+        try { Features.ShaderSourceInstall.ShaderSourceInstallEntry.Run(IoC.Resolve<IModLogger>()); }
+        catch { /* the shader copy must never stop the mod loading */ }
+
         // First, because the engine starts compiling its shaders about six seconds after TAOM loads
         // (docs/features/shader-compile-notice.md); stopped at the first main menu.
         try
@@ -679,6 +685,8 @@ public class SubModule : MBSubModuleBase
         base.OnBeforeInitialModuleScreenSetAsRoot();
         // Only sets a volatile flag, so it cannot throw.
         Features.ShaderCompileNotice.ShaderCompileNoticeEntry.Stop();
+        // #916: shows once, and only if the shader source copy failed; never throws.
+        Features.ShaderSourceInstall.ShaderSourceInstallEntry.ShowPendingWarning();
         // The engine calls this hook for every module with no try, and calls it again on every tick while
         // no state is active; Patch37 can swallow the throw, so one throw would re-run every module's hook
         // each tick (#807). CustomizeMenu goes through MainMenuStep.Run (one WARNING, never rethrows) and is

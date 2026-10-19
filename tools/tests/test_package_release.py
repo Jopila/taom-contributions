@@ -1676,5 +1676,90 @@ class TestJitReportCli(unittest.TestCase):
             self.assertIn("no planned module ships TAOM.dll or TAOM.Dependencies.dll", r.stdout)
 
 
+_SHADER_REPORT = (
+    "Shader Compile Report -- Module: LOTRLOME_Armory\n"
+    "MetaMesh        Material        Shader        Variants\n"
+    "------------    ------------    ----------    --------\n"
+    "am_body         am_body         pbr_metallic                  1664\n"
+    "gondor_bow_a    gondor_bow_mat  taom_deformer_longbow         120\n"
+    "gondor_bow_b    gondor_bow_mat2   taom_deformer_longbow         120\n"
+)
+
+
+class TestArmoryShaderSources(unittest.TestCase):
+    """A material that names a shader with no .rs source in the game's Shaders/Sources (or the TAOM
+    module's copy, which TAOM.dll installs at startup) renders invisible for every player, so the
+    packager refuses, in --dry-run too."""
+
+    def _armory(self, td, report=_SHADER_REPORT):
+        src = _fixture(Path(td))
+        _write(src, "LOTRLOME_Armory/SubModule.xml", 10)
+        if report is not None:
+            _write_text(src, "LOTRLOME_Armory/Shaders/D3D11/shader_compile_report.log", report)
+        return src
+
+    def _dry(self, td, src):
+        return _run("--source", str(src), "--dest", str(Path(td) / "out"),
+                    "--modules", "TAOM", "LOTRLOME_Armory", "--dry-run")
+
+    def test_parse_reads_the_shader_column_and_skips_header_and_dashes(self):
+        with tempfile.TemporaryDirectory() as td:
+            report = Path(td) / "r.log"
+            report.write_text(_SHADER_REPORT, encoding="utf-8")
+            self.assertEqual(pr.armory_shader_usage(report),
+                             {"pbr_metallic": ["am_body"],
+                              "taom_deformer_longbow": ["gondor_bow_mat", "gondor_bow_mat2"]})
+
+    def test_native_shaders_pass(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._armory(td)
+            _write(Path(td), "Shaders/Sources/pbr_metallic.rs", 1)
+            _write(src, "TAOM/Shaders/Sources/taom_deformer_longbow.rs", 1)
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_taom_shader_only_in_the_game_folder_fails(self):
+        # TAOM.dll copies its sources into the game folder, so that cannot prove the package ships them.
+        with tempfile.TemporaryDirectory() as td:
+            src = self._armory(td)
+            _write(Path(td), "Shaders/Sources/pbr_metallic.rs", 1)
+            _write(Path(td), "Shaders/Sources/taom_deformer_longbow.rs", 1)
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("taom_deformer_longbow", r.stderr)
+
+    def test_taom_shader_sourced_in_the_taom_module_passes(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._armory(td)
+            _write(Path(td), "Shaders/Sources/pbr_metallic.rs", 1)
+            _write(src, "TAOM/Shaders/Sources/taom_deformer_longbow.rs", 1)
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_shader_with_no_source_fails_and_names_it_and_its_materials(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._armory(td)
+            _write(Path(td), "Shaders/Sources/pbr_metallic.rs", 1)
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("taom_deformer_longbow", r.stderr)
+            self.assertIn("gondor_bow_mat", r.stderr)
+            self.assertNotIn("pbr_metallic", r.stderr)
+
+    def test_missing_report_passes_with_a_note(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._armory(td, report=None)
+            r = self._dry(td, src)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn("shader_compile_report.log", r.stdout)
+
+    def test_armory_not_planned_is_not_checked(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._armory(td)
+            r = _run("--source", str(src), "--dest", str(Path(td) / "out"), "--modules", "TAOM",
+                     "--dry-run")
+            self.assertEqual(r.returncode, 0, r.stderr)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

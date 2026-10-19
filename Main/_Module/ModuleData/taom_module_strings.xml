@@ -3265,5 +3265,9 @@
 	<string id="taom_war_blocked_alignment" text="{=taom_war_blocked_alignment}These kingdoms stand on the same side of the War of the Ring." />
 	<string id="taom_war_blocked_peace" text="{=taom_war_blocked_peace}The War of the Ring has not yet begun. No kingdom may declare war." />
 	<string id="taom_war_blocked_unscripted" text="{=taom_war_blocked_unscripted}Only the first wars of the age may be declared now." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- ShaderSourceInstall -->
+	<string id="taom_shader_source_install_failed" text="{=taom_shader_source_install_failed}TAOM could not copy its bow shaders into {FOLDER}. Some bows may make their holder invisible. Run the game once as administrator, or copy Modules\TAOM\Shaders\Sources into that folder." />
+
 
 </strings>

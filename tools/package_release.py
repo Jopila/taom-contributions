@@ -48,7 +48,8 @@ the report says so in one policy line. Scene sacks and the other files in Shader
 
 Exit codes: 0 ok · 1 nothing to do · 2 bad input / unknown entries / non-empty destination / failed --require-build /
             retired binaries in the source (RETIRED_BINARIES, dry runs included) / a shipped
-            ModuleData file defining a taom_test_ id (dry runs included).
+            ModuleData file defining a taom_test_ id / an Armory shader with no .rs source (all dry
+            runs included).
 """
 from __future__ import annotations
 
@@ -430,6 +431,47 @@ def test_troop_files(plans) -> list:
             if _TEST_TROOP_ID_RE.search(data):
                 found.append(f"{p.name}/{rel}")
     return found
+
+
+ARMORY_MODULE = "LOTRLOME_Armory"
+ARMORY_SHADER_REPORT = "Shaders/D3D11/shader_compile_report.log"
+
+
+def armory_shader_usage(report: Path) -> dict:
+    """{shader: sorted materials} from the Armory's shader_compile_report.log: a header, a dashed
+    line, then fixed-width rows `MetaMesh  Material  Shader  Variants`. Split on runs of 2+ spaces
+    so a column's width never matters; a row that does not have four columns is skipped."""
+    usage: dict = {}
+    for line in report.read_text(encoding="utf-8", errors="replace").splitlines():
+        cols = re.split(r"\s{2,}", line.strip())
+        if len(cols) != 4 or set(line.strip()) <= set("- "):
+            continue
+        if cols[0] == "MetaMesh" and cols[2] == "Shader":
+            continue
+        usage.setdefault(cols[2], set()).add(cols[1])
+    return {shader: sorted(mats) for shader, mats in usage.items()}
+
+
+def missing_armory_shaders(src: Path, plans) -> tuple:
+    """(note, {shader: materials}): every shader the Armory's materials use that has no
+    Shaders/Sources/<shader>.rs that ships: <src>/TAOM/Shaders/Sources for a taom_ shader, that or
+    the game folder's (the parent of the Modules root `src`) for any other. The engine compiles a
+    shader only from the game folder's Shaders/Sources, which TAOM.dll fills from the TAOM module
+    at startup, so a shader with no source anywhere renders its meshes invisible for every player. note is set, and the dict empty, when the Armory is not
+    planned or its report is absent."""
+    if not any(p.name == ARMORY_MODULE for p in plans):
+        return "", {}
+    report = src / ARMORY_MODULE / ARMORY_SHADER_REPORT
+    if not report.is_file():
+        return f"note: no {ARMORY_MODULE}/{ARMORY_SHADER_REPORT} in the source; shader sources not checked", {}
+    native = src.parent / "Shaders" / "Sources"
+    taom = src / "TAOM" / "Shaders" / "Sources"
+    # TAOM.dll copies the TAOM sources INTO the game's Shaders/Sources at startup (and the dev machine
+    # holds them there by hand), so that folder cannot prove a taom_ shader ships: only the package's
+    # own TAOM/Shaders/Sources counts for it (#916). Any other shader may also be native.
+    return "", {shader: mats for shader, mats in armory_shader_usage(report).items()
+                if not any((d / f"{shader}.rs").is_file()
+                           for d in ((taom,) if shader.startswith("taom_") else (native, taom)))}
 
 
 @dataclass(frozen=True)
@@ -898,6 +940,20 @@ def main(argv=None) -> int:
               "there (the install, or the channel folder) and redeploy before packaging:", file=sys.stderr)
         for rel in test_troops:
             print(f"  {rel}", file=sys.stderr)
+        return 2
+
+    shader_note, shader_gaps = missing_armory_shaders(src, plans)
+    if shader_note:
+        print(f"\n{shader_note}")
+    if shader_gaps:
+        print("\nERROR: Armory materials use shaders with no .rs source that ships, so those meshes "
+              "render invisible. A taom_ shader needs its generated .rs files in "
+              "Main/_Module/Shaders/Sources, deployed (build) to TAOM/Shaders/Sources before "
+              "packaging; any other shader needs its .rs in the game's Shaders/Sources or "
+              "TAOM/Shaders/Sources:", file=sys.stderr)
+        for shader, mats in sorted(shader_gaps.items()):
+            print(f"  {shader}: {', '.join(mats[:6])}{f' (+{len(mats) - 6} more)' if len(mats) > 6 else ''}",
+                  file=sys.stderr)
         return 2
 
     if args.require_build is not None:
