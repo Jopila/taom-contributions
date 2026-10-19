@@ -169,6 +169,29 @@ public class StripServiceTests
     }
 
     [TestMethod]
+    public void Strip_ChargingThreeHitsOnTwoOwners_ShowsOneSummaryWithTwo()
+    {
+        _f.Circle.KingdomLords = new List<LordRef> { HardQuestionsFixture.Lord("uncle"), HardQuestionsFixture.Lord("cousin", "uncle") };
+        Wears();
+
+        _f.Strip.Strip("lord1");
+
+        _f.Actions.ReceivedWithAnyArgs(1).ShowRelationsHurt(default);
+        _f.Actions.Received(1).ShowRelationsHurt(2);
+    }
+
+    [TestMethod]
+    public void Strip_ThatChargesNobody_ShowsNoSummary()
+    {
+        _f.Config.StripLordRelation = 0f;
+        Wears();
+
+        _f.Strip.Strip("lord1");
+
+        _f.Actions.DidNotReceiveWithAnyArgs().ShowRelationsHurt(default);
+    }
+
+    [TestMethod]
     public void Strip_OnlyTheFirstThreeHonourableCompanionsReproachThePlayer()
     {
         _f.Circle.Companions = new List<CompanionRef>

@@ -83,8 +83,27 @@ One reviewer checked the applied fixes for parity and found three LOW defects, a
 
 Two UNVERIFIED engine questions went to the in-game checklist (steps 5 and 12): whether the dead lord's row stays on an open party screen after the commit, and whether committing a ransom broker's sell screen pays its sale a second time.
 
+## Round 2: the relation summary line (2026-10-19)
+
+After the merge, Mike approved one summary line of relation damage after a force or a strip, as vanilla's
+execution shows. Seven lenses and a convergence pass reviewed it. No HIGH; all findings fixed before the commit.
+
+| # | Sev | Bug | Why missed | Fix |
+|---|---|---|---|---|
+| S1 | MED | The dedicated-server check sat in the adapter, where no test can reach it, while the sibling reproach check sat in the service with a test. | The builder put the guard beside the engine call; `adapters.md` already says adapters are thin and tested through service fakes. | Count, gate and call moved into `HardQuestionsPenaltyApplier.ApplyRelations` (one place, as vanilla's execution); `ApplyRelations_OnADedicatedServer_ShowsNoSummary`. |
+| S2 | LOW | The count ignored `ChangeRelation`'s false result, unlike `ApplyCompanionLosses`. | Copied the dictionary size. | Counts successes; `ApplyRelations_AnOwnerTheEngineCannotFind_IsNotCounted`. |
+| S3 | LOW | Every fixture had as many hits as owners, so a count of hits passed; and `Received(1).ShowRelationsHurt(2)` cannot tell one call from a call per owner. | The fakes mirrored the happy path; NSubstitute's `Received(n)` with an argument counts only matching calls. | Fixtures with 3 hits on 2 owners, plus `ReceivedWithAnyArgs(1)`. Lesson in `lessons/testing-qa.md`. |
+| S4 | LOW | `IS_PLURAL` went into the game-wide text table. | Vanilla's execution line does the same; most vanilla lines set it on the TextObject. | Set on the TextObject (the condition reads the TextObject's variables first). |
+| S5 | LOW | A stale "quick notifications are off" comment, missing doc lines (key files, changelog, the -100 case), weak test names and placement, a bribe test that never asserted the bribe was paid, and a commit subject that said "names the clans" for a line that shows a number. | Hygiene. | Fixed. |
+| S6 | LOW (process) | The builder wrote code before tests; a deliberate mutant to prove them was refused by the auto-mode classifier. | Brief did not insist on RED-first. | The fix brief required RED-first; failing lines were quoted. |
+
+Merge note: trunk merge `85cbd20c8` rewrote all 12 language files from CR CR LF to LF with a blank line after each
+row, so every branch edit to them conflicts with the whole file. This change restored its string files, rebased,
+and regenerated the one key with the trunk's fixed harvester.
+
 ## Follow-ups outside this change
 
 - `Main/Adapters/IArmouryPlayerAdapter.cs:36` and `CommanderLordAdapter.cs:199` repeat the belief that the
-  engine changes kin through `affectRelatives`.
-- `tools/harvest_literal_loc_keys.py:157-163` adds one blank line before `</strings>` per run.
+  engine changes kin through `affectRelatives` (#923).
+- `tools/harvest_literal_loc_keys.py` added one blank line before `</strings>` per run (fixed on trunk in
+  `337228885`; #919 closed).

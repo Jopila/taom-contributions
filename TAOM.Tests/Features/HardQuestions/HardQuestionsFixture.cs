@@ -53,7 +53,7 @@ internal sealed class HardQuestionsFixture
             .Returns(call => new ExecutionRelationResult(call.ArgAt<int>(3), false));
         Alignment.ResolveSide(Arg.Any<string>(), Arg.Any<string>()).Returns(FactionSide.Neutral);
 
-        Penalties = new HardQuestionsPenaltyApplier(Alignment, Relations, Player, Actions, Traits, ConfigProvider);
+        Penalties = new HardQuestionsPenaltyApplier(Alignment, Relations, Player, Actions, Traits, ConfigProvider, Server);
         Strip = new StripService(State, ConfigProvider, Captives, Equipment, Player, Gate, Actions, Penalties, Server, Logger);
         Service = new InterrogationService(State, ConfigProvider, Settings, Coop, Captives, Player, Skills, Actions,
             Reveal, Random, Penalties, Strip, Logger);

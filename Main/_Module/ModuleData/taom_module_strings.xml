@@ -3304,4 +3304,8 @@
 	<string id="taom_hhost_hint_body" text="{=taom_hhost_hint_body}Troop counts on the map now blur with distance. A count such as {MASK_EXAMPLE} means you can read only its first digit. {HORIZON} marks a host at the very edge of sight, too far to count. Counts sharpen as you close in, and as your scout's Scouting grows. Hosts of your own realm are easier to count. AI lords always see the true numbers. The toggle is under Map UI in the mod options." />
 	<string id="taom_hhost_hint_title" text="{=taom_hhost_hint_title}Hidden Hosts" />
 	<string id="taom_hhost_unknown_party" text="{=taom_hhost_unknown_party}Unknown party" />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- HardQuestionsActionAdapter -->
+	<string id="taom_hq_relations_hurt" text="{=taom_hq_relations_hurt}Your deed has hurt your relations with {COUNT} {?IS_PLURAL}clans{?}clan{\?}." />
+
 </strings>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TAOM.Adapters;
+using TAOM.Features.CoopInterop;
 using TAOM.Features.Execution;
 using TAOM.Features.HardQuestions.Domain;
 
@@ -23,10 +24,12 @@ public sealed class HardQuestionsPenaltyApplier
     private readonly IHardQuestionsActionAdapter _actions;
     private readonly IPlayerTraitAdapter _traits;
     private readonly IHardQuestionsConfigProvider _config;
+    private readonly IDedicatedServerProvider _server;
 
     public HardQuestionsPenaltyApplier(IAlignmentService alignment, IExecutionRelationService relations,
         IArmouryPlayerAdapter player, IHardQuestionsActionAdapter actions, IPlayerTraitAdapter traits,
-        IHardQuestionsConfigProvider config)
+        IHardQuestionsConfigProvider config,
+        IDedicatedServerProvider server)
     {
         _alignment = alignment;
         _relations = relations;
@@ -34,12 +37,14 @@ public sealed class HardQuestionsPenaltyApplier
         _actions = actions;
         _traits = traits;
         _config = config;
+        _server = server;
     }
 
     /// <summary>
     /// Charges the player's relation. The engine keeps a clan member's relation on his clan leader, so deltas
     /// are collected per relation owner (<see cref="LordRef.RelationId"/>), the strongest one wins, and each
-    /// owner is charged once whatever order the hits come in. A Neutral victim is nobody's ally, so the
+    /// owner is charged once whatever order the hits come in, then one summary line reports how many
+    /// owners were charged (none on a dedicated server). A Neutral victim is nobody's ally, so the
     /// alignment rule would charge even his own relation owner nothing; that owner always takes at least the
     /// base hit. Every other lord, whatever his side, stays unmoved, as in executions.
     /// </summary>
@@ -60,8 +65,12 @@ public sealed class HardQuestionsPenaltyApplier
             strongest[hit.Key.RelationId] = strongest.TryGetValue(hit.Key.RelationId, out var seen) ? Math.Min(seen, modified) : modified;
         }
 
+        var charged = 0;
         foreach (var pair in strongest)
-            _actions.ChangeRelation(pair.Key, pair.Value);
+            if (_actions.ChangeRelation(pair.Key, pair.Value))
+                charged++;
+        if (charged > 0 && !_server.IsDedicatedServer)
+            _actions.ShowRelationsHurt(charged);
     }
 
     /// <summary>Adds scaled trait experience (a loss when negative). The trait ids are "Honor" and "Mercy".</summary>

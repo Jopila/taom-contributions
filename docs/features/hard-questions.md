@@ -22,7 +22,7 @@ No Harmony patch and no GameModel: two campaign behaviors over a service graph. 
 
 ### Solution Approach
 
-`InterrogationService` owns eligibility, the bribe price, the bribe itself and a one-slot queue for a forced question or a strip. `StripService` strips a lord and re-kits him on release. `HardQuestionsPenaltyApplier` is shared by both: relation changes through `IExecutionRelationService`, trait experience scaled by side, companion judgement. The dialog behavior and the campaign behavior are thin (ADR-002) and are built with `new` for every campaign, because each resets per-campaign state in its constructor (a container singleton is constructed once per process).
+`InterrogationService` owns eligibility, the bribe price, the bribe itself and a one-slot queue for a forced question or a strip. `StripService` strips a lord and re-kits him on release. `HardQuestionsPenaltyApplier` is shared by both: relation changes through `IExecutionRelationService`, trait experience scaled by side, companion judgement, and the one-line relation summary. The dialog behavior and the campaign behavior are thin (ADR-002) and are built with `new` for every campaign, because each resets per-campaign state in its constructor (a container singleton is constructed once per process).
 
 ### Component Diagram
 
@@ -78,7 +78,7 @@ Every relation change goes through `IExecutionRelationService.GetRelationModifie
 
 The engine ignores `affectRelatives` (v1.5.5). It stores a clan member's relation with the player on his clan leader (`DiplomacyModel.GetHeroesForEffectiveRelation`), so deltas would add up per clan leader. `HardQuestionsPenaltyApplier.ApplyRelations` therefore reads each lord's relation owner (`LordRef.RelationId`, filled by `CaptiveLordAdapter.Circle` from the engine's own model), keeps the strongest delta per owner, and charges each owner once, whatever order the hits come in. The victim's own clan leader is the owner of the victim and of his clan, which is why the strip has no separate clan line and the force has no separate clan-leader line: they would always lose to the victim's own, stronger hit.
 
-A Neutral victim is nobody's ally in the alignment rule, so it would charge even his own relation owner nothing. For that owner only, the delta is at least the base hit. Every other lord, whatever his side, of his kingdom or not, is unmoved, as in executions. No relation summary message is shown.
+A Neutral victim is nobody's ally in the alignment rule, so it would charge even his own relation owner nothing. For that owner only, the delta is at least the base hit. Every other lord, whatever his side, of his kingdom or not, is unmoved, as in executions. After a force or a strip, `ApplyRelations` shows one quick message the way vanilla's execution does: "Your deed has hurt your relations with {COUNT} clans" (singular for one). The count is the clans whose relation the deed changed, after the side scaling, the Neutral floor and the strongest-per-owner merge; a clan already at -100 still counts, as in vanilla's execution line. Companion losses are not counted, a bribe shows nothing, and a dedicated server shows nothing.
 
 ## Save record
 
@@ -116,7 +116,7 @@ Every number above is a field. Chances are in [0, 1], penalties are at most 0 (a
 | [CaptiveLordAdapter.cs](../../Main/Adapters/CaptiveLordAdapter.cs) | Captive snapshot (cheap), circle (per deed), conversation context |
 | [LordEquipmentAdapter.cs](../../Main/Adapters/LordEquipmentAdapter.cs) | Equipment sets with the shared-set guard, slot-wise re-kit |
 | [MapRevealAdapter.cs](../../Main/Adapters/MapRevealAdapter.cs) | Visited settlements, known heroes |
-| [HardQuestionsActionAdapter.cs](../../Main/Adapters/HardQuestionsActionAdapter.cs) | Relation, gold, wound, death, renown, reproach, party-screen commit |
+| [HardQuestionsActionAdapter.cs](../../Main/Adapters/HardQuestionsActionAdapter.cs) | Relation, relation summary line, gold, wound, death, renown, reproach, party-screen commit |
 | [PlayerTraitAdapter.cs](../../Main/Adapters/PlayerTraitAdapter.cs) | Trait experience through `TraitLevelingHelper.OnIncidentResolved` |
 | [hard_questions.json](../../Main/_Module/ModuleData/hard_questions/hard_questions.json) | Numbers |
 
@@ -152,16 +152,18 @@ If Armour Acquisition's gate fails at game init (it logs when it does), named pi
 7. Set `woundChance` and `deathChance` to 1 in `hard_questions.json`, restart the game fully, force the clan topic on a healthy lord (he is wounded), then the kingdom topic on the same lord (he dies, nothing is revealed, the extra Honor cost applies).
 8. Strip a dwarf lord and an orc or goblin lord and look at the rag in the conversation scene, the party-screen tableau and the encyclopedia.
 9. After a force on a lord with kin in his clan, read the relation with his clan leader.
-10. A dungeon death: before you leave, note whether his standing figure still offers a conversation; then leave and re-enter the dungeon: he is gone.
-11. In German, the 18 lines show English seed text with `{PRICE}` and `{COMPANION}` filled.
-12. In the ransom broker's sell-prisoners screen, sell a prisoner, then talk to a captive lord there and strip him: the sale pays once, not twice (the deed commits the open screen, which reruns its done handler).
+10. After a force and after a strip, the summary line appears once, with the right clan count (singular for one clan).
+11. A dungeon death: before you leave, note whether his standing figure still offers a conversation; then leave and re-enter the dungeon: he is gone.
+12. In German, the 19 lines show English seed text with `{PRICE}`, `{COMPANION}` and `{COUNT}` filled.
+13. In the ransom broker's sell-prisoners screen, sell a prisoner, then talk to a captive lord there and strip him: the sale pays once, not twice (the deed commits the open screen, which reruns its done handler).
 
 ## Translations
 
-The 18 `taom_hq_*` keys are registered and seeded in English in all 12 languages. Paid translation is owed, on Mike's word.
+The 19 `taom_hq_*` keys are registered and seeded in English in all 12 languages. Paid translation is owed, on Mike's word.
 
 ## Changelog
 
+- 2026-10-19: one summary line of relation damage after a force or a strip.
 - 2026-10-19: deep-review fixes (relation owners, Neutral floor, party-screen commit, release kit, death record, companion scaling).
 - 2026-10-18: feature added.
 

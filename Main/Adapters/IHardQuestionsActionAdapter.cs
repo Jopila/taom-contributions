@@ -21,6 +21,12 @@ public interface IHardQuestionsActionAdapter
     /// <summary>Takes clan renown from the player's clan, never below the floor of its current tier.</summary>
     void LoseRenown(int amount);
 
+    /// <summary>
+    /// Shows one summary line: the deed hurt the player's relations with this many clans. Callers have checked
+    /// that the count is above 0 and that this is not a dedicated server.
+    /// </summary>
+    void ShowRelationsHurt(int count);
+
     /// <summary>Shows a short line in which a companion reproaches the player.</summary>
     void ShowReproach(string companionId);
 

@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
+using TAOM.Features.CoopInterop;
 using TAOM.Features.Execution;
 using TAOM.Features.HardQuestions;
 using TAOM.Features.HardQuestions.Domain;
@@ -115,8 +116,9 @@ public class HardQuestionsPenaltyApplierTests
         player.KingdomId.Returns("empire_w");
         player.CultureId.Returns("gondor");
         var actions = Substitute.For<IHardQuestionsActionAdapter>();
+        actions.ChangeRelation(Arg.Any<string>(), Arg.Any<int>()).Returns(true);
         var applier = new HardQuestionsPenaltyApplier(alignment, new ExecutionRelationService(alignment), player,
-            actions, Substitute.For<IPlayerTraitAdapter>(), _f.ConfigProvider);
+            actions, Substitute.For<IPlayerTraitAdapter>(), _f.ConfigProvider, Substitute.For<IDedicatedServerProvider>());
         var victim = new LordRef("captive", "umbar", "umbar", "umbar_chief");
         var hits = new List<KeyValuePair<LordRef, float>>
         {
@@ -132,6 +134,7 @@ public class HardQuestionsPenaltyApplierTests
         actions.DidNotReceive().ChangeRelation("other_chief", Arg.Any<int>());
         actions.DidNotReceive().ChangeRelation("stranger", Arg.Any<int>());
         actions.Received(1).ChangeRelation(Arg.Any<string>(), Arg.Any<int>());
+        actions.Received(1).ShowRelationsHurt(1);
     }
 
     [TestMethod]
@@ -154,6 +157,50 @@ public class HardQuestionsPenaltyApplierTests
         _f.Penalties.ApplyRelations(_victim, Hits(("third_party", -12f)));
 
         _f.Actions.DidNotReceiveWithAnyArgs().ChangeRelation(default!, default);
+    }
+
+    [TestMethod]
+    public void ApplyRelations_RepeatedAndZeroedOwners_ShowsTheChargedOwnerCount()
+    {
+        _f.Relations.GetRelationModifier(default, default, default, default, default)
+            .ReturnsForAnyArgs(call => new ExecutionRelationResult(
+                call.ArgAt<ExecutionParticipant>(2).KingdomId == "k_zeroed" ? 0 : call.ArgAt<int>(3), false));
+
+        _f.Penalties.ApplyRelations(_victim, Hits(("a", -10f), ("a", -12f), ("b", -5f), ("zeroed", -9f)));
+
+        _f.Actions.Received(1).ShowRelationsHurt(2);
+    }
+
+    [TestMethod]
+    public void ApplyRelations_NothingCharged_ShowsNoSummary()
+    {
+        _f.Relations.GetRelationModifier(default, default, default, default, default)
+            .ReturnsForAnyArgs(new ExecutionRelationResult(0, false));
+
+        _f.Penalties.ApplyRelations(_victim, Hits(("third_party", -12f)));
+
+        _f.Actions.DidNotReceiveWithAnyArgs().ShowRelationsHurt(default);
+    }
+
+    [TestMethod]
+    public void ApplyRelations_AnOwnerTheEngineCannotFind_IsNotCounted()
+    {
+        _f.Actions.ChangeRelation("x", Arg.Any<int>()).Returns(false);
+
+        _f.Penalties.ApplyRelations(_victim, Hits(("x", -10f), ("y", -10f)));
+
+        _f.Actions.Received(1).ShowRelationsHurt(1);
+    }
+
+    [TestMethod]
+    public void ApplyRelations_OnADedicatedServer_ShowsNoSummary()
+    {
+        _f.Server.IsDedicatedServer.Returns(true);
+
+        _f.Penalties.ApplyRelations(_victim, Hits(("kin", -10f)));
+
+        _f.Actions.Received(1).ChangeRelation("kin", -10);
+        _f.Actions.DidNotReceiveWithAnyArgs().ShowRelationsHurt(default);
     }
 
     [TestMethod]

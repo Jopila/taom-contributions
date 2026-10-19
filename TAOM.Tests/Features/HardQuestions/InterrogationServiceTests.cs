@@ -293,6 +293,17 @@ public class InterrogationServiceTests
         _f.Actions.DidNotReceiveWithAnyArgs().PayGold(default!, default);
     }
 
+    [TestMethod]
+    public void PayBribe_PaidInGold_ShowsNoRelationSummary()
+    {
+        _f.Captive();
+
+        var paid = _f.Service.PayBribe(HardQuestionTopic.Clan, "lord1");
+
+        Assert.IsTrue(paid);
+        _f.Actions.DidNotReceiveWithAnyArgs().ShowRelationsHurt(default);
+    }
+
     // --- force ---
 
     [TestMethod]
@@ -504,6 +515,33 @@ public class InterrogationServiceTests
         _f.Logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("forced question was dropped")));
         _f.Actions.DidNotReceiveWithAnyArgs().ChangeRelation(default!, default);
         _f.Actions.DidNotReceive().CommitOpenPartyScreen();
+    }
+
+    [TestMethod]
+    public void CompletePending_ForceOnLordsOfTwoClans_ShowsOneSummaryWithTheClanCount()
+    {
+        _f.Captive();
+        _f.Circle.Family = new List<LordRef> { HardQuestionsFixture.Lord("wife"), HardQuestionsFixture.Lord("son", "wife") };
+        _f.Random.NextDouble().Returns(0.9);
+        _f.Service.QueueForce(HardQuestionTopic.Clan, "lord1");
+
+        _f.Service.CompletePending();
+
+        _f.Actions.ReceivedWithAnyArgs(1).ShowRelationsHurt(default);
+        _f.Actions.Received(1).ShowRelationsHurt(2);
+    }
+
+    [TestMethod]
+    public void CompletePending_ForceThatChargesNobody_ShowsNoSummary()
+    {
+        _f.Captive();
+        _f.Config.ForceLordRelationClan = 0f;
+        _f.Random.NextDouble().Returns(0.9);
+        _f.Service.QueueForce(HardQuestionTopic.Clan, "lord1");
+
+        _f.Service.CompletePending();
+
+        _f.Actions.DidNotReceiveWithAnyArgs().ShowRelationsHurt(default);
     }
 
     // --- the party screen (A4) ---

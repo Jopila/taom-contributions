@@ -1855,3 +1855,13 @@ behind a green suite and an RCA that said it was done.
 - **Prevent:** when a fix adds a new route, its test asserts the caller takes it (`Received(1)` on the new adapter
   member) and would fail with the old wiring; an RCA marks a finding fixed only with that test named.
 - **Source:** `docs/reviews/rca-quickactions-unequip-2026-10-19.md` row 2.
+
+### `Received(1).X(n)` does not prove X ran once (2026-10-19)
+Hard Questions' summary-line tests asserted `Received(1).ShowRelationsHurt(2)`. NSubstitute counts only the calls
+whose arguments match, so a loop calling `ShowRelationsHurt(++charged)` (1, then 2) also passes, although the
+feature promises one line. The fixtures also had as many hits as relation owners, so counting hits instead of
+owners passed too.
+- **Why missed:** the assertion read as "called once with 2" and the fixtures were built from the happy path.
+- **Prevent:** when a test claims a single call, assert `ReceivedWithAnyArgs(1)` beside the argument check; when a
+  method counts or deduplicates, give the fixture inputs where the raw and the deduplicated counts differ.
+- **Source:** `docs/reviews/rca-hard-questions-2026-10-19.md` S3.

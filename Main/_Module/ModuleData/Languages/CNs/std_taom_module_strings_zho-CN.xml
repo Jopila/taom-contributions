@@ -5967,6 +5967,8 @@
 
     <string id="taom_hhost_unknown_party" text="Unknown party" />
 
+    <string id="taom_hq_relations_hurt" text="Your deed has hurt your relations with {COUNT} {?IS_PLURAL}clans{?}clan{\?}." />
+
   </strings>
 
 </base>
