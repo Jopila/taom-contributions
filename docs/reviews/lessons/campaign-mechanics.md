@@ -420,9 +420,9 @@ there (#567, every release from v2.0.24 to v2.0.28).
   option; options gate themselves. When an action on a wait menu can remove the state the menu
   describes, that action lands on the map, and a wiring test pins the exit before any screen it
   opens. Before calling a menu-shape change verified, walk every option registered on that menu
-  id, including options other features insert at reserved indexes. Enlistment's wait menu carries
-  the same `IsEnlisted` delegate and is on the audit list.
-- **Source:** #567, `docs/features/field-camp.md` "Menus and time", `docs/features/refuge.md`
+  id, including options other features insert at reserved indexes. Enlistment's wait menu carried
+  the same `IsEnlisted` delegate; #828 fixed it the same way.
+- **Source:** #567, #828, `docs/features/field-camp.md` "Menus and time", `docs/features/refuge.md`
   Traps, `docs/reviews/rca-yotthani-camps-2026-08-23.md` Class 12.
 
 ### A modal opened from a game menu must pause the game, and its callback must revalidate the menu it came from
@@ -682,3 +682,20 @@ Leave only because of that order; moving Refuge into the module list would have 
   which runs after every session listener (`Campaign.cs:754-755`; vanilla `VillageHostileActionCampaignBehavior` does
   the same).
 - **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 7.
+
+### A menu consequence that can fail part way must know what menu state each earlier step left (#828, 2026-10-19)
+Enlistment's "Go on your way" exit (an isLeave option on the service wait menu) first treated "return" and
+"exit to the map" as neutral on every failure branch. They were not: the engine calls `EndWait()` before an
+isLeave consequence on a wait menu (v1.5.5 `GameMenu.cs:284-287`), so a branch that keeps the menu must re-enter
+it; `PlayerEncounter.Finish` exits the menu itself when a context exists, so a later "keep the menu" must re-open
+it; `ExitToLast` without a context does nothing. The owed in-game check made the same mistake one level up: it
+expected the service menu after a load in a town, but the load-time discharge's own `Finish(true)` clears
+`MapStateData.GameMenuId` when no menu context exists (`PlayerEncounter.cs:988-991`).
+- **Why missed:** the plan reasoned forward from the defect report and listed the happy path; nobody wrote down
+  the menu state after each engine call on each failure branch, or walked the discharge's own release branch
+  during `OnGameLoaded`.
+- **Prevent:** for every menu consequence with more than one branch, write the menu and wait state after each
+  engine call it makes (EndWait, Finish, ExitToLast, SwitchTo) and end every branch in a stated state: a re-entered
+  menu, an opened menu, or the map with no live encounter. Write an in-game check only after tracing what the load
+  path does to the saved menu id for that exact save shape.
+- **Source:** `docs/reviews/rca-enlistment-discharged-menu-2026-10-19.md` F1 to F5.

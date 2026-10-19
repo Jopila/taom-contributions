@@ -258,5 +258,7 @@
     <string id="taom_enlist_lost_broken_body" text="Kompania {COMMANDER} została rozbita. On żyje, lecz nie został już żaden sztandar, pod którym można by ruszyć w pole. Dochowaj przysięgi i czekaj, aż wzniesie nowy, albo uznaj swą służbę za zakończoną. Jeśli w ciągu {DAYS} dni nie nadejdą żadne wieści, przysięga traci moc, a ty otrzymasz swoją zapłatę." />
     <string id="taom_enlist_lost_hold" text="Dochowaj przysięgi" />
     <string id="taom_enlist_lost_leave" text="Uznaj służbę za zakończoną" />
+    <string id="taom_enlist_menu_discharged_leave" text="Go on your way" />
+    <string id="taom_enlist_wait_discharged" text="Your service has ended." />
   </strings>
 </base>

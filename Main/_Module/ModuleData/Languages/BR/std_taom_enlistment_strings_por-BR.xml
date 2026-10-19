@@ -258,5 +258,7 @@
     <string id="taom_enlist_lost_broken_body" text="A companhia de {COMMANDER} foi destroçada. Ele vive, mas não resta estandarte algum sob o qual marchar. Mantenha seu juramento e espere que ele erga outro, ou considere seu serviço encerrado. Se nenhuma notícia chegar em {DAYS} dias, o juramento expira e você recebe o que lhe é devido." />
     <string id="taom_enlist_lost_hold" text="Manter seu juramento" />
     <string id="taom_enlist_lost_leave" text="Considerar seu serviço encerrado" />
+    <string id="taom_enlist_menu_discharged_leave" text="Go on your way" />
+    <string id="taom_enlist_wait_discharged" text="Your service has ended." />
   </strings>
 </base>

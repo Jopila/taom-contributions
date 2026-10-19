@@ -258,5 +258,7 @@
     <string id="taom_enlist_lost_broken_body" text="{COMMANDER}的隊伍已被擊潰。他仍活著，但已無旗幟可供隨行。你可堅守誓言、等他重舉旗幟，或視你的服役到此為止。若{DAYS}天內仍無消息，誓言即行失效，你將領到應得的報酬。" />
     <string id="taom_enlist_lost_hold" text="堅守你的誓言" />
     <string id="taom_enlist_lost_leave" text="視服役已然結束" />
+    <string id="taom_enlist_menu_discharged_leave" text="Go on your way" />
+    <string id="taom_enlist_wait_discharged" text="Your service has ended." />
   </strings>
 </base>

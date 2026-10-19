@@ -258,5 +258,7 @@
     <string id="taom_enlist_lost_broken_body" text="{COMMANDER}の隊は壊滅した。彼は生きているが、共に進む旗はもう残っていない。誓いを守って彼が新たな旗を掲げるのを待つか、務めは終わったものとみなすか。{DAYS}日のうちに報せが来なければ、誓いは失効し、未払いの分が支払われる。" />
     <string id="taom_enlist_lost_hold" text="誓いを守る" />
     <string id="taom_enlist_lost_leave" text="務めは終わったものとする" />
+    <string id="taom_enlist_menu_discharged_leave" text="Go on your way" />
+    <string id="taom_enlist_wait_discharged" text="Your service has ended." />
   </strings>
 </base>

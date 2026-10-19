@@ -258,5 +258,7 @@
     <string id="taom_enlist_lost_broken_body" text="{COMMANDER}의 부대는 무너졌습니다. 그는 살아 있으나, 함께 행군할 깃발이 남아 있지 않습니다. 맹세를 지키며 그가 다시 깃발을 세우기를 기다리거나, 복무를 끝난 것으로 여기십시오. {DAYS}일 안에 소식이 없으면 맹세는 소멸하고 밀린 급료를 받게 됩니다." />
     <string id="taom_enlist_lost_hold" text="맹세를 지킨다" />
     <string id="taom_enlist_lost_leave" text="복무를 끝낸 것으로 한다" />
+    <string id="taom_enlist_menu_discharged_leave" text="Go on your way" />
+    <string id="taom_enlist_wait_discharged" text="Your service has ended." />
   </strings>
 </base>

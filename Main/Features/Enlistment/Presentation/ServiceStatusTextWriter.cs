@@ -12,6 +12,9 @@ namespace TAOM.Features.Enlistment.Presentation;
 public interface IServiceStatusTextWriter
 {
     void Write(ServiceStatusModel status);
+
+    /// <summary>The wait text when nobody is serving (a discharge that ran before the map existed).</summary>
+    void WriteNotServing();
 }
 
 public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
@@ -66,6 +69,10 @@ public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
 
         MBTextManager.SetTextVariable(WaitTextVariable, text);
     }
+
+    public void WriteNotServing() =>
+        MBTextManager.SetTextVariable(
+            WaitTextVariable, new TextObject("{=taom_enlist_wait_discharged}Your service has ended."));
 
     /// <summary>
     /// The one thing standing between the player and their next rank. Promotion needs FIVE

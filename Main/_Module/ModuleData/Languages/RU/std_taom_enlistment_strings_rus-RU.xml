@@ -258,5 +258,7 @@
     <string id="taom_enlist_lost_broken_body" text="Отряд {COMMANDER} разбит. Он жив, но нет больше знамени, под которым идти в поход. Держись своей клятвы и жди, пока он поднимет новое, — или считай свою службу оконченной. Если вестей не будет {DAYS} дней, клятва теряет силу, и тебе выплатят причитающееся." />
     <string id="taom_enlist_lost_hold" text="Держаться клятвы" />
     <string id="taom_enlist_lost_leave" text="Считать службу оконченной" />
+    <string id="taom_enlist_menu_discharged_leave" text="Go on your way" />
+    <string id="taom_enlist_wait_discharged" text="Your service has ended." />
   </strings>
 </base>

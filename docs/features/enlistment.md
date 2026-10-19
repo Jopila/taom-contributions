@@ -82,14 +82,31 @@ including foreign/corrupt saves.
 
 ## Menu + battle layers
 
-**Open gap (#573, found 2026-09-12 by the Codex pass on #567):** the wait menu's condition delegate
-is `IsEnlisted`, and in 1.4.8 a wait menu's condition hides EVERY option when false
-(`GameMenu.GetMenuOptionConditionsHold`; the camp-menu incident of #567). A discharge that runs
-during load (Enable Enlistment turned off before loading, or the identity guard) fires from
+**Fixed (#828, closes #573; found 2026-09-12 by the Codex pass on #567):** the wait menu's
+condition delegate used to be `IsEnlisted`, and a wait menu's condition hides EVERY option when
+false (`GameMenu.GetMenuOptionConditionsHold`; the camp-menu incident of #567). A discharge that
+runs during load (Enable Enlistment turned off before loading, or the identity guard) fires from
 `OnGameLoaded`, before `MapState` exists, so `DischargeService.ExitServiceMenuIfOpen` sees no
-menu context and the persisted service-menu id re-enters with zero options. The Patch66 redirects
+menu context and the persisted service-menu id re-entered with zero options. The Patch66 redirects
 do not repair it: `TryRedirectMenu` returns false for the service id and for any non-attached state.
-Reproduction and fix direction are in the issue.
+
+The menu condition is now `args => true` and each option gates itself on
+`IEnlistmentPlayerActionService.IsServing`. While nobody serves, the body reads "Your service has
+ended." (`ServiceStatusTextWriter.WriteNotServing`) and one option, "Go on your way"
+(`taom_enlist_menu_discharged_leave`, the only isLeave option on this menu, never disabled), calls
+`IEnlistmentPlayerActionService.LeaveAfterDischarge`. EndWait has already run before an isLeave
+consequence. The branches: still serving, re-enter the service menu, which restarts the wait;
+inside a settlement and not in a map event, establish the settlement encounter and open the town
+menu; if the encounter cannot be made, walk out of the settlement and exit; if
+the encounter was made but the town menu will not open, finish the encounter, walk out and exit;
+if the walk-out fails, the service menu stays so an exit remains on screen; in a map event, exit
+and let vanilla push `encounter`. Everything else exits to the last menu, never leaving the player
+in a town with no menu (the #510 shape). `EnlistmentServiceMenuWiringTests` pins the source facts.
+
+**Why the persisted menu id is NOT cleared on discharge (decision A):** an empty id skips
+`PlayerEncounter.OnLoad()` in `SandBoxGameManager.OnLoadFinished`, and a surviving settlement
+encounter would then leave the player in a town with no menu. Keeping the id and giving the menu
+an exit is the safer side. The Patch66 `EnterMenuMode` postfix is untouched.
 
 - Wait menu `taom_enlistment_service_wait` (`EnlistmentMenuBehavior` +
   `EnlistmentWaitMenuPresenter` — text built once per menu init, position sync throttled
@@ -379,7 +396,7 @@ gate is precisely the one that failed. Recorded in `docs/reviews/lessons/testing
 
 | Surface | Owner | Notes |
 |---|---|---|
-| Service wait menu + its four options | `Presentation/EnlistmentWaitMenuOptions.cs` | **Every option is `isLeave: false`, and that is load-bearing.** `GameMenu.RunMenuOptionConsequence` calls `EndWait()` BEFORE the consequence for an `isLeave` option on a wait menu, which sets `IsWaitActive = false` and `TimeControlMode = Stop` — tearing down the tick that drives the position sync before the consequence runs. It also makes the option a candidate for the Escape slot. |
+| Service wait menu + its six options | `Presentation/EnlistmentWaitMenuOptions.cs` | **Every service option is `isLeave: false`, and that is load-bearing; the discharged exit ("Go on your way", #828) is the one `isLeave` option and shows only while nobody serves.** `GameMenu.RunMenuOptionConsequence` calls `EndWait()` BEFORE the consequence for an `isLeave` option on a wait menu, which sets `IsWaitActive = false` and `TimeControlMode = Stop`, tearing down the tick that drives the position sync before the consequence runs. It also makes the option a candidate for the Escape slot. |
 | Live status board | `ServiceStatusService` + `Presentation/ServiceStatusTextWriter.cs` | Rebuilt on the pump's 2 s budget, pushed only when the model differs. **The value equality IS the throttle**, so a field omitted from `Equals` is a status line that never updates — one `DataRow` per field guards it. |
 | "Speak with your commander" | `EnlistmentPlayerActionService` + `IMapConversationAdapter` | The adapter carries the game-state guard itself: `ConversationManager.OpenMapConversation` opens with `(GameStateManager.Current?.ActiveState as MapState).OnMapConversationStarts(...)` — an `as` cast dereferenced with no null check, so it throws when the state manager is null, the state stack is empty, OR the active state is anything else. `CampaignMapConversation.OpenConversation` adds a fourth route via `Campaign.Current`. |
 | "Ask your sergeant for work" | `DutyOrchestrationService.RequestDutyNow` | Shares ONE offer path with the daily tick and the same rotation cadence, so asking cannot conjure work the rotation would not have given. Host-only. |
@@ -442,7 +459,7 @@ reality is re-derived at load. **That re-derivation was never written.** On relo
 restores `MapStateData.GameMenuId = "encounter"`, and the redirect — gated on `EnlistedAttached`,
 which the coercion had just made true — swallowed it. `MapEventManager.Tick` deliberately SKIPS
 `MainParty.MapEvent`; the player's own event advances only through `PlayerEncounter.Update`, driven
-from that menu. The wait menu has no `isLeave` option, so it never closes on its own either.
+from that menu. The wait menu shows no `isLeave` option while anyone serves, so it never closes on its own either.
 
 **Fix:** `encounter` / `join_encounter` are exempt from redirect whenever the player is genuinely in
 a map event. The coercion stays (a transient state has no business in a save). The re-derivation
@@ -1672,8 +1689,8 @@ and `EncounterSettlement` is `Current?.EncounterSettlementAux`, so the menu NREs
 
 **And the chain is harder to reach than first written.** `Campaign.Tick`'s push is gated on
 `MapState.AtMenu == false`, and nothing found in the `CommanderUnavailable` path closes the TAOM wait
-menu: its condition is `IsEnlisted`, which spans that state; every wait-menu option is registered
-`isLeave: false` so there is no Escape slot; and `EnsureServiceMenu`'s gate only stops the menu being
+menu: every service option gates on `IsServing` (true across that state, as `IsEnlisted` is) and is
+registered `isLeave: false` so there is no Escape slot; the only isLeave option is hidden while anyone serves; and `EnsureServiceMenu`'s gate only stops the menu being
 RE-asserted, it never tears one down. So the smoke that would settle #511 is not "sit in a town with
 a dead commander", it is "find something that closes the wait menu in that state", plus the separate
 case of a vanilla `SwitchToMenu` swapping it, which needs no `AtMenu == false` at all.
@@ -1883,6 +1900,15 @@ cleanup* — **that model no longer exists.** Duties never spawn or destroy anyt
 
 What actually remains, each a state no test can reach:
 
+- **Discharge during load (#828).** (a) MCM switch off, saved on the open map with the service menu:
+  load, expect the body "Your service has ended." and one enabled option "Go on your way", landing
+  on the map. (b) MCM switch off, column in a town: the discharge itself finishes the settlement
+  encounter during load, clearing the saved menu and walking him out; expect the plain map beside
+  the town, no service menu, and the expected ERROR line `DISCHARGE(PlayerRequest) could not open
+  'town' for '<settlement id>'`. (c) The town route ("Go on your way" into the town menu) is reached
+  only through the identity guard from a save with no live settlement encounter; there is no
+  in-game recipe, unit tests cover it. (d) Repeat (a) once in a non-English language (the English
+  seed text shows until the paid translation).
 - **Discharge, any reason.** Zero occurrences in the live log. The save-breaker fix is written and
   never exercised; the line that would indict it is
   `DISCHARGE(…) LEFT THE PLAYER UNABLE TO START ENCOUNTERS`. Leaving service and immediately

@@ -258,5 +258,7 @@
     <string id="taom_enlist_lost_broken_body" text="La compagnie de {COMMANDER} est brisée. Il vit, mais il ne reste plus de bannière sous laquelle marcher. Tiens ton serment et attends qu'il en lève une autre, ou considère ton service achevé. Si aucune nouvelle ne vient dans {DAYS} jours, le serment s'éteint et l'on te paiera ce qui te revient." />
     <string id="taom_enlist_lost_hold" text="Tenir ton serment" />
     <string id="taom_enlist_lost_leave" text="Considérer ton service achevé" />
+    <string id="taom_enlist_menu_discharged_leave" text="Go on your way" />
+    <string id="taom_enlist_wait_discharged" text="Your service has ended." />
   </strings>
 </base>

@@ -258,5 +258,7 @@
     <string id="taom_enlist_lost_broken_body" text="{COMMANDER} komutasındaki bölük dağıldı. Kendisi yaşıyor ama ardında yürünecek bir sancak kalmadı. Yeminine bağlı kalıp yeni bir sancak kaldırmasını bekleyebilir ya da hizmetini bitmiş sayabilirsin. {DAYS} gün içinde haber gelmezse yemin düşer ve hak ettiğin ücret sana ödenir." />
     <string id="taom_enlist_lost_hold" text="Yeminine bağlı kal" />
     <string id="taom_enlist_lost_leave" text="Hizmetini bitmiş say" />
+    <string id="taom_enlist_menu_discharged_leave" text="Go on your way" />
+    <string id="taom_enlist_wait_discharged" text="Your service has ended." />
   </strings>
 </base>

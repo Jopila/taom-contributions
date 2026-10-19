@@ -258,5 +258,7 @@
     <string id="taom_enlist_lost_broken_body" text="{COMMANDER}s Kompanie ist zerschlagen. Er lebt, doch es bleibt kein Banner, unter dem man marschieren könnte. Halte an deinem Schwur fest und warte, bis er ein neues erhebt, oder betrachte deinen Dienst als beendet. Kommt innerhalb von {DAYS} Tagen keine Nachricht, verfällt der Schwur und du erhältst, was dir zusteht." />
     <string id="taom_enlist_lost_hold" text="Am Schwur festhalten" />
     <string id="taom_enlist_lost_leave" text="Den Dienst als beendet betrachten" />
+    <string id="taom_enlist_menu_discharged_leave" text="Go on your way" />
+    <string id="taom_enlist_wait_discharged" text="Your service has ended." />
   </strings>
 </base>
