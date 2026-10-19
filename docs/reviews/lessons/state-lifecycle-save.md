@@ -1080,3 +1080,17 @@ behavior has not registered yet.
 - **Prevent:** run stance changes on the first daily tick, or from an event that fires after the managers are restored.
   `EnforcePermanentAlliances` has the same shape and rarely acts.
 - **Source:** `docs/reviews/rca-wotr-war-rule-2026-10-18.md` finding 8.
+
+### A two-sample falling `shaders=` count is not "draining" when the 1 Hz stream went silent (2026-10-18)
+The battle-load triage tool called a player bundle (public 1.4.8 build, 2026-10-18) a cold shader cache that was
+DRAINING: two `WaitingForRender` samples read 3128 then 3066. But the line is written once per second on every
+render-wait frame, and the log held nothing after +11.7 s while the watchdog fired about 290 s later. The watchdog
+fires only when the published count is unchanged for 60 s, so the count was frozen and the main thread had gone
+silent. Slow compile and wedge cannot be told apart from that log.
+- **Why missed:** the tool compared the first and last sample and never asked how long after the last sample the
+  watchdog line came.
+- **Prevent:** judge a periodic stream by its cadence as well as its values. `triage_battle_load.py` now reports
+  the frozen case when the gap to the watchdog line is 30 s or more
+  (`RENDER_WAIT_SILENCE_THRESHOLD_S`), and names the next evidence: `compile_shader` lines in the full
+  `rgl_log_<pid>.txt`, then a hang dump.
+- **Source:** player bundle `taom_crash_20261018_184529_b18f3441`; fix in `tools/triage_battle_load.py`.

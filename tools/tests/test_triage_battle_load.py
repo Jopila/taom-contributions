@@ -1687,6 +1687,99 @@ class RenderWaitTests(unittest.TestCase):
         self.assertTrue(any("COLD SHADER CACHE" in n for n in v.notes))
 
 
+class RenderWaitSilenceTests(unittest.TestCase):
+    """The WaitingForRender line is emitted once per second on every render-wait frame
+    (RenderWaitEmitIntervalMs = 1000), so a working cold-cache wait writes a line per second.
+    Player bundle 2026-10-18: two samples (3128 -> 3066), then 290 s of silence, then a
+    watchdog that only fires on a count unchanged for 60 s. A two-sample falling count is
+    not 'draining' there: the count is frozen and the stream went silent."""
+
+    @staticmethod
+    def _rw(seq, ms, waited, shaders, ts):
+        return _line("INFO", f"[BattleLoad] seq={seq} t=+{ms}ms phase=WaitingForRender "
+                             f"waitedMs={waited} shaders={shaders}", ts=ts)
+
+    @staticmethod
+    def _wd(ts, shaders=3066):
+        return _line("ERROR", "[BattleLoad] WATCHDOG STILL LOADING after 303s — "
+                              f"shaders={shaders} last phase=WaitingForRender seq=40 "
+                              f"waitedMs=6154 shaders={shaders}", ts=ts)
+
+    def _silent_log(self):
+        return _log(
+            _init(), _init_done(), _finish_begin(), _after_start_begin(),
+            _after_start_done(), _finish_done(),
+            self._rw(39, 5595, 1, 3128, "2026-10-18 20:40:28"),
+            self._rw(40, 11748, 6154, 3066, "2026-10-18 20:40:35"),
+            _mem(ts="2026-10-18 20:41:00"),
+            self._wd("2026-10-18 20:45:28"))
+
+    def _continuing_log(self):
+        # Samples run right up to the watchdog line: the same falling count, but alive.
+        return _log(
+            _init(), _init_done(), _finish_begin(), _after_start_begin(),
+            _after_start_done(), _finish_done(),
+            self._rw(39, 5595, 1, 3128, "2026-10-18 20:45:20"),
+            self._rw(40, 11748, 6154, 3066, "2026-10-18 20:45:27"),
+            self._wd("2026-10-18 20:45:28"))
+
+    def test_silent_stream_before_watchdog_is_not_called_draining(self):
+        text = self._silent_log()
+        tl = tb.parse_battle_load_log(text)
+        v = tb.classify(tl)
+        report = tb.format_report(v, tl, None)
+
+        self.assertEqual(v.kind, "RENDER_WAIT")
+        self.assertNotIn("DRAINING", report)
+        self.assertNotIn("slow load", report)
+        self.assertIn("frozen", v.summary)
+        self.assertIn("went silent", report)
+        self.assertIn("293s", report)
+        self.assertIn("compile_shader", report)
+        self.assertIn("rgl_log_<pid>.txt", report)
+        self.assertIn("Phase 2b", report)
+
+    def test_silence_gap_is_derived_from_log_timestamps(self):
+        tl = tb.parse_battle_load_log(self._silent_log())
+        r = tb.classify_phase_timings(tl)["render_wait"]
+
+        self.assertEqual(293, r["silent_s"])
+
+    def test_crash_report_echo_lines_keep_their_original_timestamp(self):
+        # The crash report re-dumps the log tail behind its own prefix; the echo must not
+        # make the last sample look like it was written at crash time.
+        echo_rw = _line("ERROR", "[CrashReport]   [2026-10-18 20:40:35] [INFO] [BattleLoad] "
+                                 "seq=40 t=+11748ms phase=WaitingForRender waitedMs=6154 "
+                                 "shaders=3066", ts="2026-10-18 20:45:29")
+        tl = tb.parse_battle_load_log(self._silent_log() + echo_rw + "\n")
+
+        self.assertEqual(293, tb.classify_phase_timings(tl)["render_wait"]["silent_s"])
+
+    def test_continuing_stream_keeps_the_draining_message(self):
+        text = self._continuing_log()
+        tl = tb.parse_battle_load_log(text)
+        v = tb.classify(tl)
+        report = tb.format_report(v, tl, None)
+
+        self.assertEqual(v.kind, "RENDER_WAIT")
+        self.assertIn("COLD SHADER CACHE", v.summary)
+        self.assertIn("DRAINING", report)
+        self.assertNotIn("went silent", report)
+        self.assertIsNone(tb.classify_phase_timings(tl)["render_wait"]["silent_s"])
+
+    def test_no_watchdog_line_keeps_the_draining_message(self):
+        text = _log(
+            _init(), _init_done(), _finish_begin(), _after_start_begin(),
+            _after_start_done(), _finish_done(),
+            self._rw(39, 5595, 1, 3128, "2026-10-18 20:40:28"),
+            self._rw(40, 11748, 6154, 3066, "2026-10-18 20:40:35"))
+        tl = tb.parse_battle_load_log(text)
+        report = tb.format_report(tb.classify(tl), tl, None)
+
+        self.assertIn("DRAINING", report)
+        self.assertNotIn("went silent", report)
+
+
 class MultiMissionScopeTests(unittest.TestCase):
     """A session log holds several missions. An earlier one that completed must not mask a
     final load that stalled: the b18f3441 bundle reported COMPLETED and "the battle-load

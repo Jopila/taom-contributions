@@ -26,7 +26,10 @@ VERDICT classes (the phase the log ENDS on discriminates the hang)
   RENDER_WAIT         ends at WaitingForRender — everything loaded and the mission is
                       held at the native SceneView.ReadyToRender gate. A shaders= count
                       that is FALLING means a cold shader cache (a slow load, not a
-                      hang); a frozen count is the wedge.
+                      hang); a frozen count is the wedge. If the 1 Hz stream went
+                      silent (30 s or more) before the watchdog line, the count is
+                      frozen whatever the earlier samples did, and the log cannot
+                      separate a slow compile from a main-thread wedge.
   SCENE               ends at MissionInitialize / BattleSceneSelected /
                       MissionInitializeDone / FinishMissionLoadingBegin /
                       WaitingForSceneLoad — froze during mission construction before any
@@ -87,6 +90,7 @@ import re
 import sys
 import zipfile
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 
 # Import the mesh-ref validator's rgl parser (sibling tool). Inserting the script
@@ -181,6 +185,7 @@ _MEMSTATION_RE = re.compile(
     r"sysCommitLimitMB=(-?\d+)\s+availPhysMB=(-?\d+)\s+memLoad=(-?\d+)%")
 # Capture the FileLogger timestamp (same shape _PREFIX_RE strips) for sample ts.
 _TS_RE = re.compile(r"^\[(\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d)\]")
+_TS_ANY_RE = re.compile(r"\[(\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d)\]")
 
 # Low-commit-headroom thresholds. Single source of truth is the C# sampler:
 # Main/Features/BattleLoadDiagnostics/MemoryPressureSampler.cs (WarnHeadroomFloorMb,
@@ -199,6 +204,11 @@ HANG_KINDS = {"EQUIPMENT", "EQUIPMENT_CONFIRMED", "SCENE", "PRE_SCENE", "POST_EQ
 # means "not observed", not "zero".
 _WAITED_MS_RE = re.compile(r"\bwaitedMs=(\d+)\b")
 _SHADERS_RE = re.compile(r"\bshaders=(\d+)\b")
+
+# The service emits WaitingForRender once per render-wait frame at 1 Hz
+# (BattleLoadDiagnosticsService.RenderWaitEmitIntervalMs = 1000), so a working wait never
+# leaves a gap near this long before the watchdog line; 30 s of silence is 30 missed emits.
+RENDER_WAIT_SILENCE_THRESHOLD_S = 30
 
 # Terminal phases that mean "mission construction, before any agent equipped". The two
 # 2026-08-07 additions belong here and NOT in the PRE_SCENE fall-through: a log ending at
@@ -297,6 +307,9 @@ class PhaseEvent:
     phase: str
     detail: str
     slots: list = field(default_factory=list)
+    # FileLogger wall-clock stamp of the line (None on a bare line); t=+ms is not comparable
+    # with the watchdog line, which carries no t=+.
+    ts: str | None = None
 
 
 @dataclass
@@ -307,6 +320,7 @@ class Watchdog:
     # The `shaders=N` / `churn-capped` tokens the line carried, or "" for an older log that
     # predates them. Absent is absent: never rendered as a fabricated shaders=0.
     tokens: str = ""
+    ts: str | None = None
 
 
 @dataclass
@@ -449,7 +463,7 @@ def parse_battle_load_log(text: str) -> Timeline:
                 elapsed_seconds=int(m.group(1)),
                 last_phase=sm.group(1) if sm else "",
                 last_detail=(sm.group(3).strip() if sm else status.strip()),
-                tokens=tokens)
+                tokens=tokens, ts=_raw_ts(raw))
             continue
 
         m = _SLOT_RE.search(line)
@@ -468,7 +482,7 @@ def parse_battle_load_log(text: str) -> Timeline:
             if phase == "MissionInitialize":
                 loadouts.clear()
             event = PhaseEvent(seq=int(m.group(1)), ms=int(m.group(2)),
-                               phase=phase, detail=m.group(4).strip())
+                               phase=phase, detail=m.group(4).strip(), ts=_raw_ts(raw))
             tl.events.append(event)
 
             collecting = None
@@ -481,6 +495,33 @@ def parse_battle_load_log(text: str) -> Timeline:
                 else:
                     collecting = lid                   # this agent carries the block
     return tl
+
+
+def _raw_ts(raw: str) -> str | None:
+    """Wall-clock stamp of a [BattleLoad] line. The crash report re-dumps the log tail behind
+    its own `[ts] [LEVEL] [CrashReport]` prefix, so the LAST stamp before the tag is the
+    original line's, not the dump's (otherwise every echoed line reads as written at crash time)."""
+    cut = raw.find(_TAG)
+    stamps = _TS_ANY_RE.findall(raw[:cut] if cut >= 0 else raw)
+    return stamps[-1] if stamps else None
+
+
+def _render_silence_s(tl: Timeline) -> int | None:
+    """Seconds between the last WaitingForRender line and the watchdog line, when the log
+    ends on that sample and the gap exceeds RENDER_WAIT_SILENCE_THRESHOLD_S; else None.
+    None also covers a missing timestamp or watchdog: unmeasured, never zero."""
+    last = tl.events[-1] if tl.events else None
+    wd = tl.watchdog
+    if last is None or wd is None or last.phase != "WaitingForRender":
+        return None
+    if not last.ts or not wd.ts:
+        return None
+    try:
+        gap = (datetime.fromisoformat(wd.ts.replace(" ", "T"))
+               - datetime.fromisoformat(last.ts.replace(" ", "T"))).total_seconds()
+    except ValueError:
+        return None
+    return int(gap) if gap >= RENDER_WAIT_SILENCE_THRESHOLD_S else None
 
 
 def _loadout_id(detail: str):
@@ -508,7 +549,7 @@ def _parse_scene(event: PhaseEvent) -> str | None:
     return m.group(1) if m else None
 
 
-def _classify_render_wait(terminal: PhaseEvent) -> Verdict:
+def _classify_render_wait(terminal: PhaseEvent, silent_s: int | None = None) -> Verdict:
     """A log ending on WaitingForRender: the mission loaded and is waiting on
     SceneView.ReadyToRender(). The shaders= token decides whether that is a working slow
     load or a real wedge, and an ABSENT token is neither (unmeasured, not zero)."""
@@ -528,6 +569,28 @@ def _classify_render_wait(terminal: PhaseEvent) -> Verdict:
             "An absent shaders= token means the native "
             "Utilities.GetNumberOfShaderCompilationsInProgress() call threw. Check the "
             "top of the log for '[PatchApply] Patch43_BattleLoadDiagnostics FAILED'.")
+        return v
+
+    if shaders > 0 and silent_s is not None:
+        # The count may have fallen across the logged samples, but the 1 Hz stream then stopped
+        # and the watchdog (which fires only on a count unchanged for 60 s) came later: the
+        # published count is frozen, so "falling" proves nothing about a drain.
+        v = Verdict(
+            "RENDER_WAIT",
+            f"The mission loaded but is held at the SceneView.ReadyToRender gate"
+            + waited_part + f" with {shaders} shader compilations in flight at the last "
+            f"sample, and the shaders= count is frozen: the 1 Hz render-wait stream went "
+            f"silent {silent_s}s before the watchdog fired. The log alone cannot separate a "
+            "slow cold compile from a main-thread wedge.")
+        v.notes.append(
+            "Next evidence: count compile_shader lines in the player's FULL "
+            "rgl_log_<pid>.txt (not rgl_log_errors) during the silent window. Compiles "
+            "still landing means a cold cache; none means the main thread wedged, and the "
+            "next step is a hang dump (/native-crash-triage Phase 2b).")
+        v.notes.append(
+            "Why the two samples mislead: the WaitingForRender line is written once per "
+            "second on every render-wait frame, so a working wait leaves a line per second "
+            "with a falling count, and the watchdog fires only on a count unchanged for 60 s.")
         return v
 
     if shaders > 0:
@@ -621,7 +684,7 @@ def classify(tl: Timeline) -> Verdict:
             stuck_agent=agent)
 
     if ph == "WaitingForRender":
-        return _classify_render_wait(terminal)
+        return _classify_render_wait(terminal, _render_silence_s(tl))
 
     if ph == "FinishMissionLoadingDone":
         # Everything loaded — Mission.AfterStart returned, so the whole AgentEquip burst
@@ -946,6 +1009,8 @@ def classify_phase_timings(tl: Timeline) -> dict | None:
         "shaders_peak": max(shader_counts) if shader_counts else None,
         "draining": (len(shader_counts) > 1 and shader_counts[-1] < shader_counts[0]) or None,
         "waited_ms_last": waited[-1] if waited else None,
+        # Seconds the 1 Hz stream was silent before the watchdog fired; None when it was not.
+        "silent_s": _render_silence_s(tl),
     } if render else None
 
     return {
@@ -1031,11 +1096,14 @@ _NEXT_STEPS = {
         "Compare a working player's log: did theirs reach BattlePlayable on the same scene?",
     ],
     "RENDER_WAIT": [
-        "Read the shaders= series in the WaitingForRender lines FIRST: falling means the "
-        "load was working and the player simply waited less than it needed.",
+        "Read the shaders= series in the WaitingForRender lines FIRST: falling while the "
+        "lines keep coming (one per second) means the load was working and the player "
+        "simply waited less than it needed; a stream that stopped long before the watchdog "
+        "is the frozen case (see the notes).",
         "Confirm against the player's rgl_log for the same window: count compile_shader "
         "lines and 'Missing shader from sack' misses.",
-        "A cold shader cache is the cause, not the scene. It is refilled from scratch "
+        "When the count falls with the stream intact, a cold shader cache is the cause, "
+        "not the scene. It is refilled from scratch "
         "whenever the module list changes (v1.4.8 deletes the local cache) — see "
         "docs/features/shader-precompilation.md.",
     ],
@@ -1124,6 +1192,13 @@ def _format_timings(t: dict) -> list:
         if r["shaders_peak"] is None:
             out.append("  shaders= was omitted by the game (the native count could not be "
                        "read) — it is unmeasured, not zero.")
+        elif r.get("silent_s") is not None:
+            out.append(f"  shaders {r['shaders_first']} -> {r['shaders_last']} (peak "
+                       f"{r['shaders_peak']}) — the count is frozen at the last sample and "
+                       f"the 1 Hz render-wait stream went silent {r['silent_s']}s before the "
+                       "watchdog fired, so the fall across these samples does not show a "
+                       "drain. The log alone cannot separate a slow cold compile from a "
+                       "main-thread wedge.")
         elif r["draining"]:
             out.append(f"  shaders {r['shaders_first']} -> {r['shaders_last']} (peak "
                        f"{r['shaders_peak']}) — the compile queue is DRAINING, so this is "
