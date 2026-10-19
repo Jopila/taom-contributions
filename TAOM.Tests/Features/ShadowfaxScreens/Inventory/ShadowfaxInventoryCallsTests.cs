@@ -12,6 +12,7 @@ namespace TAOM.Tests.Features.ShadowfaxScreens.Inventory;
 
 /// <summary>The name-sort helper the rewrite calls: vanilla's result with no service, the toggle off or on.</summary>
 [TestClass]
+[TestCategory("RequiresGame")]
 public class ShadowfaxInventoryCallsTests
 {
     private IShadowfaxScreensSettingsProvider _settings = null!;

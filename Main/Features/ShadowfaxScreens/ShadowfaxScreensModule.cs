@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using DryIoc;
 using TAOM.Adapters;
 using TAOM.Composition;
-using TAOM.Core.Logging;
 using TAOM.Features.ShadowfaxScreens.Clan;
 using TAOM.Features.ShadowfaxScreens.Diagnostics;
 using TAOM.Features.ShadowfaxScreens.Inventory;

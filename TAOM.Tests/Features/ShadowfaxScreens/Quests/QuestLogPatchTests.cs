@@ -22,7 +22,7 @@ namespace TAOM.Tests.Features.ShadowfaxScreens.Quests;
 /// <summary>
 /// The six quest-log patch entry points: the plain calls on bare (uninitialised) engine objects, and the two Harmony
 /// shapes that need the real runtime, the constructor's prefix and finalizer pair (including a stripped prefix) and the
-/// sort postfix whose enum parameter is declared as <c>object</c>. RequiresGame because the patch classes name engine types.
+/// sort postfix whose parameter is an <c>int</c>. RequiresGame because the patch classes name engine types.
 /// </summary>
 [TestClass]
 [TestCategory("RequiresGame")]

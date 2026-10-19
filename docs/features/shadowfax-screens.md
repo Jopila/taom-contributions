@@ -110,8 +110,9 @@ With the call-site swap the skipped call never reaches the method, so its postfi
 `ClanFastOpenHookTests.APostfixOnTheListBuild_RunsOncePerRealBuild_NotForTheSkippedCall` pins it.
 
 **Headers:** vanilla sets the "Caravans (N)" and "Garrisons (N)" header texts at the end of
-`RefreshPartiesList` (`ClanPartiesVM.cs:500-503`), while `RefreshValues` first resets them to the stale text of the
-previous build (not the bare text). After a skip the helper renders both headers from the current lists, with the
+`RefreshPartiesList` (`ClanPartiesVM.cs:500-503`), while `RefreshValues` first resets them with whatever `{CURRENT}`
+was last set to. After build 1 that variable holds the garrison count, so the Caravans header briefly shows that
+number (not the bare text). After a skip the helper renders both headers from the current lists, with the
 same `GameTexts` calls vanilla makes; if that throws, it falls back to the full build. The Parties header is not
 touched by `RefreshValues`, so it keeps the text build 1 gave it.
 
@@ -124,7 +125,7 @@ touched by `RefreshValues`, so it keeps the text build 1 gave it.
   constructor, is wrapped by the shared timer. All three list builds happen inside it, so with "Log Screen Open
   Times" on, one line covers the VM build and not the movie load that follows in `GauntletClanScreen`, with the
   list-build counts as its detail:
-  `[ScreenOpen] Clan open: 140.2 ms (fast open on; list builds: 2 run, 1 skipped, 38.1 ms)`.
+  `[ScreenOpen] Clan open: 140.2 ms (fast open on; list builds: 1 run, 2 skipped, 38.1 ms)`.
   The detail starts `fast open on;` or `fast open off;`, the path the open ran with (off under co-op). The build
   milliseconds are the real builds only; a build the screen makes after the constructor (the category refresh
   that `OnActivate` runs) is outside the window.
@@ -145,7 +146,7 @@ the screen is vanilla. The skip itself writes only this client's view-model list
 **In-game checklist:** (1) Open Clan with the switch on: Parties, Caravans and Garrisons headers show their
 counts, refuge rows appear once. (2) Disband a party or change a leader: the lists update. (3) Rename the clan:
 the lists and headers update. (4) Close and reopen the screen three times: no stale rows. (5) With "Log Screen
-Open Times" on, the open line reads `list builds: 2 run, 1 skipped`. (6) Switch off, reopen: `3 run, 0 skipped`.
+Open Times" on, the open line reads `list builds: 1 run, 2 skipped`. (6) Switch off, reopen: `3 run, 0 skipped`.
 
 **How to measure:** turn "Log Screen Open Times" on in the Battle Load Diagnostics page, open the
 Clan screen six times with "Clan Fast Open" off, then six times with it on, on a large save. Drop
@@ -156,7 +157,9 @@ by more than the off arm's spread; otherwise delete it and keep the timer.
 **Removal checklist:** delete `ClanScreenFastPathService.cs`, `ClanFastOpenCalls.cs` and the three
 `Clan/Hooks` files; in `ShadowfaxScreensModule.cs` delete the Clan category line, the service registration, the
 `ClanFastOpenCalls.Initialize` line and the `LogInstall` line in `OnPhase`; delete the Clan tests; delete the
-"Clan Fast Open" setting in `BattleLoadDiagnosticsSettings` and its provider property and interface member; delete
+"Clan Fast Open" setting in `BattleLoadDiagnosticsSettings` and its provider property and interface member, and
+its `CoopSettingsRelevance` entry (`Main/Features/CoopInterop/CoopSettingsRelevance.cs`); delete the three
+`ShadowfaxScreens.Clan.Hooks` rows of `docs/reference/taleworlds-api-snapshot/patch-targets.md` and fix its count; delete
 the Clan sections of this page and of `harmony-patch-registry.md`, and the `feature-map.md` clause.
 
 **Files:**
@@ -243,13 +246,15 @@ cold start and confirm nothing about the screen differs from the switch off.
 `TAOM.Tests/Features/ShadowfaxScreens/Inventory/` test files; in `ShadowfaxScreensModule.cs` delete the
 inventory category line, the `InventoryOpenFastPathService` registration and the `ShadowfaxInventoryCalls.Initialize`
 line (plus its `using`); drop the `InventoryFastOpen` member of `IShadowfaxScreensSettingsProvider`, its
-provider property and the MCM setting; delete the
+provider property and the MCM setting; its `CoopSettingsRelevance` entry
+(`Main/Features/CoopInterop/CoopSettingsRelevance.cs`); the two `ShadowfaxScreens.Inventory.Hooks` rows of
+`docs/reference/taleworlds-api-snapshot/patch-targets.md` (and fix its count); delete the
 `PatchXXX_ShadowfaxInventory` section of `harmony-patch-registry.md`, this section and its Key Files rows, and
 the inventory clause of the `feature-map.md` row.
 
 **Co-op.** BannerlordCoop's `GameInterface` module carries an `SPInventoryVMPatches` class that names
-`SPInventoryVM`; which members it patches was not read, so overlap with the constructor or `InitializeInventory`
-is UNVERIFIED. These hooks only observe the constructor and rewrite two calls inside `InitializeInventory`; they
+`SPInventoryVM`; its inventory patches only add postfixes to `SPInventoryVM.SaveItemLockStates` and
+`SaveItemSortStates`, so they do not touch the constructor or `InitializeInventory`. These hooks only observe the constructor and rewrite two calls inside `InitializeInventory`; they
 write nothing to the network or the save.
 
 ## Party fast open
@@ -312,7 +317,7 @@ translation rows; this section, the registry section and the Configuration row.
 **Files:** `Main/Features/ShadowfaxScreens/Party/` (`PartyScreenFastPathService`, `PartyPhase`, `PartyFastOpenCalls`,
 `Hooks/`).
 **Tests:** `TAOM.Tests/Features/ShadowfaxScreens/Party/` (`PartyScreenFastPathServiceTests`, `PartyFastOpenPatchShapeTests`,
-`PartyFastOpenBindingTests`, `PartyFastOpenWiringTests`).
+`PartyFastOpenBindingTests`; the module wiring is in `ShadowfaxScreensModuleTests`).
 
 ## Quest log fast open
 
@@ -347,7 +352,7 @@ during the open skips its stages and builds them when it is selected. Active que
   presentation.
 - **How to measure:** turn "Log Screen Open Times" on, load the longest campaign, and open the Quest log six times
   with the switch off and six with it on, dropping the first open of each run. Compare the medians of the
-  `[ScreenOpen] Quests open` lines in `taom_debug.log`. The line ends with the open's counts: finished quests built
+  `[ScreenOpen] Quests open` lines in `taom_debug.log`. The detail starts with `fast open on|off;` (the effective path), then gives the open's counts: finished quests built
   (`old`), items and journal entries deferred, how many show the updated dot, the switch state, and the milliseconds
   the journal constructors took (timed only while the timer is on). Keep the change only if the median drops by at
   least 16 ms and by more than the off runs' spread.

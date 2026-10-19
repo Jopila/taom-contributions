@@ -1,4 +1,3 @@
-using System;
 using HarmonyLib;
 using TaleWorlds.CampaignSystem.ViewModelCollection.ClanManagement.Categories;
 

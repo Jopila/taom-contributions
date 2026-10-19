@@ -32,7 +32,7 @@ internal static class ClanFastOpenCalls
     /// <summary>
     /// Stands where <c>RefreshValues</c> called <c>vm.RefreshPartiesList()</c>. With the fast path on the lists the
     /// constructor's build left are still current, so only the two headers are rendered (the tail of
-    /// ClanPartiesVM.cs:500-503, which <c>RefreshValues</c> has just reset to the bare text); otherwise vanilla's build runs.
+    /// ClanPartiesVM.cs:500-503, which <c>RefreshValues</c> has just reset with whatever {CURRENT} was last set to, not bare text); otherwise vanilla's build runs.
     /// </summary>
     public static void RefreshPartiesListInRefresh(ClanPartiesVM vm)
     {

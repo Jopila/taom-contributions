@@ -4096,3 +4096,29 @@ times (#781, #919, #922), twice in one afternoon by two sessions.
   asserts the whole expected output, and is shown to fail on the old code and on one plausible wrong fix. Before
   filing an issue, search open issues for the file and symptom (`gh issue list --search "<file> in:title,body"`).
 - **Source:** `docs/reviews/rca-harvest-blank-line-2026-10-19.md` rows 2 and 3.
+
+### Parallel builders: pin the conventions, not only the shared API (repeat, Shadowfax Screens 2026-10-19)
+Four builders built four screens from one plan that pinned the timer API, the settings provider, the
+module and the MCM group. Each was correct against that plan, and they still diverged on six
+conventions: test category tags (five IL tests untagged in two screens), the policy for an unreadable
+setting (on in two places, off in two), one category constant (15+ repeated literals), the open line
+format, what the timer window spans (two screens included the movie load), and the wiring test setup
+(four copies, one of them leaking a facade).
+- **Why missed:** the 2026-07-02 rule covers shared sub-problems such as id normalisation; conventions
+  did not look like sub-problems, so the brief did not list them.
+- **Prevent:** the pre-dispatch checklist in `docs/ai-includes/agent-teams.md` now names conventions.
+  Before dispatch, write in the brief the failure policy, the test tags, the constant, the log formats,
+  the timing span and the wiring-test shape every sibling uses.
+- **Source:** `docs/reviews/rca-shadowfax-screens-speed-2026-10-19.md` findings 1, 2, 11, 13, 16;
+  earlier `rca-combat-mechanics-2026-07-02.md`.
+
+### Price a per-call cache with a micro-benchmark before you build it (Shadowfax Screens 2026-10-19)
+The plan called two caches "clean wins": a memo for two concept lookups per inventory row and a count
+cache for the party screen's item-category walk. Measured on the game's runtime afterwards, they saved
+about 0.7 microseconds per row and 0.1 to 1 ms per open, against a 16 ms keep rule, and carried a
+transpiler, a window protocol and about 500 lines with tests. Both were deleted.
+- **Why missed:** the plan reasoned from "vanilla repeats this work" without the cost of one repeat.
+- **Prevent:** before a cache or memo goes into a plan, time one vanilla call and one cache hit on the
+  game's runtime (a 20-line benchmark in the scratchpad) and multiply by the calls per action; keep it
+  only if the product can clear the feature's own threshold.
+- **Source:** `docs/reviews/rca-shadowfax-screens-speed-2026-10-19.md` findings 4, 5.

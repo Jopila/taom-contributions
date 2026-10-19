@@ -69,11 +69,28 @@ public sealed class QuestLogDeferService
     public void BeginOpen()
     {
         var scope = _scope.Value!;
-        if (scope.Depth++ > 0) return;
+        if (scope.Depth > 0)
+        {
+            scope.Depth++;
+            return;
+        }
+
+        // The adapter touches the engine: read it before Depth moves, so a throw cannot leave the scope open.
+        bool bound;
+        try
+        {
+            bound = _adapter.IsBound;
+        }
+        catch
+        {
+            bound = false;
+        }
+
+        scope.Depth = 1;
         scope.Reset();
         scope.Timing = _settings.LogScreenOpenTimes;
         scope.FastOpen = _settings.QuestLogFastOpen;
-        scope.Bound = _adapter.IsBound;
+        scope.Bound = bound;
         scope.FastPath = scope.FastOpen && scope.Bound && !Disarmed;
     }
 

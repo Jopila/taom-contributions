@@ -129,7 +129,7 @@ public class ClanFastOpenBindingTests
         var caravans = IndexOf(calls, "ClanPartiesVM.set_CaravansText");
         var list = IndexOf(calls, "ClanPartiesVM.RefreshPartiesList");
         Assert.IsTrue(garrisons >= 0 && caravans >= 0, "RefreshValues no longer sets the header texts: " + string.Join(" > ", calls));
-        Assert.IsTrue(list > garrisons && list > caravans, "the list build comes after the bare header texts, so a skip leaves them bare");
+        Assert.IsTrue(list > garrisons && list > caravans, "the list build comes after the header resets, so a skip leaves the reset text");
         Assert.AreEqual(1, calls.Count(c => c == "ClanPartiesVM.RefreshPartiesList"));
     }
 

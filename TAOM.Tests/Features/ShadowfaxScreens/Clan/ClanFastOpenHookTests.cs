@@ -72,7 +72,7 @@ public class ClanFastOpenHookTests
             var parties = new DummyParties();
             parties.RefreshPartiesList();
             parties.RefreshValues();
-            parties.RefreshPartiesList();
+            parties.RefreshValues();
         }
     }
 
@@ -228,7 +228,7 @@ public class ClanFastOpenHookTests
 
         var line = _logger.Lines.Single(l => l.Contains("[ScreenOpen]"));
         StringAssert.Contains(line, "[ScreenOpen] Clan open: ");
-        StringAssert.EndsWith(line, "(fast open on; list builds: 2 run, 1 skipped, 0.0 ms)");
+        StringAssert.EndsWith(line, "(fast open on; list builds: 1 run, 2 skipped, 0.0 ms)");
     }
 
     [TestMethod]

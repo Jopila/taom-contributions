@@ -68,6 +68,24 @@ public class QuestLogDeferServiceTests
     }
 
     [TestMethod]
+    public void BeginOpen_AdapterIsBoundThrows_DoesNotDefer_AndEndOpenReturnsDepthToZero()
+    {
+        var throwing = true;
+        _adapter.IsBound.Returns(_ => throwing ? throw new InvalidOperationException("engine gone") : true);
+        var item = Item();
+
+        _sut.BeginOpen();
+
+        Assert.IsFalse(_sut.TryDefer(item, true));
+        Assert.IsNotNull(_sut.EndOpen(), "the throwing open was the outermost one");
+
+        throwing = false;
+        _sut.BeginOpen();
+        Assert.IsTrue(_sut.TryDefer(Item(), true), "the next open is not nested and snapshots afresh");
+        Assert.IsNotNull(_sut.EndOpen());
+    }
+
+    [TestMethod]
     public void TryDefer_OutOfScope_DoesNotDefer()
     {
         var item = Item();
