@@ -48,5 +48,6 @@ internal static class FeatureModules
         new Features.TaomBuildings.TaomBuildingsModule(),
         new Features.PosternGate.PosternGateModule(),
         new Features.FromTheAshes.FromTheAshesModule(),
+        new Features.BardTownGuard.BardTownGuardModule(),
     };
 }

@@ -1293,6 +1293,18 @@ Inventory upgrade tint (see [telchars-mark.md](../features/telchars-mark.md)). T
 
 **Number.** Patch105 was taken on trunk by Hidden Hosts, and other uncommitted batch branches claim 105 to 107, so this category took 109; re-check at every rebase. **ACTIVE**, not yet checked in game.
 
+## Patch110_BardTownGuard
+
+**Target:** `private bool SandBox.CampaignBehaviors.TavernEmployeesCampaignBehavior.conversation_talk_bard_on_condition()` (v1.5.5, no parameters, resolved by name with `AccessTools.Method`), one transpiler class `TavernEmployeesCampaignBehavior_BardCondition_BardTownGuard_Patch` in `Main/Features/BardTownGuard/Hooks/`, category `Patch110_BardTownGuard` (GameInit). #824, 2026-10-19.
+
+Vanilla (`TavernEmployeesCampaignBehavior.cs:415-435`) reads `.Name` of `Settlement.All.GetRandomElementWithPredicate(town of the same culture, not the current one)`, which is null in a town whose culture owns no other town, so the condition throws. The transpiler rewrites that one call in place to `BardTownPickHook.PickTown` (same signature): the engine's pick first, then the same engine pick over every other town, else the current settlement. Exactly one engine call must match; any other count returns the original stream with one warning. The lyrics are not touched. `BardTownGuardBindingTests` (`BindingVerification`) pin the site against the installed SandBox.dll and the JIT-compiled replacement.
+
+**Callers and thread:** the condition delegate registered by the behavior, evaluated by the conversation system at every conversation start that reaches the `talk_bard` line (`ConversationManager.GetSentenceOptions`), on the main thread; only a musician reaches the pick.
+
+**PatchShield.** `SandBox.CampaignBehaviors` is on neither exclusion list (`PatchShieldPolicy.ExcludedTargetNamespacePrefixes` and `ExcludedTargetMethods`), so the shield's finalizer attaches to the condition from a process's second game start (TAOM's GameInit batch is patched after pass 2, so in the first game the method is unshielded). The finalizer swallows only a missing-API throw (`MissingMethodException`, `MissingFieldException`, `TypeLoadException`), in which case the condition returns false for that call, and strips the unprotected owners' patches on the method; TAOM's owner id `com.taom.mod` is not on the protected list (FOLLOW-UP L1 in the PatchShield review record), so the transpiler would be stripped too and vanilla then runs. Any other exception, a `NullReferenceException` included, is rethrown with its stack kept.
+
+**Co-op.** A transpiler with no bool prefix, so `CoopVetoClassificationTests` needs no entry: the condition only builds conversation text and mutates no campaign state. Feature: [bard-town-guard.md](../features/bard-town-guard.md). **ACTIVE**, not yet checked in game.
+
 ## Patch_MainRosterLossDiag
 
 **Targets:** `TroopRoster.AddToCountsAtIndex(int, int, int, int, bool)` and `TroopRoster.SetElementNumber(int, int)` (both Prefix, observe-only, never skip the original). **ACTIVE, TEMPORARY diagnostic.** Code: `Main/Features/TroopWeight/Diagnostics/` (`TroopRoster_AddToCountsAtIndex_Patch`, `TroopRoster_SetElementNumber_Patch`, `MainRosterLossDiagnostics`).

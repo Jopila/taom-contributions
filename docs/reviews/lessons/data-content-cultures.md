@@ -2090,3 +2090,16 @@ commit had flagged it HIGH; the materials went live anyway.
   at startup, and `tools/package_release.py` refuses a package whose shader report names a `taom_` shader it does not
   ship. Never change a shipped `taom_` shader in place: ship a changed shader under a new name.
 - **Source:** [rca-bow-shader-invisible-2026-10-19.md](../rca-bow-shader-invisible-2026-10-19.md) finding 0.
+
+### A vanilla pick of another settlement of my culture can come back empty (Bard Town Guard, 2026-10-19)
+The tavern musician's condition (`TavernEmployeesCampaignBehavior.conversation_talk_bard_on_condition`, v1.5.5
+`:420-421`) picks a random town of the current town's culture other than the current one and reads its `.Name`.
+Six TAOM cultures own one town, so the pick is null and the conversation throws, and culture conversion can make
+more such towns at runtime. It is the same family as the landless-culture CTD above: vanilla code written for six
+big cultures assumes "another settlement of my culture" exists.
+- **Why missed:** nobody had swept vanilla for culture-filtered settlement picks; the landless fix covered one site.
+- **Prevent:** when a TAOM culture owns one town (or none), or a feature moves settlements between cultures, sweep
+  the engine for picks that filter `Settlement.All` (or `Town.AllTowns`) by culture and dereference the result. The
+  2026-10-19 sweep of v1.5.5 found seven `GetRandomElementWithPredicate` sites; only the musician's was live (the
+  RCA lists the other six). Fix the one live site by keeping the engine's pick and adding a fallback, never by skipping vanilla.
+- **Source:** `docs/reviews/rca-bard-town-guard-2026-10-19.md`.
