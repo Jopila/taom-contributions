@@ -1096,3 +1096,16 @@ yotthani's PerfProbe gave each timing probe its own closed generic class (`Slot<
 - **Prevent:** format a frame as `DeclaringType?.FullName + "." + Name` (fall back to `Name` when the type is null, as
   for Harmony's replacement method), filter by namespace prefix, and feed tests the production shape.
 - **Source:** `docs/reviews/rca-main-roster-loss-diag-2026-10-17.md` finding 6.
+
+### Deleting a patch drops its engine-bump tracking: pin the vanilla logic you still copy (#886, 2026-10-18)
+The castle recruitment postfix on `RecruitmentCampaignBehavior.HourlyTickParty` became an event listener. Its
+`patch-targets.md` row went with it, and that row was how `engine_body_diff.py` diffed `HourlyTickParty` at a bump. The
+new dispatcher still copies that method's guards, and its "no double recruit" claim depends on vanilla still skipping
+castles there. The scan's slot count mirrors a private estimate that was never tracked at all.
+- **Why missed:** the deletion was read as pure removal. Nobody listed what the snapshot row protected.
+- **Prevent:** when you delete a patch or reflection site but keep code that copies or depends on the vanilla method,
+  add an IL pin in `TAOM.Tests/Migration/` (`RequiresGameIL`, `BindingVerification`) that asserts the property you rely
+  on: the call it must not make, the constant it must load, the delegate shape it must bind. Prove it can fail by
+  flipping the assertion once.
+- **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` finding 2;
+  `TAOM.Tests/Migration/CastleRecruitmentEngineMirrorTests.cs`.

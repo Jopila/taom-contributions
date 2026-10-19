@@ -2225,109 +2225,109 @@
 
 	<!-- ===== END FactionMap (CC) ===== -->
 
-  <!-- TAOM-NEWFACTIONS:goblin:BEGIN -->
-  <string id="str_faction_official.goblin" text="{=taom_str_faction_official.goblin}a chieftain of Goblin-town" />
-  <string id="str_faction_official.goblin_f" text="{=taom_str_faction_official.goblin_f}a chieftainess of Goblin-town" />
-  <string id="str_faction_ruler.goblin" text="{=taom_str_faction_ruler.goblin}Warlord" />
-  <string id="str_faction_ruler.goblin_f" text="{=taom_str_faction_ruler.goblin_f}Lady Warlord" />
-  <string id="str_faction_ruler_term_in_speech.goblin" text="{=taom_str_faction_ruler_term_in_speech.goblin}the Warlord, {RULER.NAME}" />
-  <string id="str_faction_ruler_name_with_title.goblin" text="{=taom_str_faction_ruler_name_with_title.goblin}Warlord {RULER.NAME}" />
-  <string id="str_faction_noble_name_with_title.goblin" text="{=taom_str_faction_noble_name_with_title.goblin}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
-  <string id="str_faction_formal_name_for_culture.goblin" text="{=taom_str_faction_formal_name_for_culture.goblin}Goblins of Goblin-town" />
-  <string id="str_faction_informal_name_for_culture.goblin" text="{=taom_str_faction_informal_name_for_culture.goblin}Goblin" />
-  <string id="str_neutral_term_for_culture.goblin" text="{=taom_str_neutral_term_for_culture.goblin}Goblins" />
-  <string id="str_culture_description.goblin" text="{=taom_str_culture_description.goblin}The Goblins of the High Pass are a teeming, vicious rabble dwelling in the warrens of Goblin-town. Led by their Great Goblin and petty captains, they raid the mountain roads without end, driven by greed and an ancient hatred of the Free Peoples." />
-  <string id="str_culture_rich_name.goblin" text="{=taom_str_culture_rich_name.goblin}Goblins" />
-  <string id="str_adjective_for_culture.goblin" text="{=taom_str_adjective_for_culture.goblin}Goblin" />
-  <string id="str_player_father_name.goblin" text="{=taom_str_player_father_name.goblin}Narzuk" />
-  <string id="str_player_mother_name.goblin" text="{=taom_str_player_mother_name.goblin}Borlia" />
-  <string id="taom_bandit_goblin_name" text="{=taom_bandit_goblin_name}Goblin Raiders" />
-  <string id="taom_bandit_goblin_m1" text="{=taom_bandit_goblin_m1}Bolg" />
-  <string id="taom_bandit_goblin_m2" text="{=taom_bandit_goblin_m2}Yazneg" />
-  <string id="taom_bandit_goblin_m3" text="{=taom_bandit_goblin_m3}Fimbul" />
-  <string id="taom_bandit_goblin_m4" text="{=taom_bandit_goblin_m4}Narzug" />
-  <string id="taom_bandit_goblin_m5" text="{=taom_bandit_goblin_m5}Gorbag" />
-  <string id="taom_bandit_goblin_m6" text="{=taom_bandit_goblin_m6}Mauhûr" />
-  <string id="taom_bandit_goblin_m7" text="{=taom_bandit_goblin_m7}Snaga" />
-  <string id="taom_bandit_goblin_m8" text="{=taom_bandit_goblin_m8}Ufthak" />
-  <string id="taom_bandit_goblin_m9" text="{=taom_bandit_goblin_m9}Radbug" />
-  <string id="taom_bandit_goblin_m10" text="{=taom_bandit_goblin_m10}Lugdush" />
-  <string id="taom_bandit_goblin_f1" text="{=taom_bandit_goblin_f1}Skarra" />
-  <string id="taom_bandit_goblin_f2" text="{=taom_bandit_goblin_f2}Vorga" />
-  <string id="taom_bandit_goblin_f3" text="{=taom_bandit_goblin_f3}Mazra" />
-  <string id="taom_bandit_goblin_f4" text="{=taom_bandit_goblin_f4}Grishta" />
-  <string id="taom_bandit_goblin_f5" text="{=taom_bandit_goblin_f5}Narzga" />
-  <string id="taom_hideout_desc_goblin" text="{=taom_hideout_desc_goblin}Beneath the crags of the High Pass you find a reeking warren of goblins burrowed deep into the bare rock." />
+	<!-- TAOM-NEWFACTIONS:goblin:BEGIN -->
+	<string id="str_faction_official.goblin" text="{=taom_str_faction_official.goblin}a chieftain of Goblin-town" />
+	<string id="str_faction_official.goblin_f" text="{=taom_str_faction_official.goblin_f}a chieftainess of Goblin-town" />
+	<string id="str_faction_ruler.goblin" text="{=taom_str_faction_ruler.goblin}Warlord" />
+	<string id="str_faction_ruler.goblin_f" text="{=taom_str_faction_ruler.goblin_f}Lady Warlord" />
+	<string id="str_faction_ruler_term_in_speech.goblin" text="{=taom_str_faction_ruler_term_in_speech.goblin}the Warlord, {RULER.NAME}" />
+	<string id="str_faction_ruler_name_with_title.goblin" text="{=taom_str_faction_ruler_name_with_title.goblin}Warlord {RULER.NAME}" />
+	<string id="str_faction_noble_name_with_title.goblin" text="{=taom_str_faction_noble_name_with_title.goblin}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+	<string id="str_faction_formal_name_for_culture.goblin" text="{=taom_str_faction_formal_name_for_culture.goblin}Goblins of Goblin-town" />
+	<string id="str_faction_informal_name_for_culture.goblin" text="{=taom_str_faction_informal_name_for_culture.goblin}Goblin" />
+	<string id="str_neutral_term_for_culture.goblin" text="{=taom_str_neutral_term_for_culture.goblin}Goblins" />
+	<string id="str_culture_description.goblin" text="{=taom_str_culture_description.goblin}The Goblins of the High Pass are a teeming, vicious rabble dwelling in the warrens of Goblin-town. Led by their Great Goblin and petty captains, they raid the mountain roads without end, driven by greed and an ancient hatred of the Free Peoples." />
+	<string id="str_culture_rich_name.goblin" text="{=taom_str_culture_rich_name.goblin}Goblins" />
+	<string id="str_adjective_for_culture.goblin" text="{=taom_str_adjective_for_culture.goblin}Goblin" />
+	<string id="str_player_father_name.goblin" text="{=taom_str_player_father_name.goblin}Narzuk" />
+	<string id="str_player_mother_name.goblin" text="{=taom_str_player_mother_name.goblin}Borlia" />
+	<string id="taom_bandit_goblin_name" text="{=taom_bandit_goblin_name}Goblin Raiders" />
+	<string id="taom_bandit_goblin_m1" text="{=taom_bandit_goblin_m1}Bolg" />
+	<string id="taom_bandit_goblin_m2" text="{=taom_bandit_goblin_m2}Yazneg" />
+	<string id="taom_bandit_goblin_m3" text="{=taom_bandit_goblin_m3}Fimbul" />
+	<string id="taom_bandit_goblin_m4" text="{=taom_bandit_goblin_m4}Narzug" />
+	<string id="taom_bandit_goblin_m5" text="{=taom_bandit_goblin_m5}Gorbag" />
+	<string id="taom_bandit_goblin_m6" text="{=taom_bandit_goblin_m6}Mauhûr" />
+	<string id="taom_bandit_goblin_m7" text="{=taom_bandit_goblin_m7}Snaga" />
+	<string id="taom_bandit_goblin_m8" text="{=taom_bandit_goblin_m8}Ufthak" />
+	<string id="taom_bandit_goblin_m9" text="{=taom_bandit_goblin_m9}Radbug" />
+	<string id="taom_bandit_goblin_m10" text="{=taom_bandit_goblin_m10}Lugdush" />
+	<string id="taom_bandit_goblin_f1" text="{=taom_bandit_goblin_f1}Skarra" />
+	<string id="taom_bandit_goblin_f2" text="{=taom_bandit_goblin_f2}Vorga" />
+	<string id="taom_bandit_goblin_f3" text="{=taom_bandit_goblin_f3}Mazra" />
+	<string id="taom_bandit_goblin_f4" text="{=taom_bandit_goblin_f4}Grishta" />
+	<string id="taom_bandit_goblin_f5" text="{=taom_bandit_goblin_f5}Narzga" />
+	<string id="taom_hideout_desc_goblin" text="{=taom_hideout_desc_goblin}Beneath the crags of the High Pass you find a reeking warren of goblins burrowed deep into the bare rock." />
 
-  <!-- TAOM-NEWFACTIONS:goblin:END -->
-  <!-- TAOM-NEWFACTIONS:mistymountainorcs:BEGIN -->
-  <string id="str_faction_official.mistymountainorcs" text="{=taom_str_faction_official.mistymountainorcs}a chieftain of the Misty Mountains" />
-  <string id="str_faction_official.mistymountainorcs_f" text="{=taom_str_faction_official.mistymountainorcs_f}a chieftainess of the Misty Mountains" />
-  <string id="str_faction_ruler.mistymountainorcs" text="{=taom_str_faction_ruler.mistymountainorcs}Warlord" />
-  <string id="str_faction_ruler.mistymountainorcs_f" text="{=taom_str_faction_ruler.mistymountainorcs_f}Lady Warlord" />
-  <string id="str_faction_ruler_term_in_speech.mistymountainorcs" text="{=taom_str_faction_ruler_term_in_speech.mistymountainorcs}the Warlord, {RULER.NAME}" />
-  <string id="str_faction_ruler_name_with_title.mistymountainorcs" text="{=taom_str_faction_ruler_name_with_title.mistymountainorcs}Warlord {RULER.NAME}" />
-  <string id="str_faction_noble_name_with_title.mistymountainorcs" text="{=taom_str_faction_noble_name_with_title.mistymountainorcs}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
-  <string id="str_faction_formal_name_for_culture.mistymountainorcs" text="{=taom_str_faction_formal_name_for_culture.mistymountainorcs}Orcs of the Misty Mountains" />
-  <string id="str_faction_informal_name_for_culture.mistymountainorcs" text="{=taom_str_faction_informal_name_for_culture.mistymountainorcs}Orc" />
-  <string id="str_neutral_term_for_culture.mistymountainorcs" text="{=taom_str_neutral_term_for_culture.mistymountainorcs}Misty Mountain Orcs" />
-  <string id="str_culture_description.mistymountainorcs" text="{=taom_str_culture_description.mistymountainorcs}The Orcs of the Misty Mountains are a brutal and numberless host of the high peaks. Led by their warlords, they wage endless raids on the lands below, relentless in their cruelty and their hunger for conquest." />
-  <string id="str_culture_rich_name.mistymountainorcs" text="{=taom_str_culture_rich_name.mistymountainorcs}Misty Mountain Orcs" />
-  <string id="str_adjective_for_culture.mistymountainorcs" text="{=taom_str_adjective_for_culture.mistymountainorcs}Orc" />
-  <string id="str_player_father_name.mistymountainorcs" text="{=taom_str_player_father_name.mistymountainorcs}Narzuk" />
-  <string id="str_player_mother_name.mistymountainorcs" text="{=taom_str_player_mother_name.mistymountainorcs}Borlia" />
-  <string id="taom_bandit_mistymountainorcs_name" text="{=taom_bandit_mistymountainorcs_name}Orc Raiders" />
-  <string id="taom_bandit_mistymountainorcs_m1" text="{=taom_bandit_mistymountainorcs_m1}Bolg" />
-  <string id="taom_bandit_mistymountainorcs_m2" text="{=taom_bandit_mistymountainorcs_m2}Yazneg" />
-  <string id="taom_bandit_mistymountainorcs_m3" text="{=taom_bandit_mistymountainorcs_m3}Fimbul" />
-  <string id="taom_bandit_mistymountainorcs_m4" text="{=taom_bandit_mistymountainorcs_m4}Narzug" />
-  <string id="taom_bandit_mistymountainorcs_m5" text="{=taom_bandit_mistymountainorcs_m5}Gorbag" />
-  <string id="taom_bandit_mistymountainorcs_m6" text="{=taom_bandit_mistymountainorcs_m6}Mauhûr" />
-  <string id="taom_bandit_mistymountainorcs_m7" text="{=taom_bandit_mistymountainorcs_m7}Snaga" />
-  <string id="taom_bandit_mistymountainorcs_m8" text="{=taom_bandit_mistymountainorcs_m8}Ufthak" />
-  <string id="taom_bandit_mistymountainorcs_m9" text="{=taom_bandit_mistymountainorcs_m9}Radbug" />
-  <string id="taom_bandit_mistymountainorcs_m10" text="{=taom_bandit_mistymountainorcs_m10}Lugdush" />
-  <string id="taom_bandit_mistymountainorcs_f1" text="{=taom_bandit_mistymountainorcs_f1}Skarra" />
-  <string id="taom_bandit_mistymountainorcs_f2" text="{=taom_bandit_mistymountainorcs_f2}Vorga" />
-  <string id="taom_bandit_mistymountainorcs_f3" text="{=taom_bandit_mistymountainorcs_f3}Mazra" />
-  <string id="taom_bandit_mistymountainorcs_f4" text="{=taom_bandit_mistymountainorcs_f4}Grishta" />
-  <string id="taom_bandit_mistymountainorcs_f5" text="{=taom_bandit_mistymountainorcs_f5}Narzga" />
-  <string id="taom_hideout_desc_mistymountainorcs" text="{=taom_hideout_desc_mistymountainorcs}Beneath the crags of the Misty Mountains you find a foul warren of orcs burrowed into the bare rock." />
+	<!-- TAOM-NEWFACTIONS:goblin:END -->
+	<!-- TAOM-NEWFACTIONS:mistymountainorcs:BEGIN -->
+	<string id="str_faction_official.mistymountainorcs" text="{=taom_str_faction_official.mistymountainorcs}a chieftain of the Misty Mountains" />
+	<string id="str_faction_official.mistymountainorcs_f" text="{=taom_str_faction_official.mistymountainorcs_f}a chieftainess of the Misty Mountains" />
+	<string id="str_faction_ruler.mistymountainorcs" text="{=taom_str_faction_ruler.mistymountainorcs}Warlord" />
+	<string id="str_faction_ruler.mistymountainorcs_f" text="{=taom_str_faction_ruler.mistymountainorcs_f}Lady Warlord" />
+	<string id="str_faction_ruler_term_in_speech.mistymountainorcs" text="{=taom_str_faction_ruler_term_in_speech.mistymountainorcs}the Warlord, {RULER.NAME}" />
+	<string id="str_faction_ruler_name_with_title.mistymountainorcs" text="{=taom_str_faction_ruler_name_with_title.mistymountainorcs}Warlord {RULER.NAME}" />
+	<string id="str_faction_noble_name_with_title.mistymountainorcs" text="{=taom_str_faction_noble_name_with_title.mistymountainorcs}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+	<string id="str_faction_formal_name_for_culture.mistymountainorcs" text="{=taom_str_faction_formal_name_for_culture.mistymountainorcs}Orcs of the Misty Mountains" />
+	<string id="str_faction_informal_name_for_culture.mistymountainorcs" text="{=taom_str_faction_informal_name_for_culture.mistymountainorcs}Orc" />
+	<string id="str_neutral_term_for_culture.mistymountainorcs" text="{=taom_str_neutral_term_for_culture.mistymountainorcs}Misty Mountain Orcs" />
+	<string id="str_culture_description.mistymountainorcs" text="{=taom_str_culture_description.mistymountainorcs}The Orcs of the Misty Mountains are a brutal and numberless host of the high peaks. Led by their warlords, they wage endless raids on the lands below, relentless in their cruelty and their hunger for conquest." />
+	<string id="str_culture_rich_name.mistymountainorcs" text="{=taom_str_culture_rich_name.mistymountainorcs}Misty Mountain Orcs" />
+	<string id="str_adjective_for_culture.mistymountainorcs" text="{=taom_str_adjective_for_culture.mistymountainorcs}Orc" />
+	<string id="str_player_father_name.mistymountainorcs" text="{=taom_str_player_father_name.mistymountainorcs}Narzuk" />
+	<string id="str_player_mother_name.mistymountainorcs" text="{=taom_str_player_mother_name.mistymountainorcs}Borlia" />
+	<string id="taom_bandit_mistymountainorcs_name" text="{=taom_bandit_mistymountainorcs_name}Orc Raiders" />
+	<string id="taom_bandit_mistymountainorcs_m1" text="{=taom_bandit_mistymountainorcs_m1}Bolg" />
+	<string id="taom_bandit_mistymountainorcs_m2" text="{=taom_bandit_mistymountainorcs_m2}Yazneg" />
+	<string id="taom_bandit_mistymountainorcs_m3" text="{=taom_bandit_mistymountainorcs_m3}Fimbul" />
+	<string id="taom_bandit_mistymountainorcs_m4" text="{=taom_bandit_mistymountainorcs_m4}Narzug" />
+	<string id="taom_bandit_mistymountainorcs_m5" text="{=taom_bandit_mistymountainorcs_m5}Gorbag" />
+	<string id="taom_bandit_mistymountainorcs_m6" text="{=taom_bandit_mistymountainorcs_m6}Mauhûr" />
+	<string id="taom_bandit_mistymountainorcs_m7" text="{=taom_bandit_mistymountainorcs_m7}Snaga" />
+	<string id="taom_bandit_mistymountainorcs_m8" text="{=taom_bandit_mistymountainorcs_m8}Ufthak" />
+	<string id="taom_bandit_mistymountainorcs_m9" text="{=taom_bandit_mistymountainorcs_m9}Radbug" />
+	<string id="taom_bandit_mistymountainorcs_m10" text="{=taom_bandit_mistymountainorcs_m10}Lugdush" />
+	<string id="taom_bandit_mistymountainorcs_f1" text="{=taom_bandit_mistymountainorcs_f1}Skarra" />
+	<string id="taom_bandit_mistymountainorcs_f2" text="{=taom_bandit_mistymountainorcs_f2}Vorga" />
+	<string id="taom_bandit_mistymountainorcs_f3" text="{=taom_bandit_mistymountainorcs_f3}Mazra" />
+	<string id="taom_bandit_mistymountainorcs_f4" text="{=taom_bandit_mistymountainorcs_f4}Grishta" />
+	<string id="taom_bandit_mistymountainorcs_f5" text="{=taom_bandit_mistymountainorcs_f5}Narzga" />
+	<string id="taom_hideout_desc_mistymountainorcs" text="{=taom_hideout_desc_mistymountainorcs}Beneath the crags of the Misty Mountains you find a foul warren of orcs burrowed into the bare rock." />
 
-  <!-- TAOM-NEWFACTIONS:mistymountainorcs:END -->
+	<!-- TAOM-NEWFACTIONS:mistymountainorcs:END -->
 
-  <!-- Battle Load Diagnostics — next-session stall notice (StallReportNotifier) -->
-  <string id="taom_bld_stall_title" text="{=taom_bld_stall_title}TAOM: last battle load may not have finished" />
-  <string id="taom_bld_stall_dismiss" text="{=taom_bld_stall_dismiss}Dismiss" />
-  <string id="taom_bld_stall_openfolder" text="{=taom_bld_stall_openfolder}Open log folder" />
+	<!-- Battle Load Diagnostics — next-session stall notice (StallReportNotifier) -->
+	<string id="taom_bld_stall_title" text="{=taom_bld_stall_title}TAOM: last battle load may not have finished" />
+	<string id="taom_bld_stall_dismiss" text="{=taom_bld_stall_dismiss}Dismiss" />
+	<string id="taom_bld_stall_openfolder" text="{=taom_bld_stall_openfolder}Open log folder" />
 
-  <!-- Settlement Food — labeled line in the town food-breakdown tooltip (TaomSettlementFoodModel) -->
-  <string id="taom_settlement_food_adjustment" text="{=taom_settlement_food_adjustment}Settlement food (TAOM)" />
+	<!-- Settlement Food — labeled line in the town food-breakdown tooltip (TaomSettlementFoodModel) -->
+	<string id="taom_settlement_food_adjustment" text="{=taom_settlement_food_adjustment}Settlement food (TAOM)" />
 
-  <!-- Special Resources — recruit-screen Done-button hint when the player can't afford an elephant/spider -->
-  <string id="taom_recruit_needs_resource" text="{=taom_recruit_needs_resource}Requires {AMOUNT} {RESOURCE}" />
+	<!-- Special Resources — recruit-screen Done-button hint when the player can't afford an elephant/spider -->
+	<string id="taom_recruit_needs_resource" text="{=taom_recruit_needs_resource}Requires {AMOUNT} {RESOURCE}" />
 
-  <!-- Naval convoy party names (NavalTravel #296) -->
-  <!-- The engine's CaravanPartyComponent.CacheName uses these when a party reports     -->
-  <!-- HasNavalNavigationCapability (true for AI caravans under our naval feature), but  -->
-  <!-- they ship only in the unloaded NavalDLC. Mirror the vanilla CARAVAN text + reuse  -->
-  <!-- its translation keys ({=LjUhEJxz}/{=l4pRw7pO}) so all 12 languages resolve free.  -->
-  <string id="str_convoy_party_name" text="{=LjUhEJxz}Caravan of {OWNER.NAME}" />
-  <string id="str_armed_convoy_party_name" text="{=l4pRw7pO}Armed Caravan of {OWNER.NAME}" />
+	<!-- Naval convoy party names (NavalTravel #296) -->
+	<!-- The engine's CaravanPartyComponent.CacheName uses these when a party reports     -->
+	<!-- HasNavalNavigationCapability (true for AI caravans under our naval feature), but  -->
+	<!-- they ship only in the unloaded NavalDLC. Mirror the vanilla CARAVAN text + reuse  -->
+	<!-- its translation keys ({=LjUhEJxz}/{=l4pRw7pO}) so all 12 languages resolve free.  -->
+	<string id="str_convoy_party_name" text="{=LjUhEJxz}Caravan of {OWNER.NAME}" />
+	<string id="str_armed_convoy_party_name" text="{=l4pRw7pO}Armed Caravan of {OWNER.NAME}" />
 
-  <!-- AlignmentDesertion -->
-  <string id="taom_align_desertion" text="{=taom_align_desertion}{COUNT} troops deserted — they refuse to serve a lord of the opposing alignment." />
+	<!-- AlignmentDesertion -->
+	<string id="taom_align_desertion" text="{=taom_align_desertion}{COUNT} troops deserted — they refuse to serve a lord of the opposing alignment." />
 
-  <!-- TroopWeight — party-size-limit breakdown label (2026-07-11 count->limit rework) -->
-  <string id="taom_troop_weight_size" text="{=taom_troop_weight_size}Heavy troops" />
-  <string id="taom_troop_weight_tag" text="{=taom_troop_weight_tag}{NAME} ×{MULT}" />
+	<!-- TroopWeight — party-size-limit breakdown label (2026-07-11 count->limit rework) -->
+	<string id="taom_troop_weight_size" text="{=taom_troop_weight_size}Heavy troops" />
+	<string id="taom_troop_weight_tag" text="{=taom_troop_weight_tag}{NAME} ×{MULT}" />
 
-  <!-- AiPartySize (#461) - party-size-limit and upkeep breakdown labels for AI lord parties -->
-  <string id="taom_ai_party_size" text="{=taom_ai_party_size}Warlord&apos;s host" />
-  <string id="taom_ai_garrison_size" text="{=taom_ai_garrison_size}Fortified realm" />
-  <string id="taom_caravan_escort" text="{=taom_caravan_escort}Caravan escort" />
-  <string id="taom_ai_forage" text="{=taom_ai_forage}Campaign foraging" />
-  <string id="taom_ai_levy" text="{=taom_ai_levy}Levied service" />
+	<!-- AiPartySize (#461) - party-size-limit and upkeep breakdown labels for AI lord parties -->
+	<string id="taom_ai_party_size" text="{=taom_ai_party_size}Warlord&apos;s host" />
+	<string id="taom_ai_garrison_size" text="{=taom_ai_garrison_size}Fortified realm" />
+	<string id="taom_caravan_escort" text="{=taom_caravan_escort}Caravan escort" />
+	<string id="taom_ai_forage" text="{=taom_ai_forage}Campaign foraging" />
+	<string id="taom_ai_levy" text="{=taom_ai_levy}Levied service" />
 	<!-- CultureConversion - garrison + militia re-manned in the fief's new culture -->
 	<string id="taom_garrison_culture_swap" text="{=taom_garrison_culture_swap}{COUNT} troops at {SETTLEMENT} have been replaced by soldiers of its new culture." />
 	<!-- SpecialResources -->
@@ -2654,42 +2654,42 @@
 	<!-- No key name in this hint any more: the binding is the player's to choose. -->
 	<string id="taom_extra_fast_forward_hint" text="{=taom_extra_fast_forward_hint}Extra Fast Forward" />
 
-  <!-- TAOM-NEWCULTURE:lindon:BEGIN -->
-  <string id="str_faction_official.lindon" text="{=taom_str_faction_official.lindon}a loremaster of Lindon" />
-  <string id="str_faction_official.lindon_f" text="{=taom_str_faction_official.lindon_f}a healer of Lindon" />
-  <string id="str_faction_ruler.lindon" text="{=taom_str_faction_ruler.lindon}Lord" />
-  <string id="str_faction_ruler.lindon_f" text="{=taom_str_faction_ruler.lindon_f}Lady" />
-  <string id="str_faction_ruler_term_in_speech.lindon" text="{=taom_str_faction_ruler_term_in_speech.lindon}{?RULER.GENDER}the Lady{?}the Lord{\?} {RULER.NAME}" />
-  <string id="str_faction_ruler_name_with_title.lindon" text="{=taom_str_faction_ruler_name_with_title.lindon}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
-  <string id="str_faction_noble_name_with_title.lindon" text="{=taom_str_faction_noble_name_with_title.lindon}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
-  <string id="str_faction_formal_name_for_culture.lindon" text="{=taom_str_faction_formal_name_for_culture.lindon}Grey Havens" />
-  <string id="str_faction_informal_name_for_culture.lindon" text="{=taom_str_faction_informal_name_for_culture.lindon}Lindon" />
-  <string id="str_neutral_term_for_culture.lindon" text="{=taom_str_neutral_term_for_culture.lindon}Elves of Lindon" />
-  <string id="str_culture_description.lindon" text="{=taom_str_culture_description.lindon}Lindon, the Grey Havens, is a refuge of wisdom and beauty led by Cirdan the Shipwright. Set on the shores of the Gulf of Lune, its people are loremasters and guardians of Middle-earth's ancient knowledge. The Elves of Lindon offer counsel and aid to those who stand against the darkness, preserving the light of hope and unity." />
-  <string id="str_culture_rich_name.lindon" text="{=taom_str_culture_rich_name.lindon}Falathrim" />
-  <string id="str_adjective_for_culture.lindon" text="{=taom_str_adjective_for_culture.lindon}Lindonian" />
-  <string id="str_player_father_name.lindon" text="{=taom_str_player_father_name.lindon}Celeforn" />
-  <string id="str_player_mother_name.lindon" text="{=taom_str_player_mother_name.lindon}Gilrien" />
+	<!-- TAOM-NEWCULTURE:lindon:BEGIN -->
+	<string id="str_faction_official.lindon" text="{=taom_str_faction_official.lindon}a loremaster of Lindon" />
+	<string id="str_faction_official.lindon_f" text="{=taom_str_faction_official.lindon_f}a healer of Lindon" />
+	<string id="str_faction_ruler.lindon" text="{=taom_str_faction_ruler.lindon}Lord" />
+	<string id="str_faction_ruler.lindon_f" text="{=taom_str_faction_ruler.lindon_f}Lady" />
+	<string id="str_faction_ruler_term_in_speech.lindon" text="{=taom_str_faction_ruler_term_in_speech.lindon}{?RULER.GENDER}the Lady{?}the Lord{\?} {RULER.NAME}" />
+	<string id="str_faction_ruler_name_with_title.lindon" text="{=taom_str_faction_ruler_name_with_title.lindon}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+	<string id="str_faction_noble_name_with_title.lindon" text="{=taom_str_faction_noble_name_with_title.lindon}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+	<string id="str_faction_formal_name_for_culture.lindon" text="{=taom_str_faction_formal_name_for_culture.lindon}Grey Havens" />
+	<string id="str_faction_informal_name_for_culture.lindon" text="{=taom_str_faction_informal_name_for_culture.lindon}Lindon" />
+	<string id="str_neutral_term_for_culture.lindon" text="{=taom_str_neutral_term_for_culture.lindon}Elves of Lindon" />
+	<string id="str_culture_description.lindon" text="{=taom_str_culture_description.lindon}Lindon, the Grey Havens, is a refuge of wisdom and beauty led by Cirdan the Shipwright. Set on the shores of the Gulf of Lune, its people are loremasters and guardians of Middle-earth's ancient knowledge. The Elves of Lindon offer counsel and aid to those who stand against the darkness, preserving the light of hope and unity." />
+	<string id="str_culture_rich_name.lindon" text="{=taom_str_culture_rich_name.lindon}Falathrim" />
+	<string id="str_adjective_for_culture.lindon" text="{=taom_str_adjective_for_culture.lindon}Lindonian" />
+	<string id="str_player_father_name.lindon" text="{=taom_str_player_father_name.lindon}Celeforn" />
+	<string id="str_player_mother_name.lindon" text="{=taom_str_player_mother_name.lindon}Gilrien" />
 
-  <!-- TAOM-NEWCULTURE:lindon:END -->
-  <!-- TAOM-NEWCULTURE:bluecraig:BEGIN -->
-  <string id="str_faction_official.bluecraig" text="{=taom_str_faction_official.bluecraig}a chieftain of Blue Craig" />
-  <string id="str_faction_official.bluecraig_f" text="{=taom_str_faction_official.bluecraig_f}a chieftainess of Blue Craig" />
-  <string id="str_faction_ruler.bluecraig" text="{=taom_str_faction_ruler.bluecraig}Warlord" />
-  <string id="str_faction_ruler.bluecraig_f" text="{=taom_str_faction_ruler.bluecraig_f}Lady Warlord" />
-  <string id="str_faction_ruler_term_in_speech.bluecraig" text="{=taom_str_faction_ruler_term_in_speech.bluecraig}the Warlord, {RULER.NAME}" />
-  <string id="str_faction_ruler_name_with_title.bluecraig" text="{=taom_str_faction_ruler_name_with_title.bluecraig}Warlord {RULER.NAME}" />
-  <string id="str_faction_noble_name_with_title.bluecraig" text="{=taom_str_faction_noble_name_with_title.bluecraig}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
-  <string id="str_faction_formal_name_for_culture.bluecraig" text="{=taom_str_faction_formal_name_for_culture.bluecraig}Goblins of Blue Craig" />
-  <string id="str_faction_informal_name_for_culture.bluecraig" text="{=taom_str_faction_informal_name_for_culture.bluecraig}Goblin" />
-  <string id="str_neutral_term_for_culture.bluecraig" text="{=taom_str_neutral_term_for_culture.bluecraig}Goblins" />
-  <string id="str_culture_description.bluecraig" text="{=taom_str_culture_description.bluecraig}The Goblins of the Ered Luin are a teeming, vicious rabble dwelling in the warrens of Blue Craig. Led by their Great Goblin and petty captains, they raid the mountain roads without end, driven by greed and an ancient hatred of the Free Peoples." />
-  <string id="str_culture_rich_name.bluecraig" text="{=taom_str_culture_rich_name.bluecraig}Goblins" />
-  <string id="str_adjective_for_culture.bluecraig" text="{=taom_str_adjective_for_culture.bluecraig}Goblin" />
-  <string id="str_player_father_name.bluecraig" text="{=taom_str_player_father_name.bluecraig}Narzuk" />
-  <string id="str_player_mother_name.bluecraig" text="{=taom_str_player_mother_name.bluecraig}Borlia" />
+	<!-- TAOM-NEWCULTURE:lindon:END -->
+	<!-- TAOM-NEWCULTURE:bluecraig:BEGIN -->
+	<string id="str_faction_official.bluecraig" text="{=taom_str_faction_official.bluecraig}a chieftain of Blue Craig" />
+	<string id="str_faction_official.bluecraig_f" text="{=taom_str_faction_official.bluecraig_f}a chieftainess of Blue Craig" />
+	<string id="str_faction_ruler.bluecraig" text="{=taom_str_faction_ruler.bluecraig}Warlord" />
+	<string id="str_faction_ruler.bluecraig_f" text="{=taom_str_faction_ruler.bluecraig_f}Lady Warlord" />
+	<string id="str_faction_ruler_term_in_speech.bluecraig" text="{=taom_str_faction_ruler_term_in_speech.bluecraig}the Warlord, {RULER.NAME}" />
+	<string id="str_faction_ruler_name_with_title.bluecraig" text="{=taom_str_faction_ruler_name_with_title.bluecraig}Warlord {RULER.NAME}" />
+	<string id="str_faction_noble_name_with_title.bluecraig" text="{=taom_str_faction_noble_name_with_title.bluecraig}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+	<string id="str_faction_formal_name_for_culture.bluecraig" text="{=taom_str_faction_formal_name_for_culture.bluecraig}Goblins of Blue Craig" />
+	<string id="str_faction_informal_name_for_culture.bluecraig" text="{=taom_str_faction_informal_name_for_culture.bluecraig}Goblin" />
+	<string id="str_neutral_term_for_culture.bluecraig" text="{=taom_str_neutral_term_for_culture.bluecraig}Goblins" />
+	<string id="str_culture_description.bluecraig" text="{=taom_str_culture_description.bluecraig}The Goblins of the Ered Luin are a teeming, vicious rabble dwelling in the warrens of Blue Craig. Led by their Great Goblin and petty captains, they raid the mountain roads without end, driven by greed and an ancient hatred of the Free Peoples." />
+	<string id="str_culture_rich_name.bluecraig" text="{=taom_str_culture_rich_name.bluecraig}Goblins" />
+	<string id="str_adjective_for_culture.bluecraig" text="{=taom_str_adjective_for_culture.bluecraig}Goblin" />
+	<string id="str_player_father_name.bluecraig" text="{=taom_str_player_father_name.bluecraig}Narzuk" />
+	<string id="str_player_mother_name.bluecraig" text="{=taom_str_player_mother_name.bluecraig}Borlia" />
 
-  <!-- TAOM-NEWCULTURE:bluecraig:END -->
+	<!-- TAOM-NEWCULTURE:bluecraig:END -->
 	<!-- SupplyLines (#505): resupply convoys ordered from towns, castles and friendly lords. -->
 
 	<!-- SupplyLines (#505): resupply convoys ordered from towns, castles and friendly lords. -->
@@ -2894,7 +2894,7 @@
 	<string id="taom_res_badge_emissary" text="{=taom_res_badge_emissary}Elite Emissary price" />
 	<string id="taom_res_badge_paid_in" text="{=taom_res_badge_paid_in}Upgrades, recruits and upkeep are paid in your own {RESOURCE}" />
 
-  <!-- TAOM-ASO:START ================================================================
+	<!-- TAOM-ASO:START ================================================================
        v1.5.0 Advanced Starting Options, the IN-GAME half only.
 
        str_advanced_start_value_name.<id> is what the Escape menu's starting-options
@@ -2909,61 +2909,61 @@
        is dead; TaomStartOptionsProviderTests.NoMenuFacingAsoRow_LivesInTheGameTextXml
        fails on one.
        ==================================================================== -->
-  <string id="str_advanced_start_value_name.empire" text="{=taom_aso_kingdom.empire}Dunland" />
-  <string id="str_advanced_start_value_name.empire_w" text="{=taom_aso_kingdom.empire_w}Gondor" />
-  <string id="str_advanced_start_value_name.empire_s" text="{=taom_aso_kingdom.empire_s}Mordor" />
-  <string id="str_advanced_start_value_name.sturgia" text="{=taom_aso_kingdom.sturgia}Dale" />
-  <string id="str_advanced_start_value_name.aserai" text="{=taom_aso_kingdom.aserai}Harad" />
-  <string id="str_advanced_start_value_name.vlandia" text="{=taom_aso_kingdom.vlandia}Rohan" />
-  <string id="str_advanced_start_value_name.battania" text="{=taom_aso_kingdom.battania}Khand" />
-  <string id="str_advanced_start_value_name.khuzait" text="{=taom_aso_kingdom.khuzait}Rhun" />
-  <string id="str_advanced_start_value_name.erebor" text="{=taom_aso_kingdom.erebor}Erebor" />
-  <string id="str_advanced_start_value_name.rivendell" text="{=taom_aso_kingdom.rivendell}Imladris" />
-  <string id="str_advanced_start_value_name.mirkwood" text="{=taom_aso_kingdom.mirkwood}Lasgalen" />
-  <string id="str_advanced_start_value_name.lothlorien" text="{=taom_aso_kingdom.lothlorien}Lothlorien" />
-  <string id="str_advanced_start_value_name.isengard" text="{=taom_aso_kingdom.isengard}Isengard" />
-  <string id="str_advanced_start_value_name.gundabad" text="{=taom_aso_kingdom.gundabad}Gundabad" />
-  <string id="str_advanced_start_value_name.umbar" text="{=taom_aso_kingdom.umbar}Umbar" />
-  <string id="str_advanced_start_value_name.dolguldur" text="{=taom_aso_kingdom.dolguldur}Dol Guldur" />
-  <string id="str_advanced_start_value_name.shaghana" text="{=taom_aso_kingdom.shaghana}Shaghâna" />
-  <string id="str_advanced_start_value_name.abanissa" text="{=taom_aso_kingdom.abanissa}Âbanissa" />
-  <string id="str_advanced_start_value_name.goblin" text="{=taom_aso_kingdom.goblin}Goblins" />
-  <string id="str_advanced_start_value_name.mistymountainorcs" text="{=taom_aso_kingdom.mistymountainorcs}Misty Mountain Orcs" />
-  <string id="str_advanced_start_value_name.lindon" text="{=taom_aso_kingdom.lindon}Lindon" />
-  <string id="str_advanced_start_value_name.bluecraig" text="{=taom_aso_kingdom.bluecraig}Goblins of Blue Craig" />
-  <string id="str_advanced_start_value_name.arthedain" text="{=taom_aso_kingdom.arthedain}Arthedain" />
-  <string id="str_advanced_start_value_name.alternativecalradia" text="{=taom_aso_item_name_randomized}Randomized Middle-earth" />
-  <!-- TAOM-ASO:END -->
+	<string id="str_advanced_start_value_name.empire" text="{=taom_aso_kingdom.empire}Dunland" />
+	<string id="str_advanced_start_value_name.empire_w" text="{=taom_aso_kingdom.empire_w}Gondor" />
+	<string id="str_advanced_start_value_name.empire_s" text="{=taom_aso_kingdom.empire_s}Mordor" />
+	<string id="str_advanced_start_value_name.sturgia" text="{=taom_aso_kingdom.sturgia}Dale" />
+	<string id="str_advanced_start_value_name.aserai" text="{=taom_aso_kingdom.aserai}Harad" />
+	<string id="str_advanced_start_value_name.vlandia" text="{=taom_aso_kingdom.vlandia}Rohan" />
+	<string id="str_advanced_start_value_name.battania" text="{=taom_aso_kingdom.battania}Khand" />
+	<string id="str_advanced_start_value_name.khuzait" text="{=taom_aso_kingdom.khuzait}Rhun" />
+	<string id="str_advanced_start_value_name.erebor" text="{=taom_aso_kingdom.erebor}Erebor" />
+	<string id="str_advanced_start_value_name.rivendell" text="{=taom_aso_kingdom.rivendell}Imladris" />
+	<string id="str_advanced_start_value_name.mirkwood" text="{=taom_aso_kingdom.mirkwood}Lasgalen" />
+	<string id="str_advanced_start_value_name.lothlorien" text="{=taom_aso_kingdom.lothlorien}Lothlorien" />
+	<string id="str_advanced_start_value_name.isengard" text="{=taom_aso_kingdom.isengard}Isengard" />
+	<string id="str_advanced_start_value_name.gundabad" text="{=taom_aso_kingdom.gundabad}Gundabad" />
+	<string id="str_advanced_start_value_name.umbar" text="{=taom_aso_kingdom.umbar}Umbar" />
+	<string id="str_advanced_start_value_name.dolguldur" text="{=taom_aso_kingdom.dolguldur}Dol Guldur" />
+	<string id="str_advanced_start_value_name.shaghana" text="{=taom_aso_kingdom.shaghana}Shaghâna" />
+	<string id="str_advanced_start_value_name.abanissa" text="{=taom_aso_kingdom.abanissa}Âbanissa" />
+	<string id="str_advanced_start_value_name.goblin" text="{=taom_aso_kingdom.goblin}Goblins" />
+	<string id="str_advanced_start_value_name.mistymountainorcs" text="{=taom_aso_kingdom.mistymountainorcs}Misty Mountain Orcs" />
+	<string id="str_advanced_start_value_name.lindon" text="{=taom_aso_kingdom.lindon}Lindon" />
+	<string id="str_advanced_start_value_name.bluecraig" text="{=taom_aso_kingdom.bluecraig}Goblins of Blue Craig" />
+	<string id="str_advanced_start_value_name.arthedain" text="{=taom_aso_kingdom.arthedain}Arthedain" />
+	<string id="str_advanced_start_value_name.alternativecalradia" text="{=taom_aso_item_name_randomized}Randomized Middle-earth" />
+	<!-- TAOM-ASO:END -->
 
-  <!-- Culture doctrine (#608): the team-AI tactic line shown to a player fighting as a sergeant
+	<!-- Culture doctrine (#608): the team-AI tactic line shown to a player fighting as a sergeant
        (TeamAIComponent.MakeDecision keys str_team_ai_tactic_text on the tactic type name). -->
-  <string id="str_team_ai_tactic_text.TaomTacticShieldWall" text="{=taom_tactic.shield_wall}Our plan is to lock shields and hold our ground." />
-  <string id="str_team_ai_tactic_text.TaomTacticInfantryMass" text="{=taom_tactic.infantry_mass}Our plan is to swarm them with our numbers." />
-  <string id="str_team_ai_tactic_text.TaomTacticCavalryDominance" text="{=taom_tactic.cavalry_dominance}Our plan is to ride them down and let the foot finish what the horse begins." />
-  <string id="str_team_ai_tactic_text.TaomTacticArcherRing" text="{=taom_tactic.archer_ring}Our plan is to ring our archers with spears and let the arrows do the work." />
-  <string id="str_team_ai_tactic_text.TaomTacticTwoLineWall" text="{=taom_tactic.two_line_wall}Our plan is to hold two lines: the front stands, the second waits, then strikes." />
-  <string id="str_team_ai_tactic_text.TaomTacticEnvelop" text="{=taom_tactic.envelop}Our plan is to come at them from three sides and close the jaws." />
-  <string id="str_team_ai_tactic_text.TaomTacticDisciplinedLine" text="{=taom_tactic.disciplined_line}Our plan is to hold the line until they commit, then advance as one." />
-  <string id="str_team_ai_tactic_text.TaomTacticArcherAdvance" text="{=taom_tactic.archer_advance}Our plan is to advance behind the bows and let the arrows open the way." />
-  <string id="str_team_ai_tactic_text.TaomTacticEoredScreen" text="{=taom_tactic.eored_screen}Our plan is to screen the flanks with our riders and charge once they commit." />
-  <string id="str_team_ai_tactic_text.TaomTacticHitAndRun" text="{=taom_tactic.hit_and_run}Our plan is to throw, fall back, and throw again until their line breaks." />
-  <string id="str_team_ai_tactic_text.TaomTacticMumakVanguard" text="{=taom_tactic.mumak_vanguard}Our plan is to send the mumakil in first and follow in their wake." />
-  <string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorBracedDefend" text="{=taom_behavior.braced_defend}Hold your position; square up against horse" />
-  <string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorBracedAdvance" text="{=taom_behavior.braced_advance}Advance in a wall; square up against horse" />
-  <string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorInfantrySkirmish" text="{=taom_behavior.infantry_skirmish}Close to throwing range, throw, and fall back" />
-  <string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorCycleCharge" text="{=taom_behavior.cycle_charge}Charge through, reform, and charge again" />
-  <string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorEnvelopWing" text="{=taom_behavior.envelop_wing}Swing round their flank and strike from the side" />
-  <string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorFootCharge" text="{=taom_behavior.foot_charge}Charge their foot; square up if horse come at you" />
-  <string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorArcherFlank" text="{=taom_behavior.archer_flank}Stand beside the wall and shoot; fall in behind it if they come for you" />
-  <!-- MissionOrderVM.OnDelegateCommandToAI (F6): "Infantry are ..." keyed str_formation_ai_behavior_text on the behaviour type name;
+	<string id="str_team_ai_tactic_text.TaomTacticShieldWall" text="{=taom_tactic.shield_wall}Our plan is to lock shields and hold our ground." />
+	<string id="str_team_ai_tactic_text.TaomTacticInfantryMass" text="{=taom_tactic.infantry_mass}Our plan is to swarm them with our numbers." />
+	<string id="str_team_ai_tactic_text.TaomTacticCavalryDominance" text="{=taom_tactic.cavalry_dominance}Our plan is to ride them down and let the foot finish what the horse begins." />
+	<string id="str_team_ai_tactic_text.TaomTacticArcherRing" text="{=taom_tactic.archer_ring}Our plan is to ring our archers with spears and let the arrows do the work." />
+	<string id="str_team_ai_tactic_text.TaomTacticTwoLineWall" text="{=taom_tactic.two_line_wall}Our plan is to hold two lines: the front stands, the second waits, then strikes." />
+	<string id="str_team_ai_tactic_text.TaomTacticEnvelop" text="{=taom_tactic.envelop}Our plan is to come at them from three sides and close the jaws." />
+	<string id="str_team_ai_tactic_text.TaomTacticDisciplinedLine" text="{=taom_tactic.disciplined_line}Our plan is to hold the line until they commit, then advance as one." />
+	<string id="str_team_ai_tactic_text.TaomTacticArcherAdvance" text="{=taom_tactic.archer_advance}Our plan is to advance behind the bows and let the arrows open the way." />
+	<string id="str_team_ai_tactic_text.TaomTacticEoredScreen" text="{=taom_tactic.eored_screen}Our plan is to screen the flanks with our riders and charge once they commit." />
+	<string id="str_team_ai_tactic_text.TaomTacticHitAndRun" text="{=taom_tactic.hit_and_run}Our plan is to throw, fall back, and throw again until their line breaks." />
+	<string id="str_team_ai_tactic_text.TaomTacticMumakVanguard" text="{=taom_tactic.mumak_vanguard}Our plan is to send the mumakil in first and follow in their wake." />
+	<string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorBracedDefend" text="{=taom_behavior.braced_defend}Hold your position; square up against horse" />
+	<string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorBracedAdvance" text="{=taom_behavior.braced_advance}Advance in a wall; square up against horse" />
+	<string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorInfantrySkirmish" text="{=taom_behavior.infantry_skirmish}Close to throwing range, throw, and fall back" />
+	<string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorCycleCharge" text="{=taom_behavior.cycle_charge}Charge through, reform, and charge again" />
+	<string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorEnvelopWing" text="{=taom_behavior.envelop_wing}Swing round their flank and strike from the side" />
+	<string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorFootCharge" text="{=taom_behavior.foot_charge}Charge their foot; square up if horse come at you" />
+	<string id="str_formation_ai_sergeant_instruction_behavior_text.BehaviorArcherFlank" text="{=taom_behavior.archer_flank}Stand beside the wall and shoot; fall in behind it if they come for you" />
+	<!-- MissionOrderVM.OnDelegateCommandToAI (F6): "Infantry are ..." keyed str_formation_ai_behavior_text on the behaviour type name;
        the vanilla rows carry TROOP_NAMES_BEGIN / TROOP_NAMES_END / IS_PLURAL, set by the view model before the lookup. -->
-  <string id="str_formation_ai_behavior_text.BehaviorBracedDefend" text="{=taom_behavior_f6.braced_defend}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are holding in a wall." />
-  <string id="str_formation_ai_behavior_text.BehaviorBracedAdvance" text="{=taom_behavior_f6.braced_advance}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are advancing in a wall." />
-  <string id="str_formation_ai_behavior_text.BehaviorInfantrySkirmish" text="{=taom_behavior_f6.infantry_skirmish}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are throwing and falling back." />
-  <string id="str_formation_ai_behavior_text.BehaviorCycleCharge" text="{=taom_behavior_f6.cycle_charge}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are charging in cycles." />
-  <string id="str_formation_ai_behavior_text.BehaviorEnvelopWing" text="{=taom_behavior_f6.envelop_wing}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are swinging round the flank." />
-  <string id="str_formation_ai_behavior_text.BehaviorFootCharge" text="{=taom_behavior_f6.foot_charge}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are charging the enemy foot." />
-  <string id="str_formation_ai_behavior_text.BehaviorArcherFlank" text="{=taom_behavior_f6.archer_flank}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are taking the flank of the wall." />
+	<string id="str_formation_ai_behavior_text.BehaviorBracedDefend" text="{=taom_behavior_f6.braced_defend}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are holding in a wall." />
+	<string id="str_formation_ai_behavior_text.BehaviorBracedAdvance" text="{=taom_behavior_f6.braced_advance}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are advancing in a wall." />
+	<string id="str_formation_ai_behavior_text.BehaviorInfantrySkirmish" text="{=taom_behavior_f6.infantry_skirmish}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are throwing and falling back." />
+	<string id="str_formation_ai_behavior_text.BehaviorCycleCharge" text="{=taom_behavior_f6.cycle_charge}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are charging in cycles." />
+	<string id="str_formation_ai_behavior_text.BehaviorEnvelopWing" text="{=taom_behavior_f6.envelop_wing}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are swinging round the flank." />
+	<string id="str_formation_ai_behavior_text.BehaviorFootCharge" text="{=taom_behavior_f6.foot_charge}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are charging the enemy foot." />
+	<string id="str_formation_ai_behavior_text.BehaviorArcherFlank" text="{=taom_behavior_f6.archer_flank}{TROOP_NAMES_BEGIN}{?IS_PLURAL} and {?}{\?}{TROOP_NAMES_END} are taking the flank of the wall." />
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
 	<!-- PatchCategoryApplier -->
 	<string id="taom_patch_apply_failed" text="{=taom_patch_apply_failed}TAOM: patch groups failed to apply during {PHASE}: {GROUPS}. Some fixes in those groups are off this session; the TAOM log names the cause." />
@@ -3195,24 +3195,24 @@
 
 
 
-  <!-- TAOM-NEWCULTURE:arthedain:BEGIN -->
-  <string id="str_faction_official.arthedain" text="{=taom_str_faction_official.arthedain}a noble lord" />
-  <string id="str_faction_official.arthedain_f" text="{=taom_str_faction_official.arthedain_f}a noble lady" />
-  <string id="str_faction_ruler.arthedain" text="{=taom_str_faction_ruler.arthedain}King" />
-  <string id="str_faction_ruler.arthedain_f" text="{=taom_str_faction_ruler.arthedain_f}Queen" />
-  <string id="str_faction_ruler_term_in_speech.arthedain" text="{=taom_str_faction_ruler_term_in_speech.arthedain}{?RULER.GENDER}the Queen{?}the King{\?} {RULER.NAME}" />
-  <string id="str_faction_ruler_name_with_title.arthedain" text="{=taom_str_faction_ruler_name_with_title.arthedain}{?RULER.GENDER}Queen{?}King{\?} {RULER.NAME}" />
-  <string id="str_faction_noble_name_with_title.arthedain" text="{=taom_str_faction_noble_name_with_title.arthedain}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
-  <string id="str_faction_formal_name_for_culture.arthedain" text="{=taom_str_faction_formal_name_for_culture.arthedain}Arthedain" />
-  <string id="str_faction_informal_name_for_culture.arthedain" text="{=taom_str_faction_informal_name_for_culture.arthedain}the Dúnedain of the North" />
-  <string id="str_neutral_term_for_culture.arthedain" text="{=taom_str_neutral_term_for_culture.arthedain}Dúnedain" />
-  <string id="str_culture_description.arthedain" text="{=taom_str_culture_description.arthedain}The Dúnedain of Arthedain are the last heirs of Arnor, the North-kingdom Elendil founded. From Fornost upon the North Downs the line of Arvedui still keeps the watch that Isildur's heirs have kept for a thousand years, though their towns are few, their lords are poor and the shadow of Angmar never leaves the hills. They are fewer than their southern kin and prouder than their numbers warrant, and every season the wild lands press closer." />
-  <string id="str_culture_rich_name.arthedain" text="{=taom_str_culture_rich_name.arthedain}Dúnedain of Arthedain" />
-  <string id="str_adjective_for_culture.arthedain" text="{=taom_str_adjective_for_culture.arthedain}Arthedain" />
-  <string id="str_player_father_name.arthedain" text="{=taom_str_player_father_name.arthedain}Aravir" />
-  <string id="str_player_mother_name.arthedain" text="{=taom_str_player_mother_name.arthedain}Ivorwen" />
+	<!-- TAOM-NEWCULTURE:arthedain:BEGIN -->
+	<string id="str_faction_official.arthedain" text="{=taom_str_faction_official.arthedain}a noble lord" />
+	<string id="str_faction_official.arthedain_f" text="{=taom_str_faction_official.arthedain_f}a noble lady" />
+	<string id="str_faction_ruler.arthedain" text="{=taom_str_faction_ruler.arthedain}King" />
+	<string id="str_faction_ruler.arthedain_f" text="{=taom_str_faction_ruler.arthedain_f}Queen" />
+	<string id="str_faction_ruler_term_in_speech.arthedain" text="{=taom_str_faction_ruler_term_in_speech.arthedain}{?RULER.GENDER}the Queen{?}the King{\?} {RULER.NAME}" />
+	<string id="str_faction_ruler_name_with_title.arthedain" text="{=taom_str_faction_ruler_name_with_title.arthedain}{?RULER.GENDER}Queen{?}King{\?} {RULER.NAME}" />
+	<string id="str_faction_noble_name_with_title.arthedain" text="{=taom_str_faction_noble_name_with_title.arthedain}{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+	<string id="str_faction_formal_name_for_culture.arthedain" text="{=taom_str_faction_formal_name_for_culture.arthedain}Arthedain" />
+	<string id="str_faction_informal_name_for_culture.arthedain" text="{=taom_str_faction_informal_name_for_culture.arthedain}the Dúnedain of the North" />
+	<string id="str_neutral_term_for_culture.arthedain" text="{=taom_str_neutral_term_for_culture.arthedain}Dúnedain" />
+	<string id="str_culture_description.arthedain" text="{=taom_str_culture_description.arthedain}The Dúnedain of Arthedain are the last heirs of Arnor, the North-kingdom Elendil founded. From Fornost upon the North Downs the line of Arvedui still keeps the watch that Isildur's heirs have kept for a thousand years, though their towns are few, their lords are poor and the shadow of Angmar never leaves the hills. They are fewer than their southern kin and prouder than their numbers warrant, and every season the wild lands press closer." />
+	<string id="str_culture_rich_name.arthedain" text="{=taom_str_culture_rich_name.arthedain}Dúnedain of Arthedain" />
+	<string id="str_adjective_for_culture.arthedain" text="{=taom_str_adjective_for_culture.arthedain}Arthedain" />
+	<string id="str_player_father_name.arthedain" text="{=taom_str_player_father_name.arthedain}Aravir" />
+	<string id="str_player_mother_name.arthedain" text="{=taom_str_player_mother_name.arthedain}Ivorwen" />
 
-  <!-- TAOM-NEWCULTURE:arthedain:END -->
+	<!-- TAOM-NEWCULTURE:arthedain:END -->
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
 	<!-- CareerSystem -->
 	<string id="taom_career_lock_fork" text="{=taom_career_lock_fork}You took another choice on this path." />
@@ -3266,8 +3266,27 @@
 	<string id="taom_war_blocked_peace" text="{=taom_war_blocked_peace}The War of the Ring has not yet begun. No kingdom may declare war." />
 	<string id="taom_war_blocked_unscripted" text="{=taom_war_blocked_unscripted}Only the first wars of the age may be declared now." />
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
-	<!-- ShaderSourceInstall -->
-	<string id="taom_shader_source_install_failed" text="{=taom_shader_source_install_failed}TAOM could not copy its bow shaders into {FOLDER}. Some bows may make their holder invisible. Run the game once as administrator, or copy Modules\TAOM\Shaders\Sources into that folder." />
-
+	<!-- HardQuestionsActionAdapter -->
+	<string id="taom_hq_reproach" text="{=taom_hq_reproach}{COMPANION} will not meet your eye after what was done to that lord." />
+	<!-- HardQuestions -->
+	<string id="taom_hq_cannot_afford" text="{=taom_hq_cannot_afford}You do not carry that much." />
+	<string id="taom_hq_ask_clan" text="{=taom_hq_ask_clan}Tell me where your kin hold their lands." />
+	<string id="taom_hq_refuse_clan" text="{=taom_hq_refuse_clan}You ask me to sell my own blood. I will name no hall of my kin." />
+	<string id="taom_hq_ask_kingdom" text="{=taom_hq_ask_kingdom}Tell me where your realm keeps its strength." />
+	<string id="taom_hq_refuse_kingdom" text="{=taom_hq_refuse_kingdom}You ask me to betray my whole people. I will name no fortress of my realm." />
+	<string id="taom_hq_pay" text="{=taom_hq_pay}Everyone has a price. Name yours: {PRICE} gold." />
+	<string id="taom_hq_force" text="{=taom_hq_force}I am not asking. Speak, or I will make you." />
+	<string id="taom_hq_back" text="{=taom_hq_back}Never mind. Forget I asked." />
+	<string id="taom_hq_paid_calc" text="{=taom_hq_paid_calc}Coin is a tongue I speak well. Listen, then." />
+	<string id="taom_hq_paid_valor" text="{=taom_hq_paid_valor}I take no pride in this, but a captive's pride feeds no one. Listen, then." />
+	<string id="taom_hq_paid_plain" text="{=taom_hq_paid_plain}So be it. I will tell you what you want to know." />
+	<string id="taom_hq_forced" text="{=taom_hq_forced}Then be damned, and take what you can tear from me." />
+	<string id="taom_hq_strip" text="{=taom_hq_strip}Your arms and armour are mine now." />
+	<string id="taom_hq_strip_warn" text="{=taom_hq_strip_warn}You would leave a lord in rags, before his own people's eyes? Think what it will cost you." />
+	<string id="taom_hq_strip_yes" text="{=taom_hq_strip_yes}Strip him." />
+	<string id="taom_hq_strip_no" text="{=taom_hq_strip_no}Leave him be." />
+	<string id="taom_hq_strip_done" text="{=taom_hq_strip_done}Take it, then. The shame is yours, not mine." />
+	<!-- WatchfulHoldsNoticeAdapter -->
+	<string id="taom_watchful_holds_harried" text="{=taom_watchful_holds_harried}The garrison of {FORT} harries your march, slowing it: {KILLED} killed, {WOUNDED} wounded and {FOOD} food lost." />
 
 </strings>

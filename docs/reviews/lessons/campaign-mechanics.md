@@ -631,3 +631,44 @@ two greyed options, and the player's own map event advances only through that me
   stays enabled in each state the change can reach. If none is guaranteed, release the hidden option in the states
   where nothing else is enabled, and ask vanilla's own check rather than copy its conditions.
 - **Source:** `docs/reviews/rca-enlistment-battle-exit-2026-10-18.md` F1.
+
+### Read the raise path before you add a co-op authority gate; a per-entity periodic tick needs none (#886, 2026-10-18)
+The castle recruitment listener on `HourlyTickPartyEvent` was built with `ICoopSessionProvider.IsAuthority` as its
+first check, on a plan claim that the old `HourlyTickParty` postfix had run on co-op clients. The event is raised only
+from `CampaignPeriodicEventManager.TickPeriodicEvents`, which BannerlordCoop's `PartyTickPatch` skips on a client, so
+the gate was always true where it ran. Under an enabled co-op module it allocated and invoked by reflection for every
+party every in-game hour.
+- **Why missed:** the claim came from Harmony semantics (a postfix runs after a skipping prefix), not from the raise
+  site. The lesson above ("enumerate EVERY handler and gate it") has no counterweight for handlers a client never runs.
+- **Prevent:** before you add an authority gate, find the event's raise site in the installed engine and check what
+  the co-op mod skips on that path (`docs/research/bannerlordcoop-internals.md`, `docs/features/coop-interop.md`). A
+  per-entity periodic tick (`HourlyTickPartyEvent`, `DailyTickSettlementEvent` and their kind) gets no gate; say so in a
+  comment next to the sibling handlers' co-op note. On any hot path, put a needed authority check after the cheap guards.
+- **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` finding 1.
+
+### A toggle that says "AI stops doing X" must cover every engine consumer of the resource (#886, 2026-10-18)
+"AI Recruits From Castles" gates TAOM's scoring gate and hourly listener, but vanilla's `OnBeforeSettlementEntered`
+recruits from castle notables on every entry and `GarrisonRecruitmentCampaignBehavior` takes slot 0 daily, so AI keeps
+taking castle volunteers with the toggle off. New docs in the same change also claimed a bind miss stops AI castle
+recruiting.
+- **Why missed:** the 2026-05-31 design listed the vanilla gates that block castles, not every reader and writer of a
+  castle notable's `VolunteerTypes`. The model held only the path TAOM changed.
+- **Prevent:** before a toggle, a hint or a doc says what the AI does or stops doing, list every engine consumer of
+  the resource (grep the installed engine source for the field, for example `VolunteerTypes`), and either gate each one
+  or word the promise to the paths actually gated.
+- **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` findings 4 and 5.
+
+### An hourly party handler filters on the party kind before any probe, timer or service call (#822, 2026-10-18)
+`HourlyTickPartyEvent` fires once per party per hour for all of `MobileParty.All`, 2,000 to 2,500 parties on a late
+save. Watchful Holds first called the co-op probe, a timer and its service for every one of them, then scanned 234
+forts with `foreach` over an `IReadOnlyList`, which boxes an enumerator per lord. Measured with the shipped Debug JIT,
+its own 1 ms hourly budget held only below about 110 to 160 eligible lords. The same build copied the `IsAuthority` gate
+of read-only siblings although it disorganizes other parties: the 2026-10-06 lesson above ("A sweep that decides other
+parties' outcomes") already said such a pass stands down while `IsSessionActive || ShouldDeferToHost`.
+- **Why missed:** the brief named the event and a budget but no measurement, and it took the co-op gate from sibling
+  hourly behaviors instead of from the lesson for passes that change other parties.
+- **Prevent:** in the behavior, return on the cheapest engine field (`IsLordParty || IsMainParty`) before anything
+  else; scan an array by index; cache per-campaign lists in the service's reset; measure a budget in the Debug JIT the
+  players run before writing it down. Choose the co-op gate by what the handler changes, and add the feature's row to
+  `coop-interop.md`'s gated table in the same change.
+- **Source:** `docs/reviews/rca-watchful-holds-2026-10-18.md` findings 1 and 5.

@@ -1094,3 +1094,13 @@ silent. Slow compile and wedge cannot be told apart from that log.
   (`RENDER_WAIT_SILENCE_THRESHOLD_S`), and names the next evidence: `compile_shader` lines in the full
   `rgl_log_<pid>.txt`, then a hang dump.
 - **Source:** player bundle `taom_crash_20261018_184529_b18f3441`; fix in `tools/triage_battle_load.py`.
+
+### A feature that reads another feature's computed state gates on that feature's toggle, not on its state machine (#822, 2026-10-18)
+Watchful Holds reads the Realm Borders provinces through `RealmTerritoryService.State == Ready`. Realm Borders builds
+them only while it is on, but never clears them when it is switched off (`RealmBorderService.OnMapFrame` returns early
+and only the console rebuild calls `Invalidate`). So after the borders had drawn once, switching them off left the
+provinces Ready and the gate on, against the doc's "Realm Borders off, distance only".
+- **Why missed:** the state machine looked like the on or off answer; the owner's disable path was not read.
+- **Prevent:** when a feature consumes state another feature computes, read the owner's disable path, and gate on the
+  owner's settings flag as well as on the state.
+- **Source:** `docs/reviews/rca-watchful-holds-2026-10-18.md` finding 2.

@@ -22,6 +22,7 @@ using TAOM.Features.QuickActions;
 using TAOM.Features.RealmBorders;
 using TAOM.Features.TimeAcceleration;
 using TAOM.Features.WarChronicle;
+using TAOM.Features.WatchfulHolds;
 using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features;
@@ -71,6 +72,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(FiefManagementSettingsProvider))]
     // #765 M8: the hunter's speed multiplier is read every campaign frame while a hunt runs.
     [DataRow(typeof(EyeOfSauronSettingsProvider))]
+    // #822: both switches are read for every party on every hourly tick.
+    [DataRow(typeof(WatchfulHoldsSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -103,6 +106,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(INameplateCullSettingsProvider), typeof(NameplateCullSettingsProvider))]
     [DataRow(typeof(IFiefManagementSettingsProvider), typeof(FiefManagementSettingsProvider))]
     [DataRow(typeof(IEyeOfSauronSettings), typeof(EyeOfSauronSettingsProvider))]
+    [DataRow(typeof(IWatchfulHoldsSettings), typeof(WatchfulHoldsSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -166,6 +170,21 @@ public class CampaignHotPathSettingsProvidersTests
 
         Assert.IsFalse(sut.IsEnabled);
         Assert.AreEqual(0.25f, sut.Rate, 0.0001f);
+    }
+
+    [TestMethod]
+    public void WatchfulHolds_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new WatchfulHoldsSettingsProvider(mcm);
+        Assert.IsTrue(sut.Enabled);
+        Assert.IsTrue(sut.HarassAiLords);
+
+        mcm.EnableWatchfulHolds = false;
+        mcm.WatchfulHoldsHarassAiLords = false;
+
+        Assert.IsFalse(sut.Enabled);
+        Assert.IsFalse(sut.HarassAiLords);
     }
 
     [TestMethod]

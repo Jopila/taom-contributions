@@ -54,3 +54,12 @@ evicts on `OnAgentDeleted`, and `AgentAdapter.IsActive()` requires `AgentSlotIde
 Do not add an index-keyed cache beside it, do not hold an `IAgentAdapter` across frames without
 re-asking `IsActive()`, and route every `SetActionChannel` through the clip-exists guard so a clip
 requested on the wrong monster is a TAOM log line, not a native warning of unknown consequence.
+
+## Relations and party-screen writes (MANDATORY)
+
+- **Relations live on clan leaders.** `ChangeRelationAction` ignores `affectRelatives` and writes to the pair from
+  `DiplomacyModel.GetHeroesForEffectiveRelation`, so per-lord deltas sum per clan: key a penalty list on that owner,
+  strongest delta once per owner.
+- **A write made in a conversation opened from the party screen is reverted by Escape** (`PartyScreenData.ResetUsing`):
+  after a roster, inventory or hero-state write, commit the screen with `PartyScreenLogic.DoneLogic(true)`.
+- Both, with sources: [lessons](../../docs/reviews/lessons/adapters-taleworlds-api.md) (2026-10-19).

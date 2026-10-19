@@ -1154,6 +1154,14 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     public Dropdown<string> WandererAllegianceScope { get; set; } = new Dropdown<string>(
         new[] { "All wanderers (by culture)", "Named companions only" }, 0);
 
+    // --- World / Hard Questions ---
+
+    // GroupOrder 57: 9, 10, 15, 19-56 and 100 were taken as of 2026-10-18.
+    [SettingPropertyGroup("World/Hard Questions", GroupOrder = 57)]
+    [SettingPropertyBool("Enable Hard Questions", Order = 0, RequireRestart = false,
+        HintText = "When enabled, a lord held prisoner by your clan (in your party or in one of your settlements) can be questioned about his clan's or kingdom's lands, for a bribe or by force, and stripped of his arms and armour. Force and stripping cost relation, Honor and Mercy, and stripping costs renown. Each topic works once per captivity. When off, those conversation options do not appear.")]
+    public bool EnableHardQuestions { get; set; } = true;
+
     // --- Prisoner Recruitment ---
 
     [SettingPropertyGroup("World/Prisoner Recruitment", GroupOrder = 39)]
@@ -2100,4 +2108,18 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Swing alternative probe (diagnostic)", Order = 3, RequireRestart = false,
         HintText = "Tests alternative swing clips: when a mission has act_taom_ swing codes loaded, it counts which clip each swing plays and where in the clip a hit lands, and only logs; it changes nothing in the game. While such codes exist it costs a per-frame sweep of every person in every mission, towns included; with none loaded it writes one log line per mission. Read at the start of each mission.")]
     public bool EnableSwingAlternativeProbe { get; set; } = true;
+
+    // --- World / Watchful Holds ---
+    // Both change what the campaign simulates (who is slowed, who loses men), so neither is listed in
+    // CoopSettingsRelevance. Both are new, so a fresh TAOM.json carries the defaults.
+
+    [SettingPropertyGroup("World/Watchful Holds", GroupOrder = 58)]
+    [SettingPropertyBool("Enable Watchful Holds", Order = 0, RequireRestart = false,
+        HintText = "When enabled (default), a castle or town whose realm is at war with yours harasses a lord party that marches within a few map units of its walls, if the fort is not besieged and holds enough troops (30 by default). Your party is slowed (disorganized: it moves slower, and its troops start a battle with lower morale until it wears off) and loses a few men, some food and morale. An army you lead loses cohesion, but never below 10, and each party marching with you takes its own losses. When off, forts never harass anyone. Applies at once, no restart.")]
+    public bool EnableWatchfulHolds { get; set; } = true;
+
+    [SettingPropertyGroup("World/Watchful Holds")]
+    [SettingPropertyBool("Harass AI lords", Order = 1, RequireRestart = false,
+        HintText = "When enabled (default), AI lords marching past an enemy fort are slowed (disorganized) too, at a lower chance than yours, and lose nothing else. Turn it off to protect the campaign pace: the effect then stays on your own party and the army you lead (AI lords marching with your army still take their share). Does nothing while Enable Watchful Holds is off.")]
+    public bool WatchfulHoldsHarassAiLords { get; set; } = true;
 }

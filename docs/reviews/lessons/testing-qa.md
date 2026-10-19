@@ -1802,3 +1802,18 @@ nothing.
   a new attribute form), read the gate's `continue` and `skip` lines for that shape and make the shape pass through
   the checks that still apply. Prove it with a mutant of the new instance (`ClanScreen` to `Clanscreen`).
 - **Source:** `docs/reviews/rca-shadowfax-screens-2026-10-18.md` F1.
+
+### A fake must not pass a shared rule through or hold values the engine clamps (2026-10-19)
+
+Hard Questions reused Execution's relation rule, and its test fixture made the rule return every delta unchanged
+and resolved every side Neutral. In production that same Neutral setup zeroes every delta, so a Khand or Umbar
+lord cost no relation at all, while 114 tests passed. The same suite fed companions Honor 3 to 20, which the
+engine clamps to 2 (`Hero.SetTraitLevel`, `DefaultTraits` -2..2), so a penalty cap that could never apply looked
+tested.
+- **Why missed:** the fakes were written from the author's model of the engine and of the shared rule, so they
+  could not disagree with it.
+- **Prevent:** when a feature reuses another feature's rule, add at least one test over the REAL rule service
+  (construct it with its real dependencies) for each branch the feature depends on, Neutral included. Keep every
+  faked engine value inside the range the engine can hold (trait levels -2..2, relations -100..100) and test the
+  edges of that range.
+- **Source:** `docs/reviews/rca-hard-questions-2026-10-19.md` H3, M2.
