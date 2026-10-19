@@ -4084,3 +4084,15 @@ not exist.
 - **Prevent:** after Mike approves a plan that differs from the issue, post a progress comment (no ask needed) that
   states the built design and the real test list before the build starts.
 - **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 3.
+
+### A tool's regression test covers the boundary shapes and compares whole output (harvest tool, 2026-10-19)
+`harvest_literal_loc_keys.py` added one blank line before `</strings>` per run. The first regression test started
+every case with exactly one blank line, the one shape where a wrong fix that overwrites the row above `</strings>`
+behaves like the right one, and it checked a few properties instead of the text. The same bug was also filed three
+times (#781, #919, #922), twice in one afternoon by two sessions.
+- **Why missed:** the test was written from the bug report's single example; nothing told `/issue` to look for an
+  existing issue first.
+- **Prevent:** a tool test runs each boundary of the input (none, one, many; LF and CRLF; every real file shape) and
+  asserts the whole expected output, and is shown to fail on the old code and on one plausible wrong fix. Before
+  filing an issue, search open issues for the file and symptom (`gh issue list --search "<file> in:title,body"`).
+- **Source:** `docs/reviews/rca-harvest-blank-line-2026-10-19.md` rows 2 and 3.
