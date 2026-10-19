@@ -1111,7 +1111,7 @@ carries one), his javelins on the shaghana infantry from soldier up, and his swo
 recruits. Since the steppe bows are swapped in before duplicate suppression (decision D7), the shaghana
 archer soldier has its own kit with `steppe_heavy_bow` instead of re-drawing the recruit's. Neither culture has a `support_veteran` kit any more: it would equal the soldier's, so the
 resolver descends to the soldier kit and `EnlistmentEquipmentService` issues it a second time at
-veteran (its ledger checks the requested rank, not the roster). The aserai kits, KEYforce's hand edits
+veteran (its ledger checks the requested kit tier, not the roster). The aserai kits, KEYforce's hand edits
 of 2026-10-10 kept by decision D3, were reseeded the same day on Mike's word (decision D5 in
 [rca-keyforce-harad-javelins-2026-10-16.md](../reviews/rca-keyforce-harad-javelins-2026-10-16.md)): 14 kits,
 identical to abanissa's, which share the tree. The steppe bows now come from the generator's

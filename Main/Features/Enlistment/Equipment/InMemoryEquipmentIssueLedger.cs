@@ -11,17 +11,17 @@ public sealed class InMemoryEquipmentIssueLedger : IEquipmentIssueLedger
 {
     private readonly List<string> _issuedItemIds = new List<string>();
 
-    public EnlistmentKitTier? HighestIssuedRank { get; private set; }
+    public EnlistmentKitTier? HighestIssuedTier { get; private set; }
 
     public IReadOnlyList<string> IssuedItemIds => _issuedItemIds;
 
-    public bool HasIssuedForRank(EnlistmentKitTier rank)
-        => HighestIssuedRank.HasValue && rank <= HighestIssuedRank.Value;
+    public bool HasIssuedForTier(EnlistmentKitTier tier)
+        => HighestIssuedTier.HasValue && tier <= HighestIssuedTier.Value;
 
-    public void RecordIssue(EnlistmentKitTier rank, IReadOnlyList<string> itemIds)
+    public void RecordIssue(EnlistmentKitTier tier, IReadOnlyList<string> itemIds)
     {
-        if (!HighestIssuedRank.HasValue || rank > HighestIssuedRank.Value)
-            HighestIssuedRank = rank;
+        if (!HighestIssuedTier.HasValue || tier > HighestIssuedTier.Value)
+            HighestIssuedTier = tier;
 
         if (itemIds == null)
             return;
@@ -34,7 +34,7 @@ public sealed class InMemoryEquipmentIssueLedger : IEquipmentIssueLedger
 
     public void Reset()
     {
-        HighestIssuedRank = null;
+        HighestIssuedTier = null;
         _issuedItemIds.Clear();
     }
 }

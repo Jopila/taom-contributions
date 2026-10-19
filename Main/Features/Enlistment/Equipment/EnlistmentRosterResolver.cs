@@ -5,13 +5,13 @@ using TAOM.Features.Enlistment.Content.Domain;
 namespace TAOM.Features.Enlistment.Equipment;
 
 /// <summary>
-/// Pure roster resolution over <c>enlist_{culture}_{assignment}_{rank}</c>. The chain walks
-/// CULTURE first, then assignment, then rank:
+/// Pure roster resolution over <c>enlist_{culture}_{assignment}_{tier}</c>. The chain walks
+/// CULTURE first, then assignment, then tier:
 /// <code>
 /// for culture in [requested, "default"]:
 ///   for assignment in [requested, Infantry]:     // deduped
-///     for rank from requested down to Recruit:
-///       probe enlist_{culture}_{assignment}_{rank}
+///     for tier from requested down to Recruit:
+///       probe enlist_{culture}_{assignment}_{tier}
 /// </code>
 ///
 /// <para><b>Why culture outranks assignment.</b> Because issuing another faction's kit is the
@@ -28,8 +28,8 @@ namespace TAOM.Features.Enlistment.Equipment;
 /// ordering. Clipping is a real hazard (lessons/data-content-cultures.md) but it is orthogonal to
 /// this ordering, and it is recorded as a known limitation in docs/features/enlistment.md.</para>
 ///
-/// <para><b>Why rank is innermost.</b> The right role at a lower rank beats the wrong role at
-/// the right rank: a lesser version of what the player asked for is a smaller disappointment
+/// <para><b>Why tier is innermost.</b> The right role at a lower tier beats the wrong role at
+/// the right tier: a lesser version of what the player asked for is a smaller disappointment
 /// than a kit for somebody else's job.</para>
 ///
 /// <para>Assignment falls back to Infantry because that is the one assignment every culture
@@ -45,7 +45,7 @@ public static class EnlistmentRosterResolver
     public static string Resolve(
         string cultureId,
         ServiceAssignment assignment,
-        EnlistmentKitTier rank,
+        EnlistmentKitTier tier,
         Func<string, bool> rosterExists)
     {
         if (rosterExists == null)
@@ -56,16 +56,16 @@ public static class EnlistmentRosterResolver
             if (string.IsNullOrEmpty(cultureId))
                 break;
 
-            var hit = ProbeRanks(
-                r => EnlistmentRosterIds.Build(cultureId, assignmentStep, r), rank, rosterExists);
+            var hit = ProbeTiers(
+                r => EnlistmentRosterIds.Build(cultureId, assignmentStep, r), tier, rosterExists);
             if (hit != null)
                 return hit;
         }
 
         foreach (var assignmentStep in AssignmentChain(assignment))
         {
-            var hit = ProbeRanks(
-                r => EnlistmentRosterIds.BuildDefault(assignmentStep, r), rank, rosterExists);
+            var hit = ProbeTiers(
+                r => EnlistmentRosterIds.BuildDefault(assignmentStep, r), tier, rosterExists);
             if (hit != null)
                 return hit;
         }
@@ -89,10 +89,10 @@ public static class EnlistmentRosterResolver
             yield return ServiceAssignment.Infantry;
     }
 
-    private static string ProbeRanks(
-        Func<EnlistmentKitTier, string> build, EnlistmentKitTier rank, Func<string, bool> rosterExists)
+    private static string ProbeTiers(
+        Func<EnlistmentKitTier, string> build, EnlistmentKitTier tier, Func<string, bool> rosterExists)
     {
-        for (var r = (int)rank; r >= (int)EnlistmentKitTier.Recruit; r--)
+        for (var r = (int)tier; r >= (int)EnlistmentKitTier.Recruit; r--)
         {
             var id = build((EnlistmentKitTier)r);
             if (rosterExists(id))

@@ -111,7 +111,7 @@ public class EnlistmentQuartermasterBehavior : CampaignBehaviorBase
         var cultureId = _commander.GetCultureId(_store.Record.CommanderHeroId);
         var assignment = _contentStore.Record.Assignment;
         var tier = EnlistmentKitTiers.For(_contentStore.Record.Rank);
-        var result = _equipment.IssueForRank(cultureId, assignment, tier);
+        var result = _equipment.IssueForTier(cultureId, assignment, tier);
         _lastAnswer = QuartermasterAnswerPolicy.For(result, tier);
         _logger?.LogInfo($"[Enlistment] quartermaster issue: {result} "
             + $"(culture={cultureId}, assignment={assignment}, rank={_contentStore.Record.Rank}, kitTier={tier})");

@@ -8,15 +8,15 @@ using TAOM.Features.Enlistment.Equipment;
 namespace TAOM.Tests.Features.Enlistment.Equipment;
 
 /// <summary>
-/// Issuance contract: resolve the (culture, assignment, rank) roster via the fallback chain,
+/// Issuance contract: resolve the (culture, assignment, tier) roster via the fallback chain,
 /// guard every item id through IItemPoolAdapter, add surviving items to the party INVENTORY
-/// (never equip), record in the ledger, once per rank. Every non-Issued outcome must leave the
+/// (never equip), record in the ledger, once per tier. Every non-Issued outcome must leave the
 /// ledger untouched so a later retry can succeed.
 ///
 /// These use Infantry throughout: which assignment is passed is the resolver's business and is
 /// covered by EnlistmentRosterResolverTests. What is pinned HERE is that the ledger stays keyed
-/// on rank alone, so a role swap does not re-open a spent draw
-/// (IssueForRank_SameRankDifferentAssignment_ReturnsAlreadyIssued).
+/// on tier alone, so a role swap does not re-open a spent draw
+/// (IssueForTier_SameTierDifferentAssignment_ReturnsAlreadyIssued).
 /// </summary>
 [TestClass]
 public class EnlistmentEquipmentServiceTests
@@ -51,91 +51,91 @@ public class EnlistmentEquipmentServiceTests
     }
 
     [TestMethod]
-    public void IssueForRank_HappyPath_AddsEachItemToInventory_ReturnsIssued()
+    public void IssueForTier_HappyPath_AddsEachItemToInventory_ReturnsIssued()
     {
         SetupRoster("enlist_vlandia_infantry_recruit", "helm_a", "chest_a", "boots_a");
 
-        var result = _service.IssueForRank("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        var result = _service.IssueForTier("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
 
         Assert.AreEqual(EquipmentIssueResult.Issued, result);
         _partyItems.Received(1).AddItem("helm_a", 1);
         _partyItems.Received(1).AddItem("chest_a", 1);
         _partyItems.Received(1).AddItem("boots_a", 1);
-        Assert.AreEqual(EnlistmentKitTier.Recruit, _ledger.HighestIssuedRank);
+        Assert.AreEqual(EnlistmentKitTier.Recruit, _ledger.HighestIssuedTier);
         CollectionAssert.AreEqual(new[] { "helm_a", "chest_a", "boots_a" },
             (System.Collections.ICollection)_ledger.IssuedItemIds);
     }
 
     [TestMethod]
-    public void IssueForRank_SecondCallSameRank_ReturnsAlreadyIssued_NoSecondAdd()
+    public void IssueForTier_SecondCallSameTier_ReturnsAlreadyIssued_NoSecondAdd()
     {
         SetupRoster("enlist_vlandia_infantry_recruit", "chest_a");
-        _service.IssueForRank("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        _service.IssueForTier("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
         _partyItems.ClearReceivedCalls();
 
-        var result = _service.IssueForRank("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        var result = _service.IssueForTier("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
 
-        Assert.AreEqual(EquipmentIssueResult.AlreadyIssuedForRank, result);
+        Assert.AreEqual(EquipmentIssueResult.AlreadyIssuedForTier, result);
         _partyItems.DidNotReceive().AddItem(Arg.Any<string>(), Arg.Any<int>());
     }
 
     [TestMethod]
-    public void IssueForRank_SameRankDifferentAssignment_ReturnsAlreadyIssued()
+    public void IssueForTier_SameTierDifferentAssignment_ReturnsAlreadyIssued()
     {
-        // The ledger is keyed on RANK alone, so swapping role does not re-open a spent draw.
+        // The ledger is keyed on TIER alone, so swapping role does not re-open a spent draw.
         // Assignment swaps cost trust and sit behind a cooldown, but they are not free, and a
-        // per-(assignment, rank) ledger would turn each one into another full kit.
+        // per-(assignment, tier) ledger would turn each one into another full kit.
         SetupRoster("enlist_vlandia_infantry_recruit", "chest_a");
         SetupRoster("enlist_vlandia_archer_recruit", "bow_a");
-        _service.IssueForRank("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        _service.IssueForTier("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
         _partyItems.ClearReceivedCalls();
 
-        var result = _service.IssueForRank("vlandia", ServiceAssignment.Archer, EnlistmentKitTier.Recruit);
+        var result = _service.IssueForTier("vlandia", ServiceAssignment.Archer, EnlistmentKitTier.Recruit);
 
-        Assert.AreEqual(EquipmentIssueResult.AlreadyIssuedForRank, result);
+        Assert.AreEqual(EquipmentIssueResult.AlreadyIssuedForTier, result);
         _partyItems.DidNotReceive().AddItem(Arg.Any<string>(), Arg.Any<int>());
     }
 
     [TestMethod]
-    public void IssueForRank_LowerRankAfterHigher_ReturnsAlreadyIssued()
+    public void IssueForTier_LowerTierAfterHigher_ReturnsAlreadyIssued()
     {
         SetupRoster("enlist_vlandia_infantry_veteran", "chest_v");
-        _service.IssueForRank("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Veteran);
+        _service.IssueForTier("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Veteran);
 
-        var result = _service.IssueForRank("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        var result = _service.IssueForTier("vlandia", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
 
-        Assert.AreEqual(EquipmentIssueResult.AlreadyIssuedForRank, result);
+        Assert.AreEqual(EquipmentIssueResult.AlreadyIssuedForTier, result);
     }
 
     [TestMethod]
-    public void IssueForRank_NoRosterAnywhere_ReturnsNoRosterFound_LedgerUntouched()
+    public void IssueForTier_NoRosterAnywhere_ReturnsNoRosterFound_LedgerUntouched()
     {
         // RosterExists defaults to false for every id.
-        var result = _service.IssueForRank("lothlorien", ServiceAssignment.Infantry, EnlistmentKitTier.Soldier);
+        var result = _service.IssueForTier("lothlorien", ServiceAssignment.Infantry, EnlistmentKitTier.Soldier);
 
         Assert.AreEqual(EquipmentIssueResult.NoRosterFound, result);
-        Assert.IsNull(_ledger.HighestIssuedRank);
+        Assert.IsNull(_ledger.HighestIssuedTier);
         _partyItems.DidNotReceive().AddItem(Arg.Any<string>(), Arg.Any<int>());
     }
 
     [TestMethod]
-    public void IssueForRank_ExactMissing_IssuesFromFallbackDefault()
+    public void IssueForTier_ExactMissing_IssuesFromFallbackDefault()
     {
         SetupRoster("enlist_default_infantry_soldier", "chest_d");
 
-        var result = _service.IssueForRank("lothlorien", ServiceAssignment.Infantry, EnlistmentKitTier.Soldier);
+        var result = _service.IssueForTier("lothlorien", ServiceAssignment.Infantry, EnlistmentKitTier.Soldier);
 
         Assert.AreEqual(EquipmentIssueResult.Issued, result);
         _partyItems.Received(1).AddItem("chest_d", 1);
     }
 
     [TestMethod]
-    public void IssueForRank_MissingItem_SkippedWithWarning_OthersStillIssued()
+    public void IssueForTier_MissingItem_SkippedWithWarning_OthersStillIssued()
     {
         SetupRoster("enlist_gondor_infantry_recruit", "chest_ok", "ghost_item", "boots_ok");
         _itemPool.ItemExists("ghost_item").Returns(false);
 
-        var result = _service.IssueForRank("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        var result = _service.IssueForTier("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
 
         Assert.AreEqual(EquipmentIssueResult.Issued, result);
         _partyItems.Received(1).AddItem("chest_ok", 1);
@@ -146,61 +146,61 @@ public class EnlistmentEquipmentServiceTests
     }
 
     [TestMethod]
-    public void IssueForRank_AllItemsMissing_ReturnsNoValidItems_LedgerUntouched()
+    public void IssueForTier_AllItemsMissing_ReturnsNoValidItems_LedgerUntouched()
     {
         SetupRoster("enlist_gondor_infantry_recruit", "ghost_a", "ghost_b");
         _itemPool.ItemExists(Arg.Any<string>()).Returns(false);
 
-        var result = _service.IssueForRank("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        var result = _service.IssueForTier("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
 
         Assert.AreEqual(EquipmentIssueResult.NoValidItems, result);
-        Assert.IsNull(_ledger.HighestIssuedRank);
+        Assert.IsNull(_ledger.HighestIssuedTier);
         _partyItems.DidNotReceive().AddItem(Arg.Any<string>(), Arg.Any<int>());
     }
 
     [TestMethod]
-    public void IssueForRank_EmptyRoster_ReturnsNoValidItems()
+    public void IssueForTier_EmptyRoster_ReturnsNoValidItems()
     {
         SetupRoster("enlist_gondor_infantry_recruit" /* no items */);
 
-        var result = _service.IssueForRank("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        var result = _service.IssueForTier("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
 
         Assert.AreEqual(EquipmentIssueResult.NoValidItems, result);
     }
 
     [TestMethod]
-    public void IssueForRank_PartyUnavailable_ReturnsPartyUnavailable_LedgerUntouched()
+    public void IssueForTier_PartyUnavailable_ReturnsPartyUnavailable_LedgerUntouched()
     {
         SetupRoster("enlist_gondor_infantry_recruit", "chest_a");
         _partyItems.IsMainPartyAvailable().Returns(false);
 
-        var result = _service.IssueForRank("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        var result = _service.IssueForTier("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
 
         Assert.AreEqual(EquipmentIssueResult.PartyUnavailable, result);
-        Assert.IsNull(_ledger.HighestIssuedRank);
+        Assert.IsNull(_ledger.HighestIssuedTier);
         _partyItems.DidNotReceive().AddItem(Arg.Any<string>(), Arg.Any<int>());
     }
 
     [TestMethod]
-    public void IssueForRank_EveryAddFails_ReturnsPartyUnavailable_LedgerUntouched()
+    public void IssueForTier_EveryAddFails_ReturnsPartyUnavailable_LedgerUntouched()
     {
         // Party vanished between the availability check and the adds.
         SetupRoster("enlist_gondor_infantry_recruit", "chest_a", "boots_a");
         _partyItems.AddItem(Arg.Any<string>(), Arg.Any<int>()).Returns(false);
 
-        var result = _service.IssueForRank("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        var result = _service.IssueForTier("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
 
         Assert.AreEqual(EquipmentIssueResult.PartyUnavailable, result);
-        Assert.IsNull(_ledger.HighestIssuedRank);
+        Assert.IsNull(_ledger.HighestIssuedTier);
     }
 
     [TestMethod]
-    public void IssueForRank_PartialAddFailure_LedgerRecordsOnlyDeliveredItems()
+    public void IssueForTier_PartialAddFailure_LedgerRecordsOnlyDeliveredItems()
     {
         SetupRoster("enlist_gondor_infantry_recruit", "chest_a", "boots_a");
         _partyItems.AddItem("boots_a", 1).Returns(false);
 
-        var result = _service.IssueForRank("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
+        var result = _service.IssueForTier("gondor", ServiceAssignment.Infantry, EnlistmentKitTier.Recruit);
 
         Assert.AreEqual(EquipmentIssueResult.Issued, result);
         CollectionAssert.AreEqual(new[] { "chest_a" },

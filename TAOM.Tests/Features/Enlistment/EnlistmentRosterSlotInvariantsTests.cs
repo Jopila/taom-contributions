@@ -49,27 +49,27 @@ public class EnlistmentRosterSlotInvariantsTests
         new HashSet<string>(StringComparer.Ordinal) { "Item0", "Item1", "Item2", "Item3" };
 
     private static readonly string[] Assignments = { "infantry", "archer", "cavalry", "support" };
-    private static readonly string[] RankTokens = { "recruit", "soldier", "veteran", "sergeant" };
+    private static readonly string[] TierTokens = { "recruit", "soldier", "veteran", "sergeant" };
 
     /// <summary>
-    /// enlist_{culture}_{assignment}_{rank} -> its parts, or null. Splits from the RIGHT, because
+    /// enlist_{culture}_{assignment}_{tier} -> its parts, or null. Splits from the RIGHT, because
     /// a culture token may contain an underscore (mistymountainorcs does not, but nothing stops
-    /// the next one) while the assignment and rank tokens never do.
+    /// the next one) while the assignment and tier tokens never do.
     /// </summary>
-    private static (string Culture, string Assignment, string Rank)? SplitId(string id)
+    private static (string Culture, string Assignment, string Tier)? SplitId(string id)
     {
         if (!id.StartsWith("enlist_", StringComparison.Ordinal))
             return null;
         var body = id.Substring("enlist_".Length);
-        var rank = RankTokens.FirstOrDefault(r => body.EndsWith("_" + r, StringComparison.Ordinal));
-        if (rank == null)
+        var tier = TierTokens.FirstOrDefault(r => body.EndsWith("_" + r, StringComparison.Ordinal));
+        if (tier == null)
             return null;
-        body = body.Substring(0, body.Length - rank.Length - 1);
+        body = body.Substring(0, body.Length - tier.Length - 1);
         var assignment = Assignments.FirstOrDefault(a => body.EndsWith("_" + a, StringComparison.Ordinal));
         if (assignment == null)
             return null;
         var culture = body.Substring(0, body.Length - assignment.Length - 1);
-        return culture.Length == 0 ? null : (culture, assignment, rank);
+        return culture.Length == 0 ? null : (culture, assignment, tier);
     }
 
     private static List<XElement> Rosters()
@@ -126,11 +126,11 @@ public class EnlistmentRosterSlotInvariantsTests
     }
 
     [TestMethod]
-    public void NoRankChain_IssuesTheSameKitTwice()
+    public void NoTierChain_IssuesTheSameKitTwice()
     {
-        // The ledger spends one draw per rank, so a promotion that hands back a kit the player has
+        // The ledger spends one draw per tier, so a promotion that hands back a kit the player has
         // already drawn is a wasted draw and a pile of duplicate items in his baggage. The resolver
-        // descends ranks, so the generator suppresses a repeat and the player keeps the lower cell:
+        // descends tiers, so the generator suppresses a repeat and the player keeps the lower cell:
         // same outcome, one roster instead of several, and the file stops claiming a progression
         // the donor tree does not have.
         var chains = new Dictionary<string, List<(string Id, string Kit)>>(StringComparer.Ordinal);
@@ -157,7 +157,7 @@ public class EnlistmentRosterSlotInvariantsTests
                        select $"{chain.Key}: {string.Join(", ", g.Select(x => x.Id))}").ToList();
 
         Assert.AreEqual(0, repeats.Count,
-            "These rank chains issue a byte-identical kit at more than one rank:\n  "
+            "These tier chains issue a byte-identical kit at more than one tier:\n  "
             + string.Join("\n  ", repeats));
     }
 

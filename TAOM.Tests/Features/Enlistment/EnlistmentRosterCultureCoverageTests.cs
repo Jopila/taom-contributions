@@ -22,8 +22,8 @@ namespace TAOM.Tests.Features.Enlistment;
 /// carries weapons too, so such a gap hands out the wrong faction's arms as well as its armour.</para>
 ///
 /// <para>These assert on what the resolver RETURNS, not on which ids exist. Under
-/// <c>enlist_{culture}_{assignment}_{rank}</c> a cell is legitimately absent whenever the
-/// culture's troop tree has no donor of that group within one band of the rank (goblin fields no
+/// <c>enlist_{culture}_{assignment}_{tier}</c> a cell is legitimately absent whenever the
+/// culture's troop tree has no donor of that group within one band of the tier (goblin fields no
 /// cavalry; bluecraig and mistymountainorcs field neither cavalry nor archers). Demanding every
 /// id would fail on data that is correct. What actually matters to the player is that every
 /// request lands on HIS OWN culture's gear, and only the resolver can answer that.</para>
@@ -47,12 +47,12 @@ public class EnlistmentRosterCultureCoverageTests
 
     /// <summary>
     /// Derived from production, not copied from it. A hard-coded list here would have carried the
-    /// comment "mirrors <c>EnlistmentRosterIds.RankToken</c>" while being free to drift from it —
+    /// comment "mirrors <c>EnlistmentRosterIds.TierToken</c>" while being free to drift from it —
     /// the exact defect this repo has now shipped three times (see
     /// <c>lessons/testing-qa.md</c>, "a comment is a claim"). Adding a fifth
     /// <see cref="EnlistmentKitTier"/> extends the coverage requirement automatically.
     /// </summary>
-    private static readonly EnlistmentKitTier[] Ranks =
+    private static readonly EnlistmentKitTier[] Tiers =
         Enum.GetValues(typeof(EnlistmentKitTier)).Cast<EnlistmentKitTier>().ToArray();
 
     /// <summary>Same derivation, one axis over: a fifth assignment extends coverage by itself.</summary>
@@ -114,11 +114,11 @@ public class EnlistmentRosterCultureCoverageTests
 
     /// <summary>Resolve through the shipped roster ids using the production chain.</summary>
     private static string? Resolve(HashSet<string> rosters, string culture,
-        ServiceAssignment assignment, EnlistmentKitTier rank)
-        => EnlistmentRosterResolver.Resolve(culture, assignment, rank, rosters.Contains);
+        ServiceAssignment assignment, EnlistmentKitTier tier)
+        => EnlistmentRosterResolver.Resolve(culture, assignment, tier, rosters.Contains);
 
     [TestMethod]
-    public void EveryMainCulture_ResolvesToItsOwnKit_ForEveryAssignmentAndRank_OrIsDocumented()
+    public void EveryMainCulture_ResolvesToItsOwnKit_ForEveryAssignmentAndTier_OrIsDocumented()
     {
         var rosters = LoadRosterIds();
 
@@ -129,14 +129,14 @@ public class EnlistmentRosterCultureCoverageTests
                 continue;
 
             foreach (var assignment in Assignments)
-            foreach (var rank in Ranks)
+            foreach (var tier in Tiers)
             {
-                var resolved = Resolve(rosters, culture, assignment, rank);
+                var resolved = Resolve(rosters, culture, assignment, tier);
                 var expectedPrefix = $"enlist_{culture}_";
                 if (resolved == null)
-                    wrong.Add($"{culture}/{assignment}/{rank}: resolved to NOTHING");
+                    wrong.Add($"{culture}/{assignment}/{tier}: resolved to NOTHING");
                 else if (!resolved.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
-                    wrong.Add($"{culture}/{assignment}/{rank}: resolved to '{resolved}'");
+                    wrong.Add($"{culture}/{assignment}/{tier}: resolved to '{resolved}'");
             }
         }
 
@@ -192,7 +192,7 @@ public class EnlistmentRosterCultureCoverageTests
     }
 
     [TestMethod]
-    public void EveryEnlistableCulture_ResolvesToItsOwnKit_ForEveryAssignmentAndRank()
+    public void EveryEnlistableCulture_ResolvesToItsOwnKit_ForEveryAssignmentAndTier()
     {
         // Absent cells are legitimate: they fall through to the culture's own infantry kit. What is
         // NOT legitimate is a request that resolves to null (the quartermaster issues nothing) or
@@ -204,34 +204,34 @@ public class EnlistmentRosterCultureCoverageTests
 
         var wrong = (from culture in EnlistableCultures()
                      from assignment in Assignments
-                     from rank in Ranks
-                     let resolved = Resolve(rosters, culture, assignment, rank)
+                     from tier in Tiers
+                     let resolved = Resolve(rosters, culture, assignment, tier)
                      where resolved == null
                         || !resolved.StartsWith($"enlist_{culture}_", StringComparison.OrdinalIgnoreCase)
-                     select $"{culture}/{assignment}/{rank} -> {resolved ?? "NOTHING"}").ToList();
+                     select $"{culture}/{assignment}/{tier} -> {resolved ?? "NOTHING"}").ToList();
 
         Assert.AreEqual(0, wrong.Count,
             "Every culture a player can enlist under must resolve to its OWN kit for every "
-            + "assignment and rank. These leave the culture or resolve to nothing:\n  "
+            + "assignment and tier. These leave the culture or resolve to nothing:\n  "
             + string.Join("\n  ", wrong));
     }
 
     [TestMethod]
-    public void EveryRank_MapsToItsOwnToken()
+    public void EveryTier_MapsToItsOwnToken()
     {
-        // RankToken ends in `_ => "recruit"`, so a rank added without a case silently ALIASES the
-        // recruit roster: the new rank looks covered, issues starting gear forever, and no other
-        // test can see it because the id it asks for exists. Deriving Ranks above from the enum is
+        // TierToken ends in `_ => "recruit"`, so a tier added without a case silently ALIASES the
+        // recruit roster: the new tier looks covered, issues starting gear forever, and no other
+        // test can see it because the id it asks for exists. Deriving Tiers above from the enum is
         // not enough on its own — this is the half that makes the derivation meaningful.
-        var collisions = Ranks
-            .GroupBy(EnlistmentRosterIds.RankToken)
+        var collisions = Tiers
+            .GroupBy(EnlistmentRosterIds.TierToken)
             .Where(g => g.Count() > 1)
             .Select(g => $"'{g.Key}' <- {string.Join(", ", g)}")
             .ToList();
 
         Assert.AreEqual(0, collisions.Count,
             "Two EnlistmentKitTier values produce the same roster token, so one silently wears the "
-            + "other's kit. Add the missing case to EnlistmentRosterIds.RankToken:\n  "
+            + "other's kit. Add the missing case to EnlistmentRosterIds.TierToken:\n  "
             + string.Join("\n  ", collisions));
     }
 
@@ -255,15 +255,15 @@ public class EnlistmentRosterCultureCoverageTests
     }
 
     [TestMethod]
-    public void TheDefaultFallback_CoversEveryAssignmentAndRank()
+    public void TheDefaultFallback_CoversEveryAssignmentAndTier()
     {
         // The fallback is what every undocumented gap lands on. A missing cell here turns a
         // cosmetic problem into an unequipped soldier.
         var rosters = LoadRosterIds();
 
         var missing = (from assignment in Assignments
-                       from rank in Ranks
-                       let id = EnlistmentRosterIds.BuildDefault(assignment, rank)
+                       from tier in Tiers
+                       let id = EnlistmentRosterIds.BuildDefault(assignment, tier)
                        where !rosters.Contains(id)
                        select id).ToList();
 
@@ -278,7 +278,7 @@ public class EnlistmentRosterCultureCoverageTests
         // whoever inherits it, and nothing else would ever prompt its deletion.
         //
         // This asks the RESOLVER whether the culture is still falling out to the default. The
-        // previous version counted ids of the form `enlist_{culture}_{rank}`, which no id has
+        // previous version counted ids of the form `enlist_{culture}_{tier}`, which no id has
         // taken since #525 — so it scored zero for every culture, forever, and would have gone on
         // passing after the rosters were authored. That is precisely the decay it exists to catch.
         var cultures = LoadMainCultures();
@@ -294,8 +294,8 @@ public class EnlistmentRosterCultureCoverageTests
             }
 
             var cells = (from assignment in Assignments
-                         from rank in Ranks
-                         select Resolve(rosters, exception, assignment, rank)).ToList();
+                         from tier in Tiers
+                         select Resolve(rosters, exception, assignment, tier)).ToList();
             var own = cells.Count(id =>
                 id != null && id.StartsWith($"enlist_{exception}_", StringComparison.OrdinalIgnoreCase));
 

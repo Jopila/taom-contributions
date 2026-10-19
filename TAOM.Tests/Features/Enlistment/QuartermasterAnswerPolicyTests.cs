@@ -24,14 +24,14 @@ public class QuartermasterAnswerPolicyTests
         Assert.AreEqual(QuartermasterAnswer.Issued, QuartermasterAnswerPolicy.For(EquipmentIssueResult.Issued, tier: EnlistmentKitTier.Veteran));
 
     [TestMethod]
-    public void For_AlreadyIssuedForRank_ReturnsAlreadyDrawn() =>
+    public void For_AlreadyIssuedForTier_ReturnsAlreadyDrawn() =>
         Assert.AreEqual(QuartermasterAnswer.AlreadyDrawn,
-            QuartermasterAnswerPolicy.For(EquipmentIssueResult.AlreadyIssuedForRank, tier: EnlistmentKitTier.Veteran));
+            QuartermasterAnswerPolicy.For(EquipmentIssueResult.AlreadyIssuedForTier, tier: EnlistmentKitTier.Veteran));
 
     [TestMethod]
-    public void For_AlreadyIssuedForRank_AtTopKitTier_ReturnsAlreadyDrawnBest() =>
+    public void For_AlreadyIssuedForTier_AtTopKitTier_ReturnsAlreadyDrawnBest() =>
         Assert.AreEqual(QuartermasterAnswer.AlreadyDrawnBest,
-            QuartermasterAnswerPolicy.For(EquipmentIssueResult.AlreadyIssuedForRank, tier: EnlistmentKitTiers.Best));
+            QuartermasterAnswerPolicy.For(EquipmentIssueResult.AlreadyIssuedForTier, tier: EnlistmentKitTiers.Best));
 
     [TestMethod]
     public void For_OtherResults_AtTopKitTier_AreUnchanged()
@@ -75,8 +75,8 @@ public class QuartermasterAnswerPolicyTests
         var branch = src.Substring(start, end - start);
 
         StringAssert.Contains(branch, "_lastAnswer = QuartermasterAnswer.HostOnly;");
-        Assert.IsFalse(branch.Contains("IssueForRank"), "a co-op client must never reach the issuer");
-        Assert.IsTrue(src.IndexOf("IssueForRank", StringComparison.Ordinal) > end,
+        Assert.IsFalse(branch.Contains("IssueForTier"), "a co-op client must never reach the issuer");
+        Assert.IsTrue(src.IndexOf("IssueForTier", StringComparison.Ordinal) > end,
             "the issuer must be reached only after the client branch returns");
     }
 

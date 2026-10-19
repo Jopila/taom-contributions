@@ -4,8 +4,8 @@ namespace TAOM.Features.Enlistment.Equipment;
 
 /// <summary>
 /// Single owner of the enlistment roster id convention:
-/// <c>enlist_{runtimeCultureId}_{assignment}_{rank}</c> (culture rosters) and
-/// <c>enlist_default_{assignment}_{rank}</c> (culture-neutral fallbacks). Culture ids are
+/// <c>enlist_{runtimeCultureId}_{assignment}_{tier}</c> (culture rosters) and
+/// <c>enlist_default_{assignment}_{tier}</c> (culture-neutral fallbacks). Culture ids are
 /// RUNTIME StringIds — vlandia (Rohan), empire (Dunland), aserai (Harad), khuzait (Rhûn),
 /// sturgia (Dale), battania (Khand) — never lore names.
 /// Mirrors CareerEquipmentRosterIds (CharacterCreation).
@@ -19,13 +19,13 @@ namespace TAOM.Features.Enlistment.Equipment;
 /// </summary>
 public static class EnlistmentRosterIds
 {
-    public static string Build(string cultureId, ServiceAssignment assignment, EnlistmentKitTier rank)
-        => $"enlist_{cultureId}_{AssignmentToken(assignment)}_{RankToken(rank)}";
+    public static string Build(string cultureId, ServiceAssignment assignment, EnlistmentKitTier tier)
+        => $"enlist_{cultureId}_{AssignmentToken(assignment)}_{TierToken(tier)}";
 
-    public static string BuildDefault(ServiceAssignment assignment, EnlistmentKitTier rank)
-        => $"enlist_default_{AssignmentToken(assignment)}_{RankToken(rank)}";
+    public static string BuildDefault(ServiceAssignment assignment, EnlistmentKitTier tier)
+        => $"enlist_default_{AssignmentToken(assignment)}_{TierToken(tier)}";
 
-    public static string RankToken(EnlistmentKitTier rank) => rank switch
+    public static string TierToken(EnlistmentKitTier tier) => tier switch
     {
         EnlistmentKitTier.Recruit  => "recruit",
         EnlistmentKitTier.Soldier  => "soldier",

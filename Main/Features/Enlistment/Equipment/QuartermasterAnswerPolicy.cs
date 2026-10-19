@@ -13,7 +13,7 @@ public static class QuartermasterAnswerPolicy
     public static QuartermasterAnswer For(EquipmentIssueResult result, EnlistmentKitTier tier) => result switch
     {
         EquipmentIssueResult.Issued               => QuartermasterAnswer.Issued,
-        EquipmentIssueResult.AlreadyIssuedForRank => tier == EnlistmentKitTiers.Best
+        EquipmentIssueResult.AlreadyIssuedForTier => tier == EnlistmentKitTiers.Best
             ? QuartermasterAnswer.AlreadyDrawnBest
             : QuartermasterAnswer.AlreadyDrawn,
         EquipmentIssueResult.NoRosterFound        => QuartermasterAnswer.EmptyStores,

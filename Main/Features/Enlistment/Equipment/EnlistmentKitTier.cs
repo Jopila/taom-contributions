@@ -5,7 +5,7 @@ namespace TAOM.Features.Enlistment.Equipment;
 /// career rank <c>ServiceRank</c>. Ordered: numeric comparison IS the progression order
 /// (the ledger's once-per-kit-tier check and the resolver's descending fallback both
 /// rely on it). Tokens (lowercase names) appear in roster ids —
-/// <c>enlist_{cultureId}_{assignment}_{rank}</c> in taom_enlistment_equipment.xml
+/// <c>enlist_{cultureId}_{assignment}_{tier}</c> in taom_enlistment_equipment.xml
 /// (the assignment token joined the id in #525, when the kit stopped being armour-only).
 /// </summary>
 public enum EnlistmentKitTier

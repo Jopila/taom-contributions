@@ -6,7 +6,7 @@ using TAOM.Features.Enlistment.Content.Domain;
 namespace TAOM.Features.Enlistment.Equipment;
 
 /// <summary>
-/// Resolves the (culture, assignment, rank) roster via EnlistmentRosterResolver's
+/// Resolves the (culture, assignment, tier) roster via EnlistmentRosterResolver's
 /// fallback chain, guards every item id through IItemPoolAdapter (skip-and-warn — one dead
 /// data ref must not void the whole issue), adds surviving items to the party
 /// inventory via IPartyItemRosterAdapter, and records the issue in the ledger.
@@ -35,22 +35,22 @@ public sealed class EnlistmentEquipmentService : IEnlistmentEquipmentService
         _logger = logger;
     }
 
-    public EquipmentIssueResult IssueForRank(
-        string cultureId, ServiceAssignment assignment, EnlistmentKitTier rank)
+    public EquipmentIssueResult IssueForTier(
+        string cultureId, ServiceAssignment assignment, EnlistmentKitTier tier)
     {
-        if (_ledger.HasIssuedForRank(rank))
+        if (_ledger.HasIssuedForTier(tier))
         {
-            _logger.LogInfo($"EnlistmentEquipmentService: kit tier {rank} already covered "
-                + $"(highest issued: {_ledger.HighestIssuedRank}) — skipping");
-            return EquipmentIssueResult.AlreadyIssuedForRank;
+            _logger.LogInfo($"EnlistmentEquipmentService: kit tier {tier} already covered "
+                + $"(highest issued: {_ledger.HighestIssuedTier}) — skipping");
+            return EquipmentIssueResult.AlreadyIssuedForTier;
         }
 
         var rosterId = EnlistmentRosterResolver.Resolve(
-            cultureId, assignment, rank, _catalog.RosterExists);
+            cultureId, assignment, tier, _catalog.RosterExists);
         if (rosterId == null)
         {
             _logger.LogWarning("EnlistmentEquipmentService: no roster for "
-                + $"({cultureId}/{assignment}/{rank}) anywhere on the fallback chain — "
+                + $"({cultureId}/{assignment}/{tier}) anywhere on the fallback chain — "
                 + "nothing issued");
             return EquipmentIssueResult.NoRosterFound;
         }
@@ -81,7 +81,7 @@ public sealed class EnlistmentEquipmentService : IEnlistmentEquipmentService
         if (!_partyItems.IsMainPartyAvailable())
         {
             _logger.LogWarning($"EnlistmentEquipmentService: main party unavailable — cannot "
-                + $"issue roster '{rosterId}' for kit tier {rank}");
+                + $"issue roster '{rosterId}' for kit tier {tier}");
             return EquipmentIssueResult.PartyUnavailable;
         }
 
@@ -102,9 +102,9 @@ public sealed class EnlistmentEquipmentService : IEnlistmentEquipmentService
             return EquipmentIssueResult.PartyUnavailable;
         }
 
-        _ledger.RecordIssue(rank, issued);
+        _ledger.RecordIssue(tier, issued);
         _logger.LogInfo($"EnlistmentEquipmentService: issued {issued.Count} item(s) from roster "
-            + $"'{rosterId}' for ({cultureId}/{assignment}/{rank})");
+            + $"'{rosterId}' for ({cultureId}/{assignment}/{tier})");
         return EquipmentIssueResult.Issued;
     }
 }

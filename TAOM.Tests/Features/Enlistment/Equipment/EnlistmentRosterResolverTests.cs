@@ -7,9 +7,9 @@ using TAOM.Features.Enlistment.Equipment;
 namespace TAOM.Tests.Features.Enlistment.Equipment;
 
 /// <summary>
-/// Fallback-chain contract for <c>enlist_{culture}_{assignment}_{rank}</c> (#525).
+/// Fallback-chain contract for <c>enlist_{culture}_{assignment}_{tier}</c> (#525).
 ///
-/// The chain walks CULTURE first, then assignment, then rank, because issuing another faction's
+/// The chain walks CULTURE first, then assignment, then tier, because issuing another faction's
 /// kit is the defect players actually report (#427, #431). Keeping the culture and losing the role
 /// gives a soldier the wrong job in his own army's gear; keeping the role and losing the culture
 /// dresses him as somebody else's soldier. Note this is NOT a rendering argument: the roster is
@@ -56,7 +56,7 @@ public class EnlistmentRosterResolverTests
     }
 
     [TestMethod]
-    public void Resolve_ExactMissing_FallsToNextLowerRank_KeepingTheAssignment()
+    public void Resolve_ExactMissing_FallsToNextLowerTier_KeepingTheAssignment()
     {
         var result = EnlistmentRosterResolver.Resolve(
             "vlandia", ServiceAssignment.Archer, EnlistmentKitTier.Sergeant,
@@ -66,7 +66,7 @@ public class EnlistmentRosterResolverTests
     }
 
     [TestMethod]
-    public void Resolve_DescendsFullRankChain_ToRecruit()
+    public void Resolve_DescendsFullTierChain_ToRecruit()
     {
         var result = EnlistmentRosterResolver.Resolve(
             "vlandia", ServiceAssignment.Archer, EnlistmentKitTier.Sergeant,
@@ -76,9 +76,9 @@ public class EnlistmentRosterResolverTests
     }
 
     [TestMethod]
-    public void Resolve_RightRoleAtALowerRank_BeatsWrongRoleAtTheRightRank()
+    public void Resolve_RightRoleAtALowerTier_BeatsWrongRoleAtTheRightTier()
     {
-        // Rank is the innermost loop, so a lower-rank kit of the chosen role wins. A lesser
+        // Tier is the innermost loop, so a lower-tier kit of the chosen role wins. A lesser
         // version of what you asked for is a smaller disappointment than the wrong thing.
         var result = EnlistmentRosterResolver.Resolve(
             "gondor", ServiceAssignment.Cavalry, EnlistmentKitTier.Sergeant,
@@ -102,10 +102,10 @@ public class EnlistmentRosterResolverTests
     }
 
     [TestMethod]
-    public void Resolve_CultureOutranksAssignment_EvenAtALowerRank()
+    public void Resolve_CultureOutranksAssignment_EvenAtALowerTier()
     {
         // The sharp form of the ordering: the same culture at recruit still beats the correct
-        // assignment from the neutral default at the requested rank.
+        // assignment from the neutral default at the requested tier.
         var result = EnlistmentRosterResolver.Resolve(
             "mistymountainorcs", ServiceAssignment.Archer, EnlistmentKitTier.Sergeant,
             Exists("enlist_mistymountainorcs_infantry_recruit", "enlist_default_archer_sergeant"));

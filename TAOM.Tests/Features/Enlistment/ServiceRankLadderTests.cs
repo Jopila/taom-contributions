@@ -59,11 +59,21 @@ public class ServiceRankLadderTests
     [TestMethod]
     public void ContentRecord_KitRank3_RoundTripsAlongsideAHigherCareerRank()
     {
-        var record = new ServiceContentRecord { Rank = ServiceRank.MasterSergeant, HighestIssuedEquipmentRank = 3 };
+        var record = new ServiceContentRecord { Rank = ServiceRank.MasterSergeant, HighestIssuedKitTier = 3 };
 
         Assert.IsTrue(ServiceContentRecord.TryParse(record.Serialize(), out var parsed));
         Assert.AreEqual(ServiceRank.MasterSergeant, parsed.Rank);
-        Assert.AreEqual(3, parsed.HighestIssuedEquipmentRank);
+        Assert.AreEqual(3, parsed.HighestIssuedKitTier);
+    }
+
+    [TestMethod]
+    public void ContentRecord_SaveKeyKitRank_IsFrozen_ReadAndWrittenUnderTheOldName()
+    {
+        Assert.IsTrue(ServiceContentRecord.TryParse("rank=1;kitRank=2;kitItems=a,b", out var parsed));
+        Assert.AreEqual(2, parsed.HighestIssuedKitTier);
+
+        var record = new ServiceContentRecord { HighestIssuedKitTier = 2 };
+        StringAssert.Contains(record.Serialize(), "kitRank=2");
     }
 
     [TestMethod]
