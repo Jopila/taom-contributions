@@ -145,145 +145,6 @@ public class PartyScreenFastPathServiceTests
     }
 
     [TestMethod]
-    public void Count_OutsideAWindow_Misses_AndStoreIsIgnored()
-    {
-        var roster = new object();
-        var cat = new object();
-        _sut.BeginScreen();
-
-        _sut.StoreCount(roster, cat, 5);
-
-        Assert.IsFalse(_sut.TryGetCount(roster, cat, out _));
-    }
-
-    [TestMethod]
-    public void Count_InsideAWindow_StoresAndGets_AndCloseClears()
-    {
-        var roster = new object();
-        var cat = new object();
-        _sut.BeginScreen();
-
-        var opened = _sut.OpenCategoryWindow();
-        _sut.StoreCount(roster, cat, 7);
-
-        Assert.IsTrue(opened);
-        Assert.IsTrue(_sut.TryGetCount(roster, cat, out var n));
-        Assert.AreEqual(7, n);
-
-        _sut.CloseCategoryWindow(opened);
-        Assert.IsFalse(_sut.TryGetCount(roster, cat, out _));
-        _sut.OpenCategoryWindow();
-        Assert.IsFalse(_sut.TryGetCount(roster, cat, out _));
-    }
-
-    [TestMethod]
-    public void Count_NullCategory_Works()
-    {
-        var roster = new object();
-        _sut.BeginScreen();
-        _sut.OpenCategoryWindow();
-
-        _sut.StoreCount(roster, null, 3);
-
-        Assert.IsTrue(_sut.TryGetCount(roster, null, out var n));
-        Assert.AreEqual(3, n);
-        Assert.IsFalse(_sut.TryGetCount(roster, new object(), out _));
-    }
-
-    [TestMethod]
-    public void Count_RostersAreSeparate()
-    {
-        var cat = new object();
-        var a = new EqualsAll();
-        var b = new EqualsAll();
-        _sut.BeginScreen();
-        _sut.OpenCategoryWindow();
-
-        _sut.StoreCount(a, cat, 1);
-        _sut.StoreCount(b, cat, 2);
-
-        Assert.IsTrue(_sut.TryGetCount(a, cat, out var na));
-        Assert.IsTrue(_sut.TryGetCount(b, cat, out var nb));
-        Assert.AreEqual(1, na);
-        Assert.AreEqual(2, nb);
-    }
-
-    [TestMethod]
-    public void NestedOpen_ReturnsFalse_AndInnerCloseKeepsTheOuterWindow()
-    {
-        var roster = new object();
-        var cat = new object();
-        _sut.BeginScreen();
-
-        var outer = _sut.OpenCategoryWindow();
-        _sut.StoreCount(roster, cat, 4);
-        var inner = _sut.OpenCategoryWindow();
-        _sut.CloseCategoryWindow(inner);
-
-        Assert.IsTrue(outer);
-        Assert.IsFalse(inner);
-        Assert.IsTrue(_sut.TryGetCount(roster, cat, out _));
-
-        _sut.CloseCategoryWindow(outer);
-        Assert.IsFalse(_sut.TryGetCount(roster, cat, out _));
-    }
-
-    [TestMethod]
-    public void NoWindowWithoutAnEnabledSession()
-    {
-        var roster = new object();
-        Assert.IsFalse(_sut.OpenCategoryWindow());
-        _sut.StoreCount(roster, null, 1);
-        Assert.IsFalse(_sut.TryGetCount(roster, null, out _));
-
-        _settings.PartyFastOpen.Returns(false);
-        _sut.BeginScreen();
-        Assert.IsFalse(_sut.OpenCategoryWindow());
-        _sut.StoreCount(roster, null, 1);
-        Assert.IsFalse(_sut.TryGetCount(roster, null, out _));
-    }
-
-    [TestMethod]
-    public void EndScreen_ClosesAnOpenWindow()
-    {
-        var roster = new object();
-        _sut.BeginScreen();
-        _sut.OpenCategoryWindow();
-        _sut.StoreCount(roster, null, 1);
-
-        _sut.EndScreen();
-        _sut.BeginScreen();
-
-        Assert.IsFalse(_sut.TryGetCount(roster, null, out _));
-        Assert.IsTrue(_sut.OpenCategoryWindow());
-    }
-
-    [TestMethod]
-    public void Detail_ReportsCountersAndPhases()
-    {
-        _settings.LogScreenOpenTimes.Returns(true);
-        var ch = new object();
-        var roster = new object();
-        _sut.BeginScreen();
-        _sut.TryGetCode(ch, 0, 0, out _);
-        _sut.StoreCode(ch, 0, 0, new object());
-        _sut.TryGetCode(ch, 0, 0, out _);
-        _sut.OpenCategoryWindow();
-        _sut.TryGetCount(roster, null, out _);
-        _sut.StoreCount(roster, null, 2);
-        _sut.TryGetCount(roster, null, out _);
-        _sut.TryGetCount(roster, null, out _);
-        _clock.Now = 100;
-        var start = _sut.BeginPhase();
-        _clock.Advance(25);
-        _sut.EndPhase(PartyPhase.InitializeTroopLists, start);
-
-        var detail = _sut.BuildOpenDetail();
-
-        Assert.AreEqual("rows 2, codes 1 hit/1 miss, counts 2 hit/1 miss, init 25.0 ms, refresh 0.0 ms", detail);
-    }
-
-    [TestMethod]
     public void Phase_IgnoredWithoutASession_OrAfterTheOpenWasReported()
     {
         _settings.LogScreenOpenTimes.Returns(true);
@@ -298,4 +159,45 @@ public class PartyScreenFastPathServiceTests
 
         Assert.AreEqual(0, _sut.BeginPhase());
     }
+
+    [TestMethod]
+    public void Detail_ReportsTheFastPathLookupsAndPhases()
+    {
+        _settings.LogScreenOpenTimes.Returns(true);
+        var ch = new object();
+        _sut.BeginScreen();
+        _sut.TryGetCode(ch, 0, 0, out _);
+        _sut.StoreCode(ch, 0, 0, new object());
+        _sut.TryGetCode(ch, 0, 0, out _);
+        _clock.Now = 100;
+        var start = _sut.BeginPhase();
+        _clock.Advance(25);
+        _sut.EndPhase(PartyPhase.InitializeTroopLists, start);
+
+        var detail = _sut.BuildOpenDetail();
+
+        Assert.AreEqual("fast open on; lookups 2, codes 1 hit/1 miss, init 25.0 ms, refresh 0.0 ms", detail);
+    }
+
+    [TestMethod]
+    public void Detail_StartsFastOpenOff_WhenTheSessionOpenedWithTheToggleOff()
+    {
+        _settings.PartyFastOpen.Returns(false);
+        _sut.BeginScreen();
+
+        StringAssert.StartsWith(_sut.BuildOpenDetail(), "fast open off; lookups 0, codes 0 hit/0 miss");
+    }
+
+    [TestMethod]
+    public void Detail_FastOpenFlagIsTheBeginScreenSnapshot_NotTheLiveToggle()
+    {
+        _sut.BeginScreen();
+        _settings.PartyFastOpen.Returns(false);
+
+        StringAssert.StartsWith(_sut.BuildOpenDetail(), "fast open on; ");
+    }
+
+    [TestMethod]
+    public void PatchCategory_IsThePartyCategory() =>
+        Assert.AreEqual("PatchXXX_ShadowfaxParty", PartyFastOpenCalls.PatchCategory);
 }

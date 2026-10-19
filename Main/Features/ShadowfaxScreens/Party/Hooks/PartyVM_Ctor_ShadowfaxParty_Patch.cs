@@ -9,12 +9,13 @@ namespace TAOM.Features.ShadowfaxScreens.Party.Hooks;
 /// <summary>
 /// Party Fast Open (docs/features/shadowfax-screens.md "Party fast open", registry "PatchXXX_ShadowfaxParty"): the
 /// PartyVM constructor opens one caching session and one "Party open" timer window. The finalizer writes the open line
-/// with the service's counters and ends the session only when the constructor threw; a normal session lives until
-/// OnFinalize. The prefix and finalizer link only through __state, so a stripped prefix leaves the finalizer a no-op.
+/// with the service's counters and ends the session only when the constructor threw; a normal session lives until that
+/// PartyVM's OnFinalize or the next PartyVM constructor, whose BeginScreen clears it (Talk deactivates and reactivates
+/// the screen and abandons the old view model without OnFinalize). The prefix and finalizer link only through __state, so a stripped prefix leaves the finalizer a no-op.
 /// Any error here falls through to vanilla. UI main thread.
 /// </summary>
 [HarmonyPatch(typeof(PartyVM), MethodType.Constructor, new[] { typeof(PartyScreenLogic) })]
-[HarmonyPatchCategory("PatchXXX_ShadowfaxParty")]
+[HarmonyPatchCategory(PartyFastOpenCalls.PatchCategory)]
 public static class PartyVM_Ctor_ShadowfaxParty_Patch
 {
     [HarmonyPrefix]
@@ -38,8 +39,9 @@ public static class PartyVM_Ctor_ShadowfaxParty_Patch
         try
         {
             var service = PartyFastOpenCalls.Service;
+            var detail = __state == null ? null : service?.BuildOpenDetail();
             if (__exception != null) service?.EndScreen();
-            ScreenOpenTiming.End(__state, __exception, __state == null ? null : service?.BuildOpenDetail());
+            ScreenOpenTiming.End(__state, __exception, detail);
         }
         catch
         {

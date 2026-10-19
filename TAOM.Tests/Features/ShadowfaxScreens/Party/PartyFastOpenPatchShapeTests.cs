@@ -10,7 +10,6 @@ using TAOM.Features.ShadowfaxScreens.Party.Hooks;
 using TAOM.Tests.Features.LoadTimeStamps;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Party;
-using TaleWorlds.CampaignSystem.Roster;
 using TaleWorlds.Core;
 
 namespace TAOM.Tests.Features.ShadowfaxScreens.Party;
@@ -27,12 +26,12 @@ public class PartyFastOpenPatchShapeTests
 {
     private const string HarmonyId = "taom.tests.partyfastopen";
     private static int _codeCalls;
-    private static int _countCalls;
     private static bool _throw;
 
     private IShadowfaxScreensSettingsProvider _settings = null!;
     private PartyScreenFastPathService _service = null!;
     private RecordingLogger _logger = null!;
+    private FakeStampClock _clock = null!;
 
     public static void Ctor()
     {
@@ -46,30 +45,30 @@ public class PartyFastOpenPatchShapeTests
         return CharacterCode.CreateEmpty();
     }
 
-    public static int Count(ItemRoster items, ItemCategory itemCategory)
-    {
-        _countCalls++;
-        return 9;
-    }
-
     public static void Window() => Inside?.Invoke();
+
+    public static void InitializeTroopLists() => Inside?.Invoke();
+
+    public static void RefreshValues() => Inside?.Invoke();
+
+    public static void TransferAllTroops(PartyScreenLogic.PartyCommand command) => Inside?.Invoke();
 
     public static Action? Inside { get; set; }
 
     [TestInitialize]
     public void Setup()
     {
-        _codeCalls = _countCalls = 0;
+        _codeCalls = 0;
         _throw = false;
         Inside = null;
         _settings = Substitute.For<IShadowfaxScreensSettingsProvider>();
         _settings.PartyFastOpen.Returns(true);
         _settings.LogScreenOpenTimes.Returns(true);
         _logger = new RecordingLogger();
-        var clock = new FakeStampClock();
-        _service = new PartyScreenFastPathService(_settings, clock);
+        _clock = new FakeStampClock { Now = 100 };
+        _service = new PartyScreenFastPathService(_settings, _clock);
         PartyFastOpenCalls.Initialize(_service);
-        ScreenOpenTiming.Initialize(new ScreenOpenTimer(clock, _logger, _settings));
+        ScreenOpenTiming.Initialize(new ScreenOpenTimer(_clock, _logger, _settings));
     }
 
     [TestCleanup]
@@ -126,60 +125,6 @@ public class PartyFastOpenPatchShapeTests
     }
 
     [TestMethod]
-    public void Count_CachesInsideTheWindowOnly()
-    {
-        Patch(nameof(Count), typeof(PartyCharacterVM_GetNumOfCategoryItemPartyHas_ShadowfaxParty_Patch), true, true, false);
-        var roster = new ItemRoster();
-        _service.BeginScreen();
-
-        Count(roster, null!);
-        Count(roster, null!);
-        Assert.AreEqual(2, _countCalls, "outside a window every call runs vanilla");
-
-        var opened = _service.OpenCategoryWindow();
-        var a = Count(roster, null!);
-        var b = Count(roster, null!);
-        _service.CloseCategoryWindow(opened);
-
-        Assert.AreEqual(9, a);
-        Assert.AreEqual(9, b);
-        Assert.AreEqual(3, _countCalls);
-    }
-
-    [TestMethod]
-    public void Window_PairOpensAndClosesAroundTheTarget_AndAThrowStillCloses()
-    {
-        Patch(nameof(Window), typeof(PartyVM_RefreshTroopsUpgradeable_ShadowfaxParty_Patch), true, false, true);
-        _service.BeginScreen();
-        var roster = new object();
-
-        Inside = () =>
-        {
-            _service.StoreCount(roster, null, 1);
-            Assert.IsTrue(_service.TryGetCount(roster, null, out _));
-        };
-        Window();
-        Assert.IsFalse(_service.TryGetCount(roster, null, out _), "the window must be closed after the call");
-
-        Inside = () => throw new InvalidOperationException("boom");
-        Assert.ThrowsException<InvalidOperationException>(Window);
-        Assert.IsTrue(_service.OpenCategoryWindow(), "a throwing call must still close its window");
-    }
-
-    [TestMethod]
-    public void Window_StrippedPrefix_FinalizerIsANoOp()
-    {
-        Patch(nameof(Window), typeof(PartyVM_RefreshTroopsUpgradeable_ShadowfaxParty_Patch), false, false, true);
-        _service.BeginScreen();
-        var outer = _service.OpenCategoryWindow();
-
-        Window();
-
-        Assert.IsFalse(_service.OpenCategoryWindow(), "the outer window must still be open");
-        _service.CloseCategoryWindow(outer);
-    }
-
-    [TestMethod]
     public void Ctor_OpensTheSession_AndKeepsItOnSuccess_WritingOneOpenLine()
     {
         Patch(nameof(Ctor), typeof(PartyVM_Ctor_ShadowfaxParty_Patch), true, false, true);
@@ -189,7 +134,7 @@ public class PartyFastOpenPatchShapeTests
         Assert.IsTrue(_service.SessionOpen);
         Assert.AreEqual(1, _logger.Lines.Count);
         StringAssert.StartsWith(_logger.Lines[0], "INFO [ScreenOpen] Party open: ");
-        StringAssert.Contains(_logger.Lines[0], "(rows 0, codes 0 hit/0 miss");
+        StringAssert.Contains(_logger.Lines[0], "(fast open on; lookups 0, codes 0 hit/0 miss");
     }
 
     [TestMethod]
@@ -228,5 +173,80 @@ public class PartyFastOpenPatchShapeTests
         Assert.IsFalse(_service.SessionOpen);
         var lines = new List<string>(_logger.Lines);
         Assert.AreEqual(0, lines.Count);
+    }
+
+    [TestMethod]
+    public void InitializeTroopLists_TimesTheInitPhase_AndAThrowStillEndsIt()
+    {
+        Patch(nameof(InitializeTroopLists), typeof(PartyVM_InitializeTroopLists_ShadowfaxParty_Patch), true, false, true);
+        _service.BeginScreen();
+        Inside = () => _clock.Advance(30);
+
+        InitializeTroopLists();
+        Inside = () => { _clock.Advance(5); throw new InvalidOperationException("boom"); };
+        Assert.ThrowsException<InvalidOperationException>(InitializeTroopLists);
+
+        StringAssert.Contains(_service.BuildOpenDetail(), "init 35.0 ms");
+    }
+
+    [TestMethod]
+    public void InitializeTroopLists_StrippedPrefix_FinalizerAddsNothing()
+    {
+        Patch(nameof(InitializeTroopLists), typeof(PartyVM_InitializeTroopLists_ShadowfaxParty_Patch), false, false, true);
+        _service.BeginScreen();
+        Inside = () => _clock.Advance(30);
+
+        InitializeTroopLists();
+
+        StringAssert.Contains(_service.BuildOpenDetail(), "init 0.0 ms");
+    }
+
+    [TestMethod]
+    public void RefreshValues_TimesTheRefreshPhase_AndAThrowStillEndsIt()
+    {
+        Patch(nameof(RefreshValues), typeof(PartyVM_RefreshValues_ShadowfaxParty_Patch), true, false, true);
+        _service.BeginScreen();
+        Inside = () => _clock.Advance(12);
+
+        RefreshValues();
+        Inside = () => { _clock.Advance(3); throw new InvalidOperationException("boom"); };
+        Assert.ThrowsException<InvalidOperationException>(RefreshValues);
+
+        StringAssert.Contains(_service.BuildOpenDetail(), "refresh 15.0 ms");
+    }
+
+    [TestMethod]
+    public void RefreshValues_StrippedPrefix_FinalizerAddsNothing()
+    {
+        Patch(nameof(RefreshValues), typeof(PartyVM_RefreshValues_ShadowfaxParty_Patch), false, false, true);
+        _service.BeginScreen();
+        Inside = () => _clock.Advance(12);
+
+        RefreshValues();
+
+        StringAssert.Contains(_service.BuildOpenDetail(), "refresh 0.0 ms");
+    }
+
+    [TestMethod]
+    public void TransferAllTroops_WritesItsOwnLine_AndRethrowsAThrow()
+    {
+        Patch(nameof(TransferAllTroops), typeof(PartyVM_TransferAllTroops_ShadowfaxParty_Patch), true, false, true);
+
+        TransferAllTroops(default);
+        StringAssert.StartsWith(_logger.Lines[0], "INFO [ScreenOpen] Party transfer all: ");
+
+        Inside = () => throw new InvalidOperationException("boom");
+        Assert.ThrowsException<InvalidOperationException>(() => TransferAllTroops(default));
+        StringAssert.Contains(_logger.Lines[1], ", threw InvalidOperationException");
+    }
+
+    [TestMethod]
+    public void TransferAllTroops_StrippedPrefix_WritesNothing()
+    {
+        Patch(nameof(TransferAllTroops), typeof(PartyVM_TransferAllTroops_ShadowfaxParty_Patch), false, false, true);
+
+        TransferAllTroops(default);
+
+        Assert.AreEqual(0, _logger.Lines.Count);
     }
 }

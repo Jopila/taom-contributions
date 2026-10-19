@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Features.CoopInterop;
+using TAOM.Features.ShadowfaxScreens.Party;
 
 namespace TAOM.Tests.Features.CoopInterop;
 
@@ -137,13 +138,11 @@ public class CoopVetoClassificationTests
             "two peers to disagree about. Every other outcome (toggle off, cull unavailable, any error) returns true " +
             "and runs vanilla whole. The toggle is presentation in CoopSettingsRelevance."),
         ["PartyCharacterVM_GetCharacterCode_ShadowfaxParty_Patch"] = new(CoopVeto.ReviewedSafe,
-            "PatchXXX_ShadowfaxParty: client-side UI. Returns false only on a per-screen cache hit, handing back the " +
+            PartyFastOpenCalls.PatchCategory + ": client-side UI. Returns false only on a per-screen cache hit, handing back the " +
             "CharacterCode vanilla built earlier for the same character, troop type and side; the code feeds a portrait " +
-            "image id and mutates no campaign state, so there is nothing replicated to skip. The toggle is presentation."),
-        ["PartyCharacterVM_GetNumOfCategoryItemPartyHas_ShadowfaxParty_Patch"] = new(CoopVeto.ReviewedSafe,
-            "PatchXXX_ShadowfaxParty: client-side UI. Returns false only on a hit inside one InitializeTroopLists or " +
-            "RefreshTroopsUpgradeable call, handing back the count vanilla computed for the same roster and category; " +
-            "a read-only count for a row's upgrade state, no campaign mutation. The toggle is presentation."),
+            "image id and mutates no campaign state, so there is nothing replicated to skip. Under co-op the roster refresher " +
+            "calls the screen's OnReset, which rebuilds rows through the same hook, so codes stay correct for the " +
+            "current roster. The toggle is presentation."),
         ["QuestItemVM_PopulateQuestLog_QuestLogPatch"] = new(CoopVeto.ReviewedSafe,
             "Quest Log Fast Open (#854): client-side UI. The prefix skips QuestItemVM.PopulateQuestLog, which only adds " +
             "QuestStageVM view models to a finished quest's list inside the QuestsVM constructor; it reads journal logs and " +

@@ -6,7 +6,7 @@ namespace TAOM.Features.ShadowfaxScreens.Party.Hooks;
 
 /// <summary>Times PartyVM.RefreshValues as the open line's "refresh" phase (the constructor's last step). Observe only. UI main thread.</summary>
 [HarmonyPatch(typeof(PartyVM), nameof(PartyVM.RefreshValues))]
-[HarmonyPatchCategory("PatchXXX_ShadowfaxParty")]
+[HarmonyPatchCategory(PartyFastOpenCalls.PatchCategory)]
 public static class PartyVM_RefreshValues_ShadowfaxParty_Patch
 {
     [HarmonyPrefix]

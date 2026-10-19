@@ -8,11 +8,10 @@ namespace TAOM.Features.ShadowfaxScreens.Party.Hooks;
 
 /// <summary>
 /// Times PartyVM.TransferAllTroops(PartyCommand) as its own "Party transfer all" window. It rebuilds the lists through
-/// InitializeTroopLists, so the count cache applies inside it; the code cache already spans the session. Observe only.
-/// UI main thread.
+/// InitializeTroopLists, and the code cache already spans the session. Observe only. UI main thread.
 /// </summary>
 [HarmonyPatch(typeof(PartyVM), "TransferAllTroops", new[] { typeof(PartyScreenLogic.PartyCommand) })]
-[HarmonyPatchCategory("PatchXXX_ShadowfaxParty")]
+[HarmonyPatchCategory(PartyFastOpenCalls.PatchCategory)]
 public static class PartyVM_TransferAllTroops_ShadowfaxParty_Patch
 {
     [HarmonyPrefix]

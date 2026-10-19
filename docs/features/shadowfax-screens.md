@@ -247,40 +247,62 @@ write nothing to the network or the save.
 ## Party fast open
 
 Issue #853. The party screen builds one `PartyCharacterVM` row per troop and per prisoner, on both sides, and
-vanilla repeats two lookups for each row. "Party Fast Open" (MCM, Screen Performance, default on) caches them for the
-life of one screen. Off restores vanilla's build exactly.
+vanilla recomputes each row's character code. "Party Fast Open" (MCM, Screen Performance, default on) caches those codes
+for the life of one screen. Off restores vanilla's build exactly.
 
-**The two caches** (`PartyScreenFastPathService`, no TaleWorlds types, keys compared by reference):
+**The cache** (`PartyScreenFastPathService`, no TaleWorlds types, keys compared by reference):
+`PartyCharacterVM.GetCharacterCode(character, type, side)` computes the equipment code and the body properties itself,
+and `CharacterCode.CreateFrom` only builds the string from them. The same character appears in several rows and in every
+rebuild, so a hit skips the whole `GetCharacterCode` body. The cache is keyed by (character, troop type, side).
 
-- **Character code:** `PartyCharacterVM.GetCharacterCode(character, type, side)` calls `CharacterCode.CreateFrom`, which
-  computes an equipment code and body properties. The same character appears in several rows and in every rebuild.
-  The cache is keyed by (character, troop type, side) and lives from the `PartyVM` constructor to `OnFinalize`.
-- **Category count:** `PartyCharacterVM.GetNumOfCategoryItemPartyHas(items, itemCategory)` walks the whole item roster
-  for every row, a null category included. The cache is keyed by (roster, category) and lives only inside one
-  `PartyVM.InitializeTroopLists` or `PartyVM.RefreshTroopsUpgradeable` call, where the roster cannot change.
+**Session lifetime.** A session begins in the `PartyVM` constructor and ends at that `PartyVM`'s `OnFinalize` or at the
+next `PartyVM` constructor, whichever comes first. Talk deactivates and reactivates the party screen and abandons the old
+view model without `OnFinalize`; the new constructor's `BeginScreen` clears the cache, so nothing leaks across screens.
 
-**Why this is safe next to BannerColorPersistence.** That feature's `PartyCharacterVM.GetCharacterCode` postfix writes
+**Why this is safe next to BannerColorPersistence.** Patch23's `PartyCharacterVM.GetCharacterCode` postfix writes
 `Color1` and `Color2` on the returned code. `CharacterImageIdentifier`'s constructor reads only `CharacterCode.Code`,
 which has a private setter and is built inside `CreateFrom` with the colours already in it, so those writes never
-change what a row renders and rows can share one code object. `PartyFastOpenBindingTests` reads the constructor's IL and
-fails if it ever touches another member. Side finding, not changed here: for the same reason the clan colours that
-feature intends on party rows probably never show on v1.5.5; that needs an in-game look.
+change what a row renders and rows can share one code object. `PartyFastOpenBindingTests` reads the IL of the
+`CharacterImageIdentifier`, `CharacterImageIdentifierVM` and `UpgradeTargetVM` constructors (RequiresGameIL) and fails if
+any of them touches another member or passes the code anywhere else. Side finding: the clan colours that feature intends
+on party rows never show on v1.5.5, because the portrait renderer rebuilds the image from the `Code` string through
+`CharacterImageTextureProvider` (`CreateFrom(id)`), which drops the postfix's colour writes.
 
-**Toggle and sessions.** The toggle is read once, when the `PartyVM` constructor starts. Off at that point means every
-lookup misses and every store is ignored, but the session and window transitions still run. The constructor patch
-ends the session if the constructor throws; `OnFinalize` ends it otherwise.
+**Toggle.** The toggle is read once, when the `PartyVM` constructor starts. Off at that point means every lookup misses
+and every store is ignored, but the session transitions still run. The open line's detail starts `fast open on;` or
+`fast open off;`, the fast path that open actually ran with. The constructor patch ends the session if the constructor
+throws.
 
-**Left out on purpose:** the `InitializePartyList` loop fix (tens of microseconds), deferring the trade rows, a
-`TransferAll` rewrite, pre-sorting the rosters, and skipping `RefreshValues` or property-change notifications.
+**Co-op.** The cache holds codes for the screen's own rosters and no campaign state. Coop's roster refresher calls the
+screen's `OnReset`, which rebuilds rows through the same hook, so codes stay correct for the current roster.
+
+**What was removed, and why.** A second cache for the item-category count (`GetNumOfCategoryItemPartyHas`, one roster
+walk per row) was measured at 0.1 to 1 ms per open, too little to keep next to its window bookkeeping, and is gone. Also
+left out on purpose: the `InitializePartyList` loop fix (tens of microseconds), deferring the trade rows, a `TransferAll`
+rewrite, pre-sorting the rosters, and skipping `RefreshValues` or property-change notifications.
 
 **How to measure.** Turn "Log Screen Open Times" on. Use a large army with many prisoners, plus a garrison at a big town.
 Open the party screen six times with Party Fast Open off, then six times on, and drop the first open of each arm. Compare
-the medians of the `[ScreenOpen] Party open` lines in `taom_debug.log`; the detail in parentheses lists rows built, code and
-count hits and misses, and the time in `InitializeTroopLists` and the final `RefreshValues`. Press Transfer All in the
-same save and compare the `[ScreenOpen] Party transfer all` lines the same way. Keep the change only if the median drops
-by at least 16 ms and by more than the off arm's spread.
+the medians of the `[ScreenOpen] Party open` lines in `taom_debug.log`; the detail in parentheses lists the fast-open
+flag, the character-code lookups, code hits and misses, and the time in `InitializeTroopLists` and the final
+`RefreshValues`. Press Transfer All in the same save and compare the `[ScreenOpen] Party transfer all` lines the same
+way. Keep the change only if the median drops by at least 16 ms and by more than the off arm's spread.
 
-**Files:** `Main/Features/ShadowfaxScreens/Party/` (`PartyScreenFastPathService`, `PartyFastOpenCalls`, `Hooks/`).
+**In-game correctness checklist.** With the toggle on: open the party screen with a mixed army and prisoners and check
+that every row shows its own portrait (two troops of one type on both sides, a hero, a prisoner); expand an upgrade row and
+check the upgrade-target portraits; press Transfer All and Reset; Talk, return and reopen the screen, checking portraits
+are still right; repeat once with the toggle off.
+
+**Removal checklist** (deleting Party Fast Open touches): the folders `Main/Features/ShadowfaxScreens/Party/` and
+`TAOM.Tests/Features/ShadowfaxScreens/Party/`; in `ShadowfaxScreensModule.cs` the `using`, the category line, the
+registration and the `PartyFastOpenCalls.Initialize` line; the `PartyFastOpen` member in
+`IShadowfaxScreensSettingsProvider`, `ShadowfaxScreensSettingsProvider` and `BattleLoadDiagnosticsSettings`, its
+`CoopSettingsRelevance` entry, and its rows in `ShadowfaxScreensSettingsProviderTests` and the module wiring tests; the
+`PartyCharacterVM_GetCharacterCode_ShadowfaxParty_Patch` entry in `CoopVetoClassificationTests`; the setting's
+translation rows; this section, the registry section and the Configuration row.
+
+**Files:** `Main/Features/ShadowfaxScreens/Party/` (`PartyScreenFastPathService`, `PartyPhase`, `PartyFastOpenCalls`,
+`Hooks/`).
 **Tests:** `TAOM.Tests/Features/ShadowfaxScreens/Party/` (`PartyScreenFastPathServiceTests`, `PartyFastOpenPatchShapeTests`,
 `PartyFastOpenBindingTests`, `PartyFastOpenWiringTests`).
 
@@ -330,7 +352,7 @@ page. None of its rows needs a restart; each is read on every screen open.
 | Log Screen Open Times | Off | Writes one `[ScreenOpen]` line per screen open to `taom_debug.log`: the screen, the phase and the milliseconds. Use it to compare a fast-open switch off against on. |
 | Clan Fast Open | On | Builds the Clan screen's parties list once instead of three times. Off restores vanilla's build. |
 | Inventory Fast Open | On | Skips work the Inventory and trade screen repeats. Off restores vanilla's build. |
-| Party Fast Open | On | Caches lookups the Party screen repeats for each troop. Off restores vanilla's build. |
+| Party Fast Open | On | Caches the character code the Party screen rebuilds for each troop. Off restores vanilla's build. |
 | Quest Log Fast Open | On | Builds finished quests only when they are selected. Off restores vanilla's build. |
 
 ## Key Files
