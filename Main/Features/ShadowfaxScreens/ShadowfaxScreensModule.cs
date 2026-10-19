@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DryIoc;
 using TAOM.Composition;
+using TAOM.Features.ShadowfaxScreens.Clan;
 using TAOM.Features.ShadowfaxScreens.Diagnostics;
 
 namespace TAOM.Features.ShadowfaxScreens;
@@ -29,10 +30,14 @@ internal sealed class ShadowfaxScreensModule : TaomFeatureModule
     {
         registrator.Register<IShadowfaxScreensSettingsProvider, ShadowfaxScreensSettingsProvider>(Reuse.Singleton);
         registrator.Register<ScreenOpenTimer>(Reuse.Singleton);
+
+        // Clan fast open (Clan/): needs ICoopPresenceProvider (CoopInteropIoC) and IStampClock, both registered elsewhere.
+        registrator.Register<ClanScreenFastPathService>(Reuse.Singleton);
     }
 
     public override void InitializeStatics(IResolver resolver)
     {
         ScreenOpenTiming.Initialize(resolver.Resolve<ScreenOpenTimer>());
+        ClanFastOpenCalls.Initialize(resolver.Resolve<ClanScreenFastPathService>());
     }
 }

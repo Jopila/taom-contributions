@@ -5,7 +5,9 @@ using NSubstitute;
 using TAOM.Composition;
 using TAOM.Core.Diagnostics;
 using TAOM.Core.Logging;
+using TAOM.Features.CoopInterop;
 using TAOM.Features.ShadowfaxScreens;
+using TAOM.Features.ShadowfaxScreens.Clan;
 using TAOM.Features.ShadowfaxScreens.Diagnostics;
 
 namespace TAOM.Tests.Features.ShadowfaxScreens;
@@ -23,6 +25,7 @@ public class ShadowfaxScreensModuleTests
         // IStampClock and IModLogger belong to other registrations; the module must not add them.
         _container.RegisterInstance(Substitute.For<IStampClock>());
         _container.RegisterInstance(Substitute.For<IModLogger>());
+        _container.RegisterInstance(Substitute.For<ICoopPresenceProvider>());
         _sut.RegisterServices(_container);
     }
 
@@ -30,6 +33,7 @@ public class ShadowfaxScreensModuleTests
     public void Cleanup()
     {
         ScreenOpenTiming.Initialize(null);
+        ClanFastOpenCalls.Initialize(null);
         _container.Dispose();
     }
 

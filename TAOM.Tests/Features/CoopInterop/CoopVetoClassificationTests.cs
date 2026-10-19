@@ -136,6 +136,12 @@ public class CoopVetoClassificationTests
             "tracker, and writes nothing to campaign state, so there is no replicated mutation to skip and nothing for " +
             "two peers to disagree about. Every other outcome (toggle off, cull unavailable, any error) returns true " +
             "and runs vanilla whole. The toggle is presentation in CoopSettingsRelevance."),
+        ["ClanPartiesVM_RefreshPartiesList_ClanFastOpen_Patch"] = new(CoopVeto.ReviewedSafe,
+            "Clan fast open (Shadowfax Screens): client-side UI. The prefix skips the list build vanilla makes inside the " +
+            "same ClanPartiesVM's RefreshValues, which only fills this client's view-model lists and header texts and " +
+            "writes nothing to campaign state. It is also gated for co-op anyway: ClanScreenFastPathService issues no " +
+            "refresh token while ICoopPresenceProvider.IsCoopActive, so under co-op the prefix always returns true and " +
+            "vanilla builds all three times. Presentation in CoopSettingsRelevance."),
         ["Patch86_HideoutAssaultBossFight"] = new(CoopVeto.ReviewedSafe,
             "Replaces MapEventHelper.GetPriorityListForHideoutMission, a pure roster-ORDERING " +
             "function for the local hideout mission: it decides which troops spawn in phase 1 and " +
