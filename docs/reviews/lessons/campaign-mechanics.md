@@ -616,3 +616,18 @@ never started, and every cost was still paid.
   (`GetScoreOfDeclaringWar`), `IsAllowed` for decisions, the notice itself for direct offers. Keep the action prefix as
   the backstop.
 - **Source:** `docs/reviews/rca-wotr-war-rule-2026-10-18.md` findings 4 to 6 and 9.
+
+### Before hiding a menu exit, check each remaining option is ENABLED, not just shown (#827, 2026-10-18)
+Enlistment hid vanilla 'Leave' and 'Abandon army' in the commander's battle on the claim that 'Send troops' always
+remains. 'Send troops' is shown whenever a healthy troop stands on the soldier's side, and it does not read the
+hooked predicate, so both checks passed. But `MenuHelper.CheckEnemyAttackableHonorably` disables it, and 'Attack',
+for a player outside an army who holds a safe-passage truce with the enemy faction. The no-army soldier was left with
+two greyed options, and the player's own map event advances only through that menu, so the battle could never end.
+- **Why missed:** the remaining options were walked for visibility and for whether they read the patched predicate,
+  never for the paths that set `args.IsEnabled = false`. The #567 lesson above says to walk every option on the menu;
+  this change walked them on one axis only.
+- **Prevent:** when a change hides or disables a menu option, list every other option on that menu id with both its
+  visibility condition and every `IsEnabled = false` path in it (honour, morale, raft, wounded), and name the one that
+  stays enabled in each state the change can reach. If none is guaranteed, release the hidden option in the states
+  where nothing else is enabled, and ask vanilla's own check rather than copy its conditions.
+- **Source:** `docs/reviews/rca-enlistment-battle-exit-2026-10-18.md` F1.

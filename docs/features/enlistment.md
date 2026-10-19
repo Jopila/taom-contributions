@@ -303,7 +303,10 @@ The first shipped version never joined a single battle. Five separate defects, a
 alternative exists), `MapState.EnterMenuMode` postfix (recovery for ids written without
 SetNextMenu), 4× `LordConversationsCampaignBehavior` condition prefixes (suppress
 join-army/ally-thanks lines while enlisted; the clickable variant carries `out TextObject
-hint`; ally-thanks pair is PUBLIC on 1.4.7). All fail open. All six targets pinned by
+hint`; ally-thanks pair is PUBLIC on 1.4.7), `MapEventHelper.CanMainPartyLeaveBattleCommonCondition`
+postfix (#827: encounter menu only; hides vanilla 'Leave' and 'Abandon army' while the soldier serves in his
+commander's battle, gated by `IEnlistmentMenuService.ShouldBlockBattleExit`, and released under a safe-passage
+truce so the menu never loses its last option). All fail open. All seven targets pinned by
 `Patch66EnlistmentBindingTests` against the installed DLLs. The donor's
 `MapState.OnMapConversationOver` patch was replaced by `CampaignEvents.ConversationEnded`.
 
@@ -1896,6 +1899,12 @@ What actually remains, each a state no test can reach:
   as a siege assault and a siege defence. Control: leave service and fight a battle of the player's
   own with 20 or more troops; the deployment screen MUST still open. Merge-failed path (#495, a
   kingdomless commander): `army merge unavailable` and still no screen.
+- **Battle exits hidden (#827).** Join a commander's battle through an army: the encounter menu
+  shows neither 'Abandon army' nor 'Leave'. Merge-failed path (a kingdomless commander): no
+  'Leave'. Under a safe-passage truce with the enemy faction, a soldier with no army sees
+  'Leave' again, because vanilla greys out both 'Attack' and 'Send troops' and the menu must
+  keep an exit. After that 'Leave', expect the state to return to `EnlistedAttached` once the
+  commander's battle ends (the reconciler frees it when no battle remains).
 - **The presence hold at x64 (#577).** Extra Fast Forward multiplier 64, Diagnostics ON: ride with
   the commander through three or more battles, click "Send troops" in each encounter menu. Expect no
   exception and no `TICK trigger=army left ... verdict=AttachRequired` line; expect `reconcile
