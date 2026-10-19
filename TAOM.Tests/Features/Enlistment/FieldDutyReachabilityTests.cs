@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using TAOM.Features.Enlistment.Content;
+using TAOM.Features.Enlistment.Content.Domain;
 
 namespace TAOM.Tests.Features.Enlistment;
 
@@ -32,13 +33,6 @@ public class FieldDutyReachabilityTests
         Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
             "Main", "_Module", "ModuleData", "enlistment", "enlistment_duties.json"));
 
-    /// <summary>Mirrors <c>ServiceRank</c>'s ordinal, which is what <c>(int)record.Rank</c> feeds the check.</summary>
-    private static readonly Dictionary<string, int> RankOrdinal =
-        new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["Recruit"] = 0, ["Soldier"] = 1, ["Veteran"] = 2, ["Sergeant"] = 3,
-        };
-
     /// <summary>
     /// The skill a gated-in player is assumed to have. **Zero**, because that is what a Bannerlord
     /// hero actually has in a skill they never invested in, and nothing in a duty's gates requires
@@ -65,15 +59,15 @@ public class FieldDutyReachabilityTests
         return duties;
     }
 
-    private static (int Rank, int Trust) WeakestAdmitted(JToken duty)
+    private static (ServiceRank Rank, int Trust) WeakestAdmitted(JToken duty)
     {
         var gates = duty["gates"];
-        var rankName = (string)gates?["minRank"] ?? "Recruit";
-        Assert.IsTrue(RankOrdinal.ContainsKey(rankName),
+        var rankName = (string)gates?["minRank"] ?? nameof(ServiceRank.Private);
+        Assert.IsTrue(Enum.IsDefined(typeof(ServiceRank), rankName),
             $"duty '{duty["id"]}' gates on an unknown rank '{rankName}'");
         // minTrust may be negative; the check only ever adds POSITIVE trust, so floor at zero.
         var minTrust = (int?)gates?["minTrust"] ?? 0;
-        return (RankOrdinal[rankName], Math.Max(0, minTrust));
+        return ((ServiceRank)Enum.Parse(typeof(ServiceRank), rankName), Math.Max(0, minTrust));
     }
 
     /// <summary>The roll this row demands of the weakest player its own gates admit.</summary>
@@ -81,7 +75,7 @@ public class FieldDutyReachabilityTests
     {
         var difficulty = (int)duty["difficulty"];
         var (rank, trust) = WeakestAdmitted(duty);
-        return difficulty - UntrainedSkill - (trust * 2) - (rank * SkillCheckService.RankBonusPerLevel);
+        return difficulty - UntrainedSkill - (trust * 2) - SkillCheckService.RankBonus(rank);
     }
 
     /// <summary>
@@ -191,10 +185,10 @@ public class FieldDutyReachabilityTests
     [TestMethod]
     public void FieldDutyDifficulty_RisesWithTheRankRequiredToBeOfferedIt()
     {
-        // Not a balance assertion — an ORDERING one. If the hardest work open to a Recruit is
-        // harder than anything a Veteran can be handed, the gates are not doing the job they exist
+        // Not a balance assertion — an ORDERING one. If the hardest work open to a Private is
+        // harder than anything a Sergeant can be handed, the gates are not doing the job they exist
         // for, and a promotion that should have opened up harder work has instead handed the player
-        // something easier. A Recruit row at 80 against a Soldier band topping out at 52 is the
+        // something easier. A Private row at 80 against a Specialist band topping out at 52 is the
         // shape this catches.
         //
         // Read the scope precisely, because the example that used to sit here did not: this compares
@@ -202,7 +196,7 @@ public class FieldDutyReachabilityTests
         // invisible to it. (The old comment offered `bandit_hunt` 58 Recruit "above" `deserter_sweep`
         // 64 Soldier, which is neither an inversion nor something this assertion could see. Both
         // numbers were real; the sentence was not.)
-        var byRank = new Dictionary<int, (int Min, int Max, List<string> Ids)>();
+        var byRank = new Dictionary<ServiceRank, (int Min, int Max, List<string> Ids)>();
 
         foreach (var duty in FieldDuties())
         {
@@ -221,7 +215,7 @@ public class FieldDutyReachabilityTests
             var lower = byRank[ranks[i - 1]];
             var higher = byRank[ranks[i]];
             // The hardest duty at a lower rank must not exceed the hardest at a higher one. Bands
-            // are allowed to OVERLAP — an easy Veteran duty is fine — but the ceiling must rise.
+            // are allowed to OVERLAP — an easy Sergeant duty is fine — but the ceiling must rise.
             if (lower.Max > higher.Max)
                 inversions.Add(
                     $"rank {ranks[i - 1]} tops out at {lower.Max} [{string.Join(" ", lower.Ids)}] " +

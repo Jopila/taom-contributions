@@ -31,11 +31,6 @@ namespace TAOM.Features.Enlistment.Duties;
 /// </summary>
 public class FieldDutyRuntime : IFieldDutyRuntime
 {
-    /// <summary>Rank contribution to the check, aliased from the one definition both duty
-    /// systems use. Field duties apply it unconditionally; see SkillCheckService for why the
-    /// interactive path does not.</summary>
-    private const int RankBonusPerLevel = SkillCheckService.RankBonusPerLevel;
-
     private readonly IEnlistmentStore _store;
     private readonly IEnlistmentContentStore _contentStore;
     private readonly IEnlistmentContentConfigProvider _config;
@@ -285,7 +280,8 @@ public class FieldDutyRuntime : IFieldDutyRuntime
         // rank ladder can move with it), so reading them back afterwards reports numbers that did
         // not decide anything: a failure costing 1 trust used to print "trust -1" for a check that
         // had actually run on trust 0.
-        var rankBonus = (int)record.Rank * RankBonusPerLevel;
+        // Field duties apply the rank bonus unconditionally; SkillCheckService.RankBonus caps it.
+        var rankBonus = SkillCheckService.RankBonus(record.Rank);
         var rankAtCheck = record.Rank;
         var trustBonus = SkillCheckService.TrustBonus(record.Trust);
         var effectiveSkill = SkillCheckService.EffectiveSkill(primary, secondary);

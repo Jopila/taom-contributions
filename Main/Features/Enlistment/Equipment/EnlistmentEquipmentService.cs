@@ -40,7 +40,7 @@ public sealed class EnlistmentEquipmentService : IEnlistmentEquipmentService
     {
         if (_ledger.HasIssuedForRank(rank))
         {
-            _logger.LogInfo($"EnlistmentEquipmentService: rank {rank} already covered "
+            _logger.LogInfo($"EnlistmentEquipmentService: kit tier {rank} already covered "
                 + $"(highest issued: {_ledger.HighestIssuedRank}) — skipping");
             return EquipmentIssueResult.AlreadyIssuedForRank;
         }
@@ -81,7 +81,7 @@ public sealed class EnlistmentEquipmentService : IEnlistmentEquipmentService
         if (!_partyItems.IsMainPartyAvailable())
         {
             _logger.LogWarning($"EnlistmentEquipmentService: main party unavailable — cannot "
-                + $"issue roster '{rosterId}' for rank {rank}");
+                + $"issue roster '{rosterId}' for kit tier {rank}");
             return EquipmentIssueResult.PartyUnavailable;
         }
 

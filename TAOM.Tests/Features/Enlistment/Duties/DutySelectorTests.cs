@@ -42,7 +42,7 @@ public class DutySelectorTests
         }
     }
 
-    private static ServiceProgressSnapshot Progress(ServiceRank rank = ServiceRank.Recruit, int trust = 0, ServiceAssignment assignment = ServiceAssignment.Infantry) =>
+    private static ServiceProgressSnapshot Progress(ServiceRank rank = ServiceRank.Private, int trust = 0, ServiceAssignment assignment = ServiceAssignment.Infantry) =>
         new ServiceProgressSnapshot { Rank = rank, Trust = trust, Assignment = assignment };
 
     private static DutyDefinition Field(string id, GateSpec gates = null) => new DutyDefinition { Id = id, Gates = gates ?? new GateSpec() };
@@ -61,10 +61,10 @@ public class DutySelectorTests
     {
         var duties = new EnlistmentDutiesConfig
         {
-            FieldDuties = new List<DutyDefinition> { Field("only_field", new GateSpec { MinRank = ServiceRank.Sergeant }) },
+            FieldDuties = new List<DutyDefinition> { Field("only_field", new GateSpec { MinRank = ServiceRank.StaffSergeant }) },
         };
 
-        var result = _selector.SelectOffer(duties, Progress(rank: ServiceRank.Recruit), new ArmyRhythmSnapshot(), new List<string>(), pressure: false);
+        var result = _selector.SelectOffer(duties, Progress(rank: ServiceRank.Private), new ArmyRhythmSnapshot(), new List<string>(), pressure: false);
 
         Assert.IsFalse(result.HasOffer);
     }
@@ -190,10 +190,10 @@ public class DutySelectorTests
     {
         var incidents = new List<IncidentDefinition>
         {
-            new IncidentDefinition { Id = "gated", Chance = 1f, Gates = new GateSpec { MinRank = ServiceRank.Sergeant } },
+            new IncidentDefinition { Id = "gated", Chance = 1f, Gates = new GateSpec { MinRank = ServiceRank.StaffSergeant } },
         };
 
-        var result = _selector.SelectIncident(incidents, Progress(rank: ServiceRank.Recruit), new ArmyRhythmSnapshot());
+        var result = _selector.SelectIncident(incidents, Progress(rank: ServiceRank.Private), new ArmyRhythmSnapshot());
 
         Assert.IsNull(result);
     }

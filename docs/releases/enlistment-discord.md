@@ -8,20 +8,23 @@ Every campaign starts the same way: you are nobody, and the only ladder out is *
 
 **2. Your party marches with you, out of sight.** Your own troops and companions don't disband — they're parked with the column and follow your commander wherever he goes. The map hands you a **service wait menu** instead of your usual free roam: *"You serve in Théoden's company. The column moves at your commander's pace."* When he fights, you're pulled into the battle on his side.
 
-**3. You get paid out of his purse — not thin air.** Wages are **5 / 8 / 14 / 22** a day by rank. He pays from his own gold, and if his coffers run low the pay **defers into arrears** (capped at 60) instead of vanishing. When he's flush again, he settles up. Serve out your term and the paymaster clears what's owed on the way out — **desert and you forfeit every copper of it.**
+**3. You get paid out of his purse, not thin air.** Wages are **5 / 8 / 14 / 22 / 28 / 34 / 40** a day by rank. He pays from his own gold, and if his coffers run low the pay **defers into arrears** (capped at 14 days of your rank's wage) instead of vanishing. When he's flush again, he settles up. Serve out your term and the paymaster clears what's owed on the way out: **desert and you forfeit every copper of it.**
 
-**4. Earn your stripes: Recruit → Soldier → Veteran → Sergeant.** Promotion is checked at the day's end *and* right after a battle, so the fight that earns your last XP promotes you on the spot rather than tomorrow morning.
-- **Soldier** — 7 days, 100 service XP
-- **Veteran** — 25 days, 350 XP, Leadership 20, 2 duties done
-- **Sergeant** — 60 days, 800 XP, Leadership 50, 5 duties, trust 6
+**4. Earn your stripes: Private, Specialist, Sergeant, Staff Sergeant, Sergeant First Class, Master Sergeant, Sergeant Major.** Promotion is checked at the day's end *and* right after a battle, so the fight that earns your last XP promotes you on the spot rather than tomorrow morning.
+- **Specialist**: 7 days, 100 service XP
+- **Sergeant**: 25 days, 350 XP, 2 duties done
+- **Staff Sergeant**: 60 days, 800 XP, Leadership 5, 5 duties, trust 6
+- **Sergeant First Class**: 120 days, 1800 XP, Leadership 10, 8 duties, trust 10
+- **Master Sergeant**: 200 days, 3200 XP, Leadership 10, 12 duties, trust 14
+- **Sergeant Major**: 300 days, 5000 XP, Leadership 15, 16 duties, trust 18
 
 **5. Take a place in the line, and change it later.** **Infantry, Archer, Cavalry** or **Support** — *"I can ride. Give me a horse."* Your assignment routes your daily training and decides which duties you're offered. Switching costs a **7-day cooldown and a point of your commander's trust**, so pick with intent.
 
 **6. Fight well, not just often.** Every battle is scored **0–100** on how you actually fought: kills (capped, so farming stragglers won't carry you), whether you survived, whether you held formation near your captain, whether you stayed in contact, and whether you fought **the way your assignment asks** — archers holding an 18–50m shooting line, cavalry working the flanks, support staying near the commander, infantry holding the line *and* trading blows. The sergeants notice: *"The sergeants noted your conduct: distinguished."*
 
-**7. 27 pieces of camp and campaign life.** **13 field duties** — hunt a band of deserters, carry a dispatch to an ally, run supplies, forage, stand a watch — plus **11 in-camp duties** resolved on a skill check (night patrol, treat the wounded, drill the recruits, gate watch, the quartermaster's shortage — and four officer tasks that open up once you're a **Veteran** your commander trusts, the last of them **Sergeant**-only), and **3 camp incidents** where the pay is late or the rations are short and you decide how to handle it. What you're offered depends on what the column is actually doing — under siege, at sea, marching, or sitting in garrison.
+**7. 27 pieces of camp and campaign life.** **13 field duties**: hunt a band of deserters, carry a dispatch to an ally, run supplies, forage, stand a watch, plus **11 in-camp duties** resolved on a skill check (night patrol, treat the wounded, drill the recruits, gate watch, the quartermaster's shortage, and four officer tasks that open up once you're a **Sergeant** your commander trusts, the last of them **Staff Sergeant**-only), and **3 camp incidents** where the pay is late or the rations are short and you decide how to handle it. What you're offered depends on what the column is actually doing, under siege, at sea, marching, or sitting in garrison.
 
-**8. Draw your kit from the quartermaster.** *"I would draw my service kit from the quartermaster."* — once per rank, and it's **your faction's** kit, not Calradian hand-me-downs. **64 authored armour sets** — 16 cultures at four ranks each, plus a neutral fallback set — seeded from each culture's own troop tree, so a dwarf column issues dwarf armour and an orc host issues orc armour. Ask twice and you'll be told: *"You have drawn your due for your rank already. Earn the next stripe first."*
+**8. Draw your kit from the quartermaster.** *"I would draw my service kit from the quartermaster."* Once per kit tier, and it's **your faction's** kit, not Calradian hand-me-downs. **315 authored kit sets**, 299 across 23 cultures (four kit tiers by four assignments) plus 16 neutral fallbacks, seeded from each culture's own troop tree, so a dwarf column issues dwarf armour and an orc host issues orc armour. Ask twice and you'll be told: *"You have drawn your due for your rank already. Earn the next stripe first."* At the top kit tier it says instead: *"You already carry the best kit my stores can issue."*
 
 **9. Your service actually counts.** Fighting inside another lord's army used to make you invisible to half the game's bookkeeping. Now **sieges you help storm advance the War of the Ring**, and lords your column captures credit your career quests — you get the credit for the war you're actually fighting.
 
@@ -58,7 +61,7 @@ The Erebor axeman who has carried your line through six battles is, mechanically
 **Battlefield promotion tuning:**
 `Main/_Module/ModuleData/field_commission/field_commission_config.json`
 
-**Per-rank service armour (68 rosters — 17 sets × 4 ranks):**
+**Per-kit-tier service armour (315 rosters: 299 culture cells plus 16 defaults, four kit tiers):**
 `Main/_Module/ModuleData/equipmentsets/taom_enlistment_equipment.xml`
 
 Duties are data rows — flavour, gates, deadline and rewards all live in JSON, and a malformed row is skipped with a warning rather than silently doing something else:
@@ -70,7 +73,7 @@ Duties are data rows — flavour, gates, deadline and rewards all live in JSON, 
   "mechanic": "HuntSpawnedParty",
   "deadlineDays": 4,
   "reportReward": { "serviceXp": 54, "gold": 60, "trust": 2 },
-  "gates": { "minRank": "Recruit" }
+  "gates": { "minRank": "Private" }
 }
 ```
 

@@ -1,7 +1,7 @@
 {
   "progression": {
-    "dailyWageByRank": [5, 8, 14, 22],
-    "dailyServiceXpByRank": [10, 12, 16, 20],
+    "dailyWageByRank": [5, 8, 14, 22, 28, 34, 40],
+    "dailyServiceXpByRank": [10, 12, 16, 20, 22, 24, 26],
     "dailyLeadershipXp": 10,
     "dailyAssignmentXp": 10,
     "siegeContextXp": 8,
@@ -60,8 +60,11 @@
     "incidentCooldownDays": 3
   },
   "promotions": [
-    { "toRank": "Soldier", "minDaysServed": 7, "minServiceXp": 100, "minLeadershipSkill": 0, "minDutySuccesses": 0, "minTrust": -10 },
-    { "toRank": "Veteran", "minDaysServed": 25, "minServiceXp": 350, "minLeadershipSkill": 20, "minDutySuccesses": 2, "minTrust": 0 },
-    { "toRank": "Sergeant", "minDaysServed": 60, "minServiceXp": 800, "minLeadershipSkill": 50, "minDutySuccesses": 5, "minTrust": 6 }
+    { "toRank": "Specialist", "minDaysServed": 7, "minServiceXp": 100, "minLeadershipSkill": 0, "minDutySuccesses": 0, "minTrust": -10 },
+    { "toRank": "Sergeant", "minDaysServed": 25, "minServiceXp": 350, "minLeadershipSkill": 0, "minDutySuccesses": 2, "minTrust": 0 },
+    { "toRank": "StaffSergeant", "minDaysServed": 60, "minServiceXp": 800, "minLeadershipSkill": 5, "minDutySuccesses": 5, "minTrust": 6 },
+    { "toRank": "SergeantFirstClass", "minDaysServed": 120, "minServiceXp": 1800, "minLeadershipSkill": 10, "minDutySuccesses": 8, "minTrust": 10 },
+    { "toRank": "MasterSergeant", "minDaysServed": 200, "minServiceXp": 3200, "minLeadershipSkill": 10, "minDutySuccesses": 12, "minTrust": 14 },
+    { "toRank": "SergeantMajor", "minDaysServed": 300, "minServiceXp": 5000, "minLeadershipSkill": 15, "minDutySuccesses": 16, "minTrust": 18 }
   ]
 }

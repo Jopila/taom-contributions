@@ -9,13 +9,13 @@ using TAOM.Features.Enlistment.Equipment;
 namespace TAOM.Features.Enlistment.Hooks;
 
 /// <summary>
-/// Thin dialog registration for drawing the service kit from the commander (once per rank, into
+/// Thin dialog registration for drawing the service kit from the commander (once per kit tier, into
 /// party inventory). The kit carries weapons as well as armour since #525, and the player's
 /// ASSIGNMENT selects which kit: an Archer draws a bow rather than a sword.
 ///
 /// Culture and assignment are both read LIVE at issuance (culture-conversion rule) rather than
-/// cached; rank maps ordinal-for-ordinal from the content record onto the equipment enum (both
-/// ladders are Recruit..Sergeant, pinned by test).
+/// cached; the career rank maps onto the four kit tiers through EnlistmentKitTiers.For (identity for
+/// the first four ranks, the best tier above them, pinned by test).
 /// </summary>
 public class EnlistmentQuartermasterBehavior : CampaignBehaviorBase
 {
@@ -72,6 +72,9 @@ public class EnlistmentQuartermasterBehavior : CampaignBehaviorBase
         AddAnswer("taom_enlist_qm_refused",
             "{=taom_enlist_qm_refused}You have drawn your due for your rank already. Earn the next stripe first.",
             () => _lastAnswer == QuartermasterAnswer.AlreadyDrawn);
+        AddAnswer("taom_enlist_qm_refused_best",
+            "{=taom_enlist_qm_refused_best}You already carry the best kit my stores can issue.",
+            () => _lastAnswer == QuartermasterAnswer.AlreadyDrawnBest);
         AddAnswer("taom_enlist_qm_refused_stores",
             "{=taom_enlist_qm_refused_stores}The quartermaster has nothing in his stores for your company.",
             () => _lastAnswer == QuartermasterAnswer.EmptyStores);
@@ -107,10 +110,10 @@ public class EnlistmentQuartermasterBehavior : CampaignBehaviorBase
         // Culture read at issuance time from the commander — never cached.
         var cultureId = _commander.GetCultureId(_store.Record.CommanderHeroId);
         var assignment = _contentStore.Record.Assignment;
-        var rank = (EnlistmentKitTier)(int)_contentStore.Record.Rank;
-        var result = _equipment.IssueForRank(cultureId, assignment, rank);
-        _lastAnswer = QuartermasterAnswerPolicy.For(result);
+        var tier = EnlistmentKitTiers.For(_contentStore.Record.Rank);
+        var result = _equipment.IssueForRank(cultureId, assignment, tier);
+        _lastAnswer = QuartermasterAnswerPolicy.For(result, tier);
         _logger?.LogInfo($"[Enlistment] quartermaster issue: {result} "
-            + $"(culture={cultureId}, assignment={assignment}, rank={rank})");
+            + $"(culture={cultureId}, assignment={assignment}, rank={_contentStore.Record.Rank}, kitTier={tier})");
     }
 }

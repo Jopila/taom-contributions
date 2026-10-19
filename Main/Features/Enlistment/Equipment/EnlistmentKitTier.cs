@@ -3,7 +3,7 @@ namespace TAOM.Features.Enlistment.Equipment;
 /// <summary>
 /// Kit tier key for the enlistment equipment rosters (four tiers), distinct from the
 /// career rank <c>ServiceRank</c>. Ordered: numeric comparison IS the progression order
-/// (the ledger's once-per-rank check and the resolver's descending fallback both
+/// (the ledger's once-per-kit-tier check and the resolver's descending fallback both
 /// rely on it). Tokens (lowercase names) appear in roster ids —
 /// <c>enlist_{cultureId}_{assignment}_{rank}</c> in taom_enlistment_equipment.xml
 /// (the assignment token joined the id in #525, when the kit stopped being armour-only).

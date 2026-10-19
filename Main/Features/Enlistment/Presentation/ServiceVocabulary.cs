@@ -32,10 +32,16 @@ public static class ServiceVocabulary
     {
         switch (rank)
         {
-            case ServiceRank.Soldier: return new TextObject("{=taom_enlist_rank_soldier}Soldier");
-            case ServiceRank.Veteran: return new TextObject("{=taom_enlist_rank_veteran}Veteran");
+            case ServiceRank.Private: return new TextObject("{=taom_enlist_rank_private}Private");
+            case ServiceRank.Specialist: return new TextObject("{=taom_enlist_rank_specialist}Specialist");
             case ServiceRank.Sergeant: return new TextObject("{=taom_enlist_rank_sergeant}Sergeant");
-            default: return new TextObject("{=taom_enlist_rank_recruit}Recruit");
+            case ServiceRank.StaffSergeant: return new TextObject("{=taom_enlist_rank_staff_sergeant}Staff Sergeant");
+            case ServiceRank.SergeantFirstClass: return new TextObject("{=taom_enlist_rank_sergeant_first_class}Sergeant First Class");
+            case ServiceRank.MasterSergeant: return new TextObject("{=taom_enlist_rank_master_sergeant}Master Sergeant");
+            case ServiceRank.SergeantMajor: return new TextObject("{=taom_enlist_rank_sergeant_major}Sergeant Major");
+            // An undefined value (a rank added without a case here) shows its number rather than a
+            // real rank name, so the gap is visible instead of reading as a plausible rank.
+            default: return new TextObject(((int)rank).ToString());
         }
     }
 

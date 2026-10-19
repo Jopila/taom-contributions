@@ -23,7 +23,7 @@ public sealed class RewardSpec
 /// <summary>Eligibility gates shared by field duties, interactive duties, and incidents.</summary>
 public sealed class GateSpec
 {
-    public ServiceRank MinRank { get; set; } = ServiceRank.Recruit;
+    public ServiceRank MinRank { get; set; } = ServiceRank.Private;
     public int MinTrust { get; set; } = -10;
     public int MaxTrust { get; set; } = 20;
 

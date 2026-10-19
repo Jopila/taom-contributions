@@ -56,7 +56,7 @@ public class InteractiveDutyPresenterTests
         _store.Record.CommanderHeroId = "lord_1";
     }
 
-    private static ServiceProgressSnapshot Progress(ServiceRank rank = ServiceRank.Recruit) => new ServiceProgressSnapshot { Rank = rank };
+    private static ServiceProgressSnapshot Progress(ServiceRank rank = ServiceRank.Private) => new ServiceProgressSnapshot { Rank = rank };
 
     private static InteractiveDutyDefinition Duty() => new InteractiveDutyDefinition
     {
@@ -114,17 +114,20 @@ public class InteractiveDutyPresenterTests
         Assert.AreEqual(1, _contentStore.Record.DutyFailures);
     }
 
-    [TestMethod]
-    public void ResolveOption_RankBonusApplies_PassesRankTimesFourToSkillCheck()
+    [DataTestMethod]
+    [DataRow(ServiceRank.Sergeant, 8)]
+    [DataRow(ServiceRank.SergeantMajor, 12)]
+    public void ResolveOption_RankBonusApplies_PassesTheCappedRankBonusToSkillCheck(ServiceRank rank, int expectedBonus)
     {
         var duty = Duty();
         duty.OptionA.RankBonusApplies = true;
         _skillCheck.Passes(Arg.Any<int>(), Arg.Any<int?>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>()).Returns(true);
 
-        _presenter.PresentInteractiveDuty(duty, Progress(ServiceRank.Veteran), 0);
+        _presenter.PresentInteractiveDuty(duty, Progress(rank), 0);
         _capturedOptionA();
 
-        _skillCheck.Received(1).Passes(Arg.Any<int>(), Arg.Any<int?>(), Arg.Is(0), Arg.Is(8), Arg.Is(62)); // Veteran=2 * 4 = 8
+        // Sergeant is 2 * 4 = 8; Sergeant Major would be 24 uncapped and is held at 12.
+        _skillCheck.Received(1).Passes(Arg.Any<int>(), Arg.Any<int?>(), Arg.Is(0), Arg.Is(expectedBonus), Arg.Is(62));
     }
 
     [TestMethod]
@@ -134,7 +137,7 @@ public class InteractiveDutyPresenterTests
         duty.OptionA.RankBonusApplies = false;
         _skillCheck.Passes(Arg.Any<int>(), Arg.Any<int?>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>()).Returns(true);
 
-        _presenter.PresentInteractiveDuty(duty, Progress(ServiceRank.Veteran), 0);
+        _presenter.PresentInteractiveDuty(duty, Progress(ServiceRank.Sergeant), 0);
         _capturedOptionA();
 
         _skillCheck.Received(1).Passes(Arg.Any<int>(), Arg.Any<int?>(), Arg.Is(0), Arg.Is(0), Arg.Is(62));

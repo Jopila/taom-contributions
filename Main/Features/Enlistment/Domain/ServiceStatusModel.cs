@@ -73,7 +73,7 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
         string commanderName = null,
         CommanderActivity activity = CommanderActivity.Marching,
         string settlementName = null,
-        ServiceRank rank = ServiceRank.Recruit,
+        ServiceRank rank = ServiceRank.Private,
         ServiceAssignment assignment = ServiceAssignment.Infantry,
         int daysServed = 0,
         int trust = 0,

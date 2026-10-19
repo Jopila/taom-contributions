@@ -105,14 +105,10 @@ public class ServiceStatusService : IServiceStatusService
     /// Today's wage, read from the same rank-indexed table <c>ServiceRewardService.PayDailyWage</c>
     /// pays from — so the board cannot quote a number the player is not actually paid. Out-of-range
     /// reads yield 0 rather than throwing; the config validator already pins the table at exactly
-    /// four non-negative entries, so this is a belt for a rank enum that outgrows its table.
+    /// one non-negative entry per rank, so this is a belt for a rank enum that outgrows its table.
     /// </summary>
     private int DailyWageFor(ServiceRank rank)
-    {
-        var table = _config?.GetConfig()?.Progression?.DailyWageByRank;
-        var index = (int)rank;
-        return table != null && index >= 0 && index < table.Count ? table[index] : 0;
-    }
+        => WagePolicy.DailyWageForRank((int)rank, _config?.GetConfig()?.Progression?.DailyWageByRank);
 
     /// <summary>
     /// Order matters: a battle outranks a siege outranks being in a settlement. A commander

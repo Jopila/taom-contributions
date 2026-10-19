@@ -15,7 +15,7 @@ namespace TAOM.Features.Enlistment.Content.Domain;
 /// </summary>
 public sealed class ServiceContentRecord
 {
-    public ServiceRank Rank { get; set; } = ServiceRank.Recruit;
+    public ServiceRank Rank { get; set; } = ServiceRank.Private;
     public ServiceAssignment Assignment { get; set; } = ServiceAssignment.Infantry;
     public int ServiceXp { get; set; }
     public int DaysServed { get; set; }
@@ -45,7 +45,7 @@ public sealed class ServiceContentRecord
     public double? LastIncidentDay { get; set; }
     public List<string> RecentDutyIds { get; set; } = new List<string>();
 
-    /// <summary>Highest equipment rank already drawn (monotonic), or null. -1 sentinel on the wire.</summary>
+    /// <summary>Highest kit tier already drawn (monotonic; an <c>EnlistmentKitTier</c> ordinal, not a career rank), or null. -1 sentinel on the wire.</summary>
     public int? HighestIssuedEquipmentRank { get; set; }
 
     /// <summary>One entry per issued item INSTANCE (duplicates preserved for the payoff sum).</summary>
@@ -55,7 +55,7 @@ public sealed class ServiceContentRecord
 
     public void Reset()
     {
-        Rank = ServiceRank.Recruit;
+        Rank = ServiceRank.Private;
         Assignment = ServiceAssignment.Infantry;
         ServiceXp = 0;
         DaysServed = 0;

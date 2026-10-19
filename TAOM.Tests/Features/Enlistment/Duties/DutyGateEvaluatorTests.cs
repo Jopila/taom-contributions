@@ -13,42 +13,42 @@ public class DutyGateEvaluatorTests
     [TestMethod]
     public void IsEligible_NullGates_ReturnsTrue()
     {
-        Assert.IsTrue(DutyGateEvaluator.IsEligible(null, ServiceRank.Recruit, 0, NoContexts));
+        Assert.IsTrue(DutyGateEvaluator.IsEligible(null, ServiceRank.Private, 0, NoContexts));
     }
 
     [TestMethod]
     public void IsEligible_RankBelowMinimum_ReturnsFalse()
     {
-        var gates = new GateSpec { MinRank = ServiceRank.Veteran };
-        Assert.IsFalse(DutyGateEvaluator.IsEligible(gates, ServiceRank.Soldier, 0, NoContexts));
+        var gates = new GateSpec { MinRank = ServiceRank.Sergeant };
+        Assert.IsFalse(DutyGateEvaluator.IsEligible(gates, ServiceRank.Specialist, 0, NoContexts));
     }
 
     [TestMethod]
     public void IsEligible_RankAtOrAboveMinimum_ReturnsTrue()
     {
-        var gates = new GateSpec { MinRank = ServiceRank.Veteran };
-        Assert.IsTrue(DutyGateEvaluator.IsEligible(gates, ServiceRank.Veteran, 0, NoContexts));
+        var gates = new GateSpec { MinRank = ServiceRank.Sergeant };
+        Assert.IsTrue(DutyGateEvaluator.IsEligible(gates, ServiceRank.Sergeant, 0, NoContexts));
     }
 
     [TestMethod]
     public void IsEligible_TrustBelowMinimum_ReturnsFalse()
     {
         var gates = new GateSpec { MinTrust = 5 };
-        Assert.IsFalse(DutyGateEvaluator.IsEligible(gates, ServiceRank.Recruit, 4, NoContexts));
+        Assert.IsFalse(DutyGateEvaluator.IsEligible(gates, ServiceRank.Private, 4, NoContexts));
     }
 
     [TestMethod]
     public void IsEligible_TrustAboveMaximum_ReturnsFalse()
     {
         var gates = new GateSpec { MaxTrust = 20 };
-        Assert.IsFalse(DutyGateEvaluator.IsEligible(gates, ServiceRank.Recruit, 21, NoContexts));
+        Assert.IsFalse(DutyGateEvaluator.IsEligible(gates, ServiceRank.Private, 21, NoContexts));
     }
 
     [TestMethod]
     public void IsEligible_RequiredContextMissing_ReturnsFalse()
     {
         var gates = new GateSpec { RequiredContexts = new List<string> { "siege" } };
-        Assert.IsFalse(DutyGateEvaluator.IsEligible(gates, ServiceRank.Recruit, 0, NoContexts));
+        Assert.IsFalse(DutyGateEvaluator.IsEligible(gates, ServiceRank.Private, 0, NoContexts));
     }
 
     [TestMethod]
@@ -56,7 +56,7 @@ public class DutyGateEvaluatorTests
     {
         var gates = new GateSpec { RequiredContexts = new List<string> { "siege" } };
         var active = new HashSet<string> { "siege" };
-        Assert.IsTrue(DutyGateEvaluator.IsEligible(gates, ServiceRank.Recruit, 0, active));
+        Assert.IsTrue(DutyGateEvaluator.IsEligible(gates, ServiceRank.Private, 0, active));
     }
 
     [TestMethod]
@@ -64,14 +64,14 @@ public class DutyGateEvaluatorTests
     {
         var gates = new GateSpec { ExcludedContexts = new List<string> { "siege" } };
         var active = new HashSet<string> { "siege" };
-        Assert.IsFalse(DutyGateEvaluator.IsEligible(gates, ServiceRank.Recruit, 0, active));
+        Assert.IsFalse(DutyGateEvaluator.IsEligible(gates, ServiceRank.Private, 0, active));
     }
 
     [TestMethod]
     public void IsEligible_NoContextRequirement_ReturnsTrue()
     {
         var gates = new GateSpec();
-        Assert.IsTrue(DutyGateEvaluator.IsEligible(gates, ServiceRank.Recruit, 0, NoContexts));
+        Assert.IsTrue(DutyGateEvaluator.IsEligible(gates, ServiceRank.Private, 0, NoContexts));
     }
 
     [TestMethod]

@@ -5,6 +5,7 @@ public enum QuartermasterAnswer
 {
     Issued,
     AlreadyDrawn,
+    AlreadyDrawnBest,
     EmptyStores,
     CannotLoad,
     HostOnly,

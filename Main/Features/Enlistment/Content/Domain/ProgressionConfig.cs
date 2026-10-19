@@ -14,11 +14,11 @@ public sealed class PromotionRequirement
     public int MinTrust { get; set; }
 }
 
-/// <summary>Per-rank daily wage + per-rank daily service XP (indexes follow ServiceRank order).</summary>
+/// <summary>Per-rank daily wage + per-rank daily service XP (indexes follow ServiceRank order, one entry per rank: seven).</summary>
 public sealed class ProgressionTables
 {
-    public List<int> DailyWageByRank { get; set; } = new List<int> { 5, 8, 14, 22 };
-    public List<int> DailyServiceXpByRank { get; set; } = new List<int> { 10, 12, 16, 20 };
+    public List<int> DailyWageByRank { get; set; } = new List<int> { 5, 8, 14, 22, 28, 34, 40 };
+    public List<int> DailyServiceXpByRank { get; set; } = new List<int> { 10, 12, 16, 20, 22, 24, 26 };
 
     /// <summary>Donor default was 25 — deliberately halved: career tiers unlock by hero LEVEL, and a fully passive 25/day races the ladder.</summary>
     public int DailyLeadershipXp { get; set; } = 10;
@@ -68,9 +68,9 @@ public sealed class WagePolicyConfig
 
     /// <summary>
     /// How many days of the player's CURRENT daily wage may stand as unpaid arrears. The cap is
-    /// therefore rank-relative: 14 days is 70 gold at Recruit (5/day) and 308 at Sergeant (22/day).
-    /// The pre-rename key was <c>maxDeferredWages</c>, a flat 60-GOLD cap — a Sergeant reached it in
-    /// under three days and every further gold of back pay was destroyed with no log. Anything owed
+    /// therefore rank-relative: 14 days is 70 gold at Private (5/day) and 560 at Sergeant Major (40/day).
+    /// The pre-rename key was <c>maxDeferredWages</c>, a flat 60-GOLD cap — a Staff Sergeant (22/day) reached
+    /// it in under three days and every further gold of back pay was destroyed with no log. Anything owed
     /// above the cap is still forfeited, but <c>ServiceRewardService</c> now logs the loss.
     /// Validated to [0, 365] (the contract length) by EnlistmentContentConfigProvider.
     /// </summary>

@@ -77,7 +77,7 @@ public class ServiceStatusServiceTests
     [TestMethod]
     public void Build_Marching_CarriesCommanderAndProgress()
     {
-        _content.Record.Rank = ServiceRank.Veteran;
+        _content.Record.Rank = ServiceRank.Sergeant;
         _content.Record.DaysServed = 12;
         _content.Record.Trust = 9;
 
@@ -85,7 +85,7 @@ public class ServiceStatusServiceTests
 
         Assert.AreEqual(CommanderActivity.Marching, status.Activity);
         Assert.AreEqual("Boromir", status.CommanderName);
-        Assert.AreEqual(ServiceRank.Veteran, status.Rank);
+        Assert.AreEqual(ServiceRank.Sergeant, status.Rank);
         Assert.AreEqual(12, status.DaysServed);
         Assert.AreEqual(9, status.Trust);
     }
@@ -150,7 +150,7 @@ public class ServiceStatusServiceTests
     [TestMethod]
     public void Build_HigherRank_WageFollowsTheRankTable()
     {
-        _content.Record.Rank = ServiceRank.Veteran;
+        _content.Record.Rank = ServiceRank.Sergeant;
 
         Assert.AreEqual(14, _sut.Build().DailyWage);
     }
@@ -162,7 +162,7 @@ public class ServiceStatusServiceTests
         // documented tie-break — evaluator declaration order — has to pick days.
         var status = _sut.Build();
 
-        Assert.AreEqual(ServiceRank.Soldier, status.NextRank);
+        Assert.AreEqual(ServiceRank.Specialist, status.NextRank);
         Assert.AreEqual("days", status.NextRequirementKey);
         Assert.AreEqual(7, status.NextRequirementTarget);
     }
@@ -170,27 +170,27 @@ public class ServiceStatusServiceTests
     [TestMethod]
     public void Build_SeveralGapsOpen_PicksTheLargestRelativeShortfall()
     {
-        // Soldier -> Veteran needs 25 days / 350 XP / Leadership 20 / 2 duties / trust 0.
-        // A raw difference would name XP for the wrong reason; the point is that 250-of-350 XP
-        // (71%) really does outrank 1-of-25 days (4%) and 2-of-20 Leadership (10%).
-        _content.Record.Rank = ServiceRank.Soldier;
-        _content.Record.DaysServed = 24;
-        _content.Record.ServiceXp = 100;
-        _content.Record.DutySuccesses = 2;
-        _content.Record.Trust = 0;
-        _skillXp.GetSkillValue("main_hero", "Leadership").Returns(18);
+        // Staff Sergeant -> Sergeant First Class needs 120 days / 1800 XP / Leadership 10 / 8 duties /
+        // trust 10. A raw difference would name XP for the wrong reason; the point is that 800-of-1800
+        // XP (44%) really does outrank 1-of-120 days (under 1%) and 1-of-10 Leadership (10%).
+        _content.Record.Rank = ServiceRank.StaffSergeant;
+        _content.Record.DaysServed = 119;
+        _content.Record.ServiceXp = 1000;
+        _content.Record.DutySuccesses = 8;
+        _content.Record.Trust = 10;
+        _skillXp.GetSkillValue("main_hero", "Leadership").Returns(9);
 
         var status = _sut.Build();
 
-        Assert.AreEqual(ServiceRank.Veteran, status.NextRank);
+        Assert.AreEqual(ServiceRank.SergeantFirstClass, status.NextRank);
         Assert.AreEqual("xp", status.NextRequirementKey);
-        Assert.AreEqual(350, status.NextRequirementTarget);
+        Assert.AreEqual(1800, status.NextRequirementTarget);
     }
 
     [TestMethod]
     public void Build_AtTopRank_NoLadderToShow()
     {
-        _content.Record.Rank = ServiceRank.Sergeant;
+        _content.Record.Rank = ServiceRank.SergeantMajor;
 
         var status = _sut.Build();
 
@@ -223,7 +223,7 @@ public class ServiceStatusServiceTests
 
         _sut.Build();
 
-        Assert.AreEqual(ServiceRank.Recruit, _content.Record.Rank);
+        Assert.AreEqual(ServiceRank.Private, _content.Record.Rank);
     }
 
     // ---- the throttle -----------------------------------------------------------------------
@@ -235,7 +235,7 @@ public class ServiceStatusServiceTests
         // gaps as a List<string> and builds a fresh one per evaluation; carrying that list into
         // the model would make every rebuild differ by reference and re-push the menu text on
         // every pass, defeating the throttle silently. The model stores a single string instead.
-        _content.Record.Rank = ServiceRank.Soldier;
+        _content.Record.Rank = ServiceRank.Specialist;
         _content.Record.DaysServed = 24;
         _content.Record.ServiceXp = 100;
 
@@ -333,9 +333,9 @@ public class ServiceStatusModelEqualityTests
 {
     private static ServiceStatusModel Base() => new ServiceStatusModel(
         commanderName: "Boromir", activity: CommanderActivity.Marching, settlementName: null,
-        rank: ServiceRank.Soldier, assignment: ServiceAssignment.Infantry,
+        rank: ServiceRank.Specialist, assignment: ServiceAssignment.Infantry,
         daysServed: 5, trust: 3, deferredWages: 0, activeDutyId: null,
-        serviceXp: 120, dailyWage: 8, nextRank: ServiceRank.Veteran,
+        serviceXp: 120, dailyWage: 8, nextRank: ServiceRank.Sergeant,
         nextRequirementKey: "xp", nextRequirementTarget: 350);
 
     [TestMethod]
@@ -365,7 +365,7 @@ public class ServiceStatusModelEqualityTests
             commanderName: field == "commanderName" ? "Faramir" : "Boromir",
             activity: field == "activity" ? CommanderActivity.InBattle : CommanderActivity.Marching,
             settlementName: field == "settlementName" ? "Minas Tirith" : null,
-            rank: field == "rank" ? ServiceRank.Veteran : ServiceRank.Soldier,
+            rank: field == "rank" ? ServiceRank.Sergeant : ServiceRank.Specialist,
             assignment: field == "assignment" ? ServiceAssignment.Cavalry : ServiceAssignment.Infantry,
             daysServed: field == "daysServed" ? 6 : 5,
             trust: field == "trust" ? 4 : 3,
@@ -373,7 +373,7 @@ public class ServiceStatusModelEqualityTests
             activeDutyId: field == "activeDutyId" ? "recon_sweep" : null,
             serviceXp: field == "serviceXp" ? 121 : 120,
             dailyWage: field == "dailyWage" ? 14 : 8,
-            nextRank: field == "nextRank" ? ServiceRank.Sergeant : ServiceRank.Veteran,
+            nextRank: field == "nextRank" ? ServiceRank.StaffSergeant : ServiceRank.Sergeant,
             nextRequirementKey: field == "nextRequirementKey" ? "leadership" : "xp",
             nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350);
 
@@ -394,11 +394,11 @@ public class ServiceStatusModelEqualityTests
     {
         var other = new ServiceStatusModel(
             commanderName: "Boromir", activity: CommanderActivity.Marching, settlementName: null,
-            rank: ServiceRank.Soldier, assignment: ServiceAssignment.Infantry,
+            rank: ServiceRank.Specialist, assignment: ServiceAssignment.Infantry,
             daysServed: 5, trust: 3, deferredWages: 0, activeDutyId: null,
             serviceXp: field == "serviceXp" ? 121 : 120,
             dailyWage: field == "dailyWage" ? 14 : 8,
-            nextRank: field == "nextRank" ? ServiceRank.Sergeant : ServiceRank.Veteran,
+            nextRank: field == "nextRank" ? ServiceRank.StaffSergeant : ServiceRank.Sergeant,
             nextRequirementKey: field == "nextRequirementKey" ? "leadership" : "xp",
             nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350);
 

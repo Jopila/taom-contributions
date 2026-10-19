@@ -80,10 +80,7 @@
     <string id="taom_enlist_leave_refused" text="Du kannst hier im Augenblick keinen Urlaub nehmen." />
     <string id="taom_enlist_menu_duty" text="Euren Feldwebel um Arbeit bitten" />
     <string id="taom_enlist_menu_talk" text="Mit Eurem Befehlshaber sprechen" />
-    <string id="taom_enlist_rank_recruit" text="Rekrut" />
-    <string id="taom_enlist_rank_sergeant" text="Feldwebel" />
-    <string id="taom_enlist_rank_soldier" text="Soldat" />
-    <string id="taom_enlist_rank_veteran" text="Veteran" />
+    <string id="taom_enlist_rank_sergeant" text="Sergeant" />
     <string id="taom_enlist_reassign_pick" text="Derzeit marschierst du mit {CURRENT_SECTION}. Wo möchtest du lieber stehen?" />
     <string id="taom_enlist_release_battle" text="Nicht, solange noch gekämpft wird. Frag mich wieder, wenn das Feld still ist." />
     <string id="taom_enlist_release_desert" text="Dann bin ich fertig mit euch. Ich gehe, Eid hin oder her." />
@@ -263,5 +260,12 @@
     <string id="taom_enlist_qm_refused_host" text="Only the host's quartermaster can issue kit in this campaign." />
     <string id="taom_enlist_qm_refused_load" text="Your kit cannot be loaded into your baggage just now. Ask me again later." />
     <string id="taom_enlist_qm_refused_stores" text="The quartermaster has nothing in his stores for your company." />
+    <string id="taom_enlist_qm_refused_best" text="You already carry the best kit my stores can issue." />
+    <string id="taom_enlist_rank_master_sergeant" text="Master Sergeant" />
+    <string id="taom_enlist_rank_private" text="Private" />
+    <string id="taom_enlist_rank_sergeant_first_class" text="Sergeant First Class" />
+    <string id="taom_enlist_rank_sergeant_major" text="Sergeant Major" />
+    <string id="taom_enlist_rank_specialist" text="Specialist" />
+    <string id="taom_enlist_rank_staff_sergeant" text="Staff Sergeant" />
   </strings>
 </base>

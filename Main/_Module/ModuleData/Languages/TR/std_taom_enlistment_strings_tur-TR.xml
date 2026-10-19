@@ -80,10 +80,7 @@
     <string id="taom_enlist_leave_refused" text="Şu anda burada izin alamazsın." />
     <string id="taom_enlist_menu_duty" text="Çavuşundan iş iste" />
     <string id="taom_enlist_menu_talk" text="Komutanınla konuş" />
-    <string id="taom_enlist_rank_recruit" text="Acemi" />
-    <string id="taom_enlist_rank_sergeant" text="Çavuş" />
-    <string id="taom_enlist_rank_soldier" text="Asker" />
-    <string id="taom_enlist_rank_veteran" text="Kıdemli" />
+    <string id="taom_enlist_rank_sergeant" text="Sergeant" />
     <string id="taom_enlist_reassign_pick" text="Şu anda {CURRENT_SECTION} ile yürüyorsun. Nerede durmayı yeğlerdin?" />
     <string id="taom_enlist_release_battle" text="Yapılacak çarpışma varken olmaz. Meydan sustuğunda tekrar sor." />
     <string id="taom_enlist_release_desert" text="O halde bölüğünle işim bitti. Yeminli ya da değil, izin istemeden gidiyorum." />
@@ -263,5 +260,12 @@
     <string id="taom_enlist_qm_refused_host" text="Only the host's quartermaster can issue kit in this campaign." />
     <string id="taom_enlist_qm_refused_load" text="Your kit cannot be loaded into your baggage just now. Ask me again later." />
     <string id="taom_enlist_qm_refused_stores" text="The quartermaster has nothing in his stores for your company." />
+    <string id="taom_enlist_qm_refused_best" text="You already carry the best kit my stores can issue." />
+    <string id="taom_enlist_rank_master_sergeant" text="Master Sergeant" />
+    <string id="taom_enlist_rank_private" text="Private" />
+    <string id="taom_enlist_rank_sergeant_first_class" text="Sergeant First Class" />
+    <string id="taom_enlist_rank_sergeant_major" text="Sergeant Major" />
+    <string id="taom_enlist_rank_specialist" text="Specialist" />
+    <string id="taom_enlist_rank_staff_sergeant" text="Staff Sergeant" />
   </strings>
 </base>

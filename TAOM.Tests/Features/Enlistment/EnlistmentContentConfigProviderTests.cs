@@ -62,8 +62,9 @@ public class EnlistmentContentConfigProviderTests
 
         var config = Provider().GetConfig();
 
-        Assert.AreEqual(4, config.Progression.DailyWageByRank.Count);
+        Assert.AreEqual(7, config.Progression.DailyWageByRank.Count);
         _logger.Received().LogError(Arg.Any<string>());
+        _logger.DidNotReceive().LogError(Arg.Is<string>(s => s.Contains("Rank names changed")));
     }
 
     [TestMethod]
@@ -84,14 +85,14 @@ public class EnlistmentContentConfigProviderTests
 
         var config = Provider().GetConfig();
 
-        Assert.AreEqual(4, config.Progression.DailyWageByRank.Count);
+        Assert.AreEqual(7, config.Progression.DailyWageByRank.Count);
         _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("dailyWageByRank")));
     }
 
     [TestMethod]
     public void GetConfig_NegativeWage_Reverts()
     {
-        WriteConfig("{\"progression\":{\"dailyWageByRank\":[5,8,-14,22]}}");
+        WriteConfig("{\"progression\":{\"dailyWageByRank\":[5,8,-14,22,28,34,40]}}");
 
         var config = Provider().GetConfig();
 
@@ -151,9 +152,12 @@ public class EnlistmentContentConfigProviderTests
     public void GetConfig_NonMonotonicPromotionDays_RevertsToDefaultLadder()
     {
         WriteConfig("{\"promotions\":[" +
-            "{\"toRank\":\"Soldier\",\"minDaysServed\":25,\"minServiceXp\":100}," +
-            "{\"toRank\":\"Veteran\",\"minDaysServed\":7,\"minServiceXp\":350}," +
-            "{\"toRank\":\"Sergeant\",\"minDaysServed\":60,\"minServiceXp\":800}]}");
+            "{\"toRank\":\"Specialist\",\"minDaysServed\":25,\"minServiceXp\":100}," +
+            "{\"toRank\":\"Sergeant\",\"minDaysServed\":7,\"minServiceXp\":350}," +
+            "{\"toRank\":\"StaffSergeant\",\"minDaysServed\":60,\"minServiceXp\":800}," +
+            "{\"toRank\":\"SergeantFirstClass\",\"minDaysServed\":120,\"minServiceXp\":1800}," +
+            "{\"toRank\":\"MasterSergeant\",\"minDaysServed\":200,\"minServiceXp\":3200}," +
+            "{\"toRank\":\"SergeantMajor\",\"minDaysServed\":300,\"minServiceXp\":5000}]}");
 
         var config = Provider().GetConfig();
 
@@ -164,11 +168,11 @@ public class EnlistmentContentConfigProviderTests
     [TestMethod]
     public void GetConfig_WrongPromotionCount_Reverts()
     {
-        WriteConfig("{\"promotions\":[{\"toRank\":\"Soldier\",\"minDaysServed\":7,\"minServiceXp\":100}]}");
+        WriteConfig("{\"promotions\":[{\"toRank\":\"Specialist\",\"minDaysServed\":7,\"minServiceXp\":100}]}");
 
         var config = Provider().GetConfig();
 
-        Assert.AreEqual(3, config.Promotions.Count);
+        Assert.AreEqual(6, config.Promotions.Count);
     }
 
     [TestMethod]
@@ -264,8 +268,8 @@ public class EnlistmentContentConfigProviderTests
     /// progress at different rates with nothing in the log.
     ///
     /// This is the same class of gap as the renown chain above, on the field that gates promotion:
-    /// Veteran requires <c>minTrust: 0</c>, so a soldier who fights steadily and takes no camp work
-    /// is stuck at Soldier forever if no band he can reach pays trust. That shipped, and a live
+    /// Sergeant (then Veteran) requires <c>minTrust: 0</c>, so a soldier who fights steadily and takes no camp work
+    /// is stuck at Specialist (then Soldier) forever if no band he can reach pays trust. That shipped, and a live
     /// 73-day service reached "badly thought of" on 2903 XP because of it.
     /// </summary>
     [TestMethod]
@@ -334,6 +338,155 @@ public class EnlistmentContentConfigProviderTests
         _logger.DidNotReceive().LogError(Arg.Any<string>());
     }
 
+    /// <summary>
+    /// #936: the ladder is seven ranks, so the promotion list is six rows and the wage and service-XP
+    /// tables carry seven entries. The shipped file and the compiled defaults must agree, or an
+    /// install without the file would promote on different thresholds.
+    /// </summary>
+    [TestMethod]
+    public void ShippedConfig_PromotionsAndTables_EqualTheCompiledDefaults()
+    {
+        var rankCount = Enum.GetValues(typeof(ServiceRank)).Length;
+        Assert.AreEqual(7, rankCount);
+
+        var defaults = EnlistmentContentConfigProvider.BuildDefaults();
+        Assert.AreEqual(rankCount - 1, defaults.Promotions.Count);
+        for (var i = 0; i < defaults.Promotions.Count; i++)
+            Assert.AreEqual((ServiceRank)(i + 1), defaults.Promotions[i].ToRank, $"default row {i} promotes to the wrong rank");
+        CollectionAssert.AreEqual(new[] { 5, 8, 14, 22, 28, 34, 40 }, defaults.Progression.DailyWageByRank.ToArray());
+        CollectionAssert.AreEqual(new[] { 10, 12, 16, 20, 22, 24, 26 }, defaults.Progression.DailyServiceXpByRank.ToArray());
+
+        var raw = JObject.Parse(File.ReadAllText(Path.Combine(
+            ShippedModuleDataPath(), "enlistment", "enlistment_config.json")));
+        CollectionAssert.AreEqual(defaults.Progression.DailyWageByRank.ToArray(),
+            ((JArray)raw["progression"]["dailyWageByRank"]).Select(t => (int)t).ToArray());
+        CollectionAssert.AreEqual(defaults.Progression.DailyServiceXpByRank.ToArray(),
+            ((JArray)raw["progression"]["dailyServiceXpByRank"]).Select(t => (int)t).ToArray());
+        Assert.AreEqual(defaults.Progression.DailyLeadershipXp, (int)raw["progression"]["dailyLeadershipXp"],
+            "the reachability test reads the shipped dailyLeadershipXp; the compiled default must match it");
+
+        var shipped = (JArray)raw["promotions"];
+        Assert.AreEqual(defaults.Promotions.Count, shipped.Count, "promotion row count diverged between file and defaults");
+        for (var i = 0; i < shipped.Count; i++)
+        {
+            var d = defaults.Promotions[i];
+            var row = shipped[i];
+            Assert.AreEqual(d.ToRank.ToString(), (string)row["toRank"], $"row {i} toRank");
+            Assert.AreEqual(d.MinDaysServed, (int)row["minDaysServed"], $"row {i} days");
+            Assert.AreEqual(d.MinServiceXp, (int)row["minServiceXp"], $"row {i} xp");
+            Assert.AreEqual(d.MinLeadershipSkill, (int)row["minLeadershipSkill"], $"row {i} leadership");
+            Assert.AreEqual(d.MinDutySuccesses, (int)row["minDutySuccesses"], $"row {i} duties");
+            Assert.AreEqual(d.MinTrust, (int)row["minTrust"], $"row {i} trust");
+        }
+
+        new EnlistmentContentConfigProvider(ShippedPaths(), _logger).GetConfig();
+        _logger.DidNotReceive().LogWarning(Arg.Any<string>());
+        _logger.DidNotReceive().LogError(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void DefaultLadder_DaysDutiesAndTrust_ArePinned()
+    {
+        var promotions = EnlistmentContentConfigProvider.BuildDefaults().Promotions;
+        CollectionAssert.AreEqual(new[] { 7, 25, 60, 120, 200, 300 },
+            promotions.Select(p => p.MinDaysServed).ToArray());
+        CollectionAssert.AreEqual(new[] { 0, 2, 5, 8, 12, 16 },
+            promotions.Select(p => p.MinDutySuccesses).ToArray());
+        CollectionAssert.AreEqual(new[] { -10, 0, 6, 10, 14, 18 },
+            promotions.Select(p => p.MinTrust).ToArray());
+    }
+
+    /// <summary>
+    /// #936 D2 / #521: every Leadership gate must open by its own day threshold for a new character.
+    /// The test reproduces the engine instead of trusting a nominal rate, from the installed v1.5.5
+    /// sources:
+    /// <list type="bullet">
+    /// <item>Skill curve, DefaultCharacterDevelopmentModel.cs:95-103 (InitializeXpRequiredForSkillLevel):
+    /// first requirement 30, then each step adds an increment that grows by 10 + i. Level L needs
+    /// table[L - 1] (GetXpRequiredForSkillLevel, :127-137).</item>
+    /// <item>Learning limit, :206-221: max(0, (attribute - 1) * 10) + 30 * focus. Leadership is keyed
+    /// to Social alone (DefaultSkills.cs:101).</item>
+    /// <item>Learning rate, :223-244: 1.25 * (1 + 0.4 * attribute + focus), plus the factor
+    /// -1 - 0.1 * (skill - limit) once the skill is above the rounded limit, floored at 0.
+    /// ExplainedNumber is base + base * sum of factors (ExplainedNumber.cs:149).</item>
+    /// <item>HeroDeveloper.cs:198-216 (AddSkillXp) multiplies the raw grant by the rate at the current
+    /// skill; GenericXpModel's multiplier is 1 for the player (DefaultGenericXpModel.cs:8-15).</item>
+    /// </list>
+    /// The hero is a new character: Social 2, no Leadership focus. Reads the SHIPPED file, so a retune
+    /// of the gates or of dailyLeadershipXp fails here rather than in a player's hands.
+    /// </summary>
+    [TestMethod]
+    public void ShippedLeadershipGates_AreReachedByEachStepsDayThreshold()
+    {
+        var raw = JObject.Parse(File.ReadAllText(Path.Combine(
+            ShippedModuleDataPath(), "enlistment", "enlistment_config.json")));
+        var dailyXp = (int)raw["progression"]["dailyLeadershipXp"];
+        var rows = ((JArray)raw["promotions"]).ToList();
+        var gates = rows.Select(r => (int)r["minLeadershipSkill"]).ToArray();
+        var days = rows.Select(r => (int)r["minDaysServed"]).ToArray();
+
+        for (var i = 1; i < gates.Length; i++)
+            Assert.IsTrue(gates[i] >= gates[i - 1], $"Leadership gate {i} falls below gate {i - 1}");
+
+        const int social = 2;
+        const int focus = 0;
+        var xpTable = new long[200];
+        long increment = 30;
+        xpTable[0] = increment;
+        for (var i = 1; i < xpTable.Length; i++)
+        {
+            increment += 10 + i;
+            xpTable[i] = xpTable[i - 1] + increment;
+        }
+
+        var limit = (int)Math.Round(Math.Max(0f, (social - 1) * 10f) + focus * 30);
+        float xp = 0;
+        var level = 0;
+        var dayReached = new int?[gates.Length];
+        for (var day = 1; day <= 365; day++)
+        {
+            var factors = 0.4f * social + focus;
+            if (level > limit)
+                factors += -1f - 0.1f * (level - limit);
+            var rate = Math.Max(0f, 1.25f * (1f + factors));
+            xp += dailyXp * rate;
+            while (level < 199 && xp >= xpTable[level])
+                level++;
+            for (var i = 0; i < gates.Length; i++)
+                if (dayReached[i] == null && level >= gates[i])
+                    dayReached[i] = day;
+        }
+
+        for (var i = 0; i < gates.Length; i++)
+        {
+            Assert.IsNotNull(dayReached[i], $"Leadership {gates[i]} (step {i + 1}) is never reached by a Social {social} hero");
+            Assert.IsTrue(dayReached[i] <= days[i],
+                $"Leadership {gates[i]} (step {i + 1}) is reached on day {dayReached[i]}, after its day threshold {days[i]}");
+        }
+    }
+
+    [TestMethod]
+    public void GetDuties_LegacyRankName_LogsTheRenameHint()
+    {
+        WriteDuties("{\"fieldDuties\":[{\"id\":\"old_row\",\"gates\":{\"minRank\":\"Recruit\"}}]}");
+
+        var duties = Provider().GetDuties();
+
+        Assert.AreEqual(0, duties.FieldDuties.Count);
+        _logger.Received().LogError(Arg.Is<string>(s => s.Contains("Rank names changed in v2.0.35 (#936)")));
+    }
+
+    [TestMethod]
+    public void GetConfig_LegacyRankName_LogsTheRenameHint()
+    {
+        WriteConfig("{\"promotions\":[{\"toRank\":\"Soldier\",\"minDaysServed\":7,\"minServiceXp\":100}]}");
+
+        var config = Provider().GetConfig();
+
+        Assert.AreEqual(6, config.Promotions.Count, "defaults in force");
+        _logger.Received().LogError(Arg.Is<string>(s => s.Contains("Rank names changed in v2.0.35 (#936)")));
+    }
+
     private IPathService ShippedPaths()
     {
         var paths = Substitute.For<IPathService>();
@@ -375,12 +528,12 @@ public class EnlistmentContentConfigProviderTests
         // A valid 4-entry table deserialized to 8, failed the "exactly 4" check, and silently
         // reverted to the compiled defaults — so every retune was discarded with only a warning.
         // Values here deliberately differ from the defaults so a revert cannot pass this test.
-        WriteConfig("{\"progression\":{\"dailyWageByRank\":[9,11,13,17],\"dailyServiceXpByRank\":[1,2,3,4]}}");
+        WriteConfig("{\"progression\":{\"dailyWageByRank\":[9,11,13,17,19,21,23],\"dailyServiceXpByRank\":[1,2,3,4,5,6,7]}}");
 
         var config = Provider().GetConfig();
 
-        CollectionAssert.AreEqual(new[] { 9, 11, 13, 17 }, config.Progression.DailyWageByRank.ToArray());
-        CollectionAssert.AreEqual(new[] { 1, 2, 3, 4 }, config.Progression.DailyServiceXpByRank.ToArray());
+        CollectionAssert.AreEqual(new[] { 9, 11, 13, 17, 19, 21, 23 }, config.Progression.DailyWageByRank.ToArray());
+        CollectionAssert.AreEqual(new[] { 1, 2, 3, 4, 5, 6, 7 }, config.Progression.DailyServiceXpByRank.ToArray());
         _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("dailyWageByRank")));
         _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("dailyServiceXpByRank")));
     }

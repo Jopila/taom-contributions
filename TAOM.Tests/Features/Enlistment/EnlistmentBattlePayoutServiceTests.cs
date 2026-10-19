@@ -187,8 +187,8 @@ public class EnlistmentBattlePayoutServiceTests
         _service.PayOutBattle(won: true);
 
         Assert.IsTrue(_service.LastBattlePromoted);
-        Assert.AreEqual(ServiceRank.Soldier, _service.LastPromotedRank);
-        Assert.AreEqual(ServiceRank.Soldier, _contentStore.Record.Rank);
+        Assert.AreEqual(ServiceRank.Specialist, _service.LastPromotedRank);
+        Assert.AreEqual(ServiceRank.Specialist, _contentStore.Record.Rank);
     }
 
     [TestMethod]
@@ -200,6 +200,6 @@ public class EnlistmentBattlePayoutServiceTests
         _service.PayOutBattle(won: true);
 
         Assert.IsFalse(_service.LastBattlePromoted);
-        Assert.AreEqual(ServiceRank.Recruit, _contentStore.Record.Rank);
+        Assert.AreEqual(ServiceRank.Private, _contentStore.Record.Rank);
     }
 }

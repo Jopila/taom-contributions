@@ -31,7 +31,7 @@ public static class EnlistmentRosterIds
         EnlistmentKitTier.Soldier  => "soldier",
         EnlistmentKitTier.Veteran  => "veteran",
         EnlistmentKitTier.Sergeant => "sergeant",
-        _                       => "recruit",
+        _                          => "recruit",
     };
 
     /// <summary>

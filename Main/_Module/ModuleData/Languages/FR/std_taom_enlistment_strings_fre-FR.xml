@@ -80,10 +80,7 @@
     <string id="taom_enlist_leave_refused" text="Vous ne pouvez pas prendre congé ici pour le moment." />
     <string id="taom_enlist_menu_duty" text="Demander du travail à votre sergent" />
     <string id="taom_enlist_menu_talk" text="Parler à votre commandant" />
-    <string id="taom_enlist_rank_recruit" text="Recrue" />
-    <string id="taom_enlist_rank_sergeant" text="Sergent" />
-    <string id="taom_enlist_rank_soldier" text="Soldat" />
-    <string id="taom_enlist_rank_veteran" text="Vétéran" />
+    <string id="taom_enlist_rank_sergeant" text="Sergeant" />
     <string id="taom_enlist_reassign_pick" text="Vous marchez avec {CURRENT_SECTION} pour l'instant. Où préféreriez-vous servir ?" />
     <string id="taom_enlist_release_battle" text="Pas tant qu'il reste à combattre. Redemandez-moi quand le champ sera calme." />
     <string id="taom_enlist_release_desert" text="Alors j'en ai fini avec votre compagnie. Je m'en vais, serment ou non." />
@@ -263,5 +260,12 @@
     <string id="taom_enlist_qm_refused_host" text="Only the host's quartermaster can issue kit in this campaign." />
     <string id="taom_enlist_qm_refused_load" text="Your kit cannot be loaded into your baggage just now. Ask me again later." />
     <string id="taom_enlist_qm_refused_stores" text="The quartermaster has nothing in his stores for your company." />
+    <string id="taom_enlist_qm_refused_best" text="You already carry the best kit my stores can issue." />
+    <string id="taom_enlist_rank_master_sergeant" text="Master Sergeant" />
+    <string id="taom_enlist_rank_private" text="Private" />
+    <string id="taom_enlist_rank_sergeant_first_class" text="Sergeant First Class" />
+    <string id="taom_enlist_rank_sergeant_major" text="Sergeant Major" />
+    <string id="taom_enlist_rank_specialist" text="Specialist" />
+    <string id="taom_enlist_rank_staff_sergeant" text="Staff Sergeant" />
   </strings>
 </base>

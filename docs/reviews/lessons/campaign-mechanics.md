@@ -763,3 +763,17 @@ Vanilla's own settlement wait menus route through `GetGenericStateMenu()` every 
   true)`; `ExitToLast` only when the party is in no settlement. Pin it with a source test. When a brief names
   a pattern to copy, it names the condition that makes the pattern safe.
 - **Source:** `docs/reviews/rca-from-the-ashes-2026-10-19.md` findings 1 and 2.
+
+### Size a skill gate from the XP the hero actually gains, not the grant (#936, 2026-10-19)
+Enlistment sized its Leadership promotion gates from the v1.5.5 XP table and the daily grant (10 XP), and the
+feature doc said the learning rate "only makes a gate easier". Every grant through `HeroDeveloper.AddSkillXp`
+(default `isAffectedByFocusFactor: true`) is multiplied by `CalculateLearningRate`: `1.25 * (1 + 0.4*attribute +
+focus)`, with a factor `-1 - 0.1*(skill - limit)` above the learning limit `max(0,(attribute-1)*10) + 30*focus`,
+floored at 0. A new hero (attribute 2, no focus) gains 22.5 XP a day up to skill 10, then less, and stops at 18;
+attribute 1 with no focus stops at 4. The old gates of 20 and 50 were unreachable for such a hero.
+- **Why missed:** the plan read the XP table and the grant size and skipped the scaling between them; the test then
+  pinned the derived numbers instead of re-deriving them.
+- **Prevent:** before gating on a skill level that a passive grant must reach, simulate the grant through the learning
+  rate and limit for the weakest normal hero, from the shipped config, in a test that a raised gate turns red. Say in
+  the doc which hero the gates were sized for.
+- **Source:** `docs/reviews/rca-enlistment-rank-ladder-2026-10-19.md` F1, F2.

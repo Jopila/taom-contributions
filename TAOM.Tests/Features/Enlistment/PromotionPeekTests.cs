@@ -22,14 +22,9 @@ namespace TAOM.Tests.Features.Enlistment;
 [TestClass]
 public class PromotionMostBindingTests
 {
-    /// <summary>Mirrors EnlistmentContentConfigProvider.DefaultPromotions(), including the
-    /// deliberately negative first MinTrust — the case that would divide by zero.</summary>
-    private static List<PromotionRequirement> Ladder() => new List<PromotionRequirement>
-    {
-        new PromotionRequirement { ToRank = ServiceRank.Soldier, MinDaysServed = 7, MinServiceXp = 100, MinLeadershipSkill = 0, MinDutySuccesses = 0, MinTrust = -10 },
-        new PromotionRequirement { ToRank = ServiceRank.Veteran, MinDaysServed = 25, MinServiceXp = 350, MinLeadershipSkill = 20, MinDutySuccesses = 2, MinTrust = 0 },
-        new PromotionRequirement { ToRank = ServiceRank.Sergeant, MinDaysServed = 60, MinServiceXp = 800, MinLeadershipSkill = 50, MinDutySuccesses = 5, MinTrust = 6 },
-    };
+    /// <summary>The compiled default ladder itself, so these tests cannot drift from it. It includes the
+    /// deliberately negative first MinTrust, the case that would divide by zero.</summary>
+    private static List<PromotionRequirement> Ladder() => EnlistmentContentConfigProvider.BuildDefaults().Promotions;
 
     [TestMethod]
     public void Evaluate_EqualRelativeGaps_PicksTheEarlierKey()
@@ -37,7 +32,7 @@ public class PromotionMostBindingTests
         // A fresh recruit is 7-of-7 days and 100-of-100 XP short: both are a 100% shortfall, so the
         // tie-break — the evaluator's own declaration order — decides. Pinned because the board's
         // value-equality throttle needs the pick to be stable for identical input.
-        var eval = PromotionEvaluator.Evaluate(new ServiceProgressSnapshot { Rank = ServiceRank.Recruit }, Ladder());
+        var eval = PromotionEvaluator.Evaluate(new ServiceProgressSnapshot { Rank = ServiceRank.Private }, Ladder());
 
         Assert.AreEqual("days", eval.MostBindingUnmetKey);
         Assert.AreEqual(7, eval.MostBindingUnmetTarget);
@@ -52,8 +47,8 @@ public class PromotionMostBindingTests
         var eval = PromotionEvaluator.Evaluate(
             new ServiceProgressSnapshot
             {
-                Rank = ServiceRank.Veteran, DaysServed = 60, ServiceXp = 400,
-                LeadershipSkill = 50, DutySuccesses = 0, Trust = 6,
+                Rank = ServiceRank.Sergeant, DaysServed = 60, ServiceXp = 400,
+                LeadershipSkill = 5, DutySuccesses = 0, Trust = 6,
             },
             Ladder());
 
@@ -68,7 +63,7 @@ public class PromotionMostBindingTests
         // requires no Leadership at all). The comparison is integer cross-multiplication with a
         // scale floored at 1, so neither can produce a divide — nor a float that could be NaN.
         var eval = PromotionEvaluator.Evaluate(
-            new ServiceProgressSnapshot { Rank = ServiceRank.Recruit, DaysServed = 7, ServiceXp = 100, Trust = -12 },
+            new ServiceProgressSnapshot { Rank = ServiceRank.Private, DaysServed = 7, ServiceXp = 100, Trust = -12 },
             Ladder());
 
         Assert.AreEqual("trust", eval.MostBindingUnmetKey);
@@ -82,7 +77,7 @@ public class PromotionMostBindingTests
         // 5-of-100 XP. That is the intended reading: being distrusted by the commander who has to
         // promote you is more binding than a nearly-closed XP gap.
         var eval = PromotionEvaluator.Evaluate(
-            new ServiceProgressSnapshot { Rank = ServiceRank.Recruit, DaysServed = 7, ServiceXp = 95, Trust = -12 },
+            new ServiceProgressSnapshot { Rank = ServiceRank.Private, DaysServed = 7, ServiceXp = 95, Trust = -12 },
             Ladder());
 
         Assert.AreEqual("trust", eval.MostBindingUnmetKey);
@@ -92,7 +87,7 @@ public class PromotionMostBindingTests
     public void Evaluate_EveryThresholdMet_NoBindingKey()
     {
         var eval = PromotionEvaluator.Evaluate(
-            new ServiceProgressSnapshot { Rank = ServiceRank.Recruit, DaysServed = 8, ServiceXp = 120 }, Ladder());
+            new ServiceProgressSnapshot { Rank = ServiceRank.Private, DaysServed = 8, ServiceXp = 120 }, Ladder());
 
         Assert.IsTrue(eval.Promote);
         Assert.IsNull(eval.MostBindingUnmetKey);
@@ -103,7 +98,7 @@ public class PromotionMostBindingTests
     public void Evaluate_AtTopRank_NoBindingKey()
     {
         var eval = PromotionEvaluator.Evaluate(
-            new ServiceProgressSnapshot { Rank = ServiceRank.Sergeant }, Ladder());
+            new ServiceProgressSnapshot { Rank = ServiceRank.SergeantMajor }, Ladder());
 
         Assert.IsTrue(eval.AtTopRank);
         Assert.IsNull(eval.MostBindingUnmetKey);
@@ -124,8 +119,8 @@ public class PromotionMostBindingTests
         var eval = PromotionEvaluator.Evaluate(
             new ServiceProgressSnapshot
             {
-                Rank = ServiceRank.Veteran, DaysServed = 30, ServiceXp = 400,
-                LeadershipSkill = 10, DutySuccesses = 1, Trust = 0,
+                Rank = ServiceRank.StaffSergeant, DaysServed = 30, ServiceXp = 400,
+                LeadershipSkill = 4, DutySuccesses = 1, Trust = 0,
             },
             Ladder());
 
@@ -177,7 +172,7 @@ public class PromotionServicePeekTests
         var evaluation = _sut.Peek();
 
         Assert.IsTrue(evaluation.Promote, "the ladder verdict itself is unchanged");
-        Assert.AreEqual(ServiceRank.Recruit, _content.Record.Rank, "Peek must not promote");
+        Assert.AreEqual(ServiceRank.Private, _content.Record.Rank, "Peek must not promote");
     }
 
     [TestMethod]
@@ -193,24 +188,26 @@ public class PromotionServicePeekTests
 
         Assert.AreEqual(peeked.ToRank, applied.NewRank);
         Assert.IsTrue(applied.Promoted);
-        Assert.AreEqual(ServiceRank.Soldier, _content.Record.Rank);
+        Assert.AreEqual(ServiceRank.Specialist, _content.Record.Rank);
     }
 
     [TestMethod]
     public void Peek_ShortOfTheLadder_ReportsTheBindingGate()
     {
-        _content.Record.Rank = ServiceRank.Soldier;
-        _content.Record.DaysServed = 24;
-        _content.Record.ServiceXp = 100;
-        _content.Record.DutySuccesses = 2;
-        _skillXp.GetSkillValue("main_hero", "Leadership").Returns(18);
+        // Staff Sergeant -> Sergeant First Class: 120 days / 1800 XP / Leadership 10 / 8 duties / trust 10.
+        _content.Record.Rank = ServiceRank.StaffSergeant;
+        _content.Record.DaysServed = 119;
+        _content.Record.ServiceXp = 1000;
+        _content.Record.DutySuccesses = 8;
+        _content.Record.Trust = 10;
+        _skillXp.GetSkillValue("main_hero", "Leadership").Returns(9);
 
         var evaluation = _sut.Peek();
 
         Assert.IsFalse(evaluation.Promote);
-        Assert.AreEqual(ServiceRank.Veteran, evaluation.ToRank);
+        Assert.AreEqual(ServiceRank.SergeantFirstClass, evaluation.ToRank);
         Assert.AreEqual("xp", evaluation.MostBindingUnmetKey);
-        Assert.AreEqual(350, evaluation.MostBindingUnmetTarget);
+        Assert.AreEqual(1800, evaluation.MostBindingUnmetTarget);
     }
 
     [TestMethod]

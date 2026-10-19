@@ -225,9 +225,9 @@ public class ServiceRewardServiceTests
     [TestMethod]
     public void PayDailyWage_SergeantInsolvent_CapScalesWithRankWageInsteadOfDestroyingBackPay()
     {
-        // Under the old flat 60-GOLD cap this Sergeant's arrears were clamped to 60 and 162
+        // Under the old flat 60-GOLD cap this Staff Sergeant's arrears were clamped to 60 and 162
         // gold vanished on this single tick. The cap is now 14 days x 22/day = 308.
-        _contentStore.Record.Rank = ServiceRank.Sergeant;
+        _contentStore.Record.Rank = ServiceRank.StaffSergeant;
         _contentStore.Record.DeferredWages = 200;
         _goldTransfer.GetHeroGold("lord_1_1").Returns(0);
 
@@ -243,7 +243,7 @@ public class ServiceRewardServiceTests
     {
         // A wage-relative ceiling can SHRINK (demotion, retuned wage table). A bare Min()
         // against it would confiscate arrears the player legitimately banked at the old wage.
-        _contentStore.Record.Rank = ServiceRank.Sergeant;   // 22/day, cap 2 x 22 = 44
+        _contentStore.Record.Rank = ServiceRank.StaffSergeant;   // 22/day, cap 2 x 22 = 44
         _configValue.WagePolicy.MaxDeferredWageDays = 2;
         _contentStore.Record.DeferredWages = 300;
         _goldTransfer.GetHeroGold("lord_1_1").Returns(0);
@@ -282,7 +282,7 @@ public class ServiceRewardServiceTests
     [TestMethod]
     public void PayDailyWage_HigherRank_UsesRankWage()
     {
-        _contentStore.Record.Rank = ServiceRank.Sergeant;
+        _contentStore.Record.Rank = ServiceRank.StaffSergeant;
 
         var decision = _service.PayDailyWage();
 

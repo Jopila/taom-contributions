@@ -21,32 +21,48 @@ public class QuartermasterAnswerPolicyTests
 
     [TestMethod]
     public void For_Issued_ReturnsIssued() =>
-        Assert.AreEqual(QuartermasterAnswer.Issued, QuartermasterAnswerPolicy.For(EquipmentIssueResult.Issued));
+        Assert.AreEqual(QuartermasterAnswer.Issued, QuartermasterAnswerPolicy.For(EquipmentIssueResult.Issued, tier: EnlistmentKitTier.Veteran));
 
     [TestMethod]
     public void For_AlreadyIssuedForRank_ReturnsAlreadyDrawn() =>
         Assert.AreEqual(QuartermasterAnswer.AlreadyDrawn,
-            QuartermasterAnswerPolicy.For(EquipmentIssueResult.AlreadyIssuedForRank));
+            QuartermasterAnswerPolicy.For(EquipmentIssueResult.AlreadyIssuedForRank, tier: EnlistmentKitTier.Veteran));
+
+    [TestMethod]
+    public void For_AlreadyIssuedForRank_AtTopKitTier_ReturnsAlreadyDrawnBest() =>
+        Assert.AreEqual(QuartermasterAnswer.AlreadyDrawnBest,
+            QuartermasterAnswerPolicy.For(EquipmentIssueResult.AlreadyIssuedForRank, tier: EnlistmentKitTiers.Best));
+
+    [TestMethod]
+    public void For_OtherResults_AtTopKitTier_AreUnchanged()
+    {
+        Assert.AreEqual(QuartermasterAnswer.Issued,
+            QuartermasterAnswerPolicy.For(EquipmentIssueResult.Issued, tier: EnlistmentKitTiers.Best));
+        Assert.AreEqual(QuartermasterAnswer.EmptyStores,
+            QuartermasterAnswerPolicy.For(EquipmentIssueResult.NoRosterFound, tier: EnlistmentKitTiers.Best));
+        Assert.AreEqual(QuartermasterAnswer.CannotLoad,
+            QuartermasterAnswerPolicy.For(EquipmentIssueResult.PartyUnavailable, tier: EnlistmentKitTiers.Best));
+    }
 
     [TestMethod]
     public void For_NoRosterFound_ReturnsEmptyStores() =>
         Assert.AreEqual(QuartermasterAnswer.EmptyStores,
-            QuartermasterAnswerPolicy.For(EquipmentIssueResult.NoRosterFound));
+            QuartermasterAnswerPolicy.For(EquipmentIssueResult.NoRosterFound, tier: EnlistmentKitTier.Veteran));
 
     [TestMethod]
     public void For_NoValidItems_ReturnsEmptyStores() =>
         Assert.AreEqual(QuartermasterAnswer.EmptyStores,
-            QuartermasterAnswerPolicy.For(EquipmentIssueResult.NoValidItems));
+            QuartermasterAnswerPolicy.For(EquipmentIssueResult.NoValidItems, tier: EnlistmentKitTier.Veteran));
 
     [TestMethod]
     public void For_PartyUnavailable_ReturnsCannotLoad() =>
         Assert.AreEqual(QuartermasterAnswer.CannotLoad,
-            QuartermasterAnswerPolicy.For(EquipmentIssueResult.PartyUnavailable));
+            QuartermasterAnswerPolicy.For(EquipmentIssueResult.PartyUnavailable, tier: EnlistmentKitTier.Veteran));
 
     [TestMethod]
     public void For_UndefinedResult_ReturnsCannotLoad() =>
         Assert.AreEqual(QuartermasterAnswer.CannotLoad,
-            QuartermasterAnswerPolicy.For((EquipmentIssueResult)99));
+            QuartermasterAnswerPolicy.For((EquipmentIssueResult)99, tier: EnlistmentKitTier.Veteran));
 
     [TestMethod]
     public void Behavior_ClientBranch_SetsHostOnlyAndSkipsTheIssuer()
@@ -72,7 +88,7 @@ public class QuartermasterAnswerPolicyTests
             StringComparison.Ordinal);
         Assert.IsTrue(end > 0, "could not find the client branch");
 
-        StringAssert.Contains(src.Substring(end), "_lastAnswer = QuartermasterAnswerPolicy.For(result);");
+        StringAssert.Contains(src.Substring(end), "_lastAnswer = QuartermasterAnswerPolicy.For(result, tier);");
         Assert.AreEqual(2, Regex.Matches(src, @"_lastAnswer\s*=[^=]").Count,
             "only the client branch and the policy may set the answer");
     }
@@ -107,13 +123,15 @@ public class QuartermasterAnswerPolicyTests
         {
             (QuartermasterAnswer.Issued, "taom_enlist_qm_issued"),
             (QuartermasterAnswer.AlreadyDrawn, "taom_enlist_qm_refused"),
+            (QuartermasterAnswer.AlreadyDrawnBest, "taom_enlist_qm_refused_best"),
             (QuartermasterAnswer.EmptyStores, "taom_enlist_qm_refused_stores"),
             (QuartermasterAnswer.HostOnly, "taom_enlist_qm_refused_host"),
         };
 
         foreach (var (answer, key) in table)
         {
-            int cond = src.IndexOf("_lastAnswer == QuartermasterAnswer." + answer, StringComparison.Ordinal);
+            var condMatch = Regex.Match(src, @"_lastAnswer == QuartermasterAnswer\." + answer + @"\b");
+            int cond = condMatch.Success ? condMatch.Index : -1;
             Assert.IsTrue(cond >= 0, $"{answer} has no condition");
             int start = src.LastIndexOf("AddAnswer(", cond, StringComparison.Ordinal);
             Assert.IsTrue(start >= 0, $"no registration found before the {answer} condition");

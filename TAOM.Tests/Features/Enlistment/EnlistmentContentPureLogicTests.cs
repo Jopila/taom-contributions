@@ -154,20 +154,20 @@ public class EnlistmentContentPureLogicTests
 
     private static List<PromotionRequirement> Ladder() => new List<PromotionRequirement>
     {
-        new PromotionRequirement { ToRank = ServiceRank.Soldier, MinDaysServed = 7, MinServiceXp = 100 },
-        new PromotionRequirement { ToRank = ServiceRank.Veteran, MinDaysServed = 25, MinServiceXp = 350, MinLeadershipSkill = 20, MinDutySuccesses = 2 },
-        new PromotionRequirement { ToRank = ServiceRank.Sergeant, MinDaysServed = 60, MinServiceXp = 800, MinLeadershipSkill = 50, MinDutySuccesses = 5, MinTrust = 6 },
+        new PromotionRequirement { ToRank = ServiceRank.Specialist, MinDaysServed = 7, MinServiceXp = 100 },
+        new PromotionRequirement { ToRank = ServiceRank.Sergeant, MinDaysServed = 25, MinServiceXp = 350, MinLeadershipSkill = 20, MinDutySuccesses = 2 },
+        new PromotionRequirement { ToRank = ServiceRank.StaffSergeant, MinDaysServed = 60, MinServiceXp = 800, MinLeadershipSkill = 50, MinDutySuccesses = 5, MinTrust = 6 },
     };
 
     [TestMethod]
     public void Promotion_AllThresholdsMet_Promotes()
     {
-        var progress = new ServiceProgressSnapshot { Rank = ServiceRank.Recruit, DaysServed = 8, ServiceXp = 120 };
+        var progress = new ServiceProgressSnapshot { Rank = ServiceRank.Private, DaysServed = 8, ServiceXp = 120 };
 
         var eval = PromotionEvaluator.Evaluate(progress, Ladder());
 
         Assert.IsTrue(eval.Promote);
-        Assert.AreEqual(ServiceRank.Soldier, eval.ToRank);
+        Assert.AreEqual(ServiceRank.Specialist, eval.ToRank);
     }
 
     [TestMethod]
@@ -175,7 +175,7 @@ public class EnlistmentContentPureLogicTests
     {
         var progress = new ServiceProgressSnapshot
         {
-            Rank = ServiceRank.Veteran, DaysServed = 30, ServiceXp = 400,
+            Rank = ServiceRank.Sergeant, DaysServed = 30, ServiceXp = 400,
             LeadershipSkill = 10, DutySuccesses = 1, Trust = 0,
         };
 
@@ -191,7 +191,7 @@ public class EnlistmentContentPureLogicTests
     public void Promotion_AtTopRank_NoPromotionNoGaps()
     {
         var eval = PromotionEvaluator.Evaluate(
-            new ServiceProgressSnapshot { Rank = ServiceRank.Sergeant }, Ladder());
+            new ServiceProgressSnapshot { Rank = ServiceRank.StaffSergeant }, Ladder());
 
         Assert.IsFalse(eval.Promote);
         Assert.IsTrue(eval.AtTopRank);
@@ -326,7 +326,7 @@ public class EnlistmentContentPureLogicTests
     {
         var record = new ServiceContentRecord
         {
-            Rank = ServiceRank.Veteran,
+            Rank = ServiceRank.Sergeant,
             Assignment = ServiceAssignment.Archer,
             ServiceXp = 512,
             DaysServed = 40,
@@ -350,7 +350,7 @@ public class EnlistmentContentPureLogicTests
         };
 
         Assert.IsTrue(ServiceContentRecord.TryParse(record.Serialize(), out var parsed));
-        Assert.AreEqual(ServiceRank.Veteran, parsed.Rank);
+        Assert.AreEqual(ServiceRank.Sergeant, parsed.Rank);
         Assert.AreEqual(ServiceAssignment.Archer, parsed.Assignment);
         Assert.AreEqual(512, parsed.ServiceXp);
         Assert.AreEqual(22, parsed.DeferredWages);

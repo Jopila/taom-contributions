@@ -19,7 +19,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Recruit"
+        "minRank": "Private"
       },
       "supportSkills": [
         "Scouting",
@@ -45,7 +45,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Soldier",
+        "minRank": "Specialist",
         "assignmentAffinity": [
           "Cavalry"
         ]
@@ -74,7 +74,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Recruit"
+        "minRank": "Private"
       },
       "supportSkills": [
         "Tactics",
@@ -100,7 +100,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Soldier"
+        "minRank": "Specialist"
       },
       "supportSkills": [
         "Leadership",
@@ -126,7 +126,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Recruit"
+        "minRank": "Private"
       },
       "supportSkills": [
         "Scouting",
@@ -152,7 +152,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Recruit",
+        "minRank": "Private",
         "assignmentAffinity": [
           "Archer",
           "Cavalry"
@@ -182,7 +182,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Recruit"
+        "minRank": "Private"
       },
       "supportSkills": [
         "Charm",
@@ -208,7 +208,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Veteran",
+        "minRank": "Sergeant",
         "minTrust": 15
       },
       "supportSkills": [
@@ -235,7 +235,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Veteran",
+        "minRank": "Sergeant",
         "minTrust": 8
       },
       "supportSkills": [
@@ -262,7 +262,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Recruit"
+        "minRank": "Private"
       },
       "supportSkills": [
         "Steward",
@@ -288,7 +288,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Recruit",
+        "minRank": "Private",
         "requiredContexts": [
           "march"
         ]
@@ -317,7 +317,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Veteran", "minTrust": 15 },
+        "minRank": "Sergeant", "minTrust": 15 },
       "supportSkills": [
         "Tactics",
         "Scouting"
@@ -342,7 +342,7 @@
         "trust": 0
       },
       "gates": {
-        "minRank": "Recruit"
+        "minRank": "Private"
       },
       "supportSkills": [
         "Athletics",
@@ -354,7 +354,7 @@
     {
       "id": "night_patrol",
       "gates": {
-        "minRank": "Recruit",
+        "minRank": "Private",
         "excludedContexts": [
           "siege"
         ]
@@ -395,7 +395,7 @@
     {
       "id": "treat_wounded",
       "gates": {
-        "minRank": "Recruit"
+        "minRank": "Private"
       },
       "optionA": {
         "key": "tend_wounds",
@@ -433,7 +433,7 @@
     {
       "id": "train_recruits",
       "gates": {
-        "minRank": "Soldier"
+        "minRank": "Specialist"
       },
       "optionA": {
         "key": "drill_them",
@@ -473,7 +473,7 @@
     {
       "id": "equipment_check",
       "gates": {
-        "minRank": "Recruit",
+        "minRank": "Private",
         "requiredContexts": [
           "garrison"
         ]
@@ -514,7 +514,7 @@
     {
       "id": "inspect_defenses",
       "gates": {
-        "minRank": "Recruit",
+        "minRank": "Private",
         "requiredContexts": [
           "siege"
         ]
@@ -557,7 +557,7 @@
     {
       "id": "gate_watch",
       "gates": {
-        "minRank": "Recruit",
+        "minRank": "Private",
         "requiredContexts": [
           "garrison"
         ]
@@ -597,7 +597,7 @@
     {
       "id": "quartermaster_shortage",
       "gates": {
-        "minRank": "Soldier"
+        "minRank": "Specialist"
       },
       "optionA": {
         "key": "stretch_stores",
@@ -637,7 +637,7 @@
     {
       "id": "lead_patrol",
       "gates": {
-        "minRank": "Veteran",
+        "minRank": "Sergeant",
         "minTrust": 5
       },
       "optionA": {
@@ -679,7 +679,7 @@
     {
       "id": "coordinate_supply",
       "gates": {
-        "minRank": "Veteran",
+        "minRank": "Sergeant",
         "minTrust": 5
       },
       "optionA": {
@@ -721,7 +721,7 @@
     {
       "id": "command_squad",
       "gates": {
-        "minRank": "Veteran",
+        "minRank": "Sergeant",
         "minTrust": 5
       },
       "optionA": {
@@ -763,7 +763,7 @@
     {
       "id": "strategic_planning",
       "gates": {
-        "minRank": "Sergeant",
+        "minRank": "StaffSergeant",
         "minTrust": 8
       },
       "optionA": {
@@ -810,7 +810,7 @@
       "chance": 0.22,
       "effect": "ReleaseDeferredPay",
       "gates": {
-        "minRank": "Recruit"
+        "minRank": "Private"
       },
       "optionA": {
         "key": "press_claim",
@@ -843,7 +843,7 @@
       "id": "short_rations",
       "chance": 0.16,
       "gates": {
-        "minRank": "Recruit"
+        "minRank": "Private"
       },
       "optionA": {
         "key": "share_yours",
@@ -883,7 +883,7 @@
       "id": "camp_discipline",
       "chance": 0.14,
       "gates": {
-        "minRank": "Recruit"
+        "minRank": "Private"
       },
       "optionA": {
         "key": "break_it_up",

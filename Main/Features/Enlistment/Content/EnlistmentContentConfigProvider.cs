@@ -32,6 +32,18 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
         "", "ReleaseDeferredPay",
     };
 
+    /// <summary>One entry per rank in the wage and service-XP tables.</summary>
+    private static readonly int RankCount = Enum.GetValues(typeof(ServiceRank)).Length;
+
+    /// <summary>
+    /// A pre-#936 file names ranks the enum no longer has ("Recruit"), and Newtonsoft's enum error
+    /// is otherwise a bare conversion failure. The hint tells the reader what changed.
+    /// </summary>
+    private static string LegacyRankHint(Exception ex)
+        => ex.Message.IndexOf("ServiceRank", StringComparison.Ordinal) >= 0
+            ? " Rank names changed in v2.0.35 (#936): Recruit is now Private, Soldier Specialist, Veteran Sergeant, Sergeant StaffSergeant; replace this file with the shipped one."
+            : "";
+
     /// <summary>
     /// Upper bound on wagePolicy.maxDeferredWageDays: one full contract (EnlistmentCoreConfig.ContractDays
     /// defaults to 365). Past that the arrears stop being a debt and become a discharge-time gold bomb,
@@ -92,9 +104,15 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
 
     private static List<PromotionRequirement> DefaultPromotions() => new List<PromotionRequirement>
     {
-        new PromotionRequirement { ToRank = ServiceRank.Soldier, MinDaysServed = 7, MinServiceXp = 100, MinLeadershipSkill = 0, MinDutySuccesses = 0, MinTrust = -10 },
-        new PromotionRequirement { ToRank = ServiceRank.Veteran, MinDaysServed = 25, MinServiceXp = 350, MinLeadershipSkill = 20, MinDutySuccesses = 2, MinTrust = 0 },
-        new PromotionRequirement { ToRank = ServiceRank.Sergeant, MinDaysServed = 60, MinServiceXp = 800, MinLeadershipSkill = 50, MinDutySuccesses = 5, MinTrust = 6 },
+        // Leadership (#936 D2) is sized to the engine skill curve at the nominal 10 XP a day: the
+        // highest level reachable by each step's day threshold, rounded down to a multiple of 5.
+        // docs/features/enlistment.md carries the table and its evidence.
+        new PromotionRequirement { ToRank = ServiceRank.Specialist, MinDaysServed = 7, MinServiceXp = 100, MinLeadershipSkill = 0, MinDutySuccesses = 0, MinTrust = -10 },
+        new PromotionRequirement { ToRank = ServiceRank.Sergeant, MinDaysServed = 25, MinServiceXp = 350, MinLeadershipSkill = 0, MinDutySuccesses = 2, MinTrust = 0 },
+        new PromotionRequirement { ToRank = ServiceRank.StaffSergeant, MinDaysServed = 60, MinServiceXp = 800, MinLeadershipSkill = 5, MinDutySuccesses = 5, MinTrust = 6 },
+        new PromotionRequirement { ToRank = ServiceRank.SergeantFirstClass, MinDaysServed = 120, MinServiceXp = 1800, MinLeadershipSkill = 10, MinDutySuccesses = 8, MinTrust = 10 },
+        new PromotionRequirement { ToRank = ServiceRank.MasterSergeant, MinDaysServed = 200, MinServiceXp = 3200, MinLeadershipSkill = 10, MinDutySuccesses = 12, MinTrust = 14 },
+        new PromotionRequirement { ToRank = ServiceRank.SergeantMajor, MinDaysServed = 300, MinServiceXp = 5000, MinLeadershipSkill = 15, MinDutySuccesses = 16, MinTrust = 18 },
     };
 
     private EnlistmentContentConfig LoadConfig()
@@ -114,10 +132,10 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
         {
             text = File.ReadAllText(path);
             // ObjectCreationHandling.Replace is REQUIRED, not a preference. The config model gives
-            // its list properties initializers (e.g. DailyWageByRank = { 5, 8, 14, 22 }), and
+            // its list properties initializers (e.g. DailyWageByRank = { 5, 8, 14, 22, 28, 34, 40 }), and
             // Newtonsoft's default (Auto) APPENDS the JSON entries to that existing collection
-            // instead of replacing it. A well-formed 4-entry table therefore deserialized to 8
-            // entries, failed the "exactly 4" rank-table check, and silently reverted to the
+            // instead of replacing it. A well-formed 4-entry table (the ladder then had four ranks) deserialized to 8
+            // entries, failed the rank-count table check, and silently reverted to the
             // compiled defaults — so every retune of these tables was discarded with only a
             // warning. Observed in-game 2026-08-07.
             parsed = JsonConvert.DeserializeObject<EnlistmentContentConfig>(
@@ -126,7 +144,7 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError($"EnlistmentContentConfigProvider: failed to parse enlistment_config.json: {ex.Message}");
+            _logger.LogError($"EnlistmentContentConfigProvider: failed to parse enlistment_config.json: {ex.Message}{LegacyRankHint(ex)}");
             return defaults;
         }
 
@@ -242,7 +260,7 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
 
         if (!IsValidPromotionLadder(config.Promotions))
         {
-            _logger.LogWarning("EnlistmentContentConfigProvider: promotions must be exactly 3 entries (Soldier/Veteran/Sergeant) with strictly increasing days+XP and non-negative fields, reverting to the default ladder");
+            _logger.LogWarning($"EnlistmentContentConfigProvider: promotions must be exactly {RankCount - 1} entries (one per rank above Private, in order) with strictly increasing days+XP and non-negative fields, reverting to the default ladder");
             config.Promotions = DefaultPromotions();
             rejected = true;
         }
@@ -264,9 +282,9 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
 
     private bool ValidateRankTable(List<int> table, List<int> defaultTable, string name, Action<List<int>> assign)
     {
-        if (table != null && table.Count == 4 && table.All(v => v >= 0))
+        if (table != null && table.Count == RankCount && table.All(v => v >= 0))
             return false;
-        _logger.LogWarning($"EnlistmentContentConfigProvider: {name} must be 4 non-negative entries (one per rank) but was [{(table == null ? "null" : string.Join(",", table))}] (count {table?.Count ?? 0}) — reverting to defaults");
+        _logger.LogWarning($"EnlistmentContentConfigProvider: {name} must be {RankCount} non-negative entries (one per rank) but was [{(table == null ? "null" : string.Join(",", table))}] (count {table?.Count ?? 0}) — reverting to defaults");
         assign(new List<int>(defaultTable));
         return true;
     }
@@ -292,7 +310,7 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
 
     private static bool IsValidPromotionLadder(List<PromotionRequirement> promotions)
     {
-        if (promotions == null || promotions.Count != 3)
+        if (promotions == null || promotions.Count != RankCount - 1)
             return false;
         for (var i = 0; i < promotions.Count; i++)
         {
@@ -347,7 +365,7 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError($"EnlistmentContentConfigProvider: failed to parse enlistment_duties.json: {ex.Message}");
+            _logger.LogError($"EnlistmentContentConfigProvider: failed to parse enlistment_duties.json: {ex.Message}{LegacyRankHint(ex)}");
             return new EnlistmentDutiesConfig();
         }
 

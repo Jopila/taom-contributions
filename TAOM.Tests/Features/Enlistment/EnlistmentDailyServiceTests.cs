@@ -99,23 +99,25 @@ public class EnlistmentDailyServiceTests
         var summary = _service.RunDailyTick(200.0, 12.0);
 
         Assert.IsTrue(summary.Promoted);
-        Assert.AreEqual(ServiceRank.Soldier, summary.NewRank);
-        Assert.AreEqual(ServiceRank.Soldier, _contentStore.Record.Rank);
+        Assert.AreEqual(ServiceRank.Specialist, summary.NewRank);
+        Assert.AreEqual(ServiceRank.Specialist, _contentStore.Record.Rank);
     }
 
     [TestMethod]
     public void DailyTick_LeadershipGateBlocks_UntilSkillCatchesUp()
     {
         MakeEnlisted();
-        _contentStore.Record.Rank = ServiceRank.Soldier;
-        _contentStore.Record.DaysServed = 30;
-        _contentStore.Record.ServiceXp = 400;
-        _contentStore.Record.DutySuccesses = 3;
-        _skillXp.GetSkillValue("main_hero", "Leadership").Returns(10);
+        // Sergeant -> Staff Sergeant is the first step that carries a Leadership gate (5).
+        _contentStore.Record.Rank = ServiceRank.Sergeant;
+        _contentStore.Record.DaysServed = 70;
+        _contentStore.Record.ServiceXp = 900;
+        _contentStore.Record.DutySuccesses = 6;
+        _contentStore.Record.Trust = 6;
+        _skillXp.GetSkillValue("main_hero", "Leadership").Returns(2);
 
         Assert.IsFalse(_service.RunDailyTick(200.0, 12.0).Promoted);
 
-        _skillXp.GetSkillValue("main_hero", "Leadership").Returns(25);
+        _skillXp.GetSkillValue("main_hero", "Leadership").Returns(8);
         Assert.IsTrue(_service.RunDailyTick(200.0, 12.0).Promoted);
     }
 
@@ -127,16 +129,6 @@ public class EnlistmentDailyServiceTests
         Assert.IsFalse(_service.RunDailyTick(199.8, 12.0).ContractExpiredToday);
         Assert.IsTrue(_service.RunDailyTick(200.8, 12.0).ContractExpiredToday, "first tick past the end day");
         Assert.IsFalse(_service.RunDailyTick(201.8, 12.0).ContractExpiredToday, "not re-flagged");
-    }
-
-    [TestMethod]
-    public void RankOrdinals_ContentAndEquipmentLaddersStayAligned()
-    {
-        // The quartermaster maps (EnlistmentKitTier)(int)ServiceRank — pin the ordinal parity.
-        Assert.AreEqual((int)ServiceRank.Recruit, (int)TAOM.Features.Enlistment.Equipment.EnlistmentKitTier.Recruit);
-        Assert.AreEqual((int)ServiceRank.Soldier, (int)TAOM.Features.Enlistment.Equipment.EnlistmentKitTier.Soldier);
-        Assert.AreEqual((int)ServiceRank.Veteran, (int)TAOM.Features.Enlistment.Equipment.EnlistmentKitTier.Veteran);
-        Assert.AreEqual((int)ServiceRank.Sergeant, (int)TAOM.Features.Enlistment.Equipment.EnlistmentKitTier.Sergeant);
     }
 }
 

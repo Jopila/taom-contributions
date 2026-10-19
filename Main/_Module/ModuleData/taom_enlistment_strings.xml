@@ -18,6 +18,7 @@
 	<string id="taom_enlist_promoted" text="{=taom_enlist_promoted}You have been promoted to {RANK}." />
 	<string id="taom_enlist_qm_issued" text="{=taom_enlist_qm_issued}See the quartermaster&#x27;s wagon — your kit is in your baggage." />
 	<string id="taom_enlist_qm_refused" text="{=taom_enlist_qm_refused}You have drawn your due for your rank already. Earn the next stripe first." />
+	<string id="taom_enlist_qm_refused_best" text="{=taom_enlist_qm_refused_best}You already carry the best kit my stores can issue." />
 	<string id="taom_enlist_qm_refused_host" text="{=taom_enlist_qm_refused_host}Only the host&#x27;s quartermaster can issue kit in this campaign." />
 	<string id="taom_enlist_qm_refused_load" text="{=taom_enlist_qm_refused_load}Your kit cannot be loaded into your baggage just now. Ask me again later." />
 	<string id="taom_enlist_qm_refused_stores" text="{=taom_enlist_qm_refused_stores}The quartermaster has nothing in his stores for your company." />
@@ -84,10 +85,13 @@
 	<string id="taom_enlist_leave_refused" text="{=taom_enlist_leave_refused}You cannot take your leave here just now." />
 	<string id="taom_enlist_menu_duty" text="{=taom_enlist_menu_duty}Ask your sergeant for work" />
 	<string id="taom_enlist_menu_talk" text="{=taom_enlist_menu_talk}Speak with your commander" />
-	<string id="taom_enlist_rank_recruit" text="{=taom_enlist_rank_recruit}Recruit" />
+	<string id="taom_enlist_rank_master_sergeant" text="{=taom_enlist_rank_master_sergeant}Master Sergeant" />
+	<string id="taom_enlist_rank_private" text="{=taom_enlist_rank_private}Private" />
 	<string id="taom_enlist_rank_sergeant" text="{=taom_enlist_rank_sergeant}Sergeant" />
-	<string id="taom_enlist_rank_soldier" text="{=taom_enlist_rank_soldier}Soldier" />
-	<string id="taom_enlist_rank_veteran" text="{=taom_enlist_rank_veteran}Veteran" />
+	<string id="taom_enlist_rank_sergeant_first_class" text="{=taom_enlist_rank_sergeant_first_class}Sergeant First Class" />
+	<string id="taom_enlist_rank_sergeant_major" text="{=taom_enlist_rank_sergeant_major}Sergeant Major" />
+	<string id="taom_enlist_rank_specialist" text="{=taom_enlist_rank_specialist}Specialist" />
+	<string id="taom_enlist_rank_staff_sergeant" text="{=taom_enlist_rank_staff_sergeant}Staff Sergeant" />
 	<string id="taom_enlist_reassign_pick" text="{=taom_enlist_reassign_pick}You march with the {CURRENT_SECTION} at present. Where would you rather stand?" />
 	<string id="taom_enlist_release_battle" text="{=taom_enlist_release_battle}Not while there is fighting to be done. Ask me again when the field is quiet." />
 	<string id="taom_enlist_release_desert" text="{=taom_enlist_release_desert}Then I am done with your company. I take my leave, oath or no." />

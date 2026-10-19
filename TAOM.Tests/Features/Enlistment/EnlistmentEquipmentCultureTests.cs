@@ -37,9 +37,9 @@ public class EnlistmentEquipmentCultureTests
         var vlandiaRosters = doc.Descendants("EquipmentRoster")
             .Where(r => ((string)r.Attribute("id") ?? "").StartsWith("enlist_vlandia_", StringComparison.Ordinal))
             .ToList();
-        // 16 today: 4 assignments x 4 ranks. Asserted as a floor rather than an equality
+        // 16 today: 4 assignments x 4 kit tiers. Asserted as a floor rather than an equality
         // because a culture may legitimately lose a cell when its troop tree has no donor of
-        // that group within a band of the rank. Dropping below the four ranks means the file
+        // that group within a band of the kit tier. Dropping below the four kit tiers means the file
         // layout changed and this guard needs re-aiming, not that data got thinner.
         Assert.IsTrue(vlandiaRosters.Count >= 4,
             $"Expected at least the four vlandia rank rosters, found {vlandiaRosters.Count}; "

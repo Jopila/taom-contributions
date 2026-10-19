@@ -1,4 +1,5 @@
 using System;
+using TAOM.Features.Enlistment.Content.Domain;
 using TAOM.Features.TroopProgression;
 
 namespace TAOM.Features.Enlistment.Content;
@@ -18,8 +19,8 @@ public class SkillCheckService : ISkillCheckService
     public const int RollRange = 51; // 0..50 inclusive
 
     /// <summary>
-    /// Check bonus per rank level. Both duty systems alias THIS constant, so the magnitude
-    /// cannot drift.
+    /// Check bonus per rank level. Read only through <see cref="RankBonus"/>, which both duty
+    /// systems call, so the magnitude cannot drift.
     ///
     /// It does NOT make the two curves identical, and the difference is deliberate: a field
     /// duty always applies the bonus, while an interactive option applies it only when its
@@ -27,6 +28,17 @@ public class SkillCheckService : ISkillCheckService
     /// does not always help a personal choice in camp.
     /// </summary>
     public const int RankBonusPerLevel = 4;
+
+    /// <summary>
+    /// The largest rank bonus. The duty difficulties were tuned against four ranks (a ceiling of
+    /// +12), so the ranks above Staff Sergeant add nothing to a check.
+    /// </summary>
+    public const int RankBonusCap = 12;
+
+    /// <summary>The check bonus a rank earns: <see cref="RankBonusPerLevel"/> per level, capped at
+    /// <see cref="RankBonusCap"/>. Both duty call sites use this one helper.</summary>
+    public static int RankBonus(ServiceRank rank)
+        => Math.Min((int)rank * RankBonusPerLevel, RankBonusCap);
 
     private readonly IRandomProvider _random;
 

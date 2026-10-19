@@ -80,10 +80,7 @@
     <string id="taom_enlist_leave_refused" text="지금 이곳에서는 휴가를 얻을 수 없다." />
     <string id="taom_enlist_menu_duty" text="상사에게 일거리를 청한다" />
     <string id="taom_enlist_menu_talk" text="지휘관과 이야기한다" />
-    <string id="taom_enlist_rank_recruit" text="신병" />
-    <string id="taom_enlist_rank_sergeant" text="상사" />
-    <string id="taom_enlist_rank_soldier" text="병사" />
-    <string id="taom_enlist_rank_veteran" text="고참병" />
+    <string id="taom_enlist_rank_sergeant" text="Sergeant" />
     <string id="taom_enlist_reassign_pick" text="당신은 현재 {CURRENT_SECTION}와 함께 행군한다. 어디에 서고 싶은가?" />
     <string id="taom_enlist_release_battle" text="싸움이 남아 있는 동안은 안 된다. 전장이 조용해지면 다시 청하라." />
     <string id="taom_enlist_release_desert" text="그렇다면 당신 부대와는 끝이다. 맹세가 있건 없건, 나는 떠나겠다." />
@@ -263,5 +260,12 @@
     <string id="taom_enlist_qm_refused_host" text="Only the host's quartermaster can issue kit in this campaign." />
     <string id="taom_enlist_qm_refused_load" text="Your kit cannot be loaded into your baggage just now. Ask me again later." />
     <string id="taom_enlist_qm_refused_stores" text="The quartermaster has nothing in his stores for your company." />
+    <string id="taom_enlist_qm_refused_best" text="You already carry the best kit my stores can issue." />
+    <string id="taom_enlist_rank_master_sergeant" text="Master Sergeant" />
+    <string id="taom_enlist_rank_private" text="Private" />
+    <string id="taom_enlist_rank_sergeant_first_class" text="Sergeant First Class" />
+    <string id="taom_enlist_rank_sergeant_major" text="Sergeant Major" />
+    <string id="taom_enlist_rank_specialist" text="Specialist" />
+    <string id="taom_enlist_rank_staff_sergeant" text="Staff Sergeant" />
   </strings>
 </base>

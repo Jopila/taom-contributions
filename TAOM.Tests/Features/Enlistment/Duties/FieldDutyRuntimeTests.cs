@@ -174,13 +174,28 @@ public class FieldDutyRuntimeTests
         _skillXp.GetSkillValue("main_hero", "Tactics").Returns(70);
         _skillXp.GetSkillValue("main_hero", "Scouting").Returns(40);
         _contentStore.Record.Trust = 5;
-        _contentStore.Record.Rank = ServiceRank.Veteran;
+        _contentStore.Record.Rank = ServiceRank.Sergeant;
 
         var duty = Duty("hideout_strike", hours: 8, difficulty: 76, "Tactics", "Scouting");
         StartAndReachShiftEnd(duty, passes: true);
 
         _skillCheck.Received(1).Passes(
-            70, 40, 5, (int)ServiceRank.Veteran * SkillCheckService.RankBonusPerLevel, 76);
+            70, 40, 5, (int)ServiceRank.Sergeant * SkillCheckService.RankBonusPerLevel, 76);
+    }
+
+    [TestMethod]
+    public void HourlyUpdate_SergeantMajor_PassesTheCappedRankBonus()
+    {
+        _skillXp.GetSkillValue("main_hero", "Tactics").Returns(70);
+        _skillXp.GetSkillValue("main_hero", "Scouting").Returns(40);
+        _contentStore.Record.Trust = 5;
+        _contentStore.Record.Rank = ServiceRank.SergeantMajor;
+
+        var duty = Duty("hideout_strike", hours: 8, difficulty: 76, "Tactics", "Scouting");
+        StartAndReachShiftEnd(duty, passes: true);
+
+        // Sergeant Major is ordinal 6, 24 uncapped; the duty difficulties were tuned against +12.
+        _skillCheck.Received(1).Passes(70, 40, 5, 12, 76);
     }
 
     [TestMethod]
@@ -315,7 +330,7 @@ public class FieldDutyRuntimeTests
         // The 2026-08-12 field log read `skill 29 ... vs difficulty 54` on a duty that COMPLETED,
         // because the line printed the raw skill and omitted both the roll and the bonuses — so the
         // stated comparison was not the one the code performs. A reader must be able to work out
-        // the pass ceiling from the line alone: here skill 0 + trust 0 + Recruit 0 + roll<=50 can
+        // the pass ceiling from the line alone: here skill 0 + trust 0 + Private 0 + roll<=50 can
         // never reach 54, which is a 0% check the old format hid.
         var duty = Duty(id: "recruitment_errand", difficulty: 54, skills: new[] { "Charm" });
         _skillXp.GetSkillValue("main_hero", "Charm").Returns(0);
@@ -327,7 +342,7 @@ public class FieldDutyRuntimeTests
             "the roll range is what makes the pass ceiling derivable");
         StringAssert.Contains(line, "difficulty 54");
         StringAssert.Contains(line, "check 0",
-            "skill 0 + trust bonus 0 + Recruit bonus 0 is the deterministic half of the check");
+            "skill 0 + trust bonus 0 + Private bonus 0 is the deterministic half of the check");
     }
 
     [TestMethod]
@@ -352,12 +367,12 @@ public class FieldDutyRuntimeTests
     {
         // Rank contributes SkillCheckService.RankBonusPerLevel per level and is invisible in the
         // old format, so a Soldier's check looked identical to a Recruit's.
-        _contentStore.Record.Rank = ServiceRank.Soldier;
+        _contentStore.Record.Rank = ServiceRank.Specialist;
         _skillXp.GetSkillValue("main_hero", "Scouting").Returns(12);
 
         var line = CapturedResultLine(Duty(id: "scout_route", difficulty: 56), passes: true);
 
-        StringAssert.Contains(line, "rank Soldier +" + SkillCheckService.RankBonusPerLevel);
+        StringAssert.Contains(line, "rank Specialist +" + SkillCheckService.RankBonusPerLevel);
         StringAssert.Contains(line, "check " + (12 + SkillCheckService.RankBonusPerLevel));
     }
 

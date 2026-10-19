@@ -548,7 +548,7 @@ evaluates promotion. Config: `ModuleData/enlistment/enlistment_config.json`.
 
 **Wages.** `WagePolicy` is pure: the commander pays from his own gold above a solvency
 floor; the shortfall defers into arrears capped at `wagePolicy.maxDeferredWageDays` (default
-**14**) days of the player's *current* rank wage — 70 gold at Recruit, 308 at Sergeant.
+**14**) days of the player's *current* rank wage: 70 gold at Private, 560 at Sergeant Major.
 `ServiceRewardService.PayDailyWage` spends that plan through exactly ONE channel (commander
 transfer or mint, per config) and derives the new debt by conservation — owed minus delivered
 — rather than patching the plan's fields. Anything owed above the cap is forfeited, and the
@@ -557,15 +557,91 @@ used to be destroyed silently. An honorable discharge settles remaining arrears;
 forfeits them.
 
 > **Config migration.** The key was `wagePolicy.maxDeferredWages`, a flat **60-gold** ceiling —
-> a Sergeant on 22/day reached it in 2.7 days and lost roughly 600 gold over a 30-day insolvent
+> a Staff Sergeant (then simply Sergeant) on 22/day reached it in 2.7 days and lost roughly 600 gold over a 30-day insolvent
 > stretch with nothing in the log. An existing install's `enlistment_config.json` still carrying
 > the old key gets a load-time warning; the old value is ignored (the two units are not
 > convertible), so re-set `maxDeferredWageDays` if you had retuned it. Valid range `[0, 365]`.
+>
+> An install that keeps its own pre-#936 `enlistment_config.json` or `enlistment_duties.json` (rank
+> names Recruit, Soldier, Veteran) logs an error with a rename hint and loads the compiled defaults
+> (an empty duty list for the duties file); take the shipped file.
 
-**Ranks + promotion.** Four ranks, thresholds in JSON (days / service XP / Leadership /
-duty successes / trust), evaluated at exactly two points — the daily tick and the battle
-payout — both through `IPromotionService`. The donor evaluated at twelve sites including
-mid-mission per kill.
+**Ranks + promotion (#936).** Seven ranks, the US Army enlisted ladder. Thresholds are in JSON
+(days / service XP / Leadership / duty successes / trust), evaluated at exactly two points, the
+daily tick and the battle payout, both through `IPromotionService`. The donor evaluated at twelve
+sites including mid-mission per kill. Sections further down were written against the earlier
+four-rank ladder (Recruit, Soldier, Veteran, Sergeant) and keep those names where they quote logs
+or describe what a player saw then; the mapping is below.
+
+| Rank (ordinal) | Was | Days | Service XP | Leadership | Duties | Trust | Daily wage | Service XP per day |
+|---|---|---|---|---|---|---|---|---|
+| Private (0) | Recruit | start | | | | | 5 | 10 |
+| Specialist (1) | Soldier | 7 | 100 | 0 | 0 | -10 | 8 | 12 |
+| Sergeant (2) | Veteran | 25 | 350 | 0 | 2 | 0 | 14 | 16 |
+| Staff Sergeant (3) | Sergeant | 60 | 800 | 5 | 5 | 6 | 22 | 20 |
+| Sergeant First Class (4) | new | 120 | 1800 | 10 | 8 | 10 | 28 | 22 |
+| Master Sergeant (5) | new | 200 | 3200 | 10 | 12 | 14 | 34 | 24 |
+| Sergeant Major (6) | new | 300 | 5000 | 15 | 16 | 18 | 40 | 26 |
+
+The Days through Trust columns are the thresholds to reach that rank; the wage and service XP
+columns are what that rank earns. The validators count against the enum (six promotion rows, seven
+wage and service-XP entries), so a future rank needs no validator edit.
+
+**Saves (D1).** `ServiceRank` is saved as an int in the content record (`rank=`), and `TryParse`
+rejects an undefined ordinal. Saved ranks 0 to 3 keep their position, pay and kit and only their
+names change (their thresholds too, except the Leadership gates into Sergeant and Staff Sergeant,
+which D2 lowered), so a saved Sergeant loads as a Staff Sergeant on the same 22 a day with the
+same kit. Ranks 4 to 6 are new. There is no migration code and no new save key. `enlistment_duties.json`
+parses `minRank` by enum NAME, so every row was rewritten by ordinal (Soldier to Specialist, Veteran
+to Sergeant, Sergeant to StaffSergeant); `strategic_planning` is the silent trap, because "Sergeant"
+still parses but now means ordinal 2, one rank below the row's tuning. `ServiceRankLadderTests` pins every shipped
+duty's `minRank` ordinal.
+
+**Kits (D3).** The roster data has four tiers, so `EnlistmentKitTiers.For(rank)` maps ranks 0 to 3
+to their own tier and ranks 4 to 6 to the best tier (`EnlistmentKitTiers.Best`, which is `EnlistmentKitTier.Sergeant`). The issue ledger
+stays keyed by tier. At the best tier a second request answers "You already carry the best kit my
+stores can issue." (`QuartermasterAnswer.AlreadyDrawnBest`) instead of promising a stripe that does
+not exist.
+
+**Duty rank bonus (D4).** `SkillCheckService.RankBonus(rank)` returns `min(rank * 4, 12)` and both
+duty call sites use it. The duty difficulties were tuned against a ceiling of +12, reached at Staff
+Sergeant, so the three new ranks add nothing to a check.
+
+**Leadership spread (D2).** The old ladder asked for Leadership 50 at the last step alone. The engine
+curve (`DefaultCharacterDevelopmentModel.InitializeXpRequiredForSkillLevel`, installed v1.5.5: the
+first requirement is 30 and each step adds `10 + i` to the increment, so level 50 costs 34,575 XP)
+set against the daily grant (`EnlistmentDailyService` adds `progression.dailyLeadershipXp`, 10, to
+Leadership each day) makes that about 3,460 days. Each step now asks for the highest level reachable
+from zero by its own day threshold at 10 XP a day, rounded down to a multiple of 5:
+
+| Step | Days | XP at 10/day | Level reachable | Gate |
+|---|---|---|---|---|
+| Specialist | 7 | 70 | 1 | 0 |
+| Sergeant | 25 | 250 | 4 | 0 (was 20) |
+| Staff Sergeant | 60 | 600 | 7 | 5 (was 50) |
+| Sergeant First Class | 120 | 1200 | 11 | 10 |
+| Master Sergeant | 200 | 2000 | 14 | 10 |
+| Sergeant Major | 300 | 3000 | 17 | 15 |
+
+The real rate is not the nominal one. `HeroDeveloper.AddSkillXp` multiplies each grant by the
+hero's learning rate at the current skill: `1.25 * (1 + 0.4 * Social + focus)`, minus
+`1 + 0.1 * (skill - limit)` inside the bracket once the skill passes the learning limit
+`max(0, (Social - 1) * 10) + 30 * focus`, floored at 0
+(`DefaultCharacterDevelopmentModel.CalculateLearningRate` and `CalculateLearningLimit`). A new
+character has Social 2 and no Leadership focus, so the 10 XP grant is worth 22.5 XP a day up to
+Leadership 10, then less, and it stops at 18. Simulated from zero, that hero reaches Leadership 5 on
+day 12, 10 on day 41 and 15 on day 198, so every gate opens before its day threshold. The extra army
+context XP and `GameAccelerationMode.Fast` (the curve times 0.3) only make a gate easier. Grace days
+count toward days served but grant no Leadership. `ShippedLeadershipGates_AreReachedByEachStepsDayThreshold`
+(in `EnlistmentContentConfigProviderTests`) reproduces the curve and the rate, reads the shipped
+`enlistment_config.json`, and fails if a retune makes a gate unreachable by its day threshold.
+Part of the earlier gating on this ladder is addressed here (#521).
+
+Rank still grants no battlefield command (#576).
+
+**Known limitation.** A Social 1 hero with no Leadership focus has a learning limit of 0 and stops
+at Leadership 4, one short of Staff Sergeant's gate of 5. A Leadership focus point fixes it (that
+hero then reaches 5 on day 9). The gate is a real Leadership ask, not a formality.
 
 **Battle merit.** `EnlistmentMeritMissionBehavior` (`: MissionLogic`, registered
 unconditionally, self-filtering) samples cohesion, commander proximity, engagement and
@@ -978,15 +1054,15 @@ Known and accepted: a save made mid-duty under the old model may leave its spawn
 the map with nothing to destroy it. They are ordinary bandit parties the engine already manages.
 
 **Equipment.** `enlist_{runtimeCultureId}_{assignment}_{rank}` rosters in
-`equipmentsets/taom_enlistment_equipment.xml` (312: 296 culture cells out of a possible 368, over
-23 cultures × 4 assignments × 4 ranks, plus 16 culture-neutral defaults, counts from
-`tools/audit_enlistment_roster_coverage.py` on 2026-10-15), seeded from each
+`equipmentsets/taom_enlistment_equipment.xml` (315: 299 culture cells out of a possible 368, over
+23 cultures × 4 assignments × 4 kit tiers, plus 16 culture-neutral defaults, counts from
+`tools/audit_enlistment_roster_coverage.py` on 2026-10-19), seeded from each
 culture's own troop tree by `tools/generate_enlistment_rosters.py`, so kit is race-correct by
-construction. Drawn from the quartermaster once per rank into party inventory (not
+construction. Drawn from the quartermaster once per kit tier into party inventory (not
 auto-equipped). The quartermaster's reply is chosen by `QuartermasterAnswerPolicy` (#829), except
 the host-only reply for a co-op client (when this peer is not the authority), which the authority
-check in the behavior sets. Besides the issued line there are four refusals (already drawn for the
-rank, empty stores, cannot load into the baggage, host only), each with its own text. "Cannot load"
+check in the behavior sets. Besides the issued line there are five refusals (already drawn for the
+rank, already carrying the best kit at the top tier, empty stores, cannot load into the baggage, host only), each with its own text. "Cannot load"
 is the line with no condition: it sits below the others and also answers any answer without a line
 of its own, and a new issuance result maps to it through the policy default. Before #829 every
 refusal read "already drawn". `QuartermasterAnswerPolicyTests` pins the mapping and the wiring.
@@ -1007,7 +1083,7 @@ the wrong role at the right rank. (An earlier draft justified the ordering as a 
 invariant. It is not: the roster is keyed on the commander's culture, so it cannot know the
 player's race under either ordering. See the known limitation below.)
 
-**72 of the 368 cells are absent by design.** A cell is omitted when its donor pool holds nothing
+**69 of the 368 cells are absent by design.** A cell is omitted when its donor pool holds nothing
 within one band of the rank, when the resulting kit would repeat one the player already drew at a
 lower rank, or when it would give less protection than he is already wearing, measured per hit
 zone rather than by a single stat (a body piece contributes body AND leg armour, a cape body AND
@@ -1058,10 +1134,10 @@ these rosters at all, because it walks data an `NPCCharacter` names and these ar
 runtime by id. The reassign line was reworded off "Give me a horse" in the same change so the
 shipped text does not outlive the behaviour.
 
-The issue-ledger is monotonic (covering a rank covers every rank below, so a demotion never
-re-issues), keyed on **rank alone**, and persists in the content record. Two consequences worth
+The issue-ledger is monotonic (covering a kit tier covers every tier below, so a demotion never
+re-issues), keyed on the **kit tier alone** (ranks 4 to 6 share the best tier), and persists in the content record. Two consequences worth
 stating: swapping assignment does not re-open a spent draw, and **a character already serving at
-Sergeant when #525 shipped has spent every draw and will never see weapons** without a fresh
+the top tier when #525 shipped has spent every draw and will never see weapons** without a fresh
 enlistment. There is no save migration for that, deliberately.
 
 **Known limitations.**
@@ -1994,6 +2070,12 @@ Specifically owed, because each is a state a test structurally cannot reach:
 5. **Save mid-battle, reload** (defect 2 above).
 6. A **duty assigned while inside the commander's town** (defect 3 above).
 7. The **MCM switch flipped off mid-service**.
+8. **Seven-rank ladder (#936).** Load an old save with a Sergeant: he reads as Staff Sergeant with the
+   same pay and kit. Promote through the new ranks (Sergeant First Class, Master Sergeant, Sergeant
+   Major) and read each promotion toast and the board line ("Toward Sergeant First Class" at Staff
+   Sergeant). Ask the quartermaster for kit at the top tier and read the answer ("You already carry
+   the best kit my stores can issue."). Rank names and that answer show in English until the paid
+   translation run.
 
 ### Still owed beyond testing
 
@@ -2003,8 +2085,9 @@ Specifically owed, because each is a state a test structurally cannot reach:
   **id-identical to English**, verified by set comparison rather than by count — a matching count
   with a differing key would pass the weaker check. It read "178" until today, which was true on
   2026-08-08 and then absorbed the 26 duty-result toasts (#428), the 2 duty toast keys the adapter
-  composes, the 6 commander-loss strings, and the earlier status-board work. Nothing here ships
-  English-only.
+  composes, the 6 commander-loss strings, and the earlier status-board work. That was true on
+  2026-08-09; the #828, #829 and #936 strings (the seven rank names and the best-kit answer among
+  them) ship English until the next paid translation run, tracked in #939.
 
   The **97 runtime-built duty keys** are the reason
   `tools/generate_enlistment_duty_strings.py` exists: `InteractiveDutyPresenter` and

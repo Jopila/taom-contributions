@@ -28,7 +28,7 @@ public static class WagePolicy
     /// <summary>
     /// Ceiling on outstanding arrears, in gold: <c>MaxDeferredWageDays × dailyWage</c>. Denominated
     /// in DAYS so the cap tracks the wage it caps — the old flat 60-gold cap was 12 days of a
-    /// Recruit's pay but 2.7 days of a Sergeant's, and silently destroyed everything past it.
+    /// Private's pay but 2.7 days of a Staff Sergeant's, and silently destroyed everything past it.
     /// Widened to <c>long</c> before the multiply so a hand-edited day count cannot overflow into a
     /// negative (and therefore zero) cap.
     /// </summary>
