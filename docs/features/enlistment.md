@@ -983,7 +983,13 @@ the map with nothing to destroy it. They are ordinary bandit parties the engine 
 `tools/audit_enlistment_roster_coverage.py` on 2026-10-15), seeded from each
 culture's own troop tree by `tools/generate_enlistment_rosters.py`, so kit is race-correct by
 construction. Drawn from the quartermaster once per rank into party inventory (not
-auto-equipped).
+auto-equipped). The quartermaster's reply is chosen by `QuartermasterAnswerPolicy` (#829), except
+the host-only reply for a co-op client (when this peer is not the authority), which the authority
+check in the behavior sets. Besides the issued line there are four refusals (already drawn for the
+rank, empty stores, cannot load into the baggage, host only), each with its own text. "Cannot load"
+is the line with no condition: it sits below the others and also answers any answer without a line
+of its own, and a new issuance result maps to it through the policy default. Before #829 every
+refusal read "already drawn". `QuartermasterAnswerPolicyTests` pins the mapping and the wiring.
 
 The kit carried **no weapon at all** until 2026-09-01 (#525). That was the shipped contract, not
 a regression: the generator filtered every weapon slot out and the auditor failed the build on
@@ -1900,6 +1906,11 @@ cleanup* — **that model no longer exists.** Duties never spawn or destroy anyt
 
 What actually remains, each a state no test can reach:
 
+- **Quartermaster answers (#829).** Draw a kit (expect the issued line), ask again at the same rank
+  (expect "already drawn"), and if reachable trigger empty stores and a co-op client (expect the
+  stores and host-only lines). Check each text; the three new keys show English until the paid
+  translation run. The cannot-load case (the party cannot take items) is effectively unreachable by
+  hand and is covered by unit tests.
 - **Discharge during load (#828).** (a) MCM switch off, saved on the open map with the service menu:
   load, expect the body "Your service has ended." and one enabled option "Go on your way", landing
   on the map. (b) MCM switch off, column in a town: the discharge itself finishes the settlement
