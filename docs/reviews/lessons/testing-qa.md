@@ -1844,3 +1844,14 @@ with `FormatterServices.GetUninitializedObject`, and both types worked that way.
   RED-first was lost, prove the tests by mutation (this file, "run the suite once before the
   implementation exists").
 - **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 2.
+
+### A fix's regression test fails on the old route at the caller that chooses the route (Quick Actions, 2026-10-19)
+The May 2026 Quick Actions review recorded "route Unequip All through `InventoryLogic`" as fixed. The new route went
+into `InventoryVMAdapter`, but `QuickActionsService.UnequipAll` kept calling the direct-write adapter, and the test
+`UnequipAll_DelegatesToEquipmentAdapter_ReturnsCount` asserted exactly that call. The bug stayed for five months
+behind a green suite and an RCA that said it was done.
+- **Why missed:** the regression test was written against the class that received the new code, not against the
+  caller that decides which class runs.
+- **Prevent:** when a fix adds a new route, its test asserts the caller takes it (`Received(1)` on the new adapter
+  member) and would fail with the old wiring; an RCA marks a finding fixed only with that test named.
+- **Source:** `docs/reviews/rca-quickactions-unequip-2026-10-19.md` row 2.

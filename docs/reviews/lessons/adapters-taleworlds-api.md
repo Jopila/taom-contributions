@@ -1178,3 +1178,19 @@ the block.
 - **Prevent:** for every patched handler, read its callers in the decompile and state the trigger
   (input, event, tick) from them, with the line, in the registry entry and the in-game check.
 - **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 3.
+
+### After a programmatic batch of inventory transfers, refresh the panel with UpdateRightCharacter and RefreshInformationValues (Quick Actions, 2026-10-19)
+`InventoryLogic.AddTransferCommands` raises `SPInventoryVM.AfterTransfer` per command, which updates the item rows and
+the shown set's slots only. The paper doll, armour, weight, capacity, the no-saddle warning and the Done button are
+refreshed by the private `RefreshInformationValues`, which vanilla's single-transfer handlers call after their one
+transfer (v1.5.5 `SPInventoryVM.cs:3488-3497`). That is not enough for a batch: `AfterTransfer` clears the equipment
+dirty flag on every command (`:3840`), so a batch whose last command moved nothing leaves the doll stale. Run
+`UpdateRightCharacter` first, as vanilla does when the shown outfit or character changes (`:1645-1647`, `:4314-4315`). Quick Actions Unequip All shipped without the pair twice (May 2026 direct writes, then a
+transfer route with no panel refresh).
+- **Why missed:** both fixes read the event (`AfterTransfer`) as the screen's refresh and never opened the vanilla
+  handler that issues transfers to see what it calls after `AddTransferCommands`.
+- **Prevent:** before calling an engine command API from TAOM, read the vanilla callers of that API end to end, note
+  what each refreshes after the call, and check that it still holds for TAOM's batch (one command or many). For
+  inventory transfers, call `IInventoryVMAdapter.RefreshDisplay()`, which runs the pair through
+  cached delegates pinned by `ReflectionSiteBindingTests`. EquipPresets still needs the same (follow-up).
+- **Source:** `docs/reviews/rca-quickactions-unequip-2026-10-19.md` row 1.
