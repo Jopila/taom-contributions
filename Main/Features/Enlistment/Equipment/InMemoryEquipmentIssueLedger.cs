@@ -11,14 +11,14 @@ public sealed class InMemoryEquipmentIssueLedger : IEquipmentIssueLedger
 {
     private readonly List<string> _issuedItemIds = new List<string>();
 
-    public EnlistmentRank? HighestIssuedRank { get; private set; }
+    public EnlistmentKitTier? HighestIssuedRank { get; private set; }
 
     public IReadOnlyList<string> IssuedItemIds => _issuedItemIds;
 
-    public bool HasIssuedForRank(EnlistmentRank rank)
+    public bool HasIssuedForRank(EnlistmentKitTier rank)
         => HighestIssuedRank.HasValue && rank <= HighestIssuedRank.Value;
 
-    public void RecordIssue(EnlistmentRank rank, IReadOnlyList<string> itemIds)
+    public void RecordIssue(EnlistmentKitTier rank, IReadOnlyList<string> itemIds)
     {
         if (!HighestIssuedRank.HasValue || rank > HighestIssuedRank.Value)
             HighestIssuedRank = rank;

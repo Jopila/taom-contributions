@@ -24,45 +24,45 @@ public class EquipmentIssueLedgerTests
     {
         Assert.IsNull(_ledger.HighestIssuedRank);
         Assert.AreEqual(0, _ledger.IssuedItemIds.Count);
-        Assert.IsFalse(_ledger.HasIssuedForRank(EnlistmentRank.Recruit));
-        Assert.IsFalse(_ledger.HasIssuedForRank(EnlistmentRank.Sergeant));
+        Assert.IsFalse(_ledger.HasIssuedForRank(EnlistmentKitTier.Recruit));
+        Assert.IsFalse(_ledger.HasIssuedForRank(EnlistmentKitTier.Sergeant));
     }
 
     [TestMethod]
     public void RecordIssue_SetsHighestRankAndItems()
     {
-        _ledger.RecordIssue(EnlistmentRank.Soldier, new[] { "item_a", "item_b" });
+        _ledger.RecordIssue(EnlistmentKitTier.Soldier, new[] { "item_a", "item_b" });
 
-        Assert.AreEqual(EnlistmentRank.Soldier, _ledger.HighestIssuedRank);
+        Assert.AreEqual(EnlistmentKitTier.Soldier, _ledger.HighestIssuedRank);
         CollectionAssert.AreEqual(new[] { "item_a", "item_b" }, (System.Collections.ICollection)_ledger.IssuedItemIds);
     }
 
     [TestMethod]
     public void HasIssuedForRank_TrueForRecordedAndLower_FalseForHigher()
     {
-        _ledger.RecordIssue(EnlistmentRank.Veteran, new[] { "item_a" });
+        _ledger.RecordIssue(EnlistmentKitTier.Veteran, new[] { "item_a" });
 
-        Assert.IsTrue(_ledger.HasIssuedForRank(EnlistmentRank.Recruit));
-        Assert.IsTrue(_ledger.HasIssuedForRank(EnlistmentRank.Soldier));
-        Assert.IsTrue(_ledger.HasIssuedForRank(EnlistmentRank.Veteran));
-        Assert.IsFalse(_ledger.HasIssuedForRank(EnlistmentRank.Sergeant));
+        Assert.IsTrue(_ledger.HasIssuedForRank(EnlistmentKitTier.Recruit));
+        Assert.IsTrue(_ledger.HasIssuedForRank(EnlistmentKitTier.Soldier));
+        Assert.IsTrue(_ledger.HasIssuedForRank(EnlistmentKitTier.Veteran));
+        Assert.IsFalse(_ledger.HasIssuedForRank(EnlistmentKitTier.Sergeant));
     }
 
     [TestMethod]
     public void RecordIssue_LowerRankAfterHigher_KeepsHighest()
     {
-        _ledger.RecordIssue(EnlistmentRank.Veteran, new[] { "item_a" });
-        _ledger.RecordIssue(EnlistmentRank.Recruit, new[] { "item_b" });
+        _ledger.RecordIssue(EnlistmentKitTier.Veteran, new[] { "item_a" });
+        _ledger.RecordIssue(EnlistmentKitTier.Recruit, new[] { "item_b" });
 
-        Assert.AreEqual(EnlistmentRank.Veteran, _ledger.HighestIssuedRank);
+        Assert.AreEqual(EnlistmentKitTier.Veteran, _ledger.HighestIssuedRank);
     }
 
     [TestMethod]
     public void RecordIssue_AccumulatesDuplicateItemInstances()
     {
         // The same armor piece issued at two ranks = two physical items owed payoff.
-        _ledger.RecordIssue(EnlistmentRank.Recruit, new[] { "item_a" });
-        _ledger.RecordIssue(EnlistmentRank.Soldier, new[] { "item_a", "item_c" });
+        _ledger.RecordIssue(EnlistmentKitTier.Recruit, new[] { "item_a" });
+        _ledger.RecordIssue(EnlistmentKitTier.Soldier, new[] { "item_a", "item_c" });
 
         CollectionAssert.AreEqual(new[] { "item_a", "item_a", "item_c" },
             (System.Collections.ICollection)_ledger.IssuedItemIds);
@@ -71,22 +71,22 @@ public class EquipmentIssueLedgerTests
     [TestMethod]
     public void RecordIssue_NullOrEmptyItemLists_ToleratedButRankStillRecorded()
     {
-        _ledger.RecordIssue(EnlistmentRank.Recruit, null);
-        _ledger.RecordIssue(EnlistmentRank.Soldier, new string[0]);
+        _ledger.RecordIssue(EnlistmentKitTier.Recruit, null);
+        _ledger.RecordIssue(EnlistmentKitTier.Soldier, new string[0]);
 
-        Assert.AreEqual(EnlistmentRank.Soldier, _ledger.HighestIssuedRank);
+        Assert.AreEqual(EnlistmentKitTier.Soldier, _ledger.HighestIssuedRank);
         Assert.AreEqual(0, _ledger.IssuedItemIds.Count);
     }
 
     [TestMethod]
     public void Reset_ClearsEverything()
     {
-        _ledger.RecordIssue(EnlistmentRank.Sergeant, new[] { "item_a" });
+        _ledger.RecordIssue(EnlistmentKitTier.Sergeant, new[] { "item_a" });
 
         _ledger.Reset();
 
         Assert.IsNull(_ledger.HighestIssuedRank);
         Assert.AreEqual(0, _ledger.IssuedItemIds.Count);
-        Assert.IsFalse(_ledger.HasIssuedForRank(EnlistmentRank.Recruit));
+        Assert.IsFalse(_ledger.HasIssuedForRank(EnlistmentKitTier.Recruit));
     }
 }
