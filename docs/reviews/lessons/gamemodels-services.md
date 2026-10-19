@@ -1122,3 +1122,13 @@ none, so the orcs would have been silent while the doc promised a voice. Every u
   (`ShippedVoiceAccentsConfigTests`: no tribal accent on a non-tribal culture, no imperial on a tribal one, no row on an
   accent with almost no recordings).
 - **Source:** `docs/reviews/rca-voice-accents-2026-10-18.md` F1, F2.
+### A hot-path override reads its own switch before any engine property another module may patch (#862, 2026-10-19)
+`GetHeroesForEffectiveRelation` runs on every relation read. Personal Relations evaluated
+`hero1.IsHumanPlayerCharacter || hero2.IsHumanPlayerCharacter` before reading its switch. The vanilla getter is a
+reference compare, but the installed co-op module replaces it with a scan of every party plus allocations, so every
+relation read paid it, with the feature off too.
+- **Why missed:** the cost was judged from the vanilla body.
+- **Prevent:** on a hot-path override, read the feature's cached switch first, return base's answer early when it is
+  already final, and compare with `Hero.MainHero` instead of a patched property. Pin the call order with an
+  `IlCallScanner` test.
+- **Source:** `docs/reviews/rca-personal-relations-2026-10-19.md` finding 3.

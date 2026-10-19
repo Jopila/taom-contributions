@@ -171,6 +171,14 @@ prefixes `ExecuteDone` and lets vanilla run only when `IsActive && IsKingsDecisi
 legitimate call already satisfies (the timer arms only on the true edge; nothing but `ExecuteDone`
 clears `IsActive`). A skipped call is a debug line and is expected once per seam D close.
 
+### Personal relations (`TaomDiplomacyModel`, #862)
+
+`TaomDiplomacyModel` also carries three overrides for [personal relations](personal-relations.md), all asking `IPersonalRelationService` (the model's fourth constructor argument, built in `SubModule.OnGameStart`). They act only in a single player campaign whose save is seeded, while the MCM switch is on; otherwise every one is vanilla.
+
+- `GetHeroesForEffectiveRelation` calls `base`, then, when the service is active and one effective hero is the player, puts the OTHER effective hero back to the hero it was asked about, so a relation lands on the lord dealt with instead of his clan leader. AI-to-AI pairs stay vanilla.
+- `GetRelationCostOfDisbandingArmy` returns -(28 to 32) for an army's leader, so the player loses 28 to 32 relation with him (vanilla loses 4). A member keeps vanilla's -1.
+- `GetRelationChangeAfterClanLeaderIsDead` returns 0 for the player when a clan's leader changes (death, a leader changing clan, a member elected king), so an heir keeps the relation he earned himself, instead of inheriting 0.7 of the dead leader's.
+
 ## Configuration
 
 ### `Main/_Module/ModuleData/diplomacy/diplomacy.json`
@@ -286,6 +294,7 @@ Phase 1 (Isengard and Dunland attack Rohan) triggers on day 30; Phase 2 (the ful
 
 ## Changelog
 
+- 2026-10-19: Three personal-relations overrides on `TaomDiplomacyModel` (the player's relation stays on the lord named, a larger disband cost for an army's leader, and an heir keeps his own relation), single player only, behind their own MCM group (#862).
 - 2026-10-18: Doc pass for the war rule: the side is checked before the phase, `CausedByKingdomCreation` counts as player-caused, a seventh prefix (`OnCallToWarAgreementProposedByPlayerKingdom`) keeps vetoed call-to-war notices off a player kingdom's map, and the enlistment edge and the lord-dialogue sponsor gap are recorded (#818).
 - 2026-10-08: A new campaign no longer inherits the previous campaign's War of the Ring phase and outcome: `WarOfTheRingBehavior`'s constructor resets the service (#764).
 - 2026-10-18: War rule follow-up: player-caused wars lift the phase vetoes, the AI war score carries the veto penalty, two `IsAllowed` prefixes hide impossible call-to-war offers, and the daily sweep spares the player kingdom's phase-vetoed wars (#818). Open: #819, #820.

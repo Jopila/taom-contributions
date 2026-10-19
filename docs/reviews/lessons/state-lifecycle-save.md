@@ -1126,3 +1126,12 @@ a reset.
   the instance fields and fail on any reference type from a TaleWorlds assembly
   (`PartyIntelAdapterTests`).
 - **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 4.
+### A one-time save migration and the rule it prepares share one gate (#862, 2026-10-19)
+Personal Relations seeded old saves once from clan leaders, while the per-lord rule had its own switch. Turned on
+mid-session, personal writes landed before the seed and defeated its "exactly 0" test; a new game set the "seeded" flag
+on day 0, so a save played with the feature off was never seeded later; the seeded copy then counted twice at the next
+clan succession.
+- **Why missed:** the migration and the rule were designed and gated separately.
+- **Prevent:** engage the rule only after the migration has run on this save, re-arm the migration whenever the feature
+  is seen off, and trace the migrated values through every later engine writer of the same store.
+- **Source:** `docs/reviews/rca-personal-relations-2026-10-19.md` findings 2 and 4.

@@ -17,8 +17,8 @@ namespace TAOM.Features.BondsOfBattle;
 /// of each player battle, Patch106 on the Donate Troops screen's Done, and a barter model for the overpay cap. Nothing is
 /// saved. Patch106 targets a campaign party screen, so it applies at GameInit like the other campaign-menu patches.
 /// Overlap check, 2026-10-18: no other TAOM code patches <c>PartyScreenLogic.DoneLogic</c> or fills the
-/// <c>BarterModel</c> slot. Never register a second <see cref="IRelationGrantService"/> or <see cref="IHeroRelationAdapter"/>:
-/// a second unkeyed default makes every resolve throw (Main/IoC.cs).
+/// <c>BarterModel</c> slot. The seam's registration belongs to <c>RelationsModule</c>; never register it a
+/// second time here (a second unkeyed default makes every resolve throw, Main/IoC.cs).
 /// </summary>
 internal sealed class BondsOfBattleModule : TaomFeatureModule
 {
@@ -50,11 +50,9 @@ internal sealed class BondsOfBattleModule : TaomFeatureModule
     public override void RegisterServices(IRegistrator registrator)
     {
         registrator.Register<IBondsOfBattleSettingsProvider, BondsOfBattleSettingsProvider>(Reuse.Singleton);
-        registrator.Register<IHeroRelationAdapter, HeroRelationAdapter>(Reuse.Singleton);
         registrator.Register<IBattleRelationAdapter, BattleRelationAdapter>(Reuse.Singleton);
         registrator.Register<IBondsNoticeAdapter, BondsNoticeAdapter>(Reuse.Singleton);
-        // The shared seam for new relation code, registered here until a module of its own owns it.
-        registrator.Register<IRelationGrantService, RelationGrantService>(Reuse.Singleton);
+        // IRelationGrantService and IHeroRelationAdapter, the shared seam for new relation code, are registered by RelationsModule.
         registrator.Register<BattleRelationService>(Reuse.Singleton);
         registrator.Register<TroopHandoverService>(Reuse.Singleton);
         registrator.Register<BarterOverpayService>(Reuse.Singleton);

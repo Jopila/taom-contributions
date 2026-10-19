@@ -44,5 +44,6 @@ internal static class FeatureModules
         new Features.HiddenHosts.HiddenHostsModule(),
         new Features.LordBanners.LordBannersModule(),
         new Features.BondsOfBattle.BondsOfBattleModule(),
+        new Features.Relations.RelationsModule(),
     };
 }

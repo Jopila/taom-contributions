@@ -85,6 +85,7 @@ public class BondsOfBattleWiringTests
     {
         var container = new Container();
         new BondsOfBattleModule().RegisterServices(container);
+        new TAOM.Features.Relations.RelationsModule().RegisterServices(container); // owns the relation seam
         // The services the module takes from other features, which IoC.Configure registers for every game.
         container.RegisterInstance(Substitute.For<IModLogger>());
         container.RegisterInstance(Substitute.For<IRandomSource>());
@@ -105,6 +106,7 @@ public class BondsOfBattleWiringTests
         var container = new Container();
         var module = new BondsOfBattleModule();
         module.RegisterServices(container);
+        new TAOM.Features.Relations.RelationsModule().RegisterServices(container); // owns the relation seam
         container.RegisterInstance(Substitute.For<IModLogger>());
         container.RegisterInstance(Substitute.For<IRandomSource>());
         container.RegisterInstance(Substitute.For<IEnlistmentStateQuery>());
@@ -117,6 +119,7 @@ public class BondsOfBattleWiringTests
     // --- Patch106 ------------------------------------------------------------------------------------------------
 
     [TestMethod]
+    [TestCategory("RequiresGame")] // reading attributes off every TAOM type loads types from game assemblies the stubs lack
     public void Patch106_IsTheOnlyClassInTheCategory_AndTargetsDoneLogic()
     {
         var classes = AccessTools.GetTypesFromAssembly(typeof(BondsOfBattleModule).Assembly)

@@ -90,7 +90,7 @@ public class TaomFooModel : DefaultFooModel
 | `TaomEquipmentSelectionModel` | `DefaultEquipmentSelectionModel` | `GeneratedLordKits` |
 | `TaomAllianceModel` | `DefaultAllianceModel` | `Diplomacy` |
 | `TaomKingdomDecisionPermissionModel` | `DefaultKingdomDecisionPermissionModel` | `Diplomacy` |
-| `TaomDiplomacyModel` | `DefaultDiplomacyModel` | `Diplomacy` |
+| `TaomDiplomacyModel` | `DefaultDiplomacyModel` | `Diplomacy` (+ `Relations`: `GetHeroesForEffectiveRelation`, `GetRelationCostOfDisbandingArmy`, `GetRelationChangeAfterClanLeaderIsDead`) |
 | `TaomInformationRestrictionModel` | `DefaultInformationRestrictionModel` | `Encyclopedia` |
 | `TaomCombatMechanicsModel` | `TaomAgentApplyDamageModel` (CareerSystem, **abstract**: career passives via inheritance; ultimately `SandboxAgentApplyDamageModel`) | `CombatMechanics` (+ the RaceAbilities damage, crush-through and shrug-off hooks + the CreatureSiegeRole gate blow in `ApplyDamageScaling`); campaign only, because the SandBox base throws on a mounted hit outside a campaign: Custom Battle runs `TaomCustomBattleDamageModel` |
 | `TaomPrisonerRecruitmentCalculationModel` | `DefaultPrisonerRecruitmentCalculationModel` | `PrisonerRecruitment` |

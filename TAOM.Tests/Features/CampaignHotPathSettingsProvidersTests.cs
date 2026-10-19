@@ -20,6 +20,7 @@ using TAOM.Features.FieldCommission.Domain;
 using TAOM.Features.NameplateCull;
 using TAOM.Features.PartyIconScale;
 using TAOM.Features.QuickActions;
+using TAOM.Features.Relations;
 using TAOM.Features.RealmBorders;
 using TAOM.Features.TimeAcceleration;
 using TAOM.Features.WarChronicle;
@@ -77,6 +78,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(WatchfulHoldsSettingsProvider))]
     // #846: the nameplate toggle is read for every visible party nameplate every map frame.
     [DataRow(typeof(HiddenHostsSettingsProvider))]
+    // #862: the master switch is read on every relation read (main thread).
+    [DataRow(typeof(PersonalRelationSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -111,6 +114,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IEyeOfSauronSettings), typeof(EyeOfSauronSettingsProvider))]
     [DataRow(typeof(IWatchfulHoldsSettings), typeof(WatchfulHoldsSettingsProvider))]
     [DataRow(typeof(IHiddenHostsSettings), typeof(HiddenHostsSettingsProvider))]
+    [DataRow(typeof(IPersonalRelationSettingsProvider), typeof(PersonalRelationSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -125,6 +129,18 @@ public class CampaignHotPathSettingsProvidersTests
     // Read THROUGH the cached object, never snapshotted: MCM edits its one registered TaomSettings in
     // place, so an edit after the provider is built and read must reach the getter. Each "before" value
     // is the compiled MCM default, so a getter wired to the wrong setting fails too.
+    [TestMethod]
+    public void PersonalRelations_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new PersonalRelationSettingsProvider(mcm);
+        Assert.IsTrue(sut.Enabled);
+
+        mcm.PersonalRelationsEnabled = false;
+
+        Assert.IsFalse(sut.Enabled);
+    }
+
     [TestMethod]
     public void CaravanTrade_ReadsThroughTheCachedSettings()
     {

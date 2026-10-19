@@ -2175,4 +2175,31 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyInteger("Most Relation From One Barter Overpay", TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MinOverpayRelationCap, TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.MaxOverpayRelationCap, Order = 7, RequireRestart = false,
         HintText = "The most relation one barter can buy by offering more than the goods are worth. The loop buys at most 3 points in vanilla (the setting here), before the Tribute perk (x1.2, rounded up) and the Charm relation bonus the engine adds when it applies the change. Points cost more the further relation is from 0, so only a large overpay reaches the cap. Default: 15.")]
     public int BondsOverpayRelationCap { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultOverpayRelationCap;
+
+    // --- Personal Relations (docs/features/personal-relations.md, #862) ---
+    //
+    // The master switch is read on every relation read (it gates TaomDiplomacyModel.GetHeroesForEffectiveRelation, on the
+    // main thread), through PersonalRelationSettingsProvider's one cached settings reference. The disband values are read
+    // when a disband costs relation. All RequireRestart = false: nothing is applied once at start-up. GroupOrder 58 is
+    // unused. Defaults live in PersonalRelationSettingsProvider so the fallback before MCM is up cannot drift from them.
+
+    [SettingPropertyGroup("Personal Relations", GroupOrder = 60)]
+    [SettingPropertyBool("Enable Personal Relations", Order = 0, RequireRestart = false,
+        HintText = "Your relation with a lord stays with that lord instead of passing to his clan leader, so a friendship with Faramir is not a friendship with Denethor. Affects only your own relations: relations between AI lords stay vanilla. Single player only: in a co-op session or on a dedicated server it stays vanilla. A save made before this was on is seeded once: on the first day this is on, each living lord whose personal relation with you is 0 takes his clan leader's value, and it is seeded again when this has been off for at least one in-game day. Off restores vanilla. Default: on.")]
+    public bool PersonalRelationsEnabled { get; set; } = TAOM.Features.Relations.PersonalRelationSettingsProvider.DefaultEnabled;
+
+    [SettingPropertyGroup("Personal Relations")]
+    [SettingPropertyBool("Disbanding An Army Costs Relation", Order = 1, RequireRestart = false,
+        HintText = "Paying influence to disband another lord's army costs you relation with the army's leader by the amounts below (vanilla is 4); each other lord in it costs vanilla's 1. Applies only in single player, and only while Enable Personal Relations is on. Default: on.")]
+    public bool PersonalDisbandCostEnabled { get; set; } = TAOM.Features.Relations.PersonalRelationSettingsProvider.DefaultDisbandCostEnabled;
+
+    [SettingPropertyGroup("Personal Relations")]
+    [SettingPropertyInteger("Disband Cost, Army Leader, Least", TAOM.Features.Relations.PersonalRelationSettingsProvider.MinCost, TAOM.Features.Relations.PersonalRelationSettingsProvider.MaxCost, Order = 2, RequireRestart = false,
+        HintText = "The least relation you lose with an army's leader when you pay influence to disband it. The cost is a random whole number between the least and the most. If the least is above the most, the two swap. Applies only in single player, and only while Enable Personal Relations is on. Default: 28.")]
+    public int PersonalDisbandLeaderMin { get; set; } = TAOM.Features.Relations.PersonalRelationSettingsProvider.DefaultLeaderMin;
+
+    [SettingPropertyGroup("Personal Relations")]
+    [SettingPropertyInteger("Disband Cost, Army Leader, Most", TAOM.Features.Relations.PersonalRelationSettingsProvider.MinCost, TAOM.Features.Relations.PersonalRelationSettingsProvider.MaxCost, Order = 3, RequireRestart = false,
+        HintText = "The most relation you lose with an army's leader when you pay influence to disband it. Applies only in single player, and only while Enable Personal Relations is on. Default: 32.")]
+    public int PersonalDisbandLeaderMax { get; set; } = TAOM.Features.Relations.PersonalRelationSettingsProvider.DefaultLeaderMax;
 }

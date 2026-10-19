@@ -129,6 +129,13 @@ public class CoopVetoClassificationTests
             "is no replicated mutation to skip, and a peer that sees the page open or not affects nothing the other " +
             "simulates. Every other outcome (toggle off, not at the horizon, any error) returns true and vanilla runs. " +
             "The toggle is classified as presentation in CoopSettingsRelevance."),
+        ["DefaultNotificationsCampaignBehavior_OnRelationChanged_Patch"] = new(CoopVeto.ReviewedSafe,
+            "Patch107: client-side message. The prefix replaces DefaultNotificationsCampaignBehavior.OnRelationChanged, a " +
+            "HeroRelationChanged listener whose only effect is one quick-information line on this client, with another " +
+            "line naming the lord instead of his clan. It reads its arguments and the relation, and writes nothing to " +
+            "campaign state, so there is no replicated mutation to skip and nothing for two peers to disagree about; " +
+            "a peer that differs only shows its own player a different sentence. Every other outcome (feature off, " +
+            "a change vanilla would not show, any fault) returns true and runs vanilla whole."),
         ["SettlementNameplatesVM_Update_NameplateCull_Patch"] = new(CoopVeto.ReviewedSafe,
             "Patch104: client-side UI. The prefix replaces SettlementNameplatesVM.Update, the campaign map's per-frame " +
             "nameplate refresh, with the same update over the plates that are hidden-and-staying-hidden left out. The " +

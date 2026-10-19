@@ -181,7 +181,10 @@ Models: 56. Regenerate after any engine bump: `pwsh tools/snapshot_api_surface.p
 ## TaomDiplomacyModel : DefaultDiplomacyModel
 `Base: TaleWorlds.CampaignSystem.GameComponents.DefaultDiplomacyModel`
 
+- `Void GetHeroesForEffectiveRelation(Hero hero1, Hero hero2, ref Hero effectiveHero1, ref Hero effectiveHero2)`
+- `Int32 GetRelationChangeAfterClanLeaderIsDead(Hero deadLeader, Hero relationHero)`
 - `Int32 GetRelationChangeAfterVotingInSettlementOwnerPreliminaryDecision(Hero supporter, Boolean hasHeroVotedAgainstOwner)`
+- `Int32 GetRelationCostOfDisbandingArmy(Boolean isLeaderParty)`
 - `Single GetScoreOfDeclaringWar(IFaction factionDeclaresWar, IFaction factionDeclaredWar, Clan evaluatingClan, ref TextObject reason, Boolean includeReason)`
 - `Boolean IsAtConstantWar(IFaction faction1, IFaction faction2)`
 

@@ -721,3 +721,26 @@ was therefore false in every hideout battle.
 - **Prevent:** a predicate over `MapEvent.PartiesOnSide` skips parties whose `MobileParty` is null, or states why it
   counts them; branch on `MapEvent.IsHideoutBattle`, `IsSiegeAssault` or `IsRaid` explicitly when the rule differs.
 - **Source:** `docs/reviews/rca-bonds-of-battle-2026-10-18.md` finding 1.
+
+### Before raising a relation cost, list every hero the loop can reach and every listener on a negative change (#862, 2026-10-19)
+Personal Relations raised the cost of disbanding an AI army to 13 to 17 for each member. AI armies can call
+player-clan companion parties (`DefaultArmyManagementCalculationModel` excludes only the main party, the faction leader
+and `!CanJoinArmy`), `DisbandArmyAction` charges every non-main party leader, and
+`CompanionRolesCampaignBehavior.OnHeroRelationChanged` removes a companion for good when a negative change leaves the
+relation below -10.
+- **Why missed:** the plan read the cost's only caller, not who can be in the collection it loops over, nor what reacts
+  to the change it causes.
+- **Prevent:** for any new or larger negative relation change, list the heroes the engine loop can pass (player clan,
+  companions, family) and grep the decompile for `HeroRelationChanged` listeners. Exclude player-clan heroes or keep
+  vanilla's amount for them.
+- **Source:** `docs/reviews/rca-personal-relations-2026-10-19.md` finding 1.
+
+### An override that changes who owns a relation must be checked against every writer that assumes the old owner (#862, 2026-10-19)
+Keeping the player's relations personal broke three engine paths that use the clan leader to mean the clan:
+`ChangeClanLeaderAction` (the heir takes 0.7 x the old leader's raw relation), the blood feud and execution penalties in
+`ExecutionCampaignBehavior`, and battle and raid aftermath between clan leaders.
+- **Why missed:** the plan reviewed readers of `GetHeroesForEffectiveRelation`, not writers that name `clan.Leader`.
+- **Prevent:** before changing the effective-relation mapping, grep the decompile for `Clan.Leader` and `.Leader` next
+  to `ChangeRelationAction`, `SetPersonalRelation` and `GetRelationChangeAfterClanLeaderIsDead`, and decide each one:
+  override, document, or follow up.
+- **Source:** `docs/reviews/rca-personal-relations-2026-10-19.md` findings 2 and 5.

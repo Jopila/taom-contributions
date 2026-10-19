@@ -28,6 +28,10 @@ The shared seam for new relation code. `IRelationGrantService.Grant` clamps and 
 - The result is clamped to -100..100.
 - Because of this, a grant is logged as made even when the relation moved by a different amount.
 
+### Personal relations and the grant
+
+With personal relations on, a player grant lands on the lord named: `GetHeroesForEffectiveRelation` keeps both heroes for any pair that includes the player. With it off, the grant lands on the clan leader. So Bonds of Battle's once-per-lord rule means once per lord only while personal relations are on; with it off, two lords of one clan share one number and a second grant to the same clan stacks on it.
+
 ### Callers outside the seam
 
 Three older callers still change relation directly and are migration candidates: `CommanderLordAdapter.ApplyPlayerRelation`, `ArmouryPlayerAdapter.ChangeRelationWith` and `SiegeDefenseService.GrantReward`. An amount that a game model returns (the barter overpay) is applied by vanilla, not by the seam.
@@ -64,11 +68,12 @@ ChangeRelationAction
 
 ## Registration
 
-The Bonds of Battle module registers both services. A later feature that needs them without Bonds of Battle should move the registration into a module of its own.
+`RelationsModule` (`Main/Features/Relations/RelationsModule.cs`) registers both services, and also Personal Relations ([personal-relations.md](personal-relations.md)). Bonds of Battle used to carry the registration; it no longer does, and a feature module must not register the seam again.
 
 ## Tests
 
 - `TAOM.Tests/Features/Relations/RelationGrantServiceTests.cs`: apply, zero, dedicated server, clamp at both ends and at `int.MinValue` and `int.MaxValue`, blank ids, unknown hero, log line.
+- `TAOM.Tests/Features/Relations/PersonalRelationServiceTests.cs`, `PersonalRelationSettingsProviderTests.cs`, `PersonalRelationSeedServiceTests.cs`, `PersonalRelationSeedBehaviorTests.cs`, `PersonalRelationNoticeTests.cs`, `PersonalRelationNoticeBindingTests.cs`, `RelationsWiringTests.cs`, `TaomDiplomacyModelPersonalRelationsTests.cs`: Personal Relations, listed in [personal-relations.md](personal-relations.md).
 
 ## Known Limits
 
