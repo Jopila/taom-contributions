@@ -1164,3 +1164,14 @@ reads plain snapshots and applies one shared predicate in the service.
 - **Prevent:** an adapter returns facts; any `if` that decides who is included is a service decision. When a feature
   grows a second adapter, check it against the first one's review findings.
 - **Source:** `docs/reviews/rca-hidden-hosts-p23-2026-10-19.md` finding 4.
+### Fill a gap with the engine's own pick on a TAOM pool, never a copy of the pick (#933, 2026-10-19)
+Twice on one day a fallback re-implemented the engine's random pick: Bard Town Guard's service copied
+`GetRandomElementWithPredicate` over a flags array, and the vassal reward's `PickReward` copied `GetRandomElement`
+with an index clamp that can never fire (`MBRandom.RandomInt(n)` is always below n). Each copy carried its own
+tests, and neither did anything the engine call does not.
+- **Why missed:** the habit of putting every decision in a pure service, even when the decision is "pick one at
+  random", which the engine already does with the same single draw.
+- **Prevent:** build the pool in TAOM (a service such as `LordBannerService.Allowed`), then call
+  `GetRandomElement` or `GetRandomElementWithPredicate` on it at the boundary. Test the pool; pin the call order
+  with an IL test.
+- **Source:** `docs/reviews/rca-culture-fallback-followups-2026-10-19.md` F6; `rca-bard-town-guard-2026-10-19.md` F4.

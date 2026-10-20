@@ -1917,3 +1917,13 @@ hit trigger made pass either way, and a set test that accepted a copy. Repeat of
   run the test, see it fail, restore the line, and quote the RED run in the report. A count over source text counts
   call sites only (`Release();`, not `Release()`).
 - **Source:** `docs/reviews/rca-fell-foes-2026-10-19.md` rows 9 and 29.
+### A coverage gate reads the value the runtime reads and asserts how much it parsed (#932, #938, 2026-10-19)
+Two gates built the same day checked less than they appeared to. The bearer banner gate checked every lord's
+culture, but BannerBearers picks a banner by the formation's majority troop culture, and Lindon and Blue Craig lords
+field rivendell and goblin troops. The patch number gate matched one phrasing of a feature-map row and read 10 of
+53 rows that name a number; after a rebase it would have checked one row fewer and still passed.
+- **Why missed:** each gate's input was chosen for convenience (a scan another test already had, one regex), not
+  traced from the runtime reader.
+- **Prevent:** trace the value from its runtime consumer before choosing what the gate reads, and give every gate
+  over parsed text a floor on what it found, so an input that stops matching fails instead of passing.
+- **Source:** `docs/reviews/rca-culture-fallback-followups-2026-10-19.md` F2, F3, F7.

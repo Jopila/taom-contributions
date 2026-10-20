@@ -1141,3 +1141,15 @@ screen on each one.
 - **Prevent:** count the callers of an engine event before doing per-call work in its postfix. For inventory work, put the
   per-action work on `RefreshInformationValues` and return from the `AfterTransfer` postfix while `IsRefreshed` is false.
 - **Source:** `docs/reviews/rca-telchars-mark-2026-10-19.md` row 2.
+
+### To fill what vanilla sets only for some cases, pre-set it in a prefix and let vanilla overwrite (#937, 2026-10-19)
+The tavern maid's condition sets the `DRINK` and `FOOD` text variables for seven culture ids and returns true for
+all, so TAOM-culture towns showed stale dishes. The first fix was a postfix that tested the culture against a copy
+of vanilla's seven ids, with a rule class, rule tests and an IL test to keep the copy honest. Every one of vanilla's
+branches sets both variables, so a void prefix that sets the TAOM defaults first gets overwritten for exactly
+vanilla's ids and needs no list at all.
+- **Why missed:** the plan read the method's culture checks and wrote their complement, without asking whether
+  vanilla overwrites what a prefix sets.
+- **Prevent:** before copying vanilla's case list into a postfix, check in the installed IL whether every case
+  writes the value. If it does, pre-set the fallback in a prefix. A copied list drifts on the next engine update.
+- **Source:** `docs/reviews/rca-culture-fallback-followups-2026-10-19.md` F1.
