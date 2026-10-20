@@ -3394,5 +3394,19 @@
 	<string id="taom_reeve_add_none" text="{=taom_reeve_add_none}You have no gold to add." />
 	<string id="taom_reeve_withdraw_hint" text="{=taom_reeve_withdraw_hint}Take up to 10,000 gold back from the reserve." />
 	<string id="taom_reeve_withdraw_none" text="{=taom_reeve_withdraw_none}The reserve is empty." />
+	<!-- LordCourtesyAdapter -->
+	<string id="taom_lc_gift_header" text="{=taom_lc_gift_header}Gift Troops" />
+	<string id="taom_lc_holdings_marked" text="{=taom_lc_holdings_marked}{COUNT} {?IS_PLURAL}holdings{?}holding{\?} marked on your map." />
+	<string id="taom_lc_gift_full" text="{=taom_lc_gift_full}That party has no room for so many." />
+	<!-- LordCourtesies -->
+	<string id="taom_lc_gift" text="{=taom_lc_gift}I have men to spare. Take them into your service, as a gift." />
+	<string id="taom_lc_gift_reply" text="{=taom_lc_gift_reply}Good men are always welcome. Let me look them over." />
+	<string id="taom_lc_domain" text="{=taom_lc_domain}Name the holdings of your house, if you are willing to share them." />
+	<string id="taom_lc_domain_revealed" text="{=taom_lc_domain_revealed}You have earned a plain answer. Mark these places well." />
+	<string id="taom_lc_domain_landless" text="{=taom_lc_domain_landless}My house holds no lands to name. Why would you ask me that?" />
+	<string id="taom_lc_domain_refused" text="{=taom_lc_domain_refused}I do not know you well enough to speak of my house's lands." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- LordCourtesyAdapter -->
+	<string id="taom_lc_gift_no_talk" text="{=taom_lc_gift_no_talk}You cannot talk to anyone while giving troops." />
 
 </strings>

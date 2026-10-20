@@ -2,7 +2,7 @@
 
 ## Overview
 
-A lord held prisoner by the player's clan can be questioned about his lands and stripped of his kit. Talking to such a lord adds up to two options under his main conversation menu. "Ask about his lands" has a clan topic and a kingdom topic: he refuses, and the player either pays a bribe or uses force. Either way the matching settlements are marked visited and unknown lords become known on the map. "Strip him" takes his weapons, armour, horse and harness into the player's inventory and leaves him in rags. Force and stripping cost relation, Honor, Mercy and (for the strip) clan renown.
+A lord held prisoner by the player's clan can be questioned about his lands and stripped of his kit. Talking to such a lord adds up to two options under his main conversation menu. "Ask about his lands" has a clan topic and a kingdom topic: he refuses, and the player either pays a bribe or uses force. Either way the matching settlements get the engine's visual tracking mark on the map (towns and castles) and unknown lords become known. "Strip him" takes his weapons, armour, horse and harness into the player's inventory and leaves him in rags. Force and stripping cost relation, Honor, Mercy and (for the strip) clan renown.
 
 No Harmony patch and no GameModel: two campaign behaviors over a service graph. Issue #896.
 
@@ -55,7 +55,7 @@ All of these must hold (`InterrogationService.Eligible`; the used-topic check ru
 ## The two topics
 
 - **Bribe price:** the lord's ransom (`RansomValueCalculationModel.PrisonerRansomValue`, seller the player) times 1.5 for the clan topic or 3.5 for the kingdom topic, times 0.5 for a Calculating lord. Rounded, at least 1, capped at `int.MaxValue / 2`. The gold goes to the lord. The player gains 50 (clan) or 90 (kingdom) Charm experience.
-- **Reveal scope:** the clan topic marks the clan's settlements visited and its heroes known; the kingdom topic does the same for the kingdom. Each newly known hero prints vanilla's "You've learned about" line, and the engine itself places his last-seen settlement. The reveal does not mark anyone as met. This is `MapRevealAdapter`, separate from `IPlayerIdentityAdapter.MarkClanAndKingdomKnown`, which the Player Switcher owns.
+- **Reveal scope:** the clan topic puts a visual tracking mark on each of the clan's towns and castles and makes its heroes known; the kingdom topic does the same for the kingdom. The marks are the engine's own (`VisualTrackerManager.RegisterObject`, saved with the campaign); a settlement already tracked is left alone. The marks cover towns and castles only: a tracked nameplate is drawn on the map every frame, outside the vanilla distance cull and the Nameplate Cull patch, so villages stay unmarked. The player removes a mark with the Track toggle on the settlement's encyclopedia page, and the engine also drops a mark when a siege at that settlement ends, for settlements of the player's faction that were not tracked by hand and while the auto-track setting is below 2 (`SettlementNameplateVM.OnSiegeEventEndedOnSettlement`, `:624-649`). Performance: each mark keeps that nameplate drawn every frame; a kingdom reveal (Hard Questions) marks up to about 27 (the largest kingdom at start), most 4 to 16. `Settlement.HasVisited` is no longer written, because nothing in v1.5.5 reads it. Each newly known hero prints vanilla's "You've learned about" line, and the engine itself places his last-seen settlement. The reveal does not mark anyone as met. This is `MapRevealAdapter`, separate from `IPlayerIdentityAdapter.MarkClanAndKingdomKnown`, which the Player Switcher owns.
 - **Force, at the end of the conversation:**
   - Relation: the lord -20 (clan) or -40 (kingdom); his spouse, parents, siblings and children -10 or -20; on the kingdom topic only, his king -16. See "Relations" below for how these combine.
   - Traits: Mercy -160 or -300, Honor -100 or -200, scaled by side. The player gains 80 or 150 Roguery experience.
@@ -115,7 +115,7 @@ Every number above is a field. Chances are in [0, 1], penalties are at most 0 (a
 | [HardQuestionsCampaignBehavior.cs](../../Main/Features/HardQuestions/Hooks/HardQuestionsCampaignBehavior.cs) | SyncData, release, death |
 | [CaptiveLordAdapter.cs](../../Main/Adapters/CaptiveLordAdapter.cs) | Captive snapshot (cheap), circle (per deed), conversation context |
 | [LordEquipmentAdapter.cs](../../Main/Adapters/LordEquipmentAdapter.cs) | Equipment sets with the shared-set guard, slot-wise re-kit |
-| [MapRevealAdapter.cs](../../Main/Adapters/MapRevealAdapter.cs) | Visited settlements, known heroes |
+| [MapRevealAdapter.cs](../../Main/Adapters/MapRevealAdapter.cs) | Tracking marks on settlements, known heroes |
 | [HardQuestionsActionAdapter.cs](../../Main/Adapters/HardQuestionsActionAdapter.cs) | Relation, relation summary line, gold, wound, death, renown, reproach, party-screen commit |
 | [PlayerTraitAdapter.cs](../../Main/Adapters/PlayerTraitAdapter.cs) | Trait experience through `TraitLevelingHelper.OnIncidentResolved` |
 | [hard_questions.json](../../Main/_Module/ModuleData/hard_questions/hard_questions.json) | Numbers |
@@ -143,7 +143,7 @@ If Armour Acquisition's gate fails at game init (it logs when it does), named pi
 
 ## In-game checklist (owed)
 
-1. Ask both topics by bribe and by force on a prisoner in the player's party and on one in a player dungeon.
+1. Ask both topics by bribe and by force on a prisoner in the player's party and on one in a player dungeon. The revealed towns and castles show tracking marks on the map; open one settlement's encyclopedia page and switch Track off to remove its mark.
 2. Strip a lord who carries a named weapon and confirm it stays with him.
 3. Save and load: the used topics stay used.
 4. Release a stripped lord and confirm a fresh kit; release one who kept a named weapon and confirm he still has it.
@@ -163,6 +163,7 @@ The 19 `taom_hq_*` keys are registered and seeded in English in all 12 languages
 
 ## Changelog
 
+- 2026-10-20: the reveal marks towns and castles with the map tracker instead of the unused visited flag.
 - 2026-10-19: one summary line of relation damage after a force or a strip.
 - 2026-10-19: deep-review fixes (relation owners, Neutral floor, party-screen commit, release kit, death record, companion scaling).
 - 2026-10-18: feature added.

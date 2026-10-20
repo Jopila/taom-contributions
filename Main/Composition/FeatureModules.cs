@@ -53,5 +53,6 @@ internal static class FeatureModules
         new Features.TokensOfEsteem.TokensOfEsteemModule(),
         new Features.TavernSpecialities.TavernSpecialitiesModule(),
         new Features.ReevesLedger.ReevesLedgerModule(),
+        new Features.LordCourtesies.LordCourtesiesModule(),
     };
 }

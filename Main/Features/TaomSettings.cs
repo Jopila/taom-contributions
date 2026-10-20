@@ -1200,6 +1200,19 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "When enabled, a lord held prisoner by your clan (in your party or in one of your settlements) can be questioned about his clan's or kingdom's lands, for a bribe or by force, and stripped of his arms and armour. Force and stripping cost relation, Honor and Mercy, and stripping costs renown. Each topic works once per captivity. When off, those conversation options do not appear.")]
     public bool EnableHardQuestions { get; set; } = true;
 
+    // --- World / Lord Courtesies ---
+
+    // GroupOrder 63: 0, 1, 2, 9, 10, 15, 19-62 and 100 were taken as of 2026-10-20 (rebase on trunk 599987653).
+    [SettingPropertyGroup("World/Lord Courtesies", GroupOrder = 63)]
+    [SettingPropertyBool("Enable Troop Gifts", Order = 0, RequireRestart = false,
+        HintText = "When enabled, a conversation with a lord who leads a party offers a line to gift him troops through a donate-style party screen. The lord must not be in your clan or kingdom, not at war with you, and not on the opposite side of the Free/Evil divide (a Neutral lord may receive). Troops move from you to him only. The gift is paid by Bonds of Battle's hand-over rule (half the influence the gift is worth, at most 10 relation a day per relation owner), so the relation needs Bonds of Battle and its Troop Gifts Win Lords' Favour switch on; with either off the gift is still accepted but earns nothing. When off, the line does not appear.")]
+    public bool EnableTroopGifts { get; set; } = true;
+
+    [SettingPropertyGroup("World/Lord Courtesies")]
+    [SettingPropertyBool("Enable Domain Reveal", Order = 1, RequireRestart = false,
+        HintText = "When enabled, you can ask a free lord about his clan's holdings. A lord who knows you well enough names them and they are marked on your map; a lord who does not refuses, and a lord whose clan holds nothing says so, each at a small cost in relation. Lords at war with you and your own clan never answer. When off, the line does not appear.")]
+    public bool EnableDomainReveal { get; set; } = true;
+
     // --- Prisoner Recruitment ---
 
     [SettingPropertyGroup("World/Prisoner Recruitment", GroupOrder = 39)]
@@ -2206,7 +2219,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Bonds of Battle")]
     [SettingPropertyBool("Troop Gifts Win Lords' Favour", Order = 6, RequireRestart = false,
-        HintText = "When you hand troops to another lord on the Donate Troops screen, that lord gains relation with you: half of the influence the gift is worth, at most 10, give or take one. A gift worth less than 2 earns nothing. Hand-overs stop paying a lord once 10 relation has landed with him that day; the Done that reaches 10 asks only for what is left, and Charm can raise it. A lord gains at most 10 a day from hand-overs, however the gift is split (Charm can raise the last Done). Default: on.")]
+        HintText = "When you hand troops to another lord on the Donate Troops screen, that lord gains relation with you: half of the influence the gift is worth, at most 10, give or take one. A gift worth less than 2 earns nothing. Hand-overs stop paying a lord once 10 relation has landed with him that day; the Done that reaches 10 asks only for what is left, and Charm can raise it. A lord gains at most 10 a day from hand-overs, however the gift is split (Charm can raise the last Done). The same rule pays for troops given to a lord through a Lord Courtesies gift. Default: on.")]
     public bool BondsTroopHandoverEnabled { get; set; } = TAOM.Features.BondsOfBattle.BondsOfBattleSettingsProvider.DefaultTroopHandoverEnabled;
 
     [SettingPropertyGroup("Bonds of Battle")]

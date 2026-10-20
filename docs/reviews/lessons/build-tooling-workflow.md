@@ -4122,3 +4122,20 @@ lacked those clans. The two modules ship together; a map ahead of its build poin
 - **Prevent:** deploy the TAOM build first, then edit the map, and run the per-channel check in
   [release-process.md](../../reference/release-process.md) before publishing.
 - **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
+
+### A plan proved against one trunk is re-checked when the base moves (2026-10-20)
+
+With six batch sessions merging into `bannerlord-1.5.x` in two days, two B08 changes went wrong the same way. Hard
+Questions deleted two relation pairs because, under the engine's clan-leader rule of the day, they could never win;
+Personal Relations then merged and made each lord his own relation owner, so those lords were charged nothing. Lord
+Courtesies was planned on `328ef9fc1` ("no TAOM code rewards troop gifts") and built on `227212a01`, where Bonds of
+Battle's troop hand-over, the shared relation seam and Personal Relations had landed; the review found two reward
+rules for one act and a GroupOrder already taken.
+- **Why missed:** the overlap research is a snapshot of the trunk when the plan was written, and the fast-forward
+  before the build did not trigger a second look.
+- **Prevent:** whenever a branch moves to a newer trunk before or during a build (fast-forward or rebase), run
+  `git log --stat <old>..<new>` and re-run the plan's overlap check for every seam the plan names (relation calls,
+  party screens, MCM GroupOrder, settings counts, shared adapters). A deletion or simplification justified by an
+  engine or TAOM rule gets a test that pins that rule's assumption, so a parallel change to the rule fails it.
+- **Source:** `docs/reviews/rca-lord-courtesies-2026-10-20.md` (root-cause pattern); `rca-hard-questions-2026-10-19.md`
+  round 3.

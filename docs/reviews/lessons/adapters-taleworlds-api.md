@@ -1299,3 +1299,16 @@ the morale of the men around him.
   in passes the retention test on the next tick; write that case as a test. Here retention uses a hold radius of twice
   the cornered radius, clamped to the 15 m bound.
 - **Source:** `docs/reviews/rca-fell-foes-2026-10-19.md` row 28.
+
+### An engine field you write must have a reader (2026-10-20)
+
+Hard Questions and Lord Courtesies "marked a lord's holdings on the map" by setting `Settlement.HasVisited`. In
+v1.5.5 the only writer is `PlayerTownVisitCampaignBehavior` and nothing reads it, in any assembly, so the reveal
+changed nothing the player could see while its line promised map marks. The engine's real map mark is
+`Campaign.Current.VisualTrackerManager.RegisterObject` (a tracked settlement's nameplate reads `CheckTracked`), and a
+tracked plate is drawn every map frame outside the cull, so mark few.
+- **Why missed:** the research confirmed the setter exists and is public; it never asked who reads the field.
+- **Prevent:** before a feature writes an engine field or property for an effect the player should see, find its
+  reader (grep the decompile dump for the member name across all assemblies) and name it in the plan. No reader means
+  no effect: use the mechanism the UI actually reads.
+- **Source:** `docs/reviews/rca-lord-courtesies-2026-10-20.md` row 1.

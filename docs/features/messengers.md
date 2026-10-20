@@ -28,6 +28,7 @@ Layered TAOM architecture. The behavior is the TaleWorlds-bound boundary; the se
 
 - **`MessengerCampaignBehavior`** (entry point, ~370 lines) — registers events (`HourlyTickEvent`, `OnSessionLaunchedEvent`), implements `IMissionListener`, registers the dialog tree, orchestrates encounter routing (settlement vs field), and serialises state via `SyncData`. Touches sealed types directly because that's what the boundary is for.
 - **`MessengerService`** (Reuse.Singleton) — pure logic: `CanSendMessenger(HeroSnapshot, playerGold) → MessengerValidationResult`, `RollAccident()`, `AdvancePosition(current, target, speed) → PositionUpdate`, `CalculateMessengerSpeed(mapDiagonal, travelDays)`. Tested with 26 unit tests against NSubstitute mocks.
+- **`MessengerConversationState`** (Reuse.Singleton, `IMessengerConversationState`) — one in-memory flag, `IsOpen`, set just before the encounter starts, cleared in `OnEndMission`, on the null-mission recovery and at session launch. The conversation looks like a real visit to the engine (a real `PlayerEncounter`, and the main party inside the target's settlement), so other features read this flag to tell them apart; [Lord Courtesies](lord-courtesies.md) hides its troop gift while it is open and still allows its holdings question.
 - **`MessengerStateStore`** — owns the in-memory `Dictionary<heroId, PendingMessenger>`, exposes CRUD + `Serialize`/`Deserialize` for the behavior's `SyncData`.
 - **`MessengerConfigProvider`** — validates `messenger_config.json` per the "Config Providers MUST Validate" rule (range-check + revert + warn).
 - **`MessengerSettingsProvider`** — wraps `TaomSettings.Instance.*` so the service can be mocked in tests.
@@ -170,6 +171,7 @@ The boundary classes (`MessengerCampaignBehavior`, the UI mixin, `MessengerSetti
 ## Changelog
 
 - 2026-10-20: the Send Messenger hint for the disabled state now shows: the hint sits beside the button in an enabled wrapper, as vanilla's governor button does (#944).
+- 2026-10-20: added `IMessengerConversationState`, the open-conversation flag Lord Courtesies reads.
 - 2026-05-13 — Wired Messengers into IoC + campaign starter (fixed encyclopedia hero-click NRE, #121) and added a wiring regression test (#191); fixed UI mixin notifications firing on self (#166) and per-campaign/arrival state-reset gaps (#123).
 - 2026-05-06 — Ported the LOTRAOM messenger system to TAOM (1.3.15): paid messenger dispatch from the encyclopedia/dialog, travel + arrival conversation routing, primitive-dict save, MCM + JSON tunables, 12-language localization (#109).
 
