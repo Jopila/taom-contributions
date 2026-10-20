@@ -6020,6 +6020,12 @@
 
     <string id="taom_tm_toggle_hint" text="Show only better items: upgrades (green) and sidegrades (yellow). The move-all buttons (Take, Give, Buy, Sell or Discard all) then move only the rows shown." />
 
+    <string id="taom_hhost_counted_ago" text="Counted {TIME} ago" />
+
+    <string id="taom_hhost_memory_hint_body" text="A count such as {MEMORY_EXAMPLE} is remembered from an earlier sighting, not read now. Remembered counts lose digits as the hours pass, more slowly with a better scout; hover the host to see how long ago it was counted. A host you meet, speak with or share a settlement with is counted exactly. Reading an enemy host's count from afar trains your scout's Scouting." />
+
+    <string id="taom_hhost_memory_hint_title" text="Remembered Hosts" />
+
   </strings>
 
 </base>

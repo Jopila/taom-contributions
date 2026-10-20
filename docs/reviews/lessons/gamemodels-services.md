@@ -1141,3 +1141,26 @@ shield onto the first equipped shield (`:4151-4166`), so a green row could repla
 - **Prevent:** when a verdict tells the player "do this", derive its comparison from the vanilla action it predicts, cite
   the lines, and test the case where the naive rule and vanilla's target disagree.
 - **Source:** `docs/reviews/rca-telchars-mark-2026-10-19.md` row 3.
+
+### A remembered observation is replaced by a contradicting one, not only by a better one
+
+Hidden Hosts remembered each host's counted digits and kept the row until a reading with at least as many known
+digits arrived. An 80-man party counted with two digits that grew into a 300-man army then showed "~80" beside a live
+"3??", and a 123-man memory showed "~123" over a 7-man host, because a reading with fewer digits never touched the
+row. A test pinned the second case as intended. The store now replaces a row whenever the live reading contradicts it
+(a different number of digits, or different known leading digits), with an integer test on the per-frame path.
+- **Why missed:** the design defined when a reading is better and never when it disagrees.
+- **Prevent:** for any cache of an observed value, write both rules: what improves it and what invalidates it. A
+  stale value that contradicts what the player can see is worse than no value.
+- **Source:** `docs/reviews/rca-hidden-hosts-p23-2026-10-19.md` finding 2.
+
+### A later phase's new adapter must not re-decide a policy the service already owns
+
+Hidden Hosts phase 1 moved its exemptions (main party, player clan, player army, info-hidden, true sight) from the
+adapter into the service after review. Phase 3 then added `HiddenHostsCampaignAdapter.Add`, which decided the same
+exemptions again for the exact stamps, beside the service's `IsPartyExempt`, where no unit test reached them. The fix
+reads plain snapshots and applies one shared predicate in the service.
+- **Why missed:** the phase 1 lesson lived in that feature's RCA, not in the brief for the next phase.
+- **Prevent:** an adapter returns facts; any `if` that decides who is included is a service decision. When a feature
+  grows a second adapter, check it against the first one's review findings.
+- **Source:** `docs/reviews/rca-hidden-hosts-p23-2026-10-19.md` finding 4.

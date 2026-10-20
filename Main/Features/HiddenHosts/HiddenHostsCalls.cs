@@ -20,14 +20,30 @@ internal static class HiddenHostsCalls
 
     private static IModLogger? Logger { get; set; }
 
+    /// <summary>
+    /// The label of a settlement tooltip's defenders row, the text vanilla passed to that row. A seam so a test needs no
+    /// game text; production reads the game's own text through <see cref="HiddenHostsTexts.DefendersLabel"/>.
+    /// </summary>
+    internal static Func<string> DefendersLabel { get; private set; } = () => HiddenHostsTexts.DefendersLabel;
+
+    /// <summary>The label of a party tooltip's troops row, the text vanilla passed for it. A seam, like <see cref="DefendersLabel"/>.</summary>
+    internal static Func<string> TroopsLabel { get; private set; } = () => HiddenHostsTexts.TroopsLabel;
+
+    /// <summary>The "Counted ... ago" line for a number of hours. A seam so a test needs no game text.</summary>
+    internal static Func<int, string> CountedAgo { get; private set; } = HiddenHostsTexts.CountedAgo;
+
     /// <summary>True once the fault budget is spent: every hook returns at once, leaving vanilla's text.</summary>
     internal static bool Stopped => _faults >= FaultBudget;
 
-    internal static void Initialize(HiddenHostsService? service, IPartyIntelAdapter? adapter, IModLogger? logger = null)
+    internal static void Initialize(HiddenHostsService? service, IPartyIntelAdapter? adapter, IModLogger? logger = null,
+        Func<string>? defendersLabel = null, Func<string>? troopsLabel = null, Func<int, string>? countedAgo = null)
     {
         Service = service;
         Adapter = adapter;
         Logger = logger;
+        DefendersLabel = defendersLabel ?? (() => HiddenHostsTexts.DefendersLabel);
+        TroopsLabel = troopsLabel ?? (() => HiddenHostsTexts.TroopsLabel);
+        CountedAgo = countedAgo ?? HiddenHostsTexts.CountedAgo;
         Reported.Clear();
         _faults = 0;
     }

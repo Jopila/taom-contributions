@@ -17,4 +17,13 @@ public sealed class HiddenHostsHintAdapter : IHiddenHostsHintAdapter
         InformationManager.ShowInquiry(new InquiryData(title.ToString(), body.ToString(), true, false,
             GameTexts.FindText("str_ok").ToString(), string.Empty, null, null), pauseGameActiveState: true);
     }
+
+    public void ShowMemoryHint(string memoryExample)
+    {
+        var title = new TextObject("{=taom_hhost_memory_hint_title}Remembered Hosts");
+        var body = new TextObject("{=taom_hhost_memory_hint_body}A count such as {MEMORY_EXAMPLE} is remembered from an earlier sighting, not read now. Remembered counts lose digits as the hours pass, more slowly with a better scout; hover the host to see how long ago it was counted. A host you meet, speak with or share a settlement with is counted exactly. Reading an enemy host's count from afar trains your scout's Scouting.");
+        body.SetTextVariable("MEMORY_EXAMPLE", memoryExample);
+        InformationManager.ShowInquiry(new InquiryData(title.ToString(), body.ToString(), true, false,
+            GameTexts.FindText("str_ok").ToString(), string.Empty, null, null), pauseGameActiveState: true);
+    }
 }

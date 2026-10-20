@@ -1051,3 +1051,14 @@ tab-bar art while its comment and doc said "last child". A Codex prompt had note
 - **Prevent:** every `InsertType.Child` patch states its position: `public override int Index => int.MaxValue;` to
   append, or an explicit index with a comment naming the sibling it must precede. Pin it in the feature's wiring test.
 - **Source:** `docs/reviews/rca-telchars-mark-2026-10-19.md` row 1.
+
+### A "shown" flag is set by the code that wrote the text, never by the getter that formatted it
+
+Hidden Hosts' memory popup is armed the first time a "~" count is drawn. The service method that formatted the
+settlement's "~" defenders text also set the drawn flag, before the tooltip hook had looked for the defenders row;
+with the Alt view, a hideout or hidden information there is no such row, so the popup and the "Counted ... ago" line
+fired with no "~" on screen. The flag is now set only by the code that wrote the "~".
+- **Why missed:** formatting the text and drawing it looked like one step.
+- **Prevent:** a one-time UI trigger or a "seen" flag follows the write that the player can see, and a test covers
+  the case where the write finds nothing to write into.
+- **Source:** `docs/reviews/rca-hidden-hosts-p23-2026-10-19.md` finding 3.

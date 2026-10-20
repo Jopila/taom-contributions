@@ -12,4 +12,10 @@ public interface IHiddenHostsHintAdapter
     /// the edge of sight shows. The symbols come from the caller so the text and the nameplate can never disagree.
     /// </summary>
     void ShowSymbolHint(string maskExample, string horizon);
+
+    /// <summary>
+    /// Explains the "~" on a remembered count: a one-button popup that pauses the game. <paramref name="memoryExample"/> is a
+    /// remembered count such as "~1??"; it comes from the caller so the text and the nameplate can never disagree.
+    /// </summary>
+    void ShowMemoryHint(string memoryExample);
 }

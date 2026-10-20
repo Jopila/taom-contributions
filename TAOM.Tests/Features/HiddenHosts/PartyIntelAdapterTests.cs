@@ -9,8 +9,9 @@ using TAOM.Tests.Migration;
 namespace TAOM.Tests.Features.HiddenHosts;
 
 /// <summary>
-/// The adapter caches half a second of numbers between calls (#846). A campaign object kept in a field would outlive its
-/// campaign: the adapter is a process singleton, and a faction or hero from the last game is a stale reference in the next.
+/// The adapters cache half a second of numbers between calls (#846). A campaign object kept in a field would outlive its
+/// campaign: an adapter is a process singleton, and a faction, party or hero from the last game is a stale reference in the
+/// next. The memory's campaign adapter (phase 3) keeps nothing at all, and is held to the same rule.
 /// </summary>
 [TestClass]
 [TestCategory("RequiresGame")]
@@ -38,12 +39,14 @@ public class PartyIntelAdapterTests
                     foreach (var p in Parts(field.FieldType)) yield return p;
     }
 
-    [TestMethod]
-    public void PartyIntelAdapter_KeepsNoCampaignObjectBetweenCalls()
+    [DataTestMethod]
+    [DataRow(typeof(PartyIntelAdapter))]
+    [DataRow(typeof(HiddenHostsCampaignAdapter))]
+    public void HiddenHostsAdapters_KeepNoCampaignObjectBetweenCalls(Type adapter)
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
 
-        var offenders = typeof(PartyIntelAdapter)
+        var offenders = adapter
             .GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
             .Where(f => Parts(f.FieldType).Any(FromTheEngine))
             .Select(f => f.Name + ": " + f.FieldType)

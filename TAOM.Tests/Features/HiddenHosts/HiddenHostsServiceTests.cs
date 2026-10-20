@@ -34,6 +34,9 @@ public class HiddenHostsServiceTests
             ScoutingSkill = skill,
             SameFaction = sameRealm,
             IsInfoHidden = infoHidden,
+            // No usable clock: these cases test the mask and its latch alone, so no memory is kept or consulted.
+            // The memory has its own cases in HiddenHostsMemoryServiceTests.
+            NowHour = -1,
         };
 
     private static void AssertNotMasked(NameplateIntel intel)

@@ -777,3 +777,18 @@ attribute 1 with no focus stops at 4. The old gates of 20 and 50 were unreachabl
   rate and limit for the weakest normal hero, from the shipped config, in a test that a raised gate turns red. Say in
   the doc which hero the gates were sized for.
 - **Source:** `docs/reviews/rca-enlistment-rank-ladder-2026-10-19.md` F1, F2.
+
+### A record taken on `TickEvent` misses every state that stops time
+
+Hidden Hosts stamped the exact troop counts of hosts the player meets, talks to or shares a settlement with from
+`CampaignEvents.TickEvent`. `Campaign.Tick` raises that event only while `_dt > 0` (or in the first three ticks), and
+every plain game menu sets the time control to Stop, so a town, castle, village, encounter or conversation visit was
+never stamped, while the player-facing popup promised it. The stamp throttle also summed `TickEvent`'s dt, which is
+campaign time (0.25 x real time at play speed), while the doc said real time. The fix stamps on `GameMenuOpened`
+(raised by `GameMenu.RunOnInit` for every menu, after its `OnInit`) and keeps a real-time throttled tick for waits.
+- **Why missed:** the trap line "Menus stop time" and `docs/reference/engine/campaign-tick-time-and-party-ai.md` both
+  held the fact, but the trap line did not name `TickEvent`, and the behaviour tests called the handler by hand.
+- **Prevent:** before subscribing to `TickEvent` for anything the player can trigger from a menu, list the states the
+  record must cover and the event that fires in each; menu time is `GameMenuOpened`. Pin the engine's gate with an IL
+  test, and throttle in real time (`Stopwatch`), never on the tick's dt.
+- **Source:** `docs/reviews/rca-hidden-hosts-p23-2026-10-19.md` finding 1.

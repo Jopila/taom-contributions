@@ -99,4 +99,64 @@ internal static class HiddenHostsMath
         int known = Math.Max(0, knownDigits);
         return text.Substring(0, known) + new string('?', digits - known);
     }
+
+    /// <summary>Marks a count the player remembers rather than reads now.</summary>
+    internal const string MemoryPrefix = "~";
+
+    /// <summary>Scouting skill past this adds nothing to the hold or the fade step.</summary>
+    private const int MaxScoutForMemory = 1000;
+
+    /// <summary>The XP for reading the first, second and third digit stage of an enemy host's count (raw Scouting XP).</summary>
+    private static readonly int[] StageXp = { 20, 30, 50 };
+
+    /// <summary>A remembered count: "~" and the count with its forgotten trailing digits replaced by "?" (all digits kept gives "~150").</summary>
+    internal static string FormatMemory(int count, int knownDigits) => MemoryPrefix + FormatMask(count, knownDigits);
+
+    /// <summary>
+    /// Whole hours a counted figure is held before it starts to lose digits: six, widened by Scouting (6 x (1 + skill / 150)),
+    /// rounded up, the skill clamped to 0 to 1000. Integer arithmetic, so no float is cast and every row is exact.
+    /// </summary>
+    internal static int HoldHours(int scoutingSkill) =>
+        CeilingDivide(6 * (150 + ClampScout(scoutingSkill)), 150);
+
+    /// <summary>Whole hours between two lost digits: eight, widened by Scouting (8 x (1 + skill / 300)), rounded up.</summary>
+    internal static int FadeStepHours(int scoutingSkill) =>
+        CeilingDivide(8 * (300 + ClampScout(scoutingSkill)), 300);
+
+    /// <summary>The campaign hour as a whole number, or -1 when it is not finite, negative or past <c>int.MaxValue</c> (no clock).</summary>
+    internal static int ToWholeHours(double hours)
+    {
+        if (!(FiniteFloatValidator.IsFinite(hours) && hours >= 0.0 && hours <= int.MaxValue)) return -1;
+        return (int)Math.Floor(hours);
+    }
+
+    /// <summary>The XP for reaching digit stage <paramref name="stage"/> (1 to 3); 0 for any other stage.</summary>
+    internal static int XpForStage(int stage) => stage >= 1 && stage <= StageXp.Length ? StageXp[stage - 1] : 0;
+
+    private static int ClampScout(int scoutingSkill) => Math.Min(Math.Max(scoutingSkill, 0), MaxScoutForMemory);
+
+    private static int CeilingDivide(int numerator, int denominator) => (numerator + denominator - 1) / denominator;
+
+    /// <summary>
+    /// The first <paramref name="known"/> decimal digits of <paramref name="count"/> as a number: 12 for (123, 2), the whole
+    /// count when <paramref name="known"/> covers it, 0 for none or for a count of zero or less. Integer arithmetic only: it
+    /// runs for every nameplate every frame.
+    /// </summary>
+    internal static int LeadingDigits(int count, int known)
+    {
+        if (count <= 0 || known <= 0) return 0;
+        int dropped = DigitCount(count) - known;
+        long value = count;
+        for (int i = 0; i < dropped; i++)
+            value /= 10;
+        return (int)value;
+    }
+
+    /// <summary>
+    /// Whether a reading of <paramref name="known"/> leading digits of <paramref name="count"/> is consistent with a
+    /// remembered count: the same number of digits and the same leading digits. A reading that disagrees means the host is not
+    /// the size the player remembers, so the live view replaces the memory; one that agrees only shows less than the memory.
+    /// </summary>
+    internal static bool Agrees(int count, int known, int remembered) =>
+        DigitCount(count) == DigitCount(remembered) && LeadingDigits(count, known) == LeadingDigits(remembered, known);
 }

@@ -48,7 +48,7 @@ and the gate.
 | NPCCharacter, no `<face>` | Renders as a toddler with no error: `CharacterFaceCoverageTests` | [body properties](../modding/body-properties.md) |
 | Enlisted service | Only `DischargeService` ends it; parked, or visible in the commander's settlement, is legitimate | [enlistment](../features/enlistment.md) |
 | Leaving a map event | Clearing `MainParty.AttachedTo` mid-event nulls the upgrade tracker; vanilla CTDs later | [guard](../features/map-event-guard.md) |
-| Menus stop time | Land on the map after anything timed; a false WAIT-menu condition hides every option | [field camp](../features/field-camp.md) |
+| Menus stop time | Land on the map after timed work; a false WAIT condition hides every option; no `TickEvent` in a menu | [field camp](../features/field-camp.md) |
 | Daily tick after load | A save in an elapsed day's first half reruns that day: gate daily work on a saved day | [ticks](../reference/engine/campaign-tick-time-and-party-ai.md) |
 | "Frozen" game | Can be a stuck kingdom vote waiting on an `IsKingsDecisionOver` edge: `Patch80` | [diplomacy](../features/diplomacy.md) |
 | Hero capture | Patch `Hero.CanBecomePrisoner`; denying capture grants escape; both seams share one `DeathMark` guard | [capture](../features/uncapturable-heroes.md) |

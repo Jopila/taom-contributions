@@ -3306,8 +3306,11 @@
 	<string id="taom_bonds_handover" text="{=taom_bonds_handover}{LORD} thanks you for the troops you handed over." />
 
 	<!-- HiddenHosts -->
+	<string id="taom_hhost_counted_ago" text="{=taom_hhost_counted_ago}Counted {TIME} ago" />
 	<string id="taom_hhost_hint_body" text="{=taom_hhost_hint_body}Troop counts on the map now blur with distance. A count such as {MASK_EXAMPLE} means you can read only its first digit. {HORIZON} marks a host at the very edge of sight, too far to count. Counts sharpen as you close in, and as your scout's Scouting grows. Hosts of your own realm are easier to count. AI lords always see the true numbers. The toggle is under Map UI in the mod options." />
 	<string id="taom_hhost_hint_title" text="{=taom_hhost_hint_title}Hidden Hosts" />
+	<string id="taom_hhost_memory_hint_body" text="{=taom_hhost_memory_hint_body}A count such as {MEMORY_EXAMPLE} is remembered from an earlier sighting, not read now. Remembered counts lose digits as the hours pass, more slowly with a better scout; hover the host to see how long ago it was counted. A host you meet, speak with or share a settlement with is counted exactly. Reading an enemy host's count from afar trains your scout's Scouting." />
+	<string id="taom_hhost_memory_hint_title" text="{=taom_hhost_memory_hint_title}Remembered Hosts" />
 	<string id="taom_hhost_unknown_party" text="{=taom_hhost_unknown_party}Unknown party" />
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
 	<!-- HardQuestionsActionAdapter -->

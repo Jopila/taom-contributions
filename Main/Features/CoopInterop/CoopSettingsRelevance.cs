@@ -133,7 +133,10 @@ public static class CoopSettingsRelevance
     private static readonly HashSet<string> Presentation = new HashSet<string>(StringComparer.Ordinal)
     {
         "ShowAllEncyclopediaCharacters", "EnableNameplateFade", "MapFigureScale",
-        // #846: display only, the AI and every campaign rule keep the true counts.
+        // #846: the counts are display only, the AI and every campaign rule keep the true numbers. The one write the
+        // setting gates is the scout's Scouting XP, and only the authority grants it, from its own setting; a client
+        // never grants (CoopSessionPolicy.MayWriteSaveBackedState), so peers disagreeing about the toggle cannot
+        // make the simulation differ.
         "HiddenHostsEnabled",
         "SupplyShowRouteVisual",
         "NameplateFadeFarDistance", "NameplateFadeNearDistance",

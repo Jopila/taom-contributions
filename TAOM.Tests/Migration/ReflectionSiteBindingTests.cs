@@ -173,6 +173,11 @@ public class ReflectionSiteBindingTests
     [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_extraInfoTextBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:25")]
     [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_fullNameBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:26")]
     [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_isVisibleOnMapBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:27")]
+    // --- HiddenHosts tooltips (Patch105): the two protected fields of the tooltip base view model that name the subject a
+    // tooltip was opened for, read through AccessTools.FieldRefAccess by the OnPeriodicRefresh bracket.
+    // A miss leaves the bind null: the bracket reports it once and opens no frame, and the periodic refresh shows vanilla counts.
+    [DataRow("TaleWorlds.Library.TooltipBaseVM", "TooltipBaseVM", "_invokedType", "Field", "PropertyBasedTooltipVM_OnPeriodicRefresh_HiddenHosts_Patch.cs:21")]
+    [DataRow("TaleWorlds.Library.TooltipBaseVM", "TooltipBaseVM", "_invokedArgs", "Field", "PropertyBasedTooltipVM_OnPeriodicRefresh_HiddenHosts_Patch.cs:22")]
     // --- MissionStartGuard (Patch103): the six start calls the transpiler swaps, found by AccessTools.Method at install.
     // A miss makes AccessTools.Method return null; Rewrite's fit check rejects the null target, so Mission.AfterStart stays vanilla.
     [DataRow("TaleWorlds.MountAndBlade.MBSubModuleBase", "MBSubModuleBase", "OnBeforeMissionBehaviorInitialize", "Method", "MissionStartGuardSwaps.cs:23")]
