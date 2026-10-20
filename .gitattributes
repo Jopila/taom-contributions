@@ -35,3 +35,9 @@ docs/reference/lotrlome-armory-snapshot/Prefabs/*.xml text eol=lf
 # Engine shader sources the Modding Kit generated (CRLF). ShaderSourceInstall copies these bytes into
 # <Bannerlord>\Shaders\Sources and compares them byte for byte, so Git must never convert them (#916).
 Main/_Module/Shaders/Sources/* -text
+
+# The lessons files are append-only: two branches that each append a lesson at the end used to conflict,
+# and merge 70c164bb3 resolved that by keeping one side, which silently dropped the Dale lesson. union keeps
+# both sides' new lines. It cannot see a conflict, so two edits of the SAME existing line both survive:
+# reread the entry after such a merge (rca-dale-lord-expansion-2026-10-20.md).
+docs/reviews/lessons/*.md merge=union
