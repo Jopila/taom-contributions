@@ -207,7 +207,7 @@ public class SettingsFingerprintTests
         // guards nothing. The count is the guard that can fail: add a setting anywhere below and
         // one of these numbers moves, which is the moment to decide what it is. The same numbers
         // are quoted in docs/features/coop-interop.md.
-        AssertSplit(typeof(TaomSettings), reflected: 367, covered: 252);
+        AssertSplit(typeof(TaomSettings), reflected: 376, covered: 260);
         AssertSplit(typeof(BattleLoadDiagnosticsSettings), reflected: 19, covered: 0);
         AssertSplit(typeof(BlowDiagnosticsSettings), reflected: 1, covered: 0);
         AssertSplit(typeof(CrashReportSettings), reflected: 10, covered: 0);
@@ -228,6 +228,7 @@ public class SettingsFingerprintTests
         };
         var reflected = totals.Sum(t => SettableProperties(t).Count());
         var relevant = totals.Sum(t => SettableProperties(t).Count(CoopSettingsRelevance.IsSimulationRelevant));
+        var excluded = reflected - relevant;
 
         foreach (var relative in new[]
         {
@@ -251,6 +252,11 @@ public class SettingsFingerprintTests
                 text.Contains("112 are simulation-relevant") && relevant != 112,
                 $"{relative} still quotes a stale simulation-relevant count.");
         }
+
+        // The excluded figure is total minus covered; coop-interop.md quotes it beside its dated list of additions.
+        var coopDoc = File.ReadAllText(Path.Combine(RepoRoot, @"docs\features\coop-interop.md"));
+        Assert.IsTrue(coopDoc.Contains($"The {excluded} excluded"),
+            $"docs/features/coop-interop.md does not quote the current excluded count of {excluded} (total {reflected} minus {relevant} covered).");
     }
 
     private static string RepoRoot => Path.GetFullPath(
@@ -353,7 +359,7 @@ public class SettingsFingerprintTests
         // neither throw on a diagnostic path nor cost the coverage of the objects that are there.
         var report = SettingsFingerprint.ComputeAcross(new TaomSettings(), null, new CrashReportSettings());
 
-        Assert.AreEqual(252, report.Covered, "a null entry cost coverage");
+        Assert.AreEqual(260, report.Covered, "a null entry cost coverage");
         Assert.AreEqual(SettingsFingerprint.Compute(new TaomSettings()).Global, report.Global);
     }
 
@@ -420,7 +426,7 @@ public class SettingsFingerprintTests
         var report = SettingsFingerprint.Compute(new TaomSettings());
         // Pinned, not a floor: the docs quote this number, and a change here means someone added
         // or reclassified a setting and the docs need the same edit.
-        Assert.AreEqual(252, report.Covered,
+        Assert.AreEqual(260, report.Covered,
             $"simulation-relevant settings changed — update docs/features/coop-interop.md too");
         Assert.AreEqual(64, report.Global.Length, "SHA-256 hex is 64 chars");
         Assert.IsTrue(report.ByGroup.Count > 5, "expected the fingerprint to span several groups");

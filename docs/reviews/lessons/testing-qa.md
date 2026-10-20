@@ -1895,3 +1895,25 @@ against 5 for one large Done.
 - **Prevent:** when a claim must hold for a random result, enumerate every value of the random seam in the test (sum or
   check each roll), not one fixed value. A test that pins the seam is a test of the arithmetic, not of the claim.
 - **Source:** `docs/reviews/rca-bonds-of-battle-decisions-2026-10-19.md` finding 3.
+
+### A plan brief restates every approved behaviour as a numbered acceptance list (Fell Foes, 2026-10-19)
+Mike approved "a fleeing enemy that loses health near 1 to 3 of your men turns, and nearby routers rally with him".
+The plan brief summarised the rule and, in its Decisions list, deferred "Captain's rally", a different hero-led rally.
+The builder read the base rally as deferred and built "a router near 1 to 3 men turns", with no hit and no rally.
+Only the completeness lens caught it.
+- **Why missed:** the approved wording lived in the issue comment; the brief the builder worked from paraphrased it next
+  to a similarly named deferred item.
+- **Prevent:** the plan brief quotes each approved behaviour verbatim as a numbered acceptance item, and lists deferred
+  items under their own names with one line on how they differ. The builder's report ticks each item or names it as
+  not built.
+- **Source:** `docs/reviews/rca-fell-foes-2026-10-19.md` row 1.
+
+### Prove a guard test RED by deleting the line it guards (Fell Foes, 2026-10-19)
+Four Fell Foes tests passed with the line they guard deleted: a source-text count of `Release()` that also matched the
+method's own declaration, a rollback test whose router was dropped from the set anyway, a fresh-service test that the
+hit trigger made pass either way, and a set test that accepted a copy. Repeat of the entry near line 365 of this file.
+- **Why missed:** each test was written against the behaviour as built and run green; none was run against the bug.
+- **Prevent:** for every test that guards one line (a release, a rollback, a reset, a gate), delete that line locally,
+  run the test, see it fail, restore the line, and quote the RED run in the report. A count over source text counts
+  call sites only (`Release();`, not `Release()`).
+- **Source:** `docs/reviews/rca-fell-foes-2026-10-19.md` rows 9 and 29.

@@ -2229,4 +2229,54 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyInteger("Disband Cost, Army Leader, Most", TAOM.Features.Relations.PersonalRelationSettingsProvider.MinCost, TAOM.Features.Relations.PersonalRelationSettingsProvider.MaxCost, Order = 3, RequireRestart = false,
         HintText = "The most relation you lose with an army's leader when you pay influence to disband it. Applies only in single player, and only while Enable Personal Relations is on. Default: 32.")]
     public int PersonalDisbandLeaderMax { get; set; } = TAOM.Features.Relations.PersonalRelationSettingsProvider.DefaultLeaderMax;
+
+    // --- Battle Tactics / Fell Foes (#893) ---
+    // The first property carries the GroupOrder, because MCM ignores one on any later property; no other group may
+    // share it (FellFoesSettingsProviderTests pins that). Defaults live in FellFoesTunables so the fallback before
+    // MCM is up cannot drift from them. All RequireRestart = false: the service reads them each second.
+
+    [SettingPropertyGroup("Battle Tactics/Fell Foes", GroupOrder = 61)]
+    [SettingPropertyBool("Cornered Routers Fight", Order = 0, RequireRestart = false,
+        HintText = "A routing enemy soldier who has just been hit, with a few of your men right beside him and enough health left, turns and fights instead of running on, and routers close to him turn with him (a few at most). They keep fighting only while one of your men is still near them and some of their side still stand; once the whole side has broken they run again, so the battle still ends in a rout. Soldiers of cultures that never rout, and soldiers ordered to retreat, are not touched. Field battles, sieges and sally-outs. Default: on.")]
+    public bool FellFoesCorneredRouters { get; set; } = true;
+
+    [SettingPropertyGroup("Battle Tactics/Fell Foes")]
+    [SettingPropertyInteger("Cornered By No More Than", 1, 10, Order = 1, RequireRestart = false,
+        HintText = "A routing soldier turns to fight only while this many of your men or fewer are within a few steps of him. Default: 3.")]
+    public int FellFoesCorneredMaxFoes { get; set; } = TAOM.Features.FellFoes.Domain.FellFoesTunables.DefaultCorneredMaxFoes;
+
+    [SettingPropertyGroup("Battle Tactics/Fell Foes")]
+    [SettingPropertyBool("Idle Archers Target You", Order = 2, RequireRestart = false,
+        HintText = "Enemy archers that have nothing to shoot at, are steady, and are within bow range of you may fix on you and shoot, for a few seconds at a time. A cap keeps the volley small. Archers of a team that is making a stand against horse are left to that stand. Field battles, sieges and sally-outs. Default: on.")]
+    public bool FellFoesArchersTargetPlayer { get; set; } = true;
+
+    [SettingPropertyGroup("Battle Tactics/Fell Foes")]
+    [SettingPropertyFloatingInteger("Archer Chance Each Second", 0f, 1f, "#0.00", Order = 3, RequireRestart = false,
+        HintText = "The chance each second that an idle archer in range fixes on you. 0 never, 1 always. Default: 0.25.")]
+    public float FellFoesArcherChance { get; set; } = TAOM.Features.FellFoes.Domain.FellFoesTunables.DefaultArcherChance;
+
+    [SettingPropertyGroup("Battle Tactics/Fell Foes")]
+    [SettingPropertyInteger("Archers On You At Once", 1, 30, Order = 4, RequireRestart = false,
+        HintText = "The most enemy archers that hold you as their target at the same moment. Default: 8.")]
+    public int FellFoesArcherMaxHolding { get; set; } = TAOM.Features.FellFoes.Domain.FellFoesTunables.DefaultArcherMaxHolding;
+
+    [SettingPropertyGroup("Battle Tactics/Fell Foes")]
+    [SettingPropertyBool("Last Stragglers Leave The Field", Order = 5, RequireRestart = false,
+        HintText = "In a large field battle, when only a few enemy soldiers are left, none of them a hero and none still to arrive, the survivors are sent off the field after a pause so the battle ends in your win and they can be taken prisoner. Sieges and sally-outs are not changed. Default: on.")]
+    public bool FellFoesStragglersLeave { get; set; } = true;
+
+    [SettingPropertyGroup("Battle Tactics/Fell Foes")]
+    [SettingPropertyInteger("Stragglers, Most", 1, 20, Order = 6, RequireRestart = false,
+        HintText = "The cleanup starts when this many enemy soldiers or fewer are left. Default: 3.")]
+    public int FellFoesStragglerMaxCount { get; set; } = TAOM.Features.FellFoes.Domain.FellFoesTunables.DefaultStragglerMaxCount;
+
+    [SettingPropertyGroup("Battle Tactics/Fell Foes")]
+    [SettingPropertyFloatingInteger("Straggler Pause (seconds)", 5f, 300f, "#0", Order = 7, RequireRestart = false,
+        HintText = "Seconds the battle must stay down to the last few before the survivors are sent off, one a second. Default: 30.")]
+    public float FellFoesStragglerHoldSeconds { get; set; } = TAOM.Features.FellFoes.Domain.FellFoesTunables.DefaultStragglerHoldSeconds;
+
+    [SettingPropertyGroup("Battle Tactics/Fell Foes")]
+    [SettingPropertyBool("Fell Foes Debug Log", Order = 8, RequireRestart = false,
+        HintText = "Writes a [FellFoes] line each second something is stopped, held or sent off, and whether held archers really are aiming at you. For checking the feature; leave off in normal play. Default: off.")]
+    public bool FellFoesDebug { get; set; } = false;
 }

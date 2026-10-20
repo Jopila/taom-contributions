@@ -4096,3 +4096,12 @@ times (#781, #919, #922), twice in one afternoon by two sessions.
   asserts the whole expected output, and is shown to fail on the old code and on one plausible wrong fix. Before
   filing an issue, search open issues for the file and symptom (`gh issue list --search "<file> in:title,body"`).
 - **Source:** `docs/reviews/rca-harvest-blank-line-2026-10-19.md` rows 2 and 3.
+
+### After editing a file that holds a reflection site, run `ReflectionSiteBindingTests` (Fell Foes, 2026-10-19)
+A doc pass added one summary line to `TeamTacticProbe.cs`. The reflected field moved from line 29 to 30, the row's label
+in `ReflectionSiteBindingTests` and `reflection-sites.md` still said 29, and the gate went red. The doc pass had run only
+the settings test.
+- **Why missed:** the edit was "comments only", and line labels were not thought of as code.
+- **Prevent:** any edit to a file named in `docs/reference/taleworlds-api-snapshot/reflection-sites.md`, comments
+  included, runs `dotnet test TAOM.Tests --filter FullyQualifiedName~ReflectionSiteBinding` before it is reported done.
+- **Source:** `docs/reviews/rca-fell-foes-2026-10-19.md` row 27.

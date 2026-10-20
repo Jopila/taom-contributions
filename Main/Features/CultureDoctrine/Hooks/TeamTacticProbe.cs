@@ -17,6 +17,7 @@ namespace TAOM.Features.CultureDoctrine.Hooks;
 /// (`Mission.OnPreTick` waits for the previous async tick); from the console command they can,
 /// and every read is a reference, an int or a 4-byte enum, so the worst case is one stale line,
 /// never a crash. The A/B protocol in <c>docs/features/culture-doctrine.md</c> parses this format.
+/// Fell Foes (#893) also reads the horse stand flag through <see cref="IsHorseStanding"/>.
 /// </summary>
 public static class TeamTacticProbe
 {
@@ -72,6 +73,18 @@ public static class TeamTacticProbe
             sb.Append('}');
         else
             sb.Append("{none}");
+    }
+
+    /// <summary>
+    /// True while the team's current tactic is a TAOM tactic whose horse stand has started and the
+    /// tactic has not failed (Fell Foes' archer rule steps aside then). Read-only, false on any missing piece or unreadable field.
+    /// </summary>
+    public static bool IsHorseStanding(Team team)
+    {
+        var ai = team?.TeamAI;
+        if (ai == null || CurrentTactic == null)
+            return false;
+        return CurrentTactic(ai) is TaomTacticBase tactic && tactic.Standing && !tactic.Failed;
     }
 
     public static string CurrentTacticName(Team team)

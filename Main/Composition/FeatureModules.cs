@@ -49,5 +49,6 @@ internal static class FeatureModules
         new Features.PosternGate.PosternGateModule(),
         new Features.FromTheAshes.FromTheAshesModule(),
         new Features.BardTownGuard.BardTownGuardModule(),
+        new Features.FellFoes.FellFoesModule(),
     };
 }

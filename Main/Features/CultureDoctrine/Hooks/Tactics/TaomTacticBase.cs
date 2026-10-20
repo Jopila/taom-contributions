@@ -85,8 +85,9 @@ public abstract class TaomTacticBase : TacticComponent
 
     /// <summary>True from the first Defend phase in which the gate passed until the tactic is
     /// cancelled (<see cref="RefreshStand"/> latches it; <see cref="OnCancel"/> ends it in full).
-    /// Team-AI tick only.</summary>
-    protected bool Standing => _standing;
+    /// Written on the team-AI thread; Fell Foes' archer rule also reads it on the main thread through
+    /// <c>TeamTacticProbe.IsHorseStanding</c>, where a stale read costs one second.</summary>
+    internal bool Standing => _standing;
 
     internal Formation? MainInfantry => _mainInfantry;
     internal Formation? SecondInfantry => _secondInfantry;

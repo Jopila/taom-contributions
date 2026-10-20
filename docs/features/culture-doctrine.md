@@ -406,6 +406,8 @@ behind the field). It is checked at every phase apply and once a second in `OnPh
 comparison is a positive requirement, so a NaN or infinite ratio fails the gate. Only the Defend
 phase starts a stand.
 
+**Who else reads the stand flag.** Fell Foes (#893, [fell-foes.md](fell-foes.md)) reads it through `TeamTacticProbe.IsHorseStanding`, which returns `TaomTacticBase.Standing` and is false for a failed tactic. Its archer rule skips every archer on a team whose stand is running, because this feature owns them then. The read is a plain bool written on the team-AI thread, so a stale read costs one second.
+
 **The latch.** The first Defend apply in which the gate passes starts the stand
 (`TaomTacticBase.RefreshStand`), and from then on it holds: neither the gate flickering nor the
 Defend/Engage flip ends it (the Engage phase issues no further dismount order, but the order given

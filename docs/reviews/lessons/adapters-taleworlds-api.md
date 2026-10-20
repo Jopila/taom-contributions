@@ -1279,3 +1279,23 @@ team), so the player's AI ally team read as outnumbered when the player's whole 
 - **Prevent:** a side-against-side comparison uses `AllyUnitCount` (it includes this team,
   `TeamQuerySystem.cs:240-249`) against `EnemyUnitCount`. Use `MemberCount` only for a question about this team alone.
 - **Source:** `docs/reviews/rca-horse-stand-2026-10-19.md` row 13.
+
+### A mission tweak stands down at `Mission.MissionEnded`; the mission keeps ticking after the result (Fell Foes, 2026-10-19)
+After "you won", Fell Foes kept stopping enemy routers, who turned on cheering troops and died instead of being
+captured. `CheckMissionEnd` keeps the mission in `Continuing` until the player leaves, and vanilla changes its own rules
+then (`CommonAIComponent.cs:109-116` stops the winners' panicked agents). The reused battle allowlist reads only mode,
+team-AI type and combat type, none of which changes at the result.
+- **Why missed:** the gate was checked for which missions it admits, not for when it must close.
+- **Prevent:** a mission behaviour that writes to agents checks `!mission.MissionEnded` in its gate (TAOM precedents:
+  `TaomHowdahMachine.cs:82`, `HowdahCrewSpawner.cs:60`, Fell Foes).
+- **Source:** `docs/reviews/rca-fell-foes-2026-10-19.md` row 2.
+
+### A rule that admits by one test keeps by a test everything admitted already passes (Fell Foes, 2026-10-19)
+The rally admitted panicked men within 5 m of the man who was hit, but kept a turned man only while a foe stood within
+5 m of himself. A rallied man could be 10 m from the foes, so most ran again after a second, and each re-flee drained
+the morale of the men around him.
+- **Why missed:** "follow the same re-flee rule" was written without comparing the re-flee test with the admission test.
+- **Prevent:** for any admit-and-keep rule (rally, latch, hold, target), check that every case the admission test lets
+  in passes the retention test on the next tick; write that case as a test. Here retention uses a hold radius of twice
+  the cornered radius, clamped to the 15 m bound.
+- **Source:** `docs/reviews/rca-fell-foes-2026-10-19.md` row 28.

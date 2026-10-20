@@ -19,6 +19,7 @@ using TAOM.Features.CultureDoctrine;
 using TAOM.Features.DreadAura;
 using TAOM.Features.DreadAura.Domain;
 using TAOM.Features.Elephant;
+using TAOM.Features.FellFoes;
 using TAOM.Features.MixedFormations;
 using TAOM.Features.RaceAbilities;
 using TAOM.Features.Refuge;
@@ -72,6 +73,7 @@ public class HotPathSettingsProvidersTests
     [DataRow(typeof(SignatureStrikesSettingsProvider))]
     [DataRow(typeof(GaitVarietySettingsProvider))]
     [DataRow(typeof(AnimVarietyProbeSettingsProvider))]
+    [DataRow(typeof(FellFoesSettingsProvider))]
     // #746: static, read per hit against a creature bandit. It has no instance to construct, so the counting
     // test below cannot take it: CreatureBanditTuningLiveTests runs the same CountingMcm check on it.
     [DataRow(typeof(CreatureBanditTuning))]
@@ -121,6 +123,7 @@ public class HotPathSettingsProvidersTests
     [DataRow(typeof(ISignatureStrikesSettingsProvider), typeof(SignatureStrikesSettingsProvider))]
     [DataRow(typeof(IGaitVarietySettingsProvider), typeof(GaitVarietySettingsProvider))]
     [DataRow(typeof(IAnimVarietyProbeSettingsProvider), typeof(AnimVarietyProbeSettingsProvider))]
+    [DataRow(typeof(IFellFoesSettingsProvider), typeof(FellFoesSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -189,6 +192,9 @@ public class HotPathSettingsProvidersTests
         // Read once per mission by the swing alternative probe (a lazy accessor like the rest, whatever the cadence).
         [typeof(AnimVarietyProbeSettingsProvider)] = (() => new AnimVarietyProbeSettingsProvider(),
             nameof(IAnimVarietyProbeSettingsProvider.SwingAlternativeProbe), nameof(TaomSettings.EnableSwingAlternativeProbe), () => new TaomSettings()),
+        // Fell Foes: read once a second per mission tick while a battle runs.
+        [typeof(FellFoesSettingsProvider)] = (() => new FellFoesSettingsProvider(),
+            nameof(IFellFoesSettingsProvider.CorneredRoutersEnabled), nameof(TaomSettings.FellFoesCorneredRouters), () => new TaomSettings()),
     };
 
     // The IL rule above proves WHERE MCM is resolved, not THAT the result is kept: an accessor written
@@ -212,6 +218,7 @@ public class HotPathSettingsProvidersTests
     [DataRow(typeof(SignatureStrikesSettingsProvider))]
     [DataRow(typeof(GaitVarietySettingsProvider))]
     [DataRow(typeof(AnimVarietyProbeSettingsProvider))]
+    [DataRow(typeof(FellFoesSettingsProvider))]
     public void Provider_AsksMcmUntilItHasTheSettings_ThenNeverAgain_AndReadsThrough(Type provider)
     {
         var probe = Probes[provider];

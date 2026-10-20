@@ -78,6 +78,9 @@ public static class CoopSettingsRelevance
         // The doctrine status line, the [MissionPerf] heartbeat and the load-time stamps;
         // EnableCultureDoctrine itself changes which tactics an AI team can pick and stays relevant.
         "CultureDoctrineDebug", "EnableMissionPerfHeartbeat", "EnableLoadTimeStamps",
+        // Fell Foes (docs/features/fell-foes.md): the debug log writes a [FellFoes] line and gates nothing else. The other
+        // eight are kept by include-by-default: Fell Foes stands down in co-op, so a mismatch on them is a spurious line.
+        "FellFoesDebug",
         // The Patch97 tick profiler and its two knobs (2026-10-02): log lines, never a computation.
         "EnableTickProfiler", "TickProfilerTopN", "HitchThresholdMs",
         // The Patch98 hitch probe (2026-10-02): log lines, never a computation
