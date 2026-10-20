@@ -1927,3 +1927,12 @@ field rivendell and goblin troops. The patch number gate matched one phrasing of
 - **Prevent:** trace the value from its runtime consumer before choosing what the gate reads, and give every gate
   over parsed text a floor on what it found, so an input that stops matching fails instead of passing.
 - **Source:** `docs/reviews/rca-culture-fallback-followups-2026-10-19.md` F2, F3, F7.
+
+### A new marker block goes ahead of a generator region that re-inserts itself at the closing tag (Dale expansion, 2026-10-20)
+The Dale block was first appended after the Arthedain generator's block in `clans.xml`, `lords.xml` and `heroes.xml`.
+`generate_new_faction_kingdoms.py` upserts its block at the closing tag, so a rerun would have moved it past Dale's.
+`test_generator_regions_in_sync.py` caught it, but only in the pytest folder nobody ran before the commit.
+- **Why missed:** the gate lives in `tools/tests/`, outside the C# suite that the commit routine runs.
+- **Prevent:** run `python -m pytest tools/tests` for any change to generated XML, and keep a new hand-authored marker
+  block ahead of any region a generator re-inserts at the closing tag.
+- **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.

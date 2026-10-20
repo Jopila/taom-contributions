@@ -520,6 +520,7 @@ Real failure modes from past sessions. Read these before you ship.
 | [`tools/apply_culture_skills_traits.py`](../../tools/apply_culture_skills_traits.py) | Generator (source of truth — `BASE_ARCHETYPES` + `CULTURES` dicts incl. `archetype_alias`) |
 | [`tools/repoint_evil_lord_skillsets.py`](../../tools/repoint_evil_lord_skillsets.py) | Balance-pass repoint/parity: culture-scoped skill_template swaps, full inline-`<skills>` sync from the sets XML, `TEMPLATE_ASSIGN` for template-less adults (`--dry-run`/`--apply`) |
 | [`tools/author_elf_lords.py`](../../tools/author_elf_lords.py) | One-off new-lord authoring reference (#324): full NPCCharacter+Hero+Faction wiring, inline skills from live SkillSets, donor face keys, clan party-slot math |
+| [`tools/oneoff/author_dale_lords.py`](../../tools/oneoff/author_dale_lords.py) | Finished one-off (#943) and the better authoring pattern: five Dale clans and 27 lords as idempotent marker blocks, byte-faithful reads and writes (inserted blocks assume CRLF); refuses to run without `--rerun-retired` |
 | [`tools/analyze_lord_balance.py`](../../tools/analyze_lord_balance.py) | Read-only per-culture stats + perk review; the verification lens for every balance pass |
 | [`tools/generate_culture_issue_drafts.py`](../../tools/generate_culture_issue_drafts.py) | Per-culture GitHub issue draft generator |
 | [`Main/_Module/ModuleData/taom_lord_skill_sets.xml`](../../Main/_Module/ModuleData/taom_lord_skill_sets.xml) | Generated — 120 SkillSets (DO NOT hand-edit) |

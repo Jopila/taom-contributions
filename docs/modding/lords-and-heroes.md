@@ -483,7 +483,7 @@ For content retirement across the mod, see [Retire content](recipe-retire-conten
 - [culture playability wiring](../features/culture-playability-wiring.md) for the fatal-or-silent checklist a re-culture has to satisfy.
 - [moduledata validation](../features/moduledata-validation.md) for what the validator walks and what it does not.
 - [TRANSLATOR_GUIDE](../localization/TRANSLATOR_GUIDE.md) for the string schema and the `language_data.xml` registration a new key needs.
-- [tools README](../../tools/README.md) for `complete_lords_xslt.py`, `sync_lord_name_fallbacks.py`, `analyze_lord_balance.py` and `author_elf_lords.py`, the copy-me pattern for generating a culture's lords.
+- [tools README](../../tools/README.md) for `complete_lords_xslt.py`, `sync_lord_name_fallbacks.py`, `analyze_lord_balance.py` and `author_elf_lords.py`, plus `oneoff/author_dale_lords.py`, the better copy-me pattern for generating a culture's lords (byte-faithful reads and writes, idempotent marker blocks; its inserted blocks assume CRLF line endings).
 
 ---
 

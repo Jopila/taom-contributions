@@ -2114,3 +2114,39 @@ orc-race lords.
   data (`LOTRLOME_Armory` items and `skins.xml`, `characters/lords.xml`), and test the shipped list against the live
   data where it is present.
 - **Source:** `docs/reviews/rca-tokens-of-esteem-2026-10-19.md` finding 2.
+
+### Lord count is not party count (Dale expansion, 2026-10-20)
+Party slots follow clan tier (`DefaultClanTierModel.GetPartyLimitForTier`: tier 0-2 one party, 3-4 two, 5-6 three, plus
+one for a clan leader with the Talent Magnet perk), so adding lords to existing clans raises no limit. Spare fighting
+lords only keep a clan's slots filled when lords are captured. Dale had 48 adult lords against a major-kingdom median of
+75, and padding its nine clans would have left about 18 parties.
+- **Why missed:** lord count reads as a proxy for army count, and nothing in the data shows the tier rule.
+- **Prevent:** to grow a kingdom's armies, add clans or raise tiers; count party slots, not lords. Dale went to 14 clans
+  and 30 party slots.
+- **Source:** [dale-lord-expansion.md](../../features/dale-lord-expansion.md), `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
+
+### Donor faces must be faces no loaded character wears (Dale expansion, 2026-10-20)
+The 27 new Dale lords took the face of the nearest-age, same-sex lord from the same kingdom as a donor. Those donors were
+still loaded, so the new lords were twins of existing ones at one court.
+- **Why missed:** "nearest match" was chosen for look, and nobody checked whether the donor character still exists in the
+  merged data.
+- **Prevent:** take donor faces from vanilla lords whose faces TAOM's `lords.xslt` replaces, so no campaign character wears
+  them, and gate the uniqueness of face keys in a test (`tools/tests/test_dale_lord_expansion.py`).
+- **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
+
+### Give a lord the kit of its role (Dale expansion, 2026-10-20)
+The authoring tool rotated equipment rosters `a` to `h` across lords. Only rosters `a` and `b` carry a bow, so 5 of the 7
+bowman lords had none.
+- **Why missed:** the rotation was blind to roster contents, and the skill set (`dale_bowman`) was never compared with
+  what the roster holds.
+- **Prevent:** when a role is chosen by skill set, check the roster's contents against that role (a bow for an archer, a
+  shield for a shield troop) and pin it in a shipped-data test.
+- **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
+
+### A donated banner key must use icon ids the banner_icons files define (Dale expansion, 2026-10-20)
+`clan_mirkwood_5`'s banner key, donated to a new clan, draws a blank emblem because an icon id in it is not defined in
+the `banner_icons` files. `ShippedHeraldryBannerKeyTests` checks only the key's shape, so it passed.
+- **Why missed:** the gate validates syntax, not that each icon id resolves.
+- **Prevent:** before donating a key, look each icon id up in the `banner_icons` files; prefer a key already used by
+  clans that render correctly (Dale uses clans 2 to 9's).
+- **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.

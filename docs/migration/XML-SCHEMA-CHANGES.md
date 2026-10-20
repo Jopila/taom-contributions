@@ -158,7 +158,7 @@ This document tracks XML schema changes between Bannerlord versions to ensure TA
 | `clan_empire_north_[1-9]` | `clan_empire_north_1` | Empire (Dunland) |
 | `clan_empire_west_[1-9]` | `clan_empire_west_5` | Empire West (Gondor) |
 | `clan_empire_south_[1-9]` | `clan_empire_south_3` | Empire South (Mordor) |
-| `clan_sturgia_[1-9]` | `clan_sturgia_1` | Sturgia (Dale) |
+| `clan_sturgia_[1-14]` | `clan_sturgia_1` | Sturgia (Dale) |
 | `clan_aserai_[1-9]` | `clan_aserai_4` | Aserai (Harad) |
 | `clan_vlandia_[1-11]` | `clan_vlandia_7` | Vlandia (Rohan) |
 | `clan_battania_[1-8]` | `clan_battania_2` | Battania (Khand) |

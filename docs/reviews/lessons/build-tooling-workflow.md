@@ -4105,3 +4105,20 @@ the settings test.
 - **Prevent:** any edit to a file named in `docs/reference/taleworlds-api-snapshot/reflection-sites.md`, comments
   included, runs `dotnet test TAOM.Tests --filter FullyQualifiedName~ReflectionSiteBinding` before it is reported done.
 - **Source:** `docs/reviews/rca-fell-foes-2026-10-19.md` row 27.
+
+### Change data a generator owns through that generator (Dale expansion, 2026-10-20)
+The live castle seating was hand-edited while `Assign-SettlementOwners.py`'s SPEC was changed but never run. Any later
+run of any region would have re-seated all seven Dale castles to the tool's own distribution, undoing the hand edit.
+- **Why missed:** the hand edit gave the right result today, so nothing looked wrong; the tool and the data disagreed
+  silently.
+- **Prevent:** edit the SPEC, dry-run until the diff is exactly the intended change, then `--apply`. "0 differ" on a
+  second dry-run is the check.
+- **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
+
+### Deploy the TAOM build before a live TAOM_Map edit that names new TAOM ids (Dale expansion, 2026-10-20)
+The live `TAOM_Map` named `clan_sturgia_10` and `clan_sturgia_11` as castle owners while the deployed TAOM build still
+lacked those clans. The two modules ship together; a map ahead of its build points castles at undefined clans.
+- **Why missed:** TAOM_Map is unversioned and edited live, so no commit ties it to the TAOM build that defines its ids.
+- **Prevent:** deploy the TAOM build first, then edit the map, and run the per-channel check in
+  [release-process.md](../../reference/release-process.md) before publishing.
+- **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
