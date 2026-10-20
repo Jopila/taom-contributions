@@ -4,7 +4,7 @@
 
 Lords of TAOM cultures can now receive a banner item. A `BannerItemModel` override widens the vanilla culture
 filter, so Gondor lords carry the empire banners, Erebor lords the sturgia banners, and every non-vanilla culture
-can also take the neutral ones.
+can also take the neutral ones. A second override, `VassalRewardsModel`, gives a player who joins a TAOM-culture kingdom a level 2 banner too.
 
 ## Why This Exists
 
@@ -51,6 +51,7 @@ lord_banners/lord_banner_cultures.json
   LordBannerService (the rule)  <--  projection lambda in the model (item -> culture, level)
         |
   TaomBannerItemModel (GetPossibleRewardBannerItemsForHero)
+  TaomVassalRewardsModel (joining a kingdom): a level 2 draw from the same Allowed pool
 ```
 
 ## Configuration
@@ -89,6 +90,7 @@ Elves, orcs and creatures have no row: neutral banners only.
 |------|---------|
 | `Main/Features/LordBanners/LordBannerService.cs` | The rule |
 | `Main/Features/LordBanners/Models/TaomBannerItemModel.cs` | Engine hook, one delegate |
+| `Main/Features/LordBanners/Models/TaomVassalRewardsModel.cs`, `VassalBannerReward.cs` | The joining-kingdom reward: one-line override and its boundary helper |
 | `Main/Features/LordBanners/LordBannerCulturesConfigProvider.cs` | Validating loader, plus `ILordBannerCulturesConfigProvider.cs` and `LordBannerMap.cs` (map and built-in default) |
 | `Main/Features/LordBanners/LordBannersModule.cs` | Registration and model declaration |
 | `Main/_Module/ModuleData/lord_banners/lord_banner_cultures.json` | The map |
@@ -103,11 +105,11 @@ Elves, orcs and creatures have no row: neutral banners only.
 - `TAOM.Tests/Features/LordBanners/LordBannerCulturesConfigProviderTests.cs`: one test per validation rule
 - `TAOM.Tests/Features/LordBanners/ShippedLordBannerCulturesConfigTests.cs`: the shipped file parses clean, equals the built-in map, names real culture ids; with the game installed, every culture that has a lord in repo ModuleData gets a non-empty pool at levels 1 to 3 (inconclusive without the install)
 - `TAOM.Tests/Features/LordBanners/ShippedHeraldryBannerKeyTests.cs`: every clan and kingdom `banner_key` in `clans.xml`, `taom_spkingdoms.xml`, `spclans.xslt` and `spkingdoms.xslt` is whole groups of ten integers; since #823 vanilla's captain path banners TAOM lord-led formations without TAOM's heraldry guard
-- `TAOM.Tests/Features/LordBanners/LordBannersWiringTests.cs`: module listing, no patch or behavior, the model declaration
+- `TAOM.Tests/Features/LordBanners/LordBannersWiringTests.cs`: module listing, no patch or behavior, the two model declarations, and IL scans that the vassal override calls the base then the helper with no branch and that the helper checks the roster, draws from `Allowed`, then adds one banner
 
 ## Consequences
 
-- Known gap: `DefaultVassalRewardsModel.GetEquipmentRewardsForJoiningKingdom` picks a level 2 banner of the kingdom's culture from `GetPossibleRewardBannerItems()`, which this feature does not change, so joining a TAOM-culture kingdom gives no banner reward (follow-up).
+- Joining a kingdom: `DefaultVassalRewardsModel.GetEquipmentRewardsForJoiningKingdom` picks a level 2 banner of the kingdom's culture, which never matched a TAOM culture. Closed by #933: `TaomVassalRewardsModel` keeps the base roster and, only when it holds no banner item, adds one drawn with the engine's own `GetRandomElement` from `LordBannerService.Allowed` at level 2 for the kingdom's culture. A vanilla culture's kingdom gets exactly vanilla's result. The reward is given once per campaign behind vanilla's saved `_receivedVassalRewards` flag, so a save whose player already swore fealty gets none. Under the co-op mod the client calls the model.
 - A lord-captained formation now flies the lord's own banner, level 1 to 3 by rank. `GeneralsAndCaptainsAssignmentLogic`
   uses the captain's `FormationBanner`, which comes from `Hero.BannerItem` (`BattleEquipment[ExtraWeaponSlot]`),
   instead of the level 1 culture banner from the BannerBearers feature ([banner-bearers.md](banner-bearers.md)).
@@ -124,13 +126,14 @@ Elves, orcs and creatures have no row: neutral banners only.
 
 ## In-game check
 
-Load a save, then fight a battle against or alongside a Gondor, Erebor or Mordor lord and see the bearer carry a level 1 to 3 banner (the equipment screen hides the banner slot). A clan leader carries level 2, a ruler level 3. Also run a siege with a TAOM lord defending alongside a garrison, past deployment and one reinforcement wave.
+Load a save, then fight a battle against or alongside a Gondor, Erebor or Mordor lord and see the bearer carry a level 1 to 3 banner (the equipment screen hides the banner slot). A clan leader carries level 2, a ruler level 3. Also run a siege with a TAOM lord defending alongside a garrison, past deployment and one reinforcement wave. Start a new campaign and swear fealty to a Gondor kingdom and to a Rohan kingdom: the Gondor reward holds a level 2 banner, and the Rohan reward is vanilla's.
 
 ## Changelog
 
-- 2026-10-19: added (#823).
+- 2026-10-19: added (#823); joining-kingdom banner reward (#933).
 
 ## GitHub Issue
 
 - **Issue:** #823 Lords of custom cultures never receive a banner item
 - **Status:** Open
+- **Issue:** #933 Joining a TAOM-culture kingdom gives no banner reward
