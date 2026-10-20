@@ -1979,3 +1979,13 @@ staging bug in the first reader test hid the same way.
   throw turns them red; prove RED by deleting each guard. Read source pins with
   `RepoPaths.ReadSource(path, stripComments: true)`.
 - **Source:** `docs/reviews/rca-enlistment-relief-lord-2026-10-20.md` F1.
+
+### A plan's budgets and cadences are acceptance items too (Lost Footing, 2026-10-20)
+The plan said "64 agents per frame" in its shape section. The acceptance list the builder ticked did not carry it, and the
+build read 64 agents per one-second pass, so a sweep took 16 s at 1,000 agents and every "2 s" window meant 16 to 24 s.
+Second occurrence of the acceptance-list gap after Fell Foes (entry above, "A plan brief restates every approved
+behaviour").
+- **Why missed:** the acceptance list held behaviours, not constraints.
+- **Prevent:** every number the design depends on (per-frame budgets, cadences, windows, caps) is an acceptance item with
+  its unit, and a test pins it (here: N agents over N/64 ticks, each read once).
+- **Source:** `docs/reviews/rca-lost-footing-2026-10-20.md` row 3.

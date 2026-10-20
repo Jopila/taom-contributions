@@ -1319,3 +1319,20 @@ The face adapter cached every `Hero` by id to avoid a linear `Hero.Find`, and as
 - **Why missed:** the cache was a performance shortcut and nothing cleared it.
 - **Prevent:** carry the engine object inside the snapshot as an opaque handle (the `MountSnapshot` pattern), so the adapter stays stateless and references live only for one call.
 - **Source:** `docs/reviews/rca-followups-949-952-2026-10-20.md` F4.
+### Before a shared component's presence means a kind, list every site that attaches it (Lost Footing, 2026-10-20)
+The census called an agent a creature when it carried a `BehaviorTreeAgentComponent`. Race Abilities attaches the same
+component to every soldier whose race or culture has a profile, on by default, so nearly every soldier would have read as
+a creature.
+- **Why missed:** the plan defined the kind from the creature features, the component's best-known users.
+- **Prevent:** before using a component, flag or marker as a classifier, grep every `AddComponent`/attach site of that type
+  and classify by what the component holds (here the tree type), not by its presence.
+- **Source:** `docs/reviews/rca-lost-footing-2026-10-20.md` rows 1 and 14.
+
+### Read an engine getter's body and its callers before measuring with it (Lost Footing, 2026-10-20)
+The census read `Agent.GetTargetPosition()` as the AI move destination. Natively it is the movement-lock target, written
+only by `SetTargetPosition*` (ladders, siege engines, cheering) and (0,0) for an ordinary soldier; vanilla reads it only
+while `MovementLockedState` is set. The AI destination is `GetAIMoveDestination()`.
+- **Why missed:** the name fitted, and the plan's engine table listed it without reading it.
+- **Prevent:** for every engine member that feeds a gate or a measurement, read its body (native when it is an icall) and
+  at least one vanilla caller, and write the meaning into the plan with the citation.
+- **Source:** `docs/reviews/rca-lost-footing-2026-10-20.md` row 2.

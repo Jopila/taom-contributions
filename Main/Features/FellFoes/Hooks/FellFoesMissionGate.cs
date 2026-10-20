@@ -9,6 +9,7 @@ namespace TAOM.Features.FellFoes.Hooks;
 /// never an arena or tournament, a town, a hideout or a conversation, and never in a co-op session or where a
 /// co-op host owns the battle (the soldiers' morale and orders are the host's to decide), and never once the mission has
 /// ended (the result is decided, and a write then would turn captures into routs).
+/// Lost Footing (#894) uses this gate as it stands, so a change here moves the census too.
 /// The battle allowlist is <see cref="MountDespawnMissionGate"/>'s, shared with the corpse cleanup: an
 /// allowlist, so a mission type a later engine version adds is excluded until someone adds it on purpose.
 /// </summary>

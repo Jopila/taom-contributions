@@ -2345,4 +2345,14 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyInteger("Large Gold Purse", TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MinPurse, TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MaxPurse, Order = 6, RequireRestart = false,
         HintText = "The gold in the largest purse you can give a companion. A purse is worth 1 relation per 500 gold, at most 10 (5000 gold). Between 500 and 5000 gold. Default: 5000.")]
     public int GiftPurseLarge { get; set; } = TAOM.Features.TokensOfEsteem.GiftSettingsProvider.DefaultPurseLarge;
+
+    // --- Battle Tactics / Lost Footing (#894, phase 1: the census only) ---
+    // The first property carries the GroupOrder, because MCM ignores one on any later property; no other group may
+    // share it (LostFootingSettingsProviderTests pins that). GroupOrder 64 follows the groups at 62 and 63. The scan numbers are
+    // compiled defaults in LostFootingTunables, not settings: nobody needs to tune a measurement.
+
+    [SettingPropertyGroup("Battle Tactics/Lost Footing", GroupOrder = 64)]
+    [SettingPropertyBool("Lost Footing Census", Order = 0, RequireRestart = false,
+        HintText = "Counts soldiers, mounts and creatures that are stuck in a battle, standing off the walkable ground or wading in water without moving, and writes what it finds to the log with a [LostFooting] tag, with a summary when the battle ends. It only watches: it never moves or changes anything in the battle. Field battles, sieges and sally-outs. Default: on.")]
+    public bool LostFootingCensus { get; set; } = true;
 }

@@ -81,6 +81,8 @@ public static class CoopSettingsRelevance
         // Fell Foes (docs/features/fell-foes.md): the debug log writes a [FellFoes] line and gates nothing else. The other
         // eight are kept by include-by-default: Fell Foes stands down in co-op, so a mismatch on them is a spurious line.
         "FellFoesDebug",
+        // Lost Footing (docs/features/lost-footing.md): the census writes [LostFooting] lines and reads the battle, never changes it.
+        "LostFootingCensus",
         // The Patch97 tick profiler and its two knobs (2026-10-02): log lines, never a computation.
         "EnableTickProfiler", "TickProfilerTopN", "HitchThresholdMs",
         // The Patch98 hitch probe (2026-10-02): log lines, never a computation

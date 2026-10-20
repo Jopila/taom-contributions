@@ -120,6 +120,16 @@ public class FellFoesWiringTests
     }
 
     [TestMethod]
+    public void Module_TheMissionGate_IsTheFellFoesGate_WiredIntoTheClosure()
+    {
+        var src = RepoPaths.ReadSource("Main/Features/FellFoes/FellFoesModule.cs", stripComments: true);
+
+        Assert.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(src, @"\(\)\s*=>\s*FellFoesMissionGate\.IsEligible\(mission,\s*coop\)"),
+            "a closure that ignored the gate would let Fell Foes act in co-op and after the mission ends");
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
     public void EveryMission_GetsItsOwnBehaviorAndItsOwnState()
     {
         var container = new Container();

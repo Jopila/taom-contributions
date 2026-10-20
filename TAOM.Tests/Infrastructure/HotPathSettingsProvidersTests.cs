@@ -20,6 +20,7 @@ using TAOM.Features.DreadAura;
 using TAOM.Features.DreadAura.Domain;
 using TAOM.Features.Elephant;
 using TAOM.Features.FellFoes;
+using TAOM.Features.LostFooting;
 using TAOM.Features.MixedFormations;
 using TAOM.Features.RaceAbilities;
 using TAOM.Features.Refuge;
@@ -74,6 +75,7 @@ public class HotPathSettingsProvidersTests
     [DataRow(typeof(GaitVarietySettingsProvider))]
     [DataRow(typeof(AnimVarietyProbeSettingsProvider))]
     [DataRow(typeof(FellFoesSettingsProvider))]
+    [DataRow(typeof(LostFootingSettingsProvider))]
     // #746: static, read per hit against a creature bandit. It has no instance to construct, so the counting
     // test below cannot take it: CreatureBanditTuningLiveTests runs the same CountingMcm check on it.
     [DataRow(typeof(CreatureBanditTuning))]
@@ -124,6 +126,7 @@ public class HotPathSettingsProvidersTests
     [DataRow(typeof(IGaitVarietySettingsProvider), typeof(GaitVarietySettingsProvider))]
     [DataRow(typeof(IAnimVarietyProbeSettingsProvider), typeof(AnimVarietyProbeSettingsProvider))]
     [DataRow(typeof(IFellFoesSettingsProvider), typeof(FellFoesSettingsProvider))]
+    [DataRow(typeof(ILostFootingSettingsProvider), typeof(LostFootingSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -195,6 +198,9 @@ public class HotPathSettingsProvidersTests
         // Fell Foes: read once a second per mission tick while a battle runs.
         [typeof(FellFoesSettingsProvider)] = (() => new FellFoesSettingsProvider(),
             nameof(IFellFoesSettingsProvider.CorneredRoutersEnabled), nameof(TaomSettings.FellFoesCorneredRouters), () => new TaomSettings()),
+        // Lost Footing census: read on every tick while a battle runs.
+        [typeof(LostFootingSettingsProvider)] = (() => new LostFootingSettingsProvider(),
+            nameof(ILostFootingSettingsProvider.CensusEnabled), nameof(TaomSettings.LostFootingCensus), () => new TaomSettings()),
     };
 
     // The IL rule above proves WHERE MCM is resolved, not THAT the result is kept: an accessor written
@@ -219,6 +225,7 @@ public class HotPathSettingsProvidersTests
     [DataRow(typeof(GaitVarietySettingsProvider))]
     [DataRow(typeof(AnimVarietyProbeSettingsProvider))]
     [DataRow(typeof(FellFoesSettingsProvider))]
+    [DataRow(typeof(LostFootingSettingsProvider))]
     public void Provider_AsksMcmUntilItHasTheSettings_ThenNeverAgain_AndReadsThrough(Type provider)
     {
         var probe = Probes[provider];
