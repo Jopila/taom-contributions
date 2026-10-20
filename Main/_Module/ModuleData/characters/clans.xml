@@ -2144,6 +2144,73 @@
 		default_party_template="PartyTemplate.kingdom_hero_party_rivendell_lindon_2_template"
 		banner_key="11.330.166.1528.1528.764.764.1.0.0.22000.149.171.700.700.764.764.0.0.0.22001.142.116.350.350.765.854.1.0.0" />
   <!-- TAOM-NEWFACTIONS:lindon:END -->
+  <!-- TAOM-DALE-EXPANSION:BEGIN -->
+  <Faction
+		id="clan_sturgia_10"
+		initial_home_settlement="Settlement.castle_S4"
+		name="{=aom_clan_sturgia_10_name}House of the Running River"
+		tier="4"
+		owner="Hero.lord_S10_1"
+		culture="Culture.sturgia"
+		super_faction="Kingdom.sturgia"
+		is_noble="true"
+		color="FF1B4A5E"
+		color2="FFC9A24A"
+		default_party_template="PartyTemplate.kingdom_hero_party_dale_sturgia_1_template"
+		banner_key="11.312.166.1528.1528.764.764.1.0.0.27000.238.171.900.900.765.790.0.0.0" />
+  <Faction
+		id="clan_sturgia_11"
+		initial_home_settlement="Settlement.castle_S1"
+		name="{=aom_clan_sturgia_11_name}House of the Carnen"
+		tier="4"
+		owner="Hero.lord_S11_1"
+		culture="Culture.sturgia"
+		super_faction="Kingdom.sturgia"
+		is_noble="true"
+		color="FF2A3F7A"
+		color2="FFD8B04F"
+		default_party_template="PartyTemplate.kingdom_hero_party_dale_sturgia_4_template"
+		banner_key="11.312.166.1528.1528.764.764.1.0.0.27000.238.171.900.900.765.790.0.0.0" />
+  <Faction
+		id="clan_sturgia_12"
+		initial_home_settlement="Settlement.castle_S3"
+		name="{=aom_clan_sturgia_12_name}House of Ravenhill"
+		tier="3"
+		owner="Hero.lord_S12_1"
+		culture="Culture.sturgia"
+		super_faction="Kingdom.sturgia"
+		is_noble="true"
+		color="FF3A2F6B"
+		color2="FFD9C25A"
+		default_party_template="PartyTemplate.kingdom_hero_party_dale_sturgia_2_template"
+		banner_key="11.312.166.1528.1528.764.764.1.0.0.27000.238.171.900.900.765.790.0.0.0" />
+  <Faction
+		id="clan_sturgia_13"
+		initial_home_settlement="Settlement.town_S4"
+		name="{=aom_clan_sturgia_13_name}House of the Forest River"
+		tier="3"
+		owner="Hero.lord_S13_1"
+		culture="Culture.sturgia"
+		super_faction="Kingdom.sturgia"
+		is_noble="true"
+		color="FF174A66"
+		color2="FFE0D6A8"
+		default_party_template="PartyTemplate.kingdom_hero_party_dale_sturgia_3_template"
+		banner_key="11.312.166.1528.1528.764.764.1.0.0.27000.238.171.900.900.765.790.0.0.0" />
+  <Faction
+		id="clan_sturgia_14"
+		initial_home_settlement="Settlement.town_S5"
+		name="{=aom_clan_sturgia_14_name}House of the Long Marshes"
+		tier="3"
+		owner="Hero.lord_S14_1"
+		culture="Culture.sturgia"
+		super_faction="Kingdom.sturgia"
+		is_noble="true"
+		color="FF2C4A3E"
+		color2="FFC9B458"
+		default_party_template="PartyTemplate.kingdom_hero_party_dale_sturgia_6_template"
+		banner_key="11.312.166.1528.1528.764.764.1.0.0.27000.238.171.900.900.765.790.0.0.0" />
+  <!-- TAOM-DALE-EXPANSION:END -->
   <!-- TAOM-NEWFACTIONS:arthedain:BEGIN -->
   <Faction
 		id="clan_arthedain_1"
@@ -2211,71 +2278,4 @@
 		default_party_template="PartyTemplate.kingdom_hero_party_arthedain_template"
 		banner_key="11.190.190.1528.1528.764.764.1.0.0.11004.110.110.700.700.764.764.0.0.0" />
   <!-- TAOM-NEWFACTIONS:arthedain:END -->
-  <!-- TAOM-DALE-EXPANSION:BEGIN -->
-  <Faction
-		id="clan_sturgia_10"
-		initial_home_settlement="Settlement.castle_S1"
-		name="{=aom_clan_sturgia_10_name}House of the Running River"
-		tier="4"
-		owner="Hero.lord_S10_1"
-		culture="Culture.sturgia"
-		super_faction="Kingdom.sturgia"
-		is_noble="true"
-		color="FF1B4A5E"
-		color2="FFC9A24A"
-		default_party_template="PartyTemplate.kingdom_hero_party_dale_sturgia_1_template"
-		banner_key="11.149.166.1528.1528.764.764.1.0.0.24030.330.172.900.1100.765.1024.1.0.0.515.143.143.50.50.650.745.1.0.0.515.143.143.50.50.878.745.1.0.0.24509.143.172.200.200.765.656.1.0.0" />
-  <Faction
-		id="clan_sturgia_11"
-		initial_home_settlement="Settlement.castle_S3"
-		name="{=aom_clan_sturgia_11_name}House of the Celduin"
-		tier="4"
-		owner="Hero.lord_S11_1"
-		culture="Culture.sturgia"
-		super_faction="Kingdom.sturgia"
-		is_noble="true"
-		color="FF2A3F7A"
-		color2="FFD8B04F"
-		default_party_template="PartyTemplate.kingdom_hero_party_dale_sturgia_4_template"
-		banner_key="11.99.166.1528.1528.764.764.1.0.0.24022.29.193.800.800.782.819.1.0.0.505.97.171.5988.914.717.1314.0.0.0.24505.172.116.150.150.764.1004.1.0.0.24505.172.116.150.150.655.1004.1.0.0.24505.172.116.150.150.877.1004.1.0.0.24509.249.251.250.250.762.554.1.0.0" />
-  <Faction
-		id="clan_sturgia_12"
-		initial_home_settlement="Settlement.town_S2"
-		name="{=aom_clan_sturgia_12_name}Wardens of Esgaroth"
-		tier="3"
-		owner="Hero.lord_S12_1"
-		culture="Culture.sturgia"
-		super_faction="Kingdom.sturgia"
-		is_noble="true"
-		color="FF3A2F6B"
-		color2="FFD9C25A"
-		default_party_template="PartyTemplate.kingdom_hero_party_dale_sturgia_2_template"
-		banner_key="11.2.166.1528.1528.764.764.1.0.0.505.53.171.484.484.764.764.0.0.45.505.126.171.470.470.764.764.0.0.45.505.53.171.454.454.764.764.0.0.45.17003.164.116.500.500.766.770.1.0.0.17002.96.116.500.500.770.772.1.0.0" />
-  <Faction
-		id="clan_sturgia_13"
-		initial_home_settlement="Settlement.town_S4"
-		name="{=aom_clan_sturgia_13_name}House of Lake-town"
-		tier="3"
-		owner="Hero.lord_S13_1"
-		culture="Culture.sturgia"
-		super_faction="Kingdom.sturgia"
-		is_noble="true"
-		color="FF174A66"
-		color2="FFE0D6A8"
-		default_party_template="PartyTemplate.kingdom_hero_party_dale_sturgia_3_template"
-		banner_key="11.330.166.1528.1528.764.764.1.0.0.24016.108.149.525.525.764.757.0.0.0.24016.2000.149.500.500.764.757.0.0.0" />
-  <Faction
-		id="clan_sturgia_14"
-		initial_home_settlement="Settlement.town_S5"
-		name="{=aom_clan_sturgia_14_name}House of the Long Marshes"
-		tier="3"
-		owner="Hero.lord_S14_1"
-		culture="Culture.sturgia"
-		super_faction="Kingdom.sturgia"
-		is_noble="true"
-		color="FF2C4A3E"
-		color2="FFC9B458"
-		default_party_template="PartyTemplate.kingdom_hero_party_dale_sturgia_6_template"
-		banner_key="11.158.75.4345.4345.764.764.1.0.0.505.274.100.471.471.764.764.0.0.45.505.126.100.460.460.764.764.0.0.45.17299.128.116.75.75.764.1002.0.0.0.17299.128.116.75.75.764.526.0.0.0.17299.128.116.75.75.1002.764.0.0.0.17299.128.116.75.75.526.764.0.0.0.17358.31.165.500.500.763.763.1.0.0" />
-  <!-- TAOM-DALE-EXPANSION:END -->
 </Factions>

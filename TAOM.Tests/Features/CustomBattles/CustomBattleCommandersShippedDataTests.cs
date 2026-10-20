@@ -21,9 +21,9 @@ namespace TAOM.Tests.Features.CustomBattles;
 [TestClass]
 public class CustomBattleCommandersShippedDataTests
 {
-    // The 8 factions the shipped config curates. Pins coverage so a future edit can't silently drop one.
+    // The 9 factions the shipped config curates. Pins coverage so a future edit can't silently drop one.
     private static readonly string[] ExpectedFactions =
-        { "mordor", "gondor", "vlandia", "mirkwood", "rivendell", "lothlorien", "isengard", "erebor" };
+        { "mordor", "gondor", "vlandia", "mirkwood", "rivendell", "lothlorien", "isengard", "erebor", "sturgia" };
 
     // The playable cultures, read from the data (custom is_main_culture ids plus the six XSLT ones).
     private static readonly HashSet<string> KnownCultureIds = TAOM.Tests.Core.CultureDataFixture.MainCultureIds();

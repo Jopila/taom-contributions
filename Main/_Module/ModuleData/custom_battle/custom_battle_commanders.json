@@ -10,6 +10,7 @@
     "isengard":   ["lord_I1_0", "lord_I1_1", "lord_I4_1", "lord_I2_1", "lord_I2_3", "lord_I3_1"],
     "erebor":     ["lord_E1_1", "lord_E1_2", "lord_E1_5"],
     "aserai":     ["harad_lord_infantry", "harad_lord_cavalry", "harad_lord_archer"],
-    "shaghana":   ["shaghana_lord_infantry", "shaghana_lord_cavalry", "shaghana_lord_archer"]
+    "shaghana":   ["shaghana_lord_infantry", "shaghana_lord_cavalry", "shaghana_lord_archer"],
+    "sturgia":    ["lord_S10_1", "lord_S11_1", "lord_S13_1"]
   }
 }

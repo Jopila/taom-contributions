@@ -497,35 +497,19 @@ CULTURES = {
         ],
         'canonical': {
             # The TAOM Dale roster is largely TAOM-invented wives + nobles; few canonical heroes here.
-            # 2026-10-20 lord expansion (tools/author_dale_lords.py): archetype pins so a future regen
-            # reproduces the authored assignments instead of re-deriving them from (absent) bios.
+            # 2026-10-20 lord expansion (tools/oneoff/author_dale_lords.py): pins only for the new lords
+            # whose archetype the age and sex default would not derive on its own.
             'lord_S10_1': dict(archetype='dale_lord'),         # Halvard, owner of clan_sturgia_10
-            'lord_S10_2': dict(archetype='dale_lady'),         # Ragnhild
             'lord_S10_3': dict(archetype='dale_knight'),       # Arnkel
             'lord_S10_4': dict(archetype='dale_bowman'),       # Torgrim
             'lord_S10_5': dict(archetype='dale_bowman'),       # Eyvind
-            'lord_S10_6': dict(archetype='dale_young_lady'),   # Sunniva
-            'lord_S11_1': dict(archetype='dale_knight'),       # Ketil, owner of clan_sturgia_11
-            'lord_S11_2': dict(archetype='dale_lady'),         # Gudrun
-            'lord_S11_3': dict(archetype='dale_knight'),       # Orm
             'lord_S11_4': dict(archetype='dale_bowman'),       # Skuli
-            'lord_S11_5': dict(archetype='dale_young_lady'),   # Vigdis
-            'lord_S11_6': dict(archetype='dale_young_lord'),   # Hrafn
             'lord_S12_1': dict(archetype='dale_lord'),         # Ottar, owner of clan_sturgia_12
-            'lord_S12_2': dict(archetype='dale_lady'),         # Asa
-            'lord_S12_3': dict(archetype='dale_young_lord'),   # Geirmund
             'lord_S12_4': dict(archetype='dale_bowman'),       # Bjarni
-            'lord_S12_5': dict(archetype='dale_knight'),       # Kolbein
-            'lord_S13_1': dict(archetype='dale_knight'),       # Starkad, owner of clan_sturgia_13
-            'lord_S13_2': dict(archetype='dale_lady'),         # Thora
             'lord_S13_3': dict(archetype='dale_bowman'),       # Audun
             'lord_S13_4': dict(archetype='dale_bowman'),       # Ingvar
-            'lord_S13_5': dict(archetype='dale_young_lady'),   # Solveig
             'lord_S14_1': dict(archetype='dale_lord'),         # Thormod, owner of clan_sturgia_14
-            'lord_S14_2': dict(archetype='dale_lady'),         # Helga
-            'lord_S14_3': dict(archetype='dale_knight'),       # Brynjar
             'lord_S14_4': dict(archetype='dale_bowman'),       # Valgard
-            'lord_S14_5': dict(archetype='dale_young_lady'),   # Yrsa
         },
     },
 

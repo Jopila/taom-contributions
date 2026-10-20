@@ -11,36 +11,44 @@ block in place instead of duplicating it):
   - characters/clans.xml   - five <Faction> rows. Culture.sturgia under Kingdom.sturgia, name
                              keys aom_clan_sturgia_N_name (the characters/clans.xml convention;
                              clans 1-9 keep their TAOM_clan_sturgia_N keys in spclans.xslt),
-                             party template reused from clan_sturgia_1..9, banner key donated
-                             from a long valid Erebor / Mirkwood clan (valid > invented; a
-                             placeholder until a heraldry pass), colours authored here.
+                             party template reused from clan_sturgia_1..9, banner key
+                             shared by clans 2-9 (spclans.xslt), colours authored here.
   - characters/lords.xml   - 27 NPCCharacter blocks. Inline <skills> are the live SkillSet
                              values (LordInlineSkillParityTests), <Traits> the generator
-                             archetype's, equipment rosters a..h rotated, face key + weight +
-                             build donated from the existing adult Dale lord of the SAME sex
-                             nearest in age (is_female, beard tags and key travel as one unit;
+                             archetype's, equipment rosters a..h rotated (bowmen on a/b, the
+                             only rosters with a bow), face key + weight + build donated from
+                             a vanilla Vlandian / Imperial lord that lords.xslt replaces and
+                             whose key nothing else uses, of the SAME sex nearest in age, no
+                             donor twice (is_female, beard tags and key travel as one unit;
                              women carry no <beard_tags>).
   - characters/heroes.xml  - 27 <Hero> rows (faction, father, mother, spouse).
   - clan_heraldry/dale.json - five colours-only spec entries (no roster: the clans reuse
                              existing templates, so the spec must not claim a roster).
 
-Not done here, by design (separate hand edits): canonical pins in
-apply_culture_skills_traits.py, the tier bump of clan_sturgia_8/9 in spclans.xslt, the live
-TAOM_Map castle owners (castle_S1 -> clan_sturgia_10, castle_S3 -> clan_sturgia_11),
-tools/Assign-SettlementOwners.py, the name-string generator and clan_registry.py.
+Not done here, by design (separate hand edits): the tier bump of clan_sturgia_8/9 in
+spclans.xslt, the live TAOM_Map castle owners (tools/Assign-SettlementOwners.py), the
+name-string generator and clan_registry.py.
+
+Finished one-off: the XML is now the source of truth; copy it under a new marker for new work.
+It refuses to run unless --rerun-retired is passed, before any read or write.
 
 Usage:
-    python tools/author_dale_lords.py            # dry-run (default)
-    python tools/author_dale_lords.py --apply
+    python tools/oneoff/author_dale_lords.py --rerun-retired            # dry-run (default)
+    python tools/oneoff/author_dale_lords.py --rerun-retired --apply
 """
 import argparse
+import codecs
 import json
 import re
 import sys
 import xml.etree.ElementTree as ET
+from collections import Counter
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
+REPO = Path(__file__).resolve().parents[2]
+if "--rerun-retired" not in sys.argv:
+    raise SystemExit("author_dale_lords.py is a finished one-off; the XML is the source of truth. "
+                     "Pass --rerun-retired to run it anyway.")
 MD = REPO / "Main" / "_Module" / "ModuleData"
 LORDS = MD / "characters" / "lords.xml"
 HEROES = MD / "characters" / "heroes.xml"
@@ -49,33 +57,32 @@ LORDS_XSLT = MD / "lords.xslt"
 SETS = MD / "taom_lord_skill_sets.xml"
 PARTY = MD / "taom_partyTemplates.xml"
 SPEC = MD / "clan_heraldry" / "dale.json"
-TAOM_MAP = Path(r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TAOM_Map\ModuleData\settlements.xml")
-
 sys.path.insert(0, str(REPO / "tools"))
+from _gamedir import ensure_exists, game_dir  # noqa: E402
 from apply_culture_skills_traits import BASE_ARCHETYPES, SKILL_ORDER, TRAIT_ORDER  # noqa: E402
+
+GAME = ensure_exists(game_dir(r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord"))
+VANILLA_MD = [GAME / "Modules" / "SandBox" / "ModuleData", GAME / "Modules" / "SandBoxCore" / "ModuleData"]
+TAOM_MAP = GAME / "Modules" / "TAOM_Map" / "ModuleData" / "settlements.xml"
+# The key clans 2-9 share in spclans.xslt.
+DALE_BANNER = "11.312.166.1528.1528.764.764.1.0.0.27000.238.171.900.900.765.790.0.0.0"
 
 BEGIN = "<!-- TAOM-DALE-EXPANSION:BEGIN -->"
 END = "<!-- TAOM-DALE-EXPANSION:END -->"
 EOL = "\r\n"
 
-# id, English name, tier, owner, home settlement, party template (existing), color, color2,
-# banner donor clan, spec theme
+# id, English name, tier, owner, home settlement, party template (existing), color, color2, spec theme
 CLANS_NEW = [
-    ("clan_sturgia_10", "House of the Running River", 4, "lord_S10_1", "castle_S1",
-     "kingdom_hero_party_dale_sturgia_1_template", "FF1B4A5E", "FFC9A24A", "clan_erebor_2",
-     "dale house 10 - balanced"),
-    ("clan_sturgia_11", "House of the Celduin", 4, "lord_S11_1", "castle_S3",
-     "kingdom_hero_party_dale_sturgia_4_template", "FF2A3F7A", "FFD8B04F", "clan_erebor_4",
-     "dale house 11 - cavalry"),
-    ("clan_sturgia_12", "Wardens of Esgaroth", 3, "lord_S12_1", "town_S2",
-     "kingdom_hero_party_dale_sturgia_2_template", "FF3A2F6B", "FFD9C25A", "clan_mirkwood_1",
-     "dale house 12 - infantry"),
-    ("clan_sturgia_13", "House of Lake-town", 3, "lord_S13_1", "town_S4",
-     "kingdom_hero_party_dale_sturgia_3_template", "FF174A66", "FFE0D6A8", "clan_erebor_7",
-     "dale house 13 - ranged"),
+    ("clan_sturgia_10", "House of the Running River", 4, "lord_S10_1", "castle_S4",
+     "kingdom_hero_party_dale_sturgia_1_template", "FF1B4A5E", "FFC9A24A", "dale house 10 - balanced"),
+    ("clan_sturgia_11", "House of the Carnen", 4, "lord_S11_1", "castle_S1",
+     "kingdom_hero_party_dale_sturgia_4_template", "FF2A3F7A", "FFD8B04F", "dale house 11 - cavalry"),
+    ("clan_sturgia_12", "House of Ravenhill", 3, "lord_S12_1", "castle_S3",
+     "kingdom_hero_party_dale_sturgia_2_template", "FF3A2F6B", "FFD9C25A", "dale house 12 - infantry"),
+    ("clan_sturgia_13", "House of the Forest River", 3, "lord_S13_1", "town_S4",
+     "kingdom_hero_party_dale_sturgia_3_template", "FF174A66", "FFE0D6A8", "dale house 13 - ranged"),
     ("clan_sturgia_14", "House of the Long Marshes", 3, "lord_S14_1", "town_S5",
-     "kingdom_hero_party_dale_sturgia_6_template", "FF2C4A3E", "FFC9B458", "clan_mirkwood_5",
-     "dale house 14 - skirmisher"),
+     "kingdom_hero_party_dale_sturgia_6_template", "FF2C4A3E", "FFC9B458", "dale house 14 - skirmisher"),
 ]
 
 # id, name, sex, age, voice, archetype, default_group, clan, father, mother, spouse
@@ -110,11 +117,21 @@ L = [
     ("lord_S14_5", "Yrsa", "F", 23, "softspoken", "dale_young_lady", "Infantry", 14, "lord_S14_1", "lord_S14_2", None),
 ]
 EQ = "abcdefgh"
+# Only dale_bat_template_medium_a and _b carry a bow (taom_equipment_sets_dale.xml).
+BOW_ROSTERS = "ab"
 
 
 def read(path):
     """Idiom B: full binary round-trip, so a BOM survives inside the string and so does every line ending."""
     return path.read_bytes().decode("utf-8")
+
+
+def read_loose(path):
+    """Any vanilla XML, for key counting only: a few game files are UTF-16."""
+    raw = path.read_bytes()
+    if raw.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)):
+        return raw.decode("utf-16")
+    return raw.decode("utf-8", errors="replace")
 
 
 def load_set_values():
@@ -123,21 +140,43 @@ def load_set_values():
             for ss in root.findall(".//SkillSet")}
 
 
-def harvest_donors(xslt_text):
-    """Adult Dale faces from the lords.xslt templates: (id, sex, age, weight, build, key)."""
-    donors, seen = [], set()
-    for m in re.finditer(r"<xsl:template match=\"NPCCharacter\[@id='([^']+)'\]\">(.*?)</xsl:template>", xslt_text, re.S):
-        lid, body = m.groups()
-        # lord_S8/S9 carry "PLACEHOLDER FACE KEY" comments in lords.xml: not real faces to copy.
-        if "Culture.sturgia" not in body or lid.startswith(("dead_", "lord_S")):
+HEX_KEY = re.compile(r"[0-9A-Fa-f]{100,}")
+DONOR_CULTURES = ("Culture.vlandia", "Culture.empire")
+
+
+def key_use_counts(texts):
+    """How often each face key occurs in the given texts, upper-cased."""
+    counts = Counter()
+    for text in texts:
+        counts.update(k.upper() for k in HEX_KEY.findall(text))
+    return counts
+
+
+def harvest_donors(xslt_text, vanilla_lords_text, taom_keys, vanilla_keys):
+    """Adult vanilla Vlandian / Imperial lords as face donors: (id, sex, age, weight, build, key).
+
+    A donor is a vanilla row that lords.xslt replaces with its own <face> (so the vanilla face never
+    loads) and whose key no TAOM file and no other vanilla row uses. BodyProperties may span lines and
+    omit weight or build, so the attributes are parsed one by one.
+    """
+    xslt = re.sub(r"<!--.*?-->", "", xslt_text, flags=re.S)
+    replaced = {m.group(1) for m in re.finditer(
+        r"<xsl:template match=\"NPCCharacter\[@id='([^']+)'\]\">(?:(?!</xsl:template>).)*?<BodyProperties",
+        xslt, re.S)}
+    donors = []
+    for node in ET.fromstring(vanilla_lords_text.encode("utf-8")).iter("NPCCharacter"):
+        lid, bp = node.get("id"), node.find("face/BodyProperties")
+        if node.get("culture") not in DONOR_CULTURES or lid not in replaced or bp is None or not bp.get("key"):
             continue
-        age = re.search(r'name="age">(\d+)<', body)
-        bp = re.search(r'<BodyProperties version="4" weight="([\d.]+)" build="([\d.]+)" key="([0-9A-Fa-f]{100,})"', body)
-        if not age or not bp or int(age.group(1)) < 18 or bp.group(3) in seen:
+        age = node.get("age")
+        if not age or int(age) < 18:
             continue
-        seen.add(bp.group(3))
-        sex = "F" if re.search(r'name="is_female">true<', body) else "M"
-        donors.append((lid, sex, int(age.group(1)), bp.group(1), bp.group(2), bp.group(3)))
+        key = bp.get("key").upper()
+        own = len(HEX_KEY.findall(ET.tostring(node, encoding="unicode")))
+        if taom_keys[key] or vanilla_keys[key] != own:
+            continue
+        sex = "F" if (node.get("is_female") or "").lower() == "true" else "M"
+        donors.append((lid, sex, int(age), bp.get("weight", "0.5"), bp.get("build", "0.5"), bp.get("key")))
     return donors
 
 
@@ -157,7 +196,7 @@ def npc_block(row, idx, set_values, donor):
     set_id = f"taom_{arch}_skills"
     skills, traits = set_values[set_id], BASE_ARCHETYPES[arch]["traits"]
     _, _, _, weight, build, key = donor
-    eq = EQ[idx % len(EQ)]
+    eq = BOW_ROSTERS[idx % len(BOW_ROSTERS)] if arch == "dale_bowman" else EQ[idx % len(EQ)]
     female = sex == "F"
     lines = [
         f'    <NPCCharacter id="{lid}" name="{{=aom_{lid}_name}}{name}" age="{age}" voice="{voice}"'
@@ -205,7 +244,7 @@ def hero_row(row):
     return EOL.join(lines)
 
 
-def clan_row(clan, banner):
+def clan_row(clan):
     cid, name, tier, owner, home, template, c1, c2, *_ = clan
     return EOL.join([
         "  <Faction",
@@ -220,7 +259,7 @@ def clan_row(clan, banner):
         f'\t\tcolor="{c1}"',
         f'\t\tcolor2="{c2}"',
         f'\t\tdefault_party_template="PartyTemplate.{template}"',
-        f'\t\tbanner_key="{banner}" />',
+        f'\t\tbanner_key="{DALE_BANNER}" />',
     ])
 
 
@@ -243,7 +282,7 @@ def spec_text(old_text):
     if json.dumps(spec, indent=2).replace("\n", EOL) != old_text:
         raise SystemExit("dale.json does not round-trip through json.dumps(indent=2); refusing to rewrite it")
     have = {c["id"]: c for c in spec["clans"]}
-    for cid, _n, _t, _o, _h, _tp, c1, c2, _d, theme in CLANS_NEW:
+    for cid, _n, _t, _o, _h, _tp, c1, c2, theme in CLANS_NEW:
         entry = {"id": cid, "source": "xml", "theme": theme, "color": c1, "color2": c2, "roster": []}
         if cid in have:
             have[cid].update(entry)
@@ -254,6 +293,7 @@ def spec_text(old_text):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--rerun-retired", action="store_true", help="required: this one-off is finished")
     ap.add_argument("--apply", action="store_true")
     args = ap.parse_args()
 
@@ -263,6 +303,7 @@ def main():
 
     # --- preconditions: nothing outside our block may already own an id ---
     lo, ho, co = outside_block(lords), outside_block(heroes), outside_block(clans)
+    lords_outside = lo
     for row in L:
         assert f'id="{row[0]}"' not in lo and f'id="{row[0]}"' not in ho, f"{row[0]} already defined outside the block"
     for clan in CLANS_NEW:
@@ -283,19 +324,18 @@ def main():
     else:
         print("WARNING: live TAOM_Map settlements.xml not found; home settlements not verified")
 
-    def banner(donor):
-        m = re.search(r'id="%s"(?:(?!/>).)*?banner_key="([^"]+)"' % donor, co, re.S)
-        assert m and len(m.group(1)) > 100 and len(m.group(1).split(".")) % 10 == 0, f"bad banner donor {donor}"
-        return m.group(1)
-
     # --- build ---
-    donors = harvest_donors(xslt)
+    vanilla_lords = read(VANILLA_MD[0] / "lords.xml")
+    taom_texts = [lords_outside if f == LORDS else read(f)
+                  for f in sorted(MD.rglob("*")) if f.is_file() and f.suffix.lower() in (".xml", ".xslt", ".json", ".txt")]
+    vanilla_texts = [read_loose(f) for root in VANILLA_MD for f in sorted(root.rglob("*.xml"))]
+    donors = harvest_donors(xslt, vanilla_lords, key_use_counts(taom_texts), key_use_counts(vanilla_texts))
     print(f"face donors: {sum(d[1] == 'M' for d in donors)} male, {sum(d[1] == 'F' for d in donors)} female")
     picks = pick_donors(donors)
     npcs = [npc_block(r, i, set_values, picks[r[0]]) for i, r in enumerate(L)]
     lords_new = with_block(lords, npcs, "NPCCharacters")
     heroes_new = with_block(heroes, [hero_row(r) for r in L], "Heroes")
-    clans_new = with_block(clans, [clan_row(c, banner(c[8])) for c in CLANS_NEW], "Factions")
+    clans_new = with_block(clans, [clan_row(c) for c in CLANS_NEW], "Factions")
     spec_new = spec_text(spec_old)
 
     for label, txt in (("lords", lords_new), ("heroes", heroes_new), ("clans", clans_new)):
