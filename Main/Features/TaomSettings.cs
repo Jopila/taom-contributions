@@ -2279,4 +2279,46 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Fell Foes Debug Log", Order = 8, RequireRestart = false,
         HintText = "Writes a [FellFoes] line each second something is stopped, held or sent off, and whether held archers really are aiming at you. For checking the feature; leave off in normal play. Default: off.")]
     public bool FellFoesDebug { get; set; } = false;
+    // --- Tokens of Esteem (docs/features/tokens-of-esteem.md, #863) ---
+    //
+    // Gifts of goods and gold for relation. Every value is read when a conversation line is shown or a gift is given, through
+    // GiftSettingsProvider's one cached settings reference, so none needs a restart. GroupOrder 62 follows the
+    // Fell Foes group at 61; 100 is the Map Tools group. Defaults
+    // and ranges live in GiftSettingsProvider (the purse range in the gift band, GiftService.PurseGoldPerPoint and
+    // PurseMaxPoints) so the fallback before MCM is up and the hint texts cannot drift from them.
+
+    [SettingPropertyGroup("Tokens of Esteem", GroupOrder = 62)]
+    [SettingPropertyBool("Enable Tokens of Esteem", Order = 0, RequireRestart = false,
+        HintText = "Adds \"I have a gift for you.\" to the talk with the companions in your party and, on the diplomacy branch, with lords who are not children, not prisoners, not in your own clan and not at war with you. Goods the catalog lists, from your inventory, win relation; companions also take gold purses. A co-op client, or a peer running a co-op mod TAOM cannot probe, sees no gift line. Default: on.")]
+    public bool GiftsEnabled { get; set; } = TAOM.Features.TokensOfEsteem.GiftSettingsProvider.DefaultEnabled;
+
+    [SettingPropertyGroup("Tokens of Esteem")]
+    [SettingPropertyInteger("Days Between Gifts To One Hero", TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MinCooldownDays, TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MaxCooldownDays, Order = 1, RequireRestart = false,
+        HintText = "After a gift, the same hero takes no other for this many days, so goods cannot be turned straight into relation. Whenever Personal Relations is not engaged (switched off, a co-op host, or a save not yet seeded) a clan shares one relation, so the days count for the whole clan. The count is saved with the campaign. Default: 7.")]
+    public int GiftCooldownDays { get; set; } = TAOM.Features.TokensOfEsteem.GiftSettingsProvider.DefaultCooldownDays;
+
+    [SettingPropertyGroup("Tokens of Esteem")]
+    [SettingPropertyInteger("Most Relation One Gift Asks For", TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MinRelationCap, TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MaxRelationCap, Order = 2, RequireRestart = false,
+        HintText = "The most relation one gift asks for, after the taste bonus and the scaling by relation (above relation 0 a gift adds (90 minus relation) / 90 of its worth, so a 1-point gift stops working near relation 45 and nothing helps at 90). A companion's gift starts at 1 to 5 by the item's value; a lord's starts at the catalog's value for the goods (1 to 10), and a hero who prizes the goods adds a bonus. Your Charm can add to what lands. Default: 15.")]
+    public int GiftRelationCap { get; set; } = TAOM.Features.TokensOfEsteem.GiftSettingsProvider.DefaultRelationCap;
+
+    [SettingPropertyGroup("Tokens of Esteem")]
+    [SettingPropertyBool("Free Lords Refuse Gifts From Evil Players", Order = 3, RequireRestart = false,
+        HintText = "A lord of a Free realm will not take a gift from a player who sides with the Shadow. The lord refuses with no penalty. Realms and cultures that side with neither never refuse. Default: on.")]
+    public bool GiftAlignmentRefusal { get; set; } = TAOM.Features.TokensOfEsteem.GiftSettingsProvider.DefaultAlignmentRefusalEnabled;
+
+    [SettingPropertyGroup("Tokens of Esteem")]
+    [SettingPropertyInteger("Small Gold Purse", TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MinPurse, TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MaxPurse, Order = 4, RequireRestart = false,
+        HintText = "The gold in the smallest purse you can give a companion. The gold leaves you and goes to the companion. A purse is worth 1 relation per 500 gold, at most 10 (5000 gold), before the scaling and the cap. Between 500 and 5000 gold. Default: 500.")]
+    public int GiftPurseSmall { get; set; } = TAOM.Features.TokensOfEsteem.GiftSettingsProvider.DefaultPurseSmall;
+
+    [SettingPropertyGroup("Tokens of Esteem")]
+    [SettingPropertyInteger("Medium Gold Purse", TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MinPurse, TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MaxPurse, Order = 5, RequireRestart = false,
+        HintText = "The gold in the middle purse you can give a companion. A purse is worth 1 relation per 500 gold, at most 10 (5000 gold). Between 500 and 5000 gold. Default: 2000.")]
+    public int GiftPurseMedium { get; set; } = TAOM.Features.TokensOfEsteem.GiftSettingsProvider.DefaultPurseMedium;
+
+    [SettingPropertyGroup("Tokens of Esteem")]
+    [SettingPropertyInteger("Large Gold Purse", TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MinPurse, TAOM.Features.TokensOfEsteem.GiftSettingsProvider.MaxPurse, Order = 6, RequireRestart = false,
+        HintText = "The gold in the largest purse you can give a companion. A purse is worth 1 relation per 500 gold, at most 10 (5000 gold). Between 500 and 5000 gold. Default: 5000.")]
+    public int GiftPurseLarge { get; set; } = TAOM.Features.TokensOfEsteem.GiftSettingsProvider.DefaultPurseLarge;
 }

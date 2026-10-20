@@ -2103,3 +2103,14 @@ big cultures assumes "another settlement of my culture" exists.
   2026-10-19 sweep of v1.5.5 found seven `GetRandomElementWithPredicate` sites; only the musician's was live (the
   RCA lists the other six). Fix the one live site by keeping the engine's pick and adding a fallback, never by skipping vanilla.
 - **Source:** `docs/reviews/rca-bard-town-guard-2026-10-19.md`.
+
+### A catalog keyed by item category must be counted against the shipped items, not the vanilla names (#863, 2026-10-19)
+Tokens of Esteem gave Rohirrim a taste for `war_horse`. In TAOM's live Armory all 22 mounts are creatures (wargs, war
+rams, elk, boars, spiders, mumakil) tagged `item_category="war_horse"`, seven of them sold in markets, so a warg became
+a Rohirrim's prized gift. The orc taste named `orc` and `uruk` and missed five other orc races, two thirds of the
+orc-race lords.
+- **Why missed:** the catalog was seeded from vanilla category names and two race names.
+- **Prevent:** before shipping a category or race list, count the live items per category and the lords per race in the
+  data (`LOTRLOME_Armory` items and `skins.xml`, `characters/lords.xml`), and test the shipped list against the live
+  data where it is present.
+- **Source:** `docs/reviews/rca-tokens-of-esteem-2026-10-19.md` finding 2.

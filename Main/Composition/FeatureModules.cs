@@ -50,5 +50,6 @@ internal static class FeatureModules
         new Features.FromTheAshes.FromTheAshesModule(),
         new Features.BardTownGuard.BardTownGuardModule(),
         new Features.FellFoes.FellFoesModule(),
+        new Features.TokensOfEsteem.TokensOfEsteemModule(),
     };
 }
