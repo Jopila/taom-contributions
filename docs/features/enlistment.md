@@ -2026,7 +2026,7 @@ by `ServiceMaintenanceService.ResetSessionCaches`, which also drops an unconsume
 | Siege assault or sally-out, prep complete | Disabled, "A siege needs every soldier" | Enabled |
 | Siege assault, prep incomplete | Enabled (`ForcedOpen`) | Hidden by vanilla |
 | Fortification battle that is not an assault (relief battle outside the walls, siege ambush, naval blockade) | Follows the field rows | Enabled |
-| Raid on a village | Normally not in it when the commander raids (#831; the army-attached edge and a failed read are the exceptions); as defender, follows the field rows | Enabled |
+| Raid on a village | Normally not in it when the commander raids (#831; the army-attached edge and a failed read are the exceptions); a raid a lord relieves (#954) puts the soldier in it, and it follows the field rows (`IsSiege` covers only an assault or sally-out); as defender, follows the field rows | Enabled |
 | Enemy on a raft | Hidden by vanilla | Disabled by vanilla (pre-existing) |
 | Own party on a raft | Enabled (`ForcedOpen`) | Disabled by vanilla |
 | Naval raid at sea with too few men | Disabled by vanilla | Disabled by vanilla (pre-existing gap) |
@@ -2053,7 +2053,8 @@ Army' (costs influence) and 'Leave Army' exits, which nothing guarded.
 
 **What is skipped.** A commander who is the aggressor in a raid, forced supplies or forced volunteers
 (`VillageRaidReader.IsRaiding(party)`: in a map event, `Party.Side` is the attacker, and
-`IsRaid || IsForcingSupplies || IsForcingVolunteers`). The set matches `StuckBattleEventAdapter`.
+`IsRaid || IsForcingSupplies || IsForcingVolunteers`, and no lord party with healthy troops defends it,
+#954). The set matches `StuckBattleEventAdapter`.
 Forced supplies and forced volunteers are player-only events in vanilla; they are in the set to match
 vanilla's grouping and cannot occur for an AI commander. The adapter snapshots (`CommanderSnapshot`,
 `CommanderTickSnapshot`) carry one `PartyIsRaiding` bool, and `IEncounterAdapter.IsPartyRaiding` reads
@@ -2067,11 +2068,11 @@ flag directly):
 
 | Site | Effect |
 |---|---|
-| `ServiceAttachmentService.Assess` | A raid falls through to the march rules: no `BattleJoinRequired`, no retry budget. "No pending flag" holds for Assess and the pump: `OnPartyJoinedRunningMapEvent` still arms `PendingCommanderAttachment` when the commander starts a raid, and that flag is inert because its only reader (`ServiceMaintenanceService.TryRequestBattleJoin`) sits behind the joinable gate |
+| `ServiceAttachmentService.Assess` | A raid falls through to the march rules: no `BattleJoinRequired`, no retry budget. "No pending flag" holds for Assess and the pump: `OnPartyJoinedRunningMapEvent` still arms `PendingCommanderAttachment` when the commander starts a raid, and that flag is inert only while the raid stays uncontested, because its only reader (`ServiceMaintenanceService.TryRequestBattleJoin`) sits behind the joinable gate |
 | `ServiceMaintenanceService.TryRequestBattleJoin` | No join request is raised |
 | `ServiceMaintenanceService.TryBreakBattleLatch` and the reconciler's latch predicate | Both demote a stale `EnlistedBattle` while the commander only raids (pinned together by `EnlistmentPumpAuthorityTests`) |
 | `ServiceBattleService.TryJoin` (floor) | After the side check, before the transition: one INFO line "commander raiding: not a battle to join", no rollback, no failure log. A player already in any map event still runs the existing join path |
-| `ServiceStatusService.ResolveActivity` | `CommanderActivity.Raiding` (value 5, checked before `InBattle`); the board reads "The column is raiding." (`taom_enlist_act_raid`) |
+| `ServiceStatusService.ResolveActivity` | `CommanderActivity.Raiding` (value 5, checked before `InBattle`; a raid a lord contests shows `InBattle`); the board reads "The column is raiding." (`taom_enlist_act_raid`) |
 
 **Deliberately broad.** These still read `PartyIsInMapEvent`: the reconciler's army-leave sweep; the
 stranded-encounter sweep (`EnlistmentReconciler.cs` `SweepStrandedEncounter`, which delays cleanup for
@@ -2086,26 +2087,64 @@ leads, so neither is joined. A player who is neither the raider nor in the event
 
 **Consequence for the exits.** The `raiding_village` menu's 'Leave Army', 'Abandon Army' and 'End
 Raiding' options are now reachable only in the army-attached edge case (the player already inside the
-event through the propagation) and when the raid read fails open. `MapEventHelperCanMainPartyLeaveBattlePatch`
-does not close them. In the attached edge, 'Abandon Army' ends the commander's whole raid
-(`PlayerEncounter.Finish` runs `RaidEventComponent.OnPlayerEncounterFinalizeBattle`).
+event through the propagation), when the raid read fails open, and possibly after a relief battle
+(#954, see the timing risk below). `MapEventHelperCanMainPartyLeaveBattlePatch` does not close them.
+In the attached edge, 'Abandon Army' ends the commander's whole raid (`PlayerEncounter.Finish` runs
+`RaidEventComponent.OnPlayerEncounterFinalizeBattle`).
 
 Sieges, sally-outs, hideout and field battles are never village actions and always join.
 
-**Known gap, decision pending.** A lord relieving the village attacks the raiding commander inside
-the same Raid event (`StartBattleAction.cs:116-118`, `:30`), so the commander stays the attacker in a
-Raid and the soldier sits that lord battle out. Before #831 the soldier was likely inside that fight.
-Whether to join it is waiting on the maintainer.
+**A lord who relieves the raid is joined (#954).** A relief lord attacks the raiding commander
+inside the same Raid event (`StartBattleAction.cs:116-118`, `:30`), so the commander stays the
+attacker in a Raid. `VillageRaidReader.IsRaiding` therefore returns false while the raid's defender
+side holds a lord party with healthy troops (vanilla's own test, `EncounterManager.cs:158`: mobile,
+`IsLordParty`, `TotalHealthyCount > 0`). Militia, patrols and other non-lord defenders do not count,
+so a raid they defend stays skipped. No other code changed: every site above reads the same flag. No
+`MapEventStarted` fires when the lord joins, so the pump picks the flip up on the raid's event token
+and raises the join. The fight ends the whole raid event once a side wins (`MapEvent.cs:897-899`), so
+the soldier returns to service through the existing flush, army leave and latch demote; the status
+board shows the commander engaged while it runs. With the soldier inside, the end comes through
+`PlayerEncounter.Finish` -> `FinalizeBattle` -> `RaidEventComponent.OnPlayerEncounterFinalizeBattle`
+(:220-225), and a lord retreat ends it too (`EndByRunAway` sets a winner, `MapEvent.cs:1153-1156`).
 
-**Owed in-game check.** Serve a lord through a village raid: the state stays `EnlistedAttached`, the
-status line shows "The column is raiding.", release is allowed, and no raid menu appears. Then serve a
-siege, a sally-out and a field battle: each still joins. Control: a raid fought off by the commander
-as defender still joins (he joins the running raid, so the pump makes the join, not `MapEventStarted`).
+A soldier already inside the raid through the army-attached edge is restarted by vanilla when the lord
+engages (`EncounterManager.StartPartyEncounter` :58, :75-77, `RestartPlayerEncounter` :317-339), which
+ends the raid when an encounter is open. That path is unchanged by #954.
 
-Tests: `VillageActionJoinPolicyTests` (the truth table), `ServiceAttachmentServiceTests`,
+Open risks:
+
+1. One-frame timing. A join made from `TickEvent` or from the hourly tick runs before
+   `MapEventManager.Tick` in the same frame (`Campaign.cs:980-982`), and raids update even when they
+   are the player's own event (`MapEventManager.cs:59`), so one simulation session can run with the
+   soldier inside. If it decides the fight he is left in a decided raid, where vanilla offers the
+   village hostile actions (`EncounterGameMenuBehavior.cs:2192-2217`) or the on_init jump
+   (`:1494-1521`) leads to `raiding_village`. UNVERIFIED in game; joins from the wait-menu tick are
+   safe because the menu stops time first. If it reproduces, the guard belongs in
+   `EnlistmentBattleBehavior.OnBattleJoinRequested` (defer to the next wait-menu tick), not in the
+   pump alone.
+2. The encounter's Attack and Send troops apply the hostile action against the village
+   (`MenuHelper.cs:267-269`, `:566-572`). If the soldier's clan is not at war with the village's
+   faction (a war that began after the oath; the war mirror runs only at the oath,
+   `EnlistmentService.cs:123`) that costs relation, crime and trait, applies -10 relation with the
+   faction leader, and declares the clan's own war on that faction (`BeHostileAction.cs:193-195`),
+   which discharge does not unwind (`ServiceWarPolicy.FactionsToPeaceOnDischarge` ends only mirrored
+   wars). Wars during service are A6 (#832).
+3. Any `PlayerEncounter.Finish` with no winner while he is inside ends the commander's whole fight
+   (`RaidEventComponent.cs:222`): Leave when the army merge was unavailable, or a `TryJoin` rollback.
+4. The pre-existing join-rollback `LeaveArmy` mid-event; Patch82 is the floor.
+
+**Owed in-game check.** See the #831/#954 bullet under "What actually remains". Control: a raid
+fought off by the commander as defender still joins (he joins the running raid, so the pump makes the
+join, not `MapEventStarted`).
+
+Tests: `VillageActionJoinPolicyTests` (the truth table), `VillageRaidReaderTests` (the five shapes
+against a staged raid: village alone, plus a healthy lord, plus a lord with no healthy troops, plus a
+non-lord mobile party, and the commander on the defender side), `ServiceAttachmentServiceTests`,
 `ServiceMaintenanceServiceTests`, `EnlistmentPumpAuthorityTests`, `ServiceBattleServiceTests` and
-`ServiceStatusServiceTests` (the raid rows, each with a not-raiding control), and
-`CommanderSettlementIdentityTests` (both snapshots fill the flag through `VillageRaidReader`).
+`ServiceStatusServiceTests` (the raid rows, each with a not-raiding control; they see only the bool),
+and `CommanderSettlementIdentityTests` (both snapshots fill the flag through `VillageRaidReader`, and
+the comment-stripped source pin: the reader tests `IsMobile`, `IsLordParty` and `TotalHealthyCount`
+with no LINQ and no `Find`).
 
 ## Interactions with the rest of TAOM
 
@@ -2223,11 +2262,16 @@ What actually remains, each a state no test can reach:
 - **A field battle with the commander in an army.** Still the case most likely to fail:
   `FindCommanderPartyIdIn` matches only the commander's own party in `InvolvedParties`, and an
   attached army member may not appear there.
-- **Village raids (#831).** The in-game check in the section above (state stays `EnlistedAttached`,
+- **Village raids (#831).** The in-game check (state stays `EnlistedAttached`,
   status line, release allowed, no raid menu; siege, sally-out and field battle still join; a raid
-  the commander fights off as defender still joins). Also
-  undecided: (a) a relief lord attacks the raiding commander, what should the soldier do; (b) talking
-  to the commander mid-raid.
+  the commander fights off as defender still joins). Also (#954): a relief lord attacks the raiding
+  commander: the soldier joins within a pump pass, the encounter menu (reads "encountered <village>",
+  vanilla parity) shows Attack, and Attack opens a village battle. After a win: no raid menu, he
+  leaves the army and returns to `EnlistedAttached`. Commander loses: the normal defeat path. Lord
+  retreats: the raid ends, he returns to service, and the commander's next raid is skipped. After a
+  mission: no raid menu. Plain and militia-defended raids are still skipped. PROBE: a relief at the
+  highest fast-forward speed, then check whether the battle was already decided when he joined
+  (timing risk 1). Undecided: talking to the commander mid-raid.
 - **Save-load mid-service, then a battle**, and save-load inside the wait menu.
 - Remaining smaller unknowns: SetNextMenu timing vs `EncounterGameMenuBehavior`; camera handoff;
   TimeAcceleration interplay; equipment visuals per race (erebor, goblin, the four orc cultures); and

@@ -1967,3 +1967,15 @@ every command.
   test that reads a TaleWorlds attribute through reflection carries `[TestCategory("RequiresGame")]`, or reads
   `CustomAttributeData` instead, which does not run the constructor.
 - **Source:** `docs/reviews/rca-crown-guard-2026-10-20.md` G1.
+### A fail-open read needs a test that expects true for every shape it must not fail on (#954, 2026-10-20)
+Enlistment's raid reader catches every exception and returns false, which joins the soldier. Its only
+test was a source-text pin; removing the `IsMobile` guard made the read throw on the village's own
+settlement party, the catch returned false, and every raid was joined again with the suite green. A
+staging bug in the first reader test hid the same way.
+- **Why missed:** "engine types cannot be built in a unit test" was accepted without checking, though
+  the repo already stages bare `MapEvent` objects; and a pin read with comments matched the summary.
+- **Prevent:** for a reader whose catch returns the safe answer, stage the engine objects in a
+  `RequiresGame` test and include shapes that expect the non-fail value on the same member chain, so a
+  throw turns them red; prove RED by deleting each guard. Read source pins with
+  `RepoPaths.ReadSource(path, stripComments: true)`.
+- **Source:** `docs/reviews/rca-enlistment-relief-lord-2026-10-20.md` F1.

@@ -823,3 +823,4 @@ The face pass first ran on `OnNewGameCreatedEvent` and rolled each hero at the h
 - **Why missed:** the design copied vanilla's roll call but not its input (vanilla always rolls an adult range) or its timing.
 - **Prevent:** hook a pass that must see every new-game hero to `OnNewGameCreatedPartialFollowUpEndEvent`, and roll faces at `BodyProperties.DefaultAge` (30).
 - **Source:** `docs/reviews/rca-followups-949-952-2026-10-20.md` F2, F3.
+- **Resolved (#954, 2026-10-20):** relief lords are joined; see docs/features/enlistment.md.
