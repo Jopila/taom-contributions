@@ -2,7 +2,7 @@
 
 ## Overview
 
-A single reusable, read-only validator for TAOM's Bannerlord ModuleData XML. It builds id registries from the installed game + the TAOM repo, resolves prefix-based cross-references (`Item.` / `NPCCharacter.` / `Culture.` / `PartyTemplate.`), and runs per-schema duplicate-id / enum / civilian-type checks, emitting a severity-classified report. It consolidates the scattered one-shot validators (`validate_all_troop_refs.py`, `audit_item_refs.py`, the equipment-`equipmentType` PowerShell snippet, the duplicate-id-across-Armory-folders checks) into one schema-driven engine.
+A single reusable, read-only validator for TAOM's Bannerlord ModuleData XML. It builds id registries from the installed game + the TAOM repo, resolves prefix-based cross-references (`Item.` / `NPCCharacter.` / `Culture.` / `PartyTemplate.` / `BodyProperty.` / `Faction.`), and runs per-schema duplicate-id / enum / civilian-type checks, emitting a severity-classified report. It consolidates the scattered one-shot validators (`validate_all_troop_refs.py`, `audit_item_refs.py`, the equipment-`equipmentType` PowerShell snippet, the duplicate-id-across-Armory-folders checks) into one schema-driven engine.
 
 The same engine backs **three consumers**: a **CLI** (`validate_moduledata.py` — batch report), a **pre-commit hook** (`.claude/hooks/check-moduledata-validation.sh` — blocks Claude-driven commits on ERRORs), and an **MCP server** (`taom_mcp_server.py` — interactive agent queries like "does this item exist?" / "what references this troop?").
 
@@ -26,6 +26,12 @@ TAOM repeatedly ships the same data-integrity bug classes, each previously caugh
 - **`face_key_template` pointing at an undefined `BodyProperty`** — not an XML error: the engine
   registers a placeholder, `MBObjectManager.UnregisterNonReadyObjects` drops it, and the character
   silently loses its authored face. (`BROKEN_BODY_PROPERTY_REF`)
+- **A `Faction.X` reference to an undefined clan** (settlement `owner=`, Hero `faction=`) leaves the
+  settlement or hero ownerless at load. The registry is every `<Faction id>` in the repo's
+  `characters/clans.xml` plus vanilla `SandBox/ModuleData/spclans.xml`, minus the five bandit clans
+  `spclans.xslt` strips with `<xsl:template match="Faction[@id='X']"/>` (the engine never loads
+  those rows); `Faction.neutral` (the engine's clanless value for named companions) is allowed.
+  XML only: the `faction` attributes `heroes.xslt` writes are not swept. (`BROKEN_FACTION_REF`, #949)
 - **A lord's culture owns no settlement** — vanilla `SpawnLordParty` ends with an unguarded
   `Settlement.All.First(x => x.Culture == hero.Culture)`, so a landless culture on an
   `Occupation.Lord` hero is a latent `InvalidOperationException` on the daily clan tick.
@@ -90,7 +96,7 @@ Cross-reference kinds are defined in `REF_KINDS` (code, not schema) because the 
 
 **Since 2026-09-18 the XSD layer has its own gate: `python tools/validate_xml_schemas.py`.** It validates every engine-loaded file against the XSD the engine itself picks, following `MBObjectManager.GetMergedXmlForManaged`'s file resolution and schema choice (it does not apply the `<IncludedGameTypes>` filter, so it may validate a file one game type never loads, never the reverse): files come from each SubModule.xml `<XmlName id path>` (`ModuleData/<path>.xml`, else the top level of the `ModuleData/<path>/` folder), the schema is `<Module>/ModuleData/XmlSchemas/<id>.xsd` when the module ships one and `<game>/XmlSchemas/<id>.xsd` otherwise, and `_replaceWhileMerging` is accepted as the optional boolean the engine injects. Pass files to check only those (each is validated under its own module); `--live` adds `TAOM_Map` and the Armory. It also reports registrations that load nothing or that the engine throws on at startup, and a DOCTYPE (the engine prohibits DTDs, so such a file loads nothing). The engine validates on a normal campaign load too, but `LoadXmlWithValidation` only prints a failure to the log and loads the file anyway, which is why the cases below shipped. **The same check runs inside `validate_moduledata.py` as `SCHEMA_INVALID`** (ERROR, repo module only; one WARNING when lxml or the engine's `XmlSchemas` folder is absent, never a silent pass), so the commit hook gates it. Measured on 2026-09-18: the repo module's 97 validated files all pass, so any failure there is new; `--live` finds one Armory file (#620); the seven dead `TAOM_Map` registrations it found were removed the same day (#619), and `tools/tests/test_validate_xml_schemas.py` pins the live registrations to `Settlements`, so a resync from the mirror, which still ships all eight over empty stubs, fails it. An XSD can lag the code, so confirm a failure against the element's deserializer before editing. The rest of this section is the history that motivated it, and still describes what `validate_moduledata.py` alone does not do.
 
-The validator checks **cross-references** (the `Item.` / `NPCCharacter.` / `Culture.` / `PartyTemplate.` prefixes, on any attribute in any `ModuleData/**/*.xml` — including `characters/clans.xml`) plus **per-schema** duplicate-id / enum / civilian-type rules. It does **not** validate the engine's own XSD schemas (`<game>/XmlSchemas/*.xsd`), which enforce *required-attribute presence* and element structure.
+The validator checks **cross-references** (the `Item.` / `NPCCharacter.` / `Culture.` / `PartyTemplate.` / `BodyProperty.` / `Faction.` prefixes, on any attribute in any `ModuleData/**/*.xml`, including `characters/clans.xml`) plus **per-schema** duplicate-id / enum / civilian-type rules. It does **not** validate the engine's own XSD schemas (`<game>/XmlSchemas/*.xsd`), which enforce *required-attribute presence* and element structure.
 
 Concretely, `characters/clans.xml` has **no validator schema** (`tools/schemas/` covers only equipmentsets / npccharacter / spcultures). A clan (`<Faction>`) missing a `Factions.xsd`-required attribute such as `initial_home_settlement` therefore passes both `validate_moduledata.py` and the pre-commit hook, and surfaces only when the engine/editor loads the file (and the engine reads `Factions`, `Kingdoms` and `Heroes` only when a NEW campaign starts, so loading a save never reports it) (`Error: The required attribute 'initial_home_settlement' is missing. Node: Faction`). This is how `clan_umbar_3` shipped without a home settlement (fixed 2026-06-22). When authoring or editing `clans.xml`, open the file in the Bannerlord editor (or rely on an engine load) to catch required-attribute violations; `validate_moduledata.py` alone will not. A future improvement would be a `taom_factions.json` schema, but presence-of-required-attribute is not currently in the validator's model.
 
@@ -770,8 +776,8 @@ contracts (duplicate ids, civilian `equipmentType`, enums) describe TAOM's own f
 report defects against a module this validator does not own.
 
 Today that sweep is load-bearing for `Culture.` refs (104 Armory files carry them) and effectively
-vacuous for the other four kinds — Armory XML currently contains no live `NPCCharacter.`,
-`PartyTemplate.` or `BodyProperty.` refs, and its single `Item.` hit is inside a comment. The
+vacuous for the other five kinds: Armory XML currently contains no live `NPCCharacter.`,
+`PartyTemplate.`, `BodyProperty.` or `Faction.` refs, and its single `Item.` hit is inside a comment. The
 wiring is correct and will catch a real dangling ref if one is introduced; just don't read a PASS
 as proof those kinds were stress-tested against the Armory.
 
@@ -870,7 +876,7 @@ rather than inferred from the numbers:
   sweep to TAOM-only while still printing PASS.
 - A **shrunken registry** (a renamed vanilla `*_bodyproperties.xml`, a typo'd `--game-modules` that
   still resolves to a real directory) is flagged via `Registries.suspect_registries`. Floors are set
-  far below real counts (121 body properties, 38 cultures) — they catch "the file list broke", not
+  far below real counts (121 body properties, 38 cultures, 247 clans against a floor of 100, 90 vanilla clans against a floor of 50): they catch "the file list broke", not
   "the data changed a bit". Full shrinkage would otherwise trip the empty-registry guard and skip
   the check entirely.
 
@@ -878,6 +884,13 @@ NPC duplicate-id + enum coverage spans `troops/`, `characters/`, `named_companio
 
 ## Changelog
 
+- 2026-10-20: `BROKEN_FACTION_REF` (error, in the commit hook) added (#949): a `Faction.X` ref must
+  resolve to a clan in `characters/clans.xml` or vanilla `spclans.xml` that `spclans.xslt` does not
+  strip; `Faction.neutral` is allowed. A separate suspect-registry floor (50) on the vanilla clans
+  flags a missing `spclans.xml`, which the repo's own clans could otherwise hide. The validator now
+  exits 3 on an unexpected exception (the traceback on stderr) and the commit hook allows that
+  commit with the traceback beside the tool result; Python's own exit 1 would have blocked it.
+  `taom_query.find_references` searches the `BodyProperty.` and `Faction.` prefixes as well.
 - 2026-10-02: `CREATURE_GEAR_OBTAINABLE` (error, in the commit hook) added: every item a troll-race
   character carries, and the troll shield by name, must be `is_merchandise="false"`, and every crafting
   piece of such a crafted weapon `is_hidden="true"`. New registries `item_trade` and `hidden_pieces`

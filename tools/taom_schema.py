@@ -83,6 +83,7 @@ class Registries:
     mount_barred_usages: set = None                           # item_usage ids flagged requires_no_mount (None = unavailable)
     item_trade: dict = field(default_factory=dict)            # item id -> ItemTrade (empty = unavailable)
     hidden_pieces: dict = field(default_factory=dict)         # crafting piece id -> is_hidden (empty = unavailable)
+    factions: set = field(default_factory=set)                # defined clan <Faction> ids (empty = unavailable)
 
 
 # --------------------------------------------------------------------------- #
@@ -176,6 +177,11 @@ REF_KINDS = [
     # silently loses its authored face. Nothing else cross-checked these.
     RefKind("body_property", re.compile(r'="BodyProperty\.([A-Za-z0-9_.\-]+)"'),
             "body_properties", Severity.ERROR, "BROKEN_BODY_PROPERTY_REF", "body property", "BodyProperty."),
+    # Faction.X is a clan: a settlement owner= or Hero faction= naming an undefined one leaves the
+    # object ownerless at load. `neutral` is the engine's clanless value (named companions,
+    # docs/modding/wanderers-and-named-companions.md).
+    RefKind("faction", re.compile(r'="Faction\.([A-Za-z0-9_.\-]+)"'),
+            "factions", Severity.ERROR, "BROKEN_FACTION_REF", "clan", "Faction.", {"neutral"}),
 ]
 
 
@@ -2048,6 +2054,12 @@ _PARTYTEMPLATE_DEF_RE = re.compile(r'<(?:MB)?PartyTemplate\b[^>]*?\bid="([^"]+)"
 # this must span newlines (re.S + \b[^>]*?) exactly like the others — an
 # id-on-the-same-line pattern registers nothing and turns every lord broken.
 _BODYPROP_DEF_RE = re.compile(r'<BodyProperty\b[^>]*?\bid="([^"]+)"', re.S)
+# A clan is a <Faction id="...">; the container is <Factions>, which \b keeps out.
+_CLAN_DEF_RE = re.compile(r'<Faction\b[^>]*?\bid="([^"]+)"', re.S)
+# spclans.xslt deletes vanilla's bandit clans with an empty `<xsl:template match="Faction[@id='X']"/>`;
+# the engine never loads those rows, so a ref to one is as broken as a ref to a typo.
+_CLAN_STRIP_RE = re.compile(
+    r"""<xsl:template\s+match="Faction\[@id='([^']+)'\]"\s*(?:/>|>\s*</xsl:template>)""", re.S)
 _SETTLEMENT_CULTURE_RE = re.compile(r'<Settlement\b[^>]*?\bculture="Culture\.([^"]+)"', re.S)
 # An XSLT template with an empty body and an unqualified `match="Settlement"`
 # deletes EVERY settlement contributed by earlier modules (TAOM_Map does exactly
@@ -2659,6 +2671,15 @@ def build_registries(moduledata, game_modules, armory_root=None) -> Registries:
                             ("NavalDLC", "naval_bodyproperties.xml")):
             bodyprop_files.append(game_modules / name / "ModuleData" / fname)
 
+    # Clans come from the explicit clan files only: the repo's characters/clans.xml and vanilla
+    # spclans.xml. spclans.xslt defines none, but it strips vanilla's bandit clans, and a stripped
+    # row is not a clan the engine loads, so it leaves the registry.
+    vanilla_factions = set()
+    if game_modules:
+        vanilla_factions = _scan_files([game_modules / "SandBox" / "ModuleData" / "spclans.xml"], _CLAN_DEF_RE)
+        vanilla_factions -= set(_CLAN_STRIP_RE.findall(_read_stripped(moduledata / "spclans.xslt")))
+    factions = _scan_files([moduledata / "characters" / "clans.xml"], _CLAN_DEF_RE) | vanilla_factions
+
     items, item_def_files = _scan(item_roots, _ITEM_DEF_RE, want_files=True, doc_roots=_ITEM_DOC_ROOTS)
     npccharacters = _scan(npc_roots, _NPC_DEF_RE)
     cultures = _scan_files(culture_files, _CULTURE_DEF_RE) | VANILLA_CULTURES
@@ -2707,6 +2728,8 @@ def build_registries(moduledata, game_modules, armory_root=None) -> Registries:
         # TAOM's 30 body properties are only a quarter of the 121 defined; the
         # rest are vanilla, and TAOM characters reference them freely.
         body_properties = set()
+        # The same for clans: TAOM's are only part of the set (vanilla spclans.xml is the rest).
+        factions = set()
 
     # Size floors. A registry built from an explicit file list shrinks silently when
     # a source file is renamed (a game patch, a typo'd --game-modules that still
@@ -2718,8 +2741,12 @@ def build_registries(moduledata, game_modules, armory_root=None) -> Registries:
     # "the file list broke", not "the data changed a bit".
     suspect = []
     if game_modules:
+        # vanilla_factions has its own floor: the repo's clans alone can reach the total's, and a
+        # missing spclans.xml would then pass while every ref to a vanilla clan read as broken.
         for label, value, floor in (("launchers", launchers, 30),
                                     ("body_properties", body_properties, 50),
+                                    ("factions", factions, 100),
+                                    ("vanilla_factions", vanilla_factions, 50),
                                     ("cultures", cultures, 20),
                                     ("settled_cultures", settled_cultures, 15),
                                     ("settlement_economy", settlement_economy, 400)):
@@ -2743,6 +2770,7 @@ def build_registries(moduledata, game_modules, armory_root=None) -> Registries:
         mount_barred_usages=mount_barred,
         item_trade=item_trade,
         hidden_pieces=hidden_pieces,
+        factions=factions,
     )
 
 

@@ -2842,6 +2842,61 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+head2 "7m. check-moduledata-validation fails open on a validator crash and says so, and still denies on findings"
+# validate_moduledata.py exits 1 for ERROR findings, and Python exits 1 for an uncaught exception too,
+# so a validator bug used to DENY the commit with a bare status. entry() now turns a crash into exit 3,
+# and the hook allows it, with the traceback beside the tool result (PreToolUse additionalContext: an
+# allow's stderr reaches no one). The stub imports the real validator and makes main() raise, so the
+# whole chain is under test, not a mock of it. A sandbox repo stages one ModuleData file.
+VM_REPO="$SANDBOX/vm-repo"
+mkdir -p "$VM_REPO/tools" "$VM_REPO/Main/_Module/ModuleData"
+git -C "$VM_REPO" init -q 2>/dev/null
+printf '<Items />\n' > "$VM_REPO/Main/_Module/ModuleData/x.xml"
+git -C "$VM_REPO" add Main/_Module/ModuleData/x.xml 2>/dev/null
+VM_TOOLS=$(cygpath -m "$REPO/tools" 2>/dev/null || echo "$REPO/tools")
+cat > "$VM_REPO/tools/validate_moduledata.py" <<STUB
+import sys
+sys.path.insert(0, r"$VM_TOOLS")
+import validate_moduledata as vm
+def boom():
+    raise RuntimeError("stub validator crash")
+vm.main = boom
+sys.exit(vm.entry())
+STUB
+vm_run() {  # stdin: the payload; prints the hook's answer
+    CLAUDE_PROJECT_DIR="$VM_REPO" timeout -k 2 30 bash "$REPO/.claude/hooks/check-moduledata-validation.sh" 2>/dev/null
+}
+VM_PAYLOAD=$(pre_payload Bash 'git commit -m "data: v0.0.0 - stub"')
+VM_OUT=$(printf '%s' "$VM_PAYLOAD" | vm_run)
+VM_VERDICT=$(printf '%s' "$VM_OUT" | "$HPY" -c '
+import json, sys
+try:
+    d = json.loads(sys.stdin.read() or "{}")
+except Exception:
+    print("invalid"); sys.exit()
+h = d.get("hookSpecificOutput", {}) if isinstance(d, dict) else {}
+if h.get("permissionDecision") == "deny":
+    print("deny")
+elif "stub validator crash" in h.get("additionalContext", "") and "Traceback" in h.get("additionalContext", ""):
+    print("allow-with-traceback")
+else:
+    print("allow-silent")')
+case "$VM_VERDICT" in
+    allow-with-traceback) ok "a validator crash (exit 3) allows the commit and carries the traceback in additionalContext" ;;
+    deny)                 bad "a validator crash DENIED the commit: a hook's own fault must fail open" ;;
+    *)                    bad "a validator crash was $VM_VERDICT, expected allow-with-traceback: $(printf '%s' "$VM_OUT" | head -c 200)" ;;
+esac
+# Control: a genuine findings exit (1) still denies.
+printf 'import sys\nsys.exit(1)\n' > "$VM_REPO/tools/validate_moduledata.py"
+VM_OUT=$(printf '%s' "$VM_PAYLOAD" | vm_run)
+if [[ "$(decision_of "$VM_OUT")" == deny ]]; then
+    ok "a validator findings exit (1) still denies the commit"
+else
+    bad "a validator findings exit (1) no longer denies: $(printf '%s' "$VM_OUT" | head -c 200)"
+fi
+rm -rf "$VM_REPO"
+
+# ---------------------------------------------------------------------------
 head2 "8. tools/context_budget_scan.sh runs under set -u and measures the launch load"
 # Nothing else runs this script, and it reads the budget from tools/lint_docs.py: an unbound
 # variable or a broken JSON handshake would otherwise surface only when someone runs the scan.

@@ -18,7 +18,9 @@
 # Fail-open (per .claude/rules/harness-facts.md "TAOM hooks fail open"):
 # ANY hook-internal failure -- no python, validator crash, missing game install
 # (rc=2), nothing staged -- ALLOWS the commit. Only a genuine validator ERROR
-# exit (rc=1) blocks.
+# exit (rc=1) blocks. A validator crash exits 3 (validate_moduledata.py entry(); an
+# uncaught exception would exit 1 and read as findings): allowed, but never silently,
+# the traceback goes out as PreToolUse additionalContext beside the tool result.
 #
 # Returns: {} to allow, {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"..."}} to block.
 
@@ -117,6 +119,7 @@ PY="$PYBIN"
 # ~9s on 2026-09-18, 8.2s warm on 2026-09-19. The 60s/45s budget is left deliberately
 # generous, about 3x headroom warm. Headroom costs nothing unless the work overruns, and
 # being killed is the failure mode this gate has already suffered once.
+ERR_FILE=$(mktemp 2>/dev/null) || ERR_FILE=/dev/null
 OUT=$(timeout -k 2 45 "$PY" tools/validate_moduledata.py \
         --code BROKEN_ITEM_REF --code BROKEN_TROOP_REF --code UNKNOWN_CULTURE \
         --code DUPLICATE_NPC_ID --code DUPLICATE_CULTURE_ID --code DUPLICATE_ROSTER_ID \
@@ -128,13 +131,14 @@ OUT=$(timeout -k 2 45 "$PY" tools/validate_moduledata.py \
         --code MOUNT_WITHOUT_HARNESS --code MISSING_COLLISION_BODY \
         --code COLLISION_BODY_BORROWED \
         --code SCHEMA_INVALID --code ARMOUR_ACQUISITION_REF \
-        --code CREATURE_GEAR_OBTAINABLE \
-        2>/dev/null)
+        --code CREATURE_GEAR_OBTAINABLE --code BROKEN_FACTION_REF \
+        2>"$ERR_FILE")
 RC=$?
 
 # 124 = the inner timeout fired. Never report this as a pass; ask instead of blocking,
 # because an overrun is an infrastructure fault and a hook's own fault must not hard-block.
 if [[ $RC -eq 124 ]]; then
+    [[ "$ERR_FILE" != /dev/null ]] && rm -f "$ERR_FILE"
     printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"[check-moduledata-validation] The ModuleData validator exceeded its 45s budget and was stopped. This commit is UNCHECKED for broken Item/NPCCharacter refs, unknown or landless cultures, and duplicate ids. This is NOT a pass. Run: python tools/validate_moduledata.py"}}'
     exit 0
 fi
@@ -148,6 +152,25 @@ if [[ $? -eq 1 ]]; then
     OUT=$(printf '%s\n%s\nRepair: python tools/generate_career_kits.py --apply, then python tools/wire_starter_kit_rosters.py --apply' "$OUT" "$KIT_OUT")
     RC=1
 fi
+
+# 3 = the validator crashed. Its own fault never blocks, so allow, and say so: an allow's stderr
+# reaches no one (harness-facts.md "Visibility"), and no output would read as "checked, clean".
+# The kit check above still ran and still blocks on drift; this only decides the no-block answer.
+if [[ $RC -eq 3 ]]; then
+    CRASH=$(tail -n 15 "$ERR_FILE" 2>/dev/null | "$PYBIN" -c '
+import sys, json
+print(json.dumps(
+    "[check-moduledata-validation] tools/validate_moduledata.py CRASHED (exit 3), so this commit is "
+    "UNCHECKED for broken Item/NPCCharacter/Faction refs, unknown or landless cultures and duplicate ids. "
+    "This is NOT a pass; the commit was allowed because a hook bug must not block. Fix the validator, "
+    "then run: python tools/validate_moduledata.py\n\n" + sys.stdin.read()))
+' 2>/dev/null)
+    [[ "$ERR_FILE" != /dev/null ]] && rm -f "$ERR_FILE"
+    [[ -z "$CRASH" ]] && { echo '{}'; exit 0; }
+    printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":%s}}\n' "$CRASH"
+    exit 0
+fi
+[[ "$ERR_FILE" != /dev/null ]] && rm -f "$ERR_FILE"
 
 [[ $RC -ne 1 ]] && { echo '{}'; exit 0; }
 
