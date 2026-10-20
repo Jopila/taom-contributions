@@ -323,7 +323,10 @@ join-army/ally-thanks lines while enlisted; the clickable variant carries `out T
 hint`; ally-thanks pair is PUBLIC on 1.4.7), `MapEventHelper.CanMainPartyLeaveBattleCommonCondition`
 postfix (#827: encounter menu only; hides vanilla 'Leave' and 'Abandon army' while the soldier serves in his
 commander's battle, gated by `IEnlistmentMenuService.ShouldBlockBattleExit`, and released under a safe-passage
-truce so the menu never loses its last option). All fail open. All seven targets pinned by
+truce so the menu never loses its last option), and the private
+`EncounterGameMenuBehavior.game_menu_encounter_order_attack_on_condition` postfix (#830:
+`EncounterGameMenuOrderAttackConditionPatch`, narrows 'Send troops' / 'Leave it to the others'; see
+"Leave it to the others" below). All fail open. All eight targets pinned by
 `Patch66EnlistmentBindingTests` against the installed DLLs. The donor's
 `MapState.OnMapConversationOver` patch was replaced by `CampaignEvents.ConversationEnded`.
 
@@ -909,7 +912,8 @@ So the boundary stays where it was, and two things now hold it there:
   stayed engaged and took a kill still must. A future tuner cannot move a `minScore` past either.
 - `EnlistmentBattlePayoutService` withholds band trust outright when the sample says `LeftTheField`,
   independent of where the boundaries sit. XP and gold still reflect what the player did before he
-  left, which is the same reasoning that made `LeftTheField` zero the survival term alone. The
+  left, which is the same reasoning that made `LeftTheField` zero the survival term alone. When that
+  walkout was also a sat-out battle (#830), the sit-out rule then governs the base pay and renown. The
   comment on `MeritScoringConfig.LeftFieldPenalty` used to claim 30 was "sized to sink the best
   possible walkout into the bottom band"; it arrived at that by leaving kills out of the sum, and it
   has been corrected.
@@ -1931,6 +1935,115 @@ bundle that would have named the corruption, was suppressed as a duplicate of th
 `NullReferenceException`. The chain was reconstructable only because the raw `rgl_log.txt` rode along
 in the surviving bundle. The signature now includes the inner chain (#552).
 
+## Leave it to the others: the sit-out gate (#830)
+
+An enlisted soldier with no troops of his own could pick "Leave it to the others" in his
+commander's battle, let it auto-resolve and be paid as if he had fought. Vanilla's
+`MenuHelper.EncounterOrderAttackCondition` counts healthy men across every party on the player's
+side, so the option shows even when his own party is empty. The fix is one Postfix,
+`EncounterGameMenuOrderAttackConditionPatch` on the private
+`EncounterGameMenuBehavior.game_menu_encounter_order_attack_on_condition` (`Patch66_Enlistment`),
+that asks `IEnlistmentMenuService.EvaluateSitOut()`. It only narrows: it returns at once unless
+vanilla showed the option and left it enabled, it writes only `args.IsEnabled = false` and
+`args.Tooltip`, and it never hides the option or adds a second one. Vanilla's other path to the same
+consequence, the town assault init, stays.
+
+**With or without men of his own.** The rule applies either way. A soldier who does have men of his
+own sees the label "Send troops" instead of "Leave it to the others", and both are the same option
+with the same verdicts.
+
+**The gate** is one private method, `ServesInCommandersBattle()`, shared with `ShouldBlockBattleExit`:
+state `EnlistedBattle`, and `BattleCommandPolicy.ShouldStripPlayerCommand` with the player not leading
+his side. Outside it the snapshot is never read and the verdict is `Unchanged`. The patch asks only
+when vanilla showed and enabled the option. The winner check
+(`IEncounterAdapter.PlayerMapEventHasWinner`) is read before the gate on purpose: inside the gate, a
+leadership handover in the aftermath would let a later refresh overwrite the verdict taken when the
+player clicked. Every call that passes it records its verdict in `SitOutLedger`, the closed gate
+included, so each click is preceded by a fresh record. A battle that ends without a payout can leave
+its last verdict behind; that is harmless, because the simulation flag is set only after a click on an
+enabled option whose refresh recorded a fresh verdict.
+
+**The decision** is the pure `SitOutPolicy.Decide(SitOutSnapshot, threshold)`, in this order:
+
+1. A needed field the adapter could not read: `Unchanged` (vanilla stands).
+2. Wounded: `WoundedFree`.
+3. Vanilla's Attack unavailable: `ForcedOpen`.
+4. Siege assault or sally-out: `RefusedSiege`. The lord's hall phase is part of the assault map
+   event, so it needs no rule of its own.
+5. Player side share at or above `sitOut.overwhelmingShare` (0.85), and at most 1: `OverwhelmingCost`.
+6. Otherwise: `RefusedField`.
+
+Every `Refused*` verdict implies Attack is available, so the player always keeps an enabled way out.
+`IsSiege` is `MapEvent.IsSiegeAssault || IsSallyOut` only. Every other fortification battle (a relief
+battle outside the walls, a siege ambush, a naval blockade) follows the field rules.
+
+The share is `mine / (mine + theirs)` from `MapEvent.GetStrengthsRelativeToParty(PlayerSide, ...)`,
+which is read-only (it sums `GetCustomStrength` over the involved parties and starts each side at 0.1,
+so the total is never zero). Never `MapEvent.RecalculateStrengthOfSides()`, which writes the saved
+`StrengthOfSide`. Attack availability comes from a probe that builds its throwaway `MenuCallbackArgs` the way
+`IsAttackBarredByTruce` does, but mirrors vanilla's whole Attack condition (the honour check, then
+`EncounterAttackCondition`), while the truce probe mirrors only the honour check. A binding test pins
+that vanilla's `game_menu_encounter_attack_on_condition` still calls exactly those two methods.
+
+**Tooltips.** A refused option replaces vanilla's tooltip with TAOM's line. The two allowed verdicts
+(`WoundedFree`, `OverwhelmingCost`) keep vanilla's power-context tooltip below TAOM's line. The odds
+line says "your commander will remember it", which is only true while `sitOut.trustCost` is above 0
+(the shipped value is 1); a tuner who sets 0 should reword `taom_enlist_sitout_odds_tip`.
+
+**The payout.** `EnlistmentContentBehavior.OnMapEventEnded` passes `mapEvent.IsPlayerSimulation` to
+`EnlistmentBattlePayoutService.PayOutBattle(won, playerSimulated)`; the parameter is required, so the
+call site cannot forget it. `BattleSimulation` sets that flag, and two IL pins (TaleWorlds.CampaignSystem
+only, SandBox and the other official modules are not scanned) hold that `PlayerEncounter.InitSimulation`
+is called only from `MenuHelper.EncounterOrderAttack`, the `BattleSimulation` constructor only from
+`InitSimulation`, and `MapEvent.IsPlayerSimulation` is set only by that constructor.
+
+The payout consumes the ledger on every battle. A battle counts as sat out when the player simulated it,
+the recorded verdict is one of `WoundedFree`, `ForcedOpen` or `OverwhelmingCost`, and the mission never
+ran for him: no merit sample, or a walkout (`LeftTheField`) from a mission he was never downed in
+(`SurvivalRatio` at 1). A recorded `Unchanged` or `Refused*` verdict means the simulation did not come
+from an option the gate allowed, and the battle pays as normal. For a sat-out battle:
+
+| Reason | Base XP | Renown | Trust |
+|---|---|---|---|
+| `WoundedFree` | full | withheld | unchanged |
+| `ForcedOpen` | full | withheld | unchanged |
+| `OverwhelmingCost` | times `sitOut.baseXpFactor` (0.5) | withheld | minus `sitOut.trustCost` (1) |
+
+A walkout that sat out still receives the band XP and gold its sample earned; the sit-out rule governs
+only the base pay and renown. Win and loss counters still count the battle. The announcer says which line applies
+(`AnnounceSatOut`): `taom_enlist_sat_out_wounded_line`, `taom_enlist_sat_out_line` (the cut share) or
+`taom_enlist_sat_out_forced_line`. `SitOutLedger` is a never-saved singleton, consumed by the payout and
+by `ServiceMaintenanceService.ResetSessionCaches`, which also drops an unconsumed merit sample.
+
+| Situation | Send troops / Leave it to the others | Attack |
+|---|---|---|
+| Field battle, healthy, side share below 0.85 (with or without an army) | Disabled, "Take your place in the fight" | Enabled |
+| Field battle, healthy, side share at or above 0.85 | Enabled, trust cost and cut base XP | Enabled |
+| Safe-passage truce | Disabled by vanilla | Disabled by vanilla; #827 releases 'Leave' |
+| Wounded | Enabled, full base XP, no renown | Disabled by vanilla |
+| Party morale 0, healthy | Disabled by vanilla | Enabled |
+| Wounded and morale 0 | Disabled by vanilla | Disabled by vanilla; 'Surrender' only (pre-existing) |
+| Siege assault or sally-out, prep complete | Disabled, "A siege needs every soldier" | Enabled |
+| Siege assault, prep incomplete | Enabled (`ForcedOpen`) | Hidden by vanilla |
+| Fortification battle that is not an assault (relief battle outside the walls, siege ambush, naval blockade) | Follows the field rows | Enabled |
+| Raid on a village | A village is not an assault: follows the field rows | Enabled |
+| Enemy on a raft | Hidden by vanilla | Disabled by vanilla (pre-existing) |
+| Own party on a raft | Enabled (`ForcedOpen`) | Disabled by vanilla |
+| Naval raid at sea with too few men | Disabled by vanilla | Disabled by vanilla (pre-existing gap) |
+
+Fails open: any error leaves vanilla's answer and logs once. Co-op: a postfix on a local menu
+predicate that skips no replicated mutation; a client never holds `EnlistedBattle`, so the gate is
+inert there. Text keys: `taom_enlist_sitout_*_tip` and the three `taom_enlist_sat_out_*_line` keys.
+Config: the `sitOut` section of `enlistment_config.json`.
+
+Tests: `SitOutPolicyTests` (every rule, the threshold boundary, NaN and out-of-range shares, an
+exhaustive invariant loop), `EnlistmentMenuServiceTests` (the gate, the ledger, the aftermath skip),
+`EncounterGameMenuOrderAttackConditionPatchTests` (narrow-only, fail-open, log once),
+`EnlistmentBattlePayoutServiceTests` (every sat-out row), `ServiceDailyAnnouncerSatOutTests` (line
+choice), `ServiceMaintenanceServiceTests` (the session reset), `EnlistmentContentConfigProviderTests`
+(the `sitOut` validation and the shipped-file parity) and `Patch66EnlistmentBindingTests` (the target,
+the category, `IsPlayerSimulation` and the IL pins).
+
 ## Interactions with the rest of TAOM
 
 **Leader-keyed attribution is the recurring hazard.** For months of game time the player fights
@@ -2021,12 +2134,29 @@ What actually remains, each a state no test can reach:
   keep an exit. After that 'Leave', expect the state to return to `EnlistedAttached` once the
   commander's battle ends (the reconciler frees it when no battle remains).
 - **The presence hold at x64 (#577).** Extra Fast Forward multiplier 64, Diagnostics ON: ride with
-  the commander through three or more battles, click "Send troops" in each encounter menu. Expect no
-  exception and no `TICK trigger=army left ... verdict=AttachRequired` line; expect `reconcile
+  the commander through three or more battles. In each encounter menu hover 'Leave it to the
+  others' (it is greyed with the TAOM tooltip while Attack is enabled). Click it where it is
+  enabled (wounded, or odds at or above 0.85), otherwise click Attack. Every x64 run needs at least
+  one enabled 'Leave it to the others' click, because only that click builds a `BattleSimulation`,
+  which is the path #577 hardened. Recipe: enter the battle wounded, so the option is enabled whatever
+  the odds. Expect no exception and no
+  `TICK trigger=army left ... verdict=AttachRequired` line; expect `reconcile
   skipped (trigger=army left)` or `holding presence` lines instead. The reporting player's log is
   still wanted: the confirming sequence is `RESTORE ok`, `joined ... army for the battle`, `TICK
   trigger=army left state=EnlistedBattle verdict=AttachRequired ... hasPlayerEncounter=True`,
   `PARK ok ... before: mapEvent=True ... after: mapEvent=False`.
+- **Leave it to the others (#830).** Empty party, healthy, field battle below 0.85: the option
+  is greyed with "Take your place in the fight". Same at a siege assault and a sally-out. A relief
+  battle outside the walls, a siege ambush and a naval blockade follow the field rows. With men of
+  his own the option reads "Send troops" and follows the same rows. Wounded: the option is enabled
+  with the wounded line over vanilla's tooltip; click it and expect the wounded line, full base XP and
+  no renown. Side at 0.85 or more: enabled with the odds line; click it and expect the "share was cut"
+  line, cut base XP, no renown and one trust point docked. A forced-open case (an own raft, siege
+  preparation incomplete) pays full base XP with no renown and the "no way into the line" line. The
+  `[Enlistment] sat out a simulated battle` log line names the reason. Repeat one enabled click at
+  Extra Fast Forward 64 (see the #577 step). If the game allows a save in the battle aftermath, save
+  there after a sat-out click and reload: the click-time verdict is not saved, so check whether that
+  battle is paid as sat out or in full. Not yet seen in game.
 - **A field battle with the commander in an army.** Still the case most likely to fail:
   `FindCommanderPartyIdIn` matches only the commander's own party in `InvolvedParties`, and an
   attached army member may not appear there.

@@ -792,3 +792,15 @@ campaign time (0.25 x real time at play speed), while the doc said real time. Th
   record must cover and the event that fires in each; menu time is `GameMenuOpened`. Pin the engine's gate with an IL
   test, and throttle in real time (`Stopwatch`), never on the tick's dt.
 - **Source:** `docs/reviews/rca-hidden-hosts-p23-2026-10-19.md` finding 1.
+
+### Decide "did he fight" from one owner, and let every other signal only narrow it (#830, 2026-10-19)
+Enlistment's sit-out gate first paid a battle as fought whenever a merit sample existed and as sat out
+whenever the simulation flag was set and a one-slot ledger was empty or held any verdict. Clicking Attack,
+retreating at once and then letting the others fight left a sample, so the soldier kept renown and paid no
+trust; an empty ledger was read as "forced open", so a battle he led could be paid as a sit-out.
+- **Why missed:** three signals (mission sample, `MapEvent.IsPlayerSimulation`, the ledger) each answered a
+  slightly different question, and the payout combined them without naming which one owns the answer.
+- **Prevent:** when a reward depends on what the player chose, record the choice at the moment he makes it (the
+  verdict on the option he clicked), give "nothing recorded" no meaning beyond "no choice", and make every other
+  signal a narrowing of that record. Test the walkout and the led-battle paths explicitly.
+- **Source:** `docs/reviews/rca-enlistment-sit-out-2026-10-19.md` F1, F2.
