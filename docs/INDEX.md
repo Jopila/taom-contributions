@@ -38,6 +38,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [character-selection](features/character-selection.md) — transpiler-driven race fallback in CC
 - [race-age-system](features/race-age-system.md) — race-appropriate lifespans (elven immortality, dwarf/hobbit aging) via TaomAgeModel + TaomPregnancyModel
 - [hero-race](features/hero-race.md) — race assignment + persistence on Hero; capture refuses to run when the FaceGen registry holds fewer than 2 races, because a co-op host without TAOM's modules reads every hero back as race 0 and that map rides the save transfer to fully-raced clients
+- [lord-face-variety](features/lord-face-variety.md): one pass at the end of new-campaign creation gives campaign heroes their own face: rule A rolls a hero on a template minimum inside its range (with weight and build), rule B rolls heroes sharing an explicit key near their own face at age 30, rule C does the same for generated children (#952)
 - [offspring-race-inheritance](features/offspring-race-inheritance.md) — child race from parent races, race-aware hero creation defaults
 - [initial-child-generation](features/initial-child-generation.md) — campaign-start child rolls
 - [no-mount-cultures](features/no-mount-cultures.md) — suppress narrative horse crash on no-mount cultures (Patch20)

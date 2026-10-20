@@ -435,6 +435,8 @@ For content retirement across the mod, see [Retire content](recipe-retire-conten
   placeholder that renders as a generic block. Compare against the clan the new one was derived from.
   [kingdom creation](../features/kingdom-creation.md).
 
+- **Lords on one face.** A hero starts on the minimum of his character's face range, or on his one explicit key. Many lords on the same template or the same key look identical; `LordFaceVarietyService` varies them once at the end of new-campaign creation ([lord-face-variety.md](../features/lord-face-variety.md)), and `HeroFaceVarietyDataTests` fails if a new lord would still share a face with another after that pass (Elladan and Elrohir excepted). For a group of many lords, write `<face_key_template value="BodyProperty.<culture template>" />` in place of the explicit key: the pass then rolls each lord inside the template's range, with a rolled weight and build, instead of moving each one only a little around one shared face. The test also holds a ceiling on how many lords the weaker rule may handle.
+
 ### Not answered anywhere in TAOM
 
 - **How to author a `banner_key` from scratch.** The number-group grammar is not decoded in any TAOM

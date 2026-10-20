@@ -279,6 +279,8 @@ suppression** (see the P1 note above).
 only changes the walk phase and clip choice of agents this peer built, and the managed `Agent.SetActionSet` broadcasts only under `GameNetwork.IsServerOrRecorder`, which
 BannerlordCoop does not use. Its three settings are classified as presentation above.
 
+`LordFaceVarietyBehavior` (one face pass per new campaign, [lord-face-variety.md](lord-face-variety.md)) is deliberately ungated: it listens to `OnNewGameCreatedPartialFollowUpEndEvent` only and has no load path, so it runs wherever a campaign is built and never when a save loads. It writes `Hero.StaticBodyProperties` (and weight and build for rule A), which the save already stores. A co-op client with no hero builds a local campaign for character creation, so the pass runs there too, but its rolls are discarded when the client loads the host's save. A dedicated server that builds its own world runs it. A headless server without a face generator may leave faces unchanged (UNVERIFIED). Not confirmed in a live co-op session.
+
 ## Client-side object creation
 
 [Source-verified, runtime-unconfirmed] Constructing any `MBObjectBase` on a client inside
