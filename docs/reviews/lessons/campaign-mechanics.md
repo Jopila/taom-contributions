@@ -817,3 +817,9 @@ running event) and for the looting, so the soldier would sit out a real lord bat
   fight shape the event can hold. State in the doc which shapes the rule covers and which are a known
   gap; test each listed shape.
 - **Source:** `docs/reviews/rca-enlistment-village-raids-2026-10-20.md` F1, F2.
+
+### A new-game pass over heroes runs after the follow-ups, at adult age (#952, 2026-10-20)
+The face pass first ran on `OnNewGameCreatedEvent` and rolled each hero at the hero's own age. Initial children are cloned after that event (follow-up 0), so they copied the shared faces, and the native roll picks its face table by age, so young heroes had hair and beard reset to `Bald` and `Cleanshaven`.
+- **Why missed:** the design copied vanilla's roll call but not its input (vanilla always rolls an adult range) or its timing.
+- **Prevent:** hook a pass that must see every new-game hero to `OnNewGameCreatedPartialFollowUpEndEvent`, and roll faces at `BodyProperties.DefaultAge` (30).
+- **Source:** `docs/reviews/rca-followups-949-952-2026-10-20.md` F2, F3.

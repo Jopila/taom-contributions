@@ -33,7 +33,7 @@ public sealed class HeroFaceAdapter : IHeroFaceAdapter
             character.BodyPropertyRange.HairTags,
             character.BodyPropertyRange.BeardTags,
             character.BodyPropertyRange.TattooTags);
-        // HeroCreator rolls weight and build between the range's the same way (engine random, not the seed).
+        // HeroCreator rolls weight and build between the range's minimum and maximum the same way (engine random, not the seed).
         var dynamic = CharacterHelper.GetDynamicBodyPropertiesBetweenMinMaxRange(character);
         hero.StaticBodyProperties = rolled.StaticProperties;
         hero.Weight = dynamic.Weight;

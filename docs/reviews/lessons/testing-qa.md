@@ -1944,3 +1944,15 @@ and no model" assertion, the same gap the Bard Town Guard review found one featu
 - **Prevent:** when a brief names a sibling feature as the pattern, list the sibling's test files and test names in
   the brief and require one counterpart for each, or a stated reason why it does not apply.
 - **Source:** `docs/reviews/rca-crown-guard-2026-10-20.md` F6, F7.
+
+### A gate counts what it parsed against what exists (#951, 2026-10-20)
+The banner icon gate matched keys made of digits and dots, so it silently skipped the 18 keys holding a negative rotation, and two of those named icons that do not exist. Its floor (more than 100 keys) still passed.
+- **Why missed:** the pattern was written from the keys the author looked at, and the floor counted parsed keys, not declared ones.
+- **Prevent:** assert that the parsed count equals every declaration of the thing (here every `banner_key`), so a pattern that cannot read an entry fails instead of skipping it.
+- **Source:** `docs/reviews/rca-followups-949-952-2026-10-20.md` F1.
+
+### Build a fake's result from the engine's inputs, never from the caller's identity (#952, 2026-10-20)
+The face roll fake put the hero id into every rolled key, so every result was unique by construction: a constant seed passed all tests, and the data gate could only ever report the twins it allowlists.
+- **Why missed:** the fake was written to make results tell apart, not to behave like the engine, which returns the same face for the same race, sex, face, variation and seed.
+- **Prevent:** derive a fake's output only from the inputs the engine uses, then mutate the code under test (a constant seed here) and confirm a test fails before trusting the suite.
+- **Source:** `docs/reviews/rca-followups-949-952-2026-10-20.md` F5.

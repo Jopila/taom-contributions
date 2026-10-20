@@ -1313,3 +1313,9 @@ tracked plate is drawn every map frame outside the cull, so mark few.
   reader (grep the decompile dump for the member name across all assemblies) and name it in the plan. No reader means
   no effect: use the mechanism the UI actually reads.
 - **Source:** `docs/reviews/rca-lord-courtesies-2026-10-20.md` row 1.
+
+### A singleton adapter holds no engine objects between calls (#952, 2026-10-20)
+The face adapter cached every `Hero` by id to avoid a linear `Hero.Find`, and as a process singleton it kept the last created campaign's heroes alive after the player loaded another save.
+- **Why missed:** the cache was a performance shortcut and nothing cleared it.
+- **Prevent:** carry the engine object inside the snapshot as an opaque handle (the `MountSnapshot` pattern), so the adapter stays stateless and references live only for one call.
+- **Source:** `docs/reviews/rca-followups-949-952-2026-10-20.md` F4.

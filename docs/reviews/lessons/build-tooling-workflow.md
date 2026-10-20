@@ -4145,3 +4145,9 @@ rules for one act and a GroupOrder already taken.
   blocks until it is answered by a fix or a filed follow-up.
 - **Source:** `docs/reviews/rca-lord-courtesies-2026-10-20.md` (root-cause pattern); `rca-hard-questions-2026-10-19.md`
   round 3.
+
+### Give a scratch transform a timeout (2026-10-20)
+A read-only XSLT transform a review agent started hung for more than four hours and held `spclans.xslt` open, which blocked a later data fix with `PermissionError`.
+- **Why missed:** the script had no time limit and nothing reported it as stuck.
+- **Prevent:** run scratch transforms through `timeout` (or `Start-Process` with a wait limit), and when a repo file will not open for writing, look for this session's own stale processes first.
+- **Source:** `docs/reviews/rca-followups-949-952-2026-10-20.md`, process note.
