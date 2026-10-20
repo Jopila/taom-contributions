@@ -1,0 +1,136 @@
+# Crown Guard
+
+## Overview
+
+The two guards beside a new ruler in the become-king scene are troops picked for the kingdom's culture and wear its
+colours: Gondor crowns its king between Fountain Guards, Mordor between Barad-dur Guards, and every kingdom culture
+has a row.
+
+## Why This Exists
+
+- **Vanilla behavior:** `CampaignSceneNotificationHelper.GetBodyguardOfCulture` (public static, v1.5.5) switches on
+  seven vanilla culture ids (battania, khuzait, vlandia, aserai, sturgia, empire, nord) and returns
+  `new SceneNotificationCharacter(MBObjectManager.Instance.GetObject<CharacterObject>(id))`, with `fighter_sturgia`
+  for any other culture.
+- **Callers:** the one a TAOM campaign reaches is `BecomeKingSceneNotificationItem`, which asks for two guards of the
+  new ruler's kingdom culture. `DefaultCutscenesCampaignBehavior.OnKingdomDecisionConcluded` raises it only when the
+  player wins a king-selection vote. The engine's other caller, `EmpireConspiracySupportsSceneNotificationItemBase`,
+  is raised only by Story Mode's `DefeatTheConspiracyQuestBehavior`, whose new game TAOM hides; if it ran, it would get
+  the same mapped guards.
+- **TAOM requirement:** the coronation scene shows the new realm's own people.
+- **Without this feature:** a Gondor, Mordor or Erebor ruler gets Sturgian fighters, and the reused vanilla ids get
+  Calradian elites: Rohan a Vlandian banner knight, Dunland an imperial legionary, Rhun and Harad troops that TAOM
+  marks obsolete.
+
+## Architecture
+
+### Design Challenge
+
+The method returns a struct built from a troop lookup, and TAOM cultures have no branch in it. No GameModel offers the
+seam (`CutsceneSelectionModel` has only `GetKingdomDestroyedSceneNotification`). A bool prefix could skip vanilla only
+for mapped cultures, but it would skip the original for every other patcher and need a co-op veto classification; a
+void postfix can leave vanilla's answer alone wherever TAOM has no row.
+
+### Solution Approach
+
+A Harmony postfix, Patch112, category `Patch112_CrownGuard`, applied at GameInit. The hook reads `culture.StringId` and
+asks `CrownGuardMap.GuardTroopId` through `CrownGuardConfigProvider`, which validates the JSON once per process and
+falls back to the built-in `CrownGuardMap.Default()`. If there is a troop id and the troop is loaded, `__result`
+becomes a `SceneNotificationCharacter` of that troop with the crowned culture's `Color` and `Color2`. Otherwise
+vanilla's result stands; a mapped troop that is not loaded logs one warning per culture id.
+
+The colours matter for borrowed rows: the scene tints each guard with its own troop culture's colours unless the
+character carries custom colours, so a guard borrowed from another culture would otherwise wear that culture's colours.
+For a troop of the crowned culture the two are the same, so passing them changes nothing.
+
+### Component Diagram
+
+```
+GetBodyguardOfCulture(culture)
+   vanilla: id switch, default fighter_sturgia
+   postfix: CrownGuardMap.GuardTroopId(culture.StringId) -> troop -> __result (troop, culture colours)
+```
+
+## Configuration
+
+### Config File: `Main/_Module/ModuleData/crown_guard/crown_guard_cultures.json`
+
+`{ "cultures": { "<culture id>": "<NPCCharacter id>" } }`. Keys are trimmed and lower-cased; troop ids are trimmed and
+keep their case. A row with an empty key, an empty or null troop id, or a key that repeats an earlier one after
+normalizing is dropped with a warning. A missing, unparseable or null file gives the built-in map. A JSON edit needs a
+game restart.
+
+### Current Values
+
+Each row is a troop from the top tiers of the kingdom's elite tree, infantry where the tree has some. Where a guard
+troop sits one tier below the top, the row takes the guard: Rohan's King's Royal Guard (below the Riders of Rohan),
+the Gundabad and Goblin Mountain Guards (below Bolg's Ironfang), and Khand's Ash Shieldguard (below the Obsidian
+Shieldmaster, which guards Rhun).
+
+- **Borrowed troops:** three cultures own no line troops of their own culture and field another's tree, so their row
+  borrows it: Lothlorien guards are `imladris_warden` (Rivendell), Khand (`battania`) guards are
+  `dragon_wrath_ash_shieldguard` (Rhun), Abanissa guards are `harad_serp_guard` (Harad). They wear the crowned
+  culture's colours.
+- **Shared troops:** Rivendell and Lothlorien share `imladris_warden`; Harad (`aserai`) and Abanissa share
+  `harad_serp_guard`.
+- **Mounted troops on foot:** Rohan's row is a cavalry troop. The scene draws a horse only when the character asks for
+  one, and the postfix does not, so every guard stands on foot.
+- **No trolls:** Mordor's top troops are the armoured and hill trolls, but Mordor's townsfolk are uruks. A troll guard
+  would be the only troll in the scene, a race the become-king render path has never drawn there, while an uruk guard
+  matches what the scene already renders. The row uses the Black Uruk Barad-dur Guard, and a shipped-data test rejects
+  any troll race.
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `Main/Features/CrownGuard/Hooks/CampaignSceneNotificationHelper_GetBodyguardOfCulture_CrownGuard_Patch.cs` | The postfix |
+| `Main/Features/CrownGuard/CrownGuardMap.cs` | The map, its lookup and its built-in default |
+| `Main/Features/CrownGuard/CrownGuardConfigProvider.cs` | Validating JSON loader |
+| `Main/Features/CrownGuard/CrownGuardModule.cs` | The provider registration and the patch category |
+| `Main/_Module/ModuleData/crown_guard/crown_guard_cultures.json` | The shipped rows |
+
+## Dependencies
+
+- **Patch56_SceneNotificationVisualGuard** (`Main/Features/HeroRace/Hooks/GauntletSceneNotification_OpenScene_Guard_Patch.cs`):
+  the become-king scene's net for a character visual that fails to build. Many guards are not human, but each guard's
+  race is the race of its culture's townsfolk, which the scene already renders, so Crown Guard adds no new race to that
+  path.
+
+## Tests
+
+- `TAOM.Tests/Features/CrownGuard/CrownGuardMapTests.cs`: mapped, unmapped, null or empty, case and whitespace
+- `TAOM.Tests/Features/CrownGuard/CrownGuardConfigProviderTests.cs`: one test per validation rule
+- `TAOM.Tests/Features/CrownGuard/ShippedCrownGuardConfigTests.cs`: the shipped JSON equals the default, the map's
+  keys are exactly the kingdom cultures, every troop is an `NPCCharacter` in the shipped data, no guard is a troll
+- `TAOM.Tests/Features/CrownGuard/CrownGuardWiringTests.cs`: module listing, category id and phase, the hook's
+  category, the singleton registration, no behavior, model or save data
+- `TAOM.Tests/Features/CrownGuard/CrownGuardBindingTests.cs`: the category applies to the installed engine
+- Not unit-tested: the hook's own branch for a mapped troop that is not loaded (it reads the static
+  `MBObjectManager.Instance`); the shipped-data test keeps every row's troop present.
+
+## Adding a kingdom culture
+
+Add a row to the JSON and to `CrownGuardMap.Default()` (a test keeps the two equal). The shipped-config test fails
+until the map's keys equal the kingdom cultures in `taom_spkingdoms.xml` and `spkingdoms.xslt`.
+
+## In-game check
+
+Win a king election and look at the two guards in the coronation scene. Expect:
+
+- troops of the row for your kingdom's culture, wearing its colours (check a Lothlorien, Khand or Abanissa ruler for
+  the borrowed rows);
+- each guard in its troop's first battle set, on foot, holding the scene's own vanilla spear, which the scene's spawn
+  points put in every guard's right hand (vanilla's guards hold it too);
+- founding a kingdom shows a different scene, which never calls this method.
+
+Not yet checked in game.
+
+## Changelog
+
+- 2026-10-20: added (#825).
+
+## GitHub Issue
+
+- **Issue:** #825 Scene popups show Calradian bodyguards beside Middle-earth rulers
+- **Status:** Open

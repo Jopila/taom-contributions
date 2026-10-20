@@ -54,5 +54,6 @@ internal static class FeatureModules
         new Features.TavernSpecialities.TavernSpecialitiesModule(),
         new Features.ReevesLedger.ReevesLedgerModule(),
         new Features.LordCourtesies.LordCourtesiesModule(),
+        new Features.CrownGuard.CrownGuardModule(),
     };
 }
