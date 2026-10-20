@@ -79,11 +79,11 @@ Average adult OneHanded is 146.6 (Gondor 141.4, Rohan 173.1). Dale skill sets eq
 ## Tests
 
 - `CharacterFaceCoverageTests`, `LordIdentityConsistencyTests`, `LordNameAndSexConsistencyTests`, `LordFamilyTransformTests`, `LordTemplateRosterTests` and `LordInlineSkillParityTests` cover the new lords' faces, identity, names, families, templates and inline skills.
-- `ShippedHeraldryBannerKeyTests` checks the banner key's shape only, not that its icon ids exist.
+- `ShippedHeraldryBannerKeyTests` checks the banner key's shape only. `tools/tests/test_banner_icon_ids.py` (#951) checks that every icon and colour id in the clan, kingdom and culture banner keys exists in Native's or TAOM's `banner_icons.xml`.
 - `LocalizationKeyConsistencyTests` covers the name keys; `CustomBattleCommandersShippedDataTests` covers the Custom Battle entries.
 - `tools/tests/test_dale_lord_expansion.py` pins the bow rosters, the shared banner, the clan names and homes, and the face keys.
 - `tools/tests/test_generator_regions_in_sync.py` catches a marker block that sits after a generator region.
-- `python tools/validate_moduledata.py` does not resolve `Faction`, `Hero` or `Settlement` references, so no gate yet checks the owner references in `settlements.xml`; that is a follow-up.
+- `python tools/validate_moduledata.py` resolves `Faction.X` refs since #949 (`BROKEN_FACTION_REF`: a settlement `owner=` or Hero `faction=`), so a Dale house that names a missing clan fails the commit hook. It still does not resolve `Hero` or `Settlement` references, and the `faction` attributes `heroes.xslt` writes are not swept.
 
 ## How to Add More Dale Lords
 

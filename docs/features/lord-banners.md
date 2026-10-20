@@ -105,6 +105,7 @@ Elves, orcs and creatures have no row: neutral banners only.
 - `TAOM.Tests/Features/LordBanners/LordBannerCulturesConfigProviderTests.cs`: one test per validation rule
 - `TAOM.Tests/Features/LordBanners/ShippedLordBannerCulturesConfigTests.cs`: the shipped file parses clean, equals the built-in map, names real culture ids; with the game installed, every culture that has a lord in repo ModuleData gets a non-empty pool at levels 1 to 3 (inconclusive without the install)
 - `TAOM.Tests/Features/LordBanners/ShippedHeraldryBannerKeyTests.cs`: every clan and kingdom `banner_key` in `clans.xml`, `taom_spkingdoms.xml`, `spclans.xslt` and `spkingdoms.xslt` is whole groups of ten integers; since #823 vanilla's captain path banners TAOM lord-led formations without TAOM's heraldry guard
+- `tools/tests/test_banner_icon_ids.py` (#951): the icon and colour ids those keys name (and `taom_spcultures.xml`'s `faction_banner_key`) exist in Native's or TAOM's `banner_icons.xml`; an unknown icon draws as nothing
 - `TAOM.Tests/Features/LordBanners/LordBannersWiringTests.cs`: module listing, no patch or behavior, the two model declarations, and IL scans that the vassal override calls the base then the helper with no branch and that the helper checks the roster, draws from `Allowed`, then adds one banner
 
 ## Consequences
