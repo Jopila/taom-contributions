@@ -6058,6 +6058,10 @@
 
     <string id="taom_gift_offer" text="I have a gift for you." />
 
+    <string id="taom_tavern_drink_default" text="a mug of ale" />
+
+    <string id="taom_tavern_food_default" text="a bowl of stew" />
+
   </strings>
 
 </base>

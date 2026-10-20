@@ -149,6 +149,8 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [lord-spawn-guard](features/lord-spawn-guard.md) — Patch65 + the Variag settlement retag: a landless culture CTDs the daily clan tick
 - [map-event-guard](features/map-event-guard.md): Patch82, restoring the `BattleObserver`/`TroopUpgradeTracker` pairing that four unguarded engine dereferences rely on; and the hourly sweep that ends AI battles stuck at N vs 0 (#748)
 - [bard-town-guard](features/bard-town-guard.md): Patch110 (#824), a call-site swap that stops the tavern musician's conversation condition from throwing in a town whose culture owns no other town
+- [lord-banners](features/lord-banners.md): lords of TAOM cultures receive banner items (#823) and a joining vassal a level 2 banner (#933), through two campaign models
+- [tavern-specialities](features/tavern-specialities.md): Patch111 (#937), a prefix that pre-sets default dishes for the tavern maid, which vanilla's seven culture branches overwrite
 - [return-to-army](features/return-to-army.md): Patch87, "Return to Army" leaves a town or castle for an army member who is not merged into the army, where vanilla's wait menu has no exit
 - [lord-party-templates](features/lord-party-templates.md): Patch88, a lord named in `lord_party_templates.json` fields his own party template instead of his clan's (Faramir the Ithilien rangers, Sauron a Black Numenorean and Uruk host)
 - [stale-character-repair](features/stale-character-repair.md): Patch83, making a save-restored character with no ModuleData definition inert before the engine derefs its null fields

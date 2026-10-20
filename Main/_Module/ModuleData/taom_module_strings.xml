@@ -3379,5 +3379,8 @@
 	<string id="taom_gift_thanks" text="{=taom_gift_thanks}Thank you. That is kind of you." />
 	<string id="taom_gift_failed" text="{=taom_gift_failed}Something is not right. Let us leave it." />
 	<string id="taom_gift_offer" text="{=taom_gift_offer}I have a gift for you." />
+	<!-- TavernSpecialities -->
+	<string id="taom_tavern_drink_default" text="{=taom_tavern_drink_default}a mug of ale" />
+	<string id="taom_tavern_food_default" text="{=taom_tavern_food_default}a bowl of stew" />
 
 </strings>

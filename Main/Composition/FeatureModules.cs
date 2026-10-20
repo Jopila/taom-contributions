@@ -51,5 +51,6 @@ internal static class FeatureModules
         new Features.BardTownGuard.BardTownGuardModule(),
         new Features.FellFoes.FellFoesModule(),
         new Features.TokensOfEsteem.TokensOfEsteemModule(),
+        new Features.TavernSpecialities.TavernSpecialitiesModule(),
     };
 }
