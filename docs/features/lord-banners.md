@@ -116,13 +116,14 @@ Elves, orcs and creatures have no row: neutral banners only.
 - Existing saves: every eligible lord gets a banner as soon as the save finishes loading (`BannerCampaignBehavior.GiveBannersToHeroes` on `OnGameLoadFinishedEvent`, no roll, prisoners included). A hero who comes of age, a new lord and a companion who founds a clan get one at once (`HeroComesOfAgeEvent`, `HeroCreated`, `OnClanCreated`). A lord who loses his banner, or one the other paths missed, gets one through the daily tick (25 percent per day, never while a prisoner). Under the co-op mod only the host gives banners, `Hero.BannerItem` is synced, and the load-time give is blocked, so in a co-op save lords get their banners through the daily tick.
 - Defeated TAOM lords can drop their banner as loot.
 - Two writers clear a lord's banner: vanilla's ruling-clan kit change (`NPCEquipmentsCampaignBehavior.OnRulingClanChanged` writes all 12 slots; the daily tick gives one again) and the Hard Questions strip (it takes the banner with the kit; given again after release).
-- Lindon and Blue Craig have no BannerBearers `CultureBanners` row, so only their lord-captained formations fly a banner (known gap, follow-up).
+- BannerBearers keys on a formation's majority troop culture, and the lords' own parties already field `rivendell` and `goblin` troops, so Lindon and Blue Craig lord parties already flew those banners. Their own-culture troops (Lindon militia, garrisons and volunteers, and `bluecraig_bolgs_ironfang`) had no `CultureBanners` row. Closed by #932: `lindon` takes the elves' flag, `bluecraig` the orcs' standard, and `ShippedConfig_MapsEveryInfantryTroopCultureToABanner` keeps every fielded infantry troop culture mapped.
 
 ## How to add a culture
 
 1. Add the culture to `taom_spcultures.xml` and a lord for it.
 2. Optionally add a row to `lord_banner_cultures.json` and to `LordBannerMap.Default()`. Without a row the culture
    gets the neutral banners.
+3. Add the culture to the BannerBearers `CultureBanners` map (`banner_bearers_config.json` and the compiled defaults), or its troop formations raise no banner; the gate above fails until it is there.
 
 ## In-game check
 
@@ -135,5 +136,5 @@ Load a save, then fight a battle against or alongside a Gondor, Erebor or Mordor
 ## GitHub Issue
 
 - **Issue:** #823 Lords of custom cultures never receive a banner item
-- **Status:** Open
 - **Issue:** #933 Joining a TAOM-culture kingdom gives no banner reward
+- **Status:** Open
