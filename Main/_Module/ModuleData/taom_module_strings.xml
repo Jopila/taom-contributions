@@ -3360,5 +3360,24 @@
 	<string id="taom_tm_mcm_filter_default_hint" text="{=taom_tm_mcm_filter_default_hint}Tick &quot;Show only better items&quot; each time the inventory opens." />
 	<!-- TelcharsMark -->
 	<string id="taom_tm_toggle_hint" text="{=taom_tm_toggle_hint}Show only better items: upgrades (green) and sidegrades (yellow). The move-all buttons (Take, Give, Buy, Sell or Discard all) then move only the rows shown." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- GiftConversationAdapter -->
+	<string id="taom_gift_row_purse" text="{=taom_gift_row_purse}Give a purse of {PURSE_GOLD} gold." />
+	<string id="taom_gift_row_good" text="{=taom_gift_row_good}Give {GOOD_NAME} (you carry {GOOD_COUNT})." />
+	<!-- Gifts -->
+	<string id="taom_gift_cooldown" text="{=taom_gift_cooldown}It is too soon for another gift. Days left: {DAYS}." />
+	<string id="taom_gift_cannot_afford" text="{=taom_gift_cannot_afford}You do not carry that much gold." />
+	<string id="taom_gift_no_effect" text="{=taom_gift_no_effect}This would not improve your relation." />
+	<string id="taom_gift_refuse_hostile" text="{=taom_gift_refuse_hostile}I will not take gifts from you." />
+	<string id="taom_gift_refuse_alignment" text="{=taom_gift_refuse_alignment}I take nothing from those who serve the Shadow." />
+	<string id="taom_gift_empty" text="{=taom_gift_empty}You carry nothing I can accept." />
+	<string id="taom_gift_prompt" text="{=taom_gift_prompt}What do you have for me?" />
+	<string id="taom_gift_deferred" text="{=taom_gift_deferred}Another time, perhaps." />
+	<string id="taom_gift_more" text="{=taom_gift_more}Let me look through my things again." />
+	<string id="taom_gift_back" text="{=taom_gift_back}Never mind." />
+	<string id="taom_gift_thanks_suited" text="{=taom_gift_thanks_suited}You know what I like. Thank you." />
+	<string id="taom_gift_thanks" text="{=taom_gift_thanks}Thank you. That is kind of you." />
+	<string id="taom_gift_failed" text="{=taom_gift_failed}Something is not right. Let us leave it." />
+	<string id="taom_gift_offer" text="{=taom_gift_offer}I have a gift for you." />
 
 </strings>

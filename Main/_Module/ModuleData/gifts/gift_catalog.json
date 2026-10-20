@@ -1,0 +1,28 @@
+{
+  "_about": "Tokens of Esteem gift catalog (docs/features/tokens-of-esteem.md). One entry per ITEM CATEGORY id (ItemObject.ItemCategory.StringId), never per item, so a renamed item keeps its place. lordBase is what a lord values the category at, 1 to 10 (a companion's base comes from the item's value instead). Each taste group lists race names and culture ids; a hero of ANY listed race or culture adds the group's bonus, 1 to 10, and the highest matching bonus wins (no stacking). At load every category, race and culture is checked against the game and an unknown one is dropped with one log line. Races: dwarf, elf, orc, uruk, human and the rest of skins.xml. Cultures: the Rohirrim are 'vlandia', Dunland is 'empire', Khand is 'battania'. war_horse carries no Rohirric taste on purpose: all 22 Armory creature mounts (wargs, spiders, elk and the rest) are item category war_horse, so the taste would make a warg a horse-lord's treasure. Edits need a full game restart.",
+  "entries": [
+    { "category": "jewelry", "lordBase": 8, "tastes": [ { "races": ["dwarf"], "cultures": [], "bonus": 4 } ] },
+    { "category": "silver", "lordBase": 6, "tastes": [ { "races": ["dwarf"], "cultures": [], "bonus": 4 } ] },
+
+    { "category": "wine", "lordBase": 6, "tastes": [ { "races": ["elf"], "cultures": [], "bonus": 4 } ] },
+    { "category": "velvet", "lordBase": 5, "tastes": [ { "races": ["elf"], "cultures": [], "bonus": 4 } ] },
+    { "category": "linen", "lordBase": 3, "tastes": [ { "races": ["elf"], "cultures": [], "bonus": 3 } ] },
+
+    { "category": "sumpter_horse", "lordBase": 2, "tastes": [ { "races": [], "cultures": ["vlandia"], "bonus": 3 } ] },
+    { "category": "horse", "lordBase": 4, "tastes": [ { "races": [], "cultures": ["vlandia"], "bonus": 4 } ] },
+    { "category": "war_horse", "lordBase": 6, "tastes": [] },
+    { "category": "noble_horse", "lordBase": 9, "tastes": [ { "races": [], "cultures": ["vlandia"], "bonus": 6 } ] },
+
+    { "category": "meat", "lordBase": 3, "tastes": [ { "races": ["orc", "uruk", "uruk_hai", "pale_uruk", "dg_uruk", "goblin", "berserker"], "cultures": [], "bonus": 4 } ] },
+    { "category": "melee_weapons_3", "lordBase": 5, "tastes": [ { "races": ["orc", "uruk", "uruk_hai", "pale_uruk", "dg_uruk", "goblin", "berserker"], "cultures": [], "bonus": 3 } ] },
+    { "category": "melee_weapons_4", "lordBase": 7, "tastes": [ { "races": ["orc", "uruk", "uruk_hai", "pale_uruk", "dg_uruk", "goblin", "berserker"], "cultures": [], "bonus": 4 } ] },
+    { "category": "melee_weapons_5", "lordBase": 9, "tastes": [ { "races": ["orc", "uruk", "uruk_hai", "pale_uruk", "dg_uruk", "goblin", "berserker"], "cultures": [], "bonus": 5 } ] },
+
+    { "category": "salt", "lordBase": 2, "tastes": [] },
+    { "category": "beer", "lordBase": 3, "tastes": [] },
+    { "category": "cheese", "lordBase": 2, "tastes": [] },
+    { "category": "butter", "lordBase": 2, "tastes": [] },
+    { "category": "fur", "lordBase": 3, "tastes": [] },
+    { "category": "leather", "lordBase": 2, "tastes": [] }
+  ]
+}

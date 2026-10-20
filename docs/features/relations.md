@@ -2,7 +2,7 @@
 
 ## Overview
 
-The shared seam for new relation code. `IRelationGrantService.Grant` clamps and filters the request, and `IHeroRelationAdapter` makes the engine call. [Bonds of Battle](bonds-of-battle.md) is the first user.
+The shared seam for new relation code. `IRelationGrantService.Grant` clamps and filters the request, and `IHeroRelationAdapter` makes the engine call. [Bonds of Battle](bonds-of-battle.md) is the first user and [Tokens of Esteem](tokens-of-esteem.md) the second.
 
 ## Why This Exists
 
@@ -31,6 +31,11 @@ The shared seam for new relation code. `IRelationGrantService.Grant` clamps and 
 ### Personal relations and the grant
 
 With personal relations engaged, a player grant lands on the lord named: `GetHeroesForEffectiveRelation` keeps the other side of a pair that includes the player. With it off, the grant lands on the clan leader. So Bonds of Battle's battle grants count once per recipient (one per lord with Personal Relations engaged, one per clan without it), and its hand-overs count per relation owner, the hero the relation lands on, so kinsmen share one day's cap without it.
+
+### Rules for callers
+
+- **Key any throttle on the relation owner.** Ask `DiplomacyModel.GetHeroesForEffectiveRelation(player, hero, ...)` and key a cooldown, a daily cap or a "once per" ledger on the second hero it returns (the hero itself when it returns none). With Personal Relations off a change lands on the clan leader, so two kinsmen share one relation and a throttle keyed on the hero lets the player repeat it once per kinsman. Bonds of Battle's hand-over cap and Tokens of Esteem's gift cooldown both do this.
+- **The landed change can differ from the ask.** The Charm bonus and perks can add to a positive change, and the engine clamps the result to -100..100, so the number `Grant` returns is the one to show, to log and to count against a cap. Never assume the ask landed.
 
 ### Callers outside the seam
 

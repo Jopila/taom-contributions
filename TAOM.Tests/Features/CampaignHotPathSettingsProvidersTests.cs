@@ -17,6 +17,7 @@ using TAOM.Features.FieldCommission;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HiddenHosts;
 using TAOM.Features.FromTheAshes;
+using TAOM.Features.TokensOfEsteem;
 using TAOM.Features.FieldCommission.Domain;
 using TAOM.Features.NameplateCull;
 using TAOM.Features.PartyIconScale;
@@ -86,6 +87,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(PosternGateSettingsProvider))]
     // The host menus are plain menus, so the start conditions run when a menu opens or refreshes; the accessor still takes the settings once.
     [DataRow(typeof(FromTheAshesSettingsProvider))]
+    // Tokens of Esteem: the gate and the list read the group at every gift line a conversation shows.
+    [DataRow(typeof(GiftSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -123,6 +126,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IPersonalRelationSettingsProvider), typeof(PersonalRelationSettingsProvider))]
     [DataRow(typeof(IPosternGateSettingsProvider), typeof(PosternGateSettingsProvider))]
     [DataRow(typeof(IFromTheAshesSettingsProvider), typeof(FromTheAshesSettingsProvider))]
+    [DataRow(typeof(IGiftSettingsProvider), typeof(GiftSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -137,6 +141,21 @@ public class CampaignHotPathSettingsProvidersTests
     // Read THROUGH the cached object, never snapshotted: MCM edits its one registered TaomSettings in
     // place, so an edit after the provider is built and read must reach the getter. Each "before" value
     // is the compiled MCM default, so a getter wired to the wrong setting fails too.
+    [TestMethod]
+    public void Gifts_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new GiftSettingsProvider(mcm);
+        Assert.IsTrue(sut.Get().Enabled);
+        Assert.AreEqual(7, sut.Get().CooldownDays);
+
+        mcm.GiftsEnabled = false;
+        mcm.GiftCooldownDays = 21;
+
+        Assert.IsFalse(sut.Get().Enabled);
+        Assert.AreEqual(21, sut.Get().CooldownDays);
+    }
+
     [TestMethod]
     public void PersonalRelations_ReadsThroughTheCachedSettings()
     {

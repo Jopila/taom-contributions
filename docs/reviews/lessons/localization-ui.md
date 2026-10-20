@@ -1062,3 +1062,13 @@ fired with no "~" on screen. The flag is now set only by the code that wrote the
 - **Prevent:** a one-time UI trigger or a "seen" flag follows the write that the player can see, and a test covers
   the case where the write finds nothing to write into.
 - **Source:** `docs/reviews/rca-hidden-hosts-p23-2026-10-19.md` finding 3.
+### Check new player text for speaker and player gender before the paid translation run (#863, 2026-10-19)
+Tokens of Esteem wrote six dialog lines that read neutral in English ("This is just what I would have chosen", "You
+carry nothing I could accept", "What have you brought?") but take a gendered verb or adjective in Russian and Polish.
+The translation pipeline cannot add a `{?..GENDER}` conditional, so a literal translation would fix one gender for
+every speaker.
+- **Why missed:** the wording was checked in English only.
+- **Prevent:** before seeding new player text, reword any line whose verb or adjective agrees with the speaker or the
+  player (past tense, "would have", "could", predicate adjectives) into a present-tense or verb-led form, and re-seed the
+  language rows so they equal the new English.
+- **Source:** `docs/reviews/rca-tokens-of-esteem-2026-10-19.md` finding 8.

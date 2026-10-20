@@ -2104,8 +2104,13 @@ big cultures assumes "another settlement of my culture" exists.
   RCA lists the other six). Fix the one live site by keeping the engine's pick and adding a fallback, never by skipping vanilla.
 - **Source:** `docs/reviews/rca-bard-town-guard-2026-10-19.md`.
 
-### Lord count is not party count (Dale expansion, 2026-10-20)
-Party slots follow clan tier (`DefaultClanTierModel`: tier 1-2 one party, 3-4 two, 5-6 three), so adding lords to existing clans adds no armies. Dale had 48 adult lords against a major-kingdom median of 75, and padding its nine clans would have left about 18 parties.
-- **Why missed:** lord count reads as a proxy for army count, and nothing in the data shows the tier rule.
-- **Prevent:** to grow a kingdom's armies, add clans or raise tiers; count party slots, not lords. Dale went to 14 clans and 30 party slots.
-- **Source:** [dale-lord-expansion.md](../../features/dale-lord-expansion.md).
+### A catalog keyed by item category must be counted against the shipped items, not the vanilla names (#863, 2026-10-19)
+Tokens of Esteem gave Rohirrim a taste for `war_horse`. In TAOM's live Armory all 22 mounts are creatures (wargs, war
+rams, elk, boars, spiders, mumakil) tagged `item_category="war_horse"`, seven of them sold in markets, so a warg became
+a Rohirrim's prized gift. The orc taste named `orc` and `uruk` and missed five other orc races, two thirds of the
+orc-race lords.
+- **Why missed:** the catalog was seeded from vanilla category names and two race names.
+- **Prevent:** before shipping a category or race list, count the live items per category and the lords per race in the
+  data (`LOTRLOME_Armory` items and `skins.xml`, `characters/lords.xml`), and test the shipped list against the live
+  data where it is present.
+- **Source:** `docs/reviews/rca-tokens-of-esteem-2026-10-19.md` finding 2.
