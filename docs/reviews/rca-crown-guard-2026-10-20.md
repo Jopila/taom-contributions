@@ -31,7 +31,7 @@ F14, which are documented. The convergence pass found two prose slips in the fix
 | F12 | LOW | `CrownGuardService` was a one-line pass-through with an interface whose only use was its own fake | Over-structure | The brief asked for the LordBanners shape, whose service has real logic | Lookup moved into `CrownGuardMap`; service and interface deleted |
 | F13 | LOW | The hook's branch for a mapped troop that is not loaded has no unit test (it reads the static `MBObjectManager.Instance`) | Test gap | No seam, and a seam for a log line fails the simplicity criterion | Documented under Tests in the feature doc; the shipped-data test keeps every troop present |
 | F15 | LOW | Convergence pass: the module summary kept the F5 wording, and the feature doc said every row is the top troop of its tree, which four guard rows are not | Fix-round slip | The fix round edited the module file for F12 and missed its summary; the new Current Values sentence was written from the plan's summary of the table | Both corrected; the doc names the four guard rows that sit one tier below the top |
-| F14 | INFO | The owed in-game check needs a won king election, and no console command raises the scene | Verification cost | Out of scope for the fix | In-game expectations written (troop, colours, on foot, the scene's own spear). A staging command is offered to Mike as a follow-up |
+| F14 | INFO | The owed in-game check needed a won king election, and no console command raised the scene (closed by the follow-up below) | Verification cost | Out of scope for the fix | In-game expectations written (troop, colours, on foot, the scene's own spear). A staging command is offered to Mike as a follow-up |
 
 ## Root-cause pattern: docs and tests written from the plan and the sibling's code
 
@@ -57,3 +57,30 @@ well as its code.
 - `lessons/build-tooling-workflow.md`: the issue-body lesson now asks for the body to be rewritten.
 - `lessons/harmony-il.md`: a patch doc's caller list and trigger come from the IL and the raising gate.
 - `lessons/testing-qa.md`: a feature copied from a sibling copies the sibling's test list.
+
+## Follow-up: `taom.play_coronation` (2026-10-20)
+
+Mike approved a console command that opens the coronation scene, so the F14 check takes minutes. The first build took
+no argument and showed the scene for the player's hero, which needed the player in a kingdom. Its review (six lenses)
+found no runtime defect and these:
+
+| # | Sev | Bug | Category | Why missed | Preventive action |
+|---|---|---|---|---|---|
+| G1 | MEDIUM | An untagged shape test read the command's attribute with `GetCustomAttribute`, which runs a TaleWorlds attribute constructor; the reference-assembly stub throws there, so the no-game unit run fails | Test category | The brief said "a format/shape test like the sibling" and did not name `tests.md`'s RequiresGame rule; `ConsoleCommandBindingTests` already checks every command's shape | Test deleted. Lesson in `testing-qa.md` |
+| G2 | MEDIUM | The report printed Crown Guard's map row, not the troop the scene draws; they differ when the troop is not loaded or the patch did not apply, which is when the check matters | Copy, not the same call | Repeats the recorded lesson "A comment claiming two call sites are the same must be made true structurally" (`adapters-taleworlds-api.md`) | The report calls the same patched `GetBodyguardOfCulture` the scene calls; the lesson's Source line names this repeat |
+| G3 | MEDIUM | The docs and the refusal message sent the tester to `campaign.join_kingdom`, a real saved join (peace with the clan's own foes that the kingdom is not at war with, the kingdom's wars taken on, banner recolour, influence zeroed, Alignment Desertion), once per culture | Hidden state change | Written as a convenience step without reading what the vanilla cheat does | The command takes a kingdom argument and puts that kingdom's ruler in the crowned spot, so no join is needed; an eliminated kingdom (ruling clan gone from it) is refused, because the scene would read a null kingdom outside Patch56's net |
+| G4 | LOW | A test asserted "gondor" in a report whose troop id already contained it | Vacuous assertion | Test ids chosen without checking they are distinct | Tests use a culture id that appears in neither the kingdom name nor the troop id |
+| G5 | LOW | The `play_` naming row gave no reason no existing verb fits, and Tier A still said "Read-only" | Docs | The table's own gate not followed | Reason added; Tier A reads "Read-only or display-only" |
+| G6 | LOW | Three statements still said only a player win raises the scene; the feature doc's Changelog and Status were stale | Docs drift | The new raiser was added without sweeping the statements it makes false | All three name the command; Changelog line added; Status reads closed with `triage-needs-ingame` |
+
+Also found, outside this change: the coronation title prints the engine's "Text with id str_liege_title doesn't
+exist" error (`str_liege_title_female` for a queen) for every culture outside the seven vanilla ids, because no
+module defines a liege title for those ids; Dunland reads the engine's fixed Calradian emperor line; and
+Mordor's ruler Sauron has no `as_sauron_facegen` action set, so he stands in the engine's default pose. Both are
+written into the in-game check so they are not logged against Crown Guard, and both are offered to Mike as issues.
+
+Lessons recorded for the follow-up:
+
+- `lessons/testing-qa.md`: a console command's shape is the binding test's job; an untagged attribute read breaks
+  the no-game run.
+- `lessons/adapters-taleworlds-api.md`: the "same call" lesson's Source line names this repeat (G2).

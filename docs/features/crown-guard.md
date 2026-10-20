@@ -14,9 +14,9 @@ has a row.
   for any other culture.
 - **Callers:** the one a TAOM campaign reaches is `BecomeKingSceneNotificationItem`, which asks for two guards of the
   new ruler's kingdom culture. `DefaultCutscenesCampaignBehavior.OnKingdomDecisionConcluded` raises it only when the
-  player wins a king-selection vote. The engine's other caller, `EmpireConspiracySupportsSceneNotificationItemBase`,
-  is raised only by Story Mode's `DefeatTheConspiracyQuestBehavior`, whose new game TAOM hides; if it ran, it would get
-  the same mapped guards.
+  player wins a king-selection vote, and the dev command `taom.play_coronation` (cheat mode) raises it on demand.
+  The engine's other caller, `EmpireConspiracySupportsSceneNotificationItemBase`, is raised only by Story Mode's
+  `DefeatTheConspiracyQuestBehavior`, whose new game TAOM hides; if it ran, it would get the same mapped guards.
 - **TAOM requirement:** the coronation scene shows the new realm's own people.
 - **Without this feature:** a Gondor, Mordor or Erebor ruler gets Sturgian fighters, and the reused vanilla ids get
   Calradian elites: Rohan a Vlandian banner knight, Dunland an imperial legionary, Rhun and Harad troops that TAOM
@@ -87,6 +87,7 @@ Shieldmaster, which guards Rhun).
 | `Main/Features/CrownGuard/Hooks/CampaignSceneNotificationHelper_GetBodyguardOfCulture_CrownGuard_Patch.cs` | The postfix |
 | `Main/Features/CrownGuard/CrownGuardMap.cs` | The map, its lookup and its built-in default |
 | `Main/Features/CrownGuard/CrownGuardConfigProvider.cs` | Validating JSON loader |
+| `Main/Features/CrownGuard/Cheats/CrownGuardCheats.cs` | `taom.play_coronation`, the on-demand scene |
 | `Main/Features/CrownGuard/CrownGuardModule.cs` | The provider registration and the patch category |
 | `Main/_Module/ModuleData/crown_guard/crown_guard_cultures.json` | The shipped rows |
 
@@ -106,6 +107,8 @@ Shieldmaster, which guards Rhun).
 - `TAOM.Tests/Features/CrownGuard/CrownGuardWiringTests.cs`: module listing, category id and phase, the hook's
   category, the singleton registration, no behavior, model or save data
 - `TAOM.Tests/Features/CrownGuard/CrownGuardBindingTests.cs`: the category applies to the installed engine
+- `TAOM.Tests/Features/CrownGuard/CrownGuardCheatsFormatTests.cs`: the report of `taom.play_coronation` (kingdom, culture
+  id, the guard troop the scene draws, no troop); its console shape is covered by `ConsoleCommandBindingTests`
 - Not unit-tested: the hook's own branch for a mapped troop that is not loaded (it reads the static
   `MBObjectManager.Instance`); the shipped-data test keeps every row's troop present.
 
@@ -116,21 +119,34 @@ until the map's keys equal the kingdom cultures in `taom_spkingdoms.xml` and `sp
 
 ## In-game check
 
-Win a king election and look at the two guards in the coronation scene. Expect:
+Run `taom.play_coronation <kingdom>` (a kingdom name or id; no argument means your own kingdom) to open the coronation
+scene without an election or a join; repeat per kingdom. The kingdom's ruler stands in the crowned spot and nobody is
+crowned, so any save works. Or win a king election and look at the two guards in the coronation scene. Expect:
 
-- troops of the row for your kingdom's culture, wearing its colours (check a Lothlorien, Khand or Abanissa ruler for
+- troops of the row for that kingdom's culture, wearing its colours (check a Lothlorien, Khand or Abanissa ruler for
   the borrowed rows);
 - each guard in its troop's first battle set, on foot, holding the scene's own vanilla spear, which the scene's spawn
   points put in every guard's right hand (vanilla's guards hold it too);
 - founding a kingdom shows a different scene, which never calls this method.
+
+Not Crown Guard findings, so do not log them against it:
+
+- the title line: a ruler of a culture outside the seven vanilla ids reads the engine's "ERROR: Text with id
+  str_liege_title doesn't exist! Variation: <culture>" (`str_liege_title_female` for a queen, such as Galadriel of
+  Lothlorien), because no module defines a liege title for those ids (TAOM's own titles cover only the six reused
+  vanilla ids); Dunland (`empire`) reads vanilla's Calradian emperor line, because the engine's title has a fixed
+  `str_become_king_empire` branch for `empire` and never reads TAOM's Dunland title;
+- Mordor's ruler: the `sauron` race has no `as_sauron_facegen` action set, so the engine falls back to its default set
+  and Sauron stands in a default pose.
 
 Not yet checked in game.
 
 ## Changelog
 
 - 2026-10-20: added (#825).
+- 2026-10-20: `taom.play_coronation [kingdom]` opens the scene on demand for the in-game check.
 
 ## GitHub Issue
 
 - **Issue:** #825 Scene popups show Calradian bodyguards beside Middle-earth rulers
-- **Status:** Open
+- **Status:** Closed, `triage-needs-ingame`

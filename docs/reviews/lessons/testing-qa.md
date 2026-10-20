@@ -1956,3 +1956,14 @@ The face roll fake put the hero id into every rolled key, so every result was un
 - **Why missed:** the fake was written to make results tell apart, not to behave like the engine, which returns the same face for the same race, sex, face, variation and seed.
 - **Prevent:** derive a fake's output only from the inputs the engine uses, then mutate the code under test (a constant seed here) and confirm a test fails before trusting the suite.
 - **Source:** `docs/reviews/rca-followups-949-952-2026-10-20.md` F5.
+### A console command's shape is the binding test's job, and an untagged attribute read breaks the no-game run (#825, 2026-10-20)
+The `taom.play_coronation` build added its own shape test, which read the command's attribute with
+`GetCustomAttribute`. That runs the TaleWorlds attribute constructor, which throws in the reference-assembly stub, so
+the test would fail the no-game unit run; `ConsoleCommandBindingTests` already checks shape, group, name and gate for
+every command.
+- **Why missed:** the brief asked for "a format/shape test like the sibling" and did not name the RequiresGame rule in
+  `.claude/rules/tests.md`, which lists exactly this constructor case.
+- **Prevent:** a new console command gets tests for its pure formatters only; its shape is covered assembly-wide. Any
+  test that reads a TaleWorlds attribute through reflection carries `[TestCategory("RequiresGame")]`, or reads
+  `CustomAttributeData` instead, which does not run the constructor.
+- **Source:** `docs/reviews/rca-crown-guard-2026-10-20.md` G1.

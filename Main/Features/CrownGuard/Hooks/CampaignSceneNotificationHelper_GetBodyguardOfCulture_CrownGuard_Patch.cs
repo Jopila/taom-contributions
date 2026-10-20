@@ -11,7 +11,8 @@ namespace TAOM.Features.CrownGuard.Hooks;
 /// <summary>
 /// Patch112, #825: postfix on <c>CampaignSceneNotificationHelper.GetBodyguardOfCulture</c> (public static, v1.5.5), which
 /// the become-king scene calls for the two guards of the new ruler's kingdom culture. The target has two engine callers:
-/// that scene (raised only when the player wins a king election) and Story Mode's conspiracy scenes
+/// that scene (raised when the player wins a king election, or on demand by <c>taom.play_coronation</c>, which also calls
+/// the target for its report) and Story Mode's conspiracy scenes
 /// (<c>EmpireConspiracySupportsSceneNotificationItemBase</c>), which TAOM's hidden Story Mode never reaches. Vanilla switches on its own
 /// culture ids and returns a Sturgian fighter for any other, so a TAOM kingdom is guarded by the wrong people. The postfix
 /// replaces the result with the troop mapped for the culture, and leaves vanilla's result when the culture has no row or
