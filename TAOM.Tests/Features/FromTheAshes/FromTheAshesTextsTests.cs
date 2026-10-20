@@ -7,10 +7,11 @@ using TAOM.Features.FromTheAshes.Hooks;
 namespace TAOM.Tests.Features.FromTheAshes;
 
 /// <summary>
-/// The words of From the Ashes. A TextObject keeps its raw text in <c>Value</c> without the localization manager, so the
-/// tests pin which key each block and outcome maps to rather than the rendered sentence.
+/// The words of From the Ashes. A TextObject needs the real engine assembly (the reference-assembly stubs throw), so the
+/// class is tagged RequiresGame. The tests pin which key each block and outcome maps to rather than the rendered sentence.
 /// </summary>
 [TestClass]
+[TestCategory("RequiresGame")]
 public class FromTheAshesTextsTests
 {
     private const string ItemsKey = "{=taom_ashes_need_items}";
