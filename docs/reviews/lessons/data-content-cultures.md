@@ -2150,3 +2150,16 @@ the `banner_icons` files. `ShippedHeraldryBannerKeyTests` checks only the key's 
 - **Prevent:** before donating a key, look each icon id up in the `banner_icons` files; prefer a key already used by
   clans that render correctly (Dale uses clans 2 to 9's).
 - **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
+
+### A default_group fix is a retag and a restat, and its gate must check both directions (#953, 2026-10-20)
+The bow-only Dunland Hunter was tagged `Infantry` and three Falcon horse archers `Cavalry`, so they
+fought as melee troops, and the Falcons fought sieges as infantry. Retagging them left their skills on
+the old curves (Falcon Polearm 250 with no polearm), because `rebalance_troops.py` picks the curve from
+the same attribute.
+- **Why missed:** `default_group` fails soft and has many readers: the engine, TAOM features and two
+  offline generators. The gate planned after #522 and #554 (#555 item 3) checked only Ranged troops that
+  carry no launcher, the opposite direction of this bug.
+- **Prevent:** when you change a troop's group, run `rebalance_troops.py --fix-monotonicity --restat <ids>`
+  in the same change. A group gate uses the engine's hero rule (horse crossed with launcher) in both
+  directions, and it reads troop-level `<equipment>`, where the Falcons carry their horse.
+- **Source:** `docs/reviews/rca-dunland-formation-groups-2026-10-20.md`; #555 item 3.
