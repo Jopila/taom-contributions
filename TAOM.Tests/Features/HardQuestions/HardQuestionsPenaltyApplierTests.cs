@@ -138,6 +138,41 @@ public class HardQuestionsPenaltyApplierTests
     }
 
     [TestMethod]
+    public void ApplyRelations_NeutralVictimUnderPersonalRelations_CostsHisClanAndNoOtherClan()
+    {
+        var config = Substitute.For<IAlignmentConfigProvider>();
+        config.LoadAlignments().Returns(new Dictionary<string, string>
+        {
+            ["empire_w"] = "Free",
+            ["umbar"] = "Neutral",
+        });
+        var alignment = new AlignmentService(config, Substitute.For<IModLogger>());
+        var player = Substitute.For<IArmouryPlayerAdapter>();
+        player.KingdomId.Returns("empire_w");
+        player.CultureId.Returns("gondor");
+        var actions = Substitute.For<IHardQuestionsActionAdapter>();
+        actions.ChangeRelation(Arg.Any<string>(), Arg.Any<int>()).Returns(true);
+        var applier = new HardQuestionsPenaltyApplier(alignment, new ExecutionRelationService(alignment), player,
+            actions, Substitute.For<IPlayerTraitAdapter>(), _f.ConfigProvider, Substitute.For<IDedicatedServerProvider>());
+        var victim = new LordRef("captive", "umbar", "umbar", clanId: "clan_umbar");
+        var hits = new List<KeyValuePair<LordRef, float>>
+        {
+            new(victim, -100f),
+            new(new LordRef("umbar_chief", "umbar", "umbar", clanId: "clan_umbar"), -20f),
+            new(new LordRef("cousin", "umbar", "umbar", clanId: "clan_umbar"), -20f),
+            new(new LordRef("other_clan", "umbar", "umbar", clanId: "clan_other"), -15f),
+        };
+
+        applier.ApplyRelations(victim, hits);
+
+        actions.Received(1).ChangeRelation("captive", -100);
+        actions.Received(1).ChangeRelation("umbar_chief", -20);
+        actions.Received(1).ChangeRelation("cousin", -20);
+        actions.DidNotReceive().ChangeRelation("other_clan", Arg.Any<int>());
+        actions.Received(3).ChangeRelation(Arg.Any<string>(), Arg.Any<int>());
+    }
+
+    [TestMethod]
     public void ApplyRelations_KinslayingKeepsTheLargerModifiedDeltaOverTheFloor()
     {
         _f.Relations.GetRelationModifier(default, default, default, default, default)

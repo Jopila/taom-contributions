@@ -5967,7 +5967,7 @@
 
     <string id="taom_hhost_unknown_party" text="Unknown party" />
 
-    <string id="taom_hq_relations_hurt" text="Your deed has hurt your relations with {COUNT} {?IS_PLURAL}clans{?}clan{\?}." />
+    <string id="taom_hq_relations_hurt" text="Your deed has hurt your relations with {COUNT} {?IS_PLURAL}lords{?}lord{\?}." />
   <string id="taom_postern_name" text="Postern Gate" />
   <string id="taom_postern_desc" text="A small gate in the curtain wall, kept shut and known to few. In a siege, parties slip into or out of this fief with fewer losses." />
   <string id="taom_postern_dwarf_name" text="Hidden Door" />

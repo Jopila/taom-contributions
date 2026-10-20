@@ -95,6 +95,16 @@ public class HardQuestionsConfigProviderTests
     }
 
     [TestMethod]
+    public void ShippedFile_NamesEveryField_AndNothingElse()
+    {
+        var path = RepoPaths.RepoPath("Main", "_Module", "ModuleData", "hard_questions", "hard_questions.json");
+        var shipped = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText(path)).Properties().Select(p => p.Name).ToList();
+        var fields = HardQuestionsConfigProvider.Fields.Select(f => f.Name).ToList();
+
+        CollectionAssert.AreEquivalent(fields, shipped, "a misspelt key keeps the default silently");
+    }
+
+    [TestMethod]
     public void GetConfig_MissingFile_WarnsAndUsesDefaults()
     {
         var config = Provider().GetConfig();

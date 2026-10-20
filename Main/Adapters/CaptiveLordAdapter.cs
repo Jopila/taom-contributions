@@ -71,6 +71,8 @@ public sealed class CaptiveLordAdapter : ICaptiveLordAdapter
             return new CaptiveCircle(Ref(hero, withRelationOwner: true))
             {
                 Family = Kin(hero).Where(h => Foreign(h, hero, playerClan)).Select(h => Ref(h, true)).ToList(),
+                ClanLeader = hero.Clan?.Leader is { } chief && Foreign(chief, hero, playerClan) ? Ref(chief, true) : null,
+                ClanLords = LordsOf(hero.Clan?.Heroes, hero, playerClan),
                 KingdomLeader = kingdom?.Leader is { } king && Foreign(king, hero, playerClan) ? Ref(king, true) : null,
                 KingdomLords = LordsOf(kingdom?.Heroes, hero, playerClan),
                 HonorPositiveLords = Hero.AllAliveHeroes
@@ -111,9 +113,9 @@ public sealed class CaptiveLordAdapter : ICaptiveLordAdapter
         other != captive && other.IsAlive && other.Clan != playerClan;
 
     /// <summary>
-    /// A lord reference. With <paramref name="withRelationOwner"/> it asks the engine whose relation with the
-    /// player a change to this lord really moves (<c>GetHeroesForEffectiveRelation</c>: his clan leader, unless he
-    /// is clanless or a player companion).
+    /// A lord reference. With <paramref name="withRelationOwner"/> it asks the active DiplomacyModel whose relation
+    /// with the player a change to this lord really moves (<c>GetHeroesForEffectiveRelation</c>: his clan leader
+    /// under the vanilla mapping, the lord himself under Personal Relations).
     /// </summary>
     private static LordRef Ref(Hero hero, bool withRelationOwner = false)
     {
@@ -123,7 +125,7 @@ public sealed class CaptiveLordAdapter : ICaptiveLordAdapter
             Campaign.Current.Models.DiplomacyModel.GetHeroesForEffectiveRelation(Hero.MainHero, hero, out _, out var effective);
             relationId = (effective ?? hero).StringId;
         }
-        return new LordRef(hero.StringId, hero.Clan?.Kingdom?.StringId, hero.Culture?.StringId, relationId);
+        return new LordRef(hero.StringId, hero.Clan?.Kingdom?.StringId, hero.Culture?.StringId, relationId, hero.Clan?.StringId);
     }
 
     /// <summary>The partner of the open conversation when it is the asked hero, else a lookup.</summary>

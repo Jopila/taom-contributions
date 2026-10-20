@@ -23,6 +23,8 @@ public class HardQuestionsConfig
     public float RogueryXpKingdom { get; set; } = 150f;
     public float ForceLordRelationClan { get; set; } = -20f;
     public float ForceLordRelationKingdom { get; set; } = -40f;
+    public float ForceClanLeaderRelationClan { get; set; } = -12f;
+    public float ForceClanLeaderRelationKingdom { get; set; } = -24f;
     public float ForceFamilyRelationClan { get; set; } = -10f;
     public float ForceFamilyRelationKingdom { get; set; } = -20f;
     public float ForceKingRelationKingdom { get; set; } = -16f;
@@ -37,6 +39,7 @@ public class HardQuestionsConfig
     public float StripHonorXp { get; set; } = -1000f;
     public float StripRenownLoss { get; set; } = -200f;
     public float StripLordRelation { get; set; } = -100f;
+    public float StripClanRelation { get; set; } = -20f;
     public float StripKingdomRelation { get; set; } = -15f;
     public float StripHonorLordRelation { get; set; } = -10f;
     public float CompanionHonorMaxLoss { get; set; } = -10f;

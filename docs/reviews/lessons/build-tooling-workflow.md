@@ -4127,15 +4127,19 @@ lacked those clans. The two modules ship together; a map ahead of its build poin
 
 With six batch sessions merging into `bannerlord-1.5.x` in two days, two B08 changes went wrong the same way. Hard
 Questions deleted two relation pairs because, under the engine's clan-leader rule of the day, they could never win;
-Personal Relations then merged and made each lord his own relation owner, so those lords were charged nothing. Lord
+Personal Relations then merged and made each lord his own relation owner, so a clan leader who was not kin went
+uncharged on a force, and the clan lords took only the kingdom hit on a strip. Lord
 Courtesies was planned on `328ef9fc1` ("no TAOM code rewards troop gifts") and built on `227212a01`, where Bonds of
 Battle's troop hand-over, the shared relation seam and Personal Relations had landed; the review found two reward
 rules for one act and a GroupOrder already taken.
 - **Why missed:** the overlap research is a snapshot of the trunk when the plan was written, and the fast-forward
-  before the build did not trigger a second look.
+  before the build did not trigger a second look; and a sibling branch's heads-up on #896 (2026-10-19 19:23Z) named
+  this regression before round 2 was committed, but neither the commit nor the close read the issue's new comments.
 - **Prevent:** whenever a branch moves to a newer trunk before or during a build (fast-forward or rebase), run
   `git log --stat <old>..<new>` and re-run the plan's overlap check for every seam the plan names (relation calls,
   party screens, MCM GroupOrder, settings counts, shared adapters). A deletion or simplification justified by an
   engine or TAOM rule gets a test that pins that rule's assumption, so a parallel change to the rule fails it.
+  Before a commit or an issue close, read the issue's comments since the last read; a sibling branch's heads-up
+  blocks until it is answered by a fix or a filed follow-up.
 - **Source:** `docs/reviews/rca-lord-courtesies-2026-10-20.md` (root-cause pattern); `rca-hard-questions-2026-10-19.md`
   round 3.

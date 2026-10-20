@@ -34,6 +34,15 @@ public class HardQuestionsWiringTests
     }
 
     [TestMethod]
+    public void CaptiveLordAdapter_PassesTheLordsClanId_SoTheNeutralFloorReachesHisClan()
+    {
+        var src = RepoPaths.ReadSource("Main/Adapters/CaptiveLordAdapter.cs", stripComments: true);
+
+        Assert.IsTrue(src.Contains("relationId, hero.Clan?.StringId)"),
+            "LordRef must carry the lord's clan id, or the Neutral floor (HardQuestionsPenaltyApplier) never reaches his clan");
+    }
+
+    [TestMethod]
     public void IoC_DoesNotRegisterTheFeatureByHand()
     {
         var src = RepoPaths.ReadSource("Main/IoC.cs", stripComments: true);

@@ -3314,7 +3314,7 @@
 	<string id="taom_hhost_unknown_party" text="{=taom_hhost_unknown_party}Unknown party" />
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
 	<!-- HardQuestionsActionAdapter -->
-	<string id="taom_hq_relations_hurt" text="{=taom_hq_relations_hurt}Your deed has hurt your relations with {COUNT} {?IS_PLURAL}clans{?}clan{\?}." />
+	<string id="taom_hq_relations_hurt" text="{=taom_hq_relations_hurt}Your deed has hurt your relations with {COUNT} {?IS_PLURAL}lords{?}lord{\?}." />
 	<string id="taom_postern_name" text="{=taom_postern_name}Postern Gate" />
 	<string id="taom_postern_desc" text="{=taom_postern_desc}A small gate in the curtain wall, kept shut and known to few. In a siege, parties slip into or out of this fief with fewer losses." />
 	<string id="taom_postern_dwarf_name" text="{=taom_postern_dwarf_name}Hidden Door" />

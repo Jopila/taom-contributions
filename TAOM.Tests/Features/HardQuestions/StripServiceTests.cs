@@ -138,6 +138,33 @@ public class StripServiceTests
     }
 
     [TestMethod]
+    public void Strip_PersonalRelations_EachClanLordTakesTheClanHit()
+    {
+        _f.Circle.ClanLords = HardQuestionsFixture.Lords("chief", "cousin");
+        _f.Circle.KingdomLords = HardQuestionsFixture.Lords("chief", "cousin");
+        Wears();
+
+        _f.Strip.Strip("lord1");
+
+        _f.Actions.Received(1).ChangeRelation("lord1", -100);
+        _f.Actions.Received(1).ChangeRelation("chief", -20);
+        _f.Actions.Received(1).ChangeRelation("cousin", -20);
+        _f.Actions.Received(3).ChangeRelation(Arg.Any<string>(), Arg.Any<int>());
+    }
+
+    [TestMethod]
+    public void Strip_VanillaMapping_ClanLordsMergeIntoTheVictimsOwner()
+    {
+        _f.Captive(relationId: "chief");
+        _f.Circle.ClanLords = new List<LordRef> { HardQuestionsFixture.Lord("chief"), HardQuestionsFixture.Lord("cousin", "chief") };
+
+        _f.Strip.Strip("lord1");
+
+        _f.Actions.Received(1).ChangeRelation("chief", -100);
+        _f.Actions.Received(1).ChangeRelation(Arg.Any<string>(), Arg.Any<int>());
+    }
+
+    [TestMethod]
     public void Strip_ChargesHonorRenownAndRelationsOncePerRelationOwner()
     {
         _f.Circle.KingdomLords = HardQuestionsFixture.Lords("uncle", "baron");

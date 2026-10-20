@@ -13,8 +13,9 @@ namespace TAOM.Adapters;
 /// <summary>
 /// Boundary implementation of <see cref="IHardQuestionsActionAdapter"/>. The engine ignores
 /// <c>affectRelatives</c> (v1.5.5). A relation change lands on the pair from
-/// <c>DiplomacyModel.GetHeroesForEffectiveRelation</c>, the hero's clan leader unless he is clanless or a player
-/// companion. Per-clan quick notifications are off because one deed touches many clans; ShowRelationsHurt shows one summary instead.
+/// <c>DiplomacyModel.GetHeroesForEffectiveRelation</c>, the hero's clan leader under the vanilla mapping and the
+/// lord himself under Personal Relations. Per-change quick notifications are off because one deed touches many
+/// lords; ShowRelationsHurt shows one summary instead.
 /// </summary>
 public sealed class HardQuestionsActionAdapter : IHardQuestionsActionAdapter
 {
@@ -97,7 +98,7 @@ public sealed class HardQuestionsActionAdapter : IHardQuestionsActionAdapter
     {
         try
         {
-            var text = new TextObject("{=taom_hq_relations_hurt}Your deed has hurt your relations with {COUNT} {?IS_PLURAL}clans{?}clan{\\?}.");
+            var text = new TextObject("{=taom_hq_relations_hurt}Your deed has hurt your relations with {COUNT} {?IS_PLURAL}lords{?}lord{\\?}.");
             text.SetTextVariable("IS_PLURAL", count > 1 ? 1 : 0);
             text.SetTextVariable("COUNT", count);
             MBInformationManager.AddQuickInformation(text);

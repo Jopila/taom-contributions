@@ -15,9 +15,9 @@ test fakes then encoded the same wrong model of the engine.
 | # | Sev | Bug | Category | Why missed | Preventive action |
 |---|---|---|---|---|---|
 | H1 | HIGH | The fresh kit on release copied all 12 slots and deleted the named pieces the strip had left on the lord (decision D1 broken at release). | Engine body not read | The plan named `EquipmentHelper.AssignHeroEquipmentFromEquipment` as the re-kit seam from its signature and from vanilla's come-of-age caller, which always starts from an empty hero. Its body writes every slot, empty kit slots included. | Lesson in `lessons/adapters-taleworlds-api.md`. Fixed: slot-wise copy through `KitSlotRule.CanFill` (only empty or rag slots, never an empty kit slot). |
-| H2 | HIGH | Relation penalties added up per clan: the engine stores the player's relation with any clan member on his clan leader, so -20 per relative or -10 per honourable lord summed on one number and clamped whole clans to -100. | Engine body not read | The plan read the `ApplyPlayerRelation` signature, assumed `affectRelatives: true` spreads a change to kin, and built "per lord" penalties with a per-hero dedupe. The body ignores `affectRelatives` and routes through `DiplomacyModel.GetHeroesForEffectiveRelation`. The fake adapter recorded per-hero calls, so 114 tests agreed with the wrong model. | Lesson in `lessons/adapters-taleworlds-api.md` and a trap-index line in `docs/ai-includes/orientation.md`. Fixed: `LordRef.RelationId` from the engine's own mapping, strongest delta per owner, one call per owner. |
+| H2 | HIGH | Relation penalties added up per clan: the engine stores the player's relation with any clan member on his clan leader, so -20 per relative or -10 per honourable lord summed on one number and clamped whole clans to -100. | Engine body not read | The plan read the `ApplyPlayerRelation` signature, assumed `affectRelatives: true` spreads a change to kin, and built "per lord" penalties with a per-hero dedupe. The body ignores `affectRelatives` and routes through `DiplomacyModel.GetHeroesForEffectiveRelation`. The fake adapter recorded per-hero calls, so 114 tests agreed with the wrong model. | Lesson in `lessons/adapters-taleworlds-api.md` and a rule in `.claude/rules/adapters.md` (the trap index was full and its gate refused a row). Fixed: `LordRef.RelationId` from the engine's own mapping, strongest delta per owner, one call per owner. |
 | H3 | HIGH | A Neutral victim (Khand, Umbar, the Harad cultures, any unlisted culture) cost no relation at all, not even with himself. | Shared rule faked away | D3 reused `IExecutionRelationService`, which by design zeroes every evaluator of a Neutral victim ("Neutrals don't care"). Execution still has vanilla's blood feud for the victim's own clan; Hard Questions has no feud, so nothing was left. The fixture passed every delta straight through and resolved every side Neutral, so the rule never ran in a test. | Lesson in `lessons/testing-qa.md`. Fixed: a floor for the victim's own relation owner only (Execution's semantics for every other clan kept), with a test over the real `ExecutionRelationService` and `AlignmentService`. |
-| H4 | HIGH | A deed in a conversation opened from the party screen was undone by Escape: `PartyScreenData.ResetUsing` refills the live prison and item rosters from the pre-conversation snapshot, so a force death put the dead lord back in the prison roster and the strip loot vanished. | Known mechanism, scoped too narrowly | The same `ResetUsing` behaviour is recorded in `lessons/harmony-il.md` (2026-10-17), but for a roster diagnostic, and nothing loads it for a feature that writes rosters from a conversation. The plan treated `ConversationEnded` as "after the conversation" without asking what screen the conversation returns to. | Second occurrence of the mechanism, so a stronger trigger: a trap-index line in `orientation.md` plus a lesson in `lessons/adapters-taleworlds-api.md`. Fixed: after each deed, commit an open party screen with `PartyScreenLogic.DoneLogic(true)`, as vanilla's `GauntletPartyScreen.OnCompanionRemoved` does. |
+| H4 | HIGH | A deed in a conversation opened from the party screen was undone by Escape: `PartyScreenData.ResetUsing` refills the live prison and item rosters from the pre-conversation snapshot, so a force death put the dead lord back in the prison roster and the strip loot vanished. | Known mechanism, scoped too narrowly | The same `ResetUsing` behaviour is recorded in `lessons/harmony-il.md` (2026-10-17), but for a roster diagnostic, and nothing loads it for a feature that writes rosters from a conversation. The plan treated `ConversationEnded` as "after the conversation" without asking what screen the conversation returns to. | Second occurrence of the mechanism, so a stronger trigger: a rule in `.claude/rules/adapters.md` (the trap index was full and its gate refused a row) plus a lesson in `lessons/adapters-taleworlds-api.md`. Fixed: after each deed, commit an open party screen with `PartyScreenLogic.DoneLogic(true)`, as vanilla's `GauntletPartyScreen.OnCompanionRemoved` does. |
 | M1 | MED | Eligibility gated on `IsAuthority` and release on `ShouldDeferToHost`; under a co-op mod whose role TAOM cannot read, every peer could strip a lord who was then never re-kitted and never asked again. | Two predicates for one question | The builder took `IsAuthority` from the dialog template (`FieldCommissionDismissDialogBehavior`) and `ShouldDeferToHost` from the state template. The trap index already says co-op loaded, peer authority and dedicated server are three questions. | No new rule. Fixed: both gates on `ShouldDeferToHost`, which `ICoopSessionProvider` names for shared world state. |
 | M2 | MED | The strip's "up to 10" Honor companion penalty could never exceed 2: the formula capped the loss at the trait level, and Honor runs -2 to 2. | Fake outside engine range | Tests fed companions Honor 3, 4, 5, 9 and 20, values the engine clamps away (`Hero.SetTraitLevel`). | Lesson in `lessons/testing-qa.md`. Fixed: loss = round(cap x level / 2); tests use levels 1 and 2 only. |
 | M3 | MED | Every dialog condition built a full world snapshot, including a scan of every living hero (about 4,150), on every hub display of every hero conversation. | Snapshot shape | The plan specified one snapshot for every use; only the two deeds read its lists. | No new rule. Fixed: `CaptiveSnapshot` keeps scalars, `CaptiveCircle` is built once per deed. |
@@ -64,9 +64,9 @@ plan itself named.
 
 1. `lessons/adapters-taleworlds-api.md`: read the body of an engine action, not only its signature, before a
    plan relies on what a parameter or a helper does (H1, H2, L4, L5).
-2. `lessons/adapters-taleworlds-api.md` plus a trap-index line: the player's relation with a clan member lives on
+2. `lessons/adapters-taleworlds-api.md` plus a rule in `.claude/rules/adapters.md`: the player's relation with a clan member lives on
    his clan leader, and `affectRelatives` is ignored (H2).
-3. `lessons/adapters-taleworlds-api.md` plus a trap-index line: a roster or inventory write during a conversation
+3. `lessons/adapters-taleworlds-api.md` plus a rule in `.claude/rules/adapters.md`: a roster or inventory write during a conversation
    opened from the party screen is reverted by Escape unless the screen is committed (H4, second occurrence).
 4. `lessons/testing-qa.md`: a fake must not pass a shared rule straight through or hold values the engine clamps;
    test a reused rule once over the real service (H3, M2).
@@ -100,6 +100,34 @@ execution shows. Seven lenses and a convergence pass reviewed it. No HIGH; all f
 Merge note: trunk merge `85cbd20c8` rewrote all 12 language files from CR CR LF to LF with a blank line after each
 row, so every branch edit to them conflicts with the whole file. This change restored its string files, rebased,
 and regenerated the one key with the trunk's fixed harvester.
+
+## Round 3: Personal Relations broke a round-1 removal (2026-10-20, #948)
+
+The Design lens's round-1 removal (row at line 56) deleted the force's clan-leader hit and the strip's clan-lords
+hit as redundant: under the mapping of the day every clan member's relation with the player lived on the clan
+leader, so those pairs always merged into the victim's own, stronger hit. The proof held. Trunk then merged
+Personal Relations (`e6204df97`, on by default), whose `TaomDiplomacyModel.GetHeroesForEffectiveRelation` keeps
+the player's pair on the lord himself. Each lord became his own relation owner, so a clan leader who was not kin took no
+force penalty and the summary line, which counts owners, counted lords while saying "clans".
+
+| # | Sev | Bug | Why missed | Fix |
+|---|---|---|---|---|
+| R1 | MED | After Personal Relations, a force charged the clan leader only when he was also kin (-10 or -20) or the king (-16, kingdom topic). A strip charged his clan lords the kingdom hit (-15) through `Kingdom.Heroes` instead of the clan hit (-20); in a kingdomless clan only lords with Honor above 0 were charged (-10). | The parity proof for the deletion depended on a rule TAOM's own `DiplomacyModel` override could change, and the review read the trunk, not the open branches. A sibling branch's heads-up on #896 (posted 19:23:57Z, before `328ef9fc1` was authored at 19:40Z and before the close at 20:05Z) named the regression, the doc lines and the fix; round 2 and the close did not read the issue's new comments. | `CaptiveCircle.ClanLeader` and `ClanLords` restored with `forceClanLeaderRelationClan` (-12), `forceClanLeaderRelationKingdom` (-24) and `stripClanRelation` (-20). The hit list no longer depends on the mapping, and the tests run it with distinct and with shared `RelationId`s. |
+| R2 | LOW | "hurt your relations with N clans" counted lords under Personal Relations. | Same cause: the owner is no longer a clan leader. | Text says lords in the C# literal and all 13 string rows. |
+| R3 | MED | A Neutral captive under Personal Relations: the Neutral floor covered only hits whose `RelationId` equalled the victim's, which is the victim alone, so his clan leader, clan lords and in-clan kin came back 0 from the side rule and were skipped. | The floor was written against the vanilla mapping, where a clan shares one owner. | `LordRef.ClanId` (from `hero.Clan?.StringId`); the floor also covers hits from the victim's own clan. Test over the real `ExecutionRelationService` and `AlignmentService` with distinct `RelationId`s. |
+
+Prevent: the fix makes the hit list independent of the mapping, which is what the tests pin. The rule is now stated
+in `.claude/rules/adapters.md` ("list every lord the deed should cost: never drop a hit because today's mapping
+merges it"), annotated in the lessons `adapters-taleworlds-api.md` and `build-tooling-workflow.md`, which gains
+"read the issue's comments since the last read before a commit or a close". The lesson that a plan proved against
+one trunk is re-checked when the base moves already exists: `lessons/build-tooling-workflow.md`, "A plan proved
+against one trunk is re-checked when the base moves (2026-10-20)".
+
+Round 3 had its own four-lens review (standards, completeness, data flow, XML) and a convergence pass. The convergence
+pass found three LOW defects, all fixed: this section and the lesson overstated who was spared before the fix; the
+adapters rule said "the lord himself" without limiting it to the player's own pairs (AI-to-AI pairs stay on clan
+leaders); and nothing tested the adapter line that feeds the clan floor (now a source pin, plus a Neutral case in the
+in-game checklist).
 
 ## Follow-ups outside this change
 

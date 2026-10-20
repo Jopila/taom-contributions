@@ -41,12 +41,15 @@ public sealed class HardQuestionsPenaltyApplier
     }
 
     /// <summary>
-    /// Charges the player's relation. The engine keeps a clan member's relation on his clan leader, so deltas
-    /// are collected per relation owner (<see cref="LordRef.RelationId"/>), the strongest one wins, and each
-    /// owner is charged once whatever order the hits come in, then one summary line reports how many
-    /// owners were charged (none on a dedicated server). A Neutral victim is nobody's ally, so the
-    /// alignment rule would charge even his own relation owner nothing; that owner always takes at least the
-    /// base hit. Every other lord, whatever his side, stays unmoved, as in executions.
+    /// Charges the player's relation. A relation lives on the hero whose relation with the player the active
+    /// DiplomacyModel changes: his clan leader under the vanilla mapping, the lord himself under Personal Relations
+    /// (<see cref="LordRef.RelationId"/>),
+    /// so deltas are collected per relation owner, the strongest one wins, and each owner is charged once
+    /// whatever order the hits come in, then one summary line reports how many owners were charged (none on a
+    /// dedicated server). A Neutral victim is nobody's ally, so the alignment rule would charge even his own
+    /// relation owner and his own clan nothing; they always take at least the base hit (the clan test matters
+    /// under Personal Relations, where his clanmates are not his owner). Every other lord, whatever his side,
+    /// stays unmoved, as in executions.
     /// </summary>
     public void ApplyRelations(LordRef victim, IEnumerable<KeyValuePair<LordRef, float>> hits)
     {
@@ -58,7 +61,8 @@ public sealed class HardQuestionsPenaltyApplier
             var baseDelta = (int)Math.Round(hit.Value);
             var modified = _relations.GetRelationModifier(executor, victimParticipant, Participant(hit.Key), baseDelta, false)
                 .RelationDelta;
-            if (hit.Key.RelationId == victim.RelationId)
+            if (hit.Key.RelationId == victim.RelationId
+                || (victim.ClanId != null && hit.Key.ClanId == victim.ClanId))
                 modified = Math.Min(modified, baseDelta);
             if (modified == 0)
                 continue;

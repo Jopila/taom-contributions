@@ -184,6 +184,8 @@ public sealed class InterrogationService
         {
             new(circle.Victim, clan ? config.ForceLordRelationClan : config.ForceLordRelationKingdom),
         };
+        if (circle.ClanLeader != null)
+            hits.Add(new(circle.ClanLeader, clan ? config.ForceClanLeaderRelationClan : config.ForceClanLeaderRelationKingdom));
         foreach (var kin in circle.Family)
             hits.Add(new(kin, clan ? config.ForceFamilyRelationClan : config.ForceFamilyRelationKingdom));
         if (!clan && circle.KingdomLeader != null)

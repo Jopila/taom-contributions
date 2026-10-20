@@ -4,12 +4,14 @@ namespace TAOM.Features.HardQuestions.Domain;
 public sealed class LordRef
 {
     /// <param name="relationId">
-    /// The hero whose relation with the player the engine actually changes when this lord's changes: his clan
-    /// leader unless he is clanless or a player companion (<c>DiplomacyModel.GetHeroesForEffectiveRelation</c>).
+    /// The hero whose relation with the player the active DiplomacyModel changes: his clan leader under the
+    /// vanilla mapping, the lord himself under Personal Relations (<c>GetHeroesForEffectiveRelation</c>).
     /// Defaults to the lord himself.
     /// </param>
-    public LordRef(string id, string? kingdomId, string? cultureId, string? relationId = null)
+    /// <param name="clanId">His clan, so a Neutral victim's clanmates can be told apart whoever owns their relation.</param>
+    public LordRef(string id, string? kingdomId, string? cultureId, string? relationId = null, string? clanId = null)
     {
+        ClanId = clanId;
         Id = id;
         KingdomId = kingdomId;
         CultureId = cultureId;
@@ -17,6 +19,8 @@ public sealed class LordRef
     }
 
     public string Id { get; }
+
+    public string? ClanId { get; }
 
     public string? KingdomId { get; }
 

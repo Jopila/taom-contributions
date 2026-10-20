@@ -406,6 +406,48 @@ public class InterrogationServiceTests
     }
 
     [TestMethod]
+    public void CompletePending_PersonalRelations_ChargesTheClanLeaderHisOwnClanHit()
+    {
+        _f.Captive();
+        _f.Circle.ClanLeader = HardQuestionsFixture.Lord("chief");
+        _f.Random.NextDouble().Returns(0.9);
+        _f.Service.QueueForce(HardQuestionTopic.Clan, "lord1");
+
+        _f.Service.CompletePending();
+
+        _f.Actions.Received(1).ChangeRelation("lord1", -20);
+        _f.Actions.Received(1).ChangeRelation("chief", -12);
+        _f.Actions.Received(2).ChangeRelation(Arg.Any<string>(), Arg.Any<int>());
+    }
+
+    [TestMethod]
+    public void CompletePending_KingdomTopicUnderPersonalRelations_ChargesTheClanLeaderTheKingdomHit()
+    {
+        _f.Captive();
+        _f.Circle.ClanLeader = HardQuestionsFixture.Lord("chief");
+        _f.Random.NextDouble().Returns(0.9);
+        _f.Service.QueueForce(HardQuestionTopic.Kingdom, "lord1");
+
+        _f.Service.CompletePending();
+
+        _f.Actions.Received(1).ChangeRelation("chief", -24);
+    }
+
+    [TestMethod]
+    public void CompletePending_VanillaMapping_TheClanLeaderMergesIntoTheVictimsStrongerHit()
+    {
+        _f.Captive(relationId: "chief");
+        _f.Circle.ClanLeader = HardQuestionsFixture.Lord("chief");
+        _f.Random.NextDouble().Returns(0.9);
+        _f.Service.QueueForce(HardQuestionTopic.Clan, "lord1");
+
+        _f.Service.CompletePending();
+
+        _f.Actions.Received(1).ChangeRelation("chief", -20);
+        _f.Actions.Received(1).ChangeRelation(Arg.Any<string>(), Arg.Any<int>());
+    }
+
+    [TestMethod]
     public void CompletePending_AKingdomTopicWhoseLordLostHisKingdomMeanwhile_RevealsNothing()
     {
         _f.Captive();
@@ -518,7 +560,7 @@ public class InterrogationServiceTests
     }
 
     [TestMethod]
-    public void CompletePending_ForceOnLordsOfTwoClans_ShowsOneSummaryWithTheClanCount()
+    public void CompletePending_ForceOnTwoRelationOwners_ShowsOneSummaryWithTheOwnerCount()
     {
         _f.Captive();
         _f.Circle.Family = new List<LordRef> { HardQuestionsFixture.Lord("wife"), HardQuestionsFixture.Lord("son", "wife") };

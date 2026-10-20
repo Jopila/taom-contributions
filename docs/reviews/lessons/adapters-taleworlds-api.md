@@ -1108,6 +1108,7 @@ mapping. So a "-20 to each of his relatives" penalty sums on one number per clan
   uses (ask `GetHeroesForEffectiveRelation(Hero.MainHero, hero, ...)`), keeps the strongest delta per owner and
   calls the action once per owner, as vanilla's execution loop charges one delta per clan leader.
 - **Source:** `docs/reviews/rca-hard-questions-2026-10-19.md` H2.
+- 2026-10-20: Personal Relations (#862) keeps the player's pair on the lord himself in single player; ask the model, never assume the clan leader (rca-hard-questions-2026-10-19.md round 3).
 
 ### A roster write during a party-screen conversation is reverted by Escape (2026-10-19, second occurrence)
 
@@ -1121,7 +1122,7 @@ the conversation comes back as a dead prisoner; loot added to the inventory disa
 - **Prevent:** after any roster, inventory or hero-state write made from a conversation, commit an open party
   screen the way vanilla does when a companion leaves (`GauntletPartyScreen.OnCompanionRemoved` calls
   `PartyScreenLogic.DoneLogic(true)`): `GameStateManager.Current?.LastOrDefault<PartyState>()?.PartyScreenLogic?.DoneLogic(true)`.
-  Trap index row "Party-screen conversations".
+  Rule: .claude/rules/adapters.md, Relations and party-screen writes.
 - **Source:** `docs/reviews/rca-hard-questions-2026-10-19.md` H4.
 
 ### Before describing or lowering an engine state, read every engine consumer of it and its thresholds (#822, 2026-10-18)

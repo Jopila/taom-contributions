@@ -57,9 +57,11 @@ requested on the wrong monster is a TAOM log line, not a native warning of unkno
 
 ## Relations and party-screen writes (MANDATORY)
 
-- **Relations live on clan leaders.** `ChangeRelationAction` ignores `affectRelatives` and writes to the pair from
-  `DiplomacyModel.GetHeroesForEffectiveRelation`, so per-lord deltas sum per clan: key a penalty list on that owner,
-  strongest delta once per owner.
+- **Relations live on the owner the active DiplomacyModel returns** (`GetHeroesForEffectiveRelation`): his clan leader
+  under the vanilla mapping and in co-op; the lord himself for the player's own pairs under Personal Relations (single
+  player, on by default; AI-to-AI pairs stay on clan leaders).
+  `ChangeRelationAction` ignores `affectRelatives`. Key a penalty list on that owner, strongest delta once per owner,
+  and list every lord the deed should cost: never drop a hit because today's mapping merges it.
 - **A write made in a conversation opened from the party screen is reverted by Escape** (`PartyScreenData.ResetUsing`):
   after a roster, inventory or hero-state write, commit the screen with `PartyScreenLogic.DoneLogic(true)`.
 - Both, with sources: [lessons](../../docs/reviews/lessons/adapters-taleworlds-api.md) (2026-10-19).

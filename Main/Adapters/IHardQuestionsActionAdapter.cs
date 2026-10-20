@@ -5,8 +5,8 @@ public interface IHardQuestionsActionAdapter
 {
     /// <summary>
     /// Changes the player's relation with a hero; false when the hero is unknown. The engine lands the change on
-    /// the pair from <c>DiplomacyModel.GetHeroesForEffectiveRelation</c> (the hero's clan leader), so callers pass
-    /// that relation owner's id and charge each owner once.
+    /// the pair from <c>DiplomacyModel.GetHeroesForEffectiveRelation</c> (his clan leader under the vanilla mapping,
+    /// the lord himself under Personal Relations), so callers pass that relation owner's id and charge each owner once.
     /// </summary>
     bool ChangeRelation(string heroId, int delta);
 
@@ -22,7 +22,7 @@ public interface IHardQuestionsActionAdapter
     void LoseRenown(int amount);
 
     /// <summary>
-    /// Shows one summary line: the deed hurt the player's relations with this many clans. Callers have checked
+    /// Shows one summary line: the deed hurt the player's relations with this many lords (relation owners). Callers have checked
     /// that the count is above 0 and that this is not a dedicated server.
     /// </summary>
     void ShowRelationsHurt(int count);

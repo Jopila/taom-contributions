@@ -106,6 +106,8 @@ public sealed class StripService
         _actions.LoseRenown((int)Math.Round(-config.StripRenownLoss));
 
         var hits = new List<KeyValuePair<LordRef, float>> { new(circle.Victim, config.StripLordRelation) };
+        foreach (var lord in circle.ClanLords)
+            hits.Add(new(lord, config.StripClanRelation));
         foreach (var lord in circle.KingdomLords)
             hits.Add(new(lord, config.StripKingdomRelation));
         foreach (var lord in circle.HonorPositiveLords)
