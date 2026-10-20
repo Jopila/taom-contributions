@@ -275,6 +275,7 @@ column is what fails when one is missed; a row without one is caught only by rea
 | `CareerSystemIoC.BuildCareerArchetypeMap` | every career the culture's careers file adds | `IoCMap_EveryCareerInTheData_HasAnArchetype` |
 | `RaceAbilityDefaults.CultureProfiles` and `race_abilities.json` | a culture whose troops have no race ability of their own | `ShippedRaceAbilitiesConfigTests` (counts, compiled equals shipped) |
 | The compiled culture tables in `BattleBalanceConfig.cs`, `CombatMechanicsConfig.cs`, `BannerBearerConfig.cs` | when the shipped JSON gains the culture | `CompiledDefaults_*_MatchTheShippedFile` |
+| `CrownGuardMap.Default()` and `crown_guard/crown_guard_cultures.json` | every kingdom culture (the become-king scene's two guards) | `ShippedConfig_KeysEqualTheKingdomCultures`, `ShippedConfig_EqualsTheBuiltInDefault` |
 | `CustomBattleCommandersProvider.KnownCultureIds` | every playable culture | `ProviderWarningSet_IsThePlayableCultureSet` |
 | `TaomCultureLinkStyles` | a culture that should colour its menu links | none: Lindon, Blue Craig and Arthedain fall back to the default |
 

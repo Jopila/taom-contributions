@@ -4082,8 +4082,10 @@ lines, deployment subclass and bypass flag, and the issue kept describing all of
 not exist.
 - **Why missed:** the issue was filed by another session, and the plan step did not name it as an output.
 - **Prevent:** after Mike approves a plan that differs from the issue, post a progress comment (no ask needed) that
-  states the built design and the real test list before the build starts.
-- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 3.
+  states the built design and the real test list before the build starts. A comment is not enough on its own: before
+  the commit, rewrite the body's Solution, Files Changed and Testing from what ships (Crown Guard #825 had the comment
+  and still kept a stale body).
+- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 3; `docs/reviews/rca-crown-guard-2026-10-20.md` F1.
 
 ### A tool's regression test covers the boundary shapes and compares whole output (harvest tool, 2026-10-19)
 `harvest_literal_loc_keys.py` added one blank line before `</strings>` per run. The first regression test started

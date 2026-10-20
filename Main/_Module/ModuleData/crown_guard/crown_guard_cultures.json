@@ -1,0 +1,27 @@
+{
+  "cultures": {
+    "gondor": "gondor_mt_fountain_guard",
+    "vlandia": "rohan_edoras_golden_hall_kings_own_rider",
+    "isengard": "orthanc_bodyguard",
+    "arthedain": "arthedain_kings_guard",
+    "sturgia": "dale_running_river_warden",
+    "empire": "dunland_wolf_champion",
+    "erebor": "erebor_noble_royal_warden",
+    "mirkwood": "mirkwood_palaceguard",
+    "rivendell": "imladris_warden",
+    "lothlorien": "imladris_warden",
+    "lindon": "lindon_imladris_warden",
+    "mordor": "mordor_uruk_baraddurguard",
+    "dolguldur": "dg_uruk_black_guard",
+    "gundabad": "gundabad_chosen_of_tharzog",
+    "goblin": "goblin_chosen_of_tharzog",
+    "bluecraig": "bluecraig_bolgs_ironfang",
+    "mistymountainorcs": "mistymountainorcs_bolgs_ironfang",
+    "khuzait": "dragon_wrath_obsidian_shieldmaster",
+    "battania": "dragon_wrath_ash_shieldguard",
+    "aserai": "harad_serp_guard",
+    "abanissa": "harad_serp_guard",
+    "shaghana": "harad_redserp_guard",
+    "umbar": "umbar_elite_root0000"
+  }
+}

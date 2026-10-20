@@ -1165,3 +1165,13 @@ three such targets (`MapInfoVM`, `EncyclopediaUnitVM`, `TownManagementReserveCon
 - **Prevent:** before adding a mixin, check whether its target declares `OnFinalize`; if not, prefer a target that
   does, or accept the stacked hook knowingly and keep mixin `OnFinalize` overrides empty or idempotent.
 - **Source:** `docs/reviews/rca-reeves-ledger-2026-10-19.md` "Not applied".
+
+### A patch doc's caller list and trigger come from the IL and the raising gate (#825, 2026-10-20)
+The Crown Guard docs said its target had one caller and that the scene shows when "a player or lord" wins. The
+installed IL has a second caller (a Story Mode scene) and the raising behaviour shows the scene only when the player
+wins. The plan had read both facts; the docs kept a shorter version.
+- **Why missed:** the docs were written from the plan's summary, not from the engine lines it cited.
+- **Prevent:** before writing a patch's "Callers and thread" line, list the call sites from the installed IL
+  (`ilspycmd -il` or `taom-src`) and quote the condition that raises the caller; name an unreachable caller with the
+  reason it is unreachable rather than leaving it out.
+- **Source:** `docs/reviews/rca-crown-guard-2026-10-20.md` F2, F3.

@@ -1936,3 +1936,11 @@ The Dale block was first appended after the Arthedain generator's block in `clan
 - **Prevent:** run `python -m pytest tools/tests` for any change to generated XML, and keep a new hand-authored marker
   block ahead of any region a generator re-inserts at the closing tag.
 - **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
+
+### A feature copied from a sibling copies the sibling's test list too (#825, 2026-10-20)
+Crown Guard copied Tavern Specialities' module shape but not its apply-and-JIT binding test or its "adds no behavior
+and no model" assertion, the same gap the Bard Town Guard review found one feature earlier.
+- **Why missed:** the build brief named the sibling's code files as the pattern, not its test files.
+- **Prevent:** when a brief names a sibling feature as the pattern, list the sibling's test files and test names in
+  the brief and require one counterpart for each, or a stated reason why it does not apply.
+- **Source:** `docs/reviews/rca-crown-guard-2026-10-20.md` F6, F7.
