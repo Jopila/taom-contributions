@@ -56,7 +56,11 @@ SPEC = {
     "Dale": {
         "ruling_clan": "clan_sturgia_1", "capital": "town_S1",
         "clans": {"clan_sturgia_1": 6, "clan_sturgia_2": 5, "clan_sturgia_3": 4, "clan_sturgia_4": 4,
-                  "clan_sturgia_5": 3, "clan_sturgia_6": 3, "clan_sturgia_7": 4, "clan_sturgia_8": 1, "clan_sturgia_9": 2},
+                  "clan_sturgia_5": 3, "clan_sturgia_6": 3, "clan_sturgia_7": 4, "clan_sturgia_8": 3, "clan_sturgia_9": 3,
+                  # 2026-10-20 Dale lord expansion (tools/author_dale_lords.py). The live file seats 10 on
+                  # castle_S1 and 11 on castle_S3 by hand; this spec's own distribution is not re-run for them.
+                  "clan_sturgia_10": 4, "clan_sturgia_11": 4, "clan_sturgia_12": 3, "clan_sturgia_13": 3,
+                  "clan_sturgia_14": 3},
         "towns": [("town_S1", 3100), ("town_S2", 2300), ("town_S3", 3200), ("town_S4", 3300), ("town_S5", 1700)],
         "castles": [("castle_S1", 890), ("castle_S2", 830), ("castle_S3", 470), ("castle_S4", 1000),
                     ("castle_S5", 800), ("castle_S6", 680), ("castle_S7", 660)],

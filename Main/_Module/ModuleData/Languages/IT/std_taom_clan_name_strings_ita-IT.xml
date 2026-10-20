@@ -131,5 +131,10 @@
     <string id="aom_clan_arthedain_3_name" text="Custodi di Amon Sûl" />
     <string id="aom_clan_arthedain_4_name" text="Casa del Baranduin" />
     <string id="aom_clan_arthedain_5_name" text="Casa di Emyn Beraid" />
+    <string id="aom_clan_sturgia_10_name" text="House of the Running River" />
+    <string id="aom_clan_sturgia_11_name" text="House of the Celduin" />
+    <string id="aom_clan_sturgia_12_name" text="Wardens of Esgaroth" />
+    <string id="aom_clan_sturgia_13_name" text="House of Lake-town" />
+    <string id="aom_clan_sturgia_14_name" text="House of the Long Marshes" />
   </strings>
 </base>

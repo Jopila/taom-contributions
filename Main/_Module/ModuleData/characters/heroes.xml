@@ -4008,5 +4008,113 @@
 		faction="Faction.clan_arthedain_5"
 		spouse="Hero.lord_AN5_2" />
   <!-- TAOM-NEWFACTIONS:arthedain:END -->
+  <!-- TAOM-DALE-EXPANSION:BEGIN -->
+	<Hero
+		id="lord_S10_1"
+		faction="Faction.clan_sturgia_10" />
+	<Hero
+		id="lord_S10_2"
+		spouse="Hero.lord_S10_1"
+		faction="Faction.clan_sturgia_10" />
+	<Hero
+		id="lord_S10_3"
+		father="Hero.lord_S10_1"
+		mother="Hero.lord_S10_2"
+		faction="Faction.clan_sturgia_10" />
+	<Hero
+		id="lord_S10_4"
+		faction="Faction.clan_sturgia_10" />
+	<Hero
+		id="lord_S10_5"
+		faction="Faction.clan_sturgia_10" />
+	<Hero
+		id="lord_S10_6"
+		father="Hero.lord_S10_1"
+		mother="Hero.lord_S10_2"
+		faction="Faction.clan_sturgia_10" />
+	<Hero
+		id="lord_S11_1"
+		faction="Faction.clan_sturgia_11" />
+	<Hero
+		id="lord_S11_2"
+		spouse="Hero.lord_S11_1"
+		faction="Faction.clan_sturgia_11" />
+	<Hero
+		id="lord_S11_3"
+		father="Hero.lord_S11_1"
+		mother="Hero.lord_S11_2"
+		faction="Faction.clan_sturgia_11" />
+	<Hero
+		id="lord_S11_4"
+		faction="Faction.clan_sturgia_11" />
+	<Hero
+		id="lord_S11_5"
+		father="Hero.lord_S11_1"
+		mother="Hero.lord_S11_2"
+		faction="Faction.clan_sturgia_11" />
+	<Hero
+		id="lord_S11_6"
+		father="Hero.lord_S11_1"
+		mother="Hero.lord_S11_2"
+		faction="Faction.clan_sturgia_11" />
+	<Hero
+		id="lord_S12_1"
+		faction="Faction.clan_sturgia_12" />
+	<Hero
+		id="lord_S12_2"
+		spouse="Hero.lord_S12_1"
+		faction="Faction.clan_sturgia_12" />
+	<Hero
+		id="lord_S12_3"
+		father="Hero.lord_S12_1"
+		mother="Hero.lord_S12_2"
+		faction="Faction.clan_sturgia_12" />
+	<Hero
+		id="lord_S12_4"
+		faction="Faction.clan_sturgia_12" />
+	<Hero
+		id="lord_S12_5"
+		faction="Faction.clan_sturgia_12" />
+	<Hero
+		id="lord_S13_1"
+		faction="Faction.clan_sturgia_13" />
+	<Hero
+		id="lord_S13_2"
+		spouse="Hero.lord_S13_1"
+		faction="Faction.clan_sturgia_13" />
+	<Hero
+		id="lord_S13_3"
+		father="Hero.lord_S13_1"
+		mother="Hero.lord_S13_2"
+		faction="Faction.clan_sturgia_13" />
+	<Hero
+		id="lord_S13_4"
+		faction="Faction.clan_sturgia_13" />
+	<Hero
+		id="lord_S13_5"
+		father="Hero.lord_S13_1"
+		mother="Hero.lord_S13_2"
+		faction="Faction.clan_sturgia_13" />
+	<Hero
+		id="lord_S14_1"
+		faction="Faction.clan_sturgia_14" />
+	<Hero
+		id="lord_S14_2"
+		spouse="Hero.lord_S14_1"
+		faction="Faction.clan_sturgia_14" />
+	<Hero
+		id="lord_S14_3"
+		father="Hero.lord_S14_1"
+		mother="Hero.lord_S14_2"
+		faction="Faction.clan_sturgia_14" />
+	<Hero
+		id="lord_S14_4"
+		faction="Faction.clan_sturgia_14" />
+	<Hero
+		id="lord_S14_5"
+		father="Hero.lord_S14_1"
+		mother="Hero.lord_S14_2"
+		faction="Faction.clan_sturgia_14" />
+  <!-- TAOM-DALE-EXPANSION:END -->
 </Heroes>
 

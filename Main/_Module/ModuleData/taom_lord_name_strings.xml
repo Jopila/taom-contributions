@@ -898,6 +898,33 @@
 	<string id="aom_lord_R2_3_name" text="{=aom_lord_R2_3_name}Erestor" />
 	<string id="aom_lord_R2_4_name" text="{=aom_lord_R2_4_name}Lindir" />
 	<string id="aom_lord_R3_1_name" text="{=aom_lord_R3_1_name}Chägermeister" />
+	<string id="aom_lord_S10_1_name" text="{=aom_lord_S10_1_name}Halvard" />
+	<string id="aom_lord_S10_2_name" text="{=aom_lord_S10_2_name}Ragnhild" />
+	<string id="aom_lord_S10_3_name" text="{=aom_lord_S10_3_name}Arnkel" />
+	<string id="aom_lord_S10_4_name" text="{=aom_lord_S10_4_name}Torgrim" />
+	<string id="aom_lord_S10_5_name" text="{=aom_lord_S10_5_name}Eyvind" />
+	<string id="aom_lord_S10_6_name" text="{=aom_lord_S10_6_name}Sunniva" />
+	<string id="aom_lord_S11_1_name" text="{=aom_lord_S11_1_name}Ketil" />
+	<string id="aom_lord_S11_2_name" text="{=aom_lord_S11_2_name}Gudrun" />
+	<string id="aom_lord_S11_3_name" text="{=aom_lord_S11_3_name}Orm" />
+	<string id="aom_lord_S11_4_name" text="{=aom_lord_S11_4_name}Skuli" />
+	<string id="aom_lord_S11_5_name" text="{=aom_lord_S11_5_name}Vigdis" />
+	<string id="aom_lord_S11_6_name" text="{=aom_lord_S11_6_name}Hrafn" />
+	<string id="aom_lord_S12_1_name" text="{=aom_lord_S12_1_name}Ottar" />
+	<string id="aom_lord_S12_2_name" text="{=aom_lord_S12_2_name}Asa" />
+	<string id="aom_lord_S12_3_name" text="{=aom_lord_S12_3_name}Geirmund" />
+	<string id="aom_lord_S12_4_name" text="{=aom_lord_S12_4_name}Bjarni" />
+	<string id="aom_lord_S12_5_name" text="{=aom_lord_S12_5_name}Kolbein" />
+	<string id="aom_lord_S13_1_name" text="{=aom_lord_S13_1_name}Starkad" />
+	<string id="aom_lord_S13_2_name" text="{=aom_lord_S13_2_name}Thora" />
+	<string id="aom_lord_S13_3_name" text="{=aom_lord_S13_3_name}Audun" />
+	<string id="aom_lord_S13_4_name" text="{=aom_lord_S13_4_name}Ingvar" />
+	<string id="aom_lord_S13_5_name" text="{=aom_lord_S13_5_name}Solveig" />
+	<string id="aom_lord_S14_1_name" text="{=aom_lord_S14_1_name}Thormod" />
+	<string id="aom_lord_S14_2_name" text="{=aom_lord_S14_2_name}Helga" />
+	<string id="aom_lord_S14_3_name" text="{=aom_lord_S14_3_name}Brynjar" />
+	<string id="aom_lord_S14_4_name" text="{=aom_lord_S14_4_name}Valgard" />
+	<string id="aom_lord_S14_5_name" text="{=aom_lord_S14_5_name}Yrsa" />
 	<string id="aom_lord_SH1_10_name" text="{=aom_lord_SH1_10_name}Manîzheh" />
 	<string id="aom_lord_SH1_2_name" text="{=aom_lord_SH1_2_name}Suladân" />
 	<string id="aom_lord_SH1_3_name" text="{=aom_lord_SH1_3_name}Farzûk" />

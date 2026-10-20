@@ -1015,5 +1015,32 @@
     <string id="aom_lord_AN5_2_name" text="阿維列格" />
     <string id="aom_lord_AN5_3_name" text="梅希爾" />
     <string id="aom_lord_AN5_4_name" text="提爾雯" />
+    <string id="aom_lord_S10_1_name" text="Halvard" />
+    <string id="aom_lord_S10_2_name" text="Ragnhild" />
+    <string id="aom_lord_S10_3_name" text="Arnkel" />
+    <string id="aom_lord_S10_4_name" text="Torgrim" />
+    <string id="aom_lord_S10_5_name" text="Eyvind" />
+    <string id="aom_lord_S10_6_name" text="Sunniva" />
+    <string id="aom_lord_S11_1_name" text="Ketil" />
+    <string id="aom_lord_S11_2_name" text="Gudrun" />
+    <string id="aom_lord_S11_3_name" text="Orm" />
+    <string id="aom_lord_S11_4_name" text="Skuli" />
+    <string id="aom_lord_S11_5_name" text="Vigdis" />
+    <string id="aom_lord_S11_6_name" text="Hrafn" />
+    <string id="aom_lord_S12_1_name" text="Ottar" />
+    <string id="aom_lord_S12_2_name" text="Asa" />
+    <string id="aom_lord_S12_3_name" text="Geirmund" />
+    <string id="aom_lord_S12_4_name" text="Bjarni" />
+    <string id="aom_lord_S12_5_name" text="Kolbein" />
+    <string id="aom_lord_S13_1_name" text="Starkad" />
+    <string id="aom_lord_S13_2_name" text="Thora" />
+    <string id="aom_lord_S13_3_name" text="Audun" />
+    <string id="aom_lord_S13_4_name" text="Ingvar" />
+    <string id="aom_lord_S13_5_name" text="Solveig" />
+    <string id="aom_lord_S14_1_name" text="Thormod" />
+    <string id="aom_lord_S14_2_name" text="Helga" />
+    <string id="aom_lord_S14_3_name" text="Brynjar" />
+    <string id="aom_lord_S14_4_name" text="Valgard" />
+    <string id="aom_lord_S14_5_name" text="Yrsa" />
   </strings>
 </base>

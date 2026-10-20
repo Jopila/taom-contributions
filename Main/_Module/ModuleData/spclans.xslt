@@ -471,6 +471,7 @@
       <xsl:apply-templates select="@*[local-name() != 'name' and local-name() != 'color' and local-name() != 'color2' and local-name() != 'default_party_template']"/>
       <xsl:attribute name="name">{=TAOM_clan_sturgia_8}House of Long Lake</xsl:attribute>
       <xsl:attribute name="banner_key">11.312.166.1528.1528.764.764.1.0.0.27000.238.171.900.900.765.790.0.0.0</xsl:attribute>
+      <xsl:attribute name="tier">3</xsl:attribute>
       <xsl:attribute name="color">FF243083</xsl:attribute>
       <xsl:attribute name="color2">FFD9CE50</xsl:attribute>
       <xsl:attribute name="default_party_template">PartyTemplate.kingdom_hero_party_dale_sturgia_8_template</xsl:attribute>
@@ -483,6 +484,7 @@
       <xsl:apply-templates select="@*[local-name() != 'name' and local-name() != 'color' and local-name() != 'color2' and local-name() != 'default_party_template']"/>
       <xsl:attribute name="name">{=TAOM_clan_sturgia_9}House of the Dragon-slayer</xsl:attribute>
       <xsl:attribute name="banner_key">11.312.166.1528.1528.764.764.1.0.0.27000.238.171.900.900.765.790.0.0.0</xsl:attribute>
+      <xsl:attribute name="tier">3</xsl:attribute>
       <xsl:attribute name="color">FF262B8A</xsl:attribute>
       <xsl:attribute name="color2">FFDADA57</xsl:attribute>
       <xsl:attribute name="default_party_template">PartyTemplate.kingdom_hero_party_dale_sturgia_9_template</xsl:attribute>

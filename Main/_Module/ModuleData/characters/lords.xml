@@ -55666,4 +55666,1275 @@
         </Equipments>
     </NPCCharacter>
   <!-- TAOM-NEWFACTIONS:arthedain:END -->
+  <!-- TAOM-DALE-EXPANSION:BEGIN -->
+    <NPCCharacter id="lord_S10_1" name="{=aom_lord_S10_1_name}Halvard" age="46" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_lord_skills">
+        <face>
+            <BodyProperties version="4" weight="0.3" build="0.9" key="00002C04405838836569E86B42547942A953B158E6A5883394A97756BC9B75A90197701309CE53B8000000000000000000000000000000000000000025283042" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="215" />
+            <skill id="TwoHanded" value="155" />
+            <skill id="Polearm" value="205" />
+            <skill id="Bow" value="260" />
+            <skill id="Crossbow" value="120" />
+            <skill id="Throwing" value="170" />
+            <skill id="Riding" value="215" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="230" />
+            <skill id="Tactics" value="242" />
+            <skill id="Roguery" value="80" />
+            <skill id="Charm" value="200" />
+            <skill id="Leadership" value="235" />
+            <skill id="Trade" value="210" />
+            <skill id="Steward" value="215" />
+            <skill id="Medicine" value="140" />
+            <skill id="Engineering" value="170" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_a" />
+            <EquipmentSet id="dale_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S10_2" name="{=aom_lord_S10_2_name}Ragnhild" age="43" voice="earnest" is_female="true" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_lady_skills">
+        <face>
+            <BodyProperties version="4" weight="0.5" build="0.8" key="00001C04407018C18873324163A357B4966D873971979A028B644405773A5B2401B776130B8B799C0000000000000000000000000000000000000000797C1081" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="60" />
+            <skill id="TwoHanded" value="30" />
+            <skill id="Polearm" value="50" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="50" />
+            <skill id="Throwing" value="50" />
+            <skill id="Riding" value="140" />
+            <skill id="Athletics" value="110" />
+            <skill id="Crafting" value="140" />
+            <skill id="Scouting" value="110" />
+            <skill id="Tactics" value="152" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="240" />
+            <skill id="Medicine" value="210" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_b" />
+            <EquipmentSet id="dale_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S10_3" name="{=aom_lord_S10_3_name}Arnkel" age="24" voice="ironic" default_group="Cavalry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_knight_skills">
+        <face>
+            <BodyProperties version="4" weight="0.3353" build="0.6434" key="000074044B5834D49660886B42587948A153C21585A1143894A97756BC9575A900AA50030ACE53B8000000000000000000000000000000000000000059603042" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="202" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="130" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_c" />
+            <EquipmentSet id="dale_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S10_4" name="{=aom_lord_S10_4_name}Torgrim" age="38" voice="curt" default_group="Ranged" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_bowman_skills">
+        <face>
+            <BodyProperties version="4" weight="0.2" build="0.9" key="0000500140BC09429E895C86B34CA38993A369B8B287576979538AC46B678B940177781307C60384000000000000000000000000000000000000000000F05180" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="190" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="170" />
+            <skill id="Bow" value="270" />
+            <skill id="Crossbow" value="140" />
+            <skill id="Throwing" value="170" />
+            <skill id="Riding" value="180" />
+            <skill id="Athletics" value="245" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="240" />
+            <skill id="Tactics" value="200" />
+            <skill id="Roguery" value="100" />
+            <skill id="Charm" value="170" />
+            <skill id="Leadership" value="180" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="180" />
+            <skill id="Medicine" value="140" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_d" />
+            <EquipmentSet id="dale_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S10_5" name="{=aom_lord_S10_5_name}Eyvind" age="29" voice="earnest" default_group="Ranged" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_bowman_skills">
+        <face>
+            <BodyProperties version="4" weight="0.0177" build="0.8336" key="00000004400006C06E804F030003E018F03F71A5C6A40691AE1AFD6571FA00F901CD07130C997484000000000000000000000000000000000000000001905002" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="190" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="170" />
+            <skill id="Bow" value="270" />
+            <skill id="Crossbow" value="140" />
+            <skill id="Throwing" value="170" />
+            <skill id="Riding" value="180" />
+            <skill id="Athletics" value="245" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="240" />
+            <skill id="Tactics" value="200" />
+            <skill id="Roguery" value="100" />
+            <skill id="Charm" value="170" />
+            <skill id="Leadership" value="180" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="180" />
+            <skill id="Medicine" value="140" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_e" />
+            <EquipmentSet id="dale_civ_template_default_e" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S10_6" name="{=aom_lord_S10_6_name}Sunniva" age="20" voice="softspoken" is_female="true" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_young_lady_skills">
+        <face>
+            <BodyProperties version="4" weight="0.4213" build="0.4275" key="0005140012B4300F2C654B99BBA57D7B9785373999A651AA78C8CCEC77955C9602C666240CE70A590000000000000000000000000000000000000000538C3041" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="122" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="120" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="170" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_f" />
+            <EquipmentSet id="dale_civ_template_default_f" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S11_1" name="{=aom_lord_S11_1_name}Ketil" age="51" voice="curt" default_group="Cavalry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_knight_skills">
+        <face>
+            <BodyProperties version="4" weight="0.7289" build="0.7611" key="0000300140001384967132012584CCB36EC472158520143875848D198317281906BBB0680B68CB80000000000000000000000000000000000000000073788003" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="202" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="130" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_g" />
+            <EquipmentSet id="dale_civ_template_default_g" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S11_2" name="{=aom_lord_S11_2_name}Gudrun" age="48" voice="earnest" is_female="true" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_lady_skills">
+        <face>
+            <BodyProperties version="4" weight="0.6953" build="0.6326" key="00050405007020075B7445315583A1B9864D8716668A93288847E81474585B540589A6570833596C0000000000000000000000000000000000000000470420C1" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="60" />
+            <skill id="TwoHanded" value="30" />
+            <skill id="Polearm" value="50" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="50" />
+            <skill id="Throwing" value="50" />
+            <skill id="Riding" value="140" />
+            <skill id="Athletics" value="110" />
+            <skill id="Crafting" value="140" />
+            <skill id="Scouting" value="110" />
+            <skill id="Tactics" value="152" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="240" />
+            <skill id="Medicine" value="210" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_h" />
+            <EquipmentSet id="dale_civ_template_default_h" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S11_3" name="{=aom_lord_S11_3_name}Orm" age="27" voice="ironic" default_group="Cavalry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_knight_skills">
+        <face>
+            <BodyProperties version="4" weight="0.5077" build="0.85" key="00004401400033CD997241105582FE8CE00F7751A4E7A12886CB5915805F235100C880030C578112000000000000000000000000000000000000000033882042" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="202" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="130" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_a" />
+            <EquipmentSet id="dale_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S11_4" name="{=aom_lord_S11_4_name}Skuli" age="33" voice="curt" default_group="Ranged" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_bowman_skills">
+        <face>
+            <BodyProperties version="4" weight="0.4" build="0.99" key="0000140880001343987138114783EC9AE5067865A1A5939078866E0A8C66108A018AC0130868557500000000000000000000000000000000000000006B187040" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="190" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="170" />
+            <skill id="Bow" value="270" />
+            <skill id="Crossbow" value="140" />
+            <skill id="Throwing" value="170" />
+            <skill id="Riding" value="180" />
+            <skill id="Athletics" value="245" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="240" />
+            <skill id="Tactics" value="200" />
+            <skill id="Roguery" value="100" />
+            <skill id="Charm" value="170" />
+            <skill id="Leadership" value="180" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="180" />
+            <skill id="Medicine" value="140" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_b" />
+            <EquipmentSet id="dale_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S11_5" name="{=aom_lord_S11_5_name}Vigdis" age="22" voice="softspoken" is_female="true" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_young_lady_skills">
+        <face>
+            <BodyProperties version="4" weight="0.3" build="0.554" key="00001C04528830021B7213026674749A968B7726758543278B44F71278394B350CD8A6C20D4B1750000000000000000000000000000000000000000077BC10C2" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="122" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="120" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="170" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_c" />
+            <EquipmentSet id="dale_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S11_6" name="{=aom_lord_S11_6_name}Hrafn" age="19" voice="earnest" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_young_lord_skills">
+        <face>
+            <BodyProperties version="4" weight="0.7176" build="0.8336" key="000518000000024217704A092588FD5A701E74747250801097A86A06811A760B00EDB0030E7AC993000000000000000000000000000000000000000053E02002" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="160" />
+            <skill id="TwoHanded" value="120" />
+            <skill id="Polearm" value="140" />
+            <skill id="Bow" value="90" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="100" />
+            <skill id="Riding" value="190" />
+            <skill id="Athletics" value="180" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="152" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="140" />
+            <skill id="Leadership" value="120" />
+            <skill id="Trade" value="80" />
+            <skill id="Steward" value="110" />
+            <skill id="Medicine" value="80" />
+            <skill id="Engineering" value="80" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_d" />
+            <EquipmentSet id="dale_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S12_1" name="{=aom_lord_S12_1_name}Ottar" age="44" voice="earnest" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_lord_skills">
+        <face>
+            <BodyProperties version="4" weight="0.7" build="0.7" key="000B0005807015843C72310F67D8F06E801C853C01B5813CE9923E7C7F70530C009AA602096E8FE00000000000000000000000000000000000000000012C4042" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="215" />
+            <skill id="TwoHanded" value="155" />
+            <skill id="Polearm" value="205" />
+            <skill id="Bow" value="260" />
+            <skill id="Crossbow" value="120" />
+            <skill id="Throwing" value="170" />
+            <skill id="Riding" value="215" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="230" />
+            <skill id="Tactics" value="242" />
+            <skill id="Roguery" value="80" />
+            <skill id="Charm" value="200" />
+            <skill id="Leadership" value="235" />
+            <skill id="Trade" value="210" />
+            <skill id="Steward" value="215" />
+            <skill id="Medicine" value="140" />
+            <skill id="Engineering" value="170" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_e" />
+            <EquipmentSet id="dale_civ_template_default_e" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S12_2" name="{=aom_lord_S12_2_name}Asa" age="41" voice="softspoken" is_female="true" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_lady_skills">
+        <face>
+            <BodyProperties version="4" weight="0.5" build="0.5" key="0000400891A0200FDD78477A6AB5556B977C4D59CBAD8427CD47DE9AB8BC887A01B776130BC9A5B80000000000000000000000000000000000000000517C20C3" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="60" />
+            <skill id="TwoHanded" value="30" />
+            <skill id="Polearm" value="50" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="50" />
+            <skill id="Throwing" value="50" />
+            <skill id="Riding" value="140" />
+            <skill id="Athletics" value="110" />
+            <skill id="Crafting" value="140" />
+            <skill id="Scouting" value="110" />
+            <skill id="Tactics" value="152" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="240" />
+            <skill id="Medicine" value="210" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_f" />
+            <EquipmentSet id="dale_civ_template_default_f" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S12_3" name="{=aom_lord_S12_3_name}Geirmund" age="22" voice="ironic" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_young_lord_skills">
+        <face>
+            <BodyProperties version="4" weight="0.6" build="0.6" key="00164C02C0882342BAB7B9566DA53AD368A6628171B9A586A7883546559D974501977613094979CE000000000000000000000000000000000000000041341002" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="160" />
+            <skill id="TwoHanded" value="120" />
+            <skill id="Polearm" value="140" />
+            <skill id="Bow" value="90" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="100" />
+            <skill id="Riding" value="190" />
+            <skill id="Athletics" value="180" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="152" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="140" />
+            <skill id="Leadership" value="120" />
+            <skill id="Trade" value="80" />
+            <skill id="Steward" value="110" />
+            <skill id="Medicine" value="80" />
+            <skill id="Engineering" value="80" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_g" />
+            <EquipmentSet id="dale_civ_template_default_g" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S12_4" name="{=aom_lord_S12_4_name}Bjarni" age="35" voice="curt" default_group="Ranged" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_bowman_skills">
+        <face>
+            <BodyProperties version="4" weight="0" build="0.6725" key="00001C0B4B0004D4C9BC38753878986C9767762692703328AB5977498679886A00CA00030C5A99D9000000000000000000000000000000000000000039982082" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="190" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="170" />
+            <skill id="Bow" value="270" />
+            <skill id="Crossbow" value="140" />
+            <skill id="Throwing" value="170" />
+            <skill id="Riding" value="180" />
+            <skill id="Athletics" value="245" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="240" />
+            <skill id="Tactics" value="200" />
+            <skill id="Roguery" value="100" />
+            <skill id="Charm" value="170" />
+            <skill id="Leadership" value="180" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="180" />
+            <skill id="Medicine" value="140" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_h" />
+            <EquipmentSet id="dale_civ_template_default_h" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S12_5" name="{=aom_lord_S12_5_name}Kolbein" age="30" voice="earnest" default_group="Cavalry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_knight_skills">
+        <face>
+            <BodyProperties version="4" weight="0.1836" build="0.2176" key="00000C040070009B6983CFFB7C433FF1971470640061701F776777774F60841F00D862030D840A74000000000000000000000000000000000000000067B08102" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="202" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="130" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_a" />
+            <EquipmentSet id="dale_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S13_1" name="{=aom_lord_S13_1_name}Starkad" age="49" voice="curt" default_group="Cavalry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_knight_skills">
+        <face>
+            <BodyProperties version="4" weight="0.7552" build="0.7989" key="0000200880002445C67115035783A878646476227680A42482769E468C16291901ECB0130E9A6534000000000000000000000000000000000000000021E09103" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="202" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="130" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_b" />
+            <EquipmentSet id="dale_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S13_2" name="{=aom_lord_S13_2_name}Thora" age="46" voice="earnest" is_female="true" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_lady_skills">
+        <face>
+            <BodyProperties version="4" weight="0.4526" build="0.5473" key="000A08044070300E4976245366B465B59A4B8308619547498764AA1275284A240898768909675A3A00000000000000000000000000000000000000006F3C2084" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="60" />
+            <skill id="TwoHanded" value="30" />
+            <skill id="Polearm" value="50" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="50" />
+            <skill id="Throwing" value="50" />
+            <skill id="Riding" value="140" />
+            <skill id="Athletics" value="110" />
+            <skill id="Crafting" value="140" />
+            <skill id="Scouting" value="110" />
+            <skill id="Tactics" value="152" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="240" />
+            <skill id="Medicine" value="210" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_c" />
+            <EquipmentSet id="dale_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S13_3" name="{=aom_lord_S13_3_name}Audun" age="26" voice="ironic" default_group="Ranged" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_bowman_skills">
+        <face>
+            <BodyProperties version="4" weight="0.7176" build="0.8336" key="0000180000000344BC7048192589DD69784A747472708A0097A86A068116A60B00EDB0030E7AC393000000000000000000000000000000000000000053E02002" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="190" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="170" />
+            <skill id="Bow" value="270" />
+            <skill id="Crossbow" value="140" />
+            <skill id="Throwing" value="170" />
+            <skill id="Riding" value="180" />
+            <skill id="Athletics" value="245" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="240" />
+            <skill id="Tactics" value="200" />
+            <skill id="Roguery" value="100" />
+            <skill id="Charm" value="170" />
+            <skill id="Leadership" value="180" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="180" />
+            <skill id="Medicine" value="140" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_d" />
+            <EquipmentSet id="dale_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S13_4" name="{=aom_lord_S13_4_name}Ingvar" age="31" voice="curt" default_group="Ranged" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_bowman_skills">
+        <face>
+            <BodyProperties version="4" weight="0.338" build="0.9" key="00000402C000328C8A7115113683CCD8A6497254819028629A6C8B58811E5A1800F850030F9CCE93000000000000000000000000000000000000000061F05080" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="190" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="170" />
+            <skill id="Bow" value="270" />
+            <skill id="Crossbow" value="140" />
+            <skill id="Throwing" value="170" />
+            <skill id="Riding" value="180" />
+            <skill id="Athletics" value="245" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="240" />
+            <skill id="Tactics" value="200" />
+            <skill id="Roguery" value="100" />
+            <skill id="Charm" value="170" />
+            <skill id="Leadership" value="180" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="180" />
+            <skill id="Medicine" value="140" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_e" />
+            <EquipmentSet id="dale_civ_template_default_e" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S13_5" name="{=aom_lord_S13_5_name}Solveig" age="21" voice="softspoken" is_female="true" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_young_lady_skills">
+        <face>
+            <BodyProperties version="4" weight="0.4" build="0.6" key="000B100151141010627A8278C8B6825989B65558B77AAC5795A778895979A76301C776130C385387000000000000000000000000000000000000000043A400C4" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="122" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="120" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="170" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_f" />
+            <EquipmentSet id="dale_civ_template_default_f" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S14_1" name="{=aom_lord_S14_1_name}Thormod" age="53" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_lord_skills">
+        <face>
+            <BodyProperties version="4" weight="0.4221" build="0.7302" key="00005802C000354A7788740C5598FA3C58DD3180B090DA078E6679877C84AFA801BB60130BCB1AF0000000000000000000000000000000000000000073789003" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="215" />
+            <skill id="TwoHanded" value="155" />
+            <skill id="Polearm" value="205" />
+            <skill id="Bow" value="260" />
+            <skill id="Crossbow" value="120" />
+            <skill id="Throwing" value="170" />
+            <skill id="Riding" value="215" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="230" />
+            <skill id="Tactics" value="242" />
+            <skill id="Roguery" value="80" />
+            <skill id="Charm" value="200" />
+            <skill id="Leadership" value="235" />
+            <skill id="Trade" value="210" />
+            <skill id="Steward" value="215" />
+            <skill id="Medicine" value="140" />
+            <skill id="Engineering" value="170" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_g" />
+            <EquipmentSet id="dale_civ_template_default_g" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S14_2" name="{=aom_lord_S14_2_name}Helga" age="50" voice="earnest" is_female="true" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_lady_skills">
+        <face>
+            <BodyProperties version="4" weight="0.5" build="0.5" key="000B78071114200E8D1723DA7A67949A66266E8653525564594C4368786D87B30187761308288EC7000000000000000000000000000000000000000031143003" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="60" />
+            <skill id="TwoHanded" value="30" />
+            <skill id="Polearm" value="50" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="50" />
+            <skill id="Throwing" value="50" />
+            <skill id="Riding" value="140" />
+            <skill id="Athletics" value="110" />
+            <skill id="Crafting" value="140" />
+            <skill id="Scouting" value="110" />
+            <skill id="Tactics" value="152" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="240" />
+            <skill id="Medicine" value="210" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_h" />
+            <EquipmentSet id="dale_civ_template_default_h" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S14_3" name="{=aom_lord_S14_3_name}Brynjar" age="28" voice="ironic" default_group="Cavalry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_knight_skills">
+        <face>
+            <BodyProperties version="4" weight="0.4463" build="0.6332" key="00007400000004500870001008F1EFFF800F78777781070E70E019518088880F05897057080FFEF0000000000000000000000000000000000000000011103002" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="202" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="160" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="130" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_a" />
+            <EquipmentSet id="dale_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S14_4" name="{=aom_lord_S14_4_name}Valgard" age="36" voice="curt" default_group="Ranged" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_bowman_skills">
+        <face>
+            <BodyProperties version="4" weight="0" build="0" key="00005404400036125A8E4CB3489CDB9D6F67758266101B4FF0F70D2F8A84995E01A000140ADAA974000000000000000000000000000000000000000025585000" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <beard_tags>
+                <beard_tag name="sturgia" />
+            </beard_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="190" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="170" />
+            <skill id="Bow" value="270" />
+            <skill id="Crossbow" value="140" />
+            <skill id="Throwing" value="170" />
+            <skill id="Riding" value="180" />
+            <skill id="Athletics" value="245" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="240" />
+            <skill id="Tactics" value="200" />
+            <skill id="Roguery" value="100" />
+            <skill id="Charm" value="170" />
+            <skill id="Leadership" value="180" />
+            <skill id="Trade" value="180" />
+            <skill id="Steward" value="180" />
+            <skill id="Medicine" value="140" />
+            <skill id="Engineering" value="130" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_b" />
+            <EquipmentSet id="dale_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_S14_5" name="{=aom_lord_S14_5_name}Yrsa" age="23" voice="softspoken" is_female="true" default_group="Infantry" is_hero="true" culture="Culture.sturgia" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_dale_young_lady_skills">
+        <face>
+            <BodyProperties version="4" weight="0.5" build="0.5" key="001108000070200FD33892A397AC34867B393C86ADDA750B66EE13B68C999CD90157761305747845000000000000000000000000000000000000000034A40083" />
+            <hair_tags>
+                <hair_tag name="sturgia" />
+            </hair_tags>
+            <tattoo_tags>
+                <tattoo_tag name="Cleanface" />
+            </tattoo_tags>
+        </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="122" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="120" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="170" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="dale_bat_template_medium_c" />
+            <EquipmentSet id="dale_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+  <!-- TAOM-DALE-EXPANSION:END -->
 </NPCCharacters>

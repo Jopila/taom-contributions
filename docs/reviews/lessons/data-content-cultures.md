@@ -2103,3 +2103,9 @@ big cultures assumes "another settlement of my culture" exists.
   2026-10-19 sweep of v1.5.5 found seven `GetRandomElementWithPredicate` sites; only the musician's was live (the
   RCA lists the other six). Fix the one live site by keeping the engine's pick and adding a fallback, never by skipping vanilla.
 - **Source:** `docs/reviews/rca-bard-town-guard-2026-10-19.md`.
+
+### Lord count is not party count (Dale expansion, 2026-10-20)
+Party slots follow clan tier (`DefaultClanTierModel`: tier 1-2 one party, 3-4 two, 5-6 three), so adding lords to existing clans adds no armies. Dale had 48 adult lords against a major-kingdom median of 75, and padding its nine clans would have left about 18 parties.
+- **Why missed:** lord count reads as a proxy for army count, and nothing in the data shows the tier rule.
+- **Prevent:** to grow a kingdom's armies, add clans or raise tiers; count party slots, not lords. Dale went to 14 clans and 30 party slots.
+- **Source:** [dale-lord-expansion.md](../../features/dale-lord-expansion.md).

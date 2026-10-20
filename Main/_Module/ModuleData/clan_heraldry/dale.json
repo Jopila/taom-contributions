@@ -663,6 +663,46 @@
         }
       ],
       "template_id": "kingdom_hero_party_dale_sturgia_9_template"
+    },
+    {
+      "id": "clan_sturgia_10",
+      "source": "xml",
+      "theme": "dale house 10 - balanced",
+      "color": "FF1B4A5E",
+      "color2": "FFC9A24A",
+      "roster": []
+    },
+    {
+      "id": "clan_sturgia_11",
+      "source": "xml",
+      "theme": "dale house 11 - cavalry",
+      "color": "FF2A3F7A",
+      "color2": "FFD8B04F",
+      "roster": []
+    },
+    {
+      "id": "clan_sturgia_12",
+      "source": "xml",
+      "theme": "dale house 12 - infantry",
+      "color": "FF3A2F6B",
+      "color2": "FFD9C25A",
+      "roster": []
+    },
+    {
+      "id": "clan_sturgia_13",
+      "source": "xml",
+      "theme": "dale house 13 - ranged",
+      "color": "FF174A66",
+      "color2": "FFE0D6A8",
+      "roster": []
+    },
+    {
+      "id": "clan_sturgia_14",
+      "source": "xml",
+      "theme": "dale house 14 - skirmisher",
+      "color": "FF2C4A3E",
+      "color2": "FFC9B458",
+      "roster": []
     }
   ]
 }
