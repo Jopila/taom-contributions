@@ -274,5 +274,6 @@
     <string id="taom_enlist_sat_out_line" text="You stayed back while the column fought, and your share of the battle's due was cut." />
     <string id="taom_enlist_sat_out_wounded_line" text="You were wounded and stayed back while the column fought." />
     <string id="taom_enlist_sat_out_forced_line" text="The column fought without you, and you had no way into the line." />
+    <string id="taom_enlist_act_raid" text="The column is raiding." />
   </strings>
 </base>

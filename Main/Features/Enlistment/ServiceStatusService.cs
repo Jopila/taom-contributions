@@ -111,7 +111,8 @@ public class ServiceStatusService : IServiceStatusService
         => WagePolicy.DailyWageForRank((int)rank, _config?.GetConfig()?.Progression?.DailyWageByRank);
 
     /// <summary>
-    /// Order matters: a battle outranks a siege outranks being in a settlement. A commander
+    /// Order matters: a village raid (#831) outranks the battle check, since the soldier is not in it;
+    /// a battle outranks a siege outranks being in a settlement. A commander
     /// assaulting a town is in all three states at once, and "in battle" is the one the player
     /// needs to see.
     /// </summary>
@@ -119,6 +120,8 @@ public class ServiceStatusService : IServiceStatusService
     {
         if (!commander.Exists || !commander.IsAlive || commander.IsPrisoner || !commander.HasParty)
             return CommanderActivity.Unavailable;
+        if (commander.PartyIsRaiding)
+            return CommanderActivity.Raiding;
         if (commander.PartyIsInMapEvent)
             return CommanderActivity.InBattle;
         if (commander.PartyIsBesieging)

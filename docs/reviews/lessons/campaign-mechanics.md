@@ -804,3 +804,16 @@ trust; an empty ledger was read as "forced open", so a battle he led could be pa
   verdict on the option he clicked), give "nothing recorded" no meaning beyond "no choice", and make every other
   signal a narrowing of that record. Test the walkout and the led-battle paths explicitly.
 - **Source:** `docs/reviews/rca-enlistment-sit-out-2026-10-19.md` F1, F2.
+
+### A map event's type is not its fight: trace every way a party enters a running event (#831, 2026-10-20)
+Enlistment first skipped any Raid event its commander led as attacker, on the reasoning that a raid is
+looting, not a battle. The engine reuses one Raid event for the militia fight, for a lord who comes to
+relieve the village (`StartBattleAction.Apply` keeps the type `Raid` and adds the relief lord to the
+running event) and for the looting, so the soldier would sit out a real lord battle.
+- **Why missed:** the plan traced how a raid starts (`ApplyStartRaid`), not how other parties join a
+  running one; the event type was read as a description of what is happening inside it.
+- **Prevent:** before a rule keys on `MapEvent.EventType` or a side, grep every caller that adds a
+  party to an existing event (`StartBattleAction.ApplyInternal`, `MapEventSide` setters) and list each
+  fight shape the event can hold. State in the doc which shapes the rule covers and which are a known
+  gap; test each listed shape.
+- **Source:** `docs/reviews/rca-enlistment-village-raids-2026-10-20.md` F1, F2.
