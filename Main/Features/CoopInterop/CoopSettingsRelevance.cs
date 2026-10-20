@@ -113,6 +113,10 @@ public static class CoopSettingsRelevance
     /// <summary>Player-local convenience: the player acts, the co-op layer replicates the result.</summary>
     private static readonly HashSet<string> PlayerLocal = new HashSet<string>(StringComparer.Ordinal)
     {
+        // Reeve's Ledger (#857): the +10K and -10K buttons write the world only behind ReevesLedgerService.MayWriteWorld, so the
+        // switch is inert under co-op: the buttons are hidden and a click refuses. A peer holding a different value never
+        // changes a running simulation.
+        "EnableReserveSteps",
         "EnableQuickActions", "EnableInventorySearch", "QuickActionsShowConfirmation",
         "QuickActionsPlaySounds", "DamagedQualityDropdown", "DamagedThreshold",
         "UseCustomThreshold", "SellDamagedEquipped", "ExcludeDamagedHorses",
@@ -171,6 +175,9 @@ public static class CoopSettingsRelevance
         // The faction picker shapes the local player's own character creation, which each peer runs
         // for themselves; the co-op layer replicates the hero that results, not the screen.
         "FrontEndFactionScreen",
+        // Reeve's Ledger (#857): the town management window's title, two stat rows and two icon tooltips, drawn on this
+        // client only. They read the fief and write nothing.
+        "EnableReevesLedger",
         // Campaign map performance (Battle Load Diagnostics page, Map Performance): whether hidden settlement
         // nameplates are skipped each frame (Patch104), and whether a covered map releases its render targets and how
         // often (a layer-event handler, no patch). Both change what this client draws and how much graphics memory it holds, never the campaign.

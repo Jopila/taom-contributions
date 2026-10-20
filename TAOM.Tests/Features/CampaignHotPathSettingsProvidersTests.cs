@@ -25,6 +25,7 @@ using TAOM.Features.PosternGate;
 using TAOM.Features.QuickActions;
 using TAOM.Features.Relations;
 using TAOM.Features.RealmBorders;
+using TAOM.Features.ReevesLedger;
 using TAOM.Features.TimeAcceleration;
 using TAOM.Features.WarChronicle;
 using TAOM.Features.WatchfulHolds;
@@ -89,6 +90,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(FromTheAshesSettingsProvider))]
     // Tokens of Esteem: the gate and the list read the group at every gift line a conversation shows.
     [DataRow(typeof(GiftSettingsProvider))]
+    // Not a hot path: both switches are read once, when the town management window opens. The accessor still takes the settings once.
+    [DataRow(typeof(ReevesLedgerSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -127,6 +130,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IPosternGateSettingsProvider), typeof(PosternGateSettingsProvider))]
     [DataRow(typeof(IFromTheAshesSettingsProvider), typeof(FromTheAshesSettingsProvider))]
     [DataRow(typeof(IGiftSettingsProvider), typeof(GiftSettingsProvider))]
+    [DataRow(typeof(ReevesLedgerSettingsProvider), typeof(ReevesLedgerSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -398,6 +402,21 @@ public class CampaignHotPathSettingsProvidersTests
         settings.EnableFromTheAshes = false;
 
         Assert.IsFalse(sut.Enabled);
+    }
+
+    [TestMethod]
+    public void ReevesLedger_ReadsThroughTheCachedSettings()
+    {
+        var settings = new TaomSettings();
+        var sut = new ReevesLedgerSettingsProvider(settings);
+        Assert.IsTrue(sut.LedgerEnabled);
+        Assert.IsTrue(sut.StepsEnabled);
+
+        settings.EnableReevesLedger = false;
+        settings.EnableReserveSteps = false;
+
+        Assert.IsFalse(sut.LedgerEnabled);
+        Assert.IsFalse(sut.StepsEnabled);
     }
 
     // No-MCM pins: TaomSettings.Instance is null in the test host (MCM is never initialised), so these

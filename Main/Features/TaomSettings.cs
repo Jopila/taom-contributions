@@ -806,6 +806,17 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Lets your company rebuild a looted village of your own realm from the village menu, and lend its labour to a construction project in a fief you own from the keep menu (from_the_ashes.json holds the hours, labour and materials). When off, those two options are hidden; a job already under way still finishes or stops normally. Single-player only. Default: on.")]
     public bool EnableFromTheAshes { get; set; } = true;
 
+    // GroupOrder 2 sorts it after the Postern Gate (0) and From the Ashes (1) groups; the group's first property carries it.
+    [SettingPropertyGroup("Fief Management/Reeve's Ledger", GroupOrder = 2)]
+    [SettingPropertyBool("Reeve's Ledger", Order = 0, RequireRestart = false,
+        HintText = "On the town management window: the fief's name as the title, a Profit row with a daily breakdown, a Patrol row for towns, and tooltips on the stash and prison icons. When off, the title, rows and icons are vanilla; the step buttons have their own switch. Applies the next time the window opens. Default: on.")]
+    public bool EnableReevesLedger { get; set; } = true;
+
+    [SettingPropertyGroup("Fief Management/Reeve's Ledger")]
+    [SettingPropertyBool("Reserve Step Buttons", Order = 1, RequireRestart = false,
+        HintText = "Adds a button beside the reserve's plus button to put gold into the reserve in one click, and one to take a step back out, refunded in full with no penalty. Single-player only. Applies the next time the window opens. Default: on.")]
+    public bool EnableReserveSteps { get; set; } = true;
+
     // --- Inventory / Quick Actions ---
 
     [SettingPropertyGroup("Inventory/Quick Actions", GroupOrder = 30)]

@@ -41,6 +41,7 @@ Runs under `dotnet test`, no game launch. TAOM.Tests references the installed `T
 | `HarmonyPatchBindingTests` | All 220 `[HarmonyPatch]` / `TargetMethod` targets, resolved as Harmony does at `PatchAll`. | one assertion accumulating all failures |
 | `GameModelOverrideBindingTests` | All 46 GameModels: registered in `SubModule.cs`, override ≥1 base virtual, no shadow-without-`override`. | 2 tests |
 | `ReflectionSiteBindingTests` | The auxiliary static-engine reflection members (74 at v1.5.5) from `reflection-sites.md` Category B. | one `[DataRow]` per site |
+| `ViewModelMixinBindingTests` | Every UIExtenderEx `[ViewModelMixin("Method")]` names one non-abstract method on its target view model. | one assertion accumulating all failures |
 
 > **First run (2026-05-28) caught a real defect.** `HeroViewModel_FillFrom_Patch` used a name-only `[HarmonyPatch(typeof(HeroViewModel), "FillFrom")]`. `HeroViewModel` inherits two more `FillFrom` overloads from `CharacterViewModel`, so Harmony's `AccessTools.Method` resolution found 3 candidates and threw `AmbiguousMatchException` — the postfix silently never applied in v1.4.5 (hero-portrait clan colors broken). Fixed by pinning argument types. This is exactly the gap the compiler and the BUTR analyzer miss.
 
@@ -50,7 +51,7 @@ Runs under `dotnet test`, no game launch. TAOM.Tests references the installed `T
 dotnet test TAOM.Tests/TAOM.Tests.csproj -p:DisableModuleCopy=true -p:ModuleId= --settings TAOM.Tests/binding-gate.runsettings --filter "TestCategory=BindingVerification"
 ```
 
-The three classes are in `TAOM.Tests/Migration/`: `HarmonyPatchBindingTests`, `GameModelOverrideBindingTests` and `ReflectionSiteBindingTests`.
+The classes are in `TAOM.Tests/Migration/`: `HarmonyPatchBindingTests`, `GameModelOverrideBindingTests`, `ReflectionSiteBindingTests` and `ViewModelMixinBindingTests`.
 
 **Skipped is never green.** `BANNERLORD_GAME_DIR` (or `BANNERLORD_OVERRIDE_DIR`) points the gate at the install. With no usable install, the tests that need the module DLLs call `Assert.Inconclusive`, and `binding-gate.runsettings` turns each one into a failure. Without that file MSTest reports them as Skipped and exits 0: never quote such a run, or any run with a non-zero `Skipped:` count, as a green gate. A missing install is an environment fact to report, not to fix.
 
@@ -66,6 +67,7 @@ The three classes are in `TAOM.Tests/Migration/`: `HarmonyPatchBindingTests`, `G
 | `AmbiguousMatchException` on a patch | A name-only `[HarmonyPatch]` on an overloaded method | Pin the argument types |
 | A target or member `did not resolve` or `not found` | The engine renamed, moved or removed it | Look up the new signature (`pwsh tools/taom-src.ps1 path <Type>`) and update the patch, adapter or GameModel; for a reflection site update both `reflection-sites.md` and the `[DataRow]` |
 | A GameModel `never AddModel'd` | The model compiles but is not registered | Add the `AddModel` call in `Main/SubModule.cs` |
+| A `[ViewModelMixin]` refresh method `is not declared` | UIExtenderEx throws a NullReferenceException at `UIExtender.Register` for a name that no longer resolves | Look up the renamed method (`pwsh tools/taom-src.ps1 path <Type>`) and update the attribute |
 
 **Refresh:** `pwsh tools/snapshot_api_surface.ps1`, then `pwsh tools/snapshot_api_surface.ps1 -Check` (exit 0 means the committed files reproduce). A new reflection site needs a row in `reflection-sites.md` Category B and a matching `[DataRow]` in `ReflectionSiteBindingTests.cs`; runtime-dynamic sites go in Category C. The gate is offline only: the in-game residue is in `docs/migration/s6-runtime-punchlist.md`.
 

@@ -1153,3 +1153,15 @@ vanilla's ids and needs no list at all.
 - **Prevent:** before copying vanilla's case list into a postfix, check in the installed IL whether every case
   writes the value. If it does, pre-set the fallback in a prefix. A copied list drifts on the next engine update.
 - **Source:** `docs/reviews/rca-culture-fallback-followups-2026-10-19.md` F1.
+
+### A mixin whose target declares no OnFinalize stacks a hook on every view model's OnFinalize
+
+UIExtenderEx 2.13.3 patches the target's own `OnFinalize` for its mixin teardown; when the target declares none,
+it patches the base `ViewModel.OnFinalize` instead (`ViewModelWithMixinPatch`). Harmony keeps every such patch, so
+each target of this kind adds one more hook that runs on every view model teardown in the game, builds a runtime
+list and does a table lookup; a mixin that overrides `OnFinalize` then runs once more per stacked hook. TAOM has
+three such targets (`MapInfoVM`, `EncyclopediaUnitVM`, `TownManagementReserveControlVM`).
+- **Why missed:** the hook is invisible in the mixin's code; it shows only in the UIExtenderEx decompile.
+- **Prevent:** before adding a mixin, check whether its target declares `OnFinalize`; if not, prefer a target that
+  does, or accept the stacked hook knowingly and keep mixin `OnFinalize` overrides empty or idempotent.
+- **Source:** `docs/reviews/rca-reeves-ledger-2026-10-19.md` "Not applied".

@@ -3382,5 +3382,17 @@
 	<!-- TavernSpecialities -->
 	<string id="taom_tavern_drink_default" text="{=taom_tavern_drink_default}a mug of ale" />
 	<string id="taom_tavern_food_default" text="{=taom_tavern_food_default}a bowl of stew" />
+	<string id="taom_reeve_stash_empty" text="{=taom_reeve_stash_empty}The stash is empty." />
+	<string id="taom_reeve_prisoners" text="{=taom_reeve_prisoners}Prisoners ({COUNT})" />
+	<string id="taom_reeve_prison_empty" text="{=taom_reeve_prison_empty}No prisoners are held here." />
+	<string id="taom_reeve_tariffs" text="{=taom_reeve_tariffs}Tariffs" />
+	<string id="taom_reeve_garrison_wages" text="{=taom_reeve_garrison_wages}Garrison wages" />
+	<string id="taom_reeve_more" text="{=taom_reeve_more}...and {COUNT} more" />
+	<string id="taom_reeve_add" text="{=taom_reeve_add}+10K" />
+	<string id="taom_reeve_withdraw" text="{=taom_reeve_withdraw}-10K" />
+	<string id="taom_reeve_add_hint" text="{=taom_reeve_add_hint}Add up to 10,000 gold to the reserve." />
+	<string id="taom_reeve_add_none" text="{=taom_reeve_add_none}You have no gold to add." />
+	<string id="taom_reeve_withdraw_hint" text="{=taom_reeve_withdraw_hint}Take up to 10,000 gold back from the reserve." />
+	<string id="taom_reeve_withdraw_none" text="{=taom_reeve_withdraw_none}The reserve is empty." />
 
 </strings>
