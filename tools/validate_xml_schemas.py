@@ -42,10 +42,29 @@ applied, so it may validate a file a given game type never loads, never the reve
     DTDs: a DOCTYPE throws inside a bare catch and the file loads nothing, so it fails here.
   * An XSD that includes, imports or redefines a schema by URL is refused, never fetched.
 
+A file passed explicitly that no `<XmlName>` loads is classed by what else the engine does
+with it, none of which an XSD checks:
+  * LANGUAGE FILE: a `ModuleData/Languages/**/language_data.xml`, or a file one lists through
+    `<LanguageFile xml_path>` or `<VoiceFile xml_path>` (relative to ModuleData/Languages, as
+    `LanguageData.Deserialize` joins it). The engine reads it while its language is active: the
+    <functions> always and the <strings> rows for every language but English, from the document's
+    second node, so the XML declaration must come first. A manifest the engine cannot load (it
+    does not parse, or its root is not a <LanguageData> with an id) is named as a real fault.
+  * STYLESHEET: the `.xsl` (else `.xslt`) that `MBObjectManager.HandleXsltList` queues beside a
+    loaded file or for an XSLT-only registration. `CreateMergedXmlFile` applies it to the data
+    merged from earlier registrations of the same id, before its own file merges, and never for
+    an id's first registration.
+  * NOT REGISTERED: no `<XmlName>` or language manifest loads it. The engine can still read it in
+    ways this tool does not check: by fixed name (`global_strings.xml`, `sp_battle_scenes.xml`,
+    `conversation_scenes.xml`, `meeting_scenes.xml`) or through a `project.mbproj` row (voice
+    definitions, module sounds). Expected for TAOM's own data files that C# reads directly
+    (Careers, AbilityTemplates, ...); a real fault for an .xml file under ModuleData/Languages that
+    no manifest the engine loads lists.
+None of these fails the run (the exit code is unchanged); the summary counts the real faults so a
+reader of that line alone still sees them, and a reviewer reports each one as a finding.
+
 Out of scope: files loaded through `project.mbproj` (native data such as action sets; see
-`audit_mbproj_registration.py` and `audit_action_set_parity.py`) and TAOM's own data files
-that C# reads directly (Careers, AbilityTemplates, ...). Pass one of those explicitly and
-it is listed as NOT REGISTERED, so it is named rather than silently skipped.
+`audit_mbproj_registration.py` and `audit_action_set_parity.py`).
 
 Usage:
     python tools/validate_xml_schemas.py                       # the repo module
@@ -71,8 +90,8 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-# lxml is the only non-stdlib dependency and CI's tools-tests job installs nothing, so it
-# is optional at import time (check_external_xslt.py's convention). Without it nothing
+# lxml is the only non-stdlib dependency and the tools tests (`/verify` Step 2b) do not
+# require it, so it is optional at import time (check_external_xslt.py's convention). Without it nothing
 # can be validated, and main() says so with exit 2 rather than a traceback.
 try:
     from lxml import etree
@@ -169,6 +188,68 @@ def registered_files(module_dir: Path):
     return entries, missing
 
 
+def applied_stylesheets(module_dir: Path) -> dict:
+    """{_key(sheet): (sheet path, xml_id, registered path)} for every stylesheet the engine applies
+    for this module's registrations (MBObjectManager.GetMergedXmlForManaged + HandleXsltList).
+    The sheet beside a loaded file is that file's path with `.xml` replaced by `.xsl`; a
+    registration that resolves to no file or folder looks for `<path>.xsl`. Each lookup takes
+    `.xsl` when it exists, else `.xslt`, never both."""
+    moduledata = Path(module_dir) / "ModuleData"
+    sheets = {}
+    root = ET.parse(Path(module_dir) / "SubModule.xml").getroot()
+    for node in root.iterfind("./Xmls/XmlNode"):
+        name = node.find("XmlName")
+        if name is None or "id" not in name.attrib or "path" not in name.attrib:
+            continue
+        xml_id, rel = name.get("id"), name.get("path")
+        as_file, as_folder = moduledata / f"{rel}.xml", moduledata / rel
+        if as_file.is_file():
+            bases = [moduledata / f"{rel}.xsl"]
+        elif rel and as_folder.is_dir():
+            bases = [Path(str(p).replace(".xml", ".xsl")) for p in sorted(as_folder.iterdir())
+                     if p.is_file() and p.suffix.lower().startswith(".xml")]
+        else:
+            bases = [moduledata / f"{rel}.xsl"]
+        for base in bases:
+            for sheet in (base, Path(f"{base}t")):
+                if sheet.is_file():
+                    sheets[_key(sheet)] = (sheet, xml_id, rel)
+                    break
+    return sheets
+
+
+def listed_language_files(module_dir: Path):
+    """{_key(file): (manifest path, why that manifest loads nothing or None)} for this module.
+    The engine finds each `language_data.xml` anywhere under ModuleData/Languages
+    (LocalizedTextManager.LoadLocalizationXmls) and joins a `<LanguageFile>` or `<VoiceFile>`
+    `xml_path` to ModuleData/Languages itself as a string (`modulePath + "/" + xml_path`), not to
+    the manifest's own folder (LanguageData.Deserialize). A manifest is itself scanned, so it is
+    listed as its own entry; one it cannot parse, or whose root is not a <LanguageData> with an
+    id, loads nothing and carries the reason as the second item."""
+    languages = Path(module_dir) / "ModuleData" / "Languages"
+    listed = {}
+    if not languages.is_dir():
+        return listed
+    for manifest in sorted(p for p in languages.rglob("*")
+                           if p.name.lower() == "language_data.xml" and p.is_file()):
+        key = _key(manifest)
+        listed[key] = (manifest, None)
+        try:
+            root = ET.parse(manifest).getroot()
+        except (ET.ParseError, OSError) as exc:
+            listed[key] = (manifest, f"it does not parse ({exc})")
+            continue
+        if root.tag != "LanguageData" or not root.get("id"):
+            listed[key] = (manifest, "its root is not a <LanguageData> with a non-empty id")
+            continue
+        for entry in root:
+            rel = entry.get("xml_path")
+            if entry.tag in ("LanguageFile", "VoiceFile") and rel:
+                file_key = _key(languages / rel.lstrip("/\\"))
+                listed[file_key] = (manifest, listed[file_key][1] if file_key in listed else None)
+    return listed
+
+
 def schema_path(module_dir: Path, xml_id: str, game_schemas: Path):
     """The XSD the engine validates `xml_id` with, or None when there is none."""
     local = Path(module_dir) / "ModuleData" / "XmlSchemas" / f"{xml_id}.xsd"
@@ -246,7 +327,8 @@ def module_of(path):
 
 def run(modules, game_schemas: Path, only=None) -> dict:
     """Validate every registered file of `modules` (or only those in `only`)."""
-    report = {"checked": [], "failed": [], "no_schema": [], "missing": [], "not_registered": []}
+    report = {"checked": [], "failed": [], "no_schema": [], "missing": [], "not_registered": [],
+              "language_file": [], "stylesheet": []}
     wanted = {_key(p): p for p in only} if only is not None else None
     registrations, submodules = [], set()
     for module_dir in modules:
@@ -261,7 +343,22 @@ def run(modules, game_schemas: Path, only=None) -> dict:
 
     if wanted is not None:
         known = {_key(path) for path, _, _ in registrations} | submodules
-        report["not_registered"] = [str(p) for k, p in wanted.items() if k not in known]
+        unknown = {k: p for k, p in wanted.items() if k not in known}
+        sheets, languages = {}, {}
+        if unknown:  # a file a registration loads needs neither scan
+            for module_dir in modules:
+                sheets.update(applied_stylesheets(module_dir))
+                languages.update(listed_language_files(module_dir))
+        for key, path in unknown.items():
+            if key in languages:
+                manifest, broken = languages[key]
+                report["language_file"].append({"file": str(path), "manifest": str(manifest),
+                                                "broken": broken})
+            elif key in sheets:
+                _, xml_id, rel = sheets[key]
+                report["stylesheet"].append({"file": str(path), "id": xml_id, "path": rel})
+            else:
+                report["not_registered"].append(str(path))
         registrations = [r for r in registrations if _key(r[0]) in wanted]
 
     for path, xml_id, module_dir in registrations:
@@ -277,7 +374,16 @@ def run(modules, game_schemas: Path, only=None) -> dict:
     return report
 
 
-def _print(report: dict) -> None:
+def _xml_in_own_languages_folder(path) -> bool:
+    """True for an .xml file inside its module's own ModuleData/Languages, the only folder the engine
+    scans for manifests (LocalizedTextManager.LoadLocalizationXmls), however the path is spelled."""
+    resolved = Path(path).resolve()
+    module = module_of(resolved)
+    return (resolved.suffix.lower() == ".xml" and module is not None
+            and (module / "ModuleData" / "Languages").resolve() in resolved.parents)
+
+
+def _print(report: dict, by_name: bool) -> None:
     for rec in report["failed"]:
         print(f"FAIL  {rec['file']}  ({Path(rec['schema']).name})")
         for line in rec["errors"][:MAX_ERRORS_SHOWN]:
@@ -287,20 +393,47 @@ def _print(report: dict) -> None:
             print(f"      ... {extra} more")
     for line in report["missing"]:
         print(f"MISSING  {line}")
+    faults = 0
+    for rec in report["language_file"]:
+        if rec.get("broken"):
+            faults += 1
+            print(f"LANGUAGE FILE  {rec['file']}: the engine loads nothing from it: {rec['broken']} "
+                  f"(a real fault)")
+            continue
+        print(f"LANGUAGE FILE  {rec['file']}: loaded through {Path(rec['manifest']).name} "
+              f"({rec['manifest']}); the engine checks it against no schema")
+    for rec in report["stylesheet"]:
+        print(f"STYLESHEET  {rec['file']}: queued for the <XmlName id=\"{rec['id']}\" "
+              f"path=\"{rec['path']}\"> registration (MBObjectManager.HandleXsltList) and applied to "
+              f"the data merged before it; the engine checks it against no schema")
     for path in report["not_registered"]:
-        print(f"NOT REGISTERED  {path}: no scanned SubModule.xml <XmlName> loads it, so the engine "
-              f"never reads or validates it (expected for TAOM's own C#-read data files)")
+        if _xml_in_own_languages_folder(path):
+            faults += 1
+            reason = ("it sits under ModuleData/Languages but no language_data.xml the engine loads "
+                      "lists it, so the engine never loads it (a real fault)")
+        else:
+            reason = ("if the engine reads it at all, it is only by fixed name or a project.mbproj "
+                      "row, which this tool does not check (expected for TAOM's own C#-read data files)")
+        print(f"NOT REGISTERED  {path}: no scanned SubModule.xml <XmlName> or language manifest "
+              f"loads it; {reason}")
     if report["no_schema"]:
         ids = sorted({r["id"] for r in report["no_schema"]})
         print(f"NO SCHEMA  {len(report['no_schema'])} file(s) under ids the engine ships no XSD for: "
               f"{', '.join(ids)}")
     bad = bool(report["failed"] or report["missing"])
+    # The three buckets fill only from files passed by name; a whole-module run classifies none.
+    buckets = (f", {len(report['language_file'])} language file(s), {len(report['stylesheet'])} "
+               f"stylesheet(s), {len(report['not_registered'])} not registered, {faults} real fault(s) "
+               f"named above") if by_name else ""
     print(f"\n{'FAIL' if bad else 'PASS'}: {len(report['checked'])} file(s) validated, "
-          f"{len(report['failed'])} failed, {len(report['missing'])} registration(s) resolve to nothing, "
-          f"{len(report['not_registered'])} not registered")
+          f"{len(report['failed'])} failed, {len(report['missing'])} registration(s) resolve to nothing"
+          f"{buckets}")
 
 
 def main(argv=None) -> int:
+    for stream in (sys.stdout, sys.stderr):  # a path the console cannot encode must not crash the run
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="backslashreplace")
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("files", nargs="*",
@@ -364,7 +497,7 @@ def main(argv=None) -> int:
             return 2
 
     report = run(unique, schemas, only)
-    _print(report)
+    _print(report, by_name=only is not None)
     return 1 if report["failed"] or report["missing"] else 0
 
 

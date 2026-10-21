@@ -278,6 +278,13 @@ burying a twelve-row change in a 106,152-line diff that no reviewer can read.
   file shape rather than the bytes on disk), one level lower down. Those two miss rows; this one misses
   whole files.
 - **Source:** 2026-08-14 localization and party-template balance pass.
+- **Update (2026-10-21):** the counts above are the 2026-08-14 shape and no longer hold. Measured per file
+  type, the same in all 12 languages: 18 of the 22 `std_taom_*` types are doubled CR, three mix doubled and
+  plain CRLF line by line, and `std_taom_module_strings_*` is stored as LF with a blank line after all but 61 of its 3,153 rows
+  since the merge `85cbd20c8` (2026-10-19). `language_data.xml` is LF in git, and no file under `Languages/`
+  has a BOM (0 of 277). The rule is unchanged and now carried by
+  [TRANSLATOR_GUIDE](../../localization/TRANSLATOR_GUIDE.md) "Line endings and encoding": measure, capture each
+  line's own terminator, re-emit it.
 
 ---
 

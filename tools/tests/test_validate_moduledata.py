@@ -2935,6 +2935,14 @@ class SchemaInvalidPassTests(unittest.TestCase):
         self.assertEqual(vm.SCHEMA_CODE, "SCHEMA_INVALID")
 
     @unittest.skipUnless(vx.HAVE_LXML, "lxml not installed")
+    def test_rerun_hint_is_the_repo_relative_path(self):
+        _write(self.clans, _GOOD_CLANS.replace(' initial_home_settlement="Settlement.town_A1"', ""))
+        with mock.patch.object(vm, "REPO_ROOT", Path(self._tmp.name)):
+            issues = self._issues()
+        self.assertTrue(issues[0].message.endswith(
+            "python tools/validate_xml_schemas.py Mod/ModuleData/characters/clans.xml"), issues[0].message)
+
+    @unittest.skipUnless(vx.HAVE_LXML, "lxml not installed")
     def test_clean_module_has_no_issues(self):
         self.assertEqual(self._issues(), [])
 

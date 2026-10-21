@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import validate_xml_schemas as vx  # noqa: E402
 
-# CI's tools-tests job installs nothing, so lxml is absent there. Registration and
+# `/verify` Step 2b runs these tests and does not require lxml. Registration and
 # schema-choice logic is stdlib and always runs; only what compiles or applies an XSD
 # needs lxml.
 NEEDS_LXML = unittest.skipUnless(vx.HAVE_LXML, "lxml not installed")
@@ -657,6 +657,269 @@ class LiveTaomMapRegistrationTests(unittest.TestCase):
         entries, missing = vx.registered_files(module)
         self.assertEqual(missing, [], "\n" + "\n".join(missing))
         self.assertEqual(sorted({xml_id for _, xml_id in entries}), self.EXPECTED_IDS)
+
+
+LANGUAGE_DATA = """<?xml version="1.0" encoding="utf-8"?>
+<LanguageData id="Test">
+  <!-- <LanguageFile xml_path="XX/commented.xml" /> -->
+  <LanguageFile xml_path="XX/listed.xml" />
+  <LanguageFile xml_path="" />
+</LanguageData>
+"""
+
+
+class LoaderBucketTests(_Tree):
+    """Files the engine loads WITHOUT an <XmlName>: language files through language_data.xml
+    (LocalizedTextManager.LoadLocalizationXmls, LanguageData.Deserialize) and stylesheets
+    through MBObjectManager.HandleXsltList. Each is named for what it is, not NOT REGISTERED."""
+
+    def _languages(self, manifest=LANGUAGE_DATA):
+        langs = self.md / "Languages"
+        _write(langs / "XX" / "language_data.xml", manifest)
+        listed = langs / "XX" / "listed.xml"
+        unlisted = langs / "XX" / "unlisted.xml"
+        commented = langs / "XX" / "commented.xml"
+        for p in (listed, unlisted, commented):
+            _write(p, "<base/>")
+        return listed, unlisted, commented, langs / "XX" / "language_data.xml"
+
+    def test_a_listed_language_file_is_a_language_file(self):
+        listed, _, _, _ = self._languages()
+        report = vx.run([self.module], self.schemas, only=[listed])
+        self.assertEqual(report["not_registered"], [])
+        self.assertEqual([Path(r["file"]).name for r in report["language_file"]], ["listed.xml"])
+        self.assertEqual(report["checked"], [])
+
+    def test_an_unlisted_or_commented_language_file_stays_not_registered(self):
+        _, unlisted, commented, _ = self._languages()
+        report = vx.run([self.module], self.schemas, only=[unlisted, commented])
+        self.assertEqual(report["language_file"], [])
+        self.assertEqual(sorted(Path(p).name for p in report["not_registered"]),
+                         ["commented.xml", "unlisted.xml"])
+
+    def test_the_language_manifest_itself_is_a_language_file(self):
+        _, _, _, manifest = self._languages()
+        report = vx.run([self.module], self.schemas, only=[manifest])
+        self.assertEqual(report["not_registered"], [])
+        self.assertEqual(len(report["language_file"]), 1)
+
+    def test_xml_path_is_relative_to_the_languages_folder(self):
+        """LanguageData.Deserialize prefixes modulePath (ModuleData/Languages), not the
+        folder holding language_data.xml, so a sibling spelled bare is not the listed file."""
+        listed, _, _, _ = self._languages()
+        bare = listed.parent / "XX" / "listed.xml"
+        _write(bare, "<base/>")
+        report = vx.run([self.module], self.schemas, only=[bare])
+        self.assertEqual(len(report["not_registered"]), 1)
+
+    def test_a_voice_file_a_manifest_lists_is_a_language_file(self):
+        """LanguageData.Deserialize also records <VoiceFile xml_path>, and LocalizedVoiceManager
+        loads it, so it is not the 'real fault' an unlisted Languages/ file is."""
+        listed, _, _, _ = self._languages(
+            LANGUAGE_DATA.replace('<LanguageFile xml_path="XX/listed.xml"',
+                                  '<VoiceFile xml_path="XX/listed.xml"'))
+        report = vx.run([self.module], self.schemas, only=[listed])
+        self.assertEqual(report["not_registered"], [])
+        self.assertEqual([Path(r["file"]).name for r in report["language_file"]], ["listed.xml"])
+
+    def test_an_xml_path_with_a_leading_slash_is_still_the_listed_file(self):
+        """LanguageData.Deserialize joins modulePath + "/" + xml_path as strings, so a leading
+        slash still opens a file under ModuleData/Languages; pathlib would root it at the drive."""
+        listed, _, _, _ = self._languages(
+            LANGUAGE_DATA.replace('xml_path="XX/listed.xml"', 'xml_path="/XX/listed.xml"'))
+        report = vx.run([self.module], self.schemas, only=[listed])
+        self.assertEqual([Path(r["file"]).name for r in report["language_file"]], ["listed.xml"])
+
+    def test_a_manifest_without_an_id_lists_nothing(self):
+        """LanguageData.LoadFromXml skips a language_data.xml with no id, so the files it
+        names are never loaded and stay NOT REGISTERED."""
+        listed, _, _, _ = self._languages(LANGUAGE_DATA.replace(' id="Test"', ""))
+        report = vx.run([self.module], self.schemas, only=[listed])
+        self.assertEqual(report["language_file"], [])
+        self.assertEqual([Path(p).name for p in report["not_registered"]], ["listed.xml"])
+
+    def test_a_mixed_call_still_classes_the_language_file(self):
+        """A registered file in the call must not switch the language scan off for the rest."""
+        listed, _, _, _ = self._languages()
+        report = vx.run([self.module], self.schemas, only=[self.clans, listed])
+        self.assertEqual([Path(r["file"]).name for r in report["language_file"]], ["listed.xml"])
+        self.assertEqual([Path(r["file"]).name for r in report["checked"]], ["clans.xml"])
+
+    def test_only_registered_files_skip_the_language_and_stylesheet_scans(self):
+        self._languages()
+        with mock.patch.object(vx, "listed_language_files", side_effect=AssertionError("scanned")), \
+                mock.patch.object(vx, "applied_stylesheets", side_effect=AssertionError("scanned")):
+            report = vx.run([self.module], self.schemas, only=[self.clans])
+        self.assertEqual([Path(r["file"]).name for r in report["checked"]], ["clans.xml"])
+
+    def test_a_manifest_whose_root_is_not_language_data_is_broken(self):
+        _, _, _, manifest = self._languages(LANGUAGE_DATA.replace("LanguageData", "Other"))
+        report = vx.run([self.module], self.schemas, only=[manifest])
+        self.assertEqual(len(report["language_file"]), 1)
+        self.assertIn("its root is not a <LanguageData>", report["language_file"][0]["broken"])
+
+    def test_stylesheet_beside_a_registered_file_is_a_stylesheet(self):
+        for ext in (".xsl", ".xslt"):
+            with self.subTest(ext=ext):
+                sheet = self.clans.with_suffix(ext)
+                _write(sheet, "<xsl:stylesheet/>")
+                report = vx.run([self.module], self.schemas, only=[sheet])
+                self.assertEqual(report["not_registered"], [])
+                self.assertEqual([Path(r["file"]).name for r in report["stylesheet"]],
+                                 [sheet.name])
+                self.assertEqual(report["stylesheet"][0]["id"], "Factions")
+                sheet.unlink()
+
+    def test_stylesheet_beside_a_folder_member_is_a_stylesheet(self):
+        sheet = self.md / "more_clans" / "north.xsl"
+        _write(sheet, "<xsl:stylesheet/>")
+        report = vx.run([self.module], self.schemas, only=[sheet])
+        self.assertEqual(len(report["stylesheet"]), 1)
+
+    def test_xslt_only_registration_stylesheet_is_a_stylesheet(self):
+        _write(self.module / "SubModule.xml", SUBMODULE.replace("more_clans", "spclans"))
+        sheet = self.md / "spclans.xslt"
+        _write(sheet, "<xsl:stylesheet/>")
+        report = vx.run([self.module], self.schemas, only=[sheet])
+        self.assertEqual(len(report["stylesheet"]), 1)
+
+    def test_xslt_is_ignored_when_an_xsl_also_exists(self):
+        """HandleXsltList returns at the first existing of `.xsl`, `.xslt`."""
+        _write(self.clans.with_suffix(".xsl"), "<xsl:stylesheet/>")
+        shadowed = self.clans.with_suffix(".xslt")
+        _write(shadowed, "<xsl:stylesheet/>")
+        report = vx.run([self.module], self.schemas, only=[shadowed])
+        self.assertEqual(report["stylesheet"], [])
+        self.assertEqual(len(report["not_registered"]), 1)
+
+    def test_a_stylesheet_nothing_registers_stays_not_registered(self):
+        stray = self.md / "orphan.xsl"
+        _write(stray, "<xsl:stylesheet/>")
+        report = vx.run([self.module], self.schemas, only=[stray])
+        self.assertEqual(report["stylesheet"], [])
+        self.assertEqual(len(report["not_registered"]), 1)
+
+    def test_a_stylesheet_beside_an_unregistered_xml_stays_not_registered(self):
+        stray = self.md / "custom.xsl"
+        _write(self.md / "custom.xml", GOOD_CLANS)
+        _write(stray, "<xsl:stylesheet/>")
+        report = vx.run([self.module], self.schemas, only=[stray])
+        self.assertEqual(len(report["not_registered"]), 1)
+
+
+@NEEDS_LXML
+class LoaderBucketCliTests(_Tree):
+    _languages = LoaderBucketTests._languages
+
+    def _cli(self, *files):
+        return _run_main("--module", str(self.module), "--schemas", str(self.schemas),
+                         *map(str, files))
+
+    def test_a_manifest_that_does_not_parse_is_named_a_fault_not_loaded(self):
+        """LocalizedTextManager.LoadXmlFile asserts and loads nothing from a manifest it cannot
+        parse, so the tool must not call that manifest loaded."""
+        _, _, _, manifest = self._languages(LANGUAGE_DATA.replace("</LanguageData>", ""))
+        code, text = self._cli(manifest)
+        line = next(l for l in text.splitlines() if "language_data.xml" in l and l.startswith("LANGUAGE FILE"))
+        self.assertIn("the engine loads nothing from it", line)
+        self.assertIn("a real fault", line)
+        self.assertNotIn("loaded through", line)
+        self.assertEqual(code, 0, "a real fault is reported, never a failed run (exit code unchanged)")
+        self.assertIn("1 real fault(s) named above", text.splitlines()[-1])
+
+    def test_a_file_an_id_less_manifest_lists_stays_not_registered_with_the_fault(self):
+        listed, _, _, _ = self._languages(LANGUAGE_DATA.replace(' id="Test"', ""))
+        _, text = self._cli(listed)
+        line = next(l for l in text.splitlines() if l.startswith("NOT REGISTERED"))
+        self.assertIn("no language_data.xml the engine loads lists it", line)
+
+    def test_an_id_less_manifest_passed_by_name_prints_its_root_reason_as_a_fault(self):
+        _, _, _, manifest = self._languages(LANGUAGE_DATA.replace(' id="Test"', ""))
+        code, text = self._cli(manifest)
+        line = next(l for l in text.splitlines()
+                    if l.startswith("LANGUAGE FILE") and "language_data.xml" in l)
+        self.assertIn("its root is not a <LanguageData> with a non-empty id", line)
+        self.assertIn("(a real fault)", line)
+        self.assertEqual(code, 0)
+        self.assertIn("1 real fault(s) named above", text.splitlines()[-1])
+
+    def test_a_non_xml_file_under_languages_is_not_a_fault(self):
+        notes = self.md / "Languages" / "ids_plain.txt"
+        _write(notes, "ids")
+        _, text = self._cli(notes)
+        line = next(l for l in text.splitlines() if l.startswith("NOT REGISTERED"))
+        self.assertNotIn("a real fault", line)
+
+    def test_a_whole_module_run_prints_no_bucket_counts(self):
+        code, text = _run_main("--module", str(self.module), "--schemas", str(self.schemas))
+        self.assertEqual(code, 0, text)
+        self.assertNotIn("language file(s)", text.splitlines()[-1])
+
+    def test_a_real_fault_line_gives_one_reason_and_a_data_line_none_of_the_fault(self):
+        _, unlisted, _, _ = self._languages()
+        csharp = self.md / "careers.xml"
+        _write(csharp, "<Careers/>")
+        _, text = self._cli(unlisted, csharp)
+        lines = text.splitlines()
+        unlisted_line = next(l for l in lines if l.startswith("NOT REGISTERED") and "unlisted.xml" in l)
+        csharp_line = next(l for l in lines if l.startswith("NOT REGISTERED") and "careers.xml" in l)
+        self.assertNotIn("expected for", unlisted_line)
+        self.assertNotIn("a real fault", csharp_line)
+
+    def test_a_relative_path_inside_languages_still_gets_the_fault(self):
+        _, unlisted, _, _ = self._languages()
+        cwd = os.getcwd()
+        os.chdir(self.md)
+        try:  # restore before tearDown deletes the tree: Windows cannot delete the current folder
+            _, text = self._cli(Path("Languages") / "XX" / "unlisted.xml")
+        finally:
+            os.chdir(cwd)
+        line = next(l for l in text.splitlines() if l.startswith("NOT REGISTERED"))
+        self.assertIn("a real fault", line)
+
+    def test_a_languages_folder_elsewhere_in_moduledata_is_not_the_fault(self):
+        """The engine scans only <module>/ModuleData/Languages (LocalizedTextManager:91)."""
+        other = self.md / "career_system" / "Languages" / "foo.xml"
+        _write(other, "<base/>")
+        _, text = self._cli(other)
+        line = next(l for l in text.splitlines() if l.startswith("NOT REGISTERED"))
+        self.assertNotIn("a real fault", line)
+
+    def test_a_path_the_console_cannot_encode_does_not_crash_the_run(self):
+        moved = Path(self._tmp.name) / "Мод" / "TestMod"
+        os.makedirs(moved.parent, exist_ok=True)
+        os.replace(self.module, moved)
+        self.module, self.md = moved, moved / "ModuleData"
+        listed, _, _, _ = self._languages()
+        raw = io.BytesIO()
+        out = io.TextIOWrapper(raw, encoding="cp1252")
+        with mock.patch.object(sys, "stdout", out):
+            code = vx.main(["--module", str(self.module), "--schemas", str(self.schemas), str(listed)])
+            out.flush()
+        self.assertEqual(code, 0, raw.getvalue())
+
+    def test_lines_and_summary_count_each_bucket(self):
+        listed, unlisted, _, _ = self._languages()
+        sheet = self.clans.with_suffix(".xsl")
+        _write(sheet, "<xsl:stylesheet/>")
+        csharp = self.md / "careers.xml"
+        _write(csharp, "<Careers/>")
+        code, text = self._cli(listed, unlisted, sheet, csharp)
+        self.assertEqual(code, 0, text)
+        lines = text.splitlines()
+        self.assertTrue(any(l.startswith("LANGUAGE FILE") and "listed.xml" in l
+                            and "language_data.xml" in l for l in lines), text)
+        self.assertTrue(any(l.startswith("STYLESHEET") and "clans.xsl" in l
+                            and "Factions" in l for l in lines), text)
+        unlisted_line = next(l for l in lines if l.startswith("NOT REGISTERED") and "unlisted.xml" in l)
+        self.assertIn("no language_data.xml the engine loads lists it", unlisted_line)
+        self.assertIn("1 real fault(s) named above", lines[-1])
+        csharp_line = next(l for l in lines if l.startswith("NOT REGISTERED") and "careers.xml" in l)
+        self.assertIn("only by fixed name or a project.mbproj row", csharp_line)
+        self.assertNotIn("never reads or validates", text)
+        self.assertIn("1 language file(s)", lines[-1])
+        self.assertIn("1 stylesheet(s)", lines[-1])
+        self.assertIn("2 not registered", lines[-1])
 
 
 if __name__ == "__main__":

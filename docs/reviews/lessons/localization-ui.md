@@ -797,6 +797,12 @@ checked `write_back` only.
 - **Prevent:** `sync_missing_ids` now keeps each line's own terminator, with a `\r\r\n` test. A lesson that ends in
   "follow-up" gets an issue or a failing test the same day.
 - **Source:** `docs/reviews/rca-hill-troll-and-loc-sweep-2026-09-25.md` finding 10.
+- **Recurrence (2026-10-21):** the tool gap behind the next class was marked follow-up twice with no issue:
+  MS7-4 in `rca-mouth-of-sauron-gear-2026-10-04.md` and finding 11 in `rca-generated-lord-kits-2026-10-06.md`
+  (`validate_xml_schemas.py` printing NOT REGISTERED for files the engine does load). The 2026-10-19
+  line-ending follow-up was half done: the merge `85cbd20c8` rewrote the 12 module strings files and the
+  RCA noted it, but the guide never described the blank line after almost every row until this date. Rule: a
+  follow-up with no issue is a note; file the issue the day the RCA is written.
 
 ### Gate the translation cache, not only the rows (2026-09-25)
 The writing-system gate read the repo's language files, but `tools/translation_cache/<lang>.json` holds the
