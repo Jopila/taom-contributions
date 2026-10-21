@@ -135,6 +135,7 @@ public class CombatMechanicsModelInvariantsTests
     [DataRow("CalculateRemainingMomentum", "_combat.CleaveMomentum(attacker, originalMomentum, in collisionData)")]
     [DataRow("DecideWeaponCollisionReaction", "_combat.CollisionReaction(attacker, momentumRemaining, in collisionData, colReaction)")]
     [DataRow("DecideAgentKnockedDownByBlow", "_combat.ChargeKnockdown(attackerAgent, victimAgent, in collisionData, in blow)")]
+    [DataRow("DecideAgentKnockedDownByBlow", "_combat.ShieldBashKnockdown(attackerAgent, victimAgent, in collisionData, attackerWeapon)")]
     [DataRow("DecideAgentKnockedDownByBlow", "SignatureStrikeVerdicts.Decide(_signatureStrikes, _signatureRoster, attackerAgent, victimAgent, in collisionData, in blow, knockdown: true)")]
     [DataRow("DecideAgentKnockedBackByBlow", "SignatureStrikeVerdicts.Decide(_signatureStrikes, _signatureRoster, attackerAgent, victimAgent, in collisionData, in blow, knockdown: false)")]
     public void ModelSource_HandsEachSeamItsOwnAgents(string overrideName, string call)

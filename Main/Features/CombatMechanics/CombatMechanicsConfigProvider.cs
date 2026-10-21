@@ -75,6 +75,7 @@ public class CombatMechanicsConfigProvider : ICombatMechanicsConfigProvider
             ChargeDamage = ValidateChargeDamage(parsed.ChargeDamage, ref rejected),
             Creatures = ValidateCreatures(parsed.Creatures, ref rejected),
             ShieldPenetration = ValidateShieldPenetration(parsed.ShieldPenetration, ref rejected),
+            ShieldBash = ValidateShieldBash(parsed.ShieldBash, ref rejected),
             RaceModifiers = ValidateRaceModifiers(parsed.RaceModifiers, ref rejected),
         };
 
@@ -290,6 +291,37 @@ public class CombatMechanicsConfigProvider : ICombatMechanicsConfigProvider
             ItemIds = CleanIdList(parsed.ItemIds, defaults.ItemIds, "shieldPenetration.itemIds", ref rejected),
             RuntimeShieldDamageCorrectionDivisor = CheckFiniteAboveExclusiveMin(parsed.RuntimeShieldDamageCorrectionDivisor, 0f, 1f, defaults.RuntimeShieldDamageCorrectionDivisor, "shieldPenetration.runtimeShieldDamageCorrectionDivisor", ref rejected),
         };
+    }
+
+    private ShieldBashConfig ValidateShieldBash(ShieldBashConfig parsed, ref bool rejected)
+    {
+        var defaults = new ShieldBashConfig();
+        if (parsed == null)
+        {
+            _logger.LogWarning("CombatMechanicsConfigProvider: shieldBash section is null, reverting to defaults");
+            rejected = true;
+            return defaults;
+        }
+
+        var sanitized = new ShieldBashConfig
+        {
+            Enabled = parsed.Enabled,
+            MinChancePercent = CheckFiniteInRange(parsed.MinChancePercent, 0f, 100f, defaults.MinChancePercent, "shieldBash.minChancePercent", ref rejected),
+            MaxChancePercent = CheckFiniteInRange(parsed.MaxChancePercent, 0f, 100f, defaults.MaxChancePercent, "shieldBash.maxChancePercent", ref rejected),
+            KickChanceFactor = CheckFiniteInRange(parsed.KickChanceFactor, 0f, 1f, defaults.KickChanceFactor, "shieldBash.kickChanceFactor", ref rejected),
+            PlayerVictimChanceFactor = CheckFiniteInRange(parsed.PlayerVictimChanceFactor, 0f, 1f, defaults.PlayerVictimChanceFactor, "shieldBash.playerVictimChanceFactor", ref rejected),
+        };
+
+        // A swapped band would clamp every lead to one end and answer for the other.
+        if (sanitized.MinChancePercent > sanitized.MaxChancePercent)
+        {
+            _logger.LogWarning($"CombatMechanicsConfigProvider: shieldBash.minChancePercent={sanitized.MinChancePercent} exceeds maxChancePercent={sanitized.MaxChancePercent}, reverting both to defaults {defaults.MinChancePercent}/{defaults.MaxChancePercent}");
+            sanitized.MinChancePercent = defaults.MinChancePercent;
+            sanitized.MaxChancePercent = defaults.MaxChancePercent;
+            rejected = true;
+        }
+
+        return sanitized;
     }
 
     private List<string> ValidateWeaponClasses(List<string> parsed, List<string> fallback, ref bool rejected)

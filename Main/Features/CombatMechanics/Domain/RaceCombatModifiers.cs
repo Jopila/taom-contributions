@@ -10,7 +10,8 @@ public class RaceCombatModifiers
     // Skill points added to the defender's side of the crush-through skill delta.
     public float CtbDefenseBonus { get; set; }
 
-    // Multiplies the victim's knockdown resistance in the charge-knockdown decision (dwarf 2.5).
+    // Multiplies the victim's knockdown resistance in the charge-knockdown decision (dwarf 2.5); it also divides the chance of
+    // Hammerhand's shield bash and kick knockdown. A row of 0 means no resistance.
     public float KnockdownResistanceMultiplier { get; set; } = 1f;
 
     // Multiplies CalculateStaggerThresholdDamage; feeds vanilla shrug-off via the registered model.

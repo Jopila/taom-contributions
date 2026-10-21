@@ -11,6 +11,9 @@ public interface ICombatMechanicsSettingsProvider
     bool CreatureCleaveEnabled { get; }
     bool CreatureUnstoppableEnabled { get; }
     bool ChargeKnockdownEnabled { get; }
+
+    /// <summary>Hammerhand (#895), the shield bash and kick knockdown; folds the master.</summary>
+    bool ShieldBashKnockdownEnabled { get; }
     bool ShieldPenetrationEnabled { get; }
     bool RaceCombatModifiersEnabled { get; }
 

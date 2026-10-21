@@ -60,6 +60,13 @@
     "runtimeShieldDamageCorrectionEnabled": false,
     "runtimeShieldDamageCorrectionDivisor": 0.3
   },
+  "shieldBash": {
+    "enabled": true,
+    "minChancePercent": 10,
+    "maxChancePercent": 75,
+    "kickChanceFactor": 0.5,
+    "playerVictimChanceFactor": 0.5
+  },
   "raceModifiers": {
     "dwarf": { "ctbDefenseBonus": 15, "knockdownResistanceMultiplier": 2.5, "staggerThresholdMultiplier": 1.5 },
     "elf": { "ctbAttackBonus": 20, "removeNonOverheadPenalty": true },

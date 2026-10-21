@@ -5,6 +5,7 @@ using NSubstitute;
 using TAOM.Core.Domain;
 using TAOM.Core.Infrastructure;
 using TAOM.Core.Logging;
+using TAOM.Features.CareerSystem.Abilities;
 using TAOM.Features.CombatMechanics;
 using TAOM.Features.CombatMechanics.Hooks;
 
@@ -13,7 +14,7 @@ namespace TAOM.Tests.Features.CombatMechanics;
 /// <summary>
 /// <c>SubModule</c> resolves <see cref="CombatMechanicsHooks"/> for the campaign damage model and Custom Battle's twin at every game start (#737, #788),
 /// so a registration the container cannot satisfy fails only there, in game. DryIoc's Validate walks the graph without
-/// constructing anything, so this needs no campaign; the three substitutes are the dependencies other modules register.
+/// constructing anything, so this needs no campaign; the four substitutes are the dependencies other modules register.
 /// </summary>
 [TestClass]
 public class CombatMechanicsContainerWiringTests
@@ -25,6 +26,8 @@ public class CombatMechanicsContainerWiringTests
         container.RegisterInstance(Substitute.For<IPathService>());
         container.RegisterInstance(Substitute.For<IModLogger>());
         container.RegisterInstance(Substitute.For<IRaceManager>());
+        // Registered by the CareerSystem feature; Hammerhand's immunity check reads a hero's shrug-off passive through it.
+        container.RegisterInstance(Substitute.For<ICareerAgentStatService>());
         CombatMechanicsIoC.RegisterCombatMechanicsFeature(container);
 
         // The registration is pinned on its own, so the check does not lean on how Validate treats an unregistered type.

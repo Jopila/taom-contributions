@@ -13,7 +13,8 @@ public sealed class CombatMechanicsSettingsProvider : ICombatMechanicsSettingsPr
 
     // HOT PATH: read per melee blow (crush-through, cleave, stagger, shield penetration; the charge
     // knockdown settings only on a horse charge, the one blow CombatMechanicsHooks hands to
-    // ChargeKnockdownService) and per mount stat update. Resolving TaomSettings.Instance walks MCM's
+    // ChargeKnockdownService; the shield-bash toggle only on a bash or kick, the one blow it hands to
+    // ShieldBashKnockdownService) and per mount stat update. Resolving TaomSettings.Instance walks MCM's
     // settings containers, so the reference is cached on its first non-null read and read THROUGH, never
     // snapshotted: MCM edits its one registered instance in place (reset and presets copy values into
     // it), so live MCM edits still apply. Lazy, not in the constructor, so a resolve before MCM is up
@@ -42,6 +43,8 @@ public sealed class CombatMechanicsSettingsProvider : ICombatMechanicsSettingsPr
     public bool CreatureUnstoppableEnabled => MasterEnabled && (Settings?.EnableCreatureUnstoppable ?? _defaults.Creatures.UnstoppableEnabled);
 
     public bool ChargeKnockdownEnabled => MasterEnabled && (Settings?.EnableChargeKnockdown ?? _defaults.ChargeKnockdown.Enabled);
+
+    public bool ShieldBashKnockdownEnabled => MasterEnabled && (Settings?.EnableShieldBashKnockdown ?? _defaults.ShieldBash.Enabled);
 
     public bool ShieldPenetrationEnabled => MasterEnabled && (Settings?.EnableShieldPenetration ?? _defaults.ShieldPenetration.Enabled);
 

@@ -16,7 +16,7 @@ namespace TAOM.Features.CombatMechanics.Models;
 // passives ride along via inheritance — only ONE AgentApplyDamageModel can be registered.
 // Thin boundary per gamemodels.md rule 4: each override is base plus one call per feature, in
 // the order that matters; every feature keeps its extraction, and the hits it declines, in its
-// own Hooks/ facade (CombatMechanicsHooks for the four combat services, #737).
+// own Hooks/ facade (CombatMechanicsHooks for the five combat services, #737).
 public class TaomCombatMechanicsModel : TaomAgentApplyDamageModel
 {
     private readonly CombatMechanicsHooks _combat;
@@ -98,11 +98,13 @@ public class TaomCombatMechanicsModel : TaomAgentApplyDamageModel
         => _combat.StaggerThreshold(defenderAgent, base.CalculateStaggerThresholdDamage(defenderAgent, in blow));
 
     // SignatureStrikes (#605) first: a signature hero's slam floors the struck agent regardless of
-    // the sweet spot. Then the charge rules, which own horse charges only; every other hit is base.
-    // Each facade declines the other's hits, so their order here changes no verdict.
+    // the sweet spot. Then the charge rules, which own horse charges only, then Hammerhand (#895), which
+    // adds a knockdown to a shield bash or kick; every other hit is base. Each facade declines the
+    // others' hits, so their order here changes no verdict.
     public override bool DecideAgentKnockedDownByBlow(Agent attackerAgent, Agent victimAgent, in AttackCollisionData collisionData, WeaponComponentData attackerWeapon, in Blow blow)
         => SignatureStrikeVerdicts.Decide(_signatureStrikes, _signatureRoster, attackerAgent, victimAgent, in collisionData, in blow, knockdown: true)
            ?? _combat.ChargeKnockdown(attackerAgent, victimAgent, in collisionData, in blow)
+           ?? _combat.ShieldBashKnockdown(attackerAgent, victimAgent, in collisionData, attackerWeapon)
            ?? base.DecideAgentKnockedDownByBlow(attackerAgent, victimAgent, in collisionData, attackerWeapon, in blow);
 
     // Vanilla knocks back every kick or bash (MissionCombatMechanicsHelper :63-66) and, when its damage beats

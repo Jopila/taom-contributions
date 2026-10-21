@@ -88,10 +88,11 @@ public class TaomCustomBattleDamageModel : CustomAgentApplyDamageModel
     public override float CalculateStaggerThresholdDamage(Agent defenderAgent, in Blow blow)
         => _combat.StaggerThreshold(defenderAgent, base.CalculateStaggerThresholdDamage(defenderAgent, in blow));
 
-    // SignatureStrikes (#605) first, then the charge rules (horse charges only), then the engine's.
+    // SignatureStrikes (#605) first, then the charge rules (horse charges only), then Hammerhand (#895, a shield bash or kick), then the engine's.
     public override bool DecideAgentKnockedDownByBlow(Agent attackerAgent, Agent victimAgent, in AttackCollisionData collisionData, WeaponComponentData attackerWeapon, in Blow blow)
         => SignatureStrikeVerdicts.Decide(_signatureStrikes, _signatureRoster, attackerAgent, victimAgent, in collisionData, in blow, knockdown: true)
            ?? _combat.ChargeKnockdown(attackerAgent, victimAgent, in collisionData, in blow)
+           ?? _combat.ShieldBashKnockdown(attackerAgent, victimAgent, in collisionData, attackerWeapon)
            ?? base.DecideAgentKnockedDownByBlow(attackerAgent, victimAgent, in collisionData, attackerWeapon, in blow);
 
     // The only true this adds is a signature strike whose profile sets knockBack; every other hit is the engine's.

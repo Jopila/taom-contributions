@@ -41,6 +41,7 @@ public class CombatMechanicsSettingsProviderTests
         Assert.AreEqual(json.HorseChargePenetration, settings.ChargeHorsePenetration, 0.0001f);
         Assert.AreEqual(json.MinPenetrationFactor, settings.ChargeMinPenetrationFactor, 0.0001f);
         Assert.IsTrue(settings.EnableCultureChargeDamage);
+        Assert.AreEqual(new ShieldBashConfig().Enabled, settings.EnableShieldBashKnockdown);
     }
 
     [TestMethod]
@@ -84,6 +85,16 @@ public class CombatMechanicsSettingsProviderTests
     }
 
     [TestMethod]
+    public void NoMcm_ShieldBashKnockdownEnabled_FallsBackToJson()
+    {
+        Assert.IsTrue(_sut.ShieldBashKnockdownEnabled, "the shipped default is on");
+
+        _config.ShieldBash.Enabled = false;
+
+        Assert.IsFalse(_sut.ShieldBashKnockdownEnabled);
+    }
+
+    [TestMethod]
     public void AutoFloor_DerivesFromTheNeutralRatio()
     {
         // The invariant both surfaces enforce: auto >= neutral, so Branch A never fires on a
@@ -124,6 +135,7 @@ public class CombatMechanicsSettingsProviderTests
             (s => s.EnableShieldPenetration = true, p => p.ShieldPenetrationEnabled, true),
             (s => s.EnableRaceCombatModifiers = false, p => p.RaceCombatModifiersEnabled, false),
             (s => s.EnableCultureChargeDamage = false, p => p.CultureChargeDamageEnabled, false),
+            (s => s.EnableShieldBashKnockdown = false, p => p.ShieldBashKnockdownEnabled, false),
             (s => s.CrushThroughMaxChance = 0.25f, p => p.CrushThroughMaxChance, 0.25f),
             (s => s.ChargeAutoKnockdownWeightRatio = 10, p => p.ChargeAutoKnockdownWeightRatio, 10f),
             (s => s.ChargeNeutralWeightRatio = 4f, p => p.ChargeNeutralWeightRatio, 4f),
@@ -201,5 +213,6 @@ public class CombatMechanicsSettingsProviderTests
         Assert.IsFalse(sut.ShieldPenetrationEnabled, nameof(sut.ShieldPenetrationEnabled));
         Assert.IsFalse(sut.RaceCombatModifiersEnabled, nameof(sut.RaceCombatModifiersEnabled));
         Assert.IsFalse(sut.CultureChargeDamageEnabled, nameof(sut.CultureChargeDamageEnabled));
+        Assert.IsFalse(sut.ShieldBashKnockdownEnabled, nameof(sut.ShieldBashKnockdownEnabled));
     }
 }

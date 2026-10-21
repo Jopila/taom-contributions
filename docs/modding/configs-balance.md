@@ -159,12 +159,14 @@ Inverting the two thresholds reverts **both** to defaults, not just the offender
 | `chargeKnockdown.minPenetrationFactor` | float | 0.25 | `[0, 10]` | `CombatMechanicsConfigProvider.cs:151` |
 | `chargeKnockdown.maxPenetrationFactor` | float | 2.5 | `[0, 10]` | `CombatMechanicsConfigProvider.cs:152` |
 | `chargeKnockdown.horseChargePenetration` | float | 0.4 | `[0, 1]` | `CombatMechanicsConfigProvider.cs:153` |
+| `shieldBash.minChancePercent` / `maxChancePercent` | float | 10 / 75 | `[0, 100]`, min at most max (a swapped band reverts both) | `CombatMechanicsConfigProvider.cs:309-310, 318` |
+| `shieldBash.kickChanceFactor` / `playerVictimChanceFactor` | float | 0.5 / 0.5 | `[0, 1]` | `CombatMechanicsConfigProvider.cs:311-312` |
 | `creatures.unstoppableDamageThresholds.<monsterId>` | int | 5 entries, 10 to 30 | `[0, 500]`, else the entry is removed | `CombatMechanicsConfigProvider.cs:227` |
 | `raceModifiers.<race>.ctbAttackBonus` / `ctbDefenseBonus` | float | 15 to 20 | `[0, 300]` | `CombatMechanicsConfigProvider.cs:317-318` |
 | `raceModifiers.<race>.knockdownResistanceMultiplier` / `staggerThresholdMultiplier` | float | 1.25 to 3.0 | `[0, 100]` | `CombatMechanicsConfigProvider.cs:319-320` |
 | `raceModifiers.<race>.swingEnergyBonusFactor` | float | 0.10 to 0.20 | `[0, 10]` | `CombatMechanicsConfigProvider.cs:321` |
 
-The per-mechanic booleans (`enabled`, `crushThrough.skillBasedEnabled`, `chargeKnockdown.enabled`, `creatures.cleaveEnabled`, `creatures.unstoppableEnabled`, `shieldPenetration.enabled`) and the id lists (`monsterCrushMonsterIds`, `orcShieldCrushRaces`, `cleaveMonsterIds`, `weaponClasses`, `itemIds`) sit alongside them. `shieldPenetration.enabled` ships `false`. Lists replace rather than append, so writing one entry deletes the shipped set ([combat-mechanics](../features/combat-mechanics.md)). An unknown `weaponClasses` entry is skipped, not rejected.
+The per-mechanic booleans (`enabled`, `crushThrough.skillBasedEnabled`, `chargeKnockdown.enabled`, `creatures.cleaveEnabled`, `creatures.unstoppableEnabled`, `shieldPenetration.enabled`, `shieldBash.enabled`) and the id lists (`monsterCrushMonsterIds`, `orcShieldCrushRaces`, `cleaveMonsterIds`, `weaponClasses`, `itemIds`) sit alongside them. `shieldPenetration.enabled` ships `false`. Lists replace rather than append, so writing one entry deletes the shipped set ([combat-mechanics](../features/combat-mechanics.md)). An unknown `weaponClasses` entry is skipped, not rejected.
 
 ### race_age_config.json
 
@@ -287,7 +289,7 @@ The shipped file carries **1,735 `<PassiveEffect>` elements across 23 types**, o
 
 <!-- measured: python ElementTree structure walk over troop_weights.xml, troop_resource_costs.xml, special_resources_config.xml, startup_resources_config.xml and taom_career_choices.xml 2026-09-05 -->
 
-The JSON configs nest by object rather than element: `TroopPower.TierPower` and `CasualtyRatios.CulturalSurvivalBonuses` in `battle_balance_config.json`; `crushThrough`, `chargeKnockdown`, `creatures`, `shieldPenetration` and `raceModifiers` in `combat_mechanics_config.json`; `races` in `race_age_config.json`; `defaults`, `culture_overrides` and `clan_overrides` in `initial_child_generation.json`; `fieldDuties`, `interactiveDuties` and `incidents` in `enlistment_duties.json`.
+The JSON configs nest by object rather than element: `TroopPower.TierPower` and `CasualtyRatios.CulturalSurvivalBonuses` in `battle_balance_config.json`; `crushThrough`, `chargeKnockdown`, `creatures`, `shieldPenetration`, `shieldBash` and `raceModifiers` in `combat_mechanics_config.json`; `races` in `race_age_config.json`; `defaults`, `culture_overrides` and `clan_overrides` in `initial_child_generation.json`; `fieldDuties`, `interactiveDuties` and `incidents` in `enlistment_duties.json`.
 
 ## Worked example
 

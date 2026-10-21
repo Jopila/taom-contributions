@@ -81,6 +81,11 @@ public static class RaceAbilityHooks
         return true;
     }
 
+    // The same answer without the count: Hammerhand (#895) asks on every bash or kick only to stay out of the way, and its
+    // question shrugs nothing off, so it must not add to the shrug-offs telemetry.
+    public static bool IsShruggingOff(Agent victim)
+        => Runtime?.StateOf(victim)?.CurrentEffects?.ShrugOffBlows == true;
+
     // Morale models: while a morale floor is live the soldier cannot panic at all.
     public static bool HoldsNerve(Agent agent)
     {

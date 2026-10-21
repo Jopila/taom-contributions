@@ -2019,3 +2019,12 @@ The first gate for "no pair is built outside `FactionSides`" scanned source text
 - **Why missed:** the scan was written from the shapes the author could think of, and a text pattern for a call has no way to know the type of an expression.
 - **Prevent:** gate a construction or a call on what the compiler emitted. `SidePairScanTests` walks the IL of `TAOM.dll` through `IlCallScanner`, keys callers by their outermost type (lambdas and iterators live in nested compiler types), requires the allow-list and the observed callers to match both ways, and carries a control test that compiles each banned shape into the test assembly and demands the scan find it. When a text scan is all that is possible, say plainly in its docstring which shapes it cannot see.
 - **Source:** `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, wave 1 finding 1 and wave 2 finding P1.
+### A gate test must be able to fail when the gate is removed (Hammerhand, 2026-10-20)
+Four facade tests passed null agents and asserted the service was never asked. With any gate clause deleted they still
+passed, because the context builder declined the null agents anyway. The service tests built contexts by hand with the
+gate's input false, so they also could not show that real input always tripped it.
+- **Why missed:** each test proved its clause under input that never reaches the clause.
+- **Prevent:** before trusting a gate test, delete the clause and confirm the test goes red; if it cannot (the decline comes
+  from a later step), pin the gate on the source and test the decision where it is made. Feed at least one test the input
+  the engine actually produces (here a ShrugOff-flagged bash).
+- **Source:** `docs/reviews/rca-hammerhand-2026-10-20.md` rows 1 and 7.

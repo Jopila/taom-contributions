@@ -37,6 +37,7 @@ public class RaceAbilityHooksTests
     {
         Assert.IsNull(RaceAbilityHooks.CrushVerdict(null!, null!, StrikeType.Swing, isPassiveUsage: false));
         Assert.IsFalse(RaceAbilityHooks.ShrugsOff(null!));
+        Assert.IsFalse(RaceAbilityHooks.IsShruggingOff(null!));
         Assert.IsFalse(RaceAbilityHooks.HoldsNerve(null!));
     }
 

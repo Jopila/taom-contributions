@@ -14,6 +14,7 @@ public class CombatMechanicsConfig
     public ChargeDamageConfig ChargeDamage { get; set; } = new ChargeDamageConfig();
     public CreatureCombatConfig Creatures { get; set; } = new CreatureCombatConfig();
     public ShieldPenetrationConfig ShieldPenetration { get; set; } = new ShieldPenetrationConfig();
+    public ShieldBashConfig ShieldBash { get; set; } = new ShieldBashConfig();
 
     // Keyed by race NAME (precedent: raceage/race_age_config.json). Keys are validated against
     // IRaceManager.IsValidRaceName lazily (RaceCombatModifiersResolver) because the race registry
@@ -123,6 +124,21 @@ public class ChargeKnockdownConfig
     // Vanilla SandBox value; also exposed via the GetHorseChargePenetration() override so the
     // engine fall-through path and TAOM's Branch B use the same number.
     public float HorseChargePenetration { get; set; } = 0.4f;
+}
+
+// Hammerhand (#895): the knockdown chance of a shield bash or kick is the attacker's Athletics lead over the victim, in
+// percent, clamped to [MinChancePercent, MaxChancePercent]. The factors scale it afterwards (race resistance divides it first).
+public class ShieldBashConfig
+{
+    public bool Enabled { get; set; } = true;
+    public float MinChancePercent { get; set; } = 10f;
+    public float MaxChancePercent { get; set; } = 75f;
+
+    // An empty-handed kick is the weaker blow.
+    public float KickChanceFactor { get; set; } = 0.5f;
+
+    // The player resists: an AI bash on the main agent falls this fraction as often as on anyone else.
+    public float PlayerVictimChanceFactor { get; set; } = 0.5f;
 }
 
 public class CreatureCombatConfig

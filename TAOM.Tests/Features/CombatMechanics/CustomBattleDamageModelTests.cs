@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using TAOM.Features.CareerSystem.Abilities;
 using TAOM.Features.CombatMechanics;
 using TAOM.Features.CombatMechanics.Hooks;
 using TAOM.Tests.Infrastructure;
@@ -62,7 +63,7 @@ public class CustomBattleDamageModelTests
         ["DecideWeaponCollisionReaction"] = "base,CombatMechanicsHooks.CollisionReaction",
         ["DecideAgentShrugOffBlow"] = "base,CombatMechanicsHooks.IsUnstoppable,RaceAbilityHooks.ShrugsOff",
         ["CalculateStaggerThresholdDamage"] = "base,CombatMechanicsHooks.StaggerThreshold",
-        ["DecideAgentKnockedDownByBlow"] = "SignatureStrikeVerdicts.Decide,CombatMechanicsHooks.ChargeKnockdown,base",
+        ["DecideAgentKnockedDownByBlow"] = "SignatureStrikeVerdicts.Decide,CombatMechanicsHooks.ChargeKnockdown,CombatMechanicsHooks.ShieldBashKnockdown,base",
         ["DecideAgentKnockedBackByBlow"] = "SignatureStrikeVerdicts.Decide,base",
         ["DecideMissileWeaponFlags"] = "base,CombatMechanicsHooks.PenetrationFlags",
         ["CalculateShieldDamage"] = "base,CombatMechanicsHooks.ShieldDamage",
@@ -141,6 +142,7 @@ public class CustomBattleDamageModelTests
     [DataRow("CalculateStaggerThresholdDamage", "_combat.StaggerThreshold(defenderAgent, base.CalculateStaggerThresholdDamage(defenderAgent, in blow))")]
     [DataRow("DecideAgentKnockedDownByBlow", "SignatureStrikeVerdicts.Decide(_signatureStrikes, _signatureRoster, attackerAgent, victimAgent, in collisionData, in blow, knockdown: true)")]
     [DataRow("DecideAgentKnockedDownByBlow", "_combat.ChargeKnockdown(attackerAgent, victimAgent, in collisionData, in blow)")]
+    [DataRow("DecideAgentKnockedDownByBlow", "_combat.ShieldBashKnockdown(attackerAgent, victimAgent, in collisionData, attackerWeapon)")]
     [DataRow("DecideAgentKnockedDownByBlow", "base.DecideAgentKnockedDownByBlow(attackerAgent, victimAgent, in collisionData, attackerWeapon, in blow)")]
     [DataRow("DecideAgentKnockedBackByBlow", "SignatureStrikeVerdicts.Decide(_signatureStrikes, _signatureRoster, attackerAgent, victimAgent, in collisionData, in blow, knockdown: false)")]
     [DataRow("DecideAgentKnockedBackByBlow", "base.DecideAgentKnockedBackByBlow(attackerAgent, victimAgent, in collisionData, attackerWeapon, in blow)")]
@@ -296,7 +298,7 @@ public class CustomBattleDamageModelTests
         var settings = Substitute.For<ICombatMechanicsSettingsProvider>();
         var creature = Substitute.For<ICreatureCombatService>();
         var hooks = new CombatMechanicsHooks(Substitute.For<ICrushThroughService>(), Substitute.For<IChargeKnockdownService>(),
-            creature, Substitute.For<IShieldPenetrationService>(), settings);
+            creature, Substitute.For<IShieldPenetrationService>(), Substitute.For<IShieldBashKnockdownService>(), Substitute.For<ICareerAgentStatService>(), settings);
         return (Activator.CreateInstance(Twin, hooks, null, null)!, settings, creature);
     }
 

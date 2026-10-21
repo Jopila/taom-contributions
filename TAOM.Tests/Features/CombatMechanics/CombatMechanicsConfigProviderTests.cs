@@ -531,4 +531,122 @@ public class CombatMechanicsConfigProviderTests
         Assert.AreEqual(200, c.RaceModifiers["hill_troll"].BaseHitPoints);
         _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("baseHitPoints")));
     }
+
+    [TestMethod]
+    public void GetConfig_MissingFile_ShieldBashDefaults()
+    {
+        var c = _sut.GetConfig().ShieldBash;
+
+        Assert.IsTrue(c.Enabled);
+        Assert.AreEqual(10f, c.MinChancePercent, 0.0001f);
+        Assert.AreEqual(75f, c.MaxChancePercent, 0.0001f);
+        Assert.AreEqual(0.5f, c.KickChanceFactor, 0.0001f);
+        Assert.AreEqual(0.5f, c.PlayerVictimChanceFactor, 0.0001f);
+    }
+
+    [TestMethod]
+    public void GetConfig_ShieldBashValuesInRange_AreKept()
+    {
+        WriteConfig(@"{ ""shieldBash"": { ""enabled"": false, ""minChancePercent"": 0, ""maxChancePercent"": 100, ""kickChanceFactor"": 0, ""playerVictimChanceFactor"": 1 } }");
+
+        var c = _sut.GetConfig().ShieldBash;
+
+        Assert.IsFalse(c.Enabled);
+        Assert.AreEqual(0f, c.MinChancePercent, 0.0001f);
+        Assert.AreEqual(100f, c.MaxChancePercent, 0.0001f);
+        Assert.AreEqual(0f, c.KickChanceFactor, 0.0001f);
+        Assert.AreEqual(1f, c.PlayerVictimChanceFactor, 0.0001f);
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("shieldBash")));
+    }
+
+    private static float ShieldBashField(ShieldBashConfig c, string key) => key switch
+    {
+        "minChancePercent" => c.MinChancePercent,
+        "maxChancePercent" => c.MaxChancePercent,
+        "kickChanceFactor" => c.KickChanceFactor,
+        _ => c.PlayerVictimChanceFactor,
+    };
+
+    [DataTestMethod]
+    [DataRow("minChancePercent", "-1", 10f)]
+    [DataRow("minChancePercent", "101", 10f)]
+    [DataRow("maxChancePercent", "-1", 75f)]
+    [DataRow("maxChancePercent", "100.5", 75f)]
+    [DataRow("kickChanceFactor", "-0.1", 0.5f)]
+    [DataRow("kickChanceFactor", "1.5", 0.5f)]
+    [DataRow("playerVictimChanceFactor", "-0.1", 0.5f)]
+    [DataRow("playerVictimChanceFactor", "2", 0.5f)]
+    public void GetConfig_ShieldBashValueOutOfRange_RevertsThatValueAndWarns(string key, string value, float expectedDefault)
+    {
+        WriteConfig(@"{ ""shieldBash"": { """ + key + @""": " + value + @" } }");
+
+        var c = _sut.GetConfig().ShieldBash;
+
+        Assert.AreEqual(expectedDefault, ShieldBashField(c, key), 0.0001f);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("shieldBash." + key)));
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("contained invalid values")));
+    }
+
+    // Newtonsoft reads the bare tokens NaN and Infinity as floats; a hand-edited file can carry them.
+    [DataTestMethod]
+    [DataRow("minChancePercent", "NaN", 10f)]
+    [DataRow("maxChancePercent", "Infinity", 75f)]
+    [DataRow("maxChancePercent", "-Infinity", 75f)]
+    [DataRow("kickChanceFactor", "NaN", 0.5f)]
+    [DataRow("playerVictimChanceFactor", "Infinity", 0.5f)]
+    public void GetConfig_ShieldBashNonFiniteValue_RevertsThatValueAndWarns(string key, string value, float expectedDefault)
+    {
+        WriteConfig(@"{ ""shieldBash"": { """ + key + @""": " + value + @" } }");
+
+        var c = _sut.GetConfig().ShieldBash;
+
+        Assert.AreEqual(expectedDefault, ShieldBashField(c, key), 0.0001f);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("shieldBash." + key)));
+    }
+
+    [TestMethod]
+    public void GetConfig_ShieldBashSwappedBand_RevertsBothEndsAndWarns()
+    {
+        WriteConfig(@"{ ""shieldBash"": { ""minChancePercent"": 60, ""maxChancePercent"": 20 } }");
+
+        var c = _sut.GetConfig().ShieldBash;
+
+        Assert.AreEqual(10f, c.MinChancePercent, 0.0001f);
+        Assert.AreEqual(75f, c.MaxChancePercent, 0.0001f);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("exceeds maxChancePercent")));
+    }
+
+    [TestMethod]
+    public void GetConfig_ShieldBashEqualEnds_IsAllowed()
+    {
+        WriteConfig(@"{ ""shieldBash"": { ""minChancePercent"": 30, ""maxChancePercent"": 30 } }");
+
+        var c = _sut.GetConfig().ShieldBash;
+
+        Assert.AreEqual(30f, c.MinChancePercent, 0.0001f);
+        Assert.AreEqual(30f, c.MaxChancePercent, 0.0001f);
+    }
+
+    [TestMethod]
+    public void GetConfig_ShieldBashSectionNull_RevertsToDefaultsAndWarns()
+    {
+        WriteConfig(@"{ ""shieldBash"": null }");
+
+        var c = _sut.GetConfig().ShieldBash;
+
+        Assert.IsTrue(c.Enabled);
+        Assert.AreEqual(10f, c.MinChancePercent, 0.0001f);
+        _logger.Received().LogWarning(Arg.Is<string>(s => s.Contains("shieldBash section is null")));
+    }
+
+    [TestMethod]
+    public void GetConfig_ShieldBashSectionAbsent_UsesDefaultsWithoutAWarning()
+    {
+        WriteConfig(@"{ }");
+
+        var c = _sut.GetConfig().ShieldBash;
+
+        Assert.AreEqual(75f, c.MaxChancePercent, 0.0001f);
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(s => s.Contains("shieldBash")));
+    }
 }

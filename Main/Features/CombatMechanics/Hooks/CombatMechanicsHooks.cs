@@ -1,19 +1,23 @@
 using System;
 using System.Collections.Generic;
+using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
+using TAOM.Features.CareerSystem.Abilities;
 using TAOM.Features.CombatMechanics.Domain;
+using TAOM.Features.RaceAbilities.Hooks;
 
 namespace TAOM.Features.CombatMechanics.Hooks;
 
 /// <summary>
-/// What the damage models (<c>TaomCombatMechanicsModel</c> in the campaign, <c>TaomCustomBattleDamageModel</c> in Custom Battle) ask of the four combat services, one call per seam so
+/// What the damage models (<c>TaomCombatMechanicsModel</c> in the campaign, <c>TaomCustomBattleDamageModel</c> in Custom Battle) ask of the five combat services, one call per seam so
 /// each override there stays base plus a delegate (gamemodels.md rule 4; ADR-002's 150 lines, #737). Each method turns the
 /// engine's arguments into the primitives or context its service takes and returns the service's answer; the model keeps
-/// the order the features run in. Two gates live here rather than in a service: <see cref="ChargeKnockdown"/> declines any
-/// hit that is not a horse charge before it builds a context, and <see cref="HorseChargePenetration"/> applies the charge
-/// toggle to the engine's own fall-through. The services keep every other decision, the NaN gates included. Like the model
-/// it came from, it holds only the service references and a read-only enum-name cache.
+/// the order the features run in. Three gates live here rather than in a service: <see cref="ChargeKnockdown"/> and
+/// <see cref="ShieldBashKnockdown"/> each decline a hit that is not their kind before they build a context, and
+/// <see cref="HorseChargePenetration"/> applies the charge toggle to the engine's own fall-through. The services keep every
+/// other decision, the NaN gates included. Like the model it came from, it holds only the service references and a read-only
+/// enum-name cache.
 /// </summary>
 public sealed class CombatMechanicsHooks
 {
@@ -25,6 +29,8 @@ public sealed class CombatMechanicsHooks
     private readonly IChargeKnockdownService _chargeKnockdownService;
     private readonly ICreatureCombatService _creatureCombatService;
     private readonly IShieldPenetrationService _shieldPenetrationService;
+    private readonly IShieldBashKnockdownService _shieldBashKnockdownService;
+    private readonly ICareerAgentStatService _careerAgentStatService;
     private readonly ICombatMechanicsSettingsProvider _settingsProvider;
 
     public CombatMechanicsHooks(
@@ -32,12 +38,16 @@ public sealed class CombatMechanicsHooks
         IChargeKnockdownService chargeKnockdownService,
         ICreatureCombatService creatureCombatService,
         IShieldPenetrationService shieldPenetrationService,
+        IShieldBashKnockdownService shieldBashKnockdownService,
+        ICareerAgentStatService careerAgentStatService,
         ICombatMechanicsSettingsProvider settingsProvider)
     {
         _crushThroughService = crushThroughService;
         _chargeKnockdownService = chargeKnockdownService;
         _creatureCombatService = creatureCombatService;
         _shieldPenetrationService = shieldPenetrationService;
+        _shieldBashKnockdownService = shieldBashKnockdownService;
+        _careerAgentStatService = careerAgentStatService;
         _settingsProvider = settingsProvider;
     }
 
@@ -69,6 +79,18 @@ public sealed class CombatMechanicsHooks
 
         var context = BuildChargeKnockdownContext(attackerAgent, victimAgent, in collisionData, in blow);
         return _chargeKnockdownService.DecideChargeKnockdown(in context);
+    }
+
+    // Hammerhand (#895). One cost gate: only an alternative attack (a bash or kick) between two characters may reach the two skill
+    // reads and the roll. The toggle, the horse charge, the shield class, the humanoid test and the immunity verdict are the
+    // service's. Fighters the engine did not give a character (unreachable: the melee callers dereference both) decline.
+    public bool? ShieldBashKnockdown(Agent attackerAgent, Agent victimAgent, in AttackCollisionData collisionData, WeaponComponentData attackerWeapon)
+    {
+        if (!collisionData.IsAlternativeAttack || attackerAgent?.Character == null || victimAgent?.Character == null)
+            return null;
+
+        var context = BuildShieldBashContext(attackerAgent, victimAgent, in collisionData, attackerWeapon);
+        return _shieldBashKnockdownService.Decide(in context);
     }
 
     public WeaponFlags PenetrationFlags(in MissionWeapon missileWeapon, WeaponFlags missileWeaponFlags)
@@ -139,6 +161,31 @@ public sealed class CombatMechanicsHooks
             hasShrugOffFlag: (blow.BlowFlag & BlowFlags.ShrugOff) != 0,
             hasKnockBackFlag: (blow.BlowFlag & BlowFlags.KnockBack) != 0);
     }
+
+    // The immunities replace the ShrugOff blow flag, which vanilla sets on nearly every bash and kick: creature stagger immunity, a live
+    // race ability that shrugs off blows, and the hero career shrug-off passive (the test TaomAgentApplyDamageModel makes).
+    private ShieldBashContext BuildShieldBashContext(Agent attackerAgent, Agent victimAgent, in AttackCollisionData collisionData, WeaponComponentData attackerWeapon)
+    {
+        var statModel = MissionGameModels.Current.AgentStatCalculateModel;
+        return new ShieldBashContext(
+            isAlternativeAttack: collisionData.IsAlternativeAttack,
+            isHorseCharge: collisionData.IsHorseCharge,
+            attackerWeaponIsNull: attackerWeapon == null,
+            attackerWeaponIsShield: attackerWeapon != null && IsShieldClass(attackerWeapon),
+            attackerIsHuman: attackerAgent.IsHuman,
+            victimIsImmune: _creatureCombatService.IsUnstoppable(victimAgent.Monster?.StringId, collisionData.InflictedDamage)
+                || RaceAbilityHooks.IsShruggingOff(victimAgent)
+                || (victimAgent.IsHero && _careerAgentStatService.ShouldShrugOffBlow((victimAgent.Character as CharacterObject)?.HeroObject?.StringId)),
+            attackerAthletics: statModel.GetEffectiveSkill(attackerAgent, DefaultSkills.Athletics),
+            victimAthletics: statModel.GetEffectiveSkill(victimAgent, DefaultSkills.Athletics),
+            victimRaceId: GetRaceId(victimAgent),
+            victimAbilityResistanceFactor: RaceAbilityHooks.KnockDownResistance(victimAgent, 1f),
+            victimIsPlayer: victimAgent.IsMainAgent,
+            randomRoll: MBRandom.RandomFloat);
+    }
+
+    internal static bool IsShieldClass(WeaponComponentData weapon)
+        => weapon.WeaponClass == WeaponClass.SmallShield || weapon.WeaponClass == WeaponClass.LargeShield;
 
     // Mirrors the engine's own wield resolution in DecideCrushedThrough (offhand, else primary —
     // SandboxAgentApplyDamageModel v1.5.4 :773-787).

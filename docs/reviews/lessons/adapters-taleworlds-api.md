@@ -1336,3 +1336,14 @@ while `MovementLockedState` is set. The AI destination is `GetAIMoveDestination(
 - **Prevent:** for every engine member that feeds a gate or a measurement, read its body (native when it is an icall) and
   at least one vanilla caller, and write the meaning into the plan with the citation.
 - **Source:** `docs/reviews/rca-lost-footing-2026-10-20.md` row 2.
+
+### Before gating on an engine flag, list every writer of it, vanilla first (Hammerhand, 2026-10-20)
+Hammerhand declined a bash carrying `BlowFlags.ShrugOff`, meaning to spare creatures and a dwarf standing fast. Vanilla's
+own shrug-off rule sets the flag whenever damage is at most the stagger threshold, and a bash or kick does 1 to 3 against a
+blunt threshold of 5, so the feature almost never fired.
+- **Why missed:** the plan read the flag's reader and two TAOM writers, not vanilla's writer; an existing doc row made the
+  flag look like a marker of deliberate immunity. Third instance of the class (race abilities R3, Lost Footing row 2).
+- **Prevent:** for every engine flag or stat a plan gates on, list each writer (vanilla first) with its citation and the
+  inputs that reach it in the blow you care about. When the intent is "spare X", ask X's sources directly instead of a
+  shared flag.
+- **Source:** `docs/reviews/rca-hammerhand-2026-10-20.md` row 1.

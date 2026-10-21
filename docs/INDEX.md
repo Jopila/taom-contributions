@@ -47,7 +47,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [gui-sprite-system](features/gui-sprite-system.md) — sprite atlas conventions, verification before reference, the **decompile-verified sprite-bake pipeline** (no `pack0.tpac`; per-category `AssetSources` PNG + `Assets/_tex.tpac` + manifest) + end-to-end **Adding / Verifying a sprite** workflow (a new sprite needs the generator AND a render check — **baked ≠ visible**)
 
 ### Combat, AI, & battle
-- [combat-mechanics](features/combat-mechanics.md) — TaomCombatMechanicsModel (single AgentApplyDamageModel slot): skill-based crush-through, monster/orc CTB, creature cleave + stagger immunity, weight-driven charge knockdown (`Monster.Weight` ratios), shield penetration, per-race modifier table
+- [combat-mechanics](features/combat-mechanics.md) — TaomCombatMechanicsModel (single AgentApplyDamageModel slot): skill-based crush-through, monster/orc CTB, creature cleave + stagger immunity, weight-driven charge knockdown (`Monster.Weight` ratios), Hammerhand (shield bash and kick knockdown), shield penetration, per-race modifier table
 - [advanced-combat](features/advanced-combat.md) — SpatialGrid, BoneCollision, CustomAttacks subsystems
 - [smart-cavalry-ai](features/smart-cavalry-ai.md) — player-team cavalry state machine (Form → Charge → PassThrough → Reform)
 - [mixed-formations](features/mixed-formations.md) — heterogeneous formation layout system

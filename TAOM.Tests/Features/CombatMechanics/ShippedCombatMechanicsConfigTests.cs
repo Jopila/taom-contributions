@@ -204,6 +204,39 @@ public class ShippedCombatMechanicsConfigTests
         Assert.AreEqual(compiled.RuntimeShieldDamageCorrectionDivisor, shipped.RuntimeShieldDamageCorrectionDivisor, 0.0001f);
     }
 
+    // Hammerhand (#895). The compiled values are the revert-to target on a validation failure, and the MCM toggle is the
+    // third surface of the default.
+    [TestMethod]
+    public void ShippedConfig_ShieldBash_IsOnWithTheDecidedNumbers()
+    {
+        var c = _sut.GetConfig().ShieldBash;
+
+        Assert.IsTrue(c.Enabled);
+        Assert.AreEqual(10f, c.MinChancePercent, 0.0001f);
+        Assert.AreEqual(75f, c.MaxChancePercent, 0.0001f);
+        Assert.AreEqual(0.5f, c.KickChanceFactor, 0.0001f);
+        Assert.AreEqual(0.5f, c.PlayerVictimChanceFactor, 0.0001f);
+    }
+
+    [TestMethod]
+    public void ShippedConfig_ShieldBashMatchesCompiledDefaults()
+    {
+        var shipped = _sut.GetConfig().ShieldBash;
+        var compiled = new ShieldBashConfig();
+
+        Assert.AreEqual(compiled.Enabled, shipped.Enabled);
+        Assert.AreEqual(compiled.MinChancePercent, shipped.MinChancePercent, 0.0001f);
+        Assert.AreEqual(compiled.MaxChancePercent, shipped.MaxChancePercent, 0.0001f);
+        Assert.AreEqual(compiled.KickChanceFactor, shipped.KickChanceFactor, 0.0001f);
+        Assert.AreEqual(compiled.PlayerVictimChanceFactor, shipped.PlayerVictimChanceFactor, 0.0001f);
+    }
+
+    [TestMethod]
+    public void McmDefault_ShieldBashKnockdown_MatchesShippedConfig()
+    {
+        Assert.AreEqual(_sut.GetConfig().ShieldBash.Enabled, new TaomSettings().EnableShieldBashKnockdown);
+    }
+
     [TestMethod]
     public void McmDefault_ShieldPenetrationOff_MatchesShippedConfig()
     {

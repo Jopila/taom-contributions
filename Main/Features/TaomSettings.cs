@@ -1372,6 +1372,11 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Multiplies every signature-strike cooldown (shipped: Sauron's Slam 20 s and Sweep 12 s, the Nine's Scream 15 s). Raise it if Sauron or the Nazgul feel overpowered; the JSON values need a full restart, this slider applies live.")]
     public float SignatureStrikeCooldownMultiplier { get; set; } = 1f;
 
+    [SettingPropertyGroup("Combat Mechanics")]
+    [SettingPropertyBool("Hammerhand (Shield Bash Knockdown)", Order = 17, RequireRestart = false,
+        HintText = "A shield bash or a kick can floor a man. The chance grows with the attacker's Athletics lead over the victim; the victim's race and any race ability that toughens him cut it, a kick is weaker than a bash, and you resist more than a soldier does. Fighters who shrug off blows never fall: trolls while Creature Stagger Immunity is on, a soldier with a live race ability that shrugs off blows, and a hero with a career shrug-off passive. The numbers live in combat_mechanics_config.json.")]
+    public bool EnableShieldBashKnockdown { get; set; } = true;
+
     // --- Aura of Dread ---
 
     [SettingPropertyGroup("Aura of Dread", GroupOrder = 34)]

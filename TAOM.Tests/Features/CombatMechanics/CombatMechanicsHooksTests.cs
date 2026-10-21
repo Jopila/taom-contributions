@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using TAOM.Features.CareerSystem.Abilities;
 using TAOM.Features.CombatMechanics;
 using TAOM.Features.CombatMechanics.Domain;
 using TAOM.Features.CombatMechanics.Hooks;
@@ -26,6 +27,8 @@ public class CombatMechanicsHooksTests
     private IChargeKnockdownService _charge = null!;
     private ICreatureCombatService _creature = null!;
     private IShieldPenetrationService _shield = null!;
+    private IShieldBashKnockdownService _bash = null!;
+    private ICareerAgentStatService _career = null!;
     private ICombatMechanicsSettingsProvider _settings = null!;
     private CombatMechanicsHooks _sut = null!;
 
@@ -36,8 +39,10 @@ public class CombatMechanicsHooksTests
         _charge = Substitute.For<IChargeKnockdownService>();
         _creature = Substitute.For<ICreatureCombatService>();
         _shield = Substitute.For<IShieldPenetrationService>();
+        _bash = Substitute.For<IShieldBashKnockdownService>();
+        _career = Substitute.For<ICareerAgentStatService>();
         _settings = Substitute.For<ICombatMechanicsSettingsProvider>();
-        _sut = new CombatMechanicsHooks(_crush, _charge, _creature, _shield, _settings);
+        _sut = new CombatMechanicsHooks(_crush, _charge, _creature, _shield, _bash, _career, _settings);
     }
 
     [TestMethod]
@@ -187,6 +192,31 @@ public class CombatMechanicsHooksTests
     {
         Assert.IsNull(_sut.ChargeKnockdown(null!, null!, CollisionDataFixture.With(chargeVelocity: float.NaN), default));
         _charge.DidNotReceiveWithAnyArgs().DecideChargeKnockdown(default);
+    }
+
+    // Hammerhand (#895). A live Agent cannot be built here, so the context mapping (the Athletics reads, the immunity sources, the
+    // race, the roll) is not reachable; ShieldBashWiringTests pins the facade and builder on the source. A bash that arrives
+    // without fighters (unreachable in the engine) declines instead of reading a skill off null.
+    [TestMethod]
+    public void ShieldBashKnockdown_KickWithoutAgents_DeclinesWithoutAsking()
+    {
+        _bash.Decide(default).ReturnsForAnyArgs(true);
+
+        Assert.IsNull(_sut.ShieldBashKnockdown(null!, null!, CollisionDataFixture.With(isAlternativeAttack: true), null!));
+        _bash.DidNotReceiveWithAnyArgs().Decide(default);
+    }
+
+    [DataTestMethod]
+    [DataRow(WeaponClass.SmallShield, true)]
+    [DataRow(WeaponClass.LargeShield, true)]
+    [DataRow(WeaponClass.OneHandedSword, false)]
+    [DataRow(WeaponClass.Mace, false)]
+    [DataRow(WeaponClass.Undefined, false)]
+    public void IsShieldClass_OnlyTheTwoShieldClassesPass(WeaponClass weaponClass, bool expected)
+    {
+        var weapon = new WeaponComponentData(null!, weaponClass, 0);
+
+        Assert.AreEqual(expected, CombatMechanicsHooks.IsShieldClass(weapon));
     }
 
     [TestMethod]
