@@ -2036,3 +2036,12 @@ have left `gold: 0` with no items, which hires for free behind "My price is .".
 - **Prevent:** when validation runs in two phases, write the invariant once and run it at the end of both, and
   add one test that crosses the phases (valid at load, invalid after resolution).
 - **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 4.
+
+### A fixture default must be a value production can return in the case under test (#960, 2026-10-21)
+The battle-service fixture stubbed the war top-up to succeed, so the new vassal sit-out tests ran a
+combination the real service cannot produce (for a vassal the top-up always refuses where the sit-out
+fires), and every real sit-out logged "joining anyway" first.
+- **Why missed:** the new tests inherited a convenient fixture default and asserted only the outcome.
+- **Prevent:** when a new rule runs beside an existing call, stub that call with what production returns
+  in the new case, and assert the calls that must not happen.
+- **Source:** `docs/reviews/rca-enlistment-vassal-sit-out-2026-10-21.md` F1.

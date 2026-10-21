@@ -1465,7 +1465,17 @@ sync is not run from the load normalizer or from the captivity-released path, al
 - **Own clan only (Mike, 2026-10-20).** `ShouldMirrorMidTerm(oathFactionId, currentFactionId,
   playerClanId)` is true only when the pin is set, is still the player's faction, and is his clan. A
   vassal keeps the oath mirror and the discharge unwind, nothing in between: every declaration made
-  for him is his whole kingdom's. The gate runs before any hero lookup.
+  for him is his whole kingdom's. The gate runs before any hero lookup. A vassal instead sits out a
+  battle whose opposing faction his kingdom is not at war with (#960):
+  `IServiceDiplomacyService.ShouldSitOutAsVassal(foe)` is true when the record is enlisted, the
+  player has a kingdom, mid-term mirroring does not apply, the player-enemy read is non-empty (an
+  empty read is a failure and fails open) and the foe is not among the player's enemies.
+  `ServiceBattleService.TryJoin` asks it right before the top-up, with the same "already in a map
+  event" carve-out as the other floors, and returns before any transition or join (INFO log). The own
+  clan is unchanged: the top-up takes the war on first. A soldier with no kingdom whose oath
+  identity is not his clan (he swore as a vassal and his clan later left the kingdom) gets neither
+  the top-up nor the sit-out, so Attack can still declare an untracked clan war (old behaviour,
+  rare).
 - **Prune first, then follow.** Each pass drops every `MirroredWars` entry the player is no longer at
   war with (a faction eliminated, or a peace his own side made), logged once each, without calling
   `MakePeaceWith`. A peace the player made himself while the commander still fights that faction is
@@ -1505,11 +1515,11 @@ sync is not run from the load normalizer or from the captivity-released path, al
   crown.
 
 Tests: `ServiceWarPolicyTests` (Diff, ShouldMirrorMidTerm), `ServiceDiplomacyServiceTests` (the
-hourly sync, top-up, crown war, oath), `EnlistmentHourlyTickTests` (the behavior only delegates; that
+hourly sync, top-up, crown war, oath, the #960 vassal sit-out predicate), `EnlistmentHourlyTickTests` (the behavior only delegates; that
 the load normalizer and the captivity-released path never reach the tick-only steps is pinned by
 `EnlistmentReconcilerTests.ReconcileHourly_NeverReleasesForACrownWar`, because they call
 `ReconcileHourly` alone), `ServiceBattleServiceTests` (top-up order, a refusal joins, every
-refusal logged, the crown-war join skip), `EnlistmentReconcilerTests` (the tick order, the release and its waits) and
+refusal logged, the crown-war join skip, the #960 vassal sit-out), `EnlistmentReconcilerTests` (the tick order, the release and its waits) and
 `DischargeServiceTests` (released on the map, walk-out once).
 
 **The commander-loss modal only fired once per commander per process.** `_lossAnnouncedFor` exists to
@@ -2189,12 +2199,12 @@ Open risks:
    pump alone.
 2. The encounter's Attack and Send troops apply the hostile action against the village
    (`MenuHelper.cs:265-269` for Attack, `:566-572` for Send troops). Closed for an own-clan identity
-   by the #832 join-time top-up, which mirrors and records the war first. For a vassal identity (no
-   top-up, by decision) it stays open: a war that began after the oath between the commander's realm
-   and a third faction is declared for his whole kingdom when he chooses Attack or Send troops
-   (`BeHostileAction.cs:192-195`). The costs are the -24 relation with the village owner and notables
-   (`:36-43`), crime and trait loss (`:105-115`), relation and influence (`:138-147`), and that
-   kingdom-wide war. The crown-war release does not cover it. Follow-up pending.
+   by the #832 join-time top-up, which mirrors and records the war first. For a vassal identity
+   (no top-up, by decision) it is closed by the #960 rule: a vassal sits out a battle whose opposing
+   faction his kingdom is not at war with, so Attack never declares a kingdom war on the commander's
+   behalf (`BeHostileAction.cs:192-195`, with the -24 relation with the village owner and notables at
+   `:36-43`, crime and trait loss at `:105-115`, relation and influence at `:138-147`). It fails open
+   on a failed read.
 3. Any `PlayerEncounter.Finish` with no winner while he is inside ends the commander's whole fight
    (`RaidEventComponent.cs:222`): Leave when the army merge was unavailable, or a `TryJoin` rollback.
 4. The pre-existing join-rollback `LeaveArmy` mid-event; Patch82 is the floor.
@@ -2337,8 +2347,9 @@ What actually remains, each a state no test can reach:
   war while enlisted: one declaration, no phantom mirror entry. (5) A release while held in the
   commander's town (the settlement encounter must not block it and he must walk out). (6) An
   independent-clan crown war. (7) The commander's realm losing its last fief while serving as a clan:
-  no peace flip-flop. (8) A vassal battle against a third faction in a new war: expect the
-  kingdom-wide declaration (the known risk above).
+  no peace flip-flop. (8) #960: as a vassal, the lord's realm declares war on a third faction after the oath: the soldier
+  sits out that battle and his kingdom gains no war, and he joins the next battle against a faction
+  his kingdom does fight.
 - **Village raids (#831).** The in-game check (state stays `EnlistedAttached`,
   status line, release allowed, no raid menu; siege, sally-out and field battle still join; a raid
   the commander fights off as defender still joins). Also (#954): a relief lord attacks the raiding

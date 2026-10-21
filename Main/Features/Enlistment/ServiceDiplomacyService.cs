@@ -34,6 +34,14 @@ public interface IServiceDiplomacyService
 
     /// <summary>The commander is at war with the player's faction (his kingdom, or his clan when independent). #832.</summary>
     bool IsServingAgainstOwnCrown();
+
+    /// <summary>
+    /// #960: a vassal (the player has a kingdom and mid-term mirroring does not apply to him) sits out
+    /// a battle against a faction his kingdom is not at war with, so choosing Attack never declares a
+    /// kingdom war on the commander's behalf. Fails open: an empty foe or an empty player-enemy read
+    /// (a failed read) is false.
+    /// </summary>
+    bool ShouldSitOutAsVassal(string foeFactionId);
 }
 
 /// <inheritdoc />
@@ -193,6 +201,21 @@ public sealed class ServiceDiplomacyService : IServiceDiplomacyService
         return string.IsNullOrEmpty(commanderFactionId)
             || record.EnemiesAtOath == null
             || !record.EnemiesAtOath.Contains(commanderFactionId);
+    }
+
+    public bool ShouldSitOutAsVassal(string foeFactionId)
+    {
+        var record = _store.Record;
+        if (string.IsNullOrEmpty(foeFactionId) || !record.IsEnlisted)
+            return false;
+        // With a kingdom the player's faction is the kingdom, so mid-term mirroring never applies.
+        if (string.IsNullOrEmpty(_playerContext.GetPlayerKingdomId()))
+            return false;
+
+        var playerEnemies = _diplomacy.GetPlayerEnemies();
+        if (playerEnemies == null || playerEnemies.Count == 0)
+            return false;
+        return !Contains(playerEnemies, foeFactionId);
     }
 
     private bool MayMirrorMidTerm() => ServiceWarPolicy.ShouldMirrorMidTerm(
