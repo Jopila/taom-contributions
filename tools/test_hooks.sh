@@ -2840,6 +2840,49 @@ elif (( SS_SECS >= 9 )); then
 else
     ok "session-start.sh with a hung graphify probe: the UNCHECKED note, back in ${SS_SECS} s"
 fi
+# The harness retro cadence line (#962): due with no record, quiet with a record dated today, due
+# with the day count once the newest record is seven days old, and UNCHECKED, not silent, when the
+# record's date does not parse.
+ss_retro() {   # stdout of session-start.sh in $UP, with a fake python that answers at once
+    printf '{"source":"startup"}' | timeout -k 2 20 env CLAUDE_PROJECT_DIR="$UP" TAOM_PYBIN="$UPPY" \
+        bash "$UP/.claude/hooks/session-start.sh" 2>/dev/null
+}
+mkdir -p "$UP/docs/reviews"
+rm -f "$UP"/docs/reviews/harness-retro-*.md
+if grep -q '^HARNESS RETRO DUE: no retro on record; run /harness-retro\.' <<< "$(ss_retro)"; then
+    ok "retro cadence: no record, the DUE line"
+else
+    bad "retro cadence: no record printed no DUE line"
+fi
+: > "$UP/docs/reviews/harness-retro-$(date +%F).md"
+if grep -q 'HARNESS RETRO' <<< "$(ss_retro)"; then
+    bad "retro cadence: a record dated today still printed a retro line"
+else
+    ok "retro cadence: a record dated today, nothing printed"
+fi
+rm -f "$UP"/docs/reviews/harness-retro-*.md
+: > "$UP/docs/reviews/harness-retro-2020-01-01.md"
+: > "$UP/docs/reviews/harness-retro-$(date -d '-10 days' +%F).md"
+if grep -q "^HARNESS RETRO DUE: last retro $(date -d '-10 days' +%F) (10 days ago); run /harness-retro\.$" <<< "$(ss_retro)"; then
+    ok "retro cadence: the newest of two records, ten days old, gives the DUE line with its day count"
+else
+    bad "retro cadence: a ten-day-old newest record gave no DUE line with '10 days ago'"
+fi
+rm -f "$UP"/docs/reviews/harness-retro-*.md
+: > "$UP/docs/reviews/harness-retro-2026-13-45.md"
+if grep -q 'harness retro cadence UNCHECKED this session' <<< "$(ss_retro)"; then
+    ok "retro cadence: an unparseable record date says UNCHECKED"
+else
+    bad "retro cadence: an unparseable record date printed no UNCHECKED note"
+fi
+rm -f "$UP"/docs/reviews/harness-retro-*.md
+: > "$UP/docs/reviews/harness-retro-$(date -d '+400 days' +%F).md"
+if grep -q 'harness retro cadence UNCHECKED this session (.* is dated in the future)' <<< "$(ss_retro)"; then
+    ok "retro cadence: a record dated in the future says UNCHECKED, not silence"
+else
+    bad "retro cadence: a future-dated record printed no UNCHECKED note, so a typo would silence the banner"
+fi
+rm -rf "$UP/docs"
 
 # ---------------------------------------------------------------------------
 head2 "7m. check-moduledata-validation fails open on a validator crash and says so, and still denies on findings"

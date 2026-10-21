@@ -101,6 +101,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | Yotthani ShaderCacheKeeper | `ShaderCacheKeeper` `yotthani/bannerlord` `HoN/ShaderCacheKeeper` `xinput9_1_0.dll` | MIT, (c) 2026 yotthani (its own `LICENSE`) | verbatim-port | `Native/ShaderCacheKeeper/**`; the built `bin/Win64_Shipping_Client/xinput9_1_0.dll` shipped through the launcher manifest | cleared |
 | Ghidra | `Ghidra` `NationalSecurityAgency/ghidra` `pyghidra` | Apache-2.0 | interop-only | `tools/native_decompile.py` runs the installed tool (see detail) | cleared |
 | Hindsight | `Hindsight` `vectorize-io/hindsight` | MIT | comparison-only | (none) | cleared |
+| Harness² (Google Research) | `Harness²` `harness2` `google-research/harness2` | Apache-2.0 | behavioural-port | `docs/ai-includes/harness-retro.md`; `.claude/skills/harness-retro/SKILL.md` (the verdict and proposal rules; `tools/harness_retro.py` is TAOM original, see detail) | cleared |
 | Stuck Battle Guard v1.0.0 (a TAOM player's workaround module) | `StuckBattleGuard` `stuckbattle.` | UNKNOWN | behavioural-port | the stuck AI battle sweep in `Main/Features/MapEventGuard/` and `Main/Adapters/StuckBattle*Adapter.cs`; see detail | uncleared |
 | Kingdom Borders (Nexus mod 10699) | `Kingdom Borders` `KingdomBorders` | UNKNOWN | behavioural-port | `Main/Adapters/BorderRenderAdapter.cs`; the Heraldic layout in `Main/Features/RealmBorders/Domain/BorderPainter.cs`; the module-id check in `Main/Features/RealmBorders/Hooks/RealmBordersCampaignBehavior.cs` (interop); see detail | uncleared |
 
@@ -777,6 +778,18 @@ conflicts with ADR-011's rule that durable knowledge lives in the repository, an
 plugin injects recalled text into every prompt and spends an auto-detected LLM key. Its hook scripts
 were read for the security pass; nothing was installed or ported. Record:
 [`docs/reviews/adopt-ghidra-hindsight-2026-09-26.md`](../reviews/adopt-ghidra-hindsight-2026-09-26.md).
+
+### Harness² (Google Research)
+
+Upstream: https://github.com/google-research/harness2 · Apache-2.0 (paper: arXiv 2610.14224). Its
+reflector and editor prompts (`harness2/core/prompts.py`) were read while writing TAOM's retro
+procedure, so the derivation is a behavioural port. Taken from them, in TAOM's own words: the
+per-change verdicts (helped, hurt, no observed effect, confounded) and the preference for
+confounded over a guessed attribution; the rule that a proposed edit names the moment in a session
+behind it; the order of preference for the form of a change, always-on text last; and "no change"
+as a valid outcome. No upstream file or text was copied, so no Apache-2.0 notice is carried.
+`tools/harness_retro.py` (the transcript miner) has no counterpart upstream and is TAOM original.
+Nothing was installed. Record: [`docs/reviews/adopt-harness2-2026-10-21.md`](../reviews/adopt-harness2-2026-10-21.md).
 
 ### Stuck Battle Guard (UNCLEARED)
 

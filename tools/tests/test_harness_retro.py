@@ -1,0 +1,428 @@
+#!/usr/bin/env python3
+"""Unit tests for tools/harness_retro.py.
+
+Run:  python -B -m unittest tools.tests.test_harness_retro
+
+Every transcript is synthetic and written into a temp directory; no test reads a real session.
+"""
+import contextlib
+import io
+import json
+import os
+import sys
+import tempfile
+import time
+import unittest
+from pathlib import Path
+
+TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, TOOLS)
+
+import harness_retro as hr  # noqa: E402
+
+TS = "2026-10-10T12:00:00.000Z"
+OLD_TS = "2026-08-01T12:00:00.000Z"
+
+
+def rec(kind, session="s1", ts=TS, **extra):
+    r = {"type": kind, "sessionId": session, "timestamp": ts, "isSidechain": False}
+    r.update(extra)
+    return r
+
+
+def tool_use(tid, name, session="s1", ts=TS, **inp):
+    return rec("assistant", session, ts, message={"content": [
+        {"type": "tool_use", "id": tid, "name": name, "input": inp}]})
+
+
+def tool_result(tid, text, error=True, session="s1", ts=TS):
+    return rec("user", session, ts, message={"content": [
+        {"type": "tool_result", "tool_use_id": tid, "is_error": error, "content": text}]})
+
+
+def human(text, session="s1", ts=TS, **extra):
+    return rec("user", session, ts, message={"content": text}, **extra)
+
+
+def attachment(session="s1", ts=TS, **att):
+    return rec("attachment", session, ts, attachment=att)
+
+
+class Env:
+    def __init__(self, tc):
+        self.root = Path(tc.enterContext(tempfile.TemporaryDirectory()))
+        self.tr = self.root / "tr"
+        self.repo = self.root / "repo"
+        self.mem = self.root / "mem"
+        self.out = self.root / "out"
+        for d in (self.tr, self.repo / ".claude", self.repo / "docs" / "reviews", self.mem / "features"):
+            d.mkdir(parents=True)
+
+    def write(self, name, records, raw_lines=()):
+        p = self.tr / name
+        p.parent.mkdir(parents=True, exist_ok=True)
+        lines = [json.dumps(r) for r in records] + list(raw_lines)
+        p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return p
+
+    def run(self, *extra, since="2026-10-01"):
+        argv = ["--transcripts", str(self.tr), "--repo", str(self.repo), "--memory", str(self.mem),
+                "--out", str(self.out)]
+        if since:
+            argv += ["--since", since]
+        argv += list(extra)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+            code = hr.main(argv)
+        return code, buf.getvalue()
+
+    def signals(self):
+        return json.loads((self.out / "signals.json").read_text(encoding="utf-8"))
+
+    def report(self):
+        return (self.out / "report.md").read_text(encoding="utf-8")
+
+
+class Base(unittest.TestCase):
+    def setUp(self):
+        self.env = Env(self)
+
+
+class HookTests(Base):
+    def test_pretooluse_deny_counted_by_basename(self):
+        text = ('PreToolUse:Bash hook error: ["$CLAUDE_PROJECT_DIR"/.claude/hooks/mcp-health-check.sh]: '
+                "server is down")
+        self.env.write("a.jsonl", [tool_use("t1", "Bash", command="x"), tool_result("t1", text)])
+        code, _ = self.env.run()
+        self.assertEqual(code, 0)
+        deny = self.env.signals()["hook_denies"]
+        self.assertEqual(len(deny), 1)
+        self.assertEqual(deny[0]["hook"], "mcp-health-check")
+        self.assertEqual(deny[0]["event"], "PreToolUse")
+        self.assertEqual(deny[0]["tool"], "Bash")
+        self.assertEqual(deny[0]["count"], 1)
+
+    def test_blocking_error_attachment(self):
+        self.env.write("a.jsonl", [attachment(type="hook_blocking_error", hookName="Stop",
+                                              hookEvent="Stop",
+                                              blockingError="check-verification-evidence: no test run")])
+        self.env.run()
+        blocks = self.env.signals()["hook_blocks"]
+        self.assertEqual(blocks[0]["hook"], "check-verification-evidence")
+        self.assertEqual(blocks[0]["count"], 1)
+
+    def test_blocking_error_nested_dict(self):
+        # Claude Code 2.1.29x records the Stop block reason one level down:
+        # {"blockingError": {"blockingError": "<hook>: <reason>"}}.
+        self.env.write("a.jsonl", [attachment(type="hook_blocking_error", hookName="Stop",
+                                              hookEvent="Stop",
+                                              blockingError={"blockingError": "check-version-tagged: no tag"})])
+        self.env.run()
+        blocks = self.env.signals()["hook_blocks"]
+        self.assertEqual(blocks[0]["hook"], "check-version-tagged")
+        self.assertIn("no tag", blocks[0]["sample"])
+
+    def test_rows_carry_first_and_last_seen(self):
+        later = "2026-10-15T09:00:00.000Z"
+        text = 'PreToolUse:Bash hook error: [validate-push]: BLOCKED'
+        self.env.write("a.jsonl", [tool_use("t1", "Bash"), tool_result("t1", text),
+                                   tool_use("t2", "Bash", ts=later), tool_result("t2", text, ts=later)])
+        self.env.run()
+        row = self.env.signals()["hook_denies"][0]
+        self.assertEqual((row["first_seen"], row["last_seen"]), ("2026-10-10", "2026-10-15"))
+        self.assertIn("2026-10-15", self.env.report())
+
+    def test_non_blocking_error_grouped(self):
+        recs = [attachment(session=s, type="hook_non_blocking_error", hookName="PreToolUse:Bash",
+                           hookEvent="PreToolUse", command='bash "$D"/.claude/hooks/foo.sh',
+                           exitCode=1, stderr="line 12: boom 404\nmore", stdout="")
+                for s in ("s1", "s2")]
+        self.env.write("a.jsonl", recs[:1])
+        self.env.write("b.jsonl", recs[1:])
+        self.env.run()
+        broken = self.env.signals()["hook_broken"]
+        self.assertEqual(len(broken), 1)
+        self.assertEqual(broken[0]["script"], "foo.sh")
+        self.assertEqual(broken[0]["count"], 2)
+        self.assertEqual(broken[0]["sessions"], 2)
+
+    def test_cancelled_hook(self):
+        self.env.write("a.jsonl", [attachment(type="hook_cancelled", hookName="Stop",
+                                              command="bash /x/y/slow.sh")])
+        self.env.run()
+        self.assertEqual(self.env.signals()["hook_cancelled"][0]["count"], 1)
+
+    def test_cancelled_hook_counts_timeouts(self):
+        # A timed-out gate was killed, so it failed open: the retro must see that, not just "cancelled".
+        recs = [attachment(type="hook_cancelled", hookName="PreToolUse:Bash", command="bash /x/gate.sh",
+                           timedOut=flag, durationMs=24199, timeoutMs=5000) for flag in (True, True, False)]
+        self.env.write("a.jsonl", recs)
+        self.env.run()
+        row = self.env.signals()["hook_cancelled"][0]
+        self.assertEqual((row["count"], row["timed_out"], row["example"]), (3, 2, "s1"))
+        self.assertIn("Timed out", self.env.report())
+
+    def test_no_fires_listing(self):
+        settings = {"hooks": {
+            "PreToolUse": [{"matcher": "Bash", "hooks": [
+                {"command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/never-fires.sh"},
+                {"command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/mcp-health-check.sh"}]}],
+            "Stop": [{"hooks": [{"command": "bash .claude/hooks/stop-quiet.sh"}]}],
+            "SessionStart": [{"hooks": [{"command": "bash .claude/hooks/start.sh"}]}]}}
+        (self.env.repo / ".claude" / "settings.json").write_text(json.dumps(settings), encoding="utf-8")
+        text = 'PreToolUse:Bash hook error: [.claude/hooks/mcp-health-check.sh]: down'
+        self.env.write("a.jsonl", [tool_use("t1", "Bash"), tool_result("t1", text)])
+        self.env.run()
+        quiet = self.env.signals()["no_fires"]
+        self.assertIn("stop-quiet", quiet)
+        self.assertIn("never-fires", quiet)
+        self.assertNotIn("mcp-health-check", quiet)
+        self.assertNotIn("start", quiet)
+        self.assertIn("No fires in window (rare-event guard? check before removing)", self.env.report())
+
+    def test_ask_only_gate_listed_apart(self):
+        # An approved ask leaves no trace in a transcript, so zero fires proves nothing about it.
+        hooks = self.env.repo / ".claude" / "hooks"
+        hooks.mkdir(parents=True)
+        (hooks / "confirm-gate.sh").write_text(
+            '#!/bin/bash\n# never a "deny" here\necho \'{"permissionDecision":"ask"}\'\n', encoding="utf-8")
+        (hooks / "deny-gate.sh").write_text('echo \'{"permissionDecision":"deny"}\'\n', encoding="utf-8")
+        # Asks on overrun but blocks with exit 2: not ask-only (the validate-push shape).
+        (hooks / "exit2-gate.sh").write_text(
+            'echo \'{"permissionDecision":"ask"}\'\nexit 2\n', encoding="utf-8")
+        # "task" contains "ask"; a Stop reminder blocks through its helper.
+        (hooks / "stop-gate.sh").write_text(
+            '# the task is done\nsource "$D/_stop_reminder.sh"\n', encoding="utf-8")
+        settings = {"hooks": {"PreToolUse": [{"matcher": "Bash", "hooks": [
+            {"command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/confirm-gate.sh"},
+            {"command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/deny-gate.sh"},
+            {"command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/exit2-gate.sh"}]}],
+            "Stop": [{"hooks": [{"command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/stop-gate.sh"}]}]}}
+        (self.env.repo / ".claude" / "settings.json").write_text(json.dumps(settings), encoding="utf-8")
+        self.env.write("a.jsonl", [tool_use("t1", "Skill", skill="x")])
+        self.env.run()
+        sig = self.env.signals()
+        self.assertEqual(sig["no_fires"], ["deny-gate", "exit2-gate", "stop-gate"])
+        self.assertEqual(sig["ask_only_gates"], ["confirm-gate"])
+        self.assertIn("Ask-only gates", self.env.report())
+
+
+class PermissionTests(Base):
+    def test_classifier_and_user_rejection(self):
+        self.env.write("a.jsonl", [
+            tool_use("t1", "Bash"),
+            tool_result("t1", "Permission for this action was denied by the Claude Code auto mode classifier."),
+            tool_use("t2", "Edit"),
+            tool_result("t2", "The user doesn't want to proceed with this tool use. Stop."),
+        ])
+        self.env.run()
+        sig = self.env.signals()
+        self.assertEqual(sig["classifier_denials"], {"Bash": 1})
+        self.assertEqual(sig["user_rejections"], {"Edit": 1})
+        self.assertEqual(sig["tool_errors"], [])
+
+
+class ErrorSignatureTests(Base):
+    def test_recurring_marker(self):
+        for s in ("s1", "s2", "s3"):
+            self.env.write(f"{s}.jsonl", [tool_use("t", "Bash", session=s),
+                                          tool_result("t", "Exit code 1\nfile not found: 12", session=s)])
+        for s in ("s4", "s5"):
+            self.env.write(f"{s}.jsonl", [tool_use("t", "Read", session=s),
+                                          tool_result("t", "different failure", session=s)])
+        self.env.run()
+        rows = {r["signature"]: r for r in self.env.signals()["tool_errors"]}
+        a = rows["file not found: #"]
+        b = rows["different failure"]
+        self.assertTrue(a["recurring"])
+        self.assertEqual(a["sessions"], 3)
+        self.assertFalse(b["recurring"])
+        self.assertIn("RECURRING", self.env.report())
+
+    def test_normalization(self):
+        n = hr.normalize_signature
+        self.assertEqual(n(r"cannot open E:\repos\TAOM\a_b.txt line 5"),
+                         n(r"cannot open C:\x\y\z.txt line 77"))
+        self.assertEqual(n("no such file /usr/lib/foo/bar.so 9"), n("no such file /home/u/baz/q.so 10"))
+        self.assertEqual(n("id 123e4567-e89b-12d3-a456-426614174000 bad"), "id <id> bad")
+        self.assertEqual(n("<tool_use_error>File missing</tool_use_error>"), "File missing")
+        tb = "Traceback (most recent call last):\n  File \"x.py\", line 3\nValueError: bad value 42"
+        self.assertEqual(n(tb), "ValueError: bad value #")
+        self.assertLessEqual(len(n("x" * 500)), 100)
+        self.assertEqual(n(""), "(empty result)")
+        self.assertEqual(n("Exit code 1\n   \n"), "(empty result)")
+
+    def test_runaway_three_but_not_two(self):
+        recs = []
+        for i in range(3):
+            recs += [tool_use(f"a{i}", "Bash"), tool_result(f"a{i}", "same failure")]
+        self.env.write("a.jsonl", recs)
+        recs = []
+        for i in range(2):
+            recs += [tool_use(f"b{i}", "Bash", session="s2"),
+                     tool_result(f"b{i}", "other failure", session="s2")]
+        self.env.write("b.jsonl", recs)
+        self.env.run()
+        runs = self.env.signals()["runaways"]
+        self.assertEqual(len(runs), 1)
+        self.assertEqual(runs[0]["signature"], "same failure")
+        self.assertEqual(runs[0]["length"], 3)
+
+    def test_success_breaks_runaway(self):
+        recs = []
+        for i in range(2):
+            recs += [tool_use(f"a{i}", "Bash"), tool_result(f"a{i}", "same failure")]
+        recs += [tool_use("ok", "Bash"), tool_result("ok", "fine", error=False)]
+        recs += [tool_use("a9", "Bash"), tool_result("a9", "same failure")]
+        self.env.write("a.jsonl", recs)
+        self.env.run()
+        self.assertEqual(self.env.signals()["runaways"], [])
+
+    def test_parallel_calls_of_one_message_are_not_a_runaway(self):
+        # Six Edits sent in one assistant message that all fail are one batch, not a retry loop.
+        msg = rec("assistant", message={"id": "msg_1", "content": [
+            {"type": "tool_use", "id": f"e{i}", "name": "Edit", "input": {}} for i in range(4)]})
+        recs = [msg] + [tool_result(f"e{i}", "File has not been read yet.") for i in range(4)]
+        self.env.write("a.jsonl", recs)
+        self.env.run()
+        self.assertEqual(self.env.signals()["runaways"], [])
+
+    def test_human_turn_breaks_runaway(self):
+        recs = [tool_use("a0", "Bash"), tool_result("a0", "same failure"), human("try again")]
+        for i in (1, 2):
+            recs += [tool_use(f"a{i}", "Bash"), tool_result(f"a{i}", "same failure")]
+        self.env.write("a.jsonl", recs)
+        self.env.run()
+        self.assertEqual(self.env.signals()["runaways"], [])
+
+
+class CorrectionTests(Base):
+    def test_corrections(self):
+        self.env.write("a.jsonl", [
+            human("no, I said use the adapter"),
+            human("<task-notification>no stop</task-notification>"),
+            human("no way this is meta", isMeta=True),
+            human("No, the earlier summary said otherwise", isCompactSummary=True),
+            tool_use("t1", "Bash"),
+            tool_result("t1", "no I said it", error=False),
+            human("looks good"),
+        ])
+        self.env.run()
+        c = self.env.signals()["corrections"]
+        self.assertEqual(c["count"], 1)
+        self.assertEqual(c["sessions"], 1)
+
+    def test_secret_redacted_in_excerpt(self):
+        secret = "sk_" + "live_" + "A1b2C3d4E5f6G7h8I9j0"
+        self.env.write("a.jsonl", [human("no, I said do not use " + secret)])
+        self.env.run()
+        text = self.env.report() + json.dumps(self.env.signals())
+        self.assertNotIn(secret, text)
+        self.assertIn("[REDACTED:", text)
+
+    def test_generic_secret_redacted(self):
+        value = "Tr0ub4dor" + "&3xyz"
+        self.assertNotIn(value, hr.redact('no, I said use pass' + 'word="' + value + '"'))
+        self.assertNotIn("Plural-Z", hr.normalize_signature('auth_' + 'token="zz9' + 'Plural-Z-Alpha" rejected'))
+
+
+class UsageTests(Base):
+    def test_skill_slash_and_agent(self):
+        self.env.write("a.jsonl", [
+            tool_use("t1", "Skill", skill="deep-review"),
+            human("<command-name>/verify</command-name> now"),
+            tool_use("t2", "Agent", subagent_type="feature-builder", model="sonnet"),
+            tool_use("t3", "Task", prompt="x"),
+        ])
+        self.env.run()
+        u = self.env.signals()["usage"]
+        self.assertEqual(u["skills"]["deep-review"], 1)
+        # Slash commands are counted apart: built-ins such as /model are not skills.
+        self.assertNotIn("verify", u["skills"])
+        self.assertEqual(u["slash_commands"]["verify"], 1)
+        self.assertEqual(u["subagent_types"]["feature-builder"], 1)
+        self.assertEqual(u["subagent_types"]["general-purpose"], 1)
+        self.assertEqual(u["models"]["sonnet"], 1)
+        self.assertEqual(u["models"]["(definition)"], 1)
+        self.assertEqual(self.env.signals()["corrections"]["count"], 0)
+
+    def test_unused_skills_listed(self):
+        for name in ("used-skill", "idle-skill", "typed-skill"):
+            d = self.env.repo / ".claude" / "skills" / name
+            d.mkdir(parents=True)
+            (d / "SKILL.md").write_text("x", encoding="utf-8")
+        self.env.write("a.jsonl", [tool_use("t1", "Skill", skill="used-skill"),
+                                   human("<command-name>/typed-skill</command-name>")])
+        self.env.run()
+        self.assertEqual(self.env.signals()["unused_skills"], ["idle-skill"])
+
+
+class WindowTests(Base):
+    def test_since_excludes_old_record(self):
+        self.env.write("a.jsonl", [tool_use("t1", "Skill", ts=OLD_TS, skill="old-skill"),
+                                  tool_use("t2", "Skill", skill="new-skill")])
+        self.env.run()
+        skills = self.env.signals()["usage"]["skills"]
+        self.assertIn("new-skill", skills)
+        self.assertNotIn("old-skill", skills)
+
+    def test_parse_failure_counted(self):
+        self.env.write("a.jsonl", [tool_use("t1", "Skill", skill="x")], raw_lines=["{not json", "[1,2]"])
+        code, _ = self.env.run()
+        self.assertEqual(code, 0)
+        self.assertEqual(self.env.signals()["sessions"]["parse_failures"], 1)
+
+    def test_main_and_subagent_counts(self):
+        self.env.write("a.jsonl", [tool_use("t1", "Skill", skill="x")])
+        self.env.write("a/subagents/agent-1.jsonl", [tool_use("t1", "Skill", skill="y")])
+        self.env.run()
+        s = self.env.signals()["sessions"]
+        self.assertEqual(s["main_files"], 1)
+        self.assertEqual(s["subagent_files"], 1)
+
+    def test_zero_records_exit_3(self):
+        self.env.write("a.jsonl", [tool_use("t1", "Skill", ts=OLD_TS, skill="x")])
+        code, out = self.env.run()
+        self.assertEqual(code, 3)
+        self.assertIn("UNCHECKED: no transcript records parsed in", out)
+
+    def test_default_since_from_newest_retro(self):
+        rev = self.env.repo / "docs" / "reviews"
+        (rev / "harness-retro-2026-09-01.md").write_text("x", encoding="utf-8")
+        (rev / "harness-retro-2026-10-05.md").write_text("x", encoding="utf-8")
+        self.assertEqual(hr.default_since(self.env.repo, today=hr.date(2026, 10, 21)).isoformat(),
+                         "2026-10-05")
+
+    def test_default_since_fallback_30_days(self):
+        self.assertEqual(hr.default_since(self.env.repo, today=hr.date(2026, 10, 21)).isoformat(),
+                         "2026-09-21")
+
+
+class OutDirTests(Base):
+    def test_out_inside_repo_refused(self):
+        self.env.write("a.jsonl", [tool_use("t1", "Skill", skill="x")])
+        self.env.out = self.env.repo / "docs" / "out"
+        code, _ = self.env.run()
+        self.assertEqual(code, 2)
+        self.assertFalse(self.env.out.exists())
+
+
+class MemoryTests(Base):
+    def test_stale_card_and_memory_size(self):
+        (self.env.mem / "MEMORY.md").write_bytes(b"one\ntwo\nthree\n")
+        old = self.env.mem / "features" / "old-card.md"
+        old.write_text("---\nmodified: 2020-01-01\n---\nbody\n", encoding="utf-8")
+        fresh = self.env.mem / "features" / "fresh-card.md"
+        fresh.write_text("body\n", encoding="utf-8")
+        self.env.write("a.jsonl", [tool_use("t1", "Skill", skill="x")])
+        self.env.run()
+        m = self.env.signals()["memory"]
+        self.assertEqual(m["memory_md_lines"], 3)
+        self.assertEqual(m["memory_md_bytes"], len("one\ntwo\nthree\n"))
+        names = [c["name"] for c in m["stale_cards"]]
+        self.assertIn("old-card.md", names)
+        self.assertNotIn("fresh-card.md", names)
+
+
+if __name__ == "__main__":
+    unittest.main()

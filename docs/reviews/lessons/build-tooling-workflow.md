@@ -4171,3 +4171,16 @@ The completeness lens found the gap after the build; Mike then chose to build al
 - **Prevent:** before showing a plan, list every requirement in the issue and mark each kept, changed or
   dropped; a dropped item is named in the plan, never left out.
 - **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) process finding.
+### A transcript count needs the unit its claim is about, read from real records (harness retro, 2026-10-21)
+`tools/harness_retro.py` called three failed results in a row a "runaway retry", and called a gate
+with no deny "no fires, check before removing". Both were wrong on real data: the results of one
+assistant message's parallel calls sit in consecutive records, so six Edits sent at once read as a
+loop of six (18 runaways became 3), and three gates can only ask, which leaves no trace when
+approved, so they could never count as firing. The schema had been pinned record type by record
+type, and every test passed on fixtures that had one call per message.
+- **Why missed:** the fixtures modelled each record's shape, not how records group into the event
+  the signal claims (a retry is a new message; a fire is any decision, not just a deny).
+- **Prevent:** before a transcript signal backs a proposal, read three real instances behind it
+  and name the unit it counts (message, tool call, session); a gate's "no fires" counts only when
+  its code can deny or block.
+- **Source:** [harness-retro-2026-10-21.md](../harness-retro-2026-10-21.md), code review findings.

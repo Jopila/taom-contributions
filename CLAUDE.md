@@ -69,6 +69,7 @@ instructions: follow its phases in order.
 | An architectural decision | `docs/adrs/000-template.md` | |
 | External repo, article or skill to adopt; UPSTREAM AHEAD banner, "review yotthani" | `/adopt-external`; `/upstream-review` | security-vet first |
 | After editing hooks, settings, MCP config or CLAUDE.md | `/security-scan` | skip for routine feature edits |
+| HARNESS RETRO DUE banner; "did that rule help" | `/harness-retro` | |
 | Repo-wide audit, "what next", handoff plans; execute, review, merge or resume a plans backlog | `/improve` | merge, push, issues and paid calls only on the maintainer's word |
 | Offer, don't auto-invoke | `/freeze`, `/unfreeze` | |
 | Never auto-invoke | `/review-codex` (paid), `/issue` (public) | |

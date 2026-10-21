@@ -1,0 +1,105 @@
+# Harness retro
+
+The recurring check on TAOM's own AI harness: hooks, rules, skills, agent definitions, CLAUDE.md
+and AGENTS.md. It is the executable procedure behind `/harness-retro`. It adapts the evidence
+discipline of Google's Harness² ([review](../reviews/adopt-harness2-2026-10-21.md)): a harness
+change earns its place by what the sessions show, and a change that shows nothing is a candidate
+for deletion. Harness² found that edits made without evidence made the harness worse.
+
+## When
+
+- The SessionStart banner prints `HARNESS RETRO DUE` (seven or more days since the newest
+  `docs/reviews/harness-retro-*.md`, or none exists).
+- Mike asks what the harness keeps getting wrong.
+
+A retro is advisory work. It edits no harness file until Mike approves a proposal, and git,
+issues and paid calls keep their usual rules.
+
+## Phases
+
+### 1. Collect the evidence
+
+Run `python tools/harness_retro.py`. It reads this project's Claude Code transcripts (main sessions
+and subagents) since the last retro and writes `report.md` and `signals.json` outside the repo.
+It makes no model calls. Sections: sessions, hook outcomes (denies, blocks, broken hook runs,
+cancelled and timed-out runs, gates with no fires, ask-only gates whose fires leave no trace),
+permission outcomes, tool-error signatures (RECURRING at three or more sessions), runaway retries
+(three or more assistant messages, not parallel calls of one), user corrections, skill and slash
+command usage, subagent usage, memory health.
+
+Also run `python tools/analyze_reviews.py --summary --no-plot` for the reviewer accuracy that
+`REVIEW-LOG.md` already tracks (`--no-plot` leaves the committed `progress.png` alone).
+
+If the miner prints UNCHECKED, stop: no evidence means no retro, not a clean one.
+
+### 2. List the harness changes since the last retro
+
+```bash
+git log --since <last-retro-date> --format='%h %cs %s' -- .claude AGENTS.md CLAUDE.md .ai docs/ai-includes docs/adrs
+```
+
+Add the preventive actions of the RCAs written in the same window (`docs/reviews/rca-*.md`): each
+one is a harness change with a stated purpose. Git is the ledger; there is no separate one.
+
+### 3. Give each change a verdict
+
+One row per change older than seven days: the component, the change (commit), what was observed
+(a signal from the report with its session ids), and the verdict.
+
+| Verdict | Use when |
+|---|---|
+| helped | The signal the change targets moved the right way, in more than one session |
+| hurt | It added denies, errors, corrections or retries that were not there before |
+| no observed effect | The window holds the situation it targets, and nothing changed |
+| confounded | One commit changed several components, or one session is all the evidence. Prefer this to a guessed attribution: a wrong "helped" misleads every later retro |
+| too early | The window does not yet hold the situation it targets |
+
+A gate that guards a rare, costly event (force-push, `--no-verify`, a dangerous git form) is kept
+with zero fires; record it as a guard, not as dead. A change with "no observed effect" in two
+retros becomes a deletion proposal: a deletion that holds parity is always kept
+([simplicity-criterion.md](../../.claude/rules/simplicity-criterion.md)).
+
+### 4. Propose, at most five
+
+Each proposal names its evidence: the session id and the moment (a correction, a deny, a recurring
+error, a runaway). A proposal that cannot name a moment is speculation; drop it.
+
+- **Priority:** a divergence first (the agent did it right in some sessions and wrong in others,
+  so it can do it and the harness leaves it to chance), then a failure repeated across sessions,
+  then a risk seen but not yet realised.
+- **Form, cheapest first:** a gate or hook (it acts in the tool loop and costs no context), then a
+  script in `tools/`, then a skill or path rule (loaded only when needed), then always-on text in
+  AGENTS.md or CLAUDE.md last. A proposal that adds always-on text names what it cuts. Route by
+  CLAUDE.md "Where new knowledge goes".
+- **No change is a valid result.** An edit the evidence does not support costs context and buys
+  nothing.
+
+### 5. Present the proposals
+
+One at a time: what, pros, cons, recommendation (Mike's standing preference). A long list goes on
+an HTML page that takes batch answers. A proposal is applied only on his approval, through the
+normal tiers, tests and commit rules.
+
+### 6. Write the record
+
+`docs/reviews/harness-retro-<YYYY-MM-DD>.md`, dated the day of the retro. Its date is the next
+retro's start, and it silences the banner. Contents:
+
+- **Window and coverage:** dates, session counts, parse failures.
+- **Signals:** the aggregate tables that bear on a verdict or proposal, with session ids.
+- **Verdicts:** the phase 3 rows.
+- **Proposals:** each with its evidence and Mike's decision.
+
+Never copy transcript text into the record. Cite a session id and timestamp, and paraphrase what
+happened in a few words. The miner redacts secrets in its own output, but the repo is public and
+the transcripts hold Mike's words.
+
+## Pitfalls
+
+- The transcript format is internal to Claude Code and changes between versions. A drop in a
+  signal to zero after an update is a parser question before it is a harness win: check the
+  miner's parse failures and its record counts first.
+- Counts measure how often something happened, not why. Read the session around a moment before
+  you build a proposal on it.
+- A hook deny is usually the harness working. It is evidence of a problem only when the same deny
+  repeats in one session (the agent did not learn from the reason) or the reason was wrong.
