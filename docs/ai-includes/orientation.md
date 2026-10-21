@@ -58,7 +58,7 @@ and the gate.
 | Settlement menus | Need an encounter; only `IEncounterAdapter.EnsureSettlementEncounter` places the player | [enlistment](../features/enlistment.md) |
 | Armory art drops | A mesh rename strands XML refs and hangs preload; repoint refs, never restore a tpac | [ref audit](../features/armory-ref-audit.md) |
 | `bo_` bodies | Use the mesh's own `bo_` twin, never a borrow; keep the misspelled `bo_capwm_isengard_shield_a02_clean` | [validation](../features/moduledata-validation.md) |
-| Unsaved tpac | A package without its `RuntimeDataCache` `.rdc` is skipped, silently: `check_rdc_entries.py` | [pipeline](../reference/ue-to-bannerlord-asset-pipeline.md) |
+| Unsaved tpac | No `.rdc`: skipped (`check_rdc_entries.py`). A build reverts a Kit save, not its `.rdc`: repo it first | [banners](../reference/banner-icon-generation.md) |
 | Horse-skeleton mounts | Engine actions only (`act_horse_kick`); a HorseHarness per Horse slot unless `_HARNESSLESS_BY_DESIGN` | [war ram](../features/war-ram.md) |
 | Mount size | A Monster with `taom_body_length` overrides every item's `body_length`: resize on the Monster | [monster size](../features/monster-size.md) |
 | Riderless creatures | Soldiers ignore a riderless `Mountable` agent; unmount only one built with a weapon state | [creature bandits](../features/creature-bandits.md) |
