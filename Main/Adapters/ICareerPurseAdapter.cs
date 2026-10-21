@@ -10,4 +10,10 @@ public interface ICareerPurseAdapter
     /// amount is negative or exceeds the purse; zero succeeds without a transfer.
     /// </summary>
     bool ChargeGold(int amount);
+
+    /// <summary>
+    /// Gives the player <paramref name="amount"/> gold from no one, with the engine's gold notification. False,
+    /// with nothing given, when there is no main hero or the amount is not positive.
+    /// </summary>
+    bool GrantGold(int amount);
 }

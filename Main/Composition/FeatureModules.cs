@@ -16,6 +16,7 @@ internal static class FeatureModules
     internal static readonly TaomFeatureModule[] All =
     {
         new Features.WandererAllegiance.WandererAllegianceModule(),
+        new Features.NamedCompanions.Oaths.OathsOfServiceModule(),
         new Features.CreatureBandits.CreatureBanditsModule(),
         new Features.ArmourAcquisition.ArmourAcquisitionModule(),
         new Features.RealmBorders.RealmBordersModule(),

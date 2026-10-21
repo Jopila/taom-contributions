@@ -48,7 +48,7 @@ named_companion_config.json     named_companions.xml
 | Kill protection | `is_hero="true"` + `HasMet=true` | Named companions never enter `_aliveCompanionTemplates` (requires IsTemplate); HasMet is belt-and-suspenders |
 | Spawn event | `OnNewGameCreatedPartialFollowUpEvent` index 1 | Heroes fully hydrated; matches StartupResourcesBehavior pattern |
 | Load event | `OnGameLoadedEvent` | Re-pin displaced companions; skip recruited/in-party companions |
-| Dialog | Vanilla wanderer flow | Triggers automatically for `IsHero && Occupation == Wanderer` |
+| Dialog | Vanilla wanderer flow | Triggers automatically for `IsHero && Occupation == Wanderer`. A companion with `hire_terms`, `topics` or `stay_at_home` in the JSON gets custom hire terms, extra topics and a return home: [oaths-of-service.md](oaths-of-service.md) |
 | Backstory | Vanilla string key pattern | `prebackstory.{id}`, `backstory_a.{id}`, etc. read by LordConversationsCampaignBehavior |
 | Race | XML `race=` + existing RacePersistenceService | Native deserialization handles it; defensive SetHeroRace as insurance |
 | Faction | `faction="Faction.neutral"` in heroes.xml | Required — Hero.Deserialize accesses clan.StringId without null check |
@@ -70,7 +70,7 @@ Controls which companions spawn, where, and their race.
 
 | Companion | Race | Settlement | Culture |
 |-----------|------|-----------|---------|
-| Aragorn | human | town_EN2 (Bree) | gondor |
+| Aragorn | human | town_AN3 (Bree) | gondor |
 | Legolas | elf | town_M1 (Mirkwood) | mirkwood |
 | Gimli | dwarf | town_E1 (Erebor) | erebor |
 | Swan, the Cartographer | human | town_EW2 (Dol Amroth) | gondor |
@@ -141,6 +141,10 @@ Controls which companions spawn, where, and their race.
 
 5. **No C# changes needed.**
 
+## Oaths of Service
+
+A companion's JSON entry can carry `hire_terms` (gold, items, flags), `topics` and `stay_at_home`. Hiring, the topics submenu and the return home are documented in [oaths-of-service.md](oaths-of-service.md) (#904). An entry without those members hires through the vanilla flow as before.
+
 ## Bugs Found and Fixed
 
 | Bug | Source | Fix |
@@ -152,6 +156,7 @@ Controls which companions spawn, where, and their race.
 
 ## Changelog
 
+- 2026-10-19: optional oaths per companion (hire terms, topics, stay at home), #904, [oaths-of-service.md](oaths-of-service.md).
 - 2026-09-12: the hire dialogue is alignment-gated (#575, [wanderer-allegiance.md](wanderer-allegiance.md)); no change to placement or data here.
 - 2026-05-13 — Entity State Matrix completion (#127 + #184): added prisoner/fugitive placement guards to `EnsureCompanionsPlaced` and a per-process `ResetSession()` so companions aren't force-placed onto captors/fugitives or skipped across campaigns in the same Bannerlord process.
 - 2026-04-08 — Initial feature: XML/JSON-driven placement of 18 named companions across 7 cultures as recruitable `is_hero`/`Wanderer` characters with fixed identity, race corrections, custom backstory dialog, and a load-time recruited-companion guard.

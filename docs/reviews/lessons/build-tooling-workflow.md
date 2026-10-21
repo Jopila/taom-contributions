@@ -4163,3 +4163,11 @@ issue straight from a review finding.
 - **Prevent:** `gh issue list --state open --search "<file or symptom>"` before `gh issue create`; update or comment on
   an existing issue instead. The `/issue` skill now does this as its first step.
 - **Source:** `docs/reviews/rca-coop-gate-test-and-harvest-2026-10-19.md` finding 1.
+### Compare the plan with the issue, line by line, before asking for approval (Oaths of Service, 2026-10-19)
+The approved plan for #904 dropped six issue items (maximum relation, random chance, item give and take on
+topics, negative relation, a separate home, refusing an entry with an unresolved item) without listing them.
+The completeness lens found the gap after the build; Mike then chose to build all six.
+- **Why missed:** the plan was written from the batch spec and the architect's design, not from the issue text.
+- **Prevent:** before showing a plan, list every requirement in the issue and mark each kept, changed or
+  dropped; a dropped item is named in the plan, never left out.
+- **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) process finding.

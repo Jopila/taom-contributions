@@ -2028,3 +2028,11 @@ gate's input false, so they also could not show that real input always tripped i
   from a later step), pin the gate on the source and test the decision where it is made. Feed at least one test the input
   the engine actually produces (here a ShrugOff-flagged bash).
 - **Source:** `docs/reviews/rca-hammerhand-2026-10-20.md` rows 1 and 7.
+### Re-apply a load-time invariant after every later phase that can change the data (Oaths of Service, 2026-10-19)
+`Validate` dropped hire terms that asked for nothing, at load. `ResolveIds`, at session launch, then removes an
+item id the Armory has renamed. The defect was latent: no shipped config had hire items, but a renamed id would
+have left `gold: 0` with no items, which hires for free behind "My price is .".
+- **Why missed:** each phase had its own tests, and no test fed the first phase's output through the second.
+- **Prevent:** when validation runs in two phases, write the invariant once and run it at the end of both, and
+  add one test that crosses the phases (valid at load, invalid after resolution).
+- **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 4.

@@ -125,5 +125,13 @@
     <string id="nc_response_1.named_companion_balakhor_text" text="Vom Großmeister der Überlieferung selbst zu lernen wäre eine Ehre." />
     <string id="nc_response_2.named_companion_balakhor_text" text="All dieses Wissen - lastet es nicht schwer?" />
     <string id="nc_backstory_d.named_companion_balakhor_text" text="Wissen lastet nur schwer, wenn man es hortet. Frei geteilt, erhebt es alle, die es empfangen. Wie mein Bruder Thyrell diene ich dem Ruhm dieses Reiches. Werdet Ihr Euer Kapitel zu unserer endlosen Geschichte hinzufügen?" />
+    <string id="taom_oath_aragorn_first_prompt" text="Who are the Dúnedain?" />
+    <string id="taom_oath_aragorn_first_reply" text="The Rangers of the North, the last of Númenor's blood in the wild. We guard the Shire and the roads, and no one thanks us for it. We prefer it so." />
+    <string id="taom_oath_aragorn_second_prompt" text="Do you ever wish to claim the crown?" />
+    <string id="taom_oath_aragorn_second_reply" text="Every day, and I fear it as often. If my claim comes, it will not come by taking. I am glad you ask as a friend." />
+    <string id="taom_oath_gimli_first_prompt" text="Tell me of Erebor." />
+    <string id="taom_oath_gimli_first_reply" text="The Lonely Mountain. My kin hold its halls again, and the forges burn day and night. Ask me again once we have shared more fires." />
+    <string id="taom_oath_gimli_second_prompt" text="Would you show me Erebor's deep halls one day?" />
+    <string id="taom_oath_gimli_second_reply" text="You have earned the asking. The deep halls open to a friend. When this war lets us, you shall see the gold of Durin and the hammers of my people." />
   </strings>
 </base>

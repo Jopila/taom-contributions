@@ -1162,3 +1162,12 @@ the code comment claimed "a load starts it empty". This repeats the session-rese
 - **Prevent:** any new field that holds per-campaign state in a singleton gets `ResetForNewSession()` called from a
   behavior built per campaign (its constructor), plus a session-reset test, in the same change.
 - **Source:** `docs/reviews/rca-bonds-of-battle-decisions-2026-10-19.md` finding 2.
+### A comment or doc that says a test pins something names the test and the assertion (Oaths of Service, 2026-10-19)
+The campaign behavior's comment and the feature doc said a wiring test pinned the per-campaign ledger reset.
+The test pinned only that the module builds the behavior with `new`; deleting the reset kept every test green.
+- **Why missed:** the wiring test was copied from a sibling that pins the reset in a separate test, and the
+  claim was written from the copied test's name.
+- **Prevent:** before writing "pinned by X", delete the line in a scratch copy and run X. Pin a constructor
+  reset with a source test on the constructor body and a container test that sets state, creates the behavior,
+  and asserts the state is gone.
+- **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 5.

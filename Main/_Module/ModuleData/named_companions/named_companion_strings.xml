@@ -240,4 +240,21 @@
 	<string id="backstory_d.named_companion_balakhor"
 		text="{=nc_backstory_d.named_companion_balakhor_text}Knowledge is only heavy when hoarded. Shared freely, it lifts all who receive it. Like my brother Thyrell, I serve this realm's glory. Will you add your chapter to our endless tale?" />
 
+	<string id="taom_oath_aragorn_first_prompt"
+		text="{=taom_oath_aragorn_first_prompt}Who are the Dúnedain?" />
+	<string id="taom_oath_aragorn_first_reply"
+		text="{=taom_oath_aragorn_first_reply}The Rangers of the North, the last of Númenor's blood in the wild. We guard the Shire and the roads, and no one thanks us for it. We prefer it so." />
+	<string id="taom_oath_aragorn_second_prompt"
+		text="{=taom_oath_aragorn_second_prompt}Do you ever wish to claim the crown?" />
+	<string id="taom_oath_aragorn_second_reply"
+		text="{=taom_oath_aragorn_second_reply}Every day, and I fear it as often. If my claim comes, it will not come by taking. I am glad you ask as a friend." />
+	<string id="taom_oath_gimli_first_prompt"
+		text="{=taom_oath_gimli_first_prompt}Tell me of Erebor." />
+	<string id="taom_oath_gimli_first_reply"
+		text="{=taom_oath_gimli_first_reply}The Lonely Mountain. My kin hold its halls again, and the forges burn day and night. Ask me again once we have shared more fires." />
+	<string id="taom_oath_gimli_second_prompt"
+		text="{=taom_oath_gimli_second_prompt}Would you show me Erebor's deep halls one day?" />
+	<string id="taom_oath_gimli_second_reply"
+		text="{=taom_oath_gimli_second_reply}You have earned the asking. The deep halls open to a friend. When this war lets us, you shall see the gold of Durin and the hammers of my people." />
+
 </strings>

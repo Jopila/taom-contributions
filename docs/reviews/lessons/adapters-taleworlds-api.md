@@ -1347,3 +1347,13 @@ blunt threshold of 5, so the feature almost never fired.
   inputs that reach it in the blow you care about. When the intent is "spare X", ask X's sources directly instead of a
   shared flag.
 - **Source:** `docs/reviews/rca-hammerhand-2026-10-20.md` row 1.
+### Hero.GetRelation returns the effective relation, traits included (Oaths of Service, 2026-10-19)
+Topic thresholds compared `Hero.GetRelation` with config values. Its body calls
+`DiplomacyModel.GetEffectiveRelation`, which adds up to plus or minus 4 from Honor, Valor and Mercy, so a
+threshold of 0 could hide them from a player whose Honor opposes the companion's (the trait term is a product
+of both heroes' trait levels). `ChangeRelationAction` likewise scales a positive change only, by Charm and
+Honor.
+- **Why missed:** the getter's name reads like a stored value; nobody opened its body.
+- **Prevent:** before using an engine getter as a threshold, read its body for model calls; state the model's
+  terms in the feature doc.
+- **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 7.

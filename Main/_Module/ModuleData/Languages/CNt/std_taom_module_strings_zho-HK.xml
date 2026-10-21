@@ -6300,6 +6300,28 @@
 
     <string id="taom_namegiving_taken" text="Another place already bears that name." />
 
+    <string id="taom_oath_terms" text="I do not take the road for nothing. My price is {TAOM_OATH_TERMS}. Will you meet it?" />
+
+    <string id="taom_oath_accept" text="It is agreed. Take it, and ride with me." />
+
+    <string id="taom_oath_decline" text="Not yet." />
+
+    <string id="taom_oath_locked_generic" text="Not yet. Prove yourself first, then ask me again." />
+
+    <string id="taom_oath_coop_hint" text="Only the host can seal an oath in a shared campaign." />
+
+    <string id="taom_oath_missing_hint" text="You still need: {TAOM_OATH_MISSING}" />
+
+    <string id="taom_oath_topics_open" text="There is something I would ask you." />
+
+    <string id="taom_oath_topics_npc" text="Ask, then." />
+
+    <string id="taom_oath_hint_purse" text="You cannot afford that." />
+
+    <string id="taom_oath_hint_cooldown" text="Not so soon after the last time." />
+
+    <string id="taom_oath_reply_fallback" text="Another time, perhaps." />
+
   </strings>
 
 </base>

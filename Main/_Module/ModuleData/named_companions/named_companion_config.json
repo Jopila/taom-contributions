@@ -1,9 +1,31 @@
 [
   {
     "character_id": "named_companion_aragorn",
-    "spawn_settlement": "town_EN2",
+    "spawn_settlement": "town_AN3",
     "race": "human",
-    "enabled": true
+    "enabled": true,
+    "stay_at_home": true,
+    "hire_terms": { "gold": 75000 },
+    "topics": [
+      {
+        "id": "aragorn_first",
+        "prompt_string_id": "taom_oath_aragorn_first_prompt",
+        "reply_string_id": "taom_oath_aragorn_first_reply",
+        "once": true,
+        "relation_gain": 2,
+        "sets_flags": ["aragorn.dunedain_told"]
+      },
+      {
+        "id": "aragorn_second",
+        "prompt_string_id": "taom_oath_aragorn_second_prompt",
+        "reply_string_id": "taom_oath_aragorn_second_reply",
+        "min_relation": 5,
+        "requires_flags": ["aragorn.dunedain_told"],
+        "once": true,
+        "relation_gain": 3,
+        "sets_flags": ["aragorn.dunedain_trusted"]
+      }
+    ]
   },
   {
     "character_id": "named_companion_legolas",
@@ -15,7 +37,29 @@
     "character_id": "named_companion_gimli",
     "spawn_settlement": "town_E1",
     "race": "dwarf",
-    "enabled": true
+    "enabled": true,
+    "stay_at_home": true,
+    "hire_terms": { "gold": 50000 },
+    "topics": [
+      {
+        "id": "gimli_first",
+        "prompt_string_id": "taom_oath_gimli_first_prompt",
+        "reply_string_id": "taom_oath_gimli_first_reply",
+        "once": true,
+        "relation_gain": 2,
+        "sets_flags": ["gimli.erebor_told"]
+      },
+      {
+        "id": "gimli_second",
+        "prompt_string_id": "taom_oath_gimli_second_prompt",
+        "reply_string_id": "taom_oath_gimli_second_reply",
+        "min_relation": 5,
+        "requires_flags": ["gimli.erebor_told"],
+        "once": true,
+        "relation_gain": 3,
+        "sets_flags": ["gimli.erebor_trusted"]
+      }
+    ]
   },
   {
     "character_id": "named_companion_swan",

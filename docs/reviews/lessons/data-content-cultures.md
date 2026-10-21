@@ -2170,3 +2170,13 @@ The four minor clans' leader templates (`spc_legion_of_the_betrayed_leader_*` an
 - **Why missed:** the clan files name the templates and nothing in the clan files names who else uses them; the user of a template is found in the culture files.
 - **Prevent:** before retagging a shared `NPCCharacter`, grep every module's culture XML for its id (`lord_templates`, `rebellion_hero_templates`, `notable_templates`). A template with a second user is cloned under a new id (`taom_` plus the original), the owner is pointed at the clone, and the original stays vanilla. Pin it: the clone equals the original except id and culture, and the original is unchanged (`LeaderClones_AreTheOriginalsWithOnlyTheIdAndCultureChanged`). Never rename or remove the clone: a save holds it by id in the clan's list and in each leader's origin character.
 - **Source:** `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, wave 1, minor-clan cultures.
+### Check a settlement id against the live map before a feature pins anything to it (Oaths of Service, 2026-10-19)
+Aragorn's named-companion spawn `town_EN2` was documented as Bree for months; the live `TAOM_Map` names it
+Carreglyn in Dunland. It only mattered as a starting point until a new `stay_at_home` flag returned him there
+every day.
+- **Why missed:** the repo's `settlements.xml` is a stale shadow that names the town differently again, so no
+  in-repo read could disagree, and the builder reused an existing id without re-reading what it is.
+- **Prevent:** when a change gives an existing settlement id a new, stronger role (a home, a daily target, a
+  spawn), read its row in the live `TAOM_Map/ModuleData/settlements.xml` and land a `LiveInstall` test that the
+  config's ids resolve (`NamedCompanionShippedDataTests`).
+- **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 1.

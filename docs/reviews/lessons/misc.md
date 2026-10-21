@@ -636,3 +636,12 @@ entering the worktree did not help.
   `check-moduledata-validation.sh`, `check-doc-config-drift.sh`, `check-commit-subject-version.sh` and
   `block-broad-git-add.sh`.
 - **Source:** `docs/reviews/rca-upstream-review-i3-2026-10-16.md` findings 12, 16 and 17.
+
+### A feature that adds lines to a token another feature owns updates that feature's comments and docs (Oaths of Service, 2026-10-19)
+Oaths of Service added two NPC lines to vanilla's `companion_hire`, which Wanderer Allegiance also uses.
+WA's module comment still said its lines were the only TAOM lines there, and WA's doc filed the interaction
+under its non-goals.
+- **Why missed:** the builder read WA's dialog behavior for the priority, not its module comment or doc.
+- **Prevent:** grep the token id across `Main/` and `docs/` before adding a line to it, and update every
+  comment or doc that describes who uses that token.
+- **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 13.

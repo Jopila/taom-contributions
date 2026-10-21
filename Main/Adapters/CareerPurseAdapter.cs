@@ -16,4 +16,14 @@ public class CareerPurseAdapter : ICareerPurseAdapter
             GiveGoldAction.ApplyBetweenCharacters(hero, null, amount);
         return true;
     }
+
+    public bool GrantGold(int amount)
+    {
+        var hero = Hero.MainHero;
+        if (hero == null || amount <= 0)
+            return false;
+        // A null giver is valid in GiveGoldAction.ApplyInternal: only a non-null hero or party is debited.
+        GiveGoldAction.ApplyBetweenCharacters(null, hero, amount);
+        return true;
+    }
 }

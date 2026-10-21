@@ -52,9 +52,9 @@ The `<Hero>` row that a named companion also needs has only two attributes worth
 | `id` | string | yes | crash | Must match an `<NPCCharacter>` id exactly. `Hero.Deserialize` looks the character up by this id and dereferences it one line later | `Hero.cs:1805-1807` |
 | `faction` | ref, `Faction.<clan_id>` | yes | `NullReferenceException` | Which clan the hero joins. The literal value `Faction.neutral` is the engine's escape hatch: the id is read, compared, and the clan assignment is skipped, leaving the companion clanless | `Hero.cs:1834-1835` |
 
-The JSON config that places a named companion has four fields, all read by TAOM code rather than the engine.
+The JSON config that places a named companion has eight fields, all read by TAOM code rather than the engine. The last four belong to [Oaths of Service](../features/oaths-of-service.md), which documents their shape and validation.
 
-<!-- engine-ref type="TAOM.Features.NamedCompanions.Domain.NamedCompanionDefinition" file="Main/Features/NamedCompanions/Domain/NamedCompanionDefinition.cs" lines="5-18" -->
+<!-- engine-ref type="TAOM.Features.NamedCompanions.Domain.NamedCompanionDefinition" file="Main/Features/NamedCompanions/Domain/NamedCompanionDefinition.cs" lines="6-38" -->
 
 | Field | Type | Required | Default when absent | What it does | Read at (file:line) |
 |---|---|---|---|---|---|
@@ -62,6 +62,10 @@ The JSON config that places a named companion has four fields, all read by TAOM 
 | `spawn_settlement` | string | yes | placement throws and is logged | A settlement id, for example `town_E1` | `NamedCompanionDefinition.cs:11` |
 | `race` | string | yes | race stays whatever the XML gave | Re-applied at spawn as insurance over the XML `race=` | `NamedCompanionDefinition.cs:14` |
 | `enabled` | bool | no | `true` | Set `false` to park a companion without deleting anything | `NamedCompanionDefinition.cs:17` |
+| `home_settlement` | string | no | the spawn settlement | Where `stay_at_home` sends the companion each day; an unknown id is cleared with a warning. Spawn and re-place on load still use `spawn_settlement`, so a different home means the companion walks there after the first anchor run | `NamedCompanionDefinition.cs:24` |
+| `stay_at_home` | bool | no | `false` | While unrecruited, the companion returns to `home_settlement`, else `spawn_settlement`, on the first hourly tick after each daily tick | `NamedCompanionDefinition.cs:28` |
+| `hire_terms` | object | no | absent (vanilla hire) | Gold, items and flags the companion asks before joining; see [oaths-of-service.md](../features/oaths-of-service.md) | `NamedCompanionDefinition.cs:32` |
+| `topics` | list | no | empty | Extra dialog topics with relation, flag, gold and cooldown rules; see [oaths-of-service.md](../features/oaths-of-service.md) | `NamedCompanionDefinition.cs:36` |
 
 ## Child elements
 
@@ -253,7 +257,7 @@ Code: No code changes needed
 - **The 119 named-companion backstory strings are not reachable on the current code path.** The dialogue that reads them hangs off `start_wanderer_unmet`, which is gated by `ConversationUseMeetingDialogs`, which returns false as soon as the hero's `HasMet` flag is set (`LordConversationsCampaignBehavior.cs:221, 609-618, 1222-1226`); TAOM sets that flag on every companion at placement (`Main/Features/NamedCompanions/NamedCompanionService.cs:54`, `Main/Adapters/NamedCompanionAdapter.cs:82-86`). The same branch would also break on a companion anyway, because it keys the lookup off `Hero.Template.StringId` and `Hero.Template` is null for a hero built from `heroes.xml` rather than cloned from a template (`Hero.cs:298`, `CharacterObject.cs:419`). **TAOM has never recorded an in-game check of this.** [named-companions.md](../features/named-companions.md) claims the vanilla flow triggers; if you want to settle it, talk to a companion in game and see which lines appear.
 - **Vanilla's wanderer introduction dereferences one hardcoded settlement id.** `Settlement.FindFirst(x => x.StringId == "town_ES4")` is called with no null guard while setting up the backstory text, so deleting or renaming `town_ES4` would crash the first conversation with any generated wanderer. It still exists in the live `TAOM_Map/ModuleData/settlements.xml`. `LordConversationsCampaignBehavior.cs:1751`. <!-- measured: grep -c 'id="town_ES4"' on the live TAOM_Map settlements.xml 2026-09-05 -->
 - **The two wanderer generators overwrite four files with no dry run and no backup.** `tools/extract_wanderers.py` and `tools/generate_batch2_wanderers.py` take no arguments and write in place. Worse, both write `Main/_Module/ModuleData/taom_wanderer_equipment.xml`, at the ModuleData root, while the file the game actually loads is `Main/_Module/ModuleData/equipmentsets/taom_wanderer_equipment.xml` (`SubModule.xml:771`). Running either leaves a stray root-level file the engine never reads and the real roster untouched. `tools/generate_batch2_wanderers.py:11-12, 605, 651-658`, `tools/extract_wanderers.py:18, 458-460`.
-- **Nothing in the test suite reads the shipped companion data.** Both `TAOM.Tests/Features/NamedCompanions/` test files use mocks and a temp directory, so the 1:1:1:7 agreement between `named_companions.xml`, `heroes.xml`, `named_companion_config.json` and the strings file is held by hand. It agrees today. `TAOM.Tests/Features/NamedCompanions/NamedCompanionConfigProviderTests.cs:21-25`.
+- **Only part of the shipped companion data is read by the test suite.** `NamedCompanionShippedDataTests` checks the config's text ids and spawn settlements, and `OathConfigValidatorTests.ShippedConfig_HasNoReversions` validates the oath fields, but the 1:1:1:7 agreement between `named_companions.xml`, `heroes.xml`, `named_companion_config.json` and the strings file is still held by hand. It agrees today. `TAOM.Tests/Features/NamedCompanions/NamedCompanionConfigProviderTests.cs:21-25`.
 - **The player-switcher feature offers wanderers as takeover targets only for cultures that have them,** which is 23 of TAOM's cultures. That is the same 23 counted below, and it is why an empty wanderer list in a new culture makes the switcher look broken. [player-switcher.md](../features/player-switcher.md).
 
 ## Numbers in this chapter

@@ -902,3 +902,12 @@ declaration against the kingdom whose war list the engine was iterating could th
   which runs before `MapEventManager.OnAfterLoad`. No gate enforces the 150-line entry-point limit
   (ADR-002); check `wc -l` against HEAD when a behavior grows.
 - **Source:** `docs/reviews/rca-enlistment-wars-during-service-2026-10-20.md` F1, F2.
+### A daily job that must win against a vanilla daily job runs on the next hourly tick (Oaths of Service, 2026-10-19)
+The named-companion home anchor ran on `DailyTickEvent`, and vanilla `CompanionsCampaignBehavior.SwapCompanions`
+moves unhired wanderers on the same event. Campaign listeners run newest-first, so vanilla's (added in
+`SandBoxManager.Initialize`, before TAOM's behaviors) ran last and could undo the anchor for a day.
+- **Why missed:** the rule that listeners run newest-first was already written (`state-lifecycle-save.md`), but
+  the plan's research asked only whether vanilla moves wanderers, not which daily listener runs last.
+- **Prevent:** when a TAOM daily listener must have the last word over a vanilla daily listener, raise a flag on
+  the daily tick and act on the next `HourlyTickEvent`; pin daily-alone, hourly-once and hourly-twice.
+- **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 3.

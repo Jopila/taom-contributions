@@ -85,6 +85,12 @@ settlement menu's "Talk", which share the token graph.
 The priority is explicit rather than relying on registration order: campaign-event listeners
 dispatch LIFO, so whose `OnSessionLaunched` registers first is not something to build on.
 
+[Oaths of Service](oaths-of-service.md) adds two more NPC lines on `companion_hire`, at priority 105,
+for named companions with custom hire terms. They sit under the refusals (110) and over vanilla (100).
+Because the first true line in priority order answers, a refusal here always answers before an oath
+line is tried, so this verdict is kept by priority alone and the oath lines do not re-ask it. Both
+priorities are pinned by `OathsOfServiceWiringTests`.
+
 ### The rule
 
 `WandererAllegianceService.Evaluate(wandererHeroId, wandererCultureId, player)`, where `player` is the player clan's map faction id with that faction's culture (`FactionSides.OfPlayer()`):
@@ -207,7 +213,7 @@ two MCM properties.
 
 New campaigns, each a couple of minutes:
 
-1. Mordor character, walk into Bree (`town_EN2`), talk to Aragorn in the tavern, pick "I can use someone like you in my company." Expected: the Free refusal line, then "Is there anything else?", the option list again, gold unchanged. Companion list unchanged.
+1. Mordor character, walk into Bree (`town_AN3`), talk to Aragorn in the tavern, pick "I can use someone like you in my company." Expected: the Free refusal line, then "Is there anything else?", the option list again, gold unchanged. Companion list unchanged.
 2. Gondor character, Isengard (`town_isengard`), Maztog: the Evil refusal line.
 3. Umbar (Neutral) character, kingdomless: hires a Gondor wanderer and a Mordor wanderer normally.
 4. Mordor character and a generic `spc_wanderer_mordor_*` in any tavern: vanilla hire, price and all.
@@ -226,6 +232,7 @@ New campaigns, each a couple of minutes:
 
 ## Changelog
 
+- 2026-10-19: Oaths of Service (#904) adds hire lines at priority 105 on the same token; the refusals at 110 still answer first by priority.
 - 2026-10-20 (#957, part 2): the player's side is one `SideIds` (the clan's map faction with that faction's culture) instead of the kingdom id with the player clan's or hero's culture; `Evaluate` takes it as its third argument.
 - 2026-09-12: initial feature (#575). Two condition-gated NPC lines on vanilla's `companion_hire` token; culture-keyed, symmetric, Neutral serves anyone; MCM toggle and scope dropdown.
 

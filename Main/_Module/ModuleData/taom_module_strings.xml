@@ -2885,6 +2885,19 @@
 	<!-- Wanderer Allegiance (#575): a wanderer refusing to be hired across the Free/Evil line -->
 	<string id="taom_wa_refuse_free" text="{=taom_wa_refuse_free}No. I know whose war you fight, and I will not carry a blade for the Shadow, not for any price. Find another sword." />
 	<string id="taom_wa_refuse_evil" text="{=taom_wa_refuse_evil}You march with the Elf-friends. My own people would have my head for taking your coin, and yours would sooner see me hanged than armed. No." />
+
+	<!-- Oaths of Service (#904) -->
+	<string id="taom_oath_terms" text="{=taom_oath_terms}I do not take the road for nothing. My price is {TAOM_OATH_TERMS}. Will you meet it?" />
+	<string id="taom_oath_accept" text="{=taom_oath_accept}It is agreed. Take it, and ride with me." />
+	<string id="taom_oath_decline" text="{=taom_oath_decline}Not yet." />
+	<string id="taom_oath_locked_generic" text="{=taom_oath_locked_generic}Not yet. Prove yourself first, then ask me again." />
+	<string id="taom_oath_coop_hint" text="{=taom_oath_coop_hint}Only the host can seal an oath in a shared campaign." />
+	<string id="taom_oath_missing_hint" text="{=taom_oath_missing_hint}You still need: {TAOM_OATH_MISSING}" />
+	<string id="taom_oath_topics_open" text="{=taom_oath_topics_open}There is something I would ask you." />
+	<string id="taom_oath_topics_npc" text="{=taom_oath_topics_npc}Ask, then." />
+	<string id="taom_oath_hint_purse" text="{=taom_oath_hint_purse}You cannot afford that." />
+	<string id="taom_oath_hint_cooldown" text="{=taom_oath_hint_cooldown}Not so soon after the last time." />
+	<string id="taom_oath_reply_fallback" text="{=taom_oath_reply_fallback}Another time, perhaps." />
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
 	<!-- SupplyLines -->
 	<string id="taom_sl_search_placeholder" text="{=taom_sl_search_placeholder}Search goods in every market" />

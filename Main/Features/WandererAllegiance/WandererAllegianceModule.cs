@@ -9,9 +9,9 @@ namespace TAOM.Features.WandererAllegiance;
 /// IoC.cs. Two dimensions only: the service graph and one stateless dialog behavior. No patch, no
 /// model, no mission behavior, and the behavior's SyncData is empty, so the module owns no save
 /// data. The behavior stays a container singleton, as SubModule resolved it before. Adding it after
-/// every hand-wired behavior is order-free: its two lines are the only TAOM lines on companion_hire
-/// and outrank vanilla's reply by priority (110 over 100), and LotrIssueSuppression.SuppressAll
-/// removes only vanilla issue types.
+/// every hand-wired behavior is order-free: its two lines outrank vanilla's reply by priority (110 over
+/// 100) and Oaths of Service's hire lines (105), so registration order does not matter, and
+/// LotrIssueSuppression.SuppressAll removes only vanilla issue types.
 /// </summary>
 internal sealed class WandererAllegianceModule : TaomFeatureModule
 {
