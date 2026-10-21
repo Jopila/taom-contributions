@@ -4154,3 +4154,11 @@ A read-only XSLT transform a review agent started hung for more than four hours 
 - **Why missed:** the script had no time limit and nothing reported it as stuck.
 - **Prevent:** run scratch transforms through `timeout` (or `Start-Process` with a wait limit), and when a repo file will not open for writing, look for this session's own stale processes first.
 - **Source:** `docs/reviews/rca-followups-949-952-2026-10-20.md`, process note.
+### Search the open issues before filing one (#922, 2026-10-19)
+#919 and #922 were filed by two sessions for the harvest tool's doubled blank line while #781 (same bug, same fix) and
+#702 (which names it as its second defect) were already open, and both sessions wrote the same fix. Each wrote its
+issue straight from a review finding.
+- **Why missed:** the `/issue` skill had no search step, and a review finding reads like new information.
+- **Prevent:** `gh issue list --state open --search "<file or symptom>"` before `gh issue create`; update or comment on
+  an existing issue instead. The `/issue` skill now does this as its first step.
+- **Source:** `docs/reviews/rca-coop-gate-test-and-harvest-2026-10-19.md` finding 1.
