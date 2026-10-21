@@ -71,6 +71,7 @@ Table of current configuration values with notes explaining the choices.
 
 - `TAOM.Tests/Features/<Name>/ServiceTests.cs` — N tests covering [summary]
 - `TAOM.Tests/Features/<Name>/BehaviorTests.cs` — N tests covering [summary]
+- A campaign behavior declared by a feature module also needs its co-op row in `docs/features/coop-interop.md` (gated table or "Deliberately NOT gated"); `CoopGateDocCoverageTests` enforces it. Behaviors that predate the test are listed in its `Baseline` and still need classifying; behaviors added by hand in `Main/SubModule.cs` are not checked by the test but still need a row.
 
 ## How to [Common Operation]
 
