@@ -33,6 +33,9 @@ public sealed class FireAndTributeTuning
     public const int MaxHostDaysLimit = 365;
     public const float MaxHomeRadius = 50f;
     public const float MaxSpawnRadiusDays = 3f;
+    public const int MaxEnvoyUnitPrice = 1000000;
+    public const int MaxEnvoyDelayHours = 720;
+    public const int MaxEnvoyDelayDays = 60;
 
     /// <summary>Days after Full War begins before the first host may ride.</summary>
     public int FirstHostDelayDays { get; set; } = 45;
@@ -84,6 +87,28 @@ public sealed class FireAndTributeTuning
 
     /// <summary>The spawn point is found within this many days of travel of the anchor's gate, then retried around that point to get out of the player's sight, so it can land up to about twice this far away.</summary>
     public float SpawnRadiusDays { get; set; } = 0.25f;
+
+    /// <summary>Denars per price unit of the tribute (a unit is half the player's villages, rounded up, at least one).</summary>
+    public int EnvoyUnitPrice { get; set; } = 500;
+
+    /// <summary>The envoy arrives between this many and <see cref="EnvoyMaxDelayHours"/> hours after the host rides.</summary>
+    public int EnvoyMinDelayHours { get; set; } = 24;
+
+    public int EnvoyMaxDelayHours { get; set; } = 48;
+
+    /// <summary>Days the envoy waits when the player asks for time; the price stays and nothing is spared meanwhile.</summary>
+    public int EnvoyDelayDays { get; set; } = 7;
+
+    /// <summary>The chance a haggle succeeds at Charm 0.</summary>
+    public float HaggleBaseChance { get; set; } = 0.20f;
+
+    /// <summary>Added to the haggle chance for each point of the player's Charm.</summary>
+    public float HaggleChancePerCharm { get; set; } = 0.002f;
+
+    /// <summary>The haggle chance is kept between these two bounds.</summary>
+    public float HaggleMinChance { get; set; } = 0.10f;
+
+    public float HaggleMaxChance { get; set; } = 0.70f;
 
     [JsonExtensionData]
     public Dictionary<string, JToken>? Unknown { get; set; }

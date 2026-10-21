@@ -124,6 +124,14 @@ public sealed class FireAndTributeConfigProvider : IFireAndTributeConfigProvider
             MaxHostDays = Count("maxHostDays", t.MaxHostDays, 1, FireAndTributeTuning.MaxHostDaysLimit, d.MaxHostDays),
             HomeRadius = Float("homeRadius", t.HomeRadius, 0f, FireAndTributeTuning.MaxHomeRadius, true, d.HomeRadius),
             SpawnRadiusDays = Float("spawnRadiusDays", t.SpawnRadiusDays, 0f, FireAndTributeTuning.MaxSpawnRadiusDays, true, d.SpawnRadiusDays),
+            EnvoyUnitPrice = Count("envoyUnitPrice", t.EnvoyUnitPrice, 1, FireAndTributeTuning.MaxEnvoyUnitPrice, d.EnvoyUnitPrice),
+            EnvoyMinDelayHours = Count("envoyMinDelayHours", t.EnvoyMinDelayHours, 1, FireAndTributeTuning.MaxEnvoyDelayHours, d.EnvoyMinDelayHours),
+            EnvoyMaxDelayHours = Count("envoyMaxDelayHours", t.EnvoyMaxDelayHours, 1, FireAndTributeTuning.MaxEnvoyDelayHours, d.EnvoyMaxDelayHours),
+            EnvoyDelayDays = Count("envoyDelayDays", t.EnvoyDelayDays, 1, FireAndTributeTuning.MaxEnvoyDelayDays, d.EnvoyDelayDays),
+            HaggleBaseChance = Float("haggleBaseChance", t.HaggleBaseChance, 0f, 1f, false, d.HaggleBaseChance),
+            HaggleChancePerCharm = Float("haggleChancePerCharm", t.HaggleChancePerCharm, 0f, 1f, false, d.HaggleChancePerCharm),
+            HaggleMinChance = Float("haggleMinChance", t.HaggleMinChance, 0f, 1f, false, d.HaggleMinChance),
+            HaggleMaxChance = Float("haggleMaxChance", t.HaggleMaxChance, 0f, 1f, false, d.HaggleMaxChance),
         };
 
         if (s.MinTroops > s.MaxTroops)
@@ -143,6 +151,20 @@ public sealed class FireAndTributeConfigProvider : IFireAndTributeConfigProvider
             Reject("quotaExtraMin/quotaExtraMax", $"{s.QuotaExtraMin}/{s.QuotaExtraMax}", "an ordered pair (min at most max)", $"{d.QuotaExtraMin}/{d.QuotaExtraMax}");
             s.QuotaExtraMin = d.QuotaExtraMin;
             s.QuotaExtraMax = d.QuotaExtraMax;
+        }
+        if (s.EnvoyMinDelayHours > s.EnvoyMaxDelayHours)
+        {
+            Reject("envoyMinDelayHours/envoyMaxDelayHours", $"{s.EnvoyMinDelayHours}/{s.EnvoyMaxDelayHours}", "an ordered pair (min at most max)", $"{d.EnvoyMinDelayHours}/{d.EnvoyMaxDelayHours}");
+            s.EnvoyMinDelayHours = d.EnvoyMinDelayHours;
+            s.EnvoyMaxDelayHours = d.EnvoyMaxDelayHours;
+        }
+        if (s.HaggleMinChance > s.HaggleMaxChance)
+        {
+            var shown = System.Globalization.CultureInfo.InvariantCulture;
+            Reject("haggleMinChance/haggleMaxChance", $"{s.HaggleMinChance.ToString(shown)}/{s.HaggleMaxChance.ToString(shown)}", "an ordered pair (min at most max)",
+                $"{d.HaggleMinChance.ToString(shown)}/{d.HaggleMaxChance.ToString(shown)}");
+            s.HaggleMinChance = d.HaggleMinChance;
+            s.HaggleMaxChance = d.HaggleMaxChance;
         }
         return s;
     }

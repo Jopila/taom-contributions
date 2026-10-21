@@ -2217,6 +2217,11 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Shadow Hosts", Order = 3, RequireRestart = false,
         HintText = "When enabled (default), the hosts of Gundabad, Rhûn, Harad and Dunland, and the Blacklocks of Erebor, may ride against the Free Peoples' realms. Does nothing while Enable Fire and Tribute is off.")]
     public bool FireAndTributeEvilHosts { get; set; } = true;
+
+    [SettingPropertyGroup("World/Fire and Tribute")]
+    [SettingPropertyBool("Tribute Envoys", Order = 4, RequireRestart = false,
+        HintText = "When enabled (default), a host that rides against your kingdom sends an envoy a day or two later, if your clan owns villages and you are not enlisted. The envoy asks for gold, at a price that grows with your villages and with each envoy you have seized. Pay and the host raids none of your clan's villages and never attacks your party; haggle once (a Charm roll) when the tribute is large; ask for time; refuse; or seize the envoy, after which that side's next host rides against your kingdom first. Shown only while the map is free. When off, no envoy is scheduled or shown. Single player only. Applies at once, no restart.")]
+    public bool FireAndTributeEnvoys { get; set; } = true;
     // --- Bonds of Battle (relations earned on campaign, docs/features/bonds-of-battle.md) ---
     //
     // Every value is read live where it is used (at a battle's end, a troop hand-over, a barter), so nothing is applied once

@@ -22,4 +22,6 @@ public sealed class FireAndTributeSettingsProvider : IFireAndTributeSettings
     public bool NeutralHostsEnabled => Settings?.FireAndTributeNeutralHosts ?? true;
 
     public bool EvilHostsEnabled => Settings?.FireAndTributeEvilHosts ?? true;
+
+    public bool EnvoysEnabled => Settings?.FireAndTributeEnvoys ?? true;
 }

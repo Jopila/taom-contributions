@@ -170,8 +170,9 @@ public sealed class RaidHostAdapter : IRaidHostAdapter
     {
         var settlement = village.Settlement;
         var at = settlement.Position.ToVec2();
+        // The owner is the bound fief's clan (Settlement.OwnerClan reads Village.Bound.OwnerClan, which would throw with no bound fief).
         return new VillageReading(true, KingdomIdOf(village), village.VillageState == Village.VillageStates.Normal,
-            village.Hearth, settlement.StringId, at.x, at.y);
+            village.Hearth, settlement.StringId, at.x, at.y, village.Bound?.OwnerClan?.StringId);
     }
 
     public IReadOnlyList<VillageReading> ReadVillages()
@@ -225,6 +226,8 @@ public sealed class RaidHostAdapter : IRaidHostAdapter
                 InMapEvent = p.MapEvent != null,
                 InSettlement = p.CurrentSettlement != null,
                 IsAttached = p.AttachedTo != null,
+                IsMainParty = p.IsMainParty,
+                LeadsMainParty = army != null && army.LeaderParty == p && MobileParty.MainParty?.AttachedTo == p,
                 Strength = strength,
                 Speed = p.Speed,
                 Distance = p.Position.Distance(host.Position),
@@ -234,6 +237,14 @@ public sealed class RaidHostAdapter : IRaidHostAdapter
     }
 
     // ---- orders ------------------------------------------------------------------------------------------------------
+
+    public void SpareMainParty(string hostPartyId, int hours)
+    {
+        var host = FindParty(hostPartyId);
+        if (host?.Ai == null || !host.IsActive || hours <= 0)
+            return;
+        host.Ai.SetDoNotAttackMainParty(hours);
+    }
 
     public void OrderEngage(string hostPartyId, string targetPartyId)
     {

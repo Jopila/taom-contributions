@@ -104,7 +104,9 @@ public class FireAndTributeConfigProviderTests
         Write(@"{ ""tuning"": { ""firstHostDelayDays"": 10, ""spawnChance"": 0.25, ""cooldownDays"": 30, ""warlessStartDay"": 20,
             ""minTroops"": 10, ""maxTroops"": 90, ""strengthShare"": 0.5, ""strengthPerRaid"": 100, ""quotaMin"": 2, ""quotaMax"": 9,
             ""quotaExtraMin"": 1, ""quotaExtraMax"": 4, ""minHearth"": 25, ""nearestVillages"": 5, ""engageRadius"": 12,
-            ""engageStrengthRatio"": 1.5, ""maxHostDays"": 60, ""homeRadius"": 6, ""spawnRadiusDays"": 0.5 },
+            ""engageStrengthRatio"": 1.5, ""maxHostDays"": 60, ""homeRadius"": 6, ""spawnRadiusDays"": 0.5,
+            ""envoyUnitPrice"": 800, ""envoyMinDelayHours"": 12, ""envoyMaxDelayHours"": 36, ""envoyDelayDays"": 10,
+            ""haggleBaseChance"": 0.3, ""haggleChancePerCharm"": 0.004, ""haggleMinChance"": 0.2, ""haggleMaxChance"": 0.9 },
             ""hosts"": [ " + GoodHost + " ] }");
 
         var c = _sut.GetConfig();
@@ -129,6 +131,14 @@ public class FireAndTributeConfigProviderTests
         Assert.AreEqual(60, t.MaxHostDays);
         Assert.AreEqual(6f, t.HomeRadius);
         Assert.AreEqual(0.5f, t.SpawnRadiusDays);
+        Assert.AreEqual(800, t.EnvoyUnitPrice);
+        Assert.AreEqual(12, t.EnvoyMinDelayHours);
+        Assert.AreEqual(36, t.EnvoyMaxDelayHours);
+        Assert.AreEqual(10, t.EnvoyDelayDays);
+        Assert.AreEqual(0.3f, t.HaggleBaseChance);
+        Assert.AreEqual(0.004f, t.HaggleChancePerCharm);
+        Assert.AreEqual(0.2f, t.HaggleMinChance);
+        Assert.AreEqual(0.9f, t.HaggleMaxChance);
         var h = c.Hosts.Single();
         Assert.AreEqual("gundabad", h.Id);
         Assert.AreEqual(FactionSide.Evil, h.Side);
@@ -198,6 +208,30 @@ public class FireAndTributeConfigProviderTests
     [DataRow("nearestVillages", "11")]
     [DataRow("maxHostDays", "0")]
     [DataRow("maxHostDays", "9999")]
+    [DataRow("envoyUnitPrice", "0")]
+    [DataRow("envoyUnitPrice", "-500")]
+    [DataRow("envoyUnitPrice", "5000000")]
+    [DataRow("envoyMinDelayHours", "0")]
+    [DataRow("envoyMinDelayHours", "-1")]
+    [DataRow("envoyMinDelayHours", "10000")]
+    [DataRow("envoyMaxDelayHours", "0")]
+    [DataRow("envoyMaxDelayHours", "10000")]
+    [DataRow("envoyDelayDays", "0")]
+    [DataRow("envoyDelayDays", "-7")]
+    [DataRow("envoyDelayDays", "61")]
+    [DataRow("haggleBaseChance", "NaN")]
+    [DataRow("haggleBaseChance", "Infinity")]
+    [DataRow("haggleBaseChance", "-0.1")]
+    [DataRow("haggleBaseChance", "1.5")]
+    [DataRow("haggleChancePerCharm", "NaN")]
+    [DataRow("haggleChancePerCharm", "-0.001")]
+    [DataRow("haggleChancePerCharm", "2")]
+    [DataRow("haggleMinChance", "NaN")]
+    [DataRow("haggleMinChance", "-0.5")]
+    [DataRow("haggleMinChance", "1.5")]
+    [DataRow("haggleMaxChance", "NaN")]
+    [DataRow("haggleMaxChance", "-0.5")]
+    [DataRow("haggleMaxChance", "1.5")]
     public void GetConfig_InvalidTuningField_RevertsThatFieldAndWarns(string field, string value)
     {
         WriteTuning($"\"{field}\": {value}");
@@ -216,11 +250,17 @@ public class FireAndTributeConfigProviderTests
     [DataRow("\"minTroops\": 150, \"maxTroops\": 100", "minTroops/maxTroops")]
     [DataRow("\"quotaMin\": 9, \"quotaMax\": 3", "quotaMin/quotaMax")]
     [DataRow("\"quotaExtraMin\": 5, \"quotaExtraMax\": 1", "quotaExtraMin/quotaExtraMax")]
+    [DataRow("\"envoyMinDelayHours\": 60, \"envoyMaxDelayHours\": 30", "envoyMinDelayHours/envoyMaxDelayHours")]
+    [DataRow("\"haggleMinChance\": 0.8, \"haggleMaxChance\": 0.3", "haggleMinChance/haggleMaxChance")]
     public void GetConfig_UnorderedPair_RevertsBothAndWarns(string body, string pair)
     {
         WriteTuning(body);
 
         var t = _sut.GetConfig().Tuning;
+        Assert.AreEqual(24, t.EnvoyMinDelayHours);
+        Assert.AreEqual(48, t.EnvoyMaxDelayHours);
+        Assert.AreEqual(0.10f, t.HaggleMinChance);
+        Assert.AreEqual(0.70f, t.HaggleMaxChance);
 
         Assert.AreEqual(80, t.MinTroops);
         Assert.AreEqual(200, t.MaxTroops);
@@ -234,7 +274,8 @@ public class FireAndTributeConfigProviderTests
     [TestMethod]
     public void GetConfig_EqualPairBounds_AreAccepted()
     {
-        WriteTuning("\"minTroops\": 90, \"maxTroops\": 90, \"quotaMin\": 7, \"quotaMax\": 7, \"quotaExtraMin\": 2, \"quotaExtraMax\": 2");
+        WriteTuning("\"minTroops\": 90, \"maxTroops\": 90, \"quotaMin\": 7, \"quotaMax\": 7, \"quotaExtraMin\": 2, \"quotaExtraMax\": 2, "
+            + "\"envoyMinDelayHours\": 30, \"envoyMaxDelayHours\": 30, \"haggleMinChance\": 0.4, \"haggleMaxChance\": 0.4");
 
         var t = _sut.GetConfig().Tuning;
 
@@ -243,6 +284,21 @@ public class FireAndTributeConfigProviderTests
         Assert.AreEqual(7, t.QuotaMin);
         Assert.AreEqual(2, t.QuotaExtraMax);
         _logger.DidNotReceive().LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void GetConfig_TheEnvoyDefaults_AreTheOnesTheDocumentationQuotes()
+    {
+        var t = new FireAndTributeTuning();
+
+        Assert.AreEqual(500, t.EnvoyUnitPrice);
+        Assert.AreEqual(24, t.EnvoyMinDelayHours);
+        Assert.AreEqual(48, t.EnvoyMaxDelayHours);
+        Assert.AreEqual(7, t.EnvoyDelayDays);
+        Assert.AreEqual(0.20f, t.HaggleBaseChance);
+        Assert.AreEqual(0.002f, t.HaggleChancePerCharm);
+        Assert.AreEqual(0.10f, t.HaggleMinChance);
+        Assert.AreEqual(0.70f, t.HaggleMaxChance);
     }
 
     [TestMethod]

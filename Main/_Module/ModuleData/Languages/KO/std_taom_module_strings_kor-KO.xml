@@ -6354,6 +6354,47 @@
     <string id="taom_longmemory_raid" text="The people of {VILLAGE} will long remember the raid." />
 
     <string id="taom_longmemory_coercion" text="The people of {VILLAGE} will long remember what was taken from them by force." />
+    <string id="taom_fat_envoy_haggle" text="Haggle over the price" />
+
+    <string id="taom_fat_envoy_haggle_hint" text="One try, and your Charm decides it. If you win, the price falls by a quarter." />
+
+    <string id="taom_fat_envoy_delay" text="Ask for time to decide" />
+
+    <string id="taom_fat_envoy_delay_hint" text="The envoy returns in {DAYS} {?DAYS>1}days{?}day{\?} at the same price. Nothing is spared until you pay." />
+
+    <string id="taom_fat_envoy_refuse" text="Send the envoy away" />
+
+    <string id="taom_fat_envoy_refuse_hint" text="The host raids your villages as it raids any others." />
+
+    <string id="taom_fat_envoy_seize" text="Seize the envoy" />
+
+    <string id="taom_fat_envoy_seize_hint" text="The next host of its side rides against your kingdom first, and every tribute after this one costs more." />
+
+    <string id="taom_fat_envoy_title" text="{HOST} Demands Tribute" />
+
+    <string id="taom_fat_envoy_body" text="An envoy rides up under a flag of truce. &quot;{HOST} marches against your kingdom, and every village of your clan ({VILLAGES} in all) lies in its path. Pay {PRICE} denars and its torches will pass them by. Refuse, and we shall see what is left of them.&quot;" />
+
+    <string id="taom_fat_envoy_answer" text="Answer the envoy" />
+
+    <string id="taom_fat_envoy_pay" text="Pay {PRICE} denars" />
+
+    <string id="taom_fat_envoy_pay_hint" text="{HOST} spares your clan's villages and does not attack your party." />
+
+    <string id="taom_fat_envoy_pay_poor" text="You have only {GOLD} denars." />
+
+    <string id="taom_fat_envoy_paid" text="You pay {PRICE} denars. {HOST} will pass your clan's villages by." />
+
+    <string id="taom_fat_envoy_poor" text="You cannot raise {PRICE} denars, and the envoy waits for your answer." />
+
+    <string id="taom_fat_envoy_haggle_won" text="The envoy bows to your words: the price falls to {PRICE} denars." />
+
+    <string id="taom_fat_envoy_haggle_lost" text="The envoy will not be moved: the price stays at {PRICE} denars." />
+
+    <string id="taom_fat_envoy_delayed" text="{HOST} will send its envoy back in {DAYS} {?DAYS>1}days{?}day{\?}. Your villages are not safe until you pay." />
+
+    <string id="taom_fat_envoy_refused" text="{HOST} hears your answer: its envoy rides away without a coin." />
+
+    <string id="taom_fat_envoy_seized" text="You seize the envoy. {HOST} will not forget it: the next host of its side rides against your kingdom first." />
 
   </strings>
 

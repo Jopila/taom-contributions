@@ -7,6 +7,7 @@ using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.Diplomacy;
 using TAOM.Features.Diplomacy.Models;
+using TAOM.Features.Enlistment;
 using TAOM.Features.EyeOfSauron;
 using TAOM.Features.Execution;
 using TAOM.Features.FireAndTribute;
@@ -154,6 +155,8 @@ internal sealed class FakeRaidHostAdapter : IRaidHostAdapter
         return Nearby.ToList();
     }
 
+    public void SpareMainParty(string hostPartyId, int hours) => Calls.Add($"spare:{hostPartyId}:{hours}");
+
     public void OrderEngage(string hostPartyId, string targetPartyId) => Calls.Add($"engage:{hostPartyId}:{targetPartyId}");
 
     public void OrderRaid(string hostPartyId, string villageId)
@@ -207,6 +210,101 @@ internal sealed class FakeFatSettings : IFireAndTributeSettings
     public bool NeutralHostsEnabled { get; set; } = true;
 
     public bool EvilHostsEnabled { get; set; } = true;
+
+    public bool EnvoysEnabled { get; set; } = true;
+}
+
+/// <summary>The player as the envoy reads them, and the purse it charges.</summary>
+internal sealed class FakeEnvoyPlayer : ITributeEnvoyAdapter
+{
+    public bool Exists { get; set; } = true;
+
+    public string? ClanId { get; set; } = "player_clan";
+
+    public string? KingdomId { get; set; } = "empire_w";
+
+    public int Gold { get; set; } = 100000;
+
+    public int Charm { get; set; }
+
+    /// <summary>The villages bound to the clan's fiefs, as the engine adapter sums them.</summary>
+    public int Villages { get; set; }
+
+    public bool ReadThrows { get; set; }
+
+    public List<int> Charged { get; } = new List<int>();
+
+    public EnvoyPlayerReading ReadPlayer()
+    {
+        if (ReadThrows)
+            throw new InvalidOperationException("player read failed");
+        return Exists ? new EnvoyPlayerReading(true, ClanId, KingdomId, Gold, Charm, Villages) : EnvoyPlayerReading.Missing;
+    }
+
+    public bool TryCharge(int amount)
+    {
+        if (amount < 0 || Gold < amount)
+            return false;
+        Gold -= amount;
+        Charged.Add(amount);
+        return true;
+    }
+}
+
+/// <summary>
+/// The envoy's popup and lines: the offers shown, the callback held, the outcomes told. Like the engine's gate the map is not
+/// free while this popup is open, and a popup closed by <see cref="Hide"/> (a load, <c>HideInquiry</c>) runs no callback.
+/// </summary>
+internal sealed class FakeEnvoyPresenter : IEnvoyPresenterAdapter
+{
+    public bool MapFree { get; set; } = true;
+
+    public bool ShowThrows { get; set; }
+
+    public bool OutcomeThrows { get; set; }
+
+    public bool IsOpen { get; private set; }
+
+    public List<EnvoyOffer> Offers { get; } = new List<EnvoyOffer>();
+
+    public List<(EnvoyOutcome Outcome, string Host, int Price, int Days)> Outcomes { get; } = new List<(EnvoyOutcome, string, int, int)>();
+
+    public Action<EnvoyChoice>? OnChosen { get; private set; }
+
+    public EnvoyOffer? Last => Offers.Count == 0 ? null : Offers[Offers.Count - 1];
+
+    public bool IsMapFree() => MapFree && !IsOpen;
+
+    public void ShowOffer(EnvoyOffer offer, Action<EnvoyChoice> onChosen)
+    {
+        if (ShowThrows)
+            throw new InvalidOperationException("popup failed");
+        Offers.Add(offer);
+        OnChosen = onChosen;
+        IsOpen = true;
+    }
+
+    public void ShowOutcome(EnvoyOutcome outcome, string keyedHostName, int price, int days)
+    {
+        if (OutcomeThrows)
+            throw new InvalidOperationException("message failed");
+        Outcomes.Add((outcome, keyedHostName, price, days));
+    }
+
+    /// <summary>
+    /// The player clicks an option. As in the engine, the callback runs while the popup is still open (the map is not
+    /// free), and the popup closes afterwards; a popup the callback showed takes its place.
+    /// </summary>
+    public void Choose(EnvoyChoice choice)
+    {
+        var callback = OnChosen ?? throw new InvalidOperationException("no popup is open");
+        int shownBefore = Offers.Count;
+        callback(choice);
+        IsOpen = Offers.Count > shownBefore;
+    }
+
+    /// <summary>The popup closes with no answer and no callback, as a load or the engine's <c>HideInquiry</c> closes it.</summary>
+    public void Hide() => IsOpen = false;
 }
 
 internal sealed class FakeFatSnapshots : IKingdomWarSnapshotAdapter
@@ -306,6 +404,12 @@ internal sealed class FireAndTributeRig
 
     public FakeFatConfigProvider ConfigProvider { get; } = new FakeFatConfigProvider();
 
+    public FakeEnvoyPlayer Player { get; } = new FakeEnvoyPlayer();
+
+    public FakeEnvoyPresenter Presenter { get; } = new FakeEnvoyPresenter();
+
+    public IEnlistmentStateQuery Enlistment { get; } = Substitute.For<IEnlistmentStateQuery>();
+
     public IWarOfTheRingService WarOfTheRing { get; } = Substitute.For<IWarOfTheRingService>();
 
     public ICoopSessionProvider Coop { get; } = Substitute.For<ICoopSessionProvider>();
@@ -340,7 +444,7 @@ internal sealed class FireAndTributeRig
         }
 
         Service = new FireAndTributeService(Adapter, Notices, ConfigProvider, Settings, Snapshots, Alignment,
-            WarOfTheRing, Coop, Dedicated, Random, Logger);
+            WarOfTheRing, Coop, Dedicated, Random, Player, Presenter, Enlistment, Logger);
         // The engine raises the destroy event inside the removal.
         Adapter.OnDespawned = Service.OnPartyDestroyed;
     }
@@ -395,6 +499,40 @@ internal sealed class FireAndTributeRig
 
     public IReadOnlyList<RaidHostRecord> LiveRecords() =>
         FireAndTributeSaveCodec.Parse(Service.CaptureState()).Hosts;
+
+    public FireAndTributeState State() => FireAndTributeSaveCodec.Parse(Service.CaptureState());
+
+    /// <summary>Changes the saved record and loads it back, as a save edited between two sessions would be.</summary>
+    public void Edit(Action<FireAndTributeState> change)
+    {
+        var state = State();
+        change(state);
+        Service.LoadFrom(FireAndTributeSaveCodec.Serialize(state));
+    }
+
+    /// <summary>
+    /// Gives the player's clan <paramref name="count"/> villages of the kingdom, all far from the host (x 300 and up) so
+    /// none is the nearest raid target, and returns their ids.
+    /// </summary>
+    public List<string> OwnVillages(int count, string kingdomId = "empire_w")
+    {
+        var ids = new List<string>();
+        for (int i = 1; i <= count; i++)
+        {
+            string id = "player_v" + i;
+            Adapter.Put(new VillageReading(true, kingdomId, true, 400f, id, 300f + i, 100f, "player_clan"));
+            ids.Add(id);
+        }
+        Player.Villages = Adapter.Villages.Count(v => v.OwnerClanId == "player_clan");
+        return ids;
+    }
+
+    /// <summary>The player's clan holds no village any more.</summary>
+    public void DisownVillages()
+    {
+        Adapter.Villages.RemoveAll(v => v.OwnerClanId == "player_clan");
+        Player.Villages = 0;
+    }
 
     public FatParty PartyOf(RaidHostRecord record) => Adapter.Parties[record.PartyId];
 

@@ -59,6 +59,13 @@ public interface IRaidHostAdapter
     /// </summary>
     IReadOnlyList<NearbyParty> PartiesNear(string hostPartyId, float radius);
 
+    /// <summary>
+    /// Has the engine's own party AI leave the player's party alone for <paramref name="hours"/> (the call vanilla's
+    /// safe-passage bribe makes, <c>MobilePartyAi.SetDoNotAttackMainParty</c>). It only ever lengthens the span. A
+    /// missing or inactive party is a no-op.
+    /// </summary>
+    void SpareMainParty(string hostPartyId, int hours);
+
     void OrderEngage(string hostPartyId, string targetPartyId);
 
     void OrderRaid(string hostPartyId, string villageId);
