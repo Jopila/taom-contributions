@@ -789,7 +789,9 @@ for hookfile in .claude/hooks/*.sh .claude/skills/freeze/check-freeze.sh; do
     ERRFILE=$(mktemp 2>/dev/null) || ERRFILE="$SANDBOX/stderr.$$"
     # The payload holds every gate's prefilter word (commit, push, no-verify, git, graphify), so
     # each blocking gate gets past its prefilter and must reach its taom_pybin_degraded branch.
-    OUT=$(printf '%s' '{"tool_name":"Bash","tool_input":{"command":"git push --force origin master && git commit --no-verify -m x && graphify update x"},"hook_event_name":"PreToolUse"}' \
+    # check-bash-length.sh's trigger is length, not a word: pad its command past the prefilter.
+    PAD=""; [[ "$name" == check-bash-length.sh ]] && PAD=" # $(printf 'x%.0s' {1..6000})"
+    OUT=$(printf '{"tool_name":"Bash","tool_input":{"command":"git push --force origin master && git commit --no-verify -m x && graphify update x%s"},"hook_event_name":"PreToolUse"}' "$PAD" \
           | timeout -k 2 10 env PATH="$STARVED_PATH" CLAUDE_PROJECT_DIR="$SANDBOX" TAOM_PYBIN= bash "$hookfile" 2>"$ERRFILE")
     RC=$?
     ERR=$(cat "$ERRFILE" 2>/dev/null); rm -f "$ERRFILE"
@@ -1898,7 +1900,9 @@ BT='`'; NL=$'\n'; V=${CSV_VER:-v0.0.0}
 # Bash registrations lost a gate that moved to a PowerShell-only group, and its parity row with it
 # (Codex review of plan 027). A tenth Bash gate fails until it is added here. `own` lists shell
 # hooks that read their command themselves: check-graphify-usage.sh is not a git gate, splits both
-# shells in tools/graphify_taom.py, and 7f checks it.
+# shells in tools/graphify_taom.py, and 7f checks it. check-bash-length.sh is not a git gate either:
+# it measures the raw Bash command, Bash only by design (the length limit is the Bash tool's), and 7l3
+# checks it.
 # validate-push.sh is in `own`: it reads and judges the push in one run of _shellwords.py verdict (#680).
 # Every other git gate reads through taom_hook_command (hook-authoring.md).
 G7E_GATES=$("$HPY" - <<'PY' | tr -d '\r'
@@ -1908,7 +1912,7 @@ pre = d.get('hooks', {}).get('PreToolUse', [])
 names = ["block-broad-git-add.sh", "block-dangerous-git.sh", "block-no-verify.sh",
          "check-claude-files-tracked.sh", "check-commit-subject-version.sh",
          "check-doc-config-drift.sh", "check-moduledata-validation.sh"]
-own = ["check-graphify-usage.sh", "validate-push.sh"]
+own = ["check-bash-length.sh", "check-graphify-usage.sh", "validate-push.sh"]
 extra = sorted({h['command'].rsplit('/', 1)[-1] for g in pre
                 if {'Bash', 'PowerShell'} & set(g.get('matcher', '').split('|'))
                 for h in g.get('hooks', [])} - set(names) - set(own))
