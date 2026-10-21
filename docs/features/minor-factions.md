@@ -73,7 +73,7 @@ SandBox/spclans.xml (vanilla)
 | File | Purpose |
 |------|---------|
 | `Main/_Module/ModuleData/spclans.xslt` | 14 XSLT templates overriding faction names, descriptions, settlements; the two clan culture retags (#957) and the four clans' `minor_faction_character_templates` pointed at the clones |
-| `Main/_Module/ModuleData/lords.xslt` | Retags the Grey Company, Corsair Blades, Beornings and Dunlending Reavers troops (`*_tier_*`) to their side's culture and clones the 16 leader templates as `taom_spc_*` (#957); mirrored in `tools/complete_lords_xslt.py` so a regeneration keeps it |
+| `Main/_Module/ModuleData/lords.xslt` | Retags the Grey Company, Corsair Blades, Beornings and Dunlending Reavers troops (`*_tier_*`) to their side's culture and clones the 16 leader templates as `taom_spc_*` (#957); a hand block that `tools/complete_lords_xslt.py --apply` never rewrites |
 | `Main/_Module/ModuleData/execution/alignment.json` | Four minor clan rows (`ghilman`, `skolderbrotva`, `forest_people`, `eleftheroi`); the clan's side while it serves no kingdom ([alignment-aware-execution.md](alignment-aware-execution.md)) |
 | `Main/_Module/ModuleData/custom_battle/custom_battle_harad_troop_filter.xslt` | Custom Battle only: marks the four clans' troops obsolete so the retag does not leak them into the Arthedain, Umbar, Dale and Dunland pickers |
 | `Main/Features/MinorClanMigration/` | `MinorClanMigrationService` (the decision), `Hooks/MinorClanMigrationBehavior.cs` (the `OnGameLoaded` boundary), `MinorClanMigrationModule.cs` (registration), `MinorClanFacts.cs` |
@@ -114,7 +114,7 @@ No runtime configuration. All data is in the XSLT and string table. To change a 
 - `TAOM.Tests/Features/Execution/ShippedClanSideCoverageTests.cs` (`LiveInstall`): the data gate for the clans' sides, troops, leader clones and the migration's targets, described once in [alignment-aware-execution.md](alignment-aware-execution.md) ("Tests")
 - `TAOM.Tests/Features/MinorClanMigration/MinorClanMigrationServiceTests.cs` (old culture to new, already new, missing clone, unknown clan, a refusing adapter, a second run) and `MinorClanMigrationWiringTests.cs` (the module line, no hand wiring, the guarded load handler)
 - `TAOM.Tests/Core/CustomBattleTroopFilterTests.cs`: the filter marks the four clans' troops obsolete in Custom Battle, leaves leaders, clones and other troops alone, keeps the Harad rule, and is registered for `CustomGame` only
-- `tools/tests/test_complete_lords_xslt.py`: the regenerated `lords.xslt` carries the retags and the clone template, and the shipped file carries the generator's block verbatim
+- `tools/tests/test_complete_lords_xslt.py`: `--apply` leaves the shipped `lords.xslt` (retags and clone template included) byte-identical
 - XSLT passthrough validation (all vanilla attributes preserved); string key format matches TAOM conventions
 
 ### In game
@@ -126,7 +126,7 @@ No runtime configuration. All data is in the XSLT and string table. To change a 
 
 ## Changelog
 
-- 2026-10-21 (#957, review fixes): `MinorClanMigration` brings an old save's clan cultures and leader templates to the shipped values on load; the Custom Battle troop filter hides the four clans' troops there; `tools/complete_lords_xslt.py` keeps the retag block; the `spclans.xslt` and `lords.xslt` comments say that the clone is saved by id and that the clan culture is saved.
+- 2026-10-21 (#957, review fixes): `MinorClanMigration` brings an old save's clan cultures and leader templates to the shipped values on load; the Custom Battle troop filter hides the four clans' troops there; `tools/complete_lords_xslt.py --apply` never rewrites the retag block; the `spclans.xslt` and `lords.xslt` comments say that the clone is saved by id and that the clan culture is saved.
 - 2026-10-20 (#957): The Grey Company's clan culture is `arthedain` and the Corsair Blades' is `umbar` (`spclans.xslt`), so each clan's own culture is its side; their `alignment.json` rows were not needed. Their troops (and the Beornings' and Dunlending Reavers') are retagged in `lords.xslt`, and the leader templates are cloned with the new cultures and named by the clans (#957).
 - 2026-04-06 — All 14 vanilla minor factions replaced with lore-appropriate Middle-earth equivalents via `spclans.xslt` (14 templates) + `taom_module_strings.xml` (42 strings); 3 settlement remaps and the Dunlending Reavers vlandia→empire culture change.
 - 2026-03-26 — Fixed `NullReferenceException` at `CharacterObject.get_StealthEquipments()` when spawning minor faction heroes (e.g. Ghilman) on new-game start, by setting `default_stealth_equipment_roster` in the 4 XSLT culture templates (`spcultures.xslt`).

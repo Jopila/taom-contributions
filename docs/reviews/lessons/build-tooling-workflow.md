@@ -480,27 +480,21 @@ templates and revert the party-size rescale with it.
 - **Prevent:** after editing any ModuleData file, grep `tools/` for writers of that filename. A
   regeneration is a silent revert, and it will not fail any gate.
 - **Source:** `docs/reviews/rca-black-numenorean-2026-08-17.md` finding 8.
-- **Repeat:** 2026-10-21 (#957): `tools/complete_lords_xslt.py --apply` rebuilds `lords.xslt` from scratch and would have dropped the minor-clan troop retags and the leader clone template, because only the #758 wanderer retag was a constant in the generator (the shipped file held the block, the regenerated one did not). The block is now `MINOR_CLAN_CULTURES`, emitted by `generate_xslt`, with a test that the generator emits it and a test that the shipped file carries it verbatim. Any non-lord block added to a generator-owned file goes into the generator in the same change. Source: `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, wave 2, finding D3.
+- **Repeat:** 2026-10-21 (#957): `tools/complete_lords_xslt.py --apply` then rebuilt `lords.xslt` from scratch and would have dropped the minor-clan troop retags and the leader clone template, because only the #758 wanderer retag was a constant in the generator. #957 first answered with another constant; #959 removed the cause: `--apply` now only adds missing lords and never rewrites an existing byte, so a hand block in `lords.xslt` is safe and needs no copy in the generator. The rule for any other generator-owned file stands: grep `tools/` for the writers of a file you edit. Source: `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, wave 2, finding D3.
 
 ### A regenerator that honours an override "only when present" restores the vanilla value when you delete it
-`tools/complete_lords_xslt.py` rebuilds `lords.xslt` from vanilla plus the overrides it parses back
-out of the current `lords.xslt`. For most attributes that round-trips a hand edit safely. For
-`is_female` it does not, because the male convention is to OMIT the attribute: deleting the line is
-indistinguishable from never having overridden it, so the next `--apply` copies vanilla's
-`is_female="true"` straight back in. The fix is a separate `GENDER_OVERRIDES` table that forces the
-absence, which is why `lord_4_6` and `lord_WE8_c` are listed there by id.
+`tools/complete_lords_xslt.py` once rebuilt `lords.xslt` from vanilla plus the overrides it parsed back out of the current
+`lords.xslt`. For `is_female` that did not round-trip, because the male convention is to OMIT the attribute: deleting the
+line was indistinguishable from never having overridden it, so the next `--apply` copied vanilla's `is_female="true"` straight
+back in. A `GENDER_OVERRIDES` table forced the absence for `lord_4_6` and `lord_WE8_c` among others.
 
-- **Why missed:** "the generator preserves my overrides" is true for every attribute whose corrected
-  value is a value. It fails only where the corrected value is *nothing*, and that is exactly the
-  case nobody tests, because the evidence of success and the evidence of failure look identical in
-  the source file: an absent attribute.
-- **Prevent:** when an override's correct state is an absent attribute, it needs an explicit forcing
-  table, not a deletion. Prove it the way the fix was proved, by running the merge in-process and
-  reading the resulting attribute rather than eyeballing the file:
-  `merge_lords(parse_vanilla_lords(...), parse_current_xslt(...))` should report `None` for
-  `lord_WE8_c` where vanilla reports `true`. Note the guard covers `lords.xslt` only; the file that
-  actually wins at runtime, `characters/lords.xml`, has no regenerator and therefore no guard.
-- **Source:** 2026-08-28, `a00086da`.
+- **Why missed:** "the generator preserves my overrides" is true for every attribute whose corrected value is a value. It fails
+  only where the corrected value is *nothing*, and that is the case nobody tests, because the evidence of success and the
+  evidence of failure look identical in the source file: an absent attribute.
+- **Prevent:** do not regenerate a file whose corrected state can be an absence. Since #959 `--apply` never rewrites an existing
+  template, so a deleted line stays deleted and `GENDER_OVERRIDES` is gone; see the next lessons. Any other regenerator that
+  must read overrides back needs a forcing table or a test that deletes the line and reads the result.
+- **Source:** 2026-08-28, `a00086da`; superseded by #959.
 
 ### The Write and Edit tools decode `\uXXXX`; a source file that needs a literal backslash-u escape is built from char codes
 A C# regex written as `"[\u2013\u2014]"` through the Write tool landed in the file as the two dash characters themselves, because the tool decodes the escape in its parameter. The Edit tool did the same and refused the fix as "no change". The Bash heredoc has the opposite defect (it eats one backslash round, memory `topics/bash-heredoc-backslashes`), so a Python heredoc carrying the same escape failed to parse. The only reliable shape was a script FILE composing `chr(92) + "u2013"`.
@@ -4171,3 +4165,20 @@ The completeness lens found the gap after the build; Mike then chose to build al
 - **Prevent:** before showing a plan, list every requirement in the issue and mark each kept, changed or
   dropped; a dropped item is named in the plan, never left out.
 - **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) process finding.
+
+### A generator that touches a hand-edited file may only add to it, and the proof is a byte comparison (#959, 2026-10-21)
+`tools/complete_lords_xslt.py --apply` rebuilt `lords.xslt` from vanilla and what it parsed back, and the result was not the
+shipped file: 389 `<Equipments>` blocks and 19 `race` attributes dropped, five skills and Traits blocks in three lords reflowed,
+one attribute reordered, an explicit `is_female="false"` removed, and the BOM and the final newline lost. The tools that wrote the
+Equipments blocks (`assign_xslt_lord_equipment.py`) were retired in `19b5d77c5`, so the blocks had become hand-owned data the
+generator never read. #758 and #957 each fixed only the block they had just added. The symptom (`race`) was named in two docs
+(`lords-and-heroes.md`, `lord-identity-reconciliation.md`), never in a lesson.
+- **Why missed:** each fix checked its own block (`assertIn` of a constant) and never asked whether the whole regeneration equals
+  the file. A first answer, a generator that read every unmodelled part back, grew a refusal guard and a parse-back of each shape
+  of hand data, and still needed a new case for every shape nobody had modelled.
+- **Prevent:** a tool that touches a hand-edited file only adds to it. `--apply` inserts a template for each vanilla lord the file
+  lacks, after its section's last template, and never rewrites a byte that is already there; it keeps the BOM and the dominant
+  line ending (a file with mixed line endings comes back with its dominant one) and parses before writing. A hand block in the file is therefore safe without a copy in the generator. Prove an
+  `--apply` by reading the file and `git show HEAD:<path>` as bytes (converted to the worktree's line endings) and comparing
+  them: `git hash-object` and `git diff --stat` cannot see line endings under `core.autocrlf`. Contract: `tools/README.md`.
+- **Source:** issue #959; `tools/tests/test_complete_lords_xslt.py`.
