@@ -920,3 +920,27 @@ default on, so nothing was protected, and with "Apply To AI" off an unreadable r
 - **Prevent:** before a design sets a flag to get an outcome, quote the consumer lines that turn the flag into that
   outcome, under the default settings and each toggle combination.
 - **Source:** [rca-coop-player-attribution-2026-10-21.md](../rca-coop-player-attribution-2026-10-21.md) finding 2.
+### Coercion without resistance fires no map event: hook GameMenuOptionSelectedEvent on the option ids, pinned by a binding test (Long Memory, #865, 2026-10-21)
+A forced taking whose villagers give way applies vanilla's coercion action straight from the menu consequence
+(`force_supplies_no_resist_continue`, `force_volunteers_no_resist_continue`, `VillageHostileActionCampaignBehavior.cs:145,151`)
+and raises no `ForceSuppliesCompletedEvent` or `ForceVolunteersCompletedEvent`. Those two events fire only when the villagers
+resist and a fight follows, so a listener on them alone misses every forcing where the villagers give way.
+- **Why missed:** the completed events carry the names of the acts, and the no-resist route was only found by tracing the menu
+  consequences instead of the events.
+- **Prevent:** when a rule must cover an act whose route skips the event, trace every consequence that ends in the same engine
+  action. `CampaignEvents.GameMenuOptionSelectedEvent` fires after the option's consequence (`GameMenu.cs:288-291`), so it is a
+  Harmony-free signal keyed on the option ids. The ids are strings the engine owns, so a `BindingVerification` test reads the
+  installed engine's `AddGameMenus` IL and asserts each id sits on its menu (`LongMemoryBindingTests`); a rename then reddens
+  the gate instead of silently stopping the rule.
+- **Source:** `docs/features/long-memory.md`; the `/deep-review` of #865 (lens 2).
+
+### RaidDamage is hit points removed, not a share of full health (Long Memory, #865, 2026-10-21)
+`RaidEventComponent.RaidDamage` adds the same `_nextSettlementDamage` that is taken off `SettlementHitPoints`, capped at 1
+(`RaidEventComponent.cs:361-362`), and resets when the map event initializes. It is the hit points this event removed on the
+village's 0 to 1 health scale, so it exceeds the health the village had when the raid began by at most about one hit (0.05), and the events of one raid
+add up to at most 1 plus about one hit (0.05). The first Long Memory design read it as "a share of full health" and added a floor of a quarter plus a
+"looting began" rule, which charged at least a quarter of the amount for an event that did almost nothing.
+- **Why missed:** the field name and the 0 to 1 range suggested a share of full health, and nobody read the line that adds it.
+- **Prevent:** before scaling a reward or penalty by an engine accumulator, read where it is written (reset, add, cap) and say in
+  the doc what one unit means. Scale by the value alone; an event that did nothing pays nothing, with no floor.
+- **Source:** `docs/features/long-memory.md`; the `/deep-review` of #865 (lens 6).

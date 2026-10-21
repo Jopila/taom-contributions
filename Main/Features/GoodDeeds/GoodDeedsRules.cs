@@ -1,5 +1,4 @@
 using System;
-using TAOM.Features.Execution;
 
 namespace TAOM.Features.GoodDeeds;
 
@@ -30,16 +29,5 @@ public static class GoodDeedsRules
             return 0f;
         var vanilla = float.IsNaN(vanillaGain) || float.IsInfinity(vanillaGain) ? 0m : (decimal)vanillaGain;
         return (float)Math.Round((vanilla + bonus) * (decimal)multiplier, 0, MidpointRounding.AwayFromZero);
-    }
-
-    /// <summary>
-    /// How two sides stand: Neutral when either is Neutral (a side with no alignment is nobody's ally or enemy), Same when they
-    /// match, Opposite otherwise.
-    /// </summary>
-    public static SidePairing Pair(FactionSide first, FactionSide second)
-    {
-        if (first == FactionSide.Neutral || second == FactionSide.Neutral)
-            return SidePairing.Neutral;
-        return first == second ? SidePairing.Same : SidePairing.Opposite;
     }
 }

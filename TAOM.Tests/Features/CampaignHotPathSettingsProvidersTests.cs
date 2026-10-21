@@ -18,6 +18,8 @@ using TAOM.Features.FireAndTribute;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HiddenHosts;
 using TAOM.Features.FromTheAshes;
+using TAOM.Features.GoodDeeds;
+using TAOM.Features.LongMemory;
 using TAOM.Features.TokensOfEsteem;
 using TAOM.Features.FieldCommission.Domain;
 using TAOM.Features.NameplateCull;
@@ -92,6 +94,10 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(FromTheAshesSettingsProvider))]
     // Tokens of Esteem: the gate and the list read the group at every gift line a conversation shows.
     [DataRow(typeof(GiftSettingsProvider))]
+    // Not hot paths: Good Deeds reads its group at each release, donation and tournament, Long Memory at each raid, forced taking
+    // and at the two no-resist options (the option id is tested before the read). The accessor still takes the settings once.
+    [DataRow(typeof(GoodDeedsSettingsProvider))]
+    [DataRow(typeof(LongMemorySettingsProvider))]
     // Not a hot path: both switches are read once, when the town management window opens. The accessor still takes the settings once.
     [DataRow(typeof(ReevesLedgerSettingsProvider))]
     // #870: the four switches are read on every hourly tick while a raiding host rides.
@@ -134,6 +140,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IPosternGateSettingsProvider), typeof(PosternGateSettingsProvider))]
     [DataRow(typeof(IFromTheAshesSettingsProvider), typeof(FromTheAshesSettingsProvider))]
     [DataRow(typeof(IGiftSettingsProvider), typeof(GiftSettingsProvider))]
+    [DataRow(typeof(IGoodDeedsSettingsProvider), typeof(GoodDeedsSettingsProvider))]
+    [DataRow(typeof(ILongMemorySettingsProvider), typeof(LongMemorySettingsProvider))]
     [DataRow(typeof(ReevesLedgerSettingsProvider), typeof(ReevesLedgerSettingsProvider))]
     [DataRow(typeof(IFireAndTributeSettings), typeof(FireAndTributeSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
@@ -163,6 +171,36 @@ public class CampaignHotPathSettingsProvidersTests
 
         Assert.IsFalse(sut.Get().Enabled);
         Assert.AreEqual(21, sut.Get().CooldownDays);
+    }
+
+    [TestMethod]
+    public void GoodDeeds_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new GoodDeedsSettingsProvider(mcm);
+        Assert.IsTrue(sut.Get().Enabled);
+        Assert.AreEqual(GoodDeedsSettingsProvider.DefaultReleaseLordAmount, sut.Get().ReleaseLordAmount);
+
+        mcm.GoodDeedsEnabled = false;
+        mcm.GoodDeedsReleaseLordAmount = 11;
+
+        Assert.IsFalse(sut.Get().Enabled);
+        Assert.AreEqual(11, sut.Get().ReleaseLordAmount);
+    }
+
+    [TestMethod]
+    public void LongMemory_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new LongMemorySettingsProvider(mcm);
+        Assert.IsTrue(sut.Get().Enabled);
+        Assert.AreEqual(LongMemorySettingsProvider.DefaultRaidOwnerAmount, sut.Get().RaidOwnerAmount);
+
+        mcm.LongMemoryEnabled = false;
+        mcm.LongMemoryRaidOwnerAmount = 70;
+
+        Assert.IsFalse(sut.Get().Enabled);
+        Assert.AreEqual(70, sut.Get().RaidOwnerAmount);
     }
 
     [TestMethod]

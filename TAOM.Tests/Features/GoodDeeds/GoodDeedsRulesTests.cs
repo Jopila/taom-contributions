@@ -1,11 +1,9 @@
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TAOM.Features.Execution;
 using TAOM.Features.GoodDeeds;
 
 namespace TAOM.Tests.Features.GoodDeeds;
 
-/// <summary>The rounding rule (half away from zero) and the side pairing, pinned for every input the service can hand them.</summary>
+/// <summary>The rounding rule (half away from zero), pinned for every input the service can hand them.</summary>
 [TestClass]
 public class GoodDeedsRulesTests
 {
@@ -65,47 +63,5 @@ public class GoodDeedsRulesTests
     public void ScaleDonation_ANonFiniteMultiplier_GivesNothing(float multiplier)
     {
         Assert.AreEqual(0f, GoodDeedsRules.ScaleDonation(17f, 5, multiplier));
-    }
-
-    [DataTestMethod]
-    [DataRow(FactionSide.Free, FactionSide.Free, SidePairing.Same)]
-    [DataRow(FactionSide.Evil, FactionSide.Evil, SidePairing.Same)]
-    [DataRow(FactionSide.Free, FactionSide.Evil, SidePairing.Opposite)]
-    [DataRow(FactionSide.Evil, FactionSide.Free, SidePairing.Opposite)]
-    [DataRow(FactionSide.Free, FactionSide.Neutral, SidePairing.Neutral)]
-    [DataRow(FactionSide.Neutral, FactionSide.Free, SidePairing.Neutral)]
-    [DataRow(FactionSide.Neutral, FactionSide.Evil, SidePairing.Neutral)]
-    [DataRow(FactionSide.Evil, FactionSide.Neutral, SidePairing.Neutral)]
-    [DataRow(FactionSide.Neutral, FactionSide.Neutral, SidePairing.Neutral)]
-    public void Pair_NeutralOnEitherSideIsNeutral_OtherwiseSameOrOpposite(FactionSide first, FactionSide second, SidePairing expected)
-    {
-        Assert.AreEqual(expected, GoodDeedsRules.Pair(first, second));
-    }
-
-    [TestMethod]
-    public void Pair_EachOfTheNineOrderedPairingsOfThreeSides_IsPinnedByARowAbove()
-    {
-        // The doc says "nine pairings": three sides, ordered. The rows above must name every one of them once.
-        var rows = typeof(GoodDeedsRulesTests)
-            .GetMethod(nameof(Pair_NeutralOnEitherSideIsNeutral_OtherwiseSameOrOpposite))!
-            .GetCustomAttributes(typeof(DataRowAttribute), inherit: false)
-            .Cast<DataRowAttribute>()
-            .Select(r => ((FactionSide)r.Data[0]!, (FactionSide)r.Data[1]!))
-            .ToList();
-        var sides = new[] { FactionSide.Free, FactionSide.Evil, FactionSide.Neutral };
-        var all = sides.SelectMany(a => sides.Select(b => (a, b))).ToList();
-
-        Assert.AreEqual(9, all.Count);
-        CollectionAssert.AreEquivalent(all, rows);
-    }
-
-    [TestMethod]
-    public void SideMultipliers_For_PicksTheMultiplierOfEachPairing()
-    {
-        var m = new SideMultipliers(1f, 0.75f, 0.5f);
-
-        Assert.AreEqual(1f, m.For(SidePairing.Same));
-        Assert.AreEqual(0.75f, m.For(SidePairing.Neutral));
-        Assert.AreEqual(0.5f, m.For(SidePairing.Opposite));
     }
 }

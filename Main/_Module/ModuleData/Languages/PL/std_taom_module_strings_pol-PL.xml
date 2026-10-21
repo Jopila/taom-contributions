@@ -6351,6 +6351,10 @@
 
     <string id="taom_fat_host_unknown" text="A raiding host" />
 
+    <string id="taom_longmemory_raid" text="The people of {VILLAGE} will long remember the raid." />
+
+    <string id="taom_longmemory_coercion" text="The people of {VILLAGE} will long remember what was taken from them by force." />
+
   </strings>
 
 </base>

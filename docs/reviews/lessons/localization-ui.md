@@ -1126,3 +1126,13 @@ and outside the action buttons' gamepad navigation scope, while its comments and
   feature's prefab test asserts the type, the index and the XPath. A repo-wide gate over every
   `PrefabExtensionInsertPatch` is proposed in the RCA.
 - **Source:** `docs/reviews/rca-namegiving-2026-10-20.md` finding 1.
+
+### A past-tense verb with the player as its subject, again (Long Memory, #865, 2026-10-21)
+Long Memory's coercion line read "The people of {VILLAGE} will long remember what you took by force." The verb "took" has the
+player as its subject, and a language that inflects past tense for the subject's gender fixes one gender for every player. This is
+the same defect as the Tokens of Esteem entry above (#863), two features later.
+- **Why missed:** the doc claimed the line was neutral because it avoided "he" and "she", and the check stopped at pronouns.
+- **Prevent:** a line whose subject is the villagers or the world ("what was taken from them by force") needs no gender at all.
+  Test the verb's subject, not only the pronouns: any past tense, "would have" or predicate adjective whose subject is the player
+  gets reworded before the English is seeded, and the language rows are re-seeded to equal it.
+- **Source:** `docs/features/long-memory.md`; the `/deep-review` of #865 (lens 7); `LongMemoryWordingTests`.

@@ -4,6 +4,7 @@ using NSubstitute;
 using TAOM.Features.Execution;
 using TAOM.Features.GoodDeeds;
 using TAOM.Features.GoodDeeds.Models;
+using TAOM.Features.Relations;
 using static TAOM.Tests.Features.GoodDeeds.GoodDeedsFixture;
 
 namespace TAOM.Tests.Features.GoodDeeds;

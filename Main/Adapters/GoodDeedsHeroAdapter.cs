@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TAOM.Features.Relations;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameState;
 using TaleWorlds.CampaignSystem.Party;
@@ -68,9 +69,9 @@ public sealed class GoodDeedsHeroAdapter : IGoodDeedsHeroAdapter
                 FactionSides.OfPlayer(),
                 FactionSides.Of(lord.MapFaction),
                 lord.IsLord,
-                DeedHeroOf(player, lord),
-                lord.Spouse == null ? null : DeedHeroOf(player, lord.Spouse),
-                lord.Clan?.Leader == null ? null : DeedHeroOf(player, lord.Clan.Leader));
+                RelationTargets.Of(player, lord),
+                lord.Spouse == null ? null : RelationTargets.Of(player, lord.Spouse),
+                lord.Clan?.Leader == null ? null : RelationTargets.Of(player, lord.Clan.Leader));
         }
         catch (Exception ex)
         {
@@ -114,7 +115,7 @@ public sealed class GoodDeedsHeroAdapter : IGoodDeedsHeroAdapter
                 foreach (var notable in living)
                 {
                     if (notable != null)
-                        notables.Add(new DeedNotable(DeedHeroOf(player, notable), FactionSides.Of(notable.MapFaction)));
+                        notables.Add(new DeedNotable(RelationTargets.Of(player, notable), FactionSides.Of(notable.MapFaction)));
                 }
             }
 
@@ -122,7 +123,7 @@ public sealed class GoodDeedsHeroAdapter : IGoodDeedsHeroAdapter
                 settlement.Name?.ToString() ?? string.Empty,
                 FactionSides.OfPlayer(),
                 owner != null && owner == Clan.PlayerClan,
-                owner?.Leader == null ? null : DeedHeroOf(player, owner.Leader),
+                owner?.Leader == null ? null : RelationTargets.Of(player, owner.Leader),
                 FactionSides.Of(owner?.MapFaction),
                 notables);
         }
@@ -131,19 +132,6 @@ public sealed class GoodDeedsHeroAdapter : IGoodDeedsHeroAdapter
             _logger.LogError($"[GoodDeeds] ReadTournament('{townSettlementId}') failed: {ex.Message}");
             return null;
         }
-    }
-
-    /// <summary>
-    /// The hero and the hero a change to him really moves. The player is never asked: the diplomacy model's pair rule is not
-    /// meant for the player against himself.
-    /// </summary>
-    private static DeedHero DeedHeroOf(Hero player, Hero hero)
-    {
-        if (hero == player)
-            return new DeedHero(hero.StringId, hero.StringId, hero.IsAlive, true);
-
-        Campaign.Current.Models.DiplomacyModel.GetHeroesForEffectiveRelation(player, hero, out _, out var owner);
-        return new DeedHero(hero.StringId, (owner ?? hero).StringId, hero.IsAlive, false);
     }
 
     private static Hero? PlayerHero() =>

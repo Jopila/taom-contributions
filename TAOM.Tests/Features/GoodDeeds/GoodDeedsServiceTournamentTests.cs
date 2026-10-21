@@ -4,6 +4,7 @@ using NSubstitute;
 using TAOM.Features.Execution;
 using TAOM.Features.GoodDeeds;
 using TAOM.Features.GoodDeeds.Models;
+using TAOM.Features.Relations;
 using static TAOM.Tests.Features.GoodDeeds.GoodDeedsFixture;
 
 namespace TAOM.Tests.Features.GoodDeeds;
@@ -23,7 +24,7 @@ public class GoodDeedsServiceTournamentTests
     private static DeedNotable Notable(string id, SideIds? side = null, string? owner = null, bool alive = true) =>
         new(Hero(id, owner, alive), side ?? Free);
 
-    private void Town(DeedHero? owner, bool playerOwns, SideIds ownerSide, params DeedNotable[] notables) =>
+    private void Town(RelationTarget? owner, bool playerOwns, SideIds ownerSide, params DeedNotable[] notables) =>
         _f.Heroes.ReadTournament("town_1").Returns(new TournamentFacts("Minas Tirith", Free, playerOwns, owner, ownerSide, notables));
 
     private int Won() => _f.Service.OnTournamentFinished(true, "town_1");

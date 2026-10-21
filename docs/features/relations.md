@@ -2,7 +2,7 @@
 
 ## Overview
 
-The shared seam for new relation code. `IRelationGrantService.Grant` clamps and filters the request, and `IHeroRelationAdapter` makes the engine call. [Bonds of Battle](bonds-of-battle.md) is the first user, [Tokens of Esteem](tokens-of-esteem.md) the second and [Good Deeds](good-deeds.md) the third.
+The shared seam for new relation code. `IRelationGrantService.Grant` clamps and filters the request, and `IHeroRelationAdapter` makes the engine call. [Bonds of Battle](bonds-of-battle.md) is the first user, [Tokens of Esteem](tokens-of-esteem.md) the second, [Good Deeds](good-deeds.md) the third and [Long Memory](long-memory.md) the fourth.
 
 ## Why This Exists
 
@@ -35,6 +35,7 @@ With personal relations engaged, a player grant lands on the lord named: `GetHer
 ### Rules for callers
 
 - **Key any throttle on the relation owner.** Ask `DiplomacyModel.GetHeroesForEffectiveRelation(player, hero, ...)` and key a cooldown, a daily cap or a "once per" ledger on the second hero it returns (the hero itself when it returns none). With Personal Relations off a change lands on the clan leader, so two kinsmen share one relation and a throttle keyed on the hero lets the player repeat it once per kinsman. Bonds of Battle's hand-over cap and Tokens of Esteem's gift cooldown both do this.
+- **List the heroes, then call `GrantStrongestPerOwner`.** A caller that asks several heroes at once builds a `RelationAsk(RelationTarget?, delta)` for each (a null target, a dead hero, the player and a zero delta are skipped) and calls `grants.GrantStrongestPerOwner(asks, reasonForLog)` (`RelationGrantServiceExtensions`). It grants the strongest ask once per relation owner (the largest `|delta|`, the first listed on a tie, owners in the order they first appear, a blank owner falling back to the hero) and returns how many landed. It is an extension, not a member of the interface, so a fake of the seam needs no change. `RelationTargets.Of(player, hero)` in `Main/Adapters` builds a `RelationTarget` from an engine hero; `SideMultipliers.For(first, second)` is the shared side pairing (Neutral when either side is Neutral, Same, Opposite). Good Deeds and Long Memory use all three.
 - **The landed change can differ from the ask.** The Charm bonus and perks can add to a positive change, and the engine clamps the result to -100..100, so the number `Grant` returns is the one to show, to log and to count against a cap. Never assume the ask landed.
 
 ### Callers outside the seam
@@ -63,6 +64,10 @@ ChangeRelationAction
 |------|---------|
 | `Main/Features/Relations/IRelationGrantService.cs` | The seam |
 | `Main/Features/Relations/RelationGrantService.cs` | Clamp, filter, log |
+| `Main/Features/Relations/RelationTarget.cs` | `RelationTarget` (a hero and the owner a change to it lands on) and `RelationAsk` (a target and a signed delta) |
+| `Main/Features/Relations/RelationGrantServiceExtensions.cs` | `GrantStrongestPerOwner`: the strongest ask once per relation owner, counted by what landed |
+| `Main/Features/Relations/SideMultipliers.cs` | The multiplier for each way two sides can stand, with the pairing rule |
+| `Main/Adapters/RelationTargets.cs` | Builds a `RelationTarget` from an engine hero |
 | `Main/Adapters/IHeroRelationAdapter.cs`, `HeroRelationAdapter.cs` | Engine boundary |
 
 ## Dependencies
@@ -78,6 +83,8 @@ ChangeRelationAction
 ## Tests
 
 - `TAOM.Tests/Features/Relations/RelationGrantServiceTests.cs`: the landed change returned, zero, dedicated server, clamp at both ends and at `int.MinValue` and `int.MaxValue`, blank ids, unknown hero, log line.
+- `TAOM.Tests/Features/Relations/RelationGrantServiceExtensionsTests.cs`: the strongest gain, the strongest loss, a gain against a loss, a tie, owner order, a blank owner, null, dead, player and zero asks skipped, a grant that returns 0 not counted, `int.MinValue`.
+- `TAOM.Tests/Features/Relations/SideMultipliersTests.cs`: the nine ordered pairings of three sides, each by its own row, with three different multipliers.
 - `TAOM.Tests/Features/Relations/PersonalRelationServiceTests.cs`, `PersonalRelationSettingsProviderTests.cs`, `PersonalRelationSeedServiceTests.cs`, `PersonalRelationSeedBehaviorTests.cs`, `PersonalRelationNoticeTests.cs`, `PersonalRelationNoticeBindingTests.cs`, `RelationsWiringTests.cs`, `TaomDiplomacyModelPersonalRelationsTests.cs`: Personal Relations, listed in [personal-relations.md](personal-relations.md).
 
 ## Known Limits
@@ -86,6 +93,8 @@ The seam reports the change that landed, so a diplomacy model that scaled or zer
 
 ## Changelog
 
+- 2026-10-21: the pieces Good Deeds and Long Memory shared move here: `RelationTarget` and `RelationAsk`, `GrantStrongestPerOwner`, `SideMultipliers.For` and `RelationTargets.Of` (Good Deeds' own copies are gone, behavior unchanged).
+- 2026-10-21: Long Memory is the fourth user ([long-memory.md](long-memory.md), #865): relation lost for raiding a village or forcing it to give goods or recruits, grouped per relation owner before each grant and counted by what landed. Its asks are negative, and the clamp at -100 applies to them as it does to a gain.
 - 2026-10-20: Good Deeds is the third user ([good-deeds.md](good-deeds.md), #864): release, tournament and (through a game model) donation rewards, grouped per relation owner before each grant and counted by what landed.
 - 2026-10-19: the seam returns what landed (an int, the relation the player sees after the change minus before, read with `Hero.GetRelation` around the engine call), 0 for any refusal, and logs the asked and the landed amount only when something landed.
 - 2026-10-18: first version, with Bonds of Battle.

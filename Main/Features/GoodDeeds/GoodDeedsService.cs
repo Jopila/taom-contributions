@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
@@ -70,14 +69,13 @@ public sealed class GoodDeedsService
         if (facts == null || !facts.IsLord)
             return 0;
 
-        var multiplier = settings.Release.For(PairOf(facts.Player, facts.LordSide));
-        var candidates = new List<Candidate>();
-        AddCandidate(candidates, facts.Lord, settings.ReleaseLordAmount, multiplier);
-        if (facts.Spouse != null)
-            AddCandidate(candidates, facts.Spouse, settings.ReleaseSpouseAmount, multiplier);
-        if (facts.ClanLeader != null)
-            AddCandidate(candidates, facts.ClanLeader, settings.ReleaseLeaderAmount, multiplier);
-        return Apply(candidates, "release");
+        var multiplier = MultiplierOf(settings.Release, facts.Player, facts.LordSide);
+        return _grants.GrantStrongestPerOwner(new[]
+        {
+            Ask(facts.Lord, settings.ReleaseLordAmount, multiplier),
+            Ask(facts.Spouse, settings.ReleaseSpouseAmount, multiplier),
+            Ask(facts.ClanLeader, settings.ReleaseLeaderAmount, multiplier),
+        }, "good deed: release");
     }
 
     /// <summary>
@@ -96,15 +94,13 @@ public sealed class GoodDeedsService
         if (facts == null)
             return 0;
 
-        var candidates = new List<Candidate>();
-        if (!facts.PlayerClanOwnsTown && facts.OwnerLeader != null)
-            AddCandidate(candidates, facts.OwnerLeader, settings.TournamentAmount,
-                settings.Tournament.For(PairOf(facts.Player, facts.OwnerSide)));
+        var asks = new List<RelationAsk>();
+        if (!facts.PlayerClanOwnsTown)
+            asks.Add(Ask(facts.OwnerLeader, settings.TournamentAmount, MultiplierOf(settings.Tournament, facts.Player, facts.OwnerSide)));
         foreach (var notable in facts.Notables)
-            AddCandidate(candidates, notable.Hero, settings.TournamentAmount,
-                settings.Tournament.For(PairOf(facts.Player, notable.Side)));
+            asks.Add(Ask(notable.Hero, settings.TournamentAmount, MultiplierOf(settings.Tournament, facts.Player, notable.Side)));
 
-        var landed = Apply(candidates, "tournament");
+        var landed = _grants.GrantStrongestPerOwner(asks, "good deed: tournament");
         if (landed > 0)
             _notice.ShowTournamentHonor(facts.TownName);
         return landed;
@@ -126,7 +122,7 @@ public sealed class GoodDeedsService
         if (facts == null)
             return vanillaGain;
 
-        var multiplier = settings.Donation.For(PairOf(facts.Captive, facts.Owner));
+        var multiplier = MultiplierOf(settings.Donation, facts.Captive, facts.Owner);
         var relation = GoodDeedsRules.ScaleDonation(vanillaGain, settings.DonationAmount, multiplier);
         _logger.LogInfo($"{Tag} donation of {heroId} to {settlementId}: vanilla {vanillaGain:0.##}, bonus {settings.DonationAmount}, x{multiplier:0.##} = {relation:0}.");
         return relation;
@@ -136,38 +132,12 @@ public sealed class GoodDeedsService
     // the host (CoopInterop: ShouldDeferToHost also covers co-op mods TAOM cannot probe).
     private bool Suppressed => _server.IsDedicatedServer || _coop.ShouldDeferToHost;
 
-    private SidePairing PairOf(SideIds player, SideIds other) =>
-        GoodDeedsRules.Pair(_alignment.ResolveSide(player), _alignment.ResolveSide(other));
+    private float MultiplierOf(SideMultipliers multipliers, SideIds player, SideIds other) =>
+        multipliers.For(_alignment.ResolveSide(player), _alignment.ResolveSide(other));
 
-    // A dead hero, the player himself, and a grant that scales to nothing earn nothing; the settings clamp keeps an amount at 0
-    // or more, so Good Deeds never costs relation.
-    private static void AddCandidate(List<Candidate> candidates, DeedHero hero, int amount, float multiplier)
-    {
-        if (!hero.IsAlive || hero.IsPlayer)
-            return;
-        var delta = GoodDeedsRules.Scale(amount, multiplier);
-        if (delta <= 0)
-            return;
-        candidates.Add(new Candidate(hero.HeroId, string.IsNullOrEmpty(hero.RelationOwnerId) ? hero.HeroId : hero.RelationOwnerId, delta));
-    }
-
-    /// <summary>
-    /// Keeps the strongest candidate per relation owner (the first listed on a tie), in the order the owners first appear, and
-    /// grants each one through the seam. Returns how many landed (a non-zero change).
-    /// </summary>
-    private int Apply(List<Candidate> candidates, string deed)
-    {
-        // GroupBy keeps the groups in the order their key first appears, and OrderByDescending is stable, so the first listed
-        // candidate wins a tie.
-        var landed = 0;
-        foreach (var group in candidates.GroupBy(c => c.OwnerId, StringComparer.Ordinal))
-        {
-            var grant = group.OrderByDescending(c => c.Delta).First();
-            if (_grants.Grant(grant.HeroId, grant.Delta, "good deed: " + deed) != 0)
-                landed++;
-        }
-        return landed;
-    }
-
-    private readonly record struct Candidate(string HeroId, string OwnerId, int Delta);
+    // A grant that scales to nothing earns nothing, and the settings clamp keeps an amount at 0 or more, so Good Deeds never costs
+    // relation (the Math.Max keeps even a hand-edited negative from becoming a loss). A dead hero and the player are skipped by
+    // GrantStrongestPerOwner.
+    private static RelationAsk Ask(RelationTarget? hero, int amount, float multiplier) =>
+        new(hero, Math.Max(0, GoodDeedsRules.Scale(amount, multiplier)));
 }

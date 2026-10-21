@@ -3694,5 +3694,9 @@
 	<string id="taom_fat_host_erebor" text="{=taom_fat_host_erebor}The Blacklock Warband" />
 	<string id="taom_fat_host_mirkwood" text="{=taom_fat_host_mirkwood}The Stalker Band of Mirkwood" />
 	<string id="taom_fat_host_unknown" text="{=taom_fat_host_unknown}A raiding host" />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- LongMemoryNoticeAdapter -->
+	<string id="taom_longmemory_raid" text="{=taom_longmemory_raid}The people of {VILLAGE} will long remember the raid." />
+	<string id="taom_longmemory_coercion" text="{=taom_longmemory_coercion}The people of {VILLAGE} will long remember what was taken from them by force." />
 
 </strings>

@@ -41,9 +41,9 @@ One service (`GoodDeedsService`), three thin entry points, no Harmony patch, not
 | Donation | the settlement owner's clan leader (vanilla applies it) | vanilla's gain plus 5, both scaled | captive against the settlement owner: opposite 2.0, neutral 1.0, same side 0 |
 | Tournament | the owner's clan leader (skipped when the player's clan owns the town) and every living notable in the town | +1 each | player against that person's own side: same 1.0, neutral 1.0, opposite 0 |
 
-- **Sides** come from `IAlignmentService.ResolveSide`, handed one `SideIds` per party (the shared pair type, built by `FactionSides.Of` in `GoodDeedsHeroAdapter`, which replaced Good Deeds' own `DeedSide`): the player's `Clan.PlayerClan.MapFaction` and its culture, the lord's map faction and culture, the captive's, the settlement owner clan's, each notable's. The adapter keeps `MapFaction` for a notable, so a notable reads the realm of the town. A minor clan that has a row in `alignment.json` sides by its row only while it serves no kingdom (a mercenary contract makes the employer its map faction). A missing faction or culture resolves to Neutral. "Neutral" means either side is Neutral; two Neutral parties are Neutral, not "same". That makes nine ordered pairings of three sides, each pinned by a test row.
+- **Sides** come from `IAlignmentService.ResolveSide`, handed one `SideIds` per party (the shared pair type, built by `FactionSides.Of` in `GoodDeedsHeroAdapter`, which replaced Good Deeds' own `DeedSide`): the player's `Clan.PlayerClan.MapFaction` and its culture, the lord's map faction and culture, the captive's, the settlement owner clan's, each notable's. The adapter keeps `MapFaction` for a notable, so a notable reads the realm of the town. A minor clan that has a row in `alignment.json` sides by its row only while it serves no kingdom (a mercenary contract makes the employer its map faction). A missing faction or culture resolves to Neutral. "Neutral" means either side is Neutral; two Neutral parties are Neutral, not "same". That makes nine ordered pairings of three sides, each pinned by a row in `SideMultipliersTests`: the pairing is `SideMultipliers.For(first, second)` in `Features/Relations`, shared with [Long Memory](long-memory.md).
 - **Rounding:** every scaled amount rounds half away from zero (2.5 is 3, 0.5 is 1), computed in `decimal` so 0.7 times 5 is 3.5 and not 3.4999999. The provider also rounds each multiplier to two decimals, because the slider hands back a float such as 0.6999999 for the 0.7 it shows. A grant that scales to 0 grants nothing. The donation value returned to the engine is the rounded whole number.
-- **One grant per relation owner:** the adapter reads each hero's owner with `DiplomacyModel.GetHeroesForEffectiveRelation(player, hero, out _, out var owner)` and the service groups the candidates by `(owner ?? hero)` with `GroupBy`, keeping the strongest (`OrderByDescending` is stable, so the first listed wins a tie). With Personal Relations off the lord and the lord's clan leader are one owner, so one grant of 5 is made, not 5 and 2. With it on they are two. This is the pattern in `HardQuestionsPenaltyApplier.ApplyRelations`.
+- **One grant per relation owner:** the adapter reads each hero's owner with `DiplomacyModel.GetHeroesForEffectiveRelation(player, hero, out _, out var owner)` and the service lists a `RelationAsk` for each hero and hands the list to `GrantStrongestPerOwner` (`Features/Relations`), which groups by `(owner ?? hero)` and keeps the strongest per owner (the first listed wins a tie; its own tests pin the rule). With Personal Relations off the lord and the lord's clan leader are one owner, so one grant of 5 is made, not 5 and 2. With it on they are two. This is the pattern in `HardQuestionsPenaltyApplier.ApplyRelations`.
 - **Counted by what landed:** `IRelationGrantService.Grant` returns the change that landed (the Charm bonus can add to it, the -100..100 clamp can cut it); the tournament line is shown only when at least one grant landed, never from the ask.
 - **Ignored:** a release that is not `ReleasedByChoice` (ransom, peace, escape, battle, compensation), a release from a party that is none of the three sources (an AI party, a player-clan mobile party other than the main party, no party with no player party screen open), a prisoner who is not a lord, a dead hero, the player as spouse or leader, and anything while the feature or that deed's switch is off. A captive stripped by Hard Questions still earns the release reward; there is no special rule. Hard Questions listens to the same event only to clear its own record, and changes no relation.
 - **Authority:** a co-op peer that defers to the host (`ICoopSessionProvider.ShouldDeferToHost`) and a dedicated server earn nothing, and a donation there returns vanilla's own value.
@@ -90,12 +90,14 @@ One key, `{=taom_gooddeeds_tournament}The people of {TOWN} honor your victory.`,
 | File | Purpose |
 |---|---|
 | `Main/Features/GoodDeeds/GoodDeedsService.cs` | The three rules, the side scaling, the per-owner grouping, the grants |
-| `Main/Features/GoodDeeds/GoodDeedsRules.cs`, `SidePairing.cs` | Rounding half away from zero, the donation arithmetic, the side pairing |
-| `Main/Features/GoodDeeds/GoodDeedsSettings.cs`, `SideMultipliers.cs`, `GoodDeedsSettingsProvider.cs`, `IGoodDeedsSettingsProvider.cs` | The MCM group, clamped |
+| `Main/Features/GoodDeeds/GoodDeedsRules.cs` | Rounding half away from zero, the donation arithmetic |
+| `Main/Features/GoodDeeds/GoodDeedsSettings.cs`, `GoodDeedsSettingsProvider.cs`, `IGoodDeedsSettingsProvider.cs` | The MCM group, clamped |
+| `Main/Features/Relations/SideMultipliers.cs`, `RelationTarget.cs`, `RelationGrantServiceExtensions.cs` | The side pairing, the hero and ask records and the per-owner grant, shared with Long Memory |
+| `Main/Adapters/RelationTargets.cs` | Builds a `RelationTarget` from an engine hero |
 | `Main/Features/TaomSettings.cs` | The "Good Deeds" MCM group (labels, hints, ranges) |
 | `Main/Features/GoodDeeds/Hooks/GoodDeedsBehavior.cs` | The release and tournament listeners |
 | `Main/Features/GoodDeeds/Models/TaomPrisonerDonationModel.cs` | The donation model |
-| `Main/Features/GoodDeeds/Models/DeedFacts.cs` | The raw-fact records the adapter returns, `ReleaseSource` included |
+| `Main/Features/GoodDeeds/Models/DeedFacts.cs` | The raw-fact records the adapter returns, `ReleaseSource` included (the hero record is `RelationTarget`) |
 | `Main/Features/GoodDeeds/GoodDeedsModule.cs` | Services, behavior and model declaration |
 | `Main/Adapters/IGoodDeedsHeroAdapter.cs`, `GoodDeedsHeroAdapter.cs` | Hero, party, settlement and town facts from the engine |
 | `Main/Adapters/IGoodDeedsNoticeAdapter.cs`, `GoodDeedsNoticeAdapter.cs` | The green line |
@@ -110,7 +112,7 @@ One key, `{=taom_gooddeeds_tournament}The people of {TOWN} honor your victory.`,
 
 ## Tests
 
-- `GoodDeedsRulesTests`: the rounding (halves, negatives, decimal exactness, non-finite), the donation arithmetic and the nine side pairings, each named by a row.
+- `GoodDeedsRulesTests`: the rounding (halves, negatives, decimal exactness, non-finite), and the donation arithmetic. The nine side pairings are pinned in `SideMultipliersTests`.
 - `GoodDeedsServiceReleaseTests`: each amount, each multiplier, every side pairing including a missing faction, the per-owner grouping (lord and leader as one owner and as two, spouse and leader tie and strongest), a null, dead or player spouse, a lord with no clan, a dead leader, the releases that are ignored (not by choice, none of the three sources, non-lord, blank id), the source matrix (main party pays, party screen pays, a player-clan settlement pays, nothing else does), the switches, and the co-op and dedicated-server skips.
 - `GoodDeedsServiceDonationTests`: vanilla plus the bonus, scaled, every pairing, half a point, vanilla returned untouched when off, blank or unreadable, and the co-op and server skips.
 - `GoodDeedsServiceTournamentTests`: the owner and every notable, the player-owned town, no leader, dead people, the scaling by each one's own side, the per-owner grouping, the notice only when something landed, a loss, and the skips.
@@ -123,7 +125,7 @@ One key, `{=taom_gooddeeds_tournament}The people of {TOWN} honor your victory.`,
 
 1. Amounts and multipliers: MCM, "Good Deeds". No code change.
 2. A new default: change the constant in `GoodDeedsSettingsProvider` (the property initializers and the fallback share it), and the test that pins it. A persisted MCM value keeps the old default: rename the setting (and say why in a comment) to change what existing players see.
-3. A new deed: add a method to `GoodDeedsService` that builds candidates and calls `Apply`, a raw-fact read on the adapter, and one entry point. Never call the engine from the service.
+3. A new deed: add a method to `GoodDeedsService` that builds `RelationAsk`s and calls `GrantStrongestPerOwner`, a raw-fact read on the adapter, and one entry point. Never call the engine from the service.
 
 ## Known Limits
 
@@ -164,6 +166,7 @@ Setup once: a campaign with cheat mode on. `campaign.add_hero_relation [Hero] | 
 
 ## Changelog
 
+- 2026-10-21: the side pairing (`SideMultipliers.For`), the hero record (`RelationTarget`, formerly `DeedHero`) and the strongest-per-owner grant (`GrantStrongestPerOwner`) moved to `Features/Relations`, shared with Long Memory; `SidePairing` and `GoodDeedsRules.Pair` are gone and the behavior is unchanged.
 - 2026-10-20 (#957, part 2): `DeedSide` is replaced by the shared `SideIds`; the minor clan rows in `alignment.json` side the Axemen of Erebor and the Druedain.
 - 2026-10-20: review fixes. A party-screen release and a release in the player's own dungeon now count, and the release source is three raw facts read by the adapter and decided by the service. The tournament step is Good Deeds' own listener, and TournamentRewards is back to its previous content. Multipliers round to two decimals, labels and hints are gender-neutral, the notice reads "honor", and the donation formula and the known limits are corrected.
 - 2026-10-20: first version (#864). Release by choice, donation model and the tournament step, scaled by alignment, de-duplicated per relation owner, MCM group at `GroupOrder = 65`.

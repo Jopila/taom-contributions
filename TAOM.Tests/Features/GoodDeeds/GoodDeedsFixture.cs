@@ -56,10 +56,10 @@ internal sealed class GoodDeedsFixture
 
     internal void Configure(GoodDeedsSettings settings) => Settings.Get().Returns(settings);
 
-    internal static DeedHero Hero(string id, string? owner = null, bool alive = true, bool isPlayer = false) =>
+    internal static RelationTarget Hero(string id, string? owner = null, bool alive = true, bool isPlayer = false) =>
         new(id, owner ?? id, alive, isPlayer);
 
-    internal static ReleaseFacts Release(SideIds player, SideIds lordSide, DeedHero? lord = null, DeedHero? spouse = null,
-        DeedHero? leader = null, bool isLord = true) =>
+    internal static ReleaseFacts Release(SideIds player, SideIds lordSide, RelationTarget? lord = null, RelationTarget? spouse = null,
+        RelationTarget? leader = null, bool isLord = true) =>
         new(player, lordSide, isLord, lord ?? Hero("lord"), spouse, leader);
 }

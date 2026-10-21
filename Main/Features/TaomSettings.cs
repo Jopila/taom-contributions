@@ -2488,4 +2488,62 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyFloatingInteger("Tournament: Opposite Side Multiplier", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinMultiplier, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxMultiplier, "0.00", Order = 17, RequireRestart = false,
         HintText = "Multiplier on the tournament relation with an owner or notable on the opposite side, who does not cheer a champion of the other cause. Default: 0.00.")]
     public float GoodDeedsTournamentOpposite { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultTournamentOpposite;
+
+    // --- Long Memory (docs/features/long-memory.md, #865) ---
+    //
+    // Extra relation lost with a village owner's clan leader and the village's notables for raiding it or forcing it to give
+    // goods or recruits, on top of vanilla's own loss. Every value is read when the wrong happens, through
+    // LongMemorySettingsProvider's one cached settings reference, so none needs a restart. The sliders hold magnitudes (the
+    // relation to lose), and the service negates them. GroupOrder 67 follows Fire and Tribute at 66.
+    // Defaults and ranges live in LongMemorySettingsProvider so the fallback before MCM is up and the hint texts cannot drift.
+
+    [SettingPropertyGroup("Long Memory", GroupOrder = 67)]
+    [SettingPropertyBool("Enable Long Memory", Order = 0, RequireRestart = false,
+        HintText = "Turns on the extra relation loss, on top of vanilla's own, that a village's owner and notables hold against you when you raid the village or force it to give goods or recruits. Villages your clan owns are never affected, and neither are raids you do not lead. Applies on the host in co-op. Default: on.")]
+    public bool LongMemoryEnabled { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultEnabled;
+
+    [SettingPropertyGroup("Long Memory")]
+    [SettingPropertyBool("Remember Raids", Order = 1, RequireRestart = false,
+        HintText = "A raid you lead costs relation with the owner's clan leader and with every notable of the village, in proportion to the damage the raid did. A raid that did none costs nothing. Default: on.")]
+    public bool LongMemoryRaidEnabled { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultRaidEnabled;
+
+    [SettingPropertyGroup("Long Memory")]
+    [SettingPropertyBool("Remember Forced Takings", Order = 2, RequireRestart = false,
+        HintText = "Forcing a village to give goods or recruits costs relation with the owner's clan leader and with every notable, whether the villagers resist or give way. A resisting village that wins the fight costs nothing. Default: on.")]
+    public bool LongMemoryCoercionEnabled { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultCoercionEnabled;
+
+    [SettingPropertyGroup("Long Memory")]
+    [SettingPropertyInteger("Raid: Relation Lost With The Owner's Clan Leader", TAOM.Features.LongMemory.LongMemorySettingsProvider.MinAmount, TAOM.Features.LongMemory.LongMemorySettingsProvider.MaxRaidAmount, Order = 3, RequireRestart = false,
+        HintText = "Relation lost with the clan leader who owns the village after a whole raid, before the alignment multiplier. Vanilla takes its own share as well. Between 0 and 100. Default: 50.")]
+    public int LongMemoryRaidOwnerAmount { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultRaidOwnerAmount;
+
+    [SettingPropertyGroup("Long Memory")]
+    [SettingPropertyInteger("Raid: Relation Lost With Each Notable", TAOM.Features.LongMemory.LongMemorySettingsProvider.MinAmount, TAOM.Features.LongMemory.LongMemorySettingsProvider.MaxRaidAmount, Order = 4, RequireRestart = false,
+        HintText = "Relation lost with every notable of the village after a whole raid, before the alignment multiplier. Vanilla takes its own share as well. Between 0 and 100. Default: 50.")]
+    public int LongMemoryRaidNotableAmount { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultRaidNotableAmount;
+
+    [SettingPropertyGroup("Long Memory")]
+    [SettingPropertyInteger("Forced Taking: Relation Lost With The Owner's Clan Leader", TAOM.Features.LongMemory.LongMemorySettingsProvider.MinAmount, TAOM.Features.LongMemory.LongMemorySettingsProvider.MaxCoercionAmount, Order = 5, RequireRestart = false,
+        HintText = "Relation lost with the clan leader who owns the village each time you force it to give goods or recruits, before the alignment multiplier. Between 0 and 50. Default: 20.")]
+    public int LongMemoryCoercionOwnerAmount { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultCoercionOwnerAmount;
+
+    [SettingPropertyGroup("Long Memory")]
+    [SettingPropertyInteger("Forced Taking: Relation Lost With Each Notable", TAOM.Features.LongMemory.LongMemorySettingsProvider.MinAmount, TAOM.Features.LongMemory.LongMemorySettingsProvider.MaxCoercionAmount, Order = 6, RequireRestart = false,
+        HintText = "Relation lost with every notable of the village each time you force it to give goods or recruits, before the alignment multiplier. Between 0 and 50. Default: 25.")]
+    public int LongMemoryCoercionNotableAmount { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultCoercionNotableAmount;
+
+    [SettingPropertyGroup("Long Memory")]
+    [SettingPropertyFloatingInteger("Same Side Multiplier", TAOM.Features.LongMemory.LongMemorySettingsProvider.MinMultiplier, TAOM.Features.LongMemory.LongMemorySettingsProvider.MaxMultiplier, "0.00", Order = 7, RequireRestart = false,
+        HintText = "Multiplier on the loss when you and the village owner's realm are on the same side, both Free or both Evil: the harshest pairing. Default: 1.00.")]
+    public float LongMemorySame { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultSame;
+
+    [SettingPropertyGroup("Long Memory")]
+    [SettingPropertyFloatingInteger("Neutral Multiplier", TAOM.Features.LongMemory.LongMemorySettingsProvider.MinMultiplier, TAOM.Features.LongMemory.LongMemorySettingsProvider.MaxMultiplier, "0.00", Order = 8, RequireRestart = false,
+        HintText = "Multiplier on the loss when you or the village owner's realm is on neither side. Default: 0.50.")]
+    public float LongMemoryNeutral { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultNeutral;
+
+    [SettingPropertyGroup("Long Memory")]
+    [SettingPropertyFloatingInteger("Opposite Side Multiplier", TAOM.Features.LongMemory.LongMemorySettingsProvider.MinMultiplier, TAOM.Features.LongMemory.LongMemorySettingsProvider.MaxMultiplier, "0.00", Order = 9, RequireRestart = false,
+        HintText = "Multiplier on the loss when you and the village owner's realm are on opposite sides, such as an Evil warband raiding a Free village, where raiding is expected. Default: 0.10.")]
+    public float LongMemoryOpposite { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultOpposite;
 }

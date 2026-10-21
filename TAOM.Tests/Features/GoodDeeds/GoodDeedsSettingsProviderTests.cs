@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using TAOM.Features.Relations;
 using TAOM.Features;
 using TAOM.Features.GoodDeeds;
 using TAOM.Tests.Infrastructure;

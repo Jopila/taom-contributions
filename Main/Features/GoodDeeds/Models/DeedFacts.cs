@@ -1,13 +1,7 @@
 using TAOM.Features.Execution;
+using TAOM.Features.Relations;
 
 namespace TAOM.Features.GoodDeeds.Models;
-
-/// <summary>
-/// A hero who could be granted relation, as raw facts. <see cref="RelationOwnerId"/> is the hero whose relation with the
-/// player a change to this one really moves (<c>GetHeroesForEffectiveRelation</c>: the clan leader unless personal relations
-/// are on), and it is the de-duplication key. Whether a dead hero or the player earns anything is the service's decision.
-/// </summary>
-public sealed record DeedHero(string HeroId, string RelationOwnerId, bool IsAlive, bool IsPlayer);
 
 /// <summary>
 /// A prisoner the player just released, as raw facts. <see cref="Spouse"/> is <c>Hero.Spouse</c> and
@@ -18,9 +12,9 @@ public sealed record ReleaseFacts(
     SideIds Player,
     SideIds LordSide,
     bool IsLord,
-    DeedHero Lord,
-    DeedHero? Spouse,
-    DeedHero? ClanLeader);
+    RelationTarget Lord,
+    RelationTarget? Spouse,
+    RelationTarget? ClanLeader);
 
 /// <summary>
 /// What the party named by a <c>HeroPrisonerReleased</c> event says about who released the prisoner, as three raw facts read by
@@ -40,7 +34,7 @@ public readonly record struct ReleaseSource(bool IsMainParty, bool IsPlayerParty
 public sealed record DonationFacts(SideIds Captive, SideIds Owner);
 
 /// <summary>A notable of the tournament town with the side of his own map faction.</summary>
-public sealed record DeedNotable(DeedHero Hero, SideIds Side);
+public sealed record DeedNotable(RelationTarget Hero, SideIds Side);
 
 /// <summary>
 /// The town of a finished tournament. <see cref="OwnerLeader"/> is the leader of the owning clan (null when there is none),
@@ -51,6 +45,6 @@ public sealed record TournamentFacts(
     string TownName,
     SideIds Player,
     bool PlayerClanOwnsTown,
-    DeedHero? OwnerLeader,
+    RelationTarget? OwnerLeader,
     SideIds OwnerSide,
     System.Collections.Generic.IReadOnlyList<DeedNotable> Notables);
