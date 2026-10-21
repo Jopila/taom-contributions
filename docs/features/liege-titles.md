@@ -81,4 +81,4 @@ unchanged). Not yet checked in game.
 ## GitHub Issue
 
 - **Issue:** #955 Coronation title shows an engine error for TAOM cultures
-- **Status:** Open
+- **Status:** Closed, `triage-needs-ingame`

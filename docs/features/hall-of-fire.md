@@ -158,4 +158,4 @@ Cloth simulation in the conversation tableau is left alone until #635 is underst
 ## GitHub Issue
 
 - **Issue:** #826 Map conversations in TAOM-culture settlements show a wrong backdrop
-- **Status:** Open
+- **Status:** Closed, `triage-needs-ingame`
