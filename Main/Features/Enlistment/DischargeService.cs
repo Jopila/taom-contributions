@@ -189,7 +189,11 @@ public class DischargeService : IDischargeService
 
         var settlementId = commander.SettlementId;
         var menuId = commander.SettlementMenuId;
-        if (!string.IsNullOrEmpty(settlementId) && !string.IsNullOrEmpty(menuId))
+
+        // The commander's realm is at war with the player's own (#832): his town is no place to stand,
+        // so the player is released on the map. The settlement entry below is skipped.
+        var releaseOnMap = reason == DischargeReason.CommanderAtWarWithYourRealm;
+        if (!releaseOnMap && !string.IsNullOrEmpty(settlementId) && !string.IsNullOrEmpty(menuId))
         {
             // ENCOUNTER FIRST, and it is not interchangeable with MoveIntoSettlement. That one is
             // EnterSettlementAction.ApplyForParty alone, which moves the party and creates neither

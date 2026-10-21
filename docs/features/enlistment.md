@@ -1447,6 +1447,71 @@ pins the declaring identity and the unwind refuses to act under a different one,
 either way, since those wars are neither ours to unwind nor ours to keep. An absent pin (a save from
 before the field) unwinds as previous builds did, so nobody mid-service is stranded.
 
+**#832: wars during service.** The oath mirrored the commander's wars once and the discharge unwound
+them; nothing followed the commander in between. `ServiceDiplomacyService.FollowCommanderWars` now
+does, from the hourly tick only (`EnlistmentBehavior.OnHourlyTick`, host-only, delegating to
+`EnlistmentReconciler.OnHourlyTick`: `ReconcileHourly`, then the crown-war release, then the sync). An earlier design listened to `WarDeclared`,
+`MakePeace` and `OnClanChangedKingdomEvent`; running inside those engine actions re-entered
+`ChangeKingdomAction` mid-change (a peace flip-flop when a commander's realm lost its last fief, an
+`InvalidOperationException` in its loops) and could act in the load window before the map events were
+rebuilt. The cost of the tick is a lag of up to one in-game hour, bridged by the join-time top-up. The
+sync is not run from the load normalizer or from the captivity-released path, although both call
+`ReconcileHourly`.
+
+- **The arithmetic is pure.** `ServiceWarPolicy.Diff(commanderEnemies, enemiesAtOath, mirrored)`
+  declares the commander's wars minus the pre-oath enemies minus the wars already mirrored, and makes
+  peace only with mirrored wars the commander no longer fights (never a pre-oath enemy). Deduped,
+  null-safe, ordinal.
+- **Own clan only (Mike, 2026-10-20).** `ShouldMirrorMidTerm(oathFactionId, currentFactionId,
+  playerClanId)` is true only when the pin is set, is still the player's faction, and is his clan. A
+  vassal keeps the oath mirror and the discharge unwind, nothing in between: every declaration made
+  for him is his whole kingdom's. The gate runs before any hero lookup.
+- **Prune first, then follow.** Each pass drops every `MirroredWars` entry the player is no longer at
+  war with (a faction eliminated, or a peace his own side made), logged once each, without calling
+  `MakePeaceWith`. A peace the player made himself while the commander still fights that faction is
+  therefore re-declared at the next hour: the mirror follows the commander.
+- **Only acts that landed are recorded.** `FollowWarOn` and `DeclareWarOn` report whether the war
+  exists afterwards, and `MakePeaceWith` reports whether the peace landed. A refused peace stays
+  mirrored. Followed wars use the engine's default reason (`DeclareWarAction.ApplyByDefault`): a war
+  the commander's realm chose is not the player's hostility, and the hostility reason fails open
+  quests from that faction where the default one cancels them. The oath mirror and the join top-up
+  keep the hostility reason. TAOM's war and peace vetoes act only between two kingdoms, so a
+  clan-identity mirror is never vetoed by them; another mod's prefix still can be. At the oath the
+  mirror is cleared first and each landed declaration is recorded, so a stale entry never survives.
+- **The unwind is unchanged.** Mid-term mirrors go into the same `MirroredWars` list, so the existing
+  discharge unwind ends them too, and pre-oath wars still survive it.
+- **Join-time top-up.** `ServiceBattleService.TryJoin` reads the opposing side leader's faction
+  (`IEncounterAdapter.GetOpposingLeaderFactionId`, through `MapEventSide.OtherSide`) after the raid
+  floor and calls `MirrorWarAtJoin` before the state transition. "Already at war" is true under any
+  identity (so a vassal already at war logs no refusal). Every refusal is logged and the join
+  continues: a war check never refuses a join and `CanPartyJoinBattle` stays unused. The top-up follows
+  with the engine's default reason (open quests are cancelled, not failed). For a raid the
+  opposing leader is the village, whose faction is the one vanilla's Attack and Send troops would
+  declare on (`MenuHelper.cs:265-269`; `BeHostileAction.cs:32-35` returns early when already at war,
+  `:192-195` declares otherwise), so for a clan player the top-up replaces an untracked private war.
+- **Crown-war release.** When the commander is at war with the player's faction
+  (`IServiceDiplomacyService.IsServingAgainstOwnCrown`: his kingdom, or his clan when independent),
+  `EnlistmentReconciler.ReleaseIfServingAgainstOwnCrown` shows a one-button modal (`ShowNotice`, title
+  `taom_enlist_lost_title`, body `taom_enlist_crown_war_release`, button `taom_enlist_ok`) and
+  discharges with `DischargeReason.CommanderAtWarWithYourRealm` (value 8): honourable, wages settled
+  and kit reclaimed. It is a tick-only step, derived from world state every hour with no saved
+  field. It waits only on a battle: captivity, a map event for the player or the commander, a battle
+  encounter, or a live conversation. A settlement encounter does not wait it (a soldier held in the
+  commander's town always has one; the discharge finishes it and the walk-out leaves the
+  settlement). The player is released on the map, not into the commander's settlement, which now
+  belongs to his crown's enemy. A war that predates the oath is ignored (an independent clan already
+  at war with the lord's realm can swear, and is not released for it). While the war lasts and before the release, `TryJoin` skips the join
+  (INFO line, the same carve-out as the raid floor), so the soldier sits out battles against his own
+  crown.
+
+Tests: `ServiceWarPolicyTests` (Diff, ShouldMirrorMidTerm), `ServiceDiplomacyServiceTests` (the
+hourly sync, top-up, crown war, oath), `EnlistmentHourlyTickTests` (the behavior only delegates; that
+the load normalizer and the captivity-released path never reach the tick-only steps is pinned by
+`EnlistmentReconcilerTests.ReconcileHourly_NeverReleasesForACrownWar`, because they call
+`ReconcileHourly` alone), `ServiceBattleServiceTests` (top-up order, a refusal joins, every
+refusal logged, the crown-war join skip), `EnlistmentReconcilerTests` (the tick order, the release and its waits) and
+`DischargeServiceTests` (released on the map, walk-out once).
+
 **The commander-loss modal only fired once per commander per process.** `_lossAnnouncedFor` exists to
 stop the "Word from the column" inquiry repeating every hour *within* one grace episode, but it was
 never cleared when the commander recovered, so a lord who was captured, ransomed, and later lost his
@@ -2123,12 +2188,13 @@ Open risks:
    `EnlistmentBattleBehavior.OnBattleJoinRequested` (defer to the next wait-menu tick), not in the
    pump alone.
 2. The encounter's Attack and Send troops apply the hostile action against the village
-   (`MenuHelper.cs:267-269`, `:566-572`). If the soldier's clan is not at war with the village's
-   faction (a war that began after the oath; the war mirror runs only at the oath,
-   `EnlistmentService.cs:123`) that costs relation, crime and trait, applies -10 relation with the
-   faction leader, and declares the clan's own war on that faction (`BeHostileAction.cs:193-195`),
-   which discharge does not unwind (`ServiceWarPolicy.FactionsToPeaceOnDischarge` ends only mirrored
-   wars). Wars during service are A6 (#832).
+   (`MenuHelper.cs:265-269` for Attack, `:566-572` for Send troops). Closed for an own-clan identity
+   by the #832 join-time top-up, which mirrors and records the war first. For a vassal identity (no
+   top-up, by decision) it stays open: a war that began after the oath between the commander's realm
+   and a third faction is declared for his whole kingdom when he chooses Attack or Send troops
+   (`BeHostileAction.cs:192-195`). The costs are the -24 relation with the village owner and notables
+   (`:36-43`), crime and trait loss (`:105-115`), relation and influence (`:138-147`), and that
+   kingdom-wide war. The crown-war release does not cover it. Follow-up pending.
 3. Any `PlayerEncounter.Finish` with no winner while he is inside ends the commander's whole fight
    (`RaidEventComponent.cs:222`): Leave when the army merge was unavailable, or a `TryJoin` rollback.
 4. The pre-existing join-rollback `LeaveArmy` mid-event; Patch82 is the floor.
@@ -2262,6 +2328,17 @@ What actually remains, each a state no test can reach:
 - **A field battle with the commander in an army.** Still the case most likely to fail:
   `FindCommanderPartyIdIn` matches only the commander's own party in `InvolvedParties`, and an
   attached army member may not appear there.
+- **Wars during service (#832).** (1) As a clan player, the commander declares a war mid-term (the
+  mirror follows within the hour), makes peace (the mirror ends), and his clan changes kingdom (the
+  mirror recomputes); then discharge leaves only the pre-oath wars. (2) A relieved raid in a war
+  begun after the oath: no relation loss and no private war. (3) As a vassal, his crown and the
+  commander's realm go to war: the soldier sits out battles, then the release modal appears after the
+  battle, on the map; note whether the commander's party attacks him. (4) A War of the Ring scripted
+  war while enlisted: one declaration, no phantom mirror entry. (5) A release while held in the
+  commander's town (the settlement encounter must not block it and he must walk out). (6) An
+  independent-clan crown war. (7) The commander's realm losing its last fief while serving as a clan:
+  no peace flip-flop. (8) A vassal battle against a third faction in a new war: expect the
+  kingdom-wide declaration (the known risk above).
 - **Village raids (#831).** The in-game check (state stays `EnlistedAttached`,
   status line, release allowed, no raid menu; siege, sally-out and field battle still join; a raid
   the commander fights off as defender still joins). Also (#954): a relief lord attacks the raiding

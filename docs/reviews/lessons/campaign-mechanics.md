@@ -887,3 +887,18 @@ Comments and docs called a mercenary player or a hired minor clan "kingdomless" 
 - **Why missed:** the first doc said "the clan's own culture is part of its definition and also changes at once", which is true of a new campaign and false of every save.
 - **Prevent:** for any data edit to a saved object (a clan, a hero, a settlement), name which fields the save holds and which file the load skips; a data-only change to a saved field needs a load migration or a documented new-campaign-only limit. `MinorClanMigration` is the pattern: a pure service decides from raw facts, an adapter applies, a behavior runs it on `OnGameLoadedEvent`, and a test pins its targets to the shipped data.
 - **Source:** `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, wave 2, finding D1.
+
+### Act on diplomacy from a tick, not from inside the war and peace events (#832, 2026-10-20)
+Enlistment first followed the commander's wars from `WarDeclared`, `MakePeace` and
+`OnClanChangedKingdomEvent`. Those events fire inside `ChangeKingdomAction`, which clears a clan's
+kingdom and then re-declares the old wars one event at a time, so each handler saw a half-built
+enemy list: the soldier made peace with every mirrored faction and declared war again, and a
+declaration against the kingdom whose war list the engine was iterating could throw.
+- **Why missed:** the plan checked that each event fires after its own state change, not what the
+  enclosing action does around it.
+- **Prevent:** a TAOM rule that declares war or makes peace in answer to world diplomacy runs from a
+  campaign tick (hourly or daily) and reads settled state; never from an engine war, peace or kingdom
+  event. Bridge the lag where it matters (here a join-time top-up). Keep such steps off the load path,
+  which runs before `MapEventManager.OnAfterLoad`. No gate enforces the 150-line entry-point limit
+  (ADR-002); check `wc -l` against HEAD when a behavior grows.
+- **Source:** `docs/reviews/rca-enlistment-wars-during-service-2026-10-20.md` F1, F2.

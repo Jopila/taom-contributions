@@ -13,6 +13,13 @@ public interface IEnlistmentReconciler
     void ReconcileHourly(double nowDays);
 
     /// <summary>
+    /// The hourly tick's whole job (#832): <see cref="ReconcileHourly"/>, then the crown-war release,
+    /// then the commander war sync (skipped when the release ended the term). Only the tick calls it;
+    /// the load normalizer and the captivity-released path call <see cref="ReconcileHourly"/> alone.
+    /// </summary>
+    void OnHourlyTick(double nowDays);
+
+    /// <summary>
     /// Full reconcile off an EDGE rather than the hourly tick — the commander left a settlement,
     /// left an army. Re-entrant-safe: a reconcile already in flight is a no-op, which matters
     /// because the reconciler itself calls LeaveSettlementAction and that dispatches

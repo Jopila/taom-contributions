@@ -13,6 +13,7 @@ public class ServiceBattleService : IServiceBattleService
     private readonly IGameMenuAdapter _gameMenu;
     private readonly IEncounterOwnershipPolicy _ownership;
     private readonly IArmyMembershipAdapter _army;
+    private readonly IServiceDiplomacyService _diplomacy;
     private readonly IModLogger _logger;
 
     public ServiceBattleService(
@@ -23,6 +24,7 @@ public class ServiceBattleService : IServiceBattleService
         IGameMenuAdapter gameMenu,
         IEncounterOwnershipPolicy ownership,
         IArmyMembershipAdapter army,
+        IServiceDiplomacyService diplomacy,
         IModLogger logger)
     {
         _store = store;
@@ -32,6 +34,7 @@ public class ServiceBattleService : IServiceBattleService
         _gameMenu = gameMenu;
         _ownership = ownership;
         _army = army;
+        _diplomacy = diplomacy;
         _logger = logger;
     }
 
@@ -79,6 +82,24 @@ public class ServiceBattleService : IServiceBattleService
             _logger?.LogInfo($"[Enlistment] commander raiding: not a battle to join ({trigger})");
             return;
         }
+
+        // SERVING AGAINST HIS OWN CROWN (#832): the commander's realm is at war with the player's own
+        // faction. The soldier sits the battle out until the reconciler releases him (it waits on
+        // battles, so this is the only thing that keeps him out of one). Same carve-out as the raid
+        // floor: a player already in a map event falls through to the existing join path.
+        if (!_encounter.IsMainPartyInMapEvent && _diplomacy.IsServingAgainstOwnCrown())
+        {
+            _logger?.LogInfo($"[Enlistment] commander's realm is at war with the player's own: not joining ({trigger})");
+            return;
+        }
+
+        // TOP UP A MISSING WAR before joining (#832), under the oath rules (own-clan identity only).
+        // The encounter menu would otherwise declare it as an untracked war discharge never unwinds.
+        // A refusal is logged and the join goes ahead anyway: a war check never refuses a join, and
+        // CanPartyJoinBattle stays unused (see IEncounterAdapter).
+        var foe = _encounter.GetOpposingLeaderFactionId(commanderPartyId);
+        if (!string.IsNullOrEmpty(foe) && !_diplomacy.MirrorWarAtJoin(foe))
+            _logger?.LogInfo($"[Enlistment] war top-up refused for '{foe}' (commander party '{commanderPartyId}'); joining anyway");
 
         // Ordering is load-bearing and mirrors the donor's proven sequence:
         //   state (redirect-exempt) -> presence -> position -> encounter -> join -> menu.

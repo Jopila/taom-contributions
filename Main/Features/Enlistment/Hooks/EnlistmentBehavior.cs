@@ -106,7 +106,7 @@ public class EnlistmentBehavior : CampaignBehaviorBase
     internal void OnHourlyTick()
     {
         if (!_coopSession.IsAuthority) return;
-        _reconciler.ReconcileHourly(CampaignTime.Now.ToDays);
+        _reconciler.OnHourlyTick(CampaignTime.Now.ToDays);
     }
 
     // Every peer drops the last session's state first (in-memory clears only). A save with no

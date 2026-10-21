@@ -331,7 +331,7 @@ public class SettlementFollowingReconcilerTests
             new EncounterOwnershipPolicy(),
             Substitute.For<IEnlistmentDiagnosticsSettingsProvider>(),
             EnlistmentTestDoubles.FeatureOn(), Substitute.For<IInquiryAdapter>(),
-            Substitute.For<IArmyMembershipAdapter>(), _logger);
+            Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IServiceDiplomacyService>(), _logger);
     }
 
     private void Commander(string settlementId = null)

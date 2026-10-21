@@ -58,6 +58,7 @@ public class DischargeConsequenceService : IDischargeConsequenceService
             case DischargeReason.ContractNotRenewed:
             case DischargeReason.CommanderDead:
             case DischargeReason.CommanderUnavailableGraceExpired:
+            case DischargeReason.CommanderAtWarWithYourRealm:
                 // Honorable exit: the paymaster settles what the column still owes.
                 if (record.DeferredWages > 0)
                 {

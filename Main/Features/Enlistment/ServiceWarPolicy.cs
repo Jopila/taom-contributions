@@ -79,6 +79,57 @@ public static class ServiceWarPolicy
         return result;
     }
 
+    /// <summary>
+    /// Mid-term reconciliation (#832): declare on the commander's enemies the player neither brought
+    /// with him nor already mirrors, and make peace with mirrored wars the commander no longer
+    /// fights. A faction the player was at war with at the oath is never declared on and never
+    /// peaced, for the same reason <see cref="FactionsToPeaceOnDischarge"/> subtracts it.
+    /// Deduped, null-safe, ordinal.
+    /// </summary>
+    public static ServiceWarDiff Diff(
+        IEnumerable<string> commanderEnemies, IEnumerable<string> enemiesAtOath, IEnumerable<string> mirrored)
+    {
+        var commander = ToSet(commanderEnemies);
+        var atOath = ToSet(enemiesAtOath);
+        var mirror = ToSet(mirrored);
+
+        var toDeclare = new List<string>();
+        foreach (var id in Ordered(commanderEnemies))
+        {
+            if (!atOath.Contains(id) && !mirror.Contains(id) && !toDeclare.Contains(id))
+                toDeclare.Add(id);
+        }
+
+        var toPeace = new List<string>();
+        foreach (var id in Ordered(mirrored))
+        {
+            if (!atOath.Contains(id) && !commander.Contains(id) && !toPeace.Contains(id))
+                toPeace.Add(id);
+        }
+
+        return new ServiceWarDiff(toDeclare, toPeace);
+    }
+
+    /// <summary>
+    /// Mid-term mirroring is for a player whose OWN CLAN is the oath identity (Mike, 2026-10-20). The
+    /// pin must be set, still be the player's current faction, and be his clan: a vassal's faction is
+    /// his kingdom, and a mid-term mirror would move that whole kingdom's diplomacy. A vassal keeps the
+    /// oath-and-discharge behaviour only.
+    /// </summary>
+    public static bool ShouldMirrorMidTerm(string oathFactionId, string currentFactionId, string playerClanId)
+        => !string.IsNullOrEmpty(oathFactionId)
+           && string.Equals(oathFactionId, currentFactionId, System.StringComparison.Ordinal)
+           && string.Equals(currentFactionId, playerClanId, System.StringComparison.Ordinal);
+
+    private static IEnumerable<string> Ordered(IEnumerable<string> ids)
+    {
+        foreach (var id in ids ?? new List<string>())
+        {
+            if (!string.IsNullOrEmpty(id))
+                yield return id;
+        }
+    }
+
     private static HashSet<string> ToSet(IEnumerable<string> ids)
     {
         var set = new HashSet<string>();
@@ -88,5 +139,18 @@ public static class ServiceWarPolicy
                 set.Add(id);
         }
         return set;
+    }
+}
+
+/// <summary>What <see cref="ServiceWarPolicy.Diff"/> says to do, as two ordered id lists.</summary>
+public sealed class ServiceWarDiff
+{
+    public IReadOnlyList<string> ToDeclare { get; }
+    public IReadOnlyList<string> ToPeace { get; }
+
+    public ServiceWarDiff(IReadOnlyList<string> toDeclare, IReadOnlyList<string> toPeace)
+    {
+        ToDeclare = toDeclare;
+        ToPeace = toPeace;
     }
 }

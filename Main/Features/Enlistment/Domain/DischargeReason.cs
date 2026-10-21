@@ -6,7 +6,8 @@ namespace TAOM.Features.Enlistment.Domain;
 /// unconditionally restores party presence.
 ///
 /// PRODUCER STATUS (core phase): PlayerRequest, CommanderDead,
-/// CommanderUnavailableGraceExpired and HeirSuccessionOrPossessionMismatch are live.
+/// CommanderUnavailableGraceExpired, HeirSuccessionOrPossessionMismatch and
+/// CommanderAtWarWithYourRealm (#832, raised by the reconciler) are live.
 /// Commission / Desertion / ContractNotRenewed are RESERVED for the content phase
 /// (issue #375 Phase 3: contract-expiry check + the honorable-vs-desertion split of the
 /// leave flow); SaveNormalization is reserved for load paths that can safely run the
@@ -42,4 +43,11 @@ public enum DischargeReason
     /// normalizer-driven discharges once one needs a distinct label from the identity guard.
     /// </summary>
     SaveNormalization = 7,
+
+    /// <summary>
+    /// The commander's realm went to war with the player's own kingdom or, for an independent player,
+    /// his clan (#832). Honourable: wages
+    /// settled, kit reclaimed. The player is released on the map, not into the commander's town.
+    /// </summary>
+    CommanderAtWarWithYourRealm = 8,
 }

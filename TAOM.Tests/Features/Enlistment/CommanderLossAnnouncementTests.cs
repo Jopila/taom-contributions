@@ -70,7 +70,7 @@ public class CommanderLossAnnouncementTests
             new EnlistmentConfigProvider(_logger), Substitute.For<IEncounterAdapter>(),
             new EncounterOwnershipPolicy(), Substitute.For<IEnlistmentDiagnosticsSettingsProvider>(),
             EnlistmentTestDoubles.FeatureOn(), _inquiry,
-            Substitute.For<IArmyMembershipAdapter>(), _logger);
+            Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IServiceDiplomacyService>(), _logger);
 
         _store.Record.State = EnlistmentState.EnlistedAttached;
         _store.Record.EnlistedHeroId = "main_hero";

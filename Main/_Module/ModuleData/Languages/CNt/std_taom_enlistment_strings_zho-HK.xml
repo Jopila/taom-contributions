@@ -275,5 +275,6 @@
     <string id="taom_enlist_sat_out_wounded_line" text="You were wounded and stayed back while the column fought." />
     <string id="taom_enlist_sat_out_forced_line" text="The column fought without you, and you had no way into the line." />
     <string id="taom_enlist_act_raid" text="The column is raiding." />
+    <string id="taom_enlist_crown_war_release" text="{COMMANDER}'s realm has gone to war with yours. You are released from the column with honor, and your pay is settled." />
   </strings>
 </base>

@@ -276,6 +276,37 @@ public class DischargeServiceTests
     }
 
     [TestMethod]
+    public void Execute_CommanderAtWarWithYourRealm_ReleasesOnTheMapNotIntoTheSettlement()
+    {
+        // #832: the commander's realm is at war with the player's own, so his town is no place to
+        // stand. Released on the map.
+        MakeEnlisted();
+        _commanderAdapter.GetSnapshot(Arg.Any<string>()).Returns(new CommanderSnapshot(
+            exists: true, isAlive: true, partyId: "lord_party_1", partyIsActive: true,
+            settlementId: "town_A1", settlementMenuId: "town"));
+
+        _service.Execute(DischargeReason.CommanderAtWarWithYourRealm);
+
+        _encounter.DidNotReceive().EnsureSettlementEncounter(Arg.Any<string>());
+        _gameMenu.DidNotReceive().EnsureMenuOpen("town");
+    }
+
+    [TestMethod]
+    public void Execute_CommanderAtWarWithYourRealm_PlayerInsideASettlement_WalksOutOnce()
+    {
+        MakeEnlisted();
+        _commanderAdapter.GetSnapshot(Arg.Any<string>()).Returns(new CommanderSnapshot(
+            exists: true, isAlive: true, partyId: "lord_party_1", partyIsActive: true,
+            settlementId: "town_A1", settlementMenuId: "town"));
+        _attachment.GetPresenceFlags().Returns(new PlayerPresenceFlags(
+            mainPartyExists: true, isActive: true, isVisible: true, settlementId: "town_A1"));
+
+        _service.Execute(DischargeReason.CommanderAtWarWithYourRealm);
+
+        _attachment.Received(1).LeaveSettlement();
+    }
+
+    [TestMethod]
     public void Execute_CommanderInSettlement_ReleasesThePlayerIntoIt()
     {
         MakeEnlisted();

@@ -46,7 +46,7 @@ public class EnlistmentLoadNormalizerTests
         var reconciler = new EnlistmentReconciler(_store, _machine, attachment, _commander, discharge,
             new EnlistmentConfigProvider(_logger), _encounter, new EncounterOwnershipPolicy(), Substitute.For<IEnlistmentDiagnosticsSettingsProvider>(),
             EnlistmentTestDoubles.FeatureOn(), Substitute.For<IInquiryAdapter>(),
-            Substitute.For<IArmyMembershipAdapter>(), _logger);
+            Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IServiceDiplomacyService>(), _logger);
         _normalizer = new EnlistmentLoadNormalizer(
             _store, _machine, reconciler, _partyAdapter, discharge, _encounter, _logger);
     }

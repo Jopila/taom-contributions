@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
@@ -25,6 +26,8 @@ public class EnlistmentReconcilerTests
     private DischargeService _discharge = null!;
     private IEncounterAdapter _encounter = null!;
     private IArmyMembershipAdapter _army = null!;
+    private IServiceDiplomacyService _diplomacy = null!;
+    private IInquiryAdapter _inquiry = null!;
     private EnlistmentReconciler _reconciler = null!;
 
     private const double Now = 200.0;
@@ -45,9 +48,11 @@ public class EnlistmentReconcilerTests
         _discharge = new DischargeService(_store, _machine, _partyAdapter, Substitute.For<IEncounterAdapter>(), new EncounterOwnershipPolicy(), Substitute.For<ICommanderLordAdapter>(), Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), _logger);
         _encounter = Substitute.For<IEncounterAdapter>();
         _army = Substitute.For<IArmyMembershipAdapter>();
+        _diplomacy = Substitute.For<IServiceDiplomacyService>();
+        _inquiry = Substitute.For<IInquiryAdapter>();
         _reconciler = new EnlistmentReconciler(_store, _machine, _attachment, _commander, _discharge,
             new EnlistmentConfigProvider(_logger), _encounter, new EncounterOwnershipPolicy(), Substitute.For<IEnlistmentDiagnosticsSettingsProvider>(),
-            EnlistmentTestDoubles.FeatureOn(), Substitute.For<IInquiryAdapter>(), _army, _logger);
+            EnlistmentTestDoubles.FeatureOn(), _inquiry, _army, _diplomacy, _logger);
     }
 
     private void MakeEnlisted(EnlistmentState state = EnlistmentState.EnlistedAttached)
@@ -321,6 +326,153 @@ public class EnlistmentReconcilerTests
         _reconciler.ReconcileHourly(Now);
 
         _partyAdapter.Received(1).ParkNear("lord_1_1");
+    }
+
+    // ---- #832: the commander's realm at war with the player's own (tick-only step) ----
+
+    private void Ownership(bool hasEncounter = false, bool conversation = false, bool battle = false,
+        bool insideSettlement = false, bool playerInMapEvent = false)
+    {
+        _encounter.GetOwnership(Arg.Any<string>()).Returns(new EncounterOwnershipSnapshot(
+            hasEncounter: hasEncounter, conversationInProgress: conversation,
+            playerInMapEvent: playerInMapEvent, playerInsideSettlement: insideSettlement,
+            isBattleEncounter: battle));
+    }
+
+    [TestMethod]
+    public void ReleaseIfServingAgainstOwnCrown_NothingLive_ShowsTheNoticeThenDischarges()
+    {
+        MakeEnlisted();
+        CommanderHealthy();
+        PlayerPresence();
+        Ownership();
+        _diplomacy.IsServingAgainstOwnCrown().Returns(true);
+        DischargeReason? ended = null;
+        _discharge.EnlistmentEnded += r => ended = r;
+        EnlistmentState? stateAtNotice = null;
+        _inquiry.When(i => i.ShowNotice(
+                Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+                Arg.Any<string>(), Arg.Any<string>(), Arg.Any<IReadOnlyDictionary<string, string>>(), Arg.Any<bool>()))
+            .Do(_ => stateAtNotice = _store.Record.State);
+
+        var released = _reconciler.ReleaseIfServingAgainstOwnCrown();
+
+        Assert.IsTrue(released);
+        Assert.AreEqual(DischargeReason.CommanderAtWarWithYourRealm, ended);
+        Assert.AreEqual(EnlistmentState.EnlistedAttached, stateAtNotice);
+        _inquiry.Received(1).ShowNotice(
+            "taom_enlist_lost_title", Arg.Any<string>(),
+            "taom_enlist_crown_war_release", Arg.Any<string>(),
+            "taom_enlist_ok", Arg.Any<string>(),
+            Arg.Is<IReadOnlyDictionary<string, string>>(v => v != null && v["COMMANDER"] == "Lord Test"),
+            Arg.Any<bool>());
+        _inquiry.DidNotReceiveWithAnyArgs().ShowMessage(default!, default!, default!, default!);
+    }
+
+    [TestMethod]
+    public void ReleaseIfServingAgainstOwnCrown_SettlementEncounter_StillReleases()
+    {
+        // A soldier held in the commander's town always has a settlement encounter; only a battle waits.
+        MakeEnlisted();
+        CommanderHealthy();
+        PlayerPresence(hasEncounter: true, settlementId: "town_A1");
+        Ownership(hasEncounter: true, insideSettlement: true);
+        _diplomacy.IsServingAgainstOwnCrown().Returns(true);
+
+        Assert.IsTrue(_reconciler.ReleaseIfServingAgainstOwnCrown());
+    }
+
+    [DataTestMethod]
+    [DataRow("playerMapEvent", DisplayName = "player in a map event -> wait")]
+    [DataRow("commanderMapEvent", DisplayName = "commander in a map event -> wait")]
+    [DataRow("battleEncounter", DisplayName = "battle encounter -> wait")]
+    [DataRow("conversation", DisplayName = "live conversation -> wait")]
+    [DataRow("captive", DisplayName = "player captive -> wait")]
+    public void ReleaseIfServingAgainstOwnCrown_SomethingLive_Waits(string live)
+    {
+        MakeEnlisted();
+        CommanderHealthy(inMapEvent: live == "commanderMapEvent");
+        PlayerPresence(captive: live == "captive", inMapEvent: live == "playerMapEvent",
+            hasEncounter: live == "battleEncounter" || live == "conversation");
+        Ownership(hasEncounter: live == "battleEncounter" || live == "conversation",
+            battle: live == "battleEncounter", conversation: live == "conversation");
+        _diplomacy.IsServingAgainstOwnCrown().Returns(true);
+
+        Assert.IsFalse(_reconciler.ReleaseIfServingAgainstOwnCrown());
+        Assert.AreEqual(EnlistmentState.EnlistedAttached, _store.Record.State);
+    }
+
+    [TestMethod]
+    public void ReleaseIfServingAgainstOwnCrown_NoCrownWar_Waits()
+    {
+        MakeEnlisted();
+        CommanderHealthy();
+        PlayerPresence();
+        Ownership();
+        _diplomacy.IsServingAgainstOwnCrown().Returns(false);
+
+        Assert.IsFalse(_reconciler.ReleaseIfServingAgainstOwnCrown());
+    }
+
+    [TestMethod]
+    public void OnHourlyTick_CrownWar_ReleasesAndSkipsTheWarSync()
+    {
+        MakeEnlisted();
+        CommanderHealthy();
+        PlayerPresence();
+        Ownership();
+        _diplomacy.IsServingAgainstOwnCrown().Returns(true);
+
+        _reconciler.OnHourlyTick(Now);
+
+        Assert.AreEqual(EnlistmentState.NotEnlisted, _store.Record.State);
+        _diplomacy.DidNotReceive().FollowCommanderWars();
+    }
+
+    [TestMethod]
+    public void OnHourlyTick_NoCrownWar_FollowsTheCommandersWarsAfterReconciling()
+    {
+        MakeEnlisted();
+        CommanderHealthy();
+        PlayerPresence();
+        Ownership();
+
+        _reconciler.OnHourlyTick(Now);
+
+        Assert.AreEqual(EnlistmentState.EnlistedAttached, _store.Record.State);
+        _diplomacy.Received(1).FollowCommanderWars();
+    }
+
+    [TestMethod]
+    public void OnHourlyTick_AFailingWarSync_IsLoggedNotPropagated()
+    {
+        MakeEnlisted();
+        CommanderHealthy();
+        PlayerPresence();
+        Ownership();
+        _diplomacy.When(d => d.FollowCommanderWars()).Do(_ => throw new System.InvalidOperationException("boom"));
+
+        _reconciler.OnHourlyTick(Now);
+
+        _logger.Received().LogError(Arg.Is<string>(m => m.Contains("FollowCommanderWars failed")));
+    }
+
+    [TestMethod]
+    public void ReconcileHourly_NeverReleasesForACrownWar()
+    {
+        // The release is a tick-only step: the load normalizer and the captivity-released path reach
+        // ReconcileHourly too, and must not run it.
+        MakeEnlisted();
+        CommanderHealthy();
+        PlayerPresence();
+        Ownership();
+        _diplomacy.IsServingAgainstOwnCrown().Returns(true);
+
+        _reconciler.ReconcileHourly(Now);
+
+        Assert.AreEqual(EnlistmentState.EnlistedAttached, _store.Record.State);
+        _diplomacy.DidNotReceive().IsServingAgainstOwnCrown();
+        _diplomacy.DidNotReceive().FollowCommanderWars();
     }
 
     [TestMethod]

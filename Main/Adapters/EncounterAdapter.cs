@@ -64,6 +64,19 @@ public sealed class EncounterAdapter : IEncounterAdapter
         }
     }
 
+    public string GetOpposingLeaderFactionId(string partyId)
+    {
+        try
+        {
+            return FindParty(partyId)?.Party?.MapEventSide?.OtherSide?.LeaderParty?.MapFaction?.StringId;
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"[Enlistment] GetOpposingLeaderFactionId('{partyId}') failed: {ex.Message}");
+            return null;
+        }
+    }
+
     public bool IsPartyInMapEvent(string partyId)
     {
         try

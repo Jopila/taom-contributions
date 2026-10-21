@@ -47,6 +47,39 @@ public sealed class InquiryAdapter : IInquiryAdapter
             prioritize: prioritize);
     }
 
+    public void ShowNotice(
+        string titleKey, string titleFallback,
+        string bodyKey, string bodyFallback,
+        string buttonKey, string buttonFallback,
+        IReadOnlyDictionary<string, string> bodyVariables = null,
+        bool prioritize = false)
+    {
+        var title = new TextObject("{=" + titleKey + "}" + titleFallback).ToString();
+
+        var bodyText = new TextObject("{=" + bodyKey + "}" + bodyFallback);
+        if (bodyVariables != null)
+        {
+            foreach (var pair in bodyVariables)
+            {
+                if (!string.IsNullOrEmpty(pair.Key))
+                    bodyText.SetTextVariable(pair.Key, pair.Value ?? string.Empty);
+            }
+        }
+        var button = new TextObject("{=" + buttonKey + "}" + buttonFallback).ToString();
+
+        InformationManager.ShowInquiry(new InquiryData(
+            title,
+            bodyText.ToString(),
+            true,
+            false,
+            button,
+            string.Empty,
+            null,
+            null),
+            pauseGameActiveState: true,
+            prioritize: prioritize);
+    }
+
     public void ShowMessage(
         string key, string fallback,
         string variableName, string variableValue,

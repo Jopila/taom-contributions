@@ -51,7 +51,7 @@ public class EnlistmentFeatureToggleTests
             new EnlistmentConfigProvider(logger), Substitute.For<IEncounterAdapter>(),
             new EncounterOwnershipPolicy(), Substitute.For<IEnlistmentDiagnosticsSettingsProvider>(),
             _feature, Substitute.For<IInquiryAdapter>(),
-            Substitute.For<IArmyMembershipAdapter>(), logger);
+            Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IServiceDiplomacyService>(), logger);
     }
 
     private EnlistmentDialogGateService Gate()
@@ -207,7 +207,7 @@ public class EnlistmentReviewGuardTests
             _config, Substitute.For<IEncounterAdapter>(), new EncounterOwnershipPolicy(),
             Substitute.For<IEnlistmentDiagnosticsSettingsProvider>(),
             EnlistmentTestDoubles.FeatureOn(), Substitute.For<IInquiryAdapter>(),
-            Substitute.For<IArmyMembershipAdapter>(), logger);
+            Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IServiceDiplomacyService>(), logger);
     }
 
     [DataTestMethod]

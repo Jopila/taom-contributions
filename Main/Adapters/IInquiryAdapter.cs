@@ -50,4 +50,16 @@ public interface IInquiryAdapter
         string key, string fallback,
         string variableName, string variableValue,
         string secondVariableName = null, string secondVariableValue = null);
+
+    /// <summary>
+    /// A one-button modal for news the player must read (#832). Only the affirmative button is shown,
+    /// and the game pauses like <see cref="ShowTwoOptionInquiry"/>. <paramref name="bodyVariables"/>
+    /// substitute into the body only.
+    /// </summary>
+    void ShowNotice(
+        string titleKey, string titleFallback,
+        string bodyKey, string bodyFallback,
+        string buttonKey, string buttonFallback,
+        IReadOnlyDictionary<string, string> bodyVariables = null,
+        bool prioritize = false);
 }

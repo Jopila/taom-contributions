@@ -65,6 +65,8 @@ public class EnlistmentReconciler : IEnlistmentReconciler
     /// </summary>
     private string _lossAnnouncedFor;
 
+    private readonly IServiceDiplomacyService _diplomacy;
+
     public EnlistmentReconciler(
         IEnlistmentStore store,
         IEnlistmentStateMachine machine,
@@ -78,8 +80,10 @@ public class EnlistmentReconciler : IEnlistmentReconciler
         IEnlistmentFeatureSettingsProvider feature,
         IInquiryAdapter inquiry,
         IArmyMembershipAdapter army,
+        IServiceDiplomacyService diplomacy,
         IModLogger logger)
     {
+        _diplomacy = diplomacy;
         _store = store;
         _machine = machine;
         _attachment = attachment;
@@ -189,6 +193,68 @@ public class EnlistmentReconciler : IEnlistmentReconciler
                 ReconcileAttached(record, presence, nowDays, trigger);
                 return;
         }
+    }
+
+    /// <summary>
+    /// The hourly tick (#832): reconcile, then the crown-war release, then the commander war sync.
+    /// Only the behavior's tick calls this; the load normalizer and the captivity-released path call
+    /// <see cref="ReconcileHourly"/> alone.
+    /// </summary>
+    public void OnHourlyTick(double nowDays)
+    {
+        ReconcileHourly(nowDays);
+
+        // TICK-ONLY steps (#832). Both ran inside engine actions in an earlier design and re-entered
+        // them; the load normalizer (before the map events are rebuilt) and the captivity-released
+        // path also call ReconcileHourly, and must not reach either. A crown-war release ends the
+        // term, so the war sync is skipped after it.
+        if (ReleaseIfServingAgainstOwnCrown())
+            return;
+        try
+        {
+            _diplomacy?.FollowCommanderWars();
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"[Enlistment] FollowCommanderWars failed: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// #832: the commander's realm is at war with the player's own faction (a war that began after the
+    /// oath), so serving on is serving against his crown. Never called from <c>ReconcileCore</c>. It
+    /// waits on captivity, a map event, a battle encounter or a live conversation (#551) but NOT on a
+    /// settlement encounter, which a soldier held in the commander's town always has; the discharge
+    /// finishes it. The war is re-read every pass, so no flag is saved.
+    /// </summary>
+    internal bool ReleaseIfServingAgainstOwnCrown()
+    {
+        var record = _store.Record;
+        if (!record.IsEnlisted || _diplomacy == null || !_diplomacy.IsServingAgainstOwnCrown())
+            return false;
+
+        var presence = _attachment.GetPresence(record.CommanderHeroId);
+        if (presence.IsCaptive || presence.IsInMapEvent)
+            return false;
+
+        var snapshot = _commander.GetSnapshot(record.CommanderHeroId);
+        if (snapshot.PartyIsInMapEvent)
+            return false;
+
+        var own = _encounter.GetOwnership(snapshot.PartyId);
+        if (own.ReadFailed || own.IsBattleEncounter || own.ConversationInProgress || own.PlayerInMapEvent)
+            return false;
+
+        _logger?.LogInfo("[Enlistment] the commander's realm is at war with the player's own faction; releasing the player honourably");
+        _inquiry?.ShowNotice(
+            "taom_enlist_lost_title", "Word from the column",
+            "taom_enlist_crown_war_release",
+            "{COMMANDER}'s realm has gone to war with yours. You are released from the column with honor, and your pay is settled.",
+            "taom_enlist_ok", "Understood",
+            new System.Collections.Generic.Dictionary<string, string> { { "COMMANDER", snapshot.Name ?? "" } },
+            prioritize: true);
+        _discharge.Execute(DischargeReason.CommanderAtWarWithYourRealm);
+        return true;
     }
 
     private void ReconcileCaptive(EnlistmentRecord record, PlayerPresenceSnapshot presence)

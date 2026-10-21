@@ -53,6 +53,7 @@ public class DischargeConsequenceServiceTests
         DischargeReason.ContractNotRenewed,
         DischargeReason.CommanderDead,
         DischargeReason.CommanderUnavailableGraceExpired,
+        DischargeReason.CommanderAtWarWithYourRealm,
     };
 
     [TestInitialize]
