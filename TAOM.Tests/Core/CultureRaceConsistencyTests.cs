@@ -148,22 +148,10 @@ public class CultureRaceConsistencyTests
         // Armory, so a missing one is a broken install, not a typo anyone would see in review
         // (#644 put nazghul on the Nine).
         var registered = RegisteredRaces();
-        var moduleData = Path.Combine(FindRepoRoot(), "Main", "_Module", "ModuleData");
+        var scans = StylesheetRaceScans();
+        var used = CharacterRaces(scans);
 
-        var stylesheets = Directory.EnumerateFiles(moduleData, "*.xslt", SearchOption.AllDirectories)
-            .Select(f => (source: Path.GetFileName(f), scan: RacesEmittedByXslt(File.ReadAllText(f))))
-            .ToArray();
-
-        var used = Directory.EnumerateFiles(moduleData, "*.xml", SearchOption.AllDirectories)
-            .SelectMany(f => Regex.Matches(File.ReadAllText(f), @"<NPCCharacter\b[^>]*?\brace=""([^""]+)""")
-                .Cast<Match>().Select(m => (source: Path.GetFileName(f), race: m.Groups[1].Value)))
-            .Concat(stylesheets.SelectMany(s => s.scan.Races.Select(race => (s.source, race))))
-            .ToArray();
-
-        Assert.IsTrue(used.Any(u => u.source == "lords.xml"), "parsed no race from characters/lords.xml; the file shape changed");
-        Assert.IsTrue(used.Any(u => u.source == "lords.xslt"), "parsed no race from lords.xslt; the file shape changed");
-
-        var computed = stylesheets.SelectMany(s => s.scan.Unverifiable.Select(u => $"{s.source}: {u}")).ToArray();
+        var computed = scans.SelectMany(s => s.scan.Unverifiable.Select(u => $"{s.source}: {u}")).ToArray();
         Assert.AreEqual(0, computed.Length,
             "An XSLT computes a race at transform time, which this scan cannot read; spell it as literal text, "
             + "or extend the gate to check that stylesheet's transform output: "
@@ -177,6 +165,76 @@ public class CultureRaceConsistencyTests
         Assert.AreEqual(0, unknown.Length,
             "A character declares a race no skins.xml registers; loading NPCCharacters will throw: "
             + string.Join(", ", unknown));
+    }
+
+    private static (string source, (List<string> Races, List<string> Unverifiable) scan)[] StylesheetRaceScans() =>
+        Directory.EnumerateFiles(Path.Combine(FindRepoRoot(), "Main", "_Module", "ModuleData"), "*.xslt", SearchOption.AllDirectories)
+            .Select(f => (source: Path.GetFileName(f), scan: RacesEmittedByXslt(File.ReadAllText(f))))
+            .ToArray();
+
+    private static (string source, string race)[] CharacterRaces(
+        (string source, (List<string> Races, List<string> Unverifiable) scan)[] scans)
+    {
+        var moduleData = Path.Combine(FindRepoRoot(), "Main", "_Module", "ModuleData");
+
+        var used = Directory.EnumerateFiles(moduleData, "*.xml", SearchOption.AllDirectories)
+            .SelectMany(f => Regex.Matches(File.ReadAllText(f), @"<NPCCharacter\b[^>]*?\brace=""([^""]+)""")
+                .Cast<Match>().Select(m => (source: Path.GetFileName(f), race: m.Groups[1].Value)))
+            .Concat(scans.SelectMany(s => s.scan.Races.Select(race => (s.source, race))))
+            .ToArray();
+
+        Assert.IsTrue(used.Any(u => u.source == "lords.xml"), "parsed no race from characters/lords.xml; the file shape changed");
+        Assert.IsTrue(used.Any(u => u.source == "lords.xslt"), "parsed no race from lords.xslt; the file shape changed");
+        return used;
+    }
+
+    [TestMethod]
+    public void EveryCharacterRace_HasMaleAndFemaleFacegenSet()
+    {
+        // GauntletSceneNotification.OpenScene and the face-editor views pose every character,
+        // NPC rulers included, through as_<base monster>[_female]_facegen: a race without the pair
+        // logs "Action set could not be found" and is posed with the engine's default set
+        // (#956, Sauron in the coronation scene). The monster files are the ones the engine loads.
+        var modules = @"E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\";
+        var lotrMonsters = modules + @"LOTRLOME_Armory\ModuleData\Monsters\LOTR";
+        var monsterFiles = new[] { "Native", "SandBox", "LOTRLOME_Armory" }
+            .Select(m => modules + m + @"\ModuleData\monsters.xml")
+            .Concat(Directory.Exists(lotrMonsters) ? Directory.GetFiles(lotrMonsters, "*.xml") : new string[0])
+            .Where(File.Exists).ToArray();
+        var setFiles = new[] { "Native", "LOTRLOME_Armory" }
+            .Select(m => modules + m + @"\ModuleData\action_sets.xml").Where(File.Exists).ToArray();
+        if (monsterFiles.Length == 0 || setFiles.Length == 0)
+            Assert.Inconclusive("Bannerlord install not found; facegen action sets cannot be checked here.");
+
+        var baseMonster = new Dictionary<string, string?>(StringComparer.Ordinal);
+        foreach (var f in monsterFiles)
+            foreach (var m in XDocument.Load(f).Descendants("Monster"))
+                baseMonster[(string)m.Attribute("id")!] = (string?)m.Attribute("base_monster");
+
+        var sets = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var f in setFiles)
+            foreach (var s in XDocument.Load(f).Descendants("action_set"))
+                sets.Add((string)s.Attribute("id")!);
+
+        var races = new HashSet<string>(CharacterRaces(StylesheetRaceScans()).Select(u => u.race), StringComparer.Ordinal);
+        foreach (var culture in AllowedRaces(FindRepoRoot()))
+            races.UnionWith(culture.Value);
+
+        Assert.IsTrue(races.Count >= 10, $"found only {races.Count} races; the scan shape changed");
+
+        var missing = new List<string>();
+        foreach (var race in races.OrderBy(r => r, StringComparer.Ordinal))
+        {
+            var monster = race;
+            for (var hop = 0; hop < 8 && baseMonster.TryGetValue(monster, out var b) && !string.IsNullOrEmpty(b); hop++)
+                monster = b!;
+            foreach (var set in new[] { $"as_{monster}_facegen", $"as_{monster}_female_facegen" })
+                if (!sets.Contains(set))
+                    missing.Add($"{race} -> {set}");
+        }
+
+        Assert.AreEqual(0, missing.Count,
+            "A race in use has no facegen pair (as_<monster>_facegen, as_<monster>_female_facegen): " + string.Join(", ", missing));
     }
 
     private static readonly XNamespace Xsl = "http://www.w3.org/1999/XSL/Transform";

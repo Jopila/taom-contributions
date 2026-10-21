@@ -1989,3 +1989,13 @@ behaviour").
 - **Prevent:** every number the design depends on (per-frame budgets, cadences, windows, caps) is an acceptance item with
   its unit, and a test pins it (here: N agents over N/64 ticks, each read once).
 - **Source:** `docs/reviews/rca-lost-footing-2026-10-20.md` row 3.
+
+### When a test helper is extracted, its floors move with it (#956, 2026-10-20)
+`CultureRaceConsistencyTests` moved its race scan into a shared helper for a new gate and left behind the two asserts
+that the scan found a race in `lords.xml` and in `lords.xslt`. Both gates could then pass on a broken scan, and the new
+gate's own floor (at least 10 races) was met by `cultures.json` alone, so `sauron`, reachable only through
+`lords.xslt`, would have dropped out unseen.
+- **Why missed:** "behaviour unchanged" was checked by the old test staying green, which a missing floor does not show.
+- **Prevent:** when a scan moves into a helper, the asserts that prove the scan read something move into the helper
+  too, so every caller keeps them; a new gate's floor must not be satisfiable by an input other than the one it guards.
+- **Source:** `docs/reviews/rca-coronation-fixes-2026-10-20.md` C1.

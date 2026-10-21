@@ -77,6 +77,8 @@ Transpilers iterate List<CodeInstruction> by hand; Harmony's CodeMatcher is avai
 
 A `[ViewCreatorModule]` class may hold only `[ViewMethod]` static methods: the engine reads attribute [0] of every static method unguarded, so a helper throws and breaks every mission view. The gate is `ViewCreatorModuleClasses_EveryStaticMethod_CarriesViewMethod` (`TAOM.Tests/Infrastructure/ViewCreatorModuleGateTests.cs`).
 
+A `ConversationTag` subclass anywhere in TAOM.dll must be concrete, non-generic, public-parameterless and carry a unique `StringId`: the `ConversationManager` constructor instantiates every one at each campaign start and load, so one bad tag breaks every campaign. No shared base class. The gate is `EveryTaomConversationTag_IsInstantiableAndUnique` (`TAOM.Tests/Infrastructure/Localization/LiegeTitleOverrideTests.cs`).
+
 ## Anti-Patterns
 
 - Business logic in Harmony patches (must delegate)

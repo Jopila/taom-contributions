@@ -129,15 +129,21 @@ crowned, so any save works. Or win a king election and look at the two guards in
   points put in every guard's right hand (vanilla's guards hold it too);
 - founding a kingdom shows a different scene, which never calls this method.
 
-Not Crown Guard findings, so do not log them against it:
+Two findings that are not Crown Guard's were fixed beside it, so do not log them against it:
 
-- the title line: a ruler of a culture outside the seven vanilla ids reads the engine's "ERROR: Text with id
-  str_liege_title doesn't exist! Variation: <culture>" (`str_liege_title_female` for a queen, such as Galadriel of
-  Lothlorien), because no module defines a liege title for those ids (TAOM's own titles cover only the six reused
-  vanilla ids); Dunland (`empire`) reads vanilla's Calradian emperor line, because the engine's title has a fixed
-  `str_become_king_empire` branch for `empire` and never reads TAOM's Dunland title;
-- Mordor's ruler: the `sauron` race has no `as_sauron_facegen` action set, so the engine falls back to its default set
-  and Sauron stands in a default pose.
+- the title line (#955): every kingdom culture now has a liege title, so the line reads the culture's own title
+  ("Lord of Gondor", "Queen of Arthedain", "Dark Lord of Mordor") instead of the engine's "ERROR: Text with id
+  str_liege_title doesn't exist!". The rows are `str_liege_title.<culture>` and `str_liege_title_female.<culture>` in
+  `taom_module_strings.xml`, each tagged `taom_culture_<culture>` (the classes are in
+  `Main/Features/LiegeTitles/TaomCultureTags.cs`). The coronation picks a row by its id suffix, while dialogs pick by
+  tag, so a row needs both. The coronation keys on the kingdom's culture and dialogs on the ruler's own culture,
+  so a ruler of another culture (an heir of Mordor ruling Dol Guldur) is crowned with one title and addressed with the
+  other, as in vanilla. Dunland (`empire`) reads TAOM's "was hailed as Brenin of Dunland" line from
+  `str_become_king_empire` instead of the Calradian emperor line;
+- Mordor's ruler (#956): the `sauron` race now has `as_sauron_facegen` and `as_sauron_female_facegen` in the Armory
+  (copies of the elf pair), so the scene no longer logs `Action set "as_sauron_facegen" could not be found`. His pose
+  does not change: the ruler's `act_main_story_become_king` exists only in `as_human_warrior`, which both the engine's
+  fallback set and the new set's `base_set` supply. Check the rgl log after `taom.play_coronation mordor`.
 
 Not yet checked in game.
 
@@ -145,6 +151,7 @@ Not yet checked in game.
 
 - 2026-10-20: added (#825).
 - 2026-10-20: `taom.play_coronation [kingdom]` opens the scene on demand for the in-game check.
+- 2026-10-20: liege titles for every kingdom culture and a Dunland coronation line (#955); `as_sauron_facegen` pair (#956).
 
 ## GitHub Issue
 

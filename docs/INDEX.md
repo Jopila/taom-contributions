@@ -156,6 +156,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [tavern-specialities](features/tavern-specialities.md): Patch111 (#937), a prefix that pre-sets default dishes for the tavern maid, which vanilla's seven culture branches overwrite
 - [crown-guard](features/crown-guard.md): Patch112 (#825), a postfix that gives the become-king scene's two guards a troop picked for the new kingdom's culture
 - [hall-of-fire](features/hall-of-fire.md): #826, wraps the engine's map conversation provider so a settlement of a TAOM culture borrows a vanilla culture's conversation backdrop
+- [liege-titles](features/liege-titles.md): #955, a male and female liege title for every TAOM kingdom culture (conversation tags plus tagged rows), and TAOM's Dunland coronation line
 - [return-to-army](features/return-to-army.md): Patch87, "Return to Army" leaves a town or castle for an army member who is not merged into the army, where vanilla's wait menu has no exit
 - [lord-party-templates](features/lord-party-templates.md): Patch88, a lord named in `lord_party_templates.json` fields his own party template instead of his clan's (Faramir the Ithilien rangers, Sauron a Black Numenorean and Uruk host)
 - [stale-character-repair](features/stale-character-repair.md): Patch83, making a save-restored character with no ModuleData definition inert before the engine derefs its null fields
