@@ -20,6 +20,7 @@ The player can give a gift to the companions in the party and to lords, and the 
 - **A gift moves the party roster.** A conversation opened from the party screen returns to a screen that still holds its pre-conversation snapshot. Once the item has left, a later troop change followed by Cancel or Reset would refill the roster from that snapshot and hand the item back, so the item adapter commits the open party screen after the item leaves (`lessons/adapters-taleworlds-api.md`, 2026-10-19).
 - **The cooldown key is the relation owner.** With Personal Relations off a change lands on the clan leader, so two kinsmen share one relation. The hero adapter reads the owner with `DiplomacyModel.GetHeroesForEffectiveRelation` and the ledger is keyed on it ([relations.md](relations.md), "Rules for callers").
 - **Alignment must not use `AreEnemyAlignments`:** it counts Neutral as everyone's enemy, so every Khand or Umbar lord would refuse.
+- **The side is the realm's.** Both sides are read as the map faction with that faction's own culture (`MapFaction.StringId` with `MapFaction.Culture.StringId`), so a Free-culture lord serving a Neutral realm is Neutral; an independent hero's map faction is the hero's clan, so the clan's culture decides that side; the hero's own culture decides only the tastes (#957).
 - **Day numbers come from a double.** `(int)double.NaN` and a cast past `int.MaxValue` are both `int.MinValue`, so the hero adapter accepts only a finite day from 0 to `int.MaxValue` (`GiftHeroAdapter.WholeDay`) and otherwise hides the line.
 
 ### Solution Approach
@@ -144,8 +145,8 @@ All read live; none needs a restart. A hand-edited `TAOM.json` is clamped by `Gi
 ## Tests
 
 - `TAOM.Tests/Features/TokensOfEsteem/GiftGainTests.cs`: the companion value bands at each edge, the purse band, the scaling at relation 0, 45, 46, 90, the cap and the zero-cap exit, extreme inputs, the monotone property over every relation and cap, the taste lookup.
-- `GiftServiceGateTests.cs`: each hidden case (feature off reads no fact, prisoner, own-clan lord), war beating every other rule, the cooldown inside and after it, kinsmen sharing a relation owner's cooldown, the -50 edge, the alignment table over the real `AlignmentService` and the shipped `alignment.json` (Neutral included), hostility before alignment, the charge made once by `Ask` and its notice only when something landed.
-- `GiftServiceOptionsTests.cs`: the list for a lord and a companion, purses, taste by race and culture, the cap, blocks, modified stacks, an empty catalog, no player facts.
+- `GiftServiceGateTests.cs`: each hidden case (feature off reads no fact, prisoner, own-clan lord), war beating every other rule, the cooldown inside and after it, kinsmen sharing a relation owner's cooldown, the -50 edge, the alignment table over the real `AlignmentService` and the shipped `alignment.json` (Neutral included), `Gate_AlignmentRefusal_ReadsTheRealmNotTheHerosOwnCulture` (a lord's own culture would flip the verdict, the realm's decides), hostility before alignment, the charge made once by `Ask` and its notice only when something landed.
+- `GiftServiceOptionsTests.cs`: the list for a lord and a companion, purses, taste by race and culture (`Options_TasteByCulture_ReadsTheHerosOwnCultureNotTheRealms` pins that tastes read the hero's own culture), the cap, blocks, modified stacks, an empty catalog, no player facts.
 - `GiftServiceGiveTests.cs`: one item removed, gold moving, short gold, the fresh re-read, the landed change and the notice, the stamp on the relation owner, the early exits, the real `RelationGrantService`.
 - `GiftConversationFlowTests.cs` (no game needed): the gates the lines call, the list hand-off, the pick, the ledger, the co-op deferral and the three catch blocks.
 - `GiftCatalogProviderTests.cs`: each validation rule and its exact warning count, caching, the registry not ready, and the shipped file loaded with nothing dropped (against a frozen race list, and against the installed `skins.xml` when the game is there).
@@ -161,7 +162,9 @@ Setup once: start a campaign with cheat mode on. The console command `campaign.a
 3. **Cooldown and save.** Gift the same hero again at once: the line is greyed and names the days left. Save, reload: still greyed. Advance 7 days: it works again.
 4. **War.** Meet a lord of a kingdom at war with you (declare war on one, or catch a party in a siege): no gift line at all.
 5. **Relation below -50.** `campaign.add_hero_relation [Lord] | -60`, then choose the line: "I will not take gifts from you.", relation 1 lower, vanilla's decrease line once, nothing taken. At relation -100 the 1 point cannot land, so no relation line shows.
-6. **Alignment.** As a player siding with the Shadow (an Evil kingdom or culture), choose the line with a Free lord (Gondor, Rohan, Rivendell): refused, relation unchanged. A Khand or Umbar lord, or a Neutral player, is never refused. Turn "Free Lords Refuse Gifts From Evil Players" off in MCM: the Free lord takes the gift.
+6. **Alignment.** Who refuses: a player whose realm sides with the Shadow (an Evil kingdom; without a kingdom, an Evil clan culture) choosing a lord of a Free realm (Gondor, Rohan, Rivendell): refused, relation unchanged. Who never refuses: a lord of Khand, Umbar, Shaghana or Abanissa whatever the lord's own culture, and a player in a Neutral realm whatever the player's own culture. Turn "Free Lords Refuse Gifts From Evil Players" off in MCM: the Free lord takes the gift.
+   - (a) An Evil-culture character joins Khand with `campaign.join_kingdom` (cheat mode is on from Setup) and offers a gift to a Free lord at peace with Khand: accepted.
+   - (b) A Free-culture lord whose clan serves Khand or Umbar (after a defection or marriage) is not refused by an Evil player.
 7. **Gold purse.** With a companion, choose a purse of 2000: your gold falls by 2000 and the companion's gold rises by the same amount (UNVERIFIED where the game shows a companion's gold; the TAOM log line names the sum). A purse larger than your gold is greyed with "You do not carry that much gold."
 8. **Party screen.** Open the party screen, talk to a companion from it, give an item, move one troop, press Cancel: the item stays gone.
 9. **High relation.** `campaign.add_hero_relation [Hero] | 90`: every row is greyed with "This would not improve your relation."
@@ -189,10 +192,12 @@ Setup once: start a campaign with cheat mode on. The console command `campaign.a
 - A lord's base is one number per category; companions price by the item's own value, so a rich item is worth more to a companion than to a lord who values the category low.
 - Modified stacks (a "Sharp" or "Battered" copy) are never listed: the roster adapter removes only the unmodified stack. Listing them needs a modifier-preserving removal and is a follow-up.
 - Gifts are hidden for a co-op client and for any peer running a co-op mod TAOM cannot probe (`ShouldDeferToHost`); a co-op host can give. See [coop-interop.md](coop-interop.md).
+- An independent minor clan's side now comes from its clan culture. Two clans still carry vanilla cultures that `alignment.json` does not list: the Axemen of Erebor (`skolderbrotva`, clan culture `nord`) and the Drúedain (`forest_people`, `vakken`), so while unhired they read Neutral and accept an Evil player's gift. Good Deeds reads them the same way. A follow-up is planned. The Dunlending Reavers (`brotherhood_of_woods`, `empire`) now read Evil, as intended.
 - No gift line while besieging or besieged, or on a raft or in naval auto-travel: the lines sit on vanilla's conversation tokens, which those states do not reach. Not checked in game.
 
 ## Changelog
 
+- 2026-10-20: the alignment side is the realm's map faction with its own culture, not the hero's own culture, for the lord and the player (#957).
 - 2026-10-19: first version (#863). Review fixes the same day: the cooldown is keyed on the relation owner and stamped by the service, purses have their own band (one point per 500 gold, at most 10, range 500 to 5000), the scaling switch is gone, prisoners and own-clan lords get no line, modified stacks are skipped, the catalog counts every drop, the notice is vanilla's, and the wording is gender neutral.
 
 ## GitHub Issue

@@ -247,7 +247,7 @@ public class GiftServiceGiveTests
     {
         _f.Held.Add(GiftFixture.Good("ring", "jewelry", 400));
         var option = Pick(GiftEntry.Lord, "ring");
-        _f.Player = _f.Player! with { KingdomId = "mordor", CultureId = "mordor" };
+        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
 
         var outcome = _f.Sut.Give(GiftFixture.HeroId, GiftEntry.Lord, option, _f.Ledger);
 

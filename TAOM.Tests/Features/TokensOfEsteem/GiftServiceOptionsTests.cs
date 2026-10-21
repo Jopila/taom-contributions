@@ -199,6 +199,15 @@ public class GiftServiceOptionsTests
     }
 
     [TestMethod]
+    public void Options_TasteByCulture_ReadsTheHerosOwnCultureNotTheRealms()
+    {
+        _f.Recipient = GiftFixture.Lord(race: "human", culture: "vlandia", kingdom: "battania", sideCulture: "battania");
+        _f.Held.Add(GiftFixture.Good("wine_jar", "wine", 100));
+
+        Assert.AreEqual(2, Lord().Single().TasteBonus);
+    }
+
+    [TestMethod]
     public void Options_TasteForOtherGoods_DoesNotApply()
     {
         _f.Recipient = GiftFixture.Lord(race: "dwarf");

@@ -37,8 +37,9 @@ public sealed class GiftHeroAdapter : IGiftHeroAdapter
             var hero = PlayerHero();
             if (hero == null || WholeDay(CampaignTime.Now.ToDays) is not { } today)
                 return null;
-            return new GiftPlayerFacts(hero.StringId, hero.Clan?.Kingdom?.StringId ?? string.Empty,
-                hero.Culture?.StringId ?? string.Empty, hero.Gold, today);
+            var faction = Clan.PlayerClan?.MapFaction;
+            return new GiftPlayerFacts(hero.StringId, faction?.StringId ?? string.Empty,
+                faction?.Culture?.StringId ?? string.Empty, hero.Gold, today);
         }
         catch (Exception ex)
         {
@@ -74,8 +75,9 @@ public sealed class GiftHeroAdapter : IGiftHeroAdapter
                 theirs != null && mine != null && theirs.IsAtWarWith(mine),
                 player.GetRelation(hero),
                 _races.IsValidRaceId(raceId) ? _races.GetRaceNameFromId(raceId) : string.Empty,
-                hero.Culture?.StringId ?? string.Empty,
-                hero.Clan?.Kingdom?.StringId ?? string.Empty);
+                CultureId: hero.Culture?.StringId ?? string.Empty,
+                SideFactionId: theirs?.StringId ?? string.Empty,
+                SideCultureId: theirs?.Culture?.StringId ?? string.Empty);
         }
         catch (Exception ex)
         {

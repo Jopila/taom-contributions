@@ -1948,6 +1948,7 @@ although seven cultures recruit another culture's troops, Umbar only for its bas
   `spkingdoms.xslt` and the culture's `basic_troop`/`elite_basic_troop` cultures. Any change that sides, groups or
   exempts by culture reads this file first, whatever folder the code lives in. When two lenses propose fixes for
   one finding, apply the one with the wider coverage.
+- **Repeat:** repeated in Tokens of Esteem (#957, 2026-10-20), and the same pairing remains in Lord Courtesies and Hard Questions (follow-up).
 - **Source:** `docs/reviews/rca-tournament-alignment-filter-2026-10-06.md` findings 1 to 4.
 
 ### A culture promotion drops every table keyed on the host culture or its troop ids (#749, 2026-10-06)

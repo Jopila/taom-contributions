@@ -68,12 +68,12 @@ internal sealed class GiftFixture
 
     /// <summary>A lord in peace: not a child, prisoner or clan member; his own relation owner unless told otherwise.</summary>
     public static GiftRecipientFacts Lord(int relation = 0, string race = "human", string culture = "gondor", string kingdom = "empire_w",
-        string? owner = null) =>
-        new(HeroId, owner ?? HeroId, true, false, false, false, false, false, false, relation, race, culture, kingdom);
+        string? owner = null, string? sideCulture = null) =>
+        new(HeroId, owner ?? HeroId, true, false, false, false, false, false, false, relation, race, culture, kingdom, sideCulture ?? kingdom);
 
     /// <summary>A companion travelling in the player's party.</summary>
     public static GiftRecipientFacts Companion(int relation = 0, string race = "human", string culture = "gondor") =>
-        new(HeroId, HeroId, false, false, false, false, true, true, false, relation, race, culture, "");
+        new(HeroId, HeroId, false, false, false, false, true, true, false, relation, race, culture, "", "");
 
     public static HeldGood Good(string itemId, string category, int value, int count = 1, bool modified = false) =>
         new(itemId, itemId + " name", category, value, count, modified);

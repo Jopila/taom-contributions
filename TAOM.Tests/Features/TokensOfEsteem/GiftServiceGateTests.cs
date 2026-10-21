@@ -132,7 +132,7 @@ public class GiftServiceGateTests
     [TestMethod]
     public void Gate_WarBeatsCooldownHostilityAndAlignment()
     {
-        _f.Player = _f.Player! with { KingdomId = "mordor", CultureId = "mordor" };
+        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
         _f.Recipient = GiftFixture.Lord(relation: -90) with { IsAtWarWithPlayer = true };
 
         Assert.AreEqual(GiftGateKind.Hidden, LordGate(lastDay: 100).Kind);
@@ -220,30 +220,51 @@ public class GiftServiceGateTests
         Assert.AreEqual(GiftGateKind.Cooldown, LordGate(lastDay: 99).Kind);
     }
 
-    // Kingdom and culture ids are the shipped ones (execution/alignment.json). empire_w, gondor, rivendell, vlandia, erebor are
-    // Free; mordor, empire (Dunland), isengard, aserai, empire_s are Evil; battania (Khand), umbar, shaghana are Neutral.
+    // Faction and culture ids are the shipped ones (execution/alignment.json). empire_w, gondor, rivendell, vlandia, erebor are
+    // Free; empire_s (Mordor's realm; mordor is its culture), mordor, empire (Dunland), isengard, aserai are Evil; battania
+    // (Khand), umbar, shaghana are Neutral. clan_test_1 and vakken are not listed, so they read Neutral. A hero without a
+    // kingdom is its clan (player_faction for the player) with the clan's culture.
     [DataTestMethod]
-    [DataRow("empire_w", "gondor", "mordor", "mordor", GiftGateKind.RefusesAlignment)]
+    [DataRow("empire_w", "gondor", "empire_s", "mordor", GiftGateKind.RefusesAlignment)]
     [DataRow("vlandia", "vlandia", "empire", "empire", GiftGateKind.RefusesAlignment)]
     [DataRow("erebor", "erebor", "isengard", "isengard", GiftGateKind.RefusesAlignment)]
     [DataRow("empire_w", "gondor", "empire_w", "gondor", GiftGateKind.Open)]
-    [DataRow("mordor", "mordor", "empire_w", "gondor", GiftGateKind.Open)]
-    [DataRow("mordor", "mordor", "mordor", "mordor", GiftGateKind.Open)]
-    [DataRow("battania", "battania", "mordor", "mordor", GiftGateKind.Open)]
+    [DataRow("empire_s", "mordor", "empire_w", "gondor", GiftGateKind.Open)]
+    [DataRow("empire_s", "mordor", "empire_s", "mordor", GiftGateKind.Open)]
+    [DataRow("battania", "battania", "empire_s", "mordor", GiftGateKind.Open)]
     [DataRow("umbar", "umbar", "empire", "empire", GiftGateKind.Open)]
     [DataRow("empire_w", "gondor", "umbar", "umbar", GiftGateKind.Open)]
     [DataRow("empire_w", "gondor", "battania", "battania", GiftGateKind.Open)]
     [DataRow("battania", "battania", "battania", "battania", GiftGateKind.Open)]
-    [DataRow("", "rivendell", "", "mordor", GiftGateKind.RefusesAlignment)]
-    [DataRow("", "rivendell", "empire_s", "", GiftGateKind.RefusesAlignment)]
-    [DataRow("", "rivendell", "", "rivendell", GiftGateKind.Open)]
-    [DataRow("", "", "mordor", "mordor", GiftGateKind.Open)]
-    [DataRow("empire_w", "gondor", "", "", GiftGateKind.Open)]
+    [DataRow("clan_test_1", "rivendell", "player_faction", "mordor", GiftGateKind.RefusesAlignment)]
+    [DataRow("clan_test_1", "rivendell", "empire_s", "mordor", GiftGateKind.RefusesAlignment)]
+    [DataRow("clan_test_1", "rivendell", "player_faction", "rivendell", GiftGateKind.Open)]
+    [DataRow("clan_test_1", "vakken", "empire_s", "mordor", GiftGateKind.Open)]
+    [DataRow("empire_w", "gondor", "player_faction", "vakken", GiftGateKind.Open)]
     public void Gate_AlignmentRefusal_IsFreeLordAgainstEvilPlayerOnly(string lordKingdom, string lordCulture,
         string playerKingdom, string playerCulture, GiftGateKind expected)
     {
-        _f.Recipient = GiftFixture.Lord(kingdom: lordKingdom, culture: lordCulture);
-        _f.Player = _f.Player! with { KingdomId = playerKingdom, CultureId = playerCulture };
+        _f.Recipient = GiftFixture.Lord(kingdom: lordKingdom, culture: lordCulture, sideCulture: lordCulture);
+        _f.Player = _f.Player! with { SideFactionId = playerKingdom, SideCultureId = playerCulture };
+
+        Assert.AreEqual(expected, LordGate().Kind);
+    }
+
+    // The side is the realm's: the map faction with its own culture. The hero's own culture is only a taste, so each row gives
+    // the lord an own culture that would flip the verdict if the gate read it. Recipient: faction, faction culture, own culture.
+    [DataTestMethod]
+    [DataRow("battania", "battania", "vlandia", "empire_s", "mordor", GiftGateKind.Open)]
+    [DataRow("umbar", "umbar", "gondor", "empire_s", "mordor", GiftGateKind.Open)]
+    [DataRow("vlandia", "vlandia", "battania", "empire_s", "mordor", GiftGateKind.RefusesAlignment)]
+    public void Gate_AlignmentRefusal_ReadsTheRealmNotTheHerosOwnCulture(string lordFaction, string lordFactionCulture,
+        string lordOwnCulture, string playerFaction, string playerFactionCulture, GiftGateKind expected)
+    {
+        _f.Recipient = GiftFixture.Lord(culture: lordOwnCulture, kingdom: lordFaction, sideCulture: lordFactionCulture);
+        _f.Player = _f.Player! with
+        {
+            SideFactionId = playerFaction,
+            SideCultureId = playerFactionCulture,
+        };
 
         Assert.AreEqual(expected, LordGate().Kind);
     }
@@ -252,7 +273,7 @@ public class GiftServiceGateTests
     public void Gate_AlignmentRefusalSwitchedOff_OpensTheFreeLordToTheEvilPlayer()
     {
         _f.Settings = _f.Settings with { AlignmentRefusalEnabled = false };
-        _f.Player = _f.Player! with { KingdomId = "mordor", CultureId = "mordor" };
+        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
 
         Assert.AreEqual(GiftGateKind.Open, LordGate().Kind);
     }
@@ -260,7 +281,7 @@ public class GiftServiceGateTests
     [TestMethod]
     public void Gate_FreeCompanionOfAnEvilPlayer_IsNotRefused()
     {
-        _f.Player = _f.Player! with { KingdomId = "mordor", CultureId = "mordor" };
+        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
         _f.Recipient = GiftFixture.Companion(culture: "gondor");
 
         Assert.AreEqual(GiftGateKind.Open, _f.Sut.Gate(GiftFixture.HeroId, GiftEntry.Companion, _f.Ledger).Kind);
@@ -269,7 +290,7 @@ public class GiftServiceGateTests
     [TestMethod]
     public void Gate_HostilityIsDecidedBeforeAlignment()
     {
-        _f.Player = _f.Player! with { KingdomId = "mordor", CultureId = "mordor" };
+        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
         _f.Recipient = GiftFixture.Lord(relation: -60);
 
         Assert.AreEqual(GiftGateKind.RefusesHostile, LordGate().Kind);
@@ -300,7 +321,7 @@ public class GiftServiceGateTests
     [TestMethod]
     public void Ask_AlignmentRefusal_CostsNothing()
     {
-        _f.Player = _f.Player! with { KingdomId = "mordor", CultureId = "mordor" };
+        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
 
         var gate = _f.Sut.Ask(GiftFixture.HeroId, GiftEntry.Lord, _f.Ledger);
 

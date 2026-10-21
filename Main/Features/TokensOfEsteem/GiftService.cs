@@ -225,8 +225,8 @@ public sealed class GiftService
     // Free lord, Evil player. AreEnemyAlignments is not the test: it counts Neutral as everyone's enemy, which would make
     // every Khand or Umbar lord and player refuse (the Hard Questions trap, lessons/testing-qa.md 2026-10-19).
     private bool RefusesByAlignment(GiftPlayerFacts player, GiftRecipientFacts recipient) =>
-        _alignment.ResolveSide(recipient.KingdomId, recipient.CultureId) == FactionSide.Free
-        && _alignment.ResolveSide(player.KingdomId, player.CultureId) == FactionSide.Evil;
+        _alignment.ResolveSide(recipient.SideFactionId, recipient.SideCultureId) == FactionSide.Free
+        && _alignment.ResolveSide(player.SideFactionId, player.SideCultureId) == FactionSide.Evil;
 
     private IReadOnlyList<GiftOption> Build(GiftSettings settings, GiftPlayerFacts player, GiftRecipientFacts recipient, GiftEntry entry)
     {

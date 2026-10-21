@@ -128,7 +128,7 @@ public class GiftConversationFlowTests
     [TestMethod]
     public void CanChoose_AlignmentRefusal_IsStillAChoice()
     {
-        _f.Player = _f.Player! with { KingdomId = "mordor", CultureId = "mordor" };
+        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
 
         Assert.IsTrue(_sut.CanChoose(GiftEntry.Lord, out var daysLeft));
         Assert.AreEqual(0, daysLeft);
@@ -213,7 +213,7 @@ public class GiftConversationFlowTests
     [TestMethod]
     public void Ask_AlignmentRefusal_CostsNothing_AndListsNothing()
     {
-        _f.Player = _f.Player! with { KingdomId = "mordor", CultureId = "mordor" };
+        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
 
         _sut.Ask(GiftEntry.Lord);
 
