@@ -801,4 +801,56 @@ public class EnlistmentContentConfigProviderTests
 
         Assert.AreEqual(0, Provider().GetDuties().Incidents.Count);
     }
+
+    // ---- desertion cost (#833) ----
+
+    [TestMethod]
+    public void DesertionDefaults_AreTheApprovedValues()
+    {
+        var d = EnlistmentContentConfigProvider.BuildDefaults();
+        Assert.AreEqual(-15, d.DesertionRelationPenalty);
+        Assert.AreEqual(-100, d.DesertionHonorXpPenalty);
+    }
+
+    [TestMethod]
+    public void ShippedConfig_Desertion_EqualsTheCompiledDefaults()
+    {
+        var d = EnlistmentContentConfigProvider.BuildDefaults();
+        var loaded = new EnlistmentContentConfigProvider(ShippedPaths(), _logger).GetConfig();
+        Assert.AreEqual(d.DesertionRelationPenalty, loaded.DesertionRelationPenalty);
+        Assert.AreEqual(d.DesertionHonorXpPenalty, loaded.DesertionHonorXpPenalty);
+        var raw = JObject.Parse(File.ReadAllText(Path.Combine(ShippedModuleDataPath(), "enlistment", "enlistment_config.json")));
+        Assert.IsNotNull(raw["desertionRelationPenalty"], "the key must be in the shipped file");
+        Assert.IsNotNull(raw["desertionHonorXpPenalty"], "the key must be in the shipped file");
+    }
+
+    [DataTestMethod]
+    [DataRow("{\"desertionRelationPenalty\":1}", "desertionRelationPenalty")]
+    [DataRow("{\"desertionRelationPenalty\":-101}", "desertionRelationPenalty")]
+    [DataRow("{\"desertionHonorXpPenalty\":1}", "desertionHonorXpPenalty")]
+    [DataRow("{\"desertionHonorXpPenalty\":-1001}", "desertionHonorXpPenalty")]
+    public void GetConfig_DesertionOutOfRange_RevertsWithWarning(string json, string key)
+    {
+        WriteConfig(json);
+
+        var config = Provider().GetConfig();
+
+        Assert.AreEqual(-15, config.DesertionRelationPenalty);
+        Assert.AreEqual(-100, config.DesertionHonorXpPenalty);
+        _logger.Received().LogWarning(Arg.Is<string>(m => m.Contains(key)));
+    }
+
+    [TestMethod]
+    public void GetConfig_DesertionRangeBoundaries_AreKept()
+    {
+        WriteConfig("{\"desertionRelationPenalty\":-100,\"desertionHonorXpPenalty\":-1000}");
+        var config = Provider().GetConfig();
+        Assert.AreEqual(-100, config.DesertionRelationPenalty);
+        Assert.AreEqual(-1000, config.DesertionHonorXpPenalty);
+
+        WriteConfig("{\"desertionRelationPenalty\":0,\"desertionHonorXpPenalty\":0}");
+        config = new EnlistmentContentConfigProvider(_paths, _logger).GetConfig();
+        Assert.AreEqual(0, config.DesertionRelationPenalty);
+        Assert.AreEqual(0, config.DesertionHonorXpPenalty);
+    }
 }

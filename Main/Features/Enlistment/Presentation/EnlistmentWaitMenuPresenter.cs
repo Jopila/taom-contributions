@@ -282,7 +282,11 @@ public sealed class EnlistmentWaitMenuPresenter : IEnlistmentWaitMenuPresenter
             "taom_enlist_release_stay", "Stay and serve",
             ConfirmDesertion,
             null,
-            "DAYS", daysOwed.ToString());
+            "DAYS", daysOwed.ToString(),
+            // The cost sentence is its own key, appended to the original body (#833), so the already
+            // translated body row is never edited.
+            bodyAppendKey: "taom_enlist_desert_cost",
+            bodyAppendFallback: "Deserting will also cost you your commander's favor and your good name.");
     }
 
     /// <summary>

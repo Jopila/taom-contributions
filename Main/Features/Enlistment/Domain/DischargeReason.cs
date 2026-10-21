@@ -7,10 +7,10 @@ namespace TAOM.Features.Enlistment.Domain;
 ///
 /// PRODUCER STATUS (core phase): PlayerRequest, CommanderDead,
 /// CommanderUnavailableGraceExpired, HeirSuccessionOrPossessionMismatch and
-/// CommanderAtWarWithYourRealm (#832, raised by the reconciler) are live.
-/// Commission / Desertion / ContractNotRenewed are RESERVED for the content phase
-/// (issue #375 Phase 3: contract-expiry check + the honorable-vs-desertion split of the
-/// leave flow); SaveNormalization is reserved for load paths that can safely run the
+/// CommanderAtWarWithYourRealm (#832, raised by the reconciler) are live, and so is
+/// Desertion (two producers: the release dialogue and the wait menu, #833).
+/// Commission / ContractNotRenewed are RESERVED for the content phase
+/// (issue #375 Phase 3: contract-expiry check); SaveNormalization is reserved for load paths that can safely run the
 /// world-touching pipeline — see the note on <see cref="SaveNormalization"/>.
 /// </summary>
 public enum DischargeReason
@@ -21,7 +21,11 @@ public enum DischargeReason
     /// <summary>Commission retirement — honorable exit with distinction rewards. (Content phase.)</summary>
     Commission = 1,
 
-    /// <summary>Walked out mid-contract — relation/renown penalties, deferred wages forfeit. (Content phase.)</summary>
+    /// <summary>
+    /// Walked out during the minimum term after the commander refused release. Costs relation with the
+    /// commander and Honor trait XP (enlistment_config.json, skipped if he is dead), forfeits the
+    /// deferred wages, and the deserter keeps his kit. No war, no crime, no renown (#833).
+    /// </summary>
     Desertion = 2,
 
     CommanderDead = 3,

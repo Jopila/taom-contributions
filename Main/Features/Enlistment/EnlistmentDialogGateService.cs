@@ -70,13 +70,10 @@ public class EnlistmentDialogGateService : IEnlistmentDialogGateService
     /// player's arrears and calling them a deserter for asking their lord's leave and being
     /// given it. Reported in-game 2026-08-07 after two short services both ended "Desertion".
     ///
-    /// The donor mod has no desertion concept for discharge at all. Desertion should mean walking
-    /// away WITHOUT asking; every path that reaches this method is the player asking and the
-    /// commander agreeing, which is a release, not a betrayal. `DischargeReason.Desertion` is kept
-    /// for a genuinely unilateral abandonment path, which no dialog currently offers.
-    ///
-    /// If an early-exit cost is wanted later, make it a RELATION cost on its own reason — not an
-    /// arrears forfeit, which punishes the player with wages the commander already owed them.
+    /// Every path that reaches this method is the player asking and the commander agreeing, which is
+    /// a release, not a betrayal. `DischargeReason.Desertion` is the reason for leaving before the
+    /// minimum term against the commander's refusal; its two producers are the release conversation and
+    /// the wait-menu confirmation, and it costs relation and Honor (#833).
     /// </summary>
     public Domain.DischargeReason ClassifyLeaveReason(double nowDays) =>
         Domain.DischargeReason.PlayerRequest;

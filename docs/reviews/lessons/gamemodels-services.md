@@ -1234,3 +1234,13 @@ inline `if` in a GameModel override body, which gamemodels.md rule 4 forbids and
   `Taom*Model`, csharp-architecture.md for a service). For a model override, compose the decisions in one expression with
   base fall-through (`a || b ? -1 : base(...)`), as `TaomMarriageModel` does.
 - **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` addendum, finding A1.
+
+### A config value the engine adds to an int needs a range, not only a sign (#833, 2026-10-21)
+Enlistment's desertion penalty values were validated as finite and at most 0, then cast to int. The
+engine adds the delta to the current relation or trait XP before it clamps, so a hand-edited value near
+int.MinValue made the engine's sum wrap to a large positive number (when the current relation or XP was
+negative), and the penalty became a reward.
+- **Why missed:** "validate the config value" was read as "check its sign".
+- **Prevent:** a config value that reaches engine int arithmetic is an `int` with a range matched to the
+  engine's own bounds (`RevertIfOutOfRange`); never a double cast without a range check.
+- **Source:** `docs/reviews/rca-enlistment-desertion-cost-2026-10-21.md` F1.

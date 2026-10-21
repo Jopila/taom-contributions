@@ -42,6 +42,7 @@ public static class EnlistmentIoC
         container.Register<TAOM.Adapters.IHeroRenownAdapter, TAOM.Adapters.HeroRenownAdapter>(Reuse.Singleton);
         container.Register<TAOM.Adapters.IServiceDiplomacyAdapter, TAOM.Adapters.ServiceDiplomacyAdapter>(Reuse.Singleton);
         container.Register<IServiceDiplomacyService, ServiceDiplomacyService>(Reuse.Singleton);
+        container.Register<IDesertionPenaltyService, DesertionPenaltyService>(Reuse.Singleton);
         container.Register<TAOM.Adapters.IInquiryAdapter, TAOM.Adapters.InquiryAdapter>(Reuse.Singleton);
         container.Register<IEnlistmentReconciler, EnlistmentReconciler>(Reuse.Singleton);
         container.Register<IServiceMaintenanceService, ServiceMaintenanceService>(Reuse.Singleton);

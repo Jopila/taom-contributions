@@ -22,6 +22,7 @@ public class DischargeServiceTests
     private EnlistmentStore _store = null!;
     private EnlistmentStateMachine _machine = null!;
     private IMobilePartyAttachmentAdapter _attachment = null!;
+    private IDesertionPenaltyService _penalty = null!;
     private DischargeService _service = null!;
     private IEncounterAdapter _encounter = null!;
     private ICommanderLordAdapter _commanderAdapter = null!;
@@ -44,8 +45,9 @@ public class DischargeServiceTests
         _gameMenu.EnsureMenuOpen(Arg.Any<string>()).Returns(true);
         _attachment.MoveIntoSettlement(Arg.Any<string>()).Returns(true);
         _encounter.EnsureSettlementEncounter(Arg.Any<string>()).Returns(true);
+        _penalty = Substitute.For<IDesertionPenaltyService>();
         _service = new DischargeService(_store, _machine, _attachment, _encounter,
-            new EncounterOwnershipPolicy(), _commanderAdapter, _gameMenu, Substitute.For<IServiceDiplomacyService>(), _army, _logger);
+            new EncounterOwnershipPolicy(), _commanderAdapter, _gameMenu, Substitute.For<IServiceDiplomacyService>(), _army, _penalty, _logger);
     }
 
     private void MakeEnlisted(EnlistmentState state = EnlistmentState.EnlistedAttached)
@@ -273,6 +275,60 @@ public class DischargeServiceTests
         _service.Execute(DischargeReason.PlayerRequest);
 
         _gameMenu.DidNotReceive().ExitToLast();
+    }
+
+    [TestMethod]
+    public void Execute_Desertion_AppliesThePenaltyToTheCapturedCommander()
+    {
+        MakeEnlisted();
+        _commanderAdapter.GetSnapshot("lord_1_1").Returns(new CommanderSnapshot(exists: true, isAlive: true, partyId: "p"));
+
+        _service.Execute(DischargeReason.Desertion);
+
+        _penalty.Received(1).Apply("lord_1_1", true);
+    }
+
+    [TestMethod]
+    public void Execute_Desertion_DeadCommander_PassesTheDeathSoItIsSkipped()
+    {
+        MakeEnlisted();
+        _commanderAdapter.GetSnapshot("lord_1_1").Returns(new CommanderSnapshot(exists: true, isAlive: false));
+
+        _service.Execute(DischargeReason.Desertion);
+
+        _penalty.Received(1).Apply("lord_1_1", false);
+    }
+
+    [TestMethod]
+    public void Execute_Desertion_APenaltyThatThrows_StillCompletesTheDischarge()
+    {
+        MakeEnlisted();
+        _commanderAdapter.GetSnapshot("lord_1_1").Returns(new CommanderSnapshot(exists: true, isAlive: true, partyId: "p"));
+        _penalty.When(p => p.Apply(Arg.Any<string>(), Arg.Any<bool>())).Do(_ => throw new System.InvalidOperationException("boom"));
+        DischargeReason? ended = null;
+        _service.EnlistmentEnded += r => ended = r;
+
+        var result = _service.Execute(DischargeReason.Desertion);
+
+        Assert.IsTrue(result);
+        Assert.AreEqual(EnlistmentState.NotEnlisted, _store.Record.State);
+        Assert.AreEqual(DischargeReason.Desertion, ended);
+    }
+
+    [TestMethod]
+    public void Execute_EveryOtherReason_AppliesNoPenalty()
+    {
+        foreach (DischargeReason reason in Enum.GetValues(typeof(DischargeReason)))
+        {
+            if (reason == DischargeReason.Desertion)
+                continue;
+            Setup();
+            MakeEnlisted();
+
+            _service.Execute(reason);
+
+            _penalty.DidNotReceiveWithAnyArgs().Apply(default!, default);
+        }
     }
 
     [TestMethod]

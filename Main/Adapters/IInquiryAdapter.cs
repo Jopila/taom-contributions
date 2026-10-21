@@ -26,6 +26,10 @@ public interface IInquiryAdapter
     /// number ("18 more days are owed") instead of a vague one. Optional rather than a second
     /// overload on purpose: an overload would let a call site silently bind to the variable-less
     /// form and drop the number without a compile error.
+    ///
+    /// <paramref name="bodyAppendKey"/>/<paramref name="bodyAppendFallback"/> are an optional keyed
+    /// sentence appended after the body with one space, rendered at show time, so an already
+    /// translated body row can gain a sentence without being edited (#833).
     /// </summary>
     void ShowTwoOptionInquiry(
         string titleKey, string titleFallback,
@@ -35,7 +39,8 @@ public interface IInquiryAdapter
         Action onOptionA, Action onOptionB,
         string bodyVariableName = null, string bodyVariableValue = null,
         IReadOnlyDictionary<string, string> bodyVariables = null,
-        bool prioritize = false);
+        bool prioritize = false,
+        string bodyAppendKey = null, string bodyAppendFallback = null);
 
     /// <summary>
     /// Fire-and-forget toast. Both variable pairs are optional — pass null to skip a substitution.

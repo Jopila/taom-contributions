@@ -258,6 +258,11 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
             rejected = true;
         }
 
+        // Penalties, not rewards: a positive value would pay the deserter, and an absurd negative one
+        // would wreck the player. Out of range falls back to the compiled default with a warning (#833).
+        rejected |= RevertIfOutOfRange(() => config.DesertionRelationPenalty, v => config.DesertionRelationPenalty = v, defaults.DesertionRelationPenalty, -100, 0, "desertionRelationPenalty");
+        rejected |= RevertIfOutOfRange(() => config.DesertionHonorXpPenalty, v => config.DesertionHonorXpPenalty = v, defaults.DesertionHonorXpPenalty, -1000, 0, "desertionHonorXpPenalty");
+
         if (config.SitOut == null)
             config.SitOut = new SitOutConfig();
         if (!FiniteFloatValidator.IsFiniteInRange(config.SitOut.OverwhelmingShare, 0.5f, 1f) || config.SitOut.OverwhelmingShare <= 0.5f)

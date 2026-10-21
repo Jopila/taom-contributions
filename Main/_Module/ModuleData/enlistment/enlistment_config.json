@@ -59,6 +59,8 @@
     "incidentMinDaysServed": 7,
     "incidentCooldownDays": 3
   },
+  "desertionRelationPenalty": -15,
+  "desertionHonorXpPenalty": -100,
   "sitOut": {
     "overwhelmingShare": 0.85,
     "trustCost": 1,

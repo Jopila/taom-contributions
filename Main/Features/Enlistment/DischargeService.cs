@@ -16,6 +16,7 @@ public class DischargeService : IDischargeService
     private readonly IGameMenuAdapter _gameMenu;
     private readonly IServiceDiplomacyService _diplomacy;
     private readonly IArmyMembershipAdapter _army;
+    private readonly IDesertionPenaltyService _desertion;
     private readonly IModLogger _logger;
 
     public DischargeService(
@@ -28,6 +29,7 @@ public class DischargeService : IDischargeService
         IGameMenuAdapter gameMenu,
         IServiceDiplomacyService diplomacy,
         IArmyMembershipAdapter army,
+        IDesertionPenaltyService desertion,
         IModLogger logger)
     {
         _store = store;
@@ -39,6 +41,7 @@ public class DischargeService : IDischargeService
         _gameMenu = gameMenu;
         _diplomacy = diplomacy;
         _army = army;
+        _desertion = desertion;
         _logger = logger;
     }
 
@@ -118,6 +121,20 @@ public class DischargeService : IDischargeService
         // mirror and silently leave the player at war with everyone his commander was fighting,
         // permanently and with no record of where those wars came from.
         _diplomacy.UnwindServiceWars();
+
+        // 7c: the desertion cost, with the commander captured at step 3 (step 8 wipes the id, which is
+        // why Grant could not carry it). Desertion only; every other reason is penalty-free (#833).
+        if (reason == DischargeReason.Desertion)
+        {
+            try
+            {
+                _desertion?.Apply(commanderHeroId, commander.Exists && commander.IsAlive);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError($"DischargeService: the desertion cost threw: {ex.Message}");
+            }
+        }
 
         // 8 — clear
         _attachment.InvalidateCommanderCache();

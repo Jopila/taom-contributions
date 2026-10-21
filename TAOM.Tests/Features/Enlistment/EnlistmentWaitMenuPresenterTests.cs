@@ -116,11 +116,12 @@ public class EnlistmentWaitMenuPresenterTests
         // The number has to reach the popup, or the warning is unactionable.
         _inquiry.Received(1).ShowTwoOptionInquiry(
             Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<string>(),
+            "taom_enlist_release_refused_body", Arg.Any<string>(),
             Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<Action>(), Arg.Any<Action>(),
-            "DAYS", "18");
+            "DAYS", "18",
+            bodyAppendKey: "taom_enlist_desert_cost", bodyAppendFallback: "Deserting will also cost you your commander's favor and your good name.");
     }
 
     [TestMethod]

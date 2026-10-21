@@ -12,6 +12,15 @@ public sealed class EnlistmentContentConfig
     public SchedulerConfig Scheduler { get; set; } = new SchedulerConfig();
     public List<PromotionRequirement> Promotions { get; set; } = new List<PromotionRequirement>();
     public SitOutConfig SitOut { get; set; } = new SitOutConfig();
+
+    /// <summary>
+    /// Relation with the commander lost by deserting during the minimum term (#833). In [-100, 0];
+    /// a value outside that range reverts to the default. Shipped in enlistment_config.json.
+    /// </summary>
+    public int DesertionRelationPenalty { get; set; } = -15;
+
+    /// <summary>Honor trait XP lost by the same desertion (#833). In [-1000, 0], same validation.</summary>
+    public int DesertionHonorXpPenalty { get; set; } = -100;
 }
 
 /// <summary>

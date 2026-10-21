@@ -62,7 +62,7 @@ public class EnlistmentDiagnosticsGateTests
         _attachment = new ServiceAttachmentService(_partyAdapter, Substitute.For<IGameMenuAdapter>(), _logger);
         _discharge = new DischargeService(_store, _machine, _partyAdapter,
             Substitute.For<IEncounterAdapter>(), new EncounterOwnershipPolicy(),
-            Substitute.For<ICommanderLordAdapter>(), Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), _logger);
+            Substitute.For<ICommanderLordAdapter>(), Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IDesertionPenaltyService>(), _logger);
         _encounter = Substitute.For<IEncounterAdapter>();
 
         // An NSubstitute bool defaults to false, so every test in this class runs the "toggle off"

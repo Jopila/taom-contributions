@@ -7,9 +7,9 @@ using TAOM.Features.Enlistment.Domain;
 namespace TAOM.Features.Enlistment.Hooks;
 
 /// <summary>
-/// Thin dialog registration (ADR-002) for asking your commander, in person, to be released —
-/// and for the one branch in the whole feature that produces
-/// <see cref="DischargeReason.Desertion"/>.
+/// Thin dialog registration (ADR-002) for asking your commander, in person, to be released,
+/// and for one of the two branches in the feature that produce <see cref="DischargeReason.Desertion"/>
+/// (the other is the wait-menu confirmation).
 ///
 /// Split from the oath chain (ADR-003): two genuinely separate conversations that share only
 /// the <c>hero_main_options</c> entry, and together exceeded the entry-point ceiling.
@@ -80,17 +80,18 @@ public class EnlistmentReleaseDialogBehavior : CampaignBehaviorBase
             OnDischargeGranted,
             111);
 
-        // The desert branch. The player is told the cost by the line above before choosing, and
-        // this is the ONLY producer of DischargeReason.Desertion in the feature — leaving is never
-        // classified as desertion behind the player's back.
+        // The desert branch: the original, translated key plus the cost sentence from its own key
+        // (#833). Leaving is never classified as desertion behind the player's back.
         starter.AddPlayerLine(
             "taom_enlist_release_desert",
             "taom_enlist_release_soon_reply",
             "taom_enlist_release_desert_answer",
-            "{=taom_enlist_release_desert}Then I am done with your company. I take my leave, oath or no.",
+            "{=!}{LINE} {COST}",
             null,
             null,
-            110);
+            110).Text
+            .SetTextVariable("LINE", new TextObject("{=taom_enlist_release_desert}Then I am done with your company. I take my leave, oath or no."))
+            .SetTextVariable("COST", new TextObject("{=taom_enlist_desert_cost_reply}(This will cost me my commander's favor and my good name.)"));
 
         starter.AddPlayerLine(
             "taom_enlist_release_relent",

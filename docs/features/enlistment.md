@@ -350,7 +350,7 @@ missed it; instrumenting the live game found it in one session.
 | 3 | Real-time service pump | The engine dispatches `OnMapEventStarted` exactly once, as the last statement of `MapEvent.Initialize` — so a commander joining an ALREADY-RUNNING fight is invisible to it. `OnPartyAddedToMapEventEvent` is the only edge that sees a late join. |
 | 4 | One encounter-ownership policy | Five places finished a `PlayerEncounter` with their own ad-hoc reasoning. A settlement encounter has no encountered MOBILE party — that fact is what separates "visiting a town" from "meeting a lord". |
 | 5 | Discharge hand-back invariant (INV-D1) | Every discharge must leave the player able to act. Ordering is load-bearing at three points; each is documented in place. |
-| 6 | Informed leave choice | Asking to leave now states its price with a real day count. Desertion has exactly ONE producer: a branch the player picked after being told the cost. |
+| 6 | Informed leave choice | Asking to leave now states its price with a real day count. Desertion has exactly TWO producers (the in-person dialog and the wait-menu confirmation), each a branch the player picked after being told the cost. |
 | 7 | Settlement following | The player enters the town with the column instead of standing invisibly outside the gate for the whole stop. |
 | 8 | Dialog agency + MCM master switch | Reassignment, the quartermaster and in-person discharge were shipped, tested, and unreachable — nothing could open a conversation. |
 | 9 | Live status board | The wait menu said one unchanging sentence from oath to discharge. |
@@ -425,8 +425,32 @@ deserter for asking their lord's leave and being given it). `MinimumServiceDays`
 player can actually serve, which is what makes "leave now and forfeit your pay" a choice rather
 than a trap. `ClassifyLeaveReason` still returns `PlayerRequest` unconditionally, pinned by a test.
 
-**Desertion has exactly one producer** — the dialog branch the player picks after being told the
-cost. Nothing classifies a leave as desertion behind their back.
+**What desertion costs (#833).** Two producers reach `DischargeReason.Desertion`: the in-person
+dialog (`EnlistmentReleaseDialogBehavior.OnDesertionConfirmed`) and the wait-menu prompt
+(`EnlistmentWaitMenuPresenter.ConfirmDesertion`), both only after the commander refused release inside
+the minimum term. The cost is relation -15 with the commander and Honor trait XP -100: no war, no
+crime, no renown. The values are `desertionRelationPenalty` and `desertionHonorXpPenalty` in
+`enlistment_config.json` (compiled defaults equal the shipped file; integers, relation in [-100, 0]
+and Honor XP in [-1000, 0], a value outside that range reverts to the default with a warning; 0 skips
+that part of the cost while the confirmation text still names it). `DischargeService.Execute` applies them at
+step 7c through `DesertionPenaltyService`, with the commander id captured at step 3 (the record reset
+wipes it, so `ServiceRewardService.Grant` could not carry it). Host only: both producers check the
+co-op authority before requesting the discharge. A throwing penalty is logged and the discharge still
+completes. Skipped entirely, both
+parts, if the commander is dead: the dishonour is toward him. Deferred wages are still forfeited and
+the deserter keeps his kit, as before; an honourable release (after the minimum term) is free. Both
+confirmations name the cost through two new keys that hold only the cost sentence and are composed onto
+the unchanged, already translated rows: `taom_enlist_desert_cost` (appended to the wait-menu body
+through the inquiry adapter's `bodyAppendKey`) and `taom_enlist_desert_cost_reply` (appended to the
+in-person player line, composed with a `{LINE} {COST}` text variable). Both are gender-neutral
+("your commander's favor"). The relation change is silent (no notification). The Honor change: the
+engine sets a player's Honor XP exactly at his level's threshold at character creation and on a
+player-character change, so a player at Honor +1 or +2 who has gained no Honor since then drops one
+level on his first desertion (a map notice); from level 0 it takes ten desertions to reach -1. XP is
+visible with cheats via `campaign.print_player_traits`. Tests: `DesertionPenaltyServiceTests`,
+`DischargeServiceTests` (desertion only, captured id, dead commander),
+`EnlistmentContentConfigProviderTests` (defaults, shipped parity, invalid values) and
+`DesertionCostTextTests`.
 
 ---
 ## The review pass (2026-08-08) — four terminal defects the tests could not see
@@ -2338,6 +2362,9 @@ What actually remains, each a state no test can reach:
 - **A field battle with the commander in an army.** Still the case most likely to fail:
   `FindCommanderPartyIdIn` matches only the commander's own party in `InvolvedParties`, and an
   attached army member may not appear there.
+- **Desertion cost (#833).** Desert during the minimum term: relation with the commander drops by 15,
+  Honor XP by 100, wages are forfeited, the kit is kept, and both confirmations name the cost.
+  Control: an honourable release after the term costs nothing.
 - **Wars during service (#832).** (1) As a clan player, the commander declares a war mid-term (the
   mirror follows within the hour), makes peace (the mirror ends), and his clan changes kingdom (the
   mirror recomputes); then discharge leaves only the pre-oath wars. (2) A relieved raid in a war

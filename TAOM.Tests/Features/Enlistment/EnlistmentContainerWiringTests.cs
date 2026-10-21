@@ -44,6 +44,8 @@ public class EnlistmentContainerWiringTests
         // -> IPlayerContextAdapter, and -> IEnlistmentPlayerActionService -> IDutyOrchestrationService.
         container.RegisterInstance(Substitute.For<global::TAOM.Adapters.IPlayerContextAdapter>());
         container.RegisterInstance(Substitute.For<global::TAOM.Features.Enlistment.Duties.IDutyOrchestrationService>());
+        // IPlayerTraitAdapter (HardQuestionsIoC) entered with the desertion cost (#833).
+        container.RegisterInstance(Substitute.For<global::TAOM.Adapters.IPlayerTraitAdapter>());
 
         EnlistmentIoC.RegisterEnlistmentFeature(container);
         return container;

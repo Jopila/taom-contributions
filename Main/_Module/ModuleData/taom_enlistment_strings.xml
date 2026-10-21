@@ -100,6 +100,8 @@
 	<string id="taom_enlist_release_desert_option" text="{=taom_enlist_release_desert_option}Desert the company" />
 	<string id="taom_enlist_release_in_battle" text="{=taom_enlist_release_in_battle}There is fighting to be done. Ask again once the field is quiet." />
 	<string id="taom_enlist_release_refused_body" text="{=taom_enlist_release_refused_body}Your commander holds you to your oath — {DAYS} more days are owed. Leaving now is desertion: you forfeit the pay still owed to you, and your commander will not forget it." />
+	<string id="taom_enlist_desert_cost" text="{=taom_enlist_desert_cost}Deserting will also cost you your commander's favor and your good name." />
+	<string id="taom_enlist_desert_cost_reply" text="{=taom_enlist_desert_cost_reply}(This will cost me my commander's favor and my good name.)" />
 	<string id="taom_enlist_release_refused_title" text="{=taom_enlist_release_refused_title}Your term is not served" />
 	<string id="taom_enlist_release_relent" text="{=taom_enlist_release_relent}As you say. I will hold the line." />
 	<string id="taom_enlist_release_soon" text="{=taom_enlist_release_soon}You swore to serve, and {DAYS} days of that oath are still owed. I hold you to it." />

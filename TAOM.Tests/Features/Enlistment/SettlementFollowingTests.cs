@@ -323,7 +323,7 @@ public class SettlementFollowingReconcilerTests
         var discharge = new DischargeService(
             _store, _machine, _partyAdapter, Substitute.For<IEncounterAdapter>(),
             new EncounterOwnershipPolicy(), Substitute.For<ICommanderLordAdapter>(),
-            Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), _logger);
+            Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IDesertionPenaltyService>(), _logger);
 
         _sut = new EnlistmentReconciler(
             _store, _machine, _attachment, _commander, discharge,

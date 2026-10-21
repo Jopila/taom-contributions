@@ -276,5 +276,7 @@
     <string id="taom_enlist_sat_out_forced_line" text="The column fought without you, and you had no way into the line." />
     <string id="taom_enlist_act_raid" text="The column is raiding." />
     <string id="taom_enlist_crown_war_release" text="{COMMANDER}'s realm has gone to war with yours. You are released from the column with honor, and your pay is settled." />
+    <string id="taom_enlist_desert_cost" text="Deserting will also cost you your commander's favor and your good name." />
+    <string id="taom_enlist_desert_cost_reply" text="(This will cost me my commander's favor and my good name.)" />
   </strings>
 </base>

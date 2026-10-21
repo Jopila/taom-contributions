@@ -15,7 +15,8 @@ public sealed class InquiryAdapter : IInquiryAdapter
         System.Action onOptionA, System.Action onOptionB,
         string bodyVariableName = null, string bodyVariableValue = null,
         IReadOnlyDictionary<string, string> bodyVariables = null,
-        bool prioritize = false)
+        bool prioritize = false,
+        string bodyAppendKey = null, string bodyAppendFallback = null)
     {
         var title = new TextObject("{=" + titleKey + "}" + titleFallback).ToString();
 
@@ -31,6 +32,9 @@ public sealed class InquiryAdapter : IInquiryAdapter
             }
         }
         var body = bodyText.ToString();
+        // A separate keyed sentence appended to the body (#833), so a translated body row is never edited.
+        if (!string.IsNullOrEmpty(bodyAppendKey))
+            body += " " + new TextObject("{=" + bodyAppendKey + "}" + bodyAppendFallback).ToString();
         var optionA = new TextObject("{=" + optionAKey + "}" + optionAFallback).ToString();
         var optionB = new TextObject("{=" + optionBKey + "}" + optionBFallback).ToString();
 

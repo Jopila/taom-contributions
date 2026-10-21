@@ -42,7 +42,7 @@ public class EnlistmentLoadNormalizerTests
         // whether an encounter is open, which the game cannot do.
         _encounter = Substitute.For<IEncounterAdapter>();
         var attachment = new ServiceAttachmentService(_partyAdapter, Substitute.For<IGameMenuAdapter>(), _logger);
-        var discharge = new DischargeService(_store, _machine, _partyAdapter, _encounter, new EncounterOwnershipPolicy(), Substitute.For<ICommanderLordAdapter>(), Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), _logger);
+        var discharge = new DischargeService(_store, _machine, _partyAdapter, _encounter, new EncounterOwnershipPolicy(), Substitute.For<ICommanderLordAdapter>(), Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IDesertionPenaltyService>(), _logger);
         var reconciler = new EnlistmentReconciler(_store, _machine, attachment, _commander, discharge,
             new EnlistmentConfigProvider(_logger), _encounter, new EncounterOwnershipPolicy(), Substitute.For<IEnlistmentDiagnosticsSettingsProvider>(),
             EnlistmentTestDoubles.FeatureOn(), Substitute.For<IInquiryAdapter>(),

@@ -60,7 +60,7 @@ public class CommanderLossAnnouncementTests
         var discharge = new DischargeService(
             _store, machine, _partyAdapter, Substitute.For<IEncounterAdapter>(),
             new EncounterOwnershipPolicy(), Substitute.For<ICommanderLordAdapter>(),
-            Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), _logger);
+            Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IDesertionPenaltyService>(), _logger);
 
         _commander = Substitute.For<ICommanderLordAdapter>();
         _inquiry = Substitute.For<IInquiryAdapter>();
