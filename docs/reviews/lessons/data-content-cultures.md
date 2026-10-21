@@ -2186,3 +2186,13 @@ Arthedain was cloned from Gondor, and its troops were then exempted from special
 - **Why missed:** the plan traced every reader of the cost rows (`GetTroopCost` and its callers) and stopped there. A career passive does not read the row; it modifies the mechanic the row feeds, so a search for readers cannot find it.
 - **Prevent:** when a change removes or exempts a culture from a mechanic, grep that culture's choices in `career_system/taom_career_choices.xml` for every `PassiveEffect type` that modifies the mechanic (`SpecialResourceUpgradeCostModifier` and its siblings), and put each hit to Mike: keep it and say what it still does, or replace it. `tools/insert_new_faction_careers.py` skips a culture that already exists, so the fix is a hand edit.
 - **Source:** [rca-arthedain-special-resource-costs-2026-10-21.md](../rca-arthedain-special-resource-costs-2026-10-21.md) finding 3.
+### Place and side an outlaw clan from TAOM's own data, and move every text with it (#870, 2026-10-21)
+Fire and Tribute first put the `erebor_warriors` host on the Free side and anchored it at Erebor's halls, because of the
+clan's id. TAOM renamed that clan the Blacklocks, "fallen into shadow", and all ten of its hideouts sit beside Rhûn
+fiefs. The side was then moved in the JSON while the MCM hints still named it under the Free switch. The Gondor
+outlaws were anchored on the west coast while their camps are on the Ithilien front.
+- **Why missed:** a clan id read as a lore fact, and a side change made in one file.
+- **Prevent:** read a clan's name, description and hideout positions before giving it a side or an anchor, and grep
+  every text that names that side when it moves. Fire and Tribute now has a LiveInstall test that each host's anchors
+  belong to realms of its own side.
+- **Source:** `docs/reviews/rca-fire-and-tribute-slice1-2026-10-21.md` findings 1, 2 and 5.

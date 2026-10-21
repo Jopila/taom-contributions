@@ -1357,3 +1357,12 @@ Honor.
 - **Prevent:** before using an engine getter as a threshold, read its body for model calls; state the model's
   terms in the feature doc.
 - **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 7.
+### Judge a party's fighting strength as the engine does for armies (#870, 2026-10-21)
+Fire and Tribute's engage filter read `Party.EstimatedStrength`, so an army leader looked weak on its own roster,
+yet engaging it brings the whole army into the battle (`PartyBase.MapEventSide` puts every attached party on the same
+side). Vanilla's AI uses `Army.EstimatedStrength` for a leader (`DefaultMobilePartyAIModel` ~208), and skips parties
+with `ShouldBeIgnored` and non-leader besiegers (~151).
+- **Why missed:** the lone-party case was coded and the vanilla target filter was not read.
+- **Prevent:** a TAOM party that picks fights copies vanilla's target filter and strength read, and pins them with an
+  IL test.
+- **Source:** `docs/reviews/rca-fire-and-tribute-slice1-2026-10-21.md` finding 3.

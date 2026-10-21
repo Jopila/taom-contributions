@@ -918,6 +918,10 @@ earlier (Codex review 114 F2) and fixed it with a private name-only parser nobod
 - **Recurred 2026-10-14 (#765 Batch B C18):** a private `TryEnum` in `ChronicleConfigValidator` accepted
   "+1" and " 1"; fixed in `7e8451555` by calling `EnumNames.TryParse`. Source:
   `docs/reviews/rca-war-chronicle-events-2026-10-14.md` C18.
+- **Recurred 2026-10-21 (Fire and Tribute slice 1, #870):** the fourth private parser in this family, caught in
+  `/deep-review`: the feature wrote three of its own exact-name `FactionSide` parsers (the console cheats, the config
+  provider and the save codec). Fixed by calling `EnumNames.TryParse` at all three; the tests that expected case-sensitive
+  rejection were flipped to accept any case and still refuse a number, a signed number and a comma list.
 
 ### A guard on a lazily parsed parameter is not the service-exit gate (plan 002, 2026-09-24)
 Career mutation attributes are copied into a string dictionary at load (`CareerConfigProvider.ParseChoice`) and parsed only when an ability fires (`MutationParams.GetFloat`), so issue #128's loader-side NaN sweep never saw them. Plan 002 guarded `GetFloat` and called it "the single chokepoint", but a finite parameter still overflows inside a calculator (`multiply` by `1e38` gives +Infinity) and `MutationService.ApplyMutation` writes the result unchecked. The same plan ruled out the rule-5 warning because the accessor has no logger, without looking at the two layers that do.
