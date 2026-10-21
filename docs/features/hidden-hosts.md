@@ -9,6 +9,8 @@ hotkey opens nothing for it. Wounded and prisoner text shows only when the count
 AI and the map visibility model are untouched. The one write outside the UI is the Scouting XP phase 3 grants to the main
 party's scout (`Hero.AddSkillXp`, saved hero XP), by the authority only.
 
+A masked or horizon party or army tooltip also hides the host's orders ("Orders unknown.", #848, see "Hidden party orders").
+
 Phases 1 (nameplates), 2 (hover tooltips) and 3 (memory) are built. Phase 3 is the memory fade and the `~` symbol (a count
 remembered from an earlier sighting), with its own popup text under its own key and saved flag; the Phase 1 popup does not
 mention `~`. Tracked in [#846](https://github.com/haterade22/TAOM/issues/846).
@@ -158,6 +160,7 @@ obeys the phase 1 fault budget and the one toggle.
 | T9 | private `AddEncounterParties(..., MBReadOnlyList<MapEventParty>, ..., bool isExtended)` (`:1774`) | Only T4 | same class as T8 |
 | T10 | `Helpers.PartyBaseHelper.GetPartySizeText(int, int, bool)` (`:47`) | Every troop total and count row of T1 to T5 except a settlement's defenders and party rows, inside the call and in the functions the periodic refresh re-runs. The only other callers are the army menu overlay's man-count hint (`GetArmyManCountTooltip`) and `EncounterMenuOverlayVM`, which open no frame; the party screen is not a caller | postfix, reads the frame |
 | T11 | `CampaignUIHelper.GetPartyNameplateText(MobileParty, bool)` | The settlement tooltip's party rows and the army menu overlay (no frame) | postfix, acts only inside a settlement frame |
+| T19 | `MobileParty.GetBehaviorText()` (public, instance, non-virtual) | The orders row of T1 and T2 through `CampaignUIHelper.GetMobilePartyBehaviorText`; the menu rows and patrol tooltips call it with no frame (#848) | postfix, acts only inside a masked or horizon party or army frame |
 
 Notes on single targets:
 
@@ -387,6 +390,7 @@ healthy troops (a count of 0 is one digit). Six or more digits use the five-digi
 | `Main/Features/HiddenHosts/Hooks/TooltipRefresherCollection_AddEncounterParties_HiddenHosts_Patch.cs` | T8 and T9: no per-troop rows while masked |
 | `Main/Features/HiddenHosts/Hooks/PartyBaseHelper_GetPartySizeText_HiddenHosts_Patch.cs` | T10: the count text |
 | `Main/Features/HiddenHosts/Hooks/CampaignUIHelper_GetPartyNameplateText_HiddenHosts_Patch.cs` | T11: a settlement tooltip's party rows |
+| `Main/Features/HiddenHosts/Hooks/MobileParty_GetBehaviorText_HiddenHosts_Patch.cs` | T19 (#848): "Orders unknown." in a masked or horizon party or army tooltip |
 | `Main/Adapters/SettlementIntelSnapshot.cs`, `EventIntelSnapshot.cs` | Phase 2: raw facts about a settlement, a battle or a siege |
 | `Main/Features/HiddenHosts/HiddenHostsService.Memory.cs` | Phase 3: record, stamps, fade, pending XP, save text, reset |
 | `Main/Features/HiddenHosts/HiddenHostsMemory.cs`, `MemoryRow.cs` | Phase 3: the rows and the record, visibility, fade and cap rules |
@@ -394,7 +398,7 @@ healthy troops (a count of 0 is one digit). Six or more digits use the five-digi
 | `Main/Features/HiddenHosts/HiddenHostsMemoryBehavior.cs` | Phase 3: the five campaign events, the XP grant (tick and before a save) and its co-op gate, `SyncData` |
 | `Main/Adapters/IHiddenHostsCampaignAdapter.cs`, `HiddenHostsCampaignAdapter.cs`, `SettlementDefenders.cs` | Phase 3: clock, scout, settlement sight, visibility change, XP grant; the defenders sum both snapshots share. Plain sight is `IPartyIntelAdapter.CollectPlainSight`, next to the one definition of it |
 | `Main/Features/HiddenHosts/HiddenHostsCalls.cs` | Statics the hooks reach, the fault budget |
-| `Main/Features/HiddenHosts/HiddenHostsTexts.cs` | "Unknown party", the defenders and troops labels, "Counted ... ago" |
+| `Main/Features/HiddenHosts/HiddenHostsTexts.cs` | "Unknown party", "Orders unknown.", the defenders and troops labels, "Counted ... ago" |
 | `Main/Features/HiddenHosts/HiddenHostsBehavior.cs` | Per-campaign reset, the two one-time popups, their two saved flags |
 | `Main/Features/HiddenHosts/HiddenHostsPlainSightBehavior.cs` | Phase 3: the exact stamps, on every game menu and on a real-time throttled tick |
 | `Main/Features/HiddenHosts/HiddenHostsModule.cs` | Module wiring, service registration, patch category, statics |
@@ -444,6 +448,7 @@ Phase 3:
 - `HiddenHostsMemoryBindingTests.cs`: the engine facts (the visibility setter raises the event only on a change, the destroy order, `Settlement.Find`, `Hero.AddSkillXp`, the troops game text id, the `_dt > 0f` gate in `Campaign.Tick`, `GameMenu.RunOnInit` raising `GameMenuOpened`, `SaveHandler.SaveTick` raising before-save before it writes, `MobileParty.SiegeEvent` being the camp's event, `PlayerSiege.PlayerSiegeEvent`'s fallback).
 - `HiddenHostsTooltipHookTests.cs` and `HiddenHostsTooltipHarmonyPairTests.cs` (extended): the troop-total wrapper (only the troops title, only a masked party or army, with a memory or not, flag cleared in a finally), the reason row, the total through the vanilla builder and across the two-second refresh via real Harmony.
 - `HiddenHostsScoutSeamTests.cs` (Far Watch, #847; `NoScoutIntel` is the test double every other Hidden Hosts test builds the service with): `FogSkill` at all five sites, the named-horizon plate and tooltip frame, `RaiseByScout` (digit stages, the horizon, a remembered count that disagrees with the host, the toggle, the clock, the own side), `RecordScoutedSettlement`, and a steady horizon read with the real Far Watch store that allocates nothing. The named-horizon case also runs through real Harmony in `HiddenHostsHarmonyPairTests`, `HiddenHostsHookTests` and `HiddenHostsTooltipHookTests`, and `HiddenHostsWiringTests` loads the game assemblies before it scans the patch classes.
+- #848 (orders): `HiddenHostsTooltipFrameTests.cs` (`HidesOrders` over every kind and mode, with and without a memory; a named horizon host). `HiddenHostsTooltipHookTests.cs` (hand calls of the postfix): masked and horizon party or army frames and a named horizon party replace the text; no frame, a vanilla, settlement or map event frame and a spent budget keep the original; the real frame opener far, near and with the toggle off. `HiddenHostsTooltipHarmonyPairTests.cs` (`RequiresGame`, a probe prefix standing in for the engine's branch chain on a bare party): through real Harmony a masked frame replaces the original with the shipped text, and no frame or a vanilla frame keeps it; the wrapper reaches the patch from a caller compiled before and after it. `HiddenHostsTooltipBindingTests.cs` (`BindingVerification`, `RequiresGameIL`): `GetBehaviorText`'s shape, the two builders each print it through exactly one wrapper call as a plain string row, and the exact caller sets of both methods, with the SandBox UI assemblies scanned. `HiddenHostsWiringTests.cs` lists the new class in its category pin. The postfix's catch has no test: its try body only constructs a `TextObject`, which cannot throw at run time (the rethrow mutant survives as an equivalent one).
 - `HiddenHostsBehaviorSessionResetTests.cs` (extended): the memory hint, its own flag and key, never on the tick the first hint shows. `HiddenHostsWiringTests.cs`: the memory behavior is built with `new` in the declaration, registers exactly five events (the plain-sight behavior, two: `GameMenuOpened` and `TickEvent`) and resets in its constructor.
 
 `PartyIntelAdapter`, `HiddenHostsCampaignAdapter` and `HiddenHostsHintAdapter` need a live campaign, so the in-game check below is their coverage (`PartyIntelAdapterTests` pins that neither adapter keeps a campaign object).
@@ -505,6 +510,60 @@ In the Harmony pair of Patch105 the only change is that `VanillaBinds.LayMask` s
 `IsHorizon`; the pair still goes through `__state` and the finalizer, and `HiddenHostsHarmonyPairTests` runs the named-horizon
 case through real Harmony.
 
+## Hidden party orders (#848)
+
+A party or army tooltip prints what the host is doing ("Besieging X.", "Holding.", "Following Y.") on one row under its title.
+Reading a far host's orders defeats the blurred count, so that row follows the count.
+
+| Tooltip state | Orders row |
+|---------------|------------|
+| Exempt (own, clan, player army, plain sight, true sight, info-hidden), or the tooltip's own count read in full | vanilla |
+| Masked (`1??`), with or without a remembered `~` count | `Orders unknown.` |
+| Horizon, named by a scout or not | `Orders unknown.` |
+| Toggle off, no frame, or a settlement, battle or siege tooltip | vanilla |
+
+The table covers the row vanilla prints: a party tooltip shows its orders only for an inspected party (in sight, or any member
+of the player's army); an army tooltip also prints them when its caller passes false as the third argument, which only
+the map tracker does. The kingdom army's party items and the menu's party items also pass false, but they open a party
+tooltip, whose orders row depends on inspection alone.
+
+**Rules.**
+
+- **One predicate, no new state.** `TooltipFrame.HidesOrders` is `IsPartyOrArmy && Verdict.Mode != Vanilla`. The frame's
+  verdict is the one that drew that tooltip's counts, so the orders show exactly when the count is read in full or the host is
+  exempt. There is no separate short-distance value and no setting (decision Q1): a host of 1000 or more shows its orders only
+  once it is close enough to read four digits.
+- **Live, not remembered (decision Q2).** A remembered `~` count and a scout-named host are not `Vanilla` verdicts, so both
+  hide the orders: the memory is an old count, the scout names a host, and neither is a live reading. `Agrees` is never read.
+- **Replacement (decision Q3).** `{=taom_hhost_orders_unknown}Orders unknown.` (a line with a full stop, like vanilla's own
+  orders). It is built as a fresh `TextObject` per call and not cached: it is made once per masked tooltip build, never per
+  frame, because the row is a plain string.
+
+**The seam: T19.** One postfix, `MobileParty_GetBehaviorText_HiddenHosts_Patch`, on `MobileParty.GetBehaviorText()` (public,
+instance, non-virtual, no overloads), binding only `ref TextObject __result`. It never evaluates the party: it reads
+`HiddenHostsTooltipScope.Current`, returns when the frame is null, `!HidesOrders` or the fault budget is spent, and otherwise sets `__result` inside a try (a fault is reported once and vanilla's text stays). With no frame
+it reads one `[ThreadStatic]` and returns, allocating nothing.
+
+- **Why the inner method, not the wrapper the issue names.** The tooltip rows call
+  `CampaignUIHelper.GetMobilePartyBehaviorText`, a 12-byte wrapper (`GetBehaviorText().ToString()`) in the same assembly as the
+  two builders: a JIT inlining candidate. Patching the long inner method is reached either way, so the inlining question is
+  moot. The pair test also compiles the wrapper before and after the patch.
+- **Callers (pinned from the IL, v1.5.5).** The wrapper is called by `RefreshMobilePartyTooltip`, `RefreshArmyTooltip` and
+  `GameMenuPartyItemVM` only; `GetBehaviorText` is called only by the wrapper and `CampaignUIHelper`'s town patrol tooltip. The
+  menu rows and the clan and kingdom patrol tooltips therefore run with no frame and stay vanilla (management screens stay
+  exact, T17); the kingdom army column runs with no frame because it reads `Army.GetLongTermBehaviorText` directly. `SandBox.ViewModelCollection` (the nameplate workers) calls neither.
+- **Postfix, not a skipping prefix:** vanilla runs unchanged, so `CoopVetoClassificationTests` needs no row and a vanilla throw
+  behaves as today. It is local UI and writes no state.
+- **PatchShield:** the target is on no exclusion list, so it gains the value-returning finalizer. Harmony 2.4.2 stores
+  vanilla's `TextObject` in the result local before any postfix runs and returns it after the shield swallows a fault, so a
+  missing-API fault in this postfix (its text call is direct, inside its try) keeps vanilla's orders. Only a fault raised before
+  that store (another owner's prefix or transpiler) returns null, and then the wrapper's `ToString()` would throw.
+
+**The limit.** The row is a plain string, so the periodic refresh never rewrites it: it is decided when the tooltip is built
+and updates on the next hover or the key-toggle rebuild, like the trimmed troop rows. A tooltip held open while the host closes
+in keeps "Orders unknown." until it is rebuilt. It freezes both ways: orders shown at build also stay beside a count that
+re-masks at the next two-second refresh, until the tooltip is rebuilt. Vanilla's row is just as frozen, so nothing new leaks.
+
 ## Not in Phase 1
 
 - The folder is `HiddenHosts`, not `PartyIntel`; the adapter and snapshot keep the neutral name `PartyIntel` because later phases read more of the party.
@@ -514,7 +573,7 @@ case through real Harmony.
 - The scout-away rule and the scout report moved to [#847](https://github.com/haterade22/TAOM/issues/847) and are built: see "Far Watch (#847)" above.
 - Hover tooltips still show exact numbers and the name until Phase 2.
 - The memory symbol `~` and its popup text arrive with Phase 3.
-- Translation: the six `taom_hhost_*` keys (three from phases 1 and 2, three from phase 3) are seeded as English in all 12 languages; the paid translation run is owed.
+- Translation: the seven `taom_hhost_*` keys (three from phases 1 and 2, three from phase 3, one from #848) are seeded as English in all 12 languages; the paid translation run is owed (the six in #942, the #848 key in #763).
 
 ## Not in Phase 2
 
@@ -551,6 +610,7 @@ case through real Harmony.
 
 ## Changelog
 
+- 2026-10-20: hidden party orders (#848): a masked or horizon party or army tooltip shows "Orders unknown." in place of the host's orders (T19); one new key, no setting.
 - 2026-10-20: Far Watch (#847): the scout-away rule (`FogSkill`), hosts named by a scout keep their name past the horizon (`IsNameHidden`), `RaiseByScout` and `RecordScoutedSettlement`; the service takes an `IScoutIntelQuery`.
 - 2026-10-19: deep-review fixes: exact stamps also on every game menu (the tick never fires while a menu stops time), a live view that contradicts a memory replaces it, own side and plain sight judged by one predicate, the player's own siege on both sides, battle totals leave hidden parties out, the Scouting XP is also granted before a save, a masked total row is always wrapped, a thread-local frame slot, the reason row and the drawn flag follow what reached the screen.
 - 2026-10-19: phase 3 (memory) built: the `~` count, the fade, exact stamps, Scouting XP, the save as chunked text, the reason row and its own popup; the settlement tooltip row of an army leader now masks the number vanilla printed.
@@ -564,6 +624,16 @@ Left Alt held, so the name and extra text show: counts sharpen with distance; st
 for a tenth of the threshold; past nine tenths of the party's spotting reach the plate reads `...` and "Unknown party" and
 the encyclopedia key does nothing, while a left click still engages; turn the toggle off mid-chase and the exact numbers
 return on the next frame; the popup appears once per campaign.
+
+### Hidden party orders checks (#848)
+
+Hover a far enemy lord party with a masked count: the orders row reads "Orders unknown."; close in until the count is exact and
+hover again (or press the extend key): the real orders show. Your own party, a clan party and a member of your army show
+orders while in sight. A `~` remembered host and a scout-named host past the horizon hide them. An army, far and near. The map
+tracker: track a far enemy army and hover its tracker icon: Orders unknown. while its count is masked. A member of your army, also an unmerged one while you serve in an AI army, shows its orders. A besieger while you defend the town shows its orders. The clan and kingdom patrol tooltips, the kingdom army column and an encounter
+menu row description stay vanilla. Toggle off and hover again: vanilla orders. No `[HiddenHosts] ... fell back to vanilla`
+line in the log. Keep a tooltip open while the host closes in: it stays "Orders unknown." until the next hover (the known
+limit).
 
 ### Far Watch checks
 
@@ -596,3 +666,4 @@ for the test host's JIT only).
 
 - **Issue:** #846 [Hidden Hosts](https://github.com/haterade22/TAOM/issues/846)
 - **Status:** Open (phases 1 to 3 built, in-game check owed)
+- **Issue:** #848 hidden party orders (built, in-game check owed)

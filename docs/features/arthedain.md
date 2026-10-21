@@ -135,7 +135,7 @@ decided one by one:
 | `race_abilities/race_abilities.json` and `RaceAbilityDefaults.cs` | on Gondor's key: the Citadel Guard rally | human troops resolve their ability by culture; without a row they had none |
 | `CareerSystemIoC` archetype map | Ranger of the North (Ranged), Warden of Fornost (Infantry), Knight of Arthedain (Cavalry) | an unmapped career's ability is a no-op that still shows its toast |
 | `culture_marketplace/culture_marketplace_config.xml` | `armour_from="gondor"` (lord kit and material) and three `<Stock>` rows: the Arnor kit and Numenorean blades at weight 3, Gondor's non-armour goods at 0.5 (#755); the King's Crown blacklisted | Arthedain's markets sell mostly its own gear (about 89% of the draw weight), Gondor's only for what the Arnor kit lacks (spears, lances, bows, shields, harness, more swords); the crown is never sold |
-| `special_resources/troop_resource_costs.xml` | Castar costs for the King's Guard, Knight, Ranger Captain and Warden | Gondor's elites pay Castar; so do Arthedain's |
+| `special_resources/troop_resource_costs.xml` | none | Arthedain troops cost no special resource (Mike, 2026-10-21); `NoArthedainTroop_CarriesASpecialResourceCost` keeps it so |
 | `settlement_guards/settlement_guards_config.xml` | Fornost (`town_AN2`): King's Guard, Wardens, Fornost Guards | the capital's own garrison |
 | `armour_acquisition` lord's materials and weapon picks | none of its own | one material per culture that owns armour by item culture; Arthedain owns none, so through `armour_from` its lord's ladder spends Gondor's material and offers Gondor's five weapon picks (Andúril among them) |
 | `lotr_issues/taom_lotr_issues.xml` Deep Seam | on Gondor's row (`cultures="gondor,arthedain"`) | a culture that borrows its armour shares its donor's row, as Lindon shares Rivendell's |
@@ -184,6 +184,7 @@ known-culture set in `CustomBattleCommandersProvider` (pinned to the playable cu
   `ShippedBannerBearerConfigTests`, and `CustomBattleCommandersShippedDataTests` (the provider's
   culture set equals the playable cultures read from the data).
 - `ShippedKingdomDataTests` (#818) fails on any shipped relationship row that declares war, which is what keeps the day-one Gundabad war out.
+- `TroopResourceCostDataTests.NoArthedainTroop_CarriesASpecialResourceCost` (#963) fails if any troop in `troops_arthedain.xml` has a row in `troop_resource_costs.xml`.
 - Existing data gates covering Arthedain unchanged: `CulturePartyTemplateTests`,
   `TavernMercenaryDataTests`, `RealmPaletteTests`, `TaomStartOptionsProviderTests`,
   `PlayerStartCoverageTests`, `CareerCultureCoverageTests`, `NarrativeCultureCoverageTests`.
@@ -237,6 +238,12 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 
 ## Changelog
 
+- 2026-10-21 (#963): Arthedain troops cost no special resource. The King's Guard, Knight, Ranger
+  Captain and Warden lost their special-resource upgrade cost and daily upkeep (Castar for an
+  Arthedain player), so they no longer desert at a zero balance and show no encyclopedia badge. The
+  realm still earns Castar (`special_resources_config.xml`). The Knight of Arthedain pick
+  `knight_of_arthedain_t3_a_p4` (-10% special-resource upgrade cost) now discounts only costed
+  troops from other trees.
 - 2026-10-18 (#818): The lord party template's `max_value` sum went from 83 to 200, the figure the other men's realms use, because a 200-day balance simulation had Arthedain losing 66 % of its men, the most of any free realm. `tools/generate_arthedain_troops.py` owns those numbers, so change them there. The day-one Gundabad war was removed from `spkingdoms.xslt` and `taom_spkingdoms.xml` (every start relationship is now `value="0"`, `isAtWar="false"`); Gundabad and Arthedain meet on day 44 through their Hostile row. In `army_targeting.json` Arthedain stopped being the first target: Gundabad now aims at Mirkwood, Erebor and Dale before Arthedain's towns (`town_AN1` to `town_AN3`), and Dunland at Rohan's towns, then Gondor's, with Arthedain's last. Dol Guldur aims at Lothlorien, then Mirkwood and Dale, then Erebor.
 - 2026-10-07, Mike's calls after the review: Arthedain is Hostile to every evil realm, not only
   its three neighbours, so the War of the Ring's Full War reaches it like every other free realm.
@@ -262,6 +269,6 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 
 ## GitHub Issue
 
-- **Issue:** #753; #818 (the 2026-10-18 balance and start-war change); follow-ups #754 (translations, done in `a9437a492`; the issue is still open), #755 (donor-culture market weapons),
+- **Issue:** #753; #818 (the 2026-10-18 balance and start-war change); #963 (the 2026-10-21 removal of troop special-resource costs); follow-ups #754 (translations, done in `a9437a492`; the issue is still open), #755 (donor-culture market weapons),
   #756 (policy ids no kingdom can use), both resolved 2026-10-08.
 - **Status:** built and verified in data; in-game check owed (#753 checklist).

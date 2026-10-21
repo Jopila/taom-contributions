@@ -29,15 +29,22 @@ installs are partial, so broken refs into them are environment gaps, not defects
    against the deserializer, and report XSD-STALE if the code does read it. Also check the value
    type it parses (int.Parse throws on "1.5"), the ref prefix it expects (Item., NPCCharacter.,
    Culture.), and what an ABSENT attribute defaults to (an NPCCharacter with no <face> renders as
-   a toddler). Load path: `validate_xml_schemas.py`'s NOT REGISTERED and MISSING lines say whether
-   a file loads at all; confirm each XSLT still matches the elements it targets; a new file in a
+   a toddler). Load path: `validate_xml_schemas.py` names how the engine loads a file. LANGUAGE FILE
+   (listed by a `language_data.xml`) and STYLESHEET (applied to the data merged before its
+   registration) load, but no XSD checks them. NOT REGISTERED means no `<XmlName>` or manifest loads
+   it, though the engine can still read it by fixed name (`global_strings.xml`, the scene lists) or
+   a `project.mbproj` row; that is expected for C#-read data. Every line that says "(a real fault)"
+   (a manifest the engine cannot load, a `Languages/` file no loadable manifest lists) is a finding,
+   although the run still exits 0: the summary line counts them. MISSING is a registration that
+   loads nothing. Confirm each XSLT still matches the elements it targets; a new file in a
    folder-registered Armory directory loads only after a game RESTART, so report the restart plus
    visual check as OWED; cross-module refs need a <DependedModule> (Agent 5 item 10 owns that
    trace). Then read the trap index in `docs/ai-includes/orientation.md` and apply every row your files touch; each linked doc
    names its gate.
 
 3. BYTE FIDELITY for any file a script or bulk edit touched: BOM kept or dropped as the original
-   had it, line endings kept (language files use \r\r\n), no whole-file rewrite behind a two-line
+   had it, each line's own terminator kept (the language files vary by type and even by line: measure,
+   never assume; `docs/localization/TRANSLATOR_GUIDE.md` "Line endings and encoding"), no whole-file rewrite behind a two-line
    change (compare `git diff --stat` with the intended edit), no `--` inside an XML comment, no
    backup with an .xml extension left in a globbed folder.
 

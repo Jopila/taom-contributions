@@ -667,13 +667,15 @@ def schema_invalid_issues(module_dir: Path, game_schemas: Path) -> list:
     for rec in report["failed"]:
         path = Path(rec["file"])
         rel = path.relative_to(moduledata).as_posix() if moduledata in path.parents else str(path)
+        # The rerun hint must work from the repo root, where the hook and a person run it.
+        hint = path.relative_to(REPO_ROOT).as_posix() if REPO_ROOT in path.parents else path.as_posix()
         for error in rec["errors"]:
             m = re.match(r"L(\d+): (.*)", error, flags=re.S)
             line, text = (int(m.group(1)), m.group(2)) if m else (0, error)
             issues.append(ts.Issue(
                 severity=ts.Severity.ERROR, code=SCHEMA_CODE, file=rel, line=line, entry_id=rec["id"],
                 message=f"{text} (engine schema {Path(rec['schema']).name}; the engine only logs "
-                        f"this and loads the file anyway). python tools/validate_xml_schemas.py {rel}"))
+                        f"this and loads the file anyway). python tools/validate_xml_schemas.py {hint}"))
     for text in report["missing"]:
         issues.append(ts.Issue(
             severity=ts.Severity.ERROR, code=SCHEMA_CODE, file="SubModule.xml", line=0, entry_id="",

@@ -80,31 +80,47 @@ Each translation file is XML with this structure:
 
 Hand translators can ignore this section; anyone writing a script that edits the per-language files
 cannot. Every file under `Main/_Module/ModuleData/Languages/<LANG>/` is **UTF-8 with no BOM**: all
-144 of them, measured 2026-08-14.
+276 of them (23 in each of 12 languages), measured 2026-10-21.
 
-**The line terminator is not uniform, so detect it instead of assuming it.** Every `std_taom_*` type
-except `std_taom_enlistment_strings_*.xml` ends its lines with a **doubled CR, `\r\r\n`**. That file
-and `language_data.xml` use a plain `\r\n`. Measured on `std_taom_module_strings_deu-DE.xml`: 2,451
-line terminators, every one of them `\r\r\n`. The TR, FR, PL and RU copies of that file report the
-same count.
+**The line terminator is not uniform, so detect it instead of assuming it.** Measured 2026-10-21 on
+the desktop checkout (`core.autocrlf=true`), per file type, the same in all 12 languages:
 
-The doubled CR is produced, not inherited, so it comes back after every rebuild.
-`build_translation_xml` in `tools/rebuild_translation_files.py` joins its lines on `\r\n` (`:107`),
-and `rebuild_language` writes the result with `Path.write_text(content, encoding="utf-8")` (`:159`).
-Default text mode expands each `\n` to `\r\n` on Windows, so `\r\n` goes in and `\r\r\n` comes out.
-The doubled types are exactly the ten entries in that script's `taom_sources` list (`:132-143`); the
-enlistment file is plain because it is not in that list, so the rebuild never touches it.
+| Form on disk | Types |
+|---|---|
+| **Doubled CR, `\r\r\n`**, stored that way in git | 18 of the 23 types, `std_taom_enlistment_strings_*` included |
+| Plain `\r\n`, stored as LF in git | `std_taom_module_strings_*`, `language_data.xml` |
+| Both, line by line | `std_taom_keybind_strings_*`, `std_taom_player_switcher_strings_*`, `std_taom_xslt_strings_*` |
+
+Each `std_taom_module_strings_*` file also carries a blank line after almost every row: at
+`753fb79cf` the RU, DE, JP and TR blobs each hold 6,262 lines, 3,100 of them blank, and 61 of their
+3,153 `<string>` rows have no blank line after them. The merge `85cbd20c8` left that shape. Its parents
+held 2,951 and 2,969 `\r\r\n` plus 14 plain `\r\n` each, with no blank lines, and the merge's text-mode
+round trip turned each doubled terminator into a line break plus an empty line; the 14 plain lines, and
+47 rows added since, have none. Never treat these files as row-plus-blank pairs: a script that deletes a
+row and the line after it deletes a real row at those 61 places. A row added to them copies the shape of
+its neighbours. <!-- measured: python line count of each blob, `git show 753fb79cf:<path>`, 2026-10-21 -->
+
+Git does not convert a file whose stored copy contains a CR, so a doubled file reaches every checkout
+as it is, while an LF file takes the checkout's own terminator. A type's form can change between
+commits: `std_taom_module_strings_*` was doubled on 2026-08-14 and has been stored as LF since the
+merge `85cbd20c8` (2026-10-19). Measure the file in front of you.
+
+The doubled CR is produced, not inherited. `build_translation_xml` in
+`tools/rebuild_translation_files.py` joins its lines on `\r\n` (`:107`), and `rebuild_language`
+writes the result with `Path.write_text(content, encoding="utf-8")` (`:159`). Default text mode
+expands each `\n` to `\r\n` on Windows, so `\r\n` goes in and `\r\r\n` comes out, and any other
+generator that writes `\r\n`-joined text in text mode does the same.
 
 Two consequences:
 
-- **A regex whose terminator is `\r?\n` matches nothing on a doubled file.** On that DE file
-  `/>\r?\n` finds 0 matches, while the literal `/>\r\r\n` finds 2,442. The `\r?` consumes the first
+- **A regex whose terminator is `\r?\n` matches nothing on a doubled file.** On the doubled DE module
+  strings file of 2026-08-14, `/>\r?\n` found 0 matches, while the literal `/>\r\r\n` found 2,442. The `\r?` consumes the first
   CR and then `\n` is asked to match the second CR, which fails, and the empty-`\r?` backtrack fails
   the same way. Capture the terminator and re-emit it verbatim rather than hard-coding either form,
-  or the same script will corrupt the two files in each language directory that use the other one.
+  or the same script will corrupt the files in each language directory that use the other one.
 - **A plain text-mode read silently doubles the file.** Python's universal-newline translation turns
   each `\r\r\n` into `\n\n`, so a text-read plus text-write round trip inserts a blank line between
-  all 2,451 lines and rewrites every line of the file. That is exactly the whole-file-rewrite defect
+  every pair of lines and rewrites every line of the file. That is exactly the whole-file-rewrite defect
   the XML I/O convention in [tools/README.md](../../tools/README.md) exists to prevent. Read bytes,
   decode, edit, encode, write bytes.
 

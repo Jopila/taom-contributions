@@ -394,6 +394,12 @@ TAOM guard prefixes conventionally `return true` from their catch, handing contr
 - **Why missed:** the patch was written with a deliberate, documented try/catch and a comment reasoning correctly about fail-open behaviour for exceptions thrown *inside* the body. That reasoning is sound and complete for that class of exception, which is exactly why nobody asked about the other class. Uncapturable Heroes (2026-08-26) shipped one engine reference in a postfix body, `KillCharacterActionDetail.None`, that no binding test covered.
 - **Prevent:** every engine member a patch body references needs a `BindingVerification` assertion, not just the patch TARGET. Enumerate the body's engine references (types, methods, properties, ENUM MEMBERS) and pin each. Treat "the try/catch makes this safe" as true only for runtime exceptions; ask separately what happens when the member cannot be resolved at all.
 - **Source:** docs/reviews/rca-uncapturable-heroes-2026-08-26.md finding 1.
+- **Correction (2026-10-20):** "the target returns `default(T)`" holds for a fault in a prefix or the original body. For
+  a fault in a postfix, Harmony 2.4.2 (`MethodCreator.CreateReplacement`) has already stored the original's value in the
+  result local before any postfix runs, and returns that local after PatchShield swallows, so the target returns
+  vanilla's value: a `bool` gate keeps vanilla's answer and a `TextObject` getter keeps vanilla's text. The two
+  exceptions: a prefix that skipped the original, or a patch that already wrote `__result`, leaves that value instead. Hidden party
+  orders copied the broader sentence into its docs. Source: `docs/reviews/rca-hidden-orders-2026-10-20.md` finding 2.
 
 ### Harmony binds prefix/postfix parameters by NAME, so pin the names, not just the types
 A binding test that resolves a target via `AccessTools.Method(type, name, new[]{ typeof(A), typeof(B) })` proves the method still exists with that shape. It does NOT prove the parameter NAMES are unchanged, and Harmony's injection binds by name. Parameter names are not part of a public API contract, so a rename is a legal, silent engine change; after one, the patch's parameters arrive as `null`/`default`, any null guard swallows every call, and the patch becomes a no-op that the type-resolving binding test and every behavioural test still pass.

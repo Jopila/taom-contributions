@@ -437,6 +437,56 @@ public class HiddenHostsTooltipHarmonyPairTests
         Assert.AreEqual(3, RunTroopBuilder().TooltipPropertyList.Count);
     }
 
+    // ---- Orders: the postfix on MobileParty.GetBehaviorText (#848). The branches are hand calls in HiddenHostsTooltipHookTests.
+
+    private static readonly TextObject ProbeText = new TextObject("{=!}Besieging X.");
+
+    /// <summary>Stands in for the engine's long branch chain on a bare party: skips the original and returns a known line.</summary>
+    private static bool ProbeOrdersPrefix(ref TextObject __result)
+    {
+        __result = ProbeText;
+        return false;
+    }
+
+    private static MethodBase BehaviorText() => AccessTools.Method(typeof(MobileParty), nameof(MobileParty.GetBehaviorText));
+
+    private void ProbeOrdersFirst() =>
+        _harmony.Patch(BehaviorText(), prefix: new HarmonyMethod(typeof(HiddenHostsTooltipHarmonyPairTests).GetMethod(nameof(ProbeOrdersPrefix), OwnStatic)) { priority = Priority.First });
+
+    [TestMethod]
+    public void Orders_ThroughRealHarmony_AMaskedFrameReplacesTheShippedText_AndNoFrameOrAVanillaFrameKeepsTheOriginal()
+    {
+        ProbeOrdersFirst();
+        Apply(typeof(MobileParty_GetBehaviorText_HiddenHosts_Patch));
+        var party = Bare<MobileParty>();
+
+        Assert.AreSame(ProbeText, party.GetBehaviorText(), "no frame");
+        var token = HiddenHostsTooltipScope.Open(new TooltipFrame(TooltipSubjectKind.Party, new TooltipVerdict(TooltipMode.Masked, 0.7f, 1f, 0, 123)));
+        Assert.AreEqual("Orders unknown.", party.GetBehaviorText().ToString(), "the shipped {=taom_hhost_orders_unknown} default renders");
+        HiddenHostsTooltipScope.Close(in token);
+        HiddenHostsTooltipScope.Open(new TooltipFrame(TooltipSubjectKind.Party, TooltipVerdict.Vanilla));
+        Assert.AreSame(ProbeText, party.GetBehaviorText(), "a vanilla frame");
+    }
+
+    [TestMethod]
+    public void Orders_TheWrapper_ReachesThePatch_FromACallerCompiledBeforeAndAfterIt()
+    {
+        ProbeOrdersFirst();
+        var party = Bare<MobileParty>();
+        HiddenHostsTooltipScope.Open(new TooltipFrame(TooltipSubjectKind.Party, new TooltipVerdict(TooltipMode.Masked, 0.7f, 1f, 0, 123)));
+
+        // Baseline first: this JIT-compiles the wrapper with only the probe in place, so an inlined copy could not see our detour.
+        Assert.AreEqual("Besieging X.", CampaignUIHelper.GetMobilePartyBehaviorText(party));
+
+        Apply(typeof(MobileParty_GetBehaviorText_HiddenHosts_Patch));
+
+        Assert.AreEqual("Orders unknown.", CampaignUIHelper.GetMobilePartyBehaviorText(party));
+        Assert.AreEqual("Orders unknown.", CallWrapperFromAnotherMethod(party), "and a caller compiled after the patch");
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static string CallWrapperFromAnotherMethod(MobileParty party) => CampaignUIHelper.GetMobilePartyBehaviorText(party);
+
     // ---- Every patch class applies and compiles against the installed engine
 
     [TestMethod]
@@ -468,6 +518,7 @@ public class HiddenHostsTooltipHarmonyPairTests
             (typeof(CampaignUIHelper_GetPartyNameplateText_HiddenHosts_Patch),
                 new MethodBase[] { AccessTools.Method(typeof(CampaignUIHelper), nameof(CampaignUIHelper.GetPartyNameplateText), new[] { typeof(MobileParty), typeof(bool) }) },
                 false, true, false),
+            (typeof(MobileParty_GetBehaviorText_HiddenHosts_Patch), new[] { BehaviorText() }, false, true, false),
         };
 
         foreach (var (patchClass, targets, prefix, postfix, finalizer) in expectations)

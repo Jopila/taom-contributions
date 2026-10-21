@@ -6322,6 +6322,8 @@
 
     <string id="taom_oath_reply_fallback" text="Another time, perhaps." />
 
+    <string id="taom_hhost_orders_unknown" text="Orders unknown." />
+
   </strings>
 
 </base>

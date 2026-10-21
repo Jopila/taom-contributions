@@ -333,6 +333,11 @@ window open in the very writer whose fix was meant to close it.
 - **Prevent:** write each in-game step with the exact log line it expects, and read the trigger's code and the
   line's writer before writing the expected outcome.
 - **Source:** `docs/reviews/rca-yotthani-adoption-2026-10-08.md` findings 10 and 11.
+- **Recurrence (2026-10-20, hidden party orders):** "the map tracker tooltip of a far party hides them" could never fail:
+  a party's tracker shows only while it is out of sight, and vanilla prints its orders row only for an inspected party.
+  The real case is a far army's tracker icon (the tracker passes `false` as the army tooltip's third argument). Trace the
+  vanilla condition that prints the row before writing the check. Source: `docs/reviews/rca-hidden-orders-2026-10-20.md`
+  finding 5.
 
 <!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
 
@@ -1465,6 +1470,11 @@ had no test, and the installer's production patched check was always replaced by
   pointing it back at the raw `Campaign.TimeControlMode` (the bug FOR-MIKE 16r fixed) compiled and kept the suite
   green. Its getter is now pinned by IL (`TimeControlAdapterBindingTests`), and the rule covers any engine read that a
   fake adapter stands in for.
+- **Recurrence (2026-10-20, hidden party orders):** a text seam (`HiddenHostsCalls.OrdersUnknown`) was copied from
+  siblings whose text reads `GameTexts.FindText`; the new text was a `{=key}` English default, which renders without
+  the string table, and every test replaced the seam, so no test rendered the shipped string. Before adding a seam,
+  check that the production value really needs the game; then the pair tests read the production value.
+  Source: `docs/reviews/rca-hidden-orders-2026-10-20.md` finding 4.
 
 ### A fix pass starts from the review file's own scope line, not from the file with the nearest name (plan 039, 2026-10-03)
 Plan 039's follow-up pass answered `claude-review.json`, the review of plan 028's `81811ea2` in wt-028, and left
@@ -2045,3 +2055,19 @@ fires), and every real sit-out logged "joining anyway" first.
 - **Prevent:** when a new rule runs beside an existing call, stub that call with what production returns
   in the new case, and assert the calls that must not happen.
 - **Source:** `docs/reviews/rca-enlistment-vassal-sit-out-2026-10-21.md` F1.
+### A guarantee stated in a test name or a doc sentence names the assertion that fails when it breaks
+
+Hidden party orders (#848) rests on one engine fact: every call of `MobileParty.GetBehaviorText` inside an open party or
+army tooltip frame is on the frame's own subject, so the postfix never reads `__instance`. The docs said "the exact
+caller list is pinned from the IL"; the pin matched callers by class prefix, found only the first wrapper call per
+builder, and its "never by SandBox UI" half passed if that assembly did not load. A constructor pin guarded nothing the
+build did not already guard, a checklist line ("the map tracker tooltip of a far party hides them") could never fail
+because vanilla prints no orders row there, and a limit was documented in one direction. The code was right; the words
+around it claimed more than any check provided.
+- **Why missed:** pins were written from the design's intent and docs from the pins' names; nobody compared each
+  sentence with the assertion behind it.
+- **Prevent:** for every "pinned", "exactly", "only", "never" or "the only caller" in a test name, doc or registry
+  entry, name the assertion that would fail if it broke (an exact set, an exact count, an assertion that the scanned
+  assembly loaded). A guarantee with no such assertion is reworded or gets one. A checklist line names the vanilla
+  condition under which the thing it checks is shown at all, and which screen each caller opens.
+- **Source:** `docs/reviews/rca-hidden-orders-2026-10-20.md` findings 1, 3, 5 and 6, and C1.

@@ -407,11 +407,10 @@ For content retirement across the mod, see [Retire content](recipe-retire-conten
   the biography in `heroes.xslt` saying son, daughter or wife is the cheapest spec to check against.
   `LordNameAndSexConsistencyTests` pins the female-with-beard half.
   [lord skills authoring](../ai-includes/lord-skills-authoring.md).
-- **`tools/complete_lords_xslt.py --apply` restores vanilla `is_female` when you delete the
-  attribute**, because an override counts only when present and the male convention is omission. The
-  id must go in that script's `GENDER_OVERRIDES` with value `None`. The same script's `ATTR_ORDER`
-  does not contain `race`, so `--apply` silently deletes every `race` attribute from `lords.xslt`,
-  Sauron's included. `characters/lords.xml` has no regenerator and is never at risk.
+- **`tools/complete_lords_xslt.py --apply` only adds templates for vanilla lords `lords.xslt` lacks** (#959). It never
+  rewrites an existing template, so a deleted `is_female` line stays deleted and every `race`, `<Equipments>` and hand block
+  is safe; on the shipped file it is a no-op. `characters/lords.xml` has no regenerator and is never at risk.
+  Contract: [tools/README.md](../../tools/README.md).
   [lord identity reconciliation](../features/lord-identity-reconciliation.md).
 - **Lord names reach the pipeline through THREE tiers, and since 2026-10-01 hero biographies do too.** Names edited in the stylesheets touch keys registered in `taom_xslt_strings.xml`
   (176 of 1181 since #644 removed three duplicate rows). Names edited directly in `characters/lords.xml` that are NOT in that
