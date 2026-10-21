@@ -6256,6 +6256,50 @@
 
     <string id="taom_fwatch_wait_site" text="{SCOUT} is riding to look over {SETTLEMENT}." />
 
+    <string id="taom_namegiving_lore_minas_ithil" text="Minas Ithil" />
+
+    <string id="taom_namegiving_lore_amon_lanc" text="Amon Lanc" />
+
+    <string id="taom_namegiving_lore_deadmens_dike" text="Deadmen's Dike" />
+
+    <string id="taom_namegiving_lore_treegarth" text="Treegarth of Orthanc" />
+
+    <string id="taom_namegiving_button" text="Rename" />
+
+    <string id="taom_namegiving_pick_title" text="Rename a Fief" />
+
+    <string id="taom_namegiving_pick_body" text="Choose the fief or village to rename." />
+
+    <string id="taom_namegiving_entry" text="{NAME} ({COST} influence)" />
+
+    <string id="taom_namegiving_input_title" text="Rename {NAME}" />
+
+    <string id="taom_namegiving_input_body" text="Enter a new name. It costs {COST} influence." />
+
+    <string id="taom_namegiving_confirm_title" text="Confirm the New Name" />
+
+    <string id="taom_namegiving_confirm_body" text="{OLD} will be known as {NEW}. This costs {COST} influence." />
+
+    <string id="taom_namegiving_done" text="{OLD} is now known as {NEW}." />
+
+    <string id="taom_namegiving_not_ruler" text="Only the ruler of the realm can rename its fiefs." />
+
+    <string id="taom_namegiving_not_realm" text="This fief no longer belongs to your realm." />
+
+    <string id="taom_namegiving_len" text="A name must be 1 to 50 characters long." />
+
+    <string id="taom_namegiving_chars" text="A name may hold only letters, digits, spaces and punctuation." />
+
+    <string id="taom_namegiving_brackets" text="A name cannot contain braces or square brackets." />
+
+    <string id="taom_namegiving_edge" text="A name cannot start or end with a space." />
+
+    <string id="taom_namegiving_double" text="A name cannot contain two spaces in a row." />
+
+    <string id="taom_namegiving_same" text="That is already its name." />
+
+    <string id="taom_namegiving_taken" text="Another place already bears that name." />
+
   </strings>
 
 </base>

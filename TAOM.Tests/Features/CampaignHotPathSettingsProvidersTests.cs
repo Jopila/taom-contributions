@@ -20,6 +20,7 @@ using TAOM.Features.FromTheAshes;
 using TAOM.Features.TokensOfEsteem;
 using TAOM.Features.FieldCommission.Domain;
 using TAOM.Features.NameplateCull;
+using TAOM.Features.Namegiving;
 using TAOM.Features.PartyIconScale;
 using TAOM.Features.PosternGate;
 using TAOM.Features.QuickActions;
@@ -417,6 +418,18 @@ public class CampaignHotPathSettingsProvidersTests
 
         Assert.IsFalse(sut.LedgerEnabled);
         Assert.IsFalse(sut.StepsEnabled);
+    }
+
+    [TestMethod]
+    public void Namegiving_ReadsThroughTheCachedSettings()
+    {
+        var settings = new TaomSettings();
+        var sut = new NamegivingSettingsProvider(settings);
+        Assert.IsTrue(sut.Enabled);
+
+        settings.EnableNamegiving = false;
+
+        Assert.IsFalse(sut.Enabled);
     }
 
     // No-MCM pins: TaomSettings.Instance is null in the test host (MCM is never initialised), so these

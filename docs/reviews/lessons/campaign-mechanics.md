@@ -608,6 +608,10 @@ siege windows noticed such a change only at their close (C02).
 - **Prevent:** treat the owner event as a fast path, and re-check the owner of every watched settlement in the
   daily step, or also listen to `OnClanChangedKingdom`.
 - **Source:** `docs/reviews/rca-war-chronicle-events-2026-10-14.md` C02, fixed in `7e8451555`.
+- **Repeated (Namegiving, 2026-10-20):** the lore-name reconcile listened only to the owner event, so a fief
+  whose clan changed kingdom kept the wrong side's name. Prevent at design time: any feature that reacts to which
+  side holds a fief names both events in its brief, and its wiring test pins both. Source:
+  `docs/reviews/rca-namegiving-2026-10-20.md` finding 3.
 
 ### A war veto gates where the engine prices or offers the war, not only where it declares it (#818, 2026-10-18)
 The War of the Ring phase rule first sat only on `DeclareWarAction.ApplyInternal`. The engine charges before that:

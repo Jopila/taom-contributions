@@ -3458,6 +3458,30 @@
 	<string id="taom_fwatch_report_title" text="{=taom_fwatch_report_title}{SCOUT} returns" />
 	<string id="taom_fwatch_wait_around" text="{=taom_fwatch_wait_around}{SCOUT} is sweeping the land around the camp." />
 	<string id="taom_fwatch_wait_site" text="{=taom_fwatch_wait_site}{SCOUT} is riding to look over {SETTLEMENT}." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- Namegiving -->
+	<string id="taom_namegiving_lore_minas_ithil" text="{=taom_namegiving_lore_minas_ithil}Minas Ithil" />
+	<string id="taom_namegiving_lore_amon_lanc" text="{=taom_namegiving_lore_amon_lanc}Amon Lanc" />
+	<string id="taom_namegiving_lore_deadmens_dike" text="{=taom_namegiving_lore_deadmens_dike}Deadmen's Dike" />
+	<string id="taom_namegiving_lore_treegarth" text="{=taom_namegiving_lore_treegarth}Treegarth of Orthanc" />
+	<string id="taom_namegiving_button" text="{=taom_namegiving_button}Rename" />
+	<string id="taom_namegiving_pick_title" text="{=taom_namegiving_pick_title}Rename a Fief" />
+	<string id="taom_namegiving_pick_body" text="{=taom_namegiving_pick_body}Choose the fief or village to rename." />
+	<string id="taom_namegiving_entry" text="{=taom_namegiving_entry}{NAME} ({COST} influence)" />
+	<string id="taom_namegiving_input_title" text="{=taom_namegiving_input_title}Rename {NAME}" />
+	<string id="taom_namegiving_input_body" text="{=taom_namegiving_input_body}Enter a new name. It costs {COST} influence." />
+	<string id="taom_namegiving_confirm_title" text="{=taom_namegiving_confirm_title}Confirm the New Name" />
+	<string id="taom_namegiving_confirm_body" text="{=taom_namegiving_confirm_body}{OLD} will be known as {NEW}. This costs {COST} influence." />
+	<string id="taom_namegiving_done" text="{=taom_namegiving_done}{OLD} is now known as {NEW}." />
+	<string id="taom_namegiving_not_ruler" text="{=taom_namegiving_not_ruler}Only the ruler of the realm can rename its fiefs." />
+	<string id="taom_namegiving_not_realm" text="{=taom_namegiving_not_realm}This fief no longer belongs to your realm." />
+	<string id="taom_namegiving_len" text="{=taom_namegiving_len}A name must be 1 to 50 characters long." />
+	<string id="taom_namegiving_chars" text="{=taom_namegiving_chars}A name may hold only letters, digits, spaces and punctuation." />
+	<string id="taom_namegiving_brackets" text="{=taom_namegiving_brackets}A name cannot contain braces or square brackets." />
+	<string id="taom_namegiving_edge" text="{=taom_namegiving_edge}A name cannot start or end with a space." />
+	<string id="taom_namegiving_double" text="{=taom_namegiving_double}A name cannot contain two spaces in a row." />
+	<string id="taom_namegiving_same" text="{=taom_namegiving_same}That is already its name." />
+	<string id="taom_namegiving_taken" text="{=taom_namegiving_taken}Another place already bears that name." />
 
 
 	<!-- ============================================== -->

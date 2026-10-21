@@ -230,6 +230,7 @@ behaviour's whole `RegisterEvents` and follow each handler to the service.
 | `FromTheAshesBehavior` | `OnHourlyTick` and `OnMapEventStarted` (through `FromTheAshesReconcile`), the start options and the wait menu's callbacks, through `FromTheAshesService` | **Single-player only** ([From the Ashes](from-the-ashes.md)): the start gate is the Eye of Sauron's predicate plus authority (`IsSessionActive \|\| ShouldDeferToHost \|\| IsDedicatedServer`, or no `IsAuthority`), so a peer sees no option where single-player sees none and no job starts there. `Validate` applies the same predicate to a running job, so a job carried into a co-op session cancels with no penalty at its next look. Every world write (construction points, the village's restoration, materials, relations, Athletics XP, a project's refund) also checks `IsAuthority`; Stop writes nothing without it. Trade-off (the maintainer's call): a solo player with a co-op mod enabled, or `coop-force-active.flag` present, sees the options greyed out with "Not available in a shared campaign." (`FromTheAshesTexts` does not hide `NotSinglePlayer`). |
 | `ReserveStepMixin` | `ExecuteAddReserveStep` and `ExecuteWithdrawReserveStep` (the +10K and -10K buttons on the town management window), through `ReevesLedgerService.MayWriteWorld` | **Single-player only** ([Reeve's Ledger](reeves-ledger.md)): the buttons show and work only while `!IsSessionActive && !ShouldDeferToHost && !IsDedicatedServer && IsAuthority`, the Eye of Sauron's predicate plus authority; otherwise the mixin hides them and a click does nothing. The gate is read live at each refresh and again at each click. Both buttons write the world (the player's gold and the town's reserve), always through the engine's `BuildingHelper.BoostBuildingProcessWithGold`, which moves the gold with the reserve. The title, the Profit and Patrol rows and the stash and prison tooltips only read the fief, so `TownManagementLedgerMixin` needs no gate. The trade-off: a solo player with a co-op mod TAOM cannot probe gets no buttons (the same as From the Ashes). |
 | `FarWatchBehavior` | `OnHourlyTick`, `OnPartyEncounter` and `OnMapEventStarted` (through `FarWatchReconcile`), the camp option, the pick and the wait menu's callbacks, through `FarWatchService`, and the sight contributor through `FarWatchService.SightFactor` | **Single-player only** ([Far Watch](far-watch.md)): the start gate is the From the Ashes predicate (`IsSessionActive \|\| ShouldDeferToHost \|\| IsDedicatedServer`, or no `IsAuthority`), so a peer sees the option greyed ("not available in a shared campaign") where single-player can ride. `Reconcile` applies the same predicate to a running ride, so a ride carried into a co-op session ends at its next hourly look with a message, no report and no XP, unless its wait menu finishes first: that completion does not check the session, so it reports and raises the sight, and pays the XP only where the next sentence's gate allows. The Scouting XP is the one world write and also needs `IsAuthority` and `MayWriteSaveBackedState(IsCoopClient)`; the ride is cleared from the store before it. A saved kept sight loaded into a session affects only that peer's own map sight (`MobileParty.SeeingRange` of the main party), as the lookout does, and Hidden Hosts' report writes (the raised digits, the scouted settlement) are local presentation like the rest of its memory. |
+| `NamegivingBehavior`, `FiefNamingMixin` | The behavior's `OnSettlementOwnerChangedEvent`, `OnClanChangedKingdomEvent` and `OnSessionLaunchedEvent` handlers, through `NamegivingService.ReconcileLore` and `ReconcileAllLore`; the mixin's `ExecuteRenameFief`, the prompts' final apply and the button's refresh, through `NamegivingService.MayWriteWorld` | **Single-player only** ([Namegiving](namegiving.md)): the button shows and works, and the lore names change, only while `!IsSessionActive && !ShouldDeferToHost && !IsDedicatedServer && IsAuthority`, the From the Ashes predicate. Both halves write the world (a settlement's saved custom name, and the player's influence for a rename). `NamegivingService.Check` is read live at each refresh and again inside `Apply`, so the gate holds at the moment of the write; the reconcile passes check it per call, before the switch, so a co-op peer restores nothing either. The switch is counted in the settings fingerprint (`CoopSettingsRelevance` does not exclude it), because the lore half reacts to captures on its own. The trade-off: a solo player with a co-op mod TAOM cannot probe gets no button and no lore names. |
 | `SpecialResourcesBehavior` | `OnMapEventEnded`, `OnRaidCompleted`, `OnPrisonerTaken`, `OnHideoutCompleted`, `OnTournamentFinished` | **A dedicated-server gate, not an authority gate.** All five earn paths run through a private `CanEarn()` → `SpecialResourceEarnPolicy.MayCreditMainHero(IDedicatedServerProvider.IsDedicatedServer)`, which logs once and then stays quiet. A headless server was banking prisoner and raid income against the idle world-gen hero — dozens of `[SpecRes] PRISONERS: +N` lines — while the remote players who fought those battles earned nothing. |
 
 **What makes any peer earn at all is the participation fix in the same change.** The victory gate
@@ -330,12 +331,12 @@ to characterise. The existing try/catch around acceptance is containment, not co
 
 ## What is NOT done
 
-- **No MCM settings parity: reported, not yet exchanged.** TAOM ships **436** settings across
+- **No MCM settings parity: reported, not yet exchanged.** TAOM ships **437** settings across
   four MCM classes (the 284 here counted `[SettingPropertyGroup]` lines alongside the properties;
-  the split is 406 in `TaomSettings`, 19 in `BattleLoadDiagnosticsSettings`, 10 in
+  the split is 407 in `TaomSettings`, 19 in `BattleLoadDiagnosticsSettings`, 10 in
   `CrashReportSettings` and 1 in `BlowDiagnosticsSettings`).
-  **287 are simulation-relevant**, traced to the feature that consumes each one and kept when that feature
-  ships a GameModel, CampaignBehavior, MissionBehavior or Harmony patch; all 287 are in
+  **288 are simulation-relevant**, traced to the feature that consumes each one and kept when that feature
+  ships a GameModel, CampaignBehavior, MissionBehavior or Harmony patch; all 288 are in
   `TaomSettings`. The 149 excluded (67 counted 2026-09-22, less the Native Skin Fixes toggle removed with the feature 2026-10-05, the 38 Realm Borders settings added from 2026-09-30 to 2026-10-08, the Crash Report AfterStart dev trigger added 2026-10-01, the Battle Corpses advice toggle and button added 2026-10-01, and the thirteen Menus & Loading Screens settings added 2026-10-01, #704, and the three tick profiler settings added 2026-10-02, and the hitch probe toggle added 2026-10-02, and the Animation Clip Memory probe toggle added 2026-10-02, and the map profiler toggle added 2026-10-03, and the Load-Time Stamps toggle added 2026-10-03, and the Race Abilities war cry, message and debug-log toggles added 2026-10-04, and the Race Abilities glow toggle added 2026-10-04, and the Crash Report mission-start survival toggle added 2026-10-08, and the Crash Report skeleton buffer guard and watch toggles added 2026-10-08, and the Map Performance nameplate cull and map view release settings added 2026-10-08, and the War Chronicle announcements toggle added 2026-10-08, and the three Animation Variety settings and the swing alternative probe toggle added 2026-10-17, and the Hidden Hosts toggle added 2026-10-18, and the Fell Foes debug log toggle added 2026-10-19, the two Telchar's Mark settings added 2026-10-19, #875, the two Reeve's Ledger switches added 2026-10-19, #857, and the Lost Footing census toggle added 2026-10-20, #894) are instrumentation, player-local convenience,
   presentation, two action buttons, and the three time-acceleration knobs whose UI co-op already
   suppresses; the list with its reasons is
@@ -348,13 +349,13 @@ to characterise. The existing try/catch around acceptance is containment, not co
   excluded name may stop matching a real property, and no two settings classes may share a
   property name.
 
-  `SettingsFingerprint` hashes those 287: one code per MCM group plus a global, culture-invariant
+  `SettingsFingerprint` hashes those 288: one code per MCM group plus a global, culture-invariant
   so a comma decimal separator cannot fake a mismatch — and `SettingsFingerprintLog` writes them
   to each peer's log under the co-op gate. It reads all four classes, not just `TaomSettings`:
   every diagnostics property is excluded so this moves no hash today (a test asserts exactly
   that), and it means a simulation-affecting setting added to a diagnostics page later is covered
   the day it lands. That makes the "compare settings manually" workaround a comparison of a few
-  short strings instead of 287 values read off two screens.
+  short strings instead of 288 values read off two screens.
 
   **All four classes are `AttributeGlobalSettings<T>`, and the reasoning above depends on it.**
   MCM has three scopes, and only one of them travels with a save. Verified against MCM 5.12.1:
@@ -372,11 +373,11 @@ to characterise. The existing try/catch around acceptance is containment, not co
   PerSave class would be equal by construction and need not be hashed; a PerCampaign one would
   need hashing more urgently than a global, not less.
 
-  **A matching fingerprint means the MCM settings agree, and nothing wider.** It covers the 287
+  **A matching fingerprint means the MCM settings agree, and nothing wider.** It covers the 288
   values on the four settings pages. It does not cover the `ModuleData` JSON/XML that several
   features fall back to when a setting is unset, the `TAOM.Dependencies` flag files
   (`patchshield-disabled.flag`, `saveshield-swallow-disabled.flag`, `coop-force-active.flag`),
-  or any difference outside TAOM. None of those three flags gates a setting in the 287 (each
+  or any difference outside TAOM. None of those three flags gates a setting in the 288 (each
   governs a Dependencies-side shield with no MCM property), but the general point holds: read the
   log line as "our settings pages match", not as "our installs are equivalent".
 

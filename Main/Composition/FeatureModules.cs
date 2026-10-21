@@ -60,5 +60,6 @@ internal static class FeatureModules
         new Features.HallOfFire.HallOfFireModule(),
         new Features.GoodDeeds.GoodDeedsModule(),
         new Features.FarWatch.FarWatchModule(),
+        new Features.Namegiving.NamegivingModule(),
     };
 }

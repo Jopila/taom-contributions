@@ -1148,6 +1148,11 @@ included, with only an engine `Debug.Print` as a trace. Parking the registering 
   rename or remove one), warn on the definition and on the module's `OwnsSaveData`, and never park such a
   module.
 - **Source:** `docs/reviews/rca-postern-gate-2026-10-18.md` finding 6.
+- **Widened (Namegiving, 2026-10-20):** text TAOM hands to an engine field that saves it is the same contract.
+  `PartyBase.SetCustomName` saves the raw `{=taom_namegiving_lore_*}` template, so the key prefix and every key
+  stay forever, and the module that resolves them is never parked. Ask of every engine write: does a save keep
+  this value, and what reads it after TAOM changes? Source: `docs/reviews/rca-namegiving-2026-10-20.md`
+  finding 5.
 ### An in-memory map added to a singleton service needs its session reset in the same change (#861, 2026-10-19)
 A late fix gave the Bonds of Battle hand-over service a per-lord daily map. The service is a process-lifetime
 singleton, so a save reload on the same day kept the abandoned timeline's counts, and a new campaign inherited them;

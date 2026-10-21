@@ -817,6 +817,12 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Adds a button beside the reserve's plus button to put gold into the reserve in one click, and one to take a step back out, refunded in full with no penalty. Single-player only. Applies the next time the window opens. Default: on.")]
     public bool EnableReserveSteps { get; set; } = true;
 
+    // GroupOrder 3 sorts it after the Postern Gate (0), From the Ashes (1) and Reeve's Ledger (2) groups; the group's first property carries it.
+    [SettingPropertyGroup("Fief Management/Namegiving", GroupOrder = 3)]
+    [SettingPropertyBool("Namegiving", Order = 0, RequireRestart = false,
+        HintText = "Lets the ruler of your realm rename its towns, castles and villages from the Fiefs tab of the kingdom screen for influence, and lets four fiefs take an older or darker name while the matching side holds them. A name you chose is never overwritten. Single-player only. Switching it off gives those fiefs their map names back; a name you chose stays. The button follows the next time the kingdom screen opens; the older names change at the next capture, load or change of realm. Default: on.")]
+    public bool EnableNamegiving { get; set; } = true;
+
     // --- Inventory / Quick Actions ---
 
     [SettingPropertyGroup("Inventory/Quick Actions", GroupOrder = 30)]

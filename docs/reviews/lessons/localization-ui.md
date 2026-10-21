@@ -1105,3 +1105,18 @@ build later; that lesson sits in this file and the feature's build never loaded 
 - **Prevent:** words for a hero of unknown gender use "their" or restructure; run the gender check on settings labels
   and hints as well as dialog lines. Add a test that each hint quotes the compiled default.
 - **Source:** `docs/reviews/rca-good-deeds-2026-10-20.md` finding 6.
+
+### UIExtenderEx InsertType.Append inserts a sibling, never a child (Namegiving, 2026-10-20)
+
+`PrefabExtensionInsertPatch` with `InsertType.Append` places the new node directly after the node the XPath
+selects, as its next sibling (`PrefabComponent` :382, UIExtenderEx 2.13.3). Namegiving's Rename block targeted
+`ListPanel[@Id='ActionButtonsContainer']` with `Append`, so it landed beside the Annex column in a horizontal row
+and outside the action buttons' gamepad navigation scope, while its comments and doc said "into the container".
+- **Why missed:** "Append into" was read as "append a child", and the prefab test asserted the XPath and the
+  type, not the parent of the inserted node. The inverse trap, `Child` without an `Index`, was recorded the day
+  before (Telchar's Mark).
+- **Prevent:** to add a last child, select the parent's `Children` node, use `InsertType.Child` and
+  `Index => int.MaxValue`. Use `Append` or `Prepend` only for a sibling, with a comment that names it. The
+  feature's prefab test asserts the type, the index and the XPath. A repo-wide gate over every
+  `PrefabExtensionInsertPatch` is proposed in the RCA.
+- **Source:** `docs/reviews/rca-namegiving-2026-10-20.md` finding 1.
