@@ -1175,3 +1175,13 @@ tests, and neither did anything the engine call does not.
   `GetRandomElement` or `GetRandomElementWithPredicate` on it at the boundary. Test the pool; pin the call order
   with an IL test.
 - **Source:** `docs/reviews/rca-culture-fallback-followups-2026-10-19.md` F6; `rca-bard-town-guard-2026-10-19.md` F4.
+### Verify an ordering constraint against `MbEvent` before you route a feature around a new listener (#864, 2026-10-20)
+Good Deeds put its tournament step inside TournamentRewards' `TournamentFinished` listener, claiming a new listener
+would disturb the load-bearing order. `MbEvent` inserts each new listener at the head and invokes from the head, so the
+order is fixed by registration and a separate listener was safe. The shortcut coupled two modules: a parked Good Deeds
+still paid, and a resolve failure in it would have dropped TournamentRewards' own behavior.
+- **Why missed:** "listeners are order sensitive" was taken as a reason, and the event class was never read.
+- **Prevent:** when a plan says a new listener would break an existing one, read `MbEvent.AddNonSerializedListener` and
+  `Invoke` in the installed DLL and state the actual order. A feature owns its listener, registered in its own module and
+  wrapped in a try; never hang a second feature's work inside another feature's listener to avoid an order question.
+- **Source:** `docs/reviews/rca-good-deeds-2026-10-20.md` finding 4.

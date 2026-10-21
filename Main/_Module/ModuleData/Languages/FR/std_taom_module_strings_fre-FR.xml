@@ -6162,6 +6162,7 @@
     <string id="taom_str_liege_title_female.umbar" text="Corsair Queen of Umbar" />
 
     <string id="taom_str_become_king_empire" text="On {DAY_OF_YEAR}, {YEAR}, {KING_NAME} was hailed as {?IS_KING_MALE}Brenin{?}Brenhines{\?} of Dunland." />
+    <string id="taom_gooddeeds_tournament" text="The people of {TOWN} honor your victory." />
 
   </strings>
 

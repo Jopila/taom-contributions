@@ -824,3 +824,17 @@ The face pass first ran on `OnNewGameCreatedEvent` and rolled each hero at the h
 - **Prevent:** hook a pass that must see every new-game hero to `OnNewGameCreatedPartialFollowUpEndEvent`, and roll faces at `BodyProperties.DefaultAge` (30).
 - **Source:** `docs/reviews/rca-followups-949-952-2026-10-20.md` F2, F3.
 - **Resolved (#954, 2026-10-20):** relief lords are joined; see docs/features/enlistment.md.
+### Before you gate on an engine event argument, trace every raise site and read what it holds at that moment (#864, 2026-10-20)
+Good Deeds gated its release reward on `HeroPrisonerReleased` with `party == MainParty`, on a plan claim that this
+covered the conversation and the party screen. The party screen's transfer runs `Hero.OnRemovedFromPartyAsPrisoner`,
+which nulls `PartyBelongedToAsPrisoner`, before `EndCaptivityAction.ApplyInternal` reads it, so that release raised the
+event with a null party and paid nothing. A conversation release in the player's own dungeon carried the settlement's
+party, and the gate paid nothing there either. Related to the #886 entry above, which is about the same habit for an
+authority gate.
+- **Why missed:** the argument's name said "the party the prisoner left", and the plan trusted the name. No one opened
+  the party-screen raise site, and the tests fed the adapter a party.
+- **Prevent:** before gating on an event argument, list every raise site in the installed engine (grep the action and
+  the screens that call it) and write down what the argument holds at each. Read the raw facts in the adapter (`ReleaseSource`
+  and the active `PartyState`'s `RightOwnerParty`), accept a settlement whose `OwnerClan` is the player's clan, and never accept a
+  player-clan mobile party: `MobileParty.RemoveParty` releases its prisoners `ReleasedByChoice`. Give each raise site its own test.
+- **Source:** `docs/reviews/rca-good-deeds-2026-10-20.md` finding 1 and 2.

@@ -1999,3 +1999,12 @@ gate's own floor (at least 10 races) was met by `cultures.json` alone, so `sauro
 - **Prevent:** when a scan moves into a helper, the asserts that prove the scan read something move into the helper
   too, so every caller keeps them; a new gate's floor must not be satisfiable by an input other than the one it guards.
 - **Source:** `docs/reviews/rca-coronation-fixes-2026-10-20.md` C1.
+### A guard test pinned to today's file layout, and a pair table that misses pairings, pass while the rule is open (#864, 2026-10-20)
+Good Deeds' slot-filler guard read `Main` twice and would have failed on a legitimate reader of
+`Models.PrisonerDonationModel`. The Pair rows covered 7 of the 9 pairings while the doc said nine, and the tournament
+call's arguments were not pinned, so a swapped argument passed.
+- **Why missed:** each test was written to pass against the files as built, not against the rule it names.
+- **Prevent:** a guard reads each file once and states what it excludes; a table-driven test enumerates the full
+  product (assert the row count equals the doc's number); a call that takes the feature's reward or amounts has its
+  arguments asserted, not only that it happened.
+- **Source:** `docs/reviews/rca-good-deeds-2026-10-20.md` finding 8.

@@ -58,5 +58,6 @@ internal static class FeatureModules
         new Features.CrownGuard.CrownGuardModule(),
         new Features.LostFooting.LostFootingModule(),
         new Features.HallOfFire.HallOfFireModule(),
+        new Features.GoodDeeds.GoodDeedsModule(),
     };
 }

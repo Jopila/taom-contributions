@@ -148,6 +148,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [relations](features/relations.md): `IRelationGrantService`, the shared seam for new relation code, owned by `RelationsModule`
 - [personal-relations](features/personal-relations.md): the player's relation stays on the lord named, a larger disband cost, a one-time seeding of old saves, Patch107 (#862)
 - [tokens-of-esteem](features/tokens-of-esteem.md): gifts of goods and gold to companions and lords for relation, a catalog of tastes by item category, a saved cooldown per relation owner, the first repeatable player line (#863)
+- [good-deeds](features/good-deeds.md): relation for releasing a captured lord, donating a hero prisoner and winning a town's tournament, scaled by alignment and grouped per relation owner (#864)
 - [kingdom-creation](features/kingdom-creation.md) — TAOM kingdom + clan + lord authoring
 - [lord-spawn-guard](features/lord-spawn-guard.md) — Patch65 + the Variag settlement retag: a landless culture CTDs the daily clan tick
 - [map-event-guard](features/map-event-guard.md): Patch82, restoring the `BattleObserver`/`TroopUpgradeTracker` pairing that four unguarded engine dereferences rely on; and the hourly sweep that ends AI battles stuck at N vs 0 (#748)

@@ -3408,6 +3408,9 @@
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
 	<!-- LordCourtesyAdapter -->
 	<string id="taom_lc_gift_no_talk" text="{=taom_lc_gift_no_talk}You cannot talk to anyone while giving troops." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- GoodDeedsNoticeAdapter -->
+	<string id="taom_gooddeeds_tournament" text="{=taom_gooddeeds_tournament}The people of {TOWN} honor your victory." />
 
 
 	<!-- ============================================== -->

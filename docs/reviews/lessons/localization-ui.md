@@ -1087,3 +1087,21 @@ while the button is enabled; a "why is this greyed out" hint there can never app
   the hint, keep the button's inner hint for the enabled state, and pin the shape with a structural test (the hint's
   parent has no `IsEnabled` binding). Check the hover in game with the button disabled.
 - **Source:** `docs/reviews/rca-reeves-ledger-2026-10-19.md` finding 1.
+### Any English edit on a seeded key edits all 12 rows by hand, and a per-feature wording test pins them (#864, 2026-10-20)
+Good Deeds changed "honour" to "honor" after its keys were seeded. Harvest skips registered keys and `--sync-ids` only
+appends, so no tool rewrites an existing row: the change was 13 hand edits (English plus 12 languages). The paid
+translator queues a row only while it equals the English, so a row left on the old English would ship that way for good.
+This extends the Hidden Hosts entry above, which covers re-seeding by deleting rows.
+- **Why missed:** the seed tooling has no rewrite mode and nothing compares a seeded row with the English it came from.
+- **Prevent:** treat an English edit on a seeded key as an edit of every language file. Add a wording test for the
+  feature (`GoodDeedsWordingTests`): each language row equals the current English or is a real translation. Settle
+  spelling variants (US or UK) before seeding.
+- **Source:** `docs/reviews/rca-good-deeds-2026-10-20.md` finding 3.
+
+### Gendered wording shipped again, in MCM labels and hints (#864, 2026-10-20)
+Good Deeds' settings text said "his spouse" and "his leader". This is the same defect as the Tokens of Esteem entry above, one
+build later; that lesson sits in this file and the feature's build never loaded it.
+- **Why missed:** the lesson is filed by subsystem and Good Deeds touched no localization code path that points here.
+- **Prevent:** words for a hero of unknown gender use "their" or restructure; run the gender check on settings labels
+  and hints as well as dialog lines. Add a test that each hint quotes the compiled default.
+- **Source:** `docs/reviews/rca-good-deeds-2026-10-20.md` finding 6.

@@ -2355,4 +2355,100 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Lost Footing Census", Order = 0, RequireRestart = false,
         HintText = "Counts soldiers, mounts and creatures that are stuck in a battle, standing off the walkable ground or wading in water without moving, and writes what it finds to the log with a [LostFooting] tag, with a summary when the battle ends. It only watches: it never moves or changes anything in the battle. Field battles, sieges and sally-outs. Default: on.")]
     public bool LostFootingCensus { get; set; } = true;
+    // --- Good Deeds (docs/features/good-deeds.md, #864) ---
+    //
+    // Relation earned by releasing a captured lord, donating a hero prisoner to a settlement and winning a town's tournament.
+    // Every value is read when the deed happens, through GoodDeedsSettingsProvider's one cached settings reference, so none
+    // needs a restart. GroupOrder 65 follows Lost Footing at 64; 100 is the Map Tools group. Defaults and ranges live
+    // in GoodDeedsSettingsProvider so the fallback before MCM is up and the hint texts cannot drift from them.
+
+    [SettingPropertyGroup("Good Deeds", GroupOrder = 65)]
+    [SettingPropertyBool("Enable Good Deeds", Order = 0, RequireRestart = false,
+        HintText = "Turns the three rewards on or off together: relation for releasing a captured lord, for donating a hero prisoner to a settlement and for winning a town's tournament. Each reward also has its own switch below. Applies on the host in co-op. Default: on.")]
+    public bool GoodDeedsEnabled { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultEnabled;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyBool("Reward Releasing A Lord", Order = 1, RequireRestart = false,
+        HintText = "Releasing a captured lord from your party (in conversation or on the party screen) or from your own dungeon earns relation with the lord, with the lord's living spouse and with the lord's clan leader. The post-battle \"free to go\" choice, ransom, peace, escape and any AI release earn nothing. Default: on.")]
+    public bool GoodDeedsReleaseEnabled { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultReleaseEnabled;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyBool("Reward Donating A Hero Prisoner", Order = 2, RequireRestart = false,
+        HintText = "Handing a hero prisoner to a settlement adds a bonus to the relation vanilla gives with the settlement owner's clan leader. Default: on.")]
+    public bool GoodDeedsDonationEnabled { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultDonationEnabled;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyBool("Reward Winning A Tournament", Order = 3, RequireRestart = false,
+        HintText = "Winning a town's tournament earns relation with the owner's clan leader (unless your clan owns the town) and with every notable in the town. Default: on.")]
+    public bool GoodDeedsTournamentEnabled { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultTournamentEnabled;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyInteger("Release: Relation With The Lord", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinAmount, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxAmount, Order = 4, RequireRestart = false,
+        HintText = "Relation asked for with the lord you release, before the alignment multiplier. Vanilla pays another 4 in the conversation. Your Charm can add to what lands. Default: 5.")]
+    public int GoodDeedsReleaseLordAmount { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultReleaseLordAmount;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyInteger("Release: Relation With The Lord's Spouse", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinAmount, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxAmount, Order = 5, RequireRestart = false,
+        HintText = "Relation asked for with the lord's living spouse, before the alignment multiplier. Default: 2.")]
+    public int GoodDeedsReleaseSpouseAmount { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultReleaseSpouseAmount;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyInteger("Release: Relation With The Lord's Clan Leader", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinAmount, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxAmount, Order = 6, RequireRestart = false,
+        HintText = "Relation asked for with the leader of the lord's clan, before the alignment multiplier. While Personal Relations is off, the lord and the clan leader share one relation, so only the larger of the two is paid. Default: 2.")]
+    public int GoodDeedsReleaseLeaderAmount { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultReleaseLeaderAmount;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyInteger("Donation: Bonus Relation", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinAmount, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxAmount, Order = 7, RequireRestart = false,
+        HintText = "Relation added to what vanilla gives with the settlement owner's clan leader for each hero prisoner donated, before the alignment multiplier. Vanilla itself pays nothing when the captive likes the owner. Default: 5.")]
+    public int GoodDeedsDonationAmount { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultDonationAmount;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyInteger("Tournament: Relation Per Person", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinAmount, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxTournamentAmount, Order = 8, RequireRestart = false,
+        HintText = "Relation asked for with the town owner's clan leader and with each notable in the town when you win its tournament, before the alignment multiplier. Between 0 and 10. Default: 1.")]
+    public int GoodDeedsTournamentAmount { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultTournamentAmount;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyFloatingInteger("Release: Same Side Multiplier", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinMultiplier, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxMultiplier, "0.00", Order = 9, RequireRestart = false,
+        HintText = "Multiplier on every release reward when you and the lord are on the same side (both Free, or both Shadow). Results round half away from zero, and 0 grants nothing. Default: 1.00.")]
+    public float GoodDeedsReleaseSame { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultReleaseSame;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyFloatingInteger("Release: Neutral Multiplier", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinMultiplier, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxMultiplier, "0.00", Order = 10, RequireRestart = false,
+        HintText = "Multiplier on every release reward when you or the lord is on neither side. Default: 0.75.")]
+    public float GoodDeedsReleaseNeutral { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultReleaseNeutral;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyFloatingInteger("Release: Opposite Side Multiplier", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinMultiplier, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxMultiplier, "0.00", Order = 11, RequireRestart = false,
+        HintText = "Multiplier on every release reward when you and the lord are on opposite sides, so freeing an enemy of your cause earns little. Default: 0.50.")]
+    public float GoodDeedsReleaseOpposite { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultReleaseOpposite;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyFloatingInteger("Donation: Same Side Multiplier", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinMultiplier, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxMultiplier, "0.00", Order = 12, RequireRestart = false,
+        HintText = "Multiplier on the donation relation when the captive and the settlement owner are on the same side. Zero means no reward, and no vanilla relation either, for jailing a friend of the owner. Default: 0.00.")]
+    public float GoodDeedsDonationSame { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultDonationSame;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyFloatingInteger("Donation: Neutral Multiplier", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinMultiplier, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxMultiplier, "0.00", Order = 13, RequireRestart = false,
+        HintText = "Multiplier on the donation relation when the captive or the settlement owner is on neither side. Default: 1.00.")]
+    public float GoodDeedsDonationNeutral { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultDonationNeutral;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyFloatingInteger("Donation: Opposite Side Multiplier", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinMultiplier, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxMultiplier, "0.00", Order = 14, RequireRestart = false,
+        HintText = "Multiplier on the donation relation (vanilla's gain plus the bonus) when the captive is on the opposite side to the settlement owner, such as a Mordor captive handed to Minas Tirith. Default: 2.00.")]
+    public float GoodDeedsDonationOpposite { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultDonationOpposite;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyFloatingInteger("Tournament: Same Side Multiplier", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinMultiplier, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxMultiplier, "0.00", Order = 15, RequireRestart = false,
+        HintText = "Multiplier on the tournament relation with an owner or notable on your side. Default: 1.00.")]
+    public float GoodDeedsTournamentSame { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultTournamentSame;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyFloatingInteger("Tournament: Neutral Multiplier", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinMultiplier, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxMultiplier, "0.00", Order = 16, RequireRestart = false,
+        HintText = "Multiplier on the tournament relation with an owner or notable who, or whose realm, is on neither side. Default: 1.00.")]
+    public float GoodDeedsTournamentNeutral { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultTournamentNeutral;
+
+    [SettingPropertyGroup("Good Deeds")]
+    [SettingPropertyFloatingInteger("Tournament: Opposite Side Multiplier", TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MinMultiplier, TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.MaxMultiplier, "0.00", Order = 17, RequireRestart = false,
+        HintText = "Multiplier on the tournament relation with an owner or notable on the opposite side, who does not cheer a champion of the other cause. Default: 0.00.")]
+    public float GoodDeedsTournamentOpposite { get; set; } = TAOM.Features.GoodDeeds.GoodDeedsSettingsProvider.DefaultTournamentOpposite;
 }

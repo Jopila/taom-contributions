@@ -2,7 +2,7 @@
 
 ## Overview
 
-The shared seam for new relation code. `IRelationGrantService.Grant` clamps and filters the request, and `IHeroRelationAdapter` makes the engine call. [Bonds of Battle](bonds-of-battle.md) is the first user and [Tokens of Esteem](tokens-of-esteem.md) the second.
+The shared seam for new relation code. `IRelationGrantService.Grant` clamps and filters the request, and `IHeroRelationAdapter` makes the engine call. [Bonds of Battle](bonds-of-battle.md) is the first user, [Tokens of Esteem](tokens-of-esteem.md) the second and [Good Deeds](good-deeds.md) the third.
 
 ## Why This Exists
 
@@ -39,7 +39,7 @@ With personal relations engaged, a player grant lands on the lord named: `GetHer
 
 ### Callers outside the seam
 
-Three older callers still change relation directly and are migration candidates: `CommanderLordAdapter.ApplyPlayerRelation`, `ArmouryPlayerAdapter.ChangeRelationWith` and `SiegeDefenseService.GrantReward`. An amount that a game model returns (the barter overpay) is applied by vanilla, not by the seam.
+Three older callers still change relation directly and are migration candidates: `CommanderLordAdapter.ApplyPlayerRelation`, `ArmouryPlayerAdapter.ChangeRelationWith` and `SiegeDefenseService.GrantReward`. An amount that a game model returns (the barter overpay, and Good Deeds' donation bonus) is applied by vanilla, not by the seam.
 
 ### One registration only
 
@@ -86,8 +86,9 @@ The seam reports the change that landed, so a diplomacy model that scaled or zer
 
 ## Changelog
 
-- 2026-10-18: first version, with Bonds of Battle.
+- 2026-10-20: Good Deeds is the third user ([good-deeds.md](good-deeds.md), #864): release, tournament and (through a game model) donation rewards, grouped per relation owner before each grant and counted by what landed.
 - 2026-10-19: the seam returns what landed (an int, the relation the player sees after the change minus before, read with `Hero.GetRelation` around the engine call), 0 for any refusal, and logs the asked and the landed amount only when something landed.
+- 2026-10-18: first version, with Bonds of Battle.
 
 ## GitHub Issue
 
