@@ -191,7 +191,7 @@ public class ReflectionSiteBindingTests
     // --- CastleRecruitment (#886): the private CheckRecruiting bound once per campaign to a closed delegate.
     // A miss logs one warning per session launch and the hourly in-castle top-up stops; lords still recruit
     // on entry through vanilla's OnBeforeSettlementEntered.
-    [DataRow("TaleWorlds.CampaignSystem.CampaignBehaviors.RecruitmentCampaignBehavior", "RecruitmentCampaignBehavior", "CheckRecruiting", "Method", "CastleAiRecruitDispatcher.cs:34")]
+    [DataRow("TaleWorlds.CampaignSystem.CampaignBehaviors.RecruitmentCampaignBehavior", "RecruitmentCampaignBehavior", "CheckRecruiting", "Method", "CastleAiRecruitDispatcher.cs:42")]
     public void ReflectionSite_ResolvesAgainstInstalledEngine(string fullName, string simpleName, string member, string kind, string source)
     {
         if (!_gameLoaded)

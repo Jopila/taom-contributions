@@ -864,3 +864,14 @@ engine is opening its own.
   that may follow; pin the raise site and the meeting answer with IL tests. When a design cites a lesson, list the
   engine facts in its body that touch the new feature, each with the test that pins it.
 - **Source:** `docs/reviews/rca-far-watch-2026-10-20.md` finding 4.
+### Before you claim a co-op hazard in TAOM code, read the co-op mod's patches on the engine method TAOM calls (#920, 2026-10-20)
+A review found that TAOM's hourly castle recruit excludes only `MobileParty.MainParty`, and an issue was filed saying a
+remote player's party could recruit on a BannerlordCoop host. It could not: BannerlordCoop prefixes
+`RecruitmentCampaignBehavior.CheckRecruiting` with `!mobileParty.IsPlayerParty()`, and a Harmony prefix runs for any call
+of the patched method, TAOM's bound delegate included.
+- **Why missed:** the claim was marked `[Likely]` and filed as fact; the check covered TAOM's guard, not the co-op mod's
+  patches on the method TAOM calls.
+- **Prevent:** before you file or fix a co-op hazard, grep the co-op mod's source (`E:\repos\BannerlordCoop`) for the
+  engine method TAOM calls, not only for the TAOM caller. A delegate bound with `Delegate.CreateDelegate` or a reflective
+  call goes through every Harmony patch on that method. Verify a `[Likely]` finding before it becomes an issue.
+- **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` addendum, finding A2.

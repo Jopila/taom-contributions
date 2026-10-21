@@ -7,6 +7,7 @@ using TaleWorlds.CampaignSystem.CampaignBehaviors;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
 using TAOM.Core.Logging;
+using TAOM.Features.CoopInterop;
 
 namespace TAOM.Features.CastleRecruitment.Hooks;
 
@@ -16,7 +17,9 @@ namespace TAOM.Features.CastleRecruitment.Hooks;
 /// castles. For an AI lord party in a non-besieged castle this replicates vanilla's outer guards and calls
 /// <c>CheckRecruiting</c>, reusing vanilla's recruit logic. Called once per party per hour from
 /// <see cref="CastleRecruitmentBehavior"/>, never for the main party, so there is no double-recruit.
-/// Caravans never recruit in a castle (CheckRecruiting's caravan branch is town-only).
+/// Caravans never recruit in a castle (CheckRecruiting's caravan branch is town-only). Stands down while a
+/// co-op session is live (#920), matching BannerlordCoop's hourly-off; not a gold guard (BannerlordCoop
+/// already refuses player parties in CheckRecruiting); see <see cref="TryRecruit"/>.
 ///
 /// The private method is bound once per campaign, at session launch, to a closed delegate over the
 /// vanilla behavior (no per-call reflection or argument array: this runs per AI party per hour). A bind
@@ -26,9 +29,14 @@ namespace TAOM.Features.CastleRecruitment.Hooks;
 internal sealed class CastleAiRecruitDispatcher
 {
     private readonly IModLogger _logger;
+    private readonly ICoopSessionProvider _coopSession;
     private Action<MobileParty, Settlement>? _checkRecruiting;
 
-    public CastleAiRecruitDispatcher(IModLogger logger) => _logger = logger;
+    public CastleAiRecruitDispatcher(IModLogger logger, ICoopSessionProvider coopSession)
+    {
+        _logger = logger;
+        _coopSession = coopSession;
+    }
 
     internal static MethodInfo? FindCheckRecruiting() =>
         AccessTools.Method(typeof(RecruitmentCampaignBehavior), "CheckRecruiting", new[] { typeof(MobileParty), typeof(Settlement) });
@@ -70,6 +78,13 @@ internal sealed class CastleAiRecruitDispatcher
             return;
         Settlement settlement = MobilePartyHelper.GetCurrentSettlementOfMobilePartyForAICalculation(mobileParty);
         if (settlement == null || !settlement.IsCastle || settlement.IsUnderSiege)
+            return;
+        // Not a gold guard: BannerlordCoop already refuses player-controlled parties inside CheckRecruiting (its
+        // own prefix, which also runs for this delegate call). The stand-down matches BannerlordCoop's shutdown of
+        // vanilla's hourly recruit while a session is live (Coop keeps that patch after the session; TAOM resumes), and yields under a co-op mod TAOM cannot probe
+        // (ShouldDeferToHost, while such a mod is enabled, solo play included). Read live, after the castle
+        // guards, so only a party in a castle pays for the probe.
+        if (_coopSession.IsSessionActive || _coopSession.ShouldDeferToHost)
             return;
         try
         {

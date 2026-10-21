@@ -40,7 +40,7 @@ public class CastleRecruitmentBehavior : CampaignBehaviorBase
         _logger = logger;
         _coopSession = coopSession;
         _maintainer = new CastleNotableMaintainer(service, logger);
-        _dispatcher = new CastleAiRecruitDispatcher(logger);
+        _dispatcher = new CastleAiRecruitDispatcher(logger, coopSession);
     }
 
     public override void RegisterEvents()

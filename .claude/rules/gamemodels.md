@@ -63,7 +63,7 @@ public class TaomFooModel : DefaultFooModel
 | `TaomPartyNavigationModel` | `DefaultPartyNavigationModel` | `NavalTravel` — **not registered**; the `AddModel` call in `SubModule.cs` is commented out, so these overrides do not run |
 | `TaomCharacterStatsModel` | `DefaultCharacterStatsModel` | `TroopProgression` |
 | `TaomPartyWageModel` | `DefaultPartyWageModel` | `CulturalFeats` |
-| `TaomVolunteerModel` | `DefaultVolunteerModel` | `TroopProgression` (+ the WarChronicle `VolunteerRate` multiplier through `VolunteerProductionService`; none for the player's own clan) |
+| `TaomVolunteerModel` | `DefaultVolunteerModel` | `TroopProgression` (+ the WarChronicle `VolunteerRate` multiplier through `VolunteerProductionService`; none for the player's own clan; `AlignmentRecruitment`, `CastleRecruitment`) |
 | `TaomArmyManagementModel` | `DefaultArmyManagementCalculationModel` | `CulturalFeats` |
 | `TaomPartySpeedModel` | `DefaultPartySpeedCalculatingModel` | `CulturalFeats` (+ the EyeOfSauron hunter speed floor, last, `IEyeOfSauronHook`; worker threads, snapshot only) |
 | `TaomSettlementProsperityModel` | `DefaultSettlementProsperityModel` | `CulturalFeats` |

@@ -1224,3 +1224,13 @@ the scout's report.
 - **Prevent:** a review of a new consumer of a cache lists the cache's validity predicates and checks each one is
   applied; a test row with a contradicting memory for every reader.
 - **Source:** `docs/reviews/rca-far-watch-2026-10-20.md` finding 8.
+### Code written into a fix brief is held to the same rules as the code (#918, 2026-10-20)
+The #918 brief told the implementer to add `if (...BlocksAiRecruitAtCastle(...)) return -1;` to the top of
+`TaomVolunteerModel.MaximumIndexHeroCanRecruitFromHero`. The implementer followed it, and the standards lens flagged an
+inline `if` in a GameModel override body, which gamemodels.md rule 4 forbids and #737 already ruled a defect.
+- **Why missed:** the brief was written as a recipe for a quick fix; nobody checked the snippet against the rules for
+  the file it targets, and the implementer treats a pinned snippet as decided.
+- **Prevent:** before a brief pins a snippet, check it against the path rules for the target file (gamemodels.md for a
+  `Taom*Model`, csharp-architecture.md for a service). For a model override, compose the decisions in one expression with
+  base fall-through (`a || b ? -1 : base(...)`), as `TaomMarriageModel` does.
+- **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` addendum, finding A1.
