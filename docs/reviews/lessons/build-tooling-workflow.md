@@ -4084,8 +4084,11 @@ not exist.
 - **Prevent:** after Mike approves a plan that differs from the issue, post a progress comment (no ask needed) that
   states the built design and the real test list before the build starts. A comment is not enough on its own: before
   the commit, rewrite the body's Solution, Files Changed and Testing from what ships (Crown Guard #825 had the comment
-  and still kept a stale body).
-- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 3; `docs/reviews/rca-crown-guard-2026-10-20.md` F1.
+  and still kept a stale body). Hall of Fire #826 repeated it the same day: its body was rewritten before the build
+  and counted as done. The commit-time check now lives in `docs/ai-includes/completion-workflow.md` ("Before the
+  commit").
+- **Source:** `docs/reviews/rca-host-review-2026-10-19.md` row 3; `docs/reviews/rca-crown-guard-2026-10-20.md` F1;
+  `docs/reviews/rca-hall-of-fire-2026-10-20.md` H1.
 
 ### A tool's regression test covers the boundary shapes and compares whole output (harvest tool, 2026-10-19)
 `harvest_literal_loc_keys.py` added one blank line before `</strings>` per run. The first regression test started

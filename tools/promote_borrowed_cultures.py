@@ -855,6 +855,7 @@ def main():
     print("  1. retag kingdoms/clans/lords/heroes and the LIVE TAOM_Map settlements onto the new culture")
     print("  2. character-creation wiring (cultures.json, cc_body_properties, narrative menus, CC gear)")
     print("  3. voice row: add the culture to voice_accents/voice_accents.json and VoiceAccentMap.Default()")
+    print("  4. Hall of Fire row: add the culture to hall_of_fire/hall_of_fire.json and HallOfFireMap.Default()")
     print("  Until (1), each new culture owns no settlement -> LANDLESS_CULTURE / daily-tick CTD (#374).")
     return 0
 

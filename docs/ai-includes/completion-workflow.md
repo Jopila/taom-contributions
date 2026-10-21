@@ -35,6 +35,10 @@ For **features**, the issue body MUST include:
 3. **Implementation** — key files, patterns used, configuration
 4. **Testing** — test coverage, how to verify it works
 
+**Before the commit:** re-read the issue body against `git diff --stat` and the untracked files.
+The file list (Files changed, or Implementation for a feature) names every shipped file and no
+"(planned)" row, and the Solution or Design and the Testing sections describe what ships, not the plan. A body written before the build is a plan, even when it was correct then.
+
 **Lifecycle:**
 - Label issues appropriately (`bug`, `feature`, `crash`, `enhancement`)
 - Reference the issue number in commits when possible

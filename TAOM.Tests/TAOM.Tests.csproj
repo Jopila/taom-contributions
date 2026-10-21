@@ -36,6 +36,11 @@
 			<HintPath>%(Identity)</HintPath>
 			<Private>True</Private>
 		</Reference>
+		<!-- Private=False: GameAssemblies loads the game's own SandBox.View, and a bin copy would load a second one (duplicate-type errors). -->
+		<Reference Include="$(TaomSandBoxModuleBin)\SandBox.View.dll">
+			<HintPath>%(Identity)</HintPath>
+			<Private>False</Private>
+		</Reference>
 	</ItemGroup>
 
 	<!-- The game folder this test DLL was compiled against. GameAssemblies falls back to it when the

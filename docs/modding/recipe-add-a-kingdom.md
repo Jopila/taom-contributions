@@ -276,6 +276,7 @@ column is what fails when one is missed; a row without one is caught only by rea
 | `RaceAbilityDefaults.CultureProfiles` and `race_abilities.json` | a culture whose troops have no race ability of their own | `ShippedRaceAbilitiesConfigTests` (counts, compiled equals shipped) |
 | The compiled culture tables in `BattleBalanceConfig.cs`, `CombatMechanicsConfig.cs`, `BannerBearerConfig.cs` | when the shipped JSON gains the culture | `CompiledDefaults_*_MatchTheShippedFile` |
 | `CrownGuardMap.Default()` and `crown_guard/crown_guard_cultures.json` | every kingdom culture (the become-king scene's two guards) | `ShippedConfig_KeysEqualTheKingdomCultures`, `ShippedConfig_EqualsTheBuiltInDefault` |
+| `HallOfFireMap.Default()` and `hall_of_fire/hall_of_fire.json` | every culture that owns a settlement (the map conversation backdrop) | `ShippedConfig_EveryConversionTargetCultureHasARowOrIsVanilla`, `ShippedConfig_EqualsTheBuiltInDefault`, `EveryCultureOwningANonHideoutSettlement_HasARowOrIsVanilla` (LiveInstall) |
 | `CustomBattleCommandersProvider.KnownCultureIds` | every playable culture | `ProviderWarningSet_IsThePlayableCultureSet` |
 | `TaomCultureLinkStyles` | a culture that should colour its menu links | none: Lindon, Blue Craig and Arthedain fall back to the default |
 

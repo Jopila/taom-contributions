@@ -1,0 +1,23 @@
+{
+  "cultures": {
+    "gondor": "empire",
+    "arthedain": "empire",
+    "rivendell": "empire",
+    "lindon": "empire",
+    "mirkwood": "battania",
+    "lothlorien": "battania",
+    "dolguldur": "battania",
+    "empire": "battania",
+    "erebor": "sturgia",
+    "gundabad": "sturgia",
+    "mistymountainorcs": "sturgia",
+    "goblin": "sturgia",
+    "bluecraig": "sturgia",
+    "umbar": "aserai",
+    "shaghana": "aserai",
+    "abanissa": "aserai",
+    "mordor": "khuzait",
+    "battania": "khuzait",
+    "isengard": "vlandia"
+  }
+}

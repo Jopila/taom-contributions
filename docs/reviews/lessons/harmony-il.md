@@ -1169,9 +1169,12 @@ three such targets (`MapInfoVM`, `EncyclopediaUnitVM`, `TownManagementReserveCon
 ### A patch doc's caller list and trigger come from the IL and the raising gate (#825, 2026-10-20)
 The Crown Guard docs said its target had one caller and that the scene shows when "a player or lord" wins. The
 installed IL has a second caller (a Story Mode scene) and the raising behaviour shows the scene only when the player
-wins. The plan had read both facts; the docs kept a shorter version.
+wins. The plan had read both facts; the docs kept a shorter version. The rule covers any doc that states how an engine
+hook is called (a provider, a scene path, a model), not only a Harmony patch: Hall of Fire #826 said its provider ran
+per tick, where the IL calls it once per conversation and again after the partner's equipment changes.
 - **Why missed:** the docs were written from the plan's summary, not from the engine lines it cited.
-- **Prevent:** before writing a patch's "Callers and thread" line, list the call sites from the installed IL
+- **Prevent:** before writing how an engine hook is called (a patch's "Callers and thread" line, a provider's or a
+  model's call rate), list the call sites from the installed IL
   (`ilspycmd -il` or `taom-src`) and quote the condition that raises the caller; name an unreachable caller with the
   reason it is unreachable rather than leaving it out.
-- **Source:** `docs/reviews/rca-crown-guard-2026-10-20.md` F2, F3.
+- **Source:** `docs/reviews/rca-crown-guard-2026-10-20.md` F2, F3; `docs/reviews/rca-hall-of-fire-2026-10-20.md` H2.

@@ -419,6 +419,7 @@ And the patterns visible in the Dale generator code (clone these explicitly for 
 | **Voice map** | `Main/_Module/ModuleData/voice_accents/voice_accents.json` and `VoiceAccentMap.Default()` | modified (+ a row; gated by `ShippedConfig_EveryDefinedCultureHasARow`) |
 | **Bearer banner** | `Main/_Module/ModuleData/banner_bearers/banner_bearers_config.json` and `BannerBearerConfig.cs` | modified (+ a `CultureBanners` row; gated by `ShippedConfig_MapsEveryInfantryTroopCultureToABanner`) |
 | **Crown guard** | `Main/_Module/ModuleData/crown_guard/crown_guard_cultures.json` and `CrownGuardMap.Default()` | modified when the culture rules a kingdom (+ a row; gated by `ShippedConfig_KeysEqualTheKingdomCultures`) |
+| **Hall of Fire** | `Main/_Module/ModuleData/hall_of_fire/hall_of_fire.json` and `HallOfFireMap.Default()` | modified when the culture owns a settlement (+ a row; gated by `ShippedConfig_EveryConversionTargetCultureHasARowOrIsVanilla`, `ShippedConfig_EqualsTheBuiltInDefault` and the live `EveryCultureOwningANonHideoutSettlement_HasARowOrIsVanilla`) |
 | **Culture wiring** | `Main/_Module/ModuleData/spcultures.xslt` | modified (Culture[@id='X'] block — ~9 military attrs minimum) |
 | **Party templates** | `Main/_Module/ModuleData/taom_partyTemplates.xml` | modified (+9 templates) |
 | **Recruitment** | `Main/Features/TroopProgression/VolunteerRecruitmentService.cs` | modified (+ `InitializeXxxCulture` minimum) |

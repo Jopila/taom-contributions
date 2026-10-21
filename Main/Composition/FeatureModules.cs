@@ -57,5 +57,6 @@ internal static class FeatureModules
         new Features.LordFaceVariety.LordFaceVarietyModule(),
         new Features.CrownGuard.CrownGuardModule(),
         new Features.LostFooting.LostFootingModule(),
+        new Features.HallOfFire.HallOfFireModule(),
     };
 }
