@@ -37,6 +37,12 @@ public class CoopGateDocCoverageTests
         "TrollBandSpawnBehavior",
         "WandererAllegianceDialogBehavior",
         "RealmBordersCampaignBehavior",
+        // Landed on bannerlord-1.5.x while this test was in review (2026-10-19), so they predate it too.
+        "HostReviewCampaignBehavior",
+        "HiddenHostsBehavior",
+        "HiddenHostsPlainSightBehavior",
+        "TaomBuildingSeedingBehavior",
+        "LordCourtesiesDialogBehavior",
     };
 
     [TestMethod]
