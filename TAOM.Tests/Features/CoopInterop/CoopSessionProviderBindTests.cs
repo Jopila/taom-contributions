@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Core.Logging;
@@ -7,8 +9,8 @@ using TAOM.Features.CoopInterop;
 namespace TAOM.Tests.Features.CoopInterop;
 
 /// <summary>
-/// Pins the role-probe bind retry: a bind that found nothing (co-op assembly not loaded yet) must
-/// not be cached as final, and must not rescan the AppDomain on every hot-path call either.
+/// Pins the bind-once role probe: a container provider without a readable role, or a type finder
+/// that throws, leaves the probe unavailable (so TAOM stays authoritative) and logs once.
 /// </summary>
 [TestClass]
 public class CoopSessionProviderBindTests
@@ -20,100 +22,67 @@ public class CoopSessionProviderBindTests
 
     public static class FakeModInformation
     {
-        public static bool IsServer { get; } = true;
+        public static bool IsServer => false;
     }
 
-    private static Type Finder(string name, bool present) => present
-        ? (name.EndsWith("ContainerProvider") ? typeof(FakeContainerProvider) : typeof(FakeModInformation))
-        : null;
-
     [TestMethod]
-    public void EnsureBound_TypeAbsentFirstThenPresent_BindsOnLaterCall()
+    public void BindLocked_IsServerMissing_RoleProbeUnavailable()
     {
-        var present = false;
-        long now = 0;
         var logger = Substitute.For<IModLogger>();
-        var provider = new CoopSessionProvider(logger, name => Finder(name, present), () => now);
+        var provider = new CoopSessionProvider(logger,
+            name => name.EndsWith("ContainerProvider") ? typeof(FakeContainerProvider) : null);
 
         provider.EnsureBound();
+
         Assert.IsFalse(provider.RoleProbeAvailable);
-
-        present = true;
-        now = CoopSessionProvider.BindRetryIntervalMs;
-        provider.EnsureBound();
-
-        Assert.IsTrue(provider.RoleProbeAvailable);
+        logger.Received(1).LogWarning(Arg.Any<string>());
     }
 
     [TestMethod]
-    public void EnsureBound_RetryBeforeInterval_DoesNotRescan()
+    public void BindLocked_FinderThrows_RoleProbeUnavailable()
     {
-        var scans = 0;
-        long now = 0;
-        var provider = new CoopSessionProvider(Substitute.For<IModLogger>(),
-            name => { scans++; return null; }, () => now);
-
-        provider.EnsureBound();
-        var afterFirst = scans;
-        now = CoopSessionProvider.BindRetryIntervalMs - 1;
-        provider.EnsureBound();
-        provider.EnsureBound();
-
-        Assert.AreEqual(afterFirst, scans);
-    }
-
-    [TestMethod]
-    public void EnsureBound_RetryAfterInterval_Rescans()
-    {
-        var scans = 0;
-        long now = 0;
-        var provider = new CoopSessionProvider(Substitute.For<IModLogger>(),
-            name => { scans++; return null; }, () => now);
-
-        provider.EnsureBound();
-        var afterFirst = scans;
-        now = CoopSessionProvider.BindRetryIntervalMs;
-        provider.EnsureBound();
-
-        Assert.IsTrue(scans > afterFirst);
-    }
-
-    [TestMethod]
-    public void EnsureBound_Succeeded_NeverRescans()
-    {
-        var scans = 0;
-        long now = 0;
-        var provider = new CoopSessionProvider(Substitute.For<IModLogger>(),
-            name => { scans++; return Finder(name, true); }, () => now);
-
-        provider.EnsureBound();
-        var afterFirst = scans;
-        now = CoopSessionProvider.BindRetryIntervalMs * 10;
-        provider.EnsureBound();
-
-        Assert.AreEqual(afterFirst, scans);
-        Assert.IsTrue(provider.RoleProbeAvailable);
-    }
-
-    [TestMethod]
-    public void EnsureBound_FailureThenSuccess_LogsFailureOnceAndRecoveryOnce()
-    {
-        var present = false;
-        long now = 0;
         var logger = Substitute.For<IModLogger>();
-        var provider = new CoopSessionProvider(logger, name => Finder(name, present), () => now);
+        var provider = new CoopSessionProvider(logger,
+            name => throw new InvalidOperationException("scan failed"));
 
         provider.EnsureBound();
-        now = CoopSessionProvider.BindRetryIntervalMs;
-        provider.EnsureBound();   // still absent: must not log the failure again
+
+        Assert.IsFalse(provider.RoleProbeAvailable);
         logger.Received(1).LogWarning(Arg.Any<string>());
+    }
 
-        present = true;
-        now = CoopSessionProvider.BindRetryIntervalMs * 2;
+    [TestMethod]
+    public void EnsureBound_FailedBind_DoesNotRescanOnSecondCall()
+    {
+        var logger = Substitute.For<IModLogger>();
+        var scans = new Dictionary<string, int>();
+        var provider = new CoopSessionProvider(logger, name =>
+        {
+            scans.TryGetValue(name, out var count);
+            scans[name] = count + 1;
+            return null;
+        });
+
         provider.EnsureBound();
         provider.EnsureBound();
 
-        logger.Received(1).LogWarning(Arg.Any<string>());
-        logger.Received(1).LogInfo(Arg.Any<string>());
+        Assert.AreEqual(2, scans.Count, "one scan per type name");
+        Assert.IsTrue(scans.Values.All(count => count == 1), "a failed bind is cached, not rescanned");
+        Assert.IsFalse(provider.RoleProbeAvailable);
+    }
+
+    [TestMethod]
+    public void EnsureBound_BothTypesPresent_ProbeAvailable_NoWarning()
+    {
+        var logger = Substitute.For<IModLogger>();
+        var provider = new CoopSessionProvider(logger, name =>
+            name.EndsWith("ContainerProvider") ? typeof(FakeContainerProvider)
+            : name.EndsWith("ModInformation") ? typeof(FakeModInformation)
+            : null);
+
+        provider.EnsureBound();
+
+        Assert.IsTrue(provider.RoleProbeAvailable);
+        logger.DidNotReceive().LogWarning(Arg.Any<string>());
     }
 }

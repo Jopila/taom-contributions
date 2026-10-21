@@ -355,14 +355,4 @@ public static class PatchShieldPolicy
     /// </param>
     public static bool ShouldInstall(bool coopActive, bool disabledByFlag)
         => !disabledByFlag && !coopActive;
-
-    /// <summary>
-    /// Whether a pass that declines to install should also take back the finalizers an earlier pass
-    /// attached. Pass 1 runs in <c>OnSubModuleLoad</c>, where the launcher's module list may not be
-    /// populated yet, so <c>CoopPresence</c> can read false and the shield installs; pass 2 re-probes
-    /// and finds co-op active. Without this, the finalizer tax <see cref="ShouldInstall"/> exists to
-    /// avoid stays on every method pass 1 shielded.
-    /// </summary>
-    public static bool ShouldRemoveInstalledShields(bool coopActive, int attachedCount)
-        => coopActive && attachedCount > 0;
 }

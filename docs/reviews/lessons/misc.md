@@ -645,3 +645,14 @@ under its non-goals.
 - **Prevent:** grep the token id across `Main/` and `docs/` before adding a line to it, and update every
   comment or doc that describes who uses that token.
 - **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 13.
+
+### An outside defect register is a list of hypotheses: check each premise against TAOM's RCAs and the installed engine before planning a fix (co-op safety nets, 2026-10-21)
+The co-op gap ledger copied rows from a compat register written against Bannerlord 1.4.8 and TAOM 2.0.29.5. The
+sweep confirmed that our code matched each claim's description, not that each claim's premise held. Three premises
+failed on v1.5.5 (R1 bind timing, R5 divergence, R9 module-list timing), and R9's had been refuted by a TAOM RCA two
+months earlier, while two stale code comments still stated it.
+- **Why missed:** the sweep read code and comments, not `docs/reviews/rca-*.md`, and took the register's rationale as
+  verified input.
+- **Prevent:** for every row taken from an outside source, grep the RCAs for the premise and confirm it in the
+  installed engine or the other mod's source before the row gets an action. Record the evidence in the row.
+- **Source:** [rca-coop-safety-nets-2026-10-21.md](../rca-coop-safety-nets-2026-10-21.md) findings 2 to 4.

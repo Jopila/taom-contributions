@@ -104,10 +104,10 @@ public static class SaveDefinerCollisionGuard
 
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
-            // CollectAssemblyTypesShim makes GetTypes() return the partial list instead of throwing
-            // on a ReflectionTypeLoadException, so this walk is safe across broken third-party mods.
+            // A half-loaded assembly throws on GetTypes(): keep the types that did load.
             Type[] types;
             try { types = assembly.GetTypes(); }
+            catch (ReflectionTypeLoadException tle) { types = tle.Types?.Where(t => t != null).ToArray() ?? Array.Empty<Type>(); }
             catch { continue; }
 
             var assemblyName = SafeAssemblyName(assembly);

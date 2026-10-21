@@ -63,8 +63,9 @@ public static class SaveShield
     //   - SaveManager.Load                 — 2 overloads (string, ISaveDriver) and (..., bool)
     //   - LoadResult.InitializeObjects     — runs during save deserialization (post-stream)
     //   - LoadResult.AfterInitializeObjects — runs after objects loaded, before scene init
-    //   - MissionState.OnInitialize        — protected override; calls FinishMissionLoading
-    //   - MissionState.FinishMissionLoading — private; the post-stream init point
+    //   - MissionState.OnInitialize        — protected override; sets Current and shows the loading window
+    //   - MissionState.FinishMissionLoading — private; the post-stream init point, reached from
+    //                                         OnTick via TickLoading (v1.5.5 MissionState.cs:221-233)
     //   - Mission.Initialize               — public; called when mission goes live
     //   - Mission.SetMissionMode           — runs at mode transitions inside a mission
     //   - Mission.SpawnTroop               — spawns agents into the mission
@@ -283,8 +284,8 @@ public static class SaveShield
             // Co-op interop (2026-07-31): the swallow decision now depends on the category. A
             // SAVE-LOAD failure during a co-op session must be visible — swallowing it leaves a
             // partially deserialised campaign that the host then replicates as authoritative.
-            // MISSION-INIT is rethrown under co-op too (a half-initialised mission would be synced
-            // as real); in singleplayer both categories keep swallowing.
+            // MISSION-INIT keeps swallowing under co-op too: a rethrow from OnMissionTick hangs the
+            // next frame (Mission.cs:3749, :3594-3599); see SaveShieldPolicy.ShouldSwallow.
             // The disable flag still dominates both. The failure is recorded either way: the
             // rethrow path is exactly when we most want the catalog entry.
             var swallow = SaveShieldPolicy.ShouldSwallow(category, CoopPresence.IsActive, !IsSwallowEnabled());

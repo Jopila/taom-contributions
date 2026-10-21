@@ -13,9 +13,9 @@ namespace TAOM.Tests.Infrastructure.Dependencies;
 ///   In singleplayer that is a survivable degradation. Under a host-authoritative co-op mod the
 ///   host then treats that half-built campaign as authoritative and replicates it, so a visible
 ///   load failure is enormously better than an invisible one.
-/// - MISSION-INIT (Mission.Initialize/SetMissionMode/SpawnTroop, MissionState.*). In singleplayer
-///   a fault here is local, one broken battle, so the swallow stays. Under co-op a swallowed fault
-///   leaves a half-initialised mission that the mission sync treats as real, so it is rethrown.
+/// - MISSION-INIT (Mission.Initialize/SetMissionMode/SpawnTroop, MissionState.*). The swallow stays
+///   under co-op: SpawnTroop and SetMissionMode run inside OnMissionTick, and a rethrow there hangs
+///   the next frame (Mission.cs:3749, :3594-3599).
 ///
 /// The <c>saveshield-swallow-disabled.flag</c> file dominates every other input; it is the blunt
 /// "rethrow everything" escalation we reach for during triage.
@@ -42,17 +42,10 @@ public class SaveShieldPolicyTests
     }
 
     [TestMethod]
-    public void ShouldSwallow_MissionInit_CoopActive_ReturnsFalse()
+    public void ShouldSwallow_MissionInit_CoopActive_StillReturnsTrue()
     {
-        // A swallowed mission-init fault leaves a half-initialised mission that co-op's mission
-        // sync would treat as real, so under co-op it surfaces.
-        Assert.IsFalse(SaveShieldPolicy.ShouldSwallow("MISSION-INIT", coopActive: true, swallowDisabledByFlag: false));
-    }
-
-    [TestMethod]
-    public void ShouldSwallow_MissionInitCategoryCasing_IsIgnored()
-    {
-        Assert.IsFalse(SaveShieldPolicy.ShouldSwallow("mission-init", coopActive: true, swallowDisabledByFlag: false));
+        // Rethrowing from OnMissionTick skips the agent tick, so the next frame waits forever.
+        Assert.IsTrue(SaveShieldPolicy.ShouldSwallow("MISSION-INIT", coopActive: true, swallowDisabledByFlag: false));
     }
 
     [TestMethod]

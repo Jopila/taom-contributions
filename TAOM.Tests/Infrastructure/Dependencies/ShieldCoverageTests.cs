@@ -32,20 +32,6 @@ public class ShieldCoverageTests
     }
 
     [TestMethod]
-    public void Clear_AfterAttachAndSkip_EmptiesBothSets()
-    {
-        var coverage = new ShieldCoverage();
-        coverage.RecordSkipped(Skipped1);
-        coverage.RecordAttached(Attached);
-
-        coverage.Clear();
-
-        Assert.AreEqual(0, coverage.SeenCount);
-        Assert.AreEqual(0, coverage.AttachedCount);
-        Assert.IsFalse(coverage.HasSeen(Attached), "a cleared method must be examined afresh");
-    }
-
-    [TestMethod]
     public void HasSeen_SkippedOrAttachedMethod_ReturnsTrue()
     {
         var coverage = new ShieldCoverage();

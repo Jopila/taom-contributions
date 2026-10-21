@@ -67,10 +67,10 @@ does today.
 | Behaviour | Solo | Co-op module active |
 |---|---|---|
 | `PatchShield` installing its finalizers at all | Installs | **Skipped** — `PatchShieldPolicy.ShouldInstall(coopActive, disabledByFlag)` is `!disabledByFlag && !coopActive`, and `Install()` returns early logging `co-op module(s) active (…) — PatchShield install skipped` |
-| `PatchShield` unpatching a non-allowlisted Harmony owner after a `MissingMethod`/`MissingField`/`TypeLoad` | Strips the owner's patches (the rescue path) | **Unreachable** — nothing is shielded. The `would unpatch owner 'X' … (withheld)` line now only describes the window where the module-list probe had not resolved at install time |
+| `PatchShield` unpatching a non-allowlisted Harmony owner after a `MissingMethod`/`MissingField`/`TypeLoad` | Strips the owner's patches (the rescue path) | **Unreachable**: nothing is shielded. The `would unpatch owner 'X' … (withheld)` line is a defensive path only: on v1.5.5 `Module.Initialize` fills the module list (`Module.cs:301`) before `LoadSubModules` (`:307`), so pass 1 already sees co-op |
 | `PatchShield` swallowing those exceptions | Swallows | **Unreachable** — same reason |
 | `SaveShield` on the `SAVE-LOAD` chain | Swallows | **Rethrows**, and still records the failure |
-| `SaveShield` on the `MISSION-INIT` chain | Swallows | **Rethrows**, and still records the failure |
+| `SaveShield` on the `MISSION-INIT` chain | Swallows | Swallows (unchanged; a rethrow from `OnMissionTick` hangs the next frame, `Mission.cs:3749`, `:3594-3599`) |
 | Harmony census | Not written | Written at the end of `OnGameInitializationFinished` |
 | TAOM diplomacy veto (war / peace / alliance-end) | Enforced | **Off** — host is authoritative (see "Diplomacy ordering") |
 | TAOM time-acceleration UI (`MapBar` extra fast-forward + 4 layout patches + `MapTimeControlVM` mixin) | Registered | **Not registered** — BT owns `Campaign.TimeControlMode` |
@@ -99,14 +99,20 @@ divergence.
 **Why the save-load swallow inverts.** Swallowing inside `SaveManager.Load` /
 `LoadResult.InitializeObjects` leaves a partially deserialised campaign that keeps running and looks
 fine. A host then replicates that half-built state as authoritative. A loud load failure is far
-cheaper than two silently-corrupted saves. `MISSION-INIT` is rethrown under co-op as well, because a
-swallowed fault leaves a half-initialised mission that the co-op mission sync would treat as real.
+cheaper than two silently-corrupted saves. `MISSION-INIT` keeps swallowing, because a rethrow does
+not surface the fault, it hangs the game: `SpawnTroop` and `SetMissionMode` can run inside
+`Mission.OnMissionTick`, v1.5.5 sets `tickCompleted = false` once per frame, before the `OnMissionTick` loop
+(`Mission.cs:3749`), and the next frame's `OnPreTick` waits for the agent tick that the exception
+skipped (`:3594-3599`). Only `SAVE-LOAD` is rethrown.
 
 Both flag files still function: `patchshield-disabled.flag` (skips the shield install entirely) and
 `saveshield-swallow-disabled.flag` (rethrow everything, read live per call), placed in
 `<game>/Modules/TAOM.Dependencies/`. **Under co-op they buy almost nothing** — the shield already
-skips install and SaveShield already rethrows `SAVE-LOAD` and `MISSION-INIT`, which matters because
-community dedicated-server recipes still list both as required setup steps.
+skips install and SaveShield already rethrows `SAVE-LOAD`, which matters because community
+dedicated-server recipes still list both as required setup steps. The one thing that still differs:
+`saveshield-swallow-disabled.flag` also rethrows the `MISSION-INIT` chain, which co-op deliberately
+leaves swallowing. Hosts should not set `saveshield-swallow-disabled.flag` in a co-op session: it
+rethrows `MISSION-INIT` faults too, and a rethrow from a mission tick hangs the next frame.
 
 ## The Harmony census — our substitute for decompiling
 
@@ -292,7 +298,7 @@ An override that fully replaces a vanilla body silently deletes any BT patch on 
 | Limitation | Impact | Workaround |
 |------------|--------|------------|
 | **Settings parity is reported, not exchanged** | TAOM's 442 MCM settings live in a per-user file outside the save; **293 are simulation-relevant** (traced per setting to the consuming feature, see [coop-interop.md](coop-interop.md) "What is NOT done"). Two players with different values still simulate differently (battle autocalc, bandit spawn density, AI army targeting, desertion rates) and nothing on the wire corrects it | `SettingsFingerprint` writes one code per MCM group to each peer's log under the co-op gate, so the manual comparison is a few short strings rather than 293 values. Exchanging them through save metadata and warning on join is the remaining step and needs two machines to verify |
-| **Detection reflects what the player enabled, not what constructed** | `CoopPresence` reads the launcher's active-module list. If the co-op mod's SubModule constructor throws, `SubModuleConstructionGuard` swallows it and the module still reads as active — so TAOM spends the session in co-op mode (PatchShield withholding its rescue, SaveShield rethrowing save-load faults) for a co-op layer that never came up | Check the log for the co-op mod's own init lines. Closing this needs the construction guard to map a failing assembly back to its module id plus a suppression set that survives re-probing |
+| **Detection reflects what the player enabled, not what constructed** | `CoopPresence` reads the launcher's active-module list. If the co-op mod's SubModule constructor throws, the module still reads as active (the former `SubModuleConstructionGuard` is deleted, so detection simply follows the launcher's list), so TAOM spends the session in co-op mode (PatchShield withholding its rescue, SaveShield rethrowing save-load faults) for a co-op layer that never came up | Check the log for the co-op mod's own init lines. Closing this needs a check that the co-op assembly actually constructed, mapped back to its module id, plus a suppression set that survives re-probing |
 | **PatchShield still swallows the missing-API trinity everywhere it shields** | The co-op SAVE-LOAD rethrow covers SaveShield's own targets (PatchShield now skips those), but on any other method a `MissingMethod`/`MissingField`/`TypeLoad` exception is still swallowed | Intended: that swallow is what keeps a stale third-party mod from killing the session |
 | **TAOM state that mutates mid-session is join-time-only** | War of the Ring momentum, War Chronicle effects, event rows and rally tiers, culture-conversion progress, messenger fleet, career progression and caravan memory reach the client through the host's save at join and then drift. BT has no schema for these fields, so its replication cannot correct them. Under BannerlordTogether every peer also runs the War Chronicle itself, since `IsAuthority` fails open there. Watchful Holds is the exception beside it: it stands down on every peer there (`ShouldDeferToHost`), like Eye of Sauron. | None yet. Needs an "am I the simulation authority" signal from BT. One exception: the character-creation package (race, culture gold, career, resource seed) is re-applied on **detection** rather than replicated, so a joiner keeps it even though nothing syncs it |
 | Siege defense rewards fire on the host only | Client players don't trigger `SiegeDefenseBehavior` rewards | Host handles siege events; client still fights |

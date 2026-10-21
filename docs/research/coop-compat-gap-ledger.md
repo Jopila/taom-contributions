@@ -11,7 +11,14 @@ TAOM public 2.0.29.5 on Bannerlord 1.4.8, so each row was re-read in our code.
 [coop-interop.md](../features/coop-interop.md), [bannerlordcoop-internals.md](bannerlordcoop-internals.md).
 
 **Status values:** PRESENT (the defect exists in our code), PARTIAL (gated, but the gate switches
-the feature off instead of making it work for each player), FIXED, UNVERIFIED (evidence missing).
+the feature off instead of making it work for each player), FIXED, UNVERIFIED (evidence missing),
+REFUTED (the defect or its fix does not hold on v1.5.5), OPEN (real, but the planned fix was
+refuted), DEFERRED (a maintainer decision holds it).
+
+**Check every row against TAOM's own RCAs and the installed engine before acting on it.** The
+register these rows came from was written against Bannerlord 1.4.8 and TAOM 2.0.29.5. In #965 three
+of its premises (R1, R5, R9) did not hold on v1.5.5, and one of them had been refuted by a TAOM
+RCA two months earlier.
 
 **One framing fact:** `Main/_Module/SubModule.xml:76` tags TAOM `DedicatedServerType=none`, so
 `TAOM.SubModule` runs headless only when the server forces it. Every `IsDedicatedServer` gate
@@ -21,16 +28,16 @@ matters only in that mode, and most of them stand a feature down.
 
 | ID | Item | Status | Evidence | Owner | Action |
 |---|---|---|---|---|---|
-| R1 | A failed role-provider bind is cached forever; a client then reads both `IsAuthority` and `ShouldDeferToHost` as true | PRESENT | `Main/Features/CoopInterop/CoopSessionProvider.cs:132-133` sets `_bound = true` after a failed `BindLocked()`; `:106` then returns no session, so `CoopSessionPolicy.cs:45` gives authority | TAOM | Retry the bind until it succeeds; with co-op active and no role probe, `IsAuthority` is false |
-| R1b | A client may read authority before Coop's container is live at `OnSessionLaunched` | UNVERIFIED | `CoopSessionProvider.cs:112-113`; consumers such as `WarOfTheRingBehavior.cs:86-91`. Missing: Coop's container timing on a client | TAOM, Coop | Log the probe result at each TAOM `OnSessionLaunched`, read it in a live join |
-| R2 | `CollectAssemblyTypesShim` can give Coop AutoSync a partial type list | PRESENT | `Dependencies/SubModule.cs:228` installs it unconditionally; `Dependencies/Foundation/CollectAssemblyTypesShim.cs:108-114` returns the partial list and swallows | TAOM | Rethrow for Coop assemblies, or skip the install when co-op is active |
+| R1 | A failed role-provider bind is cached forever; a client then reads both `IsAuthority` and `ShouldDeferToHost` as true | DEFERRED | Retry REFUTED (#965 review): BannerlordCoop loads GameInterface and Common in its own `OnSubModuleLoad`, so the first campaign-time bind succeeds; a bind fails only on an API rename, where a retry never heals. The split itself is real while unbound: `CoopSessionPolicy.cs:45` and `:87` | TAOM (maintainer decision) | Making `IsAuthority` false while unbound would stand down every BannerlordTogether peer; deferred on 2026-10-21 |
+| R1b | A client may read authority before Coop's container is live at `OnSessionLaunched` | UNVERIFIED | `CoopSessionProvider.cs:121` (null check) and `:127` (the `TryGetContainer` invoke); consumers such as `WarOfTheRingBehavior.cs:86-91`. Missing: Coop's container timing on a client | TAOM, Coop | Log the probe result at each TAOM `OnSessionLaunched`, read it in a live join |
+| R2 | `CollectAssemblyTypesShim` can give Coop AutoSync a partial type list | FIXED (#965) | Co-op scans GameInterface and its runtime `AutoSync` assembly with no catch (`AutoSyncModule.cs:51`, `ObjectManagerModule.cs:32`, `AutoSyncPatcher.cs:35,48`), so the swallow hid a broken co-op build. Now rethrown only while the BannerlordCoop module is active (`CollectAssemblyTypesPolicy`). Residual: while that module is enabled the policy matches by simple name, so another mod's assembly named `Common`, `Missions` or `GameInterface` also loses the swallow | TAOM | Done for Coop's own scans. Harmony and Autofac keep partial lists, and so does the engine's `GetTypesSafe`. But v1.5.5 `GauntletTutorialSystem.RegisterTutorialTypes` calls `GetTypes()` with no catch over the active game assemblies (decompile `SandBox.GauntletUI.Tutorial.GauntletTutorialSystem.cs:555-559`), so a half-loaded Coop assembly now throws there too; where that lands is UNVERIFIED |
 | R3 | `SubModuleConstructionGuard` hides a failed Coop constructor | FIXED | Deleted (`docs/migration/v1.5.5-impact.md:26`) | none | Remove the stale mention in `bannerlord-together-compat.md` |
-| R4 | SaveShield still swallows `MISSION-INIT` faults under co-op | PRESENT | `Dependencies/Foundation/SaveShieldPolicy.cs:33-35` | TAOM | Under co-op, rethrow `MISSION-INIT` |
-| R5 | `Patch69_TournamentEndGuard` swallows an NRE in the tournament completion path | PRESENT (NRE only) | `Patch69_TournamentEndGuard.cs:39,81-84`; applied with no co-op check at `Main/SubModule.cs:2013` | TAOM | Rethrow when co-op is active; keep the diagnostic dump |
+| R4 | SaveShield still swallows `MISSION-INIT` faults under co-op | OPEN (fix refuted) | A rethrow is worse on every target (#965 review, v1.5.5): `SpawnTroop` and `SetMissionMode` can run inside `OnMissionTick`, and an exception there leaves `tickCompleted` false (`Mission.cs:3749`), so the next frame's `WaitTickCompletion` (`:3594-3599`) hangs; a `MissionState.OnInitialize` rethrow leaves an inactive state on top; the loading-time rethrows leave the mission as half-initialised as the swallow does | TAOM | Shipped and reverted in #965. A real fix must stop the half-initialised mission from syncing, not rethrow |
+| R5 | `Patch69_TournamentEndGuard` swallows an NRE in the tournament completion path | REFUTED | The swallow costs only the local winner panel: winner, prize, leaderboard and `OnTournamentFinished` run before the event (`TournamentBehavior.cs:245-264`). A rethrow runs inside `OnMissionTick` and hangs the next frame (see R4) | none | Shipped and reverted in #965 |
 | R6 | `Hero._exSpouses` is null on replicated heroes; TAOM's screen finalizer leaves a half-pushed screen | PRESENT | No guard in `Main/`; `Patch37_CrashReport.cs:56-62` swallows on `ScreenManager.Tick` | Coop (field), TAOM (finalizer) | Coop initialises constructor-only collections; TAOM recovers the screen stack |
 | R7 | Headless FaceGen exposes only the human race | PRESENT | `RaceManager.cs:70-73` falls back to `human` | DS, CoopCompat | A headless race provider on the server; TAOM logs the race count at startup |
 | R8 | `DedicatedServerType=none` | PRESENT | `Main/_Module/SubModule.xml:76` | TAOM | Change only after the headless boot gate passes |
-| R9 | PatchShield pass 1 may install before co-op is detected; pass 2 does not remove it | PARTIAL | `Dependencies/SubModule.cs:221-231,287-290`; `PatchShield.cs:149-162` | TAOM | Pass 2 unpatches the pass-1 shields when co-op is active |
+| R9 | PatchShield pass 1 may install before co-op is detected; pass 2 does not remove it | REFUTED | On v1.5.5 `Module.Initialize` fills the module list (`Module.cs:301`) before `LoadSubModules` (`:307`), so pass 1 already sees co-op; settled before in `docs/reviews/rca-coop-veto-surface-2026-08-01.md:115-119`. The live log shows pass 1 scanning 12 active modules | none | Shipped and reverted in #965 |
 
 ## TAOM feature parity
 
@@ -66,7 +73,7 @@ matters only in that mode, and most of them stand a feature down.
 | C6 | Messenger, siege defence, culture conversion | PARTIAL | `MessengerCampaignBehavior.cs:103,204`, `CultureConversionBehavior.cs:83,103,114` gated; private state not synced | Snapshot, or disable during a session |
 | C7 | Enlistment and field commission | PARTIAL | `EnlistmentPlayerActionService.cs:96`, `FieldCommissionBehavior.cs:71` host-only; on a server the host is the placeholder hero | Hide the enlist offer during a session until per-player rules exist |
 | C8 | TAOM mission behaviors | PRESENT | `Main/SubModule.cs:2141-2146` adds 33 behaviors with no co-op filter | Classify each one and filter in `AddTaomMissionBehaviors` |
-| C9 | Tournaments | PARTIAL | R5; grouping, colours and agent removal are Coop seams | R5 fix, then a two-player lifecycle run |
+| C9 | Tournaments | PARTIAL | R5 is REFUTED (no fix owed); grouping, colours and agent removal are Coop seams | A two-player tournament lifecycle run |
 
 ## Co-op-only rows (upstream candidates, not verified in depth)
 
@@ -82,9 +89,11 @@ matters only in that mode, and most of them stand a feature down.
 
 ## Summary
 
-- 35 TAOM-relevant rows: 18 PRESENT, 10 PARTIAL, 4 FIXED, 3 UNVERIFIED.
+- 34 TAOM-relevant rows across the three tables: 13 PRESENT, 8 PARTIAL, 5 FIXED (R2, R3, T7, X4
+  TAOM half, C5a stand-down), 4 UNVERIFIED, 2 REFUTED (R5, R9), 1 OPEN (R4), 1 DEFERRED (R1).
 - Most existing co-op gates stop corruption by switching the feature off. On a dedicated server
   that means no player gets special resources, emissaries or War of the Ring credit.
-- Highest risk first: R1 (authority fork on a client), R2 (silent loss of Coop sync handlers),
-  C5b and T6 (silent troop loss for remote players), T3 (free priced troops), R4 and R5 (hidden
-  mission and tournament failures).
+- Highest risk first, from the PRESENT, PARTIAL and OPEN rows: C5b and T6 (silent troop loss for
+  remote players), T3 (free priced troops), T1 and T8 (no special-resource or career writes for
+  remote players), R6 (half-pushed screen), and R4 (a hidden mission fault whose fix was refuted).
+  R1 (authority fork on a client) stays DEFERRED by decision, not closed.

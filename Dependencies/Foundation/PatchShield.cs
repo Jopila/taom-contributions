@@ -159,11 +159,6 @@ public static class PatchShield
                 ? $"co-op module(s) active ({string.Join(", ", CoopPresence.ActiveCoopModuleIds)}) — " +
                   "PatchShield install skipped (finalizer tax on Coop's AutoSync surface)"
                 : "patchshield-disabled.flag present — PatchShield install skipped");
-
-            // Pass 1 can run before the module list is populated and install shields that pass 2
-            // (which sees co-op) would never have installed. Take them back.
-            if (PatchShieldPolicy.ShouldRemoveInstalledShields(coopActive, AttachedCount))
-                RemoveInstalledShields();
             return;
         }
 
@@ -273,25 +268,6 @@ public static class PatchShield
         catch (Exception ex)
         {
             DiagLog.LogCaught(Tag, "Install", ex);
-        }
-    }
-
-    // Not unit tested: it needs live Harmony patches. The decision is PatchShieldPolicy's.
-    private static void RemoveInstalledShields()
-    {
-        try
-        {
-            int removed;
-            lock (_lock) removed = _coverage.AttachedCount;
-
-            new Harmony(HarmonyId).UnpatchAll(HarmonyId);
-
-            lock (_lock) _coverage.Clear();
-            DiagLog.Log(Tag, $"co-op module(s) active — removed {removed} shield finalizer(s) installed by an earlier pass");
-        }
-        catch (Exception ex)
-        {
-            DiagLog.LogCaught(Tag, "RemoveInstalledShields", ex);
         }
     }
 

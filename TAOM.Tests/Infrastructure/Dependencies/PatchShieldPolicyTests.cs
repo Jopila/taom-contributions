@@ -172,28 +172,6 @@ public class PatchShieldPolicyTests
         Assert.IsFalse(PatchShieldPolicy.ShouldInstall(coopActive: true, disabledByFlag: false));
     }
 
-    // --- ShouldRemoveInstalledShields: pass 1 may install before the module list is populated ----
-
-    [TestMethod]
-    public void ShouldRemoveInstalledShields_CoopActiveWithAttached_ReturnsTrue()
-    {
-        Assert.IsTrue(PatchShieldPolicy.ShouldRemoveInstalledShields(coopActive: true, attachedCount: 12));
-    }
-
-    [TestMethod]
-    public void ShouldRemoveInstalledShields_CoopActiveNothingAttached_ReturnsFalse()
-    {
-        Assert.IsFalse(PatchShieldPolicy.ShouldRemoveInstalledShields(coopActive: true, attachedCount: 0));
-    }
-
-    [TestMethod]
-    public void ShouldRemoveInstalledShields_NoCoop_ReturnsFalse()
-    {
-        // Ordinary singleplayer must never lose its shield.
-        Assert.IsFalse(PatchShieldPolicy.ShouldRemoveInstalledShields(coopActive: false, attachedCount: 12));
-        Assert.IsFalse(PatchShieldPolicy.ShouldRemoveInstalledShields(coopActive: false, attachedCount: 0));
-    }
-
     // --- IsExcludedTargetNamespace: the hot-layer exclusion list ---------------------------------
 
     [TestMethod]

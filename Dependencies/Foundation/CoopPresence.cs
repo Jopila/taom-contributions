@@ -108,8 +108,10 @@ public static class CoopPresence
 
     /// <summary>
     /// Re-runs detection. Cheap and idempotent. Call once in <c>OnSubModuleLoad</c> (before
-    /// PatchShield's first pass) and again in <c>OnGameInitializationFinished</c>, since
-    /// ModuleHelper's active-module list may not be populated at the earlier point.
+    /// PatchShield's first pass) and again in <c>OnGameInitializationFinished</c>, which only
+    /// picks up a flag or coop-modules.txt edit made after launch: v1.5.5 <c>Module.Initialize</c> fills
+    /// ModuleHelper (Module.cs:301) before <c>LoadSubModules</c> (:307), so OnSubModuleLoad already
+    /// sees the active modules.
     /// </summary>
     public static void Refresh()
     {

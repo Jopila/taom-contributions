@@ -1184,3 +1184,16 @@ per tick, where the IL calls it once per conversation and again after the partne
   (`ilspycmd -il` or `taom-src`) and quote the condition that raises the caller; name an unreachable caller with the
   reason it is unreachable rather than leaving it out.
 - **Source:** `docs/reviews/rca-crown-guard-2026-10-20.md` F2, F3; `docs/reviews/rca-hall-of-fire-2026-10-20.md` H2.
+
+### Before a swallow becomes a rethrow, follow the exception to its next catcher and name the frame it leaves (co-op safety nets, 2026-10-21)
+Batch A of #965 turned two co-op swallows into rethrows to make failures visible: SaveShield's `SpawnTroop` and
+`SetMissionMode` targets, and Patch69 on `TournamentVM.OnTournamentEnd`. Both can run inside `OnMissionTick`, after
+`Mission.OnTick` has set `tickCompleted = false` (v1.5.5 `Mission.cs:3749`). The next catcher was Patch37 on
+`Module.OnApplicationTick`, which swallows, so the next frame's `WaitTickCompletion` (`:3594-3599`) would wait forever.
+A cosmetic fault (a half-drawn winner panel, one missing agent) became a hang.
+- **Why missed:** the `tickCompleted` hazard was already recorded above, but phrased for swallows and exclusions. The
+  change was specified as "rethrow under co-op" and nobody traced where the rethrow would land.
+- **Prevent:** before a finalizer or shield hands back an exception it used to swallow, list every frame between the
+  throw and the next catcher, from the installed IL, and say what each one leaves half done. Inside a mission tick, a
+  rethrow is never safer than a swallow.
+- **Source:** [rca-coop-safety-nets-2026-10-21.md](../rca-coop-safety-nets-2026-10-21.md) finding 1.

@@ -171,7 +171,7 @@ public static class IncompatibleModDetector
     /// <c>TaleWorlds.ModuleManager.ModuleHelper.GetActiveModules()</c> first (active /
     /// enabled at the launcher level — exactly the right granularity for crash-loop
     /// culprit identification); falls back to the directory scan only when reflection
-    /// fails (very early init, before ModuleHelper has populated its internal state).
+    /// fails (a renamed API, or a call before Module.Initialize has filled ModuleHelper).
     /// </summary>
     private static List<string> ReadCurrentModlist()
     {
@@ -184,7 +184,7 @@ public static class IncompatibleModDetector
         }
 
         // Strategy 2: folder scan (returns INSTALLED modules — used only if active
-        // module reflection failed, e.g., during very early init).
+        // module reflection failed).
         DiagLog.Log(Tag, "ReadCurrentModlist: GetActiveModules unavailable, falling back to directory scan");
         return ReadInstalledModuleIdsFromFolders();
     }
@@ -192,7 +192,7 @@ public static class IncompatibleModDetector
     /// <summary>
     /// Reads the launcher's ACTIVE module ids via
     /// <c>TaleWorlds.ModuleManager.ModuleHelper.GetActiveModules()</c>. Returns an empty list when
-    /// reflection fails (very early init, before ModuleHelper has populated its internal state) —
+    /// reflection fails (a renamed API, or a call before Module.Initialize has filled ModuleHelper) —
     /// callers must treat empty as "unknown", not as "no modules".
     ///
     /// Internal rather than private since 2026-07-31: <see cref="CoopPresence"/> needs the same

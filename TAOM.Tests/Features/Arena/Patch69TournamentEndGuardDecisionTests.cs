@@ -5,29 +5,22 @@ using TAOM.Features.Arena.Hooks;
 namespace TAOM.Tests.Features.Arena;
 
 /// <summary>
-/// Pins the swallow decision of Patch69_TournamentEndGuard. Singleplayer keeps containing the
-/// null-dereference; under co-op the exception is returned so the failure is not hidden behind a
-/// half-drawn tournament screen (#491).
+/// Pins the swallow decision of Patch69_TournamentEndGuard: only the null-dereference is contained,
+/// in every mode. The swallowed NRE costs only the local winner panel, and a rethrow from this event
+/// (raised inside OnMissionTick) would hang the next frame.
 /// </summary>
 [TestClass]
 public class Patch69TournamentEndGuardDecisionTests
 {
     [TestMethod]
-    public void ShouldSwallow_NullReference_NoCoop_ReturnsTrue()
+    public void ShouldSwallow_NullReference_ReturnsTrue()
     {
-        Assert.IsTrue(Patch69_TournamentEndGuard.ShouldSwallow(new NullReferenceException(), coopActive: false));
+        Assert.IsTrue(Patch69_TournamentEndGuard.ShouldSwallow(new NullReferenceException()));
     }
 
     [TestMethod]
-    public void ShouldSwallow_NullReference_CoopActive_ReturnsFalse()
+    public void ShouldSwallow_OtherException_ReturnsFalse()
     {
-        Assert.IsFalse(Patch69_TournamentEndGuard.ShouldSwallow(new NullReferenceException(), coopActive: true));
-    }
-
-    [TestMethod]
-    public void ShouldSwallow_OtherException_NeverSwallowed()
-    {
-        Assert.IsFalse(Patch69_TournamentEndGuard.ShouldSwallow(new InvalidOperationException(), coopActive: false));
-        Assert.IsFalse(Patch69_TournamentEndGuard.ShouldSwallow(new InvalidOperationException(), coopActive: true));
+        Assert.IsFalse(Patch69_TournamentEndGuard.ShouldSwallow(new InvalidOperationException()));
     }
 }

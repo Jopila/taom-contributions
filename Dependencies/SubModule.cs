@@ -219,9 +219,10 @@ public class SubModule : MBSubModuleBase
         catch (Exception ex) { DiagLog.LogCaught("Dependencies", "IncompatibleModDetector.RunEarlyPhase", ex); }
 
         // Probe for co-op modules BEFORE the shields install — PatchShield's unpatch path and
-        // SaveShield's swallow policy both read CoopPresence. Refreshed again at
-        // OnGameInitializationFinished, since ModuleHelper's active-module list may not be
-        // populated this early.
+        // SaveShield's swallow policy both read CoopPresence. v1.5.5 Module.Initialize fills
+        // ModuleHelper (Module.cs:301) before LoadSubModules (:307), so this read already sees the
+        // active modules. The refresh at OnGameInitializationFinished only picks up a flag or
+        // coop-modules.txt edit made after launch.
         try { DiagLog.Log("Dependencies", "OnSubModuleLoad: → CoopPresence.Refresh"); CoopPresence.Refresh(); }
         catch (Exception ex) { DiagLog.LogCaught("Dependencies", "CoopPresence.Refresh", ex); }
 
@@ -282,8 +283,9 @@ public class SubModule : MBSubModuleBase
 
         // Second PatchShield pass — captures patches registered by mods that hook this
         // lifecycle event (after our OnSubModuleLoad).
-        // Re-probe before pass 2: the launcher's active-module list is reliably populated by now,
-        // so this is the read that actually decides the unpatch/swallow policy for the session.
+        // Re-probe before pass 2. The active-module list was already filled before OnSubModuleLoad
+        // (Module.cs:301 before :307), so this only picks up a flag or coop-modules.txt edit made
+        // after launch.
         try { DiagLog.Log("Dependencies", "OnGameInitializationFinished: → CoopPresence.Refresh"); CoopPresence.Refresh(); }
         catch (Exception ex) { DiagLog.LogCaught("Dependencies", "CoopPresence.Refresh pass2", ex); }
 
