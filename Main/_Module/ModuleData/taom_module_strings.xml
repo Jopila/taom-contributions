@@ -3411,6 +3411,53 @@
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
 	<!-- GoodDeedsNoticeAdapter -->
 	<string id="taom_gooddeeds_tournament" text="{=taom_gooddeeds_tournament}The people of {TOWN} honor your victory." />
+	<!-- FarWatch -->
+	<string id="taom_fwatch_block_busy" text="{=taom_fwatch_block_busy}You cannot send a scout during an encounter." />
+	<string id="taom_fwatch_block_camp" text="{=taom_fwatch_block_camp}The camp must be raised before a scout rides out." />
+	<string id="taom_fwatch_block_coop" text="{=taom_fwatch_block_coop}Scouting from camp is not available in a shared campaign." />
+	<string id="taom_fwatch_block_noscout" text="{=taom_fwatch_block_noscout}Name a scout for your party, or travel alone to scout yourself." />
+	<string id="taom_fwatch_block_rest" text="{=taom_fwatch_block_rest}{SCOUT} is resting after the last ride. Ready in {TIME}." />
+	<string id="taom_fwatch_block_wounded" text="{=taom_fwatch_block_wounded}{SCOUT} is too badly wounded to ride." />
+	<string id="taom_fwatch_dir_e" text="{=taom_fwatch_dir_e}east" />
+	<string id="taom_fwatch_dir_n" text="{=taom_fwatch_dir_n}north" />
+	<string id="taom_fwatch_dir_ne" text="{=taom_fwatch_dir_ne}north-east" />
+	<string id="taom_fwatch_dir_nw" text="{=taom_fwatch_dir_nw}north-west" />
+	<string id="taom_fwatch_dir_s" text="{=taom_fwatch_dir_s}south" />
+	<string id="taom_fwatch_dir_se" text="{=taom_fwatch_dir_se}south-east" />
+	<string id="taom_fwatch_dir_sw" text="{=taom_fwatch_dir_sw}south-west" />
+	<string id="taom_fwatch_dir_w" text="{=taom_fwatch_dir_w}west" />
+	<string id="taom_fwatch_end_battle" text="{=taom_fwatch_end_battle}{SCOUT} rides back to camp as trouble finds the party." />
+	<string id="taom_fwatch_end_camp" text="{=taom_fwatch_end_camp}The camp was struck; {SCOUT} rejoins the party." />
+	<string id="taom_fwatch_end_coop" text="{=taom_fwatch_end_coop}{SCOUT} rejoins the party: scouting from camp is not available in a shared campaign." />
+	<string id="taom_fwatch_end_lost" text="{=taom_fwatch_end_lost}{SCOUT} did not come back." />
+	<string id="taom_fwatch_end_recall" text="{=taom_fwatch_end_recall}{SCOUT} rides back to camp with nothing to report." />
+	<string id="taom_fwatch_kind_archers" text="{=taom_fwatch_kind_archers}mostly archers" />
+	<string id="taom_fwatch_kind_foot" text="{=taom_fwatch_kind_foot}mostly foot" />
+	<string id="taom_fwatch_kind_horse" text="{=taom_fwatch_kind_horse}mostly horse" />
+	<string id="taom_fwatch_kind_horsearchers" text="{=taom_fwatch_kind_horsearchers}mostly horse archers" />
+	<string id="taom_fwatch_kind_none" text="{=taom_fwatch_kind_none}unclear" />
+	<string id="taom_fwatch_opt_around" text="{=taom_fwatch_opt_around}Sweep the surroundings" />
+	<string id="taom_fwatch_opt_await" text="{=taom_fwatch_opt_await}Await your scout" />
+	<string id="taom_fwatch_opt_await_self" text="{=taom_fwatch_opt_await_self}Continue the ride" />
+	<string id="taom_fwatch_opt_back" text="{=taom_fwatch_opt_back}Back to camp" />
+	<string id="taom_fwatch_opt_recall" text="{=taom_fwatch_opt_recall}Call {SCOUT} back" />
+	<string id="taom_fwatch_opt_recall_self" text="{=taom_fwatch_opt_recall_self}Ride back to camp" />
+	<string id="taom_fwatch_opt_self" text="{=taom_fwatch_opt_self}Ride out to scout" />
+	<string id="taom_fwatch_opt_send" text="{=taom_fwatch_opt_send}Send a scout" />
+	<string id="taom_fwatch_opt_site" text="{=taom_fwatch_opt_site}Look over {SETTLEMENT} ({DIRECTION})" />
+	<string id="taom_fwatch_pick_body" text="{=taom_fwatch_pick_body}Where should {SCOUT} ride?" />
+	<string id="taom_fwatch_report_around" text="{=taom_fwatch_report_around}Hosts sighted around the camp:" />
+	<string id="taom_fwatch_report_close" text="{=taom_fwatch_report_close}Close" />
+	<string id="taom_fwatch_report_garrison" text="{=taom_fwatch_report_garrison}Garrison: {COUNT} ({KIND})" />
+	<string id="taom_fwatch_report_lord" text="{=taom_fwatch_report_lord}{NAME}: {COUNT} ({KIND})" />
+	<string id="taom_fwatch_report_militia" text="{=taom_fwatch_report_militia}Militia: {COUNT}" />
+	<string id="taom_fwatch_report_none" text="{=taom_fwatch_report_none}{SCOUT} saw no hosts worth reporting." />
+	<string id="taom_fwatch_report_row" text="{=taom_fwatch_report_row}{NAME}: {COUNT} ({KIND}), {DIRECTION}" />
+	<string id="taom_fwatch_report_sight" text="{=taom_fwatch_report_sight}Your party sees farther for about {TIME}." />
+	<string id="taom_fwatch_report_site" text="{=taom_fwatch_report_site}{SETTLEMENT} is held by {COUNT} men:" />
+	<string id="taom_fwatch_report_title" text="{=taom_fwatch_report_title}{SCOUT} returns" />
+	<string id="taom_fwatch_wait_around" text="{=taom_fwatch_wait_around}{SCOUT} is sweeping the land around the camp." />
+	<string id="taom_fwatch_wait_site" text="{=taom_fwatch_wait_site}{SCOUT} is riding to look over {SETTLEMENT}." />
 
 
 	<!-- ============================================== -->

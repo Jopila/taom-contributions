@@ -13,8 +13,9 @@ public class TaomMapVisibilityModel : DefaultMapVisibilityModel
 
     // The engine holds ONE MapVisibilityModel slot and this model owns it. Other features widen
     // sight through contributors instead of a second AddModel that would silently unseat this one
-    // (FieldCamp's lookout is the first). Array, not IEnumerable: this is a per-party hot path.
-    private readonly IPartySpottingContributor[] _contributors;
+    // (FieldCamp's lookout is the first, Far Watch's scout the second). The composer holds them as an array,
+    // not an IEnumerable: this is a per-party hot path. Its rules: SpottingContributorComposer.
+    private readonly SpottingContributorComposer _composer;
 
     public TaomMapVisibilityModel(ICareerPassiveService careerPassives)
         : this(careerPassives, null)
@@ -24,24 +25,16 @@ public class TaomMapVisibilityModel : DefaultMapVisibilityModel
     public TaomMapVisibilityModel(ICareerPassiveService careerPassives, IEnumerable<IPartySpottingContributor> contributors)
     {
         _careerPassives = careerPassives;
-        _contributors = contributors == null
+        _composer = new SpottingContributorComposer(contributors == null
             ? System.Array.Empty<IPartySpottingContributor>()
-            : System.Linq.Enumerable.ToArray(contributors);
+            : System.Linq.Enumerable.ToArray(contributors));
     }
 
     public override ExplainedNumber GetPartySpottingRange(MobileParty party, bool includeDescriptions = false)
     {
         var result = base.GetPartySpottingRange(party, includeDescriptions);
         _careerPassives.ApplyFactor(party?.LeaderHero?.StringId, ref result, PassiveEffectType.PartySpottingRange);
-
-        for (int i = 0; i < _contributors.Length; i++)
-        {
-            var factor = _contributors[i].GetSpottingRangeBonusFactor(party);
-            // Positive requirement: a NaN or non-positive contribution adds nothing.
-            if (factor > 0f && !float.IsInfinity(factor))
-                result.AddFactor(factor);
-        }
-
+        _composer.Apply(ref result, party, MaximumSeeingRange(), includeDescriptions);
         return result;
     }
 

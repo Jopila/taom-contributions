@@ -78,7 +78,7 @@ public class HiddenHostsTooltipHarmonyPairTests
             IsVisible = true,
         });
         _logger = Substitute.For<IModLogger>();
-        HiddenHostsCalls.Initialize(new HiddenHostsService(_settings), _adapter, _logger, () => "Defenders", () => "Troops",
+        HiddenHostsCalls.Initialize(new HiddenHostsService(_settings, new NoScoutIntel()), _adapter, _logger, () => "Defenders", () => "Troops",
             hours => "Counted " + hours + "h ago");
         _seen = null;
         _seenCalls = 0;

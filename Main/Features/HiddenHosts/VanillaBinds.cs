@@ -28,7 +28,8 @@ public readonly struct VanillaBinds
     /// <summary>
     /// Lays the mask for <paramref name="intel"/> over the three fields and returns their originals, or returns an unset
     /// value and writes nothing when the plate is not masked. A masked plate shows the masked count and no wounded or
-    /// prisoner text; the name changes only at the horizon, to <paramref name="horizonName"/> (kept when that is null).
+    /// prisoner text; the name changes only when the plate hides it (<see cref="NameplateIntel.HidesName"/>: at the horizon, and
+    /// not named by a scout), to <paramref name="horizonName"/> (kept when that is null).
     /// </summary>
     internal static VanillaBinds LayMask(in NameplateIntel intel, string? horizonName,
         ref string count, ref string extraInfo, ref string name)
@@ -38,7 +39,7 @@ public readonly struct VanillaBinds
         var saved = new VanillaBinds(count, extraInfo, name);
         count = intel.CountText!;
         extraInfo = string.Empty;
-        if (intel.IsHorizon && horizonName != null) name = horizonName;
+        if (intel.HidesName && horizonName != null) name = horizonName;
         return saved;
     }
 

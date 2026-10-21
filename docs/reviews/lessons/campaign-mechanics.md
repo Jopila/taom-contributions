@@ -399,6 +399,11 @@ takeover inherits exactly that unmerged state from any lord marching to join an 
   fix for a vanilla dead end is a prefix that runs vanilla's own exit for the one row that traps,
   never a replacement of the whole method (`Patch87_ReturnToArmy`).
 - **Source:** #566, `docs/features/return-to-army.md`.
+- **Recurrence (2026-10-20, Far Watch):** a map sweep skipped every party with `Army != null && Army.LeaderParty != party`,
+  so members that had joined but not merged (still moving on their own) vanished from the scout's report, and the
+  leader's row took its composition from its own roster only. A party that moves on its own is `AttachedTo == null`;
+  an army row sums the leader and each `AttachedParties[i]`. Source: `docs/reviews/rca-far-watch-2026-10-20.md`
+  findings 2 and 3.
 
 ### A wait menu's condition delegate hides EVERY option, Leave included, and nothing exits the menu when it turns false
 
@@ -838,3 +843,20 @@ authority gate.
   and the active `PartyState`'s `RightOwnerParty`), accept a settlement whose `OwnerClan` is the player's clan, and never accept a
   player-clan mobile party: `MobileParty.RemoveParty` releases its prisoners `ReleasedByChoice`. Give each raise site its own test.
 - **Source:** `docs/reviews/rca-good-deeds-2026-10-20.md` finding 1 and 2.
+### Work that an encounter with the camp must stop listens to `OnPartyEncounterEvent`, not `MapEventStarted`
+
+Far Watch ended a running scout ride on `MapEventStarted`. An attack on the player's camp first opens
+`encounter_meeting` (`DefaultEncounterGameMenuModel` answers a plain meeting with no battle started), so the map event,
+and the event, come only if the meeting turns hostile. A party talked down or given safe passage left the ride running
+while the docs said any encounter ends it. The fix also listens to `CampaignEvents.OnPartyEncounterEvent`
+(`IMbEvent<PartyBase, PartyBase>`, raised as the last call of `EncounterManager.StartPartyEncounter`, on the main
+thread), gated on a running ride and on the main party being attacker or defender, and switches no menu, because the
+engine is opening its own.
+- **Why missed:** the design cited this file's lesson "A modal opened from a game menu must pause the game" for its
+  pause rule; the same entry records that a bandit reaching the camp replaces the camp menu with `encounter_meeting`,
+  and that fact was not carried into the design's list of end conditions. The IL pin proved `PlayerEncounter.Init`, not
+  the attack path.
+- **Prevent:** for "an encounter ends X", subscribe to `OnPartyEncounterEvent` and keep `MapEventStarted` for the battle
+  that may follow; pin the raise site and the meeting answer with IL tests. When a design cites a lesson, list the
+  engine facts in its body that touch the new feature, each with the test that pins it.
+- **Source:** `docs/reviews/rca-far-watch-2026-10-20.md` finding 4.

@@ -52,7 +52,7 @@ public class TaomFooModel : DefaultFooModel
 | `TaomCustomBattleAgentStatCalculateModel` | `CustomBattleAgentStatCalculateModel` | `CultureDoctrine` (Custom Battle; + the #892 horse-stand polearm favour post-pass; + the CombatMechanics mount charge multiplier, from `InitializeAgentStats` because that base writes `MountChargeDamage` once; + the RaceAbilities post-pass and resistances + the CreatureSiegeRole detachment cost) |
 | `TaomClanTierModel` | `DefaultClanTierModel` | `CareerSystem` |
 | `TaomInventoryCapacityModel` | `DefaultInventoryCapacityModel` | `CareerSystem` |
-| `TaomMapVisibilityModel` | `DefaultMapVisibilityModel` | `CareerSystem` |
+| `TaomMapVisibilityModel` | `DefaultMapVisibilityModel` | `CareerSystem` (+ sight contributors) |
 | `TaomBanditDensityModel` | `DefaultBanditDensityModel` | `BanditManagement` |
 | `TaomNotableSpawnModel` | `DefaultNotableSpawnModel` | `CulturalFeats` |
 | `TaomMarriageModel` | `DefaultMarriageModel` | `NazgulFamily` + `MarriageAlignment` (one slot, two rules) |

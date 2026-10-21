@@ -30,13 +30,14 @@ internal sealed partial class HiddenHostsService
         bool ownRoster = !asArmy && s.LeadsArmy;
         var state = StateFor(s.StringId!);
         int count = ownRoster ? s.OwnHealthyCount : s.HealthyCount;
-        float multiplier = HiddenHostsMath.ScoutMultiplier(s.ScoutingSkill, s.SameFaction || s.ArmyLeaderSameFaction);
+        float multiplier = HiddenHostsMath.ScoutMultiplier(FogSkill(s.ScoutingSkill), s.SameFaction || s.ArmyLeaderSameFaction);
 
         // Only a party drawn on the map has a horizon; a tracker or menu row for one out of sight keeps its name and its digits.
         if (s.IsVisible && HiddenHostsMath.IsHorizon(ratio, s.SpottingRatio))
         {
             state.Known = 0;
-            return new TooltipVerdict(TooltipMode.Horizon, ratio, multiplier, 0, count);
+            return new TooltipVerdict(TooltipMode.Horizon, ratio, multiplier, 0, count,
+                named: _scouting.IsNamedByScout(s.StringId!, s.NowHour));
         }
 
         int known = HiddenHostsMath.KnownDigits(count, ratio, multiplier, ownRoster ? 0 : state.Known);
@@ -60,7 +61,7 @@ internal sealed partial class HiddenHostsService
 
         var state = StateFor(_settlements, s.StringId);
         int count = s.DefenderCount;
-        float multiplier = HiddenHostsMath.ScoutMultiplier(s.ScoutingSkill, s.SameFaction);
+        float multiplier = HiddenHostsMath.ScoutMultiplier(FogSkill(s.ScoutingSkill), s.SameFaction);
         int known = HiddenHostsMath.KnownDigits(count, ratio, multiplier, state.Known);
         state.Known = known;
 
@@ -78,7 +79,7 @@ internal sealed partial class HiddenHostsService
         if (!TryRatio(s.DistanceToMain, s.MainSeeingRange, out float ratio)) return TooltipVerdict.Vanilla;
 
         int count = s.TotalHealthy;
-        float multiplier = HiddenHostsMath.ScoutMultiplier(s.ScoutingSkill, s.SameFaction);
+        float multiplier = HiddenHostsMath.ScoutMultiplier(FogSkill(s.ScoutingSkill), s.SameFaction);
         int known = HiddenHostsMath.KnownDigits(count, ratio, multiplier, 0);
         return known >= HiddenHostsMath.DigitCount(count)
             ? TooltipVerdict.Vanilla
@@ -118,7 +119,7 @@ internal sealed partial class HiddenHostsService
     {
         if (settlement.Mode == TooltipMode.Vanilla || !_settings.Enabled || IsPartyExempt(in party)) return null;
 
-        float multiplier = HiddenHostsMath.ScoutMultiplier(party.ScoutingSkill, party.SameFaction || party.ArmyLeaderSameFaction);
+        float multiplier = HiddenHostsMath.ScoutMultiplier(FogSkill(party.ScoutingSkill), party.SameFaction || party.ArmyLeaderSameFaction);
         int printed = includeAttachedParties ? party.HealthyCount : party.OwnHealthyCount;
         var row = new TooltipVerdict(settlement.Mode, settlement.Ratio, multiplier, 0, printed);
         return MaskTooltipCount(in row, printed);

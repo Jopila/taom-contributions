@@ -9,8 +9,10 @@ using TAOM.Adapters;
 using TAOM.Composition;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
+using TAOM.Features.FarWatch;
 using TAOM.Features.HiddenHosts;
 using TAOM.Tests.Infrastructure;
+using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.HiddenHosts;
 
@@ -206,11 +208,18 @@ public class HiddenHostsWiringTests
         Assert.IsTrue(IsBuiltInlinePerCampaign("CampaignBehaviorDecl.Of(r =>\n    new HiddenHostsBehavior(\n a, b)),"));
     }
 
+    /// <summary>
+    /// The service takes the scout seam (#847), which Far Watch's module registers as a mapping onto its store. The tests
+    /// that resolve the service register that module, so the graph here is the production one.
+    /// </summary>
+    private static void RegisterTheScoutSeam(IContainer container) => new FarWatchModule().RegisterServices(container);
+
     [TestMethod]
     public void Module_InitializeStatics_HandsTheHooksTheServiceAndAdapter()
     {
         using var container = new Container();
         container.RegisterInstance(Substitute.For<IModLogger>());
+        RegisterTheScoutSeam(container);
         var module = new HiddenHostsModule();
         module.RegisterServices(container);
         try
@@ -253,6 +262,10 @@ public class HiddenHostsWiringTests
     [TestCategory("RequiresGame")]
     public void EveryHarmonyPatchClassInTheFeatureNamespace_CarriesThePatchCategory()
     {
+        // GetTypes() resolves every patch class's engine base types, so the module assemblies must be loaded first (run alone,
+        // nothing else in the process has loaded them).
+        if (!GameAssemblies.EnsureLoaded()) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
+
         var offenders = typeof(HiddenHostsModule).Assembly.GetTypes()
             .Where(t => t.Namespace == "TAOM.Features.HiddenHosts.Hooks" || t.Namespace == "TAOM.Features.HiddenHosts")
             .Where(t => t.GetCustomAttributes(typeof(HarmonyLib.HarmonyPatch), inherit: false).Any())
@@ -285,6 +298,7 @@ public class HiddenHostsWiringTests
         using var container = new Container();
         container.RegisterInstance(Substitute.For<IModLogger>());
         container.RegisterInstance(Substitute.For<ICoopSessionProvider>());
+        RegisterTheScoutSeam(container);
         var module = new HiddenHostsModule();
 
         module.RegisterServices(container);

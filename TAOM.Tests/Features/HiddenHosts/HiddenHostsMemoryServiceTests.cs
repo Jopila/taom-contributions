@@ -23,7 +23,7 @@ public class HiddenHostsMemoryServiceTests
     {
         _settings = Substitute.For<IHiddenHostsSettings>();
         _settings.Enabled.Returns(true);
-        _sut = new HiddenHostsService(_settings);
+        _sut = new HiddenHostsService(_settings, new NoScoutIntel());
     }
 
     private static PartyIntelSnapshot Snap(int count, float ratio, string id = "p1", int hour = 100, bool atWar = false,
@@ -65,7 +65,7 @@ public class HiddenHostsMemoryServiceTests
         var intel = _sut.Evaluate(Snap(123, 0.5f));
 
         Assert.IsTrue(intel.Masked);
-        Assert.IsFalse(intel.IsHorizon);
+        Assert.AreNotEqual(HiddenHostsMath.HorizonText, intel.CountText);
         Assert.AreEqual("~123", intel.CountText);
     }
 
@@ -118,7 +118,7 @@ public class HiddenHostsMemoryServiceTests
 
         var intel = _sut.Evaluate(Snap(123, 0.95f));
 
-        Assert.IsTrue(intel.IsHorizon);
+        Assert.AreEqual(HiddenHostsMath.HorizonText, intel.CountText);
         Assert.AreEqual("...", intel.CountText);
     }
 
@@ -207,7 +207,7 @@ public class HiddenHostsMemoryServiceTests
         Assert.IsNotNull(counter, "the runtime must expose GC.GetAllocatedBytesForCurrentThread");
         var allocatedBytes = (Func<long>)Delegate.CreateDelegate(typeof(Func<long>), counter!);
         // A hand-written settings fake: an NSubstitute substitute records every call, which allocates by itself.
-        var sut = new HiddenHostsService(new AlwaysOn());
+        var sut = new HiddenHostsService(new AlwaysOn(), new NoScoutIntel());
         sut.Evaluate(Snap(123, 0.1f));
         var far = Snap(123, 0.7f, hour: 101);
         var near = Snap(123, 0.1f, hour: 101);
@@ -398,7 +398,7 @@ public class HiddenHostsMemoryServiceTests
         };
         foreach (var fact in facts)
         {
-            var sut = new HiddenHostsService(_settings);
+            var sut = new HiddenHostsService(_settings, new NoScoutIntel());
             var s = fact(StampSnap("p1", 123, true, 100) with { InPlainSight = false, DistanceToMain = 70f, MainSeeingRange = 100f, SpottingRatio = 1f });
 
             sut.Stamp(s with { InPlainSight = true });
@@ -782,7 +782,7 @@ public class HiddenHostsMemoryServiceTests
         StampTown("town_1", 245, 100);
         var saved = _sut.EncodeMemory(101);
 
-        var fresh = new HiddenHostsService(_settings);
+        var fresh = new HiddenHostsService(_settings, new NoScoutIntel());
         var report = fresh.LoadFrom(saved);
 
         Assert.AreEqual(2, report.Loaded);

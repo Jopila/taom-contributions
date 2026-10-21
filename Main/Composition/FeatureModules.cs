@@ -59,5 +59,6 @@ internal static class FeatureModules
         new Features.LostFooting.LostFootingModule(),
         new Features.HallOfFire.HallOfFireModule(),
         new Features.GoodDeeds.GoodDeedsModule(),
+        new Features.FarWatch.FarWatchModule(),
     };
 }

@@ -57,7 +57,7 @@ public class HiddenHostsHarmonyPairTests
             HasData = true, StringId = "p1", HealthyCount = 123, DistanceToMain = 70f, MainSeeingRange = 100f, SpottingRatio = 1f,
         });
         _logger = Substitute.For<IModLogger>();
-        HiddenHostsCalls.Initialize(new HiddenHostsService(settings), adapter, _logger);
+        HiddenHostsCalls.Initialize(new HiddenHostsService(settings, new NoScoutIntel()), adapter, _logger);
 
         _harmony = new Harmony(HarmonyId);
         _target = AccessTools.Method(PlateType, "RefreshBinding", Type.EmptyTypes);
@@ -139,6 +139,63 @@ public class HiddenHostsHarmonyPairTests
 
         Assert.IsInstanceOfType(thrown.InnerException, typeof(InvalidOperationException));
         Assert.AreEqual("a finalizer after ours", thrown.InnerException!.Message);
+        AssertVanillaFields(plate);
+    }
+
+    /// <summary>The same plate, but the party sits at the horizon (95 percent of the reach) and the scout seam says whether it was named (#847).</summary>
+    private void UseHorizonParty(bool namedByTheScout)
+    {
+        var settings = Substitute.For<IHiddenHostsSettings>();
+        settings.Enabled.Returns(true);
+        var scouting = Substitute.For<TAOM.Core.Domain.IScoutIntelQuery>();
+        scouting.IsNamedByScout("p1", 100).Returns(namedByTheScout);
+        var adapter = Substitute.For<IPartyIntelAdapter>();
+        adapter.Read(Arg.Any<MobileParty>()).Returns(new PartyIntelSnapshot
+        {
+            HasData = true, StringId = "p1", HealthyCount = 123, DistanceToMain = 95f, MainSeeingRange = 100f, SpottingRatio = 1f, NowHour = 100,
+        });
+        HiddenHostsCalls.Initialize(new HiddenHostsService(settings, scouting), adapter, _logger);
+    }
+
+    [TestMethod]
+    public void HorizonNotNamed_ThePropertiesTakeDotsAndTheUnknownName_AndTheFieldsAreVanillasAgain()
+    {
+        UseHorizonParty(namedByTheScout: false);
+        var plate = NewPlate();
+
+        CallRefreshBinding(plate);
+
+        Assert.AreEqual("...", Property(plate, "Count"));
+        Assert.AreEqual(HiddenHostsTexts.UnknownParty, Property(plate, "FullName"));
+        AssertVanillaFields(plate);
+        _logger.DidNotReceiveWithAnyArgs().LogError(null!);
+    }
+
+    [TestMethod]
+    public void HorizonNamedByTheScout_ThePropertiesTakeDotsButKeepTheName_AndTheFieldsAreVanillasAgain()
+    {
+        UseHorizonParty(namedByTheScout: true);
+        var plate = NewPlate();
+
+        CallRefreshBinding(plate);
+
+        Assert.AreEqual("...", Property(plate, "Count"), "decision Q5: the count stays hidden past the horizon");
+        Assert.AreEqual("Lord Aldric", Property(plate, "FullName"), "the name stays");
+        AssertVanillaFields(plate);
+        _logger.DidNotReceiveWithAnyArgs().LogError(null!);
+    }
+
+    [TestMethod]
+    public void HorizonNamedByTheScout_PrefixStripped_TheFinalizerStays_AndTheCallRunsVanilla()
+    {
+        UseHorizonParty(namedByTheScout: true);
+        _harmony.Unpatch(_target, HarmonyPatchType.Prefix, HarmonyId);
+        var plate = NewPlate();
+
+        CallRefreshBinding(plate);
+
+        Assert.AreEqual("123", Property(plate, "Count"));
+        Assert.AreEqual("Lord Aldric", Property(plate, "FullName"));
         AssertVanillaFields(plate);
     }
 

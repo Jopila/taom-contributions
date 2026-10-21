@@ -20,7 +20,7 @@ internal enum TooltipMode
 internal readonly struct TooltipVerdict
 {
     internal TooltipVerdict(TooltipMode mode, float ratio, float multiplier, int latchedKnown, int subjectCount,
-        string? memoryText = null, int memoryHours = 0)
+        string? memoryText = null, int memoryHours = 0, bool named = false)
     {
         Mode = mode;
         Ratio = ratio;
@@ -29,6 +29,7 @@ internal readonly struct TooltipVerdict
         SubjectCount = subjectCount;
         MemoryText = memoryText;
         MemoryHours = memoryHours;
+        Named = named;
     }
 
     /// <summary>The verdict that leaves every number to vanilla.</summary>
@@ -56,4 +57,10 @@ internal readonly struct TooltipVerdict
 
     /// <summary>Whole hours since the remembered count was taken (for the "Counted ... ago" row); 0 without a memory.</summary>
     internal int MemoryHours { get; }
+
+    /// <summary>
+    /// The horizon subject is a host the scout named (#847): its numbers still read "...", but its title is not rewritten.
+    /// Only a horizon verdict carries it.
+    /// </summary>
+    internal bool Named { get; }
 }

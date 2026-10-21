@@ -33,7 +33,7 @@ public class HiddenHostsPlainSightBehaviorTests
     {
         _settings = Substitute.For<IHiddenHostsSettings>();
         _settings.Enabled.Returns(true);
-        _service = new HiddenHostsService(_settings);
+        _service = new HiddenHostsService(_settings, new NoScoutIntel());
         _adapter = Substitute.For<IPartyIntelAdapter>();
         _logger = Substitute.For<IModLogger>();
         _now = 1000;

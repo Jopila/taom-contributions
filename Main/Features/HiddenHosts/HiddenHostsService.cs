@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TAOM.Adapters;
+using TAOM.Core.Domain;
 using TAOM.Core.Validation;
 
 namespace TAOM.Features.HiddenHosts;
@@ -28,12 +29,17 @@ internal sealed partial class HiddenHostsService
     }
 
     private readonly IHiddenHostsSettings _settings;
+    private readonly IScoutIntelQuery _scouting;
     private readonly Dictionary<string, PartyState> _parties = new();
     private readonly Dictionary<string, PartyState> _settlements = new();
     private readonly HiddenHostsMemory _memory = new();
     private int _pendingScoutXp;
 
-    public HiddenHostsService(IHiddenHostsSettings settings) => _settings = settings;
+    public HiddenHostsService(IHiddenHostsSettings settings, IScoutIntelQuery scouting)
+    {
+        _settings = settings;
+        _scouting = scouting;
+    }
 
     internal bool Enabled => _settings.Enabled;
 
@@ -59,12 +65,13 @@ internal sealed partial class HiddenHostsService
         {
             // A party that left the horizon starts from nothing again.
             state.Known = 0;
-            return new NameplateIntel(HiddenHostsMath.HorizonText, isHorizon: true);
+            return new NameplateIntel(HiddenHostsMath.HorizonText, isHorizon: true,
+                named: _scouting.IsNamedByScout(s.StringId!, s.NowHour));
         }
 
         int count = s.HealthyCount;
         bool sameRealm = s.SameFaction || s.ArmyLeaderSameFaction;
-        float multiplier = HiddenHostsMath.ScoutMultiplier(s.ScoutingSkill, sameRealm);
+        float multiplier = HiddenHostsMath.ScoutMultiplier(FogSkill(s.ScoutingSkill), sameRealm);
         int known = HiddenHostsMath.KnownDigits(count, ratio, multiplier, state.Known);
         state.Known = known;
 
@@ -83,6 +90,20 @@ internal sealed partial class HiddenHostsService
     /// <summary>True when the party is past nine tenths of its own spotting reach. Reads the latch of no party.</summary>
     internal bool IsHorizon(in PartyIntelSnapshot s) =>
         TryDistanceRatio(in s, out float ratio) && HiddenHostsMath.IsHorizon(ratio, s.SpottingRatio);
+
+    /// <summary>
+    /// True when the party has no name on the map: it is at the horizon and no scout named it (#847). The nameplate, the
+    /// encyclopedia hotkey and the tooltip title all follow this one rule; a named host's count still reads "...".
+    /// </summary>
+    internal bool IsNameHidden(in PartyIntelSnapshot s) =>
+        IsHorizon(in s) && !_scouting.IsNamedByScout(s.StringId!, s.NowHour);
+
+    /// <summary>
+    /// The Scouting skill that decides how far digits reach: 0 while the scout is away on a settlement ride (#847), because
+    /// the party's best eye is not with it. Only the reach reads it: how long a count is held and how fast it fades keep the
+    /// real skill, and the adapter keeps reporting the raw one.
+    /// </summary>
+    private int FogSkill(int scoutingSkill) => _scouting.IsScoutAway ? 0 : scoutingSkill;
 
     /// <summary>The gates every answer about a party shares; false means the plate or row is left to vanilla.</summary>
     private bool TryDistanceRatio(in PartyIntelSnapshot s, out float ratio)

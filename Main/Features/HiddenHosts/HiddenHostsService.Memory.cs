@@ -44,10 +44,55 @@ internal sealed partial class HiddenHostsService
     /// </summary>
     internal void StampSettlement(in TAOM.Adapters.SettlementIntelSnapshot s)
     {
-        if (!_settings.Enabled || !s.HasData || s.StringId == null || s.NowHour < 0 || !s.IsPlayerSettlement) return;
-        if (IsSettlementOwnSide(in s)) return;
+        if (!s.IsPlayerSettlement) return;
+        WriteSettlement(in s, visible: true);
+    }
+
+    /// <summary>
+    /// The defenders a scout counted in a settlement the player is not in (#847): the same exact stamp, with the same gates
+    /// (the toggle, a usable clock, the player's own side), but for any settlement and with the clock running from the stamp.
+    /// A settlement the player is not inside is not in sight, so the row starts at stamp plus the hold; the hourly poll puts it
+    /// back on the sight clock if it is inspected.
+    /// </summary>
+    internal void RecordScoutedSettlement(in TAOM.Adapters.SettlementIntelSnapshot s) => WriteSettlement(in s, visible: false);
+
+    private void WriteSettlement(in TAOM.Adapters.SettlementIntelSnapshot s, bool visible)
+    {
+        if (!_settings.Enabled || !s.HasData || s.StringId == null || s.NowHour < 0 || IsSettlementOwnSide(in s)) return;
         _memory.Record(MemoryKind.Settlement, s.StringId, s.DefenderCount, HiddenHostsMath.DigitCount(s.DefenderCount), s.NowHour,
-            visible: true, s.ScoutingSkill);
+            visible, s.ScoutingSkill);
+    }
+
+    /// <summary>
+    /// What a scout's report says about one host's count (#847): the digits the distance lets the player read now, plus
+    /// <paramref name="stages"/> more (one, or two for a skilled scout), never past the host's digit count, and never fewer than
+    /// the player already remembers of a host of that size (a remembered count that disagrees with the live one is another
+    /// size of host and counts for nothing). The raised figure is remembered like any counted one, but pays no Scouting XP (the
+    /// ride pays its own). The latch is read, not written: the plate keeps showing the live reading and the memory shows the
+    /// rest. With the fog off, no clock, or a host of the player's own side or one the engine hides, the report gives the whole
+    /// number and writes nothing. Returns the text to print: the number with its unknown digits as "?".
+    /// </summary>
+    internal string RaiseByScout(in TAOM.Adapters.PartyIntelSnapshot s, int stages)
+    {
+        int count = Math.Max(0, s.HealthyCount);
+        int digits = HiddenHostsMath.DigitCount(count);
+        if (!_settings.Enabled || s.NowHour < 0 || IsOwnSideOrHidden(in s)) return HiddenHostsMath.FormatMask(count, digits);
+
+        int basis = LiveKnownDigits(in s, count);
+        if (_memory.TryGet(MemoryKind.Party, s.StringId!, out var row) && HiddenHostsMath.Agrees(count, row.Known, row.Count))
+            basis = Math.Max(basis, row.Known);
+        int raised = Math.Min(digits, basis + Math.Max(0, stages));
+        _memory.Record(MemoryKind.Party, s.StringId!, count, raised, s.NowHour, s.IsVisible, s.ScoutingSkill);
+        return HiddenHostsMath.FormatMask(count, raised);
+    }
+
+    /// <summary>The digits <see cref="Evaluate"/> would show now: none at the horizon or without a usable distance, else the held latch widened by the reach.</summary>
+    private int LiveKnownDigits(in TAOM.Adapters.PartyIntelSnapshot s, int count)
+    {
+        if (!TryRatio(s.DistanceToMain, s.MainSeeingRange, out float ratio) || HiddenHostsMath.IsHorizon(ratio, s.SpottingRatio)) return 0;
+        int latch = _parties.TryGetValue(s.StringId!, out var state) ? state.Known : 0;
+        float multiplier = HiddenHostsMath.ScoutMultiplier(FogSkill(s.ScoutingSkill), s.SameFaction || s.ArmyLeaderSameFaction);
+        return HiddenHostsMath.KnownDigits(count, ratio, multiplier, latch);
     }
 
     /// <summary>

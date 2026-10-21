@@ -33,7 +33,7 @@ public class HiddenHostsMemoryBehaviorTests
     {
         _settings = Substitute.For<IHiddenHostsSettings>();
         _settings.Enabled.Returns(true);
-        _service = new HiddenHostsService(_settings);
+        _service = new HiddenHostsService(_settings, new NoScoutIntel());
         _adapter = Substitute.For<IHiddenHostsCampaignAdapter>();
         _adapter.NowHour.Returns(100);
         _adapter.MainScoutingSkill.Returns(0);
@@ -385,7 +385,7 @@ public class HiddenHostsMemoryBehaviorTests
         Assert.IsTrue(store.Has("_taomHiddenHostsMemory_0"));
 
         store.Loading = true;
-        var fresh = new HiddenHostsService(_settings);
+        var fresh = new HiddenHostsService(_settings, new NoScoutIntel());
         var b = new HiddenHostsMemoryBehavior(fresh, _adapter, _coop, _logger);
         b.SyncData(store);
 

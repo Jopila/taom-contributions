@@ -47,7 +47,7 @@ public class HiddenHostsHookTests
         _settings.Enabled.Returns(true);
         _adapter = Substitute.For<IPartyIntelAdapter>();
         _logger = Substitute.For<IModLogger>();
-        _service = new HiddenHostsService(_settings);
+        _service = new HiddenHostsService(_settings, new NoScoutIntel());
         HiddenHostsCalls.Initialize(_service, _adapter, _logger);
     }
 
@@ -268,6 +268,21 @@ public class HiddenHostsHookTests
         Sees(Snap(0.95f));
 
         Assert.IsFalse(RunEncyclopediaPrefix(NewVisual()));
+    }
+
+    [TestMethod]
+    public void EncyclopediaPrefix_PartyAtTheHorizonThatTheScoutNamed_RunsVanilla_SoTheKeyOpensIt()
+    {
+        var scouting = Substitute.For<TAOM.Core.Domain.IScoutIntelQuery>();
+        scouting.IsNamedByScout("p1", 100).Returns(true);
+        HiddenHostsCalls.Initialize(new HiddenHostsService(_settings, scouting), _adapter, _logger);
+        Sees(Snap(0.95f) with { NowHour = 100 });
+
+        Assert.IsTrue(RunEncyclopediaPrefix(NewVisual()));
+        scouting.Received(1).IsNamedByScout("p1", 100);
+
+        scouting.IsNamedByScout("p1", 100).Returns(false);
+        Assert.IsFalse(RunEncyclopediaPrefix(NewVisual()), "an unnamed horizon party is still nameless");
     }
 
     [TestMethod]

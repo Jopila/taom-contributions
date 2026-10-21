@@ -17,7 +17,7 @@ public class HiddenHostsServiceTests
     {
         _settings = Substitute.For<IHiddenHostsSettings>();
         _settings.Enabled.Returns(true);
-        _sut = new HiddenHostsService(_settings);
+        _sut = new HiddenHostsService(_settings, new NoScoutIntel());
     }
 
     /// <summary>A party <paramref name="ratio"/> of the player's seeing range away; the engine lets the player see it out to <paramref name="spotting"/>.</summary>
@@ -42,7 +42,7 @@ public class HiddenHostsServiceTests
     private static void AssertNotMasked(NameplateIntel intel)
     {
         Assert.IsFalse(intel.Masked);
-        Assert.IsFalse(intel.IsHorizon);
+        Assert.AreNotEqual(HiddenHostsMath.HorizonText, intel.CountText);
         Assert.IsNull(intel.CountText);
     }
 
@@ -118,7 +118,7 @@ public class HiddenHostsServiceTests
 
         Assert.IsTrue(intel.Masked);
         Assert.AreEqual("???", intel.CountText);
-        Assert.IsFalse(intel.IsHorizon);
+        Assert.AreNotEqual(HiddenHostsMath.HorizonText, intel.CountText);
     }
 
     [TestMethod]
@@ -145,15 +145,15 @@ public class HiddenHostsServiceTests
 
         Assert.IsTrue(intel.Masked);
         Assert.AreEqual("...", intel.CountText);
-        Assert.IsTrue(intel.IsHorizon);
+        Assert.AreEqual(HiddenHostsMath.HorizonText, intel.CountText);
     }
 
     [TestMethod]
     public void Evaluate_HorizonScalesWithTheEnginesSpottingRatio()
     {
         // A party the engine lets the player see only out to half the range is at its horizon at 0.46.
-        Assert.IsTrue(_sut.Evaluate(Snap(123, 0.46f, spotting: 0.5f)).IsHorizon);
-        Assert.IsFalse(_sut.Evaluate(Snap(123, 0.46f, spotting: 1f)).IsHorizon);
+        Assert.AreEqual(HiddenHostsMath.HorizonText, _sut.Evaluate(Snap(123, 0.46f, spotting: 0.5f)).CountText);
+        Assert.AreNotEqual(HiddenHostsMath.HorizonText, _sut.Evaluate(Snap(123, 0.46f, spotting: 1f)).CountText);
     }
 
     [TestMethod]
@@ -163,7 +163,7 @@ public class HiddenHostsServiceTests
 
         Assert.IsTrue(intel.Masked);
         Assert.AreEqual("???", intel.CountText);
-        Assert.IsFalse(intel.IsHorizon);
+        Assert.AreNotEqual(HiddenHostsMath.HorizonText, intel.CountText);
     }
 
     [TestMethod]
@@ -227,7 +227,7 @@ public class HiddenHostsServiceTests
     public void Evaluate_HorizonForgetsTheLatch()
     {
         _sut.Evaluate(Snap(7, 0.20f));
-        Assert.IsTrue(_sut.Evaluate(Snap(7, 0.95f)).IsHorizon);
+        Assert.AreEqual(HiddenHostsMath.HorizonText, _sut.Evaluate(Snap(7, 0.95f)).CountText);
 
         Assert.AreEqual("?", _sut.Evaluate(Snap(7, 0.30f)).CountText);
     }

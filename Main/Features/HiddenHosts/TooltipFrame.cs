@@ -45,8 +45,8 @@ internal sealed class TooltipFrame
     /// <summary>A party or an army: the subjects with a title row and a troops section.</summary>
     internal bool IsPartyOrArmy => Kind == TooltipSubjectKind.Party || Kind == TooltipSubjectKind.Army;
 
-    /// <summary>A party or army at the horizon loses its name.</summary>
-    internal bool RenamesTitle => IsPartyOrArmy && Verdict.Mode == TooltipMode.Horizon;
+    /// <summary>A party or army at the horizon loses its name, unless the scout named it (#847).</summary>
+    internal bool RenamesTitle => IsPartyOrArmy && Verdict.Mode == TooltipMode.Horizon && !Verdict.Named;
 
     /// <summary>
     /// A masked party or army has its troop-total row wrapped, whether or not a memory exists yet, so a memory that appears

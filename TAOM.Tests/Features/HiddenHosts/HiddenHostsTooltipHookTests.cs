@@ -46,7 +46,7 @@ public class HiddenHostsTooltipHookTests
         _settings.Enabled.Returns(true);
         _adapter = Substitute.For<IPartyIntelAdapter>();
         _logger = Substitute.For<IModLogger>();
-        _service = new HiddenHostsService(_settings);
+        _service = new HiddenHostsService(_settings, new NoScoutIntel());
         HiddenHostsCalls.Initialize(_service, _adapter, _logger, () => "Defenders", () => "Troops", hours => "Counted " + hours + "h ago");
     }
 
@@ -103,6 +103,21 @@ public class HiddenHostsTooltipHookTests
         Assert.AreEqual(TooltipSubjectKind.Army, HiddenHostsTooltipScope.Current!.Kind);
         Assert.AreEqual(TooltipMode.Horizon, HiddenHostsTooltipScope.Current.Verdict.Mode);
         _adapter.Received(1).Read(Arg.Any<MobileParty>());
+    }
+
+    [TestMethod]
+    public void Open_PartyAtTheHorizon_CarriesWhetherTheScoutNamedIt()
+    {
+        var scouting = Substitute.For<TAOM.Core.Domain.IScoutIntelQuery>();
+        scouting.IsNamedByScout("p1", 100).Returns(true);
+        HiddenHostsCalls.Initialize(new HiddenHostsService(_settings, scouting), _adapter, _logger);
+        SeesParty(Party(123, 0.95f) with { NowHour = 100 });
+
+        HiddenHostsTooltipFrames.Open(Bare<MobileParty>(), "hook");
+
+        Assert.AreEqual(TooltipMode.Horizon, HiddenHostsTooltipScope.Current!.Verdict.Mode);
+        Assert.IsTrue(HiddenHostsTooltipScope.Current.Verdict.Named);
+        Assert.IsFalse(HiddenHostsTooltipScope.Current.RenamesTitle);
     }
 
     [TestMethod]
@@ -319,6 +334,21 @@ public class HiddenHostsTooltipHookTests
 
         Assert.AreEqual(HiddenHostsTexts.UnknownParty, vm.TooltipPropertyList[0].ValueLabel);
         Assert.AreEqual(" ", vm.TooltipPropertyList[1].ValueLabel, "only the title changes: the owner block stays");
+    }
+
+    [DataTestMethod]
+    [DataRow((int)TooltipSubjectKind.Party)]
+    [DataRow((int)TooltipSubjectKind.Army)]
+    public void Subject_Postfix_AtTheHorizon_AHostTheScoutNamed_KeepsItsTitle(int subjectKind)
+    {
+        var kind = (TooltipSubjectKind)subjectKind;
+        var vm = NewVm();
+        vm.AddProperty("", "Lord Aldric", 0, TooltipProperty.TooltipPropertyFlags.Title);
+        HiddenHostsTooltipScope.Open(new TooltipFrame(kind, new TooltipVerdict(TooltipMode.Horizon, 0.95f, 1f, 0, 123, named: true)));
+
+        TooltipRefresherCollection_Subject_HiddenHosts_Patch.Postfix(vm);
+
+        Assert.AreEqual("Lord Aldric", vm.TooltipPropertyList[0].ValueLabel);
     }
 
     [TestMethod]

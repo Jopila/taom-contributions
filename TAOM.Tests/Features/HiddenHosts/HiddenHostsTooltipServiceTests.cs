@@ -20,7 +20,7 @@ public class HiddenHostsTooltipServiceTests
     {
         _settings = Substitute.For<IHiddenHostsSettings>();
         _settings.Enabled.Returns(true);
-        _sut = new HiddenHostsService(_settings);
+        _sut = new HiddenHostsService(_settings, new NoScoutIntel());
     }
 
     private static PartyIntelSnapshot Party(int count, float ratio, string id = "p1", float spotting = 1f, int skill = 0,

@@ -42,6 +42,9 @@ public sealed class LookoutSpottingContributor : IPartySpottingContributor
         return ComputeLookoutBonus(scouting);
     }
 
+    /// <summary>The lookout widens what the party sees under vanilla's cap; it never lifts the cap.</summary>
+    public float GetSpottingRangeCapBonus(MobileParty party) => 0f;
+
     /// <summary>Pure source math (AmbushMath.ComputeLookoutBonus): 0.2 + scouting/200. A corrupt
     /// (negative or non-finite) skill degrades to the flat bonus; no arbitrary upper cutoff.</summary>
     internal static float ComputeLookoutBonus(float scouting)

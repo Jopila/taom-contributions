@@ -1185,3 +1185,42 @@ still paid, and a resolve failure in it would have dropped TournamentRewards' ow
   `Invoke` in the installed DLL and state the actual order. A feature owns its listener, registered in its own module and
   wrapped in a try; never hang a second feature's work inside another feature's listener to avoid an order question.
 - **Source:** `docs/reviews/rca-good-deeds-2026-10-20.md` finding 4.
+
+### A timed effect is re-armed only by an event that beats what it holds, in every writer
+
+Far Watch's sight buff is a level with a hold clock. `End` (a ride called back) set the buff to
+`Math.Max(reached, held)` with a fresh clock whenever the ride had reached anything, so a few minutes' ride renewed an
+older full buff to a full new hold, and short rides repeated after each rest kept +50 % sight forever. After that fix,
+`Complete` still set a fresh full buff on every return, so a weaker scout's return shortened a longer one.
+- **Why missed:** "keep the larger" was applied to the level and not to the clock; the convergence pass then found the
+  same class in the second writer, because the first fix looked only at the method the finding named.
+- **Prevent:** a write to a timed effect replaces it only when the new effect is larger at every future hour (level and
+  end); otherwise it keeps the held one. Grep every writer of the effect when you fix one. Test: an older, stronger
+  effect plus a lesser event leaves the end hour where it was.
+- **Source:** `docs/reviews/rca-far-watch-2026-10-20.md` finding 1 and C7.
+
+### Raising a party's sight cap widens a per-frame engine search that has no cheap step
+
+The Far Watch buff raised vanilla's 60-unit sight cap through `IPartySpottingContributor`. The visibility pass searches
+the campaign's `LocatorGrid` (32 by 32 cells of 5 units, wrapped by modulo) around the main party every frame, and
+`GetBoundaries` caps the span at 31 cells, so past a radius of 75 most positions walk every cell, which holds parties
+from all over the map; the pass's `List.Remove` term grows with the parties inside the radius. The cost rises smoothly
+with the radius. Vanilla's step-sound search (`MapScreen.TickStepSounds`, `seeingRange + 25`) already walks the whole
+grid every frame. The composer clamps every contributor's cap bonus at 0.29 (a 77.4 cap) until an in-game A/B
+measures the cost.
+- **Why missed:** the design verified the cap (`LimitMax(60)`) and the arithmetic, not the consumer's cost; the review
+  then reported a 77.5 "whole-grid threshold", and the orchestrating session put it to Mike as a decision premise
+  without reading `GetBoundaries` (`evidence-over-claims.md` A.4).
+- **Prevent:** before raising an engine cap, read the consumer of the capped value and state its cost as a function of
+  the value, from the decompile; one clamp in the composer, named with its reason; an A/B before raising it further.
+- **Source:** `docs/reviews/rca-far-watch-2026-10-20.md` finding 5 and C1.
+
+### A new reader of a remembered value applies the value's validity predicate
+
+Hidden Hosts introduced `HiddenHostsMath.Agrees` so that a contradicting live reading replaces a remembered count. Far
+Watch's `RaiseByScout`, a new reader of the same rows, built on `row.Known` without it, so a stale memory could outrank
+the scout's report.
+- **Why missed:** the predicate lives in the math class, not on the row, so nothing makes a new reader use it.
+- **Prevent:** a review of a new consumer of a cache lists the cache's validity predicates and checks each one is
+  applied; a test row with a contradicting memory for every reader.
+- **Source:** `docs/reviews/rca-far-watch-2026-10-20.md` finding 8.

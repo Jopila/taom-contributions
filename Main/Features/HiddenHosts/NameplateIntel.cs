@@ -5,17 +5,21 @@ internal readonly struct NameplateIntel
 {
     internal static NameplateIntel Unmasked => default;
 
-    internal NameplateIntel(string countText, bool isHorizon)
+    /// <param name="named">
+    /// Only a horizon plate can lose its name, and it does unless <paramref name="named"/>: the scout's report (#847) names six
+    /// hosts so that they keep theirs past the horizon (their count still reads "...").
+    /// </param>
+    internal NameplateIntel(string countText, bool isHorizon, bool named = false)
     {
         Masked = true;
         CountText = countText;
-        IsHorizon = isHorizon;
+        HidesName = isHorizon && !named;
     }
 
     internal bool Masked { get; }
 
     internal string? CountText { get; }
 
-    /// <summary>The party is past nine tenths of its own spotting reach: its count is "..." and it has no name.</summary>
-    internal bool IsHorizon { get; }
+    /// <summary>The plate shows "Unknown party" instead of the party's name: it is at the horizon and no scout named it.</summary>
+    internal bool HidesName { get; }
 }

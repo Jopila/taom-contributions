@@ -320,6 +320,11 @@ window open in the very writer whose fix was meant to close it.
 - **Recurrence (2026-10-08, fix round):** two settings-provider pins sat in `RequiresGame` binding classes, so no
   no-game run, CI included, executed them. A pin that needs no game goes in an untagged class beside its siblings
   (finding 25).
+- **Recurrence (2026-10-20, Far Watch):** composer and sight tests that run engine types lacked `RequiresGame`, two
+  engine-fact tests that execute game IL lacked `RequiresGameIL`, and a Hidden Hosts wiring test passed only after
+  another test had loaded the game assemblies. Tag by what each test executes, not by file, and run a new reflection
+  test alone once (`--filter` on its name) before calling it green. Source: `docs/reviews/rca-far-watch-2026-10-20.md`
+  findings 6 and 7.
 
 ### An in-game check names the log line it expects and traces the trigger that produces it (2026-10-08)
 - **Why missed:** the mission-start guard's "guard off" step promised an endless loading loop, but the QA trigger

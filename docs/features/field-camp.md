@@ -123,8 +123,8 @@ TAOM's loose `Assets/` tree instead of `AssetPackages/`. Where they should live 
 | `CampService.cs` | State machine; campaign statics behind protected virtuals (CampServiceTests). Also declares `SettlementSite` and `FortificationSearch`, the nearest town-or-castle rule RefugeService shares for its keep-outs (FortificationSearchTests) |
 | `CampTerrainService.cs` / `CampAmbushService.cs` | Pure policy and odds |
 | `CampVisualService.cs` + `Visuals/CampLayoutBuilder.cs` | Entities, wind ticker (500 ms throttle), fallback chain |
-| `LookoutSpottingContributor.cs` | The sight bonus through the model seam |
-| `Hooks/FieldCampCampaignBehavior.cs` + `FieldCampMenuController.cs` | Events, SyncData, menus (index 4 on both menus reserved for Refuge; index 5 on the camp sub-menu is Host Review, before Leave, see [host-review.md](host-review.md)) |
+| `LookoutSpottingContributor.cs` | The sight bonus through the model seam (its cap member returns 0; Far Watch's scout is the second contributor, see [far-watch.md](far-watch.md) "The seam") |
+| `Hooks/FieldCampCampaignBehavior.cs` + `FieldCampMenuController.cs` | Events, SyncData, menus (index 4 on both menus reserved for Refuge; index 5 on the camp sub-menu is shared by Host Review and Far Watch, both before Leave: the camp sub-menu's options end up Forage, Fortify, Supplies, Break, Refuge, Review the host, Send a scout, Leave, see [host-review.md](host-review.md) and [far-watch.md](far-watch.md)) |
 | `Hooks/PartyNameplateCampIconPatch.cs` | Patch74 thin guarded body (registry entry has the never-throw contract) |
 | `Hooks/CampNameplateIconPresenter.cs` | Patch74's widget half: icon creation, sprite memo (same never-throw posture) |
 | `UI/FieldCampMapView.cs` + `FieldCampOverlayVM.cs` | Overlay button + status panel, 4 Hz refresh |
@@ -167,7 +167,7 @@ the lock, unpauses the engine and force-resumes time. Both live in
 
 ## Traps
 
-- The Refuge insertion point is **index 4 on BOTH menus**; do not take it. Host Review takes index 5 on the camp sub-menu, before Leave ([host-review.md](host-review.md)).
+- The Refuge insertion point is **index 4 on BOTH menus**; do not take it. Host Review and Far Watch both insert at **index 5** on the camp sub-menu, before Leave ([host-review.md](host-review.md), [far-watch.md](far-watch.md)). Both add from `OnAfterSessionLaunched`; listeners of one event run newest first, so the later module (Far Watch, listed after Host Review in `FeatureModules.cs`) inserts first and Host Review pushes it down. Reorder the modules and the two options swap; `FarWatchWiringTests` pins the order and the module positions.
 - `CampVisualService` is a process-lifetime singleton: session teardown must call `ClearAll`
   (map-view finalize + game-over handler both do; both idempotent).
 - A hand-corrupted save with NaN `BuildHours` renders that camp permanently un-ready; the only

@@ -13,6 +13,11 @@ Phases 1 (nameplates), 2 (hover tooltips) and 3 (memory) are built. Phase 3 is t
 remembered from an earlier sighting), with its own popup text under its own key and saved flag; the Phase 1 popup does not
 mention `~`. Tracked in [#846](https://github.com/haterade22/TAOM/issues/846).
 
+Far Watch ([#847](https://github.com/haterade22/TAOM/issues/847), [far-watch.md](far-watch.md)) adds three rules, all through
+the service and the `IScoutIntelQuery` seam its store implements (see "Far Watch" below): a scout away on a settlement ride
+reads Scouting as 0 for how far digits reach, the six hosts a scout's report names keep their name past the horizon, and the
+report raises the digits of every host in sight and stamps a scouted settlement's defenders.
+
 What the player sees in vanilla, and so here: the nameplate count is always drawn, but the party's name and its wounded
 and prisoner text only while the ShowIndicators key (Left Alt) is held. The mask therefore shows on the count at all times
 and on the name and extra text only while that key is down.
@@ -368,7 +373,7 @@ healthy troops (a count of 0 is one digit). Six or more digits use the five-digi
 | File | Purpose |
 |------|---------|
 | `Main/Features/HiddenHosts/HiddenHostsMath.cs` | Threshold rows, scout multiplier, known digits, horizon, mask format |
-| `Main/Features/HiddenHosts/HiddenHostsService.cs` | The decision per snapshot, the latch and the string cache |
+| `Main/Features/HiddenHosts/HiddenHostsService.cs` | The decision per snapshot, the latch and the string cache; `FogSkill` and `IsNameHidden` (Far Watch) |
 | `Main/Features/HiddenHosts/NameplateIntel.cs` | What a plate shows: masked, count text, horizon |
 | `Main/Features/HiddenHosts/VanillaBinds.cs` | Lays the mask over the three bind fields and restores vanilla's values (`__state`) |
 | `Main/Features/HiddenHosts/Hooks/PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs` | Patch105 prefix and finalizer on `RefreshBinding` |
@@ -408,6 +413,7 @@ healthy troops (a count of 0 is one digit). Six or more digits use the five-digi
 - `IHiddenHostsHintAdapter` (Adapters) over `InformationManager.ShowInquiry`.
 - `IHiddenHostsCampaignAdapter` (Adapters) over `CampaignTime`, the main party's scout, the sight poll, `Settlement.Find` and `Hero.AddSkillXp`; the plain-sight reads of `PlayerEncounter`, the map event and the siege are `IPartyIntelAdapter.CollectPlainSight`.
 - `ICoopSessionProvider` and `CoopSessionPolicy` (CoopInterop) for the XP gate; `SyncDataChunker` (Core.Persistence) for the save.
+- `IScoutIntelQuery` (Core.Domain), implemented by Far Watch's store: whether a scout is away and which hosts he named. Hidden Hosts holds the seam, not the feature.
 
 ## Tests
 
@@ -437,6 +443,7 @@ Phase 3:
 - `HiddenHostsTooltipFrameTests.cs`: the frame's decisions (rename, wrap, trim, defenders, reason row) over every kind and mode as plain code. `HiddenHostsTooltipScopeTests.cs` gains the interleaved two-thread test of the thread-local slot.
 - `HiddenHostsMemoryBindingTests.cs`: the engine facts (the visibility setter raises the event only on a change, the destroy order, `Settlement.Find`, `Hero.AddSkillXp`, the troops game text id, the `_dt > 0f` gate in `Campaign.Tick`, `GameMenu.RunOnInit` raising `GameMenuOpened`, `SaveHandler.SaveTick` raising before-save before it writes, `MobileParty.SiegeEvent` being the camp's event, `PlayerSiege.PlayerSiegeEvent`'s fallback).
 - `HiddenHostsTooltipHookTests.cs` and `HiddenHostsTooltipHarmonyPairTests.cs` (extended): the troop-total wrapper (only the troops title, only a masked party or army, with a memory or not, flag cleared in a finally), the reason row, the total through the vanilla builder and across the two-second refresh via real Harmony.
+- `HiddenHostsScoutSeamTests.cs` (Far Watch, #847; `NoScoutIntel` is the test double every other Hidden Hosts test builds the service with): `FogSkill` at all five sites, the named-horizon plate and tooltip frame, `RaiseByScout` (digit stages, the horizon, a remembered count that disagrees with the host, the toggle, the clock, the own side), `RecordScoutedSettlement`, and a steady horizon read with the real Far Watch store that allocates nothing. The named-horizon case also runs through real Harmony in `HiddenHostsHarmonyPairTests`, `HiddenHostsHookTests` and `HiddenHostsTooltipHookTests`, and `HiddenHostsWiringTests` loads the game assemblies before it scans the patch classes.
 - `HiddenHostsBehaviorSessionResetTests.cs` (extended): the memory hint, its own flag and key, never on the tick the first hint shows. `HiddenHostsWiringTests.cs`: the memory behavior is built with `new` in the declaration, registers exactly five events (the plain-sight behavior, two: `GameMenuOpened` and `TickEvent`) and resets in its constructor.
 
 `PartyIntelAdapter`, `HiddenHostsCampaignAdapter` and `HiddenHostsHintAdapter` need a live campaign, so the in-game check below is their coverage (`PartyIntelAdapterTests` pins that neither adapter keeps a campaign object).
@@ -469,13 +476,42 @@ a settlement build adds one party read per row inside it.
 The T6 prefix is two reference reads and a type comparison per periodic refresh; T10 and T11 read one static and return when
 no frame is open, which is every call outside a map tooltip.
 
+## Far Watch (#847)
+
+The scout of [far-watch.md](far-watch.md) changes Hidden Hosts in four places. `HiddenHostsService` now takes an
+`IScoutIntelQuery` (`IsScoutAway`, `IsNamedByScout(partyId, nowHour)`); the Hidden Hosts tests build it with `NoScoutIntel`, a
+test double that is never shipped.
+
+- **Scout away: reach only.** `FogSkill` reads Scouting as 0 while a settlement ride runs, at the five `ScoutMultiplier`
+  sites (the nameplate, the party, settlement and battle tooltips, and a settlement tooltip's party row) and in the live
+  reading of `RaiseByScout`. The hold of a counted figure and the fade step (`HoldHours`, `FadeStepHours`) and the skill handed to
+  the memory keep the real skill, and the adapter keeps reporting the raw one: they say how long a party remembers, not how far
+  it reads.
+- **No fog multiplier for the report.** The thresholds are fractions of `SeeingRange`, so the sight Far Watch adds already
+  scales every threshold and the horizon in absolute distance; a multiplier in the fog stack would apply it twice. The 2.25 cap
+  still covers skill times realm only. (The same reasoning as Vantage Point under "Not in Phase 1".)
+- **Named past the horizon.** A host the last report listed keeps its name, its encyclopedia hotkey and its tooltip title past
+  the horizon until the raised sight is over; its count stays `...` (decision Q5 unchanged). One predicate,
+  `IsNameHidden(snapshot)`: at the horizon and not named. `NameplateIntel.HidesName` (set only on the horizon branch),
+  `TooltipVerdict.Named` and `TooltipFrame.RenamesTitle` follow it, and the encyclopedia prefix calls `IsNameHidden` instead of
+  `IsHorizon`. An army tooltip is judged on its leader's id. The `IsNamedByScout` call is made only at the horizon branch: a
+  scan of at most 6 ids, ordinal compares, no allocation.
+- **`RaiseByScout(snapshot, stages)`** (memory half; returns the text to print): `raised = min(digits, max(live known digits, remembered digits) + stages)`, where a remembered count counts only if `HiddenHostsMath.Agrees` with the live one,
+  written to the memory (the latch is read and never written; no XP). With the fog off, no clock, or an own-side or
+  engine-hidden host it returns the whole number and writes nothing. **`RecordScoutedSettlement(snapshot)`** is the exact
+  stamp of any settlement, behind the same gates as `StampSettlement`, with the row on the out-of-sight clock.
+
+In the Harmony pair of Patch105 the only change is that `VanillaBinds.LayMask` swaps the name on `HidesName`, not on
+`IsHorizon`; the pair still goes through `__state` and the finalizer, and `HiddenHostsHarmonyPairTests` runs the named-horizon
+case through real Harmony.
+
 ## Not in Phase 1
 
 - The folder is `HiddenHosts`, not `PartyIntel`; the adapter and snapshot keep the neutral name `PartyIntel` because later phases read more of the party.
 - No MCM tuning sliders yet: the thresholds are constants.
 - No prefab widget: the mask is text in the existing nameplate fields only.
 - Vantage Point is not a separate x1.25: vanilla adds it to the spotting range and the fog reads `SeeingRange` (`DefaultMapVisibilityModel.cs:61-63`), so it already widens the reach.
-- The scout-away rule and the scout report move to [#847](https://github.com/haterade22/TAOM/issues/847).
+- The scout-away rule and the scout report moved to [#847](https://github.com/haterade22/TAOM/issues/847) and are built: see "Far Watch (#847)" above.
 - Hover tooltips still show exact numbers and the name until Phase 2.
 - The memory symbol `~` and its popup text arrive with Phase 3.
 - Translation: the six `taom_hhost_*` keys (three from phases 1 and 2, three from phase 3) are seeded as English in all 12 languages; the paid translation run is owed.
@@ -506,7 +542,7 @@ no frame is open, which is every call outside a map tooltip.
 - **No XP from stamps, memory, settlements, battles, exempt parties or hosts at peace** (decision Q3), and none on a co-op client.
 - **No setting.** The toggle off stops stamping, the XP and the display, and keeps the rows; the fade, visibility and destroy
   handlers keep running so a toggle cannot freeze a row.
-- **The scout-away rule and the scout report** stay with [#847](https://github.com/haterade22/TAOM/issues/847).
+- **The scout-away rule and the scout report** are Far Watch ([#847](https://github.com/haterade22/TAOM/issues/847)): see "Far Watch (#847)" above.
 - **A destroyed party** whose destruction bypassed `DestroyPartyAction` keeps its row until it fades out; the visibility event
   makes it stale, so the row ages out on the normal clock. `MobileParty.RemoveParty` has three callers in v1.5.5, by the
   decompile and not pinned: `DestroyPartyAction`, a cheat, and an old-save fixup in `MobileParty` (saves older than v1.3.0).
@@ -515,6 +551,7 @@ no frame is open, which is every call outside a map tooltip.
 
 ## Changelog
 
+- 2026-10-20: Far Watch (#847): the scout-away rule (`FogSkill`), hosts named by a scout keep their name past the horizon (`IsNameHidden`), `RaiseByScout` and `RecordScoutedSettlement`; the service takes an `IScoutIntelQuery`.
 - 2026-10-19: deep-review fixes: exact stamps also on every game menu (the tick never fires while a menu stops time), a live view that contradicts a memory replaces it, own side and plain sight judged by one predicate, the player's own siege on both sides, battle totals leave hidden parties out, the Scouting XP is also granted before a save, a masked total row is always wrapped, a thread-local frame slot, the reason row and the drawn flag follow what reached the screen.
 - 2026-10-19: phase 3 (memory) built: the `~` count, the fade, exact stamps, Scouting XP, the save as chunked text, the reason row and its own popup; the settlement tooltip row of an army leader now masks the number vanilla printed.
 - 2026-10-19: phase 2 (hover tooltips) built: eleven targets, a frame bracket on the five builders and on the two-second refresh, the in-plain-sight exemption (also for nameplates and the hotkey).
@@ -527,6 +564,10 @@ Left Alt held, so the name and extra text show: counts sharpen with distance; st
 for a tenth of the threshold; past nine tenths of the party's spotting reach the plate reads `...` and "Unknown party" and
 the encyclopedia key does nothing, while a left click still engages; turn the toggle off mid-chase and the exact numbers
 return on the next frame; the popup appears once per campaign.
+
+### Far Watch checks
+
+With a Ranger companion in the Scout role, send him to a town: while he is away the counts blur sooner (the plate that read `12?` reads `1??`); on his return the report rows carry digits, a listed host far off keeps its name and the encyclopedia key opens it, and the nameplate later shows `~12?` for it; scout a town and hover it from afar (`~` defenders and the "Counted" age); with Hidden Hosts off, the report gives exact counts.
 
 ### Phase 3 checks
 

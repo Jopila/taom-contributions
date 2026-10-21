@@ -71,4 +71,18 @@ public class LookoutSpottingContributorTests
         Assert.AreEqual(0f, sut.GetSpottingRangeBonusFactor(null!));
         _ = camps.DidNotReceive().PlayerCamp;
     }
+
+    [TestMethod]
+    public void GetSpottingRangeCapBonus_IsZeroInEveryState_TheLookoutNeverLiftsTheCap()
+    {
+        var settings = Substitute.For<ICampSettingsProvider>();
+        settings.Enabled.Returns(true);
+        var camps = Substitute.For<ICampService>();
+        var sut = new LookoutSpottingContributor(camps, settings);
+
+        Assert.AreEqual(0f, sut.GetSpottingRangeCapBonus(null!));
+        settings.Enabled.Returns(false);
+        Assert.AreEqual(0f, sut.GetSpottingRangeCapBonus(null!));
+        _ = camps.DidNotReceive().PlayerCamp;
+    }
 }

@@ -54,7 +54,7 @@ public static class PartyNameplateVM_RefreshBinding_HiddenHosts_Patch
 
             var intel = service.Evaluate(adapter.Read(party));
             // Everything that can throw runs before the first write.
-            string? horizonName = intel.IsHorizon ? HiddenHostsTexts.UnknownParty : null;
+            string? horizonName = intel.HidesName ? HiddenHostsTexts.UnknownParty : null;
             __state = VanillaBinds.LayMask(in intel, horizonName, ref CountBind(__instance),
                 ref ExtraInfoBind(__instance), ref NameBind(__instance));
         }

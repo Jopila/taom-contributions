@@ -29,7 +29,7 @@ public class HiddenHostsBehaviorSessionResetTests
         _settings.Enabled.Returns(true);
         _hint = Substitute.For<IHiddenHostsHintAdapter>();
         _hint.IsMapFree().Returns(true);
-        _service = new HiddenHostsService(_settings);
+        _service = new HiddenHostsService(_settings, new NoScoutIntel());
     }
 
     private HiddenHostsBehavior NewBehavior() =>
