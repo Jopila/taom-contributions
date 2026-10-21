@@ -15,7 +15,7 @@ public static class WandererAllegianceIoC
     {
         container.Register<IWandererAllegianceConfigProvider, WandererAllegianceConfigProvider>(Reuse.Singleton);
         container.Register<IWandererAllegianceSettingsProvider, WandererAllegianceSettingsProvider>(Reuse.Singleton);
-        container.Register<IWandererAllegianceService, WandererAllegianceService>(Reuse.Singleton);
+        container.Register<WandererAllegianceService>(Reuse.Singleton);
         container.Register<Hooks.WandererAllegianceDialogBehavior>(Reuse.Singleton);
     }
 }

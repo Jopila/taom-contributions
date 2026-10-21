@@ -54,12 +54,13 @@ internal sealed class LordCourtesiesFixture
         Settings.DomainRevealEnabled.Returns(true);
         Player.KingdomId.Returns("k_player");
         Player.CultureId.Returns("c_player");
+        Player.Side.Returns(new SideIds("k_player", "c_player"));
         Player.ChangeRelationWith(Arg.Any<string>(), Arg.Any<int>()).Returns(true);
         Lord = new LordCourtesySnapshot(LordId)
         {
             ClanId = "clan_lord1",
             KingdomId = "k_lord",
-            CultureId = "c_lord",
+            Side = new SideIds("k_lord", "c_lord"),
             LeadsOwnParty = true,
             IsWithPlayer = true,
             HasRoom = true,

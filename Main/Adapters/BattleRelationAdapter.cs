@@ -44,9 +44,8 @@ public sealed class BattleRelationAdapter : IBattleRelationAdapter
             var notables = notableRadius > 0f ? NotablesNear(mapEvent.Position, notableRadius) : new List<SettlementNotables>();
             // The player's side for the alignment test on a notable's settlement: his map faction (his kingdom, or his clan
             // without one) and that faction's culture, the owner reading the tournament host uses.
-            var playerFaction = Clan.PlayerClan?.MapFaction;
             return new BattleSnapshot(participants, mapEvent.WinningSide == playerSide, enemyCasualties, notables, mapEvent.IsHideoutBattle,
-                playerFaction?.StringId, playerFaction?.Culture?.StringId,
+                FactionSides.OfPlayer(),
                 main.Army != null && main.Army.LeaderParty == main, VanillaThanksAmount(mapEvent, playerSide));
         }
         catch (Exception ex)
@@ -123,7 +122,6 @@ public sealed class BattleRelationAdapter : IBattleRelationAdapter
             if (settlement == null || !(position.Distance(settlement.GatePosition) <= radius))
                 continue;
 
-            var owner = settlement.MapFaction;
             var living = new List<NotableInfo>();
             foreach (var notable in settlement.Notables)
             {
@@ -133,7 +131,7 @@ public sealed class BattleRelationAdapter : IBattleRelationAdapter
 
             if (living.Count > 0)
                 found.Add(new SettlementNotables(settlement.StringId, settlement.Name?.ToString() ?? settlement.StringId, living,
-                    owner?.StringId, owner?.Culture?.StringId));
+                    FactionSides.Of(settlement.MapFaction)));
         }
 
         return found;

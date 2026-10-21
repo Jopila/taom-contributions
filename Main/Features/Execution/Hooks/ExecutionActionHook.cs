@@ -13,14 +13,14 @@ public class ExecutionActionHook : IOnExecutionAction
 
     /// <summary>
     /// There is no dishonor in killing your enemy: the vanilla trait hit applies only when the
-    /// executor and victim are NOT on opposing sides. Sides resolve by kingdom id with a culture-id
-    /// fallback, so a kingdom-less executor (independent, mercenary, or enlisted player) is still
+    /// executor and victim are NOT on opposing sides. Sides resolve by faction id with a culture-id
+    /// fallback, so a kingdom-less executor (an independent or enlisted player) is still
     /// placed on a side instead of falling through to the vanilla penalty.
     /// </summary>
-    public bool ShouldApplyHonorPenalty(ExecutionParticipant victim, ExecutionParticipant executor)
+    public bool ShouldApplyHonorPenalty(SideIds victim, SideIds executor)
     {
-        var victimSide = _alignmentService.ResolveSide(victim.KingdomId, victim.CultureId);
-        var executorSide = _alignmentService.ResolveSide(executor.KingdomId, executor.CultureId);
+        var victimSide = _alignmentService.ResolveSide(victim);
+        var executorSide = _alignmentService.ResolveSide(executor);
         return !_alignmentService.AreEnemyAlignments(executorSide, victimSide);
     }
 
@@ -31,9 +31,9 @@ public class ExecutionActionHook : IOnExecutionAction
     /// delta is returned here; the service's notification flag has no consumer on this path.
     /// </summary>
     public int GetRelationModifier(
-        ExecutionParticipant executor,
-        ExecutionParticipant victim,
-        ExecutionParticipant evaluator,
+        SideIds executor,
+        SideIds victim,
+        SideIds evaluator,
         int baseRelationDelta)
         => _relationService
             .GetRelationModifier(executor, victim, evaluator, baseRelationDelta, baseShowNotification: false)

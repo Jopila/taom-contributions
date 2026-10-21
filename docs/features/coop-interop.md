@@ -283,6 +283,8 @@ suppression** (see the P1 note above).
 
 `HiddenHostsMemoryBehavior` rows (the remembered troop counts, [hidden-hosts.md](hidden-hosts.md)): per-player presentation in this peer's TAOM `SyncData`, the same reading as the siege defence local half, so stamping (done by `HiddenHostsPlainSightBehavior`), fading, the visibility and destroy handlers and the save are ungated. A co-op join is a save load, so a client decodes the host's memory rows at join and holds the host's remembered counts until its own play replaces them. Only the XP grant above is gated.
 
+`MinorClanMigrationBehavior` (the load migration of the minor clans' culture and leader templates, [minor-factions.md](minor-factions.md)) is deliberately ungated: it listens to `OnGameLoadedEvent` only and writes two engine-saved clan fields (`Clan.Culture` and `Clan.MinorFactionCharacterTemplates`) from the shipped data, with no RNG and no TAOM `SyncData`. A joining client does not migrate anything itself: BannerlordCoop sends it the host's current campaign as an in-memory snapshot (`SaveCurrentGame`), which the host's own load already migrated, so the client's run writes nothing, and a new campaign changes nothing. BannerlordCoop auto-syncs `Clan.Culture` (not the template list); what that sync does with the host's write during the load is UNVERIFIED in a live session.
+
 `GaitVarietyMissionBehavior` (orc and goblin step size and gait set, [animation-variety.md](animation-variety.md)) is deliberately ungated on every co-op signal: it
 only changes the walk phase and clip choice of agents this peer built, and the managed `Agent.SetActionSet` broadcasts only under `GameNetwork.IsServerOrRecorder`, which
 BannerlordCoop does not use. Its three settings are classified as presentation above.

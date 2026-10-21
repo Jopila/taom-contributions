@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using TAOM.Features.Execution;
 using TAOM.Features.HardQuestions.Domain;
 
 namespace TAOM.Tests.Features.HardQuestions;
@@ -453,7 +454,7 @@ public class InterrogationServiceTests
         _f.Captive();
         _f.Random.NextDouble().Returns(0.9);
         _f.Service.QueueForce(HardQuestionTopic.Kingdom, "lord1");
-        _f.Captives.Circle("lord1").Returns(new CaptiveCircle(new LordRef("lord1", null, "c_lord1")));
+        _f.Captives.Circle("lord1").Returns(new CaptiveCircle(new LordRef("lord1", null, new SideIds("", "c_lord1"))));
 
         _f.Service.CompletePending();
 

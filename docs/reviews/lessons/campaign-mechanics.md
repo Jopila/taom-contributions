@@ -875,3 +875,15 @@ of the patched method, TAOM's bound delegate included.
   engine method TAOM calls, not only for the TAOM caller. A delegate bound with `Delegate.CreateDelegate` or a reflective
   call goes through every Harmony patch on that method. Verify a `[Likely]` finding before it becomes an issue.
 - **Source:** `docs/reviews/rca-castle-recruitment-seam-2026-10-18.md` addendum, finding A2.
+
+### A mercenary contract sets `Clan.Kingdom`, so a hired company is not kingdomless (#957, 2026-10-20)
+Comments and docs called a mercenary player or a hired minor clan "kingdomless" and said its row in `alignment.json` decides. `StartMercenaryServiceAction.ApplyStart` sets `clan.Kingdom` to the employer, so a hired company's map faction is the employer and its heroes side by the employer's pair. Only an independent clan, and an enlisted player (enlistment deliberately does not join the commander's kingdom), have no kingdom.
+- **Why missed:** "mercenary" reads as "serves no kingdom" and nobody opened the action.
+- **Prevent:** read the action (`pwsh tools/taom-src.ps1 path TaleWorlds.CampaignSystem.Actions.StartMercenaryServiceAction`) before writing what a status does to `Clan.Kingdom`. A minor clan's own row applies only while it serves no kingdom.
+- **Source:** `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, wave 1, comments.
+
+### A save keeps `Clan.Culture` and the template list, and the Factions file does not reload on a load (#957, 2026-10-20)
+`Clan.Culture` is a `SaveableProperty` and `Clan._minorFactionCharacterTemplates` a `SaveableField`. `SandBoxManager.InitializeSandboxXMLs(isSavedCampaign: true)` skips the Kingdoms and Factions files, while `NPCCharacters` always reloads. So an XSLT change to a clan's culture or templates reaches a new campaign only, and an old save pairs retagged troops with a clan on its old culture: the Grey Company (clan culture `empire`, Evil) preferred Dunland contracts while its `arthedain` troops deserted under Dunland.
+- **Why missed:** the first doc said "the clan's own culture is part of its definition and also changes at once", which is true of a new campaign and false of every save.
+- **Prevent:** for any data edit to a saved object (a clan, a hero, a settlement), name which fields the save holds and which file the load skips; a data-only change to a saved field needs a load migration or a documented new-campaign-only limit. `MinorClanMigration` is the pattern: a pure service decides from raw facts, an adapter applies, a behavior runs it on `OnGameLoadedEvent`, and a test pins its targets to the shipped data.
+- **Source:** `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, wave 2, finding D1.

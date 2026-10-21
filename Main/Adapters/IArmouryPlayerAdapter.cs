@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TAOM.Features.ArmourAcquisition.Domain;
+using TAOM.Features.Execution;
 
 namespace TAOM.Adapters;
 
@@ -15,6 +16,14 @@ public interface IArmouryPlayerAdapter
     string? KingdomId { get; }
 
     string? CultureId { get; }
+
+    /// <summary>
+    /// The id and culture of the player's clan map faction, the pair the alignment table resolves
+    /// (<see cref="FactionSides.OfPlayer"/>). <see cref="KingdomId"/> and <see cref="CultureId"/> stay for
+    /// the callers that key on the kingdom and then the hero's culture (special resources, ladders, the
+    /// same-realm gate); a side reads this pair, never those two zipped together (#957).
+    /// </summary>
+    SideIds Side { get; }
 
     int Gold { get; }
 

@@ -1,13 +1,6 @@
-namespace TAOM.Features.GoodDeeds.Models;
+using TAOM.Features.Execution;
 
-/// <summary>
-/// The two ids <c>IAlignmentService.ResolveSide</c> takes, both read from the same entity: a map faction's own id and its own
-/// culture (a hero's, a clan's or a kingdom's). Either is empty when the entity has no faction, which resolves to Neutral.
-/// </summary>
-public sealed record DeedSide(string KingdomId, string CultureId)
-{
-    public static readonly DeedSide None = new(string.Empty, string.Empty);
-}
+namespace TAOM.Features.GoodDeeds.Models;
 
 /// <summary>
 /// A hero who could be granted relation, as raw facts. <see cref="RelationOwnerId"/> is the hero whose relation with the
@@ -22,8 +15,8 @@ public sealed record DeedHero(string HeroId, string RelationOwnerId, bool IsAliv
 /// <see cref="Player"/> and <see cref="LordSide"/> are the sides of the player's map faction and the lord's.
 /// </summary>
 public sealed record ReleaseFacts(
-    DeedSide Player,
-    DeedSide LordSide,
+    SideIds Player,
+    SideIds LordSide,
     bool IsLord,
     DeedHero Lord,
     DeedHero? Spouse,
@@ -44,10 +37,10 @@ public readonly record struct ReleaseSource(bool IsMainParty, bool IsPlayerParty
 }
 
 /// <summary>A captive hero offered to a settlement: the captive's side and the settlement owner's side.</summary>
-public sealed record DonationFacts(DeedSide Captive, DeedSide Owner);
+public sealed record DonationFacts(SideIds Captive, SideIds Owner);
 
 /// <summary>A notable of the tournament town with the side of his own map faction.</summary>
-public sealed record DeedNotable(DeedHero Hero, DeedSide Side);
+public sealed record DeedNotable(DeedHero Hero, SideIds Side);
 
 /// <summary>
 /// The town of a finished tournament. <see cref="OwnerLeader"/> is the leader of the owning clan (null when there is none),
@@ -56,8 +49,8 @@ public sealed record DeedNotable(DeedHero Hero, DeedSide Side);
 /// </summary>
 public sealed record TournamentFacts(
     string TownName,
-    DeedSide Player,
+    SideIds Player,
     bool PlayerClanOwnsTown,
     DeedHero? OwnerLeader,
-    DeedSide OwnerSide,
+    SideIds OwnerSide,
     System.Collections.Generic.IReadOnlyList<DeedNotable> Notables);

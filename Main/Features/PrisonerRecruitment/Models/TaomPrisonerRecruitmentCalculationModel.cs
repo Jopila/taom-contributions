@@ -1,6 +1,7 @@
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.CampaignSystem.Party;
+using TAOM.Adapters;
 
 namespace TAOM.Features.PrisonerRecruitment.Models;
 
@@ -35,7 +36,7 @@ public class TaomPrisonerRecruitmentCalculationModel : DefaultPrisonerRecruitmen
         var leader = party?.LeaderHero;
 
         return _morale.ShouldWaiveMoralePenalty(
-                   leader?.Clan?.Kingdom?.StringId,
+                   FactionSides.OfHero(leader),
                    leader?.Culture?.StringId,
                    character?.Culture?.StringId,
                    leader == Hero.MainHero)

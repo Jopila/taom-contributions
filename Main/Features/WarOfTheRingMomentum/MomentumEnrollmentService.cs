@@ -81,20 +81,13 @@ public class MomentumEnrollmentService : IMomentumEnrollmentService
         return removed;
     }
 
-    // Side = kingdom-id alignment, falling back to the kingdom's CULTURE when the
-    // kingdom id isn't in alignment.json. This catches player-founded / dynamically
-    // created kingdoms (id like "new_kingdom") whose culture IS classified — without
-    // it, the player's own kingdom would resolve Neutral and never enroll, hiding the
-    // whole feature from a player who founds a kingdom (Codex #327 HIGH).
+    // Side = the alignment service's answer for the kingdom's id and the CULTURE of that same kingdom. The service
+    // falls back from the id to the culture when the id isn't in alignment.json, which catches player-founded /
+    // dynamically created kingdoms (id like "new_kingdom") whose culture IS classified: without it, the player's own
+    // kingdom would resolve Neutral and never enroll, hiding the whole feature from a player who founds a kingdom
+    // (Codex #327 HIGH).
     private FactionSide ResolveSide(string kingdomId)
-    {
-        var side = _alignmentService.GetKingdomSide(kingdomId);
-        if (side != FactionSide.Neutral)
-            return side;
-
-        var cultureId = _allianceAdapter.GetKingdomCultureId(kingdomId);
-        return string.IsNullOrEmpty(cultureId) ? FactionSide.Neutral : _alignmentService.GetCultureSide(cultureId);
-    }
+        => _alignmentService.ResolveSide(kingdomId, _allianceAdapter.GetKingdomCultureId(kingdomId));
 
     // Reconcile the enrolled sets against the CURRENT world: drop any enrolled kingdom that
     // is (a) no longer live — a KingdomDestroyed missed because the feature was toggled OFF

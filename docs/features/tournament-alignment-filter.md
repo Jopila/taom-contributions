@@ -25,7 +25,7 @@ The rule, in `TournamentAlignmentFilterService` over the `execution/alignment.js
 | Who | Side read from |
 |---|---|
 | Host town | Its owner: `Settlement.MapFaction` (the owner kingdom, or the owner clan when it has none), else that owner's own culture. A captured town follows its conqueror, a town held by a Neutral realm bars nobody, and a player-founded kingdom (unlisted) takes its own culture's side |
-| Hero entrant | The kingdom of the hero's clan, else the hero's culture. A Gondor-born lord of Mordor reads Evil |
+| Hero entrant | The hero's clan map faction (the kingdom, or the clan itself when it has none) with that faction's own culture, so a Gondor-born lord of Mordor reads Evil and a Gondor-born lord of a Neutral realm reads Neutral. A clanless hero (a wanderer) is its own entity and reads its own culture. A minor clan leader reads the clan's row in `alignment.json` (#957) only while the clan serves no kingdom: a mercenary contract makes the employer the clan's map faction, so a hired company's leader reads the employer's pair |
 | Troop entrant | Its culture |
 
 An entrant is replaced only when both sides are Free or Evil and they differ. Never replaced:
@@ -67,8 +67,8 @@ The sides themselves come from `Main/_Module/ModuleData/execution/alignment.json
 | `Main/Features/Arena/TournamentAlignmentFilterService.cs` | The rule: which roster indices are barred |
 | `Main/Features/Arena/TournamentAlignmentPass.cs` | Boundary: applies the swap to the engine roster, logs it |
 | `Main/Features/Arena/ITournamentAlignmentSettingsProvider.cs`, `TournamentAlignmentSettingsProvider.cs` | The MCM switch, read live |
-| `Main/Features/Arena/TournamentEntrant.cs` | `TournamentEntrant` (kingdom, culture and player-clan fields) and `TournamentHost` |
-| `Main/Features/Arena/TournamentEntrantMapper.cs` | Engine types to entrant and host; the filler troop |
+| `Main/Features/Arena/TournamentEntrant.cs` | `TournamentEntrant` (a `SideIds` pair, the character's own culture for the troop exemption, and the player-clan flag) and `TournamentHost` (the owner's `SideIds` and the town's troop cultures) |
+| `Main/Features/Arena/TournamentEntrantMapper.cs` | Engine types to entrant and host (the pairs come from `FactionSides.OfCharacter` and `FactionSides.Of`); the filler troop |
 | `Main/Features/Arena/Hooks/Patch69_TournamentRosterGuard.cs` | The seam: alignment pass, then crash guard |
 | `Main/Features/Arena/ArenaIoC.cs` | Registration |
 | `Main/Features/TaomSettings.cs` | The "Keep Enemy Sides Out" toggle |
@@ -79,14 +79,14 @@ The sides themselves come from `Main/_Module/ModuleData/execution/alignment.json
 
 ## Tests
 
-- `TAOM.Tests/Features/Arena/TournamentAlignmentFilterServiceTests.cs`: 26 tests over the real `AlignmentService`, covering both directions, Neutral heroes, Neutral and unlisted owners, kingdomless owners, the player-clan exemption, kingdom over culture for heroes, captured towns, the town-culture and borrowed-troop exemptions (Khand's and Umbar's shapes), fail-open on missing data, the switch and its compiled default, and `Describe`.
+- `TAOM.Tests/Features/Arena/TournamentAlignmentFilterServiceTests.cs`: 27 tests over the real `AlignmentService`, including a free-culture lord of a Neutral realm kept in an Evil town (#957), covering both directions, Neutral heroes, Neutral and unlisted owners, kingdomless owners, the player-clan exemption, kingdom over culture for heroes, captured towns, the town-culture and borrowed-troop exemptions (Khand's and Umbar's shapes), fail-open on missing data, the switch and its compiled default, and `Describe`.
 - `TAOM.Tests/Features/Arena/ArenaWiringTests.cs`: the filter's graph closes across `ArenaIoC` and `ExecutionIoC`.
 
-In game: a Minas Tirith tournament with an orc wanderer or a Mordor lord present at peace shows no Evil entrants, and the log carries `[TournamentDiag] <town>: N of the other side replaced with <troop>: ...`.
+In game: a Minas Tirith tournament with an orc wanderer or a Mordor lord present at peace shows no Evil entrants, and the log carries `[TournamentDiag] <town>: N of the other side replaced with <troop>: ...`. A lord of Khand or Umbar (Neutral realms) whose own culture is Free, such as a Gondor-born vassal, still competes in a Mordor-held town, because the realm sides the lord, not the lord's culture (#957).
 
-## How to move a culture or kingdom to the other side
+## How to move a culture, kingdom or minor clan to the other side
 
-1. Edit its row in `Main/_Module/ModuleData/execution/alignment.json` (`free`, `evil` or `neutral`).
+1. Edit its row in `Main/_Module/ModuleData/execution/alignment.json` (`free`, `evil` or `neutral`; a minor clan row is `free` or `evil`, because a `neutral` clan row falls through to the clan's culture and changes nothing).
 2. Restart Bannerlord. `AlignmentService` is a singleton that reads the file once, so a new campaign or a save load does not pick up the edit.
 3. The change also moves executions, recruitment, desertion, prisoner morale, marriage, wanderer hiring, caravans, diplomacy, momentum and the realm-borders alignment map, which read the same table. No code change is needed.
 
@@ -96,6 +96,7 @@ A replaced lord becomes a troop, so the join menu's "N lords present" gossip, th
 
 ## Changelog
 
+- 2026-10-20 (#957, part 2): a hero entrant is the clan's map faction with that faction's culture, a clanless hero reads its own culture; `TournamentEntrant` and `TournamentHost` carry a `SideIds`.
 - 2026-10-06: added (#744).
 
 ## GitHub Issue

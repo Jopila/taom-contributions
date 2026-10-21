@@ -1,5 +1,6 @@
 using System;
 using TaleWorlds.CampaignSystem;
+using TAOM.Adapters;
 using TAOM.Core.Logging;
 
 namespace TAOM.Features.WandererAllegiance.Hooks;
@@ -24,10 +25,10 @@ public class WandererAllegianceDialogBehavior : CampaignBehaviorBase
 {
     private const int Priority = 110; // above vanilla's companion_hire reply at the default 100
 
-    private readonly IWandererAllegianceService _service;
+    private readonly WandererAllegianceService _service;
     private readonly IModLogger _logger;
 
-    public WandererAllegianceDialogBehavior(IWandererAllegianceService service, IModLogger logger)
+    public WandererAllegianceDialogBehavior(WandererAllegianceService service, IModLogger logger)
     {
         _service = service;
         _logger = logger;
@@ -61,23 +62,20 @@ public class WandererAllegianceDialogBehavior : CampaignBehaviorBase
             Priority);
     }
 
-    // Boundary conversion only: four ids into the pure service. Read live on every call, never
-    // cached, because Player Switcher changes MainHero and PlayerClan mid-session. Hero.Culture is a
-    // plain field and Clan.Culture / Clan.Kingdom are bare auto-property reads, so the ?. chains
-    // cannot trip a computed getter; Hero.MainHero and Clan.PlayerClan ARE computed statics, which is
-    // what the try/catch is for. A throw defers to vanilla hiring, safe here because nothing has
-    // been mutated.
+    // Boundary conversion only: the wanderer's ids and the player's faction pair into the pure service.
+    // Read live on every call, never cached, because Player Switcher changes the player clan mid-session.
+    // Hero.Culture is a plain field, while Hero.OneToOneConversationHero and Clan.PlayerClan (inside
+    // FactionSides.OfPlayer) ARE computed statics, which is what the try/catch is for. A throw defers
+    // to vanilla hiring, safe here because nothing has been mutated.
     private WandererHireVerdict Verdict()
     {
         try
         {
             var wanderer = Hero.OneToOneConversationHero;
-            var playerClan = Clan.PlayerClan;
             return _service.Evaluate(
                 wanderer?.StringId,
                 wanderer?.Culture?.StringId,
-                playerClan?.Kingdom?.StringId,
-                playerClan?.Culture?.StringId ?? Hero.MainHero?.Culture?.StringId);
+                FactionSides.OfPlayer());
         }
         catch (Exception ex)
         {

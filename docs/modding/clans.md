@@ -138,6 +138,8 @@ A new TAOM clan is one `<Faction>` row, but it only works if five things it poin
 7. **`default_party_template`** pointing at a real id in `taom_partyTemplates.xml`, or leave it out and inherit the culture's.
 8. **`banner_key`, `color`, `color2`.** Copy a working key from a sibling clan rather than inventing one. For a bandit gang add `is_bandit="true" is_outlaw="true"`, point `initial_home_settlement` at a hideout of the clan's own culture, and read the bandit paragraph under "Gotchas" first.
 
+9. **Its side.** A clan in a kingdom is sided by the kingdom's pair, so the kingdom (or its culture) must be listed in [`execution/alignment.json`](../../Main/_Module/ModuleData/execution/alignment.json) or resolve Neutral. A minor clan (`is_minor_faction`) is its own map faction while it serves no kingdom, so its own id and culture decide: add it to `IntendedMinorClanSides` in `ShippedClanSideCoverageTests` and, unless its culture already resolves the intended side, give it a `free` or `evil` row (never `neutral`). Its troops and leader templates carry their own cultures; keep them off the opposite side (`lords.xslt`), or they desert under an employer of the clan's side. See [alignment-aware-execution.md](../features/alignment-aware-execution.md).
+
 Check: `python tools/validate_moduledata.py --code LANDLESS_CULTURE` then `python tools/clan_registry.py` and confirm the new id appears under the right culture
 Takes effect: new campaign only
 Code: No code changes needed

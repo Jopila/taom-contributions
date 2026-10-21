@@ -165,6 +165,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [faction-map](features/faction-map.md) — campaign map faction rendering
 - [clan-heraldry](features/clan-heraldry.md): per-clan `color`/`color2`, which is the battlefield armour tint via Patch23, plus per-clan party templates. `clan_heraldry/*.json` + `tools/generate_clan_heraldry.py`; the specs are synced from the live files by `tools/sync_clan_specs_from_live.py` (#589) and re-applying them is a no-op
 - [minor-factions](features/minor-factions.md) — minor factions catalog + rules
+- [minor-clan-migration](features/minor-clan-migration.md): the load migration that brings an old save's minor clan cultures and leader templates to the shipped values (#957)
 - [alignment-aware-execution](features/alignment-aware-execution.md) — race/alignment-aware execution penalties
 - [marriage-alignment](features/marriage-alignment.md): a Free-aligned hero cannot marry an Evil-aligned one (#542, Boromir wed a Misty Mountain orc). Blocks in `TaomMarriageModel.IsCoupleSuitableForMarriage`, the chokepoint every marriage path funnels through; `Patch81` narrows the AI partner draw so Free clans keep their marriage rate
 - [wanderer-allegiance](features/wanderer-allegiance.md): a wanderer refuses to be hired across the Free/Evil line (#575, Aragorn serving Mordor). Two NPC lines on vanilla's `companion_hire` token at priority 110, no Harmony patch; culture-keyed, symmetric, Neutral serves anyone

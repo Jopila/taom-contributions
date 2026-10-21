@@ -5,6 +5,7 @@ using NSubstitute;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
+using TAOM.Features.Execution;
 using TAOM.Features.TokensOfEsteem;
 using TAOM.Features.TokensOfEsteem.Models;
 using TAOM.Features.Relations;
@@ -247,7 +248,7 @@ public class GiftServiceGiveTests
     {
         _f.Held.Add(GiftFixture.Good("ring", "jewelry", 400));
         var option = Pick(GiftEntry.Lord, "ring");
-        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
+        _f.Player = _f.Player! with { Side = new SideIds("mordor", "mordor") };
 
         var outcome = _f.Sut.Give(GiftFixture.HeroId, GiftEntry.Lord, option, _f.Ledger);
 

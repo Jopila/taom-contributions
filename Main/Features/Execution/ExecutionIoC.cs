@@ -20,7 +20,7 @@ public static class ExecutionIoC
 
     public static void InitializeHooks(IOnExecutionAction executionHook, IPlayerContextAdapter playerContext)
     {
-        TraitLevelingHelper_OnBloodFeudStarted_Patch.Initialize(executionHook, playerContext);
+        TraitLevelingHelper_OnBloodFeudStarted_Patch.Initialize(executionHook);
         ExecutionCampaignBehavior_BloodFeudRelationPenalty_Patch.Initialize(executionHook, playerContext);
     }
 }

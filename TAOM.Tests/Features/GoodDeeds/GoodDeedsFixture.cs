@@ -21,9 +21,9 @@ internal sealed class GoodDeedsFixture
         true, true, true, true, 5, 2, 2, 5, 1,
         new SideMultipliers(1f, 0.75f, 0.5f), new SideMultipliers(0f, 1f, 2f), new SideMultipliers(1f, 1f, 0f));
 
-    internal static readonly DeedSide Free = new("k_free", "c_free");
-    internal static readonly DeedSide Evil = new("k_evil", "c_evil");
-    internal static readonly DeedSide Unaligned = new("k_other", "c_other");
+    internal static readonly SideIds Free = new("k_free", "c_free");
+    internal static readonly SideIds Evil = new("k_evil", "c_evil");
+    internal static readonly SideIds Unaligned = new("k_other", "c_other");
 
     internal readonly IGoodDeedsSettingsProvider Settings = Substitute.For<IGoodDeedsSettingsProvider>();
     internal readonly IGoodDeedsHeroAdapter Heroes = Substitute.For<IGoodDeedsHeroAdapter>();
@@ -59,7 +59,7 @@ internal sealed class GoodDeedsFixture
     internal static DeedHero Hero(string id, string? owner = null, bool alive = true, bool isPlayer = false) =>
         new(id, owner ?? id, alive, isPlayer);
 
-    internal static ReleaseFacts Release(DeedSide player, DeedSide lordSide, DeedHero? lord = null, DeedHero? spouse = null,
+    internal static ReleaseFacts Release(SideIds player, SideIds lordSide, DeedHero? lord = null, DeedHero? spouse = null,
         DeedHero? leader = null, bool isLord = true) =>
         new(player, lordSide, isLord, lord ?? Hero("lord"), spouse, leader);
 }

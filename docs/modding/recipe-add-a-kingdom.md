@@ -121,7 +121,7 @@ singleton provider, so each needs a full application restart rather than a save 
 
 | File | Keyed on | Skipping it costs | Enforced by |
 |---|---|---|---|
-| [`execution/alignment.json`](../../Main/_Module/ModuleData/execution/alignment.json) | kingdom id, mostly | `GetKingdomSide` falls back to Neutral and mis-scores execution relations and the war block | nothing |
+| [`execution/alignment.json`](../../Main/_Module/ModuleData/execution/alignment.json) | kingdom id, culture id or minor clan id | `GetKingdomSide` falls back to Neutral and mis-scores execution relations and the war block | nothing |
 | [`diplomacy/diplomacy.json`](../../Main/_Module/ModuleData/diplomacy/diplomacy.json) | pairs of kingdom ids | the realm has no alliances and no enemies past day one | nothing |
 | [`diplomacy/war_of_the_ring.json`](../../Main/_Module/ModuleData/diplomacy/war_of_the_ring.json) | kingdom ids inside `phase1` / `phase2` wars | the realm sits out the scripted escalation | nothing |
 | [`configs/army_targeting.json`](../../Main/_Module/ModuleData/configs/army_targeting.json) | kingdom id, under `KingdomTheaters` | the realm is invisible to army-target weighting | `WarTheaterConfigInvariantsTests`, and it fails the build |
@@ -136,9 +136,11 @@ id. An empty list is legal and means "deliberately passive"; the two kingdoms th
 by name in `ExpectedPassiveKingdoms`, so a third cannot go passive quietly
 ([`TAOM.Tests/Features/ArmyTargeting/WarTheaterConfigInvariantsTests.cs`](../../TAOM.Tests/Features/ArmyTargeting/WarTheaterConfigInvariantsTests.cs)).
 
-`alignment.json` is the one to read before trusting any doc about it. It holds **25 keys**, and 23
-of them are kingdom ids while `gondor` and `mordor` are culture ids sitting in the same flat map.
-<!-- measured: python -c "import json;d=json.load(open('Main/_Module/ModuleData/execution/alignment.json'));print(len(d))" 2026-10-07 -->
+`alignment.json` is the one to read before trusting any doc about it. It holds **29 keys**: 23
+kingdom ids, `gondor` and `mordor` (culture ids sitting in the same flat map) and 4 minor clan ids
+(`ghilman`, `skolderbrotva`, `forest_people`, `eleftheroi`).
+<!-- measured: python -c "import json;d=json.load(open('Main/_Module/ModuleData/execution/alignment.json'));print(len(d))" 2026-10-21 -->
+A new kingdom whose clans resolve Neutral outside the four Neutral realms fails `ShippedClanSideCoverageTests`.
 Two feature docs call it a kingdom map with 16 and with 22 entries. Both are wrong, and the file is
 one line to check.
 
@@ -352,7 +354,7 @@ Code: No code changes needed
 | 15 | `<Kingdom>` entries in `taom_spkingdoms.xml` | `rg -c '<Kingdom\b' Main/_Module/ModuleData/taom_spkingdoms.xml` |
 | 8 | vanilla kingdoms rewritten by XSLT | `rg -c 'Kingdom\[@id=' Main/_Module/ModuleData/spkingdoms.xslt` |
 | 23 | live kingdom ids (15 plus 8) | the two rows above |
-| 25 | keys in `execution/alignment.json`, of which 23 are kingdom ids and 2 (`gondor`, `mordor`) are culture ids | `python -c "import json;d=json.load(open('Main/_Module/ModuleData/execution/alignment.json'));print(len(d))"` |
+| 29 | keys in `execution/alignment.json`, of which 23 are kingdom ids, 2 (`gondor`, `mordor`) are culture ids and 4 are minor clan ids | `python -c "import json;d=json.load(open('Main/_Module/ModuleData/execution/alignment.json'));print(len(d))"` |
 | 23 | keys under `KingdomTheaters` in `configs/army_targeting.json`, exactly the 23 kingdom ids | `python -c "import json;d=json.load(open('Main/_Module/ModuleData/configs/army_targeting.json'));print(len(d['KingdomTheaters']))"` |
 | 142 | rows in `diplomacy/diplomacy.json`, covering the same 23 ids | `python -c "import json;d=json.load(open('Main/_Module/ModuleData/diplomacy/diplomacy.json'));print(len(d['relationships']))"` |
 | 45 / 21 / 46 | entries in `factionmap/factions.json`, how many are `playable`, and entries in `factionmap/regions.json` | `python -c "import json;d=json.load(open('Main/_Module/ModuleData/factionmap/factions.json'));r=json.load(open('Main/_Module/ModuleData/factionmap/regions.json'));print(len(d),sum(1 for v in d.values() if v.get('playable')),len(r))"` |

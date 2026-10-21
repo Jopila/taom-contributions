@@ -1,6 +1,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using TAOM.Features.Execution;
 using TAOM.Features.GoodDeeds;
 using TAOM.Features.GoodDeeds.Models;
 using static TAOM.Tests.Features.GoodDeeds.GoodDeedsFixture;
@@ -19,10 +20,10 @@ public class GoodDeedsServiceTournamentTests
     [TestInitialize]
     public void Setup() => _f = new GoodDeedsFixture();
 
-    private static DeedNotable Notable(string id, DeedSide? side = null, string? owner = null, bool alive = true) =>
+    private static DeedNotable Notable(string id, SideIds? side = null, string? owner = null, bool alive = true) =>
         new(Hero(id, owner, alive), side ?? Free);
 
-    private void Town(DeedHero? owner, bool playerOwns, DeedSide ownerSide, params DeedNotable[] notables) =>
+    private void Town(DeedHero? owner, bool playerOwns, SideIds ownerSide, params DeedNotable[] notables) =>
         _f.Heroes.ReadTournament("town_1").Returns(new TournamentFacts("Minas Tirith", Free, playerOwns, owner, ownerSide, notables));
 
     private int Won() => _f.Service.OnTournamentFinished(true, "town_1");
@@ -140,7 +141,7 @@ public class GoodDeedsServiceTournamentTests
     public void OnTournamentFinished_ANotableWithNoFaction_IsNeutral()
     {
         _f.Configure(Defaults with { Tournament = new SideMultipliers(1f, 3f, 0f) });
-        Town(null, false, Free, new DeedNotable(Hero("n1"), DeedSide.None));
+        Town(null, false, Free, new DeedNotable(Hero("n1"), SideIds.None));
 
         Won();
 

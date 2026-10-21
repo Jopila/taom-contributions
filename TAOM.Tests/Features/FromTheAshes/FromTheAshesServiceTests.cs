@@ -84,9 +84,8 @@ public class FromTheAshesServiceTests
     /// <summary>Makes the alignment service resolve the snapshot's kingdom and culture pair to <paramref name="side"/>.</summary>
     private void Side(AshesSiteSnapshot site, FactionSide side)
     {
-        site.PlayerKingdomId = "kingdom_" + side;
-        site.PlayerKingdomCultureId = "culture_" + side;
-        _alignment.ResolveSide(site.PlayerKingdomId, site.PlayerKingdomCultureId).Returns(side);
+        site.PlayerSide = new SideIds("kingdom_" + side, "culture_" + side);
+        _alignment.ResolveSide(site.PlayerSide.FactionId, site.PlayerSide.CultureId).Returns(side);
     }
 
     private static AshesJob RebuildJob(double start = 100d, float total = 24f, int credited = 0) =>
@@ -173,7 +172,7 @@ public class FromTheAshesServiceTests
 
         Assert.IsTrue(check.Allowed);
         Assert.AreEqual(AshesVariant.Free, check.Variant);
-        _alignment.Received().ResolveSide(site.PlayerKingdomId, site.PlayerKingdomCultureId);
+        _alignment.Received().ResolveSide(site.PlayerSide.FactionId, site.PlayerSide.CultureId);
     }
 
     [TestMethod]
@@ -1013,9 +1012,7 @@ public class FromTheAshesServiceTests
     public void CanStart_VassalOfAnEvilKingdom_ResolvesTheKingdomWithItsOwnCulture()
     {
         var site = LootedVillage();
-        site.PlayerKingdomId = "mordor";
-        site.PlayerKingdomCultureId = "mordor_culture";
-        site.PlayerCultureId = "gondor_culture";
+        site.PlayerSide = new SideIds("mordor", "mordor_culture");
         _alignment.ResolveSide("mordor", "mordor_culture").Returns(FactionSide.Evil);
         site.HealthyTroops = 0;
         site.Prisoners = 30;
@@ -1028,13 +1025,11 @@ public class FromTheAshesServiceTests
     }
 
     [TestMethod]
-    public void CanStart_IndependentEvilCulturePlayer_ResolvesNoKingdomWithTheHeroCulture()
+    public void CanStart_IndependentEvilCulturePlayer_ResolvesTheClanWithItsOwnCulture()
     {
         var site = LootedVillage();
-        site.PlayerKingdomId = "";
-        site.PlayerKingdomCultureId = "";
-        site.PlayerCultureId = "orc_culture";
-        _alignment.ResolveSide("", "orc_culture").Returns(FactionSide.Evil);
+        site.PlayerSide = new SideIds("player_clan", "orc_culture");
+        _alignment.ResolveSide("player_clan", "orc_culture").Returns(FactionSide.Evil);
 
         var check = _sut.CanStart(AshesJobKind.VillageRebuild, site);
 
@@ -1045,12 +1040,12 @@ public class FromTheAshesServiceTests
     public void CanStart_NeutralPlayer_GetsTheFreeVariant()
     {
         var site = LootedVillage();
-        site.PlayerCultureId = "vlandia";
-        _alignment.ResolveSide("", "vlandia").Returns(FactionSide.Neutral);
+        site.PlayerSide = new SideIds("player_clan", "vlandia");
+        _alignment.ResolveSide("player_clan", "vlandia").Returns(FactionSide.Neutral);
 
         Assert.AreEqual(AshesVariant.Free, _sut.CanStart(AshesJobKind.VillageRebuild, site).Variant);
         // The default stub already answers Free, so only the arguments prove the neutral player was looked up.
-        _alignment.Received().ResolveSide("", "vlandia");
+        _alignment.Received().ResolveSide("player_clan", "vlandia");
     }
 
     private static readonly (string Id, int Count)[] ProjectMaterials = { ("hardwood", 30), ("clay", 10), ("tools", 5), ("iron", 5) };

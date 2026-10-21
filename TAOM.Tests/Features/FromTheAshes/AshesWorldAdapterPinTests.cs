@@ -55,13 +55,11 @@ public class AshesWorldAdapterPinTests
     }
 
     [TestMethod]
-    public void TheSnapshot_CarriesTheKingdomCultureAndHeroCulture_ForTheServiceToResolve()
+    public void TheSnapshot_CarriesThePlayersSidePair_ForTheServiceToResolve()
     {
         var src = Adapter();
 
-        StringAssert.Contains(src, "PlayerKingdomId = kingdom?.StringId");
-        StringAssert.Contains(src, "PlayerKingdomCultureId = kingdom?.Culture?.StringId");
-        StringAssert.Contains(src, "PlayerCultureId = hero.Culture?.StringId");
+        StringAssert.Contains(src, "PlayerSide = FactionSides.OfHero(hero)");
         Assert.IsFalse(src.Contains("ResolveSide") || src.Contains("IAlignmentService"), "the adapter reports facts; the service resolves the side");
     }
 

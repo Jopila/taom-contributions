@@ -49,7 +49,7 @@ public class BattleRelationServiceTests
         IEnumerable<SettlementNotables>? notables = null, bool hideout = false, string? playerFaction = "free_f",
         bool playerLeadsArmy = false, int thanks = 0, string? playerCulture = null) =>
         new(parties.ToList(), won, enemyCasualties, (notables ?? Enumerable.Empty<SettlementNotables>()).ToList(), hideout,
-            playerFaction, playerCulture, playerLeadsArmy, thanks);
+            new SideIds(playerFaction ?? string.Empty, playerCulture ?? string.Empty), playerLeadsArmy, thanks);
 
     /// <summary>A bandit-only win with a notable town in reach: it reaches the gratitude path, so a gate that skips it is visible.</summary>
     private static BattleSnapshot BanditWin() =>
@@ -58,7 +58,8 @@ public class BattleRelationServiceTests
     private static SettlementNotables Town(string id, params string[] notableIds) => TownOf(id, "free_f", notableIds);
 
     private static SettlementNotables TownOf(string id, string? ownerFaction, params string[] notableIds) =>
-        new(id, "Town_" + id, notableIds.Select(n => new NotableInfo(n, "Notable_" + n)).ToList(), ownerFaction, null);
+        new(id, "Town_" + id, notableIds.Select(n => new NotableInfo(n, "Notable_" + n)).ToList(),
+            new SideIds(ownerFaction ?? string.Empty, string.Empty));
 
     // --- allies and enemies ---
 
@@ -592,7 +593,8 @@ public class BattleRelationServiceTests
     {
         _alignment.ResolveSide("owner_f", "owner_c").Returns(FactionSide.Evil);
         _alignment.ResolveSide("player_f", "player_c").Returns(FactionSide.Free);
-        var town = new SettlementNotables("t1", "Town_t1", new List<NotableInfo> { new("n1", "Notable_n1") }, "owner_f", "owner_c");
+        var town = new SettlementNotables("t1", "Town_t1", new List<NotableInfo> { new("n1", "Notable_n1") },
+            new SideIds("owner_f", "owner_c"));
         var battle = Battle(new[] { Party(null, playerSide: false, bandit: true) }, enemyCasualties: 30,
             notables: new[] { town }, playerFaction: "player_f", playerCulture: "player_c");
 

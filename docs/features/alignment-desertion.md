@@ -45,7 +45,9 @@ Neutral and they would never desert.
 - A pure `AlignmentDesertionService` owns the decision matrix and is 100% unit-tested.
 - Side resolution reuses the Execution `IAlignmentService`: owner side via `GetKingdomSide`, troop side
   via a new `GetCultureSide` (same id→side table). `gondor`/`mordor` were added to `alignment.json` so
-  every real troop culture resolves; bandit/minor cultures stay absent → Neutral → never desert.
+  every real troop culture resolves; bandit cultures stay absent → Neutral → never desert. A minor clan's troops read their own
+  culture: four clans' troops were retagged to their clan's side (#957), so they can now desert under an employer of the
+  opposite side (a Grey Company contract with Mordor sheds its Arthedain troops) and never under one of their own side.
 
 ### Decision matrix (service)
 

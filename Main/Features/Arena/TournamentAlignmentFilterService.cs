@@ -12,8 +12,11 @@ namespace TAOM.Features.Arena;
 /// <remarks>
 /// The host's side is its owner's: the owner faction's id, falling back to that faction's own culture, the
 /// pairing CaravanTrade uses. A captured town therefore follows its conqueror, and a town held by a Neutral
-/// realm bars nobody. An entrant is barred only when both sides are Free/Evil and differ: Neutral enters
-/// anywhere, the reading WandererAllegiance and MarriageAlignment give the table.
+/// realm bars nobody. An entrant is sided the same way, on one pair (<c>FactionSides.OfCharacter</c>): a clan
+/// hero by the clan's map faction and that faction's culture (a lord of a Neutral realm is Neutral whatever the
+/// lord's own culture), a clanless hero by its own culture, a troop by its culture. An entrant is barred
+/// only when both sides are Free/Evil and differ: Neutral enters anywhere, the reading WandererAllegiance
+/// and MarriageAlignment give the table.
 /// <see cref="IAlignmentService.AreEnemyAlignments(FactionSide, FactionSide)"/> is deliberately not used,
 /// because it counts Neutral as everyone's enemy.
 /// <para>
@@ -57,15 +60,17 @@ public sealed class TournamentAlignmentFilterService
 
     public string Describe(TournamentEntrant entrant, TournamentHost host)
     {
-        var side = _alignment.ResolveSide(entrant.KingdomId, entrant.CultureId);
+        var side = _alignment.ResolveSide(entrant.Side);
         return $"{entrant.CharacterId ?? "<null>"} '{entrant.Name ?? "<unnamed>"}' {(entrant.IsHero ? "hero" : "troop")} " +
-               $"side={side} (kingdom={entrant.KingdomId ?? "<none>"} culture={entrant.CultureId ?? "<none>"}) " +
-               $"barred by host side={HostSide(host)} (owner={host.OwnerFactionId ?? "<none>"} " +
-               $"ownerCulture={host.OwnerCultureId ?? "<none>"} town={host.TownCultureId ?? "<none>"})";
+               $"side={side} (faction={Show(entrant.Side.FactionId)} sideCulture={Show(entrant.Side.CultureId)} " +
+               $"culture={entrant.CultureId ?? "<none>"}) " +
+               $"barred by host side={HostSide(host)} (owner={Show(host.OwnerSide.FactionId)} " +
+               $"ownerCulture={Show(host.OwnerSide.CultureId)} town={host.TownCultureId ?? "<none>"})";
     }
 
-    private FactionSide HostSide(TournamentHost host) =>
-        _alignment.ResolveSide(host.OwnerFactionId, host.OwnerCultureId);
+    private static string Show(string id) => id.Length == 0 ? "<none>" : id;
+
+    private FactionSide HostSide(TournamentHost host) => _alignment.ResolveSide(host.OwnerSide);
 
     private bool IsBarred(TournamentEntrant entrant, FactionSide hostSide, TournamentHost host)
     {
@@ -77,7 +82,7 @@ public sealed class TournamentAlignmentFilterService
              || SameId(entrant.CultureId, host.EliteTroopCultureId)))
             return false;
 
-        var side = _alignment.ResolveSide(entrant.KingdomId, entrant.CultureId);
+        var side = _alignment.ResolveSide(entrant.Side);
         return side != FactionSide.Neutral && side != hostSide;
     }
 

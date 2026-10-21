@@ -74,7 +74,7 @@ All of these must hold (`InterrogationService.Eligible`; the used-topic check ru
 
 ## Alignment scaling (decision D3) and relations
 
-Every relation change goes through `IExecutionRelationService.GetRelationModifier` with the player as executor and the captive as victim. When the sides are enemies only lords on the victim's side take the hit; when they share a side everyone takes 1.5 times. Trait experience losses use a JSON multiplier: 0.5 for enemy sides, 1.5 for the same side, 1.0 when either side is Neutral.
+Every relation change goes through `IExecutionRelationService.GetRelationModifier` with the player as executor and the captive as victim. Each party is one `SideIds` (the map faction's id with that faction's culture, `FactionSides`): the executor is `IArmouryPlayerAdapter.Side` and the victim and every evaluator is `LordRef.Side`, so a lord of a Neutral realm is Neutral whatever the lord's own culture (#957). `LordRef.KingdomId` stays for the realm-wide relation set. When the sides are enemies only lords on the victim's side take the hit; when they share a side everyone takes 1.5 times. Trait experience losses use a JSON multiplier: 0.5 for enemy sides, 1.5 for the same side, 1.0 when either side is Neutral.
 
 The engine ignores `affectRelatives` (v1.5.5). Whose relation with the player a change moves depends on the active DiplomacyModel's `GetHeroesForEffectiveRelation`, which `HardQuestionsPenaltyApplier.ApplyRelations` reads for each lord (`LordRef.RelationId`, filled by `CaptiveLordAdapter.Circle` from the engine's own model). It keeps the strongest delta per relation owner and charges each owner once, whatever order the hits come in. The clan leader (`CaptiveCircle.ClanLeader`, force) and the clan's other lords (`CaptiveCircle.ClanLords`, strip) are in the hit list in both modes, and the mapping decides what they do:
 
@@ -126,7 +126,7 @@ Every number above is a field. Chances are in [0, 1], penalties are at most 0 (a
 ## Dependencies
 
 - The module owns save data (`OwnsSaveData`).
-- Armour Acquisition: `IArmourGateService` (the Named class) and `IArmouryPlayerAdapter` (inventory, gold, side). D1 relies on `ArmourGateService` filling its class map at every game init, also with that feature's toggle off.
+- Armour Acquisition: `IArmourGateService` (the Named class) and `IArmouryPlayerAdapter` (inventory, gold, the `Side` pair). D1 relies on `ArmourGateService` filling its class map at every game init, also with that feature's toggle off.
 - Execution: `IAlignmentService` and `IExecutionRelationService`.
 - Enlistment: `IHeroSkillXpAdapter` (Charm and Roguery experience).
 - InitialChildGeneration: `IRandomSource`.
@@ -159,6 +159,7 @@ If Armour Acquisition's gate fails at game init (it logs when it does), named pi
 11. A dungeon death: before you leave, note whether his standing figure still offers a conversation; then leave and re-enter the dungeon: he is gone.
 12. In German, the 19 lines show English seed text with `{PRICE}`, `{COMPANION}` and `{COUNT}` filled.
 13. In the ransom broker's sell-prisoners screen, sell a prisoner, then talk to a captive lord there and strip him: the sale pays once, not twice (the deed commits the open screen, which reruns its done handler).
+14. Neutral realm (owed, #957): as a player whose clan serves a Neutral realm (Khand, Umbar, Shaghana or Abanissa) with a Free-culture hero, force a clan topic on a Free captive and on an Evil captive: both read the Neutral multiplier (Honor and Mercy at the base amount), not the same-side 1.5 times.
 
 ## Translations
 
@@ -166,6 +167,7 @@ The 19 `taom_hq_*` keys are registered and seeded in English in all 12 languages
 
 ## Changelog
 
+- 2026-10-20 (#957, part 2): the executor, the victim and the evaluators are `SideIds` (the realm's id with the realm's culture); `LordRef.CultureId` is replaced by `Side` and the trait multiplier reads the same pairs.
 - 2026-10-20: restored the clan-leader force hit and the clan-lords strip hit after Personal Relations moved the relation owner onto each lord, extended the Neutral floor to his clan, and made the summary count lords (#948; `docs/reviews/rca-hard-questions-2026-10-19.md`, Round 3).
 - 2026-10-20: the reveal marks towns and castles with the map tracker instead of the unused visited flag.
 - 2026-10-19: one summary line of relation damage after a force or a strip.

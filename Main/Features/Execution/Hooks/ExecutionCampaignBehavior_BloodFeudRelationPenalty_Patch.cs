@@ -21,7 +21,10 @@ namespace TAOM.Features.Execution.Hooks;
 /// <para>
 /// Patching the method rather than the loop keeps the pre-execution confirmation honest: the same
 /// method feeds the "this will hurt your relations with N clans" tooltip, so the warning and the
-/// outcome cannot disagree.
+/// outcome read the same rule. They can still differ when the kill destroys the victim's clan: the
+/// tooltip reads the victim before the kill, still in its kingdom, and the outcome reads it after
+/// <c>KillCharacterAction</c> nulled the kingdom, so the victim is then the clan's own pair (a
+/// kingdom clan resolves its kingdom's side on its own pair, which the shipped-data gate checks).
 /// </para>
 ///
 /// <para>
@@ -41,10 +44,12 @@ namespace TAOM.Features.Execution.Hooks;
 /// a bandit faction or leaderless, before this postfix sees it. So <c>dyingHero.Clan.Kingdom</c> can
 /// be null here; it always could on the second caller, the execute-troop hint text, which never had
 /// the kingdom check.
-/// Every participant carries its culture regardless, and the service resolves sides with a culture
-/// fallback and no early return, so a kingdom-less victim, evaluator or executor (independent or
-/// enlisted player, mercenary clan) is placed on a side rather than handing the calculation back to
-/// vanilla's flat penalty.
+/// Every participant is the id and the culture of ONE entity (<c>FactionSides</c>: the clan's map
+/// faction with that faction's culture, or a clanless hero's own), and the service resolves sides
+/// with a culture fallback and no early return, so a kingdom-less victim, evaluator or executor
+/// (independent or enlisted player, a minor clan serving no kingdom, a destroyed clan) is placed on a side rather than handing the
+/// calculation back to vanilla's flat penalty. A kingdom zipped with a hero's own culture would side
+/// a Neutral realm's lord by a culture the realm does not have (#957).
 /// </para>
 /// </summary>
 [HarmonyPatch(typeof(ExecutionCampaignBehavior),
@@ -71,16 +76,7 @@ public static class ExecutionCampaignBehavior_BloodFeudRelationPenalty_Patch
 
         // Past the bereaved gate the executor is the player: the tooltip and the application loop
         // both run for the main hero's own executions.
-        var executor = new ExecutionParticipant(
-            playerContext.GetPlayerKingdomId(),
-            playerContext.GetPlayerCultureId());
-        var victim = new ExecutionParticipant(
-            dyingHero?.Clan?.Kingdom?.StringId,
-            dyingHero?.Culture?.StringId);
-        var evaluator = new ExecutionParticipant(
-            otherClan?.Kingdom?.StringId,
-            otherClan?.Culture?.StringId);
-
-        __result = hook.GetRelationModifier(executor, victim, evaluator, __result);
+        __result = hook.GetRelationModifier(
+            FactionSides.OfPlayer(), FactionSides.OfHero(dyingHero), FactionSides.Of(otherClan?.MapFaction), __result);
     }
 }

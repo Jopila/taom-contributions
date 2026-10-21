@@ -232,8 +232,8 @@ public class CaravanTradeServiceTests
     public void AllowWartimeTrade_SameAlignment_SameSide_ReturnsTrue()
     {
         // Free caravan reaching another Free town despite the war.
-        _alignment.GetKingdomSide("empire_w").Returns(FactionSide.Free);
-        _alignment.GetKingdomSide("vlandia").Returns(FactionSide.Free);
+        _alignment.ResolveSide("empire_w", "gondor").Returns(FactionSide.Free);
+        _alignment.ResolveSide("vlandia", "vlandia").Returns(FactionSide.Free);
         Assert.IsTrue(_sut.AllowWartimeTrade("empire_w", "gondor", "vlandia", "vlandia", false));
     }
 
@@ -241,8 +241,8 @@ public class CaravanTradeServiceTests
     public void AllowWartimeTrade_SameAlignment_OppositeSides_ReturnsFalse()
     {
         // A Free caravan must NOT resupply an Evil town.
-        _alignment.GetKingdomSide("empire_w").Returns(FactionSide.Free);
-        _alignment.GetKingdomSide("empire_s").Returns(FactionSide.Evil);
+        _alignment.ResolveSide("empire_w", "gondor").Returns(FactionSide.Free);
+        _alignment.ResolveSide("empire_s", "mordor").Returns(FactionSide.Evil);
         Assert.IsFalse(_sut.AllowWartimeTrade("empire_w", "gondor", "empire_s", "mordor", false));
     }
 
@@ -252,40 +252,35 @@ public class CaravanTradeServiceTests
         // Neutral (Umbar etc.) trades with anyone — regression guard for the AreEnemyAlignments
         // inversion (which treats Neutral as an enemy of everyone). This is the bug the deep-review
         // data-flow agent caught: the shipped default policy silently blocked neutral trade.
-        _alignment.GetKingdomSide("umbar").Returns(FactionSide.Neutral);
-        _alignment.GetCultureSide("umbar").Returns(FactionSide.Neutral);
-        _alignment.GetKingdomSide("empire_w").Returns(FactionSide.Free);
+        _alignment.ResolveSide("umbar", "umbar").Returns(FactionSide.Neutral);
+        _alignment.ResolveSide("empire_w", "gondor").Returns(FactionSide.Free);
         Assert.IsTrue(_sut.AllowWartimeTrade("umbar", "umbar", "empire_w", "gondor", false));
     }
 
     [TestMethod]
     public void AllowWartimeTrade_SameAlignment_NeutralTarget_ReturnsTrue()
     {
-        _alignment.GetKingdomSide("empire_s").Returns(FactionSide.Evil);
-        _alignment.GetKingdomSide("umbar").Returns(FactionSide.Neutral);
-        _alignment.GetCultureSide("umbar").Returns(FactionSide.Neutral);
+        _alignment.ResolveSide("empire_s", "mordor").Returns(FactionSide.Evil);
+        _alignment.ResolveSide("umbar", "umbar").Returns(FactionSide.Neutral);
         Assert.IsTrue(_sut.AllowWartimeTrade("empire_s", "mordor", "umbar", "umbar", false));
     }
 
     [TestMethod]
     public void AllowWartimeTrade_PlayerFoundedKingdom_SidedByCulture_BlocksAcrossLine()
     {
-        // A player-founded kingdom (id "new_kingdom") is absent from alignment.json -> GetKingdomSide
-        // returns Neutral, which would wrongly let it trade across the Free/Evil line. Culture fallback
-        // sides it Free (gondor culture), so it must NOT trade with an Evil town. (Codex MED, mirrors
-        // WarOfTheRingMomentum's player-founded-kingdom culture fallback.)
-        _alignment.GetKingdomSide("new_kingdom").Returns(FactionSide.Neutral);
-        _alignment.GetCultureSide("gondor").Returns(FactionSide.Free);
-        _alignment.GetKingdomSide("empire_s").Returns(FactionSide.Evil);
+        // A player-founded kingdom (id "new_kingdom") is absent from alignment.json, so its own pair falls back to
+        // its culture and sides it Free (gondor culture): it must NOT trade with an Evil town. The fallback is the
+        // alignment service's, which this service asks with the kingdom's id and the culture of that kingdom.
+        _alignment.ResolveSide("new_kingdom", "gondor").Returns(FactionSide.Free);
+        _alignment.ResolveSide("empire_s", "mordor").Returns(FactionSide.Evil);
         Assert.IsFalse(_sut.AllowWartimeTrade("new_kingdom", "gondor", "empire_s", "mordor", false));
     }
 
     [TestMethod]
     public void AllowWartimeTrade_PlayerFoundedKingdom_SidedByCulture_AllowsSameSide()
     {
-        _alignment.GetKingdomSide("new_kingdom").Returns(FactionSide.Neutral);
-        _alignment.GetCultureSide("gondor").Returns(FactionSide.Free);
-        _alignment.GetKingdomSide("vlandia").Returns(FactionSide.Free);
+        _alignment.ResolveSide("new_kingdom", "gondor").Returns(FactionSide.Free);
+        _alignment.ResolveSide("vlandia", "vlandia").Returns(FactionSide.Free);
         Assert.IsTrue(_sut.AllowWartimeTrade("new_kingdom", "gondor", "vlandia", "vlandia", false));
     }
 

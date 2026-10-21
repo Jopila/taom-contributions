@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using TAOM.Features.Execution;
 using TAOM.Features.GoodDeeds;
 using TAOM.Features.GoodDeeds.Models;
 using static TAOM.Tests.Features.GoodDeeds.GoodDeedsFixture;
@@ -18,7 +19,7 @@ public class GoodDeedsServiceDonationTests
     [TestInitialize]
     public void Setup() => _f = new GoodDeedsFixture();
 
-    private void Facts(DeedSide captive, DeedSide owner) =>
+    private void Facts(SideIds captive, SideIds owner) =>
         _f.Heroes.ReadDonation("captive", "town").Returns(new DonationFacts(captive, owner));
 
     private float Donated(float vanilla = 17.3f) => _f.Service.DonationRelation(vanilla, "captive", "town");
@@ -86,7 +87,7 @@ public class GoodDeedsServiceDonationTests
     [DataRow("", "", 22f)]
     public void DonationRelation_FollowsThePairingOfCaptiveAndOwner(string captiveKingdom, string ownerKingdom, float expected)
     {
-        Facts(new DeedSide(captiveKingdom, string.Empty), new DeedSide(ownerKingdom, string.Empty));
+        Facts(new SideIds(captiveKingdom, string.Empty), new SideIds(ownerKingdom, string.Empty));
 
         Assert.AreEqual(expected, Donated(17.3f));
     }

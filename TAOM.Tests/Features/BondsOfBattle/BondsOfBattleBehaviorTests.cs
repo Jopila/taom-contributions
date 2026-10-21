@@ -12,6 +12,7 @@ using TAOM.Features.BondsOfBattle.Hooks;
 using TAOM.Features.BondsOfBattle.Models;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.Enlistment;
+using TAOM.Features.Execution;
 using TAOM.Features.InitialChildGeneration;
 using TAOM.Features.Relations;
 
@@ -65,7 +66,7 @@ public class BondsOfBattleBehaviorTests
 
     private static BattleSnapshot AllyBattle() =>
         new(new List<BattleParticipant> { new("ally", "Ally", true, false, false, false, true, "ally", false) },
-            true, 0, new List<SettlementNotables>(), false, "free_f", null, false, 0);
+            true, 0, new List<SettlementNotables>(), false, new SideIds("free_f", string.Empty), false, 0);
 
     [TestMethod]
     public void OnPlayerBattleEnd_AnAllyBattle_GrantsTheAllyBonus()

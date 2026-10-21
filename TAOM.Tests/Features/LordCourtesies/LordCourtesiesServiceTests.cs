@@ -170,12 +170,27 @@ public class LordCourtesiesServiceTests
     }
 
     [TestMethod]
-    public void CanGift_ReadsTheSidesFromKingdomThenCulture()
+    public void CanGift_ReadsEachSideFromItsOwnIdAndCulturePair()
     {
         _f.Service.CanGift();
 
         _f.Alignment.Received().ResolveSide("k_player", "c_player");
         _f.Alignment.Received().ResolveSide("k_lord", "c_lord");
+    }
+
+    [TestMethod]
+    public void CanGift_PlayerOfNeutralRealmWithFreeCulture_IsOfferedByEvilLord()
+    {
+        // #957: the player's realm is Neutral and the player's own culture is Free. The pair that sides the
+        // player is the realm's id with the realm's culture, not the realm's id with the hero's culture.
+        _f.Player.KingdomId.Returns("k_neutral_realm");
+        _f.Player.CultureId.Returns("c_hero_free");
+        _f.Player.Side.Returns(new SideIds("k_neutral_realm", "c_neutral_realm"));
+        _f.Alignment.ResolveSide("k_neutral_realm", "c_hero_free").Returns(FactionSide.Free);
+        _f.Alignment.ResolveSide("k_neutral_realm", "c_neutral_realm").Returns(FactionSide.Neutral);
+        _f.Alignment.ResolveSide("k_lord", "c_lord").Returns(FactionSide.Evil);
+
+        Assert.IsTrue(_f.Service.CanGift());
     }
 
     [TestMethod]

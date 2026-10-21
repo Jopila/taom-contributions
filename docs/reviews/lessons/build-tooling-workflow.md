@@ -480,6 +480,7 @@ templates and revert the party-size rescale with it.
 - **Prevent:** after editing any ModuleData file, grep `tools/` for writers of that filename. A
   regeneration is a silent revert, and it will not fail any gate.
 - **Source:** `docs/reviews/rca-black-numenorean-2026-08-17.md` finding 8.
+- **Repeat:** 2026-10-21 (#957): `tools/complete_lords_xslt.py --apply` rebuilds `lords.xslt` from scratch and would have dropped the minor-clan troop retags and the leader clone template, because only the #758 wanderer retag was a constant in the generator (the shipped file held the block, the regenerated one did not). The block is now `MINOR_CLAN_CULTURES`, emitted by `generate_xslt`, with a test that the generator emits it and a test that the shipped file carries it verbatim. Any non-lord block added to a generator-owned file goes into the generator in the same change. Source: `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, wave 2, finding D3.
 
 ### A regenerator that honours an override "only when present" restores the vanilla value when you delete it
 `tools/complete_lords_xslt.py` rebuilds `lords.xslt` from vanilla plus the overrides it parses back

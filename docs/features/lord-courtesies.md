@@ -60,7 +60,7 @@ The gift also needs (`Giftable`):
 - His party has room (fewer members than its size limit), is not being disbanded, and is not in a map event other than the player's.
 - The player's party holds at least one regular troop.
 - He is not in the player's kingdom, where vanilla's donate-for-influence already applies.
-- The sides do not cross the line. The rule is `LordCourtesiesService.SidesAllowGift`: a gift is allowed unless one side is Free and the other Evil. Neutral may give or receive. Sides come from `IAlignmentService.ResolveSide(kingdomId, cultureId)` for both parties.
+- The sides do not cross the line. The rule is `LordCourtesiesService.SidesAllowGift`: a gift is allowed unless one side is Free and the other Evil. Neutral may give or receive. Sides come from `IAlignmentService.ResolveSide` on one `SideIds` per party: the player's `IArmouryPlayerAdapter.Side` (the player clan's map faction with that faction's culture) and the lord's `LordCourtesySnapshot.Side` (`FactionSides.OfHero`: the clan's map faction with that faction's culture, or a clanless hero's own culture). A lord of a Neutral realm is Neutral whatever the lord's own culture (#957). `KingdomId` stays on both for the same-realm gate, which compares kingdom ids only.
 
 ## Rules
 
@@ -101,7 +101,7 @@ Group `World/Lord Courtesies` (`GroupOrder = 63`), both default on, neither need
 
 - `TroopHandoverService` (Bonds of Battle): the gain, the daily cap, the grant and the notice. Unchanged; this feature only calls `OnHandover`.
 - `IAlignmentService` (Execution): sides of the player and the lord.
-- `IArmouryPlayerAdapter` (Adapters): the player's kingdom and culture, and `ChangeRelationWith` for the holdings costs.
+- `IArmouryPlayerAdapter` (Adapters): the player's kingdom id (the same-realm gate), the player's `Side` pair, and `ChangeRelationWith` for the holdings costs.
 - `IMapRevealAdapter` (Adapters): `RevealClan`. Registered by `HardQuestionsIoC`; this feature resolves it and does not register it again.
 - `ICoopSessionProvider` and `IDedicatedServerProvider` (CoopInterop): hide both lines when TAOM defers to a host and on a dedicated server.
 - `PartyScreenHelper.DonateModeTroopTransferableDelegate` (engine, public): troops move from the player's side only and heroes never move.
@@ -131,11 +131,13 @@ The 10 new keys carry English seed text in all 12 languages. A paid translation 
 - Move troops, then leave by the map bar instead of Done: the gift still pays.
 - Ask the holdings question at relation 5 or more: the clan's towns and castles show tracking marks and the count line shows; open one settlement's encyclopedia page and switch Track off to remove its mark. Below 5: refusal and 1 relation lost. A landless clan at relation 5 or more: 5 relation lost.
 - Toggle each MCM option off: its line disappears and the other stays.
+- Neutral realm (owed, #957): as a player in a Neutral realm (Khand, Umbar, Shaghana or Abanissa), or with a Gondor-born lord of a Neutral realm beside you, the gift line is offered across the Free/Evil line: a Neutral player to an Evil lord and to a Free lord, and a Free player to a lord of a Neutral realm whatever the lord's own culture.
 - Reveal, save and load: the marks are still on the map after loading.
 - In German, the new lines show English text.
 
 ## Changelog
 
+- 2026-10-20 (#957, part 2): the sides are read from `SideIds` (the realm's id with the realm's culture), not the realm id with the hero's own culture; `LordCourtesySnapshot.CultureId` is replaced by `Side`.
 - 2026-10-20: the reveal marks towns and castles only; the roster diff is a static on the service; the gift reward reuses Bonds of Battle's hand-over rule and settles on the engine's commit; the reveal marks settlements with the visual tracker (also for Hard Questions); co-location, room, disbanding and troop checks added to the gift line.
 - 2026-10-19: first version (#897).
 

@@ -1,3 +1,5 @@
+using TAOM.Features.Execution;
+
 namespace TAOM.Features.Arena;
 
 /// <summary>
@@ -33,10 +35,18 @@ public readonly struct TournamentEntrant
     /// <summary>True when <c>CharacterObject.Culture</c> is non-null.</summary>
     public bool HasCulture { get; }
 
-    /// <summary>The hero's clan's kingdom id, or <c>null</c> for a kingdomless hero or a troop. #744.</summary>
-    public string? KingdomId { get; }
+    private readonly SideIds? _side;
 
-    /// <summary><c>CharacterObject.Culture.StringId</c>, or <c>null</c>. #744.</summary>
+    /// <summary>
+    /// The pair the alignment table resolves (<c>FactionSides.OfCharacter</c>): a clan hero's clan map faction
+    /// id with that faction's culture, a clanless hero's own culture, a troop's own culture. #744, #957.
+    /// </summary>
+    public SideIds Side => _side ?? SideIds.None;
+
+    /// <summary>
+    /// <c>CharacterObject.Culture.StringId</c>, or <c>null</c>. A hero in a clan keeps its own culture here,
+    /// which can differ from <see cref="Side"/>'s: this one only feeds the troop exemption. #744.
+    /// </summary>
     public string? CultureId { get; }
 
     /// <summary>The player, or a hero of the player's clan: never barred from a tournament. #744.</summary>
@@ -51,7 +61,7 @@ public readonly struct TournamentEntrant
         string? clanId,
         bool hasMapFaction,
         bool hasCulture,
-        string? kingdomId = null,
+        SideIds? side = null,
         string? cultureId = null,
         bool isPlayerOrPlayerClan = false)
     {
@@ -63,7 +73,7 @@ public readonly struct TournamentEntrant
         ClanId = clanId;
         HasMapFaction = hasMapFaction;
         HasCulture = hasCulture;
-        KingdomId = kingdomId;
+        _side = side;
         CultureId = cultureId;
         IsPlayerOrPlayerClan = isPlayerOrPlayerClan;
     }
@@ -77,11 +87,13 @@ public readonly struct TournamentEntrant
 /// </summary>
 public readonly struct TournamentHost
 {
-    /// <summary><c>Settlement.MapFaction.StringId</c>: the owner kingdom, or the owner clan without one.</summary>
-    public string? OwnerFactionId { get; }
+    private readonly SideIds? _ownerSide;
 
-    /// <summary>The owner faction's own culture id, the side's fallback when the faction is not listed.</summary>
-    public string? OwnerCultureId { get; }
+    /// <summary>
+    /// <c>Settlement.MapFaction</c>'s id with that faction's own culture (<c>FactionSides.Of</c>): the owner
+    /// kingdom, or the owner clan without one. The culture is the side's fallback when the faction is not listed.
+    /// </summary>
+    public SideIds OwnerSide => _ownerSide ?? SideIds.None;
 
     /// <summary><c>Settlement.Culture.StringId</c>.</summary>
     public string? TownCultureId { get; }
@@ -95,11 +107,10 @@ public readonly struct TournamentHost
     /// <summary>Culture of the town culture's <c>EliteBasicTroop</c>, the troop Patch69 fills with first.</summary>
     public string? EliteTroopCultureId { get; }
 
-    public TournamentHost(string? ownerFactionId, string? ownerCultureId, string? townCultureId,
+    public TournamentHost(SideIds? ownerSide, string? townCultureId,
         string? basicTroopCultureId, string? eliteTroopCultureId)
     {
-        OwnerFactionId = ownerFactionId;
-        OwnerCultureId = ownerCultureId;
+        _ownerSide = ownerSide;
         TownCultureId = townCultureId;
         BasicTroopCultureId = basicTroopCultureId;
         EliteTroopCultureId = eliteTroopCultureId;

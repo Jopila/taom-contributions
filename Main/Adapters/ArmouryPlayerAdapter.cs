@@ -7,6 +7,7 @@ using TaleWorlds.CampaignSystem.Roster;
 using TaleWorlds.Core;
 using TaleWorlds.ObjectSystem;
 using TAOM.Features.ArmourAcquisition.Domain;
+using TAOM.Features.Execution;
 
 namespace TAOM.Adapters;
 
@@ -22,6 +23,8 @@ public class ArmouryPlayerAdapter : IArmouryPlayerAdapter
     public string? KingdomId => Hero.MainHero?.Clan?.Kingdom?.StringId;
 
     public string? CultureId => Hero.MainHero?.Culture?.StringId;
+
+    public SideIds Side => FactionSides.OfPlayer();
 
     public int Gold => Hero.MainHero?.Gold ?? 0;
 

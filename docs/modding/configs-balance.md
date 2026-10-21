@@ -229,7 +229,7 @@ The six MCM-exposed fields are the ones a pack author cannot rely on. The two JS
 | `applyToAi` | bool | `true` | either | Gate AI lords | `alignment-recruitment.md:47` |
 | `applyToPlayer` | bool | `true` | either | Gate the player | `alignment-recruitment.md:48` |
 
-All four are exposed under the MCM group "World/Recruitment Alignment", so all four are subject to the precedence warning above. The alignment data itself lives in `execution/alignment.json`, which has **24 keys and mixes kingdom ids with culture ids** (`gondor`, `mordor`, `goblin`, `lindon` and five more are cultures; `empire_w`, `khuzait`, `battania` and the rest are kingdoms). <!-- measured: python json key listing over execution/alignment.json 2026-09-05 --> Two feature docs call it a kingdom-id map. It is not, and adding a faction means checking which of the two you are adding. That file belongs to [Faction and world configs](configs-factions-and-world.md).
+All four are exposed under the MCM group "World/Recruitment Alignment", so all four are subject to the precedence warning above. The alignment data itself lives in `execution/alignment.json`, which has **29 keys and mixes kingdom ids, culture ids and minor clan ids** (`gondor` and `mordor` are cultures; `ghilman`, `skolderbrotva`, `forest_people` and `eleftheroi` are minor clans; `empire_w`, `khuzait`, `battania` and the rest are kingdoms). <!-- measured: python json key listing over execution/alignment.json 2026-10-21 --> Two feature docs call it a kingdom-id map. It is not, and adding a faction means checking which of the two you are adding. That file belongs to [Faction and world configs](configs-factions-and-world.md).
 
 ### enlistment_duties.json
 
@@ -410,7 +410,7 @@ Code: No code changes needed
 | 15 race entries in `race_age_config.json` | python json key count over `races` | 2026-09-05 |
 | 13 field duties, 11 interactive duties, 3 incidents; difficulties 40 to 76; `failureReward.trust` is 0 on all 13 | python json array lengths and field scan over `enlistment_duties.json` | 2026-09-05 |
 | 1,735 `<PassiveEffect>` elements, 23 distinct types, 310 wrapped, 290 using `value=` alone, 1,445 carrying `operation`, 0 choices with a second passive | python ElementTree scan over `taom_career_choices.xml` | 2026-09-05 |
-| 24 keys in `execution/alignment.json`, mixing kingdom and culture ids | python json key listing | 2026-09-05 |
+| 29 keys in `execution/alignment.json`, mixing kingdom, culture and minor clan ids | python json key listing | 2026-10-21 |
 | 219 value knobs across 56 MCM groups (440 `[SettingProperty` lines) | `rg -o "\[SettingProperty" Main/Features/TaomSettings.cs \| wc -l` and `rg -o 'SettingPropertyGroup\("[^"]*"' Main/Features/TaomSettings.cs \| sort -u \| wc -l` | 2026-09-11 |
 | 14 providers, all registered `Reuse.Singleton` | `rg -n` over the fourteen IoC files named in the registration table | 2026-09-05 |
 | 0 hits for any of the fifteen filenames in the ModuleData validator; 3 files in `tools/schemas/` | `rg -n` over `tools/validate_moduledata.py` and `tools/taom_schema.py`, and `ls tools/schemas/` | 2026-09-05 |

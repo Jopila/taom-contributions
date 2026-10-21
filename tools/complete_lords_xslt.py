@@ -451,6 +451,61 @@ VANILLA_WANDERER_RETAG = [
 ]
 
 
+# Not a lord rule either: the #957 minor-clan block. lords.xslt runs over vanilla NPCCharacters, so it also retags the
+# four minor clans' troops to the culture of their side and clones their leader templates for the clan lists. The
+# regenerated file must carry it verbatim (tools/tests/test_complete_lords_xslt.py).
+MINOR_CLAN_CULTURES = [
+    '',
+    '    <!-- Minor-clan troops and leaders take the culture of the side their clan is on (#957). Vanilla gave the Grey',
+    '         Company empire (Dunland, Evil), the Corsair Blades and the Dunlending Reavers vlandia (Rohan, Free) and the',
+    '         Beornings empire, so a company hired by an employer of its own side shed its own troops',
+    "         (AlignmentDesertion reads the troop's culture). Troops are retagged in place: nothing but partyTemplates.xml",
+    '         names them. ShippedClanSideCoverageTests. -->',
+    '    <xsl:template match="NPCCharacter[starts-with(@id,\'legion_of_the_betrayed_tier_\')]/@culture">',
+    '        <xsl:attribute name="culture">Culture.arthedain</xsl:attribute>',
+    '    </xsl:template>',
+    '    <xsl:template match="NPCCharacter[starts-with(@id,\'company_of_the_boar_tier_\')]/@culture">',
+    '        <xsl:attribute name="culture">Culture.umbar</xsl:attribute>',
+    '    </xsl:template>',
+    '    <xsl:template match="NPCCharacter[starts-with(@id,\'eleftheroi_tier_\')]/@culture">',
+    '        <xsl:attribute name="culture">Culture.sturgia</xsl:attribute>',
+    '    </xsl:template>',
+    '    <xsl:template match="NPCCharacter[starts-with(@id,\'brotherhood_of_woods_tier_\')]/@culture">',
+    '        <xsl:attribute name="culture">Culture.empire</xsl:attribute>',
+    '    </xsl:template>',
+    '',
+    '    <!-- The leader templates are cloned, not retagged. The originals are also the vanilla empire (Dunland) and',
+    "         vlandia (Rohan) cultures' lord_templates and rebellion_hero_templates, and a hero keeps its template's",
+    '         culture (DefaultHeroCreationModel.GetCulture), so retagging them would spawn Arthedain or Umbar heroes',
+    '         for Dunland and Rohan companion clans and rebellions. The clone is the original with a new id and the',
+    "         clan's culture; every other attribute and child is copied, so it looks and behaves the same. spclans.xslt",
+    "         points each clan's minor_faction_character_templates at the clones. The originals stay untouched.",
+    "         Never rename or remove a taom_spc_* clone: a save holds it by id in the clan's template list and in the",
+    '         origin character of every leader spawned from it. -->',
+    '    <xsl:template match="NPCCharacter[starts-with(@id,\'spc_legion_of_the_betrayed_leader_\')',
+    "                                   or starts-with(@id,'spc_company_of_the_boar_leader_')",
+    "                                   or starts-with(@id,'spc_eleftheroi_leader_')",
+    '                                   or starts-with(@id,\'spc_brotherhood_of_woods_leader_\')]">',
+    '        <xsl:copy>',
+    '            <xsl:apply-templates select="@*|node()"/>',
+    '        </xsl:copy>',
+    '        <xsl:copy>',
+    '            <xsl:apply-templates select="@*[local-name() != \'id\' and local-name() != \'culture\']"/>',
+    '            <xsl:attribute name="id">taom_<xsl:value-of select="@id"/></xsl:attribute>',
+    '            <xsl:attribute name="culture">',
+    '                <xsl:choose>',
+    '                    <xsl:when test="starts-with(@id,\'spc_legion_of_the_betrayed_leader_\')">Culture.arthedain</xsl:when>',
+    '                    <xsl:when test="starts-with(@id,\'spc_company_of_the_boar_leader_\')">Culture.umbar</xsl:when>',
+    '                    <xsl:when test="starts-with(@id,\'spc_eleftheroi_leader_\')">Culture.sturgia</xsl:when>',
+    '                    <xsl:otherwise>Culture.empire</xsl:otherwise>',
+    '                </xsl:choose>',
+    '            </xsl:attribute>',
+    '            <xsl:apply-templates select="node()"/>',
+    '        </xsl:copy>',
+    '    </xsl:template>',
+]
+
+
 def generate_xslt(merged, xslt_order):
     """Generate the complete XSLT file."""
     parts = []
@@ -467,6 +522,7 @@ def generate_xslt(merged, xslt_order):
     parts.append('        </xsl:copy>')
     parts.append('    </xsl:template>')
     parts.extend(VANILLA_WANDERER_RETAG)
+    parts.extend(MINOR_CLAN_CULTURES)
 
     # Group lords by faction
     faction_lords = {i: [] for i in range(len(FACTION_SECTIONS))}

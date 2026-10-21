@@ -125,7 +125,7 @@ public sealed class CaptiveLordAdapter : ICaptiveLordAdapter
             Campaign.Current.Models.DiplomacyModel.GetHeroesForEffectiveRelation(Hero.MainHero, hero, out _, out var effective);
             relationId = (effective ?? hero).StringId;
         }
-        return new LordRef(hero.StringId, hero.Clan?.Kingdom?.StringId, hero.Culture?.StringId, relationId, hero.Clan?.StringId);
+        return new LordRef(hero.StringId, hero.Clan?.Kingdom?.StringId, FactionSides.OfHero(hero), relationId, hero.Clan?.StringId);
     }
 
     /// <summary>The partner of the open conversation when it is the asked hero, else a lookup.</summary>

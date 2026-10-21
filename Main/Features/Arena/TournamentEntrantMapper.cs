@@ -1,3 +1,4 @@
+using TAOM.Adapters;
 using TAOM.Core.Domain;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Settlements;
@@ -43,7 +44,7 @@ public static class TournamentEntrantMapper
             clanId: hero?.Clan?.StringId,
             hasMapFaction: hero?.MapFaction != null,
             hasCulture: character.Culture != null,
-            kingdomId: hero?.Clan?.Kingdom?.StringId,
+            side: FactionSides.OfCharacter(character),
             cultureId: character.Culture?.StringId,
             isPlayerOrPlayerClan: character.IsPlayerCharacter
                 || (hero?.Clan != null && hero.Clan == Clan.PlayerClan));
@@ -57,9 +58,8 @@ public static class TournamentEntrantMapper
     /// </summary>
     public static TournamentHost ResolveHost(Settlement settlement)
     {
-        var owner = settlement?.MapFaction;
         var culture = settlement?.Culture;
-        return new TournamentHost(owner?.StringId, owner?.Culture?.StringId, culture?.StringId,
+        return new TournamentHost(FactionSides.Of(settlement?.MapFaction), culture?.StringId,
             culture?.BasicTroop?.Culture?.StringId, culture?.EliteBasicTroop?.Culture?.StringId);
     }
 

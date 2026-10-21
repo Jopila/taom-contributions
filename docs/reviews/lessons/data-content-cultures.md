@@ -1948,7 +1948,7 @@ although seven cultures recruit another culture's troops, Umbar only for its bas
   `spkingdoms.xslt` and the culture's `basic_troop`/`elite_basic_troop` cultures. Any change that sides, groups or
   exempts by culture reads this file first, whatever folder the code lives in. When two lenses propose fixes for
   one finding, apply the one with the wider coverage.
-- **Repeat:** repeated in Tokens of Esteem (#957, 2026-10-20), and the same pairing remains in Lord Courtesies and Hard Questions (follow-up).
+- **Repeat:** repeated in Tokens of Esteem (#957, 2026-10-20), then found in Lord Courtesies, Hard Questions, the two execution seams, tournament hero entrants, Wanderer Allegiance and Prisoner Recruitment. Fixed in #957 part 2 by carrying the pair as one `SideIds` built only in `FactionSides`, with `SidePairScanTests` (an IL scan) failing on any new two-argument `ResolveSide` call, or a `SideIds` built or copied elsewhere (the `ExecutionParticipant` struct is gone), and four minor clan rows in `alignment.json` plus two clan-culture retags guarded by `ShippedClanSideCoverageTests`.
 - **Source:** `docs/reviews/rca-tournament-alignment-filter-2026-10-06.md` findings 1 to 4.
 
 ### A culture promotion drops every table keyed on the host culture or its troop ids (#749, 2026-10-06)
@@ -2164,3 +2164,9 @@ the same attribute.
   in the same change. A group gate uses the engine's hero rule (horse crossed with launcher) in both
   directions, and it reads troop-level `<equipment>`, where the Falcons carry their horse.
 - **Source:** `docs/reviews/rca-dunland-formation-groups-2026-10-20.md`; #555 item 3.
+
+### A template that other cultures also list must be cloned, not retagged (#957, 2026-10-20)
+The four minor clans' leader templates (`spc_legion_of_the_betrayed_leader_*` and the rest) looked like clan-private data, so the first fix retagged their culture to the clan's side. `spcultures.xslt` passes the same 16 templates through as the `lord_templates` and `rebellion_hero_templates` of the `empire` (Dunland) and `vlandia` (Rohan) cultures, and a hero keeps its template's culture, so the retag would have spawned Arthedain, Umbar, Dunland or Beorning heroes for Dunland and Rohan companion clans and rebellions.
+- **Why missed:** the clan files name the templates and nothing in the clan files names who else uses them; the user of a template is found in the culture files.
+- **Prevent:** before retagging a shared `NPCCharacter`, grep every module's culture XML for its id (`lord_templates`, `rebellion_hero_templates`, `notable_templates`). A template with a second user is cloned under a new id (`taom_` plus the original), the owner is pointed at the clone, and the original stays vanilla. Pin it: the clone equals the original except id and culture, and the original is unchanged (`LeaderClones_AreTheOriginalsWithOnlyTheIdAndCultureChanged`). Never rename or remove the clone: a save holds it by id in the clan's list and in each leader's origin character.
+- **Source:** `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, wave 1, minor-clan cultures.

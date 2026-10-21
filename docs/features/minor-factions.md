@@ -18,7 +18,7 @@ Minor factions are defined in SandBox/ModuleData/spclans.xml. TAOM cannot replac
 
 ### Solution Approach
 
-XSLT templates in `spclans.xslt` match each minor faction by ID and override specific attributes (`name`, `short_name`, `text`) while passing through all other vanilla attributes and child elements unchanged. For factions that need geographic relocation, `initial_home_settlement` is also overridden. One faction (`brotherhood_of_woods`) also has its `culture` changed.
+XSLT templates in `spclans.xslt` match each minor faction by ID and override specific attributes (`name`, `short_name`, `text`) while passing through all other vanilla attributes and child elements unchanged. For factions that need geographic relocation, `initial_home_settlement` is also overridden. Three factions also have their clan `culture` changed: `brotherhood_of_woods` (Dunland), `legion_of_the_betrayed` (Arthedain, #957) and `company_of_the_boar` (Umbar, #957). A save keeps the clan culture and the clan's leader template list and does not reload `spclans.xml`, so `MinorClanMigration` ([minor-clan-migration.md](minor-clan-migration.md)) brings an old save to the same values on load.
 
 ### Component Diagram
 
@@ -39,9 +39,9 @@ SandBox/spclans.xml (vanilla)
 | Vanilla Name | LOTR Name | Culture | Home Settlement | Description |
 |-------------|-----------|---------|-----------------|-------------|
 | Ghilman | **Serpent Guard** | darshi | castle_A7 (Harad) | Haradrim mounted mercenaries sworn to the Serpentlord |
-| Legion of the Betrayed | **The Grey Company** | empire | castle_village_EW2_2 (Gondor) | Last brotherhood of the Dúnedain Rangers |
+| Legion of the Betrayed | **The Grey Company** | arthedain (**changed**, #957) | castle_village_EW2_2 (Gondor) | Last brotherhood of the Dúnedain Rangers |
 | Skolderbroda | **Axemen of Erebor** | nord | castle_S1 (Dale) | Dwarven veterans fighting in shield wall with axe and mattock |
-| Company of the Golden Boar | **Corsair Blades** | vlandia | castle_V3 | Umbar ex-pirates fighting as crossbowmen on land |
+| Company of the Golden Boar | **Corsair Blades** | umbar (**changed**, #957) | castle_V3 | Umbar ex-pirates fighting as crossbowmen on land |
 
 ### Mafia Factions (`is_mafia`, `is_outlaw`)
 
@@ -72,13 +72,18 @@ SandBox/spclans.xml (vanilla)
 
 | File | Purpose |
 |------|---------|
-| `Main/_Module/ModuleData/spclans.xslt` | 14 XSLT templates overriding faction names, descriptions, settlements |
+| `Main/_Module/ModuleData/spclans.xslt` | 14 XSLT templates overriding faction names, descriptions, settlements; the two clan culture retags (#957) and the four clans' `minor_faction_character_templates` pointed at the clones |
+| `Main/_Module/ModuleData/lords.xslt` | Retags the Grey Company, Corsair Blades, Beornings and Dunlending Reavers troops (`*_tier_*`) to their side's culture and clones the 16 leader templates as `taom_spc_*` (#957); mirrored in `tools/complete_lords_xslt.py` so a regeneration keeps it |
+| `Main/_Module/ModuleData/execution/alignment.json` | Four minor clan rows (`ghilman`, `skolderbrotva`, `forest_people`, `eleftheroi`); the clan's side while it serves no kingdom ([alignment-aware-execution.md](alignment-aware-execution.md)) |
+| `Main/_Module/ModuleData/custom_battle/custom_battle_harad_troop_filter.xslt` | Custom Battle only: marks the four clans' troops obsolete so the retag does not leak them into the Arthedain, Umbar, Dale and Dunland pickers |
+| `Main/Features/MinorClanMigration/` | `MinorClanMigrationService` (the decision), `Hooks/MinorClanMigrationBehavior.cs` (the `OnGameLoaded` boundary), `MinorClanMigrationModule.cs` (registration), `MinorClanFacts.cs` |
+| `Main/Adapters/IMinorClanMigrationAdapter.cs`, `MinorClanMigrationAdapter.cs` | Reads and writes `Clan.Culture` and `Clan.MinorFactionCharacterTemplates` (both public members; no reflection) |
 | `Main/_Module/ModuleData/taom_module_strings.xml` | 42 localization strings (name + short_name + text per faction) |
 
 ## Dependencies
 
 - SandBox/ModuleData/spclans.xml (vanilla source data)
-- Vanilla `minor_faction_character_templates` NPC definitions (4 leader NPCs per faction, unchanged)
+- Vanilla `minor_faction_character_templates` NPC definitions (4 leader NPCs per faction). The four clans in `lords.xslt` use clones of them (`taom_spc_*`, the original with the clan's culture); the originals stay unchanged because Dunland and Rohan list them as lord and rebellion templates
 - Vanilla party templates for each faction type (unchanged)
 
 ## Configuration
@@ -93,23 +98,36 @@ No runtime configuration. All data is in the XSLT and string table. To change a 
 4. Add `<xsl:attribute name="...">` for each override
 5. Always end with `<xsl:apply-templates select="node()"/>` to pass through child elements
 6. Add corresponding `<string id="TAOM_..." text="..."/>` entries in `taom_module_strings.xml`
+7. Give the clan a deliberate side: add its row to `IntendedMinorClanSides` in `ShippedClanSideCoverageTests` and, unless its culture already resolves that side, a `free` or `evil` row to `execution/alignment.json` (never `neutral`). A clan whose troops sit on the opposite side's culture also needs a `lords.xslt` retag and a clone block; see [alignment-aware-execution.md](alignment-aware-execution.md) ("How to Add a Minor Clan")
 
 ## Design Decisions
 
-- **No culture changes except Dunlending Reavers** — changing culture without matching party templates risks broken spawns
-- **Corsair Blades keep vlandia culture** — no Umbar mercenary party template exists yet
+- **Clan culture changes are limited to the Dunlending Reavers, the Grey Company and the Corsair Blades.** Every minor clan keeps vanilla's explicit `default_party_template`, so a changed clan culture does not change the roster of its parties. The clan culture decides the contract weighting (kingdoms of the clan's culture count ten to one in `DiplomaticBartersBehavior`) and, with `alignment.json`, the clan's side while it serves no kingdom (#957)
+- **Corsair Blades are Umbar's (#957):** the vanilla `vlandia` culture made them Rohan's and Free; `umbar` makes them Neutral, matching TAOM's Umbar
 - **Drúedain keep vakken culture** — vanilla passthrough, lore-accurate cultural distinctness
-- **Vanilla leader NPCs preserved** — the 4 leader character templates per faction pass through unchanged (visual appearance is still vanilla)
+- **Old saves (#957):** a save keeps `Clan.Culture` and the clan's template list (`Clan.MinorFactionCharacterTemplates`) and the campaign does not reload the Factions file on a load, while the `NPCCharacters` always reload, so troops are retagged and the clan is not. `MinorClanMigration` closes that on every load (`OnGameLoadedEvent`): the Grey Company's culture becomes `arthedain`, the Corsair Blades' `umbar`, and each of the four clans' `spc_*` templates is replaced by its `taom_spc_*` clone when the clone exists (a missing clone keeps the original). It is idempotent, uses no RNG, logs one INFO line per clan changed, and a new campaign changes nothing. Heroes already spawned keep the culture they were created with.
+- **Battle-side effects of the troop retag are intended (#957):** a human soldier fights with the Race Abilities profile of the soldier's culture, so the retagged troops fight with the Arthedain, Umbar, Dale or Dunland profile; a formation's banner bearer carries the banner of its majority culture; a leader spawned from a clone speaks with the new culture's voice accent, and keeps the original's name key. A hired company's troops therefore look and fight like their side, which is the point of the retag.
+- **Vanilla leader NPCs preserved:** the 4 leader character templates per faction pass through unchanged (visual appearance is still vanilla). The leader templates are also the `empire` (Dunland) and `vlandia` (Rohan) culture's `lord_templates` and `rebellion_hero_templates`, so the originals keep their vanilla cultures (#957). `lords.xslt` adds a clone `taom_<id>` of each of the 16 templates of the Grey Company, Corsair Blades, Beornings and Dunlending Reavers with the clan's culture, `spclans.xslt` points `minor_faction_character_templates` at the clones, and the clans' troops are retagged in place; see "Troop and leader cultures" in [alignment-aware-execution.md](alignment-aware-execution.md)
 
 ## Tests
 
-No C# code changed — no unit tests applicable. Verified via:
-- XSLT passthrough validation (all vanilla attributes preserved)
-- Build succeeds (0 errors)
-- String key format matches TAOM conventions
+- `TAOM.Tests/Features/Execution/ShippedClanSideCoverageTests.cs` (`LiveInstall`): the data gate for the clans' sides, troops, leader clones and the migration's targets, described once in [alignment-aware-execution.md](alignment-aware-execution.md) ("Tests")
+- `TAOM.Tests/Features/MinorClanMigration/MinorClanMigrationServiceTests.cs` (old culture to new, already new, missing clone, unknown clan, a refusing adapter, a second run) and `MinorClanMigrationWiringTests.cs` (the module line, no hand wiring, the guarded load handler)
+- `TAOM.Tests/Core/CustomBattleTroopFilterTests.cs`: the filter marks the four clans' troops obsolete in Custom Battle, leaves leaders, clones and other troops alone, keeps the Harad rule, and is registered for `CustomGame` only
+- `tools/tests/test_complete_lords_xslt.py`: the regenerated `lords.xslt` carries the retags and the clone template, and the shipped file carries the generator's block verbatim
+- XSLT passthrough validation (all vanilla attributes preserved); string key format matches TAOM conventions
+
+### In game
+
+1. New campaign: the Grey Company's clan page shows the Arthedain culture and the Corsair Blades' the Umbar one; their leaders spawn with the clan's culture and keep their faces and names.
+2. An old save, loaded after the update: the log carries one `[MinorClanMigration]` line for the Grey Company and one for the Corsair Blades (and one for each clan whose templates were swapped); a second load of the same save logs none. Save, reload, and check that the Grey Company still prefers Arthedain-side contracts.
+3. Custom Battle: the Arthedain, Umbar, Dale and Dunland troop pickers do not offer the Grey Company, Corsair Blades, Beornings or Dunlending Reavers troops.
+4. Hire the Grey Company with a Free kingdom, then fight a battle: its troops carry the Arthedain banner and fight with the Arthedain ability profile, and none desert at the next daily tick.
 
 ## Changelog
 
+- 2026-10-21 (#957, review fixes): `MinorClanMigration` brings an old save's clan cultures and leader templates to the shipped values on load; the Custom Battle troop filter hides the four clans' troops there; `tools/complete_lords_xslt.py` keeps the retag block; the `spclans.xslt` and `lords.xslt` comments say that the clone is saved by id and that the clan culture is saved.
+- 2026-10-20 (#957): The Grey Company's clan culture is `arthedain` and the Corsair Blades' is `umbar` (`spclans.xslt`), so each clan's own culture is its side; their `alignment.json` rows were not needed. Their troops (and the Beornings' and Dunlending Reavers') are retagged in `lords.xslt`, and the leader templates are cloned with the new cultures and named by the clans (#957).
 - 2026-04-06 — All 14 vanilla minor factions replaced with lore-appropriate Middle-earth equivalents via `spclans.xslt` (14 templates) + `taom_module_strings.xml` (42 strings); 3 settlement remaps and the Dunlending Reavers vlandia→empire culture change.
 - 2026-03-26 — Fixed `NullReferenceException` at `CharacterObject.get_StealthEquipments()` when spawning minor faction heroes (e.g. Ghilman) on new-game start, by setting `default_stealth_equipment_roster` in the 4 XSLT culture templates (`spcultures.xslt`).
 

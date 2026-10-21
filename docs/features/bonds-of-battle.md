@@ -55,7 +55,7 @@ BondsOfBattleBehavior   Patch106 prefix/postfix  TaomBarterModel
 - **An army the player joined earns.** The snapshot carries raw facts and the service decides: `IsInPlayersArmy` (this party is in the army the player is in) and `PlayerLeadsArmy`. A party is excluded only when both hold, so an army the player leads is excluded and, when the player joined an AI lord's army, its members, the leader included, earn the ally bonus.
 - **The side leader vanilla thanks is skipped on a win.** Vanilla's thank-you conversation (`PlayerEncounter.DoPlayerVictory`, v1.5.5 :1392) pays the leader party of the player's side, who is not in the player's army, when `BattleRewardModel.GetPlayerGainedRelationAmount` for him is more than 0. The adapter reads the raw facts (`IsSideLeader`, `IsInPlayersArmy`, and the vanilla amount once per capture as `VanillaThanksAmount`, asked only inside a player encounter) and the service applies the predicate: win, player side, side leader, not in the player's army, amount above 0, and bondable (the player's own party is never bondable, so "not the main party" is covered). Such a lord is skipped and his recipient is reserved first, so a kinsman does not pay his clan through the back door. On a loss, or when vanilla's amount is 0 (a low contribution), there is no thank-you, so he earns the bonus.
 - Never counted: parties of the player's clan (the main party and the player hero included), parties in an army the player leads, parties with no leader, a settlement's own party, bandit leaders, and leaders who are not lords.
-- Gratitude: in the field, against bandits alone (cleared hideouts are thanked by vanilla, whose `HideoutCampaignBehavior.SetCleanHideoutRelations` gives +2 to one random notable per nearby village), when the player's side won and every party on the other side is a bandit party, one random living notable of each settlement within `Bandit Gratitude Distance` map units of the battle gains `max(1, bandit casualties / 10)`, capped at 10. The casualties are the bandits killed, wounded or routed. A settlement without a living notable is skipped. A settlement in the other side's land is skipped too: the adapter reads the settlement owner's faction and culture and the player's, and `IAlignmentService.ResolveSide` sides both; one Free and the other Evil skips it, Neutral on either side keeps it (the tournament filter's reading, `TournamentAlignmentFilterService`). In a hideout battle an allied lord still earns the ally bonus.
+- Gratitude: in the field, against bandits alone (cleared hideouts are thanked by vanilla, whose `HideoutCampaignBehavior.SetCleanHideoutRelations` gives +2 to one random notable per nearby village), when the player's side won and every party on the other side is a bandit party, one random living notable of each settlement within `Bandit Gratitude Distance` map units of the battle gains `max(1, bandit casualties / 10)`, capped at 10. The casualties are the bandits killed, wounded or routed. A settlement without a living notable is skipped. A settlement in the other side's land is skipped too: the adapter reads the settlement owner's faction and culture and the player's as one `SideIds` each (`BattleSnapshot.Player`, `SettlementNotables.Owner`, built by `FactionSides`), and `IAlignmentService.ResolveSide` sides both; one Free and the other Evil skips it, Neutral on either side keeps it (the tournament filter's reading, `TournamentAlignmentFilterService`). In a hideout battle an allied lord still earns the ally bonus.
 
 ### Hand-over
 
@@ -104,7 +104,7 @@ TAOM_Map's settlements sit a median 17 units from their nearest neighbour, and a
 ## Dependencies
 
 - `IEnlistmentStateQuery` (Enlistment): relation bonuses pause while the player serves a lord.
-- `IAlignmentService` (Execution): sides a notable's settlement and the player for the enemy-land filter (`ResolveSide`).
+- `IAlignmentService` (Execution): sides a notable's settlement and the player for the enemy-land filter (`ResolveSide(SideIds)`).
 - `IRandomSource` (InitialChildGeneration): the notable pick, the hand-over spread and the last barter point.
 - `ICoopSessionProvider` (CoopInterop): the battle listener and the hand-over yield to the host.
 - `IDedicatedServerProvider` (CoopInterop): the grant service refuses a dedicated server.
@@ -150,8 +150,9 @@ New lines, all in `taom_module_strings.xml`: `taom_bonds_together`, `taom_bonds_
 
 ## Changelog
 
-- 2026-10-18: first version.
+- 2026-10-20 (#957, part 2): the player's and the settlement owner's side ids travel as `SideIds`, not four loose strings.
 - 2026-10-19: the six decisions of the review applied: an army the player joined earns, a bonus is counted once per effective recipient, a gift worth under 2 earns nothing and a lord is paid at most 10 a day from hand-overs, a village in the other side's land does not thank, the side leader vanilla thanks is skipped on a win, and the seam returns what landed. See [rca-bonds-of-battle-decisions-2026-10-19.md](../reviews/rca-bonds-of-battle-decisions-2026-10-19.md).
+- 2026-10-18: first version.
 
 ## GitHub Issue
 

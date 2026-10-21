@@ -131,13 +131,13 @@ public sealed class BattleRelationService
     private void AddBanditGratitude(BattleSnapshot snapshot, HashSet<string> granted, List<BattleRelationGrant> grants)
     {
         var delta = Math.Min(MaxBanditGratitude, Math.Max(MinBanditGratitude, snapshot.EnemyCasualties / CasualtiesPerGratitudePoint));
-        var playerSide = _alignment.ResolveSide(snapshot.PlayerFactionId!, snapshot.PlayerCultureId!);
+        var playerSide = _alignment.ResolveSide(snapshot.Player);
         foreach (var town in snapshot.NearbyNotables)
         {
             // A village in the other side's land (Free against Evil) does not thank; Neutral on either side keeps it. The
             // same reading the tournament filter uses (TournamentAlignmentFilterService): AreEnemyAlignments is not used
             // because it counts Neutral as everyone's enemy.
-            var townSide = _alignment.ResolveSide(town.OwnerFactionId!, town.OwnerCultureId!);
+            var townSide = _alignment.ResolveSide(town.Owner);
             if (town.Notables.Count == 0 || (playerSide != FactionSide.Neutral && townSide != FactionSide.Neutral && playerSide != townSide))
                 continue;
 

@@ -24,11 +24,10 @@ public class ExecutionActionHookTests
         _alignmentService = Substitute.For<IAlignmentService>();
         _relationService = Substitute.For<IExecutionRelationService>();
 
-        Side(PlayerKingdom, null, FactionSide.Free);
-        Side(AllyKingdom, null, FactionSide.Free);
-        Side(VictimKingdom, null, FactionSide.Evil);
+        Side(PlayerKingdom, "", FactionSide.Free);
+        Side(AllyKingdom, "", FactionSide.Free);
+        Side(VictimKingdom, "", FactionSide.Evil);
         Side("", FreeCulture, FactionSide.Free);
-        Side(null, FreeCulture, FactionSide.Free);
         Side(VictimKingdom, EvilCulture, FactionSide.Evil);
         Side(AllyKingdom, FreeCulture, FactionSide.Free);
 
@@ -45,8 +44,8 @@ public class ExecutionActionHookTests
     private static bool IsEnemy(FactionSide a, FactionSide b)
         => a == FactionSide.Neutral || b == FactionSide.Neutral || a != b;
 
-    private static ExecutionParticipant P(string kingdomId, string cultureId = null)
-        => new ExecutionParticipant(kingdomId, cultureId);
+    private static SideIds P(string kingdomId, string cultureId = "")
+        => new SideIds(kingdomId ?? "", cultureId ?? "");
 
     // ---- honor half (unchanged contract from v1.4.8) ----
 
@@ -65,7 +64,7 @@ public class ExecutionActionHookTests
     [TestMethod]
     public void ShouldApplyHonorPenalty_KingdomlessExecutorWithFreeCulture_ReturnsFalse()
     {
-        // An independent, mercenary or enlisted player executing a Mordor lord used to eat the full
+        // An independent or enlisted player executing a Mordor lord used to eat the full
         // vanilla Honor hit because the empty kingdom id bailed out before the alignment check.
         Assert.IsFalse(_sut.ShouldApplyHonorPenalty(P(VictimKingdom, EvilCulture), P("", FreeCulture)));
     }
@@ -73,7 +72,7 @@ public class ExecutionActionHookTests
     [TestMethod]
     public void ShouldApplyHonorPenalty_KingdomlessExecutorKinslaying_StillReturnsTrue()
     {
-        Assert.IsTrue(_sut.ShouldApplyHonorPenalty(P(AllyKingdom, FreeCulture), P(null, FreeCulture)));
+        Assert.IsTrue(_sut.ShouldApplyHonorPenalty(P(AllyKingdom, FreeCulture), P("", FreeCulture)));
     }
 
     [TestMethod]
@@ -81,8 +80,8 @@ public class ExecutionActionHookTests
     {
         // KillCharacterAction.ApplyInternal destroys the victim's clan before OnHeroKilled, so
         // OnBloodFeudStarted can see a null kingdom. The culture fallback places the victim anyway.
-        _alignmentService.ResolveSide(null, EvilCulture).Returns(FactionSide.Evil);
-        Assert.IsFalse(_sut.ShouldApplyHonorPenalty(P(null, EvilCulture), P(PlayerKingdom, FreeCulture)));
+        _alignmentService.ResolveSide("", EvilCulture).Returns(FactionSide.Evil);
+        Assert.IsFalse(_sut.ShouldApplyHonorPenalty(P("", EvilCulture), P(PlayerKingdom, FreeCulture)));
     }
 
     // ---- relation half (v1.5.x Blood Feud seam): the hook delegates, the service decides ----
@@ -91,8 +90,8 @@ public class ExecutionActionHookTests
     public void GetRelationModifier_ReturnsTheServiceDelta()
     {
         _relationService
-            .GetRelationModifier(Arg.Any<ExecutionParticipant>(), Arg.Any<ExecutionParticipant>(),
-                                 Arg.Any<ExecutionParticipant>(), -30, false)
+            .GetRelationModifier(Arg.Any<SideIds>(), Arg.Any<SideIds>(),
+                                 Arg.Any<SideIds>(), -30, false)
             .Returns(new ExecutionRelationResult(-45, false));
 
         Assert.AreEqual(-45, _sut.GetRelationModifier(P(PlayerKingdom), P(AllyKingdom), P(AllyKingdom), -30));
@@ -104,8 +103,8 @@ public class ExecutionActionHookTests
         // Zero is load-bearing: the engine's own != 0 guard turns it into "skip this clan", so the
         // hook must not round, clamp or substitute it.
         _relationService
-            .GetRelationModifier(Arg.Any<ExecutionParticipant>(), Arg.Any<ExecutionParticipant>(),
-                                 Arg.Any<ExecutionParticipant>(), Arg.Any<int>(), false)
+            .GetRelationModifier(Arg.Any<SideIds>(), Arg.Any<SideIds>(),
+                                 Arg.Any<SideIds>(), Arg.Any<int>(), false)
             .Returns(new ExecutionRelationResult(0, false));
 
         Assert.AreEqual(0, _sut.GetRelationModifier(P(PlayerKingdom), P(VictimKingdom), P(AllyKingdom), -30));
@@ -118,16 +117,16 @@ public class ExecutionActionHookTests
         // back to vanilla. That escape is gone: the service owns the fallback, so a kingdom-less
         // participant must reach it intact.
         _relationService
-            .GetRelationModifier(Arg.Any<ExecutionParticipant>(), Arg.Any<ExecutionParticipant>(),
-                                 Arg.Any<ExecutionParticipant>(), Arg.Any<int>(), false)
+            .GetRelationModifier(Arg.Any<SideIds>(), Arg.Any<SideIds>(),
+                                 Arg.Any<SideIds>(), Arg.Any<int>(), false)
             .Returns(new ExecutionRelationResult(-10, false));
 
-        _sut.GetRelationModifier(P("", FreeCulture), P(null, EvilCulture), P(AllyKingdom, FreeCulture), -30);
+        _sut.GetRelationModifier(P("", FreeCulture), P("", EvilCulture), P(AllyKingdom, FreeCulture), -30);
 
         _relationService.Received(1).GetRelationModifier(
-            Arg.Is<ExecutionParticipant>(p => p.KingdomId == "" && p.CultureId == FreeCulture),
-            Arg.Is<ExecutionParticipant>(p => p.KingdomId == null && p.CultureId == EvilCulture),
-            Arg.Is<ExecutionParticipant>(p => p.KingdomId == AllyKingdom && p.CultureId == FreeCulture),
+            Arg.Is<SideIds>(p => p.FactionId == "" && p.CultureId == FreeCulture),
+            Arg.Is<SideIds>(p => p.FactionId == "" && p.CultureId == EvilCulture),
+            Arg.Is<SideIds>(p => p.FactionId == AllyKingdom && p.CultureId == FreeCulture),
             -30,
             false);
     }
@@ -138,15 +137,15 @@ public class ExecutionActionHookTests
         // The v1.5.2 seam applies each per-clan change with quick notifications off and shows one
         // summary itself, so the hook has no notification to forward and must not ask for one.
         _relationService
-            .GetRelationModifier(Arg.Any<ExecutionParticipant>(), Arg.Any<ExecutionParticipant>(),
-                                 Arg.Any<ExecutionParticipant>(), Arg.Any<int>(), Arg.Any<bool>())
+            .GetRelationModifier(Arg.Any<SideIds>(), Arg.Any<SideIds>(),
+                                 Arg.Any<SideIds>(), Arg.Any<int>(), Arg.Any<bool>())
             .Returns(new ExecutionRelationResult(-30, false));
 
         _sut.GetRelationModifier(P(PlayerKingdom), P(AllyKingdom), P(AllyKingdom), -30);
 
         _relationService.Received(1).GetRelationModifier(
-            Arg.Any<ExecutionParticipant>(), Arg.Any<ExecutionParticipant>(),
-            Arg.Any<ExecutionParticipant>(), -30, false);
+            Arg.Any<SideIds>(), Arg.Any<SideIds>(),
+            Arg.Any<SideIds>(), -30, false);
     }
 
     // ---- the bereaved path: an AI clan executed the player's kin, vanilla's number stands ----

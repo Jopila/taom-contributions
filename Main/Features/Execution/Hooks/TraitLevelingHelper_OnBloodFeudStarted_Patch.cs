@@ -23,8 +23,10 @@ namespace TAOM.Features.Execution.Hooks;
 /// <para>
 /// The victim's clan may already have been destroyed by the kill when this runs:
 /// <c>KillCharacterAction.ApplyInternal</c> destroys it before dispatching <c>OnHeroKilled</c>,
-/// which nulls its kingdom. That is why the participant carries the culture as well. The alignment
-/// service falls back to it, and there is deliberately no "unknown, defer to vanilla" early return.
+/// which nulls its kingdom. That is why the participant carries the culture as well: the clan is then
+/// its own map faction with its own culture. The alignment service reads a listed clan's row first and
+/// falls back to that culture only for an unlisted clan.
+/// There is deliberately no "unknown, defer to vanilla" early return.
 /// </para>
 ///
 /// <para>Only the TRAIT hit is suppressed. The feud itself still starts, whatever the sides.</para>
@@ -34,29 +36,19 @@ namespace TAOM.Features.Execution.Hooks;
 public static class TraitLevelingHelper_OnBloodFeudStarted_Patch
 {
     private static IOnExecutionAction _hook;
-    private static IPlayerContextAdapter _playerContext;
 
-    public static void Initialize(IOnExecutionAction hook, IPlayerContextAdapter playerContext)
+    public static void Initialize(IOnExecutionAction hook)
     {
         _hook = hook;
-        _playerContext = playerContext;
     }
 
     [HarmonyPrefix]
     public static bool Prefix(Hero executedHero)
     {
         var hook = _hook;
-        var playerContext = _playerContext;
-        if (hook == null || playerContext == null) return true;
+        if (hook == null) return true;
 
-        // Boundary: sealed engine types to participants, both ids on each side, no early return.
-        var victim = new ExecutionParticipant(
-            executedHero?.Clan?.Kingdom?.StringId,
-            executedHero?.Culture?.StringId);
-        var executor = new ExecutionParticipant(
-            playerContext.GetPlayerKingdomId(),
-            playerContext.GetPlayerCultureId());
-
-        return hook.ShouldApplyHonorPenalty(victim, executor);
+        // Boundary: sealed engine types to one id and culture pair per entity, no early return.
+        return hook.ShouldApplyHonorPenalty(FactionSides.OfHero(executedHero), FactionSides.OfPlayer());
     }
 }

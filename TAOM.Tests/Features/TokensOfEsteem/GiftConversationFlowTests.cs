@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Adapters;
 using TAOM.Features.CoopInterop;
+using TAOM.Features.Execution;
 using TAOM.Features.TokensOfEsteem;
 using TAOM.Features.TokensOfEsteem.Models;
 
@@ -128,7 +129,7 @@ public class GiftConversationFlowTests
     [TestMethod]
     public void CanChoose_AlignmentRefusal_IsStillAChoice()
     {
-        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
+        _f.Player = _f.Player! with { Side = new SideIds("mordor", "mordor") };
 
         Assert.IsTrue(_sut.CanChoose(GiftEntry.Lord, out var daysLeft));
         Assert.AreEqual(0, daysLeft);
@@ -213,7 +214,7 @@ public class GiftConversationFlowTests
     [TestMethod]
     public void Ask_AlignmentRefusal_CostsNothing_AndListsNothing()
     {
-        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
+        _f.Player = _f.Player! with { Side = new SideIds("mordor", "mordor") };
 
         _sut.Ask(GiftEntry.Lord);
 

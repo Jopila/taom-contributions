@@ -58,16 +58,17 @@ public class TournamentAlignmentFilterServiceTests
     private static TournamentEntrant Troop(string? culture) =>
         new TournamentEntrant("troop_" + culture, "Troop", isHero: false, isFemale: false,
             raceName: null, clanId: null, hasMapFaction: false, hasCulture: culture != null,
-            kingdomId: null, cultureId: culture);
+            side: new SideIds(string.Empty, culture ?? string.Empty), cultureId: culture);
 
     private static TournamentEntrant Hero(string? kingdom, string? culture, bool playerClan = false) =>
         new TournamentEntrant("hero_" + culture, "Hero", isHero: true, isFemale: false,
             raceName: null, clanId: "clan", hasMapFaction: true, hasCulture: culture != null,
-            kingdomId: kingdom, cultureId: culture, isPlayerOrPlayerClan: playerClan);
+            side: new SideIds(kingdom ?? string.Empty, culture ?? string.Empty), cultureId: culture,
+            isPlayerOrPlayerClan: playerClan);
 
     // A town held by its own kind: owner faction and culture match the town, and it recruits its own culture.
     private static TournamentHost Town(string? ownerFaction, string? culture) =>
-        new TournamentHost(ownerFaction, culture, culture, culture, culture);
+        new TournamentHost(new SideIds(ownerFaction ?? string.Empty, culture ?? string.Empty), culture, culture, culture);
 
     private List<int> Barred(TournamentHost host, params TournamentEntrant[] roster) =>
         new List<int>(_sut.FindBarredIndices(roster, host));
@@ -119,7 +120,7 @@ public class TournamentAlignmentFilterServiceTests
     public void FindBarredIndices_NeutralKingdomHoldsFreeTown_BarsNobody()
     {
         // Khand holds Minas Tirith: the owner decides, and a Neutral owner opposes nobody.
-        var host = new TournamentHost(Khand, Khand, Gondor, Gondor, Gondor);
+        var host = new TournamentHost(new SideIds(Khand, Khand), Gondor, Gondor, Gondor);
         Assert.AreEqual(0, Barred(host, Hero(MordorKingdom, Mordor), Troop(Mordor)).Count);
     }
 
@@ -128,7 +129,7 @@ public class TournamentAlignmentFilterServiceTests
     {
         // A Gondor-culture player's own kingdom holds Minas Morgul: Free, so Mordor's lord is out and the
         // player kingdom's Gondor vassals compete.
-        var host = new TournamentHost(PlayerKingdom, Gondor, Mordor, Mordor, Mordor);
+        var host = new TournamentHost(new SideIds(PlayerKingdom, Gondor), Mordor, Mordor, Mordor);
         CollectionAssert.AreEqual(new[] { 1 }, Barred(host, Hero(PlayerKingdom, Gondor), Hero(MordorKingdom, Mordor)));
     }
 
@@ -136,7 +137,7 @@ public class TournamentAlignmentFilterServiceTests
     public void FindBarredIndices_KingdomlessClanOwner_SidesByOwnerCulture()
     {
         // The owner faction is the clan itself; its id is not in the table, so its culture decides.
-        var host = new TournamentHost("clan_rebel_mordor", Mordor, Gondor, Gondor, Gondor);
+        var host = new TournamentHost(new SideIds("clan_rebel_mordor", Mordor), Gondor, Gondor, Gondor);
         CollectionAssert.AreEqual(new[] { 0 }, Barred(host, Hero(RohanKingdom, Rohan)));
     }
 
@@ -154,10 +155,22 @@ public class TournamentAlignmentFilterServiceTests
     }
 
     [TestMethod]
+    public void FindBarredIndices_FreeCultureLordOfNeutralRealm_IsNotBarredInEvilTown()
+    {
+        // #957: the lord's realm (Khand, Neutral) sides the lord with the realm's own culture. The lord's own
+        // Gondor culture is Free and must not bar the lord from Mordor's Evil town.
+        var lord = new TournamentEntrant("hero_khand_gondor", "Hero", isHero: true, isFemale: false,
+            raceName: null, clanId: "clan", hasMapFaction: true, hasCulture: true,
+            side: new SideIds(Khand, Khand), cultureId: Gondor);
+
+        Assert.AreEqual(0, Barred(Town(MordorKingdom, Mordor), lord).Count);
+    }
+
+    [TestMethod]
     public void FindBarredIndices_CapturedTown_UsesOwnerSide()
     {
         // Mordor holds Minas Tirith: its orcs may compete and Rohan's lord may not.
-        var host = new TournamentHost(MordorKingdom, Mordor, Gondor, Gondor, Gondor);
+        var host = new TournamentHost(new SideIds(MordorKingdom, Mordor), Gondor, Gondor, Gondor);
         CollectionAssert.AreEqual(new[] { 1 }, Barred(host, Hero(MordorKingdom, Mordor), Hero(RohanKingdom, Rohan)));
     }
 
@@ -166,7 +179,7 @@ public class TournamentAlignmentFilterServiceTests
     {
         // Vanilla pads, and Patch69 fills, from the town's own troops: those locals always compete, or the
         // filler would be barred and replaced by itself.
-        var host = new TournamentHost(MordorKingdom, Mordor, Gondor, Gondor, Gondor);
+        var host = new TournamentHost(new SideIds(MordorKingdom, Mordor), Gondor, Gondor, Gondor);
         Assert.AreEqual(0, Barred(host, Troop(Gondor)).Count);
     }
 
@@ -174,7 +187,7 @@ public class TournamentAlignmentFilterServiceTests
     public void FindBarredIndices_CapturedTown_KingdomlessHeroOfTownCulture_IsBarred()
     {
         // The local exemption is for troops only: a Gondor wanderer in Mordor-held Minas Tirith is judged by side.
-        var host = new TournamentHost(MordorKingdom, Mordor, Gondor, Gondor, Gondor);
+        var host = new TournamentHost(new SideIds(MordorKingdom, Mordor), Gondor, Gondor, Gondor);
         CollectionAssert.AreEqual(new[] { 0 }, Barred(host, Hero(null, Gondor)));
     }
 
@@ -183,7 +196,7 @@ public class TournamentAlignmentFilterServiceTests
     {
         // Khand's towns recruit and pad from khuzait (Evil). Gondor holds one: those troops are the town's
         // own, while a khuzait hero is still judged by side.
-        var host = new TournamentHost(GondorKingdom, Gondor, Khand, Rhun, Rhun);
+        var host = new TournamentHost(new SideIds(GondorKingdom, Gondor), Khand, Rhun, Rhun);
         CollectionAssert.AreEqual(new[] { 1 }, Barred(host, Troop(Rhun), Hero(null, Rhun)));
     }
 
@@ -192,7 +205,7 @@ public class TournamentAlignmentFilterServiceTests
     {
         // Umbar pads from its basic troop's tree (aserai, Evil) and fills with its elite troop (umbar). Gondor
         // holds the town: both sets of troops are the town's own.
-        var host = new TournamentHost(GondorKingdom, Gondor, Umbar, Harad, Umbar);
+        var host = new TournamentHost(new SideIds(GondorKingdom, Gondor), Umbar, Harad, Umbar);
         Assert.AreEqual(0, Barred(host, Troop(Harad), Troop(Umbar)).Count);
     }
 
@@ -200,7 +213,7 @@ public class TournamentAlignmentFilterServiceTests
     public void FindBarredIndices_TownCultureTroop_IsAllowedWhenTroopTreesAreForeign()
     {
         // Only the town-culture arm matches: the town is Mordor-cultured, its troop trees are khuzait.
-        var host = new TournamentHost(GondorKingdom, Gondor, Mordor, Rhun, Rhun);
+        var host = new TournamentHost(new SideIds(GondorKingdom, Gondor), Mordor, Rhun, Rhun);
         Assert.AreEqual(0, Barred(host, Troop(Mordor)).Count);
     }
 
@@ -208,7 +221,7 @@ public class TournamentAlignmentFilterServiceTests
     public void FindBarredIndices_EliteTroopCulture_IsAllowedWhenItDiffersFromTownAndBasic()
     {
         // Only the elite arm matches: town and basic troop are Khand, the elite troop is khuzait.
-        var host = new TournamentHost(GondorKingdom, Gondor, Khand, Khand, Rhun);
+        var host = new TournamentHost(new SideIds(GondorKingdom, Gondor), Khand, Khand, Rhun);
         Assert.AreEqual(0, Barred(host, Troop(Rhun)).Count);
     }
 

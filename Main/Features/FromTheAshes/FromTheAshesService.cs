@@ -434,16 +434,14 @@ public sealed class FromTheAshesService
         new() { Block = block, Variant = VariantFor(kind, SideFor(kind, site)) };
 
     /// <summary>
-    /// The player's side for a rebuild, read from the kingdom and the culture of the same entity (#744): his kingdom with its
-    /// culture, else no kingdom with his own. Project help does not care, and a missing site is Neutral.
+    /// The player's side for a rebuild, read from the pair the adapter built for the player clan's map faction (#744, #957).
+    /// Project help does not care, and a missing site is Neutral.
     /// </summary>
     private FactionSide SideFor(AshesJobKind kind, AshesSiteSnapshot? site)
     {
         if (kind == AshesJobKind.ProjectHelp || site == null)
             return FactionSide.Neutral;
-        return string.IsNullOrEmpty(site.PlayerKingdomId)
-            ? _alignment.ResolveSide("", site.PlayerCultureId)
-            : _alignment.ResolveSide(site.PlayerKingdomId, site.PlayerKingdomCultureId);
+        return _alignment.ResolveSide(site.PlayerSide);
     }
 
     private static AshesVariant VariantFor(AshesJobKind kind, FactionSide side) =>

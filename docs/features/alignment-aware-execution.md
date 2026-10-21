@@ -41,6 +41,13 @@ An execution is now blood-feud fallout, all of it inside `ExecutionCampaignBehav
    vanilla's number alone there (`IOnExecutionAction.IsPlayerTheBereaved`). Found by the 2026-09-14
    deep review of the v1.5.2 port; the first cut assumed the player was the executor on every path.
 
+Each participant is a `SideIds` pair built by `FactionSides` (#957) at the patch: the executor from `OfPlayer()` (the
+player clan's map faction with that faction's culture), the victim from `OfHero(dyingHero)`, the evaluator from
+`Of(otherClan.MapFaction)`. The earlier build zipped each hero's kingdom with the hero's own culture, which sided a
+lord of a Neutral realm by a culture the realm does not have. `IExecutionRelationService` and `IOnExecutionAction` take
+the `SideIds` directly; the `ExecutionParticipant` struct they once took is gone. `FactionId` carries the map faction
+id: a kingdom, or a clan serving none.
+
 ## Overview
 
 The Alignment-Aware Execution system replaces vanilla Bannerlord's one-size-fits-all lord execution penalties with a LOTR-thematic system that considers the moral alignment of the executor, victim, and every evaluating clan leader. When a Free Peoples lord executes a servant of Sauron, there is no dishonor — only justice. When a lord slays one of their own allies, it is kinslaying, punished far more harshly than vanilla.
@@ -208,7 +215,7 @@ Registered via `campaignStarter.AddModel()` in `SubModule.OnGameStart`. Bannerlo
 
 We override `GetRelationChangeForExecutingHero()`:
 1. Call `base.GetRelationChangeForExecutingHero()` to get the vanilla penalty
-2. Build three `ExecutionParticipant` values (kingdom id + culture id). Executor and victim come from `ExecutionContext.ResolveExecutor` / `ResolveVictim`, which return the snapshot when a kill is in flight and the live values otherwise. The evaluator is always live, because the kill does not touch him
+2. Build three `ExecutionParticipant` values (faction id + culture id). Executor and victim come from `ExecutionContext.ResolveExecutor` / `ResolveVictim`, which return the snapshot when a kill is in flight and the live values otherwise. The evaluator is always live, because the kill does not touch the evaluator
 3. Delegate to `IExecutionRelationService.GetRelationModifier()`, which resolves each side and applies the alignment logic
 4. Return its delta and notification flag
 
@@ -252,9 +259,9 @@ enum FactionSide { Free, Evil, Neutral }
 ```
 
 The mapping is stored in `Main/_Module/ModuleData/execution/alignment.json`. It is a single flat
-table read in two roles: as kingdom ids by `GetKingdomSide`, and as culture ids by `GetCultureSide`.
-`ResolveSide(kingdomId, cultureId)` tries the kingdom first and falls back to the culture, which is
-what places a hero whose clan has no kingdom.
+table read in three roles: as kingdom ids by `GetKingdomSide`, as culture ids by `GetCultureSide`,
+and as minor clan ids when `ResolveSide(id, culture)` is handed a clan. `ResolveSide` tries the id
+first and falls back to the culture, which is what places a hero whose clan has no kingdom.
 
 The authoritative id list is the file itself; the table below is the reading of it. In-game names
 come from `Main/_Module/ModuleData/spkingdoms.xslt`, which renames eight vanilla kingdoms in place,
@@ -273,6 +280,7 @@ never infer one from the other.
 | `lothlorien` | Lothlorien | Free | Custom kingdom |
 | `mirkwood` | Mirkwood | Free | Custom kingdom |
 | `lindon` | Lindon | Free | Custom kingdom |
+| `arthedain` | Arthedain | Free | Custom kingdom |
 | `empire` | Dunland | Evil | Empire (main) |
 | `empire_s` | Mordor | Evil | Southern Empire |
 | `aserai` | Harad | Evil | Aserai |
@@ -305,6 +313,88 @@ culture fallback can place a kingdom-less hero:
 `taom_spcultures.xml` has no entry here, because an unlisted culture resolves Neutral and silently
 switches the fallback off for anyone playing it.
 
+### Minor Clan ID Reference
+
+A minor clan (a mercenary company or a band of outlaws) is its own map faction while it serves no
+kingdom: a hero in one has no kingdom, so the pair `ResolveSide` reads is the clan id and the clan's own
+culture. The row applies only then. A mercenary contract makes the employer the clan's map faction
+(`StartMercenaryServiceAction.ApplyStart` sets `Clan.Kingdom`), so a hired company's heroes, and the
+player on contract, read the employer's pair and the clan row is not consulted. Most of the 14
+minor clans carry a vanilla culture that is the wrong side, or that the table does not list at all.
+Two of them (the Grey Company and the Corsair Blades) are retagged to the culture they belong to in
+`spclans.xslt`, which also drives the engine's contract weighting (kingdoms of the clan's culture count ten
+to one in `DiplomaticBartersBehavior`); the other clans that need one have a row in `alignment.json`. A row is `free` or `evil`: a `neutral`
+clan row is a no-op, because `ResolveSide` falls through to the culture for an id that is listed
+Neutral just as for one that is unlisted, so a clan meant to be Neutral is left unlisted and
+resolves through its culture. `player_faction` is never listed.
+
+| Clan StringId | TAOM name | Culture the clan carries | Side | Row |
+|---|---|---|---|---|
+| `ghilman` | Serpent Guard | `darshi` | Evil | `evil` |
+| `legion_of_the_betrayed` | Grey Company | `arthedain` (retagged by `spclans.xslt`, vanilla `empire`; troops and leader clones too) | Free | none (the culture is Free) |
+| `skolderbrotva` | Axemen of Erebor | `nord` | Free | `free` |
+| `company_of_the_boar` | Corsair Blades | `umbar` (retagged by `spclans.xslt`, vanilla `vlandia`; troops and leader clones too) | Neutral | none (the culture is Neutral) |
+| `beni_zilal` | Blind Eye | `aserai` | Evil | none (the culture is Evil) |
+| `wolfskins` | Variag Ravagers | `battania` (Khand) | Neutral | none (the culture is Neutral) |
+| `brotherhood_of_woods` | Dunlending Reavers | `empire` (Dunland; troops and leader clones were `vlandia`) | Evil | none (the culture is Evil) |
+| `hidden_hand` | Mouth's Servants | `empire` (Dunland) | Evil | none (the culture is Evil) |
+| `lakepike` | Wreckers of the Long Lake | `sturgia` (Dale) | Free | none (the culture is Free) |
+| `embers_of_flame` | Cult of the Lidless Eye | `empire` (Dunland) | Evil | none (the culture is Evil) |
+| `jawwal` | Sand-Riders | `aserai` | Evil | none (the culture is Evil) |
+| `karakhuzaits` | Wild Easterlings | `khuzait` | Evil | none (the culture is Evil) |
+| `forest_people` | Druedain | `vakken` | Free | `free` |
+| `eleftheroi` | Beornings | `empire` (Dunland; troops and leader clones are `sturgia`) | Free | `free` |
+
+The cultures are what `spclans.xslt` leaves on each clan, read from the transform output rather than the vanilla
+file. The gate is `ShippedClanSideCoverageTests` (see Tests); a new minor clan fails it until it gets a deliberate side.
+
+#### Troop and leader cultures
+
+The clan pair above is what the heroes' sides read. The clans' troops and leader templates are separate
+`NPCCharacter` rows with their own cultures, and those decide `AlignmentDesertion` (a troop whose culture side is
+Free or Evil and differs from its owner's kingdom deserts; Neutral never does) and the culture-keyed rules that read
+a hero's own culture. Vanilla gave four clans a culture on the opposite side of their intended one:
+
+| Clan | Intended | Vanilla troops' and leaders' culture | Now |
+|---|---|---|---|
+| `legion_of_the_betrayed` | Free | `empire` (Dunland, Evil) | `arthedain` |
+| `company_of_the_boar` | Neutral | `vlandia` (Rohan, Free) | `umbar` |
+| `brotherhood_of_woods` | Evil | `vlandia` (Free) | `empire` |
+| `eleftheroi` | Free | `empire` (Evil) | `sturgia` |
+
+The Serpent Guard (`darshi`), Axemen of Erebor (`nord`) and Druedain (`vakken`) troops carry cultures the table does
+not list, so they read Neutral and never desert; they are left alone.
+
+**Troops** are retagged in place by `lords.xslt` (`legion_of_the_betrayed_tier_*`, `company_of_the_boar_tier_*`,
+`eleftheroi_tier_*`, `brotherhood_of_woods_tier_*`). `lords.xslt` is registered for `NPCCharacters` and runs over the
+accumulated document, so it reaches SandBoxCore's troops with no `SubModule.xml` row, the way it already retags
+vanilla wanderer templates. Nothing but `partyTemplates.xml` and `spnpccharacters.xml` names these troops.
+
+**Leaders** are cloned, not retagged. The `spc_*_leader_*` templates are also the vanilla `empire` (Dunland) and
+`vlandia` (Rohan) cultures' `lord_templates` and `rebellion_hero_templates` (after `spcultures.xslt`: 8 of Dunland's
+16 and all 8 of Rohan's), and a hero keeps its template's culture (`DefaultHeroCreationModel.GetCulture`), so
+retagging them would have spawned Arthedain, Umbar, Dunland or Beorning heroes for Dunland and Rohan companion clans
+and rebellions. Instead `lords.xslt` emits `taom_<original id>` beside each of the 16 originals: the original with
+a new id and the clan's culture, every other attribute and child (face, equipment, skills, traits, name keys)
+identical. `spclans.xslt` points each of the four clans' `minor_faction_character_templates` at the clones. The
+originals and the culture lists are untouched. The clone keeps the original's `name` key; the same key with the same
+default text is how vanilla already shares names between templates.
+
+**Gate.** `ShippedClanSideCoverageTests` (see Tests).
+
+**Saved games.** A save keeps `Clan.Culture` (a saved property) and the clan's template list
+(`Clan.MinorFactionCharacterTemplates`, a saved field), and the campaign does not reload `spclans.xml` on a load
+(`SandBoxManager.InitializeSandboxXMLs` reads the Kingdoms and Factions files only for a new campaign), while the
+`NPCCharacters` always reload. So an old save would pair retagged troops with a clan that still carries the vanilla
+culture and the vanilla `spc_*` templates: the Grey Company, clan culture `empire`, would prefer Dunland contracts
+while its `arthedain` troops desert under Dunland. `MinorClanMigration`
+([minor-factions.md](minor-factions.md)) corrects that on every load: the Grey Company's culture becomes `arthedain`,
+the Corsair Blades' `umbar`, and each of the four clans' `spc_*` templates is replaced by its `taom_spc_*` clone
+when the clone exists. It is idempotent, deterministic on every co-op peer, and changes nothing in a new
+campaign. Heroes already spawned keep the culture they were created with (a hero's culture is saved with the hero);
+a leader created after the update, from a clone, gets the new culture. Troop culture is not saved per party, so
+troops change at once in every campaign.
+
 Not to be confused with `Main/_Module/ModuleData/factionmap/factions.json`, which is UI-level data
 for the FactionMap and uses LOTR names as `game_faction` values.
 
@@ -314,7 +404,7 @@ for the FactionMap and uses LOTR names as `game_faction` values.
 
 **`GetKingdomSide(string kingdomId)`** and **`GetCultureSide(string cultureId)`** return `FactionSide.Neutral` for null, empty, or unknown ids. Lookup is case-insensitive and both read the same table.
 
-**`ResolveSide(string kingdomId, string cultureId)`** takes the kingdom side first; when that reads Neutral, the culture side; Neutral when neither classifies. **This is what execution resolves every participant through, and it is not optional.** A kingdom id alone reads Neutral for an independent, mercenary or enlisted player (enlistment deliberately does not join the commander's kingdom), for a minor or mercenary clan leader, and for a victim whose clan was destroyed by the very kill being evaluated. The three sibling alignment features (CaravanTrade, WarOfTheRingMomentum, PrisonerRecruitment) each carried a private copy of this fallback; execution did not, which is #556.
+**`ResolveSide(string kingdomId, string cultureId)`** takes the kingdom side first; when that reads Neutral, the culture side; Neutral when neither classifies. The two ids must belong to the SAME entity: the fallback fires for an id that is unlisted OR listed Neutral, so a Neutral realm paired with the culture of one of its lords (a Free one) sides that lord Free, and a realm the table does not list is sided by a culture the realm does not have. Every caller therefore carries the pair whole as `SideIds(FactionId, CultureId)` and resolves it through the `ResolveSide(this IAlignmentService, SideIds)` extension (an extension rather than an interface member, so the test fakes of the two-string method keep working). `TAOM.Adapters.FactionSides` is the one place a pair is built from engine objects: `Of(faction)` is a faction's id and its own culture, `OfHero(hero)` is the hero's clan map faction with that faction's culture (a clanless hero is its own entity: no faction id, its own culture), `OfCharacter` is the same for a character or a troop, and `OfPlayer()` is the player clan's map faction. The gate is `SidePairScanTests` (see Tests). **This is what execution resolves every participant through, and it is not optional.** A kingdom id alone reads Neutral for an independent or enlisted player (enlistment deliberately does not join the commander's kingdom; a mercenary contract is not kingdomless, `Clan.Kingdom` is the employer), for a minor clan leader whose clan serves no kingdom, and for a victim whose clan was destroyed by the very kill being evaluated. A player-founded kingdom (an id such as `new_kingdom`, never listed) sides by the culture the player chose for it, because its own pair falls through to that culture. The three sibling alignment features (CaravanTrade, WarOfTheRingMomentum, PrisonerRecruitment) each carried a private copy of this fallback; execution did not, which is #556.
 
 **`AreEnemyAlignments(string A, string B)`** — Returns `true` if the sides differ OR if either side is Neutral. Neutral kingdoms are treated as enemies of everyone, including other neutrals. This means:
 - Free vs Evil = enemies
@@ -480,44 +570,72 @@ SubModule.OnGameInitializationFinished:
 
 | File | Purpose | Lines |
 |------|---------|-------|
-| `Main/Features/Execution/FactionSide.cs` | Enum: Free, Evil, Neutral | ~8 |
-| `Main/Features/Execution/IAlignmentService.cs` | Alignment query interface, incl. `ResolveSide` | ~35 |
-| `Main/Features/Execution/AlignmentService.cs` | Kingdom/culture side lookups, `ResolveSide`, side predicates | ~70 |
-| `Main/Features/Execution/IAlignmentConfigProvider.cs` | Config loader interface | ~8 |
-| `Main/Features/Execution/AlignmentConfigProvider.cs` | Reads alignment.json via IPathService | ~40 |
-| `Main/Features/Execution/ExecutionIoC.cs` | IoC registration + hook init | ~18 |
-| `Main/Features/Execution/Models/TaomExecutionRelationModel.cs` | GameModel override: boundary conversion + delegate | ~44 |
-| `Main/Features/Execution/IExecutionRelationService.cs` | `ExecutionParticipant`, `ExecutionRelationResult`, service contract | ~66 |
-| `Main/Features/Execution/ExecutionRelationService.cs` | Relation decision: side resolution, kinslaying, notification | ~62 |
-| `Main/Features/Execution/Hooks/IOnExecutionAction.cs` | Hook interface (honor penalty only) | ~7 |
-| `Main/Features/Execution/Hooks/ExecutionActionHook.cs` | Honor-penalty decision | ~25 |
-| `Main/Features/Execution/Hooks/ExecutionContext.cs` | Thread-local victim/killer snapshot (kingdom + culture) | ~78 |
-| `Main/Features/Execution/Hooks/KillCharacterAction_ApplyInternal_Patch.cs` | Harmony prefix/finalizer on ApplyInternal | ~30 |
-| `Main/Features/Execution/Hooks/TraitLevelingHelper_OnLordExecuted_Patch.cs` | Harmony prefix — skips honor penalty | ~30 |
-| `Main/_Module/ModuleData/execution/alignment.json` | Kingdom → side mapping (16 entries) | ~18 |
+| `Main/Features/Execution/FactionSide.cs` | Enum: Free, Evil, Neutral | 8 |
+| `Main/Features/Execution/IAlignmentService.cs` | Alignment query interface, incl. `ResolveSide` | 47 |
+| `Main/Features/Execution/SideIds.cs` | The id and culture pair of one entity | 14 |
+| `Main/Features/Execution/AlignmentServiceExtensions.cs` | `ResolveSide(this IAlignmentService, SideIds)` | 11 |
+| `Main/Adapters/FactionSides.cs` | The one place a `SideIds` is built from engine objects (`Of`, `OfHero`, `OfCharacter`, `OfPlayer`) | 57 |
+| `Main/Features/Execution/AlignmentService.cs` | Kingdom/culture side lookups, `ResolveSide`, side predicates | 66 |
+| `Main/Features/Execution/IAlignmentConfigProvider.cs` | Config loader interface | 8 |
+| `Main/Features/Execution/AlignmentConfigProvider.cs` | Reads alignment.json via IPathService | 44 |
+| `Main/Features/Execution/ExecutionIoC.cs` | IoC registration + hook init | 26 |
+| `Main/Features/Execution/IExecutionRelationService.cs` | `ExecutionRelationResult` and the relation service contract | 51 |
+| `Main/Features/Execution/ExecutionRelationService.cs` | Relation decision: side resolution, kinslaying, notification | 59 |
+| `Main/Features/Execution/Hooks/IOnExecutionAction.cs` | Hook interface for both seams (honor penalty, relation modifier, the bereaved test) | 38 |
+| `Main/Features/Execution/Hooks/ExecutionActionHook.cs` | Honor-penalty decision, delegation to the relation service | 44 |
+| `Main/Features/Execution/Hooks/ExecutionCampaignBehavior_BloodFeudRelationPenalty_Patch.cs` | Harmony postfix: rewrites the per-clan relation penalty | 82 |
+| `Main/Features/Execution/Hooks/TraitLevelingHelper_OnBloodFeudStarted_Patch.cs` | Harmony prefix: skips the honor penalty | 54 |
+| `Main/_Module/ModuleData/execution/alignment.json` | Kingdom, culture and minor clan id to side (29 entries: 23 kingdoms, `gondor`, `mordor`, 4 minor clans) | 31 |
 
 ### Modified Files
 
 | File | Change |
 |------|--------|
 | `Main/IoC.cs` | Added `ExecutionIoC.RegisterExecutionFeature(container)` |
-| `Main/SubModule.cs` | Added using statements, hook init in `OnSubModuleLoad`, model registration in `OnGameStart`, `Patch14_Execution` category in `OnGameInitializationFinished` |
+| `Main/SubModule.cs` | Added using statements, `ExecutionIoC.InitializeHooks` in `OnSubModuleLoad`, the `Patch14_Execution` category in `OnGameInitializationFinished` |
 
 ## Tests
 
-### `TAOM.Tests/Features/Execution/AlignmentServiceTests.cs` — 15 tests
+### `TAOM.Tests/Features/Execution/AlignmentServiceTests.cs` (36 tests)
 
-Tests the `AlignmentService` with mocked `IAlignmentConfigProvider`:
-- `GetKingdomSide` — Free, Evil, Neutral, Unknown (→ Neutral), Null (→ Neutral)
-- `AreEnemyAlignments` — Free vs Evil, Evil vs Free, Free vs Neutral, Evil vs Neutral, Free vs Free (false), Evil vs Evil (false), Neutral vs Neutral (true)
-- `AreSameAlignment` — Free vs Free (true), Evil vs Evil (true), Free vs Evil (false), Neutral vs Neutral (false), Free vs Neutral (false), Null (false)
+Tests the `AlignmentService` with a mocked `IAlignmentConfigProvider`:
+- `GetKingdomSide` and `GetCultureSide`: Free, Evil, Neutral, unknown and null (Neutral)
+- `AreEnemyAlignments` and `AreSameAlignment`: every pairing of the three sides, null kingdoms
+- `ResolveSide`: a listed id wins over the culture; a null, empty, unlisted or Neutral-listed id falls back to the culture of the same entity; neither classified is Neutral; the `SideIds` extension equals the string overload
 
-### `TAOM.Tests/Features/Execution/ExecutionActionHookTests.cs` — 13 tests
+### `TAOM.Tests/Features/Execution/ExecutionActionHookTests.cs` (12 tests)
 
-Tests the `ExecutionActionHook` with mocked `IAlignmentService`:
-- `ShouldApplyHonorPenalty` — Cross-alignment (false), Same-alignment (true)
-- `IsKinslaying` — Same (true), Cross (false)
-- `GetRelationModifier` — Cross-alignment with executor's ally evaluator (→ 0), victim's ally evaluator (→ vanilla), neutral evaluator (→ 0); Kinslaying with -60 (→ -90), -30 (→ -45), -10 (→ -15)
+Tests the hook with mocked `IAlignmentService` and `IExecutionRelationService`:
+- `ShouldApplyHonorPenalty`: cross-alignment (false), same alignment (true), a kingdom-less executor, a victim whose kingdom the clan destruction nulled
+- `GetRelationModifier`: returns the service's delta, passes zero through unrounded, passes every pair through intact, asks the service with notifications off
+- `IsPlayerTheBereaved`: the player's clan, another clan, an unknown clan
+
+### `TAOM.Tests/Features/Execution/ExecutionRelationServiceTests.cs` (17 tests)
+
+Tests the decision with a mocked `IAlignmentService`: a kingdom-less executor, a victim whose clan was destroyed by the kill, an evaluator with no kingdom, a participant classified on neither id, cross-alignment zeroing, kinslaying at 1.5 times, and the notification flag.
+
+### `TAOM.Tests/Features/Execution/ShippedClanSideCoverageTests.cs` (13 tests, `LiveInstall`)
+
+The data gate for the alignment table (#957). It runs the real `spclans.xslt` over the installed SandBox `spclans.xml`
+and adds `characters/clans.xml`, the way the engine loads them (and the same for the kingdoms, with
+`spkingdoms.xslt` and `taom_spkingdoms.xml`, and for the clans' troops and leader templates with `lords.xslt`), and
+reads the rows through the real `AlignmentConfigProvider`. It reports Inconclusive when the game install is absent.
+It fails when:
+- the set of minor clans differs from the intended-side table in the test, or a minor clan does not resolve its intended side on its own id and culture (the Grey Company and the Corsair Blades pass only on their retagged cultures)
+- a troop or a named leader template reads the opposite of its clan's side, does not resolve to an `NPCCharacter`, or a leader clone differs from its original beyond id and culture
+- the load migration's target cultures or clones differ from the shipped data
+- a kingdom clan resolves Neutral on its kingdom's pair outside the four Neutral realms, or its own pair (its id and its own culture, which is how a victim whose clan the kill destroyed reads) differs from its kingdom's side
+- `player_faction` is listed, a listed clan row is not `free` or `evil`, an `alignment.json` key names no loaded culture, kingdom or clan (a typo guard), or a row is listed for a clan id that is also a culture or kingdom id (a bandit clan shares its id with its culture)
+
+### `TAOM.Tests/Features/Execution/SidePairScanTests.cs` (3 tests)
+
+The source gate (#957). It reads the IL of `TAOM.dll`, so it sees what the compiler emitted: a target-typed `new(` in
+any position, an object initializer, a `with` expression, a call inside a lambda or an iterator. Callers are keyed
+by their outermost type. It fails when a type outside an allow-list (each entry names why its pair is one entity's)
+calls `ResolveSide(id, culture)` with two arguments on the interface or the concrete service, when a type other than
+`FactionSides` and the `SideIds` record constructs or copies a `SideIds`, and when an allow-list entry no longer
+matches a caller. A control test compiles each shape into the test assembly and requires the scan to find it.
+`AlignmentServiceTests.ResolveSide_SideIds_MatchesTheStringOverload` pins the extension.
 
 ## Vanilla Classes Referenced
 
@@ -540,7 +658,14 @@ All re-verified against decompiled Bannerlord v1.4.8 DLLs (2026-09-06, #556):
 ## How to Add a New Kingdom
 
 1. Add a new entry to `Main/_Module/ModuleData/execution/alignment.json` with the kingdom's StringId and side
-2. No code changes needed — `AlignmentService` reads the JSON at startup
+2. No code changes needed: `AlignmentService` reads the JSON at startup. `ShippedClanSideCoverageTests` fails when a kingdom's clans resolve Neutral outside the four Neutral realms
+
+## How to Add a Minor Clan
+
+A minor clan the game loads must get a deliberate side: add its row to `IntendedMinorClanSides` in
+`ShippedClanSideCoverageTests` and, unless its culture already resolves the intended side, a `free` or
+`evil` row to `alignment.json` (never `neutral`: leave a Neutral clan unlisted). Do not list
+`player_faction`. The gate is `ShippedClanSideCoverageTests`; restart the game to read the file. If the clan's troops carry a culture on the opposite side, retag them and clone the leader templates in `lords.xslt` (and in `MINOR_CLAN_CULTURES` of `tools/complete_lords_xslt.py`), and add the clan to `MinorClanMigrationService` so an old save follows.
 
 ## How to Change the Kinslaying Multiplier
 
@@ -555,6 +680,9 @@ Edit `KinslayingMultiplier` in `Main/Features/Execution/Hooks/ExecutionActionHoo
 5. Capture a Rohan (empire/vlandia) lord
 6. Execute them
 7. **Expected:** Relation preview shows -90 for same-clan (kinslaying). Honor penalty applies normally.
+8. Capture a lord of a Neutral realm (Khand, `battania`), ideally one born into a Free culture, and execute that lord.
+9. **Expected:** no Honor penalty and no relation hit from anyone, as for any Neutral lord. Before #957 a Gondor-born
+   lord of Khand read as Free and the kill counted as kinslaying.
 
 ## Related Documentation
 
@@ -578,6 +706,7 @@ Edit `KinslayingMultiplier` in `Main/Features/Execution/Hooks/ExecutionActionHoo
 <!-- backlinks-end -->
 ## Changelog
 
+- 2026-10-20 (#957, part 2): every `ResolveSide` caller now passes the id and the culture of ONE entity. Added `SideIds` and the `ResolveSide(SideIds)` extension, `TAOM.Adapters.FactionSides` as the single builder, and `SideIds` on the Lord Courtesies snapshot, the Hard Questions `LordRef`, the execution seams (the patches call `FactionSides.OfPlayer()`; `IExecutionRelationService` and `IOnExecutionAction` take `SideIds`, so `ExecutionParticipant` and `IPlayerContextAdapter.GetPlayerCultureId()` are gone), tournament entrants and hosts, Wanderer Allegiance, Prisoner Recruitment, Tokens of Esteem, Good Deeds (`DeedSide` removed) and Bonds of Battle. CaravanTrade and the Momentum enrollment now ask `IAlignmentService.ResolveSide` instead of keeping private copies of its fallback. Four minor clan rows (`ghilman`, `skolderbrotva`, `forest_people`, `eleftheroi`) in `alignment.json` place the clans whose vanilla culture is unlisted or the wrong side (Axemen of Erebor, Druedain, Beornings, Serpent Guard), and `spclans.xslt` gives the Grey Company the clan culture `arthedain` and the Corsair Blades `umbar` (so the Corsair Blades are Neutral, matching TAOM's Umbar). `lords.xslt` retags the troops of the Grey Company, Corsair Blades, Beornings and Dunlending Reavers and clones their 16 leader templates as `taom_spc_*` with the new cultures (`spclans.xslt` names the clones), so a hired company's own troops never desert under an employer of its side; the block lives in `tools/complete_lords_xslt.py` too, so a regeneration keeps it. A new behavior, `MinorClanMigration`, brings an old save's clan cultures and template lists to the same values on load. New gates `ShippedClanSideCoverageTests` and `SidePairScanTests`. RCA: `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, part 2 (review waves 1 and 2).
 - 2026-09-06 (#556): fixed the fall-through that made this whole feature skippable. `ExecutionRelationService` and the honor patch both handed the calculation back to vanilla whenever any one kingdom id was null or empty, and vanilla charges -10 to every honourable clan leader in the world. Reachable two ways: a kingdom-less executor (independent, mercenary, or enlisted player), and a victim whose `Clan.Kingdom` was nulled by the clan destruction that step 10 performs before step 11 fires the relation pass. Added `IAlignmentService.ResolveSide(kingdomId, cultureId)` plus `FactionSide` overloads of the two predicates, moved the relation service onto `ExecutionParticipant`, extended `ExecutionContext` to snapshot culture as well as kingdom for both victim and executor, added `IPlayerContextAdapter.GetPlayerCultureId()`, and deleted the dead duplicate relation logic (`ExecutionActionHook.GetRelationModifier` / `IsKinslaying`). New build-time gate `ShippedMainCultureAlignmentCoverageTests`. Corrected the kingdom mapping tables above, which had `vlandia` as Arthedain and `empire` as a free Rohan; the XSLT says `vlandia` is Rohan and `empire` is Dunland. The deep review then found that the Harmony finalizer cleared the snapshot unconditionally, so a nested kill during clan destruction wiped it mid-flight; ownership now runs through `ExecutionContext.TrySet` / `ClearIfOwned` and Harmony's `__state`. RCA: `docs/reviews/rca-execution-alignment-fallthrough-2026-09-06.md`.
 - 2026-05-14 — Phase 9b extraction (#147): pulled `IExecutionRelationService` out of `TaomExecutionRelationModel` (returns `ExecutionRelationResult { RelationDelta, ShowNotification }`), reduced the model body to a single-call delegate, and replaced direct `Hero.MainHero.MapFaction.StringId` access with injected `IPlayerContextAdapter.GetPlayerKingdomId()`.
 - 2026-03-25 — Introduced the Alignment-Aware Execution System: `Main/Features/Execution/` with `TaomExecutionRelationModel` GameModel override + `KillCharacterAction.ApplyInternal` / `TraitLevelingHelper.OnLordExecuted` Harmony patches (`Patch14_Execution`), `alignment.json` (16 kingdoms → Free/Evil/Neutral), zero-penalty cross-alignment kills, 1.5x kinslaying penalties, and 28 tests.

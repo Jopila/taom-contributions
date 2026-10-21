@@ -15,18 +15,23 @@ public interface IAlignmentService
     FactionSide GetCultureSide(string cultureId);
 
     /// <summary>
-    /// Side of a participant identified by kingdom id first, falling back to culture id when the
-    /// kingdom does not classify. Catches the cases where <see cref="GetKingdomSide"/> alone reads
+    /// Side of a participant identified by faction id first (a kingdom id, or a clan id), falling back to
+    /// culture id when the id does not classify. Catches the cases where <see cref="GetKingdomSide"/> alone reads
     /// Neutral and would silently disable alignment logic: a kingdom-less hero (independent or
-    /// enlisted player, minor/mercenary clan leader, a victim whose clan was destroyed by the kill
+    /// enlisted player, a minor clan leader serving no kingdom, a victim whose clan was destroyed by the kill
     /// that is being evaluated) and a player-founded kingdom whose id is absent from alignment.json.
-    /// Mirrors the private <c>ResolveSide</c> helpers in CaravanTrade, WarOfTheRingMomentum and
-    /// PrisonerRecruitment.
     /// <para>
     /// The fallback fires when the id is unlisted OR listed Neutral, so pass the culture of the SAME
-    /// entity the id names (a faction with its own culture, a hero with his). A kingdom paired with
-    /// another entity's culture (the conquered town's) sides a Neutral or player-founded owner as that
-    /// entity (#744, <c>docs/reviews/rca-tournament-alignment-filter-2026-10-06.md</c>).
+    /// entity the id names (a faction with its own culture, a clanless hero with the hero's own). A
+    /// kingdom paired with another entity's culture (the conquered town's) sides a Neutral or
+    /// player-founded owner as that entity (#744,
+    /// <c>docs/reviews/rca-tournament-alignment-filter-2026-10-06.md</c>). A <c>neutral</c> entry for a
+    /// clan id is therefore a no-op: clan entries in alignment.json are free or evil.
+    /// </para>
+    /// <para>
+    /// Callers hold the pair as a <see cref="SideIds"/> built by <c>TAOM.Adapters.FactionSides</c> (the
+    /// only place that zips engine ids) and resolve it with the
+    /// <c>ResolveSide(this IAlignmentService, SideIds)</c> extension (#957).
     /// </para>
     /// </summary>
     FactionSide ResolveSide(string kingdomId, string cultureId);

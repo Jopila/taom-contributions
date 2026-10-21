@@ -44,12 +44,13 @@ internal sealed class HardQuestionsFixture
         Player.HeroId.Returns("main_hero");
         Player.KingdomId.Returns("k_player");
         Player.CultureId.Returns("c_player");
+        Player.Side.Returns(new SideIds("k_player", "c_player"));
         Player.Gold.Returns(100000);
         Player.AddPiece(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<int>()).Returns(true);
         Actions.PayGold(Arg.Any<string>(), Arg.Any<int>()).Returns(true);
         Actions.ChangeRelation(Arg.Any<string>(), Arg.Any<int>()).Returns(true);
-        Relations.GetRelationModifier(Arg.Any<ExecutionParticipant>(), Arg.Any<ExecutionParticipant>(),
-            Arg.Any<ExecutionParticipant>(), Arg.Any<int>(), Arg.Any<bool>())
+        Relations.GetRelationModifier(Arg.Any<SideIds>(), Arg.Any<SideIds>(),
+            Arg.Any<SideIds>(), Arg.Any<int>(), Arg.Any<bool>())
             .Returns(call => new ExecutionRelationResult(call.ArgAt<int>(3), false));
         Alignment.ResolveSide(Arg.Any<string>(), Arg.Any<string>()).Returns(FactionSide.Neutral);
 
@@ -65,7 +66,7 @@ internal sealed class HardQuestionsFixture
     /// <summary>A captive lord held by the player's clan, found by the captive adapter under his id.</summary>
     public CaptiveSnapshot Captive(string id = "lord1", int ransom = 1000, string? kingdom = "k_lord1", string? relationId = null)
     {
-        var lord = new LordRef(id, kingdom, "c_" + id, relationId);
+        var lord = new LordRef(id, kingdom, new SideIds(kingdom ?? string.Empty, "c_" + id), relationId);
         var snapshot = new CaptiveSnapshot(lord)
         {
             ClanId = "clan_" + id,
@@ -78,7 +79,8 @@ internal sealed class HardQuestionsFixture
         return snapshot;
     }
 
-    public static LordRef Lord(string id, string? relationId = null) => new(id, "k_" + id, "c_" + id, relationId);
+    public static LordRef Lord(string id, string? relationId = null) =>
+        new(id, "k_" + id, new SideIds("k_" + id, "c_" + id), relationId);
 
     public static List<LordRef> Lords(params string[] ids) => ids.Select(id => Lord(id)).ToList();
 }

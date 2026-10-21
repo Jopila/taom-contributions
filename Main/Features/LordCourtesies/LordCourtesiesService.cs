@@ -191,8 +191,8 @@ public sealed class LordCourtesiesService
             return null;
         if (!string.IsNullOrEmpty(lord.KingdomId) && lord.KingdomId == _player.KingdomId)
             return null;
-        var playerSide = _alignment.ResolveSide(_player.KingdomId ?? string.Empty, _player.CultureId ?? string.Empty);
-        var lordSide = _alignment.ResolveSide(lord.KingdomId ?? string.Empty, lord.CultureId ?? string.Empty);
+        var playerSide = _alignment.ResolveSide(_player.Side);
+        var lordSide = _alignment.ResolveSide(lord.Side);
         return SidesAllowGift(playerSide, lordSide) ? lord : null;
     }
 

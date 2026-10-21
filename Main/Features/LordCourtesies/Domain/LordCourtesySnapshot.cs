@@ -1,3 +1,5 @@
+using TAOM.Features.Execution;
+
 namespace TAOM.Features.LordCourtesies.Domain;
 
 /// <summary>
@@ -17,7 +19,12 @@ public sealed class LordCourtesySnapshot
 
     public string? KingdomId { get; set; }
 
-    public string? CultureId { get; set; }
+    /// <summary>
+    /// The lord's clan map faction id with that faction's culture, or a clanless hero's own culture
+    /// (<c>FactionSides.OfHero</c>): the pair the alignment table resolves. <see cref="KingdomId"/> stays for the
+    /// same-realm gate.
+    /// </summary>
+    public SideIds Side { get; set; } = SideIds.None;
 
     public bool IsInPlayerClan { get; set; }
 

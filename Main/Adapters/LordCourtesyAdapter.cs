@@ -53,7 +53,7 @@ public sealed class LordCourtesyAdapter : ILordCourtesyAdapter
             {
                 ClanId = clan?.StringId,
                 KingdomId = clan?.Kingdom?.StringId,
-                CultureId = hero.Culture?.StringId,
+                Side = FactionSides.OfHero(hero),
                 IsInPlayerClan = clan != null && clan == Clan.PlayerClan,
                 AtWarWithPlayer = faction != null && playerFaction != null && faction.IsAtWarWith(playerFaction),
                 LeadsOwnParty = party != null && party.IsLordParty && party.LeaderHero == hero,

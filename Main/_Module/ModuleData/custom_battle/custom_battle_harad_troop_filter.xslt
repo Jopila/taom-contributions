@@ -8,6 +8,10 @@
   caravan guards. This marks every non-hero Aserai/Shaghana character obsolete unless its id starts
   with "harad_" (all TAOM Harad troops: regular, militia, Serpent, Red Serpent, Pezarsan, noble,
   elephant, howdah, mumakil). Lords and heroes are left alone. Campaigns never load this file.
+  The same goes for the four minor clans whose troops lords.xslt retags to their side's culture (#957): the
+  legion_of_the_betrayed, company_of_the_boar, eleftheroi and brotherhood_of_woods tier troops now sit on Arthedain,
+  Umbar, Sturgia and Dunland, and would otherwise be offered in those cultures' Custom Battle slots. They are
+  marked obsolete here by id prefix (CustomBattleTroopFilterTests).
   taom_vanilla_troop_obsolete_overrides.xml already hides the main vanilla Aserai line everywhere.
 -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -16,6 +20,14 @@
 	<xsl:template match="@*|node()">
 		<xsl:copy>
 			<xsl:apply-templates select="@*|node()"/>
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="NPCCharacter[not(@is_hero='true') and (starts-with(@id, 'legion_of_the_betrayed_tier_') or starts-with(@id, 'company_of_the_boar_tier_') or starts-with(@id, 'eleftheroi_tier_') or starts-with(@id, 'brotherhood_of_woods_tier_'))]">
+		<xsl:copy>
+			<xsl:apply-templates select="@*[name() != 'is_obsolete']"/>
+			<xsl:attribute name="is_obsolete">true</xsl:attribute>
+			<xsl:apply-templates select="node()"/>
 		</xsl:copy>
 	</xsl:template>
 

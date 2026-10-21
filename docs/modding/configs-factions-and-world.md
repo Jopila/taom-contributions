@@ -60,12 +60,18 @@ owned by `TAOM_Map/ModuleData/settlements.xml`.
 | any id | string | no | `Neutral` | Side for that id. Parsed case-insensitively; an unrecognised value logs a warning and becomes `Neutral` | `AlignmentService.cs:18-27` |
 
 The dictionary answers **both** `GetKingdomSide` and `GetCultureSide` from the same flat map
-(`AlignmentService.cs:32-34`), which is why the shipped file carries **24 keys**: the 22 live
-kingdom StringIds plus `gondor` and `mordor`, the two cultures whose kingdom carries a vanilla id
-(`empire_w` is Gondor, `empire_s` is Mordor). It is not a kingdom-only map, and the "16 keys" and
-"22 keys" figures in [alignment-aware-execution.md](../features/alignment-aware-execution.md) and
+(`AlignmentService.cs:32-34`), and `ResolveSide(id, culture)` also reads minor clan ids from it, which is why
+the shipped file carries **29 keys**: the 23 live kingdom StringIds, `gondor` and `mordor` (the two cultures
+whose kingdom carries a vanilla id: `empire_w` is Gondor, `empire_s` is Mordor), and four minor clan ids
+(`ghilman`, `skolderbrotva`, `forest_people`, `eleftheroi`); the Grey Company and the Corsair Blades are retagged
+to `arthedain` and `umbar` in `spclans.xslt` and need no row (an old save keeps the vanilla clan culture, so `MinorClanMigration` sets it on load; see [minor-factions.md](../features/minor-factions.md)). A clan row is `free` or `evil`: a `neutral` clan row is a no-op, because `ResolveSide` falls
+back to the culture of the same entity for an id that is unlisted or listed Neutral, so a clan meant to be
+Neutral stays unlisted. `player_faction` is never listed. The key set and the intended side of every minor
+clan are pinned by `ShippedClanSideCoverageTests`; the per-clan table is in
+[alignment-aware-execution.md](../features/alignment-aware-execution.md) ("Minor Clan ID Reference"). It is not
+a kingdom-only map, and the "16 keys" and "22 keys" figures in that document and in
 [alignment-recruitment.md](../features/alignment-recruitment.md) are both stale.
-<!-- measured: python -c "import json,collections;d=json.load(open('Main/_Module/ModuleData/execution/alignment.json'));print(len(d),collections.Counter(d.values()))" 2026-09-05 -->
+<!-- measured: python -c "import json,collections;d=json.load(open('Main/_Module/ModuleData/execution/alignment.json'));print(len(d),collections.Counter(d.values()))" 2026-10-20 -->
 
 <!-- engine-ref type="TAOM.Features.Diplomacy.Models.KingdomRelationship" file="Main/Features/Diplomacy/Models/KingdomRelationship.cs" lines="5-7" -->
 
@@ -198,7 +204,7 @@ fails on a missing id.
 | File | Must the new kingdom id appear? | Enforced by |
 |---|---|---|
 | `configs/army_targeting.json` `KingdomTheaters` | Yes, even an empty list to mark it passive | `WarTheaterConfigInvariantsTests.EveryKingdom_HasATheaterDecisionRecorded` (`WarTheaterConfigInvariantsTests.cs:131-145`) |
-| `execution/alignment.json` | Yes; absent resolves `Neutral` | Nothing. `ShippedAlignmentConfigTests.cs:125-151` pins 14 named culture rows only |
+| `execution/alignment.json` | Yes; absent resolves `Neutral` | `ShippedClanSideCoverageTests.EveryKingdomClan_ResolvesItsKingdomsSide` fails (LiveInstall) for a kingdom that has clans and resolves Neutral outside the four Neutral realms; `ShippedAlignmentConfigTests.cs:125-151` pins 14 named culture rows |
 | `diplomacy/diplomacy.json` | Yes, one row per opponent; absent pairs resolve `Neutral` | Nothing reads the shipped file |
 | `diplomacy/war_of_the_ring.json` | Only if it takes part in a scripted declaration | `WarOfTheRingShippedConfigTests.cs:51-105` pins days 30 and 44 and the two Phase 1 wars |
 | `factionmap/factions.json` and `regions.json` | Only if it is player-selectable | `FactionMapDataTests.cs:28-141` |
@@ -417,8 +423,10 @@ Code: No code changes needed
   container built at module load, so a save reload and a new campaign both read the cached copy.
   This is the single most common wasted hour on these files (`Main/Features/Execution/ExecutionIoC.cs:10`).
 - **`alignment.json` is not a kingdom-only map.** One flat dictionary answers `GetKingdomSide` and
-  `GetCultureSide`, which is why it needs `gondor` and `mordor` on top of the 22 kingdom ids
-  (`Main/Features/Execution/AlignmentService.cs:32-34`).
+  `GetCultureSide`, and `ResolveSide` reads minor clan ids from it, which is why it needs `gondor`, `mordor`
+  and four clan ids on top of the 23 kingdom ids (`Main/Features/Execution/AlignmentService.cs:32-34`). A
+  `neutral` clan entry is a no-op (the lookup falls through to the culture), so clan rows are `free` or `evil`
+  (`ShippedClanSideCoverageTests.ListedClanEntries_AreFreeOrEvil`).
 - **A `Neutral` faction is treated as everyone's enemy, not as nobody's.** `AreEnemyAlignments`
   returns true whenever either side is `Neutral`, and `AreSameAlignment` returns false, so a typo
   that drops an id out of the map is not a no-op (`Main/Features/Execution/AlignmentService.cs:44-53`).
@@ -460,12 +468,12 @@ Code: No code changes needed
 
 ## Numbers in this chapter
 
-All measured 2026-09-05 from the repo working tree at `Main/_Module/ModuleData/`.
+All measured 2026-09-05 from the repo working tree at `Main/_Module/ModuleData/`; the two `alignment.json` rows were re-measured 2026-10-20.
 
 | Number | Command |
 |---|---|
-| `alignment.json`: 24 keys, 11 evil, 9 free, 4 neutral | `python -c "import json,collections;d=json.load(open('Main/_Module/ModuleData/execution/alignment.json'));print(len(d),collections.Counter(d.values()))"` |
-| 22 live kingdom ids (14 declared, 8 retagged by XSLT); the only alignment keys that are not kingdom ids are `gondor` and `mordor` | `python -c "import xml.etree.ElementTree as ET,re,json;k=set(x.get('id') for x in ET.parse('Main/_Module/ModuleData/taom_spkingdoms.xml').getroot().findall('Kingdom'));k\|=set(re.findall(r\"Kingdom\[@id='([a-z_]+)'\]\",open('Main/_Module/ModuleData/spkingdoms.xslt').read()));a=json.load(open('Main/_Module/ModuleData/execution/alignment.json'));print(len(k),sorted(set(a)-k))"` |
+| `alignment.json`: 29 keys, 12 evil, 13 free, 4 neutral | `python -c "import json,collections;d=json.load(open('Main/_Module/ModuleData/execution/alignment.json'));print(len(d),collections.Counter(d.values()))"` |
+| 23 live kingdom ids (15 declared, 8 retagged by XSLT); the only alignment keys that are not kingdom ids are `gondor`, `mordor` and the four minor clan ids | `python -c "import xml.etree.ElementTree as ET,re,json;k=set(x.get('id') for x in ET.parse('Main/_Module/ModuleData/taom_spkingdoms.xml').getroot().findall('Kingdom'));k\|=set(re.findall(r\"Kingdom\[@id='([a-z_]+)'\]\",open('Main/_Module/ModuleData/spkingdoms.xslt').read()));a=json.load(open('Main/_Module/ModuleData/execution/alignment.json'));print(len(k),sorted(set(a)-k))"` |
 | `diplomacy.json`: 130 rows, 38 Permanent, 24 Natural, 7 Neutral, 61 Hostile | `python -c "import json,collections;print(collections.Counter(r['tier'] for r in json.load(open('Main/_Module/ModuleData/diplomacy/diplomacy.json'))['relationships']))"` |
 | `army_targeting.json`: 4 theaters, 22 `KingdomTheaters` keys (2 empty), 9 `FactionPriorityTargets`, 5 `FactionAggressionMultipliers` | `python -c "import json;a=json.load(open('Main/_Module/ModuleData/configs/army_targeting.json'));print(len(a['Theaters']),len(a['KingdomTheaters']),len(a['FactionPriorityTargets']),len(a['FactionAggressionMultipliers']),[k for k,v in a['KingdomTheaters'].items() if not v])"` |
 | `settlement_guards_config.xml`: 16 `<Settlement>`, 0 `<Clan>`, 1 `<Culture>`, 38 `<Guard>` (37 with `spawn_points`), 16 `<Spear>` | `python -c "import xml.etree.ElementTree as ET;r=ET.parse('Main/_Module/ModuleData/settlement_guards/settlement_guards_config.xml').getroot();g=r.findall('.//Guard');print(len(r.findall('Settlement')),len(r.findall('Clan')),len(r.findall('Culture')),len(g),sum(1 for x in g if 'spawn_points' in x.attrib),len(r.findall('.//Spear')))"` |

@@ -875,10 +875,27 @@
     </xsl:copy>
   </xsl:template>
 
+  <!-- The four clans whose leader templates are cloned in lords.xslt name the clones (#957). The originals stay in the
+       Dunland and Rohan lord and rebellion template lists, so they keep their vanilla cultures. -->
+  <xsl:template match="minor_faction_character_templates/template[starts-with(@id,'NPCCharacter.spc_legion_of_the_betrayed_leader_')
+                                                              or starts-with(@id,'NPCCharacter.spc_company_of_the_boar_leader_')
+                                                              or starts-with(@id,'NPCCharacter.spc_eleftheroi_leader_')
+                                                              or starts-with(@id,'NPCCharacter.spc_brotherhood_of_woods_leader_')]/@id">
+    <xsl:attribute name="id">NPCCharacter.taom_<xsl:value-of select="substring-after(.,'NPCCharacter.')"/></xsl:attribute>
+  </xsl:template>
+
   <!-- Legion of the Betrayed → The Grey Company (Dúnedain Rangers) -->
+  <!-- Culture: vanilla empire (Dunland, Evil) to arthedain (Free), so the clan's own culture is its side (#957).
+       The clan culture weights which kingdom the clan courts for a contract, ten to one for kingdoms of its culture
+       (DiplomaticBartersBehavior); once hired, the employer is the clan's map faction and its heroes side with the
+       employer. It also feeds the clan's home-settlement score (DefaultSettlementValueModel), the party feats of an
+       unhired clan's parties (PartyBase.Culture is the map faction's culture), the leaders' title text and the
+       encyclopedia culture. It is saved with the clan: an old save keeps the vanilla culture until
+       MinorClanMigration sets this one on load. -->
   <xsl:template match="Faction[@id='legion_of_the_betrayed']">
     <xsl:copy>
-      <xsl:apply-templates select="@*[local-name() != 'name' and local-name() != 'short_name' and local-name() != 'text']"/>
+      <xsl:apply-templates select="@*[local-name() != 'name' and local-name() != 'short_name' and local-name() != 'text' and local-name() != 'culture']"/>
+      <xsl:attribute name="culture">Culture.arthedain</xsl:attribute>
       <xsl:attribute name="name">{=TAOM_legion_name}The Grey Company</xsl:attribute>
       <xsl:attribute name="short_name">{=TAOM_legion_short}Grey Company</xsl:attribute>
       <xsl:attribute name="text">{=TAOM_legion_text}The Grey Company are the last organised brotherhood of the Dúnedain Rangers, descendants of the kings of Arnor who lost their kingdom ages ago. They ride across the North without a home of their own, keeping the peace in lands that have forgotten their names. Though their first loyalty is to the line of Elendil, they take contracts from lords across Middle-earth when their wandering brings them through civilised lands.</xsl:attribute>
@@ -899,9 +916,14 @@
   </xsl:template>
 
   <!-- Company of the Boar → Corsair Blades (Umbar ex-pirates) -->
+  <!-- Culture: vanilla vlandia (Rohan, Free) to umbar (Neutral), so the Corsair Blades are Umbar's, not Rohan's (#957).
+       The clan keeps its explicit default_party_template, so the roster of its parties does not change. As for the
+       Grey Company above, the culture also decides the contract weighting, feeds the home-settlement score, the
+       leaders' title text and the encyclopedia culture, and it is saved (MinorClanMigration fixes an old save). -->
   <xsl:template match="Faction[@id='company_of_the_boar']">
     <xsl:copy>
-      <xsl:apply-templates select="@*[local-name() != 'name' and local-name() != 'short_name' and local-name() != 'text' and local-name() != 'initial_home_settlement']"/>
+      <xsl:apply-templates select="@*[local-name() != 'name' and local-name() != 'short_name' and local-name() != 'text' and local-name() != 'initial_home_settlement' and local-name() != 'culture']"/>
+      <xsl:attribute name="culture">Culture.umbar</xsl:attribute>
       <xsl:attribute name="name">{=TAOM_company_name}Corsair Blades</xsl:attribute>
       <xsl:attribute name="short_name">{=TAOM_company_short}Corsairs</xsl:attribute>
       <xsl:attribute name="text">{=TAOM_company_text}The Corsair Blades are veteran sea-fighters from the harbours of Umbar who have taken to selling their skills on land. They fight as crossbowmen — the preferred arm of shipboard warfare — and are as comfortable in a siege as they are on a rolling deck. Their captain, a scarred Númenórean exile, keeps them to their contracts with iron discipline, knowing that their reputation is their most valuable cargo.</xsl:attribute>

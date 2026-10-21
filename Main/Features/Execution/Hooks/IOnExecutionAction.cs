@@ -4,9 +4,9 @@ namespace TAOM.Features.Execution.Hooks;
 /// The alignment rule for executions, consumed by the two Blood Feud seams.
 ///
 /// <para>
-/// Both halves take <see cref="ExecutionParticipant"/> values rather than bare kingdom ids. A
+/// Both halves take <see cref="SideIds"/> pairs (the id and the culture of one entity) rather than bare faction ids. A
 /// participant with no kingdom is still placed on a side by culture, so an independent or enlisted
-/// player, a mercenary clan leader, or a victim whose clan the kill just destroyed never collapses
+/// player, a minor-clan leader serving no kingdom, or a victim whose clan the kill just destroyed never collapses
 /// the calculation back to vanilla's flat penalty. That escape used to exist and it charged every
 /// honourable clan leader in the world, which is exactly the Free Peoples.
 /// </para>
@@ -14,7 +14,7 @@ namespace TAOM.Features.Execution.Hooks;
 public interface IOnExecutionAction
 {
     /// <summary>Whether vanilla's Honor and Mercy hit for starting a blood feud should apply.</summary>
-    bool ShouldApplyHonorPenalty(ExecutionParticipant victim, ExecutionParticipant executor);
+    bool ShouldApplyHonorPenalty(SideIds victim, SideIds executor);
 
     /// <summary>
     /// The alignment-modified relation change for one third-party clan leader evaluating the kill.
@@ -22,9 +22,9 @@ public interface IOnExecutionAction
     /// no count in the summary notice, not a smaller hit.
     /// </summary>
     int GetRelationModifier(
-        ExecutionParticipant executor,
-        ExecutionParticipant victim,
-        ExecutionParticipant evaluator,
+        SideIds executor,
+        SideIds victim,
+        SideIds evaluator,
         int baseRelationDelta);
 
     /// <summary>

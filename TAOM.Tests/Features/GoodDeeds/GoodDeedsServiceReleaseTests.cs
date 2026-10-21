@@ -1,6 +1,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using TAOM.Features.Execution;
 using TAOM.Features.GoodDeeds;
 using TAOM.Features.GoodDeeds.Models;
 using static TAOM.Tests.Features.GoodDeeds.GoodDeedsFixture;
@@ -73,7 +74,7 @@ public class GoodDeedsServiceReleaseTests
     [DataRow("", "", 4)]
     public void OnPrisonerReleased_TheLordsGrant_FollowsThePairingOfPlayerAndLord(string playerKingdom, string lordKingdom, int expected)
     {
-        Facts(Release(new DeedSide(playerKingdom, string.Empty), new DeedSide(lordKingdom, string.Empty)));
+        Facts(Release(new SideIds(playerKingdom, string.Empty), new SideIds(lordKingdom, string.Empty)));
 
         Released();
 
@@ -83,7 +84,7 @@ public class GoodDeedsServiceReleaseTests
     [TestMethod]
     public void OnPrisonerReleased_ALordWithNoFactionAtAll_IsNeutral()
     {
-        Facts(Release(Free, DeedSide.None));
+        Facts(Release(Free, SideIds.None));
 
         Released();
 
@@ -295,7 +296,7 @@ public class GoodDeedsServiceReleaseTests
     [TestMethod]
     public void OnPrisonerReleased_ALordWithNoClan_GrantsOnlyTheLordAndHisSpouse()
     {
-        Facts(Release(Free, DeedSide.None, Hero("lord"), Hero("wife"), null));
+        Facts(Release(Free, SideIds.None, Hero("lord"), Hero("wife"), null));
 
         Released();
 

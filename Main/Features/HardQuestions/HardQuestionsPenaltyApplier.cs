@@ -54,12 +54,10 @@ public sealed class HardQuestionsPenaltyApplier
     public void ApplyRelations(LordRef victim, IEnumerable<KeyValuePair<LordRef, float>> hits)
     {
         var strongest = new Dictionary<string, int>(StringComparer.Ordinal);
-        var executor = new ExecutionParticipant(_player.KingdomId ?? string.Empty, _player.CultureId ?? string.Empty);
-        var victimParticipant = Participant(victim);
         foreach (var hit in hits)
         {
             var baseDelta = (int)Math.Round(hit.Value);
-            var modified = _relations.GetRelationModifier(executor, victimParticipant, Participant(hit.Key), baseDelta, false)
+            var modified = _relations.GetRelationModifier(_player.Side, victim.Side, hit.Key.Side, baseDelta, false)
                 .RelationDelta;
             if (hit.Key.RelationId == victim.RelationId
                 || (victim.ClanId != null && hit.Key.ClanId == victim.ClanId))
@@ -109,13 +107,10 @@ public sealed class HardQuestionsPenaltyApplier
     private float TraitMultiplier(LordRef victim)
     {
         var config = _config.GetConfig();
-        var player = _alignment.ResolveSide(_player.KingdomId ?? string.Empty, _player.CultureId ?? string.Empty);
-        var other = _alignment.ResolveSide(victim.KingdomId ?? string.Empty, victim.CultureId ?? string.Empty);
+        var player = _alignment.ResolveSide(_player.Side);
+        var other = _alignment.ResolveSide(victim.Side);
         if (player == FactionSide.Neutral || other == FactionSide.Neutral)
             return config.NeutralTraitMultiplier;
         return _alignment.AreEnemyAlignments(player, other) ? config.EnemySideTraitMultiplier : config.SameSideTraitMultiplier;
     }
-
-    private static ExecutionParticipant Participant(LordRef lord) =>
-        new(lord.KingdomId ?? string.Empty, lord.CultureId ?? string.Empty);
 }

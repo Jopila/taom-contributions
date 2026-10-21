@@ -1,3 +1,5 @@
+using TAOM.Features.Execution;
+
 namespace TAOM.Features.FromTheAshes;
 
 /// <summary>
@@ -40,14 +42,11 @@ public sealed class AshesSiteSnapshot
     /// <summary>Regular captives in the prison roster that are not wounded: the thralls' labour. Heroes never count.</summary>
     public int Prisoners { get; set; }
 
-    /// <summary>The player's kingdom id, or "" when his clan is in none. The service resolves his side from this pair.</summary>
-    public string PlayerKingdomId { get; set; } = "";
-
-    /// <summary>The culture of that kingdom, the same entity as <see cref="PlayerKingdomId"/> (#744); "" without a kingdom.</summary>
-    public string PlayerKingdomCultureId { get; set; } = "";
-
-    /// <summary>The player hero's own culture, used only when he has no kingdom.</summary>
-    public string PlayerCultureId { get; set; } = "";
+    /// <summary>
+    /// The player's clan map faction (the kingdom, or the clan itself when it serves none) with that faction's own
+    /// culture (#744, #957). The service resolves the side from this pair.
+    /// </summary>
+    public SideIds PlayerSide { get; set; } = SideIds.None;
 
     /// <summary>The main party follows another lord's army.</summary>
     public bool InForeignArmy { get; set; }

@@ -38,7 +38,6 @@ public sealed class AshesWorldAdapter : IAshesWorldAdapter
         if (settlement == null)
             return null;
 
-        var kingdom = Clan.PlayerClan?.Kingdom;
         var site = new AshesSiteSnapshot
         {
             SettlementId = settlement.StringId,
@@ -51,9 +50,7 @@ public sealed class AshesWorldAdapter : IAshesWorldAdapter
                 || (settlement.IsVillage && settlement.Village.VillageState == Village.VillageStates.BeingRaided),
             HealthyTroops = party.Party.NumberOfHealthyMembers,
             Prisoners = HealthyCaptives(party.PrisonRoster),
-            PlayerKingdomId = kingdom?.StringId ?? "",
-            PlayerKingdomCultureId = kingdom?.Culture?.StringId ?? "",
-            PlayerCultureId = hero.Culture?.StringId ?? "",
+            PlayerSide = FactionSides.OfHero(hero),
             InForeignArmy = party.Army != null && party.Army.LeaderParty != party,
             MainPartyInMapEvent = party.MapEvent != null,
         };

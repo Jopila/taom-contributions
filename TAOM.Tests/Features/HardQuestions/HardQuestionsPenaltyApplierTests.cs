@@ -41,11 +41,26 @@ public class HardQuestionsPenaltyApplierTests
         _f.Penalties.ApplyRelations(_victim, Hits(("ally", -12f)));
 
         _f.Relations.Received().GetRelationModifier(
-            Arg.Is<ExecutionParticipant>(p => p.KingdomId == "k_player" && p.CultureId == "c_player"),
-            Arg.Is<ExecutionParticipant>(p => p.KingdomId == "k_victim" && p.CultureId == "c_victim"),
-            Arg.Is<ExecutionParticipant>(p => p.KingdomId == "k_ally" && p.CultureId == "c_ally"),
+            Arg.Is<SideIds>(p => p.FactionId == "k_player" && p.CultureId == "c_player"),
+            Arg.Is<SideIds>(p => p.FactionId == "k_victim" && p.CultureId == "c_victim"),
+            Arg.Is<SideIds>(p => p.FactionId == "k_ally" && p.CultureId == "c_ally"),
             -12, false);
         _f.Actions.Received().ChangeRelation("ally", -12);
+    }
+
+    [TestMethod]
+    public void ApplyRelations_ExecutorIsThePlayersRealmPair()
+    {
+        // #957: the executor is the player's clan map faction with that faction's culture, never the realm's id
+        // zipped with the player hero's own culture.
+        _f.Player.CultureId.Returns("c_hero");
+        _f.Player.Side.Returns(new SideIds("k_player", "c_realm"));
+
+        _f.Penalties.ApplyRelations(_victim, Hits(("ally", -12f)));
+
+        _f.Relations.Received().GetRelationModifier(
+            Arg.Is<SideIds>(p => p.FactionId == "k_player" && p.CultureId == "c_realm"),
+            Arg.Any<SideIds>(), Arg.Any<SideIds>(), -12, false);
     }
 
     [TestMethod]
@@ -115,17 +130,18 @@ public class HardQuestionsPenaltyApplierTests
         var player = Substitute.For<IArmouryPlayerAdapter>();
         player.KingdomId.Returns("empire_w");
         player.CultureId.Returns("gondor");
+        player.Side.Returns(new SideIds("empire_w", "gondor"));
         var actions = Substitute.For<IHardQuestionsActionAdapter>();
         actions.ChangeRelation(Arg.Any<string>(), Arg.Any<int>()).Returns(true);
         var applier = new HardQuestionsPenaltyApplier(alignment, new ExecutionRelationService(alignment), player,
             actions, Substitute.For<IPlayerTraitAdapter>(), _f.ConfigProvider, Substitute.For<IDedicatedServerProvider>());
-        var victim = new LordRef("captive", "umbar", "umbar", "umbar_chief");
+        var victim = new LordRef("captive", "umbar", new SideIds("umbar", "umbar"), "umbar_chief");
         var hits = new List<KeyValuePair<LordRef, float>>
         {
             new(victim, -100f),
-            new(new LordRef("cousin", "umbar", "umbar", "umbar_chief"), -15f),
-            new(new LordRef("other_clan", "umbar", "umbar", "other_chief"), -15f),
-            new(new LordRef("stranger", "sturgia", "sturgia", "stranger"), -10f),
+            new(new LordRef("cousin", "umbar", new SideIds("umbar", "umbar"), "umbar_chief"), -15f),
+            new(new LordRef("other_clan", "umbar", new SideIds("umbar", "umbar"), "other_chief"), -15f),
+            new(new LordRef("stranger", "sturgia", new SideIds("sturgia", "sturgia"), "stranger"), -10f),
         };
 
         applier.ApplyRelations(victim, hits);
@@ -150,17 +166,18 @@ public class HardQuestionsPenaltyApplierTests
         var player = Substitute.For<IArmouryPlayerAdapter>();
         player.KingdomId.Returns("empire_w");
         player.CultureId.Returns("gondor");
+        player.Side.Returns(new SideIds("empire_w", "gondor"));
         var actions = Substitute.For<IHardQuestionsActionAdapter>();
         actions.ChangeRelation(Arg.Any<string>(), Arg.Any<int>()).Returns(true);
         var applier = new HardQuestionsPenaltyApplier(alignment, new ExecutionRelationService(alignment), player,
             actions, Substitute.For<IPlayerTraitAdapter>(), _f.ConfigProvider, Substitute.For<IDedicatedServerProvider>());
-        var victim = new LordRef("captive", "umbar", "umbar", clanId: "clan_umbar");
+        var victim = new LordRef("captive", "umbar", new SideIds("umbar", "umbar"), clanId: "clan_umbar");
         var hits = new List<KeyValuePair<LordRef, float>>
         {
             new(victim, -100f),
-            new(new LordRef("umbar_chief", "umbar", "umbar", clanId: "clan_umbar"), -20f),
-            new(new LordRef("cousin", "umbar", "umbar", clanId: "clan_umbar"), -20f),
-            new(new LordRef("other_clan", "umbar", "umbar", clanId: "clan_other"), -15f),
+            new(new LordRef("umbar_chief", "umbar", new SideIds("umbar", "umbar"), clanId: "clan_umbar"), -20f),
+            new(new LordRef("cousin", "umbar", new SideIds("umbar", "umbar"), clanId: "clan_umbar"), -20f),
+            new(new LordRef("other_clan", "umbar", new SideIds("umbar", "umbar"), clanId: "clan_other"), -15f),
         };
 
         applier.ApplyRelations(victim, hits);
@@ -199,7 +216,7 @@ public class HardQuestionsPenaltyApplierTests
     {
         _f.Relations.GetRelationModifier(default, default, default, default, default)
             .ReturnsForAnyArgs(call => new ExecutionRelationResult(
-                call.ArgAt<ExecutionParticipant>(2).KingdomId == "k_zeroed" ? 0 : call.ArgAt<int>(3), false));
+                call.ArgAt<SideIds>(2).FactionId == "k_zeroed" ? 0 : call.ArgAt<int>(3), false));
 
         _f.Penalties.ApplyRelations(_victim, Hits(("a", -10f), ("a", -12f), ("b", -5f), ("zeroed", -9f)));
 
@@ -268,6 +285,33 @@ public class HardQuestionsPenaltyApplierTests
         _f.Penalties.ApplyTraitXp(_victim, "Honor", -100f);
 
         _f.Traits.Received(2).AddTraitXp("Honor", -100);
+    }
+
+    [TestMethod]
+    public void ApplyTraitXp_PlayerOfNeutralRealmWithFreeCulture_UsesNeutralMultiplier()
+    {
+        // #957: a Neutral realm's player whose own culture is Free is Neutral, so the multiplier is the Neutral one
+        // (1.0), not the same-side 1.5 that the realm id zipped with the hero's culture would pick.
+        var config = Substitute.For<IAlignmentConfigProvider>();
+        config.LoadAlignments().Returns(new Dictionary<string, string>
+        {
+            ["empire_w"] = "Free",
+            ["gondor"] = "Free",
+            ["umbar"] = "Neutral",
+        });
+        var alignment = new AlignmentService(config, Substitute.For<IModLogger>());
+        var player = Substitute.For<IArmouryPlayerAdapter>();
+        player.KingdomId.Returns("umbar");
+        player.CultureId.Returns("gondor");
+        player.Side.Returns(new SideIds("umbar", "umbar"));
+        var traits = Substitute.For<IPlayerTraitAdapter>();
+        var applier = new HardQuestionsPenaltyApplier(alignment, _f.Relations, player, Substitute.For<IHardQuestionsActionAdapter>(),
+            traits, _f.ConfigProvider, Substitute.For<IDedicatedServerProvider>());
+        var victim = new LordRef("captive", "empire_w", new SideIds("empire_w", "gondor"));
+
+        applier.ApplyTraitXp(victim, "Honor", -100f);
+
+        traits.Received().AddTraitXp("Honor", -100);
     }
 
     [TestMethod]

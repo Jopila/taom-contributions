@@ -12,8 +12,8 @@ using TAOM.Features.Execution;
 namespace TAOM.Tests.Features.Execution;
 
 /// <summary>
-/// The execution alignment rules place the player by kingdom id, falling back to his culture when
-/// his clan has no kingdom (independent, mercenary, or enlisted — enlistment deliberately does not
+/// The execution alignment rules place the player by kingdom id, falling back to the culture when
+/// the clan has no kingdom (independent or enlisted — enlistment deliberately does not
 /// join the commander's kingdom). That fallback is only as good as the culture table: a playable
 /// culture missing from execution/alignment.json resolves Neutral, and a Neutral executor is nobody's
 /// ally, so his own side stops approving of his executions.

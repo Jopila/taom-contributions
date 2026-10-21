@@ -91,9 +91,11 @@ public class CaravanTradeService : ICaravanTradeService
                 // semantics are inverted for this purpose (it treats Neutral as an enemy of everyone). Here
                 // Neutral on either side is a mercantile "trade with anyone", and otherwise only the same
                 // side trades (Free↔Free / Evil↔Evil), never across the Free/Evil line. Mirrors the sibling
-                // AlignmentRecruitment feature's deliberate work-around.
-                var caravanSide = ResolveSide(caravanKingdomId, caravanCultureId);
-                var targetSide = ResolveSide(targetKingdomId, targetCultureId);
+                // AlignmentRecruitment feature's deliberate work-around. Each side is the alignment service's
+                // answer for the id and the culture of ONE realm; a player-founded kingdom (id "new_kingdom", never
+                // listed) is sided by its culture there.
+                var caravanSide = _alignment.ResolveSide(caravanKingdomId, caravanCultureId);
+                var targetSide = _alignment.ResolveSide(targetKingdomId, targetCultureId);
                 if (caravanSide == FactionSide.Neutral || targetSide == FactionSide.Neutral)
                     return true;
                 return caravanSide == targetSide;
@@ -101,18 +103,6 @@ public class CaravanTradeService : ICaravanTradeService
             default:
                 return false;
         }
-    }
-
-    // Side by kingdom id, falling back to culture id when the kingdom isn't classified in alignment.json.
-    // A player-founded / dynamically created kingdom (id like "new_kingdom") resolves Neutral by kingdom
-    // id but IS sided by its culture — without this, a Free/Evil-cultured player kingdom would read Neutral
-    // and trade across the Free/Evil line. Mirrors WarOfTheRingMomentum's MomentumEnrollmentService.ResolveSide.
-    private FactionSide ResolveSide(string kingdomId, string cultureId)
-    {
-        var side = _alignment.GetKingdomSide(kingdomId);
-        if (side != FactionSide.Neutral)
-            return side;
-        return string.IsNullOrEmpty(cultureId) ? FactionSide.Neutral : _alignment.GetCultureSide(cultureId);
     }
 
     public float ApplyBudgetFactorFloor(float vanillaBudgetFactor, bool isPlayerCaravan)

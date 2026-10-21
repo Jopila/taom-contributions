@@ -32,10 +32,11 @@ public class MomentumEnrollmentServiceTests
 
         _wotrService.CurrentPhase.Returns(WarPhase.FullWar);
         _allianceAdapter.GetAllKingdomIds().Returns(new List<string> { "empire_w", "vlandia", "empire_s", "umbar" });
-        _alignmentService.GetKingdomSide("empire_w").Returns(FactionSide.Free);
-        _alignmentService.GetKingdomSide("vlandia").Returns(FactionSide.Free);
-        _alignmentService.GetKingdomSide("empire_s").Returns(FactionSide.Evil);
-        _alignmentService.GetKingdomSide("umbar").Returns(FactionSide.Neutral);
+        // An unmocked GetKingdomCultureId answers an empty culture, so these kingdoms resolve on their id alone.
+        _alignmentService.ResolveSide("empire_w", "").Returns(FactionSide.Free);
+        _alignmentService.ResolveSide("vlandia", "").Returns(FactionSide.Free);
+        _alignmentService.ResolveSide("empire_s", "").Returns(FactionSide.Evil);
+        _alignmentService.ResolveSide("umbar", "").Returns(FactionSide.Neutral);
 
         _sut = new MomentumEnrollmentService(_wotrService, _allianceAdapter, _alignmentService, _logger);
     }
@@ -50,6 +51,20 @@ public class MomentumEnrollmentServiceTests
         Assert.IsTrue(_state.Free.ContainsKingdom("vlandia"));
         Assert.IsTrue(_state.Evil.ContainsKingdom("empire_s"));
         Assert.IsFalse(_state.DoesKingdomTakePart("umbar"));
+    }
+
+    [TestMethod]
+    public void SweepEnrollment_SidesEachKingdomOnItsOwnIdAndCulturePair()
+    {
+        // The pair is the kingdom's id with the culture of that same kingdom, resolved by the alignment service itself.
+        _allianceAdapter.GetAllKingdomIds().Returns(new List<string> { "ghost_realm" });
+        _allianceAdapter.GetKingdomCultureId("ghost_realm").Returns("mordor");
+        _alignmentService.ResolveSide("ghost_realm", "mordor").Returns(FactionSide.Evil);
+
+        _sut.SweepEnrollment(_state);
+
+        Assert.IsTrue(_state.Evil.ContainsKingdom("ghost_realm"));
+        Assert.IsFalse(_state.Free.ContainsKingdom("ghost_realm"));
     }
 
     [TestMethod]
@@ -99,7 +114,7 @@ public class MomentumEnrollmentServiceTests
         _sut.SweepEnrollment(_state);
 
         _allianceAdapter.GetAllKingdomIds().Returns(new List<string> { "empire_w", "vlandia", "empire_s", "umbar", "player_kingdom" });
-        _alignmentService.GetKingdomSide("player_kingdom").Returns(FactionSide.Free);
+        _alignmentService.ResolveSide("player_kingdom", "").Returns(FactionSide.Free);
 
         bool changed = _sut.SweepEnrollment(_state);
 
@@ -141,15 +156,14 @@ public class MomentumEnrollmentServiceTests
     [TestMethod]
     public void SweepEnrollment_PlayerFoundedKingdom_EnrollsByCulture()
     {
-        // A dynamically-created kingdom id isn't in alignment.json → GetKingdomSide Neutral;
-        // but its culture IS classified, so it must still enroll on that culture's side.
+        // A dynamically-created kingdom id isn't in alignment.json, so its own pair falls back to its
+        // culture, which IS classified: it must still enroll on that culture's side.
         _allianceAdapter.GetAllKingdomIds().Returns(new List<string>
         {
             "empire_w", "vlandia", "empire_s", "umbar", "new_kingdom"
         });
-        _alignmentService.GetKingdomSide("new_kingdom").Returns(FactionSide.Neutral);
         _allianceAdapter.GetKingdomCultureId("new_kingdom").Returns("gondor");
-        _alignmentService.GetCultureSide("gondor").Returns(FactionSide.Free);
+        _alignmentService.ResolveSide("new_kingdom", "gondor").Returns(FactionSide.Free);
 
         _sut.SweepEnrollment(_state);
 
@@ -161,7 +175,7 @@ public class MomentumEnrollmentServiceTests
     {
         // The culture fallback must not enroll a genuinely-neutral kingdom.
         _allianceAdapter.GetKingdomCultureId("umbar").Returns("umbar");
-        _alignmentService.GetCultureSide("umbar").Returns(FactionSide.Neutral);
+        _alignmentService.ResolveSide("umbar", "umbar").Returns(FactionSide.Neutral);
 
         _sut.SweepEnrollment(_state);
 
@@ -169,12 +183,13 @@ public class MomentumEnrollmentServiceTests
     }
 
     [TestMethod]
-    public void SweepEnrollment_KingdomWithSideAlreadyKnown_DoesNotConsultCulture()
+    public void SweepEnrollment_AsksForTheCultureOfEveryKingdom_SoThePairIsOneEntitys()
     {
         _sut.SweepEnrollment(_state);
 
-        // empire_w resolved Free by kingdom id — the culture fallback must not run for it.
-        _allianceAdapter.DidNotReceive().GetKingdomCultureId("empire_w");
+        // The alignment service owns the fallback, so it gets the kingdom's own culture every time.
+        _allianceAdapter.Received().GetKingdomCultureId("empire_w");
+        _alignmentService.Received().ResolveSide("empire_w", "");
     }
 
     // ---- Codex #327: prune stale enrolled ids ----
@@ -221,8 +236,8 @@ public class MomentumEnrollmentServiceTests
         _sut.SweepEnrollment(_state);
         Assert.IsTrue(_state.Evil.ContainsKingdom("empire_s"));
 
-        _alignmentService.GetKingdomSide("empire_s").Returns(FactionSide.Neutral);
-        // GetKingdomCultureId("empire_s") is unmocked → null → culture fallback = Neutral.
+        _alignmentService.ResolveSide("empire_s", "").Returns(FactionSide.Neutral);
+        // GetKingdomCultureId("empire_s") is unmocked, so its pair is (empire_s, "") and resolves Neutral.
 
         bool changed = _sut.SweepEnrollment(_state);
 
@@ -238,7 +253,7 @@ public class MomentumEnrollmentServiceTests
         _sut.SweepEnrollment(_state);
         Assert.IsTrue(_state.Evil.ContainsKingdom("empire_s"));
 
-        _alignmentService.GetKingdomSide("empire_s").Returns(FactionSide.Free);
+        _alignmentService.ResolveSide("empire_s", "").Returns(FactionSide.Free);
 
         _sut.SweepEnrollment(_state);
 

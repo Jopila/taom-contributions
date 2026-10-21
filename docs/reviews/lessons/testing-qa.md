@@ -2013,3 +2013,9 @@ call's arguments were not pinned, so a swapped argument passed.
   product (assert the row count equals the doc's number); a call that takes the feature's reward or amounts has its
   arguments asserted, not only that it happened.
 - **Source:** `docs/reviews/rca-good-deeds-2026-10-20.md` finding 8.
+
+### A text scan cannot see a target-typed `new(`: use the compiler or the IL (#957, 2026-10-20)
+The first gate for "no pair is built outside `FactionSides`" scanned source text for `new SideIds(`. The trunk bug had been written `=> new(lord.KingdomId ?? "", lord.CultureId ?? "")`, which names no type, and the extended scan still missed `Use(new(a, b))` and a `with` copy in any position the patterns did not list. Making the constructor private fixed the struct and left the record open.
+- **Why missed:** the scan was written from the shapes the author could think of, and a text pattern for a call has no way to know the type of an expression.
+- **Prevent:** gate a construction or a call on what the compiler emitted. `SidePairScanTests` walks the IL of `TAOM.dll` through `IlCallScanner`, keys callers by their outermost type (lambdas and iterators live in nested compiler types), requires the allow-list and the observed callers to match both ways, and carries a control test that compiles each banned shape into the test assembly and demands the scan find it. When a text scan is all that is possible, say plainly in its docstring which shapes it cannot see.
+- **Source:** `docs/reviews/rca-tokens-of-esteem-sides-2026-10-20.md`, wave 1 finding 1 and wave 2 finding P1.

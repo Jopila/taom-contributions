@@ -1,6 +1,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using TAOM.Features.Execution;
 using TAOM.Features.TokensOfEsteem;
 using TAOM.Features.TokensOfEsteem.Models;
 
@@ -132,7 +133,7 @@ public class GiftServiceGateTests
     [TestMethod]
     public void Gate_WarBeatsCooldownHostilityAndAlignment()
     {
-        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
+        _f.Player = _f.Player! with { Side = new SideIds("mordor", "mordor") };
         _f.Recipient = GiftFixture.Lord(relation: -90) with { IsAtWarWithPlayer = true };
 
         Assert.AreEqual(GiftGateKind.Hidden, LordGate(lastDay: 100).Kind);
@@ -245,7 +246,7 @@ public class GiftServiceGateTests
         string playerKingdom, string playerCulture, GiftGateKind expected)
     {
         _f.Recipient = GiftFixture.Lord(kingdom: lordKingdom, culture: lordCulture, sideCulture: lordCulture);
-        _f.Player = _f.Player! with { SideFactionId = playerKingdom, SideCultureId = playerCulture };
+        _f.Player = _f.Player! with { Side = new SideIds(playerKingdom, playerCulture) };
 
         Assert.AreEqual(expected, LordGate().Kind);
     }
@@ -260,11 +261,7 @@ public class GiftServiceGateTests
         string lordOwnCulture, string playerFaction, string playerFactionCulture, GiftGateKind expected)
     {
         _f.Recipient = GiftFixture.Lord(culture: lordOwnCulture, kingdom: lordFaction, sideCulture: lordFactionCulture);
-        _f.Player = _f.Player! with
-        {
-            SideFactionId = playerFaction,
-            SideCultureId = playerFactionCulture,
-        };
+        _f.Player = _f.Player! with { Side = new SideIds(playerFaction, playerFactionCulture) };
 
         Assert.AreEqual(expected, LordGate().Kind);
     }
@@ -273,7 +270,7 @@ public class GiftServiceGateTests
     public void Gate_AlignmentRefusalSwitchedOff_OpensTheFreeLordToTheEvilPlayer()
     {
         _f.Settings = _f.Settings with { AlignmentRefusalEnabled = false };
-        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
+        _f.Player = _f.Player! with { Side = new SideIds("mordor", "mordor") };
 
         Assert.AreEqual(GiftGateKind.Open, LordGate().Kind);
     }
@@ -281,7 +278,7 @@ public class GiftServiceGateTests
     [TestMethod]
     public void Gate_FreeCompanionOfAnEvilPlayer_IsNotRefused()
     {
-        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
+        _f.Player = _f.Player! with { Side = new SideIds("mordor", "mordor") };
         _f.Recipient = GiftFixture.Companion(culture: "gondor");
 
         Assert.AreEqual(GiftGateKind.Open, _f.Sut.Gate(GiftFixture.HeroId, GiftEntry.Companion, _f.Ledger).Kind);
@@ -290,7 +287,7 @@ public class GiftServiceGateTests
     [TestMethod]
     public void Gate_HostilityIsDecidedBeforeAlignment()
     {
-        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
+        _f.Player = _f.Player! with { Side = new SideIds("mordor", "mordor") };
         _f.Recipient = GiftFixture.Lord(relation: -60);
 
         Assert.AreEqual(GiftGateKind.RefusesHostile, LordGate().Kind);
@@ -321,7 +318,7 @@ public class GiftServiceGateTests
     [TestMethod]
     public void Ask_AlignmentRefusal_CostsNothing()
     {
-        _f.Player = _f.Player! with { SideFactionId = "mordor", SideCultureId = "mordor" };
+        _f.Player = _f.Player! with { Side = new SideIds("mordor", "mordor") };
 
         var gate = _f.Sut.Ask(GiftFixture.HeroId, GiftEntry.Lord, _f.Ledger);
 

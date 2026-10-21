@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TAOM.Features.Execution;
 
 namespace TAOM.Features.BondsOfBattle.Models;
 
@@ -28,16 +29,16 @@ public sealed record NotableInfo(string HeroId, string Name);
 
 /// <summary>
 /// The living notables of one settlement that lies near the battle, with the settlement owner's faction and culture ids
-/// (the pair <c>IAlignmentService.ResolveSide</c> reads), so a village in the other side's land can be left out.
+/// (<see cref="Owner"/>, the pair <c>IAlignmentService.ResolveSide</c> reads), so a village in the other side's land can be left out.
 /// </summary>
 public sealed record SettlementNotables(string SettlementId, string SettlementName, IReadOnlyList<NotableInfo> Notables,
-    string? OwnerFactionId, string? OwnerCultureId);
+    SideIds Owner);
 
 /// <summary>
 /// A finished player battle as the service sees it. <see cref="EnemyCasualties"/> is the troop casualties of the side
 /// opposite the player's. <see cref="NearbyNotables"/> is empty unless the adapter was asked for a radius.
 /// <see cref="IsHideoutBattle"/> marks a hideout assault, which vanilla already thanks. The player's faction and culture ids
-/// are the other half of the alignment test on a notable's settlement. <see cref="PlayerLeadsArmy"/> is whether the player
+/// (<see cref="Player"/>) are the other half of the alignment test on a notable's settlement. <see cref="PlayerLeadsArmy"/> is whether the player
 /// leads the army he is in. <see cref="VanillaThanksAmount"/> is vanilla's value for the player side's leader
 /// (<c>BattleRewardModel.GetPlayerGainedRelationAmount</c>), computed on every capture; the service uses it only on a win, and
 /// it is 0 when there is no player encounter or no leader hero.
@@ -48,8 +49,7 @@ public sealed record BattleSnapshot(
     int EnemyCasualties,
     IReadOnlyList<SettlementNotables> NearbyNotables,
     bool IsHideoutBattle,
-    string? PlayerFactionId,
-    string? PlayerCultureId,
+    SideIds Player,
     bool PlayerLeadsArmy,
     int VanillaThanksAmount);
 

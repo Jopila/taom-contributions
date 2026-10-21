@@ -136,9 +136,8 @@ public sealed class GoodDeedsService
     // the host (CoopInterop: ShouldDeferToHost also covers co-op mods TAOM cannot probe).
     private bool Suppressed => _server.IsDedicatedServer || _coop.ShouldDeferToHost;
 
-    private SidePairing PairOf(DeedSide player, DeedSide other) =>
-        GoodDeedsRules.Pair(_alignment.ResolveSide(player.KingdomId, player.CultureId),
-            _alignment.ResolveSide(other.KingdomId, other.CultureId));
+    private SidePairing PairOf(SideIds player, SideIds other) =>
+        GoodDeedsRules.Pair(_alignment.ResolveSide(player), _alignment.ResolveSide(other));
 
     // A dead hero, the player himself, and a grant that scales to nothing earn nothing; the settings clamp keeps an amount at 0
     // or more, so Good Deeds never costs relation.

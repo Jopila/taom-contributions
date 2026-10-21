@@ -65,8 +65,8 @@ public sealed class GoodDeedsHeroAdapter : IGoodDeedsHeroAdapter
                 return null;
 
             return new ReleaseFacts(
-                SideOf(Clan.PlayerClan?.MapFaction),
-                SideOf(lord.MapFaction),
+                FactionSides.OfPlayer(),
+                FactionSides.Of(lord.MapFaction),
                 lord.IsLord,
                 DeedHeroOf(player, lord),
                 lord.Spouse == null ? null : DeedHeroOf(player, lord.Spouse),
@@ -88,7 +88,7 @@ public sealed class GoodDeedsHeroAdapter : IGoodDeedsHeroAdapter
             if (hero == null || settlement == null)
                 return null;
 
-            return new DonationFacts(SideOf(hero.MapFaction), SideOf(settlement.OwnerClan?.MapFaction));
+            return new DonationFacts(FactionSides.Of(hero.MapFaction), FactionSides.Of(settlement.OwnerClan?.MapFaction));
         }
         catch (Exception ex)
         {
@@ -114,16 +114,16 @@ public sealed class GoodDeedsHeroAdapter : IGoodDeedsHeroAdapter
                 foreach (var notable in living)
                 {
                     if (notable != null)
-                        notables.Add(new DeedNotable(DeedHeroOf(player, notable), SideOf(notable.MapFaction)));
+                        notables.Add(new DeedNotable(DeedHeroOf(player, notable), FactionSides.Of(notable.MapFaction)));
                 }
             }
 
             return new TournamentFacts(
                 settlement.Name?.ToString() ?? string.Empty,
-                SideOf(Clan.PlayerClan?.MapFaction),
+                FactionSides.OfPlayer(),
                 owner != null && owner == Clan.PlayerClan,
                 owner?.Leader == null ? null : DeedHeroOf(player, owner.Leader),
-                SideOf(owner?.MapFaction),
+                FactionSides.Of(owner?.MapFaction),
                 notables);
         }
         catch (Exception ex)
@@ -132,9 +132,6 @@ public sealed class GoodDeedsHeroAdapter : IGoodDeedsHeroAdapter
             return null;
         }
     }
-
-    private static DeedSide SideOf(IFaction? faction) =>
-        faction == null ? DeedSide.None : new DeedSide(faction.StringId ?? string.Empty, faction.Culture?.StringId ?? string.Empty);
 
     /// <summary>
     /// The hero and the hero a change to him really moves. The player is never asked: the diplomacy model's pair rule is not

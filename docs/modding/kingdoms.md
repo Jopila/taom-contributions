@@ -207,7 +207,7 @@ Code: No code changes needed
 |---|---|---|---|
 | `diplomacy/diplomacy.json` | kingdom id pairs | no modifier for that pair | nothing, a typo is silent |
 | `diplomacy/war_of_the_ring.json` | kingdom ids in `wars` | that war is never declared | `WarOfTheRingShippedConfigTests` (days and the two phase-1 wars only) |
-| `execution/alignment.json` | kingdom id **or** culture id | `FactionSide.Neutral`, which mis-scores executions (`AlignmentService.cs:41`) | nothing |
+| `execution/alignment.json` | kingdom id, culture id **or** minor clan id | `FactionSide.Neutral`, which mis-scores executions (`AlignmentService.cs:41`) | `ShippedClanSideCoverageTests` (a kingdom's clans must not resolve Neutral outside the four Neutral realms) |
 | `configs/army_targeting.json` | kingdom id | neutral theater weighting | `WarTheaterConfigInvariantsTests`, which fails the build on a dead key or a missing kingdom |
 | `siege/siege_defense_config.json` | kingdom id | no bespoke siege message | nothing, and the 4 newest kingdoms are already absent |
 | `factionmap/factions.json` | a lore key, with `game_faction` naming a **culture** id | the region does not appear in character creation | `dotnet test TAOM.Tests --filter FactionMap` |
@@ -229,7 +229,7 @@ All measured 2026-09-05, from the repo at `bannerlord-1.4.5`.
 - **0** hits for `settlement_banner_mesh` or `flag_mesh` in the v1.4.8 managed decompile: `rg -l 'settlement_banner_mesh|flag_mesh' -g '*.cs' .` run in the decompile root. <!-- measured 2026-09-05 -->
 - **0** `.xsd` files under the game's `Modules` folder: `find . -name '*.xsd' | wc -l` run there. <!-- measured 2026-09-05 -->
 - **130** rows in `diplomacy.json` over **22** kingdom ids, split 61 `Hostile`, 38 `Permanent`, 24 `Natural`, 7 `Neutral`: `python -c "import json,collections;d=json.load(open('Main/_Module/ModuleData/diplomacy/diplomacy.json',encoding='utf-8-sig'))['relationships'];print(len(d),collections.Counter(r['tier'] for r in d))"` <!-- measured 2026-09-05 -->
-- **24** keys in `execution/alignment.json`, being the 22 kingdom ids plus the culture ids `gondor` and `mordor`: `python -c "import json;print(len(json.load(open('Main/_Module/ModuleData/execution/alignment.json',encoding='utf-8-sig'))))"` <!-- measured 2026-09-05 -->
+- **29** keys in `execution/alignment.json`, being the 23 kingdom ids plus the culture ids `gondor` and `mordor` and 4 minor clan ids: `python -c "import json;print(len(json.load(open('Main/_Module/ModuleData/execution/alignment.json',encoding='utf-8-sig'))))"` <!-- measured 2026-10-21 -->
 - **22** `KingdomTheaters` keys in `configs/army_targeting.json`, **18** `KingdomMessages` keys in `siege/siege_defense_config.json` (missing `goblin`, `mistymountainorcs`, `bluecraig`, `lindon`), **45** keys in `factionmap/factions.json`: `python -c "import json;print(len(json.load(open(<file>,encoding='utf-8-sig'))[<section>]))"` per file. <!-- measured 2026-09-05 -->
 - **14** `<relationship>` rows and **2** `<policy>` rows on the Erebor entry alone: `python -c "import xml.etree.ElementTree as ET;e=ET.parse('Main/_Module/ModuleData/taom_spkingdoms.xml').getroot()[0];print(len(e.find('relationships')),len(e.find('policies')))"` <!-- measured 2026-10-08 -->
 - **13** of the 14 `owner=` heroes are declared in `characters/heroes.xml`; Dol Guldur's `lord_1_48` is not, and is matched instead by `rg -n "lord_1_48" Main/_Module/ModuleData/heroes.xslt`. <!-- measured 2026-09-05 -->
