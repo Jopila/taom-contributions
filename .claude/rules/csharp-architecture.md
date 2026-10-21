@@ -30,6 +30,7 @@ HarmonyPatch / GameModel / CampaignBehavior   ← THIN (<150 lines, no logic)
 | Constructor injection only | No service locator in services |
 | Convert at boundary | Adapt sealed types in the entry point, not deep in services |
 | `?.` for computed properties | TaleWorlds getters crash before your null check — see `adapters.md` |
+| Writers before gates | An engine flag or stat a plan or gate relies on lists every writer, vanilla first, with citations (`lessons/adapters-taleworlds-api.md`, Hammerhand) |
 
 ## IoC Lifetimes
 
