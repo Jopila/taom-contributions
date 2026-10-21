@@ -1484,7 +1484,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Map UI/Hidden Hosts", GroupOrder = 42)]
     [SettingPropertyBool("Hide Exact Troop Counts", Order = 0, RequireRestart = false,
-        HintText = "Another party's troop count on the campaign map blurs with its distance from you: '1??', '12?', then exact as you close in, and '...' at the very edge of sight. Standing closer, a higher Scouting skill and hosts of your own realm all sharpen it. Wounded and prisoner counts show only when the count is exact. A count you read stays remembered with a '~' and fades by the hour, and reading an enemy host's count from afar trains your scout's Scouting; Off stops both. AI lords still see true numbers. Off = vanilla counts. Applies immediately. Default: on.")]
+        HintText = "Another party's troop count on the campaign map blurs with its distance from you: '1??', '12?', then exact as you close in, and '...' at the very edge of sight. Standing closer, a higher Scouting skill and hosts of your own realm all sharpen it. Wounded and prisoner counts show only when the count is exact. A count you read stays remembered with a '~' and fades by the hour, and reading an enemy host's count from afar trains your scout's Scouting; Off stops both. AI lords still see true numbers. A host's orders in its hover tooltip stay hidden until its count is exact. Off = vanilla counts and orders. Applies immediately. Default: on.")]
     public bool HiddenHostsEnabled { get; set; } = true;
 
     // --- Kingdom Politics / Fief Grants ---

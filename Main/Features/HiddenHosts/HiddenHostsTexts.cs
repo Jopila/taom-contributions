@@ -6,13 +6,19 @@ using TaleWorlds.Localization;
 namespace TAOM.Features.HiddenHosts;
 
 /// <summary>
-/// The player-facing text of Hidden Hosts' nameplates and tooltips (#846): "Unknown party", the age of a remembered count, and
+/// The player-facing text of Hidden Hosts' nameplates and tooltips (#846): "Unknown party", "Orders unknown." (#848), the age of a remembered count, and
 /// the two engine labels the tooltip patches find their rows by. The popups' text lives with their adapter.
 /// </summary>
 internal static class HiddenHostsTexts
 {
     private static string? _unknownParty;
     private static string? _unknownPartyLanguage;
+
+    /// <summary>
+    /// The line a hidden party's orders become in a tooltip (#848). Fresh per call: a caller may SetTextVariable the result;
+    /// read once per tooltip build.
+    /// </summary>
+    internal static TextObject OrdersUnknown() => new TextObject("{=taom_hhost_orders_unknown}Orders unknown.");
 
     /// <summary>
     /// The label vanilla gives a settlement tooltip's defenders row (the game text <c>str_map_tooltip_defenders</c>, the same

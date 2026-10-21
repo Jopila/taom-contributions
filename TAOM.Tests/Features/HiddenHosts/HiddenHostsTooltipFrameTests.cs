@@ -60,6 +60,25 @@ public class HiddenHostsTooltipFrameTests
     }
 
     [TestMethod]
+    public void HidesOrders_OnlyAPartyOrArmyWhoseVerdictIsNotVanilla_WithOrWithoutAMemory()
+    {
+        foreach (var kind in Kinds)
+            foreach (var mode in Modes)
+                foreach (var memory in new string?[] { null, "~123" })
+                    Assert.AreEqual(IsPartyOrArmy(kind) && mode != TooltipMode.Vanilla, Frame(kind, mode, memory).HidesOrders,
+                        kind + "/" + mode + "/" + memory);
+    }
+
+    [TestMethod]
+    public void HidesOrders_ANamedHorizonHost_StillHidesThem()
+    {
+        var named = new TooltipFrame(TooltipSubjectKind.Party, new TooltipVerdict(TooltipMode.Horizon, 0.1f, 1f, 0, 123, null, 5, named: true));
+
+        Assert.IsTrue(named.Verdict.Named);
+        Assert.IsTrue(named.HidesOrders, "the scout names the host, not its orders");
+    }
+
+    [TestMethod]
     public void RewritesDefenders_OnlyASettlementThatIsNotVanilla()
     {
         foreach (var kind in Kinds)

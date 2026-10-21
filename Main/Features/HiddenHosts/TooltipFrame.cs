@@ -57,6 +57,12 @@ internal sealed class TooltipFrame
     /// <summary>Masked or at the horizon: the rows below a troops title are removed.</summary>
     internal bool TrimsTroopRows => Verdict.Mode != TooltipMode.Vanilla;
 
+    /// <summary>
+    /// A party or army tooltip whose count is not read in full (masked, or at the horizon even when the scout named the host) hides
+    /// the party's orders (#848): they are live, and a remembered "~" count or a name is not a live reading.
+    /// </summary>
+    internal bool HidesOrders => IsPartyOrArmy && Verdict.Mode != TooltipMode.Vanilla;
+
     /// <summary>A settlement's defenders row is looked for whenever the verdict is not vanilla.</summary>
     internal bool RewritesDefenders => Kind == TooltipSubjectKind.Settlement && Verdict.Mode != TooltipMode.Vanilla;
 

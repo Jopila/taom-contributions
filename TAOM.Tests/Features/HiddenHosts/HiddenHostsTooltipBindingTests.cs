@@ -33,6 +33,7 @@ public class HiddenHostsTooltipBindingTests
     private static bool _gameLoaded;
     private static Dictionary<string, SortedSet<string>>? _callers;
     private static int _scannedAssemblies;
+    private static HashSet<string> _scannedNames = new();
 
     [ClassInitialize]
     public static void Init(Microsoft.VisualStudio.TestTools.UnitTesting.TestContext _) => _gameLoaded = GameAssemblies.EnsureLoaded();
@@ -90,6 +91,8 @@ public class HiddenHostsTooltipBindingTests
             ["GetPartyNameplateText(MobileParty,bool)"] = new(),
             ["GetPartyNameplateText(PartyBase)"] = new(),
             ["GetArmyManCountTooltip"] = new(),
+            ["CampaignUIHelper.GetMobilePartyBehaviorText"] = new(),
+            ["MobileParty.GetBehaviorText"] = new(),
         };
 
         var assemblies = new List<Assembly>();
@@ -104,6 +107,7 @@ public class HiddenHostsTooltipBindingTests
             if (found != null) assemblies.Add(found);
         }
         _scannedAssemblies = assemblies.Count;
+        _scannedNames = assemblies.Select(a => a.GetName().Name!).ToHashSet();
 
         foreach (var assembly in assemblies)
         foreach (var method in IlCallScanner.EnumerateMethods(assembly))
@@ -121,6 +125,10 @@ public class HiddenHostsTooltipBindingTests
                     key = "TooltipProperty.RefreshValue";
                 else if (called.Name == "GetArmyManCountTooltip" && owner?.Name == "CampaignUIHelper")
                     key = "GetArmyManCountTooltip";
+                else if (called.Name == "GetMobilePartyBehaviorText" && owner?.Name == "CampaignUIHelper")
+                    key = "CampaignUIHelper.GetMobilePartyBehaviorText";
+                else if (called.Name == "GetBehaviorText" && owner?.Name == "MobileParty")
+                    key = "MobileParty.GetBehaviorText";
                 else if (called.Name == "GetPartyNameplateText" && owner?.Name == "CampaignUIHelper")
                 {
                     var p = called.GetParameters();
@@ -305,6 +313,64 @@ public class HiddenHostsTooltipBindingTests
             "a new caller of the PartyBase overload: " + string.Join(", ", callers["GetPartyNameplateText(PartyBase)"]));
         Assert.IsTrue(callers["GetArmyManCountTooltip"].All(c => c.StartsWith("ArmyMenuOverlayVM.")),
             "a new caller of GetArmyManCountTooltip: " + string.Join(", ", callers["GetArmyManCountTooltip"]));
+    }
+
+    // ---- Orders (#848): the postfix target, the wrapper over it and the two tooltip call sites
+
+    private static Type CampaignUiHelper => Named("TaleWorlds.CampaignSystem.ViewModelCollection.CampaignUIHelper");
+
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    public void GetBehaviorText_IsPublicInstanceParameterlessAndReturnsATextObject()
+    {
+        RequireGame();
+        var methods = Named("TaleWorlds.CampaignSystem.Party.MobileParty").GetMethods(AllMembers).Where(m => m.Name == "GetBehaviorText").ToList();
+
+        Assert.AreEqual(1, methods.Count, "Harmony resolves the target by name alone");
+        Assert.IsFalse(methods[0].IsStatic);
+        Assert.AreEqual(0, methods[0].GetParameters().Length);
+        Assert.AreEqual("TextObject", methods[0].ReturnType.Name, "the postfix binds ref TextObject __result");
+        Assert.IsFalse(methods[0].IsVirtual, "a non-virtual target: one detour covers every caller");
+    }
+
+    [DataTestMethod]
+    [DataRow("RefreshMobilePartyTooltip")]
+    [DataRow("RefreshArmyTooltip")]
+    [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
+    public void PartyAndArmyBuilders_PrintTheOrdersThroughTheWrapper_AsAPlainStringRow(string builder)
+    {
+        RequireGame();
+        var il = Il(Method(Refresher, builder));
+
+        Assert.AreEqual(1, il.Count(ci => ci.operand is MethodBase m && m.Name == "GetMobilePartyBehaviorText"),
+            builder + " reads the orders through the wrapper exactly once, inside its frame");
+        int wrapperCall = il.FindIndex(ci => ci.operand is MethodBase m && m.Name == "GetMobilePartyBehaviorText");
+        var add = il.Skip(wrapperCall).Select(ci => ci.operand).OfType<MethodBase>().First(m => m.Name == "AddProperty");
+        CollectionAssert.AreEqual(new[] { "String", "String", "Int32" }, add.GetParameters().Take(3).Select(p => p.ParameterType.Name).ToArray(),
+            "a plain string row: the periodic refresh never re-evaluates it, so the orders are fixed per build");
+    }
+
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
+    public void BehaviorText_IsReadOnlyByTheWrapper_AndTheTownPatrolTooltip_InTheViewModelCollection_AndNeverBySandBoxUi()
+    {
+        RequireGame();
+        var callers = Callers();
+        var wrapperCallers = callers["CampaignUIHelper.GetMobilePartyBehaviorText"];
+        var innerCallers = callers["MobileParty.GetBehaviorText"];
+
+        Assert.IsTrue(_scannedAssemblies >= 8, "the scan covered " + _scannedAssemblies + " assemblies");
+        CollectionAssert.IsSubsetOf(new[] { "TaleWorlds.CampaignSystem.ViewModelCollection", "SandBox.ViewModelCollection", "SandBox.View" },
+            _scannedNames.ToList(), "the 'never by SandBox UI' claim needs those assemblies actually scanned");
+        CollectionAssert.AreEqual(new[]
+        {
+            "GameMenuPartyItemVM.GetPartyDescriptionTextFromValues", "TooltipRefresherCollection.RefreshArmyTooltip",
+            "TooltipRefresherCollection.RefreshMobilePartyTooltip",
+        }, wrapperCallers.ToList(), "a new caller of the wrapper runs in no frame unless it is a tooltip build");
+        CollectionAssert.AreEqual(new[] { "CampaignUIHelper.GetMobilePartyBehaviorText", "CampaignUIHelper.GetTownPatrolTooltip" },
+            innerCallers.ToList(), "a new direct caller of GetBehaviorText");
     }
 
     // ---- The number helper and the registration

@@ -1255,4 +1255,77 @@ public class HiddenHostsTooltipHookTests
         Assert.AreEqual(TooltipSubjectKind.Party, party.Kind);
         Assert.IsNull(party.Verdict.MemoryText);
     }
+
+    // ---- Orders (#848): MobileParty_GetBehaviorText_HiddenHosts_Patch
+
+    private static readonly TextObject Vanilla = new TextObject("{=!}Besieging X.");
+
+    private static TextObject Orders()
+    {
+        var result = Vanilla;
+        MobileParty_GetBehaviorText_HiddenHosts_Patch.Postfix(ref result);
+        return result;
+    }
+
+    [TestMethod]
+    public void Orders_APartyOrArmyFrameThatIsNotVanilla_ReplacesTheText()
+    {
+        foreach (var kind in new[] { TooltipSubjectKind.Party, TooltipSubjectKind.Army })
+            foreach (var mode in new[] { TooltipMode.Masked, TooltipMode.Horizon })
+            {
+                OpenFrame(kind, mode);
+
+                Assert.AreEqual("Orders unknown.", Orders().ToString(), kind + "/" + mode);
+            }
+    }
+
+    [TestMethod]
+    public void Orders_ANamedHorizonHost_ReplacesTheText()
+    {
+        HiddenHostsTooltipScope.Open(new TooltipFrame(TooltipSubjectKind.Party, new TooltipVerdict(TooltipMode.Horizon, 0.95f, 1f, 0, 123, null, 0, named: true)));
+
+        Assert.AreEqual("Orders unknown.", Orders().ToString());
+    }
+
+    [TestMethod]
+    public void Orders_NoFrame_AVanillaFrame_ASettlementFrameAndAMapEventFrame_KeepTheOriginal()
+    {
+        Assert.AreSame(Vanilla, Orders(), "no frame");
+        OpenFrame(TooltipSubjectKind.Party, TooltipMode.Vanilla);
+        Assert.AreSame(Vanilla, Orders(), "a vanilla frame");
+        OpenFrame(TooltipSubjectKind.Settlement, TooltipMode.Masked);
+        Assert.AreSame(Vanilla, Orders(), "a settlement frame");
+        OpenFrame(TooltipSubjectKind.MapEvent, TooltipMode.Horizon);
+        Assert.AreSame(Vanilla, Orders(), "a map event frame");
+    }
+
+    [TestMethod]
+    public void Orders_TheFaultBudgetSpent_KeepsTheOriginal()
+    {
+        OpenFrame(TooltipSubjectKind.Party, TooltipMode.Masked);
+        for (int i = 0; i < HiddenHostsCalls.FaultBudget; i++)
+            HiddenHostsCalls.ReportFault("elsewhere", new InvalidOperationException());
+
+        Assert.AreSame(Vanilla, Orders());
+    }
+
+    [TestMethod]
+    public void Orders_ThroughTheRealFrameOpener_AFarPartyHides_ANearPartyAndToggleOffDoNot()
+    {
+        var party = Bare<MobileParty>();
+        SeesParty(Party(123, 0.7f));
+        var token = HiddenHostsTooltipFrames.Open(party, "hook");
+        Assert.AreEqual("Orders unknown.", Orders().ToString(), "a far party: masked count, hidden orders");
+        HiddenHostsTooltipScope.Close(in token);
+
+        SeesParty(Party(123, 0.1f));
+        token = HiddenHostsTooltipFrames.Open(party, "hook");
+        Assert.AreSame(Vanilla, Orders(), "close enough to read the count in full");
+        HiddenHostsTooltipScope.Close(in token);
+
+        SeesParty(Party(123, 0.7f));
+        _settings.Enabled.Returns(false);
+        token = HiddenHostsTooltipFrames.Open(party, "hook");
+        Assert.AreSame(Vanilla, Orders(), "toggle off: no frame");
+    }
 }

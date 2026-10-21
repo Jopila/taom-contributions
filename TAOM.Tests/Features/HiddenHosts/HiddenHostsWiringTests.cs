@@ -245,6 +245,7 @@ public class HiddenHostsWiringTests
         "TooltipRefresherCollection_AddEncounterParties_HiddenHosts_Patch",
         "PartyBaseHelper_GetPartySizeText_HiddenHosts_Patch",
         "CampaignUIHelper_GetPartyNameplateText_HiddenHosts_Patch",
+        "MobileParty_GetBehaviorText_HiddenHosts_Patch",
     };
 
     [TestMethod]

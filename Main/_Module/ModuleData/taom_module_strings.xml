@@ -3324,6 +3324,7 @@
 	<string id="taom_hhost_hint_title" text="{=taom_hhost_hint_title}Hidden Hosts" />
 	<string id="taom_hhost_memory_hint_body" text="{=taom_hhost_memory_hint_body}A count such as {MEMORY_EXAMPLE} is remembered from an earlier sighting, not read now. Remembered counts lose digits as the hours pass, more slowly with a better scout; hover the host to see how long ago it was counted. A host you meet, speak with or share a settlement with is counted exactly. Reading an enemy host's count from afar trains your scout's Scouting." />
 	<string id="taom_hhost_memory_hint_title" text="{=taom_hhost_memory_hint_title}Remembered Hosts" />
+	<string id="taom_hhost_orders_unknown" text="{=taom_hhost_orders_unknown}Orders unknown." />
 	<string id="taom_hhost_unknown_party" text="{=taom_hhost_unknown_party}Unknown party" />
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
 	<!-- HardQuestionsActionAdapter -->
