@@ -2180,3 +2180,9 @@ every day.
   spawn), read its row in the live `TAOM_Map/ModuleData/settlements.xml` and land a `LiveInstall` test that the
   config's ids resolve (`NamedCompanionShippedDataTests`).
 - **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 1.
+
+### Taking a mechanic away from a cloned culture strands the career passives it cloned with it (#963, 2026-10-21)
+Arthedain was cloned from Gondor, and its troops were then exempted from special-resource costs. The Knight of Arthedain pick `knight_of_arthedain_t3_a_p4` (-10% special-resource upgrade cost) is a verbatim clone of Gondor's `knight_of_belfalas_t3_a_p4`, so after the exemption it discounts no troop of its own tree.
+- **Why missed:** the plan traced every reader of the cost rows (`GetTroopCost` and its callers) and stopped there. A career passive does not read the row; it modifies the mechanic the row feeds, so a search for readers cannot find it.
+- **Prevent:** when a change removes or exempts a culture from a mechanic, grep that culture's choices in `career_system/taom_career_choices.xml` for every `PassiveEffect type` that modifies the mechanic (`SpecialResourceUpgradeCostModifier` and its siblings), and put each hit to Mike: keep it and say what it still does, or replace it. `tools/insert_new_faction_careers.py` skips a culture that already exists, so the fix is a hand edit.
+- **Source:** [rca-arthedain-special-resource-costs-2026-10-21.md](../rca-arthedain-special-resource-costs-2026-10-21.md) finding 3.

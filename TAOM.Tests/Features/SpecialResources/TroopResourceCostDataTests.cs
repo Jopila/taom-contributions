@@ -100,6 +100,26 @@ public class TroopResourceCostDataTests
     }
 
     /// <summary>
+    /// Arthedain troops cost no special resource (Mike, 2026-10-21, #963). Its four elites were priced
+    /// on Gondor's Castar band when the realm was cloned (2026-10-07). Any row for a troop in
+    /// <c>troops_arthedain.xml</c> fails here, an Elite Emissary price included, so no cost, gate or
+    /// badge can return.
+    /// </summary>
+    [TestMethod]
+    public void NoArthedainTroop_CarriesASpecialResourceCost()
+    {
+        var troopsPath = Path.Combine(CultureDataFixture.ModuleDataPath(), "troops", "troops_arthedain.xml");
+        var troops = new HashSet<string>(XDocument.Load(troopsPath).Root.Elements("NPCCharacter")
+            .Select(c => (string)c.Attribute("id")));
+        Assert.IsTrue(troops.Count > 0, "troops_arthedain.xml has no troop");
+
+        var costed = CostRows().Where(r => troops.Contains(r.TroopId)).Select(r => r.TroopId).ToList();
+
+        Assert.AreEqual(0, costed.Count,
+            "Arthedain troops with a troop_resource_costs.xml row: " + string.Join(", ", costed));
+    }
+
+    /// <summary>
     /// The Black Numenorean rows shipped at 1.0 to 3.0 a day, ten to twenty times every other tree
     /// troop, and forty of them drained a top battle payout every day (#558). The tree-troop band
     /// tops out at 0.4 (Gondor L51); only the creatures sit above it by design: the elephant, the mumak, the
