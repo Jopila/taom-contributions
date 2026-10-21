@@ -1,6 +1,7 @@
 using TaleWorlds.CampaignSystem.Encounters;
 using TaleWorlds.CampaignSystem.Party;
 using TAOM.Adapters;
+using TAOM.Features.CoopInterop;
 
 namespace TAOM.Features.FieldCamp.UI;
 
@@ -11,6 +12,13 @@ namespace TAOM.Features.FieldCamp.UI;
 /// </summary>
 public sealed class MapScreenCampMenuActivationQuery : ICampMenuActivationQuery
 {
+    private readonly ICoopSessionProvider _coopSession;
+
+    public MapScreenCampMenuActivationQuery(ICoopSessionProvider coopSession)
+    {
+        _coopSession = coopSession;
+    }
+
     // The one map-menu gate (F6 and the Fiefs button use it too): opening the camp menu under any modal
     // would push a menu context into UI that is not expecting one, the class of bug Codex review #38b
     // caught for F6.
@@ -25,4 +33,7 @@ public sealed class MapScreenCampMenuActivationQuery : ICampMenuActivationQuery
         MobileParty.MainParty?.MapEvent != null || PlayerEncounter.Current != null;
 
     public bool IsMainPartyDisorganized => MobileParty.MainParty?.IsDisorganized == true;
+
+    // Only a guest defers: a player-hosted co-op host and a solo player keep the camp.
+    public bool DefersToCoopHost => _coopSession.ShouldDeferToHost;
 }

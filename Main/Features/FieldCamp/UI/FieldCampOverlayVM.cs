@@ -173,7 +173,7 @@ public sealed class FieldCampOverlayVM : ViewModel
     public void Refresh()
     {
         // FIX over source: the master toggle hides the button (the source hardcoded true).
-        ShowCampButton = _settings.Enabled;
+        ShowCampButton = _settings.Enabled && !_activation.DefersToCoopHost;
         CanMakeCamp = _settings.Enabled && MayOpenCampMenu();
 
         var camp = _camps.PlayerCamp;
@@ -221,7 +221,8 @@ public sealed class FieldCampOverlayVM : ViewModel
 
     private bool MayOpenCampMenu()
     {
-        return _activation.IsMapScreenClear
+        return !_activation.DefersToCoopHost
+            && _activation.IsMapScreenClear
             && _activation.IsMainPartyStationary
             && !_activation.IsMainPartyInSettlement
             && !_activation.IsMainPartyInEncounter

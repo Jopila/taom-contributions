@@ -5,6 +5,7 @@ using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Core;
 using TAOM.Core.Logging;
+using TAOM.Features.CoopInterop;
 using TAOM.Features.WarOfTheRingMomentum.Snapshots;
 
 namespace TAOM.Adapters;
@@ -22,15 +23,18 @@ public class WarEventSnapshotAdapter : IWarEventSnapshotAdapter
     private readonly IPlayerContextAdapter _playerContext;
     private readonly Features.Enlistment.IEnlistmentStateQuery _enlistment;
     private readonly IModLogger _logger;
+    private readonly IPlayerControlQuery _playerControl;
 
     public WarEventSnapshotAdapter(
         IPlayerContextAdapter playerContext,
         Features.Enlistment.IEnlistmentStateQuery enlistment,
-        IModLogger logger)
+        IModLogger logger,
+        IPlayerControlQuery playerControl)
     {
         _playerContext = playerContext;
         _enlistment = enlistment;
         _logger = logger;
+        _playerControl = playerControl;
     }
 
     public BattleOutcomeSnapshot FromMapEvent(MapEvent mapEvent)
@@ -63,7 +67,9 @@ public class WarEventSnapshotAdapter : IWarEventSnapshotAdapter
                                     || mapEvent.EventType == MapEvent.BattleTypes.SiegeOutside,
                 PlayerInvolved = mapEvent.IsPlayerMapEvent
                                  || IsPlayerRelated(attackerParty, playerKingdomId)
-                                 || IsPlayerRelated(defenderParty, playerKingdomId),
+                                 || IsPlayerRelated(defenderParty, playerKingdomId)
+                                 || HasPlayerParty(mapEvent.AttackerSide)
+                                 || HasPlayerParty(mapEvent.DefenderSide),
                 AttackerFactionName = attackerFaction?.Name?.ToString() ?? "",
                 DefenderFactionName = defenderFaction?.Name?.ToString() ?? "",
                 AttackerLeaderName = LeaderName(attackerParty),
@@ -149,14 +155,48 @@ public class WarEventSnapshotAdapter : IWarEventSnapshotAdapter
     // PartyBase.Owner is a BANNED throwing computed getter (PartyOwnerGetterBanTests,
     // crash 0b462fd8) — the owner hero resolves via MobileParty?.Owner instead, which
     // also matches LOTRAOM's semantics (its leader parties are mobile parties).
-    private static bool IsPlayerRelated(PartyBase party, string playerKingdomId)
+    //
+    // Under co-op the world meter is shared, so a remote player's party and a kingdom holding any
+    // player's clan count as the player's side too. Without a session OfParty and OfClan reduce to the
+    // local-player comparison, so singleplayer is unchanged.
+    private bool IsPlayerRelated(PartyBase party, string playerKingdomId)
     {
-        if (party?.MobileParty?.IsMainParty == true)
-            return true;
+        var mobile = party?.MobileParty;
+        var sameKingdom = mobile?.Owner != null
+                          && ((!string.IsNullOrEmpty(playerKingdomId) && party.MapFaction?.StringId == playerKingdomId)
+                              || KingdomHoldsPlayerClan(party.MapFaction));
+        return IsPlayerRelated(mobile?.IsMainParty == true, _playerControl.OfParty(mobile), sameKingdom);
+    }
 
-        return party?.MobileParty?.Owner != null
-               && !string.IsNullOrEmpty(playerKingdomId)
-               && party.MapFaction?.StringId == playerKingdomId;
+    // Unknown (registry unreadable) is NOT involved: a guess would let a stranger's wars move the meter.
+    internal static bool IsPlayerRelated(bool isMainParty, PlayerControl partyControl, bool sameKingdom)
+        => isMainParty || partyControl == PlayerControl.Player || sameKingdom;
+
+    private bool KingdomHoldsPlayerClan(IFaction faction)
+    {
+        if (faction is not Kingdom kingdom)
+            return false;
+
+        foreach (var clan in kingdom.Clans)
+        {
+            if (_playerControl.OfClan(clan) == PlayerControl.Player)
+                return true;
+        }
+        return false;
+    }
+
+    private bool HasPlayerParty(MapEventSide side)
+    {
+        var parties = side?.Parties;
+        if (parties == null)
+            return false;
+
+        foreach (var mapEventParty in parties)
+        {
+            if (_playerControl.OfParty(mapEventParty?.Party?.MobileParty) == PlayerControl.Player)
+                return true;
+        }
+        return false;
     }
 
     private static string LeaderName(PartyBase party)

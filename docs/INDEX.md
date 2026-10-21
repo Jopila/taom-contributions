@@ -220,7 +220,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 
 TAOM ships no multiplayer of its own; these cover behaving correctly when a third-party co-op mod (BannerlordCoop, Bannerlord Together) or a Bannerlord dedicated server is driving the campaign.
 
-- [coop-interop](features/coop-interop.md) — the detection + authority seam every other feature gates on: presence (a co-op module is loaded) vs session authority (`IsAuthority` / `ShouldDeferToHost`) vs dedicated server (which binaries folder we loaded from) are three different questions; also assembly resolution, load order, client-side object creation, and why PatchShield skips install under co-op
+- [coop-interop](features/coop-interop.md): the detection + authority seam every other feature gates on: presence (a co-op module is loaded) vs session authority (`IsAuthority` / `ShouldDeferToHost`) vs dedicated server (which binaries folder we loaded from) vs whether a given party or clan is a human player's (`IPlayerControlQuery`) are four different questions; also assembly resolution, load order, client-side object creation, and why PatchShield skips install under co-op
 - [player-possession](features/player-possession.md) — every co-op base discards the character-creation hero at the join hand-off, so TAOM's CC grants (race, culture gold, career, resource seed) all landed on a hero about to be thrown away; re-applies them to the hero the player actually controls, detected from `Hero.MainHero.StringId` alone so no co-op assembly is referenced
 - [bannerlord-together-compat](features/bannerlord-together-compat.md) — multiplayer mod compat surface
 

@@ -24,4 +24,8 @@ public interface ICampMenuActivationQuery
     bool IsMainPartyInEncounter { get; }
 
     bool IsMainPartyDisorganized { get; }
+
+    /// <summary>A co-op guest: the host owns the shared world, so the camp button is hidden and
+    /// the menu stays closed (see <c>ICoopSessionProvider.ShouldDeferToHost</c>).</summary>
+    bool DefersToCoopHost { get; }
 }

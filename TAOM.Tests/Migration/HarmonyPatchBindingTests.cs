@@ -27,6 +27,12 @@ public class HarmonyPatchBindingTests
     private const BindingFlags StaticParameterless =
         BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
+    // Patches whose target lives in another mod (BannerlordCoop), so it is absent from this test host.
+    private static readonly HashSet<Type> ThirdPartyTargetPatches = new HashSet<Type>
+    {
+        typeof(TAOM.Features.CoopInterop.Hooks.CoopRecruitAttributionPatch),
+    };
+
     private static bool _gameLoaded;
 
     [ClassInitialize]
@@ -105,6 +111,16 @@ public class HarmonyPatchBindingTests
 
     private static (bool ok, string detail) ResolveTarget(Type patchType)
     {
+        // 0. Only a patch on a third-party type (absent here) may opt out through Prepare(): Harmony skips
+        //    it the same way. Every other patch falls through to the resolution checks below, so a
+        //    Prepare() that returns false cannot hide a broken TaleWorlds binding.
+        if (ThirdPartyTargetPatches.Contains(patchType))
+        {
+            var prepare = patchType.GetMethod("Prepare", StaticParameterless, null, Type.EmptyTypes, null);
+            if (prepare != null && prepare.ReturnType == typeof(bool) && prepare.Invoke(null, null) is false)
+                return (true, "third-party target absent: Prepare() skips the patch");
+        }
+
         // 1. TargetMethods() — multi-target patches.
         var tms = patchType.GetMethod("TargetMethods", StaticParameterless, null, Type.EmptyTypes, null);
         if (tms != null)

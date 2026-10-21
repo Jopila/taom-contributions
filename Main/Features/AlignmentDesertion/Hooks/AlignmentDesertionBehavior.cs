@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Party;
@@ -6,7 +5,9 @@ using TaleWorlds.CampaignSystem.Roster;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Core;
 using TaleWorlds.Localization;
+using TAOM.Adapters;
 using TAOM.Core.Logging;
+using TAOM.Features.CoopInterop;
 
 namespace TAOM.Features.AlignmentDesertion.Hooks;
 
@@ -22,11 +23,14 @@ public class AlignmentDesertionBehavior : CampaignBehaviorBase
 {
     private readonly IAlignmentDesertionService _service;
     private readonly IModLogger _logger;
+    private readonly IPlayerControlQuery _playerControl;
 
-    public AlignmentDesertionBehavior(IAlignmentDesertionService service, IModLogger logger)
+    public AlignmentDesertionBehavior(
+        IAlignmentDesertionService service, IModLogger logger, IPlayerControlQuery playerControl)
     {
         _service = service;
         _logger = logger;
+        _playerControl = playerControl;
     }
 
     public override void RegisterEvents()
@@ -58,7 +62,10 @@ public class AlignmentDesertionBehavior : CampaignBehaviorBase
         if (kingdom == null)
             return;
 
-        ApplyDesertion(party.MemberRoster, kingdom.StringId, clan == Clan.PlayerClan,
+        if (!TryResolveOwner(clan, out var isPlayerOwned))
+            return;
+
+        ApplyDesertion(party.MemberRoster, kingdom.StringId, isPlayerOwned,
             isGarrison: false, showPlayerPopup: party == MobileParty.MainParty);
     }
 
@@ -76,9 +83,21 @@ public class AlignmentDesertionBehavior : CampaignBehaviorBase
         if (kingdom == null)
             return;
 
+        if (!TryResolveOwner(clan, out var isPlayerOwned))
+            return;
+
         // Garrison desertion is silent (no per-settlement popup spam); it's logged below.
-        ApplyDesertion(garrison.MemberRoster, kingdom.StringId, clan == Clan.PlayerClan,
+        ApplyDesertion(garrison.MemberRoster, kingdom.StringId, isPlayerOwned,
             isGarrison: true, showPlayerPopup: false);
+    }
+
+    // A remote co-op player's clan (never Clan.PlayerClan here) and an owner the registry cannot classify lose
+    // no troops to desertion; this peer's own clan follows "Apply To Player" and an AI clan "Apply To AI Lords".
+    private bool TryResolveOwner(Clan clan, out bool isPlayerOwned)
+    {
+        var owner = _playerControl.OfClan(clan);
+        isPlayerOwned = DesertionOwnerPolicy.IsPlayerOwned(owner);
+        return !DesertionOwnerPolicy.ShouldSkip(owner, clan == Clan.PlayerClan);
     }
 
     private void ApplyDesertion(TroopRoster roster, string kingdomId, bool isPlayerOwned, bool isGarrison, bool showPlayerPopup)
@@ -109,23 +128,7 @@ public class AlignmentDesertionBehavior : CampaignBehaviorBase
 
         var total = 0;
         foreach (var entry in desertions)
-        {
-            var character = CharacterObject.Find(entry.TroopId);
-            if (character == null)
-                continue;
-
-            var index = roster.FindIndexOfTroop(character);
-            if (index < 0)
-                continue;
-
-            var current = roster.GetElementNumber(index);
-            var toRemove = Math.Min(entry.DesertCount, current);
-            if (toRemove <= 0)
-                continue;
-
-            roster.AddToCounts(character, -toRemove);
-            total += toRemove;
-        }
+            total += TroopRosterRemoval.RemoveUpTo(roster, entry.TroopId, entry.DesertCount);
 
         if (total <= 0)
             return;

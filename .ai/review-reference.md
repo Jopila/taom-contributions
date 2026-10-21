@@ -42,6 +42,10 @@ VERDICT: CLEAN / ISSUES FOUND
 ### Lessons From Prior Reviews (87 reviews, 193+ bugs found), distilled
 
 **What Codex does especially well (2026-09-01 memory-diagnostics review: 4/4 HIGH real, 0 false positives).**
+- **Weighs a path the lenses only listed** (2026-10-21, co-op player attribution, 3 of 3 real): the Claude lenses
+  had tabled co-op's prisoner recruit replacement as pre-existing; Codex quoted the replacement handler and the
+  config row and raised it with its cost (2,000 per Mumakil rider). It also confirmed an id format in the installed
+  binary before claiming it. For an event listener, ask which of the engine's raisers another mod replaces.
 - **Reproduces the engine's own merge on the live file, and follows a shared callback to every caller** (2026-10-18,
   animation variety, 3 of 3 findings real): it re-created the engine's `MergeElements` duplicate handling in memory
   (`Module.cs:1472` folds a repeated `action_set` into its first definition) against the live `action_sets.xml` and
@@ -200,6 +204,10 @@ an area with prior history. Convention: add each new essay to the top of the tra
 archive the 6th-oldest, harvest durable patterns into `docs/reviews/lessons/<category>.md`.
 
 **Look harder here — what a scoped per-feature pass structurally misses (Codex's edge):**
+- **What a flag does in its consumer** (2026-10-21, co-op player attribution: a Codex miss the Completeness lens
+  caught). Codex classed "Unknown counts as player-owned" as a decision cost; the service uses that flag only to
+  choose an MCM toggle, both default on, so nothing was protected. When a change sets a flag to get an outcome, ask
+  the reviewer to quote the consumer lines that produce it under the default settings.
 - **Semantic correctness of a SAMPLE from an engine collection.** `GetFirstUnit()` / `[0]` / `.First()` is a sample, not the owner — correct only while the collection is homogeneous. Ask "what if this is MIXED?" (culture / faction / tier).
 - **Cross-feature contention for one engine decision.** A blanket `return false` Prefix is a silent monopoly on that decision; every later feature relying on the vanilla path breaks with no error. Grep every TAOM Prefix on the contended engine method.
 - **Trace a crash INTO the `base.X()` an override calls** — the base runs vanilla code on the same (possibly degenerate) inputs the override accepts; decompile the base, don't stop at the `Main/` boundary.

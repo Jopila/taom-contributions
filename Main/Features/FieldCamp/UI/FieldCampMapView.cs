@@ -3,6 +3,7 @@ using SandBox.View.Map;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.Library;
 using TAOM.Adapters;
+using TAOM.Features.CoopInterop;
 using TAOM.Features.FieldCamp.Hooks;
 
 namespace TAOM.Features.FieldCamp.UI;
@@ -39,7 +40,7 @@ public class FieldCampMapView : MapView
             IoC.Resolve<ICampService>(),
             IoC.Resolve<ICampSettingsProvider>(),
             IoC.Resolve<IGameMenuAdapter>(),
-            new MapScreenCampMenuActivationQuery(),
+            new MapScreenCampMenuActivationQuery(IoC.Resolve<ICoopSessionProvider>()),
             IoC.ResolveAll<ICampOverlayContributor>().ToList(),
             camp => camp.BuildProgress());
         _vm.Refresh();

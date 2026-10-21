@@ -2071,3 +2071,12 @@ around it claimed more than any check provided.
   assembly loaded). A guarantee with no such assertion is reworded or gets one. A checklist line names the vanilla
   condition under which the thing it checks is shown at all, and which screen each caller opens.
 - **Source:** `docs/reviews/rca-hidden-orders-2026-10-20.md` findings 1, 3, 5 and 6, and C1.
+
+### A gate exemption names the exempt items, never a rule (co-op player attribution, 2026-10-21)
+To let Patch113 pass without BannerlordCoop installed, `HarmonyPatchBindingTests` was changed to pass any patch whose
+`Prepare()` returns false. Three engine patches (`CultureStageView_*`) express their own target check that way, so an
+engine rename would have turned the gate green while Harmony skipped them in game.
+- **Why missed:** the fix was written as a rule for every patch to make one patch pass; the comment named only one.
+- **Prevent:** an exemption in a gate is a named set (`ThirdPartyTargetPatches`), with its reason, and every other
+  case still meets the full check.
+- **Source:** [rca-coop-player-attribution-2026-10-21.md](../rca-coop-player-attribution-2026-10-21.md) finding 4.

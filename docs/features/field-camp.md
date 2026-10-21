@@ -165,6 +165,10 @@ engine pause, waiting flag, encounter); `taom.rescue_time` exits a stuck menu co
 the lock, unpauses the engine and force-resumes time. Both live in
 `Main/Features/DevConsole/Cheats/TimeControlCheats.cs`.
 
+## Co-op (#966)
+
+A co-op guest gets no camp. `ICampMenuActivationQuery.DefersToCoopHost` (`MapScreenCampMenuActivationQuery.cs:38`) returns `ICoopSessionProvider.ShouldDeferToHost`; `FieldCampOverlayVM` hides the camp button (`FieldCampOverlayVM.cs:176`) and `ExecuteOpenCampMenu` refuses (`:224`, through `MayOpenCampMenu`). A player host and a solo player keep the camp. Cost: under BannerlordTogether or another co-op mod TAOM cannot probe, or after a failed Coop role bind, `ShouldDeferToHost` is true on every peer, solo play included, so the button hides there too. See [coop-interop.md](coop-interop.md).
+
 ## Traps
 
 - The Refuge insertion point is **index 4 on BOTH menus**; do not take it. Host Review and Far Watch both insert at **index 5** on the camp sub-menu, before Leave ([host-review.md](host-review.md), [far-watch.md](far-watch.md)). Both add from `OnAfterSessionLaunched`; listeners of one event run newest first, so the later module (Far Watch, listed after Host Review in `FeatureModules.cs`) inserts first and Host Review pushes it down. Reorder the modules and the two options swap; `FarWatchWiringTests` pins the order and the module positions.

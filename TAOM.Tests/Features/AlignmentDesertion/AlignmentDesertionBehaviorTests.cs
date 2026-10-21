@@ -8,6 +8,7 @@ using TaleWorlds.CampaignSystem.Roster;
 using TAOM.Core.Logging;
 using TAOM.Features.AlignmentDesertion;
 using TAOM.Features.AlignmentDesertion.Hooks;
+using TAOM.Features.CoopInterop;
 using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.AlignmentDesertion;
@@ -35,7 +36,8 @@ public class AlignmentDesertionBehaviorTests
         _service = Substitute.For<IAlignmentDesertionService>();
         _service.CalculateDesertion(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<IReadOnlyList<DesertionTroopInfo>>())
             .Returns(new List<TroopDesertionResult>());
-        _sut = new AlignmentDesertionBehavior(_service, Substitute.For<IModLogger>());
+        _sut = new AlignmentDesertionBehavior(
+            _service, Substitute.For<IModLogger>(), Substitute.For<IPlayerControlQuery>());
     }
 
     // A roster is plain managed code (CreateDummyTroopRoster, a regular troop with no hero), so ApplyDesertion

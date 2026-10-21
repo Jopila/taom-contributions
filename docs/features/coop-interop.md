@@ -58,6 +58,8 @@ own `0Harmony`.
 | `ICoopPresenceProvider` / `CoopPresenceProvider` | Test seam over static `CoopPresence`. **Process-constant**: "is a co-op module enabled". |
 | `ICoopSessionProvider` / `CoopSessionProvider` | **Session-varying**: "is a session live, and do I own the simulation". Reflection-bound, no compile-time reference to Coop. |
 | `IDedicatedServerProvider` / `DedicatedServerProvider` | **Process-constant**: "is there a real player in this process at all". Reads the binaries folder this assembly loaded from, NOT co-op role. |
+| `PlayerControl` / `IPlayerControlQuery` / `CoopPlayerControlQuery` | **Per entity**: "is this party or clan a human player's?" (Player, NotPlayer, Unknown). Reflection-bound to Coop's `PlayerManager.TryGetControlledObjectInfo`, answers live, caches only the binding (#966). See [Who is a player](#who-is-a-player-the-fourth-question). |
+| `RecruitAttributionScope` and `Hooks/CoopRecruitAttributionPatch` (Patch113) | A thread-static party id set around Coop's server-side `HandleOnRecruitmentDone`, so the party-less `OnUnitRecruited` can be charged to the recruiting guest's party leader. Policy: `SpecialResources/RecruitChargePolicy`. Applied at `Main/SubModule.cs:1868`; notes in [the patch registry](../reference/harmony-patch-registry.md). |
 | `CoopSessionPolicy` | The pure authority decision, split out so it is testable without a game — same pattern as `PatchShieldPolicy` / `SaveShieldPolicy`. |
 | `CoopSuppressedUiAttribute` / `CoopUiRegistrationPolicy` | Marks and filters UIExtenderEx types a co-op host has taken ownership of. |
 | `SaveDefinerCollisionDetector` / `Guard` / `SaveDefinerRecord` | Base-id preflight and crash attribution. **Heuristic** — the engine keys on `_saveBaseId + saveId`, so a shared base is legal; engine-only groups are dropped and the rest warn rather than assert. [RCA](../reviews/rca-savedefiner-false-positive-2026-08-01.md). |
@@ -91,7 +93,9 @@ reflection on first use and keeps the result, success or failure. Coop loads `Ga
 `ContainerProvider`) and `Common` (which holds `ModInformation`) in its own `OnSubModuleLoad`, so the types exist before any session can be live and
 a retry would only rescan the AppDomain for an unchanged answer. A container provider without a
 readable `IsServer`, or a type finder that throws, leaves the probe unavailable and TAOM
-authoritative; the failure is logged once.
+authoritative; the failure is logged once. `CoopPlayerControlQuery` binds Coop's `PlayerManager` the
+same way, once (the `Lazy` field at `CoopPlayerControlQuery.cs:29`, `Bind` at `:92`), and in a live session answers Unknown for a
+non-local entity while that bind failed.
 
 ## Layer 2 — assembly resolution
 
@@ -149,8 +153,9 @@ per-entity tickers, so `DailyTickSettlementEvent` and friends never reach a clie
 allowlist of ~127 `RegisterEvents` prefixes over *named vanilla* types; there is no generic hook a
 third-party mod can register into, so TAOM authors its own.
 
-**Three signals, not one.** The predicates below all come out of the session/role probe. Two other
-facts are process-constant and answer different questions. Both directions have cost TAOM a real
+**Four questions, not one.** The predicates below all come out of the session/role probe. Two other
+facts are process-constant and answer different questions, and a fourth is asked per party or clan
+(see [Who is a player](#who-is-a-player-the-fourth-question)). Both directions have cost TAOM a real
 bug: presence read where session/role was needed (the diplomacy vetoes, 2026-08-01), and no signal
 at all where the dedicated-server question was the one being asked (special-resource earning,
 2026-08-03).
@@ -160,6 +165,7 @@ at all where the dedicated-server question was the one being asked (special-reso
 | `ICoopPresenceProvider.IsCoopActive` | Is a co-op module enabled? | Yes | Patch-application and other one-shot startup decisions — PatchShield install, UI registration |
 | `ICoopSessionProvider` (the predicates below) | Is a session live, and do I own the simulation? | No | Anything that mutates shared world state |
 | `IDedicatedServerProvider.IsDedicatedServer` | Is there a real player in this process at all? | Yes | Anything that credits, charges or rewards `Hero.MainHero` |
+| `IPlayerControlQuery.OfParty` / `OfClan` | Is this party or clan driven by a human player? | No, per entity | Anything that compares a party or clan against `MobileParty.MainParty` / `Clan.PlayerClan`, which under co-op name only this peer |
 
 **`IsDedicatedServer` is deliberately NOT derived from co-op role**, and that distinction is the
 whole reason the type exists. A client-hosted session's host also reports `IsServer`, but it is a
@@ -208,6 +214,61 @@ Two traps the provider exists to avoid, both verified in source:
   alone it reports "client" in plain singleplayer whenever the Coop module is enabled, and "host"
   forever after hosting once. Only meaningful alongside a live session.
 
+### Who is a player: the fourth question
+
+Under co-op `MobileParty.MainParty` and `Clan.PlayerClan` name only the local peer, so a remote
+player's party reads as an AI party. Code that means "a human drives this" asks
+`IPlayerControlQuery` instead (#966, `PlayerControl.cs`, `IPlayerControlQuery.cs`,
+`CoopPlayerControlQuery.cs`).
+
+| Answer | Means |
+|---|---|
+| `Player` | This peer's own main party or `Clan.PlayerClan`, or an entity in Coop's player registry |
+| `NotPlayer` | The AI. With no co-op session this is everything but this peer's own party and clan, so single-player is unchanged. A session TAOM cannot see (BannerlordTogether, or a failed Coop container bind) also answers `NotPlayer`, not `Unknown`, because `IsSessionActive` is false there: remote players are not protected from desertion or the troop weight shed in that case |
+| `Unknown` | A session is live but the registry is unreadable: the bind failed or the call threw |
+
+**How it reads.** The local comparison comes first (`OfParty` at `CoopPlayerControlQuery.cs:53`, `OfClan` at `:59`, tested in `Classify` at `:67`), then the
+no-session early out (`:68`), then one reflection call to Coop's static
+`PlayerManager.TryGetControlledObjectInfo(object, out ControlledObjectInfo)` (`:81-82`). The
+`MethodInfo` is bound once through a `Lazy`, success or failure; the answer is never cached because
+players join and leave. A clan counts when its `Leader` is registered. Coop registers each player's
+hero, main party and clan. It does not register companions or companion-led parties, and an offline
+player's party stays registered. The server's own placeholder hero is not in the registry.
+
+**Each feature chooses what `Unknown` means.** The provider never guesses, so each caller picks the
+side that costs least:
+
+| Caller | `Unknown` treated as | Why |
+|---|---|---|
+| Troop weight shed (`PartyUpgraderUpgradeReadyTroopsHook.cs:52`) | Player: nothing is shed | A shed deletes troops, so doubt means skip |
+| Alignment desertion (`DesertionOwnerPolicy.ShouldSkip`) | Player: no troops desert | Same reason |
+| War of the Ring participation (`WarEventSnapshotAdapter.IsPlayerRelated`) | Not involved | A guess would let a stranger's wars move the shared meter |
+
+The recruit charge does not use this query: it follows the Patch113 scope instead (below).
+
+**Known limit.** `OfParty` answers for the party only. A companion-led party is not registered, so it
+reads `NotPlayer` and the troop weight shed still applies to it; desertion goes by owner clan, which
+is registered through its leader.
+
+**Cost.** About 0.3 microseconds and 217 bytes per non-local entity in a live session (reflection
+invoke plus the argument array, `IPlayerControlQuery.cs:14-16`). Convert to compiled delegates
+before adding an hourly or per-frame caller.
+
+**Recruit attribution (Patch113).** Coop's server applies a guest's recruitment inside
+`TroopRosterInterface.HandleOnRecruitmentDone(string mobilePartyId, TroopInfo[])`, run on the game
+thread through `GameThread.Run` (`ServerTroopRosterHandler.cs:41-45`), and the target raises
+`CampaignEvents.OnUnitRecruitedEvent`, which carries no party, synchronously inside that call.
+`CoopRecruitAttributionPatch` sets a `[ThreadStatic]` `RecruitAttributionScope.Current` to the party's
+`StringId` around it (Coop's key is `MobileParty_<StringId>`; `ToPartyStringId` strips the prefix).
+`SpecialResourcesBehavior.OnUnitRecruited` reads the scope, and `RecruitChargePolicy.ChoosePayer`
+decides: a client pays nothing; a scoped recruit charges the scoped party's leader or nobody, never
+the host; a dedicated server without a scope charges nobody; otherwise `Hero.MainHero`. A scoped
+miss logs one warning, and `Prepare` logs one warning when Coop is active but the target method is
+gone. **Known limits, tracked in #967:** the guest's client-side affordability gate (Patch51) reads a
+stale balance and the server's charge floors at zero until balances are server-owned, so the charge
+has no real effect for a guest yet; and Coop's prisoner and mercenary recruit paths never raise
+`OnUnitRecruited`, so their `recruit_cost` is never charged under co-op, host included.
+
 ### Gated (host-only)
 
 `CoopGateDocCoverageTests` fails when a feature module declares a campaign behavior that has no row in this table or in "Deliberately NOT gated" below, so a new behavior gets its co-op row in the same change. Behaviors that predate the test are listed in its `Baseline` and still need classifying; behaviors added by hand in `Main/SubModule.cs` are not checked by the test but still need a row.
@@ -223,7 +284,7 @@ behaviour's whole `RegisterEvents` and follow each handler to the service.
 | `RaceAgeBehavior` | `OnDailyTick` | Re-kills locally what the host already replicated. |
 | `HiddenHostsMemoryBehavior` | the Scouting XP grant in `OnTick` and `OnBeforeSave` (the same gate: `IsAuthority` and `MayWriteSaveBackedState`) | `Hero.AddSkillXp` writes the scout's saved skill XP; a client's would be per-peer state in the host's save. The pending XP is taken every tick and dropped on a client, so it cannot be banked. The memory rows themselves are not gated (below). |
 | `WarOfTheRingBehavior` | `OnDailyTick`, **`OnSessionLaunched`** | Both call the identical `CheckPhaseTransition` → `DeclareWar`, and `OnSessionLaunched` first calls `ReconcileDeclaredWars` → `DeclareWar` (#772), before its phase check. On a save already at Full War, the reconcile declares each Phase 2 or Hostile-pair war whose stored stance is not War and that the model still holds at war (`ShouldBlockPeace`), so a peace made legitimately stays. After the phase check the daily tick (not the session launch, which runs before the map event and siege managers are restored) also calls `EndWarsForbiddenByPhase` (peace for any AI war the Peace or Isengard War phase vetoes), which returns early under `ShouldDeferToHost` because `IsAuthority` alone is true on both peers under BannerlordTogether. Both calls sit behind the one `IsAuthority` return at the top of the handler. `OnSessionLaunchedEvent` fires on every peer, and a co-op join *is* a save-load, so an ungated client issued its own war set on connect. Under BannerlordCoop the host's Phase 2 wars reach clients through Coop's stance sync, and the load-time reconcile through the join snapshot. Under BannerlordTogether `IsAuthority` fails open, so every peer runs the reconcile; it can only declare for a save already at Full War that still has undeclared Phase 2 or Hostile pairs (UNVERIFIED whether that mod's client-side suppression contains it). |
-| `WarOfTheRingMomentumBehavior` | `OnDailyTick`, **`OnKingdomDestroyed`, `OnMapEventEnded`, `OnSiegeCompleted`, `OnRaidCompleted`, `OnArmyGathered`, `OnSessionLaunched`** | `MomentumWarState` rides TAOM `SyncData` that nothing replicates. `OnKingdomDestroyed` reached the same `CheckAndApplyVictory` → `EndWar`/`MakePeace` as the tick. Daily gate sits **after** `RefreshMapMeter` — local UI a client still needs drawn. |
+| `WarOfTheRingMomentumBehavior` | `OnDailyTick`, **`OnKingdomDestroyed`, `OnMapEventEnded`, `OnSiegeCompleted`, `OnRaidCompleted`, `OnArmyGathered`, `OnSessionLaunched`** | `MomentumWarState` rides TAOM `SyncData` that nothing replicates. `OnKingdomDestroyed` reached the same `CheckAndApplyVictory` → `EndWar`/`MakePeace` as the tick. Daily gate sits **after** `RefreshMapMeter`: local UI a client still needs drawn. **Participation (#966):** `WarEventSnapshotAdapter` sets `PlayerInvolved` also when any party on either side is a player's (`OfParty == Player`), or the event involves a kingdom holding a player's clan; `Unknown` counts as not involved, and single-player is unchanged. The state itself is still per peer. |
 | `MessengerCampaignBehavior` | `OnHourlyTick` | Arrival writes `MobileParty.MainParty.Position` — on a client, *its own* party. |
 | `SiegeDefenseBehavior` | `OnHourlyTick` | `Clan.Influence` + global relation off `Hero.MainHero`, which differs per peer. **Known limitation below.** |
 | `CastleRecruitmentBehavior` | `OnGameLoaded`, `OnNewGameCreated` | The one castle path a client reaches; creates heroes. |
@@ -243,7 +304,11 @@ behaviour's whole `RegisterEvents` and follow each handler to the service.
 | `ReserveStepMixin` | `ExecuteAddReserveStep` and `ExecuteWithdrawReserveStep` (the +10K and -10K buttons on the town management window), through `ReevesLedgerService.MayWriteWorld` | **Single-player only** ([Reeve's Ledger](reeves-ledger.md)): the buttons show and work only while `!IsSessionActive && !ShouldDeferToHost && !IsDedicatedServer && IsAuthority`, the Eye of Sauron's predicate plus authority; otherwise the mixin hides them and a click does nothing. The gate is read live at each refresh and again at each click. Both buttons write the world (the player's gold and the town's reserve), always through the engine's `BuildingHelper.BoostBuildingProcessWithGold`, which moves the gold with the reserve. The title, the Profit and Patrol rows and the stash and prison tooltips only read the fief, so `TownManagementLedgerMixin` needs no gate. The trade-off: a solo player with a co-op mod TAOM cannot probe gets no buttons (the same as From the Ashes). |
 | `FarWatchBehavior` | `OnHourlyTick`, `OnPartyEncounter` and `OnMapEventStarted` (through `FarWatchReconcile`), the camp option, the pick and the wait menu's callbacks, through `FarWatchService`, and the sight contributor through `FarWatchService.SightFactor` | **Single-player only** ([Far Watch](far-watch.md)): the start gate is the From the Ashes predicate (`IsSessionActive \|\| ShouldDeferToHost \|\| IsDedicatedServer`, or no `IsAuthority`), so a peer sees the option greyed ("not available in a shared campaign") where single-player can ride. `Reconcile` applies the same predicate to a running ride, so a ride carried into a co-op session ends at its next hourly look with a message, no report and no XP, unless its wait menu finishes first: that completion does not check the session, so it reports and raises the sight, and pays the XP only where the next sentence's gate allows. The Scouting XP is the one world write and also needs `IsAuthority` and `MayWriteSaveBackedState(IsCoopClient)`; the ride is cleared from the store before it. A saved kept sight loaded into a session affects only that peer's own map sight (`MobileParty.SeeingRange` of the main party), as the lookout does, and Hidden Hosts' report writes (the raised digits, the scouted settlement) are local presentation like the rest of its memory. |
 | `NamegivingBehavior`, `FiefNamingMixin` | The behavior's `OnSettlementOwnerChangedEvent`, `OnClanChangedKingdomEvent` and `OnSessionLaunchedEvent` handlers, through `NamegivingService.ReconcileLore` and `ReconcileAllLore`; the mixin's `ExecuteRenameFief`, the prompts' final apply and the button's refresh, through `NamegivingService.MayWriteWorld` | **Single-player only** ([Namegiving](namegiving.md)): the button shows and works, and the lore names change, only while `!IsSessionActive && !ShouldDeferToHost && !IsDedicatedServer && IsAuthority`, the From the Ashes predicate. Both halves write the world (a settlement's saved custom name, and the player's influence for a rename). `NamegivingService.Check` is read live at each refresh and again inside `Apply`, so the gate holds at the moment of the write; the reconcile passes check it per call, before the switch, so a co-op peer restores nothing either. The switch is counted in the settings fingerprint (`CoopSettingsRelevance` does not exclude it), because the lore half reacts to captures on its own. The trade-off: a solo player with a co-op mod TAOM cannot probe gets no button and no lore names. |
-| `SpecialResourcesBehavior` | `OnMapEventEnded`, `OnRaidCompleted`, `OnPrisonerTaken`, `OnHideoutCompleted`, `OnTournamentFinished` | **A dedicated-server gate, not an authority gate.** All five earn paths run through a private `CanEarn()` → `SpecialResourceEarnPolicy.MayCreditMainHero(IDedicatedServerProvider.IsDedicatedServer)`, which logs once and then stays quiet. A headless server was banking prisoner and raid income against the idle world-gen hero — dozens of `[SpecRes] PRISONERS: +N` lines — while the remote players who fought those battles earned nothing. |
+| `SpecialResourcesBehavior` | `OnMapEventEnded`, `OnRaidCompleted`, `OnPrisonerTaken`, `OnHideoutCompleted`, `OnTournamentFinished` | **A dedicated-server gate, not an authority gate.** All five earn paths run through a private `CanEarn()` → `SpecialResourceEarnPolicy.MayCreditMainHero(IDedicatedServerProvider.IsDedicatedServer)`, which logs once and then stays quiet. A headless server was banking prisoner and raid income against the idle world-gen hero: dozens of `[SpecRes] PRISONERS: +N` lines while the remote players who fought those battles earned nothing. `OnUnitRecruited` (the one-time `recruit_cost`) is not a `CanEarn()` path and is attributed since #966: see "Recruit attribution (Patch113)" above. |
+| `AlignmentDesertionBehavior` | `OnDailyTickParty` and `OnDailyTickSettlement`, through `TryResolveOwner` and `DesertionOwnerPolicy.ShouldSkip` (`AlignmentDesertionBehavior.cs:65,86,96-101`) | **A who-is-a-player gate, not an authority gate.** During a session a remote player's clan (Player, but not `Clan.PlayerClan`) and any Unknown owner lose no troops; this peer's own clan follows "Apply To Player" and an AI clan "Apply To AI Lords". Before #966 a remote player's party read as an AI clan and shed troops. Skipped, not relayed: a remote player gets no desertion popup (that relay is #967). Single-player is unchanged. See [alignment-desertion.md](alignment-desertion.md). |
+| `PartyUpgraderUpgradeReadyTroopsHook` (troop weight shed) | `OnUpgradeReadyTroops`, after the `LeaderHero` exit (`PartyUpgraderUpgradeReadyTroopsHook.cs:52`) | **A who-is-a-player gate.** No shed for any mobile party whose `OfParty` is not `NotPlayer` (Player or Unknown). The `TaomSettings` toggle is still per peer; a server-authoritative setting is open. See [troop-weight-system.md](troop-weight-system.md). |
+| `EnlistmentDialogBehavior` | The enlist offer, through `ShowsOfferFor(verdict, deferToHost)` (`EnlistmentDialogBehavior.cs:109,115-116`) | **Hidden for a guest** (`ShouldDeferToHost`); a player host and a solo player keep it. On a dedicated server the host is the placeholder hero, so enlistment cannot be offered per player yet. Cost: under a co-op mod TAOM cannot probe (or a failed Coop role bind) `ShouldDeferToHost` is true on every peer, solo play included, so the offer hides there too. See [enlistment.md](enlistment.md). |
+| Field camp overlay (`FieldCampOverlayVM`) | The camp button and `ExecuteOpenCampMenu`, through `ICampMenuActivationQuery.DefersToCoopHost` (`FieldCampOverlayVM.cs:176,224`; `MapScreenCampMenuActivationQuery.cs:38`) | **Hidden for a guest** (`ShouldDeferToHost`): the camp service writes local, save-backed state. A player host and a solo player keep the camp; the same unprobeable-mod cost as the enlist offer applies. See [field-camp.md](field-camp.md). |
 | `HardQuestionsCampaignBehavior` | `OnHeroPrisonerReleased` and `OnHeroKilled`, through `HeroDied` and `ReleaseHero` (`!ShouldDeferToHost`) | **Stands down** on every peer while TAOM must defer to a co-op host, including under a co-op mod whose role TAOM cannot read. A released or dead lord's strip record is only cleared (`StripService.OnReleased`, `OnDied`) when the gate passes, because the record rides TAOM `SyncData` that nothing replicates. See [hard-questions.md](hard-questions.md). |
 | `HardQuestionsDialogBehavior` | `CanAsk`, `CanStrip`, `PriceLine`, `PriceIsPayable`, `PayBribe`, `Force`, `Strip` and `RepliesAs`, through `InterrogationService.Eligible` (`!ShouldDeferToHost`) | **Gated in the service, not in the behavior.** The behavior's handlers hold no co-op check of their own; every condition and consequence calls `InterrogationService`, whose `Eligible` returns nothing while TAOM must defer, so the options are hidden and a bribe, force or strip cannot start. `OnConversationEnded` stays ungated: it only runs the deed a gated option queued, and the queue is empty otherwise. See [hard-questions.md](hard-questions.md). |
 | `FireAndTributeBehavior` | `OnSessionLaunched`, `OnDailyTick`, `OnHourlyTick`, `OnVillageStateChanged` and `OnMobilePartyDestroyed`, through `FireAndTributeService.IsSinglePlayer` | **Single-player only** ([Fire and Tribute](fire-and-tribute.md)): stands down on every peer while a session is live, while a co-op mod TAOM cannot probe is loaded, or on a dedicated server (`IsSessionActive \|\| ShouldDeferToHost \|\| IsDedicatedServer`). No host spawns. A host restored into such a session, or alive when the gate closes, has its AI pin released, its record dropped and its side's cooldown started at the session launch, the next daily tick or the next hourly tick, whichever comes first; it is never despawned there, because removing a party is a world write the other peers would not see. `OnVillageStateChanged` and `OnMobilePartyDestroyed` are not gated as handlers: they look up at most three host records, which a closed gate has already emptied, then count a loot or report a break. The save record is TAOM `SyncData` that nothing replicates, and a peer that stands down never writes a host into it. The four MCM switches are counted in the settings fingerprint (`CoopSettingsRelevance` does not exclude them). Trade-off: a solo player with a co-op mod TAOM cannot probe, or `coop-force-active.flag` present, gets no hosts. |
@@ -323,6 +388,8 @@ desyncs; the client just quietly gets nothing.
 | Elite emissary | Pay special resources for an elite troop | The troop landed in a client-side roster the next resync overwrote — pay real, get phantom | **Fixed 2026-08-03** — `ExecutePurchase` refuses before charging when `ShouldDeferToHost` |
 | Siege defence | Be prompted, accept, and be tracked | Reward tick is authority-only | Partly addressed by `_locallyClaimed`; the prompt/accept path still needs an owner check |
 | Career quests | Be offered and accept | — (fixed: the dedup scan now filters by owner) | **Fixed 2026-08-01** |
+| Field camp | Press the camp button and establish a camp through the local camp service | A camp the host knows about: the camp book is this peer's own TAOM `SyncData` | **Switched off for guests 2026-10-21 (#966)**: the button hides and `ExecuteOpenCampMenu` refuses |
+| Enlistment | Be offered and take enlistment | Per-player service: `EnlistmentPlayerActionService.cs:96` is host-only, and on a server the host is the placeholder hero | **Switched off for guests 2026-10-21 (#966)**: the offer is hidden |
 
 **Both fixes decline rather than forward, and that is the ceiling here.** Granting either
 authoritatively would need TAOM to send a message across the co-op layer, which it cannot do without
@@ -408,16 +475,14 @@ to characterise. The existing try/catch around acceptance is containment, not co
   bump is a co-op compatibility break.
 - **No sync of TAOM's own campaign state.** Clients get the join-time baseline from the host's save,
   then never hear about WotR momentum or culture-conversion deltas.
-- **War of the Ring participation credits one kingdom, not one session.**
-  `WarEventSnapshotAdapter.FromSiege` now applies the same `IsPlayerRelated` test as the battle
-  snapshot beside it (fixed 2026-08-03), so taking a fief inside an ally's army finally records a
-  player event — that was a single-player bug too, and it is the half that is fixed.
-  `IsPlayerRelated` resolves to "the main party, or any party whose `MapFaction.StringId` equals the
-  player kingdom id", and that kingdom comes from the LOCAL player context. So a remote player in a
-  DIFFERENT kingdom is still never credited, and on a dedicated server the reference kingdom is the
-  idle world-gen hero's. Crediting across peers needs a seam TAOM does not have. (The field report
-  stated the requirement "can only be satisfied by the authority's MainHero" — that was inaccurate
-  even before the fix: any party in that MainHero's kingdom already satisfied it.)
+- **War of the Ring participation: attribution fixed, state still per peer (#966).**
+  `WarEventSnapshotAdapter.FromSiege` applies the same `IsPlayerRelated` test as the battle
+  snapshot beside it (fixed 2026-08-03). Since #966 the test also counts any party on either side
+  whose `OfParty` is `Player`, and any kingdom holding a player's clan, so a remote player in a
+  different kingdom is credited when the event is scored on the authority; `Unknown` counts as not
+  involved. The old local kingdom check stays, so on a dedicated server the local kingdom clause still names the world-gen hero's kingdom (its clan is `Clan.PlayerClan`, so `OfClan` answers Player). What is still missing: the momentum state is TAOM `SyncData` that nothing replicates, so
+  a client never sees the meter move, and the `IsAuthority` gates on the scoring handlers are
+  unchanged.
 - **Dedicated server: no longer "unsupported", but not supported either.** The 2026-08-03 field
   group ran TAOM on a BannerlordCoop dedicated server by hand-copying the client binaries into
   `bin/Win64_Shipping_Server/`, and that session is the evidence source for the race-capture,
@@ -540,6 +605,17 @@ Owed by the 2026-08-03 work specifically, none of it run:
 9. An emissary purchase attempted on a guest: it must decline, and no resources may be deducted.
 10. A server log carrying the one-shot `[SpecRes] Dedicated server —` line, with the remote players
     earning on their own clients instead.
+
+Owed by the #966 work (Batch B, co-op player attribution), none of it run in game:
+
+11. A guest on a dedicated server recruits a `recruit_cost` volunteer: the server log shows a
+    `[SpecRes] RECRUIT:` line (it does not name the hero, so read the guest hero's balance), no
+    `Recruit not charged` warning, and nothing charged to the placeholder hero. Expect the stale
+    client balance and the zero floor described under Patch113 until #967 lands.
+12. A player host recruits the same volunteer: charged once, with the toast.
+13. A guest sees no camp button and no enlist offer; a player host still sees both.
+14. A remote player's troops do not desert for alignment and are not shed for weight across a
+    day tick, while an AI lord of the same kingdom still loses opposed troops.
 
 ---
 

@@ -42,7 +42,8 @@ public class SpecialResourcesBehaviorSessionResetTests
             Substitute.For<ISpecialResourceConfigProvider>(),
             Substitute.For<IModLogger>(),
             Substitute.For<ITroopWeightService>(),
-            Substitute.For<IDedicatedServerProvider>());
+            Substitute.For<IDedicatedServerProvider>(),
+            Substitute.For<ICoopSessionProvider>());
 
     private void LeavePriorCampaignBalances()
     {

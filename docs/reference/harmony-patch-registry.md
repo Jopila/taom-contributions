@@ -1348,6 +1348,20 @@ Vanilla switches on its own culture ids and returns `new SceneNotificationCharac
 
 **Co-op.** A postfix on a pure lookup, no bool prefix and no campaign state written, so `CoopVetoClassificationTests` needs no entry. Feature: [crown-guard.md](../features/crown-guard.md). **ACTIVE**, not yet checked in game.
 
+## Patch113_CoopRecruitAttribution
+
+**Target:** `GameInterface.Services.TroopRosters.Interfaces.TroopRosterInterface.HandleOnRecruitmentDone(string mobilePartyId, TroopInfo[] troopsInCart)` in BannerlordCoop (internal class, v1.5.x source `TroopRosterInterface.cs:320-364`), resolved by reflection through `ReflectionUtils.FindTypeAcrossLoadedAssemblies`. One class `CoopRecruitAttributionPatch` in `Main/Features/CoopInterop/Hooks/`, category `Patch113_CoopRecruitAttribution` (GameInit). #966 (Batch B of #964), 2026-10-21. **ACTIVE**: applied in the GameInit batch at `Main/SubModule.cs:1868` (`TryPatchCategory("Patch113_CoopRecruitAttribution")`); not yet checked in game.
+
+`HarmonyPrepare` returns true only when the Coop type and method resolve, so the patch is skipped without Coop; when Coop is active but the method is missing, `Prepare` logs one warning (`[CoopRecruitAttribution] Patch113 not applied`), since the patch would otherwise silently never apply. `HarmonyPatchBindingTests` lets this one patch pass on `Prepare() == false` through an explicit `ThirdPartyTargetPatches` set; every other patch still has to resolve. The prefix saves `RecruitAttributionScope.Current` into `__state` and sets it to the party id (`__0`); a void finalizer restores `__state`, which keeps the scope correct after a throw and leaves Harmony's rethrow and stack untouched. With a stripped prefix `__state` is null and the finalizer clears any outer scope; PatchShield is never installed while a co-op module is active, so this does not happen in practice. The scope is `[ThreadStatic]` and spans one synchronous call.
+
+**Why:** `CampaignEvents.OnUnitRecruitedEvent` (`CharacterObject, int`) carries no party. Under Coop only the server raises it for a guest's recruitment, inside this method (`:359-360`), so `SpecialResourcesBehavior.OnUnitRecruited` reads the scope to charge the recruiting party's leader through `RecruitChargePolicy` instead of `Hero.MainHero`.
+
+**Key prefix:** the string argument is Coop's object-manager key, `"MobileParty_" + StringId` (`AutoRegistryBase`), not the bare `StringId`. `CoopRecruitAttributionPatch.ToPartyStringId` strips the prefix (`CoopRecruitAttributionPatch.cs:48-51`; the prefix is `:59-64` and the finalizer `:66-70`) and `SpecialResourcesBehavior` resolves the party with `CampaignObjectManager.Find<MobileParty>`.
+
+**Callers and thread:** the only caller of the target is `ServerTroopRosterHandler.HandleOnRecruitmentDone` (`ServerTroopRosterHandler.cs:41-45`, a `ClientRequestRecruitment` message handler, so a guest's recruit request). It runs the call through `GameThread.Run`, so the target executes on the game thread, and the target raises `OnUnitRecruited` synchronously inside it; the `[ThreadStatic]` scope therefore spans exactly that call and no handler on another thread sees it. **Known limitations (#967):** the guest's client-side affordability gate (Patch51) reads a stale balance and the server-side charge floors at zero until balances are server-owned; Coop's prisoner and mercenary recruit paths never raise `OnUnitRecruited`, so their `recruit_cost` is never charged under co-op, host included. Feature: [coop-interop.md](../features/coop-interop.md).
+
+**Co-op.** A pure bracket: no skip, no campaign state written, so `CoopVetoClassificationTests` needs no entry. **Tests:** `CoopRecruitAttributionPatchTests` (real Harmony on a local fake), `RecruitChargePolicyTests`.
+
 ## Patch_MainRosterLossDiag
 
 **Targets:** `TroopRoster.AddToCountsAtIndex(int, int, int, int, bool)` and `TroopRoster.SetElementNumber(int, int)` (both Prefix, observe-only, never skip the original). **ACTIVE, TEMPORARY diagnostic.** Code: `Main/Features/TroopWeight/Diagnostics/` (`TroopRoster_AddToCountsAtIndex_Patch`, `TroopRoster_SetElementNumber_Patch`, `MainRosterLossDiagnostics`).

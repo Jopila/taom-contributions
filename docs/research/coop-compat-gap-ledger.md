@@ -43,16 +43,16 @@ matters only in that mode, and most of them stand a feature down.
 
 | ID | Item | Status | Evidence | Owner | Action |
 |---|---|---|---|---|---|
-| T1 | Special-resource victory earning depends on `MapEventEnded`, which co-op clients rarely get | PRESENT | `SpecialResourcesBehavior.cs:60,303`; `coop-interop.md:248-249` | TAOM | Earn on the authority for every player party on the winning side, keyed by hero |
-| T2 | Prisoner and raid income credits the world-gen `MainHero` | PARTIAL | `SpecialResourcesBehavior.cs:376-378,557-559`: nobody earns on a server; the comment at `:566` is contradicted by `coop-interop.md:248-249` | TAOM | Credit the acting hero |
-| T3 | Recruit cost charges `MainHero`, so players on a server recruit priced troops free | PRESENT | `SpecialResourcesBehavior.cs:433-437` | TAOM | Charge the leader of the recruiting party |
+| T1 | Special-resource victory earning depends on `MapEventEnded`, which co-op clients rarely get | PRESENT | `SpecialResourcesBehavior.cs:64,308`; `coop-interop.md:307` | TAOM | Earn on the authority for every player party on the winning side, keyed by hero |
+| T2 | Prisoner and raid income credits the world-gen `MainHero` | PARTIAL | `SpecialResourcesBehavior.cs:380-382,593-595`: nobody earns on a server; the log text at `:601-602` is contradicted by `coop-interop.md:307` | TAOM | Credit the acting hero |
+| T3 | Recruit cost charges `MainHero`, so players on a server recruit priced troops free | PARTIAL (#966: attribution fixed, charge has no effect yet) | Attribution: Patch113 brackets Coop's `HandleOnRecruitmentDone` with a thread-static scope (`CoopRecruitAttributionPatch.cs:59-70`, applied at `SubModule.cs:1868`), and `SpecialResourcesBehavior.cs:440-453` charges the scoped party's leader through `RecruitChargePolicy.ChoosePayer` (`RecruitChargePolicy.cs:14-25`): a client pays nothing, a scoped recruit never falls back to the host. Not effective yet: the guest's affordability gate (Patch51) reads a stale client balance, and the server charge floors at zero (`SpecialResourceService.cs:250-253`) until balances are server-owned. Coop's prisoner and mercenary recruit paths never raise `OnUnitRecruited` (Coop `PartyDoneLogicHandler.cs:726`, `MercenaryHireHandler.cs:142-146`), so their `recruit_cost` is never charged under co-op, host included. Not checked in game | TAOM | Server-owned balances and the prisoner and mercenary paths: #967. In-game check owed |
 | T4 | Emissary troops are granted into a client-side roster | PARTIAL | `EliteEmissaryInquiryPresenter.cs:199-205` refuses the purchase on a guest, so on a server nobody can buy | TAOM, CoopCompat | An authoritative purchase command: charge and grant on the server |
-| T5 | War of the Ring participation counts only the authority's `MainHero` | PRESENT | `WarEventSnapshotAdapter.cs:64-66,96`; `MomentumEventService.cs:75-76` | TAOM | Count any player hero's party |
-| T6 | Troop weight sheds over-weight parties of remote players | PARTIAL | `TaomSettings.cs:41` has the toggle; `PartyUpgraderUpgradeReadyTroopsHook.cs:32` exempts only `MainParty` | TAOM | Exempt every player-controlled party; server-authoritative setting |
+| T5 | War of the Ring participation counts only the authority's `MainHero` | FIXED (#966: attribution only; state sync still open) | `PlayerInvolved` is also true when any party on either side is a player's (`WarEventSnapshotAdapter.cs:69-72`, `HasPlayerParty` at `:188-200`) or the event involves a kingdom holding a player's clan (`:162-186`); `Unknown` counts as not involved (`:171-173`). Single-player is unchanged because the provider reduces to the local comparison. Not checked in game | TAOM | Momentum state is still per peer: see C2 |
+| T6 | Troop weight sheds over-weight parties of remote players | FIXED (#966: the exemption; the setting is still per peer) | `PartyUpgraderUpgradeReadyTroopsHook.cs:52` returns for any mobile party whose `OfParty` is not `NotPlayer` (Player or Unknown), after the `LeaderHero` exit. The toggle is still `TaomSettings.cs:41` on each peer. Not checked in game | TAOM | Server-authoritative setting still open |
 | T7 | Career choice groups collapse on refresh | FIXED | PR #373 (`b5bd1d280`) is an ancestor of HEAD; the screen was later rebuilt (`29d8ac413`) | none | Tell Sternab his shim can go |
-| T8 | Career and special-resource writers act only for `MainHero` | PRESENT | Storage is per hero (`SpecialResourceStorageService.cs:17`), but writers gate on `MainHero` (`SpecialResourcesBehavior.cs:203`, `CareerCampaignBehavior.cs:56,111,118`) | TAOM | A server-side per-hero tick over player heroes, plus a client snapshot |
+| T8 | Career and special-resource writers act only for `MainHero` | PRESENT | Storage is per hero (`SpecialResourceStorageService.cs:17`), but writers gate on `MainHero` (`SpecialResourcesBehavior.cs:207`, `CareerCampaignBehavior.cs:56,111,118`) | TAOM | A server-side per-hero tick over player heroes, plus a client snapshot |
 | B1 | Unreachable path targets assert every tick; TAOM_Map navmesh holes | UNVERIFIED | Not inspected | TAOM_Map, Coop | Get Sternab's coordinates; test the Edoras path on the server |
-| X1 | The field camp overlay calls the local camp service on a co-op client | PRESENT | No co-op gate under `Main/Features/FieldCamp/` | TAOM | `[CoopSuppressedUi]` or gate on `MayWriteSaveBackedState` |
+| X1 | The field camp overlay calls the local camp service on a co-op client | PARTIAL (#966: off for guests by design) | `ICampMenuActivationQuery.DefersToCoopHost` (`MapScreenCampMenuActivationQuery.cs:38`, which returns `ICoopSessionProvider.ShouldDeferToHost`) hides the camp button (`FieldCampOverlayVM.cs:176`) and makes `ExecuteOpenCampMenu` refuse (`:224`). A player host and a solo player keep the camp. Cost: under BannerlordTogether or another co-op mod TAOM cannot probe, or after a failed Coop role bind, `ShouldDeferToHost` is true on every peer, solo play included, so the button hides there too | TAOM | None planned; per-player camps would be a new design |
 | X2 | Wanderer pre-introduction NRE for named heroes without a template | UNVERIFIED | No data scan done | TAOM data | Add a validator rule |
 | X3 | Retired Misty Mountain troop ids (2.0.23) have no save alias | PRESENT | No alias in the repo | TAOM | Decide whether pre-2.0.23 saves are supported |
 | X4 | Restored Full War saves miss configured wars | FIXED (TAOM half) | `WarOfTheRingBehavior.cs:86-91` | Coop | none |
@@ -63,15 +63,15 @@ matters only in that mode, and most of them stand a feature down.
 | ID | Feature group | Status | Evidence | Action |
 |---|---|---|---|---|
 | C1 | Race, culture, possession | PARTIAL | `PlayerPossessionService.cs:39,53` keeps choices in process memory only; a reconnect loses them | Server-held identity snapshot per player |
-| C2 | War of the Ring | PARTIAL | `WarOfTheRingMomentumBehavior.cs:139` gated; attribution is T5; state not synced | T5 fix plus momentum transport |
-| C3 | Careers and special resources | PRESENT | T1, T2, T3, T8 | Server-owned balances with a command and acknowledgement protocol |
-| C4 | Recruiting and emissary purchase | PRESENT | T3, T4 | As T3 and T4 |
+| C2 | War of the Ring | PARTIAL | `WarOfTheRingMomentumBehavior.cs:139` gated; attribution is fixed (T5); momentum state is not synced | Momentum transport |
+| C3 | Careers and special resources | PRESENT | T1, T2, T8 are open; T3 attributes the recruit charge but it has no effect until balances are server-owned | Server-owned balances with a command and acknowledgement protocol (#967) |
+| C4 | Recruiting and emissary purchase | PARTIAL | T3 (attributed, no effect yet) and T4 (the guest purchase is refused) | As T3 and T4 |
 | C5a | Recurring castle recruitment | FIXED (stand-down) | `CastleAiRecruitDispatcher.cs:87` | Accept, or design server-side recruitment later |
-| C5b | Alignment desertion | PRESENT | `AlignmentDesertionBehavior.cs:53,61-62` treat remote players as AI clans | Classify player-controlled parties, or disable during a session |
+| C5b | Alignment desertion | FIXED (#966) | `AlignmentDesertionBehavior.cs:65,86,96-101` and `DesertionOwnerPolicy.cs:15-16,19`: during a session a remote player's clan (Player, but not `Clan.PlayerClan`) and any Unknown owner lose no troops; this peer's own clan follows "Apply To Player", AI clans follow "Apply To AI Lords". Single-player is unchanged. Decision: skip rather than relay. A remote player gets no desertion popup, because that relay is #967 | Done. Not checked in game |
 | C5c | Culture marketplace | PARTIAL | `CultureMarketplaceBehavior.cs:73` runs on the server; settlement `ItemRoster` sync unverified | Confirm Coop syncs settlement stock |
-| C5d | Troop weight | PRESENT | T6 | As T6 |
+| C5d | Troop weight | FIXED (#966: the exemption) | T6 | As T6 |
 | C6 | Messenger, siege defence, culture conversion | PARTIAL | `MessengerCampaignBehavior.cs:103,204`, `CultureConversionBehavior.cs:83,103,114` gated; private state not synced | Snapshot, or disable during a session |
-| C7 | Enlistment and field commission | PARTIAL | `EnlistmentPlayerActionService.cs:96`, `FieldCommissionBehavior.cs:71` host-only; on a server the host is the placeholder hero | Hide the enlist offer during a session until per-player rules exist |
+| C7 | Enlistment and field commission | PARTIAL (#966: offer hidden for guests by design) | `EnlistmentPlayerActionService.cs:96`, `FieldCommissionBehavior.cs:71` host-only; on a server the host is the placeholder hero. `EnlistmentDialogBehavior.ShowsOfferFor(verdict, deferToHost)` (`:109`, read at `:115-116`) hides the enlist offer for a guest; a player host keeps it. Same cost as X1 under a co-op mod TAOM cannot probe | None planned until per-player rules exist |
 | C8 | TAOM mission behaviors | PRESENT | `Main/SubModule.cs:2141-2146` adds 33 behaviors with no co-op filter | Classify each one and filter in `AddTaomMissionBehaviors` |
 | C9 | Tournaments | PARTIAL | R5 is REFUTED (no fix owed); grouping, colours and agent removal are Coop seams | A two-player tournament lifecycle run |
 
@@ -89,11 +89,15 @@ matters only in that mode, and most of them stand a feature down.
 
 ## Summary
 
-- 34 TAOM-relevant rows across the three tables: 13 PRESENT, 8 PARTIAL, 5 FIXED (R2, R3, T7, X4
-  TAOM half, C5a stand-down), 4 UNVERIFIED, 2 REFUTED (R5, R9), 1 OPEN (R4), 1 DEFERRED (R1).
+- 36 TAOM-relevant rows across the three tables (counted by script over every status row after
+  #966; the earlier "34" miscounted): 8 PRESENT, 11 PARTIAL, 9 FIXED (R2, R3, T5 attribution only,
+  T6 exemption only, T7, X4 TAOM half, C5a stand-down, C5b, C5d), 4 UNVERIFIED, 2 REFUTED (R5, R9),
+  1 OPEN (R4), 1 DEFERRED (R1).
 - Most existing co-op gates stop corruption by switching the feature off. On a dedicated server
-  that means no player gets special resources, emissaries or War of the Ring credit.
-- Highest risk first, from the PRESENT, PARTIAL and OPEN rows: C5b and T6 (silent troop loss for
-  remote players), T3 (free priced troops), T1 and T8 (no special-resource or career writes for
-  remote players), R6 (half-pushed screen), and R4 (a hidden mission fault whose fix was refuted).
-  R1 (authority fork on a client) stays DEFERRED by decision, not closed.
+  that means no player gets special resources or emissaries. War of the Ring events now count a
+  remote player's party (T5), but the momentum state itself stays per peer.
+- Highest risk first, from the PRESENT, PARTIAL and OPEN rows: T3 (a guest's priced recruits still
+  cost nothing until balances are server-owned, #967), T1 and T8 (no special-resource or career
+  writes for remote players), R6 (half-pushed screen), and R4 (a hidden mission fault whose fix was
+  refuted). The silent troop loss for remote players (C5b, T6) is closed by #966. R1 (authority
+  fork on a client) stays DEFERRED by decision, not closed.

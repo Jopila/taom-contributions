@@ -386,6 +386,12 @@ ends up controlling, resolving it from the character-creation culture and the li
   the finalized event pays `per_hideout_clear`, so it pays once, even across a save made in the
   success menu (#790).
 
+## Co-op recruit charge (#966)
+
+Under BannerlordCoop the server raises `OnUnitRecruited` for a guest's recruitment, and the event carries no party. Patch113 (`CoopRecruitAttributionPatch`) brackets Coop's `HandleOnRecruitmentDone` with `RecruitAttributionScope`, and `SpecialResourcesBehavior.OnUnitRecruited` (`SpecialResourcesBehavior.cs:436-464`) hands the scoped party's leader to `RecruitChargePolicy.ChoosePayer`: a client pays nothing, a scoped recruit charges that party's leader (or nobody, never the host), a dedicated server without a scope charges nobody, and anything else charges `Hero.MainHero` as before. The toast shows only when the payer is this machine's `MainHero`.
+
+**Not effective yet:** a guest's affordability gate (Patch51) reads a stale client balance, and the server's charge floors at zero, until balances are server-owned. Coop's prisoner and mercenary recruit paths never raise `OnUnitRecruited`, so their `recruit_cost` is never charged under co-op, host included. Both are tracked in #967. Single-player is unchanged. Detail: [coop-interop.md](coop-interop.md), [harmony-patch-registry.md](../reference/harmony-patch-registry.md).
+
 ## Desertion Mechanics
 
 - Triggers daily when resource balance is 0 and the breakdown has upkeep due (`HasUpkeepDue`, judged after the career upkeep modifier)

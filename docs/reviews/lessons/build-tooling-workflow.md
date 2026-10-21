@@ -4208,3 +4208,12 @@ halves `\\`). `check-bash-length.sh` now refuses the long commands with the fix 
   from the ones that pass on the suspected cause and on size; a cause that does not separate them is
   not the cause.
 - **Source:** [harness-retro-2026-10-21.md](../harness-retro-2026-10-21.md), proposal P3.
+
+### Take a cited line number from a read of that one file (co-op player attribution, 2026-10-21)
+A docs pass for #966 cited `DesertionOwnerPolicy.cs:41-45` in a 20-line file and `IPlayerControlQuery.cs:28-30` in a
+22-line one: six citations whose numbers ran on from one file into the next, the shape of a single numbered listing over
+several files. A convergence review caught them with a script that opened each cited line.
+- **Why missed:** the line numbers were copied from a combined dump; nothing checks that a cited line exists.
+- **Prevent:** read each cited file on its own (the Read tool, or `Select-String` on that one path) and copy the number
+  from there. After a docs pass, run a citation check that opens every `path:line` it adds.
+- **Source:** [rca-coop-player-attribution-2026-10-21.md](../rca-coop-player-attribution-2026-10-21.md) finding 8.

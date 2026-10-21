@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TAOM.Core.Logging;
+using TAOM.Features.CoopInterop;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Party;
 
@@ -13,15 +14,18 @@ public class PartyUpgraderUpgradeReadyTroopsHook : IOnPartyUpgraderUpgradeReadyT
 {
     private readonly ITroopWeightService _troopWeightService;
     private readonly IModLogger _logger;
+    private readonly IPlayerControlQuery _playerControl;
 
     // One-shot breadcrumb: log the first shed event (with real values), then stay silent.
     // Static = once per game process, so the diag doesn't flood across upgrade ticks.
     private static bool _loggedShed;
 
-    public PartyUpgraderUpgradeReadyTroopsHook(ITroopWeightService troopWeightService, IModLogger logger)
+    public PartyUpgraderUpgradeReadyTroopsHook(ITroopWeightService troopWeightService, IModLogger logger,
+        IPlayerControlQuery playerControl)
     {
         _troopWeightService = troopWeightService;
         _logger = logger;
+        _playerControl = playerControl;
     }
 
     public void OnUpgradeReadyTroops(PartyBase party)
@@ -41,6 +45,11 @@ public class PartyUpgraderUpgradeReadyTroopsHook : IOnPartyUpgraderUpgradeReadyT
             // CampaignPeriodicEventManager tickers over MobileParty.All, so this postfix was trimming every
             // settlement's militia back to ~20 the same day Town.DailyTick added MilitiaChange.
             if (party.LeaderHero == null)
+                return;
+
+            // Under co-op a remote player's party is not PartyBase.MainParty here. Shed nothing from any
+            // player-driven party, and from none while the player registry is unreadable (Unknown).
+            if (party.IsMobile && _playerControl.OfParty(party.MobileParty) != PlayerControl.NotPlayer)
                 return;
 
             var roster = party.MemberRoster;

@@ -103,14 +103,17 @@ public class EnlistmentDialogBehavior : CampaignBehaviorBase
     /// CommanderUnavailable is deliberately NOT among them is argued in
     /// <see cref="Presentation.ServiceVocabulary.EnlistUnavailableReason"/>. Static because the
     /// split is load-bearing on EnlistGateResult's ladder ORDER — <c>EnlistOfferVisibilityTests</c>.
+    /// A co-op guest never sees the line (<paramref name="deferToHost"/>): the host owns the shared
+    /// world, and a player-hosted host and a solo player are not guests, so they keep it.
     /// </summary>
-    public static bool ShowsOfferFor(EnlistGateResult verdict) =>
-        verdict == EnlistGateResult.Ok || verdict == EnlistGateResult.AtWarWithYourKingdom;
+    public static bool ShowsOfferFor(EnlistGateResult verdict, bool deferToHost) =>
+        !deferToHost && (verdict == EnlistGateResult.Ok || verdict == EnlistGateResult.AtWarWithYourKingdom);
 
     /// <summary>Only a clean Ok is takeable; any other shown verdict renders greyed.</summary>
     public static bool OfferIsTakeable(EnlistGateResult verdict) => verdict == EnlistGateResult.Ok;
 
-    private bool OfferIsVisible() => ShowsOfferFor(_gate.CanEnlistWith(PartnerId()));
+    private bool OfferIsVisible() =>
+        ShowsOfferFor(_gate.CanEnlistWith(PartnerId()), _coopSession.ShouldDeferToHost);
 
     // Re-asks the gate rather than caching the verdict in a field: the engine runs this immediately
     // after the condition for the same sentence, so a cache saves one call and buys stale state.

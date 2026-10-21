@@ -66,7 +66,20 @@ public class EnlistOfferVisibilityTests
     [DataRow(EnlistGateResult.FeatureDisabled, false)]
     public void ShowsOfferFor_EachVerdict_ShowsOnlyOkAndAtWar(EnlistGateResult verdict, bool expected)
     {
-        Assert.AreEqual(expected, EnlistmentDialogBehavior.ShowsOfferFor(verdict));
+        Assert.AreEqual(expected, EnlistmentDialogBehavior.ShowsOfferFor(verdict, deferToHost: false));
+    }
+
+    [DataTestMethod]
+    [DataRow(EnlistGateResult.Ok)]
+    [DataRow(EnlistGateResult.AtWarWithYourKingdom)]
+    [DataRow(EnlistGateResult.AlreadyEnlisted)]
+    [DataRow(EnlistGateResult.NotALord)]
+    [DataRow(EnlistGateResult.UnderMercenaryContract)]
+    [DataRow(EnlistGateResult.CommanderUnavailable)]
+    [DataRow(EnlistGateResult.FeatureDisabled)]
+    public void ShowsOfferFor_CoopGuest_HidesEveryVerdict(EnlistGateResult verdict)
+    {
+        Assert.IsFalse(EnlistmentDialogBehavior.ShowsOfferFor(verdict, deferToHost: true));
     }
 
     [DataTestMethod]
@@ -149,7 +162,7 @@ public class EnlistOfferVisibilityTests
         var verdict = _gate.CanEnlistWith("lord_1_1");
 
         Assert.AreEqual(EnlistGateResult.AtWarWithYourKingdom, verdict);
-        Assert.IsTrue(EnlistmentDialogBehavior.ShowsOfferFor(verdict));
+        Assert.IsTrue(EnlistmentDialogBehavior.ShowsOfferFor(verdict, deferToHost: false));
         Assert.IsFalse(EnlistmentDialogBehavior.OfferIsTakeable(verdict));
     }
 }

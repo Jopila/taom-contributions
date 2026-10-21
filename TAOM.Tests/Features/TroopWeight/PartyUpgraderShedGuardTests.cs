@@ -87,4 +87,24 @@ public class PartyUpgraderShedGuardTests
             src.Contains("party == PartyBase.MainParty"),
             "The main-party guard is missing; the shed would trim the player's own party.");
     }
+
+    /// <summary>
+    /// Under co-op a remote player's party is not PartyBase.MainParty on this peer, so the main-party
+    /// guard alone would shed their troops. The player-control guard must exist, treat Unknown as a
+    /// player (protect troops), and run before the roster read.
+    /// </summary>
+    [TestMethod]
+    public void ShedHook_BailsOutOnAPlayerOrUnknownParty_BeforeTheRosterRead()
+    {
+        var src = ReadHook();
+        const string guard = "if (party.IsMobile && _playerControl.OfParty(party.MobileParty) != PlayerControl.NotPlayer)";
+
+        var guardAt = src.IndexOf(guard, System.StringComparison.Ordinal);
+        var roster = src.IndexOf("party.MemberRoster", System.StringComparison.Ordinal);
+
+        Assert.IsTrue(guardAt >= 0,
+            "The player-control guard is missing; a co-op player's party (or any party while the player "
+            + "registry is unreadable) would be shed.");
+        Assert.IsTrue(guardAt < roster, "The player-control guard must run before the roster is read.");
+    }
 }

@@ -127,6 +127,19 @@ culture-id keys whose ids differ from their kingdom id:
 | `Main/_Module/ModuleData/alignment_desertion/alignment_desertion_config.json` | Defaults |
 | `Main/Features/TaomSettings.cs` | MCM group "World/Alignment Desertion" (GroupOrder 38) |
 
+## Co-op (#966)
+
+Under BannerlordCoop `Clan.PlayerClan` is only this peer's clan, so a remote player's clan used to read as an AI clan and its troops deserted on the AI settings. `AlignmentDesertionBehavior` now asks `IPlayerControlQuery.OfClan` for the owner (`TryResolveOwner`, `AlignmentDesertionBehavior.cs:96-101`) and `DesertionOwnerPolicy` decides:
+
+| Owner | Result |
+|---|---|
+| This peer's own clan | Follows "Apply To Player" |
+| A remote player's clan (Player, not `Clan.PlayerClan`) | No troops lost |
+| Unknown (registry unreadable during a session) | No troops lost |
+| An AI clan | Follows "Apply To AI Lords" |
+
+The decision was to skip, not to relay: a remote player gets no desertion popup, because that relay needs a co-op message and is tracked in #967. Single-player is unchanged. Tests: `DesertionOwnerPolicyTests`. See [coop-interop.md](coop-interop.md).
+
 ## Dependencies
 
 - `IAlignmentService` (Execution) — Free/Evil/Neutral side per kingdom (`GetKingdomSide`) and per culture (`GetCultureSide`).

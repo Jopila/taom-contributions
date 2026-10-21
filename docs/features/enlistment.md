@@ -2266,6 +2266,13 @@ anywhere — renown, special resources, momentum. That is participation-consiste
 wait-menu leave option) after our own review passed, which is worth remembering: a menu *option
 consequence* is a world-mutating entry point even though it doesn't pattern-match like one.
 
+**Co-op guests see no enlist offer (#966).** `EnlistmentDialogBehavior.ShowsOfferFor(verdict, deferToHost)`
+(`EnlistmentDialogBehavior.cs:109`, read at `:115-116` with `ICoopSessionProvider.ShouldDeferToHost`)
+hides the line for a guest, because enlistment is applied host-only and on a server the host is the
+placeholder hero. A player host and a solo player keep the offer. Cost: under BannerlordTogether or
+another co-op mod TAOM cannot probe, or after a failed Coop role bind, `ShouldDeferToHost` is true on
+every peer, so the offer hides in solo play there too. See [coop-interop.md](coop-interop.md).
+
 ## Testing
 
 The Enlistment suite (`TAOM.Tests/Features/Enlistment/`, 1,042 tests as of 2026-09-06, measured with `--filter FullyQualifiedName~TAOM.Tests.Features.Enlistment`; the repo-wide total is not quoted here because it moves with every other feature): transition-table

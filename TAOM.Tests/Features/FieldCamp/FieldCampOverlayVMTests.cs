@@ -50,6 +50,7 @@ public class FieldCampOverlayVMTests
         _activation.IsMainPartyInSettlement.Returns(false);
         _activation.IsMainPartyInEncounter.Returns(false);
         _activation.IsMainPartyDisorganized.Returns(false);
+        _activation.DefersToCoopHost.Returns(false);
     }
 
     private FieldCampOverlayVM CreateVm()
@@ -310,6 +311,29 @@ public class FieldCampOverlayVMTests
     public void ExecuteOpenCampMenu_InEncounter_Blocks()
     {
         _activation.IsMainPartyInEncounter.Returns(true);
+        var vm = CreateVm();
+
+        vm.ExecuteOpenCampMenu();
+
+        _menus.DidNotReceiveWithAnyArgs().Activate(default!);
+    }
+
+    [TestMethod]
+    public void Refresh_CoopGuest_HidesButton()
+    {
+        _activation.DefersToCoopHost.Returns(true);
+        var vm = CreateVm();
+
+        vm.Refresh();
+
+        Assert.IsFalse(vm.ShowCampButton);
+        Assert.IsFalse(vm.CanMakeCamp);
+    }
+
+    [TestMethod]
+    public void ExecuteOpenCampMenu_CoopGuest_DoesNotActivate()
+    {
+        _activation.DefersToCoopHost.Returns(true);
         var vm = CreateVm();
 
         vm.ExecuteOpenCampMenu();

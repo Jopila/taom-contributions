@@ -41,7 +41,7 @@ and the gate.
 | Armory dependency | It is `LOTRLOME_Armory`. A root-level `<action>` kills a dedicated server: `audit_action_set_parity.py` | [armory](../reference/armory-guide.md) |
 | Armory files | A second `LOTRLOME_items/*/` folder shadows an id (grep the prefix); loose `Assets/**` wins; inventory is generated | [armory](../reference/armory-guide.md) |
 | Shield plus polearm | A shield troop never draws a polearm absent from `OneHandedPolearm`: `audit_polearm_shield_parity.py` | [pipeline](../features/weapon-xml-pipeline.md) |
-| Co-op gating | Co-op loaded, peer authority and dedicated server are three different questions | [co-op](../features/coop-interop.md) |
+| Co-op gating | Co-op loaded, peer authority, dedicated server and "is this party a human player's" are four different questions | [co-op](../features/coop-interop.md) |
 | Console commands | Route through `TaomConsole`; a wrongly shaped command throws in unguarded startup discovery | [console](../features/dev-console.md) |
 | Landless cultures | A culture owning no settlement CTDs the daily clan tick: `Patch65`, `LANDLESS_CULTURE` | [spawn guard](../features/lord-spawn-guard.md) |
 | Culture ids | `empire` is Dunland, `battania` Khand; troops may carry another culture: read both from the data | [lesson](../reviews/lessons/data-content-cultures.md) |

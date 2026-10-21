@@ -1269,7 +1269,8 @@ public class SubModule : MBSubModuleBase
         var specialResourceBehavior = new SpecialResourcesBehavior(
             specialResourceService, specialResourceStorage, specialResourceConfig, specialResourceLogger,
             IoC.Resolve<ITroopWeightService>(),
-            IoC.Resolve<TAOM.Features.CoopInterop.IDedicatedServerProvider>());
+            IoC.Resolve<TAOM.Features.CoopInterop.IDedicatedServerProvider>(),
+            IoC.Resolve<TAOM.Features.CoopInterop.ICoopSessionProvider>());
         campaignStarter.AddBehavior(specialResourceBehavior);
         PartyScreenLogic_AddCommand_Patch.SetBehavior(specialResourceBehavior);
 
@@ -1496,7 +1497,8 @@ public class SubModule : MBSubModuleBase
         // at runtime; stateless (no SyncData). Reuses the Execution IAlignmentService.
         campaignStarter.AddBehavior(new Features.AlignmentDesertion.Hooks.AlignmentDesertionBehavior(
             IoC.Resolve<Features.AlignmentDesertion.IAlignmentDesertionService>(),
-            IoC.Resolve<IModLogger>()));
+            IoC.Resolve<IModLogger>(),
+            IoC.Resolve<Features.CoopInterop.IPlayerControlQuery>()));
 
         // EliteEmissary — buy a faction's elite troops for its special resource at key settlements.
         // Registered unconditionally so the MCM master toggle takes effect at runtime; stateless (no SyncData).
@@ -1863,6 +1865,7 @@ public class SubModule : MBSubModuleBase
         TryPatchCategory("Patch33_EquipPresets");
         TryPatchCategory("Patch34_QuickActions");
         TryPatchCategory("Patch109_TelcharsMark");
+        TryPatchCategory("Patch113_CoopRecruitAttribution");
         TryPatchCategory("Patch35_CompanionTactics");
         TryPatchCategory("Patch36_FiefManagement");
         SettlementNameplateWidget_DetermineTargetAlphaValue_Patch.Initialize(

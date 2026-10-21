@@ -911,3 +911,12 @@ moves unhired wanderers on the same event. Campaign listeners run newest-first, 
 - **Prevent:** when a TAOM daily listener must have the last word over a vanilla daily listener, raise a flag on
   the daily tick and act on the next `HourlyTickEvent`; pin daily-alone, hourly-once and hourly-twice.
 - **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 3.
+
+### Before designing around a flag, read what its consumer does with it (co-op player attribution, 2026-10-21)
+Batch B passed `isPlayerOwned = true` for remote co-op players to "protect" their troops from alignment desertion.
+`AlignmentDesertionService.ShouldEvaluate` uses the flag only to choose which MCM toggle applies, and both toggles
+default on, so nothing was protected, and with "Apply To AI" off an unreadable registry made every AI clan desert.
+- **Why missed:** the flag's name was read as its effect; the service was not opened.
+- **Prevent:** before a design sets a flag to get an outcome, quote the consumer lines that turn the flag into that
+  outcome, under the default settings and each toggle combination.
+- **Source:** [rca-coop-player-attribution-2026-10-21.md](../rca-coop-player-attribution-2026-10-21.md) finding 2.

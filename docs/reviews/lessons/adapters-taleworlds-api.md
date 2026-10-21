@@ -1366,3 +1366,14 @@ with `ShouldBeIgnored` and non-leader besiegers (~151).
 - **Prevent:** a TAOM party that picks fights copies vanilla's target filter and strength read, and pins them with an
   IL test.
 - **Source:** `docs/reviews/rca-fire-and-tribute-slice1-2026-10-21.md` finding 3.
+
+### An id read from another mod's message is that mod's key until its sender proves otherwise (co-op player attribution, 2026-10-21)
+Patch113 captured the party id BannerlordCoop passes to `TroopRosterInterface.HandleOnRecruitmentDone` and TAOM
+compared it with `MobileParty.StringId`. The client fills that id from `objectManager.TryGetIdWithLogging`, and
+Coop keys every registered object `{typeof(T).Name}_{id}`, so the value was `MobileParty_<StringId>`, no party
+matched, and no guest was ever charged.
+- **Why missed:** the design read the handler that receives the id and took its parameter name as its meaning; the
+  test fed a value already in the shape the code expected.
+- **Prevent:** trace an id from another mod to the code that writes it, and write the test with a value of that real
+  shape. Normalise it at the boundary (here `CoopRecruitAttributionPatch.ToPartyStringId`), and log once on a miss.
+- **Source:** [rca-coop-player-attribution-2026-10-21.md](../rca-coop-player-attribution-2026-10-21.md) finding 1.

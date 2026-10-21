@@ -74,7 +74,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | BehaviorTrees | `BehaviorTrees.dll` | maintainer-owned | verbatim-port | `Main/BehaviorTrees/**` | cleared |
 | BannerlordTogether | `BannerlordTogether` `BattleLinkMPClient` | no-decompile policy, see detail | interop-only | (none) | cleared |
 | BannerlordCoop | `BannerlordCoop` `Bannerlord-Coop-Team` `Bannerlord.Coop` | UNKNOWN | comparison-only | (none) | uncleared |
-| TAOM-Coop (Sternab) | `Sternab/TAOM-Coop` `TAOM.CoopCompat` | author-granted, terms informal (via the maintainer, 2026-10-21; private repo, no `LICENSE`) | comparison-only | `docs/research/coop-compat-gap-ledger.md` | cleared |
+| TAOM-Coop (Sternab) | `Sternab/TAOM-Coop` `TAOM.CoopCompat` | author-granted, terms informal (via the maintainer, 2026-10-21; private repo, no `LICENSE`) | behavioural-port | `Main/Features/CoopInterop/CoopPlayerControlQuery.cs`; the T6 guard in `Main/Features/TroopWeight/Hooks/PartyUpgraderUpgradeReadyTroopsHook.cs`; `docs/research/coop-compat-gap-ledger.md` (comparison only) | cleared |
 | Yotthani HoN mods (external developer drop) | `Features_fixed` `HoN` `yotthani/bannerlord` | MIT, (c) 2026 yotthani (the maintainer's statement of 2026-10-09; no root `LICENSE` in `yotthani/bannerlord` yet, asked for) | verbatim-port | `Main/Features/SiegeDismount/**` `Main/Features/MixedFormations/**` `Main/Features/SmartCavalryAI/**` `Main/Features/FiefManagement/**` `Main/Features/QuickActions/**` `Main/Features/EquipPresets/**` `Main/Features/CompanionTactics/**` | cleared |
 | TAOM_Promoted | `TAOM_Promoted` `RF_Promoted` | UNKNOWN | behavioural-port | `Main/Features/FieldCommission/**` | uncleared |
 | Yotthani TransferbuttonMenu | `TransferbuttonMenu` `HoN/TransferbuttonMenu` | MIT, (c) 2026 yotthani (the maintainer's statement of 2026-10-09; no root `LICENSE` in `yotthani/bannerlord` yet, asked for) | behavioural-port | `Main/Features/QuickActions/**` | cleared |
@@ -485,10 +485,16 @@ reasoning is worth confirming against the project's actual licence rather than l
 
 Sternab's private `Sternab/TAOM-Coop` holds `TAOM.CoopCompat`, a separate compat module that kept
 TAOM 2.0.29.5 running on BannerlordCoop 0.1.6 and Bannerlord 1.4.8. Sternab gave the maintainer
-access and permission to port it into TAOM (2026-10-21, relayed by the maintainer). So far TAOM
-has only read it to build the [gap ledger](../research/coop-compat-gap-ledger.md), hence
-`comparison-only`. When code is ported, add its paths to Covers and change the derivation. The
-repo also vendors the private `Bannerlord-Coop-Team/BannerlordCoop.DedicatedServer` source under
+access and permission to port it into TAOM (2026-10-21, relayed by the maintainer). TAOM read it
+to build the [gap ledger](../research/coop-compat-gap-ledger.md), which stays
+comparison-only. Since #966 (2026-10-21) two TAOM pieces follow the approach of two of its
+components, `TroopWeightPolicyComponent` and `TournamentBracketComponent`, which were read: the
+"is this party a human player's" provider (`CoopPlayerControlQuery.cs`) and the troop weight guard
+for player-driven parties (`PartyUpgraderUpgradeReadyTroopsHook.cs`). Behaviour was reproduced from
+reading; structure, naming and decomposition are TAOM's (the provider is a reflection-bound
+interface, the guard is one early return), hence `behavioural-port`. Further ports add their paths
+to Covers. The repo
+also vendors the private `Bannerlord-Coop-Team/BannerlordCoop.DedicatedServer` source under
 `wrapper/`: that part is not Sternab's to grant and never enters this public repo.
 
 ### Yotthani HoN mods, the external developer drop `Downloads/Features_fixed/`

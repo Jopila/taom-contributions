@@ -8,6 +8,7 @@ using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.ScreenSystem;
+using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.TroopWeight;
@@ -22,6 +23,7 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
     private readonly IModLogger _logger;
     private readonly ITroopWeightService _troopWeight;
     private readonly IDedicatedServerProvider _dedicatedServer;
+    private readonly ICoopSessionProvider _coopSession;
 
     public SpecialResourcesBehavior(
         ISpecialResourceService service,
@@ -29,7 +31,8 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         ISpecialResourceConfigProvider config,
         IModLogger logger,
         ITroopWeightService troopWeight,
-        IDedicatedServerProvider dedicatedServer)
+        IDedicatedServerProvider dedicatedServer,
+        ICoopSessionProvider coopSession)
     {
         _service = service;
         _storage = storage;
@@ -37,6 +40,7 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         _logger = logger;
         _troopWeight = troopWeight;
         _dedicatedServer = dedicatedServer;
+        _coopSession = coopSession;
     }
 
     private PartyScreenLogic _activePartyScreenLogic;
@@ -423,25 +427,65 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         NotifyEarning(hero.StringId, kingdomId, cultureId, "hideout", before);
     }
 
-    // Charges the one-time recruit_cost for the recruited troop (no-op unless it carries one). Player-only
-    // event, so we always charge Hero.MainHero's resolved resource. Data-driven: any troop with a
-    // recruit_cost in troop_resource_costs.xml is charged here and gated by Patch51 — no hardcoded ids.
+    // Charges the one-time recruit_cost for the recruited troop (no-op unless it carries one). Singleplayer
+    // and a client-hosted co-op host charge Hero.MainHero. Under co-op the server also raises this for a
+    // guest's recruitment (Coop's HandleOnRecruitmentDone), and Patch113 names that guest's party in
+    // RecruitAttributionScope, so the party's leader pays. RecruitChargePolicy owns the who-pays table.
+    // Data-driven: any troop with a recruit_cost in troop_resource_costs.xml is charged here and gated
+    // by Patch51 (a guest's gate reads a stale balance until Batch C, #967).
     private void OnUnitRecruited(CharacterObject character, int count)
     {
         if (character == null || count <= 0) return;
 
-        var hero = Hero.MainHero;
-        if (hero == null) return;
+        var scopedPartyId = RecruitAttributionScope.Current;
+        var hasScope = scopedPartyId != null;
+        var scopedLeader = hasScope
+            ? Campaign.Current?.CampaignObjectManager.Find<MobileParty>(scopedPartyId)?.LeaderHero
+            : null;
+
+        var hero = RecruitChargePolicy.ChoosePayer(
+            isAuthority: _coopSession.IsAuthority, isDedicated: _dedicatedServer.IsDedicatedServer,
+            hasScope: hasScope, scopedLeader, Hero.MainHero);
+        if (hero == null)
+        {
+            LogRecruitNotCharged(scopedPartyId);
+            return;
+        }
 
         GetHeroIds(hero, out var kingdomId, out var cultureId);
         var charged = _service.ChargeRecruitCost(hero.StringId, kingdomId, cultureId, character.StringId, count);
-        if (charged > 0f)
+        // The toast is for the player at this machine: a guest's charge is applied on the server silently.
+        if (charged > 0f && hero == Hero.MainHero)
         {
             var resource = _service.ResolveResource(kingdomId, cultureId);
             InformationManager.DisplayMessage(new InformationMessage(
                 SpecialResourceMessages.RecruitCharge(resource?.DisplayName, charged, count, character.Name?.ToString()).ToString(),
                 Colors.Yellow));
         }
+    }
+
+    private bool _recruitSuppressionLogged;
+    private bool _recruitScopeLostLogged;
+
+    // Nobody was charged. A scoped recruit whose party or leader is gone is worth one warning; a
+    // dedicated server's unscoped recruit is expected and gets one info line.
+    private void LogRecruitNotCharged(string scopedPartyId)
+    {
+        if (scopedPartyId != null)
+        {
+            if (_recruitScopeLostLogged) return;
+            _recruitScopeLostLogged = true;
+            _logger.LogWarning(
+                $"[SpecRes] Recruit not charged: party '{scopedPartyId}' was not found or has no leader hero. " +
+                "Further occurrences are not logged.");
+            return;
+        }
+
+        if (_recruitSuppressionLogged || !_dedicatedServer.IsDedicatedServer) return;
+        _recruitSuppressionLogged = true;
+        _logger.LogInfo(
+            "[SpecRes] Dedicated server: a recruit with no scoped guest party is not charged to the " +
+            "world-gen hero. Further occurrences are not logged.");
     }
 
     // Unified earning toast (round-4 O1): resolves the hero's resource, then displays the positive
@@ -468,19 +512,11 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         var totalDeserted = 0;
         foreach (var entry in desertions)
         {
-            var character = CharacterObject.Find(entry.TroopId);
-            if (character == null) continue;
+            var removed = TroopRosterRemoval.RemoveUpTo(party.MemberRoster, entry.TroopId, entry.DesertCount);
+            if (removed <= 0) continue;
 
-            var index = party.MemberRoster.FindIndexOfTroop(character);
-            if (index < 0) continue;
-
-            var currentCount = party.MemberRoster.GetElementNumber(index);
-            var toRemove = System.Math.Min(entry.DesertCount, currentCount);
-            if (toRemove <= 0) continue;
-
-            party.MemberRoster.AddToCounts(character, -toRemove);
-            totalDeserted += toRemove;
-            _logger.LogInfo($"[SpecRes] Deserted: {entry.TroopId} x{toRemove}");
+            totalDeserted += removed;
+            _logger.LogInfo($"[SpecRes] Deserted: {entry.TroopId} x{removed}");
         }
 
         return totalDeserted;

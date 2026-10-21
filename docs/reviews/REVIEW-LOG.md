@@ -6,6 +6,7 @@ Running scorecard of all reviews. **Reviews 1-99, 2026-04-05 to 2026-09-12.** 93
 
 | # | Date | Feature | Codex Verdict | Claude Verdict | Real Bugs | False Positives | Missed Bugs | Prompt Version |
 |---|------|---------|--------------|----------------|-----------|-----------------|-------------|----------------|
+| (at merge) | 2026-10-21 | Co-op player attribution #966 (Batch B of #964): player registry provider, Patch113 recruit attribution, War of the Ring participation, troop weight, desertion, field camp, enlist offer; uncommitted working tree | issues-found (0 CRITICAL, 2 HIGH, 1 MEDIUM) | agree (F1 and F3 fixed; F2 confirmed, pre-existing, moved to #967 on Mike's decision) | 3 | 0 | 1 HIGH (the desertion flag protected nobody at default settings; Completeness lens) | gpt-6-astra, max; RCA `rca-coop-player-attribution-2026-10-21.md` |
 | (at merge) | 2026-10-20 | Dale review follow-ups: Faction reference gate (#949), lords.xslt cleanup (#950), banner icon and colour gate with seven clan keys (#951), LordFaceVariety (#952), clans.md renown bands, lessons union merge | not run | agree (all fixed; in-game face and banner checks owed) | 1 HIGH, 11 MEDIUM, LOWs | 0 | none known | 8-lens deep review; RCA `rca-followups-949-952-2026-10-20.md` |
 | (at merge) | 2026-10-20 | Dale lord expansion (#943), commit `64345bf3a`: five clans, 27 lords, tier raises, castle distribution | not run | agree (all fixed except the owner-ref gate, a follow-up, and the in-game check) | 2 HIGH, 9 MEDIUM, 5 LOW | 0 | none known | 7-lens deep review; RCA `rca-dale-lord-expansion-2026-10-20.md` |
 | (at merge) | 2026-10-18 | Animation variety and the orc gait revision, third pass (convergence only) on the round 2 fixes | not run | agree (all nine items fixed) | 1 HIGH (a regression of round 2: the validator judged only the plateau it found) and 8 LOW or n/r | 0 | none (this pass is the check on round 2) | convergence pass; RCA `rca-animation-variety-2026-10-17.md` rows 57 to 65 |
@@ -5428,3 +5429,21 @@ Report `docs/reviews/deep-review-031-settings-reads-off-hot-paths-2026-10-02.md`
   - Open: the owner-reference gate and the in-game check.
 - **Codex:** not run.
 - **RCA:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
+
+## Review (number assigned at merge): Co-op player attribution (#966), 6-lens deep review + Codex gpt-6-astra max (2026-10-21)
+
+Scope: Batch B of the co-op dedicated server epic #964, uncommitted. Prompt `docs/reviews/codex-adversarial-coop-player-attribution-2026-10-21.prompt.md`, output `docs/reviews/raw/codex-adversarial-coop-player-attribution-2026-10-21.md`. Each finding was verified against the TAOM source, the BannerlordCoop source and the installed binaries before it was acted on.
+
+| # | Codex severity | Our severity | Agree? | Reason |
+|---|---|---|---|---|
+| F1 | HIGH | HIGH | yes | `AutoRegistryBase.cs:141` and `ClientTroopRosterHandler.cs:37,54` confirm the key format; fixed with `ToPartyStringId` and a log on a scoped miss. Its remapped-id caution declined: every registration path writes the prefix plus the `StringId` |
+| F2 | HIGH | HIGH, pre-existing | yes | `DisableRecruitPrisonersCampaignBehavior.cs:66` and `PartyDoneLogicHandler.cs:724-734` confirm it; moved to #967 (needs server-owned balances) |
+| F3 | MEDIUM | MEDIUM | yes | the step-0 short-circuit in `HarmonyPatchBindingTests.ResolveTarget` (as reviewed) and Patch7's `Prepare` confirm it; fixed with a named `ThirdPartyTargetPatches` set |
+
+| # | Bug | Category | Why missed | Preventive action |
+|---|---|---|---|---|
+| F1 | Coop key compared with `StringId` | Other mod's data contract assumed | The sender of the id was never read; the test used a `StringId`-shaped value | Lesson in `lessons/adapters-taleworlds-api.md`; a real key shape in the test |
+| F2 | Prisoner and mercenary recruits never raise the event under co-op | Replaced engine path not enumerated | Only vanilla's raisers were listed | Recorded on #967 |
+| F3 | Gate exemption written as a rule | Gate exemption broader than its reason | One failing patch was fixed with a rule for all | Lesson in `lessons/testing-qa.md` |
+
+Missed by Codex, found by Claude: the desertion flag only chose a toggle (Completeness lens), fixed by Mike's decision; plus the MEDIUM ADR-002 growth and the split payer decision (Standards lens). Full RCA: `docs/reviews/rca-coop-player-attribution-2026-10-21.md`.

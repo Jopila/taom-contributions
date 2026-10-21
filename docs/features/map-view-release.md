@@ -233,7 +233,7 @@ about 0.4 s instead of 0.08 s. The notes do not use the word hang; that the run 
 completed 14 screens. It has been on by default since `a0befc68` (2026-10-06), at every 20th cover (lines 23-24). That run
 predates TAOM's v1.5.5 bump and the file names no engine version. TAOM's release runs on the map's return instead of on the cover, so the in-game check below still watches
 for a hang or a missing terrain on returning to the map. TAOM adds no scene view to the map: its map views add Gauntlet
-layers only (`FieldCampMapView.cs:47`, `RealmBordersMapView.cs:52`, `MomentumIndicatorMapView.cs:40`).
+layers only (`FieldCampMapView.cs:48`, `RealmBordersMapView.cs:52`, `MomentumIndicatorMapView.cs:40`).
 
 ## Performance
 

@@ -165,6 +165,10 @@ over-limit speed factor (`DefaultPartySpeedCalculatingModel`). One predicate,
 `DisplayFrameSourceTests` pins both. The garrison tooltip below stays deferred as "not
 party-size-budgeted".
 
+### Co-op: player-driven parties are exempt (#966)
+
+The shed hook used to exempt only `PartyBase.MainParty`, which under co-op is this peer's own party, so a remote player's party was trimmed as if it were an AI lord's. `PartyUpgraderUpgradeReadyTroopsHook` now returns for any mobile party whose `IPlayerControlQuery.OfParty` is not `NotPlayer`, so both `Player` and `Unknown` (a live session whose registry is unreadable) shed nothing (`PartyUpgraderUpgradeReadyTroopsHook.cs:52`, after the `LeaderHero` exit). With no session the answer reduces to the old `MainParty` comparison. Limit: a companion-led party is not in Coop's registry and still sheds. The `TaomSettings` toggle is still per peer; making it server-authoritative is open. See [coop-interop.md](coop-interop.md).
+
 ### Auto-resolve is power-driven, NOT count-driven (why weight can't touch it)
 
 Simulated-battle strength is `Σ over each man (Number − Wounded) × per-troop-power`, built by iterating

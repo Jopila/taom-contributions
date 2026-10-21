@@ -83,7 +83,8 @@ its own equivalent.
 | Is a session live? | `GameInterface.ContainerProvider.TryGetContainer(out ILifetimeScope)` | Also the service locator (`TryResolve<T>`). |
 | May I mutate now? | `GameInterface.Policies.CallOriginalPolicy.IsOriginalAllowed()` | The predicate every AutoSync intercept consults. |
 | Escape hatch | `Common.Util.AllowedThread` | `[ThreadStatic]`; wrap network-driven applies. |
-| Do I own this hero? | `HeroExtensions.IsControlledByThisInstance()` / `.IsPlayerHero()` | Only public per-entity ownership query. |
+| Do I own this hero? | `HeroExtensions.IsControlledByThisInstance()` / `.IsPlayerHero()` | Public per-hero ownership queries. |
+| Is this party or clan a human player's? | `GameInterface.Services.Players.PlayerManager.TryGetControlledObjectInfo(object, out ControlledObjectInfo)` | Static. TAOM binds it by reflection since #966 (`CoopPlayerControlQuery`); a clan counts when its `Leader` is registered. Companions and companion-led parties are not registered. |
 
 ### Traps [Verified]
 

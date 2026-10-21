@@ -29,7 +29,8 @@ public class SpecialResourcesBehaviorPhaseGuardTests
             Substitute.For<ISpecialResourceConfigProvider>(),
             Substitute.For<IModLogger>(),
             Substitute.For<ITroopWeightService>(),
-            Substitute.For<IDedicatedServerProvider>());
+            Substitute.For<IDedicatedServerProvider>(),
+            Substitute.For<ICoopSessionProvider>());
     }
 
     [DataTestMethod]

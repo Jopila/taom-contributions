@@ -14,5 +14,7 @@ public static class CoopInteropIoC
         // Session/role probe. Singleton because the reflection BINDING is cached; the probe itself
         // still re-reads Coop's state on every call, which it must — see ICoopSessionProvider.
         container.Register<ICoopSessionProvider, CoopSessionProvider>(Reuse.Singleton);
+        // Who is a human player. Singleton because only the reflection binding is cached; answers are live.
+        container.Register<IPlayerControlQuery, CoopPlayerControlQuery>(Reuse.Singleton);
     }
 }
