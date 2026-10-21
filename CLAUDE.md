@@ -104,6 +104,7 @@ the one-line note before each spawn are in `.claude/rules/model-effort-selection
   `python tools/validate_moduledata.py`. Files across modules: Read and Grep. Issues: the `gh` CLI.
 - MCP write tools bypass every PreToolUse gate (Serena's are denied): git goes through Bash, files
   through Edit and Write ([MCP servers](docs/reference/mcp-servers.md)).
-- Bash heredocs mangle backslashes and quotes: write scripts with the Write tool. Never spell
+- The Bash tool halves `\\`, and a command over 7,500 characters fails (`check-bash-length.sh`):
+  write scripts with the Write tool. Never spell
   `python3` (a Store alias that hangs); use `python`. The PowerShell tool:
   [powershell-tool.md](docs/reference/powershell-tool.md).

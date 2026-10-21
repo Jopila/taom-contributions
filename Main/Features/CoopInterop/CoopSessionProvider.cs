@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using TAOM.Core.Logging;
 using TAOM.Dependencies.Foundation;
@@ -34,7 +35,16 @@ public sealed class CoopSessionProvider : ICoopSessionProvider
     private const string ContainerProviderTypeName = "GameInterface.ContainerProvider";
     private const string ModInformationTypeName = "Common.ModInformation";
 
+    /// <summary>
+    /// Minimum gap between bind attempts while the co-op types are not found. The module is enabled
+    /// but its assembly can load after the first probe, so a failed bind is retried, but never on
+    /// every call: the type scan walks the whole AppDomain.
+    /// </summary>
+    internal const long BindRetryIntervalMs = 5000;
+
     private readonly IModLogger _logger;
+    private readonly Func<string, Type?> _findType;
+    private readonly Func<long> _nowMs;
 
     // Resolved once, then reused. Binding is the expensive part (an AppDomain-wide type scan);
     // the INVOCATION must still happen per call because the answer changes across a session.
@@ -53,8 +63,26 @@ public sealed class CoopSessionProvider : ICoopSessionProvider
     private volatile MethodInfo? _tryGetContainer;
     private volatile PropertyInfo? _isServer;
     private bool _bindingFailedLogged;
+    private bool _recoveryLogged;
+    private bool _bindAttempted;
+    private long _nextBindAttemptMs;
 
-    public CoopSessionProvider(IModLogger logger) => _logger = logger;
+    public CoopSessionProvider(IModLogger logger)
+        : this(logger, ReflectionUtils.FindTypeAcrossLoadedAssemblies,
+               () => Stopwatch.GetTimestamp() * 1000 / Stopwatch.Frequency)
+    {
+    }
+
+    // Internal for TAOM.Tests (InternalsVisibleTo): the type lookup and the clock are the two seams.
+    internal CoopSessionProvider(IModLogger logger, Func<string, Type?> findType, Func<long> nowMs)
+    {
+        _logger = logger;
+        _findType = findType;
+        _nowMs = nowMs;
+    }
+
+    // Internal for TAOM.Tests (InternalsVisibleTo).
+    internal bool RoleProbeAvailable => _tryGetContainer != null;
 
     public bool IsSessionActive => Probe().sessionActive;
 
@@ -88,7 +116,7 @@ public sealed class CoopSessionProvider : ICoopSessionProvider
                 return CoopSessionPolicy.ShouldDeferToHost(false, false, false, false);
 
             EnsureBound();
-            var roleProbeAvailable = _tryGetContainer != null;
+            var roleProbeAvailable = RoleProbeAvailable;
             var (sessionActive, isServer) = roleProbeAvailable ? Probe() : (false, false);
 
             return CoopSessionPolicy.ShouldDeferToHost(
@@ -123,14 +151,28 @@ public sealed class CoopSessionProvider : ICoopSessionProvider
         }
     }
 
-    private void EnsureBound()
+    internal void EnsureBound()
     {
         if (_bound) return;
         lock (_bindLock)
         {
             if (_bound) return;
+
+            // A failed bind is not final: the co-op assembly may load after the first probe. Retry,
+            // but at most once per BindRetryIntervalMs so a hot path does not rescan every call.
+            var now = _nowMs();
+            if (_bindAttempted && now < _nextBindAttemptMs) return;
+
             BindLocked();
+            _bindAttempted = true;
+            if (_tryGetContainer == null)
+            {
+                _nextBindAttemptMs = now + BindRetryIntervalMs;
+                return;
+            }
+
             _bound = true;   // set LAST, so no other thread can observe a half-bound state
+            LogRecoveryIfFailedBefore();
         }
     }
 
@@ -138,26 +180,31 @@ public sealed class CoopSessionProvider : ICoopSessionProvider
     {
         try
         {
-            var containerProvider = ReflectionUtils.FindTypeAcrossLoadedAssemblies(ContainerProviderTypeName);
-            _tryGetContainer = containerProvider?.GetMethod(
+            var containerProvider = _findType(ContainerProviderTypeName);
+            var tryGetContainer = containerProvider?.GetMethod(
                 "TryGetContainer", BindingFlags.Public | BindingFlags.Static);
 
-            var modInformation = ReflectionUtils.FindTypeAcrossLoadedAssemblies(ModInformationTypeName);
-            _isServer = modInformation?.GetProperty(
+            var modInformation = _findType(ModInformationTypeName);
+            var isServer = modInformation?.GetProperty(
                 "IsServer", BindingFlags.Public | BindingFlags.Static);
 
-            if (_tryGetContainer == null)
+            // Bind through locals and publish at the end: a failed bind is now retried while other
+            // threads read these fields outside the lock, so they must never see the method set
+            // before the role-property check below has had its say.
+            _isServer = isServer;
+            _tryGetContainer = isServer != null ? tryGetContainer : null;
+
+            if (tryGetContainer == null)
             {
                 LogOnce($"'{ContainerProviderTypeName}.TryGetContainer' not found — a co-op module is " +
                         "enabled but its session state is unreadable, so TAOM stays authoritative. " +
                         "If this is BannerlordCoop, its API may have changed.");
             }
-            else if (_isServer == null)
+            else if (isServer == null)
             {
                 // Session detectable but role is not. Authority would then hinge on a default-false
                 // flag, making every peer a client and disabling TAOM's campaign logic for everyone.
                 // Treating the whole probe as unavailable keeps the host correct.
-                _tryGetContainer = null;
                 LogOnce($"'{ModInformationTypeName}.IsServer' not found — cannot tell host from " +
                         "client, so TAOM stays authoritative rather than standing every peer down.");
             }
@@ -167,6 +214,14 @@ public sealed class CoopSessionProvider : ICoopSessionProvider
             _tryGetContainer = null;
             LogOnce($"binding failed, treating as no session: {ex.Message}");
         }
+    }
+
+    private void LogRecoveryIfFailedBefore()
+    {
+        if (!_bindingFailedLogged || _recoveryLogged) return;
+        _recoveryLogged = true;
+        try { _logger?.LogInfo("[CoopSession] role probe bound on a later attempt; co-op session state is now readable."); }
+        catch { /* logging must never throw here */ }
     }
 
     private void LogOnce(string message)

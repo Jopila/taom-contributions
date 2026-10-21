@@ -4195,3 +4195,16 @@ generator never read. #758 and #957 each fixed only the block they had just adde
   `--apply` by reading the file and `git show HEAD:<path>` as bytes (converted to the worktree's line endings) and comparing
   them: `git hash-object` and `git diff --stat` cannot see line endings under `core.autocrlf`. Contract: `tools/README.md`.
 - **Source:** issue #959; `tools/tests/test_complete_lords_xslt.py`.
+### Test a stated cause against the failures before fixing it (Bash tool length, 2026-10-21)
+CLAUDE.md said Bash heredocs "mangle backslashes and quotes", and agents kept hitting "unexpected EOF
+while looking for matching" anyway: 151 times in 51 session rows across every agent type. Measured
+over the whole history, the cause was length: `bash -n` accepts 58 of 61 of the failing commands,
+140 of 142 Bash calls at 8,000 or more characters (each ' counted as 4) failed, and none under 7,000
+did. A short heredoc full of quotes runs fine; the backslash half of the old rule is real (the tool
+halves `\\`). `check-bash-length.sh` now refuses the long commands with the fix in its reason.
+- **Why missed:** the rule was written from the symptom (a quote error, seen in heredocs that held
+  quotes), and every failing example also happened to be long, so nothing contradicted it.
+- **Prevent:** before writing a rule or gate against a recurring error, split the calls that fail
+  from the ones that pass on the suspected cause and on size; a cause that does not separate them is
+  not the cause.
+- **Source:** [harness-retro-2026-10-21.md](../harness-retro-2026-10-21.md), proposal P3.

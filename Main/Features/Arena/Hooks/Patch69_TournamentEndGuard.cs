@@ -3,6 +3,7 @@ using System.Text;
 using HarmonyLib;
 using SandBox.ViewModelCollection.Tournament;
 using TAOM.Core.Logging;
+using TAOM.Dependencies.Foundation;
 
 namespace TAOM.Features.Arena.Hooks;
 
@@ -19,7 +20,8 @@ namespace TAOM.Features.Arena.Hooks;
 ///
 /// On any exception this dumps the entire bracket — every round, match, team and participant slot,
 /// with <c>IsValid</c>, whether <c>Participant</c> is null, and the character behind it — then
-/// swallows. The winner panel ends up incomplete, which is strictly better than the tournament
+/// swallows (singleplayer only; under co-op the exception is returned after the dump). The
+/// winner panel ends up incomplete, which is strictly better than the tournament
 /// screen dying mid-input. If a bundle ever arrives with this dump in it, the offending slot is
 /// named outright and the guess becomes a root cause.
 ///
@@ -78,9 +80,16 @@ public static class Patch69_TournamentEndGuard
         // a real bracket-construction bug into a silently half-drawn screen with no report, which is
         // strictly worse than the crash. Same reasoning as PatchShield's ShouldSwallow, which only
         // eats the engine-drift trinity and rethrows everything else.
-        if (!(__exception is NullReferenceException)) return __exception;
+        //
+        // Under co-op nothing is swallowed (#491): a half-drawn winner panel on one peer is a
+        // divergence nobody sees, so the exception goes on to CrashReport with the dump above.
+        if (!ShouldSwallow(__exception, CoopPresence.IsActive)) return __exception;
 
         // The tournament screen survives with an incomplete winner panel.
         return null;
     }
+
+    // Internal for TAOM.Tests (InternalsVisibleTo): the decision is pure, the finalizer is not.
+    internal static bool ShouldSwallow(Exception exception, bool coopActive)
+        => !coopActive && exception is NullReferenceException;
 }

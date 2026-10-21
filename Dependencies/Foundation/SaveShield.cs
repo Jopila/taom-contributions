@@ -283,7 +283,8 @@ public static class SaveShield
             // Co-op interop (2026-07-31): the swallow decision now depends on the category. A
             // SAVE-LOAD failure during a co-op session must be visible — swallowing it leaves a
             // partially deserialised campaign that the host then replicates as authoritative.
-            // MISSION-INIT keeps swallowing (local fault, broken battle not corrupted campaign).
+            // MISSION-INIT is rethrown under co-op too (a half-initialised mission would be synced
+            // as real); in singleplayer both categories keep swallowing.
             // The disable flag still dominates both. The failure is recorded either way: the
             // rethrow path is exactly when we most want the catalog entry.
             var swallow = SaveShieldPolicy.ShouldSwallow(category, CoopPresence.IsActive, !IsSwallowEnabled());

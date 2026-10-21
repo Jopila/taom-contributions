@@ -70,7 +70,7 @@ does today.
 | `PatchShield` unpatching a non-allowlisted Harmony owner after a `MissingMethod`/`MissingField`/`TypeLoad` | Strips the owner's patches (the rescue path) | **Unreachable** — nothing is shielded. The `would unpatch owner 'X' … (withheld)` line now only describes the window where the module-list probe had not resolved at install time |
 | `PatchShield` swallowing those exceptions | Swallows | **Unreachable** — same reason |
 | `SaveShield` on the `SAVE-LOAD` chain | Swallows | **Rethrows**, and still records the failure |
-| `SaveShield` on the `MISSION-INIT` chain | Swallows | Swallows (unchanged) |
+| `SaveShield` on the `MISSION-INIT` chain | Swallows | **Rethrows**, and still records the failure |
 | Harmony census | Not written | Written at the end of `OnGameInitializationFinished` |
 | TAOM diplomacy veto (war / peace / alliance-end) | Enforced | **Off** — host is authoritative (see "Diplomacy ordering") |
 | TAOM time-acceleration UI (`MapBar` extra fast-forward + 4 layout patches + `MapTimeControlVM` mixin) | Registered | **Not registered** — BT owns `Campaign.TimeControlMode` |
@@ -99,16 +99,14 @@ divergence.
 **Why the save-load swallow inverts.** Swallowing inside `SaveManager.Load` /
 `LoadResult.InitializeObjects` leaves a partially deserialised campaign that keeps running and looks
 fine. A host then replicates that half-built state as authoritative. A loud load failure is far
-cheaper than two silently-corrupted saves. `MISSION-INIT` keeps swallowing because that fault is
-local — the cost is one broken battle, not a corrupted campaign.
+cheaper than two silently-corrupted saves. `MISSION-INIT` is rethrown under co-op as well, because a
+swallowed fault leaves a half-initialised mission that the co-op mission sync would treat as real.
 
 Both flag files still function: `patchshield-disabled.flag` (skips the shield install entirely) and
 `saveshield-swallow-disabled.flag` (rethrow everything, read live per call), placed in
 `<game>/Modules/TAOM.Dependencies/`. **Under co-op they buy almost nothing** — the shield already
-skips install and SaveShield already rethrows `SAVE-LOAD` — which matters because community
-dedicated-server recipes still list both as required setup steps. The one thing that still differs:
-`saveshield-swallow-disabled.flag` also rethrows the `MISSION-INIT` chain, which co-op deliberately
-leaves swallowing.
+skips install and SaveShield already rethrows `SAVE-LOAD` and `MISSION-INIT`, which matters because
+community dedicated-server recipes still list both as required setup steps.
 
 ## The Harmony census — our substitute for decompiling
 

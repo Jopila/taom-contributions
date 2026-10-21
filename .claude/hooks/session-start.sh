@@ -56,9 +56,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/_pybin.sh" 2>/dev/null || PYBIN=""
 if [[ -z "${PYBIN:-}" ]]; then
     echo ""
     echo "!!! HOOK TOOLCHAIN DEGRADED: no safe python resolved. !!!"
-    echo "    The python-only gates are failing OPEN right now: check-claude-files-tracked,"
-    echo "    check-commit-subject-version, check-doc-config-drift, check-graphify-usage,"
-    echo "    check-moduledata-validation."
+    echo "    The python-only gates are failing OPEN right now: check-bash-length,"
+    echo "    check-claude-files-tracked, check-commit-subject-version, check-doc-config-drift,"
+    echo "    check-graphify-usage, check-moduledata-validation."
     echo "    validate-push cannot judge a push: it asks on any force marker and allows the rest."
     if ! command -v jq >/dev/null 2>&1; then
         echo "    jq is absent too, so every other JSON-parsing gate is open."

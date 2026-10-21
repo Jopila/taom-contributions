@@ -34,6 +34,11 @@ completely, in the output format it gives.
   `docs/audits/armory-ref-audit.md` unless given `--report -`). Never write, stage, edit a file, or run
   `./build.ps1` or `dotnet`: other reviewers run beside you and parallel builds collide. Name
   the tests you want run; the orchestrator runs them and applies what you find.
+- You have **no Write tool**. A helper script outside the repo, in the session scratchpad, is
+  fine: build it through Bash with every command under 7,500 characters (`check-bash-length.sh`
+  refuses longer ones, which the Bash tool would cut short): `cat > f.py <<'EOF'` for the first
+  part, `cat >> f.py <<'EOF'` for each next part, then `python -I f.py`. The Bash tool halves
+  `\\`, so spell a literal backslash pair `chr(92) * 2` in such a script.
 
 ## How a senior reviewer reads
 

@@ -62,15 +62,15 @@ the rest are this baseline's starting point, not judged.
 
 ## Proposals
 
-Each awaits Mike's decision; nothing has been edited.
+Mike approved all five on 2026-10-21 ("fix it all"). The decision column says what was done.
 
 | # | Proposal | Evidence | Form | Decision |
 |---|---|---|---|---|
-| P1 | Make `detect-docs-gaps.sh` finish inside its budget: kebab-case in bash without a process per folder, an inner time bound, and an UNCHECKED line on overrun | Killed at 39 of 39 starts that logged it; 12.5 s and 17.8 s measured idle | hook fix | pending |
-| P2 | Put the gate-kill numbers on #661 (skip the Python start-up when a call cannot concern a gate) and raise its priority | About 400 gate kills, each an ungated call, in load bursts; `block-dangerous-git` 88 | hook performance | pending |
-| P3 | Find exactly which Bash command shapes the tool breaks on, then turn the CLAUDE.md heredoc line into a gate or a failure hint for those shapes only | 151 failures in 51 session rows across every agent type, although CLAUDE.md already warns | gate or hint, after a test | pending |
-| P4 | Tell `deep-reviewer` (no Write tool) how to run a multi-line check, in its own definition | 66 Write attempts, 35 quoting failures, 41 encoding failures | agent definition (loads on spawn only) | pending, after P3 |
-| P5 | Set `PYTHONIOENCODING=utf-8` in `.claude/settings.json` `env` | 43 encoding failures; the env block reaches Bash; the flag fixes the print. `PYTHONUTF8=1` was tried first and rejected: it also makes `subprocess` decode child output as UTF-8, and `test_gen_troll_anim_clips` broke on PowerShell's cp1252 output (41 tests pass without it). Under `PYTHONIOENCODING=utf-8` the full tools suite passes (4,583 tests) | config | pending |
+| P1 | Make `detect-docs-gaps.sh` finish inside its budget: kebab-case in bash without a process per folder, an inner time bound, and an UNCHECKED line on overrun | Killed at 39 of 39 starts that logged it; 12.5 s and 17.8 s measured idle | hook fix | done: one `sed` and one `tr` for all folders, 12.9 s to 0.5 s, output byte-identical to the old hook on a tree with 80 gaps; no inner bound needed at 0.5 s; `test_hooks.sh` 7l2 |
+| P2 | Put the gate-kill numbers on #661 (skip the Python start-up when a call cannot concern a gate) and raise its priority | About 400 gate kills, each an ungated call, in load bursts; `block-dangerous-git` 88 | hook performance | numbers posted on #661. The prefilter #661 asks for is in place; the 445 kills are machine stalls (every gate on a killed call died together after 22 to 24 s, 212 of the calls held no git). Fix: raise the safety gates' registrations to 30 s; a `settings.json` change, so it waits on the config-protection override |
+| P3 | Find exactly which Bash command shapes the tool breaks on, then turn the CLAUDE.md heredoc line into a gate or a failure hint for those shapes only | 151 failures in 51 session rows across every agent type, although CLAUDE.md already warns | gate or hint, after a test | done: the cause is length, not quotes (`bash -n` accepts 58 of 61; 140 of 142 at 8,000 or more failed, none under 7,000). New gate `check-bash-length.sh` refuses 7,500 or more with the fix in its reason; CLAUDE.md line corrected (the tool does halve `\\`, retested). Its registration waits with P2 |
+| P4 | Tell `deep-reviewer` (no Write tool) how to run a multi-line check, in its own definition | 66 Write attempts, 35 quoting failures, 41 encoding failures | agent definition (loads on spawn only) | done: one bullet, a scratchpad helper built in parts under the length limit, and the halved `\\` |
+| P5 | Set `PYTHONIOENCODING=utf-8` in `.claude/settings.json` `env` | 43 encoding failures; the env block reaches Bash; the flag fixes the print. `PYTHONUTF8=1` was tried first and rejected: it also makes `subprocess` decode child output as UTF-8, and `test_gen_troll_anim_clips` broke on PowerShell's cp1252 output (41 tests pass without it). Under `PYTHONIOENCODING=utf-8` the full tools suite passes (4,583 tests) | config | approved; a `settings.json` change, so it waits with P2 on the config-protection override |
 
 Deferred, no proposal: the Edit "file has not been read yet" errors (135 in 20 sessions) come in
 batches of parallel calls from one message, not retry loops, and the message already says what to

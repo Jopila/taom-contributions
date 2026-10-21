@@ -84,7 +84,13 @@ Adding an id requires four coupled edits, pinned by `BundledDependencyManifestTe
 
 When a co-op module is active: PatchShield stops unpatching foreign owners (stripping one peer's copy
 of a sync patch does not crash — it silently diverges two campaigns, which is worse); SaveShield
-**rethrows** `SAVE-LOAD` faults; the HarmonyCensus writes its report.
+**rethrows** `SAVE-LOAD` and `MISSION-INIT` faults; the HarmonyCensus writes its report.
+
+**Role probe retry.** `CoopSessionProvider` binds Coop's `TryGetContainer` and `IsServer` by reflection
+on first use. A bind that finds nothing (Coop's assembly not loaded yet) is no longer cached as final:
+it is retried at most once every 5 seconds, so a hot path never rescans the AppDomain per call. The
+failure is logged once and the later success once. The authority formulas in `CoopSessionPolicy` are
+unchanged.
 
 ## Layer 2 — assembly resolution
 
@@ -467,10 +473,24 @@ class docs explain why a patch-application site needs a process-constant fact.
 operators to drop `patchshield-disabled.flag` and `saveshield-swallow-disabled.flag` into
 `Modules/TAOM.Dependencies/`. Under co-op both are already the default:
 `PatchShieldPolicy.ShouldInstall(coopActive, disabledByFlag) => !disabledByFlag && !coopActive`
-skips install outright, and `SaveShieldPolicy.ShouldSwallow` already returns false for the
-`SAVE-LOAD` category. The flags still work — and `saveshield-swallow-disabled.flag` still does
-strictly more, because it also rethrows the `MISSION-INIT` chain, which co-op deliberately leaves
-swallowing (that fault is local: one broken battle, not a corrupted campaign).
+skips install outright, and `SaveShieldPolicy.ShouldSwallow` returns false for both the `SAVE-LOAD`
+and the `MISSION-INIT` category. Under co-op a swallowed mission-init fault would leave a
+half-initialised mission that the co-op mission sync then treats as real, so it surfaces like a
+save-load fault. Singleplayer still swallows both. The flags still work.
+
+**Pass 1 shields are removed once co-op is seen.** Pass 1 runs in `OnSubModuleLoad`, when the
+launcher's module list may not be populated yet, so `CoopPresence` can read false there and the
+shield installs. Pass 2 (`OnGameInitializationFinished`) re-probes; when it finds co-op active and
+pass 1 had attached finalizers, `PatchShield.Install` unpatches its own Harmony id and logs how many
+methods it released (`PatchShieldPolicy.ShouldRemoveInstalledShields`). The unpatch call itself is
+not unit tested (it needs live Harmony patches); the decision is.
+
+**Assembly type loading and the tournament guard.** Under co-op,
+`CollectAssemblyTypesShim` no longer swallows a `ReflectionTypeLoadException` from one of Coop's own
+assemblies (`CollectAssemblyTypesPolicy`); a partial type list would register half of Coop's types.
+Other assemblies keep the swallow. `Patch69_TournamentEndGuard` likewise keeps its bracket dump but
+returns the `NullReferenceException` instead of swallowing it when a co-op module is active
+(`Patch69_TournamentEndGuard.ShouldSwallow`).
 
 ## Verification status
 

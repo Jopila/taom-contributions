@@ -16,7 +16,8 @@ namespace TAOM.Dependencies.Foundation;
 /// — but with a partial list of types that DID load successfully via
 /// <see cref="ReflectionTypeLoadException.Types"/>. Bannerlord's launcher and
 /// many tools call GetTypes() over every loaded assembly; without this shim,
-/// one broken mod can cause cascade failures.
+/// one broken mod can cause cascade failures. Under co-op, Coop's own assemblies are the exception
+/// and keep the exception (<see cref="CollectAssemblyTypesPolicy"/>).
 ///
 /// BetaDeps parity (DR3 Phase 4 — 2026-05-25). Re-implements
 /// BetaDeps.Foundation.CollectAssemblyTypesShim.
@@ -104,9 +105,19 @@ public static class CollectAssemblyTypesShim
         {
             try
             {
+                var asm = __instance?.GetName().Name ?? "(?)";
+
+                // Under co-op, a co-op assembly that half-loads must fail loudly (see the policy).
+                if (!CollectAssemblyTypesPolicy.ShouldSwallow(asm, CoopPresence.IsActive))
+                {
+                    DiagLog.Log(Tag,
+                        $"co-op assembly {asm} threw ReflectionTypeLoadException; not swallowed " +
+                        $"(LoaderExceptions: {rtle.LoaderExceptions?.Length ?? 0})");
+                    return __exception;
+                }
+
                 var partial = rtle.Types?.Where(t => t != null).ToArray() ?? Array.Empty<Type>();
                 __result = partial;
-                var asm = __instance?.GetName().Name ?? "(?)";
                 DiagLog.Log(Tag,
                     $"swallowed ReflectionTypeLoadException for {asm}: returned partial " +
                     $"{partial.Length} of {rtle.Types?.Length ?? 0} types " +

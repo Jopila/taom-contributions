@@ -28,6 +28,13 @@ internal sealed class ShieldCoverage
         _attached.Add(method);
     }
 
+    /// <summary>Forgets every decision, after PatchShield has unpatched all of its finalizers.</summary>
+    public void Clear()
+    {
+        _seen.Clear();
+        _attached.Clear();
+    }
+
     /// <summary>Methods examined and decided on, skipped ones included.</summary>
     public int SeenCount => _seen.Count;
 
