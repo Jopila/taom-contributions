@@ -6323,6 +6323,33 @@
     <string id="taom_oath_reply_fallback" text="Another time, perhaps." />
 
     <string id="taom_hhost_orders_unknown" text="Orders unknown." />
+    <string id="taom_fat_spawned" text="Riders bring word: {HOST} has taken the field near {TOWN}, and villages will burn." />
+
+    <string id="taom_fat_wilds" text="the wilds" />
+
+    <string id="taom_fat_going_home" text="{HOST} has had its fill and turns for home." />
+
+    <string id="taom_fat_went_home" text="{HOST} has returned home and scattered." />
+
+    <string id="taom_fat_broken" text="{HOST} is broken. Its survivors scatter." />
+
+    <string id="taom_fat_host_gundabad" text="The Host of Gundabad" />
+
+    <string id="taom_fat_host_rhun" text="The Easterling Host of Rhûn" />
+
+    <string id="taom_fat_host_harad" text="The Warhost of Harad" />
+
+    <string id="taom_fat_host_dunland" text="The Dunlending Host" />
+
+    <string id="taom_fat_host_umbar" text="The Corsair Host of Umbar" />
+
+    <string id="taom_fat_host_gondor" text="The Free Company of Anórien" />
+
+    <string id="taom_fat_host_erebor" text="The Blacklock Warband" />
+
+    <string id="taom_fat_host_mirkwood" text="The Stalker Band of Mirkwood" />
+
+    <string id="taom_fat_host_unknown" text="A raiding host" />
 
   </strings>
 

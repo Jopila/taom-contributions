@@ -245,6 +245,7 @@ behaviour's whole `RegisterEvents` and follow each handler to the service.
 | `SpecialResourcesBehavior` | `OnMapEventEnded`, `OnRaidCompleted`, `OnPrisonerTaken`, `OnHideoutCompleted`, `OnTournamentFinished` | **A dedicated-server gate, not an authority gate.** All five earn paths run through a private `CanEarn()` → `SpecialResourceEarnPolicy.MayCreditMainHero(IDedicatedServerProvider.IsDedicatedServer)`, which logs once and then stays quiet. A headless server was banking prisoner and raid income against the idle world-gen hero — dozens of `[SpecRes] PRISONERS: +N` lines — while the remote players who fought those battles earned nothing. |
 | `HardQuestionsCampaignBehavior` | `OnHeroPrisonerReleased` and `OnHeroKilled`, through `HeroDied` and `ReleaseHero` (`!ShouldDeferToHost`) | **Stands down** on every peer while TAOM must defer to a co-op host, including under a co-op mod whose role TAOM cannot read. A released or dead lord's strip record is only cleared (`StripService.OnReleased`, `OnDied`) when the gate passes, because the record rides TAOM `SyncData` that nothing replicates. See [hard-questions.md](hard-questions.md). |
 | `HardQuestionsDialogBehavior` | `CanAsk`, `CanStrip`, `PriceLine`, `PriceIsPayable`, `PayBribe`, `Force`, `Strip` and `RepliesAs`, through `InterrogationService.Eligible` (`!ShouldDeferToHost`) | **Gated in the service, not in the behavior.** The behavior's handlers hold no co-op check of their own; every condition and consequence calls `InterrogationService`, whose `Eligible` returns nothing while TAOM must defer, so the options are hidden and a bribe, force or strip cannot start. `OnConversationEnded` stays ungated: it only runs the deed a gated option queued, and the queue is empty otherwise. See [hard-questions.md](hard-questions.md). |
+| `FireAndTributeBehavior` | `OnSessionLaunched`, `OnDailyTick`, `OnHourlyTick`, `OnVillageStateChanged` and `OnMobilePartyDestroyed`, through `FireAndTributeService.IsSinglePlayer` | **Single-player only** ([Fire and Tribute](fire-and-tribute.md)): stands down on every peer while a session is live, while a co-op mod TAOM cannot probe is loaded, or on a dedicated server (`IsSessionActive \|\| ShouldDeferToHost \|\| IsDedicatedServer`). No host spawns. A host restored into such a session, or alive when the gate closes, has its AI pin released, its record dropped and its side's cooldown started at the session launch, the next daily tick or the next hourly tick, whichever comes first; it is never despawned there, because removing a party is a world write the other peers would not see. `OnVillageStateChanged` and `OnMobilePartyDestroyed` are not gated as handlers: they look up at most three host records, which a closed gate has already emptied, then count a loot or report a break. The save record is TAOM `SyncData` that nothing replicates, and a peer that stands down never writes a host into it. The four MCM switches are counted in the settings fingerprint (`CoopSettingsRelevance` does not exclude them). Trade-off: a solo player with a co-op mod TAOM cannot probe, or `coop-force-active.flag` present, gets no hosts. |
 
 **What makes any peer earn at all is the participation fix in the same change.** The victory gate
 used to ask whether the player IS the winning side's `LeaderParty.LeaderHero`, conflating
@@ -346,12 +347,12 @@ to characterise. The existing try/catch around acceptance is containment, not co
 
 ## What is NOT done
 
-- **No MCM settings parity: reported, not yet exchanged.** TAOM ships **438** settings across
+- **No MCM settings parity: reported, not yet exchanged.** TAOM ships **442** settings across
   four MCM classes (the 284 here counted `[SettingPropertyGroup]` lines alongside the properties;
-  the split is 408 in `TaomSettings`, 19 in `BattleLoadDiagnosticsSettings`, 10 in
+  the split is 412 in `TaomSettings`, 19 in `BattleLoadDiagnosticsSettings`, 10 in
   `CrashReportSettings` and 1 in `BlowDiagnosticsSettings`).
-  **289 are simulation-relevant**, traced to the feature that consumes each one and kept when that feature
-  ships a GameModel, CampaignBehavior, MissionBehavior or Harmony patch; all 289 are in
+  **293 are simulation-relevant**, traced to the feature that consumes each one and kept when that feature
+  ships a GameModel, CampaignBehavior, MissionBehavior or Harmony patch; all 293 are in
   `TaomSettings`. The 149 excluded (67 counted 2026-09-22, less the Native Skin Fixes toggle removed with the feature 2026-10-05, the 38 Realm Borders settings added from 2026-09-30 to 2026-10-08, the Crash Report AfterStart dev trigger added 2026-10-01, the Battle Corpses advice toggle and button added 2026-10-01, and the thirteen Menus & Loading Screens settings added 2026-10-01, #704, and the three tick profiler settings added 2026-10-02, and the hitch probe toggle added 2026-10-02, and the Animation Clip Memory probe toggle added 2026-10-02, and the map profiler toggle added 2026-10-03, and the Load-Time Stamps toggle added 2026-10-03, and the Race Abilities war cry, message and debug-log toggles added 2026-10-04, and the Race Abilities glow toggle added 2026-10-04, and the Crash Report mission-start survival toggle added 2026-10-08, and the Crash Report skeleton buffer guard and watch toggles added 2026-10-08, and the Map Performance nameplate cull and map view release settings added 2026-10-08, and the War Chronicle announcements toggle added 2026-10-08, and the three Animation Variety settings and the swing alternative probe toggle added 2026-10-17, and the Hidden Hosts toggle added 2026-10-18, and the Fell Foes debug log toggle added 2026-10-19, the two Telchar's Mark settings added 2026-10-19, #875, the two Reeve's Ledger switches added 2026-10-19, #857, and the Lost Footing census toggle added 2026-10-20, #894) are instrumentation, player-local convenience,
   presentation, two action buttons, and the three time-acceleration knobs whose UI co-op already
   suppresses; the list with its reasons is
@@ -364,13 +365,13 @@ to characterise. The existing try/catch around acceptance is containment, not co
   excluded name may stop matching a real property, and no two settings classes may share a
   property name.
 
-  `SettingsFingerprint` hashes those 289: one code per MCM group plus a global, culture-invariant
+  `SettingsFingerprint` hashes those 293: one code per MCM group plus a global, culture-invariant
   so a comma decimal separator cannot fake a mismatch — and `SettingsFingerprintLog` writes them
   to each peer's log under the co-op gate. It reads all four classes, not just `TaomSettings`:
   every diagnostics property is excluded so this moves no hash today (a test asserts exactly
   that), and it means a simulation-affecting setting added to a diagnostics page later is covered
   the day it lands. That makes the "compare settings manually" workaround a comparison of a few
-  short strings instead of 289 values read off two screens.
+  short strings instead of 293 values read off two screens.
 
   **All four classes are `AttributeGlobalSettings<T>`, and the reasoning above depends on it.**
   MCM has three scopes, and only one of them travels with a save. Verified against MCM 5.12.1:
@@ -388,11 +389,11 @@ to characterise. The existing try/catch around acceptance is containment, not co
   PerSave class would be equal by construction and need not be hashed; a PerCampaign one would
   need hashing more urgently than a global, not less.
 
-  **A matching fingerprint means the MCM settings agree, and nothing wider.** It covers the 289
+  **A matching fingerprint means the MCM settings agree, and nothing wider.** It covers the 293
   values on the four settings pages. It does not cover the `ModuleData` JSON/XML that several
   features fall back to when a setting is unset, the `TAOM.Dependencies` flag files
   (`patchshield-disabled.flag`, `saveshield-swallow-disabled.flag`, `coop-force-active.flag`),
-  or any difference outside TAOM. None of those three flags gates a setting in the 289 (each
+  or any difference outside TAOM. None of those three flags gates a setting in the 293 (each
   governs a Dependencies-side shield with no MCM property), but the general point holds: read the
   log line as "our settings pages match", not as "our installs are equivalent".
 

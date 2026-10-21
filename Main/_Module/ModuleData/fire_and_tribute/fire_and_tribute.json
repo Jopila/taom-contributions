@@ -1,0 +1,143 @@
+{
+  "tuning": {
+    "firstHostDelayDays": 45,
+    "spawnChance": 0.05,
+    "cooldownDays": 120,
+    "warlessStartDay": 89,
+    "minTroops": 80,
+    "maxTroops": 200,
+    "strengthShare": 0.012,
+    "strengthPerRaid": 2000,
+    "quotaMin": 6,
+    "quotaMax": 15,
+    "quotaExtraMin": 0,
+    "quotaExtraMax": 3,
+    "minHearth": 150,
+    "nearestVillages": 3,
+    "engageRadius": 8,
+    "engageStrengthRatio": 0.8,
+    "maxHostDays": 30,
+    "homeRadius": 4,
+    "spawnRadiusDays": 0.25
+  },
+  "hosts": [
+    {
+      "id": "gundabad",
+      "side": "Evil",
+      "clan": "gundabad_raiders",
+      "name": "{=taom_fat_host_gundabad}The Host of Gundabad",
+      "anchors": ["town_G1", "castle_G4", "town_G2"],
+      "targetSides": ["Free"],
+      "preferredTargets": [],
+      "troops": [
+        { "id": "gundabad_snaga", "share": 0.30 },
+        { "id": "gundabad_hunter", "share": 0.20 },
+        { "id": "gundabad_grunt", "share": 0.30 },
+        { "id": "gundabad_lurker", "share": 0.20 }
+      ]
+    },
+    {
+      "id": "rhun",
+      "side": "Evil",
+      "clan": "rhun_raiders",
+      "name": "{=taom_fat_host_rhun}The Easterling Host of Rhûn",
+      "anchors": ["town_RU1", "town_RU3", "town_RU5"],
+      "targetSides": ["Free"],
+      "preferredTargets": [],
+      "troops": [
+        { "id": "balcoth_volunteer", "share": 0.20 },
+        { "id": "balcoth_footman", "share": 0.30 },
+        { "id": "kharaghul_rider", "share": 0.25 },
+        { "id": "balcoth_archer", "share": 0.25 }
+      ]
+    },
+    {
+      "id": "harad",
+      "side": "Evil",
+      "clan": "harad_raiders",
+      "name": "{=taom_fat_host_harad}The Warhost of Harad",
+      "anchors": ["town_A3", "town_A5", "town_A4"],
+      "targetSides": ["Free"],
+      "preferredTargets": [],
+      "troops": [
+        { "id": "harad_reg_levy", "share": 0.20 },
+        { "id": "harad_reg_bowman", "share": 0.40 },
+        { "id": "harad_reg_footman", "share": 0.40 }
+      ]
+    },
+    {
+      "id": "dunland",
+      "side": "Evil",
+      "clan": "dunland_raiders",
+      "name": "{=taom_fat_host_dunland}The Dunlending Host",
+      "anchors": ["town_EN3", "town_EN1", "town_EN2"],
+      "targetSides": ["Free"],
+      "preferredTargets": [],
+      "troops": [
+        { "id": "dunland_peasant", "share": 0.10 },
+        { "id": "dunland_raider", "share": 0.35 },
+        { "id": "dunland_hunter", "share": 0.25 },
+        { "id": "dunland_clan_warrior", "share": 0.30 }
+      ]
+    },
+    {
+      "id": "umbar",
+      "side": "Neutral",
+      "clan": "umbar_corsairs",
+      "name": "{=taom_fat_host_umbar}The Corsair Host of Umbar",
+      "anchors": ["town_U1", "town_U2", "castle_U7"],
+      "targetSides": ["Free", "Evil"],
+      "preferredTargets": [],
+      "troops": [
+        { "id": "aux_basic", "share": 0.15 },
+        { "id": "umbar_elite", "share": 0.35 },
+        { "id": "umbar_elite_root1", "share": 0.25 },
+        { "id": "umbar_elite_root0", "share": 0.25 }
+      ]
+    },
+    {
+      "id": "gondor",
+      "side": "Free",
+      "clan": "gondor_soldiers",
+      "name": "{=taom_fat_host_gondor}The Free Company of Anórien",
+      "anchors": ["town_EW1", "castle_EW4", "town_EW7"],
+      "targetSides": ["Evil"],
+      "preferredTargets": [],
+      "troops": [
+        { "id": "gondor_ano_peasant", "share": 0.10 },
+        { "id": "gondor_ano_militia", "share": 0.35 },
+        { "id": "gondor_ano_archer_militia", "share": 0.25 },
+        { "id": "gondor_ano_footman", "share": 0.30 }
+      ]
+    },
+    {
+      "id": "erebor",
+      "side": "Evil",
+      "clan": "erebor_warriors",
+      "name": "{=taom_fat_host_erebor}The Blacklock Warband",
+      "anchors": ["town_RU4", "town_RU5", "town_RU7"],
+      "targetSides": ["Free"],
+      "preferredTargets": [],
+      "troops": [
+        { "id": "erebor_reg_miner", "share": 0.25 },
+        { "id": "erebor_reg_militia", "share": 0.30 },
+        { "id": "erebor_reg_skirmisher", "share": 0.20 },
+        { "id": "erebor_reg_company", "share": 0.25 }
+      ]
+    },
+    {
+      "id": "mirkwood",
+      "side": "Free",
+      "clan": "mirkwood_stalkers",
+      "name": "{=taom_fat_host_mirkwood}The Stalker Band of Mirkwood",
+      "anchors": ["town_M1", "town_M2", "castle_M3"],
+      "targetSides": ["Evil"],
+      "preferredTargets": [],
+      "troops": [
+        { "id": "mirkwood_militia_spearman", "share": 0.40 },
+        { "id": "mirkwood_militia_archer", "share": 0.35 },
+        { "id": "mirkwood_militia_veteran_spearman", "share": 0.25 }
+      ]
+    }
+  ]
+}

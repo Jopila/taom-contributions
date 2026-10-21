@@ -63,5 +63,6 @@ internal static class FeatureModules
         new Features.FarWatch.FarWatchModule(),
         new Features.Namegiving.NamegivingModule(),
         new Features.MinorClanMigration.MinorClanMigrationModule(),
+        new Features.FireAndTribute.FireAndTributeModule(),
     };
 }

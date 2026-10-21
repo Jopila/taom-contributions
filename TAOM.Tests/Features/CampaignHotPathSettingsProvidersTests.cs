@@ -14,6 +14,7 @@ using TAOM.Features.CaravanTrade;
 using TAOM.Features.CastleRecruitment;
 using TAOM.Features.EyeOfSauron;
 using TAOM.Features.FieldCommission;
+using TAOM.Features.FireAndTribute;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HiddenHosts;
 using TAOM.Features.FromTheAshes;
@@ -93,6 +94,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(GiftSettingsProvider))]
     // Not a hot path: both switches are read once, when the town management window opens. The accessor still takes the settings once.
     [DataRow(typeof(ReevesLedgerSettingsProvider))]
+    // #870: the four switches are read on every hourly tick while a raiding host rides.
+    [DataRow(typeof(FireAndTributeSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -132,6 +135,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IFromTheAshesSettingsProvider), typeof(FromTheAshesSettingsProvider))]
     [DataRow(typeof(IGiftSettingsProvider), typeof(GiftSettingsProvider))]
     [DataRow(typeof(ReevesLedgerSettingsProvider), typeof(ReevesLedgerSettingsProvider))]
+    [DataRow(typeof(IFireAndTributeSettings), typeof(FireAndTributeSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -418,6 +422,39 @@ public class CampaignHotPathSettingsProvidersTests
 
         Assert.IsFalse(sut.LedgerEnabled);
         Assert.IsFalse(sut.StepsEnabled);
+    }
+
+    [TestMethod]
+    public void FireAndTribute_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new FireAndTributeSettingsProvider(mcm);
+        Assert.IsTrue(sut.Enabled);
+        Assert.IsTrue(sut.FreeHostsEnabled);
+        Assert.IsTrue(sut.NeutralHostsEnabled);
+        Assert.IsTrue(sut.EvilHostsEnabled);
+
+        mcm.EnableFireAndTribute = false;
+        mcm.FireAndTributeFreeHosts = false;
+        mcm.FireAndTributeNeutralHosts = false;
+        mcm.FireAndTributeEvilHosts = false;
+
+        Assert.IsFalse(sut.Enabled);
+        Assert.IsFalse(sut.FreeHostsEnabled);
+        Assert.IsFalse(sut.NeutralHostsEnabled);
+        Assert.IsFalse(sut.EvilHostsEnabled);
+    }
+
+    [TestMethod]
+    public void FireAndTribute_NoMcm_EverySwitchDefaultsOn()
+    {
+        // TaomSettings.Instance is null in the test host (MCM is never initialised), so these hold the fallbacks.
+        var sut = new FireAndTributeSettingsProvider();
+
+        Assert.IsTrue(sut.Enabled);
+        Assert.IsTrue(sut.FreeHostsEnabled);
+        Assert.IsTrue(sut.NeutralHostsEnabled);
+        Assert.IsTrue(sut.EvilHostsEnabled);
     }
 
     [TestMethod]

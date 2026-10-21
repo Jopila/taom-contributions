@@ -2191,6 +2191,32 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Harass AI lords", Order = 1, RequireRestart = false,
         HintText = "When enabled (default), AI lords marching past an enemy fort are slowed (disorganized) too, at a lower chance than yours, and lose nothing else. Turn it off to protect the campaign pace: the effect then stays on your own party and the army you lead (AI lords marching with your army still take their share). Does nothing while Enable Watchful Holds is off.")]
     public bool WatchfulHoldsHarassAiLords { get; set; } = true;
+
+    // --- Fire and Tribute (raiding hosts, docs/features/fire-and-tribute.md, #870) ---
+    //
+    // The switches are read live on every hourly tick while a host rides, so RequireRestart = false. GroupOrder 66 is
+    // unused; it is the group's first property, so it carries the order (MCM ignores a GroupOrder on any later one).
+    // A host alive when its switch goes off is sent away at its next hourly tick, or once its battle ends if it is fighting.
+
+    [SettingPropertyGroup("World/Fire and Tribute", GroupOrder = 66)]
+    [SettingPropertyBool("Enable Fire and Tribute", Order = 0, RequireRestart = false,
+        HintText = "When enabled (default), raiding hosts ride once the War of the Ring is in Full War, or from day 89 when the War of the Ring is switched off. They ride out of their homelands to burn the villages of the opposed side: Orcs of Gundabad, Easterlings of Rhûn, Haradrim, Dunlendings and the Blacklocks of Erebor against the Free Peoples; outlaw bands of Gondor and Mirkwood against the Shadow; Corsairs of Umbar against either. A host raids the villages of the strongest enemy realm, fights weaker parties of that realm it meets, and goes home after its quota. When off, no host rides and a host already out is sent away at its next hourly tick; one still fighting is sent away once its battle ends. Single player only. Applies at once, no restart.")]
+    public bool EnableFireAndTribute { get; set; } = true;
+
+    [SettingPropertyGroup("World/Fire and Tribute")]
+    [SettingPropertyBool("Free Peoples Hosts", Order = 1, RequireRestart = false,
+        HintText = "When enabled (default), the outlaw bands of Gondor and Mirkwood may ride against the Shadow's realms. Does nothing while Enable Fire and Tribute is off.")]
+    public bool FireAndTributeFreeHosts { get; set; } = true;
+
+    [SettingPropertyGroup("World/Fire and Tribute")]
+    [SettingPropertyBool("Neutral Hosts", Order = 2, RequireRestart = false,
+        HintText = "When enabled (default), the Corsair Host of Umbar may ride against Free or Shadow realms. Does nothing while Enable Fire and Tribute is off.")]
+    public bool FireAndTributeNeutralHosts { get; set; } = true;
+
+    [SettingPropertyGroup("World/Fire and Tribute")]
+    [SettingPropertyBool("Shadow Hosts", Order = 3, RequireRestart = false,
+        HintText = "When enabled (default), the hosts of Gundabad, Rhûn, Harad and Dunland, and the Blacklocks of Erebor, may ride against the Free Peoples' realms. Does nothing while Enable Fire and Tribute is off.")]
+    public bool FireAndTributeEvilHosts { get; set; } = true;
     // --- Bonds of Battle (relations earned on campaign, docs/features/bonds-of-battle.md) ---
     //
     // Every value is read live where it is used (at a battle's end, a troop hand-over, a barter), so nothing is applied once

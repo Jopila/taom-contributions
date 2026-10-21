@@ -45,7 +45,8 @@ internal static class CreatureBandParties
     // Vanilla's rule, step for step (v1.5.3 BanditSpawnCampaignBehavior.GetSpawnPositionAroundSettlement, 543-564): a
     // point in the player's sight is retried up to 15 times around itself, taking the first reachable, valid one whose
     // path distance from the player is past his sight; if none is, the first point stands.
-    private static CampaignVec2 OutOfPlayerSight(CampaignVec2 position, float radius)
+    // Also used by the Fire and Tribute hosts' adapter (RaidHostAdapter.SpawnHost).
+    internal static CampaignVec2 OutOfPlayerSight(CampaignVec2 position, float radius)
     {
         MobileParty? player = MobileParty.MainParty;
         if (player == null) return position;

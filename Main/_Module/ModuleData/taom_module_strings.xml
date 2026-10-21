@@ -3677,4 +3677,22 @@
 
 	<!-- Dunland coronation (empire culture): the engine reads this line instead of a liege title -->
 	<string id="str_become_king_empire" text="{=taom_str_become_king_empire}On {DAY_OF_YEAR}, {YEAR}, {KING_NAME} was hailed as {?IS_KING_MALE}Brenin{?}Brenhines{\?} of Dunland." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- FireAndTributeNoticeAdapter -->
+	<string id="taom_fat_spawned" text="{=taom_fat_spawned}Riders bring word: {HOST} has taken the field near {TOWN}, and villages will burn." />
+	<string id="taom_fat_wilds" text="{=taom_fat_wilds}the wilds" />
+	<string id="taom_fat_going_home" text="{=taom_fat_going_home}{HOST} has had its fill and turns for home." />
+	<string id="taom_fat_went_home" text="{=taom_fat_went_home}{HOST} has returned home and scattered." />
+	<string id="taom_fat_broken" text="{=taom_fat_broken}{HOST} is broken. Its survivors scatter." />
+	<!-- fire_and_tribute.json host names -->
+	<string id="taom_fat_host_gundabad" text="{=taom_fat_host_gundabad}The Host of Gundabad" />
+	<string id="taom_fat_host_rhun" text="{=taom_fat_host_rhun}The Easterling Host of Rhûn" />
+	<string id="taom_fat_host_harad" text="{=taom_fat_host_harad}The Warhost of Harad" />
+	<string id="taom_fat_host_dunland" text="{=taom_fat_host_dunland}The Dunlending Host" />
+	<string id="taom_fat_host_umbar" text="{=taom_fat_host_umbar}The Corsair Host of Umbar" />
+	<string id="taom_fat_host_gondor" text="{=taom_fat_host_gondor}The Free Company of Anórien" />
+	<string id="taom_fat_host_erebor" text="{=taom_fat_host_erebor}The Blacklock Warband" />
+	<string id="taom_fat_host_mirkwood" text="{=taom_fat_host_mirkwood}The Stalker Band of Mirkwood" />
+	<string id="taom_fat_host_unknown" text="{=taom_fat_host_unknown}A raiding host" />
+
 </strings>
