@@ -7,7 +7,7 @@ effort: max
 
 # Deep Review
 
-Launch as many review agents as the work needs. Which lenses run follows what is in scope (Step 2 table), and there is NO LIMIT on the total: if the scope demands 10, 20 or 100 agents, launch them, at most four at a time (Step 2 "Waves of four"). Scale the review to match the risk.
+Scale the review to the risk of the change (Step 2 "Risk tier", Mike 2026-10-22): the tier picks the lenses and the Codex effort, and a second wave runs only when the first finds a HIGH or CRITICAL. Within a tier there is no limit on agents, at most four at a time (Step 2 "Waves of four").
 
 Run this AFTER completing a feature or fix, BEFORE closing out.
 
@@ -17,9 +17,9 @@ Run this AFTER completing a feature or fix, BEFORE closing out.
 
 The feature or area to review: `$ARGUMENTS` (if empty, review all uncommitted changes).
 
-## Step 0 (Optional): Codex Independent Pre-Review
+## Step 0: Codex Independent Pre-Review
 
-**Trigger when:** `$ARGUMENTS` contains `--codex` (strip `--codex` from the feature name before proceeding).
+**Trigger when:** the Step 2 risk tier is 1 or 2, or `$ARGUMENTS` contains `--codex` (strip `--codex` from the feature name before proceeding). Codex costs no Claude usage and, on 2026-10-22, found the B3 defects that seven Claude lenses missed, so a tier 1 or 2 review always runs it; the session still needs Mike's standing word for paid dispatch (he gave it for this work on 2026-10-22).
 
 If triggered:
 1. Identify changed files (same logic as Step 1 below).
@@ -44,7 +44,7 @@ If triggered:
 
 If Codex and any Claude agent disagree on a finding, flag the disagreement explicitly — it is valuable signal.
 
-If `--codex` is not present, skip this step entirely.
+At tier 3 without `--codex`, skip this step entirely.
 
 ## Step 1: Identify Scope
 
@@ -63,9 +63,21 @@ Each lens is a prompt file under `lenses/` (next to this file) that the reviewer
 
 **XML is code** (Mike, 2026-09-18). One wrong attribute spawns a naked troop, hangs a battle load or kills a dedicated server, and the engine reports almost none of it, so XML gets the same review as C#.
 
-### Which lenses run
+### Risk tier (decide first)
 
-Decide from the Step 1 split. Every changeset shape is covered; a lens with nothing in its domain is reported NOT IN SCOPE in Step 3, never dropped silently.
+Pick the highest tier any file in scope reaches, and say the tier and why in one line before launching.
+
+| Tier | The change touches | Codex (Step 0) | Claude lenses, one wave |
+|---|---|---|---|
+| 1 | A Harmony patch, a GameModel, save data or a save definer, co-op authority or sync, DI timing or composition, native or engine calls, a mission or campaign tick, live `TAOM_Map` or Armory data | `ultra` | 5 Data flow, 2 Engine compatibility, plus 7 XML for XML and Tooling for scripts |
+| 2 | Moves between assemblies, build and deploy targets, release tooling, gates and tests, UI that reads game state | `xhigh` | 5 Data flow, plus 7 XML for XML and Tooling for scripts |
+| 3 | Docs, comments, harness text only | none | none: `python tools/lint_docs.py --fail-on-drift` and a read |
+
+**Second wave:** only when the first wave or Codex reports a CRITICAL or HIGH. It runs the remaining lenses in scope from the table below on the files involved, with those findings in SCOPE NOTES. A finding at MEDIUM or below is fixed and verified with tests, not re-reviewed. Lens 1 Standards, 3 Efficiency, 4 Completeness and 6 Design run only in a second wave or when Mike asks for a full review: on 2026-10-22 they found mostly naming, citation and comment items that the fix pass and `/verify` catch. Step 3e RCA still applies to every confirmed finding.
+
+### Which lenses run (their domains)
+
+Decide from the Step 1 split, within the tier above. A lens in scope that the tier does not launch is reported SKIPPED BY TIER in Step 3, never dropped silently.
 
 | Agent | Lens file | Runs when |
 |---|---|---|
@@ -80,7 +92,7 @@ Decide from the Step 1 split. Every changeset shape is covered; a lens with noth
 
 ### Waves of four
 
-**At most four agents in flight.** Launch a wave, let every agent in it report, then launch the next. A subagent that hits the usage limit returns nothing, so a wave boundary caps what a limit can cost (memory `agent-budget-discipline`; on 2026-09-18 a six-wide review lost three agents that way). Fill the first wave with the defect lenses in scope (1, 2, 5, 7), then the others in order. A later wave's prompts may carry the earlier waves' CRITICAL and HIGH findings, so the design lens does not polish code about to be restructured. There is no limit on the total, only on what is in flight.
+**At most four agents in flight.** Launch a wave, let every agent in it report, then launch the next. A subagent that hits the usage limit returns nothing, so a wave boundary caps what a limit can cost (memory `agent-budget-discipline`; on 2026-09-18 a six-wide review lost three agents that way). Fill the first wave with the tier's lenses; a second wave, when the tier rule calls for one, takes the others in order. A later wave's prompts may carry the earlier waves' CRITICAL and HIGH findings, so the design lens does not polish code about to be restructured. There is no limit on the total, only on what is in flight.
 
 ### The spawn prompt
 
@@ -245,4 +257,4 @@ When the verdict is NEEDS FIXES and the user chooses to address findings now:
 - If fixes are confined to one feature module, **suggest `/freeze`** scoped to that module before starting. Prevents the fix-loop from drifting into adjacent code that wasn't part of the review.
 - If a finding is structural (root cause unclear, multiple symptoms in one area), invoke **`/investigate`** instead of fixing directly — its 6-phase workflow auto-engages `/freeze` and enforces the Iron Law.
 - **Verify each fix at the OUTERMOST gate, not just the layer you edited.** When a fix makes a method's behavior unconditional (or changes its guard semantics), grep every CALLER of that method for early-outs that re-condition it before marking the finding fixed — and note that layer-local regression tests cannot see caller-level gates. (Codex review 72 caught a service-layer "unconditional close" fix bypassed by two hook-level `IsEnabled` gates one review after it shipped; RCA `rca-tournament-exit-hang-2026-07-06.md` finding #4.)
-- After fixes land, re-run `/deep-review` (or `/deep-review --codex`) on the fix diff to confirm no new HIGH findings introduced. Its design lens sees only that diff, so the loop narrows each round.
+- After fixes land, re-review the fix diff only when it fixed a CRITICAL or HIGH, or changed runtime behaviour in a tier 1 area: one Codex pass at `high` plus the lens that found it. Fixes for MEDIUM and lower are proven by their tests and `/verify`.
