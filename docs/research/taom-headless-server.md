@@ -1,8 +1,9 @@
 # Running TAOM's code on the co-op dedicated server
 
 **Status:** research and plan, 2026-10-21. B1 (the load gates) and B2 (TAOM.Dependencies headless)
-are built; the batches from B3 on wait for the decision this plan asks for, a proposed ADR-013
-(draft awaiting the maintainer).
+are built (`5fcf8390c`). The decision this plan asks for is
+[ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md), accepted 2026-10-22: option (b), a TAOM
+server settings file, missions proven absent before B4c is sized, and the GetTypes shim kept.
 **Target:** Bannerlord v1.5.5 server build (`Win64_Shipping_Server`) on the appliance's bundled .NET 6.0.36 host (the staged `dotnet/shared/Microsoft.NETCore.App`).
 **Provenance:** the type, patch-class and method-body counts come from a System.Reflection.Metadata scan of
 the staged `TAOM.dll` and `TAOM.Dependencies.dll` on 2026-10-21, compared with the engine log of the failing
@@ -415,5 +416,5 @@ it seeds the next batch.
 - [coop-interop](../features/coop-interop.md): the co-op feature page; its "Dedicated server: no longer unsupported, but not supported either" bullet is rewritten in B10.
 - [coop-compat-gap-ledger](coop-compat-gap-ledger.md): the wider co-op gap list.
 - Issue #967 (Batch C of the co-op epic #964).
-- a proposed ADR-013 (draft awaiting the maintainer): the decision this plan asks for.
+- [ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md) (accepted 2026-10-22): the decision this plan asks for.
 - The server repo's `docs/bannerlord-1.5.x-port.md` (BannerlordCoop dedicated-server repo, outside this repo): its v1.5.5 server port notes.
