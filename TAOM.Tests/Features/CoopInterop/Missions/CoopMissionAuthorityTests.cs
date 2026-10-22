@@ -11,11 +11,12 @@ using TAOM.Features.CoopInterop.Missions;
 namespace TAOM.Tests.Features.CoopInterop.Missions;
 
 /// <summary>
-/// Pins the co-op ownership and host answers against fakes shaped like BannerlordCoop's types: the
+/// Pins the co-op ownership answers against fakes shaped like BannerlordCoop's types: the
 /// reflection bind (overload choice, compiled delegates), the per-mission registry resolve, the live
 /// (never cached) answers, and the singleplayer path that binds nothing.
 /// </summary>
 [TestClass]
+[TestCategory("RequiresGame")]
 public class CoopMissionAuthorityTests
 {
     public sealed class FakeInfo
@@ -31,16 +32,24 @@ public class CoopMissionAuthorityTests
         bool IsLocallyControlled(Agent agent);
     }
 
+    // The registry after an upstream rename: the Agent overload of IsLocallyControlled is gone.
+    public interface IRenamedRegistry
+    {
+        bool TryGetAgentInfo(Agent agent, out FakeInfo info);
+        bool IsOwnedByThisPeer(Agent agent);
+    }
+
     public sealed class FakeRegistry : IFakeRegistry
     {
         public readonly Dictionary<Agent, bool> Local = new();
+        public readonly HashSet<Agent> ThrowFor = new();
         public bool Throw;
 
         public bool TryGetAgentInfo(Guid id, out FakeInfo info) { info = null!; return false; }
 
         public bool TryGetAgentInfo(Agent agent, out FakeInfo info)
         {
-            if (Throw) throw new InvalidOperationException("registry torn down");
+            if (Throw || ThrowFor.Contains(agent)) throw new InvalidOperationException("registry torn down");
             info = new FakeInfo();
             return Local.ContainsKey(agent);
         }
@@ -54,10 +63,12 @@ public class CoopMissionAuthorityTests
     {
         public static object? Registry;
         public static int Resolves;
+        public static bool ThrowOnResolve;
 
         public static bool TryResolve<T>(out T instance) where T : class
         {
             Resolves++;
+            if (ThrowOnResolve) throw new InvalidOperationException("container disposed");
             instance = (Registry as T)!;
             return instance != null;
         }
@@ -65,21 +76,6 @@ public class CoopMissionAuthorityTests
 
     public class FakeMissionController
     {
-    }
-
-    public interface IFakeSession
-    {
-        bool IsLocalHost { get; }
-    }
-
-    public sealed class FakeSession : IFakeSession
-    {
-        public bool IsLocalHost { get; set; }
-    }
-
-    public sealed class FakeBattleController : FakeMissionController
-    {
-        public IFakeSession? Session { get; set; }
     }
 
     private sealed class Facts : CoopMissionAuthority.IAgentFacts
@@ -111,6 +107,7 @@ public class CoopMissionAuthorityTests
         _scans = 0;
         FakeContainerProvider.Registry = _registry;
         FakeContainerProvider.Resolves = 0;
+        FakeContainerProvider.ThrowOnResolve = false;
     }
 
     private Type? Find(string name)
@@ -121,7 +118,6 @@ public class CoopMissionAuthorityTests
             case "GameInterface.ContainerProvider": return typeof(FakeContainerProvider);
             case "Missions.INetworkAgentRegistry": return typeof(IFakeRegistry);
             case "Missions.CoopMissionController": return typeof(FakeMissionController);
-            case "Missions.Battles.CoopBattleController": return typeof(FakeBattleController);
             default: return null;
         }
     }
@@ -136,11 +132,7 @@ public class CoopMissionAuthorityTests
     private static readonly object M1 = new object();
     private static readonly object M2 = new object();
 
-    private static object[] BattleMission() =>
-        BattleMission(new FakeBattleController { Session = new FakeSession() });
-
-    private static object[] BattleMission(FakeBattleController controller) =>
-        new object[] { new object(), controller };
+    private static object[] BattleMission() => new object[] { new object(), new FakeMissionController() };
 
     // ---- singleplayer -------------------------------------------------------------------------------
 
@@ -154,15 +146,6 @@ public class CoopMissionAuthorityTests
         Assert.AreEqual(0, FakeContainerProvider.Resolves);
     }
 
-    [TestMethod]
-    public void IsBattleHost_NoSession_HostWithoutBinding()
-    {
-        var authority = Authority(sessionActive: false);
-
-        Assert.IsTrue(authority.IsBattleHost(null));
-        Assert.AreEqual(0, _scans);
-    }
-
     // ---- ownership ----------------------------------------------------------------------------------
 
     [TestMethod]
@@ -172,7 +155,7 @@ public class CoopMissionAuthorityTests
         var agent = new Facts { Key = BareAgent(), HasLiveController = false };
         _registry.Local[(Agent)agent.Key] = true;
 
-        Assert.IsTrue(authority.Decide(authority.LinkFor(M1, BattleMission), agent));
+        Assert.IsTrue(authority.Decide(authority.LinkFor(M1, _ => BattleMission()), agent));
     }
 
     [TestMethod]
@@ -182,14 +165,14 @@ public class CoopMissionAuthorityTests
         var agent = new Facts { Key = BareAgent(), HasLiveController = true };
         _registry.Local[(Agent)agent.Key] = false;
 
-        Assert.IsFalse(authority.Decide(authority.LinkFor(M1, BattleMission), agent));
+        Assert.IsFalse(authority.Decide(authority.LinkFor(M1, _ => BattleMission()), agent));
     }
 
     [TestMethod]
     public void Decide_UnregisteredHuman_FollowsItsController()
     {
         var authority = Authority();
-        var link = authority.LinkFor(M1, BattleMission);
+        var link = authority.LinkFor(M1, _ => BattleMission());
 
         Assert.IsTrue(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = true }));
         Assert.IsFalse(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = false }));
@@ -199,7 +182,7 @@ public class CoopMissionAuthorityTests
     public void Decide_UnregisteredMount_FollowsRegisteredRider()
     {
         var authority = Authority();
-        var link = authority.LinkFor(M1, BattleMission);
+        var link = authority.LinkFor(M1, _ => BattleMission());
         var rider = new Facts { Key = BareAgent(), HasLiveController = false };
         var mount = new Facts { Key = BareAgent(), IsHuman = false, HasLiveController = true, Rider = rider };
 
@@ -214,7 +197,7 @@ public class CoopMissionAuthorityTests
     public void Decide_UnregisteredMount_UnregisteredRiderFollowsRiderController()
     {
         var authority = Authority();
-        var link = authority.LinkFor(M1, BattleMission);
+        var link = authority.LinkFor(M1, _ => BattleMission());
         var rider = new Facts { Key = BareAgent(), HasLiveController = true };
         var mount = new Facts { Key = BareAgent(), IsHuman = false, HasLiveController = false, Rider = rider };
 
@@ -230,14 +213,14 @@ public class CoopMissionAuthorityTests
         var authority = Authority();
         var mount = new Facts { Key = BareAgent(), IsHuman = false, HasLiveController = false };
 
-        Assert.IsTrue(authority.Decide(authority.LinkFor(M1, BattleMission), mount));
+        Assert.IsTrue(authority.Decide(authority.LinkFor(M1, _ => BattleMission()), mount));
     }
 
     [TestMethod]
     public void Decide_MissionWithoutCoopController_Owned()
     {
         var authority = Authority();
-        var link = authority.LinkFor(M1, () => new object[] { new object() });
+        var link = authority.LinkFor(M1, _ => new object[] { new object() });
         var agent = new Facts { Key = BareAgent(), HasLiveController = false };
         _registry.Local[(Agent)agent.Key] = false;
 
@@ -249,7 +232,7 @@ public class CoopMissionAuthorityTests
     public void Decide_AnswerFollowsTheRegistryLive_NotCached()
     {
         var authority = Authority();
-        var link = authority.LinkFor(M1, BattleMission);
+        var link = authority.LinkFor(M1, _ => BattleMission());
         var agent = new Facts { Key = BareAgent() };
 
         _registry.Local[(Agent)agent.Key] = true;
@@ -269,12 +252,12 @@ public class CoopMissionAuthorityTests
     {
         var authority = Authority();
 
-        var first = authority.LinkFor(M1, BattleMission);
-        Assert.AreSame(first, authority.LinkFor(M1, BattleMission));
-        Assert.AreSame(first, authority.LinkFor(M1, BattleMission));
+        var first = authority.LinkFor(M1, _ => BattleMission());
+        Assert.AreSame(first, authority.LinkFor(M1, _ => BattleMission()));
+        Assert.AreSame(first, authority.LinkFor(M1, _ => BattleMission()));
         Assert.AreEqual(1, FakeContainerProvider.Resolves);
 
-        authority.LinkFor(M2, BattleMission);
+        authority.LinkFor(M2, _ => BattleMission());
         Assert.AreEqual(2, FakeContainerProvider.Resolves);
     }
 
@@ -282,7 +265,7 @@ public class CoopMissionAuthorityTests
     public void Decide_TypesNotFound_FallsBackToControllerAndLogsOnce()
     {
         var authority = Authority(find: _ => null);
-        var link = authority.LinkFor(M1, BattleMission);
+        var link = authority.LinkFor(M1, _ => BattleMission());
 
         Assert.IsTrue(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = true }));
         Assert.IsFalse(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = false }));
@@ -294,66 +277,117 @@ public class CoopMissionAuthorityTests
     {
         FakeContainerProvider.Registry = null;
         var authority = Authority();
-        var link = authority.LinkFor(M1, BattleMission);
+        var link = authority.LinkFor(M1, _ => BattleMission());
 
         Assert.IsTrue(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = true }));
         Assert.IsFalse(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = false }));
     }
 
     [TestMethod]
-    public void Decide_RegistryThrows_FallsBackToControllerAndLogsOnce()
+    public void LinkFor_RegistryResolveThrowsInTwoMissions_WarnsOncePerMission()
+    {
+        FakeContainerProvider.ThrowOnResolve = true;
+        var authority = Authority();
+
+        authority.LinkFor(M1, _ => BattleMission());
+        authority.LinkFor(M1, _ => BattleMission());
+        _logger.Received(1).LogWarning(Arg.Any<string>());
+
+        authority.LinkFor(M2, _ => BattleMission());
+        _logger.Received(2).LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void LinkFor_BehaviorEnumerationAlwaysThrows_DoesNotReArmTheWarning()
+    {
+        // The caller logs the throw through LogOnce; a rebuild that fails before it finishes must not
+        // re-arm the latch, or a mission whose behavior list always throws warns on every check.
+        var authority = Authority();
+        authority.LogOnce("first failure");
+
+        for (var i = 0; i < 3; i++)
+        {
+            try { authority.LinkFor(M1, _ => ThrowsWhileEnumerated()); }
+            catch (InvalidOperationException) { authority.LogOnce("ownership probe threw"); }
+        }
+
+        _logger.Received(1).LogWarning(Arg.Any<string>());
+    }
+
+    // Throws inside BuildLink's foreach, as a behavior list changed by another thread does.
+    private static IEnumerable<object> ThrowsWhileEnumerated()
+    {
+        yield return new object();
+        throw new InvalidOperationException("Collection was modified");
+    }
+
+    [TestMethod]
+    public void Decide_CleanBind_LogsNoWarning()
     {
         var authority = Authority();
-        var link = authority.LinkFor(M1, BattleMission);
-        _registry.Throw = true;
+        var agent = new Facts { Key = BareAgent() };
+        _registry.Local[(Agent)agent.Key] = true;
+
+        Assert.IsTrue(authority.Decide(authority.LinkFor(M1, _ => BattleMission()), agent));
+        _logger.DidNotReceive().LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void Decide_TypeFinderThrows_FallsBackToControllerAndWarnsOnce()
+    {
+        var authority = Authority(find: _ => throw new InvalidOperationException("assembly scan failed"));
+        var link = authority.LinkFor(M1, _ => BattleMission());
 
         Assert.IsTrue(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = true }));
         Assert.IsFalse(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = false }));
         _logger.Received(1).LogWarning(Arg.Any<string>());
     }
 
-    // ---- battle host --------------------------------------------------------------------------------
-
     [TestMethod]
-    public void DecideHost_BeforeElection_NotHost_ThenFollowsTheSessionLive()
+    public void Decide_RegistryMemberRenamed_FallsBackToControllerAndWarnsOnce()
     {
-        var session = new FakeSession { IsLocalHost = false };
-        var authority = Authority();
-        var link = authority.LinkFor(M1, () => BattleMission(new FakeBattleController { Session = session }));
+        var authority = Authority(find: n => n == "Missions.INetworkAgentRegistry" ? typeof(IRenamedRegistry) : Find(n));
+        var link = authority.LinkFor(M1, _ => BattleMission());
 
-        Assert.IsFalse(authority.DecideHost(link), "before the election");
-
-        session.IsLocalHost = true;
-        Assert.IsTrue(authority.DecideHost(link));
-
-        session.IsLocalHost = false;
-        Assert.IsFalse(authority.DecideHost(link), "a handoff moved the host");
+        Assert.IsTrue(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = true }));
+        Assert.IsFalse(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = false }));
+        _logger.Received(1).LogWarning(Arg.Any<string>());
     }
 
     [TestMethod]
-    public void DecideHost_NoBattleController_Host()
+    public void Decide_RiderProbeThrows_FollowsTheRidersController()
     {
         var authority = Authority();
-        var link = authority.LinkFor(M1, () => new object[] { new FakeMissionController() });
+        var link = authority.LinkFor(M1, _ => BattleMission());
+        var rider = new Facts { Key = BareAgent(), HasLiveController = true };
+        var mount = new Facts { Key = BareAgent(), IsHuman = false, HasLiveController = false, Rider = rider };
+        _registry.ThrowFor.Add((Agent)rider.Key);
 
-        Assert.IsTrue(authority.DecideHost(link), "a tournament or tavern has nothing to elect");
+        Assert.IsTrue(authority.Decide(link, mount));
+
+        rider.HasLiveController = false;
+        Assert.IsFalse(authority.Decide(link, mount));
+        _logger.Received(1).LogWarning(Arg.Any<string>());
     }
 
     [TestMethod]
-    public void DecideHost_ControllerWithoutSession_NotHost()
+    public void IsLocallyControlled_NullAgentInASession_NotOwned()
     {
         var authority = Authority();
-        var link = authority.LinkFor(M1, () => BattleMission(new FakeBattleController { Session = null }));
 
-        Assert.IsFalse(authority.DecideHost(link));
+        Assert.IsFalse(authority.IsLocallyControlled(null));
+        Assert.AreEqual(0, _scans, "a null agent binds nothing");
     }
 
     [TestMethod]
-    public void DecideHost_BattleControllerTypeMissing_Host()
+    public void Decide_RegistryThrows_FallsBackToControllerAndLogsOnce()
     {
-        var authority = Authority(find: n => n == "Missions.Battles.CoopBattleController" ? null : Find(n));
-        var link = authority.LinkFor(M1, BattleMission);
+        var authority = Authority();
+        var link = authority.LinkFor(M1, _ => BattleMission());
+        _registry.Throw = true;
 
-        Assert.IsTrue(authority.DecideHost(link));
+        Assert.IsTrue(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = true }));
+        Assert.IsFalse(authority.Decide(link, new Facts { Key = BareAgent(), HasLiveController = false }));
+        _logger.Received(1).LogWarning(Arg.Any<string>());
     }
 }

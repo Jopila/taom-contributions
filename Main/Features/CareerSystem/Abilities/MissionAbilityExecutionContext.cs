@@ -55,9 +55,7 @@ public sealed class MissionAbilityExecutionContext : IAbilityExecutionContext
         int boosted = 0;
         foreach (var ally in _nearbyAlliesBuffer)
         {
-            // Co-op (#967): only this peer's own troops are inspired; a puppet's owner applies its own burst.
-            if (ally == null || !CoopMissionOwnership.IsOwnedHere(ally)) continue;
-            var ai = ally.GetComponent<CommonAIComponent>();
+            var ai = ally?.GetComponent<CommonAIComponent>();
             if (ai == null) continue;
 
             ai.Morale = Math.Min(100f, ai.Morale + magnitude);

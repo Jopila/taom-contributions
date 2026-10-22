@@ -29,7 +29,6 @@ public class CoopMissionRolePolicyTests
     {
         Assert.IsTrue(CoopMissionRolePolicy.ShouldAdd(CoopMissionRole.Local, true));
         Assert.IsTrue(CoopMissionRolePolicy.ShouldAdd(CoopMissionRole.AgentOwner, true));
-        Assert.IsTrue(CoopMissionRolePolicy.ShouldAdd(CoopMissionRole.BattleHost, true));
         Assert.IsFalse(CoopMissionRolePolicy.ShouldAdd(CoopMissionRole.Unsafe, true));
     }
 
@@ -53,7 +52,7 @@ public class CoopMissionRolePolicyTests
     }
 
     [TestMethod]
-    public void Table_UnsafeSet_IsExactlyTheSixThatMutateWorldState()
+    public void Table_UnsafeSet_IsExactlyTheSixDroppedInASession()
     {
         var unsafeNames = CoopMissionRoles.All
             .Where(p => p.Value == CoopMissionRole.Unsafe).Select(p => p.Key).OrderBy(n => n).ToArray();
@@ -66,11 +65,12 @@ public class CoopMissionRolePolicyTests
     }
 
     [TestMethod]
-    public void Table_CultureDoctrine_IsBattleHostAndNotGated()
+    public void Table_CultureDoctrine_IsLocalAndNotGated()
     {
-        Assert.AreEqual(CoopMissionRole.BattleHost,
+        Assert.AreEqual(CoopMissionRole.Local,
             CoopMissionRoles.Of(typeof(TAOM.Features.CultureDoctrine.Hooks.CultureDoctrineMissionLogic)));
-        Assert.AreEqual(1, CoopMissionRoles.All.Count(p => p.Value == CoopMissionRole.BattleHost));
+        Assert.IsTrue(CoopMissionRolePolicy.ShouldAdd(
+            typeof(TAOM.Features.CultureDoctrine.Hooks.CultureDoctrineMissionLogic), sessionActive: true));
     }
 
     [TestMethod]

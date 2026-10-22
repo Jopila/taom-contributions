@@ -164,6 +164,10 @@ Disable round-trip:
 - 2026-05-13 — Added SiegeDismount MissionBehavior wiring tests (closes #193): asserts the `AddMissionBehavior` registration in `OnMissionBehaviorInitialize`, the IoC feature registration, and that the behavior inherits `MissionBehavior`.
 - 2026-05-06 — Ported the external SiegeDismount module into `Main/Features/SiegeDismount/` (adapter/service/IoC pattern, MCM under `Battle Tactics / Siege Dismount`, four behavior modes), then fixed deep-review and Codex adversarial HIGH findings — switched siege detection to `Mission.IsSiegeBattle` only (dropped false-positive scene-name matching) and preserved `ItemModifier` on the mount round-trip.
 
+## Co-op (#967)
+
+`SiegeDismountMissionBehavior` has the co-op role `Unsafe` in `CoopMissionRoles`, so `AddTaomBehavior` does not add it to a mission while a co-op session is live. The reason is shared campaign state: `ISiegeDismountService.OnMissionStart` clears the main hero's `BattleEquipment` horse slot and deposits the horse into the party inventory, a write that a peer in a session must not make. It does not touch other peers' agents. A mounted player in a co-op siege therefore stays mounted; outside a session nothing changes. The reasoning and the in-game check are in [coop-interop.md](coop-interop.md#mission-behaviors-967-c7) (owed item 7: siege dismount is absent in a session).
+
 ## GitHub Issue
 
 - **Issues:** #116 (the port, closed), #606 (the start moved to `AfterStart`, closed), #699 (Custom Battle sieges never finished loading, closed 2026-09-30).

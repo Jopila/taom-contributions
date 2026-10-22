@@ -117,10 +117,7 @@ public sealed class SignatureStrikeRunner
 
             // Fear before damage: the blow may kill the victim, and morale on a corpse is harmless
             // while a blow on a fading agent is the crash class TakeDamage guards against.
-            // Co-op (#967): morale is not replicated, so only a victim this peer owns takes the fear; the blow below
-            // reaches a puppet through co-op's victim-side routing.
-            if (effect.FearMorale > 0f && moraleModel != null && DreadAgentGate.CanAffect(victim)
-                && CoopMissionOwnership.IsOwnedHere(victim))
+            if (effect.FearMorale > 0f && moraleModel != null && DreadAgentGate.CanAffect(victim))
             {
                 var scaled = moraleModel.CalculateMoraleChangeToCharacter(victim, effect.FearMorale);
                 var drain = _service.ComputeFearDrain(

@@ -2080,3 +2080,19 @@ engine rename would have turned the gate green while Harmony skipped them in gam
 - **Prevent:** an exemption in a gate is a named set (`ThirdPartyTargetPatches`), with its reason, and every other
   case still meets the full check.
 - **Source:** [rca-coop-player-attribution-2026-10-21.md](../rca-coop-player-attribution-2026-10-21.md) finding 4.
+
+### A moved method with a new branch applies the policy on every branch (co-op mission gating, 2026-10-21)
+C1 moved the single-player daily tick into a service verbatim and added a session branch that calls the earning
+policy. The old branch did not call it, so a dedicated server with no session would tick its placeholder hero.
+- **Why missed:** the new branch was reviewed; the moved branch was taken as already correct.
+- **Prevent:** when a policy has a session input, test the policy's whole input table through each caller, including
+  the branch that existed before (`OnDailyTick_DedicatedServerWithoutSession_DoesNotProcess`).
+- **Source:** [rca-coop-mission-gating-2026-10-21.md](../rca-coop-mission-gating-2026-10-21.md) finding 9 (Codex S4).
+
+### A doc that states behaviour is checked against the final code, not the plan (co-op mission gating, 2026-10-21)
+A code agent and a docs agent worked in parallel from one fix plan. The code agent followed the code where the plan
+was wrong (a failed bind falls back to the engine controller); the docs agent copied the plan's "answers owned".
+- **Why missed:** both agents were checked against the plan, not against each other.
+- **Prevent:** after parallel work, read each behaviour sentence in the docs against the final code and test names
+  before the commit; a convergence pass does this.
+- **Source:** [rca-coop-mission-gating-2026-10-21.md](../rca-coop-mission-gating-2026-10-21.md) finding 8.

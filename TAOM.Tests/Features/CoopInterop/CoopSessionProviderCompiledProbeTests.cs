@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Core.Logging;
@@ -61,6 +62,41 @@ public class CoopSessionProviderCompiledProbeTests
 
         Assert.IsTrue(provider.RoleProbeAvailable);
         Assert.IsTrue(provider.CompiledProbesBound, "the probe must be compiled, not reflected, on the hot path");
+    }
+
+    // Probe() is gated by CoopPresence.IsActive, which a unit-test host never has, so the compiled delegates are
+    // read off the provider and compared with what the reflected members answer on the same fake host.
+    private static T Delegate<T>(CoopSessionProvider provider, string field) where T : class
+    {
+        var info = typeof(CoopSessionProvider).GetField(field, BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.IsNotNull(info, field);
+        return (info!.GetValue(provider) as T)!;
+    }
+
+    [TestMethod]
+    public void CompiledProbes_AnswerLive_AndMatchTheReflectedMembers()
+    {
+        var provider = Bound();
+        var alive = Delegate<Func<bool>>(provider, "_containerAlive");
+        var serverRole = Delegate<Func<bool>>(provider, "_serverRole");
+        Assert.IsNotNull(alive);
+        Assert.IsNotNull(serverRole);
+
+        foreach (var container in new[] { false, true, false })
+        foreach (var server in new[] { false, true })
+        {
+            FakeContainerProvider.Alive = container;
+            FakeModInformation.Server = server;
+
+            var args = new object?[] { null };
+            var reflectedAlive = typeof(FakeContainerProvider).GetMethod("TryGetContainer")!.Invoke(null, args) is true;
+            var reflectedServer = typeof(FakeModInformation).GetProperty("IsServer")!.GetValue(null) is true;
+
+            Assert.AreEqual(reflectedAlive, alive(), $"container={container}");
+            Assert.AreEqual(container, alive(), "the answer follows the host live, never cached");
+            Assert.AreEqual(reflectedServer, serverRole(), $"server={server}");
+            Assert.AreEqual(server, serverRole());
+        }
     }
 
     [TestMethod]

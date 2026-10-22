@@ -73,7 +73,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | ADOD_Beasts | `ADOD_Beasts` `ADOD` `ADODHowdahObject` `ADODBeastsMissionLogic` | purchased-asset, code terms informal | behavioural-port | `Main/Features/Elephant/**` `Main/Features/ElephantLike/**` `Main/Features/Mumakil/**` `Main/Features/WarRam/**` `Main/Features/Elk/**` `Main/Features/Animalia/**` `docs/reference/lotrlome-armory-snapshot/Prefabs/taom_howdah_platform.xml` (live: `LOTRLOME_Armory/Prefabs`) | cleared |
 | BehaviorTrees | `BehaviorTrees.dll` | maintainer-owned | verbatim-port | `Main/BehaviorTrees/**` | cleared |
 | BannerlordTogether | `BannerlordTogether` `BattleLinkMPClient` | no-decompile policy, see detail | interop-only | (none) | cleared |
-| BannerlordCoop | `BannerlordCoop` `Bannerlord-Coop-Team` `Bannerlord.Coop` | UNKNOWN | comparison-only | (none) | uncleared |
+| BannerlordCoop | `BannerlordCoop` `Bannerlord-Coop-Team` `Bannerlord.Coop` | UNKNOWN | interop-only | `Main/Features/CoopInterop/Missions/CoopMissionAuthority.cs` (binds Coop's agent registry and `CoopMissionController` by reflection; no Coop code copied) | uncleared |
 | TAOM-Coop (Sternab) | `Sternab/TAOM-Coop` `TAOM.CoopCompat` | author-granted, terms informal (via the maintainer, 2026-10-21; private repo, no `LICENSE`) | behavioural-port | `Main/Features/CoopInterop/CoopPlayerControlQuery.cs`; the T6 guard in `Main/Features/TroopWeight/Hooks/PartyUpgraderUpgradeReadyTroopsHook.cs`; `docs/research/coop-compat-gap-ledger.md` (comparison only) | cleared |
 | Yotthani HoN mods (external developer drop) | `Features_fixed` `HoN` `yotthani/bannerlord` | MIT, (c) 2026 yotthani (the maintainer's statement of 2026-10-09; no root `LICENSE` in `yotthani/bannerlord` yet, asked for) | verbatim-port | `Main/Features/SiegeDismount/**` `Main/Features/MixedFormations/**` `Main/Features/SmartCavalryAI/**` `Main/Features/FiefManagement/**` `Main/Features/QuickActions/**` `Main/Features/EquipPresets/**` `Main/Features/CompanionTactics/**` | cleared |
 | TAOM_Promoted | `TAOM_Promoted` `RF_Promoted` | UNKNOWN | behavioural-port | `Main/Features/FieldCommission/**` | uncleared |
@@ -480,6 +480,11 @@ files") and four verified Harmony owner ids. By this register's own vocabulary t
 than `n/a`. The reasoning recorded at the time was that BannerlordCoop is a public upstream project
 shipping generated sources in plaintext and carries no policy forbidding it, unlike BT. That
 reasoning is worth confirming against the project's actual licence rather than left as an inference.
+
+The mission ownership check (#967 C7, `CoopMissionAuthority`) adds a second, narrower relationship: it
+binds Coop's `INetworkAgentRegistry`, `CoopMissionController` and `ContainerProvider` by reflection to
+ask whether this peer owns an agent. That is `interop-only` (member names and shapes, nothing copied),
+and it does not change the row's open licence question. The row's derivation cell holds `interop-only`; the `comparison-only` classification above covers the decompile research alone.
 
 ### TAOM-Coop (Sternab)
 

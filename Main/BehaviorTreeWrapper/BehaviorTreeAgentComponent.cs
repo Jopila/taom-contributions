@@ -70,7 +70,7 @@ public class BehaviorTreeAgentComponent : AgentComponent
         // Co-op (#967): every battle agent exists on every peer, the other peers' as puppets, and only the owner's
         // tree may act (a puppet tree would land a second blow). Read each tick, never at build: a mount's engine
         // controller is AI at build whatever co-op makes it later, and a host handoff moves ownership mid-battle.
-        // A skipped tick restarts the cadence so a non-owner peer asks once per evaluation delay.
+        // A skipped tick restarts the cadence, which throttles only a tree whose delay is 1000 ms or more.
         if (!CoopMissionOwnership.IsOwnedHere(Agent))
         {
             timeSinceLastEvaluation = 0f;

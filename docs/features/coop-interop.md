@@ -59,8 +59,9 @@ own `0Harmony`.
 | `ICoopSessionProvider` / `CoopSessionProvider` | **Session-varying**: "is a session live, and do I own the simulation". Reflection-bound, no compile-time reference to Coop. |
 | `IDedicatedServerProvider` / `DedicatedServerProvider` | **Process-constant**: "is there a real player in this process at all". Reads the binaries folder this assembly loaded from, NOT co-op role. |
 | `PlayerControl` / `IPlayerControlQuery` / `CoopPlayerControlQuery` | **Per entity**: "is this party, clan or hero a human player's?" (Player, NotPlayer, Unknown). Reflection-bound to Coop's `PlayerManager.TryGetControlledObjectInfo`, answers live, caches only the binding (#966). See [Who is a player](#who-is-a-player-the-fourth-question). |
-| `RecruitAttributionScope` and `Hooks/CoopRecruitAttributionPatch` (Patch113) | A thread-static party id set around Coop's server-side `HandleOnRecruitmentDone`, so the party-less `OnUnitRecruited` can be charged to the recruiting guest's party leader. Policy: `SpecialResources/RecruitChargePolicy`. Applied at `Main/SubModule.cs:1868`; notes in [the patch registry](../reference/harmony-patch-registry.md). |
+| `RecruitAttributionScope` and `Hooks/CoopRecruitAttributionPatch` (Patch113) | A thread-static party id set around Coop's server-side `HandleOnRecruitmentDone`, so the party-less `OnUnitRecruited` can be charged to the recruiting guest's party leader. Policy: `SpecialResources/RecruitChargePolicy`. Applied at `Main/SubModule.cs:1866`; notes in [the patch registry](../reference/harmony-patch-registry.md). |
 | `CoopSessionPolicy` | The pure authority decision, split out so it is testable without a game — same pattern as `PatchShieldPolicy` / `SaveShieldPolicy`. |
+| `Missions/` (`CoopMissionRole`, `CoopMissionRoles`, `CoopMissionRolePolicy`, `ICoopMissionAuthority`, `CoopMissionAuthority`, `CoopMissionOwnership`) | The mission behavior layer (#967 C7): each TAOM behavior's role, the add-time filter, and the reflection-bound live ownership read. See [Mission behaviors](#mission-behaviors-967-c7). |
 | `CoopSuppressedUiAttribute` / `CoopUiRegistrationPolicy` | Marks and filters UIExtenderEx types a co-op host has taken ownership of. |
 | `SaveDefinerCollisionDetector` / `Guard` / `SaveDefinerRecord` | Base-id preflight and crash attribution. **Heuristic** — the engine keys on `_saveBaseId + saveId`, so a shared base is legal; engine-only groups are dropped and the rest warn rather than assert. [RCA](../reviews/rca-savedefiner-false-positive-2026-08-01.md). |
 | `Diagnostics/HarmonyCensus*` | Runtime patch-overlap report — the sanctioned substitute for reading another mod's binary. |
@@ -383,68 +384,119 @@ Every TAOM mission behavior has a co-op role in `CoopMissionRoles` (`Main/Featur
 This table is the reasoning; the table in code is the contract.
 
 **The model.** No mission runs on the co-op authority process. Each client runs its own battle, spawns only the
-troops it owns, and holds every other agent as a puppet (`Controller = None`) that co-op moves from packets. The
-battle host is elected after `Mission.AfterStart`, which is where TAOM adds its behaviors, so a host check at add
-time has nothing to read. Hence two layers:
+troops it owns, and holds every other agent as a puppet (`Controller = None`) that co-op moves from packets. TAOM
+asks no "am I the battle host" question: the host is elected after `Mission.AfterStart`, which is where TAOM adds
+its behaviors, so an add-time host check has nothing to read, and no behavior needs one (the host API was removed
+in the C7 follow-up). Hence two layers:
 
 1. **At add time** (`CoopMissionRolePolicy.ShouldAdd(role, sessionActive)`, read once per mission): an `Unsafe`
    behavior is not added in a session. Nothing else is filtered here.
-2. **Live inside the behavior** (`CoopMissionOwnership.IsOwnedHere(agent)`, `IsBattleHost(mission)`): ownership and
-   host are read at the point of use and never cached across frames, because a host handoff moves authority
-   mid-battle (`BattleAuthorityMigrator`).
+2. **Live inside the behavior** (`CoopMissionOwnership.IsOwnedHere(agent)`, the only member of
+   `ICoopMissionAuthority` is `IsLocallyControlled(Agent?)`): ownership is read at the point of use and never
+   cached across frames, because a host handoff moves authority mid-battle (`BattleAuthorityMigrator`). A behavior
+   whose agents are owned by an invariant instead (an AI-controller gate, the player team) carries no check, and its
+   table row names the invariant.
 
 **How ownership is read** (`CoopMissionAuthority`, bound by reflection, compiled delegates, no `MethodInfo.Invoke`
 per call). No session: owned, with no reflection and no engine read. A mission without a `CoopMissionController`
 (a plain tournament, a custom battle): owned. Otherwise `INetworkAgentRegistry.TryGetAgentInfo` separates the
 three states: registered here (owned), registered to another peer (a puppet), unregistered. An unregistered agent
 follows co-op's own fallback in `BattleBlowInterceptPatch`: a human is owned when its engine controller is not
-`None`; a mount follows its rider; a masterless mount is owned. The registry is resolved once per mission. A bind
-failure, an unreadable registry or a throw falls back to the engine controller and logs once.
+`None`; a mount follows its rider; a masterless mount is owned. The registry is resolved once per mission. **When a
+read fails:** any failure to read the registry (a bind failure, a registry resolve that throws, a registry probe that
+throws, or a missing probe or registry) falls back to the engine controller (`HasLiveController`); only an unexpected
+throw caught in `IsLocallyControlled` answers owned. A bind failure warns once per process (the binding is a `Lazy`);
+the other failures warn once per mission, and the latch is re-armed only after a mission's behavior list was read.
 
-**Never decide at build time.** `Agent.Build` fixes a non-humanoid's controller to AI whatever the spawn asked for,
-and co-op registers puppets only after `SpawnAgent` returns, so inside `OnAgentBuild` every agent reads "not local"
-and every mount reads "AI". Every check below runs on a tick or an event, after the registry has the agent.
+**Cost.** `IsOwnedHere` can run every frame for an agent: a creature tree is due every tick, because
+`BehaviorTreeAgentComponent.TickOnMissionThread` compares `_rootEvaluationDelay / 1000` in integer math (10 / 1000
+is 0) and `BehaviorTree.ShouldRunNextTick` is set by `HandleNotification` and never reset. A skipped (non-owner) tick
+zeroes the cadence timer, which throttles only a tree whose delay is 1000 ms or more. Keep the check allocation-free.
+
+**Never decide at build time.** Inside `OnAgentBuild` the registry has not heard of the agent yet, so it answers
+"not local" for every agent: co-op registers puppets only after `SpawnAgent` returns. The engine controller is no
+better there. A human's controller is already right at build, but `Agent.Build` fixes a non-humanoid's controller to
+AI whatever the spawn asked for, so every mount reads "AI". Every check below runs on a tick or an event, after the
+registry has the agent.
+
+**Mounts.** "Controller `None` means puppet" holds for humans. An owned mount can read `None` for up to 2 seconds
+during co-op's synthetic mount turn (`AgentMovementHandler.cs:1530-1533` sets the controller to `None`; the turn lasts
+`SyntheticMountTurnDurationSeconds = 2f`, `:81`), so
+no check may treat a mount's `None` as proof it is another peer's. The ownership read follows the rider for that
+reason.
 
 | Behavior | Role | What happens in a session |
 |---|---|---|
 | `ShaderPrecompilePlayerAgentGuard` | Unsafe | Not added. It exists only for the shader-precompile walk's own battle. |
-| `SiegeDismountMissionBehavior` | Unsafe | Not added. Classed Unsafe in the C7 plan: its siege-wide dismount rule (`ISiegeDismountService.OnMissionStart`) would also reach agents another peer owns. |
-| `EnlistmentMeritMissionBehavior` | Unsafe | Not added. It scores the enlisted player's battle merit into this save's enlistment state. |
-| `FieldCommissionMissionLogic` | Unsafe | Not added. It already required `IsAuthority`, which is false on every peer that runs a mission. |
+| `SiegeDismountMissionBehavior` | Unsafe | Not added. Unsafe because `ISiegeDismountService.OnMissionStart` clears the main hero's `BattleEquipment` horse slot and deposits the horse into the party inventory, a write to shared campaign state from a peer. |
+| `EnlistmentMeritMissionBehavior` | Unsafe | Not added. It scores the enlisted player's battle merit into this save's enlistment state, so a session scores no battle merit. |
+| `FieldCommissionMissionLogic` | Unsafe | Not added. It already required `IsAuthority`, which is false on every peer that runs a mission, so a session runs no field commission logic. |
 | `FellFoesMissionLogic` | Unsafe | Not added. Mike kept the stand-down on 2026-10-19 (`FellFoesWiringTests`); co-op has no "stopped fleeing" message, so a rally would not replicate. |
 | `LostFootingMissionLogic` | Unsafe | Not added. It reuses Fell Foes' gate (`LostFootingModule`). |
-| `CultureDoctrineMissionLogic` | BattleHost | Added everywhere, no check. Tactics move only AI-controlled agents, and on a guest those are puppets. UNVERIFIED that no formation order moves a puppet; the fallback is an `IsBattleHost` check inside the tactic tick. |
-| `BehaviorTreeMissionLogic` | AgentOwner | The tree seam: `BehaviorTreeAgentComponent.TickOnMissionThread` skips `RunTree` when the agent is not owned, and restarts its cadence so a non-owner asks once per evaluation delay. Every row below marked "tree seam" is covered by it. |
+| `CultureDoctrineMissionLogic` | Local | Added everywhere, no check. Tactics move only AI-controlled agents, and on a guest the host's AI teams are puppets (`Controller` `None`), so a tactic has no agent of the host's to move there. The per-unit riding and firing orders it sets (`Formation.RidingOrder`, `FiringOrder`) only set values. Not checked in game: see the owed list. |
+| `BehaviorTreeMissionLogic` | AgentOwner | The tree seam: `BehaviorTreeAgentComponent.TickOnMissionThread` skips `RunTree` when the agent is not owned, and restarts its cadence, which throttles only a tree whose delay is 1000 ms or more (see Cost above). Every row below marked "tree seam" is covered by it. |
 | `AdvancedCombatBehavior` | AgentOwner | `BoneCheck` drops a hit whose attacker is not owned (a bite or slam in flight across an ownership change) and ends the check. |
 | `WargMissionBehavior` | AgentOwner | Tree seam; `OnWargDied` acts only when the rider is owned. The other tree listeners (`WargTryToGoRage`, `OnSpiderDied`) only write a blackboard or log, so `NotifyAll` stays ungated. |
 | `SpiderMissionBehavior`, `WarRamMissionBehavior`, `ElkMissionBehavior`, `AnimaliaMissionBehavior`, `TrollBruteForceMissionBehavior` | AgentOwner | Tree seam. |
 | `ElephantMissionBehavior` | AgentOwner | Tree seam; the howdah crew spawns only when the mahout is owned (`HowdahCrewSpawner.SpawnQueued`), so the owner's peer adds the crew once and co-op replicates it. |
 | `MumakilMissionBehavior` | AgentOwner | Tree seam; the platform crew spawns only when the rider is owned (`MumakilCrewSpawner.SpawnQueued`). |
-| `CreatureBanditMissionBehavior` | AgentOwner | Tree seam; the routed-removal backstop skips a creature whose engine controller is `None`. It reads the controller, not the registry, because a dying agent may already be deregistered. |
-| `MixedFormationsMissionBehavior` | AgentOwner | Player team only, so owned by construction. No check. |
-| `SmartCavalryAIMissionBehavior` | AgentOwner | `ApplyCollisionAvoidance` steers only owned riders (it writes the movement direction). |
-| `BannerBearerAssignmentMissionLogic` | AgentOwner | `TryAssignBanner` skips a formation whose first unit is not owned, so a puppet formation gets no banner churn. |
-| `DreadAuraMissionLogic` | AgentOwner | `DreadPulseRunner` drains morale only on owned targets (morale is not replicated). |
-| `SignatureStrikesMissionLogic` | AgentOwner | `OnMeleeHit` and `SignatureStrikeRunner.Run` need an owned attacker; the fear drain needs an owned victim. The ring's blow on a puppet reaches the victim's owner through co-op's own victim-side routing. |
-| `CareerPerkMissionBehavior` | AgentOwner | `MissionAbilityExecutionContext` inspires and buffs only owned allies. |
-| `CreatureSiegeRoleMissionBehavior` | AgentOwner | Already safe: it excludes ladder faces only for `agent.IsAIControlled`, and a puppet is `Controller None`. Pinned. |
-| `RaceAbilitiesMissionLogic` | AgentOwner | Tree seam; the fear-on-kill loop frightens only owned victims. The killer's heal-on-kill still runs for a puppet killer (open, see below). |
+| `CreatureBanditMissionBehavior` | AgentOwner | Tree seam. The routed-removal backstop has no ownership check, by an invariant: a puppet's origin has no troop supplier, so `CoopAgentOrigin.SetRouted` latches nothing and does nothing (`CoopAgentOrigin.cs:139-147`; the puppet origin is built at `PuppetSpawner.cs:439`). Co-op never replicates creature bandits either, because `SpawnMonster` bypasses `SpawnAgent`. Pinned: `CreatureBanditBackstop_StaysUngated`. |
+| `MixedFormationsMissionBehavior` | AgentOwner | Player team only, so owned by an invariant: co-op keeps other owners' puppets off `PlayerTeam` (`PuppetSpawner.cs:1031-1054`). No check. |
+| `SmartCavalryAIMissionBehavior` | AgentOwner | Player team only, the same invariant (`PuppetSpawner.cs:1031-1054`), so `ApplyCollisionAvoidance` has no check. Pinned for both rows by `PlayerTeamBehaviors_StayUngated`: they read only `Mission.Current?.PlayerTeam` and contain no `CoopMission` call. |
+| `BannerBearerAssignmentMissionLogic` | AgentOwner | No check, by an invariant: vanilla promotes a bearer only through `CanAgentBecomeBannerBearer`, which needs `IsAIControlled`, and a puppet is not AI-controlled. Pinned: `TaomBattleBannerBearersModel.CanAgentBecomeBannerBearer` calls the base first in both branches (the TAOM race and formation gates only narrow it). |
+| `DreadAuraMissionLogic` | AgentOwner | No check, by an invariant: `DreadAgentGate.CanAffect` needs `IsAIControlled` and a `CommonAIComponent`, which a puppet lacks (co-op builds a human puppet with `Controller` `None`, and `AgentCommonAILogic` removes the component when the controller leaves AI). It also covers `RaceAbilityTicker.PulseAuras`. Pinned: `DreadAgentGate_CanAffect_RequiresAnAIController`. |
+| `SignatureStrikesMissionLogic` | AgentOwner | `OnMeleeHit` and `SignatureStrikeRunner.Run` need an owned attacker. The fear drain goes through `DreadAgentGate`, the same AI-controller invariant, so it frightens no puppet. The ring's blow on a puppet reaches the victim's owner through co-op's own victim-side routing. |
+| `CareerPerkMissionBehavior` | AgentOwner | `MissionAbilityExecutionContext.ApplyAoeBuff` buffs only owned allies (a live check). The morale burst has none, by the same AI-controller invariant: it reads the ally's `CommonAIComponent`, which a human puppet lacks (puppet mounts are AI at build and keep the component until co-op sets them `None`, so the burst on a horse is inert). |
+| `CreatureSiegeRoleMissionBehavior` | AgentOwner | Already safe: it excludes ladder faces only for `agent.IsAIControlled`, and a puppet is `Controller None`. Pinned. Caveat: an owned mount reads `None` for up to 2 s during co-op's synthetic mount turn (see Mounts above), and a non-AI agent releases its role (`RoleReason.NotAIControlled`), so a mount may drop its siege role for that window (not checked in game). |
+| `RaceAbilitiesMissionLogic` | AgentOwner | Tree seam. The fear-on-kill loop and the aura pulse frighten through `DreadAgentGate` (the AI-controller invariant). The killer's heal-on-kill runs only when the killer has ability state in the store, and only this peer's own activations create that state, so a puppet killer heals nothing. |
 | `AutonomousMovementPlayerController`, `SiegePropDiagnosticsMissionBehavior`, `MissionPerfHeartbeatBehavior`, `MissionTickProfilerBehavior`, `BattleActionBarMissionView`, `MissionDiagnosticBehavior`, `CrashReportDevTriggerMissionBehavior`, `AnimMemoryProbeMissionBehavior`, `SkeletonBufferWatchMissionBehavior`, `CreatureBanditDiagnosticsBehavior` | Local | This peer's own view, log or diagnostics. Unchanged. |
 | `MountDespawnMissionBehavior`, `BattleCorpseMissionBehavior`, `AnimVarietyMissionBehavior`, `GaitVarietyMissionBehavior` | Local | Presentation on this peer's own agents (a dead mount fades on each peer). Unchanged. |
 | `EnlistmentBattleRoleMissionBehavior`, `EnlistmentBattleFormationMissionBehavior` | Local | They shape this peer's own player slot. Unchanged. |
 | `HeroKillCounterMissionLogic` | Local | The consumer is already gated (`LordsLadderBehavior` defers to the host). |
 | `BattleLoadPhaseBehavior`, `CustomBattleTeamFixBehavior`, `HostReviewMissionLogic` | Local | Added outside `AddTaomBehavior`; loading, custom battle and host review missions have no co-op controller. |
 
-**Test and pin.** `CoopMissionRolePolicyTests` (truth table, table coverage), `CoopMissionAuthorityTests` (the bind,
-the three registry states, the mount-to-rider rule, the per-mission resolve, live answers, host before election),
-`CoopMissionSeamPinTests` (each check sits before the action it guards; comments stripped).
+**Tests and pins.**
 
-**Known limits.** The `SubModule.cs` add-time filter is the one edit outside these files. A killer-side effect that
-heals or credits a puppet killer (`RaceAbilityDeaths` heal-on-kill) is not gated. Morale is not replicated by
-co-op, so a puppet's morale is whatever its own peer computes. **In-game checks owed**: host-owned creatures
-attack once on a guest; creatures idle on non-owner peers; adopted creatures act after a handoff; howdah and
-mumak crew appear once and sit on the platform on every peer; one `[CoopMission] skipped` line per Unsafe
-behavior.
+| Test class | What it holds |
+|---|---|
+| `CoopMissionRolePolicyTests` | The truth table, table coverage, `Table_UnsafeSet_IsExactlyTheSixDroppedInASession`, `Table_CultureDoctrine_IsLocalAndNotGated`. |
+| `CoopMissionAuthorityTests` | The bind, the three registry states, the mount-to-rider rule, the per-mission resolve, live answers, `Decide_CleanBind_LogsNoWarning`, and the failure paths: `Decide_TypeFinderThrows_FallsBackToControllerAndWarnsOnce`, `Decide_RegistryMemberRenamed_FallsBackToControllerAndWarnsOnce`, registry resolve throws, rider probe throws, a null agent in a session, a registry that throws in two missions (two warnings), and `LinkFor_BehaviorEnumerationAlwaysThrows_DoesNotReArmTheWarning`. |
+| `CoopMissionOwnershipTests` | The static face, including a resolver that returns null. |
+| `CoopMissionBindingTests` | Loads the installed Coop DLLs (skipped when absent) and asserts the members `CoopMissionAuthority` binds still exist with the shapes it expects, plus the two `CoopSessionProvider` members. |
+| `CoopSessionProviderCompiledProbeTests` | The compiled probe answers equal the reflection answers on a fake or no-Coop host. |
+| `CoopMissionSeamPinTests` | Each remaining check sits before the action it guards (comments stripped); the `IsLocallyControlled` source has no `() => mission`. |
+| Invariant pins | `DreadAgentGate_CanAffect_RequiresAnAIController`, `CreatureBanditBackstop_StaysUngated`, `PlayerTeamBehaviors_StayUngated`, `BannerBearers_StayUngated_BecauseThePromotionModelCallsBaseFirst` (`TaomBattleBannerBearersModel.CanAgentBecomeBannerBearer` calls the base first in both branches), and the pin that `SubModule.cs` resolves `SpecialResourceEarningService` once per campaign. |
+
+The tests for the checks removed in the C7 follow-up (`DreadPulse_DrainsOnlyOwnedTargets`,
+`RaceAbilityFear_FrightensOnlyOwnedVictims`, `SmartCavalryAvoidance_SteersOnlyOwnedRiders`,
+`BannerBearers_TryAssignBanner_SkipsAFormationThisPeerDoesNotOwn`, `CreatureBanditBackstop_NeverRoutsAPuppet`) are gone
+with them.
+
+**Known limits.** The `SubModule.cs` add-time filter is the one edit outside these files. Morale is not replicated by
+co-op, so a puppet's morale is whatever its own peer computes. An effect an event starts (a signature strike, a race
+ability's fear) reaches only the troops of the peer that ran it; the dread aura is the exception, because every peer
+pulses it over its own AI troops.
+
+After a battle-host migration, the new host adopts replicated elephant and mumakil crew as AI with no seat link. The
+crew are spawned and seated only on the owning peer (`HowdahCrewSpawner`, `MumakilCrewSpawner`), co-op's spawn message
+(`NetworkSpawnBattleAgents`) carries no seat identity, and adoption (`BattleAuthorityMigrator`) converts the crew to AI.
+The fix needs a seat relay (#967 C3). Before C7 every peer spawned its own crew.
+
+**Owed by #967 C7 (in-game checks):**
+
+1. One `[CoopMission] skipped` line per Unsafe behavior: five in an ordinary battle, six only when the shader guard
+   claims the mission.
+2. Creature trees (host-owned creatures, idle non-owner copies, adopted creatures after a handoff) act only on owned
+   creatures: a host-owned creature attacks once on a guest.
+3. No banner churn, and banners present in a two-guest battle.
+4. Dread, race and signature morale lands only on the peer's own troops.
+5. Career buffs reach only the peer's own troops.
+6. CultureDoctrine host tactics do not move the guests' puppets.
+7. Siege dismount is absent in a session.
+8. Dead mounts fade on both peers.
+9. A guest's signature strike frightens no host AI.
+10. Howdah and mumakil crews stand on the deck for puppets, once, on every peer.
+11. After a battle-host migration, the adopted elephant and mumakil crew: expect them off their seats (see Known limits).
 
 ## Client-side object creation
 

@@ -15,7 +15,7 @@ namespace TAOM.Features.CoopInterop;
 /// <see cref="CoopSessionPolicy.IsAuthority"/> maps to authoritative — i.e. exactly today's
 /// singleplayer behaviour.
 ///
-/// Members bound (verified against the shipped v0.0.3 build, 2026-08-01):
+/// Members bound (verified against v0.0.3 on 2026-08-01, and against the installed v0.1.6 on 2026-10-21 by CoopMissionBindingTests):
 ///   GameInterface.ContainerProvider.TryGetContainer(out ILifetimeScope) -> bool
 ///   Common.ModInformation.IsServer -> bool (static property)
 ///

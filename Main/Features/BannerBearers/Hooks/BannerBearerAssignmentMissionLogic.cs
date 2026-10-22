@@ -4,7 +4,6 @@ using TaleWorlds.MountAndBlade;
 using TaleWorlds.ObjectSystem;
 using TAOM.Core.Logging;
 using TAOM.Features.ShaderPrecompilation;
-using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.BannerBearers.Hooks;
 
@@ -85,10 +84,6 @@ public sealed class BannerBearerAssignmentMissionLogic : MissionLogic
     {
         if (formation == null || formation.CountOfUnits <= 0) return;
 
-        // Co-op (#967): a formation of puppets is banner-assigned by its owner; doing it here too churns the bearer.
-        var first = formation.GetFirstUnit();
-        if (first != null && !CoopMissionOwnership.IsOwnedHere(first)) return;
-
         // A hero captain may already have supplied one — never override vanilla's choice.
         if (bannerLogic.GetFormationBanner(formation) != null) return;
 
@@ -119,22 +114,13 @@ public sealed class BannerBearerAssignmentMissionLogic : MissionLogic
         bannerLogic.SetFormationBanner(formation, item);
     }
 
-    // Boundary conversion: pull plain culture ids off the sealed Agent/Character types and let the
-    // service decide. Formation.GetFirstUnit() is NOT a culture owner — it is literally
-    // Arrangement.GetAllUnits()[0], so a mixed-culture formation (allied army, mercenary-heavy
-    // player party) would fly whichever standard landed in slot 0. Codex review 2026-07-16 MED.
+    // Boundary conversion: the plain culture ids come off the sealed Agent/Character types in
+    // FormationBannerHeraldry and the service decides. Formation.GetFirstUnit() is NOT a culture owner,
+    // so a mixed-culture formation (allied army, mercenary-heavy player party) must be counted whole.
     private string? ResolveFormationCultureId(Formation formation)
     {
-        _cultureScratch.Clear();
-        foreach (var unit in formation.UnitsWithoutLooseDetachedOnes)
-        {
-            if (unit is Agent agent)
-                _cultureScratch.Add(agent.Character?.Culture?.StringId);
-        }
-
-        return _service.ResolveMajorityCultureId(_cultureScratch)
-            // Every unit detached (UnitsWithoutLooseDetachedOnes empty while CountOfUnits > 0).
-            ?? formation.GetFirstUnit()?.Character?.Culture?.StringId;
+        FormationBannerHeraldry.CollectCultureIds(formation, _cultureScratch);
+        return _service.ResolveMajorityCultureId(_cultureScratch);
     }
 
     private void WarnUnresolvedBanner(string itemId, string cultureId)

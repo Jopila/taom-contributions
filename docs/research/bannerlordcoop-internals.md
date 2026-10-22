@@ -228,28 +228,32 @@ the v0.0.3 decompile the rest of this note rests on). The members TAOM binds, al
 | `Missions.INetworkAgentRegistry.TryGetAgentInfo(Agent, out CoopAgentInfo)` | instance, one lock | Registered or not |
 | `Missions.INetworkAgentRegistry.IsLocallyControlled(Agent)` | instance, same lock; `false` for an unregistered agent | Registered here or to another peer |
 | `Missions.CoopMissionController` | abstract `MissionBehavior`; battles, taverns and tournaments each extend it | "Is this a co-op mission at all" |
-| `Missions.Battles.CoopBattleController.Session` | public instance property, `IBattleSession`, assigned in the constructor | The battle host |
-| `Missions.Battles.IBattleSession.IsLocalHost` | re-reads `IBattleHostRegistry` on each call; `false` while no instance id is set | Live host check (false before the election) |
+| `Missions.Battles.CoopBattleController.Session` | public instance property, `IBattleSession`, assigned in the constructor | Not bound. TAOM bound it for a host check until the C7 follow-up removed the host API |
+| `Missions.Battles.IBattleSession.IsLocalHost` | re-reads `IBattleHostRegistry` on each call; `false` while no instance id is set | Not bound (see above) |
 
 Facts a mission behavior must respect:
 
 - `AgentExtensions.IsLocallyControlled` calls `ContainerProvider.TryResolve` on every call and returns `false` with
   no container. TAOM does not use it: one resolve per mission, and an unregistered agent needs a third answer.
 - Owned agents register in a postfix on `Mission.SpawnAgent`; puppets register after `SpawnAgent` returns. Inside
-  `OnAgentBuild` every agent reads "not local". A non-humanoid is built with `Controller = AI` whatever the spawn
-  data says (`Agent.cs:5206`); co-op sets a puppet mount to `None` later, from movement code. So ownership is read
-  on a tick, never at build.
+  `OnAgentBuild` the registry answers "not local" for every agent. The engine controller is right at build for a
+  human, but a non-humanoid is built with `Controller = AI` whatever the spawn data says (`Agent.cs:5206`), so every
+  mount reads AI; co-op sets a puppet mount to `None` later, from movement code. So ownership is read on a tick,
+  never at build.
+- An owned mount can read `Controller` `None` too: `AgentMovementHandler.cs:1530-1533` sets it during the synthetic
+  mount turn, which lasts `SyntheticMountTurnDurationSeconds = 2f` (`:81`) and restores the original controller
+  afterwards (`ClearSyntheticMountTurn`). "`None` means puppet" holds for humans only.
 - Co-op's own answer for an unregistered agent (`BattleBlowInterceptPatch`): a human is local when `Controller` is not
   `None`; a mount with no rider, or a local rider, is local. TAOM mirrors it.
 - The registry takes a lock on every call, and the engine raises several agent callbacks off the main thread, so a
   check made from such a callback blocks briefly but is safe.
 - The battle host is elected after `Mission.AfterStart` (`BattleHostHandler`, `CoopBattleController`), and a host
   handoff moves authority mid-battle (`BattleAuthorityMigrator`). Add-time host checks are impossible; live checks
-  are required.
+  are required. TAOM asks no host question at all now; it reads ownership per agent.
 - Puppets never attack: co-op routes a blow by its victim (`BattleBlowInterceptPatch`), which re-applies it on the
   owner. A TAOM behavior that drives a puppet therefore lands a second hit.
-- Tournaments and locations have a `CoopMissionController` but no `CoopBattleController`. TAOM treats them as having
-  nothing to elect (`IsBattleHost` is true).
+- Tournaments and locations have a `CoopMissionController` but no `CoopBattleController`, so there is no host to
+  elect there.
 
 TAOM's side of this is the "Mission behaviors" section of [coop-interop.md](../features/coop-interop.md).
 

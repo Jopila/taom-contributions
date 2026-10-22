@@ -2144,8 +2144,9 @@ public class SubModule : MBSubModuleBase
         // culprit's name as the last line rather than forcing source archaeology on the order.
         void AddTaomBehavior(MissionBehavior behavior)
         {
-            // Co-op (#967, C7): an Unsafe behavior is not added in a session. Host status is unknown here (the host is
-            // elected after Mission.AfterStart), so every other role is checked live inside the behavior.
+            // Co-op (#967, C7): an Unsafe behavior is not added in a session. Agent ownership is unknown here (co-op
+            // registers agents after they are built), so an AgentOwner behavior checks it live or relies on the
+            // invariant its row in docs/features/coop-interop.md names.
             if (!Features.CoopInterop.Missions.CoopMissionRolePolicy.ShouldAdd(behavior.GetType(), coopSessionActive))
             {
                 try { IoC.Resolve<IModLogger>()?.LogInfo($"[CoopMission] skipped {behavior.GetType().Name} (Unsafe in a co-op session)"); } catch { /* diagnostic only */ }

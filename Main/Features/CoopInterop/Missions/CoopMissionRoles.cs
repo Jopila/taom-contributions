@@ -66,10 +66,7 @@ public static class CoopMissionRoles
         [nameof(FellFoesMissionLogic)] = CoopMissionRole.Unsafe,
         [nameof(LostFootingMissionLogic)] = CoopMissionRole.Unsafe,
 
-        // BattleHost: added everywhere; tactics move only AI-controlled agents.
-        [nameof(CultureDoctrineMissionLogic)] = CoopMissionRole.BattleHost,
-
-        // AgentOwner: every agent is checked at the point the behavior would act.
+        // AgentOwner: acts only on agents this peer owns, by a live check or a named invariant (see the doc row).
         [nameof(BehaviorTreeMissionLogic)] = CoopMissionRole.AgentOwner,
         [nameof(AdvancedCombatBehavior)] = CoopMissionRole.AgentOwner,
         [nameof(WargMissionBehavior)] = CoopMissionRole.AgentOwner,
@@ -113,6 +110,10 @@ public static class CoopMissionRoles
         [nameof(BattleLoadPhaseBehavior)] = CoopMissionRole.Local,
         [nameof(CustomBattleTeamFixBehavior)] = CoopMissionRole.Local,
         [nameof(HostReviewMissionLogic)] = CoopMissionRole.Local,
+
+        // Local: tactics move only AI-controlled agents, so on a guest (where the host's AI teams are
+        // puppets) it has nothing to move.
+        [nameof(CultureDoctrineMissionLogic)] = CoopMissionRole.Local,
     };
 
     /// <summary>The role of a behavior type; an unlisted type is Local so a session never loses it silently.</summary>

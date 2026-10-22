@@ -17,8 +17,6 @@ namespace TAOM.Features.CoopInterop.Missions;
 ///   Missions.INetworkAgentRegistry.TryGetAgentInfo(Agent, out CoopAgentInfo) -> bool
 ///   Missions.INetworkAgentRegistry.IsLocallyControlled(Agent) -> bool
 ///   Missions.CoopMissionController                                              (abstract MissionBehavior)
-///   Missions.Battles.CoopBattleController.Session -> IBattleSession             (public instance property)
-///   Missions.Battles.IBattleSession.IsLocalHost -> bool                         (re-read from the host registry per call)
 ///
 /// The registry answers per agent: unregistered, registered to another peer, or registered here. An
 /// unregistered agent follows co-op's own fallback in BattleBlowInterceptPatch: a human is owned when its
@@ -33,7 +31,6 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
     private const string ContainerProviderTypeName = "GameInterface.ContainerProvider";
     private const string RegistryTypeName = "Missions.INetworkAgentRegistry";
     private const string MissionControllerTypeName = "Missions.CoopMissionController";
-    private const string BattleControllerTypeName = "Missions.Battles.CoopBattleController";
 
     private const int Unregistered = 0;
     private const int RegisteredElsewhere = 1;
@@ -73,7 +70,7 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
             var mission = agent.Mission ?? Mission.Current;
             if (mission == null) return new EngineAgentFacts(agent).HasLiveController;
 
-            var link = LinkFor(mission, () => mission.MissionBehaviors);
+            var link = LinkFor(mission, static m => ((Mission)m).MissionBehaviors);
             return Decide(link, new EngineAgentFacts(agent));
         }
         catch (Exception ex)
@@ -81,23 +78,6 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
             // Never let another mod's internals throw into a mission tick. Fail open: TAOM acts as it
             // does in singleplayer.
             LogOnce($"ownership probe threw, treating the agent as owned: {ex.Message}");
-            return true;
-        }
-    }
-
-    public bool IsBattleHost(Mission? mission)
-    {
-        if (!_session.IsSessionActive) return true;
-        if (mission == null) return true;
-
-        try
-        {
-            var link = LinkFor(mission, () => mission.MissionBehaviors);
-            return DecideHost(link);
-        }
-        catch (Exception ex)
-        {
-            LogOnce($"host probe threw, treating this peer as host: {ex.Message}");
             return true;
         }
     }
@@ -129,26 +109,8 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
         return riderHasController;
     }
 
-    // Internal for TAOM.Tests.
-    internal bool DecideHost(MissionLink link)
-    {
-        // Not a co-op battle (a tournament, a tavern, a mission co-op does not manage): nothing to elect.
-        var controller = link.BattleController;
-        if (controller == null) return true;
-
-        var isHost = _binding.Value.SessionIsLocalHost;
-        if (isHost == null) return true;
-
-        try { return isHost(controller); }
-        catch (Exception ex)
-        {
-            LogOnce($"host probe threw, treating this peer as host: {ex.Message}");
-            return true;
-        }
-    }
-
     // Internal for TAOM.Tests: the mission is an opaque key, its behaviors are read once per mission.
-    internal MissionLink LinkFor(object mission, Func<IEnumerable<object>> behaviors)
+    internal MissionLink LinkFor(object mission, Func<object, IEnumerable<object>> behaviors)
     {
         var current = _link;
         if (current != null && ReferenceEquals(current.Mission, mission)) return current;
@@ -158,7 +120,7 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
             current = _link;
             if (current != null && ReferenceEquals(current.Mission, mission)) return current;
 
-            var built = BuildLink(mission, behaviors());
+            var built = BuildLink(mission, behaviors(mission));
             _link = built;
             return built;
         }
@@ -168,14 +130,16 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
     {
         var binding = _binding.Value;
         var managed = binding.MissionControllerType == null;
-        object? battleController = null;
 
         foreach (var behavior in behaviors)
         {
             if (behavior == null) continue;
             if (binding.MissionControllerType?.IsInstanceOfType(behavior) == true) managed = true;
-            if (binding.BattleControllerType?.IsInstanceOfType(behavior) == true) battleController = behavior;
         }
+
+        // A failure warns once per mission, not once per session: a new mission may fail differently.
+        // Re-armed only after the behavior list was read, so a list that throws every time warns once.
+        Interlocked.Exchange(ref _warned, 0);
 
         object? registry = null;
         if (managed && binding.ResolveRegistry != null)
@@ -184,7 +148,7 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
             catch (Exception ex) { LogOnce($"registry resolve threw, using engine controllers: {ex.Message}"); }
         }
 
-        return new MissionLink(mission, managed, registry, battleController);
+        return new MissionLink(mission, managed, registry);
     }
 
     private int Probe(Func<object, object, int> probe, object registry, object agent)
@@ -203,7 +167,6 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
         try
         {
             binding.MissionControllerType = _findType(MissionControllerTypeName);
-            binding.BattleControllerType = _findType(BattleControllerTypeName);
             if (binding.MissionControllerType == null)
                 LogOnce($"'{MissionControllerTypeName}' not found: a co-op session is live but its missions are " +
                         "unreadable, so ownership falls back to engine controllers. If this is BannerlordCoop, " +
@@ -220,10 +183,10 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
             {
                 binding.ResolveRegistry = CompileResolve(provider, registryType);
                 binding.Probe = CompileProbe(registryType);
+                if (binding.ResolveRegistry == null || binding.Probe == null)
+                    LogOnce("a member of the registry binding was not found: ownership falls back to engine " +
+                            "controllers. If this is BannerlordCoop, its API may have changed.");
             }
-
-            if (binding.BattleControllerType != null)
-                binding.SessionIsLocalHost = CompileSessionIsLocalHost(binding.BattleControllerType);
         }
         catch (Exception ex)
         {
@@ -289,25 +252,8 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
         return null;
     }
 
-    // controller => controller.Session != null && controller.Session.IsLocalHost
-    private static Func<object, bool>? CompileSessionIsLocalHost(Type controllerType)
-    {
-        var sessionProperty = controllerType.GetProperty("Session");
-        var isLocalHost = sessionProperty?.PropertyType.GetProperty("IsLocalHost");
-        if (sessionProperty == null || isLocalHost == null) return null;
-
-        var arg = Expression.Parameter(typeof(object), "controller");
-        var session = Expression.Variable(sessionProperty.PropertyType);
-        var body = Expression.Block(new[] { session },
-            Expression.Assign(session, Expression.Property(Expression.Convert(arg, controllerType), sessionProperty)),
-            Expression.Condition(
-                Expression.NotEqual(session, Expression.Constant(null, sessionProperty.PropertyType)),
-                Expression.Property(session, isLocalHost),
-                Expression.Constant(false)));
-        return Expression.Lambda<Func<object, bool>>(body, arg).Compile();
-    }
-
-    private void LogOnce(string message)
+    // Internal for TAOM.Tests.
+    internal void LogOnce(string message)
     {
         if (Interlocked.Exchange(ref _warned, 1) == 1) return;
         try { _logger?.LogWarning($"[CoopMission] {message}"); } catch { /* logging must never throw here */ }
@@ -316,24 +262,20 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
     private sealed class Binding
     {
         public Type? MissionControllerType;
-        public Type? BattleControllerType;
         public Func<object?>? ResolveRegistry;
         public Func<object, object, int>? Probe;
-        public Func<object, bool>? SessionIsLocalHost;
     }
 
     /// <summary>What was bound for one mission. Holds no Mission-owning reference past the next mission.</summary>
     internal sealed class MissionLink
     {
         private readonly WeakReference _mission;
-        private readonly WeakReference? _battleController;
 
-        public MissionLink(object mission, bool managed, object? registry, object? battleController)
+        public MissionLink(object mission, bool managed, object? registry)
         {
             _mission = new WeakReference(mission);
             Managed = managed;
             Registry = registry;
-            _battleController = battleController == null ? null : new WeakReference(battleController);
         }
 
         public object? Mission => _mission.Target;
@@ -342,8 +284,6 @@ public sealed class CoopMissionAuthority : ICoopMissionAuthority
         public bool Managed { get; }
 
         public object? Registry { get; }
-
-        public object? BattleController => _battleController?.Target;
     }
 
     /// <summary>The engine reads the ownership decision needs, behind a seam so tests need no engine agent.</summary>

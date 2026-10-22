@@ -953,3 +953,21 @@ of payment (`SafePassageBarterable` ~174).
 - **Prevent:** when the player pays, bribes or bargains with a party, re-issue that party's orders in the same call and
   set the engine's own protection flag if one exists; test an order given in the same hour as the deal.
 - **Source:** `docs/reviews/rca-fire-and-tribute-envoy-2026-10-21.md` finding 1.
+
+### An ownership change lists what each owned object keeps only on its owner (co-op mission gating, 2026-10-21)
+C7 made elephant and mumakil crew spawn only on the peer that owns the creature, which ended duplicate crews. The
+owner seats each crew agent with `seat.OnUse`, a link no other peer has, and co-op's spawn message carries no seat
+identity. After a battle-host migration the new host adopts the crew as AI with no seat link.
+- **Why missed:** the reviews asked which peer may act on an object, not what the object loses when its owner leaves.
+- **Prevent:** for every owner-only action, list the local state it creates (a seat, a cache, a timer) and say how a
+  new owner rebuilds it after a handoff, or record the gap as an owed check.
+- **Source:** [rca-coop-mission-gating-2026-10-21.md](../rca-coop-mission-gating-2026-10-21.md) finding 10 (Codex F1).
+
+### Before adding a check at a call site, read the gate the site already has (co-op mission gating, 2026-10-21)
+C7 added a co-op ownership check to four morale paths, Smart Cavalry and the banner bearers. Each already had a gate
+that rejects a co-op puppet: `DreadAgentGate.CanAffect` needs an AI-controlled human with a `CommonAIComponent`, Smart
+Cavalry reads only the player team, and banner promotion needs `IsAIControlled`. The five checks were deleted.
+- **Why missed:** the plan gated every site in its table one by one.
+- **Prevent:** read the site's existing guard first; if it already decides the case, pin the invariant with a test and
+  name it in the doc row instead of adding a second check.
+- **Source:** [rca-coop-mission-gating-2026-10-21.md](../rca-coop-mission-gating-2026-10-21.md) finding 5.

@@ -4,7 +4,6 @@ using TaleWorlds.MountAndBlade;
 using TAOM.Adapters;
 using TAOM.Adapters.Models;
 using TAOM.Core.Logging;
-using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.SmartCavalryAI.Hooks;
 
@@ -107,8 +106,6 @@ public sealed class SmartCavalryAIMissionBehavior : MissionBehavior
         {
             if (unit is not Agent agent) continue;
             if (!agent.HasMount || !agent.IsActive()) continue;
-            // Co-op (#967): the avoidance writes the movement direction, which only the owner may steer.
-            if (!CoopMissionOwnership.IsOwnedHere(agent)) continue;
 
             _battlefield.GetNearbyAgents(agent.Position.AsVec2, FriendlyAvoidanceRadius, _nearbyBuffer);
 

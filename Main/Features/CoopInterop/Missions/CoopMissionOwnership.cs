@@ -8,7 +8,7 @@ namespace TAOM.Features.CoopInterop.Missions;
 /// The call-site face of <see cref="ICoopMissionAuthority"/> for mission code that is built with
 /// <c>new</c> or runs in a tree task, where constructor injection is not available (#967, C7). The
 /// authority is resolved lazily and once from the container; with no container (a unit test, the first
-/// frame of startup) every answer is "owned" and "host", exactly as in singleplayer.
+/// frame of startup) every answer is "owned", exactly as in singleplayer.
 ///
 /// A check costs one session read in singleplayer and no reflection. In a session it is the authority's
 /// compiled registry probe. Answers are never cached here.
@@ -33,13 +33,6 @@ public static class CoopMissionOwnership
     {
         var authority = Authority();
         return authority == null || authority.IsLocallyControlled(agent);
-    }
-
-    /// <summary>True when this peer is the battle host of <paramref name="mission"/>, or there is no session.</summary>
-    public static bool IsBattleHost(Mission? mission)
-    {
-        var authority = Authority();
-        return authority == null || authority.IsBattleHost(mission);
     }
 
     private static ICoopMissionAuthority? Authority()

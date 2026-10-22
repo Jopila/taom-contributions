@@ -177,12 +177,11 @@ public sealed class SpecialResourceEarningService
     {
         var hero = input.Hero;
         var session = _coop.IsSessionActive;
+        // The policy applies with or without a session: a dedicated server's placeholder MainHero earns nothing.
+        if (!SpecialResourceEarnPolicy.MayEarn(session, _coop.IsAuthority, _dedicatedServer.IsDedicatedServer, hero.Control))
+            return DailyOutcome.NotProcessed;
         if (session)
-        {
-            if (!SpecialResourceEarnPolicy.MayEarn(true, _coop.IsAuthority, _dedicatedServer.IsDedicatedServer, hero.Control))
-                return DailyOutcome.NotProcessed;
             SeedPlayer(hero);
-        }
 
         var kingdomId = hero.KingdomId;
         var cultureId = hero.CultureId;

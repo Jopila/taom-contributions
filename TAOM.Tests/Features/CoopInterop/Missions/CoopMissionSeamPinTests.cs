@@ -48,13 +48,12 @@ public class CoopMissionSeamPinTests
     {
         var src = Source("Main/Features/CoopInterop/Missions/CoopMissionOwnership.cs");
         StringAssert.Contains(src, "authority == null || authority.IsLocallyControlled(agent)");
-        StringAssert.Contains(src, "authority == null || authority.IsBattleHost(mission)");
 
         var authority = Source("Main/Features/CoopInterop/Missions/CoopMissionAuthority.cs");
         var owned = Member(authority, "public bool IsLocallyControlled(Agent? agent)");
         CheckPrecedes(owned, "if (!_session.IsSessionActive) return true;", "LinkFor(", "IsLocallyControlled");
-        var host = Member(authority, "public bool IsBattleHost(Mission? mission)");
-        CheckPrecedes(host, "if (!_session.IsSessionActive) return true;", "LinkFor(", "IsBattleHost");
+        // The mission is read from the argument, never captured in a closure (no allocation per call).
+        Assert.IsFalse(owned.Contains("() => mission"), "LinkFor takes a static lambda over the mission");
     }
 
     [TestMethod]
@@ -71,7 +70,7 @@ public class CoopMissionSeamPinTests
         var src = Source("Main/BehaviorTreeWrapper/BehaviorTreeAgentComponent.cs");
         var tick = Member(src, "internal void TickOnMissionThread(float dt)");
         CheckPrecedes(tick, Owned + "Agent)", "Tree.RunTree()", "tree tick");
-        // The skipped tick restarts the cadence, so a non-owner peer asks once per evaluation delay, not every frame.
+        // The skipped tick restarts the cadence, so a non-owner peer is throttled only by a delay of 1000 ms or more (a creature tree still asks every frame).
         CheckPrecedes(tick, Owned + "Agent)", "timeSinceLastEvaluation = 0f;", "tree tick");
         // Never decide in the build callback: a mount's controller is AI there whatever co-op will make it.
         Assert.IsFalse(src.Contains("OnAgentBuild"), "ownership is read each tick, never at build time");
@@ -116,7 +115,9 @@ public class CoopMissionSeamPinTests
         var runner = Source("Main/Features/SignatureStrikes/Hooks/SignatureStrikeRunner.cs");
         var run = Member(runner, "public void Run(Mission mission, in StrikeRequest request)");
         CheckPrecedes(run, Owned + "attacker)", "_sound.Play(", "ring attacker");
-        CheckPrecedes(run, Owned + "victim)", "victim.ChangeMorale(", "ring victim morale");
+        // The victim's morale is gated by DreadAgentGate (an AI controller), not by a registry check.
+        CheckPrecedes(run, "DreadAgentGate.CanAffect(victim)", "victim.ChangeMorale(", "ring victim morale");
+        Assert.IsFalse(run.Contains(Owned + "victim)"), "the ring victim is gated by DreadAgentGate alone");
     }
 
     [TestMethod]
@@ -130,49 +131,79 @@ public class CoopMissionSeamPinTests
     }
 
     [TestMethod]
-    public void BannerBearers_TryAssignBanner_SkipsAFormationThisPeerDoesNotOwn()
+    public void BannerBearers_StayUngated_BecauseThePromotionModelCallsBaseFirst()
     {
-        var src = Source("Main/Features/BannerBearers/Hooks/BannerBearerAssignmentMissionLogic.cs");
-        CheckPrecedes(Member(src, "private void TryAssignBanner("), Owned, "bannerLogic.SetFormationBanner(", "banner");
+        // A puppet is never promoted to bearer: the vanilla gate (IsAIControlled) runs first in both branches
+        // of CanAgentBecomeBannerBearer, and a formation of puppets is banner-assigned by its owner.
+        var model = Source("Main/Features/BannerBearers/Models/TaomBattleBannerBearersModel.cs");
+        var can = Member(model, "public override bool CanAgentBecomeBannerBearer(Agent agent)");
+        var disabled = can.IndexOf("? base.CanAgentBecomeBannerBearer(agent)", StringComparison.Ordinal);
+        var enabled = can.IndexOf(": base.CanAgentBecomeBannerBearer(agent)", StringComparison.Ordinal);
+        Assert.IsTrue(disabled >= 0 && enabled > disabled, "both branches call base");
+        Assert.IsTrue(enabled < can.IndexOf("_service.IsRaceAllowed(", StringComparison.Ordinal), "base runs before TAOM's gates");
+
+        var logic = Source("Main/Features/BannerBearers/Hooks/BannerBearerAssignmentMissionLogic.cs");
+        Assert.IsFalse(logic.Contains("CoopMission"), "the assignment logic reads no co-op state");
     }
 
     [TestMethod]
-    public void DreadPulse_DrainsOnlyOwnedTargets()
+    public void DreadAgentGate_CanAffect_RequiresAnAIController()
     {
-        var src = Source("Main/Features/DreadAura/Hooks/DreadPulseRunner.cs");
-        CheckPrecedes(Member(src, "public void Run("), Owned + "target)", "target.ChangeMorale(", "dread pulse");
+        // The gate is also the co-op ownership test for dread, race fear, the signature ring and the aura
+        // pulse: a puppet is Controller None, so it is not AI-controlled and carries no CommonAIComponent.
+        var gate = Member(Source("Main/Features/DreadAura/Hooks/DreadAgentGate.cs"), "public static bool CanAffect(Agent agent)");
+        StringAssert.Contains(gate, "agent.IsAIControlled");
+        StringAssert.Contains(gate, "agent.CommonAIComponent != null");
+        foreach (var path in new[]
+                 {
+                     "Main/Features/DreadAura/Hooks/DreadPulseRunner.cs",
+                     "Main/Features/RaceAbilities/Hooks/RaceAbilityDeaths.cs",
+                     "Main/Features/RaceAbilities/Hooks/RaceAbilityTicker.cs",
+                 })
+        {
+            var src = Source(path);
+            StringAssert.Contains(src, "DreadAgentGate.CanAffect(", path);
+            Assert.IsFalse(src.Contains("CoopMission"), path + " relies on the gate, not a registry check");
+        }
     }
 
     [TestMethod]
     public void CareerAbilities_BuffAndInspireOnlyOwnedAllies()
     {
         var src = Source("Main/Features/CareerSystem/Abilities/MissionAbilityExecutionContext.cs");
-        CheckPrecedes(Member(src, "public void ApplyMoraleBurst("), Owned + "ally)", "ai.Morale =", "morale burst");
+        // The burst needs the ally's CommonAIComponent, which only an AI-controlled agent carries.
+        var burst = Member(src, "public void ApplyMoraleBurst(");
+        CheckPrecedes(burst, "GetComponent<CommonAIComponent>()", "ai.Morale =", "morale burst");
+        Assert.IsFalse(burst.Contains("CoopMission"), "the burst is gated by the AI component");
         CheckPrecedes(Member(src, "private void ApplyAoeBuff("), Owned + "ally)", "CareerAbilityBuffTracker.AddAllyContribution", "aoe buff");
     }
 
     [TestMethod]
-    public void RaceAbilityFear_FrightensOnlyOwnedVictims()
+    public void CreatureBanditBackstop_StaysUngated()
     {
-        var src = Source("Main/Features/RaceAbilities/Hooks/RaceAbilityDeaths.cs");
-        CheckPrecedes(Member(src, "private void Frighten("), Owned + "victim)", "victim.ChangeMorale(", "race fear");
-    }
-
-    [TestMethod]
-    public void CreatureBanditBackstop_NeverRoutsAPuppet()
-    {
+        // A puppet's origin has no supplier, so SetRouted does nothing there, and co-op never replicates
+        // creature bandits (SpawnMonster bypasses SpawnAgent): the backstop needs no ownership test.
         var src = Source("Main/Features/CreatureBandits/CreatureBanditMissionBehavior.cs");
         var removed = Member(src, "public override void OnAgentRemoved(");
-        // Controller, not the registry: the dying agent may already be deregistered.
-        CheckPrecedes(removed, "Controller == AgentControllerType.None", "SetRouted(", "backstop");
-        Assert.IsFalse(removed.Contains("CoopMissionOwnership"), "a dying agent may be deregistered: read Controller");
+        Assert.IsFalse(removed.Contains("Controller"), "the backstop reads no controller");
+        Assert.IsFalse(removed.Contains("CoopMission"), "the backstop reads no co-op state");
     }
 
     [TestMethod]
-    public void SmartCavalryAvoidance_SteersOnlyOwnedRiders()
+    public void PlayerTeamBehaviors_StayUngated()
     {
-        var src = Source("Main/Features/SmartCavalryAI/Hooks/SmartCavalryAIMissionBehavior.cs");
-        CheckPrecedes(Member(src, "private void ApplyCollisionAvoidance("), Owned + "agent)", "agent.SetMovementDirection(", "avoidance");
+        // Co-op keeps other owners' puppets off the player team (PuppetSpawner.cs:1031-1053), and both behaviors
+        // read only Mission.Current?.PlayerTeam, so neither needs an ownership test.
+        foreach (var path in new[]
+                 {
+                     "Main/Features/SmartCavalryAI/Hooks/SmartCavalryAIMissionBehavior.cs",
+                     "Main/Features/MixedFormations/Hooks/MixedFormationsMissionBehavior.cs",
+                 })
+        {
+            var src = Source(path);
+            StringAssert.Contains(src, "PlayerTeam", path);
+            Assert.IsFalse(src.Contains("CoopMission"), path + " reads only the player team");
+        }
     }
 
     [TestMethod]

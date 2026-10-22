@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using HarmonyLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Features.CoopInterop;
@@ -93,6 +94,9 @@ public class CoopRecruitAttributionPatchTests
     [TestMethod]
     public void Prepare_CoopTypeAbsent_SkipsThePatch()
     {
+        // Another test class may have loaded the installed Coop DLLs into this AppDomain; the type is then present.
+        if (AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetType("GameInterface.Services.TroopRosters.Interfaces.TroopRosterInterface", false) != null))
+            Assert.Inconclusive("The real Coop assemblies are loaded in this AppDomain.");
         Assert.IsFalse(CoopRecruitAttributionPatch.Prepare());
     }
 }

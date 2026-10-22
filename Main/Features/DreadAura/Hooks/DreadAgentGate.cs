@@ -32,6 +32,9 @@ public static class DreadAgentGate
         && agent.IsActive()
         && agent.IsHuman
         && !agent.IsMount
+        // Co-op (#967): this is also the ownership test, because co-op builds a human puppet with Controller None
+        // and sets None when authority leaves this peer, and AgentCommonAILogic removes CommonAIComponent when the
+        // controller leaves AI.
         && agent.IsAIControlled
         && agent.CommonAIComponent != null
         && agent.GetMorale() >= 0f;

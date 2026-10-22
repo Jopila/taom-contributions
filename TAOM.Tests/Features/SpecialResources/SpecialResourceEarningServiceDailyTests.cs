@@ -32,6 +32,20 @@ public class SpecialResourceEarningServiceDailyTests
     // --- Single-player branch ---
 
     [TestMethod]
+    public void OnDailyTick_DedicatedServerWithoutSession_DoesNotProcess()
+    {
+        // A dedicated server's placeholder MainHero is nobody's hero: with no session it earns nothing,
+        // the same rule the battle and raid paths already apply (Codex review 2026-10-21).
+        var kit = new EarningTestKit(dedicated: true);
+        Arrange(kit, "main", Breakdown(5f, 1f), 10f, 13f);
+
+        var outcome = kit.Sut.OnDailyTick(Input());
+
+        Assert.IsFalse(outcome.Processed);
+        kit.Service.DidNotReceiveWithAnyArgs().ApplyDailyTick(default, default, default, default, default);
+    }
+
+    [TestMethod]
     public void OnDailyTick_HeroMapsToNoResource_ProcessesWithoutTicking()
     {
         var kit = new EarningTestKit();

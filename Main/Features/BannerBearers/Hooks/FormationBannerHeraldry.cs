@@ -32,6 +32,28 @@ internal static class FormationBannerHeraldry
         }
     }
 
+    // Fill `output` with one culture id per unit. Formation.GetFirstUnit() is NOT a culture owner: it is
+    // literally Arrangement.GetAllUnits()[0], so a mixed-culture formation (allied army, mercenary-heavy
+    // player party) would fly whichever standard landed in slot 0. Codex review 2026-07-16 MED.
+    public static void CollectCultureIds(Formation formation, List<string?> output)
+    {
+        output.Clear();
+
+        foreach (var unit in formation.UnitsWithoutLooseDetachedOnes)
+        {
+            if (unit is Agent agent)
+                output.Add(agent.Character?.Culture?.StringId);
+        }
+
+        // Every unit detached (UnitsWithoutLooseDetachedOnes empty while CountOfUnits > 0).
+        if (output.Count == 0)
+        {
+            var first = formation.GetFirstUnit();
+            if (first != null)
+                output.Add(first.Character?.Culture?.StringId);
+        }
+    }
+
     // The heraldry the native tableau renders is seeded at spawn from agent.Origin.Banner. Returns 0
     // (→ the guard treats it as unrenderable and skips) when the origin has no Banner or an empty
     // BannerDataList.

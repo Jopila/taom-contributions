@@ -5447,3 +5447,22 @@ Scope: Batch B of the co-op dedicated server epic #964, uncommitted. Prompt `doc
 | F3 | Gate exemption written as a rule | Gate exemption broader than its reason | One failing patch was fixed with a rule for all | Lesson in `lessons/testing-qa.md` |
 
 Missed by Codex, found by Claude: the desertion flag only chose a toggle (Completeness lens), fixed by Mike's decision; plus the MEDIUM ADR-002 growth and the split payer decision (Standards lens). Full RCA: `docs/reviews/rca-coop-player-attribution-2026-10-21.md`.
+
+## Review (number assigned at merge): Co-op mission gating and per-player earning (#967 C1 + C7), 6-lens deep review + convergence + Codex gpt-6-astra xhigh (2026-10-21)
+
+Scope: commit `8ae036bc5` plus the uncommitted follow-up. Prompt `docs/reviews/codex-adversarial-coop-mission-gating-2026-10-21.prompt.md`, output `docs/reviews/raw/codex-adversarial-coop-mission-gating-2026-10-21.md`. Each finding was verified against the TAOM source, the BannerlordCoop source and the v1.5.5 decompile before it was acted on.
+
+| # | Codex severity | Our severity | Agree? | Reason |
+|---|---|---|---|---|
+| F1 | MEDIUM | MEDIUM, follow-up | yes | `HowdahCrewSpawner.cs:75,150-161`, `MumakilCrewSpawner.cs:119,182-191`, co-op `NetworkSpawnBattleAgents.cs:86-150` and `BattleAuthorityMigrator.cs:709,739-758` confirm it; needs a seat relay, #967 C3; recorded in `coop-interop.md` |
+| S4 | UNVERIFIED | MEDIUM | yes | `SpecialResourceEarningService.OnDailyTick` applied `MayEarn` only in a session; fixed, `OnDailyTick_DedicatedServerWithoutSession_DoesNotProcess` (RED then GREEN) |
+| S3 | UNVERIFIED | LOW | yes | `BuildLink` re-armed the latch before enumerating; fixed, `LinkFor_BehaviorEnumerationAlwaysThrows_DoesNotReArmTheWarning` (RED: 4 warnings, GREEN: 1) |
+| S1, S2, S5, S6 | DISPUTED | disputed | yes | refuted with engine and co-op code; S6 matches the installed v0.1.6 DLLs, also pinned by `CoopMissionBindingTests` |
+
+| # | Bug | Category | Why missed | Preventive action |
+|---|---|---|---|---|
+| F1 | Crew seat link lost on host migration | Lifecycle across peers | The lenses asked which peer may act, not what happens to owned objects when the owner leaves | Lesson in `lessons/campaign-mechanics.md`; owed in-game check |
+| S4 | Daily tick skipped the policy without a session | Gate applied on one branch only | C1 moved the code verbatim and gated only the new session branch | Lesson in `lessons/testing-qa.md`; one test per policy input combination |
+| S3 | Latch re-armed before the work it guards | Logging guard ordering | The fix pass added the reset where the build starts | Test with a sequence that throws while enumerated |
+
+Missed by Codex, found by Claude: the six-lens review found the closure allocated per ownership check (Efficiency), the five redundant checks (Design), the creature backstop's raw controller read (Data flow, Engine), and the convergence pass found the docs reversing the failure behaviour. Full RCA: `docs/reviews/rca-coop-mission-gating-2026-10-21.md`.

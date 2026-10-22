@@ -2470,6 +2470,10 @@ Specifically owed, because each is a state a test structurally cannot reach:
   left-the-field fix paid that down to 139 by extracting its inline geometry into
   `MeritGeometryAccumulator` + `MeritGeometryScanner`.
 
+## Co-op (#967)
+
+Two enlistment mission behaviors have the co-op role `Unsafe` in `CoopMissionRoles`, so `AddTaomBehavior` does not add them to a mission while a co-op session is live: `EnlistmentMeritMissionBehavior` (it scores the enlisted player's battle merit into this save's enlistment state) and `FieldCommissionMissionLogic` (it already required `IsAuthority`, which is false on every peer that runs a mission). In a session, battle merit is not scored and field commission logic does not run; outside a session nothing changes. `EnlistmentBattleRoleMissionBehavior` and `EnlistmentBattleFormationMissionBehavior` shape only this peer's own player slot and stay `Local`. The table and the in-game list are in [coop-interop.md](coop-interop.md#mission-behaviors-967-c7); the offer-hiding half for guests (#966) is the ledger's row C7 in [coop-compat-gap-ledger.md](../research/coop-compat-gap-ledger.md).
+
 ---
 
 <!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->

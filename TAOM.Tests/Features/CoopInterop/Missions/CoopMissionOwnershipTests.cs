@@ -9,7 +9,7 @@ namespace TAOM.Tests.Features.CoopInterop.Missions;
 
 /// <summary>
 /// The static face of the authority: with no resolver, or a resolver that cannot answer, every mission check
-/// answers as singleplayer does ("owned", "host"); with one, it delegates and resolves once.
+/// answers as singleplayer does ("owned"); with one, it delegates and resolves once.
 /// </summary>
 [TestClass]
 public class CoopMissionOwnershipTests
@@ -27,7 +27,6 @@ public class CoopMissionOwnershipTests
         CoopMissionOwnership.UseResolver(null);
 
         Assert.IsTrue(CoopMissionOwnership.IsOwnedHere(BareAgent()));
-        Assert.IsTrue(CoopMissionOwnership.IsBattleHost(null));
     }
 
     [TestMethod]
@@ -39,6 +38,17 @@ public class CoopMissionOwnershipTests
         Assert.IsTrue(CoopMissionOwnership.IsOwnedHere(BareAgent()));
         Assert.IsTrue(CoopMissionOwnership.IsOwnedHere(BareAgent()));
         Assert.AreEqual(2, calls, "a failed resolve is not cached");
+    }
+
+    [TestMethod]
+    public void IsOwnedHere_ResolverReturnsNull_OwnedAndAsksAgain()
+    {
+        var calls = 0;
+        CoopMissionOwnership.UseResolver(() => { calls++; return null; });
+
+        Assert.IsTrue(CoopMissionOwnership.IsOwnedHere(BareAgent()));
+        Assert.IsTrue(CoopMissionOwnership.IsOwnedHere(BareAgent()));
+        Assert.AreEqual(2, calls, "a null answer is not cached");
     }
 
     [TestMethod]
@@ -54,15 +64,5 @@ public class CoopMissionOwnershipTests
         Assert.IsFalse(CoopMissionOwnership.IsOwnedHere(agent), "the answer is read live, never cached");
         Assert.IsTrue(CoopMissionOwnership.IsOwnedHere(agent));
         Assert.AreEqual(1, resolves);
-    }
-
-    [TestMethod]
-    public void IsBattleHost_WithAuthority_Delegates()
-    {
-        var authority = Substitute.For<ICoopMissionAuthority>();
-        authority.IsBattleHost(null).Returns(false);
-        CoopMissionOwnership.UseResolver(() => authority);
-
-        Assert.IsFalse(CoopMissionOwnership.IsBattleHost(null));
     }
 }

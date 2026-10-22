@@ -3,7 +3,6 @@ using TAOM.Features.AdvancedCombat;
 using TAOM.Features.DreadAura.Hooks;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
-using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.RaceAbilities.Hooks;
 
@@ -99,9 +98,6 @@ public sealed class RaceAbilityDeaths
         foreach (var victim in _scratch)
         {
             if (!DreadAgentGate.CanAffect(victim))
-                continue;
-            // Co-op (#967): morale is not replicated, so only a victim this peer owns is frightened.
-            if (!CoopMissionOwnership.IsOwnedHere(victim))
                 continue;
             var drain = moraleModel.CalculateMoraleChangeToCharacter(victim, morale);
             if (!(drain > 0f))
