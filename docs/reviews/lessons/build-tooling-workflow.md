@@ -4281,6 +4281,17 @@ adapter on a client, with the themed front end blank and no error.
   a feature whose resolve-while-registering predates the client submodule.
 - **Prevent:** before inverting a call behind an adapter, grep the owning `*IoC.cs` for `container.Resolve` and move it to
   an `InitializePatchStatics` called from `IoC.Configure` after `Apply`. Pin the order with a source test
-  (`FactionMapIoCTests.IoC_InitializesTheCultureStageHooksAfterTheClientComposition`) and the outcome with a container
-  test (`ClientFrontEndCompositionTests`).
+  (`FeatureModulesTests.Kernel_IoCConfigure_ResolvesNothingBeforeTheClientSlot_AndEveryStaticsInitComesAfter`) and the
+  outcome with a container test (`ClientFrontEndCompositionTests`).
 - **Source:** `Main/Features/FactionMap/FactionMapIoC.cs`, `Main/IoC.cs`, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).
+
+### Commit a single path with `git commit -- <path>` when anything else is staged (B4a, 2026-10-22)
+A docs commit ran `git add <skill file> && git commit`, and `git commit` with no path commits the whole index. The index
+already held 15 staged `git mv` renames of an unfinished batch, so the pushed docs commit (`0a8d61a4e`) moved the files
+without the core changes and did not build on its own until the batch commit (`10f1f0b80`) landed.
+- **Why missed:** the subagent's report said the renames were staged; the commit step checked the working tree, not the
+  index.
+- **Prevent:** run `git diff --cached --name-only` before every commit and compare it with the paths you meant to commit.
+  When the index holds anything else, commit with `git commit -- <path>`, which commits only that path. Never push a commit
+  whose file list you did not read.
+- **Source:** commits `0a8d61a4e` and `10f1f0b80`; [rca-taom-client-b4a-2026-10-22.md](../rca-taom-client-b4a-2026-10-22.md).
