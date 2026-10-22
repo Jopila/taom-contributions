@@ -92,7 +92,7 @@ public class AlignmentDesertionBehavior : CampaignBehaviorBase
     }
 
     // A remote co-op player's clan (never Clan.PlayerClan here) and an owner the registry cannot classify lose
-    // no troops to desertion; this peer's own clan follows "Apply To Player" and an AI clan "Apply To AI Lords".
+    // no troops to desertion; with no session this peer's own clan follows "Apply To Player", and in a session the registry alone decides, so the authority's own clan follows "Apply To AI Lords" like an AI clan.
     private bool TryResolveOwner(Clan clan, out bool isPlayerOwned)
     {
         var owner = _playerControl.OfClan(clan);

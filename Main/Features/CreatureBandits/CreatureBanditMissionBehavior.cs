@@ -109,6 +109,11 @@ public class CreatureBanditMissionBehavior : MissionLogic
                 agentState, hasAffector: affectorAgent != null))
             return;
 
+        // Co-op (#967): the engine's own routed-removal count runs where the creature is owned. Read the engine
+        // controller, not the registry: a dying agent may already be deregistered, and a puppet is Controller None.
+        if (affectedAgent.Controller == AgentControllerType.None)
+            return;
+
         affectedAgent.Origin?.SetRouted(isOrderRetreat: false);
         Interlocked.Increment(ref CreatureBanditDiag.BackstopCount);
         CreatureBanditDiag.Enqueue(new CreatureDiagEvent(CreatureDiagEventKind.Backstopped, CreatureBanditDiag.SerialOf(affectedAgent),

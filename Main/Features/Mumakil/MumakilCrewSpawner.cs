@@ -9,6 +9,7 @@ using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.ObjectSystem;
+using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.Mumakil;
 
@@ -113,6 +114,9 @@ internal sealed class MumakilCrewSpawner
                 _logger.LogInfo($"{platform.LogTag} crew not spawned: the rider is gone");
                 return;
             }
+            // Co-op (#967): the rider's owner spawns the crew and co-op replicates it; a peer holding the rider as a
+            // puppet would add a second crew.
+            if (!CoopMissionOwnership.IsOwnedHere(rider)) return;
             // BattleObserverMissionLogic reads agent.Origin.BattleCombatant unguarded on every build, so the crew
             // need an origin to forward to.
             if (rider.Origin == null)

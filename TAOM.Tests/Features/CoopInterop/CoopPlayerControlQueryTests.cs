@@ -38,14 +38,30 @@ public class CoopPlayerControlQueryTests
     }
 
     [TestMethod]
-    public void Classify_LocalPlayer_NeverScans()
+    public void Classify_NoSessionLocalPlayer_IsPlayerWithoutScan()
     {
         var scans = 0;
-        var q = new CoopPlayerControlQuery(Session(true), Substitute.For<IModLogger>(),
-            _ => { scans++; return null; });
+        var q = new CoopPlayerControlQuery(Session(false), Substitute.For<IModLogger>(),
+            _ => { scans++; return typeof(FakePlayerManager); });
 
         Assert.AreEqual(PlayerControl.Player, q.Classify(new object(), isLocalPlayer: true));
         Assert.AreEqual(0, scans);
+    }
+
+    // In a session Hero.MainHero, MainParty and PlayerClan can be a guest's (barter, hideout finalize,
+    // crime scopes), so the local comparison proves nothing and only the registry decides.
+    [TestMethod]
+    public void Classify_SessionLocalEntity_AsksTheRegistry()
+    {
+        var q = new CoopPlayerControlQuery(Session(true), Substitute.For<IModLogger>(),
+            _ => typeof(FakePlayerManager));
+        var entity = new object();
+
+        FakePlayerManager.Registered = null;
+        Assert.AreEqual(PlayerControl.NotPlayer, q.Classify(entity, isLocalPlayer: true));
+
+        FakePlayerManager.Registered = entity;
+        Assert.AreEqual(PlayerControl.Player, q.Classify(entity, isLocalPlayer: true));
     }
 
     [TestMethod]
@@ -140,5 +156,15 @@ public class CoopPlayerControlQueryTests
 
         Assert.AreEqual(PlayerControl.NotPlayer, q.OfParty(null));
         Assert.AreEqual(PlayerControl.NotPlayer, q.OfClan(null));
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGame")] // OfHero takes an engine type
+    public void OfHero_Null_IsNotPlayer()
+    {
+        var q = new CoopPlayerControlQuery(Session(true), Substitute.For<IModLogger>(),
+            _ => typeof(FakePlayerManager));
+
+        Assert.AreEqual(PlayerControl.NotPlayer, q.OfHero(null));
     }
 }

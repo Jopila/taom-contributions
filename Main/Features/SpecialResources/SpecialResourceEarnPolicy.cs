@@ -1,11 +1,12 @@
+using TAOM.Features.CoopInterop;
 using TaleWorlds.CampaignSystem.MapEvents;
 using TaleWorlds.Core;
 
 namespace TAOM.Features.SpecialResources;
 
 /// <summary>
-/// The pure decisions behind special-resource earning (who won, whether this process may credit
-/// the hero, whether an event type pays the battle credit), extracted so they can be tested without
+/// The pure decisions behind special-resource earning (who won, whether an event type pays the
+/// battle credit), extracted so they can be tested without
 /// a running campaign (<c>MapEvent</c> is sealed and unconstructible in a unit test). The behavior
 /// keeps the plumbing; this keeps the policy — same split as <c>PatchShieldPolicy</c>.
 /// </summary>
@@ -37,19 +38,6 @@ public static class SpecialResourceEarnPolicy
     }
 
     /// <summary>
-    /// May this process credit <c>Hero.MainHero</c> with earnings?
-    ///
-    /// No on a dedicated server, where MainHero is the idle world-gen hero the campaign was created
-    /// around rather than anybody's character. Crediting it banks income nobody can spend while the
-    /// remote players who fought the battles get nothing — log-proven as dozens of
-    /// <c>[SpecRes] PRISONERS: +N</c> lines against the host hero.
-    ///
-    /// Not tied to co-op role on purpose: a client-hosted session's host also reports IsServer but
-    /// is a real player and must keep earning normally.
-    /// </summary>
-    public static bool MayCreditMainHero(bool isDedicatedServer) => !isDedicatedServer;
-
-    /// <summary>
     /// Does a won map event pay the generic battle credit? A raid and forced supplies or volunteers
     /// (#770) are village-hostile events: the engine ends them as an attacker victory, and a raid pays
     /// <c>per_raid</c> through <c>RaidCompleted</c>, so the militia fight and the loot pay nothing here.
@@ -68,4 +56,18 @@ public static class SpecialResourceEarnPolicy
         || (type != MapEvent.BattleTypes.Raid
             && type != MapEvent.BattleTypes.IsForcingSupplies
             && type != MapEvent.BattleTypes.IsForcingVolunteers);
+
+    /// <summary>
+    /// Who may earn a special resource on this process (#967 C1). A client never writes, because the
+    /// authority holds the only balance. Only a hero the player-control query calls a player earns: with
+    /// no session that is the local MainHero, in a session a registered co-op player, and the authority's
+    /// own MainHero is nobody's. With no session a dedicated server earns nothing (its MainHero is the
+    /// idle world-gen hero); in a session its registered guests are real players.
+    /// </summary>
+    /// <param name="sessionActive">A co-op session is live.</param>
+    /// <param name="isAuthority">This peer runs the authoritative campaign (true in single-player).</param>
+    /// <param name="isDedicated">This process is a dedicated server.</param>
+    /// <param name="control">What the player-control query says about the candidate hero.</param>
+    public static bool MayEarn(bool sessionActive, bool isAuthority, bool isDedicated, PlayerControl control) =>
+        isAuthority && control == PlayerControl.Player && (sessionActive || !isDedicated);
 }

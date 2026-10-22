@@ -5,6 +5,7 @@ using TAOM.Features.DreadAura;
 using TAOM.Features.SignatureStrikes.Domain;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
+using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.SignatureStrikes.Hooks;
 
@@ -57,6 +58,9 @@ public sealed class SignatureStrikesMissionLogic : MissionLogic
     public override void OnMeleeHit(Agent attacker, Agent victim, bool isCanceled, AttackCollisionData collisionData)
     {
         if (!Active() || !_roster.TryGet(attacker, out var entry))
+            return;
+        // Co-op (#967): the hero's owner rings the foes; a puppet's hit seen here must not ring them a second time.
+        if (!CoopMissionOwnership.IsOwnedHere(attacker))
             return;
         // Tripwire, not a lock: this callback shares the engine chain OnAgentHit runs on.
         MissionThreadGuard.NoteCall("SignatureStrikes.OnMeleeHit",

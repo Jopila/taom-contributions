@@ -235,8 +235,12 @@ question, not a defect, and the daily toast now makes it visible.
 | `Main/Features/SpecialResources/SpecialResourceStorageService.cs` | Composite-key dict persistence |
 | `Main/Features/SpecialResources/ISpecialResourceConfigProvider.cs` | Config interface (GetByKingdomId, GetByCultureId, GetById, GetTroopCost) |
 | `Main/Features/SpecialResources/SpecialResourceConfigProvider.cs` | XML loader with multi-key indexing |
-| `Main/Features/SpecialResources/SpecialResourcesBehavior.cs` | CampaignBehavior (8 events, desertion, notifications) |
-| `Main/Features/SpecialResources/SpecialResourceEarnPolicy.cs` | The pure earn decisions: participation victory, dedicated-server suppression, which event types pay the battle credit |
+| `Main/Features/SpecialResources/SpecialResourcesBehavior.cs` | CampaignBehavior: subscribes the events, seeds, forwards each event to the earning service (276-line ratchet) |
+| `Main/Features/SpecialResources/SpecialResourceEarningService.cs` | Who earns, pays and ticks for each event: the single-player branches moved unchanged, plus the co-op authority's per-player earning and daily tick (#967 C1) |
+| `Main/Features/SpecialResources/SpecialResourceEarningModels.cs` | Plain data between adapter and service: `EarnerRef`, `VictorySnapshot`, `RaidOrHideoutSnapshot`, `DailyTickInput`, `DailyOutcome`, `EarningNotice`, `RecruitContext`, `RecruitChargeNotice` |
+| `Main/Features/SpecialResources/SpecialResourceToasts.cs` | The on-screen lines (earning, daily, desertion, recruit charge, upgrade spend); shows only the local player's |
+| `Main/Adapters/SpecialResourceEventAdapter.cs` | Reads `MapEvent`, the raid and hideout components, `Hero` and the recruit scope into those data objects, and removes deserting troops (ADR-007) |
+| `Main/Features/SpecialResources/SpecialResourceEarnPolicy.cs` | The pure earn decisions: participation victory, which event types pay the battle credit, and `MayEarn(sessionActive, isAuthority, isDedicated, control)`, the who-may-earn table |
 | `Main/Features/SpecialResources/SpecialResourceMessages.cs` | Pure builders for the four outflow messages (daily, overdraft, upgrade spend, recruit charge) |
 | `Main/Features/SpecialResources/PartyUpkeepReader.cs` | Reads the party roster and town count off engine objects for the tick, the tooltip and the console dump |
 | `Main/Features/SpecialResources/Domain/DailyResourceBreakdown.cs` | Earning, upkeep, net, per-troop upkeep lines, `DaysUntilDepleted` |
@@ -283,7 +287,9 @@ question, not a defect, and the daily toast now makes it visible.
 - `SpecialResourceStorageServiceTests.cs`: 19 tests (get/set/add, clamp, multi-hero, multi-resource, restore-null, Contains, and the non-finite cases: `Set` refuses NaN and infinity, `Add` with a NaN delta leaves the balance alone, `RestoreData` repairs a poisoned entry to zero)
 - `SpecialResourceServiceGrantTests.cs` — 9 tests for `GrantAmount` (cap clamp, floor at 0, already-at-cap, unresolved kingdom/culture, NaN/Infinity rejection, grant during an open party-screen session) against a real storage instance
 - `SpecialResourceSpenderTests.cs`: 6 tests for the narrow spend armour acquisition uses: the balance resolved by kingdom, then culture, with its display name; none for a hero whose kingdom and culture have no resource; `TrySpend` debits only a balance that covers the amount, and refuses a non-finite or non-positive amount or a hero with no resource
-- `SpecialResourceEarnPolicyTests.cs`: the AI-led-army regression, player-led still earns, losing side, unresolved battle, player on no side, neither side resolved, both `MayCreditMainHero` cases, and every `MapEvent.BattleTypes` value with both field-party flags against an independent expectation (plus a guard on the enum's members)
+- `SpecialResourceEarnPolicyTests.cs`: the AI-led-army regression, player-led still earns, losing side, unresolved battle, player on no side, neither side resolved, and every `MapEvent.BattleTypes` value with both field-party flags against an independent expectation (plus a guard on the enum's members); and `MayEarn` for every combination of session, authority, dedicated and player control against an independent expectation (#967 C1)
+- `SpecialResourceEarningServiceCharacterizationTests.cs`, `SpecialResourceEarningServiceDailyTests.cs`, `SpecialResourceEarningServiceCoopTests.cs`: the single-player paths moved unchanged (including the NaN and infinite battle ratio and the NaN balance gates, pinned as parity), then the co-op authority's per-player earning, seeding, daily tick and recruit payer, and that a client writes nothing (#967 C1)
+- `SpecialResourcesBehaviorLineCountTests.cs`: the 276-line ratchet on the behavior
 - `SpecialResourceCheatsFormatTests.cs` — 6 tests for the console echo, including a legacy balance above a lowered cap
 - `SpecialResourceTierServiceTests.cs` (14), `SpecialResourceConfigProviderTierTests.cs` (6, plus the 2 `GetById` tests for a known and an unknown or null id) and `ResourceTierTests.cs` (3): tier resolution by threshold, `<Tiers>` parsing and sort order, the domain record
 - `SpecialResourceTroopBadgeTests.cs`: 14 tests (#590). The predicate for each cost field alone, the merchant-only row shape and a null row; the rows for a captain, an elephant rider and a ram in their fixed order with zero fields omitted; the paid-in note only when the player's resource differs; no digit baked into any label
@@ -352,18 +358,17 @@ zero.** Players who campaign as a vassal will notice earnings they never used to
 reading on a co-op client — the server is authoritative and never re-broadcasts `BattleState` — and
 treating it as a win would pay out for defeats.
 
-**A dedicated server credits nobody.** `Hero.MainHero` exists on a headless server, but it is the idle
-world-gen hero the campaign was created around, not anybody's character. `SpecialResourcesBehavior.CanEarn()`
-therefore suppresses all five earn paths — `OnMapEventEnded`, `OnRaidCompleted`, `OnPrisonerTaken`,
-`OnHideoutCompleted`, `OnTournamentFinished` — when `IDedicatedServerProvider.IsDedicatedServer` is
-true, logging one `[SpecRes]` line and staying quiet after. Without it the server banks income nobody
-can spend while the remote players who fought the battles earn nothing.
+**A dedicated server credits nobody, until a session starts.** `Hero.MainHero` exists on a headless server, but it is the idle
+world-gen hero the campaign was created around, not anybody's character. With no co-op session,
+`SpecialResourceEarnPolicy.MayEarn` therefore refuses all five earn paths (battle, raid, prisoners,
+hideout, tournament) when `IDedicatedServerProvider.IsDedicatedServer` is true, and the earning service logs one
+`[SpecRes]` line and stays quiet after. During a session the registered players earn on the server
+(see "Per-player earning under co-op" below).
 
-That gate keys off the **process**, not the co-op role: `DedicatedServerProvider` reads whether this
-assembly loaded from `Win64_Shipping_Server`. A client-hosted session's host also reports `IsServer`
-but is a real player at a real keyboard and must keep earning — which is why the provider exists
-instead of reusing `ICoopSessionProvider`. It fails to "not a server", because these gates only ever
-suppress.
+That gate keys off the **process**: `DedicatedServerProvider` reads whether this assembly loaded from
+`Win64_Shipping_Server`. It fails to "not a server", because these gates only ever suppress. It is not
+a claim that a client-hosted host plays: the co-op "host" is a loopback client of a separate server
+process, so no human plays on the authority process either way ([#967 design comment](https://github.com/haterade22/TAOM/issues/967#issuecomment-6328464305)).
 
 **Which hero gets the starting seed after a multiplayer join.** `ISpecialResourceService.InitializeHero`
 has a caller beyond `OnCharacterCreationIsOver` / `OnGameLoaded`: when a co-op join replaces the
@@ -388,9 +393,60 @@ ends up controlling, resolving it from the character-creation culture and the li
 
 ## Co-op recruit charge (#966)
 
-Under BannerlordCoop the server raises `OnUnitRecruited` for a guest's recruitment, and the event carries no party. Patch113 (`CoopRecruitAttributionPatch`) brackets Coop's `HandleOnRecruitmentDone` with `RecruitAttributionScope`, and `SpecialResourcesBehavior.OnUnitRecruited` (`SpecialResourcesBehavior.cs:436-464`) hands the scoped party's leader to `RecruitChargePolicy.ChoosePayer`: a client pays nothing, a scoped recruit charges that party's leader (or nobody, never the host), a dedicated server without a scope charges nobody, and anything else charges `Hero.MainHero` as before. The toast shows only when the payer is this machine's `MainHero`.
+Under BannerlordCoop the server raises `OnUnitRecruited` for a guest's recruitment, and the event carries no party. Patch113 (`CoopRecruitAttributionPatch`) brackets Coop's `HandleOnRecruitmentDone` with `RecruitAttributionScope`, and `SpecialResourcesBehavior.OnUnitRecruited` hands the scoped party's leader to `RecruitChargePolicy.ChoosePayer` (since #967 C1 through `SpecialResourceEarningService.ChargeRecruit`): a client pays nothing, a scoped recruit charges that party's leader (or nobody, never the host), a dedicated server without a scope charges nobody, a live session without a scope charges nobody (the authority's own `MainHero` pays nothing during a session), and anything else charges `Hero.MainHero` as before. The toast shows only when the payer is this machine's `MainHero`.
 
 **Not effective yet:** a guest's affordability gate (Patch51) reads a stale client balance, and the server's charge floors at zero, until balances are server-owned. Coop's prisoner and mercenary recruit paths never raise `OnUnitRecruited`, so their `recruit_cost` is never charged under co-op, host included. Both are tracked in #967. Single-player is unchanged. Detail: [coop-interop.md](coop-interop.md), [harmony-patch-registry.md](../reference/harmony-patch-registry.md).
+
+## Per-player earning under co-op (#967 C1)
+
+With no co-op session every earning path is the single-player code, moved unchanged from
+`SpecialResourcesBehavior` into `SpecialResourceEarningService`, and it credits only the local
+`Hero.MainHero`. During a live session the authority credits each registered remote player instead, and a
+client writes nothing. The adapter fills the candidate list only on the authority of a live session, so
+single-player never touches the player registry.
+
+**Who earns** is `SpecialResourceEarnPolicy.MayEarn(sessionActive, isAuthority, isDedicated, control)`: a
+client never; otherwise only a hero `IPlayerControlQuery.OfHero` calls `Player`, and with no session not on
+a dedicated server. With no session `OfHero` is the local `Hero.MainHero` comparison, so single-player is
+unchanged. In a session the **registry alone decides**, the local `MainHero` included, for two verified
+reasons: no human plays on the authority process, and the registry lists joiners only, never the server's
+own hero; and on the co-op server `Hero.MainHero`, `MainParty` and the player faction are temporarily a
+guest's inside `BarterPlayerContext` (hideout finalize, barters) and `MainHeroSubstitutionScope` (crime), so
+`== Hero.MainHero` is not a stable identity there. The authority's own hero is therefore `NotPlayer`: it
+earns, pays and counts as nobody's during a session ([#967 design comment](https://github.com/haterade22/TAOM/issues/967#issuecomment-6328464305)). An `Unknown` registry answer earns
+nothing. A guest swapped in as `MainHero` does earn, with no toast: a session notice is never local.
+
+| Event | Who is paid during a session |
+|---|---|
+| Won battle or siege | The leader of each party on the winning side that is a registered player, with that party's own ratio (enemy count divided by the party's `TotalManCount`) |
+| Raid, hideout clear | The leaders of the attacker side's parties that are registered players, once each |
+| Tournament | The winner's hero, if registered |
+| Prisoners | Nobody. `OnPrisonerTakenEvent` carries only the roster, so it cannot say whose capture it was; one log line, until #967 C2 patches in the capturing party |
+| Daily tick | Every living registered player hero, on the server |
+| Recruit cost | The scoped party's leader; an unscoped recruit charges nobody |
+
+A remote player's first server balance is the resource's `StartingAmount`, written by
+`SeedIfUntracked` before their first earn or tick; balance reconciliation with the client is #967 C4.
+During a session the daily tick keeps the player's income and upkeep but **does not desert troops**
+(it logs once), and shows no message on the host, until the balance mirror and the notices land
+(#967 C4 and C6). The one-tick desertion grace is the service's `_graceSpent` field: single-player only,
+spent by the first daily tick of a campaign (even one for a hero with no resource), and the service is
+registered Transient and resolved once per campaign, so every campaign starts with a fresh grace. A
+session has no grace yet; when C4 and C6 turn remote desertion on, each player gets a first-tick grace at
+the desertion branch.
+
+During a session two extra `LogInfo` lines name the hero: `[SpecRes] Co-op <source>: credited hero <id>`
+after each earn, and `[SpecRes] DailyTick (co-op): <id> <before>→<after> <resource>` for each ticked
+player. Single-player log text is unchanged.
+
+Owed in game. Single-player, same amounts as before: field win, win inside an AI army, raid,
+party-screen prisoners, tournament, send-troops hideout (pays once), daily line then desertion after
+grace, elephant recruit charge. Co-op (Steam host and two guests, server log): read the hero id on the
+`Co-op <source>: credited hero` and `DailyTick (co-op)` lines, so a guest's win credits that guest's hero
+only; two guests each earn with their own ratio; a guest's raid, hideout and tournament win pay once;
+prisoners pay nobody with one log line; upkeep per player and no desertion; the client log shows no
+battle, siege, raid, hideout or tournament `SpecRes` earn lines. The seed line check is dropped while every
+resource's `starting_amount` is 0 (a seed then only records the pair).
 
 ## Desertion Mechanics
 
@@ -416,6 +472,7 @@ Under BannerlordCoop the server raises `OnUnitRecruited` for a guest's recruitme
 
 ## Changelog
 
+- 2026-10-21 (#967 C1): earning moved out of `SpecialResourcesBehavior` into `SpecialResourceEarningService` (behavior 615 to 276 lines, pinned by `SpecialResourcesBehaviorLineCountTests`). The co-op authority now credits each registered remote player for battle, siege, raid, hideout and tournament wins and ticks their daily income and upkeep; its own `MainHero` earns nothing during a session, and prisoner income pays nobody until C2. `SpecialResourceEarnPolicy.MayCreditMainHero` is replaced by `SpecialResourceEarnPolicy.MayEarn`, and in a session the player registry alone decides who is a player. Single-player behaviour is unchanged. See "Per-player earning under co-op (#967 C1)".
 - 2026-10-08 (#771): one party-screen subscriber per process. `ScreenManager.OnPushScreen` is a static event, so a behavior left subscribed by a save load without a Game Over never became garbage, and after N loads each party-screen open wrote N `[SpecRes] PartyScreen session BEGUN` lines. `SpecialResourcesBehavior` now keeps its handler in a private static field of the engine's `ScreenManager.OnPushScreenEvent` type, removing the previous one before adding its own; the next campaign's `RegisterEvents` or a Game Over (a no-heir death) removes it and clears the field. `TroopCountDiagnosticsBehavior` (a singleton) removes its handler before adding it, so its dump is written once. No unit test covers it (campaign entry point). The in-game check is still owed: load a save three times in one session, open the party screen once, and expect one `[SpecRes] PartyScreen session BEGUN` line and one `[TroopCountDiag]` dump.
 - 2026-10-09 (#790): a "send troops" hideout clear paid `per_hideout_clear` twice; it now pays
   only when the hideout event is finalized. No unit test covers it (campaign entry point). Owed in

@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using TAOM.Features.CoopInterop;
 using TAOM.Features.SpecialResources;
 using TaleWorlds.CampaignSystem.MapEvents;
 using TaleWorlds.Core;
@@ -60,23 +61,6 @@ public class SpecialResourceEarnPolicyTests
             playerSide: BattleSideEnum.None, winningSide: BattleSideEnum.None));
     }
 
-    // --- Dedicated-server attribution ---
-
-    [TestMethod]
-    public void MayCreditMainHero_DedicatedServer_IsRefused()
-    {
-        // MainHero there is the idle world-gen hero; crediting it banks income nobody can spend.
-        Assert.IsFalse(SpecialResourceEarnPolicy.MayCreditMainHero(isDedicatedServer: true));
-    }
-
-    [TestMethod]
-    public void MayCreditMainHero_NormalGameProcess_IsAllowed()
-    {
-        // Single-player AND a client-hosted session's host both land here — the host is a real
-        // player despite also being the server, and must keep earning.
-        Assert.IsTrue(SpecialResourceEarnPolicy.MayCreditMainHero(isDedicatedServer: false));
-    }
-
     // --- #770: a raid or extortion event pays the battle credit only when a field party was beaten ---
 
     private static readonly MapEvent.BattleTypes[] KnownBattleTypes =
@@ -118,4 +102,58 @@ public class SpecialResourceEarnPolicyTests
         var actual = (MapEvent.BattleTypes[])System.Enum.GetValues(typeof(MapEvent.BattleTypes));
         CollectionAssert.AreEquivalent(KnownBattleTypes, actual);
     }
+
+    // --- Who may earn on this process (#967 C1) ---
+
+    private static readonly PlayerControl[] AllControls =
+        { PlayerControl.NotPlayer, PlayerControl.Player, PlayerControl.Unknown };
+
+    // Written out independently of the policy's branching. The control already answers "who": without a
+    // session the registry query reduces to the local MainHero, in a session it is the player registry.
+    private static bool ExpectedMayEarn(bool session, bool authority, bool dedicated, PlayerControl control)
+    {
+        // A client never writes: the server's balance is the only one.
+        if (!authority) return false;
+        // Only a hero the control query calls a player earns.
+        if (control != PlayerControl.Player) return false;
+        // A dedicated server's single-player-style MainHero is the idle world-gen hero, but in a session
+        // its registered guests are real players.
+        return session || !dedicated;
+    }
+
+    [TestMethod]
+    public void MayEarn_EveryCombination_MatchesTheTable()
+    {
+        var bools = new[] { false, true };
+        foreach (var session in bools)
+        foreach (var authority in bools)
+        foreach (var dedicated in bools)
+        foreach (var control in AllControls)
+        {
+            Assert.AreEqual(
+                ExpectedMayEarn(session, authority, dedicated, control),
+                SpecialResourceEarnPolicy.MayEarn(session, authority, dedicated, control),
+                $"session={session} authority={authority} dedicated={dedicated} control={control}");
+        }
+    }
+
+    [TestMethod]
+    public void MayEarn_SinglePlayerMainHero_Earns()
+        => Assert.IsTrue(SpecialResourceEarnPolicy.MayEarn(false, true, false, PlayerControl.Player));
+
+    [TestMethod]
+    public void MayEarn_DedicatedServerWithoutSession_RefusesMainHero()
+        => Assert.IsFalse(SpecialResourceEarnPolicy.MayEarn(false, true, true, PlayerControl.Player));
+
+    [TestMethod]
+    public void MayEarn_SessionRegisteredPlayer_EarnsEvenOnADedicatedServer()
+        => Assert.IsTrue(SpecialResourceEarnPolicy.MayEarn(true, true, true, PlayerControl.Player));
+
+    [TestMethod]
+    public void MayEarn_SessionServerHero_EarnsNothing()
+        => Assert.IsFalse(SpecialResourceEarnPolicy.MayEarn(true, true, false, PlayerControl.NotPlayer));
+
+    [TestMethod]
+    public void MayEarn_SessionUnknownControl_EarnsNothing()
+        => Assert.IsFalse(SpecialResourceEarnPolicy.MayEarn(true, true, false, PlayerControl.Unknown));
 }

@@ -9,8 +9,10 @@ namespace TAOM.Features.CoopInterop;
 /// Field report 2026-08-03 §6 caught this as dozens of <c>[SpecRes] PRISONERS: +N</c> lines on a
 /// server while the remote players who actually fought those battles earned nothing.
 ///
-/// It is deliberately NOT derivable from co-op role: a CLIENT-HOSTED session also reports
-/// <c>IsServer</c>, but that host is a real player at a real keyboard and must keep earning normally.
+/// It is deliberately NOT derived from co-op role, because it is a fact about the process. It matters
+/// only with no session live: during one, the player registry decides who is a player, and the co-op
+/// "host" is a loopback client of a separate server process, so no human plays on the authority process
+/// either way (#967 design comment, https://github.com/haterade22/TAOM/issues/967#issuecomment-6328464305).
 /// </summary>
 public interface IDedicatedServerProvider
 {

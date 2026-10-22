@@ -5,6 +5,7 @@ using TaleWorlds.Engine;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TAOM.Features.AdvancedCombat;
+using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.CareerSystem.Abilities;
 
@@ -54,7 +55,9 @@ public sealed class MissionAbilityExecutionContext : IAbilityExecutionContext
         int boosted = 0;
         foreach (var ally in _nearbyAlliesBuffer)
         {
-            var ai = ally?.GetComponent<CommonAIComponent>();
+            // Co-op (#967): only this peer's own troops are inspired; a puppet's owner applies its own burst.
+            if (ally == null || !CoopMissionOwnership.IsOwnedHere(ally)) continue;
+            var ai = ally.GetComponent<CommonAIComponent>();
             if (ai == null) continue;
 
             ai.Morale = Math.Min(100f, ai.Morale + magnitude);
@@ -119,6 +122,8 @@ public sealed class MissionAbilityExecutionContext : IAbilityExecutionContext
         {
             if (ally == null || !ally.IsHuman || !ally.IsActive()) continue;
             if (ally == _agent) continue; // MUST exclude caster — hero buff path handles them
+            // Co-op (#967): a buff is a local stat change, so only this peer's own troops take it.
+            if (!CoopMissionOwnership.IsOwnedHere(ally)) continue;
 
             // Issue #377 — contribution-counted add/remove: the tracker retires the entry
             // when the last restore fires, so GetAllyBuff means "buffed right now".

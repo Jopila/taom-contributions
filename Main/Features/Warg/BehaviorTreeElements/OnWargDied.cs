@@ -5,6 +5,7 @@ using BehaviorTreeWrapper.BlackBoardClasses;
 using TAOM.Features.AdvancedCombat.BaseBehaviorTree;
 using System;
 using TaleWorlds.MountAndBlade;
+using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.Warg.BehaviorTreeElements;
 
@@ -31,6 +32,8 @@ public class OnWargDied : BannerlordConstantEventListener, IBTBannerlordBase, IB
     {
         Agent rider = Rider.GetValue();
         if (rider == null || rider.Health == 0) return;
+        // Co-op (#967): the rider's owner resets it; a peer holding the rider as a puppet must not.
+        if (!CoopMissionOwnership.IsOwnedHere(rider)) return;
 
         if (rider.IsPlayerControlled)
             FinishRageMode.Reset(Agent.GetValue());

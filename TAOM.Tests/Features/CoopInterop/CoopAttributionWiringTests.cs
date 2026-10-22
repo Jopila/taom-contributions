@@ -12,9 +12,10 @@ namespace TAOM.Tests.Features.CoopInterop;
 [TestClass]
 public class CoopAttributionWiringTests
 {
+    private const string SpecResAdapter = "Main/Adapters/SpecialResourceEventAdapter.cs";
     private const string WarAdapter = "Main/Adapters/WarEventSnapshotAdapter.cs";
     private const string Desertion = "Main/Features/AlignmentDesertion/Hooks/AlignmentDesertionBehavior.cs";
-    private const string Recruits = "Main/Features/SpecialResources/SpecialResourcesBehavior.cs";
+    private const string Recruits = "Main/Features/SpecialResources/SpecialResourceEarningService.cs";
     private const string EnlistDialog = "Main/Features/Enlistment/Hooks/EnlistmentDialogBehavior.cs";
     private const string CampQuery = "Main/Features/FieldCamp/UI/MapScreenCampMenuActivationQuery.cs";
 
@@ -63,12 +64,25 @@ public class CoopAttributionWiringTests
     }
 
     [TestMethod]
-    public void SpecialResources_RecruitPayer_NamesTheThreeBoolArguments()
+    public void SpecialResources_RecruitPayer_NamesTheFourBoolArguments()
     {
         var src = ReadSource(Recruits, stripComments: true);
 
         StringAssert.Matches(src, new Regex(
-            @"RecruitChargePolicy\.ChoosePayer\(\s*isAuthority:[^;]*isDedicated:[^;]*hasScope:"));
+            @"RecruitChargePolicy\.ChoosePayer\(\s*isAuthority:[^;]*isDedicated:[^;]*sessionActive:[^;]*hasScope:"));
+    }
+
+    [TestMethod]
+    public void SpecialResourceAdapter_PlayerSide_IsNeverReadUnguarded()
+    {
+        // MapEvent.PlayerSide dereferences MainParty with no guard (MapEvent.cs:104), and MainParty is
+        // null on a dedicated co-op server. IsPlayerMapEvent is null-safe, so it gates every read.
+        var src = ReadSource(SpecResAdapter, stripComments: true);
+
+        Assert.IsFalse(Regex.IsMatch(src, @"PlayerSide\s*=\s*mapEvent\.PlayerSide"),
+            "PlayerSide must be read only behind the IsPlayerMapEvent check");
+        Assert.AreEqual(2, Regex.Matches(src, @"isPlayerEvent\s*\?\s*mapEvent\.PlayerSide\s*:\s*BattleSideEnum\.None").Count,
+            "both the victory and the raid or hideout snapshot guard PlayerSide");
     }
 
     [TestMethod]

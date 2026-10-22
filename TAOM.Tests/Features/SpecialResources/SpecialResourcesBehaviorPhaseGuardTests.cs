@@ -3,7 +3,7 @@ using NSubstitute;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.SpecialResources;
-using TAOM.Features.TroopWeight;
+using TAOM.Adapters;
 
 namespace TAOM.Tests.Features.SpecialResources;
 
@@ -26,11 +26,10 @@ public class SpecialResourcesBehaviorPhaseGuardTests
         _sut = new SpecialResourcesBehavior(
             _service,
             Substitute.For<ISpecialResourceStorageService>(),
-            Substitute.For<ISpecialResourceConfigProvider>(),
             Substitute.For<IModLogger>(),
-            Substitute.For<ITroopWeightService>(),
-            Substitute.For<IDedicatedServerProvider>(),
-            Substitute.For<ICoopSessionProvider>());
+            new SpecialResourceEarningService(_service, Substitute.For<ISpecialResourceStorageService>(), Substitute.For<ICoopSessionProvider>(),
+                Substitute.For<IDedicatedServerProvider>(), Substitute.For<IModLogger>()),
+            Substitute.For<ISpecialResourceEventAdapter>());
     }
 
     [DataTestMethod]

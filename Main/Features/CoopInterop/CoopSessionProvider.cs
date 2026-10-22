@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Reflection;
 using TAOM.Core.Logging;
 using TAOM.Dependencies.Foundation;
@@ -52,6 +53,10 @@ public sealed class CoopSessionProvider : ICoopSessionProvider
     private volatile bool _bound;
     private volatile MethodInfo? _tryGetContainer;
     private volatile PropertyInfo? _isServer;
+    // Compiled twins of the two members above: the probe runs on mission-tick paths (#967), where a
+    // MethodInfo.Invoke costs an argument array per call. Null when compiling failed; Probe then falls back.
+    private volatile Func<bool>? _containerAlive;
+    private volatile Func<bool>? _serverRole;
     private bool _bindingFailedLogged;
 
     private readonly Func<string, Type?> _findType;
@@ -70,6 +75,9 @@ public sealed class CoopSessionProvider : ICoopSessionProvider
 
     // Internal for TAOM.Tests (InternalsVisibleTo).
     internal bool RoleProbeAvailable => _tryGetContainer != null;
+
+    // Internal for TAOM.Tests (InternalsVisibleTo): both probes run as compiled delegates.
+    internal bool CompiledProbesBound => _containerAlive != null && _serverRole != null;
 
     public bool IsSessionActive => Probe().sessionActive;
 
@@ -123,11 +131,12 @@ public sealed class CoopSessionProvider : ICoopSessionProvider
         try
         {
             // bool TryGetContainer(out ILifetimeScope) — we only care about the bool.
-            var args = new object?[] { null };
-            var sessionActive = _tryGetContainer.Invoke(null, args) is true;
+            var alive = _containerAlive;
+            var sessionActive = alive != null ? alive() : _tryGetContainer.Invoke(null, new object?[] { null }) is true;
             if (!sessionActive) return (false, false);
 
-            var isServer = _isServer?.GetValue(null) is true;
+            var role = _serverRole;
+            var isServer = role != null ? role() : _isServer?.GetValue(null) is true;
             return (true, isServer);
         }
         catch (Exception ex)
@@ -181,6 +190,32 @@ public sealed class CoopSessionProvider : ICoopSessionProvider
         {
             _tryGetContainer = null;
             LogOnce($"binding failed, treating as no session: {ex.Message}");
+        }
+
+        CompileProbes();
+    }
+
+    // Builds () => TryGetContainer(out _) and () => IsServer. A failure leaves the delegate null, so the
+    // reflection path still answers: the compiled form is an optimisation, never a requirement.
+    private void CompileProbes()
+    {
+        try
+        {
+            var method = _tryGetContainer;
+            if (method == null) return;
+
+            var scope = Expression.Variable(method.GetParameters()[0].ParameterType.GetElementType()!);
+            _containerAlive = Expression.Lambda<Func<bool>>(
+                Expression.Block(new[] { scope }, Expression.Call(method, scope))).Compile();
+
+            var isServer = _isServer;
+            if (isServer != null && isServer.PropertyType == typeof(bool))
+                _serverRole = Expression.Lambda<Func<bool>>(Expression.Property(null, isServer)).Compile();
+        }
+        catch
+        {
+            _containerAlive = null;
+            _serverRole = null;
         }
     }
 

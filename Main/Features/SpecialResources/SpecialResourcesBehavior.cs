@@ -6,12 +6,9 @@ using TaleWorlds.CampaignSystem.Roster;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
-using TaleWorlds.Localization;
 using TaleWorlds.ScreenSystem;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
-using TAOM.Features.CoopInterop;
-using TAOM.Features.TroopWeight;
 
 namespace TAOM.Features.SpecialResources;
 
@@ -19,39 +16,25 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
 {
     private readonly ISpecialResourceService _service;
     private readonly ISpecialResourceStorageService _storage;
-    private readonly ISpecialResourceConfigProvider _config;
     private readonly IModLogger _logger;
-    private readonly ITroopWeightService _troopWeight;
-    private readonly IDedicatedServerProvider _dedicatedServer;
-    private readonly ICoopSessionProvider _coopSession;
+    private readonly SpecialResourceEarningService _earning;
+    private readonly ISpecialResourceEventAdapter _events;
 
     public SpecialResourcesBehavior(
         ISpecialResourceService service,
         ISpecialResourceStorageService storage,
-        ISpecialResourceConfigProvider config,
         IModLogger logger,
-        ITroopWeightService troopWeight,
-        IDedicatedServerProvider dedicatedServer,
-        ICoopSessionProvider coopSession)
+        SpecialResourceEarningService earning,
+        ISpecialResourceEventAdapter events)
     {
         _service = service;
         _storage = storage;
-        _config = config;
         _logger = logger;
-        _troopWeight = troopWeight;
-        _dedicatedServer = dedicatedServer;
-        _coopSession = coopSession;
+        _earning = earning;
+        _events = events;
     }
 
     private PartyScreenLogic _activePartyScreenLogic;
-
-    // Phase 9b deferred #133 P2 — desertion grace flag. Set true in OnSessionLaunched +
-    // OnNewGameCreated; cleared at the end of OnDailyTickHero. Suppresses the desertion
-    // branch on the FIRST daily tick after a save load so a player who saved at
-    // balance=0 isn't punished before they get a chance to earn (battle / raid / etc.)
-    // in the new session. After the first tick (which lets income arrive and balance
-    // potentially flip positive), the desertion branch resumes normal operation.
-    private bool _isFirstTickAfterLoad = true;
 
     // The last of the ten OnCharacterCreationIsOverEvent phases, so it runs after v1.5.0's
     // Advanced Starting Options has applied the player start at phase 8.
@@ -59,7 +42,6 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
 
     public override void RegisterEvents()
     {
-        CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
         CampaignEvents.DailyTickHeroEvent.AddNonSerializedListener(this, OnDailyTickHero);
         CampaignEvents.MapEventEnded.AddNonSerializedListener(this, OnMapEventEnded);
         CampaignEvents.RaidCompletedEvent.AddNonSerializedListener(this, OnRaidCompleted);
@@ -141,7 +123,6 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         // prior campaign. Must run BEFORE any seeding so stale _loggedResolveKeys dedupe
         // entries don't suppress the new campaign's first-resolve diagnostics.
         _service.ResetSessionState();
-        _isFirstTickAfterLoad = true;
         // Seeding is deliberately NOT done here: at OnNewGameCreated the chosen culture is not yet
         // applied to Hero.MainHero.Culture (still the character-creation placeholder), so seeding now
         // seeds the wrong faction's resource. It happens at OnCharacterCreationIsOver instead. (2026-06-25.)
@@ -176,350 +157,63 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         var hero = Hero.MainHero;
         if (hero == null) return;
         GetHeroIds(hero, out var kingdomId, out var cultureId);
-        var resource = _service.ResolveResource(kingdomId, cultureId);
-        if (resource == null) return;
-
-        // Gate on storage.Contains (true iff the (hero, resource) pair was ever written) — never
-        // re-seed a spent-to-0 or kingdom-changed balance, only a never-seen pair.
-        var alreadyTracked = _storage.Contains(hero.StringId, resource.Id);
-        if (!alreadyTracked && resource.StartingAmount > 0f)
-        {
-            _storage.Set(hero.StringId, resource.Id, resource.StartingAmount);
-            _logger.LogInfo($"SpecialResources: Seeded {resource.DisplayName} = {resource.StartingAmount} for legacy save ({hero.Name})");
-        }
-        else if (!alreadyTracked)
-        {
-            // StartingAmount==0 — still record the pair so it isn't re-evaluated as "never seen."
-            _storage.Set(hero.StringId, resource.Id, 0f);
-        }
+        _earning.SeedIfUntracked(hero.StringId, kingdomId, cultureId, $"legacy save ({hero.Name})");
     }
 
-    private void OnSessionLaunched(CampaignGameStarter starter)
-    {
-        // Seeding moved to OnCharacterCreationIsOver (new game) + OnGameLoaded (load): OnSessionLaunched
-        // fires while character creation is still in progress (placeholder culture), so seeding here
-        // seeded the wrong faction's resource. (2026-06-25 seeding-culture bug.)
-        _isFirstTickAfterLoad = true;
-    }
-
+    // The desertion grace (#133 P2) lives in the earning service, which is new for every campaign.
+    // Seeding is not done on OnSessionLaunched: it fires while character creation is still in progress
+    // (placeholder culture), which seeded the wrong faction's resource (2026-06-25 seeding-culture bug).
     private void OnDailyTickHero(Hero hero)
     {
-        if (hero != Hero.MainHero) return;
+        var input = _events.SnapshotDaily(hero, _earning.SessionActive);
+        if (input == null) return;
 
-        GetHeroIds(hero, out var kingdomId, out var cultureId);
-        var resource = _service.ResolveResource(kingdomId, cultureId);
-        if (resource == null)
-        {
-            _logger.LogDebug($"[SpecRes] DailyTick: no resource for hero (kingdom='{kingdomId}', culture='{cultureId}')");
-            // Clear the grace flag even on a no-resource tick so a kingdom change
-            // mid-session doesn't keep the flag set forever.
-            _isFirstTickAfterLoad = false;
-            return;
-        }
+        var outcome = _earning.OnDailyTick(input);
+        if (!outcome.Processed) return;
 
-        var ownedTowns = PartyUpkeepReader.CountOwnedTowns(hero);
-        var troopUpkeep = PartyUpkeepReader.Collect(hero.PartyBelongedTo, _config);
+        SpecialResourceToasts.Daily(outcome);
 
-        // The same breakdown the tick applies is what the player is told about, so the message and
-        // the deduction cannot disagree (#558). Balance is read before AND after, the idiom
-        // OnMapEventEnded already uses, because Add floors at 0: a bill larger than the balance is
-        // absorbed silently unless the caller compares the two.
-        var breakdown = _service.GetDailyBreakdown(hero.StringId, kingdomId, cultureId, ownedTowns, troopUpkeep);
-        var before = _service.GetCurrentAmount(hero.StringId, kingdomId, cultureId);
+        var deserted = outcome.Desertions.Count > 0 ? _events.ApplyDesertion(hero, outcome.Desertions) : 0;
+        if (deserted > 0) SpecialResourceToasts.Desertion(deserted, outcome.ResourceName);
+    }
 
-        _service.ApplyDailyTick(hero.StringId, kingdomId, cultureId, ownedTowns, troopUpkeep);
-
-        var balance = _service.GetCurrentAmount(hero.StringId, kingdomId, cultureId);
-        // Only troops whose row carries a daily_upkeep count: a merchant-only row is not an upkeep
-        // troop and must neither desert nor trigger the warnings (#558 finding 5). A troop whose
-        // career-modified upkeep is zero is not in arrears either (#767).
-        var hasUpkeepDue = breakdown.HasUpkeepDue;
-
-        // The daily line and the overdraft line show on the grace tick too: the deduction happened,
-        // only the desertion below is deferred by one day, and a line that goes quiet on the tick the
-        // player loads into would hide the one deduction they most want explained.
-        if (hasUpkeepDue)
-        {
-            var daily = SpecialResourceMessages.DailyUpkeep(resource.DisplayName, breakdown.Earning, breakdown.Upkeep, balance).ToString();
-            InformationManager.DisplayMessage(breakdown.Net < 0f
-                ? new InformationMessage(daily, Colors.Yellow)
-                : new InformationMessage(daily));
-
-            if (before + breakdown.Net < 0f)
-            {
-                InformationManager.DisplayMessage(new InformationMessage(
-                    SpecialResourceMessages.UpkeepOverdraft(resource.DisplayName, breakdown.Upkeep, before).ToString(),
-                    Colors.Red));
-            }
-        }
-
-        // Phase 9b deferred #133 P2 — desertion grace. On the FIRST daily tick after a save
-        // load (or new-game start), suppress desertion. This protects a player who saved at
-        // balance=0 from immediate troop loss before they have any chance to earn income.
-        // The grace is one tick only: after this method returns we clear the flag, so the
-        // SECOND daily tick (one in-game day later) applies desertion as normal.
-        var inGracePeriod = _isFirstTickAfterLoad;
-
-        if (balance <= 0f && hasUpkeepDue && !inGracePeriod)
-        {
-            // Desertion: remove troops from roster
-            var desertions = _service.CalculateDesertion(hero.StringId, kingdomId, cultureId, troopUpkeep);
-            var totalDeserted = ApplyDesertion(hero.PartyBelongedTo, desertions);
-
-            if (totalDeserted > 0)
-            {
-                // Slots, not interpolation. Baking the count and the resource name into the
-                // DEFAULT text made this string unlocalizable by construction: English reads
-                // correctly (GetLocalizedText short-circuits and returns the inline default), but
-                // the registered row a translator works from has no place to put a number, so no
-                // translation could ever carry it. Found by Codex, 2026-08-09 (#434).
-                MBInformationManager.AddQuickInformation(
-                    new TextObject("{=taom_res_desertion}{COUNT} elite troops deserted — your {RESOURCE} are depleted!")
-                        .SetTextVariable("COUNT", totalDeserted)
-                        .SetTextVariable("RESOURCE", resource.DisplayName),
-                    extraTimeInMs: 3000);
-            }
-        }
-        else if (balance <= 0f && hasUpkeepDue && inGracePeriod)
-        {
-            _logger.LogInfo($"[SpecRes] DailyTick: desertion grace active (first tick after load) — {breakdown.UpkeepLines.Count} upkeep troop types spared this tick");
-        }
-        else if (balance > 0f && hasUpkeepDue)
-        {
-            // Warn only when heading into a deficit: the next daily tick (steady-state — same
-            // towns/party as this tick) would push the balance to zero or below, which is exactly the
-            // threshold that triggers troop desertion. A low-but-stable balance (income covers
-            // upkeep) needs no warning, and neither does a party with no upkeep troops: nothing can
-            // desert, and the map-bar flag (SpecialResourceMapBarMixin) keys on the same three terms.
-            if (balance + breakdown.Net <= 0f)
-            {
-                InformationManager.DisplayMessage(new InformationMessage(
-                    $"{resource.DisplayName} running out: {balance:F0} left, losing {-breakdown.Net:F0}/day",
-                    Colors.Yellow));
-            }
-        }
-
-        _isFirstTickAfterLoad = false;
+    // A null snapshot means the adapter found nothing to credit on this process.
+    private void Pay<T>(T snapshot, System.Func<T, IReadOnlyList<EarningNotice>> earn) where T : class
+    {
+        if (snapshot != null) SpecialResourceToasts.Earnings(earn(snapshot));
     }
 
     private void OnMapEventEnded(MapEvent mapEvent)
-    {
-        if (!mapEvent.IsPlayerMapEvent) return;
-        if (!CanEarn()) return;
-
-        var hero = Hero.MainHero;
-        GetHeroIds(hero, out var kingdomId, out var cultureId);
-        _logger.LogDebug($"[SpecRes] MapEventEnded: state={mapEvent.BattleState}, isSiege={mapEvent.IsSiegeAssault || mapEvent.IsSiegeOutside}");
-
-        if (mapEvent.BattleState == BattleState.AttackerVictory || mapEvent.BattleState == BattleState.DefenderVictory)
-        {
-            // PARTICIPATION, not command — see SpecialResourceEarnPolicy.IsPlayerVictory for why
-            // the old leader-hero gate also broke ordinary single-player armies.
-            if (!SpecialResourceEarnPolicy.IsPlayerVictory(mapEvent.PlayerSide, mapEvent.WinningSide))
-                return;
-
-            var enemySide = mapEvent.BattleState == BattleState.AttackerVictory
-                ? mapEvent.DefenderSide : mapEvent.AttackerSide;
-            // Enemy strength for reward scaling, preserved EXACTLY across the 2026-07-11 TroopWeight rework.
-            // Pre-rework this read `p.Party.NumberOfAllMembers`, whose Harmony weighting was gated on
-            // EnableTroopWeight — so toggling the feature off reverted this to raw "for free". The getter is
-            // now raw always, so replicate the old toggle behaviour: weighted when on, raw when off
-            // (deep-review 2026-07-11 GAP#2 — otherwise "off = vanilla" breaks for this consumer).
-            bool weightOn = TaomSettings.Instance?.EnableTroopWeight ?? true;
-            var enemyCount = 0;
-            var beatAFieldParty = false;
-            foreach (var p in enemySide.Parties)
-            {
-                enemyCount += weightOn
-                    ? (int)System.Math.Ceiling(_troopWeight.CalculateWeightedMemberCount(p.Party))
-                    : (p.Party?.NumberOfAllMembers ?? 0);
-                if (p.Party?.MobileParty is { IsMilitia: false, IsVillager: false } && p.HealthyManCountAtStart > 0)
-                    beatAFieldParty = true;
-            }
-
-            // A raid or extortion event pays only when a real field party was beaten in it (#770).
-            if (!SpecialResourceEarnPolicy.PaysBattleCredit(mapEvent.EventType, beatAFieldParty))
-                return;
-
-            var playerCount = hero.PartyBelongedTo?.MemberRoster?.TotalManCount ?? 1;
-            var ratio = (float)enemyCount / playerCount;
-
-            var before = _service.GetCurrentAmount(hero.StringId, kingdomId, cultureId);
-
-            if (mapEvent.IsSiegeAssault || mapEvent.IsSiegeOutside)
-                _service.EarnFromSiege(hero.StringId, kingdomId, cultureId);
-            else
-                _service.EarnFromBattle(hero.StringId, kingdomId, cultureId, ratio);
-
-            // Deliberate display-only wording change (round-4 O1): "+N X from victory"
-            // (was "+N X earned from victory") — unified with the other delta toasts.
-            NotifyEarning(hero.StringId, kingdomId, cultureId, "victory", before);
-        }
-    }
+        => Pay(_events.SnapshotVictory(mapEvent), _earning.OnVictory);
 
     private void OnRaidCompleted(BattleSideEnum side, RaidEventComponent component)
-    {
-        if (side != BattleSideEnum.Attacker) return;
-        if (component?.MapEvent == null || !component.MapEvent.IsPlayerMapEvent) return;
-        // RaidCompleted also reports the attacker as winner when only the militia was beaten (#770);
-        // per_raid is for the loot. The engine sets the village to Looted just before raising the event.
-        if (component.MapEventSettlement?.Village?.VillageState != Village.VillageStates.Looted) return;
-        if (!SpecialResourceEarnPolicy.IsPlayerVictory(component.MapEvent.PlayerSide, side)) return;
-        if (!CanEarn()) return;
-
-        var hero = Hero.MainHero;
-        GetHeroIds(hero, out var kingdomId, out var cultureId);
-
-        var before = _service.GetCurrentAmount(hero.StringId, kingdomId, cultureId);
-        _service.EarnFromRaid(hero.StringId, kingdomId, cultureId);
-        NotifyEarning(hero.StringId, kingdomId, cultureId, "raid", before);
-    }
+        => Pay(_events.SnapshotRaid(side, component), _earning.OnRaid);
 
     private void OnPrisonerTaken(FlattenedTroopRoster roster)
-    {
-        if (!CanEarn()) return;
-
-        var hero = Hero.MainHero;
-        GetHeroIds(hero, out var kingdomId, out var cultureId);
-
-        var count = 0;
-        if (roster != null)
-            foreach (var _ in roster)
-                count++;
-        if (count > 0)
-        {
-            var before = _service.GetCurrentAmount(hero.StringId, kingdomId, cultureId);
-            _service.EarnFromPrisoners(hero.StringId, kingdomId, cultureId, count);
-            NotifyEarning(hero.StringId, kingdomId, cultureId, "prisoners", before);
-        }
-    }
+        => SpecialResourceToasts.Earnings(_earning.OnPrisoners(_events.DescribeLocalHero(), _events.CountPrisoners(roster)));
 
     private void OnTournamentFinished(CharacterObject winner, MBReadOnlyList<CharacterObject> participants, Town town, ItemObject prize)
-    {
-        if (winner != Hero.MainHero?.CharacterObject) return;
-        if (!CanEarn()) return;
-
-        GetHeroIds(Hero.MainHero, out var kingdomId, out var cultureId);
-        var before = _service.GetCurrentAmount(Hero.MainHero.StringId, kingdomId, cultureId);
-        _service.EarnFromTournament(Hero.MainHero.StringId, kingdomId, cultureId);
-        NotifyEarning(Hero.MainHero.StringId, kingdomId, cultureId, "tournament", before);
-    }
+        => SpecialResourceToasts.Earnings(_earning.OnTournament(_events.DescribeTournamentWinner(winner)));
 
     // v1.4.3 added the 3rd param HideoutBattleEndState; we don't act on it (any attacker win
     // with a player map event still earns the resource).
     private void OnHideoutCompleted(BattleSideEnum winnerSide, HideoutEventComponent component, HideoutEventComponent.HideoutBattleEndState battleEndState)
-    {
-        if (winnerSide != BattleSideEnum.Attacker) return;
-        if (component?.MapEvent == null || !component.MapEvent.IsPlayerMapEvent) return;
-        // A "send troops" clear raises this twice for one event (#790): first from its success menu,
-        // before the event is finalized, then from HideoutEventComponent.OnBeforeMapEventFinalize.
-        // MapEvent.FinalizeEventAux sets WaitingRemoval just before that second raise (v1.5.5), so
-        // paying only a finalized event pays once, and a save made in the success menu still pays
-        // once after load. Re-check this line order at an engine bump.
-        if (!component.MapEvent.IsFinalized) return;
-        if (!CanEarn()) return;
+        => Pay(_events.SnapshotHideout(winnerSide, component), _earning.OnHideout);
 
-        var hero = Hero.MainHero;
-        GetHeroIds(hero, out var kingdomId, out var cultureId);
-
-        var before = _service.GetCurrentAmount(hero.StringId, kingdomId, cultureId);
-        _service.EarnFromHideout(hero.StringId, kingdomId, cultureId);
-        NotifyEarning(hero.StringId, kingdomId, cultureId, "hideout", before);
-    }
-
-    // Charges the one-time recruit_cost for the recruited troop (no-op unless it carries one). Singleplayer
-    // and a client-hosted co-op host charge Hero.MainHero. Under co-op the server also raises this for a
-    // guest's recruitment (Coop's HandleOnRecruitmentDone), and Patch113 names that guest's party in
-    // RecruitAttributionScope, so the party's leader pays. RecruitChargePolicy owns the who-pays table.
-    // Data-driven: any troop with a recruit_cost in troop_resource_costs.xml is charged here and gated
-    // by Patch51 (a guest's gate reads a stale balance until Batch C, #967).
+    // Charges the one-time recruit_cost (no-op unless the troop carries one in troop_resource_costs.xml;
+    // Patch51 gates it, and a guest's gate reads a stale balance until Batch C, #967). The service picks
+    // the payer: Hero.MainHero in single-player, the leader of the party Patch113 names under co-op.
     private void OnUnitRecruited(CharacterObject character, int count)
     {
         if (character == null || count <= 0) return;
 
-        var scopedPartyId = RecruitAttributionScope.Current;
-        var hasScope = scopedPartyId != null;
-        var scopedLeader = hasScope
-            ? Campaign.Current?.CampaignObjectManager.Find<MobileParty>(scopedPartyId)?.LeaderHero
-            : null;
+        var context = _events.SnapshotRecruit();
+        if (context == null) return;
 
-        var hero = RecruitChargePolicy.ChoosePayer(
-            isAuthority: _coopSession.IsAuthority, isDedicated: _dedicatedServer.IsDedicatedServer,
-            hasScope: hasScope, scopedLeader, Hero.MainHero);
-        if (hero == null)
-        {
-            LogRecruitNotCharged(scopedPartyId);
-            return;
-        }
+        var notice = _earning.ChargeRecruit(context, character.StringId, count);
+        if (notice == null) return;
 
-        GetHeroIds(hero, out var kingdomId, out var cultureId);
-        var charged = _service.ChargeRecruitCost(hero.StringId, kingdomId, cultureId, character.StringId, count);
-        // The toast is for the player at this machine: a guest's charge is applied on the server silently.
-        if (charged > 0f && hero == Hero.MainHero)
-        {
-            var resource = _service.ResolveResource(kingdomId, cultureId);
-            InformationManager.DisplayMessage(new InformationMessage(
-                SpecialResourceMessages.RecruitCharge(resource?.DisplayName, charged, count, character.Name?.ToString()).ToString(),
-                Colors.Yellow));
-        }
-    }
-
-    private bool _recruitSuppressionLogged;
-    private bool _recruitScopeLostLogged;
-
-    // Nobody was charged. A scoped recruit whose party or leader is gone is worth one warning; a
-    // dedicated server's unscoped recruit is expected and gets one info line.
-    private void LogRecruitNotCharged(string scopedPartyId)
-    {
-        if (scopedPartyId != null)
-        {
-            if (_recruitScopeLostLogged) return;
-            _recruitScopeLostLogged = true;
-            _logger.LogWarning(
-                $"[SpecRes] Recruit not charged: party '{scopedPartyId}' was not found or has no leader hero. " +
-                "Further occurrences are not logged.");
-            return;
-        }
-
-        if (_recruitSuppressionLogged || !_dedicatedServer.IsDedicatedServer) return;
-        _recruitSuppressionLogged = true;
-        _logger.LogInfo(
-            "[SpecRes] Dedicated server: a recruit with no scoped guest party is not charged to the " +
-            "world-gen hero. Further occurrences are not logged.");
-    }
-
-    // Unified earning toast (round-4 O1): resolves the hero's resource, then displays the positive
-    // delta earned across the earn call; a zero or negative delta stays silent.
-    private void NotifyEarning(string heroId, string kingdomId, string cultureId, string source, float before)
-    {
-        var resource = _service.ResolveResource(kingdomId, cultureId);
-        if (resource == null) return;
-
-        var earned = _service.GetCurrentAmount(heroId, kingdomId, cultureId) - before;
-        if (earned > 0f)
-        {
-            InformationManager.DisplayMessage(new InformationMessage(
-                $"+{earned:F0} {resource.DisplayName} from {source}",
-                Colors.Green));
-        }
-    }
-
-    private int ApplyDesertion(MobileParty party, IReadOnlyList<TroopDesertionEntry> desertions)
-    {
-        if (party?.MemberRoster == null || desertions == null || desertions.Count == 0)
-            return 0;
-
-        var totalDeserted = 0;
-        foreach (var entry in desertions)
-        {
-            var removed = TroopRosterRemoval.RemoveUpTo(party.MemberRoster, entry.TroopId, entry.DesertCount);
-            if (removed <= 0) continue;
-
-            totalDeserted += removed;
-            _logger.LogInfo($"[SpecRes] Deserted: {entry.TroopId} x{removed}");
-        }
-
-        return totalDeserted;
+        SpecialResourceToasts.RecruitCharge(notice, count, character.Name?.ToString());
     }
 
     private void OnScreenPushed(ScreenBase screen)
@@ -561,13 +255,9 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
             var spent = _service.CommitSession(hero?.StringId, kingdomId, cultureId);
             if (spent > 0f && hero != null)
             {
-                // The one outflow a player triggers by hand, and until #558 the only feedback was a
-                // log line: upgrade twenty troops after a battle and the balance was simply gone.
                 var resource = _service.ResolveResource(kingdomId, cultureId);
                 var balance = _service.GetCurrentAmount(hero.StringId, kingdomId, cultureId);
-                InformationManager.DisplayMessage(new InformationMessage(
-                    SpecialResourceMessages.UpgradeSpend(resource?.DisplayName, spent, balance).ToString(),
-                    Colors.Yellow));
+                SpecialResourceToasts.UpgradeSpend(resource?.DisplayName, spent, balance);
             }
         }
     }
@@ -578,38 +268,9 @@ public class SpecialResourcesBehavior : CampaignBehaviorBase
         _service.BeginPartyScreenSession();
     }
 
-    /// <summary>
-    /// Whether this process may credit <c>Hero.MainHero</c> with earnings at all.
-    ///
-    /// False only on a dedicated server, where MainHero is the idle world-gen hero the campaign was
-    /// created around — not a player. Every earn path below reads MainHero, so without this gate the
-    /// server banks prisoner and raid income against a hero nobody controls while the remote players
-    /// who did the fighting get nothing (field report 2026-08-03 §6, log-proven: dozens of
-    /// <c>[SpecRes] PRISONERS: +N</c> lines on the server for battles fought by other people).
-    ///
-    /// Deliberately not tied to co-op ROLE: a client-hosted session's host also reports IsServer but
-    /// is a real player and must keep earning. Single-player is unaffected in every case.
-    /// </summary>
-    private bool CanEarn()
-    {
-        if (SpecialResourceEarnPolicy.MayCreditMainHero(_dedicatedServer.IsDedicatedServer)) return true;
-
-        if (!_suppressionLogged)
-        {
-            _suppressionLogged = true;
-            _logger.LogInfo(
-                "[SpecRes] Dedicated server — earnings are not credited to the world-gen hero. " +
-                "Players earn on their own clients. Further occurrences are not logged.");
-        }
-        return false;
-    }
-
-    private bool _suppressionLogged;
-
     private static void GetHeroIds(Hero hero, out string kingdomId, out string cultureId)
     {
         kingdomId = hero?.Clan?.Kingdom?.StringId;
         cultureId = hero?.Culture?.StringId;
     }
-
 }

@@ -133,7 +133,8 @@ Under BannerlordCoop `Clan.PlayerClan` is only this peer's clan, so a remote pla
 
 | Owner | Result |
 |---|---|
-| This peer's own clan | Follows "Apply To Player" |
+| This peer's own clan, with no session | Follows "Apply To Player" |
+| The authority's own clan, during a session (the registry does not list it) | Follows "Apply To AI Lords" |
 | A remote player's clan (Player, not `Clan.PlayerClan`) | No troops lost |
 | Unknown (registry unreadable during a session) | No troops lost |
 | An AI clan | Follows "Apply To AI Lords" |

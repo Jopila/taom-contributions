@@ -13,8 +13,7 @@ namespace TAOM.Features.CoopInterop;
 ///
 /// Member bound: <c>GameInterface.Services.Players.PlayerManager.TryGetControlledObjectInfo(object, out
 /// ControlledObjectInfo)</c> -> bool. One method answers for a party and a clan (a clan counts when its
-/// leader is registered). A remote player's clan is never <c>Clan.PlayerClan</c> here, so
-/// <c>OfClan</c> asks the registry after the local comparison.
+/// leader is registered). During a session the registry alone decides, including for the local entity.
 ///
 /// The registry lists joiners only; the server's own placeholder hero is never in it. Only the MethodInfo
 /// is cached: whether an entity is a player changes as peers join and leave.
@@ -59,14 +58,24 @@ public sealed class CoopPlayerControlQuery : IPlayerControlQuery
         return Classify(clan, clan == Clan.PlayerClan);
     }
 
+    public PlayerControl OfHero(Hero? hero)
+    {
+        if (hero == null) return PlayerControl.NotPlayer;
+        return Classify(hero, hero == Hero.MainHero);
+    }
+
     // Internal for TAOM.Tests: the whole decision below the engine-type comparisons.
     internal PlayerControl Classify(object entity, bool isLocalPlayer)
     {
-        // Cheap early outs first: a local player and a solo session never touch reflection. IsSessionActive
-        // already returns false without a type scan when no co-op module is enabled.
-        if (isLocalPlayer) return PlayerControl.Player;
-        if (!_session.IsSessionActive) return PlayerControl.NotPlayer;
+        // Without a session the answer is the local comparison and never touches reflection
+        // (IsSessionActive is false without a type scan when no co-op module is enabled).
+        if (!_session.IsSessionActive) return isLocalPlayer ? PlayerControl.Player : PlayerControl.NotPlayer;
 
+        // In a session the registry alone decides, for the local entity too. No human plays on the
+        // authority process, and the registry lists joiners only, never the server's own hero. On the
+        // co-op server Hero.MainHero, MainParty and PlayerClan are a guest's for a while (inside
+        // BarterPlayerContext and MainHeroSubstitutionScope), so "is the local entity" is not a stable
+        // identity there.
         return ReadRegistry(entity);
     }
 

@@ -7,6 +7,7 @@ using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.ObjectSystem;
+using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.Elephant;
 
@@ -69,6 +70,9 @@ internal sealed class HowdahCrewSpawner
                 _logger.LogInfo($"{machine.LogTag} crew not spawned: the mahout is gone");
                 return;
             }
+            // Co-op (#967): the mahout's owner spawns the crew and co-op replicates it; a peer holding the mahout as a
+            // puppet would add a second crew.
+            if (!CoopMissionOwnership.IsOwnedHere(mahout)) return;
             // No origin is not an option either: BattleObserverMissionLogic reads agent.Origin.BattleCombatant
             // unguarded on every build.
             if (mahout.Origin == null)

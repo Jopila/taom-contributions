@@ -6,6 +6,7 @@ using TAOM.Features.DreadAura.Hooks;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
+using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.SignatureStrikes.Hooks;
 
@@ -55,6 +56,10 @@ public sealed class SignatureStrikeRunner
         // managed handle keeps answering for the new tenant (#592): only the slot's current
         // occupant may deal the ring.
         if (attacker == null || !attacker.IsActive() || !AgentSlotIdentity.IsCurrentOccupant(attacker))
+            return;
+
+        // Co-op (#967): ownership may have moved in the frame since the hit.
+        if (!CoopMissionOwnership.IsOwnedHere(attacker))
             return;
 
         var team = attacker.Team;
@@ -112,7 +117,10 @@ public sealed class SignatureStrikeRunner
 
             // Fear before damage: the blow may kill the victim, and morale on a corpse is harmless
             // while a blow on a fading agent is the crash class TakeDamage guards against.
-            if (effect.FearMorale > 0f && moraleModel != null && DreadAgentGate.CanAffect(victim))
+            // Co-op (#967): morale is not replicated, so only a victim this peer owns takes the fear; the blow below
+            // reaches a puppet through co-op's victim-side routing.
+            if (effect.FearMorale > 0f && moraleModel != null && DreadAgentGate.CanAffect(victim)
+                && CoopMissionOwnership.IsOwnedHere(victim))
             {
                 var scaled = moraleModel.CalculateMoraleChangeToCharacter(victim, effect.FearMorale);
                 var drain = _service.ComputeFearDrain(

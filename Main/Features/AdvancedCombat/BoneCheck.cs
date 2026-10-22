@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using TaleWorlds.Engine;
 using TaleWorlds.Library;
+using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.AdvancedCombat;
 
@@ -148,6 +149,11 @@ public class BoneCheck
             if (boneId != -1)
             {
                 _targets.RemoveAt(i);
+                // Co-op (#967): a bite or slam in flight across an ownership change must not land from the peer that
+                // no longer owns the attacker; the check ends here, which runs the expiration. Test doubles are not
+                // AgentAdapter and stay owned.
+                if (_agent is AgentAdapter attacker && !CoopMissionOwnership.IsOwnedHere(attacker.GetUnderlyingAgent()))
+                    return false;
                 _onCollisionCallback?.Invoke(_agent, target, boneId);
                 if (_stopOnFirstHit)
                     return false;

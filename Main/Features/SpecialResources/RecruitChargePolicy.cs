@@ -8,11 +8,12 @@ namespace TAOM.Features.SpecialResources;
 /// </summary>
 public static class RecruitChargePolicy
 {
+    /// <param name="sessionActive">A co-op session is live: an unscoped recruit then charges nobody, because no human plays on the authority process (<see href="https://github.com/haterade22/TAOM/issues/967#issuecomment-6328464305">#967 design comment</see>).</param>
     /// <param name="hasScope">Patch113 named a recruiting party for this event.</param>
     /// <param name="scopedLeader">That party's leader, or null when the party or its leader is gone.</param>
     /// <returns>The payer, or null to charge nobody.</returns>
     public static T? ChoosePayer<T>(
-        bool isAuthority, bool isDedicated, bool hasScope, T? scopedLeader, T? mainHero) where T : class
+        bool isAuthority, bool isDedicated, bool sessionActive, bool hasScope, T? scopedLeader, T? mainHero) where T : class
     {
         // A client's own balance is not the server's: the authority charges, once.
         if (!isAuthority) return null;
@@ -21,6 +22,8 @@ public static class RecruitChargePolicy
         if (hasScope) return scopedLeader;
         // A dedicated server's MainHero is a placeholder nobody controls.
         if (isDedicated) return null;
+        // Under a live session an unscoped recruit is nobody's: the authority's own MainHero earns and pays nothing.
+        if (sessionActive) return null;
         return mainHero;
     }
 }

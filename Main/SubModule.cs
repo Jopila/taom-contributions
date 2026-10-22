@@ -1264,13 +1264,11 @@ public class SubModule : MBSubModuleBase
     {
         var specialResourceService = IoC.Resolve<ISpecialResourceService>();
         var specialResourceStorage = IoC.Resolve<ISpecialResourceStorageService>();
-        var specialResourceConfig = IoC.Resolve<ISpecialResourceConfigProvider>();
         var specialResourceLogger = IoC.Resolve<IModLogger>();
         var specialResourceBehavior = new SpecialResourcesBehavior(
-            specialResourceService, specialResourceStorage, specialResourceConfig, specialResourceLogger,
-            IoC.Resolve<ITroopWeightService>(),
-            IoC.Resolve<TAOM.Features.CoopInterop.IDedicatedServerProvider>(),
-            IoC.Resolve<TAOM.Features.CoopInterop.ICoopSessionProvider>());
+            specialResourceService, specialResourceStorage, specialResourceLogger,
+            IoC.Resolve<SpecialResourceEarningService>(),
+            IoC.Resolve<ISpecialResourceEventAdapter>());
         campaignStarter.AddBehavior(specialResourceBehavior);
         PartyScreenLogic_AddCommand_Patch.SetBehavior(specialResourceBehavior);
 
@@ -2138,11 +2136,22 @@ public class SubModule : MBSubModuleBase
         try { battleLoadDiagSvc?.LogTaomBehaviorsBegin(); } catch { /* diagnostic only */ }
         int taomBehaviorCount = 0;
 
+        // Read once per mission. IsSessionActive does no type scan unless a co-op module is enabled.
+        var coopSessionActive = IoC.Resolve<Features.CoopInterop.ICoopSessionProvider>()?.IsSessionActive == true;
+
         // Stamps the name BEFORE handing the behavior to the engine: the ctors here are trivial,
         // but AddMissionBehavior does real engine registration, so a fault there leaves the
         // culprit's name as the last line rather than forcing source archaeology on the order.
         void AddTaomBehavior(MissionBehavior behavior)
         {
+            // Co-op (#967, C7): an Unsafe behavior is not added in a session. Host status is unknown here (the host is
+            // elected after Mission.AfterStart), so every other role is checked live inside the behavior.
+            if (!Features.CoopInterop.Missions.CoopMissionRolePolicy.ShouldAdd(behavior.GetType(), coopSessionActive))
+            {
+                try { IoC.Resolve<IModLogger>()?.LogInfo($"[CoopMission] skipped {behavior.GetType().Name} (Unsafe in a co-op session)"); } catch { /* diagnostic only */ }
+                return;
+            }
+
             try { battleLoadDiagSvc?.LogTaomBehaviorAdded(behavior.GetType().Name); } catch { /* diagnostic only */ }
             mission.AddMissionBehavior(behavior);
             taomBehaviorCount++;

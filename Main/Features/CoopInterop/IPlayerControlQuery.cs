@@ -19,4 +19,7 @@ public interface IPlayerControlQuery
 {
     PlayerControl OfParty(MobileParty? party);
     PlayerControl OfClan(Clan? clan);
+
+    /// <summary>Without a session a hero counts when it is <c>Hero.MainHero</c>; in a session only a registered co-op player's hero does.</summary>
+    PlayerControl OfHero(Hero? hero);
 }

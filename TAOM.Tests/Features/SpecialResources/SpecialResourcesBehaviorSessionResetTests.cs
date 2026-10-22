@@ -6,7 +6,7 @@ using TaleWorlds.CampaignSystem;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.SpecialResources;
-using TAOM.Features.TroopWeight;
+using TAOM.Adapters;
 using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.SpecialResources;
@@ -39,11 +39,10 @@ public class SpecialResourcesBehaviorSessionResetTests
         new SpecialResourcesBehavior(
             service,
             storage,
-            Substitute.For<ISpecialResourceConfigProvider>(),
             Substitute.For<IModLogger>(),
-            Substitute.For<ITroopWeightService>(),
-            Substitute.For<IDedicatedServerProvider>(),
-            Substitute.For<ICoopSessionProvider>());
+            new SpecialResourceEarningService(service, storage, Substitute.For<ICoopSessionProvider>(),
+                Substitute.For<IDedicatedServerProvider>(), Substitute.For<IModLogger>()),
+            Substitute.For<ISpecialResourceEventAdapter>());
 
     private void LeavePriorCampaignBalances()
     {

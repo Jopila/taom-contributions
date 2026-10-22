@@ -2,6 +2,7 @@ using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TAOM.Features.DreadAura.Domain;
+using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.DreadAura.Hooks;
 
@@ -65,6 +66,10 @@ public sealed class DreadPulseRunner
             // result UNCONDITIONALLY, so a reclaimed id lands in this list as null. The gate's
             // null check is load-bearing, not defensive decoration.
             if (!DreadAgentGate.CanAffect(target))
+                continue;
+
+            // Co-op (#967): morale is not replicated, so only a target this peer owns is drained.
+            if (!CoopMissionOwnership.IsOwnedHere(target))
                 continue;
 
             if (!affectsPlayerTroops && playerTeam != null && ReferenceEquals(target.Team, playerTeam))

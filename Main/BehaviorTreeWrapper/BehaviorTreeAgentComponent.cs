@@ -2,6 +2,7 @@ using System;
 using BehaviorTrees;
 using TAOM.Features.AdvancedCombat;
 using TaleWorlds.MountAndBlade;
+using TAOM.Features.CoopInterop.Missions;
 
 namespace BehaviorTreeWrapper;
 
@@ -66,6 +67,15 @@ public class BehaviorTreeAgentComponent : AgentComponent
         // Checked only when the tree is due: both are native reads, and a race-ability tree runs once a
         // second on every soldier of its race, where a creature tree runs every tick on a few.
         if (!Agent.IsActive() || !AgentSlotIdentity.IsCurrentOccupant(Agent)) return;
+        // Co-op (#967): every battle agent exists on every peer, the other peers' as puppets, and only the owner's
+        // tree may act (a puppet tree would land a second blow). Read each tick, never at build: a mount's engine
+        // controller is AI at build whatever co-op makes it later, and a host handoff moves ownership mid-battle.
+        // A skipped tick restarts the cadence so a non-owner peer asks once per evaluation delay.
+        if (!CoopMissionOwnership.IsOwnedHere(Agent))
+        {
+            timeSinceLastEvaluation = 0f;
+            return;
+        }
         Tree.RunTree();
         timeSinceLastEvaluation = 0f;
     }

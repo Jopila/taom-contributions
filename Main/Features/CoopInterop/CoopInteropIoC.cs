@@ -16,5 +16,8 @@ public static class CoopInteropIoC
         container.Register<ICoopSessionProvider, CoopSessionProvider>(Reuse.Singleton);
         // Who is a human player. Singleton because only the reflection binding is cached; answers are live.
         container.Register<IPlayerControlQuery, CoopPlayerControlQuery>(Reuse.Singleton);
+        // Who owns an agent, and who is the battle host, for TAOM's mission behaviors (#967, C7). Singleton: the
+        // reflection binding and the per-mission registry link are cached; every answer is live.
+        container.Register<Missions.ICoopMissionAuthority, Missions.CoopMissionAuthority>(Reuse.Singleton);
     }
 }

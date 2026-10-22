@@ -4,6 +4,7 @@ using TaleWorlds.MountAndBlade;
 using TaleWorlds.ObjectSystem;
 using TAOM.Core.Logging;
 using TAOM.Features.ShaderPrecompilation;
+using TAOM.Features.CoopInterop.Missions;
 
 namespace TAOM.Features.BannerBearers.Hooks;
 
@@ -83,6 +84,10 @@ public sealed class BannerBearerAssignmentMissionLogic : MissionLogic
     private void TryAssignBanner(BannerBearerLogic bannerLogic, Formation formation)
     {
         if (formation == null || formation.CountOfUnits <= 0) return;
+
+        // Co-op (#967): a formation of puppets is banner-assigned by its owner; doing it here too churns the bearer.
+        var first = formation.GetFirstUnit();
+        if (first != null && !CoopMissionOwnership.IsOwnedHere(first)) return;
 
         // A hero captain may already have supplied one — never override vanilla's choice.
         if (bannerLogic.GetFormationBanner(formation) != null) return;

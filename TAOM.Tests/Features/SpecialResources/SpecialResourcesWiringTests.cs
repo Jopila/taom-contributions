@@ -7,7 +7,9 @@ using TAOM.Adapters;
 using TAOM.Core.Infrastructure;
 using TAOM.Core.Logging;
 using TAOM.Features.CareerSystem;
+using TAOM.Features.CoopInterop;
 using TAOM.Features.SpecialResources;
+using TAOM.Features.TroopWeight;
 using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.SpecialResources;
@@ -28,6 +30,11 @@ public class SpecialResourcesWiringTests
         container.RegisterInstance(Substitute.For<IPathService>());
         // Production registers this in IoC.RegisterCoreServices, outside both features.
         container.RegisterInstance(Substitute.For<IPartySizeCacheInvalidator>());
+        // Production registers these in the CoopInterop and TroopWeight features, outside this one.
+        container.RegisterInstance(Substitute.For<ICoopSessionProvider>());
+        container.RegisterInstance(Substitute.For<IDedicatedServerProvider>());
+        container.RegisterInstance(Substitute.For<IPlayerControlQuery>());
+        container.RegisterInstance(Substitute.For<ITroopWeightService>());
         CareerSystemIoC.RegisterCareerSystemFeature(container);
         SpecialResourcesIoC.RegisterSpecialResourcesFeature(container);
         return container;
@@ -43,6 +50,30 @@ public class SpecialResourcesWiringTests
             typeof(ICareerLifecycleService), typeof(CareerSwitchService));
 
         Assert.AreEqual(0, errors.Length, string.Join("; ", errors.Select(e => e.Value.Message)));
+    }
+
+    [TestMethod]
+    public void RegisterSpecialResources_EarningServiceAndEventAdapter_ResolveWithoutError()
+    {
+        var container = BuildContainer();
+
+        var errors = container.Validate(typeof(SpecialResourceEarningService), typeof(ISpecialResourceEventAdapter));
+
+        Assert.AreEqual(0, errors.Length, string.Join("; ", errors.Select(e => e.Value.Message)));
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void ResolveEarningService_Twice_ReturnsFreshInstances()
+    {
+        // SubModule resolves the service once per campaign, and it holds the campaign's one-tick desertion
+        // grace and its log-once latches, so a second campaign must not inherit the first one's.
+        var container = BuildContainer();
+
+        var first = container.Resolve<SpecialResourceEarningService>();
+        var second = container.Resolve<SpecialResourceEarningService>();
+
+        Assert.AreNotSame(first, second);
     }
 
     [TestMethod]
