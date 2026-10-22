@@ -6,6 +6,7 @@ using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.Diplomacy;
+using TAOM.Features.Enlistment;
 using TAOM.Features.Execution;
 using TAOM.Features.InitialChildGeneration;
 using Inv = System.Globalization.CultureInfo;
@@ -21,9 +22,10 @@ namespace TAOM.Features.FireAndTribute;
 /// session, a co-op mod TAOM cannot probe or a dedicated server releases every host's pin and stops the feature.
 /// </summary>
 /// <remarks>
-/// Singleton state is the saved record, the planned-despawn set and the diagnostic counters, all per campaign: the
-/// behavior's constructor calls <see cref="ResetForNewSession"/>. Parts: this file (lifecycle, gates, status), the
-/// Spawn part (daily roll and creation) and the Steering part (hourly steps and events). Main thread only.
+/// Singleton state is the saved record, the planned-despawn set and the diagnostic counters, all
+/// per campaign: the behavior's constructor calls <see cref="ResetForNewSession"/>. Parts: this file (lifecycle, gates,
+/// status), the Spawn part (daily roll and creation), the Steering part (hourly steps and events) and the Envoy part (the
+/// tribute envoy: schedule, popup, the player's answer, the console's "bring it now"). Main thread only.
 /// </remarks>
 public sealed partial class FireAndTributeService : IFireAndTributeService
 {
@@ -41,6 +43,9 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
     private readonly ICoopSessionProvider _coop;
     private readonly IDedicatedServerProvider _dedicatedServer;
     private readonly IRandomSource _random;
+    private readonly ITributeEnvoyAdapter _envoyPlayer;
+    private readonly IEnvoyPresenterAdapter _envoyPresenter;
+    private readonly IEnlistmentStateQuery _enlistment;
     private readonly IModLogger _logger;
 
     private FireAndTributeState _state = new FireAndTributeState();
@@ -63,6 +68,9 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
         ICoopSessionProvider coop,
         IDedicatedServerProvider dedicatedServer,
         IRandomSource random,
+        ITributeEnvoyAdapter envoyPlayer,
+        IEnvoyPresenterAdapter envoyPresenter,
+        IEnlistmentStateQuery enlistment,
         IModLogger logger)
     {
         _adapter = adapter;
@@ -75,6 +83,9 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
         _coop = coop;
         _dedicatedServer = dedicatedServer;
         _random = random;
+        _envoyPlayer = envoyPlayer;
+        _envoyPresenter = envoyPresenter;
+        _enlistment = enlistment;
         _logger = logger;
     }
 
@@ -232,6 +243,7 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
         int seen = hasDay ? ProjectedWarSeenDay(day) : _state.WarSeenDay;
         lines.Add($"Spawn window: {(hasDay && WindowOpen(day, config) ? "open" : "closed")} (war of the Ring {(_warOfTheRing.IsEnabled ? "on, phase " + _warOfTheRing.CurrentPhase : "off")}, "
             + $"Full War first seen day {(seen >= 0 ? seen.ToString(Inv.InvariantCulture) : "never")}).");
+        lines.AddRange(EnvoyLines());
         foreach (var side in Sides)
         {
             var host = HostOf(side);
@@ -243,7 +255,7 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
                 continue;
             }
             lines.Add($"{side} ({switchText}): {host.HostId} party {host.PartyId} against {host.TargetKingdomId}, "
-                + $"raids {host.Raids}/{host.Quota}, since day {host.StartDay}, {(host.Returning ? "going home" : "raiding")}, {rest}.");
+                + $"raids {host.Raids}/{host.Quota}, since day {host.StartDay}, {(host.Returning ? "going home" : "raiding")}, {rest}; {EnvoyText(host)}.");
         }
         lines.Add($"Today: spawned {_spawnedToday}, raids {_raidsToday}, slowest hourly step {_maxHourMs.ToString("F3", Inv.InvariantCulture)} ms.");
         return lines;

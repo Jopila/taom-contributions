@@ -471,16 +471,19 @@ public class CampaignHotPathSettingsProvidersTests
         Assert.IsTrue(sut.FreeHostsEnabled);
         Assert.IsTrue(sut.NeutralHostsEnabled);
         Assert.IsTrue(sut.EvilHostsEnabled);
+        Assert.IsTrue(sut.EnvoysEnabled);
 
         mcm.EnableFireAndTribute = false;
         mcm.FireAndTributeFreeHosts = false;
         mcm.FireAndTributeNeutralHosts = false;
         mcm.FireAndTributeEvilHosts = false;
+        mcm.FireAndTributeEnvoys = false;
 
         Assert.IsFalse(sut.Enabled);
         Assert.IsFalse(sut.FreeHostsEnabled);
         Assert.IsFalse(sut.NeutralHostsEnabled);
         Assert.IsFalse(sut.EvilHostsEnabled);
+        Assert.IsFalse(sut.EnvoysEnabled);
     }
 
     [TestMethod]
@@ -493,6 +496,7 @@ public class CampaignHotPathSettingsProvidersTests
         Assert.IsTrue(sut.FreeHostsEnabled);
         Assert.IsTrue(sut.NeutralHostsEnabled);
         Assert.IsTrue(sut.EvilHostsEnabled);
+        Assert.IsTrue(sut.EnvoysEnabled);
     }
 
     [TestMethod]

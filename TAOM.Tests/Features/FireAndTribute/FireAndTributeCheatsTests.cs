@@ -102,13 +102,50 @@ public class FireAndTributeCheatsTests
     }
 
     [TestMethod]
+    public void TryParseSetEnvoyDue_NoArguments_IsADryRun()
+    {
+        Assert.IsTrue(FireAndTributeCheats.TryParseSetEnvoyDue(new List<string>(), out bool confirmed, out string error));
+        Assert.IsFalse(confirmed);
+        Assert.AreEqual(string.Empty, error);
+    }
+
+    [TestMethod]
+    public void TryParseSetEnvoyDue_TheLiteralConfirm_Sends()
+    {
+        Assert.IsTrue(FireAndTributeCheats.TryParseSetEnvoyDue(new List<string> { "confirm" }, out bool confirmed, out _));
+        Assert.IsTrue(confirmed);
+    }
+
+    [DataTestMethod]
+    [DataRow("Confirm")]
+    [DataRow("CONFIRM")]
+    [DataRow("yes")]
+    [DataRow("1")]
+    [DataRow("confirm extra")]
+    [DataRow("evil")]
+    public void TryParseSetEnvoyDue_AnythingElse_IsRefusedWithTheUsage(string raw)
+    {
+        var args = raw.Split(new[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries).ToList();
+
+        Assert.IsFalse(FireAndTributeCheats.TryParseSetEnvoyDue(args, out bool confirmed, out string error), raw);
+        Assert.IsFalse(confirmed, raw);
+        StringAssert.Contains(error, "taom.set_envoy_due");
+    }
+
+    [TestMethod]
+    public void TryParseSetEnvoyDue_NullArguments_AreRefused()
+    {
+        Assert.IsFalse(FireAndTributeCheats.TryParseSetEnvoyDue(null!, out _, out _));
+    }
+
+    [TestMethod]
     public void TheCommandsAreNamedAndShapedForTheEngineBinding()
     {
         var commands = typeof(FireAndTributeCheats).GetMethods(BindingFlags.Public | BindingFlags.Static)
             .Where(m => m.GetCustomAttributes(typeof(CommandLineFunctionality.CommandLineArgumentFunction), false).Length > 0)
             .ToList();
 
-        CollectionAssert.AreEquivalent(new[] { "PrintFireAndTribute", "SpawnRaidHost" }, commands.Select(m => m.Name).ToArray());
+        CollectionAssert.AreEquivalent(new[] { "PrintFireAndTribute", "SpawnRaidHost", "SetEnvoyDue" }, commands.Select(m => m.Name).ToArray());
         foreach (var method in commands)
         {
             Assert.AreEqual(typeof(string), method.ReturnType, method.Name);

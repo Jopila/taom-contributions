@@ -12,6 +12,7 @@ using TAOM.Core.Infrastructure;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.Diplomacy;
+using TAOM.Features.Enlistment;
 using TAOM.Features.Execution;
 using TAOM.Features.FireAndTribute;
 using TAOM.Features.FireAndTribute.Hooks;
@@ -128,7 +129,12 @@ public class FireAndTributeWiringTests
     public void TheFeature_BansNothingTheHouseRulesBan()
     {
         foreach (var path in Directory.EnumerateFiles(RepoPaths.RepoPath("Main", "Features", "FireAndTribute"), "*.cs", SearchOption.AllDirectories)
-                     .Concat(new[] { RepoPaths.RepoPath("Main", "Adapters", "RaidHostAdapter.cs"), RepoPaths.RepoPath("Main", "Adapters", "FireAndTributeNoticeAdapter.cs") }))
+                     .Concat(new[]
+                     {
+                         RepoPaths.RepoPath("Main", "Adapters", "RaidHostAdapter.cs"), RepoPaths.RepoPath("Main", "Adapters", "FireAndTributeNoticeAdapter.cs"),
+                         RepoPaths.RepoPath("Main", "Adapters", "TributeEnvoyAdapter.cs"), RepoPaths.RepoPath("Main", "Adapters", "EnvoyPresenterAdapter.cs"),
+                         RepoPaths.RepoPath("Main", "Adapters", "EnvoyTypes.cs"),
+                     }))
         {
             var text = RepoPaths.StripComments(File.ReadAllText(path));
             Assert.IsFalse(text.Contains("#region"), path);
@@ -146,8 +152,32 @@ public class FireAndTributeWiringTests
             .ToList();
 
         Assert.AreEqual(0, forbidden.Count, string.Join(", ", forbidden.Select(t => t.Name)));
-        foreach (var method in typeof(IRaidHostAdapter).GetMethods())
+        foreach (var method in typeof(IRaidHostAdapter).GetMethods().Concat(typeof(ITributeEnvoyAdapter).GetMethods()).Concat(typeof(IEnvoyPresenterAdapter).GetMethods()))
             Assert.IsFalse(method.GetParameters().Any(p => p.ParameterType.Namespace?.StartsWith("TaleWorlds") == true), method.Name);
+    }
+
+    [TestMethod]
+    public void TheEnvoyAdapters_HoldNoEngineObjectInAField_SoNoCampaignOutlivesItsSave()
+    {
+        foreach (var type in new[] { typeof(TributeEnvoyAdapter), typeof(EnvoyPresenterAdapter) })
+        {
+            var offenders = type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
+                .Where(f => f.FieldType.Namespace != null && f.FieldType.Namespace.StartsWith("TaleWorlds", StringComparison.Ordinal))
+                .Select(f => f.Name)
+                .ToList();
+
+            Assert.AreEqual(0, offenders.Count, type.Name + ": " + string.Join(", ", offenders));
+        }
+    }
+
+    [TestMethod]
+    public void TheEnvoyPresenter_AsksTheOneMapFreeTest_AndNeverShowsASceneNotification()
+    {
+        var src = RepoPaths.ReadSource("Main/Adapters/EnvoyPresenterAdapter.cs", stripComments: true);
+
+        StringAssert.Contains(src, "MapPopupGate.IsMapFree()");
+        Assert.IsFalse(src.Contains("SceneNotification"), "scene notifications NRE for custom races");
+        StringAssert.Contains(src, "isExitShown: false");
     }
 
     [TestCategory("RequiresGame")]
@@ -163,6 +193,8 @@ public class FireAndTributeWiringTests
         container.RegisterInstance(Substitute.For<IWarOfTheRingService>());
         container.RegisterInstance(Substitute.For<ICoopSessionProvider>());
         container.RegisterInstance(Substitute.For<IDedicatedServerProvider>());
+        container.RegisterInstance(Substitute.For<IEnlistmentStateQuery>());
+        container.RegisterInstance(Substitute.For<ICareerPurseAdapter>());
         var module = new FireAndTributeModule();
 
         module.RegisterServices(container);
@@ -175,6 +207,8 @@ public class FireAndTributeWiringTests
         Assert.AreSame(container.Resolve<IFireAndTributeService>(), container.Resolve<IFireAndTributeService>());
         Assert.IsInstanceOfType(container.Resolve<IRaidHostAdapter>(), typeof(RaidHostAdapter));
         Assert.IsInstanceOfType(container.Resolve<IFireAndTributeNoticeAdapter>(), typeof(FireAndTributeNoticeAdapter));
+        Assert.IsInstanceOfType(container.Resolve<ITributeEnvoyAdapter>(), typeof(TributeEnvoyAdapter));
+        Assert.IsInstanceOfType(container.Resolve<IEnvoyPresenterAdapter>(), typeof(EnvoyPresenterAdapter));
         Assert.IsInstanceOfType(container.Resolve<IFireAndTributeSettings>(), typeof(FireAndTributeSettingsProvider));
         Assert.IsInstanceOfType(container.Resolve<IFireAndTributeConfigProvider>(), typeof(FireAndTributeConfigProvider));
     }

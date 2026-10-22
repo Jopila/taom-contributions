@@ -18,7 +18,15 @@
     "engageStrengthRatio": 0.8,
     "maxHostDays": 30,
     "homeRadius": 4,
-    "spawnRadiusDays": 0.25
+    "spawnRadiusDays": 0.25,
+    "envoyUnitPrice": 500,
+    "envoyMinDelayHours": 24,
+    "envoyMaxDelayHours": 48,
+    "envoyDelayDays": 7,
+    "haggleBaseChance": 0.20,
+    "haggleChancePerCharm": 0.002,
+    "haggleMinChance": 0.10,
+    "haggleMaxChance": 0.70
   },
   "hosts": [
     {

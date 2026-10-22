@@ -42,4 +42,10 @@ public interface IFireAndTributeService
     /// reports the plan and changes nothing.
     /// </summary>
     string TrySpawn(FactionSide side, bool dryRun);
+
+    /// <summary>
+    /// The console's envoy: brings a live host's tribute envoy due now (or reports what stands in its way). A dry run
+    /// reports the quote and the blockers and changes nothing. The switch and single-player gates hold.
+    /// </summary>
+    string BringEnvoyNow(bool dryRun);
 }

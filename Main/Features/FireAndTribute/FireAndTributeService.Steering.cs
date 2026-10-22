@@ -20,10 +20,11 @@ public sealed partial class FireAndTributeService
         if (!TryToday(out int day))
             return;
 
+        FireAndTributeConfig config;
         long started = Stopwatch.GetTimestamp();
         try
         {
-            var config = _configProvider.GetConfig();
+            config = _configProvider.GetConfig();
             // One record per side; a copy, because a step can remove its own record.
             foreach (var record in _state.Hosts.ToList())
             {
@@ -45,6 +46,8 @@ public sealed partial class FireAndTributeService
         {
             RecordHour(Stopwatch.GetTimestamp() - started);
         }
+        // After the timing is kept: the popup's movie load is engine UI time, not the service's.
+        RunEnvoys(config);
     }
 
     /// <summary>
@@ -99,6 +102,10 @@ public sealed partial class FireAndTributeService
         {
             if (party.KingdomId != record.TargetKingdomId || party.InMapEvent || party.InSettlement || party.IsAttached)
                 continue;
+            // A host that was paid never engages the player's own party, nor the leader of an army that carries it (a battle
+            // with the leader pulls the player in); the rest of the player's clan is fair game.
+            if ((party.IsMainParty || party.LeadsMainParty) && record.SparedClanId.Length > 0)
+                continue;
             // Positive requirements: a NaN distance, strength or speed fails them.
             if (!(party.Distance <= t.EngageRadius) || !(party.Strength <= t.EngageStrengthRatio * host.Strength) || !(party.Speed <= host.Speed))
                 continue;
@@ -115,12 +122,14 @@ public sealed partial class FireAndTributeService
     /// </summary>
     private bool KeepOrPickVillage(RaidHostRecord record, RaidHostSnapshot read, FireAndTributeTuning t)
     {
+        // A clan that paid is spared: its villages are never kept as a target nor picked, even the nearest.
+        string? spared = record.SparedClanId.Length > 0 ? record.SparedClanId : null;
         if (read.RaidTargetId != null
-            && FireAndTributeMath.IsRaidable(_adapter.ReadVillage(read.RaidTargetId), record.TargetKingdomId, t.MinHearth))
+            && FireAndTributeMath.IsRaidable(_adapter.ReadVillage(read.RaidTargetId), record.TargetKingdomId, t.MinHearth, spared))
             return true;
 
         var near = FireAndTributeMath.NearestRaidable(
-            _adapter.ReadVillages(), record.TargetKingdomId, read.X, read.Y, t.MinHearth, t.NearestVillages);
+            _adapter.ReadVillages(), record.TargetKingdomId, read.X, read.Y, t.MinHearth, t.NearestVillages, spared);
         if (near.Count == 0)
             return false;
         _adapter.OrderRaid(record.PartyId, near[near.Count == 1 ? 0 : _random.Next(0, near.Count)]);

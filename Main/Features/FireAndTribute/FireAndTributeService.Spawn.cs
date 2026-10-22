@@ -139,7 +139,8 @@ public sealed partial class FireAndTributeService
     private SpawnOutcome SendOne(RaidHostDef def, FireAndTributeConfig config, List<TargetCandidate> candidates, int day, bool dryRun)
     {
         var t = config.Tuning;
-        string? target = FireAndTributeMath.PickTarget(candidates, def.TargetSides, def.PreferredTargets);
+        _state.Grudges.TryGetValue(def.Side, out string? grudge);
+        string? target = FireAndTributeMath.PickTarget(candidates, def.TargetSides, def.PreferredTargets, grudge);
         if (target == null)
             return new SpawnOutcome(false, $"{def.Id}: no kingdom of {string.Join("/", def.TargetSides)} has a raidable village.");
         float targetStrength = candidates.First(c => c.Id == target).Strength;
@@ -195,6 +196,9 @@ public sealed partial class FireAndTributeService
         };
         _state.Hosts.Add(record);
         _spawnedToday++;
+        // The side's grudge is spent by the host that rides, whether or not it could use it.
+        _state.Grudges.Remove(def.Side);
+        ScheduleEnvoy(record, t);
         _notices.ShowSpawned(def.Name, spawn.NearestTownId);
         _logger.LogInfo($"{Tag} {def.Id} rides ({partyId}) from {spawn.HomeId} against {target}: {plan.Sum(p => p.Count)} men, quota {quota}");
         Steer(record, config, day);

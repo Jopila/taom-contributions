@@ -27,6 +27,30 @@ public sealed class RaidHostRecord
 
     /// <summary>True once the host has turned for home: it raids no more.</summary>
     public bool Returning { get; set; }
+
+    /// <summary>
+    /// The campaign hour the host's tribute envoy is next due, or -1 for none. An envoy is scheduled when the host rides
+    /// against the player's kingdom; it stays due, and is tried every hour, until the map is free and the player can be asked.
+    /// </summary>
+    public int EnvoyDueHour { get; set; } = -1;
+
+    /// <summary>True once the envoy is settled (paid, refused, seized or no longer needed): one envoy per host.</summary>
+    public bool EnvoyDone { get; set; }
+
+    /// <summary>The villages of the player's clan the first quote counted; 0 until the envoy has been quoted.</summary>
+    public int EnvoyVillages { get; set; }
+
+    /// <summary>The price quoted in denars (after a successful haggle, the cut price); 0 until the envoy has been quoted.</summary>
+    public int EnvoyPrice { get; set; }
+
+    /// <summary>True once the player has tried to haggle: one try per host.</summary>
+    public bool EnvoyHaggled { get; set; }
+
+    /// <summary>
+    /// The clan that paid this host: it raids none of that clan's villages and never engages the player's party. Empty
+    /// for none.
+    /// </summary>
+    public string SparedClanId { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -41,6 +65,15 @@ public sealed class FireAndTributeState
     public Dictionary<FactionSide, int> CooldownUntil { get; } = new Dictionary<FactionSide, int>();
 
     public List<RaidHostRecord> Hosts { get; } = new List<RaidHostRecord>();
+
+    /// <summary>
+    /// Per side, the kingdom whose envoy the player seized: that side's next host rides against it first. Spent when a
+    /// host of the side rides.
+    /// </summary>
+    public Dictionary<FactionSide, string> Grudges { get; } = new Dictionary<FactionSide, string>();
+
+    /// <summary>How many envoys the player has seized: each adds one full price to every later tribute.</summary>
+    public int EnvoysSeized { get; set; }
 
     public List<string> Warnings { get; } = new List<string>();
 }

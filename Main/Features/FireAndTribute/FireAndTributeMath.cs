@@ -35,11 +35,12 @@ internal static class FireAndTributeMath
 {
     /// <summary>
     /// The kingdom a host will raid, from <paramref name="candidates"/> (living, with a raidable village) of the host's
-    /// <paramref name="targetSides"/>: the first of <paramref name="preferred"/> that qualifies, then the strongest, ties
-    /// broken by ordinal id. Null when none qualifies.
+    /// <paramref name="targetSides"/>: the <paramref name="grudge"/> kingdom when it qualifies, else the first of
+    /// <paramref name="preferred"/> that qualifies, then the strongest, ties broken by ordinal id. Null when none qualifies.
     /// </summary>
     internal static string? PickTarget(
-        IReadOnlyList<TargetCandidate> candidates, IReadOnlyList<FactionSide> targetSides, IReadOnlyList<string> preferred)
+        IReadOnlyList<TargetCandidate> candidates, IReadOnlyList<FactionSide> targetSides, IReadOnlyList<string> preferred,
+        string? grudge = null)
     {
         if (candidates == null || targetSides == null || candidates.Count == 0)
             return null;
@@ -47,6 +48,9 @@ internal static class FireAndTributeMath
         var pool = candidates.Where(c => targetSides.Contains(c.Side) && !string.IsNullOrEmpty(c.Id)).ToList();
         if (pool.Count == 0)
             return null;
+
+        if (!string.IsNullOrEmpty(grudge) && pool.Any(c => c.Id == grudge))
+            return grudge;
 
         if (preferred != null)
         {
@@ -69,10 +73,12 @@ internal static class FireAndTributeMath
     /// <summary>
     /// Whether a host of <paramref name="kingdomId"/>'s enemies may raid this village: it exists, is in its normal state
     /// (not being raided, looted or forced for supplies), belongs to that kingdom, and has a finite hearth of at least
-    /// <paramref name="minHearth"/>.
+    /// <paramref name="minHearth"/>. A village owned by <paramref name="sparedClanId"/> (a clan that paid the host's envoy)
+    /// is never raidable; null or empty spares nobody.
     /// </summary>
-    internal static bool IsRaidable(VillageReading village, string kingdomId, float minHearth) =>
-        Raidable(village, minHearth) && village.KingdomId == kingdomId;
+    internal static bool IsRaidable(VillageReading village, string kingdomId, float minHearth, string? sparedClanId = null) =>
+        Raidable(village, minHearth) && village.KingdomId == kingdomId
+        && (string.IsNullOrEmpty(sparedClanId) || village.OwnerClanId != sparedClanId);
 
     private static bool Raidable(VillageReading village, float minHearth) =>
         village.Exists && village.IsNormal && village.KingdomId != null
@@ -97,12 +103,13 @@ internal static class FireAndTributeMath
     /// broken by ordinal id. A village or query point whose distance is not a finite number is left out.
     /// </summary>
     internal static IReadOnlyList<string> NearestRaidable(
-        IReadOnlyList<VillageReading> villages, string kingdomId, float x, float y, float minHearth, int count)
+        IReadOnlyList<VillageReading> villages, string kingdomId, float x, float y, float minHearth, int count,
+        string? sparedClanId = null)
     {
         if (villages == null || count <= 0)
             return new List<string>();
         return villages
-            .Where(v => IsRaidable(v, kingdomId, minHearth))
+            .Where(v => IsRaidable(v, kingdomId, minHearth, sparedClanId))
             .Select(v => (Id: v.Id, DistanceSquared: (v.X - x) * (v.X - x) + (v.Y - y) * (v.Y - y)))
             .Where(v => FiniteFloatValidator.IsFinite(v.DistanceSquared))
             .OrderBy(v => v.DistanceSquared)
@@ -193,6 +200,50 @@ internal static class FireAndTributeMath
         long anchor = Math.Max(fullWarEffectiveDay ?? 0, Math.Max(warSeenDay, 0));
         return today >= anchor + Math.Max(0, firstHostDelayDays);
     }
+
+    /// <summary>A haggle is offered only from this many price units up.</summary>
+    internal const int HaggleMinUnits = 4;
+
+    /// <summary>
+    /// The tribute's price units: <c>max(1, (villages + 1) / 2)</c> with integer division, so two villages cost one unit
+    /// and three cost two. A negative count reads as none.
+    /// </summary>
+    internal static int TributeUnits(int villages) =>
+        (int)Math.Max(1L, ((long)Math.Max(0, villages) + 1L) / 2L);
+
+    /// <summary>
+    /// The tribute in denars: <c>units x unitPrice x (1 + envoysSeized)</c>, at least 1 and capped at <c>int.MaxValue</c>
+    /// (the product is taken in a wider type, never wrapped). A negative seized count counts as none.
+    /// </summary>
+    internal static int TributePrice(int units, int unitPrice, int envoysSeized)
+    {
+        decimal price = (decimal)Math.Max(0, units) * Math.Max(0, unitPrice) * (1m + Math.Max(0, envoysSeized));
+        return (int)Math.Max(1m, Math.Min(price, (decimal)int.MaxValue));
+    }
+
+    /// <summary>Whether the player may still haggle: the tribute is at least <see cref="HaggleMinUnits"/> units and no try was made.</summary>
+    internal static bool CanHaggle(int units, bool alreadyHaggled) => !alreadyHaggled && units >= HaggleMinUnits;
+
+    /// <summary>
+    /// The chance a haggle succeeds: <c>base + perPoint x charm</c> clamped to [min, max]. A negative Charm counts as
+    /// zero. Any non-finite input gives no chance at all (a NaN would otherwise clamp to a bound or slip a comparison).
+    /// </summary>
+    internal static float HaggleChance(int charm, float baseChance, float perPoint, float minChance, float maxChance)
+    {
+        if (!FiniteFloatValidator.IsFinite(baseChance) || !FiniteFloatValidator.IsFinite(perPoint)
+            || !FiniteFloatValidator.IsFinite(minChance) || !FiniteFloatValidator.IsFinite(maxChance))
+            return 0f;
+        double chance = baseChance + (double)perPoint * Math.Max(0, charm);
+        return (float)Math.Min(maxChance, Math.Max(minChance, chance));
+    }
+
+    /// <summary>A successful haggle cuts the price to <c>ceil(0.75 x price)</c>, in integers, never below zero.</summary>
+    internal static int HaggledPrice(int price) =>
+        price <= 0 ? 0 : (int)((3L * price + 3L) / 4L);
+
+    /// <summary>The hour <paramref name="waitHours"/> from <paramref name="nowHour"/>, never overflowing and never earlier than now.</summary>
+    internal static int DueHour(int nowHour, int waitHours) =>
+        (int)Math.Min((long)nowHour + Math.Max(0, waitHours), int.MaxValue);
 
     /// <summary>The first day the side may ride again: <paramref name="today"/> plus the cooldown, never overflowing.</summary>
     internal static int CooldownEnd(int today, int cooldownDays) =>

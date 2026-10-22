@@ -82,7 +82,8 @@ public readonly struct VillageReading
 {
     private readonly string? _id;
 
-    public VillageReading(bool exists, string? kingdomId, bool isNormal, float hearth, string? id = null, float x = 0f, float y = 0f)
+    public VillageReading(bool exists, string? kingdomId, bool isNormal, float hearth, string? id = null, float x = 0f, float y = 0f,
+        string? ownerClanId = null)
     {
         Exists = exists;
         KingdomId = kingdomId;
@@ -91,6 +92,7 @@ public readonly struct VillageReading
         _id = id;
         X = x;
         Y = y;
+        OwnerClanId = ownerClanId;
     }
 
     public static VillageReading Missing => default;
@@ -112,6 +114,9 @@ public readonly struct VillageReading
     public bool IsNormal { get; }
 
     public float Hearth { get; }
+
+    /// <summary>The owning clan's StringId (the clan that holds the fief the village is bound to), or null when unreadable.</summary>
+    public string? OwnerClanId { get; }
 }
 
 /// <summary>
@@ -130,6 +135,12 @@ public sealed class NearbyParty
 
     /// <summary>Attached to an army another party leads.</summary>
     public bool IsAttached { get; set; }
+
+    /// <summary>The player's own party. A host that has been paid never engages it.</summary>
+    public bool IsMainParty { get; set; }
+
+    /// <summary>The leader of an army the player's party is attached to: a battle with it pulls the player in, so a paid host leaves it alone too.</summary>
+    public bool LeadsMainParty { get; set; }
 
     /// <summary>
     /// What a battle with this party would put at risk: its whole army's strength when it leads an army (vanilla weighs a

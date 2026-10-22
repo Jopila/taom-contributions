@@ -161,15 +161,161 @@ public class FireAndTributeSaveCodecTests
         Assert.AreEqual(1, parsed.Warnings.Count);
     }
 
-    [TestMethod]
-    public void Serialize_WritesNoGrudgeSection_AndAnOldOneIsIgnoredWithoutAWarning()
+    // ---- slice 2: the envoy state, the grudges and the seized count (additive, version stays 1) --------------------
+
+    private const string SliceOneSave =
+        "{\"v\":1,\"seen\":44,\"cool\":{\"Free\":300},\"hosts\":[{\"p\":\"bandit_party_7\",\"h\":\"gundabad\",\"s\":\"Evil\","
+        + "\"t\":\"empire_w\",\"d\":91,\"r\":3,\"q\":9,\"ret\":false}]}";
+
+    internal static FireAndTributeState SeedEnvoy()
     {
-        Assert.IsFalse(FireAndTributeSaveCodec.Serialize(Seed()).Contains("grudge"));
+        var state = Seed();
+        state.EnvoysSeized = 2;
+        state.Grudges[FactionSide.Evil] = "empire_w";
+        state.Grudges[FactionSide.Neutral] = "vlandia";
+        var a = state.Hosts[0];
+        a.EnvoyDueHour = 2461;
+        a.EnvoyVillages = 7;
+        a.EnvoyPrice = 6000;
+        a.EnvoyHaggled = true;
+        var b = state.Hosts[1];
+        b.EnvoyDone = true;
+        b.SparedClanId = "player_clan";
+        return state;
+    }
 
-        var parsed = FireAndTributeSaveCodec.Parse(Root("[" + GoodRow + "]", "\"grudge\":{\"Evil\":\"empire_w\"},"));
+    [TestMethod]
+    public void RoundTrip_KeepsTheEnvoyStateTheGrudgesAndTheSeizedCount()
+    {
+        var parsed = FireAndTributeSaveCodec.Parse(FireAndTributeSaveCodec.Serialize(SeedEnvoy()));
 
-        Assert.AreEqual(1, parsed.Hosts.Count);
         Assert.AreEqual(0, parsed.Warnings.Count);
+        Assert.AreEqual(2, parsed.EnvoysSeized);
+        Assert.AreEqual("empire_w", parsed.Grudges[FactionSide.Evil]);
+        Assert.AreEqual("vlandia", parsed.Grudges[FactionSide.Neutral]);
+        Assert.IsFalse(parsed.Grudges.ContainsKey(FactionSide.Free));
+        var a = parsed.Hosts[0];
+        Assert.AreEqual(2461, a.EnvoyDueHour);
+        Assert.AreEqual(7, a.EnvoyVillages);
+        Assert.AreEqual(6000, a.EnvoyPrice);
+        Assert.IsTrue(a.EnvoyHaggled);
+        Assert.IsFalse(a.EnvoyDone);
+        Assert.AreEqual(string.Empty, a.SparedClanId);
+        var b = parsed.Hosts[1];
+        Assert.AreEqual(-1, b.EnvoyDueHour);
+        Assert.IsTrue(b.EnvoyDone);
+        Assert.AreEqual("player_clan", b.SparedClanId);
+        Assert.IsFalse(b.EnvoyHaggled);
+    }
+
+    [TestMethod]
+    public void Serialize_ADefaultEnvoyState_WritesNoNewKeys_SoASliceOneSaveRoundTripsUnchanged()
+    {
+        var parsed = FireAndTributeSaveCodec.Parse(SliceOneSave);
+
+        Assert.AreEqual(0, parsed.Warnings.Count);
+        Assert.AreEqual(SliceOneSave, FireAndTributeSaveCodec.Serialize(parsed));
+        Assert.IsFalse(FireAndTributeSaveCodec.Serialize(Seed()).Contains("grudge"));
+        Assert.IsFalse(FireAndTributeSaveCodec.Serialize(Seed()).Contains("seized"));
+    }
+
+    [TestMethod]
+    public void Parse_ASliceOneSave_ReadsWithNoEnvoyAndNoGrudge_AndNoWarning()
+    {
+        var parsed = FireAndTributeSaveCodec.Parse(SliceOneSave);
+
+        var host = parsed.Hosts.Single();
+        Assert.AreEqual(-1, host.EnvoyDueHour);
+        Assert.IsFalse(host.EnvoyDone);
+        Assert.AreEqual(0, host.EnvoyVillages);
+        Assert.AreEqual(0, host.EnvoyPrice);
+        Assert.IsFalse(host.EnvoyHaggled);
+        Assert.AreEqual(string.Empty, host.SparedClanId);
+        Assert.AreEqual(0, parsed.Grudges.Count);
+        Assert.AreEqual(0, parsed.EnvoysSeized);
+        Assert.AreEqual(44, parsed.WarSeenDay);
+        Assert.AreEqual(91, host.StartDay);
+    }
+
+    [TestMethod]
+    public void Parse_ASliceTwoSave_KeepsEveryHostRowFieldAMissingSectionReadsAsEmpty()
+    {
+        var parsed = FireAndTributeSaveCodec.Parse(Root("[" + GoodRow.Replace("\"ret\":false", "\"ret\":false,\"due\":50,\"price\":1000") + "]"));
+
+        Assert.AreEqual(50, parsed.Hosts.Single().EnvoyDueHour);
+        Assert.AreEqual(1000, parsed.Hosts.Single().EnvoyPrice);
+        Assert.AreEqual(0, parsed.Grudges.Count);
+        Assert.AreEqual(0, parsed.EnvoysSeized);
+        Assert.AreEqual(0, parsed.Warnings.Count);
+    }
+
+    [TestMethod]
+    public void Parse_TheGrudgeSection_IsReadSideBySide_AndBadRowsAreSkippedOneByOne()
+    {
+        var parsed = FireAndTributeSaveCodec.Parse(Root("[" + GoodRow + "]",
+            "\"grudge\":{\"Evil\":\"empire_w\",\"Good\":\"x\",\"Free\":\"bad id\",\"Neutral\":5,\"free\":\"\"},"));
+
+        Assert.AreEqual(1, parsed.Grudges.Count);
+        Assert.AreEqual("empire_w", parsed.Grudges[FactionSide.Evil]);
+        Assert.AreEqual(4, parsed.Warnings.Count);
+        Assert.AreEqual(1, parsed.Hosts.Count);
+    }
+
+    [TestMethod]
+    public void Parse_AGrudgeSectionThatIsNotAnObject_ResetsItAlone()
+    {
+        var parsed = FireAndTributeSaveCodec.Parse(Root("[" + GoodRow + "]", "\"grudge\":[1],"));
+
+        Assert.AreEqual(0, parsed.Grudges.Count);
+        Assert.AreEqual(1, parsed.Hosts.Count);
+        Assert.AreEqual(1, parsed.Warnings.Count);
+    }
+
+    [DataTestMethod]
+    [DataRow("\"seized\":\"x\",")]
+    [DataRow("\"seized\":-1,")]
+    [DataRow("\"seized\":2.5,")]
+    [DataRow("\"seized\":100001,")]
+    public void Parse_ABadSeizedCount_ResetsThatFieldAlone(string extra)
+    {
+        var parsed = FireAndTributeSaveCodec.Parse(Root("[" + GoodRow + "]", extra));
+
+        Assert.AreEqual(0, parsed.EnvoysSeized);
+        Assert.AreEqual(1, parsed.Hosts.Count);
+        Assert.AreEqual(1, parsed.Warnings.Count);
+    }
+
+    [DataTestMethod]
+    [DataRow("\"due\":-4")]
+    [DataRow("\"due\":\"soon\"")]
+    [DataRow("\"due\":1.5")]
+    [DataRow("\"due\":99999999999")]
+    [DataRow("\"vil\":-1")]
+    [DataRow("\"vil\":100001")]
+    [DataRow("\"vil\":\"7\"")]
+    [DataRow("\"price\":-1")]
+    [DataRow("\"price\":99999999999")]
+    [DataRow("\"price\":\"cheap\"")]
+    [DataRow("\"done\":1")]
+    [DataRow("\"done\":\"yes\"")]
+    [DataRow("\"hag\":1")]
+    [DataRow("\"hag\":null")]
+    [DataRow("\"sp\":5")]
+    [DataRow("\"sp\":\"bad id\"")]
+    public void Parse_ABadEnvoyField_ResetsThatFieldAlone_AndTheHostRowIsKept(string field)
+    {
+        var parsed = FireAndTributeSaveCodec.Parse(Root("[" + GoodRow.Replace("\"ret\":false", "\"ret\":false," + field) + "]"));
+
+        var host = parsed.Hosts.Single();
+        Assert.AreEqual("p1", host.PartyId);
+        Assert.AreEqual(-1, host.EnvoyDueHour);
+        Assert.IsFalse(host.EnvoyDone);
+        Assert.AreEqual(0, host.EnvoyVillages);
+        Assert.AreEqual(0, host.EnvoyPrice);
+        Assert.IsFalse(host.EnvoyHaggled);
+        Assert.AreEqual(string.Empty, host.SparedClanId);
+        Assert.AreEqual(1, parsed.Warnings.Count);
+        StringAssert.Contains(parsed.Warnings.Single(), "host row 0");
     }
 
     [TestMethod]

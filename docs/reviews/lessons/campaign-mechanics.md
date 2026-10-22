@@ -944,3 +944,12 @@ add up to at most 1 plus about one hit (0.05). The first Long Memory design read
 - **Prevent:** before scaling a reward or penalty by an engine accumulator, read where it is written (reset, add, cap) and say in
   the doc what one unit means. Scale by the value alone; an event that did nothing pays nothing, with no floor.
 - **Source:** `docs/features/long-memory.md`; the `/deep-review` of #865 (lens 6).
+### A player's deal with a party acts at once, not at the party's next step (#870, 2026-10-21)
+Fire and Tribute's tribute payment only recorded the spared clan, which the host read at its next hourly step. An
+engage order on the player's party, or a raid order on a spared village, given earlier in the same hour, kept running
+and could land before then. Vanilla's own safe-passage bribe sets `MobilePartyAi.SetDoNotAttackMainParty` at the moment
+of payment (`SafePassageBarterable` ~174).
+- **Why missed:** the payment was modelled as data for the next tick, not as an event that changes the party now.
+- **Prevent:** when the player pays, bribes or bargains with a party, re-issue that party's orders in the same call and
+  set the engine's own protection flag if one exists; test an order given in the same hour as the deal.
+- **Source:** `docs/reviews/rca-fire-and-tribute-envoy-2026-10-21.md` finding 1.
