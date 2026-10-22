@@ -651,7 +651,7 @@ do exist; here the destination is absent and the engine runs past it.
   same `$(ModuleId) != ''` condition family as the `-p:ModuleId=` entry above) mirrors the **assembled**
   client folder, `$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Client\*.*`, because the vendored
   natives and NuGet companions only exist there after `PostBuildCopyToModules`. Since B3, TAOM's
-  mirror excludes `TAOM.Client.*` and deletes stale copies from its server bin (`Main/TAOM.csproj:193-198`).
+  mirror excludes `TAOM.Client.*` and deletes stale copies from its server bin (`Main/TAOM.csproj:221` is the `Exclude`, `:225` the `Delete`).
   It is modelled on the pre-existing `MirrorWin64ShippingClientToEditor` target; the same absent-target
   question applies to any future build folder. A real deploying build mirrored 10 files for TAOM
   (incl. `TAOM.dll`, `DryIoc.dll`, `MinHook.x64.dll`, `TAOM.NativeSkinFixes.dll`) and 42 for
@@ -4216,7 +4216,8 @@ A docs pass for #966 cited `DesertionOwnerPolicy.cs:41-45` in a 20-line file and
 several files. A convergence review caught them with a script that opened each cited line.
 - **Why missed:** the line numbers were copied from a combined dump; nothing checks that a cited line exists.
 - **Prevent:** read each cited file on its own (the Read tool, or `Select-String` on that one path) and copy the number
-  from there. After a docs pass, run a citation check that opens every `path:line` it adds.
+  from there. After a docs pass, run a citation check that opens every `path:line` it adds. An insertion also stales every citation below it in every doc, so
+  after any insertion grep the docs for `<file>:[0-9]` and re-read each hit.
 - **Source:** [rca-coop-player-attribution-2026-10-21.md](../rca-coop-player-attribution-2026-10-21.md) finding 8.
 
 ### A release gate for a new artifact follows the shipped manifest, not the current tree
@@ -4227,14 +4228,16 @@ The first B3 gate required `TAOM.Client.dll` of every tag. A tag cut before ADR-
   older manifest that must still pass (`required_dlls` in `tools/package_release.py`).
 - **Source:** B3 review, 2026-10-22, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).
 
-### Bannerlord.BuildResources cleans the whole module bin, so a second project deploys after it
-`CopyBinariesWindows` deletes every DLL in the module's bin folder before it copies the build's own. A second project
-in the same module (`TAOM.Client`) that copies its output earlier is deleted by the next core build, and
-`DisableModuleCopy=true` without `ModuleId=` does not stop that clean.
+### Bannerlord.BuildResources cleans only Win64_Shipping_Client, so a second project deploys after it
+`CopyBinariesWindows` deletes every `.dll`, `.pdb` and `.config` file in the module's `Win64_Shipping_Client` folder
+(`PostBuildCopyToModulesRegex`) before it copies the build's own, and touches no other bin. A second project in the same
+module (`TAOM.Client`) that copies its output earlier is deleted by the next core build, and `DisableModuleCopy=true`
+without `ModuleId=` does not stop that clean.
 - **Why missed:** the build package's clean is not visible from either project file, so a deploy ordered before it looked correct.
 - **Prevent:** give the second project its own deploy target ordered after the build package's copy, build the pair in
   one solution build, and keep both flags on every agent build (`-p:DisableModuleCopy=true -p:ModuleId=`).
-- **Source:** B3 review, 2026-10-22, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).
+- **Source:** B3 review, 2026-10-22, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md). The scope of the
+  clean was corrected by [rca-taom-client-b3-2026-10-22.md](../rca-taom-client-b3-2026-10-22.md).
 
 ### The dirty-flag pathspec lists every compiled project root
 The build stamp marks a DLL `.dirty` when the tree has uncommitted changes under the compiled roots. A new project root
@@ -4243,3 +4246,27 @@ absent from that pathspec leaves a stamp that reads clean while its sources are 
 - **Prevent:** when a project joins the module, add its root to the pathspec in `Directory.Build.props` in the same
   change and pin it with a test.
 - **Source:** B3 review, 2026-10-22, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).
+
+### A deploy target that writes into a folder with no clean leaves stale files: tabulate each destination (TAOM.Client B3, 2026-10-22)
+A deploying build of `Main/TAOM.csproj` alone cleaned `TAOM.Client` from `Win64_Shipping_Client` (BuildResources), but the
+editor mirror and the Game Pass `CopyModule` are additive, so an old `TAOM.Client.dll` stayed beside the new `TAOM.dll` in
+`Win64_Shipping_wEditor` and `Gaming.Desktop.x64_Shipping_Client`. The first fix then gated the Game Pass delete on
+`DisableModuleCopy`, which `CopyModule` ignores, so `-p:DisableModuleCopy=true` alone still left a mismatched pair there.
+- **Why missed:** the deploy was designed from the Steam bin, where the package cleans, and the other bins were assumed to
+  match. The fix borrowed the editor mirror's condition instead of reading CopyModule's.
+- **Prevent:** before trusting a deploy or mirror target, write a table of each destination's end state for each build mode
+  (full build, Main alone, `DisableModuleCopy` only, `ModuleId` only). Delete the stale half where a destination is additive,
+  on the same condition as the target that fills it (`Basic.targets:64-65` for CopyModule), and pin each delete with a test.
+  Tolerate a locked file (`TreatErrorsAsWarnings`) where the Modding Kit holds it open. A stale pair can load old client
+  code against the new core; it aborts only when core changed a type the client binds at load, and a missing file only
+  shows the engine's "Cannot find" box. Say which in the comment.
+- **Source:** [rca-taom-client-b3-2026-10-22.md](../rca-taom-client-b3-2026-10-22.md) findings 1, 5 to 8 and 12.
+
+### A completeness check must not be keyed on the member it requires (TAOM.Client B3, 2026-10-22)
+`require_build` checked a secondary client bin only when it held `TAOM.dll`. A bin with `TAOM.Client.dll` alone passed, and
+that assembly fails `GetTypes` without its core and aborts the game.
+- **Why missed:** the rule was written for the half of the pair the author was thinking about, and the test covered the
+  opposite half only (`TAOM.dll` without the client).
+- **Prevent:** trigger a bundle check on any member of the bundle being present, then require the rest. Test each member
+  alone, and a bin holding neither. Run the check with the keying member absent and the others present before trusting it.
+- **Source:** [rca-taom-client-b3-2026-10-22.md](../rca-taom-client-b3-2026-10-22.md) finding 3.

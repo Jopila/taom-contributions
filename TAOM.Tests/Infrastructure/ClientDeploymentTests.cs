@@ -82,6 +82,79 @@ public class ClientDeploymentTests
         CollectionAssert.Contains(deletes, "@(_TaomServerClientFiles)");
     }
 
+    // The Delete items of a target whose Include names `folder` and TAOM.Client., in document order.
+    private static System.Collections.Generic.List<XElement> StaleClientDeletes(XElement target, string folder)
+    {
+        var itemNames = target.Descendants("ItemGroup").Elements()
+            .Where(i => ((string?)i.Attribute("Include") ?? "").Contains(folder)
+                        && ((string?)i.Attribute("Include") ?? "").Contains("TAOM.Client."))
+            .Select(i => i.Name.LocalName).ToList();
+
+        return target.Descendants("Delete")
+            .Where(d => itemNames.Any(n => ((string?)d.Attribute("Files") ?? "") == $"@({n})"))
+            .ToList();
+    }
+
+    [TestMethod]
+    public void MainCsproj_EditorMirror_DeletesAStaleTaomClientBeforeItsCopy()
+    {
+        var target = Target("Main/TAOM.csproj", "MirrorWin64ShippingClientToEditor");
+
+        var deletes = StaleClientDeletes(target, "Win64_Shipping_wEditor");
+        Assert.AreEqual(1, deletes.Count,
+            "A Main-only build leaves the editor bin's TAOM.Client built against an older core; the pair then runs old client code "
+            + "against the new core, or aborts the game (CriticalError) if core changed a type the client binds at load.");
+        var copy = target.Descendants("Copy").Single();
+        Assert.IsTrue(deletes[0].IsBefore(copy), "The Delete must run before the additive Copy re-mirrors the client folder.");
+    }
+
+    [TestMethod]
+    public void MainCsproj_EditorMirror_ToleratesALockedTaomClient()
+    {
+        var target = Target("Main/TAOM.csproj", "MirrorWin64ShippingClientToEditor");
+
+        var delete = StaleClientDeletes(target, "Win64_Shipping_wEditor").Single();
+        Assert.AreEqual("true", (string?)delete.Attribute("TreatErrorsAsWarnings"),
+            "The Modding Kit holds TAOM.Client.dll open; a locked delete must not fail a build in which nothing changed.");
+    }
+
+    [DataTestMethod]
+    [DataRow("MirrorWin64ShippingClientToEditor")]
+    [DataRow("MirrorWin64ShippingClientToServer")]
+    public void MainCsproj_Mirrors_RunAfterTheModuleCopy(string targetName)
+    {
+        var target = Target("Main/TAOM.csproj", targetName);
+
+        Assert.AreEqual("PostBuildCopyToModules", (string?)target.Attribute("AfterTargets"),
+            "The source bin is only populated once Bannerlord.BuildResources has copied into it.");
+    }
+
+    [TestMethod]
+    public void MainCsproj_GamePassTaomClientDelete_RunsOnCopyModulesCondition()
+    {
+        var targets = XDocument.Load(RepoPath("Main", "TAOM.csproj")).Descendants()
+            .Where(t => t.Name.LocalName == "Target"
+                        && (((string?)t.Attribute("BeforeTargets") ?? "").Contains("PostBuildCopyToModules")
+                            || ((string?)t.Attribute("AfterTargets") ?? "").Contains("PostBuildCopyToModules")))
+            .Where(t => StaleClientDeletes(t, "Gaming.Desktop.x64_Shipping_Client").Count == 1)
+            .ToList();
+
+        Assert.AreEqual(1, targets.Count,
+            "The additive CopyModule fills the installed Gaming.Desktop bin from Main/_Module/bin, so a stale TAOM.Client survives there.");
+        var condition = (string?)targets[0].Attribute("Condition") ?? "";
+        StringAssert.Contains(condition, "ModuleId");
+        Assert.IsFalse(condition.Contains("DisableModuleCopy"),
+            "CopyModule writes TAOM.dll into the Game Pass bin even with DisableModuleCopy=true, so the delete must not be gated on it.");
+    }
+
+    [TestMethod]
+    public void ClientCsproj_Deploy_RunsAfterBuild()
+    {
+        var target = Target("Client/TAOM.Client.csproj", "DeployTaomClientToTaomModule");
+
+        Assert.AreEqual("Build", (string?)target.Attribute("AfterTargets"));
+    }
+
     [TestMethod]
     public void DirtyFlagPathspec_CoversTheClientProject()
     {

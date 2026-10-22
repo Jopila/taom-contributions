@@ -168,8 +168,8 @@ SHIPPED_DLLS = {"taom": ("TAOM.dll", "TAOM.Client.dll"), "taom.dependencies": ("
 CLIENT_ONLY_DLLS = frozenset({"taom.client.dll"})
 SERVER_BIN = "bin/Win64_Shipping_Server/"
 
-# The bin folders a client loads TAOM from: each that holds TAOM.dll must hold every assembly the
-# shipped SubModule.xml names.
+# The bin folders a client loads TAOM from: Win64_Shipping_Client must hold every assembly the
+# shipped SubModule.xml names; any other client bin that holds one of them must hold them all.
 CLIENT_PLATFORM_BINS = ("Win64_Shipping_Client", "Win64_Shipping_wEditor", "Gaming.Desktop.x64_Shipping_Client")
 
 # InformationalVersion as the assembly metadata stores it (UTF-8): build.<yyyyMMdd-HHmmss>Z, then
@@ -653,9 +653,13 @@ def require_build(plans, rev: str, requested=()) -> tuple:
         have = {rel.casefold() for rel in copies}
         required = required_dlls(p)
         # Win64_Shipping_Client is always checked. Any other client bin (Game Pass, the editor) is checked
-        # only when it holds the primary assembly, because they load the same manifest as Steam does.
+        # when it holds any required assembly, because it loads the same manifest as Steam:
+        # TAOM.Client.dll without TAOM.dll fails GetTypes and aborts the game (Module.AddSubModule's
+        # CriticalError), and TAOM.dll without TAOM.Client.dll shows the engine's "Cannot find" box and
+        # runs without the client half.
         for platform in CLIENT_PLATFORM_BINS:
-            if platform != CLIENT_PLATFORM_BINS[0] and f"bin/{platform}/{required[0]}".casefold() not in have:
+            if platform != CLIENT_PLATFORM_BINS[0] and not any(
+                    f"bin/{platform}/{d}".casefold() in have for d in required):
                 continue
             for dll_name in required:
                 rel = f"bin/{platform}/{dll_name}"

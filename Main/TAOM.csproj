@@ -143,6 +143,21 @@
 		       Text="IDE workspace state under _Module would be deployed to the game install: @(_TaomIdeState, '%3B '). Delete the .vs folder under Main/_Module/ (and from &lt;game&gt;\Modules\$(ModuleId)\, deployment is additive)." />
 	</Target>
 
+	<!-- Bannerlord.BuildResources' CopyModule (Basic.targets:64-65) writes TAOM.dll into the installed
+	     Gaming.Desktop.x64_Shipping_Client whenever ModuleId and GameFolder are set, even with
+	     DisableModuleCopy=true. It is additive, so a TAOM.Client left there from an earlier build would
+	     pair with the new TAOM.dll. The two bind by simple name, so the old client loads: it runs old code
+	     against the new core, or aborts the game only if core changed a type the client binds at load. The delete therefore runs on the
+	     same condition as CopyModule, not on DisableModuleCopy (see FailOnIdeStateInModule).
+	     Client/TAOM.Client.csproj redeploys a fresh copy afterwards. -->
+	<Target Name="DeleteStaleGamePassTaomClient" BeforeTargets="PostBuildCopyToModules"
+	        Condition="$(ModuleId) != '' AND Exists($(GameFolder))">
+		<ItemGroup>
+			<_TaomGamePassClientFiles Include="$(GameFolder)\Modules\$(ModuleId)\bin\Gaming.Desktop.x64_Shipping_Client\TAOM.Client.*" />
+		</ItemGroup>
+		<Delete Files="@(_TaomGamePassClientFiles)" />
+	</Target>
+
 	<Target Name="CopyBinariesToModuleFolder" BeforeTargets="PostBuildCopyToModules">
 		<!-- Create directories if they don't exist -->
 		<MakeDir Directories="$(ProjectDir)_Module\bin\Gaming.Desktop.x64_Shipping_Client\" Condition="!Exists('$(ProjectDir)_Module\bin\Gaming.Desktop.x64_Shipping_Client\')" />
@@ -162,14 +177,26 @@
 	     Runs AFTER Bannerlord.BuildResources's PostBuildCopyToModules — the source folder must already be
 	     populated by CopyBinariesWindows + CopyModule. Without this mirror, the modding kit launches
 	     stale DLLs and code changes are invisible until manually copied with `cp -v Client/* wEditor/`.
-	     See docs/features/scene-scripts.md "Editor compatibility" section. -->
+	     See docs/features/scene-scripts.md "Editor compatibility" section.
+
+	     TAOM.Client (ADR-013) is not part of this build: a deploying build of Main alone cleans it from
+	     Win64_Shipping_Client, but the additive mirror would keep the editor bin's old copy, built
+	     against an older core (old code runs against the new core, or the game aborts if core changed a
+	     type the client binds at load). It is deleted here, and
+	     Client/TAOM.Client.csproj (DeployTaomClientToTaomModule) redeploys a fresh one into all three
+	     client bins after Main. The Game Pass bin is handled by DeleteStaleGamePassTaomClient.
+	     The Delete uses TreatErrorsAsWarnings because the Modding Kit holds TAOM.Client.dll open: a locked
+	     file means the Kit has a matched pair loaded, so the build must not fail over it. The Copy after it
+	     still fails loudly if TAOM.dll changed while the Kit holds it. -->
 	<Target Name="MirrorWin64ShippingClientToEditor"
 	        AfterTargets="PostBuildCopyToModules"
 	        Condition="$(ModuleId) != '' AND Exists($(GameFolder)) AND $(DisableModuleCopy) != 'true' AND Exists('$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Client\')">
 		<ItemGroup>
 			<_TaomEditorMirrorFiles Include="$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Client\*.*" />
+			<_TaomEditorClientFiles Include="$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_wEditor\TAOM.Client.*" />
 		</ItemGroup>
 		<MakeDir Directories="$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_wEditor\" Condition="!Exists('$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_wEditor\')" />
+		<Delete Files="@(_TaomEditorClientFiles)" TreatErrorsAsWarnings="true" />
 		<Copy SourceFiles="@(_TaomEditorMirrorFiles)" DestinationFolder="$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_wEditor\" SkipUnchangedFiles="true" />
 		<Message Importance="high" Text="TAOM: mirrored @(_TaomEditorMirrorFiles->Count()) files Win64_Shipping_Client -&gt; Win64_Shipping_wEditor in $(GameFolder)\Modules\$(ModuleId)\bin\" />
 	</Target>

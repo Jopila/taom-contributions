@@ -806,8 +806,8 @@ class TestRequireBuildCli(unittest.TestCase):
             self.assertIn("TAOM.Client.dll is missing", r.stderr)
 
     def test_refuses_a_client_bin_with_taom_dll_but_no_taom_client(self):
-        # Game Pass and the editor load the same manifest as Steam, so a bin holding TAOM.dll alone
-        # would crash there on the missing second submodule.
+        # Game Pass and the editor load the same manifest as Steam. A lone TAOM.dll does not crash: the
+        # engine shows its "Cannot find" box and the game runs without the client half.
         with tempfile.TemporaryDirectory() as td:
             src = self._taom(td, f"{STAMP}+{self.head}")
             self._modules(td, f"{STAMP}+{self.head}", "TAOM/bin/Win64_Shipping_wEditor/TAOM.dll")
@@ -815,6 +815,25 @@ class TestRequireBuildCli(unittest.TestCase):
             r = self._gate(src, td)
             self.assertEqual(r.returncode, 2, r.stdout)
             self.assertIn("bin/Win64_Shipping_wEditor/TAOM.Client.dll is missing", r.stderr)
+
+    def test_refuses_a_client_bin_with_taom_client_but_no_taom_dll(self):
+        # A lone TAOM.Client.dll in the editor bin fails GetTypes and aborts the game (Module.AddSubModule's
+        # CriticalError): the pair must be complete wherever either one is present.
+        with tempfile.TemporaryDirectory() as td:
+            src = self._taom(td, f"{STAMP}+{self.head}")
+            self._modules(td, f"{STAMP}+{self.head}", "TAOM/bin/Win64_Shipping_wEditor/TAOM.Client.dll")
+            self._manifest(src, "TAOM.dll", "TAOM.Client.dll")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("bin/Win64_Shipping_wEditor/TAOM.dll is missing", r.stderr)
+
+    def test_skips_a_client_bin_holding_neither_assembly(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._taom(td, f"{STAMP}+{self.head}")
+            self._modules(td, f"{STAMP}+{self.head}", "TAOM/bin/Win64_Shipping_wEditor/0Harmony.dll")
+            self._manifest(src, "TAOM.dll", "TAOM.Client.dll")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 0, r.stderr)
 
     def test_refuses_a_dirty_taom_client(self):
         with tempfile.TemporaryDirectory() as td:

@@ -208,6 +208,13 @@ archive the 6th-oldest, harvest durable patterns into `docs/reviews/lessons/<cat
   caught). Codex classed "Unknown counts as player-owned" as a decision cost; the service uses that flag only to
   choose an MCM toggle, both default on, so nothing was protected. When a change sets a flag to get an outcome, ask
   the reviewer to quote the consumer lines that produce it under the default settings.
+- **Additive deploy destinations** (2026-10-22, TAOM.Client B3: a Codex catch). A build target that writes into a folder
+  with no clean leaves old files beside the new ones: a Main-only build left an old `TAOM.Client.dll` beside a new
+  `TAOM.dll` in the editor and Game Pass bins while the Steam bin was cleaned. For every deploy or mirror target, tabulate
+  each destination's end state for each build mode, and read the condition of the target that fills it.
+- **A completeness check keyed on the very member it requires** (2026-10-22, TAOM.Client B3, F3: Codex). The release
+  gate checked a secondary bin only when it held `TAOM.dll`, so a bin with the client alone passed. Run each check with
+  the member it keys on absent and the others present.
 - **Semantic correctness of a SAMPLE from an engine collection.** `GetFirstUnit()` / `[0]` / `.First()` is a sample, not the owner — correct only while the collection is homogeneous. Ask "what if this is MIXED?" (culture / faction / tier).
 - **Cross-feature contention for one engine decision.** A blanket `return false` Prefix is a silent monopoly on that decision; every later feature relying on the vanilla path breaks with no error. Grep every TAOM Prefix on the contended engine method.
 - **Trace a crash INTO the `base.X()` an override calls** — the base runs vanilla code on the same (possibly degenerate) inputs the override accepts; decompile the base, don't stop at the `Main/` boundary.

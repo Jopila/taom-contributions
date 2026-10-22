@@ -2130,3 +2130,19 @@ so code moved to the client would have escaped them without a failure.
   scans through one shared list (`RepoPaths.CodeRoots` and `RepoPaths.CSharpFiles`), and widen each assembly gate with
   `.Concat` over the new assembly, as `ViewCreatorModuleGateTests` does.
 - **Source:** B3 review, 2026-10-22, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).
+
+### A regex scan sees one spelling: list the ones it cannot see and test the variants (TAOM.Client B3, 2026-10-22)
+The `ClientIsolationGateTests` tripwire, which bans patches, UI extensions, save definers and settings in `TAOM.Client`,
+required `[` right before the short attribute name. Codex ran it on six spellings and five escaped, among them `[HarmonyLib.HarmonyPatch(`,
+`[HarmonyPatchAttribute(`, `[HarmonyPatchCategory("X"), HarmonyPatch(` and a qualified `ViewModelMixin`. The tripwire's tests
+used only the spelling the regex was written for.
+- **Repeat of:** "Detection rulesets need a positive firing test per rule" (2026-06-22, YAML versus JSON form) and its
+  #644 recurrence (2026-09-23, one regex spelling of `<xsl:attribute name="race">`); "A text scan cannot see a target-typed
+  `new(`" (#957, 2026-10-20); and the `PartyBase.MainParty` scan that missed `?.` (#792, 2026-10-14, "Recurred" above).
+- **Why missed:** the scan was written from the shapes the author could think of, and the added test rows extended the
+  same shape (three setting-base names) instead of varying it.
+- **Prevent:** write the spellings the scan cannot see in a comment next to the regex (a subclass under another name, a
+  hand-applied `Harmony.Patch(...)`), and give every pattern a DataRow for the qualified, the suffixed (`...Attribute`) and
+  the grouped (`[A, B]`) forms, plus a negative row for a near-miss name (`HarmonyPatchCategory` alone). Prefer the compiler
+  or the IL where a text scan is not enough.
+- **Source:** [rca-taom-client-b3-2026-10-22.md](../rca-taom-client-b3-2026-10-22.md) finding 2.

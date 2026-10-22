@@ -30,8 +30,10 @@ public class ClientIsolationGateTests
 
     // Each of these is found by a scan over Main (or the built assembly) that does not read Client/.
     // Wire the scan first, then move the declaration.
+    // A word scan cannot see a subclass of HarmonyPatch or of the UIExtenderEx attributes under another
+    // name, nor a patch applied by hand through Harmony.Patch(...) without an attribute.
     private static readonly Regex ForbiddenInTheClient = new Regex(
-        @"\[\s*(HarmonyPatch|PrefabExtension|ViewModelMixin)\b|\bSaveableTypeDefiner\b"
+        @"\b(HarmonyPatch|PrefabExtension|ViewModelMixin)(Attribute)?\b|\bSaveableTypeDefiner\b"
         + @"|\b(AttributeGlobalSettings|AttributePerCampaignSettings|AttributePerSaveSettings)\b|\bMCM\.Abstractions\b");
 
     [TestMethod]
@@ -54,6 +56,11 @@ public class ClientIsolationGateTests
 
     [DataTestMethod]
     [DataRow("[HarmonyPatch(typeof(X), \"Y\")]")]
+    [DataRow("[HarmonyLib.HarmonyPatch(typeof(X), \"Y\")]")]
+    [DataRow("[HarmonyPatchAttribute(typeof(X), \"Y\")]")]
+    [DataRow("[HarmonyPatchCategory(\"PatchX\"), HarmonyPatch(typeof(X), \"Y\")]")]
+    [DataRow("[PrefabExtensionAttribute(\"X\", \"Y\")]")]
+    [DataRow("[Bannerlord.UIExtenderEx.Attributes.ViewModelMixin(\"Z\")]")]
     [DataRow("[PrefabExtension]")]
     [DataRow("[ViewModelMixin(\"Z\")]")]
     [DataRow("class D : SaveableTypeDefiner")]
@@ -63,6 +70,10 @@ public class ClientIsolationGateTests
     [DataRow("using MCM.Abstractions.Base;")]
     public void TripwirePattern_MatchesEachForbiddenDeclaration(string source) =>
         Assert.IsTrue(ForbiddenInTheClient.IsMatch(source), source);
+
+    [TestMethod]
+    public void TripwirePattern_HarmonyPatchCategoryAlone_DoesNotMatch() =>
+        Assert.IsFalse(ForbiddenInTheClient.IsMatch("[HarmonyPatchCategory(\"X\")]"));
 
     [TestMethod]
     public void CoreSource_NamesTaomClientOnlyInComments()

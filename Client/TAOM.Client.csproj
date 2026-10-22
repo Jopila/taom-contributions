@@ -79,10 +79,15 @@
 	     before copying this project's output, which would delete TAOM.dll. Main/TAOM.csproj builds first
 	     (the ProjectReference above), so its clean and its editor and server mirrors have already run.
 	     Never Win64_Shipping_Server: a dedicated server must not carry this assembly, and Main/TAOM.csproj's
-	     server mirror excludes it. A deploying build of Main/TAOM.csproj alone deletes the client copy (its
-	     clean); ./build.ps1 builds the solution and redeploys it. -p:DisableModuleCopy=true WITHOUT
-	     -p:ModuleId= deletes TAOM.Client from the client bins: BuildResources' CopyBinariesWindows
-	     ignores DisableModuleCopy and cleans them, and this target is skipped too. Pass both, as AGENTS.md does. -->
+	     server mirror excludes it. A deploying build of Main/TAOM.csproj alone removes TAOM.Client from all
+	     three client bins, so no copy is left built against an older core: BuildResources' clean in
+	     Win64_Shipping_Client, the editor mirror's Delete in Win64_Shipping_wEditor, and
+	     DeleteStaleGamePassTaomClient in Gaming.Desktop.x64_Shipping_Client. ./build.ps1 builds the solution
+	     and this target redeploys a fresh one. -p:DisableModuleCopy=true WITHOUT -p:ModuleId= still runs
+	     CopyBinariesWindows (it cleans Win64_Shipping_Client only) and CopyModule, but skips the mirrors and
+	     this target; the Game Pass delete still runs. The Steam and Game Pass bins then end with a new
+	     TAOM.dll and no TAOM.Client, while the editor bin keeps an old but matched pair. Pass both flags, as
+	     AGENTS.md does. -->
 	<Target Name="DeployTaomClientToTaomModule"
 	        AfterTargets="Build"
 	        Condition="'$(ModuleId)' != '' AND Exists('$(GameFolder)') AND '$(DisableModuleCopy)' != 'true'">

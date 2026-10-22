@@ -383,9 +383,11 @@ block is marked as an excerpt rather than an example.
 ```
 
 1. `<DLLName value="TAOM.dll" />` is probed at `bin\Win64_Shipping_Client` and loaded from
-   `bin/<ConfigName>`; `Main/TAOM.csproj:166-175` and `:189-201` mirror the client folder into the
-   editor and server folders. The server mirror excludes `TAOM.Client.*` and deletes stale copies.
-   `Client/TAOM.Client.csproj:86-100` deploys `TAOM.Client.dll` and its available `.pdb` to the three
+   `bin/<ConfigName>`; `Main/TAOM.csproj:191-202` and `:216-228` mirror the client folder into the
+   editor and server folders. The server mirror excludes `TAOM.Client.*` and deletes stale copies;
+   the editor mirror deletes a stale `TAOM.Client.*` from the editor bin (`:196,199`), and
+   `DeleteStaleGamePassTaomClient` (`:153-159`) deletes it from the Game Pass bin.
+   `Client/TAOM.Client.csproj:91-105` deploys `TAOM.Client.dll` and its available `.pdb` to the three
    client/editor folders only. Its entry point is `TAOM.Client.ClientSubModule`.
 2. `<Tag key="DedicatedServerType" value="none" />` is the vanilla `SandBox` pair; any other value
    forces the DLL to count as certified (`SubModuleInfo.cs:87-90`), so shipping server binaries does
