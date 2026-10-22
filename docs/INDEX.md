@@ -221,7 +221,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 
 TAOM ships no multiplayer of its own; these cover behaving correctly when a third-party co-op mod (BannerlordCoop, Bannerlord Together) or a Bannerlord dedicated server is driving the campaign.
 
-- [coop-interop](features/coop-interop.md): the detection + authority seam every other feature gates on: presence (a co-op module is loaded) vs session authority (`IsAuthority` / `ShouldDeferToHost`) vs dedicated server (which binaries folder we loaded from) vs whether a given party or clan is a human player's (`IPlayerControlQuery`) are four different questions; also assembly resolution, load order, client-side object creation, and why PatchShield skips install under co-op
+- [coop-interop](features/coop-interop.md): the detection + authority seam every other feature gates on: presence (a co-op module is loaded) vs session authority (`IsAuthority` / `ShouldDeferToHost`) vs dedicated server (the engine's build constant) vs whether a given party or clan is a human player's (`IPlayerControlQuery`) are four different questions; also assembly resolution, load order, client-side object creation, and why PatchShield skips install under co-op
 - [player-possession](features/player-possession.md) — every co-op base discards the character-creation hero at the join hand-off, so TAOM's CC grants (race, culture gold, career, resource seed) all landed on a hero about to be thrown away; re-applies them to the hero the player actually controls, detected from `Hero.MainHero.StringId` alone so no co-op assembly is referenced
 - [bannerlord-together-compat](features/bannerlord-together-compat.md) — multiplayer mod compat surface
 
@@ -365,6 +365,7 @@ These are recurring lessons the auto-memory system has captured. The memory file
 LLM-compiled wiki nodes derived from `docs/raw/`. See [research/README.md](research/README.md) for the structure and "Compile workflow".
 
 - [karpathy-autoresearch](research/karpathy-autoresearch.md) — full review of Karpathy's autoresearch repo (10 files, 52 patterns extracted) + Tier-1/2/3 adoption map for TAOM. Source: `docs/raw/ai-research/karpathy-autoresearch/`.
+- [taom-headless-server](research/taom-headless-server.md): why TAOM aborts the co-op dedicated server at load (40 types, `TAOM.Dependencies`), the problem points after `GetTypes`, options (a) to (e) and the batch plan; decision in a proposed ADR-013 (draft awaiting the maintainer).
 - [creature-bandits-roadmap](research/creature-bandits-roadmap.md): riderless creature bandits (Design B, chosen, bandits only) with an invisible-rider fallback (Design A); engine facts, render gate, spike plan, rollout.
 - [reference/external-resources.md](reference/external-resources.md) — verified external resources to improve TAOM (official-vs-community Bannerlord docs hierarchy, BUTR deps, Harmony, LOTR/Tolkien lore + naming generators, comparable total-conversion mods, save-compat versioning). Cite this instead of re-searching the web.
 

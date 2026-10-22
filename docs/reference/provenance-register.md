@@ -74,6 +74,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | BehaviorTrees | `BehaviorTrees.dll` | maintainer-owned | verbatim-port | `Main/BehaviorTrees/**` | cleared |
 | BannerlordTogether | `BannerlordTogether` `BattleLinkMPClient` | no-decompile policy, see detail | interop-only | (none) | cleared |
 | BannerlordCoop | `BannerlordCoop` `Bannerlord-Coop-Team` `Bannerlord.Coop` | UNKNOWN | interop-only | `Main/Features/CoopInterop/Missions/CoopMissionAuthority.cs` (binds Coop's agent registry and `CoopMissionController` by reflection; no Coop code copied) | uncleared |
+| BannerlordCoop.DedicatedServer | `Bannerlord-Coop-Team/BannerlordCoop.DedicatedServer` `Bannerlord Coop LLC` | proprietary (Bannerlord Coop LLC) | interop-only | `docs/research/taom-headless-server.md` (staging and boot research read from the server repo's scripts and its staged output); `TAOM.Tests/Infrastructure/ServerLoadGateTests.cs` (reads a staged server root read-only, from `TAOM_DS_STAGE`); nothing from the repo ships and no file of it is copied | uncleared |
 | TAOM-Coop (Sternab) | `Sternab/TAOM-Coop` `TAOM.CoopCompat` | author-granted, terms informal (via the maintainer, 2026-10-21; private repo, no `LICENSE`) | behavioural-port | `Main/Features/CoopInterop/CoopPlayerControlQuery.cs`; the T6 guard in `Main/Features/TroopWeight/Hooks/PartyUpgraderUpgradeReadyTroopsHook.cs`; `docs/research/coop-compat-gap-ledger.md` (comparison only) | cleared |
 | Yotthani HoN mods (external developer drop) | `Features_fixed` `HoN` `yotthani/bannerlord` | MIT, (c) 2026 yotthani (the maintainer's statement of 2026-10-09; no root `LICENSE` in `yotthani/bannerlord` yet, asked for) | verbatim-port | `Main/Features/SiegeDismount/**` `Main/Features/MixedFormations/**` `Main/Features/SmartCavalryAI/**` `Main/Features/FiefManagement/**` `Main/Features/QuickActions/**` `Main/Features/EquipPresets/**` `Main/Features/CompanionTactics/**` | cleared |
 | TAOM_Promoted | `TAOM_Promoted` `RF_Promoted` | UNKNOWN | behavioural-port | `Main/Features/FieldCommission/**` | uncleared |
@@ -485,6 +486,8 @@ The mission ownership check (#967 C7, `CoopMissionAuthority`) adds a second, nar
 binds Coop's `INetworkAgentRegistry`, `CoopMissionController` and `ContainerProvider` by reflection to
 ask whether this peer owns an agent. That is `interop-only` (member names and shapes, nothing copied),
 and it does not change the row's open licence question. The row's derivation cell holds `interop-only`; the `comparison-only` classification above covers the decompile research alone.
+
+The co-op dedicated server repo, `Bannerlord-Coop-Team/BannerlordCoop.DedicatedServer`, has its own row: it is proprietary, under a licence from Bannerlord Coop LLC. TAOM reads it for staging and boot research (the headless plan in [`docs/research/taom-headless-server.md`](../research/taom-headless-server.md)) and runs one test against a server staged from it. That is `interop-only`: TAOM ships nothing from it, copies none of its files.
 
 ### TAOM-Coop (Sternab)
 

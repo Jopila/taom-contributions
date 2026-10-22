@@ -1,0 +1,419 @@
+# Running TAOM's code on the co-op dedicated server
+
+**Status:** research and plan, 2026-10-21. B1 (the load gates) and B2 (TAOM.Dependencies headless)
+are built; the batches from B3 on wait for the decision this plan asks for, a proposed ADR-013
+(draft awaiting the maintainer).
+**Target:** Bannerlord v1.5.5 server build (`Win64_Shipping_Server`) on the appliance's bundled .NET 6.0.36 host (the staged `dotnet/shared/Microsoft.NETCore.App`).
+**Provenance:** the type, patch-class and method-body counts come from a System.Reflection.Metadata scan of
+the staged `TAOM.dll` and `TAOM.Dependencies.dll` on 2026-10-21, compared with the engine log of the failing
+boot (`rgl_log_46908.txt`). The scan outputs were session scratch and are not kept; the tables below are the
+copy. Engine behavior (`Module.LoadSubModules`, `AssemblyLoader`, the tag checks) is from a decompile of the
+server build, not re-read for this document. Every TAOM `file:line` below was read in the repo on
+2026-10-21. Anything not confirmed is marked UNVERIFIED with the step that settles it.
+
+## The problem
+
+The co-op dedicated server (the BannerlordCoop appliance) loads TAOM's submodules by name. The engine then
+does two things for each one, for every module, before any `OnSubModuleLoad` runs: `Assembly.GetTypes()` on
+the submodule DLL, then the submodule's constructor. If either throws, the engine reports
+`<submodule> could not be loaded correctly` and ends the process with `MBDebug.AbortGame`, exit code 5 and
+no further message.
+
+As of a4b8f7e21 three TAOM submodules failed this. B2 fixed the last two rows; `TAOM` still fails:
+
+| Submodule | Failing step | Cause |
+|---|---|---|
+| `TAOM` (`TAOM.dll`) | `GetTypes` | 40 types derive from, or implement, a type in an assembly the server cannot resolve when TAOM loads (the table below). |
+| `TAOM.Dependencies` | constructor | Fixed by B2. The static constructor called `Assembly.Load("TaleWorlds.Engine.GauntletUI")` and wrote `UIConfig` (`Dependencies/SubModule.cs:21-30` as of a4b8f7e21; the work now sits in the client-only helper `ConfigureGauntletPrefabs`, `:34-43`, behind the server check at `:28-31`); a static-constructor throw surfaces as a constructor failure. No `Error while getting types` line was logged for it (run 61152), which is what points at the constructor path. |
+| The two untagged UI submodules in the Dependencies manifest | load | Fixed by B2. `UIExtenderEx` (only a `DumpXML` tag) and `Bannerlord Module Loader` (loader tags only) carried neither server tag as of a4b8f7e21; both now carry `DedicatedServerType=none` and `IsNoRenderModeElement=false` (`Dependencies/_Module/SubModule.xml:150-160` and `:228-239`), as ButterLib and MCM already did. |
+
+**How it was found.** On 2026-10-21, by bisection on a v1.5.5 server: stage TAOM modules one submodule at a
+time, boot, read the newest `rgl_log_*.txt`. Run 46908 (TAOM staged) logged 4,715 `Loaded Types:` lines for
+`TAOM.dll`, whose metadata has 4,756 type definitions. Removing `<Module>` and the 4,715 loaded leaves 40,
+and each of the 40 has a client-only base type or interface.
+
+**Why the staging hides the cause.** The appliance's `Copy-SubModuleXml` strips `DedicatedServerType` tags
+from a mod's manifest and keeps only the submodules named in `-KeepSubModules`. TAOM's core submodule carries
+`DedicatedServerType=none` and `IsNoRenderModeElement=false` (`Main/_Module/SubModule.xml:75-78`); once
+staged without them, the engine tries to load it. The strip exists in two places: `Copy-SubModuleXml` in the
+server repo's `windows/run-windows.ps1` and its twin in `docker/prepare-and-run.ps1`.
+
+**Tags mean different things in the two builds.** The server build loads an `IsNoRenderModeElement` submodule
+only when the value is `"true"`; the v1.5.5 client build loads it only when the value is `"false"`. The
+co-op server starts with `/dedicatedcustomserver`, which sets `DedicatedServerType.Custom`, so a submodule
+tagged `DedicatedServerType=none` is rejected. Vanilla marks its own UI submodules with both tags (Native's
+`ViewSubModule` and `GauntletUISubModule`, `Modules/Native/SubModule.xml`). The engine already has a
+client-only submodule convention, and the plan uses it.
+
+**The engine builds every submodule before any `OnSubModuleLoad`.** A second TAOM submodule's constructor
+runs before the first one's `OnSubModuleLoad`. Two consequences: the existing `CollectAssemblyTypesShim`
+(installed from `TAOM.Dependencies` `OnSubModuleLoad`, `Dependencies/SubModule.cs:245-246`, `:229` as of a4b8f7e21) runs after every
+`GetTypes` and cannot help as wired; and a hand-off from a client submodule to core can ride on the client
+constructor ("The client hand-off" below). Since B2 that shim is live on the server, because
+`TAOM.Dependencies` now boots there and installs it; whether the server should keep it is still open (the
+`CollectAssemblyTypesShim.Install` row of the keep table below).
+
+## What makes a type fail on .NET 6
+
+**The base type and the interfaces, including generic arguments of the base, and three layout shapes besides:
+a declared field of a client-only VALUE type (an enum, a struct, `Nullable<T>`, `KeyValuePair<Client,int>`), a
+generic parameter constraint on the type or on a declared method, and a declared override of a virtual from
+another assembly whose return or parameter names a client-only type.** Reference-typed fields, `List<Client>`
+fields and arrays do not fail. The B2 review reported the extra shapes from an experiment on .NET Framework 4.8
+and CoreCLR 10; the server's .NET 6 is UNVERIFIED for them. All 40 failures have a client-only base or
+interface; for the view-model mixins it is the generic argument of
+`BaseViewModelMixin<T>` (for example `TimeAccelerationMixin : BaseViewModelMixin<MapTimeControlVM>`,
+`Main/Features/TimeAcceleration/UI/TimeAccelerationMixin.cs:18`). Twenty-six other types whose only
+client-only references were instance or static fields (17 field-only, 7 static-only, 2 both) loaded fine
+in run 46908, and 190 types with client-only references in method bodies or signatures loaded fine. Shapes 3 and 4 do occur
+inside the 40, next to a client-only base: `TaomSettlementPlateWidget.SetReference<T> where T : Widget`
+(`Main/Features/SettlementNameplateRelation/TaomSettlementPlateWidget.cs:105`) and the `OnRender(TwoDimensionContext, ...)`
+overrides of `PolygonWidget` (`Main/Features/FactionMap/Widgets/PolygonWidget.cs:383`) and `BannerWidget`
+(`Main/Features/FactionMap/Widgets/BannerWidget.cs:208`). No type outside the 40 has any of the extra shapes:
+gate 1, widened to cover them on 2026-10-22, still reports exactly the same 40 types.
+
+A type deriving from `Widget`, `MapView` or a view model cannot be rewritten to load headless. It can only
+live in an assembly the server never asks the engine to scan.
+
+**The view layer is on the server, but not resolvable when TAOM loads.** The Coop module's server bin carries
+SandBox.View, SandBox.GauntletUI, SandBox.ViewModelCollection, TaleWorlds.GauntletUI (and `.Data`,
+`.PrefabSystem`, `.ExtraWidgets`), TaleWorlds.Engine.GauntletUI, TaleWorlds.MountAndBlade.View (and
+`.GauntletUI`, `.GauntletUI.Widgets`, `.ViewModelCollection`), TaleWorlds.CampaignSystem.ViewModelCollection,
+TaleWorlds.Core.ViewModelCollection and TaleWorlds.TwoDimension, staged on purpose by the server repo. TAOM
+loads before Coop, and the engine's assembly resolver only returns an already-loaded assembly with a matching
+full name. So at TAOM's boot these resolve to nothing. After Coop's `PatchAll` has loaded them a later TAOM
+reference may resolve to Coop's copy. Any TAOM UI path that "works" at campaign time on the server may be
+working by accident of Coop's load order. UNVERIFIED; settled by logging the loaded `AppDomain` assemblies at
+`OnGameInitializationFinished` in the first clean boot. Do not rely on it.
+
+**Two assemblies are absent even from Coop's bin:** `TaleWorlds.MountAndBlade.CustomBattle` (no CustomBattle
+module on the server) and `System.Windows.Forms` (the runtime config names only `Microsoft.NETCore.App` and
+`Microsoft.AspNetCore.App`). Five of the 40 types depend on them.
+
+**MCMv5 and UIExtenderEx are load-time dependencies of `TAOM.dll`.** Four settings classes derive from MCMv5
+types (`TaomSettings`, `CrashReportSettings`, `BattleLoadDiagnosticsSettings`, `BlowDiagnosticsSettings`);
+26 types derive from UIExtenderEx base types, 11 of them among the 40. `MCMv5.dll` and the Harmony build TAOM
+binds (0Harmony 2.4.2.0) sit in the staged app bin, which is why those types loaded in run 46908. If a
+future staging stops copying non-kept DLLs, the four settings types would fail `GetTypes`. No gate checks
+that: gate 2 covers only the TaleWorlds and SandBox references, so MCMv5 staging is a manual check.
+
+## The 40 types
+
+"Dropped" prefix: every feature type below is `TAOM.Features.<row>`. Defining lines were read in the repo on
+2026-10-21. The client-only assembly is the one that declares the failing base or interface.
+
+| Type | Defined at | Client-only base or interface (assembly) |
+|---|---|---|
+| `WarOfTheRingMomentum.UI.MomentumIndicatorMapView` | `Main/Features/WarOfTheRingMomentum/UI/MomentumIndicatorMapView.cs:17` | base MapView (SandBox.View) |
+| `TimeAcceleration.UI.TimeAccelerationMixin` | `Main/Features/TimeAcceleration/UI/TimeAccelerationMixin.cs:18` | base arg MapTimeControlVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
+| `TelcharsMark.UI.UpgradeRowMixin` | `Main/Features/TelcharsMark/UI/UpgradeRowMixin.cs:16` | base arg SPItemVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
+| `TelcharsMark.UI.UpgradeScreenMixin` | `Main/Features/TelcharsMark/UI/UpgradeScreenMixin.cs:23` | base arg SPInventoryVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
+| `SpecialResources.UI.EncyclopediaUnitBadgeMixin` | `Main/Features/SpecialResources/UI/EncyclopediaUnitBadgeMixin.cs:29` | base arg EncyclopediaUnitVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
+| `SpecialResources.UI.SpecialResourceMapBarMixin` | `Main/Features/SpecialResources/UI/SpecialResourceMapBarMixin.cs:15` | base arg MapInfoVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
+| `SpecialResources.UI.SpecialResourceSpriteWidget` | `Main/Features/SpecialResources/UI/SpecialResourceSpriteWidget.cs:11` | base IconBrushWidget (TaleWorlds.MountAndBlade.GauntletUI.Widgets) |
+| `ShaderPrecompilation.TaomShaderGameManager` | `Main/Features/ShaderPrecompilation/TaomShaderGameManager.cs:28` | base CustomGameManager (TaleWorlds.MountAndBlade.CustomBattle) |
+| `ShaderCompileNotice.ShaderCompileNoticeWindow` | `Main/Features/ShaderCompileNotice/ShaderCompileNoticeWindow.cs:13` | base Form (System.Windows.Forms) |
+| `ShaderCompileNotice.WindowHandleOwner` | `Main/Features/ShaderCompileNotice/ShaderCompileNoticeWindow.cs:85` | interface IWin32Window (System.Windows.Forms) |
+| `ShaderCompileNotice.ShaderCompileNotice+NoticeContext` | `Main/Features/ShaderCompileNotice/ShaderCompileNotice.cs:58` | base ApplicationContext (System.Windows.Forms) |
+| `SettlementNameplateRelation.TaomSettlementPlateWidget` | `Main/Features/SettlementNameplateRelation/TaomSettlementPlateWidget.cs:19` | base Widget (TaleWorlds.GauntletUI) |
+| `ReevesLedger.UI.ReserveStepMixin` | `Main/Features/ReevesLedger/UI/ReserveStepMixin.cs:25` | base arg TownManagementReserveControlVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
+| `ReevesLedger.UI.TownManagementLedgerMixin` | `Main/Features/ReevesLedger/UI/TownManagementLedgerMixin.cs:24` | base arg TownManagementVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
+| `RealmBorders.UI.RealmBordersMapView` | `Main/Features/RealmBorders/UI/RealmBordersMapView.cs:22` | base MapView (SandBox.View) |
+| `Namegiving.UI.FiefNamingMixin` | `Main/Features/Namegiving/UI/FiefNamingMixin.cs:24` | base arg KingdomManagementVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
+| `Messengers.UI.MessengerEncyclopediaMixin` | `Main/Features/Messengers/UI/MessengerEncyclopediaMixin.cs:12` | base arg EncyclopediaHeroPageVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
+| `HostReview.Hooks.HostReviewVisualOrderProvider` | `Main/Features/HostReview/Hooks/HostReviewVisualOrderProvider.cs:11` | base DefaultVisualOrderProvider (TaleWorlds.MountAndBlade.View) |
+| `HallOfFire.TaomMapConversationDataProvider` | `Main/Features/HallOfFire/TaomMapConversationDataProvider.cs:15` | interface IMapConversationDataProvider (SandBox.View) |
+| `FieldCamp.UI.FieldCampMapView` | `Main/Features/FieldCamp/UI/FieldCampMapView.cs:21` | base MapView (SandBox.View) |
+| `FiefManagement.UI.TaomFiefsNavigationElement` | `Main/Features/FiefManagement/UI/TaomFiefsNavigationElement.cs:21` | base MapNavigationElementBase (SandBox.View) |
+| `FactionUI.UI.Widgets.FilteredPropertyRow` | `Main/Features/FactionUI/UI/Widgets/FilteredPropertyRow.cs:18` | base Widget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.FrontEndRichTextWidget` | `Main/Features/FactionUI/UI/Widgets/FrontEndRichTextWidget.cs:9` | base RichTextWidget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.FrontEndTextWidget` | `Main/Features/FactionUI/UI/Widgets/FrontEndTextWidget.cs:14` | base TextWidget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.NarrativeRandomButton` | `Main/Features/FactionUI/UI/Widgets/NarrativeRandomButton.cs:16` | base ButtonWidget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.ScrollShortcutButton` | `Main/Features/FactionUI/UI/Widgets/ScrollShortcutButton.cs:10` | base ButtonWidget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.StageJumpButton` | `Main/Features/FactionUI/UI/Widgets/StageJumpButton.cs:12` | base ButtonWidget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.ThemeIconWidget` | `Main/Features/FactionUI/UI/Widgets/ThemeIconWidget.cs:10` | base Widget (TaleWorlds.GauntletUI) |
+| `FactionMap.Widgets.BannerWidget` | `Main/Features/FactionMap/Widgets/BannerWidget.cs:14` | base ImageWidget (TaleWorlds.GauntletUI) |
+| `FactionMap.Widgets.FactionImageWidget` | `Main/Features/FactionMap/Widgets/FactionImageWidget.cs:13` | base ImageWidget (TaleWorlds.GauntletUI) |
+| `FactionMap.Widgets.MapContainerWidget` | `Main/Features/FactionMap/Widgets/MapContainerWidget.cs:7` | base Widget (TaleWorlds.GauntletUI) |
+| `FactionMap.Widgets.PolygonWidget` | `Main/Features/FactionMap/Widgets/PolygonWidget.cs:23` | base ImageWidget (TaleWorlds.GauntletUI) |
+| `FactionMap.Widgets.RuntimeSprite` | `Main/Features/FactionMap/Widgets/RuntimeSprite.cs:6` | base Sprite (TaleWorlds.TwoDimension) |
+| `CustomBattles.TaomFactionSelectionVM` | `Main/Features/CustomBattles/TaomFactionSelectionVM.cs:7` | base CustomBattleFactionSelectionVM (TaleWorlds.MountAndBlade.CustomBattle) |
+| `CompanionTactics.BattleActionBar.Hooks.BattleActionBarMissionView` | `Main/Features/CompanionTactics/BattleActionBar/Hooks/BattleActionBarMissionView.cs:17` | base MissionView (TaleWorlds.MountAndBlade.View) |
+| `CareerSystem.UI.CharacterDeveloperCareerMixin` | `Main/Features/CareerSystem/UI/CharacterDeveloperCareerMixin.cs:12` | base arg CharacterDeveloperVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
+| `CareerSystem.UI.MissionAgentStatusCareerMixin` | `Main/Features/CareerSystem/UI/MissionAgentStatusCareerMixin.cs:18` | base arg MissionAgentStatusVM (TaleWorlds.MountAndBlade.ViewModelCollection) |
+| `CareerSystem.UI.TaomCareerDiamondWidget` | `Main/Features/CareerSystem/UI/TaomCareerDiamondWidget.cs:28` | base Widget (TaleWorlds.GauntletUI) |
+| `AdvancedCombat.AutonomousMovementPlayerController` | `Main/Features/AdvancedCombat/AutonomousMovementPlayerController.cs:16` | base MissionView (TaleWorlds.MountAndBlade.View) |
+| `TAOM.Adapters.FrontEndRuntimeSprite` (not under `Features`) | `Main/Adapters/FrontEndRuntimeSprite.cs:11` | base Sprite (TaleWorlds.TwoDimension) |
+
+By group: front end 14 (7 `FactionUI.UI.Widgets`, 5 `FactionMap.Widgets`, `FrontEndRuntimeSprite`,
+`TaomFactionSelectionVM`); campaign map 6 (three MapViews, `TaomFiefsNavigationElement`,
+`TaomMapConversationDataProvider`, `TaomSettlementPlateWidget`); UIExtenderEx view-model mixins 11 plus
+`SpecialResourceSpriteWidget` and `TaomCareerDiamondWidget` (13); mission, custom-battle engine and WinForms 7
+(`AutonomousMovementPlayerController`, `BattleActionBarMissionView`, `HostReviewVisualOrderProvider`,
+`TaomShaderGameManager`, `ShaderCompileNoticeWindow`, `WindowHandleOwner`, `NoticeContext`).
+
+**Core methods that name one of the 40**, each moving with it or being inverted behind an adapter (26
+methods): `SubModule.AddTaomMissionBehaviors`; `MomentumUIService.AddMapMeter` and `RemoveMapMeter`;
+`WargMissionBehavior.Initialize` and `SwitchMainAgentController`; `WargRiderHandManager.ClearCustomLookDirection`
+and `UpdateWargRiderHandle`; `FinishRageMode.Reset`; `PrepareOnFirstCall.Execute`; the three
+`Patch109_SPInventoryVM*` postfixes; `ShaderPrecompileRunner.StartCurrentItem`; `ShaderCompileNotice.Run`;
+`NameplateRelationIoC.InitializeWidgetStatics`; `RealmBordersCampaignBehavior.EnsureMapView`;
+`HostReviewModule.OnPhase`; `HallOfFireInstaller.Install`; `FieldCampCampaignBehavior.EnsureOverlay`;
+`RuntimeSpriteFactory.FromEngineTexture`; `FactionSelectionVM.Tick` and `ExecuteSelectRegion`;
+`CultureStageViewCreatedHook.OnCreated`; `CustomBattleSideVM_Constructor_Patch.Postfix`;
+`FrontEndResourceAdapter.RegisterSprite`; the `Patch36_MapNavigationElements` postfix lambda.
+
+## TAOM.Dependencies
+
+No type in `TAOM.Dependencies.dll` fails `GetTypes` (76 type definitions, none failed). As of a4b8f7e21 exactly
+two method bodies referenced a client-only assembly: the static constructor (`UIConfig`,
+TaleWorlds.Engine.GauntletUI, `Dependencies/SubModule.cs:21-30`) and `OnSubModuleLoad` (`UIExtender`,
+Bannerlord.UIExtenderEx, forced static init at `:195`). After B2 the only references sit in two NoInlining
+helpers, `ConfigureGauntletPrefabs` (`:34-43`) and `ForceUiExtenderStaticInit` (`:287-289`), and
+`DependenciesClientIlTests` pins that for every method of every type in the assembly.
+
+Line numbers in the two tables below are in the B2 working tree (after a4b8f7e21).
+
+**Keep on the server** (none of these reference a client-only assembly):
+
+| Step | Where | Why headless needs it |
+|---|---|---|
+| `InstallAssemblyResolveHandler` | `Dependencies/SubModule.cs:136-155` | Same BUTR-name redirect as a client; harmless when nothing asks. |
+| `ApplyHarmonyGuards` (blocks `UnpatchAll(null)`) | `Dependencies/SubModule.cs:336-341` | Coop, the server core and TAOM share one Harmony registry in the process. |
+| `CheckForDuplicateHarmony` | `Dependencies/SubModule.cs:353-365` | The staging forces one net6 0Harmony; a second copy is worth one log line. |
+| `CoopPresence.Refresh` | `Dependencies/SubModule.cs:242-243` | Feeds the shield policies below. |
+| `SaveShield.Install` | `Dependencies/SubModule.cs:251-252` | Under co-op it rethrows save-load faults and keeps swallowing mission-init faults, the same contract as a co-op client ([coop-interop](../features/coop-interop.md), "PatchShield is skipped under co-op" and the SaveShield text near it). |
+| `PatchShield.Install` | `Dependencies/SubModule.cs:248-249` | Already a no-op under co-op (`PatchShieldPolicy.ShouldInstall`). |
+| `IncompatibleModDetector`, `VersionProbe`, the ProcessExit summary | `Dependencies/SubModule.cs:234-275` | Diagnostics; no UI. |
+| `CollectAssemblyTypesShim.Install` | `Dependencies/SubModule.cs:245-246` | Runs after every `GetTypes`; its policy rethrows for Coop's assemblies. Keep for parity with a co-op client, or skip headless so a half-loaded assembly fails loudly. Open question for the maintainer; B2 made it live on the server, since `TAOM.Dependencies` now boots there and installs it. |
+
+**Skip on the server:** the Gauntlet prefab setup in the static constructor (`:29-32`) and the forced
+UIExtenderEx static constructor (`:201-220`). With the UIExtenderEx submodule absent headless there is nothing
+for it to patch.
+
+**The fix (batch B2):**
+
+1. The server check is the engine's build constant `TaleWorlds.MountAndBlade.GameNetwork.IsDedicatedServer`, not a
+   rule of TAOM's own. Its getter in the server DLL is `ldc.i4.1; ret` (Windows and Linux builds) and in the client
+   DLL `ldc.i4.0; ret`; the engine reads it in `Module.Initialize` before `LoadSubModules`; the client type's
+   initializer only sets one constant and the server type has none, so reading it runs nothing that can fail.
+   `Dependencies/SubModule.cs` reads it in both guards, and `DedicatedServerProvider`
+   (`IDedicatedServerProvider.IsDedicatedServer`, `Main/Features/CoopInterop/DedicatedServerProvider.cs:13`) reads it
+   for the services and stays the test seam (`DedicatedServerProviderTests.Getter_CallsGameNetworkIsDedicatedServer`
+   pins the read). On the server a false answer is fatal (the client UI setup runs and ends the process), which a
+   build constant cannot give and the bin-folder rule that B2 first used could. That rule (`ServerHost`) was
+   replaced after review. The B2 boot ran on the bin-folder build and will be repeated on this one.
+2. Static constructor: keep `InstallAssemblyResolveHandler()`, then `if (!GameNetwork.IsDedicatedServer)
+   ConfigureGauntletPrefabs();` with `ConfigureGauntletPrefabs` a separate `[MethodImpl(MethodImplOptions.NoInlining)]`
+   method holding the `Assembly.Load` and the `UIConfig` write, so the `UIConfig` token is not in the
+   constructor's own IL.
+3. `OnSubModuleLoad`: the `RunClassConstructor(typeof(UIExtender).TypeHandle)` block moves into a NoInlining
+   `ForceUiExtenderStaticInit()` called only off-server. `Bannerlord.UIExtenderEx.dll` itself resolves on the
+   current staging (it is promoted into the server app bin); what does not resolve is the Gauntlet layer its
+   static init patches, so running that init headless would throw (Likely, not run).
+4. Manifest: tag `UIExtenderEx` and `Bannerlord Module Loader` with `DedicatedServerType=none` and
+   `IsNoRenderModeElement=false`, as ButterLib and MCM already are. `TAOM.Dependencies` stays untagged.
+
+## Startup and campaign-time problem points
+
+**The rule behind most rows.** On CoreCLR a method whose IL names a type or member in an unresolvable
+assembly fails when that method is JIT-compiled, before its first line runs, so an `if` inside the same method
+does not protect it. Likely, not run; the first clean boot settles it. The guard pattern is the server check
+in the caller with the UI work in a separate `[MethodImpl(MethodImplOptions.NoInlining)]` method, or an
+adapter interface with a server null implementation. Whether a reference fails also depends on whether Coop
+has already loaded the assembly, so every row is guarded regardless.
+
+| # | Where | Headless behavior | Guard |
+|---|---|---|---|
+| 1 | `Main/SubModule.cs:242-244` (`UIExtender.Create`, `RegisterUiExtensions`, `Enable`); `RegisterUiExtensions` `:963-1033` | Unguarded. UIExtenderEx's static constructor patches Gauntlet types; a throw ends `OnSubModuleLoad` and the game does not start (comment `:206-212`). | Moves to `ClientSubModule.OnSubModuleLoad` (B5). |
+| 2 | `Main/SubModule.cs:218-223`; `Main/PatchCategoryIndex.cs:31-57`, `:65-70` | 98 of 317 patch classes reference a client-only assembly: by attribute target (read inside `Build`'s try: skipped, then reported as a failure) or only by patch-method signature (fails in `Apply`, which aborts the rest of that category by design). 11 categories mix UI and core classes: Patch101_MapFrameProfiler, Patch105_HiddenHosts, Patch108_TaomBuildings, Patch17_TroopWeight, Patch19_CustomBattles, Patch23_BannerColorPersistence, Patch26_SpecialResources, Patch29_CCBodyProperties, Patch75_Refuge, Patch94_CreatureBroodCampaign, Patch95_FactionUI. A core class after a signature-only UI class is silently not applied headless. | A core `[ClientOnly]` marker; `PatchCategoryIndex.Build` drops marked classes headless; split the 11 mixed categories; log skipped client-only classes once instead of reporting them as failures (B6a). |
+| 3 | `Main/SubModule.cs:339-360` FactionUI init; `_factionUiTicker` `:354`, ticked `:2285` | Resolves, then `OnApplicationTick` drives front-end services each frame; the call graph reaches `FrontEndStateAdapter`, `FrontEndResourceAdapter` and `FactionScreenWidgets` from that tick. | Skip the block headless; the ticker stays null (B6c). |
+| 4 | `Main/SubModule.cs:255`, `:2284` time acceleration | `TimeAccelerationService.OnTick` reads `_input.IsMapActive` while a campaign runs (`Main/Features/TimeAcceleration/TimeAccelerationService.cs:56`); that is `MapScreen.Instance` (SandBox.View, `Main/Features/TimeAcceleration/MapInputAdapter.cs:19`), a JIT failure out of every application tick. | Do not resolve the service headless (B6c). |
+| 5 | `Main/SubModule.cs:263-285` hotkey categories (`TaomTimeControlHotKeyCategory.Register()` at `:265`) | InputSystem is on the server; the effect headless is UNVERIFIED. | Skip headless (B6c). |
+| 6 | `Main/SubModule.cs:498-499` Patch62; `:520-522` Patch79 | Targets in Engine.GauntletUI and MountAndBlade.GauntletUI. | `[ClientOnly]` (B6c). |
+| 7 | `Main/SubModule.cs:666` `FeatureModuleHooks.RunPhase(ApplyPhase.ProcessLoad, ...)` | Reaches client code in `HostReviewModule.OnPhase`, `HallOfFireInstaller.Install`, `NameplateCullService.Install` and `MapViewReleaseLayerEvents`. `ModuleRunner.Run` faults the module and skips it in every later step (`Main/Composition/ModuleRunner.cs:62-90`), so its campaign behaviors are lost too; a save-owning module fails closed at campaign start. | `TaomFeatureModule.ClientOnly` (whole module) or a client flag on `PatchCategoryDecl`; `ModuleRunner` skips client work headless without faulting (B6b). |
+| 8 | `Main/SubModule.cs:675-801` `OnBeforeInitialModuleScreenSetAsRoot` | Called on the dedicated server: the engine runs every submodule's hook before its own `IsDedicatedServer` return. Menu customization `:684`, Patch55 `:696`, startup inquiry `:704`. | Skip menu customization and Patch55 headless; notices go to the log only (B6c). |
+| 9 | `Main/SubModule.cs:1590` Patch101 installer (`MapFrameProfilerInstaller.OnGameInitialized`); `:1701-1703` Patch80 bindings; `:2024` `ManualPatchApplicator.ApplyAll` | `KingdomVoteDeadlockBinding.Initialize` names CampaignSystem.ViewModelCollection types; `ApplyAll` names `OrderOfBattleHeroItemVM`. Both unguarded in `OnGameInitializationFinished`: one JIT failure skips the rest of that method (Patch69, the GameInit module phase, the manual patches, the Harmony census). | Server check before each, UI part in a NoInlining helper; Patch80 fixes a vote screen that does not exist headless (B6c). |
+| 10 | Campaign behaviors wired in `OnGameStart`: `Main/Features/RealmBorders/Hooks/RealmBordersCampaignBehavior.cs:52` runs `EnsureMapView` (`:85`) on every campaign tick; `Main/Features/FieldCamp/Hooks/FieldCampCampaignBehavior.cs:133,145` (`EnsureOverlay`); `Main/Features/WarOfTheRingMomentum/WarOfTheRingMomentumBehavior.cs:215-217` to `MomentumUIService`; `Main/Features/SupplyLines/Hooks/SupplyLinesCampaignBehavior.cs:144` to `SupplyRouteVisualService.Update`; `RefugeService.TryShowVisual` to `RefugeVisualService.Show`; `CampService.TryShowVisual` to `CampVisualService.Show`; `HiddenHostsPlainSightBehavior.Stamp` and `FarWatchService` to `PartyIntelAdapter` (`SandBoxUIHelper`). | These call UI services and adapters directly during the campaign. | Visual services and adapters get a server null implementation, replaced by the client composition (B7). |
+| 11 | `Main/SubModule.cs:2098`, `:2115` `AddTaomMissionBehaviors` | Names two of the 40. Whether the dedicated server ever runs a mission is UNVERIFIED. | They move to `ClientSubModule.OnMissionBehaviorInitialize` (B4c). |
+| 12 | `Main/SubModule.cs:120` `IoC.Configure` | No direct client reference. `InitializeStatics` is fail-closed for save owners (`Main/Composition/ModuleRunner.cs:38-39`); HiddenHosts owns save data (`Main/Features/HiddenHosts/HiddenHostsModule.cs:41`) but its statics only capture a method group (`Main/Features/HiddenHosts/HiddenHostsCalls.cs:33,46`), which does not JIT it. Likely safe. | None now; the JIT ratchet gate watches it. |
+| 13 | `Main/SubModule.cs:130-133` shader-compile notice | Already server-aware (`Main/Features/ShaderCompileNotice/ShaderCompileNoticeEntry.cs:17,31`). Only its WinForms types must move. | B4c. |
+| 14 | `Main/SubModule.cs:672` and the inquiry paths | `InformationManager` is TaleWorlds.Library; nothing renders headless. Likely harmless. | None. |
+
+The call-graph scan from the `SubModule` hooks, `IoC`, every `CampaignBehaviorBase` and `GameModel` subclass
+and every core patch class found 97 methods that can reach a client-only method. They are candidates, not
+proofs: virtual dispatch was matched by name, so it over-approximates. Each B7 slice reads its candidates
+before guarding them. A separate IL scan found 739 `TAOM.dll` methods, in 190 types, whose body references a
+client-only assembly or one of the 40.
+
+## Settings headless
+
+- **What a server reads today.** From an MCMv5 decompile: `GlobalSettings<T>.Instance` returns
+  `BaseSettingsProvider.Instance?.GetSettings(id) as T`, and `BaseSettingsProvider.Instance` has an
+  `internal` setter. Only MCM's own submodules set it and the server loads none of them (they are tagged
+  `none`), so `TaomSettings.Instance` is null headless and does not throw (Likely; the first clean boot
+  confirms it with one log line).
+- **Gameplay reads MCM constantly.** 227 `TaomSettings.Instance` occurrences in 112 files under `Main` (grep
+  this turn; the three diagnostics settings classes add more), nearly all through settings providers with
+  `private TaomSettings? Settings => _settings ??= TaomSettings.Instance;` (43 files; for example
+  `Main/Features/CaravanTrade/CaravanTradeSettingsProvider.cs:21`) and compiled or ModuleData fallbacks (for
+  example `Main/Features/AiPartySize/AiPartySizeService.cs:106-108`, which defaults with
+  `settings?.EnableAiPartyScaling ?? true`). A grep for `TaomSettings.Instance.` member access without a null
+  guard found no code use outside comments. So a server runs on **compiled defaults**. While the instance is
+  null, `??=` re-reads MCM's dictionary on every access: cheap, no throw.
+- **What that means.** The server's gameplay settings are the defaults whatever the host player chose.
+  `SettingsFingerprint` and `SettingsFingerprintLog` already hash the simulation-relevant groups; peers do not
+  exchange them ([coop-interop](../features/coop-interop.md), "What is NOT done", the MCM settings parity
+  bullet).
+- **Decision for the maintainer (B8):** (1) compiled defaults, logged once at boot with the fingerprint (cheap,
+  recommended first); or (2) a TAOM-owned settings file the server reads into a `TaomSettings` instance behind
+  one `ITaomSettingsSource` seam that every provider's accessor uses (43 files use the `??= TaomSettings.Instance`
+  accessor and 81 files declare a `*SettingsProvider` class; the other `TaomSettings.Instance` readers too).
+  Where MCM writes TAOM's json2 file on a server user profile, and whether `TaomSettings` can be deserialized
+  outside MCM, are UNVERIFIED.
+
+## Options considered
+
+(b) is the smallest form of (a): a type deriving from `Widget`, `MapView` or a view model can only live in a
+second assembly, so "move the 40 types" has one possible destination.
+
+| Option | Win | Cost | Verdict |
+|---|---|---|---|
+| **(a) Full split**: every UI type and UI patch into `TAOM.Client.dll`, a submodule tagged as vanilla tags its UI submodules | The compiler proves core never touches UI, and the server loads nothing it cannot use. | About 190 types with UI bodies, 98 UI patch classes and every core-to-UI call (97 reachable candidates) move or get inverted, in one effort. | Keep as the direction, reject as one change: the cost lands before any boot proves the approach. |
+| **(b) Minimal client assembly** (recommended): `TAOM.Client.dll` holds only what cannot load headless, the 40 types plus the 15 UIExtenderEx prefab classes, and the callers that exist only to instantiate them | `GetTypes` passes on the server, and a gate keeps it passing. | One new project and submodule, about 55 type moves, 26 core methods inverted, build-script changes. | **Keep**: the win (TAOM boots headless at all) dominates the cost. |
+| **(c) GetTypes shim**: install `CollectAssemblyTypesShim` early enough | Smallest code change: TAOM loads its 4,715 good types. | Swallows `ReflectionTypeLoadException` for every non-Coop assembly in the server process, leaves 40 TAOM types absent with a latent `TypeLoadException` wherever code reaches them, and does not fix the Dependencies static constructor. | **Reject as the fix.** Acceptable only as an uncommitted local spike to see the next failure early. |
+| **(d) `TAOM.Server` submodule** | A server entry point with no UI in it. | A third entry point that must repeat TAOM's gameplay wiring (behaviors, models, patches, save definers) and drift from it, or that still needs the core/UI separation of (b) underneath. | **Reject**: more complexity, no gain over (b). |
+| **(e) Make the view layer resolvable early** (load Coop's view assemblies before TAOM) | `GetTypes` would fail for only 5 types (CustomBattle, WinForms). | TAOM would depend on Coop's private bin layout and load order, and all TAOM UI code would run half-alive headless. | **Reject.** |
+
+**Why (c) is mechanically viable but still rejected.** In both CoreLibs checked (6.0.36 on the desktop and 6.0.12 on the
+server's bundled host as read on 2026-10-21; the appliance stage bundles 6.0.36), `Assembly.GetTypes` is `public virtual` and `RuntimeAssembly` does not override it
+(only `GetExportedTypes`), so a Harmony finalizer on it would intercept the engine's call. It would have to be
+installed from the `TAOM.Dependencies` submodule constructor, because of the load order above. UNVERIFIED: that
+net6 0Harmony patches a CoreLib method there without the JIT inlining or devirtualizing the call site. The
+rejection does not rest on that; it rests on a process-wide behavior change that hides type-load faults and
+leaves the runtime surface broken.
+
+**Recommendation: (b) now, with the gates below, then grow toward (a) feature by feature where it pays.**
+Everything that loads but must not run headless stays in core behind the existing server signal
+(`IDedicatedServerProvider`) or a null adapter.
+
+**The client hand-off.** Core must not reference `TAOM.Client`. Core defines a small slot
+(`TAOM.Composition.ClientComposition`, a static settable `IClientComposition` with one method,
+`RegisterServices(IRegistrator)`); the `TAOM.Client.ClientSubModule` constructor sets it; `IoC.Configure` calls
+it after core registrations with replace semantics. This works because the client submodule's constructor
+runs before core's `OnSubModuleLoad` (every submodule is constructed before any `OnSubModuleLoad` fans out,
+in both builds). On the server the slot stays empty and core's null adapters remain. Rejected alternative:
+registering from the client's `OnSubModuleLoad`, because singletons resolved in core's `OnSubModuleLoad` (for
+example `_timeAccelerationService`, `Main/SubModule.cs:255`) would already hold the null adapter.
+
+## Staging
+
+**Generic rule for the server repo (mod-agnostic):** for an extra module with no `-KeepSubModules` entry, stage
+exactly the submodules the server engine itself would load and leave their tags as written. Concretely, in
+`Copy-SubModuleXml` and its docker twin, drop a submodule whose tags include `DedicatedServerType=none` or
+`IsNoRenderModeElement=false` (the two client-only markers), keep the rest with their tags. A module named in
+`-KeepSubModules` keeps today's behavior (named submodules only, tags stripped), as an explicit override for
+mods that tag wrongly. The module author's manifest becomes the contract.
+
+**TAOM's side (B9, after the `GetTypes` milestone):**
+
+- `Main/_Module/SubModule.xml:71-79`: the `TAOM` submodule loses both tags (it is server-safe after B5), and a
+  second `TAOM.Client` submodule (`TAOM.Client.dll`, `TAOM.Client.ClientSubModule`) carries
+  `DedicatedServerType=none` and `IsNoRenderModeElement=false`. Removing `IsNoRenderModeElement=false` from
+  core changes nothing on a client, because an absent tag is never evaluated.
+- `Dependencies/_Module/SubModule.xml`: the two tags from B2.
+- `Main/TAOM.csproj`, target `MirrorWin64ShippingClientToServer` (`:186-195`): exclude `TAOM.Client.dll` and its
+  pdb, so nothing headless carries it.
+- Expected staged submodules: `TAOM.Dependencies`, `TAOM`. Dropped: `UIExtenderEx`, `ButterLib`,
+  `ButterLib Implementation Loader`, `MCMv5`, `MCMv5 Basic Implementation`, `Bannerlord Module Loader`,
+  `TAOM.Client`.
+
+**Order matters.** The server-repo rule must not ship before TAOM's manifest flip, or the generic rule would
+drop today's `none`-tagged TAOM core. Rejected alternative: a separate server manifest shipped by TAOM (two
+manifests drift; the engine's tags already say it).
+
+## The gates
+
+All in `TAOM.Tests/Infrastructure/`, plain reflection, no new package. In the test process every client
+assembly resolves, so ordinary reflection sees base types, interfaces, fields and constraints, and
+`MethodBody.GetILAsByteArray()` plus `Module.ResolveMember` read IL tokens (through `IlCallScanner`).
+
+`ClientAssemblies` (`TAOM.Tests/Infrastructure/ClientAssemblies.cs`) is one shared static list of 16 names, with
+a comment naming its source: the `TAOM.dll` references that do not resolve when TAOM loads headless.
+SandBox.View, SandBox.GauntletUI, SandBox.ViewModelCollection, TaleWorlds.CampaignSystem.ViewModelCollection,
+TaleWorlds.Core.ViewModelCollection, TaleWorlds.Engine.GauntletUI, TaleWorlds.GauntletUI,
+TaleWorlds.GauntletUI.Data, TaleWorlds.GauntletUI.PrefabSystem, TaleWorlds.MountAndBlade.GauntletUI,
+TaleWorlds.MountAndBlade.GauntletUI.Widgets, TaleWorlds.MountAndBlade.View,
+TaleWorlds.MountAndBlade.ViewModelCollection, TaleWorlds.TwoDimension,
+TaleWorlds.MountAndBlade.CustomBattle and System.Windows.Forms. `Bannerlord.UIExtenderEx` is deliberately not on
+it yet: the 15 UIExtenderEx prefab classes would join the failing set, so it is added in B5 when those types
+move (`DependenciesClientIlTests` names it separately). There is no "must be staged" list; gate 2 checks the
+TaleWorlds and SandBox references instead.
+
+| Gate | What it checks | Lands in |
+|---|---|---|
+| `ServerLoadGateTests.EveryCoreType_LoadsWithoutClientAssemblies` | For each type in `TAOM.dll`, four shapes name a `ClientAssemblies` assembly: (1) the base chain and interfaces, generic arguments included recursively; (2) a declared field of a value type (enums, structs, `Nullable<T>`, `KeyValuePair<Client,int>`; reference-typed fields, `List<Client>` and arrays do not fail); (3) a generic parameter constraint of the type or of a declared method; (4) a declared method that overrides a virtual from another assembly and names a client type in its return or parameters. A ratchet allowlist (`KnownClientTypesInCore`, exactly the 40 rows above; the 15 UIExtenderEx prefab classes join when UIExtenderEx joins the list) makes it pass today; the test fails on a new violator and on an allowlisted type that no longer violates, so the list only shrinks. Empty list is milestone M1. The detectors live in `ServerLoadScan`; `ServerLoadFixtureTests` holds one fixture per shape plus the negatives (System.dll as the stand-in client assembly), so a detector that stops firing fails there. `EveryDependenciesType_LoadsWithoutClientAssemblies` runs the same walk over `TAOM.Dependencies.dll` and expects an empty set. | B1 |
+| `ServerLoadGateTests.ClientOnlyList_AgainstStagedServer_ListedAbsentAndOtherReferencesPresent` | Reads a staged server root from the `TAOM_DS_STAGE` environment variable (default `E:\repos\BannerlordCoop.DedicatedServer\.stage-win\engine`); `Assert.Inconclusive` when absent. It looks in the app bin (`bin/Win64_Shipping_Server`) plus the bins of the modules that load before TAOM in the stock order (Native, SandBoxCore, SandBox, TAOM.Dependencies, LOTRLOME_Armory, TAOM_Map). Every `ClientAssemblies` name must be absent there (the Coop module loads after TAOM, so its copies do not count), and every TaleWorlds or SandBox assembly `TAOM.dll` references that is not client-only must be present. Tagged `LiveInstall`. | B1 |
+| `DependenciesClientIlTests` | Every method and static constructor of every type in `TAOM.Dependencies.dll`, compiler-generated ones included, except the two NoInlining helpers, references no client type (call, field, type and ldtoken operands, a resolved generic method's own type arguments, locals, catch clauses, signatures); the helpers do hold the references and are NoInlining; every submodule of the Dependencies manifest except `TAOM.Dependencies` carries both server tags; and a guard test per site (`StaticConstructor_UiHelperCall_IsGuardedByTheServerCheck`, `OnSubModuleLoad_UiHelperCall_IsGuardedByTheServerCheck`): the helper call is reached only after a read of `GameNetwork.IsDedicatedServer` and a conditional branch, so removing the `if` fails. | B2 |
+| `ServerJitGateTests.ServerReachableMethods_ReferenceNoClientAssembly` | The runtime ratchet. IL-token scan of every `TAOM.dll` method; a method referencing `ClientAssemblies` must be in a `[ClientOnly]` type, carry `[ClientOnly]`, or sit in a checked-in baseline (`ServerJitBaseline.txt`, 739 entries today) that only shrinks. `[ClientOnly]` means "never reached headless"; its guard is the caller's server check, pinned by per-site tests. | B7 |
+| `ServerLoadGateTests.PatchClassesReferencingClientAssemblies_AreClientOnly` | Every patch class whose `[HarmonyPatch]` target type or patch-method parameter types come from a client-only assembly carries `[ClientOnly]`. String-resolved targets (`TargetMethod` via `AccessTools`) are not visible to it; the boot test catches those. | B6 |
+
+`ViewCreatorModuleGateTests` (`TAOM.Tests/Infrastructure/ViewCreatorModuleGateTests.cs`) and the
+`ConversationTag` gate also extend to scan `TAOM.Client` once it exists.
+
+## Batches
+
+Every batch: TDD (test first, RED, GREEN); `dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId=`
+green; `/deep-review` before its commit (C# or XML); its own checkbox under one epic issue. **SO** marks a
+batch that touches a single-owner file (`Main/SubModule.cs` or `Main/IoC.cs`): the file's owner applies those
+hunks and a builder agent recommends them.
+
+| Batch | Scope | Tier | Single-owner files | Boot test |
+|---|---|---|---|---|
+| B0 | ADR 013 and the epic with one checkbox per batch (issue creation needs the maintainer's word). No code. | architect | none | none |
+| B1 | Gates 1 and 2 with the 40-row allowlist: `ServerLoadGateTests.cs`, shared `ClientAssemblies.cs`. RED first: write gate 1 with an empty allowlist and confirm it lists exactly the 40; a mismatch is a finding, stop and report. | implementer | none | none (no runtime change) |
+| B2 | `TAOM.Dependencies` headless: `Dependencies/SubModule.cs`, both guards read `GameNetwork.IsDedicatedServer`, `DedicatedServerProvider` reads it (the test seam), two manifest tags. Tests first: `DedicatedServerProviderTests`, `DependenciesClientIlTests`, a manifest test. | implementer | none | Server with TAOM staged without `TAOM` and with only `TAOM.Dependencies` kept: no `TAOM.Dependencies could not be loaded correctly`, boot reaches Coop. Then a desktop client boot, UI unchanged. The first boot ran the bin-folder build: repeat it on the build constant. |
+| B3 | `TAOM.Client` skeleton and hand-off slot: `Client/TAOM.Client.csproj`, empty `ClientSubModule`, core `Composition/ClientComposition.cs`, second submodule in the manifest (core's tags unchanged until B9), build-script plan by architect. | architect plans, implementer executes | `Main/IoC.cs` (one call to the slot) | Client only: boots with both submodules. Server unchanged. |
+| B4a | Front-end types to `TAOM.Client` (14 types plus the callers listed in the core-methods paragraph as needed). Research first: how Gauntlet discovers widget types across a second assembly (`pwsh tools/taom-src.ps1 path WidgetFactory`). | implementer | none unless a caller is in `SubModule.cs` | Client: themed main menu, faction screen, custom battle faction list. |
+| B4b | Campaign-map types (6). Inversions become core adapter interfaces (ADR-007) with a no-op default, the client implementation registered through the slot. | implementer | none | Client: realm borders, camp overlay, momentum meter, fiefs nav button, settlement plates, Hall of Fire conversation. |
+| B4c | Mission, custom-battle engine and WinForms types (7). Keep the mission-behavior add order the comments around `Main/SubModule.cs:2084-2092` depend on. `ShaderPrecompilation` is a parked feature: sweep every file its last toggle touched. Sized by whether the dedicated server runs missions at all (problem row 11, UNVERIFIED). | implementer, architect reviews the Warg controller swap | `Main/SubModule.cs` | Client: a battle with a warg rider as player, battle action bar, host review, shader notice at cold start. |
+| B5 | UIExtenderEx moves to the client (13 types, 15 prefab classes, the three Patch109 postfixes, `UIExtender.Create/Register/Enable` and `RegisterUiExtensions`, the attribute-reading half of `CoopUiRegistrationPolicy`). Allowlist reaches zero: M1. | implementer | `Main/SubModule.cs` | Server (the milestone), current staging with only `TAOM` kept: no `Error while getting types` for `TAOM.dll`, no `TAOM could not be loaded correctly`, and the first post-`GetTypes` failure recorded as B6 input. Client: every mixin and prefab extension present. |
+| B6 | Lifecycle guards headless (problem rows 2 to 9), one hook per sub-batch: 6a `[ClientOnly]`, `PatchCategoryIndex.Build(assembly, headless)`, the 11 split categories, gate 4; 6b `TaomFeatureModule.ClientOnly` and a client flag on `PatchCategoryDecl` honored by `ModuleRunner` without faulting; 6c the `SubModule.cs` guards. | implementer | `Main/SubModule.cs` (6a call sites, 6c) | After each sub-batch: server reaches `OnGameInitializationFinished` for the staged save with no TAOM exception; record the next failure. |
+| B7 | Campaign-time UI paths (row 10 and the remaining 97 candidates), one feature group per slice: map visuals, party intel, map profiler targets. Gate 3 lands in the first slice. | implementer | none unless a caller is in `SubModule.cs` | Server runs the staged campaign for several in-game days with no TAOM exception; a guest connects and plays a day. |
+| B8 | Settings headless. Minimum: one boot line "MCM not loaded: TAOM settings at compiled defaults" plus the existing fingerprint log (it can go in `SettingsFingerprintLog`). Option 2 is its own design and issue. Needs the settings decision. | implementer | none | Boot line present. |
+| B9 | Manifest flip and the generic staging rule: TAOM first (core tags removed, server mirror excludes `TAOM.Client`), then the server repo's two scripts. | implementer, two repos | none | Stage with no `-KeepSubModules`; the submodule list matches the expected set; the B7 campaign run repeats clean. |
+| B10 | Docs and closeout: the "not supported either" bullet in [coop-interop](../features/coop-interop.md), a feature doc, its feature-map row, an orientation trap line, the lessons entry, `python tools/lint_docs.py --fail-on-drift`. | implementer | none | none |
+
+**Order and parallelism.** B0, then B1 and B2 in parallel (disjoint files), B3, then B4a and B4b in parallel.
+B4c and B5 both touch `SubModule.cs`: serial, in a worktree. Then the M1 boot, B6a to B6c serial, B7 slices in
+parallel up to four wide, B8, B9, B10.
+
+**Boot-test procedure.** The server repo owns port 4200, so these wait for a free machine and the maintainer's
+word: deploy the build under test with `./build.ps1` (which also refreshes `bin/Win64_Shipping_Server`
+through `MirrorWin64ShippingClientToServer`), restage, boot, then read the newest `rgl_log_*.txt` under
+`C:/ProgramData/Mount and Blade II Bannerlord/logs/` for `could not be loaded correctly`,
+`Error while getting types`, `Loader Exceptions`, the TAOM lines the batch names, and the last line before
+exit (exit 5 with no message is `MBDebug.AbortGame`). Record the first failure in the batch's issue checkbox;
+it seeds the next batch.
+
+## UNVERIFIED, with the step that settles each
+
+| Item | Settling step |
+|---|---|
+| Harmony patching `Assembly.GetTypes` in the server's CoreLib (option c) | An uncommitted spike. |
+| The JIT-time failure rule for a method naming an unresolvable assembly | The B5 boot. |
+| Whether Coop's view-layer copies make TAOM UI paths resolve after Coop loads | Log the `AppDomain` assemblies at `OnGameInitializationFinished` in the M1 boot. |
+| Gauntlet widget discovery across a second assembly | `taom-src` `WidgetFactory` before B4a. |
+| Effect of registering hotkey categories headless (row 5); whether the server runs missions (row 11) | The first clean boot. |
+| Where TAOM's `IModLogger` file and MCM's json2 file live on the server profile | Find them in the M1 boot. |
+| The value-field, generic-constraint and override shapes of a failing `GetTypes` on .NET 6 | The B2 review's experiment ran on .NET Framework 4.8 and CoreCLR 10. Shapes 3 and 4 occur only inside the 40 (see above), and gate 1 flags every shape. |
+| The server repo's test harness for its staging scripts | Read that repo before B9. |
+| Engine statements taken from the server-build decompile (load order, tag checks, `AbortGame`) | Re-decompile the server `Module` type when B2 or B5 is booted. |
+
+## Related
+
+- [coop-interop](../features/coop-interop.md): the co-op feature page; its "Dedicated server: no longer unsupported, but not supported either" bullet is rewritten in B10.
+- [coop-compat-gap-ledger](coop-compat-gap-ledger.md): the wider co-op gap list.
+- Issue #967 (Batch C of the co-op epic #964).
+- a proposed ADR-013 (draft awaiting the maintainer): the decision this plan asks for.
+- The server repo's `docs/bannerlord-1.5.x-port.md` (BannerlordCoop dedicated-server repo, outside this repo): its v1.5.5 server port notes.

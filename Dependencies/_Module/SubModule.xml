@@ -154,6 +154,8 @@
 			<Assemblies />
 			<Tags>
 				<Tag key="DumpXML" value="false" />
+				<Tag key="DedicatedServerType" value="none" />
+				<Tag key="IsNoRenderModeElement" value="false" />
 			</Tags>
 		</SubModule>
 
@@ -231,6 +233,8 @@
 				<Tag key="LoaderFilter" value="Bannerlord.MBOptionScreen.*.dll" />
 				<Tag key="LoaderSubModuleOrder" value="MCM.UI.MCMUIAdapterSubModule" />
 				<Tag key="LoaderSubModuleOrder" value="MCM.UI.MCMUISubModule" />
+				<Tag key="DedicatedServerType" value="none" />
+				<Tag key="IsNoRenderModeElement" value="false" />
 			</Tags>
 		</SubModule>
 	</SubModules>

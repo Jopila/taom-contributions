@@ -2096,3 +2096,28 @@ was wrong (a failed bind falls back to the engine controller); the docs agent co
 - **Prevent:** after parallel work, read each behaviour sentence in the docs against the final code and test names
   before the commit; a convergence pass does this.
 - **Source:** [rca-coop-mission-gating-2026-10-21.md](../rca-coop-mission-gating-2026-10-21.md) finding 8.
+
+### A gate widened to new shapes that is green at once has no failing test for them (headless server B0-B2, 2026-10-22)
+Gate 1 was widened from the base chain to four load-failure shapes and passed the same day with the same 40 types,
+because no TAOM type has shapes 2 to 4 outside the allowlist. A green run could not show the new detectors worked.
+- **Why missed:** the widening was judged by the gate staying green, and a detector that always returns null is green too.
+- **Prevent:** when a gate learns a new shape, add a fixture per shape and prove each fails (short-circuit the detector,
+  see the fixture fail, restore). Take the client-only test as a parameter so a loaded assembly can stand in
+  (`ServerLoadFixtureTests`).
+- **Source:** [taom-headless-server.md](../../research/taom-headless-server.md), the B0-B2 headless review, 2026-10-22.
+
+### A guard needs a test that fails when the guard is removed, not only tests of what it protects
+The two `if (server)` guards in `TAOM.Dependencies` had tests that the helpers hold the client references and that
+no other method names a client type. Deleting the `if` kept all of them green.
+- **Why missed:** the tests covered what the guard protects, not the guard.
+- **Prevent:** for each guard site, walk the IL fingerprint (`IlCallScanner.Fingerprint`): the server-check read, a
+  conditional branch right after it, then the helper call. Remove the `if` once and see it fail
+  (`StaticConstructor_UiHelperCall_IsGuardedByTheServerCheck`).
+- **Source:** [taom-headless-server.md](../../research/taom-headless-server.md), the B0-B2 headless review, 2026-10-22.
+
+### Boot evidence names the build it ran
+The B2 boot ran before the fix pass, which then replaced the server rule with the engine's build constant, so the
+boot evidence described a build that no longer existed.
+- **Why missed:** a boot is evidence of one build, and the fix pass changed the build after it.
+- **Prevent:** after a fix pass, re-stage and boot again, or write which build booted next to the evidence.
+- **Source:** [taom-headless-server.md](../../research/taom-headless-server.md), the B0-B2 headless review, 2026-10-22.

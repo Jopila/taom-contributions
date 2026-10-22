@@ -365,8 +365,8 @@ hideout, tournament) when `IDedicatedServerProvider.IsDedicatedServer` is true, 
 `[SpecRes]` line and stays quiet after. During a session the registered players earn on the server
 (see "Per-player earning under co-op" below).
 
-That gate keys off the **process**: `DedicatedServerProvider` reads whether this assembly loaded from
-`Win64_Shipping_Server`. It fails to "not a server", because these gates only ever suppress. It is not
+That gate keys off the **process**: `DedicatedServerProvider` (the test seam) reads the engine's build constant
+`GameNetwork.IsDedicatedServer`, true in the server build and false in the client build. It is not
 a claim that a client-hosted host plays: the co-op "host" is a loopback client of a separate server
 process, so no human plays on the authority process either way ([#967 design comment](https://github.com/haterade22/TAOM/issues/967#issuecomment-6328464305)).
 

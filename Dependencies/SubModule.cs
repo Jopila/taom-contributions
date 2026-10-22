@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using HarmonyLib;
 using TaleWorlds.Core;
-using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.MountAndBlade;
 using TAOM.Dependencies.Foundation;
 
@@ -22,10 +21,25 @@ public class SubModule : MBSubModuleBase
     {
         InstallAssemblyResolveHandler();
 
+        // GameNetwork.IsDedicatedServer is the engine's build constant (server DLL true, client DLL false).
+        // A throw here is a CriticalError that ends the dedicated server at exit 5, and
+        // TaleWorlds.Engine.GauntletUI does not resolve when this module loads (the co-op stage ships
+        // it later, in the Coop module's bin). The UI work sits in a NoInlining helper
+        // because the JIT fails a method that names an unresolvable type before its first line runs.
+        if (GameNetwork.IsDedicatedServer)
+            EarlyLog.Info("[TAOM.Dependencies] Static init: server host, skipping UI setup");
+        else
+            ConfigureGauntletPrefabs();
+    }
+
+    /// <summary>Client only. Holds every TaleWorlds.Engine.GauntletUI reference of the static constructor.</summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void ConfigureGauntletPrefabs()
+    {
         EarlyLog.Info("[TAOM.Dependencies] Static init: loading TaleWorlds.Engine.GauntletUI");
         Assembly.Load("TaleWorlds.Engine.GauntletUI");
 
-        UIConfig.DoNotUseGeneratedPrefabs = true;
+        TaleWorlds.Engine.GauntletUI.UIConfig.DoNotUseGeneratedPrefabs = true;
         EarlyLog.Info("[TAOM.Dependencies] Static init: DoNotUseGeneratedPrefabs = true");
     }
 
@@ -184,22 +198,25 @@ public class SubModule : MBSubModuleBase
         DiagLog.Log("Dependencies", "OnSubModuleLoad: checking for duplicate Harmony");
         CheckForDuplicateHarmony();
 
-        try
+        if (GameNetwork.IsDedicatedServer)
         {
-            // Codex review 2026-05-22 (P1): `_ = typeof(UIExtender)` only fetches the Type
-            // object — it does NOT execute the class's static constructor where
-            // UIConfigPatch.Patch / ViewModelPatch.Patch / etc. are applied.
-            // RunClassConstructor forces the static cctor to run (idempotent — JIT
-            // marks the type as initialized after the first call).
-            DiagLog.Log("Dependencies", "OnSubModuleLoad: forcing UIExtenderEx static cctor");
-            RuntimeHelpers.RunClassConstructor(typeof(Bannerlord.UIExtenderEx.UIExtender).TypeHandle);
-            DiagLog.Log("Dependencies", "OnSubModuleLoad: UIExtenderEx static cctor done");
-            EarlyLog.Info("[TAOM.Dependencies] UIExtenderEx static cctor executed (system patches applied)");
+            DiagLog.Log("Dependencies", "OnSubModuleLoad: server host, skipping UIExtenderEx");
+            EarlyLog.Info("[TAOM.Dependencies] OnSubModuleLoad: server host, skipping UI setup");
         }
-        catch (Exception ex)
+        else
         {
-            DiagLog.LogCaught("Dependencies", "OnSubModuleLoad/UIExtenderEx", ex);
-            EarlyLog.Error($"[TAOM.Dependencies] UIExtenderEx initialization failed: {ex.Message}");
+            try
+            {
+                DiagLog.Log("Dependencies", "OnSubModuleLoad: forcing UIExtenderEx static cctor");
+                ForceUiExtenderStaticInit();
+                DiagLog.Log("Dependencies", "OnSubModuleLoad: UIExtenderEx static cctor done");
+                EarlyLog.Info("[TAOM.Dependencies] UIExtenderEx static cctor executed (system patches applied)");
+            }
+            catch (Exception ex)
+            {
+                DiagLog.LogCaught("Dependencies", "OnSubModuleLoad/UIExtenderEx", ex);
+                EarlyLog.Error($"[TAOM.Dependencies] UIExtenderEx initialization failed: {ex.Message}");
+            }
         }
 
         // DR3 Phase 4 C-series: install ALL the defensive shields here. Originally
@@ -261,6 +278,16 @@ public class SubModule : MBSubModuleBase
         DiagLog.Log("Dependencies", "OnSubModuleLoad: complete");
         EarlyLog.Info("[TAOM.Dependencies] OnSubModuleLoad complete");
     }
+
+    /// <summary>
+    /// Client only. Holds the UIExtenderEx reference of OnSubModuleLoad. Codex review 2026-05-22 (P1):
+    /// `_ = typeof(UIExtender)` only fetches the Type object and does NOT execute the class's static
+    /// constructor, where UIConfigPatch.Patch / ViewModelPatch.Patch / etc. are applied;
+    /// RunClassConstructor forces it (idempotent).
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void ForceUiExtenderStaticInit() =>
+        RuntimeHelpers.RunClassConstructor(typeof(Bannerlord.UIExtenderEx.UIExtender).TypeHandle);
 
     /// <summary>
     /// Runs at the end of every game initialisation, NOT at the main menu: the engine's

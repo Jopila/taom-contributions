@@ -111,7 +111,7 @@ so it is a BUTR and BLSE launcher convention only. TAOM writes it as a version-p
 
 Two consequences of the second table matter for this module. The `DumpXML`, `LoaderFilter` and
 `LoaderSubModuleOrder` keys that TAOM's manifest carries (`Dependencies/_Module/SubModule.xml:156,
-231-233`) are not `SubModuleTags` members, so the engine drops them at `SubModuleInfo.cs:83`; they are
+233-235`) are not `SubModuleTags` members, so the engine drops them at `SubModuleInfo.cs:83`; they are
 read by UIExtenderEx and the BUTR module loader from the XML themselves, which this chapter did not
 trace. And the DLL existence probe is hardcoded to `Win64_Shipping_Client`, so a dedicated server
 needs the same files mirrored into `bin/Win64_Shipping_Server/`, which the
@@ -311,8 +311,8 @@ question. The `_Module/` destination is documented as intended at
 
 ## Worked example
 
-The Dependencies manifest is 237 lines. <!-- measured: wc -l Dependencies/_Module/SubModule.xml 2026-09-05 -->
-Its comment blocks at lines 11-20, 58-68, 86-140 and 160-162 contain characters the handbook lint
+The Dependencies manifest is 241 lines. <!-- measured: wc -l Dependencies/_Module/SubModule.xml 2026-10-22 -->
+Its comment blocks at lines 11-20, 58-68, 86-140 and 162-164 contain characters the handbook lint
 forbids, so they are not reproduced; the five slices below are every non-comment line of the file,
 copied verbatim, and the omitted comments are summarised after each slice.
 
@@ -426,7 +426,7 @@ how the BUTR meta-loader picks the highest `Implementation.1.4.N.dll` whose suff
 running engine, and the construction order the seven entries follow.
 
 <!-- example file="Dependencies/_Module/SubModule.xml" id="TAOM.Dependencies" -->
-Lines 142-158, the note that Harmony has no SubModule class, and the first entry:
+Lines 142-160, the note that Harmony has no SubModule class, and the first entry (B2 added the two server tags):
 
 ```xml
 		<!-- Note: 0Harmony.dll (Lib.Harmony NuGet) has NO SubModule class because
@@ -444,12 +444,14 @@ Lines 142-158, the note that Harmony has no SubModule class, and the first entry
 			<Assemblies />
 			<Tags>
 				<Tag key="DumpXML" value="false" />
+				<Tag key="DedicatedServerType" value="none" />
+				<Tag key="IsNoRenderModeElement" value="false" />
 			</Tags>
 		</SubModule>
 ```
 
 <!-- example file="Dependencies/_Module/SubModule.xml" id="TAOM.Dependencies" -->
-Lines 163-237, the remaining six entries (the comment at lines 160-162 says entry two is a thin stub
+Lines 165-239, the remaining six entries (the comment at lines 162-164 says entry two is a thin stub
 whose NativeSkinFixes init moved into TAOM.dll on 2026-05-26, before the feature was removed on 2026-10-05):
 
 ```xml
@@ -524,6 +526,8 @@ whose NativeSkinFixes init moved into TAOM.dll on 2026-05-26, before the feature
 				<Tag key="LoaderFilter" value="Bannerlord.MBOptionScreen.*.dll" />
 				<Tag key="LoaderSubModuleOrder" value="MCM.UI.MCMUIAdapterSubModule" />
 				<Tag key="LoaderSubModuleOrder" value="MCM.UI.MCMUISubModule" />
+				<Tag key="DedicatedServerType" value="none" />
+				<Tag key="IsNoRenderModeElement" value="false" />
 			</Tags>
 		</SubModule>
 	</SubModules>
@@ -534,13 +538,13 @@ The seven `<SubModule>` entries, in construction order: <!-- measured: rg -c '^\
 
 | # | `Name` | `DLLName` | `SubModuleClassType` | Lines | What it is |
 |---|---|---|---|---|---|
-| 1 | `UIExtenderEx` | `Bannerlord.UIExtenderEx.dll` (NuGet) | `Bannerlord.UIExtenderEx.SubModule` | 150-158 | boots UIExtenderEx; `DumpXML=false` is a UIExtenderEx debug switch the engine drops |
-| 2 | `TAOM.Dependencies` | `TAOM.Dependencies.dll` (built) | `TAOM.Dependencies.SubModule` | 163-169 | this module's own class: the redirect, the Harmony guards and the shields (`Dependencies/SubModule.cs`) |
-| 3 | `ButterLib` | `Bannerlord.ButterLib.dll` (vendored) | `Bannerlord.ButterLib.ButterLibSubModule` | 172-186 | ButterLib core; its 4 `<Assembly>` rows pre-load `Microsoft.Bcl.HashCode` and the three Serilog DLLs <!-- measured: sed -n '176,181p' Dependencies/_Module/SubModule.xml | rg -c '<Assembly ' 2026-09-05 --> |
-| 4 | `ButterLib Implementation Loader` | `Bannerlord.ButterLib.dll` (same file) | `Bannerlord.ButterLib.ImplementationLoaderSubModule` | 190-199 | picks the `Implementation.1.4.N.dll` for the running engine |
-| 5 | `MCMv5` | `MCMv5.dll` (NuGet) | `MCM.MCMSubModule` | 202-211 | the MCM API |
-| 6 | `MCMv5 Basic Implementation` | `MCMv5.dll` (same file) | `MCM.Internal.MCMImplementationSubModule` | 212-221 | MCM's default implementation |
-| 7 | `Bannerlord Module Loader` | `Bannerlord.ModuleLoader.Bannerlord.MBOptionScreen.dll` (vendored) | `Bannerlord.ModuleLoader.Bannerlord_MBOptionScreen` | 226-235 | the meta-loader that picks `Bannerlord.MBOptionScreen.v1.4.N.dll` via `LoaderFilter`, then boots the two classes named by `LoaderSubModuleOrder`; the comment says do not rename |
+| 1 | `UIExtenderEx` | `Bannerlord.UIExtenderEx.dll` (NuGet) | `Bannerlord.UIExtenderEx.SubModule` | 150-160 | boots UIExtenderEx; `DumpXML=false` is a UIExtenderEx debug switch the engine drops; the two server tags (B2) keep it off the dedicated server |
+| 2 | `TAOM.Dependencies` | `TAOM.Dependencies.dll` (built) | `TAOM.Dependencies.SubModule` | 165-171 | this module's own class: the redirect, the Harmony guards and the shields (`Dependencies/SubModule.cs`) |
+| 3 | `ButterLib` | `Bannerlord.ButterLib.dll` (vendored) | `Bannerlord.ButterLib.ButterLibSubModule` | 174-188 | ButterLib core; its 4 `<Assembly>` rows pre-load `Microsoft.Bcl.HashCode` and the three Serilog DLLs <!-- measured: sed -n '178,183p' Dependencies/_Module/SubModule.xml | rg -c '<Assembly ' 2026-10-22 --> |
+| 4 | `ButterLib Implementation Loader` | `Bannerlord.ButterLib.dll` (same file) | `Bannerlord.ButterLib.ImplementationLoaderSubModule` | 192-201 | picks the `Implementation.1.4.N.dll` for the running engine |
+| 5 | `MCMv5` | `MCMv5.dll` (NuGet) | `MCM.MCMSubModule` | 204-213 | the MCM API |
+| 6 | `MCMv5 Basic Implementation` | `MCMv5.dll` (same file) | `MCM.Internal.MCMImplementationSubModule` | 214-223 | MCM's default implementation |
+| 7 | `Bannerlord Module Loader` | `Bannerlord.ModuleLoader.Bannerlord.MBOptionScreen.dll` (vendored) | `Bannerlord.ModuleLoader.Bannerlord_MBOptionScreen` | 228-239 | the meta-loader that picks `Bannerlord.MBOptionScreen.v1.4.N.dll` via `LoaderFilter`, then boots the two classes named by `LoaderSubModuleOrder`; the comment says do not rename |
 
 Nothing asserts the seven class names against the upstream BUTR manifests; the tests check versions
 and file sets only. A rename upstream would be a silent no-op at load
@@ -852,18 +856,20 @@ Code: No code changes needed
 ## Numbers in this chapter
 
 All measured 2026-09-05 from the repo at its current commit and the live install on this machine,
-except the two MCM FileVersion values (`5.12.3.0`), which were re-read on 2026-10-03.
+except the two MCM FileVersion values (`5.12.3.0`), which were re-read on 2026-10-03, and the Dependencies
+manifest line count and the ButterLib `<Assembly>` range, re-measured on 2026-10-22 after the two server tags
+were added (a later manifest edit moves them again).
 
 | Number | What | Command |
 |---|---|---|
-| 237 | lines in `Dependencies/_Module/SubModule.xml` | `wc -l Dependencies/_Module/SubModule.xml` |
+| 241 | lines in `Dependencies/_Module/SubModule.xml` | `wc -l Dependencies/_Module/SubModule.xml` |
 | 126 | lines in `Dependencies/TAOM.Dependencies.csproj` | `wc -l Dependencies/TAOM.Dependencies.csproj` |
 | 31 | lines in `Dependencies/_Module/coop-modules.txt` | `wc -l Dependencies/_Module/coop-modules.txt` |
 | 124 | lines in `Dependencies/_Module/THIRD-PARTY-LICENSES.txt` | `wc -l Dependencies/_Module/THIRD-PARTY-LICENSES.txt` |
 | 7 | `<SubModule>` entries in the Dependencies manifest | `rg -c '^\s*<SubModule>' Dependencies/_Module/SubModule.xml` |
 | 35 | `<Module Id>` rows in its `<ModulesToLoadAfterThis>` | `sed -n '21,77p' Dependencies/_Module/SubModule.xml \| rg -c '<Module Id='` |
 | 5 | `<DependedModuleMetadata>` rows in the Dependencies manifest | `rg -c '<DependedModuleMetadata ' Dependencies/_Module/SubModule.xml` |
-| 4 | `<Assembly>` rows under the ButterLib entry | `sed -n '176,181p' Dependencies/_Module/SubModule.xml \| rg -c '<Assembly '` |
+| 4 | `<Assembly>` rows under the ButterLib entry | `sed -n '178,183p' Dependencies/_Module/SubModule.xml \| rg -c '<Assembly '` |
 | 5 | `<DependedModule>` rows in `Main/_Module/SubModule.xml` | `rg -c '<DependedModule ' Main/_Module/SubModule.xml` |
 | 4 (lines 11, 19, 21, 31) | mentions of `TAOM.Dependencies` in `Main/_Module/SubModule.xml` | `rg -n 'TAOM.Dependencies' Main/_Module/SubModule.xml` |
 | 3 | ids in the `[modules]` section of `coop-modules.txt` | `awk '/^\[modules\]/{f=1;next} /^\[/{f=0} f && !/^#/ && NF' Dependencies/_Module/coop-modules.txt` |

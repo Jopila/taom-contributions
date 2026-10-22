@@ -448,7 +448,7 @@ culprit diff for free.
 | [SiegeDefenseBehavior.cs](../../Main/Features/Siege/) | Host-only; expected not to fire on clients |
 | [RacePersistenceBehavior.cs](../../Main/Features/HeroRace/) | Race data rides the campaign save; capture refuses a degenerate one-race table, which is what a TAOM-less host looks like |
 | [PlayerPossessionBehavior.cs](../../Main/Features/PlayerPossession/PlayerPossessionBehavior.cs) | Re-applies the character-creation package after a join hand-off. Detection is a pure `Hero.MainHero.StringId` comparison and references no co-op assembly, so it was built to work under BT exactly as under BannerlordCoop |
-| [DedicatedServerProvider.cs](../../Main/Features/CoopInterop/DedicatedServerProvider.cs) | "Is there a real player in this process at all" — reads the binaries folder this assembly loaded from, deliberately not co-op role |
+| [DedicatedServerProvider.cs](../../Main/Features/CoopInterop/DedicatedServerProvider.cs) | "Is there a real player in this process at all": the test seam over the engine's build constant `GameNetwork.IsDedicatedServer`, deliberately not co-op role |
 
 ## Changelog
 

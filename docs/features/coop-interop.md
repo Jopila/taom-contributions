@@ -57,7 +57,7 @@ own `0Harmony`.
 |---|---|
 | `ICoopPresenceProvider` / `CoopPresenceProvider` | Test seam over static `CoopPresence`. **Process-constant**: "is a co-op module enabled". |
 | `ICoopSessionProvider` / `CoopSessionProvider` | **Session-varying**: "is a session live, and do I own the simulation". Reflection-bound, no compile-time reference to Coop. |
-| `IDedicatedServerProvider` / `DedicatedServerProvider` | **Process-constant**: "is there a real player in this process at all". Reads the binaries folder this assembly loaded from, NOT co-op role. |
+| `IDedicatedServerProvider` / `DedicatedServerProvider` | **Process-constant**: "is there a real player in this process at all". Reads the engine's build constant `GameNetwork.IsDedicatedServer` (the server DLL returns true, the client DLL false), NOT co-op role; `TAOM.Dependencies` reads the same constant directly and `DedicatedServerProvider` is the test seam for the services. |
 | `PlayerControl` / `IPlayerControlQuery` / `CoopPlayerControlQuery` | **Per entity**: "is this party, clan or hero a human player's?" (Player, NotPlayer, Unknown). Reflection-bound to Coop's `PlayerManager.TryGetControlledObjectInfo`, answers live, caches only the binding (#966). See [Who is a player](#who-is-a-player-the-fourth-question). |
 | `RecruitAttributionScope` and `Hooks/CoopRecruitAttributionPatch` (Patch113) | A thread-static party id set around Coop's server-side `HandleOnRecruitmentDone`, so the party-less `OnUnitRecruited` can be charged to the recruiting guest's party leader. Policy: `SpecialResources/RecruitChargePolicy`. Applied at `Main/SubModule.cs:1866`; notes in [the patch registry](../reference/harmony-patch-registry.md). |
 | `CoopSessionPolicy` | The pure authority decision, split out so it is testable without a game — same pattern as `PatchShieldPolicy` / `SaveShieldPolicy`. |
@@ -174,10 +174,11 @@ whole reason the type exists. The co-op "host" is a loopback client of a separat
 authority's own hero is nobody's whether or not it is a headless server. What the provider adds is the
 no-session case: a headless server with no session live has only the idle world-gen hero the campaign was
 created around. So the provider reads the
-binaries folder this assembly was loaded from — `Assembly.GetExecutingAssembly().Location`
-containing `Win64_Shipping_Server` — which is a fact about the process rather than a probe of
-another mod's state, and cannot change mid-session. An unreadable location reports "not a server",
-because every gate built on it only ever suppresses behaviour.
+engine's build constant `GameNetwork.IsDedicatedServer` (the server DLL's getter returns true, the
+client's false, and the engine reads it in `Module.Initialize` before it loads any submodule), which is a
+fact about the process rather than a probe of another mod's state, and cannot change mid-session. On the
+server a false answer is fatal rather than quiet (`TAOM.Dependencies` would run the client UI setup and end
+the process), which a build constant cannot give.
 
 **Which predicate to use.** Three, and picking the wrong one has already shipped bugs both ways:
 
@@ -627,7 +628,7 @@ to characterise. The existing try/catch around acceptance is containment, not co
   needs the `LOTRLOME_Armory` `action_sets.xml` fix: build 117131, which the dedicated-server engine
   ships, throws `KeyNotFoundException` in `MBObjectManager.MergeElements` at schema path
   `/action_sets/action` on data that 1.4.7.117484 tolerates. What is still true: both manifests tag
-  `DedicatedServerType=none` (`Main/_Module/SubModule.xml`, four entries in
+  `DedicatedServerType=none` (`Main/_Module/SubModule.xml`, six entries in
   `Dependencies/_Module/SubModule.xml`), the appliance's `engine/Modules` ships no TAOM, and its
   `default_new_game.sav` bootstrap is a vanilla world. An earlier revision of this bullet also said
   the appliance runs on `Microsoft.NETCore.App` against TAOM's .NET Framework 4.7.2; that is
