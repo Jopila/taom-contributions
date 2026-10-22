@@ -88,7 +88,7 @@ same sentence applies to every `SandBoxCore/`, `SandBox/`, `CustomBattle/`, `TAO
 | `SandBox` | The vanilla campaign: settlements, kingdoms, clans, heroes, workshops, concepts, music. **Folder `SandBox`, id `Sandbox`** (`SandBox/SubModule.xml:4`); every TAOM manifest writes `Sandbox` on purpose | Never. Game install, `Official`, depends on `Native` and `SandBoxCore` (`SandBox/SubModule.xml:10-11`) | `v1.5.5` | vanilla | 31 rows across 16 ids | 0 `<file>` rows | not counted |
 | `CustomBattle` | The custom-battle game type (`CustomGame`) and its scene list | Never. Game install, `Official`, depends on `Native` and `SandBoxCore` (`CustomBattle/SubModule.xml:10-11`) | `v1.5.5` | vanilla | 2 rows across 2 ids | none (no `project.mbproj`) | not counted |
 | `TAOM.Dependencies` | The library module: Harmony, UIExtenderEx, ButterLib, MCM and TAOM's shield layer, booted from one folder so a player enables only two TAOM entries | Repo, [`Dependencies/_Module/`](../../Dependencies/_Module/SubModule.xml); the build copies it | `v2.0.6` (`Dependencies/_Module/SubModule.xml:6`) | 7 `<SubModule>` entries | 0 | 0 (no `project.mbproj`) | 46 MB, 42 of it `bin/` <!-- measured: du -sm "<game>/Modules/TAOM.Dependencies"/* 2026-09-05 --> |
-| `TAOM` | The code and data module: `TAOM.dll`, every troop, lord, culture, kingdom, clan, roster, string, GUI and config | Repo, [`Main/_Module/`](../../Main/_Module/SubModule.xml); the build copies it | `v2.0.28` (`Main/_Module/SubModule.xml:6`) | 1 (`TAOM.dll`, `TAOM.SubModule`) | 100 `XmlNode` rows across 12 ids <!-- measured: grep -c "<XmlNode>" Main/_Module/SubModule.xml 2026-09-05 --> | 5 `<file>` rows (4 voice definitions, 1 module sound) | 6,147 MB, of which 5,141 MB is `RuntimeDataCache` <!-- measured: du -sm "<game>/Modules/TAOM" and du -sm "<game>/Modules/TAOM"/* 2026-09-05 --> |
+| `TAOM` | The code and data module: `TAOM.dll`, every troop, lord, culture, kingdom, clan, roster, string, GUI and config | Repo, [`Main/_Module/`](../../Main/_Module/SubModule.xml); the build copies it | `v2.0.28` (`Main/_Module/SubModule.xml:6`) | 2: `TAOM.dll` (`TAOM.SubModule`) and client-only `TAOM.Client.dll` (`TAOM.Client.ClientSubModule`) | 100 `XmlNode` rows across 12 ids <!-- measured: grep -c "<XmlNode>" Main/_Module/SubModule.xml 2026-09-05 --> | 5 `<file>` rows (4 voice definitions, 1 module sound) | 6,147 MB, of which 5,141 MB is `RuntimeDataCache` <!-- measured: du -sm "<game>/Modules/TAOM" and du -sm "<game>/Modules/TAOM"/* 2026-09-05 --> |
 | `LOTRLOME_Armory` | Every TAOM-authored item, crafting piece, monster, race skin, action set and creature asset. Vanilla items keep loading beside them, from `SandBoxCore/SubModule.xml:15`. Data plus art, no C# | Game install only, `LOTRLOME_Armory/SubModule.xml`; the reinstall warning above applies | `v2.0.23` (`LOTRLOME_Armory/SubModule.xml:4`) | 0 (`<SubModules/>`, line 20) | 33 rows: 21 `Items`, 8 `Monsters`, 1 each `CraftingPieces`, `CraftingTemplates`, `WeaponDescriptions`, `ModuleSounds` <!-- measured: grep -o 'XmlName id="[^"]*"' LOTRLOME_Armory/SubModule.xml | sort | uniq -c 2026-09-05 --> | 11 `<file>` rows | 35,595 MB: 18,415 `AssetSources`, 12,978 `RuntimeDataCache`, 4,148 `Assets`, 22 `ModuleData` <!-- measured: du -sm "<game>/Modules/LOTRLOME_Armory"/* 2026-09-05 --> |
 | `TAOM_Map` | The Middle-earth campaign map: `SceneObj/Main_map`, `settlements.xml`, the distance cache, prefabs, atmospheres | Game install only, `TAOM_Map/SubModule.xml`; same warning | `v2.0.23` (`TAOM_Map/SubModule.xml:4`) | 0 (`<SubModules/>`, line 21) | 8 rows across 8 ids, 7 of them pointing at Kit template stubs | 9 `<Module>` rows, all inert (see below) | 56,404 MB: 21,205 `RuntimeDataCache`, 15,286 `AssetSources`, 12,859 `AssetPackages`, 3,929 `Assets`, 2,219 `SceneEditData`, 735 `SceneObj`, 14 `ModuleData` <!-- measured: du -sm "<game>/Modules/TAOM_Map"/* 2026-09-05 --> |
 
@@ -352,7 +352,7 @@ block is marked as an excerpt rather than an example.
 3. `<DependedModule Id="Sandbox" />` uses the declared id, lower-case b; `SandBox` would match nothing
    in `GetDependentModulesOf`, which compares ids case-sensitively (`ModuleHelper.cs:256`).
 
-**`TAOM`, the C# entry point** (`Main/_Module/SubModule.xml`, lines 56-66):
+**`TAOM`, the two C# entry points** (`Main/_Module/SubModule.xml`, lines 70-93):
 
 <!-- excerpt file="Main/_Module/SubModule.xml" -->
 ```xml
@@ -366,11 +366,27 @@ block is marked as an excerpt rather than an example.
         <Tag key="IsNoRenderModeElement" value="false" />
       </Tags>
     </SubModule>
+    <!-- ADR-013: the client-only half of TAOM (Client/TAOM.Client.csproj). Tagged like vanilla's UI
+         submodules (Native's ViewSubModule), so a dedicated server never loads it. Its constructor hands
+         its registrations to core (TAOM.Composition.ClientComposition) before any OnSubModuleLoad runs.
+         After TAOM, so its hooks run after core's and TAOM.dll is already loaded when it is built. -->
+    <SubModule>
+      <Name value="TAOM.Client" />
+      <DLLName value="TAOM.Client.dll" />
+      <SubModuleClassType value="TAOM.Client.ClientSubModule" />
+      <Tags>
+        <Tag key="DedicatedServerType" value="none" />
+        <Tag key="IsNoRenderModeElement" value="false" />
+      </Tags>
+    </SubModule>
   </SubModules>
 ```
 
 1. `<DLLName value="TAOM.dll" />` is probed at `bin\Win64_Shipping_Client` and loaded from
-   `bin/<ConfigName>`; `Main/TAOM.csproj:166-195` mirrors the client folder into the others.
+   `bin/<ConfigName>`; `Main/TAOM.csproj:166-175` and `:189-201` mirror the client folder into the
+   editor and server folders. The server mirror excludes `TAOM.Client.*` and deletes stale copies.
+   `Client/TAOM.Client.csproj:86-100` deploys `TAOM.Client.dll` and its available `.pdb` to the three
+   client/editor folders only. Its entry point is `TAOM.Client.ClientSubModule`.
 2. `<Tag key="DedicatedServerType" value="none" />` is the vanilla `SandBox` pair; any other value
    forces the DLL to count as certified (`SubModuleInfo.cs:87-90`), so shipping server binaries does
    not by itself make TAOM server-capable ([bannerlord-engine-and-toolchain](../reference/bannerlord-engine-and-toolchain.md), section 1.2).

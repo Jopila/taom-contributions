@@ -622,8 +622,9 @@ to characterise. The existing try/catch around acceptance is containment, not co
   SpecialResources and `action_sets.xml` findings on this page. The build now does that copy: both
   `Main/TAOM.csproj` and `Dependencies/TAOM.Dependencies.csproj` carry a
   `MirrorWin64ShippingClientToServer` target modelled on the existing `…ToEditor` mirror. It
-  mirrors the **assembled** client folder rather than build output, deliberately — the vendored
-  natives and NuGet companions only exist there, after `PostBuildCopyToModules`. A verified
+  mirrors the **assembled** client folder because the vendored natives and NuGet companions only
+  exist there after `PostBuildCopyToModules`. TAOM's mirror excludes `TAOM.Client.*` and deletes
+  stale copies from its server bin (`Main/TAOM.csproj:193-198`). A verified
   deploying build mirrored 10 files for TAOM and 42 for TAOM.Dependencies. A server that boots also
   needs the `LOTRLOME_Armory` `action_sets.xml` fix: build 117131, which the dedicated-server engine
   ships, throws `KeyNotFoundException` in `MBObjectManager.MergeElements` at schema path

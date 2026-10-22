@@ -60,12 +60,15 @@ motivated the mirror below.
 
 Distinct from the engine builds above: each module carries its **own** `bin/<build>/` folders, and the
 engine loads the one matching the build it is running. TAOM populates them from the assembled client
-folder via mirror targets:
+folder via mirror targets. TAOM's server mirror excludes `TAOM.Client.*` and deletes stale copies
+(`Main/TAOM.csproj:193-198`); the client-only deploy target adds `TAOM.Client.dll` and its available
+`.pdb` to the three client/editor folders (`Client/TAOM.Client.csproj:86-100`). The counts below
+precede B3 and do not include that client deployment:
 
 | Target | csproj | Mirrors into | Deployed file count |
 |---|---|---|---|
 | `MirrorWin64ShippingClientToEditor` | `Main/TAOM.csproj` | `Modules/TAOM/bin/Win64_Shipping_wEditor/` | 12 |
-| `MirrorWin64ShippingClientToServer` | `Main/TAOM.csproj` | `Modules/TAOM/bin/Win64_Shipping_Server/` | 10 (same set as Client) |
+| `MirrorWin64ShippingClientToServer` | `Main/TAOM.csproj` | `Modules/TAOM/bin/Win64_Shipping_Server/` | 10 before B3; now excludes `TAOM.Client.*` |
 | `MirrorWin64ShippingClientToServer` | `Dependencies/TAOM.Dependencies.csproj` | `Modules/TAOM.Dependencies/bin/Win64_Shipping_Server/` | 42 (same set as Client) |
 
 Both server targets run `AfterTargets="PostBuildCopyToModules"`, gated on `$(DisableModuleCopy) != 'true'`

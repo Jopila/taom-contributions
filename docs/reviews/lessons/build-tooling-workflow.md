@@ -649,8 +649,9 @@ do exist; here the destination is absent and the engine runs past it.
 - **Prevent:** enumerate the engine BUILDS your artifact must be present for, not just the
   configurations you build. `MirrorWin64ShippingClientToServer` (both csprojs, `AfterTargets="PostBuildCopyToModules"`,
   same `$(ModuleId) != ''` condition family as the `-p:ModuleId=` entry above) mirrors the **assembled**
-  client folder — `$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Client\*.*`, not build output,
-  because the vendored natives and NuGet companions only exist there after `PostBuildCopyToModules`.
+  client folder, `$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Client\*.*`, because the vendored
+  natives and NuGet companions only exist there after `PostBuildCopyToModules`. Since B3, TAOM's
+  mirror excludes `TAOM.Client.*` and deletes stale copies from its server bin (`Main/TAOM.csproj:193-198`).
   It is modelled on the pre-existing `MirrorWin64ShippingClientToEditor` target; the same absent-target
   question applies to any future build folder. A real deploying build mirrored 10 files for TAOM
   (incl. `TAOM.dll`, `DryIoc.dll`, `MinHook.x64.dll`, `TAOM.NativeSkinFixes.dll`) and 42 for
