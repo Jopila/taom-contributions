@@ -103,9 +103,8 @@ public static class IoC
         BannerColorPersistenceIoC.RegisterBannerColorPersistenceFeature(container);
         TroopProgressionIoC.RegisterTroopProgressionFeature(container);
         Features.Arena.ArenaIoC.RegisterArenaFeature(container);
-        // Player Switcher and the faction UI (#704) register before FactionMap, which resolves its
-        // culture-stage hook while registering: that hook takes the faction UI's screen launcher, and
-        // the launcher takes Player Switcher's policy provider.
+        // FactionMap's culture-stage hooks are resolved in FactionMapIoC.InitializePatchStatics below,
+        // after the client composition, because their graph holds adapters TAOM.Client replaces (ADR-013).
         Features.PlayerSwitcher.PlayerSwitcherIoC.RegisterPlayerSwitcherFeature(container);
         Features.FactionUI.FactionUIIoC.RegisterFactionUIFeature(container);
         FactionMapIoC.RegisterFactionMapFeature(container);
@@ -231,6 +230,7 @@ public static class IoC
         // Resolve inside a feature IoC materializes IEnumerable<T> contributor injections, so any
         // contributor registered later is silently invisible (round-A CRITICAL on the Refuge
         // camp-block). One block, at the end, for every patch that captures a service statically.
+        FactionMapIoC.InitializePatchStatics(container);
         FieldCampIoC.InitializePatchStatics(container);
         Features.Refuge.RefugeIoC.InitializePatchStatics(container);
         Features.UncapturableHeroes.UncapturableHeroesIoC.InitializePatchStatics(container);

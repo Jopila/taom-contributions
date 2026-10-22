@@ -77,16 +77,16 @@ public class CultureStageViewLifecycleTests
     public void OnCreated_CallsCleanupBeforeResetSession_175_F6()
     {
         // Source-content assertion — verify the ordering invariant: Cleanup() appears before
-        // PolygonWidget.ResetSession() in OnCreated(). The audit's F6 finding was that backward
+        // _widgets.ResetSession() in OnCreated(). The audit's F6 finding was that backward
         // navigation could leave _factionVM briefly alive during construct-new → finalize-old
         // sequence; calling Cleanup() first eliminates that window.
         var path = Path.Combine(FindRepoRoot(), "Main", "Features", "FactionMap", "Hooks", "CultureStageViewCreatedHook.cs");
         var src = File.ReadAllText(path);
         int cleanupIdx = src.IndexOf("Cleanup();", System.StringComparison.Ordinal);
-        int resetIdx = src.IndexOf("PolygonWidget.ResetSession();", System.StringComparison.Ordinal);
+        int resetIdx = src.IndexOf("_widgets.ResetSession();", System.StringComparison.Ordinal);
         Assert.IsTrue(cleanupIdx > 0, "OnCreated must call Cleanup()");
-        Assert.IsTrue(resetIdx > 0, "OnCreated must call PolygonWidget.ResetSession()");
+        Assert.IsTrue(resetIdx > 0, "OnCreated must call _widgets.ResetSession()");
         Assert.IsTrue(cleanupIdx < resetIdx,
-            "Cleanup() must appear BEFORE PolygonWidget.ResetSession() in OnCreated (#175 F6)");
+            "Cleanup() must appear BEFORE _widgets.ResetSession() in OnCreated (#175 F6)");
     }
 }

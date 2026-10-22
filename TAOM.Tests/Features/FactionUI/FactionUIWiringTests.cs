@@ -29,7 +29,7 @@ namespace TAOM.Tests.Features.FactionUI;
 [TestClass]
 public class FactionUIWiringTests
 {
-    private static IContainer NewContainer()
+    internal static IContainer NewContainer()
     {
         var container = new Container();
         FactionUIIoC.RegisterFactionUIFeature(container);
@@ -64,26 +64,11 @@ public class FactionUIWiringTests
                  {
                      typeof(IFrontEndResourceAdapter), typeof(IMenuMusicAdapter), typeof(IFrontEndStateAdapter),
                      typeof(ITextLocalizerAdapter), typeof(IPresetAppearanceAdapter), typeof(IFactionRosterAdapter),
+                     typeof(IFrontEndSpriteTableAdapter),
                  })
         {
             Assert.IsTrue(container.IsRegistered(adapter),
                 adapter.Name + " is not registered: SubModule's FactionUI init would throw and keep the vanilla menus");
-        }
-    }
-
-    [TestMethod]
-    public void IoC_RegistersPlayerSwitcherAndTheFactionUIBeforeFactionMap()
-    {
-        // FactionMapIoC resolves its culture-stage hook while registering; the hook takes the faction
-        // screen's launcher, which takes Player Switcher's policy provider. Registered after it, launch throws.
-        var code = RepoPaths.ReadSource("Main/IoC.cs", stripComments: true);
-        var factionMap = code.IndexOf("FactionMapIoC.RegisterFactionMapFeature(container);", StringComparison.Ordinal);
-        Assert.AreNotEqual(-1, factionMap, "FactionMap's registration call was not found in IoC.cs");
-
-        foreach (var earlier in new[] { "RegisterPlayerSwitcherFeature(container);", "FactionUIIoC.RegisterFactionUIFeature(container);" })
-        {
-            var at = code.IndexOf(earlier, StringComparison.Ordinal);
-            Assert.IsTrue(at >= 0 && at < factionMap, earlier + " must come before FactionMap's registration in IoC.cs");
         }
     }
 
@@ -131,12 +116,11 @@ public class FactionUIWiringTests
     }
 
     [TestMethod]
-    public void TheLauncher_ResolvesWhileFactionMapRegisters_BeforeTheUncapturableRegistryExists()
+    public void TheLauncher_ResolvesWithoutTheUncapturableRegistry_BuildsNoHeroPickerGraph()
     {
-        // FactionMapIoC resolves its culture-stage hook while registering, which builds the launcher and
-        // its pick service. IoC.cs registers UncapturableHeroes (whose registry Player Switcher's hero
-        // adapter takes) much later, so anything the launcher builds eagerly may not reach it: DryIoc would
-        // throw at startup and take every feature registered after FactionMap with it.
+        // The launcher and its pick service build without UncapturableHeroes registered (its registry is
+        // what Player Switcher's hero adapter takes), so the pick service must take the hero picker
+        // lazily: an eager one would drag that graph into every launcher construction.
         var container = new Container();
         PlayerSwitcherIoC.RegisterPlayerSwitcherFeature(container);
         FactionUIIoC.RegisterFactionUIFeature(container);

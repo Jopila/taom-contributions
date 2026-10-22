@@ -136,10 +136,10 @@ One entry per region id (matching faction id). Fields:
 | `Main/Features/FactionMap/FactionDisplayHelper.cs` | UI display utilities |
 | `Main/Features/FactionMap/FactionMapStaticBridge.cs` | Static accessor to `IFactionRegistryService` for widgets that cannot use DI |
 | `Main/Features/FactionMap/ViewModels/FactionSelectionVM.cs` | Main view model for the custom movie |
-| `Main/Features/FactionMap/Widgets/PolygonWidget.cs` | Draws faction region polygon outlines |
-| `Main/Features/FactionMap/Widgets/FactionImageWidget.cs` | Faction art display |
-| `Main/Features/FactionMap/Widgets/BannerWidget.cs` | Banner at capital position |
-| `Main/Features/FactionMap/Widgets/MapContainerWidget.cs` | Root container widget |
+| `Client/Features/FactionMap/Widgets/PolygonWidget.cs` | Draws faction region polygon outlines |
+| `Client/Features/FactionMap/Widgets/FactionImageWidget.cs` | Faction art display |
+| `Client/Features/FactionMap/Widgets/BannerWidget.cs` | Banner at capital position |
+| `Client/Features/FactionMap/Widgets/MapContainerWidget.cs` | Root container widget |
 | `Main/Features/FactionMap/Models/FactionData.cs` | POCO for faction lore data (`SpecialUnits[]` field, see schema below) |
 | `Main/Features/FactionMap/Models/RegionData.cs` | POCO for region bbox and capital position |
 | `Main/Features/FactionMap/ViewModels/FactionSpecialUnitItemVM.cs` | Per-unit item VM bound to the prefab's special-units `ListPanel` (`UnitName` / `UnitDescription` props) |

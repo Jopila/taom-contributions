@@ -27,14 +27,16 @@ public sealed class FrontEndResourceAdapter : IFrontEndResourceAdapter
         AccessTools.PropertySetter(typeof(SpriteCategory), nameof(SpriteCategory.IsLoaded));
 
     private readonly IModLogger _logger;
+    private readonly IFrontEndSpriteTableAdapter _spriteTable;
 
     // A font's glyph sheet, kept for the process like the font itself, so registering it again after the
     // engine rebuilds its tables reuses the texture instead of loading a second copy.
     private readonly Dictionary<string, NativeTexture> _fontSheets = new(StringComparer.Ordinal);
 
-    public FrontEndResourceAdapter(IModLogger logger)
+    public FrontEndResourceAdapter(IModLogger logger, IFrontEndSpriteTableAdapter spriteTable)
     {
         _logger = logger;
+        _spriteTable = spriteTable;
     }
 
     public bool IsUiReady => UIResourceManager.SpriteData != null;
@@ -83,18 +85,8 @@ public sealed class FrontEndResourceAdapter : IFrontEndResourceAdapter
         return new FrontEndTexture(texture, texture.MemorySize);
     }
 
-    public void RegisterSprite(string spriteName, FrontEndTexture texture, NinePatch? ninePatch)
-    {
-        var sprites = UIResourceManager.SpriteData?.Sprites;
-        if (sprites == null || texture.Native is not NativeTexture engineTexture)
-            return;
-
-        var gauntletTexture = new TwoDimensionTexture(new EngineTexture(engineTexture));
-        var nine = ninePatch is { } n
-            ? new SpriteNinePatchParameters(n.Left, n.Right, n.Top, n.Bottom)
-            : SpriteNinePatchParameters.Empty;
-        sprites[spriteName] = new FrontEndRuntimeSprite(spriteName, gauntletTexture, nine);
-    }
+    public void RegisterSprite(string spriteName, FrontEndTexture texture, NinePatch? ninePatch) =>
+        _spriteTable.RegisterSprite(spriteName, texture, ninePatch);
 
     public void UnregisterSprite(string spriteName) => UIResourceManager.SpriteData?.Sprites?.Remove(spriteName);
 

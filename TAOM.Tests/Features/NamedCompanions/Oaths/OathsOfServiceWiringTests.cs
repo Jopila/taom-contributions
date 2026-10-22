@@ -74,7 +74,7 @@ public class OathsOfServiceWiringTests
     [TestMethod]
     public void ProductionSource_NoOtherFileConstructsTheBehaviors()
     {
-        var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(path => !IsFile(path, "OathsOfServiceModule.cs"))
             .Where(path => RepoPaths.MentionsOutsideComments(path, "new OathsOfServiceCampaignBehavior(", wholeWord: false)
                 || RepoPaths.MentionsOutsideComments(path, "new OathsOfServiceDialogBehavior(", wholeWord: false))

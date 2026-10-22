@@ -61,9 +61,9 @@ GUI/
 The name is actively misleading: `SpriteData/` is where the generator writes compiled sheets, but
 the `FactionMap/` subfolder under it holds **loose runtime-loaded PNGs that never touch the bake**.
 
-`Main/Features/FactionMap/Widgets/FactionImageWidget.cs` builds the path itself —
+`Client/Features/FactionMap/Widgets/FactionImageWidget.cs` builds the path itself:
 `Path.Combine(modPath, "GUI", "SpriteData", "FactionMap", $"{_imageId}.png")` — and hands it to
-`EngineTexture.LoadTextureFromPath(fileName, folder)`. Verified 2026-08-08: **zero** references to
+`TaleWorlds.Engine.Texture.LoadTextureFromPath` (aliased `EngineTexture` in the widget). Verified 2026-08-08: **zero** references to
 FactionMap in `TAOMSpriteData.xml`, and it is **not** declared in `SpriteParts/Config.xml`, so it is
 not a sprite category at all. `PolygonWidget` and `BannerWidget` load the same way (five
 `LoadTextureFromPath` sites in total). Yotthani's measured cost of this call and the

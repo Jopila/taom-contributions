@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.PlayerSwitcher;
 
@@ -50,7 +51,8 @@ public class PlayerSwitcherLocalizationTests
     private static string ConsumerText(string root)
     {
         var files = new List<string>();
-        files.AddRange(Directory.GetFiles(Path.Combine(root, "Main"), "*.cs", SearchOption.AllDirectories));
+        foreach (var codeRoot in RepoPaths.CodeRoots)
+            files.AddRange(Directory.GetFiles(Path.Combine(root, codeRoot), "*.cs", SearchOption.AllDirectories));
 
         var prefab = Path.Combine(root, @"Main\_Module\GUI\Prefabs\FacGen\PreBuildCharacterSelection.xml");
         if (File.Exists(prefab))

@@ -123,7 +123,7 @@ A Custom Battle registers cultures as plain `BasicCultureObject` (`CustomGame.On
 | `Main/Features/CustomBattles/Hooks/CustomBattleHelper_Troop_Patch.cs` | Harmony postfix: replaces vanilla's formation default with the culture's eligible TAOM troop; with no vanilla pick, any loaded candidate (Start spawns it for an empty slot) |
 | `Main/Features/CustomBattles/Hooks/BannerlordMissions_CustomBattle_Patch.cs` | Harmony postfix — injects team fix |
 | `Main/Features/CustomBattles/Hooks/BannerlordMissions_Siege_Patch.cs` | Harmony postfix — injects team fix for siege |
-| `Main/Features/CustomBattles/TaomFactionSelectionVM.cs` | Custom faction-selection VM with prev/next navigation |
+| `Client/Features/CustomBattles/TaomFactionSelectionVM.cs` | Custom faction-selection VM with prev/next navigation |
 | `Main/Features/CustomBattles/Hooks/CustomBattleSideVM_Constructor_Patch.cs` | Harmony postfix — swaps FactionSelectionGroup; fires initial OnCultureSelection callback |
 | `Main/Features/CustomBattles/Hooks/CustomBattleSideVM_OnCultureSelection_Patch.cs` | Harmony postfix — filters commander dropdown on faction click (cap=3) |
 | `Main/Features/CustomBattles/Hooks/CustomBattleSideVM_RefreshValues_Patch.cs` | Harmony postfix — defensive re-filter for refresh events |

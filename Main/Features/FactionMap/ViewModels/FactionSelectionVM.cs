@@ -2,7 +2,7 @@ using System;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
-using TAOM.Features.FactionMap.Widgets;
+using TAOM.Adapters;
 
 namespace TAOM.Features.FactionMap.ViewModels;
 
@@ -13,6 +13,7 @@ public class FactionSelectionVM : ViewModel
     private readonly IFactionSelectionService _selectionService;
     private readonly IFactionHoverService _hoverService;
     private readonly ICultureResolverService _cultureResolver;
+    private readonly IFactionMapWidgetAdapter _widgets;
     private string _selectedRegionName = "";
     private string _title = "Choose your Realm";
     private string _selectedFactionName = "";
@@ -40,13 +41,15 @@ public class FactionSelectionVM : ViewModel
         IFactionSelectionService selectionService,
         IFactionHoverService hoverService,
         ICultureResolverService cultureResolver,
-        ILandmarkService landmarkService)
+        ILandmarkService landmarkService,
+        IFactionMapWidgetAdapter widgets)
     {
         _onCultureSelected = onCultureSelected;
         _onPreviousStage = onPreviousStage;
         _selectionService = selectionService;
         _hoverService = hoverService;
         _cultureResolver = cultureResolver;
+        _widgets = widgets;
 
         FactionTraits = new MBBindingList<FactionTraitItemVM>();
         FactionBonuses = new MBBindingList<FactionBonusItemVM>();
@@ -99,13 +102,13 @@ public class FactionSelectionVM : ViewModel
     public bool SelectedHasCulture { get => _selectedHasCulture; set { if (value != _selectedHasCulture) { _selectedHasCulture = value; OnPropertyChanged(nameof(CanConfirm)); } } }
     public void Tick()
     {
-        string current = PolygonWidget.HoveredFactionName ?? "";
+        string current = _widgets.HoveredFactionName ?? "";
         var change = _hoverService.UpdateHover(current);
         if (change != null)
             FactionDisplayHelper.ShowHoverTooltip(change);
     }
 
-    public void ExecuteSelectRegion() => SelectRegion(PolygonWidget.LastClickedRegionName);
+    public void ExecuteSelectRegion() => SelectRegion(_widgets.LastClickedRegionName);
 
     /// <summary>Selects <paramref name="regionName"/> and confirms its culture, as a click on the map
     /// and then on Confirm would (#704: Kysaro's faction screen confirms through this).</summary>

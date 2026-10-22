@@ -217,7 +217,7 @@ public class ReflectionSiteBindingTests
     ///
     /// Convention: label the line that spells the member (its string literal, its nameof, or the name
     /// filter inside the lookup), not the first line of a multi-line call and not a declaration. A label
-    /// with no line number only has to name a file that exists under Main/.
+    /// with no line number only has to name a file that exists under Main/, Client/ or Dependencies/.
     ///
     /// Limit: RepoPaths.StripComments is not string-aware, so a "//" or "/*" inside a string literal blanks
     /// the code after it. If this test reports a line that does spell its member, look for such a string on
@@ -241,7 +241,7 @@ public class ReflectionSiteBindingTests
                 var files = SourceFilesNamed(fileName);
                 if (files.Count == 0)
                 {
-                    failures.Add($"{fileName}: no such file under Main/ or Dependencies/ (member {member})");
+                    failures.Add($"{fileName}: no such file under Main/, Client/ or Dependencies/ (member {member})");
                     continue;
                 }
                 if (!label.Groups["lines"].Success) continue;
@@ -320,10 +320,10 @@ public class ReflectionSiteBindingTests
 
     private static List<string> SourceFilesNamed(string fileName)
     {
-        // Main/ and Dependencies/: TAOM.Dependencies binds engine members by name too (its rows carry the
-        // Dependencies file names).
+        // Main/, Client/ and Dependencies/: TAOM.Dependencies binds engine members by name too (its rows carry the
+        // Dependencies file names), and the front-end types moved to TAOM.Client (ADR-013) keep their rows.
         var sep = Path.DirectorySeparatorChar;
-        return new[] { "Main", "Dependencies" }
+        return new[] { "Main", "Client", "Dependencies" }
             .SelectMany(root => Directory.GetFiles(RepoPaths.RepoPath(root), fileName, SearchOption.AllDirectories))
             .Where(f => !f.Contains(sep + "obj" + sep) && !f.Contains(sep + "bin" + sep))
             .ToList();

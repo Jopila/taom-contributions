@@ -45,7 +45,7 @@ public class WarChronicleEventsWiringTests
     [TestMethod]
     public void ProductionSource_OnlyTheModuleConstructsTheEventsBehavior()
     {
-        var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(p => !p.EndsWith("WarChronicleModule.cs", StringComparison.OrdinalIgnoreCase)
                         && !p.EndsWith("WarChronicleEventsBehavior.cs", StringComparison.OrdinalIgnoreCase))
             .Where(p => RepoPaths.MentionsOutsideComments(p, "WarChronicleEventsBehavior", wholeWord: true))

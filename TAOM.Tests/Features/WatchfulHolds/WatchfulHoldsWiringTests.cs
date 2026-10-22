@@ -77,7 +77,7 @@ public class WatchfulHoldsWiringTests
     [TestMethod]
     public void ProductionSource_NoOtherFileConstructsTheBehavior()
     {
-        var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(path => !IsFile(path, "WatchfulHoldsModule.cs") && !IsFile(path, "WatchfulHoldsBehavior.cs"))
             .Where(path => RepoPaths.MentionsOutsideComments(path, "WatchfulHoldsBehavior", wholeWord: true))
             .ToList();

@@ -4270,3 +4270,17 @@ that assembly fails `GetTypes` without its core and aborts the game.
 - **Prevent:** trigger a bundle check on any member of the bundle being present, then require the rest. Test each member
   alone, and a bin holding neither. Run the check with the keying member absent and the others present before trusting it.
 - **Source:** [rca-taom-client-b3-2026-10-22.md](../rca-taom-client-b3-2026-10-22.md) finding 3.
+
+### An adapter a client replaces must not be resolved before ClientComposition.Apply (TAOM.Client B4a, 2026-10-22)
+`FactionMapIoC.RegisterFactionMapFeature` resolved the three culture-stage hooks while it registered, long before
+`IoC.Configure` runs `ClientComposition.Apply`. DryIoc keeps the instances it has built, so a new seam injected into that
+graph (the map-widget adapter, the sprite table under the front-end resource adapter) would have kept core's null
+adapter on a client, with the themed front end blank and no error.
+- **Why missed:** the limit is documented on `IClientComposition` and pinned by
+  `ClientCompositionTests.Apply_ReplacesAServiceResolvedBeforeApply_EarlierGraphKeepsTheCoreInstance`, but nothing tied it to
+  a feature whose resolve-while-registering predates the client submodule.
+- **Prevent:** before inverting a call behind an adapter, grep the owning `*IoC.cs` for `container.Resolve` and move it to
+  an `InitializePatchStatics` called from `IoC.Configure` after `Apply`. Pin the order with a source test
+  (`FactionMapIoCTests.IoC_InitializesTheCultureStageHooksAfterTheClientComposition`) and the outcome with a container
+  test (`ClientFrontEndCompositionTests`).
+- **Source:** `Main/Features/FactionMap/FactionMapIoC.cs`, `Main/IoC.cs`, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).

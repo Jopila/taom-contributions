@@ -1,4 +1,6 @@
+using System;
 using DryIoc;
+using TaleWorlds.MountAndBlade;
 using TAOM.Core.Diagnostics;
 using TAOM.Core.Logging;
 
@@ -15,6 +17,14 @@ public static class ClientComposition
 {
     /// <summary>Set by the client submodule's constructor; null on a dedicated server.</summary>
     public static IClientComposition? Current { get; set; }
+
+    /// <summary>
+    /// Whether this process is a dedicated server: the engine's own build constant, as
+    /// DedicatedServerProvider reads it. A seam so a test can stand on either side.
+    /// </summary>
+    internal static Func<bool> IsDedicatedServer = ReadDedicatedServer;
+
+    internal static bool ReadDedicatedServer() => GameNetwork.IsDedicatedServer;
 
     /// <summary>
     /// Runs the slot's registrations with IfAlreadyRegistered.Replace as the default. The registrator is a
@@ -34,16 +44,56 @@ public static class ClientComposition
             composition.RegisterServices(replacing);
         }
 
-        Log(container, composition == null
-            ? "[Client] no client composition: core registrations only (a dedicated server, or the client submodule did not load)"
-            : $"[Client] composition applied: {composition.GetType().FullName} "
-                + $"(client={BuildStampReport.ReadInformationalVersion(composition.GetType().Assembly)}, "
-                + $"core={BuildStampReport.ReadInformationalVersion(typeof(ClientComposition).Assembly)})");
+        if (composition == null)
+        {
+            Log(container, l => l.LogInfo(
+                "[Client] no client composition: core registrations only (a dedicated server, or the client submodule did not load)"));
+            if (!SafeIsDedicatedServer())
+            {
+                Log(container, l => l.LogError(
+                    "[Client] TAOM.Client did not load on a rendering client: front-end UI will not work "
+                    + "(faction map, front-end art, Custom Battle factions). Check that the TAOM.Client submodule is installed."));
+            }
+
+            return;
+        }
+
+        string clientVer = BuildStampReport.ReadInformationalVersion(composition.GetType().Assembly);
+        string coreVer = BuildStampReport.ReadInformationalVersion(typeof(ClientComposition).Assembly);
+        Log(container, l => l.LogInfo(
+            $"[Client] composition applied: {composition.GetType().FullName} (client={clientVer}, core={coreVer})"));
+        string? mismatch = DescribeStampMismatch(clientVer, coreVer);
+        if (mismatch != null) Log(container, l => l.LogWarning(mismatch));
     }
 
-    private static void Log(IContainer container, string line)
+    /// <summary>A warning line when the client and core build stamps are not from one build; null when paired or unreadable.</summary>
+    internal static string? DescribeStampMismatch(string clientVersion, string coreVersion)
     {
-        try { container.Resolve<IModLogger>(IfUnresolved.ReturnDefault)?.LogInfo(line); }
+        if (!BuildStampReport.TryParseStamp(clientVersion, out var client)
+            || !BuildStampReport.TryParseStamp(coreVersion, out var core)) return null;
+
+        var verdict = BuildStampReport.Classify(client, core);
+        return verdict == BuildPairVerdict.Paired
+            ? null
+            : "[Client] TAOM.Client and TAOM core were not built together (client="
+                + clientVersion + ", core=" + coreVersion + ")"
+                + BuildStampReport.DescribeVerdict(verdict, client, core);
+    }
+
+    private static bool SafeIsDedicatedServer()
+    {
+        // Unreadable means unknown, and unknown must not raise the rendering-client error.
+        try { return IsDedicatedServer(); }
+        catch { return true; }
+    }
+
+    private static void Log(IContainer container, Action<IModLogger> write)
+    {
+        try
+        {
+            var logger = container.Resolve<IModLogger>(IfUnresolved.ReturnDefault);
+            if (logger != null) write(logger);
+        }
         catch { /* the log line must never stop the mod loading */ }
     }
 }

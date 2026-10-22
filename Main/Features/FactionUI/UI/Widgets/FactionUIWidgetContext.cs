@@ -9,7 +9,7 @@ namespace TAOM.Features.FactionUI.UI.Widgets;
 /// </summary>
 public static class FactionUIWidgetContext
 {
-    internal static NarrativeThemeIconMap? ThemeIcons { get; private set; }
+    public static NarrativeThemeIconMap? ThemeIcons { get; private set; }
 
     public static void Initialize(NarrativeThemeIconMap themeIcons) => ThemeIcons = themeIcons;
 }

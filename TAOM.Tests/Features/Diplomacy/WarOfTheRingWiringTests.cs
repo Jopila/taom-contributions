@@ -42,7 +42,7 @@ public class WarOfTheRingWiringTests
     [TestMethod]
     public void ProductionSource_NoOtherFileConstructsOrRegistersTheBehavior()
     {
-        var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(path => !IsFile(path, "SubModule.cs") && !IsFile(path, "WarOfTheRingBehavior.cs"))
             .Where(path => RepoPaths.MentionsOutsideComments(path, "WarOfTheRingBehavior", wholeWord: true))
             .ToList();

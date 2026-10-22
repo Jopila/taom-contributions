@@ -66,7 +66,7 @@ public class FromTheAshesWiringTests
     [TestMethod]
     public void ProductionSource_NoOtherFileConstructsTheBehavior()
     {
-        var offenders = System.IO.Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", System.IO.SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(path => !path.EndsWith("FromTheAshesModule.cs") && !path.EndsWith("FromTheAshesBehavior.cs"))
             .Where(path => RepoPaths.MentionsOutsideComments(path, "FromTheAshesBehavior", wholeWord: true))
             .ToList();

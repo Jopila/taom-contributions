@@ -18,6 +18,7 @@ public static class FactionUIIoC
     public static void RegisterFactionUIFeature(IContainer container)
     {
         container.Register<IFrontEndResourceAdapter, FrontEndResourceAdapter>(Reuse.Singleton);
+        container.Register<IFrontEndSpriteTableAdapter, NullFrontEndSpriteTableAdapter>(Reuse.Singleton);
         container.Register<IMenuMusicAdapter, MenuMusicAdapter>(Reuse.Singleton);
         container.Register<IFrontEndStateAdapter, FrontEndStateAdapter>(Reuse.Singleton);
         container.Register<ITextLocalizerAdapter, TextLocalizerAdapter>(Reuse.Singleton);
@@ -48,7 +49,7 @@ public static class FactionUIIoC
         container.Register<FaceGenCameraService>(Reuse.Singleton);
         container.Register<NarrativeThemeIconMap>(Reuse.Singleton);
         container.Register<FactionPresetService>(Reuse.Singleton);
-        // Takes over a living hero through Player Switcher's own registrations, which IoC.cs makes first.
+        // Takes over a living hero through Player Switcher's own registrations (the hero picker is taken lazily).
         container.Register<FactionPickService>(Reuse.Singleton);
         container.Register<FactionScreenConfigProvider>(Reuse.Singleton);
         container.Register<FactionScreenCatalog>(Reuse.Singleton);

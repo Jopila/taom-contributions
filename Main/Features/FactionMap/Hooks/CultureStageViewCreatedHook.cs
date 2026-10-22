@@ -4,9 +4,9 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.GauntletUI.Data;
+using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.FactionMap.ViewModels;
-using TAOM.Features.FactionMap.Widgets;
 
 namespace TAOM.Features.FactionMap.Hooks;
 
@@ -21,6 +21,7 @@ public class CultureStageViewCreatedHook : IOnCultureStageViewCreated
     private readonly ICultureSettingService _cultureSettingService;
     private readonly ICultureStageProgressionService _progressionService;
     private readonly ICultureStageMovieOverride _movieOverride;
+    private readonly IFactionMapWidgetAdapter _widgets;
     private readonly IModLogger _logger;
 
     private static FactionSelectionVM? _factionVM;
@@ -36,9 +37,11 @@ public class CultureStageViewCreatedHook : IOnCultureStageViewCreated
         ICultureSettingService cultureSettingService,
         ICultureStageProgressionService progressionService,
         ICultureStageMovieOverride movieOverride,
+        IFactionMapWidgetAdapter widgets,
         IModLogger logger)
     {
         _movieOverride = movieOverride;
+        _widgets = widgets;
         _configProvider = configProvider;
         _registry = registry;
         _selectionService = selectionService;
@@ -63,7 +66,7 @@ public class CultureStageViewCreatedHook : IOnCultureStageViewCreated
             // with the NEW widget state (just cleared by ResetSession) producing stale
             // HoveredFactionName="" for 0-1 frames.
             Cleanup();
-            PolygonWidget.ResetSession();
+            _widgets.ResetSession();
 
             var regions = _configProvider.LoadRegions();
             var factions = _configProvider.LoadFactions();
@@ -115,7 +118,8 @@ public class CultureStageViewCreatedHook : IOnCultureStageViewCreated
                 _selectionService,
                 _hoverService,
                 _cultureResolver,
-                _landmarkService);
+                _landmarkService,
+                _widgets);
 
             if (_originalDataSource != null)
             {

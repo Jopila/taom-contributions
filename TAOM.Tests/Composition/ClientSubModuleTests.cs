@@ -34,7 +34,12 @@ public class ClientSubModuleTests
 
         ClientComposition.Apply(container);
 
-        var expected = new System.Type[0];
+        var expected = new[]
+        {
+            typeof(TAOM.Adapters.IFactionMapWidgetAdapter),
+            typeof(TAOM.Adapters.IFrontEndSpriteTableAdapter),
+            typeof(TAOM.Features.CustomBattles.ICustomBattleFactionSelectionFactory),
+        };
         var actual = container.GetServiceRegistrations().Select(r => r.ServiceType).ToArray();
         CollectionAssert.AreEquivalent(expected, actual);
     }

@@ -154,11 +154,13 @@ public class PrefabCloneWidgetReferenceTests
 
     private static Dictionary<string, Type> WidgetTypesByName()
     {
+        // TAOM.Client loads lazily: touch it so the front-end widgets that moved there (ADR-013) are in the AppDomain.
+        _ = typeof(TAOM.Client.ClientSubModule).Assembly;
         var types = new Dictionary<string, Type>(StringComparer.Ordinal);
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             var simple = assembly.GetName().Name ?? string.Empty;
-            if (simple.IndexOf("GauntletUI", StringComparison.Ordinal) < 0 && simple != "TAOM") continue;
+            if (simple.IndexOf("GauntletUI", StringComparison.Ordinal) < 0 && simple != "TAOM" && simple != "TAOM.Client") continue;
             Type[] loaded;
             try { loaded = assembly.GetTypes(); }
             catch (ReflectionTypeLoadException ex) { loaded = ex.Types.Where(t => t != null).ToArray(); }

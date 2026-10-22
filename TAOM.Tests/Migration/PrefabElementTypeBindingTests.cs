@@ -90,11 +90,13 @@ public class PrefabElementTypeBindingTests
 
     private static HashSet<string> WidgetTypeNames()
     {
+        // TAOM.Client loads lazily: touch it so the front-end widgets that moved there (ADR-013) are in the AppDomain.
+        _ = typeof(TAOM.Client.ClientSubModule).Assembly;
         var names = new HashSet<string>(StringComparer.Ordinal);
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             var simple = assembly.GetName().Name ?? string.Empty;
-            if (simple.IndexOf("GauntletUI", StringComparison.Ordinal) < 0 && simple != "TAOM") continue;
+            if (simple.IndexOf("GauntletUI", StringComparison.Ordinal) < 0 && simple != "TAOM" && simple != "TAOM.Client") continue;
             Type[] types;
             try { types = assembly.GetTypes(); }
             catch (ReflectionTypeLoadException ex) { types = ex.Types.Where(t => t != null).ToArray(); }

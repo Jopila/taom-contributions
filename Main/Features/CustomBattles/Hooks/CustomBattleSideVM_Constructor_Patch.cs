@@ -16,13 +16,14 @@ public static class CustomBattleSideVM_Constructor_Patch
 {
     private static IModLogger _logger;
     private static MethodInfo _onCultureSelectionMethod;
-
-    public static void Initialize(IModLogger logger)
+    private static ICustomBattleFactionSelectionFactory? _factionSelection;
+    public static void Initialize(IModLogger logger, ICustomBattleFactionSelectionFactory factionSelection)
     {
         _logger = logger;
         _onCultureSelectionMethod = AccessTools.Method(typeof(CustomBattleSideVM), "OnCultureSelection");
         if (_onCultureSelectionMethod == null)
             _logger?.LogWarning("[CustomBattles] Could not resolve CustomBattleSideVM.OnCultureSelection MethodInfo at Initialize");
+        _factionSelection = factionSelection;
     }
 
     [HarmonyPostfix]
@@ -36,7 +37,11 @@ public static class CustomBattleSideVM_Constructor_Patch
             var callback = (Action<BasicCultureObject>)Delegate.CreateDelegate(
                 typeof(Action<BasicCultureObject>), __instance, _onCultureSelectionMethod);
 
-            __instance.FactionSelectionGroup = new TaomFactionSelectionVM(callback);
+            var selection = _factionSelection?.Create(callback);
+            if (selection == null)
+                return;
+
+            __instance.FactionSelectionGroup = selection;
             _logger?.LogInfo($"[CustomBattles] Injected TaomFactionSelectionVM with {__instance.FactionSelectionGroup.Factions.Count} factions");
 
             var initialFaction = __instance.FactionSelectionGroup.SelectedItem?.Faction;

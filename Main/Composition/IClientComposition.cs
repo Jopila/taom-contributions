@@ -14,7 +14,7 @@ public interface IClientComposition
     /// every core default registration of that service type (a client adapter over core's null adapter,
     /// and all of a collection's core contributors). To add to a contributor collection instead, pass
     /// IfAlreadyRegistered.AppendNotKeyed explicitly. A replacement cannot reach a service core already
-    /// resolved during its own registration (BannerInjectionIoC, FactionMapIoC, HeroRaceIoC): that graph
+    /// resolved during its own registration (BannerInjectionIoC, HeroRaceIoC): that graph
     /// keeps the core instance.
     /// </summary>
     void RegisterServices(IRegistrator registrator);

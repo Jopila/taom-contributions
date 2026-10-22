@@ -35,9 +35,9 @@ public sealed class FactionPickService
         { FaceGenerator, BannerEditor, ClanNaming, Review, Options };
 
     private readonly FactionPresetService _presets;
-    // Lazy on purpose: FactionMapIoC builds the faction screen's launcher, and so this service, while it
-    // registers, and the hero picker's adapter takes UncapturableHeroes' registry, which IoC.cs registers
-    // later. Built eagerly, that throws at startup (FactionUIWiringTests pins the resolvable graph).
+    // Lazy on purpose: only a takeover needs the hero picker, and its adapter takes UncapturableHeroes'
+    // registry. Building the launcher (and so this service) should not build that graph for a plain pick
+    // (FactionUIWiringTests pins the resolvable graph).
     private readonly Lazy<IHeroPickerService> _heroes;
     private readonly IPlayerSwitchPolicyProvider _policy;
     private readonly IPlayerSwitchSessionWriter _session;

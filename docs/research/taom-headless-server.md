@@ -1,7 +1,7 @@
 # Running TAOM's code on the co-op dedicated server
 
 **Status:** research and plan, 2026-10-21. B1 (the load gates) and B2 (TAOM.Dependencies headless)
-are built (`5fcf8390c`); B3 (the TAOM.Client skeleton) is committed as `03d9db8dc`; its follow-up (stale client deletes, gate and tripwire fixes) is in progress. The decision this plan asks for is
+are built (`5fcf8390c`); B3 (the TAOM.Client skeleton) is committed as `03d9db8dc`, with its follow-up in `e0a6970dd`. B4a (the 14 front-end types to TAOM.Client, `KnownClientTypesInCore` from 40 to 26) has landed; its client boot is owed. The decision this plan asks for is
 [ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md), accepted 2026-10-22: option (b), a TAOM
 server settings file, missions proven absent before B4c is sized, and the GetTypes shim kept.
 **Target:** Bannerlord v1.5.5 server build (`Win64_Shipping_Server`) on the appliance's bundled .NET 6.0.36 host (the staged `dotnet/shared/Microsoft.NETCore.App`).
@@ -69,8 +69,8 @@ client-only references were instance or static fields (17 field-only, 7 static-o
 in run 46908, and 190 types with client-only references in method bodies or signatures loaded fine. Shapes 3 and 4 do occur
 inside the 40, next to a client-only base: `TaomSettlementPlateWidget.SetReference<T> where T : Widget`
 (`Main/Features/SettlementNameplateRelation/TaomSettlementPlateWidget.cs:105`) and the `OnRender(TwoDimensionContext, ...)`
-overrides of `PolygonWidget` (`Main/Features/FactionMap/Widgets/PolygonWidget.cs:383`) and `BannerWidget`
-(`Main/Features/FactionMap/Widgets/BannerWidget.cs:208`). No type outside the 40 has any of the extra shapes:
+overrides of `PolygonWidget` (`Client/Features/FactionMap/Widgets/PolygonWidget.cs:383`) and `BannerWidget`
+(`Client/Features/FactionMap/Widgets/BannerWidget.cs:208`). No type outside the 40 has any of the extra shapes:
 gate 1, widened to cover them on 2026-10-22, still reports exactly the same 40 types.
 
 A type deriving from `Widget`, `MapView` or a view model cannot be rewritten to load headless. It can only
@@ -126,25 +126,25 @@ that: gate 2 covers only the TaleWorlds and SandBox references, so MCMv5 staging
 | `HallOfFire.TaomMapConversationDataProvider` | `Main/Features/HallOfFire/TaomMapConversationDataProvider.cs:15` | interface IMapConversationDataProvider (SandBox.View) |
 | `FieldCamp.UI.FieldCampMapView` | `Main/Features/FieldCamp/UI/FieldCampMapView.cs:21` | base MapView (SandBox.View) |
 | `FiefManagement.UI.TaomFiefsNavigationElement` | `Main/Features/FiefManagement/UI/TaomFiefsNavigationElement.cs:21` | base MapNavigationElementBase (SandBox.View) |
-| `FactionUI.UI.Widgets.FilteredPropertyRow` | `Main/Features/FactionUI/UI/Widgets/FilteredPropertyRow.cs:18` | base Widget (TaleWorlds.GauntletUI) |
-| `FactionUI.UI.Widgets.FrontEndRichTextWidget` | `Main/Features/FactionUI/UI/Widgets/FrontEndRichTextWidget.cs:9` | base RichTextWidget (TaleWorlds.GauntletUI) |
-| `FactionUI.UI.Widgets.FrontEndTextWidget` | `Main/Features/FactionUI/UI/Widgets/FrontEndTextWidget.cs:14` | base TextWidget (TaleWorlds.GauntletUI) |
-| `FactionUI.UI.Widgets.NarrativeRandomButton` | `Main/Features/FactionUI/UI/Widgets/NarrativeRandomButton.cs:16` | base ButtonWidget (TaleWorlds.GauntletUI) |
-| `FactionUI.UI.Widgets.ScrollShortcutButton` | `Main/Features/FactionUI/UI/Widgets/ScrollShortcutButton.cs:10` | base ButtonWidget (TaleWorlds.GauntletUI) |
-| `FactionUI.UI.Widgets.StageJumpButton` | `Main/Features/FactionUI/UI/Widgets/StageJumpButton.cs:12` | base ButtonWidget (TaleWorlds.GauntletUI) |
-| `FactionUI.UI.Widgets.ThemeIconWidget` | `Main/Features/FactionUI/UI/Widgets/ThemeIconWidget.cs:10` | base Widget (TaleWorlds.GauntletUI) |
-| `FactionMap.Widgets.BannerWidget` | `Main/Features/FactionMap/Widgets/BannerWidget.cs:14` | base ImageWidget (TaleWorlds.GauntletUI) |
-| `FactionMap.Widgets.FactionImageWidget` | `Main/Features/FactionMap/Widgets/FactionImageWidget.cs:13` | base ImageWidget (TaleWorlds.GauntletUI) |
-| `FactionMap.Widgets.MapContainerWidget` | `Main/Features/FactionMap/Widgets/MapContainerWidget.cs:7` | base Widget (TaleWorlds.GauntletUI) |
-| `FactionMap.Widgets.PolygonWidget` | `Main/Features/FactionMap/Widgets/PolygonWidget.cs:23` | base ImageWidget (TaleWorlds.GauntletUI) |
-| `FactionMap.Widgets.RuntimeSprite` | `Main/Features/FactionMap/Widgets/RuntimeSprite.cs:6` | base Sprite (TaleWorlds.TwoDimension) |
-| `CustomBattles.TaomFactionSelectionVM` | `Main/Features/CustomBattles/TaomFactionSelectionVM.cs:7` | base CustomBattleFactionSelectionVM (TaleWorlds.MountAndBlade.CustomBattle) |
+| `FactionUI.UI.Widgets.FilteredPropertyRow` | `Client/Features/FactionUI/UI/Widgets/FilteredPropertyRow.cs:18` | base Widget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.FrontEndRichTextWidget` | `Client/Features/FactionUI/UI/Widgets/FrontEndRichTextWidget.cs:9` | base RichTextWidget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.FrontEndTextWidget` | `Client/Features/FactionUI/UI/Widgets/FrontEndTextWidget.cs:14` | base TextWidget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.NarrativeRandomButton` | `Client/Features/FactionUI/UI/Widgets/NarrativeRandomButton.cs:16` | base ButtonWidget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.ScrollShortcutButton` | `Client/Features/FactionUI/UI/Widgets/ScrollShortcutButton.cs:10` | base ButtonWidget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.StageJumpButton` | `Client/Features/FactionUI/UI/Widgets/StageJumpButton.cs:12` | base ButtonWidget (TaleWorlds.GauntletUI) |
+| `FactionUI.UI.Widgets.ThemeIconWidget` | `Client/Features/FactionUI/UI/Widgets/ThemeIconWidget.cs:10` | base Widget (TaleWorlds.GauntletUI) |
+| `FactionMap.Widgets.BannerWidget` | `Client/Features/FactionMap/Widgets/BannerWidget.cs:14` | base ImageWidget (TaleWorlds.GauntletUI) |
+| `FactionMap.Widgets.FactionImageWidget` | `Client/Features/FactionMap/Widgets/FactionImageWidget.cs:13` | base ImageWidget (TaleWorlds.GauntletUI) |
+| `FactionMap.Widgets.MapContainerWidget` | `Client/Features/FactionMap/Widgets/MapContainerWidget.cs:7` | base Widget (TaleWorlds.GauntletUI) |
+| `FactionMap.Widgets.PolygonWidget` | `Client/Features/FactionMap/Widgets/PolygonWidget.cs:23` | base ImageWidget (TaleWorlds.GauntletUI) |
+| `FactionMap.Widgets.RuntimeSprite` | `Client/Features/FactionMap/Widgets/RuntimeSprite.cs:6` | base Sprite (TaleWorlds.TwoDimension) |
+| `CustomBattles.TaomFactionSelectionVM` | `Client/Features/CustomBattles/TaomFactionSelectionVM.cs:7` | base CustomBattleFactionSelectionVM (TaleWorlds.MountAndBlade.CustomBattle) |
 | `CompanionTactics.BattleActionBar.Hooks.BattleActionBarMissionView` | `Main/Features/CompanionTactics/BattleActionBar/Hooks/BattleActionBarMissionView.cs:17` | base MissionView (TaleWorlds.MountAndBlade.View) |
 | `CareerSystem.UI.CharacterDeveloperCareerMixin` | `Main/Features/CareerSystem/UI/CharacterDeveloperCareerMixin.cs:12` | base arg CharacterDeveloperVM (TaleWorlds.CampaignSystem.ViewModelCollection) |
 | `CareerSystem.UI.MissionAgentStatusCareerMixin` | `Main/Features/CareerSystem/UI/MissionAgentStatusCareerMixin.cs:18` | base arg MissionAgentStatusVM (TaleWorlds.MountAndBlade.ViewModelCollection) |
 | `CareerSystem.UI.TaomCareerDiamondWidget` | `Main/Features/CareerSystem/UI/TaomCareerDiamondWidget.cs:28` | base Widget (TaleWorlds.GauntletUI) |
 | `AdvancedCombat.AutonomousMovementPlayerController` | `Main/Features/AdvancedCombat/AutonomousMovementPlayerController.cs:16` | base MissionView (TaleWorlds.MountAndBlade.View) |
-| `TAOM.Adapters.FrontEndRuntimeSprite` (not under `Features`) | `Main/Adapters/FrontEndRuntimeSprite.cs:11` | base Sprite (TaleWorlds.TwoDimension) |
+| `TAOM.Adapters.FrontEndRuntimeSprite` (not under `Features`) | `Client/Adapters/FrontEndRuntimeSprite.cs:11` | base Sprite (TaleWorlds.TwoDimension) |
 
 By group: front end 14 (7 `FactionUI.UI.Widgets`, 5 `FactionMap.Widgets`, `FrontEndRuntimeSprite`,
 `TaomFactionSelectionVM`); campaign map 6 (three MapViews, `TaomFiefsNavigationElement`,
@@ -153,16 +153,14 @@ By group: front end 14 (7 `FactionUI.UI.Widgets`, 5 `FactionMap.Widgets`, `Front
 (`AutonomousMovementPlayerController`, `BattleActionBarMissionView`, `HostReviewVisualOrderProvider`,
 `TaomShaderGameManager`, `ShaderCompileNoticeWindow`, `WindowHandleOwner`, `NoticeContext`).
 
-**Core methods that name one of the 40**, each moving with it or being inverted behind an adapter (26
-methods): `SubModule.AddTaomMissionBehaviors`; `MomentumUIService.AddMapMeter` and `RemoveMapMeter`;
+**Core methods that name one of the 40**, each moving with it or being inverted behind an adapter (20
+methods, after B4a settled the six front-end ones): `SubModule.AddTaomMissionBehaviors`; `MomentumUIService.AddMapMeter` and `RemoveMapMeter`;
 `WargMissionBehavior.Initialize` and `SwitchMainAgentController`; `WargRiderHandManager.ClearCustomLookDirection`
 and `UpdateWargRiderHandle`; `FinishRageMode.Reset`; `PrepareOnFirstCall.Execute`; the three
 `Patch109_SPInventoryVM*` postfixes; `ShaderPrecompileRunner.StartCurrentItem`; `ShaderCompileNotice.Run`;
 `NameplateRelationIoC.InitializeWidgetStatics`; `RealmBordersCampaignBehavior.EnsureMapView`;
 `HostReviewModule.OnPhase`; `HallOfFireInstaller.Install`; `FieldCampCampaignBehavior.EnsureOverlay`;
-`RuntimeSpriteFactory.FromEngineTexture`; `FactionSelectionVM.Tick` and `ExecuteSelectRegion`;
-`CultureStageViewCreatedHook.OnCreated`; `CustomBattleSideVM_Constructor_Patch.Postfix`;
-`FrontEndResourceAdapter.RegisterSprite`; the `Patch36_MapNavigationElements` postfix lambda.
+the `Patch36_MapNavigationElements` postfix lambda.
 
 ## TAOM.Dependencies
 
@@ -380,7 +378,7 @@ hunks and a builder agent recommends them.
 | B4b | Campaign-map types (6). Inversions become core adapter interfaces (ADR-007) with a no-op default, the client implementation registered through the slot. | implementer | none | Client: realm borders, camp overlay, momentum meter, fiefs nav button, settlement plates, Hall of Fire conversation. |
 | B4c | Mission, custom-battle engine and WinForms types (7). Keep the mission-behavior add order the comments around `Main/SubModule.cs:2084-2092` depend on. `ShaderPrecompilation` is a parked feature: sweep every file its last toggle touched. Sized by whether the dedicated server runs missions at all (problem row 11, UNVERIFIED). | implementer, architect reviews the Warg controller swap | `Main/SubModule.cs` | Client: a battle with a warg rider as player, battle action bar, host review, shader notice at cold start. |
 | B5 | UIExtenderEx moves to the client (13 types, 15 prefab classes, the three Patch109 postfixes, `UIExtender.Create/Register/Enable` and `RegisterUiExtensions`, the attribute-reading half of `CoopUiRegistrationPolicy`). Allowlist reaches zero: M1. | implementer | `Main/SubModule.cs` | Server (the milestone), current staging with only `TAOM` kept: no `Error while getting types` for `TAOM.dll`, no `TAOM could not be loaded correctly`, and the first post-`GetTypes` failure recorded as B6 input. Client: every mixin and prefab extension present. |
-| B6 | Lifecycle guards headless (problem rows 2 to 9), one hook per sub-batch: 6a `[ClientOnly]`, `PatchCategoryIndex.Build(assembly, headless)`, the 11 split categories, gate 4; 6b `TaomFeatureModule.ClientOnly` and a client flag on `PatchCategoryDecl` honored by `ModuleRunner` without faulting; 6c the `SubModule.cs` guards. | implementer | `Main/SubModule.cs` (6a call sites, 6c) | After each sub-batch: server reaches `OnGameInitializationFinished` for the staged save with no TAOM exception; record the next failure. |
+| B6 | Lifecycle guards headless (problem rows 2 to 9), one hook per sub-batch: 6a `[ClientOnly]`, `PatchCategoryIndex.Build(assembly, headless)`, the 11 split categories, gate 4; 6b `TaomFeatureModule.ClientOnly` and a client flag on `PatchCategoryDecl` honored by `ModuleRunner` without faulting; 6c the `SubModule.cs` guards, including `CustomBattlesIoC.InitializeHooks`, which throws headless (`SelectorVM<CharacterItemVM>`, `typeof(CustomBattleSideVM)`) and is called at `Main/SubModule.cs:565` with no try. | implementer | `Main/SubModule.cs` (6a call sites, 6c) | After each sub-batch: server reaches `OnGameInitializationFinished` for the staged save with no TAOM exception; record the next failure. |
 | B7 | Campaign-time UI paths (row 10 and the remaining 97 candidates), one feature group per slice: map visuals, party intel, map profiler targets. Gate 3 lands in the first slice. | implementer | none unless a caller is in `SubModule.cs` | Server runs the staged campaign for several in-game days with no TAOM exception; a guest connects and plays a day. |
 | B8 | Settings headless. Minimum: one boot line "MCM not loaded: TAOM settings at compiled defaults" plus the existing fingerprint log (it can go in `SettingsFingerprintLog`). Option 2 is its own design and issue. Needs the settings decision. | implementer | none | Boot line present. |
 | B9 | Manifest flip and the generic staging rule: TAOM first (core tags removed; the second submodule and the server-mirror exclusion of `TAOM.Client` landed in B3), then the server repo's two scripts. | implementer, two repos | none | Stage with no `-KeepSubModules`; the submodule list matches the expected set; the B7 campaign run repeats clean. |
@@ -405,7 +403,7 @@ it seeds the next batch.
 | Harmony patching `Assembly.GetTypes` in the server's CoreLib (option c) | An uncommitted spike. |
 | The JIT-time failure rule for a method naming an unresolvable assembly | The B5 boot. |
 | Whether Coop's view-layer copies make TAOM UI paths resolve after Coop loads | Log the `AppDomain` assemblies at `OnGameInitializationFinished` in the M1 boot. |
-| Gauntlet widget discovery across a second assembly | `taom-src` `WidgetFactory` before B4a. |
+| Gauntlet widget discovery across a second assembly | Read from the decompile (`WidgetInfo.CollectWidgetTypes` scans every loaded assembly that references TaleWorlds.GauntletUI; `WidgetFactory` keys by short type name), and `ClientWidgetDiscoveryTests` pins the preconditions. The runtime proof is the client boot's visual checks: on a client Debug.FailedAssert writes nothing (v1.5.5 MBDebugManager.Assert is empty), so the rgl log cannot show a widget Gauntlet failed to find. |
 | Effect of registering hotkey categories headless (row 5); whether the server runs missions (row 11) | The first clean boot. |
 | Where TAOM's `IModLogger` file and MCM's json2 file live on the server profile | Find them in the M1 boot. |
 | The value-field, generic-constraint and override shapes of a failing `GetTypes` on .NET 6 | The B2 review's experiment ran on .NET Framework 4.8 and CoreCLR 10. Shapes 3 and 4 occur only inside the 40 (see above), and gate 1 flags every shape. |

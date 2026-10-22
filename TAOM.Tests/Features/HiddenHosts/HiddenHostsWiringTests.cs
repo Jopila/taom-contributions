@@ -178,7 +178,7 @@ public class HiddenHostsWiringTests
     [TestMethod]
     public void ProductionSource_NoOtherFileConstructsOrRegistersTheBehavior()
     {
-        var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(path => !IsFile(path, "HiddenHostsModule.cs") && !IsFile(path, "HiddenHostsBehavior.cs")
                            && !IsFile(path, "HiddenHostsMemoryBehavior.cs") && !IsFile(path, "HiddenHostsPlainSightBehavior.cs"))
             .Where(path => RepoPaths.MentionsOutsideComments(path, "HiddenHostsBehavior", wholeWord: true)

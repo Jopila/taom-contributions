@@ -244,8 +244,8 @@ character id in these files against the shipped data.
 - Player Switcher: `IPlayerSwitchPolicyProvider.SetPickerHidden` while the faction screen is shown; for
   a takeover, `IHeroPickerService.FindTakeover`, its session writer, `IPlayerIdentityAdapter`'s refusals,
   Patch78's career fast path and the 1100 handover. `FactionPickService` takes the hero picker lazily:
-  FactionMap builds the launcher while it registers, before `IoC.cs` registers the registry the hero
-  picker's adapter needs.
+  only a takeover needs it, and its adapter takes the registry UncapturableHeroes registers, so building
+  the launcher for a plain pick does not build that graph.
 - CharacterCreation: the picks are applied after its finalize (1050); its race filter (Patch9) skips a
   face generator showing a pick.
 

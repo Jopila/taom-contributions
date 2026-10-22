@@ -14,6 +14,7 @@ public static class CustomBattlesIoC
         container.Register<IOnGetCustomBattleCommanders, CustomBattleCommandersHook>(Reuse.Transient);
         container.Register<IOnGetCustomBattleFactions, CustomBattleFactionsHook>(Reuse.Transient);
         container.Register<IOnGetDefaultTroopOfFormation, CustomBattleTroopHook>(Reuse.Transient);
+        container.Register<ICustomBattleFactionSelectionFactory, NullCustomBattleFactionSelectionFactory>(Reuse.Singleton);
     }
 
     public static void InitializeHooks(
@@ -21,13 +22,14 @@ public static class CustomBattlesIoC
         IOnGetCustomBattleFactions factionsHook,
         IOnGetDefaultTroopOfFormation troopHook,
         ISideCommanderFilter sideCommanderFilter,
+        ICustomBattleFactionSelectionFactory factionSelection,
         Core.Logging.IModLogger logger)
     {
         CommanderSelectorRebuilder.Initialize(logger);
         CustomBattleData_Characters_Patch.Initialize(commandersHook, logger);
         CustomBattleData_Factions_Patch.Initialize(factionsHook, logger);
         CustomBattleHelper_Troop_Patch.Initialize(troopHook, logger);
-        CustomBattleSideVM_Constructor_Patch.Initialize(logger);
+        CustomBattleSideVM_Constructor_Patch.Initialize(logger, factionSelection);
         CustomBattleSideVM_OnCultureSelection_Patch.Initialize(sideCommanderFilter, logger);
         CustomBattleSideVM_RefreshValues_Patch.Initialize(sideCommanderFilter, logger);
         BannerlordMissions_CustomBattle_Patch.Initialize(logger);

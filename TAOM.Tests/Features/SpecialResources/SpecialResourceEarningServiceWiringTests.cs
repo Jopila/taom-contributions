@@ -17,11 +17,9 @@ public class SpecialResourceEarningServiceWiringTests
     private const string Resolve = "Resolve<SpecialResourceEarningService>(";
 
     [TestMethod]
-    public void EarningService_IsResolvedOnceInSubModule_AndNowhereElseInMain()
+    public void EarningService_IsResolvedOnceInSubModule_AndNowhereElse()
     {
-        var holders = Directory.GetFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
-            .Where(path => !path.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar)
-                        && !path.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar))
+        var holders = RepoPaths.CSharpFiles()
             .Where(path => RepoPaths.StripComments(File.ReadAllText(path)).Contains(Resolve))
             .Select(path => Path.GetFileName(path))
             .ToList();

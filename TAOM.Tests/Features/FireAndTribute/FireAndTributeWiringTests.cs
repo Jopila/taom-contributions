@@ -80,7 +80,7 @@ public class FireAndTributeWiringTests
     [TestMethod]
     public void ProductionSource_NoOtherFileConstructsTheBehavior()
     {
-        var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(path => !IsFile(path, "FireAndTributeModule.cs") && !IsFile(path, "FireAndTributeBehavior.cs"))
             .Where(path => RepoPaths.MentionsOutsideComments(path, "FireAndTributeBehavior", wholeWord: true))
             .ToList();

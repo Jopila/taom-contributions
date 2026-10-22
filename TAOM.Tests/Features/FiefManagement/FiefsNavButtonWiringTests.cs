@@ -117,10 +117,7 @@ public class FiefsNavButtonWiringTests
     {
         // Three copies of this list drifted before (F6, the field camp's query, and the nav button). One
         // gate now; every other file delegates. IsMapIncidentActive is the member only the list names.
-        var mainDir = RepoPath("Main");
-        var holders = Directory.EnumerateFiles(mainDir, "*.cs", SearchOption.AllDirectories)
-            .Where(f => !f.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar)
-                        && !f.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar))
+        var holders = CSharpFiles()
             .Where(f => MentionsOutsideComments(f, "IsMapIncidentActive"))
             .Select(f => Path.GetFullPath(f).Substring(Path.GetFullPath(RepoPath()).Length).TrimStart('\\', '/').Replace('\\', '/'))
             .OrderBy(f => f)

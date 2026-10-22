@@ -567,6 +567,7 @@ public class SubModule : MBSubModuleBase
             IoC.Resolve<IOnGetCustomBattleFactions>(),
             IoC.Resolve<IOnGetDefaultTroopOfFormation>(),
             IoC.Resolve<ISideCommanderFilter>(),
+            IoC.Resolve<ICustomBattleFactionSelectionFactory>(),
             logger);
 
         // Patch21_ShaderPrecompilation: PARKED 2026-09-25 with the main-menu option (see

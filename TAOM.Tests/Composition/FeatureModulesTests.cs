@@ -154,8 +154,32 @@ public class FeatureModulesTests
         var code = RepoPaths.ReadSource("Main/IoC.cs", stripComments: true);
 
         AssertOnceBetween(code, "Modules = modules;", "ClientComposition.Apply(container);", "_container = container;");
+        // The first call of the eager block; the next test pins that every such call follows Apply.
         AssertOnceBetween(code, "ClientComposition.Apply(container);",
-            "FieldCampIoC.InitializePatchStatics(container);", "modules.InitializeStatics(container);");
+            "FactionMapIoC.InitializePatchStatics(container);", "modules.InitializeStatics(container);");
+    }
+
+    // ADR-013: DryIoc keeps the instance it built, so anything resolved before the client composition
+    // replaced core's null adapters keeps the null. Configure resolves nothing before Apply, and every
+    // patch-static initialisation (which resolves) comes after it.
+    [TestMethod]
+    public void Kernel_IoCConfigure_ResolvesNothingBeforeTheClientSlot_AndEveryStaticsInitComesAfter()
+    {
+        var code = RepoPaths.ReadSource("Main/IoC.cs", stripComments: true);
+        var apply = code.IndexOf("ClientComposition.Apply(container);", StringComparison.Ordinal);
+        var configure = code.IndexOf("public static void Configure()", StringComparison.Ordinal);
+        Assert.IsTrue(configure >= 0 && apply > configure, "Configure or ClientComposition.Apply(container); was not found in IoC.cs");
+
+        // The module runner's logger factory resolves lazily, when a module first fails: not before Apply.
+        var beforeApply = code.Substring(configure, apply - configure).Replace("() => container.Resolve<IModLogger>()", "");
+        Assert.IsFalse(beforeApply.Contains(".Resolve"),
+            "Configure resolves a service before ClientComposition.Apply; the client's replacement adapters would miss it");
+
+        var inits = Regex.Matches(code, @"Initialize\w*Statics\(container\)");
+        Assert.IsTrue(inits.Count >= 5, "expected the eager patch-static block in IoC.cs, found " + inits.Count);
+        foreach (Match init in inits)
+            Assert.IsTrue(init.Index > apply, init.Value + " runs before ClientComposition.Apply");
+        StringAssert.Contains(code, "FactionMapIoC.InitializePatchStatics(container);");
     }
 
     [TestMethod]

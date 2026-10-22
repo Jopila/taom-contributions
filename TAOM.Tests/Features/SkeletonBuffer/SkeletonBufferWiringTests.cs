@@ -169,11 +169,11 @@ public class SkeletonBufferWiringTests
         Assert.IsTrue(Regex.IsMatch(RepoPaths.ReadSource("Main/" + theAdapter, stripComments: true), nativeWrite),
             "the floor: the pattern must match the adapter itself, or an empty offender list proves nothing");
 
-        var mainDir = RepoPaths.RepoPath("Main");
-        var offenders = Directory.GetFiles(mainDir, "*.cs", SearchOption.AllDirectories)
-            .Select(f => f.Substring(mainDir.Length + 1).Replace('\\', '/'))
-            .Where(f => f != theAdapter)
-            .Where(f => Regex.IsMatch(RepoPaths.ReadSource("Main/" + f, stripComments: true), nativeWrite))
+        var repoDir = RepoPaths.RepoPath();
+        var offenders = RepoPaths.CSharpFiles()
+            .Select(f => f.Substring(repoDir.Length).TrimStart('\\', '/').Replace('\\', '/'))
+            .Where(f => f != "Main/" + theAdapter)
+            .Where(f => Regex.IsMatch(RepoPaths.ReadSource(f, stripComments: true), nativeWrite))
             .ToList();
 
         CollectionAssert.AreEqual(new string[0], offenders, "native write calls outside the one adapter: " + string.Join(", ", offenders));

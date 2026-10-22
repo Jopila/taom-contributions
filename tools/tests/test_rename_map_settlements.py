@@ -234,6 +234,28 @@ class RepoTests(unittest.TestCase):
         self.assertEqual(hits["castle_village_EW7_2"], [])
 
 
+    def test_repo_references_reads_the_client_project_too(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "Main").mkdir(parents=True)
+            (root / "Client" / "Features").mkdir(parents=True)
+            (root / "Client" / "obj" / "Debug").mkdir(parents=True)
+            (root / "Client" / "Features" / "C.cs").write_text('var x = "hideout_desert_34";\n', encoding="utf-8")
+            (root / "Client" / "obj" / "Debug" / "G.cs").write_text('var g = "hideout_desert_34";\n', encoding="utf-8")
+            hits = rms.repo_references(root, ["hideout_desert_34"])
+        self.assertEqual(hits["hideout_desert_34"], ["Client/Features/C.cs"])
+
+    def test_repo_under_a_folder_named_bin_still_sweeps(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "bin" / "repo"
+            (root / "Main" / "Features").mkdir(parents=True)
+            (root / "Main" / "obj").mkdir(parents=True)
+            (root / "Main" / "Features" / "A.cs").write_text('var x = "hideout_desert_34";\n', encoding="utf-8")
+            (root / "Main" / "obj" / "G.cs").write_text('var g = "hideout_desert_34";\n', encoding="utf-8")
+            hits = rms.repo_references(root, ["hideout_desert_34"])
+        self.assertEqual(hits["hideout_desert_34"], ["Main/Features/A.cs"])
+
+
 class StateAndCheckTests(unittest.TestCase):
     def test_id_state(self):
         self.assertEqual(rms.id_state(MASTER, "castle_village_EW7_3", "village_EW10_1"), "pending")

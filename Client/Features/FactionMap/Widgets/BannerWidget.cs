@@ -30,7 +30,7 @@ public class BannerWidget : ImageWidget
 
     private bool _textureLoaded;
     private bool _loadFailed;
-    private Sprite _loadedSprite;
+    private Sprite? _loadedSprite;
     private string _bannerImage = "";
 
     private float _stampProgress;

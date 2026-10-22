@@ -216,5 +216,5 @@ Initial construction can mask this — `LoadMovie("...", DataSource)` reads the 
 | ViewModel | `Main/Features/<Feature>/UI/` | `<Name>VM.cs` |
 | Mixin | `Main/Features/<Feature>/UI/` | `<Target>Mixin.cs` |
 | Prefab extension | `Main/Features/<Feature>/UI/` | `<Feature>Prefab.cs` |
-| Custom widget | `Main/Features/<Feature>/UI/` | `<Name>Widget.cs` |
+| Custom widget | `Client/Features/<Feature>/Widgets/` (TAOM.Client, ADR-013; `ServerLoadGateTests` fails a new widget in TAOM.dll) | `<Name>Widget.cs` |
 | Source sprites | `GUI/SpriteParts/ui_taom/<Feature>/` | `<sprite_name>.png` |

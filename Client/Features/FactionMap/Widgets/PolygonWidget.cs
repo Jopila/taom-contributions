@@ -33,7 +33,7 @@ public class PolygonWidget : ImageWidget
     private string _factionId = "";          // faction key for banner_<factionId>.png
 
     // Faction banner overlay during pulse
-    private Sprite _bannerSprite;             // per-instance: banner_<factionId>.png
+    private Sprite? _bannerSprite;             // per-instance: banner_<factionId>.png
     private bool _bannerLoaded;
     private bool _bannerLoadFailed;
     private const float BannerDisplaySize = 80f; // max display dimension in pixels
@@ -44,10 +44,10 @@ public class PolygonWidget : ImageWidget
     // Texture loading
     private bool _textureLoaded;
     private bool _loadFailed;
-    private Sprite _loadedSprite;
+    private Sprite? _loadedSprite;
 
     // Alpha hit-test data (1 byte per pixel, stored row-major)
-    private AlphaHitMap _hitMap; // pixel-accurate hit testing (null = fallback to bbox)
+    private AlphaHitMap? _hitMap; // pixel-accurate hit testing (null = fallback to bbox)
 
     // Hover animation
     private float _hoverOffset;
@@ -65,7 +65,7 @@ public class PolygonWidget : ImageWidget
     private int _playableIndex = -1;               // this instance's index in the playable rotation
 
     // Faction pin/flag icon at capital
-    private static Sprite _emblemSprite;    // shared across all instances
+    private static Sprite? _emblemSprite;    // shared across all instances
     private static bool _emblemLoaded;
     private static bool _emblemLoadFailed;
     private float _capitalNormX = -1f;  // capital position normalized within bbox (0-1)
@@ -101,7 +101,7 @@ public class PolygonWidget : ImageWidget
     private static readonly System.Collections.Generic.List<PolygonWidget> _allInstances
         = new System.Collections.Generic.List<PolygonWidget>();
     // The currently hovered widget (globally unique -- only one at a time)
-    private static PolygonWidget _globalHovered;
+    private static PolygonWidget? _globalHovered;
     private bool _registered;
 
     // Polygon hit-test data (normalized 0-1 relative to bbox)
@@ -702,7 +702,7 @@ public class PolygonWidget : ImageWidget
     /// </summary>
     private static void ResolveGlobalHover()
     {
-        PolygonWidget bestCandidate = null;
+        PolygonWidget? bestCandidate = null;
 
         // Cleanup: remove widgets that were explicitly removed from the visual tree.
         // Only remove if the widget was registered (had a parent before) but now lost it.

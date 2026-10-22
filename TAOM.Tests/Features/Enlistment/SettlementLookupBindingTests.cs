@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.Enlistment;
 
@@ -22,19 +24,19 @@ namespace TAOM.Tests.Features.Enlistment;
 [TestClass]
 public class SettlementLookupBindingTests
 {
-    private static string AdaptersDir()
+    // Every compiled code root's Adapters folder (core and the client submodule, ADR-013); a root with no
+    // such folder is skipped, but core's must exist.
+    private static IEnumerable<string> AdapterFiles()
     {
-        var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
-        while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, "Main", "Adapters")))
-            dir = dir.Parent;
-        Assert.IsNotNull(dir, "could not locate the repo root from the test working directory");
-        return Path.Combine(dir!.FullName, "Main", "Adapters");
+        var dirs = RepoPaths.CodeRoots.Select(root => RepoPaths.RepoPath(root, "Adapters")).Where(Directory.Exists).ToList();
+        Assert.IsTrue(dirs.Contains(RepoPaths.RepoPath("Main", "Adapters")), "Main/Adapters was not found");
+        return dirs.SelectMany(dir => Directory.EnumerateFiles(dir, "*.cs", SearchOption.AllDirectories));
     }
 
     [TestMethod]
     public void NoAdapterResolvesASettlementThroughCampaignObjectManager()
     {
-        var offenders = Directory.EnumerateFiles(AdaptersDir(), "*.cs", SearchOption.AllDirectories)
+        var offenders = AdapterFiles()
             .Select(f => new { File = Path.GetFileName(f), Lines = File.ReadAllLines(f) })
             .SelectMany(x => x.Lines.Select((line, i) => new { x.File, Line = line, Number = i + 1 }))
             .Where(x => x.Line.Contains("Find<Settlement>")

@@ -97,7 +97,7 @@ public class FarWatchWiringTests
     [TestMethod]
     public void ProductionSource_NoOtherFileConstructsTheBehavior()
     {
-        var offenders = System.IO.Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", System.IO.SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(path => !path.EndsWith("FarWatchModule.cs") && !path.EndsWith("FarWatchBehavior.cs"))
             .Where(path => RepoPaths.MentionsOutsideComments(path, "FarWatchBehavior", wholeWord: true))
             .ToList();

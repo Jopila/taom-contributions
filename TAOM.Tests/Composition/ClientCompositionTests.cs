@@ -37,7 +37,11 @@ public class ClientCompositionTests
     }
 
     [TestCleanup]
-    public void Cleanup() => ClientComposition.Current = null;
+    public void Cleanup()
+    {
+        ClientComposition.Current = null;
+        ClientComposition.IsDedicatedServer = ClientComposition.ReadDedicatedServer;
+    }
 
     private static Container CoreContainer()
     {
@@ -100,7 +104,7 @@ public class ClientCompositionTests
     }
 
     // Pins the limit IClientComposition documents: a replacement never reaches a graph built before Apply
-    // (the services core resolves during registration: BannerInjectionIoC, FactionMapIoC, HeroRaceIoC).
+    // (the services core resolves during registration: BannerInjectionIoC, HeroRaceIoC).
     [TestMethod]
     public void Apply_ReplacesAServiceResolvedBeforeApply_EarlierGraphKeepsTheCoreInstance()
     {
@@ -169,6 +173,82 @@ public class ClientCompositionTests
         ClientComposition.Apply(container);
 
         logger.Received(1).LogInfo(NSubstitute.Arg.Is<string>(s => s.Contains("[Client] no client composition")));
+    }
+
+    [TestMethod]
+    public void Apply_EmptySlotOnARenderingClient_LogsAnErrorNamingTheMissingClient()
+    {
+        var container = CoreContainer();
+        var logger = Substitute.For<IModLogger>();
+        container.RegisterInstance(logger);
+        ClientComposition.Current = null;
+        ClientComposition.IsDedicatedServer = () => false;
+
+        ClientComposition.Apply(container);
+
+        logger.Received(1).LogError(NSubstitute.Arg.Is<string>(s =>
+            s.Contains("TAOM.Client") && s.Contains("faction map") && s.Contains("front-end art")
+            && s.Contains("Custom Battle")));
+    }
+
+    [TestMethod]
+    public void Apply_EmptySlotOnADedicatedServer_LogsNoError()
+    {
+        var container = CoreContainer();
+        var logger = Substitute.For<IModLogger>();
+        container.RegisterInstance(logger);
+        ClientComposition.Current = null;
+        ClientComposition.IsDedicatedServer = () => true;
+
+        ClientComposition.Apply(container);
+
+        logger.DidNotReceive().LogError(NSubstitute.Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void Apply_SlotSetOnAClient_LogsNoMissingClientError()
+    {
+        var container = CoreContainer();
+        var logger = Substitute.For<IModLogger>();
+        container.RegisterInstance(logger);
+        ClientComposition.Current = new Registering(_ => { });
+        ClientComposition.IsDedicatedServer = () => false;
+
+        ClientComposition.Apply(container);
+
+        logger.DidNotReceive().LogError(NSubstitute.Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void DescribeStampMismatch_PairedStamps_ReturnsNull()
+    {
+        Assert.IsNull(ClientComposition.DescribeStampMismatch(
+            "v2.0.35.0 build.20261022-100000Z+abc", "v2.0.35.0 build.20261022-100500Z+abc"));
+    }
+
+    [TestMethod]
+    public void DescribeStampMismatch_StampsDaysApart_NamesTheClientAndCoreStamps()
+    {
+        var line = ClientComposition.DescribeStampMismatch(
+            "v2.0.35.0 build.20261001-100000Z+abc", "v2.0.35.0 build.20261022-100000Z+def");
+
+        Assert.IsNotNull(line);
+        StringAssert.Contains(line, "TAOM.Client");
+        StringAssert.Contains(line, "build.20261001-100000Z");
+        StringAssert.Contains(line, "build.20261022-100000Z");
+    }
+
+    [TestMethod]
+    public void DescribeStampMismatch_HoursApart_ReturnsAWarning()
+    {
+        Assert.IsNotNull(ClientComposition.DescribeStampMismatch(
+            "v1 build.20261022-010000Z+a", "v1 build.20261022-100000Z+a"));
+    }
+
+    [TestMethod]
+    public void DescribeStampMismatch_NoStampOnOneSide_ReturnsNull()
+    {
+        Assert.IsNull(ClientComposition.DescribeStampMismatch("v1", "v1 build.20261022-100000Z+a"));
     }
 
     [TestMethod]

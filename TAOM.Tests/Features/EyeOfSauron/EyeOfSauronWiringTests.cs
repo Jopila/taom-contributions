@@ -68,7 +68,7 @@ public class EyeOfSauronWiringTests
     [TestMethod]
     public void ProductionSource_NoOtherFileConstructsOrRegistersTheBehavior()
     {
-        var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(path => !IsFile(path, "EyeOfSauronModule.cs") && !IsFile(path, "EyeOfSauronBehavior.cs"))
             .Where(path => RepoPaths.MentionsOutsideComments(path, "EyeOfSauronBehavior", wholeWord: true))
             .ToList();

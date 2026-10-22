@@ -42,7 +42,7 @@ public class WarChronicleWiringTests
     [TestMethod]
     public void ProductionSource_NoOtherFileNamesTheBehavior()
     {
-        var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(path => !IsFile(path, "WarChronicleModule.cs") && !IsFile(path, "WarChronicleBehavior.cs"))
             .Where(path => RepoPaths.MentionsOutsideComments(path, "WarChronicleBehavior", wholeWord: true))
             .ToList();

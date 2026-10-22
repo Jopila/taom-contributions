@@ -182,9 +182,7 @@ public class GoodDeedsWiringTests
     {
         // A source scan, not reflection: GetTypes() on TAOM's assembly needs the game. Two models on one slot would make the
         // later one win and drop the other's rule (gamemodels.md rule 7). Each file is read once.
-        var fillers = Directory.GetFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
-            .Where(f => !f.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar)
-                        && !f.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar))
+        var fillers = RepoPaths.CSharpFiles()
             .Where(f => FillsThePrisonerDonationSlot(RepoPaths.StripComments(File.ReadAllText(f))))
             .Select(Path.GetFileName)
             .OrderBy(n => n, StringComparer.Ordinal)

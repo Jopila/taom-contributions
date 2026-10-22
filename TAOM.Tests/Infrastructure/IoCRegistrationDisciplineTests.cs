@@ -31,7 +31,6 @@ public class IoCRegistrationDisciplineTests
         // on their resolve paths) but grandfathered, not endorsed. Verified by source scan
         // 2026-08-23; the stale-entry test below keeps this list honest.
         "BannerInjectionIoC.cs",
-        "FactionMapIoC.cs",
         "HeroRaceIoC.cs",
     };
 

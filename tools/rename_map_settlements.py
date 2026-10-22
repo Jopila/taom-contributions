@@ -18,7 +18,7 @@ new key. Repo files that carry settlement ids (REPO_ID_FILES) get the same exact
 REMOVALS: the whole block and its loc rows go; a fortification that still has bound villages is
 refused, because every one of them would dereference null on the next new campaign.
 
-Before --apply the tool sweeps Main/**/*.cs and Main/_Module/ModuleData/**/*.json for every old or
+Before --apply the tool sweeps Main/**/*.cs, Client/**/*.cs and Main/_Module/ModuleData/**/*.json for every old or
 removed id and refuses on a hit outside REPO_ID_FILES: a settlement id in code is a recruitment
 pool or a guard, and a rename that leaves it behind is a dead dictionary key nobody logs.
 
@@ -159,11 +159,12 @@ def rename_json_ids(text, old, new):
 
 
 def repo_references(root, ids):
-    """{id: [repo-relative paths]} of every Main/**/*.cs and Main/_Module/ModuleData/**/*.json that
+    """{id: [repo-relative paths]} of every Main/**/*.cs, Client/**/*.cs and Main/_Module/ModuleData/**/*.json that
     names the id as a whole token. The settlements.xml shadow is XML and deliberately outside it."""
     root = Path(root)
-    files = list((root / "Main").rglob("*.cs")) + list((root / "Main" / "_Module" / "ModuleData").rglob("*.json"))
-    files = [f for f in files if not ({"bin", "obj"} & set(f.parts))]
+    files = (list((root / "Main").rglob("*.cs")) + list((root / "Client").rglob("*.cs"))
+             + list((root / "Main" / "_Module" / "ModuleData").rglob("*.json")))
+    files = [f for f in files if not ({"bin", "obj"} & set(f.relative_to(root).parts))]
     pats = {sid: re.compile("(?<![" + _ID_CHARS + "])" + re.escape(sid) + "(?![" + _ID_CHARS + "])") for sid in ids}
     hits = {sid: [] for sid in ids}
     for f in sorted(files):
