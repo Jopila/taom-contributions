@@ -25,6 +25,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Main\TAOM.csproj" />
+		<ProjectReference Include="..\Client\TAOM.Client.csproj" />
 		<!-- CrashBundleWriter builds the upload ZIP with System.IO.Compression, so asserting on the
 		     bundle's contents needs the same BCL assembly the production code uses. -->
 		<Reference Include="System.IO.Compression" />

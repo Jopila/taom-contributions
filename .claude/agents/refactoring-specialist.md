@@ -17,7 +17,7 @@ tools:
 Behavior-preserving structural refactoring of TAOM C#. Use when code is hard to read or extend, or when it is *redundant* (see "Deleting redundant code").
 
 ## Execution model (read first)
-Fixed tool allowlist (Read/Write/Edit/Bash/Glob/Grep); you **cannot invoke skills or spawn agents**. Where this references a skill (`/investigate`), **recommend it in your report**; don't try to invoke it. Tests must be green before AND after (`dotnet test TAOM.Tests/TAOM.Tests.csproj -p:DisableModuleCopy=true`). CLAUDE.md, its imports and the unscoped rules are loaded for you; a path rule loads when you read a matching file. Tool catalog + full model: [docs/ai-includes/agent-operating-manual.md](../../docs/ai-includes/agent-operating-manual.md).
+Fixed tool allowlist (Read/Write/Edit/Bash/Glob/Grep); you **cannot invoke skills or spawn agents**. Where this references a skill (`/investigate`), **recommend it in your report**; don't try to invoke it. Tests must be green before AND after (`dotnet test TAOM.Tests/TAOM.Tests.csproj -p:DisableModuleCopy=true -p:ModuleId=`). CLAUDE.md, its imports and the unscoped rules are loaded for you; a path rule loads when you read a matching file. Tool catalog + full model: [docs/ai-includes/agent-operating-manual.md](../../docs/ai-includes/agent-operating-manual.md).
 
 | Tool | Purpose | Mode |
 |------|---------|------|

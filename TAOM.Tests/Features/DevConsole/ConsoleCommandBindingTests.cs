@@ -62,15 +62,19 @@ public class ConsoleCommandBindingTests
         // load outside the game host, and a hard GetTypes() would throw before reaching our commands.
         // FiniteFloatValidator is a deliberately neutral anchor into the Main assembly: it belongs to
         // no feature, so this test does not have to move when commands are added or retired.
-        Type[] types;
-        try
-        {
-            types = typeof(FiniteFloatValidator).Assembly.GetTypes();
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            types = ex.Types.Where(t => t != null).ToArray();
-        }
+        var types = new[] { typeof(FiniteFloatValidator).Assembly, typeof(TAOM.Client.ClientSubModule).Assembly }
+            .SelectMany(a =>
+            {
+                try
+                {
+                    return a.GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    return ex.Types.Where(t => t != null).ToArray();
+                }
+            })
+            .ToArray();
 
         return types
             .SelectMany(t => t.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))

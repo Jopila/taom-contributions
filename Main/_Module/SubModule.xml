@@ -77,6 +77,19 @@
         <Tag key="IsNoRenderModeElement" value="false" />
       </Tags>
     </SubModule>
+    <!-- ADR-013: the client-only half of TAOM (Client/TAOM.Client.csproj). Tagged like vanilla's UI
+         submodules (Native's ViewSubModule), so a dedicated server never loads it. Its constructor hands
+         its registrations to core (TAOM.Composition.ClientComposition) before any OnSubModuleLoad runs.
+         After TAOM, so its hooks run after core's and TAOM.dll is already loaded when it is built. -->
+    <SubModule>
+      <Name value="TAOM.Client" />
+      <DLLName value="TAOM.Client.dll" />
+      <SubModuleClassType value="TAOM.Client.ClientSubModule" />
+      <Tags>
+        <Tag key="DedicatedServerType" value="none" />
+        <Tag key="IsNoRenderModeElement" value="false" />
+      </Tags>
+    </SubModule>
   </SubModules>
   <Xmls>
     <!-- XSLT transformations to replace vanilla kingdoms with TAOM versions -->

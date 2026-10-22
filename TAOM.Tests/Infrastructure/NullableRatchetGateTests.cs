@@ -21,6 +21,7 @@ public class NullableRatchetGateTests
 
     [DataTestMethod]
     [DataRow("Main", "TAOM.csproj")]
+    [DataRow("Client", "TAOM.Client.csproj")]
     [DataRow("Dependencies", "TAOM.Dependencies.csproj")]
     public void ProductionCsproj_NoWarn_OmitsEveryRatchetId(string folder, string csproj)
     {

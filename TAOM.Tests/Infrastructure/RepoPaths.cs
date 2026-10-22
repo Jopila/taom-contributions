@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -15,6 +16,21 @@ public static class RepoPaths
 {
     private static readonly Regex CommentPattern =
         new(@"/\*.*?\*/|//[^\n]*", RegexOptions.Compiled | RegexOptions.Singleline);
+
+    /// <summary>The compiled code roots a source-scanning gate reads: core and the client submodule (ADR-013).</summary>
+    public static readonly string[] CodeRoots = { "Main", "Client" };
+
+    /// <summary>
+    /// Every .cs file under the given repo roots (the compiled code roots when none are named), skipping
+    /// any path with an obj or bin segment below the repo root.
+    /// </summary>
+    public static IEnumerable<string> CSharpFiles(params string[] roots)
+    {
+        var repoDir = RepoPath();
+        return (roots.Length == 0 ? CodeRoots : roots)
+            .SelectMany(root => Directory.EnumerateFiles(RepoPath(root), "*.cs", SearchOption.AllDirectories))
+            .Where(f => !f.Substring(repoDir.Length).Split('\\', '/').Any(seg => seg == "obj" || seg == "bin"));
+    }
 
     public static string RepoPath(params string[] parts)
     {

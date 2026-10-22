@@ -42,15 +42,19 @@ public class MissionBehaviorLifecycleTests
 
         var missionBehavior = Type.GetType("TaleWorlds.MountAndBlade.MissionBehavior, TaleWorlds.MountAndBlade", throwOnError: true)!;
 
-        Type[] types;
-        try
-        {
-            types = typeof(TAOM.IoC).Assembly.GetTypes();
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            types = ex.Types.Where(t => t != null).ToArray()!;
-        }
+        var types = new[] { typeof(TAOM.IoC).Assembly, typeof(TAOM.Client.ClientSubModule).Assembly }
+            .SelectMany(a =>
+            {
+                try
+                {
+                    return a.GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    return ex.Types.Where(t => t != null).ToArray()!;
+                }
+            })
+            .ToArray();
 
         var overriders = types
             .Where(t => missionBehavior.IsAssignableFrom(t) && !t.IsAbstract)

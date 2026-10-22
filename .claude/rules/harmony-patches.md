@@ -3,6 +3,9 @@ paths:
   - "Main/**/Hooks/**"
   - "Main/**/Patches/**"
   - "Main/**/*Patch.cs"
+  - "Client/**/Hooks/**"
+  - "Client/**/Patches/**"
+  - "Client/**/*Patch.cs"
   - "Dependencies/Foundation/**"
 ---
 

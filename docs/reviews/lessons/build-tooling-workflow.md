@@ -4217,3 +4217,28 @@ several files. A convergence review caught them with a script that opened each c
 - **Prevent:** read each cited file on its own (the Read tool, or `Select-String` on that one path) and copy the number
   from there. After a docs pass, run a citation check that opens every `path:line` it adds.
 - **Source:** [rca-coop-player-attribution-2026-10-21.md](../rca-coop-player-attribution-2026-10-21.md) finding 8.
+
+### A release gate for a new artifact follows the shipped manifest, not the current tree
+The first B3 gate required `TAOM.Client.dll` of every tag. A tag cut before ADR-013 ships no such DLL and its
+`SubModule.xml` never loads one, so the gate would have refused a valid older build.
+- **Why missed:** the gate assumed every tag carries what HEAD ships.
+- **Prevent:** require an extra assembly only where the manifest shipped in that tag names it, and add a fixture for the
+  older manifest that must still pass (`required_dlls` in `tools/package_release.py`).
+- **Source:** B3 review, 2026-10-22, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).
+
+### Bannerlord.BuildResources cleans the whole module bin, so a second project deploys after it
+`CopyBinariesWindows` deletes every DLL in the module's bin folder before it copies the build's own. A second project
+in the same module (`TAOM.Client`) that copies its output earlier is deleted by the next core build, and
+`DisableModuleCopy=true` without `ModuleId=` does not stop that clean.
+- **Why missed:** the build package's clean is not visible from either project file, so a deploy ordered before it looked correct.
+- **Prevent:** give the second project its own deploy target ordered after the build package's copy, build the pair in
+  one solution build, and keep both flags on every agent build (`-p:DisableModuleCopy=true -p:ModuleId=`).
+- **Source:** B3 review, 2026-10-22, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).
+
+### The dirty-flag pathspec lists every compiled project root
+The build stamp marks a DLL `.dirty` when the tree has uncommitted changes under the compiled roots. A new project root
+absent from that pathspec leaves a stamp that reads clean while its sources are modified.
+- **Why missed:** nothing ties the pathspec to the list of compiled projects.
+- **Prevent:** when a project joins the module, add its root to the pathspec in `Directory.Build.props` in the same
+  change and pin it with a test.
+- **Source:** B3 review, 2026-10-22, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).

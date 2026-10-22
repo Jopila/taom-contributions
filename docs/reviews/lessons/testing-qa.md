@@ -2121,3 +2121,12 @@ boot evidence described a build that no longer existed.
 - **Why missed:** a boot is evidence of one build, and the fix pass changed the build after it.
 - **Prevent:** after a fix pass, re-stage and boot again, or write which build booted next to the evidence.
 - **Source:** [taom-headless-server.md](../../research/taom-headless-server.md), the B0-B2 headless review, 2026-10-22.
+
+### A new assembly needs every root scan and every typeof(X).Assembly gate, found by grep
+Adding `TAOM.Client` left source scans that read only `Main/` and assembly gates that enumerated only `TAOM.dll` types,
+so code moved to the client would have escaped them without a failure.
+- **Why missed:** each gate named its own root list; nothing pointed at them when a root was added.
+- **Prevent:** grep for the root string (`"Main"`) and for `typeof(...).Assembly` across `TAOM.Tests`, route the source
+  scans through one shared list (`RepoPaths.CodeRoots` and `RepoPaths.CSharpFiles`), and widen each assembly gate with
+  `.Concat` over the new assembly, as `ViewCreatorModuleGateTests` does.
+- **Source:** B3 review, 2026-10-22, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).

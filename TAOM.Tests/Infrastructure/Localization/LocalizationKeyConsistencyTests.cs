@@ -262,14 +262,8 @@ public class LocalizationKeyConsistencyTests
 
         var checkedSites = 0;
         var problems = new List<string>();
-        var mainDir = Path.Combine(RepoRoot, "Main");
-        foreach (var file in Directory.EnumerateFiles(mainDir, "*.cs", SearchOption.AllDirectories))
+        foreach (var file in RepoPaths.CSharpFiles())
         {
-            if (file.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar)
-                || file.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar))
-            {
-                continue;
-            }
             var lines = File.ReadAllLines(file);
             for (var n = 0; n < lines.Length; n++)
             {

@@ -220,6 +220,11 @@ public static class IoC
         modules.RegisterServices(container);
         Modules = modules;
 
+        // ADR-013: the client submodule's registrations, after every core one and before the first eager
+        // Resolve below, replacing core's null adapters. Its constructor filled the slot before any
+        // OnSubModuleLoad ran; on a dedicated server the slot is empty and this only logs.
+        ClientComposition.Apply(container);
+
         _container = container;
 
         // Eager patch-static initialisation runs ONLY after the last registration above: an eager

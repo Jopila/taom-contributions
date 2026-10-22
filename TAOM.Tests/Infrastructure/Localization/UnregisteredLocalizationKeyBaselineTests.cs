@@ -107,16 +107,9 @@ public class UnregisteredLocalizationKeyBaselineTests
 
     private static Dictionary<string, string> FindDeclaredKeys()
     {
-        var mainPath = Path.Combine(RepoRoot, "Main");
-        Assert.IsTrue(Directory.Exists(mainPath), $"Main not found at {mainPath}");
-
         var declared = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var file in Directory.GetFiles(mainPath, "*.cs", SearchOption.AllDirectories))
+        foreach (var file in RepoPaths.CSharpFiles())
         {
-            var parts = file.Split(Path.DirectorySeparatorChar);
-            if (parts.Contains("bin") || parts.Contains("obj"))
-                continue;
-
             var lines = File.ReadAllLines(file);
             for (var i = 0; i < lines.Length; i++)
             {
@@ -130,7 +123,7 @@ public class UnregisteredLocalizationKeyBaselineTests
         }
 
         Assert.IsTrue(declared.Count > 100,
-            $"Only {declared.Count} taom_ key literals found in Main/ — the scan is broken.");
+            $"Only {declared.Count} taom_ key literals found in Main/ and Client/ — the scan is broken.");
         return declared;
     }
 
@@ -180,8 +173,9 @@ public class UnregisteredLocalizationKeyBaselineTests
             .OrderBy(k => k, StringComparer.Ordinal).ToList();
 
         Assert.AreEqual(0, stale.Count,
-            $"{stale.Count} baseline entries are no longer unregistered (fixed, or the key is gone). "
-            + "Delete these lines from unregistered-loc-keys-baseline.txt:\n  "
+            $"{stale.Count} baseline entries are no longer unregistered (registered, moved, or the key is gone). "
+            + "Check each before deleting its line from unregistered-loc-keys-baseline.txt: a key "
+            + "that moved between Main/ and Client/ is still declared, so find where it went first:\n  "
             + string.Join("\n  ", stale));
     }
 }

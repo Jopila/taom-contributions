@@ -1,0 +1,103 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!-- TAOM.Client (ADR-013): the client-only half of the TAOM module, TAOM's second submodule in
+	     Main/_Module/SubModule.xml. A dedicated server never loads it. This project references core;
+	     core (Main/TAOM.csproj) never references this project (ClientIsolationGateTests). -->
+	<PropertyGroup>
+		<Version>2.0.0</Version>
+		<Deterministic>true</Deterministic>
+		<PathMap>$(MSBuildProjectDirectory)=/_/</PathMap>
+		<!-- The module whose bin this assembly deploys into; TAOM.Client is not a module of its own.
+		     The agent build's -p:ModuleId= empties it, which switches the deploy below off, as for TAOM. -->
+		<ModuleId>TAOM</ModuleId>
+		<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- The game references of Main/TAOM.csproj, through GameReferences.targets properties only
+		     (GameReferencesTargetsTests). The client-only bases of the 40 types that move here live in
+		     TaleWorlds.GauntletUI, TaleWorlds.TwoDimension, TaleWorlds.CampaignSystem.ViewModelCollection,
+		     TaleWorlds.MountAndBlade.ViewModelCollection and TaleWorlds.MountAndBlade.GauntletUI.Widgets
+		     (game bin), TaleWorlds.MountAndBlade.View (Native), SandBox.View (SandBox),
+		     TaleWorlds.MountAndBlade.CustomBattle (CustomBattle) and System.Windows.Forms.
+		     System.Management and System.Numerics.Vectors as in Main/TAOM.csproj:16-43 (the TaleWorlds
+		     assemblies bind the game's copies; SNV is the alias PolygonWidget uses). -->
+		<Reference Include="$(TaomSystemManagementDll)">
+			<HintPath>%(Identity)</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="$(TaomSystemNumericsVectorsDll)">
+			<HintPath>%(Identity)</HintPath>
+			<Private>False</Private>
+			<Aliases>SNV</Aliases>
+		</Reference>
+		<Reference Include="$(TaomGameBin)\TaleWorlds.*.dll" Exclude="$(TaomGameBin)\TaleWorlds.Native.dll">
+			<HintPath>%(Identity)</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="$(TaomNativeModuleBin)\*.dll">
+			<HintPath>%(Identity)</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="$(TaomSandBoxModuleBin)\*.dll">
+			<HintPath>%(Identity)</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="$(TaomCustomBattleModuleBin)\*.dll">
+			<HintPath>%(Identity)</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="System.Windows.Forms" />
+		<Reference Include="System.Drawing" />
+	</ItemGroup>
+
+	<!-- Private=False, as Main/TAOM.csproj references TAOM.Dependencies: TAOM.dll ships from Main's
+	     own deploy, never from this project's output. -->
+	<ItemGroup>
+		<ProjectReference Include="..\Main\TAOM.csproj">
+			<Private>False</Private>
+		</ProjectReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Compile-only, as in Main/TAOM.csproj: at runtime Harmony comes from TAOM.Dependencies.
+		     No IsExternalInit polyfill: TAOM.Tests sees the internals of both assemblies, and two copies
+		     of the type are CS8356 there. Client code uses no init accessors or records. -->
+		<PackageReference Include="Lib.Harmony" Version="2.4.2" IncludeAssets="compile" />
+		<PackageReference Include="BUTR.Harmony.Analyzer" Version="1.0.1.50" PrivateAssets="all" />
+		<PackageReference Include="Nullable" Version="1.3.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>TAOM.Tests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
+	<!-- Deploy into the TAOM module's bin folders. Not through Bannerlord.BuildResources: its
+	     CopyBinariesWindows cleans every .dll/.pdb/.config in Modules\$(ModuleId)\bin\Win64_Shipping_Client
+	     before copying this project's output, which would delete TAOM.dll. Main/TAOM.csproj builds first
+	     (the ProjectReference above), so its clean and its editor and server mirrors have already run.
+	     Never Win64_Shipping_Server: a dedicated server must not carry this assembly, and Main/TAOM.csproj's
+	     server mirror excludes it. A deploying build of Main/TAOM.csproj alone deletes the client copy (its
+	     clean); ./build.ps1 builds the solution and redeploys it. -p:DisableModuleCopy=true WITHOUT
+	     -p:ModuleId= deletes TAOM.Client from the client bins: BuildResources' CopyBinariesWindows
+	     ignores DisableModuleCopy and cleans them, and this target is skipped too. Pass both, as AGENTS.md does. -->
+	<Target Name="DeployTaomClientToTaomModule"
+	        AfterTargets="Build"
+	        Condition="'$(ModuleId)' != '' AND Exists('$(GameFolder)') AND '$(DisableModuleCopy)' != 'true'">
+		<PropertyGroup>
+			<_TaomClientModuleBin>$(GameFolder)\Modules\$(ModuleId)\bin</_TaomClientModuleBin>
+		</PropertyGroup>
+		<ItemGroup>
+			<_TaomClientFiles Include="$(TargetPath)" />
+			<_TaomClientFiles Include="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_TaomClientFiles)" DestinationFolder="$(_TaomClientModuleBin)\Win64_Shipping_Client\" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(_TaomClientFiles)" DestinationFolder="$(_TaomClientModuleBin)\Win64_Shipping_wEditor\" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(_TaomClientFiles)" DestinationFolder="$(_TaomClientModuleBin)\Gaming.Desktop.x64_Shipping_Client\" SkipUnchangedFiles="true" />
+		<Message Importance="high" Text="TAOM.Client: deployed @(_TaomClientFiles->Count()) files into Win64_Shipping_Client, Win64_Shipping_wEditor and Gaming.Desktop.x64_Shipping_Client under $(_TaomClientModuleBin)\" />
+	</Target>
+
+	<Import Project="..\GameReferences.targets" />
+</Project>

@@ -37,8 +37,8 @@ Every run also reports, and never refuses over: what each shipped SceneObj/<scen
 ShaderCache/D3D11 (terrain shader header, compressed shader cache sack, the sack's format), with
 a WARNING for a sack whose format differs from the majority; every module-level
 <module>/Shaders/D3D11 sack the planned modules hold (size and format); and whether the JIT
-optimizes each shipped copy of TAOM.dll and TAOM.Dependencies.dll (OFF, ON, or unknown with its
-reason when the file, or its DebuggableAttribute, cannot be read). TAOM ships Debug builds on
+optimizes each shipped copy of TAOM.dll, TAOM.Client.dll and TAOM.Dependencies.dll (OFF, ON, or
+unknown with its reason when the file, or its DebuggableAttribute, cannot be read). TAOM ships Debug builds on
 purpose, so the JIT line is a fact to read, not a gate.
 
 Module-level sacks are left out of the copy by policy, not by proof. The maintainer's policy
@@ -48,7 +48,8 @@ the report says so in one policy line. Scene sacks and the other files in Shader
 (shader_mapping.bin, shader_compile_report.log) still ship.
 
 Exit codes: 0 ok · 1 nothing to do · 2 bad input / unknown entries / non-empty destination / failed --require-build /
-            retired binaries in the source (RETIRED_BINARIES, dry runs included) / a shipped
+            retired binaries in the source (RETIRED_BINARIES, dry runs included) / a client-only
+            assembly (TAOM.Client.dll) in a dedicated-server bin (dry runs included) / a shipped
             ModuleData file defining a taom_test_ id / a shader with no complete source that ships, or
             a shader report that is missing, unreadable or does not add up (all dry runs included).
 """
@@ -62,6 +63,7 @@ import shutil
 import struct
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
@@ -153,11 +155,22 @@ CANDIDATE_RULES = ("EM_ASSET_PACKAGES", "RACE_TEST")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# The two assemblies TAOM compiles, by module (keyed casefolded: "--modules taom" resolves on
-# Windows). Each carries the build stamp from Directory.Build.props. The build writes a copy into
-# every bin/<platform>/ folder (Steam, Game Pass, dedicated server, Modding Kit) and every copy
-# ships, so the gate reads them all; the Win64 client copy must exist.
-SHIPPED_DLLS = {"taom": "TAOM.dll", "taom.dependencies": "TAOM.Dependencies.dll"}
+# The assemblies TAOM compiles, by module (keyed casefolded: "--modules taom" resolves on Windows).
+# Each carries the build stamp from Directory.Build.props. The build writes a copy into every
+# bin/<platform>/ folder it deploys (Steam, Game Pass, dedicated server, Modding Kit) and every copy
+# ships, so the gate reads them all; the Win64 client copy of each must exist. TAOM.Client.dll
+# (ADR-013) is TAOM's client-only second submodule: it is in every client bin and never in the
+# dedicated-server one.
+SHIPPED_DLLS = {"taom": ("TAOM.dll", "TAOM.Client.dll"), "taom.dependencies": ("TAOM.Dependencies.dll",)}
+
+# A dedicated server must never carry these: the server staging promotes a stray DLL from a module's
+# Win64_Shipping_Server folder into its app bin. Compared case-insensitively by file name.
+CLIENT_ONLY_DLLS = frozenset({"taom.client.dll"})
+SERVER_BIN = "bin/Win64_Shipping_Server/"
+
+# The bin folders a client loads TAOM from: each that holds TAOM.dll must hold every assembly the
+# shipped SubModule.xml names.
+CLIENT_PLATFORM_BINS = ("Win64_Shipping_Client", "Win64_Shipping_wEditor", "Gaming.Desktop.x64_Shipping_Client")
 
 # InformationalVersion as the assembly metadata stores it (UTF-8): build.<yyyyMMdd-HHmmss>Z, then
 # '+' ('.' on older builds), then the commit SHA or "nogit", then an optional .dirty or .nogit flag.
@@ -394,14 +407,32 @@ def stamps_dirty_trees(sha: str) -> bool:
 
 
 def shipped_dll_copies(plan) -> list:
-    """Module-relative path of every bin/<platform>/ copy of the TAOM assembly this module ships
+    """Module-relative path of every bin/<platform>/ copy of every TAOM assembly this module ships
     (none for a module outside SHIPPED_DLLS)."""
-    dll_name = SHIPPED_DLLS.get(plan.name.casefold())
-    if dll_name is None:
-        return []
+    names = {n.casefold() for n in SHIPPED_DLLS.get(plan.name.casefold(), ())}
     return [rel for rel, _size in plan._copy_list
-            if rel.casefold().startswith("bin/")
-            and PurePosixPath(rel).name.casefold() == dll_name.casefold()]
+            if rel.casefold().startswith("bin/") and PurePosixPath(rel).name.casefold() in names]
+
+
+def loaded_dll_names(plan):
+    """Casefolded DLLName values of the SubModule.xml this module ships, or None when it cannot be
+    read (the caller then requires every assembly, the stricter reading)."""
+    try:
+        tree = ET.parse(plan.root / "SubModule.xml")
+    except (OSError, ET.ParseError):
+        return None
+    return {(e.get("value") or "").strip().casefold() for e in tree.iter("DLLName")}
+
+
+def required_dlls(plan) -> tuple:
+    """The assemblies a clean build must have shipped for this module: the first SHIPPED_DLLS entry
+    always, each further one only when the shipped SubModule.xml loads it. A pre-ADR-013 tag's manifest
+    does not name TAOM.Client.dll, so it is not required of that tag."""
+    names = SHIPPED_DLLS.get(plan.name.casefold(), ())
+    loaded = loaded_dll_names(plan)
+    if loaded is None:
+        return names
+    return names[:1] + tuple(n for n in names[1:] if n.casefold() in loaded)
 
 
 def retired_binaries(plans) -> list:
@@ -409,6 +440,13 @@ def retired_binaries(plans) -> list:
     return [f"{p.name}/{rel}" for p in plans for rel, _size in p._copy_list
             if rel.split("/", 1)[0] == "bin"
             and PurePosixPath(rel).name.casefold() in RETIRED_BINARIES]
+
+
+def client_only_in_server_bin(plans) -> list:
+    """<module>/<rel> of every client-only TAOM assembly in a planned module's bin/Win64_Shipping_Server/."""
+    return [f"{p.name}/{rel}" for p in plans for rel, _size in p._copy_list
+            if rel.casefold().startswith(SERVER_BIN.casefold())
+            and PurePosixPath(rel).name.casefold() in CLIENT_ONLY_DLLS]
 
 
 # A Custom-Battle test troop (/release pre-flight 5) DEFINED by id; a {=taom_test_x} name key alone
@@ -609,13 +647,20 @@ def require_build(plans, rev: str, requested=()) -> tuple:
         if name.casefold() in SHIPPED_DLLS and name.casefold() not in planned:
             problems.append(f"{name}: requested but not present in the source")
     for p in plans:
-        dll_name = SHIPPED_DLLS.get(p.name.casefold())
-        if dll_name is None:
+        if p.name.casefold() not in SHIPPED_DLLS:
             continue
         copies = shipped_dll_copies(p)
-        client = f"bin/Win64_Shipping_Client/{dll_name}"
-        if client.casefold() not in {rel.casefold() for rel in copies}:
-            problems.append(f"{p.name}: {client} is missing")
+        have = {rel.casefold() for rel in copies}
+        required = required_dlls(p)
+        # Win64_Shipping_Client is always checked. Any other client bin (Game Pass, the editor) is checked
+        # only when it holds the primary assembly, because they load the same manifest as Steam does.
+        for platform in CLIENT_PLATFORM_BINS:
+            if platform != CLIENT_PLATFORM_BINS[0] and f"bin/{platform}/{required[0]}".casefold() not in have:
+                continue
+            for dll_name in required:
+                rel = f"bin/{platform}/{dll_name}"
+                if rel.casefold() not in have:
+                    problems.append(f"{p.name}: {rel} is missing")
         for rel in copies:
             checked.append(f"{p.name}/{rel}")
             try:
@@ -896,14 +941,15 @@ def _jit_report(plans) -> None:
     TAOM ships Debug builds on purpose, so this never refuses."""
     taom = [p for p in plans if p.name.casefold() in SHIPPED_DLLS]
     if not taom:
-        print("\nTAOM assemblies: no planned module ships TAOM.dll or TAOM.Dependencies.dll, "
-              "so there is no JIT optimization line")
+        print("\nTAOM assemblies: no planned module ships TAOM.dll, TAOM.Client.dll or "
+              "TAOM.Dependencies.dll, so there is no JIT optimization line")
         return
     print("\nTAOM assemblies, JIT optimization (report only, never refuses):")
     for p in taom:
         copies = shipped_dll_copies(p)
         if not copies:
-            print(f"  {p.name}: no bin/<platform>/{SHIPPED_DLLS[p.name.casefold()]} copy ships")
+            print(f"  {p.name}: no bin/<platform>/ copy of "
+                  f"{' or '.join(SHIPPED_DLLS[p.name.casefold()])} ships")
         for rel in copies:
             disabled, why = jit_optimization(p.root / rel)
             if disabled is None:
@@ -934,7 +980,7 @@ def main(argv=None) -> int:
                     help="Bannerlord install folder whose Shaders/Sources holds the native shader "
                          "sources (default: the parent of --source)")
     ap.add_argument("--require-build", metavar="REV",
-                    help="refuse unless TAOM.dll and TAOM.Dependencies.dll are clean builds of "
+                    help="refuse unless TAOM.dll, TAOM.Client.dll and TAOM.Dependencies.dll are clean builds of "
                          "this tag or commit (checked in --dry-run too)")
     args = ap.parse_args(argv)
     # A piped stdout on Windows is cp1252: a folder name it cannot encode is escaped, never a
@@ -991,6 +1037,14 @@ def main(argv=None) -> int:
         print("\nERROR: retired binaries in the source; delete them there (install bin folders or "
               "the channel folder) and re-run:", file=sys.stderr)
         for rel in retired:
+            print(f"  {rel}", file=sys.stderr)
+        return 2
+
+    server_client = client_only_in_server_bin(plans)
+    if server_client:
+        print("\nERROR: a client-only assembly in a dedicated-server bin (ADR-013); delete it there and "
+              "re-run (Main/TAOM.csproj's server mirror never writes it):", file=sys.stderr)
+        for rel in server_client:
             print(f"  {rel}", file=sys.stderr)
         return 2
 

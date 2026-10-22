@@ -32,7 +32,7 @@ These are pulled via `<PackageReference>` in `Dependencies/TAOM.Dependencies.csp
 3. **Keep `Main/TAOM.csproj` in lockstep** — it pins the same three packages with `IncludeAssets="compile"`. Compile-time (Main) and runtime (Dependencies) MUST match or you risk `MissingMethodException` on APIs only in the newer build.
 4. **If the bump crosses a MINOR** (e.g. 2.4.x → 2.5.x, 5.11.x → 5.12.x): ALSO bump the matching stub `<Version>` to the new minor's `.99.0` in `Stubs/Bannerlord.Harmony/_Module/SubModule.xml` (or `.UIExtenderEx`, `.MBOptionScreen` — note: MCM's stub is `Bannerlord.MBOptionScreen`). A **patch** bump within the same minor needs no stub edit — the `.99.0` sentinel already covers it. See the v99 rule under "Stub modules" below.
 5. Run `dotnet restore Dependencies/TAOM.Dependencies.csproj`.
-6. Run `./build.ps1 -RunTests` — must pass. (If Bannerlord is open and you only need build+test signal, `dotnet build TAOM.sln -p:DisableModuleCopy=true` + `dotnet test` skips the game-install deploy — but it does NOT prove the deploy, so the smoke test below is still owed.)
+6. Run `./build.ps1 -RunTests`: must pass. (If Bannerlord is open and you only need build+test signal, `dotnet build TAOM.sln -p:DisableModuleCopy=true -p:ModuleId=` + `dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId=` skips the game-install deploy; it does NOT prove the deploy, so the smoke test below is still owed.)
 7. Run smoke test (see "Verification" below).
 
 Steps 3 and 4 are enforced by [`BundledDependencyManifestTests`](../../TAOM.Tests/Infrastructure/Dependencies/BundledDependencyManifestTests.cs) — if you forget either, `dotnet test` fails with the expected value.

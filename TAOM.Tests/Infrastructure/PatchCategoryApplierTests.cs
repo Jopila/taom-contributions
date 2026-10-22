@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -341,12 +342,8 @@ public class PatchCategoryApplierTests
     public void MainSource_AppliesEveryPatchCategoryThroughTheGuardedHelper()
     {
         var hits = new List<string>();
-        foreach (var file in Directory.GetFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories))
+        foreach (var file in RepoPaths.CSharpFiles())
         {
-            var sep = Path.DirectorySeparatorChar;
-            if (file.Contains(sep + "obj" + sep) || file.Contains(sep + "bin" + sep))
-                continue;
-
             var code = CommentPattern.Replace(File.ReadAllText(file), string.Empty);
             foreach (Match match in DirectPatchCategoryCall.Matches(code))
             {

@@ -207,6 +207,7 @@ public class LiegeTitleOverrideTests
         // ConversationTag in TAOM.dll and Dictionary.Add on its StringId: an abstract type, a type
         // without a public parameterless constructor or a duplicate id breaks every campaign start.
         var taomTypes = AccessTools.GetTypesFromAssembly(typeof(FeatureModules).Assembly)
+            .Concat(AccessTools.GetTypesFromAssembly(typeof(TAOM.Client.ClientSubModule).Assembly))
             .Where(t => t.IsSubclassOf(typeof(ConversationTag))).ToArray();
         var vanillaIds = new HashSet<string>(AccessTools.GetTypesFromAssembly(typeof(ConversationTag).Assembly)
             .Where(t => t.IsSubclassOf(typeof(ConversationTag)) && !t.IsAbstract)

@@ -93,14 +93,17 @@ Use `/release`. It runs the sequence below and fails closed on the #371 pairing 
    `git log --grep 'vX.Y.Z - '` lists the commits a build reporting that `TaomVersion` can contain.
 8. Confirm `git rev-parse <release commit>^` prints the commit step 5 ended at (if not, stop and ask), then `git tag -a vX.Y.Z <release commit> -m "…"`, tagging the step 7 commit by SHA, then `git push origin <release branch> vX.Y.Z`.
 9. Build at the tag and gate the DLLs (the skill's Phase 8). Run `./build.ps1` in the main checkout only when `git status --porcelain` is empty and `HEAD` is the tag's commit; otherwise build a clean worktree of the tag (`git worktree add ../taom-release-vX.Y.Z vX.Y.Z`, `./build.ps1` there, then `git worktree remove ../taom-release-vX.Y.Z`). Then `python tools/package_release.py --source "<game>/Modules" --dest <out> --game-root "<game>" --require-build vX.Y.Z --dry-run` must print `build stamp OK`. Any later deploying build of a dirty tree (`./build.ps1`, or any build without `-p:DisableModuleCopy=true -p:ModuleId=`) replaces the gated DLLs and the module's ModuleData in the install: after the v2.0.34 gate passed, one made the installed `TAOM.dll` `+18a4e402...dirty`. So repeat the dry run right before Mike packages. Mike packages through the Modding Kit editor; Claude never writes a package with this command. Once his package exists in `E:\LOTRAOM_Releases\<channel>\Modules\`, offer the same dry run with `--source` pointing there and `--game-root "<game>"`. ShaderCacheKeeper ships beside the modules: build and test it at the tag (`python Native/ShaderCacheKeeper/build.py`, then `pwsh -File Native/ShaderCacheKeeper/test/run_tests.ps1`), copy `out/xinput9_1_0.dll` to `E:\LOTRAOM_Releases\<channel>\bin\Win64_Shipping_Client\` before the launcher manifest is generated, and record its SHA-256 in the release note; testing channel first ([shader-cache-keeper.md](../features/shader-cache-keeper.md)).
-   The gate reads every `bin/<platform>/` copy of `TAOM.dll` and `TAOM.Dependencies.dll` and
-   refuses a tag whose `Directory.Build.props` predates the `.dirty` flag. Every run also prints three reports that never refuse and never change the exit code:
+   The gate reads every `bin/<platform>/` copy of `TAOM.dll`, `TAOM.Client.dll` and
+   `TAOM.Dependencies.dll`, refuses a `TAOM.Client.dll` in a `bin/Win64_Shipping_Server/` (ADR-013), and
+   refuses a tag whose `Directory.Build.props` predates the `.dirty` flag. It requires
+   `TAOM.Client.dll` only where the shipped `SubModule.xml` names it, so a tag cut before ADR-013
+   still gates, and a client bin that holds `TAOM.dll` must hold every named assembly beside it. Every run also prints three reports that never refuse and never change the exit code:
    one line per shipped `<module>/SceneObj/<scene>` saying whether `ShaderCache/D3D11/` holds
    `terrain_shaders_header_data.bin` and `compressed_shader_cache.sack`, with the sack's format, a
    summary line and a `WARNING` for any sack whose format differs from the majority of the shipped
    sacks; one line per module-level `<module>/Shaders/D3D11/compressed_shader_cache.sack`, with its
-   size and format; and one `JIT optimization` line per shipped copy of `TAOM.dll` and
-   `TAOM.Dependencies.dll` (OFF for the Debug builds TAOM ships on purpose; a bare ON when the
+   size and format; and one `JIT optimization` line per shipped copy of `TAOM.dll`,
+   `TAOM.Client.dll` and `TAOM.Dependencies.dll` (OFF for the Debug builds TAOM ships on purpose; a bare ON when the
    assembly's `DebuggableAttribute` leaves optimization on; `ON (no DebuggableAttribute on the
    assembly)` when it carries none; `unknown (<reason>)` when the file holds no readable .NET
    metadata or its `DebuggableAttribute` is malformed). A scene without a sack is not an error, and
@@ -139,7 +142,9 @@ Use `/release`. It runs the sequence below and fails closed on the #371 pairing 
      none for TAOM from the NativeSkinFixes removal on, 2 on earlier tags; 44 for TAOM.Dependencies)
      or the tag's build writes. The build writes
      `TAOM.dll`, `TAOM.pdb`, `DryIoc.dll`, `Newtonsoft.Json.dll` and
-     `System.Runtime.CompilerServices.Unsafe.dll` into TAOM, and `TAOM.Dependencies.dll`,
+     `System.Runtime.CompilerServices.Unsafe.dll` into TAOM (plus `TAOM.Client.dll` and
+     `TAOM.Client.pdb` into its `Win64_Shipping_Client`, `Win64_Shipping_wEditor` and
+     `Gaming.Desktop.x64_Shipping_Client`, never `_Server`: the server mirror excludes them), and `TAOM.Dependencies.dll`,
      `TAOM.Dependencies.pdb`, `0Harmony.dll`, `Bannerlord.UIExtenderEx.dll`, `MCMv5.dll` and
      `System.Runtime.CompilerServices.Unsafe.dll` into TAOM.Dependencies. That is each project's
      `bin/Debug/net472/` output, every runtime DLL its packages bring in (the other packages are

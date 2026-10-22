@@ -115,7 +115,7 @@ public class MainPartyNullCheckScanTests
     [TestMethod]
     public void ProductionSource_NeverNullChecksTheComputedPartyBaseMainParty()
     {
-        var offenders = Directory.EnumerateFiles(RepoPaths.RepoPath("Main"), "*.cs", SearchOption.AllDirectories)
+        var offenders = RepoPaths.CSharpFiles()
             .Where(p => RepoPaths.MentionsOutsideComments(p, "MainParty"))
             .Where(p => NullCheck.IsMatch(RepoPaths.StripComments(File.ReadAllText(p))))
             .Select(p => p.Substring(RepoPaths.RepoPath().Length).TrimStart('\\', '/'))

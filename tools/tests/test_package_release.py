@@ -590,6 +590,63 @@ def _git_head():
     return r.stdout.strip() if r.returncode == 0 else None
 
 
+class TestClientOnlyServerBin(unittest.TestCase):
+    """TAOM.Client.dll (ADR-013) is client-only: the dedicated-server staging promotes a stray DLL from
+    a module's Win64_Shipping_Server folder into its app bin, so the packager refuses one there."""
+
+    def test_dry_run_refuses_taom_client_in_the_server_bin(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write(src, "TAOM/bin/Win64_Shipping_Server/TAOM.Client.dll", 16)
+            r = _run("--source", str(src), "--dest", str(Path(td) / "out"), "--modules", "TAOM",
+                     "--dry-run")
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("TAOM/bin/Win64_Shipping_Server/TAOM.Client.dll", r.stderr)
+
+    def test_client_editor_and_gamepass_copies_are_not_refused(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            for folder in ("Win64_Shipping_Client", "Win64_Shipping_wEditor",
+                           "Gaming.Desktop.x64_Shipping_Client"):
+                _write(src, f"TAOM/bin/{folder}/TAOM.Client.dll", 16)
+            plan = pr.plan_module(src / "TAOM")
+            self.assertEqual(pr.client_only_in_server_bin([plan]), [])
+
+    def test_match_is_case_insensitive(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write(src, "TAOM/bin/Win64_Shipping_Server/taom.client.DLL", 16)
+            plan = pr.plan_module(src / "TAOM")
+            self.assertEqual(pr.client_only_in_server_bin([plan]),
+                             ["TAOM/bin/Win64_Shipping_Server/taom.client.DLL"])
+
+    def test_match_is_case_insensitive_on_the_folder_too(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write(src, "TAOM/bin/win64_shipping_server/TAOM.Client.dll", 16)
+            plan = pr.plan_module(src / "TAOM")
+            self.assertEqual(pr.client_only_in_server_bin([plan]),
+                             ["TAOM/bin/win64_shipping_server/TAOM.Client.dll"])
+
+    def test_a_real_run_refuses_taom_client_in_the_server_bin_and_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write(src, "TAOM/bin/Win64_Shipping_Server/TAOM.Client.dll", 16)
+            r = _run("--source", str(src), "--dest", str(Path(td) / "out"), "--modules", "TAOM")
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("TAOM/bin/Win64_Shipping_Server/TAOM.Client.dll", r.stderr)
+            self.assertFalse((Path(td) / "out").exists())
+
+    def test_shipped_dll_copies_lists_both_taom_assemblies(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write(src, "TAOM/bin/Win64_Shipping_Client/TAOM.Client.dll", 16)
+            plan = pr.plan_module(src / "TAOM")
+            self.assertEqual(sorted(pr.shipped_dll_copies(plan)),
+                             ["bin/Win64_Shipping_Client/TAOM.Client.dll",
+                              "bin/Win64_Shipping_Client/TAOM.dll"])
+
+
 class TestRequireBuildUnit(unittest.TestCase):
     def setUp(self):
         self.head = _git_head()
@@ -631,6 +688,16 @@ class TestRequireBuildCli(unittest.TestCase):
         dll.write_bytes(_dll_bytes(stamp))
         return src
 
+    def _taom(self, td, stamp, folder="Win64_Shipping_Client"):
+        # TAOM ships two assemblies since ADR-013: the core and the client-only second submodule.
+        self._modules(td, stamp, f"TAOM/bin/{folder}/TAOM.dll")
+        return self._modules(td, stamp, f"TAOM/bin/{folder}/TAOM.Client.dll")
+
+    def _manifest(self, src, *dlls):
+        rows = "".join(f'<SubModule><DLLName value="{d}" /></SubModule>' for d in dlls)
+        (src / "TAOM").mkdir(parents=True, exist_ok=True)
+        (src / "TAOM/SubModule.xml").write_text(f"<Module><SubModules>{rows}</SubModules></Module>")
+
     def _gate(self, src, td, rev="HEAD", modules=("TAOM",), dry_run=True):
         return _run("--source", str(src), "--dest", str(Path(td) / "out"), "--modules", *modules,
                     *(["--dry-run"] if dry_run else []), "--require-build", rev)
@@ -639,7 +706,7 @@ class TestRequireBuildCli(unittest.TestCase):
         # Every bin/<platform>/ copy ships (Game Pass, dedicated server, Modding Kit), so a
         # clean Win64 copy must not vouch for a dirty one beside it.
         with tempfile.TemporaryDirectory() as td:
-            src = self._modules(td, f"{STAMP}+{self.head}")
+            src = self._taom(td, f"{STAMP}+{self.head}")
             self._modules(td, f"{STAMP}+{self.head}.dirty",
                           "TAOM/bin/Win64_Shipping_Server/TAOM.dll")
             r = self._gate(src, td)
@@ -650,8 +717,9 @@ class TestRequireBuildCli(unittest.TestCase):
     def test_accepts_every_copy_when_all_are_clean(self):
         with tempfile.TemporaryDirectory() as td:
             for folder in ("Win64_Shipping_Client", "Gaming.Desktop.x64_Shipping_Client",
-                           "Win64_Shipping_Server", "Win64_Shipping_wEditor"):
-                src = self._modules(td, f"{STAMP}+{self.head}", f"TAOM/bin/{folder}/TAOM.dll")
+                           "Win64_Shipping_wEditor"):
+                src = self._taom(td, f"{STAMP}+{self.head}", folder)
+            src = self._modules(td, f"{STAMP}+{self.head}", "TAOM/bin/Win64_Shipping_Server/TAOM.dll")
             r = self._gate(src, td)
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertIn("TAOM/bin/Win64_Shipping_Server/TAOM.dll", r.stdout)
@@ -706,9 +774,57 @@ class TestRequireBuildCli(unittest.TestCase):
 
     def test_accepts_a_clean_dll_built_at_the_rev(self):
         with tempfile.TemporaryDirectory() as td:
-            r = self._gate(self._modules(td, f"{STAMP}+{self.head}"), td)
+            r = self._gate(self._taom(td, f"{STAMP}+{self.head}"), td)
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertIn("build stamp OK", r.stdout)
+
+    def test_refuses_when_taom_client_is_missing(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._modules(td, f"{STAMP}+{self.head}")
+            self._manifest(src, "TAOM.dll", "TAOM.Client.dll")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("TAOM.Client.dll is missing", r.stderr)
+            self.assertEqual(
+                r.stderr.count("bin/Win64_Shipping_Client/TAOM.Client.dll is missing"), 1, r.stderr)
+
+    def test_a_manifest_that_does_not_name_taom_client_does_not_require_it(self):
+        # A tag cut before ADR-013 ships no TAOM.Client.dll and its SubModule.xml never loads one.
+        with tempfile.TemporaryDirectory() as td:
+            src = self._modules(td, f"{STAMP}+{self.head}")
+            self._manifest(src, "TAOM.dll")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn("build stamp OK", r.stdout)
+
+    def test_an_unreadable_manifest_requires_every_assembly(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._modules(td, f"{STAMP}+{self.head}")
+            (src / "TAOM/SubModule.xml").write_text("<Module><SubModules>")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("TAOM.Client.dll is missing", r.stderr)
+
+    def test_refuses_a_client_bin_with_taom_dll_but_no_taom_client(self):
+        # Game Pass and the editor load the same manifest as Steam, so a bin holding TAOM.dll alone
+        # would crash there on the missing second submodule.
+        with tempfile.TemporaryDirectory() as td:
+            src = self._taom(td, f"{STAMP}+{self.head}")
+            self._modules(td, f"{STAMP}+{self.head}", "TAOM/bin/Win64_Shipping_wEditor/TAOM.dll")
+            self._manifest(src, "TAOM.dll", "TAOM.Client.dll")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("bin/Win64_Shipping_wEditor/TAOM.Client.dll is missing", r.stderr)
+
+    def test_refuses_a_dirty_taom_client(self):
+        with tempfile.TemporaryDirectory() as td:
+            self._modules(td, f"{STAMP}+{self.head}")
+            src = self._modules(td, f"{STAMP}+{self.head}.dirty",
+                                "TAOM/bin/Win64_Shipping_Client/TAOM.Client.dll")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("TAOM.Client.dll", r.stderr)
+            self.assertIn("uncommitted", r.stderr)
 
     def test_refuses_a_dirty_dll(self):
         with tempfile.TemporaryDirectory() as td:
@@ -722,7 +838,7 @@ class TestRequireBuildCli(unittest.TestCase):
             _write(src, "TAOM/SubModule.xml", 10)
             r = self._gate(src, td)
             self.assertEqual(r.returncode, 2)
-            self.assertIn("is missing", r.stderr)
+            self.assertIn("TAOM.dll is missing", r.stderr)
 
     def test_refuses_an_unresolvable_rev(self):
         with tempfile.TemporaryDirectory() as td:
@@ -1666,7 +1782,7 @@ class TestJitReportCli(unittest.TestCase):
             _write(src, "TAOM/SubModule.xml", 10)
             r = self._dry(src, td)
             self.assertEqual(r.returncode, 0, r.stderr)
-            self.assertIn("TAOM: no bin/<platform>/TAOM.dll copy ships", r.stdout)
+            self.assertIn("TAOM: no bin/<platform>/ copy of TAOM.dll or TAOM.Client.dll ships", r.stdout)
 
     def test_a_run_without_taom_assemblies_says_so(self):
         with tempfile.TemporaryDirectory() as td:
@@ -1674,7 +1790,7 @@ class TestJitReportCli(unittest.TestCase):
             _write(src, "TAOM_Map/SubModule.xml", 10)
             r = self._dry(src, td, modules=("TAOM_Map",))
             self.assertEqual(r.returncode, 0, r.stderr)
-            self.assertIn("no planned module ships TAOM.dll or TAOM.Dependencies.dll", r.stdout)
+            self.assertIn("no planned module ships TAOM.dll, TAOM.Client.dll or TAOM.Dependencies.dll", r.stdout)
 
 
 def _report_text(rows, trailer=True, total=None):

@@ -1,6 +1,7 @@
 ---
 paths:
   - "Main/**/*.cs"
+  - "Client/**/*.cs"
   - "Dependencies/**/*.cs"
   - "docs/features/**/*.md"
   - "docs/reference/**/*.md"

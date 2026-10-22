@@ -14,6 +14,25 @@ namespace TAOM.Tests.Infrastructure;
 public class RepoPathsTests
 {
     [TestMethod]
+    public void CSharpFiles_Client_ContainsTheSubModuleAndNothingUnderObjOrBin()
+    {
+        var files = RepoPaths.CSharpFiles("Client").ToList();
+
+        Assert.IsTrue(files.Any(f => Path.GetFileName(f) == "ClientSubModule.cs"), "ClientSubModule.cs is missing.");
+        var repoDir = RepoPaths.RepoPath();
+        var built = files.Where(f => f.Substring(repoDir.Length).Split('\\', '/').Any(s => s == "obj" || s == "bin")).ToList();
+        CollectionAssert.AreEqual(new string[0], built, "CSharpFiles must skip obj and bin.");
+    }
+
+    [TestMethod]
+    public void CSharpFiles_WithNoRoots_ReadsEveryCodeRoot()
+    {
+        CollectionAssert.AreEqual(new[] { "Main", "Client" }, RepoPaths.CodeRoots);
+        Assert.IsTrue(RepoPaths.CSharpFiles().Any(f => Path.GetFileName(f) == "ClientSubModule.cs"));
+        Assert.IsTrue(RepoPaths.CSharpFiles().Any(f => Path.GetFileName(f) == "SubModule.cs"));
+    }
+
+    [TestMethod]
     public void ReadSource_ReturnsTheFileWithLfLineEndingsOnly()
     {
         var text = RepoPaths.ReadSource("TAOM.Tests/Infrastructure/RepoPaths.cs");

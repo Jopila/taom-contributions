@@ -182,14 +182,20 @@
 
 	     Mirroring the assembled CLIENT folder (rather than copying build output) is deliberate: it
 	     picks up the vendored natives and NuGet companions that are only present after
-	     PostBuildCopyToModules, which is exactly the file set the field recipe listed by hand. -->
+	     PostBuildCopyToModules, which is exactly the file set the field recipe listed by hand.
+
+	     TAOM.Client (ADR-013) is client-only and never reaches this folder: it is excluded here and a
+	     stale copy is deleted, because the server staging promotes a stray DLL into its app bin. -->
 	<Target Name="MirrorWin64ShippingClientToServer"
 	        AfterTargets="PostBuildCopyToModules"
 	        Condition="$(ModuleId) != '' AND Exists($(GameFolder)) AND $(DisableModuleCopy) != 'true' AND Exists('$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Client\')">
 		<ItemGroup>
-			<_TaomServerMirrorFiles Include="$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Client\*.*" />
+			<_TaomServerMirrorFiles Include="$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Client\*.*"
+			                        Exclude="$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Client\TAOM.Client.*" />
+			<_TaomServerClientFiles Include="$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Server\TAOM.Client.*" />
 		</ItemGroup>
 		<MakeDir Directories="$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Server\" Condition="!Exists('$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Server\')" />
+		<Delete Files="@(_TaomServerClientFiles)" />
 		<Copy SourceFiles="@(_TaomServerMirrorFiles)" DestinationFolder="$(GameFolder)\Modules\$(ModuleId)\bin\Win64_Shipping_Server\" SkipUnchangedFiles="true" />
 		<Message Importance="high" Text="TAOM: mirrored @(_TaomServerMirrorFiles->Count()) files Win64_Shipping_Client -&gt; Win64_Shipping_Server in $(GameFolder)\Modules\$(ModuleId)\bin\" />
 	</Target>

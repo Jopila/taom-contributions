@@ -1,6 +1,7 @@
 ---
 paths:
   - "Main/**/*.cs"
+  - "Client/**/*.cs"
   - "TAOM.Tests/**/*.cs"
 ---
 

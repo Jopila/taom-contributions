@@ -1,7 +1,7 @@
 # Running TAOM's code on the co-op dedicated server
 
 **Status:** research and plan, 2026-10-21. B1 (the load gates) and B2 (TAOM.Dependencies headless)
-are built (`5fcf8390c`). The decision this plan asks for is
+are built (`5fcf8390c`); B3 (the TAOM.Client skeleton) is built and uncommitted. The decision this plan asks for is
 [ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md), accepted 2026-10-22: option (b), a TAOM
 server settings file, missions proven absent before B4c is sized, and the GetTypes shim kept.
 **Target:** Bannerlord v1.5.5 server build (`Win64_Shipping_Server`) on the appliance's bundled .NET 6.0.36 host (the staged `dotnet/shared/Microsoft.NETCore.App`).
@@ -318,13 +318,14 @@ mods that tag wrongly. The module author's manifest becomes the contract.
 
 **TAOM's side (B9, after the `GetTypes` milestone):**
 
-- `Main/_Module/SubModule.xml:71-79`: the `TAOM` submodule loses both tags (it is server-safe after B5), and a
-  second `TAOM.Client` submodule (`TAOM.Client.dll`, `TAOM.Client.ClientSubModule`) carries
-  `DedicatedServerType=none` and `IsNoRenderModeElement=false`. Removing `IsNoRenderModeElement=false` from
-  core changes nothing on a client, because an absent tag is never evaluated.
+- `Main/_Module/SubModule.xml:71-79`: the `TAOM` submodule loses both tags (`:76-77`; it is server-safe after
+  B5). The second `TAOM.Client` submodule (`TAOM.Client.dll`, `TAOM.Client.ClientSubModule`, carrying
+  `DedicatedServerType=none` and `IsNoRenderModeElement=false`, `:84-92`) already landed in B3. Removing
+  `IsNoRenderModeElement=false` from core changes nothing on a client, because an absent tag is never evaluated.
 - `Dependencies/_Module/SubModule.xml`: the two tags from B2.
-- `Main/TAOM.csproj`, target `MirrorWin64ShippingClientToServer` (`:186-195`): exclude `TAOM.Client.dll` and its
-  pdb, so nothing headless carries it.
+- `Main/TAOM.csproj`, target `MirrorWin64ShippingClientToServer` (`:189-195`): the exclusion of
+  `TAOM.Client.*` already landed in B3, so nothing headless carries it. B9 only keeps it and the staging rule
+  honest.
 - Expected staged submodules: `TAOM.Dependencies`, `TAOM`. Dropped: `UIExtenderEx`, `ButterLib`,
   `ButterLib Implementation Loader`, `MCMv5`, `MCMv5 Basic Implementation`, `Bannerlord Module Loader`,
   `TAOM.Client`.
@@ -374,7 +375,7 @@ hunks and a builder agent recommends them.
 | B0 | ADR 013 and the epic with one checkbox per batch (issue creation needs the maintainer's word). No code. | architect | none | none |
 | B1 | Gates 1 and 2 with the 40-row allowlist: `ServerLoadGateTests.cs`, shared `ClientAssemblies.cs`. RED first: write gate 1 with an empty allowlist and confirm it lists exactly the 40; a mismatch is a finding, stop and report. | implementer | none | none (no runtime change) |
 | B2 | `TAOM.Dependencies` headless: `Dependencies/SubModule.cs`, both guards read `GameNetwork.IsDedicatedServer`, `DedicatedServerProvider` reads it (the test seam), two manifest tags. Tests first: `DedicatedServerProviderTests`, `DependenciesClientIlTests`, a manifest test. | implementer | none | Server with TAOM staged without `TAOM` and with only `TAOM.Dependencies` kept: no `TAOM.Dependencies could not be loaded correctly`, boot reaches Coop. Then a desktop client boot, UI unchanged. The first boot ran the bin-folder build: repeat it on the build constant. |
-| B3 | `TAOM.Client` skeleton and hand-off slot: `Client/TAOM.Client.csproj`, empty `ClientSubModule`, core `Composition/ClientComposition.cs`, second submodule in the manifest (core's tags unchanged until B9), build-script plan by architect. | architect plans, implementer executes | `Main/IoC.cs` (one call to the slot) | Client only: boots with both submodules. Server unchanged. |
+| B3 | `TAOM.Client` skeleton and hand-off slot: `Client/TAOM.Client.csproj`, empty `ClientSubModule`, core `Composition/ClientComposition.cs`, second submodule in the manifest (core's tags unchanged until B9), the server-mirror exclusion of `TAOM.Client.*`, build-script plan by architect. **Built, uncommitted (2026-10-22).** | architect plans, implementer executes | `Main/IoC.cs` (one call to the slot) | Client only: boots with both submodules. Server unchanged. |
 | B4a | Front-end types to `TAOM.Client` (14 types plus the callers listed in the core-methods paragraph as needed). Research first: how Gauntlet discovers widget types across a second assembly (`pwsh tools/taom-src.ps1 path WidgetFactory`). | implementer | none unless a caller is in `SubModule.cs` | Client: themed main menu, faction screen, custom battle faction list. |
 | B4b | Campaign-map types (6). Inversions become core adapter interfaces (ADR-007) with a no-op default, the client implementation registered through the slot. | implementer | none | Client: realm borders, camp overlay, momentum meter, fiefs nav button, settlement plates, Hall of Fire conversation. |
 | B4c | Mission, custom-battle engine and WinForms types (7). Keep the mission-behavior add order the comments around `Main/SubModule.cs:2084-2092` depend on. `ShaderPrecompilation` is a parked feature: sweep every file its last toggle touched. Sized by whether the dedicated server runs missions at all (problem row 11, UNVERIFIED). | implementer, architect reviews the Warg controller swap | `Main/SubModule.cs` | Client: a battle with a warg rider as player, battle action bar, host review, shader notice at cold start. |
@@ -382,7 +383,7 @@ hunks and a builder agent recommends them.
 | B6 | Lifecycle guards headless (problem rows 2 to 9), one hook per sub-batch: 6a `[ClientOnly]`, `PatchCategoryIndex.Build(assembly, headless)`, the 11 split categories, gate 4; 6b `TaomFeatureModule.ClientOnly` and a client flag on `PatchCategoryDecl` honored by `ModuleRunner` without faulting; 6c the `SubModule.cs` guards. | implementer | `Main/SubModule.cs` (6a call sites, 6c) | After each sub-batch: server reaches `OnGameInitializationFinished` for the staged save with no TAOM exception; record the next failure. |
 | B7 | Campaign-time UI paths (row 10 and the remaining 97 candidates), one feature group per slice: map visuals, party intel, map profiler targets. Gate 3 lands in the first slice. | implementer | none unless a caller is in `SubModule.cs` | Server runs the staged campaign for several in-game days with no TAOM exception; a guest connects and plays a day. |
 | B8 | Settings headless. Minimum: one boot line "MCM not loaded: TAOM settings at compiled defaults" plus the existing fingerprint log (it can go in `SettingsFingerprintLog`). Option 2 is its own design and issue. Needs the settings decision. | implementer | none | Boot line present. |
-| B9 | Manifest flip and the generic staging rule: TAOM first (core tags removed, server mirror excludes `TAOM.Client`), then the server repo's two scripts. | implementer, two repos | none | Stage with no `-KeepSubModules`; the submodule list matches the expected set; the B7 campaign run repeats clean. |
+| B9 | Manifest flip and the generic staging rule: TAOM first (core tags removed; the second submodule and the server-mirror exclusion of `TAOM.Client` landed in B3), then the server repo's two scripts. | implementer, two repos | none | Stage with no `-KeepSubModules`; the submodule list matches the expected set; the B7 campaign run repeats clean. |
 | B10 | Docs and closeout: the "not supported either" bullet in [coop-interop](../features/coop-interop.md), a feature doc, its feature-map row, an orientation trap line, the lessons entry, `python tools/lint_docs.py --fail-on-drift`. | implementer | none | none |
 
 **Order and parallelism.** B0, then B1 and B2 in parallel (disjoint files), B3, then B4a and B4b in parallel.

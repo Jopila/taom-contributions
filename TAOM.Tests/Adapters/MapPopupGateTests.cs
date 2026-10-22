@@ -24,9 +24,7 @@ public class MapPopupGateTests
     [TestMethod]
     public void NoFileOutsideTheGate_RespellsTheFourConditionTest()
     {
-        var mainDir = RepoPaths.RepoPath("Main");
-        var offenders = Directory.EnumerateFiles(mainDir, "*.cs", SearchOption.AllDirectories)
-            .Where(p => !p.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar))
+        var offenders = RepoPaths.CSharpFiles()
             .Where(p => Path.GetFileName(p) != GateFile)
             .Where(p => RepoPaths.MentionsOutsideComments(p, "IsAnyInquiryActive()"))
             .Where(p => EncounterTest.IsMatch(RepoPaths.StripComments(File.ReadAllText(p))))

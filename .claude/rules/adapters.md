@@ -3,6 +3,8 @@ paths:
   - "Main/Adapters/**"
   - "Main/**/I*Adapter.cs"
   - "Main/**/*Adapter.cs"
+  - "Client/**/I*Adapter.cs"
+  - "Client/**/*Adapter.cs"
 ---
 
 # Adapter Pattern Rules (ADR-007)

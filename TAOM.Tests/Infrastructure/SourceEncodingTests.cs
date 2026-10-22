@@ -15,7 +15,7 @@ namespace TAOM.Tests.Infrastructure;
 [TestClass]
 public class SourceEncodingTests
 {
-    private static readonly string[] SourceRoots = { "Main", "Dependencies", "TAOM.Tests" };
+    private static readonly string[] SourceRoots = { "Main", "Client", "Dependencies", "TAOM.Tests" };
 
     private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 

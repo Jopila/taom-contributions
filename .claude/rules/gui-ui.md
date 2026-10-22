@@ -5,6 +5,11 @@ paths:
   - "Main/**/*Widget*.cs"
   - "Main/**/*VM.cs"
   - "Main/**/*ViewModel*.cs"
+  - "Client/**/*Mixin*.cs"
+  - "Client/**/*Prefab*.cs"
+  - "Client/**/*Widget*.cs"
+  - "Client/**/*VM.cs"
+  - "Client/**/*ViewModel*.cs"
   - "Main/_Module/GUI/**"
 ---
 

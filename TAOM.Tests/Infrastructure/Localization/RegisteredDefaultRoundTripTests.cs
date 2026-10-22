@@ -42,8 +42,7 @@ public class RegisteredDefaultRoundTripTests
     public void EveryRegisteredDefault_MatchesTheLongestInlineCodeDefault()
     {
         var code = new Dictionary<string, string>(StringComparer.Ordinal);
-        var mainDir = Path.Combine(RepoRoot, "Main");
-        foreach (var file in Directory.EnumerateFiles(mainDir, "*.*", SearchOption.AllDirectories))
+        foreach (var file in RepoPaths.CodeRoots.SelectMany(r => Directory.EnumerateFiles(Path.Combine(RepoRoot, r), "*.*", SearchOption.AllDirectories)))
         {
             if (!file.EndsWith(".cs") && !file.EndsWith(".xml"))
                 continue;

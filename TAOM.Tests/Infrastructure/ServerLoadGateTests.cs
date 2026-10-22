@@ -145,4 +145,45 @@ public class ServerLoadGateTests
             "TAOM.dll references these TaleWorlds/SandBox assemblies, not visible on the staged server and not in "
             + "ClientAssemblies: " + string.Join(", ", missing));
     }
+
+    [TestMethod]
+    [TestCategory("LiveInstall")]
+    public void TaomClient_AbsentFromTheStagedServer()
+    {
+        var root = Environment.GetEnvironmentVariable(StageEnvVar);
+        if (string.IsNullOrEmpty(root))
+            root = DefaultStageRoot;
+        var appBin = Path.Combine(root, "bin", "Win64_Shipping_Server");
+        var moduleBin = Path.Combine(root, "Modules", "TAOM", "bin", "Win64_Shipping_Server");
+        if (!Directory.Exists(appBin) && !Directory.Exists(moduleBin))
+            Assert.Inconclusive("No staged server at " + root + " (set " + StageEnvVar + ")");
+
+        var found = new[] { appBin, moduleBin }.Where(Directory.Exists)
+            .SelectMany(d => Directory.GetFiles(d, "TAOM.Client.*")).ToList();
+        CollectionAssert.AreEqual(new List<string>(), found,
+            "TAOM.Client is client-only (ADR-013); the server staging promotes a stray DLL into its app bin.");
+
+        var manifest = Path.Combine(root, "Modules", "TAOM", "SubModule.xml");
+        if (File.Exists(manifest))
+        {
+            var names = System.Xml.Linq.XDocument.Load(manifest).Descendants("SubModule")
+                .Select(s => (string)s.Element("Name")?.Attribute("value")).ToList();
+            CollectionAssert.DoesNotContain(names, "TAOM.Client", "The staged TAOM manifest must not list the client submodule.");
+        }
+    }
+
+    [TestMethod]
+    [TestCategory("LiveInstall")]
+    public void TaomClient_AbsentFromTheInstallServerMirror()
+    {
+        if (!TAOM.Tests.Migration.GameAssemblies.EnsureLoaded())
+            Assert.Inconclusive("No game install resolved.");
+        var serverBin = Path.Combine(TAOM.Tests.Migration.GameAssemblies.GameDir, "Modules", "TAOM", "bin", "Win64_Shipping_Server");
+        if (!Directory.Exists(serverBin))
+            Assert.Inconclusive("No TAOM server bin at " + serverBin);
+
+        var found = Directory.GetFiles(serverBin, "TAOM.Client.*").ToList();
+        CollectionAssert.AreEqual(new List<string>(), found,
+            "Main/TAOM.csproj's server mirror must never write TAOM.Client (ADR-013).");
+    }
 }

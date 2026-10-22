@@ -153,10 +153,11 @@ Rebuild at the tag before anything ships.
    `./build.ps1` there, then `git worktree remove ../taom-release-vX.Y.Z`). `build.ps1` compiles and
    deploys every file in the tree, committed or not.
 2. Gate the DLLs: `python tools/package_release.py --source "<game>/Modules" --dest <out> --game-root "<game>" --require-build vX.Y.Z --dry-run`
-   must print `build stamp OK` and exit 0. It reads every `bin/<platform>/` copy of `TAOM.dll` and
-   `TAOM.Dependencies.dll` and refuses one whose stamp says `.dirty` or `nogit`, or names a commit
-   other than the tag's; a requested TAOM or TAOM.Dependencies missing from `--source`; and a tag whose
-   `Directory.Build.props` predates the `.dirty` flag.
+   must print `build stamp OK` and exit 0. It reads every `bin/<platform>/` copy of `TAOM.dll`,
+   `TAOM.Client.dll` and `TAOM.Dependencies.dll` and refuses any copy whose stamp says `.dirty` or
+   `nogit`, or names a commit other than the tag's; a requested TAOM or TAOM.Dependencies missing from
+   `--source`; and a tag whose `Directory.Build.props` predates the `.dirty` flag. Every run also
+   refuses a `TAOM.Client.dll` in a `bin/Win64_Shipping_Server/` (ADR-013).
    Its scene shader cache, module shader sack and `JIT optimization` sections are reports that
    never refuse: a scene without a sack ships as it is (Mike's call), JIT optimization OFF is
    expected (Debug builds ship on purpose), `ON (no DebuggableAttribute on the assembly)` means the
@@ -192,7 +193,9 @@ Rebuild at the tag before anything ships.
      none for TAOM from the NativeSkinFixes removal on, 2 on earlier tags; 44 for TAOM.Dependencies)
      or the tag's build writes. The build writes
      `TAOM.dll`, `TAOM.pdb`, `DryIoc.dll`, `Newtonsoft.Json.dll` and
-     `System.Runtime.CompilerServices.Unsafe.dll` into TAOM, and `TAOM.Dependencies.dll`,
+     `System.Runtime.CompilerServices.Unsafe.dll` into TAOM (plus `TAOM.Client.dll` and
+     `TAOM.Client.pdb` into its `Win64_Shipping_Client`, `Win64_Shipping_wEditor` and
+     `Gaming.Desktop.x64_Shipping_Client`, never `_Server`: the server mirror excludes them), and `TAOM.Dependencies.dll`,
      `TAOM.Dependencies.pdb`, `0Harmony.dll`, `Bannerlord.UIExtenderEx.dll`, `MCMv5.dll` and
      `System.Runtime.CompilerServices.Unsafe.dll` into TAOM.Dependencies. That is each project's
      `bin/Debug/net472/` output, every runtime DLL its packages bring in (the other packages are

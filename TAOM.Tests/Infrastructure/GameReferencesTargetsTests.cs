@@ -20,6 +20,7 @@ public class GameReferencesTargetsTests
     private static readonly string[] GameProjects =
     {
         Path.Combine("Main", "TAOM.csproj"),
+        Path.Combine("Client", "TAOM.Client.csproj"),
         Path.Combine("Dependencies", "TAOM.Dependencies.csproj"),
         Path.Combine("TAOM.Tests", "TAOM.Tests.csproj"),
     };

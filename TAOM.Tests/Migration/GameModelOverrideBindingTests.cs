@@ -195,9 +195,13 @@ public class GameModelOverrideBindingTests
 
     private static List<Type> DiscoverGameModels()
     {
-        Type[] all;
-        try { all = TaomAssembly.GetTypes(); }
-        catch (ReflectionTypeLoadException ex) { all = ex.Types.Where(t => t != null).ToArray(); }
+        var all = new[] { TaomAssembly, typeof(TAOM.Client.ClientSubModule).Assembly }
+            .SelectMany(a =>
+            {
+                try { return a.GetTypes(); }
+                catch (ReflectionTypeLoadException ex) { return ex.Types.Where(t => t != null).ToArray(); }
+            })
+            .ToArray();
 
         return all
             .Where(t => t != null && !t.IsAbstract && !t.Name.Contains('<'))

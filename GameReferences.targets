@@ -1,8 +1,9 @@
 <Project>
   <!--
     Where every TAOM project finds the Bannerlord assemblies it compiles against. Imported at the
-    end of Main/TAOM.csproj, Dependencies/TAOM.Dependencies.csproj and TAOM.Tests/TAOM.Tests.csproj,
-    whose game Reference items name only the properties below (GameReferencesTargetsTests).
+    end of Main/TAOM.csproj, Client/TAOM.Client.csproj, Dependencies/TAOM.Dependencies.csproj and
+    TAOM.Tests/TAOM.Tests.csproj, whose game Reference items name only the properties below
+    (GameReferencesTargetsTests).
 
     TaomGameRefs=Install (the default): the Bannerlord install that Directory.Build.props resolves
     into GameFolder. These are the paths the projects spelled out before this file existed, less

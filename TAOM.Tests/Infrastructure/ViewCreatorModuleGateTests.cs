@@ -24,18 +24,23 @@ public class ViewCreatorModuleGateTests
     private static bool Carries(MemberInfo member, string attributeName) =>
         member.GetCustomAttributesData().Any(a => a.AttributeType.Name == attributeName);
 
-    [TestMethod]
-    public void ViewCreatorModuleClasses_EveryStaticMethod_CarriesViewMethod()
+    private static Type[] TypesOf(Assembly assembly)
     {
-        Type[] types;
         try
         {
-            types = typeof(FiniteFloatValidator).Assembly.GetTypes();
+            return assembly.GetTypes();
         }
         catch (ReflectionTypeLoadException ex)
         {
-            types = ex.Types.Where(t => t != null).ToArray();
+            return ex.Types.Where(t => t != null).ToArray();
         }
+    }
+
+    [TestMethod]
+    public void ViewCreatorModuleClasses_EveryStaticMethod_CarriesViewMethod()
+    {
+        var types = TypesOf(typeof(FiniteFloatValidator).Assembly)
+            .Concat(TypesOf(typeof(TAOM.Client.ClientSubModule).Assembly)).ToArray();
 
         var modules = types.Where(t => Carries(t, "ViewCreatorModule")).ToList();
         Assert.IsTrue(modules.Count > 0, "Expected at least one [ViewCreatorModule] class (HostReviewMissionViews).");

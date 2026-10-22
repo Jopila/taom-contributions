@@ -138,15 +138,24 @@ public class FeatureModulesTests
     [TestMethod]
     public void IoCResolver_IsReadOnlyByTheFeatureModuleHooks()
     {
-        var mainDir = RepoPaths.RepoPath("Main");
-        var readers = Directory.GetFiles(mainDir, "*.cs", SearchOption.AllDirectories)
-            .Select(f => f.Substring(mainDir.Length + 1).Replace('\\', '/'))
-            .Where(rel => !rel.StartsWith("obj/", StringComparison.Ordinal) && !rel.StartsWith("bin/", StringComparison.Ordinal))
-            .Where(rel => RepoPaths.MentionsOutsideComments(Path.Combine(mainDir, rel), "IoC.Resolver"))
+        var repoDir = RepoPaths.RepoPath();
+        var readers = RepoPaths.CSharpFiles()
+            .Select(f => f.Substring(repoDir.Length).TrimStart('\\', '/').Replace('\\', '/'))
+            .Where(rel => RepoPaths.MentionsOutsideComments(Path.Combine(repoDir, rel), "IoC.Resolver"))
             .ToList();
 
-        CollectionAssert.AreEquivalent(new[] { "Composition/FeatureModuleHooks.cs" }, readers,
+        CollectionAssert.AreEquivalent(new[] { "Main/Composition/FeatureModuleHooks.cs" }, readers,
             "Only the feature-module hooks may read IoC.Resolver; a service takes its dependencies by constructor.");
+    }
+
+    [TestMethod]
+    public void Kernel_IoCConfigure_AppliesTheClientSlotAfterEveryRegistration_BeforeThePostRegistrationEagerBlock()
+    {
+        var code = RepoPaths.ReadSource("Main/IoC.cs", stripComments: true);
+
+        AssertOnceBetween(code, "Modules = modules;", "ClientComposition.Apply(container);", "_container = container;");
+        AssertOnceBetween(code, "ClientComposition.Apply(container);",
+            "FieldCampIoC.InitializePatchStatics(container);", "modules.InitializeStatics(container);");
     }
 
     [TestMethod]
