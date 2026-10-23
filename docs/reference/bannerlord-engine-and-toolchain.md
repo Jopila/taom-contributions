@@ -61,9 +61,9 @@ motivated the mirror below.
 Distinct from the engine builds above: each module carries its **own** `bin/<build>/` folders, and the
 engine loads the one matching the build it is running. TAOM populates them from the assembled client
 folder via mirror targets. TAOM's server mirror excludes `TAOM.Client.*` and deletes stale copies
-(`Main/TAOM.csproj:201-205`); the editor mirror deletes a stale `TAOM.Client.*` from the editor bin
-(`Main/TAOM.csproj:176,179`); the client-only deploy target adds `TAOM.Client.dll` and its available
-`.pdb` to the two client/editor folders (`Client/TAOM.Client.csproj:94-119`). Game Pass is not
+(`Main/TAOM.csproj:212,216`); the editor mirror deletes a stale `TAOM.Client.*` from the editor bin
+(`Main/TAOM.csproj:186,189`); the client-only deploy target adds `TAOM.Client.dll` and its available
+`.pdb` to the two client/editor folders (`Client/TAOM.Client.csproj:98-131`). Game Pass is not
 supported (2026-10-22): no target writes its `Gaming.Desktop.x64_Shipping_Client` folder. The counts below
 precede B3 and do not include that client deployment:
 
@@ -362,6 +362,7 @@ References: [howdah-crew-mechanism.md](../features/elephant/howdah-crew-mechanis
 
 ## Referenced by
 
+- [docs/features/ghidra-native-decompile.md](../features/ghidra-native-decompile.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/investigations/native-commit-audit-2026-08.md](../investigations/native-commit-audit-2026-08.md)
 - [docs/modding/items-armor.md](../modding/items-armor.md)
@@ -374,6 +375,7 @@ References: [howdah-crew-mechanism.md](../features/elephant/howdah-crew-mechanis
 - [docs/reference/engine/agent-spawn-and-render-pipeline.md](engine/agent-spawn-and-render-pipeline.md)
 - [docs/reference/lotrlome-warg-changes.md](./lotrlome-warg-changes.md)
 - [docs/reference/mcp-servers.md](./mcp-servers.md)
+- [docs/reviews/adopt-mithrilforge-engine-perf-2026-10-02.md](../reviews/adopt-mithrilforge-engine-perf-2026-10-02.md)
 
 <!-- backlinks-end -->
 ## Decompiled-source folder layout (E:\Decompiled_Bannerlord\ category tree)

@@ -638,7 +638,7 @@ to characterise. The existing try/catch around acceptance is containment, not co
   `MirrorWin64ShippingClientToServer` target modelled on the existing `…ToEditor` mirror. It
   mirrors the **assembled** client folder because the vendored natives and NuGet companions only
   exist there after `PostBuildCopyToModules`. TAOM's mirror excludes `TAOM.Client.*` and deletes
-  stale copies from its server bin (`Main/TAOM.csproj:201-205`). A verified
+  stale copies from its server bin (`Main/TAOM.csproj:212,216`). A verified
   deploying build mirrored 10 files for TAOM and 42 for TAOM.Dependencies. A server that boots also
   needs the `LOTRLOME_Armory` `action_sets.xml` fix: build 117131, which the dedicated-server engine
   ships, throws `KeyNotFoundException` in `MBObjectManager.MergeElements` at schema path
@@ -779,19 +779,47 @@ Owed by the #966 work (Batch B, co-op player attribution), none of it run in gam
 
 ## Referenced by
 
+- [docs/adrs/013-server-safe-core-client-ui-submodule.md](../adrs/013-server-safe-core-client-ui-submodule.md)
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/alignment-desertion.md](./alignment-desertion.md)
+- [docs/features/animation-variety.md](./animation-variety.md)
 - [docs/features/bannerlord-together-compat.md](./bannerlord-together-compat.md)
 - [docs/features/dread-aura.md](./dread-aura.md)
+- [docs/features/enlistment.md](./enlistment.md)
+- [docs/features/eye-of-sauron.md](./eye-of-sauron.md)
+- [docs/features/far-watch.md](./far-watch.md)
 - [docs/features/fief-granting.md](./fief-granting.md)
+- [docs/features/field-camp.md](./field-camp.md)
+- [docs/features/fire-and-tribute.md](./fire-and-tribute.md)
+- [docs/features/from-the-ashes.md](./from-the-ashes.md)
+- [docs/features/good-deeds.md](./good-deeds.md)
 - [docs/features/hero-race.md](./hero-race.md)
+- [docs/features/hidden-hosts.md](./hidden-hosts.md)
+- [docs/features/long-memory.md](./long-memory.md)
+- [docs/features/lord-courtesies.md](./lord-courtesies.md)
+- [docs/features/lord-face-variety.md](./lord-face-variety.md)
+- [docs/features/minor-clan-migration.md](./minor-clan-migration.md)
+- [docs/features/namegiving.md](./namegiving.md)
+- [docs/features/oaths-of-service.md](./oaths-of-service.md)
 - [docs/features/player-possession.md](./player-possession.md)
 - [docs/features/player-switcher.md](./player-switcher.md)
+- [docs/features/reeves-ledger.md](./reeves-ledger.md)
+- [docs/features/siege-dismount.md](./siege-dismount.md)
 - [docs/features/smart-cavalry-ai.md](./smart-cavalry-ai.md)
+- [docs/features/special-resources.md](./special-resources.md)
+- [docs/features/tokens-of-esteem.md](./tokens-of-esteem.md)
+- [docs/features/troop-weight-system.md](./troop-weight-system.md)
+- [docs/features/war-chronicle.md](./war-chronicle.md)
+- [docs/features/war-of-the-ring-momentum.md](./war-of-the-ring-momentum.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/migration/dr3-maintenance.md](../migration/dr3-maintenance.md)
 - [docs/modding/module-dependencies.md](../modding/module-dependencies.md)
 - [docs/modding/modules-overview.md](../modding/modules-overview.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
 - [docs/research/bannerlordcoop-internals.md](../research/bannerlordcoop-internals.md)
+- [docs/research/coop-compat-gap-ledger.md](../research/coop-compat-gap-ledger.md)
+- [docs/research/taom-headless-server.md](../research/taom-headless-server.md)
 
 <!-- backlinks-end -->

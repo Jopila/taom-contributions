@@ -78,9 +78,11 @@ Before closing out any feature or fix, run this FULL sequence:
 ```
 Phase 1: BUILD & INTERNAL REVIEW
   1. /verify                        — build + tests pass
-  2. /deep-review [feature]         — 6+ senior agents (standards, compat, efficiency, completeness, data-flow,
-                                      design; XML integrity whenever XML/XSLT is in scope), then applies
-                                      every better way it found to the changed code
+  2. /deep-review [feature]         : sized by risk tier (its SKILL.md "Risk tier"): tier 1 runs Codex at ultra
+                                      plus the Data flow and Engine lenses, tier 2 Codex at xhigh plus Data flow,
+                                      each with XML or Tooling where in scope; a second wave only after a
+                                      CRITICAL or HIGH; tier 3 (docs) is lint and a read. Then it applies every
+                                      better way it found to the changed code
   3. Fix all confirmed findings (HIGH must fix in-session)
 
 Phase 2: CODEX ADVERSARIAL REVIEW (Claude dispatches directly, no user terminal step)

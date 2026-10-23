@@ -557,11 +557,14 @@ results (rest error 2.8e-6 m).
 
 ## Referenced by
 
+- [docs/ai-includes/git-and-commits.md](../../ai-includes/git-and-commits.md)
 - [docs/modding/README.md](../../modding/README.md)
 - [docs/modding/validation-and-testing.md](../../modding/validation-and-testing.md)
+- [docs/reference/release-process.md](../../reference/release-process.md)
 - [docs/reviews/LESSONS-LEARNED.md](../LESSONS-LEARNED.md)
 - [docs/reviews/lessons/data-content-cultures.md](./data-content-cultures.md)
 - [docs/reviews/rca-butr-dependency-update-2026-07-16.md](../rca-butr-dependency-update-2026-07-16.md)
+- [docs/reviews/rca-shader-precompile-repark-2026-09-25.md](../rca-shader-precompile-repark-2026-09-25.md)
 
 <!-- backlinks-end -->
 ### A tool that widens its own coverage must report the DEGRADED path, not just the success path
@@ -4312,7 +4315,7 @@ shows), and three gates went red (`HarmonyPatchBindingTests`,
 ### Read the per-submodule hook order before moving a mission add to another submodule (B4c, 2026-10-22)
 The headless-server research (row 11) proposed moving the mission view adds to `ClientSubModule.OnMissionBehaviorInitialize`. Reading `Mission.AfterStart` (`Mission.cs:3808-3825`) and the manifest order showed that hook runs after core's whole `OnMissionBehaviorInitialize`, so the views would have been registered behind the loading-window closer, outside the co-op add filter and outside the `[BattleLoad]` bracket, and the documented add order would have changed.
 - **Why missed:** the research table listed the call sites and the types, not the order in which the engine calls each submodule's hook.
-- **Prevent:** before moving a mission add to another submodule's hook, read `Mission.AfterStart` and the manifest order. B4c kept the add sites in core behind null-by-default factories that TAOM.Client replaces.
+- **Prevent:** before moving a mission add to another submodule's hook, read `Mission.AfterStart` and the manifest order. B4c kept the add sites in core behind null-by-default factories that TAOM.Client replaces. **Superseded 2026-10-23 (#970):** both factories are gone; the two views are `[DefaultView]` types in TAOM.Client, because a view added in `OnMissionBehaviorInitialize` never registers with the MissionScreen and never ticks ([state-lifecycle-save.md](state-lifecycle-save.md), #970).
 - **Source:** `docs/research/taom-headless-server.md` problem row 11; `SubModuleMissionViewWiringTests`.
 
 ### A source-text gate must fail on the wrong code, not only on missing code (B4c, 2026-10-22)

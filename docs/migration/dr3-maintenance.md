@@ -114,7 +114,7 @@ This folder held `MinHook.x64.dll` and `TAOM.NativeSkinFixes.dll` until NativeSk
 
 A Bannerlord dedicated server loads a module's assemblies from `bin/Win64_Shipping_Server/`, not `bin/Win64_Shipping_Client/`. Neither module shipped that folder until 2026-08-03, so a server logged `Cannot find: ...\TAOM\bin\Win64_Shipping_Server\TAOM.dll` and then ran a **vanilla simulation over TAOM's map** — no race capture, no War of the Ring, no campaign systems. Operators were hand-copying the DLLs.
 
-`MirrorWin64ShippingClientToServer` now does it on every deploying build: one target in `Main/TAOM.csproj`, a sibling in `Dependencies/TAOM.Dependencies.csproj`. Both run `AfterTargets="PostBuildCopyToModules"` and copy the **assembled** `Modules/<id>/bin/Win64_Shipping_Client/` folder inside the game install, NOT the project's build output: the vendored natives and NuGet companions only exist after `PostBuildCopyToModules`, and that assembled set is exactly what the hand-copy recipe listed. `Main/TAOM.csproj`'s older `MirrorWin64ShippingClientToEditor` (modding kit → `Win64_Shipping_wEditor`) keeps the full client set. TAOM's server mirror excludes `TAOM.Client.*` and deletes stale copies from its destination (`Main/TAOM.csproj:220-225`).
+`MirrorWin64ShippingClientToServer` now does it on every deploying build: one target in `Main/TAOM.csproj`, a sibling in `Dependencies/TAOM.Dependencies.csproj`. Both run `AfterTargets="PostBuildCopyToModules"` and copy the **assembled** `Modules/<id>/bin/Win64_Shipping_Client/` folder inside the game install, NOT the project's build output: the vendored natives and NuGet companions only exist after `PostBuildCopyToModules`, and that assembled set is exactly what the hand-copy recipe listed. `Main/TAOM.csproj`'s older `MirrorWin64ShippingClientToEditor` (modding kit → `Win64_Shipping_wEditor`) keeps the full client set. TAOM's server mirror excludes `TAOM.Client.*` and deletes stale copies from its destination (`Main/TAOM.csproj:212,216`).
 
 Maintenance consequences:
 
@@ -462,6 +462,7 @@ If ILRepack consolidation is later desired, do it as a focused project with thor
 - [docs/features/mcm.md](../features/mcm.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/migration/dependency-audit-2026-07-15.md](./dependency-audit-2026-07-15.md)
+- [docs/migration/v1.5.4-impact.md](./v1.5.4-impact.md)
 - [docs/modding/module-dependencies.md](../modding/module-dependencies.md)
 - [docs/modding/modules-overview.md](../modding/modules-overview.md)
 - [docs/modding/recipe-new-mod-from-zero.md](../modding/recipe-new-mod-from-zero.md)

@@ -16,6 +16,7 @@
 | Understand architecture | [architecture.md](../../docs/ai-includes/architecture.md) |
 | Check design patterns | [patterns.md](../../docs/ai-includes/patterns.md) |
 | Work with GUI/sprites/UI | [gui-sprite-system.md](../../docs/features/gui-sprite-system.md) |
+| Add a widget, MapView, MissionView, UIExtenderEx mixin or prefab extension, or a patch whose target or signature is a view or view model: where it goes so a dedicated server still loads TAOM | `Client/` (TAOM.Client) and the core seam with a null version: [architecture.md](../ai-includes/architecture.md) "Client-only UI"; a core patch class that names a client-only assembly carries `[ClientOnly]`: [harmony-patch-registry.md](harmony-patch-registry.md) intro; the decision: [ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md) |
 | Change the first loading screen's background or the spinning ring in the corner (native, not Gauntlet) | [native-loading-screen.md](../features/native-loading-screen.md): same-name texture overrides through the Modding Kit; Kysaro's loading paintings are [faction-ui.md](../features/faction-ui.md) |
 | Check ADR rules | [docs/adrs/](../../docs/adrs/README.md) |
 | Ensure code quality | [code-quality.md](../../docs/ai-includes/code-quality.md) |
@@ -116,6 +117,7 @@
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/modding/README.md](../modding/README.md)
 - [docs/reference/release-process.md](./release-process.md)
 - [docs/reviews/adopt-graphify-v8-2026-08-18.md](../reviews/adopt-graphify-v8-2026-08-18.md)

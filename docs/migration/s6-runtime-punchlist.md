@@ -24,7 +24,7 @@ Run before touching the items below: `dotnet test TAOM.Tests/TAOM.Tests.csproj -
 ### 2. Six `VerticalBottomToTop` ListPanel sites — visual order
 v1.4.0 fixed inverted `VerticalTopToBottom` / `VerticalBottomToTop` semantics (`TRACKING.md` S5). Visual order may now be wrong at these sites:
 - [ ] `Main/_Module/GUI/Prefabs/FacGen/PreBuildCharacterSelection.xml` (lines 38, 40, 51, 59) — CC pre-build character selection list.
-- [ ] `Main/Features/Messengers/UI/MessengerEncyclopediaPrefabExtension.cs:24` (string-injected) — messenger encyclopedia panel.
+- [ ] `Client/Features/Messengers/UI/MessengerEncyclopediaPrefabExtension.cs:26` (string-injected): messenger encyclopedia panel.
 - [ ] If a list renders bottom-to-top / reversed, swap `VerticalBottomToTop` → `VerticalTopToBottom`.
 
 ### 3. Equipment-roster ruler fallback — no naked rulers

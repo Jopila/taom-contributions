@@ -387,7 +387,7 @@ block is marked as an excerpt rather than an example.
    `bin/<ConfigName>`; `Main/TAOM.csproj:181-192` and `:206-218` mirror the client folder into the
    editor and server folders. The server mirror excludes `TAOM.Client.*` and deletes stale copies;
    the editor mirror deletes a stale `TAOM.Client.*` from the editor bin (`:186,189`).
-   `Client/TAOM.Client.csproj:97-130` deploys `TAOM.Client.dll` and its available `.pdb` to the two
+   `Client/TAOM.Client.csproj:98-131` deploys `TAOM.Client.dll` and its available `.pdb` to the two
    client/editor folders only. Its entry point is `TAOM.Client.ClientSubModule`.
 2. `<Tag key="DedicatedServerType" value="none" />` is the vanilla `SandBox` pair; any other value
    forces the DLL to count as certified (`SubModuleInfo.cs:87-90`), so shipping server binaries does

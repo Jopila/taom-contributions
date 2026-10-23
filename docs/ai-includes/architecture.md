@@ -253,6 +253,16 @@ Entry Point → [Hook Interface] → Service → Engine → Adapter
 
 The hook interface is optional: a patch uses one only when it needs a narrow seam or a test fake; most patches call their service directly.
 
+### Client-only UI: a core seam with a null version (ADR-013)
+
+A dedicated server cannot load a type that derives from, or names in its layout, a view-layer assembly, so such a type lives in
+`Client/` (TAOM.Client.dll), which core never references. Core reaches it through an interface it owns, registered in core with a
+do-nothing version (for example `IRealmBordersMapViewAdapter` and `NullRealmBordersMapViewAdapter`). The `ClientSubModule`
+constructor fills `ClientComposition.Current`; `IoC.Configure` then runs `TaomClientComposition.RegisterServices` with
+replace semantics, so a client resolves the real implementation and a server keeps the null one. Core code that scans TAOM's
+own types reads `ClientComposition.LoadedTaomAssemblies()`. A core Harmony patch class that names a client-only assembly
+carries `[ClientOnly]` (`.claude/rules/harmony-patches.md`). Gates: `ServerLoadGateTests` and `ClientIsolationGateTests`.
+
 ### Example Flow: Damage Calculation
 
 1. **Harmony Patch** intercepts `CalculateDamage`
@@ -269,7 +279,7 @@ The hook interface is optional: a patch uses one only when it needs a narrow sea
 
 ```
 Main/
-├── Adapters/                    # 166 .cs files: I<X>Adapter.cs beside <X>Adapter.cs
+├── Adapters/                    # I<X>Adapter.cs beside <X>Adapter.cs; Null<X>Adapter.cs for a client seam
 │   ├── IAgentAdapter.cs
 │   ├── AgentAdapter.cs
 │   ├── ICareerHeroAdapter.cs
@@ -277,13 +287,14 @@ Main/
 │   └── Models/                  # adapter-facing DTOs (MovementOrderType, NearbyAgentSnapshot)
 ├── BehaviorTrees/               # behavior-tree runtime
 ├── BehaviorTreeWrapper/
+├── Composition/                 # feature modules, ModuleRunner, ClientComposition (the TAOM.Client slot)
 ├── Core/                        # cross-cutting infrastructure
 │   ├── Diagnostics/
 │   ├── Domain/
 │   ├── Infrastructure/
 │   ├── Logging/                 # IModLogger.cs, FileLogger.cs
 │   └── Validation/
-├── Features/                    # 87 feature modules, each self-contained
+├── Features/                    # one folder per feature, each self-contained
 │   └── CareerSystem/            # a representative one
 │       ├── Abilities/
 │       ├── Domain/
@@ -294,11 +305,19 @@ Main/
 │       └── UI/
 ├── SceneScripts/
 ├── _Module/                     # shipped payload: ModuleData, Prefabs, GUI, SubModule.xml
+├── ClientOnlyAttribute.cs       # [ClientOnly]: a patch class a dedicated server never indexes
 ├── IoC.cs                       # single-owner DI composition root
 ├── ManualPatchApplicator.cs
 ├── PatchCategoryApplier.cs      # guarded apply of one Harmony patch category
 ├── PatchCategoryIndex.cs        # category index built class by class (#653)
 └── SubModule.cs                 # single-owner engine entry point
+
+Client/                          # TAOM.Client.dll, the client-only submodule (ADR-013)
+├── Adapters/                    # client implementations of core adapter seams
+├── Features/                    # UI types a server cannot load: widgets, MapViews, MissionViews, mixins, prefab extensions
+├── ClientSubModule.cs           # constructor fills ClientComposition.Current; registers UIExtenderEx
+├── ClientUiExtensions.cs
+└── TaomClientComposition.cs     # replaces core null adapters with the client implementations
 
 TAOM.Tests/
 ├── Adapters/
