@@ -643,15 +643,17 @@ to characterise. The existing try/catch around acceptance is containment, not co
   deploying build mirrored 10 files for TAOM and 42 for TAOM.Dependencies. A server that boots also
   needs the `LOTRLOME_Armory` `action_sets.xml` fix: build 117131, which the dedicated-server engine
   ships, throws `KeyNotFoundException` in `MBObjectManager.MergeElements` at schema path
-  `/action_sets/action` on data that 1.4.7.117484 tolerates. What is still true: both manifests tag
-  `DedicatedServerType=none` (`Main/_Module/SubModule.xml`, six entries in
-  `Dependencies/_Module/SubModule.xml`), the appliance's `engine/Modules` ships no TAOM, and its
+  `/action_sets/action` on data that 1.4.7.117484 tolerates. What is still true: the client-only
+  submodules carry `DedicatedServerType=none` (`TAOM.Client` in `Main/_Module/SubModule.xml`, the six
+  library entries in `Dependencies/_Module/SubModule.xml`; the core `TAOM` and `TAOM.Dependencies`
+  submodules carry no server tag since B9), the appliance's `engine/Modules` ships no TAOM, and its
   `default_new_game.sav` bootstrap is a vanilla world. **Update 2026-10-23:** a spike build of TAOM
   reached SERVING on the v1.5.5 co-op dedicated server (2026-10-22, 2026-10-23), and so did the
   committed build (2026-10-23), with one client joined and playing. The load work is
   [ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md) and the operator steps are in
-  [coop-dedicated-server](coop-dedicated-server.md). Because both manifests tag
-  `DedicatedServerType=none`, the server loads TAOM only because staging names it. The earlier
+  [coop-dedicated-server](coop-dedicated-server.md). A staging that honours each module's own tags
+  therefore loads `TAOM.Dependencies` and `TAOM` and skips the rest; until the server repo's staging
+  does that, `-KeepSubModules` names them. The earlier
   remark that the appliance runs on `Microsoft.NETCore.App` against TAOM's .NET Framework 4.7.2 is
   resolved: the staged host is .NET 6.0.36 and TAOM loads on it. In-game checks with two clients are owed. The listen-host path remains the one that carries TAOM into the spawned
   server process with no copying at all.
