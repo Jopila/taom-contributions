@@ -222,6 +222,13 @@ class TestCandidates(unittest.TestCase):
             pr.EXCLUDE,
         )
 
+    def test_ds_asset_packages_ships(self):
+        # The dedicated server loads <module>/DsAssetPackages; TAOM ships its creature
+        # skeletons there (tools/build_ds_skeleton_pack.py), and the client never reads it.
+        d = pr.classify("DsAssetPackages/taom_creature_skeletons.tpac")
+        self.assertEqual(d.action, pr.COPY)
+        self.assertFalse(d.candidate)
+
     def test_race_test(self):
         d = pr.classify("Assets/Race Test/head.tpac")
         self.assertEqual(d.action, pr.COPY)

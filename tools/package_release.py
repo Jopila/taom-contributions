@@ -80,8 +80,10 @@ DEFAULT_MODULES = ("TAOM", "TAOM_Map", "LOTRLOME_Armory", "TAOM.Dependencies")
 # Top-level directories observed across TAOM's release set AND vanilla Native /
 # SandBoxCore (enumerated 2026-08-10). Evidence, not memory: SceneEditData and SceneObj
 # are on this list precisely because vanilla ships them.
+# DsAssetPackages: the dedicated server's Modules/Native ships it, and TAOM ships its creature
+# skeletons there (tools/build_ds_skeleton_pack.py); the game client never reads it.
 KNOWN_TOP_DIRS = frozenset({
-    "AssetPackages", "Assets", "Atmospheres", "bin", "EmAssetPackages", "GUI",
+    "AssetPackages", "Assets", "Atmospheres", "bin", "DsAssetPackages", "EmAssetPackages", "GUI",
     "LauncherGUI", "ModuleData", "ModuleSounds", "MultiplayerForcedAvatars", "Music",
     "NavMeshPrefabs", "Prefabs", "SceneEditData", "SceneObj", "Shaders", "Sounds",
     "TileSets", "Videos",
