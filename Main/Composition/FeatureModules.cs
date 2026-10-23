@@ -68,5 +68,6 @@ internal static class FeatureModules
         new Features.ServerSettings.ServerSettingsModule(),
         new Features.ArmyTargeting.HoldTheWalls.HoldTheWallsModule(),
         new Features.UnderTheEaves.UnderTheEavesModule(),
+        new Features.AlignmentRecruitment.AlignmentRecruitmentModule(),
     };
 }

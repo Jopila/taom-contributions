@@ -7,6 +7,7 @@ using NSubstitute;
 using TAOM.Core.Logging;
 using TAOM.Features;
 using TAOM.Features.AlignmentDesertion;
+using TAOM.Features.AlignmentRecruitment;
 using TAOM.Features.BattleLoadDiagnostics;
 using TAOM.Features.FieldCamp;
 using TAOM.Features.SupplyLines;
@@ -105,6 +106,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(ReevesLedgerSettingsProvider))]
     // #870: the four switches are read on every hourly tick while a raiding host rides.
     [DataRow(typeof(FireAndTributeSettingsProvider))]
+    // #887: read per foreign candidate per AI lord think (Patch114) and per notable per party-hour (TaomVolunteerModel).
+    [DataRow(typeof(RecruitmentAlignmentSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)

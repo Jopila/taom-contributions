@@ -1384,6 +1384,18 @@ Vanilla switches on its own culture ids and returns `new SceneNotificationCharac
 
 **Co-op.** A pure bracket: no skip, no campaign state written, so `CoopVetoClassificationTests` needs no entry. **Tests:** `CoopRecruitAttributionPatchTests` (real Harmony on a local fake), `RecruitChargePolicyTests`.
 
+## Patch114_AlignmentRecruitmentScoring
+
+**Target:** `private (int, float) TaleWorlds.CampaignSystem.CampaignBehaviors.AiBehaviors.AiVisitSettlementBehavior.GetApproximateVolunteersCanBeRecruitedDataFromSettlement(Hero hero, Settlement settlement)` (v1.5.5, `AiVisitSettlementBehavior.cs:396-425`), one postfix class `Patch114_AiVolunteerEstimate_Postfix` in `Main/Features/AlignmentRecruitment/Hooks/`, category `Patch114_AlignmentRecruitmentScoring` (ProcessLoad, declared by `AlignmentRecruitmentModule`). #887, 2026-10-23.
+
+Vanilla counts filled volunteer slots (4 own faction, 2 foreign) with no alignment check, and the result feeds the AI lord's recruiting score. `TaomVolunteerModel` blocks the actual recruit across the Free/Evil divide, so a lord could plan a trip that yields nothing. The postfix returns when the service is null, the count is 0 or an argument is null, then skips a settlement of the lord's own map faction (the same kingdom on both sides, or no kingdom, which resolves Neutral: never blocked; most of the calls); otherwise it asks `IRecruitmentAlignmentService.IsRecruitmentBlocked` with the recruiter's `Clan.Kingdom.StringId`, the settlement's `MapFaction.StringId` and `hero == Hero.MainHero`, and sets `__result = (0, 0f)` on a block. A throw is caught and logged once.
+
+**Callers and thread:** `AiHourlyTick` :294, once per candidate settlement passing the gates at :269 and :292, for every AI lord party; only foreign candidates (a kingdom lord far from home scanning towns and villages within half a day, a landless kingdom's fallback villages) can be zeroed; own-faction candidates return after one reference compare. Main thread. Food and trade scoring for the same settlement is separate and unchanged.
+
+**PatchShield.** `TaleWorlds.CampaignSystem.CampaignBehaviors.AiBehaviors` is not an excluded namespace and the estimate is not on `ExcludedTargetMethods` (`Dependencies/Foundation/PatchShieldPolicy.cs`), so the shield's finalizer wraps the method from a process's first game start (the category applies at OnSubModuleLoad, before PatchShield's pass 2); it does not install while a co-op module is active (`PatchShieldPolicy.ShouldInstall`). The postfix catches what its body throws at run time. A missing-API failure in JIT-compiling the postfix after an engine update reaches the finalizer, and the target returns vanilla's estimate (stored before the postfix runs). A missing-API failure in vanilla's own body returns the default `(0, 0f)`.
+
+**Co-op.** A void postfix on a pure estimate, no skip and no campaign state written, so `CoopVetoClassificationTests` needs no entry. Feature: [alignment-recruitment.md](../features/alignment-recruitment.md). **Tests:** `AiVolunteerEstimateBindingTests`, `AlignmentRecruitmentWiringTests`. **ACTIVE**, not yet checked in game.
+
 ## Patch_MainRosterLossDiag
 
 **Targets:** `TroopRoster.AddToCountsAtIndex(int, int, int, int, bool)` and `TroopRoster.SetElementNumber(int, int)` (both Prefix, observe-only, never skip the original). **ACTIVE, TEMPORARY diagnostic.** Code: `Main/Features/TroopWeight/Diagnostics/` (`TroopRoster_AddToCountsAtIndex_Patch`, `TroopRoster_SetElementNumber_Patch`, `MainRosterLossDiagnostics`).
