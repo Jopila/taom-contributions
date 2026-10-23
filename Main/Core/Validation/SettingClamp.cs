@@ -2,7 +2,9 @@ namespace TAOM.Core.Validation;
 
 /// <summary>
 /// Shared null-safe, NaN-safe clamp for MCM setting reads — the standard settings-provider recipe
-/// (`TaomSettings.Instance?.Knob` → default when MCM isn't loaded, reject non-finite, clamp to the
+/// (`TaomSettings.Instance?.Knob` → default when the instance is null: in tests, before MCM initializes, or on
+/// a client whose MCM failed to load; a dedicated server always gets the instance built from
+/// taom-server-settings.json. Then reject non-finite, clamp to the
 /// knob's engine-valid range). Consolidates the byte-identical private SafeClamp/SafeClampInt helpers
 /// previously copy-pasted across SmartCavalryAI / BanditManagement / CultureConversion /
 /// CastleRecruitment providers (R2, 2026-07-01).

@@ -178,7 +178,7 @@ The MCM options menu (via `Bannerlord.MCM.v5`) provides runtime overrides:
 1. MCM Test Mode enabled → uses JSON `testMode.phase1Day` / `testMode.phase2Day`
 2. JSON `testMode.enabled = true` → uses JSON `testMode.phase1Day` / `testMode.phase2Day`
 3. MCM Phase 1/2 day values (when MCM is available)
-4. JSON `phase1.triggerDay` / `phase2.triggerDay` (fallback when MCM is unavailable)
+4. JSON `phase1.triggerDay` / `phase2.triggerDay` (fallback when MCM is unavailable, on a client without MCM settings only; a dedicated server uses `taom-server-settings.json` ([server-settings](server-settings.md)))
 
 For the master enable/disable toggle: MCM `WarOfTheRingEnabled` takes precedence over JSON `enabled` when MCM is available.
 
@@ -232,7 +232,7 @@ Benefits: MCM config changes take effect immediately on next tick. No save migra
 MCM settings are accessed through an injected `ITaomSettingsProvider` interface rather than direct static access to `TaomSettings.Instance`. This:
 - Keeps the service testable (tests inject a mock with `IsAvailable = false`)
 - Follows the explicit-dependency-via-constructor-injection principle
-- Gracefully falls back to JSON config when MCM is unavailable
+- Falls back to JSON config when MCM is unavailable, on a client without MCM settings only; a dedicated server uses `taom-server-settings.json` ([server-settings](server-settings.md))
 
 ## Key Files
 

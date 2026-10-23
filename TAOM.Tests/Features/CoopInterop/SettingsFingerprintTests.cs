@@ -165,14 +165,31 @@ public class SettingsFingerprintTests
     [TestMethod]
     public void FloatsRenderRoundTripExact()
     {
-        // The property that matters: the rendered text parses back to the same float, so two
+        // The property that matters: the rendered text maps back to the same float, so two
         // peers holding the same value always produce the same bytes.
         foreach (var f in new[] { 0.1f, 0.25f, 1f / 3f, 1e-7f, 12345.678f })
         {
             var rendered = SettingsFingerprint.Render(f);
-            Assert.AreEqual(f, float.Parse(rendered, CultureInfo.InvariantCulture),
+            var bits = int.Parse(rendered, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            Assert.AreEqual(f, BitConverter.ToSingle(BitConverter.GetBytes(bits), 0),
                 $"'{rendered}' did not round-trip");
         }
+    }
+
+    [TestMethod]
+    public void Float_RendersAsItsBitPattern_NotRuntimeDecimalText()
+    {
+        // 1 + 2^-9 is a G9 rounding tie: .NET Framework renders "1.00195313", .NET Core
+        // (the dedicated server) "1.00195312". The bit pattern is the same on both.
+        Assert.AreEqual("3F804000", SettingsFingerprint.Render(1.001953125f));
+        Assert.AreEqual("3FF0080000000000", SettingsFingerprint.Render(1.001953125d));
+    }
+
+    [TestMethod]
+    public void NegativeZero_RendersAsZero()
+    {
+        Assert.AreEqual(SettingsFingerprint.Render(0f), SettingsFingerprint.Render(-0f));
+        Assert.AreEqual(SettingsFingerprint.Render(0d), SettingsFingerprint.Render(-0d));
     }
 
     [TestMethod]

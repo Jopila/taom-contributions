@@ -20,8 +20,8 @@ namespace TAOM.Features.CoopInterop;
 /// <para><b>Culture is the trap.</b> <c>0.25f.ToString()</c> is <c>"0,25"</c> on a Spanish
 /// Windows and <c>"0.25"</c> on an English one — two peers with identical settings would hash
 /// differently and the warning would fire on everyone with a comma. Every value goes through
-/// <see cref="CultureInfo.InvariantCulture"/>, and floats use the round-trip format so
-/// 0.1f + 0.2f never collapses onto a neighbour.</para>
+/// <see cref="CultureInfo.InvariantCulture"/>, and floats hash as their IEEE bit pattern (see
+/// <see cref="Render"/>), so neither a neighbour nor a runtime's rounding can change the text.</para>
 ///
 /// <para><b>Reflection, deliberately.</b> Hard-coding the property list would drift the first
 /// time someone adds a setting. Reading the type means a new knob is covered on the day it is
@@ -165,21 +165,21 @@ public static class SettingsFingerprint
         return Ungrouped;
     }
 
-    /// <summary>Culture-invariant, round-trip-exact rendering. See the class remarks.</summary>
+    /// <summary>Culture- and runtime-invariant, exact rendering for the hash input. See the class remarks.</summary>
     internal static string Render(object value)
     {
         switch (value)
         {
             case null: return "<null>";
             case bool b: return b ? "true" : "false";
-            // "G9"/"G17", not "R". On .NET Framework — and Directory.Build.props pins net472 —
-            // "R" is documented as not reliably round-tripping; "G9" for Single and "G17" for
-            // Double are the shortest formats that always do. The failure mode matters here: two
-            // genuinely different values collapsing to the same text is a MISSED divergence, and
-            // missing one is the whole thing this feature exists to prevent. It cannot invent a
-            // false alarm either way, since both peers run the same framework.
-            case float f: return f.ToString("G9", CultureInfo.InvariantCulture);
-            case double d: return d.ToString("G17", CultureInfo.InvariantCulture);
+            // The IEEE bit pattern, not decimal text. Clients run .NET Framework 4.7.2 and the
+            // dedicated server runs .NET 6, and the two round a "G9" tie differently: 1.001953125f
+            // is "1.00195313" on Framework and "1.00195312" on .NET Core (ties to even), so equal settings would
+            // hash differently. The bits are exact and runtime-independent, so two different values
+            // never collapse onto one text and two equal ones never split. -0 is folded into 0
+            // because they compare equal. The hash input only; logs show hashes, never this text.
+            case float f: return SingleBits(f).ToString("X8", CultureInfo.InvariantCulture);
+            case double d: return BitConverter.DoubleToInt64Bits(d == 0d ? 0d : d).ToString("X16", CultureInfo.InvariantCulture);
             case string s: return s;
         }
 
@@ -197,6 +197,9 @@ public static class SettingsFingerprint
             ? f2.ToString(null, CultureInfo.InvariantCulture)
             : value.ToString() ?? "<null>";
     }
+
+    // BitConverter.SingleToInt32Bits is not in net472.
+    private static int SingleBits(float f) => BitConverter.ToInt32(BitConverter.GetBytes(f == 0f ? 0f : f), 0);
 
     private static string Sha256(string text)
     {

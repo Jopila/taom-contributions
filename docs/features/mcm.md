@@ -119,7 +119,9 @@ what the player reads.
 
 **A JSON behind an MCM knob is dead.** `GlobalSettings<T>.Instance` is non-null whenever MCM is
 loaded, UI opened or not, so a `SettingClamp.Clamp(TaomSettings.Instance?.X, jsonValue, ...)`
-fallback never reads the file for that field. The bandit one was deleted in #559; the twelve other
+fallback never reads the file for that field. This holds on a co-op dedicated server too: MCM is not
+loaded there, but `X.Instance` returns the instance built from `taom-server-settings.json`
+([server-settings](server-settings.md)), so the JSON is dead there as well. The bandit one was deleted in #559; the twelve other
 features shipping the same shape are #561. Fields the UI does not expose still come from the file.
 
 `AiPartySizeSettingsWatcher` is the one subscriber to `BaseSettings.PropertyChanged`; it acts on

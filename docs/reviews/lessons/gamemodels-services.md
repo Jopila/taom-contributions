@@ -1248,3 +1248,15 @@ negative), and the penalty became a reward.
 - **Prevent:** a config value that reaches engine int arithmetic is an `int` with a range matched to the
   engine's own bounds (`RevertIfOutOfRange`); never a double cast without a range check.
 - **Source:** `docs/reviews/rca-enlistment-desertion-cost-2026-10-21.md` F1.
+
+### When a source that returned null starts returning an object, diff every reader's old fallback (B8, 2026-10-23)
+B8 made `TaomSettings.Instance` and its three siblings return fresh compiled-default objects on a dedicated
+server, where MCM had returned null. Every `X.Instance?.Prop ?? fallback` reader switched from its fallback to the
+property initializer. One differed: the hitch probe's `?? false` against a compiled `true`, so Patch98 began
+installing on every server boot, against the provider's own fail-closed contract. Config-backed fallbacks went
+dead the same way.
+- **Why missed:** the plan checked the readers that test for null, not the value every reader got before and after.
+- **Prevent:** before a null source becomes an object, script a comparison of every `?? fallback`, clamp default and
+  config-backed fallback against the new object's value (lens 5's `compare.py` did 285 rows in one run), and either
+  match the old value in the new object or document each change.
+- **Source:** [rca-b8-server-settings-2026-10-23.md](../rca-b8-server-settings-2026-10-23.md) findings 2 and 6.

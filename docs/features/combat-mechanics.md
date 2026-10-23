@@ -251,7 +251,7 @@ charge rules, then Hammerhand, then base. Signature Strikes already declines alt
 `kickChanceFactor` 0.5, `playerVictimChanceFactor` 0.5. Percents must be finite and in 0 to 100 with min at most max; both factors
 finite and in 0 to 1. An invalid value reverts to its compiled default with a warning (a swapped band reverts both ends). The
 service trusts the provider's validation. No sliders. MCM toggle `Hammerhand (Shield Bash Knockdown)` (Combat Mechanics group,
-Order 17, on by default, folds the master, JSON `enabled` when MCM is absent). It is co-op relevant: it changes the simulation, so
+Order 17, on by default, folds the master, JSON `enabled` when MCM is absent, on a client without MCM settings only; a dedicated server uses `taom-server-settings.json` ([server-settings](server-settings.md))). It is co-op relevant: it changes the simulation, so
 it is counted in the settings fingerprint.
 
 **Engine facts** (v1.5.5, read from the installed DLLs):

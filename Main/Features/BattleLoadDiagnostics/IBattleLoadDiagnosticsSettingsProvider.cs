@@ -52,8 +52,10 @@ public interface IBattleLoadDiagnosticsSettingsProvider
     /// 50-2000 ms, default 250); read at each mission start.</summary>
     double HitchThresholdMs { get; }
 
-    /// <summary>The Patch98 hitch probe's toggle. Fails CLOSED to false when MCM is not ready, because it
-    /// installs Harmony patches; the compiled MCM default is true. Read once per process at the first game
+    /// <summary>The Patch98 hitch probe's toggle. Fails CLOSED to false when the instance is null (in tests,
+    /// before MCM initializes, or on a client whose MCM failed to load), because it installs Harmony patches;
+    /// the compiled MCM default is true. A dedicated server always gets the instance built from
+    /// taom-server-settings.json, and its settings set also defaults this to false. Read once per process at the first game
     /// init, where Patch98 installs or is skipped, and at each mission start.</summary>
     bool HitchProbeEnabled { get; }
 

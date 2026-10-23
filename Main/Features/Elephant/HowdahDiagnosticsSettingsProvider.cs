@@ -2,7 +2,8 @@ namespace TAOM.Features.Elephant;
 
 /// <summary>
 /// Wraps <see cref="TaomSettings"/> so the howdah code can read the toggle without MCM loaded. TaomSettings.Instance is
-/// null whenever MCM is absent, so the fallback must equal the compiled default: on, while the platform is being tested
+/// null in tests, before MCM initializes, or on a client whose MCM failed to load (a dedicated server always gets the
+/// instance built from taom-server-settings.json), so the fallback must equal the compiled default: on, while the platform is being tested
 /// (Mike, 2026-09-19, #627). HowdahDiagnosticsSettingsProviderTests pins both.
 /// </summary>
 public class HowdahDiagnosticsSettingsProvider : IHowdahDiagnosticsSettingsProvider

@@ -236,7 +236,7 @@ target inside their kit line (the rest are mostly elite pieces with no lord sibl
 
 | Element | Field | Current | Meaning |
 |---|---|---|---|
-| `<ArmourAcquisition>` | `enabled` | true | The master switch when MCM is not loaded; with MCM, its toggle decides |
+| `<ArmourAcquisition>` | `enabled` | true | The master switch when MCM is not loaded, on a client without MCM settings only; a dedicated server uses `taom-server-settings.json` ([server-settings](server-settings.md)). With MCM, its toggle decides |
 | `<Gate>` | `heavy` / `elite` / `lord` | 1 / 2 / 3 | Armoury level a class needs, to be sold and to be upgraded into (0 to 3, in order) |
 | `<Upgrade target="medium">` | gold, value_share, materials | 150, 0.25, 3 wrought iron + 2 crude iron | |
 | `<Upgrade target="heavy">` | | 500, 0.35, 3 steel + 4 iron | |

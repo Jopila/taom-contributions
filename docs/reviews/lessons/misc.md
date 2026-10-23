@@ -656,3 +656,13 @@ months earlier, while two stale code comments still stated it.
 - **Prevent:** for every row taken from an outside source, grep the RCAs for the premise and confirm it in the
   installed engine or the other mod's source before the row gets an action. Record the evidence in the row.
 - **Source:** [rca-coop-safety-nets-2026-10-21.md](../rca-coop-safety-nets-2026-10-21.md) findings 2 to 4.
+
+### A value two processes compare is hashed from its bits, not from runtime-formatted text (B8, 2026-10-23)
+The co-op settings fingerprint rendered floats with `G9`. A net472 client prints `1.001953125f` as `1.00195313` and
+a .NET Core 3.0 or later runtime (the dedicated server runs .NET 6) prints `1.00195312`, so identical settings could
+hash differently. The code comment said "both peers run the same framework", which held only until a server existed.
+- **Why missed:** the formatter was checked on one runtime; the premise behind its comment was never re-read when a
+  second runtime joined.
+- **Prevent:** hash floats and doubles as their IEEE bit patterns (fold -0 into 0) whenever the value is compared
+  across processes, and pin a vector test with a value whose decimal text differs between runtimes.
+- **Source:** [rca-b8-server-settings-2026-10-23.md](../rca-b8-server-settings-2026-10-23.md) finding 1.

@@ -9,6 +9,12 @@ namespace TAOM.Features.CrashReport;
 // specific sections.
 public sealed class CrashReportSettings : AttributeGlobalSettings<CrashReportSettings>
 {
+    // Hides MCM's GlobalSettings<T>.Instance: a dedicated server, where MCM is not loaded, reads
+    // taom-server-settings.json (ServerSettingsSource); a client gets MCM's own. Name the base explicitly:
+    // a bare Instance here would recurse.
+    public static new CrashReportSettings? Instance =>
+        ServerSettings.ServerSettingsSource.Get<CrashReportSettings>() ?? GlobalSettings<CrashReportSettings>.Instance;
+
     public override string Id => "TAOM.CrashReport";
     public override string DisplayName => "TAOM — Crash Report";
     public override string FolderName => "TAOM";

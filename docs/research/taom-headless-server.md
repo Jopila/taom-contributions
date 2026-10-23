@@ -1,7 +1,7 @@
 # Running TAOM's code on the co-op dedicated server
 
 **Status:** research and plan, 2026-10-21. B1 (the load gates) and B2 (TAOM.Dependencies headless)
-are built (`5fcf8390c`); B3 (the TAOM.Client skeleton) is committed as `03d9db8dc`, with its follow-up in `e0a6970dd`. B4a (the 14 front-end types to TAOM.Client, `KnownClientTypesInCore` from 40 to 26) has landed; its client boot is owed. B4b (the six campaign-map types and three helpers, `KnownClientTypesInCore` from 26 to 20) has landed as `a15563a3c`. B4c (the 7 mission, custom-battle engine and WinForms types, 20 to 13) has landed as `c91380274`. B5 (the 13 UIExtenderEx types, the 15 prefab classes, the three Patch109 postfixes and the UIExtenderEx registration to TAOM.Client, 13 to 0) is built: `KnownClientTypesInCore` is empty, so milestone M1 is reached in source. B7 slice 1 (the camp, refuge and supply route map visuals to TAOM.Client behind core nulls, and the server JIT ratchet with its first baseline) has landed; its client map checks are owed. The client boots of B4b, B4c and B5 and the M1 server boot of the committed build are owed. A spike build of TAOM has since booted to SERVING on the dedicated server (spike boot 8, 2026-10-22, and boots on 2026-10-23); the record of that is [coop-dedicated-server](../features/coop-dedicated-server.md). B6c (the startup-hook guards: problem rows 3 to 6, 8, 9 and 15 to 17) has landed as `8960a0c24`; B6a and B6b are in progress, and the 6c server boot waits for them. The decision this plan asks for is
+are built (`5fcf8390c`); B3 (the TAOM.Client skeleton) is committed as `03d9db8dc`, with its follow-up in `e0a6970dd`. B4a (the 14 front-end types to TAOM.Client, `KnownClientTypesInCore` from 40 to 26) has landed; its client boot is owed. B4b (the six campaign-map types and three helpers, `KnownClientTypesInCore` from 26 to 20) has landed as `a15563a3c`. B4c (the 7 mission, custom-battle engine and WinForms types, 20 to 13) has landed as `c91380274`. B5 (the 13 UIExtenderEx types, the 15 prefab classes, the three Patch109 postfixes and the UIExtenderEx registration to TAOM.Client, 13 to 0) is built: `KnownClientTypesInCore` is empty, so milestone M1 is reached in source. B7 slice 1 (the camp, refuge and supply route map visuals to TAOM.Client behind core nulls, and the server JIT ratchet with its first baseline) has landed; its client map checks are owed. The client boots of B4b, B4c and B5 and the M1 server boot of the committed build are owed. A spike build of TAOM has since booted to SERVING on the dedicated server (spike boot 8, 2026-10-22, and boots on 2026-10-23); the record of that is [coop-dedicated-server](../features/coop-dedicated-server.md). B6c (the startup-hook guards: problem rows 3 to 6, 8, 9 and 15 to 17) has landed as `8960a0c24`; B6a and B6b are in progress, and the 6c server boot waits for them. B8 (the server settings file, [server-settings](../features/server-settings.md)) is built; its server and client boots are owed. The decision this plan asks for is
 [ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md), accepted 2026-10-22: option (b), a TAOM
 server settings file, missions proven absent before B4c is sized, and the GetTypes shim kept.
 **Target:** Bannerlord v1.5.5 server build (`Win64_Shipping_Server`) on the appliance's bundled .NET 6.0.36 host (the staged `dotnet/shared/Microsoft.NETCore.App`).
@@ -99,8 +99,10 @@ module on the server) and `System.Windows.Forms` (the runtime config names only 
 **MCMv5 and UIExtenderEx are load-time dependencies of `TAOM.dll`.** Four settings classes derive from MCMv5
 types (`TaomSettings`, `CrashReportSettings`, `BattleLoadDiagnosticsSettings`, `BlowDiagnosticsSettings`);
 26 types derive from UIExtenderEx base types, 11 of them among the 40. `MCMv5.dll` and the Harmony build TAOM
-binds (0Harmony 2.4.2.0) sit in the staged app bin, which is why those types loaded in run 46908. If a
-future staging stops copying non-kept DLLs, the four settings types would fail `GetTypes`. No gate checks
+binds (0Harmony 2.4.2.0) sit in the staged app bin, which is why those types loaded in run 46908. Since B8
+`MCMv5.dll` is needed at runtime on a server too, not only at type load: the server constructs the four
+settings classes and their `MCM.Common.Dropdown` values. If a future staging stops copying non-kept DLLs,
+the four settings types would fail `GetTypes` and the settings file could not be served. No gate checks
 that: gate 2 covers only the TaleWorlds and SandBox references, so MCMv5 staging is a manual check.
 
 ## The 40 types
@@ -270,26 +272,31 @@ client-only assembly or one of the 40. Since B7 slice 1 that scan is a checked-i
 - **What a server reads today.** From an MCMv5 decompile: `GlobalSettings<T>.Instance` returns
   `BaseSettingsProvider.Instance?.GetSettings(id) as T`, and `BaseSettingsProvider.Instance` has an
   `internal` setter. Only MCM's own submodules set it and the server loads none of them (they are tagged
-  `none`), so `TaomSettings.Instance` is null headless and does not throw (Likely; the first clean boot
-  confirms it with one log line).
+  `none`). Before B8 that made MCM's `TaomSettings.Instance` null headless, without a throw. Since B8 each of
+  the four settings classes hides MCM's `Instance` with `ServerSettingsSource.Get<X>() ?? GlobalSettings<X>.Instance`,
+  so on a server `X.Instance` returns the instance built from `taom-server-settings.json` and is never null
+  unless the loader itself throws ([server-settings](../features/server-settings.md)).
 - **Gameplay reads MCM constantly.** 227 `TaomSettings.Instance` occurrences in 112 files under `Main` (grep
-  this turn; the three diagnostics settings classes add more), nearly all through settings providers with
+  on 2026-10-21; the three diagnostics settings classes add more). Since B8 every one of them reads the hide,
+  not MCM's property directly. Nearly all go through settings providers with
   `private TaomSettings? Settings => _settings ??= TaomSettings.Instance;` (43 files; for example
   `Main/Features/CaravanTrade/CaravanTradeSettingsProvider.cs:21`) and compiled or ModuleData fallbacks (for
   example `Main/Features/AiPartySize/AiPartySizeService.cs:106-108`, which defaults with
   `settings?.EnableAiPartyScaling ?? true`). A grep for `TaomSettings.Instance.` member access without a null
-  guard found no code use outside comments. So a server runs on **compiled defaults**. While the instance is
-  null, `??=` re-reads MCM's dictionary on every access: cheap, no throw.
-- **What that means.** The server's gameplay settings are the defaults whatever the host player chose.
+  guard found no code use outside comments. Before B8 a server therefore ran on those fallbacks, and the
+  `??=` re-read MCM's dictionary on every access while the instance was null. Since B8 a server runs on the
+  **server defaults** (the compiled defaults, except `EnableHitchProbe` off) plus the values in the file,
+  and the first read caches the instance.
+- **What that means.** The server's gameplay settings are the server defaults plus the file, whatever the host player chose.
   `SettingsFingerprint` and `SettingsFingerprintLog` already hash the simulation-relevant groups; peers do not
   exchange them ([coop-interop](../features/coop-interop.md), "What is NOT done", the MCM settings parity
   bullet).
-- **Decision for the maintainer (B8):** (1) compiled defaults, logged once at boot with the fingerprint (cheap,
-  recommended first); or (2) a TAOM-owned settings file the server reads into a `TaomSettings` instance behind
-  one `ITaomSettingsSource` seam that every provider's accessor uses (43 files use the `??= TaomSettings.Instance`
-  accessor and 81 files declare a `*SettingsProvider` class; the other `TaomSettings.Instance` readers too).
-  Where MCM writes TAOM's json2 file on a server user profile, and whether `TaomSettings` can be deserialized
-  outside MCM, are UNVERIFIED.
+- **Decision (B8): option 2,** a TAOM-owned settings file ([ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md)
+  decision 2). The choice was between (1) compiled defaults logged once at boot and (2) a file the server reads
+  into the settings instances. Built 2026-10-23 as a static `Instance` hide on each of the four settings
+  classes, so no provider or call site changed (43 files use the `??= TaomSettings.Instance` accessor and 81
+  declare a `*SettingsProvider` class). `new TaomSettings()` works outside MCM, which the tests construct
+  freely. MCM is not loaded on a server, so it writes no json2 file there.
 
 ## Options considered
 
@@ -404,7 +411,7 @@ hunks and a builder agent recommends them.
 | B5 (built, client and server boots owed) | UIExtenderEx moves to the client (13 types, 15 prefab classes, the three Patch109 postfixes, `UIExtender.Create/Register/Enable` and `RegisterUiExtensions`, the attribute-reading half of `CoopUiRegistrationPolicy`). Allowlist reaches zero: M1. | implementer | `Main/SubModule.cs` | Server (the milestone), current staging with only `TAOM` kept: no `Error while getting types` for `TAOM.dll`, no `TAOM could not be loaded correctly`, and the first post-`GetTypes` failure recorded as B6 input. Client: every mixin and prefab extension present. |
 | B6 | Lifecycle guards headless (problem rows 2 to 9), one hook per sub-batch: 6a `[ClientOnly]`, `PatchCategoryIndex.Build(assembly, headless)`, the 11 split categories, gate 4; 6b `TaomFeatureModule.ClientOnly` and a client flag on `PatchCategoryDecl` honored by `ModuleRunner` without faulting; 6c the `SubModule.cs` guards, including `CustomBattlesIoC.InitializeHooks`, which throws headless (`SelectorVM<CharacterItemVM>`, `typeof(CustomBattleSideVM)`) and is called at `Main/SubModule.cs:565` with no try. | implementer | `Main/SubModule.cs` (6a call sites, 6c) | After each sub-batch: server reaches `OnGameInitializationFinished` for the staged save with no TAOM exception; record the next failure. |
 | B7 | Campaign-time UI paths (row 10 and the remaining 97 candidates), one feature group per slice: map visuals, party intel, map profiler targets. Slice 1 (map visuals, and gate 3 as `ServerJitGateTests`) is built; party intel and map profiler targets remain. | implementer | none unless a caller is in `SubModule.cs` | Server runs the staged campaign for several in-game days with no TAOM exception; a guest connects and plays a day. |
-| B8 | Settings headless. Minimum: one boot line "MCM not loaded: TAOM settings at compiled defaults" plus the existing fingerprint log (it can go in `SettingsFingerprintLog`). Option 2 is its own design and issue. Needs the settings decision. | implementer | none | Boot line present. |
+| B8 (built, server and client boots owed) | Settings headless, decision 2: `taom-server-settings.json`, read on the first `X.Instance` read in a dedicated-server process through a static `Instance` hide on each of the four settings classes, validated per kind, with a generated defaults reference and one boot line. The fingerprint hashes the file values. Built 2026-10-23 without a `Main/SubModule.cs` or `Main/IoC.cs` hunk; see [server-settings.md](../features/server-settings.md). | implementer | none | Boot line present. |
 | B9 | Manifest flip and the generic staging rule: TAOM first (core tags removed; the second submodule and the server-mirror exclusion of `TAOM.Client` landed in B3), then the server repo's two scripts. | implementer, two repos | none | Stage with no `-KeepSubModules`; the submodule list matches the expected set; the B7 campaign run repeats clean. |
 | B10 | Docs and closeout: the "not supported either" bullet in [coop-interop](../features/coop-interop.md), a feature doc, its feature-map row, an orientation trap line, the lessons entry, `python tools/lint_docs.py --fail-on-drift`. | implementer | none | none |
 
@@ -431,7 +438,7 @@ it seeds the next batch.
 | Whether `RefugeClanScreenPatch`'s static constructor throws inside `IoC.Configure` headless (row 18) | The M1 boot. |
 | Gauntlet widget discovery across a second assembly | Read from the decompile (`WidgetInfo.CollectWidgetTypes` scans every loaded assembly that references TaleWorlds.GauntletUI; `WidgetFactory` keys by short type name), and `ClientWidgetDiscoveryTests` pins the preconditions. The runtime proof is the client boot's visual checks: on a client Debug.FailedAssert writes nothing (v1.5.5 MBDebugManager.Assert is empty), so the rgl log cannot show a widget Gauntlet failed to find. |
 | Whether the server runs missions (row 11, still unproven after B4c: a server mission is a logged no-op). Row 5's hotkey question is moot: B6c skips the registration headless. | The first clean boot. |
-| Where MCM's json2 file lives on the server profile. TAOM's log is at `<stage>\engine\bin\Win64_Shipping_Server\Logs\taom_debug_*.log` (found in the 2026-10-23 spike boot). | Find it in the M1 boot. |
+| MCM does not load on a server, so it writes no json2 file there. TAOM's log is at `<stage>\engine\bin\Win64_Shipping_Server\Logs\taom_debug_*.log` (found in the 2026-10-23 spike boot). | Both answered (2026-10-23). |
 | The value-field, generic-constraint and override shapes of a failing `GetTypes` on .NET 6 | The B2 review's experiment ran on .NET Framework 4.8 and CoreCLR 10. Shapes 3 and 4 occur only inside the 40 (see above), and gate 1 flags every shape. |
 | The server repo's test harness for its staging scripts | Read that repo before B9. |
 | Engine statements taken from the server-build decompile (load order, tag checks, `AbortGame`) | Partly settled 2026-10-23 by the B6c review's server `Module` decompile: `GameNetwork.IsDedicatedServer => true` in both server builds (Win64 and Linux64) and read by the engine before `OnSubModuleLoad`; `InitializeSubModuleBases` rethrows a hook failure; `OnBeforeInitialModuleScreenSetAsRoot` runs only while no game state is active. Load order, tag checks and `AbortGame` are not re-read. |

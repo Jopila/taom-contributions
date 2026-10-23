@@ -570,7 +570,10 @@ to characterise. The existing try/catch around acceptance is containment, not co
 
   `SettingsFingerprint` hashes those 304: one code per MCM group plus a global, culture-invariant
   so a comma decimal separator cannot fake a mismatch — and `SettingsFingerprintLog` writes them
-  to each peer's log under the co-op gate. It reads all four classes, not just `TaomSettings`:
+  to each peer's log under the co-op gate. Floats and doubles hash as their IEEE bit patterns
+  (-0 folded to 0), not as runtime-formatted text, so a .NET 6 server and a net472 client agree on
+  the same values; hashes from older builds differ for any group that contains a float, which is
+  harmless because nothing stores a hash. It reads all four classes, not just `TaomSettings`:
   every diagnostics property is excluded so this moves no hash today (a test asserts exactly
   that), and it means a simulation-affecting setting added to a diagnostics page later is covered
   the day it lands. That makes the "compare settings manually" workaround a comparison of a few
@@ -586,7 +589,8 @@ to characterise. The existing try/catch around acceptance is containment, not co
   arrive in parity with the host's save — the campaign id matches while the local file may not
   exist at all, which is worse than global rather than better. TAOM declares neither:
   the only `AttributePerCampaignSettings` reference in the tree is a reflection target string in
-  `McmSettingsCollector.cs`, which scans third-party mods. So nothing here is save-inherited and
+  `McmSettingsCollector.cs`, which scans third-party mods and, since B8's `Instance` hide, also
+  finds TAOM's own four classes. So nothing here is save-inherited and
   nothing arrives guaranteed-equal. **If a PerSave or PerCampaign settings class ever lands in
   TAOM, this paragraph stops being true and the fingerprint's meaning changes with it** — a
   PerSave class would be equal by construction and need not be hashed; a PerCampaign one would
@@ -594,11 +598,19 @@ to characterise. The existing try/catch around acceptance is containment, not co
 
   **A matching fingerprint means the MCM settings agree, and nothing wider.** It covers the 304
   values on the four settings pages. It does not cover the `ModuleData` JSON/XML that several
-  features fall back to when a setting is unset, the `TAOM.Dependencies` flag files
+  features fall back to when a setting is unset (on a client only; a server never reads them for an
+  MCM-backed field), the `TAOM.Dependencies` flag files
   (`patchshield-disabled.flag`, `saveshield-swallow-disabled.flag`, `coop-force-active.flag`),
   or any difference outside TAOM. None of those three flags gates a setting in the 304 (each
   governs a Dependencies-side shield with no MCM property), but the general point holds: read the
   log line as "our settings pages match", not as "our installs are equivalent".
+
+  **On a dedicated server the values come from a file.** MCM is not loaded there, so each settings
+  class's `Instance` reads `taom-server-settings.json` on the first read in the process and falls
+  back to the server defaults (compiled, except `EnableHitchProbe` off) for every key the file leaves out
+  ([server-settings.md](server-settings.md)). The fingerprint reads `X.Instance`, so a server's
+  fingerprint hashes the file's values; a client still hashes its MCM values. The counts above do
+  not change: the file covers the same settings.
 
   **Still not done:** peers do not exchange them. Putting the fingerprint in save metadata and
   comparing on join is the remaining step, and it cannot be verified without two machines in a

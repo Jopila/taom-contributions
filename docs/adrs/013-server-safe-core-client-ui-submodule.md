@@ -78,7 +78,8 @@ The path then grows toward a full split (a) only feature by feature, where a fea
 - `Main/SubModule.cs` and `Main/IoC.cs` are single-owner files and take hunks from several batches, so
   those batches run serially.
 - A server reads TAOM settings from a TAOM server settings file (decision 2), validated like every TAOM
-  config, with compiled defaults for anything it leaves out.
+  config, with the server defaults (compiled, except `EnableHitchProbe` off) for anything it leaves out;
+  built in B8, see [server-settings](../features/server-settings.md).
 - A player's client keeps the same features; only where the UI types live changes.
 
 ## Alternatives Considered
@@ -115,6 +116,7 @@ All four were decided by the maintainer on 2026-10-22. Batches B1 (the gate test
    feature behind an inverted call for good.
 2. **Server settings: a TAOM server settings file, done right the first time.** Batch B8 builds it behind
    one settings-source seam, validated like every TAOM config, with compiled defaults as the fallback.
+   Built 2026-10-23 as a static `Instance` hide on each settings class (`ServerSettingsSource`).
 3. **Whether the dedicated server ever runs missions: prove it first, then decide.** A code trace on
    2026-10-22 found no co-op path that opens a mission on the server (battles run on the players'
    clients, and the server simulates or finalizes them), and [Likely] no vanilla path, because the server
@@ -137,5 +139,6 @@ so; each move batch also ends with a client boot.
 
 - [taom-headless-server](../research/taom-headless-server.md): evidence, the 40 types, the problem points, the batches.
 - [coop-interop](../features/coop-interop.md): the co-op feature page.
+- [server-settings](../features/server-settings.md): the B8 server settings file (decision 2).
 - [ADR-007](./007-adapter-pattern.md): null adapters for the server side of each inverted call.
 - Issue #967 (Batch C of the co-op epic #964).

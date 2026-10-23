@@ -2,8 +2,9 @@ namespace TAOM.Features.Enlistment;
 
 /// <summary>
 /// Wraps <see cref="TaomSettings"/> so the gate can be unit-tested without MCM loaded.
-/// <c>TaomSettings.Instance</c> is null whenever MCM is absent or not yet initialized, so the
-/// setting falls back to its compiled default — on.
+/// <c>TaomSettings.Instance</c> is null in tests, before MCM initializes, or on a client whose MCM
+/// failed to load (a dedicated server always gets the instance built from
+/// <c>taom-server-settings.json</c>), so the setting falls back to its compiled default, on.
 ///
 /// The static is read on EVERY call rather than cached at construction, which is what makes the
 /// MCM property honestly <c>RequireRestart = false</c>: flipping the switch mid-session is picked

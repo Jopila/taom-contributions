@@ -1,7 +1,7 @@
 {
   "_comment_feature": "Signature strikes (#605, #645): direction-mapped effects when a configured hero lands a melee hit with any weapon except thrown and ranged. Sauron: Overhead = Slam, Left/Right = Sweep. The Nine: Overhead, Left and Right = Scream. Thrust = a plain hit. Keys are case-insensitive. Full design and every gate: docs/features/signature-strikes.md. A full Bannerlord restart is needed for changes here; the MCM cooldown multiplier applies live.",
 
-  "_comment_enabled": "Read only when MCM is absent. Once MCM has loaded, the Combat Mechanics group's Signature Strikes toggle (default on) owns this switch and the value here is not consulted.",
+  "_comment_enabled": "A fallback, read only on a client without MCM settings. Once MCM has loaded, the Combat Mechanics group's Signature Strikes toggle (default on) owns this switch and the value here is not consulted. A dedicated server uses taom-server-settings.json instead.",
   "enabled": true,
 
   "_comment_shieldBlockedMultiplier": "Fraction of the damage basis kept when the triggering hit landed on a shield, and of a ring victim's damage while that victim is shield-blocking (a blocking victim is never knocked down). 0 to 1. Shared by every signature.",

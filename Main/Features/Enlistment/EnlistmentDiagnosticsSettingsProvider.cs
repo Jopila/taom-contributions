@@ -2,8 +2,9 @@ namespace TAOM.Features.Enlistment;
 
 /// <summary>
 /// Wraps <see cref="TaomSettings"/> so the gated call sites can be reasoned about (and the fail
-/// direction unit-tested) without MCM loaded. <c>TaomSettings.Instance</c> is null whenever MCM is
-/// absent or not yet initialized, so the setting falls back to its compiled default — off from
+/// direction unit-tested) without MCM loaded. <c>TaomSettings.Instance</c> is null in tests, before
+/// MCM initializes, or on a client whose MCM failed to load (a dedicated server always gets the
+/// instance built from <c>taom-server-settings.json</c>), so the setting falls back to its compiled default: off from
 /// 2026-08-09, and back on TEMPORARILY from 2026-08-28 for the #520 in-game smoke.
 ///
 /// While the trace is on by default, a player without MCM gets it too, and that is the correct

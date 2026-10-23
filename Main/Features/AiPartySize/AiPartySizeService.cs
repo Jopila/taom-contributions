@@ -51,7 +51,9 @@ public class AiPartySizeService : IAiPartySizeService
     public const float MaxAbilityScale = 1.50f;
 
     // Shipped defaults. These are the single source: TaomSettings uses them as its property
-    // initializers and the fallbacks below use them when MCM is absent, so each number exists once.
+    // initializers and the fallbacks below use them when the instance is null (in tests, before MCM
+    // initializes, or on a client whose MCM failed to load; a dedicated server always gets the instance
+    // built from taom-server-settings.json), so each number exists once.
     //
     // NEUTRAL BY DEFAULT (2026-09-01). The feature ships doing nothing to party size: 1.0 applies no
     // factor and 0 adds no men, so an out-of-box game keeps vanilla limits and a player opts in

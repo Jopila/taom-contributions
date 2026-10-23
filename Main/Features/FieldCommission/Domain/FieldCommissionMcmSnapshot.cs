@@ -4,8 +4,10 @@ namespace TAOM.Features.FieldCommission.Domain;
 
 /// <summary>
 /// An immutable read of the Battlefield Promotions MCM knobs at one instant. Every field is nullable
-/// because <c>TaomSettings.Instance</c> is null whenever MCM is absent or not yet initialized — a null
-/// field means "the player expressed no preference", and the JSON value stands.
+/// because <c>TaomSettings.Instance</c> is null in tests, before MCM initializes, or on a client whose
+/// MCM failed to load. A null field means "the player expressed no preference", and the JSON value stands.
+/// A dedicated server always gets the instance built from <c>taom-server-settings.json</c>, so there every
+/// field is set and the JSON value never stands.
 ///
 /// It exists to be a cheap cache key. <c>GetConfig()</c> runs on the campaign tick, so the merged
 /// config is rebuilt only when this struct's value changes; equality therefore has to cover EVERY

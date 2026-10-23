@@ -90,7 +90,8 @@ public sealed class FieldCommissionSettingsProvider : IFieldCommissionConfigProv
         var source = json ?? new FieldCommissionConfig();
 
         // Each surface validates only its OWN input. The slider bounds below exist to contain a
-        // hand-edited MCM json; running the JSON value through them too would narrow a config the
+        // hand-edited MCM json (a dedicated server reads taom-server-settings.json instead, and the
+        // JSON config is the fallback only on a client without MCM settings); running the JSON value through them too would narrow a config the
         // JSON provider already validated on its own, stricter terms — `ratioThreshold: 0` is
         // explicitly legal there ("never eligible") and would come back out of a 0.1-floored clamp
         // as 0.1, quietly re-enabling the thing the pack author turned off. Same shape as the
@@ -125,7 +126,8 @@ public sealed class FieldCommissionSettingsProvider : IFieldCommissionConfigProv
 
     /// <summary>
     /// Reads the cached MCM settings. Separated from <see cref="Merge"/> so nothing above this line needs
-    /// MCM loaded; <c>TaomSettings.Instance</c> is null in the test host and whenever MCM fails to load.
+    /// MCM loaded; <c>TaomSettings.Instance</c> is null in the test host and on a client whenever MCM fails to load
+    /// (a dedicated server gets the instance read from <c>taom-server-settings.json</c>).
     /// </summary>
     private FieldCommissionMcmSnapshot Capture()
     {

@@ -146,7 +146,8 @@ Battle Load Diagnostics MCM page, `Mission Performance` group:
 
 The provider validates both numbers (an out-of-range or non-finite value falls back to the
 default, and a measured mission names each replaced value in one warning) and fails CLOSED to off when MCM is not ready, unlike its siblings, because the toggle
-installs patches. All three are instrumentation and excluded from the co-op settings fingerprint.
+installs patches. On a dedicated server `Enable Hitch Probe` defaults off unless `taom-server-settings.json` sets it
+([server-settings](server-settings.md)). All three are instrumentation and excluded from the co-op settings fingerprint.
 Behaviour timing needs the profiler installed, its toggle on at that mission's start AND every hook the profiler
 needs still in place (see Hook health); with it off, a mission still measures in `probe` mode when the hitch probe
 is on (see Patch98 below).
@@ -647,7 +648,7 @@ installed and the cost is the one `probe off:` line per process.
 
 | Setting | Default | Read |
 |---|---|---|
-| `Enable Hitch Probe` (`EnableHitchProbe`) | on | Once per process at the first game init, where Patch98 installs or is skipped (`RequireRestart = true`, allowlisted in `SettingRequireRestartPostureTests`), and at each mission start. The provider fails CLOSED to off when MCM is not ready, because the toggle installs patches |
+| `Enable Hitch Probe` (`EnableHitchProbe`) | on (off on a dedicated server unless `taom-server-settings.json` sets it, [server-settings](server-settings.md)) | Once per process at the first game init, where Patch98 installs or is skipped (`RequireRestart = true`, allowlisted in `SettingRequireRestartPostureTests`), and at each mission start. The provider fails CLOSED to off when MCM is not ready, because the toggle installs patches |
 
 `Hitch Threshold (ms)` applies to both modes. The toggle is instrumentation and excluded from the
 co-op settings fingerprint.

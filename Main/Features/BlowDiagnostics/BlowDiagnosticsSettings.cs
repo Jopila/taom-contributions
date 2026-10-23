@@ -10,6 +10,12 @@ namespace TAOM.Features.BlowDiagnostics;
 // stops names the fatal blow (victim race, blow flags, damage type).
 public sealed class BlowDiagnosticsSettings : AttributeGlobalSettings<BlowDiagnosticsSettings>
 {
+    // Hides MCM's GlobalSettings<T>.Instance: a dedicated server, where MCM is not loaded, reads
+    // taom-server-settings.json (ServerSettingsSource); a client gets MCM's own. Name the base explicitly:
+    // a bare Instance here would recurse.
+    public static new BlowDiagnosticsSettings? Instance =>
+        ServerSettings.ServerSettingsSource.Get<BlowDiagnosticsSettings>() ?? GlobalSettings<BlowDiagnosticsSettings>.Instance;
+
     public override string Id => "TAOM.BlowDiagnostics";
     public override string DisplayName => "TAOM — Blow Diagnostics";
     public override string FolderName => "TAOM";

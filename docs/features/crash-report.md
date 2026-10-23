@@ -125,7 +125,7 @@ Each section is gathered by a dedicated collector. Any collector that throws is 
 | Campaign | UniqueGameId, time, hero (level/clan/kingdom/gold/renown/influence/race), party (size/wounded/prisoners/morale/food/tier histogram), current settlement or map position, recent CampaignEvents ring buffer |
 | Mission | Scene, mode, time-of-day, teams (alive/total per team), player formations (count/orders), player agent (health/pos/mount/wielded item) |
 | TAOM State | Career, special resources, cultural feats, revolt tuning, active messengers — populated when feature adapters are wired (v1 ships with stubs; subsystems can register state providers later) |
-| MCM Settings | Reflected snapshot of every `AttributeGlobalSettings` / `AttributePerCampaignSettings` provider (TAOM + third-party) |
+| MCM Settings | Reflected snapshot of each MCM settings class that declares its own static `Instance`: today that is TAOM's four classes, found through the B8 `Instance` hide ([server-settings](server-settings.md)). A class that only inherits `GlobalSettings<T>.Instance` (for example `Diplomacy.Settings`) is skipped, a known gap left for a follow-up. A dropdown shows its selected value |
 | Process | Working set, private bytes, GC totals + gen 0/1/2 counts, thread count, uptime, throwing-thread id+name+bg+apartment |
 | System Memory | Process priv/ws/heap **plus** system commit used/limit, headroom + %, available/total physical, memLoad %, and a MEMORY PRESSURE verdict. Rendered `(unavailable)` wholesale when the reader fails, never as zeros |
 | GPU | Per adapter: name, driver version, driver date, VRAM, video processor (via WMI `Win32_VideoController`) |
@@ -225,6 +225,7 @@ No new third-party dependencies.
 - `AppDomainExceptionHookTests`: `Subscribe()` records the subscribing thread as `MainThreadId`; `IsOffMainThread` is false only on the recorded thread, and true for an unset id; `OnUnhandled` passes the service `offMainThread: false` on the subscribing thread and `true` on a worker
 - `CrashReportPatchHelperTests`: `HandleAndSwallow` with the service unreachable hands back the same instance, which keeps its throw site across that `throw`; with a reachable service it swallows and passes the origin; when the service throws it hands back the original with its throw site; re-entered from inside the service it hands the inner exception back without capturing it; with no exception it returns null
 - `CrashBundleThrottleTests`: dedup, session cap and cooldown admission, and the 1, 2, 10, 100 suppression-log cadence
+- [`McmSettingsCollectorTests`](../../TAOM.Tests/Features/CrashReport/McmSettingsCollectorTests.cs) (2): a dropdown renders as its selected value, not its type name, and a dropdown whose selection is out of range renders a marker in parentheses instead of throwing
 - `PlainTextCrashReportRendererTests`: all 19 sections render, signature in header, inner exception chain, collector failures, and the "last segment only" note under both frame sections exactly when `TAOM.ThrowSite` is present
 
 Components NOT unit-tested (per ADR-008 + the plan's "Not-tested:" trailer policy):
@@ -233,7 +234,7 @@ Components NOT unit-tested (per ADR-008 + the plan's "Not-tested:" trailer polic
 - The live Native2Managed attach: only the `attached N of M` launch log line checks it; no trigger throws inside a callback shim, so the native toggle's pass-through has no in-game check
 - `CrashReportService.HandleException` composition — depends on 14 collectors, each touching TaleWorlds APIs; integration-only
 - TaleWorlds-facing collectors (`Modules`, `Assemblies`, `Campaign`, `Mission`, `Process`, `Gpu`, `Logs`) — best-effort with try/catch on every field; failure surfaces in `CollectorFailures` section
-- MCM settings reflection collector — reflection over loaded third-party assemblies, hard to fixture
+- MCM settings reflection collector: the discovery over loaded third-party assemblies is hard to fixture and stays untested; only its value rendering is covered (`McmSettingsCollectorTests`)
 - `CrashNotifier` — `InformationManager.ShowInquiry` requires a running engine
 - `ButterLibExceptionHandlerAdapter` — reflection wrapper, exercised by integration
 
@@ -326,6 +327,7 @@ No restart is needed before TAOM's first capture of the session: TAOM's finalize
 
 ## Changelog
 
+- 2026-10-23: **TAOM's settings appear in bundles** (B8). The four TAOM settings classes now declare their own static `Instance`, so the MCM Settings section lists them on clients and on a dedicated server (where it shows the values from `taom-server-settings.json`). Dropdowns render as their selected values instead of the `Dropdown` type name.
 - 2026-09-24: **Boot cost and dead finalizers** (plan 006). The Native2Managed sweep patched all 247 `*CallbacksGenerated` methods and cost 29 to 33 s of every launch on the maintainer's desktop (0 to 1 s on player machines); it is now an allowlist of six shims (`Native2ManagedTargets`) and logs its attach time. Four Patch37 finalizers on empty base virtuals were deleted. Both MCM toggles are read at capture time (the `OnSubModuleLoad` gate always saw a null MCM instance) and no longer ask for a restart. Suppression log lines for a recurring crash are written at occurrences 1, 2, 10, 100 and so on.
 - 2026-09-24: **Maintainer decisions** (#650). The sixth allowlist entry is now `RenderTargetComponent_OnPaintNeeded`, the tableau render callback, in place of the never-armed `BannerlordTableauManager_RequestCharacterTableauSetup`. Every exception the bridge or `CrashReportPatchHelper.HandleAndSwallow` hands back now goes through `RethrowStackPreserver.PreserveForRethrow`, so Harmony's rethrow keeps the throw site. The bridge stays at Harmony priority 400, the suppression log keeps its powers-of-ten cadence with no time floor, and capture stays on by default with Enable Native-to-Managed Capture as its toggle.
 - 2026-09-24: **Combat callbacks and off-thread captures** (#650). The bridge marks a capture made on any thread other than the one `AppDomainExceptionHook.Subscribe()` recorded at `OnSubModuleLoad` (or with no recorded thread) as off-main, so the service takes its reduced path. The ten mission combat callbacks with a traced path into TAOM code are back on the allowlist, now 16 entries; mount, dismount and alarmed-state stay out.

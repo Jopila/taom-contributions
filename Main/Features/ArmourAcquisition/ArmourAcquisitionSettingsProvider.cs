@@ -2,7 +2,8 @@ namespace TAOM.Features.ArmourAcquisition;
 
 /// <summary>
 /// MCM live values (<c>TaomSettings.Instance</c>) over the config default. TaomSettings.Instance is null
-/// early in startup and when MCM fails to load, so every read falls back safely (the
+/// in tests, before MCM initializes, or on a client whose MCM failed to load (a dedicated server always gets
+/// the instance built from <c>taom-server-settings.json</c>), so every read falls back safely (the
 /// EliteEmissarySettingsProvider pattern). The master switch is read once per game init, by
 /// <see cref="IArmourGateService.ApplyGating"/>; every consumer of the two sub-toggles runs only while that
 /// game's gate is active, so they need not fold the live master in (turning the master off mid-game then

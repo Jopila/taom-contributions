@@ -365,7 +365,7 @@ Code: No code changes needed for a new row in an existing file. A new **key** or
 Changing a value in place.
 
 1. Read the field's row in the attribute table above and note its legal range. A value outside the range does not clamp: it reverts to the compiled default and warns.
-2. Check the MCM column. If the field has an MCM knob, your edit only reaches players running without MCM, and it will never reach a player who has already launched TAOM, because their stored `json2` value wins.
+2. Check the MCM column. If the field has an MCM knob, your edit only reaches players running without MCM, and never a dedicated server, which reads `taom-server-settings.json`. It will never reach a player who has already launched TAOM, because their stored `json2` value wins.
 3. Make the edit in the repo copy.
 4. For a settlement or economy pass that also touches settlement data, run the ModuleData validator afterwards. `SETTLEMENT_ECONOMY_FLOOR` compares live settlement prosperity and hearth values against the committed spec in `tools/settlement_economy_floor.json` and tells you which culture fell below it.
 5. Launch and confirm the number in play, not just in the file. For character-creation bonus changes the read-only auditor gives you the stacked per-culture totals without launching anything.

@@ -65,5 +65,6 @@ internal static class FeatureModules
         new Features.MinorClanMigration.MinorClanMigrationModule(),
         new Features.FireAndTribute.FireAndTributeModule(),
         new Features.LongMemory.LongMemoryModule(),
+        new Features.ServerSettings.ServerSettingsModule(),
     };
 }

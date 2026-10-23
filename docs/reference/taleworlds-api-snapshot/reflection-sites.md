@@ -163,7 +163,7 @@ These resolve the target *type* from a live instance (`instance.GetType()…`), 
 | `FactionMap/CultureSettingService.cs:24,28,32,38,55,61,65` | `activeState.GetType()`, `content.GetType()`, `cultureVM.GetType()` etc. | CC manager/content/culture-VM types resolved from the live `GameStateManager` instance |
 | `FactionMap/Hooks/CultureStageViewCreatedHook.cs`, `CultureStageViewTickHook.cs`, `CultureStageProgressionService.cs:30,38` | `viewInstance.GetType().GetField(...)` | CC culture-stage view type resolved from the live view instance |
 | `CharacterCreation/Hooks/CharacterCreationNarrativeStageView_RefreshAgentVisuals_BodySync_Patch.cs:38`, `CharacterCreationCampaignBehavior_GetYouthMenuArgs_Patch.cs:198` | `__instance?.GetType().GetField("_characterCreationManager", …)` | field name fixed, but type comes from the patched instance |
-| `CrashReport/Collectors/*` (`HarmonyCorrelationCollector`, `StackFrameSnapshotBuilder`, `McmSettingsCollector`), `CrashReport/Adapters/ButterLibExceptionHandlerAdapter.cs` | `frame.GetMethod()`, `settingsInstance.GetType().GetProperty(...)` | reflects over arbitrary stack frames / optional third-party (ButterLib, MCM) types that may be absent |
+| `CrashReport/Collectors/*` (`HarmonyCorrelationCollector`, `StackFrameSnapshotBuilder`, `McmSettingsCollector`), `CrashReport/Adapters/ButterLibExceptionHandlerAdapter.cs` | `frame.GetMethod()`, `settingsInstance.GetType().GetProperty(...)`; `McmSettingsCollector.StringifyValue` also reads `SelectedValue` by name off an MCM `Dropdown` | reflects over arbitrary stack frames / optional third-party (ButterLib, MCM) types that may be absent |
 | `Dependencies/Foundation/IncompatibleModDetector.cs:~220` | `moduleInfo.GetType().GetProperty("Id")` | `ModuleInfo.Id` is read off each element returned by `ModuleHelper.GetActiveModules` (the method itself is a Category B row); the element type comes from the live list |
 
 ---
@@ -178,6 +178,7 @@ Reflection whose target is a TAOM-owned type or a dynamic member name. Not affec
 | `CareerSystem/Mutations/MutationService.cs:105` | `typeof(AbilityTemplateData).GetProperty(propertyName)` | `AbilityTemplateData` is a TAOM type; `propertyName` is data-driven |
 | `CrashReport/Hooks/Native2ManagedPatcher.cs` | `new HarmonyMethod(typeof(Native2ManagedBridge), nameof(Native2ManagedBridge.Finalizer))` | TAOM bridge type; `nameof` makes it compiler-verified. The engine shim names in `Native2ManagedTargets.cs` are engine reflection and are listed under Category A |
 | `CharacterSelection/Patches/RefreshCharacterEntityAuxPatch.cs:43` | `typeof(AgentVisualsData).GetMethod(nameof(AgentVisualsData.ActionSet))` | `nameof` → compiler-verified member; no string drift risk |
+| `ServerSettings/ServerSettingsSchema.cs` | `type.GetProperties(Public \| Instance)` and the MCM `SettingProperty*Attribute`s on each property of the four TAOM settings classes | TAOM types and compile-time MCM attribute types; reflects every settable property for the server settings file. Gated by `ServerSettingsSchemaTests` (kinds, counts, parked pair, defaults) |
 
 ---
 

@@ -139,13 +139,21 @@ public sealed class McmSettingsCollector
         return entries.OrderBy(e => e.PropertyPath, StringComparer.Ordinal).ToList();
     }
 
-    private static string StringifyValue(object? v)
+    internal static string StringifyValue(object? v)
     {
         if (v == null) return "(null)";
         if (v is string s) return s;
         if (v is float f) return f.ToString("R", CultureInfo.InvariantCulture);
         if (v is double d) return d.ToString("R", CultureInfo.InvariantCulture);
         if (v is IConvertible c) return c.ToString(CultureInfo.InvariantCulture);
+        // MCM's Dropdown<T> has no ToString override, so it would print its type name. Show the selection, the same
+        // SelectedValue read SettingsFingerprint hashes; an index left out of range by a removed option throws there.
+        var type = v.GetType();
+        if (type.Name.IndexOf("Dropdown", StringComparison.Ordinal) >= 0 && type.GetProperty("SelectedValue") is { } selected)
+        {
+            try { return StringifyValue(selected.GetValue(v)); }
+            catch (Exception ex) { return $"(dropdown-read-failed: {(ex.InnerException ?? ex).GetType().Name})"; }
+        }
         try { return v.ToString() ?? "(toString-null)"; }
         catch (Exception ex) { return $"(toString-failed: {ex.GetType().Name})"; }
     }

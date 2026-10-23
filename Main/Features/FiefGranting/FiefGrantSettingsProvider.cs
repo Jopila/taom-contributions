@@ -4,7 +4,9 @@ namespace TAOM.Features.FiefGranting;
 
 /// <summary>
 /// Reads the fief-grant knobs off MCM (#458, #565). Standard TAOM recipe: <c>TaomSettings.Instance?.Knob</c>
-/// so the compiled default applies when MCM is not loaded, then <see cref="SettingClamp"/> for the
+/// so the compiled default applies when the instance is null (in tests, before MCM initializes, or on a client
+/// whose MCM failed to load; a dedicated server always gets the instance built from taom-server-settings.json),
+/// then <see cref="SettingClamp"/> for the
 /// null-safe, NaN-safe clamp to the knob's valid range.
 ///
 /// The ranges here MUST match the MCM attribute ranges in <c>TaomSettings</c>. They are duplicated on

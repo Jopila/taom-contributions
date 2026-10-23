@@ -10,6 +10,12 @@ namespace TAOM.Features;
 
 public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 {
+    // Hides MCM's GlobalSettings<T>.Instance: a dedicated server, where MCM is not loaded, reads
+    // taom-server-settings.json (ServerSettingsSource); a client gets MCM's own. Name the base explicitly:
+    // a bare Instance here would recurse.
+    public static new TaomSettings? Instance =>
+        ServerSettings.ServerSettingsSource.Get<TaomSettings>() ?? GlobalSettings<TaomSettings>.Instance;
+
     public override string Id => "TAOM";
     public override string DisplayName => "TAOM - Tales From the Age of Men";
     public override string FolderName => "TAOM";

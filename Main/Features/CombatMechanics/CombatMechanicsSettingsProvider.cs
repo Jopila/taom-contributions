@@ -56,7 +56,8 @@ public sealed class CombatMechanicsSettingsProvider : ICombatMechanicsSettingsPr
     public float CrushThroughMaxChance
         => SettingClamp.Clamp(Settings?.CrushThroughMaxChance, _defaults.CrushThrough.MaxSkillChance, 0f, 1f);
 
-    // MCM slider is an int [2,30]; without MCM the provider-validated JSON float applies as-is.
+    // MCM slider is an int [2,30]; on a client without MCM settings the provider-validated JSON float
+    // applies as-is (a dedicated server reads the slider value from taom-server-settings.json).
     // The slider floor is the validated NeutralWeightRatio: a below-neutral auto-knockdown ratio
     // would let Branch A auto-floor ordinary horse-vs-man charges — the exact state the JSON
     // ordering invariant (auto >= neutral) exists to prevent. Both entry points enforce one rule.

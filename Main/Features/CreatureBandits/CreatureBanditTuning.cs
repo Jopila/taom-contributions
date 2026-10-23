@@ -110,7 +110,9 @@ public sealed class CreatureBanditTuning
     internal static void UseSettings(TaomSettings? settings) => _settings = settings;
 
     /// <summary>
-    /// The MCM values (a new object each call), or the shared <see cref="Defaults"/> when MCM is not loaded, for the main thread's
+    /// The MCM values (a new object each call), or the shared <see cref="Defaults"/> when the instance is null (in tests, before
+    /// MCM initializes, or on a client whose MCM failed to load; a dedicated server always gets the instance built from
+    /// taom-server-settings.json), for the main thread's
     /// spawn, tree build and attack. The per-hit damage step asks <see cref="CurrentTakenFactor"/> instead.
     /// </summary>
     public static CreatureBanditTuning Current

@@ -10,6 +10,12 @@ namespace TAOM.Features.BattleLoadDiagnostics;
 // disable it.
 public sealed class BattleLoadDiagnosticsSettings : AttributeGlobalSettings<BattleLoadDiagnosticsSettings>
 {
+    // Hides MCM's GlobalSettings<T>.Instance: a dedicated server, where MCM is not loaded, reads
+    // taom-server-settings.json (ServerSettingsSource); a client gets MCM's own. Name the base explicitly:
+    // a bare Instance here would recurse.
+    public static new BattleLoadDiagnosticsSettings? Instance =>
+        ServerSettings.ServerSettingsSource.Get<BattleLoadDiagnosticsSettings>() ?? GlobalSettings<BattleLoadDiagnosticsSettings>.Instance;
+
     public override string Id => "TAOM.BattleLoadDiagnostics";
     public override string DisplayName => "TAOM — Battle Load Diagnostics";
     public override string FolderName => "TAOM";

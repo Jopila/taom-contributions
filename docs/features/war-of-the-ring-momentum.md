@@ -92,7 +92,7 @@ Kingdoms are resolved by StringId with `Kingdom.All.FirstOrDefault(k => k.String
 
 | Field | Default | Meaning |
 |-------|---------|---------|
-| `enabled` | true | JSON fallback for the master toggle |
+| `enabled` | true | JSON fallback for the master toggle, on a client without MCM settings only; a dedicated server uses `taom-server-settings.json` ([server-settings](server-settings.md)) |
 | `victoryEnabled` | **false** | when off, the war is endless (tracked, never resolves); on = a side can win |
 | `victoryThreshold` | 500 | internal momentum lead to win (only when `victoryEnabled`) |
 | `events.maxBattleMomentum` | 350 | battle-won cap (scaled by casualties ÷ loser strength — stays small; that's why `killMomentumPerHundred` exists). Was 300, bumped 2026-07-05 |
