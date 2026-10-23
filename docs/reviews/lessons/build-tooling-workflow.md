@@ -4360,3 +4360,14 @@ The #978 build read `validate_moduledata.py` for warnings naming Cardolan or Rhu
 - **Why missed:** the fix was scoped to the defect that broke the build; the README documented the write-by-default behaviour instead of fixing it.
 - **Prevent:** when a change touches a writer, check the whole tool against `moduledata-validation.md`: dry-run default with `--apply`, every output parsed before any is written, backups for live files. A documented hazard in a tool you are already editing is a fix, not a note.
 - **Source:** [rca-cardolan-rhudaur-2026-10-23.md](../rca-cardolan-rhudaur-2026-10-23.md) finding 4.
+### A rebase that keeps one side of a conflicted line drops the other session's facts (B7 slice 1, 2026-10-23)
+B7 slice 1 and B6a both edited `docs/research/taom-headless-server.md` the same day. B6a's commit put its older copy back
+over five slice 1 lines: row 10 said the map visuals were still open, and the gates row said "739 entries today" a day
+after the baseline went to 385. A line-by-line check of the pushed branch (`git show <tip>:<file>` against each added
+line of the earlier commit) found it; no test reads prose.
+- **Why missed:** a conflict on a long table row was resolved by taking one side whole, and nothing compared the result
+  with the other parent.
+- **Prevent:** when a rebase conflicts on a shared doc, rebuild each conflicted line from both sides, then grep the result
+  for the other commit's key facts. After landing, check that every line your commits added still exists at the tip, or
+  was replaced on purpose.
+- **Source:** [rca-b7-slice1-map-visuals-2026-10-23.md](../rca-b7-slice1-map-visuals-2026-10-23.md) finding 11.

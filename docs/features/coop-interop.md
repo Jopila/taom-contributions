@@ -589,8 +589,8 @@ to characterise. The existing try/catch around acceptance is containment, not co
   arrive in parity with the host's save — the campaign id matches while the local file may not
   exist at all, which is worse than global rather than better. TAOM declares neither:
   the only `AttributePerCampaignSettings` reference in the tree is a reflection target string in
-  `McmSettingsCollector.cs`, which scans third-party mods and, since B8's `Instance` hide, also
-  finds TAOM's own four classes. So nothing here is save-inherited and
+  `McmSettingsCollector.cs`, which since B8's `Instance` hide finds TAOM's own four classes
+  (it reads only TAOM's own assembly, so no third-party settings class is read and no third-party value is copied, #982). So nothing here is save-inherited and
   nothing arrives guaranteed-equal. **If a PerSave or PerCampaign settings class ever lands in
   TAOM, this paragraph stops being true and the fingerprint's meaning changes with it** — a
   PerSave class would be equal by construction and need not be hashed; a PerCampaign one would

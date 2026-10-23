@@ -23,7 +23,9 @@ where it used to hand out null, and two pieces of older code had quietly depende
 
 **Follow-up:** `McmSettingsCollector` skips a third-party settings class that only inherits
 `GlobalSettings<T>.Instance` (for example `Diplomacy.Settings`), because it looks `Instance` up without
-`FlattenHierarchy`. This predates B8. MEDIUM; an issue is owed on Mike's word.
+`FlattenHierarchy`. This predates B8. Filed as #982 and decided as by design: reading another mod's settings
+runs its code inside crash handling, so the collector reads only settings classes from TAOM's own assembly (see
+[rca-982-collector-instance-2026-10-23.md](rca-982-collector-instance-2026-10-23.md)).
 
 ## Root-cause pattern
 

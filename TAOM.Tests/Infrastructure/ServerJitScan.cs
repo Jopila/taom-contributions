@@ -22,7 +22,7 @@ internal static class ServerJitScan
     internal const BindingFlags AllDeclared = BindingFlags.Instance | BindingFlags.Static
         | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 
-    /// <summary>Any attribute with this name declared in the scanned assembly marks a type or method as client-only.</summary>
+    /// <summary>Any attribute with this name declared in the scanned assembly marks a class as client-only (B6a's is class-only).</summary>
     private const string MarkerName = "ClientOnlyAttribute";
 
     /// <summary>
@@ -78,22 +78,17 @@ internal static class ServerJitScan
     }
 
     /// <summary>
-    /// A key is exempt when its owner type or any enclosing type carries the marker, or when every user method of
-    /// that name on the owner carries it. A lambda inside a marked method folds into that method, so it is exempt too.
+    /// A key is exempt when its owner type or any enclosing type carries the marker. Closures and state machines fold
+    /// into their declaring method's key, so they share its owner.
     /// </summary>
     internal static bool IsExempt(MethodBase method)
     {
-        var (owner, name) = Resolve(method);
+        var (owner, _) = Resolve(method);
         var scanned = owner.Assembly;
         for (var t = owner; t != null; t = t.DeclaringType)
             if (HasMarker(t, scanned))
                 return true;
-
-        var userMethods = owner.GetMethods(AllDeclared).Cast<MethodBase>()
-            .Concat(owner.GetConstructors(AllDeclared))
-            .Where(m => m.Name == name)
-            .ToList();
-        return userMethods.Count > 0 && userMethods.All(m => HasMarker(m, scanned));
+        return false;
     }
 
     internal static (List<string> Added, List<string> Stale) Compare(IEnumerable<string> live, IEnumerable<string> baseline)

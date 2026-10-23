@@ -132,7 +132,8 @@ namespace TAOM.Tests.Infrastructure.ServerJitUnreadableFixtures
 
 namespace TAOM.Tests.Infrastructure.ServerJitMarkedFixtures
 {
-    [AttributeUsage(AttributeTargets.All)]
+    /// <summary>Class-only, like B6a's <c>Main/ClientOnlyAttribute.cs</c>.</summary>
+    [AttributeUsage(AttributeTargets.Class)]
     public sealed class ClientOnlyAttribute : Attribute { }
 
     [ClientOnly]
@@ -143,23 +144,8 @@ namespace TAOM.Tests.Infrastructure.ServerJitMarkedFixtures
         public class Nested { public object N() => new Uri("http://a"); }
     }
 
-    public class MarkedMethodOwner
-    {
-        [ClientOnly]
-        public Func<int> Outer() => () => new Uri("http://a").Port;
-    }
-
     /// <summary>Not marked: the control that proves the marked fixtures are exempt, not just undetected.</summary>
     public class UnmarkedControl { public object M() => new Uri("http://a"); }
-
-    /// <summary>One overload marked, one not: the key is still an offender (every user method must carry it).</summary>
-    public class PartlyMarkedOverloads
-    {
-        [ClientOnly]
-        public object M() => new Uri("http://a");
-
-        public object M(int x) => new Uri("http://a");
-    }
 }
 
 namespace TAOM.Tests.Infrastructure
@@ -204,12 +190,11 @@ namespace TAOM.Tests.Infrastructure
         }
 
         [TestMethod]
-        public void Offenders_Fixtures_HonorClientOnlyOnTypesNestedTypesAndMethods()
+        public void Offenders_Fixtures_HonorClientOnlyOnTypesAndNestedTypes()
         {
             var found = Scan(Marked, out var unreadable, out _);
 
-            var expected = new[] { "UnmarkedControl::M", "PartlyMarkedOverloads::M" }
-                .Select(k => Marked + k).OrderBy(k => k, StringComparer.Ordinal).ToList();
+            var expected = new[] { Marked + "UnmarkedControl::M" }.ToList();
 
             CollectionAssert.AreEqual(expected, found.ToList());
             CollectionAssert.AreEqual(new List<string>(), unreadable);

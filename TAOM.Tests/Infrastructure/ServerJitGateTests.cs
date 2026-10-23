@@ -13,10 +13,13 @@ namespace TAOM.Tests.Infrastructure;
 /// The server JIT ratchet (ADR-013, B7). The JIT fails a method whose IL names a type from an assembly that does
 /// not resolve before its first line runs, so a core method that names a client-only type is a dedicated-server
 /// hazard even when the type loads. <c>ServerJitBaseline.txt</c> lists the user-level methods of TAOM.dll that
-/// still do; the list may only shrink. A new offender fails <see cref="ServerReachableMethods_ReferenceNoClientAssembly"/>,
-/// a fixed one fails <see cref="Baseline_HasNoStaleEntriesAndIsSortedUnique"/> until it is pruned. TAOM.Client is
+/// still do; the list may only shrink. A new offender under a new key fails
+/// <see cref="ServerReachableMethods_ReferenceNoClientAssembly"/> (one under a key already listed, such as another
+/// overload or constructor, does not: keys merge), a fixed one fails <see cref="Baseline_HasNoStaleEntriesAndIsSortedUnique"/> until it is pruned. TAOM.Client is
 /// out of scope (it never loads headless) but is scanned as a positive control, and TAOM.Dependencies has its own
-/// no-baseline gate (<c>DependenciesClientIlTests</c>). A method or type marked <c>ClientOnlyAttribute</c> is exempt.
+/// no-baseline gate (<c>DependenciesClientIlTests</c>). Every member of a class marked <c>ClientOnlyAttribute</c>
+/// (B6a: Harmony patch classes a server never indexes) is exempt, its helpers included, so their callers' server
+/// checks are what keep those helpers off a server (<c>SubModuleServerGuardTests</c>).
 /// </summary>
 [TestClass]
 [TestCategory("RequiresGame")]
@@ -25,10 +28,11 @@ public class ServerJitGateTests
     private const string WriteEnvVar = "TAOM_WRITE_SERVER_JIT_BASELINE";
 
     /// <summary>
-    /// The baseline only shrinks: lower this to the new line count whenever you prune. A hand-added line raises the
-    /// count past it and fails <see cref="Baseline_HasNoStaleEntriesAndIsSortedUnique"/>.
+    /// The baseline only shrinks, and this must equal its line count: a prune fails
+    /// <see cref="Baseline_HasNoStaleEntriesAndIsSortedUnique"/> until this is lowered to match, and a net addition
+    /// fails unless this is raised. A line added in the same change as a prune keeps the count, so only review sees it.
     /// </summary>
-    private const int MaxBaselineEntries = 385;
+    private const int MaxBaselineEntries = 270;
 
     private static string BaselinePath => RepoPaths.RepoPath("TAOM.Tests", "Infrastructure", "ServerJitBaseline.txt");
 
@@ -86,8 +90,8 @@ public class ServerJitGateTests
         Assert.AreEqual(0, added.Count,
             "These core methods name a client-only type, so the JIT fails them whenever that assembly is unresolvable "
             + "(always at TAOM's boot on the dedicated server). Move the code to TAOM.Client behind a core interface with a "
-            + "null or, once B6a adds ClientOnlyAttribute, mark it [ClientOnly] with a server-checked caller "
-            + "(ADR-013). Never add a line to ServerJitBaseline.txt:" + Environment.NewLine
+            + "null (ADR-013), or, for a Harmony patch class whose target or patch signature names a client assembly, mark "
+            + "the class [ClientOnly] (gate 4). Never add a line to ServerJitBaseline.txt:" + Environment.NewLine
             + string.Join(Environment.NewLine, added.Select(k => k + " -> " + first[k])));
     }
 
@@ -106,8 +110,9 @@ public class ServerJitGateTests
         CollectionAssert.AreEqual(lines.OrderBy(l => l, StringComparer.Ordinal).Distinct().ToList(), lines,
             "ServerJitBaseline.txt must be sorted (ordinal) with no duplicates.");
         Assert.IsFalse(lines.Any(l => l.Contains('<')), "a compiler-generated name is in the baseline: fix the key folding");
-        Assert.IsTrue(lines.Count <= MaxBaselineEntries,
-            "The baseline has " + lines.Count + " lines, over MaxBaselineEntries (" + MaxBaselineEntries + "). It only "
+        // Equal, not at most: a prune that leaves the cap high would let the pruned lines come back unnoticed.
+        Assert.AreEqual(MaxBaselineEntries, lines.Count,
+            "The baseline has " + lines.Count + " lines and MaxBaselineEntries is " + MaxBaselineEntries + ". It only "
             + "shrinks: never add a line. When you prune, lower MaxBaselineEntries to the new count.");
     }
 
@@ -162,8 +167,8 @@ public class ServerJitGateTests
             "# (always at TAOM's boot on the dedicated server).",
             "# One line per user-level method: <owner type FullName>::<method name>. Closures, local functions and iterator or",
             "# async state machines fold into the method that declares them; overloads merge (ServerJitScan.KeyOf).",
-            "# The list may only shrink. Never add a line: move the code to TAOM.Client behind a core seam or, once B6a adds",
-            "# ClientOnlyAttribute, mark it [ClientOnly] with a server-checked caller (ADR-013). To prune after a fix: set",
+            "# The list may only shrink. Never add a line: move the code to TAOM.Client behind a core seam (ADR-013), or mark a",
+            "# Harmony patch class whose target or signature names a client assembly [ClientOnly] (gate 4). To prune: set",
             "# " + WriteEnvVar + "=1, run ServerJitGateTests.Baseline_Regenerate_WhenAsked, then lower MaxBaselineEntries.",
             "# Entries: " + keys.Count + " (methods scanned: " + scanned + ").",
         };

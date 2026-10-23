@@ -61,8 +61,10 @@ it hashes the values from the file with no further change.
 **Side effect on clients.** TAOM's own crash-bundle collector (`McmSettingsCollector`) looks for a static
 `Instance` without `FlattenHierarchy`, so before this change it found no TAOM settings class. With the hide
 it finds all four, and client crash bundles now list TAOM's settings, each dropdown as its selected option.
-A crash bundle written on a server lists them too, with the values from the file. The collector still skips a
-third-party class that only inherits `GlobalSettings<T>.Instance`; that predates B8 and is a follow-up.
+A crash bundle written on a server lists them too, with the values from the file. Crash bundles list
+TAOM's four classes only: the collector reads only settings classes from TAOM's own assembly and skips
+third-party classes by design (#982), so no third-party settings class is read inside crash handling and no
+third-party value is copied.
 
 **Reflection on `Instance`.** Each class now has two public static `Instance` properties, its own and MCM's.
 A lookup with `BindingFlags.FlattenHierarchy` throws `AmbiguousMatchException`. No caller does that today.
