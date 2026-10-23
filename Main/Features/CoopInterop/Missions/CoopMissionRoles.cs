@@ -88,14 +88,15 @@ public static class CoopMissionRoles
         [nameof(RaceAbilitiesMissionLogic)] = CoopMissionRole.AgentOwner,
 
         // Local: this peer's own view, log or files.
-        [nameof(AutonomousMovementPlayerController)] = CoopMissionRole.Local,
+        // TAOM.Client types (ADR-013): core cannot name them; ClientViewRows_MatchTheClientTypeNames pins the strings.
+        ["AutonomousMovementPlayerController"] = CoopMissionRole.Local,
         [nameof(SiegePropDiagnosticsMissionBehavior)] = CoopMissionRole.Local,
         [nameof(MountDespawnMissionBehavior)] = CoopMissionRole.Local,
         [nameof(EnlistmentBattleRoleMissionBehavior)] = CoopMissionRole.Local,
         [nameof(EnlistmentBattleFormationMissionBehavior)] = CoopMissionRole.Local,
         [nameof(MissionPerfHeartbeatBehavior)] = CoopMissionRole.Local,
         [nameof(MissionTickProfilerBehavior)] = CoopMissionRole.Local,
-        [nameof(BattleActionBarMissionView)] = CoopMissionRole.Local,
+        ["BattleActionBarMissionView"] = CoopMissionRole.Local,
         [nameof(MissionDiagnosticBehavior)] = CoopMissionRole.Local,
         [nameof(CrashReportDevTriggerMissionBehavior)] = CoopMissionRole.Local,
         [nameof(HeroKillCounterMissionLogic)] = CoopMissionRole.Local,

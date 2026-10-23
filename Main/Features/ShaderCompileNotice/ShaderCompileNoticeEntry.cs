@@ -14,7 +14,7 @@ namespace TAOM.Features.ShaderCompileNotice;
 /// </summary>
 public static class ShaderCompileNoticeEntry
 {
-    public static void Start(IModLogger logger, bool isDedicatedServer)
+    public static void Start(IModLogger logger, bool isDedicatedServer, IShaderCompileNoticeWindowHost host)
     {
         try
         {
@@ -29,7 +29,7 @@ public static class ShaderCompileNoticeEntry
             }
 
             if (!ShaderCompileProgress.ShouldStart(isDedicatedServer, ids)) return;
-            ShaderCompileNotice.Start(ResolveTexts(), logger);
+            ShaderCompileNotice.Start(ResolveTexts(), logger, host);
         }
         catch (Exception e)
         {

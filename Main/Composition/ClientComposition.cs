@@ -58,9 +58,10 @@ public static class ClientComposition
             if (!SafeIsDedicatedServer())
             {
                 Log(container, l => l.LogError(
-                    "[Client] TAOM.Client did not load on a rendering client: front-end and campaign map UI will not work "
+                    "[Client] TAOM.Client did not load on a rendering client: front-end, campaign map and mission UI will not work "
                     + "(faction map, front-end art, Custom Battle factions, realm borders, camp overlay, War of the Ring meter, "
-                    + "Fiefs button, settlement plates, Hall of Fire backdrops). Check that the TAOM.Client submodule is installed."));
+                    + "Fiefs button, settlement plates, Hall of Fire backdrops, battle action bar, warg rage control, "
+                    + "Host Review order bar, shader notice). Check that the TAOM.Client submodule is installed."));
             }
 
             return;

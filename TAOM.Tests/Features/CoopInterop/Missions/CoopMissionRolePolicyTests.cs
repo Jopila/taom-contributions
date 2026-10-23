@@ -73,13 +73,33 @@ public class CoopMissionRolePolicyTests
             typeof(TAOM.Features.CultureDoctrine.Hooks.CultureDoctrineMissionLogic), sessionActive: true));
     }
 
+    // The table rows for the two TAOM.Client views are string literals (core cannot name the types, ADR-013).
+    // This guards them against a rename in TAOM.Client.
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void ClientViewRows_MatchTheClientTypeNames()
+    {
+        TAOM.Tests.Migration.GameAssemblies.EnsureLoaded();
+        var client = typeof(TAOM.Client.ClientSubModule).Assembly;
+        foreach (var fullName in new[]
+        {
+            "TAOM.Features.AdvancedCombat.AutonomousMovementPlayerController",
+            "TAOM.Features.CompanionTactics.BattleActionBar.Hooks.BattleActionBarMissionView",
+        })
+        {
+            var type = client.GetType(fullName);
+            Assert.IsNotNull(type, fullName + " must live in TAOM.Client");
+            Assert.AreEqual(CoopMissionRole.Local, CoopMissionRoles.All[type!.Name], type.Name);
+        }
+    }
+
     [TestMethod]
     public void Table_CoversEveryBehaviorTheModAdds_NoMissingNoStale()
     {
         var subModule = RepoPaths.ReadSource("Main/SubModule.cs", stripComments: true);
         var added = Regex.Matches(subModule, @"AddTaomBehavior\(\s*new\s+([\w.]+)\(")
             .Cast<Match>().Select(m => m.Groups[1].Value.Split('.').Last()).ToList();
-        Assert.AreEqual(31, added.Count, "AddTaomBehavior(new ...) call sites in SubModule.cs changed; recount and update the table");
+        Assert.AreEqual(29, added.Count, "AddTaomBehavior(new ...) call sites in SubModule.cs changed; recount and update the table");
 
         var declared = FeatureModules.All.SelectMany(m => m.MissionBehaviors).Select(d => d.BehaviorType.Name).ToList();
         Assert.AreEqual(12, declared.Count, "module mission behavior declarations changed; update the table");
@@ -88,7 +108,14 @@ public class CoopMissionRolePolicyTests
         // host review launcher. All local by construction.
         var outside = new[] { "BattleLoadPhaseBehavior", "CustomBattleTeamFixBehavior", "HostReviewMissionLogic" };
 
-        var expected = new HashSet<string>(added.Concat(declared).Concat(outside));
+        // Added through a core factory seam; the views live in TAOM.Client (ADR-013), so SubModule has no `new` for them.
+        var clientViews = new[] { "AutonomousMovementPlayerController", "BattleActionBarMissionView" };
+        // Every add of a variable must be one of these, so a new seam cannot skip the table (lens 5, B4c review).
+        int variableAdds = Regex.Matches(subModule, @"AddTaomBehavior\(\s*\w+\s*\)").Count;
+        Assert.AreEqual(clientViews.Length, variableAdds,
+            "an AddTaomBehavior(variable) site changed; list its behavior in clientViews and classify it in CoopMissionRoles");
+
+        var expected = new HashSet<string>(added.Concat(declared).Concat(outside).Concat(clientViews));
         var actual = new HashSet<string>(CoopMissionRoles.All.Keys);
 
         CollectionAssert.AreEquivalent(expected.OrderBy(n => n).ToList(), actual.OrderBy(n => n).ToList(),

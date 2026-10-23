@@ -31,9 +31,9 @@ public class WargTickCostTests
 
     private static bool _gameLoaded;
 
-    /// <summary>A same-type helper whose locals name a type from TaleWorlds.MountAndBlade.View (the
-    /// base class of AutonomousMovementPlayerController, used by
-    /// WargRiderHandManager.UpdateWargRiderHandle) can only have its body read once that assembly
+    /// <summary>A same-type helper whose locals name a type from a game assembly outside the test bin (since
+    /// ADR-013 B4c the Warg code names no View type: the controller sits behind IAutonomousMovementController)
+    /// can only have its body read once that assembly
     /// resolves. It lives in the game's Modules\Native\bin folder, which GameAssemblies adds.</summary>
     [ClassInitialize]
     public static void Init(TestContext _) => _gameLoaded = GameAssemblies.EnsureLoaded();

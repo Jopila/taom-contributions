@@ -1,13 +1,23 @@
 using DryIoc;
 using TAOM.Adapters;
 using TAOM.Client.Adapters;
+using TAOM.Client.Features.AdvancedCombat;
+using TAOM.Client.Features.CompanionTactics;
 using TAOM.Client.Features.CustomBattles;
 using TAOM.Client.Features.FiefManagement;
 using TAOM.Client.Features.HallOfFire;
+using TAOM.Client.Features.HostReview;
+using TAOM.Client.Features.ShaderCompileNotice;
+using TAOM.Client.Features.ShaderPrecompilation;
 using TAOM.Composition;
+using TAOM.Features.AdvancedCombat;
+using TAOM.Features.CompanionTactics.BattleActionBar;
 using TAOM.Features.CustomBattles;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HallOfFire;
+using TAOM.Features.HostReview;
+using TAOM.Features.ShaderCompileNotice;
+using TAOM.Features.ShaderPrecompilation;
 using TAOM.Features.WarOfTheRingMomentum.UI;
 
 namespace TAOM.Client;
@@ -29,5 +39,10 @@ internal sealed class TaomClientComposition : IClientComposition
         registrator.Register<IFieldCampOverlayAdapter, FieldCampOverlayAdapter>(Reuse.Singleton);
         registrator.Register<IFiefsNavigationElementFactory, TaomFiefsNavigationElementFactory>(Reuse.Singleton);
         registrator.Register<IMapConversationProviderWrapper, HallOfFireConversationWrapper>(Reuse.Singleton);
+        registrator.Register<IAutonomousMovementControllerFactory, AutonomousMovementControllerFactory>(Reuse.Singleton);
+        registrator.Register<IBattleActionBarViewFactory, BattleActionBarViewFactory>(Reuse.Singleton);
+        registrator.Register<IHostReviewOrderProviderRegistrar, HostReviewOrderProviderRegistrar>(Reuse.Singleton);
+        registrator.Register<IShaderPrecompileGameManagerFactory, ShaderPrecompileGameManagerFactory>(Reuse.Singleton);
+        registrator.Register<IShaderCompileNoticeWindowHost, ShaderCompileNoticeWindowHost>(Reuse.Singleton);
     }
 }

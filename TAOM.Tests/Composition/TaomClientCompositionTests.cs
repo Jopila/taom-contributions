@@ -5,17 +5,28 @@ using NSubstitute;
 using TAOM.Adapters;
 using TAOM.Client;
 using TAOM.Client.Adapters;
+using TAOM.Client.Features.AdvancedCombat;
+using TAOM.Client.Features.CompanionTactics;
 using TAOM.Client.Features.CustomBattles;
 using TAOM.Client.Features.FiefManagement;
 using TAOM.Client.Features.HallOfFire;
+using TAOM.Client.Features.HostReview;
+using TAOM.Client.Features.ShaderCompileNotice;
+using TAOM.Client.Features.ShaderPrecompilation;
 using TAOM.Composition;
 using TAOM.Core.Logging;
+using TAOM.Features.AdvancedCombat;
+using TAOM.Features.CompanionTactics.BattleActionBar;
 using TAOM.Features.CustomBattles;
 using TAOM.Features.Enlistment;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HallOfFire;
+using TAOM.Features.HostReview;
+using TAOM.Features.ShaderCompileNotice;
+using TAOM.Features.ShaderPrecompilation;
 using TAOM.Features.WarOfTheRingMomentum.UI;
 using TAOM.Tests.Migration;
+using NSubstitute;
 
 namespace TAOM.Tests.Composition;
 
@@ -48,6 +59,13 @@ public class TaomClientCompositionTests
         container.Register<IFieldCampOverlayAdapter, NullFieldCampOverlayAdapter>(Reuse.Singleton);
         container.Register<IFiefsNavigationElementFactory, NullFiefsNavigationElementFactory>(Reuse.Singleton);
         container.Register<IMapConversationProviderWrapper, NullMapConversationProviderWrapper>(Reuse.Singleton);
+        container.Register<IAutonomousMovementControllerFactory, NullAutonomousMovementControllerFactory>(Reuse.Singleton);
+        container.Register<IBattleActionBarViewFactory, NullBattleActionBarViewFactory>(Reuse.Singleton);
+        container.Register<IHostReviewOrderProviderRegistrar, NullHostReviewOrderProviderRegistrar>(Reuse.Singleton);
+        container.Register<IShaderPrecompileGameManagerFactory, NullShaderPrecompileGameManagerFactory>(Reuse.Singleton);
+        container.Register<IShaderCompileNoticeWindowHost, NullShaderCompileNoticeWindowHost>(Reuse.Singleton);
+        // The shader factory's constructor dependencies come from core's feature registrations.
+        container.RegisterInstance(Substitute.For<IShaderPrecompilationService>());
         ClientComposition.Current = new TaomClientComposition();
 
         ClientComposition.Apply(container);
@@ -60,13 +78,21 @@ public class TaomClientCompositionTests
         Assert.IsInstanceOfType(container.Resolve<IFieldCampOverlayAdapter>(), typeof(FieldCampOverlayAdapter));
         Assert.IsInstanceOfType(container.Resolve<IFiefsNavigationElementFactory>(), typeof(TaomFiefsNavigationElementFactory));
         Assert.IsInstanceOfType(container.Resolve<IMapConversationProviderWrapper>(), typeof(HallOfFireConversationWrapper));
+        Assert.IsInstanceOfType(container.Resolve<IAutonomousMovementControllerFactory>(), typeof(AutonomousMovementControllerFactory));
+        Assert.IsInstanceOfType(container.Resolve<IBattleActionBarViewFactory>(), typeof(BattleActionBarViewFactory));
+        Assert.IsInstanceOfType(container.Resolve<IHostReviewOrderProviderRegistrar>(), typeof(HostReviewOrderProviderRegistrar));
+        Assert.IsInstanceOfType(container.Resolve<IShaderPrecompileGameManagerFactory>(), typeof(ShaderPrecompileGameManagerFactory));
+        Assert.IsInstanceOfType(container.Resolve<IShaderCompileNoticeWindowHost>(), typeof(ShaderCompileNoticeWindowHost));
         var seams = new[]
         {
             typeof(IFactionMapWidgetAdapter), typeof(IFrontEndSpriteTableAdapter), typeof(ICustomBattleFactionSelectionFactory),
             typeof(IMomentumUIService), typeof(IRealmBordersMapViewAdapter), typeof(IFieldCampOverlayAdapter),
             typeof(IFiefsNavigationElementFactory), typeof(IMapConversationProviderWrapper),
+            typeof(IAutonomousMovementControllerFactory), typeof(IBattleActionBarViewFactory),
+            typeof(IHostReviewOrderProviderRegistrar), typeof(IShaderPrecompileGameManagerFactory),
+            typeof(IShaderCompileNoticeWindowHost),
         };
-        Assert.AreEqual(8, container.GetServiceRegistrations().Count(r => seams.Contains(r.ServiceType)),
+        Assert.AreEqual(13, container.GetServiceRegistrations().Count(r => seams.Contains(r.ServiceType)),
             "each seam is replaced, never appended");
     }
 }

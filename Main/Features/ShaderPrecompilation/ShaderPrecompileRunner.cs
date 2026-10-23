@@ -60,6 +60,7 @@ public sealed class ShaderPrecompileRunner
     private readonly IPrecompileSceneProvider _sceneProvider;
     private readonly IShaderPrecompileCrashGuard _crashGuard;
     private readonly IModLogger _logger;
+    private readonly IShaderPrecompileGameManagerFactory _games;
     private readonly ShaderPrecompileDecider _decider = new();
 
     private RunState _state = RunState.Idle;
@@ -91,8 +92,9 @@ public sealed class ShaderPrecompileRunner
     private bool _cancelRequested;
 
     public ShaderPrecompileRunner(IShaderPrecompilationService service, IPrecompileSceneProvider sceneProvider,
-        IShaderPrecompileCrashGuard crashGuard, IModLogger logger)
+        IShaderPrecompileCrashGuard crashGuard, IModLogger logger, IShaderPrecompileGameManagerFactory games)
     {
+        _games = games;
         _service = service;
         _sceneProvider = sceneProvider;
         _crashGuard = crashGuard;
@@ -185,7 +187,16 @@ public sealed class ShaderPrecompileRunner
         if (item.Kind == PrecompileItemKind.ScenePass) _crashGuard.MarkLoading(item.SceneId);
         try
         {
-            MBGameManager.StartNewGame(new TaomShaderGameManager(item, gen, _service, _logger));
+            var manager = _games.Create(item, gen);
+            if (manager == null)
+            {
+                _logger?.LogError($"[ShaderPrecompilation] no game manager for item {_index + 1} (TAOM.Client did not load), skipping");
+                _abortedItems++;
+                BeginEnd();
+                return;
+            }
+
+            MBGameManager.StartNewGame(manager);
         }
         catch (Exception ex)
         {

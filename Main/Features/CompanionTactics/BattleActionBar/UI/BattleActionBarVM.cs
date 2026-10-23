@@ -76,7 +76,7 @@ public sealed class BattleActionBarVM : ViewModel
     /// Always rebuilds (no formation-equality short-circuit) so external stance changes
     /// (Patch35_Formation_SetMovementOrder) and composition changes (casualties) are reflected.
     /// </summary>
-    public void UpdateForFormation(Formation formation, IFormationAdapter adapter)
+    public void UpdateForFormation(Formation? formation, IFormationAdapter? adapter)
     {
         _actionButtons.Clear();
 

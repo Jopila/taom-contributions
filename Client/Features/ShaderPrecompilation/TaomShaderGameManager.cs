@@ -88,7 +88,7 @@ public class TaomShaderGameManager : CustomGameManager
 
     private CustomBattleData BuildCharacterBattleData(IReadOnlyList<string> ids)
     {
-        var resolved = ids.Select(Resolve).Where(c => c != null).ToList();
+        var resolved = ids.Select(Resolve).OfType<BasicCharacterObject>().ToList();
         var playerChar = resolved.FirstOrDefault(c => c.IsHero) ?? resolved.FirstOrDefault()
             ?? throw new InvalidOperationException($"[ShaderPrecompilation] batch {_batchLabel}: none of its {ids.Count} ids resolved");
         var data = BuildBattle(ShaderPrecompilePlanner.CharacterBattleScene, playerChar, resolved, out int dropped);
@@ -136,7 +136,7 @@ public class TaomShaderGameManager : CustomGameManager
         };
     }
 
-    private static BasicCharacterObject Resolve(string id) => MBObjectManager.Instance?.GetObject<BasicCharacterObject>(id);
+    private static BasicCharacterObject? Resolve(string id) => MBObjectManager.Instance?.GetObject<BasicCharacterObject>(id);
     private BasicCultureObject ResolveFirstCulture(IReadOnlyList<string> cultureIds)
     {
         var c = cultureIds.Select(id => MBObjectManager.Instance?.GetObject<BasicCultureObject>(id)).FirstOrDefault(x => x != null);

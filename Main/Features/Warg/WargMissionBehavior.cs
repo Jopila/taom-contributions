@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
-using TaleWorlds.MountAndBlade.View.MissionViews;
 
 namespace TAOM.Features.Warg;
 
@@ -49,7 +48,7 @@ public class WargMissionBehavior : MissionLogic
         BTRegister.RegisterClass("WargTree", (object[] objects) => WargBehaviorTree.BuildTree(objects));
         BTRegister.AddLogger(new TaomBTLogger());
 
-        var autonomousMovementController = Mission.Current.GetMissionBehavior<AutonomousMovementPlayerController>();
+        var autonomousMovementController = Mission.Current.GetMissionBehavior<IAutonomousMovementController>();
         if (autonomousMovementController != null)
             autonomousMovementController.Disable();
         else
@@ -189,19 +188,8 @@ public class WargMissionBehavior : MissionLogic
         base.OnRemoveBehavior();
     }
 
-    public static void SwitchMainAgentController(bool switchToSpecialController)
-    {
-        MissionMainAgentController baseController = Mission.Current.GetMissionBehavior<MissionMainAgentController>();
-        AutonomousMovementPlayerController noMovementController = Mission.Current.GetMissionBehavior<AutonomousMovementPlayerController>();
-        if (switchToSpecialController)
-        {
-            baseController.Disable();
-            noMovementController.Enable();
-        }
-        else
-        {
-            baseController.Enable();
-            noMovementController.Disable();
-        }
-    }
+    // ADR-013: the first controller does the swap (it holds vanilla's half too). With none, nothing switches and the
+    // player keeps vanilla's controller; before the move this threw after disabling it.
+    public static void SwitchMainAgentController(bool switchToSpecialController) =>
+        Mission.Current.GetMissionBehavior<IAutonomousMovementController>()?.SwitchMainAgentController(switchToSpecialController);
 }

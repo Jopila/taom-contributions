@@ -260,6 +260,10 @@ public static class IoC
         // Shared by two features (#768): the AI party size MCM watcher and the career passive
         // refresh. Registered here so neither feature silently owns the other's dependency.
         container.Register<IPartySizeCacheInvalidator, PartySizeCacheInvalidator>(Reuse.Singleton);
+        // ADR-013: the shader notice's window is WinForms; TAOM.Client replaces this null host. SubModule resolves
+        // it right after Configure, so after the client composition.
+        container.Register<Features.ShaderCompileNotice.IShaderCompileNoticeWindowHost,
+            Features.ShaderCompileNotice.NullShaderCompileNoticeWindowHost>(Reuse.Singleton);
     }
 
     private static void RegisterLoggingServices(IContainer container)

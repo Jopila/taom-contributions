@@ -218,4 +218,5 @@ Initial construction can mask this — `LoadMovie("...", DataSource)` reads the 
 | Prefab extension | `Main/Features/<Feature>/UI/` | `<Feature>Prefab.cs` |
 | Custom widget | `Client/Features/<Feature>/Widgets/` (TAOM.Client, ADR-013; `ServerLoadGateTests` fails a new widget in TAOM.dll) | `<Name>Widget.cs` |
 | MapView, map navigation element, map conversation provider | `Client/Features/<Feature>/`, behind a core interface with a null version (ADR-013) | `<Name>MapView.cs` |
+| MissionView, `[DefaultView]` view, visual order provider, CustomBattle game manager, WinForms window | `Client/Features/<Feature>/` with the source's relative path (TAOM.Client, ADR-013; a new one in TAOM.dll fails `ServerLoadGateTests`) | the type name, behind a core factory or interface with a null version (`IBattleActionBarViewFactory`, `IAutonomousMovementController`) |
 | Source sprites | `GUI/SpriteParts/ui_taom/<Feature>/` | `<sprite_name>.png` |

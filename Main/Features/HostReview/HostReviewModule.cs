@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using DryIoc;
-using TaleWorlds.MountAndBlade.ViewModelCollection.Order.Visual;
 using TAOM.Adapters;
 using TAOM.Composition;
 using TAOM.Features.HostReview.Hooks;
@@ -28,14 +27,16 @@ internal sealed class HostReviewModule : TaomFeatureModule
         registrator.Register<IHostReviewPartyAdapter, HostReviewPartyAdapter>(Reuse.Singleton);
         registrator.Register<IHostReviewMissionLauncher, HostReviewMissionLauncher>(Reuse.Singleton);
         registrator.Register<HostReviewService>(Reuse.Singleton);
+        registrator.Register<IHostReviewOrderProviderRegistrar, NullHostReviewOrderProviderRegistrar>(Reuse.Singleton);
     }
 
     public override IReadOnlyList<CampaignBehaviorDecl> CampaignBehaviors => Behaviors;
 
     public override void OnPhase(ApplyPhase phase, IResolver resolver)
     {
-        // Once per process: the factory rejects a second provider of the same type.
+        // Once per process (the engine's factory rejects a second provider of the same type); the provider is
+        // TAOM.Client's, behind the registrar seam.
         if (phase == ApplyPhase.ProcessLoad)
-            VisualOrderFactory.RegisterProvider(new HostReviewVisualOrderProvider());
+            resolver.Resolve<IHostReviewOrderProviderRegistrar>().Register();
     }
 }

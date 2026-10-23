@@ -42,7 +42,7 @@ SubModule.OnBeforeInitialModuleScreenSetAsRoot()
 ShaderPrecompileRunner.Begin()           (main menu: no MBObjectManager yet)
     └── plan = ShaderPrecompilePlanner.BuildBootstrapPlan(scenes)
             = [ bootstrap CharacterBattle (no ids) ] + [ ScenePass(scene) ... ] (scenes only if the MCM opt-in is on)
-    └── MBGameManager.StartNewGame(new TaomShaderGameManager(item 0))
+    └── MBGameManager.StartNewGame(IShaderPrecompileGameManagerFactory.Create(item 0))   (TaomShaderGameManager, built in TAOM.Client)
 
 TaomShaderGameManager.OnLoadFinished()   (inside the first custom game: the roster is readable)
     └── roster = IShaderPrecompilationService.GetCharacterIdsForShaderBattle()
@@ -66,7 +66,7 @@ SubModule menu action  ──▶  ShaderPrecompileRunner.Begin()
     plan = BuildBootstrapPlan( scenes )             scenes = PrecompileSceneProvider.GetScenes() if the opt-in is on, else empty
 
 SubModule.OnApplicationTick ──▶  runner.Tick()   (every frame while the walk is active)
-    StartCurrentItem → MBGameManager.StartNewGame(new TaomShaderGameManager(item))
+    StartCurrentItem → MBGameManager.StartNewGame(_games.Create(item, generation))   (null factory: the item is skipped and counted aborted)
         TaomShaderGameManager.OnLoadFinished → (item 0) NotifyRosterDiscovered → runner re-plans the batches
                                              → CustomBattleHelper.StartGame(item data)
                                              → ShaderPrecompileRunner.NotifyItemRendering()  [Running]
@@ -78,7 +78,7 @@ SubModule.OnApplicationTick ──▶  runner.Tick()   (every frame while the wa
 
 - **`ShaderPrecompileDecider`** (pure, unit-tested) owns per-item compile detection. Completion (count back to 0) requires `_observedWork` first (the 2026-05-04 initial-zero latch fix, generalized). The "nothing to compile, advance" grace counts **render** time (from the first non-loading frame), not load time, so a heavy scene still loading is never skipped. Backstops: a no-progress (count frozen) abort and an absolute per-item cap, both set per item kind by the runner.
 - **`ShaderPrecompileRunner`** (engine boundary) owns the outer state machine (Idle→Starting→Running→Ending→Complete) and chains the per-item custom battles. Every state has a timeout escape. `Game.Current==null` is the post-`EndGame` teardown signal, with a 90-s last-resort backstop; `TickEnding` logs the live state at 1 Hz to confirm which path fires. Because each item is a fresh `MBGameManager.StartNewGame`, the walk re-enters `SubModule.OnGameInitializationFinished` once per item, which surfaced a latent per-game re-patch crash (issue #288: patch application was unguarded, so the 2nd game re-applied a non-idempotent transpiler and threw). Now guarded once-per-process; see `docs/reviews/rca-repatch-crash-2026-06-18.md`. The completion line and toast carry the number of items that timed out, failed to start or were aborted, so a partial walk never reads as full coverage.
-- **`TaomShaderGameManager`** (`CustomGameManager` subclass) builds the per-item `CustomBattleData`: a character batch = the one designated character as the player party plus the batch as the enemy party; a `ScenePass` = the same one-character player party against five copies of that character on the item's real scene.
+- **`TaomShaderGameManager`** (`CustomGameManager` subclass; in TAOM.Client since ADR-013 B4c, built through `IShaderPrecompileGameManagerFactory`, null in core) builds the per-item `CustomBattleData`: a character batch = the one designated character as the player party plus the batch as the enemy party; a `ScenePass` = the same one-character player party against five copies of that character on the item's real scene.
 - **`PrecompileSceneProvider`** reads the scene list (below) and falls back to a baked default. Of the **21 registered** TAOM `_forceatmo` scenes (8 open-field battle + 9 custom siege + 4 custom village), the live `precompile_scenes.txt` walks **12** (8 siege + 4 village): the 8 open-field battle scenes (6 Mordor `62470413`, 2 Rohan `ee2cb04b`) and the Helm's Deep siege are **disabled** because their `pbr_terrain` vista permutation hard-crashes some GPUs on scene load, re-enable once the native shader-compile-guard hook lands (#287). **Fallback synced (2026-06-25):** the baked `DefaultScenes` mirrors the live `precompile_scenes.txt` exactly, so deleting/emptying the config no longer resurrects the crashing Mordor scenes. Pinned by `PrecompileSceneProviderParseTests.DefaultScenes_ExcludesDisabledCrashScenes` (a class inside `ShaderPrecompilePlannerTests.cs`).
 
 ### Roster batching (2026-09-11, #560)
@@ -156,8 +156,8 @@ Tunable constants:
 | Constant | Where | Value | Description |
 |----------|-------|-------|-------------|
 | `DefaultCharacterBatchSize` | `ShaderPrecompilePlanner.cs` | `1000` | Characters per batch. A 4,600 to 5,300 roster becomes 5 or 6 batches, roughly five minutes of load and teardown overhead in total, while each batch preloads about a fifth of what one battle already carried on the dev machine. Re-tune from the walk's per-batch memory lines; halve it if the `MemStats()` commit peak approaches the #385 envelope. |
-| `MaxEnemyRoster` | `TaomShaderGameManager.cs` | `3000` | Ceiling on the enemy roster. Unreachable at the default batch size; kept so a future batch-size change cannot silently overflow a combatant. A non-zero `skipped` in the batch log line is the tell. |
-| `ScenePassEnemyTroops` | `TaomShaderGameManager.cs` | `5` | Enemy copies of the designated character on a scene pass. Enough to render agents; the point of a scene pass is the scene's own shaders. |
+| `MaxEnemyRoster` | `Client/.../TaomShaderGameManager.cs` | `3000` | Ceiling on the enemy roster. Unreachable at the default batch size; kept so a future batch-size change cannot silently overflow a combatant. A non-zero `skipped` in the batch log line is the tell. |
+| `ScenePassEnemyTroops` | `Client/.../TaomShaderGameManager.cs` | `5` | Enemy copies of the designated character on a scene pass. Enough to render agents; the point of a scene pass is the scene's own shaders. |
 | `CharacterBattleScene` | `ShaderPrecompilePlanner.cs` | `"battle_terrain_029"` | `CustomBattleData.CoreContentDefaultSceneName`, the default custom battle scene, always present (`SandBoxCore/SceneObj/`). |
 | `CharBattlePerItemMs` / `CharBattleNoProgressMs` / `CharBattleMaxActiveMs` | `ShaderPrecompileRunner.cs` | 60 min / 15 min / off | Per-batch decider caps: absolute wall, frozen-count abort, churn backstop. |
 | `ScenePerItemMs` / `SceneNoProgressMs` / `SceneMaxActiveMs` | `ShaderPrecompileRunner.cs` | 8 min / 3 min / 6 min | Per-scene-pass decider caps. |
@@ -183,7 +183,7 @@ The original values (`MaxTroopsPerSide=2000`, `SoldierCopies=4`, `StuckAbortSeco
 | `Main/Features/ShaderPrecompilation/{IShaderPrecompileCrashGuard,ShaderPrecompileCrashGuard}.cs` | Scene crash skip list (`Logs/` marker + list files) |
 | `Main/Features/ShaderPrecompilation/Domain/PrecompileItem.cs` | `PrecompileItem` (`Kind`, `SceneId`, `Description`, `CharacterIds`, `BatchIndex`, `BatchCount`) + `PrecompileItemKind {CharacterBattle, ScenePass}` |
 | `Main/_Module/ModuleData/shader_precompilation/precompile_scenes.txt` | Editable scene list, 12 active (8 siege + 4 village); the 8 open-field battle scenes + Helm's Deep are disabled (Mordor + Rohan `pbr_terrain` vista crash, #287). 21 registered total. Baked `DefaultScenes` fallback mirrors this exactly (synced 2026-06-25). |
-| `Main/Features/ShaderPrecompilation/TaomShaderGameManager.cs` | Extends `CustomGameManager`; builds the per-item `CustomBattleData` (one-character player party; a character batch or five scene-pass copies as the enemy party); discovers the roster on the bootstrap batch |
+| `Client/Features/ShaderPrecompilation/TaomShaderGameManager.cs` | Extends `CustomGameManager` (TAOM.Client; core reaches it through `Main/Features/ShaderPrecompilation/IShaderPrecompileGameManagerFactory.cs`, `Client/Features/ShaderPrecompilation/ShaderPrecompileGameManagerFactory.cs`); builds the per-item `CustomBattleData` (one-character player party; a character batch or five scene-pass copies as the enemy party); discovers the roster on the bootstrap batch |
 | `Main/Features/ShaderPrecompilation/Hooks/LoadingScreen_ShaderProgress_Patch.cs` | `Patch21_ShaderPrecompilation`, loading screen progress text |
 | `Main/SubModule.cs` | Applies `Patch21_ShaderPrecompilation`, calls `InitializeHooks`, registers the menu button + inquiry in `OnBeforeInitialModuleScreenSetAsRoot()`, adds the guard to the walk's own battle (`TryClaimMission`) in `OnMissionBehaviorInitialize` |
 | `Main/Features/TaomSettings.cs` | The two MCM properties (`EnableShaderPrecompilation`, `EnableShaderPrecompileScenePasses`) |

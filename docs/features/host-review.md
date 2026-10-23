@@ -19,7 +19,7 @@ The map shows a party as one icon and a number. The player has no way to see the
 Vanilla field battles lean on a map event at every turn, and a friendly mission loses several of its own features. Each choice below answers one engine fact:
 
 - **Own mission name and view list, no scoreboard.** The scoreboard view marks a mission as not friendly. A friendly mission keeps holding the leave key to leave, so the view list for `TaomHostReview` is the campaign field battle's list (`SandBoxMissionViews.OpenBattleMission`) minus the battle scoreboard, the equipment drop view, `MissionSingleplayerViewHandler` (the campaign hotkey panels), the battle music, the kill notification feed, `MissionCampaignBattleSpectatorView`, the order-of-battle screen and `MissionPreloadView`. `MissionPreloadView` is omitted because it reads `MapEvent.PlayerMapEvent` unguarded. `MissionFaceCacheView` is kept, and the escape menu gets `CampaignOptions.IsIronmanMode` as vanilla passes it, so an ironman run greys "Exit to Main Menu". A `[ViewCreatorModule]` class may hold only `[ViewMethod]` statics, because `ViewCreatorManager` reads attribute [0] unguarded; `ViewCreatorModuleGateTests` pins it.
-- **A `DefaultVisualOrderProvider` subclass.** The vanilla order bar hides itself in a friendly mission, so `HostReviewVisualOrderProvider` inherits the whole order set and overrides only `IsAvailable()` to return true in a Host Review mission.
+- **A `DefaultVisualOrderProvider` subclass.** The vanilla order bar hides itself in a friendly mission, so `HostReviewVisualOrderProvider` (in TAOM.Client since ADR-013) inherits the whole order set and overrides only `IsAvailable()` to return true in a Host Review mission.
 - **`PartyAgentOrigin` with `isInvincible`.** SandBox models hard-cast the origin's combatant to `PartyBase`, so a plain custom-battle origin crashes them. An invincible party origin satisfies the cast and writes no wound, death or hit points back. No combat XP is awarded because `BattleAgentLogic` is not in the behavior list (it would also read `MapEvent.PlayerMapEvent`), not because of `isInvincible`.
 - **`CustomBattleCombatant` for both teams.** A party has no battle side without a map event, so the two sides are custom-battle combatants (the player's lineup as Defender, an empty Attacker).
 - **No Order of Battle screen, and no static bypass flag.** `TaomBattleInitializationModel.CanPlayerSideDeployWithOrderOfBattleAux` returns `_service.CanPlayerSideDeployWithOrderOfBattle() ?? base`. `EnlistmentDeploymentService` returns `null` with no map event (pinned by `EnlistmentDeploymentServiceTests`), and `SandboxBattleInitializationModel` then returns false, so the screen never appears on its own. Nothing global is set, which is why the next real battle still shows it. See [enlistment.md](enlistment.md).
@@ -68,7 +68,7 @@ HostReviewPartyAdapter   HostReviewMissionLauncher
 IEncounterAdapter               |
 (encounter, map event)  HostReviewTroopSupplier (invincible origins)
                         HostReviewMissionLogic (friendly-safe rules)
-                        HostReviewMissionViews / HostReviewVisualOrderProvider
+                        HostReviewMissionViews / HostReviewVisualOrderProvider (TAOM.Client, via IHostReviewOrderProviderRegistrar)
 ```
 
 ## Configuration
@@ -90,7 +90,9 @@ There is no config file and no MCM toggle. The player has to pick the menu optio
 | `Main/Features/HostReview/Hooks/HostReviewTroopSupplier.cs` | Feeds the lineup to the spawn logic in order |
 | `Main/Features/HostReview/Hooks/HostReviewMissionLogic.cs` | No friendly fire, no dying, start message |
 | `Main/Features/HostReview/Hooks/HostReviewMissionViews.cs` | The `TaomHostReview` view list |
-| `Main/Features/HostReview/Hooks/HostReviewVisualOrderProvider.cs` | Makes the vanilla order bar available |
+| `Client/Features/HostReview/Hooks/HostReviewVisualOrderProvider.cs` | Makes the vanilla order bar available (TAOM.Client, ADR-013: derives from a `TaleWorlds.MountAndBlade.View` type) |
+| `Main/Features/HostReview/IHostReviewOrderProviderRegistrar.cs`, `NullHostReviewOrderProviderRegistrar.cs` | The seam `HostReviewModule.OnPhase(ProcessLoad)` calls once per process; null in core |
+| `Client/Features/HostReview/HostReviewOrderProviderRegistrar.cs` | Registers the provider with `VisualOrderFactory` |
 
 ## Dependencies
 

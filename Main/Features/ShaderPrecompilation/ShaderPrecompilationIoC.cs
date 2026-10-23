@@ -11,6 +11,8 @@ public static class ShaderPrecompilationIoC
         container.Register<IShaderPrecompilationService, ShaderPrecompilationService>(Reuse.Singleton);
         container.Register<IPrecompileSceneProvider, PrecompileSceneProvider>(Reuse.Singleton);
         container.Register<IShaderPrecompileCrashGuard, ShaderPrecompileCrashGuard>(Reuse.Singleton);
+        // ADR-013: the game manager is a CustomBattle type, client-only; TAOM.Client replaces this null factory.
+        container.Register<IShaderPrecompileGameManagerFactory, NullShaderPrecompileGameManagerFactory>(Reuse.Singleton);
         container.Register<ShaderPrecompileRunner>(Reuse.Singleton);
     }
 

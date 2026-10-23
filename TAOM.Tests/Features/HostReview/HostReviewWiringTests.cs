@@ -46,6 +46,40 @@ public class HostReviewWiringTests
     }
 
     [TestMethod]
+    public void Module_RegistersTheNullOrderProviderRegistrar()
+    {
+        using var container = BuildContainer();
+
+        Assert.IsInstanceOfType(container.Resolve<IHostReviewOrderProviderRegistrar>(), typeof(NullHostReviewOrderProviderRegistrar));
+    }
+
+    [TestMethod]
+    public void OnPhase_ProcessLoad_RegistersTheOrderProviderOnce_AndNoOtherPhaseDoes()
+    {
+        using var container = BuildContainer();
+        var registrar = Substitute.For<IHostReviewOrderProviderRegistrar>();
+        container.RegisterInstance(registrar, IfAlreadyRegistered.Replace);
+        var module = new HostReviewModule();
+
+        foreach (var phase in Enum.GetValues(typeof(ApplyPhase)).Cast<ApplyPhase>().Where(p => p != ApplyPhase.ProcessLoad))
+            module.OnPhase(phase, container);
+        registrar.DidNotReceive().Register();
+
+        module.OnPhase(ApplyPhase.ProcessLoad, container);
+        registrar.Received(1).Register();
+    }
+
+    [TestMethod]
+    public void Module_NamesNoClientOrderType()
+    {
+        var src = RepoPaths.ReadSource("Main/Features/HostReview/HostReviewModule.cs", stripComments: true);
+
+        Assert.IsFalse(src.Contains("VisualOrderFactory"));
+        Assert.IsFalse(src.Contains("HostReviewVisualOrderProvider"));
+        Assert.IsFalse(src.Contains("Order.Visual"));
+    }
+
+    [TestMethod]
     public void Module_DeclaresTheCampaignBehavior()
     {
         var decls = new HostReviewModule().CampaignBehaviors;

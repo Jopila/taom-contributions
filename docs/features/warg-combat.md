@@ -19,7 +19,8 @@ The `Agent` class is sealed (cannot subclass). Warg AI must run alongside the ex
 ### Solution Approach
 
 - **BehaviorTreeAgentComponent** (TAOM-inlined at `Main/BehaviorTreeWrapper/`, was vendored `BehaviorTreeWrapper.dll` until 2026-05-24) — attached to each warg `Agent` via `AddComponent`, manually ticked by `WargMissionBehavior.OnMissionTick`
-- **AutonomousMovementPlayerController** — `[DefaultView]` MissionView that takes over player movement during rage mode
+- **AutonomousMovementPlayerController**: `[DefaultView]` MissionView that takes over player movement during rage mode. A MissionView, so it lives in TAOM.Client (ADR-013) and implements the core `IAutonomousMovementController`; the Warg code finds it with `Mission.GetMissionBehavior<IAutonomousMovementController>()`, which returns the first match
+- **Two controller instances per mission.** The engine builds one from `[DefaultView]` when the mission opens (first in the behavior list), and `SubModule.AddTaomMissionBehaviors` adds a second through `IAutonomousMovementControllerFactory` (null on a server). The Warg code always takes the first, so rage mode drives the default instance. The explicit one is added in `Mission.AfterStart`, after the mission screen registered the mission's views (`MissionScreen.OnMissionAfterStarting`), so its `MissionScreen` stays null: its pre-tick returns before it writes anything, and `OnMissionScreenFinalize` never reaches it, so the handlers its `EarlyStart` registers are never removed. Dropping it is a separate change
 - **SpatialGrid** — O(1) cell-based spatial partitioning for enemy proximity queries
 - **CustomAttacksUtils** — reflection-based `Mission.RegisterBlow` access for programmatic damage
 
@@ -96,7 +97,9 @@ LOTRLOME_Armory (XML: monster, items, animations, sounds)
 | `Main/Features/AdvancedCombat/AdvancedCombatBehavior.cs` | MissionLogic: SpatialGrid + BoneCollision ticking; owns the adapter cache lifecycle (build, delete, mission end, #592) |
 | `Main/Features/AdvancedCombat/MissionThreadGuard.cs` | Marks the main mission thread; reports once per site when a blow or creature action runs off it (#592) |
 | `Main/Features/AdvancedCombat/AgentSlotIdentity.cs` | Is this managed `Agent` still its slot's occupant (`Mission.FindAgentWithIndex`); the guard behind `AgentAdapter.IsActive()` and `TakeDamage` (#592) |
-| `Main/Features/AdvancedCombat/AutonomousMovementPlayerController.cs` | [DefaultView] MissionView for rage mode |
+| `Client/Features/AdvancedCombat/AutonomousMovementPlayerController.cs` | [DefaultView] MissionView for rage mode (TAOM.Client); also holds the swap with vanilla's `MissionMainAgentController` (`SwitchMainAgentController`) |
+| `Main/Features/AdvancedCombat/IAutonomousMovementController.cs`, `IAutonomousMovementControllerFactory.cs`, `NullAutonomousMovementControllerFactory.cs` | The core seam: the interface the Warg code drives, and the factory `SubModule` uses for the explicit instance (null in core) |
+| `Client/Features/AdvancedCombat/AutonomousMovementControllerFactory.cs` | Replaces the null factory on a rendering client |
 | `Main/Features/AdvancedCombat/AdvancedCombatIoC.cs` | Registers IBoneCollisionService, ISpatialGridDebugService |
 | `Main/Features/AdvancedCombat/TaomBTLogger.cs` | ILogger forwarding to IModLogger |
 | **Warg** | |

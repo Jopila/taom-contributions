@@ -4309,3 +4309,14 @@ shows), and three gates went red (`HarmonyPatchBindingTests`,
   test or script that stands in for a client process fills `ClientComposition.Current` with `TaomClientComposition`.
 - **Source:** `Main/Features/MapPerf/Hooks/MapProfilerTargets.cs`, `Main/Composition/ClientComposition.cs`,
   `tools/snapshot_api_surface.ps1`, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).
+### Read the per-submodule hook order before moving a mission add to another submodule (B4c, 2026-10-22)
+The headless-server research (row 11) proposed moving the mission view adds to `ClientSubModule.OnMissionBehaviorInitialize`. Reading `Mission.AfterStart` (`Mission.cs:3808-3825`) and the manifest order showed that hook runs after core's whole `OnMissionBehaviorInitialize`, so the views would have been registered behind the loading-window closer, outside the co-op add filter and outside the `[BattleLoad]` bracket, and the documented add order would have changed.
+- **Why missed:** the research table listed the call sites and the types, not the order in which the engine calls each submodule's hook.
+- **Prevent:** before moving a mission add to another submodule's hook, read `Mission.AfterStart` and the manifest order. B4c kept the add sites in core behind null-by-default factories that TAOM.Client replaces.
+- **Source:** `docs/research/taom-headless-server.md` problem row 11; `SubModuleMissionViewWiringTests`.
+
+### A source-text gate must fail on the wrong code, not only on missing code (B4c, 2026-10-22)
+Two B4c gates went RED before the change and green after it, yet passed on a wrong implementation: `SubModuleMissionServerGuardTests` matched the word `IsDedicatedServer`, so an inverted condition passed, and `WargControllerSwapTests` compared two `IndexOf` results, so a deleted call (`-1`) still came "before" the other.
+- **Why missed:** a RED run proves the test sees the missing code. It does not show what wrong code the test accepts.
+- **Prevent:** for every source-text gate, name one plausible wrong edit (an inverted condition, a deleted or swapped call) and make sure the assertion rejects it. Pin exact condition text, require every `IndexOf` to be at least 0 before comparing positions, or compare one whitespace-collapsed sequence.
+- **Source:** Codex B4c review F1 and F2; [rca-taom-client-b4c-2026-10-22.md](../rca-taom-client-b4c-2026-10-22.md).

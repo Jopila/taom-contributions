@@ -13,12 +13,12 @@ using TaleWorlds.MountAndBlade.View.MissionViews;
 namespace TAOM.Features.AdvancedCombat;
 
 [DefaultView]
-public class AutonomousMovementPlayerController : MissionView
+public class AutonomousMovementPlayerController : MissionView, IAutonomousMovementController
 {
-    public event OnLockedAgentChangedDelegate OnLockedAgentChanged;
-    public event OnPotentialLockedAgentChangedDelegate OnPotentialLockedAgentChanged;
+    public event OnLockedAgentChangedDelegate? OnLockedAgentChanged;
+    public event OnPotentialLockedAgentChangedDelegate? OnPotentialLockedAgentChanged;
     public bool IsDisabled { get; set; }
-    public Agent TargetAgent { get; set; }
+    public Agent? TargetAgent { get; set; }
 
     bool wentLeftLastTick = false;
     private Vec2 GoToTarget()
@@ -108,7 +108,7 @@ public class AutonomousMovementPlayerController : MissionView
         }
     }
 
-    public Agent LockedAgent
+    public Agent? LockedAgent
     {
         get => _lockedAgent;
         private set
@@ -121,7 +121,7 @@ public class AutonomousMovementPlayerController : MissionView
         }
     }
 
-    public Agent PotentialLockTargetAgent
+    public Agent? PotentialLockTargetAgent
     {
         get => _potentialLockTargetAgent;
         private set
@@ -148,7 +148,7 @@ public class AutonomousMovementPlayerController : MissionView
         MissionMultiplayerGameModeBaseClient missionBehavior = Mission.GetMissionBehavior<MissionMultiplayerGameModeBaseClient>();
         if ((missionBehavior != null ? missionBehavior.RoundComponent : null) != null)
         {
-            missionBehavior.RoundComponent.OnRoundStarted += Disable;
+            missionBehavior!.RoundComponent.OnRoundStarted += Disable;
             missionBehavior.RoundComponent.OnPreparationEnded += Enable;
         }
         ManagedOptions.OnManagedOptionChanged = (ManagedOptions.OnManagedOptionChangedDelegate)Delegate.Combine(ManagedOptions.OnManagedOptionChanged, new ManagedOptions.OnManagedOptionChangedDelegate(OnManagedOptionChanged));
@@ -163,7 +163,7 @@ public class AutonomousMovementPlayerController : MissionView
         MissionMultiplayerGameModeBaseClient missionBehavior = Mission.GetMissionBehavior<MissionMultiplayerGameModeBaseClient>();
         if ((missionBehavior != null ? missionBehavior.RoundComponent : null) != null)
         {
-            missionBehavior.RoundComponent.OnRoundStarted -= Disable;
+            missionBehavior!.RoundComponent.OnRoundStarted -= Disable;
             missionBehavior.RoundComponent.OnPreparationEnded -= Enable;
         }
         ManagedOptions.OnManagedOptionChanged = (ManagedOptions.OnManagedOptionChangedDelegate)Delegate.Remove(ManagedOptions.OnManagedOptionChanged, new ManagedOptions.OnManagedOptionChangedDelegate(OnManagedOptionChanged));
@@ -204,7 +204,7 @@ public class AutonomousMovementPlayerController : MissionView
                     RequestToSpawnAsBotCheck();
             }
         }
-        if (mainAgent != null && mainAgent.State == AgentState.Active && !MissionScreen.IsCheatGhostMode && !Mission.MainAgent.IsAIControlled && !IsDisabled && _activated)
+        if (mainAgent != null && mainAgent.State == AgentState.Active && !MissionScreen.IsCheatGhostMode && !Mission.MainAgent!.IsAIControlled && !IsDisabled && _activated)
         {
             ControlTick();
             LookTick(dt);
@@ -308,7 +308,7 @@ public class AutonomousMovementPlayerController : MissionView
         }
     }
 
-    private Agent FindTargetedLockableAgent(Agent player)
+    private Agent? FindTargetedLockableAgent(Agent player)
     {
         Vec3 direction = MissionScreen.CombatCamera.Direction;
         Vec3 vec = direction;
@@ -317,7 +317,7 @@ public class AutonomousMovementPlayerController : MissionView
         float num = new Vec3(position.x, position.y, 0f, -1f).Distance(new Vec3(visualPosition.x, visualPosition.y, 0f, -1f));
         Vec3 v = position * (1f - num) + (position + direction) * num;
         float num2 = 0f;
-        Agent agent = null;
+        Agent? agent = null;
         foreach (Agent agent2 in Mission.Agents)
         {
             if (agent2.IsMount && agent2.RiderAgent != null && agent2.RiderAgent.IsEnemyOf(player) || !agent2.IsMount && agent2.IsEnemyOf(player))
@@ -377,7 +377,7 @@ public class AutonomousMovementPlayerController : MissionView
     private bool ShouldClearLockedAgent(Agent mainAgent)
     {
         return !Mission.Agents.ContainsQ(LockedAgent) ||
-               !LockedAgent.IsActive() ||
+               !LockedAgent!.IsActive() ||
                LockedAgent.Position.DistanceSquared(mainAgent.Position) > 625f ||
                Input.IsGameKeyReleased(26) ||
                Input.IsGameKeyDown(25) ||
@@ -635,6 +635,22 @@ public class AutonomousMovementPlayerController : MissionView
     public void Disable() { _activated = false; }
     public void Enable() { _activated = true; }
 
+    // Moved from WargMissionBehavior.SwitchMainAgentController (ADR-013): vanilla's controller is a View type.
+    public void SwitchMainAgentController(bool switchToSpecialController)
+    {
+        MissionMainAgentController baseController = Mission.Current.GetMissionBehavior<MissionMainAgentController>();
+        if (switchToSpecialController)
+        {
+            baseController.Disable();
+            Enable();
+        }
+        else
+        {
+            baseController.Enable();
+            Disable();
+        }
+    }
+
     private void OnPlayerToggleOrder(MissionPlayerToggledOrderViewEvent obj)
     {
         _isPlayerOrderOpen = obj.IsOrderEnabled;
@@ -666,13 +682,13 @@ public class AutonomousMovementPlayerController : MissionView
     private bool _isPlayerAiming;
     private bool _isPlayerOrderOpen;
     private bool _isTargetLockEnabled;
-    private Agent _lockedAgent;
-    private Agent _potentialLockTargetAgent;
+    private Agent? _lockedAgent;
+    private Agent? _potentialLockTargetAgent;
     private float _lastLockKeyPressTime;
     private float _lastLockedAgentHeightDifference;
     public bool IsChatOpen;
     private bool _weaponUsageToggleRequested;
 
-    public delegate void OnLockedAgentChangedDelegate(Agent newAgent);
-    public delegate void OnPotentialLockedAgentChangedDelegate(Agent newPotentialAgent);
+    public delegate void OnLockedAgentChangedDelegate(Agent? newAgent);
+    public delegate void OnPotentialLockedAgentChangedDelegate(Agent? newPotentialAgent);
 }

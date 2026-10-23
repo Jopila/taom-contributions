@@ -34,5 +34,7 @@ public static class CompanionTacticsIoC
         container.Register<IBattleActionBarService, BattleActionBarService>(Reuse.Singleton);
         container.Register<ITroopStanceManager, TroopStanceManager>(Reuse.Singleton);
         container.Register<IFormationCompositionAnalyzer, FormationCompositionAnalyzer>(Reuse.Singleton);
+        // ADR-013: the action bar view is client-only; TAOM.Client replaces this null factory.
+        container.Register<IBattleActionBarViewFactory, NullBattleActionBarViewFactory>(Reuse.Singleton);
     }
 }

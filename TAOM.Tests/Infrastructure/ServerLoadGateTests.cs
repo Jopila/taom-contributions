@@ -36,20 +36,13 @@ public class ServerLoadGateTests
         "TAOM.Features.SpecialResources.UI.EncyclopediaUnitBadgeMixin",
         "TAOM.Features.SpecialResources.UI.SpecialResourceMapBarMixin",
         "TAOM.Features.SpecialResources.UI.SpecialResourceSpriteWidget",
-        "TAOM.Features.ShaderPrecompilation.TaomShaderGameManager",
-        "TAOM.Features.ShaderCompileNotice.ShaderCompileNoticeWindow",
-        "TAOM.Features.ShaderCompileNotice.WindowHandleOwner",
         "TAOM.Features.ReevesLedger.UI.ReserveStepMixin",
         "TAOM.Features.ReevesLedger.UI.TownManagementLedgerMixin",
         "TAOM.Features.Namegiving.UI.FiefNamingMixin",
         "TAOM.Features.Messengers.UI.MessengerEncyclopediaMixin",
-        "TAOM.Features.HostReview.Hooks.HostReviewVisualOrderProvider",
-        "TAOM.Features.CompanionTactics.BattleActionBar.Hooks.BattleActionBarMissionView",
         "TAOM.Features.CareerSystem.UI.CharacterDeveloperCareerMixin",
         "TAOM.Features.CareerSystem.UI.MissionAgentStatusCareerMixin",
         "TAOM.Features.CareerSystem.UI.TaomCareerDiamondWidget",
-        "TAOM.Features.AdvancedCombat.AutonomousMovementPlayerController",
-        "TAOM.Features.ShaderCompileNotice.ShaderCompileNotice+NoticeContext",
     };
 
     [ClassInitialize]

@@ -63,9 +63,11 @@ no compile progress to managed code.
 
 ```
 SubModule.OnSubModuleLoad ──> ShaderCompileNoticeEntry.Start   (game thread: texts, module list, server check)
-                                    └── ShaderCompileNotice.Start ──> STA thread: ApplicationContext + timer
-                                              ├── reads rgl_log_<pid>.txt ──> ShaderCompileProgress (pure, tested)
-                                              └── ShaderCompileNoticeWindow (WinForms), process priority
+                                    └── ShaderCompileNotice.Start (TAOM.dll: flags + STA thread)
+                                              └── IShaderCompileNoticeWindowHost.Run (TAOM.Client; core's null host shows nothing)
+                                                    └── ShaderCompileNoticeContext: ApplicationContext + timer
+                                                          ├── reads rgl_log_<pid>.txt ──> ShaderCompileProgress (pure, tested)
+                                                          └── ShaderCompileNoticeWindow (WinForms), process priority
 SubModule.OnBeforeInitialModuleScreenSetAsRoot ──> ShaderCompileNoticeEntry.Stop
 ```
 
@@ -80,11 +82,14 @@ None. Log lines: `[ShaderNotice] the engine is compiling its shaders: notice sho
 |------|---------|
 | `Main/Features/ShaderCompileNotice/ShaderCompileProgress.cs` | Pure: counting, show threshold, title, remembered total, `ShouldStart` |
 | `Main/Features/ShaderCompileNotice/ShaderCompileNoticeTexts.cs` | The resolved texts and their placeholders |
-| `Main/Features/ShaderCompileNotice/ShaderCompileNotice.cs` | Boundary: the thread, the log reading, the priority |
-| `Main/Features/ShaderCompileNotice/ShaderCompileNoticeWindow.cs` | The window |
+| `Main/Features/ShaderCompileNotice/ShaderCompileNotice.cs` | The start and stop flags and the STA thread. Stays in TAOM.dll under this name on purpose (ADR-013 B4c): VanillaTuning may look it up by full type name |
+| `Main/Features/ShaderCompileNotice/IShaderCompileNoticeWindowHost.cs`, `NullShaderCompileNoticeWindowHost.cs` | The window-host seam; the null host shows nothing and returns at once |
+| `Client/Features/ShaderCompileNotice/ShaderCompileNoticeContext.cs` | The message loop: the log reading, the timer, the priority (was the nested `NoticeContext`) |
+| `Client/Features/ShaderCompileNotice/ShaderCompileNoticeWindow.cs` | The window and its owner handle (WinForms) |
+| `Client/Features/ShaderCompileNotice/ShaderCompileNoticeWindowHost.cs` | Runs the context with `Application.Run`; replaces the null host |
 | `Main/Features/ShaderCompileNotice/ShaderCompileNoticeEntry.cs` | Engine boundary: texts, module list, start and stop |
 | `Main/SubModule.cs` | Start in `OnSubModuleLoad`, stop in `OnBeforeInitialModuleScreenSetAsRoot` |
-| `Main/TAOM.csproj` | `System.Windows.Forms` and `System.Drawing` references (the game bin ships neither) |
+| `Client/TAOM.Client.csproj` | `System.Windows.Forms` and `System.Drawing` references (the game bin ships neither); TAOM.dll has none |
 | `Main/_Module/ModuleData/taom_module_strings.xml` | `taom_shader_notice_title_total`, `taom_shader_notice_title_count`, `taom_shader_notice_detail` |
 
 ## Dependencies

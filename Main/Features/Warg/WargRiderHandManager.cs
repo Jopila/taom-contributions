@@ -28,18 +28,19 @@ internal static class WargRiderHandManager
 
     private static void ClearCustomLookDirection()
     {
-        AutonomousMovementPlayerController missionMainAgentController = Mission.Current.GetMissionBehavior<AutonomousMovementPlayerController>();
-        missionMainAgentController.CustomLookDir = Vec3.Zero;
+        var controller = Mission.Current.GetMissionBehavior<IAutonomousMovementController>();
+        if (controller != null) controller.CustomLookDir = Vec3.Zero;
     }
 
     private static void UpdateWargRiderHandle()
     {
-        AutonomousMovementPlayerController missionMainAgentController = Mission.Current.GetMissionBehavior<AutonomousMovementPlayerController>();
+        var controller = Mission.Current.GetMissionBehavior<IAutonomousMovementController>();
+        if (controller == null) return;
 
         if (Agent.Main.GetCurrentAction(0) == ActionIndexCache.act_none && Agent.Main.GetCurrentAction(1) == ActionIndexCache.act_none && !Agent.Main.HeadCameraMode)
         {
             Vec3 newLookDir = Agent.Main.GetMovementDirection().ToVec3();
-            missionMainAgentController.CustomLookDir = newLookDir;
+            controller.CustomLookDir = newLookDir;
             return;
         }
 

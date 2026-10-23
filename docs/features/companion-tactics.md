@@ -67,7 +67,7 @@ TAOM.Features.CompanionTactics/
     ├── ITroopStanceManager → TroopStanceManager           (per-formationIndex stance dict)
     ├── UI/{BattleActionBarVM, ActionButtonVM}
     └── Hooks/
-        BattleActionBarMissionView                        (MissionView NOT Harmony; field battles only)
+        BattleActionBarMissionView                        (MissionView NOT Harmony; field battles only; lives in Client/ since ADR-013, same path under Client/Features/)
         Patch35_Formation_SetMovementOrder                (clears stance on move when CancelStanceOnMove; lives in shared Patch_MissionTime_SetMovementOrder category — see below)
 ```
 
@@ -179,7 +179,8 @@ A preset is a named copy of the Order of Battle layout: the formation type of ea
 | `Main/Features/CompanionTactics/FormationPresets/Models/PresetApplyResult.cs` | Load outcome: classes set, captains placed, hero troops placed, skipped |
 | `Main/Features/CompanionTactics/FormationPresets/OOBOverlayService.cs` | Cached-FieldInfo reflection on `_dataSource`, `_isActive`; `GauntletLayer` lifecycle |
 | `Main/Features/CompanionTactics/FormationPresets/Hooks/FormationPresetCampaignBehavior.cs` | `SyncData` with try/catch — guards the LOAD/ref path only (NOT the off-thread save write); degrades to empty on BaseId collision |
-| `Main/Features/CompanionTactics/BattleActionBar/Hooks/BattleActionBarMissionView.cs` | MissionView; field-battle-only `GauntletLayer` attach + 0.5s refresh + 1–9 hotkey input |
+| `Client/Features/CompanionTactics/BattleActionBar/Hooks/BattleActionBarMissionView.cs` | MissionView (TAOM.Client, ADR-013); field-battle-only `GauntletLayer` attach + 0.5s refresh + keys 1 to 9 for the hotkeys |
+| `Main/Features/CompanionTactics/BattleActionBar/IBattleActionBarViewFactory.cs`, `NullBattleActionBarViewFactory.cs`; `Client/Features/CompanionTactics/BattleActionBarViewFactory.cs` | The factory `SubModule.AddTaomMissionBehaviors` adds the view through: null in core, the real view from TAOM.Client |
 | `Main/Features/CompanionTactics/BattleActionBar/Hooks/Patch35_Formation_SetMovementOrder.cs` | Implements `CancelStanceOnMove`. Belongs to shared `Patch_MissionTime_SetMovementOrder` category (applied once from `OnMissionBehaviorInitialize` because `MovementOrder.cctor` reads `Mission.Current.CurrentTime`). |
 | `Main/Adapters/{I,}BattleEquipmentSnapshot.cs` | Equipment value-object snapshot (no sealed `Equipment` leak) |
 | `Main/Adapters/{I,}HeroCombatAdapter.cs` | `Hero` wrapper; classifies from `BattleEquipment`, or from a given `Equipment` (Auto-Assign passes the agent's spawn equipment) |

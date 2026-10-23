@@ -34,7 +34,7 @@ public class FinishRageMode : BTTask, IBTWargBlackboard
             InformationManager.DisplayMessage(new InformationMessage("You are able to control your warg again!"));
         }
         WargMissionBehavior.SwitchMainAgentController(false);
-        AutonomousMovementPlayerController noMovementController = Mission.Current.GetMissionBehavior<AutonomousMovementPlayerController>();
-        noMovementController.TargetAgent = null;
+        var controller = Mission.Current.GetMissionBehavior<IAutonomousMovementController>();
+        if (controller != null) controller.TargetAgent = null;
     }
 }

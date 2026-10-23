@@ -19,16 +19,16 @@ public sealed class BattleActionBarMissionView : MissionView
     private const float RefreshIntervalSec = 0.5f;
     private const int MaxHotkeys = 9;
 
-    private ICompanionTacticsSettingsProvider _settings;
-    private IBattleActionBarService _service;
-    private ITroopStanceManager _stances;
-    private IModLogger _logger;
+    private ICompanionTacticsSettingsProvider? _settings;
+    private IBattleActionBarService? _service;
+    private ITroopStanceManager? _stances;
+    private IModLogger? _logger;
 
-    private GauntletLayer _layer;
-    private BattleActionBarVM _vm;
+    private GauntletLayer? _layer;
+    private BattleActionBarVM? _vm;
     private bool _isInitialized;
     private float _refreshAccumulator;
-    private Formation _lastFormation;
+    private Formation? _lastFormation;
 
     public override void OnMissionScreenInitialize()
     {
@@ -122,7 +122,7 @@ public sealed class BattleActionBarMissionView : MissionView
         // which is cheap (≤9 buttons) and runs at most twice per second.
         _lastFormation = formation;
         var adapter = formation != null ? new FormationAdapter(formation) : null;
-        _vm.UpdateForFormation(formation, adapter);
+        _vm!.UpdateForFormation(formation, adapter);
     }
 
     private void HandleHotkeyInput()

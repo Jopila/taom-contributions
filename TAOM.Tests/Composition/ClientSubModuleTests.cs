@@ -49,6 +49,11 @@ public class ClientSubModuleTests
             typeof(TAOM.Adapters.IFieldCampOverlayAdapter),
             typeof(TAOM.Features.FiefManagement.IFiefsNavigationElementFactory),
             typeof(TAOM.Features.HallOfFire.IMapConversationProviderWrapper),
+            typeof(TAOM.Features.AdvancedCombat.IAutonomousMovementControllerFactory),
+            typeof(TAOM.Features.CompanionTactics.BattleActionBar.IBattleActionBarViewFactory),
+            typeof(TAOM.Features.HostReview.IHostReviewOrderProviderRegistrar),
+            typeof(TAOM.Features.ShaderPrecompilation.IShaderPrecompileGameManagerFactory),
+            typeof(TAOM.Features.ShaderCompileNotice.IShaderCompileNoticeWindowHost),
         };
         var actual = container.GetServiceRegistrations().Select(r => r.ServiceType).ToArray();
         CollectionAssert.AreEquivalent(expected, actual);

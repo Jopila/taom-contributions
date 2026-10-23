@@ -55,7 +55,7 @@ public sealed class ShaderCompileProgress
     }
 
     /// <summary>The total remembered beside the shader cache; 0 for a missing, unreadable or absurd value.</summary>
-    public static int ParseRememberedTotal(string text)
+    public static int ParseRememberedTotal(string? text)
     {
         return int.TryParse(text?.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int total)
             && total > 0 && total <= MaxSaneTotal
