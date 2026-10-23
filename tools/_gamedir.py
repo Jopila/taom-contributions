@@ -63,10 +63,14 @@ def game_modules(default):
 
 
 def armory_trees(armory_md, asset_repo):
-    """[(label, ModuleData)] for an Armory writer: the live Armory, then the mirror when it
-    exists. A missing mirror is a warning, never an error: the live install is what the game
-    loads. The caller checks the live Armory itself (each tool words that refusal its own way)."""
+    """[(label, ModuleData)] for an Armory writer: the live Armory, then the mirror when one is
+    named and exists. `asset_repo=None` is the live Armory alone, silently: sessions never touch
+    the lotraom-assets mirror unless asked (Mike, 2026-09-22), the live install being the only
+    source of truth. A named mirror that is missing is a warning, never an error. The caller
+    checks the live Armory itself (each tool words that refusal its own way)."""
     trees = [("armory", Path(armory_md))]
+    if asset_repo is None:
+        return trees
     mirror = Path(asset_repo) / "ModuleData"
     if mirror.is_dir():
         trees.append(("mirror", mirror))

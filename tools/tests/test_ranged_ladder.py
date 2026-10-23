@@ -1178,8 +1178,15 @@ class GeneratorTests(unittest.TestCase):
     def _elf_file(self, md=None):
         return (md or self.armory / "ModuleData") / "LOTRLOME_items" / "elf" / self.gen.ITEMS_FILE_NAME
 
-    def test_the_default_mirror_is_the_v15_tree(self):
-        self.assertIn("v1.5", str(self.gen.DEFAULT_ASSET_REPO))
+    def test_without_asset_repo_the_mirror_is_never_written(self):
+        # Even with the shared mirror path pointed at a real mirror, a run that names none leaves it alone.
+        argv = ["--game-modules", str(self.modules), "--spec", str(self.spec_path), "--moduledata", str(self.md)]
+        from unittest import mock
+        with mock.patch.object(self.gen.gd, "ASSET_REPO", self.mirror):
+            self.assertEqual(self.gen.main([*argv, "--apply"]), 0)
+            self.assertEqual(self.gen.main([*argv, "--verify"]), 0)
+        self.assertTrue(self._elf_file().exists())
+        self.assertFalse(self._elf_file(self.mirror / "ModuleData").exists())
 
     def test_a_files_token_with_no_troop_file_is_refused(self):
         (self.md / "troops" / "troops_elf_twin.xml").unlink()

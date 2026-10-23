@@ -11,7 +11,7 @@ swung above the one-handed-sword median, the Rivendell and Harad starters sat ne
 the whole game, career bows ran 83 to 99 damage against vanilla's hunting bow at 40. Troops
 must keep the real items, so the fix is a duplicate per donor with much lower XML stats.
 
-WHAT IT WRITES (live Armory and, when present, the lotraom-assets mirror)
+WHAT IT WRITES (the live Armory; the lotraom-assets mirror too only with --asset-repo)
 -------------------------------------------------------------------------
   LOTRLOME_items/<folder>/starter_kit.xml   one generated file per donor culture folder
   LOTRLOME_crafting_pieces.xml              one marker block of starter blade pieces
@@ -43,7 +43,7 @@ start a new campaign before believing anything (docs/features/starting-equipment
 USAGE
 -----
     python tools/generate_starter_kit.py                 # dry run: the full report
-    python tools/generate_starter_kit.py --apply         # write to the Armory (+ asset repo)
+    python tools/generate_starter_kit.py --apply         # write to the live Armory
     python tools/generate_starter_kit.py --verify        # exit 1 if any registration drifted
     python tools/generate_starter_kit.py --revert        # remove every generated block and file
 """
@@ -69,7 +69,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_GAME = game_dir(r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord")
 DEFAULT_MODULES = Path(DEFAULT_GAME) / "Modules"
 DEFAULT_ARMORY = DEFAULT_MODULES / "LOTRLOME_Armory"
-DEFAULT_ASSET_REPO = ASSET_REPO
 DEFAULT_MODULEDATA = REPO_ROOT / "Main" / "_Module" / "ModuleData"
 # Not the career file: since #629 its rosters name the gear each culture's lowest troops carry,
 # and cloning those would author twins nobody asked for. Its old twins are kept by
@@ -1183,8 +1182,9 @@ def main() -> int:
     ap.add_argument("--verify", action="store_true", help="exit 1 if the Armory has drifted from the plan")
     ap.add_argument("--revert", action="store_true", help="remove every generated block and file")
     ap.add_argument("--armory-path", default=str(DEFAULT_ARMORY))
-    ap.add_argument("--asset-repo", default=str(DEFAULT_ASSET_REPO), help="second Armory copy to keep in step")
-    ap.add_argument("--no-asset-repo", action="store_true")
+    ap.add_argument("--asset-repo", default=None,
+                    help=f"also update this second Armory copy (e.g. {ASSET_REPO}); off by default")
+    ap.add_argument("--no-asset-repo", action="store_true", help="the default; kept so older commands still run")
     ap.add_argument("--game-modules", default=str(DEFAULT_MODULES))
     ap.add_argument("--rosters", nargs="+", default=[str(r) for r in DEFAULT_ROSTERS])
     ap.add_argument("--quiet", action="store_true", help="skip the per-clone report")
@@ -1210,10 +1210,11 @@ def main() -> int:
         print()
 
     targets = [Path(sources.armory) / "ModuleData"]
-    if not args.no_asset_repo and Path(args.asset_repo).exists():
-        targets.append(Path(args.asset_repo) / "ModuleData")
-    else:
-        print(f"(asset repo {args.asset_repo} not present; live Armory only)")
+    asset_repo = None if args.no_asset_repo else args.asset_repo
+    if asset_repo is not None and Path(asset_repo).exists():
+        targets.append(Path(asset_repo) / "ModuleData")
+    elif asset_repo is not None:
+        print(f"(asset repo {asset_repo} not present; live Armory only)")
 
     rc = 0
     for md in targets:

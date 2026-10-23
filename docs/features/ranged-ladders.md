@@ -282,7 +282,8 @@ tools/ranged_ladder.py     cell, skill_cell, rank, tiers_for, ladder_id, line_of
         |
         +--> tools/generate_ranged_ladder_items.py   LOTRLOME_items/<folder>/ranged_ladder.xml + loc rows
         +--> tools/restat_ranged_donors.py           LOTRAOM_weapons.xml attribute values
-        |                                             (both: live Armory + lotraom-assets v1.5 mirror)
+        |                                             (ladder items: live Armory, the v1.5 mirror only with
+        |                                              --asset-repo; restat: live Armory + v1.5 mirror)
         +--> tools/rebalance_ranged_ladders.py       reports; --apply: troops/troops_*.xml slots + skills
         +--> tools/sync_ranged_ladder_translations.py  the 12 languages' loc files (both trees)
         +--> tools/rebalance_troops.py               ladder_cells (the same skill cell; the clamp keeps it)
@@ -359,7 +360,7 @@ one; `donor_stats` / `ammo_stats` / `hero_ceiling` values that are not positive 
 |---|---|
 | `tools/ranged_ladders.json` | The spec |
 | `tools/ranged_ladder.py` | Library shared by the tools and the validator (no CLI) |
-| `tools/generate_ranged_ladder_items.py` | Items and English loc rows into the live Armory and the v1.5 mirror (`--apply`, `--verify` on speed, damage, accuracy and usage, `--revert`) |
+| `tools/generate_ranged_ladder_items.py` | Items and English loc rows into the live Armory, the v1.5 mirror only with `--asset-repo` (`--apply`, `--verify` on speed, damage, accuracy and usage, `--revert`) |
 | `tools/restat_ranged_donors.py` | `donor_stats` / `ammo_stats` into the Armory's own items (`--apply`, `--verify`) |
 | `tools/rebalance_ranged_ladders.py` | Report to `tools/reports/ranged-ladders/` (md, html, json); `--apply` rewrites the launcher slots and the ranged skill |
 | `tools/sync_ranged_ladder_translations.py` | The translated names move from retired ids to current ones in the 12 translated languages (`--apply`, `--verify`) |

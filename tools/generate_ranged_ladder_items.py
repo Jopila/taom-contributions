@@ -11,7 +11,7 @@ the clones changed only the speed, so every tier of a line carried the donor's d
 accuracy. Every cell now carries its own three values; the donor gives only the look. The Armory's
 own bows are restatted separately by tools/restat_ranged_donors.py.
 
-WHAT IT WRITES (live Armory and, when present, the lotraom-assets mirror)
+WHAT IT WRITES (the live Armory; the lotraom-assets mirror too only with --asset-repo)
 -------------------------------------------------------------------------
   LOTRLOME_items/<folder>/ranged_ladder.xml   one generated file per line folder
   Languages/loc_<folder>.xml                  one marker block of English name rows, so
@@ -43,7 +43,7 @@ so an unregistered `folder` in the spec is an error, not a warning.
 USAGE
 -----
     python tools/generate_ranged_ladder_items.py             # dry run: the plan
-    python tools/generate_ranged_ladder_items.py --apply     # write to the Armory (+ mirror)
+    python tools/generate_ranged_ladder_items.py --apply     # write to the live Armory
     python tools/generate_ranged_ladder_items.py --verify    # exit 1 if any file drifted
     python tools/generate_ranged_ladder_items.py --revert    # remove every generated file
 """
@@ -64,7 +64,6 @@ import generate_starter_kit as gsk  # noqa: E402  read_xml, checked_write, index
 import ranged_ladder as rl  # noqa: E402
 import rebalance_troops as rb  # noqa: E402  DEFAULT_GAME_MODULES
 
-DEFAULT_ASSET_REPO = gd.ASSET_REPO
 ITEMS_FILE_NAME = "ranged_ladder.xml"
 EOL = "\r\n"
 LOC_MARKER_START = "<!-- TAOM-RANGED-LADDER:START -->"
@@ -317,8 +316,9 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--game-modules", default=rb.DEFAULT_GAME_MODULES,
                     help=".../Mount & Blade II Bannerlord/Modules (the live Armory and vanilla donors)")
-    ap.add_argument("--asset-repo", default=str(DEFAULT_ASSET_REPO),
-                    help="the lotraom-assets LOTRLOME_Armory mirror; skipped with a warning when absent")
+    ap.add_argument("--asset-repo", default=None,
+                    help=f"also update this lotraom-assets LOTRLOME_Armory mirror (e.g. {gd.ASSET_REPO}); "
+                         "off by default, and skipped with a warning when absent")
     ap.add_argument("--spec", default=str(rl.DEFAULT_SPEC))
     ap.add_argument("--moduledata", default=str(rl.MODULEDATA_DIR),
                     help="TAOM ModuleData root, only to check the spec's files tokens against troops/")

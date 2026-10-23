@@ -132,6 +132,18 @@ class EnsureExistsTests(_EnvIsolated):
         self.assertIn("the Erebor item folder", err.getvalue())
 
 
+class ArmoryTreesTests(unittest.TestCase):
+    def test_no_mirror_means_the_live_armory_alone_and_no_warning(self):
+        # Mike, 2026-09-22 and 09-26: sessions never touch the lotraom-assets mirror; the live
+        # Armory is the only source of truth, so a writer reaches the mirror only when asked.
+        with tempfile.TemporaryDirectory() as tmp:
+            out = io.StringIO()
+            with redirect_stdout(out):
+                trees = _gamedir.armory_trees(Path(tmp), None)
+        self.assertEqual(trees, [("armory", Path(tmp))])
+        self.assertEqual(out.getvalue(), "")
+
+
 class GameModulesTests(_EnvIsolated):
     """Precedence for the Modules folder, which taom_mcp_server.py needs.
 
