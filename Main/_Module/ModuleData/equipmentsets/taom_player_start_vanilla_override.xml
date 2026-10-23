@@ -517,7 +517,7 @@
             <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.steppe_harness" />
         </EquipmentSet>
         <EquipmentSet equipmentType="Civilian">
             <Equipment slot="Item0" id="Item.sm_rh_loke_1h_sword_a" />
@@ -533,7 +533,7 @@
             <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.steppe_harness" />
         </EquipmentSet>
         <EquipmentSet equipmentType="Civilian">
             <Equipment slot="Item0" id="Item.sm_rh_loke_1h_sword_a" />
@@ -691,7 +691,7 @@
             <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.steppe_harness" />
         </EquipmentSet>
         <EquipmentSet equipmentType="Civilian">
             <Equipment slot="Item0" id="Item.sm_rh_loke_1h_sword_a" />
@@ -707,7 +707,7 @@
             <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.steppe_harness" />
         </EquipmentSet>
         <EquipmentSet equipmentType="Civilian">
             <Equipment slot="Item0" id="Item.sm_rh_loke_1h_sword_a" />

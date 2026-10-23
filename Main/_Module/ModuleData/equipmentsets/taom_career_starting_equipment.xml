@@ -32,8 +32,14 @@
   Every playable culture has its career rosters (CareerKitCoverageTests). Khand (battania),
   Lothlorien, Abanissa, the Misty Mountain orcs and Blue Craig take the gear of the troops they
   recruit, which carry another culture's id (KIT_SOURCE in the generator). The nine kits added
-  on 2026-10-23 (those five, Lindon, Umbar, Shaghana and the goblins) ride placeholder mounts
-  (Mike): the saddle horse with the light harness, or the brown warg with its saddle.
+  on 2026-10-23 (those five, Lindon, Umbar, Shaghana and the goblins) ride the saddle horse
+  or, for the three orc cultures, the brown warg with its saddle. Every horse culture keeps the
+  saddle horse (Riding 0): careers grant no skill and every vanilla culture horse needs Riding
+  10 to 20, so a fresh character could not put one back on. Its harness is the one vanilla's own
+  character creation gives the culture's retainer: Harad, Abanissa and Shaghana the Bedouin Common
+  Saddle, Rhun the Steppe Saddle (Khand follows Rhun's kit), the other six horse cultures the light
+  harness (Dunland is vanilla empire, whose retainer rides it), Gondor and the Arnor realms Gondor's
+  starter harness.
 -->
 <EquipmentRosters>
 
@@ -756,7 +762,7 @@
             <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.aseran_village_harness" />
         </EquipmentSet>
     </EquipmentRoster>
 
@@ -768,7 +774,7 @@
             <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.aseran_village_harness" />
         </EquipmentSet>
     </EquipmentRoster>
 
@@ -824,7 +830,7 @@
             <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.steppe_harness" />
         </EquipmentSet>
     </EquipmentRoster>
 
@@ -836,7 +842,7 @@
             <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.steppe_harness" />
         </EquipmentSet>
     </EquipmentRoster>
 
@@ -1380,7 +1386,7 @@
             <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.steppe_harness" />
         </EquipmentSet>
     </EquipmentRoster>
 
@@ -1392,7 +1398,7 @@
             <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.steppe_harness" />
         </EquipmentSet>
     </EquipmentRoster>
 
@@ -1450,7 +1456,7 @@
             <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.aseran_village_harness" />
         </EquipmentSet>
     </EquipmentRoster>
 
@@ -1462,7 +1468,7 @@
             <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.aseran_village_harness" />
         </EquipmentSet>
     </EquipmentRoster>
 
@@ -1520,7 +1526,7 @@
             <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_light_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.aseran_village_harness" />
         </EquipmentSet>
     </EquipmentRoster>
 
@@ -1532,7 +1538,7 @@
             <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
             <Equipment slot="Leg" id="Item.sk_sg_st_grvs_light_a" />
             <Equipment slot="Horse" id="Item.saddle_horse" />
-            <Equipment slot="HorseHarness" id="Item.light_harness" />
+            <Equipment slot="HorseHarness" id="Item.aseran_village_harness" />
         </EquipmentSet>
     </EquipmentRoster>
 

@@ -243,17 +243,24 @@ an item folder loads as a duplicate item id.
 - About 128 new `{=starter_*}` item names use inline English defaults, plus the 180 older
   `{=starter_*}` armour names: none harvested into the 12-language pipeline (`/localize`).
 - Horse and HorseHarness are untouched by #629; the career layer hands a vanilla `saddle_horse` to 16
-  cultures' cavalry (12 of them with `light_harness`, the three Arnor realms and Gondor with
-  `starter_cavalry_gondor_horse_armor_a`), a warg to seven, the war ram to Erebor (#515) and the
+  cultures' cavalry (the three Arnor realms and Gondor with `starter_cavalry_gondor_horse_armor_a`,
+  Harad, Abanissa and Shaghana with `aseran_village_harness`, Rhun and Khand with `steppe_harness`,
+  the other seven, Dunland among them, with `light_harness`), a warg to seven, the war ram to Erebor (#515) and the
   Animalia elk to Mirkwood (#646; the great elk, #636, until 2026-09-23, when Mike put the career start on the
   lower cavalry's mount). The Armory has no riding horse of its own: every Armory `Horse` is a creature
   (wargs, rams, spiders, mumakil, elephant, chariot, the great elk, the Animalia elk and moose).
 - Lothlorien's, Lindon's and Rivendell's archers start with an elven ladder bow that needs Bow 100,
   so a new character cannot put it back on once it is taken off. Elf troops carry no javelin, so the
   rule has no other pick; left as it is for now (Mike, 2026-10-23).
-- The nine career kits added on 2026-10-23 ride placeholder mounts (Mike): the saddle horse and light
-  harness, or the brown warg and saddle for the goblins, Misty Mountains and Blue Craig, whose markets
-  do not stock the warg (`culture_marketplace_config.xml` routes it to the four warg cultures only).
+- **Why the saddle horse and not a culture horse** (mount analysis, 2026-10-23). Every vanilla culture
+  horse is stronger (speed 44 to 54 against 37, maneuver 55 to 67 against 52, charge 14 to 22 against
+  12), and each culture's lowest rider already sits on a tier-2 horse or a war horse. It needs
+  Riding 10 to 20 (`aserai_horse` and `empire_horse` 10, `khuzait_horse` and `vlandia_horse` 15,
+  `battania_horse` and `sturgia_horse` 20), and careers grant no skill (`career_menu.json`), so a fresh
+  character may be below it and could not put the horse back on: the elven bow trap again. The saddle
+  horse needs Riding 0 and already beats vanilla's own start, `sumpter_horse` (speed 34, maneuver 41,
+  charge 8). Harnesses need no skill, so each culture takes the harness vanilla's character creation
+  gives its retainer (Dunland is vanilla `empire`: the light harness; Khand follows Rhun's kit). The goblins, Misty Mountains and Blue Craig ride the brown warg, which their markets stock.
 - Since the 1.5.3 bump vanilla `battered_kite_shield` carries `culture="Culture.empire"`, which maps to
   `dunland`, while its twin sits in `mercenary`. The generator keeps an on-disk twin where it is, so
   `--verify` is green and the run prints a note instead of moving it.

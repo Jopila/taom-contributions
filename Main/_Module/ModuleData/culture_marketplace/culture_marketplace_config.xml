@@ -105,7 +105,7 @@
          min_stock="1" guarantees at least one of each variant + the saddle is always
          available in Isengard / Mordor / Gundabad / Dol Guldur towns. The brown warg and the
          saddle also stock the goblin, Misty Mountain and Blue Craig markets, whose cavalry
-         careers start on them (placeholder mounts, Mike 2026-10-23). -->
+         careers start on them (Mike, 2026-10-23). -->
     <Item id="warg_brown"  cultures="isengard,mordor,gundabad,dolguldur,goblin,mistymountainorcs,bluecraig" min_stock="1" />
     <Item id="warg_dark"   cultures="isengard,mordor,gundabad,dolguldur" min_stock="1" />
     <Item id="warg_albino" cultures="isengard,mordor,gundabad,dolguldur" min_stock="1" />
