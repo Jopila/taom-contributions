@@ -238,7 +238,7 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         // A verdict or an unconsumed merit sample from the previous world would be paid to the first
         // battle of the next one.
         _sitOutLedger?.Consume();
-        _meritAccumulator?.Consume();
+        _meritAccumulator?.ResetForNewSession();
 
         _cachedCommanderPartyId = null;
         _lastJoinRequestedForMapEventToken = 0;

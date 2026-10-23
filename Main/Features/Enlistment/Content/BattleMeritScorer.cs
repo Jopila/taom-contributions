@@ -25,6 +25,12 @@ public sealed class MeritSample
 
     /// <summary>Mean distance to the nearest enemy across samples; negative when never measured.</summary>
     public float AverageEnemyDistance { get; set; } = -1f;
+
+    /// <summary>
+    /// String ids of the human enemies the player killed (#834), copied from the mission's thread-safe
+    /// queue at mission end. Ids only, never an Agent. Read by the personal spoils on a win.
+    /// </summary>
+    public IReadOnlyList<string> KilledCharacterIds { get; set; } = Array.Empty<string>();
 }
 
 /// <summary>

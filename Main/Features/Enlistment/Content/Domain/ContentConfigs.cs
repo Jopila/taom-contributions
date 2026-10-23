@@ -21,6 +21,18 @@ public sealed class EnlistmentContentConfig
 
     /// <summary>Honor trait XP lost by the same desertion (#833). In [-1000, 0], same validation.</summary>
     public int DesertionHonorXpPenalty { get; set; } = -100;
+
+    /// <summary>Most personal spoils (items from his own kills) a won battle can pay (#834). In [0, 10].</summary>
+    public int SpoilsMaxItemsPerBattle { get; set; } = 3;
+
+    /// <summary>Per-rank-ordinal raise of the spoils target value: target x (1 + scale x rank). Finite, in [0, 2].</summary>
+    public double SpoilsValueScalePerRank { get; set; } = 0.25;
+
+    /// <summary>Lower edge of the random factor on the spoils target value. Finite, 0 &lt;= min &lt;= max &lt;= 2.</summary>
+    public double SpoilsRandomMin { get; set; } = 0.1;
+
+    /// <summary>Upper edge of the random factor on the spoils target value. Finite, 0 &lt;= min &lt;= max &lt;= 2.</summary>
+    public double SpoilsRandomMax { get; set; } = 0.9;
 }
 
 /// <summary>

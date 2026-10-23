@@ -46,6 +46,9 @@ public class EnlistmentContainerWiringTests
         container.RegisterInstance(Substitute.For<global::TAOM.Features.Enlistment.Duties.IDutyOrchestrationService>());
         // IPlayerTraitAdapter (HardQuestionsIoC) entered with the desertion cost (#833).
         container.RegisterInstance(Substitute.For<global::TAOM.Adapters.IPlayerTraitAdapter>());
+        // IRandomProvider (TroopProgressionIoC) is registered by Main/IoC.cs; the payout service rolls
+        // the personal spoils with it (#834).
+        container.RegisterInstance(Substitute.For<global::TAOM.Features.TroopProgression.IRandomProvider>());
 
         EnlistmentIoC.RegisterEnlistmentFeature(container);
         return container;
@@ -64,6 +67,20 @@ public class EnlistmentContainerWiringTests
             0,
             errors.Length,
             "EnlistmentBattleBehavior is not resolvable: "
+                + string.Join("; ", errors.Select(e => e.Value.Message)));
+    }
+
+    [TestMethod]
+    public void BattlePayoutService_Resolvable_PersonalSpoilsDependenciesSatisfied()
+    {
+        var container = BuildContainer();
+
+        var errors = container.Validate(typeof(global::TAOM.Features.Enlistment.Content.EnlistmentBattlePayoutService));
+
+        Assert.AreEqual(
+            0,
+            errors.Length,
+            "EnlistmentBattlePayoutService is not resolvable: "
                 + string.Join("; ", errors.Select(e => e.Value.Message)));
     }
 

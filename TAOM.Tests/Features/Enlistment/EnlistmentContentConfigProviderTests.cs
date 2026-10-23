@@ -853,4 +853,66 @@ public class EnlistmentContentConfigProviderTests
         Assert.AreEqual(0, config.DesertionRelationPenalty);
         Assert.AreEqual(0, config.DesertionHonorXpPenalty);
     }
+
+    // ---- personal spoils (#834) ----
+
+    [TestMethod]
+    public void SpoilsDefaults_AreTheApprovedValues()
+    {
+        var d = EnlistmentContentConfigProvider.BuildDefaults();
+        Assert.AreEqual(3, d.SpoilsMaxItemsPerBattle);
+        Assert.AreEqual(0.25, d.SpoilsValueScalePerRank);
+        Assert.AreEqual(0.1, d.SpoilsRandomMin);
+        Assert.AreEqual(0.9, d.SpoilsRandomMax);
+    }
+
+    [TestMethod]
+    public void ShippedConfig_Spoils_EqualsTheCompiledDefaults()
+    {
+        var d = EnlistmentContentConfigProvider.BuildDefaults();
+        var raw = JObject.Parse(File.ReadAllText(Path.Combine(ShippedModuleDataPath(), "enlistment", "enlistment_config.json")));
+        Assert.AreEqual(d.SpoilsMaxItemsPerBattle, (int)raw["spoilsMaxItemsPerBattle"]);
+        Assert.AreEqual(d.SpoilsValueScalePerRank, (double)raw["spoilsValueScalePerRank"]);
+        Assert.AreEqual(d.SpoilsRandomMin, (double)raw["spoilsRandomMin"]);
+        Assert.AreEqual(d.SpoilsRandomMax, (double)raw["spoilsRandomMax"]);
+        var loaded = new EnlistmentContentConfigProvider(ShippedPaths(), _logger).GetConfig();
+        Assert.AreEqual(d.SpoilsMaxItemsPerBattle, loaded.SpoilsMaxItemsPerBattle);
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(m => m.Contains("spoils")));
+    }
+
+    [DataTestMethod]
+    [DataRow("{\"spoilsMaxItemsPerBattle\":-1}", "spoilsMaxItemsPerBattle")]
+    [DataRow("{\"spoilsMaxItemsPerBattle\":11}", "spoilsMaxItemsPerBattle")]
+    [DataRow("{\"spoilsValueScalePerRank\":-0.1}", "spoilsValueScalePerRank")]
+    [DataRow("{\"spoilsValueScalePerRank\":2.5}", "spoilsValueScalePerRank")]
+    [DataRow("{\"spoilsValueScalePerRank\":\"NaN\"}", "spoilsValueScalePerRank")]
+    [DataRow("{\"spoilsRandomMin\":-0.5}", "spoilsRandomMin")]
+    [DataRow("{\"spoilsRandomMax\":2.5}", "spoilsRandomMax")]
+    [DataRow("{\"spoilsRandomMin\":\"Infinity\"}", "spoilsRandomMin")]
+    [DataRow("{\"spoilsRandomMin\":0.8,\"spoilsRandomMax\":0.2}", "spoilsRandomM")]
+    public void GetConfig_SpoilsOutOfRange_RevertsWithWarning(string json, string key)
+    {
+        WriteConfig(json);
+
+        var c = Provider().GetConfig();
+
+        Assert.AreEqual(3, c.SpoilsMaxItemsPerBattle);
+        Assert.AreEqual(0.25, c.SpoilsValueScalePerRank);
+        Assert.AreEqual(0.1, c.SpoilsRandomMin);
+        Assert.AreEqual(0.9, c.SpoilsRandomMax);
+        _logger.Received().LogWarning(Arg.Is<string>(m => m.Contains(key)));
+    }
+
+    [TestMethod]
+    public void GetConfig_SpoilsBoundaries_AreKept()
+    {
+        WriteConfig("{\"spoilsMaxItemsPerBattle\":0,\"spoilsValueScalePerRank\":2,\"spoilsRandomMin\":0,\"spoilsRandomMax\":2}");
+
+        var c = Provider().GetConfig();
+
+        Assert.AreEqual(0, c.SpoilsMaxItemsPerBattle);
+        Assert.AreEqual(2.0, c.SpoilsValueScalePerRank);
+        Assert.AreEqual(0.0, c.SpoilsRandomMin);
+        Assert.AreEqual(2.0, c.SpoilsRandomMax);
+    }
 }

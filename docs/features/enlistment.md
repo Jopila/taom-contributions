@@ -2246,6 +2246,55 @@ and `CommanderSettlementIdentityTests` (both snapshots fill the flag through `Vi
 the comment-stripped source pin: the reader tests `IsMobile`, `IsLordParty` and `TotalHealthyCount`
 with no LINQ and no `Find`).
 
+## Personal spoils (#834)
+
+A soldier who wins a battle keeps a few items from the enemies he killed himself, on top of
+vanilla's loot share (which is kept as it is; no `DoLootInventory` patch).
+
+- **Kill list, hero by character.** `EnlistmentMeritMissionBehavior.OnAgentRemoved` now counts a kill
+  only when the killer's `Character` is `CharacterObject.PlayerCharacter`, not when the killer is the
+  controlled agent. A soldier the player takes over after falling is never a hero
+  (`Mission.CanTakeControlOfAgent` requires `!Character.IsHero`), so his kills are not the player's. This
+  also changes kill XP and the merit score's kill term (the `BattleMeritScorer` kill weight): both now
+  count only the hero's own kills. The merit sampler's fall and position readings also treat a
+  controlled soldier as "hero down" after a takeover, so the fall is recorded. Each human enemy kill also queues the
+  `Character.StringId` into a `ConcurrentQueue<string>` (callbacks run off-thread; an `Agent` is never
+  stored), copied at mission end into `MeritSample.KilledCharacterIds`.
+- **Win-only payout.** `EnlistmentBattlePayoutService.PayOutBattle` runs the spoils only when the
+  battle was won and not sat out, from the same consumed sample, at `MapEventEnded` on the host. A loss,
+  a sat-out battle, a missing sample or a kill-less battle gives nothing.
+- **Rank, then try.** `PersonalSpoilsPolicy.Rank` orders the kills by expected value, highest first
+  (ties keep kill order), and gives each a target value = expected x (1 + `spoilsValueScalePerRank` x
+  rank ordinal) x a random factor from `spoilsRandomMin` to `spoilsRandomMax`. Empty ids and unreadable,
+  non-finite and non-positive expected values are skipped. There is no cap in the policy: the payout stops
+  once `spoilsMaxItemsPerBattle` items have LANDED, because vanilla's roll often returns nothing and an
+  empty roll must not use a slot. With the cap at 0 no engine read happens at all.
+- **One adapter call rolls and grants.** `IBattleLootAdapter.GrantLootFrom` wraps `BattleRewardModel`
+  (`GetLootedItemFromTroop`), adds the element with `ItemRoster.AddToCounts(element, 1)` so the rolled
+  modifier is kept, and returns the display name, or null for a missing character, a troop with no battle
+  set (vanilla's `GetRandomItem` dereferences a null `Equipment` there), an empty roll, a banner, or a
+  failure. Vanilla's roll walks the troop's merchandise items from most to least valuable, accepts each
+  with a chance that drops once the item is worth more than the target, skips non-merchandise items, and
+  often returns nothing. So no gated armour piece can be a spoil (see
+  [armour-acquisition.md](armour-acquisition.md)).
+- **Not in the ledger.** Spoils are never recorded in the issue ledger; like any loot, an unmodified
+  spoil of the same item as a piece he was issued can be taken back at an honourable discharge when no
+  unmodified copy of that issued piece is left in the inventory (sold, lost or worn) (the known limitation under "Honourable discharge reclaims the issued kit by item id"
+  in this doc). One summary toast (`taom_enlist_spoils`, "Spoils of your own blade: {ITEMS}") lists what
+  landed; none when nothing did.
+- **Config** (`enlistment_config.json`, validated, out of range reverts that key with a warning):
+  `spoilsMaxItemsPerBattle` 3 (0 to 10), `spoilsValueScalePerRank` 0.25 (finite, 0 to 2),
+  `spoilsRandomMin` 0.1 and `spoilsRandomMax` 0.9 (finite, 0 <= min <= max <= 2).
+- **Session reset.** `IBattleMeritAccumulator.ResetForNewSession` drops a pending sample, called from
+  `ServiceMaintenanceService.ResetSessionCaches`, so a sample cannot pay into another campaign. A save
+  taken mid-battle loses the sample, as it already loses the merit.
+
+Tests: `PersonalSpoilsPolicyTests`, `BattleMeritAccumulatorTests`, `EnlistmentBattlePayoutServiceTests`
+(the spoils rows, the cap counting landed items, a zero cap reading nothing), `EnlistmentContentConfigProviderTests`
+(spoils defaults, shipped parity, range), `PersonalSpoilsWiringTests` (the kill-queue, hero-by-character
+and adapter source shapes, and the engine binding) and `EnlistmentContainerWiringTests` (the payout
+service resolves).
+
 ## Interactions with the rest of TAOM
 
 **Leader-keyed attribution is the recurring hazard.** For months of game time the player fights
@@ -2369,6 +2418,12 @@ What actually remains, each a state no test can reach:
 - **A field battle with the commander in an army.** Still the case most likely to fail:
   `FindCommanderPartyIdIn` matches only the commander's own party in `InvolvedParties`, and an
   attached army member may not appear there.
+- **Personal spoils (#834).** Win a field battle in service with several kills: up to 3 items land in
+  the inventory with their modifiers kept, and one "Spoils of your own blade" toast lists them. Lose a
+  battle: nothing. Fall, take control of a soldier, kill an enemy: no spoil, no kill XP and no kill credit in the merit score; the fall is still recorded. Discharge
+  afterwards: the spoils stay, with the one known exception that an unmodified spoil of the same item as a
+  piece he was issued can be taken back at an honourable discharge when no unmodified copy of that
+  issued piece is left in the inventory (sold, lost or worn); spoils are never recorded in the ledger.
 - **Desertion cost (#833).** Desert during the minimum term: relation with the commander drops by 15,
   Honor XP by 100, wages are forfeited, the kit is kept, and both confirmations name the cost.
   Control: an honourable release after the term costs nothing.

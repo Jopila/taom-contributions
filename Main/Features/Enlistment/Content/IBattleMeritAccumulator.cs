@@ -14,6 +14,9 @@ public interface IBattleMeritAccumulator
 
     /// <summary>Returns and clears the pending sample, or null when none.</summary>
     MeritSample Consume();
+
+    /// <summary>Drops the pending sample when a new campaign session starts (#834).</summary>
+    void ResetForNewSession();
 }
 
 public class BattleMeritAccumulator : IBattleMeritAccumulator
@@ -28,4 +31,6 @@ public class BattleMeritAccumulator : IBattleMeritAccumulator
         _pending = null;
         return sample;
     }
+
+    public void ResetForNewSession() => _pending = null;
 }

@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using TAOM.Adapters;
 using TAOM.Core.Logging;
+using TAOM.Features.TroopProgression;
 using TAOM.Features.Enlistment.Content.Domain;
 
 namespace TAOM.Features.Enlistment.Content;
@@ -16,6 +19,9 @@ public class EnlistmentBattlePayoutService
     private readonly IServiceRewardService _rewards;
     private readonly IPromotionService _promotion;
     private readonly SitOutLedger _ledger;
+    private readonly IBattleLootAdapter _loot;
+    private readonly IInquiryAdapter _inquiry;
+    private readonly IRandomProvider _random;
     private readonly IModLogger _logger;
 
     public EnlistmentBattlePayoutService(
@@ -26,6 +32,9 @@ public class EnlistmentBattlePayoutService
         IServiceRewardService rewards,
         IPromotionService promotion,
         SitOutLedger ledger,
+        IBattleLootAdapter loot,
+        IInquiryAdapter inquiry,
+        IRandomProvider random,
         IModLogger logger)
     {
         _store = store;
@@ -35,6 +44,9 @@ public class EnlistmentBattlePayoutService
         _rewards = rewards;
         _promotion = promotion;
         _ledger = ledger;
+        _loot = loot;
+        _inquiry = inquiry;
+        _random = random;
         _logger = logger;
     }
 
@@ -149,6 +161,10 @@ public class EnlistmentBattlePayoutService
         if (renown > 0 && !satOut)
             _rewards.Grant(new RewardSpec { Renown = renown }, won ? "battle-won" : "battle-lost");
 
+        // Personal spoils (#834): a WON battle he did not sit out, from the same consumed sample.
+        if (won && !satOut && sample != null)
+            PaySpoils(sample, config, (int)record.Rank);
+
         // The SECOND promotion evaluation point (the daily tick is the first). Both route
         // through the single IPromotionService chokepoint so the thresholds can't drift —
         // without this, a battle that earns the last XP you need wouldn't promote you until
@@ -158,5 +174,38 @@ public class EnlistmentBattlePayoutService
         LastPromotedRank = promotion.NewRank;
 
         return true;
+    }
+
+    /// <summary>
+    /// Items from his own kills, on top of vanilla's loot share. <see cref="PersonalSpoilsPolicy"/> ranks
+    /// the kills; the loot adapter rolls and grants in one call, so a roll that comes up empty costs no
+    /// slot: the cap counts items that LANDED. The engine reads are skipped entirely when the cap is 0.
+    /// Spoils are never recorded in the issue ledger; like any loot, an unmodified spoil of the same item
+    /// as a piece he was issued can be taken back at an honourable discharge when no unmodified copy of
+    /// that issued piece is left in the inventory (sold, lost or worn); see docs/features/enlistment.md. One summary toast, none when nothing landed.
+    /// </summary>
+    private void PaySpoils(MeritSample sample, EnlistmentContentConfig config, int rankOrdinal)
+    {
+        var cap = config.SpoilsMaxItemsPerBattle;
+        if (cap <= 0)
+            return;
+
+        var names = new List<string>();
+        foreach (var target in PersonalSpoilsPolicy.Rank(
+                     sample.KilledCharacterIds, _loot.GetExpectedLootValue, rankOrdinal, config,
+                     () => _random.Next(10000) / 10000.0))
+        {
+            if (names.Count >= cap)
+                break;
+            var name = _loot.GrantLootFrom(target.CharacterId, target.TargetValue);
+            if (!string.IsNullOrEmpty(name))
+                names.Add(name);
+        }
+
+        if (names.Count == 0)
+            return;
+        _logger?.LogInfo($"[Enlistment] personal spoils: {names.Count} item(s) from {sample.KilledCharacterIds.Count} kill(s)");
+        _inquiry.ShowMessage(
+            "taom_enlist_spoils", "Spoils of your own blade: {ITEMS}", "ITEMS", string.Join(", ", names));
     }
 }

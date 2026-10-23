@@ -81,7 +81,8 @@ companions that only exist after `PostBuildCopyToModules`. There is no editor mi
 expected, not a bug.
 
 Two caveats on the server mirror. A spike build of TAOM has booted on the co-op dedicated server to
-SERVING (2026-10-22, 2026-10-23); a boot of the committed build is still owed (see
+SERVING (2026-10-22, 2026-10-23), and the committed build `0fb0e6c13` did too on 2026-10-23, with one
+client joined (see
 [coop-dedicated-server](../features/coop-dedicated-server.md)). And `Main/_Module/SubModule.xml` still
 declares `<Tag key="DedicatedServerType" value="none" />` on the core submodule, so shipping the binaries
 does not by itself mark TAOM server-capable.

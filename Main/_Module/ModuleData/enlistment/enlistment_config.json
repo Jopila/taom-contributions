@@ -61,6 +61,10 @@
   },
   "desertionRelationPenalty": -15,
   "desertionHonorXpPenalty": -100,
+  "spoilsMaxItemsPerBattle": 3,
+  "spoilsValueScalePerRank": 0.25,
+  "spoilsRandomMin": 0.1,
+  "spoilsRandomMax": 0.9,
   "sitOut": {
     "overwhelmingShare": 0.85,
     "trustCost": 1,
