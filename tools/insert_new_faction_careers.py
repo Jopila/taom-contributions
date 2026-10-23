@@ -234,7 +234,7 @@ TEXT_REMAP = {
         ("Hunter of the Ithilien Road", "Hunter of the Greenway"),
         ("Watcher of Henneth Annûn", "Watcher of Weathertop"),
         ("Scout of North Ithilien", "Scout of the North Downs"),
-        ("Bowman of Faramir", "Bowman of the Angle"),
+        ("Bowman of Faramir", "Dúnedain Rangers"),
         ("Arrow of the Forbidden Pool", "Arrow of Nenuial"),
         ("Shadow of Emyn Arnen", "Shadow of the Chetwood"),
         ("Ithilien Scout", "Scout of Eriador"),

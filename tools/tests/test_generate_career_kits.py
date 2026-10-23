@@ -75,7 +75,15 @@ class TestLayout(unittest.TestCase):
         self.assertEqual(weapons("isengard"), ("Crossbow", "Bolts", "OneHandedSword"))
         self.assertEqual(weapons("erebor"), ("Crossbow", "Bolts", "OneHandedAxe"))
         self.assertEqual(weapons("aserai"), ("Javelin", "Shield", "OneHandedSword"))
+        # Chatak Javelineer: every Shaghana bow needs skill 100, so a new character could not re-equip one
+        self.assertEqual(weapons("shaghana"), ("Javelin", "Shield", "OneHandedSword"))
+        # Jiret Javelineer takes Harad's rule through KIT_SOURCE
+        self.assertEqual(weapons("abanissa"), ("Javelin", "Shield", "OneHandedSword"))
         self.assertEqual(ck.slot_classes("isengard", "infantry")["Item0"], "OneHandedSword")
+
+    def test_kit_source_reads_the_recruited_troops_culture(self):
+        self.assertEqual(ck.KIT_SOURCE["battania"], "khuzait")
+        self.assertEqual(ck.slot_classes("battania", "ranged"), ck.slot_classes("khuzait", "ranged"))
 
 
 def _item(iid, klass, difficulty=None):

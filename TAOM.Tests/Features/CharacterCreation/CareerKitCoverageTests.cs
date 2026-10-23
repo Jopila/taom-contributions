@@ -18,12 +18,9 @@ namespace TAOM.Tests.Features.CharacterCreation;
 [TestClass]
 public class CareerKitCoverageTests
 {
-    /// <summary>Playable cultures with no career rosters yet (2026-10-23): a decision for Mike.</summary>
-    private static readonly HashSet<string> WithoutCareerKits = new(StringComparer.Ordinal)
-    {
-        "lothlorien", "umbar", "battania", "lindon", "bluecraig", "goblin", "mistymountainorcs",
-        "abanissa", "shaghana",
-    };
+    /// <summary>Playable cultures deliberately without career rosters. Empty since 2026-10-23, when
+    /// every playable culture got its kits; a culture added here needs Mike's word.</summary>
+    private static readonly HashSet<string> WithoutCareerKits = new(StringComparer.Ordinal);
 
     private static readonly string[] Archetypes = { "ranged", "cavalry", "infantry" };
 

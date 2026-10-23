@@ -10,7 +10,7 @@
 
   Archetypes (CareerArchetype.cs):
     ranged   - bow + arrows + one-handed sidearm (Isengard and Erebor: crossbow + bolts;
-               Harad: javelins + shield)
+               Harad, Abanissa and Shaghana: javelins + shield)
     cavalry  - polearm + shield + sidearm + horse + harness
     infantry - one-handed weapon + shield + polearm (Dol Guldur: two-handed axe)
 
@@ -29,9 +29,11 @@
 
   taom_player_start_vanilla_override.xml is GENERATED from this file by
   tools/wire_starter_kit_rosters.py; re-run it after any change here.
-  Nine playable cultures have no career rosters yet and fall through to the culture-default
-  roster via ICareerStartingEquipmentService graceful fallback: Lothlorien, Umbar, Khand
-  (battania), Lindon, Blue Craig, the goblins, the Misty Mountain orcs, Abanissa and Shaghana.
+  Every playable culture has its career rosters (CareerKitCoverageTests). Khand (battania),
+  Lothlorien, Abanissa, the Misty Mountain orcs and Blue Craig take the gear of the troops they
+  recruit, which carry another culture's id (KIT_SOURCE in the generator). The nine kits added
+  on 2026-10-23 (those five, Lindon, Umbar, Shaghana and the goblins) ride placeholder mounts
+  (Mike): the saddle horse with the light harness, or the brown warg with its saddle.
 -->
 <EquipmentRosters>
 
@@ -1133,6 +1135,636 @@
             <Equipment slot="Item2" id="Item.wm_gondor_spear_a" />
             <Equipment slot="Body" id="Item.sk_ar_art_chainmail_half_a" />
             <Equipment slot="Leg" id="Item.sk_ar_art_boots_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ LOTHLORIEN — RANGED; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_lothlorien_ranged_m" culture="Culture.lothlorien">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_rivendell_bow_t2" />
+            <Equipment slot="Item1" id="Item.wm_elven_arrow_v2_a" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_lothlorien_ranged_f" culture="Culture.lothlorien">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_rivendell_bow_t2" />
+            <Equipment slot="Item1" id="Item.wm_elven_arrow_v2_a" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ LOTHLORIEN — CAVALRY; placeholder mount (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_lothlorien_cavalry_m" culture="Culture.lothlorien">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_rivendell_spear_a01" />
+            <Equipment slot="Item1" id="Item.wm_rivendell_shield_a02_silver" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_lothlorien_cavalry_f" culture="Culture.lothlorien">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_rivendell_spear_a01" />
+            <Equipment slot="Item1" id="Item.wm_rivendell_shield_a02_silver" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ LOTHLORIEN — INFANTRY; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_lothlorien_infantry_m" culture="Culture.lothlorien">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Item1" id="Item.wm_rivendell_shield_a02_silver" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_spear_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_lothlorien_infantry_f" culture="Culture.lothlorien">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Item1" id="Item.wm_rivendell_shield_a02_silver" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_spear_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ LINDON — RANGED; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_lindon_ranged_m" culture="Culture.lindon">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_rivendell_bow_t2" />
+            <Equipment slot="Item1" id="Item.wm_elven_arrow_v2_a" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_lindon_ranged_f" culture="Culture.lindon">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_rivendell_bow_t2" />
+            <Equipment slot="Item1" id="Item.wm_elven_arrow_v2_a" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ LINDON — CAVALRY; placeholder mount (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_lindon_cavalry_m" culture="Culture.lindon">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_rivendell_spear_a01" />
+            <Equipment slot="Item1" id="Item.wm_rivendell_shield_a02_silver" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_lindon_cavalry_f" culture="Culture.lindon">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_rivendell_spear_a01" />
+            <Equipment slot="Item1" id="Item.wm_rivendell_shield_a02_silver" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ LINDON — INFANTRY; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_lindon_infantry_m" culture="Culture.lindon">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Item1" id="Item.wm_rivendell_shield_a02_silver" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_spear_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_lindon_infantry_f" culture="Culture.lindon">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_rivendell_sword_a01" />
+            <Equipment slot="Item1" id="Item.wm_rivendell_shield_a02_silver" />
+            <Equipment slot="Item2" id="Item.wm_rivendell_spear_a01" />
+            <Equipment slot="Body" id="Item.rivendell_torso_infantry_tier1_silver" />
+            <Equipment slot="Leg" id="Item.rivendell_boots_leather2" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ UMBAR — RANGED; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_umbar_ranged_m" culture="Culture.umbar">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_umbar_bow_t3" />
+            <Equipment slot="Item1" id="Item.arrow_emp_1_a" />
+            <Equipment slot="Item2" id="Item.wm_gondor_sword_a01" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_umbar_ranged_f" culture="Culture.umbar">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_umbar_bow_t3" />
+            <Equipment slot="Item1" id="Item.arrow_emp_1_a" />
+            <Equipment slot="Item2" id="Item.wm_gondor_sword_a01" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ UMBAR — CAVALRY; placeholder mount (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_umbar_cavalry_m" culture="Culture.umbar">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_gondor_spear_b" />
+            <Equipment slot="Item1" id="Item.small_flat_heater_shield" />
+            <Equipment slot="Item2" id="Item.wm_gondor_sword_a01" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_umbar_cavalry_f" culture="Culture.umbar">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_gondor_spear_b" />
+            <Equipment slot="Item1" id="Item.small_flat_heater_shield" />
+            <Equipment slot="Item2" id="Item.wm_gondor_sword_a01" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ UMBAR — INFANTRY; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_umbar_infantry_m" culture="Culture.umbar">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_gondor_sword_a01" />
+            <Equipment slot="Item1" id="Item.small_flat_heater_shield" />
+            <Equipment slot="Item2" id="Item.wm_gondor_spear_b" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_umbar_infantry_f" culture="Culture.umbar">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_gondor_sword_a01" />
+            <Equipment slot="Item1" id="Item.small_flat_heater_shield" />
+            <Equipment slot="Item2" id="Item.wm_gondor_spear_b" />
+            <Equipment slot="Body" id="Item.sk_hr_st_chest_inf_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ BATTANIA — RANGED; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_battania_ranged_m" culture="Culture.battania">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_rhun_new_bow_t2" />
+            <Equipment slot="Item1" id="Item.bodkin_arrows_b" />
+            <Equipment slot="Item2" id="Item.sm_rh_loke_1h_sword_a" />
+            <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_battania_ranged_f" culture="Culture.battania">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_rhun_new_bow_t2" />
+            <Equipment slot="Item1" id="Item.bodkin_arrows_b" />
+            <Equipment slot="Item2" id="Item.sm_rh_loke_1h_sword_a" />
+            <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ BATTANIA — CAVALRY; placeholder mount (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_battania_cavalry_m" culture="Culture.battania">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_harad_spear_a02" />
+            <Equipment slot="Item1" id="Item.sm_rh_loke_shield_med_a" />
+            <Equipment slot="Item2" id="Item.sm_rh_loke_1h_sword_a" />
+            <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_battania_cavalry_f" culture="Culture.battania">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_harad_spear_a02" />
+            <Equipment slot="Item1" id="Item.sm_rh_loke_shield_med_a" />
+            <Equipment slot="Item2" id="Item.sm_rh_loke_1h_sword_a" />
+            <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ BATTANIA — INFANTRY; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_battania_infantry_m" culture="Culture.battania">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_rh_loke_1h_sword_a" />
+            <Equipment slot="Item1" id="Item.sm_rh_loke_shield_med_a" />
+            <Equipment slot="Item2" id="Item.wm_harad_spear_a02" />
+            <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_battania_infantry_f" culture="Culture.battania">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_rh_loke_1h_sword_a" />
+            <Equipment slot="Item1" id="Item.sm_rh_loke_shield_med_a" />
+            <Equipment slot="Item2" id="Item.wm_harad_spear_a02" />
+            <Equipment slot="Body" id="Item.sk_rh_loke_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_rh_loke_boots_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ ABANISSA — RANGED; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_abanissa_ranged_m" culture="Culture.abanissa">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.eastern_javelin_3_t4" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_abanissa_ranged_f" culture="Culture.abanissa">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.eastern_javelin_3_t4" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ ABANISSA — CAVALRY; placeholder mount (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_abanissa_cavalry_m" culture="Culture.abanissa">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_spear_light_a" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_abanissa_cavalry_f" culture="Culture.abanissa">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_spear_light_a" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ ABANISSA — INFANTRY; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_abanissa_infantry_m" culture="Culture.abanissa">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_sword_a" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_spear_light_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_abanissa_infantry_f" culture="Culture.abanissa">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_sword_a" />
+            <Equipment slot="Item1" id="Item.sm_hr_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_spear_light_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_hr_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ SHAGHANA — RANGED; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_shaghana_ranged_m" culture="Culture.shaghana">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sg_st_javelin_light_a" />
+            <Equipment slot="Item1" id="Item.sm_sg_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_sg_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_shaghana_ranged_f" culture="Culture.shaghana">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sg_st_javelin_light_a" />
+            <Equipment slot="Item1" id="Item.sm_sg_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_sg_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ SHAGHANA — CAVALRY; placeholder mount (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_shaghana_cavalry_m" culture="Culture.shaghana">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_spear_light_a" />
+            <Equipment slot="Item1" id="Item.sm_sg_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_sg_st_grvs_light_a" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_shaghana_cavalry_f" culture="Culture.shaghana">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_spear_light_a" />
+            <Equipment slot="Item1" id="Item.sm_sg_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_sword_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_sg_st_grvs_light_a" />
+            <Equipment slot="Horse" id="Item.saddle_horse" />
+            <Equipment slot="HorseHarness" id="Item.light_harness" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ SHAGHANA — INFANTRY; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_shaghana_infantry_m" culture="Culture.shaghana">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_sword_a" />
+            <Equipment slot="Item1" id="Item.sm_sg_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_spear_light_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_sg_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_shaghana_infantry_f" culture="Culture.shaghana">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.hr_st_sword_a" />
+            <Equipment slot="Item1" id="Item.sm_sg_st_shield_cav_light_b" />
+            <Equipment slot="Item2" id="Item.hr_st_spear_light_a" />
+            <Equipment slot="Body" id="Item.sk_hr_st_tunic_a" />
+            <Equipment slot="Leg" id="Item.sk_sg_st_grvs_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ GOBLIN — RANGED; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_goblin_ranged_m" culture="Culture.goblin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_goblin_bow_t2" />
+            <Equipment slot="Item1" id="Item.steppe_arrows" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_goblin_ranged_f" culture="Culture.goblin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_goblin_bow_t2" />
+            <Equipment slot="Item1" id="Item.steppe_arrows" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ GOBLIN — CAVALRY; placeholder mount (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_goblin_cavalry_m" culture="Culture.goblin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+            <Equipment slot="Horse" id="Item.warg_brown" />
+            <Equipment slot="HorseHarness" id="Item.warg_saddle" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_goblin_cavalry_f" culture="Culture.goblin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+            <Equipment slot="Horse" id="Item.warg_brown" />
+            <Equipment slot="HorseHarness" id="Item.warg_saddle" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ GOBLIN — INFANTRY; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_goblin_infantry_m" culture="Culture.goblin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_goblin_infantry_f" culture="Culture.goblin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ MISTYMOUNTAINORCS — RANGED; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_mistymountainorcs_ranged_m" culture="Culture.mistymountainorcs">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_goblin_bow_t2" />
+            <Equipment slot="Item1" id="Item.steppe_arrows" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_mistymountainorcs_ranged_f" culture="Culture.mistymountainorcs">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_goblin_bow_t2" />
+            <Equipment slot="Item1" id="Item.steppe_arrows" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ MISTYMOUNTAINORCS — CAVALRY; placeholder mount (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_mistymountainorcs_cavalry_m" culture="Culture.mistymountainorcs">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+            <Equipment slot="Horse" id="Item.warg_brown" />
+            <Equipment slot="HorseHarness" id="Item.warg_saddle" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_mistymountainorcs_cavalry_f" culture="Culture.mistymountainorcs">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+            <Equipment slot="Horse" id="Item.warg_brown" />
+            <Equipment slot="HorseHarness" id="Item.warg_saddle" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ MISTYMOUNTAINORCS — INFANTRY; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_mistymountainorcs_infantry_m" culture="Culture.mistymountainorcs">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_mistymountainorcs_infantry_f" culture="Culture.mistymountainorcs">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ BLUECRAIG — RANGED; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_bluecraig_ranged_m" culture="Culture.bluecraig">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_goblin_bow_t2" />
+            <Equipment slot="Item1" id="Item.steppe_arrows" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_bluecraig_ranged_f" culture="Culture.bluecraig">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_goblin_bow_t2" />
+            <Equipment slot="Item1" id="Item.steppe_arrows" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ BLUECRAIG — CAVALRY; placeholder mount (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_bluecraig_cavalry_m" culture="Culture.bluecraig">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+            <Equipment slot="Horse" id="Item.warg_brown" />
+            <Equipment slot="HorseHarness" id="Item.warg_saddle" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_bluecraig_cavalry_f" culture="Culture.bluecraig">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+            <Equipment slot="Horse" id="Item.warg_brown" />
+            <Equipment slot="HorseHarness" id="Item.warg_saddle" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ BLUECRAIG — INFANTRY; placeholder kit (Mike, 2026-10-23) ═══ -->
+
+    <EquipmentRoster id="player_career_bluecraig_infantry_m" culture="Culture.bluecraig">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_bluecraig_infantry_f" culture="Culture.bluecraig">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.wm_dol_goldur_1h_sword_a02" />
+            <Equipment slot="Item1" id="Item.wm_gundabad_shield_a03" />
+            <Equipment slot="Item2" id="Item.wm_gundabad_spear_a01" />
+            <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
+            <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
         </EquipmentSet>
     </EquipmentRoster>
 

@@ -47,10 +47,15 @@ public class StarterKitCoverageTests
 
     private const string StarterPrefix = "Item.starter_";
 
-    // Khand's override rosters are built from Rhûn's career kit (#571); mirrors BORROW in
-    // tools/wire_starter_kit_rosters.py.
+    // A culture whose troops carry another culture's id: Khand's override rosters are built from
+    // Rhûn's career kit (#571, BORROW in tools/wire_starter_kit_rosters.py), and the career kits of
+    // these cultures come from the troops they recruit (KIT_SOURCE in tools/generate_career_kits.py).
     private static readonly Dictionary<string, string> KitSourceCulture =
-        new Dictionary<string, string>(StringComparer.Ordinal) { ["battania"] = "khuzait" };
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["battania"] = "khuzait", ["lothlorien"] = "rivendell", ["abanissa"] = "aserai",
+            ["mistymountainorcs"] = "goblin", ["bluecraig"] = "goblin",
+        };
 
     // The vanilla cultures whose player_char_creation_* roster ids vanilla SandBox also defines;
     // mirrors VANILLA_CULTURES in tools/wire_starter_kit_rosters.py.

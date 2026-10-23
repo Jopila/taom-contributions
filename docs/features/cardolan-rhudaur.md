@@ -191,7 +191,7 @@ generator and `--only <culture>`. Both `generate_new_faction_kingdoms.py` and
 - Arthedain's narrative menus and culture text still name "fallen Cardolan" and the hill-men of
   Rhudaur "under Angmar's banners", its kingdom text calls it "the last of the three realms", two of
   its career descriptions (`taom_careers.xml`) and five wanderer backstories still fight Angmar,
-  its ranger group is still "Bowman of the Angle" (the Angle is Rhudaur's), and the Remnants
+  and the Remnants
   of Angmar faction card still stands (a decision for Mike; changing them resets their translations).
 - All new English text waits for the paid translation run (#763). The 12 translated
   `loc_arnor.xml` files in the live Armory have no row yet for the 9 new ladder bows, so
@@ -207,6 +207,9 @@ generator and `--only <culture>`. Both `generate_new_faction_kingdoms.py` and
     registration region in place. The parse-before-write guard (`unparsable()`, #979) and the
     one marker-region writer (`tools/_marker_region.py`, #975/#976) landed upstream at the same
     time, and the merge kept those in every writer.
+- 2026-10-23 (Mike): Arthedain's ranger group "Bowman of the Angle" is "Dúnedain Rangers" (the
+  Angle is Rhudaur's land; 12 rows reset, #763), and every other playable culture got placeholder
+  career kits too (`starting-equipment-tuning.md`).
 - 2026-10-23 (#978 follow-up, Mike): career starting kits for all three Arnor realms (18 rosters,
   each realm's lowest troop gear by `generate_career_kits.py`; Rhudaur's sidearm is the Dunland
   axe, and all three ride Gondor's saddle horse and starter harness). King Arvegil II now holds
