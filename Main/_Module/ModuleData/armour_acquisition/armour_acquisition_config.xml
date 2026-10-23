@@ -7,8 +7,9 @@
   The class of every armour piece comes from the GENERATED armour_classes.xml beside this file.
   This file holds the decisions around it.
 
-  enabled            default for the master switch when MCM is not loaded; with MCM, the
-                     "Enable Armour Acquisition" toggle decides, from the next game load.
+  enabled            fallback for the master switch on a client without MCM settings; with MCM,
+                     the "Enable Armour Acquisition" toggle decides, from the next game load.
+                     A dedicated server uses taom-server-settings.json instead.
 
   <Gate>             the armoury level a town needs (its Barracks level, plus a visiting master
                      armourer's bonus), 0 to 3, heavy <= elite <= lord. At that level the town's
