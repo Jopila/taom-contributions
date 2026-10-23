@@ -18,7 +18,7 @@
 | 8 | LOW | Comments understated what is stripped (SandBox noble teen templates) and gave the wrong reason for keeping Khand's child templates. | Docs accuracy | Written from intent, not from the transform's measured output. | Fixed in the stylesheet comment and the feature doc. |
 | 9 | LOW | Feature doc, feature-map row, both GameModel catalogues, the RaceAge doc and the `/xslt-check` mapping were missing or stale. | Process | Documentation duty deferred to "after review". | Fixed; `lint_docs.py` reports 0 missing docs and 0 registry drift. |
 | 10 | LOW | Each pick built signatures for every lord of every culture, and the gate ran after the scan. | Efficiency | Written for correctness first. | Fixed: prefilter to the request; `Wants` runs before the scan. |
-| 11 | LOW | `validate_xml_schemas.py` prints "NOT REGISTERED" for an XSLT-only stylesheet the engine does apply. | Tooling | Pre-existing. | FOLLOW-UP, not fixed here. |
+| 11 | LOW | `validate_xml_schemas.py` prints "NOT REGISTERED" for an XSLT-only stylesheet the engine does apply. | Tooling | Pre-existing. | FOLLOW-UP, not fixed here. Fixed in 48d66b59a (2026-10-21). |
 
 ## Root-cause pattern
 

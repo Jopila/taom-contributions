@@ -38,6 +38,8 @@ doc's description of `0x56EBA0`, written in `a728f35b`); MS5-5 (a failed armour-
 MS7-4 (`validate_xml_schemas.py` says NOT REGISTERED for files the engine does load); MST-4 (a stale "done" report can
 answer the documented poll); the same allowlist for `transfer_upper_mesh_weights.py`, which copies the guard.
 
+MS7-4: Fixed under #980 (2026-10-23).
+
 ## Root cause: shipped without review
 
 The gear reached trunk in a commit made outside the review flow, with no body, no issue and no in-game check on

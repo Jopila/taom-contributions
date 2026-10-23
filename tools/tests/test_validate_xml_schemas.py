@@ -552,6 +552,13 @@ class CliTests(_Tree):
         self.assertIn("is not well-formed", text)
         self.assertIn("Nothing was validated", text)
 
+    def test_a_submodule_with_an_unknown_encoding_exits_two_not_a_traceback(self):
+        _write(self.module / "SubModule.xml", '<?xml version="1.0" encoding="bogus"?><Module/>')
+        code, text = self._cli()
+        self.assertEqual(code, 2)
+        self.assertIn("is not well-formed", text)
+        self.assertIn("Nothing was validated", text)
+
     def test_a_file_from_an_unscanned_module_is_validated_under_its_own_module(self):
         """A file passed from a module --module does not name must not read as PASS. The
         tool finds its module (the nearest parent holding SubModule.xml) and scans it."""
@@ -738,6 +745,7 @@ class LoaderBucketTests(_Tree):
         self.assertEqual(report["language_file"], [])
         self.assertEqual([Path(p).name for p in report["not_registered"]], ["listed.xml"])
 
+    @NEEDS_LXML
     def test_a_mixed_call_still_classes_the_language_file(self):
         """A registered file in the call must not switch the language scan off for the rest."""
         listed, _, _, _ = self._languages()
@@ -745,12 +753,29 @@ class LoaderBucketTests(_Tree):
         self.assertEqual([Path(r["file"]).name for r in report["language_file"]], ["listed.xml"])
         self.assertEqual([Path(r["file"]).name for r in report["checked"]], ["clans.xml"])
 
+    @NEEDS_LXML
     def test_only_registered_files_skip_the_language_and_stylesheet_scans(self):
         self._languages()
         with mock.patch.object(vx, "listed_language_files", side_effect=AssertionError("scanned")), \
                 mock.patch.object(vx, "applied_stylesheets", side_effect=AssertionError("scanned")):
             report = vx.run([self.module], self.schemas, only=[self.clans])
         self.assertEqual([Path(r["file"]).name for r in report["checked"]], ["clans.xml"])
+
+    def test_a_manifest_with_an_unknown_encoding_loads_like_the_engine_reads_it(self):
+        """LocalizedTextManager reads the text with StreamReader.ReadToEnd and LoadXml, so it ignores the
+        declared encoding; expat raises LookupError for one it does not know."""
+        _, _, _, manifest = self._languages(LANGUAGE_DATA.replace(
+            '<?xml version="1.0" encoding="utf-8"?>', '<?xml version="1.0" encoding="bogus"?>'))
+        listed = manifest.parent / "listed.xml"
+        report = vx.run([self.module], self.schemas, only=[manifest, listed])
+        self.assertEqual(sorted(Path(r["file"]).name for r in report["language_file"]),
+                         ["language_data.xml", "listed.xml"])
+        self.assertEqual([r["broken"] for r in report["language_file"]], [None, None])
+
+    def test_a_manifest_with_an_unclosed_tag_is_still_broken(self):
+        _, _, _, manifest = self._languages('<?xml version="1.0" encoding="bogus"?>\n<LanguageData id="Test">')
+        report = vx.run([self.module], self.schemas, only=[manifest])
+        self.assertIn("it does not parse", report["language_file"][0]["broken"])
 
     def test_a_manifest_whose_root_is_not_language_data_is_broken(self):
         _, _, _, manifest = self._languages(LANGUAGE_DATA.replace("LanguageData", "Other"))
@@ -824,7 +849,8 @@ class LoaderBucketCliTests(_Tree):
         self.assertIn("the engine loads nothing from it", line)
         self.assertIn("a real fault", line)
         self.assertNotIn("loaded through", line)
-        self.assertEqual(code, 0, "a real fault is reported, never a failed run (exit code unchanged)")
+        self.assertEqual(code, 1, "a real fault in a by-name run fails the run")
+        self.assertTrue(text.splitlines()[-1].startswith("FAIL"), text)
         self.assertIn("1 real fault(s) named above", text.splitlines()[-1])
 
     def test_a_file_an_id_less_manifest_lists_stays_not_registered_with_the_fault(self):
@@ -840,8 +866,41 @@ class LoaderBucketCliTests(_Tree):
                     if l.startswith("LANGUAGE FILE") and "language_data.xml" in l)
         self.assertIn("its root is not a <LanguageData> with a non-empty id", line)
         self.assertIn("(a real fault)", line)
-        self.assertEqual(code, 0)
+        self.assertEqual(code, 1)
         self.assertIn("1 real fault(s) named above", text.splitlines()[-1])
+
+    def test_an_unlisted_languages_xml_exits_one(self):
+        _, unlisted, _, _ = self._languages()
+        code, text = self._cli(unlisted)
+        self.assertEqual(code, 1, text)
+        self.assertTrue(text.splitlines()[-1].startswith("FAIL"), text)
+
+    def test_a_clean_by_name_run_exits_zero(self):
+        listed, _, _, manifest = self._languages()
+        csharp = self.md / "careers.xml"
+        _write(csharp, "<Careers/>")
+        code, text = self._cli(listed, manifest, csharp)
+        self.assertEqual(code, 0, text)
+        self.assertTrue(text.splitlines()[-1].startswith("PASS"), text)
+
+    def test_a_whole_module_run_with_a_stray_languages_xml_still_exits_zero(self):
+        self._languages()
+        code, text = _run_main("--module", str(self.module), "--schemas", str(self.schemas))
+        self.assertEqual(code, 0, text)
+
+    def test_a_whole_module_run_with_a_broken_manifest_still_exits_zero(self):
+        self._languages(LANGUAGE_DATA.replace("</LanguageData>", ""))
+        code, text = _run_main("--module", str(self.module), "--schemas", str(self.schemas))
+        self.assertEqual(code, 0, text)
+
+    def test_each_not_registered_path_is_classified_once(self):
+        _, unlisted, _, _ = self._languages()
+        csharp = self.md / "careers.xml"
+        _write(csharp, "<Careers/>")
+        with mock.patch.object(vx, "_xml_in_own_languages_folder",
+                               wraps=vx._xml_in_own_languages_folder) as spy:
+            self._cli(unlisted, csharp)
+        self.assertEqual(spy.call_count, 2)
 
     def test_a_non_xml_file_under_languages_is_not_a_fault(self):
         notes = self.md / "Languages" / "ids_plain.txt"
@@ -905,7 +964,7 @@ class LoaderBucketCliTests(_Tree):
         csharp = self.md / "careers.xml"
         _write(csharp, "<Careers/>")
         code, text = self._cli(listed, unlisted, sheet, csharp)
-        self.assertEqual(code, 0, text)
+        self.assertEqual(code, 1, text)
         lines = text.splitlines()
         self.assertTrue(any(l.startswith("LANGUAGE FILE") and "listed.xml" in l
                             and "language_data.xml" in l for l in lines), text)
@@ -915,11 +974,234 @@ class LoaderBucketCliTests(_Tree):
         self.assertIn("no language_data.xml the engine loads lists it", unlisted_line)
         self.assertIn("1 real fault(s) named above", lines[-1])
         csharp_line = next(l for l in lines if l.startswith("NOT REGISTERED") and "careers.xml" in l)
-        self.assertIn("only by fixed name or a project.mbproj row", csharp_line)
+        self.assertIn("no project.mbproj row names it", csharp_line)
+        self.assertIn("only by fixed name (global_strings.xml, the scene lists, "
+                      "ModuleData/project.mbproj itself)", csharp_line)
         self.assertNotIn("never reads or validates", text)
         self.assertIn("1 language file(s)", lines[-1])
         self.assertIn("1 stylesheet(s)", lines[-1])
         self.assertIn("2 not registered", lines[-1])
+
+
+MBPROJ = """<?xml version="1.0" encoding="utf-8"?>
+<base>
+  <file id="soln_voice_definitions" name="ModuleData/voice_definitions.xml"/>
+  <file id="soln_action_sets" name="ModuleData/action_sets.xml"/>
+</base>
+"""
+
+
+BROKEN_MBPROJ = {
+    "does not parse": "<base><file id=",
+    "is empty": "",
+    "root is not base": "<other><file id='a' name='ModuleData/voice_definitions.xml'/></other>",
+    "row without an id": '<base><file name="ModuleData/voice_definitions.xml"/></base>',
+    "row without a name": '<base><file id="x"/></base>',
+    "unclosed tag after an unknown encoding": '<?xml version="1.0" encoding="bogus"?><base><file id="x"',
+}
+
+
+class NativeBucketTests(_Tree):
+    """Files a project.mbproj row loads: `Module` requests soln_* ids, `XmlResource.GetMbprojxmls`
+    registers each <file id name> row of <module>/ModuleData/project.mbproj, and
+    `MBObjectManager.GetMergedXmlForNative` reads `<module folder>/<name>` (not relative to
+    ModuleData) and applies `<name minus its last 4 characters>.xsl`, else `.xslt`."""
+
+    def _mbproj(self, text=MBPROJ):
+        _write(self.md / "project.mbproj", text)
+        data = self.md / "voice_definitions.xml"
+        _write(data, "<voice_definitions/>")
+        return data
+
+    def test_a_file_a_row_names_is_native(self):
+        data = self._mbproj()
+        report = vx.run([self.module], self.schemas, only=[data])
+        self.assertEqual(report["not_registered"], [])
+        self.assertEqual([(Path(r["file"]).name, r["id"], r["kind"]) for r in report["native"]],
+                         [("voice_definitions.xml", "soln_voice_definitions", "data")])
+
+    def test_the_row_name_is_relative_to_the_module_folder_not_moduledata(self):
+        _write(self.md / "project.mbproj",
+               MBPROJ.replace('name="ModuleData/voice_definitions.xml"', 'name="voice_definitions.xml"'))
+        under_moduledata = self.md / "voice_definitions.xml"
+        at_module_root = self.module / "voice_definitions.xml"
+        _write(under_moduledata, "<voice_definitions/>")
+        _write(at_module_root, "<voice_definitions/>")
+        report = vx.run([self.module], self.schemas, only=[under_moduledata, at_module_root])
+        self.assertEqual([Path(r["file"]) for r in report["native"]], [at_module_root])
+        self.assertEqual([Path(p) for p in report["not_registered"]], [under_moduledata])
+
+    def test_the_stylesheet_beside_a_row_file_is_native(self):
+        self._mbproj()
+        for ext in (".xsl", ".xslt"):
+            with self.subTest(ext=ext):
+                sheet = self.md / f"voice_definitions{ext}"
+                _write(sheet, "<xsl:stylesheet/>")
+                report = vx.run([self.module], self.schemas, only=[sheet])
+                self.assertEqual([(Path(r["file"]).name, r["kind"]) for r in report["native"]],
+                                 [(sheet.name, "stylesheet")])
+                self.assertEqual(report["not_registered"], [])
+                sheet.unlink()
+
+    def test_an_xslt_is_ignored_when_an_xsl_also_exists(self):
+        self._mbproj()
+        _write(self.md / "voice_definitions.xsl", "<xsl:stylesheet/>")
+        shadowed = self.md / "voice_definitions.xslt"
+        _write(shadowed, "<xsl:stylesheet/>")
+        report = vx.run([self.module], self.schemas, only=[shadowed])
+        self.assertEqual(report["native"], [])
+        self.assertEqual(len(report["not_registered"]), 1)
+
+    def test_an_xml_no_row_names_stays_not_registered(self):
+        self._mbproj()
+        stray = self.md / "careers.xml"
+        _write(stray, "<Careers/>")
+        report = vx.run([self.module], self.schemas, only=[stray])
+        self.assertEqual(report["native"], [])
+        self.assertEqual(len(report["not_registered"]), 1)
+
+    def test_a_malformed_mbproj_is_handled_without_a_crash(self):
+        for text in ("<base><file id=", "<other><file id='a' name='b.xml'/></other>", ""):
+            with self.subTest(text=text):
+                data = self._mbproj(text)
+                report = vx.run([self.module], self.schemas, only=[data])
+                self.assertEqual(report["native"], [])
+                self.assertEqual(len(report["not_registered"]), 1)
+
+    def test_a_row_missing_its_id_or_name_is_skipped(self):
+        data = self._mbproj('<base><file name="ModuleData/voice_definitions.xml"/><file id="x"/></base>')
+        report = vx.run([self.module], self.schemas, only=[data])
+        self.assertEqual(report["native"], [])
+
+    def test_a_row_name_joins_as_a_string_like_the_engine(self):
+        """A leading slash still opens a file under the module; an absolute name does not escape it
+        (pathlib would root the join at the drive)."""
+        data = self.md / "voice_definitions.xml"
+        _write(data, "<voice_definitions/>")
+        _write(self.md / "project.mbproj",
+               MBPROJ.replace('name="ModuleData/voice_definitions.xml"',
+                              'name="/ModuleData/voice_definitions.xml"'))
+        report = vx.run([self.module], self.schemas, only=[data])
+        self.assertEqual([Path(r["file"]).name for r in report["native"]], ["voice_definitions.xml"])
+        _write(self.md / "project.mbproj",
+               MBPROJ.replace('name="ModuleData/voice_definitions.xml"', f'name="{data}"'))
+        report = vx.run([self.module], self.schemas, only=[data])
+        self.assertEqual(report["native"], [])
+        self.assertEqual(len(report["not_registered"]), 1)
+
+    def test_the_record_carries_the_row_type(self):
+        data = self._mbproj(MBPROJ.replace('<file id="soln_voice_definitions"',
+                                           '<file id="soln_voice_definitions" type="voice"'))
+        report = vx.run([self.module], self.schemas, only=[data])
+        self.assertEqual([r["type"] for r in report["native"]], ["voice"])
+
+    def test_an_unknown_encoding_in_the_mbproj_loads_like_the_engine_reads_it(self):
+        """XmlResource reads project.mbproj through a StreamReader, so the declared encoding is ignored."""
+        data = self._mbproj(MBPROJ.replace('encoding="utf-8"', 'encoding="bogus"'))
+        found, problems = vx.native_files(self.module)
+        self.assertEqual(problems, [])
+        self.assertEqual([v[1] for v in found.values()], ["soln_voice_definitions"])
+        report = vx.run([self.module], self.schemas, only=[data, self.md / "project.mbproj"])
+        self.assertEqual(report["missing"], [])
+        self.assertEqual(len(report["native"]), 1)
+
+    def test_a_short_row_name_is_not_a_problem(self):
+        """GetMbprojxmls never checks the length; only a requested id reaches the Remove(Length - 4)."""
+        self._mbproj('<base><file id="y" name="ab"/></base>')
+        found, problems = vx.native_files(self.module)
+        self.assertEqual((found, problems), ({}, []))
+
+    def test_native_files_returns_the_files_and_the_problems(self):
+        self._mbproj()
+        found, problems = vx.native_files(self.module)
+        self.assertEqual(len(found), 1)
+        self.assertEqual(problems, [])
+
+    def test_each_broken_mbproj_passed_by_name_is_a_missing_registration(self):
+        for label, text in BROKEN_MBPROJ.items():
+            with self.subTest(label):
+                self._mbproj(text)
+                report = vx.run([self.module], self.schemas, only=[self.md / "project.mbproj"])
+                self.assertEqual(len(report["missing"]), 1, report["missing"])
+                self.assertIn("project.mbproj", report["missing"][0])
+                self.assertIn("throws", report["missing"][0])
+                self.assertEqual(report["not_registered"], [])
+
+    def test_a_clean_mbproj_passed_by_name_is_neither_missing_nor_not_registered(self):
+        self._mbproj()
+        report = vx.run([self.module], self.schemas, only=[self.md / "project.mbproj"])
+        self.assertEqual(report["missing"], [])
+        self.assertEqual(report["not_registered"], [])
+
+    def test_a_broken_mbproj_is_not_reported_for_another_file(self):
+        data = self._mbproj("<base><file id=")
+        report = vx.run([self.module], self.schemas, only=[data])
+        self.assertEqual(report["missing"], [])
+
+    @NEEDS_LXML
+    def test_a_registered_file_skips_the_mbproj_scan(self):
+        self._mbproj()
+        with mock.patch.object(vx, "native_files", side_effect=AssertionError("scanned")):
+            report = vx.run([self.module], self.schemas, only=[self.clans])
+        self.assertEqual(len(report["checked"]) + len(report["no_schema"]), 1)
+
+    @NEEDS_LXML
+    def test_the_cli_prints_the_native_line_and_counts_it(self):
+        data = self._mbproj()
+        sheet = self.md / "voice_definitions.xsl"
+        _write(sheet, "<xsl:stylesheet/>")
+        code, text = _run_main("--module", str(self.module), "--schemas", str(self.schemas),
+                               str(data), str(sheet))
+        self.assertEqual(code, 0, text)
+        lines = text.splitlines()
+        data_line = next(l for l in lines if l.startswith("NATIVE") and "voice_definitions.xml" in l)
+        self.assertIn('named by project.mbproj row id="soln_voice_definitions" type="-" (data); '
+                      'it loads only if the engine requests that id or reads that type; '
+                      'no XSD here checks it; gates: .claude/rules/moduledata-validation.md '
+                      '"Gate per file kind"', data_line)
+        sheet_line = next(l for l in lines if l.startswith("NATIVE") and "voice_definitions.xsl" in l)
+        self.assertIn('row id="soln_voice_definitions" type="-" (stylesheet)', sheet_line)
+        self.assertIn("2 native", lines[-1])
+        self.assertIn("0 not registered", lines[-1])
+
+
+@NEEDS_LXML
+class NativeBucketCliTests(_Tree):
+    _mbproj = NativeBucketTests._mbproj
+
+    def _cli(self, *files):
+        return _run_main("--module", str(self.module), "--schemas", str(self.schemas),
+                         *map(str, files))
+
+    def test_each_broken_mbproj_passed_by_name_exits_one(self):
+        for label, text in BROKEN_MBPROJ.items():
+            with self.subTest(label):
+                self._mbproj(text)
+                code, out = self._cli(self.md / "project.mbproj")
+                self.assertEqual(code, 1, out)
+                self.assertTrue(any(l.startswith("MISSING") and "project.mbproj" in l
+                                    for l in out.splitlines()), out)
+                self.assertTrue(out.splitlines()[-1].startswith("FAIL"), out)
+
+    def test_a_clean_mbproj_passed_by_name_exits_zero_with_no_not_registered_line(self):
+        self._mbproj()
+        code, out = self._cli(self.md / "project.mbproj")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("NOT REGISTERED", out)
+        self.assertIn("0 not registered", out.splitlines()[-1])
+
+    def test_a_broken_mbproj_with_only_a_data_file_named_exits_zero(self):
+        data = self._mbproj("<base><file id=")
+        code, out = self._cli(data)
+        self.assertEqual(code, 0, out)
+
+    def test_a_dead_row_id_is_not_called_loaded(self):
+        data = self._mbproj('<base><file id="taom_invented" name="ModuleData/voice_definitions.xml"/></base>')
+        code, out = self._cli(data)
+        line = next(l for l in out.splitlines() if l.startswith("NATIVE"))
+        self.assertIn('id="taom_invented"', line)
+        self.assertNotIn("loaded", line)
+        self.assertEqual(code, 0, out)
 
 
 class EngineIdUniquenessTests(unittest.TestCase):

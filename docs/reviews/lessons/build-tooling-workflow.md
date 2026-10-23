@@ -4371,3 +4371,19 @@ line of the earlier commit) found it; no test reads prose.
   for the other commit's key facts. After landing, check that every line your commits added still exists at the tip, or
   was replaced on purpose.
 - **Source:** [rca-b7-slice1-map-visuals-2026-10-23.md](../rca-b7-slice1-map-visuals-2026-10-23.md) finding 11.
+### A validator states an engine verdict only from the engine's own read path
+
+`tools/validate_xml_schemas.py` was written to say how the engine loads a file. Its first NATIVE line said "loaded
+through project.mbproj row X" for any row, but the engine loads a row only when a caller requests its exact id
+(managed `GetMergedXmlForNative`) or when native code reads its `type`; a dead id printed "loaded". Its first
+unloadable-manifest check said "the engine throws at startup" whenever Python failed to parse the file, but the engine
+reads `project.mbproj` and `language_data.xml` as decoded text and ignores the declared encoding, so a file the tool
+called fatal loads in the game. Both repeat the class #980 was opened for: the tool described a load from the data's
+shape or from its own parser instead of from the engine's consumer.
+- **Why missed:** the brief described one loader, and the builder verified the parsing it wrote, not the engine call
+  that decides whether anything is read; "Python cannot parse it" was taken as "the engine cannot".
+- **Prevent:** before a tool prints that the engine loads, ignores or rejects a file, name the engine method that
+  decides it and read it (`pwsh tools/taom-src.ps1 path <Type>`); when the tool's parser is stricter or looser than
+  the engine's, either parse the way the engine does or word the line as the tool's own verdict. Replay one edge case
+  on the engine's real reader when the two might differ.
+- **Source:** `docs/reviews/rca-schema-check-2026-10-23.md` finding 1 and C1.

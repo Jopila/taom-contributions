@@ -170,6 +170,7 @@ gate is registered here once. A gate that cannot run (no install, no lxml) has n
 | GUI prefabs, PrefabExtension XML | `gui-ui.md` | sprite ids against `TAOMSpriteData.xml`; every `Command.*` handler resolves to a TAOM method with the right parameter count |
 | language files, `{=KEY}` text | `docs/reference/localization-map.md` | `python tools/check_external_loc_coverage.py`; `dotnet test ... --filter FullyQualifiedName~Infrastructure.Localization` (`LanguageDataXmlTests`, `LocalizationKeyConsistencyTests`: one text per id and per shared key, inline defaults equal the registration; `LanguageTextIntegrityTests`: no wrong-script word in the rows or the translation cache); `python tools/register_armory_names.py --check` for Armory item and piece names |
 | `project.mbproj` | the tool's docstring | `python tools/audit_mbproj_registration.py` |
+| voice definitions, module sounds (`voice_definitions.xml`, `module_sounds.xml`) | `tools/audit_voice_clip_lengths.py` docstring | `python tools/audit_voice_clip_lengths.py` (only the module sounds a voice binds: clip paths, voice types, sound categories and clip lengths per slot; for the rest of `module_sounds.xml`, only duplicate names) |
 | scenes, prefabs | `docs/modding/module-map.md` (prefab entity cap) | `python tools/check_prefab_budget.py` (counts `TAOM_Map` only; sum all modules) |
 | XML a `tools/` generator wrote | `tools/README.md` "XML I/O convention" | the generator's own `--verify` or `--check`; `python tools/check_generator_item_refs.py`; hand-read three generated entries |
 

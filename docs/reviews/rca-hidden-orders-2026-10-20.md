@@ -67,6 +67,7 @@ commit, `fix(tools): v2.0.35 - schema check names language files and stylesheets
   `rca-generated-lord-kits-2026-10-06.md` #11). It now names LANGUAGE FILE and STYLESHEET from the engine's own
   loaders, names a manifest the engine cannot load as a real fault (the one HIGH of that review: the first version
   called such a manifest loaded), and counts real faults on the summary line without changing the exit code.
+  Fixed under #980 (2026-10-23): a by-name real fault now exits 1, and the NATIVE bucket names project.mbproj rows.
 
 Review findings of that commit, all fixed in it: the first wording still claimed "the engine never reads it" (the
 engine reads `global_strings.xml` and the scene lists by fixed name, and voice and sound files through
