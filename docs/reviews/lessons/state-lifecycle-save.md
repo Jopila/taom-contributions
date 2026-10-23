@@ -1182,8 +1182,8 @@ never ran, and a second rage-mode controller leaked its handlers.
 - **Source:** issue #970.
 ### Mission.Mode is Deployment at screen init in a field battle (#970, 2026-10-22)
 `DeploymentHandler.AfterStart` saves the mode and sets `Deployment` (`DeploymentHandler.cs:40-41`); `Battle` returns only
-when the handler is removed. A gate on `Mission.Mode == Battle` at `OnMissionScreenInitialize` is therefore false in every
-campaign and custom field battle.
+when the handler is removed. A gate on `Mission.Mode == Battle` at `OnMissionScreenInitialize` is therefore false in field
+battles with a deployment phase.
 - **Why missed:** the gate read plausibly and the view never ran, so nothing exercised it.
 - **Prevent:** decide "field battle" with `Mission.IsFieldBattle` (set in `MissionCombatantsLogic.EarlyStart`), and attach on
   the first screen tick whose mode is Battle (`BattleActionBarMissionView.ShouldAttach`).

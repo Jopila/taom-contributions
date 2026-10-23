@@ -43,7 +43,7 @@ public class MissionViewRegistrationGateTests
             .ToList();
 
         var offenders = views
-            .Where(t => t.GetCustomAttributesData().Count(a => a.AttributeType.Name == "DefaultView") != 1
+            .Where(t => t.GetCustomAttributesData().Count(a => a.AttributeType.FullName == "TaleWorlds.MountAndBlade.View.DefaultView") != 1
                         || t.GetConstructor(Type.EmptyTypes) == null)
             .Select(t => t.FullName)
             .ToList();

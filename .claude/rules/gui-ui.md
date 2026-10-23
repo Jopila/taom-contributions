@@ -85,7 +85,9 @@ The claim cost a session: it was read as fact and nearly drove a full rewrite of
 
 ## Custom GauntletLayer Input Wiring (MANDATORY)
 
-When adding a custom `GauntletLayer` overlay that contains interactive widgets (buttons, click bindings, drag handles) to **either** a `ScreenBase` (via Harmony postfix on `OnInitialize`) **or** a `MissionScreen` (via `MissionView.OnMissionScreenInitializeFirstTime`, `MissionLogic` overlay attach, or any other feature-overlay attach path), the layer MUST call `_layer.InputRestrictions.SetInputRestrictions()` after construction or it paints but never registers with the screen's input dispatcher — mouse clicks pass through. Pair with `_layer.InputRestrictions.ResetInputRestrictions()` in the teardown path before `RemoveLayer`.
+When adding a custom `GauntletLayer` overlay that contains interactive widgets (buttons, click bindings, drag handles) to **either** a `ScreenBase` (via Harmony postfix on `OnInitialize`) **or** a `MissionScreen` (via `MissionView.OnMissionScreenInitialize`, `MissionLogic` overlay attach, or any other feature-overlay attach path), the layer MUST call `_layer.InputRestrictions.SetInputRestrictions(...)` after construction or it paints but never registers with the screen's input dispatcher — mouse clicks pass through. Pair with `_layer.InputRestrictions.ResetInputRestrictions()` in the teardown path before `RemoveLayer`.
+
+**In a battle, pass `(false, InputUsageMask.MouseButtons)`, never the parameterless call** (#970). The defaults are a visible cursor and all input: a visible cursor stops vanilla attack and block (`MissionMainAgentController` runs them only while it is hidden) and turns the camera into an edge scroll. Put `DoNotAcceptEvents="true"` on every non-button widget of the prefab, because any widget that accepts events wins the mouse buttons from the scene layer. Note that with the cursor hidden the engine pins it to the screen centre, so a battle overlay button can be clicked only while another view shows a cursor (the Esc menu).
 
 The v1.4.5 input dispatcher does NOT distinguish between `ScreenBase` and `MissionScreen` hosts for this purpose. Both require explicit input registration. Display-only overlays with zero interactive widgets (no `ButtonWidget`, no `Command.Click`, no `AcceptEvents`) are the only exception; verify with grep before claiming it. (The CareerSystem `AbilityHUD` was the canonical display-only example until #382 retired it — the career energy bar now rides inside Native's AgentStatus movie via PrefabExtension, which needs no input wiring at all.)
 
@@ -116,12 +118,12 @@ public static void OnFinalize_Prefix(GauntletInventoryScreen __instance)
 
 **Correct pattern (MissionScreen overlay via MissionView):**
 ```csharp
-public override void OnMissionScreenInitializeFirstTime()
+public override void OnMissionScreenInitialize()
 {
-    base.OnMissionScreenInitializeFirstTime();
+    base.OnMissionScreenInitialize();
     _vm = new MyOverlayVM(...);
     _layer = new GauntletLayer("GauntletLayer", zOrder, false);
-    _layer.InputRestrictions.SetInputRestrictions();        // ← REQUIRED (same as ScreenBase)
+    _layer.InputRestrictions.SetInputRestrictions(false, InputUsageMask.MouseButtons); // ← REQUIRED; cursor stays hidden
     _layer.LoadMovie(prefabName, _vm);
     MissionScreen.AddLayer(_layer);
 }
@@ -219,5 +221,5 @@ Initial construction can mask this — `LoadMovie("...", DataSource)` reads the 
 | Harmony patch that names a TAOM.Client type | `Client/Features/<Feature>/Hooks/` (the patch index reads both assemblies) | `Patch<N>_<Target>.cs` |
 | Custom widget | `Client/Features/<Feature>/Widgets/` (TAOM.Client, ADR-013; `ServerLoadGateTests` fails a new widget in TAOM.dll) | `<Name>Widget.cs` |
 | MapView, map navigation element, map conversation provider | `Client/Features/<Feature>/`, behind a core interface with a null version (ADR-013) | `<Name>MapView.cs` |
-| MissionView, `[DefaultView]` view, visual order provider, CustomBattle game manager, WinForms window | `Client/Features/<Feature>/` with the source's relative path (TAOM.Client, ADR-013; a new one in TAOM.dll fails `ServerLoadGateTests`) | the type name, behind a core factory or interface with a null version (`IBattleActionBarViewFactory`, `IAutonomousMovementController`) |
+| MissionView, `[DefaultView]` view, visual order provider, CustomBattle game manager, WinForms window | `Client/Features/<Feature>/` with the source's relative path (TAOM.Client, ADR-013; a new one in TAOM.dll fails `ServerLoadGateTests`) | the type name; a MissionView is a `[DefaultView]` the engine builds (never added through `AddTaomBehavior`, which runs after the screen registers views: #970); other types sit behind a core interface with a null version (`IAutonomousMovementController`) |
 | Source sprites | `GUI/SpriteParts/ui_taom/<Feature>/` | `<sprite_name>.png` |

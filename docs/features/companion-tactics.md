@@ -6,7 +6,7 @@ Three independently-toggleable battle-tactics features bundled in one TAOM modul
 
 1. **CompanionRoles** — equipment-based combat-role detector (11 roles); appends a role badge to companion tooltips on the party screen and OOB hero items.
 2. **FormationPresets**: named Order of Battle layouts (formation types, captains and hero troops) that Save captures and Load applies through vanilla's own flows; injects an Assign Heroes (Auto-Assign) button and a Presets button into the Order of Battle screen.
-3. **BattleActionBar** — context-sensitive on-screen action bar that appears in field battles. 1–9 hotkeys toggle stance buttons (Hold Fire, Brace, Shield Wall, etc.). **Stances are display-only — they record state but do NOT change formation behavior** (the original developer's mod was UI-only here; the engine doesn't expose the firing-order / tighten-spacing APIs the original referenced).
+3. **BattleActionBar**: context-sensitive on-screen action bar that appears in field battles. It is parked: click-only (no hotkeys), **off by default** (`ShowBattleActionBar`), and clickable only while a menu shows the cursor (see the #970 section); the buttons are Hold Fire, Brace, Shield Wall, etc. **Stances are display-only: they record state but do NOT change formation behavior** (the original developer's mod was UI-only here; the engine doesn't expose the firing-order / tighten-spacing APIs the original referenced).
 
 Ported from `Downloads/Features_fixed/CompanionTactics/` (Bannerlord 1.3 mod template) for TAOM v1.3.15. Patch35 reserves the Harmony category. SaveableTypeDefiner BaseId 726900601 (matches the original mod for save-import compat).
 
@@ -155,7 +155,7 @@ A preset is a named copy of the Order of Battle layout: the formation type of ea
 | `MaxFormationPresets` | 10 (1–20) | Save attempts beyond this are refused with a warning ("Preset limit reached. Delete one before saving."). |
 | `FormationPresetsDebug` | false | HUD diagnostics. |
 | **Battle Action Bar (Group 29)** | | |
-| `EnableBattleActionBar` | true | Show contextual action bar in field battles only (NOT siege). |
+| `ShowBattleActionBar` | **false** | Show the click-only stance bar in field battles only (NOT siege). Renamed from `EnableBattleActionBar` (default true) in #970: MCM keeps a saved value per property name, so only a new name moves every install to off. Turning it off mid-battle removes the layer; turning it on again re-attaches it. |
 | `CancelStanceOnMove` | true | Clear stance state when formation receives a movement order (postfix on `Formation.SetMovementOrder`). |
 | `EnableVolleyFire` | true | Include Volley Fire as a ranged-action button. |
 | `BattleActionBarDebug` | false | HUD diagnostics — logs composition flags per refresh. |
@@ -179,7 +179,7 @@ A preset is a named copy of the Order of Battle layout: the formation type of ea
 | `Main/Features/CompanionTactics/FormationPresets/Models/PresetApplyResult.cs` | Load outcome: classes set, captains placed, hero troops placed, skipped |
 | `Main/Features/CompanionTactics/FormationPresets/OOBOverlayService.cs` | Cached-FieldInfo reflection on `_dataSource`, `_isActive`; `GauntletLayer` lifecycle |
 | `Main/Features/CompanionTactics/FormationPresets/Hooks/FormationPresetCampaignBehavior.cs` | `SyncData` with try/catch — guards the LOAD/ref path only (NOT the off-thread save write); degrades to empty on BaseId collision |
-| `Client/Features/CompanionTactics/BattleActionBar/Hooks/BattleActionBarMissionView.cs` | `[DefaultView]` MissionView (TAOM.Client, ADR-013), built by the engine in every mission with a screen. A field battle is `Mission.IsFieldBattle`; the `GauntletLayer` attaches on the first screen tick whose mode is Battle (the mode is Deployment at screen init), then a 0.5s refresh and keys 1 to 9 for the hotkeys. A view added through `AddTaomBehavior` would never tick (#970) |
+| `Client/Features/CompanionTactics/BattleActionBar/Hooks/BattleActionBarMissionView.cs` | `[DefaultView]` MissionView (TAOM.Client, ADR-013), built by the engine in every mission with a screen. A field battle is `Mission.IsFieldBattle`; the `GauntletLayer` attaches on the first screen tick whose mode is Battle (the mode is Deployment at screen init), then a 0.5s refresh. The layer takes mouse buttons only (`SetInputRestrictions(false, InputUsageMask.MouseButtons)`), so the cursor stays hidden and attack, block and the camera keep working. A view added through `AddTaomBehavior` would never tick (#970) |
 | `Main/Features/CompanionTactics/BattleActionBar/Hooks/Patch35_Formation_SetMovementOrder.cs` | Implements `CancelStanceOnMove`. Belongs to shared `Patch_MissionTime_SetMovementOrder` category (applied once from `OnMissionBehaviorInitialize` because `MovementOrder.cctor` reads `Mission.Current.CurrentTime`). |
 | `Main/Adapters/{I,}BattleEquipmentSnapshot.cs` | Equipment value-object snapshot (no sealed `Equipment` leak) |
 | `Main/Adapters/{I,}HeroCombatAdapter.cs` | `Hero` wrapper; classifies from `BattleEquipment`, or from a given `Equipment` (Auto-Assign passes the agent's spawn equipment) |
@@ -232,7 +232,7 @@ A preset is a named copy of the Order of Battle layout: the formation type of ea
 - `RoleTooltipDecorator` caches `PropertyInfo` / `FieldInfo` in readonly fields at construction; no reflection in postfix bodies.
 - `CompanionRoleService._cache` keyed by Hero StringId + 64-bit equipment signature; cache miss recomputes role and updates entry. **Note: cache is never explicitly cleared on hero death/removal** — see "Known limitations" below.
 - `FormationAdapter` polearm/shield count scan is TTL-cached at 500ms (per-formation key). The action bar refreshes at most twice per second.
-- `BattleActionBarMissionView.OnMissionScreenTick` uses a 0.5s accumulator gate so the formation-change check + button rebuild runs at most twice per second; per-frame work is just a 9-key hotkey poll.
+- `BattleActionBarMissionView.OnMissionScreenTick` uses a 0.5s accumulator gate so the formation-change check + button rebuild runs at most twice per second; there is no per-frame work.
 
 ## Known limitations
 
@@ -244,7 +244,7 @@ A preset is a named copy of the Order of Battle layout: the formation type of ea
 - **History — DateTime save-corruption CTD (fixed 2026-06-21).** `HoNFormationPreset` used to carry a `[SaveableField(3)] DateTime _createdAt`. `System.DateTime` is not a TaleWorlds-serializable type, so once a preset was persisted, **every** campaign save crashed: the engine left a null serialized buffer that NRE'd in `GameData.Write` on the async save thread → `AggregateException` CTD (crash bundle `taom_crash_20260621_200427_8754f009`). The field was vestigial; it was removed (id 3 retired) and pinned by `HoNFormationPresetSerializationTests`. **Player recovery:** because the save *write* failed, no post-preset save file ever completed, so a player's last valid save predates the preset — loading any existing save and continuing works (self-healing, no migration). The `try/catch` in `SyncData` did **not** and **cannot** catch this class of bug: byte serialization runs later on the `AsyncFileSaveDriver` background thread, outside that block. The fix belongs in the saveable model (keep every `[SaveableField]` serializable), not in a behavior-level catch.
 - Auto-Assign places captains only. It never adds hero-troops; a hero already placed as a hero-troop is still a candidate, so it can be made captain of another formation and leaves the first one. It does not use presets, and needs an in-game check on each engine bump because it drives vanilla's OOB handlers (`OrderOfBattleHeroItemVM.OnHeroSelection`, `OrderOfBattleFormationItemVM.ExecuteAcceptCaptain`).
 - **The OOB role badge still reads campaign gear.** `RoleTooltipDecorator` classifies from `Hero.BattleEquipment`, so in a siege assault it can show `[CAV]` for a companion on foot whom Auto-Assign places on a foot formation. Outside sieges the two agree.
-- **Stances are display-only.** Pressing 1–9 in the action bar updates the stance dict and highlights the button, but the formation behavior is unchanged. The original developer's mod was the same — TAOM Phase 1 ports verbatim. Real stance enforcement (firing-order changes, tightened spacing, brace-pose triggers) requires APIs not exposed by the engine and is deferred to a follow-up feature.
+- **Stances are display-only, and the bar is click-only and off by default.** Clicking a bar button updates the stance dict and highlights the button, but the formation behavior is unchanged. Number-key hotkeys were removed (#970): they collided with the vanilla formation-select keys and the badges did not match button positions. The original developer's mod was the same: TAOM Phase 1 ports verbatim. Real stance enforcement (firing-order changes, tightened spacing, brace-pose triggers) requires APIs not exposed by the engine and is deferred to a follow-up feature.
 - **`CompanionRoleService._cache` does not evict dead heroes.** Cache is keyed by Hero.StringId. When a hero dies or is removed mid-campaign, the cache entry leaks for the rest of the session. The leak is bounded (one entry per Hero ever inspected) and small — a pathological 1000-hero campaign leaks ~50KB. A follow-up could subscribe to `OnHeroKilled` to evict, but it's not blocking.
 - **Hot-path role detection uses `Agent.SpawnEquipment`, not current battle equipment.** `FormationAdapter.EnsurePolearmShieldCounts` reads each agent's spawn-time equipment to compute polearm + shield counts. If a hero swaps weapons mid-battle, the action bar composition does not update until next mission. Tooltip role detection (campaign-time) uses `Hero.BattleEquipment` and is current.
 - **Integration was previously in a `// TEMP-SMARTCAVALRY-EXCLUDE` state** during the 2026-05-06 parallel-port session. **Restored in commit `0cc457f` (2026-05-07).** The feature is now fully wired (`Main/SubModule.cs` + `Main/IoC.cs`) and built into the mod. See `docs/reviews/rca-companiontactics-2026-05-06.md` for the historical RCA on the build-watcher cascade that caused the temporary exclusion.
@@ -282,6 +282,20 @@ A preset is a named copy of the Order of Battle layout: the formation type of ea
 - #779 (open): formation presets, Save and Load.
 - #117: superseded by #779.
 - #787: follow-up for troop shares and filters, and for swaps between single-class formations.
+
+## Battle action bar: parked, known gaps and in-game check (#970)
+
+- **Parked (Mike, 2026-10-23).** The bar now registers and ticks, and it no longer blocks attack, block or mouse-look.
+  It stays off by default because its stances change nothing in battle, and because a hidden cursor is pinned to the
+  screen centre by the engine (`TaleWorlds.Native.dll` input update), so a bar button can be clicked only while another
+  view shows a cursor, such as the Esc menu. Make it usable when stances do something: for example show the cursor on the
+  bar's layer while the order menu is open, as vanilla deployment does.
+- **Known, LOW:** a sally-out sortie is not a field battle for the bar (`Mission.IsFieldBattle`); not changed here.
+- **Known, LOW:** the prefab uses the `Popup.Text.Small` brush, which is missing, so the labels fall back to the default font; not changed here.
+- **In-game check owed** (turn `Show Battle Action Bar` on first): the log shows `[BattleActionBar] screen init` at load;
+  after Begin battle the cursor is hidden, left-click attacks, right-click blocks and the camera follows the mouse; a ground
+  click with the order menu open gives a move order; with Esc open, clicking a bar button highlights it; turning the
+  setting off mid-battle removes the bar and turning it on again shows it once.
 
 ---
 
