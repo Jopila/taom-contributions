@@ -508,3 +508,19 @@ melee near the camera can reach the limit. TAOM guards and watches the two skele
 | A managed body | `pwsh tools/taom-src.ps1 path TaleWorlds.MountAndBlade.Mission` |
 
 ---
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/mission-perf-heartbeat.md](../../features/mission-perf-heartbeat.md)
+- [docs/features/skeleton-buffer-guard.md](../../features/skeleton-buffer-guard.md)
+- [docs/INDEX.md](../../INDEX.md)
+- [docs/reference/bannerlord-engine-and-toolchain.md](../bannerlord-engine-and-toolchain.md)
+- [docs/reference/provenance-register.md](../provenance-register.md)
+- [docs/reference/scripted-melee-strikes.md](../scripted-melee-strikes.md)
+- [docs/reviews/adopt-mithrilforge-engine-perf-2026-10-02.md](../../reviews/adopt-mithrilforge-engine-perf-2026-10-02.md)
+
+<!-- backlinks-end -->

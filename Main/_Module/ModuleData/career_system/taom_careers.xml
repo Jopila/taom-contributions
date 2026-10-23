@@ -1565,4 +1565,130 @@
     </ChoiceGroups>
   </Career>
 
+  <Career id="bowman_of_minhiriath" rank1_name="{=taom_career_rank1_bowman_of_minhiriath}Scout of Minhiriath" rank2_name="{=taom_career_rank2_bowman_of_minhiriath}Bowman of Minhiriath" rank3_name="{=taom_career_rank3_bowman_of_minhiriath}Captain of the Bowmen"
+          display_name="{=taom_career_bowman_of_minhiriath}Bowman of Minhiriath"
+          description="{=taom_career_bowman_of_minhiriath_desc}An elite scout who strikes from the river country of Minhiriath, ambushing raiders from Dunland with deadly precision."
+          portrait_sprite="career_ranger_of_ithilien_portrait"
+          ability_template_id="bowman_of_minhiriath_ability"
+          min_clan_tier="0"
+          root_choice_id="bowman_of_minhiriath_root"
+          keystone_icon="10003">
+    <EligibleCultures>
+      <Culture id="cardolan" />
+    </EligibleCultures>
+    <ChoiceGroups>
+      <Group id="bowman_of_minhiriath_t1_a" />
+      <Group id="bowman_of_minhiriath_t1_b" />
+      <Group id="bowman_of_minhiriath_t2_a" />
+      <Group id="bowman_of_minhiriath_t2_b" />
+      <Group id="bowman_of_minhiriath_t3_a" />
+      <Group id="bowman_of_minhiriath_t3_b" />
+    </ChoiceGroups>
+  </Career>
+
+  <Career id="warden_of_tyrn_gorthad" rank1_name="{=taom_career_rank1_warden_of_tyrn_gorthad}Ohtar of Sarn Ford" rank2_name="{=taom_career_rank2_warden_of_tyrn_gorthad}Warden of the Barrows" rank3_name="{=taom_career_rank3_warden_of_tyrn_gorthad}Warden of Tyrn Gorthad"
+          display_name="{=taom_career_warden_of_tyrn_gorthad}Warden of Tyrn Gorthad"
+          description="{=taom_career_warden_of_tyrn_gorthad_desc}A battle-hardened infantry officer who keeps the barrows of Tyrn Gorthad and the walls of Caras Gorthad, forging order from chaos when the downs burn. The Warden holds the line where others would break, rallying soldiers through sheer force of will."
+          portrait_sprite="career_captain_of_osgiliath_portrait"
+          ability_template_id="warden_of_tyrn_gorthad_ability"
+          min_clan_tier="0"
+          root_choice_id="warden_of_tyrn_gorthad_root"
+          keystone_icon="10004">
+    <EligibleCultures>
+      <Culture id="cardolan" />
+    </EligibleCultures>
+    <ChoiceGroups>
+      <Group id="warden_of_tyrn_gorthad_t1_a" />
+      <Group id="warden_of_tyrn_gorthad_t1_b" />
+      <Group id="warden_of_tyrn_gorthad_t2_a" />
+      <Group id="warden_of_tyrn_gorthad_t2_b" />
+      <Group id="warden_of_tyrn_gorthad_t3_a" />
+      <Group id="warden_of_tyrn_gorthad_t3_b" />
+    </ChoiceGroups>
+  </Career>
+
+  <Career id="knight_of_cardolan" rank1_name="{=taom_career_rank1_knight_of_cardolan}Squire of Caras Gorthad" rank2_name="{=taom_career_rank2_knight_of_cardolan}Barrow-Knight" rank3_name="{=taom_career_rank3_knight_of_cardolan}Knight of the Barrow-Kings"
+          display_name="{=taom_career_knight_of_cardolan}Knight of Cardolan"
+          description="{=taom_career_knight_of_cardolan_desc}An armored champion of the southern kingdom, whose thundering charge has broken countless enemy formations. The Knight of Cardolan combines Cardolan discipline with Caras Gorthad's proud cavalry tradition, becoming an immovable wall of steel."
+          portrait_sprite="career_knight_of_belfalas_portrait"
+          ability_template_id="knight_of_cardolan_ability"
+          min_clan_tier="0"
+          root_choice_id="knight_of_cardolan_root"
+          keystone_icon="10005">
+    <EligibleCultures>
+      <Culture id="cardolan" />
+    </EligibleCultures>
+    <ChoiceGroups>
+      <Group id="knight_of_cardolan_t1_a" />
+      <Group id="knight_of_cardolan_t1_b" />
+      <Group id="knight_of_cardolan_t2_a" />
+      <Group id="knight_of_cardolan_t2_b" />
+      <Group id="knight_of_cardolan_t3_a" />
+      <Group id="knight_of_cardolan_t3_b" />
+    </ChoiceGroups>
+  </Career>
+
+  <Career id="ranger_of_the_angle" rank1_name="{=taom_career_rank1_ranger_of_the_angle}Scout of the Angle" rank2_name="{=taom_career_rank2_ranger_of_the_angle}Ranger of the Angle" rank3_name="{=taom_career_rank3_ranger_of_the_angle}Captain of the Angle Rangers"
+          display_name="{=taom_career_ranger_of_the_angle}Ranger of the Angle"
+          description="{=taom_career_ranger_of_the_angle_desc}An elite scout who strikes from the fells of the Angle, ambushing orcs and trolls from the mountains with deadly precision."
+          portrait_sprite="career_ranger_of_ithilien_portrait"
+          ability_template_id="ranger_of_the_angle_ability"
+          min_clan_tier="0"
+          root_choice_id="ranger_of_the_angle_root"
+          keystone_icon="10003">
+    <EligibleCultures>
+      <Culture id="rhudaur" />
+    </EligibleCultures>
+    <ChoiceGroups>
+      <Group id="ranger_of_the_angle_t1_a" />
+      <Group id="ranger_of_the_angle_t1_b" />
+      <Group id="ranger_of_the_angle_t2_a" />
+      <Group id="ranger_of_the_angle_t2_b" />
+      <Group id="ranger_of_the_angle_t3_a" />
+      <Group id="ranger_of_the_angle_t3_b" />
+    </ChoiceGroups>
+  </Career>
+
+  <Career id="captain_of_cameth_brin" rank1_name="{=taom_career_rank1_captain_of_cameth_brin}Ohtar of the Last Bridge" rank2_name="{=taom_career_rank2_captain_of_cameth_brin}Warden of the Fells" rank3_name="{=taom_career_rank3_captain_of_cameth_brin}Captain of Cameth Brin"
+          display_name="{=taom_career_captain_of_cameth_brin}Captain of Cameth Brin"
+          description="{=taom_career_captain_of_cameth_brin_desc}A battle-hardened infantry officer who holds the tower of Cameth Brin against the mountains, forging order from chaos when the fells burn. The Captain holds the line where others would break, rallying soldiers through sheer force of will."
+          portrait_sprite="career_captain_of_osgiliath_portrait"
+          ability_template_id="captain_of_cameth_brin_ability"
+          min_clan_tier="0"
+          root_choice_id="captain_of_cameth_brin_root"
+          keystone_icon="10004">
+    <EligibleCultures>
+      <Culture id="rhudaur" />
+    </EligibleCultures>
+    <ChoiceGroups>
+      <Group id="captain_of_cameth_brin_t1_a" />
+      <Group id="captain_of_cameth_brin_t1_b" />
+      <Group id="captain_of_cameth_brin_t2_a" />
+      <Group id="captain_of_cameth_brin_t2_b" />
+      <Group id="captain_of_cameth_brin_t3_a" />
+      <Group id="captain_of_cameth_brin_t3_b" />
+    </ChoiceGroups>
+  </Career>
+
+  <Career id="rider_of_the_fells" rank1_name="{=taom_career_rank1_rider_of_the_fells}Squire of the Angle" rank2_name="{=taom_career_rank2_rider_of_the_fells}Fell-Knight" rank3_name="{=taom_career_rank3_rider_of_the_fells}Knight of the Fells"
+          display_name="{=taom_career_rider_of_the_fells}Rider of the Fells"
+          description="{=taom_career_rider_of_the_fells_desc}An armored champion of the hill kingdom, whose thundering charge has broken countless enemy formations. The Rider of the Fells combines Rhudaur discipline with Cameth Brin's proud cavalry tradition, becoming an immovable wall of steel."
+          portrait_sprite="career_knight_of_belfalas_portrait"
+          ability_template_id="rider_of_the_fells_ability"
+          min_clan_tier="0"
+          root_choice_id="rider_of_the_fells_root"
+          keystone_icon="10005">
+    <EligibleCultures>
+      <Culture id="rhudaur" />
+    </EligibleCultures>
+    <ChoiceGroups>
+      <Group id="rider_of_the_fells_t1_a" />
+      <Group id="rider_of_the_fells_t1_b" />
+      <Group id="rider_of_the_fells_t2_a" />
+      <Group id="rider_of_the_fells_t2_b" />
+      <Group id="rider_of_the_fells_t3_a" />
+      <Group id="rider_of_the_fells_t3_b" />
+    </ChoiceGroups>
+  </Career>
+
 </Careers>

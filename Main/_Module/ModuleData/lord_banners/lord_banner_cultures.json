@@ -3,6 +3,8 @@
     "gondor": ["empire"],
     "gondor_soldiers": ["empire"],
     "arthedain": ["empire"],
+    "cardolan": ["empire"],
+    "rhudaur": ["empire"],
     "erebor": ["sturgia"],
     "erebor_warriors": ["sturgia"],
     "mirkwood": ["battania"],

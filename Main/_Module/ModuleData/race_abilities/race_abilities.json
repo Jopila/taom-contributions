@@ -217,7 +217,7 @@
     }
   },
   "cultures": {
-    "gondor,gondor_soldiers,arthedain": {
+    "gondor,gondor_soldiers,arthedain,cardolan,rhudaur": {
       "abilityId": "citadel_guard",
       "glow": "#5B9BD5",
       "cooldownSeconds": 120,

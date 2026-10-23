@@ -37,6 +37,8 @@ public sealed class CrownGuardMap
             ["vlandia"] = "rohan_edoras_golden_hall_kings_own_rider",
             ["isengard"] = "orthanc_bodyguard",
             ["arthedain"] = "arthedain_kings_guard",
+            ["cardolan"] = "cardolan_warden",
+            ["rhudaur"] = "rhudaur_lord_of_the_angle",
             ["sturgia"] = "dale_running_river_warden",
             ["empire"] = "dunland_wolf_champion",
             ["erebor"] = "erebor_noble_royal_warden",

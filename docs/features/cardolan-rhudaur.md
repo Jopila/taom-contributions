@@ -1,0 +1,198 @@
+# Cardolan and Rhudaur
+
+## Overview
+
+Cardolan and Rhudaur are two playable kingdoms: with [Arthedain](arthedain.md) they are the three
+realms Eärendur's sons made of Arnor (LOTR Appendix A I iii), and in TAOM all three lines survive.
+Each has its own culture (`cardolan`, `rhudaur`), troop tree, kingdom, clans, lords, character
+creation and faction card. Both are **Neutral**: they stand apart from the War of the Ring, and the
+enemies at their borders are Dunland, Gundabad, the Misty Mountain orcs and the goblins.
+
+## Why This Exists
+
+- **Mike's request (2026-10-23, #978):** one kingdom per son of Eärendur, so Arthedain is no longer
+  the only Arnor realm. Mike placed the settlements on the TAOM_Map main map and approved the
+  names, the troop trees and the clan sizes.
+- **Before:** the faction screen carried two non-playable placeholder cards. Rhudaur's said its
+  hill-men served the Witch-king; Mike's design has Angmar gone and the Dúnedain line ruling.
+
+## Architecture
+
+### Design Challenge
+
+The Arthedain recipe ([arthedain.md](arthedain.md) "Solution Approach") touches about thirty
+surfaces in three modules. Doing it twice more by copying Arthedain's tools would have tripled the
+troop generator and left three realms whose generators reorder each other's regions.
+
+### Solution Approach
+
+The same recipe and the same generators, extended rather than copied:
+
+| Step | Tool | What changed for these two realms |
+|------|------|-----------------------------------|
+| Troops and the 9 soldier party templates | `tools/generate_cardolan_troops.py`, `tools/generate_rhudaur_troops.py` | The machinery moved out of `generate_arthedain_troops.py` into `tools/realm_troops.py` (Arthedain's output is byte-identical); each realm file holds only its design |
+| Bow ladder | `tools/ranged_ladders.json` lines `cardolan`, `rhudaur`; `tools/generate_ranged_ladder_items.py` | Live `LOTRLOME_items/arnor/ranged_ladder.xml` now has 14 items |
+| Culture, notables, wanderers, villager and caravan templates, education templates, rosters | `tools/promote_borrowed_cultures.py --only cardolan` / `--only rhudaur` | Both built by `_arnor_successor()` from Arthedain's settings; three promoter defects fixed (Changelog) |
+| Towns, castles, villages | `tools/add_map_fortifications.py`, `tools/add_map_villages.py` | 9 fortifications, 29 villages; Cardolan and Rhudaur take Arthedain's `STYLE` |
+| Kingdom, clans, lords, heroes | `tools/generate_new_faction_kingdoms.py --only cardolan` / `--only rhudaur` | New `face_template` option; regions now replaced in place |
+| Narrative menus | `tools/insert_new_faction_cc_menus.py` | Authored text per realm on Gondor's mechanics |
+| Careers | `tools/insert_new_faction_careers.py` | Three each, cloned from Gondor's |
+| Starting gear | `tools/generate_char_creation_equipment.py --append cardolan rhudaur`, `generate_starter_kit.py`, `wire_starter_kit_rosters.py` | 55 rosters each |
+
+**Armour is a placeholder** (Mike, 2026-10-23): Cardolan wears Gondor's armour (Anfalas, Pinnath
+Gelin and Dol Amroth pieces) and carries the three Cardolan spears the Armory ships; Rhudaur wears
+the Arnor kit, with Dunland's axes and shields for its hill-men.
+
+**Weak on purpose**, as Arthedain: ruling clans at tier 4, the rest at 3 and 2, towns at 2,400 to
+2,800 prosperity, castles at 800, villages at hearth 300, and no row in
+`tools/settlement_economy_floor.json`.
+
+**Neutral, not Free** (Mike, 2026-10-23): `execution/alignment.json` lists both as `neutral`, every
+start relationship is 0, and `diplomacy/diplomacy.json` has no row for either, because an unlisted
+pair is Neutral. In this code `Natural` is an alliance tier, not "no stance".
+
+### Component Diagram
+
+```
+realm_troops.py <-- generate_{arthedain,cardolan,rhudaur}_troops.py --> troops_<c>.xml + 9 party templates
+promote_borrowed_cultures.py --only <c> --> <Culture id="<c>"> + npcs + rosters + wanderers + strings
+add_map_fortifications.py / add_map_villages.py --> LIVE TAOM_Map settlements.xml (+ 12 loc files)
+generate_new_faction_kingdoms.py --only <c> --> Kingdom.<c>, clan_<c>_N, lord_CA*/lord_RH*
+CC menus, careers, CC gear --> character creation
+C#: VolunteerRecruitmentService.Cardolan.cs / .Rhudaur.cs, the culture rows of the compiled tables
+```
+
+## Configuration
+
+### Ids (fixed: saves reference them)
+
+| Concept | Cardolan | Rhudaur |
+|---------|----------|---------|
+| Kingdom id, culture id | `cardolan` | `rhudaur` |
+| Settlement and lord prefix | `CA` (`town_CA2`, `lord_CA1_1`) | `RH` (`town_RH1`, `lord_RH1_1`) |
+| Clans | `clan_cardolan_1` to `_4` | `clan_rhudaur_1` to `_3` |
+| Troops | `cardolan_*` | `rhudaur_*` |
+| Name keys of notables and townsfolk | `aom_card_*` | `aom_rhud_*` |
+
+### Realms
+
+| Realm | Clan (tier) | Holds |
+|-------|-------------|-------|
+| Cardolan, King Aranthir | House of Tyrn Gorthad (4) | Caras Gorthad `town_CA2` (capital), Tyrn Gorthad `castle_CA1` |
+| | House of Minas Eithel (3) | Minas Eithel `town_CA1` |
+| | House of Tharbad (2) | Tharbad `town_CA3` |
+| | Wardens of Sarn Ford (2) | Sarn Ford `castle_CA2` |
+| Rhudaur, King Belegorn | House of Cameth Brin (4) | Cameth Brin `town_RH1` (capital), Egladil `castle_RH1` |
+| | House of Ettendale (3) | Ettendale Hold `castle_RH2` |
+| | Wardens of the Coldfells (2) | Coldfells `castle_RH3` |
+
+Four lords per clan (two married couples), 16 for Cardolan and 12 for Rhudaur. Each lord draws his
+own face from the `fighter_gondor` template at campaign start (Lord Face Variety rule A), where a
+copied face key is only nudged (`HeroFaceVarietyDataTests`). Banners: the Arnor icons (group 110) in
+silver on palette 154 for Cardolan and 99 for Rhudaur.
+
+### Troop trees
+
+- **Cardolan** (20 troops with the tavern copy): Levy (L6) to Spearman, Cardolan Spearman, Barrow
+  Guard, Veteran Barrow Guard and Warden of Tyrn Gorthad (L31). Dunadan of Cardolan (elite basic,
+  L11) splits into the knights (Rider of Cardolan to Knight-Captain, then King's Guard of Caras
+  Gorthad, the mounted L36 capstone) and the Minhiriath Bowmen (to L26).
+- **Rhudaur** (21 troops with the tavern copy): Hillman Levy (L6) to Hill Spearman, Rhudaur Axeman,
+  Veteran Axeman and Fell Warden (L26); the Hill Spearman also leads to the Hill Rider (L21), the one
+  cavalry troop. Dunadan of the Angle (elite basic, L11) splits into the Angle Rangers (to L31) and
+  the Guard of Cameth Brin (to Lord of the Angle, the L36 capstone).
+- Both: the four militia troops at the TAOM militia rule, and bows from the realm's own ranged-ladder
+  line (`cardolan` ranked with Harad and Dale, `rhudaur` with Arthedain).
+
+### Tables keyed on culture
+
+Every table that names `arthedain` was decided for both:
+
+| Table | Cardolan | Rhudaur |
+|-------|----------|---------|
+| `configs/battle_balance_config.json` survival bonus | 0.3 | 0.2 (hill-men a step under) |
+| `combat_mechanics/combat_mechanics_config.json` charge multiplier | 1.3 (the horse realm) | 1.2, as Dale |
+| `crown_guard/crown_guard_cultures.json` | `cardolan_warden` (the capstone rides) | `rhudaur_lord_of_the_angle` |
+| `banner_bearers`, `lord_banners`, `race_abilities`, `hall_of_fire`, `voice_accents`, Postern Gate | Arthedain's rows | Arthedain's rows |
+| `culture_marketplace_config.xml` | Gondor's whole pool (it wears Gondor's armour) | Arthedain's three `<Stock>` rows, the crown blacklisted |
+| `special_resources_config.xml` | Castar, with Gondor and Arthedain | Castar |
+| `startup_resources_config.xml` gold | 90,000 | 80,000 |
+| `lotr_issues` | own Armourer's Commission; on Gondor's Deep Seam row | the same |
+| `configs/army_targeting.json` | theater `north` | theater `north` |
+| `realm_borders/palette.json` and MCM | `#E8B89A`, `RealmColourCardolan` | `#E0735A`, `RealmColourRhudaur` |
+| Careers | Bowman of Minhiriath, Warden of Tyrn Gorthad, Knight of Cardolan | Ranger of the Angle, Captain of Cameth Brin, Rider of the Fells |
+| Faction card | playable, Neutral, difficulty 5 | playable, Neutral, difficulty 6 |
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `tools/realm_troops.py` | shared troop machinery for the three Arnor realms |
+| `tools/generate_cardolan_troops.py`, `tools/generate_rhudaur_troops.py` | each realm's tree and party templates; `--check` |
+| `Main/Features/TroopProgression/RecruitmentPools/VolunteerRecruitmentService.Cardolan.cs`, `.Rhudaur.cs` | volunteer pools (Levy 6, Dunadan 2) |
+| `Main/Features/LiegeTitles/TaomCultureTags.cs` | `TaomCardolanCultureTag`, `TaomRhudaurCultureTag` for the King and Queen titles |
+| `Main/_Module/ModuleData/troops/troops_cardolan.xml`, `troops_rhudaur.xml` | generated trees |
+| `Main/_Module/ModuleData/characters/npcs_cardolan.xml`, `npcs_rhudaur.xml` | notables and townsfolk |
+| live `TAOM_Map/ModuleData/settlements.xml` | the 38 settlements, the last rows of the file |
+
+## Dependencies
+
+- Gondor's armour, spears, shields and horses; the Arnor kit; Dunland's axes and shields; the
+  `cardolan` and `rhudaur` ranged-ladder items in the live Armory.
+
+## Tests
+
+- `tools/tests/test_realm_troops.py`: both designs (self-check, skill monotonicity, militia rule,
+  mercenary, ladder cells, party templates, labels and cultures).
+- `TAOM.Tests/Features/TroopProgression/VolunteerRecruitmentServiceTests.cs`: both pools.
+- Count and list pins moved with the data: `TroopUpgradeSkillMonotonicityTests`
+  (`ExpectedMilitiaCultures`), `ShippedRaceAbilitiesConfigTests` (20 cultures),
+  `SettingsFingerprintTests` (425 settings), `ShippedClanSideCoverageTests` (`NeutralRealmIds`).
+- Existing gates that now cover them: `LiegeTitleOverrideTests`, `RealmPaletteTests`,
+  `ArmourAcquisitionShippedDataTests`, `ShippedHallOfFireConfigTests`, `HeroFaceVarietyDataTests`,
+  `WandererBackstoryCoverageTests`, `EveryLanguage_DeclaresARowForEveryEnglishKey`.
+- `tools/tests/test_generator_regions_in_sync.py` runs both troop generators' and both kingdoms'
+  `--check`.
+
+## How to Change a Realm
+
+The steps in [arthedain.md](arthedain.md) "How to Change the Realm" apply, with each realm's own
+generator and `--only <culture>`. Never run `generate_new_faction_kingdoms.py` or
+`promote_borrowed_cultures.py` without `--only`.
+
+## Known gaps
+
+- The armour is a placeholder until each realm has its own.
+- The cloned wanderers keep the surnames of Gondor's and Arthedain's wanderers.
+- Arthedain's narrative menus and culture text still name "fallen Cardolan" and the hill-men of
+  Rhudaur "under Angmar's banners" (a decision for Mike; changing them resets their translations).
+- All new English text waits for the paid translation run (#763).
+- No faction-screen art for either realm.
+
+## Changelog
+
+- 2026-10-23 (#978): created. Built with the Arthedain recipe. Along the way:
+  - `tools/realm_troops.py` replaced the copy-per-realm troop generator.
+  - `promote_borrowed_cultures.py` stopped copying the multi-line liege-title strings line by line
+    (which wrote a malformed `taom_module_strings.xml`), now parses every file before writing any,
+    and replaces its marker regions in place (strip-and-append reordered the realms, so only the last
+    one written passed `--check`); the same in-place fix went into `generate_new_faction_kingdoms.py`.
+  - Arthedain's start point moved to Fornost Erain's live position (464.975, 1162.654), and its
+    faction card no longer calls it the only Arnor realm still standing.
+
+## GitHub Issue
+
+- **Issue:** #978.
+- **Status:** built and verified in data; in-game check owed (#978 checklist).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/arthedain.md](./arthedain.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

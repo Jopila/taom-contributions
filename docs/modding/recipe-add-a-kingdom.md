@@ -370,7 +370,7 @@ Code: No code changes needed
 | 23 / 1479 / 28 to 80 | `npcs_*.xml` files, notables in them, and the per-file range | `python -c "import glob,xml.etree.ElementTree as ET;n=[len([x for x in ET.parse(p).getroot().iter('NPCCharacter')]) for p in glob.glob('Main/_Module/ModuleData/characters/npcs_*.xml')];print(len(n),sum(n),min(n),max(n))"` |
 | 243 / 23 / 19 | wanderer entries, cultures covered, and cultures with exactly 10 | `python -c "import xml.etree.ElementTree as ET,collections;c=collections.Counter(e.get('culture') for e in ET.parse('Main/_Module/ModuleData/taom_wanderers.xml').getroot().iter('NPCCharacter'));print(len(c),sum(1 for v in c.values() if v==10))"` |
 | 17 | troop files, every one swept by `validate_all_troop_refs.py` | `ls Main/_Module/ModuleData/troops/ \| rg '^troops_[a-z_]+\.xml$' \| wc -l` |
-| 1040 | settlements in the live map module | `rg -c '<Settlement\b' "$BANNERLORD_GAME_DIR/Modules/TAOM_Map/ModuleData/settlements.xml"` |
+| 1087 | settlements in the live map module (re-counted 2026-10-23, after Carn Dûm, Lithur, Cardolan and Rhudaur) | `rg -c '<Settlement\b' "$BANNERLORD_GAME_DIR/Modules/TAOM_Map/ModuleData/settlements.xml"` |
 | 2 / 10 / 5 | Lindon's clans, heroes and settlements, the smallest shipped realm | the three `rg -c` commands quoted under "The floor" |
 | 10 / 0 | older kingdoms, and how many `<relationship>` rows among them name any of the four newest | the ElementTree one-liner under "Worked example" |
 | 78.79 / 236 | average town gap over 78 towns, and the resulting march radius, from the 2026-08-26 position snapshot the analyzer reads (before Arthedain's three towns and Luinkrag; the in-game Map Tools rebuild refreshes it) | `python tools/analyze_war_theaters.py` |

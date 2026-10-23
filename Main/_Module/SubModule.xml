@@ -546,6 +546,64 @@
       </IncludedGameTypes>
     </XmlNode>
     <!-- TAOM-NEWCULTURE-REG:arthedain:END -->
+    <!-- TAOM-NEWCULTURE-REG:rhudaur:BEGIN -->
+    <XmlNode>
+      <XmlName id="NPCCharacters" path="troops/troops_rhudaur"/>
+      <IncludedGameTypes>
+        <GameType value ="Campaign"/>
+        <GameType value ="CampaignStoryMode"/>
+        <GameType value = "CustomGame"/>
+        <GameType value = "EditorGame"/>
+      </IncludedGameTypes>
+    </XmlNode>
+    <XmlNode>
+      <XmlName id="NPCCharacters" path="characters/npcs_rhudaur"/>
+      <IncludedGameTypes>
+        <GameType value ="Campaign"/>
+        <GameType value ="CampaignStoryMode"/>
+        <GameType value = "CustomGame"/>
+        <GameType value = "EditorGame"/>
+      </IncludedGameTypes>
+    </XmlNode>
+    <XmlNode>
+      <XmlName id="EquipmentRosters" path="equipmentsets/taom_equipment_sets_rhudaur"/>
+      <IncludedGameTypes>
+        <GameType value ="Campaign"/>
+        <GameType value ="CampaignStoryMode"/>
+        <GameType value = "CustomGame"/>
+        <GameType value = "EditorGame"/>
+      </IncludedGameTypes>
+    </XmlNode>
+    <!-- TAOM-NEWCULTURE-REG:rhudaur:END -->
+    <!-- TAOM-NEWCULTURE-REG:cardolan:BEGIN -->
+    <XmlNode>
+      <XmlName id="NPCCharacters" path="troops/troops_cardolan"/>
+      <IncludedGameTypes>
+        <GameType value ="Campaign"/>
+        <GameType value ="CampaignStoryMode"/>
+        <GameType value = "CustomGame"/>
+        <GameType value = "EditorGame"/>
+      </IncludedGameTypes>
+    </XmlNode>
+    <XmlNode>
+      <XmlName id="NPCCharacters" path="characters/npcs_cardolan"/>
+      <IncludedGameTypes>
+        <GameType value ="Campaign"/>
+        <GameType value ="CampaignStoryMode"/>
+        <GameType value = "CustomGame"/>
+        <GameType value = "EditorGame"/>
+      </IncludedGameTypes>
+    </XmlNode>
+    <XmlNode>
+      <XmlName id="EquipmentRosters" path="equipmentsets/taom_equipment_sets_cardolan"/>
+      <IncludedGameTypes>
+        <GameType value ="Campaign"/>
+        <GameType value ="CampaignStoryMode"/>
+        <GameType value = "CustomGame"/>
+        <GameType value = "EditorGame"/>
+      </IncludedGameTypes>
+    </XmlNode>
+    <!-- TAOM-NEWCULTURE-REG:cardolan:END -->
     <XmlNode>
       <XmlName id="NPCCharacters" path="characters/npcs_mirkwood"/>
       <IncludedGameTypes>

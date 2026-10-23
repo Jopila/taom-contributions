@@ -27,7 +27,11 @@ REPO = os.path.dirname(TOOLS)
 # ModuleData and has a --check that passes today.
 OWNERS = [
     ("generate_arthedain_troops.py", ["--check"]),
+    ("generate_cardolan_troops.py", ["--check"]),
+    ("generate_rhudaur_troops.py", ["--check"]),
     ("generate_new_faction_kingdoms.py", ["--only", "arthedain", "--check"]),
+    ("generate_new_faction_kingdoms.py", ["--only", "cardolan", "--check"]),
+    ("generate_new_faction_kingdoms.py", ["--only", "rhudaur", "--check"]),
 ]
 
 

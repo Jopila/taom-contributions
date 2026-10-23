@@ -25,16 +25,16 @@
     "shaghana": "#DC7FA8",
     "abanissa": "#2A8C8C",
     "lindon": "#4FC4A0",
-    "arthedain": "#A0B4D8"
+    "arthedain": "#A0B4D8",
+    "cardolan": "#E8B89A",
+    "rhudaur": "#E0735A"
   },
   "reserve": [
-    "#E8B89A",
     "#8FD3F0",
     "#A5D98A",
     "#C878D8",
     "#F5DC5A",
     "#B4B4B4",
-    "#E0735A",
     "#6E5A8C"
   ]
 }

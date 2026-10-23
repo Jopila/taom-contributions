@@ -12,6 +12,10 @@
 	<string id="aom_clan_bluecraig_3_name" text="{=aom_clan_bluecraig_3_name}Lune-skulkers" />
 	<string id="aom_clan_bluecraig_4_name" text="{=aom_clan_bluecraig_4_name}Ered Luin Raiders" />
 	<string id="aom_clan_bluecraig_5_name" text="{=aom_clan_bluecraig_5_name}Mirkstone Tribe" />
+	<string id="aom_clan_cardolan_1_name" text="{=aom_clan_cardolan_1_name}House of Tyrn Gorthad" />
+	<string id="aom_clan_cardolan_2_name" text="{=aom_clan_cardolan_2_name}House of Minas Eithel" />
+	<string id="aom_clan_cardolan_3_name" text="{=aom_clan_cardolan_3_name}House of Tharbad" />
+	<string id="aom_clan_cardolan_4_name" text="{=aom_clan_cardolan_4_name}Wardens of Sarn Ford" />
 	<string id="aom_clan_dolguldur_10_name" text="{=aom_clan_dolguldur_10_name}Drûzgûl" />
 	<string id="aom_clan_dolguldur_11_name" text="{=aom_clan_dolguldur_11_name}Vrûkmog" />
 	<string id="aom_clan_dolguldur_12_name" text="{=aom_clan_dolguldur_12_name}Hlakûrz" />
@@ -107,6 +111,9 @@
 	<string id="aom_clan_mistymountainorcs_7_name" text="{=aom_clan_mistymountainorcs_7_name}Skarnâk" />
 	<string id="aom_clan_mistymountainorcs_8_name" text="{=aom_clan_mistymountainorcs_8_name}Maughâsh" />
 	<string id="aom_clan_mistymountainorcs_9_name" text="{=aom_clan_mistymountainorcs_9_name}Throgmaw" />
+	<string id="aom_clan_rhudaur_1_name" text="{=aom_clan_rhudaur_1_name}House of Cameth Brin" />
+	<string id="aom_clan_rhudaur_2_name" text="{=aom_clan_rhudaur_2_name}House of Ettendale" />
+	<string id="aom_clan_rhudaur_3_name" text="{=aom_clan_rhudaur_3_name}Wardens of the Coldfells" />
 	<string id="aom_clan_rivendell_1_name" text="{=aom_clan_rivendell_1_name}Nos Peredhel" />
 	<string id="aom_clan_rivendell_2_name" text="{=aom_clan_rivendell_2_name}Nos Glorfindel" />
 	<string id="aom_clan_rivendell_3_name" text="{=aom_clan_rivendell_3_name}Elen-Nolmarë" />

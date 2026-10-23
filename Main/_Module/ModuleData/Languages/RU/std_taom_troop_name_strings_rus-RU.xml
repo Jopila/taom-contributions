@@ -911,5 +911,46 @@
     <string id="aom_harad_sreg_warrior_name" text="[Shaghana] Southron Warrior" />
     <string id="aom_merc_harad_pz_levy_name" text="[Harwan] Hired Pezarsan Levy" />
     <string id="aom_merc_harad_redserp_noble_name" text="[Shaghana] Hired Red Serpent Noble" />
+    <string id="aom_cardolan_barrow_guard_name" text="[Cardolan] Barrow Guard" />
+    <string id="aom_cardolan_bowman_name" text="[Cardolan] Minhiriath Bowman" />
+    <string id="aom_cardolan_dunadan_merc_name" text="[Cardolan] Dunadan Sellsword" />
+    <string id="aom_cardolan_dunadan_name" text="[Cardolan] Dunadan of Cardolan" />
+    <string id="aom_cardolan_kings_guard_name" text="[Cardolan] King's Guard of Caras Gorthad" />
+    <string id="aom_cardolan_knight_captain_name" text="[Cardolan] Knight-Captain of Cardolan" />
+    <string id="aom_cardolan_knight_name" text="[Cardolan] Knight of Cardolan" />
+    <string id="aom_cardolan_lancer_name" text="[Cardolan] Lancer of Cardolan" />
+    <string id="aom_cardolan_levy_name" text="[Cardolan] Levy" />
+    <string id="aom_cardolan_militia_archer_name" text="[Cardolan] Militia Archer" />
+    <string id="aom_cardolan_militia_spearman_name" text="[Cardolan] Militia Spearman" />
+    <string id="aom_cardolan_militia_veteran_archer_name" text="[Cardolan] Veteran Militia Archer" />
+    <string id="aom_cardolan_militia_veteran_spearman_name" text="[Cardolan] Veteran Militia Spearman" />
+    <string id="aom_cardolan_minhiriath_bowman_name" text="[Cardolan] Bowman of Minhiriath" />
+    <string id="aom_cardolan_rider_name" text="[Cardolan] Rider of Cardolan" />
+    <string id="aom_cardolan_river_spearman_name" text="[Cardolan] Cardolan Spearman" />
+    <string id="aom_cardolan_spearman_name" text="[Cardolan] Spearman" />
+    <string id="aom_cardolan_veteran_barrow_guard_name" text="[Cardolan] Veteran Barrow Guard" />
+    <string id="aom_cardolan_veteran_bowman_name" text="[Cardolan] Veteran Minhiriath Bowman" />
+    <string id="aom_cardolan_warden_name" text="[Cardolan] Warden of Tyrn Gorthad" />
+    <string id="aom_rhudaur_angle_ranger_name" text="[Rhudaur] Angle Ranger" />
+    <string id="aom_rhudaur_axeman_name" text="[Rhudaur] Rhudaur Axeman" />
+    <string id="aom_rhudaur_dunadan_merc_name" text="[Rhudaur] Angle Sellsword" />
+    <string id="aom_rhudaur_dunadan_name" text="[Rhudaur] Dunadan of the Angle" />
+    <string id="aom_rhudaur_fell_warden_name" text="[Rhudaur] Fell Warden" />
+    <string id="aom_rhudaur_guard_captain_name" text="[Rhudaur] Captain of Cameth Brin" />
+    <string id="aom_rhudaur_guard_name" text="[Rhudaur] Guard of Cameth Brin" />
+    <string id="aom_rhudaur_hill_rider_name" text="[Rhudaur] Hill Rider" />
+    <string id="aom_rhudaur_hill_spearman_name" text="[Rhudaur] Hill Spearman" />
+    <string id="aom_rhudaur_levy_name" text="[Rhudaur] Hillman Levy" />
+    <string id="aom_rhudaur_lord_of_the_angle_name" text="[Rhudaur] Lord of the Angle" />
+    <string id="aom_rhudaur_militia_archer_name" text="[Rhudaur] Militia Archer" />
+    <string id="aom_rhudaur_militia_spearman_name" text="[Rhudaur] Militia Spearman" />
+    <string id="aom_rhudaur_militia_veteran_archer_name" text="[Rhudaur] Veteran Militia Archer" />
+    <string id="aom_rhudaur_militia_veteran_spearman_name" text="[Rhudaur] Veteran Militia Spearman" />
+    <string id="aom_rhudaur_ranger_captain_name" text="[Rhudaur] Angle Ranger Captain" />
+    <string id="aom_rhudaur_ranger_name" text="[Rhudaur] Ranger of the Angle" />
+    <string id="aom_rhudaur_squire_name" text="[Rhudaur] Squire of the Angle" />
+    <string id="aom_rhudaur_veteran_axeman_name" text="[Rhudaur] Veteran Axeman" />
+    <string id="aom_rhudaur_veteran_guard_name" text="[Rhudaur] Veteran Guard of Cameth Brin" />
+    <string id="aom_rhudaur_veteran_ranger_name" text="[Rhudaur] Veteran Angle Ranger" />
   </strings>
 </base>

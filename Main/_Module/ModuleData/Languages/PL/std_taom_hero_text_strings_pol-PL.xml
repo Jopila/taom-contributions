@@ -467,5 +467,7 @@
     <string id="zulgora_description" text="Zulgora, tkaczka cieni, tworzy iluzje, zwodząc wrogów niczym podstępy Saurona z opowieści." />
     <string id="zulgoth_description" text="Zulgoth działa jako orkowy rytualista, składając ofiary mrocznym mocom, jak sugerują orkowe zwyczaje. Jego obrzędy przyzywają siłę dla przedsięwzięć klanu." />
     <string id="lord_AN1_1_description" text="Arvegil II, król Arthedainu, dziedzic Arveduiego i Isildura, który broni Fornostu przed Angmarem, mając z każdym rokiem coraz mniej mieczy." />
+    <string id="lord_CA1_1_description" text="Aranthir, King of Cardolan, heir of Earendur's second son, who keeps the barrow-kings' crown at Caras Gorthad." />
+    <string id="lord_RH1_1_description" text="Belegorn, King of Rhudaur, heir of Earendur's third son, lord of Cameth Brin and of the hill-men of the Angle." />
   </strings>
 </base>

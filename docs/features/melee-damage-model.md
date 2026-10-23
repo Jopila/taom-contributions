@@ -442,3 +442,14 @@ before anything automated keys on either.
   same pivot-distance algorithm, which this model agrees with
 
 ---
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/ranged-ladders.md](./ranged-ladders.md)
+- [docs/INDEX.md](../INDEX.md)
+
+<!-- backlinks-end -->

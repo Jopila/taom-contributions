@@ -1079,3 +1079,18 @@ multiplier above 0 for the defender side, or the block does nothing, and
 row resolves to `default`; one with a row but no block uses its own row and never stands.
 
 ---
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/combat-mechanics.md](./combat-mechanics.md)
+- [docs/features/dev-console.md](./dev-console.md)
+- [docs/features/fell-foes.md](./fell-foes.md)
+- [docs/features/race-abilities.md](./race-abilities.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reviews/rca-horse-stand-2026-10-19.md](../reviews/rca-horse-stand-2026-10-19.md)
+
+<!-- backlinks-end -->

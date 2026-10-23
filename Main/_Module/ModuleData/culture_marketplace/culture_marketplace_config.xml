@@ -70,6 +70,20 @@
     <Stock match="^numenorean_" weight="3" />
     <Stock from="gondor" kind="not_armour" weight="0.5" />
   </Culture>
+  <!-- Cardolan and Rhudaur (#978). Cardolan's troops wear Gondor's armour, so its markets sell Gondor's
+       goods, the crown kept out by Gondor's own blacklist. Rhudaur wears the Arnor kit, so it takes
+       Arthedain's rows: the Arnor kit and Numenorean blades first, Gondor's other goods as a supplement. -->
+  <Culture id="cardolan" armour_from="gondor">
+    <Stock from="gondor" />
+  </Culture>
+  <Culture id="rhudaur" armour_from="gondor">
+    <Blacklist>
+      <Item id="sk_ar_art_crown_king_a" />
+    </Blacklist>
+    <Stock match="^sk_ar_art_" weight="3" />
+    <Stock match="^numenorean_" weight="3" />
+    <Stock from="gondor" kind="not_armour" weight="0.5" />
+  </Culture>
   <!-- Gondor's own pool carries the Arnor pieces (tagged Culture.gondor); the crown stays out of it too. -->
   <Culture id="gondor">
     <Blacklist>

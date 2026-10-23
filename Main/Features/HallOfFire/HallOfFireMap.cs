@@ -32,7 +32,7 @@ public sealed class HallOfFireMap
     public static HallOfFireMap Default()
     {
         var cultures = new Dictionary<string, string>(StringComparer.Ordinal);
-        Add(cultures, "empire", "gondor", "arthedain", "rivendell", "lindon");
+        Add(cultures, "empire", "gondor", "arthedain", "cardolan", "rhudaur", "rivendell", "lindon");
         Add(cultures, "battania", "mirkwood", "lothlorien", "dolguldur", "empire");
         Add(cultures, "sturgia", "erebor", "gundabad", "mistymountainorcs", "goblin", "bluecraig");
         Add(cultures, "aserai", "umbar", "shaghana", "abanissa");

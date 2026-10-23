@@ -79,6 +79,19 @@ FORTS = [
     # Grishûk (tier 3, landless until now). Prosperity at the 950 Gundabad castle floor;
     # sturgia_castle_003 is the least used Gundabad castle scene.
     Fort("castle_G6", "Lithur", "clan_gundabad_6", "gundabad", "castle", "sturgia_castle_003", 950, "town_G3"),
+    # Cardolan and Rhudaur (#978; Mike placed the entities 2026-10-23 and approved the names). Weak
+    # realms like Arthedain: prosperity under Gondor's and no economy-floor row. The ruling clan holds
+    # the capital and the castle nearest it; each other clan one fief. Scenes: unused vanilla empire
+    # towns and Gondor's castles, as Arthedain's.
+    Fort("town_CA2", "Caras Gorthad", "clan_cardolan_1", "cardolan", "town", "empire_town_f", 2800, "castle_village_G6_3"),
+    Fort("town_CA1", "Minas Eithel", "clan_cardolan_2", "cardolan", "town", "empire_town_k", 2400, "town_CA2"),
+    Fort("town_CA3", "Tharbad", "clan_cardolan_3", "cardolan", "town", "empire_town_l", 2400, "town_CA1"),
+    Fort("castle_CA1", "Tyrn Gorthad", "clan_cardolan_1", "cardolan", "castle", "taom_gondor_castle_001_forceatmo", 800, "town_CA3"),
+    Fort("castle_CA2", "Sarn Ford", "clan_cardolan_4", "cardolan", "castle", "taom_gondor_castle_002_forceatmo", 800, "castle_CA1"),
+    Fort("town_RH1", "Cameth Brin", "clan_rhudaur_1", "rhudaur", "town", "empire_town_m", 2400, "castle_CA2"),
+    Fort("castle_RH1", "Egladil", "clan_rhudaur_1", "rhudaur", "castle", "taom_gondor_castle_003_forceatmo", 800, "town_RH1"),
+    Fort("castle_RH2", "Ettendale Hold", "clan_rhudaur_2", "rhudaur", "castle", "taom_gondor_castle_001_forceatmo", 800, "castle_RH1"),
+    Fort("castle_RH3", "Coldfells", "clan_rhudaur_3", "rhudaur", "castle", "taom_gondor_castle_002_forceatmo", 800, "castle_RH2"),
 ]
 
 # FORTS ids a release has shipped. The save-order check protects saves made BEFORE a batch, so once
@@ -166,6 +179,8 @@ STYLE = {
                          ("building_castle_farmlands", 1), ("building_castle_mason", 0),
                          ("building_castle_roads_and_paths", 1)]),
 }
+# Cardolan and Rhudaur take Arthedain's style: the same Gondor-built scenes and weak building levels.
+STYLE["cardolan"] = STYLE["rhudaur"] = STYLE["arthedain"]
 
 
 # ---------------------------------------------------------------- scene transforms

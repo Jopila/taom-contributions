@@ -558,5 +558,53 @@
         "focus_to_add": 0,
         "skill_level_to_add": 0,
         "attribute_level_to_add": 0
+    },
+    {
+        "career_string_id": "bowman_of_minhiriath",
+        "skills": [],
+        "attribute": "",
+        "focus_to_add": 0,
+        "skill_level_to_add": 0,
+        "attribute_level_to_add": 0
+    },
+    {
+        "career_string_id": "warden_of_tyrn_gorthad",
+        "skills": [],
+        "attribute": "",
+        "focus_to_add": 0,
+        "skill_level_to_add": 0,
+        "attribute_level_to_add": 0
+    },
+    {
+        "career_string_id": "knight_of_cardolan",
+        "skills": [],
+        "attribute": "",
+        "focus_to_add": 0,
+        "skill_level_to_add": 0,
+        "attribute_level_to_add": 0
+    },
+    {
+        "career_string_id": "ranger_of_the_angle",
+        "skills": [],
+        "attribute": "",
+        "focus_to_add": 0,
+        "skill_level_to_add": 0,
+        "attribute_level_to_add": 0
+    },
+    {
+        "career_string_id": "captain_of_cameth_brin",
+        "skills": [],
+        "attribute": "",
+        "focus_to_add": 0,
+        "skill_level_to_add": 0,
+        "attribute_level_to_add": 0
+    },
+    {
+        "career_string_id": "rider_of_the_fells",
+        "skills": [],
+        "attribute": "",
+        "focus_to_add": 0,
+        "skill_level_to_add": 0,
+        "attribute_level_to_add": 0
     }
 ]

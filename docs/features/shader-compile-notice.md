@@ -125,3 +125,15 @@ only; the translator run (`/localize`, paid) is owed.
 - **Status:** Closed with `triage-needs-ingame` (the in-game check above is owed)
 
 ---
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/shader-cache-keeper.md](./shader-cache-keeper.md)
+- [docs/modding/load-order-and-dependencies.md](../modding/load-order-and-dependencies.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

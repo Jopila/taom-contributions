@@ -43,7 +43,7 @@ public sealed class VoiceAccentMap
     public static VoiceAccentMap Default()
     {
         var cultures = new Dictionary<string, string>(StringComparer.Ordinal);
-        Add(cultures, Imperial, "gondor", "gondor_soldiers", "arthedain", "neutral_culture", "rivendell", "lothlorien",
+        Add(cultures, Imperial, "gondor", "gondor_soldiers", "arthedain", "cardolan", "rhudaur", "neutral_culture", "rivendell", "lothlorien",
             "mirkwood", "lindon", "erebor", "erebor_warriors", "umbar", "abanissa", "shaghana", "darshi");
         Add(cultures, "khuzait", "battania");
         Add(cultures, "sturgian", "nord", "vakken");

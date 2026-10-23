@@ -56937,4 +56937,1100 @@
         </Equipments>
     </NPCCharacter>
   <!-- TAOM-NEWFACTIONS:arthedain:END -->
+  <!-- TAOM-NEWFACTIONS:cardolan:BEGIN -->
+    <NPCCharacter id="lord_CA1_1" name="{=aom_lord_CA1_1_name}Aranthir" age="33" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_a" />
+            <EquipmentSet id="cardolan_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA1_2" name="{=aom_lord_CA1_2_name}Belethor" age="36" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_b" />
+            <EquipmentSet id="cardolan_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA1_3" name="{=aom_lord_CA1_3_name}Elendis" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_c" />
+            <EquipmentSet id="cardolan_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA1_4" name="{=aom_lord_CA1_4_name}Aerin" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_d" />
+            <EquipmentSet id="cardolan_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA2_1" name="{=aom_lord_CA2_1_name}Caladhor" age="33" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_a" />
+            <EquipmentSet id="cardolan_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA2_2" name="{=aom_lord_CA2_2_name}Anardil" age="36" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_b" />
+            <EquipmentSet id="cardolan_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA2_3" name="{=aom_lord_CA2_3_name}Daeriel" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_c" />
+            <EquipmentSet id="cardolan_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA2_4" name="{=aom_lord_CA2_4_name}Eilinel" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_d" />
+            <EquipmentSet id="cardolan_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA3_1" name="{=aom_lord_CA3_1_name}Baradhel" age="33" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_a" />
+            <EquipmentSet id="cardolan_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA3_2" name="{=aom_lord_CA3_2_name}Calenon" age="36" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_b" />
+            <EquipmentSet id="cardolan_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA3_3" name="{=aom_lord_CA3_3_name}Gwaeren" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_c" />
+            <EquipmentSet id="cardolan_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA3_4" name="{=aom_lord_CA3_4_name}Lindis" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_d" />
+            <EquipmentSet id="cardolan_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA4_1" name="{=aom_lord_CA4_1_name}Dorthar" age="33" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_a" />
+            <EquipmentSet id="cardolan_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA4_2" name="{=aom_lord_CA4_2_name}Hirluin" age="36" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_b" />
+            <EquipmentSet id="cardolan_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA4_3" name="{=aom_lord_CA4_3_name}Mirwen" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_c" />
+            <EquipmentSet id="cardolan_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_CA4_4" name="{=aom_lord_CA4_4_name}Saelind" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="cardolan_bat_template_medium_d" />
+            <EquipmentSet id="cardolan_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+  <!-- TAOM-NEWFACTIONS:cardolan:END -->
+  <!-- TAOM-NEWFACTIONS:rhudaur:BEGIN -->
+    <NPCCharacter id="lord_RH1_1" name="{=aom_lord_RH1_1_name}Belegorn" age="33" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_a" />
+            <EquipmentSet id="rhudaur_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH1_2" name="{=aom_lord_RH1_2_name}Cadorn" age="36" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_b" />
+            <EquipmentSet id="rhudaur_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH1_3" name="{=aom_lord_RH1_3_name}Gilwen" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_c" />
+            <EquipmentSet id="rhudaur_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH1_4" name="{=aom_lord_RH1_4_name}Branwen" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_d" />
+            <EquipmentSet id="rhudaur_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH2_1" name="{=aom_lord_RH2_1_name}Corran" age="33" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_a" />
+            <EquipmentSet id="rhudaur_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH2_2" name="{=aom_lord_RH2_2_name}Eredhir" age="36" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_b" />
+            <EquipmentSet id="rhudaur_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH2_3" name="{=aom_lord_RH2_3_name}Eirlys" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_c" />
+            <EquipmentSet id="rhudaur_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH2_4" name="{=aom_lord_RH2_4_name}Heledd" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_d" />
+            <EquipmentSet id="rhudaur_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH3_1" name="{=aom_lord_RH3_1_name}Gorlan" age="33" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_a" />
+            <EquipmentSet id="rhudaur_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH3_2" name="{=aom_lord_RH3_2_name}Harnoth" age="36" voice="curt" default_group="Infantry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_knight_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="230" />
+            <skill id="TwoHanded" value="180" />
+            <skill id="Polearm" value="220" />
+            <skill id="Bow" value="100" />
+            <skill id="Crossbow" value="70" />
+            <skill id="Throwing" value="120" />
+            <skill id="Riding" value="250" />
+            <skill id="Athletics" value="240" />
+            <skill id="Crafting" value="60" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="205" />
+            <skill id="Roguery" value="60" />
+            <skill id="Charm" value="160" />
+            <skill id="Leadership" value="186" />
+            <skill id="Trade" value="90" />
+            <skill id="Steward" value="138" />
+            <skill id="Medicine" value="90" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="0" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_b" />
+            <EquipmentSet id="rhudaur_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH3_3" name="{=aom_lord_RH3_3_name}Olwen" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_c" />
+            <EquipmentSet id="rhudaur_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_RH3_4" name="{=aom_lord_RH3_4_name}Seren" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_gondor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="40" />
+            <skill id="TwoHanded" value="20" />
+            <skill id="Polearm" value="30" />
+            <skill id="Bow" value="70" />
+            <skill id="Crossbow" value="40" />
+            <skill id="Throwing" value="40" />
+            <skill id="Riding" value="120" />
+            <skill id="Athletics" value="100" />
+            <skill id="Crafting" value="110" />
+            <skill id="Scouting" value="90" />
+            <skill id="Tactics" value="125" />
+            <skill id="Roguery" value="50" />
+            <skill id="Charm" value="180" />
+            <skill id="Leadership" value="146" />
+            <skill id="Trade" value="130" />
+            <skill id="Steward" value="178" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="100" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="1" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="0" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="0" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="rhudaur_bat_template_medium_d" />
+            <EquipmentSet id="rhudaur_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+  <!-- TAOM-NEWFACTIONS:rhudaur:END -->
 </NPCCharacters>

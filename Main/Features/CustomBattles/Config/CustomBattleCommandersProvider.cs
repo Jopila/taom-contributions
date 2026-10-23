@@ -30,7 +30,7 @@ public class CustomBattleCommandersProvider : ICustomBattleCommandersProvider
         "gondor", "mordor", "erebor", "rivendell", "lothlorien",
         "mirkwood", "isengard", "gundabad", "dolguldur", "umbar",
         "shaghana", "abanissa", "goblin", "mistymountainorcs",
-        "bluecraig", "lindon", "arthedain",
+        "bluecraig", "lindon", "arthedain", "cardolan", "rhudaur",
         "vlandia", "empire", "aserai", "khuzait", "sturgia", "battania"
     };
 

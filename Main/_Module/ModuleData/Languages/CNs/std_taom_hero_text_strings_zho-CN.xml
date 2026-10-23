@@ -467,5 +467,7 @@
     <string id="zulgora_description" text="祖尔戈拉是编影者，制造幻象以欺骗敌人，一如故事中索隆的诡诈。" />
     <string id="zulgoth_description" text="祖尔戈斯是部族的祭仪者，依照奥克习俗向黑暗力量献祭。他的仪式为部族的行动召来力量。" />
     <string id="lord_AN1_1_description" text="阿尔维吉尔二世，阿尔诺斯特之王，阿维杜伊与埃西铎的后裔。他据守佛诺斯特以抗安格玛，麾下的刀剑却年复一年地减少。" />
+    <string id="lord_CA1_1_description" text="Aranthir, King of Cardolan, heir of Earendur's second son, who keeps the barrow-kings' crown at Caras Gorthad." />
+    <string id="lord_RH1_1_description" text="Belegorn, King of Rhudaur, heir of Earendur's third son, lord of Cameth Brin and of the hill-men of the Angle." />
   </strings>
 </base>

@@ -467,5 +467,7 @@
     <string id="zulgora_description" text="Зулгора, ткачиха теней, творит иллюзии, обманывая врагов, как обманы Саурона в преданиях." />
     <string id="zulgoth_description" text="Зулгот выступает орком-ритуалистом, принося жертвы тёмным силам, как намекают орочьи обычаи. Его обряды призывают силу для деяний клана." />
     <string id="lord_AN1_1_description" text="Арвегил II, король Артедайна, наследник Арведуи и Исильдура, удерживающий Форност против Ангмара, с каждым годом всё меньшим числом мечей." />
+    <string id="lord_CA1_1_description" text="Aranthir, King of Cardolan, heir of Earendur's second son, who keeps the barrow-kings' crown at Caras Gorthad." />
+    <string id="lord_RH1_1_description" text="Belegorn, King of Rhudaur, heir of Earendur's third son, lord of Cameth Brin and of the hill-men of the Angle." />
   </strings>
 </base>

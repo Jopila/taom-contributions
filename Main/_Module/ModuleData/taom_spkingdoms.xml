@@ -1311,4 +1311,122 @@
         </policies>
     </Kingdom>
   <!-- TAOM-NEWFACTIONS:arthedain:END -->
+  <!-- TAOM-NEWFACTIONS:cardolan:BEGIN -->
+    <Kingdom
+        id="cardolan"
+        owner="Hero.lord_CA1_1"
+        initial_home_settlement="Settlement.town_CA2"
+        banner_key="11.154.154.1528.1528.764.764.1.0.0.11005.110.110.700.700.764.764.0.0.0"        primary_banner_color="0xFF885040"
+        secondary_banner_color="0xFFD8C8A0"
+        color="0xFF885040"
+        color2="0xFFD8C8A0"      
+        culture="Culture.cardolan"
+        settlement_banner_mesh="encounter_flag_a"
+        flag_mesh="info_screen_flags_b"
+        name="{=taom_cardolan_name}Kingdom of Cardolan"
+        short_name="{=taom_cardolan_short_name}Cardolan"
+        title="{=taom_cardolan_title}Kingdom of Cardolan"
+        ruler_title="{=taom_cardolan_ruler_title}King"
+        text="{=taom_cardolan_desc}The southern of the three realms into which Arnor was sundered. Its kings lie in the barrows of Tyrn Gorthad and its riders keep the plains between the Baranduin and the Greyflood, but its towns are few and its lords contend with Arthedain and Rhudaur for the crown of Arnor.">
+        <relationships>
+            <relationship
+                kingdom="Kingdom.gundabad"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.empire"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.isengard"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.rivendell"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.lindon"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.empire_w"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.arthedain"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.rhudaur"
+                value="0"
+                isAtWar="false" />
+        </relationships>
+        <policies>
+            <policy
+                id="policy_royal_privilege" />
+            <policy
+                id="policy_castle_charters" />
+        </policies>
+    </Kingdom>
+  <!-- TAOM-NEWFACTIONS:cardolan:END -->
+  <!-- TAOM-NEWFACTIONS:rhudaur:BEGIN -->
+    <Kingdom
+        id="rhudaur"
+        owner="Hero.lord_RH1_1"
+        initial_home_settlement="Settlement.town_RH1"
+        banner_key="11.99.99.1528.1528.764.764.1.0.0.11006.110.110.700.700.764.764.0.0.0"        primary_banner_color="0xFF603830"
+        secondary_banner_color="0xFFC8B8A8"
+        color="0xFF603830"
+        color2="0xFFC8B8A8"      
+        culture="Culture.rhudaur"
+        settlement_banner_mesh="encounter_flag_a"
+        flag_mesh="info_screen_flags_b"
+        name="{=taom_rhudaur_name}Kingdom of Rhudaur"
+        short_name="{=taom_rhudaur_short_name}Rhudaur"
+        title="{=taom_rhudaur_title}Kingdom of Rhudaur"
+        ruler_title="{=taom_rhudaur_ruler_title}King"
+        text="{=taom_rhudaur_desc}The eastern of the three realms into which Arnor was sundered, a hill kingdom between the Hoarwell and the Loudwater. Its Dunedain lords hold Cameth Brin and the Angle and rule a hard people of hill-men, with trolls in the fells and orcs on every pass.">
+        <relationships>
+            <relationship
+                kingdom="Kingdom.gundabad"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.empire"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.isengard"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.rivendell"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.lindon"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.empire_w"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.arthedain"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.cardolan"
+                value="0"
+                isAtWar="false" />
+        </relationships>
+        <policies>
+            <policy
+                id="policy_royal_privilege" />
+            <policy
+                id="policy_castle_charters" />
+        </policies>
+    </Kingdom>
+  <!-- TAOM-NEWFACTIONS:rhudaur:END -->
 </Kingdoms>

@@ -46,6 +46,26 @@
 	<string id="aom_black_sun_scout_name" text="{=aom_black_sun_scout_name}[Rhûn] Black Sun Scout" />
 	<string id="aom_black_sun_trainee_name" text="{=aom_black_sun_trainee_name}[Rhûn] Black Sun Trainee" />
 	<string id="aom_bluecraig_bolgs_ironfang_name" text="{=aom_bluecraig_bolgs_ironfang_name}[Goblin] Skarnak's Ironfang" />
+	<string id="aom_cardolan_barrow_guard_name" text="{=aom_cardolan_barrow_guard_name}[Cardolan] Barrow Guard" />
+	<string id="aom_cardolan_bowman_name" text="{=aom_cardolan_bowman_name}[Cardolan] Minhiriath Bowman" />
+	<string id="aom_cardolan_dunadan_merc_name" text="{=aom_cardolan_dunadan_merc_name}[Cardolan] Dunadan Sellsword" />
+	<string id="aom_cardolan_dunadan_name" text="{=aom_cardolan_dunadan_name}[Cardolan] Dunadan of Cardolan" />
+	<string id="aom_cardolan_kings_guard_name" text="{=aom_cardolan_kings_guard_name}[Cardolan] King's Guard of Caras Gorthad" />
+	<string id="aom_cardolan_knight_captain_name" text="{=aom_cardolan_knight_captain_name}[Cardolan] Knight-Captain of Cardolan" />
+	<string id="aom_cardolan_knight_name" text="{=aom_cardolan_knight_name}[Cardolan] Knight of Cardolan" />
+	<string id="aom_cardolan_lancer_name" text="{=aom_cardolan_lancer_name}[Cardolan] Lancer of Cardolan" />
+	<string id="aom_cardolan_levy_name" text="{=aom_cardolan_levy_name}[Cardolan] Levy" />
+	<string id="aom_cardolan_militia_archer_name" text="{=aom_cardolan_militia_archer_name}[Cardolan] Militia Archer" />
+	<string id="aom_cardolan_militia_spearman_name" text="{=aom_cardolan_militia_spearman_name}[Cardolan] Militia Spearman" />
+	<string id="aom_cardolan_militia_veteran_archer_name" text="{=aom_cardolan_militia_veteran_archer_name}[Cardolan] Veteran Militia Archer" />
+	<string id="aom_cardolan_militia_veteran_spearman_name" text="{=aom_cardolan_militia_veteran_spearman_name}[Cardolan] Veteran Militia Spearman" />
+	<string id="aom_cardolan_minhiriath_bowman_name" text="{=aom_cardolan_minhiriath_bowman_name}[Cardolan] Bowman of Minhiriath" />
+	<string id="aom_cardolan_rider_name" text="{=aom_cardolan_rider_name}[Cardolan] Rider of Cardolan" />
+	<string id="aom_cardolan_river_spearman_name" text="{=aom_cardolan_river_spearman_name}[Cardolan] Cardolan Spearman" />
+	<string id="aom_cardolan_spearman_name" text="{=aom_cardolan_spearman_name}[Cardolan] Spearman" />
+	<string id="aom_cardolan_veteran_barrow_guard_name" text="{=aom_cardolan_veteran_barrow_guard_name}[Cardolan] Veteran Barrow Guard" />
+	<string id="aom_cardolan_veteran_bowman_name" text="{=aom_cardolan_veteran_bowman_name}[Cardolan] Veteran Minhiriath Bowman" />
+	<string id="aom_cardolan_warden_name" text="{=aom_cardolan_warden_name}[Cardolan] Warden of Tyrn Gorthad" />
 	<string id="aom_cave_troll_name" text="{=aom_cave_troll_name}[AMordor] Armored Troll" />
 	<string id="aom_dale_black_arrow_marksman_name" text="{=aom_dale_black_arrow_marksman_name}[Dale] Dalian Barding" />
 	<string id="aom_dale_bowman_name" text="{=aom_dale_bowman_name}[Dale] Dalian Yeoman" />
@@ -750,6 +770,27 @@
 	<string id="aom_orthanc_chosen_name" text="{=aom_orthanc_chosen_name}[Isengard] Orthanc Chosen" />
 	<string id="aom_orthanc_guard_name" text="{=aom_orthanc_guard_name}[Isengard] Orthanc Guard" />
 	<string id="aom_orthanc_warden_name" text="{=aom_orthanc_warden_name}[Isengard] Orthanc Warden" />
+	<string id="aom_rhudaur_angle_ranger_name" text="{=aom_rhudaur_angle_ranger_name}[Rhudaur] Angle Ranger" />
+	<string id="aom_rhudaur_axeman_name" text="{=aom_rhudaur_axeman_name}[Rhudaur] Rhudaur Axeman" />
+	<string id="aom_rhudaur_dunadan_merc_name" text="{=aom_rhudaur_dunadan_merc_name}[Rhudaur] Angle Sellsword" />
+	<string id="aom_rhudaur_dunadan_name" text="{=aom_rhudaur_dunadan_name}[Rhudaur] Dunadan of the Angle" />
+	<string id="aom_rhudaur_fell_warden_name" text="{=aom_rhudaur_fell_warden_name}[Rhudaur] Fell Warden" />
+	<string id="aom_rhudaur_guard_captain_name" text="{=aom_rhudaur_guard_captain_name}[Rhudaur] Captain of Cameth Brin" />
+	<string id="aom_rhudaur_guard_name" text="{=aom_rhudaur_guard_name}[Rhudaur] Guard of Cameth Brin" />
+	<string id="aom_rhudaur_hill_rider_name" text="{=aom_rhudaur_hill_rider_name}[Rhudaur] Hill Rider" />
+	<string id="aom_rhudaur_hill_spearman_name" text="{=aom_rhudaur_hill_spearman_name}[Rhudaur] Hill Spearman" />
+	<string id="aom_rhudaur_levy_name" text="{=aom_rhudaur_levy_name}[Rhudaur] Hillman Levy" />
+	<string id="aom_rhudaur_lord_of_the_angle_name" text="{=aom_rhudaur_lord_of_the_angle_name}[Rhudaur] Lord of the Angle" />
+	<string id="aom_rhudaur_militia_archer_name" text="{=aom_rhudaur_militia_archer_name}[Rhudaur] Militia Archer" />
+	<string id="aom_rhudaur_militia_spearman_name" text="{=aom_rhudaur_militia_spearman_name}[Rhudaur] Militia Spearman" />
+	<string id="aom_rhudaur_militia_veteran_archer_name" text="{=aom_rhudaur_militia_veteran_archer_name}[Rhudaur] Veteran Militia Archer" />
+	<string id="aom_rhudaur_militia_veteran_spearman_name" text="{=aom_rhudaur_militia_veteran_spearman_name}[Rhudaur] Veteran Militia Spearman" />
+	<string id="aom_rhudaur_ranger_captain_name" text="{=aom_rhudaur_ranger_captain_name}[Rhudaur] Angle Ranger Captain" />
+	<string id="aom_rhudaur_ranger_name" text="{=aom_rhudaur_ranger_name}[Rhudaur] Ranger of the Angle" />
+	<string id="aom_rhudaur_squire_name" text="{=aom_rhudaur_squire_name}[Rhudaur] Squire of the Angle" />
+	<string id="aom_rhudaur_veteran_axeman_name" text="{=aom_rhudaur_veteran_axeman_name}[Rhudaur] Veteran Axeman" />
+	<string id="aom_rhudaur_veteran_guard_name" text="{=aom_rhudaur_veteran_guard_name}[Rhudaur] Veteran Guard of Cameth Brin" />
+	<string id="aom_rhudaur_veteran_ranger_name" text="{=aom_rhudaur_veteran_ranger_name}[Rhudaur] Veteran Angle Ranger" />
 	<string id="aom_rhun_mil_arch_name" text="{=aom_rhun_mil_arch_name}[Rhûn] Militia Archer" />
 	<string id="aom_rhun_mil_spear_name" text="{=aom_rhun_mil_spear_name}[Rhûn] Militia Spearman" />
 	<string id="aom_rhun_mil_varch_name" text="{=aom_rhun_mil_varch_name}[Rhûn] Militia Veteran Archer" />

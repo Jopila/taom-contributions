@@ -1042,5 +1042,33 @@
     <string id="aom_lord_S14_3_name" text="Brynjar" />
     <string id="aom_lord_S14_4_name" text="Valgard" />
     <string id="aom_lord_S14_5_name" text="Yrsa" />
+    <string id="aom_lord_CA1_1_name" text="Aranthir" />
+    <string id="aom_lord_CA1_2_name" text="Belethor" />
+    <string id="aom_lord_CA1_3_name" text="Elendis" />
+    <string id="aom_lord_CA1_4_name" text="Aerin" />
+    <string id="aom_lord_CA2_1_name" text="Caladhor" />
+    <string id="aom_lord_CA2_2_name" text="Anardil" />
+    <string id="aom_lord_CA2_3_name" text="Daeriel" />
+    <string id="aom_lord_CA2_4_name" text="Eilinel" />
+    <string id="aom_lord_CA3_1_name" text="Baradhel" />
+    <string id="aom_lord_CA3_2_name" text="Calenon" />
+    <string id="aom_lord_CA3_3_name" text="Gwaeren" />
+    <string id="aom_lord_CA3_4_name" text="Lindis" />
+    <string id="aom_lord_CA4_1_name" text="Dorthar" />
+    <string id="aom_lord_CA4_2_name" text="Hirluin" />
+    <string id="aom_lord_CA4_3_name" text="Mirwen" />
+    <string id="aom_lord_CA4_4_name" text="Saelind" />
+    <string id="aom_lord_RH1_1_name" text="Belegorn" />
+    <string id="aom_lord_RH1_2_name" text="Cadorn" />
+    <string id="aom_lord_RH1_3_name" text="Gilwen" />
+    <string id="aom_lord_RH1_4_name" text="Branwen" />
+    <string id="aom_lord_RH2_1_name" text="Corran" />
+    <string id="aom_lord_RH2_2_name" text="Eredhir" />
+    <string id="aom_lord_RH2_3_name" text="Eirlys" />
+    <string id="aom_lord_RH2_4_name" text="Heledd" />
+    <string id="aom_lord_RH3_1_name" text="Gorlan" />
+    <string id="aom_lord_RH3_2_name" text="Harnoth" />
+    <string id="aom_lord_RH3_3_name" text="Olwen" />
+    <string id="aom_lord_RH3_4_name" text="Seren" />
   </strings>
 </base>

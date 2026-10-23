@@ -308,7 +308,7 @@ public class ArmourAcquisitionShippedDataTests
             .Where(e => ((string?)e.Attribute("id") ?? string.Empty).StartsWith("lotr_armourer_commission_", StringComparison.Ordinal))
             .ToList();
 
-        Assert.AreEqual(19, commissions.Count);
+        Assert.AreEqual(21, commissions.Count);
         foreach (var issue in commissions)
         {
             var id = (string?)issue.Attribute("id");

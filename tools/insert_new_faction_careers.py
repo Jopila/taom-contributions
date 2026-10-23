@@ -74,6 +74,11 @@ SOURCES_FOR = {
     # straight across (ranger scout, infantry captain, heavy horse).
     "arthedain": [("ranger_of_ithilien", "roi"), ("captain_of_osgiliath", "cop"),
                   ("knight_of_belfalas", "kob")],
+    # Cardolan and Rhudaur (#978) take Gondor's three the same way.
+    "cardolan": [("ranger_of_ithilien", "roi"), ("captain_of_osgiliath", "cop"),
+                 ("knight_of_belfalas", "kob")],
+    "rhudaur": [("ranger_of_ithilien", "roi"), ("captain_of_osgiliath", "cop"),
+                ("knight_of_belfalas", "kob")],
 }
 
 TARGETS = {
@@ -116,12 +121,22 @@ TARGETS = {
         "captain_of_osgiliath": ("warden_of_fornost", "wof", "Warden of Fornost"),
         "knight_of_belfalas": ("knight_of_arthedain", "koa", "Knight of Arthedain"),
     },
+    "cardolan": {
+        "ranger_of_ithilien": ("bowman_of_minhiriath", "bom", "Bowman of Minhiriath"),
+        "captain_of_osgiliath": ("warden_of_tyrn_gorthad", "wotg", "Warden of Tyrn Gorthad"),
+        "knight_of_belfalas": ("knight_of_cardolan", "koc", "Knight of Cardolan"),
+    },
+    "rhudaur": {
+        "ranger_of_ithilien": ("ranger_of_the_angle", "rota", "Ranger of the Angle"),
+        "captain_of_osgiliath": ("captain_of_cameth_brin", "cocb", "Captain of Cameth Brin"),
+        "knight_of_belfalas": ("rider_of_the_fells", "rotf", "Rider of the Fells"),
+    },
 }
 
 # Extra source-culture rows to remove from a cloned <Career>'s eligibility. Gondor's careers list
 # both its culture (gondor) and its kingdom id (empire_w); swapping only the first would leave an
 # Arthedain career selectable by Gondor's players too.
-ELIGIBILITY_DROP = {"arthedain": ["empire_w"]}
+ELIGIBILITY_DROP = {"arthedain": ["empire_w"], "cardolan": ["empire_w"], "rhudaur": ["empire_w"]}
 
 # The source culture whose <Culture id="..."> row is swapped for the target's. Gundabad for the two
 # orc kingdoms; the promoted cultures take theirs from the culture they were carved out of.
@@ -130,6 +145,7 @@ ELIGIBILITY_SRC = {
     "bluecraig": "goblin", "lindon": "rivendell",
     "shaghana": "aserai", "abanissa": "aserai",
     "arthedain": "gondor",
+    "cardolan": "gondor", "rhudaur": "gondor",
 }
 
 # Player-facing wording. Longest phrase FIRST so a substring never double-substitutes — the same
@@ -249,6 +265,96 @@ TEXT_REMAP = {
         ("Imrahil", "Arvegil"),
         ("Gondorian", "Arthedain"),  # before the bare name, or "Gondorian" becomes "Arthedainian"
         ("Gondor", "Arthedain"),
+    ],
+    # Cardolan (#978): Gondor's places move to the plains and rivers of the southern kingdom.
+    "cardolan": [
+        ("shadows of Ithilien, ambushing enemies of Gondor", "river country of Minhiriath, ambushing raiders from Dunland"),
+        ("commands Gondor's frontline defense at the ruins of Osgiliath, forging order from chaos in brutal urban combat",
+         "keeps the barrows of Tyrn Gorthad and the walls of Caras Gorthad, forging order from chaos when the downs burn"),
+        ("the coastal fiefdom of Belfalas", "the southern kingdom"),
+        ("The Captain holds the line", "The Warden holds the line"),
+        ("Captain of the White Company", "Captain of the Bowmen"),
+        ("Hunter of the Ithilien Road", "Hunter of the Greenway"),
+        ("Watcher of Henneth Annûn", "Watcher of the Marshes"),
+        ("Scout of North Ithilien", "Scout of the South Downs"),
+        ("Bowman of Faramir", "Bowman of the Greyflood"),
+        ("Arrow of the Forbidden Pool", "Arrow of the Gwathló"),
+        ("Shadow of Emyn Arnen", "Shadow of Eryn Vorn"),
+        ("Ithilien Scout", "Scout of Minhiriath"),
+        ("Ranger of Ithilien", "Bowman of Minhiriath"),
+        ("Ohtar of the Crossing", "Ohtar of Sarn Ford"),
+        ("Warden of Osgiliath", "Warden of the Barrows"),
+        ("Captain of Osgiliath", "Warden of Tyrn Gorthad"),
+        ("Warden of the East Bank", "Warden of the Downs"),
+        ("Keeper of the Anduin Crossing", "Keeper of the Greyflood Crossing"),
+        ("Vanguard of the Rammas", "Vanguard of the South Downs"),
+        ("Host of Faramir", "Host of Aranthir"),
+        ("Lord of the Dome of Stars", "Keeper of the Royal Barrows"),
+        ("Squire of Dol Amroth", "Squire of Caras Gorthad"),
+        ("Knight of the Silver Swan", "Knight of the Barrow-Kings"),
+        ("Swan-Knight", "Barrow-Knight"),
+        ("Knight of Belfalas", "Knight of Cardolan"),
+        ("Lancer of Dol Amroth", "Lancer of Minhiriath"),
+        ("Warden of the Bay", "Warden of Tharbad"),
+        ("Rider of the Silver Swan", "Rider of the Plains"),
+        ("Shieldwall of Imrahil", "Shieldwall of Aranthir"),
+        ("Knight of the Swan-Prow", "Knight of the Greenway"),
+        ("Charge of Dol Amroth", "Charge of Caras Gorthad"),
+        ("charge of Dol Amroth", "charge of Caras Gorthad"),
+        ("host of Belfalas", "host of Cardolan"),
+        ("Dol Amroth", "Caras Gorthad"),
+        ("Belfalas", "Cardolan"),
+        ("Osgiliath", "Tharbad"),
+        ("Ithilien", "Minhiriath"),
+        ("Faramir", "Aranthir"),
+        ("Imrahil", "Aranthir"),
+        ("Gondorian", "Cardolan"),
+        ("Gondor", "Cardolan"),
+    ],
+    # Rhudaur (#978): Gondor's places move to the hills of the Angle.
+    "rhudaur": [
+        ("shadows of Ithilien, ambushing enemies of Gondor", "fells of the Angle, ambushing orcs and trolls from the mountains"),
+        ("commands Gondor's frontline defense at the ruins of Osgiliath, forging order from chaos in brutal urban combat",
+         "holds the tower of Cameth Brin against the mountains, forging order from chaos when the fells burn"),
+        ("the coastal fiefdom of Belfalas", "the hill kingdom"),
+        ("The Captain holds the line", "The Captain holds the line"),
+        ("Captain of the White Company", "Captain of the Angle Rangers"),
+        ("Hunter of the Ithilien Road", "Hunter of the East Road"),
+        ("Watcher of Henneth Annûn", "Watcher of the Last Bridge"),
+        ("Scout of North Ithilien", "Scout of the Ettenmoors"),
+        ("Bowman of Faramir", "Bowman of the Hoarwell"),
+        ("Arrow of the Forbidden Pool", "Arrow of the Loudwater"),
+        ("Shadow of Emyn Arnen", "Shadow of the Trollshaws"),
+        ("Ithilien Scout", "Scout of the Angle"),
+        ("Ranger of Ithilien", "Ranger of the Angle"),
+        ("Ohtar of the Crossing", "Ohtar of the Last Bridge"),
+        ("Warden of Osgiliath", "Warden of the Fells"),
+        ("Captain of Osgiliath", "Captain of Cameth Brin"),
+        ("Warden of the East Bank", "Warden of the Ettendale"),
+        ("Keeper of the Anduin Crossing", "Keeper of the Hoarwell Crossing"),
+        ("Vanguard of the Rammas", "Vanguard of the Coldfells"),
+        ("Host of Faramir", "Host of Belegorn"),
+        ("Lord of the Dome of Stars", "Lord of the Tower of Cameth Brin"),
+        ("Squire of Dol Amroth", "Squire of the Angle"),
+        ("Knight of the Silver Swan", "Knight of the Fells"),
+        ("Swan-Knight", "Fell-Knight"),
+        ("Knight of Belfalas", "Rider of the Fells"),
+        ("Lancer of Dol Amroth", "Lancer of the Angle"),
+        ("Warden of the Bay", "Warden of the Loudwater"),
+        ("Rider of the Silver Swan", "Rider of the High Fells"),
+        ("Shieldwall of Imrahil", "Shieldwall of Belegorn"),
+        ("Knight of the Swan-Prow", "Knight of the Ettenmoors"),
+        ("Charge of Dol Amroth", "Charge of Cameth Brin"),
+        ("charge of Dol Amroth", "charge of Cameth Brin"),
+        ("host of Belfalas", "host of Rhudaur"),
+        ("Dol Amroth", "Cameth Brin"),
+        ("Belfalas", "Rhudaur"),
+        ("Osgiliath", "the Last Bridge"),
+        ("Ithilien", "the Angle"),
+        ("Faramir", "Belegorn"),
+        ("Imrahil", "Belegorn"),
+        ("Gondorian", "Rhudaur"),
+        ("Gondor", "Rhudaur"),
     ],
 }
 

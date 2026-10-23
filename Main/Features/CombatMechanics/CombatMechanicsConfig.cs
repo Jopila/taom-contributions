@@ -86,6 +86,8 @@ public class ChargeDamageConfig
         ["khuzait"] = 1.4f,
         ["gondor"] = 1.3f,
         ["arthedain"] = 1.3f,
+        ["cardolan"] = 1.3f,
+        ["rhudaur"] = 1.2f,
         ["sturgia"] = 1.2f,
         ["mordor"] = 1.2f,
         ["isengard"] = 1.2f,

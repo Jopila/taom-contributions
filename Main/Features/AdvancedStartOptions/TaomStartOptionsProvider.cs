@@ -32,7 +32,7 @@ public static class TaomStartOptionsProvider
     {
         "erebor", "rivendell", "mirkwood", "lothlorien", "isengard", "gundabad", "umbar",
         "dolguldur", "shaghana", "abanissa", "goblin", "mistymountainorcs", "lindon", "bluecraig",
-        "arthedain",
+        "arthedain", "cardolan", "rhudaur",
     };
 
     // Every ASO list option that lets the player pick a faction.

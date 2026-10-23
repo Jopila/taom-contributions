@@ -3259,6 +3259,88 @@ public class VolunteerRecruitmentServiceTests
         Assert.IsTrue(_sut.HasCulturePool("arthedain"));
     }
 
+    // --- Cardolan: levy-heavy, the Dunadan of Cardolan as the one elite root (#978) ---
+    // pool: cardolan_levy(6)[0..5] + cardolan_dunadan(2)[6..7] = total 8
+
+    [TestMethod]
+    public void GetVolunteerTroopId_CardolanCulture_Roll0_ReturnsLevy()
+    {
+        _random.Next(8).Returns(0);
+        var context = new VolunteerContext(null, null, null, "cardolan");
+        Assert.AreEqual("cardolan_levy", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void GetVolunteerTroopId_CardolanCulture_Roll5_ReturnsLevy()
+    {
+        _random.Next(8).Returns(5);
+        var context = new VolunteerContext(null, null, null, "cardolan");
+        Assert.AreEqual("cardolan_levy", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void GetVolunteerTroopId_CardolanCulture_Roll6_ReturnsDunadan()
+    {
+        _random.Next(8).Returns(6);
+        var context = new VolunteerContext(null, null, null, "cardolan");
+        Assert.AreEqual("cardolan_dunadan", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void GetVolunteerTroopId_CardolanCulture_Roll7_ReturnsDunadan()
+    {
+        _random.Next(8).Returns(7);
+        var context = new VolunteerContext(null, null, null, "cardolan");
+        Assert.AreEqual("cardolan_dunadan", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void HasCulturePool_Cardolan_True()
+    {
+        Assert.IsTrue(_sut.HasCulturePool("cardolan"));
+    }
+
+    // --- Rhudaur: levy-heavy, the Dunadan of the Angle as the one elite root (#978) ---
+    // pool: rhudaur_levy(6)[0..5] + rhudaur_dunadan(2)[6..7] = total 8
+
+    [TestMethod]
+    public void GetVolunteerTroopId_RhudaurCulture_Roll0_ReturnsLevy()
+    {
+        _random.Next(8).Returns(0);
+        var context = new VolunteerContext(null, null, null, "rhudaur");
+        Assert.AreEqual("rhudaur_levy", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void GetVolunteerTroopId_RhudaurCulture_Roll5_ReturnsLevy()
+    {
+        _random.Next(8).Returns(5);
+        var context = new VolunteerContext(null, null, null, "rhudaur");
+        Assert.AreEqual("rhudaur_levy", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void GetVolunteerTroopId_RhudaurCulture_Roll6_ReturnsDunadan()
+    {
+        _random.Next(8).Returns(6);
+        var context = new VolunteerContext(null, null, null, "rhudaur");
+        Assert.AreEqual("rhudaur_dunadan", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void GetVolunteerTroopId_RhudaurCulture_Roll7_ReturnsDunadan()
+    {
+        _random.Next(8).Returns(7);
+        var context = new VolunteerContext(null, null, null, "rhudaur");
+        Assert.AreEqual("rhudaur_dunadan", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void HasCulturePool_Rhudaur_True()
+    {
+        Assert.IsTrue(_sut.HasCulturePool("rhudaur"));
+    }
+
     [TestMethod]
     public void HasCulturePool_MirkwoodAndUmbar_NowTrue()
     {

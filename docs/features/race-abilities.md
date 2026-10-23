@@ -512,3 +512,16 @@ the chronological log of record.
   `triage-needs-ingame` and `triage-blocked-decision` for the remaining in-game steps and decisions listed above
 
 ---
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/combat-mechanics.md](./combat-mechanics.md)
+- [docs/features/dev-console.md](./dev-console.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

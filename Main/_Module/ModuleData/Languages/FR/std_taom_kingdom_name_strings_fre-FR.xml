@@ -71,5 +71,15 @@
     <string id="taom_arthedain_ruler_title" text="Roi" />
     <string id="taom_arthedain_short_name" text="Arthedain" />
     <string id="taom_arthedain_title" text="Royaume du Nord d'Arthedain" />
+    <string id="taom_cardolan_desc" text="The southern of the three realms into which Arnor was sundered. Its kings lie in the barrows of Tyrn Gorthad and its riders keep the plains between the Baranduin and the Greyflood, but its towns are few and its lords contend with Arthedain and Rhudaur for the crown of Arnor." />
+    <string id="taom_cardolan_name" text="Kingdom of Cardolan" />
+    <string id="taom_cardolan_ruler_title" text="King" />
+    <string id="taom_cardolan_short_name" text="Cardolan" />
+    <string id="taom_cardolan_title" text="Kingdom of Cardolan" />
+    <string id="taom_rhudaur_desc" text="The eastern of the three realms into which Arnor was sundered, a hill kingdom between the Hoarwell and the Loudwater. Its Dunedain lords hold Cameth Brin and the Angle and rule a hard people of hill-men, with trolls in the fells and orcs on every pass." />
+    <string id="taom_rhudaur_name" text="Kingdom of Rhudaur" />
+    <string id="taom_rhudaur_ruler_title" text="King" />
+    <string id="taom_rhudaur_short_name" text="Rhudaur" />
+    <string id="taom_rhudaur_title" text="Kingdom of Rhudaur" />
   </strings>
 </base>

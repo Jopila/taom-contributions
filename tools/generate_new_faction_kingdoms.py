@@ -110,9 +110,68 @@ KINGDOMS = {
         # <Equipments>, laid over that slot in each of his sets.
         leader_head="sk_ar_art_crown_king_a",
     ),
+    # Cardolan and Rhudaur (#978; Mike, 2026-10-23): the other two of the three kingdoms Earendur's
+    # sons made of Arnor, each on its own culture (promote_borrowed_cultures.py and its own troop
+    # generator), weak in numbers like Arthedain. Neutral realms (Mike, 2026-10-23): Natural toward
+    # every realm at the start, so the War of the Ring does not draw them in on either side.
+    "cardolan": dict(
+        region="CA", culture="cardolan", race=None, capital="town_CA2", tmpl="rivendell", lords="human",
+        equip="cardolan", side="neutral", color="0xFF885040", color2="0xFFD8C8A0",
+        name="Kingdom of Cardolan", short="Cardolan", title="Kingdom of Cardolan", ruler="King",
+        desc="The southern of the three realms into which Arnor was sundered. Its kings lie in the barrows of Tyrn Gorthad and its riders keep the plains between the Baranduin and the Greyflood, but its towns are few and its lords contend with Arthedain and Rhudaur for the crown of Arnor.",
+        lord_skill=("taom_gondor_knight_skills", "taom_gondor_knight_skills", "taom_gondor_young_lady_skills"),
+        lords_per_clan=4,  # 4 clans x 4 = 16 lords (2 male + 2 female, married within the clan)
+        clans=[("clan_cardolan_1", 4, "town_CA2", "House of Tyrn Gorthad"),
+               ("clan_cardolan_2", 3, "town_CA1", "House of Minas Eithel"),
+               ("clan_cardolan_3", 2, "town_CA3", "House of Tharbad"),
+               ("clan_cardolan_4", 2, "castle_CA2", "Wardens of Sarn Ford")],
+        leader_name="Aranthir",
+        male_names=["Belethor", "Caladhor", "Anardil", "Baradhel", "Calenon", "Dorthar", "Hirluin",
+                    "Vorondil", "Turgil", "Faelon"],
+        female_names=["Elendis", "Aerin", "Daeriel", "Eilinel", "Gwaeren", "Lindis", "Mirwen", "Saelind",
+                      "Nimloth", "Andreth"],
+        party_template="PartyTemplate.kingdom_hero_party_cardolan_template",
+        # Arnor icons (group 110) in silver (palette 110) on Cardolan brown (palette 154), so no clan
+        # flies Arthedain's blue banner.
+        banner="11.154.154.1528.1528.764.764.1.0.0.{icon}.110.110.700.700.764.764.0.0.0",
+        kingdom_icon=11005, clan_icons=[11005, 11006, 11000, 11001],
+        clan_colors=[("FF885040", "FFD8C8A0"), ("FF7A4A3A", "FFD8C8A0"), ("FF94603F", "FFE0D4B8"),
+                     ("FF6E4632", "FFCACCCB")],
+        relationships={"gundabad": (0, False), "empire": (0, False), "isengard": (0, False),
+                       "rivendell": (0, False), "lindon": (0, False), "empire_w": (0, False),
+                       "arthedain": (0, False), "rhudaur": (0, False)},
+        # A face template, not copied keys: each lord draws his own face from Gondor's range at
+        # campaign start (Lord Face Variety rule A), where a copied key is only nudged (rule B,
+        # HeroFaceVarietyDataTests' ceiling).
+        face_template="fighter_gondor",
+    ),
+    "rhudaur": dict(
+        region="RH", culture="rhudaur", race=None, capital="town_RH1", tmpl="rivendell", lords="human",
+        equip="rhudaur", side="neutral", color="0xFF603830", color2="0xFFC8B8A8",
+        name="Kingdom of Rhudaur", short="Rhudaur", title="Kingdom of Rhudaur", ruler="King",
+        desc="The eastern of the three realms into which Arnor was sundered, a hill kingdom between the Hoarwell and the Loudwater. Its Dunedain lords hold Cameth Brin and the Angle and rule a hard people of hill-men, with trolls in the fells and orcs on every pass.",
+        lord_skill=("taom_gondor_knight_skills", "taom_gondor_knight_skills", "taom_gondor_young_lady_skills"),
+        lords_per_clan=4,  # 3 clans x 4 = 12 lords (2 male + 2 female, married within the clan)
+        clans=[("clan_rhudaur_1", 4, "town_RH1", "House of Cameth Brin"),
+               ("clan_rhudaur_2", 3, "castle_RH2", "House of Ettendale"),
+               ("clan_rhudaur_3", 2, "castle_RH3", "Wardens of the Coldfells")],
+        leader_name="Belegorn",
+        male_names=["Cadorn", "Corran", "Eredhir", "Gorlan", "Harnoth", "Lorgan", "Talgar", "Vardil"],
+        female_names=["Gilwen", "Branwen", "Eirlys", "Heledd", "Olwen", "Seren", "Tegwen", "Rhiain"],
+        party_template="PartyTemplate.kingdom_hero_party_rhudaur_template",
+        # Arnor icons (group 110) in silver (palette 110) on a dark hill brown (palette 99).
+        banner="11.99.99.1528.1528.764.764.1.0.0.{icon}.110.110.700.700.764.764.0.0.0",
+        kingdom_icon=11006, clan_icons=[11002, 11003, 11004],
+        clan_colors=[("FF603830", "FFC8B8A8"), ("FF4E3A30", "FFC8B8A8"), ("FF6A4A3A", "FFCACCCB")],
+        relationships={"gundabad": (0, False), "empire": (0, False), "isengard": (0, False),
+                       "rivendell": (0, False), "lindon": (0, False), "empire_w": (0, False),
+                       "arthedain": (0, False), "cardolan": (0, False)},
+        # Its lords are Dunedain: Gondor's face range, drawn per lord as Cardolan's.
+        face_template="fighter_gondor",
+    ),
 }
 # The realms a regeneration reproduces (main() --only). See the note there.
-REGENERATABLE = ("arthedain",)
+REGENERATABLE = ("arthedain", "cardolan", "rhudaur")
 # Leader (clan-1 lord-1) descriptions, period-correct for TA 3018 (War of the Ring).
 LEADER_BLURB = {
     "goblin": "the Great Goblin of Goblin Town, master of the warrens of the High Pass.",
@@ -120,6 +179,8 @@ LEADER_BLURB = {
     "bluecraig": "the Great Goblin of Blue Craig, whose swarms infest the Blue Mountains of the far west, hard by the Grey Havens of Lindon.",
     "lindon": "the Shipwright, Lord of the Grey Havens and eldest of the Eldar in Middle-earth, who kept the Ring Narya until he gave it to Mithrandir.",
     "arthedain": "King of Arthedain, heir of Arvedui and of Isildur, who holds Fornost against Angmar with fewer swords each year.",
+    "cardolan": "King of Cardolan, heir of Earendur's second son, who keeps the barrow-kings' crown at Caras Gorthad.",
+    "rhudaur": "King of Rhudaur, heir of Earendur's third son, lord of Cameth Brin and of the hill-men of the Angle.",
 }
 # lords per clan: ruling clan (first) 6, vassals 4
 LORDS_RULING, LORDS_VASSAL = 6, 4
@@ -347,6 +408,12 @@ def main():
                     face = next(next_face[female], None)
                     if face is None:
                         raise RuntimeError(f"{kid}: only {len(faces[female])} {k['faces_from']} faces for its lords")
+                    L, n = re.subn(r"<face>.*?</face>", lambda _m, f=face: f, L, count=1, flags=re.DOTALL)
+                    if n != 1:
+                        raise RuntimeError(f"{lord_id}: template lord has no <face>")
+                if k.get("face_template"):
+                    face = (f'<face>\n            <face_key_template value="BodyProperty.{k["face_template"]}" />'
+                            '\n          </face>')
                     L, n = re.subn(r"<face>.*?</face>", lambda _m, f=face: f, L, count=1, flags=re.DOTALL)
                     if n != 1:
                         raise RuntimeError(f"{lord_id}: template lord has no <face>")

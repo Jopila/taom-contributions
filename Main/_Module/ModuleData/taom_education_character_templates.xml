@@ -3055,4 +3055,358 @@
 	</NPCCharacter>
 
   <!-- TAOM-NEWCULTURE:arthedain:END -->
+  <!-- TAOM-NEWCULTURE:cardolan:BEGIN -->
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_0_cardolan"
+		name="{=!}stage_2_page_0_branch_0_cardolan"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.cardolan"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Body"
+					id="Item.empire_horseman_armor" />
+				<equipment
+					slot="Leg"
+					id="Item.strapped_leather_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_1_cardolan"
+		name="{=!}stage_2_page_0_branch_1_cardolan"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.cardolan"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Head"
+					id="Item.empire_crown_v2" />
+				<equipment
+					slot="Body"
+					id="Item.empire_dress" />
+				<equipment
+					slot="Leg"
+					id="Item.empire_horseman_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_2_cardolan"
+		name="{=!}stage_2_page_0_branch_2_cardolan"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.cardolan"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Body"
+					id="Item.short_padded_robe" />
+				<equipment
+					slot="Leg"
+					id="Item.empire_horseman_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_3_cardolan"
+		name="{=!}stage_2_page_0_branch_3_cardolan"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.cardolan"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Body"
+					id="Item.padded_leather_overcoat" />
+				<equipment
+					slot="Leg"
+					id="Item.strapped_leather_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_4_cardolan"
+		name="{=!}stage_2_page_0_branch_4_cardolan"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.cardolan"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Body"
+					id="Item.empire_plate_vest_armor" />
+				<equipment
+					slot="Leg"
+					id="Item.empire_horseman_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_5_cardolan"
+		name="{=!}stage_2_page_0_branch_5_cardolan"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.cardolan"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Cape"
+					id="Item.scarf" />
+				<equipment
+					slot="Body"
+					id="Item.empire_horseman_armor" />
+				<equipment
+					slot="Leg"
+					id="Item.strapped_leather_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+
+  <!-- TAOM-NEWCULTURE:cardolan:END -->
+  <!-- TAOM-NEWCULTURE:rhudaur:BEGIN -->
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_0_rhudaur"
+		name="{=!}stage_2_page_0_branch_0_rhudaur"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.rhudaur"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Body"
+					id="Item.empire_horseman_armor" />
+				<equipment
+					slot="Leg"
+					id="Item.strapped_leather_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_1_rhudaur"
+		name="{=!}stage_2_page_0_branch_1_rhudaur"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.rhudaur"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Head"
+					id="Item.empire_crown_v2" />
+				<equipment
+					slot="Body"
+					id="Item.empire_dress" />
+				<equipment
+					slot="Leg"
+					id="Item.empire_horseman_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_2_rhudaur"
+		name="{=!}stage_2_page_0_branch_2_rhudaur"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.rhudaur"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Body"
+					id="Item.short_padded_robe" />
+				<equipment
+					slot="Leg"
+					id="Item.empire_horseman_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_3_rhudaur"
+		name="{=!}stage_2_page_0_branch_3_rhudaur"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.rhudaur"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Body"
+					id="Item.padded_leather_overcoat" />
+				<equipment
+					slot="Leg"
+					id="Item.strapped_leather_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_4_rhudaur"
+		name="{=!}stage_2_page_0_branch_4_rhudaur"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.rhudaur"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Body"
+					id="Item.empire_plate_vest_armor" />
+				<equipment
+					slot="Leg"
+					id="Item.empire_horseman_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="child_education_templates_stage_2_page_0_branch_5_rhudaur"
+		name="{=!}stage_2_page_0_branch_5_rhudaur"
+		age="45"
+		default_group="Infantry"
+		is_hero="false"
+		occupation="Lord"
+		culture="Culture.rhudaur"
+		skill_template="SkillSet.infantry_heavyinfantry_level1_template_skills"
+		is_template="true">
+		<face>
+			<face_key_template
+				value="BodyProperty.fighter_gondor" />
+		</face>
+		<skills />
+		<Equipments>
+			<EquipmentRoster>
+				<equipment
+					slot="Cape"
+					id="Item.scarf" />
+				<equipment
+					slot="Body"
+					id="Item.empire_horseman_armor" />
+				<equipment
+					slot="Leg"
+					id="Item.strapped_leather_boots" />
+			</EquipmentRoster>
+			<EquipmentRoster
+				civilian="true" />
+		</Equipments>
+	</NPCCharacter>
+
+  <!-- TAOM-NEWCULTURE:rhudaur:END -->
 </NPCCharacters>

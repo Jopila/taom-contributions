@@ -66,6 +66,8 @@ public sealed class BannerBearerConfig
         { "gondor", "standard_of_duty_t1" },
         { "gondor_soldiers", "standard_of_duty_t1" },
         { "arthedain", "standard_of_duty_t1" },         // Arnor, cloned from Gondor
+        { "cardolan", "standard_of_duty_t1" },          // Arnor's other two realms (#978)
+        { "rhudaur", "standard_of_duty_t1" },
         { "vlandia", "banner_of_the_horseman_t1" },      // Rohirrim — charge standard
         { "sturgia", "close_shields_banner_t1" },        // Barding (Dale)
 

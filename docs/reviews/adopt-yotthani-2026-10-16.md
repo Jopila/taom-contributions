@@ -151,3 +151,17 @@ has restated the facts it could check, credited to you in each doc. What we woul
 Thank you again.
 
 ---
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/external-repo-adoption.md](../ai-includes/external-repo-adoption.md)
+- [docs/features/troop-weight-system.md](../features/troop-weight-system.md)
+- [docs/features/upstream-review.md](../features/upstream-review.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reviews/rca-upstream-review-i3-2026-10-16.md](./rca-upstream-review-i3-2026-10-16.md)
+
+<!-- backlinks-end -->

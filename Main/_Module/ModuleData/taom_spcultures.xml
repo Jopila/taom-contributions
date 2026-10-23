@@ -5734,8 +5734,8 @@
     marriage_bride_equipment_roster="EquipmentRoster.marriage_female_emp_cutscene_template"
     board_game_type="Tablut"
     default_character_creation_body_property="BodyProperty.default_character_creation_body_property_empire"
-    start_point_position_x="460.8415"
-    start_point_position_y="1242.603">
+    start_point_position_x="464.975"
+    start_point_position_y="1162.654">
     <caravan_party_templates>
       <caravan_party_template id="PartyTemplate.caravan_template_arthedain" />
     </caravan_party_templates>
@@ -5953,4 +5953,600 @@
   </Culture>
 
   <!-- TAOM-NEWCULTURE:arthedain:END -->
+  <!-- TAOM-NEWCULTURE:cardolan:BEGIN -->
+  <Culture
+    id="cardolan"
+    name="{=aom_cardolan_name}Cardolan"
+    is_main_culture="true"
+    color="0xFF885040"
+    color2="0xFFD8C8A0"
+    elite_basic_troop="NPCCharacter.cardolan_dunadan"
+    executioner="NPCCharacter.cardolan_dunadan"
+    basic_troop="NPCCharacter.cardolan_levy"
+    melee_militia_troop="NPCCharacter.cardolan_militia_spearman"
+    ranged_militia_troop="NPCCharacter.cardolan_militia_archer"
+    melee_elite_militia_troop="NPCCharacter.cardolan_militia_veteran_spearman"
+    ranged_elite_militia_troop="NPCCharacter.cardolan_militia_veteran_archer"
+    can_have_settlement="true"
+    villager_party_template="PartyTemplate.villager_cardolan_template"
+    default_party_template="PartyTemplate.kingdom_hero_party_cardolan_template"
+    settlement_patrol_template_level_1="PartyTemplate.patrol_party_cardolan_template_level_1"
+    settlement_patrol_template_level_2="PartyTemplate.patrol_party_cardolan_template_level_2"
+    settlement_patrol_template_level_3="PartyTemplate.patrol_party_cardolan_template_level_3"
+    militia_party_template="PartyTemplate.militia_cardolan_template"
+    rebels_party_template="PartyTemplate.rebels_cardolan_template"
+    vassal_reward_party_template="PartyTemplate.vassal_reward_troops_cardolan"
+    prosperity_bonus="1"
+    encounter_background_mesh="encounter_empire"
+    faction_banner_key="11.12.12.4345.4345.764.764.1.0.0.462.13.13.512.512.764.764.1.0.0"
+    text="{=aom_cardolan_desc}The Dúnedain of Cardolan hold the south of old Arnor, the plains and river country between the Baranduin and the Greyflood. Their kings lie in the barrows of Tyrn Gorthad, their barges still come up to Tharbad, and their riders are the best of the three northern kingdoms. Their towns are few and their lords quarrel with Arthedain and Rhudaur over the old crown, while the wild lands grow bolder every year."
+    tournament_master="NPCCharacter.tournament_master_cardolan"
+    villager="NPCCharacter.villager_cardolan"
+    caravan_master="NPCCharacter.caravan_master_cardolan"
+    caravan_guard="NPCCharacter.caravan_guard_cardolan"
+    veteran_caravan_guard="NPCCharacter.veteran_caravan_guard_cardolan"
+    prison_guard="NPCCharacter.prison_guard_cardolan"
+    guard="NPCCharacter.guard_cardolan"
+    blacksmith="NPCCharacter.blacksmith_cardolan"
+    weaponsmith="NPCCharacter.weaponsmith_cardolan"
+    townswoman="NPCCharacter.townswoman_cardolan"
+    townswoman_infant="NPCCharacter.townswoman_infant_cardolan"
+    townswoman_child="NPCCharacter.townswoman_child_cardolan"
+    townswoman_teenager="NPCCharacter.townswoman_teenager_cardolan"
+    townsman="NPCCharacter.townsman_cardolan"
+    townsman_infant="NPCCharacter.townsman_infant_cardolan"
+    townsman_child="NPCCharacter.townsman_child_cardolan"
+    village_woman="NPCCharacter.village_woman_cardolan"
+    villager_male_child="NPCCharacter.villager_child_cardolan"
+    villager_male_teenager="NPCCharacter.villager_teenager_cardolan"
+    villager_female_child="NPCCharacter.village_woman_child_cardolan"
+    villager_female_teenager="NPCCharacter.village_woman_teenager_cardolan"
+    townsman_teenager="NPCCharacter.townsman_teenager_cardolan"
+    ransom_broker="NPCCharacter.ransom_broker_cardolan"
+    gangleader_bodyguard="NPCCharacter.gangleader_bodyguard_cardolan"
+    merchant_notary="NPCCharacter.spc_notable_cardolan_0"
+    artisan_notary="NPCCharacter.spc_notable_cardolan_8"
+    preacher_notary="NPCCharacter.spc_notable_cardolan_5"
+    rural_notable_notary="NPCCharacter.spc_notable_cardolan_21"
+    shop_worker="NPCCharacter.shop_worker_cardolan"
+    tavernkeeper="NPCCharacter.tavernkeeper_cardolan"
+    taverngamehost="NPCCharacter.taverngamehost_cardolan"
+    musician="NPCCharacter.musician_cardolan"
+    tavern_wench="NPCCharacter.tavern_wench_cardolan"
+    armorer="NPCCharacter.armorer_cardolan"
+    horseMerchant="NPCCharacter.horseMerchant_cardolan"
+    barber="NPCCharacter.barber_cardolan"
+    merchant="NPCCharacter.merchant_cardolan"
+    beggar="NPCCharacter.beggar_cardolan"
+    female_beggar="NPCCharacter.female_beggar_cardolan"
+    female_dancer="NPCCharacter.female_dancer_cardolan"
+    gear_practice_dummy="NPCCharacter.gear_practice_dummy_cardolan"
+    weapon_practice_stage_1="NPCCharacter.weapon_practice_stage_1_cardolan"
+    weapon_practice_stage_2="NPCCharacter.weapon_practice_stage_2_cardolan"
+    weapon_practice_stage_3="NPCCharacter.weapon_practice_stage_3_cardolan"
+    gear_dummy="NPCCharacter.gear_dummy_cardolan"
+    default_battle_equipment_roster="EquipmentRoster.cardolan_bat_template_medium_a"
+    default_civilian_equipment_roster="EquipmentRoster.cardolan_civ_template_default_a"
+    default_stealth_equipment_roster="EquipmentRoster.default_stealth_equipment_roster"
+    duel_preset_equipment_roster="EquipmentRoster.emp_duel_preset_template"
+    marriage_bride_equipment_roster="EquipmentRoster.marriage_female_emp_cutscene_template"
+    board_game_type="Tablut"
+    default_character_creation_body_property="BodyProperty.default_character_creation_body_property_empire"
+    start_point_position_x="469.367"
+    start_point_position_y="956.422">
+    <caravan_party_templates>
+      <caravan_party_template id="PartyTemplate.caravan_template_cardolan" />
+    </caravan_party_templates>
+    <elite_caravan_party_templates>
+      <caravan_party_template id="PartyTemplate.elite_caravan_template_cardolan" />
+    </elite_caravan_party_templates>
+    <available_ship_hulls></available_ship_hulls>
+    <vassal_reward_items>
+      <item id="Item.wm_gondor_sword_a01" />
+    </vassal_reward_items>
+    <banner_bearer_replacement_weapons>
+      <item id="Item.wm_gondor_sword_a01" />
+      <item id="Item.wm_gondor_sword_a02" />
+      <item id="Item.wm_gondor_sword_a03" />
+    </banner_bearer_replacement_weapons>
+    <default_policies>
+      <policy id="policy_senate" />
+    </default_policies>
+    <male_names>
+      <name name="{=aom_cardolan_male_name_1}Anardil" />
+      <name name="{=aom_cardolan_male_name_2}Arthaer" />
+      <name name="{=aom_cardolan_male_name_3}Baradhel" />
+      <name name="{=aom_cardolan_male_name_4}Belethor" />
+      <name name="{=aom_cardolan_male_name_5}Caladhor" />
+      <name name="{=aom_cardolan_male_name_6}Calenon" />
+      <name name="{=aom_cardolan_male_name_7}Celebros" />
+      <name name="{=aom_cardolan_male_name_8}Dagnir" />
+      <name name="{=aom_cardolan_male_name_9}Dorthar" />
+      <name name="{=aom_cardolan_male_name_10}Erchon" />
+      <name name="{=aom_cardolan_male_name_11}Faelon" />
+      <name name="{=aom_cardolan_male_name_12}Gaerhil" />
+      <name name="{=aom_cardolan_male_name_13}Hallon" />
+      <name name="{=aom_cardolan_male_name_14}Hirluin" />
+      <name name="{=aom_cardolan_male_name_15}Iorlas" />
+      <name name="{=aom_cardolan_male_name_16}Lothon" />
+      <name name="{=aom_cardolan_male_name_17}Mallos" />
+      <name name="{=aom_cardolan_male_name_18}Morlad" />
+      <name name="{=aom_cardolan_male_name_19}Nardur" />
+      <name name="{=aom_cardolan_male_name_20}Orodhel" />
+      <name name="{=aom_cardolan_male_name_21}Pelendur" />
+      <name name="{=aom_cardolan_male_name_22}Ruithel" />
+      <name name="{=aom_cardolan_male_name_23}Sarandil" />
+      <name name="{=aom_cardolan_male_name_24}Tarandor" />
+      <name name="{=aom_cardolan_male_name_25}Thalion" />
+      <name name="{=aom_cardolan_male_name_26}Turgil" />
+      <name name="{=aom_cardolan_male_name_27}Vorondil" />
+      <name name="{=aom_cardolan_male_name_28}Bregor" />
+      <name name="{=aom_cardolan_male_name_29}Celedor" />
+      <name name="{=aom_cardolan_male_name_30}Dírion" />
+      <name name="{=aom_cardolan_male_name_31}Golasgil" />
+      <name name="{=aom_cardolan_male_name_32}Hadrion" />
+      <name name="{=aom_cardolan_male_name_33}Ingold" />
+      <name name="{=aom_cardolan_male_name_34}Mardacil" />
+      <name name="{=aom_cardolan_male_name_35}Nimbor" />
+      <name name="{=aom_cardolan_male_name_36}Ohtar" />
+      <name name="{=aom_cardolan_male_name_37}Rondor" />
+      <name name="{=aom_cardolan_male_name_38}Taurion" />
+      <name name="{=aom_cardolan_male_name_39}Ulbor" />
+      <name name="{=aom_cardolan_male_name_40}Halmir" />
+    </male_names>
+    <female_names>
+      <name name="{=aom_cardolan_female_name_1}Elendis" />
+      <name name="{=aom_cardolan_female_name_2}Aerin" />
+      <name name="{=aom_cardolan_female_name_3}Beriel" />
+      <name name="{=aom_cardolan_female_name_4}Calimë" />
+      <name name="{=aom_cardolan_female_name_5}Daeriel" />
+      <name name="{=aom_cardolan_female_name_6}Eilinel" />
+      <name name="{=aom_cardolan_female_name_7}Faeleth" />
+      <name name="{=aom_cardolan_female_name_8}Gwaeren" />
+      <name name="{=aom_cardolan_female_name_9}Haleth" />
+      <name name="{=aom_cardolan_female_name_10}Ivren" />
+      <name name="{=aom_cardolan_female_name_11}Lindis" />
+      <name name="{=aom_cardolan_female_name_12}Mírwen" />
+      <name name="{=aom_cardolan_female_name_13}Morleth" />
+      <name name="{=aom_cardolan_female_name_14}Nellas" />
+      <name name="{=aom_cardolan_female_name_15}Nimloth" />
+      <name name="{=aom_cardolan_female_name_16}Orwen" />
+      <name name="{=aom_cardolan_female_name_17}Rían" />
+      <name name="{=aom_cardolan_female_name_18}Saelind" />
+      <name name="{=aom_cardolan_female_name_19}Tirnel" />
+      <name name="{=aom_cardolan_female_name_20}Vanwë" />
+      <name name="{=aom_cardolan_female_name_21}Andreth" />
+      <name name="{=aom_cardolan_female_name_22}Emeldir" />
+      <name name="{=aom_cardolan_female_name_23}Lalaith" />
+      <name name="{=aom_cardolan_female_name_24}Silmariën" />
+    </female_names>
+    <clan_names>
+      <name name="{=aom_cardolan_clan_1}House of Tyrn Gorthad" />
+      <name name="{=aom_cardolan_clan_2}House of Tharbad" />
+      <name name="{=aom_cardolan_clan_3}House of the Greyflood" />
+      <name name="{=aom_cardolan_clan_4}House of Minhiriath" />
+      <name name="{=aom_cardolan_clan_5}House of the South Downs" />
+      <name name="{=aom_cardolan_clan_6}House of Sarn Ford" />
+      <name name="{=aom_cardolan_clan_7}House of Eryn Vorn" />
+      <name name="{=aom_cardolan_clan_8}House of the Barrows" />
+      <name name="{=aom_cardolan_clan_9}House of Minas Eithel" />
+      <name name="{=aom_cardolan_clan_10}House of the Greenway" />
+      <name name="{=aom_cardolan_clan_11}House of Swanfleet" />
+      <name name="{=aom_cardolan_clan_12}House of Andrath" />
+    </clan_names>
+        <cultural_feats>
+            <feat id="taom_gondor_garrison_wage" />
+            <feat id="taom_gondor_hearth_growth" />
+            <feat id="taom_gondor_loyalty" />
+            <feat id="taom_gondor_morale" />
+            <feat id="taom_gondor_plain_speed" />
+        </cultural_feats>
+    <possible_clan_banner_icon_ids>
+      <icon id="100" />
+      <icon id="101" />
+      <icon id="102" />
+      <icon id="103" />
+      <icon id="104" />
+      <icon id="105" />
+      <icon id="106" />
+      <icon id="107" />
+      <icon id="108" />
+      <icon id="109" />
+      <icon id="110" />
+      <icon id="119" />
+      <icon id="147" />
+      <icon id="148" />
+      <icon id="152" />
+      <icon id="200" />
+      <icon id="201" />
+      <icon id="202" />
+      <icon id="203" />
+      <icon id="204" />
+      <icon id="205" />
+      <icon id="206" />
+      <icon id="207" />
+      <icon id="208" />
+      <icon id="209" />
+      <icon id="210" />
+      <icon id="211" />
+      <icon id="212" />
+      <icon id="213" />
+      <icon id="214" />
+      <icon id="215" />
+      <icon id="216" />
+      <icon id="217" />
+      <icon id="218" />
+      <icon id="219" />
+      <icon id="220" />
+      <icon id="221" />
+      <icon id="222" />
+      <icon id="223" />
+      <icon id="400" />
+    </possible_clan_banner_icon_ids>
+    <notable_templates>
+      <template name="NPCCharacter.spc_wanderer_cardolan_0" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_1" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_2" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_3" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_4" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_5" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_6" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_7" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_8" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_9" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_10" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_11" />
+      <template name="NPCCharacter.spc_wanderer_cardolan_12" />
+      <template name="NPCCharacter.spc_notable_cardolan_0" />
+      <template name="NPCCharacter.spc_notable_cardolan_0b" />
+      <template name="NPCCharacter.spc_notable_cardolan_1" />
+      <template name="NPCCharacter.spc_notable_cardolan_1b" />
+      <template name="NPCCharacter.spc_notable_cardolan_2" />
+      <template name="NPCCharacter.spc_notable_cardolan_2b" />
+      <template name="NPCCharacter.spc_notable_cardolan_3" />
+      <template name="NPCCharacter.spc_notable_cardolan_3b" />
+      <template name="NPCCharacter.spc_notable_cardolan_4" />
+      <template name="NPCCharacter.spc_notable_cardolan_4b" />
+      <template name="NPCCharacter.spc_notable_cardolan_5" />
+      <template name="NPCCharacter.spc_notable_cardolan_6" />
+      <template name="NPCCharacter.spc_notable_cardolan_7" />
+      <template name="NPCCharacter.spc_notable_cardolan_8" />
+      <template name="NPCCharacter.spc_notable_cardolan_9" />
+      <template name="NPCCharacter.spc_notable_cardolan_gl1" />
+      <template name="NPCCharacter.spc_notable_cardolan_10" />
+      <template name="NPCCharacter.spc_notable_cardolan_11" />
+      <template name="NPCCharacter.spc_notable_cardolan_gl4" />
+      <template name="NPCCharacter.spc_notable_cardolan_12" />
+      <template name="NPCCharacter.spc_notable_cardolan_13" />
+      <template name="NPCCharacter.spc_notable_cardolan_21" />
+      <template name="NPCCharacter.spc_notable_cardolan_22" />
+      <template name="NPCCharacter.spc_cardolan_headman_1" />
+      <template name="NPCCharacter.spc_cardolan_headman_2" />
+      <template name="NPCCharacter.spc_cardolan_headman_3" />
+    </notable_templates>
+    <lord_templates>
+      <template name="NPCCharacter.spc_cardolan_lord_1" />
+      <template name="NPCCharacter.spc_cardolan_lord_2" />
+    </lord_templates>
+    <rebellion_hero_templates>
+      <template name="NPCCharacter.spc_cardolan_lord_1" />
+      <template name="NPCCharacter.spc_cardolan_lord_2" />
+    </rebellion_hero_templates>
+    <tournament_team_templates_one_participant>
+      <template name="NPCCharacter.tournament_template_empire_one_participant_set_v1" />
+    </tournament_team_templates_one_participant>
+    <tournament_team_templates_two_participant>
+      <template name="NPCCharacter.tournament_template_empire_two_participant_set_v1" />
+      <template name="NPCCharacter.tournament_template_empire_two_participant_set_v2" />
+      <template name="NPCCharacter.tournament_template_empire_two_participant_set_v3" />
+    </tournament_team_templates_two_participant>
+    <tournament_team_templates_four_participant>
+      <template name="NPCCharacter.tournament_template_empire_four_participant_set_v1" />
+      <template name="NPCCharacter.tournament_template_empire_four_participant_set_v2" />
+      <template name="NPCCharacter.tournament_template_empire_four_participant_set_v3" />
+    </tournament_team_templates_four_participant>
+    <basic_mercenary_troops>
+      <template name="NPCCharacter.cardolan_dunadan_merc" />
+    </basic_mercenary_troops>
+  </Culture>
+
+  <!-- TAOM-NEWCULTURE:cardolan:END -->
+  <!-- TAOM-NEWCULTURE:rhudaur:BEGIN -->
+  <Culture
+    id="rhudaur"
+    name="{=aom_rhudaur_name}Rhudaur"
+    is_main_culture="true"
+    color="0xFF603830"
+    color2="0xFFC8B8A8"
+    elite_basic_troop="NPCCharacter.rhudaur_dunadan"
+    executioner="NPCCharacter.rhudaur_dunadan"
+    basic_troop="NPCCharacter.rhudaur_levy"
+    melee_militia_troop="NPCCharacter.rhudaur_militia_spearman"
+    ranged_militia_troop="NPCCharacter.rhudaur_militia_archer"
+    melee_elite_militia_troop="NPCCharacter.rhudaur_militia_veteran_spearman"
+    ranged_elite_militia_troop="NPCCharacter.rhudaur_militia_veteran_archer"
+    can_have_settlement="true"
+    villager_party_template="PartyTemplate.villager_rhudaur_template"
+    default_party_template="PartyTemplate.kingdom_hero_party_rhudaur_template"
+    settlement_patrol_template_level_1="PartyTemplate.patrol_party_rhudaur_template_level_1"
+    settlement_patrol_template_level_2="PartyTemplate.patrol_party_rhudaur_template_level_2"
+    settlement_patrol_template_level_3="PartyTemplate.patrol_party_rhudaur_template_level_3"
+    militia_party_template="PartyTemplate.militia_rhudaur_template"
+    rebels_party_template="PartyTemplate.rebels_rhudaur_template"
+    vassal_reward_party_template="PartyTemplate.vassal_reward_troops_rhudaur"
+    prosperity_bonus="1"
+    encounter_background_mesh="encounter_empire"
+    faction_banner_key="11.12.12.4345.4345.764.764.1.0.0.462.13.13.512.512.764.764.1.0.0"
+    text="{=aom_rhudaur_desc}Rhudaur is the hill kingdom of old Arnor, between the Hoarwell and the Loudwater. Its Dúnedain lords hold the Angle and the tower of Cameth Brin and rule a people of hill-men who never loved the West. The line of its first king still endures, but its holds are cold, its fells are full of trolls, and the orcs of the mountains watch every pass."
+    tournament_master="NPCCharacter.tournament_master_rhudaur"
+    villager="NPCCharacter.villager_rhudaur"
+    caravan_master="NPCCharacter.caravan_master_rhudaur"
+    caravan_guard="NPCCharacter.caravan_guard_rhudaur"
+    veteran_caravan_guard="NPCCharacter.veteran_caravan_guard_rhudaur"
+    prison_guard="NPCCharacter.prison_guard_rhudaur"
+    guard="NPCCharacter.guard_rhudaur"
+    blacksmith="NPCCharacter.blacksmith_rhudaur"
+    weaponsmith="NPCCharacter.weaponsmith_rhudaur"
+    townswoman="NPCCharacter.townswoman_rhudaur"
+    townswoman_infant="NPCCharacter.townswoman_infant_rhudaur"
+    townswoman_child="NPCCharacter.townswoman_child_rhudaur"
+    townswoman_teenager="NPCCharacter.townswoman_teenager_rhudaur"
+    townsman="NPCCharacter.townsman_rhudaur"
+    townsman_infant="NPCCharacter.townsman_infant_rhudaur"
+    townsman_child="NPCCharacter.townsman_child_rhudaur"
+    village_woman="NPCCharacter.village_woman_rhudaur"
+    villager_male_child="NPCCharacter.villager_child_rhudaur"
+    villager_male_teenager="NPCCharacter.villager_teenager_rhudaur"
+    villager_female_child="NPCCharacter.village_woman_child_rhudaur"
+    villager_female_teenager="NPCCharacter.village_woman_teenager_rhudaur"
+    townsman_teenager="NPCCharacter.townsman_teenager_rhudaur"
+    ransom_broker="NPCCharacter.ransom_broker_rhudaur"
+    gangleader_bodyguard="NPCCharacter.gangleader_bodyguard_rhudaur"
+    merchant_notary="NPCCharacter.spc_notable_rhudaur_0"
+    artisan_notary="NPCCharacter.spc_notable_rhudaur_8"
+    preacher_notary="NPCCharacter.spc_notable_rhudaur_5"
+    rural_notable_notary="NPCCharacter.spc_notable_rhudaur_21"
+    shop_worker="NPCCharacter.shop_worker_rhudaur"
+    tavernkeeper="NPCCharacter.tavernkeeper_rhudaur"
+    taverngamehost="NPCCharacter.taverngamehost_rhudaur"
+    musician="NPCCharacter.musician_rhudaur"
+    tavern_wench="NPCCharacter.tavern_wench_rhudaur"
+    armorer="NPCCharacter.armorer_rhudaur"
+    horseMerchant="NPCCharacter.horseMerchant_rhudaur"
+    barber="NPCCharacter.barber_rhudaur"
+    merchant="NPCCharacter.merchant_rhudaur"
+    beggar="NPCCharacter.beggar_rhudaur"
+    female_beggar="NPCCharacter.female_beggar_rhudaur"
+    female_dancer="NPCCharacter.female_dancer_rhudaur"
+    gear_practice_dummy="NPCCharacter.gear_practice_dummy_rhudaur"
+    weapon_practice_stage_1="NPCCharacter.weapon_practice_stage_1_rhudaur"
+    weapon_practice_stage_2="NPCCharacter.weapon_practice_stage_2_rhudaur"
+    weapon_practice_stage_3="NPCCharacter.weapon_practice_stage_3_rhudaur"
+    gear_dummy="NPCCharacter.gear_dummy_rhudaur"
+    default_battle_equipment_roster="EquipmentRoster.rhudaur_bat_template_medium_a"
+    default_civilian_equipment_roster="EquipmentRoster.rhudaur_civ_template_default_a"
+    default_stealth_equipment_roster="EquipmentRoster.default_stealth_equipment_roster"
+    duel_preset_equipment_roster="EquipmentRoster.emp_duel_preset_template"
+    marriage_bride_equipment_roster="EquipmentRoster.marriage_female_emp_cutscene_template"
+    board_game_type="Tablut"
+    default_character_creation_body_property="BodyProperty.default_character_creation_body_property_empire"
+    start_point_position_x="596.587"
+    start_point_position_y="1105.077">
+    <caravan_party_templates>
+      <caravan_party_template id="PartyTemplate.caravan_template_rhudaur" />
+    </caravan_party_templates>
+    <elite_caravan_party_templates>
+      <caravan_party_template id="PartyTemplate.elite_caravan_template_rhudaur" />
+    </elite_caravan_party_templates>
+    <available_ship_hulls></available_ship_hulls>
+    <vassal_reward_items>
+      <item id="Item.wm_gondor_sword_a01" />
+    </vassal_reward_items>
+    <banner_bearer_replacement_weapons>
+      <item id="Item.wm_gondor_sword_a01" />
+      <item id="Item.wm_gondor_sword_a02" />
+      <item id="Item.wm_gondor_sword_a03" />
+    </banner_bearer_replacement_weapons>
+    <default_policies>
+      <policy id="policy_senate" />
+    </default_policies>
+    <male_names>
+      <name name="{=aom_rhudaur_male_name_1}Belegorn" />
+      <name name="{=aom_rhudaur_male_name_2}Amrodir" />
+      <name name="{=aom_rhudaur_male_name_3}Brannoc" />
+      <name name="{=aom_rhudaur_male_name_4}Cadorn" />
+      <name name="{=aom_rhudaur_male_name_5}Corran" />
+      <name name="{=aom_rhudaur_male_name_6}Dergil" />
+      <name name="{=aom_rhudaur_male_name_7}Dunhal" />
+      <name name="{=aom_rhudaur_male_name_8}Eredhir" />
+      <name name="{=aom_rhudaur_male_name_9}Fengar" />
+      <name name="{=aom_rhudaur_male_name_10}Galdric" />
+      <name name="{=aom_rhudaur_male_name_11}Gorlan" />
+      <name name="{=aom_rhudaur_male_name_12}Haldric" />
+      <name name="{=aom_rhudaur_male_name_13}Harnoth" />
+      <name name="{=aom_rhudaur_male_name_14}Ithrandor" />
+      <name name="{=aom_rhudaur_male_name_15}Kelmar" />
+      <name name="{=aom_rhudaur_male_name_16}Lorgan" />
+      <name name="{=aom_rhudaur_male_name_17}Malbor" />
+      <name name="{=aom_rhudaur_male_name_18}Morcai" />
+      <name name="{=aom_rhudaur_male_name_19}Nethril" />
+      <name name="{=aom_rhudaur_male_name_20}Orodrim" />
+      <name name="{=aom_rhudaur_male_name_21}Pellam" />
+      <name name="{=aom_rhudaur_male_name_22}Radhruin" />
+      <name name="{=aom_rhudaur_male_name_23}Rostan" />
+      <name name="{=aom_rhudaur_male_name_24}Sarn" />
+      <name name="{=aom_rhudaur_male_name_25}Talgar" />
+      <name name="{=aom_rhudaur_male_name_26}Thorondur" />
+      <name name="{=aom_rhudaur_male_name_27}Ulfar" />
+      <name name="{=aom_rhudaur_male_name_28}Vardil" />
+      <name name="{=aom_rhudaur_male_name_29}Wulfric" />
+      <name name="{=aom_rhudaur_male_name_30}Arnach" />
+      <name name="{=aom_rhudaur_male_name_31}Bryn" />
+      <name name="{=aom_rhudaur_male_name_32}Cuthred" />
+      <name name="{=aom_rhudaur_male_name_33}Draugor" />
+      <name name="{=aom_rhudaur_male_name_34}Egalric" />
+      <name name="{=aom_rhudaur_male_name_35}Fornor" />
+      <name name="{=aom_rhudaur_male_name_36}Garth" />
+      <name name="{=aom_rhudaur_male_name_37}Hunthor" />
+      <name name="{=aom_rhudaur_male_name_38}Ivorn" />
+      <name name="{=aom_rhudaur_male_name_39}Mardoc" />
+      <name name="{=aom_rhudaur_male_name_40}Torgil" />
+    </male_names>
+    <female_names>
+      <name name="{=aom_rhudaur_female_name_1}Gilwen" />
+      <name name="{=aom_rhudaur_female_name_2}Aelin" />
+      <name name="{=aom_rhudaur_female_name_3}Branwen" />
+      <name name="{=aom_rhudaur_female_name_4}Cerys" />
+      <name name="{=aom_rhudaur_female_name_5}Dilwen" />
+      <name name="{=aom_rhudaur_female_name_6}Eirlys" />
+      <name name="{=aom_rhudaur_female_name_7}Ffion" />
+      <name name="{=aom_rhudaur_female_name_8}Glenwen" />
+      <name name="{=aom_rhudaur_female_name_9}Heledd" />
+      <name name="{=aom_rhudaur_female_name_10}Ilar" />
+      <name name="{=aom_rhudaur_female_name_11}Lowri" />
+      <name name="{=aom_rhudaur_female_name_12}Maelis" />
+      <name name="{=aom_rhudaur_female_name_13}Morfudd" />
+      <name name="{=aom_rhudaur_female_name_14}Nesta" />
+      <name name="{=aom_rhudaur_female_name_15}Olwen" />
+      <name name="{=aom_rhudaur_female_name_16}Rhosyn" />
+      <name name="{=aom_rhudaur_female_name_17}Seren" />
+      <name name="{=aom_rhudaur_female_name_18}Tegwen" />
+      <name name="{=aom_rhudaur_female_name_19}Andraste" />
+      <name name="{=aom_rhudaur_female_name_20}Brynja" />
+      <name name="{=aom_rhudaur_female_name_21}Eluned" />
+      <name name="{=aom_rhudaur_female_name_22}Gwenith" />
+      <name name="{=aom_rhudaur_female_name_23}Mirien" />
+      <name name="{=aom_rhudaur_female_name_24}Rhiain" />
+    </female_names>
+    <clan_names>
+      <name name="{=aom_rhudaur_clan_1}House of Cameth Brin" />
+      <name name="{=aom_rhudaur_clan_2}House of the Angle" />
+      <name name="{=aom_rhudaur_clan_3}House of Ettendale" />
+      <name name="{=aom_rhudaur_clan_4}House of the Coldfells" />
+      <name name="{=aom_rhudaur_clan_5}House of the Trollshaws" />
+      <name name="{=aom_rhudaur_clan_6}House of the Last Bridge" />
+      <name name="{=aom_rhudaur_clan_7}House of the Loudwater" />
+      <name name="{=aom_rhudaur_clan_8}House of the Hoarwell" />
+      <name name="{=aom_rhudaur_clan_9}House of the Ettenmoors" />
+      <name name="{=aom_rhudaur_clan_10}House of Egladil" />
+      <name name="{=aom_rhudaur_clan_11}House of the Fells" />
+      <name name="{=aom_rhudaur_clan_12}House of Greyfell" />
+    </clan_names>
+        <cultural_feats>
+            <feat id="taom_gondor_garrison_wage" />
+            <feat id="taom_gondor_hearth_growth" />
+            <feat id="taom_gondor_loyalty" />
+            <feat id="taom_gondor_morale" />
+            <feat id="taom_gondor_plain_speed" />
+        </cultural_feats>
+    <possible_clan_banner_icon_ids>
+      <icon id="100" />
+      <icon id="101" />
+      <icon id="102" />
+      <icon id="103" />
+      <icon id="104" />
+      <icon id="105" />
+      <icon id="106" />
+      <icon id="107" />
+      <icon id="108" />
+      <icon id="109" />
+      <icon id="110" />
+      <icon id="119" />
+      <icon id="147" />
+      <icon id="148" />
+      <icon id="152" />
+      <icon id="200" />
+      <icon id="201" />
+      <icon id="202" />
+      <icon id="203" />
+      <icon id="204" />
+      <icon id="205" />
+      <icon id="206" />
+      <icon id="207" />
+      <icon id="208" />
+      <icon id="209" />
+      <icon id="210" />
+      <icon id="211" />
+      <icon id="212" />
+      <icon id="213" />
+      <icon id="214" />
+      <icon id="215" />
+      <icon id="216" />
+      <icon id="217" />
+      <icon id="218" />
+      <icon id="219" />
+      <icon id="220" />
+      <icon id="221" />
+      <icon id="222" />
+      <icon id="223" />
+      <icon id="400" />
+    </possible_clan_banner_icon_ids>
+    <notable_templates>
+      <template name="NPCCharacter.spc_wanderer_rhudaur_0" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_1" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_2" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_3" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_4" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_5" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_6" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_7" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_8" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_9" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_10" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_11" />
+      <template name="NPCCharacter.spc_wanderer_rhudaur_12" />
+      <template name="NPCCharacter.spc_notable_rhudaur_0" />
+      <template name="NPCCharacter.spc_notable_rhudaur_0b" />
+      <template name="NPCCharacter.spc_notable_rhudaur_1" />
+      <template name="NPCCharacter.spc_notable_rhudaur_1b" />
+      <template name="NPCCharacter.spc_notable_rhudaur_2" />
+      <template name="NPCCharacter.spc_notable_rhudaur_2b" />
+      <template name="NPCCharacter.spc_notable_rhudaur_3" />
+      <template name="NPCCharacter.spc_notable_rhudaur_3b" />
+      <template name="NPCCharacter.spc_notable_rhudaur_4" />
+      <template name="NPCCharacter.spc_notable_rhudaur_4b" />
+      <template name="NPCCharacter.spc_notable_rhudaur_5" />
+      <template name="NPCCharacter.spc_notable_rhudaur_6" />
+      <template name="NPCCharacter.spc_notable_rhudaur_7" />
+      <template name="NPCCharacter.spc_notable_rhudaur_8" />
+      <template name="NPCCharacter.spc_notable_rhudaur_9" />
+      <template name="NPCCharacter.spc_notable_rhudaur_gl1" />
+      <template name="NPCCharacter.spc_notable_rhudaur_10" />
+      <template name="NPCCharacter.spc_notable_rhudaur_11" />
+      <template name="NPCCharacter.spc_notable_rhudaur_gl4" />
+      <template name="NPCCharacter.spc_notable_rhudaur_12" />
+      <template name="NPCCharacter.spc_notable_rhudaur_13" />
+      <template name="NPCCharacter.spc_notable_rhudaur_21" />
+      <template name="NPCCharacter.spc_notable_rhudaur_22" />
+      <template name="NPCCharacter.spc_rhudaur_headman_1" />
+      <template name="NPCCharacter.spc_rhudaur_headman_2" />
+      <template name="NPCCharacter.spc_rhudaur_headman_3" />
+    </notable_templates>
+    <lord_templates>
+      <template name="NPCCharacter.spc_rhudaur_lord_1" />
+      <template name="NPCCharacter.spc_rhudaur_lord_2" />
+    </lord_templates>
+    <rebellion_hero_templates>
+      <template name="NPCCharacter.spc_rhudaur_lord_1" />
+      <template name="NPCCharacter.spc_rhudaur_lord_2" />
+    </rebellion_hero_templates>
+    <tournament_team_templates_one_participant>
+      <template name="NPCCharacter.tournament_template_empire_one_participant_set_v1" />
+    </tournament_team_templates_one_participant>
+    <tournament_team_templates_two_participant>
+      <template name="NPCCharacter.tournament_template_empire_two_participant_set_v1" />
+      <template name="NPCCharacter.tournament_template_empire_two_participant_set_v2" />
+      <template name="NPCCharacter.tournament_template_empire_two_participant_set_v3" />
+    </tournament_team_templates_two_participant>
+    <tournament_team_templates_four_participant>
+      <template name="NPCCharacter.tournament_template_empire_four_participant_set_v1" />
+      <template name="NPCCharacter.tournament_template_empire_four_participant_set_v2" />
+      <template name="NPCCharacter.tournament_template_empire_four_participant_set_v3" />
+    </tournament_team_templates_four_participant>
+    <basic_mercenary_troops>
+      <template name="NPCCharacter.rhudaur_dunadan_merc" />
+    </basic_mercenary_troops>
+  </Culture>
+
+  <!-- TAOM-NEWCULTURE:rhudaur:END -->
 </SPCultures>

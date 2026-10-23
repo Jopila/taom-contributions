@@ -260,3 +260,17 @@ until the peak line reports overflows above zero in either pool.
 - **Issue:** #806 (2026-10-15): the v1.5.5 `KnownBuilds` row and the binding gate for both native pin classes.
 
 ---
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/crash-report.md](./crash-report.md)
+- [docs/features/mcm.md](./mcm.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/engine/mission-frame-threads-and-native-costs.md](../reference/engine/mission-frame-threads-and-native-costs.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

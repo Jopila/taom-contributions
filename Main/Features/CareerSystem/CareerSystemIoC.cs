@@ -99,6 +99,14 @@ public static class CareerSystemIoC
         ["ranger_of_the_north"]    = CareerArchetype.Ranged,
         ["knight_of_arthedain"]    = CareerArchetype.Cavalry,
 
+        // ═══ CARDOLAN AND RHUDAUR ═══ (#978, the same three re-themed for each)
+        ["warden_of_tyrn_gorthad"] = CareerArchetype.Infantry,
+        ["bowman_of_minhiriath"]   = CareerArchetype.Ranged,
+        ["knight_of_cardolan"]     = CareerArchetype.Cavalry,
+        ["captain_of_cameth_brin"] = CareerArchetype.Infantry,
+        ["ranger_of_the_angle"]    = CareerArchetype.Ranged,
+        ["rider_of_the_fells"]     = CareerArchetype.Cavalry,
+
         // ═══ MORDOR ═══
         ["black_uruk_captain"]     = CareerArchetype.Infantry,
         ["olog_hai_warchief"]      = CareerArchetype.Infantry,

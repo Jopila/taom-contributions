@@ -88,6 +88,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [troop-tree-revamp](features/troop-tree-revamp.md) — multi-culture troop roster authoring discipline
 - [black-numenorean](features/black-numenorean.md): Mordor's first human troops and first horse cavalry, a 13-troop T5-T9 line plus its 113 Armory entries. Records why a corrupted-Man troop carries **no** `race=` attribute (absent means index 0 means `human`), the `level = 5T + 1` tier formula, why the line is deliberately AI-only and what that costs in the recruitment-reachability test, and the three spec errors that had to be worked around (no universal `_slim`, cloth-only T7 capes, `_a`-only collision bodies)
 - [arthedain](features/arthedain.md): the playable what-if North-kingdom of Arnor. Its culture, troop tree, ten fortifications and twenty-four villages on the main map, five low-tier clans, diplomacy and character creation, which generator writes each, and how to change the realm without breaking the map or Lindon's generated blocks
+- [cardolan-rhudaur](features/cardolan-rhudaur.md): the other two Arnor realms, both Neutral. Their cultures, troop trees on the shared realm-troop generator, map rows, clans, careers and faction cards, and the tables each one is keyed in
 - [volunteer-recruitment](features/volunteer-recruitment.md) — per-settlement / clan / culture recruitment pools (TaomVolunteerModel)
 - [tavern-mercenaries](features/tavern-mercenaries.md) — culture-specific `<basic_mercenary_troops>`: how the town's daily offer is rolled (70/30 split, upgrade walk, tier-inverse stack size), and why the hires are dedicated leaf `*_merc` copies of each culture's rarest recruitment-pool troops
 - [prisoner-recruitment](features/prisoner-recruitment.md) — no morale lost recruiting a prisoner of your own faction or alignment side (TaomPrisonerRecruitmentCalculationModel)
@@ -458,6 +459,7 @@ lives here; the published copy is downstream.
 
 - [docs/adrs/010-knowledge-base-architecture.md](adrs/010-knowledge-base-architecture.md)
 - [docs/ai-includes/codex-operating-guide.md](ai-includes/codex-operating-guide.md)
+- [docs/ai-includes/orientation.md](ai-includes/orientation.md)
 - [docs/features/doc-graph.md](features/doc-graph.md)
 - [docs/modding/README.md](modding/README.md)
 - [docs/reference/doc-lookup.md](reference/doc-lookup.md)

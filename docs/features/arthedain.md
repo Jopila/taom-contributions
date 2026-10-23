@@ -34,7 +34,7 @@ Data only, no new `Main/Features/` module. The pieces, in the order they must be
 
 | Step | Tool | Writes |
 |------|------|--------|
-| Troop tree and the 9 soldier party templates | `tools/generate_arthedain_troops.py` | `troops/troops_arthedain.xml`, a `TAOM-ARTHEDAIN-PT` region of `taom_partyTemplates.xml` |
+| Troop tree and the 9 soldier party templates | `tools/generate_arthedain_troops.py` (the design; the machinery is `tools/realm_troops.py`, shared with Cardolan and Rhudaur since #978) | `troops/troops_arthedain.xml`, a `TAOM-ARTHEDAIN-PT` region of `taom_partyTemplates.xml` |
 | Ranger bow ladder | `tools/ranged_ladders.json` line `arthedain`, `tools/generate_ranged_ladder_items.py` | live `LOTRLOME_items/arnor/ranged_ladder.xml` |
 | Culture, townsfolk, notables, wanderers, villager and caravan templates, education templates, lord and child rosters | `tools/promote_borrowed_cultures.py --only arthedain` (Gondor as the scaffold) | `taom_spcultures.xml`, `characters/npcs_arthedain.xml`, `equipmentsets/taom_equipment_sets_arthedain.xml`, shared files |
 | Towns and castles | `tools/add_map_fortifications.py` | live `TAOM_Map/ModuleData/settlements.xml` and 12 `loc_settlements.xml` |
@@ -238,6 +238,7 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 
 ## Changelog
 
+- 2026-10-23 (#978): Cardolan and Rhudaur joined as the other two Arnor realms ([cardolan-rhudaur.md](cardolan-rhudaur.md)). The troop generator's machinery moved to `tools/realm_troops.py` with byte-identical output. The faction card no longer calls Arthedain the only Arnor realm still standing, and no longer names Angmar (Mike: Angmar is gone); those three card lines wait for their translations (#763). Character creation now starts an Arthedain player at Fornost Erain's live position (464.975, 1162.654), not the stale point the culture shipped with.
 - 2026-10-21 (#963): Arthedain troops cost no special resource. The King's Guard, Knight, Ranger
   Captain and Warden lost their special-resource upgrade cost and daily upkeep (Castar for an
   Arthedain player), so they no longer desert at a zero balance and show no encyclopedia badge. The
@@ -272,3 +273,18 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 - **Issue:** #753; #818 (the 2026-10-18 balance and start-war change); #963 (the 2026-10-21 removal of troop special-resource costs); follow-ups #754 (translations, done in `a9437a492`; the issue is still open), #755 (donor-culture market weapons),
   #756 (policy ids no kingdom can use), both resolved 2026-10-08.
 - **Status:** built and verified in data; in-game check owed (#753 checklist).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/cardolan-rhudaur.md](./cardolan-rhudaur.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/recipe-add-a-kingdom.md](../modding/recipe-add-a-kingdom.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/release-process.md](../reference/release-process.md)
+- [docs/reviews/lessons/data-content-cultures.md](../reviews/lessons/data-content-cultures.md)
+
+<!-- backlinks-end -->

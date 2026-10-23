@@ -467,5 +467,7 @@
     <string id="zulgora_description" text="影を織る者ズルゴラは幻を作り出し、物語に語られるサウロンの欺瞞のごとく敵を惑わす。" />
     <string id="zulgoth_description" text="ズルゴスは儀式師のオークとして、オークの慣習に示唆される通り暗黒の力に生贄を捧げる。その儀式は氏族の企てに力を呼び込む。" />
     <string id="lord_AN1_1_description" text="アルヴェギル二世、アルセダインの王、アルヴェドゥイとイシルドゥアの後継者。年ごとに減りゆく剣をもってフォルノストをアングマールより守り抜いている。" />
+    <string id="lord_CA1_1_description" text="Aranthir, King of Cardolan, heir of Earendur's second son, who keeps the barrow-kings' crown at Caras Gorthad." />
+    <string id="lord_RH1_1_description" text="Belegorn, King of Rhudaur, heir of Earendur's third son, lord of Cameth Brin and of the hill-men of the Angle." />
   </strings>
 </base>

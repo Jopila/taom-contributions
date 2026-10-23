@@ -287,5 +287,25 @@
         "default_build": 0.7222,
         "focus_to_add": 0,
         "skill_level_to_add": 0
+    },
+    {
+        "culture_id": "cardolan",
+        "races": ["human"],
+        "starting_settlement": "town_CA2",
+        "default_age": 20.0,
+        "default_weight": 0.0,
+        "default_build": 0.7222,
+        "focus_to_add": 0,
+        "skill_level_to_add": 0
+    },
+    {
+        "culture_id": "rhudaur",
+        "races": ["human"],
+        "starting_settlement": "town_RH1",
+        "default_age": 20.0,
+        "default_weight": 0.0,
+        "default_build": 0.7222,
+        "focus_to_add": 0,
+        "skill_level_to_add": 0
     }
 ]

@@ -89,12 +89,12 @@ Authoritative table for naming new settlements anywhere on the map. Match the pr
 | `K` | Khand (Variag) | `Culture.battania` (26 of 27; `castle_K4` stays `Culture.khuzait`) | Eastern/Mongolic | Sûransûra, Khondûr, Klagül | Khond-Vol, Sturlûsh, Ardamün |
 | `EW` | Gondor | `Culture.gondor` | Sindarin | Minas Tirith, Pelargir, Dol Amroth | Anduinmir, Celebnir, Amonbain |
 | `R` | Rivendell (Eriador elves) | `Culture.rivendell` | Sindarin (high-elven) | Rivendell, Nan Tornaeth, Baracharn | Hithaeglin, Imladtawar, Bruinael |
-| `G` | Gundabad | `Culture.gundabad` | Black Speech (Uruk-Hai) | Mount Gundabad, Mazūglod, Shôrdmôl | Mazūg-mîr, Gund-mauz, Gram-krimp |
+| `G` | Gundabad | `Culture.gundabad` | Black Speech (Uruk-Hai); each fief's villages share one stem (Gund-, Gram-, Fram-, Dûm-, Lith-) and end by type: -bosh swine farm, -mauz cattle farm, -mîr silver mine | Mount Gundabad, Mazūglod, Shôrdmôl, Carn Dûm (`town_G3`, 2026-10-15), Lithur (`castle_G6`, Mike's name) | Mazūg-mîr, Gund-mauz, Gram-krimp, Dûm-ghâsh, Lith-bosh |
 | `FH` | Far Harad | `Culture.aserai/abanissa/shaghana` | Variag/Mongol-Arabic | Archadízar, Erakôndo, Zakhôr | Archad-Khoth, Bara-Mukh, Shôla-Argûn |
 | `U` | Umbar | `Culture.umbar` | Adunaic / Black Númenórean | Umbar, Azruphêr, Bôluzir | Bej-Phazân, Azar-Mîr, Bôluz-Sêr |
 | `A` | Khand (Aserai-mapped) | `Culture.aserai/abanissa/shaghana` | Eastern/Mongolic | Nagakhôdi, Korb Taskral, Khanôg Gôr | Shatag-Lub, Lajôr-Argûn, Kalmôkh-Bûsh |
 | `RU` | Rhûn (Easterling) | `Culture.khuzait` | Easterling/Wainrider | Mistrand, Lest, Vorgavuld | Mistrand-Krish, Vorgav-Argûn, Iôrig-Mukh |
-| `AN` | Arthedain (Arnor, 2026-10-07) | `Culture.arthedain` | Sindarin of the North + Bree-land Mannish | Fornost Erain, Annúminas, Bree, Amon Sûl, Staddle, Archet | Barad Forn, Lond Nenuial, Talath Forn, Rhaw Field |
+| `AN` | Arthedain (Arnor, 2026-10-07) | `Culture.arthedain` | Sindarin of the North + Bree-land Mannish | Fornost Erain, Annúminas, Bree, Amon Sûl, Staddle, Archet | Barad Forn, Lond Nenuial, Talath Forn, Rhaw Field, Hoarwell Watch (`castle_AN5`, renamed from Weather Hills 2026-10-16: the Weather Hills stay the broken country round Weathertop) |
 | `GBC` | Blue Craig (Ered Luin goblins) | `Culture.bluecraig` | Black Speech, hyphenated compounds | Blue Craig, Bolgkrag, Krimp-morn | Luinkrag, Gash-nakh, Mok-bûr, Zog-tang |
 
 ### Suffix vocabulary (for compound names)
@@ -252,6 +252,7 @@ Bannerlord's default font (LiberationSans-derived) supports:
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/file-catalogue.md](../modding/file-catalogue.md)
 - [docs/modding/id-cheatsheet.md](../modding/id-cheatsheet.md)

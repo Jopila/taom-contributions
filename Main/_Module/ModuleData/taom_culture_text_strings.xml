@@ -265,6 +265,84 @@
 	<string id="aom_bluecraig_male_name_8" text="{=aom_bluecraig_male_name_8}Durmash" />
 	<string id="aom_bluecraig_male_name_9" text="{=aom_bluecraig_male_name_9}Vorgoth" />
 	<string id="aom_bluecraig_name" text="{=aom_bluecraig_name}Blue Craig Goblins" />
+	<string id="aom_cardolan_clan_1" text="{=aom_cardolan_clan_1}House of Tyrn Gorthad" />
+	<string id="aom_cardolan_clan_10" text="{=aom_cardolan_clan_10}House of the Greenway" />
+	<string id="aom_cardolan_clan_11" text="{=aom_cardolan_clan_11}House of Swanfleet" />
+	<string id="aom_cardolan_clan_12" text="{=aom_cardolan_clan_12}House of Andrath" />
+	<string id="aom_cardolan_clan_2" text="{=aom_cardolan_clan_2}House of Tharbad" />
+	<string id="aom_cardolan_clan_3" text="{=aom_cardolan_clan_3}House of the Greyflood" />
+	<string id="aom_cardolan_clan_4" text="{=aom_cardolan_clan_4}House of Minhiriath" />
+	<string id="aom_cardolan_clan_5" text="{=aom_cardolan_clan_5}House of the South Downs" />
+	<string id="aom_cardolan_clan_6" text="{=aom_cardolan_clan_6}House of Sarn Ford" />
+	<string id="aom_cardolan_clan_7" text="{=aom_cardolan_clan_7}House of Eryn Vorn" />
+	<string id="aom_cardolan_clan_8" text="{=aom_cardolan_clan_8}House of the Barrows" />
+	<string id="aom_cardolan_clan_9" text="{=aom_cardolan_clan_9}House of Minas Eithel" />
+	<string id="aom_cardolan_desc" text="{=aom_cardolan_desc}The Dúnedain of Cardolan hold the south of old Arnor, the plains and river country between the Baranduin and the Greyflood. Their kings lie in the barrows of Tyrn Gorthad, their barges still come up to Tharbad, and their riders are the best of the three northern kingdoms. Their towns are few and their lords quarrel with Arthedain and Rhudaur over the old crown, while the wild lands grow bolder every year." />
+	<string id="aom_cardolan_female_name_1" text="{=aom_cardolan_female_name_1}Elendis" />
+	<string id="aom_cardolan_female_name_10" text="{=aom_cardolan_female_name_10}Ivren" />
+	<string id="aom_cardolan_female_name_11" text="{=aom_cardolan_female_name_11}Lindis" />
+	<string id="aom_cardolan_female_name_12" text="{=aom_cardolan_female_name_12}Mírwen" />
+	<string id="aom_cardolan_female_name_13" text="{=aom_cardolan_female_name_13}Morleth" />
+	<string id="aom_cardolan_female_name_14" text="{=aom_cardolan_female_name_14}Nellas" />
+	<string id="aom_cardolan_female_name_15" text="{=aom_cardolan_female_name_15}Nimloth" />
+	<string id="aom_cardolan_female_name_16" text="{=aom_cardolan_female_name_16}Orwen" />
+	<string id="aom_cardolan_female_name_17" text="{=aom_cardolan_female_name_17}Rían" />
+	<string id="aom_cardolan_female_name_18" text="{=aom_cardolan_female_name_18}Saelind" />
+	<string id="aom_cardolan_female_name_19" text="{=aom_cardolan_female_name_19}Tirnel" />
+	<string id="aom_cardolan_female_name_2" text="{=aom_cardolan_female_name_2}Aerin" />
+	<string id="aom_cardolan_female_name_20" text="{=aom_cardolan_female_name_20}Vanwë" />
+	<string id="aom_cardolan_female_name_21" text="{=aom_cardolan_female_name_21}Andreth" />
+	<string id="aom_cardolan_female_name_22" text="{=aom_cardolan_female_name_22}Emeldir" />
+	<string id="aom_cardolan_female_name_23" text="{=aom_cardolan_female_name_23}Lalaith" />
+	<string id="aom_cardolan_female_name_24" text="{=aom_cardolan_female_name_24}Silmariën" />
+	<string id="aom_cardolan_female_name_3" text="{=aom_cardolan_female_name_3}Beriel" />
+	<string id="aom_cardolan_female_name_4" text="{=aom_cardolan_female_name_4}Calimë" />
+	<string id="aom_cardolan_female_name_5" text="{=aom_cardolan_female_name_5}Daeriel" />
+	<string id="aom_cardolan_female_name_6" text="{=aom_cardolan_female_name_6}Eilinel" />
+	<string id="aom_cardolan_female_name_7" text="{=aom_cardolan_female_name_7}Faeleth" />
+	<string id="aom_cardolan_female_name_8" text="{=aom_cardolan_female_name_8}Gwaeren" />
+	<string id="aom_cardolan_female_name_9" text="{=aom_cardolan_female_name_9}Haleth" />
+	<string id="aom_cardolan_male_name_1" text="{=aom_cardolan_male_name_1}Anardil" />
+	<string id="aom_cardolan_male_name_10" text="{=aom_cardolan_male_name_10}Erchon" />
+	<string id="aom_cardolan_male_name_11" text="{=aom_cardolan_male_name_11}Faelon" />
+	<string id="aom_cardolan_male_name_12" text="{=aom_cardolan_male_name_12}Gaerhil" />
+	<string id="aom_cardolan_male_name_13" text="{=aom_cardolan_male_name_13}Hallon" />
+	<string id="aom_cardolan_male_name_14" text="{=aom_cardolan_male_name_14}Hirluin" />
+	<string id="aom_cardolan_male_name_15" text="{=aom_cardolan_male_name_15}Iorlas" />
+	<string id="aom_cardolan_male_name_16" text="{=aom_cardolan_male_name_16}Lothon" />
+	<string id="aom_cardolan_male_name_17" text="{=aom_cardolan_male_name_17}Mallos" />
+	<string id="aom_cardolan_male_name_18" text="{=aom_cardolan_male_name_18}Morlad" />
+	<string id="aom_cardolan_male_name_19" text="{=aom_cardolan_male_name_19}Nardur" />
+	<string id="aom_cardolan_male_name_2" text="{=aom_cardolan_male_name_2}Arthaer" />
+	<string id="aom_cardolan_male_name_20" text="{=aom_cardolan_male_name_20}Orodhel" />
+	<string id="aom_cardolan_male_name_21" text="{=aom_cardolan_male_name_21}Pelendur" />
+	<string id="aom_cardolan_male_name_22" text="{=aom_cardolan_male_name_22}Ruithel" />
+	<string id="aom_cardolan_male_name_23" text="{=aom_cardolan_male_name_23}Sarandil" />
+	<string id="aom_cardolan_male_name_24" text="{=aom_cardolan_male_name_24}Tarandor" />
+	<string id="aom_cardolan_male_name_25" text="{=aom_cardolan_male_name_25}Thalion" />
+	<string id="aom_cardolan_male_name_26" text="{=aom_cardolan_male_name_26}Turgil" />
+	<string id="aom_cardolan_male_name_27" text="{=aom_cardolan_male_name_27}Vorondil" />
+	<string id="aom_cardolan_male_name_28" text="{=aom_cardolan_male_name_28}Bregor" />
+	<string id="aom_cardolan_male_name_29" text="{=aom_cardolan_male_name_29}Celedor" />
+	<string id="aom_cardolan_male_name_3" text="{=aom_cardolan_male_name_3}Baradhel" />
+	<string id="aom_cardolan_male_name_30" text="{=aom_cardolan_male_name_30}Dírion" />
+	<string id="aom_cardolan_male_name_31" text="{=aom_cardolan_male_name_31}Golasgil" />
+	<string id="aom_cardolan_male_name_32" text="{=aom_cardolan_male_name_32}Hadrion" />
+	<string id="aom_cardolan_male_name_33" text="{=aom_cardolan_male_name_33}Ingold" />
+	<string id="aom_cardolan_male_name_34" text="{=aom_cardolan_male_name_34}Mardacil" />
+	<string id="aom_cardolan_male_name_35" text="{=aom_cardolan_male_name_35}Nimbor" />
+	<string id="aom_cardolan_male_name_36" text="{=aom_cardolan_male_name_36}Ohtar" />
+	<string id="aom_cardolan_male_name_37" text="{=aom_cardolan_male_name_37}Rondor" />
+	<string id="aom_cardolan_male_name_38" text="{=aom_cardolan_male_name_38}Taurion" />
+	<string id="aom_cardolan_male_name_39" text="{=aom_cardolan_male_name_39}Ulbor" />
+	<string id="aom_cardolan_male_name_4" text="{=aom_cardolan_male_name_4}Belethor" />
+	<string id="aom_cardolan_male_name_40" text="{=aom_cardolan_male_name_40}Halmir" />
+	<string id="aom_cardolan_male_name_5" text="{=aom_cardolan_male_name_5}Caladhor" />
+	<string id="aom_cardolan_male_name_6" text="{=aom_cardolan_male_name_6}Calenon" />
+	<string id="aom_cardolan_male_name_7" text="{=aom_cardolan_male_name_7}Celebros" />
+	<string id="aom_cardolan_male_name_8" text="{=aom_cardolan_male_name_8}Dagnir" />
+	<string id="aom_cardolan_male_name_9" text="{=aom_cardolan_male_name_9}Dorthar" />
+	<string id="aom_cardolan_name" text="{=aom_cardolan_name}Cardolan" />
 	<string id="aom_dolguldur_clan_1" text="{=aom_dolguldur_clan_1}Necromancer's Thralls" />
 	<string id="aom_dolguldur_clan_10" text="{=aom_dolguldur_clan_10}Shadow Scouts" />
 	<string id="aom_dolguldur_clan_11" text="{=aom_dolguldur_clan_11}Corruption's Edge" />
@@ -1561,6 +1639,84 @@
 	<string id="aom_mordor_male_name_8" text="{=aom_mordor_male_name_8}Snaga" />
 	<string id="aom_mordor_male_name_9" text="{=aom_mordor_male_name_9}Gothmog" />
 	<string id="aom_mordor_name" text="{=aom_mordor_name}Mordor" />
+	<string id="aom_rhudaur_clan_1" text="{=aom_rhudaur_clan_1}House of Cameth Brin" />
+	<string id="aom_rhudaur_clan_10" text="{=aom_rhudaur_clan_10}House of Egladil" />
+	<string id="aom_rhudaur_clan_11" text="{=aom_rhudaur_clan_11}House of the Fells" />
+	<string id="aom_rhudaur_clan_12" text="{=aom_rhudaur_clan_12}House of Greyfell" />
+	<string id="aom_rhudaur_clan_2" text="{=aom_rhudaur_clan_2}House of the Angle" />
+	<string id="aom_rhudaur_clan_3" text="{=aom_rhudaur_clan_3}House of Ettendale" />
+	<string id="aom_rhudaur_clan_4" text="{=aom_rhudaur_clan_4}House of the Coldfells" />
+	<string id="aom_rhudaur_clan_5" text="{=aom_rhudaur_clan_5}House of the Trollshaws" />
+	<string id="aom_rhudaur_clan_6" text="{=aom_rhudaur_clan_6}House of the Last Bridge" />
+	<string id="aom_rhudaur_clan_7" text="{=aom_rhudaur_clan_7}House of the Loudwater" />
+	<string id="aom_rhudaur_clan_8" text="{=aom_rhudaur_clan_8}House of the Hoarwell" />
+	<string id="aom_rhudaur_clan_9" text="{=aom_rhudaur_clan_9}House of the Ettenmoors" />
+	<string id="aom_rhudaur_desc" text="{=aom_rhudaur_desc}Rhudaur is the hill kingdom of old Arnor, between the Hoarwell and the Loudwater. Its Dúnedain lords hold the Angle and the tower of Cameth Brin and rule a people of hill-men who never loved the West. The line of its first king still endures, but its holds are cold, its fells are full of trolls, and the orcs of the mountains watch every pass." />
+	<string id="aom_rhudaur_female_name_1" text="{=aom_rhudaur_female_name_1}Gilwen" />
+	<string id="aom_rhudaur_female_name_10" text="{=aom_rhudaur_female_name_10}Ilar" />
+	<string id="aom_rhudaur_female_name_11" text="{=aom_rhudaur_female_name_11}Lowri" />
+	<string id="aom_rhudaur_female_name_12" text="{=aom_rhudaur_female_name_12}Maelis" />
+	<string id="aom_rhudaur_female_name_13" text="{=aom_rhudaur_female_name_13}Morfudd" />
+	<string id="aom_rhudaur_female_name_14" text="{=aom_rhudaur_female_name_14}Nesta" />
+	<string id="aom_rhudaur_female_name_15" text="{=aom_rhudaur_female_name_15}Olwen" />
+	<string id="aom_rhudaur_female_name_16" text="{=aom_rhudaur_female_name_16}Rhosyn" />
+	<string id="aom_rhudaur_female_name_17" text="{=aom_rhudaur_female_name_17}Seren" />
+	<string id="aom_rhudaur_female_name_18" text="{=aom_rhudaur_female_name_18}Tegwen" />
+	<string id="aom_rhudaur_female_name_19" text="{=aom_rhudaur_female_name_19}Andraste" />
+	<string id="aom_rhudaur_female_name_2" text="{=aom_rhudaur_female_name_2}Aelin" />
+	<string id="aom_rhudaur_female_name_20" text="{=aom_rhudaur_female_name_20}Brynja" />
+	<string id="aom_rhudaur_female_name_21" text="{=aom_rhudaur_female_name_21}Eluned" />
+	<string id="aom_rhudaur_female_name_22" text="{=aom_rhudaur_female_name_22}Gwenith" />
+	<string id="aom_rhudaur_female_name_23" text="{=aom_rhudaur_female_name_23}Mirien" />
+	<string id="aom_rhudaur_female_name_24" text="{=aom_rhudaur_female_name_24}Rhiain" />
+	<string id="aom_rhudaur_female_name_3" text="{=aom_rhudaur_female_name_3}Branwen" />
+	<string id="aom_rhudaur_female_name_4" text="{=aom_rhudaur_female_name_4}Cerys" />
+	<string id="aom_rhudaur_female_name_5" text="{=aom_rhudaur_female_name_5}Dilwen" />
+	<string id="aom_rhudaur_female_name_6" text="{=aom_rhudaur_female_name_6}Eirlys" />
+	<string id="aom_rhudaur_female_name_7" text="{=aom_rhudaur_female_name_7}Ffion" />
+	<string id="aom_rhudaur_female_name_8" text="{=aom_rhudaur_female_name_8}Glenwen" />
+	<string id="aom_rhudaur_female_name_9" text="{=aom_rhudaur_female_name_9}Heledd" />
+	<string id="aom_rhudaur_male_name_1" text="{=aom_rhudaur_male_name_1}Belegorn" />
+	<string id="aom_rhudaur_male_name_10" text="{=aom_rhudaur_male_name_10}Galdric" />
+	<string id="aom_rhudaur_male_name_11" text="{=aom_rhudaur_male_name_11}Gorlan" />
+	<string id="aom_rhudaur_male_name_12" text="{=aom_rhudaur_male_name_12}Haldric" />
+	<string id="aom_rhudaur_male_name_13" text="{=aom_rhudaur_male_name_13}Harnoth" />
+	<string id="aom_rhudaur_male_name_14" text="{=aom_rhudaur_male_name_14}Ithrandor" />
+	<string id="aom_rhudaur_male_name_15" text="{=aom_rhudaur_male_name_15}Kelmar" />
+	<string id="aom_rhudaur_male_name_16" text="{=aom_rhudaur_male_name_16}Lorgan" />
+	<string id="aom_rhudaur_male_name_17" text="{=aom_rhudaur_male_name_17}Malbor" />
+	<string id="aom_rhudaur_male_name_18" text="{=aom_rhudaur_male_name_18}Morcai" />
+	<string id="aom_rhudaur_male_name_19" text="{=aom_rhudaur_male_name_19}Nethril" />
+	<string id="aom_rhudaur_male_name_2" text="{=aom_rhudaur_male_name_2}Amrodir" />
+	<string id="aom_rhudaur_male_name_20" text="{=aom_rhudaur_male_name_20}Orodrim" />
+	<string id="aom_rhudaur_male_name_21" text="{=aom_rhudaur_male_name_21}Pellam" />
+	<string id="aom_rhudaur_male_name_22" text="{=aom_rhudaur_male_name_22}Radhruin" />
+	<string id="aom_rhudaur_male_name_23" text="{=aom_rhudaur_male_name_23}Rostan" />
+	<string id="aom_rhudaur_male_name_24" text="{=aom_rhudaur_male_name_24}Sarn" />
+	<string id="aom_rhudaur_male_name_25" text="{=aom_rhudaur_male_name_25}Talgar" />
+	<string id="aom_rhudaur_male_name_26" text="{=aom_rhudaur_male_name_26}Thorondur" />
+	<string id="aom_rhudaur_male_name_27" text="{=aom_rhudaur_male_name_27}Ulfar" />
+	<string id="aom_rhudaur_male_name_28" text="{=aom_rhudaur_male_name_28}Vardil" />
+	<string id="aom_rhudaur_male_name_29" text="{=aom_rhudaur_male_name_29}Wulfric" />
+	<string id="aom_rhudaur_male_name_3" text="{=aom_rhudaur_male_name_3}Brannoc" />
+	<string id="aom_rhudaur_male_name_30" text="{=aom_rhudaur_male_name_30}Arnach" />
+	<string id="aom_rhudaur_male_name_31" text="{=aom_rhudaur_male_name_31}Bryn" />
+	<string id="aom_rhudaur_male_name_32" text="{=aom_rhudaur_male_name_32}Cuthred" />
+	<string id="aom_rhudaur_male_name_33" text="{=aom_rhudaur_male_name_33}Draugor" />
+	<string id="aom_rhudaur_male_name_34" text="{=aom_rhudaur_male_name_34}Egalric" />
+	<string id="aom_rhudaur_male_name_35" text="{=aom_rhudaur_male_name_35}Fornor" />
+	<string id="aom_rhudaur_male_name_36" text="{=aom_rhudaur_male_name_36}Garth" />
+	<string id="aom_rhudaur_male_name_37" text="{=aom_rhudaur_male_name_37}Hunthor" />
+	<string id="aom_rhudaur_male_name_38" text="{=aom_rhudaur_male_name_38}Ivorn" />
+	<string id="aom_rhudaur_male_name_39" text="{=aom_rhudaur_male_name_39}Mardoc" />
+	<string id="aom_rhudaur_male_name_4" text="{=aom_rhudaur_male_name_4}Cadorn" />
+	<string id="aom_rhudaur_male_name_40" text="{=aom_rhudaur_male_name_40}Torgil" />
+	<string id="aom_rhudaur_male_name_5" text="{=aom_rhudaur_male_name_5}Corran" />
+	<string id="aom_rhudaur_male_name_6" text="{=aom_rhudaur_male_name_6}Dergil" />
+	<string id="aom_rhudaur_male_name_7" text="{=aom_rhudaur_male_name_7}Dunhal" />
+	<string id="aom_rhudaur_male_name_8" text="{=aom_rhudaur_male_name_8}Eredhir" />
+	<string id="aom_rhudaur_male_name_9" text="{=aom_rhudaur_male_name_9}Fengar" />
+	<string id="aom_rhudaur_name" text="{=aom_rhudaur_name}Rhudaur" />
 	<string id="aom_rivendell_clan_1" text="{=aom_rivendell_clan_1}House of Elrond" />
 	<string id="aom_rivendell_clan_10" text="{=aom_rivendell_clan_10}House of Erestor" />
 	<string id="aom_rivendell_clan_11" text="{=aom_rivendell_clan_11}Lambengolmor" />

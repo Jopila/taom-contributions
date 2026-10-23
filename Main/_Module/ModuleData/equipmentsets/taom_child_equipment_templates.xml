@@ -1002,4 +1002,142 @@
 	</EquipmentRoster>
 
   <!-- TAOM-NEWCULTURE:arthedain:END -->
+  <!-- TAOM-NEWCULTURE:cardolan:BEGIN -->
+	<EquipmentRoster id="child_template_cardolan_noble_male" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_cardolan_noble_female" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="true" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_cardolan_townsman_male" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_cardolan_townsman_female" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="true" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_cardolan_villager_male" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_cardolan_villager_female" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="true" IsLordTemplate="true" />
+	</EquipmentRoster>
+
+  <!-- TAOM-NEWCULTURE:cardolan:END -->
+  <!-- TAOM-NEWCULTURE:rhudaur:BEGIN -->
+	<EquipmentRoster id="child_template_rhudaur_noble_male" culture="Culture.rhudaur">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_rhudaur_noble_female" culture="Culture.rhudaur">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="true" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_rhudaur_townsman_male" culture="Culture.rhudaur">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_rhudaur_townsman_female" culture="Culture.rhudaur">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="true" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_rhudaur_villager_male" culture="Culture.rhudaur">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_rhudaur_villager_female" culture="Culture.rhudaur">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_long" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.ithilien_jerkin_short" />
+			<Equipment slot="Leg" id="Item.ithilien_boots" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="true" IsLordTemplate="true" />
+	</EquipmentRoster>
+
+  <!-- TAOM-NEWCULTURE:rhudaur:END -->
 </EquipmentRosters>

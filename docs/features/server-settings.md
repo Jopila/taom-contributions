@@ -5,7 +5,7 @@
 A Bannerlord dedicated server does not load MCM, so TAOM's settings pages do not exist there. This feature
 gives the server a JSON file, `taom-server-settings.json`, that carries any TAOM setting the operator wants
 to change. Every key the file leaves out stays at its server default: the compiled MCM default, except the
-hitch probe, which a server keeps off. The four TAOM settings classes have 451 properties: 447 are settable from
+hitch probe, which a server keeps off. The four TAOM settings classes have 453 properties: 449 are settable from
 the file, plus 2 buttons and 2 parked settings. It is ADR-013 decision 2
 ([ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md)).
 
@@ -200,7 +200,7 @@ the operator and are not localized.
 
 ## Tests
 
-- `TAOM.Tests/Features/ServerSettings/ServerSettingsSchemaTests.cs`: 6 tests. Every settable property has one known kind (the parked pair is pinned), the schema matches the fingerprint's reflection per class (451), and every compiled default passes its own validation.
+- `TAOM.Tests/Features/ServerSettings/ServerSettingsSchemaTests.cs`: 6 tests. Every settable property has one known kind (the parked pair is pinned), the schema matches the fingerprint's reflection per class (453), and every compiled default passes its own validation.
 - `TAOM.Tests/Features/ServerSettings/ServerSettingsReaderTests.cs`: 35 tests, one per validation rule, plus unknown keys, summaries, malformed files, comments and empty files.
 - `TAOM.Tests/Features/ServerSettings/ServerSettingsDefaultsRendererTests.cs`: 5 tests. The defaults reference reads back with nothing reverted and shows the hitch probe off; the template reads as zero keys.
 - `TAOM.Tests/Features/ServerSettings/ServerSettingsFileStoreTests.cs`: 12 tests in real temp folders: the path rule, write-once, the creation race, a failed template write leaving no file, write-if-changed, unwritable and unreadable paths.

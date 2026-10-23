@@ -39,6 +39,15 @@ public sealed class TaomBlueCraigCultureTag : ConversationTag
     public override bool IsApplicableTo(CharacterObject character) => character?.Culture?.StringId == CultureId;
 }
 
+public sealed class TaomCardolanCultureTag : ConversationTag
+{
+    public const string CultureId = "cardolan";
+
+    public override string StringId => "taom_culture_" + CultureId;
+
+    public override bool IsApplicableTo(CharacterObject character) => character?.Culture?.StringId == CultureId;
+}
+
 public sealed class TaomDolGuldurCultureTag : ConversationTag
 {
     public const string CultureId = "dolguldur";
@@ -132,6 +141,15 @@ public sealed class TaomMistyMountainOrcsCultureTag : ConversationTag
 public sealed class TaomMordorCultureTag : ConversationTag
 {
     public const string CultureId = "mordor";
+
+    public override string StringId => "taom_culture_" + CultureId;
+
+    public override bool IsApplicableTo(CharacterObject character) => character?.Culture?.StringId == CultureId;
+}
+
+public sealed class TaomRhudaurCultureTag : ConversationTag
+{
+    public const string CultureId = "rhudaur";
 
     public override string StringId => "taom_culture_" + CultureId;
 

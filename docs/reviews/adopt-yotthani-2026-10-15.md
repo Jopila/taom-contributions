@@ -203,3 +203,17 @@ we would ask, in case it helps:
 Thank you again.
 
 ---
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/external-repo-adoption.md](../ai-includes/external-repo-adoption.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reviews/adopt-yotthani-2026-10-08.md](./adopt-yotthani-2026-10-08.md)
+- [docs/reviews/adopt-yotthani-2026-10-16.md](./adopt-yotthani-2026-10-16.md)
+- [docs/reviews/rca-yotthani-review-2026-10-15.md](./rca-yotthani-review-2026-10-15.md)
+
+<!-- backlinks-end -->

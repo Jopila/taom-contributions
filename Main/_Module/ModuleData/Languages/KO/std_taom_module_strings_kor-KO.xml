@@ -3177,25 +3177,48 @@
 
     <string id="taom_faction_kingdom_of_angaladh_name" text="앙갈라드 왕국" />
 
-    <string id="taom_faction_kingdom_of_arthedain_desc" text="아르노르의 세 계승 왕국 중 마지막으로 남아 아직 서 있는 유일한 나라. 아르베두이의 혈통이 북구릉 위의 포르노스트를 지키고 그 순찰자들이 에리아도르의 길을 보살피지만, 앙마르와 던랜드, 군다바드의 오르크들이 너무 적은 검을 가진 이 왕국의 모든 국경을 짓누른다." />
+    <string id="taom_faction_kingdom_of_arthedain_desc" text="One of the three kingdoms into which Arnor was sundered. Arvedui's line holds Fornost upon the North Downs and its Rangers keep the roads of Eriador, but Dunland and the orcs of Gundabad press on every border of a realm with too few swords." />
 
     <string id="taom_faction_kingdom_of_arthedain_name" text="아르세다인 왕국" />
 
-    <string id="taom_faction_kingdom_of_arthedain_trait_0" text="아르노르의 마지막" />
+    <string id="taom_faction_kingdom_of_arthedain_trait_0" text="Heirs of Arvedui" />
 
     <string id="taom_faction_kingdom_of_arthedain_trait_1" text="안누미나스의 팔란티르" />
 
     <string id="taom_faction_kingdom_of_arthedain_trait_2" text="북부의 두네다인" />
 
-    <string id="taom_faction_kingdom_of_cardolan_desc" text="카르돌란의 후계 왕국으로, 한때 위대한 아르노르 왕국의 일부였다. 이제는 흩어진 정착지와 망령이 출몰하는 고대 고분이 있는 땅이다." />
+    <string id="taom_faction_kingdom_of_cardolan_desc" text="The southern of Arnor's three successor kingdoms. Its kings lie in the barrows of Tyrn Gorthad and its riders keep the plains between the Baranduin and the Greyflood. It stands apart from the War of the Ring, but Dunland, the goblins and the orcs of the mountains test its few towns every year." />
 
     <string id="taom_faction_kingdom_of_cardolan_name" text="카르돌란 왕국" />
 
-    <string id="taom_faction_kingdom_of_cardolan_trait_0" text="아르노르의 후계자" />
+    <string id="taom_faction_kingdom_of_cardolan_trait_0" text="Heirs of the Barrow-Kings" />
 
-    <string id="taom_faction_kingdom_of_cardolan_trait_1" text="고분구릉" />
+    <string id="taom_faction_kingdom_of_cardolan_trait_1" text="Riders of the Plains" />
 
-    <string id="taom_faction_kingdom_of_cardolan_trait_2" text="북부의 순찰자들" />
+    <string id="taom_faction_kingdom_of_cardolan_trait_2" text="Tharbad on the Greyflood" />
+    <string id="taom_faction_kingdom_of_cardolan_bonus_0" text="+10% party speed on plains (Riders of Minhiriath)" />
+    <string id="taom_faction_kingdom_of_cardolan_bonus_1" text="-20% garrison wage (Barrow-Wardens)" />
+    <string id="taom_faction_kingdom_of_cardolan_bonus_2" text="+5 party morale (Dúnedain Resolve)" />
+    <string id="taom_faction_kingdom_of_cardolan_bonus_3" text="+1 settlement loyalty per day (Line of Eärendur)" />
+    <string id="taom_faction_kingdom_of_cardolan_bonus_4" text="-15% village hearth growth (A Dwindling People)" />
+    <string id="taom_faction_kingdom_of_cardolan_perk_0_name" text="Barrow-Wardens" />
+    <string id="taom_faction_kingdom_of_cardolan_perk_0_desc" text="-20% garrison wage and +1 settlement loyalty per day." />
+    <string id="taom_faction_kingdom_of_cardolan_perk_1_name" text="Dúnedain Resolve" />
+    <string id="taom_faction_kingdom_of_cardolan_perk_1_desc" text="+5 party morale. Few as they are, the Dúnedain do not break." />
+    <string id="taom_faction_kingdom_of_cardolan_perk_2_name" text="Riders of Minhiriath" />
+    <string id="taom_faction_kingdom_of_cardolan_perk_2_desc" text="+10% party speed on plains, the open country Cardolan's riders know best." />
+    <string id="taom_faction_kingdom_of_cardolan_su_0_name" text="King's Guard of Caras Gorthad" />
+    <string id="taom_faction_kingdom_of_cardolan_su_0_desc" text="Mounted elite guard of the King." />
+    <string id="taom_faction_kingdom_of_cardolan_su_1_name" text="Knight-Captain of Cardolan" />
+    <string id="taom_faction_kingdom_of_cardolan_su_1_desc" text="Heavy lancer of the old houses." />
+    <string id="taom_faction_kingdom_of_cardolan_su_2_name" text="Warden of Tyrn Gorthad" />
+    <string id="taom_faction_kingdom_of_cardolan_su_2_desc" text="Sword-and-shield guardian of the royal barrows." />
+    <string id="taom_faction_kingdom_of_cardolan_strength_0" text="The best horsemen of the three northern realms" />
+    <string id="taom_faction_kingdom_of_cardolan_strength_1" text="Steadfast morale and loyal towns" />
+    <string id="taom_faction_kingdom_of_cardolan_strength_2" text="Cheap garrisons behind old walls" />
+    <string id="taom_faction_kingdom_of_cardolan_weakness_0" text="Few lords and small hosts" />
+    <string id="taom_faction_kingdom_of_cardolan_weakness_1" text="Poor lands that grow slowly" />
+    <string id="taom_faction_kingdom_of_cardolan_weakness_2" text="Open plains with Dunland across the Greyflood" />
 
     <string id="taom_faction_kingdom_of_dale_bonus_0" text="평원에서 부대 속도 +10% (골짜기 상인)" />
 
@@ -3613,15 +3636,38 @@
 
     <string id="taom_faction_kingdom_of_neldoreth_trait_2" text="스란두일의 일족" />
 
-    <string id="taom_faction_kingdom_of_rhudaur_desc" text="아르노르의 후계 왕국들 중 가장 동쪽에 있는 루다우르의 거친 구릉 지대. 앙그마르의 영향 아래 들어갔으며 그곳의 언덕 사람들은 마술사 왕을 섬긴다." />
+    <string id="taom_faction_kingdom_of_rhudaur_desc" text="The eastern of Arnor's three successor kingdoms, a hill realm between the Hoarwell and the Loudwater. Its Dúnedain lords hold Cameth Brin and the Angle and rule a hard people of hill-men. It stands apart from the War of the Ring, but trolls walk its fells and the orcs of Gundabad and the mountains watch every pass." />
 
     <string id="taom_faction_kingdom_of_rhudaur_name" text="루다우르 왕국" />
 
-    <string id="taom_faction_kingdom_of_rhudaur_trait_0" text="앙그마르의 하인들" />
+    <string id="taom_faction_kingdom_of_rhudaur_trait_0" text="Lords of the Angle" />
 
-    <string id="taom_faction_kingdom_of_rhudaur_trait_1" text="거친 언덕 사람들" />
+    <string id="taom_faction_kingdom_of_rhudaur_trait_1" text="Hill-Men of the Fells" />
 
-    <string id="taom_faction_kingdom_of_rhudaur_trait_2" text="몰락한 왕국" />
+    <string id="taom_faction_kingdom_of_rhudaur_trait_2" text="Tower of Cameth Brin" />
+    <string id="taom_faction_kingdom_of_rhudaur_bonus_0" text="+10% party speed on plains (Angle Roads)" />
+    <string id="taom_faction_kingdom_of_rhudaur_bonus_1" text="-20% garrison wage (Tower Wardens)" />
+    <string id="taom_faction_kingdom_of_rhudaur_bonus_2" text="+5 party morale (Dúnedain Resolve)" />
+    <string id="taom_faction_kingdom_of_rhudaur_bonus_3" text="+1 settlement loyalty per day (Line of Eärendur)" />
+    <string id="taom_faction_kingdom_of_rhudaur_bonus_4" text="-15% village hearth growth (Hard Hill Country)" />
+    <string id="taom_faction_kingdom_of_rhudaur_perk_0_name" text="Tower Wardens" />
+    <string id="taom_faction_kingdom_of_rhudaur_perk_0_desc" text="-20% garrison wage and +1 settlement loyalty per day." />
+    <string id="taom_faction_kingdom_of_rhudaur_perk_1_name" text="Dúnedain Resolve" />
+    <string id="taom_faction_kingdom_of_rhudaur_perk_1_desc" text="+5 party morale. Few as they are, the Dúnedain do not break." />
+    <string id="taom_faction_kingdom_of_rhudaur_perk_2_name" text="Angle Roads" />
+    <string id="taom_faction_kingdom_of_rhudaur_perk_2_desc" text="+10% party speed on plains, along the roads the Rangers of the Angle keep open." />
+    <string id="taom_faction_kingdom_of_rhudaur_su_0_name" text="Lord of the Angle" />
+    <string id="taom_faction_kingdom_of_rhudaur_su_0_desc" text="Two-handed elite of the old Dúnedain houses." />
+    <string id="taom_faction_kingdom_of_rhudaur_su_1_name" text="Angle Ranger Captain" />
+    <string id="taom_faction_kingdom_of_rhudaur_su_1_desc" text="Veteran Dúnedain scout-bowman of the hills." />
+    <string id="taom_faction_kingdom_of_rhudaur_su_2_name" text="Fell Warden" />
+    <string id="taom_faction_kingdom_of_rhudaur_su_2_desc" text="Hill-man with a great axe, hardened in the fells." />
+    <string id="taom_faction_kingdom_of_rhudaur_strength_0" text="Fine rangers and a hard two-handed guard" />
+    <string id="taom_faction_kingdom_of_rhudaur_strength_1" text="Steadfast morale and loyal towns" />
+    <string id="taom_faction_kingdom_of_rhudaur_strength_2" text="Cheap garrisons behind old walls" />
+    <string id="taom_faction_kingdom_of_rhudaur_weakness_0" text="One town and a handful of hill-holds" />
+    <string id="taom_faction_kingdom_of_rhudaur_weakness_1" text="Few horses in hill country" />
+    <string id="taom_faction_kingdom_of_rhudaur_weakness_2" text="Trolls and orcs on every border" />
 
     <string id="taom_faction_kingdom_of_rohan_bonus_0" text="기병 모집 비용 -15% (기마 군주의 유산)" />
 
@@ -5745,7 +5791,7 @@
 
     <string id="taom_faction_kingdom_of_arthedain_weakness_1" text="더디게 자라는 척박한 땅" />
 
-    <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="앙마르, 던랜드, 군다바드에 포위됨" />
+    <string id="taom_faction_kingdom_of_arthedain_weakness_2" text="Ringed by Dunland and Gundabad" />
 
     <string id="taom_eye_hunt_free" text="사우론의 눈이 그대를 향했다. {HUNTER}이(가) 그대를 멸하기 위해 군세를 이끌고 출진한다." />
 
@@ -6395,6 +6441,78 @@
     <string id="taom_fat_envoy_refused" text="{HOST} hears your answer: its envoy rides away without a coin." />
 
     <string id="taom_fat_envoy_seized" text="You seize the envoy. {HOST} will not forget it: the next host of its side rides against your kingdom first." />
+
+    <string id="taom_aso_kingdom.cardolan" text="Cardolan" />
+
+    <string id="taom_aso_kingdom.rhudaur" text="Rhudaur" />
+
+    <string id="taom_str_liege_title.cardolan" text="King of Cardolan" />
+
+    <string id="taom_str_liege_title_female.cardolan" text="Queen of Cardolan" />
+
+    <string id="taom_str_liege_title.rhudaur" text="King of Rhudaur" />
+
+    <string id="taom_str_liege_title_female.rhudaur" text="Queen of Rhudaur" />
+
+    <string id="taom_str_faction_official.cardolan" text="a noble lord" />
+
+    <string id="taom_str_faction_official.cardolan_f" text="a noble lady" />
+
+    <string id="taom_str_faction_ruler.cardolan" text="King" />
+
+    <string id="taom_str_faction_ruler.cardolan_f" text="Queen" />
+
+    <string id="taom_str_faction_ruler_term_in_speech.cardolan" text="{?RULER.GENDER}the Queen{?}the King{\?} {RULER.NAME}" />
+
+    <string id="taom_str_faction_ruler_name_with_title.cardolan" text="{?RULER.GENDER}Queen{?}King{\?} {RULER.NAME}" />
+
+    <string id="taom_str_faction_noble_name_with_title.cardolan" text="{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+
+    <string id="taom_str_faction_formal_name_for_culture.cardolan" text="Cardolan" />
+
+    <string id="taom_str_faction_informal_name_for_culture.cardolan" text="the Dúnedain of Cardolan" />
+
+    <string id="taom_str_neutral_term_for_culture.cardolan" text="Dúnedain" />
+
+    <string id="taom_str_culture_description.cardolan" text="The Dúnedain of Cardolan hold the south of old Arnor, the plains and river country between the Baranduin and the Greyflood. Their kings lie in the barrows of Tyrn Gorthad, their barges still come up to Tharbad, and their riders are the best of the three northern kingdoms. Their towns are few and their lords quarrel with Arthedain and Rhudaur over the old crown, while the wild lands grow bolder every year." />
+
+    <string id="taom_str_culture_rich_name.cardolan" text="Dúnedain of Cardolan" />
+
+    <string id="taom_str_adjective_for_culture.cardolan" text="Cardolan" />
+
+    <string id="taom_str_player_father_name.cardolan" text="Tarandor" />
+
+    <string id="taom_str_player_mother_name.cardolan" text="Elendis" />
+
+    <string id="taom_str_faction_official.rhudaur" text="a noble lord" />
+
+    <string id="taom_str_faction_official.rhudaur_f" text="a noble lady" />
+
+    <string id="taom_str_faction_ruler.rhudaur" text="King" />
+
+    <string id="taom_str_faction_ruler.rhudaur_f" text="Queen" />
+
+    <string id="taom_str_faction_ruler_term_in_speech.rhudaur" text="{?RULER.GENDER}the Queen{?}the King{\?} {RULER.NAME}" />
+
+    <string id="taom_str_faction_ruler_name_with_title.rhudaur" text="{?RULER.GENDER}Queen{?}King{\?} {RULER.NAME}" />
+
+    <string id="taom_str_faction_noble_name_with_title.rhudaur" text="{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+
+    <string id="taom_str_faction_formal_name_for_culture.rhudaur" text="Rhudaur" />
+
+    <string id="taom_str_faction_informal_name_for_culture.rhudaur" text="the Dúnedain of the Angle" />
+
+    <string id="taom_str_neutral_term_for_culture.rhudaur" text="Dúnedain" />
+
+    <string id="taom_str_culture_description.rhudaur" text="Rhudaur is the hill kingdom of old Arnor, between the Hoarwell and the Loudwater. Its Dúnedain lords hold the Angle and the tower of Cameth Brin and rule a people of hill-men who never loved the West. The line of its first king still endures, but its holds are cold, its fells are full of trolls, and the orcs of the mountains watch every pass." />
+
+    <string id="taom_str_culture_rich_name.rhudaur" text="Dúnedain of Rhudaur" />
+
+    <string id="taom_str_adjective_for_culture.rhudaur" text="Rhudaur" />
+
+    <string id="taom_str_player_father_name.rhudaur" text="Orodrim" />
+
+    <string id="taom_str_player_mother_name.rhudaur" text="Gilwen" />
 
   </strings>
 

@@ -251,7 +251,7 @@ class RepoSpecTests(unittest.TestCase):
 
     def test_lines_and_ranks(self):
         ids = [ln["id"] for ln in self.spec["lines"]]
-        self.assertEqual(len(ids), 20)  # +arthedain 2026-10-07
+        self.assertEqual(len(ids), 22)  # +arthedain 2026-10-07, +cardolan +rhudaur 2026-10-23 (#978)
         self.assertIn("ithilien", ids)
         self.assertIn("blackroot", ids)
         self.assertNotIn("gondor_special", ids)
@@ -307,7 +307,7 @@ class RepoSpecTests(unittest.TestCase):
                     self.assertLess(sx, sb, f"T{tx} {lx} crossbow spread {sx:.2f}, {lb} bow {sb:.2f}")
 
     def test_one_item_per_listed_tier(self):
-        self.assertEqual(len(rl.planned_items(self.spec)), 129)  # +1 harad bow tier 7 (#803)
+        self.assertEqual(len(rl.planned_items(self.spec)), 138)  # +1 harad bow tier 7 (#803); +4 cardolan, +5 rhudaur (#978)
 
     def test_donor_table_stays_under_the_hero_ceiling(self):
         s = self.spec

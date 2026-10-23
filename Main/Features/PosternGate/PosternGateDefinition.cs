@@ -44,7 +44,7 @@ internal static class PosternGateDefinition
             new TaomBuildingVariant("building_taom_postern_gate_gondor",
                 "{=taom_postern_gondor_name}Sally Port",
                 "{=taom_postern_gondor_desc}A stout gate low in the wall, where a company can march out under the eyes of the watch. In a siege, parties slip into or out of this fief with fewer losses.",
-                new[] { "gondor", "arthedain" }),
+                new[] { "gondor", "arthedain", "cardolan", "rhudaur" }),
             new TaomBuildingVariant("building_taom_postern_gate_elf",
                 "{=taom_postern_elf_name}Hidden Way",
                 "{=taom_postern_elf_desc}A path through roots and rock that only the Elves can follow. In a siege, parties slip into or out of this fief with fewer losses.",

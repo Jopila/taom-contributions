@@ -136,5 +136,12 @@
     <string id="aom_clan_sturgia_12_name" text="House of Ravenhill" />
     <string id="aom_clan_sturgia_13_name" text="House of the Forest River" />
     <string id="aom_clan_sturgia_14_name" text="House of the Long Marshes" />
+    <string id="aom_clan_cardolan_1_name" text="House of Tyrn Gorthad" />
+    <string id="aom_clan_cardolan_2_name" text="House of Minas Eithel" />
+    <string id="aom_clan_cardolan_3_name" text="House of Tharbad" />
+    <string id="aom_clan_cardolan_4_name" text="Wardens of Sarn Ford" />
+    <string id="aom_clan_rhudaur_1_name" text="House of Cameth Brin" />
+    <string id="aom_clan_rhudaur_2_name" text="House of Ettendale" />
+    <string id="aom_clan_rhudaur_3_name" text="Wardens of the Coldfells" />
   </strings>
 </base>

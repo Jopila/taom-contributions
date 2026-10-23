@@ -180,3 +180,18 @@ the plates left. Not measured in TAOM yet.
 - **Status:** built and unit-tested; not yet checked in game.
 
 ---
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/map-perf-profiler.md](./map-perf-profiler.md)
+- [docs/features/skeleton-buffer-guard.md](./skeleton-buffer-guard.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/engine/campaign-tick-time-and-party-ai.md](../reference/engine/campaign-tick-time-and-party-ai.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

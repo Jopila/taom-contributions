@@ -257,6 +257,22 @@
 	<string id="aom_lord_BC5_6_name" text="{=aom_lord_BC5_6_name}Gnashrak" />
 	<string id="aom_lord_BC5_7_name" text="{=aom_lord_BC5_7_name}Gralza" />
 	<string id="aom_lord_BC5_8_name" text="{=aom_lord_BC5_8_name}Shelza" />
+	<string id="aom_lord_CA1_1_name" text="{=aom_lord_CA1_1_name}Aranthir" />
+	<string id="aom_lord_CA1_2_name" text="{=aom_lord_CA1_2_name}Belethor" />
+	<string id="aom_lord_CA1_3_name" text="{=aom_lord_CA1_3_name}Elendis" />
+	<string id="aom_lord_CA1_4_name" text="{=aom_lord_CA1_4_name}Aerin" />
+	<string id="aom_lord_CA2_1_name" text="{=aom_lord_CA2_1_name}Caladhor" />
+	<string id="aom_lord_CA2_2_name" text="{=aom_lord_CA2_2_name}Anardil" />
+	<string id="aom_lord_CA2_3_name" text="{=aom_lord_CA2_3_name}Daeriel" />
+	<string id="aom_lord_CA2_4_name" text="{=aom_lord_CA2_4_name}Eilinel" />
+	<string id="aom_lord_CA3_1_name" text="{=aom_lord_CA3_1_name}Baradhel" />
+	<string id="aom_lord_CA3_2_name" text="{=aom_lord_CA3_2_name}Calenon" />
+	<string id="aom_lord_CA3_3_name" text="{=aom_lord_CA3_3_name}Gwaeren" />
+	<string id="aom_lord_CA3_4_name" text="{=aom_lord_CA3_4_name}Lindis" />
+	<string id="aom_lord_CA4_1_name" text="{=aom_lord_CA4_1_name}Dorthar" />
+	<string id="aom_lord_CA4_2_name" text="{=aom_lord_CA4_2_name}Hirluin" />
+	<string id="aom_lord_CA4_3_name" text="{=aom_lord_CA4_3_name}Mirwen" />
+	<string id="aom_lord_CA4_4_name" text="{=aom_lord_CA4_4_name}Saelind" />
 	<string id="aom_lord_D10_1_name" text="{=aom_lord_D10_1_name}Vrâkmug" />
 	<string id="aom_lord_D10_2_name" text="{=aom_lord_D10_2_name}Shâgthul" />
 	<string id="aom_lord_D10_3_name" text="{=aom_lord_D10_3_name}Gûrnak" />
@@ -898,6 +914,18 @@
 	<string id="aom_lord_R2_3_name" text="{=aom_lord_R2_3_name}Erestor" />
 	<string id="aom_lord_R2_4_name" text="{=aom_lord_R2_4_name}Lindir" />
 	<string id="aom_lord_R3_1_name" text="{=aom_lord_R3_1_name}Chägermeister" />
+	<string id="aom_lord_RH1_1_name" text="{=aom_lord_RH1_1_name}Belegorn" />
+	<string id="aom_lord_RH1_2_name" text="{=aom_lord_RH1_2_name}Cadorn" />
+	<string id="aom_lord_RH1_3_name" text="{=aom_lord_RH1_3_name}Gilwen" />
+	<string id="aom_lord_RH1_4_name" text="{=aom_lord_RH1_4_name}Branwen" />
+	<string id="aom_lord_RH2_1_name" text="{=aom_lord_RH2_1_name}Corran" />
+	<string id="aom_lord_RH2_2_name" text="{=aom_lord_RH2_2_name}Eredhir" />
+	<string id="aom_lord_RH2_3_name" text="{=aom_lord_RH2_3_name}Eirlys" />
+	<string id="aom_lord_RH2_4_name" text="{=aom_lord_RH2_4_name}Heledd" />
+	<string id="aom_lord_RH3_1_name" text="{=aom_lord_RH3_1_name}Gorlan" />
+	<string id="aom_lord_RH3_2_name" text="{=aom_lord_RH3_2_name}Harnoth" />
+	<string id="aom_lord_RH3_3_name" text="{=aom_lord_RH3_3_name}Olwen" />
+	<string id="aom_lord_RH3_4_name" text="{=aom_lord_RH3_4_name}Seren" />
 	<string id="aom_lord_S10_1_name" text="{=aom_lord_S10_1_name}Halvard" />
 	<string id="aom_lord_S10_2_name" text="{=aom_lord_S10_2_name}Ragnhild" />
 	<string id="aom_lord_S10_3_name" text="{=aom_lord_S10_3_name}Arnkel" />

@@ -69,6 +69,8 @@ MESHES = {
     "gondor": ("gui_bg_village_empire", "wait_empire_village", "gui_bg_castle_empire"),
     "gundabad": ("gui_bg_village_sturgia", "wait_sturgia_village", "gui_bg_castle_sturgia"),
     "arthedain": ("gui_bg_village_empire", "wait_empire_village", "gui_bg_castle_empire"),
+    "cardolan": ("gui_bg_village_empire", "wait_empire_village", "gui_bg_castle_empire"),
+    "rhudaur": ("gui_bg_village_empire", "wait_empire_village", "gui_bg_castle_empire"),
     "bluecraig": ("gui_bg_village_sturgia", "wait_sturgia_village", "gui_bg_castle_sturgia"),
 }
 HEARTH = "500"  # the SETTLEMENT_ECONOMY_FLOOR for isengard (tools/settlement_economy_floor.json)
@@ -159,6 +161,40 @@ VILLAGES = [
     Village("castle_village_G6_1", "Lith-bosh", "castle_G6", "swine_farm",  "gundabad", "sturgia_village_b", after="castle_G6"),
     Village("castle_village_G6_2", "Lith-mauz", "castle_G6", "cattle_farm", "gundabad", "sturgia_village_h", after="castle_G6"),
     Village("castle_village_G6_3", "Lith-mîr",  "castle_G6", "silver_mine", "gundabad", "sturgia_village_d", after="castle_G6"),
+    # Cardolan and Rhudaur (#978): the 29 villages Mike placed 2026-10-23 with their nine fortifications
+    # (tools/add_map_fortifications.py writes those first). Names in each realm's style: Bree-land and
+    # Sindarin for Cardolan, with the canon Swanfleet, Andrath, Eryn Vorn and Girdley; hill names for
+    # Rhudaur, with the canon Last Bridge and Ettendale. Hearth 300 and Gondor's four village scenes in
+    # rotation, as Arthedain's: weak realms, off the economy-floor spec.
+    Village("village_CA1_1", "Eithelford", "town_CA1", "fisherman", "cardolan", "taom_gondor_village_001_forceatmo", hearth="300", after="town_CA1"),
+    Village("village_CA1_2", "Talath Eithel", "town_CA1", "wheat_farm", "cardolan", "taom_gondor_village_002_forceatmo", hearth="300", after="town_CA1"),
+    Village("village_CA1_3", "Greenway Stead", "town_CA1", "cattle_farm", "cardolan", "taom_gondor_village_003_forceatmo", hearth="300", after="town_CA1"),
+    Village("village_CA1_4", "Nen Galen", "town_CA1", "sheep_farm", "cardolan", "taom_gondor_village_004_forceatmo", hearth="300", after="town_CA1"),
+    Village("village_CA2_1", "Gorthad Fold", "town_CA2", "sheep_farm", "cardolan", "taom_gondor_village_001_forceatmo", hearth="300", after="town_CA2"),
+    Village("village_CA2_2", "Barrowfield", "town_CA2", "wheat_farm", "cardolan", "taom_gondor_village_002_forceatmo", hearth="300", after="town_CA2"),
+    Village("village_CA2_4", "Downsend", "town_CA2", "cattle_farm", "cardolan", "taom_gondor_village_003_forceatmo", hearth="300", after="town_CA2"),
+    Village("village_CA3_1", "Swanfleet", "town_CA3", "fisherman", "cardolan", "taom_gondor_village_004_forceatmo", hearth="300", after="town_CA3"),
+    Village("village_CA3_2", "Minhiriath Mead", "town_CA3", "wheat_farm", "cardolan", "taom_gondor_village_001_forceatmo", hearth="300", after="town_CA3"),
+    Village("village_CA3_3", "Gwathló Ferry", "town_CA3", "flax_plant", "cardolan", "taom_gondor_village_002_forceatmo", hearth="300", after="town_CA3"),
+    Village("village_CA3_4", "Eryn Vorn", "town_CA3", "lumberjack", "cardolan", "taom_gondor_village_003_forceatmo", hearth="300", after="town_CA3"),
+    Village("castle_village_CA1_1", "Downsedge", "castle_CA1", "sheep_farm", "cardolan", "taom_gondor_village_004_forceatmo", hearth="300", after="castle_CA1"),
+    Village("castle_village_CA1_2", "Andrath", "castle_CA1", "cattle_farm", "cardolan", "taom_gondor_village_001_forceatmo", hearth="300", after="castle_CA1"),
+    Village("castle_village_CA1_3", "Old Forest Eaves", "castle_CA1", "lumberjack", "cardolan", "taom_gondor_village_002_forceatmo", hearth="300", after="castle_CA1"),
+    Village("castle_village_CA2_1", "Sarn Mead", "castle_CA2", "wheat_farm", "cardolan", "taom_gondor_village_003_forceatmo", hearth="300", after="castle_CA2"),
+    Village("castle_village_CA2_2", "Girdley", "castle_CA2", "fisherman", "cardolan", "taom_gondor_village_004_forceatmo", hearth="300", after="castle_CA2"),
+    Village("castle_village_CA2_3", "Stonewold", "castle_CA2", "sheep_farm", "cardolan", "taom_gondor_village_001_forceatmo", hearth="300", after="castle_CA2"),
+    Village("castle_village_CA2_4", "Brandy Reach", "castle_CA2", "cattle_farm", "cardolan", "taom_gondor_village_002_forceatmo", hearth="300", after="castle_CA2"),
+    Village("village_RH1_1", "Brin Hollow", "town_RH1", "sheep_farm", "rhudaur", "taom_gondor_village_003_forceatmo", hearth="300", after="town_RH1"),
+    Village("village_RH1_2", "Trollshaw Edge", "town_RH1", "lumberjack", "rhudaur", "taom_gondor_village_004_forceatmo", hearth="300", after="town_RH1"),
+    Village("village_RH1_3", "Last Bridge", "town_RH1", "fisherman", "rhudaur", "taom_gondor_village_001_forceatmo", hearth="300", after="town_RH1"),
+    Village("castle_village_RH1_1", "Angle Fold", "castle_RH1", "wheat_farm", "rhudaur", "taom_gondor_village_002_forceatmo", hearth="300", after="castle_RH1"),
+    Village("castle_village_RH1_2", "Loudwater Mead", "castle_RH1", "cattle_farm", "rhudaur", "taom_gondor_village_003_forceatmo", hearth="300", after="castle_RH1"),
+    Village("castle_village_RH2_1", "Ettendale", "castle_RH2", "sheep_farm", "rhudaur", "taom_gondor_village_004_forceatmo", hearth="300", after="castle_RH2"),
+    Village("castle_village_RH2_2", "Fell Steading", "castle_RH2", "iron_mine", "rhudaur", "taom_gondor_village_001_forceatmo", hearth="300", after="castle_RH2"),
+    Village("castle_village_RH2_3", "Hoarwell Bend", "castle_RH2", "fisherman", "rhudaur", "taom_gondor_village_002_forceatmo", hearth="300", after="castle_RH2"),
+    Village("castle_village_RH3_1", "Coldfell Shieling", "castle_RH3", "sheep_farm", "rhudaur", "taom_gondor_village_003_forceatmo", hearth="300", after="castle_RH3"),
+    Village("castle_village_RH3_2", "Rimecliff", "castle_RH3", "trapper", "rhudaur", "taom_gondor_village_004_forceatmo", hearth="300", after="castle_RH3"),
+    Village("castle_village_RH3_3", "Greyfell Wood", "castle_RH3", "lumberjack", "rhudaur", "taom_gondor_village_001_forceatmo", hearth="300", after="castle_RH3"),
 ]
 INSERT_AFTER = "village_isengard_a"   # default anchor: last settlement of the Isengard block, and its last loc row
 

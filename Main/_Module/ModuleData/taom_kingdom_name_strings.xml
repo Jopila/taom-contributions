@@ -12,6 +12,11 @@
 	<string id="taom_bluecraig_ruler_title" text="{=taom_bluecraig_ruler_title}Great Goblin" />
 	<string id="taom_bluecraig_short_name" text="{=taom_bluecraig_short_name}Blue Craig" />
 	<string id="taom_bluecraig_title" text="{=taom_bluecraig_title}Goblin-Realm of Blue Craig" />
+	<string id="taom_cardolan_desc" text="{=taom_cardolan_desc}The southern of the three realms into which Arnor was sundered. Its kings lie in the barrows of Tyrn Gorthad and its riders keep the plains between the Baranduin and the Greyflood, but its towns are few and its lords contend with Arthedain and Rhudaur for the crown of Arnor." />
+	<string id="taom_cardolan_name" text="{=taom_cardolan_name}Kingdom of Cardolan" />
+	<string id="taom_cardolan_ruler_title" text="{=taom_cardolan_ruler_title}King" />
+	<string id="taom_cardolan_short_name" text="{=taom_cardolan_short_name}Cardolan" />
+	<string id="taom_cardolan_title" text="{=taom_cardolan_title}Kingdom of Cardolan" />
 	<string id="taom_dolguldur_desc" text="{=taom_dolguldur_desc}Dol Guldur, the fortress of shadow and despair, stands as a menacing beacon of the Necromancer's dark will. The Orcs and foul creatures that inhabit its depths strike fear into the hearts of all." />
 	<string id="taom_dolguldur_name" text="{=taom_dolguldur_name}Dol Guldur" />
 	<string id="taom_dolguldur_ruler_title" text="{=taom_dolguldur_ruler_title}Dread-Lord" />
@@ -57,6 +62,11 @@
 	<string id="taom_mistymountainorcs_ruler_title" text="{=taom_mistymountainorcs_ruler_title}Warlord" />
 	<string id="taom_mistymountainorcs_short_name" text="{=taom_mistymountainorcs_short_name}Misty Orcs" />
 	<string id="taom_mistymountainorcs_title" text="{=taom_mistymountainorcs_title}Orc-Host of the Misty Mountains" />
+	<string id="taom_rhudaur_desc" text="{=taom_rhudaur_desc}The eastern of the three realms into which Arnor was sundered, a hill kingdom between the Hoarwell and the Loudwater. Its Dunedain lords hold Cameth Brin and the Angle and rule a hard people of hill-men, with trolls in the fells and orcs on every pass." />
+	<string id="taom_rhudaur_name" text="{=taom_rhudaur_name}Kingdom of Rhudaur" />
+	<string id="taom_rhudaur_ruler_title" text="{=taom_rhudaur_ruler_title}King" />
+	<string id="taom_rhudaur_short_name" text="{=taom_rhudaur_short_name}Rhudaur" />
+	<string id="taom_rhudaur_title" text="{=taom_rhudaur_title}Kingdom of Rhudaur" />
 	<string id="taom_rivendell_desc" text="{=taom_rivendell_desc}Hidden deep within the clefts of the Misty Mountains, Rivendell is the Last Homely House East of the Sea. Founded by Elrond Half-elven, it is a refuge against the gathering dark, a place of healing, lore, and quiet strength." />
 	<string id="taom_rivendell_name" text="{=taom_rivendell_name}Imladris" />
 	<string id="taom_rivendell_ruler_title" text="{=taom_rivendell_ruler_title}Lord" />

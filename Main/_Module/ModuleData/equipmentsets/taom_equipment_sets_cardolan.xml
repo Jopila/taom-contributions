@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EquipmentRosters>
+
+	<!-- ==================== GONDOR LORD BATTLE EQUIPMENT ==================== -->
+
+	<EquipmentRoster id="cardolan_bat_template_medium_a" culture="Culture.cardolan">
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.wm_gondor_sword_a01" />
+			<Equipment slot="Item1" id="Item.sm_gd_shield_a1" />
+			<Equipment slot="Head" id="Item.sk_gd_mns_cita_helmet_heavy_a" />
+			<Equipment slot="Body" id="Item.sk_gd_mns_citadel_chest_med_a" />
+			<Equipment slot="Cape" id="Item.sk_gd_ano_pauld_inf_heavy_a" />
+			<Equipment slot="Gloves" id="Item.sk_gd_ano_gloves_a" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_grvs_inf_med_a" />
+			<Equipment slot="HorseHarness" id="Item.chain_horse_harness" />
+			<Equipment slot="Horse" id="Item.charger" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+	<EquipmentRoster id="cardolan_bat_template_medium_b" culture="Culture.cardolan">
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.wm_gondor_sword_a03" />
+			<Equipment slot="Item1" id="Item.sm_gd_shield_a1" />
+			<Equipment slot="Head" id="Item.sk_gd_mns_cita_helmet_heavy_b" />
+			<Equipment slot="Body" id="Item.sk_gd_mns_citadel_chest_heavy_a" />
+			<Equipment slot="Cape" id="Item.sk_gd_ano_pauld_inf_med_a" />
+			<Equipment slot="Gloves" id="Item.sk_gd_ano_bracer_inf_med_a" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_grvs_inf_med_a" />
+			<Equipment slot="HorseHarness" id="Item.chain_horse_harness" />
+			<Equipment slot="Horse" id="Item.charger" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+	<EquipmentRoster id="cardolan_bat_template_medium_c" culture="Culture.cardolan">
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.wm_gondor_sword_a01" />
+			<Equipment slot="Head" id="Item.sk_gd_mns_fount_helmet_heavy_a" />
+			<Equipment slot="Body" id="Item.sk_gd_mns_fount_chest_heavy_a" />
+			<Equipment slot="Cape" id="Item.sk_gd_ano_pauld_cape_fount_elite_a" />
+			<Equipment slot="Gloves" id="Item.sk_gd_ano_gloves_a" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_grvs_noble_med_a" />
+			<Equipment slot="HorseHarness" id="Item.chain_horse_harness" />
+			<Equipment slot="Horse" id="Item.charger" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+	<EquipmentRoster id="cardolan_bat_template_medium_d" culture="Culture.cardolan">
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.wm_gondor_sword_a07" />
+			<Equipment slot="Head" id="Item.sk_gd_ano_noble_helmet_med_a" />
+			<Equipment slot="Body" id="Item.sk_gd_ano_inf_chest_heavy_b" />
+			<Equipment slot="Cape" id="Item.sk_gd_ano_pauld_noble_heavy_a" />
+			<Equipment slot="Gloves" id="Item.sk_gd_ano_bracer_noble_heavy_a" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+			<Equipment slot="HorseHarness" id="Item.chain_horse_harness" />
+			<Equipment slot="Horse" id="Item.charger" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+	<EquipmentRoster id="cardolan_bat_template_medium_e" culture="Culture.cardolan">
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.wm_gondor_sword_a02" />
+			<Equipment slot="Head" id="Item.sk_gd_mns_noble_helmet_heavy_a" />
+			<Equipment slot="Body" id="Item.sk_gd_ano_inf_chest_heavy_a" />
+			<Equipment slot="Cape" id="Item.sk_gd_ano_pauld_inf_med_a" />
+			<Equipment slot="Gloves" id="Item.sk_gd_ano_bracer_noble_med_a" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_grvs_inf_med_a" />
+			<Equipment slot="HorseHarness" id="Item.chain_horse_harness" />
+			<Equipment slot="Horse" id="Item.charger" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+	<!-- ==================== GONDOR LORD CIVILIAN EQUIPMENT ==================== -->
+
+	<EquipmentRoster id="cardolan_civ_template_default_a" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Item0" id="Item.wm_gondor_sword_a01" />
+			<Equipment slot="Item1" id="Item.sm_gd_shield_a1" />
+			<Equipment slot="Head" id="Item.sk_gd_mns_cita_helmet_heavy_a" />
+			<Equipment slot="Body" id="Item.sk_gd_mns_citadel_chest_med_a" />
+			<Equipment slot="Cape" id="Item.sk_gd_ano_pauld_inf_heavy_a" />
+			<Equipment slot="Gloves" id="Item.sk_gd_ano_gloves_a" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_grvs_inf_med_a" />
+			<Equipment slot="HorseHarness" id="Item.chain_horse_harness" />
+			<Equipment slot="Horse" id="Item.charger" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+	<EquipmentRoster id="cardolan_civ_template_default_b" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Item0" id="Item.wm_gondor_sword_a03" />
+			<Equipment slot="Item1" id="Item.sm_gd_shield_a1" />
+			<Equipment slot="Head" id="Item.sk_gd_mns_cita_helmet_heavy_b" />
+			<Equipment slot="Body" id="Item.sk_gd_mns_citadel_chest_heavy_a" />
+			<Equipment slot="Cape" id="Item.sk_gd_ano_pauld_inf_med_a" />
+			<Equipment slot="Gloves" id="Item.sk_gd_ano_bracer_inf_med_a" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_grvs_inf_med_a" />
+			<Equipment slot="HorseHarness" id="Item.chain_horse_harness" />
+			<Equipment slot="Horse" id="Item.charger" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+	<EquipmentRoster id="cardolan_civ_template_default_c" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Item0" id="Item.wm_gondor_sword_a01" />
+			<Equipment slot="Head" id="Item.sk_gd_mns_fount_helmet_heavy_a" />
+			<Equipment slot="Body" id="Item.sk_gd_mns_fount_chest_heavy_a" />
+			<Equipment slot="Cape" id="Item.sk_gd_ano_pauld_cape_fount_elite_a" />
+			<Equipment slot="Gloves" id="Item.sk_gd_ano_gloves_a" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_grvs_noble_med_a" />
+			<Equipment slot="HorseHarness" id="Item.chain_horse_harness" />
+			<Equipment slot="Horse" id="Item.charger" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+	<EquipmentRoster id="cardolan_civ_template_default_d" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Item0" id="Item.wm_gondor_sword_a07" />
+			<Equipment slot="Head" id="Item.sk_gd_ano_noble_helmet_med_a" />
+			<Equipment slot="Body" id="Item.sk_gd_ano_inf_chest_heavy_b" />
+			<Equipment slot="Cape" id="Item.sk_gd_ano_pauld_noble_heavy_a" />
+			<Equipment slot="Gloves" id="Item.sk_gd_ano_bracer_noble_heavy_a" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_boots_a" />
+			<Equipment slot="HorseHarness" id="Item.chain_horse_harness" />
+			<Equipment slot="Horse" id="Item.charger" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+	<EquipmentRoster id="cardolan_civ_template_default_e" culture="Culture.cardolan">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Item0" id="Item.wm_gondor_sword_a02" />
+			<Equipment slot="Head" id="Item.sk_gd_mns_noble_helmet_heavy_a" />
+			<Equipment slot="Body" id="Item.sk_gd_ano_inf_chest_heavy_a" />
+			<Equipment slot="Cape" id="Item.sk_gd_ano_pauld_inf_med_a" />
+			<Equipment slot="Gloves" id="Item.sk_gd_ano_bracer_noble_med_a" />
+			<Equipment slot="Leg" id="Item.sk_gd_ano_grvs_inf_med_a" />
+			<Equipment slot="HorseHarness" id="Item.chain_horse_harness" />
+			<Equipment slot="Horse" id="Item.charger" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+</EquipmentRosters>

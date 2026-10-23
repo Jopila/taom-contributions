@@ -266,6 +266,119 @@ TARGETS = {
     },
 }
 
+
+def _arnor_successor(**over):
+    """Cardolan and Rhudaur (#978) are cut from Gondor the way Arthedain is: the same feats, the same
+    standalone files, roster family, townsfolk templates and own registration region. Each passes its
+    own capital, words, names and strings; `item_map` is opt-in (Rhudaur wears the Arnor kit, Cardolan
+    keeps Gondor's armour as its placeholder)."""
+    base = TARGETS["arthedain"]
+    cfg = {k: base[k] for k in ("src", "race", "raceword", "src_short", "feats", "standalone",
+                                "party_names", "own_reg")}
+    c = over["tag"].lower()
+    cfg.update(
+        rosters_kept=rf"^{c}_(bat_template_medium|civ_template_default)_[a-e]$",
+        id_overrides={f"{c}_ano_peasant": f"{c}_levy", f"{c}_ano_footman": f"{c}_dunadan"},
+        mercenaries=[f"{c}_dunadan_merc"],
+    )
+    cfg.update(over)
+    return cfg
+
+
+def _ruler_strings(c, formal, informal, neutral, rich, adjective, father, mother):
+    return {
+        f"str_faction_ruler.{c}": "King",
+        f"str_faction_ruler.{c}_f": "Queen",
+        f"str_faction_ruler_term_in_speech.{c}": "{?RULER.GENDER}the Queen{?}the King{\\?} {RULER.NAME}",
+        f"str_faction_ruler_name_with_title.{c}": "{?RULER.GENDER}Queen{?}King{\\?} {RULER.NAME}",
+        f"str_faction_formal_name_for_culture.{c}": formal,
+        f"str_faction_informal_name_for_culture.{c}": informal,
+        f"str_neutral_term_for_culture.{c}": neutral,
+        f"str_culture_rich_name.{c}": rich,
+        f"str_adjective_for_culture.{c}": adjective,
+        f"str_player_father_name.{c}": father,
+        f"str_player_mother_name.{c}": mother,
+    }
+
+
+TARGETS["cardolan"] = _arnor_successor(
+    capital="town_CA2",  # Caras Gorthad (Mike, 2026-10-23)
+    adjective="Cardolan", tag="Cardolan", short="card",
+    color="0xFF885040", color2="0xFFD8C8A0",
+    subs=[
+        ("Minas Tirith", "Caras Gorthad"),
+        ("Pelargir", "Tharbad"),
+        ("Gondorians", "Dúnedain"),
+        ("Gondorian", "Cardolan"),
+        ("Gondor", "Cardolan"),
+    ],
+    culture_name="Cardolan",
+    culture_desc=(
+        "The Dúnedain of Cardolan hold the south of old Arnor, the plains and river country between "
+        "the Baranduin and the Greyflood. Their kings lie in the barrows of Tyrn Gorthad, their "
+        "barges still come up to Tharbad, and their riders are the best of the three northern "
+        "kingdoms. Their towns are few and their lords quarrel with Arthedain and Rhudaur over the "
+        "old crown, while the wild lands grow bolder every year."),
+    string_overrides=_ruler_strings("cardolan", "Cardolan", "the Dúnedain of Cardolan", "Dúnedain",
+                                    "Dúnedain of Cardolan", "Cardolan", "Tarandor", "Elendis"),
+    names={
+        "male_names": [
+            "Anardil", "Arthaer", "Baradhel", "Belethor", "Caladhor", "Calenon", "Celebros", "Dagnir",
+            "Dorthar", "Erchon", "Faelon", "Gaerhil", "Hallon", "Hirluin", "Iorlas", "Lothon",
+            "Mallos", "Morlad", "Nardur", "Orodhel", "Pelendur", "Ruithel", "Sarandil", "Tarandor",
+            "Thalion", "Turgil", "Vorondil", "Bregor", "Celedor", "Dírion", "Golasgil", "Hadrion",
+            "Ingold", "Mardacil", "Nimbor", "Ohtar", "Rondor", "Taurion", "Ulbor", "Halmir"],
+        "female_names": [
+            "Elendis", "Aerin", "Beriel", "Calimë", "Daeriel", "Eilinel", "Faeleth", "Gwaeren",
+            "Haleth", "Ivren", "Lindis", "Mírwen", "Morleth", "Nellas", "Nimloth", "Orwen",
+            "Rían", "Saelind", "Tirnel", "Vanwë", "Andreth", "Emeldir", "Lalaith", "Silmariën"],
+        "clan_names": [
+            "House of Tyrn Gorthad", "House of Tharbad", "House of the Greyflood", "House of Minhiriath",
+            "House of the South Downs", "House of Sarn Ford", "House of Eryn Vorn", "House of the Barrows",
+            "House of Minas Eithel", "House of the Greenway", "House of Swanfleet", "House of Andrath"],
+    },
+)
+
+TARGETS["rhudaur"] = _arnor_successor(
+    capital="town_RH1",  # Cameth Brin (Mike, 2026-10-23)
+    adjective="Rhudaur", tag="Rhudaur", short="rhud",
+    color="0xFF603830", color2="0xFFC8B8A8",
+    subs=[
+        ("Minas Tirith", "Cameth Brin"),
+        ("Pelargir", "Egladil"),
+        ("Gondorians", "Dúnedain"),
+        ("Gondorian", "Rhudaur"),
+        ("Gondor", "Rhudaur"),
+    ],
+    culture_name="Rhudaur",
+    culture_desc=(
+        "Rhudaur is the hill kingdom of old Arnor, between the Hoarwell and the Loudwater. Its "
+        "Dúnedain lords hold the Angle and the tower of Cameth Brin and rule a people of hill-men "
+        "who never loved the West. The line of its first king still endures, but its holds are cold, "
+        "its fells are full of trolls, and the orcs of the mountains watch every pass."),
+    string_overrides=_ruler_strings("rhudaur", "Rhudaur", "the Dúnedain of the Angle", "Dúnedain",
+                                    "Dúnedain of Rhudaur", "Rhudaur", "Orodrim", "Gilwen"),
+    item_map_files=TARGETS["arthedain"]["item_map_files"],
+    item_map=TARGETS["arthedain"]["item_map"],
+    names={
+        "male_names": [
+            "Belegorn", "Amrodir", "Brannoc", "Cadorn", "Corran", "Dergil", "Dunhal", "Eredhir",
+            "Fengar", "Galdric", "Gorlan", "Haldric", "Harnoth", "Ithrandor", "Kelmar", "Lorgan",
+            "Malbor", "Morcai", "Nethril", "Orodrim", "Pellam", "Radhruin", "Rostan", "Sarn",
+            "Talgar", "Thorondur", "Ulfar", "Vardil", "Wulfric", "Arnach", "Bryn", "Cuthred",
+            "Draugor", "Egalric", "Fornor", "Garth", "Hunthor", "Ivorn", "Mardoc", "Torgil"],
+        "female_names": [
+            "Gilwen", "Aelin", "Branwen", "Cerys", "Dilwen", "Eirlys", "Ffion", "Glenwen",
+            "Heledd", "Ilar", "Lowri", "Maelis", "Morfudd", "Nesta", "Olwen", "Rhosyn",
+            "Seren", "Tegwen", "Andraste", "Brynja", "Eluned", "Gwenith", "Mirien", "Rhiain"],
+        "clan_names": [
+            "House of Cameth Brin", "House of the Angle", "House of Ettendale", "House of the Coldfells",
+            "House of the Trollshaws", "House of the Last Bridge", "House of the Loudwater",
+            "House of the Hoarwell", "House of the Ettenmoors", "House of Egladil", "House of the Fells",
+            "House of Greyfell"],
+    },
+)
+
 # BANNERLORD_GAME_DIR overrides the install path (#404), as in tools/add_map_villages.py.
 LIVE_SETTLEMENTS = (Path(game_dir(r"E:/Steam/steamapps/common/Mount & Blade II Bannerlord"))
                     / "Modules" / "TAOM_Map" / "ModuleData" / "settlements.xml")
@@ -526,8 +639,12 @@ def source_blocks(kind, text, src, cfg=None):
             raise SystemExit(f"no canonical party templates found for {src}")
         return "".join(found)
     if kind == "strings":
+        # The liege titles (str_liege_title*.<culture>, commit 30003668b) are multi-line elements with a
+        # culture tag and belong to the Liege Titles feature, which writes one row pair per realm by
+        # hand: a line-based clone would copy only their opening tag and break the file.
         lines = [ln for ln in text.splitlines()
-                 if f".{src}" in ln and "<string" in ln and "taom_faction_" not in ln]
+                 if f".{src}" in ln and "<string" in ln and "taom_faction_" not in ln
+                 and "str_liege_title" not in ln]
         if not lines:
             raise SystemExit(f"no <string> lines found for {src}")
         return "\n".join("  " + ln.strip() for ln in lines) + "\n"
@@ -813,8 +930,9 @@ def main():
     # troop file is registered whether or not this script wrote it: a generated tree lives there.
     for target in (t for t in targets if TARGETS[t].get("own_reg")):
         mark = f"{MARKER}-REG:{target}"
-        sm_text = re.sub(r"[ \t]*<!-- " + re.escape(mark) + r":BEGIN -->.*?<!-- " + re.escape(mark) + r":END -->\n",
-                         "", sm_text, flags=re.DOTALL)
+        # Replaced where it stands (see upsert): strip-and-append reordered the regions on every run.
+        reg_region = re.compile(r"[ \t]*<!-- " + re.escape(mark) + r":BEGIN -->.*?<!-- " + re.escape(mark)
+                                + r":END -->\n", re.DOTALL)
         reg = f"    <!-- {mark}:BEGIN -->\n"
         for idv, path in (("NPCCharacters", f"troops/troops_{target}"),
                           ("NPCCharacters", f"characters/npcs_{target}"),
@@ -825,6 +943,9 @@ def main():
                                  "about to be written")
             reg += xml_node(idv, path)
         reg += f"    <!-- {mark}:END -->\n"
+        if reg_region.search(sm_text):
+            sm_text = reg_region.sub(lambda _m, r=reg: r, sm_text, count=1)
+            continue
         anchor = re.search(r"[ \t]*<!-- " + MARKER + r"-REG:END -->\n", sm_text)
         if not anchor:
             raise SystemExit("SubModule.xml: TAOM-NEWCULTURE-REG:END anchor not found")
@@ -861,10 +982,16 @@ def main():
         print("DRY RUN — re-run with --apply to write")
         return 0
 
+    # Parse every document before writing any of them: a transform that breaks one file must leave
+    # all of them untouched (tools/README.md "XML I/O convention").
+    for path, text, nl, bom in pending_writes:
+        try:
+            ET.fromstring(text.lstrip("﻿").encode("utf-8"))
+        except ET.ParseError as exc:
+            raise SystemExit(f"REFUSING: {Path(path).relative_to(ROOT)} would not parse ({exc}); nothing written")
     for path, text, nl, bom in pending_writes:
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         write(path, text, nl, bom)
-        ET.parse(path)
         print(f"  written + well-formed: {Path(path).relative_to(ROOT)}")
 
     print("\nDONE, SubModule.xml registration included. NOT yet done, and required before this is safe to load:")

@@ -310,6 +310,28 @@ CULTURES["arthedain"] = {
     "shield": "sm_gd_shield_a1",
 }
 
+# Cardolan and Rhudaur (#978): each culture's starting kit from the pieces its own troops wear
+# (tools/generate_cardolan_troops.py: Gondor's armour; generate_rhudaur_troops.py: the Arnor kit and
+# Dunland's axes), with Gondor's civilian coats and starter weapons as Arthedain has. Both mounted.
+CULTURES["cardolan"] = {
+    "body_civilian": "gondor_noble_coat_a",
+    "body_alt": "gondor_noble_coat_b",
+    "body_military": "sk_gd_anf_inf_chainmail_a",
+    "leg": "sk_gd_ano_boots_a",
+    "leg_alt": "sk_gd_ano_grvs_inf_light_a",
+    "head_light": "ithilien_hood",
+    "head_military": "sk_gd_pin_inf_helmet_med_a",
+    "gloves": "sk_gd_ano_gloves_a",
+    "cape": "sk_gd_ano_pauld_inf_med_a",
+    "cape_alt": "sk_gd_ano_pauld_inf_med_b",
+    "sword": "wm_gondor_sword_a01",
+    "spear": "wm_gondor_light_spear_cardolan",
+    "bow": "gondor_steel_bow_starter",
+    "arrows": "default_arrows",
+    "shield": "sm_gd_shield_a1",
+}
+CULTURES["rhudaur"] = dict(CULTURES["arthedain"], sword="sturgia_axe_2_t2", shield="dunland_wulf_shield_light_a")
+
 OCCUPATIONS = ["retainer", "merchant", "farmer", "artisan", "hunter", "vagabond"]
 CAREERS = ["retainer", "mercenary", "guard", "hunter", "infantry", "skirmisher", "bard", "6"]
 

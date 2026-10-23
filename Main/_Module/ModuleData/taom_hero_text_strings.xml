@@ -346,6 +346,7 @@
 	<string id="leordinoth_description" text="{=leordinoth_description}Leôrdinoth Kalkian, a veteran campaigner of Rhûn, leads seasoned warriors into battle during the Third Age for Sauron. His experience turns the tide in many conflicts. Leôrdinoth's tactical genius maximizes the Easterlings' martial prowess." />
 	<string id="lord_AN1_1_description" text="{=lord_AN1_1_description}Arvegil II, King of Arthedain, heir of Arvedui and of Isildur, who holds Fornost against Angmar with fewer swords each year." />
 	<string id="lord_BC1_1_description" text="{=lord_BC1_1_description}Morgrub, the Great Goblin of Blue Craig, whose swarms infest the Blue Mountains of the far west, hard by the Grey Havens of Lindon." />
+	<string id="lord_CA1_1_description" text="{=lord_CA1_1_description}Aranthir, King of Cardolan, heir of Earendur's second son, who keeps the barrow-kings' crown at Caras Gorthad." />
 	<string id="lord_GB1_1_description" text="{=lord_GB1_1_description}Muzgash, the Great Goblin of Goblin Town, master of the warrens of the High Pass." />
 	<string id="lord_I1_10_text" text="{=lord_I1_10_text}Krazdra leads scouting parties for the Iron Fist. Her knowledge of the terrain surrounding Isengard is unmatched." />
 	<string id="lord_I1_13_text" text="{=lord_I1_13_text}Ughasha commands the Blood Guard's forward sentries. Her vigilance has foiled many attempts to infiltrate Isengard's defenses." />
@@ -370,6 +371,7 @@
 	<string id="lord_I4_5_text" text="{=lord_I4_5_text}Thraka serves the Black Maw as quartermaster and enforcer. Her iron discipline keeps the supply lines running even under siege." />
 	<string id="lord_LN1_1_description" text="{=lord_LN1_1_description}Círdan, the Shipwright, Lord of the Grey Havens and eldest of the Eldar in Middle-earth, who kept the Ring Narya until he gave it to Mithrandir." />
 	<string id="lord_MM1_1_description" text="{=lord_MM1_1_description}Bûrzum, Warlord of the Misty Mountains, who holds the deep places of Moria and the cold peaks above." />
+	<string id="lord_RH1_1_description" text="{=lord_RH1_1_description}Belegorn, King of Rhudaur, heir of Earendur's third son, lord of Cameth Brin and of the hill-men of the Angle." />
 	<string id="lord_U1_2_text" text="{=lord_U1_2_text}Zimraphel, a descendant of the Black Númenóreans, commands the Corsair fleet with cunning and grace. Her knowledge of the sea and its treacherous currents is unrivaled among the captains of Umbar." />
 	<string id="lorgath_description" text="{=lorgath_description}Lorgath, master of the Black Spider Horde, breeds giant spiders, directly inspired by the arachnids of Mirkwood in The Hobbit." />
 	<string id="lothuial_description" text="{=lothuial_description}Lothuial, consort to Thranduil, draws from the elegant elven queens in Middle-earth's tales, providing counsel and healing wisdom to the royal house. Her presence strengthens the bonds of Nos Lasgalen, fostering unity among the Wood-elves as they confront the darkness spreading through Mirkwood." />
