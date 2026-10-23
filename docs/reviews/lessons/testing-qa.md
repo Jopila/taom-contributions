@@ -2150,3 +2150,17 @@ used only the spelling the regex was written for.
   the grouped (`[A, B]`) forms, plus a negative row for a near-miss name (`HarmonyPatchCategory` alone). Prefer the compiler
   or the IL where a text scan is not enough.
 - **Source:** [rca-taom-client-b3-2026-10-22.md](../rca-taom-client-b3-2026-10-22.md) finding 2.
+
+### An IL gate fails closed on an operand it does not decode; a guard test counts every call (B6c, 2026-10-23)
+The ADR-013 IL walk (`IlCallScanner.ExtractReferencedMembers`) decodes method, field, type and token operands, so a
+client type named only in a `calli` stand-alone signature passed the server gates while the JIT still resolves it. The
+`ManualPatchApplicator` source test matched one guarded call and so accepted a second, unguarded one, and it walked
+`ApplyAll` but not the lambdas the compiler moves into nested types.
+- **Repeat of:** "A regex scan sees one spelling" (B3, 2026-10-22), here for IL operand kinds and for call counts.
+- **Why missed:** each gate was proven red by one mutation, which is blind to the forms it does not exercise.
+- **Prevent:** an IL walk reports a sentinel for any operand kind it skips (`IlClientReferences.UndecodedCalliSignature`);
+  a guard test asserts the guarded call once in source and counts the member's call instructions in IL (a named
+  argument escapes a regex); a method gate walks every method of the type and its nested types, because a lambda lands
+  in a nested type and a non-capturing local function on the type itself. Write `_ = typeof(X);` off as a mutation: the compiler emits no IL for
+  it; use `GC.KeepAlive(typeof(X))`.
+- **Source:** [rca-b6c-headless-guards-2026-10-23.md](../rca-b6c-headless-guards-2026-10-23.md) findings 1 and 2.

@@ -51,7 +51,7 @@ public class ReflectionSiteBindingTests
     // --- CompanionTactics role tooltips (RoleTooltipDecorator.cs) + manual patch (ManualPatchApplicator.cs) ---
     [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.Party.PartyCharacterVM", "PartyCharacterVM", "TypeIconData", "Property", "RoleTooltipDecorator.cs:40")]
     [DataRow("TaleWorlds.MountAndBlade.ViewModelCollection.OrderOfBattle.OrderOfBattleHeroItemVM", "OrderOfBattleHeroItemVM", "_cachedTooltipProperties", "Field", "RoleTooltipDecorator.cs:41")]
-    [DataRow("TaleWorlds.MountAndBlade.ViewModelCollection.OrderOfBattle.OrderOfBattleHeroItemVM", "OrderOfBattleHeroItemVM", "GetCaptainTooltip", "Method", "ManualPatchApplicator.cs:24 (manual patch)")]
+    [DataRow("TaleWorlds.MountAndBlade.ViewModelCollection.OrderOfBattle.OrderOfBattleHeroItemVM", "OrderOfBattleHeroItemVM", "GetCaptainTooltip", "Method", "ManualPatchApplicator.cs:72 (manual patch)")]
     // --- CharacterCreation race selector (FaceGenRaceSelectorRebuilder.cs) ---
     [DataRow("TaleWorlds.MountAndBlade.ViewModelCollection.FaceGenerator.FaceGenVM", "FaceGenVM", "_selectedRace", "Field", "FaceGenRaceSelectorRebuilder.cs:208")]
     // --- SelectorVM<T> backing fields (FaceGen + CustomBattles commander selector) ---

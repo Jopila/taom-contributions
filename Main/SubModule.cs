@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using TAOM.Dependencies.Foundation;
 using TAOM.Features.CoopInterop;
@@ -252,37 +253,14 @@ public class SubModule : MBSubModuleBase
         // must already be attached when MCM calls CreateAndRegister.
         TryPatchCategory("Patch41_McmLayoutFix");
 
-        _timeAccelerationService = IoC.Resolve<ITimeAccelerationService>();
+        // ADR-013: the time controls read MapScreen on every application tick. A server has no map screen and
+        // cannot load SandBox.View at boot, so the service stays null there and OnApplicationTick skips it.
+        if (!ClientComposition.IsDedicatedServer())
+            _timeAccelerationService = IoC.Resolve<ITimeAccelerationService>();
 
-        // Publish the time controls as native rebindable game keys so they appear in
-        // Options > Keybindings > Campaign Map. Registering here is deliberate: it is after Native's
-        // ViewSubModule has called RegisterInitialContexts (which CLEARS every category, so a
-        // context registered before it would be silently dropped), and RegisterContext flags the
-        // manager for a reload, so the player's saved bindings still land from BannerlordGameKeys.xml
-        // on the next tick.
-        try
-        {
-            TaomTimeControlHotKeyCategory.Register();
-        }
-        catch (System.Exception ex)
-        {
-            IoC.Resolve<IModLogger>().LogWarning(
-                $"[TimeAcceleration] hotkey registration failed, keys fall back to unbound: {ex.GetType().Name}: {ex.Message}");
-        }
-
-        // Same deal for the in-mission career ability key, which shipped hardcoded to V. It lands
-        // under Options > Keybindings > Action rather than Campaign Map because that is where it is
-        // pressed. Registered separately so its Options label and its saved binding both carry the
-        // career category id.
-        try
-        {
-            Features.CareerSystem.Abilities.TaomCareerHotKeyCategory.Register();
-        }
-        catch (System.Exception ex)
-        {
-            IoC.Resolve<IModLogger>().LogWarning(
-                $"[CareerSystem] hotkey registration failed, ability key falls back to unbound: {ex.GetType().Name}: {ex.Message}");
-        }
+        // ADR-013: game keys belong to a client's Options screen; a server registers none.
+        if (!ClientComposition.IsDedicatedServer())
+            RegisterHotKeyCategories();
 
         // Must be first — intercepts GetLocalizedText before any game texts are resolved.
         // Loads English string overrides from taom_module_strings.xml (removes hardcoded "The" articles).
@@ -336,28 +314,10 @@ public class SubModule : MBSubModuleBase
         // splash and the main menu render before any campaign, and the loading window's movie is built on
         // the engine's first application tick (GauntletUISubModule.OnApplicationTick, v1.5.3), after this
         // method. GUARDED: resolving the services must not take module load down with it.
-        try
-        {
-            Features.FactionUI.Hooks.FactionUIPatchContext.Initialize(
-                IoC.Resolve<Features.FactionUI.Menus.FrontEndMovieService>(),
-                IoC.Resolve<Features.FactionUI.Resources.FrontEndSpriteService>(),
-                IoC.Resolve<Features.FactionUI.Menus.MenuMediaService>(),
-                IoC.Resolve<Features.FactionUI.Menus.LoadingImageService>(),
-                IoC.Resolve<TAOM.Adapters.IMenuMusicAdapter>(),
-                IoC.Resolve<TAOM.Adapters.IFrontEndStateAdapter>(),
-                IoC.Resolve<Features.FactionUI.UI.FrontEndScreenEffects>(),
-                IoC.Resolve<Features.FactionUI.CharacterCreation.FaceGenCameraService>(),
-                IoC.Resolve<Features.FactionUI.Presets.FactionPresetService>(),
-                IoC.Resolve<IModLogger>());
-            Features.FactionUI.UI.Widgets.FactionUIWidgetContext.Initialize(
-                IoC.Resolve<Features.FactionUI.CharacterCreation.NarrativeThemeIconMap>());
-            _factionUiTicker = IoC.Resolve<Features.FactionUI.FactionUITicker>();
-            TryPatchCategory("Patch95_FactionUI");
-        }
-        catch (System.Exception ex)
-        {
-            IoC.Resolve<IModLogger>().LogError($"[FactionUI] init failed, vanilla menus kept: {ex.GetType().Name}: {ex.Message}");
-        }
+        // ADR-013: the front end does not exist on a dedicated server, and its ticker reaches Gauntlet widgets
+        // every frame; the ticker stays null there.
+        if (!ClientComposition.IsDedicatedServer())
+            InitializeFactionUi();
 
         // Patch83_StaleCharacterRepair — makes a character restored from a save whose ModuleData
         // definition is gone INERT, so the engine's several unguarded dereferences of its null
@@ -515,16 +475,10 @@ public class SubModule : MBSubModuleBase
         // Patch62 precedent (a root-bin assembly) does not carry; what does is that Native's
         // SubModule.xml declares GauntletUISubModule from that very DLL and TAOM depends on Native
         // LoadBeforeThis, so the assembly is resident before this method runs. Verified 2026-09-04.
-        try
-        {
-            Features.DevConsole.Hooks.Patch79_MapInfoItemVM_ExecuteBeginHint_Probe.Initialize(IoC.Resolve<IModLogger>());
-            Features.DevConsole.Hooks.Patch79_GauntletInformationView_OnShowTooltip_Probe.Initialize(IoC.Resolve<IModLogger>());
-            TryPatchCategory("Patch79_TooltipDiagnostics");
-        }
-        catch (System.Exception ex)
-        {
-            IoC.Resolve<IModLogger>().LogWarning($"[DevConsole] Patch79 tooltip probes failed to apply: {ex.Message}");
-        }
+        // ADR-013: the probes target a map-bar view model and a Gauntlet view, neither of which resolves when
+        // TAOM boots on a dedicated server, and the GauntletInformationView probe's Initialize names its target.
+        if (!ClientComposition.IsDedicatedServer())
+            ApplyTooltipProbes();
 
         // Patch0_BattleScenes: loads TAOM's sp_battle_scenes.xml (full 0-255 map_indices coverage) so the
         // TAOM_Map Main_map grid's extended indices (158-255) resolve to real battle terrains instead of
@@ -562,13 +516,9 @@ public class SubModule : MBSubModuleBase
             IoC.Resolve<IOnCampaignUIHelperGetPartyHealthTooltip>(),
             IoC.Resolve<IOnPartyCharacterVMRefreshValues>());
 
-        CustomBattlesIoC.InitializeHooks(
-            IoC.Resolve<IOnGetCustomBattleCommanders>(),
-            IoC.Resolve<IOnGetCustomBattleFactions>(),
-            IoC.Resolve<IOnGetDefaultTroopOfFormation>(),
-            IoC.Resolve<ISideCommanderFilter>(),
-            IoC.Resolve<ICustomBattleFactionSelectionFactory>(),
-            logger);
+        // ADR-013: TaleWorlds.MountAndBlade.CustomBattle exists nowhere on a dedicated server, and these hooks name it.
+        if (!ClientComposition.IsDedicatedServer())
+            InitializeCustomBattleHooks(logger);
 
         // Patch21_ShaderPrecompilation: PARKED 2026-09-25 with the main-menu option (see
         // OnBeforeInitialModuleScreenSetAsRoot). Its only member postfixes LoadingWindowViewModel.Update
@@ -638,7 +588,9 @@ public class SubModule : MBSubModuleBase
         Clan_UpdateBannerColorsAccordingToKingdom_Patch.Initialize(logger);
         Clan_UpdateBannerColor_Patch.Initialize(bannerColorService, bannerHeroAdapter);
         Banner_GetFirstIconColor_Patch.Initialize(bannerColorService);
-        BannerEditorView_OnTick_Patch.Initialize(bannerColorService, logger);
+        // ADR-013: this hook's Initialize names SandBox.GauntletUI, which a server cannot load at boot.
+        if (!ClientComposition.IsDedicatedServer())
+            InitializeBannerEditorHook(bannerColorService, logger);
         CampaignUIHelper_GetCharacterCode_Patch.Initialize(bannerColorService, bannerHeroAdapter);
         SandBoxUIHelper_GetCharacterCode_Patch.Initialize(bannerColorService, bannerHeroAdapter);
         SPInventoryVM_UpdateCurrentCharacterIfPossible_Patch.Initialize(bannerColorService, bannerHeroAdapter);
@@ -802,6 +754,96 @@ public class SubModule : MBSubModuleBase
     }
 
     private static IModLogger? MainMenuLogger() => IoC.Resolve<IModLogger>();
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void RegisterHotKeyCategories()
+    {
+        // Publish the time controls as native rebindable game keys so they appear in
+        // Options > Keybindings > Campaign Map. Registering here is deliberate: it is after Native's
+        // ViewSubModule has called RegisterInitialContexts (which CLEARS every category, so a
+        // context registered before it would be silently dropped), and RegisterContext flags the
+        // manager for a reload, so the player's saved bindings still land from BannerlordGameKeys.xml
+        // on the next tick.
+        try
+        {
+            TaomTimeControlHotKeyCategory.Register();
+        }
+        catch (System.Exception ex)
+        {
+            IoC.Resolve<IModLogger>().LogWarning(
+                $"[TimeAcceleration] hotkey registration failed, keys fall back to unbound: {ex.GetType().Name}: {ex.Message}");
+        }
+
+        // Same deal for the in-mission career ability key, which shipped hardcoded to V. It lands
+        // under Options > Keybindings > Action rather than Campaign Map because that is where it is
+        // pressed. Registered separately so its Options label and its saved binding both carry the
+        // career category id.
+        try
+        {
+            Features.CareerSystem.Abilities.TaomCareerHotKeyCategory.Register();
+        }
+        catch (System.Exception ex)
+        {
+            IoC.Resolve<IModLogger>().LogWarning(
+                $"[CareerSystem] hotkey registration failed, ability key falls back to unbound: {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void InitializeFactionUi()
+    {
+        try
+        {
+            Features.FactionUI.Hooks.FactionUIPatchContext.Initialize(
+                IoC.Resolve<Features.FactionUI.Menus.FrontEndMovieService>(),
+                IoC.Resolve<Features.FactionUI.Resources.FrontEndSpriteService>(),
+                IoC.Resolve<Features.FactionUI.Menus.MenuMediaService>(),
+                IoC.Resolve<Features.FactionUI.Menus.LoadingImageService>(),
+                IoC.Resolve<TAOM.Adapters.IMenuMusicAdapter>(),
+                IoC.Resolve<TAOM.Adapters.IFrontEndStateAdapter>(),
+                IoC.Resolve<Features.FactionUI.UI.FrontEndScreenEffects>(),
+                IoC.Resolve<Features.FactionUI.CharacterCreation.FaceGenCameraService>(),
+                IoC.Resolve<Features.FactionUI.Presets.FactionPresetService>(),
+                IoC.Resolve<IModLogger>());
+            Features.FactionUI.UI.Widgets.FactionUIWidgetContext.Initialize(
+                IoC.Resolve<Features.FactionUI.CharacterCreation.NarrativeThemeIconMap>());
+            _factionUiTicker = IoC.Resolve<Features.FactionUI.FactionUITicker>();
+            TryPatchCategory("Patch95_FactionUI");
+        }
+        catch (System.Exception ex)
+        {
+            IoC.Resolve<IModLogger>().LogError($"[FactionUI] init failed, vanilla menus kept: {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void ApplyTooltipProbes()
+    {
+        try
+        {
+            Features.DevConsole.Hooks.Patch79_MapInfoItemVM_ExecuteBeginHint_Probe.Initialize(IoC.Resolve<IModLogger>());
+            Features.DevConsole.Hooks.Patch79_GauntletInformationView_OnShowTooltip_Probe.Initialize(IoC.Resolve<IModLogger>());
+            TryPatchCategory("Patch79_TooltipDiagnostics");
+        }
+        catch (System.Exception ex)
+        {
+            IoC.Resolve<IModLogger>().LogWarning($"[DevConsole] Patch79 tooltip probes failed to apply: {ex.Message}");
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void InitializeCustomBattleHooks(IModLogger logger) =>
+        CustomBattlesIoC.InitializeHooks(
+            IoC.Resolve<IOnGetCustomBattleCommanders>(),
+            IoC.Resolve<IOnGetCustomBattleFactions>(),
+            IoC.Resolve<IOnGetDefaultTroopOfFormation>(),
+            IoC.Resolve<ISideCommanderFilter>(),
+            IoC.Resolve<ICustomBattleFactionSelectionFactory>(),
+            logger);
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void InitializeBannerEditorHook(IBannerColorService bannerColorService, IModLogger logger) =>
+        BannerEditorView_OnTick_Patch.Initialize(bannerColorService, logger);
 
     public override void OnGameEnd(Game game)
     {
@@ -1504,12 +1546,15 @@ public class SubModule : MBSubModuleBase
         // install failed). The installer applies its categories at most once per process and contains its
         // own failures; the four services it takes are registered singletons (BattleLoadDiagnosticsIoC,
         // TimeAccelerationIoC, the logger), resolved here before its try.
-        Features.MapPerf.Hooks.MapFrameProfilerInstaller.OnGameInitialized(
-            IoC.Resolve<Features.BattleLoadDiagnostics.IBattleLoadDiagnosticsSettingsProvider>(),
-            IoC.Resolve<Features.TimeAcceleration.ITimeControlAdapter>(),
-            IoC.Resolve<Features.TimeAcceleration.ITimeAccelerationSettingsProvider>(),
-            IoC.Resolve<IModLogger>(),
-            TryPatchCategory);
+        // Not on a dedicated server: there is no map frame to profile, and its core targets name
+        // SandBox.View (ADR-013).
+        if (!ClientComposition.IsDedicatedServer())
+            Features.MapPerf.Hooks.MapFrameProfilerInstaller.OnGameInitialized(
+                IoC.Resolve<Features.BattleLoadDiagnostics.IBattleLoadDiagnosticsSettingsProvider>(),
+                IoC.Resolve<Features.TimeAcceleration.ITimeControlAdapter>(),
+                IoC.Resolve<Features.TimeAcceleration.ITimeAccelerationSettingsProvider>(),
+                IoC.Resolve<IModLogger>(),
+                TryPatchCategory);
 
         // [XmlMerge] summary (docs/features/xml-merge-fast-path.md): one line per game for the module-XML merges
         // since the previous one. Every game init, before the once-per-process guard: Campaign.OnInitialize and
@@ -1525,6 +1570,13 @@ public class SubModule : MBSubModuleBase
         // Mirrors _missionTimePatchesApplied in OnMissionBehaviorInitialize.
         if (_gameInitPatchesApplied) return;
         _gameInitPatchesApplied = true;
+
+        // ADR-013: which client-only assemblies a dedicated server has loaded by OnGameInitializationFinished, before
+        // TAOM's once-per-process batch (the Coop module loads the stage's copies after TAOM boots). First in this once-per-process block, so a throw in the code below,
+        // which a server runs for the first time, cannot lose the line.
+        if (ClientComposition.IsDedicatedServer())
+            Features.CoopInterop.ServerAssemblyReport.Log(IoC.Resolve<IModLogger>());
+
         var onceStamp = Features.LoadTimeStamps.LoadTimeStampsHooks.StartHook("GameInitOnce", null);
 
         // Diagnostics 2026-07-31 ("bendy man" / prone tableau): these categories own the entire
@@ -1615,18 +1667,9 @@ public class SubModule : MBSubModuleBase
         // silent no-op on a cancelled election, so the popup's auto-close never fires and its only
         // button is already disabled. The kingdom screen is only reachable inside a campaign, so the
         // standard OnGameInitializationFinished batch is early enough.
-        TAOM.Features.Diplomacy.Hooks.KingdomVoteDeadlockBinding.Initialize(
-            IoC.Resolve<TAOM.Features.Diplomacy.IKingdomVoteDeadlockService>(), IoC.Resolve<IModLogger>());
-        TAOM.Features.Diplomacy.Hooks.KingdomDecisionsVM_RefreshWith_Patch.Initialize(IoC.Resolve<IModLogger>());
-        TAOM.Features.Diplomacy.Hooks.KingdomDecisionsVM_HandleDecision_Patch.Initialize(IoC.Resolve<IModLogger>());
-        TAOM.Features.Diplomacy.Hooks.DecisionItemBaseVM_ExecuteFinalSelection_Patch.Initialize(IoC.Resolve<IModLogger>());
-        // Seam D (#550): a window built on an election that concluded inside the view model's own
-        // constructor (the player is not their clan's leader) is closed through vanilla ExecuteDone.
-        TAOM.Features.Diplomacy.Hooks.KingdomDecisionsVM_RefreshWith_AutoResolved_Patch.Initialize(IoC.Resolve<IModLogger>());
-        // Seam E: ExecuteDone runs once and only on a concluded window, because seam D closes before
-        // the popup widget's five-second timer and nothing else ever disarms that timer.
-        TAOM.Features.Diplomacy.Hooks.DecisionItemBaseVM_ExecuteDone_Patch.Initialize(IoC.Resolve<IModLogger>());
-        TryPatchCategory("Patch80_KingdomVoteDeadlock");
+        // ADR-013: the kingdom decision window is a view model a server never builds, and the binding names it.
+        if (!ClientComposition.IsDedicatedServer())
+            ApplyKingdomVoteDeadlockFix();
 
         TryPatchCategory("Patch14_Execution");
         TryPatchCategory("Patch15_BannerLayerLimit");
@@ -1915,9 +1958,10 @@ public class SubModule : MBSubModuleBase
         // MissionGauntletTournamentView leaks both (nulls without release, unlike the practice
         // view), deferring the Tournament-movie teardown into ScreenBase.HandleFinalize under
         // the exit loading screen, where an in-flight prize tableau render stalls it ~108s (#331).
-        var tournamentExitLogger = IoC.Resolve<IModLogger>();
-        Features.Arena.Hooks.Patch60_TournamentExitMovieRelease.Initialize(tournamentExitLogger);
-        TryPatchCategory("Patch60_TournamentExitMovieRelease");
+        // ADR-013: the patch only serves a tournament screen a dedicated server never shows, and its type initializer
+        // names SandBox.GauntletUI, which may not resolve there.
+        if (!ClientComposition.IsDedicatedServer())
+            ApplyTournamentExitMovieRelease();
 
         // Patch69 — winner-panel crash guard. Vanilla TournamentVM.OnTournamentEnd dereferences
         // hero.MapFaction.Color / character.Culture.Color without a null check; a clanless hero
@@ -1980,6 +2024,31 @@ public class SubModule : MBSubModuleBase
             IoC.Resolve<IModLogger>().LogWarning($"[HarmonyCensus] wiring failed: {ex.GetType().Name}: {ex.Message}");
         }
         onceStamp?.End();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void ApplyKingdomVoteDeadlockFix()
+    {
+        TAOM.Features.Diplomacy.Hooks.KingdomVoteDeadlockBinding.Initialize(
+            IoC.Resolve<TAOM.Features.Diplomacy.IKingdomVoteDeadlockService>(), IoC.Resolve<IModLogger>());
+        TAOM.Features.Diplomacy.Hooks.KingdomDecisionsVM_RefreshWith_Patch.Initialize(IoC.Resolve<IModLogger>());
+        TAOM.Features.Diplomacy.Hooks.KingdomDecisionsVM_HandleDecision_Patch.Initialize(IoC.Resolve<IModLogger>());
+        TAOM.Features.Diplomacy.Hooks.DecisionItemBaseVM_ExecuteFinalSelection_Patch.Initialize(IoC.Resolve<IModLogger>());
+        // Seam D (#550): a window built on an election that concluded inside the view model's own
+        // constructor (the player is not their clan's leader) is closed through vanilla ExecuteDone.
+        TAOM.Features.Diplomacy.Hooks.KingdomDecisionsVM_RefreshWith_AutoResolved_Patch.Initialize(IoC.Resolve<IModLogger>());
+        // Seam E: ExecuteDone runs once and only on a concluded window, because seam D closes before
+        // the popup widget's five-second timer and nothing else ever disarms that timer.
+        TAOM.Features.Diplomacy.Hooks.DecisionItemBaseVM_ExecuteDone_Patch.Initialize(IoC.Resolve<IModLogger>());
+        TryPatchCategory("Patch80_KingdomVoteDeadlock");
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void ApplyTournamentExitMovieRelease()
+    {
+        var tournamentExitLogger = IoC.Resolve<IModLogger>();
+        Features.Arena.Hooks.Patch60_TournamentExitMovieRelease.Initialize(tournamentExitLogger);
+        TryPatchCategory("Patch60_TournamentExitMovieRelease");
     }
 
     public override void OnMissionBehaviorInitialize(Mission mission)

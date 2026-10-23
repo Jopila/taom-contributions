@@ -1,4 +1,6 @@
+using System.Runtime.CompilerServices;
 using HarmonyLib;
+using TAOM.Composition;
 using TAOM.Core.Logging;
 using TAOM.Features.BannerColorPersistence.Hooks;
 using TAOM.Features.SettlementGuards;
@@ -12,22 +14,20 @@ namespace TAOM;
 /// <c>[HarmonyPatch]</c> attribute binding + <c>PatchCategory</c>: each resolves its target via
 /// <c>AccessTools</c> at apply time and fail-safes with a logged warning (vanilla behavior) when the
 /// engine method has moved. Extracted verbatim from <c>SubModule.OnGameInitializationFinished</c>
-/// (ADR-002); called once per process from that same callback, order unchanged.
+/// (ADR-002); called once per process from that same callback, order unchanged. On a dedicated server the
+/// captain tooltip and the four visual patches are skipped (ADR-013): they patch screens a server never shows, and
+/// their targets live in view and view-model assemblies that do not resolve when TAOM boots there (the Coop module can
+/// load the stage's copies by game init), so each block sits in a NoInlining helper a server never compiles.
 /// </summary>
 internal static class ManualPatchApplicator
 {
     internal static void ApplyAll(Harmony harmony)
     {
-        // CompanionTactics — manual patch for the PRIVATE method
-        // OrderOfBattleHeroItemVM.GetCaptainTooltip (private in v1.3.15, can't use
-        // [HarmonyPatch] attribute binding).
-        var captainTooltipTarget = AccessTools.Method(typeof(OrderOfBattleHeroItemVM), "GetCaptainTooltip");
-        if (captainTooltipTarget != null)
-            harmony.Patch(captainTooltipTarget, postfix: new HarmonyMethod(
-                typeof(Features.CompanionTactics.Roles.Hooks.Patch35_OOBHeroItem_GetCaptainTooltip),
-                nameof(Features.CompanionTactics.Roles.Hooks.Patch35_OOBHeroItem_GetCaptainTooltip.Postfix)));
-        else
-            IoC.Resolve<IModLogger>().LogWarning("[CompanionTactics] OrderOfBattleHeroItemVM.GetCaptainTooltip not found — captain tooltip role hint will not appear");
+        // ADR-013: the captain tooltip and the four visual patches patch screens a dedicated server never shows, in
+        // view and view-model assemblies that may not resolve there; each block sits in a NoInlining helper a server
+        // never compiles. The settlement-guard patches target SandBox.dll and apply everywhere. Apply order unchanged.
+        if (!ClientComposition.IsDedicatedServer())
+            ApplyCaptainTooltip(harmony);
 
         var settlementGuardService = IoC.Resolve<ISettlementGuardService>();
         GuardsCampaignBehavior_TakeGuardAgentData_Patch.Initialize(settlementGuardService);
@@ -59,6 +59,28 @@ internal static class ManualPatchApplicator
         else
             IoC.Resolve<IModLogger>().LogWarning("[SettlementGuards] InitializeGarrisonCharacters not found — excluded-race garrison scrub will not apply (#346)");
 
+        if (!ClientComposition.IsDedicatedServer())
+            ApplyVisualPatches(harmony);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void ApplyCaptainTooltip(Harmony harmony)
+    {
+        // CompanionTactics — manual patch for the PRIVATE method
+        // OrderOfBattleHeroItemVM.GetCaptainTooltip (private in v1.3.15, can't use
+        // [HarmonyPatch] attribute binding).
+        var captainTooltipTarget = AccessTools.Method(typeof(OrderOfBattleHeroItemVM), "GetCaptainTooltip");
+        if (captainTooltipTarget != null)
+            harmony.Patch(captainTooltipTarget, postfix: new HarmonyMethod(
+                typeof(Features.CompanionTactics.Roles.Hooks.Patch35_OOBHeroItem_GetCaptainTooltip),
+                nameof(Features.CompanionTactics.Roles.Hooks.Patch35_OOBHeroItem_GetCaptainTooltip.Postfix)));
+        else
+            IoC.Resolve<IModLogger>().LogWarning("[CompanionTactics] OrderOfBattleHeroItemVM.GetCaptainTooltip not found — captain tooltip role hint will not appear");
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void ApplyVisualPatches(Harmony harmony)
+    {
         // Manual patch for the private nested MobilePartyVisualHelper (SandBox.View.dll).
         // v1.5.0 moved the party-icon colour work here out of MobilePartyVisual.AddCharacterToPartyIcon,
         // and deleted the teamColor parameters the old postfix wrote to, so this is a transpiler now.

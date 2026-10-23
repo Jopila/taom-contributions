@@ -36,71 +36,8 @@ public class DependenciesClientIlTests
         return name.Equals(UiExtenderAssembly, StringComparison.OrdinalIgnoreCase) || ClientAssemblies.IsClientOnly(name);
     }
 
-    private static IEnumerable<Type> TypesOfSignature(MethodBase method)
-    {
-        if (method is MethodInfo mi)
-            yield return mi.ReturnType;
-        foreach (var p in method.GetParameters())
-            yield return p.ParameterType;
-    }
-
-    private static IEnumerable<Type> TypesReferencedBy(MethodBase method)
-    {
-        foreach (var t in TypesOfSignature(method))
-            yield return t;
-
-        var body = method.GetMethodBody();
-        if (body == null)
-            yield break;
-
-        foreach (var member in IlCallScanner.ExtractReferencedMembers(method, body.GetILAsByteArray()!))
-        {
-            switch (member)
-            {
-                case Type t:
-                    yield return t;
-                    break;
-                case FieldInfo f:
-                    yield return f.DeclaringType!;
-                    yield return f.FieldType;
-                    break;
-                case MethodInfo m:
-                    yield return m.DeclaringType!;
-                    foreach (var t in TypesOfSignature(m)) yield return t;
-                    if (m.IsGenericMethod)
-                        foreach (var a in m.GetGenericArguments()) yield return a;
-                    break;
-                case ConstructorInfo c:
-                    yield return c.DeclaringType!;
-                    foreach (var t in TypesOfSignature(c)) yield return t;
-                    break;
-            }
-        }
-
-        foreach (var local in body.LocalVariables)
-            yield return local.LocalType;
-        foreach (var clause in body.ExceptionHandlingClauses)
-            if (clause.Flags == ExceptionHandlingClauseOptions.Clause)
-                yield return clause.CatchType;
-    }
-
-    private static IEnumerable<Type> Flatten(Type t)
-    {
-        if (t.HasElementType)
-        {
-            foreach (var e in Flatten(t.GetElementType()!)) yield return e;
-            yield break;
-        }
-        yield return t;
-        if (t.IsGenericType)
-            foreach (var a in t.GetGenericArguments())
-                foreach (var e in Flatten(a)) yield return e;
-    }
-
     private static List<string> ClientReferences(MethodBase method) =>
-        TypesReferencedBy(method).SelectMany(Flatten)
-            .Where(t => IsClientAssembly(t.Assembly))
-            .Select(t => t.FullName ?? t.Name).Distinct().ToList();
+        IlClientReferences.ClientReferences(method, IsClientAssembly);
 
     private static MethodBase Cctor => typeof(DepsSubModule).TypeInitializer!;
 
