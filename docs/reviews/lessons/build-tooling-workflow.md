@@ -4320,3 +4320,9 @@ Two B4c gates went RED before the change and green after it, yet passed on a wro
 - **Why missed:** a RED run proves the test sees the missing code. It does not show what wrong code the test accepts.
 - **Prevent:** for every source-text gate, name one plausible wrong edit (an inverted condition, a deleted or swapped call) and make sure the assertion rejects it. Pin exact condition text, require every `IndexOf` to be at least 0 before comparing positions, or compare one whitespace-collapsed sequence.
 - **Source:** Codex B4c review F1 and F2; [rca-taom-client-b4c-2026-10-22.md](../rca-taom-client-b4c-2026-10-22.md).
+
+### A registration API that reads one assembly must be fed one assembly (B5, 2026-10-22)
+UIExtenderEx's `Register(Assembly)` reads the types of the one assembly it is given and refuses a second call under the same module name. The refusal is not shown in game: `InformationManager` has no listener during `OnSubModuleLoad`. It reaches only ButterLib's `Configs/ModLogs/default<date>.log`, as an `[ERR] Failed to load extension module TAOM - already loaded!` line that nobody reads unless they look. A split between TAOM.dll and TAOM.Client would have lost one half silently.
+- **Why missed:** the symptom is an absent screen extension with no line in the TAOM log; neither the build nor a unit test touches the registration.
+- **Prevent:** put every extension in the one assembly that registers, and pin the other side empty with a test (`TaomCore_DeclaresNoUiExtension`, `TaomClient_DeclaresEveryUiExtension`, `UIExtenderCreate_IsCalledOnlyByTheClientSubModule`). Keep the module name stable: the census and `PatchShieldPolicy` match it. `taom-src` resolves UIExtenderEx to the DOTS.Dependencies copy (2.13.1), not TAOM's shipped 2.13.3; decompile the shipped DLL.
+- **Source:** `docs/research/taom-headless-server.md` problem row 1; `ClientIsolationGateTests`, `ClientSubModuleTests`.

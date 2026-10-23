@@ -13,7 +13,7 @@ namespace TAOM.Tests.Infrastructure;
 /// Reference-typed fields and method bodies do not fail GetTypes (26 field-only and 190 body-only types
 /// loaded in run 46908), so the walk covers base chain, interfaces, value-typed fields, generic
 /// constraints and cross-assembly override signatures
-/// (see <c>ServerLoadScan</c>; its fixtures are <c>ServerLoadFixtureTests</c>). The allowlist is the set known to fail today and can only shrink.
+/// (see <c>ServerLoadScan</c>; its fixtures are <c>ServerLoadFixtureTests</c>). There is no allowlist since M1 (ADR-013): a failing type moves to TAOM.Client.
 /// </summary>
 [TestClass]
 [TestCategory("RequiresGame")]
@@ -26,25 +26,6 @@ public class ServerLoadGateTests
     private static readonly string[] ModulesLoadedBeforeTaom =
         { "Native", "SandBoxCore", "SandBox", "TAOM.Dependencies", "LOTRLOME_Armory", "TAOM_Map" };
 
-    // The 40 types that failed GetTypes in rgl_log_46908.txt. Remove an entry when its type moves out of
-    // TAOM.dll; the test fails if an entry stops failing, so this list never grows back.
-    private static readonly HashSet<string> KnownClientTypesInCore = new HashSet<string>(StringComparer.Ordinal)
-    {
-        "TAOM.Features.TimeAcceleration.UI.TimeAccelerationMixin",
-        "TAOM.Features.TelcharsMark.UI.UpgradeRowMixin",
-        "TAOM.Features.TelcharsMark.UI.UpgradeScreenMixin",
-        "TAOM.Features.SpecialResources.UI.EncyclopediaUnitBadgeMixin",
-        "TAOM.Features.SpecialResources.UI.SpecialResourceMapBarMixin",
-        "TAOM.Features.SpecialResources.UI.SpecialResourceSpriteWidget",
-        "TAOM.Features.ReevesLedger.UI.ReserveStepMixin",
-        "TAOM.Features.ReevesLedger.UI.TownManagementLedgerMixin",
-        "TAOM.Features.Namegiving.UI.FiefNamingMixin",
-        "TAOM.Features.Messengers.UI.MessengerEncyclopediaMixin",
-        "TAOM.Features.CareerSystem.UI.CharacterDeveloperCareerMixin",
-        "TAOM.Features.CareerSystem.UI.MissionAgentStatusCareerMixin",
-        "TAOM.Features.CareerSystem.UI.TaomCareerDiamondWidget",
-    };
-
     [ClassInitialize]
     public static void Init(Microsoft.VisualStudio.TestTools.UnitTesting.TestContext _) =>
         TAOM.Tests.Migration.GameAssemblies.EnsureLoaded();
@@ -53,21 +34,13 @@ public class ServerLoadGateTests
     public void EveryCoreType_LoadsWithoutClientAssemblies()
     {
         var failing = ServerLoadScan.FindClientDependentTypes(typeof(SubModule).Assembly.GetTypes(), ClientAssemblies.IsClientOnly)
-            .ToDictionary(kv => kv.Key.FullName!, kv => kv.Value, StringComparer.Ordinal);
-
-        var added = failing.Where(kv => !KnownClientTypesInCore.Contains(kv.Key))
-            .Select(kv => $"{kv.Key} (from {kv.Value.Assembly}, shape {(int)kv.Value.Shape} {kv.Value.Shape})")
-            .OrderBy(s => s, StringComparer.Ordinal).ToList();
-        var healed = KnownClientTypesInCore.Where(n => !failing.ContainsKey(n))
+            .Select(kv => $"{kv.Key.FullName} (from {kv.Value.Assembly}, shape {(int)kv.Value.Shape} {kv.Value.Shape})")
             .OrderBy(s => s, StringComparer.Ordinal).ToList();
 
-        Assert.IsTrue(added.Count == 0,
-            "New TAOM.dll types would fail to load on the dedicated server (they need a client-only assembly to be "
+        CollectionAssert.AreEqual(new List<string>(), failing,
+            "These TAOM.dll types would fail to load on the dedicated server (they need a client-only assembly to be "
             + "laid out: shape 1 base type or interface, 2 value-typed field, 3 generic constraint, 4 cross-assembly "
-            + "override). Put them in a client assembly or break the dependency: " + string.Join("; ", added));
-        Assert.IsTrue(healed.Count == 0,
-            "These allowlisted types no longer depend on a client-only assembly; remove them from "
-            + "KnownClientTypesInCore: " + string.Join("; ", healed));
+            + "override). Put them in TAOM.Client or break the dependency; there is no allowlist (ADR-013, M1).");
     }
 
     [TestMethod]

@@ -100,7 +100,7 @@ TAOM doesn't subscribe directly. `Patch24_BannerDriftGuard` reads `__instance.Ki
 #### Prefab UI fix (v1.4.0) — 6 TAOM sites
 
 Vanilla 1.4.0 fixed inverted `VerticalTopToBottom` / `VerticalBottomToTop` ListPanel semantics. TAOM has 6 sites using `VerticalBottomToTop`:
-- `Main/Features/Messengers/UI/MessengerEncyclopediaPrefabExtension.cs:24` (string-injected)
+- `Client/Features/Messengers/UI/MessengerEncyclopediaPrefabExtension.cs:24` (string-injected)
 - `Main/_Module/GUI/Prefabs/FacGen/PreBuildCharacterSelection.xml` (lines 38, 40, 51, 59)
 
 Visual order may now be inverted. S5 task: verify in-game; swap to `VerticalTopToBottom` if inverted.

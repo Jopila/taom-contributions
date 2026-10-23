@@ -45,8 +45,6 @@ public class PrefabExtensionBindingTests
     [ClassInitialize]
     public static void Init(TestContext _) => _gameLoaded = GameAssemblies.EnsureLoaded();
 
-    private static Assembly TaomAssembly => typeof(TAOM.IoC).Assembly;
-
     // Vanilla modules that ship Gauntlet prefabs, plus TAOM's own GUI tree. TAOM is searched LAST
     // so its clones win, matching the engine's last-module-wins basename resolution.
     private static readonly string[] VanillaGuiModules =
@@ -65,7 +63,7 @@ public class PrefabExtensionBindingTests
         var failures = new StringBuilder();
         var checkedCount = 0;
 
-        foreach (var type in TaomAssembly.GetTypes())
+        foreach (var type in TAOM.Tests.Infrastructure.TaomAssemblies.All.SelectMany(a => a.GetTypes()))
         {
             foreach (var attr in type.GetCustomAttributes<PrefabExtensionAttribute>(inherit: false))
             {

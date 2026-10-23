@@ -23,7 +23,7 @@ namespace TAOM.Features.CareerSystem.UI;
 ///
 /// Registration is automatic: <c>WidgetInfo.CollectWidgetTypes()</c> scans every loaded
 /// assembly that references TaleWorlds.GauntletUI and collects all Widget subclasses, so
-/// defining this type inside TAOM.dll is sufficient — there is no register call.
+/// defining this type inside TAOM.Client.dll is sufficient — there is no register call.
 /// </summary>
 public class TaomCareerDiamondWidget : Widget
 {
@@ -36,10 +36,10 @@ public class TaomCareerDiamondWidget : Widget
     private bool _isKeystoneState;
     private bool _childrenResolved;
     private bool _keystoneTintApplied;
-    private Widget _glowWidget;
-    private Widget _tooltipWidget;
-    private Widget _iconTaken;
-    private Widget _iconFree;
+    private Widget? _glowWidget;
+    private Widget? _tooltipWidget;
+    private Widget? _iconTaken;
+    private Widget? _iconFree;
 
     public TaomCareerDiamondWidget(UIContext context) : base(context)
     {
@@ -115,7 +115,7 @@ public class TaomCareerDiamondWidget : Widget
         }
     }
 
-    private static Widget FindById(Widget root, string id)
+    private static Widget? FindById(Widget root, string id)
     {
         for (var i = 0; i < root.ChildCount; i++)
         {

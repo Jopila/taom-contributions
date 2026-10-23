@@ -27,6 +27,8 @@ public class PatchCategoryIndexTests
     internal const string BrokenCategory = "Test_IndexProbe_Broken";
     internal const string HealthyCategory = "Test_IndexProbe_Healthy";
     private const string MixedCategory = "Test_IndexProbe_Mixed";
+    private const string SecondCategory = "Test_IndexProbe_Second";
+    private const string OrderedCategory = "Test_IndexProbe_Ordered";
     private const string BrokenClassName = "TaomIndexProbe.BrokenAttributeProbe";
     private const string HealthyClassName = "TaomIndexProbe.HealthyProbe";
     private const string UncategorisedClassName = "TaomIndexProbe.UncategorisedProbe";
@@ -40,6 +42,12 @@ public class PatchCategoryIndexTests
 
     private static readonly MethodInfo MixedTarget =
         typeof(PatchCategoryIndexProbeTarget).GetMethod(nameof(PatchCategoryIndexProbeTarget.MixedProbe))!;
+
+    private static readonly MethodInfo SecondTarget =
+        typeof(PatchCategoryIndexProbeTarget).GetMethod(nameof(PatchCategoryIndexProbeTarget.SecondProbe))!;
+
+    private static readonly MethodInfo OrderedTarget =
+        typeof(PatchCategoryIndexProbeTarget).GetMethod(nameof(PatchCategoryIndexProbeTarget.OrderedProbe))!;
 
     private IModLogger _logger = null!;
     private Harmony _harmony = null!;
@@ -130,6 +138,44 @@ public class PatchCategoryIndexTests
         CollectionAssert.Contains(PostfixOwners(MixedTarget), _harmony.Id);
     }
 
+    // ADR-013: TAOM's patch classes live in two assemblies (TAOM.dll and TAOM.Client.dll), and a category holds the
+    // classes of both. The second probe assembly stands in for the client.
+    [TestMethod]
+    public void Build_TwoAssemblies_IndexesTheClassesOfBoth()
+    {
+        var second = EmitSmallAssembly("TAOM.Tests.PatchCategoryIndexProbe.Second",
+            ("TaomIndexProbe.SecondAssemblyProbe", SecondCategory, nameof(PatchCategoryIndexProbeTarget.SecondProbe)));
+
+        var index = PatchCategoryIndex.Build(ProbeAssembly.Value, second);
+        index.Apply(_harmony, HealthyCategory);
+        index.Apply(_harmony, SecondCategory);
+
+        CollectionAssert.Contains(PostfixOwners(), _harmony.Id);
+        CollectionAssert.Contains(PostfixOwners(SecondTarget), _harmony.Id);
+        CollectionAssert.AreEqual(new[] { "TaomIndexProbe.SecondAssemblyProbe" },
+            index.ClassesOf(SecondCategory).Select(t => t.FullName).ToArray());
+        Assert.AreEqual(0, index.ClassesOf("Test_IndexProbe_NoSuchCategory").Count);
+    }
+
+    // A category applies the first assembly's classes first, then the second's, so a core class runs before a client one.
+    [TestMethod]
+    public void Build_TwoAssemblies_AppliesTheFirstAssemblysClassesFirst()
+    {
+        var healthy = EmitSmallAssembly("TAOM.Tests.PatchCategoryIndexProbe.OrderGood",
+            ("TaomIndexProbe.OrderedHealthy", OrderedCategory, nameof(PatchCategoryIndexProbeTarget.OrderedProbe)));
+        var unresolvable = EmitSmallAssembly("TAOM.Tests.PatchCategoryIndexProbe.OrderBad",
+            ("TaomIndexProbe.OrderedUnresolvable", OrderedCategory, "NoSuchMethod"));
+
+        Assert.ThrowsException<HarmonyException>(
+            () => PatchCategoryIndex.Build(healthy, unresolvable).Apply(_harmony, OrderedCategory));
+        CollectionAssert.Contains(PostfixOwners(OrderedTarget), _harmony.Id, "the healthy class came first, so it stays patched");
+
+        _harmony.UnpatchAll(_harmony.Id);
+        Assert.ThrowsException<HarmonyException>(
+            () => PatchCategoryIndex.Build(unresolvable, healthy).Apply(_harmony, OrderedCategory));
+        CollectionAssert.DoesNotContain(PostfixOwners(OrderedTarget), _harmony.Id, "the unresolvable class came first and threw");
+    }
+
     // Harmony keeps an empty patch record after an unpatch, so ask for owners, not for null.
     private static string[] PostfixOwners() => PostfixOwners(Target);
 
@@ -159,6 +205,15 @@ public class PatchCategoryIndexTests
             builder.SetCustomAttribute(TargetAttribute(nameof(PatchCategoryIndexProbeTarget.MixedProbe))));
         EmitPatchClass(module, MixedUnresolvableClassName, MixedCategory, harmonyPatch: builder =>
             builder.SetCustomAttribute(TargetAttribute("NoSuchMethod")));
+        return assembly;
+    }
+
+    private static Assembly EmitSmallAssembly(string name, params (string Class, string Category, string Method)[] classes)
+    {
+        var assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(name), AssemblyBuilderAccess.Run);
+        var module = assembly.DefineDynamicModule(name);
+        foreach (var (className, category, method) in classes)
+            EmitPatchClass(module, className, category, harmonyPatch: builder => builder.SetCustomAttribute(TargetAttribute(method)));
         return assembly;
     }
 
@@ -205,4 +260,10 @@ public static class PatchCategoryIndexProbeTarget
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static int MixedProbe() => 2;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int SecondProbe() => 3;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int OrderedProbe() => 4;
 }

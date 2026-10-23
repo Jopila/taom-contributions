@@ -25,7 +25,7 @@ namespace TAOM.Tests.Migration;
 /// throws is *logged and swallowed*, so this class of bug produces a silently absent patch rather
 /// than a crash.
 ///
-/// Runs against every <c>[HarmonyPatch]</c> class in the TAOM assembly, so it also covers patches
+/// Runs against every <c>[HarmonyPatch]</c> class in the TAOM assemblies (core and TAOM.Client), so it also covers patches
 /// that have no binding test of their own.
 /// </summary>
 [TestClass]
@@ -42,11 +42,9 @@ public class HarmonyFieldInjectionNamingTests
     [ClassInitialize]
     public static void Init(TestContext _) => _gameLoaded = GameAssemblies.EnsureLoaded();
 
-    private static Assembly TaomAssembly => typeof(TAOM.SubModule).Assembly;
-
     private static IEnumerable<(Type PatchClass, Type Target, MethodInfo Method, ParameterInfo Parameter)> InjectedFieldParameters()
     {
-        foreach (var patchClass in TaomAssembly.GetTypes())
+        foreach (var patchClass in TAOM.Tests.Infrastructure.TaomAssemblies.All.SelectMany(a => a.GetTypes()))
         {
             var patchAttr = patchClass.GetCustomAttributes(typeof(HarmonyPatch), inherit: false)
                                       .OfType<HarmonyPatch>()
@@ -103,7 +101,7 @@ public class HarmonyFieldInjectionNamingTests
         // reflection returning no types, would otherwise make this test vacuously green forever).
         Assert.IsTrue(
             checkedCount > 0,
-            "No injected-field parameters were found at all across the TAOM assembly — the scan is broken, " +
+            "No injected-field parameters were found at all across the TAOM assemblies — the scan is broken, " +
             "not the code. TAOM has several patches using the ____field form.");
     }
 }

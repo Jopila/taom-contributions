@@ -56,10 +56,10 @@ internal class ReserveStepMixin : BaseViewModelMixin<TownManagementReserveContro
     }
 
     [DataSourceProperty]
-    public string AddReserveStepText { get; }
+    public string AddReserveStepText { get; } = "";
 
     [DataSourceProperty]
-    public string WithdrawReserveStepText { get; }
+    public string WithdrawReserveStepText { get; } = "";
 
     [DataSourceProperty]
     public bool IsReserveStepVisible

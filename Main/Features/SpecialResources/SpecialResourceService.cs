@@ -26,7 +26,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         _passiveService = passiveService;
     }
 
-    public SpecialResource ResolveResource(string kingdomId, string cultureId)
+    public SpecialResource? ResolveResource(string? kingdomId, string? cultureId)
     {
         // Resolve is hot-path (called from MapInfoVM.OnRefresh tooltip rebuild several times per tick).
         // Dedupe DEBUG logging by (kingdomId, cultureId) so we keep diagnostics on transitions
@@ -59,14 +59,14 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         return null;
     }
 
-    public float GetCurrentAmount(string heroId, string kingdomId, string cultureId)
+    public float GetCurrentAmount(string heroId, string? kingdomId, string? cultureId)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return 0f;
         return _storage.Get(heroId, resource.Id);
     }
 
-    public void EarnFromBattle(string heroId, string kingdomId, string cultureId, float enemySizeRatio)
+    public void EarnFromBattle(string heroId, string? kingdomId, string? cultureId, float enemySizeRatio)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return;
@@ -76,7 +76,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
             $" (ratio {enemySizeRatio:F2}→{clampedRatio:F2})");
     }
 
-    public void EarnFromRaid(string heroId, string kingdomId, string cultureId)
+    public void EarnFromRaid(string heroId, string? kingdomId, string? cultureId)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return;
@@ -84,7 +84,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         Earn(heroId, resource, "RAID", resource.PerRaid, "F0", "");
     }
 
-    public void EarnFromSiege(string heroId, string kingdomId, string cultureId)
+    public void EarnFromSiege(string heroId, string? kingdomId, string? cultureId)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return;
@@ -92,7 +92,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         Earn(heroId, resource, "SIEGE", resource.PerSiegeVictory, "F0", "");
     }
 
-    public void EarnFromPrisoners(string heroId, string kingdomId, string cultureId, int prisonerCount)
+    public void EarnFromPrisoners(string heroId, string? kingdomId, string? cultureId, int prisonerCount)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return;
@@ -100,7 +100,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         Earn(heroId, resource, "PRISONERS", resource.PerPrisoner * prisonerCount, "F0", $" ({prisonerCount} captured)");
     }
 
-    public void EarnFromTournament(string heroId, string kingdomId, string cultureId)
+    public void EarnFromTournament(string heroId, string? kingdomId, string? cultureId)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return;
@@ -108,7 +108,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         Earn(heroId, resource, "TOURNAMENT", resource.PerTournamentWin, "F0", "");
     }
 
-    public void EarnFromHideout(string heroId, string kingdomId, string cultureId)
+    public void EarnFromHideout(string heroId, string? kingdomId, string? cultureId)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return;
@@ -126,7 +126,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         _logger.LogInfo($"[SpecRes] {source}: +{earned.ToString(amountFormat)} {resource.DisplayName}{detail} | {before:F0}→{after:F0}");
     }
 
-    public void ApplyDailyTick(string heroId, string kingdomId, string cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep)
+    public void ApplyDailyTick(string heroId, string? kingdomId, string? cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return;
@@ -139,14 +139,14 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
             _storage.Add(heroId, resource.Id, net);
     }
 
-    public DailyResourceBreakdown GetDailyBreakdown(string heroId, string kingdomId, string cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep)
+    public DailyResourceBreakdown GetDailyBreakdown(string heroId, string? kingdomId, string? cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return DailyResourceBreakdown.Empty;
         return ComputeBreakdown(heroId, resource, ownedTownCount, troopsWithUpkeep);
     }
 
-    public float GetProjectedDailyNet(string heroId, string kingdomId, string cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep)
+    public float GetProjectedDailyNet(string heroId, string? kingdomId, string? cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep)
         => GetDailyBreakdown(heroId, kingdomId, cultureId, ownedTownCount, troopsWithUpkeep).Net;
 
     // The single daily calculation: earning (+SpecialResourceGain) and one upkeep line per troop type
@@ -203,7 +203,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         return FiniteFloatValidator.IsFinite(scaled) && scaled > 0f ? scaled : 0f;
     }
 
-    public bool CanAffordUpgrade(string heroId, string kingdomId, string cultureId, string troopId, int count)
+    public bool CanAffordUpgrade(string heroId, string? kingdomId, string? cultureId, string troopId, int count)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return true;
@@ -218,7 +218,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         return canAfford;
     }
 
-    public void SpendForUpgrade(string heroId, string kingdomId, string cultureId, string troopId, int count)
+    public void SpendForUpgrade(string heroId, string? kingdomId, string? cultureId, string troopId, int count)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return;
@@ -231,7 +231,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         _logger.LogInfo($"[SpecRes] SPEND: -{totalCost} {resource.DisplayName} for {troopId} x{count}");
     }
 
-    public float ChargeRecruitCost(string heroId, string kingdomId, string cultureId, string troopId, int count)
+    public float ChargeRecruitCost(string heroId, string? kingdomId, string? cultureId, string troopId, int count)
     {
         if (count <= 0) return 0f;
 
@@ -254,7 +254,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         return debited;
     }
 
-    public RecruitGateResult CanAffordRecruit(string heroId, string kingdomId, string cultureId, IReadOnlyList<RecruitCartEntry> cart)
+    public RecruitGateResult CanAffordRecruit(string heroId, string? kingdomId, string? cultureId, IReadOnlyList<RecruitCartEntry> cart)
     {
         if (cart == null || cart.Count == 0) return RecruitGateResult.Allowed;
 
@@ -280,7 +280,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         return new RecruitGateResult(blocked, required, resource.DisplayName);
     }
 
-    public bool CanAffordMerchantPurchase(string heroId, string kingdomId, string cultureId, string troopId, int count)
+    public bool CanAffordMerchantPurchase(string heroId, string? kingdomId, string? cultureId, string troopId, int count)
     {
         if (count <= 0) return true;
 
@@ -297,7 +297,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         return canAfford;
     }
 
-    public void ChargeMerchantPurchase(string heroId, string kingdomId, string cultureId, string troopId, int count)
+    public void ChargeMerchantPurchase(string heroId, string? kingdomId, string? cultureId, string troopId, int count)
     {
         if (count <= 0) return;
 
@@ -341,14 +341,14 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         _logger.LogDebug($"[SpecRes] QUEUED: {troopId} x{count} = {added} pending (total pending={_pendingSpend:F0})");
     }
 
-    public float GetAvailableAfterPending(string heroId, string kingdomId, string cultureId)
+    public float GetAvailableAfterPending(string heroId, string? kingdomId, string? cultureId)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null) return 0f;
         return _storage.Get(heroId, resource.Id) - _pendingSpend;
     }
 
-    public int ClampUpgradeCount(string heroId, string kingdomId, string cultureId, string troopId, int requestedCount)
+    public int ClampUpgradeCount(string heroId, string? kingdomId, string? cultureId, string troopId, int requestedCount)
     {
         var cost = _config.GetTroopCost(troopId);
         if (cost == null || cost.UpgradeCost <= 0) return requestedCount;
@@ -366,7 +366,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         return clamped;
     }
 
-    public float CommitSession(string heroId, string kingdomId, string cultureId)
+    public float CommitSession(string heroId, string? kingdomId, string? cultureId)
     {
         if (!_inSession) return 0f;
 
@@ -421,7 +421,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         _logger.LogInfo($"[SpecRes] ResetSessionState: cleared (pending was {hadPending:F0}, inSession was {wasInSession})");
     }
 
-    public void InitializeHero(string heroId, string kingdomId, string cultureId)
+    public void InitializeHero(string heroId, string? kingdomId, string? cultureId)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null)
@@ -434,7 +434,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         _logger.LogInfo($"[SpecRes] InitializeHero: {heroId} → {resource.DisplayName} = {resource.StartingAmount}");
     }
 
-    public IReadOnlyList<TroopDesertionEntry> CalculateDesertion(string heroId, string kingdomId, string cultureId, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep)
+    public IReadOnlyList<TroopDesertionEntry> CalculateDesertion(string heroId, string? kingdomId, string? cultureId, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep)
     {
         var result = new List<TroopDesertionEntry>();
 
@@ -469,7 +469,7 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         return result;
     }
 
-    public ResourceTier GetCurrentTier(string heroId, string kingdomId, string cultureId)
+    public ResourceTier? GetCurrentTier(string heroId, string? kingdomId, string? cultureId)
     {
         var resource = ResolveResource(kingdomId, cultureId);
         if (resource == null || resource.TierThresholds.Count == 0)
@@ -487,13 +487,13 @@ public class SpecialResourceService : ISpecialResourceService, ISpecialResourceS
         return null;
     }
 
-    public int GetCurrentTierLevel(string heroId, string kingdomId, string cultureId)
+    public int GetCurrentTierLevel(string heroId, string? kingdomId, string? cultureId)
     {
         var tier = GetCurrentTier(heroId, kingdomId, cultureId);
         return tier?.Level ?? 0;
     }
 
-    public ResourceGrantResult GrantAmount(string heroId, string kingdomId, string cultureId, float amount)
+    public ResourceGrantResult GrantAmount(string heroId, string? kingdomId, string? cultureId, float amount)
     {
         // Console text is untrusted: float.TryParse accepts "NaN" and "Infinity", and a NaN would
         // survive AddCapped's Math.Min to poison the saved balance (csharp-architecture.md,

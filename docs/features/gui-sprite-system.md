@@ -357,11 +357,11 @@ The 3 completed resource icons (gems, caster, marks) are in `SpriteParts/ui_taom
 | `Main/Features/CareerSystem/UI/CareerChoiceObjectVM.cs` | Individual choice VM (taken/free state) |
 | `Main/Features/CareerSystem/UI/CareerAbilityEffectVM.cs` | Ability effect line item VM |
 | `Main/Features/CareerSystem/UI/CareerAbilityHudVM.cs` | Battle HUD VM |
-| `Main/Features/CareerSystem/UI/CharacterDeveloperCareerMixin.cs` | Mixin for career button on CharDev |
-| `Main/Features/CareerSystem/UI/CareerButtonPrefab.cs` | Prefab injection for career button |
-| `Main/Features/SpecialResources/UI/SpecialResourceMapBarMixin.cs` | Mixin for resource on map bar |
-| `Main/Features/SpecialResources/UI/SpecialResourcePrefab.cs` | Prefab injection for resource widget |
-| `Main/Features/SpecialResources/UI/SpecialResourceSpriteWidget.cs` | Custom widget for dynamic sprite |
+| `Client/Features/CareerSystem/UI/CharacterDeveloperCareerMixin.cs` | Mixin for career button on CharDev |
+| `Client/Features/CareerSystem/UI/CareerButtonPrefab.cs` | Prefab injection for career button |
+| `Client/Features/SpecialResources/UI/SpecialResourceMapBarMixin.cs` | Mixin for resource on map bar |
+| `Client/Features/SpecialResources/UI/SpecialResourcePrefab.cs` | Prefab injection for resource widget |
+| `Client/Features/SpecialResources/UI/SpecialResourceSpriteWidget.cs` | Custom widget for dynamic sprite |
 
 ## How-To
 

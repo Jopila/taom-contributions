@@ -27,27 +27,12 @@ public class ResetForUnloadSweepTests
     private static readonly Regex ClassDecl = new Regex(
         @"\b(?:public|internal)\s+(?:static\s+|sealed\s+|partial\s+)*class\s+(\w+)", RegexOptions.Compiled);
 
-    private static string FindMainSourceDir()
-    {
-        var dir = new DirectoryInfo(Path.GetDirectoryName(typeof(ResetForUnloadSweepTests).Assembly.Location)!);
-        while (dir != null)
-        {
-            if (Directory.Exists(Path.Combine(dir.FullName, "Main", "Features")))
-                return Path.Combine(dir.FullName, "Main");
-            dir = dir.Parent;
-        }
-        return null;
-    }
-
     /// <summary>Every class declaring a public static ResetForUnload(), by class name.</summary>
-    private static IReadOnlyList<string> DeclaringClasses(string mainDir)
+    private static IReadOnlyList<string> DeclaringClasses()
     {
         var names = new List<string>();
 
-        foreach (var path in Directory
-                     .EnumerateFiles(mainDir, "*.cs", SearchOption.AllDirectories)
-                     .Where(p => !p.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar))
-                     .Where(p => !p.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar)))
+        foreach (var path in RepoPaths.CSharpFiles())
         {
             var text = File.ReadAllText(path);
             if (!ResetDecl.IsMatch(text)) continue;
@@ -71,10 +56,7 @@ public class ResetForUnloadSweepTests
     [TestMethod]
     public void EveryResetForUnload_IsCalledFromOnSubModuleUnloaded()
     {
-        var mainDir = FindMainSourceDir();
-        Assert.IsNotNull(mainDir, "could not locate Main/ from the test assembly — this test scans source.");
-
-        var declaring = DeclaringClasses(mainDir);
+        var declaring = DeclaringClasses();
         Assert.AreNotEqual(0, declaring.Count,
             "scan found no ResetForUnload declarations at all — the regex is broken, not the codebase.");
 
@@ -92,5 +74,17 @@ public class ResetForUnloadSweepTests
             "their cached statics survive into a disposed IoC container on a reload-in-process:\n  " +
             string.Join("\n  ", unwired) +
             "\n\nAdd the call to the sweep in Main/SubModule.cs.");
+    }
+    [TestMethod]
+    public void TaomClient_DeclaresNoResetForUnload()
+    {
+        var offenders = RepoPaths.CSharpFiles("Client")
+            .Where(f => ResetDecl.IsMatch(File.ReadAllText(f)))
+            .Select(Path.GetFileName)
+            .ToList();
+
+        Assert.AreEqual(0, offenders.Count,
+            "A TAOM.Client class may not declare ResetForUnload(): the sweep in Main/SubModule.cs.OnSubModuleUnloaded "
+            + "is the only caller and ClientSubModule has none. Offenders: " + string.Join(", ", offenders));
     }
 }

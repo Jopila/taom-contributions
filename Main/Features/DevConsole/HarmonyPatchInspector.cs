@@ -28,10 +28,11 @@ internal static class HarmonyPatchInspector
         internal int TotalPatchedMethods { get; set; }
     }
 
-    internal static Result Collect(string taomOwnerId, Assembly taomAssembly)
+    /// <summary>Reads the categories declared by every given TAOM assembly (core, then TAOM.Client: ADR-013).</summary>
+    internal static Result Collect(string taomOwnerId, IEnumerable<Assembly> taomAssemblies)
     {
         var result = new Result();
-        var types = SafeGetTypes(taomAssembly);
+        var types = taomAssemblies.SelectMany(SafeGetTypes).ToArray();
 
         result.Declared = types
             .Select(SafeGetCategory)

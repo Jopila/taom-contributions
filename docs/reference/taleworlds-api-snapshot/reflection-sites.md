@@ -194,6 +194,7 @@ Reflection whose target is a TAOM-owned type or a dynamic member name. Not affec
 ## Referenced by
 
 - [docs/migration/s6-runtime-punchlist.md](../../migration/s6-runtime-punchlist.md)
+- [docs/reference/harmony-patch-registry.md](../harmony-patch-registry.md)
 - [docs/reference/taleworlds-api-snapshot/README.md](./README.md)
 
 <!-- backlinks-end -->

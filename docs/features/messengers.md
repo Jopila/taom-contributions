@@ -117,8 +117,8 @@ Out-of-range values revert to defaults with a warning. **JSON config requires a 
 | [Main/Features/Messengers/Domain/MapCoord.cs](../../Main/Features/Messengers/Domain/MapCoord.cs) | TAOM-owned 2D map-coordinate struct — keeps the service/domain layers free of TaleWorlds types per ADR-007; the boundary (`MessengerCampaignBehavior`) converts to/from `Vec2` (NaN = invalid sentinel, `IsValid` matches `Vec2.IsValid` incl. ±Infinity rejection) |
 | [Main/Features/Messengers/MessengerCampaignBehavior.cs](../../Main/Features/Messengers/MessengerCampaignBehavior.cs) | Boundary: dialog tree, IMissionListener, encounter routing, `SyncData` |
 | [Main/Features/Messengers/MessengerIoC.cs](../../Main/Features/Messengers/MessengerIoC.cs) | DryIoc registrations |
-| [Main/Features/Messengers/UI/MessengerEncyclopediaPrefabExtension.cs](../../Main/Features/Messengers/UI/MessengerEncyclopediaPrefabExtension.cs) | UIExtenderEx prefab patch (button injection) |
-| [Main/Features/Messengers/UI/MessengerEncyclopediaMixin.cs](../../Main/Features/Messengers/UI/MessengerEncyclopediaMixin.cs) | UIExtenderEx VM mixin (data sources + click command) |
+| [Client/Features/Messengers/UI/MessengerEncyclopediaPrefabExtension.cs](../../Client/Features/Messengers/UI/MessengerEncyclopediaPrefabExtension.cs) | UIExtenderEx prefab patch (button injection) |
+| [Client/Features/Messengers/UI/MessengerEncyclopediaMixin.cs](../../Client/Features/Messengers/UI/MessengerEncyclopediaMixin.cs) | UIExtenderEx VM mixin (data sources + click command) |
 | [Main/_Module/ModuleData/messengers/messenger_config.json](../../Main/_Module/ModuleData/messengers/messenger_config.json) | Advanced tuning |
 | [Main/_Module/ModuleData/taom_messenger_strings.xml](../../Main/_Module/ModuleData/taom_messenger_strings.xml) | EN base — 29 keys |
 | `Main/_Module/ModuleData/Languages/<LANG>/std_taom_messenger_strings_*.xml` | 12 language variants (BR/CNs/CNt/DE/FR/IT/JP/KO/PL/RU/SP/TR) — English placeholder text where untranslated |

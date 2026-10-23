@@ -1,6 +1,4 @@
 ﻿using System.Linq;
-using Bannerlord.UIExtenderEx;
-using Bannerlord.UIExtenderEx.Attributes;
 using HarmonyLib;
 using TAOM.Dependencies.Foundation;
 using TAOM.Features.CoopInterop;
@@ -102,7 +100,6 @@ public class SubModule : MBSubModuleBase
 {
     private Harmony _harmony;
     private PatchCategoryApplier _patches;
-    private UIExtender? _uiExtender;
     private ITimeAccelerationService? _timeAccelerationService;
     private static float _shaderTickAccumulator;
     // Null unless the Patch21 wiring in OnSubModuleLoad resolves it (commented out while
@@ -217,8 +214,10 @@ public class SubModule : MBSubModuleBase
         // indexed by PatchCategoryIndex, class by class, not by Harmony's own assembly-wide index:
         // a class whose [HarmonyPatch] names a type the engine no longer has would fail Harmony's
         // index and so every category, where here only that class is skipped and reported (#653).
+        // The index reads core, then TAOM.Client when it loaded (ADR-013), so a client patch class
+        // joins its category like a core one.
         _harmony = new Harmony("com.taom.mod");
-        var categoryIndex = PatchCategoryIndex.Build(typeof(SubModule).Assembly);
+        var categoryIndex = PatchCategoryIndex.Build(ClientComposition.LoadedTaomAssemblies());
         _patches = new PatchCategoryApplier(
             category => categoryIndex.Apply(_harmony, category),
             IoC.Resolve<IModLogger>());
@@ -241,9 +240,8 @@ public class SubModule : MBSubModuleBase
             IoC.Resolve<IModLogger>().LogError($"[CrashReport] init failed: {ex.GetType().Name}: {ex.Message}");
         }
 
-        _uiExtender = UIExtender.Create("TAOM");
-        RegisterUiExtensions(_uiExtender);
-        _uiExtender.Enable();
+        // TAOM's UIExtenderEx extensions all live in TAOM.Client, which registers them in its own
+        // OnSubModuleLoad (ADR-013); a dedicated server never loads them.
 
         // Patch41_McmLayoutFix — flip MCM's embedded options-screen prefabs from VerticalBottomToTop
         // to VerticalTopToBottom (v1.4.0 layout regression). MCM's prefabs are embedded in
@@ -949,90 +947,6 @@ public class SubModule : MBSubModuleBase
                 .LogPhase(phase, Features.BattleLoadDiagnostics.ProcessMemoryTokens.Format());
         }
         catch { /* never fail a load over a diagnostic */ }
-    }
-
-    /// <summary>
-    /// #370 — registers TAOM's UIExtenderEx extensions, minus any marked
-    /// <c>[CoopSuppressedUi]</c> when a co-op module is active.
-    ///
-    /// Mirrors UIExtenderEx's own <c>Register(Assembly)</c> type selection (any type carrying an
-    /// attribute derived from <c>BaseUIExtenderAttribute</c>), then filters. Registration is a
-    /// one-shot here in <c>OnSubModuleLoad</c>, so this is the only point at which a widget can be
-    /// kept out of the prefab — a runtime check inside a mixin cannot un-inject one.
-    ///
-    /// Never throws: a failure here would cost every TAOM UI extension, so the fallback is the
-    /// unfiltered assembly registration (solo behaviour).
-    /// </summary>
-    private static void RegisterUiExtensions(UIExtender extender)
-    {
-        var assembly = typeof(SubModule).Assembly;
-
-        // SOLO TAKES THE ORIGINAL PATH, UNTOUCHED. Not an optimisation — a guarantee. Our own type
-        // collection could in principle select a different set than UIExtenderEx's (its per-type
-        // attribute read is tolerant where UIExtenderEx's is not), and a silently short list would
-        // break TAOM's UI with no visible cause. Solo players are the overwhelming majority and must
-        // not be exposed to that risk to serve a co-op path they never load, so the filtered path is
-        // reached ONLY when a co-op module is present.
-        bool coopActive;
-        try
-        {
-            // Reading the flag here is SAFE, and that is verified rather than assumed.
-            //
-            // This is the one CoopPresence consumer that cannot self-correct: UI registration is a
-            // one-shot, and a mixin cannot un-inject a widget that is already built. Everything else
-            // (PatchShield, SaveShield, the diplomacy gates) reads live at gameplay time. So the
-            // worry was that this decided from a probe taken before the launcher had published its
-            // module list — which would silently take the solo branch and log nothing.
-            //
-            // Decompiled v1.4.7 settles it (two independent Codex passes, 2026-08-01):
-            // Module.Initialize populates ModuleHelper's _loadedModules from the native module-code
-            // string BEFORE calling LoadSubModules, which is what invokes OnSubModuleLoad. The list
-            // is therefore complete here — even a SubModule constructor already sees it. The
-            // "may not be populated this early" caution in CoopPresence.Refresh's docs is about the
-            // pre-managed native string, not an OnSubModuleLoad race, and no extra Refresh() helps
-            // with that. Removed the redundant re-probe accordingly.
-            coopActive = CoopPresence.IsActive;
-        }
-        catch (System.Exception ex)
-        {
-            IoC.Resolve<IModLogger>().LogWarning(
-                $"[CoopInterop] co-op probe failed ({ex.GetType().Name}: {ex.Message}) — " +
-                "registering UI unfiltered (solo behaviour)");
-            extender.Register(assembly);
-            return;
-        }
-
-        if (!coopActive)
-        {
-            // Logged unconditionally: this line's ABSENCE is the only way to tell a genuine solo
-            // session from a co-op session whose detection ran too late, and the boot matrix has to
-            // be able to tell those apart.
-            IoC.Resolve<IModLogger>().LogInfo(
-                "[CoopInterop] no co-op module detected at UI registration — registering all TAOM UI");
-            extender.Register(assembly);
-            return;
-        }
-
-        try
-        {
-            var candidates = CoopUiRegistrationPolicy.CollectUiExtensionTypes(assembly);
-            var registered = CoopUiRegistrationPolicy.Filter(candidates, coopActive: true);
-            var dropped = CoopUiRegistrationPolicy.Suppressed(candidates);
-
-            IoC.Resolve<IModLogger>().LogInfo(
-                $"[CoopInterop] co-op active — registering {registered.Count} UI extension(s), " +
-                $"suppressing {dropped.Count}" +
-                (dropped.Count > 0 ? ": " + string.Join(", ", dropped.Select(t => t.Name)) : ""));
-
-            extender.Register(registered);
-        }
-        catch (System.Exception ex)
-        {
-            IoC.Resolve<IModLogger>().LogWarning(
-                $"[CoopInterop] UI extension filtering failed ({ex.GetType().Name}: {ex.Message}) — " +
-                "registering the full assembly unfiltered");
-            extender.Register(assembly);
-        }
     }
 
     // Character identity, creation, and troop-progression registrations (ADR-002 extraction of the

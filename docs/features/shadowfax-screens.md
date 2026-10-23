@@ -50,7 +50,7 @@ VisualDefinitions, and each XPath misses when an engine update renames its node.
   has `TransitionDuration="0"` in the XML. That includes the party section headers' 0.045 s press
   squish. FormationListPanel and FormationSeperator belong to the formation dropdown, which is
   commented out in PartyScreen.xml; their zeros take effect only if it returns.
-- **Registration:** `UIExtender.Register` in `SubModule.RegisterUiExtensions` finds the class, in
+- **Registration:** `UIExtender.Register` in `ClientUiExtensions.Register` (called from `ClientSubModule.OnSubModuleLoad`) finds the class, in
   solo and, through `CoopUiRegistrationPolicy`, under co-op (the class has no `[CoopSuppressedUi]`;
   the change is visual only). No IoC entry and no Harmony patch.
 - **Generated prefabs:** TAOM.Dependencies sets `UIConfig.DoNotUseGeneratedPrefabs = true`, so the
@@ -79,7 +79,7 @@ prefabs by file name too).
 | File | Purpose |
 |------|---------|
 | `Main/Features/ShadowfaxScreens/InstantTransitionRewriter.cs` | Pure XML transform: zero every VisualDefinition's duration |
-| `Main/Features/ShadowfaxScreens/UI/ShadowfaxScreensPrefab.cs` | UIExtenderEx patch on the nine vanilla movies |
+| `Client/Features/ShadowfaxScreens/UI/ShadowfaxScreensPrefab.cs` | UIExtenderEx patch on the nine vanilla movies |
 | `Main/_Module/GUI/PreFabs/Party/PartyScreen.xml`, `PartyTroopTuple.xml`, `PartyTroopTupleLeft.xml` | Party screen and troop rows, zero durations |
 | `Main/_Module/GUI/PreFabs/CareerSystem/CareerScreen.xml` | Career screen header and footer, zero durations |
 
@@ -115,3 +115,6 @@ prefabs by file name too).
 
 - **Issue:** #850: [Instant UI: management screens open without slide animations](https://github.com/haterade22/TAOM/issues/850)
 - **Status:** Open
+
+---
+

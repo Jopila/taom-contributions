@@ -2,7 +2,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Bannerlord.UIExtenderEx.Attributes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using TAOM.Features.CoopInterop;
 
 namespace TAOM.Tests.Infrastructure;
 
@@ -29,15 +31,15 @@ public class ClientIsolationGateTests
     }
 
     // Each of these is found by a scan over Main (or the built assembly) that does not read Client/.
-    // Wire the scan first, then move the declaration.
-    // A word scan cannot see a subclass of HarmonyPatch or of the UIExtenderEx attributes under another
-    // name, nor a patch applied by hand through Harmony.Patch(...) without an attribute.
+    // Wire the scan first, then move the declaration. Patches and UIExtenderEx extensions are not on the list
+    // any more: B5 made the patch-category pass (LoadedTaomAssemblies) and the UIExtenderEx registration
+    // (ClientSubModule) read TAOM.Client, and TaomCore_DeclaresNoUiExtension pins the core side.
     private static readonly Regex ForbiddenInTheClient = new Regex(
-        @"\b(HarmonyPatch|PrefabExtension|ViewModelMixin)(Attribute)?\b|\bSaveableTypeDefiner\b"
+        @"\bSaveableTypeDefiner\b"
         + @"|\b(AttributeGlobalSettings|AttributePerCampaignSettings|AttributePerSaveSettings)\b|\bMCM\.Abstractions\b");
 
     [TestMethod]
-    public void ClientSource_DeclaresNoPatchUiExtensionSaveDefinerOrSettingsType()
+    public void ClientSource_DeclaresNoSaveDefinerOrSettingsType()
     {
         var files = RepoPaths.CSharpFiles("Client").ToList();
         Assert.IsTrue(files.Count > 0, "The scan read no file under Client/.");
@@ -48,32 +50,69 @@ public class ClientIsolationGateTests
             .ToList();
 
         CollectionAssert.AreEqual(new string[0], offenders,
-            "TAOM.Client may not declare a [HarmonyPatch] class, a UIExtenderEx PrefabExtension or ViewModelMixin, a "
-            + "SaveableTypeDefiner or an MCM settings type until the scan that finds it also reads Client/: "
-            + "PatchCategoryIndex.Build (Main/SubModule.cs, the patch-category pass), RegisterUiExtensions "
-            + "(Main/SubModule.cs, the UIExtenderEx registration), the save definer registration and the localization scans.");
+            "TAOM.Client may not declare a SaveableTypeDefiner or an MCM settings type until the scans that find them "
+            + "also read Client/: the save definer registration and the settings scans.");
     }
 
     [DataTestMethod]
-    [DataRow("[HarmonyPatch(typeof(X), \"Y\")]")]
-    [DataRow("[HarmonyLib.HarmonyPatch(typeof(X), \"Y\")]")]
-    [DataRow("[HarmonyPatchAttribute(typeof(X), \"Y\")]")]
-    [DataRow("[HarmonyPatchCategory(\"PatchX\"), HarmonyPatch(typeof(X), \"Y\")]")]
-    [DataRow("[PrefabExtensionAttribute(\"X\", \"Y\")]")]
-    [DataRow("[Bannerlord.UIExtenderEx.Attributes.ViewModelMixin(\"Z\")]")]
-    [DataRow("[PrefabExtension]")]
-    [DataRow("[ViewModelMixin(\"Z\")]")]
     [DataRow("class D : SaveableTypeDefiner")]
     [DataRow("class S : AttributeGlobalSettings<S>")]
     [DataRow("class S : AttributePerCampaignSettings<S>")]
     [DataRow("class S : AttributePerSaveSettings<S>")]
     [DataRow("using MCM.Abstractions.Base;")]
+    [DataRow("class D : TaleWorlds.SaveSystem.SaveableTypeDefiner")]
+    [DataRow("class S : MCM.Abstractions.Base.Global.AttributeGlobalSettings<S>")]
     public void TripwirePattern_MatchesEachForbiddenDeclaration(string source) =>
         Assert.IsTrue(ForbiddenInTheClient.IsMatch(source), source);
 
+    // The scan is a word search, so a subclass of a non-sealed core definer (class D : TaomSaveDefiner) escapes it.
+    [DataTestMethod]
+    [DataRow("[SaveableField(1)]")]
+    [DataRow("class PresetSaveableTypeDefinerTests")]
+    public void TripwirePattern_IgnoresSaveAttributesAndLookalikeNames(string source) =>
+        Assert.IsFalse(ForbiddenInTheClient.IsMatch(source), source);
+
+    // UIExtenderEx's Register(Assembly) reads one assembly and refuses a second call under one module name, so TAOM
+    // registers once, from ClientSubModule.OnSubModuleLoad, and every extension lives in TAOM.Client (ADR-013).
     [TestMethod]
-    public void TripwirePattern_HarmonyPatchCategoryAlone_DoesNotMatch() =>
-        Assert.IsFalse(ForbiddenInTheClient.IsMatch("[HarmonyPatchCategory(\"X\")]"));
+    [TestCategory("RequiresGame")]
+    public void TaomCore_DeclaresNoUiExtension()
+    {
+        if (!TAOM.Tests.Migration.GameAssemblies.EnsureLoaded())
+            Assert.Inconclusive("No game install resolved: the core types cannot be read.");
+
+        // Strict GetTypes (a partial load throws) and UIExtenderEx's own selection: any custom attribute whose type
+        // derives from BaseUIExtenderAttribute.
+        var coreTypes = typeof(TAOM.SubModule).Assembly.GetTypes();
+        var inCore = coreTypes
+            .Where(t => t.CustomAttributes.Any(a => a.AttributeType.IsSubclassOf(typeof(BaseUIExtenderAttribute))))
+            .Select(t => t.FullName!)
+            .OrderBy(n => n, StringComparer.Ordinal).ToArray();
+
+        Assert.IsTrue(coreTypes.Length > 1000, "The scan read only " + coreTypes.Length + " core types.");
+        CollectionAssert.AreEqual(new string[0], inCore,
+            "UIExtenderEx reads only TAOM.Client (ClientSubModule.OnSubModuleLoad), so a core extension would never load.");
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void TaomClient_DeclaresEveryUiExtension()
+    {
+        TAOM.Tests.Migration.GameAssemblies.EnsureLoaded();
+
+        var inClient = CoopUiRegistrationPolicy.CollectUiExtensionTypes(typeof(TAOM.Client.ClientSubModule).Assembly);
+
+        Assert.AreEqual(26, inClient.Count,
+            "11 view model mixins and 15 prefab extension classes: " + string.Join(", ", inClient.Select(t => t.Name)));
+        CollectionAssert.AreEquivalent(
+            new[]
+            {
+                "TimeAccelerationMixin", "PrefabCenterPanel", "PrefabFastForwardButton", "PrefabPlayButton",
+                "PrefabPauseButton", "PrefabInsertExtraFastForward",
+            },
+            CoopUiRegistrationPolicy.Suppressed(inClient).Select(t => t.Name).ToArray(),
+            "the co-op registration drops exactly the time-control extensions");
+    }
 
     [TestMethod]
     public void CoreSource_NamesTaomClientOnlyInComments()

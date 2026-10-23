@@ -10,10 +10,10 @@ namespace TAOM.Features.SpecialResources.UI;
 
 public class SpecialResourceSpriteWidget : IconBrushWidget
 {
-    private ISpecialResourceConfigProvider _config;
-    private IModLogger _logger;
-    private string _cachedSpriteName;
-    private Sprite _cachedSprite;
+    private ISpecialResourceConfigProvider? _config;
+    private IModLogger? _logger;
+    private string? _cachedSpriteName;
+    private Sprite? _cachedSprite;
     private bool _loggedOnce;
 
     public SpecialResourceSpriteWidget(UIContext context) : base(context)

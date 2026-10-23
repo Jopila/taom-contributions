@@ -23,7 +23,7 @@ internal sealed class MessengerEncyclopediaMixin : BaseViewModelMixin<Encycloped
     // Last-state tracker keys the rejection-reason hint by validation result so we don't allocate a fresh
     // HintViewModel + TextObject on every refresh when the same reason still applies.
     private Domain.MessengerValidationResult _lastValidationResult = Domain.MessengerValidationResult.Ok;
-    private HintViewModel _lastReasonHint;
+    private HintViewModel? _lastReasonHint;
     private bool _isMessengerAvailable;
     private HintViewModel _sendMessengerHint;
     private string _sendMessengerActionName = "";
@@ -101,9 +101,9 @@ internal sealed class MessengerEncyclopediaMixin : BaseViewModelMixin<Encycloped
         SendMessengerHint = _lastReasonHint;
     }
 
+    // The one caller has already returned for a null hero, so the snapshot always exists.
     private static Domain.HeroSnapshot SnapshotForMixin(Hero hero)
     {
-        if (hero == null) return null;
         var inPlayerParty = hero.PartyBelongedTo != null
                             && Hero.MainHero?.PartyBelongedTo != null
                             && hero.PartyBelongedTo == Hero.MainHero.PartyBelongedTo;
@@ -181,7 +181,7 @@ internal sealed class MessengerEncyclopediaMixin : BaseViewModelMixin<Encycloped
         }
     }
 
-    private Hero ResolveHero()
+    private Hero? ResolveHero()
     {
         if (ViewModel == null) return null;
         return ViewModel.Obj as Hero;

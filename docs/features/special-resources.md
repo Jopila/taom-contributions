@@ -258,11 +258,11 @@ question, not a defect, and the daily toast now makes it visible.
 | `Main/Features/SpecialResources/Hooks/RecruitmentVM_ExecuteDone_Patch.cs` | Patch51: prefix on `ExecuteDone`, the commit boundary the Confirm hotkey reaches without the button (#600) |
 | `Main/Features/SpecialResources/Hooks/RecruitCartGrouping.cs` | Pure: cart of units to one `RecruitCartEntry` per troop id |
 | `Main/Features/SpecialResources/Cheats/SpecialResourceCheats.cs` | `taom.add_special_resources` console command |
-| `Main/Features/SpecialResources/UI/SpecialResourceMapBarMixin.cs` | Map bar UIExtenderEx mixin |
-| `Main/Features/SpecialResources/UI/SpecialResourceSpriteWidget.cs` | Dynamic icon sprite (extends IconBrushWidget) |
-| `Main/Features/SpecialResources/UI/SpecialResourcePrefab.cs` | PrefabExtension: swap widget in BottomInfoBar |
+| `Client/Features/SpecialResources/UI/SpecialResourceMapBarMixin.cs` | Map bar UIExtenderEx mixin |
+| `Client/Features/SpecialResources/UI/SpecialResourceSpriteWidget.cs` | Dynamic icon sprite (extends IconBrushWidget) |
+| `Client/Features/SpecialResources/UI/SpecialResourcePrefab.cs` | PrefabExtension: swap widget in BottomInfoBar |
 | `Main/Features/SpecialResources/SpecialResourceTroopBadge.cs` | Pure predicate and tooltip rows for the encyclopedia badge (#590) |
-| `Main/Features/SpecialResources/UI/EncyclopediaUnitBadgeMixin.cs` | UIExtenderEx mixin on `EncyclopediaUnitVM`: badge visibility, icon sprite, lazy tooltip (#590) |
+| `Client/Features/SpecialResources/UI/EncyclopediaUnitBadgeMixin.cs` | UIExtenderEx mixin on `EncyclopediaUnitVM`: badge visibility, icon sprite, lazy tooltip (#590) |
 | `Main/_Module/GUI/Prefabs/Encyclopedia/EncyclopediaSubPages/EncyclopediaUnitTreeNodeItem.xml` | TAOM clone of the vanilla troop-tree node; carries the badge widget beside the tier and type icons |
 | `Main/_Module/ModuleData/special_resources/special_resources_config.xml` | 11 resource definitions |
 | `Main/_Module/ModuleData/special_resources/troop_resource_costs.xml` | 85 cost rows: 43 with daily upkeep, 42 merchant-only emissary offers |

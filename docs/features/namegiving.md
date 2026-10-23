@@ -76,10 +76,10 @@ The switch is counted in the co-op settings fingerprint (`CoopSettingsRelevance`
 | `Main/Features/Namegiving/LoreNames.cs` | the four lore rows and the key prefix |
 | `Main/Features/Namegiving/NamegivingSettingsProvider.cs` | the MCM switch, cached lazily (a concrete class) |
 | `Main/Features/Namegiving/Hooks/NamegivingBehavior.cs` | the capture, kingdom-change and session-launch listeners |
-| `Main/Features/Namegiving/UI/FiefNamingMixin.cs` | the button's state and click |
+| `Client/Features/Namegiving/UI/FiefNamingMixin.cs` | the button's state and click |
 | `Main/Features/Namegiving/UI/NamegivingPrompts.cs` | picker, text box, confirmation |
 | `Main/Features/Namegiving/UI/NamegivingTexts.cs` | every player text |
-| `Main/Features/Namegiving/UI/FiefActionsRenamePrefab.cs` | the insertion into the `FiefsPanel` prefab |
+| `Client/Features/Namegiving/UI/FiefActionsRenamePrefab.cs` | the insertion into the `FiefsPanel` prefab |
 | `Main/Adapters/IFiefNamingAdapter.cs`, `FiefNamingAdapter.cs` | settlement reads and the three writes |
 | `Main/Features/TaomSettings.cs` | `EnableNamegiving` |
 | `Main/Composition/FeatureModules.cs` | the module line |
@@ -152,3 +152,6 @@ Unseen in game. `{..}` reaching `KingdomManagementVM` across the `FiefsPanel` bo
 
 - **Issue:** [#858](https://github.com/haterade22/TAOM/issues/858) Rename towns, castles and villages from the kingdom fiefs screen
 - **Status:** Open. The in-game check is owed, and so is the paid translation of the 22 new strings ([#931](https://github.com/haterade22/TAOM/issues/931)).
+
+---
+

@@ -55,12 +55,7 @@ internal static class MapProfilerTargets
 
     /// <summary>The assemblies that hold TAOM <see cref="MapView"/> subclasses: core, then TAOM.Client when the client
     /// slot is filled (ADR-013: the three views live there). A dedicated server has no client and scans core only.</summary>
-    internal static IReadOnlyList<Assembly> ViewAssemblies()
-    {
-        var core = typeof(MapProfilerTargets).Assembly;
-        var client = ClientComposition.Assembly;
-        return client == null || client == core ? new[] { core } : new[] { core, client };
-    }
+    internal static IReadOnlyList<Assembly> ViewAssemblies() => ClientComposition.LoadedTaomAssemblies();
 
     /// <summary>Every TAOM <see cref="MapView"/> subclass's own override of a per-frame virtual, in TAOM.dll and
     /// TAOM.Client.dll, sorted by declaring type then method name. Never throws: returns what it found.</summary>

@@ -41,6 +41,13 @@ public class ClientWidgetDiscoveryTests
         "TAOM.Features.SettlementNameplateRelation.TaomSettlementPlateWidget",
     };
 
+    // B5: the screen-extension widgets named only by prefab XML (an inline prefab string and CareerScreen.xml).
+    private static readonly string[] ScreenExtensionWidgets =
+    {
+        "TAOM.Features.SpecialResources.UI.SpecialResourceSpriteWidget",
+        "TAOM.Features.CareerSystem.UI.TaomCareerDiamondWidget",
+    };
+
     [ClassInitialize]
     public static void Init(Microsoft.VisualStudio.TestTools.UnitTesting.TestContext _) =>
         TAOM.Tests.Migration.GameAssemblies.EnsureLoaded();
@@ -71,7 +78,7 @@ public class ClientWidgetDiscoveryTests
         var core = typeof(SubModule).Assembly;
         var problems = new List<string>();
 
-        foreach (var fullName in FrontEndWidgets.Concat(CampaignMapWidgets))
+        foreach (var fullName in FrontEndWidgets.Concat(CampaignMapWidgets).Concat(ScreenExtensionWidgets))
         {
             if (core.GetType(fullName) != null)
                 problems.Add(fullName + " is still defined in TAOM.dll");

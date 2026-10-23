@@ -5,14 +5,14 @@ namespace TAOM.Features.SpecialResources;
 
 public interface ISpecialResourceService
 {
-    SpecialResource ResolveResource(string kingdomId, string cultureId);
-    float GetCurrentAmount(string heroId, string kingdomId, string cultureId);
-    void EarnFromBattle(string heroId, string kingdomId, string cultureId, float enemySizeRatio);
-    void EarnFromRaid(string heroId, string kingdomId, string cultureId);
-    void EarnFromSiege(string heroId, string kingdomId, string cultureId);
-    void EarnFromPrisoners(string heroId, string kingdomId, string cultureId, int prisonerCount);
-    void EarnFromTournament(string heroId, string kingdomId, string cultureId);
-    void EarnFromHideout(string heroId, string kingdomId, string cultureId);
+    SpecialResource? ResolveResource(string? kingdomId, string? cultureId);
+    float GetCurrentAmount(string heroId, string? kingdomId, string? cultureId);
+    void EarnFromBattle(string heroId, string? kingdomId, string? cultureId, float enemySizeRatio);
+    void EarnFromRaid(string heroId, string? kingdomId, string? cultureId);
+    void EarnFromSiege(string heroId, string? kingdomId, string? cultureId);
+    void EarnFromPrisoners(string heroId, string? kingdomId, string? cultureId, int prisonerCount);
+    void EarnFromTournament(string heroId, string? kingdomId, string? cultureId);
+    void EarnFromHideout(string heroId, string? kingdomId, string? cultureId);
     /// <summary>
     /// The amount an earning source of <paramref name="amount"/> base pays this hero after the career
     /// SpecialResourceGain (#767); 0 when the result is not a finite positive. The tooltip projects
@@ -20,9 +20,9 @@ public interface ISpecialResourceService
     /// </summary>
     float ScaleEarned(string heroId, float amount);
 
-    void ApplyDailyTick(string heroId, string kingdomId, string cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep);
-    bool CanAffordUpgrade(string heroId, string kingdomId, string cultureId, string troopId, int count);
-    void SpendForUpgrade(string heroId, string kingdomId, string cultureId, string troopId, int count);
+    void ApplyDailyTick(string heroId, string? kingdomId, string? cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep);
+    bool CanAffordUpgrade(string heroId, string? kingdomId, string? cultureId, string troopId, int count);
+    void SpendForUpgrade(string heroId, string? kingdomId, string? cultureId, string troopId, int count);
 
     /// <summary>
     /// Deducts the one-time recruit cost (<c>recruit_cost</c>) for <paramref name="troopId"/> ×
@@ -31,7 +31,7 @@ public interface ISpecialResourceService
     /// the caller can tell the player. Charged from <c>OnUnitRecruitedEvent</c> (player-only) for the
     /// elephant/spider volunteers; the RecruitmentVM gate guarantees affordability before this fires.
     /// </summary>
-    float ChargeRecruitCost(string heroId, string kingdomId, string cultureId, string troopId, int count);
+    float ChargeRecruitCost(string heroId, string? kingdomId, string? cultureId, string troopId, int count);
 
     /// <summary>
     /// Decides whether the recruit-volunteers cart can be confirmed: sums <c>recruit_cost × count</c>
@@ -39,7 +39,7 @@ public interface ISpecialResourceService
     /// balance. Returns <see cref="RecruitGateResult.Allowed"/> when nothing in the cart costs a resource
     /// or the hero maps to no resource. Used by the RecruitmentVM Done-button gate.
     /// </summary>
-    RecruitGateResult CanAffordRecruit(string heroId, string kingdomId, string cultureId, IReadOnlyList<RecruitCartEntry> cart);
+    RecruitGateResult CanAffordRecruit(string heroId, string? kingdomId, string? cultureId, IReadOnlyList<RecruitCartEntry> cart);
 
     /// <summary>
     /// True if the hero can afford <c>merchant_cost × count</c> of <paramref name="troopId"/> from the
@@ -49,7 +49,7 @@ public interface ISpecialResourceService
     /// <c>merchant_cost</c>, or the faction maps to no resource (those cases are gated elsewhere).
     /// Distinct from <see cref="CanAffordRecruit"/>, which reads <c>recruit_cost</c> for the volunteer gate.
     /// </summary>
-    bool CanAffordMerchantPurchase(string heroId, string kingdomId, string cultureId, string troopId, int count);
+    bool CanAffordMerchantPurchase(string heroId, string? kingdomId, string? cultureId, string troopId, int count);
 
     /// <summary>
     /// Deducts <c>merchant_cost × count</c> of <paramref name="troopId"/> from the resource resolved via
@@ -57,19 +57,19 @@ public interface ISpecialResourceService
     /// No-op when count ≤ 0, the troop has no <c>merchant_cost</c>, or the faction maps to no resource.
     /// Reads <c>merchant_cost</c>, never <c>recruit_cost</c> — the two economies never cross.
     /// </summary>
-    void ChargeMerchantPurchase(string heroId, string kingdomId, string cultureId, string troopId, int count);
+    void ChargeMerchantPurchase(string heroId, string? kingdomId, string? cultureId, string troopId, int count);
 
     void BeginPartyScreenSession();
     void QueueUpgradeSpend(string heroId, string troopId, int count);
-    float GetAvailableAfterPending(string heroId, string kingdomId, string cultureId);
-    int ClampUpgradeCount(string heroId, string kingdomId, string cultureId, string troopId, int requestedCount);
+    float GetAvailableAfterPending(string heroId, string? kingdomId, string? cultureId);
+    int ClampUpgradeCount(string heroId, string? kingdomId, string? cultureId, string troopId, int requestedCount);
     /// <summary>
     /// Debits the spend queued during the party-screen session and returns the amount debited
     /// (0 when no session is open, nothing was queued, or the hero maps to no resource).
     /// </summary>
-    float CommitSession(string heroId, string kingdomId, string cultureId);
+    float CommitSession(string heroId, string? kingdomId, string? cultureId);
     void CancelSession();
-    void InitializeHero(string heroId, string kingdomId, string cultureId);
+    void InitializeHero(string heroId, string? kingdomId, string? cultureId);
 
     /// <summary>
     /// The daily change for one tick: earning (career gain applied), upkeep (career upkeep modifier
@@ -79,25 +79,25 @@ public interface ISpecialResourceService
     /// from it (#558). Returns <see cref="DailyResourceBreakdown.Empty"/> when the hero's
     /// kingdom/culture maps to no resource.
     /// </summary>
-    DailyResourceBreakdown GetDailyBreakdown(string heroId, string kingdomId, string cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep);
+    DailyResourceBreakdown GetDailyBreakdown(string heroId, string? kingdomId, string? cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep);
 
     /// <summary>
     /// <see cref="GetDailyBreakdown"/>'s <c>Net</c>, kept as a convenience for callers that need
     /// only the sign. Returns 0 when the hero's kingdom/culture maps to no resource.
     /// </summary>
-    float GetProjectedDailyNet(string heroId, string kingdomId, string cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep);
-    IReadOnlyList<TroopDesertionEntry> CalculateDesertion(string heroId, string kingdomId, string cultureId, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep);
+    float GetProjectedDailyNet(string heroId, string? kingdomId, string? cultureId, int ownedTownCount, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep);
+    IReadOnlyList<TroopDesertionEntry> CalculateDesertion(string heroId, string? kingdomId, string? cultureId, IReadOnlyList<TroopUpkeepInfo> troopsWithUpkeep);
 
     /// <summary>
     /// Returns the highest <see cref="ResourceTier"/> the hero has reached,
     /// or <c>null</c> if the resource has no tiers or the hero is below all thresholds.
     /// </summary>
-    ResourceTier GetCurrentTier(string heroId, string kingdomId, string cultureId);
+    ResourceTier? GetCurrentTier(string heroId, string? kingdomId, string? cultureId);
 
     /// <summary>
     /// Returns the current tier level (1-N), or 0 if below all thresholds or no tiers defined.
     /// </summary>
-    int GetCurrentTierLevel(string heroId, string kingdomId, string cultureId);
+    int GetCurrentTierLevel(string heroId, string? kingdomId, string? cultureId);
 
     /// <summary>
     /// Clears singleton-scope session state that must not leak across new campaigns started in the
@@ -113,7 +113,7 @@ public interface ISpecialResourceService
     /// <see cref="ResourceGrantResult.None"/> when the kingdom/culture maps to no resource or the
     /// amount is non-finite. Backs the <c>taom.add_special_resources</c> console command.
     /// </summary>
-    ResourceGrantResult GrantAmount(string heroId, string kingdomId, string cultureId, float amount);
+    ResourceGrantResult GrantAmount(string heroId, string? kingdomId, string? cultureId, float amount);
 }
 
 public sealed class TroopUpkeepInfo

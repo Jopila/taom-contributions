@@ -32,19 +32,19 @@ public class SpecialResourceConfigProvider : ISpecialResourceConfigProvider
         return _resources;
     }
 
-    public SpecialResource GetByKingdomId(string kingdomId)
+    public SpecialResource? GetByKingdomId(string? kingdomId)
     {
         EnsureLoaded();
         return kingdomId != null && _byKingdom.TryGetValue(kingdomId, out var resource) ? resource : null;
     }
 
-    public SpecialResource GetByCultureId(string cultureId)
+    public SpecialResource? GetByCultureId(string? cultureId)
     {
         EnsureLoaded();
         return cultureId != null && _byCulture.TryGetValue(cultureId, out var resource) ? resource : null;
     }
 
-    public SpecialResource GetById(string resourceId)
+    public SpecialResource? GetById(string resourceId)
     {
         EnsureLoaded();
         return resourceId != null && _byId.TryGetValue(resourceId, out var resource) ? resource : null;

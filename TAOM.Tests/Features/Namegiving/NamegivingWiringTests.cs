@@ -76,6 +76,7 @@ public class NamegivingWiringTests
     public void EveryEntryPointFile_StaysUnder150Lines()
     {
         var files = Directory.GetFiles(RepoPaths.RepoPath("Main", "Features", "Namegiving", "UI"), "*.cs")
+            .Concat(Directory.GetFiles(RepoPaths.RepoPath("Client", "Features", "Namegiving", "UI"), "*.cs"))
             .Concat(Directory.GetFiles(RepoPaths.RepoPath("Main", "Features", "Namegiving", "Hooks"), "*.cs")).ToList();
 
         Assert.IsTrue(files.Count >= 5, "the mixin, the prompts, the texts, the prefab and the behavior");
@@ -212,5 +213,5 @@ public class NamegivingWiringTests
 
     private static string Behavior() => RepoPaths.ReadSource("Main/Features/Namegiving/Hooks/NamegivingBehavior.cs", stripComments: true);
 
-    private static string Mixin() => RepoPaths.ReadSource("Main/Features/Namegiving/UI/FiefNamingMixin.cs", stripComments: true);
+    private static string Mixin() => RepoPaths.ReadSource("Client/Features/Namegiving/UI/FiefNamingMixin.cs", stripComments: true);
 }

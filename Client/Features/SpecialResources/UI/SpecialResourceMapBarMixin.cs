@@ -31,9 +31,9 @@ internal class SpecialResourceMapBarMixin : BaseViewModelMixin<MapInfoVM>
     private bool _itemAdded;
     private bool _baseInitialized;
     private int _lastAmount = -1;
-    private Domain.SpecialResource _lastResource;
-    private string _lastKingdomId;
-    private string _lastCultureId;
+    private Domain.SpecialResource? _lastResource;
+    private string? _lastKingdomId;
+    private string? _lastCultureId;
 
     public SpecialResourceMapBarMixin(MapInfoVM viewModel) : base(viewModel)
     {

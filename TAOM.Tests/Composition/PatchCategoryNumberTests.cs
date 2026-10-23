@@ -31,7 +31,7 @@ public class PatchCategoryNumberTests
 
     private static readonly Regex Mention = new Regex(@"Patch(\d+[a-z]?)(_[A-Za-z0-9_]+)?", RegexOptions.Compiled);
 
-    private static readonly Regex FeaturePath = new Regex(@"Main/Features/(\w+)/", RegexOptions.Compiled);
+    private static readonly Regex FeaturePath = new Regex(@"(?:Main|Client)/Features/(\w+)/", RegexOptions.Compiled);
 
     private static readonly Regex Heading = new Regex(@"^##\s+(\S+)", RegexOptions.Multiline | RegexOptions.Compiled);
 
@@ -94,7 +94,7 @@ public class PatchCategoryNumberTests
     private static List<(string Category, string Owner)> Declared()
     {
         var found = new List<(string, string)>();
-        foreach (var type in AccessTools.GetTypesFromAssembly(typeof(FeatureModules).Assembly))
+        foreach (var type in TAOM.Tests.Infrastructure.TaomAssemblies.All.SelectMany(AccessTools.GetTypesFromAssembly))
             foreach (var attribute in type.GetCustomAttributes<HarmonyPatchCategory>())
                 found.Add((attribute.info.category, OwnerOf(type)));
         foreach (var module in FeatureModules.All)

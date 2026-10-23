@@ -4,6 +4,8 @@ using System.Reflection;
 using HarmonyLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TaleWorlds.CampaignSystem.ViewModelCollection.Inventory;
+using TAOM.Client;
+using TAOM.Composition;
 using TAOM.Features.TelcharsMark.Hooks;
 using TAOM.Features.TelcharsMark.UI;
 using TAOM.Tests.Infrastructure;
@@ -42,6 +44,46 @@ public class Patch109WiringTests
                 .ToList();
             CollectionAssert.Contains(categories, Category,
                 patch.Name + " lost its [HarmonyPatchCategory]: SubModule's apply call would skip it.");
+        }
+    }
+
+    // The three classes live in TAOM.Client (ADR-013, B5). The category pass builds its index from the loaded TAOM
+    // assemblies, so on a client the category holds them; on a server (no client) it holds none and applies nothing.
+    [TestMethod]
+    public void Index_FromTheLoadedTaomAssemblies_HoldsTheThreeClientClasses()
+    {
+        var previous = ClientComposition.Current;
+        ClientComposition.Current = new TaomClientComposition();
+        try
+        {
+            var index = PatchCategoryIndex.Build(ClientComposition.LoadedTaomAssemblies());
+            var classes = index.ClassesOf(Category);
+
+            Assert.AreEqual(0, index.SkippedClasses.Count,
+                "A skipped class belongs to no category and applies nothing: "
+                + string.Join("; ", index.SkippedClasses.Select(k => k.Key.FullName + " (" + k.Value.GetType().Name + ")")));
+            CollectionAssert.AreEquivalent(PatchClasses, classes.ToArray());
+            foreach (var type in classes)
+                Assert.AreEqual(typeof(ClientSubModule).Assembly, type.Assembly, type.Name + " must be declared in TAOM.Client.");
+        }
+        finally
+        {
+            ClientComposition.Current = previous;
+        }
+    }
+
+    [TestMethod]
+    public void Index_EmptyClientSlot_HoldsNone()
+    {
+        var previous = ClientComposition.Current;
+        ClientComposition.Current = null;
+        try
+        {
+            Assert.AreEqual(0, PatchCategoryIndex.Build(ClientComposition.LoadedTaomAssemblies()).ClassesOf(Category).Count);
+        }
+        finally
+        {
+            ClientComposition.Current = previous;
         }
     }
 

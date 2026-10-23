@@ -71,7 +71,8 @@ public class ReevesLedgerWiringTests
     [TestMethod]
     public void EveryUiFile_StaysUnder150Lines()
     {
-        var files = Directory.GetFiles(RepoPaths.RepoPath("Main", "Features", "ReevesLedger", "UI"), "*.cs");
+        var files = Directory.GetFiles(RepoPaths.RepoPath("Main", "Features", "ReevesLedger", "UI"), "*.cs")
+            .Concat(Directory.GetFiles(RepoPaths.RepoPath("Client", "Features", "ReevesLedger", "UI"), "*.cs")).ToArray();
 
         Assert.IsTrue(files.Length >= 5, "two mixins, the tooltip builder and two prefab patches");
         foreach (var file in files)
@@ -235,7 +236,7 @@ public class ReevesLedgerWiringTests
     [TestMethod]
     public void TheProfitAndProjectsAndTotalLabels_ReuseVanillasKeys()
     {
-        var tips = Mixin("LedgerTooltips.cs");
+        var tips = CoreUi("LedgerTooltips.cs");
 
         StringAssert.Contains(tips, "{=L1Q4AysI}Profit");
         StringAssert.Contains(tips, "{=LpsoPtOo}Projects");
@@ -245,5 +246,8 @@ public class ReevesLedgerWiringTests
             Assert.IsFalse(tips.Contains(key) || Mixin("TownManagementLedgerMixin.cs").Contains(key), key + " is registered nowhere now");
     }
 
-    private static string Mixin(string file) => RepoPaths.ReadSource("Main/Features/ReevesLedger/UI/" + file, stripComments: true);
+    private static string Mixin(string file) => RepoPaths.ReadSource("Client/Features/ReevesLedger/UI/" + file, stripComments: true);
+
+    // LedgerTooltips and LedgerFaultLog stay in core (they load headless); the mixins and prefabs live in TAOM.Client.
+    private static string CoreUi(string file) => RepoPaths.ReadSource("Main/Features/ReevesLedger/UI/" + file, stripComments: true);
 }

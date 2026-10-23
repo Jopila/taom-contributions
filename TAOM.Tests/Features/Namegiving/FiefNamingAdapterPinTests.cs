@@ -13,7 +13,7 @@ public class FiefNamingAdapterPinTests
 {
     private static string Adapter() => RepoPaths.ReadSource("Main/Adapters/FiefNamingAdapter.cs", stripComments: true);
 
-    private static string Mixin() => RepoPaths.ReadSource("Main/Features/Namegiving/UI/FiefNamingMixin.cs", stripComments: true);
+    private static string Mixin() => RepoPaths.ReadSource("Client/Features/Namegiving/UI/FiefNamingMixin.cs", stripComments: true);
 
     [TestMethod]
     public void ApplyPlayerName_NamesTheSettlementFirst_ThenChargesTheInfluence()

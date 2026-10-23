@@ -37,14 +37,14 @@ internal sealed class EncyclopediaUnitBadgeMixin : BaseViewModelMixin<Encycloped
     // path writes to our log. One instance per node would log the same fault twenty times a page.
     private static readonly HashSet<string> FailuresLogged = new HashSet<string>(StringComparer.Ordinal);
 
-    private ISpecialResourceService _service;
-    private IModLogger _logger;
-    private TroopResourceCostEntry _cost;
-    private SpecialResource _resource;
+    private ISpecialResourceService? _service;
+    private IModLogger? _logger;
+    private TroopResourceCostEntry? _cost;
+    private SpecialResource? _resource;
 
     private bool _hasSpecialResourceCost;
     private string _specialResourceIconSprite = "";
-    private BasicTooltipViewModel _specialResourceTooltip;
+    private BasicTooltipViewModel _specialResourceTooltip = null!; // first statement of the constructor sets it
 
     public EncyclopediaUnitBadgeMixin(EncyclopediaUnitVM viewModel) : base(viewModel)
     {
@@ -68,8 +68,8 @@ internal sealed class EncyclopediaUnitBadgeMixin : BaseViewModelMixin<Encycloped
                                   + $"'{_cost.ResourceId}', which special_resources_config.xml does not define; no badge");
             }
 
-            var shown = _resource != null && SpecialResourceTroopBadge.IsShown(_cost);
-            SpecialResourceIconSprite = shown ? _resource.IconSpriteName : "";
+            var shown = _resource != null && _cost != null && SpecialResourceTroopBadge.IsShown(_cost);
+            SpecialResourceIconSprite = shown && _resource != null ? _resource.IconSpriteName : "";
             HasSpecialResourceCost = shown;
         }
         catch (Exception ex)
@@ -98,7 +98,7 @@ internal sealed class EncyclopediaUnitBadgeMixin : BaseViewModelMixin<Encycloped
             var playerResource = hero == null
                 ? null
                 : _service?.ResolveResource(hero.Clan?.Kingdom?.StringId, hero.Culture?.StringId);
-            var note = SpecialResourceTroopBadge.PaidInNote(_resource, playerResource);
+            var note = playerResource == null ? null : SpecialResourceTroopBadge.PaidInNote(_resource, playerResource);
             if (note != null)
             {
                 result.Add(new TooltipProperty("", note.ToString(), 0,

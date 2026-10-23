@@ -186,8 +186,8 @@ the extra multiplier at the fast-forward one (`ClampExtra`); without it "extra" 
 | `Main/Features/TimeAcceleration/ITimeAccelerationSettingsProvider.cs` | Settings interface |
 | `Main/Features/TimeAcceleration/TimeAccelerationSettingsProvider.cs` | Reads `TaomSettings.Instance`; floors extra at fast |
 | `Main/Features/TimeAcceleration/TimeAccelerationIoC.cs` | DryIoc registration (4 singletons) |
-| `Main/Features/TimeAcceleration/UI/TimeAccelerationMixin.cs` | ViewModel mixin on `Tick`: `IsExtraFastForwardActive`, tooltip, `ExecuteExtraFastForward` / `ExecuteFastForward` |
-| `Main/Features/TimeAcceleration/UI/TimeAccelerationPrefab.cs` | 5 prefab patches: widen panel, shift buttons (and rebind vanilla's FF button to the mixin), insert EFF button |
+| `Client/Features/TimeAcceleration/UI/TimeAccelerationMixin.cs` | ViewModel mixin on `Tick`: `IsExtraFastForwardActive`, tooltip, `ExecuteExtraFastForward` / `ExecuteFastForward` |
+| `Client/Features/TimeAcceleration/UI/TimeAccelerationPrefab.cs` | 5 prefab patches: widen panel, shift buttons (and rebind vanilla's FF button to the mixin), insert EFF button |
 | `Main/_Module/ModuleData/global_strings.xml` | Key names/descriptions for the Options screen. The filename is a hard engine contract: `GlobalTextManager.LoadDefaultTexts()` opens this literal path and reads nothing else |
 | `Main/_Module/ModuleData/Languages/*/std_taom_keybind_strings_*.xml` | The 12 translations of the above, listed in each `language_data.xml` |
 

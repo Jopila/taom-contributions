@@ -47,7 +47,7 @@ public class ViewModelMixinBindingTests
 
         var failures = new StringBuilder();
         var checkedCount = 0;
-        foreach (var mixin in typeof(TAOM.IoC).Assembly.GetTypes())
+        foreach (var mixin in TAOM.Tests.Infrastructure.TaomAssemblies.All.SelectMany(a => a.GetTypes()))
         {
             var attr = mixin.GetCustomAttribute<ViewModelMixinAttribute>(inherit: false);
             if (attr?.RefreshMethodName == null) continue;

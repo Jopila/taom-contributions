@@ -189,7 +189,27 @@ public class ClientCompositionTests
         logger.Received(1).LogError(NSubstitute.Arg.Is<string>(s =>
             s.Contains("TAOM.Client") && s.Contains("faction map") && s.Contains("front-end art")
             && s.Contains("Custom Battle") && s.Contains("realm borders") && s.Contains("settlement plates")
-            && s.Contains("battle action bar") && s.Contains("Host Review")));
+            && s.Contains("battle action bar") && s.Contains("Host Review") && s.Contains("screen extensions")));
+    }
+
+    // Every runtime scan of TAOM's own types reads this list (the patch categories, the map profiler's views, the
+    // dev console's patch report), so a type that moved to TAOM.Client is still found.
+    [TestMethod]
+    public void LoadedTaomAssemblies_EmptySlot_IsCoreOnly()
+    {
+        ClientComposition.Current = null;
+
+        CollectionAssert.AreEqual(new[] { typeof(ClientComposition).Assembly }, ClientComposition.LoadedTaomAssemblies());
+    }
+
+    [TestMethod]
+    public void LoadedTaomAssemblies_SlotFilled_IsCoreThenClient()
+    {
+        ClientComposition.Current = new Registering(_ => { });
+
+        CollectionAssert.AreEqual(
+            new[] { typeof(ClientComposition).Assembly, typeof(Registering).Assembly },
+            ClientComposition.LoadedTaomAssemblies());
     }
 
     [TestMethod]

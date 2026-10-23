@@ -200,7 +200,7 @@ TAOM kept *advertising* control it no longer had: the `MapBar` extra fast-forwar
 rendered and still accepted clicks while doing nothing.
 
 **Resolution (2026-08-01):** the five `TimeAcceleration` prefab extensions and the
-`MapTimeControlVM` mixin carry `[CoopSuppressedUi]`, and `SubModule.RegisterUiExtensions` filters
+`MapTimeControlVM` mixin carry `[CoopSuppressedUi]`, and `ClientUiExtensions.Register` (TAOM.Client) filters
 them out of the UIExtenderEx registration when `CoopPresence.IsActive`. Registration is a one-shot at
 `OnSubModuleLoad`, so this is the only point where a widget can be kept out of the prefab — a
 runtime check inside the mixin cannot un-inject an already-built widget. Solo play is untouched; the
@@ -440,7 +440,7 @@ culprit diff for free.
 | [HarmonyCensusReportBuilder.cs](../../Main/Features/CoopInterop/Diagnostics/HarmonyCensusReportBuilder.cs) | The report; pure and tested |
 | [HarmonyCensusWriter.cs](../../Main/Features/CoopInterop/Diagnostics/HarmonyCensusWriter.cs) | The Harmony registry walk |
 | [ICoopPresenceProvider.cs](../../Main/Features/CoopInterop/ICoopPresenceProvider.cs) | Test seam over the static `CoopPresence` |
-| [CoopUiRegistrationPolicy.cs](../../Main/Features/CoopInterop/CoopUiRegistrationPolicy.cs) | Filters `[CoopSuppressedUi]` types out of UIExtenderEx registration |
+| [CoopUiRegistrationPolicy.cs](../../Client/Features/CoopInterop/CoopUiRegistrationPolicy.cs) | Filters `[CoopSuppressedUi]` types out of UIExtenderEx registration |
 | [CoopSuppressedUiAttribute.cs](../../Main/Features/CoopInterop/CoopSuppressedUiAttribute.cs) | Marks UI the co-op host has taken ownership of |
 | [AllianceActionHook.cs](../../Main/Features/Diplomacy/Hooks/AllianceActionHook.cs) | War / alliance-end veto; `DeferToHost` under co-op |
 | [PeaceActionHook.cs](../../Main/Features/Diplomacy/Hooks/PeaceActionHook.cs) | Peace veto; defers under co-op |

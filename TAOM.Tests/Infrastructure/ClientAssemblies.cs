@@ -14,10 +14,9 @@ namespace TAOM.Tests.Infrastructure;
 /// the Coop module only after TAOM loads, so it is unresolvable at TAOM's GetTypes; CustomBattle and
 /// System.Windows.Forms exist nowhere on the server.
 ///
-/// <c>Bannerlord.UIExtenderEx</c> is deliberately absent: it is not a game assembly and the 15 UIExtenderEx
-/// prefab classes would join the failing set. In batch B5 it is added as a SEPARATE policy entry beside
-/// <see cref="Names"/>, never into it: it resolves on the staged server, so the staged-server check that
-/// reads <see cref="Names"/> must never see it.
+/// <c>Bannerlord.UIExtenderEx</c> is not here: it resolves on the staged server, and the staged-server check that
+/// reads <see cref="Names"/> must never see it. That no core type carries a UIExtenderEx attribute is pinned by
+/// <c>ClientIsolationGateTests.TaomCore_DeclaresNoUiExtension</c> (ADR-013).
 /// </summary>
 internal static class ClientAssemblies
 {

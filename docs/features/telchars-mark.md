@@ -117,12 +117,12 @@ Quick Actions Sell Damaged and Sell Low Value ignore the hide.
 | `Main/Features/TelcharsMark/ITelcharsMarkSettingsProvider.cs` + impl | The two MCM settings |
 | `Main/Features/TelcharsMark/TelcharsMarkIoC.cs` | DryIoc registration |
 | `Main/Features/TelcharsMark/TelcharsMarkLog.cs` | Error log, repeats suppressed |
-| `Main/Features/TelcharsMark/UI/UpgradeScreenMixin.cs` | Owns the feature for one screen |
-| `Main/Features/TelcharsMark/UI/UpgradeRowMixin.cs` | One row: candidate, verdict, tint flags |
-| `Main/Features/TelcharsMark/UI/UpgradeTintPrefab.cs`, `UpgradeToggleButtonPrefab.cs` | Prefab extensions |
-| `Main/Features/TelcharsMark/Hooks/Patch109_SPInventoryVMRefreshInformation.cs` | Rescore after `RefreshInformationValues` |
-| `Main/Features/TelcharsMark/Hooks/Patch109_SPInventoryVMAfterTransfer.cs` | Rescore after a transfer no vanilla handler follows |
-| `Main/Features/TelcharsMark/Hooks/Patch109_SPInventoryVMUpdateFiltered.cs` | Hide rows after `UpdateFilteredStatusOfItem` |
+| `Client/Features/TelcharsMark/UI/UpgradeScreenMixin.cs` | Owns the feature for one screen |
+| `Client/Features/TelcharsMark/UI/UpgradeRowMixin.cs` | One row: candidate, verdict, tint flags |
+| `Client/Features/TelcharsMark/UI/UpgradeTintPrefab.cs`, `UpgradeToggleButtonPrefab.cs` | Prefab extensions |
+| `Client/Features/TelcharsMark/Hooks/Patch109_SPInventoryVMRefreshInformation.cs` | Rescore after `RefreshInformationValues` |
+| `Client/Features/TelcharsMark/Hooks/Patch109_SPInventoryVMAfterTransfer.cs` | Rescore after a transfer no vanilla handler follows |
+| `Client/Features/TelcharsMark/Hooks/Patch109_SPInventoryVMUpdateFiltered.cs` | Hide rows after `UpdateFilteredStatusOfItem` |
 | `Main/Adapters/IUpgradeScreen.cs`, `IUpgradeRow.cs` | The adapter seams |
 | `Main/Adapters/InventoryUpgradeScreen.cs` | `IUpgradeScreen` over one inventory VM |
 | `Main/Adapters/UpgradeCandidateReader.cs`, `UpgradeStatsReader.cs` | Row and item reads |
@@ -199,3 +199,6 @@ Quick Actions Sell Damaged and Sell Low Value ignore the hide.
 - **Issue:** [#875](https://github.com/haterade22/TAOM/issues/875), Inventory upgrade highlight and a
   show-only-better-items filter.
 - **Status:** Open. Paid translation of the five `taom_tm_*` keys is owed on Mike's word.
+
+---
+

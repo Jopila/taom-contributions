@@ -11,6 +11,7 @@ namespace TAOM.Features.CoopInterop;
 ///
 /// Pure and engine-free so it can be unit-tested — the same shape as
 /// <c>PatchShieldPolicy.ShouldUnpatchForeignOwners(bool coopActive)</c> in TAOM.Dependencies.
+/// Its caller is <c>ClientUiExtensions.Register</c> in TAOM.Client.
 /// </summary>
 public static class CoopUiRegistrationPolicy
 {

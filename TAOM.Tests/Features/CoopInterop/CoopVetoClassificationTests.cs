@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Features.CoopInterop;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.CoopInterop;
 
@@ -393,21 +394,6 @@ public class CoopVetoClassificationTests
     private static string StripComments(string source) =>
         CommentPattern.Replace(source, m => Regex.Replace(m.Value, "[^\n]", " "));
 
-    private static string FindMainSourceDir()
-    {
-        var dir = new DirectoryInfo(
-            Path.GetDirectoryName(typeof(CoopVetoClassificationTests).Assembly.Location)!);
-
-        while (dir != null)
-        {
-            var candidate = Path.Combine(dir.FullName, "Main", "Features");
-            if (Directory.Exists(candidate)) return Path.Combine(dir.FullName, "Main");
-            dir = dir.Parent;
-        }
-
-        return null;
-    }
-
     /// <summary>
     /// Names of every CLASS declaring a bool-returning Harmony prefix.
     ///
@@ -417,17 +403,9 @@ public class CoopVetoClassificationTests
     /// </summary>
     private static IReadOnlyList<string> BoolPrefixSources()
     {
-        var mainDir = FindMainSourceDir();
-        Assert.IsNotNull(mainDir,
-            "could not locate the Main/ source tree from the test assembly — this test scans source, " +
-            "so it cannot run from a detached bin drop");
-
         var names = new List<string>();
 
-        foreach (var path in Directory
-                     .EnumerateFiles(mainDir, "*.cs", SearchOption.AllDirectories)
-                     .Where(p => !p.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar))
-                     .Where(p => !p.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar)))
+        foreach (var path in RepoPaths.CSharpFiles())
         {
             var text = StripComments(File.ReadAllText(path));
             if (!BoolPrefixPattern.IsMatch(text)) continue;
@@ -532,15 +510,9 @@ public class CoopVetoClassificationTests
     [TestMethod]
     public void EveryConsumerOfADivergenceProneDiplomacyRule_AlsoReadsTheCoopFlag()
     {
-        var mainDir = FindMainSourceDir();
-        Assert.IsNotNull(mainDir, "could not locate Main/ source tree");
-
         var offenders = new List<string>();
 
-        foreach (var path in Directory
-                     .EnumerateFiles(mainDir, "*.cs", SearchOption.AllDirectories)
-                     .Where(p => !p.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar))
-                     .Where(p => !p.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar)))
+        foreach (var path in RepoPaths.CSharpFiles())
         {
             var text = StripComments(File.ReadAllText(path));
             var name = Path.GetFileNameWithoutExtension(path);

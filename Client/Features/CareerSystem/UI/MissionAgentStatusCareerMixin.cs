@@ -51,8 +51,9 @@ internal class MissionAgentStatusCareerMixin : BaseViewModelMixin<MissionAgentSt
 
         // Same identity gate as CareerPerkMissionBehavior (Issue #377): the bar belongs to
         // the career hero, not to whichever soldier the player is controlling.
+        var mainAgent = Mission.Current?.MainAgent;
         var isControllingCareerHero =
-            CareerHeroIdentityGate.IsCareerHeroAgent(Mission.Current?.MainAgent, hero);
+            mainAgent != null && CareerHeroIdentityGate.IsCareerHeroAgent(mainAgent, hero);
 
         if (!isControllingCareerHero || !_dataService.HasCareer(hero.StringId))
         {

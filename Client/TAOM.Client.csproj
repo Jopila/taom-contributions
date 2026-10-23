@@ -60,10 +60,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- Compile-only, as in Main/TAOM.csproj: at runtime Harmony comes from TAOM.Dependencies.
+		<!-- Compile-only, as in Main/TAOM.csproj: at runtime Harmony and UIExtenderEx come from TAOM.Dependencies.
 		     No IsExternalInit polyfill: TAOM.Tests sees the internals of both assemblies, and two copies
 		     of the type are CS8356 there. Client code uses no init accessors or records. -->
 		<PackageReference Include="Lib.Harmony" Version="2.4.2" IncludeAssets="compile" />
+		<PackageReference Include="Bannerlord.UIExtenderEx" Version="2.13.3" IncludeAssets="compile" />
 		<PackageReference Include="BUTR.Harmony.Analyzer" Version="1.0.1.50" PrivateAssets="all" />
 		<PackageReference Include="Nullable" Version="1.3.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
 	</ItemGroup>

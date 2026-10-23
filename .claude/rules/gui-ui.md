@@ -214,8 +214,9 @@ Initial construction can mask this — `LoadMovie("...", DataSource)` reads the 
 |---|---|---|
 | Prefab XML | `Main/_Module/GUI/PreFabs/<Feature>/` | `<ScreenName>.xml` |
 | ViewModel | `Main/Features/<Feature>/UI/` | `<Name>VM.cs` |
-| Mixin | `Main/Features/<Feature>/UI/` | `<Target>Mixin.cs` |
-| Prefab extension | `Main/Features/<Feature>/UI/` | `<Feature>Prefab.cs` |
+| Mixin | `Client/Features/<Feature>/UI/` (TAOM.Client registers every UIExtenderEx extension, ADR-013; `ClientIsolationGateTests` fails one in TAOM.dll) | `<Target>Mixin.cs` |
+| Prefab extension | `Client/Features/<Feature>/UI/` (same rule) | `<Feature>Prefab.cs` |
+| Harmony patch that names a TAOM.Client type | `Client/Features/<Feature>/Hooks/` (the patch index reads both assemblies) | `Patch<N>_<Target>.cs` |
 | Custom widget | `Client/Features/<Feature>/Widgets/` (TAOM.Client, ADR-013; `ServerLoadGateTests` fails a new widget in TAOM.dll) | `<Name>Widget.cs` |
 | MapView, map navigation element, map conversation provider | `Client/Features/<Feature>/`, behind a core interface with a null version (ADR-013) | `<Name>MapView.cs` |
 | MissionView, `[DefaultView]` view, visual order provider, CustomBattle game manager, WinForms window | `Client/Features/<Feature>/` with the source's relative path (TAOM.Client, ADR-013; a new one in TAOM.dll fails `ServerLoadGateTests`) | the type name, behind a core factory or interface with a null version (`IBattleActionBarViewFactory`, `IAutonomousMovementController`) |

@@ -17,7 +17,7 @@ The v1.3.15 → v1.4.5 migration completed its code stages but the formal runtim
 | [`reflection-sites.md`](./reflection-sites.md) | Authoritative catalogue of every reflection touchpoint, grouped by gated / runtime-dynamic / internal. Data source for `ReflectionSiteBindingTests`. |
 | [`gamemodel-bases.md`](./gamemodel-bases.md) | Auto-generated: each `Taom*Model`, its `Default*Model` base, and the exact signature of every overridden method, as of the pinned version. |
 | [`patch-targets.md`](./patch-targets.md) | Auto-generated: each of the 220 `[HarmonyPatch]` / `TargetMethod` classes and the engine method it patches, resolved as Harmony resolves it. |
-| [`../../../tools/snapshot_api_surface.ps1`](../../../tools/snapshot_api_surface.ps1) | Regenerates the two auto-generated files from the installed DLLs. Auto-derives the type list from `TAOM.dll`. |
+| [`../../../tools/snapshot_api_surface.ps1`](../../../tools/snapshot_api_surface.ps1) | Regenerates the two auto-generated files from the installed DLLs. Auto-derives the type list from `TAOM.dll` and `TAOM.Client.dll`. |
 
 > **The generator is PowerShell 7 only, and now says so.** It uses the null-coalescing `??` operator
 > and an em dash inside a double-quoted `throw`, both of which Windows PowerShell 5.1 rejects at PARSE
@@ -100,6 +100,9 @@ After a Bannerlord version bump, or any patch or GameModel change, refresh the s
 
 ## Referenced by
 
+- [docs/ai-includes/creature-mount-authoring.md](../../ai-includes/creature-mount-authoring.md)
+- [docs/features/lotr-issues.md](../../features/lotr-issues.md)
+- [docs/reference/engine/submodule-lifecycle-and-harmony.md](../engine/submodule-lifecycle-and-harmony.md)
 - [docs/reference/taleworlds-api-snapshot/reflection-sites.md](./reflection-sites.md)
 
 <!-- backlinks-end -->

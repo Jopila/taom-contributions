@@ -360,7 +360,7 @@ public class PatchCategoryApplierTests
 
         var subModule = CommentPattern.Replace(File.ReadAllText(RepoPaths.RepoPath("Main", "SubModule.cs")), string.Empty);
         StringAssert.Matches(subModule, new Regex(
-            @"var (\w+) = PatchCategoryIndex\.Build\(typeof\(SubModule\)\.Assembly\);\s*"
+            @"var (\w+) = PatchCategoryIndex\.Build\(ClientComposition\.LoadedTaomAssemblies\(\)\);\s*"
             + @"_patches = new PatchCategoryApplier\(\s*category => \1\.Apply\(_harmony, category\),[^;]+;\s*"
             + @"_patches\.RecordSkippedClasses\(\1\.SkippedClasses\);"));
     }

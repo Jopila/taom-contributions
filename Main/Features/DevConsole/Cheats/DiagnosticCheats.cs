@@ -34,7 +34,7 @@ public static class DiagnosticCheats
         TaomConsole.RunAnywhere(strings, PatchesUsage, args =>
         {
             var filter = args.Count > 0 ? args[0] : null;
-            var result = HarmonyPatchInspector.Collect(TaomHarmonyId, typeof(TaomConsole).Assembly);
+            var result = HarmonyPatchInspector.Collect(TaomHarmonyId, TAOM.Composition.ClientComposition.LoadedTaomAssemblies());
 
             return PatchReportFormatter.Format(
                 result.Declared, result.AppliedCounts, result.Uncategorized,

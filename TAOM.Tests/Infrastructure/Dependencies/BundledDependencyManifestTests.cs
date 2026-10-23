@@ -117,6 +117,19 @@ public class BundledDependencyManifestTests
         }
     }
 
+    // TAOM.Client compiles against the same Harmony and UIExtenderEx as core (ADR-013); at runtime both come from
+    // TAOM.Dependencies, so a pin that drifts from it risks a MissingMethodException in the client only.
+    [TestMethod]
+    public void CompilePins_ClientCsproj_MatchDependencies()
+    {
+        var clientCsproj = Path.Combine(RepoRoot, @"Client\TAOM.Client.csproj");
+        foreach (var package in new[] { "Lib.Harmony", "Bannerlord.UIExtenderEx" })
+        {
+            Assert.AreEqual(GetPackageVersion(DepsCsproj, package), GetPackageVersion(clientCsproj, package),
+                $"'{package}' pin drift: Client/TAOM.Client.csproj must match Dependencies/TAOM.Dependencies.csproj.");
+        }
+    }
+
     // ── The v99 stub rule (docs/migration/dr3-maintenance.md "Stub modules") ──────────────────
 
     [TestMethod]

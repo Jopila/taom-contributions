@@ -68,11 +68,11 @@ Both are excluded from the co-op settings fingerprint: the first is presentation
 | `Main/Features/ReevesLedger/ReevesLedgerService.cs` | profit lines, step planning, capped lists, the co-op write gate |
 | `Main/Features/ReevesLedger/LedgerTypes.cs` | the plain value types in and out of the service |
 | `Main/Features/ReevesLedger/ReevesLedgerSettingsProvider.cs` | the two MCM switches, cached lazily (a concrete class) |
-| `Main/Features/ReevesLedger/UI/TownManagementLedgerMixin.cs` | title, rows and icon tooltips |
-| `Main/Features/ReevesLedger/UI/ReserveStepMixin.cs` | the two buttons |
+| `Client/Features/ReevesLedger/UI/TownManagementLedgerMixin.cs` | title, rows and icon tooltips |
+| `Client/Features/ReevesLedger/UI/ReserveStepMixin.cs` | the two buttons |
 | `Main/Features/ReevesLedger/UI/LedgerTooltips.cs` | the three tooltips as tooltip property lists |
 | `Main/Features/ReevesLedger/UI/LedgerFaultLog.cs` | the guard and the once-per-site log |
-| `Main/Features/ReevesLedger/UI/ReevesLedgerIconsPrefab.cs`, `ReserveStepButtonsPrefab.cs` | the two insertions into the `TownManagement` movie |
+| `Client/Features/ReevesLedger/UI/ReevesLedgerIconsPrefab.cs`, `ReserveStepButtonsPrefab.cs` | the two insertions into the `TownManagement` movie |
 | `Main/Adapters/IFiefLedgerAdapter.cs`, `FiefLedgerAdapter.cs` | profit inputs, stash, prisoners, patrol |
 | `Main/Features/TaomSettings.cs` | `EnableReevesLedger`, `EnableReserveSteps` |
 | `Main/Composition/FeatureModules.cs` | the module line |
@@ -139,3 +139,6 @@ Layout and the hover and click behaviour of the new widgets are unseen in game.
 
 - **Issue:** [#857](https://github.com/haterade22/TAOM/issues/857) Town management extras: profit, patrol, reserve buttons, stash and prison tooltips
 - **Status:** Open. The in-game check is owed, and so is the paid translation of the new strings (#931).
+
+---
+

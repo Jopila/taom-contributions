@@ -11,7 +11,7 @@ namespace TAOM.Tests.Migration;
 
 /// <summary>
 /// Binding-verification gate for every Harmony patch in TAOM. Enumerates all <c>[HarmonyPatch]</c>
-/// types in the TAOM assembly and resolves each one's target method against the *installed*
+/// types in the TAOM assemblies (core and TAOM.Client) and resolves each one's target method against the *installed*
 /// Bannerlord engine — exactly the resolution Harmony performs when it applies the patch at game
 /// load. A renamed / moved / re-signatured engine method makes the resolution return null, which is
 /// a silent no-op (or crash) in-game but a red test here.
@@ -38,8 +38,6 @@ public class HarmonyPatchBindingTests
     [ClassInitialize]
     public static void Init(TestContext _) => _gameLoaded = GameAssemblies.EnsureLoaded();
 
-    private static Assembly TaomAssembly => typeof(TAOM.IoC).Assembly;
-
     [TestMethod]
     [TestCategory("BindingVerification")]
     public void EveryHarmonyPatch_ResolvesTargetMethod_AgainstInstalledEngine()
@@ -55,6 +53,10 @@ public class HarmonyPatchBindingTests
                 $"Only {patchTypes.Count} [HarmonyPatch] types discovered (taleworlds-api-snapshot/patch-targets.md has the current count). " +
                 $"{typesFailedToLoad} type(s) failed to load. This indicates an assembly-load problem, " +
                 "not a genuine pass — investigate before trusting this gate.");
+
+        // The floor above catches a collapse; this catches a handful of lost patch types that would pass it.
+        Assert.AreEqual(0, typesFailedToLoad,
+            "Patch types that failed to load are patches this gate never resolved: an assembly-load problem, not a pass.");
 
         var failures = new List<string>();
         // A client process fills the slot in ClientSubModule's constructor, long before patches apply; the
@@ -98,12 +100,16 @@ public class HarmonyPatchBindingTests
     // Shared with Patch37TargetShapeTests so the suite derives a patch target one way only.
     internal static List<Type> DiscoverPatchTypes(out int typesFailedToLoad)
     {
-        Type[] all;
-        try { all = TaomAssembly.GetTypes(); typesFailedToLoad = 0; }
-        catch (ReflectionTypeLoadException ex)
+        var all = new List<Type>();
+        typesFailedToLoad = 0;
+        foreach (var assembly in TAOM.Tests.Infrastructure.TaomAssemblies.All)
         {
-            typesFailedToLoad = ex.Types.Count(t => t == null);
-            all = ex.Types.Where(t => t != null).ToArray();
+            try { all.AddRange(assembly.GetTypes()); }
+            catch (ReflectionTypeLoadException ex)
+            {
+                typesFailedToLoad += ex.Types.Count(t => t == null);
+                all.AddRange(ex.Types.Where(t => t != null));
+            }
         }
 
         return all

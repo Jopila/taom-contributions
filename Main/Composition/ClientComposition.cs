@@ -26,6 +26,19 @@ public static class ClientComposition
     internal static Assembly? Assembly => Current?.GetType().Assembly;
 
     /// <summary>
+    /// TAOM's assemblies in load order: core, then TAOM.Client when the slot is filled (ADR-013). A dedicated server,
+    /// or a rendering client whose TAOM.Client did not load, gets core only. Every runtime scan of TAOM's own types
+    /// reads this (the patch categories, the map profiler's views, the dev console's patch report), so a type that
+    /// moves to the client is still found.
+    /// </summary>
+    internal static Assembly[] LoadedTaomAssemblies()
+    {
+        var core = typeof(ClientComposition).Assembly;
+        var client = Assembly;
+        return client == null || client == core ? new[] { core } : new[] { core, client };
+    }
+
+    /// <summary>
     /// Whether this process is a dedicated server: the engine's own build constant, as
     /// DedicatedServerProvider reads it. A seam so a test can stand on either side.
     /// </summary>
@@ -61,7 +74,8 @@ public static class ClientComposition
                     "[Client] TAOM.Client did not load on a rendering client: front-end, campaign map and mission UI will not work "
                     + "(faction map, front-end art, Custom Battle factions, realm borders, camp overlay, War of the Ring meter, "
                     + "Fiefs button, settlement plates, Hall of Fire backdrops, battle action bar, warg rage control, "
-                    + "Host Review order bar, shader notice). Check that the TAOM.Client submodule is installed."));
+                    + "Host Review order bar, shader notice, and the TAOM screen extensions: time controls, Telchar's Mark, "
+                    + "special resources, Reeve's Ledger, fief naming, messengers, careers, Shadowfax screens). Check that the TAOM.Client submodule is installed."));
             }
 
             return;
