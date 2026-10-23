@@ -13,8 +13,9 @@ namespace TAOM.Features.TelcharsMark.Hooks;
 /// with IsRefreshed=false ... RefreshInformationValues(); IsRefreshed=true (:3480-3484, :3492-3495, :3522-3531,
 /// :3561-3570, :3708-3717, :3723-3732, :4751-4840), so the RefreshInformationValues postfix covers those once and
 /// this one returns early while IsRefreshed is false. It covers the transfers nothing follows with that call:
-/// TAOM's EquipPresets load (InventoryScreenAdapter AddTransferCommands) and InventoryLogic.Reset, whose empty
-/// AfterTransfer (InventoryLogic.cs:734-739) runs after AfterReset rebuilt the slots (:3796, :3806).
+/// InventoryLogic.Reset, whose empty AfterTransfer (InventoryLogic.cs:734-739) runs after AfterReset rebuilt the
+/// slots (:3796, :3806). TAOM's EquipPresets load and Quick Actions Unequip All do not set IsRefreshed, so this
+/// postfix rescores per command for them too, before InventoryVMAdapter.RefreshPanel rescores once more.
 /// </summary>
 [HarmonyPatch(typeof(SPInventoryVM), "AfterTransfer", new[] { typeof(InventoryLogic), typeof(List<TransferCommandResult>) })]
 [HarmonyPatchCategory("Patch109_TelcharsMark")]
