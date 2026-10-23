@@ -31,14 +31,17 @@
             <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="300" SuggestedHeight="16" HorizontalAlignment="Center" VerticalAlignment="Top" MarginTop="352" Sprite="mm_divider" DoNotAcceptEvents="true" />
 
             <!-- MENU ENTRIES: the game's own list (whatever mods add appears here); each one runs its own action -->
-            <Widget Id="MenuHost" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="430" VerticalAlignment="Top" MarginTop="382" MarginLeft="20" MarginRight="20">
+            <!-- The bottom divider stacks under the list, so it follows the last entry however many mods add -->
+            <Widget Id="MenuHost" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" VerticalAlignment="Top" MarginTop="382" MarginLeft="20" MarginRight="20">
               <Children>
-                <NavigationScopeTargeter ScopeID="InitialScreen" ScopeParent="..\MenuItems" ScopeMovements="Vertical" HasCircularMovement="true" />
+                <NavigationScopeTargeter ScopeID="InitialScreen" ScopeParent="..\MenuStack\MenuItems" ScopeMovements="Vertical" HasCircularMovement="true" />
+                <ListPanel Id="MenuStack" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" VerticalAlignment="Top" StackLayout.LayoutMethod="VerticalTopToBottom" DoNotAcceptEvents="true">
+                  <Children>
                 <NavigatableListPanel Id="MenuItems" DataSource="{MenuOptions}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" StackLayout.LayoutMethod="VerticalTopToBottom">
                   <ItemTemplate>
-                    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="40" MarginTop="1" MarginBottom="1" IsHidden="@IsHidden">
+                    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="36" MarginTop="1" MarginBottom="1" IsHidden="@IsHidden">
                       <Children>
-                        <ButtonWidget DoNotPassEventsToChildren="true" UpdateChildrenStates="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="310" SuggestedHeight="40" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="MM.Button" Command.Click="ExecuteAction" IsDisabled="@IsDisabled">
+                        <ButtonWidget DoNotPassEventsToChildren="true" UpdateChildrenStates="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="310" SuggestedHeight="36" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="MM.Button" Command.Click="ExecuteAction" IsDisabled="@IsDisabled">
                           <Children>
                             <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="14" MarginRight="14" Brush="MM.ButtonText" Text="@NameText" />
                             <!-- Restored from vanilla Native/GUI/Prefabs/InitialScreen.xml:61 (lens7-xml #10):
@@ -54,11 +57,13 @@
                     </Widget>
                   </ItemTemplate>
                 </NavigatableListPanel>
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="300" SuggestedHeight="16" HorizontalAlignment="Center" MarginTop="8" Sprite="mm_divider" DoNotAcceptEvents="true" />
+                  </Children>
+                </ListPanel>
               </Children>
             </Widget>
 
             <!-- bottom illustration -->
-            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="300" SuggestedHeight="16" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginBottom="252" Sprite="mm_divider" DoNotAcceptEvents="true" />
             <!-- TAGLINE: handwriting with a light sweep (TagShimmer0..3 windows onto the bright copy), same mechanism as the title -->
             <Widget Id="TaglineBox" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="170" SuggestedHeight="130" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginBottom="100" DoNotAcceptEvents="true">
               <Children>
