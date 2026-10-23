@@ -20,6 +20,7 @@ namespace TAOM.Features.CreatureBandits.Hooks;
 /// </summary>
 [HarmonyPatch]
 [HarmonyPatchCategory(CreatureBanditsConfig.CampaignPatchCategory)]
+[ClientOnly]
 public static class Patch94_CreatureBroodMapIcon
 {
     internal static MethodBase? TargetMethod() =>

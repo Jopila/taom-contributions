@@ -62,6 +62,7 @@ ALWAYS decompile the target method with `ilspycmd` (`pwsh tools/taom-src.ps1 pat
 ## Patch Organization
 - Place in `Main/Features/{FeatureName}/Hooks/`; a patch that names a TAOM.Client type goes in
   `Client/Features/{FeatureName}/Hooks/` (ADR-013; the patch index reads both assemblies)
+- A core patch class whose target, patch-method signature or `TargetMethod` names a client-only assembly carries `[ClientOnly]`, so a dedicated server never indexes it: gate 4, `ServerLoadGateTests.PatchClassesReferencingClientAssemblies_AreClientOnly`
 - Name: `{TargetClass}{TargetMethod}Patch.cs`
 - A new patch number names one feature, and its category gets a `## <category>` heading in the registry: `PatchCategoryNumberTests` pins both.
 - Register in a `SubModule.cs` patch category (`[HarmonyPatchCategory]` + the SubModule apply batch — verify the apply TIMING fits the target: most apply in `OnGameInitializationFinished`, but targets that fire during new-game load/main menu need `OnSubModuleLoad`, e.g. `Patch58`/`Patch61`; see the registry)

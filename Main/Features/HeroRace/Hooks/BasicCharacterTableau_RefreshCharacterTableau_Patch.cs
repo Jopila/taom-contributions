@@ -41,6 +41,7 @@ namespace TAOM.Features.HeroRace.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(BasicCharacterTableau), "RefreshCharacterTableau")]
 [HarmonyPatchCategory("Patch55_BasicTableauRaceGuard")]
+[ClientOnly]
 public static class BasicCharacterTableau_RefreshCharacterTableau_Patch
 {
     private static IBasicTableauRaceGuard _guard;

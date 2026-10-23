@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using DryIoc;
 using TAOM.Features.FieldCamp;
 using TAOM.Features.Refuge.Hooks;
@@ -30,10 +31,16 @@ public static class RefugeIoC
     internal static void InitializePatchStatics(IContainer container)
     {
         var refugeService = container.Resolve<IRefugeService>();
-        RefugeClanScreenPatch.Initialize(refugeService);
+        // ADR-013: the clan-screen patch type initializer names ClanPartiesVM, which a dedicated server cannot load at
+        // boot. The patch is [ClientOnly] and never applies there, so its statics stay unset.
+        if (!TAOM.Composition.ClientComposition.IsDedicatedServer())
+            InitializeClanScreenPatch(refugeService);
         RefugeEncounterPatch.Initialize(
             refugeService,
             container.Resolve<TAOM.Features.Enlistment.IEnlistmentStateQuery>(),
             container.Resolve<TAOM.Adapters.IGameMenuAdapter>());
     }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void InitializeClanScreenPatch(IRefugeService refuges) => RefugeClanScreenPatch.Initialize(refuges);
 }

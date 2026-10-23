@@ -9,6 +9,7 @@ namespace TAOM.Features.CompanionTactics.Roles.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(PartyCharacterVM), nameof(PartyCharacterVM.RefreshValues))]
 [HarmonyPatchCategory("Patch35_CompanionTactics")]
+[ClientOnly]
 public static class Patch35_PartyCharacterVM_RefreshValues
 {
     private static IRoleTooltipDecorator _decorator;

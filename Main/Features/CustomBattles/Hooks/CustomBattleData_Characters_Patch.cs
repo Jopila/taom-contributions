@@ -10,6 +10,7 @@ namespace TAOM.Features.CustomBattles.Hooks;
 
 [HarmonyPatch(typeof(CustomBattleData), nameof(CustomBattleData.Characters), MethodType.Getter)]
 [HarmonyPatchCategory("Patch19_CustomBattles")]
+[ClientOnly]
 public static class CustomBattleData_Characters_Patch
 {
     private static IOnGetCustomBattleCommanders _hook;

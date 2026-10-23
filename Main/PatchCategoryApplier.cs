@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TaleWorlds.Localization;
 using TAOM.Core.Diagnostics;
 using TAOM.Core.Logging;
@@ -122,6 +123,17 @@ internal sealed class PatchCategoryApplier
             _logger.LogError(
                 $"[PatchApply] {name} SKIPPED (its attributes cannot be read, so its patches are off; every other class still applies): {entry.Value}");
         }
+    }
+
+    /// <summary>
+    /// On a dedicated server, one Info line naming the [ClientOnly] patch classes the index left out (ADR-013). Expected
+    /// there, so not a failure and not in the phase summary.
+    /// </summary>
+    internal void RecordClientOnlyClasses(IReadOnlyCollection<Type> classes)
+    {
+        if (classes.Count == 0) return;
+        _logger.LogInfo($"[PatchApply] dedicated server: {classes.Count} client-only patch classes not indexed (ADR-013): "
+            + string.Join(", ", classes.Select(t => t.FullName ?? t.Name)));
     }
 
     /// <summary>

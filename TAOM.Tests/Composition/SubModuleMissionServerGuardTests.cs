@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Tests.Infrastructure;
 
@@ -30,5 +31,22 @@ public class SubModuleMissionServerGuardTests
         int ret = between.IndexOf("return;", guard, StringComparison.Ordinal);
         Assert.IsTrue(ret > guard, "the guard returns");
         StringAssert.Contains(between.Substring(guard, ret - guard), "LogError(", "the guard logs before it returns");
+    }
+
+    // The patch category index leaves out [ClientOnly] classes only when ClientComposition.IsDedicatedServer() is
+    // true, and the 6c guards read the same seam; an inverted body would strip them from a client and index them on
+    // a server, with every other test green.
+    [TestMethod]
+    public void ClientCompositionIsDedicatedServer_ReadsTheBuildConstantWithoutNegation()
+    {
+        var src = RepoPaths.ReadSource("Main/Composition/ClientComposition.cs", stripComments: true);
+
+        var seam = Regex.Match(src, @"static\s+Func<bool>\s+IsDedicatedServer\s*=\s*(?<init>[^;]*);");
+        var read = Regex.Match(src, @"static\s+bool\s+ReadDedicatedServer\s*\(\s*\)\s*=>\s*(?<body>[^;]*);");
+
+        Assert.IsTrue(seam.Success && read.Success, "an anchor moved");
+        Assert.AreEqual("ReadDedicatedServer", seam.Groups["init"].Value.Trim(), "the seam's default must be the engine read");
+        Assert.AreEqual("GameNetwork.IsDedicatedServer", Regex.Replace(read.Groups["body"].Value, @"\s+", " ").Trim(),
+            "the body must be the exact positive build-constant read, no negation");
     }
 }

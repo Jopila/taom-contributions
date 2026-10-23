@@ -23,6 +23,7 @@ namespace TAOM.Features.MenuLinkColors.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(GameMenuVM), "ContextText", MethodType.Setter)]
 [HarmonyPatchCategory("Patch64_MenuLinkColors")]
+[ClientOnly]
 public static class Patch64_MenuLinkColors
 {
     private static IMenuLinkStyleRewriter _rewriter;

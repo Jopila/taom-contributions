@@ -26,6 +26,7 @@ namespace TAOM.Features.Mcm.Hooks;
 [HarmonyPatch(typeof(WidgetFactoryManager), nameof(WidgetFactoryManager.CreateAndRegister),
     new[] { typeof(string), typeof(XmlDocument) })]
 [HarmonyPatchCategory("Patch41_McmLayoutFix")]
+[ClientOnly]
 public static class Patch41_McmLayoutFix
 {
     private static IModLogger _logger;

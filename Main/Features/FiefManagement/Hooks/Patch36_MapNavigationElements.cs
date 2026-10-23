@@ -20,6 +20,7 @@ namespace TAOM.Features.FiefManagement.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(MapNavigationHandler), "OnCreateElements")]
 [HarmonyPatchCategory("Patch36_FiefManagement")]
+[ClientOnly]
 public static class Patch36_MapNavigationElements
 {
     private static IModLogger _logger;

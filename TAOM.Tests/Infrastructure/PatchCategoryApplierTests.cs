@@ -318,6 +318,35 @@ public class PatchCategoryApplierTests
             $"Timing overhead {microsPerCall:0.000} us per category is 50 us or more");
     }
 
+    // ADR-013: the [ClientOnly] classes a dedicated server did not index are expected there, so they get one Info line
+    // and never reach the failure list or the player-facing summary.
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void RecordClientOnlyClasses_TwoClasses_LogsOneInfoLineAndNoFailure()
+    {
+        var sut = new PatchCategoryApplier(_ => { }, _logger);
+
+        sut.RecordClientOnlyClasses(new[] { typeof(string), typeof(Uri) });
+
+        _logger.Received(1).LogInfo(Arg.Is<string>(s =>
+            s.Contains("[PatchApply]") && s.Contains("dedicated server") && s.Contains("2 client-only")
+            && s.Contains("System.String") && s.Contains("System.Uri")));
+        _logger.DidNotReceiveWithAnyArgs().LogError(default!);
+        Assert.IsNull(sut.TakeFailureSummary(new TextObject("startup")), "a left-out client class is not a failure");
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void RecordClientOnlyClasses_None_LogsNothing()
+    {
+        var sut = new PatchCategoryApplier(_ => { }, _logger);
+
+        sut.RecordClientOnlyClasses(Array.Empty<Type>());
+
+        Assert.AreEqual(0, _logger.ReceivedCalls().Count());
+        Assert.IsNull(sut.TakeFailureSummary(new TextObject("startup")));
+    }
+
     // Also pins the premise against the pinned Harmony 2.4.2: a class whose target does not
     // resolve THROWS out of its class processor rather than being a silent no-op. Goes through
     // PatchCategoryIndex, as SubModule does.
@@ -360,9 +389,10 @@ public class PatchCategoryApplierTests
 
         var subModule = CommentPattern.Replace(File.ReadAllText(RepoPaths.RepoPath("Main", "SubModule.cs")), string.Empty);
         StringAssert.Matches(subModule, new Regex(
-            @"var (\w+) = PatchCategoryIndex\.Build\(ClientComposition\.LoadedTaomAssemblies\(\)\);\s*"
+            @"var (\w+) = PatchCategoryIndex\.Build\(ClientComposition\.IsDedicatedServer\(\), ClientComposition\.LoadedTaomAssemblies\(\)\);\s*"
             + @"_patches = new PatchCategoryApplier\(\s*category => \1\.Apply\(_harmony, category\),[^;]+;\s*"
-            + @"_patches\.RecordSkippedClasses\(\1\.SkippedClasses\);"));
+            + @"_patches\.RecordSkippedClasses\(\1\.SkippedClasses\);\s*"
+            + @"_patches\.RecordClientOnlyClasses\(\1\.ClientOnlyClasses\);"));
     }
 
     // Nothing receives InformationManager.DisplayMessage during OnSubModuleLoad: Native builds the

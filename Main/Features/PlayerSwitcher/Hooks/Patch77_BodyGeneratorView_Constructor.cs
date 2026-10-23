@@ -26,6 +26,7 @@ namespace TAOM.Features.PlayerSwitcher.Hooks;
 /// </remarks>
 [HarmonyPatch]
 [HarmonyPatchCategory("Patch77_PlayerSwitcher")]
+[ClientOnly]
 public static class Patch77_BodyGeneratorView_Constructor
 {
     private const string SpriteCategory = "ui_clan";

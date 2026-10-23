@@ -26,6 +26,7 @@ namespace TAOM.Features.EquipPresets.Hooks;
 /// </summary>
 [HarmonyPatch]
 [HarmonyPatchCategory("Patch33_EquipPresets")]
+[ClientOnly]
 public static class Patch33_GauntletInventoryScreen
 {
     private const int OverlayLayerZOrder = 1000;

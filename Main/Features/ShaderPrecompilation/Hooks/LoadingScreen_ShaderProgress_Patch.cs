@@ -15,6 +15,7 @@ namespace TAOM.Features.ShaderPrecompilation.Hooks;
 // public setter and is MVVM data-bound — safe to write from the UI thread.
 [HarmonyPatch]
 [HarmonyPatchCategory("Patch21_ShaderPrecompilation")]
+[ClientOnly]
 public static class LoadingScreen_ShaderProgress_Patch
 {
     private static IModLogger _logger;

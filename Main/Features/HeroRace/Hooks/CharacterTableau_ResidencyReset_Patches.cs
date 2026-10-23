@@ -16,6 +16,7 @@ namespace TAOM.Features.HeroRace.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(CharacterTableau), nameof(CharacterTableau.SetRace))]
 [HarmonyPatchCategory("Patch67_TableauResidencyDiag")]
+[ClientOnly]
 public class CharacterTableau_SetRace_ResidencyReset_Patch
 {
     [HarmonyPostfix]
@@ -47,6 +48,7 @@ public class CharacterTableau_SetRace_ResidencyReset_Patch
 /// </summary>
 [HarmonyPatch(typeof(CharacterTableau), nameof(CharacterTableau.OnFinalize))]
 [HarmonyPatchCategory("Patch67_TableauResidencyDiag")]
+[ClientOnly]
 public class CharacterTableau_OnFinalize_ResidencyReset_Patch
 {
     [HarmonyPostfix]

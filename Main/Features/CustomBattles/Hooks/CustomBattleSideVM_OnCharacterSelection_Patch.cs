@@ -7,6 +7,7 @@ namespace TAOM.Features.CustomBattles.Hooks;
 
 [HarmonyPatch(typeof(CustomBattleSideVM), "OnCharacterSelection")]
 [HarmonyPatchCategory("Patch19_CustomBattles")]
+[ClientOnly]
 public static class CustomBattleSideVM_OnCharacterSelection_Patch
 {
     // Vanilla OnCharacterSelection dereferences selector.SelectedItem.Character without a null guard.

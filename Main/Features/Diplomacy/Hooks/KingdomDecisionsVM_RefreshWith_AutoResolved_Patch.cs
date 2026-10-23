@@ -58,6 +58,7 @@ namespace TAOM.Features.Diplomacy.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(KingdomDecisionsVM), nameof(KingdomDecisionsVM.RefreshWith))]
 [HarmonyPatchCategory("Patch80_KingdomVoteDeadlock")]
+[ClientOnly]
 public static class KingdomDecisionsVM_RefreshWith_AutoResolved_Patch
 {
     private static IModLogger _logger;

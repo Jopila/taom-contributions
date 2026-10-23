@@ -28,6 +28,7 @@ namespace TAOM.Features.Arena.Hooks;
 // per tournament exit, so per-call GetValue cost is irrelevant.
 [HarmonyPatch(typeof(MissionGauntletTournamentView), nameof(MissionGauntletTournamentView.OnMissionScreenFinalize))]
 [HarmonyPatchCategory("Patch60_TournamentExitMovieRelease")]
+[ClientOnly]
 public static class Patch60_TournamentExitMovieRelease
 {
     // internal (not private) so Patch60TournamentExitMovieReleaseTests can drift-guard the

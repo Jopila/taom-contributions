@@ -25,6 +25,7 @@ namespace TAOM.Features.DevConsole.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(MapInfoItemVM), nameof(MapInfoItemVM.ExecuteBeginHint))]
 [HarmonyPatchCategory("Patch79_TooltipDiagnostics")]
+[ClientOnly]
 public static class Patch79_MapInfoItemVM_ExecuteBeginHint_Probe
 {
     private static IModLogger? _logger;

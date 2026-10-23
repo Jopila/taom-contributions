@@ -19,6 +19,7 @@ namespace TAOM.Features.QuickActions.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(SPInventoryVM), nameof(SPInventoryVM.ExecuteSellAllItems))]
 [HarmonyPatchCategory("Patch34_QuickActions")]
+[ClientOnly]
 public static class Patch34_SellAllItemsMenu
 {
     [ThreadStatic]

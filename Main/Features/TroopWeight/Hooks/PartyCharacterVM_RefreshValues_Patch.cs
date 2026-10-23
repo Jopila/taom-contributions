@@ -8,6 +8,7 @@ namespace TAOM.Features.TroopWeight.Hooks;
 // postfix cannot double-append across repeated calls.
 [HarmonyPatch(typeof(PartyCharacterVM), nameof(PartyCharacterVM.RefreshValues))]
 [HarmonyPatchCategory("Patch17_TroopWeight")]
+[ClientOnly]
 public static class PartyCharacterVM_RefreshValues_Patch
 {
     private static IOnPartyCharacterVMRefreshValues? _hook;

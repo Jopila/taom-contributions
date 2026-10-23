@@ -18,6 +18,7 @@ namespace TAOM.Features.TaomBuildings.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(DevelopmentItemVisualButtonWidget), "DetermineSpriteImageFromSpriteCode")]
 [HarmonyPatchCategory(TaomBuildingsModule.PatchCategory)]
+[ClientOnly]
 public static class Patch108_DevelopmentSprite
 {
     private static bool _warned;

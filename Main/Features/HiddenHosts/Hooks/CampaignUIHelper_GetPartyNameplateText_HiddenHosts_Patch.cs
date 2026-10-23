@@ -14,6 +14,7 @@ namespace TAOM.Features.HiddenHosts.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(CampaignUIHelper), nameof(CampaignUIHelper.GetPartyNameplateText), new[] { typeof(MobileParty), typeof(bool) })]
 [HarmonyPatchCategory(HiddenHostsModule.PatchCategory)]
+[ClientOnly]
 public static class CampaignUIHelper_GetPartyNameplateText_HiddenHosts_Patch
 {
     [HarmonyPostfix]

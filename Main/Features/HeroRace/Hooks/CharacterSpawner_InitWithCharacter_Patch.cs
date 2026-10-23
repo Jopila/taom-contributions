@@ -7,6 +7,7 @@ namespace TAOM.Features.HeroRace.Hooks;
 
 [HarmonyPatch(typeof(CharacterSpawner), "InitWithCharacter")]
 [HarmonyPatchCategory("Patch4_CharacterSpawner")]
+[ClientOnly]
 public class CharacterSpawner_InitWithCharacter_Patch
 {
     [HarmonyPrefix]

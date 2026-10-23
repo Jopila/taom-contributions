@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -29,6 +30,11 @@ public class PatchCategoryIndexTests
     private const string MixedCategory = "Test_IndexProbe_Mixed";
     private const string SecondCategory = "Test_IndexProbe_Second";
     private const string OrderedCategory = "Test_IndexProbe_Ordered";
+    private const string ClientOnlyCategory = "Test_IndexProbe_ClientOnly";
+    private const string ClientOnlyMixedCategory = "Test_IndexProbe_ClientOnlyMixed";
+    private const string ClientOnlyMissingClassName = "TaomIndexProbe.ClientOnlyMissingTypeProbe";
+    private const string ClientOnlyHealthyClassName = "TaomIndexProbe.ClientOnlyHealthyProbe";
+    private const string UnresolvableAttributeClassName = "TaomIndexProbe.UnresolvableAttributeProbe";
     private const string BrokenClassName = "TaomIndexProbe.BrokenAttributeProbe";
     private const string HealthyClassName = "TaomIndexProbe.HealthyProbe";
     private const string UncategorisedClassName = "TaomIndexProbe.UncategorisedProbe";
@@ -48,6 +54,12 @@ public class PatchCategoryIndexTests
 
     private static readonly MethodInfo OrderedTarget =
         typeof(PatchCategoryIndexProbeTarget).GetMethod(nameof(PatchCategoryIndexProbeTarget.OrderedProbe))!;
+
+    private static readonly MethodInfo ClientOnlyTarget =
+        typeof(PatchCategoryIndexProbeTarget).GetMethod(nameof(PatchCategoryIndexProbeTarget.ClientOnlyProbe))!;
+
+    private static readonly MethodInfo ClientOnlyMixedTarget =
+        typeof(PatchCategoryIndexProbeTarget).GetMethod(nameof(PatchCategoryIndexProbeTarget.ClientOnlyMixedProbe))!;
 
     private IModLogger _logger = null!;
     private Harmony _harmony = null!;
@@ -176,6 +188,103 @@ public class PatchCategoryIndexTests
         CollectionAssert.DoesNotContain(PostfixOwners(OrderedTarget), _harmony.Id, "the unresolvable class came first and threw");
     }
 
+    // ADR-013: on a dedicated server a [ClientOnly] class is left out before its attributes are read, so a class whose
+    // [HarmonyPatch] names a type the server cannot load is neither skipped nor reported as a failure.
+    [TestMethod]
+    public void Build_DedicatedServer_LeavesOutAClientOnlyClassBeforeReadingItsAttributes()
+    {
+        var assembly = EmitClientOnlyAssembly("TAOM.Tests.PatchCategoryIndexProbe.ClientOnlyMissing",
+            ClientOnlyMissingClassName, missingTarget: true);
+
+        var index = PatchCategoryIndex.Build(true, assembly);
+
+        CollectionAssert.AreEqual(new[] { ClientOnlyMissingClassName },
+            index.ClientOnlyClasses.Select(t => t.FullName).ToArray());
+        Assert.AreEqual(0, index.SkippedClasses.Count, "a marked class is left out, not skipped as unreadable");
+        Assert.AreEqual(0, index.ClassesOf(ClientOnlyCategory).Count);
+
+        var onAClient = PatchCategoryIndex.Build(false, assembly);
+        Assert.AreEqual(0, onAClient.ClientOnlyClasses.Count, "a client leaves nothing out");
+        CollectionAssert.AreEqual(new[] { ClientOnlyMissingClassName },
+            onAClient.SkippedClasses.Select(s => s.Key.FullName).ToArray(),
+            "on a client the unreadable class is still skipped as before");
+    }
+
+    // The real server log (taom_debug_2026-10-23_09-23-19.log) shows both screens' attribute types cannot be resolved on a
+    // server. IsDefined resolves the TYPE of every attribute on a class, so the first 6a shape, with the check outside the
+    // per-class try, would have thrown out of Build (found by review, reproduced by this test). It must be skipped like
+    // any unreadable class.
+    [TestMethod]
+    public void Build_DedicatedServer_AnUnmarkedClassWithAnAttributeTypeThatCannotLoad_IsSkippedNotThrown()
+    {
+        var assembly = GoneAttributeProbe.Emit(UnresolvableAttributeClassName);
+
+        var index = PatchCategoryIndex.Build(true, assembly);
+
+        CollectionAssert.AreEqual(new[] { UnresolvableAttributeClassName },
+            index.SkippedClasses.Select(s => s.Key.FullName).ToArray());
+        Assert.AreEqual(0, index.ClientOnlyClasses.Count);
+    }
+
+    [TestMethod]
+    public void Build_OnAClient_IndexesAClientOnlyClassAsBefore()
+    {
+        var assembly = EmitClientOnlyAssembly("TAOM.Tests.PatchCategoryIndexProbe.ClientOnlyHealthy",
+            ClientOnlyHealthyClassName, missingTarget: false);
+
+        var index = PatchCategoryIndex.Build(false, assembly);
+        index.Apply(_harmony, ClientOnlyCategory);
+
+        Assert.AreEqual(0, index.ClientOnlyClasses.Count);
+        CollectionAssert.Contains(PostfixOwners(ClientOnlyTarget), _harmony.Id);
+
+        _harmony.UnpatchAll(_harmony.Id);
+        PatchCategoryIndex.Build(true, assembly).Apply(_harmony, ClientOnlyCategory);
+        CollectionAssert.DoesNotContain(PostfixOwners(ClientOnlyTarget), _harmony.Id, "a server applies nothing of it");
+    }
+
+    // The mixed-category case B6 plan decision D1 relies on: a server drops the marked class, so the category applies its
+    // core class instead of aborting at the marked class's unresolvable target.
+    [TestMethod]
+    public void Build_DedicatedServer_AMixedCategory_AppliesItsCoreClassWithoutThrowing()
+    {
+        var assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(
+            new AssemblyName("TAOM.Tests.PatchCategoryIndexProbe.ClientOnlyMixed"), AssemblyBuilderAccess.Run);
+        var module = assembly.DefineDynamicModule("TAOM.Tests.PatchCategoryIndexProbe.ClientOnlyMixed");
+        EmitPatchClass(module, "TaomIndexProbe.MixedClientHalf", ClientOnlyMixedCategory,
+            harmonyPatch: builder => builder.SetCustomAttribute(TargetAttribute("NoSuchMethod")), clientOnly: true);
+        EmitPatchClass(module, "TaomIndexProbe.MixedCoreHalf", ClientOnlyMixedCategory,
+            harmonyPatch: builder => builder.SetCustomAttribute(TargetAttribute(nameof(PatchCategoryIndexProbeTarget.ClientOnlyMixedProbe))));
+
+        PatchCategoryIndex.Build(true, assembly).Apply(_harmony, ClientOnlyMixedCategory);
+        CollectionAssert.Contains(PostfixOwners(ClientOnlyMixedTarget), _harmony.Id, "the core class applies on a server");
+
+        _harmony.UnpatchAll(_harmony.Id);
+        Assert.ThrowsException<HarmonyException>(
+            () => PatchCategoryIndex.Build(false, assembly).Apply(_harmony, ClientOnlyMixedCategory),
+            "control: on a client the marked class is indexed and aborts the category");
+    }
+
+    // Over the real TAOM.dll: the server drops exactly the marked classes, and nothing else fails to read.
+    [TestCategory("RequiresGame")]
+    [TestMethod]
+    public void Build_DedicatedServer_OverTaomDll_LeavesOutExactlyTheMarkedClasses()
+    {
+        TAOM.Tests.Migration.GameAssemblies.EnsureLoaded();
+        var core = typeof(IoC).Assembly;
+        var marked = AccessTools.GetTypesFromAssembly(core)
+            .Where(t => t.IsDefined(typeof(ClientOnlyAttribute), false)).Select(t => t.FullName!).OrderBy(n => n).ToArray();
+
+        var index = PatchCategoryIndex.Build(true, core);
+
+        Assert.IsTrue(marked.Length > 0, "no [ClientOnly] class in TAOM.dll: the marker pass is missing");
+        CollectionAssert.AreEqual(marked, index.ClientOnlyClasses.Select(t => t.FullName!).OrderBy(n => n).ToArray());
+        Assert.AreEqual(0, index.SkippedClasses.Count,
+            "here the client assemblies load, so nothing is unreadable; the classes a real server skips are pinned by "
+            + "ServerLoadGateTests.CoreClassesWithAClientOnlyAttributeType_AreTheKnownList: "
+            + string.Join(", ", index.SkippedClasses.Select(s => s.Key.FullName)));
+    }
+
     // Harmony keeps an empty patch record after an unpatch, so ask for owners, not for null.
     private static string[] PostfixOwners() => PostfixOwners(Target);
 
@@ -217,17 +326,38 @@ public class PatchCategoryIndexTests
         return assembly;
     }
 
+    // One [ClientOnly] class; missingTarget names a type in a missing assembly, as a client-only patch would on a server.
+    private static Assembly EmitClientOnlyAssembly(string name, string className, bool missingTarget)
+    {
+        var assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(name), AssemblyBuilderAccess.Run);
+        var module = assembly.DefineDynamicModule(name);
+        EmitPatchClass(module, className, ClientOnlyCategory, harmonyPatch: builder =>
+        {
+            if (missingTarget)
+                builder.SetCustomAttribute(
+                    typeof(HarmonyPatch).GetConstructor(new[] { typeof(Type) })!,
+                    TypeArgumentBlob("TaleWorlds.RemovedByAnEngineUpdate.GoneType, " + typeof(PatchCategoryIndexTests).Assembly.FullName));
+            else
+                builder.SetCustomAttribute(TargetAttribute(nameof(PatchCategoryIndexProbeTarget.ClientOnlyProbe)));
+        }, clientOnly: true);
+        return assembly;
+    }
+
     private static CustomAttributeBuilder TargetAttribute(string method)
         => new(typeof(HarmonyPatch).GetConstructor(new[] { typeof(Type), typeof(string) })!,
             new object[] { typeof(PatchCategoryIndexProbeTarget), method });
 
-    private static void EmitPatchClass(ModuleBuilder module, string name, string? category, Action<TypeBuilder> harmonyPatch)
+    private static void EmitPatchClass(
+        ModuleBuilder module, string name, string? category, Action<TypeBuilder> harmonyPatch, bool clientOnly = false)
     {
         var type = module.DefineType(name,
             TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed);
         if (category != null)
             type.SetCustomAttribute(new CustomAttributeBuilder(
                 typeof(HarmonyPatchCategory).GetConstructor(new[] { typeof(string) })!, new object[] { category }));
+        if (clientOnly)
+            type.SetCustomAttribute(new CustomAttributeBuilder(
+                typeof(ClientOnlyAttribute).GetConstructor(Type.EmptyTypes)!, Array.Empty<object>()));
         harmonyPatch(type);
         var postfix = type.DefineMethod("Postfix", MethodAttributes.Public | MethodAttributes.Static,
             typeof(void), Type.EmptyTypes);
@@ -266,4 +396,75 @@ public static class PatchCategoryIndexProbeTarget
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static int OrderedProbe() => 4;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int ClientOnlyProbe() => 5;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int ClientOnlyMixedProbe() => 6;
+}
+
+/// <summary>
+/// An emitted assembly whose one class carries an attribute from an assembly that is not on disk, the shape of a
+/// class-level [GameStateScreen] on a server. A reference cannot be left unresolvable in this process once the attribute
+/// assembly has been loaded into it, so both assemblies are built and saved in a throwaway AppDomain; the attribute
+/// assembly is then deleted, and only the probe is read back.
+/// </summary>
+internal static class GoneAttributeProbe
+{
+    private const string AttributeAssembly = "TaomIndexProbe.GoneAttributes";
+    private const string ProbeAssembly = "TaomIndexProbe.UnresolvableAttribute";
+
+    internal static Assembly Emit(string className)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "taom-index-probe-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        var child = AppDomain.CreateDomain("taom-index-probe", null,
+            new AppDomainSetup { ApplicationBase = AppDomain.CurrentDomain.BaseDirectory });
+        try
+        {
+            child.SetData("directory", directory);
+            child.SetData("className", className);
+            child.DoCallBack(BuildBothAssemblies);
+        }
+        finally
+        {
+            AppDomain.Unload(child);
+        }
+
+        try
+        {
+            File.Delete(Path.Combine(directory, AttributeAssembly + ".dll"));
+            return Assembly.Load(File.ReadAllBytes(Path.Combine(directory, ProbeAssembly + ".dll")));
+        }
+        finally
+        {
+            Directory.Delete(directory, true);
+        }
+    }
+
+    private static void BuildBothAssemblies()
+    {
+        var directory = (string)AppDomain.CurrentDomain.GetData("directory");
+        var className = (string)AppDomain.CurrentDomain.GetData("className");
+
+        var attributeBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
+            new AssemblyName(AttributeAssembly), AssemblyBuilderAccess.RunAndSave, directory);
+        var attributeModule = attributeBuilder.DefineDynamicModule(AttributeAssembly, AttributeAssembly + ".dll");
+        var attribute = attributeModule.DefineType("TaomIndexProbe.GoneAttribute", TypeAttributes.Public | TypeAttributes.Class, typeof(Attribute));
+        attribute.DefineDefaultConstructor(MethodAttributes.Public);
+        attribute.CreateType();
+        attributeBuilder.Save(AttributeAssembly + ".dll");
+
+        var ctor = Assembly.LoadFile(Path.Combine(directory, AttributeAssembly + ".dll"))
+            .GetType("TaomIndexProbe.GoneAttribute")!.GetConstructor(Type.EmptyTypes)!;
+        var probeBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
+            new AssemblyName(ProbeAssembly), AssemblyBuilderAccess.RunAndSave, directory);
+        var probeModule = probeBuilder.DefineDynamicModule(ProbeAssembly, ProbeAssembly + ".dll");
+        var type = probeModule.DefineType(className,
+            TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed);
+        type.SetCustomAttribute(new CustomAttributeBuilder(ctor, Array.Empty<object>()));
+        type.CreateType();
+        probeBuilder.Save(ProbeAssembly + ".dll");
+    }
 }

@@ -13,6 +13,7 @@ namespace TAOM.Features.NameplateCull.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(SettlementNameplatesVM), nameof(SettlementNameplatesVM.Update))]
 [HarmonyPatchCategory(NameplateCullModule.PatchCategory)]
+[ClientOnly]
 public static class SettlementNameplatesVM_Update_NameplateCull_Patch
 {
     [HarmonyPrefix]

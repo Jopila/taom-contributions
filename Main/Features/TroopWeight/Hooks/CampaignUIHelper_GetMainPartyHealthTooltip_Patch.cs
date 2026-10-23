@@ -12,6 +12,7 @@ namespace TAOM.Features.TroopWeight.Hooks;
 // Vanilla takes no party argument here; it builds the tooltip for MobileParty.MainParty.
 [HarmonyPatch(typeof(CampaignUIHelper), nameof(CampaignUIHelper.GetMainPartyHealthTooltip))]
 [HarmonyPatchCategory("Patch17_TroopWeight")]
+[ClientOnly]
 public static class CampaignUIHelper_GetMainPartyHealthTooltip_Patch
 {
     private static IOnCampaignUIHelperGetPartyHealthTooltip? _hook;

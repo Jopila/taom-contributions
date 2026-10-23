@@ -18,6 +18,7 @@ namespace TAOM.Features.SpecialResources.Hooks;
 // category) re-runs EvaluateCart at that boundary. Both go through EvaluateCart below.
 [HarmonyPatch(typeof(RecruitmentVM), "RefreshPartyProperties")]
 [HarmonyPatchCategory("Patch51_RecruitmentResourceGate")]
+[ClientOnly]
 public static class RecruitmentVM_RecruitGate_Patch
 {
     private static IOnRecruitmentResourceGate _hook;

@@ -15,6 +15,7 @@ namespace TAOM.Features.HiddenHosts.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(PropertyBasedTooltipVM), "OnPeriodicRefresh")]
 [HarmonyPatchCategory(HiddenHostsModule.PatchCategory)]
+[ClientOnly]
 public static class PropertyBasedTooltipVM_OnPeriodicRefresh_HiddenHosts_Patch
 {
     // Bound once, fail-soft: a missing field on a future engine leaves a null and the hook stands down, reported once.

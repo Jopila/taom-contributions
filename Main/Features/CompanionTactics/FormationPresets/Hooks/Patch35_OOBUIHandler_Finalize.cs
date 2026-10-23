@@ -9,6 +9,7 @@ namespace TAOM.Features.CompanionTactics.FormationPresets.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(MissionGauntletOrderOfBattleUIHandler), "OnMissionScreenFinalize")]
 [HarmonyPatchCategory("Patch35_CompanionTactics")]
+[ClientOnly]
 public static class Patch35_OOBUIHandler_Finalize
 {
     private static IOOBOverlayService _overlay;

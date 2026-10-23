@@ -8,6 +8,7 @@ namespace TAOM.Features.HeroRace.Hooks;
 
 [HarmonyPatch(typeof(CharacterTableau), nameof(CharacterTableau.SetRace))]
 [HarmonyPatchCategory("Patch3_SetRace")]
+[ClientOnly]
 public class CharacterTableau_SetRace_Patch
 {
     [HarmonyPostfix]

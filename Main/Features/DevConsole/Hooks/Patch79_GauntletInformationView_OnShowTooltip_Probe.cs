@@ -36,6 +36,7 @@ namespace TAOM.Features.DevConsole.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(GauntletInformationView), "OnShowTooltip")]
 [HarmonyPatchCategory("Patch79_TooltipDiagnostics")]
+[ClientOnly]
 public static class Patch79_GauntletInformationView_OnShowTooltip_Probe
 {
     private static IModLogger? _logger;

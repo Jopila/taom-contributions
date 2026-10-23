@@ -15,6 +15,7 @@ namespace TAOM.Features.PartyIconScale.Hooks;
 /// fails safe.
 /// </summary>
 [HarmonyPatchCategory("Patch53_PartyIconScale")]
+[ClientOnly]
 public static class Patch53_PartyIconScaleHumanVisual
 {
     private static IModLogger? _logger;

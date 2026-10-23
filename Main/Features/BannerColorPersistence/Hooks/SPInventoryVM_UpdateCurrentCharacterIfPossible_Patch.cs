@@ -19,6 +19,7 @@ namespace TAOM.Features.BannerColorPersistence.Hooks;
 /// class keeps that name because <c>Main/SubModule.cs</c> calls its <see cref="Initialize"/>.
 /// </summary>
 [HarmonyPatchCategory("Patch23_BannerColorPersistence")]
+[ClientOnly]
 public static class SPInventoryVM_UpdateCurrentCharacterIfPossible_Patch
 {
     private static IBannerColorService? _service;

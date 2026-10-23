@@ -20,6 +20,7 @@ namespace TAOM.Features.FactionUI.Hooks;
 /// </summary>
 [HarmonyPatch]
 [HarmonyPatchCategory(FactionUIPatchContext.Category)]
+[ClientOnly]
 public static class BodyGeneratorViewConstructorPatch
 {
     private static bool _reported;

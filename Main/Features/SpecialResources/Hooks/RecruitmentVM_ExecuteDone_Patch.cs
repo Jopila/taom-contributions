@@ -14,6 +14,7 @@ namespace TAOM.Features.SpecialResources.Hooks;
 // its cart is empty and passes.
 [HarmonyPatch(typeof(RecruitmentVM), "ExecuteDone")]
 [HarmonyPatchCategory("Patch51_RecruitmentResourceGate")]
+[ClientOnly]
 public static class RecruitmentVM_ExecuteDone_Patch
 {
     [HarmonyPrefix]

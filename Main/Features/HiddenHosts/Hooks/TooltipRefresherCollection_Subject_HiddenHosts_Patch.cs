@@ -18,6 +18,7 @@ namespace TAOM.Features.HiddenHosts.Hooks;
 /// </summary>
 [HarmonyPatch]
 [HarmonyPatchCategory(HiddenHostsModule.PatchCategory)]
+[ClientOnly]
 public static class TooltipRefresherCollection_Subject_HiddenHosts_Patch
 {
     private static IEnumerable<MethodBase> TargetMethods()

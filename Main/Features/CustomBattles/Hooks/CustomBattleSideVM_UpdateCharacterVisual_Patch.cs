@@ -5,6 +5,7 @@ namespace TAOM.Features.CustomBattles.Hooks;
 
 [HarmonyPatch(typeof(CustomBattleSideVM), nameof(CustomBattleSideVM.UpdateCharacterVisual))]
 [HarmonyPatchCategory("Patch19_CustomBattles")]
+[ClientOnly]
 public static class CustomBattleSideVM_UpdateCharacterVisual_Patch
 {
     // Companion guard for CustomBattleSideVM_OnCharacterSelection_Patch.

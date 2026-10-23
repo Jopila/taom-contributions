@@ -20,6 +20,7 @@ namespace TAOM.Features.HiddenHosts.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(TooltipRefresherCollection), "AddPartyTroopProperties")]
 [HarmonyPatchCategory(HiddenHostsModule.PatchCategory)]
+[ClientOnly]
 public static class TooltipRefresherCollection_AddPartyTroopProperties_HiddenHosts_Patch
 {
     /// <summary>The spacer and the title row this call adds first, which the trim keeps.</summary>

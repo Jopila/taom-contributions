@@ -6,6 +6,7 @@ namespace TAOM.Features.BannerInjection.Hooks;
 
 [HarmonyPatch(typeof(GauntletBannerEditorScreen), "OnDone")]
 [HarmonyPatchCategory("Patch6_BannerEditor")]
+[ClientOnly]
 public static class GauntletBannerEditorScreen_OnDone_Patch
 {
     private static IOnBannerEditorDone _hook;

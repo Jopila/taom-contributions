@@ -23,6 +23,7 @@ namespace TAOM.Features.CharacterCreation.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(CharacterCreationCultureStageVM), nameof(CharacterCreationCultureStageVM.OnCultureSelection))]
 [HarmonyPatchCategory("Patch29_CCBodyProperties")]
+[ClientOnly]
 public static class CharacterCreationCultureStageVM_OnCultureSelection_Patch
 {
     [HarmonyPostfix]

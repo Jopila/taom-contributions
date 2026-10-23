@@ -36,6 +36,7 @@ namespace TAOM.Features.Refuge.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(ClanPartiesVM), "RefreshPartiesList")]
 [HarmonyPatchCategory("Patch75_Refuge")]
+[ClientOnly]
 public static class RefugeClanScreenPatch
 {
     private static IRefugeService? _refuges;

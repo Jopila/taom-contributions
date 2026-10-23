@@ -7,6 +7,7 @@ namespace TAOM.Features.CharacterCreation.Hooks;
 
 [HarmonyPatch(typeof(FaceGenVM), "Refresh", new[] { typeof(bool) })]
 [HarmonyPatchCategory("Patch9_RaceFilter")]
+[ClientOnly]
 public static class FaceGenVM_Refresh_RaceFilter_Patch
 {
     private static ICultureRaceFilterService _filterService;

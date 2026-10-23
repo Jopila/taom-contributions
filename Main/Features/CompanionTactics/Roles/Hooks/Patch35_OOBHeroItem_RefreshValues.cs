@@ -11,6 +11,7 @@ namespace TAOM.Features.CompanionTactics.Roles.Hooks;
 [HarmonyPatch(typeof(OrderOfBattleHeroItemVM), nameof(OrderOfBattleHeroItemVM.RefreshValues))]
 [HarmonyPatchCategory("Patch35_CompanionTactics")]
 [HarmonyPriority(Priority.LowerThanNormal)]
+[ClientOnly]
 public static class Patch35_OOBHeroItem_RefreshValues
 {
     private static IRoleTooltipDecorator _decorator;

@@ -48,6 +48,7 @@ namespace TAOM.Features.HeroRace.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(GauntletSceneNotification), "OpenScene")]
 [HarmonyPatchCategory("Patch56_SceneNotificationVisualGuard")]
+[ClientOnly]
 public static class GauntletSceneNotification_OpenScene_Guard_Patch
 {
     private static IModLogger _logger;
@@ -93,6 +94,7 @@ public static class GauntletSceneNotification_OpenScene_Guard_Patch
 /// </summary>
 [HarmonyPatch(typeof(GauntletSceneNotification), "OnTick", new[] { typeof(float) })]
 [HarmonyPatchCategory("Patch56_SceneNotificationVisualGuard")]
+[ClientOnly]
 public static class GauntletSceneNotification_OnTick_DeferredClose_Patch
 {
     [HarmonyPostfix]
@@ -134,6 +136,7 @@ public static class GauntletSceneNotification_OnTick_DeferredClose_Patch
 /// </summary>
 [HarmonyPatch(typeof(PopupSceneSpawnPoint), nameof(PopupSceneSpawnPoint.InitializeWithAgentVisuals))]
 [HarmonyPatchCategory("Patch56_SceneNotificationVisualGuard")]
+[ClientOnly]
 public static class PopupSceneSpawnPoint_InitializeWithAgentVisuals_Diagnostic_Patch
 {
     private static IModLogger _logger;

@@ -21,6 +21,7 @@ namespace TAOM.Features.FieldCamp.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(PartyPlayerNameplateWidget), "UpdateNameplatesVisibility")]
 [HarmonyPatchCategory("Patch74_FieldCampNameplateIcon")]
+[ClientOnly]
 public static class PartyNameplateCampIconPatch
 {
     private static ICampService? _campService;

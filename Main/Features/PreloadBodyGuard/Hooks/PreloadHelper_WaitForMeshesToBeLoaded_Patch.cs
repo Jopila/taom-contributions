@@ -42,6 +42,7 @@ namespace TAOM.Features.PreloadBodyGuard.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(PreloadHelper), nameof(PreloadHelper.WaitForMeshesToBeLoaded))]
 [HarmonyPatchCategory("Patch90_PreloadBodyGuard")]
+[ClientOnly]
 public static class PreloadHelper_WaitForMeshesToBeLoaded_Patch
 {
     /// <summary>Generous on purpose: a false drop removes a real weapon's collision shape, a late

@@ -7,6 +7,7 @@ namespace TAOM.Features.BannerColorPersistence.Hooks;
 
 [HarmonyPatch(typeof(CampaignUIHelper), nameof(CampaignUIHelper.GetCharacterCode))]
 [HarmonyPatchCategory("Patch23_BannerColorPersistence")]
+[ClientOnly]
 public static class CampaignUIHelper_GetCharacterCode_Patch
 {
     private static IBannerColorService? _service;

@@ -13,6 +13,7 @@ namespace TAOM.Features.QuickActions.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(SPInventoryVM), nameof(SPInventoryVM.RefreshCallbacks))]
 [HarmonyPatchCategory("Patch34_QuickActions")]
+[ClientOnly]
 public static class Patch34_SPInventoryVMSearchApply
 {
     [HarmonyPostfix]

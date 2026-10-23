@@ -7,6 +7,7 @@ namespace TAOM.Features.CustomBattles.Hooks;
 
 [HarmonyPatch(typeof(CustomBattleSideVM), nameof(CustomBattleSideVM.RefreshValues))]
 [HarmonyPatchCategory("Patch19_CustomBattles")]
+[ClientOnly]
 public static class CustomBattleSideVM_RefreshValues_Patch
 {
     private static ISideCommanderFilter _filter;

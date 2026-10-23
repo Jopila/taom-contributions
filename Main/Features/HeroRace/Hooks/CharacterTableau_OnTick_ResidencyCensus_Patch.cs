@@ -26,6 +26,7 @@ namespace TAOM.Features.HeroRace.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(CharacterTableau), "OnTick")]
 [HarmonyPatchCategory("Patch67_TableauResidencyDiag")]
+[ClientOnly]
 public class CharacterTableau_OnTick_ResidencyCensus_Patch
 {
     // Resolved once. Reflection on a per-frame path must never be re-resolved per call, and these are

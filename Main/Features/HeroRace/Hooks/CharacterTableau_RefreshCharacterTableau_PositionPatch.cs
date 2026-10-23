@@ -47,6 +47,7 @@ namespace TAOM.Features.HeroRace.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(CharacterTableau), "RefreshCharacterTableau")]
 [HarmonyPatchCategory("Patch72_TableauRacePosition")]
+[ClientOnly]
 public static class CharacterTableau_RefreshCharacterTableau_PositionPatch
 {
     private static ITableauPositionService _service;

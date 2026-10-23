@@ -10,6 +10,7 @@ namespace TAOM.Features.TroopWeight.Hooks;
 // suppressed. Private method -> patched by string name (v1.4.8-verified).
 [HarmonyPatch(typeof(PartyVM), "RefreshPartyInformation")]
 [HarmonyPatchCategory("Patch17_TroopWeight")]
+[ClientOnly]
 public static class PartyVM_RefreshPartyInformation_Patch
 {
     private static IOnPartyVMRefreshPartyInformation? _hook;

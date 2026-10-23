@@ -17,6 +17,7 @@ namespace TAOM.Features.PartyIconScale.Hooks;
 /// method (transpiler rewrites IL; postfix runs after).
 /// </summary>
 [HarmonyPatchCategory("Patch53_PartyIconScale")]
+[ClientOnly]
 public static class Patch53_PartyIconScale
 {
     private static IModLogger? _logger;

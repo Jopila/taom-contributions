@@ -8,6 +8,7 @@ namespace TAOM.Features.CustomBattles.Hooks;
 
 [HarmonyPatch(typeof(CustomBattleHelper), nameof(CustomBattleHelper.GetDefaultTroopOfFormationForFaction))]
 [HarmonyPatchCategory("Patch19_CustomBattles")]
+[ClientOnly]
 public static class CustomBattleHelper_Troop_Patch
 {
     private static IOnGetDefaultTroopOfFormation _hook;

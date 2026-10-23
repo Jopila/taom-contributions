@@ -17,6 +17,7 @@ namespace TAOM.Features.QuickActions.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(SPInventoryVM), nameof(SPInventoryVM.OnFinalize))]
 [HarmonyPatchCategory("Patch34_QuickActions")]
+[ClientOnly]
 public static class Patch34_SPInventoryVMFinalize
 {
     [HarmonyPostfix]

@@ -53,6 +53,7 @@ public static class GameState_OnInitialize_Trace_Patch
 /// </summary>
 [HarmonyPatch(typeof(MapScreen), "OnInitialize")]
 [HarmonyPatchCategory("Patch89_MapLoadDiagnostics_MapScreen")]
+[ClientOnly]
 public static class MapScreen_OnInitialize_Trace_Patch
 {
     [HarmonyPrefix] public static void Prefix() => MapLoadTracer.Trace("MapScreen.OnInitialize ENTER");
@@ -61,6 +62,7 @@ public static class MapScreen_OnInitialize_Trace_Patch
 
 [HarmonyPatch(typeof(MapScreen), "OnFrameTick")]
 [HarmonyPatchCategory("Patch89_MapLoadDiagnostics_MapScreen")]
+[ClientOnly]
 public static class MapScreen_FirstFrame_Trace_Patch
 {
     private static bool _logged;

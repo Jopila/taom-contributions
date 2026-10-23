@@ -7,6 +7,7 @@ namespace TAOM.Features.SpecialResources.Hooks;
 
 [HarmonyPatch(typeof(PartyCharacterVM), nameof(PartyCharacterVM.InitializeUpgrades))]
 [HarmonyPatchCategory("Patch26_SpecialResources")]
+[ClientOnly]
 public static class PartyCharacterVM_InitializeUpgrades_Patch
 {
     private static IOnPartyUpgradeResourceCheck _hook;

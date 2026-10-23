@@ -216,13 +216,15 @@ public class SubModule : MBSubModuleBase
         // a class whose [HarmonyPatch] names a type the engine no longer has would fail Harmony's
         // index and so every category, where here only that class is skipped and reported (#653).
         // The index reads core, then TAOM.Client when it loaded (ADR-013), so a client patch class
-        // joins its category like a core one.
+        // joins its category like a core one. On a dedicated server it leaves out every [ClientOnly]
+        // class before reading that class's attributes, and the applier says so in one line.
         _harmony = new Harmony("com.taom.mod");
-        var categoryIndex = PatchCategoryIndex.Build(ClientComposition.LoadedTaomAssemblies());
+        var categoryIndex = PatchCategoryIndex.Build(ClientComposition.IsDedicatedServer(), ClientComposition.LoadedTaomAssemblies());
         _patches = new PatchCategoryApplier(
             category => categoryIndex.Apply(_harmony, category),
             IoC.Resolve<IModLogger>());
         _patches.RecordSkippedClasses(categoryIndex.SkippedClasses);
+        _patches.RecordClientOnlyClasses(categoryIndex.ClientOnlyClasses);
         // Installed unconditionally. CrashReportSettings.Instance is always null here: MCM builds
         // its settings provider in its own OnBeforeInitialModuleScreenSetAsRoot, after every
         // OnSubModuleLoad, so an MCM gate at this point always took its fallback. The toggles are

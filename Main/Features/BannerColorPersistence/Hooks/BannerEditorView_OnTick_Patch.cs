@@ -8,6 +8,7 @@ namespace TAOM.Features.BannerColorPersistence.Hooks;
 
 [HarmonyPatch(typeof(BannerEditorView), nameof(BannerEditorView.OnTick))]
 [HarmonyPatchCategory("Patch23_BannerColorPersistence")]
+[ClientOnly]
 public static class BannerEditorView_OnTick_Patch
 {
     private static IBannerColorService? _service;

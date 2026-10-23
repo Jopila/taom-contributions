@@ -26,6 +26,15 @@ public class ServerLoadGateTests
     private static readonly string[] ModulesLoadedBeforeTaom =
         { "Native", "SandBoxCore", "SandBox", "TAOM.Dependencies", "LOTRLOME_Armory", "TAOM_Map" };
 
+    // The core classes that carry a class-level attribute from a client-only assembly ([GameStateScreen], in
+    // TaleWorlds.MountAndBlade.View). The attribute type cannot load on a server, so PatchCategoryIndex.Build reports
+    // each as a skipped class there. ADR-013 batch B7 moves both screens to TAOM.Client, which empties this list.
+    internal static readonly string[] CoreClassesWithClientOnlyAttributes =
+    {
+        "TAOM.Features.CareerSystem.UI.GauntletCareerScreen",
+        "TAOM.Features.SupplyLines.UI.GauntletSupplyOrderScreen",
+    };
+
     [ClassInitialize]
     public static void Init(Microsoft.VisualStudio.TestTools.UnitTesting.TestContext _) =>
         TAOM.Tests.Migration.GameAssemblies.EnsureLoaded();
@@ -43,6 +52,22 @@ public class ServerLoadGateTests
             + "override). Put them in TAOM.Client or break the dependency; there is no allowlist (ADR-013, M1).");
     }
 
+    // Reading a class's attributes on a server resolves each attribute type, so a core class carrying one from a client-only
+    // assembly throws there even though GetTypes() succeeds. The list is the known debt: this fails on a new one (move the
+    // class to TAOM.Client) and on a healed one (remove it from CoreClassesWithClientOnlyAttributes).
+    [TestMethod]
+    public void CoreClassesWithAClientOnlyAttributeType_AreTheKnownList()
+    {
+        var found = typeof(SubModule).Assembly.GetTypes()
+            .Where(t => CustomAttributeData.GetCustomAttributes(t)
+                .Any(a => ClientAssemblies.IsClientOnly(a.AttributeType.Assembly.GetName().Name!)))
+            .Select(t => t.FullName!).OrderBy(n => n, StringComparer.Ordinal).ToList();
+
+        CollectionAssert.AreEqual(CoreClassesWithClientOnlyAttributes.OrderBy(n => n, StringComparer.Ordinal).ToList(), found,
+            "The TAOM.dll classes with a class-level attribute from a client-only assembly changed. A new one fails to read on "
+            + "the dedicated server: put it in TAOM.Client. A healed one: remove it from CoreClassesWithClientOnlyAttributes.");
+    }
+
     [TestMethod]
     public void EveryDependenciesType_LoadsWithoutClientAssemblies()
     {
@@ -53,6 +78,74 @@ public class ServerLoadGateTests
 
         CollectionAssert.AreEqual(new List<string>(), failing,
             "TAOM.Dependencies.dll loads first on the dedicated server and must have no type that needs a client-only assembly");
+    }
+
+    // Gate 4 (ADR-013, B6): a dedicated server drops every [ClientOnly] class before it reads the class attributes, so the
+    // marker must sit on exactly the patch classes that name a client-only assembly. Missing: the server indexes the class
+    // and fails or aborts its category. Stale: the server silently loses a patch it could have applied. Three ways a class
+    // names one: a [HarmonyPatch] target, a patch-method signature, and what a TargetMethod/TargetMethods returns (a string
+    // resolved target is invisible to the first two, so each is invoked here, which needs the client assemblies loaded).
+    // Bannerlord.UIExtenderEx resolves on the server but its submodule never loads there, so it counts as a patch target
+    // only; it stays out of ClientAssemblies.Names, which the staged-server check asserts are all absent.
+    [TestMethod]
+    public void PatchClassesReferencingClientAssemblies_AreClientOnly()
+    {
+        foreach (var name in ClientAssemblies.Names)
+        {
+            // A framework assembly is not found by simple name on net472; the rest come through GameAssemblies' resolver.
+            var display = name.StartsWith("System.", StringComparison.Ordinal)
+                ? name + ", Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" : name;
+            try { Assembly.Load(display); }
+            catch (Exception ex) { Assert.Inconclusive($"Cannot load {name} ({ex.GetType().Name}); the TargetMethod half of the gate cannot run."); }
+        }
+
+        bool IsClient(Assembly assembly)
+        {
+            var name = assembly.GetName().Name!;
+            return ClientAssemblies.IsClientOnly(name) || name == "Bannerlord.UIExtenderEx"
+                || assembly == typeof(TAOM.Client.ClientSubModule).Assembly;
+        }
+
+        var previous = TAOM.Composition.ClientComposition.Current;
+        TAOM.Composition.ClientComposition.Current = new TAOM.Client.TaomClientComposition();
+        var problems = new List<string>();
+        var patchClasses = 0;
+        var withReason = 0;
+        try
+        {
+            var core = TaomAssemblies.All[0];
+            foreach (var type in TaomAssemblies.All.SelectMany(HarmonyLib.AccessTools.GetTypesFromAssembly))
+            {
+                var marked = type.IsDefined(typeof(ClientOnlyAttribute), false);
+                var isPatchClass = type.Assembly == core && HarmonyLib.HarmonyMethodExtensions.GetFromType(type).Count > 0;
+                if (marked && type.Assembly != core)
+                    problems.Add($"MISPLACED {type.FullName}: [ClientOnly] is a core marker, TAOM.Client is never indexed on a server");
+                else if (marked && !isPatchClass)
+                    problems.Add($"MISPLACED {type.FullName}: [ClientOnly] on a class that is not a Harmony patch class");
+                if (!isPatchClass) continue;
+
+                patchClasses++;
+                var errors = new List<string>();
+                var reasons = PatchClientReasons.For(type, IsClient, errors);
+                problems.AddRange(errors.Select(e => "TARGETMETHOD THREW " + e));
+                if (reasons.Count > 0) withReason++;
+                if (reasons.Count > 0 && !marked)
+                    problems.Add($"MISSING {type.FullName}: {string.Join("; ", reasons)}");
+                if (reasons.Count == 0 && marked && errors.Count == 0)
+                    problems.Add($"STALE {type.FullName}: marked [ClientOnly] but names no client-only assembly");
+            }
+        }
+        finally
+        {
+            TAOM.Composition.ClientComposition.Current = previous;
+        }
+
+        Assert.IsTrue(patchClasses >= 300 && withReason >= 100,
+            $"the scan went vacuous: {patchClasses} patch classes (floor 300), {withReason} with a client reason (floor 100)");
+        Assert.AreEqual(0, problems.Count,
+            "Mark a patch class that names a client-only assembly [ClientOnly] (namespace TAOM), and remove the marker from "
+            + "one that does not (ADR-013):" + Environment.NewLine
+            + string.Join(Environment.NewLine, problems.OrderBy(p => p, StringComparer.Ordinal)));
     }
 
     [TestMethod]

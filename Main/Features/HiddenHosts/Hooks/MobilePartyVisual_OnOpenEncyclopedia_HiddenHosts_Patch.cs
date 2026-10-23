@@ -15,6 +15,7 @@ namespace TAOM.Features.HiddenHosts.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(MobilePartyVisual), nameof(MobilePartyVisual.OnOpenEncyclopedia))]
 [HarmonyPatchCategory(HiddenHostsModule.PatchCategory)]
+[ClientOnly]
 public static class MobilePartyVisual_OnOpenEncyclopedia_HiddenHosts_Patch
 {
     [HarmonyPrefix]

@@ -324,6 +324,8 @@ patch in it, not just the offending method.
 
 ## Referenced by
 
+- [docs/features/crash-report.md](../../features/crash-report.md)
+- [docs/features/namegiving.md](../../features/namegiving.md)
 - [docs/features/return-to-army.md](../../features/return-to-army.md)
 - [docs/reviews/LESSONS-LEARNED.md](../LESSONS-LEARNED.md)
 - [docs/reviews/lessons/testing-qa.md](./testing-qa.md)
@@ -650,6 +652,26 @@ In Lib.Harmony 2.4.2, `PatchCategory(Assembly, string)` runs `CreateClassProcess
 - **Prevent:** say a failed category "stops at its failing class" and name the assembly-wide index case wherever a doc claims category isolation. Read the whole Harmony entry point, not the line that throws, before describing what a failure leaves behind.
 - **Source:** `docs/reviews/rca-guarded-patch-category-apply-2026-09-24.md` findings 2 and 3.
 - **Resolved (#653, 2026-09-24):** the maintainer chose to isolate the class. `Main/PatchCategoryIndex.cs` builds the category index class by class from Harmony's public API (`GetTypesFromAssembly`, `GetFromType`, `HarmonyMethod.Merge`, `CreateClassProcessor`), skips a class whose attributes cannot be read, and reports it through `PatchCategoryApplier.RecordSkippedClasses`; `PatchCategoryIndexTests` proves it on an emitted probe assembly. The category loop is still neither atomic nor rolled back.
+
+### An attribute check reads every attribute on the class: keep it inside the per-type guard (ADR-013 B6a, 2026-10-23)
+The B6a plan put `type.IsDefined(typeof(ClientOnlyAttribute), false)` in `PatchCategoryIndex.Build` before the per-type
+try, on the claim that it resolves only the attribute asked about. It resolves the type of every custom attribute on
+the class (it decodes no arguments), so on a dedicated server it threw for two unmarked core classes whose class-level
+`[GameStateScreen]` comes from client-only TaleWorlds.MountAndBlade.View (`GauntletCareerScreen`,
+`GauntletSupplyOrderScreen`), and that throw would have left `OnSubModuleLoad`. The spike boot's TAOM log already showed
+both classes failing to read inside the old try
+(`E:\CoopDS\stage-spike\engine\bin\Win64_Shipping_Server\Logs\taom_debug_2026-10-23_09-23-19.log:88` and `:720`). Two
+Claude lenses found it; Codex disputed it. This is the #653 lesson again: Harmony's `BuildCategoryCache` failed every
+category because it read `GetCustomAttributes` on every type with no per-type guard.
+- **Why missed:** the plan reasoned about the one attribute it filtered on, not about what the reflection call loads
+  to answer, and marked its own claim [Likely] without a test that could refute it.
+- **Prevent:** any reflection over every type of an assembly (`IsDefined`, `GetCustomAttributes`,
+  `CustomAttributeData`, Harmony's own attribute readers) runs inside the per-type try, and a test proves it with an
+  attribute whose assembly is gone (`PatchCategoryIndexTests.Build_DedicatedServer_AnUnmarkedClassWithAnAttributeTypeThatCannotLoad_IsSkippedNotThrown`).
+  `ServerLoadGateTests.CoreClassesWithAClientOnlyAttributeType_AreTheKnownList` names every core class with such an
+  attribute.
+- **Source:** `docs/reviews/rca-taom-client-b6a-2026-10-23.md` finding 1; the fix re-review prompt
+  `docs/reviews/codex-adversarial-b6a-fixes-2026-10-23.prompt.md`; `Main/PatchCategoryIndex.cs:55-63`.
 
 ### A namespace-prefix exclusion excludes every type in the namespace: list the namespace in the installed DLLs, and every other patcher of it, before justifying the entry
 

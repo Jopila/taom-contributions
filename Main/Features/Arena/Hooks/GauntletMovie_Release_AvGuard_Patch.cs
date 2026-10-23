@@ -33,6 +33,7 @@ namespace TAOM.Features.Arena.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(GauntletMovie), nameof(GauntletMovie.Release))]
 [HarmonyPatchCategory("Patch62_MovieReleaseAvGuard")]
+[ClientOnly]
 public static class GauntletMovie_Release_AvGuard_Patch
 {
     private static IModLogger? _logger;

@@ -25,7 +25,7 @@ Postfix on MCM's actual load path. The `Func<WidgetPrefab>` that `CreateAndRegis
 - **Exact Harmony target:** `Bannerlord.UIExtenderEx.ResourceManager.WidgetFactoryManager.CreateAndRegister(string, XmlDocument)` — Postfix, category `Patch41_McmLayoutFix` (`Patch41_McmLayoutFix.cs:26-28`).
 - **What the rewriter changes:** every `LayoutImp.LayoutMethod` or `StackLayout.LayoutMethod` attribute valued `VerticalBottomToTop` becomes `VerticalTopToBottom` (`McmLayoutRewriter.cs:30-39, 69-91`). `StackLayout.LayoutMethod` is handled defensively — MCM's prefabs use the `LayoutImp.` spelling (`McmLayoutRewriter.cs:33-34`).
 - **Scoping:** only prefabs named in `McmLayoutPrefabNames` (`SettingsView`, `SettingsPropertyGroupView`, `ModOptionsView_MCM`, `ModOptionsView`, `ModOptionsPageView`) are touched, case-insensitive with an optional `.xml` suffix — verified against the embedded `MCM.UI.GUI.Prefabs.*.xml` resources; other mods' embedded prefabs pass through untouched (`McmLayoutRewriter.cs:41-62`).
-- **Safety:** null-safe, idempotent (re-running flips 0), and the Postfix try/catch-swallows everything — a cosmetic layout fix must never break MCM screen registration (`McmLayoutRewriter.cs:26, 67`; `Patch41_McmLayoutFix.cs:43-48`).
+- **Safety:** null-safe, idempotent (re-running flips 0), and the Postfix try/catch-swallows everything: a cosmetic layout fix must never break MCM screen registration (`McmLayoutRewriter.cs:26, 67`; `Patch41_McmLayoutFix.cs:44-49`).
 - **Apply timing:** registered in `SubModule.OnSubModuleLoad` (`Main/SubModule.cs:144`), NOT the late `OnGameInitializationFinished` batch — MCM's `ResourceInjector.Inject()` runs at `OnBeforeInitialModuleScreenSetAsRoot`, after every module's `OnSubModuleLoad`, so the Postfix must already be attached by then (`Main/SubModule.cs:137-143`, `Patch41_McmLayoutFix.cs:22-24`).
 
 ### Component Diagram
@@ -54,7 +54,7 @@ None — no config file and no MCM toggle. The fix is hardcoded always-on: it co
 | `Main/Features/Mcm/Hooks/Patch41_McmLayoutFix.cs` | Thin Harmony Postfix on `WidgetFactoryManager.CreateAndRegister`; delegates to the rewriter |
 | `Main/SubModule.cs:137-144` | Applies category `Patch41_McmLayoutFix` in `OnSubModuleLoad` (timing-critical) |
 
-No IoC registration, service interface, or adapter — the rewriter is a static pure function on `System.Xml` types only; the patch resolves `IModLogger` lazily (`Patch41_McmLayoutFix.cs:31-32`).
+No IoC registration, service interface, or adapter: the rewriter is a static pure function on `System.Xml` types only; the patch resolves `IModLogger` lazily (`Patch41_McmLayoutFix.cs:32-33`).
 
 ## Dependencies
 

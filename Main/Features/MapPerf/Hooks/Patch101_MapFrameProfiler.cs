@@ -84,6 +84,7 @@ public static class CampaignEvents_Tick_MapProfiler_Patch
 
 [HarmonyPatch(typeof(MapScreen), "OnFrameTick", new[] { typeof(float) })]
 [HarmonyPatchCategory(MapFrameProfilerInstaller.Category)]
+[ClientOnly]
 public static class MapScreen_OnFrameTick_MapProfiler_Patch
 {
     [HarmonyPrefix, HarmonyPriority(Priority.First)]

@@ -22,6 +22,7 @@ namespace TAOM.Features.FactionUI.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(GauntletLayer), nameof(GauntletLayer.LoadMovie), new[] { typeof(string), typeof(ViewModel) })]
 [HarmonyPatchCategory(FactionUIPatchContext.Category)]
+[ClientOnly]
 public static class GauntletLayerLoadMoviePatch
 {
     [ThreadStatic] private static bool _loadingVanillaFallback;

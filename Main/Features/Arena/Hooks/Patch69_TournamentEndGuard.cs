@@ -38,6 +38,7 @@ namespace TAOM.Features.Arena.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(TournamentVM), "OnTournamentEnd")]
 [HarmonyPatchCategory("Patch69_TournamentEndGuard")]
+[ClientOnly]
 public static class Patch69_TournamentEndGuard
 {
     private const string Tag = "[TournamentDiag]";

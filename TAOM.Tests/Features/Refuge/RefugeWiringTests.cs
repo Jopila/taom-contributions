@@ -53,6 +53,28 @@ public class RefugeWiringTests
             + "and stands down, so meeting a refuge opens vanilla's stranger-conversation flow.");
     }
 
+    // ADR-013: RefugeClanScreenPatch's type initializer names ClanPartiesVM, which a dedicated server cannot load at
+    // boot, and Initialize stores a static, so an unguarded call faults inside IoC.Configure. The check sits in
+    // RefugeIoC (no IoC.cs hunk) and the call is behind a helper the JIT cannot inline into the guarded method.
+    [TestMethod]
+    public void InitializePatchStatics_ClanScreenPatch_IsBehindTheServerCheck()
+    {
+        var src = RepoPaths.ReadSource("Main/Features/Refuge/RefugeIoC.cs", stripComments: true);
+
+        var guarded = new System.Text.RegularExpressions.Regex(
+            @"if \(!TAOM\.Composition\.ClientComposition\.IsDedicatedServer\(\)\)\s*InitializeClanScreenPatch\(refugeService\);");
+        Assert.AreEqual(1, guarded.Matches(src).Count,
+            "the clan-screen patch Initialize must run only when this is not a dedicated server");
+        Assert.AreEqual(1, System.Text.RegularExpressions.Regex.Matches(src, @"RefugeClanScreenPatch\.Initialize").Count,
+            "the only call is inside the helper");
+
+        var helper = typeof(TAOM.Features.Refuge.RefugeIoC).GetMethod(
+            "InitializeClanScreenPatch", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        Assert.IsNotNull(helper, "InitializeClanScreenPatch helper");
+        Assert.IsTrue((helper!.GetMethodImplementationFlags() & System.Reflection.MethodImplAttributes.NoInlining) != 0,
+            "without NoInlining the JIT may compile the type-initializer reference into the guarded method");
+    }
+
     // ---- SubModule wiring (single-owner file; these pin the two lines Refuge depends on) ----
 
     [TestMethod]

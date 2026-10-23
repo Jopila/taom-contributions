@@ -17,6 +17,7 @@ namespace TAOM.Features.HiddenHosts.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(PartyNameplateVM), nameof(PartyNameplateVM.RefreshBinding))]
 [HarmonyPatchCategory(HiddenHostsModule.PatchCategory)]
+[ClientOnly]
 public static class PartyNameplateVM_RefreshBinding_HiddenHosts_Patch
 {
     // Bound once, fail-soft: a missing field on a future engine leaves a null here and the hook reports it once and

@@ -10,6 +10,7 @@ namespace TAOM.Features.FiefManagement.Hooks;
 
 [HarmonyPatch(typeof(GameStateScreenManager), "CreateScreen")]
 [HarmonyPatchCategory("Patch36_FiefManagement")]
+[ClientOnly]
 public static class Patch36_GameStateScreenManager
 {
     private static IRemoteFiefSettlementSwapper _swapper;

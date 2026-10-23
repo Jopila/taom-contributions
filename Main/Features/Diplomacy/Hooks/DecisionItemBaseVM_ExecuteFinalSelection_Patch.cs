@@ -40,6 +40,7 @@ namespace TAOM.Features.Diplomacy.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(DecisionItemBaseVM), nameof(DecisionItemBaseVM.ExecuteFinalSelection))]
 [HarmonyPatchCategory("Patch80_KingdomVoteDeadlock")]
+[ClientOnly]
 public static class DecisionItemBaseVM_ExecuteFinalSelection_Patch
 {
     private static IModLogger _logger;

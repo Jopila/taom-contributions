@@ -25,6 +25,7 @@ namespace TAOM.Features.NavalTravel.Hooks;
 /// work lives here (ADR-008, in-game-only). Whole body try/caught — never breaks the map render.
 /// </summary>
 [HarmonyPatchCategory("Patch54_NavalTravelBoatVisual")]
+[ClientOnly]
 public static class Patch54_NavalTravelBoatVisual
 {
     private const string BoatTag = "taom_naval_boat";
@@ -125,6 +126,7 @@ public static class Patch54_NavalTravelBoatVisual
 /// the moment the boat must appear (embark) or disappear (disembark). Shares <see cref="Patch54_NavalTravelBoatVisual.UpdateBoat"/>.
 /// </summary>
 [HarmonyPatchCategory("Patch54_NavalTravelBoatVisual")]
+[ClientOnly]
 public static class Patch54_NavalTravelBoatVisual_OnTransitionEnded
 {
     public static MethodBase? TargetMethod() =>

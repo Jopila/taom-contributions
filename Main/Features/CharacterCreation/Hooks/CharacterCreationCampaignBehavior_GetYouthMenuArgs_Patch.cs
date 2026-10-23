@@ -136,6 +136,7 @@ public static class CharacterCreationCampaignBehavior_GetAgeSelectionMenuArgs_Pa
 /// </summary>
 [HarmonyPatch]
 [HarmonyPatchCategory("Patch20_NarrativeHorseGuard")]
+[ClientOnly]
 public static class CharacterCreationNarrativeStageView_SpawnNonHuman_Patch
 {
     static MethodBase TargetMethod()
@@ -181,6 +182,7 @@ public static class CharacterCreationNarrativeStageView_SpawnNonHuman_Patch
 /// </summary>
 [HarmonyPatch]
 [HarmonyPatchCategory("Patch20_NarrativeHorseGuard")]
+[ClientOnly]
 public static class CharacterCreationNarrativeStageView_RefreshAgentVisuals_Patch
 {
     static MethodBase TargetMethod()

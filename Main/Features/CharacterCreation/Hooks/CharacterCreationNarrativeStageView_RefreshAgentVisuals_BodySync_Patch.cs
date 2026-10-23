@@ -17,6 +17,7 @@ namespace TAOM.Features.CharacterCreation.Hooks;
 /// </summary>
 [HarmonyPatch]
 [HarmonyPatchCategory("Patch29_CCBodyProperties")]
+[ClientOnly]
 public static class CharacterCreationNarrativeStageView_RefreshAgentVisuals_BodySync_Patch
 {
     private const string PlayerCareerCharacterId = "player_career_character";

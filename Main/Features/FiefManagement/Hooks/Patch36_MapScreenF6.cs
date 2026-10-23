@@ -11,6 +11,7 @@ namespace TAOM.Features.FiefManagement.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(MapScreen), "OnFrameTick")]
 [HarmonyPatchCategory("Patch36_FiefManagement")]
+[ClientOnly]
 public static class Patch36_MapScreenF6
 {
     private static IMapScreenInputAdapter _input;

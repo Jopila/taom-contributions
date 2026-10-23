@@ -13,6 +13,7 @@ namespace TAOM.Features.CharacterSelection.Patches;
 
 [HarmonyPatch(typeof(BodyGeneratorView), "RefreshCharacterEntityAux")]
 [HarmonyPatchCategory("Late_Transpiler")]
+[ClientOnly]
 public class RefreshCharacterEntityAuxPatch
 {
     public static MBActionSet GetActionSet(BodyGeneratorView bodyGeneratorView)

@@ -17,6 +17,7 @@ namespace TAOM.Features.QuickActions.Hooks;
     typeof(bool),
     typeof(Func<TaleWorlds.Core.WeaponComponentData, TaleWorlds.Core.ItemObject.ItemUsageSetFlags>))]
 [HarmonyPatchCategory("Patch34_QuickActions")]
+[ClientOnly]
 public static class Patch34_SPInventoryVMCapture
 {
     [HarmonyPostfix]

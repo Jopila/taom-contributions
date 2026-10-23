@@ -9,6 +9,7 @@ namespace TAOM.Features.CompanionTactics.FormationPresets.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(OrderOfBattleVM), nameof(OrderOfBattleVM.OnFinalize))]
 [HarmonyPatchCategory("Patch35_CompanionTactics")]
+[ClientOnly]
 public static class Patch35_OrderOfBattleVM_Finalize
 {
     private static IOrderOfBattleVMTracker _tracker;

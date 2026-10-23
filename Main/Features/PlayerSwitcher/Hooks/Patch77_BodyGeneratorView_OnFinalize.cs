@@ -20,6 +20,7 @@ namespace TAOM.Features.PlayerSwitcher.Hooks;
 // other patch class in the repo puts HarmonyPatch first, so this one does too.
 [HarmonyPatch(typeof(BodyGeneratorView), nameof(BodyGeneratorView.OnFinalize))]
 [HarmonyPatchCategory("Patch77_PlayerSwitcher")]
+[ClientOnly]
 public static class Patch77_BodyGeneratorView_OnFinalize
 {
     private const string SpriteCategory = "ui_clan";

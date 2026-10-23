@@ -16,6 +16,7 @@ namespace TAOM.Features.FactionUI.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(LoadingWindowViewModel), nameof(LoadingWindowViewModel.LoadingImageName), MethodType.Setter)]
 [HarmonyPatchCategory(FactionUIPatchContext.Category)]
+[ClientOnly]
 public static class LoadingWindowViewModelLoadingImageNamePatch
 {
     private static bool _reported;

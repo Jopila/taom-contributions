@@ -24,6 +24,7 @@ namespace TAOM.Features.CharacterCreation.Hooks;
     typeof(Action), typeof(TextObject), typeof(bool)
 })]
 [HarmonyPatchCategory("Patch44_CCNameAutofill")]
+[ClientOnly]
 public static class CharacterCreationReviewStageVM_AutoFillName_Patch
 {
     [HarmonyPostfix]

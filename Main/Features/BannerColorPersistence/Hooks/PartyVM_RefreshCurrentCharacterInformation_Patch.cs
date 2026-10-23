@@ -7,6 +7,7 @@ using TaleWorlds.CampaignSystem.ViewModelCollection.Party;
 namespace TAOM.Features.BannerColorPersistence.Hooks;
 
 [HarmonyPatchCategory("Patch23_BannerColorPersistence")]
+[ClientOnly]
 public static class PartyVM_RefreshCurrentCharacterInformation_Patch
 {
     private static IBannerColorService? _service;

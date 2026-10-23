@@ -11,6 +11,7 @@ namespace TAOM.Features.TroopWeight.Hooks;
 // the two categories is not load-bearing — keep it that way.
 [HarmonyPatch(typeof(RecruitmentVM), "RefreshPartyProperties")]
 [HarmonyPatchCategory("Patch17_TroopWeight")]
+[ClientOnly]
 public static class RecruitmentVM_RefreshPartyProperties_Patch
 {
     private static IOnRecruitmentVMRefreshPartyProperties? _hook;

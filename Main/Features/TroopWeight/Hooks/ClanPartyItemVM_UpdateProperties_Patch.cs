@@ -16,6 +16,7 @@ namespace TAOM.Features.TroopWeight.Hooks;
 // both overrides; the postfix still receives the row as its base type.
 [HarmonyPatch]
 [HarmonyPatchCategory("Patch17_TroopWeight")]
+[ClientOnly]
 public static class ClanPartyItemVM_UpdateProperties_Patch
 {
     static IEnumerable<MethodBase> TargetMethods()

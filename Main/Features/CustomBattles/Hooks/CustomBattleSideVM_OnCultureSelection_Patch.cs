@@ -16,6 +16,7 @@ namespace TAOM.Features.CustomBattles.Hooks;
 // would cascade to break all sibling Patch19 patches.
 [HarmonyPatch(typeof(CustomBattleSideVM), "OnCultureSelection", new[] { typeof(BasicCultureObject) })]
 [HarmonyPatchCategory("Patch19_CustomBattles")]
+[ClientOnly]
 public static class CustomBattleSideVM_OnCultureSelection_Patch
 {
     private static ISideCommanderFilter _filter;

@@ -6,6 +6,7 @@ namespace TAOM.Features.FactionMap.Hooks;
 
 [HarmonyPatch]
 [HarmonyPatchCategory("Patch7_FactionMap")]
+[ClientOnly]
 public static class CultureStageView_Finalize_Patch
 {
     private static IOnCultureStageViewFinalize? _hook;

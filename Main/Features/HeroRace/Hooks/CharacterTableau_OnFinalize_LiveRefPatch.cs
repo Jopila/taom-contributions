@@ -26,6 +26,7 @@ namespace TAOM.Features.HeroRace.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(CharacterTableau), nameof(CharacterTableau.OnFinalize))]
 [HarmonyPatchCategory("Patch72_TableauRacePosition")]
+[ClientOnly]
 public static class CharacterTableau_OnFinalize_LiveRefPatch
 {
     [HarmonyPostfix]

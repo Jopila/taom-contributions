@@ -16,6 +16,7 @@ namespace TAOM.Features.FactionUI.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(UIResourceManager), nameof(UIResourceManager.Refresh))]
 [HarmonyPatchCategory(FactionUIPatchContext.Category)]
+[ClientOnly]
 public static class UIResourceManagerRefreshPatch
 {
     private static bool _reported;

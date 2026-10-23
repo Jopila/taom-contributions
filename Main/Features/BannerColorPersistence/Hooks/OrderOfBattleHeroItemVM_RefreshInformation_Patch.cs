@@ -10,6 +10,7 @@ namespace TAOM.Features.BannerColorPersistence.Hooks;
 
 [HarmonyPatch(typeof(OrderOfBattleHeroItemVM), nameof(OrderOfBattleHeroItemVM.RefreshInformation))]
 [HarmonyPatchCategory("Patch23_BannerColorPersistence")]
+[ClientOnly]
 public static class OrderOfBattleHeroItemVM_RefreshInformation_Patch
 {
     private static IBannerColorService? _service;

@@ -26,6 +26,7 @@ namespace TAOM.Features.SettlementNameplateFade.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(SettlementNameplateWidget), "DetermineTargetAlphaValue")]
 [HarmonyPatchCategory("Patch38_SettlementNameplateFade")]
+[ClientOnly]
 public static class SettlementNameplateWidget_DetermineTargetAlphaValue_Patch
 {
     private static INameplateFadeService? _service;

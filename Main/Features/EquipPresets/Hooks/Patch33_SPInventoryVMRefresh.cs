@@ -25,6 +25,7 @@ namespace TAOM.Features.EquipPresets.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(SPInventoryVM), nameof(SPInventoryVM.RefreshValues))]
 [HarmonyPatchCategory("Patch33_EquipPresets")]
+[ClientOnly]
 public static class Patch33_SPInventoryVMRefresh
 {
     // Phase 9b #141 P1 — use the interface type, not the concrete. SetActive is now on

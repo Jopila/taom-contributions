@@ -12,6 +12,7 @@ namespace TAOM.Features.CustomBattles.Hooks;
 [HarmonyPatch(typeof(CustomBattleSideVM), MethodType.Constructor,
     new[] { typeof(TextObject), typeof(bool), typeof(TroopTypeSelectionPopUpVM), typeof(Action) })]
 [HarmonyPatchCategory("Patch19_CustomBattles")]
+[ClientOnly]
 public static class CustomBattleSideVM_Constructor_Patch
 {
     private static IModLogger _logger;

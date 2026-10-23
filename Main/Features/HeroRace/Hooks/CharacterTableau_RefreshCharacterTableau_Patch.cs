@@ -13,6 +13,7 @@ namespace TAOM.Features.HeroRace.Hooks;
 
 [HarmonyPatch(typeof(CharacterTableau), "FirstTimeInit")]
 [HarmonyPatchCategory("Patch1_FirstTimeInit")]
+[ClientOnly]
 public class CharacterTableau_FirstTimeInit_Patch
 {
     [HarmonyPostfix]
@@ -33,6 +34,7 @@ public class CharacterTableau_FirstTimeInit_Patch
 
 [HarmonyPatch(typeof(CharacterTableau), "RefreshCharacterTableau")]
 [HarmonyPatchCategory("Patch2_RefreshTableau")]
+[ClientOnly]
 public class CharacterTableau_RefreshCharacterTableau_Patch
 {
     [HarmonyPrefix]

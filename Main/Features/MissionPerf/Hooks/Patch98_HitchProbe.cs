@@ -117,6 +117,7 @@ public static class Mission_SpawnAgent_HitchProbe_Patch
 
 [HarmonyPatch(typeof(MissionScreen), "TaleWorlds.MountAndBlade.IMissionSystemHandler.UpdateCamera", new[] { typeof(Mission), typeof(float) })]
 [HarmonyPatchCategory("Patch98_HitchProbe_Camera")]
+[ClientOnly]
 public static class MissionScreen_UpdateCamera_HitchProbe_Patch
 {
     [HarmonyPrefix]

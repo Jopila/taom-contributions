@@ -15,6 +15,7 @@ namespace TAOM.Features.FactionUI.Hooks;
 /// </summary>
 [HarmonyPatch(typeof(BodyGeneratorView), nameof(BodyGeneratorView.InitCamera))]
 [HarmonyPatchCategory(FactionUIPatchContext.Category)]
+[ClientOnly]
 public static class BodyGeneratorViewInitCameraPatch
 {
     private const float VanillaVerticalFov = (float)Math.PI / 4f;

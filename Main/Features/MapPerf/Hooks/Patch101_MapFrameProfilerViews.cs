@@ -13,6 +13,7 @@ namespace TAOM.Features.MapPerf.Hooks;
 
 [HarmonyPatch]
 [HarmonyPatchCategory(MapFrameProfilerInstaller.ViewsCategory)]
+[ClientOnly]
 public static class MapView_PerFrame_MapProfiler_Patch
 {
     public static IEnumerable<MethodBase> TargetMethods() => MapProfilerTargets.MapViewTargets();

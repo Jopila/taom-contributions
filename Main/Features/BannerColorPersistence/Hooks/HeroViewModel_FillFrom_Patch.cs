@@ -14,6 +14,7 @@ namespace TAOM.Features.BannerColorPersistence.Hooks;
 [HarmonyPatch(typeof(HeroViewModel), nameof(HeroViewModel.FillFrom),
     new[] { typeof(Hero), typeof(int), typeof(bool), typeof(bool) })]
 [HarmonyPatchCategory("Patch23_BannerColorPersistence")]
+[ClientOnly]
 public static class HeroViewModel_FillFrom_Patch
 {
     private static IBannerColorService? _service;

@@ -59,7 +59,7 @@ public class ReflectionSiteBindingTests
     [DataRow("TaleWorlds.Core.ViewModelCollection.Selector.SelectorVM`1", "SelectorVM`1", "_selectedItem", "Field", "FaceGenRaceSelectorRebuilder.cs:212")]
     [DataRow("TaleWorlds.Core.ViewModelCollection.Selector.SelectorVM`1", "SelectorVM`1", "_onChange", "Field", "FaceGenRaceSelectorRebuilder.cs:213 / CommanderSelectorRebuilder.cs:21")]
     // --- CustomBattles faction injection (CustomBattleSideVM_Constructor_Patch.cs) ---
-    [DataRow("TaleWorlds.MountAndBlade.CustomBattle.CustomBattleSideVM", "CustomBattleSideVM", "OnCultureSelection", "Method", "CustomBattleSideVM_Constructor_Patch.cs:23")]
+    [DataRow("TaleWorlds.MountAndBlade.CustomBattle.CustomBattleSideVM", "CustomBattleSideVM", "OnCultureSelection", "Method", "CustomBattleSideVM_Constructor_Patch.cs:24")]
     // --- AdvancedCombat custom attacks (CustomAttacksUtils.cs) ---
     [DataRow("TaleWorlds.MountAndBlade.Mission", "Mission", "RegisterBlow", "Method", "CustomAttacksUtils.cs:60")]
     // --- MissionPerf tick profiler: the private wait it times at its call site (MissionTickProfilerInstaller.cs) ---
@@ -76,7 +76,7 @@ public class ReflectionSiteBindingTests
     // --- Culture Doctrine / Fell Foes: the team AI's current tactic, read for the horse-stand flag (TeamTacticProbe.cs) ---
     [DataRow("TaleWorlds.MountAndBlade.TeamAIComponent", "TeamAIComponent", "_currentTactic", "Field", "TeamTacticProbe.cs:30")]
     // --- BannerColorPersistence banner-paste (BannerEditorView_OnTick_Patch.cs) ---
-    [DataRow("SandBox.GauntletUI.BannerEditor.BannerEditorView", "BannerEditorView", "RefreshShieldAndCharacter", "Method", "BannerEditorView_OnTick_Patch.cs:22")]
+    [DataRow("SandBox.GauntletUI.BannerEditor.BannerEditorView", "BannerEditorView", "RefreshShieldAndCharacter", "Method", "BannerEditorView_OnTick_Patch.cs:23")]
     // --- SpecialResources transactional spend (PartyScreenLogic_AddCommand_Patch.cs) ---
     [DataRow("TaleWorlds.CampaignSystem.Party.PartyScreenLogic+PartyCommand", "PartyCommand", "TotalNumber", "Member", "PartyScreenLogic_AddCommand_Patch.cs:72")]
     // --- SpecialResources encyclopedia troop badge (EncyclopediaUnitBadgeMixin.cs, #590) ---
@@ -171,15 +171,15 @@ public class ReflectionSiteBindingTests
     [DataRow("SandBox.ViewModelCollection.Nameplate.SettlementNameplateVM", "SettlementNameplateVM", "_worldPos", "Field", "NameplateCullAdapter.cs:51")]
     // --- HiddenHosts (Patch105): four protected bind fields of the party nameplate, read and written through AccessTools.FieldRefAccess.
     // A miss leaves the bind null: the nameplate prefix reports it once, does nothing, and vanilla counts show.
-    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_countBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:24")]
-    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_extraInfoTextBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:25")]
-    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_fullNameBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:26")]
-    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_isVisibleOnMapBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:27")]
+    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_countBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:25")]
+    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_extraInfoTextBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:26")]
+    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_fullNameBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:27")]
+    [DataRow("SandBox.ViewModelCollection.Nameplate.PartyNameplateVM", "PartyNameplateVM", "_isVisibleOnMapBind", "Field", "PartyNameplateVM_RefreshBinding_HiddenHosts_Patch.cs:28")]
     // --- HiddenHosts tooltips (Patch105): the two protected fields of the tooltip base view model that name the subject a
     // tooltip was opened for, read through AccessTools.FieldRefAccess by the OnPeriodicRefresh bracket.
     // A miss leaves the bind null: the bracket reports it once and opens no frame, and the periodic refresh shows vanilla counts.
-    [DataRow("TaleWorlds.Library.TooltipBaseVM", "TooltipBaseVM", "_invokedType", "Field", "PropertyBasedTooltipVM_OnPeriodicRefresh_HiddenHosts_Patch.cs:21")]
-    [DataRow("TaleWorlds.Library.TooltipBaseVM", "TooltipBaseVM", "_invokedArgs", "Field", "PropertyBasedTooltipVM_OnPeriodicRefresh_HiddenHosts_Patch.cs:22")]
+    [DataRow("TaleWorlds.Library.TooltipBaseVM", "TooltipBaseVM", "_invokedType", "Field", "PropertyBasedTooltipVM_OnPeriodicRefresh_HiddenHosts_Patch.cs:22")]
+    [DataRow("TaleWorlds.Library.TooltipBaseVM", "TooltipBaseVM", "_invokedArgs", "Field", "PropertyBasedTooltipVM_OnPeriodicRefresh_HiddenHosts_Patch.cs:23")]
     // --- MissionStartGuard (Patch103): the six start calls the transpiler swaps, found by AccessTools.Method at install.
     // A miss makes AccessTools.Method return null; Rewrite's fit check rejects the null target, so Mission.AfterStart stays vanilla.
     [DataRow("TaleWorlds.MountAndBlade.MBSubModuleBase", "MBSubModuleBase", "OnBeforeMissionBehaviorInitialize", "Method", "MissionStartGuardSwaps.cs:23")]
