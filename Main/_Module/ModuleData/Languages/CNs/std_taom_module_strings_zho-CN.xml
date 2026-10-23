@@ -6514,6 +6514,10 @@
 
     <string id="taom_str_player_mother_name.rhudaur" text="Gilwen" />
 
+    <string id="taom_cargo_tt_fill_value" text="{WEIGHT} / {CAPACITY} ({PERCENT})" />
+
+    <string id="taom_cargo_tt_fill" text="Inventory fill" />
+
   </strings>
 
 </base>

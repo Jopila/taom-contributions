@@ -353,6 +353,7 @@
       <BrushLayer Name="speed_at_sea" Sprite="Map\ship_speed" ExtendTop="-3" ExtendBottom="-3" ImageFit.Type="Contain" ImageFit.VerticalAlignment="Center" ImageFit.HorizontalAlignment="Center" />
       <BrushLayer Name="view_distance" Sprite="MapBar\monocular_icon" ExtendLeft="-3" ExtendRight="-3" ExtendTop="-3" ExtendBottom="-3" ImageFit.Type="Contain" ImageFit.VerticalAlignment="Center" ImageFit.HorizontalAlignment="Center" />
       <BrushLayer Name="troop_wage" Sprite="General\Icons\PartyCost@2x" ImageFit.Type="Contain" ImageFit.VerticalAlignment="Center" ImageFit.HorizontalAlignment="Center" />
+      <BrushLayer Name="taom_cargo" Sprite="MapBar\taom_cargo" ImageFit.Type="Contain" ImageFit.VerticalAlignment="Center" ImageFit.HorizontalAlignment="Center" />
       <BrushLayer Name="ship_health" Sprite="Map\ship_hp" ExtendTop="-3" ExtendBottom="-3" ImageFit.Type="Contain" ImageFit.VerticalAlignment="Center" ImageFit.HorizontalAlignment="Center" />
     </Layers>
   </Brush>

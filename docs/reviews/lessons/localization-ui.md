@@ -1140,3 +1140,27 @@ the same defect as the Tokens of Esteem entry above (#863), two features later.
   Test the verb's subject, not only the pronouns: any past tense, "would have" or predicate adjective whose subject is the player
   gets reworded before the English is seeded, and the language rows are re-seeded to equal it.
 - **Source:** `docs/features/long-memory.md`; the `/deep-review` of #865 (lens 7); `LongMemoryWordingTests`.
+
+### A number that a vanilla screen also shows uses vanilla's format expression (Bill's Burden, 2026-10-20)
+The cargo tooltip printed the party's weight with `(int)Math.Round(weight)`. C#'s `Math.Round` rounds
+half to even by default, while the inventory screen prints the same `TotalWeightCarried` with
+`ToString("#0")` (`SPInventoryVM.cs:3973`), which rounds half away from zero, so 12.5 showed 12 in the
+tooltip and 13 in the inventory.
+- **Why missed:** the builder wrote its own rounding for a figure vanilla already displays.
+- **Prevent:** when a TAOM row repeats a number a vanilla screen shows, find vanilla's expression in the
+  decompile and use it verbatim (format string, cast, rounding). For TAOM's own maths, pass
+  `MidpointRounding.AwayFromZero` explicitly; never rely on the default.
+- **Source:** `docs/reviews/rca-bills-burden-2026-10-20.md` finding 2.
+
+### A new UI wiring pin copies its sibling: GenericSprite asserted, layer named by the C# constant (Bill's Burden, 2026-10-20)
+The cargo row's sprite pin merged SpritePart and GenericSprite names into one list, so a manifest with
+only the SpritePart passed, while `SpriteData.GetSprite` reads only the sprite table (GenericSprite and
+NineRegionSprite entries) and a brush
+layer then draws nothing. Its brush test matched the layer by a string literal, so renaming the mixin's
+item id would blank the icon with every test green. The sibling `FiefsNavButtonWiringTests` already
+did both correctly.
+- **Why missed:** the new test was written without the nearest sibling pin open.
+- **Prevent:** before writing a brush or sprite pin, open the newest sibling wiring test and copy its
+  shape: assert the SpritePart and the GenericSprite separately, and match the brush layer through the
+  `internal const` id the C# binds (a const inlines, so the test loads no engine type).
+- **Source:** `docs/reviews/rca-bills-burden-2026-10-20.md` finding 3.

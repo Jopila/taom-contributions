@@ -3545,6 +3545,9 @@
 	<string id="taom_namegiving_same" text="{=taom_namegiving_same}That is already its name." />
 	<string id="taom_namegiving_taken" text="{=taom_namegiving_taken}Another place already bears that name." />
 
+	<!-- BillsBurden -->
+	<string id="taom_cargo_tt_fill_value" text="{=taom_cargo_tt_fill_value}{WEIGHT} / {CAPACITY} ({PERCENT})" />
+	<string id="taom_cargo_tt_fill" text="{=taom_cargo_tt_fill}Inventory fill" />
 
 	<!-- ============================================== -->
 	<!-- Liege titles for the TAOM-only kingdom cultures (#955). Each row carries its own   -->
