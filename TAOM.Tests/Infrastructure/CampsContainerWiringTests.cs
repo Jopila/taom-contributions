@@ -68,4 +68,15 @@ public class CampsContainerWiringTests
         // Resolve, not Validate: a registration that exists only in a comment or a string cannot satisfy it.
         Assert.IsInstanceOfType(container.Resolve<IFieldCampOverlayAdapter>(), typeof(NullFieldCampOverlayAdapter));
     }
+
+    [TestMethod]
+    public void CampsFeatures_RegisterTheNullVisualServices()
+    {
+        var container = BuildContainer();
+
+        // Resolve, not Validate: the real visual services live in TAOM.Client (ADR-013) and replace these there.
+        Assert.IsInstanceOfType(container.Resolve<ICampVisualService>(), typeof(NullCampVisualService));
+        Assert.IsInstanceOfType(container.Resolve<IRefugeVisualService>(), typeof(NullRefugeVisualService));
+        Assert.IsInstanceOfType(container.Resolve<ISupplyRouteVisualService>(), typeof(NullSupplyRouteVisualService));
+    }
 }

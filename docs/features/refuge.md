@@ -161,7 +161,7 @@ disagrees.
 | `WardenService.cs` | Candidates, promotion, the no-kill release policy |
 | `RefugeDefenseService.cs` (+ `IRefugeBook`) | Hot-path tier factors; one singleton serves both faces |
 | `Hooks/RefugeDamageHooks.cs` | The real-time reduction the campaign damage model applies: the victim's party from its agent origin's `BattleCombatant` (a mount's from its rider's), then `RefugeDamageReduction` (#737, #741) |
-| `Visuals/RefugeVisualService.cs` | refuge tpacs (scale 4/4.8, palisade 4.6/5.4) over CampLayoutBuilder, vanilla fallback |
+| `Client/Features/Refuge/Visuals/RefugeVisualService.cs` | refuge tpacs (scale 4/4.8, palisade 4.6/5.4) over CampLayoutBuilder, vanilla fallback. TAOM.Client (ADR-013); core registers `NullRefugeVisualService` |
 | `Hooks/RefugeCampaignBehavior.cs` + `RefugeMenuController.cs` | Events, SyncData, menus, index-4 insertions |
 | `Hooks/RefugeCampContributor.cs` | Overlay caption/blocked-reason/status through FieldCamp's seam |
 | `Hooks/RefugeClanScreenPatch.cs` + `RefugeEncounterPatch.cs` | Patch75 |

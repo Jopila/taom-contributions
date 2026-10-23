@@ -160,6 +160,9 @@ public class ClientSubModuleTests
             typeof(TAOM.Features.HostReview.IHostReviewOrderProviderRegistrar),
             typeof(TAOM.Features.ShaderPrecompilation.IShaderPrecompileGameManagerFactory),
             typeof(TAOM.Features.ShaderCompileNotice.IShaderCompileNoticeWindowHost),
+            typeof(TAOM.Features.SupplyLines.ISupplyRouteVisualService),
+            typeof(TAOM.Features.FieldCamp.ICampVisualService),
+            typeof(TAOM.Features.Refuge.IRefugeVisualService),
         };
         var actual = container.GetServiceRegistrations().Select(r => r.ServiceType).ToArray();
         CollectionAssert.AreEquivalent(expected, actual);

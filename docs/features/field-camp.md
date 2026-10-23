@@ -15,7 +15,7 @@ taom_field_camp_menu (choose type) / taom_fc_camp (manage: forage, fortify, supp
    -> ICampService state machine (camp book, SyncData "_taomFieldCamps")
         terrain policy  -> ICampTerrainService (pure; every 1.4.8 TerrainType explicitly mapped)
         ambush odds     -> ICampAmbushService (pure)
-        visuals         -> ICampVisualService -> CampLayoutBuilder (tpac prefab, vanilla fallback)
+        visuals         -> ICampVisualService (core null; TAOM.Client CampVisualService) -> CampLayoutBuilder (tpac prefab, vanilla fallback)
         supplies        -> ISupplyOrderService.CancelCampOrders on break; SupplyOrderScreens.Open from menu
         lookout range   -> LookoutSpottingContributor -> TaomMapVisibilityModel contributor seam
         nameplate icon  -> Patch74 postfix (PatchShield-excluded namespace: never-throw body)
@@ -122,7 +122,7 @@ TAOM's loose `Assets/` tree instead of `AssetPackages/`. Where they should live 
 | `Domain/CampState.cs` + `FieldCampSaveDefiner.cs` | Persisted camp record; definer base 726901101 |
 | `CampService.cs` | State machine; campaign statics behind protected virtuals (CampServiceTests). Also declares `SettlementSite` and `FortificationSearch`, the nearest town-or-castle rule RefugeService shares for its keep-outs (FortificationSearchTests) |
 | `CampTerrainService.cs` / `CampAmbushService.cs` | Pure policy and odds |
-| `CampVisualService.cs` + `Visuals/CampLayoutBuilder.cs` | Entities, wind ticker (500 ms throttle), fallback chain |
+| `Client/Features/FieldCamp/CampVisualService.cs` + `Visuals/CampLayoutBuilder.cs` | Entities, wind ticker (500 ms throttle), fallback chain. TAOM.Client (ADR-013); core registers `NullCampVisualService`, whose `Show` reports not ready |
 | `LookoutSpottingContributor.cs` | The sight bonus through the model seam (its cap member returns 0; Far Watch's scout is the second contributor, see [far-watch.md](far-watch.md) "The seam") |
 | `Hooks/FieldCampCampaignBehavior.cs` + `FieldCampMenuController.cs` | Events, SyncData, menus (index 4 on both menus reserved for Refuge; index 5 on the camp sub-menu is shared by Host Review and Far Watch, both before Leave: the camp sub-menu's options end up Forage, Fortify, Supplies, Break, Refuge, Review the host, Send a scout, Leave, see [host-review.md](host-review.md) and [far-watch.md](far-watch.md)) |
 | `Hooks/PartyNameplateCampIconPatch.cs` | Patch74 thin guarded body (registry entry has the never-throw contract) |

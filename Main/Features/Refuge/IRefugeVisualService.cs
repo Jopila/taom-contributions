@@ -6,7 +6,8 @@ namespace TAOM.Features.Refuge;
 /// <summary>
 /// Map-scene refuge visuals, the Refuge sibling of <c>ICampVisualService</c>. The boundary
 /// builder implements it over <c>CampLayoutBuilder</c>; the service layer only ever asks for
-/// show/remove so the layout code never leaks into decision logic.
+/// show/remove so the layout code never leaks into decision logic. The implementation draws on SandBox.View's
+/// map scene, so it lives in TAOM.Client and core registers NullRefugeVisualService (ADR-013).
 /// </summary>
 public interface IRefugeVisualService
 {

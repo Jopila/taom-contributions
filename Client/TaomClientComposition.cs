@@ -9,11 +9,15 @@ using TAOM.Client.Features.ShaderCompileNotice;
 using TAOM.Client.Features.ShaderPrecompilation;
 using TAOM.Composition;
 using TAOM.Features.CustomBattles;
+using TAOM.Features.FieldCamp;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HallOfFire;
 using TAOM.Features.HostReview;
+using TAOM.Features.Refuge;
+using TAOM.Features.Refuge.Visuals;
 using TAOM.Features.ShaderCompileNotice;
 using TAOM.Features.ShaderPrecompilation;
+using TAOM.Features.SupplyLines;
 using TAOM.Features.WarOfTheRingMomentum.UI;
 
 namespace TAOM.Client;
@@ -38,5 +42,8 @@ internal sealed class TaomClientComposition : IClientComposition
         registrator.Register<IHostReviewOrderProviderRegistrar, HostReviewOrderProviderRegistrar>(Reuse.Singleton);
         registrator.Register<IShaderPrecompileGameManagerFactory, ShaderPrecompileGameManagerFactory>(Reuse.Singleton);
         registrator.Register<IShaderCompileNoticeWindowHost, ShaderCompileNoticeWindowHost>(Reuse.Singleton);
+        registrator.Register<ICampVisualService, CampVisualService>(Reuse.Singleton);
+        registrator.Register<IRefugeVisualService, RefugeVisualService>(Reuse.Singleton);
+        registrator.Register<ISupplyRouteVisualService, SupplyRouteVisualService>(Reuse.Singleton);
     }
 }

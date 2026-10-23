@@ -12,7 +12,8 @@ public static class FieldCampIoC
         container.Register<ICampSettingsProvider, CampSettingsProvider>(Reuse.Singleton);
         container.Register<ICampTerrainService, CampTerrainService>(Reuse.Singleton);
         container.Register<ICampAmbushService, CampAmbushService>(Reuse.Singleton);
-        container.Register<ICampVisualService, CampVisualService>(Reuse.Singleton);
+        // Client-only implementation (ADR-013): core's null, replaced by TAOM.Client's.
+        container.Register<ICampVisualService, NullCampVisualService>(Reuse.Singleton);
 
         // The overlay's map view is client-only (ADR-013): core's null adapter, replaced by TAOM.Client's.
         container.Register<IFieldCampOverlayAdapter, NullFieldCampOverlayAdapter>(Reuse.Singleton);

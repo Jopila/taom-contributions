@@ -232,7 +232,7 @@ complete so cargo is never stranded by a toggle.
 | `UI/SupplySearchHitRowVM.cs` | One search result row: "{ITEM} at {SOURCE}" plus stock/price/distance; locked wholesale while an order is pending |
 | `SupplyCaravanService.cs` | Spawn/teardown/respawn + the hardened teleport movement; AI re-pin on load |
 | `SupplyOrderService.cs` | The order book: place/advance/deliver/lose/cancel; campaign statics behind protected virtuals |
-| `SupplyRouteVisualService.cs` | Throttled map arrow trail (0.25h resample, retint on change, 40-arrow cap) |
+| `Client/Features/SupplyLines/SupplyRouteVisualService.cs` | Throttled map arrow trail (0.25h resample, retint on change, 40-arrow cap). TAOM.Client (ADR-013); the interface is `ISupplyRouteVisualService.cs` and core registers `NullSupplyRouteVisualService` |
 | `Components/SupplyCaravanComponent.cs` | First custom PartyComponent in TAOM; identity only |
 | `Hooks/SupplyLinesCampaignBehavior.cs` | Events, SyncData halves, session reset gate, town/town_keep menu options |
 | `Hooks/SupplyCaravanEncounterPatch.cs` | Patch73_SupplyLines: DoMeeting guard, caravan click-through suppressed |

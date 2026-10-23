@@ -7,7 +7,8 @@ namespace TAOM.Features.FieldCamp;
 /// Map-scene camp visuals. Prefab meshes first (the shipped tpacs: fieldcamp_camp_a,
 /// fieldcamp_palisade_ring), the source's procedural vanilla-mesh layout as the fallback when a
 /// mesh is missing. Idempotent per party; all entity work null-tolerant, because the map scene may
-/// not exist yet when a save loads (callers retry from the frame tick).
+/// not exist yet when a save loads (callers retry from the frame tick). The implementation draws on
+/// SandBox.View's map scene, so it lives in TAOM.Client and core registers NullCampVisualService (ADR-013).
 /// </summary>
 public interface ICampVisualService
 {

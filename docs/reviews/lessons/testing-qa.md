@@ -2164,3 +2164,15 @@ client type named only in a `calli` stand-alone signature passed the server gate
   in a nested type and a non-capturing local function on the type itself. Write `_ = typeof(X);` off as a mutation: the compiler emits no IL for
   it; use `GC.KeepAlive(typeof(X))`.
 - **Source:** [rca-b6c-headless-guards-2026-10-23.md](../rca-b6c-headless-guards-2026-10-23.md) findings 1 and 2.
+### A fixture that several detectors hit proves none of them (B7 slice 1, 2026-10-23)
+`ServerJitFixtures` had one fixture per reference shape, and the builder's mutations (empty the detector, drop the
+exemption) all went RED. The Tooling lens removed each walker branch alone: three branches (generic method arguments,
+constructor signature, locals) could go and every test stayed green, because `u == null` also calls `Uri.op_Equality` and
+`Enumerable.Empty<Uri>()` also returns `IEnumerable<Uri>`.
+- **Repeat of:** "A gate is only as strong as the mutation that would make it fail" (B4a, B5, 2026-10-22).
+- **Why missed:** the mutations removed whole detectors or the whole walker, never one branch, and each fixture was written
+  for its shape without checking what else in its IL names the same type.
+- **Prevent:** for a multi-branch detector, give every branch a fixture only that branch can see, then short-circuit each
+  branch once and watch the fixture test fail. Read the fixture's compiled IL when a shape could leak through an operator,
+  a return type or a closure.
+- **Source:** [rca-b7-slice1-map-visuals-2026-10-23.md](../rca-b7-slice1-map-visuals-2026-10-23.md) finding 2.

@@ -15,11 +15,15 @@ using TAOM.Composition;
 using TAOM.Core.Logging;
 using TAOM.Features.CustomBattles;
 using TAOM.Features.Enlistment;
+using TAOM.Features.FieldCamp;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HallOfFire;
 using TAOM.Features.HostReview;
+using TAOM.Features.Refuge;
+using TAOM.Features.Refuge.Visuals;
 using TAOM.Features.ShaderCompileNotice;
 using TAOM.Features.ShaderPrecompilation;
+using TAOM.Features.SupplyLines;
 using TAOM.Features.WarOfTheRingMomentum.UI;
 using TAOM.Tests.Migration;
 using NSubstitute;
@@ -60,6 +64,13 @@ public class TaomClientCompositionTests
         container.Register<IShaderCompileNoticeWindowHost, NullShaderCompileNoticeWindowHost>(Reuse.Singleton);
         // The shader factory's constructor dependencies come from core's feature registrations.
         container.RegisterInstance(Substitute.For<IShaderPrecompilationService>());
+        container.Register<ICampVisualService, NullCampVisualService>(Reuse.Singleton);
+        container.Register<IRefugeVisualService, NullRefugeVisualService>(Reuse.Singleton);
+        container.Register<ISupplyRouteVisualService, NullSupplyRouteVisualService>(Reuse.Singleton);
+        // The map visual services' constructor dependencies come from the camps features' registrations.
+        container.RegisterInstance(Substitute.For<ISupplyOrderService>());
+        container.RegisterInstance(Substitute.For<ISupplyLinesSettingsProvider>());
+        container.RegisterInstance(Substitute.For<IRefugeSettingsProvider>());
         ClientComposition.Current = new TaomClientComposition();
 
         ClientComposition.Apply(container);
@@ -75,15 +86,19 @@ public class TaomClientCompositionTests
         Assert.IsInstanceOfType(container.Resolve<IHostReviewOrderProviderRegistrar>(), typeof(HostReviewOrderProviderRegistrar));
         Assert.IsInstanceOfType(container.Resolve<IShaderPrecompileGameManagerFactory>(), typeof(ShaderPrecompileGameManagerFactory));
         Assert.IsInstanceOfType(container.Resolve<IShaderCompileNoticeWindowHost>(), typeof(ShaderCompileNoticeWindowHost));
+        Assert.IsInstanceOfType(container.Resolve<ICampVisualService>(), typeof(CampVisualService));
+        Assert.IsInstanceOfType(container.Resolve<IRefugeVisualService>(), typeof(RefugeVisualService));
+        Assert.IsInstanceOfType(container.Resolve<ISupplyRouteVisualService>(), typeof(SupplyRouteVisualService));
         var seams = new[]
         {
             typeof(IFactionMapWidgetAdapter), typeof(IFrontEndSpriteTableAdapter), typeof(ICustomBattleFactionSelectionFactory),
             typeof(IMomentumUIService), typeof(IRealmBordersMapViewAdapter), typeof(IFieldCampOverlayAdapter),
             typeof(IFiefsNavigationElementFactory), typeof(IMapConversationProviderWrapper),
             typeof(IHostReviewOrderProviderRegistrar), typeof(IShaderPrecompileGameManagerFactory),
-            typeof(IShaderCompileNoticeWindowHost),
+            typeof(IShaderCompileNoticeWindowHost), typeof(ICampVisualService), typeof(IRefugeVisualService),
+            typeof(ISupplyRouteVisualService),
         };
-        Assert.AreEqual(11, container.GetServiceRegistrations().Count(r => seams.Contains(r.ServiceType)),
+        Assert.AreEqual(14, container.GetServiceRegistrations().Count(r => seams.Contains(r.ServiceType)),
             "each seam is replaced, never appended");
     }
 }

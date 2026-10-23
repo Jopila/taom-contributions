@@ -11,7 +11,8 @@ public static class SupplyLinesIoC
         container.Register<ISupplyOrderEngine, SupplyOrderEngine>(Reuse.Singleton);
         container.Register<ISupplySourceService, SupplySourceService>(Reuse.Singleton);
         container.Register<ISupplyCaravanService, SupplyCaravanService>(Reuse.Singleton);
-        container.Register<ISupplyRouteVisualService, SupplyRouteVisualService>(Reuse.Singleton);
+        // Client-only implementation (ADR-013): core's null, replaced by TAOM.Client's.
+        container.Register<ISupplyRouteVisualService, NullSupplyRouteVisualService>(Reuse.Singleton);
 
         // Singleton: the order book lives here between SyncData calls; a transient would lose
         // every order between the behavior's save and load halves.

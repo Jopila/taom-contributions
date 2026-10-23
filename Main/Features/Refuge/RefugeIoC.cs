@@ -10,7 +10,8 @@ public static class RefugeIoC
     {
         container.Register<IRefugeSettingsProvider, RefugeSettingsProvider>(Reuse.Singleton);
         container.Register<IWardenService, WardenService>(Reuse.Singleton);
-        container.Register<IRefugeVisualService, Visuals.RefugeVisualService>(Reuse.Singleton);
+        // Client-only implementation (ADR-013): core's null, replaced by TAOM.Client's.
+        container.Register<IRefugeVisualService, NullRefugeVisualService>(Reuse.Singleton);
 
         // ONE RefugeService singleton serves both faces: the full service, and the read-only
         // book the hot-path defense service probes. Two separate registrations would give the

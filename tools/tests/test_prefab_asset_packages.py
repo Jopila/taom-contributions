@@ -11,7 +11,7 @@ caller draws the vanilla siege-camp layout instead; the only trace is the entity
 packaged mesh item, or a package that stops parsing, would degrade the camps without an error.
 This test makes each of those a failure:
 
-  * the mesh constants the code passes to PlaceCenteredPrefab (found by scanning Main/**/*.cs for
+  * the mesh constants the code passes to PlaceCenteredPrefab (found by scanning Main/ and Client/ for
     its call sites) are exactly the table below, and each is declared once, outside a comment;
   * each of those meshes is a Metamesh item in a package here, and no item name or GUID repeats;
   * every package parses, its header's TOC-size field places the data where its first segment
@@ -29,8 +29,10 @@ packed. The parser reads both; only the writer differs. Measured 2026-09-29 on a
 """
 import os
 import re
+import shutil
 import struct
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -44,14 +46,17 @@ ASSET_PACKAGES = REPO / "Main" / "_Module" / "AssetPackages"
 # (source file, constant name) for every prefab mesh the code places from these packages. A new
 # prop is added here and to a package in the same change; the call-site test fails until it is.
 MESH_CONSTANTS = [
-    ("Main/Features/FieldCamp/Visuals/CampLayoutBuilder.cs", "FieldCampPrefabMesh"),
-    ("Main/Features/FieldCamp/Visuals/CampLayoutBuilder.cs", "PalisadeRingMesh"),
-    ("Main/Features/Refuge/Visuals/RefugeVisualService.cs", "RefugeCampMesh"),
-    ("Main/Features/Refuge/Visuals/RefugeVisualService.cs", "RefugeRingMesh"),
+    ("Client/Features/FieldCamp/Visuals/CampLayoutBuilder.cs", "FieldCampPrefabMesh"),
+    ("Client/Features/FieldCamp/Visuals/CampLayoutBuilder.cs", "PalisadeRingMesh"),
+    ("Client/Features/Refuge/Visuals/RefugeVisualService.cs", "RefugeCampMesh"),
+    ("Client/Features/Refuge/Visuals/RefugeVisualService.cs", "RefugeRingMesh"),
 ]
 
 # PlaceCenteredPrefab(scene, in center, <mesh>, ...): the third argument. A string literal there is
 # captured with its quotes, so it can never equal a table entry and fails the call-site test.
+# The visual services moved from Main/ to Client/ (ADR-013); the scan reads both roots.
+CODE_ROOTS = ("Main", "Client")
+
 CALL_SITE = re.compile(r'PlaceCenteredPrefab\(\s*\w+\s*,\s*in\s+\w+\s*,\s*(\w+|"[^"]*")\s*,')
 
 
@@ -66,10 +71,15 @@ def constant_value(source: str, name: str) -> str:
     return hits[0]
 
 
-def placed_prefab_arguments() -> set[str]:
+def placed_prefab_arguments(repo: Path = REPO) -> set[str]:
     placed = set()
-    for cs in (REPO / "Main").rglob("*.cs"):
-        placed.update(CALL_SITE.findall(cs.read_text(encoding="utf-8-sig")))
+    for root in CODE_ROOTS:
+        directory = repo / root
+        if not directory.is_dir():
+            # A missing root would otherwise read as "no call sites there" and pass over nothing.
+            raise AssertionError(f"code root {root}/ not found under {repo}")
+        for cs in directory.rglob("*.cs"):
+            placed.update(CALL_SITE.findall(cs.read_text(encoding="utf-8-sig")))
     return placed
 
 
@@ -81,6 +91,19 @@ class PrefabAssetPackagesTests(unittest.TestCase):
     def test_packages_exist(self):
         # An empty glob would let every other test here pass over nothing.
         self.assertTrue(prefab_packages(), f"no .tpac under {ASSET_PACKAGES}")
+
+    def test_call_site_scan_reads_both_code_roots(self):
+        # The visual services moved from Main/ to Client/ (ADR-013); a scan of Main/ alone would see no call site.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "Main").mkdir()
+            (root / "Client").mkdir()
+            (root / "Main" / "A.cs").write_text("PlaceCenteredPrefab(scene, in c, MainMesh, 1f);", encoding="utf-8")
+            (root / "Client" / "B.cs").write_text("PlaceCenteredPrefab(scene, in c, ClientMesh, 1f);", encoding="utf-8")
+            self.assertEqual(placed_prefab_arguments(root), {"MainMesh", "ClientMesh"})
+            shutil.rmtree(root / "Client")
+            with self.assertRaises(AssertionError):
+                placed_prefab_arguments(root)
 
     def test_the_table_is_what_the_code_places(self):
         self.assertEqual(placed_prefab_arguments(), {name for _, name in MESH_CONSTANTS},

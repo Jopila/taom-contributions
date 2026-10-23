@@ -12,7 +12,7 @@ measured here; everything else is MithrilForge's finding, restated, and has not 
 **TAOM:** the four packages in `Main/_Module/AssetPackages/` (`fieldcamp_camp_a`, `fieldcamp_palisade_ring`,
 `refuge_camp_a`, `refuge_palisade_ring`) are MithrilForge output. Each holds five items, named `<mesh>_d`, `<mesh>_n`,
 `<mesh>_s`, `<mesh>` (the Metamesh) and `<mesh>_mat`, which is the layout `TpacPropWriter.WriteMany` produces (read
-2026-09-29). `CampLayoutBuilder.PlaceCenteredPrefab` asks for them by name through
+2026-09-29). `CampLayoutBuilder.PlaceCenteredPrefab` (TAOM.Client) asks for them by name through
 `MetaMesh.GetCopy(name, showErrors: false, mayReturnNull: true)`; on a miss the caller draws the vanilla siege-camp
 layout, and nothing is logged beyond the entity count.
 

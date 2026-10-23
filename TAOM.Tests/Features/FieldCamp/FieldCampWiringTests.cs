@@ -70,8 +70,8 @@ public class FieldCampWiringTests
             "The settings provider is no longer registered; the MapView resolve throws at CreateLayout.");
         StringAssert.Contains(src, "ICampService, CampService",
             "The camp service is no longer registered; overlay, menus and ticks all go dead.");
-        StringAssert.Contains(src, "ICampVisualService, CampVisualService",
-            "The visual service is no longer registered; camp tents never appear or leak across sessions.");
+        StringAssert.Contains(src, "ICampVisualService, NullCampVisualService",
+            "The null visual service is no longer registered; a server or a client without TAOM.Client would resolve nothing.");
         StringAssert.Contains(src, "ICampTerrainService, CampTerrainService",
             "The terrain service is no longer registered.");
         StringAssert.Contains(src, "ICampAmbushService, CampAmbushService",

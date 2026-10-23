@@ -83,6 +83,12 @@ internal static class IlClientReferences
     /// </summary>
     internal const string UndecodedCalliSignature = "calli (stand-alone signature not decoded; the gate fails closed)";
 
+    /// <summary>
+    /// What a call to a vararg method reports instead of its optional argument types. They sit only in the
+    /// call-site signature, which resolving the member to a <see cref="MethodBase"/> drops, so the gate fails closed.
+    /// </summary>
+    internal const string UndecodedVarargCallSite = "vararg call (call-site argument types not decoded; the gate fails closed)";
+
     /// <summary>Full names of the types <paramref name="method"/> names from an assembly the predicate calls client-only.</summary>
     internal static List<string> ClientReferences(MethodBase method, Func<Assembly, bool> isClientAssembly)
     {
@@ -92,6 +98,9 @@ internal static class IlClientReferences
         var il = method.GetMethodBody()?.GetILAsByteArray();
         if (il != null && IlCallScanner.ExtractOpCodes(il).Contains(OpCodes.Calli))
             names.Add(UndecodedCalliSignature);
+        if (il != null && IlCallScanner.ExtractReferencedMembers(method, il)
+                .OfType<MethodBase>().Any(m => (m.CallingConvention & CallingConventions.VarArgs) != 0))
+            names.Add(UndecodedVarargCallSite);
         return names;
     }
 

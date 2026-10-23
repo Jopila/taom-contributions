@@ -11,17 +11,6 @@ using TaleWorlds.Library;
 
 namespace TAOM.Features.SupplyLines;
 
-/// <summary>Draws the on-map arrow trail for in-transit supply caravans. Engine boundary.</summary>
-public interface ISupplyRouteVisualService
-{
-    /// <summary>Per-frame update; cheap when nothing changed. Gates itself on the setting with a
-    /// clear-once latch so a toggle-off removes the entities exactly once.</summary>
-    void Update();
-
-    /// <summary>Removes every arrow entity. Safe to call with none present.</summary>
-    void ClearAll();
-}
-
 /// <summary>
 /// Implementation ported from the source module's SupplyRouteVisual, throttled: the path is
 /// resampled every 0.25 game-hours (source cadence) and arrows are only re-tinted when the travel
@@ -36,7 +25,7 @@ public sealed class SupplyRouteVisualService : ISupplyRouteVisualService
         public List<RouteSample> Samples = new List<RouteSample>();
         public double LastPathRefreshHours = double.MinValue;
         public float LastTintedFraction = float.MinValue;
-        public MobileParty Caravan;
+        public MobileParty? Caravan;
     }
 
     private readonly struct RouteSample
@@ -149,7 +138,7 @@ public sealed class SupplyRouteVisualService : ISupplyRouteVisualService
             }
         }
 
-        List<string> stale = null;
+        List<string>? stale = null;
         foreach (var pair in _entries)
         {
             if (!seen.Contains(pair.Key))
@@ -174,7 +163,7 @@ public sealed class SupplyRouteVisualService : ISupplyRouteVisualService
 
     // --- caravan resolution (only at resample cadence, never per frame) ---
 
-    private static MobileParty ResolveCaravan(RouteEntry entry, SupplyOrder order)
+    private static MobileParty? ResolveCaravan(RouteEntry entry, SupplyOrder order)
     {
         var cached = entry.Caravan;
         if (cached != null && cached.IsActive && cached.StringId == order.CaravanPartyId)
@@ -309,7 +298,7 @@ public sealed class SupplyRouteVisualService : ISupplyRouteVisualService
         }
     }
 
-    private GameEntity CreateArrow(Scene scene)
+    private GameEntity? CreateArrow(Scene scene)
     {
         try
         {
