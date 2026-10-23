@@ -42,6 +42,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import types
 import unittest
 from unittest import mock
 from pathlib import Path, PurePosixPath
@@ -455,11 +456,11 @@ class TestRetiredBinaries(unittest.TestCase):
     def test_match_is_case_insensitive_and_limited_to_bin(self):
         with tempfile.TemporaryDirectory() as td:
             src = _fixture(Path(td))
-            _write(src, "TAOM/bin/Gaming.Desktop.x64_Shipping_Client/BehaviorTreeWrapper.DLL", 16)
+            _write(src, "TAOM/bin/Win64_Shipping_wEditor/BehaviorTreeWrapper.DLL", 16)
             _write(src, "TAOM/ModuleData/minhook.x64.dll", 16)
             plan = pr.plan_module(src / "TAOM")
             self.assertEqual(pr.retired_binaries([plan]),
-                             ["TAOM/bin/Gaming.Desktop.x64_Shipping_Client/BehaviorTreeWrapper.DLL"])
+                             ["TAOM/bin/Win64_Shipping_wEditor/BehaviorTreeWrapper.DLL"])
 
     def test_no_retired_name_is_tracked_in_the_repo(self):
         # A retired name coming back into a tracked _Module/bin would be refused at every release.
@@ -603,11 +604,10 @@ class TestClientOnlyServerBin(unittest.TestCase):
             self.assertEqual(r.returncode, 2, r.stdout)
             self.assertIn("TAOM/bin/Win64_Shipping_Server/TAOM.Client.dll", r.stderr)
 
-    def test_client_editor_and_gamepass_copies_are_not_refused(self):
+    def test_client_and_editor_copies_are_not_refused(self):
         with tempfile.TemporaryDirectory() as td:
             src = _fixture(Path(td))
-            for folder in ("Win64_Shipping_Client", "Win64_Shipping_wEditor",
-                           "Gaming.Desktop.x64_Shipping_Client"):
+            for folder in ("Win64_Shipping_Client", "Win64_Shipping_wEditor"):
                 _write(src, f"TAOM/bin/{folder}/TAOM.Client.dll", 16)
             plan = pr.plan_module(src / "TAOM")
             self.assertEqual(pr.client_only_in_server_bin([plan]), [])
@@ -647,6 +647,59 @@ class TestClientOnlyServerBin(unittest.TestCase):
                               "bin/Win64_Shipping_Client/TAOM.dll"])
 
 
+class TestGamePassBinIsRefused(unittest.TestCase):
+    """Game Pass is not supported (maintainer, 2026-10-22). An existing install or channel folder keeps
+    the old bin/Gaming.Desktop.x64_Shipping_Client/ folder (an old TAOM.dll and BehaviorTreeWrapper.dll
+    among its files). Leaving it out of the copy would only stop it being gated, so it is refused
+    like a retired binary, dry runs included."""
+
+    GP = "bin/Gaming.Desktop.x64_Shipping_Client/"
+
+    def test_the_folder_is_not_a_client_platform_bin(self):
+        self.assertFalse(any("gaming.desktop" in b.casefold() for b in pr.CLIENT_PLATFORM_BINS))
+
+    def test_other_bins_still_ship(self):
+        self.assertEqual(pr.classify("bin/Win64_Shipping_Client/TAOM.dll").action, pr.COPY)
+
+    def test_game_pass_bins_names_the_folder(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write(src, "TAOM/" + self.GP + "TAOM.dll", 16)
+            plan = pr.plan_module(src / "TAOM")
+            self.assertEqual(pr.game_pass_bins([plan]), ["TAOM/bin/Gaming.Desktop.x64_Shipping_Client"])
+
+    def test_a_dry_run_refuses_and_names_the_fix(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write(src, "TAOM/" + self.GP + "TAOM.dll", 16)
+            r = _run("--source", str(src), "--dest", str(Path(td) / "out"), "--modules", "TAOM",
+                     "--dry-run")
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("Game Pass is not supported", r.stderr)
+            self.assertIn("TAOM/bin/Gaming.Desktop.x64_Shipping_Client", r.stderr)
+            self.assertIn("_Module/bin", r.stderr)
+
+    def test_a_real_run_refuses_before_writing(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write(src, "TAOM/" + self.GP + "BehaviorTreeWrapper.dll", 16)
+            dest = Path(td) / "out"
+            r = _run("--source", str(src), "--dest", str(dest), "--modules", "TAOM", "--allow-unknown")
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertFalse(dest.exists(), "must fail before writing anything")
+
+    def test_a_module_without_the_folder_prints_no_game_pass_message(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = _fixture(Path(td))
+            _write(src, "TAOM/bin/Win64_Shipping_Client/TAOM.dll", 16)
+            plan = pr.plan_module(src / "TAOM")
+            self.assertEqual(pr.game_pass_bins([plan]), [])
+            r = _run("--source", str(src), "--dest", str(Path(td) / "out"), "--modules", "TAOM",
+                     "--dry-run")
+            self.assertNotIn("Game Pass", r.stdout + r.stderr)
+            self.assertNotIn("Gaming.Desktop", r.stdout + r.stderr)
+
+
 class TestRequireBuildUnit(unittest.TestCase):
     def setUp(self):
         self.head = _git_head()
@@ -673,6 +726,45 @@ class TestRequireBuildUnit(unittest.TestCase):
             with mock.patch.object(pr, "read_build_stamp", side_effect=PermissionError("denied")):
                 problems, _checked = pr.require_build([plan], "HEAD")
             self.assertTrue(any("cannot read" in m for m in problems), problems)
+
+
+class TestCommitManifestDecoding(unittest.TestCase):
+    """`git show <sha>:<path>` is read as bytes: a text-mode read decodes with the console code page
+    (cp1252 on Windows), which breaks a UTF-8 BOM or a byte cp1252 does not define."""
+
+    MANIFEST = "Main/_Module/SubModule.xml"
+
+    def _tree(self, td, data: bytes) -> str:
+        def git(*a, inp=None):
+            return subprocess.run(["git", *a], cwd=td, input=inp, capture_output=True, check=True).stdout
+        git("init", "-q")
+        blob = git("hash-object", "-w", "--stdin", inp=data).decode().strip()
+        git("update-index", "--add", "--cacheinfo", f"100644,{blob},{self.MANIFEST}")
+        return git("write-tree").decode().strip()
+
+    def _names(self, data: bytes):
+        with tempfile.TemporaryDirectory() as td:
+            tree = self._tree(td, data)
+            with mock.patch.object(pr, "REPO_ROOT", Path(td)):
+                return pr.commit_dll_names(types.SimpleNamespace(name="TAOM"), tree)
+
+    def _xml(self, comment=""):
+        return (f'<Module>{comment}<SubModules><SubModule><DLLName value="TAOM.dll" /></SubModule>'
+                '<SubModule><DLLName value="TAOM.Client.dll" /></SubModule></SubModules></Module>')
+
+    def test_a_utf8_bom_manifest_returns_both_names(self):
+        self.assertEqual(self._names(b"\xef\xbb\xbf" + self._xml().encode("utf-8")),
+                         ["TAOM.Client.dll", "TAOM.dll"])
+
+    def test_a_non_cp1252_character_returns_both_names(self):
+        self.assertEqual(self._names(self._xml("<!-- \u0410 -->").encode("utf-8")),
+                         ["TAOM.Client.dll", "TAOM.dll"])
+
+    def test_an_unknown_commit_returns_none(self):
+        with tempfile.TemporaryDirectory() as td:
+            subprocess.run(["git", "init", "-q"], cwd=td, check=True)
+            with mock.patch.object(pr, "REPO_ROOT", Path(td)):
+                self.assertIsNone(pr.commit_dll_names(types.SimpleNamespace(name="TAOM"), "0" * 40))
 
 
 class TestRequireBuildCli(unittest.TestCase):
@@ -703,7 +795,7 @@ class TestRequireBuildCli(unittest.TestCase):
                     *(["--dry-run"] if dry_run else []), "--require-build", rev)
 
     def test_refuses_a_dirty_copy_in_another_binaries_folder(self):
-        # Every bin/<platform>/ copy ships (Game Pass, dedicated server, Modding Kit), so a
+        # Every bin/<platform>/ copy ships (dedicated server, Modding Kit), so a
         # clean Win64 copy must not vouch for a dirty one beside it.
         with tempfile.TemporaryDirectory() as td:
             src = self._taom(td, f"{STAMP}+{self.head}")
@@ -716,8 +808,7 @@ class TestRequireBuildCli(unittest.TestCase):
 
     def test_accepts_every_copy_when_all_are_clean(self):
         with tempfile.TemporaryDirectory() as td:
-            for folder in ("Win64_Shipping_Client", "Gaming.Desktop.x64_Shipping_Client",
-                           "Win64_Shipping_wEditor"):
+            for folder in ("Win64_Shipping_Client", "Win64_Shipping_wEditor"):
                 src = self._taom(td, f"{STAMP}+{self.head}", folder)
             src = self._modules(td, f"{STAMP}+{self.head}", "TAOM/bin/Win64_Shipping_Server/TAOM.dll")
             r = self._gate(src, td)
@@ -788,25 +879,85 @@ class TestRequireBuildCli(unittest.TestCase):
             self.assertEqual(
                 r.stderr.count("bin/Win64_Shipping_Client/TAOM.Client.dll is missing"), 1, r.stderr)
 
-    def test_a_manifest_that_does_not_name_taom_client_does_not_require_it(self):
+    def _pre_b3(self):
+        # 03d9db8dc added TAOM.Client.dll to Main/_Module/SubModule.xml (ADR-013); its parent names TAOM.dll only
+        # and already carries the dirty-flag target.
+        pre = pr.resolve_commit("03d9db8dc^")
+        if pre is None:
+            self.skipTest("history does not reach the commit before the TAOM.Client submodule")
+        return pre
+
+    def test_a_pre_b3_commit_requires_only_taom_dll(self):
         # A tag cut before ADR-013 ships no TAOM.Client.dll and its SubModule.xml never loads one.
+        pre = self._pre_b3()
+        with tempfile.TemporaryDirectory() as td:
+            src = self._modules(td, f"{STAMP}+{pre}")
+            self._manifest(src, "TAOM.dll")
+            r = self._gate(src, td, rev=pre)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn("build stamp OK", r.stdout)
+
+    def test_the_commits_manifest_decides_not_the_installed_one(self):
+        # An installed manifest naming only TAOM.dll must not excuse a missing TAOM.Client.dll when the
+        # release commit names both.
         with tempfile.TemporaryDirectory() as td:
             src = self._modules(td, f"{STAMP}+{self.head}")
             self._manifest(src, "TAOM.dll")
             r = self._gate(src, td)
-            self.assertEqual(r.returncode, 0, r.stderr)
-            self.assertIn("build stamp OK", r.stdout)
-
-    def test_an_unreadable_manifest_requires_every_assembly(self):
-        with tempfile.TemporaryDirectory() as td:
-            src = self._modules(td, f"{STAMP}+{self.head}")
-            (src / "TAOM/SubModule.xml").write_text("<Module><SubModules>")
-            r = self._gate(src, td)
             self.assertEqual(r.returncode, 2, r.stdout)
             self.assertIn("TAOM.Client.dll is missing", r.stderr)
 
+    def test_accepts_when_commit_and_install_both_name_two_assemblies(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._taom(td, f"{STAMP}+{self.head}")
+            self._manifest(src, "TAOM.dll", "TAOM.Client.dll")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn("build stamp OK", r.stdout)
+
+    def test_refuses_when_the_commit_names_two_and_the_install_names_one(self):
+        # Both DLLs are present and clean, but the installed manifest would not load the client half.
+        with tempfile.TemporaryDirectory() as td:
+            src = self._taom(td, f"{STAMP}+{self.head}")
+            self._manifest(src, "TAOM.dll")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("SubModule.xml", r.stderr)
+            self.assertIn("TAOM.Client.dll", r.stderr)
+
+    def test_refuses_when_a_pre_b3_commit_meets_an_install_that_loads_the_client(self):
+        pre = self._pre_b3()
+        with tempfile.TemporaryDirectory() as td:
+            src = self._taom(td, f"{STAMP}+{pre}")
+            self._manifest(src, "TAOM.dll", "TAOM.Client.dll")
+            r = self._gate(src, td, rev=pre)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("SubModule.xml", r.stderr)
+
+    def test_refuses_an_installed_manifest_that_does_not_parse(self):
+        # Both DLLs are present and clean, so the only reason to refuse is the manifest the game would load.
+        with tempfile.TemporaryDirectory() as td:
+            src = self._taom(td, f"{STAMP}+{self.head}")
+            (src / "TAOM/SubModule.xml").write_text("<Module><SubModules>")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 2, r.stdout)
+            self.assertIn("SubModule.xml does not parse", r.stderr)
+
+    def test_a_missing_installed_manifest_is_not_this_checks_finding(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._taom(td, f"{STAMP}+{self.head}")
+            r = self._gate(src, td)
+            self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_a_commit_without_a_known_manifest_requires_every_assembly(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = self._modules(td, f"{STAMP}+{self.head}")
+            with mock.patch.object(pr, "commit_dll_names", return_value=None):
+                problems, _checked = pr.require_build([pr.plan_module(src / "TAOM")], "HEAD")
+            self.assertTrue(any("TAOM.Client.dll is missing" in m for m in problems), problems)
+
     def test_refuses_a_client_bin_with_taom_dll_but_no_taom_client(self):
-        # Game Pass and the editor load the same manifest as Steam. A lone TAOM.dll does not crash: the
+        # The editor loads the same manifest as Steam. A lone TAOM.dll does not crash: the
         # engine shows its "Cannot find" box and the game runs without the client half.
         with tempfile.TemporaryDirectory() as td:
             src = self._taom(td, f"{STAMP}+{self.head}")

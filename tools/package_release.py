@@ -48,7 +48,7 @@ the report says so in one policy line. Scene sacks and the other files in Shader
 (shader_mapping.bin, shader_compile_report.log) still ship.
 
 Exit codes: 0 ok · 1 nothing to do · 2 bad input / unknown entries / non-empty destination / failed --require-build /
-            retired binaries in the source (RETIRED_BINARIES, dry runs included) / a client-only
+            retired binaries or a Game Pass bin in the source (dry runs included) / a client-only
             assembly (TAOM.Client.dll) in a dedicated-server bin (dry runs included) / a shipped
             ModuleData file defining a taom_test_ id / a shader with no complete source that ships, or
             a shader report that is missing, unreadable or does not add up (all dry runs included).
@@ -157,7 +157,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # The assemblies TAOM compiles, by module (keyed casefolded: "--modules taom" resolves on Windows).
 # Each carries the build stamp from Directory.Build.props. The build writes a copy into every
-# bin/<platform>/ folder it deploys (Steam, Game Pass, dedicated server, Modding Kit) and every copy
+# bin/<platform>/ folder it deploys (Steam, dedicated server, Modding Kit) and every copy
 # ships, so the gate reads them all; the Win64 client copy of each must exist. TAOM.Client.dll
 # (ADR-013) is TAOM's client-only second submodule: it is in every client bin and never in the
 # dedicated-server one.
@@ -170,7 +170,16 @@ SERVER_BIN = "bin/Win64_Shipping_Server/"
 
 # The bin folders a client loads TAOM from: Win64_Shipping_Client must hold every assembly the
 # shipped SubModule.xml names; any other client bin that holds one of them must hold them all.
-CLIENT_PLATFORM_BINS = ("Win64_Shipping_Client", "Win64_Shipping_wEditor", "Gaming.Desktop.x64_Shipping_Client")
+CLIENT_PLATFORM_BINS = ("Win64_Shipping_Client", "Win64_Shipping_wEditor")
+
+# Game Pass is not supported (maintainer, 2026-10-22): nothing stages or deploys this bin any more.
+# An install or channel folder built earlier keeps the old folder, with an old TAOM.dll in it. Leaving
+# it out of the copy would only stop it being gated, so the run refuses (dry runs included).
+GAME_PASS_DIR = "Gaming.Desktop.x64_Shipping_Client"
+
+# Where each shipped module's SubModule.xml lives in the repo, for the release commit's copy.
+REPO_MANIFESTS = {"taom": "Main/_Module/SubModule.xml",
+                  "taom.dependencies": "Dependencies/_Module/SubModule.xml"}
 
 # InformationalVersion as the assembly metadata stores it (UTF-8): build.<yyyyMMdd-HHmmss>Z, then
 # '+' ('.' on older builds), then the commit SHA or "nogit", then an optional .dirty or .nogit flag.
@@ -388,7 +397,17 @@ def check_build_stamp(stamp: str | None, expected_sha: str) -> str | None:
 
 def _git(*args: str):
     try:
-        return subprocess.run(["git", *args], cwd=REPO_ROOT, capture_output=True, text=True)
+        return subprocess.run(["git", *args], cwd=REPO_ROOT, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+
+
+def _git_bytes(*args: str):
+    """Like _git, but stdout stays bytes: a manifest is parsed from bytes so its BOM or encoding
+    declaration decides, not the console code page."""
+    try:
+        return subprocess.run(["git", *args], cwd=REPO_ROOT, capture_output=True)
     except OSError:
         return None
 
@@ -414,25 +433,62 @@ def shipped_dll_copies(plan) -> list:
             if rel.casefold().startswith("bin/") and PurePosixPath(rel).name.casefold() in names]
 
 
-def loaded_dll_names(plan):
-    """Casefolded DLLName values of the SubModule.xml this module ships, or None when it cannot be
-    read (the caller then requires every assembly, the stricter reading)."""
+def _dll_names(root) -> list:
+    """DLLName values (as written, stripped) under a parsed SubModule.xml root."""
+    return sorted({(e.get("value") or "").strip() for e in root.iter("DLLName")})
+
+
+def installed_dll_names(plan):
+    """DLLName values of the SubModule.xml this module ships, or None when it cannot be read."""
     try:
-        tree = ET.parse(plan.root / "SubModule.xml")
+        return _dll_names(ET.parse(plan.root / "SubModule.xml").getroot())
     except (OSError, ET.ParseError):
         return None
-    return {(e.get("value") or "").strip().casefold() for e in tree.iter("DLLName")}
 
 
-def required_dlls(plan) -> tuple:
-    """The assemblies a clean build must have shipped for this module: the first SHIPPED_DLLS entry
-    always, each further one only when the shipped SubModule.xml loads it. A pre-ADR-013 tag's manifest
-    does not name TAOM.Client.dll, so it is not required of that tag."""
+def commit_dll_names(plan, sha: str):
+    """DLLName values of the SubModule.xml the release commit holds for this module, or None when the
+    commit has none or it cannot be parsed (the caller then requires every assembly, the stricter
+    reading)."""
+    path = REPO_MANIFESTS.get(plan.name.casefold())
+    if path is None:
+        return None
+    r = _git_bytes("show", f"{sha}:{path}")
+    if not r or r.returncode != 0:
+        return None
+    try:
+        return _dll_names(ET.fromstring(r.stdout))
+    except ET.ParseError:
+        return None
+
+
+def required_dlls(plan, sha: str) -> tuple:
+    """The assemblies a clean build of `sha` must have shipped for this module: the first SHIPPED_DLLS
+    entry always, each further one only when the commit's SubModule.xml loads it. A pre-ADR-013
+    commit's manifest does not name TAOM.Client.dll, so it is not required of that commit."""
     names = SHIPPED_DLLS.get(plan.name.casefold(), ())
-    loaded = loaded_dll_names(plan)
+    loaded = commit_dll_names(plan, sha)
     if loaded is None:
         return names
-    return names[:1] + tuple(n for n in names[1:] if n.casefold() in loaded)
+    folded = {n.casefold() for n in loaded}
+    return names[:1] + tuple(n for n in names[1:] if n.casefold() in folded)
+
+
+def manifest_mismatch(plan, sha: str):
+    """A refusal line when the installed SubModule.xml names a different set of assemblies than the
+    release commit's, or exists and does not parse, else None. None too when the commit's names are
+    unknown (that side then requires every assembly) or the installed manifest is absent (not this
+    check's finding)."""
+    committed = commit_dll_names(plan, sha)
+    if committed is None or not (plan.root / "SubModule.xml").exists():
+        return None
+    installed = installed_dll_names(plan)
+    if installed is None:
+        return f"{plan.name}: the installed SubModule.xml does not parse, so the game could not load it"
+    if {n.casefold() for n in committed} == {n.casefold() for n in installed}:
+        return None
+    return (f"{plan.name}: the installed SubModule.xml names {', '.join(installed) or 'no assembly'}, "
+            f"but {sha[:12]} names {', '.join(committed) or 'no assembly'}")
 
 
 def retired_binaries(plans) -> list:
@@ -440,6 +496,11 @@ def retired_binaries(plans) -> list:
     return [f"{p.name}/{rel}" for p in plans for rel, _size in p._copy_list
             if rel.split("/", 1)[0] == "bin"
             and PurePosixPath(rel).name.casefold() in RETIRED_BINARIES]
+
+
+def game_pass_bins(plans) -> list:
+    """<module>/bin/Gaming.Desktop.x64_Shipping_Client of every planned module that has the folder."""
+    return [f"{p.name}/bin/{GAME_PASS_DIR}" for p in plans if (p.root / "bin" / GAME_PASS_DIR).is_dir()]
 
 
 def client_only_in_server_bin(plans) -> list:
@@ -651,8 +712,11 @@ def require_build(plans, rev: str, requested=()) -> tuple:
             continue
         copies = shipped_dll_copies(p)
         have = {rel.casefold() for rel in copies}
-        required = required_dlls(p)
-        # Win64_Shipping_Client is always checked. Any other client bin (Game Pass, the editor) is checked
+        required = required_dlls(p, sha)
+        mismatch = manifest_mismatch(p, sha)
+        if mismatch:
+            problems.append(mismatch)
+        # Win64_Shipping_Client is always checked. Any other client bin (the editor) is checked
         # when it holds any required assembly, because it loads the same manifest as Steam:
         # TAOM.Client.dll without TAOM.dll fails GetTypes and aborts the game (Module.AddSubModule's
         # CriticalError), and TAOM.dll without TAOM.Client.dll shows the engine's "Cannot find" box and
@@ -1041,6 +1105,15 @@ def main(argv=None) -> int:
         print("\nERROR: retired binaries in the source; delete them there (install bin folders or "
               "the channel folder) and re-run:", file=sys.stderr)
         for rel in retired:
+            print(f"  {rel}", file=sys.stderr)
+        return 2
+
+    game_pass = game_pass_bins(plans)
+    if game_pass:
+        print("\nERROR: Game Pass is not supported, but the source holds a Game Pass bin (an old "
+              "TAOM.dll and more). Delete the folder from the install or the channel folder, and from any "
+              "old checkout's _Module/bin/ staging, then re-run:", file=sys.stderr)
+        for rel in game_pass:
             print(f"  {rel}", file=sys.stderr)
         return 2
 

@@ -138,29 +138,19 @@
 		       Text="IDE workspace state under _Module would be deployed to the game install: @(_TaomIdeState, '%3B '). Delete the .vs folder under Main/_Module/ (and from &lt;game&gt;\Modules\$(ModuleId)\, deployment is additive)." />
 	</Target>
 
-	<!-- Bannerlord.BuildResources' CopyModule (Basic.targets:64-65) writes TAOM.dll into the installed
-	     Gaming.Desktop.x64_Shipping_Client whenever ModuleId and GameFolder are set, even with
-	     DisableModuleCopy=true. It is additive, so a TAOM.Client left there from an earlier build would
-	     pair with the new TAOM.dll. The two bind by simple name, so the old client loads: it runs old code
-	     against the new core, or aborts the game only if core changed a type the client binds at load. The delete therefore runs on the
-	     same condition as CopyModule, not on DisableModuleCopy (see FailOnIdeStateInModule).
-	     Client/TAOM.Client.csproj redeploys a fresh copy afterwards. -->
-	<Target Name="DeleteStaleGamePassTaomClient" BeforeTargets="PostBuildCopyToModules"
-	        Condition="$(ModuleId) != '' AND Exists($(GameFolder))">
-		<ItemGroup>
-			<_TaomGamePassClientFiles Include="$(GameFolder)\Modules\$(ModuleId)\bin\Gaming.Desktop.x64_Shipping_Client\TAOM.Client.*" />
-		</ItemGroup>
-		<Delete Files="@(_TaomGamePassClientFiles)" />
+	<!-- Game Pass is not supported (2026-10-22), but Bannerlord.BuildResources' CopyModule deploys everything
+	     under _Module verbatim, so a Gaming.Desktop.x64_Shipping_Client folder left in this project's
+	     staging by an older checkout would reach the game install with an old TAOM.dll. Fail loudly rather
+	     than delete. Same condition as CopyModule's, not DisableModuleCopy (see FailOnIdeStateInModule). -->
+	<Target Name="FailOnGamePassStagingInModule" BeforeTargets="PostBuildCopyToModules"
+	        Condition="'$(ModuleId)' != '' AND Exists('$(GameFolder)')">
+		<Error Condition="Exists('$(ProjectDir)_Module\bin\Gaming.Desktop.x64_Shipping_Client\')"
+		       Text="Game Pass is not supported, but $(ProjectDir)_Module\bin\Gaming.Desktop.x64_Shipping_Client\ exists and CopyModule would deploy it. Delete that folder (and from &lt;game&gt;\Modules\$(ModuleId)\bin\, deployment is additive), then build again." />
 	</Target>
 
 	<Target Name="CopyBinariesToModuleFolder" BeforeTargets="PostBuildCopyToModules">
 		<!-- Create directories if they don't exist -->
-		<MakeDir Directories="$(ProjectDir)_Module\bin\Gaming.Desktop.x64_Shipping_Client\" Condition="!Exists('$(ProjectDir)_Module\bin\Gaming.Desktop.x64_Shipping_Client\')" />
 		<MakeDir Directories="$(ProjectDir)_Module\bin\Win64_Shipping_Client\" Condition="!Exists('$(ProjectDir)_Module\bin\Win64_Shipping_Client\')" />
-
-		<!-- Copy to Gaming.Desktop.x64_Shipping_Client -->
-		<Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(ProjectDir)_Module\bin\Gaming.Desktop.x64_Shipping_Client\" />
-		<Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(ProjectDir)_Module\bin\Gaming.Desktop.x64_Shipping_Client\" />
 
 		<!-- Copy to Win64_Shipping_Client -->
 		<Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(ProjectDir)_Module\bin\Win64_Shipping_Client\" />
@@ -178,8 +168,8 @@
 	     Win64_Shipping_Client, but the additive mirror would keep the editor bin's old copy, built
 	     against an older core (old code runs against the new core, or the game aborts if core changed a
 	     type the client binds at load). It is deleted here, and
-	     Client/TAOM.Client.csproj (DeployTaomClientToTaomModule) redeploys a fresh one into all three
-	     client bins after Main. The Game Pass bin is handled by DeleteStaleGamePassTaomClient.
+	     Client/TAOM.Client.csproj (DeployTaomClientToTaomModule) redeploys a fresh one into both
+	     client bins after Main. Game Pass is not supported: nothing here stages or deploys its bin.
 	     The Delete uses TreatErrorsAsWarnings because the Modding Kit holds TAOM.Client.dll open: a locked
 	     file means the Kit has a matched pair loaded, so the build must not fail over it. The Copy after it
 	     still fails loudly if TAOM.dll changed while the Kit holds it. -->

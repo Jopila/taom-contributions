@@ -61,10 +61,10 @@ motivated the mirror below.
 Distinct from the engine builds above: each module carries its **own** `bin/<build>/` folders, and the
 engine loads the one matching the build it is running. TAOM populates them from the assembled client
 folder via mirror targets. TAOM's server mirror excludes `TAOM.Client.*` and deletes stale copies
-(`Main/TAOM.csproj:220-225`); the editor mirror deletes a stale `TAOM.Client.*` from the editor bin
-(`Main/TAOM.csproj:196,199`) and `DeleteStaleGamePassTaomClient` from the Game Pass bin
-(`Main/TAOM.csproj:153-159`); the client-only deploy target adds `TAOM.Client.dll` and its available
-`.pdb` to the three client/editor folders (`Client/TAOM.Client.csproj:91-105`). The counts below
+(`Main/TAOM.csproj:201-205`); the editor mirror deletes a stale `TAOM.Client.*` from the editor bin
+(`Main/TAOM.csproj:176,179`); the client-only deploy target adds `TAOM.Client.dll` and its available
+`.pdb` to the two client/editor folders (`Client/TAOM.Client.csproj:94-119`). Game Pass is not
+supported (2026-10-22): no target writes its `Gaming.Desktop.x64_Shipping_Client` folder. The counts below
 precede B3 and do not include that client deployment:
 
 | Target | csproj | Mirrors into | Deployed file count |

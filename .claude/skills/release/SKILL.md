@@ -194,8 +194,10 @@ Rebuild at the tag before anything ships.
      or the tag's build writes. The build writes
      `TAOM.dll`, `TAOM.pdb`, `DryIoc.dll`, `Newtonsoft.Json.dll` and
      `System.Runtime.CompilerServices.Unsafe.dll` into TAOM (plus `TAOM.Client.dll` and
-     `TAOM.Client.pdb` into its `Win64_Shipping_Client`, `Win64_Shipping_wEditor` and
-     `Gaming.Desktop.x64_Shipping_Client`, never `_Server`: the server mirror excludes them), and `TAOM.Dependencies.dll`,
+     `TAOM.Client.pdb` into its `Win64_Shipping_Client` and `Win64_Shipping_wEditor`, never
+     `_Server`: the server mirror excludes them; Game Pass is not supported, so no
+     `Gaming.Desktop.x64_Shipping_Client` bin is built or shipped, and the gate refuses a channel
+     folder that still holds one: delete it first), and `TAOM.Dependencies.dll`,
      `TAOM.Dependencies.pdb`, `0Harmony.dll`, `Bannerlord.UIExtenderEx.dll`, `MCMv5.dll` and
      `System.Runtime.CompilerServices.Unsafe.dll` into TAOM.Dependencies. That is each project's
      `bin/Debug/net472/` output, every runtime DLL its packages bring in (the other packages are

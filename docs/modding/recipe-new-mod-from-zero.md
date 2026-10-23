@@ -639,7 +639,7 @@ Real gaps, not omissions from this chapter. Do not expect a repo doc to answer t
   `Path.Combine(_pathService.ModuleDataPath, "configs", "battle_balance_config.json")`. Every other
   directory needs the same kind of grep.
 - **The four alias stub modules.** They are deployed to `Modules/<Id>/_Module/SubModule.xml`, one
-  level below where `ModuleHelper.GetPhysicalModules` looks (`ModuleHelper.cs:327-330`), so the
+  level below where `ModuleHelper.GetPhysicalModules` looks (`ModuleHelper.cs:364-376, v1.5.5`), so the
   vanilla engine cannot see them. Whether any launcher enumerates them is unanswered. Do not repeat
   the claim that they auto-tick in the vanilla launcher.
 - **TAOM's own dependency pin.** `Main/_Module/SubModule.xml` lists four `<DependedModule>` rows and

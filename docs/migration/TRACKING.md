@@ -111,7 +111,7 @@ Visual order may now be inverted. S5 task: verify in-game; swap to `VerticalTopT
 |---|---|
 | Restore Dependencies/ tree from git SHA `0b16cca` (1,444 files) | ✅ |
 | Build TAOM.Dependencies.csproj against 1.4.5 | ✅ 0 errors, 878 benign warnings |
-| Verify output deployed to `Dependencies/_Module/bin/{Win64,Gaming.Desktop.x64}_Shipping_Client/` | ✅ |
+| Verify output deployed to `Dependencies/_Module/bin/Win64_Shipping_Client/` (the Gaming.Desktop twin was dropped 2026-10-22: Game Pass is not supported) | ✅ |
 | Verify Steam install path reflects rebuild | ✅ — `E:\...\Modules\TAOM.Dependencies\bin\Win64_Shipping_Client\TAOM.Dependencies.dll` synced |
 
 **Conclusion:** The internalized Harmony 2.4.2 fork is fully API-compatible with Bannerlord 1.4.5. No Harmony/MCM/UIExtenderEx version bumps needed.

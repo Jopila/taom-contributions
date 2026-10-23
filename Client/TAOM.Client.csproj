@@ -79,29 +79,54 @@
 	     before copying this project's output, which would delete TAOM.dll. Main/TAOM.csproj builds first
 	     (the ProjectReference above), so its clean and its editor and server mirrors have already run.
 	     Never Win64_Shipping_Server: a dedicated server must not carry this assembly, and Main/TAOM.csproj's
-	     server mirror excludes it. A deploying build of Main/TAOM.csproj alone removes TAOM.Client from all
-	     three client bins, so no copy is left built against an older core: BuildResources' clean in
-	     Win64_Shipping_Client, the editor mirror's Delete in Win64_Shipping_wEditor, and
-	     DeleteStaleGamePassTaomClient in Gaming.Desktop.x64_Shipping_Client. ./build.ps1 builds the solution
-	     and this target redeploys a fresh one. -p:DisableModuleCopy=true WITHOUT -p:ModuleId= still runs
-	     CopyBinariesWindows (it cleans Win64_Shipping_Client only) and CopyModule, but skips the mirrors and
-	     this target; the Game Pass delete still runs. The Steam and Game Pass bins then end with a new
-	     TAOM.dll and no TAOM.Client, while the editor bin keeps an old but matched pair. Pass both flags, as
-	     AGENTS.md does. -->
+	     server mirror excludes it. Never Gaming.Desktop.x64_Shipping_Client: Game Pass is not supported.
+	     A deploying build of Main/TAOM.csproj alone removes TAOM.Client from both client bins, so no copy is
+	     left built against an older core: BuildResources' clean in Win64_Shipping_Client and the editor
+	     mirror's Delete in Win64_Shipping_wEditor. ./build.ps1 builds the solution and this target
+	     redeploys a fresh one. -p:DisableModuleCopy=true WITHOUT -p:ModuleId= still runs CopyBinariesWindows
+	     (it cleans Win64_Shipping_Client only) and CopyModule, but skips the mirrors and this target; the
+	     Steam bin then ends with a new TAOM.dll and no TAOM.Client, while the editor bin keeps an old but
+	     matched pair. Pass both flags, as AGENTS.md does.
+	     Visual Studio's fast up-to-date check, the no-dependencies switch, or another build can skip Main and still
+	     build and deploy this project against a core TAOM.dll that differs from the installed one. The guard
+	     below fails the build when the installed Win64_Shipping_Client core is missing (Main's
+	     CopyBinariesWindows has already deployed it whenever this target runs, so a missing core means Main
+	     was skipped), and when the core this project compiled against (its resolved ProjectReference)
+	     differs by hash from the installed one or from the Win64_Shipping_wEditor copy when that exists.
+	     Both deploy together from a Main rebuild. -->
 	<Target Name="DeployTaomClientToTaomModule"
 	        AfterTargets="Build"
 	        Condition="'$(ModuleId)' != '' AND Exists('$(GameFolder)') AND '$(DisableModuleCopy)' != 'true'">
 		<PropertyGroup>
 			<_TaomClientModuleBin>$(GameFolder)\Modules\$(ModuleId)\bin</_TaomClientModuleBin>
+			<_TaomInstalledCore>$(_TaomClientModuleBin)\Win64_Shipping_Client\TAOM.dll</_TaomInstalledCore>
+			<_TaomEditorCore>$(_TaomClientModuleBin)\Win64_Shipping_wEditor\TAOM.dll</_TaomEditorCore>
 		</PropertyGroup>
 		<ItemGroup>
 			<_TaomClientFiles Include="$(TargetPath)" />
 			<_TaomClientFiles Include="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+			<_TaomBuiltCore Include="@(ReferencePath)" Condition="'%(Filename)' == 'TAOM' AND '%(ReferenceSourceTarget)' == 'ProjectReference'" />
 		</ItemGroup>
+		<Error Condition="'@(_TaomBuiltCore)' == ''"
+		       Text="TAOM.Client could not find the core TAOM.dll it was built against among its resolved ProjectReference outputs, so it cannot check that the installed core matches. Rebuild TAOM (Main) together with TAOM.Client." />
+		<Error Condition="!Exists('$(_TaomInstalledCore)')"
+		       Text="No TAOM.dll is installed in $(_TaomClientModuleBin)\Win64_Shipping_Client, although Main deploys it before this project. Main was skipped by Visual Studio's up-to-date check, --no-dependencies, or another build. Rebuild TAOM (Main) so both deploy together, then build again." />
+		<GetFileHash Files="@(_TaomBuiltCore)" Algorithm="SHA256">
+			<Output TaskParameter="Hash" PropertyName="_TaomBuiltCoreHash" />
+		</GetFileHash>
+		<GetFileHash Files="$(_TaomInstalledCore)" Algorithm="SHA256">
+			<Output TaskParameter="Hash" PropertyName="_TaomInstalledCoreHash" />
+		</GetFileHash>
+		<GetFileHash Files="$(_TaomEditorCore)" Algorithm="SHA256" Condition="Exists('$(_TaomEditorCore)')">
+			<Output TaskParameter="Hash" PropertyName="_TaomEditorCoreHash" />
+		</GetFileHash>
+		<Error Condition="'$(_TaomBuiltCoreHash)' != '$(_TaomInstalledCoreHash)'"
+		       Text="The TAOM.dll installed in $(_TaomClientModuleBin)\Win64_Shipping_Client differs from the core TAOM.Client was built against. Main was skipped by Visual Studio's up-to-date check, --no-dependencies, or another build. Rebuild TAOM (Main) so both deploy together, then build again." />
+		<Error Condition="Exists('$(_TaomEditorCore)') AND '$(_TaomBuiltCoreHash)' != '$(_TaomEditorCoreHash)'"
+		       Text="The TAOM.dll installed in $(_TaomClientModuleBin)\Win64_Shipping_wEditor differs from the core TAOM.Client was built against. Main was skipped by Visual Studio's up-to-date check, --no-dependencies, or another build. Rebuild TAOM (Main) so both deploy together, then build again." />
 		<Copy SourceFiles="@(_TaomClientFiles)" DestinationFolder="$(_TaomClientModuleBin)\Win64_Shipping_Client\" SkipUnchangedFiles="true" />
 		<Copy SourceFiles="@(_TaomClientFiles)" DestinationFolder="$(_TaomClientModuleBin)\Win64_Shipping_wEditor\" SkipUnchangedFiles="true" />
-		<Copy SourceFiles="@(_TaomClientFiles)" DestinationFolder="$(_TaomClientModuleBin)\Gaming.Desktop.x64_Shipping_Client\" SkipUnchangedFiles="true" />
-		<Message Importance="high" Text="TAOM.Client: deployed @(_TaomClientFiles->Count()) files into Win64_Shipping_Client, Win64_Shipping_wEditor and Gaming.Desktop.x64_Shipping_Client under $(_TaomClientModuleBin)\" />
+		<Message Importance="high" Text="TAOM.Client: deployed @(_TaomClientFiles->Count()) files into Win64_Shipping_Client and Win64_Shipping_wEditor under $(_TaomClientModuleBin)\" />
 	</Target>
 
 	<Import Project="..\GameReferences.targets" />

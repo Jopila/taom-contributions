@@ -6,7 +6,7 @@ using static TAOM.Tests.Infrastructure.RepoPaths;
 namespace TAOM.Tests.Infrastructure;
 
 /// <summary>
-/// How TAOM.Client.dll reaches the install (ADR-013): into the three client bins of the TAOM module,
+/// How TAOM.Client.dll reaches the install (ADR-013): into the Steam client and editor bins of the TAOM module (Game Pass is not supported),
 /// never the dedicated-server bin, and without Bannerlord.BuildResources.
 /// </summary>
 [TestClass]
@@ -37,21 +37,149 @@ public class ClientDeploymentTests
     }
 
     [TestMethod]
-    public void ClientCsproj_DeploysIntoClientEditorAndGamePassBins_NeverTheServerBin()
+    public void ClientCsproj_DeploysIntoClientAndEditorBins_NeverTheServerOrGamePassBin()
     {
         var target = Target("Client/TAOM.Client.csproj", "DeployTaomClientToTaomModule");
 
         var destinations = target.Descendants("Copy").Select(c => (string?)c.Attribute("DestinationFolder") ?? "").ToList();
-        foreach (var bin in new[] { "Win64_Shipping_Client", "Win64_Shipping_wEditor", "Gaming.Desktop.x64_Shipping_Client" })
+        foreach (var bin in new[] { "Win64_Shipping_Client", "Win64_Shipping_wEditor" })
             Assert.IsTrue(destinations.Any(d => d.Contains(bin)), $"No Copy into {bin}.");
 
         var attributeValues = target.DescendantsAndSelf().SelectMany(e => e.Attributes()).Select(a => a.Value).ToList();
         Assert.IsFalse(attributeValues.Any(v => v.Contains("Win64_Shipping_Server")),
             "A dedicated server must not carry TAOM.Client.dll.");
+        Assert.IsFalse(attributeValues.Any(v => v.Contains("Gaming.Desktop")),
+            "Game Pass is not supported (Mike, 2026-10-22): nothing deploys into its bin.");
 
         var condition = (string?)target.Attribute("Condition") ?? "";
         StringAssert.Contains(condition, "DisableModuleCopy");
         StringAssert.Contains(condition, "ModuleId");
+    }
+
+    // Every attribute value and property text inside a Target, except the places a target only talks about
+    // a path: a Condition, an Error and a Message. An item Include or Exclude is a write in waiting.
+    private static System.Collections.Generic.List<string> ValuesThatCouldWrite(string project) =>
+        XDocument.Load(RepoPath(project.Split('/'))).Descendants()
+            .Where(t => t.Name.LocalName == "Target")
+            .SelectMany(t => t.Descendants())
+            .Where(e => e.Name.LocalName is not ("Error" or "Message"))
+            .SelectMany(e => e.Attributes().Where(a => a.Name.LocalName != "Condition").Select(a => a.Value)
+                .Concat(e.HasElements ? Enumerable.Empty<string>() : new[] { e.Value }))
+            .ToList();
+
+    [DataTestMethod]
+    [DataRow("Main/TAOM.csproj")]
+    [DataRow("Client/TAOM.Client.csproj")]
+    [DataRow("Dependencies/TAOM.Dependencies.csproj")]
+    public void NoRepoTarget_WritesIntoAGamingDesktopFolder(string project)
+    {
+        var writers = ValuesThatCouldWrite(project).Where(v => v.Contains("Gaming.Desktop")).ToList();
+
+        Assert.AreEqual(0, writers.Count,
+            "Game Pass is not supported (Mike, 2026-10-22); no target stages, deploys or deletes in a Gaming.Desktop folder: "
+            + string.Join(" | ", writers));
+    }
+
+    [TestMethod]
+    public void NoRepoTargetScan_SeesAWriteThroughAnItem()
+    {
+        var path = System.IO.Path.GetTempFileName();
+        try
+        {
+            System.IO.File.WriteAllText(path, "<Project><Target Name=\"T\"><ItemGroup><F Include=\"a\\Gaming.Desktop\\x\" />"
+                + "</ItemGroup><Error Condition=\"Exists('Gaming.Desktop')\" Text=\"Gaming.Desktop\" /></Target></Project>");
+            var values = XDocument.Load(path).Descendants().Where(t => t.Name.LocalName == "Target")
+                .SelectMany(t => t.Descendants()).Where(e => e.Name.LocalName is not ("Error" or "Message"))
+                .SelectMany(e => e.Attributes().Where(a => a.Name.LocalName != "Condition").Select(a => a.Value))
+                .ToList();
+
+            Assert.AreEqual(1, values.Count(v => v.Contains("Gaming.Desktop")), "The item Include is scanned; the Error is exempt.");
+        }
+        finally
+        {
+            System.IO.File.Delete(path);
+        }
+    }
+
+    private static XElement GuardTarget() => Target("Client/TAOM.Client.csproj", "DeployTaomClientToTaomModule");
+
+    private static string Attr(XElement e, string name) => (string?)e.Attribute(name) ?? "";
+
+    [TestMethod]
+    public void ClientCsproj_Deploy_FailsWhenTheInstalledCoreDiffersFromTheBuiltOne_BeforeAnyCopy()
+    {
+        var target = GuardTarget();
+
+        // The Error compares the hash of the core the client was BUILT against with the INSTALLED one. Exact property
+        // names: an Error comparing a hash with itself would pass every other check here.
+        var error = target.Descendants("Error").Single(e => Attr(e, "Condition") == "'$(_TaomBuiltCoreHash)' != '$(_TaomInstalledCoreHash)'");
+        StringAssert.Contains(Attr(error, "Text"), "TAOM");
+        StringAssert.Contains(Attr(error, "Text").ToLowerInvariant(), "rebuild");
+
+        var hashes = target.Descendants().Where(e => e.Name.LocalName == "GetFileHash").ToList();
+        var built = hashes.Single(h => Attr(h, "Files") == "@(_TaomBuiltCore)");
+        Assert.AreEqual("_TaomBuiltCoreHash", (string?)built.Element("Output")!.Attribute("PropertyName"));
+        var installed = hashes.Single(h => Attr(h, "Files") == "$(_TaomInstalledCore)");
+        Assert.AreEqual("_TaomInstalledCoreHash", (string?)installed.Element("Output")!.Attribute("PropertyName"));
+
+        var props = target.Descendants("PropertyGroup").Elements().ToDictionary(p => p.Name.LocalName, p => p.Value);
+        StringAssert.EndsWith(props["_TaomInstalledCore"], @"Win64_Shipping_Client\TAOM.dll");
+        Assert.IsTrue(target.Descendants("_TaomBuiltCore").Any(i => Attr(i, "Include") == "@(ReferencePath)"),
+            "The built core is the client's own resolved ProjectReference output, not an installed file.");
+
+        var firstCopy = target.Descendants("Copy").First();
+        Assert.IsTrue(error.IsBefore(firstCopy), "The guard runs before the first copy.");
+        Assert.IsTrue(hashes.All(h => h.IsBefore(firstCopy)), "The hashes are taken before the first copy.");
+    }
+
+    [TestMethod]
+    public void ClientCsproj_Deploy_FailsWhenTheInstalledCoreIsMissing_BeforeHashingIt()
+    {
+        var target = GuardTarget();
+
+        // Main's CopyBinariesWindows has already deployed the core whenever this target runs, so a missing core
+        // means Main was skipped. Hashing a missing file would fail with a worse message.
+        var error = target.Descendants("Error").Single(e => Attr(e, "Condition") == "!Exists('$(_TaomInstalledCore)')");
+        var text = Attr(error, "Text");
+        StringAssert.Contains(text, "Visual Studio's up-to-date check");
+        StringAssert.Contains(text, "--no-dependencies");
+        StringAssert.Contains(text.ToLowerInvariant(), "another build");
+        var installedHash = target.Descendants().Single(e => e.Name.LocalName == "GetFileHash" && Attr(e, "Files") == "$(_TaomInstalledCore)");
+        Assert.IsTrue(error.IsBefore(installedHash));
+    }
+
+    [TestMethod]
+    public void ClientCsproj_Deploy_FailsWhenTheEditorCoreDiffersFromTheBuiltOne()
+    {
+        var target = GuardTarget();
+
+        var props = target.Descendants("PropertyGroup").Elements().ToDictionary(p => p.Name.LocalName, p => p.Value);
+        StringAssert.EndsWith(props["_TaomEditorCore"], @"Win64_Shipping_wEditor\TAOM.dll");
+        var hash = target.Descendants().Single(e => e.Name.LocalName == "GetFileHash" && Attr(e, "Files") == "$(_TaomEditorCore)");
+        StringAssert.Contains(Attr(hash, "Condition"), "Exists('$(_TaomEditorCore)')", "No editor bin yet is not a failure.");
+        Assert.AreEqual("_TaomEditorCoreHash", (string?)hash.Element("Output")!.Attribute("PropertyName"));
+
+        var error = target.Descendants("Error").Single(e =>
+            Attr(e, "Condition") == "Exists('$(_TaomEditorCore)') AND '$(_TaomBuiltCoreHash)' != '$(_TaomEditorCoreHash)'");
+        StringAssert.Contains(Attr(error, "Text").ToLowerInvariant(), "rebuild");
+        Assert.IsTrue(error.IsBefore(target.Descendants("Copy").First()));
+    }
+
+    [DataTestMethod]
+    [DataRow("Main/TAOM.csproj")]
+    [DataRow("Dependencies/TAOM.Dependencies.csproj")]
+    public void Csproj_FailsWhenAGamePassBinIsStagedUnderModule(string project)
+    {
+        // Bannerlord.BuildResources' CopyModule deploys everything under _Module, so a Gaming.Desktop folder left by an
+        // older checkout would reach the install. Same condition as CopyModule's, not DisableModuleCopy.
+        var target = Target(project, "FailOnGamePassStagingInModule");
+
+        Assert.AreEqual("PostBuildCopyToModules", Attr(target, "BeforeTargets"));
+        Assert.AreEqual("'$(ModuleId)' != '' AND Exists('$(GameFolder)')", Attr(target, "Condition"));
+        var error = target.Descendants("Error").Single();
+        StringAssert.Contains(Attr(error, "Condition"), @"Exists('$(ProjectDir)_Module\bin\Gaming.Desktop.x64_Shipping_Client\')");
+        StringAssert.Contains(Attr(error, "Text").ToLowerInvariant(), "delete");
+        StringAssert.Contains(Attr(error, "Text"), "Game Pass is not supported");
     }
 
     [TestMethod]
@@ -127,24 +255,6 @@ public class ClientDeploymentTests
 
         Assert.AreEqual("PostBuildCopyToModules", (string?)target.Attribute("AfterTargets"),
             "The source bin is only populated once Bannerlord.BuildResources has copied into it.");
-    }
-
-    [TestMethod]
-    public void MainCsproj_GamePassTaomClientDelete_RunsOnCopyModulesCondition()
-    {
-        var targets = XDocument.Load(RepoPath("Main", "TAOM.csproj")).Descendants()
-            .Where(t => t.Name.LocalName == "Target"
-                        && (((string?)t.Attribute("BeforeTargets") ?? "").Contains("PostBuildCopyToModules")
-                            || ((string?)t.Attribute("AfterTargets") ?? "").Contains("PostBuildCopyToModules")))
-            .Where(t => StaleClientDeletes(t, "Gaming.Desktop.x64_Shipping_Client").Count == 1)
-            .ToList();
-
-        Assert.AreEqual(1, targets.Count,
-            "The additive CopyModule fills the installed Gaming.Desktop bin from Main/_Module/bin, so a stale TAOM.Client survives there.");
-        var condition = (string?)targets[0].Attribute("Condition") ?? "";
-        StringAssert.Contains(condition, "ModuleId");
-        Assert.IsFalse(condition.Contains("DisableModuleCopy"),
-            "CopyModule writes TAOM.dll into the Game Pass bin even with DisableModuleCopy=true, so the delete must not be gated on it.");
     }
 
     [TestMethod]

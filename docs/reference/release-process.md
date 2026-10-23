@@ -96,8 +96,9 @@ Use `/release`. It runs the sequence below and fails closed on the #371 pairing 
    The gate reads every `bin/<platform>/` copy of `TAOM.dll`, `TAOM.Client.dll` and
    `TAOM.Dependencies.dll`, refuses a `TAOM.Client.dll` in a `bin/Win64_Shipping_Server/` (ADR-013), and
    refuses a tag whose `Directory.Build.props` predates the `.dirty` flag. It requires
-   `TAOM.Client.dll` only where the shipped `SubModule.xml` names it, so a tag cut before ADR-013
-   still gates, and `Win64_Shipping_Client` must hold every named assembly, and any other client bin that holds one of them must hold them all. Every run also prints three reports that never refuse and never change the exit code:
+   `TAOM.Client.dll` only where the release commit's `SubModule.xml` (`git show <sha>:Main/_Module/SubModule.xml`)
+   names it, so a tag cut before ADR-013 still gates, refuses when the installed `SubModule.xml` names a
+   different set of assemblies than that commit's or does not parse, and `Win64_Shipping_Client` must hold every named assembly, and any other client bin that holds one of them must hold them all. Every run also prints three reports that never refuse and never change the exit code:
    one line per shipped `<module>/SceneObj/<scene>` saying whether `ShaderCache/D3D11/` holds
    `terrain_shaders_header_data.bin` and `compressed_shader_cache.sack`, with the sack's format, a
    summary line and a `WARNING` for any sack whose format differs from the majority of the shipped
@@ -143,8 +144,10 @@ Use `/release`. It runs the sequence below and fails closed on the #371 pairing 
      or the tag's build writes. The build writes
      `TAOM.dll`, `TAOM.pdb`, `DryIoc.dll`, `Newtonsoft.Json.dll` and
      `System.Runtime.CompilerServices.Unsafe.dll` into TAOM (plus `TAOM.Client.dll` and
-     `TAOM.Client.pdb` into its `Win64_Shipping_Client`, `Win64_Shipping_wEditor` and
-     `Gaming.Desktop.x64_Shipping_Client`, never `_Server`: the server mirror excludes them), and `TAOM.Dependencies.dll`,
+     `TAOM.Client.pdb` into its `Win64_Shipping_Client` and `Win64_Shipping_wEditor`, never `_Server`: the
+     server mirror excludes them; Game Pass is not supported, so nothing is built for
+     `Gaming.Desktop.x64_Shipping_Client` and the packager refuses any such folder an older install
+     or channel folder still holds, so delete it first), and `TAOM.Dependencies.dll`,
      `TAOM.Dependencies.pdb`, `0Harmony.dll`, `Bannerlord.UIExtenderEx.dll`, `MCMv5.dll` and
      `System.Runtime.CompilerServices.Unsafe.dll` into TAOM.Dependencies. That is each project's
      `bin/Debug/net472/` output, every runtime DLL its packages bring in (the other packages are

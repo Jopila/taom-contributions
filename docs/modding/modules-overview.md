@@ -64,9 +64,10 @@ Three facts to carry into the module table:
   `Path.Combine(FolderPath, "bin", Common.ConfigName)` (`Module.cs:1044`), and `Common.ConfigName` is
   the process's working directory name (`Common.cs:37`): `Win64_Shipping_Client` for the game,
   `Win64_Shipping_wEditor` for the Modding Kit, `Win64_Shipping_Server` for a dedicated server. The
-  deployed `TAOM` therefore carries four `bin/` subfolders (Client 10 files, wEditor 12, Server 10,
-  Gaming.Desktop 4) and `TAOM.Dependencies` three populated ones (Client 42, Server 42, Gaming.Desktop 3,
-  wEditor 0). <!-- measured: for d in "<game>/Modules/TAOM/bin"/*; do ls "$d" | wc -l; done (and the same for TAOM.Dependencies) 2026-09-05 -->
+  deployed `TAOM` therefore carries three `bin/` subfolders (Client 10 files, wEditor 12, Server 10)
+  and `TAOM.Dependencies` two populated ones (Client 42, Server 42, wEditor 0). Game Pass is not supported
+  (2026-10-22): an install built earlier keeps a stale `Gaming.Desktop.x64_Shipping_Client` folder (4 files
+  for `TAOM`, 3 for `TAOM.Dependencies`) that no build writes and the packager refuses. <!-- measured: for d in "<game>/Modules/TAOM/bin"/*; do ls "$d" | wc -l; done (and the same for TAOM.Dependencies) 2026-09-05 -->
 - **Data registers before any DLL loads.** `LoadSubModules` calls `GetMbprojxmls` then
   `GetXmlListAndApply` for every module (`Module.cs:1029-1033`) before it loads a single assembly, so a
   module with an empty `<SubModules/>` still registers all of its XML.
@@ -308,7 +309,7 @@ The chain the project expects, from [coop-interop](../features/coop-interop.md) 
 **The four alias stubs are invisible to the vanilla launcher as deployed.** `DeployTAOMDependenciesStubs`
 copies `Stubs/**/SubModule.xml` preserving the `_Module` segment (`Dependencies/TAOM.Dependencies.csproj:90-103`),
 so the deployed `Modules/Bannerlord.Harmony/` contains only `_Module/SubModule.xml`, one level below
-where `GetPhysicalModules` looks (`ModuleHelper.cs:327-330`). <!-- measured: ls -R "<game>/Modules/Bannerlord.Harmony" 2026-09-05 -->
+where `GetPhysicalModules` looks (`ModuleHelper.cs:364-376, v1.5.5`). <!-- measured: ls -R "<game>/Modules/Bannerlord.Harmony" 2026-09-05 -->
 None of the 14 `<Id>` rows in `LauncherData.xml` is a stub id; the four stub DLL names do occur there,
 4 times, but only as `<DLLName>` rows under `<DLLCheckData>`, the DLL check, not the module list. <!-- measured: grep -c "<Id>Bannerlord\.\(Harmony\|ButterLib\|UIExtenderEx\|MBOptionScreen\)<" LauncherData.xml returns 0 (the only Bannerlord.* id row is Bannerlord.Diplomacy); grep -n "Bannerlord\.\(Harmony\|ButterLib\|UIExtenderEx\|MBOptionScreen\)" returns 4 DLLName lines 2026-09-05 -->
 So `<DefaultModule value="true" />` at `Stubs/Bannerlord.Harmony/_Module/SubModule.xml:47` cannot tick
@@ -383,11 +384,10 @@ block is marked as an excerpt rather than an example.
 ```
 
 1. `<DLLName value="TAOM.dll" />` is probed at `bin\Win64_Shipping_Client` and loaded from
-   `bin/<ConfigName>`; `Main/TAOM.csproj:191-202` and `:216-228` mirror the client folder into the
+   `bin/<ConfigName>`; `Main/TAOM.csproj:181-192` and `:206-218` mirror the client folder into the
    editor and server folders. The server mirror excludes `TAOM.Client.*` and deletes stale copies;
-   the editor mirror deletes a stale `TAOM.Client.*` from the editor bin (`:196,199`), and
-   `DeleteStaleGamePassTaomClient` (`:153-159`) deletes it from the Game Pass bin.
-   `Client/TAOM.Client.csproj:91-105` deploys `TAOM.Client.dll` and its available `.pdb` to the three
+   the editor mirror deletes a stale `TAOM.Client.*` from the editor bin (`:186,189`).
+   `Client/TAOM.Client.csproj:97-130` deploys `TAOM.Client.dll` and its available `.pdb` to the two
    client/editor folders only. Its entry point is `TAOM.Client.ClientSubModule`.
 2. `<Tag key="DedicatedServerType" value="none" />` is the vanilla `SandBox` pair; any other value
    forces the DLL to count as certified (`SubModuleInfo.cs:87-90`), so shipping server binaries does
@@ -545,7 +545,7 @@ All measured 2026-09-05 on this machine; the game install is referred to as `<ga
 - `ModuleData` file counts: repo 367, deployed 371 (`find -type f | wc -l`); XML / XSLT: `Main` 284 / 8, `LOTRLOME_Armory` 425 / 8, `TAOM_Map` 44 / 1 (`find -name "*.xml" | wc -l`, `-name "*.xslt"`).
 - Repo module folders: `Main/_Module/bin` 7 files, `Dependencies/_Module/bin` 42, 4 stub manifests under `Stubs/`, and no `TAOM_Map` or `LOTRLOME_Armory` module directory anywhere under the repo root: `find <path> -type f | wc -l`, `find Stubs -name SubModule.xml | wc -l`, `find . -type d -name <name>`.
 - Modules owning a `SceneObj/Main_map`: 3 (`NavalDLC`, `SandBox`, `TAOM_Map`): a `test -d "$d/SceneObj/Main_map"` loop over `<game>/Modules`.
-- Deployed `bin/` folders: `TAOM` Client 10, wEditor 12, Server 10, Gaming.Desktop 4; `TAOM.Dependencies` Client 42, Server 42, wEditor 0, Gaming.Desktop 3: `ls <folder> | wc -l`.
+- Deployed `bin/` folders: `TAOM` Client 10, wEditor 12, Server 10; `TAOM.Dependencies` Client 42, Server 42, wEditor 0 (plus a stale Gaming.Desktop folder, 4 and 3 files, on installs built before 2026-10-22): `ls <folder> | wc -l`.
 - Sizes: `TAOM` 6,147 MB (RuntimeDataCache 5,141); `TAOM.Dependencies` 46 MB (bin 42); `TAOM_Map` 56,404 MB (RuntimeDataCache 21,205, AssetSources 15,286, AssetPackages 12,859, Assets 3,929, SceneEditData 2,219, SceneObj 735, ModuleData 14); `LOTRLOME_Armory` 35,595 MB (AssetSources 18,415, RuntimeDataCache 12,978, Assets 4,148, ModuleData 22): `du -sm "<game>/Modules/<Id>"` and `du -sm "<game>/Modules/<Id>"/*`.
 - Release dry run: ships 23.94 GB of 95.84 GB, drops 71.91 GB (RUNTIME_DATA_CACHE 38.38, ASSET_SOURCES 33.44, PREFABS_UNUSED 0.05, NATIVE_DEBUG 0.03), per module `TAOM` 0.41 GB / 2,277 files, `TAOM_Map` 19.39 / 2,519, `LOTRLOME_Armory` 4.10 / 4,990, `TAOM.Dependencies` 0.04 / 142, candidates RACE_TEST 0.96 GB and EM_ASSET_PACKAGES 0.0 GB: `python tools/package_release.py --source "<game>/Modules" --dest <scratch> --dry-run`.
 - Backup sweep dry run: 40 files, 441.9 MB (repo `Main/_Module` 9, deployed `TAOM` 9, `LOTRLOME_Armory` 13, `TAOM_Map` scene backups 9 at 437.3 MB), 0 orphans: `pwsh tools/sweep_module_backups.ps1`.

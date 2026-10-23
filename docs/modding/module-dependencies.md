@@ -300,7 +300,7 @@ exactly that one file and nothing at its root. <!-- measured: find "<game>/Modul
 Those deployed folders live in the game install, not the repo; a module reinstall reverts hand edits,
 so land a repo-side change and redeploy rather than editing them in place.
 `ModuleHelper.GetPhysicalModules` looks for `SubModule.xml` at the folder root and skips the folder
-otherwise (`ModuleHelper.cs:327-331`), and vanilla `Native/SubModule.xml` sits at the root. So
+otherwise (`ModuleHelper.cs:364-376, v1.5.5`), and vanilla `Native/SubModule.xml` sits at the root. So
 the vanilla engine does not see the four stubs at all. That matches the observation recorded at
 `Dependencies/SubModule.cs:205-211` that the launcher never constructs `AliasStubSubModule`, and it
 means the "auto-tick so third-party mods are not greyed out" purpose in
@@ -800,7 +800,7 @@ Code: No code changes needed
 
 - **The four alias stubs deploy to `Modules/<Id>/_Module/SubModule.xml`, one level too deep for the
   engine**, which requires `Modules/<Id>/SubModule.xml` and skips the folder otherwise. On the vanilla
-  launcher the stubs are invisible (`ModuleHelper.cs:327-331`; `Dependencies/TAOM.Dependencies.csproj:99-101`;
+  launcher the stubs are invisible (`ModuleHelper.cs:364-376, v1.5.5`; `Dependencies/TAOM.Dependencies.csproj:99-101`;
   the deployed folders listed on this machine).
 - **`-p:DisableModuleCopy=true` does not stop deployment.** `CopyBinariesWindows` and `CopyModule`
   fire regardless; the game holds `0Harmony.dll` and `Bannerlord.ButterLib.dll`, so a build with the
