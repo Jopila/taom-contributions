@@ -32,11 +32,36 @@ code or the v1.5.5 decompile before it was fixed. The raw Codex outputs are in `
 
 - **A copy of the region's rows without the exact markers passes `--check` (Codex re-review 2, rated HIGH).**
   Rejected for `upsert`: no marker parser can see a copy without markers, and the old code saw it only because
-  re-appending moved the real block, which is the false positive #947 removes. The real gap is that nothing
-  catches a repeated `Faction`, `Hero` or `Kingdom` id (`DUPLICATE_NPC_ID` covers lords only). Follow-up: three
-  JSON schemas for `taom_schema.py`; the files are clean today (15 Kingdom, 157 Faction, 1,049 Hero ids).
+  re-appending moved the real block, which is the false positive #947 removes. A repeated id is the real
+  defect, and it is already caught: `SCHEMA_INVALID` validates these files against the engine XSDs, which
+  declare `Faction`, `Hero` and `Kingdom` ids unique (`xs:unique`), and `DUPLICATE_NPC_ID` covers lords. This
+  RCA first said nothing caught them; #974 was filed on that claim, and its review proved it wrong. #974 added
+  `EngineIdUniquenessTests` to pin the existing check instead of a second gate.
 - **`generate_arthedain_troops.py` `upsert_templates` has finding 1's defect** (second-wave Tooling lens). Latent:
-  one region today. Follow-up.
-- **`promote_borrowed_cultures.py` and `insert_new_factions.py` still strip and re-append.** Follow-up.
-- **The #958 map-bar entry stays after a hero loses the resource** (Data flow lens; older than #958, reachable
-  through Player Switcher to a goblin, mistymountainorcs, bluecraig or lindon lord). Follow-up.
+  one region today. Fixed in #975 (`tools/_marker_region.py`).
+- **`promote_borrowed_cultures.py` and `insert_new_factions.py` still strip and re-append.** Fixed in #976.
+- **The #958 map-bar entry stays after a hero loses the resource** (Data flow lens; older than #958). Fixed in #977.
+  Reachable when the hero leaves a resource kingdom with a culture that has none (goblin, mistymountainorcs,
+  bluecraig, lindon), through vanilla heir succession, or the `campaign.set_hero_culture` cheat. Not through
+  Player Switcher, as first written here: it runs only during character creation, before the map bar exists.
+
+## Follow-up batch (#974 to #977, #979, same day)
+
+The maintainer asked for the four follow-ups above to be fixed and closed. Each was reviewed at tier 2 (Codex
+`xhigh` plus the Tooling or Data flow lens). Findings:
+
+| # | Sev | Finding | Category | Why missed | Preventive action |
+|---|---|---|---|---|---|
+| F1 | MED | #974's premise was wrong: `SCHEMA_INVALID` already blocks a repeated `Faction`, `Hero` or `Kingdom` id at commit, because the engine XSDs declare the id unique. The three new duplicate-id schemas only reported each duplicate twice, and flagged commented-out rows the engine skips (#974 Tooling lens) | A gate added without checking for an existing one | The claim came from the #947 review (Codex re-review 2) and was relayed into this RCA, a lesson and two docs unprobed | Schemas removed; `EngineIdUniquenessTests` pins the engine check; docs corrected. New lesson in `lessons/build-tooling-workflow.md` |
+| F2 | MED | #977's in-game test used Player Switcher, which runs only during character creation, before the map bar exists, so the test passed on the old code (#977 Data flow lens) | A verification route not traced to the code it exercises | The route came from the #958 review and was not checked against `PlayerSwitchRegistrationBehavior` | Issue and this RCA corrected: the `campaign.set_hero_culture` cheat, or heir succession. One-off |
+| F3 | HIGH | Pre-existing, filed as #979: `promote_borrowed_cultures.py --apply` would write an unparseable `taom_module_strings.xml` and stop half-way, because it parsed each file after writing it and its strings extractor copies multi-line rows line by line (#975/#976 Tooling lens) | Write-then-parse | The script's `--check` compares bytes and never parses | Both writer scripts parse every output before writing any; the extractor fix stays open in #979. README convention bullet |
+| F4 | LOW | Docstrings in `promote_borrowed_cultures.py`, `insert_new_factions.py` and the regions test still described strip-and-re-append, and the regions test misnamed the remaining drift (#975/#976 Tooling lens) | Docs not swept with the code | The callers' docstrings were outside the edited functions | Reworded |
+| F5 | LOW | `gui-sprite-system.md` lacked the removal step (#977 Data flow lens) | A REPEAT of finding 7 above | Only `special-resources.md` was updated | Line added |
+| F6 | MED | The first #979 guard in `insert_new_factions.py` left `SubModule.xml` outside it: built and written after the eight guarded files (Codex) | A guard placed before the list was complete | The guard was added where the old loop stood | `SubModule.xml` is built first and joins the guarded list; a source-order test pins it |
+| F7 | MED | `EngineIdUniquenessTests` matched registrations as raw text, so a commented-out registration passed (Codex) | A gate test reading text instead of what the gate reads | A REPEAT of the B4c lesson "A source-text gate must fail on the wrong code" | Asserts the `(file, id)` pairs `validate_xml_schemas.registered_files` resolves |
+
+Rejected: a check that a block passed to `replace_region` carries its own marker (#975/#976 Tooling lens, T4). Every
+caller builds the block from the same marker variable, and a mismatch fails that caller's first test: a tiny win
+for added code. Still open: #979's extractor fix (whole `<string>` elements, and which Arthedain liege title
+wins), and two hero ids, `lord_6_23` and `lord_6_24`, that both `heroes.xslt` and `characters/heroes.xml`
+define, so the XML's text wins the engine merge (#974 Data flow lens; needs the maintainer's choice of bio).

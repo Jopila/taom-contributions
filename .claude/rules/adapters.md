@@ -61,8 +61,9 @@ requested on the wrong monster is a TAOM log line, not a native warning of unkno
 
 - **Relations live on the owner the active DiplomacyModel returns** (`GetHeroesForEffectiveRelation`): his clan leader
   under the vanilla mapping and in co-op; the lord himself for the player's own pairs under Personal Relations (single
-  player, on by default; AI-to-AI pairs stay on clan leaders).
-  `ChangeRelationAction` ignores `affectRelatives`. Key a penalty list on that owner, strongest delta once per owner,
+  player, on by default; AI-to-AI pairs stay on clan leaders). Under the vanilla mapping a clanless hero and a member
+  of the player's clan (companions included) own their own relation.
+  `ChangeRelationAction` ignores `affectRelatives`; never pass it as true (`AffectRelativesGateTests`, #923). Key a penalty list on that owner, strongest delta once per owner,
   and list every lord the deed should cost: never drop a hit because today's mapping merges it.
 - **A write made in a conversation opened from the party screen is reverted by Escape** (`PartyScreenData.ResetUsing`):
   after a roster, inventory or hero-state write, commit the screen with `PartyScreenLogic.DoneLogic(true)`.

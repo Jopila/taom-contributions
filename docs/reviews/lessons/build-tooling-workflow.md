@@ -4331,5 +4331,11 @@ UIExtenderEx's `Register(Assembly)` reads the types of the one assembly it is gi
 ### A fix that removes a false positive must keep what the old code caught by accident (#947, 2026-10-23)
 `generate_new_faction_kingdoms.py` deleted every copy of its marker region and re-appended one, so a block added after it read as drift. The first in-place fix replaced only the first region, and that also silenced the case the strip-all code had caught: a stale second copy, which the engine loads last and so wins. Two more re-reviews found the same hole in other shapes (an orphan END, a missing closing tag).
 - **Why missed:** the fix was tested against the one false positive it removed, not against the damage the old behaviour happened to report.
-- **Prevent:** before you narrow what a gate or a writer matches, list every input the old code rejected or changed, and keep a test that each one still fails. For a marker region, count BEGIN and END and refuse anything but zero or one complete region.
+- **Prevent:** before you narrow what a gate or a writer matches, list every input the old code rejected or changed, and keep a test that each one still fails. For a marker region, write through `tools/_marker_region.py` `replace_region` (#975), which counts BEGIN and END and refuses anything but zero or one complete region.
 - **Source:** [rca-ui-data-sweep-2026-10-23.md](../rca-ui-data-sweep-2026-10-23.md) findings 1 to 3.
+
+### Before you add a gate, prove no gate already catches the case (#974, 2026-10-23)
+A review said nothing caught a repeated clan, hero or kingdom id, and the claim went into an RCA, a lesson, two docs and an issue, then three new duplicate-id schemas. The next review showed `SCHEMA_INVALID` already blocked it at commit: the engine XSDs declare those ids unique (`xs:unique`), and the hook validates the registered files against them. The schemas only reported each duplicate twice and were removed.
+- **Why missed:** the claim was relayed from a reviewer without a probe; the schema JSON files looked like the only duplicate-id source.
+- **Prevent:** before writing a new check, break a copy of the real file the way the check targets and run the existing gate (`validate_moduledata.py`, which includes the engine XSD layer). Write the gate only if that run passes. Pin an existing protection with a test instead (`EngineIdUniquenessTests`).
+- **Source:** [rca-ui-data-sweep-2026-10-23.md](../rca-ui-data-sweep-2026-10-23.md) follow-up batch.

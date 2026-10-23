@@ -198,13 +198,14 @@ That is survivable rather than broken, because an undeclared pair defaults to ne
 mean the new realms open at peace with everyone who was there first. The mechanism is in
 [kingdoms](kingdoms.md).
 
-Every insertion is wrapped in a marker pair by the script's `upsert` helper
-(`generate_new_faction_kingdoms.py`), so a re-run replaces its own previous block where it stands instead
-of duplicating it, and refuses a file that holds two of its marker regions or a lone BEGIN or END (a copy
-of the rows without the exact markers is not caught: `validate_moduledata.py` `DUPLICATE_NPC_ID` catches a
-repeated lord, and nothing yet catches a repeated clan, hero or kingdom). If you open `characters/clans.xml` and find `<!-- TAOM-NEWFACTIONS:goblin:BEGIN -->`
-above a run of clans, that run is generated. Edit the script, not the block, or the next run throws
-your edit away.
+Every insertion is wrapped in a marker pair by `tools/_marker_region.py` (`replace_region`), so a re-run
+replaces its own previous block where it stands instead of duplicating it, and refuses a file that holds
+two of its marker regions or a lone BEGIN or END (#947, #975). A copy of the rows without the exact markers
+is caught by `validate_moduledata.py` instead: `SCHEMA_INVALID` for a repeated clan, hero or kingdom (the
+engine XSDs declare the id unique, #974) and `DUPLICATE_NPC_ID` for a repeated lord. A `<!-- TAOM-NEWFACTIONS:<kingdom>:BEGIN -->` run in
+`characters/clans.xml` is generated. For `arthedain`, the one kingdom the script still regenerates, edit
+the script, not the block, or the next run throws your edit away. The older blocks (goblin,
+mistymountainorcs, bluecraig, lindon) are no longer regenerated (below), so they are edited by hand.
 
 **Since 2026-10-07 the script requires `--only <kingdom>`.** Lindon's clans and lords were retagged
 to `Culture.lindon` and given their own party templates after generation, and its table entry still
