@@ -1377,3 +1377,15 @@ matched, and no guest was ever charged.
 - **Prevent:** trace an id from another mod to the code that writes it, and write the test with a value of that real
   shape. Normalise it at the boundary (here `CoopRecruitAttributionPatch.ToPartyStringId`), and log once on a miss.
 - **Source:** [rca-coop-player-attribution-2026-10-21.md](../rca-coop-player-attribution-2026-10-21.md) finding 1.
+
+### Before adding "missing" behaviour, trace what the live path's own vanilla calls already do (#971, 2026-10-23)
+#971 said the career button's click sound never plays, because the mixin method that held it was never added to the
+view model. The live handler, the Patch27 postfix, already called `CharacterDeveloperVM.ExecuteDone`, whose close callback
+(`GauntletCharacterDeveloperScreen.CloseCharacterDeveloperScreen`) plays the same `event:/ui/default`. The first fix
+added a second call and doubled the sound.
+- **Why missed:** the issue proved the dead copy was dead (the UIExtenderEx attribute filter, the brush) and inferred
+  the effect was absent, without reading the vanilla methods the live path calls.
+- **Prevent:** when an issue says "X never happens", find the path that runs and read each vanilla call it makes, one
+  level into callbacks, before adding X. An in-game check on the old build settles it in seconds; ask for one when the
+  trace is not conclusive.
+- **Source:** [rca-career-click-sound-971-2026-10-23.md](../rca-career-click-sound-971-2026-10-23.md) finding 1.

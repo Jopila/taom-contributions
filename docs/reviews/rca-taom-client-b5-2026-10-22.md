@@ -27,8 +27,9 @@ prompt `docs/reviews/codex-adversarial-taom-client-b5-2026-10-22.prompt.md`.
 | 9 | LOW | `string?` only on the client-called special-resource members | Inconsistent annotation | Annotated to fix one compile error | Every id parameter and null return annotated; no cascade |
 
 Not changed, recorded: the career button's mixin click handler has no `[DataSourceMethod]` (removed in
-`19201d793`), so UIExtenderEx never adds it; core Patch27 handles the click and the #378 click sound never
-plays. Pre-existing; a follow-up issue.
+`19201d793`), so UIExtenderEx never adds it; core Patch27 handles the click. Pre-existing; a follow-up issue (#971).
+Corrected by #971 on 2026-10-23: the click was never silent, because the postfix's `ExecuteDone` runs
+vanilla's close callback, which plays the same `event:/ui/default`; only the mixin's own copy was dead.
 
 ## Why the reviewers found these
 
