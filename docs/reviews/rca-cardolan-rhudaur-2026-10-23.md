@@ -98,3 +98,10 @@ Lens 5 and lens 7 at tier 2. Fixed in the same commit unless marked open:
 | P3 | LOW | The ranged and infantry section comments said "placeholder mount" on rosters with no mount | Template comment written once for all three archetypes | Fixed |
 | P4 | LOW, open | `wire_starter_kit_rosters.py` `BORROW` still builds Khand's no-career start from Rhûn's kit, now duplicating `KIT_SOURCE` | Two tables encode one fact | Output is identical today; removing `BORROW` touches the tool, its tests and the override header, so it waits until Khand has gear of its own (#571) |
 | P5 | LOW, open | Lothlorien and Lindon archers start with a Rivendell ladder bow that needs Bow 100, as Rivendell's own kit already does | Elf troops carry no javelin, so the rule cannot pick another weapon | A decision for Mike: lower the elven ladder bows' difficulty, or accept it |
+
+## Career mounts (Mike, 2026-10-23: compare the horses, then the harnesses)
+
+| # | Sev | Finding | Why missed | Preventive action |
+|---|---|---|---|---|
+| M1 | MED | Dunland's cavalry kit took `bandit_saddle_highland`, vanilla `battania`'s harness, under a rule that said "the harness vanilla gives the culture"; Dunland is vanilla `empire`, whose retainer rides the light harness | **Repeat** of the trap index row "Culture ids": the lore name (Dunland, hill folk) was matched to a vanilla culture by flavour, not by the id the data uses | Caught by lens 7 before commit; Dunland keeps the light harness. When a rule says "vanilla's X for this culture", read the culture's id from `cultures.json` first, then look X up under that id |
+| M2 | LOW | The doc said a culture horse is "still weaker than each culture's lowest rider"; Rohan's level 6 steppe war horse has less maneuver, and Harad's riders are slower than `aserai_horse` | A summary written from tiers, not from the stats it quoted | Reworded to the fact checked: every lowest rider sits on a tier-2 horse or a war horse |
