@@ -1197,3 +1197,18 @@ A cosmetic fault (a half-drawn winner panel, one missing agent) became a hang.
   throw and the next catcher, from the installed IL, and say what each one leaves half done. Inside a mission tick, a
   rethrow is never safer than a swallow.
 - **Source:** [rca-coop-safety-nets-2026-10-21.md](../rca-coop-safety-nets-2026-10-21.md) finding 1.
+
+### Patch the method that writes the value, not one of its callers (Banner Color Persistence, #973, 2026-10-23)
+The inventory doll's clan colours lived in a postfix on `SPInventoryVM.UpdateCurrentCharacterIfPossible`, one of
+five callers of `UpdateRightCharacter`, which reaches the private colour writer `UpdateCharacterArmorColor` (v1.5.5
+`:4381`, `:4421-4433`). Opening the screen, the outfit toggle, Reset, and TAOM's own panel refresh (#917, #924) all
+repainted the doll in the map faction's colours, so a vassal saw the kingdom's colours after nearly every refresh.
+The same postfix also wrote clan colours over vanilla's fixed stealth colour after a character switch, because
+the caller it hooked had no stealth check. Moving it onto `UpdateCharacterArmorColor` covers every caller and lets
+the guard mirror vanilla's own branch.
+- **Why missed:** the patch was written for the one trigger the author tested (a character switch); nobody listed
+  the callers of the method that actually writes `ArmorColor1/2`. Two later TAOM features then added callers.
+- **Prevent:** when a patch overrides a value the engine writes, find the writer first (grep the decompile for the
+  assignment), list every caller of the writer, and patch the writer unless a caller needs different behaviour.
+  Copy the writer's own branches (here, stealth) into the postfix guard.
+- **Source:** issue #973; found by the Data flow review of #924.
