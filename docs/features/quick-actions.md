@@ -151,7 +151,8 @@ Claims from the CLAUDE.md Key Paths row, verified against the current source (`M
 ## GitHub Issue
 
 - **Issues:** #114 (port, closed), #146 (search toggle, closed), #917 (Unequip All left the open screen stale)
-- **Status:** #917 fixed in code; in-game check owed (Unequip All with the inventory open, then Reset and Cancel)
+- **Issues (2026-10-23):** #925 (the "include equipped" options never acted; removed), #926 (batch sells left sold-out rows at count 0)
+- **Status:** #917, #925 and #926 fixed in code; in-game checks owed (label `triage-needs-ingame`): Unequip All with the inventory open, then Reset and Cancel; Sell Low Value on a full stack; the two options gone from MCM
 
 ---
 

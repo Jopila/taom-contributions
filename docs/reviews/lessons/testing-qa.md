@@ -2176,3 +2176,16 @@ constructor signature, locals) could go and every test stayed green, because `u 
   branch once and watch the fixture test fail. Read the fixture's compiled IL when a shape could leak through an operator,
   a return type or a closure.
 - **Source:** [rca-b7-slice1-map-visuals-2026-10-23.md](../rca-b7-slice1-map-visuals-2026-10-23.md) finding 2.
+### A fake that returns a state the adapter can never produce hides a dead setting (Quick Actions, #925, 2026-10-23)
+Two MCM options, "Sell Damaged Equipped" and "Sell Low Value Equipped", never acted in game. The sells read
+`GetRightPaneItems`, which wraps `SPInventoryVM.RightItemListVM`, and every row there is on the `PlayerInventory`
+side (v1.5.5 `:4519-4522`, `:3885`), so `IInventoryItemAdapter.IsEquipped` was always false. Four unit tests passed
+because they faked `isEquipped: true` on such a row. The options and `IsEquipped` were removed.
+- **Repeat of:** "keep every faked engine value inside the range the engine can hold" (Hard Questions, 2026-10-19,
+  above). The range here is a set of states, not a number.
+- **Why missed:** the fake was written from the setting's hint text ("items currently equipped on heroes"), not from
+  where the adapter's rows come from.
+- **Prevent:** before a test fakes an adapter property, find the engine source of the rows or values the adapter
+  wraps and confirm that the faked state occurs there. When it cannot occur, the feature branch it reaches is dead:
+  report it, do not test it.
+- **Source:** issue #925; first found in `docs/reviews/rca-quickactions-unequip-2026-10-19.md` (follow-ups).

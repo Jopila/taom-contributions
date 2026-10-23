@@ -1181,7 +1181,7 @@ the block.
   (input, event, tick) from them, with the line, in the registry entry and the in-game check.
 - **Source:** `docs/reviews/rca-hidden-hosts-2026-10-19.md` finding 3.
 
-### After a programmatic batch of inventory transfers, refresh the panel with UpdateRightCharacter and RefreshInformationValues (Quick Actions, 2026-10-19)
+### After a programmatic batch of inventory transfers, refresh the panel with UpdateRightCharacter, RefreshInformationValues and ExecuteRemoveZeroCounts (Quick Actions, 2026-10-19; widened 2026-10-23)
 `InventoryLogic.AddTransferCommands` raises `SPInventoryVM.AfterTransfer` per command, which updates the item rows and
 the shown set's slots only. The paper doll, armour, weight, capacity, the no-saddle warning and the Done button are
 refreshed by the private `RefreshInformationValues`, which vanilla's single-transfer handlers call after their one
@@ -1193,8 +1193,12 @@ transfer route with no panel refresh).
   handler that issues transfers to see what it calls after `AddTransferCommands`.
 - **Prevent:** before calling an engine command API from TAOM, read the vanilla callers of that API end to end, note
   what each refreshes after the call, and check that it still holds for TAOM's batch (one command or many). For
-  inventory transfers, call `IInventoryVMAdapter.RefreshDisplay()`, which runs the pair through
-  cached delegates pinned by `ReflectionSiteBindingTests`. EquipPresets still needs the same (follow-up).
+  inventory transfers, call `InventoryVMAdapter.RefreshPanel` (through `IInventoryVMAdapter.RefreshDisplay()` or
+  `IInventoryScreenAdapter.RefreshActiveVM()`), which runs the pair through cached delegates pinned by
+  `ReflectionSiteBindingTests`, then the public `ExecuteRemoveZeroCounts`. The prune matters because a batch that
+  empties a stack leaves the row at count 0 (`AfterTransfer`, `:3853-3856`), and `ProcessSellItem(item, true)` skips
+  vanilla's own prune (`:3565-3568`). EquipPresets used `RefreshValues`, which redraws labels only, until #924;
+  batch sells left count-0 rows until #926.
 - **Source:** `docs/reviews/rca-quickactions-unequip-2026-10-19.md` row 1.
 ### A guard on TAOM's call does not guard the engine's call: pin its precondition in data (Lord Banners, 2026-10-19)
 TAOM checks every formation's heraldry before its own `SetFormationBanner`, because the native banner-tableau rebuild
