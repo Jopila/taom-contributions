@@ -103,3 +103,13 @@ the transcripts hold Mike's words.
   you build a proposal on it.
 - A hook deny is usually the harness working. It is evidence of a problem only when the same deny
   repeats in one session (the agent did not learn from the reason) or the reason was wrong.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/harness-retro-2026-10-21.md](../reviews/harness-retro-2026-10-21.md)
+
+<!-- backlinks-end -->

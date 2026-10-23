@@ -67,3 +67,17 @@ a worktree that still carries the block registers the riders again. The testing 
 2026-10-18 (built from `6553b8c70`) still ships and registers them. Mike kept the number v2.0.35 for this release
 anyway (2026-10-18, overriding `/release` pre-flight 4b): replace that package from the tag build and delete its
 `Modules/TAOM/ModuleData/test_riders/` folder.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/quadruped-pack-to-horse-skeleton-workflow.md](../ai-includes/quadruped-pack-to-horse-skeleton-workflow.md)
+- [docs/features/wildmesh-mounts.md](../features/wildmesh-mounts.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/file-catalogue.md](../modding/file-catalogue.md)
+- [docs/reference/lotrlome-armory-snapshot/README.md](lotrlome-armory-snapshot/README.md)
+
+<!-- backlinks-end -->

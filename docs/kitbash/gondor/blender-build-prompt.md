@@ -180,3 +180,14 @@ asks for, re-export and re-probe. Do not start the next building until he approv
 After each building, update `docs/kitbash/gondor-buildings.md` (buildings table, recipe, probe
 results, review history, deliberate choices, known open) and `design-patterns.md`, append lessons,
 and run `python tools/lint_docs.py`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/kitbash/gondor/README.md](./README.md)
+- [docs/kitbash/README.md](../README.md)
+
+<!-- backlinks-end -->

@@ -667,3 +667,16 @@ for the test host's JIT only).
 - **Issue:** #846 [Hidden Hosts](https://github.com/haterade22/TAOM/issues/846)
 - **Status:** Open (phases 1 to 3 built, in-game check owed)
 - **Issue:** #848 hidden party orders (built, in-game check owed)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

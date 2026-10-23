@@ -66,3 +66,14 @@ for both session states; the daily path did not.
   only on its owner" and "Before adding a check at a call site, read the gate the site already has".
 - `docs/reviews/lessons/testing-qa.md`: "A moved method with a new branch applies the policy on every
   branch" and "A doc that states behaviour is checked against the final code, not the plan".
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/campaign-mechanics.md](lessons/campaign-mechanics.md)
+- [docs/reviews/lessons/testing-qa.md](lessons/testing-qa.md)
+
+<!-- backlinks-end -->

@@ -59,3 +59,13 @@ cases is to look through the other lens: grep the old value, diff the original b
 ## Feedback memories to codify
 
 None beyond the two lessons: both rules are general and belong in `docs/reviews/lessons/build-tooling-workflow.md`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/rca-creature-collision-review-2026-09-18.md](./rca-creature-collision-review-2026-09-18.md)
+
+<!-- backlinks-end -->

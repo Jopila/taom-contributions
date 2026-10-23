@@ -154,6 +154,7 @@ _Most history is in the repository-root `CHANGELOG.md`; this section is the go-f
 
 ## Referenced by
 
+- [docs/features/localization.md](./localization.md)
 - [docs/features/lotr-issues.md](./lotr-issues.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/file-catalogue.md](../modding/file-catalogue.md)

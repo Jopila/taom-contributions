@@ -114,3 +114,17 @@ The pass runs only where a campaign is created and has no load path. See [coop-i
 
 - **Issue:** #952, Haradrim lords may all share one face (widened to every shared-face campaign hero)
 - **Status:** the in-game check is owed: start a new campaign and read the `[LordFaceVariety]` log line, look at the Harad houses, and tune `OwnFaceVariation` if needed.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/body-properties.md](../modding/body-properties.md)
+- [docs/modding/lords-and-heroes.md](../modding/lords-and-heroes.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

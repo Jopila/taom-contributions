@@ -36,6 +36,5 @@ The MCM setting `TaomSettings.EnableNativeSkinFixes` and the strings `taom_nativ
 - [docs/INDEX.md](../INDEX.md)
 - [docs/migration/dr3-maintenance.md](../migration/dr3-maintenance.md)
 - [docs/migration/v1.5.4-impact.md](../migration/v1.5.4-impact.md)
-- [docs/reference/lotrlome-armory-snapshot/README.md](../reference/lotrlome-armory-snapshot/README.md)
 
 <!-- backlinks-end -->

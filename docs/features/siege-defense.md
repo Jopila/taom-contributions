@@ -165,6 +165,7 @@ Changes take effect on next game load (config is loaded at construction).
 
 ## Referenced by
 
+- [docs/features/siege.md](./siege.md)
 - [docs/INDEX.md](../INDEX.md)
 
 <!-- backlinks-end -->

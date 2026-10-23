@@ -165,3 +165,14 @@ than the estimate, which is what lets two capsules fit along it rather than one.
 Per-pass notes with citations (scratch, not committed): `1-crew-on-deck.md`, `2-engine-platform-apis.md`,
 `3-machines-and-combat.md`, `4-ship-assets.md`. The mechanism TAOM ported first:
 [howdah-crew-mechanism.md](howdah-crew-mechanism.md).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/elephant.md](../elephant.md)
+- [docs/reviews/rca-howdah-prefab-review-2026-09-19.md](../../reviews/rca-howdah-prefab-review-2026-09-19.md)
+
+<!-- backlinks-end -->

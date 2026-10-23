@@ -71,3 +71,13 @@ is possible but unproven; the skill's last section says how to try it.
 ## GitHub Issue
 
 Not filed yet (draft 3 in the 2026-10-16 record).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

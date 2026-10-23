@@ -104,6 +104,7 @@ Service: 20 tests (seq/reset semantics, Aggregate/TargetInvocation flattening in
 ## Referenced by
 
 - [docs/INDEX.md](../INDEX.md)
+- [docs/migration/v1.5.4-impact.md](../migration/v1.5.4-impact.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
 
 <!-- backlinks-end -->

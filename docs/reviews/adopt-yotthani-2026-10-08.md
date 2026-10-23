@@ -263,3 +263,24 @@ map-view-release (with your MIT notice). What we changed while porting, in case 
    `HoN/ShaderCacheKeeper` carry one. TAOM carries seven features that began as your HoN mods (SiegeDismount,
    MixedFormations, SmartCavalryAI, FiefManagement, QuickActions, EquipPresets, CompanionTactics) and credits them
    to you under MIT in its `THIRD-PARTY-LICENSES.txt`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/external-repo-adoption.md](../ai-includes/external-repo-adoption.md)
+- [docs/features/companion-tactics.md](../features/companion-tactics.md)
+- [docs/features/map-view-release.md](../features/map-view-release.md)
+- [docs/features/mission-start-guard.md](../features/mission-start-guard.md)
+- [docs/features/nameplate-cull.md](../features/nameplate-cull.md)
+- [docs/features/skeleton-buffer-guard.md](../features/skeleton-buffer-guard.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/engine/mission-frame-threads-and-native-costs.md](../reference/engine/mission-frame-threads-and-native-costs.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reviews/adopt-yotthani-2026-10-15.md](./adopt-yotthani-2026-10-15.md)
+- [docs/reviews/rca-formation-presets-2026-10-09.md](./rca-formation-presets-2026-10-09.md)
+- [docs/reviews/rca-yotthani-adoption-2026-10-08.md](./rca-yotthani-adoption-2026-10-08.md)
+
+<!-- backlinks-end -->

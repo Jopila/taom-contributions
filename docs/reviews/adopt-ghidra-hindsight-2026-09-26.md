@@ -154,3 +154,15 @@ Nothing was ported.
 Both have rows in [`docs/reference/provenance-register.md`](../reference/provenance-register.md):
 Ghidra `interop-only` (TAOM runs the installed tool; no Ghidra code is copied, and nothing from it
 ships), Hindsight `comparison-only`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/ghidra-native-decompile.md](../features/ghidra-native-decompile.md)
+- [docs/reference/development-machines.md](../reference/development-machines.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+
+<!-- backlinks-end -->

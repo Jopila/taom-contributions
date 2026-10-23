@@ -242,3 +242,14 @@ Verification after the convergence fixes:
 VERDICT: READY FOR COMMIT. Step 4 is complete: the convergence pass found four defects in tests and
 review docs, all fixed, and none in runtime code. Every confirmed defect in the changed code is fixed
 except S1 (the ADR-002 split, which needs an issue) and F9 (the issue body), both waiting on Mike.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/rca-enlistment-session-scope-decisions-2026-09-24.md](./rca-enlistment-session-scope-decisions-2026-09-24.md)
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

@@ -267,3 +267,20 @@ as a cause until the code that consumes it, or a third asset that has the differ
 [race page](../community/bannerlordmodding-lt/guides/custom_creature_race.md) "Face and hand morph channels";
 [head-mesh-and-groom-authoring.md](head-mesh-and-groom-authoring.md) (yotthani's FaceLearner: head packages without
 the Kit, the neck seam, the head material, groom on a baked head).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/arena.md](../features/arena.md)
+- [docs/features/troll-race.md](../features/troll-race.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/investigations/upper-mesh-mapping-2026-09-29.md](../investigations/upper-mesh-mapping-2026-09-29.md)
+- [docs/reference/doc-lookup.md](./doc-lookup.md)
+- [docs/reference/head-mesh-and-groom-authoring.md](./head-mesh-and-groom-authoring.md)
+- [docs/reference/lotrlome-armory-snapshot/README.md](lotrlome-armory-snapshot/README.md)
+- [docs/reviews/adopt-yotthani-bannerlord-2026-09-30.md](../reviews/adopt-yotthani-bannerlord-2026-09-30.md)
+
+<!-- backlinks-end -->

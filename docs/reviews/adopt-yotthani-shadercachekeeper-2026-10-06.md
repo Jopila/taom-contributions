@@ -127,3 +127,15 @@ into `Native/ShaderCacheKeeper/` with four fixes (forwarders to a fixed C: path,
 game type, a silently shortened signature), shipped in `bin/Win64_Shipping_Client` through the launcher manifest,
 testing channel first. Owed: the in-game check. Doc:
 `docs/features/shader-cache-keeper.md`. Labels: enhancement.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/external-repo-adoption.md](../ai-includes/external-repo-adoption.md)
+- [docs/features/shader-cache-keeper.md](../features/shader-cache-keeper.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+
+<!-- backlinks-end -->

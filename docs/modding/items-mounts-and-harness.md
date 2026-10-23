@@ -575,5 +575,6 @@ deserializer, so its attributes are readable only by experiment or from
 - [docs/modding/recipe-add-a-race-or-creature.md](./recipe-add-a-race-or-creature.md)
 - [docs/modding/recipe-new-mod-from-zero.md](./recipe-new-mod-from-zero.md)
 - [docs/modding/troubleshooting.md](./troubleshooting.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
 
 <!-- backlinks-end -->

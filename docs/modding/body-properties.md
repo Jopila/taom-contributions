@@ -329,6 +329,7 @@ Code: No code changes needed.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/features/moduledata-validation.md](../features/moduledata-validation.md)
 - [docs/features/tournament-armor-assignment.md](../features/tournament-armor-assignment.md)
 - [docs/INDEX.md](../INDEX.md)

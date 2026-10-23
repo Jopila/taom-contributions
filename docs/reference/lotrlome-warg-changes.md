@@ -778,6 +778,7 @@ BUTR and BLSE launcher behaviour here is not established.
 - [docs/reference/bannerlord-engine-and-toolchain.md](./bannerlord-engine-and-toolchain.md)
 - [docs/reference/lotrlome-armory-snapshot/README.md](lotrlome-armory-snapshot/README.md)
 - [docs/reference/lotrlome-soln-id-fix.md](./lotrlome-soln-id-fix.md)
+- [docs/reference/lotrlome-spider-mount-changes.md](./lotrlome-spider-mount-changes.md)
 - [docs/reference/module-backup-sweep.md](./module-backup-sweep.md)
 - [docs/reviews/lessons/animation-skeleton.md](../reviews/lessons/animation-skeleton.md)
 

@@ -55,3 +55,14 @@ value it gets after, which is the check that catches this class.
   diff every reader's old fallback against the object's value before shipping.
 - **Lesson** (`lessons/misc.md`): a value two processes compare is hashed from its bits, never from runtime
   formatted text, unless both processes provably share one runtime.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/gamemodels-services.md](lessons/gamemodels-services.md)
+- [docs/reviews/lessons/misc.md](lessons/misc.md)
+
+<!-- backlinks-end -->

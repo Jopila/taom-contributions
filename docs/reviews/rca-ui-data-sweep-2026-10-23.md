@@ -65,3 +65,13 @@ caller builds the block from the same marker variable, and a mismatch fails that
 for added code. Still open: #979's extractor fix (whole `<string>` elements, and which Arthedain liege title
 wins), and two hero ids, `lord_6_23` and `lord_6_24`, that both `heroes.xslt` and `characters/heroes.xml`
 define, so the XML's text wins the engine merge (#974 Data flow lens; needs the maintainer's choice of bio).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+
+<!-- backlinks-end -->

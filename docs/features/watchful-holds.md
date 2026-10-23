@@ -226,3 +226,16 @@ MSTest with NSubstitute and hand-written fakes, in `TAOM.Tests/Features/Watchful
 
 - **Issue:** #822, Watchful Holds: hostile castles and towns harass passing lord parties
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/realm-borders.md](./realm-borders.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

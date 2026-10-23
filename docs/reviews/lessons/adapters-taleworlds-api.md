@@ -251,8 +251,11 @@ position left every troll on the old slots (2026-09-25).
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../../ai-includes/orientation.md)
+- [docs/reference/engine/mission-frame-threads-and-native-costs.md](../../reference/engine/mission-frame-threads-and-native-costs.md)
 - [docs/reviews/LESSONS-LEARNED.md](../LESSONS-LEARNED.md)
 - [docs/reviews/rca-banner-bearers-siege-ctd-2026-07-23.md](../rca-banner-bearers-siege-ctd-2026-07-23.md)
+- [docs/reviews/rca-custom-battle-bannerless-factions-2026-10-02.md](../rca-custom-battle-bannerless-factions-2026-10-02.md)
 
 <!-- backlinks-end -->
 ### Prove a count/consume adapter pair ranges over the same set — decompile BOTH members

@@ -293,3 +293,17 @@ Owed; nothing below has been run yet. Desktop, Debug build, campaign:
 
 - **Issue:** #734, [Siege forces: choose which troops go into a siege wall battle](https://github.com/haterade22/TAOM/issues/734)
 - **Status:** Open (in-game check owed)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/creature-siege-role.md](./creature-siege-role.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+
+<!-- backlinks-end -->

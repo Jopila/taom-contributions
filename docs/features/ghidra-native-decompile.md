@@ -205,3 +205,19 @@ describes as "hash-map miss dereferencing its end-sentinel".
 
 - **Issue:** #688, [tools: headless Ghidra decompile for native crash triage](https://github.com/haterade22/TAOM/issues/688)
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/agent-operating-manual.md](../ai-includes/agent-operating-manual.md)
+- [docs/ai-includes/taleworlds-research-guide.md](../ai-includes/taleworlds-research-guide.md)
+- [docs/reference/bannerlord-engine-and-toolchain.md](../reference/bannerlord-engine-and-toolchain.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/mcp-servers.md](../reference/mcp-servers.md)
+- [docs/reviews/adopt-ghidra-hindsight-2026-09-26.md](../reviews/adopt-ghidra-hindsight-2026-09-26.md)
+
+<!-- backlinks-end -->

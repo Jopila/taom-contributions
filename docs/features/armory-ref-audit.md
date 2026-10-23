@@ -173,3 +173,20 @@ one `find`, under a second, bounded at 4 s.
 `PreloadHelper.WaitForMeshesToBeLoaded` that logs and drops unresolvable body names so a player's
 mission still loads) is not built; it is the only protection for an install that already has a
 bad pair.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/audits/armory-ref-audit.md](../audits/armory-ref-audit.md)
+- [docs/audits/README.md](../audits/README.md)
+- [docs/features/mesh-ref-validation.md](./mesh-ref-validation.md)
+- [docs/features/moduledata-validation.md](./moduledata-validation.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

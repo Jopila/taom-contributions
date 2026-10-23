@@ -82,3 +82,15 @@ dual-wield combat code, the Kit axis settings (claim 14), the working practices 
 The ram's head-butt clip is at 0 with no segment of its own, so re-pointing it at the new hold master with
 TpacTool did reach the game. That rules out one explanation for "I don't see the ram lower its head"; the clip
 flags and the Kit re-cook remain the live ones (`docs/features/war-ram.md`).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reference/scripted-melee-strikes.md](../reference/scripted-melee-strikes.md)
+- [docs/reviews/adopt-mithrilforge-2026-09-29.md](./adopt-mithrilforge-2026-09-29.md)
+
+<!-- backlinks-end -->

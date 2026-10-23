@@ -204,3 +204,16 @@ Setup once: start a campaign with cheat mode on. The console command `campaign.a
 
 - **Issue:** #863: Gifts: give trade goods or gold to companions and lords for relation
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/relations.md](./relations.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

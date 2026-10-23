@@ -137,3 +137,21 @@ no stamp and reports MISSING until the first `refresh`.
   ADR-010's 2026-09-26 amendment points here.
 - [ADR-011](./011-knowledge-delivery-tiers.md): Knowledge Delivery Tiers. The gate is tier 1; the
   AGENTS.md row is tier 2.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/adrs/010-knowledge-base-architecture.md](./010-knowledge-base-architecture.md)
+- [docs/adrs/README.md](./README.md)
+- [docs/features/doc-graph.md](../features/doc-graph.md)
+- [docs/features/graphify-code-graph.md](../features/graphify-code-graph.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reviews/adopt-graphify-v8-2026-08-18.md](../reviews/adopt-graphify-v8-2026-08-18.md)
+
+<!-- backlinks-end -->

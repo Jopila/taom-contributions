@@ -292,6 +292,7 @@ burying a twelve-row change in a 106,152-line diff that no reviewer can read.
 
 ## Referenced by
 
+- [docs/ai-includes/lord-skills-authoring.md](../../ai-includes/lord-skills-authoring.md)
 - [docs/features/culture-playability-wiring.md](../../features/culture-playability-wiring.md)
 - [docs/modding/cultures.md](../../modding/cultures.md)
 - [docs/modding/editing-safely.md](../../modding/editing-safely.md)
@@ -302,6 +303,8 @@ burying a twelve-row change in a 106,152-line diff that no reviewer can read.
 - [docs/modding/troubleshooting.md](../../modding/troubleshooting.md)
 - [docs/reviews/LESSONS-LEARNED.md](../LESSONS-LEARNED.md)
 - [docs/reviews/rca-dale-2026-05-26.md](../rca-dale-2026-05-26.md)
+- [docs/reviews/rca-v1.5.2-bodydiff-2026-09-14.md](../rca-v1.5.2-bodydiff-2026-09-14.md)
+- [docs/reviews/skill-usage-audit-2026-10-08.md](../skill-usage-audit-2026-10-08.md)
 
 <!-- backlinks-end -->
 ### In a stylesheet the owning entity is the template's match predicate, not an enclosing element

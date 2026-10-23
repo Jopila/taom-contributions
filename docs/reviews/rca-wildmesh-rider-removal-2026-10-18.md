@@ -63,3 +63,14 @@ moment it is deployed and packaged. The gate therefore belongs in the packager, 
 ## Feedback memories to codify
 
 None. The lessons entry in `docs/reviews/lessons/build-tooling-workflow.md` carries the one new rule.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/release-process.md](../reference/release-process.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+
+<!-- backlinks-end -->

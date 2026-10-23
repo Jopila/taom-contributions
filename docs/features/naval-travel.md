@@ -288,6 +288,7 @@ release the key and click land while at sea — it disembarks on the coast.
 
 ## Referenced by
 
+- [docs/features/eye-of-sauron.md](./eye-of-sauron.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
 
 <!-- backlinks-end -->

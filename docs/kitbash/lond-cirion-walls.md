@@ -86,6 +86,9 @@ rise for the 15 m deck).
 
 ## Referenced by
 
+- [docs/kitbash/erebor/blender-build-prompt.md](erebor/blender-build-prompt.md)
+- [docs/kitbash/gondor/blender-build-prompt.md](gondor/blender-build-prompt.md)
+- [docs/kitbash/gondor/README.md](gondor/README.md)
 - [docs/kitbash/lond-cirion-buildings.md](./lond-cirion-buildings.md)
 - [docs/kitbash/README.md](./README.md)
 - [docs/reference/ue-to-bannerlord-asset-pipeline.md](../reference/ue-to-bannerlord-asset-pipeline.md)

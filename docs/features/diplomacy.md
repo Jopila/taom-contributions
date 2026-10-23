@@ -328,6 +328,8 @@ Phase 1 (Isengard and Dunland attack Rohan) triggers on day 30; Phase 2 (the ful
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/player-switcher.md](./player-switcher.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-factions-and-world.md](../modding/configs-factions-and-world.md)
 - [docs/modding/kingdoms.md](../modding/kingdoms.md)

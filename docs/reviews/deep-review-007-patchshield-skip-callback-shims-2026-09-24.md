@@ -318,3 +318,13 @@ true). Added by the decisions review,
   `AnimaliaActionSets_BindOnlyHorseActions_ToClipsThatExist`.
 - Owed in game (unchanged from action item 4, new wording): the second `shield pass` line should
   read about `+125 new`, with `attached` well below `seen`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/rca-patchshield-skip-callback-shims-2026-09-24.md](./rca-patchshield-skip-callback-shims-2026-09-24.md)
+
+<!-- backlinks-end -->

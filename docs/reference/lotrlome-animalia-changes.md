@@ -151,3 +151,19 @@ CultureMarketplace does: it does not read `is_merchandise`, so the Mirkwood cult
 (Mike: the moose may be sold), then (`.bak-caravan-20260923`) the caravan clause corrected (caravans do not read
 `is_merchandise`). The comment matches `ITEMS` in `tools/apply_animalia_armory.py`; no test compares comments, so
 diff them by hand after an edit.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/quadruped-pack-to-horse-skeleton-workflow.md](../ai-includes/quadruped-pack-to-horse-skeleton-workflow.md)
+- [docs/features/animalia-elk-moose.md](../features/animalia-elk-moose.md)
+- [docs/features/monster-size.md](../features/monster-size.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/file-catalogue.md](../modding/file-catalogue.md)
+- [docs/reference/lotrlome-armory-snapshot/README.md](lotrlome-armory-snapshot/README.md)
+- [docs/reference/lotrlome-elk-changes.md](./lotrlome-elk-changes.md)
+
+<!-- backlinks-end -->

@@ -116,6 +116,7 @@ confirmed in-game.
 ## Referenced by
 
 - [docs/features/elephant.md](../elephant.md)
+- [docs/features/elephant/howdah-ship-research-2026-09-18.md](./howdah-ship-research-2026-09-18.md)
 - [docs/INDEX.md](../../INDEX.md)
 - [docs/reference/adod-beasts-architecture-and-taom-port.md](../../reference/adod-beasts-architecture-and-taom-port.md)
 - [docs/reference/bannerlord-engine-and-toolchain.md](../../reference/bannerlord-engine-and-toolchain.md)

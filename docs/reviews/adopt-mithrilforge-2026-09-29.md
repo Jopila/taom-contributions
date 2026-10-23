@@ -88,3 +88,18 @@ idea (weapon contact against the `combat_parameters.xml` window) for creature st
 wield), `blade_fix` (upstream's own dead end), the DualWield recipe, and the rest of anim-findings' dead-ends table:
 its GUID-override and TpacTool-master rows are already in `bannerlord-animation-clip-flags.md` from the 09-18 pass,
 the BlendInPeriod and editor-with-Harmony rows are untested here, and the others concern mirroring.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/bannerlord-animation-clip-flags.md](../reference/bannerlord-animation-clip-flags.md)
+- [docs/reference/bannerlord-animation-system-map.md](../reference/bannerlord-animation-system-map.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reference/scripted-melee-strikes.md](../reference/scripted-melee-strikes.md)
+- [docs/reference/tpac-static-prop-authoring.md](../reference/tpac-static-prop-authoring.md)
+- [docs/reviews/adopt-mithrilforge-engine-perf-2026-10-02.md](./adopt-mithrilforge-engine-perf-2026-10-02.md)
+
+<!-- backlinks-end -->

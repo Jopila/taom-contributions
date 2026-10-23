@@ -649,12 +649,15 @@ Weight values are continuous floats — any positive value works. Common tiers:
 
 - [docs/features/auto-resolve-diagnostics.md](./auto-resolve-diagnostics.md)
 - [docs/features/black-numenorean.md](./black-numenorean.md)
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/cultural-feats.md](./cultural-feats.md)
 - [docs/features/troop-skill-balance.md](./troop-skill-balance.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/balance-levers.md](../modding/balance-levers.md)
 - [docs/modding/configs-balance.md](../modding/configs-balance.md)
 - [docs/reference/engine/settlement-economy-food-prosperity.md](../reference/engine/settlement-economy-food-prosperity.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
 - [docs/reference/party-template-sizing.md](../reference/party-template-sizing.md)
 
 <!-- backlinks-end -->

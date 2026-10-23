@@ -105,3 +105,17 @@ full C# suite) passed with finding 1 present, because no gate reads launcher dif
    its own change.
 8. Enlistment generator: backups outside `Main/_Module`, and a `--seed-missing` dry run that lists what it would add.
 9. The translation run for the new Harad name keys (paid).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/starting-equipment-tuning.md](../features/starting-equipment-tuning.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+- [docs/reviews/lessons/localization-ui.md](lessons/localization-ui.md)
+- [docs/reviews/rca-keyforce-harad-javelins-2026-10-16.md](./rca-keyforce-harad-javelins-2026-10-16.md)
+
+<!-- backlinks-end -->

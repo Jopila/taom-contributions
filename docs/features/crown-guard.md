@@ -157,3 +157,17 @@ Not yet checked in game.
 
 - **Issue:** #825 Scene popups show Calradian bodyguards beside Middle-earth rulers
 - **Status:** Closed, `triage-needs-ingame`
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/dev-console.md](./dev-console.md)
+- [docs/features/liege-titles.md](./liege-titles.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

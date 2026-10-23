@@ -158,3 +158,13 @@ and nothing fits it returns the first TAOM candidate that loads (their Harad tro
   tournament-rewards keys awaiting their translation run), unrelated to this change. In game: Custom Battle starts with
   22 factions (Mike, 2026-10-02). Note: `9e2a39f4` carried the stubs without the face-gate exemption, so CI run
   37056303520 failed `EveryNpcCharacterDeclaresAFace` on it; the follow-up commit restores it.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

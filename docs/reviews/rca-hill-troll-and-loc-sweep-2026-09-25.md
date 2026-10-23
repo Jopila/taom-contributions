@@ -154,3 +154,14 @@ fixes) or a one-line lesson in the category the next builder reads. Wave 2 added
 default invocation" and "A verify mode that fails on the correct state is a dead gate" (build-tooling-workflow), "A
 tool test must run under CI's runner, not only the author's" (testing-qa, with the `test_ci_runner_compat.py`
 ratchet as its gate) and "Gate the translation cache, not only the rows" (localization-ui). The features review added two more (a reused clip must carry its code's flags, animation-skeleton; a culture template is not unused because every shipped clan binds its own, data-content-cultures).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/bannerlord-animation-system-map.md](../reference/bannerlord-animation-system-map.md)
+- [docs/reviews/rca-hill-troll-2026-09-26.md](./rca-hill-troll-2026-09-26.md)
+
+<!-- backlinks-end -->

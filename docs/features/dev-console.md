@@ -459,8 +459,10 @@ only coverage.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/features/battle-load-diagnostics.md](./battle-load-diagnostics.md)
 - [docs/features/special-resources.md](./special-resources.md)
+- [docs/features/war-chronicle.md](./war-chronicle.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/body-properties.md](../modding/body-properties.md)
 - [docs/modding/settlements.md](../modding/settlements.md)

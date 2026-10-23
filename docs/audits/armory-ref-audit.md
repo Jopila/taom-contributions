@@ -35,3 +35,12 @@ None. Every item a troop, lord, roster or config names is defined.
 - A deleted or renamed mesh that is still named is tomorrow's row: fix it today.
 - New art nothing uses is an audit signal for the roster authors, not a fault.
 
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/audits/README.md](./README.md)
+
+<!-- backlinks-end -->

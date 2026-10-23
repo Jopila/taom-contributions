@@ -108,5 +108,6 @@ None. Tier values and wage tables are hardcoded in `VolunteerTierService` and `T
 - [docs/features/troop-skill-balance.md](./troop-skill-balance.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/balance-levers.md](../modding/balance-levers.md)
+- [docs/reviews/rca-v1.5.2-bodydiff-2026-09-14.md](../reviews/rca-v1.5.2-bodydiff-2026-09-14.md)
 
 <!-- backlinks-end -->

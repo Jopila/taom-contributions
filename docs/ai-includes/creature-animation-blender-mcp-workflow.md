@@ -263,6 +263,7 @@ Each links its backing memory; the session's meta-lesson is last.
 - [docs/features/spider.md](../features/spider.md)
 - [docs/reference/bannerlord-skeleton-authoring.md](../reference/bannerlord-skeleton-authoring.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/mcp-servers.md](../reference/mcp-servers.md)
 - [docs/reference/substance-painter-mcp-setup.md](../reference/substance-painter-mcp-setup.md)
 
 <!-- backlinks-end -->

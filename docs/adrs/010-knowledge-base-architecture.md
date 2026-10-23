@@ -218,6 +218,8 @@ A `tools/search_docs.py` (Karpathy's "naive search engine") is **deferred indefi
 
 ## Referenced by
 
+- [docs/adrs/011-knowledge-delivery-tiers.md](./011-knowledge-delivery-tiers.md)
+- [docs/adrs/012-graphify-code-graph-in-the-workflow.md](./012-graphify-code-graph-in-the-workflow.md)
 - [docs/adrs/README.md](./README.md)
 - [docs/features/doc-graph.md](../features/doc-graph.md)
 - [docs/features/doc-health-linter.md](../features/doc-health-linter.md)

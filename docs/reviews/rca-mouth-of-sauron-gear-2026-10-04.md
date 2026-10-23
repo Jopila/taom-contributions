@@ -82,3 +82,14 @@ reviewed-or-not had changed. The same happened to Tournament Rewards in `9e2a39f
   changes nothing says so and writes nothing (M1, M2).
 - `.claude/agents/deep-reviewer.md`: `audit_armory_refs.py` rewrites a tracked report unless given `--report -` (a
   reviewer in this run modified `docs/audits/armory-ref-audit.md`; restored).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/modding/equipment-rosters.md](../modding/equipment-rosters.md)
+- [docs/reviews/rca-tournament-rewards-2026-10-04.md](./rca-tournament-rewards-2026-10-04.md)
+
+<!-- backlinks-end -->

@@ -585,3 +585,16 @@ Used only if Phase 1 fails. A normal mounted troop with a "husk" rider:
 - With panic and rout blocked (findings 2 and 3), does native AI still move a riderless mount on its own
   against our scripted position? (Phase 2)
 - Every agent-reported line in Phase 0, and the UNVERIFIED engine claims under "Engine facts".
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/creature-bandits.md](../features/creature-bandits.md)
+- [docs/features/elephant.md](../features/elephant.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

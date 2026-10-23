@@ -355,5 +355,6 @@ No restart is needed before TAOM's first capture of the session: TAOM's finalize
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/troubleshooting.md](../modding/troubleshooting.md)
 - [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reference/scripted-melee-strikes.md](../reference/scripted-melee-strikes.md)
 
 <!-- backlinks-end -->

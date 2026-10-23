@@ -345,6 +345,7 @@ an item folder loads as a duplicate item id.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/features/career-system.md](./career-system.md)
 - [docs/features/character-creation.md](./character-creation.md)
 - [docs/features/lord-identity-reconciliation.md](./lord-identity-reconciliation.md)

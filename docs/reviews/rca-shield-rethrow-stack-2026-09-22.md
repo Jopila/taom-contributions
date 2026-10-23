@@ -182,3 +182,14 @@ was one read away.
   covers only what was patched before it ran".
 - `docs/reviews/lessons/build-tooling-workflow.md`: "`ReadAllText` strips the BOM, so a
   preserve-the-BOM check on its result can never fire".
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/crash-report.md](../features/crash-report.md)
+- [docs/migration/dr3-maintenance.md](../migration/dr3-maintenance.md)
+
+<!-- backlinks-end -->

@@ -278,11 +278,18 @@ If a culture's characters are not getting compiled, verify:
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/audits/feature-manifest.md](../audits/feature-manifest.md)
 - [docs/features/atmosphere-persistence.md](./atmosphere-persistence.md)
 - [docs/features/battle-load-diagnostics.md](./battle-load-diagnostics.md)
+- [docs/features/battle-scenes.md](./battle-scenes.md)
+- [docs/features/eye-of-sauron.md](./eye-of-sauron.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-balance.md](../modding/configs-balance.md)
 - [docs/modding/file-catalogue.md](../modding/file-catalogue.md)
+- [docs/modding/recipe-add-a-field-battle-scene.md](../modding/recipe-add-a-field-battle-scene.md)
+- [docs/reference/engine/mission-and-missionbehavior-lifecycle.md](../reference/engine/mission-and-missionbehavior-lifecycle.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reviews/rca-shader-precompile-repark-2026-09-25.md](../reviews/rca-shader-precompile-repark-2026-09-25.md)
 
 <!-- backlinks-end -->

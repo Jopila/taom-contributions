@@ -287,3 +287,16 @@ cleanup in sieges and sally-outs. Routers regrouping and rampaging beasts are no
 - **Issue:** #893 Enemy battle behavior tweaks: cornered routers, archers, straggler cleanup
 - **Follow-up:** #940 Fell Foes follow-up: Hunters of the Ringbearer and reinforcements steady the routers
 - **Status:** Open until the in-game checks pass
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/culture-doctrine.md](./culture-doctrine.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reviews/rca-fell-foes-2026-10-19.md](../reviews/rca-fell-foes-2026-10-19.md)
+
+<!-- backlinks-end -->

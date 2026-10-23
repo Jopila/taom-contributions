@@ -164,6 +164,13 @@ preview colour** — and if a render looks wrong, check the material fallback be
 
 ## Referenced by
 
+- [docs/kitbash/erebor-buildings.md](./erebor-buildings.md)
+- [docs/kitbash/erebor/blender-build-prompt.md](erebor/blender-build-prompt.md)
+- [docs/kitbash/gondor-buildings.md](./gondor-buildings.md)
+- [docs/kitbash/gondor/blender-build-prompt.md](gondor/blender-build-prompt.md)
+- [docs/kitbash/gondor/design-patterns.md](gondor/design-patterns.md)
+- [docs/kitbash/gondor/README.md](gondor/README.md)
+- [docs/kitbash/map-icons.md](./map-icons.md)
 - [docs/kitbash/README.md](./README.md)
 
 <!-- backlinks-end -->

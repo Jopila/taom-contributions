@@ -238,3 +238,15 @@ keep it so. The design waits for the census logs.
 
 - **Issue:** #894, Stuck agent rescue: off-navmesh soldiers and soldiers stranded in water
 - **Status:** Open (phase 1 built, phase 2 not built)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reviews/rca-lost-footing-2026-10-20.md](../reviews/rca-lost-footing-2026-10-20.md)
+
+<!-- backlinks-end -->

@@ -207,3 +207,16 @@ Baseline during the review, before any fix: `dotnet test TAOM.Tests` 17,376 pass
 error (clan heraldry specs x2, generator item refs x2, career kits, and the troop-name strings, which also count the
 five riders on purpose). Another session pushed 17 commits after `c3fa211d4` during the review, none in this change's
 files except three docs, so the baseline is re-run on the new HEAD before the fixes.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/wildmesh-mounts.md](../features/wildmesh-mounts.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+- [docs/reviews/lessons/localization-ui.md](lessons/localization-ui.md)
+
+<!-- backlinks-end -->

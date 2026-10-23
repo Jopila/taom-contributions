@@ -70,3 +70,14 @@ Two lessons, appended to `docs/reviews/lessons/state-lifecycle-save.md`:
 - A state that "ends when X ends" is cleared on X's own edge, not on one of the ways the player
   leaves.
 - A "released" claim is a reachability claim; so is a claim about when a teardown hook runs.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/deep-review-014-enlistment-session-scope-decisions-2026-09-24.md](./deep-review-014-enlistment-session-scope-decisions-2026-09-24.md)
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

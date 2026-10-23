@@ -100,6 +100,7 @@ The probe's summary said every address is proven inside a mapped section before 
 
 ## Referenced by
 
+- [docs/features/native-skin-fixes.md](../../features/native-skin-fixes.md)
 - [docs/reviews/LESSONS-LEARNED.md](../LESSONS-LEARNED.md)
 
 <!-- backlinks-end -->

@@ -115,3 +115,16 @@ The XML is the source of truth and the generator is retired. A future change edi
 - **Issue:** #943
 - **Status:** Open
 - **Review:** [rca-dale-lord-expansion-2026-10-20.md](../reviews/rca-dale-lord-expansion-2026-10-20.md)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/dale.md](./dale.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/release-process.md](../reference/release-process.md)
+- [docs/reviews/lessons/data-content-cultures.md](../reviews/lessons/data-content-cultures.md)
+
+<!-- backlinks-end -->

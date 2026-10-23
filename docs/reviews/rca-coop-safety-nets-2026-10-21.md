@@ -63,3 +63,15 @@ Commit `6ce20f6ed` was made outside the session that built Batch A, while its re
 bundled the Batch A files with 33 banner packages and other sessions' harness files, and its subject
 has no version label. It is pushed, so it stays. The corrections ship in a new commit that carries
 the release note for #965.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/harmony-il.md](lessons/harmony-il.md)
+- [docs/reviews/lessons/misc.md](lessons/misc.md)
+- [docs/reviews/rca-coop-player-attribution-2026-10-21.md](./rca-coop-player-attribution-2026-10-21.md)
+
+<!-- backlinks-end -->

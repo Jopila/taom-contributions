@@ -83,5 +83,6 @@ The patch is a safety net only; the intended fix is to add the scene entities.
 
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/settlements.md](../modding/settlements.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
 
 <!-- backlinks-end -->

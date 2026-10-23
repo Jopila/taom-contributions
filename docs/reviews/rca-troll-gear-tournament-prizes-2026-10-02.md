@@ -71,3 +71,14 @@ Armory edits, inside the Tournament Rewards review (workflow `wf_614275cb-eec`, 
 - **New, follow-up:** when `ApplyGating` throws, its catch clears the record and class snapshot that both consumers
   of this fix now read, so culture stalls admit every item and the prize class falls back to engine tier (error path
   only; no gate failure has been logged). Fix with a test, or document it.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/troll-race.md](../features/troll-race.md)
+- [docs/reviews/rca-tournament-rewards-2026-10-04.md](./rca-tournament-rewards-2026-10-04.md)
+
+<!-- backlinks-end -->

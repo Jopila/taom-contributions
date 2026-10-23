@@ -656,6 +656,7 @@ All measured 2026-09-05 against the live install and, where noted, the repo.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/load-order-and-dependencies.md](./load-order-and-dependencies.md)
 - [docs/modding/module-taom.md](./module-taom.md)

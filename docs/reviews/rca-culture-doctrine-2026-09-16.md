@@ -97,3 +97,13 @@ data is tuned; an A/B instrument is wired in the OFF arm) and
 `docs/reviews/lessons/adapters-taleworlds-api.md` (grep the whole dump for every writer of an
 engine list before replacing it; mirror the engine's own partition rule rather than the nearest
 public helper). No new harness memory: the review prompts that found these already exist.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

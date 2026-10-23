@@ -507,6 +507,7 @@ not yet verified to play right.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/settlements.md](../modding/settlements.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)

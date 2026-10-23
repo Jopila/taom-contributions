@@ -528,14 +528,19 @@ invariant under Phase 2, still unverified). Keep the previous decompile as
 ## Referenced by
 
 - [docs/ai-includes/creature-animation-blender-mcp-workflow.md](./creature-animation-blender-mcp-workflow.md)
+- [docs/ai-includes/quadruped-pack-to-horse-skeleton-workflow.md](./quadruped-pack-to-horse-skeleton-workflow.md)
+- [docs/features/animalia-elk-moose.md](../features/animalia-elk-moose.md)
 - [docs/features/elephant.md](../features/elephant.md)
+- [docs/features/elk.md](../features/elk.md)
 - [docs/features/mumakil.md](../features/mumakil.md)
 - [docs/features/spider.md](../features/spider.md)
 - [docs/features/war-ram.md](../features/war-ram.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/items-mounts-and-harness.md](../modding/items-mounts-and-harness.md)
 - [docs/modding/recipe-add-a-race-or-creature.md](../modding/recipe-add-a-race-or-creature.md)
+- [docs/reference/bannerlord-animation-system-map.md](../reference/bannerlord-animation-system-map.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/lotrlome-elk-changes.md](../reference/lotrlome-elk-changes.md)
 - [docs/reference/lotrlome-war-ram-changes.md](../reference/lotrlome-war-ram-changes.md)
 - [docs/reviews/lessons/animation-skeleton.md](../reviews/lessons/animation-skeleton.md)
 

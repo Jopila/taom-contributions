@@ -200,8 +200,14 @@ at a time, and installs only what verifies.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/ai-includes/weapon-creation-workflow.md](../ai-includes/weapon-creation-workflow.md)
 - [docs/features/armoury-mesh-cleanup.md](../features/armoury-mesh-cleanup.md)
+- [docs/features/chariot.md](../features/chariot.md)
+- [docs/features/elephant.md](../features/elephant.md)
 - [docs/features/gondor-armor-revamp.md](../features/gondor-armor-revamp.md)
+- [docs/features/mesh-ref-validation.md](../features/mesh-ref-validation.md)
+- [docs/features/multi-culture-armor-revamp.md](../features/multi-culture-armor-revamp.md)
 - [docs/modding/editing-safely.md](../modding/editing-safely.md)
 - [docs/modding/file-catalogue.md](../modding/file-catalogue.md)
 - [docs/modding/id-cheatsheet.md](../modding/id-cheatsheet.md)
@@ -214,8 +220,10 @@ at a time, and installs only what verifies.
 - [docs/modding/recipe-retire-content.md](../modding/recipe-retire-content.md)
 - [docs/reference/armory-catalogue/README.md](armory-catalogue/README.md)
 - [docs/reference/armory-shield-audit.md](./armory-shield-audit.md)
+- [docs/reference/bannerlord-animation-system-map.md](./bannerlord-animation-system-map.md)
 - [docs/reference/lotrlome-soln-id-fix.md](./lotrlome-soln-id-fix.md)
 - [docs/reference/lotrlome-war-ram-changes.md](./lotrlome-war-ram-changes.md)
+- [docs/reference/tpac-static-prop-authoring.md](./tpac-static-prop-authoring.md)
 - [docs/reviews/lessons/xslt-moduledata.md](../reviews/lessons/xslt-moduledata.md)
 
 <!-- backlinks-end -->

@@ -888,10 +888,11 @@ repeat is needed before attributing the 19.5 s wholly to TAOM. Also note `[MemSa
 - [docs/features/atmosphere-persistence.md](./atmosphere-persistence.md)
 - [docs/features/crash-report.md](./crash-report.md)
 - [docs/features/dev-console.md](./dev-console.md)
-- [docs/features/shader-precompilation.md](./shader-precompilation.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/investigations/native-commit-audit-2026-08.md](../investigations/native-commit-audit-2026-08.md)
 - [docs/modding/troubleshooting.md](../modding/troubleshooting.md)
 - [docs/modding/validation-and-testing.md](../modding/validation-and-testing.md)
+- [docs/reference/engine/save-system.md](../reference/engine/save-system.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
 
 <!-- backlinks-end -->

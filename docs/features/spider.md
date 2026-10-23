@@ -413,6 +413,7 @@ the module is outside this repo, so that ledger is the only durable record of it
 - [docs/ai-includes/creature-mount-authoring.md](../ai-includes/creature-mount-authoring.md)
 - [docs/features/elephant.md](./elephant.md)
 - [docs/features/spider-skeleton-animation-pipeline.md](./spider-skeleton-animation-pipeline.md)
+- [docs/features/spider/wolf-parity-and-render-tests.md](spider/wolf-parity-and-render-tests.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/reference/adod-beasts-architecture-and-taom-port.md](../reference/adod-beasts-architecture-and-taom-port.md)
 - [docs/reference/bannerlord-engine-and-toolchain.md](../reference/bannerlord-engine-and-toolchain.md)
@@ -420,6 +421,7 @@ the module is outside this repo, so that ledger is the only durable record of it
 - [docs/reference/feature-map.md](../reference/feature-map.md)
 - [docs/reference/lotrlome-soln-id-fix.md](../reference/lotrlome-soln-id-fix.md)
 - [docs/reference/lotrlome-spider-mount-changes.md](../reference/lotrlome-spider-mount-changes.md)
+- [docs/research/creature-bandits-roadmap.md](../research/creature-bandits-roadmap.md)
 - [docs/reviews/rca-spider-troop-2026-06-04.md](../reviews/rca-spider-troop-2026-06-04.md)
 
 <!-- backlinks-end -->

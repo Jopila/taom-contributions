@@ -158,3 +158,13 @@ table is the principle:
 - `armory-audit:58` names a scratch script outside the repo; `security-scan` pins counts nothing computes.
 - `xslt.md:83-87` restates its own lines 14-18 and 38-50.
 - Agent roster: no redundant pair.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/adopt-claude-code-2026-10-08.md](./adopt-claude-code-2026-10-08.md)
+
+<!-- backlinks-end -->

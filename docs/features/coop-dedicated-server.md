@@ -109,3 +109,21 @@ Recorded in `doc/porting/bannerlord-1.5.x.md` in the BannerlordCoop repo.
 
 - **Issue:** #964 epic, #972 skeleton package (closed)
 - **Status:** Open (committed-build boot and client checks owed)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/module-taom.md](../modding/module-taom.md)
+- [docs/reference/bannerlord-animation-system-map.md](../reference/bannerlord-animation-system-map.md)
+- [docs/reference/bannerlord-engine-and-toolchain.md](../reference/bannerlord-engine-and-toolchain.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/research/taom-headless-server.md](../research/taom-headless-server.md)
+
+<!-- backlinks-end -->

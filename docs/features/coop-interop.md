@@ -784,6 +784,7 @@ Owed by the #966 work (Batch B, co-op player attribution), none of it run in gam
 - [docs/features/alignment-desertion.md](./alignment-desertion.md)
 - [docs/features/animation-variety.md](./animation-variety.md)
 - [docs/features/bannerlord-together-compat.md](./bannerlord-together-compat.md)
+- [docs/features/coop-dedicated-server.md](./coop-dedicated-server.md)
 - [docs/features/dread-aura.md](./dread-aura.md)
 - [docs/features/enlistment.md](./enlistment.md)
 - [docs/features/eye-of-sauron.md](./eye-of-sauron.md)

@@ -276,3 +276,14 @@ passed, 0 failed. Full suite, `dotnet test TAOM.Tests -p:DisableModuleCopy=true 
 "Failed: 2, Passed: 10259, Skipped: 2, Total: 10263"; the two failures are the known live-Armory
 tests `TheElkItem_DeclaresTheScaleTheReachIsTunedFor` and
 `AnimaliaActionSets_BindOnlyHorseActions_ToClipsThatExist`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/rca-enlistment-session-scope-2026-09-24.md](./rca-enlistment-session-scope-2026-09-24.md)
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

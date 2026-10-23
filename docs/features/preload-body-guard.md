@@ -164,3 +164,15 @@ vanilla makes on its first pass) and no sleep. Broken load: the 5 s budget once.
 ## GitHub Issue
 
 #601. Mechanism: #352, #599.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

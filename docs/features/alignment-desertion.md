@@ -201,6 +201,7 @@ roster is scanned once into a small POCO list, decided, and written back.
 
 ## Referenced by
 
+- [docs/features/coop-interop.md](./coop-interop.md)
 - [docs/features/prisoner-recruitment.md](./prisoner-recruitment.md)
 
 <!-- backlinks-end -->

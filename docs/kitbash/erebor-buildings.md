@@ -251,6 +251,11 @@ floor ray passes anywhere above z -0.05, not only at grade.
 
 ## Referenced by
 
+- [docs/kitbash/erebor/blender-build-prompt.md](erebor/blender-build-prompt.md)
+- [docs/kitbash/erebor/design-patterns.md](erebor/design-patterns.md)
+- [docs/kitbash/erebor/README.md](erebor/README.md)
+- [docs/kitbash/gondor-buildings.md](./gondor-buildings.md)
+- [docs/kitbash/gondor/blender-build-prompt.md](gondor/blender-build-prompt.md)
 - [docs/kitbash/README.md](./README.md)
 
 <!-- backlinks-end -->

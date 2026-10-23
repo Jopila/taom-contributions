@@ -200,3 +200,27 @@ items. Per scan of a creature that opts in: one native `AgentScale` read, about 
 
 - **Issue:** part of [#646](https://github.com/haterade22/TAOM/issues/646)
 - **Status:** built and unit-tested; in-game checks owed
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/creature-mount-authoring.md](../ai-includes/creature-mount-authoring.md)
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/ai-includes/quadruped-pack-to-horse-skeleton-workflow.md](../ai-includes/quadruped-pack-to-horse-skeleton-workflow.md)
+- [docs/features/animalia-elk-moose.md](./animalia-elk-moose.md)
+- [docs/features/elk.md](./elk.md)
+- [docs/features/war-ram.md](./war-ram.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/items-mounts-and-harness.md](../modding/items-mounts-and-harness.md)
+- [docs/modding/module-armory.md](../modding/module-armory.md)
+- [docs/modding/recipe-add-a-race-or-creature.md](../modding/recipe-add-a-race-or-creature.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/lotrlome-animalia-changes.md](../reference/lotrlome-animalia-changes.md)
+- [docs/reference/lotrlome-elk-changes.md](../reference/lotrlome-elk-changes.md)
+- [docs/reviews/rca-animalia-2026-09-23.md](../reviews/rca-animalia-2026-09-23.md)
+
+<!-- backlinks-end -->

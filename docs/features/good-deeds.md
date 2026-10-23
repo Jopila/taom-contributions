@@ -175,3 +175,17 @@ Setup once: a campaign with cheat mode on. `campaign.add_hero_relation [Hero] | 
 
 - **Issue:** #864, [Relation rewards for releasing prisoners, donating them and winning tournaments](https://github.com/haterade22/TAOM/issues/864)
 - **Status:** Open. In-game checks owed.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/long-memory.md](./long-memory.md)
+- [docs/features/relations.md](./relations.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

@@ -115,7 +115,9 @@ Enabled plugins add their own skills alongside TAOM's and the MCP servers. Where
 
 ## Referenced by
 
+- [docs/features/kingdom-voices.md](../features/kingdom-voices.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/validation-and-testing.md](../modding/validation-and-testing.md)
+- [docs/reference/substance-painter-mcp-setup.md](./substance-painter-mcp-setup.md)
 
 <!-- backlinks-end -->

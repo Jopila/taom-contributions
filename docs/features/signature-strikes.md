@@ -381,3 +381,17 @@ registration lines); `hit by ... -> no effect` on every swing means the gates in
 - **Status:** Open (smoke owed)
 - **Issue:** #645 Nazgul SCREAM: a second SignatureStrikes signature for the Nine
 - **Status:** Open (smoke owed)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/combat-mechanics.md](./combat-mechanics.md)
+- [docs/features/dread-aura.md](./dread-aura.md)
+- [docs/features/nazgul-family.md](./nazgul-family.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/scripted-melee-strikes.md](../reference/scripted-melee-strikes.md)
+
+<!-- backlinks-end -->

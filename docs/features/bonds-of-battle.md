@@ -165,7 +165,9 @@ New lines, all in `taom_module_strings.xml`: `taom_bonds_together`, `taom_bonds_
 
 ## Referenced by
 
+- [docs/features/lord-courtesies.md](./lord-courtesies.md)
 - [docs/features/relations.md](./relations.md)
+- [docs/INDEX.md](../INDEX.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
 - [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
 

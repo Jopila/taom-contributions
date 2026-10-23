@@ -70,3 +70,15 @@ commit. The fix commit's body carries the release-note paragraph that `d99398f12
 None new. Finding 1 is a repeat: its lesson entry is amended with the brief wording that caused the
 second instance. The new source-text test pins this feature's two files only; another module's
 startup notice sent with `DisplayMessage` is still unchecked. A general gate is a follow-up decision.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+- [docs/reviews/lessons/localization-ui.md](lessons/localization-ui.md)
+
+<!-- backlinks-end -->

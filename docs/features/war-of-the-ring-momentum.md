@@ -206,6 +206,7 @@ The feature was play-tested iteratively after the reviews; the notable live-only
 
 ## Referenced by
 
+- [docs/features/war-chronicle.md](./war-chronicle.md)
 - [docs/features/war-of-the-ring.md](./war-of-the-ring.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)

@@ -1175,11 +1175,16 @@ terrain reads 0 as well, and face id 0 is walkable.
 - [docs/features/mumakil.md](./mumakil.md)
 - [docs/features/spider.md](./spider.md)
 - [docs/features/volunteer-recruitment.md](./volunteer-recruitment.md)
+- [docs/features/war-ram.md](./war-ram.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/reference/adod-beasts-architecture-and-taom-port.md](../reference/adod-beasts-architecture-and-taom-port.md)
+- [docs/reference/bannerlord-animation-clip-flags.md](../reference/bannerlord-animation-clip-flags.md)
 - [docs/reference/bannerlord-engine-and-toolchain.md](../reference/bannerlord-engine-and-toolchain.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/lotrlome-armory-snapshot/README.md](../reference/lotrlome-armory-snapshot/README.md)
 - [docs/reference/lotrlome-warg-changes.md](../reference/lotrlome-warg-changes.md)
+- [docs/research/creature-bandits-roadmap.md](../research/creature-bandits-roadmap.md)
 - [docs/reviews/rca-spider-troop-2026-06-04.md](../reviews/rca-spider-troop-2026-06-04.md)
 
 <!-- backlinks-end -->

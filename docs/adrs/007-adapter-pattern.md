@@ -814,6 +814,7 @@ See `TAOM.Tests/Architecture/AdapterPatternArchitectureTests.cs` for automated e
 
 ## Referenced by
 
+- [docs/adrs/013-server-safe-core-client-ui-submodule.md](./013-server-safe-core-client-ui-submodule.md)
 - [docs/adrs/README.md](./README.md)
 - [docs/ai-includes/taleworlds-research-guide.md](../ai-includes/taleworlds-research-guide.md)
 - [docs/INDEX.md](../INDEX.md)

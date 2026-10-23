@@ -66,3 +66,13 @@ read. No new rule file: `evidence-over-claims.md` already says to prove a result
 and the misses were in applying it to tools and guards. F10's lesson is in
 `docs/reviews/lessons/native-cpp-port.md` ("A native pin table fails the engine-bump gate on a build it
 does not list").
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/rca-yotthani-review-2026-10-15.md](./rca-yotthani-review-2026-10-15.md)
+
+<!-- backlinks-end -->

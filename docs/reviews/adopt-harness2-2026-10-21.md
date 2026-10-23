@@ -101,3 +101,16 @@ and no evidence trail beyond their commit body.
 | X4 | A separate ledger file | Declined: git history and the retro records already hold it |
 | X5 | Cue and confidence fields on lesson entries | Declined: lesson headings already name the situation and the operation; `output-style.md` carries the confidence tags |
 | X6 | Grader-verdict tripwire, budget identity, run fingerprint, candidate diversity metric | Declined: they protect benchmark integrity; the git SHA already fingerprints the harness |
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/external-repo-adoption.md](../ai-includes/external-repo-adoption.md)
+- [docs/ai-includes/harness-retro.md](../ai-includes/harness-retro.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reviews/harness-retro-2026-10-21.md](./harness-retro-2026-10-21.md)
+
+<!-- backlinks-end -->

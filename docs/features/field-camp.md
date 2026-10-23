@@ -206,6 +206,9 @@ A co-op guest gets no camp. `ICampMenuActivationQuery.DefersToCoopHost` (`MapScr
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/from-the-ashes.md](./from-the-ashes.md)
 - [docs/features/wanderer-allegiance.md](./wanderer-allegiance.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)

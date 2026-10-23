@@ -458,3 +458,15 @@ ratio ("Performance", "Timing policy"). The bar stays at 50%.
 - [#724](https://github.com/haterade22/TAOM/issues/724): perf: cut the module XML merge from every campaign load and
   custom battle start. Plan 042.
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/engine/object-system-mbobjectmanager.md](../reference/engine/object-system-mbobjectmanager.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

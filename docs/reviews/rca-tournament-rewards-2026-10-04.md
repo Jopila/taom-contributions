@@ -87,3 +87,14 @@ Sauron's gear took the same road in `799e189e` ([rca-mouth-of-sauron-gear-2026-1
   (T2).
 - `lessons/build-tooling-workflow.md`: a memory card's "UNCOMMITTED" is a claim about the past; before saying what
   ships, grep the code at the commit being released (the release statement).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/tournament-rewards.md](../features/tournament-rewards.md)
+- [docs/reviews/rca-mouth-of-sauron-gear-2026-10-04.md](./rca-mouth-of-sauron-gear-2026-10-04.md)
+
+<!-- backlinks-end -->

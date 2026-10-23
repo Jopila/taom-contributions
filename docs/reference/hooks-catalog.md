@@ -121,6 +121,8 @@ Skill-inline (not in `.claude/hooks/`): `check-freeze.sh` — PreToolUse (Edit|W
 
 ## Referenced by
 
+- [docs/ai-includes/git-and-commits.md](../ai-includes/git-and-commits.md)
+- [docs/features/upstream-review.md](../features/upstream-review.md)
 - [docs/modding/validation-and-testing.md](../modding/validation-and-testing.md)
 
 <!-- backlinks-end -->

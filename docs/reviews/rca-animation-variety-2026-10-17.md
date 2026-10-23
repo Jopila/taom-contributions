@@ -270,3 +270,16 @@ folder listing); it holds the superseded main FBX.
 every frame the validator did not select. The gate's contract is the producer's claim, so the claim is checked both ways:
 every frame the validator finds is claimed, and every frame claimed is explained by what the validator found. Rows 50 and
 48 stand behind it as before: the check that settled it was an executed scenario against the fix, not a read of it.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/animation-skeleton.md](lessons/animation-skeleton.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/testing-qa.md](lessons/testing-qa.md)
+- [docs/reviews/lessons/xslt-moduledata.md](lessons/xslt-moduledata.md)
+
+<!-- backlinks-end -->

@@ -62,3 +62,13 @@ layers: when a sweep settles who is female, every layer that encodes sex (clothi
 ## Feedback memories to codify
 
 None. The pattern is already a rule and a same-day lesson; the fix is to follow them.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+
+<!-- backlinks-end -->

@@ -247,6 +247,7 @@ New campaigns, each a couple of minutes:
 
 ## Referenced by
 
+- [docs/features/field-commission.md](./field-commission.md)
 - [docs/features/named-companions.md](./named-companions.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/wanderers-and-named-companions.md](../modding/wanderers-and-named-companions.md)

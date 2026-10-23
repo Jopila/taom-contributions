@@ -89,3 +89,13 @@ reviewers.
 
 None: each lesson is a review-time check, and the per-category lessons files are where the next
 review of PatchShield or any blanket-patching component reads first.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/rca-patchshield-skip-callback-shims-decisions-2026-09-24.md](./rca-patchshield-skip-callback-shims-decisions-2026-09-24.md)
+
+<!-- backlinks-end -->

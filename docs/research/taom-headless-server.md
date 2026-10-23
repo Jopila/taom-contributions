@@ -497,3 +497,17 @@ boot, and whether `IsDefined` reads the `[ClientOnly]` marker without parsing a 
 
 ---
 
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/adrs/013-server-safe-core-client-ui-submodule.md](../adrs/013-server-safe-core-client-ui-submodule.md)
+- [docs/features/coop-dedicated-server.md](../features/coop-dedicated-server.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reviews/lessons/testing-qa.md](../reviews/lessons/testing-qa.md)
+
+<!-- backlinks-end -->

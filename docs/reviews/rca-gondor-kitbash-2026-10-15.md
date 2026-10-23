@@ -131,3 +131,14 @@ that greps `tools/oneoff/blender_*.py` for a DONE write without the helper.
   change, since its docs link to it.
 - **Commit hygiene:** `blender_probe_erebor_building.py`, `tools/README.md` and
   `docs/kitbash/README.md` hold other sessions' uncommitted hunks; stage this change's hunks only.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/kitbash/gondor-buildings.md](../kitbash/gondor-buildings.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+
+<!-- backlinks-end -->

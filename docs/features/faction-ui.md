@@ -429,3 +429,18 @@ career page and into the game. Owed:
 
 - **Issue:** #704, [Merge Kysaro's faction screen and front-end reskin (TAOM_FactionUI) into TAOM](https://github.com/haterade22/TAOM/issues/704)
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/advanced-start-options.md](./advanced-start-options.md)
+- [docs/features/native-loading-screen.md](./native-loading-screen.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

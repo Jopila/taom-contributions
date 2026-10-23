@@ -45,6 +45,8 @@ Already institutionalized (no new rule needed) — `external-skill-ports.md` "do
 
 ## Referenced by
 
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reviews/adopt-ecc-2026-09-29.md](./adopt-ecc-2026-09-29.md)
 - [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
 
 <!-- backlinks-end -->

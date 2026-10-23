@@ -208,5 +208,6 @@ No performance impact — translation files are loaded once at startup by the en
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/module-taom.md](../modding/module-taom.md)
 - [docs/modding/strings-and-localization.md](../modding/strings-and-localization.md)
+- [docs/reference/localization-map.md](../reference/localization-map.md)
 
 <!-- backlinks-end -->

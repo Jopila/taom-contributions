@@ -227,3 +227,20 @@ the id tuples, the clip folder and the `as_animalia_` / `anim_animalia_` prefixe
 PowerShell stages need Windows PowerShell 5.1, TpacTool's `bin` and `TolerantTpacLoader.cs` (both outside the repo,
 passed as `-TpacBin` / `-Loader`); the Blender stages detach, so their only completion signal is the report's
 `.DONE` twin. For a pack on another rig family, write its map first and let the reskin report say whether the fit holds.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/creature-mount-authoring.md](./creature-mount-authoring.md)
+- [docs/features/animalia-elk-moose.md](../features/animalia-elk-moose.md)
+- [docs/features/wildmesh-mounts.md](../features/wildmesh-mounts.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/recipe-add-a-race-or-creature.md](../modding/recipe-add-a-race-or-creature.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/ue-to-bannerlord-asset-pipeline.md](../reference/ue-to-bannerlord-asset-pipeline.md)
+
+<!-- backlinks-end -->

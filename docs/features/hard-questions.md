@@ -178,3 +178,15 @@ The 19 `taom_hq_*` keys are registered and seeded in English in all 12 languages
 
 - **Issue:** #896, Hard Questions
 - **Status:** Closed with `triage-needs-ingame`; the regression work is in #948
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

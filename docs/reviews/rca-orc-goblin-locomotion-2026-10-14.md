@@ -134,3 +134,14 @@ None is filed: GitHub issues are public and need the maintainer's word. Each is 
   outfit), the Harad parent, childhood and education screens, Abanissa and Shaghana if reachable (#570).
 - #791: the 24 codes bound at 17:08 (thrown, dagger, hand-shield and polearm-with-shield walks and runs; the
   idle of a halted running formation).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/orc-goblin-locomotion.md](../features/orc-goblin-locomotion.md)
+- [docs/features/starting-equipment-tuning.md](../features/starting-equipment-tuning.md)
+
+<!-- backlinks-end -->

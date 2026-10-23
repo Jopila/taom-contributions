@@ -40,3 +40,13 @@ choices (a font size, a hidden arrow button, a ring icon in place of a portrait)
 attributes whose name is a Widget-typed property on the element's widget class catches exactly the
 null-dereference class and nothing else, and reflection over the installed assemblies supplies
 that list without a hand-maintained table.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+
+<!-- backlinks-end -->

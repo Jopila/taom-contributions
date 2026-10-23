@@ -1179,3 +1179,20 @@ bands, read 2026-09-26); `Agent.cs`, `MBActionSet.cs`, `MBAnimation.cs`, `Monste
 `check_race_morph_channels.py`, `verify_mount_assets.py`, `audit_action_set_parity.py` and `audit_mount_parity.py`.
 
 ---
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/troll-race.md](../features/troll-race.md)
+- [docs/reference/bannerlord-animation-clip-flags.md](./bannerlord-animation-clip-flags.md)
+- [docs/reference/engine/mission-frame-threads-and-native-costs.md](engine/mission-frame-threads-and-native-costs.md)
+- [docs/reference/lotrlome-hill-troll-changes.md](./lotrlome-hill-troll-changes.md)
+- [docs/reference/scripted-melee-strikes.md](./scripted-melee-strikes.md)
+- [docs/reference/tpac-static-prop-authoring.md](./tpac-static-prop-authoring.md)
+- [docs/reference/ue-to-bannerlord-asset-pipeline.md](./ue-to-bannerlord-asset-pipeline.md)
+- [docs/reviews/adopt-yotthani-bannerlord-2026-09-30.md](../reviews/adopt-yotthani-bannerlord-2026-09-30.md)
+
+<!-- backlinks-end -->

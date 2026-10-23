@@ -204,3 +204,17 @@ swing CTD").
 - 2026-09-25: extended to the hill troll (`ActionSetsByMonster`, `IsBruteForceTroll`); distances scale with body
   size (eye height); the log reports the scale the distances use.
 - 2026-09-24: the prototype on the cave troll (#649).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/troll-race.md](./troll-race.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/bannerlord-animation-system-map.md](../reference/bannerlord-animation-system-map.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

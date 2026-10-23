@@ -132,3 +132,15 @@ reflection call per process.
 
 - **Issue:** #740, [Campaign map: ButterLib Distance Matrix rebuild stalls every siege end](https://github.com/haterade22/TAOM/issues/740)
 - **Status:** Open until the in-game check
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/diplomacy.md](./diplomacy.md)
+- [docs/reference/engine/campaign-tick-time-and-party-ai.md](../reference/engine/campaign-tick-time-and-party-ai.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

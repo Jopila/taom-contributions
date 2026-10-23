@@ -366,6 +366,7 @@ To fix a flagged siege: look at the kingdom's fortification census + the leader/
 
 ## Referenced by
 
+- [docs/features/war-chronicle.md](./war-chronicle.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-factions-and-world.md](../modding/configs-factions-and-world.md)
 - [docs/modding/kingdoms.md](../modding/kingdoms.md)

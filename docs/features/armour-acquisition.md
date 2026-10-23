@@ -552,3 +552,22 @@ The lord's gear ladder: #693. The base feature: none yet (see Owed).
   it is never sold, looted or a tournament prize; `MouthOfSauronHelmDataTests` pins the row and the live helm's 50
   head armour (Mike lowered it from 55 in the unversioned Armory:
   [snapshot README](../reference/lotrlome-armory-snapshot/README.md)).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/animalia-elk-moose.md](./animalia-elk-moose.md)
+- [docs/features/arena.md](./arena.md)
+- [docs/features/career-quest-system.md](./career-quest-system.md)
+- [docs/features/culture-marketplace.md](./culture-marketplace.md)
+- [docs/features/lotr-issues.md](./lotr-issues.md)
+- [docs/features/moduledata-validation.md](./moduledata-validation.md)
+- [docs/features/special-resources.md](./special-resources.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/file-catalogue.md](../modding/file-catalogue.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

@@ -302,6 +302,10 @@ the engine version, the reported date) rather than inventing a commit range.
 
 ## Referenced by
 
+- [docs/ai-includes/git-and-commits.md](../ai-includes/git-and-commits.md)
+- [docs/features/coop-dedicated-server.md](../features/coop-dedicated-server.md)
+- [docs/features/dale-lord-expansion.md](../features/dale-lord-expansion.md)
+- [docs/features/war-chronicle.md](../features/war-chronicle.md)
 - [docs/modding/editing-safely.md](../modding/editing-safely.md)
 - [docs/modding/module-dependencies.md](../modding/module-dependencies.md)
 - [docs/modding/module-taom.md](../modding/module-taom.md)
@@ -309,5 +313,7 @@ the engine version, the reported date) rather than inventing a commit range.
 - [docs/modding/recipe-new-mod-from-zero.md](../modding/recipe-new-mod-from-zero.md)
 - [docs/reference/doc-lookup.md](./doc-lookup.md)
 - [docs/reference/module-backup-sweep.md](./module-backup-sweep.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](../reviews/lessons/build-tooling-workflow.md)
+- [docs/reviews/rca-hill-troll-2026-09-26.md](../reviews/rca-hill-troll-2026-09-26.md)
 
 <!-- backlinks-end -->

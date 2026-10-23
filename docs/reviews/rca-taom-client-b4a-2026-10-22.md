@@ -44,3 +44,13 @@ The adapters-folder gate is a repeat of the B3 class (a check scoped to one memb
 one root): `docs/reviews/lessons/build-tooling-workflow.md` "A deploy target that writes into a folder
 with no clean leaves stale files". When files move between roots, grep the test tree for every
 `Path.Combine` or `RepoPath` that names the old root, not only `RepoPath("Main")`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+
+<!-- backlinks-end -->

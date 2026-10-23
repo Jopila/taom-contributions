@@ -131,3 +131,16 @@ whether the native view reads the argument live is unverified, and it would miss
 
 - **Issue:** not yet filed
 - **Status:** Open; `triage-needs-ingame` for the War Sails background once filed (not seen in game yet)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/faction-ui.md](./faction-ui.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

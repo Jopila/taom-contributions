@@ -232,3 +232,18 @@ The probe counts which code each swing plays and where in the clip a hit lands, 
 ## GitHub Issue
 
 #817, filed on 2026-10-18 at Mike's word (he had deferred it on 2026-10-17) and closed with the install, labelled `triage-needs-ingame` while his verdict on the look is owed. Owed checks are in Unverified and How to Test; the clip half is tracked in #791.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/bannerlord-animation-system-map.md](../reference/bannerlord-animation-system-map.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/lotrlome-armory-snapshot/README.md](../reference/lotrlome-armory-snapshot/README.md)
+- [docs/reviews/rca-animation-variety-2026-10-17.md](../reviews/rca-animation-variety-2026-10-17.md)
+
+<!-- backlinks-end -->

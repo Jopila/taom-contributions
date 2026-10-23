@@ -658,11 +658,13 @@ _See the repository-root `CHANGELOG.md` for full chronological history._
 
 - [docs/features/battle-balance.md](./battle-balance.md)
 - [docs/features/career-quest-system.md](./career-quest-system.md)
+- [docs/features/dev-console.md](./dev-console.md)
 - [docs/features/starting-equipment-tuning.md](./starting-equipment-tuning.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-balance.md](../modding/configs-balance.md)
 - [docs/modding/equipment-rosters.md](../modding/equipment-rosters.md)
 - [docs/modding/load-order-and-dependencies.md](../modding/load-order-and-dependencies.md)
+- [docs/reference/engine/mount-and-rider-runtime.md](../reference/engine/mount-and-rider-runtime.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
 - [docs/research/karpathy-autoresearch.md](../research/karpathy-autoresearch.md)
 - [docs/reviews/rca-career-phantom-passives-2026-06-26.md](../reviews/rca-career-phantom-passives-2026-06-26.md)

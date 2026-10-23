@@ -72,7 +72,10 @@
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/creature-siege-role.md](../features/creature-siege-role.md)
 - [docs/features/troop-weight-system.md](../features/troop-weight-system.md)
 - [docs/modding/balance-levers.md](../modding/balance-levers.md)
+- [docs/reference/engine/gamemodel-system.md](engine/gamemodel-system.md)
 
 <!-- backlinks-end -->

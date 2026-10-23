@@ -111,7 +111,9 @@ A tester suspected this patch (`Patch16_AtmospherePersistence`) of causing the n
 
 ## Referenced by
 
+- [docs/features/battle-scenes.md](./battle-scenes.md)
 - [docs/features/shader-precompilation.md](./shader-precompilation.md)
 - [docs/INDEX.md](../INDEX.md)
+- [docs/modding/recipe-add-a-field-battle-scene.md](../modding/recipe-add-a-field-battle-scene.md)
 
 <!-- backlinks-end -->

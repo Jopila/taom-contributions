@@ -76,5 +76,6 @@ rider surfaces it. The in-game battle-test is the irreplaceable gate for creatur
 ## Referenced by
 
 - [docs/features/spider.md](../features/spider.md)
+- [docs/reviews/rca-spider-directional-attacks-2026-06-15.md](./rca-spider-directional-attacks-2026-06-15.md)
 
 <!-- backlinks-end -->

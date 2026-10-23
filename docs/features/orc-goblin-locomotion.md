@@ -709,3 +709,16 @@ Found by the 2026-10-17/18 review and not fixed:
 - **Issue:** #791, [Orc and goblin walk, run and idle animations](https://github.com/haterade22/TAOM/issues/791)
 - **Status:** Open (items 2 to 6 remain; the in-game check of the 24 codes bound later on 2026-10-14 is owed, and so is the whole 2026-10-17 revision from the Kit import on)
 - **Review:** [rca-orc-goblin-locomotion-2026-10-14.md](../reviews/rca-orc-goblin-locomotion-2026-10-14.md)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/animation-variety.md](./animation-variety.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reviews/rca-animation-variety-2026-10-17.md](../reviews/rca-animation-variety-2026-10-17.md)
+
+<!-- backlinks-end -->

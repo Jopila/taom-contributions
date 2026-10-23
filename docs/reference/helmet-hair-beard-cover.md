@@ -80,3 +80,15 @@ both) put the old value back for any id they regenerate.
 
 - [items-armor.md](../modding/items-armor.md): the full `<Armor>` attribute table, including `covers_head`,
   which hides the face, not the hair.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/items-armor.md](../modding/items-armor.md)
+- [docs/reference/lotrlome-beard-cover-changes.md](./lotrlome-beard-cover-changes.md)
+
+<!-- backlinks-end -->

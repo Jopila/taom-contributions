@@ -332,3 +332,18 @@ Any CTD goes to `/native-crash-triage`, never a blind retry.
 
 [#636](https://github.com/haterade22/TAOM/issues/636) (the elk); [#643](https://github.com/haterade22/TAOM/issues/643)
 (the attack under a player rider, and the rider owning the blow, for all four elephant-like creatures)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/creature-mount-authoring.md](../ai-includes/creature-mount-authoring.md)
+- [docs/features/animalia-elk-moose.md](./animalia-elk-moose.md)
+- [docs/features/war-ram.md](./war-ram.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/lotrlome-elk-changes.md](../reference/lotrlome-elk-changes.md)
+
+<!-- backlinks-end -->

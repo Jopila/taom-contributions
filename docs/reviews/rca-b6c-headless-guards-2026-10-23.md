@@ -56,3 +56,13 @@ written from a plan's predictions (a crash, "resolvable") states as fact what on
 Appended to `docs/reviews/lessons/testing-qa.md`: an IL gate fails closed on an operand kind it does not decode, and
 a guard's source test counts every call of the guarded member, not only the guarded spelling. This repeats the
 B3 lesson "A regex scan sees one spelling" for IL and for call counts.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/testing-qa.md](lessons/testing-qa.md)
+
+<!-- backlinks-end -->

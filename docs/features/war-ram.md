@@ -545,8 +545,10 @@ Resolved since the first draft: the eight barding meshes are in the cooked packs
 ## Referenced by
 
 - [docs/ai-includes/creature-mount-authoring.md](../ai-includes/creature-mount-authoring.md)
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/animalia-elk-moose.md](./animalia-elk-moose.md)
+- [docs/features/elk.md](./elk.md)
 - [docs/features/moduledata-validation.md](./moduledata-validation.md)
-- [docs/features/mumakil.md](./mumakil.md)
 - [docs/features/no-mount-cultures.md](./no-mount-cultures.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/items-mounts-and-harness.md](../modding/items-mounts-and-harness.md)

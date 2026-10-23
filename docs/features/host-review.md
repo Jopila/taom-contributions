@@ -158,3 +158,17 @@ The combatant names ("Host Review", "Host Review (empty)") use the `{=!}` form a
 
 - **Issue:** #891, Host Review
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/enlistment.md](./enlistment.md)
+- [docs/features/field-camp.md](./field-camp.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reviews/rca-host-review-2026-10-19.md](../reviews/rca-host-review-2026-10-19.md)
+
+<!-- backlinks-end -->

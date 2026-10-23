@@ -83,3 +83,14 @@ half of a change was committed and the code half was not.
 
 More incidents and the reasoning behind these rules:
 [lessons/build-tooling-workflow.md](../reviews/lessons/build-tooling-workflow.md).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/agent-teams.md](./agent-teams.md)
+- [docs/ai-includes/lord-skills-authoring.md](./lord-skills-authoring.md)
+
+<!-- backlinks-end -->

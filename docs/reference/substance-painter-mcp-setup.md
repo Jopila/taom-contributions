@@ -183,3 +183,15 @@ reverts a whole AI edit sequence (for scripted layer-level rollback of an AI bat
 
 New release email from itch.io → unzip → overwrite the contents of
 `C:\Users\mikew\substance_painter_mcp\` → `uv` re-syncs on next run. Restart Claude Code.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/doc-lookup.md](./doc-lookup.md)
+- [docs/reference/ue-to-bannerlord-asset-pipeline.md](./ue-to-bannerlord-asset-pipeline.md)
+
+<!-- backlinks-end -->

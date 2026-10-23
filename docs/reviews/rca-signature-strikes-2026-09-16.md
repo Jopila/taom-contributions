@@ -78,3 +78,13 @@ faithful port, re-audit limb N": the limb you leave out is the one that carried 
 One durable lesson from #1 (below, in `docs/reviews/lessons/state-lifecycle-save.md`) and one
 tooling lesson from #8 (`docs/reviews/lessons/build-tooling-workflow.md`). The line-count habit
 (#2) is a one-liner on an existing ADR, not a new rule.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

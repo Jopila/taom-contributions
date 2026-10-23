@@ -85,6 +85,7 @@ Run these steps for a topic; step 1 is the deterministic half, the rest is synth
 
 ## Referenced by
 
+- [docs/features/doc-graph.md](../features/doc-graph.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/raw/README.md](../raw/README.md)
 

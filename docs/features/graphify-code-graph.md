@@ -161,3 +161,21 @@ text contains `graphify` or a JSON escape.
 
 - **Issue:** [#677](https://github.com/haterade22/TAOM/issues/677): Wire graphify into the workflow
 - **Status:** Closed (resolved in b8833474)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/adrs/012-graphify-code-graph-in-the-workflow.md](../adrs/012-graphify-code-graph-in-the-workflow.md)
+- [docs/ai-includes/agent-operating-manual.md](../ai-includes/agent-operating-manual.md)
+- [docs/features/doc-graph.md](./doc-graph.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/hooks-catalog.md](../reference/hooks-catalog.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reviews/adopt-graphify-v8-2026-08-18.md](../reviews/adopt-graphify-v8-2026-08-18.md)
+
+<!-- backlinks-end -->

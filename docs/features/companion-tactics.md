@@ -304,5 +304,7 @@ A preset is a named copy of the Order of Battle layout: the formation type of ea
 ## Referenced by
 
 - [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reviews/rca-formation-presets-2026-10-09.md](../reviews/rca-formation-presets-2026-10-09.md)
 
 <!-- backlinks-end -->

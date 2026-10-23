@@ -144,3 +144,13 @@ Live Armory edits already applied (unversioned, backups beside each file): `skin
 channels stripped (`.bak-stripupper`, the March original); Saruman's FBX stripped earlier (`.bak-stripupper`).
 Not yet written into the morphs doc: the builder and trace results above (fold them into its "Hair, beards and
 eyebrows" section when the lead resolves).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/lotrlome-armory-snapshot/README.md](../reference/lotrlome-armory-snapshot/README.md)
+
+<!-- backlinks-end -->

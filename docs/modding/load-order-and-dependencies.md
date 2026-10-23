@@ -342,6 +342,7 @@ yotthani's VanillaTuning v0.1.1 switches five of its own patches off when TAOM c
 
 ## Referenced by
 
+- [docs/features/shader-compile-notice.md](../features/shader-compile-notice.md)
 - [docs/features/starting-equipment-tuning.md](../features/starting-equipment-tuning.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/clans.md](./clans.md)
@@ -360,5 +361,6 @@ yotthani's VanillaTuning v0.1.1 switches five of its own patches off when TAOM c
 - [docs/modding/troops.md](./troops.md)
 - [docs/modding/wanderers-and-named-companions.md](./wanderers-and-named-companions.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
 
 <!-- backlinks-end -->

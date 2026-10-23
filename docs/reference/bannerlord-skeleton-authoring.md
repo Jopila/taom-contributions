@@ -459,11 +459,19 @@ set to the report's `pelvis_scale`.
 
 ## Referenced by
 
+- [docs/ai-includes/creature-animation-blender-mcp-workflow.md](../ai-includes/creature-animation-blender-mcp-workflow.md)
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/ai-includes/troll-race-arp-retargeting-workflow.md](../ai-includes/troll-race-arp-retargeting-workflow.md)
+- [docs/features/animalia-elk-moose.md](../features/animalia-elk-moose.md)
+- [docs/features/chariot.md](../features/chariot.md)
+- [docs/features/spider.md](../features/spider.md)
 - [docs/features/troll-race.md](../features/troll-race.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/recipe-add-a-race-or-creature.md](../modding/recipe-add-a-race-or-creature.md)
+- [docs/reference/bannerlord-animation-system-map.md](./bannerlord-animation-system-map.md)
 - [docs/reference/doc-lookup.md](./doc-lookup.md)
+- [docs/reference/lotrlome-hill-troll-changes.md](./lotrlome-hill-troll-changes.md)
+- [docs/reference/scripted-melee-strikes.md](./scripted-melee-strikes.md)
 - [docs/reference/ue-to-bannerlord-asset-pipeline.md](./ue-to-bannerlord-asset-pipeline.md)
 
 <!-- backlinks-end -->

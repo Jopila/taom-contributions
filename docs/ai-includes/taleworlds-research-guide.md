@@ -789,7 +789,10 @@ See [development machines](../reference/development-machines.md) and the
 - [docs/ai-includes/multi-approach-validation.md](./multi-approach-validation.md)
 - [docs/ai-includes/new-culture-authoring.md](./new-culture-authoring.md)
 - [docs/ai-includes/research-workflow.md](./research-workflow.md)
+- [docs/features/elephant/howdah-ship-research-2026-09-18.md](../features/elephant/howdah-ship-research-2026-09-18.md)
+- [docs/features/ghidra-native-decompile.md](../features/ghidra-native-decompile.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/scripted-melee-strikes.md](../reference/scripted-melee-strikes.md)
 
 <!-- backlinks-end -->

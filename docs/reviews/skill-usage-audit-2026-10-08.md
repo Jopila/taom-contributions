@@ -140,3 +140,17 @@ reviewed change to those files.
   regenerated, so it never cleared.
 - P5 (prune the skill listing) and P10 (change `/build-fix`) in the 2026-10-08 Claude Code update
   review overlap this audit.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/external-repo-adoption.md](../ai-includes/external-repo-adoption.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reviews/adopt-claude-code-2026-10-08.md](./adopt-claude-code-2026-10-08.md)
+- [docs/reviews/adopt-harness2-2026-10-21.md](./adopt-harness2-2026-10-21.md)
+- [docs/reviews/prompt-audit-2026-10-08.md](./prompt-audit-2026-10-08.md)
+
+<!-- backlinks-end -->

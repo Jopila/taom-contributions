@@ -221,3 +221,14 @@ Incomplete or misnamed meshes in an FBX whose own tpac does not ship them: anima
 | `weapons/Mordor/wm_mordor_set1.fbx` | 24 | `mordor_props/orc_weapons/wm_mordor_set1_geo.tpac` |
 | `weapons/spears/Gondor/wm_gondor_spears.fbx` | 4 | `gondor_weapons/spears/wm_gondor_spears_geo.tpac` |
 | `weapons/swords/Gondor/Lamedon/wm_lamedon_swords.fbx` | 8 | `gondor_weapons/swords/wm_lamedon_swords_geo.tpac` |
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/armory-catalogue/README.md](./README.md)
+- [docs/reference/armory-guide.md](../armory-guide.md)
+
+<!-- backlinks-end -->

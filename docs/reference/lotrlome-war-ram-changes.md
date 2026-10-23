@@ -309,12 +309,15 @@ section, a rename of the set or a re-cut of the clip changes the elk as well.
 
 ## Referenced by
 
+- [docs/features/war-ram.md](../features/war-ram.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/file-catalogue.md](../modding/file-catalogue.md)
 - [docs/modding/items-mounts-and-harness.md](../modding/items-mounts-and-harness.md)
 - [docs/reference/bannerlord-skeleton-authoring.md](./bannerlord-skeleton-authoring.md)
 - [docs/reference/doc-lookup.md](./doc-lookup.md)
 - [docs/reference/feature-map.md](./feature-map.md)
+- [docs/reference/lotrlome-animalia-changes.md](./lotrlome-animalia-changes.md)
+- [docs/reference/lotrlome-elk-changes.md](./lotrlome-elk-changes.md)
 - [docs/reference/lotrlome-soln-id-fix.md](./lotrlome-soln-id-fix.md)
 - [docs/reference/lotrlome-warg-changes.md](./lotrlome-warg-changes.md)
 - [docs/reference/module-backup-sweep.md](./module-backup-sweep.md)

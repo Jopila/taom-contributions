@@ -80,3 +80,14 @@ be checked.
 
 None new. The pattern is covered by the lessons entries and the `harmony-patches.md` bullet; a memory
 file would duplicate the rule that now loads with every patch file.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/advanced-start-options.md](../features/advanced-start-options.md)
+- [docs/reviews/rca-v1.5.2-bodydiff-2026-09-14.md](./rca-v1.5.2-bodydiff-2026-09-14.md)
+
+<!-- backlinks-end -->

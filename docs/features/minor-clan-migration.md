@@ -84,3 +84,15 @@ None. The four clan ids, the two target cultures and the clone naming (`taom_` +
 
 - **Issue:** [#957](https://github.com/haterade22/TAOM/issues/957)
 - **Status:** In progress (part 2 is uncommitted on feat/relations-politics)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/minor-factions.md](./minor-factions.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

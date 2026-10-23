@@ -401,9 +401,13 @@ would act on.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/dev-console.md](./dev-console.md)
 - [docs/features/enlistment.md](./enlistment.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reviews/lessons/campaign-mechanics.md](../reviews/lessons/campaign-mechanics.md)
 
 <!-- backlinks-end -->

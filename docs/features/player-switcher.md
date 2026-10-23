@@ -655,10 +655,13 @@ non-human preview render), [uncapturable-heroes.md](uncapturable-heroes.md),
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/advanced-start-options.md](./advanced-start-options.md)
 - [docs/features/character-creation.md](./character-creation.md)
 - [docs/features/character-selection.md](./character-selection.md)
 - [docs/features/diplomacy.md](./diplomacy.md)
 - [docs/features/return-to-army.md](./return-to-army.md)
+- [docs/features/startup-resources.md](./startup-resources.md)
 - [docs/modding/wanderers-and-named-companions.md](../modding/wanderers-and-named-companions.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
 - [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)

@@ -54,3 +54,13 @@ Not changed, recorded (they exist at the base `fd2072a0a`, B4c neither causes no
 Appended to `docs/reviews/lessons/build-tooling-workflow.md`: "A source-text gate must fail on the wrong
 code, not only on missing code". Lens 2's view-registration finding is an engine fact for the mission
 lifecycle doc and the follow-up issue, not a review lesson.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+
+<!-- backlinks-end -->

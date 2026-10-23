@@ -353,6 +353,7 @@ The pipeline is project-agnostic. Run `--init` from any directory containing wea
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/ai-includes/weapon-creation-workflow.md](../ai-includes/weapon-creation-workflow.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/items-weapons-and-crafting.md](../modding/items-weapons-and-crafting.md)

@@ -60,3 +60,13 @@ Every finding was caught in this round; the table says which lens did not, and w
 
 None. The pattern is already codified twice in `lessons/build-tooling-workflow.md`; the new entries
 make the grep concrete for renames, added files and cross-branch reword lists.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/deep-review-007-patchshield-skip-callback-shims-decisions-2026-09-24.md](./deep-review-007-patchshield-skip-callback-shims-decisions-2026-09-24.md)
+
+<!-- backlinks-end -->

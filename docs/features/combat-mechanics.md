@@ -359,8 +359,10 @@ All overrides are per-hit. Services precompute lookups at construction (monster-
 
 ## Referenced by
 
+- [docs/features/culture-doctrine.md](./culture-doctrine.md)
 - [docs/features/dread-aura.md](./dread-aura.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-balance.md](../modding/configs-balance.md)
+- [docs/reviews/rca-hammerhand-2026-10-20.md](../reviews/rca-hammerhand-2026-10-20.md)
 
 <!-- backlinks-end -->

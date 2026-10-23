@@ -131,3 +131,15 @@ The mission behavior's apply-on-change needs a live `Mission` and is covered by 
 
 - **Issue:** #701 ([Mid-battle freezes with high ragdoll and corpse settings](https://github.com/haterade22/TAOM/issues/701))
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/mount-despawn.md](./mount-despawn.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

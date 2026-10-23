@@ -255,6 +255,7 @@ per ADR-008.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/features/dev-console.md](./dev-console.md)
 - [docs/features/nazgul-family.md](./nazgul-family.md)
 - [docs/INDEX.md](../INDEX.md)

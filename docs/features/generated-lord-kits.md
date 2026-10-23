@@ -105,3 +105,17 @@ The adapter is registered in `RaceAgeIoC` and both models in `SubModule.Register
 
 - **Issue:** #747, [Generated lords wear vanilla Calradic gear, and the gear pick ignores race](https://github.com/haterade22/TAOM/issues/747)
 - **Status:** Closed, `triage-needs-ingame` (in-game checklist owed)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/offspring-race-inheritance.md](./offspring-race-inheritance.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/gamemodel-registry.md](../reference/gamemodel-registry.md)
+- [docs/reviews/lessons/data-content-cultures.md](../reviews/lessons/data-content-cultures.md)
+- [docs/reviews/rca-generated-lord-kits-2026-10-06.md](../reviews/rca-generated-lord-kits-2026-10-06.md)
+
+<!-- backlinks-end -->

@@ -119,6 +119,7 @@ Status: `banner_icons.xml` wired ✅; green material sources placed in `AssetSou
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/modding/banners-and-heraldry.md](../modding/banners-and-heraldry.md)
 - [docs/modding/cultures.md](../modding/cultures.md)
 - [docs/modding/lords-and-heroes.md](../modding/lords-and-heroes.md)

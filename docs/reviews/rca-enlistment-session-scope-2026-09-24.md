@@ -61,3 +61,14 @@ so dropping Agent 1, 2, 4, 5 or 6 would have lost at least one of them.
 
 None beyond the three lesson entries: the propagation and enumeration rules already exist, and this
 is their recurrence, recorded as new entries with the plan-gate twist.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/deep-review-014-enlistment-session-scope-2026-09-24.md](./deep-review-014-enlistment-session-scope-2026-09-24.md)
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

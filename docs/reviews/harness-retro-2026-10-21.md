@@ -76,3 +76,14 @@ Deferred, no proposal: the Edit "file has not been read yet" errors (135 in 20 s
 batches of parallel calls from one message, not retry loops, and the message already says what to
 do; `check-verification-evidence` blocked 52 times, and whether that is a nag or a catch needs the
 sessions read, which is the next retro's question.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/adopt-harness2-2026-10-21.md](./adopt-harness2-2026-10-21.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+
+<!-- backlinks-end -->

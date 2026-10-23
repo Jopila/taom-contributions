@@ -82,3 +82,14 @@ unchanged). Not yet checked in game.
 
 - **Issue:** #955 Coronation title shows an engine error for TAOM cultures
 - **Status:** Closed, `triage-needs-ingame`
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

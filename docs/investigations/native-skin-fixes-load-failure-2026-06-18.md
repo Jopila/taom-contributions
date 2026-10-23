@@ -45,3 +45,13 @@ Root cause (which hypothesis, with PE-import evidence) + the fix:
 - Either way: document the dependency + requirement in `docs/features/native-skin-fixes.md`, and consider a clearer in-game/log message that names the *likely* cause (missing VC++ redist) rather than just "Win32 error 126."
 
 Apply the C++ port discipline in `.claude/rules/native-cpp-ports.md` + `.claude/skills/deep-review` C++ checks for any code change.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/native-skin-fixes.md](../features/native-skin-fixes.md)
+
+<!-- backlinks-end -->

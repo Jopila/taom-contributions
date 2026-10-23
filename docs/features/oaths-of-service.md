@@ -384,3 +384,17 @@ round trip through a dictionary-backed store into a fresh behavior).
 
 - **Issue:** #904, Oaths of Service
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/named-companions.md](./named-companions.md)
+- [docs/features/wanderer-allegiance.md](./wanderer-allegiance.md)
+- [docs/modding/wanderers-and-named-companions.md](../modding/wanderers-and-named-companions.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

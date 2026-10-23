@@ -155,8 +155,11 @@ battle the player watches actually loads.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../../ai-includes/orientation.md)
+- [docs/features/butter-lib-distance-matrix.md](../../features/butter-lib-distance-matrix.md)
 - [docs/INDEX.md](../../INDEX.md)
 - [docs/reference/doc-lookup.md](../doc-lookup.md)
+- [docs/reference/engine/campaignevents-and-campaignbehavior.md](./campaignevents-and-campaignbehavior.md)
 - [docs/reference/engine/issue-and-quest-system.md](./issue-and-quest-system.md)
 - [docs/reference/engine/settlement-economy-food-prosperity.md](./settlement-economy-food-prosperity.md)
 

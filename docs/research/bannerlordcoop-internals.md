@@ -403,5 +403,6 @@ are affected.
 - [docs/features/coop-interop.md](../features/coop-interop.md)
 - [docs/modding/module-dependencies.md](../modding/module-dependencies.md)
 - [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/research/coop-compat-gap-ledger.md](./coop-compat-gap-ledger.md)
 
 <!-- backlinks-end -->

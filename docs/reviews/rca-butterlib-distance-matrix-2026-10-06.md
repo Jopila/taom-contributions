@@ -57,3 +57,13 @@ was searched: a settings page that enumerates an interface, and a constructor re
 ## Feedback memories to codify
 
 None. The lesson is in `docs/reviews/lessons/adapters-taleworlds-api.md`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+
+<!-- backlinks-end -->

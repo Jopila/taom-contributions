@@ -207,3 +207,15 @@ All of this is unseen in game. Items marked verified in source were read in the 
 ## GitHub Issue
 
 - **Issue:** #856, open. The in-game check and the paid translation of the two new strings (`taom_ashes_short_rebuild`, `taom_ashes_done_thralls`) are owed.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

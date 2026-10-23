@@ -221,6 +221,8 @@ The hotkey is currently hard-coded as `InputKey.F6` in `MapScreenInputAdapter.Is
 
 ## Referenced by
 
+- [docs/features/reeves-ledger.md](./reeves-ledger.md)
 - [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
 
 <!-- backlinks-end -->

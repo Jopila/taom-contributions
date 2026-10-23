@@ -205,10 +205,12 @@ run after any large scripted data pass, since those are what produce the sidecar
 - [docs/modding/modules-overview.md](../modding/modules-overview.md)
 - [docs/modding/recipe-retire-content.md](../modding/recipe-retire-content.md)
 - [docs/reference/lotrlome-armory-snapshot/README.md](lotrlome-armory-snapshot/README.md)
+- [docs/reference/lotrlome-hill-troll-changes.md](./lotrlome-hill-troll-changes.md)
 - [docs/reference/lotrlome-soln-id-fix.md](./lotrlome-soln-id-fix.md)
 - [docs/reference/lotrlome-spider-mount-changes.md](./lotrlome-spider-mount-changes.md)
 - [docs/reference/lotrlome-war-ram-changes.md](./lotrlome-war-ram-changes.md)
 - [docs/reference/lotrlome-warg-changes.md](./lotrlome-warg-changes.md)
 - [docs/reference/release-process.md](./release-process.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](../reviews/lessons/build-tooling-workflow.md)
 
 <!-- backlinks-end -->

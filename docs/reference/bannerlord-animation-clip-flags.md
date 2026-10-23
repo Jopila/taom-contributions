@@ -307,9 +307,13 @@ programmatically. Until then: read/set flags in the Kit's Animation Clip Inspect
 
 ## Referenced by
 
+- [docs/ai-includes/creature-mount-authoring.md](../ai-includes/creature-mount-authoring.md)
+- [docs/features/orc-goblin-locomotion.md](../features/orc-goblin-locomotion.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/reference/adod-beasts-architecture-and-taom-port.md](./adod-beasts-architecture-and-taom-port.md)
+- [docs/reference/bannerlord-animation-system-map.md](./bannerlord-animation-system-map.md)
 - [docs/reference/bannerlord-engine-and-toolchain.md](./bannerlord-engine-and-toolchain.md)
+- [docs/reference/doc-lookup.md](./doc-lookup.md)
 - [docs/reference/engine/animation-binding-and-playback.md](engine/animation-binding-and-playback.md)
 
 <!-- backlinks-end -->

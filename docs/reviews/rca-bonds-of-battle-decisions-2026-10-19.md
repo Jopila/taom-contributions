@@ -38,3 +38,14 @@ raw facts and test every value of every input that shapes the result.
 ## Feedback memories to codify
 
 None. The lessons carry the rules.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/bonds-of-battle.md](../features/bonds-of-battle.md)
+- [docs/reviews/rca-bonds-of-battle-2026-10-18.md](./rca-bonds-of-battle-2026-10-18.md)
+
+<!-- backlinks-end -->

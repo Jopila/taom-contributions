@@ -34,6 +34,7 @@ This document **is the index** of the per-category lesson files under `lessons/`
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/features/race-age-system.md](../features/race-age-system.md)
 - [docs/modding/README.md](../modding/README.md)
 - [docs/modding/troubleshooting.md](../modding/troubleshooting.md)

@@ -279,6 +279,7 @@ stood normally and the rider lay flat beside it. Every in-game tableau was fine.
 
 ## Referenced by
 
+- [docs/reviews/rca-load-game-preview-bind-pose-2026-10-01.md](./rca-load-game-preview-bind-pose-2026-10-01.md)
 - [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
 
 <!-- backlinks-end -->

@@ -121,3 +121,13 @@ then a convergence pass) found no runtime defect: the name, the registration and
 | W7 | LOW (convergence) | The CHANGELOG draft gave the peak as -1 dBFS as if of the shipped file, which measures -1.6 dB; -1 dBFS is the level before encoding. | Figure without its condition | Copied from the processing step without "before encoding". | Added, as the doc already had it. |
 | W8 | LOW (convergence) | The committed #645 CHANGELOG entry sends the reader to the doc's Sound provenance section for the prompts, which the swap deleted. | Dangling pointer | The swap rewrote the section without searching for references into it. | The section says the prompts are in its `b90fd3a4` copy; recurrence on the `lessons/misc.md` data-change lesson. |
 | W9 | LOW (convergence) | The Review 130 paragraph (`437d5911`, 12:44) said "Nothing is pushed or deployed"; the install already held #645's three takes and XML, in a folder created at 12:41. | Status claim from the plan | Written from the plan (deploy on Mike's word) without reading the install. | Now "Nothing is pushed", with the install state. `evidence-over-claims.md` C covers it. |
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

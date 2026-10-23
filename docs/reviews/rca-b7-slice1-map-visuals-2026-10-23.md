@@ -61,3 +61,13 @@ The baseline swaps those two keys and stays at 385 entries.
 
 A fixture that several detectors hit proves none of them. Give each detector a fixture that only it can see,
 and remove each detector once to watch its fixture fail (`docs/reviews/lessons/testing-qa.md`).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/testing-qa.md](lessons/testing-qa.md)
+
+<!-- backlinks-end -->

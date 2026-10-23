@@ -44,3 +44,13 @@ engine fact each copied pattern depends on, and a reviewer checks that fact befo
 
 - `lessons/localization-ui.md`: a hint on a disabled button needs an enabled parent.
 - `lessons/harmony-il.md`: a mixin whose target declares no `OnFinalize` stacks a hook on every view model's `OnFinalize`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/namegiving.md](../features/namegiving.md)
+
+<!-- backlinks-end -->

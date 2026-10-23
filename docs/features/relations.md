@@ -111,5 +111,10 @@ The seam reports the change that landed, so a diplomacy model that scaled or zer
 ## Referenced by
 
 - [docs/features/bonds-of-battle.md](./bonds-of-battle.md)
+- [docs/features/good-deeds.md](./good-deeds.md)
+- [docs/features/long-memory.md](./long-memory.md)
+- [docs/features/tokens-of-esteem.md](./tokens-of-esteem.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
 
 <!-- backlinks-end -->

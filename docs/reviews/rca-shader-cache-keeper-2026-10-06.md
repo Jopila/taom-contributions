@@ -30,3 +30,13 @@ treated as fully reviewed.
 ## Feedback memories to codify
 
 None: one first-time, test-only finding.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/shader-cache-keeper.md](../features/shader-cache-keeper.md)
+
+<!-- backlinks-end -->

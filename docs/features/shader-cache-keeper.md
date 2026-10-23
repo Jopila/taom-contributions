@@ -159,3 +159,17 @@ a PC whose Windows is not on C: (the reason the forwarders were replaced).
 
 - **Issue:** [#751, feat: ship ShaderCacheKeeper, keep the shader cache across mod list changes](https://github.com/haterade22/TAOM/issues/751)
 - **Status:** Closed with `triage-needs-ingame` (the in-game check above is owed)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/shader-compile-notice.md](./shader-compile-notice.md)
+- [docs/features/shader-precompilation.md](./shader-precompilation.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/release-process.md](../reference/release-process.md)
+- [docs/reviews/adopt-yotthani-shadercachekeeper-2026-10-06.md](../reviews/adopt-yotthani-shadercachekeeper-2026-10-06.md)
+
+<!-- backlinks-end -->

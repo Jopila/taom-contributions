@@ -463,7 +463,9 @@ MCM hint says so.
 
 ## Referenced by
 
+- [docs/features/signature-strikes.md](./signature-strikes.md)
 - [docs/modding/configs-factions-and-world.md](../modding/configs-factions-and-world.md)
+- [docs/reference/engine/formations-and-team-ai.md](../reference/engine/formations-and-team-ai.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
 - [docs/roadmap.md](../roadmap.md)
 

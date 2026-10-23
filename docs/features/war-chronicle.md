@@ -438,3 +438,22 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 
 - **Issue:** #765 (closed with `triage-needs-ingame`: the checks under "How to test the chronicle in game" are owed). Review follow-ups: #792 (closed). The repeated daily tick after a load: #793 (open; this feature's two daily listeners are guarded, and TAOM's other daily listeners are not audited yet).
 - **Status:** Closed (the Eye of Sauron hunt is in [eye-of-sauron.md](eye-of-sauron.md))
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/army-targeting.md](./army-targeting.md)
+- [docs/features/castle-recruitment.md](./castle-recruitment.md)
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/dev-console.md](./dev-console.md)
+- [docs/features/troop-progression.md](./troop-progression.md)
+- [docs/features/war-of-the-ring-momentum.md](./war-of-the-ring-momentum.md)
+- [docs/features/war-of-the-ring.md](./war-of-the-ring.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/engine/campaign-tick-time-and-party-ai.md](../reference/engine/campaign-tick-time-and-party-ai.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

@@ -91,3 +91,13 @@ anyway. The convergence pass was cut off once by the usage limit and rerun.
   its scope names.
 - `docs/reviews/lessons/adapters-taleworlds-api.md` (extended): when an engine rule flips, grep the
   docs, skills and tools for the old sentence, not only the data.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

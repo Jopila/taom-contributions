@@ -55,3 +55,13 @@ A/B before switching a cheaper path live, and native verification of every engin
 own: the mission tick profiler (plan 028), the log comparison tool (plan 029) and the clip memory probe
 (plan 036). Nothing is installed or run from either repository. Ask yotthani for the unpushed
 `docs/perf-audit/` notes and a licence line for `bannerlord`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+
+<!-- backlinks-end -->

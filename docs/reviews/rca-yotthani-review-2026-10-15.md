@@ -186,3 +186,14 @@ The second review added:
   figure or address goes in).
 - `lessons/misc.md` (with the knowledge-base batch): "A doc batch written beside the code is re-read against the
   reviewed code before it ships", for S12.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/adopt-yotthani-2026-10-15.md](./adopt-yotthani-2026-10-15.md)
+- [docs/reviews/rca-engine-bump-v1.5.5-2026-10-14.md](./rca-engine-bump-v1.5.5-2026-10-14.md)
+
+<!-- backlinks-end -->

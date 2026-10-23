@@ -406,3 +406,21 @@ After sign-off, delete `Main/Features/CreatureBandits/Diagnostics/` and every ca
 - **Issue:** #694: [twenty spider broods and wild troll bands, one per kingdom](https://github.com/haterade22/TAOM/issues/694)
 - **Status:** Closed, `triage-needs-ingame` (the owed checks are in its closing comment)
 - **Translations:** #695: [the seven Creature Bandits names into the 12 languages](https://github.com/haterade22/TAOM/issues/695), open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/bandit-management.md](./bandit-management.md)
+- [docs/features/dev-console.md](./dev-console.md)
+- [docs/features/spider.md](./spider.md)
+- [docs/features/troll-race.md](./troll-race.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+- [docs/research/creature-bandits-roadmap.md](../research/creature-bandits-roadmap.md)
+
+<!-- backlinks-end -->

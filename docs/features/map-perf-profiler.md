@@ -455,3 +455,15 @@ from the first game start.
 
 - **Issue:** [#721](https://github.com/haterade22/TAOM/issues/721) diagnostics: attribute campaign-map frame time to TAOM's per-frame map code
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/time-acceleration.md](./time-acceleration.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

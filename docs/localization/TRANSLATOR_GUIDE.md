@@ -553,7 +553,11 @@ Open an issue on GitHub or reach out on the mod's Discord channel.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/ai-includes/weapon-creation-workflow.md](../ai-includes/weapon-creation-workflow.md)
+- [docs/features/localization.md](../features/localization.md)
+- [docs/features/oaths-of-service.md](../features/oaths-of-service.md)
+- [docs/features/war-chronicle.md](../features/war-chronicle.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/editing-safely.md](../modding/editing-safely.md)
 - [docs/modding/file-catalogue.md](../modding/file-catalogue.md)
@@ -563,6 +567,7 @@ Open an issue on GitHub or reach out on the mod's Discord channel.
 - [docs/modding/wanderers-and-named-companions.md](../modding/wanderers-and-named-companions.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
 - [docs/reference/localization-map.md](../reference/localization-map.md)
+- [docs/reviews/lessons/xslt-moduledata.md](../reviews/lessons/xslt-moduledata.md)
 
 <!-- backlinks-end -->
 ## Adding a new strings file to the pipeline (order matters)

@@ -227,3 +227,18 @@ an in-game check.
 
 - **Issue:** #794 [WildMesh3D boars, goats, deer and moose as second-variant mounts](https://github.com/haterade22/TAOM/issues/794)
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/quadruped-pack-to-horse-skeleton-workflow.md](../ai-includes/quadruped-pack-to-horse-skeleton-workflow.md)
+- [docs/features/moduledata-validation.md](./moduledata-validation.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/lotrlome-wildmesh-changes.md](../reference/lotrlome-wildmesh-changes.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](../reviews/lessons/build-tooling-workflow.md)
+
+<!-- backlinks-end -->

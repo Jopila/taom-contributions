@@ -477,5 +477,6 @@ All measured 2026-09-05 against the installed `Modules/LOTRLOME_Armory/` and the
 - [docs/modding/README.md](./README.md)
 - [docs/modding/recipe-new-mod-from-zero.md](./recipe-new-mod-from-zero.md)
 - [docs/modding/troubleshooting.md](./troubleshooting.md)
+- [docs/reference/bannerlord-animation-system-map.md](../reference/bannerlord-animation-system-map.md)
 
 <!-- backlinks-end -->

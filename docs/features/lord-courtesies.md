@@ -145,3 +145,17 @@ The 10 new keys carry English seed text in all 12 languages. A paid translation 
 
 - **Issue:** #897, Lord Courtesies: [issue #897](https://github.com/haterade22/TAOM/issues/897)
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/bonds-of-battle.md](./bonds-of-battle.md)
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/messengers.md](./messengers.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

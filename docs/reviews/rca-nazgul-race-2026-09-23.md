@@ -98,3 +98,13 @@ The design lens proposed checking `lords.xslt`'s transform output over the insta
 instead of scanning stylesheets. Mike kept the scan: it covers every stylesheet in about 25 ms,
 while the transform covers the one stylesheet over NPCCharacters today and adds about 3.3 s to each
 full suite run.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

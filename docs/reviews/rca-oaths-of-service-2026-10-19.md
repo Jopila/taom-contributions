@@ -61,3 +61,19 @@ engine's event order, the engine's getter, and the second validation phase.
 
 None beyond the lessons above. The listener-order trap is already a written rule; the fix is to apply it at plan
 time (the lesson says so).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/adapters-taleworlds-api.md](lessons/adapters-taleworlds-api.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/campaign-mechanics.md](lessons/campaign-mechanics.md)
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+- [docs/reviews/lessons/misc.md](lessons/misc.md)
+- [docs/reviews/lessons/state-lifecycle-save.md](lessons/state-lifecycle-save.md)
+- [docs/reviews/lessons/testing-qa.md](lessons/testing-qa.md)
+
+<!-- backlinks-end -->

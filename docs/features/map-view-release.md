@@ -253,3 +253,16 @@ closure on every call until the 2026-10-08 review). The release itself is one na
 
 - **Issue:** #778 (draft item 4 in [adopt-yotthani-2026-10-08.md](../reviews/adopt-yotthani-2026-10-08.md)).
 - **Status:** built and unit-tested; not yet checked in game.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/map-perf-profiler.md](./map-perf-profiler.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/engine/gauntletui-viewmodel-screen.md](../reference/engine/gauntletui-viewmodel-screen.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

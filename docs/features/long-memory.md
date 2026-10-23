@@ -178,3 +178,17 @@ Setup once: a campaign with cheat mode on. Read the `[Relations]` lines in the T
 
 - **Issue:** #865, [Heavier relation loss for raiding and coercing villages, scaled by alignment](https://github.com/haterade22/TAOM/issues/865)
 - **Status:** Open. In-game checks owed.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/good-deeds.md](./good-deeds.md)
+- [docs/features/relations.md](./relations.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

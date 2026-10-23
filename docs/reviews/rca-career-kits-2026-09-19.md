@@ -62,3 +62,13 @@ The lenses found every item above; the misses were the author's, before the revi
 
 None new. Findings 1 to 3 go into `docs/reviews/lessons/data-content-cultures.md`; finding 5 is an
 instance of the existing `evidence-over-claims.md` §B ("a gate that cannot run has not passed").
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

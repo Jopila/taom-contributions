@@ -220,7 +220,9 @@ The full walk-through is in [alignment-aware-execution.md](alignment-aware-execu
 
 ## Referenced by
 
+- [docs/features/alignment-aware-execution.md](./alignment-aware-execution.md)
 - [docs/INDEX.md](../INDEX.md)
+- [docs/migration/v1.5.2-impact.md](../migration/v1.5.2-impact.md)
 - [docs/modding/configs-factions-and-world.md](../modding/configs-factions-and-world.md)
 - [docs/modding/kingdoms.md](../modding/kingdoms.md)
 

@@ -387,5 +387,7 @@ These come up on every armour job and no doc in the repo settles them. Say so ra
 - [docs/modding/recipe-retire-content.md](./recipe-retire-content.md)
 - [docs/modding/troops.md](./troops.md)
 - [docs/modding/troubleshooting.md](./troubleshooting.md)
+- [docs/reference/helmet-hair-beard-cover.md](../reference/helmet-hair-beard-cover.md)
+- [docs/reference/lotrlome-beard-cover-changes.md](../reference/lotrlome-beard-cover-changes.md)
 
 <!-- backlinks-end -->

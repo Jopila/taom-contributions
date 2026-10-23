@@ -139,3 +139,15 @@ Load a save, then fight a battle against or alongside a Gondor, Erebor or Mordor
 - **Issue:** #823 Lords of custom cultures never receive a banner item
 - **Issue:** #933 Joining a TAOM-culture kingdom gives no banner reward
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/banner-bearers.md](./banner-bearers.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

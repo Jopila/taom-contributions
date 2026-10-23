@@ -251,6 +251,7 @@ or a debug console command that calls `Clan.CreateClan` without `SetInitialHomeS
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/features/culture-conversion.md](./culture-conversion.md)
 - [docs/features/moduledata-validation.md](./moduledata-validation.md)
 - [docs/INDEX.md](../INDEX.md)

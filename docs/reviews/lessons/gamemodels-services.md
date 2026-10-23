@@ -216,6 +216,7 @@ The Combat Mechanics damage rules (crush-through, cleave, stagger, charge knockd
 - [docs/modding/troubleshooting.md](../../modding/troubleshooting.md)
 - [docs/reviews/LESSONS-LEARNED.md](../LESSONS-LEARNED.md)
 - [docs/reviews/lessons/campaign-mechanics.md](./campaign-mechanics.md)
+- [docs/reviews/rca-v1.5.2-bodydiff-2026-09-14.md](../rca-v1.5.2-bodydiff-2026-09-14.md)
 
 <!-- backlinks-end -->
 ### Gate the rule, not the call site

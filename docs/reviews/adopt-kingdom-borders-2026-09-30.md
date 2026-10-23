@@ -282,3 +282,14 @@ a second consumer.
   material.
 - Whether `vertex_color_mat` still exists in v1.5.3 (the mod relies on it; not checked).
 - The prototype's heightmap costs stand in for navmesh terrain types; rivers are not modelled in it.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/realm-borders.md](../features/realm-borders.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+
+<!-- backlinks-end -->

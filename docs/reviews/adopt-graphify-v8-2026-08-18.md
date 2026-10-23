@@ -339,10 +339,11 @@ fix the routing row, not CLAUDE.md.
 ## Referenced by
 
 - [docs/adrs/010-knowledge-base-architecture.md](../adrs/010-knowledge-base-architecture.md)
+- [docs/adrs/012-graphify-code-graph-in-the-workflow.md](../adrs/012-graphify-code-graph-in-the-workflow.md)
 - [docs/ai-includes/external-repo-adoption.md](../ai-includes/external-repo-adoption.md)
 - [docs/features/doc-graph.md](../features/doc-graph.md)
+- [docs/features/graphify-code-graph.md](../features/graphify-code-graph.md)
 - [docs/INDEX.md](../INDEX.md)
-- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
 - [docs/reference/provenance-register.md](../reference/provenance-register.md)
 - [docs/reviews/adopt-graphify-2026-06-08.md](./adopt-graphify-2026-06-08.md)
 

@@ -230,6 +230,7 @@ All commands were run on 2026-09-05. The ones that name `LOTRLOME_Armory/...` or
 
 ## Referenced by
 
+- [docs/ai-includes/weapon-creation-workflow.md](../ai-includes/weapon-creation-workflow.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/file-catalogue.md](./file-catalogue.md)
 - [docs/modding/items-armor.md](./items-armor.md)

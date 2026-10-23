@@ -58,3 +58,16 @@ had no instruction to trace a value to its producer or a flag to its consumer.
 - **Lesson** (`lessons/build-tooling-workflow.md`): take a cited line number from a read of that one file,
   and check every new citation after a docs pass (finding 8).
 - **Gate:** `SourceEncodingTests` (finding 7).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/adapters-taleworlds-api.md](lessons/adapters-taleworlds-api.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/campaign-mechanics.md](lessons/campaign-mechanics.md)
+- [docs/reviews/lessons/testing-qa.md](lessons/testing-qa.md)
+
+<!-- backlinks-end -->

@@ -52,3 +52,13 @@ Suspect verdicts: KS1 disputed (both fill loops insert any root unconditionally;
 2. User decision on Bar Melui's villages (F4).
 3. Live-map coverage gate in `validate_moduledata.py` (F3), with the #597 session's validator work.
 4. In-game recruit-screen check at Glanhir, Morlad, Bar-en-Siril and Dol Amroth after a full restart; the pool provider is a process singleton.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

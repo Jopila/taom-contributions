@@ -425,3 +425,18 @@ All owed unless marked done.
 
 - **Issue:** #735, [Creature siege role: trolls skip ladders, break gates and stay off walls](https://github.com/haterade22/TAOM/issues/735)
 - **Status:** Open (in-game check owed)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/combat-mechanics.md](./combat-mechanics.md)
+- [docs/features/siege-forces.md](./siege-forces.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+
+<!-- backlinks-end -->

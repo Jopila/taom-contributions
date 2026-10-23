@@ -61,3 +61,13 @@ TAOM-versus-TAOM edge under the engine's hysteresis. `docs/reviews/lessons/adapt
 an engine query named for the threat is scoped by its own facing and its one formation; a
 routed formation is folded by every tactic that does not own it, and the engine's exemption is
 `enforceNotSplittableByAI`; constants lifted from a disabled vanilla path carry its bugs.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

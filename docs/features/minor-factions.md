@@ -142,7 +142,11 @@ No runtime configuration. All data is in the XSLT and string table. To change a 
 
 ## Referenced by
 
+- [docs/features/alignment-aware-execution.md](./alignment-aware-execution.md)
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/minor-clan-migration.md](./minor-clan-migration.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/clans.md](../modding/clans.md)
+- [docs/modding/configs-factions-and-world.md](../modding/configs-factions-and-world.md)
 
 <!-- backlinks-end -->

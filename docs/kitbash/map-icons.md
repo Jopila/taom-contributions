@@ -93,3 +93,16 @@ normal map instead of adding detail, and worn edges, soot, streaks and stone cou
 | Icon | Settlement | Source | Kit files | Staging (source of truth) | State |
 |---|---|---|---|---|---|
 | `carn_dum_town` | `town_G3` Carn Dûm (Gundabad) | Rebuilt from solids (`blender_build_carn_dum_icon.py` v11) on the layout of Mike's Tripo model: 83,797 triangles, 54.8 × 55.9 × 40.8 m, 7 texture sets (unique UVs); Painter stone colour, tone and baked occlusion | Obsolete Tripo version still there: `Gundabad/carn_dum_town.fbx` (25,000 triangles) and `Gundabad/textures/t_carn_dum_town_{d,n,s}.png`, copied 2026-10-16 and imported by Mike the same day (five packages in `Assets/Campaign Map/Map Icons/Gundabad/`: `carn_dum_town_geo.tpac`, `textures/t_carn_dum_town_mtl.tpac` and `_{d,n,s}_tex.tpac`), not placed: the map scene does not name it. The rebuild is not copied yet | `E:\LOTRAOMAssets\_export\carn_dum_rebuild\v11\` (builder `.blend` and renders, `uv\carn_dum_town.fbx` and `_uv.blend`); the round 14 paint is on v10 (`v10\carn_dum_fortress.spp`, `v10\paint_r14\`); the Tripo version in `carn_dum_icon_final\` | Texturing in progress; Mike's look so far: stone colour, broad tone and occlusion, no snow, edges, soot, streaks or courses. Next: a Painter project from v11 (its unwrap gives the town set 11.9 px/m, v10 had 9.7), every set painted as stone (round 14 still had the paving lighter), conversion. Decisions owed first: the `carn_dum_town` set converts to `t_carn_dum_town_*`, the Tripo version's names (rename the set or replace the Tripo files); occlusion in the albedo or in `_s` blue, not both (`_s` dims ambient light again); whether 1K is enough, being about four times coarser than full zoom. Then the Kit copy (backup of the Tripo FBX), 7 materials with `use_specular`, the `town_G3` child swap (`Gundabad`, now `gundabad_town`) and the in-game check |
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/kitbash/README.md](./README.md)
+- [docs/modding/settlements.md](../modding/settlements.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/ue-to-bannerlord-asset-pipeline.md](../reference/ue-to-bannerlord-asset-pipeline.md)
+
+<!-- backlinks-end -->

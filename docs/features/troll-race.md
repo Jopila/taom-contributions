@@ -751,9 +751,19 @@ empty: `tools/bind_troll_action_set.py` owns its 213 overrides.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/ai-includes/troll-race-arp-retargeting-workflow.md](../ai-includes/troll-race-arp-retargeting-workflow.md)
+- [docs/features/moduledata-validation.md](./moduledata-validation.md)
+- [docs/features/troll-brute-force.md](./troll-brute-force.md)
+- [docs/INDEX.md](../INDEX.md)
 - [docs/modding/body-properties.md](../modding/body-properties.md)
 - [docs/modding/recipe-add-a-race-or-creature.md](../modding/recipe-add-a-race-or-creature.md)
+- [docs/reference/bannerlord-animation-clip-flags.md](../reference/bannerlord-animation-clip-flags.md)
+- [docs/reference/bannerlord-animation-system-map.md](../reference/bannerlord-animation-system-map.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/lotrlome-hill-troll-changes.md](../reference/lotrlome-hill-troll-changes.md)
+- [docs/reference/race-face-and-hand-morphs.md](../reference/race-face-and-hand-morphs.md)
+- [docs/reference/ue-to-bannerlord-asset-pipeline.md](../reference/ue-to-bannerlord-asset-pipeline.md)
 
 <!-- backlinks-end -->

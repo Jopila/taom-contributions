@@ -35,3 +35,13 @@ call added back, `ExecuteDone` and `OpenCareerScreen` swapped, and the mixin met
 
 Before adding behaviour an issue says is missing, trace what the live path already does, vanilla calls
 included (`docs/reviews/lessons/adapters-taleworlds-api.md`).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/adapters-taleworlds-api.md](lessons/adapters-taleworlds-api.md)
+
+<!-- backlinks-end -->

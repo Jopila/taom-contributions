@@ -243,3 +243,17 @@ is the only one whose count is large; its cost is not measured. Nothing runs per
 
 - **Issue:** #775 (draft item 1 in [adopt-yotthani-2026-10-08.md](../reviews/adopt-yotthani-2026-10-08.md)).
 - **Status:** built and unit-tested; not yet checked in game.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/crash-report.md](./crash-report.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/engine/mission-and-missionbehavior-lifecycle.md](../reference/engine/mission-and-missionbehavior-lifecycle.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

@@ -502,6 +502,7 @@ resource's `starting_amount` is 0 (a seed then only records the pair).
 
 ## Referenced by
 
+- [docs/features/coop-interop.md](./coop-interop.md)
 - [docs/features/dev-console.md](./dev-console.md)
 - [docs/features/elite-emissary.md](./elite-emissary.md)
 - [docs/INDEX.md](../INDEX.md)

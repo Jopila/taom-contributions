@@ -142,3 +142,23 @@ so; each move batch also ends with a client boot.
 - [server-settings](../features/server-settings.md): the B8 server settings file (decision 2).
 - [ADR-007](./007-adapter-pattern.md): null adapters for the server side of each inverted call.
 - Issue #967 (Batch C of the co-op epic #964).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/adrs/README.md](./README.md)
+- [docs/features/coop-dedicated-server.md](../features/coop-dedicated-server.md)
+- [docs/features/coop-interop.md](../features/coop-interop.md)
+- [docs/features/server-settings.md](../features/server-settings.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/module-taom.md](../modding/module-taom.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/research/taom-headless-server.md](../research/taom-headless-server.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](../reviews/lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/testing-qa.md](../reviews/lessons/testing-qa.md)
+
+<!-- backlinks-end -->

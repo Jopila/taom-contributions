@@ -182,3 +182,19 @@ Animalia items, inserted after the saddle on 2026-09-23: restore a later backup,
 4. **Record the elk art's source and licence** in [provenance-register.md](./provenance-register.md) if it came
    from outside TAOM.
 5. **Mirror sync**: the lotraom-assets mirror is Mike's to sync; it was not touched.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/elk.md](../features/elk.md)
+- [docs/features/monster-size.md](../features/monster-size.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/file-catalogue.md](../modding/file-catalogue.md)
+- [docs/reference/feature-map.md](./feature-map.md)
+- [docs/reference/lotrlome-animalia-changes.md](./lotrlome-animalia-changes.md)
+- [docs/reference/lotrlome-war-ram-changes.md](./lotrlome-war-ram-changes.md)
+
+<!-- backlinks-end -->

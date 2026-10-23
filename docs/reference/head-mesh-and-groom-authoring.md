@@ -190,3 +190,16 @@ vanilla to avoid per-spawn cost. TAOM's races are real races, so this is context
 - **The groom hook** is an alternative to authoring each beard on each head. TAOM follows vanilla instead (Mike,
   2026-09-28: follow vanilla, so upper meshes carry no channels and are modelled on the head they serve); the hook
   matters only if a head ever bakes its shape into the geometry.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/provenance-register.md](./provenance-register.md)
+- [docs/reference/race-face-and-hand-morphs.md](./race-face-and-hand-morphs.md)
+- [docs/reviews/adopt-yotthani-bannerlord-2026-09-30.md](../reviews/adopt-yotthani-bannerlord-2026-09-30.md)
+
+<!-- backlinks-end -->

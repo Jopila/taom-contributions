@@ -156,3 +156,16 @@ Outputs in `E:\LOTRAOMAssets\_export\gondor\buildings\`: renders `<building>__{q
 the brief and layout JSON per building, `gondor_buildings_a_inspect.blend` (the exported file
 re-imported, one collection per tier, the buildings 35 m apart), `zfight\<building>_zfight_*` (one
 DONE file per building).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/kitbash/gondor/design-patterns.md](gondor/design-patterns.md)
+- [docs/kitbash/gondor/README.md](gondor/README.md)
+- [docs/kitbash/lond-cirion-buildings.md](./lond-cirion-buildings.md)
+- [docs/kitbash/README.md](./README.md)
+
+<!-- backlinks-end -->

@@ -275,8 +275,11 @@ Engine authority is the installed DLLs: `pwsh tools/taom-src.ps1 path <Type>` (v
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/module-map.md](../modding/module-map.md)
 - [docs/modding/modules-overview.md](../modding/modules-overview.md)
+- [docs/modding/recipe-add-a-field-battle-scene.md](../modding/recipe-add-a-field-battle-scene.md)
 - [docs/modding/recipe-new-mod-from-zero.md](../modding/recipe-new-mod-from-zero.md)
 - [docs/modding/settlements.md](../modding/settlements.md)
+- [docs/reference/doc-lookup.md](./doc-lookup.md)
+- [docs/reference/feature-map.md](./feature-map.md)
 - [docs/reference/scene-reference-audit.md](./scene-reference-audit.md)
 - [docs/reviews/rca-worldmap-grid-loose-import-crash-2026-06-01.md](../reviews/rca-worldmap-grid-loose-import-crash-2026-06-01.md)
 

@@ -57,3 +57,13 @@ One lesson, appended to `docs/reviews/lessons/data-content-cultures.md`: before 
 mount item's `speed` or `charge_damage`, open the charge formula and grep the creature's
 `*Config.cs` for velocity thresholds, and state the compounded effect in the plan. No new rule
 file; the existing review already asks the question, the plan did not.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

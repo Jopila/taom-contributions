@@ -525,6 +525,7 @@ promoted companion.
 
 ## Referenced by
 
+- [docs/features/dev-console.md](./dev-console.md)
 - [docs/features/wanderer-allegiance.md](./wanderer-allegiance.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-balance.md](../modding/configs-balance.md)

@@ -259,6 +259,7 @@ Branches off `gondor_pg_spearman.upgrade_target` (now expands to `vet_spearman |
 
 - [docs/features/troop-skill-balance.md](./troop-skill-balance.md)
 - [docs/INDEX.md](../INDEX.md)
+- [docs/modding/items-armor.md](../modding/items-armor.md)
 - [docs/modding/load-order-and-dependencies.md](../modding/load-order-and-dependencies.md)
 - [docs/modding/troops.md](../modding/troops.md)
 

@@ -393,6 +393,9 @@ Kept here so nobody restores the old guesses. Each line was measured on 2026-10-
 
 ## Referenced by
 
+- [docs/kitbash/erebor-buildings.md](../erebor-buildings.md)
+- [docs/kitbash/erebor/blender-build-prompt.md](./blender-build-prompt.md)
+- [docs/kitbash/erebor/design-patterns.md](./design-patterns.md)
 - [docs/kitbash/erebor/README.md](./README.md)
 
 <!-- backlinks-end -->

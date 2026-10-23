@@ -89,3 +89,13 @@ CultureDoctrine fallback question (no runtime effect), a NaN `VictimMaxHealth` p
 | Round | Diff read | Finding | Why missed | Preventive action |
 |---|---|---|---|---|
 | 1 | `bf1898c3..3dc3739c` | None: the fix diff, the cached settings references (against the installed MCMv5), the reordered gates and the id slice were re-checked clean | n/a | n/a |
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/deep-review-031-settings-reads-off-hot-paths-2026-10-02.md](./deep-review-031-settings-reads-off-hot-paths-2026-10-02.md)
+
+<!-- backlinks-end -->

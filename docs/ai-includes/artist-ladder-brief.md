@@ -213,3 +213,13 @@ without `--apply`, paste the plan into your message to Mike, and let him or a TA
 State in your message: which files changed, which section-5 checks you ran with their results, which
 generated files you regenerated, which warnings are new, and anything you chose not to do because a
 rule above blocked it. Do not claim a check passed that you did not run.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+
+<!-- backlinks-end -->

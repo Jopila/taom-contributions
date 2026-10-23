@@ -70,3 +70,13 @@ that turns "the numbers look reasonable" into "here is the battle where they are
 `docs/reviews/lessons/adapters-taleworlds-api.md`: the two formation lists; a distance rule
 carries a time. `docs/reviews/lessons/testing-qa.md`: a rule written from an observation is
 tested against the engine fact behind it, and the default rows under a plan are part of the plan.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

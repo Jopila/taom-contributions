@@ -150,3 +150,13 @@ Ship a changed shader under a new name.
 
 - **Issue:** #916 [Bows on taom_deformer shaders make their holder invisible](https://github.com/haterade22/TAOM/issues/916)
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

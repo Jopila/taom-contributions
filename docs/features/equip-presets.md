@@ -156,5 +156,6 @@ Saveable types (registered via PresetSaveableTypeDefiner, BaseId 726900501):
 ## Referenced by
 
 - [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
 
 <!-- backlinks-end -->

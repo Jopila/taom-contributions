@@ -103,3 +103,16 @@ A replaced lord becomes a troop, so the join menu's "N lords present" gossip, th
 
 - **Issue:** #744: [Tournaments keep Free and Evil entrants apart (no orcs at Minas Tirith)](https://github.com/haterade22/TAOM/issues/744)
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/arena.md](./arena.md)
+- [docs/features/tournament-rewards.md](./tournament-rewards.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

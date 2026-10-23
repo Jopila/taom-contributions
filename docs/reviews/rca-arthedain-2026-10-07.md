@@ -88,3 +88,13 @@ was the only tool for culture coverage, and the map tools had no save rule.
   first.
 - `lessons/data-content-cultures.md`: hold a new culture's coverage with tests that read the data,
   not with a sweep.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/modding/recipe-add-a-kingdom.md](../modding/recipe-add-a-kingdom.md)
+
+<!-- backlinks-end -->

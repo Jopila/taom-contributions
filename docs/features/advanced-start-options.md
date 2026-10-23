@@ -199,6 +199,9 @@ block, so the pairing is refused rather than left to chance.
 
 ## Referenced by
 
+- [docs/features/eye-of-sauron.md](./eye-of-sauron.md)
+- [docs/features/war-of-the-ring.md](./war-of-the-ring.md)
+- [docs/migration/v1.5.2-impact.md](../migration/v1.5.2-impact.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
 
 <!-- backlinks-end -->

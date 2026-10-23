@@ -161,3 +161,16 @@ lord, a Nazgul and a troll should log no path.
 
 - **Issue:** #821 Voiced dialogue plays a random vanilla voice for TAOM cultures
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/hero-race.md](./hero-race.md)
+- [docs/features/kingdom-voices.md](./kingdom-voices.md)
+- [docs/migration/v1.5.5-impact.md](../migration/v1.5.5-impact.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

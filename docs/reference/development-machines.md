@@ -133,7 +133,10 @@ correct there and the register above is enough to translate them.
 ## Referenced by
 
 - [docs/ai-includes/codex-operating-guide.md](../ai-includes/codex-operating-guide.md)
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/ai-includes/taleworlds-research-guide.md](../ai-includes/taleworlds-research-guide.md)
+- [docs/features/ghidra-native-decompile.md](../features/ghidra-native-decompile.md)
+- [docs/features/orc-goblin-locomotion.md](../features/orc-goblin-locomotion.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/reference/bannerlord-engine-and-toolchain.md](./bannerlord-engine-and-toolchain.md)
 

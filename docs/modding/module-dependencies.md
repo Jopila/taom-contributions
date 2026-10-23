@@ -918,10 +918,12 @@ were added (a later manifest edit moves them again).
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/module-taom.md](./module-taom.md)
 - [docs/modding/modules-overview.md](./modules-overview.md)
 - [docs/modding/README.md](./README.md)
 - [docs/modding/recipe-new-mod-from-zero.md](./recipe-new-mod-from-zero.md)
+- [docs/reference/release-process.md](../reference/release-process.md)
 
 <!-- backlinks-end -->

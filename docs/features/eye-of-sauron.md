@@ -309,3 +309,19 @@ Owed in game: #765 closed on 2026-10-14 with the `triage-needs-ingame` label, wh
 
 - **Issue:** #765 (War Chronicle), milestone M8; follow-ups #792 (closed)
 - **Status:** Closed
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/bannerlord-together-compat.md](./bannerlord-together-compat.md)
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/dev-console.md](./dev-console.md)
+- [docs/features/war-chronicle.md](./war-chronicle.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/gamemodel-registry.md](../reference/gamemodel-registry.md)
+
+<!-- backlinks-end -->

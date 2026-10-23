@@ -75,3 +75,19 @@ Which cell belongs to which region, and how that was measured, is the region tab
 - [worldmap-battle-scene-grid.md](../reference/worldmap-battle-scene-grid.md): the grid texture, import rules and the region table
 - [scene-reference-audit.md](../reference/scene-reference-audit.md): scene id checks after an engine bump
 - `tools/README.md`, "Content Generation": the `build_battle_scenes.py` row
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/atmosphere-persistence.md](../features/atmosphere-persistence.md)
+- [docs/features/battle-scenes.md](../features/battle-scenes.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/README.md](./README.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/worldmap-battle-scene-grid.md](../reference/worldmap-battle-scene-grid.md)
+
+<!-- backlinks-end -->

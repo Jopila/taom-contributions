@@ -29,3 +29,13 @@ Seven suspects were handed over; Codex disputed six with decompiled lines and co
 ## Feedback memories to codify
 
 None new. The lesson is a small one and belongs in the adapters category file, not in a standing memory: `Hero.IsAlive` is `!IsDead`, and any guard that means "this hero can be acted on" must say which of `Active`, `Prisoner`, `Fugitive`, `Released`, `Disabled`, `NotSpawned` it admits.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

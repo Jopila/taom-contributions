@@ -196,3 +196,16 @@ MSTest with NSubstitute and a hand-written engine fake, in `TAOM.Tests/Features/
 
 - **Issue:** #870, Fire and Tribute: raiding hosts for Good, Neutral and Evil, with a tribute envoy
 - **Status:** Open (slices 1 and 2 built; in-game checks and translation owed)
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/dev-console.md](./dev-console.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

@@ -86,3 +86,16 @@ Nothing to build now. When creature combat is next in scope, the scripted-melee 
 point: routing `CustomAttacksUtils` through `MeleeHitCallback` is the large win (armour, shields, skill and swing
 speed would count) and wants its own issue, `/research` on the internal method, and a `/verify-bindings` entry. The
 face pages are useful as they stand for any custom head whose neck shows a line or whose tools touch face channels.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/head-mesh-and-groom-authoring.md](../reference/head-mesh-and-groom-authoring.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reference/scripted-melee-strikes.md](../reference/scripted-melee-strikes.md)
+
+<!-- backlinks-end -->

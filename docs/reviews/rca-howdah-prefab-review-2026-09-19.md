@@ -222,3 +222,13 @@ kind of battle the crew have never been tested in.
   too coarse. Neither was needed once C2 was fixed.
 - Attributing which of the rails, the floor's missile flag and the detachment removal mattered: they shipped in one
   build, and the user judged the rails ruled out rather than spend a round on attribution.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

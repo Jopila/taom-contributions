@@ -67,9 +67,20 @@ A watched repo (listed in `docs/reviews/upstream-watch.json`, today yotthani's t
 ## Referenced by
 
 - [docs/INDEX.md](../INDEX.md)
+- [docs/reviews/adopt-ecc-2026-09-29.md](../reviews/adopt-ecc-2026-09-29.md)
+- [docs/reviews/adopt-ghidra-hindsight-2026-09-26.md](../reviews/adopt-ghidra-hindsight-2026-09-26.md)
+- [docs/reviews/adopt-kingdom-borders-2026-09-30.md](../reviews/adopt-kingdom-borders-2026-09-30.md)
 - [docs/reviews/adopt-mattpocock-improve-architecture-2026-06-22.md](../reviews/adopt-mattpocock-improve-architecture-2026-06-22.md)
 - [docs/reviews/adopt-mattpocock-teach-handoff-2026-06-22.md](../reviews/adopt-mattpocock-teach-handoff-2026-06-22.md)
+- [docs/reviews/adopt-mithrilforge-2026-09-29.md](../reviews/adopt-mithrilforge-2026-09-29.md)
+- [docs/reviews/adopt-mithrilforge-engine-perf-2026-10-02.md](../reviews/adopt-mithrilforge-engine-perf-2026-10-02.md)
 - [docs/reviews/adopt-ponytail-2026-06-18.md](../reviews/adopt-ponytail-2026-06-18.md)
 - [docs/reviews/adopt-skillspector-2026-06-22.md](../reviews/adopt-skillspector-2026-06-22.md)
+- [docs/reviews/adopt-yotthani-2026-10-08.md](../reviews/adopt-yotthani-2026-10-08.md)
+- [docs/reviews/adopt-yotthani-2026-10-15.md](../reviews/adopt-yotthani-2026-10-15.md)
+- [docs/reviews/adopt-yotthani-2026-10-16.md](../reviews/adopt-yotthani-2026-10-16.md)
+- [docs/reviews/adopt-yotthani-animation-handoff-2026-09-18.md](../reviews/adopt-yotthani-animation-handoff-2026-09-18.md)
+- [docs/reviews/adopt-yotthani-bannerlord-2026-09-30.md](../reviews/adopt-yotthani-bannerlord-2026-09-30.md)
+- [docs/reviews/adopt-yotthani-shadercachekeeper-2026-10-06.md](../reviews/adopt-yotthani-shadercachekeeper-2026-10-06.md)
 
 <!-- backlinks-end -->

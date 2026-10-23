@@ -473,7 +473,11 @@ character files for hero kit.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/field-commission.md](./field-commission.md)
+- [docs/features/troop-skill-balance.md](./troop-skill-balance.md)
 - [docs/INDEX.md](../INDEX.md)
+- [docs/modding/balance-levers.md](../modding/balance-levers.md)
 - [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
 
 <!-- backlinks-end -->

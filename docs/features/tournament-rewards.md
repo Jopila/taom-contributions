@@ -213,3 +213,19 @@ row. A bad value reverts with a warning; read once per process.
 - **Issue:** #732, [Tournament Rewards](https://github.com/haterade22/TAOM/issues/732); the dialog strings' translations: #731
 - **Status:** shipped in the v2.0.33 testing build, tagged in v2.0.34; reviewed 2026-10-04; #732 closed with
   `triage-needs-ingame`, the in-game checks it lists still owed
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/arena.md](./arena.md)
+- [docs/features/good-deeds.md](./good-deeds.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/gamemodel-registry.md](../reference/gamemodel-registry.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+- [docs/reviews/rca-tournament-rewards-2026-10-04.md](../reviews/rca-tournament-rewards-2026-10-04.md)
+
+<!-- backlinks-end -->

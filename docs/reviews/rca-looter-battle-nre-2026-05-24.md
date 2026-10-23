@@ -97,5 +97,6 @@ Five Claude agents reviewed the rebuild on 2026-05-24 (Standards / Compatibility
 ## Referenced by
 
 - [docs/migration/dr3-maintenance.md](../migration/dr3-maintenance.md)
+- [docs/reference/engine/mission-and-missionbehavior-lifecycle.md](../reference/engine/mission-and-missionbehavior-lifecycle.md)
 
 <!-- backlinks-end -->

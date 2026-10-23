@@ -54,3 +54,13 @@ shipped. No review lens ran before the commit, because the commit came before th
 
 None. Each pattern is recorded as a lesson in `docs/reviews/lessons/`, which is the repo's durable
 record.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/dale-lord-expansion.md](../features/dale-lord-expansion.md)
+
+<!-- backlinks-end -->

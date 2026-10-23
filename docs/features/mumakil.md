@@ -369,8 +369,14 @@ invalidates the rest if it fails.
 
 ## Referenced by
 
+- [docs/ai-includes/creature-mount-authoring.md](../ai-includes/creature-mount-authoring.md)
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/features/elephant.md](./elephant.md)
+- [docs/features/elk.md](./elk.md)
+- [docs/features/war-ram.md](./war-ram.md)
 - [docs/modding/items-mounts-and-harness.md](../modding/items-mounts-and-harness.md)
+- [docs/modding/recipe-add-a-race-or-creature.md](../modding/recipe-add-a-race-or-creature.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reviews/rca-mumakil-platform-2026-09-20.md](../reviews/rca-mumakil-platform-2026-09-20.md)
 
 <!-- backlinks-end -->

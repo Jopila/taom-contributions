@@ -37,6 +37,7 @@ The matcher gap (finding 2) is already documented in `harness-facts.md`'s git-in
 
 ## Referenced by
 
+- [docs/features/native-skin-fixes.md](../features/native-skin-fixes.md)
 - [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
 
 <!-- backlinks-end -->

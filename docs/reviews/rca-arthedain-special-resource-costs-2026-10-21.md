@@ -33,3 +33,13 @@ there before it.
 
 `docs/reviews/lessons/data-content-cultures.md`: "Taking a mechanic away from a cloned culture strands
 the career passives it cloned with it (#963, 2026-10-21)".
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+
+<!-- backlinks-end -->

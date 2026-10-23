@@ -137,3 +137,17 @@ its own skeleton". The cave troll's Monster `hit_points` (200 since 2026-09-25) 
   codes in a logged battle, and a look at a quick overswing to confirm it animates. The eight thrust codes are out
   of reach while the troll carries the hammer, which has no thrust.
 - Tattoo materials in the skins are still the human ones.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/troll-race.md](../features/troll-race.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/recipe-add-a-race-or-creature.md](../modding/recipe-add-a-race-or-creature.md)
+- [docs/reference/feature-map.md](./feature-map.md)
+- [docs/reference/lotrlome-armory-snapshot/README.md](lotrlome-armory-snapshot/README.md)
+
+<!-- backlinks-end -->

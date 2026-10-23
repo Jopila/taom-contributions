@@ -145,3 +145,15 @@ After each building, add its recipe and any new rule to `design-patterns.md`, an
 to a new `docs/kitbash/erebor-buildings.md` modelled on `lond-cirion-buildings.md` (sections
 table, rules, deviations, verification). Append review lessons to
 `docs/reviews/lessons/<category>.md`. Run `python tools/lint_docs.py`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/kitbash/erebor-buildings.md](../erebor-buildings.md)
+- [docs/kitbash/erebor/README.md](./README.md)
+- [docs/kitbash/gondor/blender-build-prompt.md](../gondor/blender-build-prompt.md)
+
+<!-- backlinks-end -->

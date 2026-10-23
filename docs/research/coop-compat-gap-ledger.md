@@ -101,3 +101,16 @@ matters only in that mode, and most of them stand a feature down.
   writes for remote players), R6 (half-pushed screen), and R4 (a hidden mission fault whose fix was
   refuted). The silent troop loss for remote players (C5b, T6) is closed by #966. R1 (authority
   fork on a client) stays DEFERRED by decision, not closed.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/enlistment.md](../features/enlistment.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/research/taom-headless-server.md](./taom-headless-server.md)
+- [docs/reviews/rca-coop-safety-nets-2026-10-21.md](../reviews/rca-coop-safety-nets-2026-10-21.md)
+
+<!-- backlinks-end -->

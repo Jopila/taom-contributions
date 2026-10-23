@@ -90,3 +90,13 @@ the translation tool, which only adds, was trusted to follow.
   design pass for which attributes are pinned, not a one-line change.
 - In-game: full restart, `/armory-audit`, Custom Battle smokes (owed since #617), plus one
   non-English client to see the carried names.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

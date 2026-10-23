@@ -76,3 +76,13 @@ Patch51 shipped.
 None new. The durable rules go to `docs/reviews/lessons/campaign-mechanics.md` (finding 1, how TAOM's
 volunteer model seeds slots) and `docs/reviews/lessons/localization-ui.md` (finding 5, a disabled button
 is not a gate; gate the commit).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

@@ -147,6 +147,7 @@ Boundary classes (`CastleRecruitmentBehavior`, `CastleNotableMaintainer`, `Castl
 
 ## Referenced by
 
+- [docs/features/alignment-recruitment.md](./alignment-recruitment.md)
 - [docs/features/culture-conversion.md](./culture-conversion.md)
 - [docs/modding/npcs-notables-and-townsfolk.md](../modding/npcs-notables-and-townsfolk.md)
 - [docs/modding/troubleshooting.md](../modding/troubleshooting.md)

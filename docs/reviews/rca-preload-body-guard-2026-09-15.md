@@ -32,3 +32,13 @@ Two entries appended to `docs/reviews/lessons/harmony-il.md`: cost a guard's fai
 ## Verification
 
 `dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId= --filter "FullyQualifiedName~PreloadBodyGuard|FullyQualifiedName~CoopVetoClassification"`: 13/13 after the hoist. Full suite before the review: 9,215 passed, 2 skipped. In game: owed, the bogus-body probe on the player's kit.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

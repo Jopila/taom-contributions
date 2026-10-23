@@ -188,6 +188,8 @@ is managed (yours).
 
 ## Referenced by
 
+- [docs/features/gui-sprite-system.md](../../features/gui-sprite-system.md)
+- [docs/features/hero-race.md](../../features/hero-race.md)
 - [docs/INDEX.md](../../INDEX.md)
 
 <!-- backlinks-end -->

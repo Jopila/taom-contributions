@@ -220,5 +220,6 @@ The formation mapping reads the culture's troop attributes (in Custom Battle fro
 ## Referenced by
 
 - [docs/INDEX.md](../INDEX.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
 
 <!-- backlinks-end -->

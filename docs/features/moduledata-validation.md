@@ -1001,6 +1001,7 @@ NPC duplicate-id + enum coverage spans `troops/`, `characters/`, `named_companio
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/features/doc-health-linter.md](./doc-health-linter.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-balance.md](../modding/configs-balance.md)

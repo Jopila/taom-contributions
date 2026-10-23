@@ -159,3 +159,14 @@ Cloth simulation in the conversation tableau is left alone until #635 is underst
 
 - **Issue:** #826 Map conversations in TAOM-culture settlements show a wrong backdrop
 - **Status:** Closed, `triage-needs-ingame`
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

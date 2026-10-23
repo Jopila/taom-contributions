@@ -577,6 +577,7 @@ Nimlothiel, `lord_L3_3` Silivren) had the same shape from a different route: `is
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../../ai-includes/orientation.md)
 - [docs/features/faction-map.md](../../features/faction-map.md)
 - [docs/INDEX.md](../../INDEX.md)
 - [docs/modding/clans.md](../../modding/clans.md)
@@ -584,6 +585,7 @@ Nimlothiel, `lord_L3_3` Silivren) had the same shape from a different route: `is
 - [docs/modding/troubleshooting.md](../../modding/troubleshooting.md)
 - [docs/reviews/LESSONS-LEARNED.md](../LESSONS-LEARNED.md)
 - [docs/reviews/lessons/xslt-moduledata.md](./xslt-moduledata.md)
+- [docs/reviews/rca-custom-battle-bannerless-factions-2026-10-02.md](../rca-custom-battle-bannerless-factions-2026-10-02.md)
 - [docs/reviews/rca-townsfolk-sex-2026-09-06.md](../rca-townsfolk-sex-2026-09-06.md)
 
 <!-- backlinks-end -->

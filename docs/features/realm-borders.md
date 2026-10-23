@@ -506,3 +506,16 @@ boxes below are still owed.
 
 - **Issue:** #698, [Realm Borders](https://github.com/haterade22/TAOM/issues/698)
 - **Status:** Open until the in-game checks above pass
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/dev-console.md](./dev-console.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reviews/adopt-kingdom-borders-2026-09-30.md](../reviews/adopt-kingdom-borders-2026-09-30.md)
+
+<!-- backlinks-end -->

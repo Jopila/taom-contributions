@@ -230,3 +230,26 @@ re-read during play.
 
 - **Issue:** #968, [Co-op: run TAOM's code on the dedicated server (ADR-013)](https://github.com/haterade22/TAOM/issues/968)
 - **Status:** Open. Owed: a staged server boot showing the boot line, and a client boot showing the MCM page works.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/adrs/013-server-safe-core-client-ui-submodule.md](../adrs/013-server-safe-core-client-ui-submodule.md)
+- [docs/features/armour-acquisition.md](./armour-acquisition.md)
+- [docs/features/combat-mechanics.md](./combat-mechanics.md)
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/crash-report.md](./crash-report.md)
+- [docs/features/mcm.md](./mcm.md)
+- [docs/features/mission-perf-heartbeat.md](./mission-perf-heartbeat.md)
+- [docs/features/war-of-the-ring-momentum.md](./war-of-the-ring-momentum.md)
+- [docs/features/war-of-the-ring.md](./war-of-the-ring.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+- [docs/research/taom-headless-server.md](../research/taom-headless-server.md)
+
+<!-- backlinks-end -->

@@ -128,3 +128,13 @@ MEDIUM, 3 LOW. It confirmed every fix above, the four repointed labels and the n
    its conditions (the decisions in a pure tested class, public flows only, a check after each step, the vanilla
    members pinned by binding tests), so that a literal ADR-007 pass does not file a CRITICAL. Changing the review
    policy is the maintainer's call, so it is not done here.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/adopt-yotthani-2026-10-08.md](./adopt-yotthani-2026-10-08.md)
+
+<!-- backlinks-end -->

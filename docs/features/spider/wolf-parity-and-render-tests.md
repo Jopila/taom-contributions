@@ -177,3 +177,13 @@ idle-shuffle. (This is why B is "do it in the Kit," not a drop-in XML block here
 Every live-file edit above is reversible: back up before editing (`.bak` alongside, as the prior session
 did for `action_sets_spider.xml`). The mesh asset's original single mesh is already preserved at
 `meshes/sk_spider_forest_c_geo.tpac.backup`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/research/creature-bandits-roadmap.md](../../research/creature-bandits-roadmap.md)
+
+<!-- backlinks-end -->

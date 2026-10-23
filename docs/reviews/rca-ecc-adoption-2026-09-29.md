@@ -61,3 +61,13 @@ further instance rather than as a new lesson (one root cause, one entry).
   every shape above.
 
 No new always-load rule: every prevention sits where the next author of that kind of change reads.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/adopt-ecc-2026-09-29.md](./adopt-ecc-2026-09-29.md)
+
+<!-- backlinks-end -->

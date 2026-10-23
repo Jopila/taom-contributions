@@ -135,3 +135,15 @@ Khamul line (27), `mercenary` Northern (2) and Thenn, where `thenn_helm6` was a 
 2. **Release copies:** `E:\LOTRAOM_Releases\{public,patreon,testing}` still hold the pre-edit files (byte
    identical to the backups), so copying the four live files over carries exactly this change. Mike's call.
 3. **Mirror:** the lotraom-assets mirror is Mike's to sync; it was not touched.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/dale.md](../features/dale.md)
+- [docs/modding/items-armor.md](../modding/items-armor.md)
+- [docs/reference/helmet-hair-beard-cover.md](./helmet-hair-beard-cover.md)
+
+<!-- backlinks-end -->

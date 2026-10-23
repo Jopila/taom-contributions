@@ -553,3 +553,22 @@ the output folder in variables whose names differ by more than case (`$M` and `$
 
 - **Issue:** #646 [Animalia elk and moose: horse_skeleton reskin, retargeted clips, Mirkwood moose mount](https://github.com/haterade22/TAOM/issues/646)
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/creature-mount-authoring.md](../ai-includes/creature-mount-authoring.md)
+- [docs/ai-includes/quadruped-pack-to-horse-skeleton-workflow.md](../ai-includes/quadruped-pack-to-horse-skeleton-workflow.md)
+- [docs/features/elk.md](./elk.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/recipe-add-a-race-or-creature.md](../modding/recipe-add-a-race-or-creature.md)
+- [docs/reference/doc-lookup.md](../reference/doc-lookup.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/lotrlome-animalia-changes.md](../reference/lotrlome-animalia-changes.md)
+- [docs/reference/provenance-register.md](../reference/provenance-register.md)
+- [docs/reference/ue-to-bannerlord-asset-pipeline.md](../reference/ue-to-bannerlord-asset-pipeline.md)
+
+<!-- backlinks-end -->

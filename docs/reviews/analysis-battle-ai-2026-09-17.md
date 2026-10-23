@@ -725,3 +725,14 @@ inside a 60 m cap with the engine's own slope search, and only enemy foot inside
 march. Still open in the order given: the per-team picture (3), reaction rules (4), weights as
 decisions (5), the event-driven volley (6), per-formation keys (8). The `TeamAIGeneral` subclass
 (4B) is no nearer: nothing in the first battle was lost to the 5 s cadence.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/rca-culture-doctrine-phase-c-2026-09-17.md](./rca-culture-doctrine-phase-c-2026-09-17.md)
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

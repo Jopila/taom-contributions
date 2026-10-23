@@ -118,6 +118,7 @@ Per-feat steps are in [`docs/features/cultural-feats.md` → How-To: Add a new f
 ## Referenced by
 
 - [docs/features/cultural-feats.md](../features/cultural-feats.md)
+- [docs/research/creature-bandits-roadmap.md](./creature-bandits-roadmap.md)
 - [docs/reviews/rca-cultural-feats-wave1-2026-06-07.md](../reviews/rca-cultural-feats-wave1-2026-06-07.md)
 
 <!-- backlinks-end -->

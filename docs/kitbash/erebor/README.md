@@ -61,3 +61,13 @@ Reference for the erebor dwarven kit under
 - Exported buildings: `Modules/TAOM_Map/AssetSources/Scenes/erebor/buildings/*.fbx`, packaged
   by the Modding Kit to `Modules/TAOM_Map/Assets/Scenes/erebor/buildings/*_geo.tpac`
 - FBX mesh lister: `tools/list_fbx_objects_all.py`
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/kitbash/erebor/blender-build-prompt.md](./blender-build-prompt.md)
+
+<!-- backlinks-end -->

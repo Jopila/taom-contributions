@@ -65,3 +65,16 @@ A feature supplies a `TaomBuildingDefinition` (family id, variants with their cu
 ## Tests
 
 `TaomBuildingCatalogTests`, `TaomBuildingSeedingServiceTests`, `TaomBuildingsPatch108Tests`, `TaomBuildingsWiringTests`, `TownBuildingsAdapterSourceTests`, `TaomBuildingBindingTests`, `FeatureModuleHooksTests`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/postern-gate.md](./postern-gate.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

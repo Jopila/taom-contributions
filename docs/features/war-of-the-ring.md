@@ -337,7 +337,11 @@ Later War of the Ring beats belong in their own state, keyed off the phases rath
 
 ## Referenced by
 
+- [docs/features/advanced-start-options.md](./advanced-start-options.md)
 - [docs/features/alignment-aware-execution.md](./alignment-aware-execution.md)
+- [docs/features/diplomacy.md](./diplomacy.md)
+- [docs/features/enlistment.md](./enlistment.md)
+- [docs/features/war-chronicle.md](./war-chronicle.md)
 - [docs/features/war-of-the-ring-momentum.md](./war-of-the-ring-momentum.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-factions-and-world.md](../modding/configs-factions-and-world.md)

@@ -120,6 +120,8 @@ missing `_anm`? clip flags unset? — check in that order.
 ## Referenced by
 
 - [docs/INDEX.md](../../INDEX.md)
+- [docs/reference/bannerlord-animation-system-map.md](../bannerlord-animation-system-map.md)
+- [docs/reference/engine/agent-spawn-and-render-pipeline.md](./agent-spawn-and-render-pipeline.md)
 - [docs/reference/engine/monster-model.md](./monster-model.md)
 
 <!-- backlinks-end -->

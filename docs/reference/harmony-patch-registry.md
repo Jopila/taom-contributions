@@ -1456,5 +1456,6 @@ A culprit is a same-tick run that drives `regulars` toward the surviving count w
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/banners-and-heraldry.md](../modding/banners-and-heraldry.md)
 - [docs/modding/configs-factions-and-world.md](../modding/configs-factions-and-world.md)
+- [docs/reference/doc-lookup.md](./doc-lookup.md)
 
 <!-- backlinks-end -->

@@ -216,5 +216,6 @@ Before the troop approach, the spider was built as a **rideable mount** (creatur
 - [docs/features/spider.md](../features/spider.md)
 - [docs/features/spider/wolf-parity-and-render-tests.md](../features/spider/wolf-parity-and-render-tests.md)
 - [docs/reference/adod-beasts-architecture-and-taom-port.md](../reference/adod-beasts-architecture-and-taom-port.md)
+- [docs/research/creature-bandits-roadmap.md](../research/creature-bandits-roadmap.md)
 
 <!-- backlinks-end -->

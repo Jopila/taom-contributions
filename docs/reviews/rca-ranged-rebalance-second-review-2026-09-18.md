@@ -204,3 +204,13 @@ would judge 0 edges today. The deep review of that change (seven lenses, 2026-09
 - In-game: full restart, `/armory-audit`, a Custom Battle, one campaign battle with a crossbow line
   against a bow line of the same kingdom (Custom Battle cannot show the accuracy rule), one
   non-English client.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/REVIEW-LOG.md](./REVIEW-LOG.md)
+
+<!-- backlinks-end -->

@@ -249,3 +249,17 @@ The decision is Mike's; these are the trade-offs as the facts stand.
   crowd.
 - **Banner bearers**: the `ExtraWeaponSlot` and off-hand facts in section 6 explain why the AI never sheathes a
   banner.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/bannerlord-animation-system-map.md](./bannerlord-animation-system-map.md)
+- [docs/reference/engine/mission-frame-threads-and-native-costs.md](engine/mission-frame-threads-and-native-costs.md)
+- [docs/reference/provenance-register.md](./provenance-register.md)
+- [docs/reviews/adopt-yotthani-bannerlord-2026-09-30.md](../reviews/adopt-yotthani-bannerlord-2026-09-30.md)
+
+<!-- backlinks-end -->

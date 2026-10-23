@@ -234,6 +234,7 @@ which is a worse bug than the one being fixed and leaves no trace. Two tests pin
 - [docs/modding/load-order-and-dependencies.md](../../modding/load-order-and-dependencies.md)
 - [docs/modding/recipe-retire-content.md](../../modding/recipe-retire-content.md)
 - [docs/reviews/LESSONS-LEARNED.md](../LESSONS-LEARNED.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](./build-tooling-workflow.md)
 
 <!-- backlinks-end -->
 ### Un-persisted state on a `Reuse.Singleton` service outlives the campaign — clear it at the session boundary

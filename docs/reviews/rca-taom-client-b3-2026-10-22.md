@@ -115,3 +115,14 @@ memory entry would repeat them.
   cover qualified, suffixed and grouped forms.
 - **Review reference** (`.ai/review-reference.md`, "Look harder here"): additive deploy
   destinations; a completeness check keyed on the member it requires.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/testing-qa.md](lessons/testing-qa.md)
+
+<!-- backlinks-end -->

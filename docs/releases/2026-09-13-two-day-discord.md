@@ -66,3 +66,13 @@ are left out, as are tooling and diagnostics entries a player never sees.
 | Translations | #579, #534, #508, #498, #446 (closed), `df0fa43f` |
 | Texture downsizing | CHANGELOG 2026-09-13 `chore(armory-assets)` and `chore(map-assets)`; live folders, uncommitted in lotraom-assets |
 | LODs | CHANGELOG 2026-09-13 `chore(armory-assets)` LOD entry |
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+
+<!-- backlinks-end -->

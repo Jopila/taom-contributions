@@ -63,3 +63,15 @@ scene. Findings 1 and 2 share another: a check that would have caught the defect
 - `docs/reviews/lessons/localization-ui.md`: "Deferring the paid translation never defers the free seed".
 - `docs/reviews/lessons/build-tooling-workflow.md`: "A generator's own header carries no count".
 - `docs/reviews/lessons/data-content-cultures.md`: "Open a scene before choosing its cells or its name".
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+- [docs/reviews/lessons/localization-ui.md](lessons/localization-ui.md)
+
+<!-- backlinks-end -->

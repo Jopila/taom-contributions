@@ -100,3 +100,14 @@ the main clips: plain `--check` exit 1 naming both variants, `--allow-no-clips` 
   release reads" (row 4).
 - `docs/reviews/lessons/animation-skeleton.md`: "A cache entry without its package is inert; a restored package needs
   its own entry back" (row 2 and Engine S1), "Count the whole clip family before writing a flag rule" (row 11).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/animation-skeleton.md](lessons/animation-skeleton.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+
+<!-- backlinks-end -->

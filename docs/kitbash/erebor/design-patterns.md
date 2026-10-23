@@ -221,6 +221,10 @@ FBX files change.
 
 ## Referenced by
 
+- [docs/kitbash/erebor-buildings.md](../erebor-buildings.md)
+- [docs/kitbash/erebor/blender-build-prompt.md](./blender-build-prompt.md)
+- [docs/kitbash/erebor/meshes.md](./meshes.md)
 - [docs/kitbash/erebor/README.md](./README.md)
+- [docs/kitbash/gondor/blender-build-prompt.md](../gondor/blender-build-prompt.md)
 
 <!-- backlinks-end -->

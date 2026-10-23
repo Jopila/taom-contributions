@@ -182,3 +182,20 @@ The provider also joins `CampaignHotPathSettingsProvidersTests`. The pair overri
 
 - **Issue:** #862
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/bonds-of-battle.md](./bonds-of-battle.md)
+- [docs/features/diplomacy.md](./diplomacy.md)
+- [docs/features/lord-courtesies.md](./lord-courtesies.md)
+- [docs/features/relations.md](./relations.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/gamemodel-registry.md](../reference/gamemodel-registry.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

@@ -600,7 +600,10 @@ extent) and the formation width the measured shoulders times `AgentScale`.
 
 ## Referenced by
 
+- [docs/reference/bannerlord-animation-system-map.md](../../reference/bannerlord-animation-system-map.md)
 - [docs/reference/doc-lookup.md](../../reference/doc-lookup.md)
+- [docs/reference/race-face-and-hand-morphs.md](../../reference/race-face-and-hand-morphs.md)
+- [docs/reviews/adopt-yotthani-bannerlord-2026-09-30.md](../adopt-yotthani-bannerlord-2026-09-30.md)
 - [docs/reviews/LESSONS-LEARNED.md](../LESSONS-LEARNED.md)
 - [docs/reviews/lessons/xslt-moduledata.md](./xslt-moduledata.md)
 

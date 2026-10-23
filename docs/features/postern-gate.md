@@ -128,3 +128,16 @@ The shared pipeline's files are listed in [taom-buildings.md](taom-buildings.md)
 ## GitHub Issue
 
 #855, open, in-game check owed; #915 was a duplicate, closed.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/taom-buildings.md](./taom-buildings.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

@@ -530,6 +530,8 @@ unification — see the RCA).
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/ai-includes/quadruped-pack-to-horse-skeleton-workflow.md](../ai-includes/quadruped-pack-to-horse-skeleton-workflow.md)
 - [docs/ai-includes/troll-race-arp-retargeting-workflow.md](../ai-includes/troll-race-arp-retargeting-workflow.md)
 - [docs/features/troll-race.md](../features/troll-race.md)
 - [docs/INDEX.md](../INDEX.md)
@@ -537,6 +539,8 @@ unification — see the RCA).
 - [docs/modding/items-mounts-and-harness.md](../modding/items-mounts-and-harness.md)
 - [docs/modding/module-armory.md](../modding/module-armory.md)
 - [docs/modding/recipe-new-mod-from-zero.md](../modding/recipe-new-mod-from-zero.md)
+- [docs/reference/bannerlord-animation-system-map.md](./bannerlord-animation-system-map.md)
+- [docs/reference/bannerlord-skeleton-authoring.md](./bannerlord-skeleton-authoring.md)
 - [docs/reference/development-machines.md](./development-machines.md)
 - [docs/reference/doc-lookup.md](./doc-lookup.md)
 

@@ -147,3 +147,16 @@ not tool order; the Tooling lens found finding 1 because it ran each guard again
 
 - `lessons/build-tooling-workflow.md`: stage a file two sessions append to by hunk, and read the staged diff; a
   guard that refuses must run before the first write; a cap of zero must be a cap.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/enlistment.md](../features/enlistment.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+- [docs/reviews/lessons/xslt-moduledata.md](lessons/xslt-moduledata.md)
+
+<!-- backlinks-end -->

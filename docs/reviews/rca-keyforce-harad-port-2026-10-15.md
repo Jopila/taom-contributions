@@ -76,3 +76,13 @@ melee gate's vanilla pricing and the couchable spear balance call; #815 the loc 
 KEYforce (carry TAOM's three edits upstream, the Gondor values, shipping the shaders, the shared-troop prefix,
 re-syncing the mirror); #804 the enlistment generator's `--verify` and the schema tool's XSLT label. The brief for his
 assistant is `docs/ai-includes/artist-ladder-brief.md`.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+
+<!-- backlinks-end -->

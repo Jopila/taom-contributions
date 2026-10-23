@@ -276,3 +276,20 @@ Each step names what it expects to see.
 
 - **Issue:** #847 [Send a scout from camp](https://github.com/haterade22/TAOM/issues/847)
 - **Status:** Open (code done; the in-game checklist and the paid translation are owed).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/field-camp.md](./field-camp.md)
+- [docs/features/hidden-hosts.md](./hidden-hosts.md)
+- [docs/features/host-review.md](./host-review.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/gamemodel-registry.md](../reference/gamemodel-registry.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

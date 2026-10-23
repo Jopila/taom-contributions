@@ -625,3 +625,15 @@ number on those sheets.
 | 85 | `minas_tirith_gate_state4` | 7.54 x 1.93 x 7.96 | -0.50 to 7.46 | mid/0.42/0.06 | 7.42 | 112103 | none | opening 0.60 x 0.47 at z -0.50 (through Y); opening 0.60 x 0.47 at z -0.50 (through Y); +2 more openings; **no bo_** | 1: (base) [-] |
 | 86 | `minas_tirith_gate_state5` | 7.76 x 4.01 x 7.95 | -0.46 to 7.50 | mid/0.05/0.06 | 7.42 | 110097 | none | opening 0.40 x 0.40 at z -0.46 (through X); opening 0.47 x 0.40 at z -0.46 (through X) | 1: (base) [-] |
 | 87 | `minas_tirith_gate_top` | 6.78 x 1.28 x 2.92 | 7.22 to 10.14 | mid/0.59/outside | 7.42 | 9062 | none |  | 1: (base) [-] |
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/kitbash/gondor/design-patterns.md](./design-patterns.md)
+- [docs/kitbash/gondor/README.md](./README.md)
+- [docs/kitbash/lond-cirion-buildings.md](../lond-cirion-buildings.md)
+
+<!-- backlinks-end -->

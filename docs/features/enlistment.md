@@ -2480,9 +2480,14 @@ Two enlistment mission behaviors have the co-op role `Unsafe` in `CoopMissionRol
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/coop-interop.md](./coop-interop.md)
+- [docs/features/diplomacy.md](./diplomacy.md)
+- [docs/features/host-review.md](./host-review.md)
 - [docs/features/map-event-guard.md](./map-event-guard.md)
 - [docs/features/return-to-army.md](./return-to-army.md)
 - [docs/features/wanderer-allegiance.md](./wanderer-allegiance.md)
+- [docs/features/war-of-the-ring.md](./war-of-the-ring.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-balance.md](../modding/configs-balance.md)
 - [docs/modding/equipment-rosters.md](../modding/equipment-rosters.md)

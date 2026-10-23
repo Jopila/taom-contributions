@@ -163,3 +163,20 @@ This table is derived from shipped prefabs, not from the Kit's own `bf_` flag ta
 - One material slot per object: bake several materials into one atlas first.
 - A prop placed at one terrain height does not tilt to the slope; that is the placing code, not the package.
 - No LODs and no collision. A clickable map object needs its click target from a prefab, not from the prop.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/field-camp.md](../features/field-camp.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/bannerlord-animation-system-map.md](./bannerlord-animation-system-map.md)
+- [docs/reference/bannerlord-engine-and-toolchain.md](./bannerlord-engine-and-toolchain.md)
+- [docs/reference/head-mesh-and-groom-authoring.md](./head-mesh-and-groom-authoring.md)
+- [docs/reference/provenance-register.md](./provenance-register.md)
+- [docs/reference/ue-to-bannerlord-asset-pipeline.md](./ue-to-bannerlord-asset-pipeline.md)
+- [docs/reviews/adopt-mithrilforge-2026-09-29.md](../reviews/adopt-mithrilforge-2026-09-29.md)
+
+<!-- backlinks-end -->

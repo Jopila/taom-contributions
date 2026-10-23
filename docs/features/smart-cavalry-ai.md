@@ -295,6 +295,7 @@ compare and one lock; for a charge order it scans the enemy formations once for 
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
 

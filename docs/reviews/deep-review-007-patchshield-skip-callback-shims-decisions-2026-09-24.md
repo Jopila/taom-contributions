@@ -196,3 +196,13 @@ edited tree.
 ```
 VERDICT: READY FOR COMMIT
 ```
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/rca-patchshield-skip-callback-shims-decisions-2026-09-24.md](./rca-patchshield-skip-callback-shims-decisions-2026-09-24.md)
+
+<!-- backlinks-end -->

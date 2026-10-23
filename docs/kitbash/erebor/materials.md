@@ -101,6 +101,7 @@ section.
 
 ## Referenced by
 
+- [docs/kitbash/erebor/blender-build-prompt.md](./blender-build-prompt.md)
 - [docs/kitbash/erebor/README.md](./README.md)
 
 <!-- backlinks-end -->

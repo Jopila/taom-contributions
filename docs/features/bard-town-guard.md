@@ -103,3 +103,15 @@ The tavern maid's local speciality line sets `DRINK` and `FOOD` only for vanilla
 
 - **Issue:** #824 Tavern musician conversation may crash in towns with no same-culture town
 - **Status:** Open
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](../INDEX.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/harmony-patch-registry.md](../reference/harmony-patch-registry.md)
+
+<!-- backlinks-end -->

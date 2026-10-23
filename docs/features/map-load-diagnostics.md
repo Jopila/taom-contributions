@@ -100,3 +100,15 @@ minutes and defined the entire problem. That should have come first. Hours of sy
 preceded it, and every hypothesis formed before it was wrong.
 
 **Establish how the mechanism is supposed to work before instrumenting what it is doing.**
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/map-perf-profiler.md](./map-perf-profiler.md)
+- [docs/migration/v1.5.2-impact.md](../migration/v1.5.2-impact.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+
+<!-- backlinks-end -->

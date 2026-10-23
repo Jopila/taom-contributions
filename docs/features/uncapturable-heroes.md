@@ -281,6 +281,7 @@ exactly as this feature does.
 
 ## Referenced by
 
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
 - [docs/features/player-switcher.md](./player-switcher.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-factions-and-world.md](../modding/configs-factions-and-world.md)

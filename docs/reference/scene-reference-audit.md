@@ -64,6 +64,7 @@ Full machine output: [`docs/reviews/scene-name-audit-2026-05-28.txt`](../reviews
 
 - [docs/features/bandit-management.md](../features/bandit-management.md)
 - [docs/modding/module-map.md](../modding/module-map.md)
+- [docs/modding/recipe-add-a-field-battle-scene.md](../modding/recipe-add-a-field-battle-scene.md)
 - [docs/modding/settlements.md](../modding/settlements.md)
 - [docs/reference/bannerlord-engine-and-toolchain.md](./bannerlord-engine-and-toolchain.md)
 - [docs/reference/doc-lookup.md](./doc-lookup.md)

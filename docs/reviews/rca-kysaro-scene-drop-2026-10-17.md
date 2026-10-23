@@ -61,3 +61,13 @@ too narrowly, and an odds figure computed from a region size while the tool's ow
 
 - `docs/reviews/lessons/data-content-cultures.md`: "Audit a delivered scene's contents before wiring it to a
   settlement".
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+
+<!-- backlinks-end -->

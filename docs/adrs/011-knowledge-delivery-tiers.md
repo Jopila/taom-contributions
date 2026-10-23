@@ -252,3 +252,19 @@ Applied in stop-anywhere phases, each ending green:
 - [ADR-010](./010-knowledge-base-architecture.md): Knowledge-Base Architecture. ADR-010 organises
   the mod-knowledge surface under `docs/`; this ADR decides how that knowledge, and the harness's
   own, is delivered into an agent's context.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/adrs/010-knowledge-base-architecture.md](./010-knowledge-base-architecture.md)
+- [docs/adrs/012-graphify-code-graph-in-the-workflow.md](./012-graphify-code-graph-in-the-workflow.md)
+- [docs/adrs/README.md](./README.md)
+- [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/doc-health-linter.md](../features/doc-health-linter.md)
+- [docs/reference/rule-provenance.md](../reference/rule-provenance.md)
+- [docs/reference/rules-catalog.md](../reference/rules-catalog.md)
+
+<!-- backlinks-end -->

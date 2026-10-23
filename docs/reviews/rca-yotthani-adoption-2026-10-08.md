@@ -155,3 +155,13 @@ both confirmed.
    release; until a release ships it, only his machine holds a saved value, so the default can still flip.
 3. The other nine unbounded per-frame pools: documented, not guarded, decided in this session under the
    maintainer's "full control" instruction (2026-10-08); a guard waits for the measurement in issue draft 9.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/adopt-yotthani-2026-10-08.md](./adopt-yotthani-2026-10-08.md)
+
+<!-- backlinks-end -->

@@ -72,3 +72,13 @@ correctly. Read the staged blob of every shared file before committing.
 
 None new. Finding 1's rule is the lesson "Trace the load path before calling an asset shipped"
 (`lessons/animation-skeleton.md`); finding 5 is an existing lesson not followed.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/adopt-mithrilforge-2026-09-29.md](./adopt-mithrilforge-2026-09-29.md)
+
+<!-- backlinks-end -->

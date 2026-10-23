@@ -136,9 +136,12 @@ The `MapScene_Load_DiagnosticPatch` prints to the engine log every time `MapScen
 
 ## Referenced by
 
+- [docs/features/shader-precompilation.md](./shader-precompilation.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/file-catalogue.md](../modding/file-catalogue.md)
 - [docs/modding/module-map.md](../modding/module-map.md)
+- [docs/modding/recipe-add-a-field-battle-scene.md](../modding/recipe-add-a-field-battle-scene.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
 - [docs/reference/worldmap-battle-scene-grid.md](../reference/worldmap-battle-scene-grid.md)
 
 <!-- backlinks-end -->

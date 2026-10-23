@@ -432,6 +432,7 @@ Code: No code changes needed
 
 ## Referenced by
 
+- [docs/features/advanced-start-options.md](../features/advanced-start-options.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/balance-levers.md](./balance-levers.md)
 - [docs/modding/configs-factions-and-world.md](./configs-factions-and-world.md)

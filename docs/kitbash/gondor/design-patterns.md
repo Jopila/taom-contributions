@@ -180,3 +180,17 @@ results: [../gondor-buildings.md](../gondor-buildings.md).
 
 When a building teaches something new (a join, a pivot, a trap), add it here and in
 [../gondor-buildings.md](../gondor-buildings.md) in the same change.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/kitbash/gondor-buildings.md](../gondor-buildings.md)
+- [docs/kitbash/gondor/meshes.md](./meshes.md)
+- [docs/kitbash/gondor/README.md](./README.md)
+- [docs/kitbash/lond-cirion-buildings.md](../lond-cirion-buildings.md)
+- [docs/kitbash/map-icons.md](../map-icons.md)
+
+<!-- backlinks-end -->

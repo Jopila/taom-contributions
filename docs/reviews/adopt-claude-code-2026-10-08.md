@@ -72,3 +72,14 @@ rules) deferred to its own session with the lessons de-dup; D4 recorded as a fla
 - The `davinci-resolve` MCP server failed to connect on 2026-10-08 (`CONNECTION_CLOSED`). Not
   investigated; 2.1.292 made stdio servers negotiate MCP protocol 2026-07-28 by default
   (`MCP_PROTOCOL_NEGOTIATION=legacy` opts out), which is one possible cause.
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/adopt-harness2-2026-10-21.md](./adopt-harness2-2026-10-21.md)
+- [docs/reviews/prompt-audit-2026-10-08.md](./prompt-audit-2026-10-08.md)
+
+<!-- backlinks-end -->
