@@ -2,6 +2,7 @@ using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.InputSystem;
 using TaleWorlds.MountAndBlade;
+using TaleWorlds.MountAndBlade.View;
 using TaleWorlds.MountAndBlade.View.MissionViews;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
@@ -10,10 +11,14 @@ using TAOM.Features.CompanionTactics.BattleActionBar.UI;
 namespace TAOM.Features.CompanionTactics.BattleActionBar.Hooks;
 
 /// <summary>
-/// MissionView that owns the BattleActionBar GauntletLayer lifecycle. Field battles only
-/// (gated on <c>Mission.Mode == Battle &amp;&amp; !IsSiegeBattle</c>). Refreshes the action
-/// bar VM at most twice per second based on the player's selected formation.
+/// MissionView that owns the BattleActionBar GauntletLayer lifecycle. Built by the engine as a
+/// <c>[DefaultView]</c> in every mission with a screen (MissionScreen.OnMissionAfterStarting registers it), because a
+/// view TAOM adds in OnMissionBehaviorInitialize is never registered and never ticks (#970). Attaches in field
+/// battles (<c>Mission.IsFieldBattle</c>) on the first screen tick once the mode is Battle: the mode is Deployment at
+/// screen init (DeploymentHandler.AfterStart). Refreshes the action bar VM at most twice per second based on the
+/// player's selected formation.
 /// </summary>
+[DefaultView]
 public sealed class BattleActionBarMissionView : MissionView
 {
     private const float RefreshIntervalSec = 0.5f;
@@ -27,6 +32,7 @@ public sealed class BattleActionBarMissionView : MissionView
     private GauntletLayer? _layer;
     private BattleActionBarVM? _vm;
     private bool _isInitialized;
+    private bool _attachAttempted;
     private float _refreshAccumulator;
     private Formation? _lastFormation;
 
@@ -38,15 +44,15 @@ public sealed class BattleActionBarMissionView : MissionView
         _stances = IoC.Resolve<ITroopStanceManager>();
         _logger = IoC.Resolve<IModLogger>();
 
-        if (_settings == null || !_settings.EnableBattleActionBar)
+        if (Mission.IsFieldBattle)
         {
-            _logger?.LogInfo("[BattleActionBar] disabled via MCM — patches inert");
-            return;
+            _logger?.LogInfo($"[BattleActionBar] screen init: MissionScreen={(MissionScreen != null ? "set" : "NULL")} mode={Mission.Mode} enabled={_settings?.EnableBattleActionBar}");
         }
-        if (!IsFieldBattle())
-        {
-            return;
-        }
+    }
+
+    private void TryAttachLayer()
+    {
+        if (_service == null || _stances == null) return;
 
         try
         {
@@ -72,8 +78,16 @@ public sealed class BattleActionBarMissionView : MissionView
     public override void OnMissionScreenTick(float dt)
     {
         base.OnMissionScreenTick(dt);
-        if (!_isInitialized || _vm == null) return;
-        if (_settings == null || !_settings.EnableBattleActionBar) return;
+        if (_settings == null) return;
+        if (!_isInitialized)
+        {
+            // Mode is Deployment at screen init in a field battle (DeploymentHandler.cs:41): attach on the first Battle tick.
+            if (_attachAttempted || !ShouldAttach(_settings.EnableBattleActionBar, Mission.IsFieldBattle, Mission.Mode)) return;
+            _attachAttempted = true;
+            TryAttachLayer();
+            if (!_isInitialized) return;
+        }
+        if (_vm == null || !_settings.EnableBattleActionBar) return;
 
         _refreshAccumulator += dt;
         if (_refreshAccumulator >= RefreshIntervalSec)
@@ -158,11 +172,6 @@ public sealed class BattleActionBarMissionView : MissionView
         _ => InputKey.Invalid,
     };
 
-    private static bool IsFieldBattle()
-    {
-        var mission = Mission.Current;
-        if (mission == null) return false;
-        if (mission.Mode != MissionMode.Battle) return false;
-        return !mission.IsSiegeBattle;
-    }
+    internal static bool ShouldAttach(bool enabled, bool isFieldBattle, MissionMode mode) =>
+        enabled && isFieldBattle && mode == MissionMode.Battle;
 }

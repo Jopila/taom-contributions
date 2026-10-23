@@ -108,14 +108,13 @@ public class CoopMissionRolePolicyTests
         // host review launcher. All local by construction.
         var outside = new[] { "BattleLoadPhaseBehavior", "CustomBattleTeamFixBehavior", "HostReviewMissionLogic" };
 
-        // Added through a core factory seam; the views live in TAOM.Client (ADR-013), so SubModule has no `new` for them.
-        var clientViews = new[] { "AutonomousMovementPlayerController", "BattleActionBarMissionView" };
-        // Every add of a variable must be one of these, so a new seam cannot skip the table (lens 5, B4c review).
+        // Built by the engine from [DefaultView] (TAOM.Client, ADR-013), outside AddTaomBehavior; Local by construction.
+        var defaultViews = new[] { "AutonomousMovementPlayerController", "BattleActionBarMissionView" };
         int variableAdds = Regex.Matches(subModule, @"AddTaomBehavior\(\s*\w+\s*\)").Count;
-        Assert.AreEqual(clientViews.Length, variableAdds,
-            "an AddTaomBehavior(variable) site changed; list its behavior in clientViews and classify it in CoopMissionRoles");
+        Assert.AreEqual(0, variableAdds,
+            "an AddTaomBehavior(variable) site appeared: a MissionView added there never ticks; make it a [DefaultView]");
 
-        var expected = new HashSet<string>(added.Concat(declared).Concat(outside).Concat(clientViews));
+        var expected = new HashSet<string>(added.Concat(declared).Concat(outside).Concat(defaultViews));
         var actual = new HashSet<string>(CoopMissionRoles.All.Keys);
 
         CollectionAssert.AreEquivalent(expected.OrderBy(n => n).ToList(), actual.OrderBy(n => n).ToList(),

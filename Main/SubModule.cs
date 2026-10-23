@@ -2099,11 +2099,6 @@ public class SubModule : MBSubModuleBase
         // removal callbacks may run in either order (#595, Codex review 109).
         AddTaomBehavior(new BehaviorTreeMissionLogic());
         AddTaomBehavior(new AdvancedCombatBehavior());
-        // The rage-mode controller is a MissionView in TAOM.Client (ADR-013); null headless. The engine adds a second
-        // instance from its [DefaultView] attribute when the mission opens; that one, first in the list, is the one
-        // the Warg code drives (IAutonomousMovementController).
-        var movementController = IoC.Resolve<IAutonomousMovementControllerFactory>().Create();
-        if (movementController != null) AddTaomBehavior(movementController);
         AddTaomBehavior(new WargMissionBehavior());
         AddTaomBehavior(new SpiderMissionBehavior());
         AddTaomBehavior(new Features.Elephant.ElephantMissionBehavior());
@@ -2170,9 +2165,6 @@ public class SubModule : MBSubModuleBase
             IoC.Resolve<Features.BattleLoadDiagnostics.IBattleLoadDiagnosticsSettingsProvider>(),
             IoC.Resolve<IGraphicsOptionsAdapter>(),
             IoC.Resolve<IModLogger>()));
-        // The battle action bar is a MissionView in TAOM.Client (ADR-013); null headless.
-        var actionBar = IoC.Resolve<Features.CompanionTactics.BattleActionBar.IBattleActionBarViewFactory>().Create();
-        if (actionBar != null) AddTaomBehavior(actionBar);
 
         // Feature modules' mission behaviors: after the feature behaviors above, before the kernel tail
         // below (MissionDiagnostic, the CrashReport dev trigger, CareerPerk).

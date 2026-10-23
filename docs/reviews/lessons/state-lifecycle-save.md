@@ -1171,3 +1171,20 @@ The test pinned only that the module builds the behavior with `new`; deleting th
   reset with a source test on the constructor body and a container test that sets state, creates the behavior,
   and asserts the state is gone.
 - **Source:** [rca-oaths-of-service-2026-10-19.md](../rca-oaths-of-service-2026-10-19.md) finding 5.
+### A MissionView added in OnMissionBehaviorInitialize never ticks (#970, 2026-10-22)
+`MissionScreen.OnMissionAfterStarting` registers views once (`MissionScreen.cs:4054-4065`), before `Mission.AfterStart`
+runs the submodules' `OnMissionBehaviorInitialize` (`Mission.cs:3822-3825`). A view added there gets
+`OnMissionScreenInitialize` with a null `MissionScreen` and no tick, activate or finalize, so the battle action bar
+never ran, and a second rage-mode controller leaked its handlers.
+- **Why missed:** the add worked, the MissionDiag dump listed the view, and no log line existed for the view's own tick.
+- **Prevent:** every TAOM MissionView is a `[DefaultView]` in TAOM.Client, which the engine builds before the
+  registration; `MissionViewRegistrationGateTests` fails any other. Give a new view a log line that proves its screen is set.
+- **Source:** issue #970.
+### Mission.Mode is Deployment at screen init in a field battle (#970, 2026-10-22)
+`DeploymentHandler.AfterStart` saves the mode and sets `Deployment` (`DeploymentHandler.cs:40-41`); `Battle` returns only
+when the handler is removed. A gate on `Mission.Mode == Battle` at `OnMissionScreenInitialize` is therefore false in every
+campaign and custom field battle.
+- **Why missed:** the gate read plausibly and the view never ran, so nothing exercised it.
+- **Prevent:** decide "field battle" with `Mission.IsFieldBattle` (set in `MissionCombatantsLogic.EarlyStart`), and attach on
+  the first screen tick whose mode is Battle (`BattleActionBarMissionView.ShouldAttach`).
+- **Source:** issue #970.

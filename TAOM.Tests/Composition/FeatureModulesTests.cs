@@ -236,7 +236,7 @@ public class FeatureModulesTests
             "FeatureModuleHooks.RunPhase(ApplyPhase.GameInit, TryPatchCategory);", "ReportPatchFailures(new TextObject(\"{=taom_patch_apply_phase_game_init}game initialization\"));");
         AssertOnceBetween(code, "TryPatchCategory(\"Patch_MissionTime_SetMovementOrder\");",
             "FeatureModuleHooks.RunPhase(ApplyPhase.FirstMission, TryPatchCategory);", "ReportPatchFailures(new TextObject(\"{=taom_patch_apply_phase_mission_start}mission start\"));");
-        AssertOnceBetween(code, "IoC.Resolve<Features.CompanionTactics.BattleActionBar.IBattleActionBarViewFactory>().Create()",
+        AssertOnceBetween(code, "new Features.MissionPerf.Hooks.MissionTickProfilerBehavior(",
             "FeatureModuleHooks.AddMissionBehaviors(mission, AddTaomBehavior);", "new Features.MissionDiagnostic.Hooks.MissionDiagnosticBehavior(");
     }
 
