@@ -47,15 +47,16 @@ public class ClientSubModuleManifestTests
     }
 
     [TestMethod]
-    public void Manifest_TaomCore_KeepsItsDllClassAndTagsUntilB9()
+    public void Manifest_TaomCore_KeepsItsDllClassAndCarriesNoClientOnlyTag()
     {
-        // B9 (the batch that makes core server-safe) flips this test with the tags.
+        // ADR-013 B9: core is server-safe, so a dedicated server loads it. A staging that honours the module's
+        // own tags keeps TAOM and drops TAOM.Client; a client never evaluates either tag.
         var sub = Named("TAOM");
 
         Assert.AreEqual("TAOM.dll", Value(sub, "DLLName"));
         Assert.AreEqual("TAOM.SubModule", Value(sub, "SubModuleClassType"));
-        Assert.AreEqual("none", Tag(sub, "DedicatedServerType"));
-        Assert.AreEqual("false", Tag(sub, "IsNoRenderModeElement"));
+        Assert.IsNull(Tag(sub, "DedicatedServerType"));
+        Assert.IsNull(Tag(sub, "IsNoRenderModeElement"));
     }
 
     [TestMethod]

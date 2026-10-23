@@ -339,8 +339,12 @@ example `_timeAccelerationService`, `Main/SubModule.cs:255`) would already hold 
 
 **Generic rule for the server repo (mod-agnostic):** for an extra module with no `-KeepSubModules` entry, stage
 exactly the submodules the server engine itself would load and leave their tags as written. Concretely, in
-`Copy-SubModuleXml` and its docker twin, drop a submodule whose tags include `DedicatedServerType=none` or
-`IsNoRenderModeElement=false` (the two client-only markers), keep the rest with their tags. A module named in
+`Copy-SubModuleXml`, drop a submodule whose `DedicatedServerType` tag the co-op server rejects and keep the rest
+with their tags. The engine decides with that tag alone (v1.5.5 `Module.GetSubModuleValiditiy`, called by
+`CheckIfSubmoduleCanBeLoadable`): it lowercases the value, and on a server started with `/dedicatedcustomserver`
+it rejects `none`, `matchmaker` and `community` and accepts `both`, `all`, `custom` and any other value.
+`IsNoRenderModeElement` never blocks a submodule there (its check is `value.Equals("false")`), so it is not a
+client-only marker for staging, whatever vanilla pairs it with. A module named in
 `-KeepSubModules` keeps today's behavior (named submodules only, tags stripped), as an explicit override for
 mods that tag wrongly. The module author's manifest becomes the contract.
 
@@ -348,8 +352,8 @@ A module's `DsAssetPackages/` folder is not in the staging exclude list (`window
 
 **TAOM's side (B9, after the `GetTypes` milestone):**
 
-- `Main/_Module/SubModule.xml:71-79`: the `TAOM` submodule loses both tags (`:76-77`; it is server-safe after
-  B5). The second `TAOM.Client` submodule (`TAOM.Client.dll`, `TAOM.Client.ClientSubModule`, carrying
+- `Main/_Module/SubModule.xml`: the `TAOM` submodule loses both tags (done 2026-10-23; it is server-safe after
+  B5, and `ClientSubModuleManifestTests.Manifest_TaomCore_KeepsItsDllClassAndCarriesNoClientOnlyTag` pins it). The second `TAOM.Client` submodule (`TAOM.Client.dll`, `TAOM.Client.ClientSubModule`, carrying
   `DedicatedServerType=none` and `IsNoRenderModeElement=false`, `:84-92`) already landed in B3. Removing
   `IsNoRenderModeElement=false` from core changes nothing on a client, because an absent tag is never evaluated.
 - `Dependencies/_Module/SubModule.xml`: the two tags from B2.

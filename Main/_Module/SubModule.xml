@@ -72,10 +72,8 @@
       <Name value="TAOM" />
       <DLLName value="TAOM.dll" />
       <SubModuleClassType value="TAOM.SubModule" />
-      <Tags>
-        <Tag key="DedicatedServerType" value="none" />
-        <Tag key="IsNoRenderModeElement" value="false" />
-      </Tags>
+      <!-- ADR-013 B9: no client-only tag. Core is server-safe, so a dedicated server loads it and
+           skips TAOM.Client below by that submodule's own tags. -->
     </SubModule>
     <!-- ADR-013: the client-only half of TAOM (Client/TAOM.Client.csproj). Tagged like vanilla's UI
          submodules (Native's ViewSubModule), so a dedicated server never loads it. Its constructor hands
