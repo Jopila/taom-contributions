@@ -263,6 +263,19 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
         rejected |= RevertIfOutOfRange(() => config.DesertionRelationPenalty, v => config.DesertionRelationPenalty = v, defaults.DesertionRelationPenalty, -100, 0, "desertionRelationPenalty");
         rejected |= RevertIfOutOfRange(() => config.DesertionHonorXpPenalty, v => config.DesertionHonorXpPenalty = v, defaults.DesertionHonorXpPenalty, -1000, 0, "desertionHonorXpPenalty");
 
+        // Personal spoils (#834): out of range reverts the key to its compiled default with a warning.
+        rejected |= RevertIfOutOfRange(() => config.SpoilsMaxItemsPerBattle, v => config.SpoilsMaxItemsPerBattle = v, defaults.SpoilsMaxItemsPerBattle, 0, 10, "spoilsMaxItemsPerBattle");
+        rejected |= RevertIfNotFiniteInRange(() => config.SpoilsValueScalePerRank, v => config.SpoilsValueScalePerRank = v, defaults.SpoilsValueScalePerRank, 0, 2, "spoilsValueScalePerRank");
+        rejected |= RevertIfNotFiniteInRange(() => config.SpoilsRandomMin, v => config.SpoilsRandomMin = v, defaults.SpoilsRandomMin, 0, 2, "spoilsRandomMin");
+        rejected |= RevertIfNotFiniteInRange(() => config.SpoilsRandomMax, v => config.SpoilsRandomMax = v, defaults.SpoilsRandomMax, 0, 2, "spoilsRandomMax");
+        if (config.SpoilsRandomMin > config.SpoilsRandomMax)
+        {
+            _logger.LogWarning($"EnlistmentContentConfigProvider: spoilsRandomMin={config.SpoilsRandomMin} must not exceed spoilsRandomMax={config.SpoilsRandomMax}, reverting both to {defaults.SpoilsRandomMin}/{defaults.SpoilsRandomMax}");
+            config.SpoilsRandomMin = defaults.SpoilsRandomMin;
+            config.SpoilsRandomMax = defaults.SpoilsRandomMax;
+            rejected = true;
+        }
+
         if (config.SitOut == null)
             config.SitOut = new SitOutConfig();
         if (!FiniteFloatValidator.IsFiniteInRange(config.SitOut.OverwhelmingShare, 0.5f, 1f) || config.SitOut.OverwhelmingShare <= 0.5f)
@@ -315,6 +328,16 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
         if (get() >= 0)
             return false;
         _logger.LogWarning($"EnlistmentContentConfigProvider: {name}={get()} must be >= 0, reverting to {defaultValue}");
+        set(defaultValue);
+        return true;
+    }
+
+    private bool RevertIfNotFiniteInRange(Func<double> get, Action<double> set, double defaultValue, double min, double max, string name)
+    {
+        var value = get();
+        if (FiniteFloatValidator.IsFiniteInRange(value, min, max))
+            return false;
+        _logger.LogWarning($"EnlistmentContentConfigProvider: {name}={value} must be finite in [{min},{max}], reverting to {defaultValue}");
         set(defaultValue);
         return true;
     }

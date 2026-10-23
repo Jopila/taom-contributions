@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Threading;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
@@ -37,6 +38,7 @@ public class EnlistmentMeritMissionBehavior : MissionLogic
     private bool _battleResolved;
     private float _sampleClock;
     private int _kills;
+    private readonly ConcurrentQueue<string> _killed = new ConcurrentQueue<string>();
     private float _downSince = -1f;
     private float _missionStart = -1f;
     private bool _fellEarly;
@@ -94,7 +96,7 @@ public class EnlistmentMeritMissionBehavior : MissionLogic
         _sampleClock = 0f;
 
         var main = Mission.MainAgent;
-        if (main == null || !main.IsActive())
+        if (main == null || !main.IsActive() || main.Character != CharacterObject.PlayerCharacter)
         {
             if (_downSince < 0f)
             {
@@ -109,12 +111,16 @@ public class EnlistmentMeritMissionBehavior : MissionLogic
 
     public override void OnAgentRemoved(Agent affectedAgent, Agent affectorAgent, AgentState agentState, KillingBlow blow)
     {
-        if (!_active || affectorAgent == null || !affectorAgent.IsMainAgent)
+        if (!_active || affectorAgent == null || affectorAgent.Character != CharacterObject.PlayerCharacter)
             return;
         // OnAgentRemoved is native's to place and was caught off the main thread (#634): two removals at
         // once must not lose a kill.
         if (affectedAgent?.Team != null && affectorAgent.Team != null && affectedAgent.Team.IsEnemyOf(affectorAgent.Team))
+        {
             Interlocked.Increment(ref _kills);
+            if (affectedAgent.IsHuman && affectedAgent.Character != null)
+                _killed.Enqueue(affectedAgent.Character.StringId);
+        }
     }
 
     protected override void OnEndMission()
@@ -126,6 +132,7 @@ public class EnlistmentMeritMissionBehavior : MissionLogic
         var sample = new MeritSample
         {
             Kills = _kills,
+            KilledCharacterIds = _killed.ToArray(),
             SurvivalRatio = _downSince < 0f ? 1f : 0f,
             // No verdict means the player ended this mission themselves. Before this flag, walking
             // out at t=5s banked the full survival weight — never went down, so "survived".

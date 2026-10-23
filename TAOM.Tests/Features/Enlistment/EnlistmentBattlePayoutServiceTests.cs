@@ -19,6 +19,9 @@ public class EnlistmentBattlePayoutServiceTests
     private BattleMeritAccumulator _accumulator = null!;
     private IServiceRewardService _rewards = null!;
     private IHeroSkillXpAdapter _skillXp = null!;
+    private IBattleLootAdapter _loot = null!;
+    private IInquiryAdapter _inquiry = null!;
+    private TAOM.Features.TroopProgression.IRandomProvider _random = null!;
     private EnlistmentBattlePayoutService _service = null!;
 
     [TestInitialize]
@@ -34,8 +37,12 @@ public class EnlistmentBattlePayoutServiceTests
         _skillXp = Substitute.For<IHeroSkillXpAdapter>();
         var promotion = new PromotionService(_contentStore, _config, _skillXp, _store, _logger);
         _ledger = new SitOutLedger();
+        _loot = Substitute.For<IBattleLootAdapter>();
+        _inquiry = Substitute.For<IInquiryAdapter>();
+        _random = Substitute.For<TAOM.Features.TroopProgression.IRandomProvider>();
+        _random.Next(Arg.Any<int>()).Returns(5000);
         _service = new EnlistmentBattlePayoutService(
-            _store, _contentStore, _config, _accumulator, _rewards, promotion, _ledger, _logger);
+            _store, _contentStore, _config, _accumulator, _rewards, promotion, _ledger, _loot, _inquiry, _random, _logger);
     }
 
     private SitOutLedger _ledger = null!;
@@ -398,5 +405,145 @@ public class EnlistmentBattlePayoutServiceTests
 
         Assert.IsFalse(_service.LastBattlePromoted);
         Assert.AreEqual(ServiceRank.Private, _contentStore.Record.Rank);
+    }
+
+    // ---- personal spoils (#834) ----
+
+    private void KilledInBattle(params string[] ids)
+    {
+        _accumulator.Submit(new MeritSample { Kills = ids.Length, SurvivalRatio = 1f, KilledCharacterIds = ids });
+    }
+
+    private void Loot(string characterId, float expected, string grantedName)
+    {
+        _loot.GetExpectedLootValue(characterId).Returns(expected);
+        _loot.GrantLootFrom(characterId, Arg.Any<float>()).Returns(grantedName);
+    }
+
+    [TestMethod]
+    public void PayOut_WinWithKills_GrantsTheSpoilsAndShowsOneSummaryToast()
+    {
+        MakeEnlisted();
+        KilledInBattle("orc_a", "orc_b");
+        Loot("orc_a", 100f, "Sharp Sword");
+        Loot("orc_b", 200f, "Axe");
+
+        Assert.IsTrue(_service.PayOutBattle(won: true, playerSimulated: false));
+
+        _loot.Received(1).GrantLootFrom("orc_a", Arg.Any<float>());
+        _loot.Received(1).GrantLootFrom("orc_b", Arg.Any<float>());
+        _inquiry.Received(1).ShowMessage(
+            "taom_enlist_spoils", Arg.Any<string>(), "ITEMS", Arg.Is<string>(t => t.Contains("Sharp Sword") && t.Contains("Axe")));
+    }
+
+    [TestMethod]
+    public void PayOut_Loss_TakesNothing()
+    {
+        MakeEnlisted();
+        KilledInBattle("orc_a");
+        Loot("orc_a", 100f, "Sword");
+
+        _service.PayOutBattle(won: false, playerSimulated: false);
+
+        _loot.DidNotReceiveWithAnyArgs().GrantLootFrom(default!, default);
+        _inquiry.DidNotReceiveWithAnyArgs().ShowMessage(default!, default!, default!, default!);
+    }
+
+    [TestMethod]
+    public void PayOut_WinWithNoSample_TakesNothing()
+    {
+        MakeEnlisted();
+
+        _service.PayOutBattle(won: true, playerSimulated: false);
+
+        _loot.DidNotReceiveWithAnyArgs().GrantLootFrom(default!, default);
+        _inquiry.DidNotReceiveWithAnyArgs().ShowMessage(default!, default!, default!, default!);
+    }
+
+    [TestMethod]
+    public void PayOut_WinWithoutKills_ShowsNoToast()
+    {
+        MakeEnlisted();
+        _accumulator.Submit(Fought());
+
+        _service.PayOutBattle(won: true, playerSimulated: false);
+
+        _inquiry.DidNotReceiveWithAnyArgs().ShowMessage(default!, default!, default!, default!);
+    }
+
+    [TestMethod]
+    public void PayOut_SatOutBattle_TakesNothing()
+    {
+        MakeEnlisted();
+        _ledger.Record(SitOutVerdict.OverwhelmingCost);
+        _accumulator.Submit(new MeritSample { Kills = 1, SurvivalRatio = 1f, LeftTheField = true, KilledCharacterIds = new[] { "orc_a" } });
+        Loot("orc_a", 100f, "Sword");
+
+        _service.PayOutBattle(won: true, playerSimulated: true);
+
+        _loot.DidNotReceiveWithAnyArgs().GrantLootFrom(default!, default);
+    }
+
+    [TestMethod]
+    public void PayOut_CapCountsLandedItems_EmptyRollsUseNoSlot()
+    {
+        // Five kills, highest value first: a and b roll nothing (vanilla often returns nothing), c, d, e land.
+        // The cap is 3 landed items, so all five are tried and exactly three are listed.
+        MakeEnlisted();
+        KilledInBattle("a", "b", "c", "d", "e");
+        Loot("a", 500f, null!);
+        Loot("b", 400f, null!);
+        Loot("c", 300f, "C");
+        Loot("d", 200f, "D");
+        Loot("e", 100f, "E");
+
+        _service.PayOutBattle(won: true, playerSimulated: false);
+
+        _loot.ReceivedWithAnyArgs(5).GrantLootFrom(default!, default);
+        _inquiry.Received(1).ShowMessage("taom_enlist_spoils", Arg.Any<string>(), "ITEMS", "C, D, E");
+    }
+
+    [TestMethod]
+    public void PayOut_GrantsStopOnceTheCapHasLanded()
+    {
+        MakeEnlisted();
+        KilledInBattle("a", "b", "c", "d", "e");
+        foreach (var id in new[] { "a", "b", "c", "d", "e" })
+            Loot(id, 100f, "item_" + id);
+
+        _service.PayOutBattle(won: true, playerSimulated: false);
+
+        _loot.ReceivedWithAnyArgs(3).GrantLootFrom(default!, default);
+    }
+
+    [TestMethod]
+    public void PayOut_ZeroCap_ReadsNothingFromTheEngine()
+    {
+        MakeEnlisted();
+        var cfg = EnlistmentContentConfigProvider.BuildDefaults();
+        cfg.SpoilsMaxItemsPerBattle = 0;
+        _config.GetConfig().Returns(cfg);
+        KilledInBattle("a");
+        Loot("a", 100f, "Sword");
+
+        _service.PayOutBattle(won: true, playerSimulated: false);
+
+        _loot.DidNotReceiveWithAnyArgs().GetExpectedLootValue(default!);
+        _loot.DidNotReceiveWithAnyArgs().GrantLootFrom(default!, default);
+    }
+
+    [TestMethod]
+    public void PayOut_TargetUsesTheRankScale()
+    {
+        MakeEnlisted();
+        _contentStore.Record.Rank = ServiceRank.Sergeant;
+        KilledInBattle("a");
+        Loot("a", 100f, "Sword");
+
+        _service.PayOutBattle(won: true, playerSimulated: false);
+
+        // rank ordinal x scale 0.25, random 0.5 -> factor 0.5
+        var ordinal = (int)ServiceRank.Sergeant;
+        _loot.Received(1).GrantLootFrom("a", Arg.Is<float>(t => System.Math.Abs(t - 100f * (1f + 0.25f * ordinal) * 0.5f) < 0.01f));
     }
 }

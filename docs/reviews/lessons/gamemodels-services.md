@@ -1261,3 +1261,15 @@ dead the same way.
   config-backed fallback against the new object's value (lens 5's `compare.py` did 285 rows in one run), and either
   match the old value in the new object or document each change.
 - **Source:** [rca-b8-server-settings-2026-10-23.md](../rca-b8-server-settings-2026-10-23.md) findings 2 and 6.
+
+### Cap what a model call returns, not what you send it; read the body before trusting its name (#834, 2026-10-23)
+Enlistment's personal spoils first chose the three highest-value kills and then asked the loot model
+for one item each. The model often returns nothing (it skips non-merchandise gear and accepts each
+item with a chance of at most 0.325), and the highest-value kills (trolls) carry only non-merchandise
+gear, so a battle full of kills could pay nothing. The same feature attributed kills to
+`Mission.MainAgent`, which moves to a soldier the player takes control of after his hero falls.
+- **Why missed:** "a loot roll" and "the main agent" were read as names, not as the decompiled bodies.
+- **Prevent:** when a cap or a count governs what an engine call yields, apply it to the results that
+  landed, not to the inputs. Identify the player's own actions by `CharacterObject.PlayerCharacter`, not
+  by `Mission.MainAgent` or `IsMainAgent`.
+- **Source:** `docs/reviews/rca-enlistment-personal-spoils-2026-10-23.md` F1, F2.
