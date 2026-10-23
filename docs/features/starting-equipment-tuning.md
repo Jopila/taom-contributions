@@ -248,6 +248,9 @@ an item folder loads as a duplicate item id.
   Animalia elk to Mirkwood (#646; the great elk, #636, until 2026-09-23, when Mike put the career start on the
   lower cavalry's mount). The Armory has no riding horse of its own: every Armory `Horse` is a creature
   (wargs, rams, spiders, mumakil, elephant, chariot, the great elk, the Animalia elk and moose).
+- Lothlorien's, Lindon's and Rivendell's archers start with an elven ladder bow that needs Bow 100,
+  so a new character cannot put it back on once it is taken off. Elf troops carry no javelin, so the
+  rule has no other pick; left as it is for now (Mike, 2026-10-23).
 - The nine career kits added on 2026-10-23 ride placeholder mounts (Mike): the saddle horse and light
   harness, or the brown warg and saddle for the goblins, Misty Mountains and Blue Craig, whose markets
   do not stock the warg (`culture_marketplace_config.xml` routes it to the four warg cultures only).

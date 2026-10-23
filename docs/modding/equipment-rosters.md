@@ -54,7 +54,7 @@ with any fix.
 | `taom_child_equipment_templates.xml` | 84 | 14 | `child_template_<culture>_noble_male` |
 | `taom_education_equipment_templates.xml` | 1,568 | 16 | `child_education_equipments_stage_1_page_0_branch_default_<culture>` |
 | `taom_char_creation_equipment.xml` | 880 | 16 | `player_char_creation_<culture>_<titletype>_<m or f>` |
-| `taom_career_starting_equipment.xml` | 78 | 13 | `player_career_<culture>_<archetype>_<m or f>` |
+| `taom_career_starting_equipment.xml` | 150 (2026-10-23) | 25 | `player_career_<culture>_<archetype>_<m or f>` |
 | `taom_enlistment_equipment.xml` | 268 | 21 | `enlist_<culture>_<assignment>_<rank>` |
 | `taom_wanderer_equipment.xml` | 18 | 18 | `npc_companion_equipment_template_<culture>` |
 

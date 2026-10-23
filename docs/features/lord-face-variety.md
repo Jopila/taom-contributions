@@ -89,6 +89,7 @@ A hero takes only the template's static minimum, so a swapped hero now also gets
 
 - `TAOM.Tests/Features/LordFaceVariety/LordFaceVarietyServiceTests.cs`: rules A, B and C, anchor order, roll age, one seed per hero, twins, skips (player, empty id, non-original on a spread range, unique faces), seed, self-check, throw and refuse in rules A and B, a rule A failure falling into rule B.
 - `TAOM.Tests/Features/LordFaceVariety/LordFaceVarietyWiringTests.cs`: module listed once, behavior declared, exactly one listener on `OnNewGameCreatedPartialFollowUpEndEvent` and no load event, the catch scoped to `_service.Run()`.
+- `TAOM.Tests/Core/FemaleLordHairDataTests.cs`: every human lady on a face template carries her own hair tags, because rule A rolls with the template's tags and the human templates hold men's styles (a lady with none starts bald half the time; `docs/modding/body-properties.md` Gotchas).
 - `TAOM.Tests/Core/HeroFaceVarietyDataTests.cs`: runs the real service over the repo's heroes with a roller that always gives a unique face. Only the twins may remain shared, every canon id and twin must be an explicit-key hero, no Harad hero may keep a shared explicit key, and rule B may not exceed a ceiling. The test prints the rule A and rule B counts.
 
 ## Known limitations

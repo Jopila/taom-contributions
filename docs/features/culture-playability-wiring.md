@@ -106,6 +106,7 @@ stage; the rest fail silently.
 | 5 | CC starting equipment, m+f per `title_type` | `equipmentsets/taom_char_creation_equipment.xml` | silent |
 | 6 | Starting denars | `startup_resources/startup_resources_config.xml` | silent |
 | 7 | At least one eligible career | `career_system/taom_careers.xml` + `charactercreation/career_menu.json` | silent |
+| 7b | Career starting kits, one per archetype and sex | `equipmentsets/taom_career_starting_equipment.xml` (skeletons, then `tools/generate_career_kits.py --apply`) | silent: the career start keeps the youth kit |
 | 8 | Child / teen / lord / education equipment templates | `equipmentsets/taom_{child_equipment,lord_template_equipment,education_equipment}_templates.xml` | fatal — NRE on new game |
 | 9 | Stage-2 education tutor templates | `taom_education_character_templates.xml` | fatal — age-8 CTD (#354) |
 | 10 | Enlistment rosters, 4 ranks | `equipmentsets/taom_enlistment_equipment.xml` | silent — issues another culture's gear |
@@ -144,6 +145,11 @@ that has died and respawned, before treating it as a regression.
 6. Give it careers: `tools/insert_new_faction_careers.py --apply` clones an existing culture's. Then
    add each new career to `CareerSystemIoC.BuildCareerArchetypeMap`, or its battle ability is a
    no-op behind a working toast (`IoCMap_EveryCareerInTheData_HasAnArchetype` fails until you do).
+   Add the six `player_career_<culture>_<archetype>_<m|f>` roster skeletons, then run
+   `python tools/generate_career_kits.py --apply`: it fills each kit with the culture's lowest troop
+   gear. If the culture's troops carry another culture's id, add a `KIT_SOURCE` row (and the same row
+   to `StarterKitCoverageTests.KitSourceCulture`); a ranged career that is not a bow career needs a
+   `RANGED` row. Horse and harness are hand-kept.
 7. Add enlistment rosters, child/teen/lord/education templates, and a recruitment pool.
 8. Remove the culture from every `documentedExceptions` list in `TAOM.Tests/` that names it.
    **Leaving a fixed culture parked in an exception list is a permanent blind spot**, and the
@@ -298,6 +304,8 @@ before retuning `taom_partyTemplates.xml`.
 - `TAOM.Tests/Features/CharacterCreation/NarrativeCultureCoverageTests.cs` — options in all four
   culture-scoped menus, plus a stale-suppression check.
 - `TAOM.Tests/Features/CharacterCreation/CareerCultureCoverageTests.cs` — at least one eligible career.
+- `TAOM.Tests/Features/CharacterCreation/CareerKitCoverageTests.cs`: all six career kits for every
+  culture in `cultures.json` (no exceptions since 2026-10-23).
 - `TAOM.Tests/Features/Enlistment/EnlistmentRosterCultureCoverageTests.cs` — four rank rosters.
 - `TAOM.Tests/Core/CulturePartyTemplateTests.cs`: every party-template binding on every culture, for
   both sources. Runs `spcultures.xslt` over a sentinel stub rather than reading the markup, which is

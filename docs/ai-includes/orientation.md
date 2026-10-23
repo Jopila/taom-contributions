@@ -45,7 +45,7 @@ and the gate.
 | Console commands | Route through `TaomConsole`; a wrongly shaped command throws in unguarded startup discovery | [console](../features/dev-console.md) |
 | Landless cultures | A culture owning no settlement CTDs the daily clan tick: `Patch65`, `LANDLESS_CULTURE` | [spawn guard](../features/lord-spawn-guard.md) |
 | Culture ids | `empire` is Dunland, `battania` Khand; troops may carry another culture: read both from the data | [lesson](../reviews/lessons/data-content-cultures.md) |
-| NPCCharacter `<face>` | Missing: toddler; a copied key: twin lords. `CharacterFaceCoverageTests`, `HeroFaceVarietyDataTests` | [body properties](../modding/body-properties.md) |
+| NPCCharacter `<face>` | Missing: toddler; copied key: twin lords; a lady on a template: her own hair tag. Gates in the doc | [body properties](../modding/body-properties.md) |
 | Enlisted service | Only `DischargeService` ends it; parked, or visible in the commander's settlement, is legitimate | [enlistment](../features/enlistment.md) |
 | Leaving a map event | Clearing `MainParty.AttachedTo` mid-event nulls the upgrade tracker; vanilla CTDs later | [guard](../features/map-event-guard.md) |
 | Menus stop time | Land on the map after timed work; a false WAIT condition hides every option; no `TickEvent` in a menu | [field camp](../features/field-camp.md) |
