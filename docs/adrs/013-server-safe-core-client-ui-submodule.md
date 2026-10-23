@@ -65,7 +65,10 @@ The path then grows toward a full split (a) only feature by feature, where a fea
 ### Negative
 - One more project, submodule and build step, about 55 type moves and 26 core methods inverted behind
   adapters, in a dozen batches.
-- Two submodules to keep in step in the manifest and in `Main/TAOM.csproj`'s server mirror.
+- Two submodules to keep in step in the manifest and in every deploy path: `Main/TAOM.csproj`'s server
+  mirror excludes `TAOM.Client` and its editor mirror deletes a stale copy, and `Client/TAOM.Client.csproj`
+  deploys it only beside the core it was built against (Game Pass is not supported, so there is no third
+  client bin).
 - Booting is only the first milestone: guards for startup hooks, patch categories and campaign-time UI
   paths follow (batches B6 and B7), and some may only show in a long server run.
 - Unproven until batch B4a: that Gauntlet finds widget types in a second assembly. Every move batch ends
