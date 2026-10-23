@@ -1,50 +1,50 @@
 {
   "BR": {
-    "armory": 92,
-    "taom_map": 372
+    "armory": 101,
+    "taom_map": 419
   },
   "CNs": {
-    "armory": 87,
-    "taom_map": 0
+    "armory": 96,
+    "taom_map": 47
   },
   "CNt": {
-    "armory": 87,
-    "taom_map": 0
+    "armory": 96,
+    "taom_map": 47
   },
   "DE": {
-    "armory": 100,
-    "taom_map": 369
+    "armory": 109,
+    "taom_map": 416
   },
   "FR": {
-    "armory": 99,
-    "taom_map": 372
+    "armory": 108,
+    "taom_map": 419
   },
   "IT": {
-    "armory": 90,
-    "taom_map": 373
+    "armory": 99,
+    "taom_map": 420
   },
   "JP": {
-    "armory": 87,
-    "taom_map": 0
+    "armory": 96,
+    "taom_map": 47
   },
   "KO": {
-    "armory": 87,
-    "taom_map": 23
+    "armory": 96,
+    "taom_map": 70
   },
   "PL": {
-    "armory": 89,
-    "taom_map": 827
+    "armory": 98,
+    "taom_map": 874
   },
   "RU": {
-    "armory": 87,
-    "taom_map": 0
+    "armory": 96,
+    "taom_map": 47
   },
   "SP": {
-    "armory": 88,
-    "taom_map": 372
+    "armory": 97,
+    "taom_map": 419
   },
   "TR": {
-    "armory": 90,
-    "taom_map": 376
+    "armory": 99,
+    "taom_map": 423
   }
 }

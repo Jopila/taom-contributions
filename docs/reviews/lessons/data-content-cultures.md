@@ -2198,3 +2198,9 @@ outlaws were anchored on the west coast while their camps are on the Ithilien fr
   every text that names that side when it moves. Fire and Tribute now has a LiveInstall test that each host's anchors
   belong to realms of its own side.
 - **Source:** `docs/reviews/rca-fire-and-tribute-slice1-2026-10-21.md` findings 1, 2 and 5.
+
+### A lady on a face template carries her own hair tags (#978, 2026-10-23)
+Cardolan's and Rhudaur's 14 ladies moved from copied face keys to the `fighter_gondor` template so each lord rolls a fresh face. The template's hair tags are men's styles that match no adult female hair in vanilla `skins.xml`, and with no match the native roll falls back to the template keys' hair indices, where a woman's index 0 is the Bald mesh: about half would have started bald, for the whole campaign. A copied key had carried its hair, so nothing was missing before the swap.
+- **Why missed:** the template replaced the keys to pass the face-variety ceiling, and nobody listed what the keys had supplied; `HeroFaceVarietyDataTests` models faces, not hair.
+- **Prevent:** a human lady on a face template carries `<hair_tags>` in her `<face>` (`empire` matches 10 of 22 adult female hairs, none bald), as the Harad ladies carry `aserai`. `FemaleLordHairDataTests` gates it. When you replace one data mechanism with another, list what the old one supplied implicitly before you trust the new one.
+- **Source:** [rca-cardolan-rhudaur-2026-10-23.md](../rca-cardolan-rhudaur-2026-10-23.md) finding 1.

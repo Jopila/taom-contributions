@@ -1294,6 +1294,7 @@
 			<AvailablePiece id="starter_wm_mordor_set1_axe_a01_blade"/>
 			<AvailablePiece id="starter_sm_dwarf_erebor_axe_blade_1h_a"/>
 			<AvailablePiece id="starter_wm_gundabad_axe_a01_blade"/>
+			<AvailablePiece id="starter_axe_craft_20_head"/>
 			<!-- TAOM-STARTER-KIT:END -->
 		</AvailablePieces>
 	</xsl:template>

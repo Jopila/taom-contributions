@@ -57019,6 +57019,9 @@
     <NPCCharacter id="lord_CA1_3" name="{=aom_lord_CA1_3_name}Elendis" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57058,6 +57061,9 @@
     <NPCCharacter id="lord_CA1_4" name="{=aom_lord_CA1_4_name}Aerin" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57175,6 +57181,9 @@
     <NPCCharacter id="lord_CA2_3" name="{=aom_lord_CA2_3_name}Daeriel" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57214,6 +57223,9 @@
     <NPCCharacter id="lord_CA2_4" name="{=aom_lord_CA2_4_name}Eilinel" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57331,6 +57343,9 @@
     <NPCCharacter id="lord_CA3_3" name="{=aom_lord_CA3_3_name}Gwaeren" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57370,6 +57385,9 @@
     <NPCCharacter id="lord_CA3_4" name="{=aom_lord_CA3_4_name}Lindis" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57487,6 +57505,9 @@
     <NPCCharacter id="lord_CA4_3" name="{=aom_lord_CA4_3_name}Mirwen" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57526,6 +57547,9 @@
     <NPCCharacter id="lord_CA4_4" name="{=aom_lord_CA4_4_name}Saelind" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.cardolan" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57645,6 +57669,9 @@
     <NPCCharacter id="lord_RH1_3" name="{=aom_lord_RH1_3_name}Gilwen" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57684,6 +57711,9 @@
     <NPCCharacter id="lord_RH1_4" name="{=aom_lord_RH1_4_name}Branwen" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57801,6 +57831,9 @@
     <NPCCharacter id="lord_RH2_3" name="{=aom_lord_RH2_3_name}Eirlys" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57840,6 +57873,9 @@
     <NPCCharacter id="lord_RH2_4" name="{=aom_lord_RH2_4_name}Heledd" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57957,6 +57993,9 @@
     <NPCCharacter id="lord_RH3_3" name="{=aom_lord_RH3_3_name}Olwen" voice="curt" is_female="true" age="25" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />
@@ -57996,6 +58035,9 @@
     <NPCCharacter id="lord_RH3_4" name="{=aom_lord_RH3_4_name}Seren" voice="curt" is_female="true" age="26" default_group="Cavalry" is_hero="true" culture="Culture.rhudaur" occupation="Lord" face_mesh_cache="true" skill_template="SkillSet.taom_gondor_young_lady_skills">
         <face>
             <face_key_template value="BodyProperty.fighter_gondor" />
+            <hair_tags>
+                <hair_tag name="empire" />
+            </hair_tags>
           </face>
         <skills>
             <skill id="OneHanded" value="40" />

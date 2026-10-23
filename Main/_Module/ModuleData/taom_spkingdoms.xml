@@ -1375,7 +1375,7 @@
         id="rhudaur"
         owner="Hero.lord_RH1_1"
         initial_home_settlement="Settlement.town_RH1"
-        banner_key="11.99.99.1528.1528.764.764.1.0.0.11006.110.110.700.700.764.764.0.0.0"        primary_banner_color="0xFF603830"
+        banner_key="11.99.99.1528.1528.764.764.1.0.0.11002.110.110.700.700.764.764.0.0.0"        primary_banner_color="0xFF603830"
         secondary_banner_color="0xFFC8B8A8"
         color="0xFF603830"
         color2="0xFFC8B8A8"      

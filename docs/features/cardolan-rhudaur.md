@@ -34,7 +34,7 @@ The same recipe and the same generators, extended rather than copied:
 | Bow ladder | `tools/ranged_ladders.json` lines `cardolan`, `rhudaur`; `tools/generate_ranged_ladder_items.py` | Live `LOTRLOME_items/arnor/ranged_ladder.xml` now has 14 items |
 | Culture, notables, wanderers, villager and caravan templates, education templates, rosters | `tools/promote_borrowed_cultures.py --only cardolan` / `--only rhudaur` | Both built by `_arnor_successor()` from Arthedain's settings; three promoter defects fixed (Changelog) |
 | Towns, castles, villages | `tools/add_map_fortifications.py`, `tools/add_map_villages.py` | 9 fortifications, 29 villages; Cardolan and Rhudaur take Arthedain's `STYLE` |
-| Kingdom, clans, lords, heroes | `tools/generate_new_faction_kingdoms.py --only cardolan` / `--only rhudaur` | New `face_template` option; regions now replaced in place |
+| Kingdom, clans, lords, heroes | `tools/generate_new_faction_kingdoms.py --only cardolan --apply` / `--only rhudaur --apply` | New `face_template` and `female_hair_tag` options |
 | Narrative menus | `tools/insert_new_faction_cc_menus.py` | Authored text per realm on Gondor's mechanics |
 | Careers | `tools/insert_new_faction_careers.py` | Three each, cloned from Gondor's |
 | Starting gear | `tools/generate_char_creation_equipment.py --append cardolan rhudaur`, `generate_starter_kit.py`, `wire_starter_kit_rosters.py` | 55 rosters each |
@@ -88,7 +88,11 @@ C#: VolunteerRecruitmentService.Cardolan.cs / .Rhudaur.cs, the culture rows of t
 
 Four lords per clan (two married couples), 16 for Cardolan and 12 for Rhudaur. Each lord draws his
 own face from the `fighter_gondor` template at campaign start (Lord Face Variety rule A), where a
-copied face key is only nudged (`HeroFaceVarietyDataTests`). Banners: the Arnor icons (group 110) in
+copied face key is only nudged (`HeroFaceVarietyDataTests`). The template's hair tags are men's
+styles that match no woman's hair, and with no match the native roll falls back to the template
+keys' hair indices, where a woman's index 0 is bald. So each lady carries her own
+`<hair_tag name="empire" />` (10 of the 22 adult female hairs, none bald), written by the
+generator's `female_hair_tag` and pinned by `FemaleLordHairDataTests`. Banners: the Arnor icons (group 110) in
 silver on palette 154 for Cardolan and 99 for Rhudaur.
 
 ### Troop trees
@@ -106,7 +110,11 @@ silver on palette 154 for Cardolan and 99 for Rhudaur.
 
 ### Tables keyed on culture
 
-Every table that names `arthedain` was decided for both:
+Every table that names `arthedain` was decided for both. Four keep no row for either realm:
+`settlement_guards_config.xml` (it names only Fornost's guards, so both use the default guards),
+`troop_resource_costs.xml` (keyed by troop; no Arnor troop costs a special resource),
+`war_chronicle.json` (the generic text), and the lord's ladder crown in
+`armour_acquisition_config.xml` (Arthedain's king's crown).
 
 | Table | Cardolan | Rhudaur |
 |-------|----------|---------|
@@ -147,26 +155,49 @@ Every table that names `arthedain` was decided for both:
 - `TAOM.Tests/Features/TroopProgression/VolunteerRecruitmentServiceTests.cs`: both pools.
 - Count and list pins moved with the data: `TroopUpgradeSkillMonotonicityTests`
   (`ExpectedMilitiaCultures`), `ShippedRaceAbilitiesConfigTests` (20 cultures),
-  `SettingsFingerprintTests` (425 settings), `ShippedClanSideCoverageTests` (`NeutralRealmIds`).
+  `SettingsFingerprintTests` (423 in `TaomSettings`), `ShippedClanSideCoverageTests` (`NeutralRealmIds`),
+  `LotrIssueConfigProviderTests` (77 issues), `GlobalStringsOverridesTests` (the picker names).
+- `TAOM.Tests/Core/FemaleLordHairDataTests.cs`: every human lady on a face template carries her own
+  hair tags.
+- `ClonedCultureFlavorTests` scans both realms for Gondor's places and Arthedain's seats.
 - Existing gates that now cover them: `LiegeTitleOverrideTests`, `RealmPaletteTests`,
   `ArmourAcquisitionShippedDataTests`, `ShippedHallOfFireConfigTests`, `HeroFaceVarietyDataTests`,
   `WandererBackstoryCoverageTests`, `EveryLanguage_DeclaresARowForEveryEnglishKey`.
-- `tools/tests/test_generator_regions_in_sync.py` runs both troop generators' and both kingdoms'
-  `--check`.
+- `tools/tests/test_generator_regions_in_sync.py` runs every Arnor troop generator's and kingdom's
+  `--check`, and the promoter's for the three realms when the live map is installed.
+- `tools/tests/test_generate_new_faction_kingdoms_writes.py` and
+  `tools/tests/test_promote_register_region.py`: the dry-run default, parse before write, and the
+  refusal of a doubled registration region.
+
+## Save Compatibility
+
+A new campaign is required to play either realm. A save made before them loads `settlements.xml`
+again but never the new kingdoms, clans or heroes (`SandBoxManager.InitializeSandboxXMLs`). The 38
+new rows sit at the end of the file under `town_CA2`, so the first of them throws inside
+`Settlement.Deserialize` (its alleys), `MBObjectManager.LoadXML` swallows it, and the unfinished rows
+are dropped; every older settlement has already loaded. The mechanism is Arthedain's
+([arthedain.md](arthedain.md) "Save Compatibility"), and the in-game check on an old save is owed.
 
 ## How to Change a Realm
 
 The steps in [arthedain.md](arthedain.md) "How to Change the Realm" apply, with each realm's own
-generator and `--only <culture>`. Never run `generate_new_faction_kingdoms.py` or
-`promote_borrowed_cultures.py` without `--only`.
+generator and `--only <culture>`. Both `generate_new_faction_kingdoms.py` and
+`promote_borrowed_cultures.py` only report what would change until you add `--apply`.
 
 ## Known gaps
 
 - The armour is a placeholder until each realm has its own.
 - The cloned wanderers keep the surnames of Gondor's and Arthedain's wanderers.
 - Arthedain's narrative menus and culture text still name "fallen Cardolan" and the hill-men of
-  Rhudaur "under Angmar's banners" (a decision for Mike; changing them resets their translations).
-- All new English text waits for the paid translation run (#763).
+  Rhudaur "under Angmar's banners", its kingdom text calls it "the last of the three realms", King
+  Arvegil II's entry has him hold Fornost "against Angmar", and the Remnants of Angmar faction card
+  still stands (a decision for Mike; changing them resets their translations).
+- All new English text waits for the paid translation run (#763). The 12 translated
+  `loc_arnor.xml` files in the live Armory have no row yet for the 9 new ladder bows, so
+  `sync_ranged_ladder_translations.py` stops on `ladder_rhudaur_bow_t2` until that run adds them.
+- No `player_career_<culture>_*` starting kits exist for any of the three Arnor realms, so a career
+  start keeps the youth-title kit and `CareerStartingEquipmentService` logs a warning (inherited from
+  Arthedain; a decision for Mike).
 - No faction-screen art for either realm.
 
 ## Changelog
@@ -174,9 +205,21 @@ generator and `--only <culture>`. Never run `generate_new_faction_kingdoms.py` o
 - 2026-10-23 (#978): created. Built with the Arthedain recipe. Along the way:
   - `tools/realm_troops.py` replaced the copy-per-realm troop generator.
   - `promote_borrowed_cultures.py` stopped copying the multi-line liege-title strings line by line
-    (which wrote a malformed `taom_module_strings.xml`), now parses every file before writing any,
-    and replaces its marker regions in place (strip-and-append reordered the realms, so only the last
-    one written passed `--check`); the same in-place fix went into `generate_new_faction_kingdoms.py`.
+    (which wrote a malformed `taom_module_strings.xml`) and replaces its `SubModule.xml`
+    registration region in place. The parse-before-write guard (`unparsable()`, #979) and the
+    one marker-region writer (`tools/_marker_region.py`, #975/#976) landed upstream at the same
+    time, and the merge kept those in every writer.
+- 2026-10-23 (#978 deep review):
+  - The 14 ladies carry `empire` hair tags; on the bare template about half would start bald.
+  - Rhudaur's kingdom banner is its royal house's icon (11002), as Arthedain's and Cardolan's are.
+  - Cardolan's "Sword of the Last Bridge" career group is "Sword of Sarn Ford": the Last Bridge is in
+    Rhudaur.
+  - The armour class table was regenerated: Cardolan's level 26 troops wear
+    `sk_gd_ano_bracer_noble_heavy_a`, which moves that piece from elite to heavy.
+  - Tooling: the promoter rounds the live start point to 3 decimals (an editor save had broken its
+    `--check`), joins `test_generator_regions_in_sync.py`, and refuses a duplicated registration
+    region; the kingdom generator parses every output before writing any and writes only with
+    `--apply`; the troop self-check catches a two-handed axe carried with a shield.
   - Arthedain's start point moved to Fornost Erain's live position (464.975, 1162.654), and its
     faction card no longer calls it the only Arnor realm still standing.
 

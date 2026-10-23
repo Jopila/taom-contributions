@@ -81,110 +81,106 @@ BASTARD_ELITE = ("numenorean_bastard_elite_a", "numenorean_bastard_elite_b")
 LIGHT_FOOT = dict(head=None, body=ab("anf_inf_chainmail"), leg=one("ano_boots_a"), gloves=None, cape=None)
 
 
-def foot(head, body, leg, gloves, cape):
-    return armour(head, body, leg, gloves, cape)
-
-
 def build():
     t = []
 
     # ---- Levy and the spear line ----
     t.append(Troop("cardolan_levy", "Levy", 6, "Infantry", "spear",
                    paired(LIGHT_SPEAR, SHIELD_LOW),
-                   foot(**LIGHT_FOOT),
+                   armour(**LIGHT_FOOT),
                    ["cardolan_spearman"], basic=True))
     t.append(Troop("cardolan_spearman", "Spearman", 11, "Infantry", "spear",
                    paired(SPEAR, SHIELD_LOW, "wm_gondor_sword_a01"),
-                   foot(one("pin_inf_helmet_med_a"), ab("pin_chainmail"), one("ano_grvs_inf_light_a"),
-                        one("ano_gloves_a"), ab("ano_pauld_inf_med")),
+                   armour(one("pin_inf_helmet_med_a"), ab("pin_chainmail"), one("ano_grvs_inf_light_a"),
+                          one("ano_gloves_a"), ab("ano_pauld_inf_med")),
                    ["cardolan_river_spearman"]))
     t.append(Troop("cardolan_river_spearman", "Cardolan Spearman", 16, "Infantry", "spear",
                    paired(SPEAR, SHIELD_MID, "wm_gondor_sword_a07"),
-                   foot(one("pin_inf_helmet_med_a"), ab("pin_inf_chest_med"), one("ano_grvs_inf_med_a"),
-                        one("ano_gloves_a"), ab("ano_pauld_inf_med")),
+                   armour(one("pin_inf_helmet_med_a"), ab("pin_inf_chest_med"), one("ano_grvs_inf_med_a"),
+                          one("ano_gloves_a"), ab("ano_pauld_inf_med")),
                    ["cardolan_barrow_guard"]))
     t.append(Troop("cardolan_barrow_guard", "Barrow Guard", 21, "Infantry", "spear",
                    paired(SPEAR, SHIELD_MID, BASTARD_HEAVY),
-                   foot(ab("anf_inf_helmet_med"), ab("anf_inf_chest_med"), one("ano_grvs_inf_med_a"),
-                        one("ano_bracer_inf_med_a"), ab("ano_pauld_inf_med")),
+                   armour(ab("anf_inf_helmet_med"), ab("anf_inf_chest_med"), one("ano_grvs_inf_med_a"),
+                          one("ano_bracer_inf_med_a"), ab("ano_pauld_inf_med")),
                    ["cardolan_veteran_barrow_guard"]))
     t.append(Troop("cardolan_veteran_barrow_guard", "Veteran Barrow Guard", 26, "Infantry", "spear",
                    paired(SPEAR, SHIELD_HIGH, BASTARD_ELITE),
-                   foot(ab("pin_spear_helmet_heavy"), ab("pin_inf_chest_heavy"), one("ano_grvs_inf_heavy_a"),
-                        one("ano_bracer_noble_heavy_a"), one("ano_pauld_inf_heavy_a")),
+                   armour(ab("pin_spear_helmet_heavy"), ab("pin_inf_chest_heavy"), one("ano_grvs_inf_heavy_a"),
+                          one("ano_bracer_noble_heavy_a"), one("ano_pauld_inf_heavy_a")),
                    ["cardolan_warden"]))
     t.append(Troop("cardolan_warden", "Warden of Tyrn Gorthad", 31, "Infantry", "sword",
                    paired(BASTARD_ELITE, SHIELD_HIGH, SPEAR),
-                   foot(ab("pin_spear_helmet_heavy"), ab("pin_inf_chest_heavy"), one("ano_grvs_inf_heavy_a"),
-                        one("ano_bracer_noble_heavy_a"), one("ano_pauld_cape_inf_elite_a"))))
+                   armour(ab("pin_spear_helmet_heavy"), ab("pin_inf_chest_heavy"), one("ano_grvs_inf_heavy_a"),
+                          one("ano_bracer_noble_heavy_a"), one("ano_pauld_cape_inf_elite_a"))))
 
     # ---- Dunadan of Cardolan, the two-way split ----
     t.append(Troop("cardolan_dunadan", "Dunadan of Cardolan", 11, "Infantry", "sword",
                    paired(BASTARD_HEAVY, SHIELD_LOW),
-                   foot(ab("anf_inf_helmet_med"), ab("anf_inf_chainmail"), one("ano_grvs_inf_light_a"),
-                        one("ano_gloves_a"), ab("ano_pauld_inf_med")),
+                   armour(ab("anf_inf_helmet_med"), ab("anf_inf_chainmail"), one("ano_grvs_inf_light_a"),
+                          one("ano_gloves_a"), ab("ano_pauld_inf_med")),
                    ["cardolan_rider", "cardolan_bowman"], basic=True))
 
     # Knights: the horse realm's long cavalry line, ending in the mounted capstone.
     t.append(Troop("cardolan_rider", "Rider of Cardolan", 16, "Cavalry", "cavalry",
                    paired(SPEAR, SHIELD_MID, "wm_gondor_sword_a07"),
-                   foot(ab("anf_inf_helmet_med"), ab("anf_inf_chest_med"), one("ano_grvs_inf_med_a"),
-                        one("ano_gloves_a"), ab("ano_pauld_inf_med")),
+                   armour(ab("anf_inf_helmet_med"), ab("anf_inf_chest_med"), one("ano_grvs_inf_med_a"),
+                          one("ano_gloves_a"), ab("ano_pauld_inf_med")),
                    ["cardolan_lancer"], horse=HORSE_LIGHT))
     t.append(Troop("cardolan_lancer", "Lancer of Cardolan", 21, "Cavalry", "cavalry",
                    paired(LANCE, SHIELD_MID, BASTARD_HEAVY),
-                   foot(ab("anf_inf_helmet_med"), ab("anf_inf_chest_med"), one("ano_grvs_inf_med_a"),
-                        one("ano_bracer_inf_med_a"), ab("ano_pauld_inf_med")),
+                   armour(ab("anf_inf_helmet_med"), ab("anf_inf_chest_med"), one("ano_grvs_inf_med_a"),
+                          one("ano_bracer_inf_med_a"), ab("ano_pauld_inf_med")),
                    ["cardolan_knight"], horse=HORSE_LIGHT))
     t.append(Troop("cardolan_knight", "Knight of Cardolan", 26, "Cavalry", "cavalry",
                    paired(LANCE, SHIELD_HIGH, BASTARD_ELITE),
-                   foot(one("anf_cav_helmet_heavy_a"), one("anf_inf_chest_heavy_a"), one("ano_grvs_inf_heavy_a"),
-                        one("ano_bracer_noble_heavy_a"), one("ano_pauld_inf_heavy_a")),
+                   armour(one("anf_cav_helmet_heavy_a"), one("anf_inf_chest_heavy_a"), one("ano_grvs_inf_heavy_a"),
+                          one("ano_bracer_noble_heavy_a"), one("ano_pauld_inf_heavy_a")),
                    ["cardolan_knight_captain"], horse=HORSE_HEAVY))
     t.append(Troop("cardolan_knight_captain", "Knight-Captain of Cardolan", 31, "Cavalry", "cavalry",
                    paired(LANCE, SHIELD_HIGH, BASTARD_ELITE),
-                   foot(ab("dol_helmet_heavy"), ab("dol_chest_heavy"), one("dol_grvs_heavy_a"),
-                        one("dol_bracer_heavy_a"), one("dol_pauld_cape_noble_heavy_a")),
+                   armour(ab("dol_helmet_heavy"), ab("dol_chest_heavy"), one("dol_grvs_heavy_a"),
+                          one("dol_bracer_heavy_a"), one("dol_pauld_cape_noble_heavy_a")),
                    ["cardolan_kings_guard"], horse=HORSE_HEAVY))
     t.append(Troop("cardolan_kings_guard", "King's Guard of Caras Gorthad", 36, "Cavalry", "cavalry",
                    paired(LANCE, SHIELD_HIGH, BASTARD_ELITE),
-                   foot(ab("dol_cav_helmet_elite"), ab("dol_chest_elite"), one("dol_grvs_elite_a"),
-                        one("dol_bracer_elite_a"), one("dol_pauld_cape_noble_elite_a")),
+                   armour(ab("dol_cav_helmet_elite"), ab("dol_chest_elite"), one("dol_grvs_elite_a"),
+                          one("dol_bracer_elite_a"), one("dol_pauld_cape_noble_elite_a")),
                    horse=HORSE_HEAVY))
 
     # Bowmen of Minhiriath: bow in Item0 and arrows in Item1/Item2 in BOTH rosters, sword in Item3.
     t.append(Troop("cardolan_bowman", "Minhiriath Bowman", 16, "Ranged", "ranged",
                    same(bow(16), ARROWS, ARROWS, "wm_gondor_sword_a07"),
-                   foot(one("pin_inf_helmet_med_a"), ab("pin_chainmail"), one("ano_grvs_inf_light_a"),
-                        one("ano_gloves_a"), ab("ano_pauld_inf_med")),
+                   armour(one("pin_inf_helmet_med_a"), ab("pin_chainmail"), one("ano_grvs_inf_light_a"),
+                          one("ano_gloves_a"), ab("ano_pauld_inf_med")),
                    ["cardolan_minhiriath_bowman"]))
     t.append(Troop("cardolan_minhiriath_bowman", "Bowman of Minhiriath", 21, "Ranged", "ranged",
                    same(bow(21), ARROWS, ARROWS, "wm_gondor_sword_a03"),
-                   foot(one("pin_inf_helmet_med_a"), ab("pin_inf_chest_med"), one("ano_grvs_inf_med_a"),
-                        one("ano_bracer_inf_med_a"), ab("ano_pauld_inf_med")),
+                   armour(one("pin_inf_helmet_med_a"), ab("pin_inf_chest_med"), one("ano_grvs_inf_med_a"),
+                          one("ano_bracer_inf_med_a"), ab("ano_pauld_inf_med")),
                    ["cardolan_veteran_bowman"]))
     t.append(Troop("cardolan_veteran_bowman", "Veteran Minhiriath Bowman", 26, "Ranged", "ranged",
                    same(bow(26), ARROWS, ARROWS, "numenorean_bastard_heavy_a"),
-                   foot(ab("pin_arc_helmet_heavy"), ab("pin_inf_chest_heavy"), one("ano_grvs_inf_heavy_a"),
-                        one("ano_bracer_noble_heavy_a"), one("ano_pauld_inf_heavy_a"))))
+                   armour(ab("pin_arc_helmet_heavy"), ab("pin_inf_chest_heavy"), one("ano_grvs_inf_heavy_a"),
+                          one("ano_bracer_noble_heavy_a"), one("ano_pauld_inf_heavy_a"))))
 
     # ---- Militia, named by the culture's four militia attributes ----
     t.append(Troop("cardolan_militia_spearman", "Militia Spearman", 11, "Infantry", "spear",
                    paired(SPEAR, SHIELD_LOW, "wm_gondor_sword_a01"),
-                   foot(None, ab("anf_inf_chainmail"), one("ano_boots_a"), None, None),
+                   armour(None, ab("anf_inf_chainmail"), one("ano_boots_a"), None, None),
                    ["cardolan_militia_veteran_spearman"]))
     t.append(Troop("cardolan_militia_archer", "Militia Archer", 11, "Ranged", "ranged",
                    same(bow(11), ARROWS, ARROWS, "wm_gondor_sword_a01"),
-                   foot(None, ab("pin_chainmail"), one("ano_boots_a"), None, None),
+                   armour(None, ab("pin_chainmail"), one("ano_boots_a"), None, None),
                    ["cardolan_militia_veteran_archer"]))
     t.append(Troop("cardolan_militia_veteran_spearman", "Veteran Militia Spearman", 16, "Infantry", "spear",
                    paired(SPEAR, SHIELD_MID, "wm_gondor_sword_a03"),
-                   foot(one("pin_inf_helmet_med_a"), ab("pin_inf_chest_med"), one("ano_grvs_inf_med_a"),
-                        one("ano_gloves_a"), ab("ano_pauld_inf_med"))))
+                   armour(one("pin_inf_helmet_med_a"), ab("pin_inf_chest_med"), one("ano_grvs_inf_med_a"),
+                          one("ano_gloves_a"), ab("ano_pauld_inf_med"))))
     t.append(Troop("cardolan_militia_veteran_archer", "Veteran Militia Archer", 16, "Ranged", "ranged",
                    same(bow(16), ARROWS, ARROWS, "wm_gondor_sword_a03"),
-                   foot(one("pin_inf_helmet_med_a"), ab("pin_inf_chest_med"), one("ano_grvs_inf_med_a"),
-                        one("ano_gloves_a"), ab("ano_pauld_inf_med"))))
+                   armour(one("pin_inf_helmet_med_a"), ab("pin_inf_chest_med"), one("ano_grvs_inf_med_a"),
+                          one("ano_gloves_a"), ab("ano_pauld_inf_med"))))
     return t
 
 

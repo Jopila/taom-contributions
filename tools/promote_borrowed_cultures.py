@@ -398,11 +398,29 @@ def capital_position(target, cfg):
         m = re.search(r'<Settlement\b[^>]*\bid="%s"[^>]*>' % re.escape(sid), live)
         if m:
             head = m.group(0)
-            pos = {"posX": re.search(r'\bposX="([^"]+)"', head).group(1),
-                   "posY": re.search(r'\bposY="([^"]+)"', head).group(1)}
+            # Three decimals, the precision the shipped data uses: an editor save rewrites the live rows
+            # with four, and copying them verbatim made --check report drift for rounding alone.
+            pos = {axis: "%.3f" % float(re.search(r'\b%s="([^"]+)"' % axis, head).group(1))
+                   for axis in ("posX", "posY")}
             return pos, sid != cfg["capital"]
     raise SystemExit(f"{target}: capital {cfg['capital']} is in neither the layout nor the live map, "
                      "and no provisional_start_from resolves")
+
+
+def register_own_region(sm_text, mark, reg):
+    """SubModule.xml text with the `mark` registration region replaced where it stands, or added after the
+    shared TAOM-NEWCULTURE-REG block when there is none. A doubled region, a lone BEGIN or END is refused
+    (SystemExit, nothing written): replacing only the first copy would let --check pass over a stale second
+    one, which the engine loads last (tools/_marker_region.py)."""
+    if f"<!-- {mark}:BEGIN -->" in sm_text or f"<!-- {mark}:END -->" in sm_text:
+        try:
+            return replace_region(sm_text, mark, reg, "</Module>")
+        except RuntimeError as ex:
+            raise SystemExit(f"SubModule.xml: {ex}; nothing written")
+    anchor = re.search(r"[ \t]*<!-- " + MARKER + r"-REG:END -->\n", sm_text)
+    if not anchor:
+        raise SystemExit("SubModule.xml: TAOM-NEWCULTURE-REG:END anchor not found")
+    return sm_text[:anchor.end()] + reg + sm_text[anchor.end():]
 
 
 def keep_rosters(text, pattern):
@@ -930,9 +948,6 @@ def main():
     # troop file is registered whether or not this script wrote it: a generated tree lives there.
     for target in (t for t in targets if TARGETS[t].get("own_reg")):
         mark = f"{MARKER}-REG:{target}"
-        # Replaced where it stands (see upsert): strip-and-append reordered the regions on every run.
-        reg_region = re.compile(r"[ \t]*<!-- " + re.escape(mark) + r":BEGIN -->.*?<!-- " + re.escape(mark)
-                                + r":END -->\n", re.DOTALL)
         reg = f"    <!-- {mark}:BEGIN -->\n"
         for idv, path in (("NPCCharacters", f"troops/troops_{target}"),
                           ("NPCCharacters", f"characters/npcs_{target}"),
@@ -943,13 +958,7 @@ def main():
                                  "about to be written")
             reg += xml_node(idv, path)
         reg += f"    <!-- {mark}:END -->\n"
-        if reg_region.search(sm_text):
-            sm_text = reg_region.sub(lambda _m, r=reg: r, sm_text, count=1)
-            continue
-        anchor = re.search(r"[ \t]*<!-- " + MARKER + r"-REG:END -->\n", sm_text)
-        if not anchor:
-            raise SystemExit("SubModule.xml: TAOM-NEWCULTURE-REG:END anchor not found")
-        sm_text = sm_text[:anchor.end()] + reg + sm_text[anchor.end():]
+        sm_text = register_own_region(sm_text, mark, reg)
     pending_writes.append((SUBMODULE, sm_text, sm_nl, sm_bom))
 
     for path, (text, nl, bom) in shared_state.items():
@@ -982,13 +991,6 @@ def main():
         print("DRY RUN — re-run with --apply to write")
         return 0
 
-    # Parse every document before writing any of them: a transform that breaks one file must leave
-    # all of them untouched (tools/README.md "XML I/O convention").
-    for path, text, nl, bom in pending_writes:
-        try:
-            ET.fromstring(text.lstrip("﻿").encode("utf-8"))
-        except ET.ParseError as exc:
-            raise SystemExit(f"REFUSING: {Path(path).relative_to(ROOT)} would not parse ({exc}); nothing written")
     for path, text, nl, bom in pending_writes:
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         write(path, text, nl, bom)

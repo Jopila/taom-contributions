@@ -9,6 +9,7 @@ otherwise report only after a write: the self-check passes, no upgrade lowers a 
 follow the TAOM rule, the tavern mercenary is a leaf copy, every bow troop carries its ranged-ladder
 cell, the party templates name only defined troops and the lord template sits at the men's target.
 """
+import dataclasses
 import os
 import sys
 import unittest
@@ -33,6 +34,24 @@ class RealmDesignTests(unittest.TestCase):
         for gen in GENERATORS:
             with self.subTest(culture=gen.CULTURE):
                 self.assertEqual(gen.self_check(built(gen)), [])
+
+    def _probe_errors(self, weapons):
+        """Self-check errors for the first Cardolan troop re-armed with `weapons` in both rosters."""
+        probe = dataclasses.replace(built(gct)[0], weapons=(list(weapons), list(weapons)), upgrades=[])
+        return rt.self_check(lambda: [], [probe])
+
+    def test_a_shield_with_a_two_handed_axe_fails_the_self_check(self):
+        # Dunland's two-handed axes are named dunland_caerdh_axe_2h_*, with no greatsword or poleaxe in the id.
+        errors = self._probe_errors(["dunland_caerdh_axe_2h_b", "sk_shield_round_a"])
+        self.assertTrue(any("shield and a two-handed" in e for e in errors), errors)
+
+    def test_a_shield_with_a_greatsword_fails_the_self_check(self):
+        errors = self._probe_errors(["gondor_greatsword_a", "sk_shield_round_a"])
+        self.assertTrue(any("shield and a two-handed" in e for e in errors), errors)
+
+    def test_a_shield_with_a_one_handed_weapon_passes_that_rule(self):
+        errors = self._probe_errors(["gondor_sword_a", "sk_shield_round_a"])
+        self.assertFalse(any("shield and a two-handed" in e for e in errors), errors)
 
     def test_no_upgrade_lowers_any_skill(self):
         for gen in GENERATORS:

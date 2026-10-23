@@ -1485,9 +1485,9 @@
   <Item id="sk_gd_anf_inf_helmet_med_a" class="light" next="sk_gd_har_inf_helmet_med_a" />
   <Item id="sk_gd_anf_inf_helmet_med_b" class="light" next="sk_gd_har_inf_helmet_med_a" />
   <Item id="sk_gd_ano_boots_a" class="light" next="sk_gd_ano_grvs_inf_med_a" />
-  <Item id="sk_gd_ano_bracer_inf_med_a" class="medium" next="sk_gd_ano_bracer_noble_med_a" />
+  <Item id="sk_gd_ano_bracer_inf_med_a" class="medium" next="sk_gd_ano_bracer_noble_heavy_a" />
   <Item id="sk_gd_ano_bracer_noble_elite_a" class="elite" next="sk_gd_sere_bracer_lord_a" />
-  <Item id="sk_gd_ano_bracer_noble_heavy_a" class="elite" next="sk_gd_sere_bracer_lord_a" />
+  <Item id="sk_gd_ano_bracer_noble_heavy_a" class="heavy" next="sk_gd_ano_bracer_noble_elite_a" />
   <Item id="sk_gd_ano_bracer_noble_med_a" class="heavy" next="sk_gd_ano_bracer_noble_elite_a" />
   <Item id="sk_gd_ano_cape_a" class="light" next="sk_gd_ano_pauld_noble_med_c" />
   <Item id="sk_gd_ano_cape_b" class="heavy" next="sk_gd_ano_cape_noble_a" />

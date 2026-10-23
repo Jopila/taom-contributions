@@ -299,7 +299,7 @@ def self_check(party_templates, troops):
         if "Body" not in tr.gear[0]:
             errors.append(f"{tr.id}: no Body armour (MISSING_BODY_ARMOUR)")
         shields = any("shield" in w for w in ra + rb)
-        twohanders = any("greatsword" in w or "poleaxe" in w for w in ra + rb)
+        twohanders = any(re.search(r"greatsword|poleaxe|_2h_", w) for w in ra + rb)
         if shields and twohanders:
             errors.append(f"{tr.id}: a shield and a two-handed weapon in the same troop")
     for tid, stacks in party_templates():

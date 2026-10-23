@@ -9,11 +9,9 @@ generator's next --apply. This shipped three times in three days (2026-10-16 KEY
 "check who owns the region" and that check was skipped each time. Each case here runs the owner's
 own --check, so the edit fails /verify instead of waiting for a regeneration.
 
-Not covered yet: promote_borrowed_cultures.py --only arthedain --check is red for reasons that
-predate this test: taom_spcultures.xml differs only in the Arthedain start point, which has drifted
-from the live map, and its taom_module_strings.xml output does not parse, so the script refuses
-(#979: the strings extractor copies multi-line rows line by line, and the file's region is
-tab-indented). Its position drift went with #976. Add it once #979 is fixed.
+promote_borrowed_cultures.py --check is covered for Arthedain, Cardolan and Rhudaur (the #979 strings
+blocker is cleared). It reads the culture start points from the live TAOM_Map settlements.xml, so those
+cases skip, never fake a pass, when that install is absent.
 """
 import os
 import subprocess
@@ -34,11 +32,27 @@ OWNERS = [
     ("generate_new_faction_kingdoms.py", ["--only", "rhudaur", "--check"]),
 ]
 
+# Owners whose output depends on the live (unversioned) TAOM_Map install.
+LIVE_OWNERS = [
+    ("promote_borrowed_cultures.py", ["--only", "arthedain", "--check"]),
+    ("promote_borrowed_cultures.py", ["--only", "cardolan", "--check"]),
+    ("promote_borrowed_cultures.py", ["--only", "rhudaur", "--check"]),
+]
+
+sys.path.insert(0, TOOLS)
+from _gamedir import game_dir  # noqa: E402
+
+LIVE_SETTLEMENTS = os.path.join(game_dir(r"E:/Steam/steamapps/common/Mount & Blade II Bannerlord"),
+                                "Modules", "TAOM_Map", "ModuleData", "settlements.xml")
+
 
 class GeneratorRegionsInSyncTests(unittest.TestCase):
     def test_every_owned_region_matches_a_fresh_run(self):
-        for script, args in OWNERS:
-            with self.subTest(script=script):
+        live = os.path.exists(LIVE_SETTLEMENTS)
+        for script, args in OWNERS + LIVE_OWNERS:
+            with self.subTest(script=script, args=" ".join(args)):
+                if (script, args) in LIVE_OWNERS and not live:
+                    self.skipTest("live TAOM_Map install not present: %s" % LIVE_SETTLEMENTS)
                 run = subprocess.run(
                     [sys.executable, "-B", os.path.join(TOOLS, script)] + args,
                     cwd=REPO, capture_output=True, text=True, timeout=600)

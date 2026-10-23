@@ -4342,3 +4342,21 @@ A review said nothing caught a repeated clan, hero or kingdom id, and the claim 
 - **Why missed:** the claim was relayed from a reviewer without a probe; the schema JSON files looked like the only duplicate-id source.
 - **Prevent:** before writing a new check, break a copy of the real file the way the check targets and run the existing gate (`validate_moduledata.py`, which includes the engine XSD layer). Write the gate only if that run passes. Pin an existing protection with a test instead (`EngineIdUniquenessTests`).
 - **Source:** [rca-ui-data-sweep-2026-10-23.md](../rca-ui-data-sweep-2026-10-23.md) follow-up batch.
+
+### A generator that copies a live value writes it at the precision it compares (#978, 2026-10-23)
+`promote_borrowed_cultures.py` copied each capital's live `posX`/`posY` into the culture's start point verbatim. An editor save rewrote the new rows with 4 decimals, and the promoter's `--check` turned red with no data change; no gate ran the promoter, so only the review saw it.
+- **Why missed:** the `--check` was run by hand once, before the save; `test_generator_regions_in_sync.py` still excluded the promoter for a blocker that this change had cleared.
+- **Prevent:** normalise a value copied from an editor-owned file to the precision the shipped data uses, and put every generator that has a `--check` into `test_generator_regions_in_sync.py` (a live-only one skips without the install). A check you ran once is evidence for that moment only.
+- **Source:** [rca-cardolan-rhudaur-2026-10-23.md](../rca-cardolan-rhudaur-2026-10-23.md) finding 3.
+
+### Read validator warnings as a diff against the base commit, not by the feature's names (#978, 2026-10-23)
+The #978 build read `validate_moduledata.py` for warnings naming Cardolan or Rhudaur and found none. Its new `ARMOUR_CLASS_TABLE_DRIFT` named two Gondor bracer ids, because Cardolan's level 26 troops wore one of them, so the name filter hid it and the class table shipped stale.
+- **Why missed:** a warning names the object it is about, which is often not the feature that caused it.
+- **Prevent:** save the warning set at the base commit and diff it against the new run; every new line is the change's, whatever it names. Run each gate in `moduledata-validation.md` "Gate per file kind" for every kind of file the change touched.
+- **Source:** [rca-cardolan-rhudaur-2026-10-23.md](../rca-cardolan-rhudaur-2026-10-23.md) finding 2.
+
+### When you extend a writer, audit all of it against the XML I/O checklist (#978, 2026-10-23)
+#978 fixed `generate_new_faction_kingdoms.py`'s strip-and-append regions but left two older defects the same rule names: it wrote on a plain run, and it parsed and wrote one file at a time, so a later parse failure left earlier files written. One run in the same session wrote at once.
+- **Why missed:** the fix was scoped to the defect that broke the build; the README documented the write-by-default behaviour instead of fixing it.
+- **Prevent:** when a change touches a writer, check the whole tool against `moduledata-validation.md`: dry-run default with `--apply`, every output parsed before any is written, backups for live files. A documented hazard in a tool you are already editing is a fix, not a note.
+- **Source:** [rca-cardolan-rhudaur-2026-10-23.md](../rca-cardolan-rhudaur-2026-10-23.md) finding 4.

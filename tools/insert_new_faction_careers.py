@@ -268,6 +268,8 @@ TEXT_REMAP = {
     ],
     # Cardolan (#978): Gondor's places move to the plains and rivers of the southern kingdom.
     "cardolan": [
+        # The Last Bridge spans the Hoarwell in Rhudaur, so Cardolan's sword holds its own ford.
+        ("Sword of the Last Bridge", "Sword of Sarn Ford"),
         ("shadows of Ithilien, ambushing enemies of Gondor", "river country of Minhiriath, ambushing raiders from Dunland"),
         ("commands Gondor's frontline defense at the ruins of Osgiliath, forging order from chaos in brutal urban combat",
          "keeps the barrows of Tyrn Gorthad and the walls of Caras Gorthad, forging order from chaos when the downs burn"),

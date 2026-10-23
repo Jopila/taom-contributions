@@ -149,7 +149,8 @@ one line to check.
 The four newest realms were not hand written.
 [`tools/generate_new_faction_kingdoms.py`](../../tools/generate_new_faction_kingdoms.py) reads an
 existing kingdom, clan and lord out of the live files as templates, rewrites the attributes that
-differ, and inserts the result. One dict entry is a whole realm.
+differ, and inserts the result when run with `--apply` (a plain run only reports). One dict
+entry is a whole realm.
 
 <!-- excerpt file="tools/generate_new_faction_kingdoms.py" -->
 

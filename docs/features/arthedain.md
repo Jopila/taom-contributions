@@ -39,7 +39,7 @@ Data only, no new `Main/Features/` module. The pieces, in the order they must be
 | Culture, townsfolk, notables, wanderers, villager and caravan templates, education templates, lord and child rosters | `tools/promote_borrowed_cultures.py --only arthedain` (Gondor as the scaffold) | `taom_spcultures.xml`, `characters/npcs_arthedain.xml`, `equipmentsets/taom_equipment_sets_arthedain.xml`, shared files |
 | Towns and castles | `tools/add_map_fortifications.py` | live `TAOM_Map/ModuleData/settlements.xml` and 12 `loc_settlements.xml` |
 | Villages | `tools/add_map_villages.py` | the same live files |
-| Kingdom, clans, lords, heroes | `tools/generate_new_faction_kingdoms.py --only arthedain` | `taom_spkingdoms.xml`, `characters/{clans,lords,heroes}.xml` |
+| Kingdom, clans, lords, heroes | `tools/generate_new_faction_kingdoms.py --only arthedain --apply` | `taom_spkingdoms.xml`, `characters/{clans,lords,heroes}.xml` |
 | Narrative menus and their strings | `tools/insert_new_faction_cc_menus.py` | the four culture-scoped menus, `taom_cc_strings.xml` |
 | Careers | `tools/insert_new_faction_careers.py` | `career_system/*`, `charactercreation/career_menu.json` |
 | Starting gear | `tools/generate_char_creation_equipment.py --append arthedain`, then `generate_starter_kit.py`, then `wire_starter_kit_rosters.py` | `taom_char_creation_equipment.xml`, live starter kits |
@@ -219,9 +219,9 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
    `--check` notices only when their positions differ, so search the scene for the id. Then rebuild
    the distance cache in game (Map Tools, Rebuild Now; `docs/modding/settlements.md` "Add" step 7).
 3. **Lords, clans or the ruler:** edit the `arthedain` entry of `generate_new_faction_kingdoms.py`
-   and run it with `--only arthedain`. Never run it without `--only`.
+   and run it with `--only arthedain --apply`; without `--apply` it only reports what would change.
 4. **Culture text or names:** edit the `arthedain` target of `promote_borrowed_cultures.py` and run
-   it with `--only arthedain`. Any changed English that is already translated needs the reset in
+   it with `--only arthedain --apply`. Any changed English that is already translated needs the reset in
    `docs/localization/TRANSLATOR_GUIDE.md` "Changing English Text That Is Already Translated".
 5. Restart Bannerlord and start a new campaign: kingdoms, clans and new item files load only then.
 

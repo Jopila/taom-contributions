@@ -71,6 +71,21 @@ public class ClonedCultureFlavorTests
             "Morthond", "Blackroot", "Pelennor", "Ethir", "Anfalas", "Pinnath Gelin", "Ringló",
             "Cair Andros", "Erech", "Swan Knight", "Harlond", "Mardil", "Tower of Guard",
         },
+        // Cardolan and Rhudaur (#978) are cloned from Gondor's scaffold on Arthedain's settings. The
+        // South-kingdom's words stay forbidden, and so do Arthedain's own seats and king. Naming
+        // Arthedain as a rival or Weathertop as the border is deliberate and stays legal.
+        ["cardolan"] = GondorAndArthedainSeats(),
+        ["rhudaur"] = GondorAndArthedainSeats(),
+    };
+
+    private static string[] GondorAndArthedainSeats() => new[]
+    {
+        "Gondor", "Minas Tirith", "Minas Anor", "White City", "Osgiliath", "Steward", "Denethor",
+        "Boromir", "Faramir", "Ecthelion", "Imrahil", "Anárion", "Anarion", "Anórien", "Anorien",
+        "Lossarnach", "Lebennin", "Pelargir", "Dol Amroth", "Ithilien", "Belfalas", "Lamedon",
+        "Morthond", "Blackroot", "Pelennor", "Ethir", "Anfalas", "Pinnath Gelin", "Ringló",
+        "Cair Andros", "Erech", "Swan Knight", "Harlond", "Mardil", "Tower of Guard",
+        "Fornost", "Annúminas", "Annuminas", "Arvedui", "Evendim", "Nenuial",
     };
 
     private static void Scan(List<string> hits, string culture, string where, string value)

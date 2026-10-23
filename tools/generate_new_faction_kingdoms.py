@@ -5,7 +5,9 @@ into taom_spkingdoms.xml / characters/clans.xml / characters/lords.xml / charact
 Templates are read by id from the live files (gundabad for the two orc kingdoms, rivendell
 for Lindon) and parametrized — no hand-copied XML. Idempotent via TAOM-NEWFACTIONS markers.
 
-Run: python tools/generate_new_faction_kingdoms.py --only arthedain [--check]
+Run: python tools/generate_new_faction_kingdoms.py --only arthedain            # dry run: names the files it would change
+     python tools/generate_new_faction_kingdoms.py --only arthedain --check    # exit 1 if a run would change a file
+     python tools/generate_new_faction_kingdoms.py --only arthedain --apply
 """
 import os, re, json, sys
 import xml.etree.ElementTree as ET
@@ -112,7 +114,7 @@ KINGDOMS = {
     ),
     # Cardolan and Rhudaur (#978; Mike, 2026-10-23): the other two of the three kingdoms Earendur's
     # sons made of Arnor, each on its own culture (promote_borrowed_cultures.py and its own troop
-    # generator), weak in numbers like Arthedain. Neutral realms (Mike, 2026-10-23): Natural toward
+    # generator), weak in numbers like Arthedain. Neutral realms (Mike, 2026-10-23): Neutral toward
     # every realm at the start, so the War of the Ring does not draw them in on either side.
     "cardolan": dict(
         region="CA", culture="cardolan", race=None, capital="town_CA2", tmpl="rivendell", lords="human",
@@ -142,8 +144,9 @@ KINGDOMS = {
                        "arthedain": (0, False), "rhudaur": (0, False)},
         # A face template, not copied keys: each lord draws his own face from Gondor's range at
         # campaign start (Lord Face Variety rule A), where a copied key is only nudged (rule B,
-        # HeroFaceVarietyDataTests' ceiling).
-        face_template="fighter_gondor",
+        # HeroFaceVarietyDataTests' ceiling). The template's men's hair tags would bald half the
+        # ladies, so they roll hair from the "empire" tag, as Gondor's ladies do.
+        face_template="fighter_gondor", female_hair_tag="empire",
     ),
     "rhudaur": dict(
         region="RH", culture="rhudaur", race=None, capital="town_RH1", tmpl="rivendell", lords="human",
@@ -161,13 +164,13 @@ KINGDOMS = {
         party_template="PartyTemplate.kingdom_hero_party_rhudaur_template",
         # Arnor icons (group 110) in silver (palette 110) on a dark hill brown (palette 99).
         banner="11.99.99.1528.1528.764.764.1.0.0.{icon}.110.110.700.700.764.764.0.0.0",
-        kingdom_icon=11006, clan_icons=[11002, 11003, 11004],
+        kingdom_icon=11002, clan_icons=[11002, 11003, 11004],
         clan_colors=[("FF603830", "FFC8B8A8"), ("FF4E3A30", "FFC8B8A8"), ("FF6A4A3A", "FFCACCCB")],
         relationships={"gundabad": (0, False), "empire": (0, False), "isengard": (0, False),
                        "rivendell": (0, False), "lindon": (0, False), "empire_w": (0, False),
                        "arthedain": (0, False), "cardolan": (0, False)},
         # Its lords are Dunedain: Gondor's face range, drawn per lord as Cardolan's.
-        face_template="fighter_gondor",
+        face_template="fighter_gondor", female_hair_tag="empire",
     ),
 }
 # The realms a regeneration reproduces (main() --only). See the note there.
@@ -220,10 +223,24 @@ def read_doc(path):
     return text.replace("\r\n", "\n"), nl, bom
 
 
-def write_doc(path, text, nl, bom):
-    data = text.replace("\n", nl).encode("utf-8")
-    ET.fromstring(data)  # refuse to write a document that no longer parses
-    open(path, "wb").write((b"\xef\xbb\xbf" if bom else b"") + data)
+def encode_doc(text, nl, bom):
+    """The bytes read_doc's inverse writes: the text in its own newline and BOM."""
+    return (b"\xef\xbb\xbf" if bom else b"") + text.replace("\n", nl).encode("utf-8")
+
+
+def unparsable(pending):
+    """(path, error) for each pending (path, bytes) that does not parse. Checked before any write."""
+    bad = []
+    for path, data in pending:
+        try:
+            ET.fromstring(data)
+        except ET.ParseError as ex:
+            bad.append((path, str(ex)))
+    return bad
+
+
+def write_file(path, data):
+    open(path, "wb").write(data)
 
 
 def relationship_rows(rels):
@@ -240,7 +257,9 @@ def main():
     # after generation; --only goblin would rewrite 15,661 lines of lords.xml), so they stay in
     # KINGDOMS as history and templates, not as targets.
     ap.add_argument("--only", action="append", choices=REGENERATABLE, required=True)
-    ap.add_argument("--check", action="store_true", help="exit 1, writing nothing, if a run would change a file")
+    mode = ap.add_mutually_exclusive_group()
+    mode.add_argument("--check", action="store_true", help="exit 1, writing nothing, if a run would change a file")
+    mode.add_argument("--apply", action="store_true", help="write the changed files; without it a run is a dry run")
     args = ap.parse_args()
     only = set(args.only)
 
@@ -285,6 +304,8 @@ def main():
     for kid, k in KINGDOMS.items():
         if kid not in only:
             continue
+        if k.get("face_template") and not k.get("female_hair_tag"):
+            raise RuntimeError(f"{kid}: face_template needs female_hair_tag (the template's hair tags are men's)")
         tmpl = k_gund if k["tmpl"] == "gundabad" else k_riven
         blk = tmpl
         # opening-tag attribute rewrites (targeted, leave banner_key/relationships/policies)
@@ -412,8 +433,11 @@ def main():
                     if n != 1:
                         raise RuntimeError(f"{lord_id}: template lord has no <face>")
                 if k.get("face_template"):
+                    # A lady keeps the template's men's hair tags otherwise, and about half start bald.
+                    hair = (f'\n            <hair_tags>\n                <hair_tag name="{k["female_hair_tag"]}" />'
+                            '\n            </hair_tags>') if re.search(r'is_female="true"', L) else ""
                     face = (f'<face>\n            <face_key_template value="BodyProperty.{k["face_template"]}" />'
-                            '\n          </face>')
+                            f'{hair}\n          </face>')
                     L, n = re.subn(r"<face>.*?</face>", lambda _m, f=face: f, L, count=1, flags=re.DOTALL)
                     if n != 1:
                         raise RuntimeError(f"{lord_id}: template lord has no <face>")
@@ -449,18 +473,29 @@ def main():
         heroes = upsert(heroes, "</Heroes>", new_heroes[kid], f"TAOM-NEWFACTIONS:{kid}")
 
     outputs = (("spk", spk), ("clans", clans), ("lords", lords), ("heroes", heroes))
+    pending = [(paths[key], encode_doc(content, docs[key][1], docs[key][2]))
+               for key, content in outputs if content != docs[key][0]]
+    changed = [os.path.basename(p) for p, _ in pending]
+    # Every changed output must parse before any is written: one broken file leaves all four untouched.
+    bad = unparsable(pending)
+    if bad:
+        print("REFUSING: these outputs do not parse, so nothing was written:")
+        for p, error in bad:
+            print(f"  {os.path.basename(p)}: {error}")
+        return 1
     if args.check:
-        changed = [os.path.basename(paths[key]) for key, content in outputs if content != docs[key][0]]
         print("  would change: " + ", ".join(changed) if changed else "  unchanged: all four files")
         return 1 if changed else 0
-    for key, content in outputs:
-        _, nl_, bom = docs[key]
-        if content == docs[key][0]:
+    if not args.apply:
+        print("  would change: " + ", ".join(changed) if changed else "  unchanged: all four files")
+        print("DRY RUN: re-run with --apply to write")
+        return 0
+    for key, _ in outputs:
+        if os.path.basename(paths[key]) not in changed:
             print(f"  unchanged: {os.path.basename(paths[key])}")
-            continue
-        write_doc(paths[key], content, nl_, bom)
-        ET.parse(paths[key])
-        print(f"  inserted + well-formed: {os.path.basename(paths[key])}")
+    for p, data in pending:
+        write_file(p, data)
+        print(f"  inserted + well-formed: {os.path.basename(p)}")
 
     nl = sum(len(re.findall(r'<NPCCharacter\b', v)) for v in new_lords.values())
     nh = sum(v.count("<Hero") for v in new_heroes.values())
