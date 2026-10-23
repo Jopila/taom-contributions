@@ -264,8 +264,21 @@ if ($Check) {
     $diff = $false
     foreach ($path in $files.Keys) {
         $new = $files[$path] -replace "`r`n", "`n"
-        $old = if (Test-Path $path) { (Get-Content $path -Raw) -replace "`r`n", "`n" } else { '' }
-        if ($new -ne $old) { Write-Host "DRIFT: $path differs from generated output." -ForegroundColor Red; $diff = $true }
+        # tools/build_backlinks.py appends a "Referenced by" footer the generator never writes; drop it.
+        $old = if (Test-Path $path) {
+            ((Get-Content $path -Raw) -replace "`r`n", "`n") -replace '(?s)(?:---\n\n)?<!-- backlinks-start.*?<!-- backlinks-end -->\n?\z', ''
+        } else { '' }
+        if ($new -ne $old) {
+            Write-Host "DRIFT: $path differs from generated output." -ForegroundColor Red
+            $newLines = $new -split "`n"
+            $oldLines = $old -split "`n"
+            $cmp = Compare-Object $oldLines $newLines | Select-Object -First 20
+            foreach ($c in $cmp) {
+                $mark = if ($c.SideIndicator -eq '=>') { '+ generated' } else { '- committed' }
+                Write-Host "  $mark : $($c.InputObject)"
+            }
+            $diff = $true
+        }
         else { Write-Host "OK: $([IO.Path]::GetFileName($path)) reproduces." -ForegroundColor Green }
     }
     if ($diff) { exit 1 }
