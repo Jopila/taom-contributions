@@ -35,20 +35,23 @@ WHAT IT CHECKS (each section reuses the engine that owns it; nothing is re-deriv
                           against the registry validate_moduledata uses.
   5. generators           `generate_ranged_ladder_items.py --verify` and
                           `generate_starter_kit.py --verify --quiet`, so the
-                          scaffolders still agree with the shipped XML.
+                          scaffolders still agree with the shipped XML, and
+                          `build_ds_skeleton_pack.py --check`, so the dedicated
+                          server's creature skeletons still match the art.
   6. new art nothing uses NEW catalogue rows that no item names (exact match;
                           the `--unreferenced` matcher is case-insensitive and
                           reported the new bows as used when nothing used them).
 
 Exit code (mirrors validate_moduledata.py): 1 if any MISSING_BODY, MISSING_MESH,
-referenced DELETE / RENAME, dead item id, or generator drift; 2 if an input path
-is bad; else 0. The report is written either way.
+referenced DELETE / RENAME or dead item id; 2 if an input path is bad; else 0.
+Generator drift is a warning in the report, never a failure (exit_code). The
+report is written either way.
 
 Usage:
   python tools/audit_armory_refs.py                       # report to docs/audits/armory-ref-audit.md
   python tools/audit_armory_refs.py --regen-catalogue     # also rewrite the committed catalogue
   python tools/audit_armory_refs.py --report -            # print the report instead of writing it
-  python tools/audit_armory_refs.py --no-generators       # skip the two subprocess verifies (fast)
+  python tools/audit_armory_refs.py --no-generators       # skip the generator check subprocesses (fast)
 """
 from __future__ import annotations
 
@@ -73,10 +76,12 @@ DEFAULT_GAME = game_dir(r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord"
 DEFAULT_MODULE = "LOTRLOME_Armory"
 DEFAULT_CONSUMERS = REPO_ROOT / "Main" / "_Module" / "ModuleData"
 DEFAULT_REPORT = REPO_ROOT / "docs" / "audits" / "armory-ref-audit.md"
-# The two scaffolders that write Armory item XML and carry a --verify mode.
+# The two scaffolders that write Armory item XML and carry a --verify mode, and the
+# dedicated server's creature skeleton package, copied from the Armory's art (#972).
 GENERATOR_VERIFIES = [
     ["generate_ranged_ladder_items.py", "--verify"],
     ["generate_starter_kit.py", "--verify", "--quiet"],
+    ["build_ds_skeleton_pack.py", "--check"],
 ]
 BREAKING_CODES = ("MISSING_BODY", "MISSING_MESH")
 

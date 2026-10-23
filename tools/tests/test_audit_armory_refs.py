@@ -137,5 +137,17 @@ class ReportAndExitCode(unittest.TestCase):
         self.assertIn("DRIFT: x missing", text)
 
 
+class GeneratorChecks(unittest.TestCase):
+    def test_the_server_skeleton_package_is_checked_after_an_armory_sync(self):
+        # An art drop that changes a creature skeleton leaves the dedicated server's
+        # DsAssetPackages copy stale (#972); the audit is what runs after every sync.
+        self.assertIn(["build_ds_skeleton_pack.py", "--check"], aa.GENERATOR_VERIFIES)
+
+    def test_every_check_names_a_script_that_exists(self):
+        tools = Path(aa.__file__).resolve().parent
+        for argv in aa.GENERATOR_VERIFIES:
+            self.assertTrue((tools / argv[0]).is_file(), argv[0])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -52,7 +52,10 @@ lines shown.
 1. **Broken mesh and body refs**: each row names the asset, the item, the file:line, and every troop, lord, roster or config carrying it. A `MISSING_BODY` row hangs every mission that preloads a carrier; the player character is always first in a tournament's preload set.
 2. **Catalogue drift**: a deleted or renamed mesh still named by an item is tomorrow's row.
 3. **New art nothing uses**: what the artists shipped that no item wears yet (a signal for the roster authors, not a fault).
-4. **Dead item ids** and **generators**.
+4. **Dead item ids** and **generators**. A `build_ds_skeleton_pack.py --check` DRIFT means the
+   drop changed a creature skeleton the dedicated server copies (#972): run
+   `python tools/build_ds_skeleton_pack.py --apply` and commit
+   `Main/_Module/DsAssetPackages/taom_creature_skeletons.tpac`.
 
 ## Step 3: repair the REF side, never the asset side
 
