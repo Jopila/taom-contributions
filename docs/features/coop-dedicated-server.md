@@ -16,8 +16,8 @@ How to stage, boot, stop and diagnose TAOM on the BannerlordCoop dedicated serve
 |---|---|
 | Vanilla v1.5.5 server | Booted to SERVING, clients joined, battles fought, a client rejoined (2026-10-21 and 2026-10-22) |
 | TAOM, spike build | Reached SERVING on 2026-10-22 and again on 2026-10-23 (probe boots, including the skeleton package). The spike is a throwaway worktree (`taom-headless-spike`, branch `spike/headless-local`, never pushed) staged as `stage-spike` |
-| TAOM, committed build | **Boot to SERVING still owed.** A server boot of the B2 build ended at the save refusal (exit 2) |
-| Clients joining a TAOM server | Owed (epic #964) |
+| TAOM, committed build | Reached SERVING on 2026-10-23 (`0fb0e6c13`, deployed with the `bdef312b4` fix) on save `taomcoop2`: the 107-class `[ClientOnly]` line, exactly two `SKIPPED` screens, `failed=0` in OnSubModuleLoad (31 categories) and GameInit (79), autosaves every 5 minutes, 0 TAOM crash reports |
+| Clients joining a TAOM server | One client on the same desktop, 2026-10-23: TAOM character creation, 11 in-game days with time running, Minas Tirith entered, a field battle fought and closed, the server autosaved during the battle. No `set_MapEventSide` exception. Two clients on two machines: owed |
 
 ## Parts and owners
 
@@ -29,7 +29,22 @@ How to stage, boot, stop and diagnose TAOM on the BannerlordCoop dedicated serve
 
 ## Stage and boot
 
-Stage with the server repo's script (its `-KeepSubModules` option and the rules for extra modules are in [taom-headless-server](../research/taom-headless-server.md), "Staging"). The script's exclude list does not name `DsAssetPackages`, so a module's package folder reaches the server.
+Stage with the server repo's script (its `-KeepSubModules` option and the rules for extra modules are in [taom-headless-server](../research/taom-headless-server.md), "Staging"). The script's exclude list does not name `DsAssetPackages`, so a module's package folder reaches the server. The script reads TAOM from the game install, not from this repo, so stage after a deploying build.
+
+1. **Server map.** The server loads a stripped copy of TAOM_Map's `Main_map` from `-ModuleAssets`. Build it again after every TAOM_Map scene save: `navmesh.bin` must be byte-identical to the client's, because the server paths on it and the distance cache indexes its faces. The 2026-10-17 copy was stale by 2026-10-23 (navmesh 879,614 against 880,433 bytes).
+   ```
+   python -I <server repo>\scripts\strip_main_map.py "<game>\Modules\TAOM_Map\SceneObj\Main_map" <assets>\SceneObj\Main_map
+   ```
+   It prints `verify OK` and writes `extents.json`. `<assets>\DsAssetPackages` takes the server repo's three stock packages (`core.tpac`, `pack_3.tpac`, `pack_19.tpac`, byte-identical to the vanilla set).
+2. **Stage** (PowerShell 7; `-KeepSubModules` is a hashtable, so it cannot pass through `pwsh -File` arguments: put the call in a script file):
+   ```
+   & .\windows\run-windows.ps1 -PrepareOnly -GameRoot <game> -DedicatedServerRoot <ds app> -ModuleAssets <assets> `
+       -Modules 'TAOM.Dependencies','Native','SandBoxCore','Sandbox','LOTRLOME_Armory','TAOM_Map','TAOM','Coop','DedicatedServer.Windows' `
+       -ExtraModules 'TAOM.Dependencies','LOTRLOME_Armory','TAOM_Map','TAOM' `
+       -KeepSubModules @{ 'TAOM.Dependencies' = @('TAOM.Dependencies'); 'TAOM' = @('TAOM') }
+   ```
+   Check the staged `Modules\TAOM`: only the `TAOM` submodule, no `TAOM.Client.dll`, and `DsAssetPackages\taom_creature_skeletons.tpac` present.
+3. **Data directory:** `server-config.json` (`saveName`, `port` 4200, `steam`, and the same `modules` list as above), `Game Saves\<saveName>.sav`, and `eula.txt`. The save must come from a campaign started with the installed TAOM release (see "Saves" below).
 
 The data directory holds `eula.txt`. The operator accepts the EULA there. Never pass `--accept-eula` for someone else.
 
@@ -62,19 +77,25 @@ Add `--no-tui` for a log-only run. A healthy boot reaches LOADED, then SERVING, 
 
 It is not the deprecated `tpac_skeleton_extract.py`. That tool reused an item GUID as the package GUID and wrote TOC size 0, and the copy loaded beside the bundled one crashed the client (2026-06-14). The package here carries the cooked-package GUID every cooked tpac shares and the real TOC size, and sits where only the server looks. Never put a skeleton-only package in a path the client loads.
 
+## Saves
+
+**Trap:** a save made before the installed TAOM_Map added settlements (Cardolan and Rhudaur, 2026-10-23) makes the server load loop forever. `SandBoxNavigationCache` looks each cached settlement up with `Settlement.Find`, which returns null for a settlement the save lacks, and the cache read throws a NullReferenceException. TAOM's crash handler on `Module.OnApplicationTick` catches it, the loading state calls `CreateMapScene` again on every tick, and each retry fails with an `IOException` because the first read left the cache file open. The console repeats `CreateMapScene -> DedicatedServerMapScene` and `reading Main_map...` and the engine's memory grows (7 GB after about 580 retries). Fix: start a new campaign with the installed release and boot on that save. A healthy boot logs `settlement distance cache registered` once. Evidence: `E:\CoopDS\boot-play-oldsave.out`.
+
 ## Known log noise
 
-Both are pre-existing and unfixed (2026-10-23).
+All are pre-existing and unfixed (2026-10-23).
 
 - 75 to 90 "Voice def can not be found" message boxes per TAOM boot (dwarf and uruk voices): a staging gap found by the spike.
+- A message box per missing hill troll animation (`anim_hill_troll_combat_walk1`, `anim_hill_troll_walk_*_staff` and more), about one every 0.3 s while trolls load: the server stages no Armory animation clips, only the skeletons.
 - Hundreds of `Failed to get id for object of type "TaleWorlds.CampaignSystem.Clan"` per co-op boot.
+- Three `[SaveLoad] ... UnknownSaveId` container warnings when the server loads a save made on a client: the server build has no definition for three saved types. Not yet traced; data in those containers may not survive a server save.
 
 ## Damaged saves and the co-op load repair
 
 From the BannerlordCoop repo, not this one. `b18e9a7a2` adds `MapEventLoadCleaner`: at CampaignReady, before ServerRunningState, it finalizes or repairs half-finished player map events. Each stage's throw is logged as an Error, and parties that left the campaign are unregistered from the co-op object manager. Before it, one throw exited the server (exit 3).
 
 - **Checked** (`5994a8322`): on a copy of a damaged save, 7 half-finished events were released and 7 parties unregistered; the server reached LOADED, SERVING and an autosave.
-- **Owed:** that no `set_MapEventSide` NullReferenceException appears once time runs. With no client connected the pulse line reads `timeMode=Stop players=0`, so the check waits for a client.
+- **Checked once time runs** (2026-10-23, TAOM server, one client, 11 in-game days): no `set_MapEventSide` NullReferenceException in the server console. That save was a new campaign, not a damaged one; a damaged save with a client joined is still unchecked.
 - **Deserters** (`66b2f7bbb`): v1.5 deserter parties, created with a null `PartyTemplate`, no longer log a server error per spawn.
 
 ## Open co-op follow-ups
@@ -85,6 +106,12 @@ Recorded in `doc/porting/bannerlord-1.5.x.md` in the BannerlordCoop repo.
 - The player pass `FinalizeEvent` publishes no `MapEventFinalized`.
 - The E2E harness client looter sits at (0,0).
 - A bandit component with null init args throws in the send handler.
+
+## Distribution
+
+BannerlordCoop is source-available since 2026-06-17: its `LICENSE` forbids copying, distributing, or using it in another project without written permission from its maintainers. The dedicated server is proprietary software of Bannerlord Coop LLC. TAOM therefore ships neither, and a guide must not tell players to take a build from our checkouts. The Workshop Coop item stays on Bannerlord 1.4.8.
+
+The plan Garrett proposed (2026-10-23): BannerlordCoop publishes a Coop 1.5 build on Steam, and a TAOM compatibility module (`TAOM.CoopCompat`) depends on both Coop and TAOM; the server runs the same modules. Points to settle with him: written permission for the compat module to reference Coop; the 1.5 item's module id and advance notice of Coop updates (co-op's join check compares exact versions); and staging, where TAOM's side is the manifest flip and shipping the stripped server map inside TAOM_Map (B9), and the server's side is the two generic rules in [taom-headless-server](../research/taom-headless-server.md), "Staging". The community install page draft waits for this.
 
 ## Key Files
 
@@ -104,11 +131,12 @@ Recorded in `doc/porting/bannerlord-1.5.x.md` in the BannerlordCoop repo.
 ## Changelog
 
 - 2026-10-23: page created. Skeleton package (`61276c182`, #972) and the audit check (`12afef4d2`) landed; the TAOM boot to SERVING is recorded for the spike build only.
+- 2026-10-23: the committed build reached SERVING and one client played (map, town, battle). Staging steps, the old-save loop, the troll animation and `UnknownSaveId` noise, and the distribution plan recorded.
 
 ## GitHub Issue
 
-- **Issue:** #964 epic, #972 skeleton package (closed)
-- **Status:** Open (committed-build boot and client checks owed)
+- **Issue:** #964 epic, #968 ADR-013, #972 skeleton package (closed)
+- **Status:** Open (two clients on two machines, the B9 manifest flip and the distribution agreement owed)
 
 ---
 

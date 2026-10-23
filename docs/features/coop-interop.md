@@ -646,13 +646,13 @@ to characterise. The existing try/catch around acceptance is containment, not co
   `DedicatedServerType=none` (`Main/_Module/SubModule.xml`, six entries in
   `Dependencies/_Module/SubModule.xml`), the appliance's `engine/Modules` ships no TAOM, and its
   `default_new_game.sav` bootstrap is a vanilla world. **Update 2026-10-23:** a spike build of TAOM
-  reached SERVING on the v1.5.5 co-op dedicated server (2026-10-22, 2026-10-23); a boot of the
-  committed build to SERVING is still owed. The load work is
+  reached SERVING on the v1.5.5 co-op dedicated server (2026-10-22, 2026-10-23), and so did the
+  committed build (2026-10-23), with one client joined and playing. The load work is
   [ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md) and the operator steps are in
   [coop-dedicated-server](coop-dedicated-server.md). Because both manifests tag
   `DedicatedServerType=none`, the server loads TAOM only because staging names it. The earlier
   remark that the appliance runs on `Microsoft.NETCore.App` against TAOM's .NET Framework 4.7.2 is
-  resolved: the staged host is .NET 6.0.36 and TAOM loads on it. In-game checks with clients are owed. The listen-host path remains the one that carries TAOM into the spawned
+  resolved: the staged host is .NET 6.0.36 and TAOM loads on it. In-game checks with two clients are owed. The listen-host path remains the one that carries TAOM into the spawned
   server process with no copying at all.
 
 ## PatchShield is skipped under co-op
@@ -751,8 +751,8 @@ Owed by the 2026-08-03 work specifically, none of it run:
 
 7. A dedicated-server boot against the mirrored `Win64_Shipping_Server` binaries **and** the fixed
    `action_sets.xml` — the two together are what a server needs to start with TAOM's simulation.
-   Part done: a spike build reached SERVING (2026-10-22, 2026-10-23). Still owed: the boot of the
-   committed build on the mirrored binaries and the fixed `action_sets.xml`.
+   Done 2026-10-23: the committed build (`0fb0e6c13`) on the mirrored binaries reached SERVING, and
+   one client played on it ([coop-dedicated-server](coop-dedicated-server.md), "Status").
 8. A two-client join where the joiner keeps their character-creation race, culture startup gold,
    career and special-resource seed. The line to look for is
    `[Possession] Controlled hero changed 'X' -> 'Y'`.
