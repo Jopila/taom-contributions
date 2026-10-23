@@ -148,7 +148,7 @@ Total: 132 tests across 12 classes, all green (`dotnet test --filter "FullyQuali
 
 ## Cross-Culture Item Routing
 
-Some items legitimately belong to a faction GROUP rather than a single culture — Warg mounts (`warg_brown`, `warg_dark`, `warg_albino`, `warg_saddle`) are tagged `Culture.isengard` upstream but lore-correctly should appear in every "evil" culture's markets (Isengard, Mordor, Gundabad, Dol Guldur).
+Some items legitimately belong to a faction GROUP rather than a single culture — Warg mounts (`warg_brown`, `warg_dark`, `warg_albino`, `warg_saddle`) are tagged `Culture.isengard` upstream but lore-correctly should appear in every "evil" culture's markets (Isengard, Mordor, Gundabad, Dol Guldur). Since 2026-10-23 the brown warg and the saddle also stock the goblin, Misty Mountain and Blue Craig markets, because those cultures' cavalry careers start on them (placeholder mounts).
 
 The `<Routing>` section of [`culture_marketplace_config.xml`](../../Main/_Module/ModuleData/culture_marketplace/culture_marketplace_config.xml) handles this:
 

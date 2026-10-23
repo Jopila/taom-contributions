@@ -238,6 +238,8 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 
 ## Changelog
 
+- 2026-10-23: the Ranger of the North's "Bowman of the Angle" group is "Dúnedain Rangers"; the
+  Angle is Rhudaur's land. It waits for its translations (#763).
 - 2026-10-23 (#978 follow-up): career starting kits (`player_career_arthedain_*`, the realm's
   lowest troop gear); King Arvegil II's entry names Gundabad and his kin in Cardolan and Rhudaur
   instead of Angmar; the Warden of Fornost's "Sword of the Last Bridge" group is "Sword of the

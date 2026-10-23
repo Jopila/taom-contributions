@@ -11,7 +11,7 @@ TWO STEPS
    file puts every attribute on its own line and a re-emitted set would rewrite thousands of
    lines the change did not ask for. The id rule and the roster filter are imported from
    generate_starter_kit.py, so the two tools cannot disagree about which items exist. The
-   career file is NOT rewired (#629): its 96 `player_career_*` rosters name the gear each
+   career file is NOT rewired (#629): its `player_career_*` rosters name the gear each
    culture's lowest troops carry, and `REWIRE_FILES` pins that.
    The same pass gives `_replaceWhileMerging="true"` to every roster of that file whose id
    vanilla also defines (`mark_vanilla_replacements`; aserai's 37 since Erkam's 2026-10-10
@@ -68,7 +68,7 @@ MENUS_DIR = MODULEDATA / "charactercreation"
 REWIRE_FILES = (CC_FILE,)
 
 VANILLA_CULTURES = ("vlandia", "empire", "sturgia", "aserai", "battania", "khuzait")
-BORROW = {"battania": "khuzait"}   # Khand has no kit of its own (#571)
+BORROW = {"battania": "khuzait"}   # Khand has no gear of its own (#571); generate_career_kits KIT_SOURCE agrees
 TITLE_TO_ARCHETYPE = {
     "hunter": "ranged", "skirmisher": "ranged", "bard": "ranged",
     "guard": "infantry", "infantry": "infantry", "mercenary": "infantry",

@@ -337,7 +337,7 @@ After the culture-default starting roster is applied at `OnCharacterCreationFina
 
 | Archetype | Weapons | Armor |
 |-----------|---------|-------|
-| **Ranged** | bow + arrows + one-handed sidearm (Isengard and Erebor: crossbow + bolts; Harad: javelins + shield) | the culture's lowest troop body + legs (Isengard and Mordor: their lowest uruk armour) |
+| **Ranged** | bow + arrows + one-handed sidearm (Isengard and Erebor: crossbow + bolts; Harad, Abanissa and Shaghana: javelins + shield) | the culture's lowest troop body + legs (Isengard and Mordor: their lowest uruk armour) |
 | **Cavalry** | polearm + shield + sidearm + horse + harness | the same |
 | **Infantry** | one-handed weapon + shield + polearm (Dol Guldur: two-handed axe) | the same |
 
@@ -413,7 +413,7 @@ Same fallback policy as the runtime grant: missing roster → log + leave the yo
 | `Main/Features/CareerSystem/CareerArchetypeService.cs` | careerId → archetype lookup; backed by static map in `CareerSystemIoC` |
 | `Main/Features/CharacterCreation/CareerStartingEquipmentService.cs` | Applies archetype roster at end of CC over the culture default |
 | `Main/Features/CharacterCreation/CareerEquipmentRosterIds.cs` | Roster ID builder: `player_career_{culture}_{archetype}_{f\|m}` |
-| `Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml` | Per-(culture, archetype, gender) rosters: 96 across 16 cultures, each culture's lowest troop gear (#629; the three Arnor realms since #978) |
+| `Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml` | Per-(culture, archetype, gender) rosters: 150 across 25 cultures, every playable culture, each culture's lowest troop gear (#629; the last nine on 2026-10-23 with placeholder mounts) |
 
 ## Dependencies
 

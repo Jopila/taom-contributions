@@ -65,8 +65,18 @@ SIDEARM = {"erebor": "OneHandedAxe",   # dwarves carry axes
 SECOND = {"dolguldur": "TwoHandedAxe"}
 RANGED = {"isengard": ("Crossbow", "Bolts"),   # Uruk Crossbow
           "erebor": ("Crossbow", "Bolts"),     # Crossbow Master
-          "aserai": ("Javelin", "Shield")}     # Pezarsani Javelineer (Harad)
+          "aserai": ("Javelin", "Shield"),     # Pezarsani Javelineer (Harad)
+          "shaghana": ("Javelin", "Shield")}   # Chatak Javelineer: every Shaghana bow needs skill 100
 ARMOUR_LINE = {"isengard": "sk_uruk_hai_", "mordor": "sk_uruk_mordor_"}   # docstring step 1
+# A culture whose troops carry another culture's id takes that culture's troops and slot rules: the
+# culture= of the troops its volunteer pool recruits (VolunteerRecruitmentService). Umbar is not here:
+# its basic_troop is a Harad levy, but its pool recruits its own troops. StarterKitCoverageTests'
+# KitSourceCulture mirrors this table.
+KIT_SOURCE = {"battania": "khuzait",            # Khand fields Rhun's troops
+              "lothlorien": "rivendell",        # imladris_recruit
+              "abanissa": "aserai",             # harad_reg_levy
+              "mistymountainorcs": "goblin",    # goblin_snaga
+              "bluecraig": "goblin"}            # goblin_snaga
 ARMOUR = ("BodyArmor", "LegArmor")
 LAUNCHERS = ("Bow", "Crossbow")
 
@@ -98,6 +108,7 @@ def pick(candidates: list[Candidate], is_launcher: bool = False) -> str | None:
 
 
 def slot_classes(culture: str, archetype: str) -> dict[str, str]:
+    culture = KIT_SOURCE.get(culture, culture)
     launcher, ammo = RANGED.get(culture, ("Bow", "Arrows"))
     resolve = {"SIDEARM": SIDEARM.get(culture, "OneHandedSword"), "SECOND": SECOND.get(culture, "TwoHandedPolearm"),
                "LAUNCHER": launcher, "AMMO": ammo}
@@ -203,6 +214,7 @@ def _is_vanilla(el: ET.Element, sources: Sources) -> bool:
 
 
 def candidates(sources: Sources, culture: str, klass: str) -> list[Candidate]:
+    culture = KIT_SOURCE.get(culture, culture)
     line = ARMOUR_LINE.get(culture, "") if klass in ARMOUR else ""   # "" admits every id
     out = []
     for item, (level, count) in sources.troops.get(culture, {}).items():

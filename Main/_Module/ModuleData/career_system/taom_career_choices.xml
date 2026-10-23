@@ -9992,7 +9992,7 @@
     </Choice>
   </ChoiceGroup>
 
-  <ChoiceGroup id="ranger_of_the_north_t2_b" display_name="{=taom_career_grp_ranger_of_the_north_t2_b}Bowman of the Angle" career_id="ranger_of_the_north" tier="2">
+  <ChoiceGroup id="ranger_of_the_north_t2_b" display_name="{=taom_career_grp_ranger_of_the_north_t2_b}Dúnedain Rangers" career_id="ranger_of_the_north" tier="2">
     <Choice id="ranger_of_the_north_t2_b_key" type="Keystone"
             description="{=taom_rotn_t2b_key}Ambush also increases troop ranged damage while active."
             icon_sprite="career_choice_roi_t2b_key">

@@ -82,7 +82,19 @@ findings, all fixed in the same commit:
 | F1 | LOW | Three more "78 kits" counts (a doc line, the feature map, a tool docstring) and two per-culture claims (the axe sidearm list, the saddle-horse count) went stale | The counts were searched by the words "career kits", not by the number | A count nothing computes is removed where it can be (the README now names no number); the rest moved to 96 |
 | F2 | LOW | The kit file's header named three cultures without career rosters; nine have none | The comment was written for #629 and no test pinned it | `CareerKitCoverageTests`: a character-creation culture with no kits fails unless listed, so the next new culture fails until it is decided (proved against the HEAD file: it names exactly the three Arnor realms) |
 | F3 | LOW | Arvegil's entry is a saved hero property, so an English campaign started before the change keeps the Angmar line | Not a defect; the change did not say so | Stated in both feature changelogs |
-| F4 | LOW, open | Arthedain still has Angmar in two career descriptions and five wanderer backstories, and its ranger group is "Bowman of the Angle" (Rhudaur's land) | Outside the request | Listed in the Known gaps for Mike's decision |
+| F4 | LOW, open | Arthedain still has Angmar in two career descriptions and five wanderer backstories (Mike: leave for now); its ranger group "Bowman of the Angle" is now "Dúnedain Rangers" | Outside the request | Known gaps; the rename landed with the placeholder kits |
 
 The Arnor kits shipped late for the same reason as F2: a culture can reach a career that has no kit
 and nothing fails. The test now closes that.
+
+## Placeholder kits batch (Mike, 2026-10-23: kits for the nine other cultures, "Dúnedain Rangers")
+
+Lens 5 and lens 7 at tier 2. Fixed in the same commit unless marked open:
+
+| # | Sev | Finding | Why missed | Preventive action |
+|---|---|---|---|---|
+| P1 | MED | Shaghana's Chatak Javelineer started with a bow that needs Bow 100, so a new character could not re-equip it; its Abanissa sibling got javelins | The generator's default ranged rule (bow and arrows) was taken for every new culture; `career-system.md` says a ranged career that is not a bow career needs a `RANGED` row, and the career names were not read | `RANGED["shaghana"]`; the test asserts the javelin rule for Shaghana and Abanissa |
+| P2 | MED | The goblin, Misty Mountain and Blue Craig markets never stock the warg and saddle their cavalry kits start on, while Erebor's ram and Mirkwood's elk have guaranteed stock | A starting mount was treated as gear only; its market routing lives in another file | Routed to those three cultures; the rule "a career mount is rebuyable in its culture's market" now stands in the warg comment |
+| P3 | LOW | The ranged and infantry section comments said "placeholder mount" on rosters with no mount | Template comment written once for all three archetypes | Fixed |
+| P4 | LOW, open | `wire_starter_kit_rosters.py` `BORROW` still builds Khand's no-career start from Rhûn's kit, now duplicating `KIT_SOURCE` | Two tables encode one fact | Output is identical today; removing `BORROW` touches the tool, its tests and the override header, so it waits until Khand has gear of its own (#571) |
+| P5 | LOW, open | Lothlorien and Lindon archers start with a Rivendell ladder bow that needs Bow 100, as Rivendell's own kit already does | Elf troops carry no javelin, so the rule cannot pick another weapon | A decision for Mike: lower the elven ladder bows' difficulty, or accept it |
