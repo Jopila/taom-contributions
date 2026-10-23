@@ -42,6 +42,12 @@ public interface IArmouryPlayerAdapter
     /// <summary>Takes gold from the player (to no one); false when they have less.</summary>
     bool ChargeGold(int amount);
 
-    /// <summary>Changes the player's relation with a hero (and, as the engine does, his kin); false when the hero is unknown.</summary>
+    /// <summary>
+    /// Changes the player's relation with the hero's relation owner, the pair from
+    /// <c>DiplomacyModel.GetHeroesForEffectiveRelation</c>. Under the vanilla mapping that is his clan leader, whose
+    /// relation every member of his clan shares; a clanless hero and a member of the player's clan (companions
+    /// included) own their own. Under Personal Relations it is the hero himself. Nothing spreads to his kin as a
+    /// separate step (#923). False when the hero is unknown.
+    /// </summary>
     bool ChangeRelationWith(string heroId, int delta);
 }

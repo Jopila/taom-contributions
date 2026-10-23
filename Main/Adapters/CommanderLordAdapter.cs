@@ -200,7 +200,8 @@ public sealed class CommanderLordAdapter : ICommanderLordAdapter
             var hero = FindHero(heroId);
             if (hero == null)
                 return false;
-            ChangeRelationAction.ApplyPlayerRelation(hero, delta, affectRelatives: true, showQuickNotification: false);
+            // No affectRelatives: v1.5.5 ignores it, and the change lands on GetHeroesForEffectiveRelation's pair (#923).
+            ChangeRelationAction.ApplyPlayerRelation(hero, delta, showQuickNotification: false);
             return true;
         }
         catch (Exception ex)
