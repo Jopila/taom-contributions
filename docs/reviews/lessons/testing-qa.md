@@ -2075,6 +2075,11 @@ around it claimed more than any check provided.
   assembly loaded). A guarantee with no such assertion is reworded or gets one. A checklist line names the vanilla
   condition under which the thing it checks is shown at all, and which screen each caller opens.
 - **Source:** `docs/reviews/rca-hidden-orders-2026-10-20.md` findings 1, 3, 5 and 6, and C1.
+- **Recurrence (2026-10-23, Under the Eaves):** a pure rule with a full eight-row truth table looked like coverage,
+  but the contributor passed it literal `true, false`, so six rows were unreachable and the real decisions were early
+  returns no test ran; the builder's own mutation log showed three gate mutations caught only by a text-order test and
+  read it as "caught". A table pins production only if production passes the table's inputs; check that, and treat a
+  mutation caught only by a source-text test as a weak catch. Source: `docs/reviews/rca-under-the-eaves-2026-10-23.md` C1.
 
 ### A gate exemption names the exempt items, never a rule (co-op player attribution, 2026-10-21)
 To let Patch113 pass without BannerlordCoop installed, `HarmonyPatchBindingTests` was changed to pass any patch whose

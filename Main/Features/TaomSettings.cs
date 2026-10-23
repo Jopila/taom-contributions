@@ -1493,6 +1493,11 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Another party's troop count on the campaign map blurs with its distance from you: '1??', '12?', then exact as you close in, and '...' at the very edge of sight. Standing closer, a higher Scouting skill and hosts of your own realm all sharpen it. Wounded and prisoner counts show only when the count is exact. A count you read stays remembered with a '~' and fades by the hour, and reading an enemy host's count from afar trains your scout's Scouting; Off stops both. AI lords still see true numbers. A host's orders in its hover tooltip stay hidden until its count is exact. Off = vanilla counts and orders. Applies immediately. Default: on.")]
     public bool HiddenHostsEnabled { get; set; } = true;
 
+    [SettingPropertyGroup("Map UI/Hidden Hosts")]
+    [SettingPropertyBool("Shorter Sight Under Trees", Order = 1, RequireRestart = false,
+        HintText = "In vanilla, forest makes other parties harder for you to see and slows your party by 20%; it never hides your party from anyone. With this on, your own sight on the campaign map also shrinks by 30% of your base sight while your party travels through forest, and by half that if your scout has the Keen Sight perk. It does not apply inside a settlement. A raised lookout, perks and a Far Watch ride still add to your sight, and the penalties together never take more than half of your base sight. Only your own party is affected; AI parties see as before. The map bar view distance shows the shorter range, but its tooltip has no line for the forest. Off = vanilla sight in forest. Applies immediately. Default: on.")]
+    public bool ForestSightPenaltyEnabled { get; set; } = true;
+
     // --- Kingdom Politics / Fief Grants ---
     //
     // #458, #565. When a kingdom takes a town or castle it holds an election for the new owner.

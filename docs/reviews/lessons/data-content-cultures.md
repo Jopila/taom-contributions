@@ -237,6 +237,10 @@ TAOM re-themed vanilla `battania` to Khand (Variags, evil), but `rebalance_lords
 - **Why missed:** the map lived in a different tool from the one that re-themed the culture; nothing cross-checks `CULTURE_MAP` against `CULTURES[*]['culture_id']` or `taom_spcultures` renames. The polluted "mirkwood" row looked plausible (71 lords, mid-pack stats).
 - **Prevent:** when a vanilla culture is re-themed, grep ALL of tools/ for the vanilla id and re-map every hit (fixed in 12b06e47 with the full mapping table in a comment: empire=dunland, sturgia=dale, vlandia=rohan, khuzait=rhun, battania=khand). When two tools disagree on a culture mapping, the generator's `culture_id` + `taom_spcultures.xml` rename are authoritative.
 - **Source:** commit 12b06e47; #323 session 2026-07-02.
+- **Recurrence (2026-10-23, Under the Eaves):** the design credited vanilla's `battanian_forest_speed` (+15 % sight in
+  forest) to Dunland only; `battania` is Khand, which keeps the feat through `spcultures.xslt`. Read the feat holder from
+  vanilla `spcultures.xml` and the xslt, not from the culture's theme. Source:
+  `docs/reviews/rca-under-the-eaves-2026-10-23.md` finding 5.
 
 ### Balance passes on shared SkillSets: fork per-culture variants; average targets are pooled-exact only
 Lord SkillSets are shared aggressively (the orc trio feeds 6 cultures; `taom_knight_skills` feeds 8). Editing a shared set in place bleeds the change into cultures outside the pass — so a per-culture balance change forks a variant (copy with only the balance skills changed) + `archetype_alias` + a repoint, leaving the base set untouched (verified byte-identical averages for the 6 bystander cultures in #326). Corollary: when several cultures SHARE their sets (3 elf realms, 4 north-orc cultures), a target average lands exactly only POOLED — per-culture results spread ±10 by set-mix composition, and forcing per-culture exactness would need absurd per-canonical residuals (Thranduil at Led ~500).

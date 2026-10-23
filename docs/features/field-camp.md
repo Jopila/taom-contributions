@@ -55,7 +55,9 @@ short prefix.
   finding).
 - **The trigger chance uses the PLAYER's spotting range** (source formula): a wider sight radius
   erodes the concealment term. `ICampAmbushService.TriggerChance(playerSpottingRange, ...)` is
-  named for it so nobody re-reads the first argument as a candidate distance.
+  named for it so nobody re-reads the first argument as a candidate distance. In forest the player's sight is shorter
+  ([under-the-eaves.md](under-the-eaves.md)), so the ambush reach narrows and the chance rises (day at Scouting 0: reach 10 to 8.4,
+  chance 0.50 to 0.548; night: 6 to 4.2, 0.62 to 0.674).
 - **Fortify is a real second raise** (source behaviour): double the setup hours, effects paused
   until the palisade stands. The one fix kept over the source: the foraging flag, accumulator and
   tally survive the upgrade instead of being silently wiped.
@@ -123,7 +125,7 @@ TAOM's loose `Assets/` tree instead of `AssetPackages/`. Where they should live 
 | `CampService.cs` | State machine; campaign statics behind protected virtuals (CampServiceTests). Also declares `SettlementSite` and `FortificationSearch`, the nearest town-or-castle rule RefugeService shares for its keep-outs (FortificationSearchTests) |
 | `CampTerrainService.cs` / `CampAmbushService.cs` | Pure policy and odds |
 | `Client/Features/FieldCamp/CampVisualService.cs` + `Visuals/CampLayoutBuilder.cs` | Entities, wind ticker (500 ms throttle), fallback chain. TAOM.Client (ADR-013); core registers `NullCampVisualService`, whose `Show` reports not ready |
-| `LookoutSpottingContributor.cs` | The sight bonus through the model seam (its cap member returns 0; Far Watch's scout is the second contributor, see [far-watch.md](far-watch.md) "The seam") |
+| `LookoutSpottingContributor.cs` | The sight bonus through the model seam (its cap member returns 0; Far Watch's scout is the second contributor, see [far-watch.md](far-watch.md) "The seam"; Under the Eaves' forest penalty is the third, see [under-the-eaves.md](under-the-eaves.md)) |
 | `Hooks/FieldCampCampaignBehavior.cs` + `FieldCampMenuController.cs` | Events, SyncData, menus (index 4 on both menus reserved for Refuge; index 5 on the camp sub-menu is shared by Host Review and Far Watch, both before Leave: the camp sub-menu's options end up Forage, Fortify, Supplies, Break, Refuge, Review the host, Send a scout, Leave, see [host-review.md](host-review.md) and [far-watch.md](far-watch.md)) |
 | `Hooks/PartyNameplateCampIconPatch.cs` | Patch74 thin guarded body (registry entry has the never-throw contract) |
 | `Hooks/CampNameplateIconPresenter.cs` | Patch74's widget half: icon creation, sprite memo (same never-throw posture) |

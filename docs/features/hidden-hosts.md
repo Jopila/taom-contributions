@@ -20,6 +20,8 @@ the service and the `IScoutIntelQuery` seam its store implements (see "Far Watch
 reads Scouting as 0 for how far digits reach, the six hosts a scout's report names keep their name past the horizon, and the
 report raises the digits of every host in sight and stamps a scouted settlement's defenders.
 
+Under the Eaves ([#849](https://github.com/haterade22/TAOM/issues/849), [under-the-eaves.md](under-the-eaves.md)) shortens the main party's sight while it travels through forest (half that with Keen Sight, none inside a settlement). The digit thresholds and the horizon are fractions of `SeeingRange`, so in forest every threshold pulls in by the same share and counts blur closer. No Hidden Hosts code changed.
+
 What the player sees in vanilla, and so here: the nameplate count is always drawn, but the party's name and its wounded
 and prisoner text only while the ShowIndicators key (Left Alt) is held. The mask therefore shows on the count at all times
 and on the name and extra text only while that key is down.

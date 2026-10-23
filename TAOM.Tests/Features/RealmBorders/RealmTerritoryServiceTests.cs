@@ -49,6 +49,8 @@ public class RealmTerritoryServiceTests
             return TerrainAt(x, y);
         }
 
+        public bool IsInForest(TaleWorlds.CampaignSystem.Party.MobileParty party) => false;
+
         public float HeightAt(float x, float y, float fallback) => 50f;
     }
 

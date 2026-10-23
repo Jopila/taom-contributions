@@ -11,9 +11,9 @@ public class TaomMapVisibilityModel : DefaultMapVisibilityModel
 {
     private readonly ICareerPassiveService _careerPassives;
 
-    // The engine holds ONE MapVisibilityModel slot and this model owns it. Other features widen
-    // sight through contributors instead of a second AddModel that would silently unseat this one
-    // (FieldCamp's lookout is the first, Far Watch's scout the second). The composer holds them as an array,
+    // The engine holds ONE MapVisibilityModel slot and this model owns it. Other features change
+    // sight, wider or shorter, through contributors instead of a second AddModel that would silently unseat this one
+    // (FieldCamp's lookout is the first, Far Watch's scout the second, Under the Eaves' forest penalty the third). The composer holds them as an array,
     // not an IEnumerable: this is a per-party hot path. Its rules: SpottingContributorComposer.
     private readonly SpottingContributorComposer _composer;
 

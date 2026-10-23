@@ -972,3 +972,23 @@ Cavalry reads only the player team, and banner promotion needs `IsAIControlled`.
 - **Prevent:** read the site's existing guard first; if it already decides the case, pin the invariant with a test and
   name it in the doc row instead of adding a second check.
 - **Source:** [rca-coop-mission-gating-2026-10-21.md](../rca-coop-mission-gating-2026-10-21.md) finding 5.
+
+### Before a design says what vanilla already does, list the callers, the perks and the settlement case
+
+Under the Eaves (#849) was designed on the claim that vanilla forest already hides the player's party, so only seeing
+out of the trees was new. `DefaultMapVisibilityModel.GetPartySpottingRatioForMainPartySeeingRange` has one caller,
+`CalculateMobilePartyVisibilityAndInspected`: how far the PLAYER sees other parties. No AI path reads forest for
+spotting, and forest costs the player 20 % speed (#614 made the same misreading). Four more facts were each one read
+away: the Keen Sight perk's text promises half the sight penalty for traveling in forests and vanilla applies it only
+to the target side; 111 settlement gates stand on forest faces (a party in a settlement sits at its gate), so the rule
+applied inside Caras Galadhon and Rivendell; the TAOM map paints the Old Forest and the other Eriador woods as plain;
+Khand (`battania`) keeps vanilla's forest feat as well as Dunland.
+- **Why missed:** the design read the method it planned to sit beside and inferred its neighbours; its lessons table
+  cited the right RCAs without listing the callers and data each claim rested on.
+- **Prevent:** a design that states what vanilla does names the engine callers of the method it cites (one grep of the
+  decompile, one line each); before adding a penalty or bonus, search the perk and feat texts for one that names the
+  same effect; a rule keyed on map position states the inside-a-settlement case (`CurrentSettlement`, gate position)
+  and checks the painted terrain offline before a doc names regions (TAOM_Map `SceneObj/Main_map/navmesh.bin`: an
+  `RNM1` header, an LZ4 block from offset 48 holding `NMG9` geometry, 24-byte edge records, then face records whose third
+  trailing u32 is the face group, which matches `TerrainType`; observed on this one file, 2026-10-23).
+- **Source:** `docs/reviews/rca-under-the-eaves-2026-10-23.md` findings 1 to 5.

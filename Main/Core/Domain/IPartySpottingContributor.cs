@@ -6,8 +6,8 @@ namespace TAOM.Core.Domain;
 /// Cross-feature seam for spotting-range changes on <c>TaomMapVisibilityModel</c>.
 ///
 /// <para>The engine holds ONE MapVisibilityModel slot and CareerSystem's model owns it
-/// (SubModule.cs registration). Any other feature wanting to change a party's sight (FieldCamp's
-/// lookout, Far Watch's scout) contributes through this interface instead of registering a second model, which would
+/// (SubModule.cs registration). Any other feature wanting to change a party's sight, wider or shorter (FieldCamp's
+/// lookout, Far Watch's scout, Under the Eaves' forest penalty) contributes through this interface instead of registering a second model, which would
 /// silently unseat the first (the collision docs/roadmap.md used to invite).</para>
 ///
 /// <para>A contributor has two members. <see cref="GetSpottingRangeBonusFactor"/> is a share of the party's BASE sight that

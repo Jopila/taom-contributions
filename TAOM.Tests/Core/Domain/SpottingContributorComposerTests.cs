@@ -3,6 +3,8 @@ using NSubstitute;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Party;
 using TAOM.Core.Domain;
+using TAOM.Features.FarWatch;
+using TAOM.Features.UnderTheEaves;
 using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Core.Domain;
@@ -140,6 +142,39 @@ public class SpottingContributorComposerTests
 
         Assert.AreEqual(0.15f, adj.Factor, 0.0001f);
         Assert.AreEqual(SpottingContributorComposer.MaxCapBonus, adj.CapBonus, 0.0001f);
+    }
+
+    // ---- Under the Eaves (#849): the forest penalty beside the other contributors, Compose rows are pure data
+
+    private static IPartySpottingContributor Forest() => Contributor(UnderTheEavesRule.Factor(true, false, false));
+
+    private static IPartySpottingContributor ForestWithKeenSight() => Contributor(UnderTheEavesRule.Factor(true, false, true));
+
+    [TestMethod]
+    public void TheForestPenalty_WithTheLookout_Nets_PlusFourTenths() =>
+        Assert.AreEqual(0.4f, Compose(Contributor(0.7f), Forest()).Factor, 0.0001f);
+
+    [TestMethod]
+    public void TheForestPenalty_WithFarWatchsSurroundingsRide_Nets_PlusTwoTenths() =>
+        Assert.AreEqual(0.2f, Compose(Contributor(FarWatchMath.RampMax), Forest()).Factor, 0.0001f);
+
+    [TestMethod]
+    public void TheForestPenalty_WithFarWatchsSettlementRide_IsFlooredAtMinusHalf()
+    {
+        // -0.35 and -0.3 would be -0.65; the penalties alone stop at -0.5, in either order.
+        Assert.AreEqual(-0.5f, Compose(Contributor(FarWatchMath.SettlementPenalty), Forest()).Factor, 0.0001f);
+        Assert.AreEqual(-0.5f, Compose(Forest(), Contributor(FarWatchMath.SettlementPenalty)).Factor, 0.0001f);
+    }
+
+    [TestMethod]
+    public void TheKeenSightForestPenalty_WithFarWatchsSettlementRide_LandsExactlyOnTheFloor()
+    {
+        // -0.15 and -0.35: the two penalties sum to the floor without being trimmed.
+        float sum = UnderTheEavesRule.Factor(true, false, true) + FarWatchMath.SettlementPenalty;
+
+        Assert.AreEqual(SpottingContributorComposer.MaxPenalty, sum, 0.00001f);
+        Assert.AreEqual(SpottingContributorComposer.MaxPenalty,
+            Compose(ForestWithKeenSight(), Contributor(FarWatchMath.SettlementPenalty)).Factor, 0.00001f);
     }
 
     // ---- The per-query path allocates nothing
@@ -315,6 +350,44 @@ public class SpottingContributorComposerTests
         var cap = lines[lines.Count - 1];
         Assert.AreEqual("Limit", cap.name, "the tooltip keeps vanilla's own name for the line");
         Assert.AreEqual(77.4f - 100.5f, cap.number, 0.001f, "and it clamps at the raised cap");
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void Apply_TheForestPenalty_WithTheLookout_GivesTwentyFivePointTwo() =>
+        Assert.AreEqual(25.2f, Apply(VanillaNumber(18f, 0f), Contributor(0.7f), Forest()), 0.001f);
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void Apply_TheForestPenalty_AloneOnAScoutingHundredParty_GivesTwelvePointSix() =>
+        Assert.AreEqual(12.6f, Apply(VanillaNumber(18f, 0f), Forest()), 0.001f);
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void Apply_TheForestPenalty_WithFarWatchsSettlementRide_FloorsAtHalfTheBase() =>
+        Assert.AreEqual(9f, Apply(VanillaNumber(18f, 0f), Contributor(FarWatchMath.SettlementPenalty), Forest()), 0.001f);
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void Apply_TheForestPenalty_WithASurroundingsRide_NetsPlusTwoTenths() =>
+        Assert.AreEqual(21.6f, Apply(VanillaNumber(18f, 0f), Contributor(FarWatchMath.RampMax), Forest()), 0.001f);
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void Apply_TheKeenSightForestPenalty_AloneGivesFifteenPointThree() =>
+        Assert.AreEqual(15.3f, Apply(VanillaNumber(18f, 0f), ForestWithKeenSight()), 0.001f);
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void Apply_TheKeenSightForestPenalty_WithFarWatchsSettlementRide_LandsOnHalfTheBase() =>
+        Assert.AreEqual(9f, Apply(VanillaNumber(18f, 0f), ForestWithKeenSight(), Contributor(FarWatchMath.SettlementPenalty)), 0.001f);
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void Apply_TheForestPenalty_ASumPastSixty_StaysAtSixty()
+    {
+        // 30 x (1 + 0.65 + 1.0 - 0.3) = 70.5, past the cap, so the cap absorbs the forest cut.
+        Assert.AreEqual(60f, Apply(VanillaNumber(30f, 0.65f), Contributor(1.0f), Forest()), 0.001f);
     }
 
     [TestMethod]

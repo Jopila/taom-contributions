@@ -31,6 +31,7 @@ using TAOM.Features.Relations;
 using TAOM.Features.RealmBorders;
 using TAOM.Features.ReevesLedger;
 using TAOM.Features.TimeAcceleration;
+using TAOM.Features.UnderTheEaves;
 using TAOM.Features.WarChronicle;
 using TAOM.Features.WatchfulHolds;
 using TAOM.Tests.Migration;
@@ -86,6 +87,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(WatchfulHoldsSettingsProvider))]
     // #846: the nameplate toggle is read for every visible party nameplate every map frame.
     [DataRow(typeof(HiddenHostsSettingsProvider))]
+    // #849: the forest toggle is read for every spotting query (the visibility pass reads the main party's sight every frame).
+    [DataRow(typeof(UnderTheEavesSettingsProvider))]
     // #862: the master switch is read on every relation read (main thread).
     [DataRow(typeof(PersonalRelationSettingsProvider))]
     // The defender's siege wait menu re-checks the break-out options every frame, and each check asks the Postern Gate model.
@@ -136,6 +139,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IEyeOfSauronSettings), typeof(EyeOfSauronSettingsProvider))]
     [DataRow(typeof(IWatchfulHoldsSettings), typeof(WatchfulHoldsSettingsProvider))]
     [DataRow(typeof(IHiddenHostsSettings), typeof(HiddenHostsSettingsProvider))]
+    [DataRow(typeof(IUnderTheEavesSettings), typeof(UnderTheEavesSettingsProvider))]
     [DataRow(typeof(IPersonalRelationSettingsProvider), typeof(PersonalRelationSettingsProvider))]
     [DataRow(typeof(IPosternGateSettingsProvider), typeof(PosternGateSettingsProvider))]
     [DataRow(typeof(IFromTheAshesSettingsProvider), typeof(FromTheAshesSettingsProvider))]
@@ -419,6 +423,18 @@ public class CampaignHotPathSettingsProvidersTests
         Assert.IsTrue(sut.Enabled);
 
         mcm.HiddenHostsEnabled = false;
+
+        Assert.IsFalse(sut.Enabled);
+    }
+
+    [TestMethod]
+    public void UnderTheEaves_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new UnderTheEavesSettingsProvider(mcm);
+        Assert.IsTrue(sut.Enabled);
+
+        mcm.ForestSightPenaltyEnabled = false;
 
         Assert.IsFalse(sut.Enabled);
     }

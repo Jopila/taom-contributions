@@ -1,5 +1,7 @@
 using SandBox;
 using TaleWorlds.CampaignSystem;
+using TaleWorlds.CampaignSystem.Party;
+using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TAOM.Core.Validation;
 
@@ -13,7 +15,8 @@ namespace TAOM.Adapters;
 /// sampling asks about the open sea thousands of times. Heights come straight from the heightfield
 /// (<c>Scene.GetTerrainHeight</c>, as vanilla drapes its hover outline; over water it is the bed), not from
 /// <c>MapScene.GetHeightAtPoint</c>: that is a physics query against collision bodies, and one border
-/// tile's worth of them froze the game for 286 ms in the first look session.
+/// tile's worth of them froze the game for 286 ms in the first look session. <c>IsInForest</c> (#849) reads the party's own face,
+/// the member vanilla reads: a struct copy while the stored position has a warm face cache, vanilla's native face lookup while it is cold.
 /// </summary>
 public sealed class MapTerrainAdapter : IMapTerrainAdapter
 {
@@ -39,6 +42,19 @@ public sealed class MapTerrainAdapter : IMapTerrainAdapter
         // (SandBoxNavigationCache.GetFaceRecordForPoint).
         var face = scene.GetFaceIndex(new CampaignVec2(new Vec2(x, y), true));
         return face.IsValid() ? face.FaceGroupIndex : -1;
+    }
+
+    public bool IsInForest(MobileParty party)
+    {
+        // Null party first, then the campaign map: CurrentNavigationFace is a computed getter (Position.Face) that
+        // dereferences Campaign.Current when the position's cache is cold, so it must not be touched without a campaign.
+        if (party == null || Campaign.Current?.MapSceneWrapper == null)
+            return false;
+        // The party's own face, as vanilla reads it, not a new CampaignVec2 (which would always pay the native lookup). The
+        // IsValid check is MapScene.GetFaceTerrainType's own, which otherwise raises Debug.FailedAssert on an invalid face; the
+        // terrain type is the face group index.
+        var face = party.CurrentNavigationFace;
+        return face.IsValid() && face.FaceGroupIndex == (int)TerrainType.Forest;
     }
 
     public float HeightAt(float x, float y, float fallback)

@@ -1,8 +1,10 @@
+using TaleWorlds.CampaignSystem.Party;
+
 namespace TAOM.Adapters;
 
 /// <summary>
-/// The campaign map's terrain as the realm borders read it: its extent, the navmesh terrain type
-/// under a point, and the ground height. Main-thread only: every call is a native scene query.
+/// The campaign map's terrain: its extent, the navmesh terrain type under a point, the ground height and whether a party stands in
+/// forest. Main-thread only.
 /// </summary>
 public interface IMapTerrainAdapter
 {
@@ -14,6 +16,13 @@ public interface IMapTerrainAdapter
     /// where the land navmesh has no face (open sea, off the map).
     /// </summary>
     int TerrainTypeAt(float x, float y);
+
+    /// <summary>
+    /// True when the party stands on a forest face (false for a null party, no campaign map or an invalid face): a struct copy while the
+    /// party's stored position has a warm face cache; while it is cold (after a load, until the party moves) each read repeats vanilla's
+    /// native face lookup.
+    /// </summary>
+    bool IsInForest(MobileParty party);
 
     /// <summary>The ground height at the point, or <paramref name="fallback"/> when the scene cannot say.</summary>
     float HeightAt(float x, float y, float fallback);
