@@ -4342,3 +4342,15 @@ A review said nothing caught a repeated clan, hero or kingdom id, and the claim 
 - **Why missed:** the claim was relayed from a reviewer without a probe; the schema JSON files looked like the only duplicate-id source.
 - **Prevent:** before writing a new check, break a copy of the real file the way the check targets and run the existing gate (`validate_moduledata.py`, which includes the engine XSD layer). Write the gate only if that run passes. Pin an existing protection with a test instead (`EngineIdUniquenessTests`).
 - **Source:** [rca-ui-data-sweep-2026-10-23.md](../rca-ui-data-sweep-2026-10-23.md) follow-up batch.
+
+### A rebase that keeps one side of a conflicted line drops the other session's facts (B7 slice 1, 2026-10-23)
+B7 slice 1 and B6a both edited `docs/research/taom-headless-server.md` the same day. B6a's commit put its older copy back
+over five slice 1 lines: row 10 said the map visuals were still open, and the gates row said "739 entries today" a day
+after the baseline went to 385. A line-by-line check of the pushed branch (`git show <tip>:<file>` against each added
+line of the earlier commit) found it; no test reads prose.
+- **Why missed:** a conflict on a long table row was resolved by taking one side whole, and nothing compared the result
+  with the other parent.
+- **Prevent:** when a rebase conflicts on a shared doc, rebuild each conflicted line from both sides, then grep the result
+  for the other commit's key facts. After landing, check that every line your commits added still exists at the tip, or
+  was replaced on purpose.
+- **Source:** [rca-b7-slice1-map-visuals-2026-10-23.md](../rca-b7-slice1-map-visuals-2026-10-23.md) finding 11.

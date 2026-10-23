@@ -31,7 +31,7 @@ HarmonyPatch / GameModel / CampaignBehavior   ← THIN (<150 lines, no logic)
 | Constructor injection only | No service locator in services |
 | Convert at boundary | Adapt sealed types in the entry point, not deep in services |
 | `?.` for computed properties | TaleWorlds getters crash before your null check — see `adapters.md` |
-| Core names no client-only assembly | ADR-013: code that needs SandBox.View, Gauntlet, a ViewModelCollection or WinForms goes to TAOM.Client behind a core interface with a null; `ServerJitGateTests` fails a new core method that names one |
+| Core names no client-only assembly | ADR-013: code that needs SandBox.View, Gauntlet, a ViewModelCollection or WinForms goes to TAOM.Client behind a core interface with a null; `ServerJitGateTests` fails a new core method that names one (unless its key is already in the baseline) |
 | Writers before gates | An engine flag or stat a plan or gate relies on lists every writer, vanilla first, with citations (`lessons/adapters-taleworlds-api.md`, Hammerhand) |
 | Server-safe startup (ADR-013) | A call in a `SubModule` hook or `ManualPatchApplicator.ApplyAll` whose callee names a client-only assembly (`ClientAssemblies.cs`) goes behind the server check in a `[MethodImpl(MethodImplOptions.NoInlining)]` helper, with a row in `SubModuleServerGuardTests`: its IL walk sees only `SubModule`'s own body, not the callee's |
 

@@ -62,12 +62,30 @@ The baseline swaps those two keys and stays at 385 entries.
 A fixture that several detectors hit proves none of them. Give each detector a fixture that only it can see,
 and remove each detector once to watch its fixture fail (`docs/reviews/lessons/testing-qa.md`).
 
+## After landing (2026-10-23)
+
+A check of `bannerlord-1.5.x` after B6a (`6d7e67f3f`) found two problems, fixed in one follow-up commit and
+reviewed at tier 2 (Codex xhigh, data flow lens):
+
+| # | Sev | Bug | Category | Why missed | Preventive action |
+|---|---|---|---|---|---|
+| 10 | MEDIUM | B6a pruned the baseline from 385 to 270 but left `MaxBaselineEntries` at 385, and the test asserted `count <= cap`, so 115 pruned lines could come back | Ratchet unenforced | A cap that may sit above the count relies on every pruner lowering it by hand | The cap must equal the count: a prune fails until the constant is lowered (RED seen at 385 against 270) |
+| 11 | MEDIUM | B6a's rebase put older text over five slice 1 facts in the research doc: row 10 said the map visuals were still open, and the gates row said "739 entries today" | Lost facts | The conflict was resolved by taking one side of whole lines | Facts restored at today's numbers; lesson in `build-tooling-workflow.md` |
+| 12 | MEDIUM | The gate's message, baseline header and doc told readers to mark a method `[ClientOnly]`, but B6a's attribute is class-only and gate 4 allows it only on a patch class with a client target or signature | Stale guidance | Written before B6a existed | Text names the two routes that work; the dead method-marker branch and its fixtures are deleted |
+| 13 | LOW | Limits not stated: a swap (a line added in the same change as a prune) keeps the count; keys merge overloads and constructors; every member of a marked class is exempt | Overclaim | | Stated in the gate summary and the doc's gates row |
+
+Not changed, decision owed: exempting only the members Harmony calls would put 24 keys back in the baseline
+(three `Initialize`, four static constructors, 17 helpers of marked classes, all behind server checks today).
+New open item: `FieldCampCampaignBehavior.OnGameOver` calls the `[ClientOnly]` `PartyNameplateCampIconPatch.Reset`
+with no server check (research doc row 10, UNVERIFIED at runtime).
+
 ---
 
 <!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
 
 ## Referenced by
 
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
 - [docs/reviews/lessons/testing-qa.md](lessons/testing-qa.md)
 
 <!-- backlinks-end -->

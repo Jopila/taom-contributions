@@ -2,10 +2,10 @@
 # (always at TAOM's boot on the dedicated server).
 # One line per user-level method: <owner type FullName>::<method name>. Closures, local functions and iterator or
 # async state machines fold into the method that declares them; overloads merge (ServerJitScan.KeyOf).
-# The list may only shrink. Never add a line: move the code to TAOM.Client behind a core seam or, once B6a adds
-# ClientOnlyAttribute, mark it [ClientOnly] with a server-checked caller (ADR-013). To prune after a fix: set
+# The list may only shrink. Never add a line: move the code to TAOM.Client behind a core seam (ADR-013), or mark a
+# Harmony patch class whose target or signature names a client assembly [ClientOnly] (gate 4). To prune: set
 # TAOM_WRITE_SERVER_JIT_BASELINE=1, run ServerJitGateTests.Baseline_Regenerate_WhenAsked, then lower MaxBaselineEntries.
-# Entries: 270 (methods scanned: 29570).
+# Entries: 270 (methods scanned: 29694).
 TAOM.Adapters.FiefLedgerAdapter::PatrolTooltip
 TAOM.Adapters.FiefNamingAdapter::MapActionBlockedReason
 TAOM.Adapters.FrontEndResourceAdapter::.cctor
