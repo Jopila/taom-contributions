@@ -135,5 +135,15 @@
     "gundabad": 1.75,
     "dolguldur": 1.75,
     "khuzait": 1.5
+  },
+  "CapturedFortHold": {
+    "Sides": ["Free"],
+    "MinCohesionToHold": 45,
+    "ReleaseCohesion": 40,
+    "ReleaseFoodDays": 1,
+    "BaseHours": 22,
+    "PerTraitPointHours": 5,
+    "MinHours": 12,
+    "MaxHours": 30
   }
 }

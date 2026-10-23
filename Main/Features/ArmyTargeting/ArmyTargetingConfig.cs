@@ -58,4 +58,10 @@ public class ArmyTargetingConfig
     /// target, patrols, and disbands its army about two days later via Army.CheckInactivity.
     /// </summary>
     public float ForeignTheaterWeight { get; set; } = 0.35f;
+
+    /// <summary>
+    /// Hold the Walls (#871): how long a good army that just took a fortress stays inside it. Validated on load; a
+    /// missing section is the compiled defaults.
+    /// </summary>
+    public CapturedFortHoldConfig CapturedFortHold { get; set; } = new CapturedFortHoldConfig();
 }

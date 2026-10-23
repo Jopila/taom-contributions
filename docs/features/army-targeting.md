@@ -90,6 +90,7 @@ MCM (TaomSettings)
   - EnableWarTheaters
   - ArmyReachRadiusInTownGaps
   - ArmyDefenderPriority
+  - HoldCapturedForts   (Hold the Walls' switch, read by the service through this provider)
         |
 ArmyTargetingSettingsProvider (reads TaomSettings.Instance with defaults)
 ```
@@ -108,10 +109,11 @@ ArmyTargetingSettingsProvider (reads TaomSettings.Instance with defaults)
 | Enable War Theaters | true | bool | Softly bias each kingdom toward its own front. Weighting only; no war is ever forbidden. Off = every enemy weights at 1.0. |
 | Border Rescue Radius | 3.2 | 1.0-20.0 | How far, in town gaps, a priority-list target may sit and still have its unreachable verdict overturned by the Border Proximity Floor. **Not a general distance penalty**: the game already applies one. 3.2 clears the widest real front on the map. |
 | Home Defence Priority | 1.6 | 1.0-5.0 | Score multiplier on defending one of your own settlements. |
+| Good armies hold captured forts | true | bool | Hold the Walls (#871, see below): a good army that takes a fortress stays inside longer than the engine's 10 hours. Needs the master toggle above. |
 
 ### Config File: `Main/_Module/ModuleData/configs/army_targeting.json`
 
-All sections optional, missing entries default to vanilla behaviour. **Every value is validated on load**; a rejected field reverts to the compiled default with a warning, and one summary warning fires so the earlier lines get read.
+All sections optional, missing entries default to vanilla behaviour. **Every value is validated on load**; a rejected field reverts to the compiled default with a warning, and one summary warning fires so the earlier lines get read. A missing `CapturedFortHold` section loads the compiled defaults, so Free armies hold.
 
 > **This file is read once per Bannerlord process.** `ArmyTargetingConfigProvider` is a
 > `Reuse.Singleton` in a container built at module load, so an edit needs a **full application
@@ -127,7 +129,9 @@ All sections optional, missing entries default to vanilla behaviour. **Every val
   "SecondaryTheaterWeight": 1.0,
   "ForeignTheaterWeight": 0.35,
   "FactionPriorityTargets": { "<kingdom_id>": ["<settlement_id>", ...] },
-  "FactionAggressionMultipliers": { "<kingdom_id>": 2.0 }
+  "FactionAggressionMultipliers": { "<kingdom_id>": 2.0 },
+  "CapturedFortHold": { "Sides": ["Free"], "MinCohesionToHold": 45, "ReleaseCohesion": 40, "ReleaseFoodDays": 1,
+                        "BaseHours": 22, "PerTraitPointHours": 5, "MinHours": 12, "MaxHours": 30 }
 }
 ```
 
@@ -137,6 +141,7 @@ All sections optional, missing entries default to vanilla behaviour. **Every val
 - **`PrimaryTheaterWeight` / `SecondaryTheaterWeight` / `ForeignTheaterWeight`:** must be ordered foreign ≤ secondary ≤ primary, enforced on load. Foreign must be above zero: a veto strands a kingdom and costs it its army to `Army.CheckInactivity`.
 - **`FactionPriorityTargets`:** ordered target lists. Earlier entries score higher, decaying from `MaxPriorityBoost` to 1.0 across the list. Because the decay spans the list, pruning an entry re-steepens it for the survivors.
 - **`FactionAggressionMultipliers`:** how much to inflate `ourStrength` before the vanilla `2x defender` strength gate. At 2.0 the faction can siege at 1:1 parity instead of requiring 2:1.
+- **`CapturedFortHold`:** Hold the Walls' numbers, with the valid range of each field in [hold-the-walls.md](hold-the-walls.md). A rejected field reverts to its default alone, a violated pair (`ReleaseCohesion` above `MinCohesionToHold`, `MinHours` above `MaxHours`) reverts both, and an unknown `Sides` entry is dropped with a warning.
 
 ### Army focus
 
@@ -149,6 +154,15 @@ The War Chronicle ([war-chronicle.md](war-chronicle.md), #765 M4) pushes each op
 The registry is read for every scored candidate, so it is an immutable array swapped in whole (copy-on-write): the read is a length check, the empty fast path outside a window, then a scan of a few entries, with no lock and no allocation. Entries are validated on write: a blank settlement id, no attacker and no defender, or a multiplier that is not finite or not above 1 is dropped, and a multiplier above 2.5 is clamped. The base score is positive by the time the focus applies, so a vanilla zero (the strength gate in `DefaultTargetScoreCalculatingModel`; the distance veto returns before the model is called) stays zero and a NaN base is returned unchanged. The focused score also reaches `CurrentObjectiveValue`, which `Army.ThinkAboutCohesionBoost` reads, so during a window armies at the target boost cohesion with influence up to 2.5 times as often. With two windows on one target the larger focus applies.
 
 The registry is not saved: the chronicle pushes its Active windows again at session launch and on every daily step, drops a window when it resolves, and clears the set when the war ends, when the chronicle is switched off, and when each campaign's chronicle behavior is built. The focus needs AI Strategic Intelligence on, like every other term here. Tests: `ArmyTargetFocusRegistryTests` (19) and `ArmyTargetFocusScoringTests` (7).
+
+### Hold the Walls (captured forts)
+
+The scoring above decides where an army goes next. It cannot make one stay: a captured settlement leaves the enemy pool, and pushing the other targets down risks `Army.CheckInactivity` disbanding the army. So the capture itself is handled apart, by [hold-the-walls.md](hold-the-walls.md) (#871), which does not touch the target score:
+
+- After a siege win the engine pauses each capturing army leader's AI for 10 hours (`KingdomManager.SiegeCompleted`, `KingdomManager.cs:241-274`). An AI army of a Free realm (config `CapturedFortHold.Sides`) that stands inside the fortress, with cohesion of at least 45 and the fortress not under siege, has that same pause lengthened to 12 to 30 hours from the capture, by the leader's Valor and Calculating (22 + 5 x (Calculating - Valor), clamped; the code never goes above 32). The hold counts toward the engine's 48 hour inactivity disband of an army whose leader waits on Hold, and releasing it does not reset that counter, so the 30 hour ceiling leaves the army about 14 or more hours to march out.
+- It ends early on a siege, cohesion below 40 or less than a day of food, restoring what is left of the engine's 10 hours. Evil and (by default) Neutral armies keep rolling on. Nothing is minted.
+- MCM "Good armies hold captured forts" in this group (default on), effective only while Enable AI Strategic Intelligence is on. The `CapturedFortHold` section of `army_targeting.json` carries the numbers and is validated on load like the rest of the file.
+- Single-player only.
 
 ### War theaters
 
@@ -266,6 +280,7 @@ No TaleWorlds adapter interfaces are required — the service works exclusively 
   - theater weighting (10): primary, shared-but-not-primary, foreign, foreign-is-damped-not-vetoed, `new_kingdom`, `player_faction` and `<settlement>_rebel_clan` all neutral, passive kingdom, null ids, both toggles
   - `ApplyTargetScoreModifiers` (11): NaN and infinite base score, vanilla rejection, null context, Defender multiplier, Raider and Patrolling pass-through, master switch, boosted near primary target, damped far foreign target, and **commitment cannot outrun suppression**
 - `TAOM.Tests/Features/ArmyTargeting/ArmyTargetingConfigProviderValidationTests.cs` (22 tests): one per rejection branch in `Validate`, covering NaN, out-of-range and sign-flipped values for every float, both ordering invariants, an undeclared theater name, and null, blank and duplicate priority target ids
+- `TAOM.Tests/Features/ArmyTargeting/HoldTheWalls/CapturedFortHoldConfigTests.cs`: the `CapturedFortHold` validation branches and their two ordering pairs
 - `TAOM.Tests/Features/ArmyTargeting/WarTheaterConfigInvariantsTests.cs` (11 tests against the SHIPPED JSON):
   - every `KingdomTheaters` and `FactionPriorityTargets` key resolves against `taom_spkingdoms.xml` + `spkingdoms.xslt`; the six lore names are rejected by name; every shipped kingdom has a theater decision recorded; every theater name used is declared; declared names are unique; passive kingdoms are exactly the acknowledged pair; no duplicate entry within a kingdom's list; both ordering invariants; and the shipped file survives its own validator with no warning
 - `TAOM.Tests/Features/ArmyTargeting/SiegeGatheringDiagnosticsServiceTests.cs` — 14 tests:
@@ -366,6 +381,7 @@ To fix a flagged siege: look at the kingdom's fortification census + the leader/
 
 ## Referenced by
 
+- [docs/features/hold-the-walls.md](./hold-the-walls.md)
 - [docs/features/war-chronicle.md](./war-chronicle.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-factions-and-world.md](../modding/configs-factions-and-world.md)

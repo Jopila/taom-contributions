@@ -66,5 +66,6 @@ internal static class FeatureModules
         new Features.FireAndTribute.FireAndTributeModule(),
         new Features.LongMemory.LongMemoryModule(),
         new Features.ServerSettings.ServerSettingsModule(),
+        new Features.ArmyTargeting.HoldTheWalls.HoldTheWallsModule(),
     };
 }

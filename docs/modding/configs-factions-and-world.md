@@ -94,7 +94,7 @@ A pair with no row resolves `AllianceTier.Neutral` (`DiplomacyService.cs:46`), s
 | `phase2` | object | no | a `PhaseConfig` with day 44 | Phase 2 block. The compiled default is deliberately later than Phase 1's | `WarOfTheRingConfig.cs:9-12` |
 | `testMode` | object | no | disabled, days 1 and 3 | Short trigger days for testing | `WarOfTheRingConfig.cs:13`, `:31-34` |
 
-<!-- engine-ref type="TAOM.Features.ArmyTargeting.ArmyTargetingConfig" file="Main/Features/ArmyTargeting/ArmyTargetingConfig.cs" lines="11-60" -->
+<!-- engine-ref type="TAOM.Features.ArmyTargeting.ArmyTargetingConfig" file="Main/Features/ArmyTargeting/ArmyTargetingConfig.cs" lines="11-66" -->
 
 | Attribute (`configs/army_targeting.json`) | Type | Required | Default when absent | What it does | Read at (file:line) |
 |---|---|---|---|---|---|
@@ -106,6 +106,7 @@ A pair with no row resolves `AllianceTier.Neutral` (`DiplomacyService.cs:46`), s
 | `PrimaryTheaterWeight` | float | no | `1.25` | Weight for the first listed theater | `ArmyTargetingConfig.cs:50` |
 | `SecondaryTheaterWeight` | float | no | `1.0` | Weight for later listed theaters | `ArmyTargetingConfig.cs:53` |
 | `ForeignTheaterWeight` | float | no | `0.35` | Weight for a theater the kingdom does not list. Must be above zero | `ArmyTargetingConfig.cs:60` |
+| `CapturedFortHold` | object | no | the compiled section: `Sides` `["Free"]`, cohesion 45 to hold and 40 to release, 1 day of food, base 22 hours, 12 to 30 | Hold the Walls (#871): which sides' armies stay in a fortress they took by siege, the floors that start and end a hold, and its length. Validated field by field, a `Sides` list replaces the default; see [hold-the-walls.md](../features/hold-the-walls.md) | `ArmyTargetingConfig.cs:66` |
 
 Ordering is enforced on load: foreign at or below secondary, secondary at or below primary
 ([army-targeting.md:134](../features/army-targeting.md)). A kingdom absent from `KingdomTheaters`
