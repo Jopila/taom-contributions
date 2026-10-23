@@ -1189,3 +1189,13 @@ battles with a deployment phase.
 - **Prevent:** decide "field battle" with `Mission.IsFieldBattle` (set in `MissionCombatantsLogic.EarlyStart`), and attach on
   the first screen tick whose mode is Battle (`BattleActionBarMissionView.ShouldAttach`).
 - **Source:** issue #970.
+
+### A config list with a non-empty default needs ObjectCreationHandling.Replace (#871, 2026-10-23)
+Hold the Walls added `CapturedFortHold.Sides = ["Free"]` to `army_targeting.json`, whose provider deserialized with
+Json.NET's defaults. `ObjectCreationHandling.Auto` reuses a non-null collection and appends the file's items, so
+`["Evil"]` loaded as Free plus Evil and Free could never be removed; a dedup hid the duplicate, so the shipped-file
+test passed.
+- **Why missed:** every earlier list in that config defaulted to empty, where Auto and Replace agree.
+- **Prevent:** deserialize every config with `ObjectCreationHandling.Replace` (the Watchful Holds and Field Commission
+  providers already do), and test a non-default list value through the real provider, not a hand-built object.
+- **Source:** `docs/reviews/rca-hold-the-walls-2026-10-23.md` finding 1.

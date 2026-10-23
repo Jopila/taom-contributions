@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using TAOM.Core.Infrastructure;
 using TAOM.Core.Logging;
 using TAOM.Core.Validation;
+using TAOM.Features.Execution;
 
 namespace TAOM.Features.ArmyTargeting;
 
@@ -23,6 +24,13 @@ public class ArmyTargetingConfigProvider : IArmyTargetingConfigProvider
 
     public ArmyTargetingConfig GetConfig() => _config.Value;
 
+    // Replace, not append-merge: Json.NET's default appends a JSON list onto the constructor's, so "Sides": ["Evil"]
+    // would load as Free and Evil. The other collections default empty, so only CapturedFortHold.Sides is affected.
+    private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
+    {
+        ObjectCreationHandling = ObjectCreationHandling.Replace,
+    };
+
     private ArmyTargetingConfig LoadConfig()
     {
         var path = Path.Combine(_pathService.ModuleDataPath, "configs", "army_targeting.json");
@@ -37,7 +45,7 @@ public class ArmyTargetingConfigProvider : IArmyTargetingConfigProvider
         try
         {
             var json = File.ReadAllText(path);
-            parsed = JsonConvert.DeserializeObject<ArmyTargetingConfig>(json) ?? new ArmyTargetingConfig();
+            parsed = JsonConvert.DeserializeObject<ArmyTargetingConfig>(json, SerializerSettings) ?? new ArmyTargetingConfig();
         }
         catch (Exception ex)
         {
@@ -166,12 +174,96 @@ public class ArmyTargetingConfigProvider : IArmyTargetingConfigProvider
             rejected = true;
         }
 
+        parsed.CapturedFortHold ??= new CapturedFortHoldConfig();
+        ValidateCapturedFortHold(parsed.CapturedFortHold, ref rejected);
+
         if (rejected)
             _logger.LogWarning("ArmyTargetingConfigProvider: army_targeting.json contained invalid values. See prior warnings for details.");
         else
             _logger.LogInfo($"ArmyTargetingConfigProvider: Loaded army_targeting.json ({parsed.KingdomTheaters.Count} kingdoms across {parsed.Theaters.Count} theaters)");
 
         return parsed;
+    }
+
+    /// <summary>
+    /// Hold the Walls (#871). Every field reverts alone to its compiled default; the two ordered pairs (release below hold
+    /// cohesion, shortest below longest hold) revert both fields when violated. The hold length bounds sit inside the
+    /// engine's own limits: above the 10 hours it already pauses a capturing army, and at most the 32 hour code cap that
+    /// keeps a hold well inside the 48 hour inactivity disband (<see cref="CapturedFortHoldConfig.CodeCapHours"/>).
+    /// </summary>
+    private void ValidateCapturedFortHold(CapturedFortHoldConfig hold, ref bool rejected)
+    {
+        var defaults = new CapturedFortHoldConfig();
+        hold.Sides = ValidateSides(hold.Sides, defaults.Sides, ref rejected);
+
+        hold.MinCohesionToHold = ValidateHoldField("MinCohesionToHold", hold.MinCohesionToHold, 0f, 100f, defaults.MinCohesionToHold, ref rejected);
+        hold.ReleaseCohesion = ValidateHoldField("ReleaseCohesion", hold.ReleaseCohesion, 0f, 100f, defaults.ReleaseCohesion, ref rejected);
+        hold.ReleaseFoodDays = ValidateHoldField("ReleaseFoodDays", hold.ReleaseFoodDays, 0f, 30f, defaults.ReleaseFoodDays, ref rejected);
+        hold.BaseHours = ValidateHoldField("BaseHours", hold.BaseHours, 1f, 100f, defaults.BaseHours, ref rejected);
+        hold.PerTraitPointHours = ValidateHoldField("PerTraitPointHours", hold.PerTraitPointHours, 0f, 24f, defaults.PerTraitPointHours, ref rejected);
+
+        float lowest = CapturedFortHoldConfig.VanillaPauseHours + 1f;
+        hold.MinHours = ValidateHoldField("MinHours", hold.MinHours, lowest, CapturedFortHoldConfig.CodeCapHours, defaults.MinHours, ref rejected);
+        hold.MaxHours = ValidateHoldField("MaxHours", hold.MaxHours, lowest, CapturedFortHoldConfig.CodeCapHours, defaults.MaxHours, ref rejected);
+
+        // A release floor above the hold floor would end every hold on the hour after it began.
+        if (hold.ReleaseCohesion > hold.MinCohesionToHold)
+        {
+            _logger.LogWarning($"ArmyTargetingConfigProvider: CapturedFortHold ReleaseCohesion({hold.ReleaseCohesion}) must not exceed MinCohesionToHold({hold.MinCohesionToHold}), reverting both to defaults");
+            hold.MinCohesionToHold = defaults.MinCohesionToHold;
+            hold.ReleaseCohesion = defaults.ReleaseCohesion;
+            rejected = true;
+        }
+
+        if (hold.MinHours > hold.MaxHours)
+        {
+            _logger.LogWarning($"ArmyTargetingConfigProvider: CapturedFortHold MinHours({hold.MinHours}) must not exceed MaxHours({hold.MaxHours}), reverting both to defaults");
+            hold.MinHours = defaults.MinHours;
+            hold.MaxHours = defaults.MaxHours;
+            rejected = true;
+        }
+    }
+
+    private float ValidateHoldField(string name, float value, float min, float max, float fallback, ref bool rejected)
+    {
+        if (FiniteFloatValidator.IsFiniteInRange(value, min, max)) return value;
+
+        _logger.LogWarning($"ArmyTargetingConfigProvider: CapturedFortHold {name}={value} must be finite in [{min},{max}], reverting to {fallback}");
+        rejected = true;
+        return fallback;
+    }
+
+    /// <summary>
+    /// The consumer branches on these names, so an unknown one is dropped with a warning and never read as a side. The kept
+    /// names are the canonical member names, once each. A list left with nothing reverts to the default: an empty list
+    /// would switch the feature off, and the MCM switch is the place for that.
+    /// </summary>
+    private List<string> ValidateSides(List<string>? sides, List<string> fallback, ref bool rejected)
+    {
+        if (sides == null)
+            return new List<string>(fallback);
+
+        var kept = new List<string>(sides.Count);
+        foreach (var name in sides)
+        {
+            if (!EnumNames.TryParse(name, out FactionSide side))
+            {
+                _logger.LogWarning($"ArmyTargetingConfigProvider: CapturedFortHold Sides lists '{name}', which is not Free, Neutral or Evil, skipping it");
+                rejected = true;
+                continue;
+            }
+            var canonical = side.ToString();
+            if (!kept.Contains(canonical))
+                kept.Add(canonical);
+        }
+
+        if (kept.Count == 0)
+        {
+            _logger.LogWarning($"ArmyTargetingConfigProvider: CapturedFortHold Sides has no valid side, reverting to {string.Join(", ", fallback)}");
+            rejected = true;
+            return new List<string>(fallback);
+        }
+        return kept;
     }
 
     private float ValidateWeight(string name, float value, float fallback, ref bool rejected)

@@ -45,6 +45,8 @@ public class ArmyTargetingSettingsProvider : IArmyTargetingSettingsProvider
 
     public bool EnableWarTheaters => TaomSettings.Instance?.EnableWarTheaters ?? true;
 
+    public bool HoldCapturedForts => TaomSettings.Instance?.HoldCapturedForts ?? true;
+
     public float CommitmentMultiplier =>
         Sane("ArmyCommitmentMultiplier", TaomSettings.Instance?.ArmyCommitmentMultiplier, 1.0f, 10.0f, DefaultCommitmentMultiplier);
 
