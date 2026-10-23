@@ -9,9 +9,11 @@ generator's next --apply. This shipped three times in three days (2026-10-16 KEY
 "check who owns the region" and that check was skipped each time. Each case here runs the owner's
 own --check, so the edit fails /verify instead of waiting for a regeneration.
 
-Not covered yet: promote_borrowed_cultures.py --only arthedain --check is red for a reason that
-predates this test (it re-appends its block at the end of the file, and the Arthedain start point
-has drifted from the live map); add it once that is fixed.
+Not covered yet: promote_borrowed_cultures.py --only arthedain --check is red for reasons that
+predate this test: taom_spcultures.xml differs only in the Arthedain start point, which has drifted
+from the live map, and its taom_module_strings.xml output does not parse, so the script refuses
+(#979: the strings extractor copies multi-line rows line by line, and the file's region is
+tab-indented). Its position drift went with #976. Add it once #979 is fixed.
 """
 import os
 import subprocess

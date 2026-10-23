@@ -19,8 +19,9 @@ target file wholesale from the CURRENT gundabad block, so re-running it now woul
 shipped goblin/mistymountainorcs blocks against a source that has moved since. This script only ever
 adds its own marker regions and never re-derives an existing culture.
 
-Idempotent: each inserted region is wrapped in <!-- TAOM-NEWCULTURE:<id>:BEGIN/END --> and stripped
-before re-insert, so re-running regenerates cleanly. Byte-faithful: each file is written back with
+Idempotent: each inserted region is wrapped in <!-- TAOM-NEWCULTURE:<id>:BEGIN/END --> and replaced
+where it stands on a re-run, or refused when the file is damaged (tools/_marker_region.py, #976).
+Every output file is parsed before any is written (#979); --dump diagnostics are written earlier. Byte-faithful: each file is written back with
 the line endings and BOM it arrived with.
 
 Run:  python tools/promote_borrowed_cultures.py --only arthedain            # dry run: each file same or edit
@@ -37,6 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _gamedir import game_dir  # noqa: E402
+from _marker_region import replace_region  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 MD = ROOT / "Main" / "_Module" / "ModuleData"
@@ -389,6 +391,18 @@ def write(path, text, newline, bom):
     Path(path).write_bytes((b"\xef\xbb\xbf" if bom else b"") + data)
 
 
+def unparsable(pending_writes):
+    """(path, error) for each pending output that does not parse. Checked before any write, in every mode (#979):
+    the write loop used to parse each file after writing it, so a broken file landed and the rest never did."""
+    bad = []
+    for path, text, newline, _bom in pending_writes:
+        try:
+            ET.fromstring(text.replace("\n", newline).encode("utf-8"))
+        except ET.ParseError as ex:
+            bad.append((path, str(ex)))
+    return bad
+
+
 def build_id_map(src, target, texts):
     """Map every id DEFINED by the source culture's standalone files onto a target-unique id.
 
@@ -530,15 +544,10 @@ def source_blocks(kind, text, src, cfg=None):
 
 
 def upsert(text, close_tag, payload, marker):
-    text = re.sub(r"[ \t]*<!-- " + re.escape(marker) + r":BEGIN -->.*?<!-- " + re.escape(marker) + r":END -->\n",
-                  "", text, flags=re.DOTALL)
-    block = f"  <!-- {marker}:BEGIN -->\n{payload}\n  <!-- {marker}:END -->\n"
+    # In place, or refused when damaged (#976): see tools/_marker_region.py.
     if close_tag is None:
         close_tag = "</strings>" if "</strings>" in text else "</base>"
-    idx = text.rfind(close_tag)
-    if idx < 0:
-        raise SystemExit(f"close tag {close_tag} not found")
-    return text[:idx] + block + text[idx:]
+    return replace_region(text, marker, f"  <!-- {marker}:BEGIN -->\n{payload}\n  <!-- {marker}:END -->\n", close_tag)
 
 
 def contamination_check(target, cfg, blob):
@@ -621,8 +630,8 @@ def duplicate_id_check(target, generated):
                          + "\n    ".join(sorted(set(internal))[:12]))
     minted = seen
 
-    # "Already defined" must mean "defined by someone else". This script is idempotent — it strips
-    # and re-inserts its own marker regions — so on a re-run its previous output is sitting in these
+    # "Already defined" must mean "defined by someone else". This script is idempotent (it replaces
+    # its own marker regions in place), so on a re-run its previous output is sitting in these
     # very files. Counting that as a collision would make the second run fail on the work the first
     # run did correctly. Exclude this target's own marker regions and its own standalone files.
     own_files = {MD / rel.format(c=target) for rel, _ in STANDALONE_FILES}
@@ -829,6 +838,13 @@ def main():
     for target, src, capital, n in summary:
         print(f"  {target:12s} <- clone of {src:12s} capital={capital:12s} ({n} block sets)")
     print(f"  -> {len(pending_writes)} file writes")
+
+    bad = unparsable(pending_writes)
+    if bad:
+        print("REFUSING: these outputs do not parse, so nothing was written (#979):")
+        for path, error in bad:
+            print(f"  {Path(path).relative_to(ROOT)}: {error}")
+        return 1
 
     def changes(path, text, nl, bom):
         return not Path(path).exists() or Path(path).read_bytes() != (
