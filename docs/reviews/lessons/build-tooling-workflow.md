@@ -2,6 +2,33 @@
 
 > Category file of the master lessons record — index + house shape: [LESSONS-LEARNED.md](../LESSONS-LEARNED.md). **Append new Build, Tooling & Workflow lessons HERE** (`### rule` → `**Why missed:**` → `**Prevent:**` → `**Source:**`).
 
+### A build step that agent builds switch off needs its own proving run (TAOM.Client deploy, 2026-10-23)
+`DeployTaomClientToTaomModule` selected the built core with unqualified `%(Filename)` and
+`%(ReferenceSourceTarget)` over `@(ReferencePath)`. Framework facades such as `netstandard.dll` carry no
+`ReferenceSourceTarget`, so MSBuild stopped every deploying build with MSB4096: `TAOM.dll` reached the game and
+`TAOM.Client.dll` did not, from B3 until the fix.
+- **Why missed:** the target runs only when `ModuleId` is set and `DisableModuleCopy` is not `true`, and every
+  agent build and test passes `-p:ModuleId=`. The reviews read the target's text, and `ClientDeploymentTests`
+  parsed the XML without evaluating it. In Visual Studio the one error sat among about 2,600 nullable warnings.
+- **Prevent:** before committing a target that only a deploying build runs, evaluate its item expressions once in a
+  throwaway MSBuild project, with items that have the metadata and items that lack it. Qualify metadata in any item
+  condition over a list whose items differ (`%(ReferencePath.Name)`). After the first deploying build of a new
+  project, list the install folder and check that every DLL the deploy should place is there.
+- **Source:** `bdef312b4`; [coop-dedicated-server](../../features/coop-dedicated-server.md).
+
+### Take a gate's rule from the engine's decision method, not from a plan's summary (server staging rule, 2026-10-23)
+The research plan called `DedicatedServerType=none` and `IsNoRenderModeElement=false` "the two client-only markers",
+and the first version of the server staging rule dropped a submodule on either. The v1.5.5 engine decides with
+`DedicatedServerType` alone (`Module.GetSubModuleValiditiy`, called by `CheckIfSubmoduleCanBeLoadable`): on a
+`/dedicatedcustomserver` start it lowercases the value and rejects `none`, `matchmaker` and `community`, and its
+`IsNoRenderModeElement` case returns `value.Equals("false")`, so that tag never blocks a submodule there.
+- **Why missed:** the plan's sentence summarised vanilla's habit of pairing the two tags, and the rule was written from
+  the summary.
+- **Prevent:** before a staging rule, validator or gate claims to mirror "what the engine loads", read the engine
+  method that decides and give every value its switch handles a test, including the fall-through.
+- **Source:** server PR [#104](https://github.com/Bannerlord-Coop-Team/BannerlordCoop.DedicatedServer/pull/104);
+  [taom-headless-server](../../research/taom-headless-server.md), "Staging".
+
 ### A fix verified against the artifact that motivated it cannot see the defect the fix introduces
 After changing a log line, a parser, or a data shape, re-running the ORIGINAL reproduction proves
 nothing about the new behaviour: the original evidence predates the change, so it exercises the old

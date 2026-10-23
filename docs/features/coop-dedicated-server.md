@@ -44,6 +44,8 @@ Stage with the server repo's script (its `-KeepSubModules` option and the rules 
        -KeepSubModules @{ 'TAOM.Dependencies' = @('TAOM.Dependencies'); 'TAOM' = @('TAOM') }
    ```
    Check the staged `Modules\TAOM`: only the `TAOM` submodule, no `TAOM.Client.dll`, and `DsAssetPackages\taom_creature_skeletons.tpac` present.
+Once server PRs #104 and #105 are merged, step 1 and the `-KeepSubModules` argument fall away: the staging picks TAOM's submodules from its manifest and builds the map from the installed TAOM_Map (see "Distribution").
+
 3. **Data directory:** `server-config.json` (`saveName`, `port` 4200, `steam`, and the same `modules` list as above), `Game Saves\<saveName>.sav`, and `eula.txt`. The save must come from a campaign started with the installed TAOM release (see "Saves" below).
 
 The data directory holds `eula.txt`. The operator accepts the EULA there. Never pass `--accept-eula` for someone else.
@@ -111,7 +113,15 @@ Recorded in `doc/porting/bannerlord-1.5.x.md` in the BannerlordCoop repo.
 
 BannerlordCoop is source-available since 2026-06-17: its `LICENSE` forbids copying, distributing, or using it in another project without written permission from its maintainers. The dedicated server is proprietary software of Bannerlord Coop LLC. TAOM therefore ships neither, and a guide must not tell players to take a build from our checkouts. The Workshop Coop item stays on Bannerlord 1.4.8.
 
-The plan Garrett proposed (2026-10-23): BannerlordCoop publishes a Coop 1.5 build on Steam, and a TAOM compatibility module (`TAOM.CoopCompat`) depends on both Coop and TAOM; the server runs the same modules. Points to settle with him: written permission for the compat module to reference Coop; the 1.5 item's module id and advance notice of Coop updates (co-op's join check compares exact versions); and staging, where TAOM's side is the manifest flip and shipping the stripped server map inside TAOM_Map (B9), and the server's side is the two generic rules in [taom-headless-server](../research/taom-headless-server.md), "Staging". The community install page draft waits for this.
+The plan Garrett proposed (2026-10-23): BannerlordCoop publishes a Coop 1.5 build on Steam, and a TAOM compatibility module (`TAOM.CoopCompat`) depends on both Coop and TAOM; the server runs the same modules. Points to settle with him: written permission for the compat module to reference Coop, and the 1.5 item's module id and advance notice of Coop updates (co-op's join check compares exact versions). He asked for the staging work as PRs:
+
+| Change | Where | State |
+|---|---|---|
+| An extra module without a `-KeepSubModules` entry keeps the submodules the engine loads (a `DedicatedServerType` of `none`, `matchmaker` or `community` drops one; `IsNoRenderModeElement` never does) | [server PR #104](https://github.com/Bannerlord-Coop-Team/BannerlordCoop.DedicatedServer/pull/104) | Open, review requested (2026-10-23) |
+| The server map is built from the last map module's own `SceneObj\Main_map` with `strip_main_map.py`, cached and rebuilt when `navmesh.bin` or `scene.xscene` changes | [server PR #105](https://github.com/Bannerlord-Coop-Team/BannerlordCoop.DedicatedServer/pull/105) | Open, review requested; one real staging run built a byte-identical navmesh and a second reused the cache |
+| The core `TAOM` submodule carries no client-only tag (B9) | TAOM `316072f40` | On trunk |
+
+With all three, TAOM stages with only `-Modules` and `-ExtraModules`, and TAOM_Map needs no shipped server map. Two questions are open on #104: whether the release launcher should stage mod modules (today only `run-windows.ps1` does), and whether the README's Host-button sentence is stale (the Host button starts `Bannerlord.exe` on both Coop branches). The community install page draft waits for the distribution answer.
 
 ## Key Files
 
@@ -136,7 +146,7 @@ The plan Garrett proposed (2026-10-23): BannerlordCoop publishes a Coop 1.5 buil
 ## GitHub Issue
 
 - **Issue:** #964 epic, #968 ADR-013, #972 skeleton package (closed)
-- **Status:** Open (two clients on two machines, the B9 manifest flip and the distribution agreement owed)
+- **Status:** Open (two clients on two machines, a boot staged with server PRs #104 and #105, and the distribution agreement owed)
 
 ---
 

@@ -653,7 +653,8 @@ to characterise. The existing try/catch around acceptance is containment, not co
   [ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md) and the operator steps are in
   [coop-dedicated-server](coop-dedicated-server.md). A staging that honours each module's own tags
   therefore loads `TAOM.Dependencies` and `TAOM` and skips the rest; until the server repo's staging
-  does that, `-KeepSubModules` names them. The earlier
+  does that ([server PR #104](https://github.com/Bannerlord-Coop-Team/BannerlordCoop.DedicatedServer/pull/104),
+  open), `-KeepSubModules` names them. The earlier
   remark that the appliance runs on `Microsoft.NETCore.App` against TAOM's .NET Framework 4.7.2 is
   resolved: the staged host is .NET 6.0.36 and TAOM loads on it. In-game checks with two clients are owed. The listen-host path remains the one that carries TAOM into the spawned
   server process with no copying at all.
