@@ -1951,6 +1951,10 @@ The Dale block was first appended after the Arthedain generator's block in `clan
 - **Prevent:** run `python -m pytest tools/tests` for any change to generated XML, and keep a new hand-authored marker
   block ahead of any region a generator re-inserts at the closing tag.
 - **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
+- **Update 2026-10-23 (#947):** `generate_new_faction_kingdoms.py` now replaces its block where it stands and
+  refuses a second marker region, so the "keep it ahead" rule no longer applies to that generator. A copy of
+  the rows without the exact markers still passes: `DUPLICATE_NPC_ID` catches a repeated lord, and nothing
+  yet catches a repeated clan, hero or kingdom.
 
 ### A feature copied from a sibling copies the sibling's test list too (#825, 2026-10-20)
 Crown Guard copied Tavern Specialities' module shape but not its apply-and-JIT binding test or its "adds no behavior

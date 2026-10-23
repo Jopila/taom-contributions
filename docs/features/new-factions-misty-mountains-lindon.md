@@ -167,7 +167,8 @@ Re-run order: `generate_new_factions.py` → `insert_new_factions.py` → `gener
 (since 2026-10-07 it takes `--only` and offers only `arthedain`: these four realms have drifted from
 their table entries, Lindon retagged to `Culture.lindon`, so a regeneration would revert them)
 → `generate_new_faction_settlements.py --apply`. All inserts are idempotent
-(`<!-- TAOM-NEWFACTIONS:… -->` markers stripped + re-inserted).
+(`<!-- TAOM-NEWFACTIONS:… -->` markers; `generate_new_faction_kingdoms.py` replaces a block where it
+stands since #947, `insert_new_factions.py` still strips and re-appends it).
 
 ### Child / teenager / lord / education equipment templates (REQUIRED — child-generation crash, issue #267)
 

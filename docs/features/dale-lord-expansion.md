@@ -24,7 +24,7 @@ Pure data, written once by `tools/oneoff/author_dale_lords.py` (a finished one-o
 - **Faces:** each new lord's face is a vanilla Vlandian or Imperial lord face that `lords.xslt` replaces, so no campaign character wears it. Whether they read as Bardings needs an in-game look.
 - **Banner:** all five clans fly the Dale banner key that clans 2 to 9 use.
 - **Custom Battle:** `custom_battle_commanders.json` curates three Dale commanders: `lord_S10_1` Halvard, `lord_S11_1` Ketil and `lord_S13_1` Starkad.
-- **Marker blocks:** the Dale block sits in front of the Arthedain generator's block in `clans.xml`, `lords.xml` and `heroes.xml`, because `generate_new_faction_kingdoms.py` re-inserts its block at the closing tag and must stay last.
+- **Marker blocks:** the Dale block sits in front of the Arthedain generator's block in `clans.xml`, `lords.xml` and `heroes.xml`. Since #947 `generate_new_faction_kingdoms.py` replaces its block where it stands, so the order no longer matters to a re-run.
 - **Castles:** after the deploy, `python tools/Assign-SettlementOwners.py --apply` seats Dale by the tool's own distribution (`castle_S1` clan 11, `castle_S2` clan 5, `castle_S3` clan 12, `castle_S4` clan 10, `castle_S5` clan 6, `castle_S6` clan 8, `castle_S7` clan 9; towns unchanged). 12 of the 14 clans hold one fief. The tool is again the record of Dale's owners.
 
 ## Configuration
@@ -82,14 +82,14 @@ Average adult OneHanded is 146.6 (Gondor 141.4, Rohan 173.1). Dale skill sets eq
 - `ShippedHeraldryBannerKeyTests` checks the banner key's shape only. `tools/tests/test_banner_icon_ids.py` (#951) checks that every icon and colour id in the clan, kingdom and culture banner keys exists in Native's or TAOM's `banner_icons.xml`.
 - `LocalizationKeyConsistencyTests` covers the name keys; `CustomBattleCommandersShippedDataTests` covers the Custom Battle entries.
 - `tools/tests/test_dale_lord_expansion.py` pins the bow rosters, the shared banner, the clan names and homes, and the face keys.
-- `tools/tests/test_generator_regions_in_sync.py` catches a marker block that sits after a generator region.
+- `tools/tests/test_generator_regions_in_sync.py` catches a hand edit inside the Arthedain generator regions.
 - `python tools/validate_moduledata.py` resolves `Faction.X` refs since #949 (`BROKEN_FACTION_REF`: a settlement `owner=` or Hero `faction=`), so a Dale house that names a missing clan fails the commit hook. It still does not resolve `Hero` or `Settlement` references, and the `faction` attributes `heroes.xslt` writes are not swept.
 
 ## How to Add More Dale Lords
 
 The XML is the source of truth and the generator is retired. A future change edits the XML and runs these steps:
 
-1. Raise or add tiers in `spclans.xslt`, or add the clan and lords inside the Dale marker block in `clans.xml`, `lords.xml` and `heroes.xml`. Keep that block ahead of the Arthedain block.
+1. Raise or add tiers in `spclans.xslt`, or add the clan and lords inside the Dale marker block in `clans.xml`, `lords.xml` and `heroes.xml`.
 2. Pin any id whose archetype the age and sex default would not derive in `CULTURES['dale']['canonical']` in `tools/apply_culture_skills_traits.py`.
 3. Edit the SPEC in `tools/Assign-SettlementOwners.py`, take a backup, dry-run until the diff is exactly the intended change, then run it with `--apply`.
 4. Run `python tools/generate_name_localization_strings.py --apply --category clan` and `--category lord`, then seed the rows.
