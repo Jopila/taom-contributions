@@ -922,5 +922,43 @@ class LoaderBucketCliTests(_Tree):
         self.assertIn("2 not registered", lines[-1])
 
 
+class EngineIdUniquenessTests(unittest.TestCase):
+    """#974: a repeated clan, hero or kingdom id needs no TAOM schema. The engine's own XSDs declare the row id
+    unique (`xs:unique` on `@id`), and `SCHEMA_INVALID` validates the registered files against them in the commit
+    hook. This pins both halves, so a lost registration or a changed engine XSD does not silently drop the check."""
+
+    REPO = Path(__file__).resolve().parents[2]
+    CASES = (("Factions", "characters/clans.xml", "Faction"),
+             ("Heroes", "characters/heroes.xml", "Hero"),
+             ("Kingdoms", "taom_spkingdoms.xml", "Kingdom"))
+
+    def test_the_three_files_are_registered_under_their_engine_ids(self):
+        # What SCHEMA_INVALID really validates, not text: a commented-out registration loads nothing.
+        entries, _ = vx.registered_files(self.REPO / "Main" / "_Module")
+        moduledata = self.REPO / "Main" / "_Module" / "ModuleData"
+        resolved = {(Path(path).resolve(), xml_id) for path, xml_id in entries}
+        for xml_id, rel, _ in self.CASES:
+            with self.subTest(xml_id):
+                self.assertIn(((moduledata / rel).resolve(), xml_id), resolved)
+
+    @NEEDS_LXML
+    def test_a_repeated_id_breaks_the_engine_schema(self):
+        import copy
+        from lxml import etree
+        from _gamedir import game_dir
+        schemas = Path(game_dir(r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord")) / "XmlSchemas"
+        if not schemas.is_dir():
+            self.skipTest(f"no engine XmlSchemas at {schemas}")
+        for xml_id, rel, element in self.CASES:
+            with self.subTest(xml_id):
+                schema = etree.XMLSchema(etree.parse(str(schemas / f"{xml_id}.xsd")))
+                doc = etree.parse(str(self.REPO / "Main" / "_Module" / "ModuleData" / rel))
+                self.assertTrue(schema.validate(doc), f"{rel} must start valid")
+                root = doc.getroot()
+                root.append(copy.deepcopy(next(c for c in root if c.tag == element)))
+                self.assertFalse(schema.validate(doc))
+                self.assertIn("Duplicate key-sequence", str(schema.error_log))
+
+
 if __name__ == "__main__":
     unittest.main()
