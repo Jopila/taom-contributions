@@ -80,10 +80,11 @@ companions that only exist after `PostBuildCopyToModules`. There is no editor mi
 `TAOM.Dependencies.csproj`, so `Modules/TAOM.Dependencies/bin/Win64_Shipping_wEditor/` being empty is
 expected, not a bug.
 
-Two honesty caveats on the server mirror: **no dedicated server has been booted against these binaries**
-(commit 5f373df9 carries `Not-tested:` to that effect), and `Main/_Module/SubModule.xml` still declares
-`<Tag key="DedicatedServerType" value="none" />` — shipping the binaries does not by itself mark TAOM
-server-capable.
+Two caveats on the server mirror. A spike build of TAOM has booted on the co-op dedicated server to
+SERVING (2026-10-22, 2026-10-23); a boot of the committed build is still owed (see
+[coop-dedicated-server](../features/coop-dedicated-server.md)). And `Main/_Module/SubModule.xml` still
+declares `<Tag key="DedicatedServerType" value="none" />` on the core submodule, so shipping the binaries
+does not by itself mark TAOM server-capable.
 
 ## 2. Decompiled-source layout (`E:\Decompiled_Bannerlord\`)
 

@@ -556,7 +556,7 @@ carry its own motion"), so this binds only an edit of a vanilla clip's payload.
 
 **Which asset tree loads.** The client's loader loop (0x73960) logs "Loading packages %s...", "Could not find any
 asset directory in module folders" and "Loading done..."; the client carries the names `AssetPackages`,
-`DsAssetPackages` and `EmAssetPackages` [Certain]. The selection rule is not traced: UNVERIFIED. The Kit session
+`DsAssetPackages` and `EmAssetPackages` [Certain]. On the dedicated server the engine reads `<module>/DsAssetPackages/*.tpac`; the game client never does (boot evidence 2026-10-22, see [coop-dedicated-server](../features/coop-dedicated-server.md)). The client selection rule is not traced: UNVERIFIED. The Kit session
 `rgl_log_11008` loaded `Native/EmAssetPackages`, `SandBox/EmAssetPackages` and `LOTRLOME_Armory/Assets` [Certain]; for
 the game client, loose `Assets` wins even where cooked packs exist ([armory-guide.md](armory-guide.md) "Two asset
 trees", from logs of 2026-09-01 and 2026-09-26). Two game sessions' logs survive: `rgl_log_19864` (14:34) and

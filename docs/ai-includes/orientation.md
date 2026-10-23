@@ -38,10 +38,10 @@ and the gate.
 | Moving platforms | Agents need a navmesh riding the entity, plus physics; teleporting fails. Crew stand inside the deck | [mumakil](../features/mumakil.md) |
 | Vendored DLLs | `Main/_Module/bin/Win64_Shipping_Client/` ships no vendored binary (`TAOM.dll` is build output); never MCMv5 | [deps](../modding/module-dependencies.md) |
 | Mission logic | Logic `BehaviorType` needs `: MissionLogic`; keep `AfterStart` throw-safe | [lifecycle](../reference/engine/mission-and-missionbehavior-lifecycle.md) |
-| Armory dependency | It is `LOTRLOME_Armory`. A root-level `<action>` kills a dedicated server: `audit_action_set_parity.py` | [armory](../reference/armory-guide.md) |
-| Armory files | A second `LOTRLOME_items/*/` folder shadows an id (grep the prefix); loose `Assets/**` wins; inventory is generated | [armory](../reference/armory-guide.md) |
+| Armory | `LOTRLOME_Armory`: a root `<action>` kills a server, a second `LOTRLOME_items/*/` shadows an id, loose `Assets/**` wins | [armory](../reference/armory-guide.md) |
 | Shield plus polearm | A shield troop never draws a polearm absent from `OneHandedPolearm`: `audit_polearm_shield_parity.py` | [pipeline](../features/weapon-xml-pipeline.md) |
 | Co-op gating | Co-op loaded, peer authority, dedicated server and "is this party a human player's" are four different questions | [co-op](../features/coop-interop.md) |
+| Server stop | A hard-killed launcher leaves its engine on UDP 4200: end both, or the next boot exits 3 | [server](../features/coop-dedicated-server.md) |
 | Console commands | Route through `TaomConsole`; a wrongly shaped command throws in unguarded startup discovery | [console](../features/dev-console.md) |
 | Landless cultures | A culture owning no settlement CTDs the daily clan tick: `Patch65`, `LANDLESS_CULTURE` | [spawn guard](../features/lord-spawn-guard.md) |
 | Culture ids | `empire` is Dunland, `battania` Khand; troops may carry another culture: read both from the data | [lesson](../reviews/lessons/data-content-cultures.md) |

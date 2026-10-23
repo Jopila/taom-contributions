@@ -66,7 +66,8 @@ the generators' `--verify` is per generator. And nothing ran any of them after a
   from the LIVE refs; `audit_deleted_mesh_impact.sweep_consumers` + `resolve_roster_hop` to join
   every broken item to every troop, lord, roster and config that carries it, directly or through
   a standalone `<EquipmentSet id>`; `taom_schema.build_registries` for dead `Item.<id>` refs; the
-  two scaffolders' `--verify` as subprocesses.
+  two scaffolders' `--verify` and `build_ds_skeleton_pack.py --check` (the dedicated server's creature
+  skeletons, #972) as subprocesses.
 - **A committed report.** Deterministic markdown (sorted rows, run date and HEAD in the header) at
   `docs/audits/armory-ref-audit.md`, so `git diff` after a re-run is the change log. Verdict
   `CLEAN` or `BROKEN`; generator drift is a WARNING with its `DRIFT:` lines, because a verdict that
@@ -94,7 +95,7 @@ session-start.sh  --"ARMORY ART DRIFT"-->  /armory-audit  -->  tools/audit_armor
                                                                     |-- generate_armory_catalogue (rows + diff)
                                                                     |-- audit_deleted_mesh_impact (item -> troop join)
                                                                     |-- taom_schema.build_registries (item ids)
-                                                                    '-- generate_ranged_ladder_items / generate_starter_kit --verify
+                                                                    '-- generate_ranged_ladder_items / generate_starter_kit --verify, build_ds_skeleton_pack --check
                                                                     v
                                                     docs/audits/armory-ref-audit.md  (committed)
 validate_moduledata.py  --MISSING_COLLISION_BODY-->  check-moduledata-validation.sh  (MCP, /verify: #623)
@@ -111,7 +112,7 @@ the CLI.
 | File | Role |
 |------|------|
 | `tools/audit_armory_refs.py` | the composer; `flag_breakage`, `join_impact`, `render_report`, `exit_code` are pure |
-| `tools/tests/test_audit_armory_refs.py` | seven synthetic tests, no install |
+| `tools/tests/test_audit_armory_refs.py` | nine synthetic tests, no install |
 | `docs/audits/armory-ref-audit.md` | the committed report |
 | `tools/validate_moduledata.py` | `missing_collision_body_issues`, `BODY_CODE`, `MESH_CODE`, `_loaded_tpacs` |
 | `tools/tests/test_validate_moduledata.py` | `MissingCollisionBodyTests`; `CommitGateCoverageTests` scans both emitting files |
@@ -127,9 +128,10 @@ the CLI.
 
 ## Tests
 
-- `python -m unittest tools/tests/test_audit_armory_refs.py` (7): live-ref flagging beats the
+- `python -m unittest tools/tests/test_audit_armory_refs.py` (9): live-ref flagging beats the
   committed flag; direct and roster-hop consumers both appear; the report names body, item and
-  troop on one row and is byte-stable; exit code semantics; generator drift warns.
+  troop on one row and is byte-stable; exit code semantics; generator drift warns; the server skeleton package is checked; every check names
+  a script that exists.
 - `python -m unittest tools.tests.test_validate_moduledata.MissingCollisionBodyTests
   tools.tests.test_validate_moduledata.CommitGateCoverageTests` (5).
 - `bash tools/test_hooks.sh` (208) covers the hook's timeout and inner bound.
@@ -142,6 +144,8 @@ the CLI.
 python tools/audit_armory_refs.py --regen-catalogue
 git diff docs/audits/armory-ref-audit.md            # what changed since the last audit
 ```
+
+A `build_ds_skeleton_pack.py --check` DRIFT means an art drop changed a creature skeleton: run `python tools/build_ds_skeleton_pack.py --apply` and commit `Main/_Module/DsAssetPackages/taom_creature_skeletons.tpac`.
 
 Repair the ref side (never restore a tpac beside its replacement), re-run, commit the report and
 the catalogue with the repair. The #599 repair script (`E:\taom-hang-2026-09-15\repoint_refs.py`)

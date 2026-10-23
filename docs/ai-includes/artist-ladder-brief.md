@@ -172,9 +172,10 @@ python tools/validate_xml_schemas.py <files you touched>
 python tools/check_external_xslt.py                  # after any XSLT edit
 ```
 
-`generate_ranged_ladder_items.py --verify` checks the live Armory and then the mirror. Drift reported
-only in the `mirror` tree means the mirror lags the live install; Mike syncs it. Never run `--apply` to
-quiet it, because `--apply` writes the mirror too.
+`generate_ranged_ladder_items.py --verify` and `generate_starter_kit.py --verify` check the live Armory
+only. `restat_ranged_donors.py --verify` also checks the lotraom-assets mirror; drift reported only in its
+`mirror` tree means the mirror lags the live install, and Mike syncs it. Never run a generator with
+`--asset-repo` to quiet it.
 
 Warnings to treat as blocking for your change: `RANGED_LADDER_INVERSION`, `RANGED_DAMAGE_CEILING`,
 `MELEE_LADDER_INVERSION`, `ARMOUR_MESH_TIER_LADDER`, `UPGRADE_ARMOUR_REGRESSION`,

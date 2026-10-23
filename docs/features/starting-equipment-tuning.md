@@ -190,10 +190,9 @@ reports every player roster slot as `BROKEN_ITEM_REF`, which is the backstop.
   `starter_wm_mordor_set1_polearm_a01`. The four Mordor career rosters left the list on 2026-10-06 (#743):
   their polearm is `sm_md_num_lance_a`, which resolves one-handed.
 - `python tools/check_external_xslt.py`: both modified stylesheets compile.
-- `python tools/generate_starter_kit.py --verify` on both Armory copies (the live install and
-  `lotraom-assets\v1.5`). It checks ids only, not stats. Without `--no-asset-repo` it also checks the
-  mirror, which stays red (5 drift lines on 2026-10-14) until Mike syncs it; the live Armory is the source
-  of truth, and `--no-asset-repo --verify` reports no drift.
+- `python tools/generate_starter_kit.py --verify` on the live Armory. It checks ids only, not stats. The
+  lotraom-assets mirror is checked only with `--asset-repo`; it stayed red (5 drift lines on 2026-10-14)
+  until Mike syncs it, and the live Armory is the source of truth.
 - `python tools/generate_career_kits.py --verify`: the career file is exactly what the rule derives.
 - Python: `tools/tests/test_generate_starter_kit.py`, `test_wire_starter_kit_rosters.py` (including
   the committed override being byte-for-byte what the tool builds from the committed career file, and the
@@ -278,7 +277,7 @@ an item folder loads as a duplicate item id.
 | `Main/_Module/ModuleData/equipmentsets/taom_char_creation_equipment.xml` | Culture-default rosters (in repo) |
 | `Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml` | Career rosters: the culture's lowest troop gear (in repo) |
 | `Main/_Module/ModuleData/equipmentsets/taom_player_start_vanilla_override.xml` | The five vanilla-mapped cultures' rosters, generated from the career kit (in repo, registered in `SubModule.xml`) |
-| `LOTRLOME_Armory/.../LOTRLOME_items/<folder>/starter_kit.xml` | Starter item defs, generated (live install and `E:\repos\lotraom-assets\v1.5\LOTRLOME_Armory`) |
+| `LOTRLOME_Armory/.../LOTRLOME_items/<folder>/starter_kit.xml` | Starter item defs, generated (live install; the `lotraom-assets` mirror only with `--asset-repo`) |
 | `LOTRLOME_Armory/.../LOTRLOME_crafting_pieces.xml`, `weapon_descriptions.xslt`, `crafting_templates.xslt` | Starter blades and their registrations, in marker blocks |
 | `LOTRLOME_Armory/.../LOTRLOME_items/<culture>/starter_armors.xml` | The older career-layer starter armour |
 

@@ -126,6 +126,8 @@ Use `/release`. It runs the sequence below and fails closed on the #371 pairing 
      `RuntimeDataCache*` alone: the packager already excludes it unless `--keep-rdc` asks for it.
      `AssetPackages/pack0.tpac` is what packaging TAOM in the editor writes and is not needed:
      delete it. The other tpacs there are git-tracked (field camp and refuge prefabs) and stay.
+     `DsAssetPackages/` is git-tracked and ships; run `python tools/build_ds_skeleton_pack.py --check`
+     before packaging.
      A leftover test-troop file (a `taom_test_` id under `ModuleData/`) is one of these; the packager
      refuses it, dry runs included, so the dry run fails until it is pruned.
    - **Shader sources:** the same dry run refuses a shader in a planned module's

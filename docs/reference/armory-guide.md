@@ -59,6 +59,8 @@
 > still describes the authoring-vs-cooked distinction correctly; what it got wrong was which one
 > the running game reads.
 >
+> **The dedicated server reads a third folder.** The co-op server engine loads `<module>/DsAssetPackages/*.tpac` for every loaded module (`Rgl.dll` `get_asset_path_for_module`). It stages the Armory's ModuleData but not its art, so creature skeletons come from `Main/_Module/DsAssetPackages/taom_creature_skeletons.tpac`, copied unchanged from the tree the client loads. After an Armory art sync, `audit_armory_refs.py` runs `build_ds_skeleton_pack.py --check` and warns on drift.
+>
 > **Re-confirmed 2026-09-26: the Armory now ships BOTH trees, and loose still wins.** A cook
 > wrote `AssetPackages/pack0-9.tpac` at 07:36; the 08:41 game session still logged
 > `Loading packages $BASE/Modules/LOTRLOME_Armory/Assets...`. The live `Assets/` folder is

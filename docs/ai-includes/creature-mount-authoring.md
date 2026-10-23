@@ -502,8 +502,10 @@ invariant under Phase 2, still unverified). Keep the previous decompile as
     elephant; run `tools/verify_mount_assets.py <creature>`. **Fix by re-BUNDLING the skeleton into
     the new mesh tpac with `tools/tpac_skeleton_inject.py` — NOT a standalone skeleton tpac.** The
     standalone approach (`tpac_skeleton_extract.py`, since deprecated) CRASHED the engine with a
-    recursive worker-thread native AV (spider 2026-06-14): a standalone skeleton tpac is an unproven
-    structure, and every shipping creature bundles its skeleton WITH the mesh. (spider rework
+    recursive worker-thread native AV (spider 2026-06-14): a standalone skeleton tpac built by that tool is
+    an unproven structure on the client, and every shipping creature bundles its skeleton WITH the mesh.
+    The one proven standalone skeleton package is the dedicated server's
+    `DsAssetPackages/taom_creature_skeletons.tpac`; it is server-only. (spider rework
     2026-06-13/14). See the "Replacing FBX/TPAC files" section at the top.
 18. **A `Mountable` monster with an incomplete rein surface is a TAOM-only shape** — vanilla pairs
     `Mountable` with all twelve rein attributes without exception, whereas the elephant and mûmakil

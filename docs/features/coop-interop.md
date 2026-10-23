@@ -34,6 +34,7 @@ still stands.
 |---|---|
 | BannerlordTogether specifics, its no-decompile policy, its boot matrix | [`bannerlord-together-compat.md`](bannerlord-together-compat.md) |
 | BannerlordCoop internals — Harmony ids, tick model, policies, object identity, integration surface | [`../research/bannerlordcoop-internals.md`](../research/bannerlordcoop-internals.md) |
+| Staging, booting, stopping and diagnosing TAOM on the dedicated server | [`coop-dedicated-server.md`](coop-dedicated-server.md) |
 | What happens to the hero a joiner created, and how TAOM's character-creation grants get re-applied | [`player-possession.md`](player-possession.md) |
 | Why a TAOM-less host can corrupt every hero's race on a full client | [`hero-race.md`](hero-race.md) — the degenerate-legend capture guard |
 | Raw analysis evidence (133 findings, 30 adversarial verdicts) | [`../raw/bannerlordcoop/`](../raw/bannerlordcoop/) |
@@ -632,10 +633,14 @@ to characterise. The existing try/catch around acceptance is containment, not co
   `/action_sets/action` on data that 1.4.7.117484 tolerates. What is still true: both manifests tag
   `DedicatedServerType=none` (`Main/_Module/SubModule.xml`, six entries in
   `Dependencies/_Module/SubModule.xml`), the appliance's `engine/Modules` ships no TAOM, and its
-  `default_new_game.sav` bootstrap is a vanilla world. An earlier revision of this bullet also said
-  the appliance runs on `Microsoft.NETCore.App` against TAOM's .NET Framework 4.7.2; that is
-  **unverified and now in tension with the field evidence** — treat it as a claim to re-check, not
-  as the reason not to try. The listen-host path remains the one that carries TAOM into the spawned
+  `default_new_game.sav` bootstrap is a vanilla world. **Update 2026-10-23:** a spike build of TAOM
+  reached SERVING on the v1.5.5 co-op dedicated server (2026-10-22, 2026-10-23); a boot of the
+  committed build to SERVING is still owed. The load work is
+  [ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md) and the operator steps are in
+  [coop-dedicated-server](coop-dedicated-server.md). Because both manifests tag
+  `DedicatedServerType=none`, the server loads TAOM only because staging names it. The earlier
+  remark that the appliance runs on `Microsoft.NETCore.App` against TAOM's .NET Framework 4.7.2 is
+  resolved: the staged host is .NET 6.0.36 and TAOM loads on it. In-game checks with clients are owed. The listen-host path remains the one that carries TAOM into the spawned
   server process with no copying at all.
 
 ## PatchShield is skipped under co-op
@@ -734,6 +739,8 @@ Owed by the 2026-08-03 work specifically, none of it run:
 
 7. A dedicated-server boot against the mirrored `Win64_Shipping_Server` binaries **and** the fixed
    `action_sets.xml` — the two together are what a server needs to start with TAOM's simulation.
+   Part done: a spike build reached SERVING (2026-10-22, 2026-10-23). Still owed: the boot of the
+   committed build on the mirrored binaries and the fixed `action_sets.xml`.
 8. A two-client join where the joiner keeps their character-creation race, culture startup gold,
    career and special-resource seed. The line to look for is
    `[Possession] Controlled hero changed 'X' -> 'Y'`.

@@ -1,7 +1,7 @@
 # Running TAOM's code on the co-op dedicated server
 
 **Status:** research and plan, 2026-10-21. B1 (the load gates) and B2 (TAOM.Dependencies headless)
-are built (`5fcf8390c`); B3 (the TAOM.Client skeleton) is committed as `03d9db8dc`, with its follow-up in `e0a6970dd`. B4a (the 14 front-end types to TAOM.Client, `KnownClientTypesInCore` from 40 to 26) has landed; its client boot is owed. B4b (the six campaign-map types and three helpers, `KnownClientTypesInCore` from 26 to 20) has landed as `a15563a3c`. B4c (the 7 mission, custom-battle engine and WinForms types, 20 to 13) has landed as `c91380274`. B5 (the 13 UIExtenderEx types, the 15 prefab classes, the three Patch109 postfixes and the UIExtenderEx registration to TAOM.Client, 13 to 0) is built: `KnownClientTypesInCore` is empty, so milestone M1 is reached in source. The client boots of B4b, B4c and B5 and the M1 server boot are owed. B6c (the startup-hook guards: problem rows 3 to 6, 8, 9 and 15 to 17) has landed as `8960a0c24`; B6a and B6b are in progress, and the 6c server boot waits for them. The decision this plan asks for is
+are built (`5fcf8390c`); B3 (the TAOM.Client skeleton) is committed as `03d9db8dc`, with its follow-up in `e0a6970dd`. B4a (the 14 front-end types to TAOM.Client, `KnownClientTypesInCore` from 40 to 26) has landed; its client boot is owed. B4b (the six campaign-map types and three helpers, `KnownClientTypesInCore` from 26 to 20) has landed as `a15563a3c`. B4c (the 7 mission, custom-battle engine and WinForms types, 20 to 13) has landed as `c91380274`. B5 (the 13 UIExtenderEx types, the 15 prefab classes, the three Patch109 postfixes and the UIExtenderEx registration to TAOM.Client, 13 to 0) is built: `KnownClientTypesInCore` is empty, so milestone M1 is reached in source. The client boots of B4b, B4c and B5 and the M1 server boot of the committed build are owed. A spike build of TAOM has since booted to SERVING on the dedicated server (spike boot 8, 2026-10-22, and boots on 2026-10-23); the record of that is [coop-dedicated-server](../features/coop-dedicated-server.md). B6c (the startup-hook guards: problem rows 3 to 6, 8, 9 and 15 to 17) has landed as `8960a0c24`; B6a and B6b are in progress, and the 6c server boot waits for them. The decision this plan asks for is
 [ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md), accepted 2026-10-22: option (b), a TAOM
 server settings file, missions proven absent before B4c is sized, and the GetTypes shim kept.
 **Target:** Bannerlord v1.5.5 server build (`Win64_Shipping_Server`) on the appliance's bundled .NET 6.0.36 host (the staged `dotnet/shared/Microsoft.NETCore.App`).
@@ -329,6 +329,8 @@ exactly the submodules the server engine itself would load and leave their tags 
 `IsNoRenderModeElement=false` (the two client-only markers), keep the rest with their tags. A module named in
 `-KeepSubModules` keeps today's behavior (named submodules only, tags stripped), as an explicit override for
 mods that tag wrongly. The module author's manifest becomes the contract.
+
+A module's `DsAssetPackages/` folder is not in the staging exclude list (`windows/run-windows.ps1` near lines 550-552), so it reaches the server. TAOM uses that for its creature skeletons.
 
 **TAOM's side (B9, after the `GetTypes` milestone):**
 
