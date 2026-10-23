@@ -31,12 +31,15 @@ installs are partial, so broken refs into them are environment gaps, not defects
    Culture.), and what an ABSENT attribute defaults to (an NPCCharacter with no <face> renders as
    a toddler). Load path: `validate_xml_schemas.py` names how the engine loads a file. LANGUAGE FILE
    (listed by a `language_data.xml`) and STYLESHEET (applied to the data merged before its
-   registration) load, but no XSD checks them. NOT REGISTERED means no `<XmlName>` or manifest loads
-   it, though the engine can still read it by fixed name (`global_strings.xml`, the scene lists) or
-   a `project.mbproj` row; that is expected for C#-read data. Every line that says "(a real fault)"
-   (a manifest the engine cannot load, a `Languages/` file no loadable manifest lists) is a finding,
-   although the run still exits 0: the summary line counts them. MISSING is a registration that
-   loads nothing. Confirm each XSLT still matches the elements it targets; a new file in a
+   registration) load, but no XSD checks them. NATIVE means a `project.mbproj` row names it (or the
+   stylesheet beside it); the line gives the row's id and type and claims no load, since the engine
+   loads a row only when it requests that id or reads that type, and the gates are in
+   `moduledata-validation.md` "Gate per file kind". NOT REGISTERED means no `<XmlName>`, manifest or
+   `project.mbproj` row loads it, though the engine can still read it by fixed name
+   (`global_strings.xml`, the scene lists); that is expected for C#-read data. Every line that says
+   "(a real fault)" (a manifest the engine cannot load, a `Languages/` file no loadable manifest
+   lists) is a finding, and it fails a by-name run (exit 1, summary FAIL); the summary line counts
+   them. MISSING is a registration that loads nothing, or a `project.mbproj` the engine cannot load. Confirm each XSLT still matches the elements it targets; a new file in a
    folder-registered Armory directory loads only after a game RESTART, so report the restart plus
    visual check as OWED; cross-module refs need a <DependedModule> (Agent 5 item 10 owns that
    trace). Then read the trap index in `docs/ai-includes/orientation.md` and apply every row your files touch; each linked doc

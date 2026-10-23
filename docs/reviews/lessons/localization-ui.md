@@ -803,6 +803,10 @@ checked `write_back` only.
   line-ending follow-up was half done: the merge `85cbd20c8` rewrote the 12 module strings files and the
   RCA noted it, but the guide never described the blank line after almost every row until this date. Rule: a
   follow-up with no issue is a note; file the issue the day the RCA is written.
+- **Recurrence (2026-10-23, #980):** the 2026-10-21 bullet above shipped in a commit (`48d66b59a`) whose RCA again
+  left three items as follow-ups with no issue; #980 was filed two days later. The rule has now failed in prose three
+  times, so it becomes a machine check: #984 makes `lint_docs.py` report a new RCA line with `FOLLOW-UP` that cites no
+  issue and no reason. Source: `docs/reviews/rca-schema-check-2026-10-23.md` root-cause pattern.
 
 ### Gate the translation cache, not only the rows (2026-09-25)
 The writing-system gate read the repo's language files, but `tools/translation_cache/<lang>.json` holds the
