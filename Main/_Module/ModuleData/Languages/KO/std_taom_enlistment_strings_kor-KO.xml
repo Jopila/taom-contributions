@@ -279,5 +279,8 @@
     <string id="taom_enlist_desert_cost" text="Deserting will also cost you your commander's favor and your good name." />
     <string id="taom_enlist_desert_cost_reply" text="(This will cost me my commander's favor and my good name.)" />
     <string id="taom_enlist_spoils" text="Spoils of your own blade: {ITEMS}" />
+    <string id="taom_enlist_promoted_kit" text="The quartermaster has kit for your new rank." />
+    <string id="taom_enlist_promoted_notice" text="{COMMANDER} names you {RANK}." />
+    <string id="taom_enlist_board_kit" text="{NEWLINE}Kit to draw: the quartermaster holds gear for your rank." />
   </strings>
 </base>

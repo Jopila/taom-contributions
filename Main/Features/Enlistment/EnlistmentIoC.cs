@@ -89,6 +89,7 @@ public static class EnlistmentIoC
         container.Register<Content.IBattleMeritAccumulator, Content.BattleMeritAccumulator>(Reuse.Singleton);
         container.Register<Content.EnlistmentBattlePayoutService>(Reuse.Singleton);
         container.Register<IBattleLootAdapter, BattleLootAdapter>(Reuse.Singleton);
+        container.Register<IQuickNoticeAdapter, QuickNoticeAdapter>(Reuse.Singleton);
 
         // Entry points (resolved by SubModule for AddBehavior)
         container.Register<EnlistmentBehavior>(Reuse.Singleton);

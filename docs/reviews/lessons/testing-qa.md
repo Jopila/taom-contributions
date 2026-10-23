@@ -2194,3 +2194,15 @@ because they faked `isEquipped: true` on such a row. The options and `IsEquipped
   wraps and confirm that the faked state occurs there. When it cannot occur, the feature branch it reaches is dead:
   report it, do not test it.
 - **Source:** issue #925; first found in `docs/reviews/rca-quickactions-unequip-2026-10-19.md` (follow-ups).
+
+### Before guarding against a repeat, read the code that would repeat (#835, 2026-10-23)
+Enlistment's promotion notice was built with a gate so that a battle and a daily check on the same day would
+not announce one promotion twice. Each promotion is exactly one rank up (the ladder validator forces it),
+so the two calls always report different ranks and the gate could never fire; it still cost a class, an
+event subscription and a service dependency on the presentation layer.
+- **Why missed:** the plan's risk note was carried into the build without reading the method that changes
+  the rank and its callers.
+- **Prevent:** a dedupe, latch or "only once" guard ships only with a test that reproduces the repeat it
+  prevents through the real producer (or a cited code path that can produce it). If no such path exists,
+  delete the guard and say why in the doc.
+- **Source:** `docs/reviews/rca-enlistment-promotion-notice-2026-10-23.md` F1.

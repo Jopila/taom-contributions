@@ -46,6 +46,7 @@ public class ServiceStatusService : IServiceStatusService
     private readonly IServiceStatusTextWriter _writer;
     private readonly IPromotionService _promotion;
     private readonly IEnlistmentContentConfigProvider _config;
+    private readonly Equipment.IEquipmentIssueLedger _ledger;
 
     private ServiceStatusModel _last;
 
@@ -55,7 +56,8 @@ public class ServiceStatusService : IServiceStatusService
         ICommanderLordAdapter commander,
         IServiceStatusTextWriter writer,
         IPromotionService promotion,
-        IEnlistmentContentConfigProvider config)
+        IEnlistmentContentConfigProvider config,
+        Equipment.IEquipmentIssueLedger ledger)
     {
         _store = store;
         _content = content;
@@ -63,6 +65,7 @@ public class ServiceStatusService : IServiceStatusService
         _writer = writer;
         _promotion = promotion;
         _config = config;
+        _ledger = ledger;
     }
 
     public ServiceStatusModel Build()
@@ -98,7 +101,8 @@ public class ServiceStatusService : IServiceStatusService
             dailyWage: DailyWageFor(content.Rank),
             nextRank: showLadder ? promotion.ToRank : (ServiceRank?)null,
             nextRequirementKey: showLadder ? promotion.MostBindingUnmetKey : null,
-            nextRequirementTarget: showLadder ? promotion.MostBindingUnmetTarget : 0);
+            nextRequirementTarget: showLadder ? promotion.MostBindingUnmetTarget : 0,
+            kitWaits: Equipment.EnlistmentKitTiers.KitWaits(content.Rank, _ledger));
     }
 
     /// <summary>

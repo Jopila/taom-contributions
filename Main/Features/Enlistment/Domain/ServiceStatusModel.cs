@@ -70,6 +70,9 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
     /// <summary>Threshold <see cref="NextRequirementKey"/> must reach. 0 when there is no key.</summary>
     public int NextRequirementTarget { get; }
 
+    /// <summary>The quartermaster holds a kit tier above the last one drawn (#835). A bool, so it compares by value.</summary>
+    public bool KitWaits { get; }
+
     public ServiceStatusModel(
         string commanderName = null,
         CommanderActivity activity = CommanderActivity.Marching,
@@ -84,7 +87,8 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
         int dailyWage = 0,
         ServiceRank? nextRank = null,
         string nextRequirementKey = null,
-        int nextRequirementTarget = 0)
+        int nextRequirementTarget = 0,
+        bool kitWaits = false)
     {
         CommanderName = commanderName;
         Activity = activity;
@@ -100,6 +104,7 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
         NextRank = nextRank;
         NextRequirementKey = nextRequirementKey;
         NextRequirementTarget = nextRequirementTarget;
+        KitWaits = kitWaits;
     }
 
     public bool Equals(ServiceStatusModel other)
@@ -120,7 +125,8 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
             && DailyWage == other.DailyWage
             && NextRank == other.NextRank
             && string.Equals(NextRequirementKey, other.NextRequirementKey, StringComparison.Ordinal)
-            && NextRequirementTarget == other.NextRequirementTarget;
+            && NextRequirementTarget == other.NextRequirementTarget
+            && KitWaits == other.KitWaits;
     }
 
     public override bool Equals(object obj) => Equals(obj as ServiceStatusModel);
@@ -143,6 +149,7 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
             hash = (hash * 397) ^ (NextRank.HasValue ? (int)NextRank.Value : -1);
             hash = (hash * 397) ^ (NextRequirementKey?.GetHashCode() ?? 0);
             hash = (hash * 397) ^ NextRequirementTarget;
+            hash = (hash * 397) ^ (KitWaits ? 1 : 0);
             return hash;
         }
     }

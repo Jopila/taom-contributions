@@ -85,6 +85,20 @@ public class EnlistmentContainerWiringTests
     }
 
     [TestMethod]
+    public void DailyAnnouncer_Resolvable_PromotionNoticeDependenciesSatisfied()
+    {
+        var container = BuildContainer();
+
+        var errors = container.Validate(typeof(global::TAOM.Features.Enlistment.Presentation.IServiceDailyAnnouncer));
+
+        Assert.AreEqual(
+            0,
+            errors.Length,
+            "IServiceDailyAnnouncer is not resolvable: "
+                + string.Join("; ", errors.Select(e => e.Value.Message)));
+    }
+
+    [TestMethod]
     public void Reconciler_Resolvable_EncounterGuardDependencySatisfied()
     {
         // Takes IEncounterAdapter so it can tell an open loot encounter from a finished battle.

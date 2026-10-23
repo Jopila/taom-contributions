@@ -759,6 +759,7 @@ game hour.
   {RANK}."* Rations, the morale floor and the surgeon stay — they are the difference between waiting
   and starving, and the player did not choose to be left behind. Pay and rank are the parts that
   require someone to award them.
+  The battle payout also skips the promotion in this state (#835).
 
 ### Two toasts, one of which is conditional (#436)
 
@@ -2295,6 +2296,41 @@ Tests: `PersonalSpoilsPolicyTests`, `BattleMeritAccumulatorTests`, `EnlistmentBa
 and adapter source shapes, and the engine binding) and `EnlistmentContainerWiringTests` (the payout
 service resolves).
 
+## The promotion notice and the kit line (#835)
+
+A promotion used to be a one-line message in the log. It is now a quick-information notice with the
+commander's portrait, and the status board says when the quartermaster has gear to hand over.
+
+- **The notice.** `ServiceDailyAnnouncer.AnnouncePromotion` builds "{COMMANDER} names you {RANK}."
+  (`taom_enlist_promoted_notice`) and, when a kit waits, appends "The quartermaster has kit for your new
+  rank." (`taom_enlist_promoted_kit`), then shows it through `IQuickNoticeAdapter` /
+  `QuickNoticeAdapter` (`MBInformationManager.AddQuickInformation`, 3000 ms extra, with the commander's
+  `CharacterObject`). If showing the notice throws, the old plain `taom_enlist_promoted` message is shown
+  instead; a notice the UI does not display cannot be detected. A commander who is missing, dead or a
+  prisoner (`ServiceDailyAnnouncer.UsePortraitNotice`) gets that neutral text instead of a portrait. Both
+  callers go through `AnnouncePromotion`: the battle payout and the daily check. Every promotion is
+  exactly one rank up, so two promotions in a day are two ranks and show two notices.
+- **No promotion in the grace state.** `EnlistmentBattlePayoutService` skips the promotion evaluation
+  while the commander is unavailable, as the daily tick already does: there is no chain of command left
+  to promote anyone.
+- **A kit waits** when `EnlistmentKitTiers.KitWaits(rank, ledger)`: the quartermaster's own ledger
+  (`IEquipmentIssueLedger.HasIssuedForTier`) has not covered the rank's kit tier, so the board, the
+  notice and the quartermaster's answer share one rule (an undefined stored tier counts as nothing
+  drawn). Ranks 4 to 6 share the top tier, so a promotion inside it promises no kit once the Staff
+  Sergeant kit is drawn.
+- **Status board.** `ServiceStatusModel.KitWaits` (in `Equals` and `GetHashCode`, so a change reaches the
+  screen) adds "Kit to draw: the quartermaster holds gear for your rank." (`taom_enlist_board_kit`, with
+  its own leading newline like the other board lines) under the same condition. The writer appends it to
+  the board's last variable, so the registered board template keeps its shape and its translations. The
+  line also shows before the first kit is drawn.
+- **Not built:** naming the next rank's gate inside the promotion notice (the status board already shows it), and automatic issue of gear (drawing in conversation
+  is deliberate).
+
+Tests: `PromotionNoticeTests` (the kit rule against the real ledger, the portrait-or-neutral choice, source
+shapes), `ServiceStatusServiceTests` (`KitWaits` on the board and in equality),
+`EnlistmentBattlePayoutServiceTests` (no promotion in the grace state) and `EnlistmentContainerWiringTests`
+(the announcer resolves).
+
 ## Interactions with the rest of TAOM
 
 **Leader-keyed attribution is the recurring hazard.** For months of game time the player fights
@@ -2418,6 +2454,10 @@ What actually remains, each a state no test can reach:
 - **A field battle with the commander in an army.** Still the case most likely to fail:
   `FindCommanderPartyIdIn` matches only the commander's own party in `InvolvedParties`, and an
   attached army member may not appear there.
+- **Promotion notice (#835).** A promotion shows the notice with the commander's portrait. The kit line
+  appears on the board when a kit waits and disappears after drawing it from the quartermaster. A
+  promotion inside the top tier (Sergeant First Class and above) promises no kit after drawing the Staff
+  Sergeant kit.
 - **Personal spoils (#834).** Win a field battle in service with several kills: up to 3 items land in
   the inventory with their modifiers kept, and one "Spoils of your own blade" toast lists them. Lose a
   battle: nothing. Fall, take control of a soldier, kill an enemy: no spoil, no kill XP and no kill credit in the merit score; the fall is still recorded. Discharge

@@ -65,7 +65,7 @@ public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
         text.SetTextVariable("COIN", CoinIcon);
         text.SetTextVariable("LADDER", LadderLine(status));
         text.SetTextVariable("ARREARS", ArrearsLine(status.DeferredWages));
-        text.SetTextVariable("DUTY", DutyLine(status.ActiveDutyId));
+        text.SetTextVariable("DUTY", WithKitLine(DutyLine(status.ActiveDutyId), status));
 
         MBTextManager.SetTextVariable(WaitTextVariable, text);
     }
@@ -175,6 +175,20 @@ public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
         line.SetTextVariable("GOLD", deferredWages.ToString());
         line.SetTextVariable("GOLD_ICON", CoinIcon);
         return line;
+    }
+
+    /// <summary>
+    /// Appends the "Kit to draw" line (#835) to the board's last variable, so the registered board
+    /// template keeps its shape: a changed template needs a new id and re-translation.
+    /// </summary>
+    private static TextObject WithKitLine(TextObject duty, ServiceStatusModel status)
+    {
+        if (!status.KitWaits)
+            return duty;
+        var combined = new TextObject("{=!}{DUTY_LINE}{KIT_LINE}");
+        combined.SetTextVariable("DUTY_LINE", duty);
+        combined.SetTextVariable("KIT_LINE", new TextObject("{=taom_enlist_board_kit}{NEWLINE}Kit to draw: the quartermaster holds gear for your rank."));
+        return combined;
     }
 
     private static TextObject DutyLine(string activeDutyId)

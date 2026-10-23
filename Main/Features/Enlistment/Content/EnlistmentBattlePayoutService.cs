@@ -169,6 +169,11 @@ public class EnlistmentBattlePayoutService
         // through the single IPromotionService chokepoint so the thresholds can't drift —
         // without this, a battle that earns the last XP you need wouldn't promote you until
         // the next day rolled over.
+        //
+        // Not in the grace state: no chain of command is left to promote anyone (#835; the daily tick
+        // makes the same rule).
+        if (_store.Record.State == TAOM.Features.Enlistment.Domain.EnlistmentState.CommanderUnavailable)
+            return true;
         var promotion = _promotion.EvaluateAndApply();
         LastBattlePromoted = promotion.Promoted;
         LastPromotedRank = promotion.NewRank;

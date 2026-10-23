@@ -1,8 +1,10 @@
 using TaleWorlds.Core;
+using TAOM.Adapters;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TAOM.Features.Enlistment.Content;
 using TAOM.Features.Enlistment.Content.Domain;
+using TAOM.Features.Enlistment.Equipment;
 
 namespace TAOM.Features.Enlistment.Presentation;
 
@@ -19,6 +21,11 @@ public interface IServiceDailyAnnouncer
     /// <summary>Say what happened to today's pay (field report 2). Silent when nothing happened.</summary>
     void AnnounceWage(WageDecision decision);
 
+    /// <summary>
+    /// The promotion notice (#835): the commander's portrait, and a second sentence when a kit waits.
+    /// A commander who is missing, dead or a prisoner gets the neutral promotion text instead. If showing
+    /// the notice throws, the old plain message is shown; a notice the UI does not display cannot be detected.
+    /// </summary>
     void AnnouncePromotion(ServiceRank rank);
 
     /// <summary>The merit toast for the battle's band. Silent when the battle had no sample.</summary>
@@ -36,6 +43,23 @@ public sealed class ServiceDailyAnnouncer : IServiceDailyAnnouncer
     /// not a contract anything else depends on.
     /// </summary>
     private const string GoldIcon = "<img src=\"General\\Icons\\Coin@2x\" extend=\"8\">";
+
+    private readonly IEnlistmentStore _store;
+    private readonly Equipment.IEquipmentIssueLedger _ledger;
+    private readonly ICommanderLordAdapter _commander;
+    private readonly IQuickNoticeAdapter _notice;
+
+    public ServiceDailyAnnouncer(
+        IEnlistmentStore store,
+        Equipment.IEquipmentIssueLedger ledger,
+        ICommanderLordAdapter commander,
+        IQuickNoticeAdapter notice)
+    {
+        _store = store;
+        _ledger = ledger;
+        _commander = commander;
+        _notice = notice;
+    }
 
     public void AnnounceWage(WageDecision decision)
     {
@@ -61,8 +85,27 @@ public sealed class ServiceDailyAnnouncer : IServiceDailyAnnouncer
         }
     }
 
+    /// <summary>The portrait notice needs a commander who can still hold a command (the daily tick uses the grace state for the same purpose).</summary>
+    internal static bool UsePortraitNotice(CommanderSnapshot commander) =>
+        commander != null && commander.Exists && commander.IsAlive && !commander.IsPrisoner;
+
     public void AnnouncePromotion(ServiceRank rank)
     {
+        var commanderId = _store.Record.CommanderHeroId;
+        var commander = _commander.GetSnapshot(commanderId);
+        if (UsePortraitNotice(commander))
+        {
+            var notice = new TextObject("{=taom_enlist_promoted_notice}{COMMANDER} names you {RANK}.");
+            notice.SetTextVariable("COMMANDER", commander.Name ?? "");
+            notice.SetTextVariable("RANK", ServiceVocabulary.RankName(rank));
+            var message = notice.ToString();
+            if (EnlistmentKitTiers.KitWaits(rank, _ledger))
+                message += " " + new TextObject("{=taom_enlist_promoted_kit}The quartermaster has kit for your new rank.").ToString();
+            if (_notice.Show(message, commanderId))
+                return;
+        }
+
+        // Neutral text: no commander to name, or the notice could not be shown.
         var text = new TextObject("{=taom_enlist_promoted}You have been promoted to {RANK}.");
         text.SetTextVariable("RANK", ServiceVocabulary.RankName(rank));
         InformationManager.DisplayMessage(new InformationMessage(text.ToString()));

@@ -50,7 +50,7 @@ public class ServiceStatusServiceTests
         _store.Record.EnlistedHeroId = "main_hero";
         _store.Record.CommanderHeroId = "lord_1";
 
-        _sut = new ServiceStatusService(_store, _content, _commander, _writer, _promotion, _config);
+        _sut = new ServiceStatusService(_store, _content, _commander, _writer, _promotion, _config, new TAOM.Features.Enlistment.Equipment.PersistedEquipmentIssueLedger(_content));
     }
 
     private void Commander(
@@ -334,6 +334,45 @@ public class ServiceStatusServiceTests
         Assert.IsTrue(_sut.RefreshIfChanged());
         _writer.ReceivedWithAnyArgs(1).Write(default);
     }
+
+    // ---- the kit line (#835) ----
+
+    [TestMethod]
+    public void Build_KitWaits_WhenTheRanksTierIsAboveTheLastDrawn()
+    {
+        _content.Record.Rank = ServiceRank.Specialist;
+        _content.Record.HighestIssuedKitTier = 0;
+
+        Assert.IsTrue(_sut.Build().KitWaits);
+    }
+
+    [TestMethod]
+    public void Build_KitDoesNotWait_AfterDrawingThatTier()
+    {
+        _content.Record.Rank = ServiceRank.Specialist;
+        _content.Record.HighestIssuedKitTier = 1;
+
+        Assert.IsFalse(_sut.Build().KitWaits);
+    }
+
+    [TestMethod]
+    public void Build_KitDoesNotWait_InsideTheTopTier()
+    {
+        _content.Record.Rank = ServiceRank.MasterSergeant;
+        _content.Record.HighestIssuedKitTier = 3;
+
+        Assert.IsFalse(_sut.Build().KitWaits);
+    }
+
+    [TestMethod]
+    public void Build_NothingDrawnYet_KitWaits()
+    {
+        _content.Record.Rank = ServiceRank.Private;
+        _content.Record.HighestIssuedKitTier = null;
+
+        Assert.IsTrue(_sut.Build().KitWaits);
+    }
+
 }
 
 /// <summary>
@@ -371,6 +410,7 @@ public class ServiceStatusModelEqualityTests
     [DataRow("nextRank")]
     [DataRow("nextRequirementKey")]
     [DataRow("nextRequirementTarget")]
+    [DataRow("kitWaits")]
     public void Equals_IsFalse_WhenAnySingleFieldDiffers(string field)
     {
         var other = new ServiceStatusModel(
@@ -387,7 +427,8 @@ public class ServiceStatusModelEqualityTests
             dailyWage: field == "dailyWage" ? 14 : 8,
             nextRank: field == "nextRank" ? ServiceRank.StaffSergeant : ServiceRank.Sergeant,
             nextRequirementKey: field == "nextRequirementKey" ? "leadership" : "xp",
-            nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350);
+            nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350,
+            kitWaits: field == "kitWaits");
 
         Assert.IsFalse(Base().Equals(other), $"'{field}' is missing from Equals — its changes would never reach the screen");
     }
@@ -402,6 +443,7 @@ public class ServiceStatusModelEqualityTests
     [DataRow("nextRank")]
     [DataRow("nextRequirementKey")]
     [DataRow("nextRequirementTarget")]
+    [DataRow("kitWaits")]
     public void GetHashCode_Differs_WhenANewFieldDiffers(string field)
     {
         var other = new ServiceStatusModel(
@@ -412,7 +454,8 @@ public class ServiceStatusModelEqualityTests
             dailyWage: field == "dailyWage" ? 14 : 8,
             nextRank: field == "nextRank" ? ServiceRank.StaffSergeant : ServiceRank.Sergeant,
             nextRequirementKey: field == "nextRequirementKey" ? "leadership" : "xp",
-            nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350);
+            nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350,
+            kitWaits: field == "kitWaits");
 
         Assert.AreNotEqual(Base().GetHashCode(), other.GetHashCode(), $"'{field}' is missing from GetHashCode");
     }
