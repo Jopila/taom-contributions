@@ -2206,3 +2206,10 @@ event subscription and a service dependency on the presentation layer.
   prevents through the real producer (or a cited code path that can produce it). If no such path exists,
   delete the guard and say why in the doc.
 - **Source:** `docs/reviews/rca-enlistment-promotion-notice-2026-10-23.md` F1.
+### A cap is checked where each counted item is added, not where its group starts (Lines of Descent, 2026-10-23)
+The 300-card cap was checked before each couple row, and the row then added its spouses; the 5,000-visited cap
+was checked at the outer loop, and the inner loop added a whole neighbour list. Both caps could be passed.
+- **Why missed:** each cap was written when its group held one item; the group grew later in the design.
+- **Prevent:** put a bound check at the line that increments the counted thing, and test it with a group larger
+  than the remaining budget (150 married children, a fan-out past the visited cap).
+- **Source:** [rca-lines-of-descent-2026-10-23.md](../rca-lines-of-descent-2026-10-23.md) findings 1 and 3.

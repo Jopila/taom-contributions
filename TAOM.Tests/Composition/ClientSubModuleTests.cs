@@ -163,6 +163,7 @@ public class ClientSubModuleTests
             typeof(TAOM.Features.SupplyLines.ISupplyRouteVisualService),
             typeof(TAOM.Features.FieldCamp.ICampVisualService),
             typeof(TAOM.Features.Refuge.IRefugeVisualService),
+            typeof(TAOM.Features.LinesOfDescent.UI.FamilyTreePopup),
         };
         var actual = container.GetServiceRegistrations().Select(r => r.ServiceType).ToArray();
         CollectionAssert.AreEquivalent(expected, actual);

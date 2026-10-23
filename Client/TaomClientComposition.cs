@@ -9,6 +9,7 @@ using TAOM.Client.Features.ShaderCompileNotice;
 using TAOM.Client.Features.ShaderPrecompilation;
 using TAOM.Composition;
 using TAOM.Features.CustomBattles;
+using TAOM.Features.LinesOfDescent.UI;
 using TAOM.Features.FieldCamp;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HallOfFire;
@@ -45,5 +46,6 @@ internal sealed class TaomClientComposition : IClientComposition
         registrator.Register<ICampVisualService, CampVisualService>(Reuse.Singleton);
         registrator.Register<IRefugeVisualService, RefugeVisualService>(Reuse.Singleton);
         registrator.Register<ISupplyRouteVisualService, SupplyRouteVisualService>(Reuse.Singleton);
+        registrator.Register<FamilyTreePopup>(Reuse.Singleton);
     }
 }

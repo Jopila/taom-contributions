@@ -1164,3 +1164,23 @@ did both correctly.
   shape: assert the SpritePart and the GenericSprite separately, and match the brush layer through the
   `internal const` id the C# binds (a const inlines, so the test loads no engine type).
 - **Source:** `docs/reviews/rca-bills-burden-2026-10-20.md` finding 3.
+### A UIExtenderEx mixin constructor never calls OnRefresh (Lines of Descent, 2026-10-23)
+UIExtenderEx 2.13.3 creates a mixin at the end of the view model's constructor and replays the constructor's
+own refresh call on it as `OnRefresh`. Two new mixins also called `OnRefresh()` in their constructors, so each
+clan member row ran its relation search three times when the screen opened.
+- **Why missed:** the plan cited a precedent for the explicit call; the rule against it existed only as a code
+  comment (`Client/Features/Namegiving/UI/FiefNamingMixin.cs:46`).
+- **Prevent:** do not call `OnRefresh()` from a mixin constructor; `LinesOfDescent` pins this with a source test.
+  When a plan cites a precedent for a framework call, read the precedent and the framework's code, not only the
+  plan.
+- **Source:** [rca-lines-of-descent-2026-10-23.md](../rca-lines-of-descent-2026-10-23.md) finding 5.
+
+### A child list under a wider parent row needs HorizontalAlignment="Center" (Lines of Descent, 2026-10-23)
+The family tree's child row had no `HorizontalAlignment`, and Gauntlet defaults to Left. Vanilla's troop tree
+never shows this because its parent row is a fixed 150 px, never wider than a child; the TAOM couple row is
+190 px per card, so an only child under a married couple sat at the left with its connector line dropping into
+empty space. This is the same default-left class as the fixed-width columns entry above.
+- **Why missed:** the node template was adapted from vanilla's, whose geometry hid the default.
+- **Prevent:** when a copied layout changes a size, check every container's alignment default against the new
+  sizes; pin a needed `HorizontalAlignment` with a source test.
+- **Source:** [rca-lines-of-descent-2026-10-23.md](../rca-lines-of-descent-2026-10-23.md) finding 4.

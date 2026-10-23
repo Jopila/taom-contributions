@@ -3828,4 +3828,24 @@
   <string id="str_player_mother_name.rhudaur" text="{=taom_str_player_mother_name.rhudaur}Gilwen" />
 
   <!-- TAOM-NEWCULTURE:rhudaur:END -->
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- Lines of Descent (#905) -->
+	<string id="taom_lod_button" text="{=taom_lod_button}Family Tree" />
+	<string id="taom_lod_title" text="{=taom_lod_title}The Line of {ROOT.NAME}" />
+	<string id="taom_lod_kin" text="{=taom_lod_kin}Kin of {HERO.NAME}" />
+	<string id="taom_lod_more" text="{=taom_lod_more}{COUNT} more not shown" />
+	<string id="taom_lod_repeat" text="{=taom_lod_repeat}See above" />
+	<string id="taom_lod_chain" text="{=taom_lod_chain}{FIRST}, {REST}" />
+	<string id="taom_lod_link_parents" text="{=taom_lod_link_parents}{RELATION} of {FATHER.NAME} and {MOTHER.NAME}" />
+	<string id="taom_lod_link" text="{=taom_lod_link}{RELATION} of {HERO.NAME}" />
+	<string id="taom_lod_rel_father" text="{=taom_lod_rel_father}father" />
+	<string id="taom_lod_rel_mother" text="{=taom_lod_rel_mother}mother" />
+	<string id="taom_lod_rel_son" text="{=taom_lod_rel_son}son" />
+	<string id="taom_lod_rel_daughter" text="{=taom_lod_rel_daughter}daughter" />
+	<string id="taom_lod_rel_husband" text="{=taom_lod_rel_husband}husband" />
+	<string id="taom_lod_rel_wife" text="{=taom_lod_rel_wife}wife" />
+	<string id="taom_lod_rel_brother" text="{=taom_lod_rel_brother}brother" />
+	<string id="taom_lod_rel_sister" text="{=taom_lod_rel_sister}sister" />
+	<string id="taom_lod_rel_ex_husband" text="{=taom_lod_rel_ex_husband}former husband" />
+	<string id="taom_lod_rel_ex_wife" text="{=taom_lod_rel_ex_wife}former wife" />
 </strings>

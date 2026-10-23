@@ -1,0 +1,61 @@
+<Prefab>
+	<!--
+		Lines of Descent (#905): one couple row and the branch under it. Bound to FamilyTreeNodeVM (Client/Features/LinesOfDescent/UI).
+		It refers to itself for the children, as vanilla's EncyclopediaUnitTreeNodeItem does. EncyclopediaUnitTreeNodeItemBrushWidget
+		draws one connecting line per child as the list items are added, so the view model tree is built before the movie loads
+		and never changes. It has no ButtonContainer property (vanilla names one anyway and the widget ignores it), so the couple
+		row is only found by its Id here.
+		Layout: the couple row is 176 tall (card 63, name below it, then the relation text, up to four lines). The line
+		container starts under it and the child row 35 further down (line sprite height 30, as vanilla's 134 and 169).
+	-->
+	<Constants>
+		<Constant Name="Encyclopedia.CharacterTree.Line.Height" BrushName="Encyclopedia.CharacterTree.Line" BrushLayer="Default" BrushValueType="Height"/>
+	</Constants>
+	<Window>
+		<EncyclopediaUnitTreeNodeItemBrushWidget HeightSizePolicy="CoverChildren" WidthSizePolicy="CoverChildren" MarginLeft="10" MarginRight="10" ChildContainer="ChildContainer" LineContainer="LineContainer" LineBrush="Encyclopedia.CharacterTree.Line">
+			<Children>
+
+				<!--Couple row, or the stub for children a cap left out-->
+				<Widget Id="ButtonContainer" WidthSizePolicy="CoverChildren" HeightSizePolicy="Fixed" SuggestedHeight="176" HorizontalAlignment="Center">
+					<Children>
+
+						<ListPanel DataSource="{Members}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" StackLayout.LayoutMethod="HorizontalLeftToRight">
+							<ItemTemplate>
+
+								<!--Card: vanilla's family element, the relation text under the name-->
+								<Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="190" SuggestedHeight="176">
+									<Children>
+										<EncyclopediaSubPageElement>
+											<Children>
+												<Widget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="SelectionBorder@2x_9" IsVisible="@IsSelected"/>
+											</Children>
+										</EncyclopediaSubPageElement>
+										<TextWidget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="186" SuggestedHeight="76" HorizontalAlignment="Center" VerticalAlignment="Top" MarginTop="98" Brush="Encyclopedia.SubPage.Element.Name.Text" Brush.TextVerticalAlignment="Top" Text="@Role"/>
+									</Children>
+								</Widget>
+
+							</ItemTemplate>
+						</ListPanel>
+
+						<TextWidget DoNotAcceptEvents="true" IsVisible="@IsMore" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="190" SuggestedHeight="40" HorizontalAlignment="Center" VerticalAlignment="Top" MarginTop="20" Brush="Encyclopedia.SubPage.Element.Name.Text" Text="@MoreText"/>
+
+					</Children>
+				</Widget>
+
+				<!--Connection lines (added from code, one per child)-->
+				<Widget Id="LineContainer" DoNotAcceptEvents="true" DoNotPassEventsToChildren="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="Fixed" SuggestedHeight="!Encyclopedia.CharacterTree.Line.Height" HorizontalAlignment="Center" MarginTop="180">
+					<Children>
+					</Children>
+				</Widget>
+
+				<!--Children-->
+				<ListPanel Id="ChildContainer" DataSource="{Branch}" HeightSizePolicy="CoverChildren" WidthSizePolicy="CoverChildren" MarginTop="215" HorizontalAlignment="Center" DoNotAcceptEvents="true" StackLayout.LayoutMethod="HorizontalLeftToRight">
+					<ItemTemplate>
+						<TaomFamilyTreeNode/>
+					</ItemTemplate>
+				</ListPanel>
+
+			</Children>
+		</EncyclopediaUnitTreeNodeItemBrushWidget>
+	</Window>
+</Prefab>

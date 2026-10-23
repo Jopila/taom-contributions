@@ -6518,6 +6518,42 @@
 
     <string id="taom_cargo_tt_fill" text="Inventory fill" />
 
+    <string id="taom_lod_button" text="Family Tree" />
+
+    <string id="taom_lod_title" text="The Line of {ROOT.NAME}" />
+
+    <string id="taom_lod_kin" text="Kin of {HERO.NAME}" />
+
+    <string id="taom_lod_more" text="{COUNT} more not shown" />
+
+    <string id="taom_lod_repeat" text="See above" />
+
+    <string id="taom_lod_chain" text="{FIRST}, {REST}" />
+
+    <string id="taom_lod_link_parents" text="{RELATION} of {FATHER.NAME} and {MOTHER.NAME}" />
+
+    <string id="taom_lod_link" text="{RELATION} of {HERO.NAME}" />
+
+    <string id="taom_lod_rel_father" text="father" />
+
+    <string id="taom_lod_rel_mother" text="mother" />
+
+    <string id="taom_lod_rel_son" text="son" />
+
+    <string id="taom_lod_rel_daughter" text="daughter" />
+
+    <string id="taom_lod_rel_husband" text="husband" />
+
+    <string id="taom_lod_rel_wife" text="wife" />
+
+    <string id="taom_lod_rel_brother" text="brother" />
+
+    <string id="taom_lod_rel_sister" text="sister" />
+
+    <string id="taom_lod_rel_ex_husband" text="former husband" />
+
+    <string id="taom_lod_rel_ex_wife" text="former wife" />
+
   </strings>
 
 </base>

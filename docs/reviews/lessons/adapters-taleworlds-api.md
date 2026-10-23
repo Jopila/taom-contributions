@@ -1396,3 +1396,14 @@ added a second call and doubled the sound.
   level into callbacks, before adding X. An in-game check on the old build settles it in seconds; ask for one when the
   trace is not conclusive.
 - **Source:** [rca-career-click-sound-971-2026-10-23.md](../rca-career-click-sound-971-2026-10-23.md) finding 1.
+
+### Hero parent and child lists are never pruned: every reader checks the current link (Lines of Descent, 2026-10-23)
+`Hero.Father` and `Hero.Mother` setters add the hero to the new parent's children and never remove it from the
+old parent's list, so a parent's `Children` can hold a child whose father is now someone else. The family tree
+builder rejected such stale children, but the relation search over the same lists did not, and labelled a hero
+"Son of" a man who is no longer his father.
+- **Why missed:** the stale-link rule was found while building the tree and was not carried to the second reader
+  of the same lists.
+- **Prevent:** when you find an engine-data trap, grep every reader of that data in the change and apply the
+  rule once, in a shared helper; test each reader with the stale case.
+- **Source:** [rca-lines-of-descent-2026-10-23.md](../rca-lines-of-descent-2026-10-23.md) finding 2.

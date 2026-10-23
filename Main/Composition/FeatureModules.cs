@@ -17,6 +17,7 @@ internal static class FeatureModules
     {
         new Features.WandererAllegiance.WandererAllegianceModule(),
         new Features.NamedCompanions.Oaths.OathsOfServiceModule(),
+        new Features.LinesOfDescent.FamilyTreeModule(),
         new Features.CreatureBandits.CreatureBanditsModule(),
         new Features.ArmourAcquisition.ArmourAcquisitionModule(),
         new Features.RealmBorders.RealmBordersModule(),

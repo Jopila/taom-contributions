@@ -381,6 +381,8 @@ BannerlordCoop does not use. Its three settings are classified as presentation a
 
 `LordFaceVarietyBehavior` (one face pass per new campaign, [lord-face-variety.md](lord-face-variety.md)) is deliberately ungated: it listens to `OnNewGameCreatedPartialFollowUpEndEvent` only and has no load path, so it runs wherever a campaign is built and never when a save loads. It writes `Hero.StaticBodyProperties` (and weight and build for rule A), which the save already stores. A co-op client with no hero builds a local campaign for character creation, so the pass runs there too, but its rolls are discarded when the client loads the host's save. A dedicated server that builds its own world runs it. A headless server without a face generator may leave faces unchanged (UNVERIFIED). Not confirmed in a live co-op session.
 
+Lines of Descent (the Family Tree popup and clan relation text, [lines-of-descent.md](lines-of-descent.md)) is deliberately ungated: it is a read-only UI with no campaign behavior, no Harmony patch and nothing saved, so every peer reads the family lists it already holds.
+
 ## Mission behaviors (#967 C7)
 
 Every TAOM mission behavior has a co-op role in `CoopMissionRoles` (`Main/Features/CoopInterop/Missions/`), and
