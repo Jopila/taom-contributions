@@ -106,7 +106,7 @@
 		<ItemGroup>
 			<_TaomClientFiles Include="$(TargetPath)" />
 			<_TaomClientFiles Include="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
-			<_TaomBuiltCore Include="@(ReferencePath)" Condition="'%(Filename)' == 'TAOM' AND '%(ReferenceSourceTarget)' == 'ProjectReference'" />
+			<_TaomBuiltCore Include="@(ReferencePath)" Condition="'%(ReferencePath.Filename)' == 'TAOM' AND '%(ReferencePath.ReferenceSourceTarget)' == 'ProjectReference'" />
 		</ItemGroup>
 		<Error Condition="'@(_TaomBuiltCore)' == ''"
 		       Text="TAOM.Client could not find the core TAOM.dll it was built against among its resolved ProjectReference outputs, so it cannot check that the installed core matches. Rebuild TAOM (Main) together with TAOM.Client." />

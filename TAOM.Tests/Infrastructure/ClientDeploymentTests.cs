@@ -124,8 +124,13 @@ public class ClientDeploymentTests
 
         var props = target.Descendants("PropertyGroup").Elements().ToDictionary(p => p.Name.LocalName, p => p.Value);
         StringAssert.EndsWith(props["_TaomInstalledCore"], @"Win64_Shipping_Client\TAOM.dll");
-        Assert.IsTrue(target.Descendants("_TaomBuiltCore").Any(i => Attr(i, "Include") == "@(ReferencePath)"),
-            "The built core is the client's own resolved ProjectReference output, not an installed file.");
+        var builtCore = target.Descendants("_TaomBuiltCore").Single(i => Attr(i, "Include") == "@(ReferencePath)");
+        // Unqualified %(Name) in an item condition fails the build with MSB4096 when any ReferencePath item lacks that
+        // metadata, and framework facades such as netstandard.dll carry no ReferenceSourceTarget. Only a deploying build
+        // (Visual Studio, build.ps1) runs this target, so the agent builds with -p:ModuleId= never reach it.
+        Assert.AreEqual("'%(ReferencePath.Filename)' == 'TAOM' AND '%(ReferencePath.ReferenceSourceTarget)' == 'ProjectReference'",
+            Attr(builtCore, "Condition"),
+            "The built core is the client's own resolved ProjectReference output, selected with qualified metadata.");
 
         var firstCopy = target.Descendants("Copy").First();
         Assert.IsTrue(error.IsBefore(firstCopy), "The guard runs before the first copy.");
