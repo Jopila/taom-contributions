@@ -63,6 +63,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ranged_ladder as rl  # noqa: E402  engine_tier, skill_cell, ladder_id: the ladder's own functions
+from _marker_region import replace_region  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 MD = ROOT / "Main" / "_Module" / "ModuleData"
@@ -535,16 +536,10 @@ def read_bytes_faithful(path):
 def upsert_templates(text, nl, payload):
     """Replace this script's region in place, or insert it before </partyTemplates> the first time.
     In place, not strip-and-append: promote_borrowed_cultures.py appends its own region at the same
-    spot, and strip-and-append would swap the two regions on every alternate run."""
+    spot, and strip-and-append would swap the two regions on every alternate run. A second region or a
+    lone marker is refused (#975)."""
     block = f"\t<!-- {PT_MARKER}:BEGIN -->{nl}{payload}\t<!-- {PT_MARKER}:END -->{nl}"
-    region = re.compile(r"[ \t]*<!-- " + PT_MARKER + r":BEGIN -->.*?<!-- " + PT_MARKER + r":END -->\r?\n",
-                        re.DOTALL)
-    if region.search(text):
-        return region.sub(lambda _m: block, text, count=1)
-    idx = text.rfind("</partyTemplates>")
-    if idx < 0:
-        raise SystemExit("taom_partyTemplates.xml: </partyTemplates> not found")
-    return text[:idx] + block + text[idx:]
+    return replace_region(text, PT_MARKER, block, "</partyTemplates>")
 
 
 def main():
