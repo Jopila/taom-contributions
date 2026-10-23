@@ -70,3 +70,19 @@ land on top of it.
 - **Unverified:** Gondor's female notable templates (and the cloned ones, `village_woman_*`,
   `townswoman_*`) also use a bare `fighter_gondor`. Whether notable creation takes the same native
   hair fallback is not traced; an in-game look at Gondor's women decides it.
+
+## Follow-up batch (Mike, 2026-10-23: kits, Arvegil, the Arthedain career group)
+
+Lens 5 and lens 7 reviewed the batch at tier 2 and found no defect in the data: every Arnor career
+start reaches its roster, every item resolves, and both translation resets are complete. Their LOW
+findings, all fixed in the same commit:
+
+| # | Sev | Finding | Why missed | Preventive action |
+|---|---|---|---|---|
+| F1 | LOW | Three more "78 kits" counts (a doc line, the feature map, a tool docstring) and two per-culture claims (the axe sidearm list, the saddle-horse count) went stale | The counts were searched by the words "career kits", not by the number | A count nothing computes is removed where it can be (the README now names no number); the rest moved to 96 |
+| F2 | LOW | The kit file's header named three cultures without career rosters; nine have none | The comment was written for #629 and no test pinned it | `CareerKitCoverageTests`: a character-creation culture with no kits fails unless listed, so the next new culture fails until it is decided (proved against the HEAD file: it names exactly the three Arnor realms) |
+| F3 | LOW | Arvegil's entry is a saved hero property, so an English campaign started before the change keeps the Angmar line | Not a defect; the change did not say so | Stated in both feature changelogs |
+| F4 | LOW, open | Arthedain still has Angmar in two career descriptions and five wanderer backstories, and its ranger group is "Bowman of the Angle" (Rhudaur's land) | Outside the request | Listed in the Known gaps for Mike's decision |
+
+The Arnor kits shipped late for the same reason as F2: a culture can reach a career that has no kit
+and nothing fails. The test now closes that.

@@ -4038,7 +4038,7 @@
 		id="lord_AN1_1"
 		faction="Faction.clan_arthedain_1"
 		spouse="Hero.lord_AN1_3"
-		text="{=lord_AN1_1_description}Arvegil II, King of Arthedain, heir of Arvedui and of Isildur, who holds Fornost against Angmar with fewer swords each year." />
+		text="{=lord_AN1_1_description}Arvegil II, King of Arthedain, heir of Arvedui and of Isildur, who holds Fornost against the orcs of Gundabad and keeps an uneasy peace with his kin in Cardolan and Rhudaur." />
 	<Hero
 		id="lord_AN1_2"
 		faction="Faction.clan_arthedain_1"

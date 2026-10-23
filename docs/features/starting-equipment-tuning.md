@@ -80,7 +80,7 @@ Two stacked rosters build the player's kit at CC finalize (`Main/Features/Charac
    two independently. The same file also holds the childhood, education and show-stage rosters and the
    parents' rosters, which share the id prefix and are not the player's kit.
 2. **Career override**: `player_career_{culture}_{ranged|cavalry|infantry}_{m|f}` in
-   `taom_career_starting_equipment.xml`, 78 rosters, applied via `Equipment.FillFrom`: a complete 12-slot
+   `taom_career_starting_equipment.xml`, 96 rosters, applied via `Equipment.FillFrom`: a complete 12-slot
    replacement of the battle set (`Equipment.cs:184-194` copies every slot), so Head, Cape and Gloves are
    empty for a careered player by design. Real troop items, not twins (#629); see "Career kits" below.
 3. **Vanilla override**: `taom_player_start_vanilla_override.xml`, 58 rosters with the same ids as vanilla
@@ -119,8 +119,8 @@ equip on any of them; how they look on an orc or a human player is owed in game.
 the Uruk-hai recruit (L6), Mordor's at the uruk grunt (L11), so Mordor's career armour comes from
 engine tier 2, two tiers above its level-1 orcs; the weapons still come from the lowest troops.
 
-Class exceptions, in the tool's `SIDEARM`/`SECOND`/`RANGED` tables: Erebor and Dunland carry a one-handed
-axe as the sidearm (no non-vanilla Dunland sword exists), Dol Guldur infantry a two-handed axe, and three
+Class exceptions, in the tool's `SIDEARM`/`SECOND`/`RANGED` tables: Erebor, Dunland and Rhudaur carry a
+one-handed axe as the sidearm (no non-vanilla Dunland sword exists; Rhudaur's troops carry none), Dol Guldur infantry a two-handed axe, and three
 ranged careers carry their own weapon: Isengard's Uruk Crossbow and Erebor's Crossbow Master a crossbow
 and bolts, Harad's Pezarsani Javelineer javelins and a shield. Erebor fields no crossbow below L21, so its
 start is `ladder_erebor_xbow_t4`. The level cap keeps a Rhun tier-7 bow (first carried at L36) out of a
@@ -173,7 +173,7 @@ folder's `starter_armors.xml`, anchors Ranged 5, Cavalry 7, Infantry 9, from `ge
 
 | Tool | Purpose |
 |---|---|
-| `tools/generate_career_kits.py` | Derive the 78 career kits from the troops (#629, rule above): dry run by default, `--apply` rewrites only the five slot ids per roster (byte-faithful), `--verify` exits 1 when the career file drifts from the rule, for instance after a troop rebalance moves a culture's floor. Needs the install; stops rather than guesses without it. Follow an `--apply` with the wiring tool. |
+| `tools/generate_career_kits.py` | Derive the 96 career kits from the troops (#629, rule above): dry run by default, `--apply` rewrites only the five slot ids per roster (byte-faithful), `--verify` exits 1 when the career file drifts from the rule, for instance after a troop rebalance moves a culture's floor. Needs the install; stops rather than guesses without it. Follow an `--apply` with the wiring tool. |
 | `tools/generate_starter_kit.py` | Author the twins. Reads the culture-default roster file (not the career file since #629, whose troop items it would otherwise twin) and plans every donor in `RETIRED_DONORS` as well, a committed list of the 18 twins only the old career kits named, so a reinstall that wiped them restores them and a retired donor that stops resolving fails the run. A twin already on disk keeps its folder when its donor's culture later changes (the run prints a note). Indexes the Armory plus vanilla item and piece files, floors per class, writes the per-folder item files and the three marker blocks in the live Armory (the mirror only with `--asset-repo`). Dry run by default; `--apply`; `--verify` (exit 1 on any missing item, piece or registration: the reversion gate for the unversioned install); `--revert`; `--crafted-value` (0 lets the engine price crafted twins). Prints per clone the ratio, the class percentile and the resulting weapon tier. Aborts on a donor with no definition, a class with no anchor, a blade registered nowhere, a folder the Armory does not register. It also refuses to rewrite or revert a marker block holding another author's rows in any of the three files (the two stylesheets and the pieces file), computing and parsing every new text before any write, and `--verify` exits 2 when a gate checked nothing (a missing Armory). |
 | `tools/wire_starter_kit_rosters.py` | Point the culture-default rosters at the twins: in-place `id=` substitution over the 288 rosters of `REWIRE_FILES` (both sets, Horse and HorseHarness untouched; the career file is excluded since #629), then write the vanilla override from the career kit exactly as the career file names it, refusing any override id that both vanilla SandBox and SandBoxCore lack (the engine would merge such a roster into the first vanilla roster instead of adding it). Shares the id rule and the roster filter with the generator. It also gives `_replaceWhileMerging="true"` to every roster of the culture-default file whose id vanilla SandBox or SandBoxCore also defines (37 today, all aserai: the 16 youth rosters plus the parent, childhood, education and show rosters), refuses that flag on any roster whose id vanilla lacks (the engine would merge it into the first roster of the document), and leaves out of the vanilla override every roster the culture-default file defines; without the flag the engine appends the roster's sets after vanilla's and the player keeps vanilla's first set. Re-run it after any career roster change. |
 | `tools/generate_starter_armor.py` | The older career-layer armour pass (see above); its items stay on disk for old saves. Its wiring script, `wire_career_starter_armor.py`, was deleted in #629. |
@@ -240,8 +240,9 @@ an item folder loads as a duplicate item id.
 
 - About 128 new `{=starter_*}` item names use inline English defaults, plus the 180 older
   `{=starter_*}` armour names: none harvested into the 12-language pipeline (`/localize`).
-- Horse and HorseHarness are untouched by #629; the career layer hands a vanilla `saddle_horse` to seven
-  cultures' cavalry (six of them with `light_harness`), a warg to four, the war ram to Erebor (#515) and the
+- Horse and HorseHarness are untouched by #629; the career layer hands a vanilla `saddle_horse` to ten
+  cultures' cavalry (six of them with `light_harness`, the three Arnor realms and Gondor with
+  `starter_cavalry_gondor_horse_armor_a`), a warg to four, the war ram to Erebor (#515) and the
   Animalia elk to Mirkwood (#646; the great elk, #636, until 2026-09-23, when Mike put the career start on the
   lower cavalry's mount). The Armory has no riding horse of its own: every Armory `Horse` is a creature
   (wargs, rams, spiders, mumakil, elephant, chariot, the great elk, the Animalia elk and moose).

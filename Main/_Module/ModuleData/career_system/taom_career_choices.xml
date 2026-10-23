@@ -10179,7 +10179,7 @@
     </Choice>
   </ChoiceGroup>
 
-  <ChoiceGroup id="warden_of_fornost_t2_b" display_name="{=taom_career_grp_warden_of_fornost_t2_b}Sword of the Last Bridge" career_id="warden_of_fornost" tier="2">
+  <ChoiceGroup id="warden_of_fornost_t2_b" display_name="{=taom_career_grp_warden_of_fornost_t2_b}Sword of the North Downs" career_id="warden_of_fornost" tier="2">
     <Choice id="warden_of_fornost_t2_b_key" type="Keystone"
             description="{=taom_wof_t2b_key}Career Ability also boosts troop melee damage while active."
             icon_sprite="career_choice_cop_t2b_key">

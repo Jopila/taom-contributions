@@ -413,7 +413,7 @@ Same fallback policy as the runtime grant: missing roster → log + leave the yo
 | `Main/Features/CareerSystem/CareerArchetypeService.cs` | careerId → archetype lookup; backed by static map in `CareerSystemIoC` |
 | `Main/Features/CharacterCreation/CareerStartingEquipmentService.cs` | Applies archetype roster at end of CC over the culture default |
 | `Main/Features/CharacterCreation/CareerEquipmentRosterIds.cs` | Roster ID builder: `player_career_{culture}_{archetype}_{f\|m}` |
-| `Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml` | Per-(culture, archetype, gender) rosters: 78 across 13 cultures, each culture's lowest troop gear (#629) |
+| `Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml` | Per-(culture, archetype, gender) rosters: 96 across 16 cultures, each culture's lowest troop gear (#629; the three Arnor realms since #978) |
 
 ## Dependencies
 

@@ -189,15 +189,13 @@ generator and `--only <culture>`. Both `generate_new_faction_kingdoms.py` and
 - The armour is a placeholder until each realm has its own.
 - The cloned wanderers keep the surnames of Gondor's and Arthedain's wanderers.
 - Arthedain's narrative menus and culture text still name "fallen Cardolan" and the hill-men of
-  Rhudaur "under Angmar's banners", its kingdom text calls it "the last of the three realms", King
-  Arvegil II's entry has him hold Fornost "against Angmar", and the Remnants of Angmar faction card
-  still stands (a decision for Mike; changing them resets their translations).
+  Rhudaur "under Angmar's banners", its kingdom text calls it "the last of the three realms", two of
+  its career descriptions (`taom_careers.xml`) and five wanderer backstories still fight Angmar,
+  its ranger group is still "Bowman of the Angle" (the Angle is Rhudaur's), and the Remnants
+  of Angmar faction card still stands (a decision for Mike; changing them resets their translations).
 - All new English text waits for the paid translation run (#763). The 12 translated
   `loc_arnor.xml` files in the live Armory have no row yet for the 9 new ladder bows, so
   `sync_ranged_ladder_translations.py` stops on `ladder_rhudaur_bow_t2` until that run adds them.
-- No `player_career_<culture>_*` starting kits exist for any of the three Arnor realms, so a career
-  start keeps the youth-title kit and `CareerStartingEquipmentService` logs a warning (inherited from
-  Arthedain; a decision for Mike).
 - No faction-screen art for either realm.
 
 ## Changelog
@@ -209,6 +207,13 @@ generator and `--only <culture>`. Both `generate_new_faction_kingdoms.py` and
     registration region in place. The parse-before-write guard (`unparsable()`, #979) and the
     one marker-region writer (`tools/_marker_region.py`, #975/#976) landed upstream at the same
     time, and the merge kept those in every writer.
+- 2026-10-23 (#978 follow-up, Mike): career starting kits for all three Arnor realms (18 rosters,
+  each realm's lowest troop gear by `generate_career_kits.py`; Rhudaur's sidearm is the Dunland
+  axe, and all three ride Gondor's saddle horse and starter harness). King Arvegil II now holds
+  Fornost against the orcs of Gundabad, at peace with his kin in Cardolan and Rhudaur, and
+  Arthedain's "Sword of the Last Bridge" career group is "Sword of the North Downs"; both reset
+  their 12 translations (#763). Arvegil's entry is saved with the hero, so an English campaign
+  started before this keeps the old line; new campaigns get the new one.
 - 2026-10-23 (#978 deep review):
   - The 14 ladies carry `empire` hair tags; on the bare template about half would start bald.
   - Rhudaur's kingdom banner is its royal house's icon (11002), as Arthedain's and Cardolan's are.

@@ -223,6 +223,8 @@ TEXT_REMAP = {
     # Arthedain: every Gondor place, person and order in the three careers moves north. Ranks and
     # group names first (longest phrase first), then the catch-all place and people words.
     "arthedain": [
+        # The Last Bridge spans the Hoarwell in Rhudaur; Arthedain's sword keeps the North Downs.
+        ("Sword of the Last Bridge", "Sword of the North Downs"),
         ("shadows of Ithilien, ambushing enemies of Gondor", "wilds of Eriador, ambushing the servants of Angmar"),
         ("commands Gondor's frontline defense at the ruins of Osgiliath, forging order from chaos in brutal urban combat",
          "holds the walls of Fornost against the hosts of Angmar, forging order from chaos when the North Downs burn"),

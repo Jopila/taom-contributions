@@ -238,6 +238,11 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 
 ## Changelog
 
+- 2026-10-23 (#978 follow-up): career starting kits (`player_career_arthedain_*`, the realm's
+  lowest troop gear); King Arvegil II's entry names Gundabad and his kin in Cardolan and Rhudaur
+  instead of Angmar; the Warden of Fornost's "Sword of the Last Bridge" group is "Sword of the
+  North Downs". The two texts wait for their translations (#763). Arvegil's entry is saved with
+  the hero, so an English campaign started before this keeps the old line.
 - 2026-10-23 (#978): Cardolan and Rhudaur joined as the other two Arnor realms ([cardolan-rhudaur.md](cardolan-rhudaur.md)). The troop generator's machinery moved to `tools/realm_troops.py` with byte-identical output. The faction card no longer calls Arthedain the only Arnor realm still standing, and no longer names Angmar (Mike: Angmar is gone); those three card lines wait for their translations (#763). Character creation now starts an Arthedain player at Fornost Erain's live position (464.975, 1162.654), not the stale point the culture shipped with.
 - 2026-10-21 (#963): Arthedain troops cost no special resource. The King's Guard, Knight, Ranger
   Captain and Warden lost their special-resource upgrade cost and daily upkeep (Castar for an

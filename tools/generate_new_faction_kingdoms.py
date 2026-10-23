@@ -181,7 +181,7 @@ LEADER_BLURB = {
     "mistymountainorcs": "Warlord of the Misty Mountains, who holds the deep places of Moria and the cold peaks above.",
     "bluecraig": "the Great Goblin of Blue Craig, whose swarms infest the Blue Mountains of the far west, hard by the Grey Havens of Lindon.",
     "lindon": "the Shipwright, Lord of the Grey Havens and eldest of the Eldar in Middle-earth, who kept the Ring Narya until he gave it to Mithrandir.",
-    "arthedain": "King of Arthedain, heir of Arvedui and of Isildur, who holds Fornost against Angmar with fewer swords each year.",
+    "arthedain": "King of Arthedain, heir of Arvedui and of Isildur, who holds Fornost against the orcs of Gundabad and keeps an uneasy peace with his kin in Cardolan and Rhudaur.",
     "cardolan": "King of Cardolan, heir of Earendur's second son, who keeps the barrow-kings' crown at Caras Gorthad.",
     "rhudaur": "King of Rhudaur, heir of Earendur's third son, lord of Cameth Brin and of the hill-men of the Angle.",
 }

@@ -60,7 +60,8 @@ LAYOUT = {
     "infantry": ("SIDEARM", "Shield", "SECOND"),
 }
 SIDEARM = {"erebor": "OneHandedAxe",   # dwarves carry axes
-           "empire": "OneHandedAxe"}   # Dunland has no non-vanilla one-handed sword
+           "empire": "OneHandedAxe",   # Dunland has no non-vanilla one-handed sword
+           "rhudaur": "OneHandedAxe"}  # the hill-men carry Dunland's axes, no sword (#978)
 SECOND = {"dolguldur": "TwoHandedAxe"}
 RANGED = {"isengard": ("Crossbow", "Bolts"),   # Uruk Crossbow
           "erebor": ("Crossbow", "Bolts"),     # Crossbow Master
