@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import generate_arthedain_troops as gat  # noqa: E402
 import ranged_ladder as rl  # noqa: E402
+import realm_troops as rt  # noqa: E402
 
 
 def built():
@@ -112,31 +113,32 @@ class OutputTests(unittest.TestCase):
 
 
 class UpsertTemplatesTests(unittest.TestCase):
-    """#975: replacing only the first region let a stale second copy pass --check."""
+    """#975: replacing only the first region let a stale second copy pass --check. The writer moved to
+    realm_troops.upsert_templates with the Cardolan and Rhudaur generators (#978)."""
 
     @staticmethod
     def _region(rows, nl="\r\n"):
-        return f"\t<!-- {gat.PT_MARKER}:BEGIN -->{nl}{rows}\t<!-- {gat.PT_MARKER}:END -->{nl}"
+        return f"\t<!-- {gat.REALM.pt_marker}:BEGIN -->{nl}{rows}\t<!-- {gat.REALM.pt_marker}:END -->{nl}"
 
     def test_the_region_is_replaced_in_place(self):
         other = "\t<!-- OTHER:BEGIN -->\r\n\t<PartyTemplate id=\"o\" />\r\n\t<!-- OTHER:END -->\r\n"
         text = "<partyTemplates>\r\n" + self._region("\t<PartyTemplate id=\"a\" />\r\n") + other + "</partyTemplates>\r\n"
         new_rows = "\t<PartyTemplate id=\"a\" v=\"2\" />\r\n"
-        self.assertEqual(gat.upsert_templates(text, "\r\n", new_rows),
+        self.assertEqual(rt.upsert_templates(gat.REALM, text, "\r\n", new_rows),
                          "<partyTemplates>\r\n" + self._region(new_rows) + other + "</partyTemplates>\r\n")
 
     def test_a_second_region_is_refused(self):
         rows = "\t<PartyTemplate id=\"a\" />\r\n"
         text = "<partyTemplates>\r\n" + self._region(rows) + self._region(rows) + "</partyTemplates>\r\n"
         with self.assertRaises(RuntimeError):
-            gat.upsert_templates(text, "\r\n", rows)
+            rt.upsert_templates(gat.REALM, text, "\r\n", rows)
 
     def test_a_lone_end_is_refused(self):
         rows = "\t<PartyTemplate id=\"a\" />\r\n"
-        text = ("<partyTemplates>\r\n" + self._region(rows) + rows + f"\t<!-- {gat.PT_MARKER}:END -->\r\n"
+        text = ("<partyTemplates>\r\n" + self._region(rows) + rows + f"\t<!-- {gat.REALM.pt_marker}:END -->\r\n"
                 + "</partyTemplates>\r\n")
         with self.assertRaises(RuntimeError):
-            gat.upsert_templates(text, "\r\n", rows)
+            rt.upsert_templates(gat.REALM, text, "\r\n", rows)
 
 
 if __name__ == "__main__":

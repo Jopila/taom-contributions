@@ -37,7 +37,7 @@ code or the v1.5.5 decompile before it was fixed. The raw Codex outputs are in `
   declare `Faction`, `Hero` and `Kingdom` ids unique (`xs:unique`), and `DUPLICATE_NPC_ID` covers lords. This
   RCA first said nothing caught them; #974 was filed on that claim, and its review proved it wrong. #974 added
   `EngineIdUniquenessTests` to pin the existing check instead of a second gate.
-- **`generate_arthedain_troops.py` `upsert_templates` has finding 1's defect** (second-wave Tooling lens). Latent:
+- **`generate_arthedain_troops.py` `upsert_templates` (since #978 `realm_troops.upsert_templates`) has finding 1's defect** (second-wave Tooling lens). Latent:
   one region today. Fixed in #975 (`tools/_marker_region.py`).
 - **`promote_borrowed_cultures.py` and `insert_new_factions.py` still strip and re-append.** Fixed in #976.
 - **The #958 map-bar entry stays after a hero loses the resource** (Data flow lens; older than #958). Fixed in #977.
