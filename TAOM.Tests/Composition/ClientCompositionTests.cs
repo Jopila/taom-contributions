@@ -188,7 +188,7 @@ public class ClientCompositionTests
 
         logger.Received(1).LogError(NSubstitute.Arg.Is<string>(s =>
             s.Contains("TAOM.Client") && s.Contains("faction map") && s.Contains("front-end art")
-            && s.Contains("Custom Battle")));
+            && s.Contains("Custom Battle") && s.Contains("realm borders") && s.Contains("settlement plates")));
     }
 
     [TestMethod]

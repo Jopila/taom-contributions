@@ -2,6 +2,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TaleWorlds.Library;
+using TAOM.Tests.Infrastructure;
 using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.PlayerSwitcher;
@@ -55,8 +56,7 @@ public class InformationManagerClearBanTests
         Assert.IsNotNull(banned,
             "InformationManager.Clear no longer exists on the installed engine. Re-verify the hazard, then retire this ban test.");
 
-        var violations = IlCallScanner.FindCallers(
-            typeof(TAOM.IoC).Assembly,
+        var violations = TaomAssemblies.FindCallers(
             target => IlCallScanner.SameMethod(target, banned),
             out var unreadable,
             out var scanned);

@@ -97,6 +97,19 @@ foreach ($d in $probeDirs) {
 }
 
 $taom = [Reflection.Assembly]::LoadFrom((Join-Path $testBin 'TAOM.dll'))
+
+# The three TAOM MapViews live in TAOM.Client.dll (ADR-013, B4b). MapView_PerFrame_MapProfiler_Patch.TargetMethods()
+# finds them through the client slot, which a game client fills in ClientSubModule's constructor, so fill it the
+# same way here; without it the patch row below would resolve an empty target list. TaomClientComposition is internal.
+$clientDll = Join-Path $testBin 'TAOM.Client.dll'
+if (-not (Test-Path $clientDll)) {
+    throw "TAOM.Client.dll not found in $testBin. Build TAOM.Tests first: without it the MapView patch row resolves an empty target list and the snapshot would be wrong."
+}
+$client = [Reflection.Assembly]::LoadFrom($clientDll)
+$compositionType = $client.GetType('TAOM.Client.TaomClientComposition', $true)
+$slot = $taom.GetType('TAOM.Composition.ClientComposition', $true).GetProperty('Current')
+if (-not $slot) { throw 'TAOM.Composition.ClientComposition.Current was not found in TAOM.dll; the client slot cannot be filled.' }
+$slot.SetValue($null, [Activator]::CreateInstance($compositionType, $true))
 $harmonyPatchType = [AppDomain]::CurrentDomain.GetAssemblies() |
     ForEach-Object { try { $_.GetType('HarmonyLib.HarmonyPatch', $false) } catch { $null } } |
     Where-Object { $_ } | Select-Object -First 1

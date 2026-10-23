@@ -13,7 +13,7 @@ namespace TAOM.Features.SettlementNameplateRelation;
 /// diamond on descendants the engine never propagates those values to. This widget consumes them:
 /// <c>RelationType="@Relation"</c> picks a palette entry, blended by the MCM tint strength (#596),
 /// and <see cref="SettlementPlatePresenter"/> mirrors the item's alpha every late update.
-/// Engine-constructed (settings arrive through the static <see cref="Settings"/>), auto-registered
+/// Engine-constructed (settings arrive through <see cref="NameplateRelationWidgetContext"/>), auto-registered
 /// by simple type name (hence the Taom prefix). Never throws: a broken tint is cosmetic.
 /// </summary>
 public class TaomSettlementPlateWidget : Widget
@@ -21,9 +21,6 @@ public class TaomSettlementPlateWidget : Widget
     /// <summary>Parents to walk for the item widget (the prefabs nest it two up; a prefab test pins that).</summary>
     internal const int MaxAncestorDepth = 4;
     private const int MaxResolveAttempts = 120;
-
-    /// <summary>Captured once by <c>NameplateRelationIoC.InitializeWidgetStatics</c>; null means defaults.</summary>
-    public static INameplateRelationSettingsProvider? Settings { get; set; }
 
     private int _relationType = -1;
     private bool _paletteDirty;
@@ -86,7 +83,7 @@ public class TaomSettlementPlateWidget : Widget
             ResolveReferences();
             ApplyPaletteIfDirty();
             if (_item != null)
-                SettlementPlatePresenter.MirrorAlpha(_item, Settings, _relationType, _bar, _frame, _text, _banner, _ring, ref _lastAlpha, ref _lastColorFactor);
+                SettlementPlatePresenter.MirrorAlpha(_item, NameplateRelationWidgetContext.Settings, _relationType, _bar, _frame, _text, _banner, _ring, ref _lastAlpha, ref _lastColorFactor);
         }
         catch
         {
@@ -135,7 +132,7 @@ public class TaomSettlementPlateWidget : Widget
     /// <summary>A slider move (or the toggle) repaints on the next frame: one float compare per plate.</summary>
     private void ApplyPaletteIfDirty()
     {
-        var settings = Settings;
+        var settings = NameplateRelationWidgetContext.Settings;
         var tint = NameplateRelationPalette.EffectiveStrength(settings?.ColorsEnabled ?? true, settings?.TintStrength ?? 1f);
         if (tint != _appliedTint) _paletteDirty = true;
         if (!_paletteDirty) return;

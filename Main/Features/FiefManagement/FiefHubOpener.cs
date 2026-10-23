@@ -13,6 +13,9 @@ namespace TAOM.Features.FiefManagement;
 /// </summary>
 public sealed class FiefHubOpener
 {
+    /// <summary>The navigation element's StringId: core needs it before any element exists (TAOM.Client builds the element).</summary>
+    public const string NavigationElementId = "taom_fiefs";
+
     private readonly IFiefManagementSettingsProvider _settings;
     private readonly IFiefHubService _service;
     private readonly IEnlistmentStateQuery _enlistment;

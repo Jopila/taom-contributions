@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using DryIoc;
 using TaleWorlds.MountAndBlade;
 using TAOM.Core.Diagnostics;
@@ -17,6 +18,12 @@ public static class ClientComposition
 {
     /// <summary>Set by the client submodule's constructor; null on a dedicated server.</summary>
     public static IClientComposition? Current { get; set; }
+
+    /// <summary>
+    /// The client submodule's assembly, or null on a dedicated server. Core finds client types through this and never
+    /// names TAOM.Client (ADR-013); a reflection scan that must see the client's types reads it.
+    /// </summary>
+    internal static Assembly? Assembly => Current?.GetType().Assembly;
 
     /// <summary>
     /// Whether this process is a dedicated server: the engine's own build constant, as
@@ -51,8 +58,9 @@ public static class ClientComposition
             if (!SafeIsDedicatedServer())
             {
                 Log(container, l => l.LogError(
-                    "[Client] TAOM.Client did not load on a rendering client: front-end UI will not work "
-                    + "(faction map, front-end art, Custom Battle factions). Check that the TAOM.Client submodule is installed."));
+                    "[Client] TAOM.Client did not load on a rendering client: front-end and campaign map UI will not work "
+                    + "(faction map, front-end art, Custom Battle factions, realm borders, camp overlay, War of the Ring meter, "
+                    + "Fiefs button, settlement plates, Hall of Fire backdrops). Check that the TAOM.Client submodule is installed."));
             }
 
             return;

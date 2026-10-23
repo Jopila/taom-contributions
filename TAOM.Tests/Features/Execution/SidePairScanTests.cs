@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Adapters;
 using TAOM.Features.Execution;
+using TAOM.Tests.Infrastructure;
 using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.Execution;
@@ -68,14 +69,14 @@ public class SidePairScanTests
         return type?.FullName ?? "?";
     }
 
-    /// <summary>The outermost type of every method in the assembly whose IL calls a method <paramref name="isBanned"/> accepts.</summary>
-    private static SortedSet<string> OutermostCallers(Assembly assembly, Func<MethodBase, bool> isBanned,
+    /// <summary>The outermost type of every method in the assemblies whose IL calls a method <paramref name="isBanned"/> accepts.</summary>
+    private static SortedSet<string> OutermostCallers(IEnumerable<Assembly> assemblies, Func<MethodBase, bool> isBanned,
         out List<string> unreadable, out int scanned)
     {
         var callers = new SortedSet<string>(StringComparer.Ordinal);
         unreadable = new List<string>();
         scanned = 0;
-        foreach (var method in IlCallScanner.EnumerateMethods(assembly))
+        foreach (var method in assemblies.SelectMany(IlCallScanner.EnumerateMethods))
         {
             byte[]? il;
             try
@@ -129,7 +130,7 @@ public class SidePairScanTests
         if (!_gameLoaded)
             Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
 
-        var observed = OutermostCallers(typeof(SideIds).Assembly, IsTwoArgumentResolveSide, out var unreadable, out var scanned);
+        var observed = OutermostCallers(TaomAssemblies.All, IsTwoArgumentResolveSide, out var unreadable, out var scanned);
         RequireScan(scanned);
 
         AssertEquivalent(observed, TwoArgumentCallers.Keys, unreadable, "call ResolveSide(id, culture) with two arguments",
@@ -143,7 +144,7 @@ public class SidePairScanTests
         if (!_gameLoaded)
             Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
 
-        var observed = OutermostCallers(typeof(SideIds).Assembly, IsSideIdsBuild, out var unreadable, out var scanned);
+        var observed = OutermostCallers(TaomAssemblies.All, IsSideIdsBuild, out var unreadable, out var scanned);
         RequireScan(scanned);
 
         AssertEquivalent(observed, SideIdsBuilders.Keys, unreadable, "construct or copy a SideIds",
@@ -158,7 +159,7 @@ public class SidePairScanTests
         if (!_gameLoaded)
             Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
 
-        var builds = OutermostCallers(typeof(SidePairScanTests).Assembly, IsSideIdsBuild, out _, out var scanned);
+        var builds = OutermostCallers(new[] { typeof(SidePairScanTests).Assembly }, IsSideIdsBuild, out _, out var scanned);
         RequireScan(scanned);
         foreach (var probe in new[]
         {
@@ -167,7 +168,7 @@ public class SidePairScanTests
         })
             CollectionAssert.Contains(builds.ToList(), "TAOM.Tests.Features.Execution." + probe, "The SideIds scan missed " + probe);
 
-        var calls = OutermostCallers(typeof(SidePairScanTests).Assembly, IsTwoArgumentResolveSide, out _, out _);
+        var calls = OutermostCallers(new[] { typeof(SidePairScanTests).Assembly }, IsTwoArgumentResolveSide, out _, out _);
         foreach (var probe in new[]
         {
             nameof(SidePairProbeInterfaceCall), nameof(SidePairProbeConcreteCall), nameof(SidePairProbeLambdaCall),

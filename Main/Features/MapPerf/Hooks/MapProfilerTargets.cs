@@ -6,6 +6,7 @@ using HarmonyLib;
 using SandBox.View.Map;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameState;
+using TAOM.Composition;
 using TAOM.Features.MissionPerf;
 
 namespace TAOM.Features.MapPerf.Hooks;
@@ -52,28 +53,43 @@ internal static class MapProfilerTargets
         return CoreTargetNames.Where((_, i) => targets[i] == null || !isPatched(targets[i]!)).ToList();
     }
 
-    /// <summary>Every TAOM <see cref="MapView"/> subclass's own override of a per-frame virtual, sorted by
-    /// declaring type then method name. Never throws: returns what it found.</summary>
-    internal static List<MethodBase> MapViewTargets()
+    /// <summary>The assemblies that hold TAOM <see cref="MapView"/> subclasses: core, then TAOM.Client when the client
+    /// slot is filled (ADR-013: the three views live there). A dedicated server has no client and scans core only.</summary>
+    internal static IReadOnlyList<Assembly> ViewAssemblies()
+    {
+        var core = typeof(MapProfilerTargets).Assembly;
+        var client = ClientComposition.Assembly;
+        return client == null || client == core ? new[] { core } : new[] { core, client };
+    }
+
+    /// <summary>Every TAOM <see cref="MapView"/> subclass's own override of a per-frame virtual, in TAOM.dll and
+    /// TAOM.Client.dll, sorted by declaring type then method name. Never throws: returns what it found.</summary>
+    internal static List<MethodBase> MapViewTargets() => MapViewTargets(ViewAssemblies());
+
+    internal static List<MethodBase> MapViewTargets(IEnumerable<Assembly> assemblies)
     {
         var result = new List<MethodBase>();
         try
         {
-            Type?[] types;
-            try { types = typeof(MapProfilerTargets).Assembly.GetTypes(); }
-            catch (ReflectionTypeLoadException ex) { types = ex.Types; }
             const BindingFlags Own = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
-            foreach (var type in types)
+            foreach (var assembly in assemblies)
             {
-                if (type == null || type.IsAbstract || !typeof(MapView).IsAssignableFrom(type))
-                    continue;
-                foreach (var name in PerFrameVirtuals)
+                Type?[] types;
+                try { types = assembly.GetTypes(); }
+                catch (ReflectionTypeLoadException ex) { types = ex.Types; }
+                foreach (var type in types)
                 {
-                    var method = type.GetMethod(name, Own, null, new[] { typeof(float) }, null);
-                    if (method != null)
-                        result.Add(method);
+                    if (type == null || type.IsAbstract || !typeof(MapView).IsAssignableFrom(type))
+                        continue;
+                    foreach (var name in PerFrameVirtuals)
+                    {
+                        var method = type.GetMethod(name, Own, null, new[] { typeof(float) }, null);
+                        if (method != null)
+                            result.Add(method);
+                    }
                 }
             }
+
             result.Sort((a, b) =>
             {
                 var byType = string.CompareOrdinal(a.DeclaringType?.FullName, b.DeclaringType?.FullName);

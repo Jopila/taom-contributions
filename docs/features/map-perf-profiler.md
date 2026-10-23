@@ -61,7 +61,7 @@ closed frames.
 | `CampaignEvents.Tick(float)` | transpiler: the one `callvirt MbEvent<float>::Invoke(float)` becomes `call MapFrameProfilerHooks.TimedTickEvent` | `tickEventMs`, inside `campaignTickMs`, and one entry per listener owner type |
 | `MapScreen.OnFrameTick(float)` | prefix `First` / postfix `Last` | `mapScreenMs` (Patch36's and Patch89's postfixes included) |
 | `TAOM.SubModule.OnApplicationTick(float)` | prefix `First` / postfix `Last` | `appTickMs` and the continuity count |
-| each TAOM `MapView` subclass's own `OnFrameTick`, `OnMapScreenUpdate`, `OnMenuModeTick` or `OnIdleTick` | prefix `First` / postfix `Last` (views category) | one entry per view type |
+| each TAOM `MapView` subclass's (in TAOM.dll and TAOM.Client.dll) own `OnFrameTick`, `OnMapScreenUpdate`, `OnMenuModeTick` or `OnIdleTick` | prefix `First` / postfix `Last` (views category) | one entry per view type |
 
 Nesting: `realTickMs` and `campaignTickMs` are inside `mapStateMs`; `tickEventMs` is inside
 `campaignTickMs`; listener entries are inside `tickEventMs`. View entries depend on the override: an
@@ -402,7 +402,7 @@ from the first game start.
 | `Main/Features/MapPerf/Hooks/MapSessionHooks.cs` | sessions, window lines, the speed read and the hook revalidation |
 | `Main/Features/MapPerf/Hooks/TickEventListenerWalker.cs` | the `InvokeList` copy that times each listener |
 | `Main/Features/MapPerf/Hooks/MapFrameProfilerInstaller.cs` | the once-per-process install and later-init reports |
-| `Main/Features/MapPerf/Hooks/MapProfilerTargets.cs` | the six core targets and the unpatched check, the TAOM map view targets, the call swap |
+| `Main/Features/MapPerf/Hooks/MapProfilerTargets.cs` | the six core targets and the unpatched check, the TAOM map view targets (core plus the client assembly, through `ClientComposition.Assembly`), the call swap |
 | `Main/Features/TimeAcceleration/ITimeControlAdapter.cs`, `TimeControlAdapter.cs` | `SimplifiedTimeControlMode`, the engine's simplified mode the speed class reads |
 | `Main/Features/MapPerf/Hooks/Patch101_MapFrameProfiler.cs` | the six core patch classes |
 | `Main/Features/MapPerf/Hooks/Patch101_MapFrameProfilerViews.cs` | the TAOM map view patch class |

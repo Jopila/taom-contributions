@@ -3,6 +3,7 @@ using DryIoc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Client;
 using TAOM.Composition;
+using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Composition;
 
@@ -10,6 +11,9 @@ namespace TAOM.Tests.Composition;
 [TestClass]
 public class ClientSubModuleTests
 {
+    [ClassInitialize]
+    public static void Init(TestContext _) => GameAssemblies.EnsureLoaded();
+
     [TestCleanup]
     public void Cleanup() => ClientComposition.Current = null;
 
@@ -27,6 +31,7 @@ public class ClientSubModuleTests
     // Each move batch (B4a to B5) adds its rows here. This is the container round trip: DryIoc's
     // constructor selection fails at Register time, which no other test exercises for the client.
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void TaomClientComposition_RegisterServices_RegistersExactlyTheExpectedServices()
     {
         var container = new Container();
@@ -39,6 +44,11 @@ public class ClientSubModuleTests
             typeof(TAOM.Adapters.IFactionMapWidgetAdapter),
             typeof(TAOM.Adapters.IFrontEndSpriteTableAdapter),
             typeof(TAOM.Features.CustomBattles.ICustomBattleFactionSelectionFactory),
+            typeof(TAOM.Features.WarOfTheRingMomentum.UI.IMomentumUIService),
+            typeof(TAOM.Adapters.IRealmBordersMapViewAdapter),
+            typeof(TAOM.Adapters.IFieldCampOverlayAdapter),
+            typeof(TAOM.Features.FiefManagement.IFiefsNavigationElementFactory),
+            typeof(TAOM.Features.HallOfFire.IMapConversationProviderWrapper),
         };
         var actual = container.GetServiceRegistrations().Select(r => r.ServiceType).ToArray();
         CollectionAssert.AreEquivalent(expected, actual);

@@ -82,7 +82,7 @@ public class FiefsNavButtonWiringTests
     [TestMethod]
     public void NavElement_OpensThroughTheSharedOpener_AndNeverActivatesTheMenuItself()
     {
-        var source = ReadSource("Main/Features/FiefManagement/UI/TaomFiefsNavigationElement.cs", stripComments: true);
+        var source = ReadSource("Client/Features/FiefManagement/UI/TaomFiefsNavigationElement.cs", stripComments: true);
 
         StringAssert.Contains(source, "FiefHubOpener");
         StringAssert.Contains(source, ".TryOpen(");
@@ -96,16 +96,34 @@ public class FiefsNavButtonWiringTests
     {
         // The postfix factory resolves them once; a service locator call inside the element would resolve
         // on every construction and hide a missing registration behind a null check.
-        var source = ReadSource("Main/Features/FiefManagement/UI/TaomFiefsNavigationElement.cs", stripComments: true);
+        var source = ReadSource("Client/Features/FiefManagement/UI/TaomFiefsNavigationElement.cs", stripComments: true);
 
         Assert.IsFalse(source.Contains("IoC.Resolve"), "The element must not resolve IoC itself.");
+    }
+
+    [TestMethod]
+    public void Postfix_BuildsTheElementThroughTheFactory()
+    {
+        // ADR-013: the element type lives in TAOM.Client, so the core patch asks a factory core registers as a null.
+        var source = ReadSource("Main/Features/FiefManagement/Hooks/Patch36_MapNavigationElements.cs", stripComments: true);
+
+        StringAssert.Contains(source, "IoC.Resolve<IFiefsNavigationElementFactory>().Create(__instance)");
+        Assert.IsFalse(source.Contains("new TaomFiefsNavigationElement("), "core must not name the client element type");
+    }
+
+    [TestMethod]
+    public void ClientFactory_BuildsTheFiefsElementWithItsOpenerAndLogger()
+    {
+        var source = ReadSource("Client/Features/FiefManagement/TaomFiefsNavigationElementFactory.cs", stripComments: true);
+
+        StringAssert.Contains(source, "new TaomFiefsNavigationElement(handler, _opener, _logger)");
     }
 
     [TestMethod]
     public void NavElement_NeverReportsItselfActive()
     {
         // fief_hub is a game menu, not a pushed state: an active element would leak the bar's selected look onto pushed screens.
-        var source = ReadSource("Main/Features/FiefManagement/UI/TaomFiefsNavigationElement.cs", stripComments: true);
+        var source = ReadSource("Client/Features/FiefManagement/UI/TaomFiefsNavigationElement.cs", stripComments: true);
 
         StringAssert.Matches(source, new Regex(@"IsActive\s*=>\s*false"));
         StringAssert.Matches(source, new Regex(@"IsLockingNavigation\s*=>\s*false"));

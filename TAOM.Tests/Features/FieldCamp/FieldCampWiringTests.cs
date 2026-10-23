@@ -79,6 +79,9 @@ public class FieldCampWiringTests
         StringAssert.Contains(src, "IPartySpottingContributor, LookoutSpottingContributor",
             "The lookout spotting contributor is no longer registered; the lookout bonus silently "
             + "stops reaching TaomMapVisibilityModel.");
+        StringAssert.Contains(src, "IFieldCampOverlayAdapter, NullFieldCampOverlayAdapter",
+            "The null overlay adapter is no longer registered; the behavior's static would keep a stale default "
+            + "and a missing TAOM.Client would draw no overlay and log nothing.");
         StringAssert.Contains(src, "PartyNameplateCampIconPatch.Initialize",
             "FieldCampIoC no longer hands the camp service to Patch74; the patch null-guards a "
             + "missing service, so the nameplate icon silently never draws.");

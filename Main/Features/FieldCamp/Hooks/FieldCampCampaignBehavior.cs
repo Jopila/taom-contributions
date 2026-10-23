@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using SandBox.View.Map;
 using TaleWorlds.CampaignSystem;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.FieldCamp.Domain;
-using TAOM.Features.FieldCamp.UI;
 using TAOM.Features.SupplyLines;
 
 namespace TAOM.Features.FieldCamp.Hooks;
@@ -19,6 +17,14 @@ public class FieldCampCampaignBehavior : CampaignBehaviorBase
 {
     public const string BaseMenuId = "taom_field_camp_menu";
     public const string CampSubMenuId = "taom_fc_camp";
+
+    /// <summary>
+    /// Attaches the overlay map view (ADR-013). TAOM.Client's adapter replaces core's null one when
+    /// FieldCampIoC.InitializePatchStatics runs, after the client composition. A static rather than a constructor
+    /// parameter because SubModule.OnGameStart builds this behavior with new (a fresh one per campaign, for the
+    /// session reset) and that file is single-owner.
+    /// </summary>
+    internal static IFieldCampOverlayAdapter Overlay { get; set; } = new NullFieldCampOverlayAdapter();
 
     private readonly ICampService _camps;
     private readonly ICampVisualService _visuals;
@@ -125,12 +131,12 @@ public class FieldCampCampaignBehavior : CampaignBehaviorBase
         _camps.HourlyTick();
     }
 
-    private void OnTick(float dt)
+    internal void OnTick(float dt)
     {
         // The overlay is (re)attached from the tick, not from session launch: MapScreen.Instance
         // does not exist yet when OnSessionLaunched fires, and the screen is rebuilt on every
         // save-load. GetMapView is a short list scan, cheap at frame rate.
-        EnsureOverlay();
+        Overlay.EnsureAttached();
 
         _camps.FrameTick();
     }
@@ -140,16 +146,5 @@ public class FieldCampCampaignBehavior : CampaignBehaviorBase
         _visuals.ClearAll();
         PartyNameplateCampIconPatch.Reset();
         _logger.LogInfo("[FieldCamp] game over - camp visuals and nameplate icon state cleared");
-    }
-
-    private static void EnsureOverlay()
-    {
-        var mapScreen = MapScreen.Instance;
-        if (mapScreen == null)
-            return;
-        if (mapScreen.GetMapView<FieldCampMapView>() != null)
-            return;
-
-        mapScreen.AddMapView<FieldCampMapView>();
     }
 }

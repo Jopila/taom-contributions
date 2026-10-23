@@ -18,10 +18,10 @@ public class MomentumIndicatorMapView : MapView
 {
     private const float VisibilityPollSeconds = 1.0f;
 
-    private MomentumIndicatorVM _dataSource;
-    private MomentumIndicatorItemVM _itemVm;
-    private GauntletLayer _layerAsGauntletLayer;
-    private MomentumPopupController _popup;
+    private MomentumIndicatorVM? _dataSource;
+    private MomentumIndicatorItemVM? _itemVm;
+    private GauntletLayer? _layerAsGauntletLayer;
+    private MomentumPopupController? _popup;
     private float _pollAccumulator;
 
     protected override void CreateLayout()

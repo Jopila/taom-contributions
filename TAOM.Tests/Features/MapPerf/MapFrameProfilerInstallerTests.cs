@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using TAOM.Composition;
+using TAOM.Client;
 using TAOM.Core.Logging;
 using TAOM.Features.BattleLoadDiagnostics;
 using TAOM.Features.MapPerf;
@@ -43,6 +45,8 @@ public class MapFrameProfilerInstallerTests
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));
         MapFrameProfilerInstaller.ResetForTests();
+        // The three views live in TAOM.Client (ADR-013, B4b); a client process fills the slot in ClientSubModule's constructor.
+        ClientComposition.Current = new TaomClientComposition();
         _logger = Substitute.For<IModLogger>();
         _settings = Substitute.For<IBattleLoadDiagnosticsSettingsProvider>();
         _time = Substitute.For<ITimeControlAdapter>();
@@ -51,7 +55,11 @@ public class MapFrameProfilerInstallerTests
     }
 
     [TestCleanup]
-    public void Cleanup() => MapFrameProfilerInstaller.ResetForTests();
+    public void Cleanup()
+    {
+        MapFrameProfilerInstaller.ResetForTests();
+        ClientComposition.Current = null;
+    }
 
     private Func<string, bool> Apply(bool core = true, bool views = true, int sites = 1) => category =>
     {

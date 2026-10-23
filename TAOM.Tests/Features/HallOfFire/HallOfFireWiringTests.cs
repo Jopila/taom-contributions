@@ -49,7 +49,7 @@ public class HallOfFireWiringTests
         Assert.AreEqual(0, module.PatchCategories.Count);
     }
 
-    private static Container BuildContainer(string tempDir, out IMapConversationProviderSlot slot, out IMapConversationDataProvider vanilla)
+    private static Container BuildContainer(string tempDir, out IMapConversationProviderSlot slot, out IMapConversationDataProvider vanilla, bool withClient = false)
     {
         var container = new Container();
         var paths = Substitute.For<IPathService>();
@@ -64,6 +64,13 @@ public class HallOfFireWiringTests
         vanilla = Substitute.For<IMapConversationDataProvider>();
         slot.Current.Returns(vanilla);
         container.RegisterInstance(slot, ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+        if (withClient)
+        {
+            // What IoC.Configure does after every core registration (ADR-013): the client replaces the null wrapper.
+            ClientComposition.Current = new TAOM.Client.TaomClientComposition();
+            ClientComposition.Apply(container);
+        }
+
         return container;
     }
 
@@ -93,16 +100,30 @@ public class HallOfFireWiringTests
         Assert.IsInstanceOfType(container.Resolve<IMapConversationProviderSlot>(), typeof(MapConversationProviderSlot));
     }
 
+    [TestCleanup]
+    public void Cleanup() => ClientComposition.Current = null;
+
     [TestMethod]
     [TestCategory("RequiresGame")]
     public void OnPhase_MainMenu_WrapsTheCurrentProvider()
     {
-        using var container = BuildContainer(Path.GetTempPath(), out var slot, out var vanilla);
+        using var container = BuildContainer(Path.GetTempPath(), out var slot, out var vanilla, withClient: true);
 
         new HallOfFireModule().OnPhase(ApplyPhase.MainMenu, container);
 
         slot.Received(1).Set(NSubstitute.Arg.Is<IMapConversationDataProvider>(p =>
             p is TaomMapConversationDataProvider && ((TaomMapConversationDataProvider)p).Inner == vanilla));
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void OnPhase_MainMenu_WithoutTheClient_WrapsNothing()
+    {
+        using var container = BuildContainer(Path.GetTempPath(), out var slot, out _);
+
+        new HallOfFireModule().OnPhase(ApplyPhase.MainMenu, container);
+
+        slot.DidNotReceive().Set(NSubstitute.Arg.Any<IMapConversationDataProvider>());
     }
 
     [TestMethod]

@@ -1,4 +1,5 @@
 using DryIoc;
+using TAOM.Adapters;
 using TAOM.Core.Domain;
 using TAOM.Features.FieldCamp.Hooks;
 
@@ -12,6 +13,9 @@ public static class FieldCampIoC
         container.Register<ICampTerrainService, CampTerrainService>(Reuse.Singleton);
         container.Register<ICampAmbushService, CampAmbushService>(Reuse.Singleton);
         container.Register<ICampVisualService, CampVisualService>(Reuse.Singleton);
+
+        // The overlay's map view is client-only (ADR-013): core's null adapter, replaced by TAOM.Client's.
+        container.Register<IFieldCampOverlayAdapter, NullFieldCampOverlayAdapter>(Reuse.Singleton);
 
         // Singleton: owns the persisted camp book between the behavior's SyncData halves.
         container.Register<ICampService, CampService>(Reuse.Singleton);
@@ -30,5 +34,7 @@ public static class FieldCampIoC
     internal static void InitializePatchStatics(IContainer container)
     {
         PartyNameplateCampIconPatch.Initialize(container.Resolve<ICampService>());
+        // After ClientComposition.Apply, so this is the client's adapter when TAOM.Client loaded.
+        FieldCampCampaignBehavior.Overlay = container.Resolve<IFieldCampOverlayAdapter>();
     }
 }

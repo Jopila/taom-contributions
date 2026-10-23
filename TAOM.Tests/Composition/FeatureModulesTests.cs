@@ -179,7 +179,21 @@ public class FeatureModulesTests
         Assert.IsTrue(inits.Count >= 5, "expected the eager patch-static block in IoC.cs, found " + inits.Count);
         foreach (Match init in inits)
             Assert.IsTrue(init.Index > apply, init.Value + " runs before ClientComposition.Apply");
-        StringAssert.Contains(code, "FactionMapIoC.InitializePatchStatics(container);");
+        // Each call by name: the count above passes while one is deleted, and the camp overlay or the plate
+        // settings then go missing with every test still green. All run after the client slot is filled.
+        foreach (var call in new[]
+        {
+            "FactionMapIoC.InitializePatchStatics(container);",
+            "FieldCampIoC.InitializePatchStatics(container);",
+            "Features.Refuge.RefugeIoC.InitializePatchStatics(container);",
+            "Features.UncapturableHeroes.UncapturableHeroesIoC.InitializePatchStatics(container);",
+            "NameplateRelationIoC.InitializeWidgetStatics(container);",
+        })
+        {
+            var at = code.IndexOf(call, StringComparison.Ordinal);
+            Assert.IsTrue(at >= 0, call + " is missing from IoC.Configure");
+            Assert.IsTrue(at > apply, call + " runs before ClientComposition.Apply");
+        }
     }
 
     [TestMethod]

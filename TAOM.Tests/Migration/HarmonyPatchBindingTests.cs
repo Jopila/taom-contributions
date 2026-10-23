@@ -57,18 +57,29 @@ public class HarmonyPatchBindingTests
                 "not a genuine pass — investigate before trusting this gate.");
 
         var failures = new List<string>();
-        foreach (var t in patchTypes)
+        // A client process fills the slot in ClientSubModule's constructor, long before patches apply; the
+        // MapView profiler patch finds the TAOM.Client views through it (ADR-013, B4b), so fill it for this run.
+        var previousClient = TAOM.Composition.ClientComposition.Current;
+        TAOM.Composition.ClientComposition.Current = new TAOM.Client.TaomClientComposition();
+        try
         {
-            try
+            foreach (var t in patchTypes)
             {
-                var (ok, detail) = ResolveTarget(t);
-                if (!ok) failures.Add($"  {t.FullName}\n      → {detail}");
+                try
+                {
+                    var (ok, detail) = ResolveTarget(t);
+                    if (!ok) failures.Add($"  {t.FullName}\n      → {detail}");
+                }
+                catch (Exception ex)
+                {
+                    var inner = (ex as TargetInvocationException)?.InnerException ?? ex;
+                    failures.Add($"  {t.FullName}\n      → threw during resolution: {inner.GetType().Name}: {inner.Message}");
+                }
             }
-            catch (Exception ex)
-            {
-                var inner = (ex as TargetInvocationException)?.InnerException ?? ex;
-                failures.Add($"  {t.FullName}\n      → threw during resolution: {inner.GetType().Name}: {inner.Message}");
-            }
+        }
+        finally
+        {
+            TAOM.Composition.ClientComposition.Current = previousClient;
         }
 
         if (failures.Count > 0)

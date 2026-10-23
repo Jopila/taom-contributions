@@ -14,13 +14,13 @@ namespace TAOM.Features.FiefManagement.UI;
 /// brushes in Main/_Module/GUI/Brushes/MapBar.xml.
 ///
 /// IsActive stays false on purpose: fief_hub is a game menu, not a pushed state, so an active element
-/// would leak the bar's selected look onto the screens pushed from it. Constructed by the postfix on
-/// <c>MapNavigationHandler.OnCreateElements</c> (see Patch36_MapNavigationElements), which resolves the
-/// opener and logger and hands them in.
+/// would leak the bar's selected look onto the screens pushed from it. Constructed by
+/// <c>TaomFiefsNavigationElementFactory</c>, which holds the opener and logger; the postfix on
+/// <c>MapNavigationHandler.OnCreateElements</c> (see Patch36_MapNavigationElements) asks the factory for it.
 /// </summary>
 public sealed class TaomFiefsNavigationElement : MapNavigationElementBase
 {
-    public const string ElementId = "taom_fiefs";
+    public const string ElementId = FiefHubOpener.NavigationElementId;
 
     // F6 is a raw InputKey with no game-key binding to look up (MapScreenInputAdapter reads it directly);
     // the literal matches every shipped translation of vanilla's str_game_key_text.f6.

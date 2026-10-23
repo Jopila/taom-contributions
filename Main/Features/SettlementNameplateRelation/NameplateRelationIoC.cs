@@ -10,10 +10,10 @@ public static class NameplateRelationIoC
         container.Register<INameplateRelationAlphaService, NameplateRelationAlphaService>(Reuse.Singleton);
     }
 
-    /// <summary>The plate widget is engine-constructed (no DI), so it reads its settings through
-    /// a static captured once here, in the end block of <c>IoC.Configure</c>.</summary>
+    /// <summary>The plate widget is engine-constructed (no DI) and lives in TAOM.Client, so it reads its settings
+    /// through <see cref="NameplateRelationWidgetContext"/>, captured once here, in the end block of <c>IoC.Configure</c>.</summary>
     public static void InitializeWidgetStatics(IContainer container)
     {
-        TaomSettlementPlateWidget.Settings = container.Resolve<INameplateRelationSettingsProvider>();
+        NameplateRelationWidgetContext.Initialize(container.Resolve<INameplateRelationSettingsProvider>());
     }
 }

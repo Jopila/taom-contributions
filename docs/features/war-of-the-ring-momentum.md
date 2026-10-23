@@ -138,7 +138,7 @@ Defaults equal LOTRAOM's shipped `momentum_config.xml`, so the out-of-box balanc
 | `MomentumTextService.cs` | localized event-description composer |
 | `WarOfTheRingMomentumBehavior.cs` | thin campaign-event entry point + SyncData |
 | `WarOfTheRingMomentumIoC.cs` | registrations |
-| `UI/MomentumIndicatorMapView.cs` | on-map slider MapView (adds/removes via `IMomentumUIService`) |
+| `Client/Features/WarOfTheRingMomentum/UI/MomentumIndicatorMapView.cs`, `MomentumUIService.cs` (TAOM.Client) | on-map slider MapView and the service that adds and removes it; core registers `NullMomentumUIService` and the client composition replaces it |
 | `UI/MomentumPopupController.cs` + `MomentumPopupVM.cs` | detail popup |
 | `UI/MomentumIndicatorItemVM.cs`, `MomentumIndicatorVM.cs`, `FactionRelationshipVM.cs`, `BreakdownVM.cs` | VMs |
 | `Main/Adapters/WarEventSnapshotAdapter.cs` + `KingdomStrengthAdapter.cs` | engine boundary |

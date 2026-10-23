@@ -42,7 +42,7 @@ hall, and with the swap it shows the borrowed culture's hall. That is why the na
 
 No patch. `SandBoxViewSubModule` exposes the slot through a static getter (`MapConversationDataProvider`) and a public
 static setter (`SetMapConversationDataProvider`). At `ApplyPhase.MainMenu` the module's `HallOfFireInstaller` wraps the
-current provider in `TaomMapConversationDataProvider`. The wrapper calls the inner provider outside any `try`, then
+current provider in `TaomMapConversationDataProvider` (TAOM.Client, built through `IMapConversationProviderWrapper`; core registers a null wrapper and logs a warning when no client wrapper is present). The wrapper calls the inner provider outside any `try`, then
 asks `HallOfFireService.Resolve(tag, culture id)`. The service swaps the prefix `conv_<culture>_` for
 `conv_<set>_` once, when the culture has a row and the tag starts with that prefix as the engine wrote it. A hideout
 needs no case of its own: vanilla gives it a wilderness tag, so the prefix never matches. A failure in the rewrite logs once and returns vanilla's tag.
@@ -95,7 +95,7 @@ feature off, set `"cultures": {}`; a missing or empty file loads the built-in ro
 | `Main/Features/HallOfFire/HallOfFireService.cs` | The pure tag rewrite |
 | `Main/Features/HallOfFire/HallOfFireConfigProvider.cs`, `IHallOfFireConfigProvider.cs` | Validating JSON loader |
 | `Main/Features/HallOfFire/IMapConversationProviderSlot.cs`, `MapConversationProviderSlot.cs` | ADR-007 adapter over the engine's static slot |
-| `Main/Features/HallOfFire/TaomMapConversationDataProvider.cs` | The wrapper, never throws after the inner call |
+| `Client/Features/HallOfFire/TaomMapConversationDataProvider.cs` | The wrapper, never throws after the inner call (TAOM.Client); `HallOfFireConversationWrapper` builds and recognizes it |
 | `Main/Features/HallOfFire/HallOfFireInstaller.cs` | The install decision |
 | `Main/Features/HallOfFire/HallOfFireModule.cs` | Registrations and the MainMenu install |
 | `Main/_Module/ModuleData/hall_of_fire/hall_of_fire.json` | The shipped rows |

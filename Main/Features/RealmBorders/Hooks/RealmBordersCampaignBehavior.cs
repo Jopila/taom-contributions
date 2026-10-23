@@ -1,11 +1,10 @@
 using System;
 using System.Linq;
-using SandBox.View.Map;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.ModuleManager;
+using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
-using TAOM.Features.RealmBorders.UI;
 
 namespace TAOM.Features.RealmBorders.Hooks;
 
@@ -26,12 +25,15 @@ public sealed class RealmBordersCampaignBehavior : CampaignBehaviorBase
 
     private readonly RealmBorderService _borders;
     private readonly IDedicatedServerProvider _server;
+    private readonly IRealmBordersMapViewAdapter _mapView;
     private readonly IModLogger _logger;
 
-    public RealmBordersCampaignBehavior(RealmBorderService borders, IDedicatedServerProvider server, IModLogger logger)
+    public RealmBordersCampaignBehavior(RealmBorderService borders, IDedicatedServerProvider server,
+        IRealmBordersMapViewAdapter mapView, IModLogger logger)
     {
         _borders = borders ?? throw new ArgumentNullException(nameof(borders));
         _server = server ?? throw new ArgumentNullException(nameof(server));
+        _mapView = mapView ?? throw new ArgumentNullException(nameof(mapView));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -49,7 +51,7 @@ public sealed class RealmBordersCampaignBehavior : CampaignBehaviorBase
         CampaignEvents.OnAllianceStartedEvent.AddNonSerializedListener(this, (_, _) => _borders.MarkDirty());
         CampaignEvents.OnAllianceEndedEvent.AddNonSerializedListener(this, (_, _) => _borders.MarkDirty());
         CampaignEvents.HourlyTickEvent.AddNonSerializedListener(this, _borders.OnHourlyTick);
-        CampaignEvents.TickEvent.AddNonSerializedListener(this, _ => EnsureMapView());
+        CampaignEvents.TickEvent.AddNonSerializedListener(this, OnTick);
     }
 
     public override void SyncData(IDataStore dataStore)
@@ -82,11 +84,5 @@ public sealed class RealmBordersCampaignBehavior : CampaignBehaviorBase
         }
     }
 
-    private static void EnsureMapView()
-    {
-        var mapScreen = MapScreen.Instance;
-        if (mapScreen == null || mapScreen.GetMapView<RealmBordersMapView>() != null)
-            return;
-        mapScreen.AddMapView<RealmBordersMapView>();
-    }
+    internal void OnTick(float dt) => _mapView.EnsureAttached();
 }

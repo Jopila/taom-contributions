@@ -2,6 +2,7 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using SandBox.View.Map;
+using TAOM.Client.Features.HallOfFire;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.HallOfFire;
@@ -38,7 +39,7 @@ public class HallOfFireInstallerTests
         var config = Substitute.For<IHallOfFireConfigProvider>();
         config.GetMap().Returns(HallOfFireMap.Default());
         _service = new HallOfFireService(config);
-        _sut = new HallOfFireInstaller(_slot, _service, _dedicated, _logger);
+        _sut = new HallOfFireInstaller(_slot, new HallOfFireConversationWrapper(_service, _logger), _dedicated, _logger);
     }
 
     [TestMethod]
@@ -60,6 +61,18 @@ public class HallOfFireInstallerTests
 
         _slot.DidNotReceive().Set(Arg.Any<IMapConversationDataProvider>());
         _logger.DidNotReceive().LogInfo(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void Install_WithoutAClientWrapper_SetsNothingAndLogsOneWarning()
+    {
+        var sut = new HallOfFireInstaller(_slot, new NullMapConversationProviderWrapper(), _dedicated, _logger);
+
+        sut.Install();
+
+        _slot.DidNotReceive().Set(Arg.Any<IMapConversationDataProvider>());
+        _logger.DidNotReceive().LogInfo(Arg.Any<string>());
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("TAOM.Client")));
     }
 
     [TestMethod]

@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TaleWorlds.CampaignSystem.Actions;
 using TAOM.Adapters;
 using TAOM.Features.Enlistment;
+using TAOM.Tests.Infrastructure;
 using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.Enlistment;
@@ -89,8 +90,7 @@ public class SettlementEncounterInvariantTests
         for (var i = 0; i < banned.Length; i++)
             Assert.IsNotNull(banned[i], $"Banned target {i} no longer resolves — retire or retarget this invariant.");
 
-        var callers = IlCallScanner.FindCallers(
-            typeof(TAOM.IoC).Assembly,
+        var callers = TaomAssemblies.FindCallers(
             target => banned.Any(b => IlCallScanner.SameMethod(target, b)),
             out var unreadable,
             out var scanned);

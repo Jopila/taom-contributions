@@ -127,7 +127,7 @@ TAOM's loose `Assets/` tree instead of `AssetPackages/`. Where they should live 
 | `Hooks/FieldCampCampaignBehavior.cs` + `FieldCampMenuController.cs` | Events, SyncData, menus (index 4 on both menus reserved for Refuge; index 5 on the camp sub-menu is shared by Host Review and Far Watch, both before Leave: the camp sub-menu's options end up Forage, Fortify, Supplies, Break, Refuge, Review the host, Send a scout, Leave, see [host-review.md](host-review.md) and [far-watch.md](far-watch.md)) |
 | `Hooks/PartyNameplateCampIconPatch.cs` | Patch74 thin guarded body (registry entry has the never-throw contract) |
 | `Hooks/CampNameplateIconPresenter.cs` | Patch74's widget half: icon creation, sprite memo (same never-throw posture) |
-| `UI/FieldCampMapView.cs` + `FieldCampOverlayVM.cs` | Overlay button + status panel, 4 Hz refresh |
+| `UI/FieldCampOverlayVM.cs` (core) + `Client/Features/FieldCamp/UI/FieldCampMapView.cs` (TAOM.Client) | Overlay button + status panel, 4 Hz refresh. The behavior attaches the view through `IFieldCampOverlayAdapter` (`FieldCampCampaignBehavior.Overlay`, set by `FieldCampIoC.InitializePatchStatics` after the client composition; core registers a null adapter) |
 | `Main/_Module/GUI/PreFabs/FieldCamp/TaomFieldCampOverlay.xml` | Ported prefab; brushes are grep-verified vanilla (`Popup.Description.Text`, `Popup.Button.Text`, `Popup.Frame`, `ButtonBrush2`); the source's root `Frame1.Broken` was a phantom too (only `.Left`/`.Right` exist), swapped for the real `Popup.Frame` in round C |
 
 ## Menus and time: establish lands on the map, the camp sub-menu is a WAIT menu (field-tested 2026-08-23/25)

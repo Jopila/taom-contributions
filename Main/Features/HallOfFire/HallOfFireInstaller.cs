@@ -5,21 +5,21 @@ using TAOM.Features.CoopInterop;
 namespace TAOM.Features.HallOfFire;
 
 /// <summary>
-/// Puts <see cref="TaomMapConversationDataProvider"/> in the engine slot once per process, around whatever provider is
+/// Puts <c>TaomMapConversationDataProvider</c> (TAOM.Client) in the engine slot once per process, around whatever provider is
 /// there. Skipped on a dedicated server (no map view), for an empty slot and when the wrapper is already installed.
 /// A throwing slot (the SandBox.View module not loaded) is logged, never propagated into startup.
 /// </summary>
 public sealed class HallOfFireInstaller
 {
     private readonly IMapConversationProviderSlot _slot;
-    private readonly HallOfFireService _service;
+    private readonly IMapConversationProviderWrapper _wrapper;
     private readonly IDedicatedServerProvider _dedicated;
     private readonly IModLogger _logger;
 
-    public HallOfFireInstaller(IMapConversationProviderSlot slot, HallOfFireService service, IDedicatedServerProvider dedicated, IModLogger logger)
+    public HallOfFireInstaller(IMapConversationProviderSlot slot, IMapConversationProviderWrapper wrapper, IDedicatedServerProvider dedicated, IModLogger logger)
     {
         _slot = slot;
-        _service = service;
+        _wrapper = wrapper;
         _dedicated = dedicated;
         _logger = logger;
     }
@@ -37,10 +37,17 @@ public sealed class HallOfFireInstaller
                 _logger.LogWarning("HallOfFireInstaller: the map conversation provider slot is empty, not installing");
                 return;
             }
-            if (current is TaomMapConversationDataProvider)
+            if (_wrapper.IsWrapper(current))
                 return;
 
-            _slot.Set(new TaomMapConversationDataProvider(current, _service, _logger));
+            var wrapped = _wrapper.Wrap(current);
+            if (wrapped == null)
+            {
+                _logger.LogWarning("HallOfFireInstaller: no client wrapper (TAOM.Client did not load), TAOM settlements keep the engine's conversation backdrops");
+                return;
+            }
+
+            _slot.Set(wrapped);
             _logger.LogInfo($"HallOfFireInstaller: wrapped {current.GetType().Name} so TAOM settlements borrow vanilla conversation backdrops");
         }
         catch (Exception ex)

@@ -112,7 +112,7 @@ percentages into fractions and reverts a non-finite or out-of-range value to the
 with one warning per property in the TAOM log (MCM's slider clamps to the range, but its JSON
 loader assigns a hand-edited `TAOM.json` value as is); the alpha service additionally refuses a
 non-positive value and leaves vanilla's target alone. The engine-constructed plate widget reads
-the toggle and strength through the static `TaomSettlementPlateWidget.Settings`, captured once in
+the toggle and strength through the static `NameplateRelationWidgetContext.Settings` (core), captured once in
 the IoC end block; each plate compares the effective strength against the one it last painted,
 once per frame, so a change repaints on the first frame back on the map. MCM writes every slider
 move straight into the live settings object (Cancel undoes them), and raises only a save-time
@@ -149,8 +149,8 @@ vanilla's own-faction level for every coloured plate.
 
 | File | Purpose |
 |------|---------|
-| `Main/Features/SettlementNameplateRelation/TaomSettlementPlateWidget.cs` | The custom container widget: XML properties, reference resolution, never throws |
-| `Main/Features/SettlementNameplateRelation/SettlementPlatePresenter.cs` | Finds the item widget, paints the palette, mirrors alpha and colour factor onto the children |
+| `Client/Features/SettlementNameplateRelation/TaomSettlementPlateWidget.cs` | The custom container widget (TAOM.Client): XML properties, reference resolution, never throws |
+| `Client/Features/SettlementNameplateRelation/SettlementPlatePresenter.cs` | Finds the item widget, paints the palette, mirrors alpha and colour factor onto the children |
 | `Main/Features/SettlementNameplateRelation/NameplateRelationPalette.cs` | Relation int to colours, defaults, unknown resolves to neutral |
 | `Main/Features/SettlementNameplateRelation/NameplatePaletteEntry.cs` | Bar / text / frame colour triple |
 | `Main/Features/SettlementNameplateRelation/PlateAlphaPolicy.cs` | Per-frame change detector with finite guard; text alpha curve |

@@ -4295,3 +4295,17 @@ without the core changes and did not build on its own until the batch commit (`1
   When the index holds anything else, commit with `git commit -- <path>`, which commits only that path. Never push a commit
   whose file list you did not read.
 - **Source:** commits `0a8d61a4e` and `10f1f0b80`; [rca-taom-client-b4a-2026-10-22.md](../rca-taom-client-b4a-2026-10-22.md).
+
+### A runtime reflection scan of TAOM.dll for a base type loses the subclasses that move to TAOM.Client (B4b, 2026-10-22)
+`MapProfilerTargets.MapViewTargets` found every TAOM `MapView` subclass with `typeof(MapProfilerTargets).Assembly.GetTypes()`.
+The three views moved to TAOM.Client, so the scan found none: the profiler's views category would have had zero targets
+and Harmony would have rejected it ("Undefined target method" for an empty `TargetMethods`), so `PatchCategoryApplier`
+logged `[PatchApply] Patch101_MapFrameProfiler_Views FAILED` at error when the profiler is on (off by default: nothing
+shows), and three gates went red (`HarmonyPatchBindingTests`,
+`MapFrameProfilerBindingTests`, `tools/snapshot_api_surface.ps1 -Check`, which loads TAOM.dll only).
+- **Why missed:** the scope grep looked for the moved type names, and this scan names none of them; it finds them by base type.
+- **Prevent:** before moving a type, grep for `Assembly.GetTypes()` and `typeof(...).Assembly` scans that would have found it,
+  in Main, TAOM.Tests and `tools/`. Core reaches the client assembly through `ClientComposition.Assembly`, never by name; a
+  test or script that stands in for a client process fills `ClientComposition.Current` with `TaomClientComposition`.
+- **Source:** `Main/Features/MapPerf/Hooks/MapProfilerTargets.cs`, `Main/Composition/ClientComposition.cs`,
+  `tools/snapshot_api_surface.ps1`, [ADR-013](../../adrs/013-server-safe-core-client-ui-submodule.md).

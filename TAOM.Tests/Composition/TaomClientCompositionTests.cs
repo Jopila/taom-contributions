@@ -1,30 +1,53 @@
 using System.Linq;
 using DryIoc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using TAOM.Adapters;
 using TAOM.Client;
 using TAOM.Client.Adapters;
 using TAOM.Client.Features.CustomBattles;
+using TAOM.Client.Features.FiefManagement;
+using TAOM.Client.Features.HallOfFire;
 using TAOM.Composition;
+using TAOM.Core.Logging;
 using TAOM.Features.CustomBattles;
+using TAOM.Features.Enlistment;
+using TAOM.Features.FiefManagement;
+using TAOM.Features.HallOfFire;
+using TAOM.Features.WarOfTheRingMomentum.UI;
+using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Composition;
 
-/// <summary>ADR-013, B4a. What TAOM.Client replaces in core's container for the front-end types.</summary>
+/// <summary>ADR-013, B4a and B4b. What TAOM.Client replaces in core's container: the front-end seams and the campaign map seams.</summary>
 [TestClass]
 [TestCategory("RequiresGame")]
 public class TaomClientCompositionTests
 {
+    [ClassInitialize]
+    public static void Init(TestContext _) => GameAssemblies.EnsureLoaded();
+
     [TestCleanup]
     public void Cleanup() => ClientComposition.Current = null;
 
     [TestMethod]
-    public void RegisterServices_ReplacesTheThreeFrontEndSeams()
+    public void RegisterServices_ReplacesEveryCoreSeam()
     {
         var container = new Container();
         container.Register<IFactionMapWidgetAdapter, NullFactionMapWidgetAdapter>(Reuse.Singleton);
         container.Register<IFrontEndSpriteTableAdapter, NullFrontEndSpriteTableAdapter>(Reuse.Singleton);
         container.Register<ICustomBattleFactionSelectionFactory, NullCustomBattleFactionSelectionFactory>(Reuse.Singleton);
+        // The factory and the wrapper take these from the container when first resolved.
+        container.RegisterInstance(Substitute.For<IModLogger>());
+        container.RegisterInstance(new FiefHubOpener(
+            Substitute.For<IFiefManagementSettingsProvider>(), Substitute.For<IFiefHubService>(),
+            Substitute.For<IEnlistmentStateQuery>(), Substitute.For<IFiefHubHostAdapter>(), Substitute.For<IModLogger>()));
+        container.RegisterInstance(new HallOfFireService(Substitute.For<IHallOfFireConfigProvider>()));
+        container.Register<IMomentumUIService, NullMomentumUIService>(Reuse.Singleton);
+        container.Register<IRealmBordersMapViewAdapter, NullRealmBordersMapViewAdapter>(Reuse.Singleton);
+        container.Register<IFieldCampOverlayAdapter, NullFieldCampOverlayAdapter>(Reuse.Singleton);
+        container.Register<IFiefsNavigationElementFactory, NullFiefsNavigationElementFactory>(Reuse.Singleton);
+        container.Register<IMapConversationProviderWrapper, NullMapConversationProviderWrapper>(Reuse.Singleton);
         ClientComposition.Current = new TaomClientComposition();
 
         ClientComposition.Apply(container);
@@ -32,6 +55,18 @@ public class TaomClientCompositionTests
         Assert.IsInstanceOfType(container.Resolve<IFactionMapWidgetAdapter>(), typeof(FactionMapWidgetAdapter));
         Assert.IsInstanceOfType(container.Resolve<IFrontEndSpriteTableAdapter>(), typeof(FrontEndSpriteTableAdapter));
         Assert.IsInstanceOfType(container.Resolve<ICustomBattleFactionSelectionFactory>(), typeof(TaomFactionSelectionFactory));
-        Assert.AreEqual(3, container.GetServiceRegistrations().Count(), "each seam is replaced, never appended");
+        Assert.IsInstanceOfType(container.Resolve<IMomentumUIService>(), typeof(MomentumUIService));
+        Assert.IsInstanceOfType(container.Resolve<IRealmBordersMapViewAdapter>(), typeof(RealmBordersMapViewAdapter));
+        Assert.IsInstanceOfType(container.Resolve<IFieldCampOverlayAdapter>(), typeof(FieldCampOverlayAdapter));
+        Assert.IsInstanceOfType(container.Resolve<IFiefsNavigationElementFactory>(), typeof(TaomFiefsNavigationElementFactory));
+        Assert.IsInstanceOfType(container.Resolve<IMapConversationProviderWrapper>(), typeof(HallOfFireConversationWrapper));
+        var seams = new[]
+        {
+            typeof(IFactionMapWidgetAdapter), typeof(IFrontEndSpriteTableAdapter), typeof(ICustomBattleFactionSelectionFactory),
+            typeof(IMomentumUIService), typeof(IRealmBordersMapViewAdapter), typeof(IFieldCampOverlayAdapter),
+            typeof(IFiefsNavigationElementFactory), typeof(IMapConversationProviderWrapper),
+        };
+        Assert.AreEqual(8, container.GetServiceRegistrations().Count(r => seams.Contains(r.ServiceType)),
+            "each seam is replaced, never appended");
     }
 }

@@ -17,6 +17,7 @@ internal sealed class HallOfFireModule : TaomFeatureModule
         registrator.Register<IHallOfFireConfigProvider, HallOfFireConfigProvider>(Reuse.Singleton);
         registrator.Register<HallOfFireService>(Reuse.Singleton);
         registrator.Register<IMapConversationProviderSlot, MapConversationProviderSlot>(Reuse.Singleton);
+        registrator.Register<IMapConversationProviderWrapper, NullMapConversationProviderWrapper>(Reuse.Singleton);
         registrator.Register<HallOfFireInstaller>(Reuse.Singleton);
     }
 

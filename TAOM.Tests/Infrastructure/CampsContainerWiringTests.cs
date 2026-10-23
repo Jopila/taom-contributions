@@ -59,4 +59,13 @@ public class CampsContainerWiringTests
                 + "startup, before Harmony registration): "
                 + string.Join("; ", errors.Select(e => e.Value.Message)));
     }
+
+    [TestMethod]
+    public void FieldCampFeature_RegistersTheNullOverlayAdapter()
+    {
+        var container = BuildContainer();
+
+        // Resolve, not Validate: a registration that exists only in a comment or a string cannot satisfy it.
+        Assert.IsInstanceOfType(container.Resolve<IFieldCampOverlayAdapter>(), typeof(NullFieldCampOverlayAdapter));
+    }
 }

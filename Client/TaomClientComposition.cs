@@ -2,8 +2,13 @@ using DryIoc;
 using TAOM.Adapters;
 using TAOM.Client.Adapters;
 using TAOM.Client.Features.CustomBattles;
+using TAOM.Client.Features.FiefManagement;
+using TAOM.Client.Features.HallOfFire;
 using TAOM.Composition;
 using TAOM.Features.CustomBattles;
+using TAOM.Features.FiefManagement;
+using TAOM.Features.HallOfFire;
+using TAOM.Features.WarOfTheRingMomentum.UI;
 
 namespace TAOM.Client;
 
@@ -19,5 +24,10 @@ internal sealed class TaomClientComposition : IClientComposition
         registrator.Register<IFactionMapWidgetAdapter, FactionMapWidgetAdapter>(Reuse.Singleton);
         registrator.Register<IFrontEndSpriteTableAdapter, FrontEndSpriteTableAdapter>(Reuse.Singleton);
         registrator.Register<ICustomBattleFactionSelectionFactory, TaomFactionSelectionFactory>(Reuse.Singleton);
+        registrator.Register<IMomentumUIService, MomentumUIService>(Reuse.Singleton);
+        registrator.Register<IRealmBordersMapViewAdapter, RealmBordersMapViewAdapter>(Reuse.Singleton);
+        registrator.Register<IFieldCampOverlayAdapter, FieldCampOverlayAdapter>(Reuse.Singleton);
+        registrator.Register<IFiefsNavigationElementFactory, TaomFiefsNavigationElementFactory>(Reuse.Singleton);
+        registrator.Register<IMapConversationProviderWrapper, HallOfFireConversationWrapper>(Reuse.Singleton);
     }
 }

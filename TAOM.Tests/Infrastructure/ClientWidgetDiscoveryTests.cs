@@ -35,6 +35,12 @@ public class ClientWidgetDiscoveryTests
         "TAOM.Features.FactionMap.Widgets.PolygonWidget",
     };
 
+    // B4b: the campaign map's settlement plate is a client widget too; the engine builds it from a prefab tag.
+    private static readonly string[] CampaignMapWidgets =
+    {
+        "TAOM.Features.SettlementNameplateRelation.TaomSettlementPlateWidget",
+    };
+
     [ClassInitialize]
     public static void Init(Microsoft.VisualStudio.TestTools.UnitTesting.TestContext _) =>
         TAOM.Tests.Migration.GameAssemblies.EnsureLoaded();
@@ -65,7 +71,7 @@ public class ClientWidgetDiscoveryTests
         var core = typeof(SubModule).Assembly;
         var problems = new List<string>();
 
-        foreach (var fullName in FrontEndWidgets)
+        foreach (var fullName in FrontEndWidgets.Concat(CampaignMapWidgets))
         {
             if (core.GetType(fullName) != null)
                 problems.Add(fullName + " is still defined in TAOM.dll");

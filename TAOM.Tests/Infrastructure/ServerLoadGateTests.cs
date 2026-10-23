@@ -30,7 +30,6 @@ public class ServerLoadGateTests
     // TAOM.dll; the test fails if an entry stops failing, so this list never grows back.
     private static readonly HashSet<string> KnownClientTypesInCore = new HashSet<string>(StringComparer.Ordinal)
     {
-        "TAOM.Features.WarOfTheRingMomentum.UI.MomentumIndicatorMapView",
         "TAOM.Features.TimeAcceleration.UI.TimeAccelerationMixin",
         "TAOM.Features.TelcharsMark.UI.UpgradeRowMixin",
         "TAOM.Features.TelcharsMark.UI.UpgradeScreenMixin",
@@ -40,16 +39,11 @@ public class ServerLoadGateTests
         "TAOM.Features.ShaderPrecompilation.TaomShaderGameManager",
         "TAOM.Features.ShaderCompileNotice.ShaderCompileNoticeWindow",
         "TAOM.Features.ShaderCompileNotice.WindowHandleOwner",
-        "TAOM.Features.SettlementNameplateRelation.TaomSettlementPlateWidget",
         "TAOM.Features.ReevesLedger.UI.ReserveStepMixin",
         "TAOM.Features.ReevesLedger.UI.TownManagementLedgerMixin",
-        "TAOM.Features.RealmBorders.UI.RealmBordersMapView",
         "TAOM.Features.Namegiving.UI.FiefNamingMixin",
         "TAOM.Features.Messengers.UI.MessengerEncyclopediaMixin",
         "TAOM.Features.HostReview.Hooks.HostReviewVisualOrderProvider",
-        "TAOM.Features.HallOfFire.TaomMapConversationDataProvider",
-        "TAOM.Features.FieldCamp.UI.FieldCampMapView",
-        "TAOM.Features.FiefManagement.UI.TaomFiefsNavigationElement",
         "TAOM.Features.CompanionTactics.BattleActionBar.Hooks.BattleActionBarMissionView",
         "TAOM.Features.CareerSystem.UI.CharacterDeveloperCareerMixin",
         "TAOM.Features.CareerSystem.UI.MissionAgentStatusCareerMixin",

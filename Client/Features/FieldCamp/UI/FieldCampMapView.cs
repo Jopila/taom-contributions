@@ -10,7 +10,8 @@ namespace TAOM.Features.FieldCamp.UI;
 
 /// <summary>
 /// Persistent on-map camp overlay (MomentumIndicatorMapView is the template). Added/removed via
-/// MapScreen.AddMapView by <see cref="FieldCampCampaignBehavior"/>'s per-tick presence check.
+/// MapScreen.AddMapView by <c>FieldCampOverlayAdapter</c>, which <c>FieldCampCampaignBehavior</c> calls from
+/// its per-tick presence check.
 /// Parameterless ctor is required by AddMapView's new() constraint, so services resolve via IoC
 /// here - the sanctioned engine-instantiated-boundary exception (GauntletCareerScreen precedent).
 /// The overlay must NOT steal map input: SetInputRestrictions(false, mouse+keys) and no

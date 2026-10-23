@@ -11,7 +11,7 @@ namespace TAOM.Features.FieldCamp.UI;
 /// <summary>
 /// Data source for TaomFieldCampOverlay.xml: the always-on Make Camp button plus the
 /// bottom-center status panel. All campaign state arrives through injected services (review #26
-/// lesson: no IoC.Resolve inside a VM; <see cref="FieldCampMapView"/> resolves at its
+/// lesson: no IoC.Resolve inside a VM; <c>FieldCampMapView</c> (TAOM.Client) resolves at its
 /// engine-instantiated boundary and passes everything in).
 ///
 /// <para>Ported from the source module's FieldCampOverlayVM with fixes: the button visibility

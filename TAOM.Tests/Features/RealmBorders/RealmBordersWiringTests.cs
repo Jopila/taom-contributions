@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TaleWorlds.InputSystem;
 using TaleWorlds.MountAndBlade;
+using TAOM.Adapters;
 using TAOM.Composition;
 using TAOM.Core.Infrastructure;
 using TAOM.Core.Logging;
@@ -45,7 +46,7 @@ public class RealmBordersWiringTests
     [TestMethod]
     public void MapView_DrivesTheParchmentMapEveryFrameAndOnClose()
     {
-        var src = RepoPaths.ReadSource("Main/Features/RealmBorders/UI/RealmBordersMapView.cs", stripComments: true);
+        var src = RepoPaths.ReadSource("Client/Features/RealmBorders/UI/RealmBordersMapView.cs", stripComments: true);
 
         StringAssert.Matches(src, new Regex(@"_atlas\?\.OnMapFrame\(distance, Campaign\.MapMaximumHeight, _borders\.Alpha > 0f\);"),
             "the parchment map no longer follows the camera, its furthest zoom or the borders' visibility");
@@ -145,6 +146,42 @@ public class RealmBordersWiringTests
         Assert.AreSame(container.Resolve<RealmBorderService>(), container.Resolve<RealmBorderService>());
         Assert.AreSame(container.Resolve<RealmAtlasService>(), container.Resolve<RealmAtlasService>(),
             "the map view resolves the parchment map's service; a missing registration throws in CreateLayout");
+    }
+
+    private static Container RealmBordersContainer()
+    {
+        var container = new Container();
+        var paths = Substitute.For<IPathService>();
+        paths.ModuleDataPath.Returns(ModuleDataPath);
+        container.RegisterInstance(paths);
+        container.RegisterInstance(Substitute.For<IModLogger>());
+        container.RegisterInstance(Substitute.For<IAlignmentService>());
+        container.RegisterInstance(Substitute.For<IDedicatedServerProvider>());
+        new RealmBordersModule().RegisterServices(container);
+        return container;
+    }
+
+    [TestCategory("RequiresGame")]
+    [TestMethod]
+    public void Module_RegistersTheNullMapViewAdapter()
+    {
+        using var container = RealmBordersContainer();
+
+        Assert.IsInstanceOfType(container.Resolve<IRealmBordersMapViewAdapter>(), typeof(NullRealmBordersMapViewAdapter));
+    }
+
+    [TestCategory("RequiresGame")]
+    [TestMethod]
+    public void Behavior_OnTick_AsksTheMapViewAdapterToAttach()
+    {
+        using var container = RealmBordersContainer();
+        var adapter = Substitute.For<IRealmBordersMapViewAdapter>();
+        container.RegisterInstance(adapter, ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+        var behavior = (RealmBordersCampaignBehavior)new RealmBordersModule().CampaignBehaviors[0].Create(container);
+
+        behavior.OnTick(0f);
+
+        adapter.Received(1).EnsureAttached();
     }
 
     [TestCategory("RequiresGame")]

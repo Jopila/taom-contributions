@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -154,13 +155,19 @@ public class MapFrameProfilerBindingTests
     public void MapViewTargets_AreTheTaomMapViewPerFrameOverrides()
     {
         RequireGame();
-        var targets = MapProfilerTargets.MapViewTargets();
+        // The three views live in TAOM.Client, which a client process offers through the slot (ADR-013, B4b).
+        var previousClient = TAOM.Composition.ClientComposition.Current;
+        TAOM.Composition.ClientComposition.Current = new TAOM.Client.TaomClientComposition();
+        List<MethodBase> targets;
+        try { targets = MapProfilerTargets.MapViewTargets(); }
+        finally { TAOM.Composition.ClientComposition.Current = previousClient; }
         var perFrame = new[] { "OnFrameTick", "OnMapScreenUpdate", "OnMenuModeTick", "OnIdleTick" };
+        var taomAssemblies = new[] { typeof(MapFrameProfilerHooks).Assembly, typeof(TAOM.Client.ClientSubModule).Assembly };
 
         foreach (var m in targets)
         {
             var owner = m.DeclaringType!;
-            Assert.AreEqual(typeof(MapFrameProfilerHooks).Assembly, owner.Assembly, m.Name + " is not declared on a TAOM type.");
+            CollectionAssert.Contains(taomAssemblies, owner.Assembly, m.Name + " is not declared on a TAOM type (TAOM.dll or TAOM.Client.dll).");
             Assert.IsFalse(owner.IsAbstract, owner.Name);
             Assert.IsTrue(DerivesFromMapView(owner), owner.Name + " does not derive from SandBox.View.Map.MapView.");
             CollectionAssert.Contains(perFrame, m.Name);

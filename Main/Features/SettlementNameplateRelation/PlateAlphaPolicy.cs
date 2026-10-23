@@ -3,7 +3,7 @@ using TAOM.Core.Validation;
 namespace TAOM.Features.SettlementNameplateRelation;
 
 /// <summary>
-/// The per-frame decision behind <see cref="TaomSettlementPlateWidget"/>'s alpha mirroring, kept
+/// The per-frame decision behind <c>TaomSettlementPlateWidget</c> (TAOM.Client)'s alpha mirroring, kept
 /// pure so the widget carries no logic. Vanilla's <c>SettlementNameplateWidget</c> lerps the item
 /// widget's <c>AlphaFactor</c> / <c>ColorFactor</c> every frame; the plate's own sprites live on
 /// child widgets that the engine never propagates those values to, so the widget copies them.

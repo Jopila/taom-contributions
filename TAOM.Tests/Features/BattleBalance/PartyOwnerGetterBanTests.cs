@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TaleWorlds.CampaignSystem.Party;
+using TAOM.Tests.Infrastructure;
 using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.BattleBalance;
@@ -42,8 +43,7 @@ public class PartyOwnerGetterBanTests
         var bannedGetter = typeof(PartyBase).GetProperty(nameof(PartyBase.Owner))?.GetGetMethod();
         Assert.IsNotNull(bannedGetter, "PartyBase.Owner no longer exists on the installed engine — retire this ban test.");
 
-        var violations = IlCallScanner.FindCallers(
-            typeof(TAOM.IoC).Assembly,
+        var violations = TaomAssemblies.FindCallers(
             target => IlCallScanner.SameMethod(target, bannedGetter),
             out var unreadable,
             out var scanned);

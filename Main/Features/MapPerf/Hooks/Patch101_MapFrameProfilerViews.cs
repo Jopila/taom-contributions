@@ -6,7 +6,7 @@ namespace TAOM.Features.MapPerf.Hooks;
 
 // Patch101 views category (default off; applied once per process by MapFrameProfilerInstaller, separate from
 // the core category so a failing view cannot stop the frame boundary). Targets every TAOM MapView subclass's
-// own override of a per-frame virtual (OnFrameTick, OnMapScreenUpdate, OnMenuModeTick, OnIdleTick), found
+// own override of a per-frame virtual, in TAOM.dll and TAOM.Client.dll (OnFrameTick, OnMapScreenUpdate, OnMenuModeTick, OnIdleTick), found
 // by reflection; at v1.5.3 that is the three OnMapScreenUpdate overrides. MapScreen ticks the views through
 // compiler-generated closures (ForeachReverse), so each TAOM view is timed on its own override instead; the
 // entry is keyed by the view's type and counts toward taomMs. Main thread.

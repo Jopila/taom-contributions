@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Features.Elephant;
+using TAOM.Tests.Infrastructure;
 using TAOM.Tests.Migration;
 using TaleWorlds.CampaignSystem;
 
@@ -35,8 +36,7 @@ public class HowdahCrewLookupBanTests
         Assert.IsTrue(typeof(CharacterObject).IsSealed,
             "CharacterObject is no longer sealed: GetObject<T> would take the assignable path and this ban can retire.");
 
-        var violations = IlCallScanner.FindCallers(
-            typeof(HowdahCrewSpawner).Assembly,
+        var violations = TaomAssemblies.FindCallers(
             IsSealedCharacterObjectLookup,
             out List<string> unreadable,
             out int scanned);

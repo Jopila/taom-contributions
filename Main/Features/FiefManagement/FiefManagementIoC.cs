@@ -14,6 +14,8 @@ public static class FiefManagementIoC
         container.Register<IFiefHubService, FiefHubService>(Reuse.Singleton);
         container.Register<IFiefHubHostAdapter, FiefHubHostAdapter>(Reuse.Singleton);
         container.Register<FiefHubOpener>(Reuse.Singleton);
+        // The "Fiefs" button type is client-only (ADR-013): core's null factory, replaced by TAOM.Client's.
+        container.Register<IFiefsNavigationElementFactory, NullFiefsNavigationElementFactory>(Reuse.Singleton);
         container.Register<IFiefHubMenuPresenter, FiefHubMenuPresenter>(Reuse.Singleton);
     }
 }

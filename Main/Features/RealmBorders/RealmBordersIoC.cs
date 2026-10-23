@@ -16,6 +16,7 @@ public static class RealmBordersIoC
         registrator.Register<IRealmMapAdapter, RealmMapAdapter>(Reuse.Singleton);
         registrator.Register<IBorderRenderAdapter, BorderRenderAdapter>(Reuse.Singleton);
         registrator.Register<IRealmNoticeAdapter, RealmNoticeAdapter>(Reuse.Singleton);
+        registrator.Register<IRealmBordersMapViewAdapter, NullRealmBordersMapViewAdapter>(Reuse.Singleton);
 
         // Singletons: the territory is per map and outlives a campaign; the border service holds the
         // drawn tiles, reset per session by the behavior (Singleton Services Session-Reset rule).

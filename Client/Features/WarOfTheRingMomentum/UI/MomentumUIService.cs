@@ -19,7 +19,7 @@ public class MomentumUIService : IMomentumUIService
     {
         var mapScreen = MapScreen.Instance;
         var view = mapScreen?.GetMapView<MomentumIndicatorMapView>();
-        if (view != null)
+        if (mapScreen != null && view != null)
             mapScreen.RemoveMapView(view);
     }
 }

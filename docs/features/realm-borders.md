@@ -46,7 +46,7 @@ under the borders. The player's settings, each realm's colour included, are in M
 | Domain (engine-free, `Domain/`) | `ProvincePartitioner`, `BoundaryTracer`, `RealmBorderSelector`, `PolylineMath`, `StripBuilder`, `BorderPainter`, `BorderStyleSelector`, `RealmFill`, `TileBinner`, `RealmPalette`, `RealmLabelPlacer`, `RealmNameLettering`, `BorderCrossingTracker`, `ProvinceBitmap`, `MapMode`, `RealmRelation`, `AtlasSheet` |
 | Services | `RealmTerritoryService` (the per-map province map), `RealmBorderService` (snapshot, repaint on the worker, uploads, fade, notices), `RealmAtlasService` (the parchment map), `RealmBordersSettingsProvider`, `RealmPaletteProvider` |
 | Adapters (`Main/Adapters/`) | `MapTerrainAdapter` (bounds, navmesh terrain type, height), `RealmMapAdapter` (fiefs, their realms, each realm's relation to the player, the player's realm and position, the clock), `BorderRenderAdapter` (the border meshes and the parchment map), `RealmNoticeAdapter` (the messages) |
-| Entry points | `RealmBordersCampaignBehavior` (events; attaches the map view), `RealmBordersMapView` (keys, the per-frame calls, the names layer), `RealmBordersCheats` and `RealmAtlasCheats` (console) |
+| Entry points | `RealmBordersCampaignBehavior` (events; attaches the map view), `RealmBordersMapView` (in TAOM.Client: keys, the per-frame calls, the names layer; the behavior attaches it through `IRealmBordersMapViewAdapter`), `RealmBordersCheats` and `RealmAtlasCheats` (console) |
 | Wiring | `RealmBordersModule` in `FeatureModules.All`. No Harmony patch, no GameModel, no save data |
 
 The domain uses its own `MapPoint` rather than the engine's `Vec2`, so every geometry test runs on
@@ -67,7 +67,7 @@ navmesh terrain types           fiefs, owners, relations, the player
 BorderRenderAdapter   Labels -> RealmNamesVM   RealmNoticeAdapter
 (one mesh per tile)   (the names layer)        (mode and crossing messages)
         \                 |
-         RealmBordersMapView  <- attached on the first map tick by RealmBordersCampaignBehavior
+         RealmBordersMapView  <- attached on the first map tick: RealmBordersCampaignBehavior -> IRealmBordersMapViewAdapter (TAOM.Client)
                           |
      RealmAtlasService (the parchment map at full zoom-out, drawn through BorderRenderAdapter)
 ```
