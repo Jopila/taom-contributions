@@ -22,6 +22,6 @@ public class EnlistmentMessengerWiringTests
     {
         var src = RepoPaths.ReadSource("Main/Features/Enlistment/Hooks/EnlistmentDialogBehavior.cs", stripComments: true);
 
-        StringAssert.Matches(src, new Regex(@"EnlistUnavailableReason\(\s*verdict\s*,\s*throughMessenger\s*\)"));
+        StringAssert.Matches(src, new Regex(@"EnlistUnavailableReason\(\s*verdict\s*,[^;]*,\s*throughMessenger\s*\)"));
     }
 }

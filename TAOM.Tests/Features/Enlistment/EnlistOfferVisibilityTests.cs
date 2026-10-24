@@ -180,7 +180,7 @@ public class EnlistOfferVisibilityTests
 
         Assert.AreEqual(EnlistGateResult.DesertedFromHim, verdict);
         Assert.IsTrue(EnlistmentDialogBehavior.ShowsOfferFor(verdict, deferToHost: false));
-        Assert.IsFalse(EnlistmentDialogBehavior.OfferIsTakeable(verdict));
+        Assert.IsFalse(EnlistmentDialogBehavior.OfferIsTakeable(verdict, throughMessenger: false));
     }
 
     /// <summary>The greyed case is genuinely reachable — a healthy commander, blocked only by the war.</summary>

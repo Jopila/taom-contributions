@@ -126,15 +126,9 @@ public class EnlistmentDialogBehavior : CampaignBehaviorBase
     {
         var verdict = _gate.CanEnlistWith(PartnerId());
         var throughMessenger = _messenger.IsOpen;
-        if (OfferIsTakeable(verdict, throughMessenger))
-        {
-            explanation = null;
-            return true;
-        }
-
-        explanation = Presentation.ServiceVocabulary.EnlistUnavailableReason(
-            verdict, Hero.OneToOneConversationHero?.Name?.ToString(), throughMessenger);
-        return false;
+        explanation = OfferIsTakeable(verdict, throughMessenger) ? null : Presentation.ServiceVocabulary
+            .EnlistUnavailableReason(verdict, Hero.OneToOneConversationHero?.Name?.ToString(), throughMessenger);
+        return explanation == null;
     }
 
     private void OnOathSworn()
