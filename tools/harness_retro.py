@@ -31,6 +31,15 @@ if str(TOOLS_DIR) not in sys.path:
 
 from audit_claude_config import _GENERIC_SECRET, _SECRET_COMPILED  # noqa: E402
 
+# The hooks' command reader, so section 9 reads a command the way the git gates do.
+HOOKS_DIR = TOOLS_DIR.parent / ".claude" / "hooks"
+if str(HOOKS_DIR) not in sys.path:
+    sys.path.insert(0, str(HOOKS_DIR))
+sys.dont_write_bytecode = True  # no __pycache__ folder inside .claude/hooks
+import _shellwords  # noqa: E402
+
+_VALUE_OPTS = _shellwords.GIT_OPTS_WITH_VALUE | {"-R", "--repo"}   # gh -R owner/repo
+
 DEFAULT_SLUG = "e--repos-TAOM"
 RECURRING_SESSIONS = 3
 RUNAWAY_LEN = 3
@@ -59,6 +68,14 @@ _DIGITS = re.compile(r"\d+")
 _SPACE = re.compile(r"\s+")
 _EXIT_LINE = re.compile(r"^\s*Exit code \d+\s*\n?")
 _ERR_TAG = re.compile(r"</?tool_use_error>")
+_NOT_A_FAMILY = {"cd", "chdir", "pushd", "popd", "set-location", "sl", "push-location", "pop-location",
+                 "for", "select", "case"}
+FAMILY_HEAD = 4096
+_SUBCOMMAND_TOOLS = {"git", "dotnet", "gh"}
+_SCRIPT_TOOLS = {"python", "py", "pwsh", "powershell", "bash", "sh"}
+_INLINE_FLAGS = {"-c", "-command", "-encodedcommand", "-e", "-ec"}
+_PWSH_VALUE_OPTS = {"-executionpolicy", "-ep", "-workingdirectory", "-wd", "-windowstyle", "-outputformat",
+                    "-inputformat", "-configurationname"}
 
 
 def _redact_generic(m):
@@ -104,6 +121,55 @@ def script_of(command):
     if found:
         return found[-1]
     return redact((command or "").strip())[:40] or "(unknown)"
+
+
+def command_family(command, tool="Bash"):
+    """`cd /x && FOO=1 git -C y diff a` -> `git diff`; `python -B tools/x.py` -> `python x.py`.
+    The command is read by the git gates' own reader, so `timeout 600 dotnet test` and
+    `{ git status; }` count as their command here too (#985; the idea of rtk's command reader,
+    docs/reviews/adopt-rtk-2026-10-23.md). The first segment that runs something other than a
+    directory change or a loop header names the family."""
+    try:
+        # The family is the first command, so the head of a long script is enough to read.
+        text, _bodies = _shellwords.strip_heredocs(_shellwords.to_posix((command or "")[:FAMILY_HEAD], tool))
+        segs = _shellwords.segments(text).split("\n")
+    except Exception:  # a reader failure costs one bucket, never the run
+        segs = [command or ""]
+    for seg in segs:
+        words = [w[2] for w in _shellwords._lead_words(seg, 40)]
+        k = _shellwords.command_index(words, tool)
+        if k >= len(words):
+            continue
+        name = re.sub(r"\.exe$", "", re.split(r"[\\/]", words[k])[-1].lower())
+        if name not in _NOT_A_FAMILY:
+            return name + _family_detail(name, words[k + 1:])
+    return "(unknown)"
+
+
+def _family_detail(name, rest):
+    """` <subcommand>` for git, dotnet and gh; ` <script basename>` for a script runner, and nothing
+    for inline code (`-c`, `bash -lc`, `pwsh -EncodedCommand`, a heredoc), so a script never
+    becomes its own bucket."""
+    skip = False
+    for w in rest:
+        lw = w.lower()
+        if skip:
+            skip = False
+        elif name in _SUBCOMMAND_TOOLS:
+            if w in _VALUE_OPTS:
+                skip = True
+            elif not w.startswith("-"):
+                return " " + w
+        elif name in _SCRIPT_TOOLS:
+            if lw in _INLINE_FLAGS or lw.startswith("<") or (name in ("bash", "sh") and re.fullmatch(r"-[a-z]*c[a-z]*", lw)):
+                return ""
+            if lw in _PWSH_VALUE_OPTS:
+                skip = True
+            elif not w.startswith("-"):
+                return "" if re.search(r"\s", w) else " " + re.split(r"[\\/]", w)[-1]
+        else:
+            return ""
+    return ""
 
 
 def default_since(repo, today=None):
@@ -181,6 +247,15 @@ class Stats:
         self.slash_commands = Counter()
         self.subagent_types = Counter()
         self.models = Counter()
+        self.out_tools = defaultdict(lambda: [0, 0, 0])  # tool -> [results, chars, max]
+        self.out_families = defaultdict(lambda: [0, 0, 0])
+
+
+def add_output(table, key, size):
+    row = table[key]
+    row[0] += 1
+    row[1] += size
+    row[2] = max(row[2], size)
 
 
 def classify_error(stats, text, tool, sid, ts=None):
@@ -272,7 +347,9 @@ def handle_human(stats, r, sid, ts):
 
 
 def handle_assistant(stats, r, tools, count):
-    """Map each tool_use id to (tool name, the id of the assistant message that sent it)."""
+    """Map each tool_use id to (tool name, the id of the assistant message that sent it, the shell
+    command or None). The family is read only when a result is counted, so records outside the window
+    cost no parse."""
     msg = r.get("message")
     content = msg.get("content") if isinstance(msg, dict) else None
     if not isinstance(content, list):
@@ -283,7 +360,8 @@ def handle_assistant(stats, r, tools, count):
         name = str(b.get("name", "?"))
         inp = b.get("input") if isinstance(b.get("input"), dict) else {}
         if b.get("id"):
-            tools[b["id"]] = (name, str(msg.get("id") or b["id"]))
+            command = str(inp.get("command", ""))[:FAMILY_HEAD] if name in ("Bash", "PowerShell") else None
+            tools[b["id"]] = (name, str(msg.get("id") or b["id"]), command)
         if not count:
             continue
         if name == "Skill" and inp.get("skill"):
@@ -349,9 +427,13 @@ def scan_file(stats, path, since_str):
                 if not results and handle_human(stats, r, sid, ts):
                     flush()  # a person answered between the failures: not a runaway
                 for b in results:
-                    tool, msg_id = tools.get(b.get("tool_use_id"), ("?", b.get("tool_use_id")))
+                    tool, msg_id, command = tools.get(b.get("tool_use_id"), ("?", b.get("tool_use_id"), None))
+                    text = result_text(b.get("content"))
+                    add_output(stats.out_tools, tool, len(text))
+                    if command is not None:
+                        add_output(stats.out_families, command_family(command, tool), len(text))
                     if b.get("is_error") is True:
-                        key = classify_error(stats, result_text(b.get("content")), tool, sid, ts)
+                        key = classify_error(stats, text, tool, sid, ts)
                     else:
                         key = None
                     if key is not None and run and run[0] == key:
@@ -461,6 +543,31 @@ def top_groups(groups, n, keys):
     return rows[:n]
 
 
+def output_rows(table, label, total, n, shell_total=None):
+    ranked = sorted(table.items(), key=lambda kv: -kv[1][1])
+    if len(ranked) > n:
+        rest = ranked[n:]
+        ranked = ranked[:n] + [("(other)", [sum(v[0] for _k, v in rest), sum(v[1] for _k, v in rest),
+                                            max(v[2] for _k, v in rest)])]
+    rows = []
+    for key, (results, chars, biggest) in ranked:
+        row = {label: redact(key), "results": results, "chars": chars, "max": biggest,
+               "share": round(chars / total, 4) if total else 0,
+               "mean": round(chars / results) if results else 0}
+        if shell_total is not None:
+            row["shell_share"] = round(chars / shell_total, 4) if shell_total else 0
+        rows.append(row)
+    return rows
+
+
+def output_size(stats, n):
+    total = sum(v[1] for v in stats.out_tools.values())
+    shell = sum(v[1] for v in stats.out_families.values())
+    return {"total_chars": total,
+            "tools": output_rows(stats.out_tools, "tool", total, n),
+            "families": output_rows(stats.out_families, "family", total, n, shell)}
+
+
 def build_signals(stats, args, since, today, main, sub):
     n = args.top
     tool_rows = top_groups(stats.tool_errors, n, ("signature", "tool"))
@@ -495,6 +602,7 @@ def build_signals(stats, args, since, today, main, sub):
                   "subagent_types": dict(stats.subagent_types), "models": dict(stats.models)},
         "unused_skills": unused_skills(args.repo, used),
         "memory": memory_health(args.memory, today),
+        "output_size": output_size(stats, n),
     }
 
 
@@ -573,6 +681,17 @@ def render(sig):
               m["memory_md_bytes"], m["memory_md_lines"]), "",
           "### Feature cards older than %d days" % STALE_CARD_DAYS, ""]
     L += table(["Card", "Age (days)"], [[x["name"], x["age_days"]] for x in m["stale_cards"]])
+    o = sig["output_size"]
+    L += ["## 9. Tool output size", "",
+          "%d characters of tool results (errors included) in the window. Shares are of all results; "
+          "shell share is of Bash and PowerShell results." % o["total_chars"], "", "### By tool", ""]
+    L += table(["Tool", "Results", "Chars", "Share", "Mean"],
+               [[r["tool"], r["results"], r["chars"], "%.1f%%" % (100 * r["share"]), r["mean"]]
+                for r in o["tools"]])
+    L += ["### By shell command family", ""]
+    L += table(["Family", "Results", "Chars", "Share of all", "Share of shell", "Mean", "Max"],
+               [[r["family"], r["results"], r["chars"], "%.1f%%" % (100 * r["share"]),
+                 "%.1f%%" % (100 * r["shell_share"]), r["mean"], r["max"]] for r in o["families"]])
     return "\n".join(L) + "\n"
 
 

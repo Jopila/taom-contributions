@@ -12,7 +12,7 @@ read it first.
 
 ## Phases
 
-1. **Evidence:** `python tools/harness_retro.py`, then `python tools/analyze_reviews.py --summary --no-plot`. UNCHECKED means stop.
+1. **Evidence:** `python tools/harness_retro.py`, then `python tools/analyze_reviews.py --summary --no-plot`. UNCHECKED means stop. Section 9 of the report is tool output size by tool and shell family.
 2. **Changes:** `git log --since <last retro>` over the harness paths, plus the window's RCA preventive actions.
 3. **Verdicts:** helped, hurt, no observed effect, confounded or too early, one row per change older than seven days.
 4. **Proposals:** at most five, each naming its session moment; cheapest form first; no change is a valid result.

@@ -25,7 +25,8 @@ It makes no model calls. Sections: sessions, hook outcomes (denies, blocks, brok
 cancelled and timed-out runs, gates with no fires, ask-only gates whose fires leave no trace),
 permission outcomes, tool-error signatures (RECURRING at three or more sessions), runaway retries
 (three or more assistant messages, not parallel calls of one), user corrections, skill and slash
-command usage, subagent usage, memory health.
+command usage, subagent usage, memory health, and tool output size (section 9: characters of
+results by tool and by shell command family, the baseline for any output-trimming change).
 
 Also run `python tools/analyze_reviews.py --summary --no-plot` for the reviewer accuracy that
 `REVIEW-LOG.md` already tracks (`--no-plot` leaves the committed `progress.png` alone).

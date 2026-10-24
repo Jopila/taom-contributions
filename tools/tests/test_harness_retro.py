@@ -407,6 +407,75 @@ class OutDirTests(Base):
         self.assertFalse(self.env.out.exists())
 
 
+class OutputSizeTests(Base):
+    def test_share_by_tool_and_family(self):
+        self.env.write("a.jsonl", [
+            tool_use("t1", "Bash", command="cd /x && GIT_PAGER=cat git diff HEAD~1"),
+            tool_result("t1", "d" * 300, error=False),
+            tool_use("t2", "Bash", command="grep -rn foo ."),
+            tool_result("t2", "g" * 100, error=False),
+            tool_use("t3", "Read", file_path="/x/y.txt"),
+            tool_result("t3", "r" * 600, error=False),
+        ])
+        self.env.run()
+        o = self.env.signals()["output_size"]
+        self.assertEqual(o["total_chars"], 1000)
+        tools = {r["tool"]: r for r in o["tools"]}
+        self.assertEqual(tools["Read"]["share"], 0.6)
+        self.assertEqual(tools["Bash"]["share"], 0.4)
+        fams = {r["family"]: r for r in o["families"]}
+        self.assertEqual(fams["git diff"]["chars"], 300)
+        self.assertEqual(fams["grep"]["chars"], 100)
+        self.assertIn("## 9. Tool output size", self.env.report())
+
+    def test_error_results_count_too(self):
+        self.env.write("a.jsonl", [tool_use("t1", "Bash", command="ls"),
+                                   tool_result("t1", "e" * 50, error=True)])
+        self.env.run()
+        self.assertEqual(self.env.signals()["output_size"]["total_chars"], 50)
+
+    def test_command_family(self):
+        f = hr.command_family
+        self.assertEqual(f("FOO=1 python tools/x.py"), "python x.py")
+        self.assertEqual(f("dotnet test a"), "dotnet test")
+        self.assertEqual(f("git -C /e/x diff"), "git diff")
+        self.assertEqual(f(""), "(unknown)")
+
+    def test_command_family_reads_past_wrappers(self):
+        f = hr.command_family
+        self.assertEqual(f("timeout 600 dotnet test TAOM.Tests"), "dotnet test")
+        self.assertEqual(f("timeout -k 5 60 git log -3"), "git log")
+        self.assertEqual(f("time dotnet build x"), "dotnet build")
+        self.assertEqual(f("env FOO=1 git status"), "git status")
+        self.assertEqual(f('& "C:/Python314/python.exe" tools/x.py'), "python x.py")
+
+    def test_command_family_uses_the_hook_reader(self):
+        f = hr.command_family
+        self.assertEqual(f("env -i FOO=1 dotnet test"), "dotnet test")
+        self.assertEqual(f("nice -n 5 dotnet test"), "dotnet test")
+        self.assertEqual(f("git -c a=b --git-dir x status"), "git status")
+        self.assertEqual(f("cd /e/x; S=/e/y; for f in a; do git clean -n; done"), "git clean")
+        self.assertEqual(f("python - <<'EOF'\nprint(1)\nEOF"), "python")
+        self.assertEqual(f('& "C:/Program Files/dotnet/dotnet.exe" test', "PowerShell"), "dotnet test")
+        self.assertEqual(f("timeout /t 5", "PowerShell"), "timeout")
+
+    def test_command_family_keeps_inline_scripts_out_of_the_key(self):
+        f = hr.command_family
+        self.assertEqual(f('bash -lc "git status && dotnet test"'), "bash")
+        self.assertEqual(f("pwsh -NoProfile -EncodedCommand ZQBjAGgAbwA=", "PowerShell"), "pwsh")
+        self.assertEqual(f("pwsh -NoProfile -ExecutionPolicy Bypass -File tools/x.ps1"), "pwsh x.ps1")
+        self.assertEqual(f("gh -R a/b pr list"), "gh pr")
+
+    def test_tool_table_folds_past_top(self):
+        recs = []
+        for i, name in enumerate(["Read", "Bash", "Grep", "Glob"]):
+            recs += [tool_use("t%d" % i, name, command="ls"), tool_result("t%d" % i, "x" * (400 - 100 * i), error=False)]
+        self.env.write("a.jsonl", recs)
+        self.env.run("--top", "2")
+        names = [r["tool"] for r in self.env.signals()["output_size"]["tools"]]
+        self.assertEqual(names, ["Read", "Bash", "(other)"])
+
+
 class MemoryTests(Base):
     def test_stale_card_and_memory_size(self):
         (self.env.mem / "MEMORY.md").write_bytes(b"one\ntwo\nthree\n")
