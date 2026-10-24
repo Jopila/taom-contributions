@@ -18,12 +18,12 @@ With no fresh user prompt, continue established work; don't start new work.
   obvious steps, first re-read the transcript and recombine near-misses.
 - A trivial failure (typo, missing import, a flake): fix and retry. A fundamentally broken approach:
   record the outcome (commit body, log) and move on.
-- No-progress breaker: a loop that drives work stops after three ticks in a row with no new commit,
-  no change in `git status --porcelain` or `git diff` since the previous tick, and no change to the
-  out-of-repo files the task names (the live Armory, TAOM_Map); it reports what it tried. A tick is
-  one `/loop` iteration or one wakeup. A tick that only watches CI, outside state or the loop's own
-  running job (a hook suite, a Codex run) does not count. Progress is what the files show, never the
-  agent's own report.
+- No-progress breaker: a work-driving `/loop` or wakeup ends each work tick with
+  `python tools/loop_progress.py --state "<scratchpad>\loop-<name>.json"`, adding `--watch-path` for
+  each out-of-repo file the task edits (the live Armory, TAOM_Map). Exit 3 means three ticks with no
+  new commit and no change in status, diff or watched files: stop and report what was tried. A tick
+  that only watches CI or the loop's own job skips the call. Progress is what the files show, never
+  the agent's own report.
 
 ## Edit scope
 

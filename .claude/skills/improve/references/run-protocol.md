@@ -123,7 +123,8 @@ decisions for the maintainer; considered and rejected; not audited; where the ev
 
 After compaction, a usage limit, a session end or a restart:
 
-1. Read PROGRESS.md: Status, Next, Blockers, Dead ends, Authorizations.
+1. Read PROGRESS.md: Status, Next, Blockers, Dead ends, Authorizations. After a compaction the
+   SessionStart hook prints the Dead ends lines edited in the last two days.
 2. `git worktree list` and each `improve/*` branch tip; compare with the Status rows.
 3. A RUNNING row with a run id: read its journal. A run that ended early resumes with the same
    `scriptPath` and `resumeFromRunId`; finished agents replay from cache. A staged build that died

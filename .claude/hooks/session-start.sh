@@ -1,6 +1,6 @@
 #!/bin/bash
 # SessionStart hook: Print recent project context on fresh startup
-# Only fires on "startup" source — resume/compact/clear already have context
+# Startup prints the full context; compact prints only recent Dead ends (resume/clear print nothing)
 
 # The two bounded probes below (the Armory tpac scan, the graphify status) share one deadline counted
 # from this first command, so together they leave the tail (git log, diff, ls-files, the TODO grep) about
@@ -26,6 +26,19 @@ if command -v jq >/dev/null 2>&1; then
   SOURCE=$(echo "$INPUT" | jq -r '.source // empty')
 else
   SOURCE=$(echo "$INPUT" | grep -oE '"source"\s*:\s*"[^"]*"' | head -1 | sed 's/.*"\([^"]*\)"$/\1/')
+fi
+
+# After compaction, re-surface recent Dead ends (run-protocol.md; CLAUDE.md item 8). SessionStart is
+# the only compact-time hook whose stdout reaches Claude (harness-facts.md "Visibility"). One find
+# bounded at 3 s of the 10 s registration, run folders and memory cards edited in the last two days,
+# at most 40 lines; a heading "## Dead ends" or a bold "**Dead ends:**" line opens a section.
+if [[ "$SOURCE" == compact ]]; then
+  cd "${CLAUDE_PROJECT_DIR:-$(pwd)}" || exit 0
+  DE=$(timeout -k 1 3 find plans/_audit "$HOME"/.claude/projects/*"$(basename "$PWD")"*/memory -maxdepth 2 \
+       -type f \( -name PROGRESS.md -o -path '*/features/*.md' \) -mmin -2880 \
+       -exec awk 'FNR==1{s=0} /^## /{s=/^## Dead ends/; next} /^\*\*[^*]+\*\*/{s=/^\*\*Dead ends/} s&&NF{print FILENAME": "$0; if(++n>=40) exit}' {} + 2>/dev/null)
+  [[ -n "$DE" ]] && printf 'Dead ends recorded in the last two days (do not retry these):\n%s\n' "$DE"
+  exit 0
 fi
 
 # Only run on fresh startup

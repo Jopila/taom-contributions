@@ -17,7 +17,10 @@ export const meta = {
 //     A repeated num is refused (its agents would share labels and scratch folders).
 //   knownFailures rides in an items object: --items takes { "items": [...], "knownFailures": [...] }.
 // Returns one entry per item: { num, contract, status: DONE | BLOCKED | PARTIAL | FAILED, ... the
-//   executor's result }, or for stages { num, contract, status, stoppedAt?, notRun?, stages: [...] }.
+//   executor's result }, or for stages { num, contract, status, blocked_on?, stoppedAt?, notRun?, stages: [...] }.
+//   Every result carries blocked_on (none | step0 | maintainer) when the executor answered. When three
+//   or more results are not DONE and do not wait on the maintainer (BLOCKED with step0 or maintainer),
+//   the run breaker trips: every result gets runBreaker (the reason) and a RUN BREAKER line is logged.
 
 // Every value that changes between runs comes from args. The standing rules for dispatched agents
 // (references/dispatch-rules.md) arrive verbatim as args.rules, because a Workflow script cannot
@@ -122,8 +125,9 @@ const SCHEMA = {
     stop_reason: { type: 'string' },
     deviations: { type: 'string' },
     owed: { type: 'string' },
+    blocked_on: { type: 'string', enum: ['none', 'step0', 'maintainer'] },
   },
-  required: ['status', 'base_before', 'commit', 'summary', 'files_changed', 'red_evidence', 'tests', 'stop_reason', 'deviations', 'owed'],
+  required: ['status', 'base_before', 'commit', 'summary', 'files_changed', 'red_evidence', 'tests', 'stop_reason', 'deviations', 'owed', 'blocked_on'],
 }
 
 const refOf = it => String(it.ref || `plan ${it.num}`)
@@ -144,11 +148,11 @@ Path-scoped rules do not load for files outside the main checkout, so read the r
 ${HOOK_SUITE(it)}
 ${it.note ? `ORCHESTRATOR NOTE (binding; it overrides your contract and the standing rules where it says so):\n${it.note}\n` : ''}`
 
-const RETURN = 'Return the structured result: the status, base_before, the commit (the branch HEAD after your last commit; empty if you committed nothing), what you did in order, the files changed, the RED evidence (the failing test output you saw before the fix), the final full-suite totals line, any stop reason, deviations from the contract with why, and what is owed (in-game checks, CI runs, maintainer decisions).'
+const RETURN = 'Return the structured result: the status, base_before, the commit (the branch HEAD after your last commit; empty if you committed nothing), what you did in order, the files changed, the RED evidence (the failing test output you saw before the fix), the final full-suite totals line, any stop reason, deviations from the contract with why, and what is owed (in-game checks, CI runs, maintainer decisions). Set blocked_on to step0 when your contract\'s Step 0 check failed, to maintainer when you stopped on a choice only the maintainer can make, and to none otherwise (a failing test, a stale plan and a broken environment are none).'
 
 const planPrompt = it => `ROLE: the EXECUTOR for improve ${refOf(it)}. You implement it exactly, verify it, and commit it on its own branch.
 ${workspace(it)}
-YOUR CONTRACT: ${planFile(it)}. Read it completely before doing anything. It is written for an executor with no context and is the only authority for scope. Follow its steps in order, run every verification command and compare with the expected result. If it has a Step 0 for the maintainer (a protected-file edit), run its check first and STOP if the check fails. If any STOP condition fires, reality differs from its "Current state" excerpts, or a step's verification fails twice after a reasonable fix: STOP, do not improvise, commit nothing further, and return BLOCKED with the exact reason and what you had done.
+YOUR CONTRACT: ${planFile(it)}. Read it completely before doing anything. It is written for an executor with no context and is the only authority for scope. Follow its steps in order, run every verification command and compare with the expected result. If it has a Step 0 for the maintainer (a protected-file edit), run its check first and STOP and return BLOCKED with blocked_on step0 if the check fails. If any STOP condition fires, reality differs from its "Current state" excerpts, or a step's verification fails twice after a reasonable fix: STOP, do not improvise, commit nothing further, and return BLOCKED with the exact reason and what you had done.
 BASELINE: before your first edit, run the full suite once and record the base's own totals and failing tests (standing rule "Build and test"); at the end, match them.${knownFailures(it)}
 COMMIT when the done criteria all hold (standing rule "Commit"), with a body that names ${refOf(it)}${issueLine(it)}.
 ${RETURN}`
@@ -188,7 +192,7 @@ async function executeOne(it) {
       results.push(res)
       log(`${refOf(it)} stage ${st.key}: ${res.status} ${res.commit || res.failure || ''}`)
       if (res.status !== 'DONE') {
-        return { num: it.num, contract: it.contract, status: res.status, stoppedAt: st.key, notRun: it.stages.slice(i + 1).map(s => s.key), stages: results }
+        return { num: it.num, contract: it.contract, status: res.status, blocked_on: res.blocked_on, stoppedAt: st.key, notRun: it.stages.slice(i + 1).map(s => s.key), stages: results }
       }
     }
     return { num: it.num, contract: it.contract, status: 'DONE', stages: results }
@@ -203,6 +207,15 @@ async function executeOne(it) {
 
 phase('Execute')
 // One item's exception fails that item only, never the whole batch's results.
-return await Promise.all(ITEMS.map(it => executeOne(it).catch(e => ({
+const results = await Promise.all(ITEMS.map(it => executeOne(it).catch(e => ({
   num: it.num, contract: it.contract, status: 'FAILED', failure: `execute of ${it.num} threw: ${String(e)}`,
 }))))
+// Run breaker (references/execute-and-review.md): a shared cause is likelier than three bad plans.
+const waits = r => r.status === 'BLOCKED' && (r.blocked_on === 'step0' || r.blocked_on === 'maintainer')
+const counted = results.filter(r => r.status !== 'DONE' && !waits(r))
+if (counted.length >= 3) {
+  const why = `RUN BREAKER: ${counted.length} of ${results.length} items ended BLOCKED, PARTIAL or FAILED (${counted.map(r => `${r.num} ${r.status}`).join(', ')}); launch no further batch`
+  log(why)
+  results.forEach(r => { r.runBreaker = why })
+}
+return results

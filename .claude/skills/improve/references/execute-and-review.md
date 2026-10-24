@@ -46,9 +46,11 @@ the review loop with its stop rule, stopped plans, decisions, and reconciling th
    `.claude/skills/improve/workflows/execute.js` with that args JSON. Top-level fields such as
    `knownFailures` ride in an items object, `{"items": [...], "knownFailures": [...]}` (the script's
    header comment lists them).
-3. Each result: `status` DONE, BLOCKED or PARTIAL, with the commit, tests, RED evidence, deviations, stop
-   reason and what is owed. A null result is a failure: report it, then resume the run
-   ([run-protocol.md](run-protocol.md) "Resume").
+3. Each result: `status` DONE, BLOCKED, PARTIAL or FAILED (a dead agent), with the commit, tests, RED
+   evidence, deviations, stop reason and what is owed. `blocked_on` says what a BLOCKED waits for: `step0`
+   (the contract's Step 0 check failed), `maintainer` (a choice only the maintainer can make) or `none`.
+   When the run breaker trips, every result also carries `runBreaker`. A FAILED result is a failure:
+   report it, then resume the run ([run-protocol.md](run-protocol.md) "Resume").
 4. Your checks on every DONE, before review: a clean tree (`git -C "<wt>" status --porcelain`); no AI
    trailer (`git -C "<wt>" log --format=%B <base>..HEAD`); `Main/IoC.cs` and `Main/SubModule.cs` hunks
    exactly as the plan lists; every data file it touched parses (language rows inside `<strings>`);
@@ -86,9 +88,11 @@ maintainer with both reasons. Set the index row to STOPPED with the reason while
 **Run breaker.** When one execute batch returns three or more results that are BLOCKED, PARTIAL,
 FAILED or null, not counting a Step 0 check or a decision that waits on the maintainer, launch no
 further batch: a shared cause (a stale base, a broken environment, a usage limit) is likelier than
-three bad plans. Set the batch's PROGRESS.md row to STOPPED with the reason "run breaker", write the
-pause and the stop reasons under `## Blockers` and in FOR-MIKE.md, and look for the shared cause
-before any plan is amended.
+three bad plans. `execute.js` does the counting: a BLOCKED result with `blocked_on` step0 or
+maintainer is left out, and when the count reaches three it stamps `runBreaker` on every result and
+logs a line that starts with RUN BREAKER. When you see either, set the batch's PROGRESS.md row to
+STOPPED with the reason "run breaker", write the pause and the stop reasons under `## Blockers` and in
+FOR-MIKE.md, and look for the shared cause before any plan is amended.
 
 ## Stage 2: the review
 

@@ -148,6 +148,8 @@ command. A value from tool input, a file, git output or the environment enters a
 `tr -cd '0-9'`, `${X//[!0-9]/}` or a `^[0-9]+$` check (`mcp-health-check.sh` and `validate-push.sh`
 do this); counts from `grep -c`, `wc -l` and `date +%s` are already digits. A value that may start
 with a zero goes in as `10#$X`: bash reads `08` as bad octal, and the hook dies, which fails open.
+`tools/test_hooks.sh` 4f probes every hook with payload and session-id values; values from git output
+or state files stay covered by this rule and review.
 
 ## Never spell it `python3` (EMPIRICAL: TAOM 2026-08-31)
 

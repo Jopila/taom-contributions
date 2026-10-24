@@ -727,7 +727,8 @@ class StubRuntime(unittest.TestCase):
 
     def done(self, summary):
         return {"status": "DONE", "base_before": "B", "commit": "C-" + summary, "summary": summary,
-                "files_changed": [], "red_evidence": "", "tests": "T", "stop_reason": "", "deviations": "", "owed": ""}
+                "files_changed": [], "red_evidence": "", "tests": "T", "stop_reason": "", "deviations": "", "owed": "",
+                "blocked_on": "none"}
 
     STAGES = [{"key": "one", "prompt": "STAGE ONE"}, {"key": "two", "prompt": "STAGE TWO"},
               {"key": "three", "prompt": "STAGE THREE"}]
@@ -765,6 +766,66 @@ class StubRuntime(unittest.TestCase):
 
     def test_execute_refuses_a_repeated_num(self):
         self.assert_refused("execute.js", run_args(items=[self.exec_item("042"), self.exec_item("042")]), "042")
+
+    def stopped(self, status, blocked_on=None):
+        reply = dict(self.done("stopped"), status=status, commit="", stop_reason="stopped")
+        if blocked_on is None:
+            del reply["blocked_on"]
+        else:
+            reply["blocked_on"] = blocked_on
+        return reply
+
+    def four_items(self):
+        return [self.exec_item(n) for n in ("041", "042", "043", "044")]
+
+    def test_execute_run_breaker_trips_on_three_results_that_are_not_done(self):
+        out = self.run_script("execute.js", {"args": run_args(items=self.four_items()), "replies": {
+            "exec-041": self.stopped("BLOCKED", "none"), "exec-042": None,
+            "exec-043": self.stopped("PARTIAL", "none"), "exec-044": self.done("ok")}})
+        self.assert_contract(out)
+        self.assertEqual(len(out["result"]), 4)
+        for result in out["result"]:
+            with self.subTest(num=result["num"]):
+                self.assertIn("3 of 4", result["runBreaker"])
+        self.assertTrue(any(line.startswith("RUN BREAKER") for line in out["logs"]), out["logs"])
+
+    def test_execute_run_breaker_leaves_out_what_waits_on_the_maintainer(self):
+        items = self.four_items() + [self.exec_item("045", contract="stages", stages=self.STAGES)]
+        out = self.run_script("execute.js", {"args": run_args(items=items), "replies": {
+            "exec-041": self.stopped("BLOCKED", "step0"), "exec-042": self.stopped("BLOCKED", "maintainer"),
+            "exec-043": self.stopped("PARTIAL", "none"), "exec-044": None,
+            "stage-045-one": self.stopped("BLOCKED", "step0")}})
+        self.assert_contract(out)
+        for result in out["result"]:
+            with self.subTest(num=result["num"]):
+                self.assertNotIn("runBreaker", result)
+        self.assertFalse(any("RUN BREAKER" in line for line in out["logs"]), out["logs"])
+        by_num = {r["num"]: r for r in out["result"]}
+        self.assertEqual(by_num["045"]["blocked_on"], "step0")
+
+    def test_execute_run_breaker_counts_a_partial_and_a_missing_blocked_on(self):
+        items = [self.exec_item(n) for n in ("041", "042", "043")]
+        out = self.run_script("execute.js", {"args": run_args(items=items), "replies": {
+            "exec-041": self.stopped("PARTIAL", "maintainer"), "exec-042": self.stopped("BLOCKED"),
+            "exec-043": None}})
+        self.assert_contract(out)
+        for result in out["result"]:
+            with self.subTest(num=result["num"]):
+                self.assertIn("3 of 3", result["runBreaker"])
+
+    def test_execute_asks_every_executor_for_blocked_on(self):
+        items = [self.exec_item("041"), self.exec_item("042", contract="decisions", decisions=["D"]),
+                 self.exec_item("043", contract="stages", stages=self.STAGES[:1])]
+        out = self.run_script("execute.js", {"args": run_args(items=items), "prefixes": [
+            ["exec-", self.done("ok")], ["decide-", self.done("ok")], ["stage-", self.done("ok")]]})
+        self.assert_contract(out)
+        self.assertEqual(sorted(self.labels(out)), ["decide-042", "exec-041", "stage-043-one"])
+        for call in out["calls"]:
+            with self.subTest(label=call["label"]):
+                schema = call["schemaValue"]
+                self.assertIn("blocked_on", schema["required"])
+                self.assertEqual(schema["properties"]["blocked_on"]["enum"], ["none", "step0", "maintainer"])
+                self.assertIn("blocked_on", call["prompt"])
 
     # review.js ---------------------------------------------------------------------------------
 
