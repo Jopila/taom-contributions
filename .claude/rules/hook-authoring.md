@@ -145,8 +145,9 @@ Never feed unbounded text through `<<<` or an expanding here-document (Git Bash 
 Bash evaluates every operand of `$(( ))`, `(( ))` and the `-eq`/`-gt` family inside `[[ ]]` as an
 expression, so an operand that holds an array subscript with a command substitution runs that
 command. A value from tool input, a file, git output or the environment enters arithmetic only after
-`tr -cd '0-9'` or a `^[0-9]+$` check (`mcp-health-check.sh` reads its marker that way); counts from
-`grep -c`, `wc -l` and `date +%s` are already digits.
+`tr -cd '0-9'`, `${X//[!0-9]/}` or a `^[0-9]+$` check (`mcp-health-check.sh` and `validate-push.sh`
+do this); counts from `grep -c`, `wc -l` and `date +%s` are already digits. A value that may start
+with a zero goes in as `10#$X`: bash reads `08` as bad octal, and the hook dies, which fails open.
 
 ## Never spell it `python3` (EMPIRICAL: TAOM 2026-08-31)
 

@@ -59,15 +59,17 @@ task, and ends with a `RALPH_STATUS` block (status, tasks done, files changed, t
 ## TAOM's hooks against A3
 
 Every arithmetic operand in `.claude/hooks/*.sh` was traced to its source on 2026-10-24: counts from
-`grep -c`, `wc -l` and `find | wc -l`, `date +%s`, exit codes, string lengths, and the MCP health
-marker, which `mcp-health-check.sh` strips with `tr -cd '0-9'`. None takes raw input. A3 keeps the
+`grep -c`, `wc -l` and `find | wc -l`, `date +%s`, exit codes, string lengths, `EPOCHREALTIME`
+stripped with `${X//[!0-9]/}`, the length `check-bash-length.sh` gets from Python and strips the same
+way, and the MCP health marker, which `mcp-health-check.sh` strips with `tr -cd '0-9'`. None takes raw
+input. A3 keeps the
 next hook that way; it fixes no defect today.
 
 ## Decisions
 
 | # | Item | Decision |
 |---|---|---|
-| A1 | No-progress breaker across iterations | Adopted: `working-discipline.md` (a work-driving loop stops after three ticks with no commit and no tracked-file change; git decides) and `execute-and-review.md` "Run breaker" (three non-DONE executor results in a row across plans pause an `/improve` run). TAOM stopped per error and per plan, never across iterations |
+| A1 | No-progress breaker across iterations | Adopted: `working-discipline.md` (a work-driving loop stops after three ticks with no commit, no change in the working tree and no change to the out-of-repo files it names; the files decide, not the agent's report) and `execute-and-review.md` "Run breaker" (an execute batch with three or more results not DONE, Step 0 checks and maintainer decisions aside, stops the run, recorded as a STOPPED row so a resumed session sees it). TAOM stopped per error and per plan, never across iterations |
 | A2 | Dead ends in the resume record (`docs/vision.md` handoff template) | Adopted: `## Dead ends` in the PROGRESS.md template, read at resume, and CLAUDE.md item 8 names dead ends in the memory resume card |
 | A3 | Digits only into bash arithmetic (`to_int`) | Adopted: a section in `hook-authoring.md` |
 | X1 | Install, auto-update, sandboxes, rate limiting, tmux monitor | Declined: see Security; TAOM runs interactive sessions and `/improve` workflows, not a headless bash loop |

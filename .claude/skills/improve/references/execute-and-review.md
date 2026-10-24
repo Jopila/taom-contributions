@@ -83,10 +83,12 @@ plan's copy in the main checkout, committed with the next plans record, and a fr
 `note` names the amendment) or RE-CUT through `plans.js`. A second STOP on the same plan goes to the
 maintainer with both reasons. Set the index row to STOPPED with the reason while it waits.
 
-**Run breaker.** Three executor results in a row that are not DONE, across different plans, pause
-the run: a shared cause (a stale base, a broken environment, a usage limit) is likelier than three bad
-plans. Dispatch nothing more. Write the pause and the three stop reasons to FOR-MIKE.md, and look for
-the shared cause before any plan is amended.
+**Run breaker.** When one execute batch returns three or more results that are BLOCKED, PARTIAL,
+FAILED or null, not counting a Step 0 check or a decision that waits on the maintainer, launch no
+further batch: a shared cause (a stale base, a broken environment, a usage limit) is likelier than
+three bad plans. Set the batch's PROGRESS.md row to STOPPED with the reason "run breaker", write the
+pause and the stop reasons under `## Blockers` and in FOR-MIKE.md, and look for the shared cause
+before any plan is amended.
 
 ## Stage 2: the review
 

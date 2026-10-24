@@ -76,12 +76,15 @@ Codex: <asked | not asked>. Second Codex pass on fix diffs: <run | replaced by c
 
 ## Next
 ## Blockers
+## Dead ends
 ```
 
 - One row per phase or batch, updated in place: TODO, RUNNING, DONE, STOPPED, BLOCKED. Never leave a
   second RUNNING row behind a DONE one.
 - Write the workflow run id into the row when you launch it: resume needs it.
 - Next and Blockers are rewritten at every state change; the Log is append-only.
+- Dead ends is append-only: one line per approach that failed, with why and the evidence path, so a
+  resumed session does not try it again.
 - A standing approval ("continue through the night", "merge what is ready") goes under Authorizations
   with its scope, and is not asked again.
 
@@ -120,7 +123,7 @@ decisions for the maintainer; considered and rejected; not audited; where the ev
 
 After compaction, a usage limit, a session end or a restart:
 
-1. Read PROGRESS.md: Status, Next, Blockers, Authorizations.
+1. Read PROGRESS.md: Status, Next, Blockers, Dead ends, Authorizations.
 2. `git worktree list` and each `improve/*` branch tip; compare with the Status rows.
 3. A RUNNING row with a run id: read its journal. A run that ended early resumes with the same
    `scriptPath` and `resumeFromRunId`; finished agents replay from cache. A staged build that died

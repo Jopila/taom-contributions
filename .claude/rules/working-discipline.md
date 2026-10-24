@@ -14,13 +14,16 @@ With no fresh user prompt, continue established work; don't start new work.
   branch delete, posting a comment) need authorization given for this run.
 - If the transcript doesn't make the next step obvious, stop and report rather than guess.
 - Once the run is established, never stop to ask "should I keep going?"; the user may be away. End
-  only when the work is done or genuinely blocked. Out of obvious steps, first re-read
-  the transcript and recombine near-misses.
+  only when the work is done, genuinely blocked, or the no-progress breaker below trips. Out of
+  obvious steps, first re-read the transcript and recombine near-misses.
 - A trivial failure (typo, missing import, a flake): fix and retry. A fundamentally broken approach:
   record the outcome (commit body, log) and move on.
-- A loop that drives work (not one that watches CI or other outside state) stops after three ticks in
-  a row with no new commit and no tracked-file change, and reports what it tried. Progress is what
-  `git` shows, never the agent's own report.
+- No-progress breaker: a loop that drives work stops after three ticks in a row with no new commit,
+  no change in `git status --porcelain` or `git diff` since the previous tick, and no change to the
+  out-of-repo files the task names (the live Armory, TAOM_Map); it reports what it tried. A tick is
+  one `/loop` iteration or one wakeup. A tick that only watches CI, outside state or the loop's own
+  running job (a hook suite, a Codex run) does not count. Progress is what the files show, never the
+  agent's own report.
 
 ## Edit scope
 
