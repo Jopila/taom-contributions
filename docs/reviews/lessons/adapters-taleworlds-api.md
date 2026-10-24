@@ -1462,3 +1462,19 @@ resolves them all after the conditions have run (`ConversationItemVM`), so playe
 - **Why missed:** caught before review by reading the view; it would have shipped otherwise, since only the game shows it.
 - **Prevent:** every player line sets variables no other line on the same token uses; a test pins it from the source.
 - **Source:** `docs/reviews/rca-provender-2026-10-23.md` row S3.
+### A remote conversation is an encounter: audit its setup as well as its lines (2026-10-23)
+
+The messenger session rules hid every dialog line that moves a party, and the review then found that Messengers'
+own setup moved one. For a target in a settlement it calls `PlayerEncounter.EnterSettlement`, and
+`EnterSettlementAction.ApplyForParty` attaches a main party that is in an army it does not lead to that army when the
+leader is in the settlement; `PlayerEncounter.Finish(true)` then leaves the attached party in place. No dialog line was
+involved. The same pass found three more lines that hand things over or move a hero with no presence check (clan
+troop and inventory exchange, companion recall, a gift line).
+- **Why missed:** the plan listed the dialog consequences that move a party and treated the encounter the
+  conversation runs in as neutral.
+- **Prevent:** before a feature opens a conversation the player is not physically part of (a messenger, a remote
+  hail), list what its encounter setup does (`PlayerEncounter.Start`, `SetupFields`, `EnterSettlement`, the
+  mission it opens and `Finish`), read each engine body for party, army, position and roster writes, and then sweep
+  every reachable dialog consequence for the same writes. Gate the feature's lines on one shared "remote
+  conversation" flag rather than one check per feature.
+- **Source:** `docs/reviews/rca-messenger-session-rules-2026-10-23.md` findings 1 and 4.

@@ -51,6 +51,8 @@ GiftBehavior + GiftDialogLines  -->  IGiftConversationAdapter (repeatable line s
 
 **Order of the gate.** Hidden (feature off, wrong kind of hero, prisoner, at war), then the cooldown (the line shows, greyed, with the days left), then a lord below relation -50 (refuses with "I will not take gifts from you." and takes 1 relation, once per ask; vanilla's notice shows only if the change landed), then a Free lord against an Evil player (refuses, no penalty; Neutral never refuses). A hostile companion still accepts.
 
+**Not through a messenger.** `GiftConversationFlow.CanOffer` and `CanChoose` are false while `IMessengerConversationState.IsOpen`, so neither entry line shows in a messenger conversation: goods cannot be handed across the map, and a messenger only reaches a lord, whose list holds goods alone (#898).
+
 **Gain.**
 
 | Step | Rule |
@@ -137,6 +139,7 @@ All read live; none needs a restart. A hand-edited `TAOM.json` is clamped by `Gi
 - `IPartyItemRosterAdapter` (Enlistment registration): removes one item from the unmodified stack.
 - `IRaceManager` (Core): race names, race id to name.
 - `ICoopSessionProvider` (CoopInterop): a client sees no gift line.
+- `IMessengerConversationState` (Messengers): the gift line is hidden while a messenger conversation is open (#898).
 
 ## Localization
 
@@ -148,7 +151,7 @@ All read live; none needs a restart. A hand-edited `TAOM.json` is clamped by `Gi
 - `GiftServiceGateTests.cs`: each hidden case (feature off reads no fact, prisoner, own-clan lord), war beating every other rule, the cooldown inside and after it, kinsmen sharing a relation owner's cooldown, the -50 edge, the alignment table over the real `AlignmentService` and the shipped `alignment.json` (Neutral included), `Gate_AlignmentRefusal_ReadsTheRealmNotTheHerosOwnCulture` (a lord's own culture would flip the verdict, the realm's decides), hostility before alignment, the charge made once by `Ask` and its notice only when something landed.
 - `GiftServiceOptionsTests.cs`: the list for a lord and a companion, purses, taste by race and culture (`Options_TasteByCulture_ReadsTheHerosOwnCultureNotTheRealms` pins that tastes read the hero's own culture), the cap, blocks, modified stacks, an empty catalog, no player facts.
 - `GiftServiceGiveTests.cs`: one item removed, gold moving, short gold, the fresh re-read, the landed change and the notice, the stamp on the relation owner, the early exits, the real `RelationGrantService`.
-- `GiftConversationFlowTests.cs` (no game needed): the gates the lines call, the list hand-off, the pick, the ledger, the co-op deferral and the three catch blocks.
+- `GiftConversationFlowTests.cs` (no game needed): the gates the lines call, the list hand-off, the pick, the ledger, the co-op deferral, the messenger conversation (no line, no facts read) and the three catch blocks.
 - `GiftCatalogProviderTests.cs`: each validation rule and its exact warning count, caching, the registry not ready, and the shipped file loaded with nothing dropped (against a frozen race list, and against the installed `skins.xml` when the game is there).
 - `GiftSettingsProviderTests.cs`: clamps, the purse range derived from the band, the slider range and the hint numbers tied to the provider constants.
 - `GiftCooldownLedgerTests.cs`, `GiftHeroAdapterTests.cs` (the day cast), `GiftBehaviorTests.cs` (the saved ledger, the explanation texts), `TokensOfEsteemWiringTests.cs` (the module, the line ids, priorities, consequences and tokens, the English rows and the twelve language files).
@@ -179,6 +182,7 @@ Setup once: start a campaign with cheat mode on. The console command `campaign.a
 18. **No line.** A captive lord in your dungeon and a lord of your own clan: no gift line on the diplomacy branch.
 19. **Co-op, two machines.** The client sees no gift line; the host can give.
 20. **Ransom broker screen.** Open the ransom broker's sell-prisoners screen with a prisoner put up for sale. If the screen allows a conversation, talk to a companion from it and give an item, then leave the screen with Escape: the prisoner is sold once, not twice (the commit skips this screen while prisoners are on the broker's side, because forcing it done reruns its sale handler). Note whether the item is still gone. Then open the ransom screen with nothing for sale, and the alley screen, give an item, move one troop and press Escape: the item stays gone.
+21. **Messenger.** Send a messenger to a lord and talk when it arrives: no "I have a gift for you." line (#898).
 
 ## How to Change a Rule
 
@@ -198,6 +202,7 @@ Setup once: start a campaign with cheat mode on. The console command `campaign.a
 
 ## Changelog
 
+- 2026-10-23: the gift line is hidden while a messenger conversation is open (#898).
 - 2026-10-20: the alignment side is the realm's map faction with its own culture, not the hero's own culture, for the lord and the player (#957). Part 2: the pair is carried as `SideIds`, and the minor clan rows in `alignment.json` plus two clan-culture retags close the minor-clan limit.
 - 2026-10-19: first version (#863). Review fixes the same day: the cooldown is keyed on the relation owner and stamped by the service, purses have their own band (one point per 500 gold, at most 10, range 500 to 5000), the scaling switch is gone, prisoners and own-clan lords get no line, modified stacks are skipped, the catalog counts every drop, the notice is vanilla's, and the wording is gender neutral.
 

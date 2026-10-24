@@ -151,6 +151,7 @@ public class TokensOfEsteemWiringTests
         container.RegisterInstance(Substitute.For<IRelationGrantService>());
         container.RegisterInstance(Substitute.For<IPartyItemRosterAdapter>());
         container.RegisterInstance(Substitute.For<ICoopSessionProvider>());
+        container.RegisterInstance(Substitute.For<TAOM.Features.Messengers.IMessengerConversationState>());
         var module = new TokensOfEsteemModule();
 
         module.RegisterServices(container);

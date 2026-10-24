@@ -93,7 +93,7 @@ public class EnlistOfferVisibilityTests
     [DataRow(EnlistGateResult.CommanderUnavailable, false)]
     public void OfferIsTakeable_EachVerdict_OnlyACleanOkIsClickable(EnlistGateResult verdict, bool expected)
     {
-        Assert.AreEqual(expected, EnlistmentDialogBehavior.OfferIsTakeable(verdict));
+        Assert.AreEqual(expected, EnlistmentDialogBehavior.OfferIsTakeable(verdict, throughMessenger: false));
     }
 
     /// <summary>
@@ -195,6 +195,16 @@ public class EnlistOfferVisibilityTests
 
         Assert.AreEqual(EnlistGateResult.AtWarWithYourKingdom, verdict);
         Assert.IsTrue(EnlistmentDialogBehavior.ShowsOfferFor(verdict, deferToHost: false));
-        Assert.IsFalse(EnlistmentDialogBehavior.OfferIsTakeable(verdict));
+        Assert.IsFalse(EnlistmentDialogBehavior.OfferIsTakeable(verdict, throughMessenger: false));
+    }
+
+    // ---- a messenger conversation (#898) -------------------------------------------------
+
+    [DataTestMethod]
+    [DataRow(EnlistGateResult.Ok)]
+    [DataRow(EnlistGateResult.AtWarWithYourKingdom)]
+    public void OfferIsTakeable_ThroughAMessenger_IsNeverClickable(EnlistGateResult verdict)
+    {
+        Assert.IsFalse(EnlistmentDialogBehavior.OfferIsTakeable(verdict, throughMessenger: true));
     }
 }

@@ -2552,8 +2552,10 @@ anywhere — renown, special resources, momentum. That is participation-consiste
 wait-menu leave option) after our own review passed, which is worth remembering: a menu *option
 consequence* is a world-mutating entry point even though it doesn't pattern-match like one.
 
+**Not through a messenger (#898).** `EnlistmentDialogBehavior.OfferIsTakeable(verdict, throughMessenger)` greys the offer while `IMessengerConversationState.IsOpen`, with `taom_enlist_not_by_messenger`. Swearing finishes the live encounter and `MobilePartyAttachmentAdapter.ParkNear` sets the player's position to the commander's, which through a messenger would be a teleport. The line stays visible, so the player learns why. See [messengers.md](messengers.md).
+
 **Co-op guests see no enlist offer (#966).** `EnlistmentDialogBehavior.ShowsOfferFor(verdict, deferToHost)`
-(`EnlistmentDialogBehavior.cs:109`, read at `:115-116` with `ICoopSessionProvider.ShouldDeferToHost`)
+(`EnlistmentDialogBehavior.cs:113`, read at `:120-121` with `ICoopSessionProvider.ShouldDeferToHost`)
 hides the line for a guest, because enlistment is applied host-only and on a server the host is the
 placeholder hero. A player host and a solo player keep the offer. Cost: under BannerlordTogether or
 another co-op mod TAOM cannot probe, or after a failed Coop role bind, `ShouldDeferToHost` is true on

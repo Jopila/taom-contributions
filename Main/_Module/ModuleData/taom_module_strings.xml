@@ -3913,4 +3913,7 @@
 	<string id="taom_provender_block_stock" text="{=taom_provender_block_stock}The stores and the market here do not hold enough." />
 	<string id="taom_provender_block_market" text="{=taom_provender_block_market}The stores do not hold enough, and there is no market here to buy the rest." />
 	<string id="taom_provender_block_closed" text="{=taom_provender_block_closed}This cannot be done now." />
+	<!-- Enlistment -->
+	<string id="taom_enlist_not_by_messenger" text="{=taom_enlist_not_by_messenger}Swear service in person, not through a messenger." />
+
 </strings>

@@ -4,6 +4,7 @@ using TAOM.Adapters;
 using TAOM.Composition;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
+using TAOM.Features.Messengers;
 using TAOM.Features.TokensOfEsteem.Hooks;
 
 namespace TAOM.Features.TokensOfEsteem;
@@ -24,6 +25,7 @@ internal sealed class TokensOfEsteemModule : TaomFeatureModule
             r.Resolve<GiftService>(),
             r.Resolve<IGiftConversationAdapter>(),
             r.Resolve<ICoopSessionProvider>(),
+            r.Resolve<IMessengerConversationState>(),
             r.Resolve<IModLogger>())),
     };
 

@@ -6658,6 +6658,7 @@
     <string id="taom_keep_wardens_label" text="Castle Patrols" />
 
     <string id="taom_keep_wardens_hint" text="A castle with a built Guard House fields one patrol party of its owner's culture at a time, as a town does: stronger at each Guard House level. A lost patrol is replaced after 10, 8 or 6 days (castle_patrols.json). When off, no new castle patrol is queued, and the game's daily check removes the castle patrols already out. Default: on." />
+    <string id="taom_enlist_not_by_messenger" text="Swear service in person, not through a messenger." />
 
   </strings>
 

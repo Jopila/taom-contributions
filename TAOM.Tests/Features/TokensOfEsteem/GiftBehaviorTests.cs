@@ -22,7 +22,7 @@ public class GiftBehaviorTests
     [TestInitialize]
     public void Setup() => _f = new GiftFixture();
 
-    private GiftBehavior Build() => new(_f.Sut, Substitute.For<IGiftConversationAdapter>(), Substitute.For<ICoopSessionProvider>(), _f.Logger);
+    private GiftBehavior Build() => new(_f.Sut, Substitute.For<IGiftConversationAdapter>(), Substitute.For<ICoopSessionProvider>(), Substitute.For<TAOM.Features.Messengers.IMessengerConversationState>(), _f.Logger);
 
     [TestMethod]
     public void SyncData_SaveThenLoadIntoAnotherBehavior_RestoresTheLedger()

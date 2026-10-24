@@ -3,6 +3,7 @@ using TaleWorlds.CampaignSystem;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
+using TAOM.Features.Messengers;
 
 namespace TAOM.Features.TokensOfEsteem.Hooks;
 
@@ -19,9 +20,9 @@ public sealed class GiftBehavior : CampaignBehaviorBase
     private readonly GiftConversationFlow _flow;
     private readonly IModLogger _logger;
 
-    public GiftBehavior(GiftService service, IGiftConversationAdapter conversation, ICoopSessionProvider coop, IModLogger logger)
+    public GiftBehavior(GiftService service, IGiftConversationAdapter conversation, ICoopSessionProvider coop, IMessengerConversationState messenger, IModLogger logger)
     {
-        _flow = new GiftConversationFlow(service, conversation, coop, logger);
+        _flow = new GiftConversationFlow(service, conversation, coop, messenger, logger);
         _logger = logger;
     }
 

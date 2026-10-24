@@ -77,5 +77,6 @@ internal static class FeatureModules
         new Features.SwornAnew.SwornAnewModule(),
         new Features.Provender.ProvenderModule(),
         new Features.SettlementServices.SettlementServicesModule(),
+        new Features.Messengers.MessengerSessionRulesModule(),
     };
 }

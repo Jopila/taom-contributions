@@ -2,6 +2,7 @@ using System;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
+using TAOM.Features.Messengers;
 using TAOM.Features.TokensOfEsteem.Models;
 
 namespace TAOM.Features.TokensOfEsteem;
@@ -21,17 +22,19 @@ public sealed class GiftConversationFlow
     private readonly GiftService _service;
     private readonly IGiftConversationAdapter _conversation;
     private readonly ICoopSessionProvider _coop;
+    private readonly IMessengerConversationState _messenger;
     private readonly IModLogger _logger;
     private GiftEntry _entry;
     private GiftGate _gate = Closed;
     private int _optionCount;
     private GiftOutcome _outcome = GiftOutcome.Failed;
 
-    public GiftConversationFlow(GiftService service, IGiftConversationAdapter conversation, ICoopSessionProvider coop, IModLogger logger)
+    public GiftConversationFlow(GiftService service, IGiftConversationAdapter conversation, ICoopSessionProvider coop, IMessengerConversationState messenger, IModLogger logger)
     {
         _service = service;
         _conversation = conversation;
         _coop = coop;
+        _messenger = messenger;
         _logger = logger;
     }
 
@@ -41,7 +44,7 @@ public sealed class GiftConversationFlow
 
     /// <summary>True when the entry line shows for the conversation partner (greyed during a cooldown).</summary>
     public bool CanOffer(GiftEntry entry) =>
-        !_coop.ShouldDeferToHost && Partner is { } id && ReadGate(id, entry).Kind != GiftGateKind.Hidden;
+        !_coop.ShouldDeferToHost && !_messenger.IsOpen && Partner is { } id && ReadGate(id, entry).Kind != GiftGateKind.Hidden;
 
     /// <summary>
     /// True when the entry line can be chosen. False during a cooldown (<paramref name="daysLeft"/> says how long) and when the
@@ -50,7 +53,7 @@ public sealed class GiftConversationFlow
     /// </summary>
     public bool CanChoose(GiftEntry entry, out int daysLeft)
     {
-        var gate = !_coop.ShouldDeferToHost && Partner is { } id ? ReadGate(id, entry) : Closed;
+        var gate = !_coop.ShouldDeferToHost && !_messenger.IsOpen && Partner is { } id ? ReadGate(id, entry) : Closed;
         daysLeft = gate.Kind == GiftGateKind.Cooldown ? gate.DaysLeft : 0;
         return gate.Kind != GiftGateKind.Cooldown && gate.Kind != GiftGateKind.Hidden;
     }

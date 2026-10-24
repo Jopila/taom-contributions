@@ -21,6 +21,7 @@ public class GiftConversationFlowTests
     private GiftFixture _f = null!;
     private IGiftConversationAdapter _conversation = null!;
     private ICoopSessionProvider _coop = null!;
+    private TAOM.Features.Messengers.IMessengerConversationState _messenger = null!;
     private GiftConversationFlow _sut = null!;
 
     [TestInitialize]
@@ -30,7 +31,8 @@ public class GiftConversationFlowTests
         _conversation = Substitute.For<IGiftConversationAdapter>();
         _conversation.PartnerId.Returns(GiftFixture.HeroId);
         _coop = Substitute.For<ICoopSessionProvider>();
-        _sut = new GiftConversationFlow(_f.Sut, _conversation, _coop, _f.Logger);
+        _messenger = Substitute.For<TAOM.Features.Messengers.IMessengerConversationState>();
+        _sut = new GiftConversationFlow(_f.Sut, _conversation, _coop, _messenger, _f.Logger);
     }
 
     // The option is built before the call that configures the substitute: NSubstitute cannot take another substitute call inside Returns.
@@ -171,6 +173,17 @@ public class GiftConversationFlowTests
         Assert.IsFalse(_sut.CanChoose(GiftEntry.Lord, out var daysLeft));
         Assert.AreEqual(0, daysLeft);
         _f.Logger.ReceivedWithAnyArgs(1).LogError(default!);
+    }
+
+    [DataTestMethod]
+    [DataRow(GiftEntry.Lord)]
+    [DataRow(GiftEntry.Companion)]
+    public void CanOffer_ThroughAMessenger_IsFalse_AndReadsNoFacts(GiftEntry entry)
+    {
+        _messenger.IsOpen.Returns(true);
+
+        Assert.IsFalse(_sut.CanOffer(entry));
+        _f.Heroes.DidNotReceiveWithAnyArgs().ReadRecipient(default!);
     }
 
     // ---- Ask
@@ -470,7 +483,7 @@ public class GiftConversationFlowTests
     [TestMethod]
     public void EveryFlow_OwnsItsOwnLedger()
     {
-        var other = new GiftConversationFlow(_f.Sut, _conversation, _coop, _f.Logger);
+        var other = new GiftConversationFlow(_f.Sut, _conversation, _coop, _messenger, _f.Logger);
         _sut.Ledger.Stamp(GiftFixture.HeroId, 99);
 
         Assert.AreNotSame(_sut.Ledger, other.Ledger);

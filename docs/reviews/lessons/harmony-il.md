@@ -1244,4 +1244,5 @@ record the same clash for Patch105 and Patch106.
 - **Prevent:** before you choose a number, grep every worktree (`git worktree list`, then `grep -rhoE "Patch1[0-9]{2}_"`
   in each `Main/`) and every remote branch, and take the next number free in all of them. Keep the number out of test
   method names so a renumber at merge stays small, and run `PatchCategoryNumberTests` after every rebase.
-- **Source:** `docs/reviews/rca-alignment-scoring-2026-10-23.md` finding 1.
+- **Source:** `docs/reviews/rca-alignment-scoring-2026-10-23.md` finding 1. Resolved at the B08 rebase: Messengers
+  became Patch117, after a grep of every worktree and remote branch found no number above 116.

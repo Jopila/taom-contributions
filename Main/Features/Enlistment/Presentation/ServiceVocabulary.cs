@@ -91,7 +91,8 @@ public static class ServiceVocabulary
     }
 
     /// <summary>
-    /// Why the enlist offer is greyed out, as words for the disabled-option hint.
+    /// Why the enlist offer is greyed out, as words for the disabled-option hint. A clean Ok verdict through a messenger
+    /// (<paramref name="throughMessenger"/>) returns the messenger text before the switch, since the verdict itself passed.
     ///
     /// Two rejections reach this method in practice, the war and the deserter, and the split is deliberate:
     ///
@@ -111,8 +112,10 @@ public static class ServiceVocabulary
     /// The default arm is unreachable while that split holds. It exists so a verdict added to the
     /// enum later surfaces as a vague hint instead of an unhandled case.
     /// </summary>
-    public static TextObject EnlistUnavailableReason(EnlistGateResult verdict, string commanderName = null)
+    public static TextObject EnlistUnavailableReason(EnlistGateResult verdict, string commanderName = null, bool throughMessenger = false)
     {
+        if (verdict == EnlistGateResult.Ok && throughMessenger)
+            return new TextObject("{=taom_enlist_not_by_messenger}Swear service in person, not through a messenger.");
         switch (verdict)
         {
             case EnlistGateResult.AtWarWithYourKingdom:
