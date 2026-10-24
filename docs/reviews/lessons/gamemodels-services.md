@@ -1273,3 +1273,11 @@ gear, so a battle full of kills could pay nothing. The same feature attributed k
   landed, not to the inputs. Identify the player's own actions by `CharacterObject.PlayerCharacter`, not
   by `Mission.MainAgent` or `IsMainAgent`.
 - **Source:** `docs/reviews/rca-enlistment-personal-spoils-2026-10-23.md` F1, F2.
+### An override that only narrows vanilla's answer short-circuits on base before it reads anything (#872, 2026-10-23)
+Help Unlooked-For first wrote `ShouldConsiderAvoiding` as `Decide(base(...), Read(...))`, so the fact reader
+walked the lord's army for every party pair the AI weighs, on the AI worker, even when vanilla had already said
+no or the feature was off.
+- **Why missed:** "vanilla first, then TAOM decides" was coded as evaluating both, not as a guard.
+- **Prevent:** when the override can only turn vanilla's true into false, write `base(...) && Decide(Read(...))`;
+  in the reader take expensive values only on the branch that uses them, and report unread values as NaN, never 0.
+- **Source:** [rca-unlooked-for-aid-2026-10-23.md](../rca-unlooked-for-aid-2026-10-23.md) finding 2.
