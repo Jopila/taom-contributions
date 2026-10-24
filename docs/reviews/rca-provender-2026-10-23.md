@@ -84,5 +84,6 @@ the shape it kept. The fix-pass Codex run and the second wave caught them, which
   `lessons/adapters-taleworlds-api.md` (a bulk action prices and notifies per unit; conversation text resolves after all
   conditions), `lessons/testing-qa.md` (a fake for an engine quantity must take every shape the engine gives it).
 - **Applied on Mike's word (2026-10-24):** because pattern A repeated within three days, it is promoted from a lesson to
-  a standing rule: a row in `.claude/rules/csharp-architecture.md` "Non-Negotiable Rules": for every engine figure a rule
-  measures or gates on, the plan cites the line that builds it (not only its getter) and one vanilla caller.
+  a standing rule. Trunk had meanwhile added the "Writers before gates" row to `.claude/rules/csharp-architecture.md`
+  "Non-Negotiable Rules" from another review; that row is extended rather than duplicated: the plan also cites the line
+  that builds every engine figure it measures or gates on, not only its getter.
