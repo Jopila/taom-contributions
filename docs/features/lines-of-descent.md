@@ -99,7 +99,7 @@ None. There is no config file, no MCM setting and no toggle. The caps are consta
 | Prefab extension | `ClanMembersFamilyTreePrefab` on `ClanMembers` | `descendant::ListPanel[@Id='LastSeenLocationParent']/Children`, `InsertType.Child`, index `int.MaxValue` (appended as the last child). Two nodes: a `NavigationScopeTargeter` and the button (`GamepadNavigationIndex` 0), the pattern of the vanilla Show On Map pair in the same row. |
 | Prefab extension | `EncyclopediaHeroFamilyTreePrefab` on `EncyclopediaHeroPage` | `descendant::NavigationScopeTargeter[@ScopeID='EncyclopediaHeroFamilyContentScope']`, `InsertType.Prepend` (siblings just before it: the button's scope targeter, then the button with `GamepadNavigationIndex` 0). The anchor exists once in TAOM's `EncyclopediaHeroPage.xml`; that shared prefab is not edited. |
 
-Both buttons use the brushes `Popup.Button.Base` and `Popup.Button.Text`. The Messengers hero-page button uses `Popup.PartySelection.Confirm`, which this feature found declared nowhere (reported separately, not changed here).
+Both buttons use the brushes `Popup.Button.Base` and `Popup.Button.Text`, and so does the Messengers hero-page button (#989 replaced its two undeclared brush names; `PrefabExtensionBrushTests` now checks every brush-typed attribute in a PrefabExtension against the brushes the engine loads for TAOM's module set).
 
 ### Popup layer and close triggers
 

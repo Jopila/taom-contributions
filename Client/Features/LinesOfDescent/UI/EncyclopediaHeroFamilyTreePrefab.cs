@@ -13,7 +13,7 @@ namespace TAOM.Features.LinesOfDescent.UI;
 // nodes after the first follow it in order, so the button's own scope targeter and the button both land before the anchor. The
 // button joins the page's navigation the way the Family divider beside it does (GamepadNavigationIndex 0). Bindings
 // resolve on EncyclopediaHeroPageVM, which EncyclopediaHeroFamilyTreeMixin extends, and the button shows only when the page
-// lists family. Do NOT copy the Messengers button brushes: Popup.PartySelection.Confirm and .Button.Text are declared nowhere.
+// lists family.
 // The parent is a plain vertical ListPanel (:121) with no widget class of its own, and no view model reads its children by position.
 // Brushes: Native Popup.xml:2 and :195.
 [PrefabExtension("EncyclopediaHeroPage", "descendant::NavigationScopeTargeter[@ScopeID='EncyclopediaHeroFamilyContentScope']")]
