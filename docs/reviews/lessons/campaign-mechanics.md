@@ -1041,3 +1041,14 @@ the authority and the one peer that should act. A server-hosted campaign then bo
   clans or world state: gate on `ShouldDeferToHost` only, so the authority acts and clients defer. A server settings key
   for a part that is skipped on the server is a sign of the wrong gate.
 - **Source:** `docs/reviews/rca-bond-of-hire-2026-10-24.md` finding 1.
+### Moving work to another caller moves it in the engine's frame: check the frame order, not only the rate (#841, 2026-10-24)
+The service upkeep had two feeders, the campaign tick and the wait-menu tick. Removing the menu feed while
+time ran was judged by cost alone, but it also moved every join the upkeep raised on a running menu from
+before the frame's time advance to inside it, where `MapEventManager.Tick` still updates a raid that is the
+player's own event (`MapEventManager.cs:59-61`, `Campaign.cs:980-982`).
+- **Why missed:** both feeders were treated as interchangeable sources of one budget; the raid window was
+  already in the feature doc, but nobody tied it to which feeder runs.
+- **Prevent:** when a change moves an action from one engine callback to another (a menu tick, `TickEvent`,
+  an hourly or daily event, a mission tick), read the engine's frame order for both and list what runs
+  between them; an action that joins, starts or ends a map event belongs where time does not advance first.
+- **Source:** [rca-enlistment-trace-and-pump-clock-2026-10-24.md](../rca-enlistment-trace-and-pump-clock-2026-10-24.md) F1.

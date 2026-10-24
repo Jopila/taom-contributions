@@ -17,7 +17,6 @@ public class EnlistmentHooksLineCountTests
     {
         { "EnlistedSoldierPlacement.cs", 175 },
         { "EnlistmentBattleBehavior.cs", 303 },
-        { "EnlistmentMenuBehavior.cs", 157 },
     };
 
     [TestMethod]

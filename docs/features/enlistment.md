@@ -109,8 +109,9 @@ encounter would then leave the player in a town with no menu. Keeping the id and
 an exit is the safer side. The Patch66 `EnterMenuMode` postfix is untouched.
 
 - Wait menu `taom_enlistment_service_wait` (`EnlistmentMenuBehavior` +
-  `EnlistmentWaitMenuPresenter` — text built once per menu init, position sync throttled
-  to every 5th tick). Menu-guard policy in `EnlistmentMenuService`: redirect ONLY while
+  `EnlistmentWaitMenuPresenter`; text built once per menu init; the wait-menu tick feeds the
+  pump (whose cheap tier syncs the parked position) only while campaign time is stopped; the campaign tick
+  feeds it otherwise). Menu-guard policy in `EnlistmentMenuService`: redirect ONLY while
   `EnlistedAttached`, from a config-driven id list (11 defaults incl. the 1.4.x naval
   `port_menu`/`naval_town_outside`), fail-open with a once-per-id diagnostic funnel.
 - Battle: `EnlistmentBattleBehavior` (MapEventStarted/Ended boundary) →
@@ -249,10 +250,11 @@ Trace", `RequireRestart = false`) reaches the call sites through `IEnlistmentDia
 the static on every call — which is what makes "takes effect immediately" true rather than aspirational.
 
 **It ships OFF (again, #840).** It was off from 2026-08-09, went back on temporarily on 2026-08-28 for an
-in-game smoke and was never switched off, so v2.0.34 shipped it on. The setting was then RENAMED from
-`EnableEnlistmentDiagnostics` to `EnableEnlistmentTrace` rather than just flipped: MCM keeps a saved value per
-property name, so the old id had persisted `true` for every player and a flipped default would not have
-reached them. The orphaned old key is ignored on load and dropped by the next save. To record the trace for
+in-game smoke and was never switched off, so every release from v2.0.24 (2026-09-01) through v2.0.35
+(2026-10-19) shipped it on. The setting was then RENAMED from `EnableEnlistmentDiagnostics` to
+`EnableEnlistmentTrace` rather than just flipped: MCM keeps a saved value per property name, and any player who
+confirmed a change of any TAOM setting while the default was on has `true` saved under the old name, so a
+flipped default would not have reached them. The orphaned old key is ignored on load and dropped by the next save. To record the trace for
 a bug report, switch it on in MCM (Enlistment, Diagnostics); real faults always log regardless, so
 `[EnlistDiag]` lines still appear for them with the trace off. The provider's MCM-absent fallback is `?? false` to match.
 Those are two independent literals encoding one decision; `CompiledDefault_AndProviderFallback_Agree`
@@ -388,7 +390,7 @@ only exit — Batch 1's bug wearing a different hat.
 
 **Four of the donor's six re-attach edges are DECLINED, on purpose.** Subscribed:
 `OnSettlementLeftEvent`, `OnPartyLeftArmyEvent`. Declined: player-battle-end, army-joined,
-siege-joined, siege-left, siege-completed. The pump re-derives everything within 250 ms, and the
+siege-joined, siege-left, siege-completed. The pump re-derives everything every 18 campaign minutes (about 250 ms at the menu's default fast forward), and the
 declined edges only re-arm a flag whose own retry budget is an hour anyway — so they buy nothing
 the hourly pass does not already give. **The honest caveat:** `CampaignEvents.TickEvent` does not
 fire inside encounter/settlement menus or a map conversation, and the wait-menu tick only runs on
@@ -542,6 +544,23 @@ re-enlistment and across campaigns. **Fix:** state transition before gate; plus
   was fed a constant `1f/30f`, fabricating ~4.8s of budget per real second at 144 fps — running the
   "4 Hz" expensive tier at ~19 Hz and the status board (which uses the forbidden `GetSnapshot`) at
   ~2.4 Hz. It now measures real elapsed time, clamped so a stall cannot burst it.
+- **The pump's two feeders used different clocks and double-fed a running wait menu (#841).** The campaign
+  tick (`CampaignEvents.TickEvent`) passes the campaign delta (0.25 of real time at play speed, times the
+  fast-forward multiplier), and the wait-menu tick passed real seconds; on a wait menu with time running both
+  fire in the same frame, so the budget filled twice and the cheap position sync ran twice per frame. The
+  wait-menu tick now pumps only while campaign time is stopped (the delta the engine passes it is zero,
+  with its real-time clock kept for that case; no clamp is needed, because both budgets reset to zero when
+  a tier fires, so a post-stall step fires each tier at most once). The cadence is in budget seconds. While campaign time runs, the budget is the campaign tick's delta,
+  so the expensive tier (0.25 budget seconds) runs every 18 campaign minutes and the status board (2
+  budget seconds) every 2.4 campaign hours at any speed: on the service menu's own fast forward at the
+  default multiplier of 4 that is about every 250 ms and every 2 real seconds, at extra fast forward
+  (8) every 125 ms and every second, and at play speed, which the player can choose on the menu, every
+  second and every 8 seconds. On a stopped wait menu (paused, or just after loading a save) the budget
+  is real seconds: about every 250 ms and every 2 seconds. The board rebuild exceeds 4 Hz from a fast-forward multiplier above 32 (equal at 32), which is accepted;
+  before this change the running menu ran both tiers twice as often, so the change halves the rate only at
+  the default x4. The wait-menu frame is also the one place a deferred raid join is performed (see "#954 Open
+  risk 1"): `ServiceMaintenanceService.OnWaitMenuFrame` flushes it first, then pumps only when the campaign
+  delta is exactly zero; the hook makes that one call and restarts its Stopwatch every frame.
 - **Deferred duty callbacks** granted rewards and mutated the record without re-checking authority
   or enlistment — the same stale-authorisation shape as the desertion confirmation.
 - **`RestorePresence`'s result was discarded** immediately before encounter work its own comment
@@ -1297,7 +1316,7 @@ effectively unreachable anyway) and adding the two seams the role strip could no
   before moving him, so the move alone would leave him captain. Known cosmetic leftover: the
   formation banner set for the brief captaincy stays.
 
-Proof lines, with Enlistment Diagnostics off: `[Enlistment] Order of Battle deployment
+Proof lines, with the Enlistment Trace off: `[Enlistment] Order of Battle deployment
 suppressed: enlisted soldier in the commander's battle`, `[Enlistment] battle command stripped at
 AfterStart`, and `[Enlistment] after deployment: cleared N captaincy vanilla handed the soldier,
 formation X -> Y` when vanilla had moved him. Pinned by `EnlistmentDeploymentServiceTests` (every
@@ -1367,7 +1386,7 @@ reconciler ran about 16 times more often than at 4x. The feature's campaign-time
 (`StaleBattleLatchDays` = 1 hour, `AttachRetryIntervalHours` = 1, `SettlementDwellHours` = 6) all
 collapse to tens of milliseconds at that speed; that is #578, not this fix.
 
-Proof lines, with Enlistment Diagnostics ON: `[EnlistDiag] holding presence: EnlistedBattle with a
+Proof lines, with the Enlistment Trace ON: `[EnlistDiag] holding presence: EnlistedBattle with a
 live encounter` and `[EnlistDiag] reconcile skipped (trigger=army left): raised from inside our own
 army join/leave`. A `TICK trigger=army left ... verdict=AttachRequired ... hasPlayerEncounter=True`
 line followed by `PARK ok` is the defect. Pinned by `ServiceAttachmentServiceTests` (the hold and
@@ -2228,10 +2247,28 @@ Open risks:
    are the player's own event (`MapEventManager.cs:59`), so one simulation session can run with the
    soldier inside. If it decides the fight he is left in a decided raid, where vanilla offers the
    village hostile actions (`EncounterGameMenuBehavior.cs:2192-2217`) or the on_init jump
-   (`:1494-1521`) leads to `raiding_village`. UNVERIFIED in game; joins from the wait-menu tick are
-   safe because the menu stops time first. If it reproduces, the guard belongs in
-   `EnlistmentBattleBehavior.OnBattleJoinRequested` (defer to the next wait-menu tick), not in the
-   pump alone.
+   (`:1494-1521`) leads to `raiding_village`. Guarded for raids since #841. The engine skips
+   `MapEvent.Update` for the player's own event unless it is a raid (`MapEventManager.cs:59-61`). It runs at
+   `Campaign.cs:982`, after the `TickEvent` dispatch (`:980`) and the periodic (hourly, daily) events (`:981`),
+   and a session can hurt and decide it: the party's troops take casualties with no difficulty reduction
+   (`MapEvent.cs:760-763`), and the fight can finish because the defender side holds more than one party
+   (`:889-900`); the main hero is never a simulation troop (`MapEventSide.cs:765`). Field battles and siege
+   assaults are skipped from `JoinBattleInternal` (`PlayerEncounter.cs:912`) on, so they join at once. A join
+   into a RAID (`CommanderTickSnapshot.PartyIsInRaidEvent`, `MapEvent.IsRaid`) that is requested outside the
+   wait-menu frame while the service wait menu is current is held as one pending join (the commander and his
+   map event token) by `ServiceMaintenanceService.RequestJoin`, and performed by `OnWaitMenuFrame` before it
+   pumps. The wait-menu tick runs before `Campaign.RealTick` (`MapState.OnTick:156-160`), and the join's
+   switch to the encounter menu sets Stop (`GameMenu.cs:370`) before `Campaign.RealTick` computes this frame's
+   delta, so `Campaign.Tick` skips `MapEventManager.Tick` (`:978-982`), except in a session's first two ticks
+   (`CurrentTickCount < 3`). That post-load case predates #841, needs a save taken between a relief's arrival
+   and the next update, and has no code guard (UNVERIFIED). The pending join is dropped when the event ends or
+   changes, the commander leaves or is no longer followable, the service ends or the soldier is no longer
+   attached, the player is already inside, or the session resets. Off the service wait menu nothing is
+   deferred, so a soldier is never stranded; a raid joined there keeps this risk, the intended trade-off. The
+   battle-start edge (`MapEventStarted`) also joins at once, by design: the event was created that instant and
+   its first session is 30 campaign minutes away (`MapEvent.cs:787`), and AI raids start after the update
+   (`EncounterManager.Tick`, `Campaign.cs:994`). The reconciler's hourly request goes through
+   `IServiceMaintenanceService.RequestBattleJoin`, so both sources share the guard. UNVERIFIED in game.
 2. The encounter's Attack and Send troops apply the hostile action against the village
    (`MenuHelper.cs:265-269` for Attack, `:566-572` for Send troops). Closed for an own-clan identity
    by the #832 join-time top-up, which mirrors and records the war first. For a vassal identity
@@ -2636,7 +2673,7 @@ What actually remains, each a state no test can reach:
   'Leave' again, because vanilla greys out both 'Attack' and 'Send troops' and the menu must
   keep an exit. After that 'Leave', expect the state to return to `EnlistedAttached` once the
   commander's battle ends (the reconciler frees it when no battle remains).
-- **The presence hold at x64 (#577).** Extra Fast Forward multiplier 64, Diagnostics ON: ride with
+- **The presence hold at x64 (#577).** Extra Fast Forward multiplier 64, Enable Enlistment Trace on: ride with
   the commander through three or more battles. In each encounter menu hover 'Leave it to the
   others' (it is greyed with the TAOM tooltip while Attack is enabled). Click it where it is
   enabled (wounded, or odds at or above 0.85), otherwise click Attack. Every x64 run needs at least
@@ -2671,6 +2708,16 @@ What actually remains, each a state no test can reach:
   what service pays today (0 while the column is lost). For the line to go, dismiss every troop and leave
   the companions in a town; with companions only, N falls to their wages. Release some troops and the number
   follows on the next board refresh.
+- **Raid join from the running service menu (#841, #954 risk 1).** Join a relief battle against a village
+  raid from the running service menu: the encounter opens on the next frame with no casualties taken before
+  it. Joins into field battles and sieges still happen at once, and a raid joined off the service wait menu
+  is not delayed.
+- **Pump rates (#841) and the trace default (#840).** After a board input changes (the Column line, a day
+  passing) the board follows within about 2 seconds on the default running service menu and about 8 seconds
+  at play speed; the pump keeps running while
+  paused and right after loading onto the menu; a commander joining a running battle is still followed (the
+  pump fallback now waits up to 18 campaign minutes). A `TAOM.json` carrying `"EnableEnlistmentDiagnostics": true`
+  ends up with the trace off (the old key is ignored), and switching "Enable Enlistment Trace" on records it.
 - **Column line (#838).** On the wait menu the board shows, under the activity line, "Column: ..." with the commander party's
   current activity (for example besieging or travelling to a settlement). Let the column change what it is
   doing and the line follows within a few seconds; with the commander in a battle, note what the engine
