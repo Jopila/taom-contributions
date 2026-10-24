@@ -73,6 +73,8 @@ If ANY of these are true: **do NOT inject children into that container**. Use bo
 [PrefabExtension] → inject widget into a NON-data-bound container, bind to mixin properties
 ```
 
+**Hover targets:** a `HintWidget` relays only its parent's hover, and `EventManager.CollectEnableWidgetsAt` enters a child only when it is enabled and the pointer is inside its own `AreaRect`. So a hint's parent must be enabled and lie inside every ancestor's rectangle (no offset past a parent's edge), with `DoNotPassEventsToChildren` when it has enabled children. Pin the shape with a structural test and hover it in game (`docs/reviews/lessons/localization-ui.md`, #877).
+
 **Discouraged, on ownership grounds:**
 ```
 mapInfo.SecondaryInfoItems.Add(new MapInfoItemVM(...))
