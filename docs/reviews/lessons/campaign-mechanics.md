@@ -1028,3 +1028,16 @@ automatic budget; a purchase the player clicks, with its price shown, needs no r
   must never take.
 - **Prevent:** for every automatic spend, name what it must leave untouched before writing the budget.
 - **Source:** `docs/reviews/rca-provender-2026-10-23.md` row 3.
+### Skip the dedicated server only when the feature's subject is the local player (Bond of Hire, 2026-10-24)
+
+The dedicated-server gate exists for code that credits or charges `Hero.MainHero`, which on a server is nobody's
+character. Bond of Hire copied it into a service that writes the saved contract date of AI clans, where the server is
+the authority and the one peer that should act. A server-hosted campaign then bound no clan, and its
+`BondOfHireMinimumDays` server key was settable and had no effect.
+- **Why missed:** the plan's test list named "co-op peer and dedicated server skipped" as one line, copied from
+  sibling features that pay the player. The maintainer's later decision (the server binds) reached the plan notes and not
+  the builder's brief.
+- **Prevent:** for each part of a feature, ask who its subject is. The local player: gate on `IsDedicatedServer`. AI
+  clans or world state: gate on `ShouldDeferToHost` only, so the authority acts and clients defer. A server settings key
+  for a part that is skipped on the server is a sign of the wrong gate.
+- **Source:** `docs/reviews/rca-bond-of-hire-2026-10-24.md` finding 1.

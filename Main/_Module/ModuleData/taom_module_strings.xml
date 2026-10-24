@@ -3921,5 +3921,9 @@
 	<string id="taom_messenger_trip_days" text="{=taom_messenger_trip_days}The messenger will take about {DAYS} {?IS_PLURAL}days{?}day{\?}." />
 	<string id="taom_messenger_same_settlement" text="{=taom_messenger_same_settlement}{HERO_NAME} is here with you. Speak to them instead." />
 	<string id="taom_messenger_same_army" text="{=taom_messenger_same_army}{HERO_NAME} marches in your army. Speak to them instead." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- BondOfHire -->
+	<string id="taom_boh_term_days" text="{=taom_boh_term_days}These mercenaries agreed to serve for at least {DAYS} more {?IS_PLURAL}days{?}day{\?}" />
+	<string id="taom_boh_term_unknown" text="{=taom_boh_term_unknown}It is not known how long these mercenaries will serve" />
 
 </strings>

@@ -1253,3 +1253,15 @@ logged. Separately, a `ButtonWidget` passes its enabled, hover and disabled stat
   brushes the engine loads; a button whose label should follow its state sets `UpdateChildrenStates="true"`, as vanilla
   and the Family Tree buttons do.
 - **Source:** [rca-messengers-brushes-2026-10-24.md](../rca-messengers-brushes-2026-10-24.md) findings 0 and 1.
+### A CoverChildren TextWidget never wraps: give a text that may grow a fixed width (Bond of Hire, 2026-10-24)
+
+Gauntlet's `TextLayout.MeasureChildren` treats a TextWidget as fixed-width only when its width policy is not
+CoverChildren or it has a `MaxWidth`. A CoverChildren text therefore measures as one unbounded line. The Clans panel
+contract line fitted in English (about 453 px of a column about 600 px wide) and a translation about 35% longer would
+have run under the next column.
+- **Why missed:** the #866 rule (no StretchToParent inside a CoverChildren parent) was applied, and the opposite
+  question, whether this text must wrap, was not asked.
+- **Prevent:** a sentence of player-facing text gets `WidthSizePolicy="Fixed"` with a `SuggestedWidth` (or a
+  `MaxWidth`) and `HeightSizePolicy="CoverChildren"`, as vanilla's explanation texts do; keep CoverChildren width for
+  short labels only.
+- **Source:** `docs/reviews/rca-bond-of-hire-2026-10-24.md` finding 2.

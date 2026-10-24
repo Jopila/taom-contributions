@@ -21,6 +21,7 @@ using TAOM.Features.HiddenHosts;
 using TAOM.Features.KeepWardens;
 using TAOM.Features.FromTheAshes;
 using TAOM.Features.GoodDeeds;
+using TAOM.Features.BondOfHire;
 using TAOM.Features.LongMemory;
 using TAOM.Features.TokensOfEsteem;
 using TAOM.Features.Provender;
@@ -131,6 +132,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(TAOM.Features.SettlementServices.SettlementServicesSettingsProvider))]
     // #873: not a hot path (read a few times per party row when the Army Management screen opens); it still takes the settings once.
     [DataRow(typeof(RedArrowSettingsProvider))]
+    // #867: not a hot path; read once when a clan signs on as a mercenary. The accessor still takes the settings once.
+    [DataRow(typeof(BondOfHireSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -180,6 +183,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IFireAndTributeSettings), typeof(FireAndTributeSettingsProvider))]
     [DataRow(typeof(IUnlookedForAidSettingsProvider), typeof(UnlookedForAidSettingsProvider))]
     [DataRow(typeof(ISwornAnewSettingsProvider), typeof(SwornAnewSettingsProvider))]
+    [DataRow(typeof(IBondOfHireSettingsProvider), typeof(BondOfHireSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -252,6 +256,18 @@ public class CampaignHotPathSettingsProvidersTests
 
         Assert.IsFalse(sut.Get().Enabled);
         Assert.AreEqual(12, sut.Get().WageDaysKept);
+    }
+
+    [TestMethod]
+    public void BondOfHire_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new BondOfHireSettingsProvider(mcm);
+        Assert.AreEqual(BondOfHireSettingsProvider.DefaultMinimumDays, sut.MinimumDays);
+
+        mcm.BondOfHireMinimumDays = 60;
+
+        Assert.AreEqual(60, sut.MinimumDays);
     }
 
     [TestMethod]

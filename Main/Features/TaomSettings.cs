@@ -2686,4 +2686,16 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyInteger("Wage Days Kept", TAOM.Features.Provender.ProvenderSettingsProvider.MinWageDaysKept, TAOM.Features.Provender.ProvenderSettingsProvider.MaxWageDaysKept, Order = 7, RequireRestart = false,
         HintText = "The food order never spends the gold your party needs for this many days of wages, so buying food cannot leave your troops unpaid. 0 lets it spend the whole purse. Morale purchases are not limited: they show their price. Between 0 and 30. Default: 3.")]
     public int ProvenderWageDaysKept { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultWageDaysKept;
+
+    // --- Bond of Hire (docs/features/bond-of-hire.md, #867) ---
+    //
+    // Read when a clan signs on as a mercenary (the engine's service-started event), through BondOfHireSettingsProvider's one
+    // cached settings reference, so RequireRestart = false. GroupOrder 72 is unused; it is the group's first property, so it
+    // carries the order (MCM ignores a GroupOrder on any later one). The default and the range live in BondOfHireSettingsProvider
+    // so the fallback before MCM is up and the hint cannot drift.
+
+    [SettingPropertyGroup("World/Bond of Hire", GroupOrder = 72)]
+    [SettingPropertyInteger("Minimum Mercenary Contract (Days)", TAOM.Features.BondOfHire.BondOfHireSettingsProvider.MinDays, TAOM.Features.BondOfHire.BondOfHireSettingsProvider.MaxDays, Order = 0, RequireRestart = false,
+        HintText = "The fewest days a clan that signs on as a mercenary stays with its kingdom. Until then it cannot leave a ruler who is in debt, be hired away by another kingdom, or leave in its daily consideration of whether to stay. A clan with more time left is not shortened. Your own clan is not bound, and neither is dismissing or hiring away a mercenary yourself. 0 turns it off. Applies when a clan signs on; clans already serving get it at their next signing. Between 0 and 120. Default: 30.")]
+    public int BondOfHireMinimumDays { get; set; } = TAOM.Features.BondOfHire.BondOfHireSettingsProvider.DefaultMinimumDays;
 }

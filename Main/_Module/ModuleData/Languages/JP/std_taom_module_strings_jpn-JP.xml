@@ -6668,6 +6668,10 @@
 
     <string id="taom_messenger_same_army" text="{HERO_NAME} marches in your army. Speak to them instead." />
 
+    <string id="taom_boh_term_days" text="These mercenaries agreed to serve for at least {DAYS} more {?IS_PLURAL}days{?}day{\?}" />
+
+    <string id="taom_boh_term_unknown" text="It is not known how long these mercenaries will serve" />
+
   </strings>
 
 </base>

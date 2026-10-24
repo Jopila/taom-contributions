@@ -79,5 +79,6 @@ internal static class FeatureModules
         new Features.SettlementServices.SettlementServicesModule(),
         new Features.Messengers.MessengerSessionRulesModule(),
         new Features.RedArrow.RedArrowModule(),
+        new Features.BondOfHire.BondOfHireModule(),
     };
 }
