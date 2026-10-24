@@ -188,6 +188,11 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "A Free People's tournament seats no lord, wanderer or troop of the Shadow, and a tournament of the Shadow seats none of the Free Peoples; each is replaced by one of the town's own troops. A town's side is its owner's, so a captured town follows its conqueror, and a town held by a neutral realm bars nobody. Neutral lords and wanderers, the troops the town itself recruits, you and your clan always compete. Fewer lords in the field means a lesser prize. Default: on.")]
     public bool TournamentKeepEnemySidesOut { get; set; } = true;
 
+    [SettingPropertyGroup("Tournaments")]
+    [SettingPropertyBool("Tidings of the Lists", Order = 4, RequireRestart = false,
+        HintText = "Adds an option to a town's arena menu: for a small fee the arena master names the nearest towns holding a tournament now that are not at war with your realm. It marks nothing on the map. When off, the option is hidden. Single-player only. Default: on.")]
+    public bool EnableTidingsOfTheLists { get; set; } = true;
+
     // --- Armour Acquisition ---
 
     [SettingPropertyGroup("Armour Acquisition")]
@@ -833,6 +838,12 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Namegiving", Order = 0, RequireRestart = false,
         HintText = "Lets the ruler of your realm rename its towns, castles and villages from the Fiefs tab of the kingdom screen for influence, and lets four fiefs take an older or darker name while the matching side holds them. A name you chose is never overwritten. Single-player only. Switching it off gives those fiefs their map names back; a name you chose stays. The button follows the next time the kingdom screen opens; the older names change at the next capture, load or change of realm. Default: on.")]
     public bool EnableNamegiving { get; set; } = true;
+
+    // GroupOrder 5 sorts it after the Postern Gate (0), From the Ashes (1), Reeve's Ledger (2), Namegiving (3) and Keep Wardens (4) groups; the group's first property carries it.
+    [SettingPropertyGroup("Fief Management/Watch-Silver", GroupOrder = 5)]
+    [SettingPropertyBool("Watch-Silver", Order = 0, RequireRestart = false,
+        HintText = "Lets you talk to the governor of a town or castle your clan owns, inside that fief, and pay silver to the watch to raise its loyalty. Each offer shows its price, and there is a ceiling on how far silver can raise loyalty. When off, the line is hidden. Single-player only. Default: on.")]
+    public bool EnableWatchSilver { get; set; } = true;
 
     // --- Character Screen / Loremaster's Line (#877) ---
 

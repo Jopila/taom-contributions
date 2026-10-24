@@ -832,6 +832,12 @@ toast said 5. The value was right as a request and wrong as a receipt.
   `before - after` read from that store, and test it against the REAL store with a balance below the
   nominal cost. A `Received(Add, x)` assertion is a request assertion; name it as one.
 - **Source:** Codex review 95 (GPT-6-Astra, ultra) F1, 2026-09-11; follow-up #563 for the ungated path.
+- **Throw after the debit (Settlement Services, 2026-10-23):** `GiveGoldAction` takes the gold first and raises
+  `OnHeroOrPartyTradedGold` afterwards (v1.5.5 `GiveGoldAction.cs:13-14`, `:39`), so a charge that throws can still
+  have taken the gold. Read the purse before the call and measure it again in the catch; refund what left it, and
+  guard the refund too: it raises the same event after it credits, so the same listener can throw again. One
+  shared charge helper owns this for every caller. Source: `docs/reviews/rca-settlement-services-2026-10-23.md`
+  finding 1.
 
 ### A float-to-int cast overflows on FINITE input too: a divisor below the dividend's float resolution is the NaN of division
 

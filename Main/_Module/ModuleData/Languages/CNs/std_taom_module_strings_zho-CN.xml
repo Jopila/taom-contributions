@@ -6631,6 +6631,29 @@
     <string id="taom_provender_block_closed" text="This cannot be done now." />
 
     <string id="taom_provender_drink_buy" text="Share out {PROV_BUY_COUNT} {PROV_BUY_ITEM} among the host, buying {PROV_BUY_EXTRA} here for {PROV_BUY_GOLD} gold." />
+    <string id="taom_wsilver_tier" text="Raise loyalty by {POINTS} for {COST}{GOLD_ICON}." />
+
+    <string id="taom_wsilver_at_ceiling" text="Silver cannot steady this place beyond what it holds now." />
+
+    <string id="taom_tidings_title" text="Tidings of the Lists" />
+
+    <string id="taom_tidings_none" text="The arena master knows of no tournament in a friendly town. You keep your coin." />
+
+    <string id="taom_tidings_refused" text="The arena master has no answer for you now." />
+
+    <string id="taom_tidings_row" text="{TOWN} ({REALM})" />
+
+    <string id="taom_tidings_body" text="The arena master names the nearest tournaments:{newline}{LIST}" />
+
+    <string id="taom_tidings_option" text="Ask after tournaments elsewhere ({TAOM_TIDINGS_FEE}{GOLD_ICON})" />
+
+    <string id="taom_wsilver_offer" text="The watch here could use some silver to keep the peace." />
+
+    <string id="taom_wsilver_ask" text="Silver in the right hands steadies the watch. Loyalty here stands at {TAOM_WSILVER_LOYALTY}. What will you spend?" />
+
+    <string id="taom_wsilver_done" text="It will be done. The watch is paid, and loyalty here now stands at {LOYALTY}." />
+
+    <string id="taom_wsilver_refused" text="That cannot be done now. Speak to me of it another time." />
 
     <string id="taom_keep_wardens_label" text="Castle Patrols" />
 

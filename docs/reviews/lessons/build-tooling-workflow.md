@@ -3366,6 +3366,10 @@ switch-off logged no reason. The settings gate beside it returned "off" from a c
   returns the off value logs why, once or on change. Pin each with a test that a second reason still
   logs after the first.
 - **Source:** `docs/reviews/rca-load-time-stamps-2026-10-02.md` rows 2 and 3 (all six lenses).
+- **Repeated (Settlement Services, 2026-10-23):** a constant latch key on a `Reuse.Singleton` service logged the
+  first fief's bad number and then nothing for any fief for the rest of the process. Key the latch by the subject
+  it reports (here the fief id), and say in the comment how long it lives. Source:
+  `docs/reviews/rca-settlement-services-2026-10-23.md` finding 2.
 
 ### Evidence for a flag comes from the same parse that raised it (2026-10-02)
 `perf_runs.py` raised `MEMORY_PRESSURE` from `triage_battle_load.py`'s strict `[MemSample]` parser but chose the line to show with its own looser `memLoad=(\d+)%` scan, so the cited line could be one the flag never read; its docstring said `[MemSample]` was never re-implemented.

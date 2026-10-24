@@ -3854,6 +3854,19 @@
 	<string id="taom_fiefgrant_ballot_hint_title" text="{=taom_fiefgrant_ballot_hint_title}Fiefs held" />
 	<string id="taom_fiefgrant_ballot_hint_none" text="{=taom_fiefgrant_ballot_hint_none}Holds no town or castle." />
 	<string id="taom_fiefgrant_ballot_hint_excluded" text="{=taom_fiefgrant_ballot_hint_excluded}Not counting {SETTLEMENT}, the fief under vote" />
+	<!-- SettlementServices -->
+	<string id="taom_wsilver_tier" text="{=taom_wsilver_tier}Raise loyalty by {POINTS} for {COST}{GOLD_ICON}." />
+	<string id="taom_wsilver_at_ceiling" text="{=taom_wsilver_at_ceiling}Silver cannot steady this place beyond what it holds now." />
+	<string id="taom_tidings_title" text="{=taom_tidings_title}Tidings of the Lists" />
+	<string id="taom_tidings_none" text="{=taom_tidings_none}The arena master knows of no tournament in a friendly town. You keep your coin." />
+	<string id="taom_tidings_refused" text="{=taom_tidings_refused}The arena master has no answer for you now." />
+	<string id="taom_tidings_row" text="{=taom_tidings_row}{TOWN} ({REALM})" />
+	<string id="taom_tidings_body" text="{=taom_tidings_body}The arena master names the nearest tournaments:{newline}{LIST}" />
+	<string id="taom_tidings_option" text="{=taom_tidings_option}Ask after tournaments elsewhere ({TAOM_TIDINGS_FEE}{GOLD_ICON})" />
+	<string id="taom_wsilver_offer" text="{=taom_wsilver_offer}The watch here could use some silver to keep the peace." />
+	<string id="taom_wsilver_ask" text="{=taom_wsilver_ask}Silver in the right hands steadies the watch. Loyalty here stands at {TAOM_WSILVER_LOYALTY}. What will you spend?" />
+	<string id="taom_wsilver_done" text="{=taom_wsilver_done}It will be done. The watch is paid, and loyalty here now stands at {LOYALTY}." />
+	<string id="taom_wsilver_refused" text="{=taom_wsilver_refused}That cannot be done now. Speak to me of it another time." />
 
 	<!-- LoremastersLine -->
 	<string id="taom_ll_limit_line" text="{=taom_ll_limit_line}Up to the learning limit this skill learns at full speed; past it, learning slows until the red marker." />

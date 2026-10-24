@@ -126,6 +126,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(SwornAnewSettingsProvider))]
     // #888: the patrol queue asks the castle patrol model for every settlement it visits.
     [DataRow(typeof(CastlePatrolSettingsProvider))]
+    // Watch-Silver and Tidings of the Lists: read when a conversation or an arena menu is built; the accessor takes the settings once.
+    [DataRow(typeof(TAOM.Features.SettlementServices.SettlementServicesSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -619,6 +621,21 @@ public class CampaignHotPathSettingsProvidersTests
         settings.EnableNamegiving = false;
 
         Assert.IsFalse(sut.Enabled);
+    }
+
+    [TestMethod]
+    public void SettlementServices_ReadsThroughTheCachedSettings()
+    {
+        var settings = new TaomSettings();
+        var sut = new TAOM.Features.SettlementServices.SettlementServicesSettingsProvider(settings);
+        Assert.IsTrue(sut.WatchSilverEnabled);
+        Assert.IsTrue(sut.TidingsEnabled);
+
+        settings.EnableWatchSilver = false;
+        settings.EnableTidingsOfTheLists = false;
+
+        Assert.IsFalse(sut.WatchSilverEnabled);
+        Assert.IsFalse(sut.TidingsEnabled);
     }
 
     // No-MCM pins: TaomSettings.Instance is null in the test host (MCM is never initialised), so these

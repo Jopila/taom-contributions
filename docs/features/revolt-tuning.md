@@ -127,6 +127,8 @@ Invalid individual fields are reverted to their compiled default; other fields i
 - **Issue:** _pending — create via `gh issue create` with the completion workflow_
 - **Status:** Implementation complete; docs updated
 
+- **See also:** [Watch-Silver and Tidings of the Lists](settlement-services.md): a governor's silver lifts a fief's loyalty at once, up to a ceiling of 50, the drift medium these thresholds work against. Revolt Tuning itself does not change.
+
 ---
 
 <!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->

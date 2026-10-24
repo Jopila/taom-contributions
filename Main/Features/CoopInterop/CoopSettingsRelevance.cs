@@ -119,6 +119,9 @@ public static class CoopSettingsRelevance
         // switch is inert under co-op: the buttons are hidden and a click refuses. A peer holding a different value never
         // changes a running simulation.
         "EnableReserveSteps",
+        // Watch-Silver and Tidings of the Lists (#859): each switch only gates a player's click, and every write (a fief's loyalty,
+        // the player's gold) is behind the single-player predicate, so peers holding different values never compute differently.
+        "EnableWatchSilver", "EnableTidingsOfTheLists",
         "EnableQuickActions", "EnableInventorySearch", "QuickActionsShowConfirmation",
         "QuickActionsPlaySounds", "DamagedQualityDropdown", "DamagedThreshold",
         "UseCustomThreshold", "ExcludeDamagedHorses",
