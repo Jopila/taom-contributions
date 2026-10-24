@@ -271,6 +271,27 @@ public class MessengerConfigProviderTests
         _logger.Received().LogWarning(Arg.Is<string>(m => m.Contains("invalid values")));
     }
 
+    [DataTestMethod]
+    [DataRow("0.1", true)]
+    [DataRow("10", true)]
+    [DataRow("0.09", false)]
+    [DataRow("10.01", false)]
+    public void GetConfig_TravelSpeedMultiplierAtItsBounds_IsKeptInsideAndRevertedOutside(string value, bool kept)
+    {
+        WriteConfig("{ \"travelSpeedMultiplier\": " + value + " }");
+
+        var cfg = _sut.GetConfig();
+
+        if (kept)
+        {
+            Assert.AreEqual(float.Parse(value, System.Globalization.CultureInfo.InvariantCulture), cfg.TravelSpeedMultiplier);
+            _logger.DidNotReceive().LogWarning(Arg.Is<string>(m => m.Contains("travelSpeedMultiplier")));
+            return;
+        }
+        Assert.AreEqual(new MessengerConfig().TravelSpeedMultiplier, cfg.TravelSpeedMultiplier);
+        _logger.Received().LogWarning(Arg.Is<string>(m => m.Contains("travelSpeedMultiplier")));
+    }
+
     [TestMethod]
     public void GetConfig_PricingFieldsInRange_AreKept()
     {

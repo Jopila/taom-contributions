@@ -11,7 +11,6 @@ public sealed class HeroSnapshot
     public bool IsWanderer { get; }
     public bool IsHumanPlayerCharacter { get; }
     public bool IsInPlayerParty { get; }
-    public bool IsInMapEvent { get; }
     public bool SameSettlement { get; }
     public bool SameArmy { get; }
 
@@ -25,7 +24,6 @@ public sealed class HeroSnapshot
         bool isWanderer,
         bool isHumanPlayerCharacter,
         bool isInPlayerParty,
-        bool isInMapEvent,
         bool sameSettlement = false,
         bool sameArmy = false)
     {
@@ -38,7 +36,6 @@ public sealed class HeroSnapshot
         IsWanderer = isWanderer;
         IsHumanPlayerCharacter = isHumanPlayerCharacter;
         IsInPlayerParty = isInPlayerParty;
-        IsInMapEvent = isInMapEvent;
         SameSettlement = sameSettlement;
         SameArmy = sameArmy;
     }

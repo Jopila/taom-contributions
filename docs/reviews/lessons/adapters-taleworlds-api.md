@@ -1419,7 +1419,9 @@ tinted while the clan screen still listed it.
   holds.
 - **Prevent:** in a view-model mixin or any boundary that already has the `Hero`, read it directly
   (`Hero.MainHero?.GetRelation(hero)`). A by-id lookup that must also find away, captive or disabled heroes uses
-  `Hero.Find`, which walks the dead-or-disabled list too.
+  `Hero.Find`, which walks the dead-or-disabled list too. It does not find a dead wanderer, notable or rebel that
+  `UnregisterDeadHero` removed from that list; a lookup that must still see such a hero keeps `Hero.FindFirst`
+  (`rca-messenger-pricing-2026-10-23.md`, follow-ups).
 - **Source:** [rca-hearth-roll-2026-10-23.md](../rca-hearth-roll-2026-10-23.md) finding 1.
 ### Before gating a decision through a GameModel, list every engine path to the outcome (Sworn Anew, #869, 2026-10-24)
 Sworn Anew gates a captured lord's offer to join a ruler. The plan overrode `DefectionModel`, but vanilla v1.5.5

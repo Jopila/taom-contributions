@@ -609,6 +609,8 @@ public class MessengerCampaignBehavior : CampaignBehaviorBase, IMissionListener
 
     // --- Helpers ---
 
+    // FindFirst scans Characters on purpose: Hero.Find misses a dead hero the engine unregistered (UnregisterDeadHero),
+    // which would drop the messenger with no "lost" notice.
     private static Hero ResolveHero(string heroId)
     {
         if (string.IsNullOrEmpty(heroId)) return null;
