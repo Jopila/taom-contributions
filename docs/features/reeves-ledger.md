@@ -138,7 +138,8 @@ Layout and the hover and click behaviour of the new widgets are unseen in game.
 ## GitHub Issue
 
 - **Issue:** [#857](https://github.com/haterade22/TAOM/issues/857) Town management extras: profit, patrol, reserve buttons, stash and prison tooltips
-- **Status:** Open. The in-game check is owed, and so is the paid translation of the new strings (#931).
+- **Status:** Shipped on `bannerlord-1.5.x` in `e7cdb2e96` (v2.0.35); its fault log became the shared `ScreenFaultLog` in
+  `69b47d00b`. Issue open: the in-game check is owed; the paid translation of its strings is tracked in [#931](https://github.com/haterade22/TAOM/issues/931).
 
 ---
 

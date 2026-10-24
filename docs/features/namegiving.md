@@ -154,7 +154,9 @@ Unseen in game. `{..}` reaching `KingdomManagementVM` across the `FiefsPanel` bo
 ## GitHub Issue
 
 - **Issue:** [#858](https://github.com/haterade22/TAOM/issues/858) Rename towns, castles and villages from the kingdom fiefs screen
-- **Status:** Open. The in-game check is owed, and so is the paid translation of the 22 new strings ([#931](https://github.com/haterade22/TAOM/issues/931)).
+- **Status:** Shipped on `bannerlord-1.5.x` in `d0e6725ec` (v2.0.35); the review follow-ups (the prefab insert gate and the
+  shared `ScreenFaultLog`) landed in `69b47d00b`. Issue open: the in-game check is owed; the paid translation of the 22 new
+  strings is tracked in [#931](https://github.com/haterade22/TAOM/issues/931).
 
 ---
 

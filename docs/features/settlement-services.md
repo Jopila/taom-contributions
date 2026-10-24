@@ -143,4 +143,5 @@ All of this is unseen in game.
 ## GitHub Issue
 
 - **Issue:** [#859](https://github.com/haterade22/TAOM/issues/859) Settlement services: governor militia bribe and nearby tournament inquiry
-- **Status:** Open. The in-game check is owed, and so is the paid translation of the twelve new strings (`taom_wsilver_*`, `taom_tidings_*`, tracked in [#931](https://github.com/haterade22/TAOM/issues/931)).
+- **Status:** Shipped on `bannerlord-1.5.x` in `2057ad5d9` (v2.0.35). Issue open: the in-game check is owed; the paid
+  translation of the twelve new strings (`taom_wsilver_*`, `taom_tidings_*`) is tracked in [#931](https://github.com/haterade22/TAOM/issues/931).
