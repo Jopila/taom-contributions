@@ -151,4 +151,4 @@ On every engine bump re-diff, against the previous version: `DefaultArmyManageme
 ## GitHub Issue
 
 - **Issue:** #873, [The Red Arrow: call parties into your army during your own siege](https://github.com/haterade22/TAOM/issues/873)
-- **Status:** Built on `feat/war-armies`; open until the in-game checks are done.
+- **Status:** Shipped on `bannerlord-1.5.x` in `765995176` (v2.0.35). Issue open: the in-game checks are owed.
