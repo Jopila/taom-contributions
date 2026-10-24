@@ -36,20 +36,20 @@ public class HearthRollSettingsProviderTests
     }
 
     [TestMethod]
-    public void TheProperty_OpensItsOwnHearthRollGroup_AtOrder68()
+    public void TheProperty_OpensItsOwnHearthRollGroup_AtOrder69()
     {
         var group = Attribute(Tint, "SettingPropertyGroupAttribute");
 
         Assert.AreEqual("Hearth Roll", Read(group, "GroupName"));
-        Assert.AreEqual(68, Read(group, "GroupOrder"), "Long Memory is 67");
+        Assert.AreEqual(69, Read(group, "GroupOrder"), "Help Unlooked-For is 68");
         Assert.AreEqual(0, Read(Attribute(Tint, "SettingPropertyBoolAttribute"), "Order"));
     }
 
     [TestMethod]
-    public void NoOtherGroupTakesOrder68()
+    public void NoOtherGroupTakesOrder69()
     {
         var holders = typeof(TaomSettings).GetProperties()
-            .Where(p => p.GetCustomAttributes(inherit: false).Any(a => a.GetType().Name == "SettingPropertyGroupAttribute" && (int)Read(a, "GroupOrder") == 68))
+            .Where(p => p.GetCustomAttributes(inherit: false).Any(a => a.GetType().Name == "SettingPropertyGroupAttribute" && (int)Read(a, "GroupOrder") == 69))
             .Select(p => p.Name)
             .ToArray();
 

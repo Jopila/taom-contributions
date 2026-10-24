@@ -30,7 +30,7 @@ One MCM setting on `TaomSettings`:
 
 | Field | Value |
 |-------|-------|
-| Group | "Hearth Roll", `GroupOrder = 68` (after Long Memory at 67) |
+| Group | "Hearth Roll", `GroupOrder = 69` (after Help Unlooked-For at 68) |
 | Name | "Tint Unhappy Companions" (`EnableUnhappyCompanionTint`) |
 | Default | on |
 | Restart | not required; the switch is read each time a row refreshes, so it applies the next time the clan screen opens |

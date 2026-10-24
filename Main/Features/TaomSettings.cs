@@ -2597,7 +2597,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     // GroupOrder 68 follows Long Memory at 67. The switch is read through HearthRollSettingsProvider's one cached settings
     // reference each time a clan member row refreshes, so it needs no restart.
 
-    [SettingPropertyGroup("Hearth Roll", GroupOrder = 68)]
+    [SettingPropertyGroup("Hearth Roll", GroupOrder = 69)]
     [SettingPropertyBool("Tint Unhappy Companions", Order = 0, RequireRestart = false,
         HintText = "On the Members tab of the clan screen, gives the row of a companion of your clan a faint red tint when their relation with you has fallen below zero, a warning before they leave. The age beside each child's name is always shown. Applies the next time the clan screen opens. Default: on.")]
     public bool EnableUnhappyCompanionTint { get; set; } = true;
