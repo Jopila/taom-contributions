@@ -64,7 +64,7 @@ public class EnlistmentFeatureToggleTests
             exists: true, isAlive: true, partyId: "lord_party", partyIsActive: true));
         var store = new EnlistmentStore(Substitute.For<IModLogger>());
         return new EnlistmentDialogGateService(
-            store, commander, Substitute.For<IPlayerContextAdapter>(), config, _feature, Substitute.For<IServiceHistoryService>());
+            store, commander, Substitute.For<IPlayerContextAdapter>(), config, _feature, Substitute.For<IServiceHistoryService>(), Substitute.For<IPlayerPartyAdapter>(), Substitute.For<IModLogger>());
     }
 
     // ---- the switch blocks new service ------------------------------------------------------
@@ -95,7 +95,7 @@ public class EnlistmentFeatureToggleTests
             exists: true, isAlive: true, partyId: "lord_party", partyIsActive: true));
         var gate = new EnlistmentDialogGateService(
             new EnlistmentStore(Substitute.For<IModLogger>()), commander,
-            Substitute.For<IPlayerContextAdapter>(), config, null, Substitute.For<IServiceHistoryService>());
+            Substitute.For<IPlayerContextAdapter>(), config, null, Substitute.For<IServiceHistoryService>(), Substitute.For<IPlayerPartyAdapter>(), Substitute.For<IModLogger>());
 
         Assert.AreEqual(EnlistGateResult.Ok, gate.CanEnlistWith("lord_1"));
     }

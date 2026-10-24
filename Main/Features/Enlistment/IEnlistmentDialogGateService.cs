@@ -25,6 +25,13 @@ public interface IEnlistmentDialogGateService
 {
     EnlistGateResult CanEnlistWith(string partnerHeroId);
 
+    /// <summary>
+    /// What the player's own men cost a day and what service would pay at the rank the oath with this
+    /// commander starts at (#839), for the oath question. (0, 0) when he keeps no paid men or any read fails;
+    /// it never throws, because the question is the only path to the oath.
+    /// </summary>
+    (int Cost, int Pay) OathRetinueCost(string partnerHeroId);
+
     /// <summary>True when the player serves under this conversation partner.</summary>
     bool IsServingUnder(string partnerHeroId);
 

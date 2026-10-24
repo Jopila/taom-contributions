@@ -2496,6 +2496,42 @@ Tests: `ServiceStatusServiceTests` (the model's equality and hash, the service f
 including the `ACTIVITY` placement, no ask when there is no party or the commander is in a settlement, that
 neither snapshot body renders the text, and the log-once pin).
 
+## The cost of your own men (#839)
+
+A soldier who keeps his own paid people is told what they cost next to what service pays, where he decides.
+
+- **N, the cost.** `IPlayerPartyAdapter.GetMainPartyDailyWage()` returns `Hero.MainHero.PartyBelongedTo.TotalWage`
+  (v1.5.5 `MobileParty.TotalWage`, which asks the installed `PartyWageModel`). That is the value
+  `DefaultClanFinanceModel.CalculatePartyWage` charges the player's clan, so it is the real daily bill and
+  includes any rule a model override adds; it is not recomputed. Companions draw a wage too, so N counts them
+  as well as troops. It returns 0 when there is no party or the read throws (logged once until a read
+  succeeds).
+- **M, what service pays.** On the board it is `IEnlistmentWagePreview.GetDailyWage()`, the rank's daily
+  wage when a wage is due today and otherwise 0 (not enlisted, or the column is lost,
+  `CommanderUnavailable`), so the board's "Daily pay" line and this line both say 0 then. In the oath
+  question it is the table wage of the rank the oath would start at: `IServiceHistoryService.WageAtOath`
+  shares one start-rank rule with `RestoreOnOath`, so a returning veteran is quoted his restored rank's pay,
+  and the oath grants exactly that rank.
+- **Where it shows.** In the commander's oath question: the line `taom_enlist_oath_ask` is composed as
+  `{=!}{OATH_ASK}{OATH_RETINUE}` (the ask text and its key are unchanged), and the line's condition,
+  `RetinueCostText.SetOathLine(IEnlistmentDialogGateService.OathRetinueCost(partnerId))`, sets the retinue
+  sentence after a space, or an empty text when N is 0, so the question reads as before. The gate method
+  never throws (it catches, logs once, and answers (0, 0)), because the question is the only path to the
+  oath. Declining is still free. On the status board: `ServiceStatusModel.RetinueWage` (part of its value
+  equality; M is the model's `DailyWage`) and `ServiceStatusTextWriter.WithRetinueLine` append the sentence
+  on its own line after the pay-owed line (`{=!}{PREVIOUS_LINES}{NEWLINE}{RETINUE_LINE}`), so the translated
+  board template `taom_enlist_wait_board_v2` does not change. Both are left out when N is 0. The board
+  reads one wage on each board refresh.
+- **One key.** `taom_enlist_retinue_cost` ("Your own men cost {COST}{COIN} a day; service pays {PAY}{COIN}."),
+  built by the one `RetinueCostText.Build` for both places, with the coin icon the "Daily pay" line uses.
+- **No relief, by decision.** The retinue keeps costing its full wage. A discount would let a parked army
+  cost little, which changes balance; it is a possible follow-up on the maintainer's word.
+
+Tests: `RetinueCostTextTests` (the builder, the single key, the oath-question composition),
+`EnlistmentDialogGateServiceTests` (`OathRetinueCost`), `PastServiceTests` (`WageAtOath` agrees with
+`RestoreOnOath`), `ServiceStatusServiceTests` (the model's equality and hash, the service fill, M as the
+preview's wage, the writer and adapter source pins).
+
 ## Interactions with the rest of TAOM
 
 **Leader-keyed attribution is the recurring hazard.** For months of game time the player fights
@@ -2619,6 +2655,14 @@ What actually remains, each a state no test can reach:
 - **A field battle with the commander in an army.** Still the case most likely to fail:
   `FindCommanderPartyIdIn` matches only the commander's own party in `InvolvedParties`, and an
   attached army member may not appear there.
+- **Cost of your own men (#839).** Keep paid troops or companions in your party and ask a lord to enlist: his
+  oath question ends with "Your own men cost N a day; service pays M." (declining is still free), and the
+  wait-menu board shows the same line, with coin icons, after the pay lines. N should match the main party
+  wage line of the detailed gold tooltip (or the map bar's troop wage figure); M is the pay of the rank the
+  oath starts at (a returning veteran sees his restored rank's pay, and gets that rank), and on the board
+  what service pays today (0 while the column is lost). For the line to go, dismiss every troop and leave
+  the companions in a town; with companions only, N falls to their wages. Release some troops and the number
+  follows on the next board refresh.
 - **Column line (#838).** On the wait menu the board shows, under the activity line, "Column: ..." with the commander party's
   current activity (for example besieging or travelling to a settlement). Let the column change what it is
   doing and the line follows within a few seconds; with the commander in a battle, note what the engine

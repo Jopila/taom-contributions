@@ -641,6 +641,43 @@ public class PastServiceTests
         Assert.AreEqual(ServiceRank.Private, _content.Record.Rank);
     }
 
+    private static int Wage(ServiceRank rank)
+        => EnlistmentContentConfigProvider.BuildDefaults().Progression.DailyWageByRank[(int)rank];
+
+    [TestMethod]
+    public void WageAtOath_NoHistory_IsThePrivateWage()
+        => Assert.AreEqual(Wage(ServiceRank.Private), _sut.WageAtOath("lord_a", Hero, Lord()));
+
+    [TestMethod]
+    public void WageAtOath_ARememberedTerm_IsTheRestoredRanksWage_AndTheOathGrantsThatRank()
+    {
+        _content.History.Entries.Add(E("lord_a", rank: ServiceRank.StaffSergeant, end: 250));
+
+        var wage = _sut.WageAtOath("lord_a", Hero, Lord());
+        _sut.RestoreOnOath("lord_a", Hero, Lord());
+
+        Assert.AreEqual(Wage(ServiceRank.Sergeant), wage);
+        Assert.AreEqual(ServiceRank.Sergeant, _content.Record.Rank, "the oath starts at the rank the question quoted");
+        Assert.AreEqual(Wage(_content.Record.Rank), wage);
+    }
+
+    [TestMethod]
+    public void WageAtOath_NeverBelowARankAlreadyHeld()
+    {
+        _content.Record.Rank = ServiceRank.SergeantMajor;
+        _content.History.Entries.Add(E("lord_a", rank: ServiceRank.Sergeant, end: 250));
+
+        Assert.AreEqual(Wage(ServiceRank.SergeantMajor), _sut.WageAtOath("lord_a", Hero, Lord()));
+    }
+
+    [TestMethod]
+    public void WageAtOath_AnotherHeroesService_IsThePrivateWage()
+    {
+        _content.History.Entries.Add(E("lord_a", rank: ServiceRank.StaffSergeant, end: 250, hero: "hero_2"));
+
+        Assert.AreEqual(Wage(ServiceRank.Private), _sut.WageAtOath("lord_a", Hero, Lord()));
+    }
+
     [TestMethod]
     public void RestoreOnOath_NeverLowersARankAlreadyHeld()
     {

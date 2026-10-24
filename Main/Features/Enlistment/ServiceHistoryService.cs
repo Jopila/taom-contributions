@@ -30,6 +30,12 @@ public interface IServiceHistoryService
 
     /// <summary>Applies the rank this oath is owed to the hero who swears it (and the kit tier he kept) and says so.</summary>
     void RestoreOnOath(string commanderHeroId, string enlistedHeroId, CommanderSnapshot snapshot);
+
+    /// <summary>
+    /// The daily wage of the rank the oath with this commander would start at, past service included
+    /// (#839). Shares its rank rule with <see cref="RestoreOnOath"/>, so the oath question quotes what the oath grants.
+    /// </summary>
+    int WageAtOath(string commanderHeroId, string enlistedHeroId, CommanderSnapshot snapshot);
 }
 
 /// <inheritdoc />
@@ -104,16 +110,14 @@ public sealed class ServiceHistoryService : IServiceHistoryService
 
     public void RestoreOnOath(string commanderHeroId, string enlistedHeroId, CommanderSnapshot snapshot)
     {
-        var config = _config.GetConfig();
-        var result = ReenlistmentPolicy.Restore(
-            _content.History.Entries, _clock.NowDays, config.ServiceHistoryExpiryDays,
-            commanderHeroId, snapshot?.ClanId, KingdomOf(snapshot), enlistedHeroId);
+        var result = RestoredAtOath(commanderHeroId, enlistedHeroId, snapshot);
         var record = _content.Record;
+        var start = StartRank(result);
         // Only rank: service XP and days served restart, so the next promotion's gates count from this oath.
-        if (!result.Restored || (int)result.Rank <= (int)record.Rank)
+        if (start == record.Rank)
             return;
 
-        record.Rank = result.Rank;
+        record.Rank = start;
         // The ledger is seeded with the tier he really kept, and only then; after a full reclaim it stays
         // empty so the veteran can draw kit for his rank again.
         if (result.KitTier.HasValue)
@@ -121,6 +125,22 @@ public sealed class ServiceHistoryService : IServiceHistoryService
         _logger?.LogInfo($"[Enlistment] past service restored: begins as {result.Rank} (kit tier {result.KitTier?.ToString() ?? "none"})");
         _announcer.AnnounceRemembered(snapshot?.Name ?? "", result.Rank);
     }
+
+    public int WageAtOath(string commanderHeroId, string enlistedHeroId, CommanderSnapshot snapshot)
+    {
+        var rank = StartRank(RestoredAtOath(commanderHeroId, enlistedHeroId, snapshot));
+        return WagePolicy.DailyWageForRank((int)rank, _config.GetConfig()?.Progression?.DailyWageByRank);
+    }
+
+    /// <summary>What past service owes this hero under this commander. Applied by <see cref="RestoreOnOath"/>, quoted by <see cref="WageAtOath"/>.</summary>
+    private RestoredService RestoredAtOath(string commanderHeroId, string enlistedHeroId, CommanderSnapshot snapshot)
+        => ReenlistmentPolicy.Restore(
+            _content.History.Entries, _clock.NowDays, _config.GetConfig().ServiceHistoryExpiryDays,
+            commanderHeroId, snapshot?.ClanId, KingdomOf(snapshot), enlistedHeroId);
+
+    /// <summary>The rank the oath starts at: the restored rank when it is higher than the one already held, else the held rank.</summary>
+    private ServiceRank StartRank(RestoredService restored)
+        => restored.Restored && (int)restored.Rank > (int)_content.Record.Rank ? restored.Rank : _content.Record.Rank;
 
     private void Forget()
     {

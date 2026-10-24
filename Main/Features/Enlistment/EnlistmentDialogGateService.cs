@@ -1,4 +1,6 @@
+using System;
 using TAOM.Adapters;
+using TAOM.Core.Logging;
 
 namespace TAOM.Features.Enlistment;
 
@@ -10,6 +12,9 @@ public class EnlistmentDialogGateService : IEnlistmentDialogGateService
     private readonly IEnlistmentConfigProvider _config;
     private readonly IEnlistmentFeatureSettingsProvider _feature;
     private readonly IServiceHistoryService _history;
+    private readonly IPlayerPartyAdapter _playerParty;
+    private readonly IModLogger _logger;
+    private bool _retinueFailureLogged;
 
     public EnlistmentDialogGateService(
         IEnlistmentStore store,
@@ -17,7 +22,9 @@ public class EnlistmentDialogGateService : IEnlistmentDialogGateService
         IPlayerContextAdapter playerContext,
         IEnlistmentConfigProvider config,
         IEnlistmentFeatureSettingsProvider feature,
-        IServiceHistoryService history)
+        IServiceHistoryService history,
+        IPlayerPartyAdapter playerParty,
+        IModLogger logger)
     {
         _store = store;
         _commander = commander;
@@ -25,6 +32,8 @@ public class EnlistmentDialogGateService : IEnlistmentDialogGateService
         _config = config;
         _feature = feature;
         _history = history;
+        _playerParty = playerParty;
+        _logger = logger;
     }
 
     public EnlistGateResult CanEnlistWith(string partnerHeroId)
@@ -60,6 +69,28 @@ public class EnlistmentDialogGateService : IEnlistmentDialogGateService
             return EnlistGateResult.DesertedFromHim;
 
         return EnlistGateResult.Ok;
+    }
+
+    public (int Cost, int Pay) OathRetinueCost(string partnerHeroId)
+    {
+        try
+        {
+            var cost = _playerParty.GetMainPartyDailyWage();
+            var result = cost <= 0
+                ? (0, 0)
+                : (cost, _history.WageAtOath(partnerHeroId, _playerParty.GetMainHeroId(), _commander.GetSnapshot(partnerHeroId)));
+            _retinueFailureLogged = false;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            if (!_retinueFailureLogged)
+            {
+                _retinueFailureLogged = true;
+                _logger.LogError($"[Enlistment] OathRetinueCost('{partnerHeroId}') failed: {ex.Message}");
+            }
+            return (0, 0);
+        }
     }
 
     public bool IsServingUnder(string partnerHeroId)

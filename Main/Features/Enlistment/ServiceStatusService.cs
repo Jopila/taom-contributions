@@ -30,8 +30,8 @@ public interface IServiceStatusService
 
     /// <summary>
     /// Rebuild and push the menu text if anything changed. Cheap on the unchanged path — one
-    /// snapshot read, one behaviour text render (a hero lookup and a few TextObjects) and a value
-    /// comparison; no TextObject is built for the board itself.
+    /// snapshot read, one behaviour text render (a hero lookup and a few TextObjects), one party wage
+    /// read (the roster's wage sum) and a value comparison; no TextObject is built for the board itself.
     /// </summary>
     bool RefreshIfChanged();
 
@@ -46,8 +46,9 @@ public class ServiceStatusService : IServiceStatusService
     private readonly ICommanderLordAdapter _commander;
     private readonly IServiceStatusTextWriter _writer;
     private readonly IPromotionService _promotion;
-    private readonly IEnlistmentContentConfigProvider _config;
+    private readonly IEnlistmentWagePreview _wagePreview;
     private readonly Equipment.IEquipmentIssueLedger _ledger;
+    private readonly IPlayerPartyAdapter _playerParty;
 
     private ServiceStatusModel _last;
 
@@ -57,16 +58,18 @@ public class ServiceStatusService : IServiceStatusService
         ICommanderLordAdapter commander,
         IServiceStatusTextWriter writer,
         IPromotionService promotion,
-        IEnlistmentContentConfigProvider config,
-        Equipment.IEquipmentIssueLedger ledger)
+        IEnlistmentWagePreview wagePreview,
+        Equipment.IEquipmentIssueLedger ledger,
+        IPlayerPartyAdapter playerParty)
     {
         _store = store;
         _content = content;
         _commander = commander;
         _writer = writer;
         _promotion = promotion;
-        _config = config;
+        _wagePreview = wagePreview;
         _ledger = ledger;
+        _playerParty = playerParty;
     }
 
     public ServiceStatusModel Build()
@@ -99,7 +102,8 @@ public class ServiceStatusService : IServiceStatusService
             deferredWages: content.DeferredWages,
             activeDutyId: content.ActiveDutyId,
             serviceXp: content.ServiceXp,
-            dailyWage: DailyWageFor(content.Rank),
+            // What service pays today, so 0 while the column is lost: the board must not promise unpaid wages.
+            dailyWage: _wagePreview.GetDailyWage(),
             nextRank: showLadder ? promotion.ToRank : (ServiceRank?)null,
             nextRequirementKey: showLadder ? promotion.MostBindingUnmetKey : null,
             nextRequirementTarget: showLadder ? promotion.MostBindingUnmetTarget : 0,
@@ -107,17 +111,9 @@ public class ServiceStatusService : IServiceStatusService
             // Left out in a settlement: the engine blanks this text there and the activity line already says where he is.
             columnText: commander.HasParty && !commander.PartyIsInSettlement
                 ? _commander.GetPartyBehaviorText(record.CommanderHeroId)
-                : null);
+                : null,
+            retinueWage: _playerParty.GetMainPartyDailyWage());
     }
-
-    /// <summary>
-    /// Today's wage, read from the same rank-indexed table <c>ServiceRewardService.PayDailyWage</c>
-    /// pays from — so the board cannot quote a number the player is not actually paid. Out-of-range
-    /// reads yield 0 rather than throwing; the config validator already pins the table at exactly
-    /// one non-negative entry per rank, so this is a belt for a rank enum that outgrows its table.
-    /// </summary>
-    private int DailyWageFor(ServiceRank rank)
-        => WagePolicy.DailyWageForRank((int)rank, _config?.GetConfig()?.Progression?.DailyWageByRank);
 
     /// <summary>
     /// Order matters: a village raid (#831) outranks the battle check, since the soldier is not in it;

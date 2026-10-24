@@ -47,7 +47,7 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
     /// one the player had no way at all to see.</summary>
     public int ServiceXp { get; }
 
-    /// <summary>What the commander owes for today, from the rank wage table.</summary>
+    /// <summary>What service pays today: the rank's wage, or 0 when no wage is due (the column is lost).</summary>
     public int DailyWage { get; }
 
     /// <summary>
@@ -76,6 +76,9 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
     /// <summary>The commander party's own behaviour text, rendered when the model was built (#838), or null. A string, so it compares by value.</summary>
     public string ColumnText { get; }
 
+    /// <summary>What the player's own men cost a day (#839), 0 when he keeps none. The service pay is <see cref="DailyWage"/>.</summary>
+    public int RetinueWage { get; }
+
     public ServiceStatusModel(
         string commanderName = null,
         CommanderActivity activity = CommanderActivity.Marching,
@@ -92,7 +95,8 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
         string nextRequirementKey = null,
         int nextRequirementTarget = 0,
         bool kitWaits = false,
-        string columnText = null)
+        string columnText = null,
+        int retinueWage = 0)
     {
         CommanderName = commanderName;
         Activity = activity;
@@ -110,6 +114,7 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
         NextRequirementTarget = nextRequirementTarget;
         KitWaits = kitWaits;
         ColumnText = columnText;
+        RetinueWage = retinueWage;
     }
 
     public bool Equals(ServiceStatusModel other)
@@ -132,7 +137,8 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
             && string.Equals(NextRequirementKey, other.NextRequirementKey, StringComparison.Ordinal)
             && NextRequirementTarget == other.NextRequirementTarget
             && KitWaits == other.KitWaits
-            && string.Equals(ColumnText, other.ColumnText, StringComparison.Ordinal);
+            && string.Equals(ColumnText, other.ColumnText, StringComparison.Ordinal)
+            && RetinueWage == other.RetinueWage;
     }
 
     public override bool Equals(object obj) => Equals(obj as ServiceStatusModel);
@@ -157,6 +163,7 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
             hash = (hash * 397) ^ NextRequirementTarget;
             hash = (hash * 397) ^ (KitWaits ? 1 : 0);
             hash = (hash * 397) ^ (ColumnText?.GetHashCode() ?? 0);
+            hash = (hash * 397) ^ RetinueWage;
             return hash;
         }
     }

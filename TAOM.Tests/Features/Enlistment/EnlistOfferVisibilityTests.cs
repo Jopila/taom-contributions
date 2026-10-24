@@ -34,7 +34,7 @@ public class EnlistOfferVisibilityTests
         _config = Substitute.For<IEnlistmentConfigProvider>();
         _config.GetConfig().Returns(new EnlistmentCoreConfig());
         _history = Substitute.For<IServiceHistoryService>();
-        _gate = new EnlistmentDialogGateService(_store, _commander, _playerContext, _config, null, _history);
+        _gate = new EnlistmentDialogGateService(_store, _commander, _playerContext, _config, null, _history, Substitute.For<IPlayerPartyAdapter>(), Substitute.For<IModLogger>());
 
         _commander.IsLord("lord_1_1").Returns(true);
         _playerContext.IsUnderMercenaryService().Returns(false);

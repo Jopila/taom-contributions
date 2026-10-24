@@ -61,10 +61,10 @@ public class EnlistmentDialogBehavior : CampaignBehaviorBase
             "taom_enlist_oath_ask",
             "taom_enlist_oath_ask",
             "taom_enlist_oath_answer",
-            "{=taom_enlist_oath_ask}Then swear it: your blade at my side, my bread in your pack, until your term is served. Do you swear?",
+            "{=!}{OATH_ASK}{TAOM_ENLIST_OATH_RETINUE}",
+            () => Presentation.RetinueCostText.SetOathLine(_gate.OathRetinueCost(PartnerId())),
             null,
-            null,
-            110);
+            110).Text.SetTextVariable("OATH_ASK", new TextObject("{=taom_enlist_oath_ask}Then swear it: your blade at my side, my bread in your pack, until your term is served. Do you swear?"));
 
         starter.AddPlayerLine(
             "taom_enlist_oath_swear",

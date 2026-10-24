@@ -28,6 +28,8 @@ public class ServiceStatusServiceTests
     private IHeroSkillXpAdapter _skillXp;
     private PromotionService _promotion;
     private ServiceStatusService _sut;
+    private IPlayerPartyAdapter _playerParty;
+    private IEnlistmentWagePreview _wagePreview;
 
     [TestInitialize]
     public void Setup()
@@ -40,6 +42,11 @@ public class ServiceStatusServiceTests
         _config = Substitute.For<IEnlistmentContentConfigProvider>();
         _config.GetConfig().Returns(EnlistmentContentConfigProvider.BuildDefaults());
         _skillXp = Substitute.For<IHeroSkillXpAdapter>();
+        _playerParty = Substitute.For<IPlayerPartyAdapter>();
+        // What service pays today: the rank's table wage, as ServiceRewardService.GetDailyWage answers it.
+        _wagePreview = Substitute.For<IEnlistmentWagePreview>();
+        _wagePreview.GetDailyWage().Returns(_ => WagePolicy.DailyWageForRank(
+            (int)_content.Record.Rank, EnlistmentContentConfigProvider.BuildDefaults().Progression.DailyWageByRank));
 
         // A REAL PromotionService on purpose. Substituting it here would stub out the exact seam
         // this batch adds — the board reading the same ladder that promotes the player — and leave
@@ -51,7 +58,7 @@ public class ServiceStatusServiceTests
         _store.Record.EnlistedHeroId = "main_hero";
         _store.Record.CommanderHeroId = "lord_1";
 
-        _sut = new ServiceStatusService(_store, _content, _commander, _writer, _promotion, _config, new TAOM.Features.Enlistment.Equipment.PersistedEquipmentIssueLedger(_content));
+        _sut = new ServiceStatusService(_store, _content, _commander, _writer, _promotion, _wagePreview, new TAOM.Features.Enlistment.Equipment.PersistedEquipmentIssueLedger(_content), _playerParty);
     }
 
     private void Commander(
@@ -365,6 +372,58 @@ public class ServiceStatusServiceTests
         Assert.IsFalse(_sut.Build().KitWaits);
     }
 
+    // ---- the retinue line (#839) ----
+
+    [TestMethod]
+    public void Build_DailyWage_IsWhatServicePaysToday_NotTheRanksTableWage()
+    {
+        _content.Record.Rank = ServiceRank.Sergeant;
+        _wagePreview.GetDailyWage().Returns(0);
+
+        Assert.AreEqual(0, _sut.Build().DailyWage, "while the column is lost nothing is paid, and the board must not promise it");
+    }
+
+    [TestMethod]
+    public void Build_RetinueWage_IsTheAdaptersMainPartyDailyWage()
+    {
+        _playerParty.GetMainPartyDailyWage().Returns(180);
+
+        Assert.AreEqual(180, _sut.Build().RetinueWage);
+    }
+
+    [TestMethod]
+    public void Build_RetinueWageChange_IsADifferentModel_SoTheBoardRefreshes()
+    {
+        _playerParty.GetMainPartyDailyWage().Returns(180);
+        var before = _sut.Build();
+        _playerParty.GetMainPartyDailyWage().Returns(200);
+
+        Assert.AreNotEqual(before, _sut.Build());
+    }
+
+    [TestMethod]
+    public void TheBoardWriter_AppendsTheRetinueLine_OnlyWhenItCosts()
+    {
+        var src = RepoPaths.ReadSource("Main/Features/Enlistment/Presentation/ServiceStatusTextWriter.cs", stripComments: true);
+        StringAssert.Contains(src, "{=!}{PREVIOUS_LINES}{NEWLINE}{RETINUE_LINE}");
+        StringAssert.Contains(src, "RetinueCostText.Build(status.RetinueWage, status.DailyWage)");
+        StringAssert.Contains(src, "status.RetinueWage <= 0");
+        StringAssert.Contains(src, "SetTextVariable(\"ARREARS\", WithRetinueLine(ArrearsLine(status.DeferredWages), status))");
+    }
+
+    [TestMethod]
+    public void ThePartyAdapter_ReadsTheSameWageTheClanFinanceCharges_AndLogsAFailureOnce()
+    {
+        var src = RepoPaths.ReadSource("Main/Adapters/PlayerPartyAdapter.cs", stripComments: true);
+        var body = src.Substring(src.IndexOf("int GetMainPartyDailyWage", System.StringComparison.Ordinal));
+        body = body.Substring(0, body.IndexOf("bool GrantTroop", System.StringComparison.Ordinal));
+        StringAssert.Contains(body, "PartyBelongedTo?.TotalWage");
+        StringAssert.Contains(body, "wage > 0 ? wage : 0");
+        StringAssert.Contains(body, "if (!_wageFailureLogged)");
+        StringAssert.Contains(body, "_wageFailureLogged = true;");
+        StringAssert.Contains(body, "_wageFailureLogged = false;");
+    }
+
     // ---- the column line (#838) ----
 
     [TestMethod]
@@ -496,6 +555,7 @@ public class ServiceStatusModelEqualityTests
     [DataRow("nextRequirementTarget")]
     [DataRow("kitWaits")]
     [DataRow("columnText")]
+    [DataRow("retinueWage")]
     public void Equals_IsFalse_WhenAnySingleFieldDiffers(string field)
     {
         var other = new ServiceStatusModel(
@@ -514,7 +574,8 @@ public class ServiceStatusModelEqualityTests
             nextRequirementKey: field == "nextRequirementKey" ? "leadership" : "xp",
             nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350,
             kitWaits: field == "kitWaits",
-            columnText: field == "columnText" ? "Besieging Osgiliath." : null);
+            columnText: field == "columnText" ? "Besieging Osgiliath." : null,
+            retinueWage: field == "retinueWage" ? 90 : 0);
 
         Assert.IsFalse(Base().Equals(other), $"'{field}' is missing from Equals — its changes would never reach the screen");
     }
@@ -531,6 +592,7 @@ public class ServiceStatusModelEqualityTests
     [DataRow("nextRequirementTarget")]
     [DataRow("kitWaits")]
     [DataRow("columnText")]
+    [DataRow("retinueWage")]
     public void GetHashCode_Differs_WhenANewFieldDiffers(string field)
     {
         var other = new ServiceStatusModel(
@@ -543,7 +605,8 @@ public class ServiceStatusModelEqualityTests
             nextRequirementKey: field == "nextRequirementKey" ? "leadership" : "xp",
             nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350,
             kitWaits: field == "kitWaits",
-            columnText: field == "columnText" ? "Besieging Osgiliath." : null);
+            columnText: field == "columnText" ? "Besieging Osgiliath." : null,
+            retinueWage: field == "retinueWage" ? 90 : 0);
 
         Assert.AreNotEqual(Base().GetHashCode(), other.GetHashCode(), $"'{field}' is missing from GetHashCode");
     }

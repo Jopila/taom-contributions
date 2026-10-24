@@ -16,6 +16,8 @@ public class EnlistmentDialogGateServiceTests
     private IEnlistmentConfigProvider _config = null!;
     private EnlistmentDialogGateService _gate = null!;
     private IServiceHistoryService _history = null!;
+    private IPlayerPartyAdapter _playerParty = null!;
+    private IModLogger _logger = null!;
 
     [TestInitialize]
     public void Setup()
@@ -26,7 +28,9 @@ public class EnlistmentDialogGateServiceTests
         _config = Substitute.For<IEnlistmentConfigProvider>();
         _config.GetConfig().Returns(new EnlistmentCoreConfig());
         _history = Substitute.For<IServiceHistoryService>();
-        _gate = new EnlistmentDialogGateService(_store, _commander, _playerContext, _config, null, _history);
+        _playerParty = Substitute.For<IPlayerPartyAdapter>();
+        _logger = Substitute.For<IModLogger>();
+        _gate = new EnlistmentDialogGateService(_store, _commander, _playerContext, _config, null, _history, _playerParty, _logger);
 
         _commander.IsLord("lord_1_1").Returns(true);
         _commander.GetSnapshot("lord_1_1").Returns(new CommanderSnapshot(
@@ -153,6 +157,44 @@ public class EnlistmentDialogGateServiceTests
         _history.IsInDesertionCooldown("lord_1_1").Returns(true);
 
         Assert.AreEqual(EnlistGateResult.DesertedFromHim, _gate.CanEnlistWith("lord_1_1"));
+    }
+
+    // ---- the cost of his own men, stated in the oath question (#839) ----
+
+    [TestMethod]
+    public void OathRetinueCost_NoPaidMen_IsNothing_AndNeverAsksForTheWage()
+    {
+        _playerParty.GetMainPartyDailyWage().Returns(0);
+
+        Assert.AreEqual((0, 0), _gate.OathRetinueCost("lord_1_1"));
+        _history.DidNotReceiveWithAnyArgs().WageAtOath(default!, default!, default!);
+    }
+
+    [TestMethod]
+    public void OathRetinueCost_PaidMen_IsTheirCostAndTheWageTheOathWouldStartAt()
+    {
+        _playerParty.GetMainPartyDailyWage().Returns(180);
+        _playerParty.GetMainHeroId().Returns("main_hero");
+        _history.WageAtOath("lord_1_1", "main_hero", _commander.GetSnapshot("lord_1_1")).Returns(14);
+
+        Assert.AreEqual((180, 14), _gate.OathRetinueCost("lord_1_1"));
+    }
+
+    [TestMethod]
+    public void OathRetinueCost_WhenAReadThrows_IsNothing_AndLogsOnceUntilItSucceeds()
+    {
+        var failing = true;
+        _playerParty.GetMainPartyDailyWage().Returns(_ => failing ? throw new System.InvalidOperationException("boom") : 0);
+
+        Assert.AreEqual((0, 0), _gate.OathRetinueCost("lord_1_1"));
+        Assert.AreEqual((0, 0), _gate.OathRetinueCost("lord_1_1"));
+        _logger.Received(1).LogError(Arg.Any<string>());
+
+        failing = false;
+        _gate.OathRetinueCost("lord_1_1");
+        failing = true;
+        _gate.OathRetinueCost("lord_1_1");
+        _logger.Received(2).LogError(Arg.Any<string>());
     }
 
     [TestMethod]

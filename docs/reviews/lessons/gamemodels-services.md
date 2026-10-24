@@ -1293,3 +1293,12 @@ TAOM's own size hook kept the refill reachable.
   slot's "may it exist" check. A member such a caller can reach must keep answering for anything already alive (a live
   party, a built building) whatever a switch says; put the switch only on the member that creates new things.
 - **Source:** `docs/reviews/rca-keep-wardens-2026-10-23.md` finding 1.
+### A number shown to the player comes from the code that pays it, at the moment he decides (#839, 2026-10-24)
+The retinue cost line first read the rank wage table beside the payout, so the board promised pay on days the
+daily tick pays nothing, and it showed in a message after the oath, where the issue asked for the decision point.
+- **Why missed:** the builder implemented the plan's words ("on the oath line", "service pays M") and never
+  checked them against the reason the issue gave.
+- **Prevent:** for any figure on a board, tooltip or dialog, read it through the service that moves the money
+  (`IEnlistmentWagePreview`), not its table; put a cost the player weighs on the line where he can still decline,
+  and quote a value the following step grants from the same method that grants it.
+- **Source:** [rca-enlistment-retinue-cost-2026-10-24.md](../rca-enlistment-retinue-cost-2026-10-24.md) F1, F2.

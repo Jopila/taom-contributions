@@ -27,7 +27,7 @@ public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
     private const string WaitTextVariable = "TAOM_ENLISTMENT_WAIT_TEXT";
 
     /// <summary>Inline coin glyph. Shared by the wage and arrears lines so the two cannot diverge.</summary>
-    private const string CoinIcon = "<img src=\"General\\Icons\\Coin@2x\" extend=\"8\">";
+    internal const string CoinIcon = "<img src=\"General\\Icons\\Coin@2x\" extend=\"8\">";
 
     public void Write(ServiceStatusModel status)
     {
@@ -64,7 +64,7 @@ public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
         text.SetTextVariable("WAGE", status.DailyWage.ToString());
         text.SetTextVariable("COIN", CoinIcon);
         text.SetTextVariable("LADDER", LadderLine(status));
-        text.SetTextVariable("ARREARS", ArrearsLine(status.DeferredWages));
+        text.SetTextVariable("ARREARS", WithRetinueLine(ArrearsLine(status.DeferredWages), status));
         text.SetTextVariable("DUTY", WithKitLine(DutyLine(status.ActiveDutyId), status));
 
         MBTextManager.SetTextVariable(WaitTextVariable, text);
@@ -204,6 +204,20 @@ public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
         var line = new TextObject("{=taom_enlist_board_column}{NEWLINE}Column: {COLUMN}");
         line.SetTextVariable("COLUMN", status.ColumnText);
         combined.SetTextVariable("COLUMN_LINE", line);
+        return combined;
+    }
+
+    /// <summary>
+    /// Appends "Your own men cost N a day; service pays M." (#839) after the pay-owed line, by the same
+    /// composition as the kit line. Left out when he keeps no paid men.
+    /// </summary>
+    private static TextObject WithRetinueLine(TextObject previous, ServiceStatusModel status)
+    {
+        if (status.RetinueWage <= 0)
+            return previous;
+        var combined = new TextObject("{=!}{PREVIOUS_LINES}{NEWLINE}{RETINUE_LINE}");
+        combined.SetTextVariable("PREVIOUS_LINES", previous);
+        combined.SetTextVariable("RETINUE_LINE", RetinueCostText.Build(status.RetinueWage, status.DailyWage));
         return combined;
     }
 
