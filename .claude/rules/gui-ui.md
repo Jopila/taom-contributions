@@ -67,6 +67,8 @@ If ANY of these are true: **do NOT inject children into that container**. Use bo
 
 **Why:** the four checks above are the general rule and they stand. Any data-bound `ListPanel` whose contents vanilla indexes by position is unsafe to grow.
 
+`PrefabInsertPositionTests` fails a Child insert without its own Index or not on `/Children`, and an Append or Prepend on `/Children`.
+
 **Safe pattern:**
 ```
 [ViewModelMixin] → [DataSourceProperty] bindings

@@ -1060,6 +1060,8 @@ tab-bar art while its comment and doc said "last child". A Codex prompt had note
 - **Why missed:** "Child" was read as "append"; nobody opened `InsertAsChild`.
 - **Prevent:** every `InsertType.Child` patch states its position: `public override int Index => int.MaxValue;` to
   append, or an explicit index with a comment naming the sibling it must precede. Pin it in the feature's wiring test.
+  `PrefabInsertPositionTests.EveryInsertPatch_LandsWhereItsInsertTypeSays` fails a Child insert without its own Index,
+  a Child insert whose XPath does not end in `/Children`, and an Append or Prepend on `/Children`.
 - **Source:** `docs/reviews/rca-telchars-mark-2026-10-19.md` row 1.
 
 ### A "shown" flag is set by the code that wrote the text, never by the getter that formatted it
@@ -1127,8 +1129,11 @@ and outside the action buttons' gamepad navigation scope, while its comments and
   before (Telchar's Mark).
 - **Prevent:** to add a last child, select the parent's `Children` node, use `InsertType.Child` and
   `Index => int.MaxValue`. Use `Append` or `Prepend` only for a sibling, with a comment that names it. The
-  feature's prefab test asserts the type, the index and the XPath. A repo-wide gate over every
-  `PrefabExtensionInsertPatch` is proposed in the RCA.
+  feature's prefab test asserts the type, the index and the XPath. The repo-wide gate
+  `PrefabInsertPositionTests.EveryInsertPatch_LandsWhereItsInsertTypeSays` catches a Child without an Index, a Child not
+  on `/Children`, and an Append or Prepend on `/Children`. It would not have caught this defect (an Append on the
+  container itself, no `/Children`): whether an Append beside a container was meant to go inside it is intent, and
+  stays a reading check.
 - **Source:** `docs/reviews/rca-namegiving-2026-10-20.md` finding 1.
 
 ### A past-tense verb with the player as its subject, again (Long Memory, #865, 2026-10-21)

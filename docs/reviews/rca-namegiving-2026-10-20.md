@@ -30,9 +30,11 @@ The lessons exist; the step that reads them before the design does not. The repe
 - The briefs for the two remaining B10 features (#859, #860) list, for each engine event and each prefab insert they
   use, the lesson entry that covers it, and the architect reads `campaign-mechanics.md`, `state-lifecycle-save.md`
   and `localization-ui.md` before the brief.
-- A mechanical gate replaces the reading for the insert position: a test over every `PrefabExtensionInsertPatch` in
-  `TAOM.dll` that fails on an `Append` whose comment or name says "child", and on a `Child` without an `Index`
-  override. It is a follow-up on Mike's word, because it touches every existing patch.
+- A mechanical gate narrows the reading for the insert position: `PrefabInsertPositionTests.EveryInsertPatch_LandsWhereItsInsertTypeSays`,
+  a test over every `PrefabExtensionInsertPatch` in `TAOM.dll`. It fails a `Child` without an `Index` override, a `Child`
+  whose XPath does not end in `/Children`, and an `Append` or `Prepend` on `/Children`. It would not have caught finding 1
+  (an `Append` on the container itself): whether an `Append` beside a container was meant to go inside it is intent, and
+  stays a reading check.
 
 ## Why each lens caught or missed these
 
@@ -52,3 +54,19 @@ The lessons exist; the step that reads them before the design does not. The repe
 - `lessons/localization-ui.md`: UIExtenderEx `InsertType.Append` inserts a sibling, never a child.
 - `lessons/campaign-mechanics.md`: the clan kingdom-change entry gets this second occurrence and a design-time check.
 - `lessons/state-lifecycle-save.md`: the save-contract entry is widened to text the engine saves for TAOM.
+
+## Follow-ups (2026-10-23)
+
+- **Landed:** the insert-position gate (only `CareerEnergyBarPrefab` needed an edit: an explicit `Index => 0`, the default, so it still lands first, with a
+  comment), `ScreenFaultLog` in
+  `Main/Core/Logging`, shared by Reeve's Ledger and Namegiving (the Namegiving prompts included), and the lens 1 and lesson text for UIExtenderEx mixin constructors. A shared binding walk was built too, but another session landed
+  `TAOM.Tests/Infrastructure/PrefabBindingWalker.cs` on trunk first, so the follow-ups adopted it and dropped their own copy.
+  The difference left behind: trunk's walker returns a `{..}` to one fixed parent scope, so a `{..}` nested under two
+  `{Path}` steps resolves against the wrong scope. No TAOM prefab nests one; a follow-up on Mike's word.
+- **What the follow-ups review found in the follow-up itself:** the first gate told an author with an `Append` on
+  `/Children` to select the parent widget and use `InsertType.Child`, which lands beside that widget's `Children`
+  element (never loaded); it had no rule for a Child insert off `/Children`; its scope was not stated (it cannot see the
+  intent of an `Append` beside a container); and `lessons/gamemodels-services.md` still listed a mixin resolve as a
+  violation, contradicting the edited lens 1.
+- **Why:** the follow-up was built from this RCA's one-line proposal without re-reading `PrefabComponent` and
+  `WidgetTemplate`. The proposal named two mistakes; the engine code names three.

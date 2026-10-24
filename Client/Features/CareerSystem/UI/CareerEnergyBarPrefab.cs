@@ -27,6 +27,9 @@ internal class CareerEnergyBarPrefab : PrefabExtensionInsertPatch
 {
     public override InsertType Type => InsertType.Child;
 
+    // First child, as shipped: it draws under every vanilla sibling, including the lance and brace row (AgentStatus.xml:109) whose box overlaps the bar.
+    public override int Index => 0;
+
     [PrefabExtensionXmlDocument]
     public XmlDocument GetDocument()
     {

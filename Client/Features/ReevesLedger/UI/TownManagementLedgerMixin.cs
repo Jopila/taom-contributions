@@ -25,7 +25,7 @@ internal class TownManagementLedgerMixin : BaseViewModelMixin<TownManagementVM>
 {
     private readonly ReevesLedgerService? _service;
     private readonly IFiefLedgerAdapter? _fief;
-    private readonly LedgerFaultLog? _faults;
+    private readonly ScreenFaultLog? _faults;
     private readonly Settlement? _settlement;
     private readonly bool _enabled;
     private TownManagementDescriptionItemVM? _profitRow;
@@ -39,7 +39,7 @@ internal class TownManagementLedgerMixin : BaseViewModelMixin<TownManagementVM>
         try
         {
             // First, so a fault in anything below reaches the log.
-            _faults = new LedgerFaultLog(IoC.Resolve<IModLogger>());
+            _faults = new ScreenFaultLog(IoC.Resolve<IModLogger>(), "ReevesLedger");
             _service = IoC.Resolve<ReevesLedgerService>();
             _fief = IoC.Resolve<IFiefLedgerAdapter>();
             _settlement = Settlement.CurrentSettlement;

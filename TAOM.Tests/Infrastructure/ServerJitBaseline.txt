@@ -5,7 +5,7 @@
 # The list may only shrink. Never add a line: move the code to TAOM.Client behind a core seam (ADR-013), or mark a
 # Harmony patch class whose target or signature names a client assembly [ClientOnly] (gate 4). To prune: set
 # TAOM_WRITE_SERVER_JIT_BASELINE=1, run ServerJitGateTests.Baseline_Regenerate_WhenAsked, then lower MaxBaselineEntries.
-# Entries: 270 (methods scanned: 29694).
+# Entries: 269 (methods scanned: 30054).
 TAOM.Adapters.FiefLedgerAdapter::PatrolTooltip
 TAOM.Adapters.FiefNamingAdapter::MapActionBlockedReason
 TAOM.Adapters.FrontEndResourceAdapter::.cctor
@@ -227,7 +227,6 @@ TAOM.Features.PlayerSwitcher.UI.HeroPickItemVM::get_Banner_9
 TAOM.Features.PlayerSwitcher.UI.HeroPickItemVM::get_Visual
 TAOM.Features.PlayerSwitcher.UI.HeroPickItemVM::set_Banner_9
 TAOM.Features.PlayerSwitcher.UI.HeroPickItemVM::set_Visual
-TAOM.Features.ReevesLedger.UI.LedgerFaultLog::Lines
 TAOM.Features.ReevesLedger.UI.LedgerTooltips::AddMore
 TAOM.Features.ReevesLedger.UI.LedgerTooltips::Note
 TAOM.Features.ReevesLedger.UI.LedgerTooltips::Prisoners

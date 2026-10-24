@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
+using TAOM.Core.Logging;
 
 namespace TAOM.Features.Namegiving.UI;
 
@@ -10,19 +11,19 @@ namespace TAOM.Features.Namegiving.UI;
 /// The three prompts of a rename (docs/features/namegiving.md): a picker of the selected fief and its villages (each row shows its
 /// price; a row that cannot be renamed is disabled with its reason), a text box prefilled with the current name whose OK button
 /// is greyed with the reason while the name is invalid, and a confirmation. The last step asks <see cref="NamegivingService.Apply"/>,
-/// which re-checks every gate against the engine's state at that moment. Every callback runs inside a guard that reports to
-/// <c>onFault</c> (the mixin's log latch): they run from the inquiry popups, where a throw would take the popup down.
+/// which re-checks every gate against the engine's state at that moment. Every callback runs inside the mixin's
+/// <see cref="ScreenFaultLog"/> (one log line per site per screen): they run from the inquiry popups, where a throw would take the popup down.
 /// </summary>
 internal sealed class NamegivingPrompts
 {
     private readonly NamegivingService _service;
-    private readonly Action<string, Exception> _onFault;
+    private readonly ScreenFaultLog _faults;
     private readonly Action<string> _onRenamed;
 
-    internal NamegivingPrompts(NamegivingService service, Action<string, Exception> onFault, Action<string> onRenamed)
+    internal NamegivingPrompts(NamegivingService service, ScreenFaultLog faults, Action<string> onRenamed)
     {
         _service = service;
-        _onFault = onFault;
+        _faults = faults;
         _onRenamed = onRenamed;
     }
 
@@ -45,7 +46,7 @@ internal sealed class NamegivingPrompts
             maxSelectableOptionCount: 1,
             affirmativeText: GameTexts.FindText("str_ok").ToString(),
             negativeText: GameTexts.FindText("str_cancel").ToString(),
-            affirmativeAction: chosen => Guard("picker", () =>
+            affirmativeAction: chosen => _faults.Run("picker", () =>
             {
                 if (chosen != null && chosen.Count > 0 && chosen[0].Identifier is RenameTarget target)
                     AskName(fiefId, target);
@@ -64,7 +65,7 @@ internal sealed class NamegivingPrompts
             true,
             GameTexts.FindText("str_ok").ToString(),
             GameTexts.FindText("str_cancel").ToString(),
-            typed => Guard("name", () => Confirm(fiefId, target, typed)),
+            typed => _faults.Run("name", () => Confirm(fiefId, target, typed)),
             () => { },
             shouldInputBeObfuscated: false,
             textCondition: typed => Condition(typed, target.Name, others),
@@ -82,7 +83,7 @@ internal sealed class NamegivingPrompts
         }
         catch (Exception ex)
         {
-            _onFault("condition", ex);
+            _faults.LogOnce("condition", ex);
             return Tuple.Create(false, "");
         }
     }
@@ -96,7 +97,7 @@ internal sealed class NamegivingPrompts
             true,
             GameTexts.FindText("str_yes").ToString(),
             GameTexts.FindText("str_no").ToString(),
-            () => Guard("apply", () => Apply(fiefId, target, typed)),
+            () => _faults.Run("apply", () => Apply(fiefId, target, typed)),
             () => { }));
     }
 
@@ -113,17 +114,5 @@ internal sealed class NamegivingPrompts
         var why = result.Problem != NameProblem.None ? NamegivingTexts.Problem(result.Problem) : NamegivingTexts.Block(result.Block, result.Detail);
         if (why.Length > 0)
             InformationManager.DisplayMessage(new InformationMessage(why));
-    }
-
-    private void Guard(string site, Action action)
-    {
-        try
-        {
-            action();
-        }
-        catch (Exception ex)
-        {
-            _onFault(site, ex);
-        }
     }
 }

@@ -137,9 +137,9 @@ public class NamegivingWiringTests
         Assert.IsFalse(Regex.IsMatch(src, @"catch\s*(\{|\(Exception\s*\))"), "a catch without a variable cannot log the cause");
         Assert.IsFalse(Regex.IsMatch(src, @"catch[^{]*\{\s*\}"), "an empty catch");
         StringAssert.Contains(src, "LogOnce(");
-        Assert.IsTrue(Regex.IsMatch(src, @"Guard\(""refresh"""), "the refresh runs inside the guard");
-        Assert.IsTrue(Regex.IsMatch(src, @"Guard\(""selection"""), "the selection handler runs inside the guard");
-        Assert.IsTrue(Regex.IsMatch(src, @"Guard\(""click"""), "the click runs inside the guard");
+        Assert.IsTrue(Regex.IsMatch(src, @"_faults\?\.Run\(""refresh"""), "the refresh runs inside the guard");
+        Assert.IsTrue(Regex.IsMatch(src, @"_faults\?\.Run\(""selection"""), "the selection handler runs inside the guard");
+        Assert.IsTrue(Regex.IsMatch(src, @"_faults\?\.Run\(""click"""), "the click runs inside the guard");
     }
 
     [TestMethod]
@@ -147,10 +147,10 @@ public class NamegivingWiringTests
     {
         var src = Mixin();
         var firstResolve = src.IndexOf("IoC.Resolve<", System.StringComparison.Ordinal);
-        var logger = src.IndexOf("_logger = IoC.Resolve<IModLogger>();", System.StringComparison.Ordinal);
+        var logger = src.IndexOf("_faults = new ScreenFaultLog(IoC.Resolve<IModLogger>(), \"Namegiving\");", System.StringComparison.Ordinal);
 
         Assert.IsTrue(logger >= 0);
-        Assert.AreEqual(logger + "_logger = ".Length, firstResolve, "the logger is the first resolve");
+        Assert.AreEqual(logger + "_faults = new ScreenFaultLog(".Length, firstResolve, "the logger is the first resolve");
     }
 
     [TestMethod]
@@ -198,7 +198,11 @@ public class NamegivingWiringTests
         var src = RepoPaths.ReadSource("Main/Features/Namegiving/UI/NamegivingPrompts.cs", stripComments: true);
 
         Assert.IsTrue(Regex.IsMatch(src, @"catch \(Exception ex\)"));
-        StringAssert.Contains(src, "_onFault(");
+        Assert.IsTrue(Regex.IsMatch(src, @"_faults\.Run\(""picker"""), "the picker callback runs inside the shared fault log");
+        Assert.IsTrue(Regex.IsMatch(src, @"_faults\.Run\(""name"""), "the text box callback runs inside the shared fault log");
+        Assert.IsTrue(Regex.IsMatch(src, @"_faults\.Run\(""apply"""), "the confirmation callback runs inside the shared fault log");
+        StringAssert.Contains(src, "_faults.LogOnce(\"condition\", ex)");
+        Assert.IsFalse(src.Contains("Guard("), "no private guard beside the shared fault log");
         Assert.IsFalse(Regex.IsMatch(src, @"catch\s*(\{|\(Exception\s*\))"), "a catch without a variable cannot log the cause");
     }
 

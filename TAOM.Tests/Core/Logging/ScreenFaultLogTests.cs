@@ -2,21 +2,20 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Core.Logging;
-using TAOM.Features.ReevesLedger.UI;
 
-namespace TAOM.Tests.Features.ReevesLedger;
+namespace TAOM.Tests.Core.Logging;
 
 [TestClass]
-public class LedgerFaultLogTests
+public class ScreenFaultLogTests
 {
     private IModLogger _logger = null!;
-    private LedgerFaultLog _sut = null!;
+    private ScreenFaultLog _sut = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _logger = Substitute.For<IModLogger>();
-        _sut = new LedgerFaultLog(_logger);
+        _sut = new ScreenFaultLog(_logger, "Probe");
     }
 
     [TestMethod]
@@ -37,6 +36,33 @@ public class LedgerFaultLogTests
     }
 
     [TestMethod]
+    public void TheTag_FollowsTheConstructor_AndTheLineSaysLoggedOnce()
+    {
+        new ScreenFaultLog(_logger, "Namegiving").Run("click", () => throw new InvalidOperationException("boom"));
+
+        _logger.Received(1).LogError(Arg.Is<string>(m => m.StartsWith("[Namegiving] click threw.") && m.Contains("This line is logged once and later calls still run.") && !m.Contains("per screen")));
+    }
+
+    [TestMethod]
+    public void Condition_ReturnsFalseOnAThrow_AndLogsOncePerSite()
+    {
+        for (var i = 0; i < 3; i++)
+            Assert.IsFalse(_sut.Condition("offer", () => throw new InvalidOperationException("boom")));
+        Assert.IsFalse(_sut.Condition("tier", () => throw new InvalidOperationException("bang")));
+
+        _logger.Received(1).LogError(Arg.Is<string>(m => m.Contains("offer") && m.Contains("boom")));
+        _logger.Received(2).LogError(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void Condition_PassesTheAnswerThrough()
+    {
+        Assert.IsTrue(_sut.Condition("a", () => true));
+        Assert.IsFalse(_sut.Condition("b", () => false));
+        _logger.DidNotReceive().LogError(Arg.Any<string>());
+    }
+
+    [TestMethod]
     public void ADifferentSite_StillLogs()
     {
         _sut.Run("refresh", () => throw new InvalidOperationException("a"));
@@ -48,7 +74,7 @@ public class LedgerFaultLogTests
     [TestMethod]
     public void Lines_And_Text_ReturnEmptyOnAThrow()
     {
-        Assert.AreEqual(0, _sut.Lines("tip", () => throw new InvalidOperationException()).Count);
+        Assert.AreEqual(0, _sut.Lines<string>("tip", () => throw new InvalidOperationException()).Count);
         Assert.AreEqual("", _sut.Text("patrol", () => throw new InvalidOperationException()));
         Assert.AreEqual("ok", _sut.Text("patrol2", () => "ok"));
         _logger.Received(2).LogError(Arg.Any<string>());

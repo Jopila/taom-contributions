@@ -183,10 +183,10 @@ public class ReevesLedgerWiringTests
         {
             var src = Mixin(file);
             var firstResolve = src.IndexOf("IoC.Resolve<", StringComparison.Ordinal);
-            var logLine = src.IndexOf("_faults = new LedgerFaultLog(IoC.Resolve<IModLogger>());", StringComparison.Ordinal);
+            var logLine = src.IndexOf("_faults = new ScreenFaultLog(IoC.Resolve<IModLogger>(), \"ReevesLedger\");", StringComparison.Ordinal);
 
             Assert.IsTrue(logLine >= 0, file);
-            Assert.AreEqual(logLine + "_faults = new LedgerFaultLog(".Length, firstResolve, file + ": the fault log is the first resolve");
+            Assert.AreEqual(logLine + "_faults = new ScreenFaultLog(".Length, firstResolve, file + ": the fault log is the first resolve");
         }
     }
 
@@ -248,6 +248,6 @@ public class ReevesLedgerWiringTests
 
     private static string Mixin(string file) => RepoPaths.ReadSource("Client/Features/ReevesLedger/UI/" + file, stripComments: true);
 
-    // LedgerTooltips and LedgerFaultLog stay in core (they load headless); the mixins and prefabs live in TAOM.Client.
+    // LedgerTooltips stays in core and the fault log is Main/Core/Logging/ScreenFaultLog (both load headless); the mixins and prefabs live in TAOM.Client.
     private static string CoreUi(string file) => RepoPaths.ReadSource("Main/Features/ReevesLedger/UI/" + file, stripComments: true);
 }

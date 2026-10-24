@@ -31,7 +31,7 @@ The Reeve's Ledger adds six extras to the town management window, the one you op
 - **Step buttons.** `ReserveStepMixin` is `[ViewModelMixin("ExecuteConfirm")]` on `TownManagementReserveControlVM`. A press plans the step from the view model's own figures, `PlanReserveStep(vm.CurrentReserveAmount, vm.MaxReserveAmount, direction)` (`MaxReserveAmount` is vanilla's smaller of the purse and 10,000; +10K adds the smallest of 10,000, that figure and the room below `int.MaxValue`; -10K takes the smaller of 10,000 and the reserve). It then sets `CurrentGivenAmount = 0`, `CurrentReserveAmount = target` and runs the view model's own `ExecuteConfirm`, in that order. The confirm passes `CurrentReserveAmount + CurrentGivenAmount` to `BuildingHelper.BoostBuildingProcessWithGold`, which charges the purse for a rise and refunds the difference for a fall, so -10K refunds in full and never costs a penalty; it then refreshes the reserve texts and fires the vanilla callback that rebuilds the stat rows. The mixin checks the reserve equals the target afterwards and logs once if not. The +10K button is disabled with no gold and -10K with an empty reserve.
 - **Single-player only.** Both buttons write the world, so they show and work only while `MayWriteWorld` holds (`!IsSessionActive && !ShouldDeferToHost && !IsDedicatedServer && IsAuthority`, the same predicate as From the Ashes). The title, rows and icons only read, so they need no gate. See [coop-interop.md](coop-interop.md).
 - **Hints.** Each button is built in the shape of vanilla's governor button (SandBox `TownManagement.xml` lines 105-111): a fixed 80 x 44 wrapper `Widget` carrying the id, alignment, offset and visibility, with its own `HintWidget` (the disabled hint, empty while the button is enabled) beside a `ButtonWidget` that stretches to the wrapper and holds its own `HintWidget` for the enabled state. Gauntlet never hovers a disabled widget, so a hint inside the disabled button could never say why it is disabled. The four hint view models and the two icon tooltips are created once and their text or callback is updated in place on each refresh.
-- **Guards.** Every member the engine calls (the two constructors, both refreshes, both clicks, all four tooltip functions) runs inside `LedgerFaultLog`, which logs one line per call site and swallows the throw (later calls still run); a failed constructor leaves the mixin disabled rather than taking the window down. Each constructor builds the fault log first, so a fault in any later resolve is logged.
+- **Guards.** Every member the engine calls (the two constructors, both refreshes, both clicks, all four tooltip functions) runs inside `ScreenFaultLog` (`Main/Core/Logging`, shared with Namegiving), which logs one line per call site and swallows the throw (later calls still run); a failed constructor leaves the mixin disabled rather than taking the window down. Each constructor builds the fault log first, so a fault in any later resolve is logged.
 - **The switches.** `EnableReevesLedger` (title, rows, icons) and `EnableReserveSteps` (the buttons) sit in the MCM group "Fief Management/Reeve's Ledger", both default on. Each is read once, in the mixin's constructor, so an edit applies the next time the window opens. `ReevesLedgerSettingsProvider` is a concrete class, resolved directly: it has one implementer and no test fakes it.
 - **The F6 swap.** The F6 window reads the right fief only because `GauntletFiefManagementScreen` swaps `Settlement.CurrentSettlement` for the screen's whole lifetime; the step buttons read it at click time through the reserve view model's confirm. See [fief-management.md](fief-management.md).
 
@@ -43,7 +43,7 @@ TaomSettings.EnableReevesLedger / EnableReserveSteps ─ ReevesLedgerSettingsPro
 TownManagementVM ── TownManagementLedgerMixin ──┬── ReevesLedgerService ◄── ICoopSessionProvider, IDedicatedServerProvider
   (RefreshTownManagementStats)                  │         ▲
                                                 ├── IFiefLedgerAdapter ── Campaign.Current.Models, Settlement
-                                                └── LedgerTooltips, LedgerFaultLog
+                                                └── LedgerTooltips, ScreenFaultLog
 TownManagementReserveControlVM ── ReserveStepMixin ──┬── ReevesLedgerService
   (ExecuteConfirm)                                   └── the view model's own ExecuteConfirm ── BuildingHelper.BoostBuildingProcessWithGold
 TownManagement.xml ◄── ReevesLedgerIconsPrefab (after Consumptions), ReserveStepButtonsPrefab (after ReserveListPanel)
@@ -71,7 +71,7 @@ Both are excluded from the co-op settings fingerprint: the first is presentation
 | `Client/Features/ReevesLedger/UI/TownManagementLedgerMixin.cs` | title, rows and icon tooltips |
 | `Client/Features/ReevesLedger/UI/ReserveStepMixin.cs` | the two buttons |
 | `Main/Features/ReevesLedger/UI/LedgerTooltips.cs` | the three tooltips as tooltip property lists |
-| `Main/Features/ReevesLedger/UI/LedgerFaultLog.cs` | the guard and the once-per-site log |
+| `Main/Core/Logging/ScreenFaultLog.cs` | the guard and the once-per-site log (shared) |
 | `Client/Features/ReevesLedger/UI/ReevesLedgerIconsPrefab.cs`, `ReserveStepButtonsPrefab.cs` | the two insertions into the `TownManagement` movie |
 | `Main/Adapters/IFiefLedgerAdapter.cs`, `FiefLedgerAdapter.cs` | profit inputs, stash, prisoners, patrol |
 | `Main/Features/TaomSettings.cs` | `EnableReevesLedger`, `EnableReserveSteps` |
@@ -91,7 +91,7 @@ Both are excluded from the co-op settings fingerprint: the first is presentation
 - `TAOM.Tests/Features/ReevesLedger/FiefLedgerAdapterPinTests.cs` (6): source pins (never `applyWithdrawals: true`, the model slots, the patrol null guard, the list reads).
 - `TAOM.Tests/Features/ReevesLedger/ReevesLedgerWiringTests.cs` (19): the module line, the container graph, the 150-line cap, the guard and latch on every engine-called member, the fault log built first, one settings read per mixin, the confirm order, the two `MayWriteWorld` reads, no slider write but zero, no `IReserveAdapter`, tooltips and hints created once, the vanilla label keys.
 - `TAOM.Tests/Features/ReevesLedger/ReevesLedgerPrefabTests.cs` (7): every binding, command and data source in the inserted XML resolves (read from attribute metadata, constructing nothing); each step button is a wrapper whose hint sits outside the button; both brushes and both sprites exist.
-- `TAOM.Tests/Features/ReevesLedger/ReevesLedgerTextsTests.cs` (8, tagged `RequiresGame`: it builds `TextObject`s), `LedgerFaultLogTests.cs` (5), `ReevesLedgerSettingsProviderTests.cs` (5).
+- `TAOM.Tests/Features/ReevesLedger/ReevesLedgerTextsTests.cs` (8, tagged `RequiresGame`: it builds `TextObject`s), `TAOM.Tests/Core/Logging/ScreenFaultLogTests.cs` (8), `ReevesLedgerSettingsProviderTests.cs` (5).
 - `TAOM.Tests/Migration/ViewModelMixinBindingTests.cs` (2, one of them a `BindingVerification` gate): every `[ViewModelMixin("X")]` in TAOM names a method that exists on its target view model.
 - `CampaignHotPathSettingsProvidersTests`, `SettingsFingerprintTests`: the lazy accessor and the setting counts.
 

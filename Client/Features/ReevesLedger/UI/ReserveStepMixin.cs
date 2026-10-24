@@ -25,7 +25,7 @@ namespace TAOM.Features.ReevesLedger.UI;
 internal class ReserveStepMixin : BaseViewModelMixin<TownManagementReserveControlVM>
 {
     private readonly ReevesLedgerService? _service;
-    private readonly LedgerFaultLog? _faults;
+    private readonly ScreenFaultLog? _faults;
     private readonly bool _enabled;
     private readonly TextObject _addNone = new("{=taom_reeve_add_none}You have no gold to add.");
     private readonly TextObject _withdrawNone = new("{=taom_reeve_withdraw_none}The reserve is empty.");
@@ -38,7 +38,7 @@ internal class ReserveStepMixin : BaseViewModelMixin<TownManagementReserveContro
         try
         {
             // First, so a fault in anything below reaches the log.
-            _faults = new LedgerFaultLog(IoC.Resolve<IModLogger>());
+            _faults = new ScreenFaultLog(IoC.Resolve<IModLogger>(), "ReevesLedger");
             _service = IoC.Resolve<ReevesLedgerService>();
             _enabled = IoC.Resolve<ReevesLedgerSettingsProvider>().StepsEnabled;
             AddReserveStepText = new TextObject("{=taom_reeve_add}+10K").ToString();

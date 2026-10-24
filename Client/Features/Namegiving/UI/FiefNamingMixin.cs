@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Bannerlord.UIExtenderEx.Attributes;
 using Bannerlord.UIExtenderEx.ViewModels;
@@ -25,9 +24,8 @@ internal class FiefNamingMixin : BaseViewModelMixin<KingdomManagementVM>
 {
     private readonly NamegivingService? _service;
     private readonly NamegivingPrompts? _prompts;
-    private readonly IModLogger? _logger;
+    private readonly ScreenFaultLog? _faults;
     private readonly KingdomSettlementVM? _settlements;
-    private readonly HashSet<string> _logged = new(StringComparer.Ordinal);
     private bool _isVisible, _canRename;
     private int _cost;
 
@@ -36,9 +34,9 @@ internal class FiefNamingMixin : BaseViewModelMixin<KingdomManagementVM>
         try
         {
             // First, so a later fault reaches the log.
-            _logger = IoC.Resolve<IModLogger>();
+            _faults = new ScreenFaultLog(IoC.Resolve<IModLogger>(), "Namegiving");
             _service = IoC.Resolve<NamegivingService>();
-            _prompts = new NamegivingPrompts(_service, LogOnce, Renamed);
+            _prompts = new NamegivingPrompts(_service, _faults, Renamed);
             RenameText = NamegivingTexts.Button().ToString();
             RenameHint.HintText = new TextObject("{=!}" + NamegivingTexts.PickBody());
             _settlements = viewModel.Settlement;
@@ -47,7 +45,7 @@ internal class FiefNamingMixin : BaseViewModelMixin<KingdomManagementVM>
         }
         catch (Exception ex)
         {
-            LogOnce("constructor", ex); // a throw here would take the kingdom screen down
+            _faults?.LogOnce("constructor", ex); // a throw here would take the kingdom screen down
         }
     }
 
@@ -82,7 +80,7 @@ internal class FiefNamingMixin : BaseViewModelMixin<KingdomManagementVM>
     [DataSourceProperty]
     public HintViewModel RenameDisabledHint { get; } = new();
 
-    public override void OnRefresh() => Guard("refresh", Refresh);
+    public override void OnRefresh() => _faults?.Run("refresh", Refresh);
 
     public override void OnFinalize()
     {
@@ -91,7 +89,7 @@ internal class FiefNamingMixin : BaseViewModelMixin<KingdomManagementVM>
     }
 
     [DataSourceMethod]
-    public void ExecuteRenameFief() => Guard("click", () =>
+    public void ExecuteRenameFief() => _faults?.Run("click", () =>
     {
         var id = SelectedFiefId();
         if (id != null) _prompts?.Start(id);
@@ -100,7 +98,7 @@ internal class FiefNamingMixin : BaseViewModelMixin<KingdomManagementVM>
     private void OnSettlementChanged(object sender, PropertyChangedWithValueEventArgs e)
     {
         if (e.PropertyName == "CurrentSelectedSettlement")
-            Guard("selection", Refresh);
+            _faults?.Run("selection", Refresh);
     }
 
     private string? SelectedFiefId() => _settlements?.CurrentSelectedSettlement?.Settlement?.StringId;
@@ -127,23 +125,5 @@ internal class FiefNamingMixin : BaseViewModelMixin<KingdomManagementVM>
         }
 
         Refresh();
-    }
-
-    private void Guard(string site, Action action)
-    {
-        try
-        {
-            action();
-        }
-        catch (Exception ex)
-        {
-            LogOnce(site, ex);
-        }
-    }
-
-    private void LogOnce(string site, Exception ex)
-    {
-        if (_logged.Add(site))
-            _logger?.LogError($"[Namegiving] {site} threw. This line is logged once per screen and later calls still run. Root cause: {ex}");
     }
 }
