@@ -128,4 +128,4 @@ A bare postfix with no strength check (a weak lord would walk into a siege that 
 ## GitHub Issue
 
 - **Issue:** #872, [Help Unlooked-For: lords strong enough stop fleeing from sieges](https://github.com/haterade22/TAOM/issues/872)
-- **Status:** Open. In-game checks owed.
+- **Status:** Shipped on `bannerlord-1.5.x` in `d07ea836b` (v2.0.35). Issue open: the in-game checks are owed.

@@ -225,7 +225,7 @@ MSTest with NSubstitute and hand-written fakes, in `TAOM.Tests/Features/Watchful
 ## GitHub Issue
 
 - **Issue:** #822, Watchful Holds: hostile castles and towns harass passing lord parties
-- **Status:** Open
+- **Status:** Shipped on `bannerlord-1.5.x` in `af66af81f` (v2.0.35). Issue open: the in-game check, the two balance runs and the translation of its one key (#763) are owed.
 
 ---
 

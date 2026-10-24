@@ -162,7 +162,7 @@ Single-player only. `HoldTheWallsService` reads `ICoopSessionProvider.IsSessionA
 ## GitHub Issue
 
 - **Issue:** #871, Hold the Walls: Good armies hold a fortress they just captured
-- **Status:** Open
+- **Status:** Shipped on `bannerlord-1.5.x` in `1e04de50a` (v2.0.35). Issue open: the in-game check and the balance runs are owed.
 
 ---
 

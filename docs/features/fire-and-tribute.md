@@ -195,7 +195,7 @@ MSTest with NSubstitute and a hand-written engine fake, in `TAOM.Tests/Features/
 ## GitHub Issue
 
 - **Issue:** #870, Fire and Tribute: raiding hosts for Good, Neutral and Evil, with a tribute envoy
-- **Status:** Open (slices 1 and 2 built; in-game checks and translation owed)
+- **Status:** Shipped on `bannerlord-1.5.x` (slice 1 `21e0807f9`, slice 2 the envoy `c3246f607`, v2.0.35). Issue open: the in-game checks, balance runs, the MapPerf budget check and the translation of its 35 keys (#763) are owed.
 
 ---
 
