@@ -290,5 +290,6 @@
     <string id="taom_enlist_refused_deserter" text="{COMMANDER} remembers your desertion and will not take your oath." />
     <string id="taom_enlist_desert_memory" text="Your commander will not take your oath again for a time, and this term will count for nothing if you return." />
     <string id="taom_enlist_desert_memory_reply" text="(My commander will not take my oath again for a time, and this term will count for nothing.)" />
+    <string id="taom_enlist_board_column" text="{NEWLINE}Column: {COLUMN}" />
   </strings>
 </base>

@@ -55,7 +55,7 @@ public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
         var text = new TextObject(
             "{=taom_enlist_wait_board_v2}{ACTIVITY}{NEWLINE}{NEWLINE}Rank: {RANK} · {SECTION}{NEWLINE}Days served: {DAYS} · Standing: {TRUST}{NEWLINE}Service record: {XP} XP · Daily pay: {WAGE}{COIN}{LADDER}{ARREARS}{DUTY}");
 
-        text.SetTextVariable("ACTIVITY", ActivityLine(status));
+        text.SetTextVariable("ACTIVITY", WithColumnLine(ActivityLine(status), status));
         text.SetTextVariable("RANK", ServiceVocabulary.RankName(status.Rank));
         text.SetTextVariable("SECTION", ServiceVocabulary.SectionName(status.Assignment));
         text.SetTextVariable("DAYS", status.DaysServed.ToString());
@@ -188,6 +188,22 @@ public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
         var combined = new TextObject("{=!}{DUTY_LINE}{KIT_LINE}");
         combined.SetTextVariable("DUTY_LINE", duty);
         combined.SetTextVariable("KIT_LINE", new TextObject("{=taom_enlist_board_kit}{NEWLINE}Kit to draw: the quartermaster holds gear for your rank."));
+        return combined;
+    }
+
+    /// <summary>
+    /// Appends the "Column:" line (#838), the commander party's own engine text, under the activity
+    /// sentence, by the same composition as the kit line, so the registered board template still does not change.
+    /// </summary>
+    private static TextObject WithColumnLine(TextObject previous, ServiceStatusModel status)
+    {
+        if (string.IsNullOrEmpty(status.ColumnText))
+            return previous;
+        var combined = new TextObject("{=!}{PREVIOUS_LINES}{COLUMN_LINE}");
+        combined.SetTextVariable("PREVIOUS_LINES", previous);
+        var line = new TextObject("{=taom_enlist_board_column}{NEWLINE}Column: {COLUMN}");
+        line.SetTextVariable("COLUMN", status.ColumnText);
+        combined.SetTextVariable("COLUMN_LINE", line);
         return combined;
     }
 

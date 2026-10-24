@@ -10,6 +10,7 @@ namespace TAOM.Adapters;
 public sealed class CommanderLordAdapter : ICommanderLordAdapter
 {
     private readonly IModLogger _logger;
+    private bool _behaviorTextFailureLogged;
 
     public CommanderLordAdapter(IModLogger logger)
     {
@@ -88,6 +89,27 @@ public sealed class CommanderLordAdapter : ICommanderLordAdapter
             _lastMapEventToken = _nextMapEventToken++;
         }
         return _lastMapEventToken;
+    }
+
+    public string GetPartyBehaviorText(string heroId)
+    {
+        try
+        {
+            // MobileParty.GetBehaviorText is the text the vanilla party tooltip shows.
+            var text = FindHero(heroId)?.PartyBelongedTo?.GetBehaviorText()?.ToString();
+            _behaviorTextFailureLogged = false;
+            return text;
+        }
+        catch (Exception ex)
+        {
+            // Read every board refresh: log a failure once, then stay quiet until a read succeeds.
+            if (!_behaviorTextFailureLogged)
+            {
+                _behaviorTextFailureLogged = true;
+                _logger?.LogError($"[Enlistment] CommanderLordAdapter.GetPartyBehaviorText('{heroId}') failed: {ex.Message}");
+            }
+            return null;
+        }
     }
 
     public CommanderTickSnapshot GetTickSnapshot(string heroId)

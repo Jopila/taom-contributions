@@ -30,7 +30,8 @@ public interface IServiceStatusService
 
     /// <summary>
     /// Rebuild and push the menu text if anything changed. Cheap on the unchanged path — one
-    /// snapshot read and a value comparison, no allocation of a TextObject.
+    /// snapshot read, one behaviour text render (a hero lookup and a few TextObjects) and a value
+    /// comparison; no TextObject is built for the board itself.
     /// </summary>
     bool RefreshIfChanged();
 
@@ -102,7 +103,11 @@ public class ServiceStatusService : IServiceStatusService
             nextRank: showLadder ? promotion.ToRank : (ServiceRank?)null,
             nextRequirementKey: showLadder ? promotion.MostBindingUnmetKey : null,
             nextRequirementTarget: showLadder ? promotion.MostBindingUnmetTarget : 0,
-            kitWaits: Equipment.EnlistmentKitTiers.KitWaits(content.Rank, _ledger));
+            kitWaits: Equipment.EnlistmentKitTiers.KitWaits(content.Rank, _ledger),
+            // Left out in a settlement: the engine blanks this text there and the activity line already says where he is.
+            columnText: commander.HasParty && !commander.PartyIsInSettlement
+                ? _commander.GetPartyBehaviorText(record.CommanderHeroId)
+                : null);
     }
 
     /// <summary>

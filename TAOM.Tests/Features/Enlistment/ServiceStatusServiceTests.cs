@@ -9,6 +9,7 @@ using TAOM.Features.Enlistment.Domain;
 using TAOM.Features.Enlistment.Hooks;
 
 using TAOM.Features.Enlistment.Presentation;
+using TAOM.Tests.Infrastructure;
 namespace TAOM.Tests.Features.Enlistment;
 
 /// <summary>
@@ -364,6 +365,89 @@ public class ServiceStatusServiceTests
         Assert.IsFalse(_sut.Build().KitWaits);
     }
 
+    // ---- the column line (#838) ----
+
+    [TestMethod]
+    public void Build_ColumnText_IsTheAdaptersBehaviourTextForTheCommander()
+    {
+        _commander.GetPartyBehaviorText("lord_1").Returns("Besieging Osgiliath.");
+
+        Assert.AreEqual("Besieging Osgiliath.", _sut.Build().ColumnText);
+    }
+
+    [TestMethod]
+    public void Build_NoColumnText_WhenTheAdapterHasNone()
+    {
+        _commander.GetPartyBehaviorText("lord_1").Returns((string)null);
+
+        Assert.IsNull(_sut.Build().ColumnText);
+    }
+
+    [TestMethod]
+    public void Build_NoParty_NeverAsksForTheColumnText()
+    {
+        _commander.GetSnapshot("lord_1").Returns(new CommanderSnapshot(exists: true, isAlive: true, name: "Boromir"));
+        _commander.GetPartyBehaviorText("lord_1").Returns("Besieging Osgiliath.");
+
+        Assert.IsNull(_sut.Build().ColumnText);
+        _commander.DidNotReceive().GetPartyBehaviorText(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void Build_CommanderInASettlement_LeavesTheColumnLineOut()
+    {
+        Commander(settlementId: "town_1", settlementName: "Minas Tirith");
+        _commander.GetPartyBehaviorText("lord_1").Returns("The column rests inside Minas Tirith.");
+
+        Assert.IsNull(_sut.Build().ColumnText, "the settlement line already says where he is");
+        _commander.DidNotReceive().GetPartyBehaviorText(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void Build_ColumnTextChange_IsADifferentModel_SoTheBoardRefreshes()
+    {
+        _commander.GetPartyBehaviorText("lord_1").Returns("Besieging Osgiliath.");
+        var before = _sut.Build();
+        _commander.GetPartyBehaviorText("lord_1").Returns("Travelling to Minas Tirith.");
+
+        Assert.AreNotEqual(before, _sut.Build());
+    }
+
+    [TestMethod]
+    public void TheBoardWriter_AppendsTheColumnLine_OnlyWhenThereIsText_WithoutChangingTheBoardTemplate()
+    {
+        var src = RepoPaths.ReadSource("Main/Features/Enlistment/Presentation/ServiceStatusTextWriter.cs", stripComments: true);
+        StringAssert.Contains(src, "{=taom_enlist_board_column}{NEWLINE}Column: {COLUMN}");
+        StringAssert.Contains(src, "ColumnText");
+        StringAssert.Contains(src, "string.IsNullOrEmpty(status.ColumnText)");
+        StringAssert.Contains(src, "SetTextVariable(\"ACTIVITY\", WithColumnLine(ActivityLine(status), status))");
+        StringAssert.Contains(src, "SetTextVariable(\"DUTY\", WithKitLine(DutyLine(status.ActiveDutyId), status))");
+        StringAssert.Contains(src, "{ACTIVITY}{NEWLINE}{NEWLINE}Rank: {RANK} · {SECTION}{NEWLINE}Days served: {DAYS} · Standing: {TRUST}{NEWLINE}Service record: {XP} XP · Daily pay: {WAGE}{COIN}{LADDER}{ARREARS}{DUTY}\"");
+    }
+
+    [TestMethod]
+    public void TheTickSnapshot_CarriesNoBehaviourText()
+    {
+        var src = RepoPaths.ReadSource("Main/Adapters/CommanderLordAdapter.cs", stripComments: true);
+        var tick = src.Substring(src.IndexOf("GetTickSnapshot(string", System.StringComparison.Ordinal));
+        tick = tick.Substring(0, tick.IndexOf("catch", System.StringComparison.Ordinal));
+        Assert.IsFalse(tick.Contains("GetBehaviorText"), "the tick snapshot and the reconciler never pay for this render; only the board's 2-second status tier renders one behaviour text");
+        var full = src.Substring(src.IndexOf("CommanderSnapshot GetSnapshot(string", System.StringComparison.Ordinal));
+        full = full.Substring(0, full.IndexOf("string GetPartyBehaviorText", System.StringComparison.Ordinal));
+        Assert.IsFalse(full.Contains("GetBehaviorText"), "GetSnapshot renders names but never the behaviour text");
+    }
+
+    [TestMethod]
+    public void TheAdapterLogsABehaviourTextFailureOnce_UntilTheNextSuccessfulRead()
+    {
+        var src = RepoPaths.ReadSource("Main/Adapters/CommanderLordAdapter.cs", stripComments: true);
+        var body = src.Substring(src.IndexOf("string GetPartyBehaviorText", System.StringComparison.Ordinal));
+        body = body.Substring(0, body.IndexOf("GetTickSnapshot", System.StringComparison.Ordinal));
+        StringAssert.Contains(body, "if (!_behaviorTextFailureLogged)");
+        StringAssert.Contains(body, "_behaviorTextFailureLogged = true;");
+        StringAssert.Contains(body, "_behaviorTextFailureLogged = false;");
+    }
+
     [TestMethod]
     public void Build_NothingDrawnYet_KitWaits()
     {
@@ -411,6 +495,7 @@ public class ServiceStatusModelEqualityTests
     [DataRow("nextRequirementKey")]
     [DataRow("nextRequirementTarget")]
     [DataRow("kitWaits")]
+    [DataRow("columnText")]
     public void Equals_IsFalse_WhenAnySingleFieldDiffers(string field)
     {
         var other = new ServiceStatusModel(
@@ -428,7 +513,8 @@ public class ServiceStatusModelEqualityTests
             nextRank: field == "nextRank" ? ServiceRank.StaffSergeant : ServiceRank.Sergeant,
             nextRequirementKey: field == "nextRequirementKey" ? "leadership" : "xp",
             nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350,
-            kitWaits: field == "kitWaits");
+            kitWaits: field == "kitWaits",
+            columnText: field == "columnText" ? "Besieging Osgiliath." : null);
 
         Assert.IsFalse(Base().Equals(other), $"'{field}' is missing from Equals — its changes would never reach the screen");
     }
@@ -444,6 +530,7 @@ public class ServiceStatusModelEqualityTests
     [DataRow("nextRequirementKey")]
     [DataRow("nextRequirementTarget")]
     [DataRow("kitWaits")]
+    [DataRow("columnText")]
     public void GetHashCode_Differs_WhenANewFieldDiffers(string field)
     {
         var other = new ServiceStatusModel(
@@ -455,7 +542,8 @@ public class ServiceStatusModelEqualityTests
             nextRank: field == "nextRank" ? ServiceRank.StaffSergeant : ServiceRank.Sergeant,
             nextRequirementKey: field == "nextRequirementKey" ? "leadership" : "xp",
             nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350,
-            kitWaits: field == "kitWaits");
+            kitWaits: field == "kitWaits",
+            columnText: field == "columnText" ? "Besieging Osgiliath." : null);
 
         Assert.AreNotEqual(Base().GetHashCode(), other.GetHashCode(), $"'{field}' is missing from GetHashCode");
     }

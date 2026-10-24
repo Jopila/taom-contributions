@@ -26,6 +26,15 @@ public interface ICommanderLordAdapter
     /// </summary>
     CommanderTickSnapshot GetTickSnapshot(string heroId);
 
+    /// <summary>
+    /// The engine's own localized behaviour text for the commander's party (besieging, travelling to,
+    /// fleeing from and so on), rendered to a string now, or null when there is no party or the read
+    /// fails (#838). A separate read, not part of either snapshot: the tick snapshot and the reconciler never
+    /// pay for this render; only the board's 2-second status tier renders one behaviour text (a hero
+    /// lookup and a few TextObjects).
+    /// </summary>
+    string GetPartyBehaviorText(string heroId);
+
 
     /// <summary>Live culture StringId of the commander, or null. Read at issuance/decision time only.</summary>
     string GetCultureId(string heroId);

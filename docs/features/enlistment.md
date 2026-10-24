@@ -2468,6 +2468,34 @@ rule per path, every reason), `DischargeServiceTests` (the commander is noted be
 and `EnlistmentWaitMenuPresenterTests` (the warning), `EnlistmentContentConfigProviderTests` (defaults,
 shipped parity, range).
 
+## The column line (#838)
+
+The status board shows what the commander's column is doing, in the engine's own words.
+
+- **Source.** `ICommanderLordAdapter.GetPartyBehaviorText(heroId)` returns
+  `hero.PartyBelongedTo.GetBehaviorText()` rendered to a string (the text the vanilla party tooltip uses:
+  "Besieging X.", "Defending Z.", "Travelling to Y.", "Running from W.", an army's long-term text, and so
+  on). It is the engine's localized string, so only the label needed a new key. It returns null when the
+  hero does not resolve or has no party, or the read throws (logged once until a read succeeds). The engine returns
+  a non-empty text on v1.5.5, and its phrases are shown as-is, including ones such as "Unknown Behavior.".
+- **A separate read, not part of a snapshot.** The text is not on `CommanderSnapshot` or
+  `CommanderTickSnapshot`: the full snapshot is also read by the reconciler and the enlist gate, and the
+  tick snapshot is the pump's read, which must not render text. Only `ServiceStatusService.Build`
+  asks for it, and only when the commander has a party and is not inside a settlement.
+- **When it shows.** `ServiceStatusModel.ColumnText` is part of the model's value equality, so a changed
+  activity reaches the screen on the board's next refresh (the same throttle as every other field, about
+  every 2 seconds on the wait menu). The line is left out when the text is null or empty, and
+  while the commander's party is in a settlement (the engine blanks this text there, and the activity line
+  already says where he is).
+- **Rendering.** `ServiceStatusTextWriter.WithColumnLine` appends `taom_enlist_board_column`
+  ("{NEWLINE}Column: {COLUMN}") under the activity sentence (the `ACTIVITY` variable) through the same
+  composition as the kit line, so the translated board template `taom_enlist_wait_board_v2` does not change.
+- **Key:** `taom_enlist_board_column`.
+
+Tests: `ServiceStatusServiceTests` (the model's equality and hash, the service fill, the writer source pin
+including the `ACTIVITY` placement, no ask when there is no party or the commander is in a settlement, that
+neither snapshot body renders the text, and the log-once pin).
+
 ## Interactions with the rest of TAOM
 
 **Leader-keyed attribution is the recurring hazard.** For months of game time the player fights
@@ -2591,6 +2619,11 @@ What actually remains, each a state no test can reach:
 - **A field battle with the commander in an army.** Still the case most likely to fail:
   `FindCommanderPartyIdIn` matches only the commander's own party in `InvolvedParties`, and an
   attached army member may not appear there.
+- **Column line (#838).** On the wait menu the board shows, under the activity line, "Column: ..." with the commander party's
+  current activity (for example besieging or travelling to a settlement). Let the column change what it is
+  doing and the line follows within a few seconds; with the commander in a battle, note what the engine
+  says. No line when he has no party or is inside a settlement. After a battle the soldier joined, the Column line
+  must not name the commander's home settlement (a leftover battle army names its seeded objective).
 - **Past service (#837).** Reach Sergeant under one lord (25 days, 350 XP, 2 duty wins), leave
   honorably, and take the oath with him again: you begin as Specialist and the kit can be drawn. A lord of
   ANOTHER clan of the same kingdom gives two ranks lower, so it takes a Staff Sergeant to show a gain.

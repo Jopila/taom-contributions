@@ -34,6 +34,7 @@
 	<string id="taom_enlist_promoted_kit" text="{=taom_enlist_promoted_kit}The quartermaster has kit for your new rank." />
 	<string id="taom_enlist_promoted_notice" text="{=taom_enlist_promoted_notice}{COMMANDER} names you {RANK}." />
 	<string id="taom_enlist_board_kit" text="{=taom_enlist_board_kit}{NEWLINE}Kit to draw: the quartermaster holds gear for your rank." />
+	<string id="taom_enlist_board_column" text="{=taom_enlist_board_column}{NEWLINE}Column: {COLUMN}" />
 	<string id="taom_enlist_term_body" text="{=taom_enlist_term_body}{COMMANDER} offers you up to {BONUS} denars and renewed trust to sign on for another term, or you may leave the service with honor." />
 	<string id="taom_enlist_term_bonus_paid" text="{=taom_enlist_term_bonus_paid}You receive {GOLD} denars for signing on again." />
 	<string id="taom_enlist_term_leave" text="{=taom_enlist_term_leave}Leave with honor" />

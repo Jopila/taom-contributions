@@ -73,6 +73,9 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
     /// <summary>The quartermaster holds a kit tier above the last one drawn (#835). A bool, so it compares by value.</summary>
     public bool KitWaits { get; }
 
+    /// <summary>The commander party's own behaviour text, rendered when the model was built (#838), or null. A string, so it compares by value.</summary>
+    public string ColumnText { get; }
+
     public ServiceStatusModel(
         string commanderName = null,
         CommanderActivity activity = CommanderActivity.Marching,
@@ -88,7 +91,8 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
         ServiceRank? nextRank = null,
         string nextRequirementKey = null,
         int nextRequirementTarget = 0,
-        bool kitWaits = false)
+        bool kitWaits = false,
+        string columnText = null)
     {
         CommanderName = commanderName;
         Activity = activity;
@@ -105,6 +109,7 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
         NextRequirementKey = nextRequirementKey;
         NextRequirementTarget = nextRequirementTarget;
         KitWaits = kitWaits;
+        ColumnText = columnText;
     }
 
     public bool Equals(ServiceStatusModel other)
@@ -126,7 +131,8 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
             && NextRank == other.NextRank
             && string.Equals(NextRequirementKey, other.NextRequirementKey, StringComparison.Ordinal)
             && NextRequirementTarget == other.NextRequirementTarget
-            && KitWaits == other.KitWaits;
+            && KitWaits == other.KitWaits
+            && string.Equals(ColumnText, other.ColumnText, StringComparison.Ordinal);
     }
 
     public override bool Equals(object obj) => Equals(obj as ServiceStatusModel);
@@ -150,6 +156,7 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
             hash = (hash * 397) ^ (NextRequirementKey?.GetHashCode() ?? 0);
             hash = (hash * 397) ^ NextRequirementTarget;
             hash = (hash * 397) ^ (KitWaits ? 1 : 0);
+            hash = (hash * 397) ^ (ColumnText?.GetHashCode() ?? 0);
             return hash;
         }
     }
