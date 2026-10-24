@@ -46,8 +46,11 @@ public class MessengerEncyclopediaPrefabTests
         Assert.IsNotNull(button);
         Assert.AreEqual("@IsMessengerAvailable", button.GetAttribute("IsEnabled"));
         Assert.AreEqual("ExecuteSendMessenger", button.GetAttribute("Command.Click"));
-        // The mixin binds an empty hint whenever the button is enabled (MessengerEncyclopediaMixin.UpdateAvailability),
-        // so a hint inside the button could never show anything: the one hint sits on the wrapper.
-        Assert.IsNull(button.SelectSingleNode("descendant::HintWidget"), "no hint inside the button: it would never show text");
+        // An enabled button takes the hover, so the wrapper hint never fires for it: the days hint needs its own
+        // HintWidget inside the button (vanilla's BarterScreen.xml shape).
+        var inner = (XmlElement?)button.SelectSingleNode("Children/HintWidget");
+        Assert.IsNotNull(inner, "the enabled state needs a hint inside the button");
+        Assert.AreEqual("{SendMessengerHint}", inner.GetAttribute("DataSource"));
+        Assert.IsFalse(inner.HasAttribute("IsDisabled"), "the inner hint must be hoverable");
     }
 }

@@ -11,7 +11,9 @@ internal class MessengerEncyclopediaPrefabExtension : PrefabExtensionInsertPatch
     public override InsertType Type => InsertType.Append;
 
     // Vanilla's governor-button shape (SandBox TownManagement.xml:105-111, #944): Gauntlet never hovers a disabled
-    // widget, so the disabled-state hint is a sibling of the ButtonWidget inside a wrapper that stays enabled.
+    // widget, so the disabled-state hint is a sibling of the ButtonWidget inside a wrapper that stays enabled. An
+    // enabled button takes the hover itself, so the days hint sits in a second HintWidget inside the button
+    // (vanilla's BarterScreen.xml shape).
     [PrefabExtensionXmlDocument]
     public XmlDocument GetDocument()
     {
@@ -48,6 +50,13 @@ internal class MessengerEncyclopediaPrefabExtension : PrefabExtensionInsertPatch
             " Brush=\"Popup.PartySelection.Button.Text\"" +
             " VerticalAlignment=\"Center\"" +
             " HorizontalAlignment=\"Center\" />" +
+            "<HintWidget" +
+            " WidthSizePolicy=\"StretchToParent\"" +
+            " HeightSizePolicy=\"StretchToParent\"" +
+            " DataSource=\"{SendMessengerHint}\"" +
+            " Command.HoverBegin=\"ExecuteBeginHint\"" +
+            " Command.HoverEnd=\"ExecuteEndHint\"" +
+            " DoNotAcceptEvents=\"true\" />" +
             "</Children>" +
             "</ButtonWidget>" +
             "<HintWidget" +

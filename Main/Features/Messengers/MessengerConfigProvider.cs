@@ -3,6 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using TAOM.Core.Infrastructure;
 using TAOM.Core.Logging;
+using TAOM.Core.Validation;
 
 namespace TAOM.Features.Messengers;
 
@@ -52,6 +53,10 @@ public class MessengerConfigProvider : IMessengerConfigProvider
         {
             AccidentChancePerHour = parsed.AccidentChancePerHour,
             TravelSpeedMultiplier = parsed.TravelSpeedMultiplier,
+            GoldPerTravelDay = parsed.GoldPerTravelDay,
+            AtWarMultiplier = parsed.AtWarMultiplier,
+            NeverMetMultiplier = parsed.NeverMetMultiplier,
+            BesiegedMultiplier = parsed.BesiegedMultiplier,
         };
 
         var defaults = new MessengerConfig();
@@ -76,11 +81,25 @@ public class MessengerConfigProvider : IMessengerConfigProvider
             rejected = true;
         }
 
+        sanitized.GoldPerTravelDay = Checked("goldPerTravelDay", sanitized.GoldPerTravelDay, 0f, 1000f, defaults.GoldPerTravelDay, ref rejected);
+        sanitized.AtWarMultiplier = Checked("atWarMultiplier", sanitized.AtWarMultiplier, 1f, 10f, defaults.AtWarMultiplier, ref rejected);
+        sanitized.NeverMetMultiplier = Checked("neverMetMultiplier", sanitized.NeverMetMultiplier, 1f, 10f, defaults.NeverMetMultiplier, ref rejected);
+        sanitized.BesiegedMultiplier = Checked("besiegedMultiplier", sanitized.BesiegedMultiplier, 1f, 10f, defaults.BesiegedMultiplier, ref rejected);
+
         if (rejected)
             _logger.LogWarning("MessengerConfigProvider: messenger_config.json contained invalid values. See prior warnings for details.");
         else
             _logger.LogInfo("MessengerConfigProvider: Loaded messenger_config.json");
 
         return sanitized;
+    }
+
+    private float Checked(string key, float value, float min, float max, float fallback, ref bool rejected)
+    {
+        if (FiniteFloatValidator.IsFiniteInRange(value, min, max))
+            return value;
+        _logger.LogWarning($"MessengerConfigProvider: {key}={value} not finite or outside [{min},{max}], reverting to default {fallback}");
+        rejected = true;
+        return fallback;
     }
 }

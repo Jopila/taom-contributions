@@ -753,17 +753,17 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Messengers", GroupOrder = 25)]
     [SettingPropertyBool("Enable Messengers", Order = 0, RequireRestart = false,
-        HintText = "Send paid messengers to heroes you have already met. They travel for several days and trigger a conversation on arrival. Disable to remove the encyclopedia button and dialog hook.")]
+        HintText = "Send paid messengers to heroes. The price grows with distance. They travel for several days and trigger a conversation on arrival. Disable to grey out the encyclopedia button and stop the dialog line.")]
     public bool EnableMessengers { get; set; } = true;
 
     [SettingPropertyGroup("Messengers")]
-    [SettingPropertyInteger("Gold Cost", 10, 500, Order = 1, RequireRestart = false,
-        HintText = "Denar cost to dispatch one messenger.")]
+    [SettingPropertyInteger("Base Gold Cost", 10, 500, Order = 1, RequireRestart = false,
+        HintText = "Denar price of the shortest trip. The price grows with the distance to the target, and is higher again when the target is at war with you, when you have never met them, and when they sit in a besieged town or castle. A stranger costs more but is never refused. The per-day rate and the multipliers live in messenger_config.json.")]
     public int MessengerGoldCost { get; set; } = 50;
 
     [SettingPropertyGroup("Messengers")]
     [SettingPropertyInteger("Travel Days", 1, 10, Order = 2, RequireRestart = false,
-        HintText = "In-game days a messenger spends in transit before arriving at the target. Speed scales to map size.")]
+        HintText = "In-game days a messenger spends in transit before arriving at the target. Speed scales to map size. The days also scale the price.")]
     public int MessengerTravelDays { get; set; } = 3;
 
     [SettingPropertyGroup("Messengers")]

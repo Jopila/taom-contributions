@@ -5,8 +5,9 @@ using TAOM.Tests.Infrastructure;
 namespace TAOM.Tests.Features.Messengers;
 
 /// <summary>
-/// Source pins on the conversation start (#898). They only read the file, so they run without the game, unlike the
-/// RequiresGame class that holds the wiring checks.
+/// Source pins on the messenger boundary (#898): the recovery when a conversation fails to open, the one offer shared by the
+/// dialog, the send and the button, the in-person dialog path, the quote reads and the mixin's wiring. They only read
+/// files, so they run without the game, unlike the RequiresGame class that holds the wiring checks.
 /// </summary>
 [TestClass]
 public class MessengerCampaignBehaviorSourceTests
@@ -48,5 +49,94 @@ public class MessengerCampaignBehaviorSourceTests
 
         Assert.IsTrue(body.Length > 0, "AbortConversation not found");
         Assert.IsFalse(body.Contains("_originalPosition"), "AbortConversation must leave _originalPosition for CleanUpSettlementEncounter to restore");
+    }
+
+    [TestMethod]
+    public void TheButtonAndTheSend_ReadTheSameOffer_FromTheOneTargetReader()
+    {
+        var behavior = RepoPaths.ReadSource(Path, stripComments: true);
+        var mixin = RepoPaths.ReadSource("Client/Features/Messengers/UI/MessengerEncyclopediaMixin.cs", stripComments: true);
+
+        StringAssert.Contains(behavior, "MessengerTargetReader.ReadSnapshot(");
+        StringAssert.Contains(behavior, "MessengerTargetReader.ReadQuoteInput(");
+        Assert.IsFalse(behavior.Contains("new HeroSnapshot("), "the behavior must not build its own snapshot");
+        Assert.IsFalse(mixin.Contains("HeroSnapshot"), "the mixin must not build its own snapshot");
+        StringAssert.Contains(mixin, "behavior.GetOffer(hero, inPerson: false)");
+        Assert.AreEqual(1, Regex.Matches(behavior, @"GiveGoldAction\.ApplyBetweenCharacters\(Hero\.MainHero, null, offer\.Cost, false\)").Count, "the send pays the quoted cost");
+    }
+
+    [TestMethod]
+    public void TheInPersonLine_KeepsItsOldBehaviour_OnlyTheRemoteSendRefusesTogetherness()
+    {
+        var src = RepoPaths.ReadSource(Path, stripComments: true);
+
+        StringAssert.Matches(src, new Regex(@"DialogCondition_CanSend\(\)[^}]*GetOffer\(hero, inPerson: true\)"));
+        StringAssert.Matches(src, new Regex(@"DialogConsequence_DispatchMessenger\(\)[^}]*SendMessenger\(hero, inPerson: true\)"));
+        StringAssert.Matches(src, new Regex(@"DialogCondition_CanSendAtQuote\(\)[\s\S]*?GetOffer\(hero, inPerson: true\)"));
+    }
+
+    [TestMethod]
+    public void TheSameArmyRule_MeansBothPartiesAreInTheLeadersGroup()
+    {
+        var reader = RepoPaths.ReadSource("Main/Features/Messengers/MessengerTargetReader.cs", stripComments: true);
+
+        Assert.AreEqual(2, Regex.Matches(reader, @"DoesLeaderPartyAndAttachedPartiesContain\(").Count);
+    }
+
+    [TestMethod]
+    public void TheGoldLine_AsksTheOfferOnce_NoInlineGoldCompare()
+    {
+        var src = RepoPaths.ReadSource(Path, stripComments: true);
+        var body = Regex.Match(src, @"bool DialogCondition_CanSendAtQuote\(\)[\s\S]*?\n    \}").Value;
+
+        StringAssert.Contains(body, "offer.CanSend");
+        StringAssert.Contains(body, "offer.Cost");
+        Assert.IsFalse(body.Contains("Hero.MainHero?.Gold"), "the gold check lives in the service, behind CanSend");
+    }
+
+    [TestMethod]
+    public void TheButton_BuildsItsReasonFromTheOfferItAlreadyHas_AndPluralisesTheDays()
+    {
+        var mixin = RepoPaths.ReadSource("Client/Features/Messengers/UI/MessengerEncyclopediaMixin.cs", stripComments: true);
+
+        StringAssert.Contains(mixin, "behavior.GetReason(offer, hero)");
+        StringAssert.Contains(mixin, "{=taom_messenger_trip_days}The messenger will take about {DAYS} {?IS_PLURAL}days{?}day");
+        StringAssert.Matches(mixin, new Regex(@"SetTextVariable\(""IS_PLURAL"",\s*offer\.Days\s*>\s*1\s*\?\s*1\s*:\s*0\)"));
+    }
+
+    [TestMethod]
+    public void TheQuoteInput_ReadsWarStrangerAndSiege()
+    {
+        var reader = RepoPaths.ReadSource("Main/Features/Messengers/MessengerTargetReader.cs", stripComments: true);
+
+        StringAssert.Contains(reader, "FactionManager.IsAtWarAgainstFaction(hero?.MapFaction, Hero.MainHero?.MapFaction)");
+        StringAssert.Contains(reader, "!hero.HasMet");
+        StringAssert.Contains(reader, "IsUnderSiege");
+    }
+
+    [TestMethod]
+    public void TheEncyclopediaSend_IsRemote()
+    {
+        var mixin = RepoPaths.ReadSource("Client/Features/Messengers/UI/MessengerEncyclopediaMixin.cs", stripComments: true);
+
+        StringAssert.Contains(mixin, "SendMessenger(hero, inPerson: false)");
+    }
+
+    [TestMethod]
+    public void TheTargetReader_ReadsFactsOnly_TheServiceDecidesWhatTogethernessMeans()
+    {
+        var reader = RepoPaths.ReadSource("Main/Features/Messengers/MessengerTargetReader.cs", stripComments: true);
+        var behavior = RepoPaths.ReadSource(Path, stripComments: true);
+
+        Assert.IsFalse(reader.Contains("inPerson"), "inPerson is a service rule");
+        StringAssert.Contains(behavior, "_service.GetOffer(");
+    }
+
+    [TestMethod]
+    public void TheSentNotice_StillPromisesTheTravelDaysCap_NotTheStraightLineEstimate()
+    {
+        var src = RepoPaths.ReadSource(Path, stripComments: true);
+
+        StringAssert.Contains(src, "sentText.SetTextVariable(\"DAYS\", _settings.MessengerTravelDays);");
     }
 }

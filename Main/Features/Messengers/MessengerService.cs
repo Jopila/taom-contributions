@@ -1,4 +1,5 @@
 using System;
+using TAOM.Core.Validation;
 using TAOM.Features.Messengers.Domain;
 
 namespace TAOM.Features.Messengers;
@@ -22,7 +23,7 @@ public class MessengerService : IMessengerService
         _random = random;
     }
 
-    public MessengerValidationResult CanSendMessenger(HeroSnapshot target, int playerGold)
+    public MessengerValidationResult CanSendMessenger(HeroSnapshot? target, int playerGold, int quotedCost, bool inPerson)
     {
         if (target == null)
             return MessengerValidationResult.NullTarget;
@@ -50,13 +51,68 @@ public class MessengerService : IMessengerService
         if (target.IsInPlayerParty)
             return MessengerValidationResult.TargetInPlayerParty;
 
-        if (playerGold < _settings.MessengerGoldCost)
+        // In person the player is already with the hero, so being together is no reason to refuse.
+        if (!inPerson && target.SameSettlement)
+            return MessengerValidationResult.SameSettlement;
+
+        if (!inPerson && target.SameArmy)
+            return MessengerValidationResult.SameArmy;
+
+        if (playerGold < quotedCost)
             return MessengerValidationResult.InsufficientGold;
 
         if (_store.Contains(target.HeroId))
             return MessengerValidationResult.AlreadyPending;
 
         return MessengerValidationResult.Ok;
+    }
+
+    public MessengerOffer GetOffer(HeroSnapshot? target, MessengerQuoteInput trip, int playerGold, bool inPerson)
+    {
+        var cost = QuoteCost(trip);
+        return new MessengerOffer(CanSendMessenger(target, playerGold, cost, inPerson), cost, QuoteTravelDays(trip));
+    }
+
+    private const int CostCeiling = 100000;
+
+    public int QuoteCost(MessengerQuoteInput input)
+    {
+        // The provider has validated the four pricing values and the speed multiplier, as it has for CalculateMessengerSpeed.
+        var config = _config.GetConfig();
+        var baseCost = _settings.MessengerGoldCost;
+        var raw = (baseCost + (double)config.GoldPerTravelDay * TripDays(input))
+                  * (input.AtWar ? config.AtWarMultiplier : 1.0)
+                  * (input.NeverMet ? config.NeverMetMultiplier : 1.0)
+                  * (input.Besieged ? config.BesiegedMultiplier : 1.0);
+
+        // Clamp as a double before the cast: a float-to-int conversion of a huge or NaN value is undefined.
+        if (!FiniteFloatValidator.IsFinite(raw))
+            return baseCost;
+        if (raw >= CostCeiling)
+            return CostCeiling;
+        return Math.Max(baseCost, (int)Math.Ceiling(raw));
+    }
+
+    public int QuoteTravelDays(MessengerQuoteInput input) =>
+        Math.Max(1, (int)Math.Ceiling(TripDays(input)));
+
+    // Days of travel, 0 to TravelDays, from the same per-hour speed the hourly tick moves the messenger at
+    // (CalculateMessengerSpeed, 24 hours a day). An unknown or negative distance, a map with no usable size or a speed
+    // that is not a positive finite number is a full trip.
+    private double TripDays(MessengerQuoteInput input)
+    {
+        var full = Math.Max(input.TravelDays, 1);
+        if (!FiniteFloatValidator.IsFinite(input.Distance) || input.Distance < 0f)
+            return full;
+
+        var speed = CalculateMessengerSpeed(input.MapDiagonal, input.TravelDays);
+        if (!FiniteFloatValidator.IsFinite(speed) || speed <= 0f)
+            return full;
+
+        var days = input.Distance / (24.0 * speed);
+        if (!FiniteFloatValidator.IsFinite(days))
+            return full;
+        return Math.Min(full, days);
     }
 
     public bool RollAccident()

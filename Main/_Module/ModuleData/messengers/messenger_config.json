@@ -1,4 +1,8 @@
 {
   "accidentChancePerHour": 0.002,
-  "travelSpeedMultiplier": 1.0
+  "travelSpeedMultiplier": 1.0,
+  "goldPerTravelDay": 25.0,
+  "atWarMultiplier": 2.0,
+  "neverMetMultiplier": 2.0,
+  "besiegedMultiplier": 5.0
 }

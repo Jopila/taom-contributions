@@ -13,4 +13,6 @@ public enum MessengerValidationResult
     TargetInPlayerParty,
     InsufficientGold,
     AlreadyPending,
+    SameSettlement,
+    SameArmy,
 }

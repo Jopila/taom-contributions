@@ -46,7 +46,7 @@ public class MessengerServiceTests
     [TestMethod]
     public void CanSendMessenger_NullTarget_ReturnsNullTarget()
     {
-        var result = _sut.CanSendMessenger(null, playerGold: 1000);
+        var result = _sut.CanSendMessenger(null, playerGold: 1000, quotedCost: 50, inPerson: false);
         Assert.AreEqual(MessengerValidationResult.NullTarget, result);
     }
 
@@ -58,7 +58,7 @@ public class MessengerServiceTests
             isActive: true, isWanderer: false, isHumanPlayerCharacter: true,
             isInPlayerParty: true, isInMapEvent: false);
 
-        var result = _sut.CanSendMessenger(hero, playerGold: 1000);
+        var result = _sut.CanSendMessenger(hero, playerGold: 1000, quotedCost: 50, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.HumanPlayerCharacter, result);
     }
@@ -71,7 +71,7 @@ public class MessengerServiceTests
             isActive: false, isWanderer: false, isHumanPlayerCharacter: false,
             isInPlayerParty: false, isInMapEvent: false);
 
-        var result = _sut.CanSendMessenger(hero, playerGold: 1000);
+        var result = _sut.CanSendMessenger(hero, playerGold: 1000, quotedCost: 50, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.HeroDead, result);
     }
@@ -84,7 +84,7 @@ public class MessengerServiceTests
             isActive: false, isWanderer: false, isHumanPlayerCharacter: false,
             isInPlayerParty: false, isInMapEvent: false);
 
-        var result = _sut.CanSendMessenger(hero, playerGold: 1000);
+        var result = _sut.CanSendMessenger(hero, playerGold: 1000, quotedCost: 50, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.HeroPrisoner, result);
     }
@@ -97,7 +97,7 @@ public class MessengerServiceTests
             isActive: true, isWanderer: false, isHumanPlayerCharacter: false,
             isInPlayerParty: false, isInMapEvent: false);
 
-        var result = _sut.CanSendMessenger(hero, playerGold: 1000);
+        var result = _sut.CanSendMessenger(hero, playerGold: 1000, quotedCost: 50, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.HeroChild, result);
     }
@@ -110,7 +110,7 @@ public class MessengerServiceTests
             isActive: false, isWanderer: false, isHumanPlayerCharacter: false,
             isInPlayerParty: false, isInMapEvent: false);
 
-        var result = _sut.CanSendMessenger(hero, playerGold: 1000);
+        var result = _sut.CanSendMessenger(hero, playerGold: 1000, quotedCost: 50, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.HeroFugitive, result);
     }
@@ -123,7 +123,7 @@ public class MessengerServiceTests
             isActive: false, isWanderer: false, isHumanPlayerCharacter: false,
             isInPlayerParty: false, isInMapEvent: false);
 
-        var result = _sut.CanSendMessenger(hero, playerGold: 1000);
+        var result = _sut.CanSendMessenger(hero, playerGold: 1000, quotedCost: 50, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.TargetUnavailable, result);
     }
@@ -136,7 +136,7 @@ public class MessengerServiceTests
             isActive: true, isWanderer: true, isHumanPlayerCharacter: false,
             isInPlayerParty: true, isInMapEvent: false);
 
-        var result = _sut.CanSendMessenger(hero, playerGold: 1000);
+        var result = _sut.CanSendMessenger(hero, playerGold: 1000, quotedCost: 50, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.TargetInPlayerParty, result);
     }
@@ -144,11 +144,65 @@ public class MessengerServiceTests
     [TestMethod]
     public void CanSendMessenger_InsufficientGold_ReturnsInsufficientGold()
     {
-        _settings.MessengerGoldCost.Returns(50);
-
-        var result = _sut.CanSendMessenger(ValidActiveHero(), playerGold: 49);
+        var result = _sut.CanSendMessenger(ValidActiveHero(), playerGold: 124, quotedCost: 125, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.InsufficientGold, result);
+    }
+
+    [TestMethod]
+    public void CanSendMessenger_SameSettlement_ReturnsSameSettlement()
+    {
+        var hero = new HeroSnapshot("lord_1",
+            isAlive: true, isPrisoner: false, isChild: false, isFugitive: false,
+            isActive: true, isWanderer: false, isHumanPlayerCharacter: false,
+            isInPlayerParty: false, isInMapEvent: false, sameSettlement: true);
+
+        Assert.AreEqual(MessengerValidationResult.SameSettlement, _sut.CanSendMessenger(hero, playerGold: 1000, quotedCost: 50, inPerson: false));
+    }
+
+    [TestMethod]
+    public void CanSendMessenger_SameArmy_ReturnsSameArmy()
+    {
+        var hero = new HeroSnapshot("lord_1",
+            isAlive: true, isPrisoner: false, isChild: false, isFugitive: false,
+            isActive: true, isWanderer: false, isHumanPlayerCharacter: false,
+            isInPlayerParty: false, isInMapEvent: false, sameArmy: true);
+
+        Assert.AreEqual(MessengerValidationResult.SameArmy, _sut.CanSendMessenger(hero, playerGold: 1000, quotedCost: 50, inPerson: false));
+    }
+
+    [TestMethod]
+    public void CanSendMessenger_InPerson_IgnoresTogethernessButStillChecksGold()
+    {
+        var hero = new HeroSnapshot("lord_1",
+            isAlive: true, isPrisoner: false, isChild: false, isFugitive: false,
+            isActive: true, isWanderer: false, isHumanPlayerCharacter: false,
+            isInPlayerParty: false, isInMapEvent: false, sameSettlement: true, sameArmy: true);
+
+        Assert.AreEqual(MessengerValidationResult.Ok, _sut.CanSendMessenger(hero, playerGold: 1000, quotedCost: 50, inPerson: true));
+        Assert.AreEqual(MessengerValidationResult.InsufficientGold, _sut.CanSendMessenger(hero, playerGold: 0, quotedCost: 50, inPerson: true));
+    }
+
+    [TestMethod]
+    public void GetOffer_ChecksGoldAgainstThisTripsQuote()
+    {
+        var offer = _sut.GetOffer(ValidActiveHero(), Trip(1000f), playerGold: 124, inPerson: false);
+
+        Assert.AreEqual(MessengerValidationResult.InsufficientGold, offer.Validation);
+        Assert.AreEqual(125, offer.Cost);
+        Assert.AreEqual(3, offer.Days);
+        Assert.IsFalse(offer.CanSend);
+    }
+
+    [TestMethod]
+    public void CanSendMessenger_SameSettlementAndPoor_ReportsTheSettlementFirst()
+    {
+        var hero = new HeroSnapshot("lord_1",
+            isAlive: true, isPrisoner: false, isChild: false, isFugitive: false,
+            isActive: true, isWanderer: false, isHumanPlayerCharacter: false,
+            isInPlayerParty: false, isInMapEvent: false, sameSettlement: true);
+
+        Assert.AreEqual(MessengerValidationResult.SameSettlement, _sut.CanSendMessenger(hero, playerGold: 0, quotedCost: 50, inPerson: false));
     }
 
     [TestMethod]
@@ -156,7 +210,7 @@ public class MessengerServiceTests
     {
         _store.Contains("lord_1").Returns(true);
 
-        var result = _sut.CanSendMessenger(ValidActiveHero(), playerGold: 1000);
+        var result = _sut.CanSendMessenger(ValidActiveHero(), playerGold: 1000, quotedCost: 50, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.AlreadyPending, result);
     }
@@ -169,7 +223,7 @@ public class MessengerServiceTests
             isActive: false, isWanderer: true, isHumanPlayerCharacter: false,
             isInPlayerParty: false, isInMapEvent: false);
 
-        var result = _sut.CanSendMessenger(wanderer, playerGold: 1000);
+        var result = _sut.CanSendMessenger(wanderer, playerGold: 1000, quotedCost: 50, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.Ok, result);
     }
@@ -177,7 +231,7 @@ public class MessengerServiceTests
     [TestMethod]
     public void CanSendMessenger_ValidActiveHero_ReturnsOk()
     {
-        var result = _sut.CanSendMessenger(ValidActiveHero(), playerGold: 1000);
+        var result = _sut.CanSendMessenger(ValidActiveHero(), playerGold: 1000, quotedCost: 50, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.Ok, result);
     }
@@ -185,9 +239,7 @@ public class MessengerServiceTests
     [TestMethod]
     public void CanSendMessenger_ExactlyEnoughGold_ReturnsOk()
     {
-        _settings.MessengerGoldCost.Returns(50);
-
-        var result = _sut.CanSendMessenger(ValidActiveHero(), playerGold: 50);
+        var result = _sut.CanSendMessenger(ValidActiveHero(), playerGold: 125, quotedCost: 125, inPerson: false);
 
         Assert.AreEqual(MessengerValidationResult.Ok, result);
     }
@@ -329,4 +381,107 @@ public class MessengerServiceTests
 
         Assert.AreEqual(4.0f, speed, 0.0001f);
     }
+
+    // --- QuoteCost / QuoteTravelDays (#898 part 2) ---
+
+    private static MessengerQuoteInput Trip(float distance, bool atWar = false, bool neverMet = false, bool besieged = false,
+        float diagonal = 1000f, int travelDays = 3) =>
+        new(distance, diagonal, travelDays, atWar, neverMet, besieged);
+
+    [TestMethod]
+    public void QuoteCost_NextDoor_IsTheBaseCost() => Assert.AreEqual(50, _sut.QuoteCost(Trip(0f)));
+
+    [TestMethod]
+    public void QuoteCost_AcrossTheMap_IsBasePlusAFullTrip() => Assert.AreEqual(125, _sut.QuoteCost(Trip(1000f)));
+
+    [TestMethod]
+    public void QuoteCost_HalfWay_RoundsTheFractionUp() => Assert.AreEqual(88, _sut.QuoteCost(Trip(500f)));
+
+    [TestMethod]
+    public void QuoteCost_BeyondTheDiagonal_StopsAtAFullTrip() => Assert.AreEqual(125, _sut.QuoteCost(Trip(5000f)));
+
+    [DataTestMethod]
+    [DataRow(float.NaN)]
+    [DataRow(-1f)]
+    [DataRow(float.NegativeInfinity)]
+    [DataRow(float.PositiveInfinity)]
+    public void QuoteCost_ABadDistance_CountsAsAFullTrip(float distance) => Assert.AreEqual(125, _sut.QuoteCost(Trip(distance)));
+
+    [DataTestMethod]
+    [DataRow(0f)]
+    [DataRow(-5f)]
+    [DataRow(float.NaN)]
+    public void QuoteCost_ABadMapDiagonal_CountsAsAFullTrip(float diagonal) => Assert.AreEqual(125, _sut.QuoteCost(Trip(10f, diagonal: diagonal)));
+
+    [TestMethod]
+    public void QuoteCost_AtWar_DoublesIt() => Assert.AreEqual(250, _sut.QuoteCost(Trip(1000f, atWar: true)));
+
+    [TestMethod]
+    public void QuoteCost_NeverMet_DoublesIt() => Assert.AreEqual(250, _sut.QuoteCost(Trip(1000f, neverMet: true)));
+
+    [TestMethod]
+    public void QuoteCost_Besieged_IsFiveTimes() => Assert.AreEqual(625, _sut.QuoteCost(Trip(1000f, besieged: true)));
+
+    [TestMethod]
+    public void QuoteCost_EveryMultiplier_Stacks() => Assert.AreEqual(2500, _sut.QuoteCost(Trip(1000f, true, true, true)));
+
+    [TestMethod]
+    public void QuoteCost_TravelSpeedMultiplier_ShortensTheTrip()
+    {
+        _config.GetConfig().Returns(new MessengerConfig { TravelSpeedMultiplier = 2f });
+
+        Assert.AreEqual(50 + 19, _sut.QuoteCost(Trip(500f)), "3 days * 0.25 = 0.75 day, 18.75 gold, rounded up");
+    }
+
+    [TestMethod]
+    public void QuoteCost_ASpeedMultiplierOfZero_CountsAsAFullTrip()
+    {
+        // The provider keeps this at 0.1 or more; the service still must not divide into a non-finite fraction.
+        _config.GetConfig().Returns(new MessengerConfig { TravelSpeedMultiplier = 0f });
+
+        Assert.AreEqual(125, _sut.QuoteCost(Trip(500f)));
+        Assert.AreEqual(3, _sut.QuoteTravelDays(Trip(500f)));
+    }
+
+    [TestMethod]
+    public void QuoteCost_ZeroTravelDays_IsTreatedAsOne()
+    {
+        Assert.AreEqual(75, _sut.QuoteCost(Trip(1000f, travelDays: 0)));
+        Assert.AreEqual(1, _sut.QuoteTravelDays(Trip(1000f, travelDays: 0)));
+    }
+
+    [TestMethod]
+    public void QuoteCost_NeverExceedsTheCeiling()
+    {
+        _settings.MessengerGoldCost.Returns(500);
+        _config.GetConfig().Returns(new MessengerConfig { GoldPerTravelDay = 1000f, AtWarMultiplier = 10f, NeverMetMultiplier = 10f, BesiegedMultiplier = 10f });
+
+        Assert.AreEqual(100000, _sut.QuoteCost(Trip(1000f, true, true, true, travelDays: 10)));
+    }
+
+    [TestMethod]
+    public void QuoteCost_WithNoPerDayRate_IsTheBaseCostAnywhere()
+    {
+        _config.GetConfig().Returns(new MessengerConfig { GoldPerTravelDay = 0f });
+
+        Assert.AreEqual(50, _sut.QuoteCost(Trip(1000f)));
+    }
+
+    [TestMethod]
+    public void QuoteCost_ANonFiniteResult_IsTheBaseCost()
+    {
+        // The provider validates the config; if a poisoned value ever got through, the NaN exit gate keeps the
+        // price finite instead of letting it reach the gold check.
+        _config.GetConfig().Returns(new MessengerConfig { GoldPerTravelDay = float.NaN });
+
+        Assert.AreEqual(50, _sut.QuoteCost(Trip(1000f)));
+    }
+
+    [DataTestMethod]
+    [DataRow(0f, 1)]
+    [DataRow(500f, 2)]
+    [DataRow(1000f, 3)]
+    [DataRow(float.NaN, 3)]
+    public void QuoteTravelDays_IsTheWholeDaysTheTripTakes_AtLeastOne(float distance, int expected)
+        => Assert.AreEqual(expected, _sut.QuoteTravelDays(Trip(distance)));
 }

@@ -229,4 +229,92 @@ public class MessengerConfigProviderTests
         Assert.AreEqual(1.0f, config.TravelSpeedMultiplier, 0.0001f,
             "Default speed multiplier should be 1.0 (no scaling)");
     }
+
+    [TestMethod]
+    public void GetConfig_PricingKeysMissing_UsesTheDefaults()
+    {
+        WriteConfig("{}");
+
+        var cfg = _sut.GetConfig();
+
+        Assert.AreEqual(25f, cfg.GoldPerTravelDay);
+        Assert.AreEqual(2f, cfg.AtWarMultiplier);
+        Assert.AreEqual(2f, cfg.NeverMetMultiplier);
+        Assert.AreEqual(5f, cfg.BesiegedMultiplier);
+    }
+
+    private static float PricingValue(MessengerConfig cfg, string key) => key switch
+    {
+        "goldPerTravelDay" => cfg.GoldPerTravelDay,
+        "atWarMultiplier" => cfg.AtWarMultiplier,
+        "neverMetMultiplier" => cfg.NeverMetMultiplier,
+        _ => cfg.BesiegedMultiplier,
+    };
+
+    private static float DefaultFor(string key) => PricingValue(new MessengerConfig(), key);
+
+    [DataTestMethod]
+    [DataRow("goldPerTravelDay", "-1")]
+    [DataRow("goldPerTravelDay", "1001")]
+    [DataRow("atWarMultiplier", "0.5")]
+    [DataRow("atWarMultiplier", "11")]
+    [DataRow("neverMetMultiplier", "0")]
+    [DataRow("neverMetMultiplier", "10.5")]
+    [DataRow("besiegedMultiplier", "0.9")]
+    [DataRow("besiegedMultiplier", "99")]
+    public void GetConfig_PricingFieldOutOfRange_RevertsToTheDefaultAndWarns(string key, string value)
+    {
+        WriteConfig("{ \"" + key + "\": " + value + " }");
+
+        Assert.AreEqual(DefaultFor(key), PricingValue(_sut.GetConfig(), key));
+        _logger.Received().LogWarning(Arg.Is<string>(m => m.Contains(key)));
+        _logger.Received().LogWarning(Arg.Is<string>(m => m.Contains("invalid values")));
+    }
+
+    [TestMethod]
+    public void GetConfig_PricingFieldsInRange_AreKept()
+    {
+        WriteConfig("{ \"goldPerTravelDay\": 1000, \"atWarMultiplier\": 10, \"neverMetMultiplier\": 1, \"besiegedMultiplier\": 3.5 }");
+
+        var cfg = _sut.GetConfig();
+
+        Assert.AreEqual(1000f, cfg.GoldPerTravelDay);
+        Assert.AreEqual(10f, cfg.AtWarMultiplier);
+        Assert.AreEqual(1f, cfg.NeverMetMultiplier);
+        Assert.AreEqual(3.5f, cfg.BesiegedMultiplier);
+    }
+
+    [TestMethod]
+    public void GetConfig_PricingFieldsAtTheirLowerBounds_AreKept()
+    {
+        WriteConfig("{ \"goldPerTravelDay\": 0, \"atWarMultiplier\": 1, \"neverMetMultiplier\": 1, \"besiegedMultiplier\": 1 }");
+
+        var cfg = _sut.GetConfig();
+
+        Assert.AreEqual(0f, cfg.GoldPerTravelDay);
+        Assert.AreEqual(1f, cfg.AtWarMultiplier);
+        Assert.AreEqual(1f, cfg.NeverMetMultiplier);
+        Assert.AreEqual(1f, cfg.BesiegedMultiplier);
+    }
+
+    [DataTestMethod]
+    [DataRow("goldPerTravelDay", "NaN")]
+    [DataRow("goldPerTravelDay", "Infinity")]
+    [DataRow("goldPerTravelDay", "-Infinity")]
+    [DataRow("atWarMultiplier", "NaN")]
+    [DataRow("atWarMultiplier", "Infinity")]
+    [DataRow("atWarMultiplier", "-Infinity")]
+    [DataRow("neverMetMultiplier", "NaN")]
+    [DataRow("neverMetMultiplier", "Infinity")]
+    [DataRow("neverMetMultiplier", "-Infinity")]
+    [DataRow("besiegedMultiplier", "NaN")]
+    [DataRow("besiegedMultiplier", "Infinity")]
+    [DataRow("besiegedMultiplier", "-Infinity")]
+    public void GetConfig_NonFinitePricingField_RevertsToTheDefaultAndWarns(string key, string value)
+    {
+        WriteConfig("{ \"" + key + "\": \"" + value + "\" }");
+
+        Assert.AreEqual(DefaultFor(key), PricingValue(_sut.GetConfig(), key));
+        _logger.Received().LogWarning(Arg.Is<string>(m => m.Contains(key)));
+    }
 }

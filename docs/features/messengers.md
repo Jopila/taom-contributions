@@ -19,20 +19,20 @@ Ported from LOTRAOM (Bannerlord 1.2.12) with TAOM conventions (adapter disciplin
 - The messenger model is "queue → travel → arrive → conversation," but the conversation must reuse the engine's full conversation/encounter/mission stack — there is no headless way to fire dialog. That forces a `IMissionListener` implementation plus careful interleaving of `PlayerEncounter` lifecycle calls.
 - A messenger to a hero in a settlement must enter that settlement's scene (otherwise the conversation is locationless) and the player must be returned to the original map position when the mission ends. That requires a one-shot `TickEvent` listener after `OnEndMission` (you cannot tear down a `PlayerEncounter` mid-iteration of mission listeners).
 - Save-compat must survive across sessions: a messenger sent on day 100 must continue toward arrival even if the player saves and reloads on day 102. TAOM's convention is primitive-dict save (no `SaveableTypeDefiner`), so the entire pending list is serialised as `Dictionary<heroId, "dispatchDays|posX|posY|arrivedFlag">`.
-- Pre-flight validation has 11 rejection paths (dead, prisoner, fugitive, child, in player party, etc.). Putting all of those in the campaign behavior would explode the boundary class. Validation lives in the service via a `HeroSnapshot` POCO that the behavior populates at the boundary.
+- Pre-flight validation has 12 rejection paths (dead, prisoner, fugitive, child, in player party, same settlement, same army, not enough gold, etc.). Putting all of those in the campaign behavior would explode the boundary class. Validation lives in the service via a `HeroSnapshot` POCO that `MessengerTargetReader.ReadSnapshot` fills at the boundary.
 - Bannerlord 1.3.15 introduced API breaks vs LOTRAOM's 1.2.12: `IMissionListener.OnInitialDeploymentPlanMade(BattleSideEnum, bool)` removed → replaced by `OnDeploymentPlanMade(Team, bool)`; `TextObject.Empty` removed → `TextObject.GetEmpty()`; `MobileParty.Position2D` setter removed → `MobileParty.Position = new CampaignVec2(vec, isOnLand)`; `IMapPoint.Position2D` (Vec2) renamed to `IMapPoint.Position` (CampaignVec2 — needs `.ToVec2()`); `CampaignTime` ctor became internal — use `CampaignTime.Now.ToDays` for elapsed math.
 
 ### Solution Approach
 
 Layered TAOM architecture. The behavior is the TaleWorlds-bound boundary; the service is pure logic; the store owns mutable state; the config provider validates JSON tunables; the settings provider wraps MCM.
 
-- **`MessengerCampaignBehavior`** (entry point, ~370 lines) — registers events (`HourlyTickEvent`, `OnSessionLaunchedEvent`), implements `IMissionListener`, registers the dialog tree, orchestrates encounter routing (settlement vs field), and serialises state via `SyncData`. Touches sealed types directly because that's what the boundary is for.
-- **`MessengerService`** (Reuse.Singleton) — pure logic: `CanSendMessenger(HeroSnapshot, playerGold) → MessengerValidationResult`, `RollAccident()`, `AdvancePosition(current, target, speed) → PositionUpdate`, `CalculateMessengerSpeed(mapDiagonal, travelDays)`. Tested with 26 unit tests against NSubstitute mocks.
+- **`MessengerCampaignBehavior`** (entry point): registers events (`HourlyTickEvent`, `OnSessionLaunchedEvent`), implements `IMissionListener`, registers the dialog tree, orchestrates encounter routing (settlement vs field), and serialises state via `SyncData`. Touches sealed types directly because that's what the boundary is for.
+- **`MessengerService`** (Reuse.Singleton): pure logic: `CanSendMessenger(HeroSnapshot?, playerGold, quotedCost, inPerson) → MessengerValidationResult`, `GetOffer(HeroSnapshot?, MessengerQuoteInput, playerGold, inPerson) → MessengerOffer` (quote, verdict against that quote, days), `QuoteCost(MessengerQuoteInput) → int`, `QuoteTravelDays(MessengerQuoteInput) → int`, `RollAccident()`, `AdvancePosition(current, target, speed) → PositionUpdate`, `CalculateMessengerSpeed(mapDiagonal, travelDays)`. Tested against NSubstitute mocks.
 - **`MessengerConversationState`** (Reuse.Singleton, `IMessengerConversationState`): one in-memory flag, `IsOpen`, set just before the encounter starts, cleared in `OnEndMission`, on the null-mission recovery, when opening throws (`AbortConversation`) and at session launch. The conversation looks like a real visit to the engine (a real `PlayerEncounter`, and the main party inside the target's settlement), so other features read this flag to tell them apart: [Lord Courtesies](lord-courtesies.md) hides its troop gift while it is open and still allows its holdings question, Enlistment greys the oath, Tokens of Esteem hides its gift line, and Patch117 hides six vanilla lines.
 - **`MessengerStateStore`** — owns the in-memory `Dictionary<heroId, PendingMessenger>`, exposes CRUD + `Serialize`/`Deserialize` for the behavior's `SyncData`.
 - **`MessengerConfigProvider`** — validates `messenger_config.json` per the "Config Providers MUST Validate" rule (range-check + revert + warn).
 - **`MessengerSettingsProvider`** — wraps `TaomSettings.Instance.*` so the service can be mocked in tests.
-- **`MessengerEncyclopediaPrefabExtension` + `MessengerEncyclopediaMixin`** — UIExtenderEx integration. The prefab extension appends a `<ListPanel>` containing a "Send Messenger" `<ButtonWidget>` after the `RichTextWidget[@Text='@InformationText']` in `EncyclopediaHeroPage`. The mixin exposes `IsMessengerAvailable`, `SendMessengerCost`, `SendMessengerHint`, `SendMessengerActionName` as data sources, and `ExecuteSendMessenger` as the click command.
+- **`MessengerEncyclopediaPrefabExtension` + `MessengerEncyclopediaMixin`**: UIExtenderEx integration. The prefab extension appends a `<ListPanel>` containing a "Send Messenger" `<ButtonWidget>` after the `RichTextWidget[@Text='@InformationText']` in `EncyclopediaHeroPage`. The mixin exposes `IsMessengerAvailable`, `SendMessengerHint` and `SendMessengerActionName` as data sources (the action name carries the price: "Send Messenger (N denars)"), and `ExecuteSendMessenger` as the click command. It reads one `MessengerOffer` from `MessengerCampaignBehavior.GetOffer(hero, inPerson: false)`, which delegates to the service, the same quote the dialog and the send use.
 
 ### Component Diagram
 
@@ -60,8 +60,8 @@ MessengerSettingsProvider     MessengerConfigProvider
 MessengerEncyclopediaPrefabExtension  --[XPath append]-->  EncyclopediaHeroPage
 MessengerEncyclopediaMixin            --[ViewModelMixin("RefreshValues")]-->  EncyclopediaHeroPageVM
         |
-        +-> calls IMessengerService for validation
-        +-> calls Campaign.Current.GetCampaignBehavior<MessengerCampaignBehavior>().SendMessenger(hero) on click
+        +-> calls MessengerCampaignBehavior.GetOffer(hero, inPerson: false): verdict, quoted price, days (engine reads in MessengerTargetReader)
+        +-> calls Campaign.Current.GetCampaignBehavior<MessengerCampaignBehavior>().SendMessenger(hero, inPerson: false) on click
 ```
 
 ## Configuration
@@ -72,9 +72,9 @@ Group: **Messengers**
 
 | Setting | Type | Range | Default | Effect |
 |---------|------|-------|---------|--------|
-| `EnableMessengers` | bool | — | true | Master toggle. When off, the behavior is not registered and the encyclopedia button is greyed out, and hovering it shows why. **Requires restart to take effect** (Singleton lifetime). |
-| `MessengerGoldCost` | int | 10–500 | 50 | Denar cost per dispatch. |
-| `MessengerTravelDays` | int | 1–10 | 3 | In-game days a messenger spends in transit. Speed scales to map size: `mapDiagonal / (24 * travelDays) * speedMultiplier`. |
+| `EnableMessengers` | bool | n/a | true | Master toggle, read at each use (`RequireRestart = false`). When off, the dialog line, the send and the hourly delivery stop and the encyclopedia button is greyed out, and hovering it shows why. |
+| `MessengerGoldCost` | int | 10-500 | 50 | Shown as "Base Gold Cost". The price of the shortest trip; the distance and the three multipliers below build on it. The property id and default are unchanged (a persisted MCM value keeps working). |
+| `MessengerTravelDays` | int | 1-10 | 3 | In-game days a messenger spends in transit. Speed scales to map size: `mapDiagonal / (24 * travelDays) * speedMultiplier`. The same days also scale the price (a longer crossing costs more per map distance). |
 | `MessengerAccidents` | bool | — | true | Master toggle for the random ambush roll. |
 
 ### JSON config — [messenger_config.json](../../Main/_Module/ModuleData/messengers/messenger_config.json)
@@ -84,14 +84,22 @@ Advanced tunables that are not exposed in MCM.
 ```json
 {
   "accidentChancePerHour": 0.002,
-  "travelSpeedMultiplier": 1.0
+  "travelSpeedMultiplier": 1.0,
+  "goldPerTravelDay": 25.0,
+  "atWarMultiplier": 2.0,
+  "neverMetMultiplier": 2.0,
+  "besiegedMultiplier": 5.0
 }
 ```
 
 | Field | Range | Default | Effect |
 |-------|-------|---------|--------|
 | `accidentChancePerHour` | [0.0, 1.0] | 0.002 | Per-hour ambush probability (gated by MCM `MessengerAccidents`). 0.002 = ~0.2% per hour, ~5% chance over a 24-hour leg. |
-| `travelSpeedMultiplier` | [0.1, 10.0] | 1.0 | Multiplies the per-hour travel speed. Use to retune travel without changing in-game `TravelDays`. |
+| `travelSpeedMultiplier` | [0.1, 10.0] | 1.0 | Multiplies the per-hour travel speed. Use to retune travel without changing in-game `TravelDays`. It also scales the price: a faster messenger spends fewer days on the same distance. |
+| `goldPerTravelDay` | [0, 1000] | 25 | Denars added per in-game day of the trip. |
+| `atWarMultiplier` | [1, 10] | 2 | Price multiplier when the target is at war with you. |
+| `neverMetMultiplier` | [1, 10] | 2 | Price multiplier when you have never met the target. |
+| `besiegedMultiplier` | [1, 10] | 5 | Price multiplier when the target sits in a besieged settlement. |
 
 Out-of-range values revert to defaults with a warning. **JSON config requires a Bannerlord application restart to reload** — `MessengerConfigProvider` is `Reuse.Singleton` and caches the config at first access for the entire process lifetime.
 
@@ -99,7 +107,7 @@ Out-of-range values revert to defaults with a warning. **JSON config requires a 
 
 | File | Purpose |
 |------|---------|
-| [Main/Features/Messengers/IMessengerService.cs](../../Main/Features/Messengers/IMessengerService.cs) | Service contract (validation, accident roll, position math, speed calc) |
+| [Main/Features/Messengers/IMessengerService.cs](../../Main/Features/Messengers/IMessengerService.cs) | Service contract (validation, price quote, accident roll, position math, speed calc) |
 | [Main/Features/Messengers/MessengerService.cs](../../Main/Features/Messengers/MessengerService.cs) | Pure-logic implementation |
 | [Main/Features/Messengers/IMessengerStateStore.cs](../../Main/Features/Messengers/IMessengerStateStore.cs) | Pending-messenger CRUD + serialise/deserialise |
 | [Main/Features/Messengers/MessengerStateStore.cs](../../Main/Features/Messengers/MessengerStateStore.cs) | In-memory dict with primitive-string roundtrip |
@@ -110,12 +118,15 @@ Out-of-range values revert to defaults with a warning. **JSON config requires a 
 | [Main/Features/Messengers/MessengerSettingsProvider.cs](../../Main/Features/Messengers/MessengerSettingsProvider.cs) | Reads `TaomSettings.Instance.*` |
 | [Main/Features/Messengers/IMessengerRandomSource.cs](../../Main/Features/Messengers/IMessengerRandomSource.cs) | Random-float contract (for accident roll testability) |
 | [Main/Features/Messengers/MessengerRandomSource.cs](../../Main/Features/Messengers/MessengerRandomSource.cs) | `MBRandom.RandomFloat` wrapper |
-| [Main/Features/Messengers/Domain/HeroSnapshot.cs](../../Main/Features/Messengers/Domain/HeroSnapshot.cs) | Boundary POCO (10 hero properties) for validation |
-| [Main/Features/Messengers/Domain/MessengerValidationResult.cs](../../Main/Features/Messengers/Domain/MessengerValidationResult.cs) | 11-value rejection enum |
+| [Main/Features/Messengers/Domain/HeroSnapshot.cs](../../Main/Features/Messengers/Domain/HeroSnapshot.cs) | Boundary POCO (12 hero properties) for validation |
+| [Main/Features/Messengers/Domain/MessengerValidationResult.cs](../../Main/Features/Messengers/Domain/MessengerValidationResult.cs) | 13-value enum: Ok plus 12 rejections |
 | [Main/Features/Messengers/Domain/PendingMessenger.cs](../../Main/Features/Messengers/Domain/PendingMessenger.cs) | Saveable POCO + `Serialize`/`TryDeserialize` |
 | [Main/Features/Messengers/Domain/PositionUpdate.cs](../../Main/Features/Messengers/Domain/PositionUpdate.cs) | Service return struct (new position + arrived flag) |
 | [Main/Features/Messengers/Domain/MapCoord.cs](../../Main/Features/Messengers/Domain/MapCoord.cs) | TAOM-owned 2D map-coordinate struct — keeps the service/domain layers free of TaleWorlds types per ADR-007; the boundary (`MessengerCampaignBehavior`) converts to/from `Vec2` (NaN = invalid sentinel, `IsValid` matches `Vec2.IsValid` incl. ±Infinity rejection) |
 | [Main/Features/Messengers/MessengerCampaignBehavior.cs](../../Main/Features/Messengers/MessengerCampaignBehavior.cs) | Boundary: dialog tree, IMissionListener, encounter routing, `SyncData` |
+| [Main/Features/Messengers/MessengerTargetReader.cs](../../Main/Features/Messengers/MessengerTargetReader.cs) | The one engine read of a target: validation snapshot and quote input (#898) |
+| [Main/Features/Messengers/Domain/MessengerOffer.cs](../../Main/Features/Messengers/Domain/MessengerOffer.cs) | Verdict, quoted price and days for one target |
+| [Main/Features/Messengers/Domain/MessengerQuoteInput.cs](../../Main/Features/Messengers/Domain/MessengerQuoteInput.cs) | What the price depends on |
 | [Main/Features/Messengers/MessengerEntryPolicy.cs](../../Main/Features/Messengers/MessengerEntryPolicy.cs) | Pure rule: when entering the town would attach the player to an army (#898) |
 | [Main/Features/Messengers/MessengerSessionRulesModule.cs](../../Main/Features/Messengers/MessengerSessionRulesModule.cs) | Applies Patch117 at GameInit |
 | [Main/Features/Messengers/Hooks/MessengerSessionRulesPatch.cs](../../Main/Features/Messengers/Hooks/MessengerSessionRulesPatch.cs) | Patch117 postfix over six vanilla conditions |
@@ -123,8 +134,22 @@ Out-of-range values revert to defaults with a warning. **JSON config requires a 
 | [Client/Features/Messengers/UI/MessengerEncyclopediaPrefabExtension.cs](../../Client/Features/Messengers/UI/MessengerEncyclopediaPrefabExtension.cs) | UIExtenderEx prefab patch (button injection) |
 | [Client/Features/Messengers/UI/MessengerEncyclopediaMixin.cs](../../Client/Features/Messengers/UI/MessengerEncyclopediaMixin.cs) | UIExtenderEx VM mixin (data sources + click command) |
 | [Main/_Module/ModuleData/messengers/messenger_config.json](../../Main/_Module/ModuleData/messengers/messenger_config.json) | Advanced tuning |
-| [Main/_Module/ModuleData/taom_messenger_strings.xml](../../Main/_Module/ModuleData/taom_messenger_strings.xml) | EN base — 29 keys |
-| `Main/_Module/ModuleData/Languages/<LANG>/std_taom_messenger_strings_*.xml` | 12 language variants (BR/CNs/CNt/DE/FR/IT/JP/KO/PL/RU/SP/TR) — English placeholder text where untranslated |
+| [Main/_Module/ModuleData/taom_messenger_strings.xml](../../Main/_Module/ModuleData/taom_messenger_strings.xml) | EN base. Keys added since #898 live in `taom_module_strings.xml` (harvested by `tools/harvest_literal_loc_keys.py`) |
+| `Main/_Module/ModuleData/Languages/<LANG>/std_taom_messenger_strings_*.xml` | 12 language variants (BR/CNs/CNt/DE/FR/IT/JP/KO/PL/RU/SP/TR), English placeholder text where untranslated. The five keys added by #898 (`taom_enlist_not_by_messenger`, `taom_send_messenger_cost`, `taom_messenger_trip_days`, `taom_messenger_same_settlement`, `taom_messenger_same_army`) are in `taom_module_strings.xml` and its language files; their translation is owed in backlog #763. |
+
+## Pricing and refusals (#898)
+
+`MessengerService.QuoteCost` is pure. With `days = travelDays * clamp01(distance / (mapDiagonal * travelSpeedMultiplier))`:
+
+```
+cost = ceil((base + goldPerTravelDay * days) * (atWar ? atWarMultiplier : 1) * (neverMet ? neverMetMultiplier : 1) * (besieged ? besiegedMultiplier : 1))
+```
+
+The result is clamped to the base price at the low end and 100000 at the top. A NaN or negative distance (a target with no map position, such as an unspawned wanderer) and a map diagonal that is zero, negative or NaN count as a full trip. Config values that are not finite or are out of range revert to the defaults in the provider, with a warning; the service trusts the provider and keeps a NaN exit gate on the computed price (a non-finite result is the base price). The price is paid when the messenger leaves and never refunded, so it is not stored and the save format is unchanged.
+
+`MessengerTargetReader` is the one engine read: the validation snapshot and the quote input (distance between the two map points, `Campaign.MapDiagonal`, `FactionManager.IsAtWarAgainstFaction` (false for a null faction), `!Hero.HasMet`, `Settlement.IsUnderSiege`, and for the two "together" refusals `Army.DoesLeaderPartyAndAttachedPartiesContain`: both parties must be in the leader's group, so a lord still marching to join is not "in your army"). `MessengerCampaignBehavior.GetOffer` turns it into a `MessengerOffer` (verdict, price, days) for the dialog, the send and the encyclopedia button. A stranger is a surcharge, not a refusal.
+
+Refusals added to the validation ladder, after "in your party" and before the gold check: `SameSettlement` (the target is in the settlement the player is in) and `SameArmy` (the target is in the player's army). Each has a reason line the greyed button shows. The gold check compares against the quoted price, and "Not enough gold" names that price. The button reads "Send Messenger (N denars)"; the enabled hint says the messenger will take about N days ("1 day" when it is one), in a second hint inside the button. The two "together" refusals apply only to the remote send from the encyclopedia: the dialog line keeps its old behaviour, so a lord in the same hall is still offered the messenger line (`GetOffer(hero, inPerson: true)`). The "arrives within N days" notice still names the travel-days cap, since the straight-line estimate is not a promise.
 
 ## What a messenger conversation cannot do (#898)
 
@@ -154,7 +179,19 @@ Wanderer hiring and barter stay on purpose: remote hiring is intended, and a tra
 7. **Troop gift.** No Lord Courtesies troop gift line.
 8. **In an army, not attached.** Join a lord's army, stay unattached, send a messenger to a lord in a town where the army's leader is: the field conversation opens and the party does not attach.
 9. **The lord's hall.** A lord in a town and a lady in her home castle: the conversation opens in the hall, ends cleanly, and the party is back where it was.
-10. **In person.** Every line above is still there when you talk to the same people face to face.
+10. **Near lord.** A lord in the next town: the button shows about the base price, the hint says about 1 day.
+11. **Far lord.** A lord across the map: a higher price and a longer hint. 125 appears only corner to corner; a far lord shows less.
+12. **At war.** A lord of a kingdom at war with you: the price doubles.
+13. **Never met.** A hero you have not talked to: the price doubles and the button is still enabled.
+14. **Besieged.** A lord inside a besieged town: the price is five times.
+15. **Same settlement.** Stand in a town with a lord and open their page: the button is greyed with the reason line.
+16. **Same army.** Join a lord's army and open another member's page: greyed with the reason line.
+17. **Poor.** With less gold than the price: greyed, and the hint names the price.
+18. **Days hint.** Hover the enabled button: the hint says about N days, and "about 1 day" (singular) for a lord next door.
+19. **Still marching.** A lord who was called to your army but is still marching is not refused as "in your army".
+20. **Dispatch line in the hall.** The dispatch line still shows in a lord's hall conversation.
+21. **In person.** Checks 1 to 7 above are for the messenger; face to face, those lines are all still there.
+22. **In-person price.** In a lord's hall the dispatch line still shows, and its price still carries the war and siege surcharges. The design keeps this on purpose.
 
 ## Dependencies
 
@@ -164,49 +201,51 @@ Wanderer hiring and barter stay on purpose: remote hiring is intended, and a tra
 - `IMessengerRandomSource` — wraps `MBRandom.RandomFloat`
 - `IModLogger` (Core) — used by `MessengerConfigProvider` and `MessengerStateStore` for warnings
 - `IPathService` (Core) — used by `MessengerConfigProvider` to locate `messenger_config.json`
-- TaleWorlds (boundary only): `Hero`, `MobileParty`, `Settlement`, `PartyBase`, `PlayerEncounter`, `LocationComplex`, `Mission`, `IMissionListener`, `ConversationCharacterData`, `CampaignTime`, `CampaignVec2`, `Vec2`, `EnterSettlementAction`, `GiveGoldAction`, `CampaignEvents`, `CampaignEventDispatcher`, `MBTextManager`, `InformationManager`
+- TaleWorlds (boundary only): `Hero`, `MobileParty`, `Settlement`, `PartyBase`, `PlayerEncounter`, `LocationComplex`, `Mission`, `IMissionListener`, `ConversationCharacterData`, `CampaignTime`, `CampaignVec2`, `Vec2`, `EnterSettlementAction`, `GiveGoldAction`, `CampaignEvents`, `CampaignEventDispatcher`, `MBTextManager`, `InformationManager`, `FactionManager`, `Army` (the last two read in `MessengerTargetReader`)
 
 ## Tests
 
 Unit tests:
 
-- [TAOM.Tests/Features/Messengers/MessengerServiceTests.cs](../../TAOM.Tests/Features/Messengers/MessengerServiceTests.cs) — 26 tests covering all 11 `MessengerValidationResult` rejection paths, accident roll boundaries (p=0/1/disabled), position math edge cases (distance < / = / > speed; invalid target), speed calculation (zero/negative days clamping, multiplier).
-- [TAOM.Tests/Features/Messengers/MessengerStateStoreTests.cs](../../TAOM.Tests/Features/Messengers/MessengerStateStoreTests.cs) — 15 tests covering Add/Remove/Get/Contains/Clear, duplicate-id replacement, null/empty input, save roundtrip preserves all fields, malformed-on-load drops + warns.
-- [TAOM.Tests/Features/Messengers/MessengerConfigProviderTests.cs](../../TAOM.Tests/Features/Messengers/MessengerConfigProviderTests.cs) — 14 tests covering valid JSON, missing file, malformed JSON, every validation rule (negative chance, >1.0 chance, zero/negative speed mult, absurd speed mult), boundary values, partial JSON merge, caching, info-vs-warning logging.
-- [TAOM.Tests/Features/Messengers/MessengerEncyclopediaPrefabTests.cs](../../TAOM.Tests/Features/Messengers/MessengerEncyclopediaPrefabTests.cs): the button's shape (#944). The button sits in an always-enabled wrapper that holds the one hint, so the reason for a greyed button shows on hover.
+- [TAOM.Tests/Features/Messengers/MessengerServiceTests.cs](../../TAOM.Tests/Features/Messengers/MessengerServiceTests.cs): every `MessengerValidationResult` rejection path, the price quote (distance, multipliers, ceiling, bad inputs), accident roll boundaries (p=0/1/disabled), position math edge cases (distance < / = / > speed; invalid target), speed calculation (zero/negative days clamping, multiplier).
+- [TAOM.Tests/Features/Messengers/MessengerStateStoreTests.cs](../../TAOM.Tests/Features/Messengers/MessengerStateStoreTests.cs): Add/Remove/Get/Contains/Clear, duplicate-id replacement, null/empty input, save roundtrip preserves all fields, malformed-on-load drops + warns.
+- [TAOM.Tests/Features/Messengers/MessengerConfigProviderTests.cs](../../TAOM.Tests/Features/Messengers/MessengerConfigProviderTests.cs): valid JSON, missing file, malformed JSON, every validation rule (negative chance, >1.0 chance, zero/negative speed mult, absurd speed mult, the four pricing fields out of range and non-finite), boundary values, partial JSON merge, caching, info-vs-warning logging.
+- [TAOM.Tests/Features/Messengers/MessengerEncyclopediaPrefabTests.cs](../../TAOM.Tests/Features/Messengers/MessengerEncyclopediaPrefabTests.cs): the button's shape (#944). The button sits in an always-enabled wrapper whose hint shows the reason for a greyed button, and the button holds a second hint for the enabled state (the days), because an enabled button takes the hover.
+- [TAOM.Tests/Features/Messengers/MessengerShippedConfigTests.cs](../../TAOM.Tests/Features/Messengers/MessengerShippedConfigTests.cs): the shipped `messenger_config.json` equals the defaults and names every field.
 - [TAOM.Tests/Features/Messengers/MessengerSessionRulesPatchTests.cs](../../TAOM.Tests/Features/Messengers/MessengerSessionRulesPatchTests.cs): the postfix filter, the six targets and the JIT check against the installed DLLs (#898).
 - [TAOM.Tests/Features/Messengers/MessengerSessionRulesWiringTests.cs](../../TAOM.Tests/Features/Messengers/MessengerSessionRulesWiringTests.cs): one module line, Patch117 at GameInit, nothing registered by hand in `IoC.cs`.
-- [TAOM.Tests/Features/Messengers/MessengerCampaignBehaviorSourceTests.cs](../../TAOM.Tests/Features/Messengers/MessengerCampaignBehaviorSourceTests.cs): source pins on the recovery when opening throws or returns no mission, and on the cleanup `AbortConversation` schedules.
+- [TAOM.Tests/Features/Messengers/MessengerCampaignBehaviorSourceTests.cs](../../TAOM.Tests/Features/Messengers/MessengerCampaignBehaviorSourceTests.cs): source pins on the recovery when opening throws or returns no mission, the cleanup `AbortConversation` schedules, the one offer behind the dialog, the send and the button, the in-person dialog path, the quote reads (war, stranger, siege) and the mixin's remote send.
 - [TAOM.Tests/Features/Messengers/MessengerEntryPolicyTests.cs](../../TAOM.Tests/Features/Messengers/MessengerEntryPolicyTests.cs): the army-attach rule and the source pin on the settlement branch.
 
-The boundary classes (`MessengerCampaignBehavior`, the UI mixin, `MessengerSettingsProvider`, `MessengerRandomSource`, `MessengerIoC`) follow TAOM's "boundaries are not unit-tested" convention and are validated through manual game-testing (see GitHub issue #109 manual test plan).
+The boundary classes (`MessengerCampaignBehavior`, the UI mixin, `MessengerTargetReader`, `MessengerSettingsProvider`, `MessengerRandomSource`, `MessengerIoC`) follow TAOM's "boundaries are not unit-tested" convention and are validated through manual game-testing (see GitHub issue #109 manual test plan).
 
 ## How to add a new validation rejection reason
 
 1. Add the new value to `MessengerValidationResult` (e.g., `HeroRetired`).
 2. Add a corresponding skip-guard in `MessengerService.CanSendMessenger` returning the new value.
-3. Add a `case` to `MessengerCampaignBehavior.BuildValidationReason` that returns the player-facing `TextObject` with `{HERO_NAME}` substitution if needed.
-4. Add the localization key (`taom_messenger_<reason>`) to all 13 string files (1 EN base + 12 language variants).
+3. Add a `case` to `MessengerCampaignBehavior.GetReason(MessengerOffer, Hero)` that returns the player-facing `TextObject` with `{HERO_NAME}` substitution if needed.
+4. Add the localization key (`taom_messenger_<reason>`) as an inline `{=key}English` literal, then run `tools/harvest_literal_loc_keys.py --apply` and the seed-only translate step for the 12 languages (new keys land in `taom_module_strings.xml`).
 5. Add a unit test in `MessengerServiceTests` named `CanSendMessenger_<NewState>_Returns<NewEnum>`.
-6. Optionally extend `HeroSnapshot` if the new check needs a property not already exposed.
+6. Optionally extend `HeroSnapshot` (and `MessengerTargetReader.ReadSnapshot`, which fills it) if the new check needs a property not already exposed.
 
 ## How to add a new advanced tuning knob to messenger_config.json
 
 1. Add the property to `MessengerConfig.cs` with its default value.
 2. Add a validation block to `MessengerConfigProvider.Validate` (range-check, sign-check, revert-with-warning per the rule).
 3. Consume the new property in `MessengerService` (or wherever the consumer lives).
-4. Add a unit test in `MessengerConfigProviderTests` named `GetConfig_<InvalidVariant>_RevertsToDefaultAndWarns` for each validation rule, plus a boundary test.
+4. Add a unit test in `MessengerConfigProviderTests` named `GetConfig_<InvalidVariant>_RevertsToTheDefaultAndWarns` for each validation rule, plus a boundary test.
 5. Document the new field + range in the "JSON config" table above.
 
 ## Performance
 
 - `OnHourlyTick` uses a reusable `_toRemoveScratch` field (cleared per tick) instead of allocating `new List<string>()` each campaign hour.
 - `IMessengerStateStore.GetAll()` returns the live `Dictionary<,>.ValueCollection` (zero allocation).
-- `MessengerEncyclopediaMixin` caches the four state-independent `HintViewModel` instances at construction (`_emptyHint`, `_hintTargetUnavailable`, `_hintMessengersDisabled`, `_hintSystemUnavailable`); the rejection-reason hint is keyed by `MessengerValidationResult` and only re-allocated when the rejection class transitions.
+- `MessengerEncyclopediaMixin` builds the four fixed `HintViewModel` instances once (`_hintTargetUnavailable`, `_hintMessengersDisabled`, `_hintSystemUnavailable` and the empty initial one) and builds the label and the reason or days hint on every refresh; the page refreshes when it opens and after a click, never per frame.
 - `MessengerConfigProvider` and `MessengerSettingsProvider` are `Reuse.Singleton`; config is loaded once via `Lazy<>` at first access.
 
 ## Changelog
 
+- 2026-10-23: the price grows with the distance to the target and is higher for a war, a stranger and a besieged town; the button shows it and the hint shows about how many days; a target in the same settlement or army is refused with a reason (#898). The base price keeps its MCM id and default and is shown as "Base Gold Cost". Docs: the encyclopedia mixin has no `SendMessengerCost` data source, and `EnableMessengers` needs no restart.
 - 2026-10-23: a messenger conversation no longer offers the join-army lines, the board game, the clan troop and inventory exchange or the companion recall (Patch117); the enlist oath is greyed and the gift line is hidden there; a player in an army whose leader is in the target town gets the field conversation; a throw while opening recovers and rethrows (#898).
 - 2026-10-20: the Send Messenger hint for the disabled state now shows: the hint sits beside the button in an enabled wrapper, as vanilla's governor button does (#944).
 - 2026-10-20: added `IMessengerConversationState`, the open-conversation flag Lord Courtesies reads.

@@ -1099,6 +1099,11 @@ while the button is enabled; a "why is this greyed out" hint there can never app
   the hint, keep the button's inner hint for the enabled state, and pin the shape with a structural test (the hint's
   parent has no `IsEnabled` binding). Check the hover in game with the button disabled.
 - **Source:** `docs/reviews/rca-reeves-ledger-2026-10-19.md` finding 1.
+- **Repeat (Messengers, #898, 2026-10-23):** the Send Messenger button lost its inner hint in #944, which fixed only
+  the disabled state. Its new "about N days" hint was then bound to the outer one and never showed on the enabled
+  button. The structural test pinned the outer hint and asserted that no inner hint exists. So a fix for one state
+  needs a test for both: a hint inside the button for the enabled state, and one on the wrapper for the disabled
+  state (`docs/reviews/rca-messenger-pricing-2026-10-23.md` finding 1).
 ### Any English edit on a seeded key edits all 12 rows by hand, and a per-feature wording test pins them (#864, 2026-10-20)
 Good Deeds changed "honour" to "honor" after its keys were seeded. Harvest skips registered keys and `--sync-ids` only
 appends, so no tool rewrites an existing row: the change was 13 hand edits (English plus 12 languages). The paid

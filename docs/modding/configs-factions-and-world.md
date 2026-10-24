@@ -187,12 +187,16 @@ Keys prefixed `_comment` are notes in the shipped file and are ignored by the de
 | `excludeHeroIds` | string[] | no | empty | Evaluated first; beats the rule and both include lists | `UncapturableHeroesConfig.cs:43` |
 | `announceEscape` | bool | no | `true` | Write the campaign message-feed line on an escape | `UncapturableHeroesConfig.cs:48` |
 
-<!-- engine-ref type="TAOM.Features.Messengers.MessengerConfig" file="Main/Features/Messengers/MessengerConfig.cs" lines="5-6" -->
+<!-- engine-ref type="TAOM.Features.Messengers.MessengerConfig" file="Main/Features/Messengers/MessengerConfig.cs" lines="5-19" -->
 
 | Attribute (`messenger_config.json`) | Type | Required | Default when absent | What it does | Read at (file:line) |
 |---|---|---|---|---|---|
 | `accidentChancePerHour` | float | no | `0.002` | Per-hour ambush probability; valid 0.0 to 1.0 | `MessengerConfig.cs:5` |
-| `travelSpeedMultiplier` | float | no | `1.0` | Multiplies per-hour travel speed; valid 0.1 to 10.0 | `MessengerConfig.cs:6` |
+| `travelSpeedMultiplier` | float | no | `1.0` | Multiplies per-hour travel speed and so scales the price; valid 0.1 to 10.0 | `MessengerConfig.cs:6` |
+| `goldPerTravelDay` | float | no | `25.0` | Denars added to the base price per in-game day of the trip; valid 0 to 1000 | `MessengerConfig.cs:9` |
+| `atWarMultiplier` | float | no | `2.0` | Price multiplier when the target is at war with the player; valid 1 to 10 | `MessengerConfig.cs:12` |
+| `neverMetMultiplier` | float | no | `2.0` | Price multiplier when the player has never met the target; valid 1 to 10 | `MessengerConfig.cs:15` |
+| `besiegedMultiplier` | float | no | `5.0` | Price multiplier when the target is in a besieged settlement; valid 1 to 10 | `MessengerConfig.cs:18` |
 
 ### Coverage: what a new kingdom id must gain
 

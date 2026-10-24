@@ -11,31 +11,24 @@ namespace TAOM.Features.Messengers.UI;
 [ViewModelMixin("RefreshValues")]
 internal sealed class MessengerEncyclopediaMixin : BaseViewModelMixin<EncyclopediaHeroPageVM>
 {
-    private readonly IMessengerService _service;
     private readonly IMessengerSettingsProvider _settings;
 
-    // Cached hint instances — avoids HintViewModel + TextObject allocation on every encyclopedia refresh.
-    private readonly HintViewModel _emptyHint = new HintViewModel();
+    // Fixed hints built once. The page refreshes when it opens and after a click, never per frame.
     private readonly HintViewModel _hintTargetUnavailable;
     private readonly HintViewModel _hintMessengersDisabled;
     private readonly HintViewModel _hintSystemUnavailable;
 
-    // Last-state tracker keys the rejection-reason hint by validation result so we don't allocate a fresh
-    // HintViewModel + TextObject on every refresh when the same reason still applies.
-    private Domain.MessengerValidationResult _lastValidationResult = Domain.MessengerValidationResult.Ok;
-    private HintViewModel? _lastReasonHint;
     private bool _isMessengerAvailable;
     private HintViewModel _sendMessengerHint;
     private string _sendMessengerActionName = "";
 
     public MessengerEncyclopediaMixin(EncyclopediaHeroPageVM viewModel) : base(viewModel)
     {
-        _service = TAOM.IoC.Resolve<IMessengerService>();
         _settings = TAOM.IoC.Resolve<IMessengerSettingsProvider>();
         _hintTargetUnavailable = new HintViewModel(new TextObject("{=taom_messenger_target_unavailable}This person cannot be reached by messenger at this time."));
         _hintMessengersDisabled = new HintViewModel(new TextObject("{=taom_messenger_disabled}The messenger system is disabled in settings."));
         _hintSystemUnavailable = new HintViewModel(new TextObject("{=taom_messenger_not_available}Messenger system not available."));
-        _sendMessengerHint = _emptyHint;
+        _sendMessengerHint = new HintViewModel();
         _sendMessengerActionName = new TextObject("{=taom_send_messenger}Send Messenger").ToString();
     }
 
@@ -78,47 +71,26 @@ internal sealed class MessengerEncyclopediaMixin : BaseViewModelMixin<Encycloped
             return;
         }
 
-        // Use the service result enum (not the TextObject form) to key the hint cache — same enum value
-        // means same reason text, so we can reuse the previous HintViewModel.
-        var validation = _service.CanSendMessenger(SnapshotForMixin(hero), Hero.MainHero?.Gold ?? 0);
-        var canSend = validation == Domain.MessengerValidationResult.Ok;
-        IsMessengerAvailable = canSend;
+        // One look at the target (verdict, price, days) from the core boundary; the button shows the price and the
+        // hint explains a refusal or says about how long the trip takes.
+        var offer = behavior.GetOffer(hero, inPerson: false);
+        IsMessengerAvailable = offer.CanSend;
 
-        if (canSend)
+        var name = new TextObject("{=taom_send_messenger_cost}Send Messenger ({COST} denars)");
+        name.SetTextVariable("COST", offer.Cost);
+        SendMessengerActionName = name.ToString();
+
+        if (offer.CanSend)
         {
-            SendMessengerHint = _emptyHint;
-            _lastValidationResult = Domain.MessengerValidationResult.Ok;
-            return;
+            var days = new TextObject("{=taom_messenger_trip_days}The messenger will take about {DAYS} {?IS_PLURAL}days{?}day{\\?}.");
+            days.SetTextVariable("DAYS", offer.Days);
+            days.SetTextVariable("IS_PLURAL", offer.Days > 1 ? 1 : 0);
+            SendMessengerHint = new HintViewModel(days);
         }
-
-        if (validation != _lastValidationResult || _lastReasonHint == null)
+        else
         {
-            _lastValidationResult = validation;
-            // Re-fetch the rich reason (with HERO_NAME / COST variables) only when the rejection class changes.
-            behavior.CanSendMessenger(hero, out var reason);
-            _lastReasonHint = new HintViewModel(reason);
+            SendMessengerHint = new HintViewModel(behavior.GetReason(offer, hero));
         }
-        SendMessengerHint = _lastReasonHint;
-    }
-
-    // The one caller has already returned for a null hero, so the snapshot always exists.
-    private static Domain.HeroSnapshot SnapshotForMixin(Hero hero)
-    {
-        var inPlayerParty = hero.PartyBelongedTo != null
-                            && Hero.MainHero?.PartyBelongedTo != null
-                            && hero.PartyBelongedTo == Hero.MainHero.PartyBelongedTo;
-        var inMapEvent = hero.PartyBelongedTo?.MapEvent != null;
-        return new Domain.HeroSnapshot(
-            heroId: hero.StringId,
-            isAlive: hero.IsAlive,
-            isPrisoner: hero.IsPrisoner,
-            isChild: hero.IsChild,
-            isFugitive: hero.IsFugitive,
-            isActive: hero.IsActive,
-            isWanderer: hero.IsWanderer,
-            isHumanPlayerCharacter: hero.IsHumanPlayerCharacter,
-            isInPlayerParty: inPlayerParty,
-            isInMapEvent: inMapEvent);
     }
 
     [DataSourceMethod]
@@ -128,7 +100,7 @@ internal sealed class MessengerEncyclopediaMixin : BaseViewModelMixin<Encycloped
         if (hero == null) return;
 
         var behavior = Campaign.Current?.GetCampaignBehavior<MessengerCampaignBehavior>();
-        behavior?.SendMessenger(hero);
+        behavior?.SendMessenger(hero, inPerson: false);
         OnRefresh();
     }
 

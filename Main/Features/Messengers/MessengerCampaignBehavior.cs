@@ -94,7 +94,8 @@ public class MessengerCampaignBehavior : CampaignBehaviorBase, IMissionListener
 
     // --- Public API (callable by other features) ---
 
-    public void SendMessenger(Hero targetHero)
+    /// <param name="inPerson">True from the dialog line; see <see cref="GetOffer"/>.</param>
+    public void SendMessenger(Hero targetHero, bool inPerson)
     {
         // CO-OP: refuse on a client. Sending charges gold immediately and queues the messenger in
         // the SyncData-backed store, but OnHourlyTick — the only thing that ever delivers it — is
@@ -110,19 +111,18 @@ public class MessengerCampaignBehavior : CampaignBehaviorBase, IMissionListener
         // must short-circuit dispatch in addition to behavior registration.
         if (!_settings.EnableMessengers) return;
 
-        var snapshot = SnapshotHero(targetHero);
-        var playerGold = Hero.MainHero?.Gold ?? 0;
-        var validation = _service.CanSendMessenger(snapshot, playerGold);
-        if (validation != MessengerValidationResult.Ok)
+        var offer = GetOffer(targetHero, inPerson);
+        if (!offer.CanSend)
         {
             ShowInquiry(
                 new TextObject("{=taom_messenger_cannot_send}Cannot Send Messenger").ToString(),
-                BuildValidationReason(validation, targetHero).ToString(),
+                GetReason(offer, targetHero).ToString(),
                 affirmative: GameTexts.FindText("str_ok").ToString());
             return;
         }
 
-        GiveGoldAction.ApplyBetweenCharacters(Hero.MainHero, null, _settings.MessengerGoldCost, false);
+        // The price is not stored: it is paid now and never refunded, so the save format is unchanged.
+        GiveGoldAction.ApplyBetweenCharacters(Hero.MainHero, null, offer.Cost, false);
 
         var startVec = Hero.MainHero?.GetMapPoint()?.Position.ToVec2() ?? Vec2.Zero;
         var messenger = new PendingMessenger(
@@ -141,22 +141,19 @@ public class MessengerCampaignBehavior : CampaignBehaviorBase, IMissionListener
             affirmative: GameTexts.FindText("str_ok").ToString());
     }
 
-    public bool CanSendMessenger(Hero targetHero, out TextObject reason)
+    /// <summary>
+    /// The one look at a target that the dialog, the send and the encyclopedia button share (#898): the verdict, the
+    /// quoted price and the days the trip takes. The caller has already checked the MCM toggle. <paramref name="inPerson"/>
+    /// is true for the dialog line, where the player is already with the hero, so being in the same settlement or army is
+    /// no reason to refuse; the remote send from the encyclopedia passes false.
+    /// </summary>
+    public MessengerOffer GetOffer(Hero targetHero, bool inPerson)
     {
-        if (!_settings.EnableMessengers)
-        {
-            reason = new TextObject("{=taom_messenger_disabled}The messenger system is disabled in settings.");
-            return false;
-        }
-
-        var validation = _service.CanSendMessenger(SnapshotHero(targetHero), Hero.MainHero?.Gold ?? 0);
-        if (validation == MessengerValidationResult.Ok)
-        {
-            reason = TextObject.GetEmpty();
-            return true;
-        }
-        reason = BuildValidationReason(validation, targetHero);
-        return false;
+        return _service.GetOffer(
+            MessengerTargetReader.ReadSnapshot(targetHero),
+            MessengerTargetReader.ReadQuoteInput(targetHero, _settings.MessengerTravelDays),
+            Hero.MainHero?.Gold ?? 0,
+            inPerson);
     }
 
     // --- Lifecycle ---
@@ -556,7 +553,7 @@ public class MessengerCampaignBehavior : CampaignBehaviorBase, IMissionListener
             "taom_messenger_send_choice",
             "taom_messenger_dialog_sent",
             "{=taom_messenger_dialog_send}Send the messenger ({COST} denars)",
-            DialogCondition_HasGold,
+            DialogCondition_CanSendAtQuote,
             DialogConsequence_DispatchMessenger);
 
         starter.AddPlayerLine(
@@ -586,25 +583,28 @@ public class MessengerCampaignBehavior : CampaignBehaviorBase, IMissionListener
         if (!_settings.EnableMessengers) return false;
         var hero = Hero.OneToOneConversationHero;
         if (hero == null) return false;
-        return _service.CanSendMessenger(SnapshotHero(hero), Hero.MainHero?.Gold ?? 0) == MessengerValidationResult.Ok;
+        return GetOffer(hero, inPerson: true).CanSend;
     }
 
-    private bool DialogCondition_HasGold()
+    private bool DialogCondition_CanSendAtQuote()
     {
         // Codex review #34 round 2: the initial dialog line gates on EnableMessengers via DialogCondition_CanSend,
         // but the MCM toggle can flip OFF between accept and the cost line. If we don't re-check here, the player
         // can pick "Send the messenger" → SendMessenger silently no-ops → dialog still advances to the success
         // line "I'll be expecting your messenger then." Re-validating here keeps the gate honest.
         if (!_settings.EnableMessengers) return false;
-        MBTextManager.SetTextVariable("COST", _settings.MessengerGoldCost.ToString());
-        return (Hero.MainHero?.Gold ?? 0) >= _settings.MessengerGoldCost;
+        var hero = Hero.OneToOneConversationHero;
+        if (hero == null) return false;
+        var offer = GetOffer(hero, inPerson: true);
+        MBTextManager.SetTextVariable("COST", offer.Cost.ToString());
+        return offer.CanSend;
     }
 
     private void DialogConsequence_DispatchMessenger()
     {
         var hero = Hero.OneToOneConversationHero;
         if (hero == null) return;
-        SendMessenger(hero);
+        SendMessenger(hero, inPerson: true);
     }
 
     // --- Helpers ---
@@ -613,26 +613,6 @@ public class MessengerCampaignBehavior : CampaignBehaviorBase, IMissionListener
     {
         if (string.IsNullOrEmpty(heroId)) return null;
         return Hero.FindFirst(h => h != null && h.StringId == heroId);
-    }
-
-    private static HeroSnapshot SnapshotHero(Hero hero)
-    {
-        if (hero == null) return null;
-        var inPlayerParty = hero.PartyBelongedTo != null
-                            && Hero.MainHero?.PartyBelongedTo != null
-                            && hero.PartyBelongedTo == Hero.MainHero.PartyBelongedTo;
-        var inMapEvent = hero.PartyBelongedTo?.MapEvent != null;
-        return new HeroSnapshot(
-            heroId: hero.StringId,
-            isAlive: hero.IsAlive,
-            isPrisoner: hero.IsPrisoner,
-            isChild: hero.IsChild,
-            isFugitive: hero.IsFugitive,
-            isActive: hero.IsActive,
-            isWanderer: hero.IsWanderer,
-            isHumanPlayerCharacter: hero.IsHumanPlayerCharacter,
-            isInPlayerParty: inPlayerParty,
-            isInMapEvent: inMapEvent);
     }
 
     private static bool IsTargetAvailableNow(Hero hero)
@@ -649,17 +629,18 @@ public class MessengerCampaignBehavior : CampaignBehaviorBase, IMissionListener
         return false;
     }
 
-    private TextObject BuildValidationReason(MessengerValidationResult result, Hero target)
+    /// <summary>The line that explains why <paramref name="offer"/> cannot be sent, for the greyed button.</summary>
+    public TextObject GetReason(MessengerOffer offer, Hero target)
     {
         TextObject text;
-        switch (result)
+        switch (offer.Validation)
         {
             case MessengerValidationResult.NullTarget:
             case MessengerValidationResult.HumanPlayerCharacter:
                 return new TextObject("{=taom_messenger_invalid_target}Invalid target.");
             case MessengerValidationResult.InsufficientGold:
                 text = new TextObject("{=taom_messenger_no_gold}Not enough gold! You need {COST} denars.");
-                text.SetTextVariable("COST", _settings.MessengerGoldCost);
+                text.SetTextVariable("COST", offer.Cost);
                 return text;
             case MessengerValidationResult.AlreadyPending:
                 return new TextObject("{=taom_messenger_already_sent}A messenger has already been dispatched to this person.");
@@ -681,6 +662,14 @@ public class MessengerCampaignBehavior : CampaignBehaviorBase, IMissionListener
                 return text;
             case MessengerValidationResult.TargetInPlayerParty:
                 text = new TextObject("{=taom_messenger_confused}The messenger seems confused — they were trying to reach someone in your own party!");
+                text.SetTextVariable("HERO_NAME", target?.Name ?? new TextObject(""));
+                return text;
+            case MessengerValidationResult.SameSettlement:
+                text = new TextObject("{=taom_messenger_same_settlement}{HERO_NAME} is here with you. Speak to them instead.");
+                text.SetTextVariable("HERO_NAME", target?.Name ?? new TextObject(""));
+                return text;
+            case MessengerValidationResult.SameArmy:
+                text = new TextObject("{=taom_messenger_same_army}{HERO_NAME} marches in your army. Speak to them instead.");
                 text.SetTextVariable("HERO_NAME", target?.Name ?? new TextObject(""));
                 return text;
             default:

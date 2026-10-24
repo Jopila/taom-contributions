@@ -6660,6 +6660,14 @@
     <string id="taom_keep_wardens_hint" text="A castle with a built Guard House fields one patrol party of its owner's culture at a time, as a town does: stronger at each Guard House level. A lost patrol is replaced after 10, 8 or 6 days (castle_patrols.json). When off, no new castle patrol is queued, and the game's daily check removes the castle patrols already out. Default: on." />
     <string id="taom_enlist_not_by_messenger" text="Swear service in person, not through a messenger." />
 
+    <string id="taom_send_messenger_cost" text="Send Messenger ({COST} denars)" />
+
+    <string id="taom_messenger_trip_days" text="The messenger will take about {DAYS} {?IS_PLURAL}days{?}day{\?}." />
+
+    <string id="taom_messenger_same_settlement" text="{HERO_NAME} is here with you. Speak to them instead." />
+
+    <string id="taom_messenger_same_army" text="{HERO_NAME} marches in your army. Speak to them instead." />
+
   </strings>
 
 </base>
