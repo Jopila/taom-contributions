@@ -2243,6 +2243,17 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Tribute Envoys", Order = 4, RequireRestart = false,
         HintText = "When enabled (default), a host that rides against your kingdom sends an envoy a day or two later, if your clan owns villages and you are not enlisted. The envoy asks for gold, at a price that grows with your villages and with each envoy you have seized. Pay and the host raids none of your clan's villages and never attacks your party; haggle once (a Charm roll) when the tribute is large; ask for time; refuse; or seize the envoy, after which that side's next host rides against your kingdom first. Shown only while the map is free. When off, no envoy is scheduled or shown. Single player only. Applies at once, no restart.")]
     public bool FireAndTributeEnvoys { get; set; } = true;
+
+    // --- Help Unlooked-For (docs/features/unlooked-for-aid.md, #872) ---
+    //
+    // Read live on the AI worker thread and the main thread, once per avoid question, through the settings object
+    // the provider captured on the main thread when the model was built; RequireRestart = false. GroupOrder 68 is
+    // unused; it is the group's first property, so it carries the order (MCM ignores a GroupOrder on any later one).
+
+    [SettingPropertyGroup("World/Help Unlooked-For", GroupOrder = 68)]
+    [SettingPropertyBool("Lords stop fleeing sieges", Order = 0, RequireRestart = false,
+        HintText = "When enabled (default), an AI lord stops running from an army that besieges a settlement when the lord, with its army if it leads one or is attached to it, is at least half as strong as the entire siege camp (0.5 by default, unlooked_for_aid.json). Lords can then pass a siege or gather near it. A lord shut inside a besieged settlement is never fled from, whatever the strengths. A weaker lord still flees, so it is not caught when the siege lifts beside it. At a siege you lead, AI lords keep the base game behaviour. Caravans, villagers, bandits, patrols and garrisons are unchanged. When off, lords flee exactly as in the base game. Applies at once, no restart.")]
+    public bool EnableUnlookedForAid { get; set; } = true;
     // --- Bonds of Battle (relations earned on campaign, docs/features/bonds-of-battle.md) ---
     //
     // Every value is read live where it is used (at a battle's end, a troop hand-over, a barter), so nothing is applied once

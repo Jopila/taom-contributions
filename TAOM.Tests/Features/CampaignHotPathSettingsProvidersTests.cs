@@ -33,6 +33,7 @@ using TAOM.Features.RealmBorders;
 using TAOM.Features.ReevesLedger;
 using TAOM.Features.TimeAcceleration;
 using TAOM.Features.UnderTheEaves;
+using TAOM.Features.UnlookedForAid;
 using TAOM.Features.WarChronicle;
 using TAOM.Features.WatchfulHolds;
 using TAOM.Tests.Migration;
@@ -108,6 +109,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(FireAndTributeSettingsProvider))]
     // #887: read per foreign candidate per AI lord think (Patch114) and per notable per party-hour (TaomVolunteerModel).
     [DataRow(typeof(RecruitmentAlignmentSettingsProvider))]
+    // #872: read on the AI worker thread for every avoid question; the constructor takes the settings once, on the main thread.
+    [DataRow(typeof(UnlookedForAidSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -151,6 +154,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(ILongMemorySettingsProvider), typeof(LongMemorySettingsProvider))]
     [DataRow(typeof(ReevesLedgerSettingsProvider), typeof(ReevesLedgerSettingsProvider))]
     [DataRow(typeof(IFireAndTributeSettings), typeof(FireAndTributeSettingsProvider))]
+    [DataRow(typeof(IUnlookedForAidSettingsProvider), typeof(UnlookedForAidSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -517,6 +521,22 @@ public class CampaignHotPathSettingsProvidersTests
         Assert.IsTrue(sut.EvilHostsEnabled);
         Assert.IsTrue(sut.EnvoysEnabled);
     }
+
+    [TestMethod]
+    public void UnlookedForAid_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new UnlookedForAidSettingsProvider(mcm);
+        Assert.IsTrue(sut.Enabled);
+
+        mcm.EnableUnlookedForAid = false;
+
+        Assert.IsFalse(sut.Enabled);
+    }
+
+    [TestMethod]
+    public void UnlookedForAid_NoMcm_DefaultsOn()
+        => Assert.IsTrue(new UnlookedForAidSettingsProvider().Enabled);
 
     [TestMethod]
     public void Namegiving_ReadsThroughTheCachedSettings()
