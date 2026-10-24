@@ -1512,7 +1512,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Kingdom Politics/Fief Grants", GroupOrder = 42)]
     [SettingPropertyBool("Enable Fief Grant Rebalance", Order = 0, RequireRestart = false,
-        HintText = "Rebalances who gets a captured town or castle. Off = exact vanilla, where the ruling clan's +60 merit and its unlimited King's Vote override let it take fief after fief. Does not change starting ownership.")]
+        HintText = "Rebalances who gets a captured town or castle. Off = exact vanilla, where the ruling clan's +60 merit and its unlimited King's Vote override let it take fief after fief. Does not change starting ownership. The ballot's fief count shows either way.")]
     public bool EnableFiefGrantRebalance { get; set; } = true;
 
     [SettingPropertyGroup("Kingdom Politics/Fief Grants", GroupOrder = 42)]

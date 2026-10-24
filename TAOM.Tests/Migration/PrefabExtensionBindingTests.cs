@@ -103,6 +103,11 @@ public class PrefabExtensionBindingTests
                         $"{type.Name}: XPath matched 0 nodes in {path}{Environment.NewLine}"
                         + $"    xpath: {attr.XPath}{Environment.NewLine}"
                         + $"    first step that drops to zero: {FirstFailingStep(path, attr.XPath!)}");
+                else if (matches > 1)
+                    // UIExtenderEx patches only the first node SelectSingleNode returns, so a second match is silently left unpatched.
+                    failures.AppendLine(
+                        $"{type.Name}: XPath matched {matches} nodes in {path}, and UIExtenderEx patches only the first{Environment.NewLine}"
+                        + $"    xpath: {attr.XPath}");
             }
         }
 

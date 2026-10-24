@@ -118,7 +118,7 @@
 			<_Parameter1>TAOM_Online</_Parameter1>
 		</AssemblyAttribute>
 		<!-- ADR-013: TAOM.Client is core's friend, not a dependency; core never references it
-		     (ClientIsolationGateTests). The moved screen extensions use ten core internals (B5), and the supply route visual an eleventh (SupplyCaravanService.ComputeNavPathPoints, B7); Bill's Burden's map-bar row two more (CargoFillCalculator, CargoFill, #876). -->
+		     (ClientIsolationGateTests). The moved screen extensions use several core internals. -->
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
 			<_Parameter1>TAOM.Client</_Parameter1>
 		</AssemblyAttribute>

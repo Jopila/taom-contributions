@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Library;
@@ -43,7 +45,7 @@ internal static class FiefGrantFactsBuilder
                              && clan.Culture == settlementCulture;
 
         return new FiefGrantCandidateFacts(
-            CountFortifications(clan.Settlements, contested),
+            CountClanFortifications(clan, contested),
             isRulingClan,
             share,
             recorded,
@@ -51,13 +53,25 @@ internal static class FiefGrantFactsBuilder
             clan == Clan.PlayerClan);
     }
 
-    /// <summary>Fortifications a clan holds, excluding the contested one.</summary>
+    /// <summary>Fortifications a clan holds, excluding the contested one. This is the scoring input <see cref="Build"/> uses.</summary>
     public static int CountClanFortifications(Clan clan, Settlement contested) =>
         CountFortifications(clan?.Settlements, contested);
+
+    /// <summary>
+    /// Names of the fortifications a clan holds, excluding the contested one (#866): the ballot's hover list. It shares
+    /// <see cref="EnumerateFortifications"/> with <see cref="CountClanFortifications"/>, so the count the scoring uses and the
+    /// list the player reads cannot drift apart.
+    /// </summary>
+    internal static IReadOnlyList<string> ClanFortificationNames(Clan clan, Settlement contested) =>
+        EnumerateFortifications(clan?.Settlements, contested).Select(s => s.Name?.ToString() ?? "").ToList();
 
     /// <summary>Fortifications a kingdom holds, excluding the contested one.</summary>
     public static int CountKingdomFortifications(Kingdom kingdom, Settlement contested) =>
         CountFortifications(kingdom?.Settlements, contested);
+
+    private static int CountFortifications(
+        MBReadOnlyList<Settlement> settlements, Settlement contested) =>
+        EnumerateFortifications(settlements, contested).Count();
 
     /// <summary>
     /// Both <c>Clan.Settlements</c> and <c>Kingdom.Settlements</c> include bound villages, so the
@@ -67,19 +81,16 @@ internal static class FiefGrantFactsBuilder
     /// a fief nobody has been granted yet. Excluding it on both sides of the King's Vote share keeps
     /// that ratio measuring fiefs already settled.
     /// </summary>
-    private static int CountFortifications(
+    private static IEnumerable<Settlement> EnumerateFortifications(
         MBReadOnlyList<Settlement> settlements, Settlement contested)
     {
-        if (settlements == null) return 0;
+        if (settlements == null) yield break;
 
-        var count = 0;
         for (var i = 0; i < settlements.Count; i++)
         {
             var settlement = settlements[i];
             if (settlement != null && settlement.IsFortification && settlement != contested)
-                count++;
+                yield return settlement;
         }
-
-        return count;
     }
 }

@@ -7,7 +7,8 @@ new owner, and this feature rewrites the scoring that decides it: the clans that
 the assault get a claim in proportion to how much they fought, clans that were not there are damped,
 clans already sitting on many holdings are damped, clans of the settlement's own culture are
 favoured, and a ruling clan that already holds most of the kingdom loses its right to overrule the
-council. All weights are player-editable through MCM.
+council. All weights are player-editable through MCM. Each candidate card of a fief vote also shows the
+clan's fortification count, with a hover list of the fiefs (#866).
 
 Also ships a one-time data pass that spread starting fief ownership in three kingdoms that opened
 every campaign with a single clan holding every fortification.
@@ -294,7 +295,49 @@ MCM (TaomSettings, group "Kingdom Politics/Fief Grants")
         |                                                  claim, when vanilla opens a claim)
         |
   vanilla SettlementClaimantDecision.CalculateMeritOfOutcome (kept, multiplied)
+
+  ballot (read-only, #866, TAOM.Client)
+  DecisionOptionVM  --mixin-->  DecisionOptionFiefCountMixin  --names, count-->  FiefGrantFactsBuilder
+        |                                |                                       (the scoring's own enumeration)
+  KingdomDecisionOptionItem  <--prefab-- DecisionOptionFiefCountPrefab        FiefGrantBallotTexts (player text)
 ```
+
+### The ballot shows holdings (#866)
+
+Each candidate card of a fief vote carries a row under it: "Current fiefs: N", with a hover that
+lists the clan's towns and castles by name, sorted. A clan with none reads "Holds no town or castle."
+It explains why a clan ranks low (the concentration damping above) without changing any score.
+
+- **Scoring is untouched.** The concentration term already multiplies merit by `1/(1 + 0.35n)` from the
+  first fortification, on top of vanilla's divide-by-other-fortification-value and the landless `+30`.
+  Stacking a second soft cap would double-damp and shift the support. Tuning stays on Concentration
+  Penalty.
+- **One enumeration.** `FiefGrantFactsBuilder` counts and names fortifications from the same private
+  iterator (towns and castles, bound villages and the fief under vote excluded), and `Build` takes its
+  count from `CountClanFortifications`, so the number on the card equals the count the scoring used.
+  Vanilla's merit divides by the value of the clan's other fortifications plus the fief's own, which is
+  why the fief under vote is left out of the count. A clan that already owns the fief under vote (the
+  ruler after a siege) gets one extra line, "Not counting <fief>, the fief under vote". The hover sorts
+  names ignoring case with the invariant culture, which the game pins, so the order is the same on every
+  machine.
+- **Where it shows.** `SettlementClaimantDecision` ballots only, which includes
+  `TaomSettlementClaimantDecision`. Hidden on the abstain card (no outcome) and on every other
+  decision type, since vanilla uses one option template for all of them. Shown even with Enable Fief
+  Grant Rebalance off, because the count is a fact about the clan, not about the scoring.
+- **Mixin and prefab.** `DecisionOptionFiefCountMixin` (a `DecisionOptionVM` mixin refreshed from
+  `RefreshValues`) exposes `ShowFiefCount`, `FiefCountText` and `FiefCountHint`.
+  `DecisionOptionFiefCountPrefab` appends one row to `KingdomDecisionOptionItem` after the card
+  Widget, outside the selection `ButtonWidget`, so a disabled card still hovers (Gauntlet never hovers a
+  disabled widget; a card is disabled when the player lacks the influence to back it, and every card once
+  the ruler has chosen). The row is vanilla's own shape (`Inventory.xml`): one `TextWidget` with a
+  `HintWidget` child that relays its hover and needs no size. A `StretchToParent` child of a
+  `CoverChildren` panel fills all the space the parent is offered. The XPath reaches the card Widget through its
+  button: `descendant::ButtonWidget[@Command.Click='ExecuteSelection']/parent::Children/parent::Widget`.
+  `OptionHint` is not reused, because `RefreshCanChooseOption` overwrites it. No sprite is used; the
+  text takes the vanilla `Kingdom.DecisionParagraph.Text` brush.
+- **Co-op.** Read-only: no random draws, no change to the election, no suppressed UI. A dedicated
+  server never loads `TAOM.Client`.
+- **Owed in game.** See the smoke tests for #866 at the end of this page.
 
 ## Configuration
 
@@ -340,7 +383,7 @@ policy's `ApplyPenaltiesToPlayerClan`, so the policy and its tests did not churn
 | `Main/Features/FiefGranting/FiefGrantPolicyService.cs` | Scoring policy, pure over primitives |
 | `Main/Features/FiefGranting/IFiefGrantPolicyService.cs` | Service interface |
 | `Main/Features/FiefGranting/FiefGrantCandidateFacts.cs` | Primitive snapshot of one candidate clan |
-| `Main/Features/FiefGranting/FiefGrantFactsBuilder.cs` | Boundary conversion: counts holdings, reads the participation share |
+| `Main/Features/FiefGranting/FiefGrantFactsBuilder.cs` | Boundary conversion: counts holdings, reads the participation share, and names the fortifications for the ballot (`ClanFortificationNames`) from the iterator the scoring count uses (#866) |
 | `Main/Features/FiefGranting/FiefSiegeParticipationService.cs` | Per-settlement record of who fought and how much (#565) |
 | `Main/Features/FiefGranting/FiefSiegeCaptureRules.cs` | The engine-derived rules: which battles capture, which clans may claim, when vanilla opens a claim (#565) |
 | `Main/Features/FiefGranting/IFiefSiegeParticipationService.cs` | Record interface |
@@ -352,6 +395,9 @@ policy's `ApplyPenaltiesToPlayerClan`, so the policy and its tests did not churn
 | `Main/Features/FiefGranting/Hooks/Patch70_FiefGrantDecisionSwap.cs` | Instance swap on `Kingdom.AddDecision` |
 | `Main/Features/FiefGranting/FiefGrantingIoC.cs` | DryIoc registration |
 | `tools/apply_starting_fief_spread.py` | Starting-ownership data pass and its drift check |
+| `Main/Features/FiefGranting/UI/FiefGrantBallotTexts.cs` | The ballot row's player text, `taom_fiefgrant_ballot_*`; sorts the names |
+| `Client/Features/FiefGranting/UI/DecisionOptionFiefCountMixin.cs` | `DecisionOptionVM` mixin: row visibility, text and hover |
+| `Client/Features/FiefGranting/UI/DecisionOptionFiefCountPrefab.cs` | Appends the row to `KingdomDecisionOptionItem` |
 
 ## Dependencies
 
@@ -359,7 +405,9 @@ policy's `ApplyPenaltiesToPlayerClan`, so the policy and its tests did not churn
 - `ICoopSessionProvider` (CoopInterop) supplies `ShouldDeferToHost` for the swap and `IsAuthority`
   for the recorder
 - `IModLogger` (Core) for the one-shot fault report, the per-capture record line and the malformed
-  save-record warning
+  save-record warning, and for the ballot mixin's once-per-card fault line (resolved lazily)
+- UIExtenderEx and `TAOM.Client` for the ballot row: the mixin and prefab live in `Client/` and reach
+  the builder and the ballot text through `InternalsVisibleTo`
 
 ## Save compatibility
 
@@ -433,6 +481,21 @@ a separate design question, deliberately out of scope.
   lookups (`PartyBase.MobileParty`, `MobileParty.ActualClan`, `MobileParty.Owner`,
   `Clan.IsUnderMercenaryService`), and the two `CampaignEvents` the recorder listens to including
   the six-argument owner-changed signature and the `BySiege` detail.
+- `TAOM.Tests/Features/FiefGranting/FiefGrantFactsBuilderNamesTests.cs`: on bare engine objects, the
+  names list every fortification except the contested one and no village, the scoring count equals
+  the names list, and a source pin that `Build` takes its count from `CountClanFortifications`
+  (`Build` itself reads `Clan.PlayerClan`, which needs a campaign).
+- `TAOM.Tests/Features/FiefGranting/FiefGrantBallotTextsTests.cs`: the count line, the hover with
+  names sorted ignoring case, the no-fortification line, and the not-counted line only when given.
+- `TAOM.Tests/Features/FiefGranting/DecisionOptionFiefCountMixinTests.cs`: on uninitialized engine
+  objects, the row shows for a claimant ballot with its text and hover, shows the not-counted line
+  for the clan that owns the fief under vote, and hides on abstain, on a non-claimant decision and
+  after a fault.
+- `TAOM.Tests/Features/FiefGranting/DecisionOptionFiefCountPrefabTests.cs`: the extension attribute
+  and Append, one `TextWidget` row with a `HintWidget` child and no sprite, button or
+  `StretchToParent`, every binding resolving to a mixin or vanilla member (through the shared
+  `PrefabBindingWalker`), and (live install) the brush declared and the XPath match outside every
+  `ButtonWidget`. That the XPath matches exactly one node is `PrefabExtensionBindingTests`.
 
 ## How to retune the weights
 
@@ -469,6 +532,8 @@ covered by `SettingsFingerprint`.
 
 ## Changelog
 
+- 2026-10-23: #866. The fief-vote ballot shows each candidate clan's fortification count with a hover
+  list of names (a `DecisionOptionVM` mixin and one prefab append). No scoring change.
 - 2026-09-11: #565. Participation replaces the `Town.LastCapturedBy` stamp: a per-clan record of the
   winning assault, share-scaled bonus, a new Absent From Siege Factor, and the player exemption
   renamed so its new default (scored like any clan) reaches existing installs.
@@ -482,6 +547,8 @@ covered by `SettingsFingerprint`.
   behind #565 were that smoke test, and it failed.
 - **Issue:** #565, [Fief grants: players win fiefs from sieges they never joined](https://github.com/haterade22/TAOM/issues/565).
   Open until the smoke tests below pass.
+- **Issue:** #866, the fief-vote ballot shows each candidate's fief count and a hover list. Open until
+  the smoke tests for #866 below pass.
 - **Follow-up:** [#460](https://github.com/haterade22/TAOM/issues/460) carries the two design
   questions the first review surfaced (merit weights the election but does not decide it; the King's
   Vote cap binds AI rulers only). Unchanged by #565.
@@ -500,6 +567,17 @@ not yet verified to play right.
 3. Save between the capture and the election, reload, let the election run: the record survives.
 4. On an install that played the first version, Mod Options shows Exempt Your Clan From Penalties
    OFF without a reset.
+
+## Smoke tests owed (#866)
+
+1. Win a siege and open the fief vote. Every clan card shows "Current fiefs: N" under it.
+2. The cards stay inside the panel, and the win bars sit above the stage bar.
+3. Hover the count on an enabled card and on a disabled card: the list of fiefs appears on both.
+4. A landless clan reads "Current fiefs: 0" and its hover says it holds no town or castle.
+5. A clan with many fiefs lists them all, sorted, and the list fits on screen.
+6. The ruler's card, when the ruler's clan owns the fief under vote, ends its hover with
+   "Not counting <fief>, the fief under vote".
+7. The abstain card and a non-fief vote (war, peace, policy) show no row.
 
 ---
 

@@ -6,6 +6,7 @@ using System.Xml;
 using Bannerlord.UIExtenderEx.Attributes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Features.Namegiving.UI;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.Namegiving;
 
@@ -18,8 +19,6 @@ namespace TAOM.Tests.Features.Namegiving;
 [TestClass]
 public class NamegivingPrefabTests
 {
-    private const BindingFlags AnyInstance = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-
     private static readonly Type Vm = typeof(TaleWorlds.CampaignSystem.ViewModelCollection.KingdomManagement.KingdomManagementVM);
 
     private static List<XmlElement> Nodes()
@@ -93,75 +92,11 @@ public class NamegivingPrefabTests
     [TestMethod]
     public void EveryBindingCommandAndDataSource_ResolvesToAMixinOrVanillaMember()
     {
-        var failures = new List<string>();
-        var count = 0;
-        Walk(Nodes()[0], Vm, typeof(FiefNamingMixin), failures, ref count);
+        // One level up from the FiefsPanel's Settlement view model is the KingdomManagementVM: the scope the walk starts in.
+        var (failures, count) = PrefabBindingWalker.Walk(Nodes()[0], Vm, typeof(FiefNamingMixin), Vm, typeof(FiefNamingMixin));
 
         Assert.AreEqual(0, failures.Count, string.Join(Environment.NewLine, failures));
         Assert.IsTrue(count >= 10, "the walk found only " + count + " bindings; it is not reading the inserted XML");
-    }
-
-    private static void Walk(XmlElement element, Type scope, Type? mixin, List<string> failures, ref int count)
-    {
-        var dataSource = element.GetAttribute("DataSource");
-        if (dataSource.StartsWith("{", StringComparison.Ordinal))
-        {
-            count++;
-            var path = dataSource.Trim('{', '}');
-            if (path == "..")
-            {
-                // One level up from the FiefsPanel's Settlement view model is the KingdomManagementVM: the scope the walk started in.
-                scope = Vm;
-                mixin = typeof(FiefNamingMixin);
-            }
-            else
-            {
-                if (Find(scope, path, mixin) is not PropertyInfo property)
-                {
-                    failures.Add($"DataSource {dataSource} resolves to no property on {scope.Name} or its mixin.");
-                    return;
-                }
-
-                scope = property.PropertyType;
-                mixin = null;
-            }
-        }
-
-        foreach (XmlAttribute attribute in element.Attributes)
-        {
-            var isBinding = attribute.Value.StartsWith("@", StringComparison.Ordinal);
-            var isCommand = attribute.Name.StartsWith("Command.", StringComparison.Ordinal);
-            if (!isBinding && !isCommand)
-                continue;
-            count++;
-            var name = isBinding ? attribute.Value.Substring(1) : attribute.Value;
-            if (Find(scope, name, mixin) == null)
-                failures.Add($"{attribute.Name}=\"{attribute.Value}\" on <{element.Name}> resolves to no member of {scope.Name} or its mixin.");
-        }
-
-        foreach (var child in element.SelectNodes("Children/*")!.Cast<XmlElement>())
-            Walk(child, scope, mixin, failures, ref count);
-    }
-
-    // A mixin member counts only with its UIExtenderEx attribute; a vanilla member counts at any visibility.
-    private static MemberInfo? Find(Type scope, string name, Type? mixin)
-    {
-        if (mixin != null)
-        {
-            var onMixin = mixin.GetMember(name, BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(m => m.CustomAttributes.Any(a => a.AttributeType.Name == "DataSourceProperty" || a.AttributeType.Name == "DataSourceMethodAttribute"));
-            if (onMixin != null)
-                return onMixin;
-        }
-
-        for (var type = scope; type != null; type = type.BaseType)
-        {
-            var member = type.GetMember(name, AnyInstance).FirstOrDefault(m => m is PropertyInfo || m is MethodInfo);
-            if (member != null)
-                return member;
-        }
-
-        return null;
     }
 
     [TestMethod]

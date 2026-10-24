@@ -12,6 +12,7 @@ using TaleWorlds.CampaignSystem.ViewModelCollection.GameMenu.TownManagement;
 using TaleWorlds.Core.ViewModelCollection.Information;
 using TaleWorlds.Library;
 using TAOM.Features.ReevesLedger.UI;
+using TAOM.Tests.Infrastructure;
 using TAOM.Tests.Migration;
 using static TAOM.Tests.Infrastructure.RepoPaths;
 
@@ -27,8 +28,6 @@ namespace TAOM.Tests.Features.ReevesLedger;
 [TestClass]
 public class ReevesLedgerPrefabTests
 {
-    private const BindingFlags AnyInstance = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-
     private static readonly (Type Prefab, Type Mixin, Type Vm)[] Pairs =
     {
         (typeof(ReevesLedgerIconsPrefab), typeof(TownManagementLedgerMixin), typeof(TownManagementVM)),
@@ -114,66 +113,14 @@ public class ReevesLedgerPrefabTests
         var bindings = 0;
         foreach (var (prefab, mixin, vm) in Pairs)
             foreach (var node in NodesOf(prefab))
-                Walk(node, vm, mixin, prefab.Name, failures, ref bindings);
+            {
+                var (nodeFailures, nodeBindings) = PrefabBindingWalker.Walk(node, vm, mixin, owner: prefab.Name);
+                failures.AddRange(nodeFailures);
+                bindings += nodeBindings;
+            }
 
         Assert.AreEqual(0, failures.Count, string.Join(Environment.NewLine, failures));
         Assert.IsTrue(bindings >= 20, "the walk found only " + bindings + " bindings; it is not reading the inserted XML");
-    }
-
-    private static void Walk(XmlElement element, Type scope, Type? mixin, string owner, List<string> failures, ref int count)
-    {
-        // A DataSource on an element scopes the element's own bindings too.
-        var dataSource = element.GetAttribute("DataSource");
-        if (dataSource.StartsWith("{", StringComparison.Ordinal))
-        {
-            var member = Find(scope, dataSource.Trim('{', '}'), mixin);
-            count++;
-            if (member is not PropertyInfo property)
-            {
-                failures.Add($"{owner}: DataSource {dataSource} resolves to no property on {scope.Name} or its mixin.");
-                return;
-            }
-
-            scope = property.PropertyType;
-            mixin = null;
-        }
-
-        foreach (XmlAttribute attribute in element.Attributes)
-        {
-            var isBinding = attribute.Value.StartsWith("@", StringComparison.Ordinal);
-            var isCommand = attribute.Name.StartsWith("Command.", StringComparison.Ordinal);
-            if (!isBinding && !isCommand)
-                continue;
-            count++;
-            var name = isBinding ? attribute.Value.Substring(1) : attribute.Value;
-            if (Find(scope, name, mixin) == null)
-                failures.Add($"{owner}: {attribute.Name}=\"{attribute.Value}\" on <{element.Name}> resolves to no member of {scope.Name} or its mixin.");
-        }
-
-        foreach (var child in element.SelectNodes("Children/*")!.Cast<XmlElement>())
-            Walk(child, scope, mixin, owner, failures, ref count);
-    }
-
-    // A mixin member counts only with its UIExtenderEx attribute (the wrapper exposes nothing else); a vanilla member counts
-    // at any visibility, as the Gauntlet binder reads private view model methods too.
-    private static MemberInfo? Find(Type scope, string name, Type? mixin)
-    {
-        if (mixin != null)
-        {
-            var onMixin = mixin.GetMember(name, BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(m => m.CustomAttributes.Any(a => a.AttributeType == typeof(DataSourceProperty) || a.AttributeType == typeof(DataSourceMethodAttribute)));
-            if (onMixin != null)
-                return onMixin;
-        }
-
-        for (var type = scope; type != null; type = type.BaseType)
-        {
-            var member = type.GetMember(name, AnyInstance).FirstOrDefault(m => m is PropertyInfo || m is MethodInfo);
-            if (member != null)
-                return member;
-        }
-
-        return null;
     }
 
     [TestMethod]

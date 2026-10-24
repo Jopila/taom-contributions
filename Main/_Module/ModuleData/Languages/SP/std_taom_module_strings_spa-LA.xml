@@ -6553,6 +6553,13 @@
     <string id="taom_lod_rel_ex_husband" text="former husband" />
 
     <string id="taom_lod_rel_ex_wife" text="former wife" />
+    <string id="taom_fiefgrant_ballot_count" text="Current fiefs: {COUNT}" />
+
+    <string id="taom_fiefgrant_ballot_hint_title" text="Fiefs held" />
+
+    <string id="taom_fiefgrant_ballot_hint_none" text="Holds no town or castle." />
+
+    <string id="taom_fiefgrant_ballot_hint_excluded" text="Not counting {SETTLEMENT}, the fief under vote" />
 
   </strings>
 

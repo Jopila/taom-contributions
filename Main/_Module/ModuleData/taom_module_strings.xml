@@ -3848,4 +3848,11 @@
 	<string id="taom_lod_rel_sister" text="{=taom_lod_rel_sister}sister" />
 	<string id="taom_lod_rel_ex_husband" text="{=taom_lod_rel_ex_husband}former husband" />
 	<string id="taom_lod_rel_ex_wife" text="{=taom_lod_rel_ex_wife}former wife" />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- FiefGranting -->
+	<string id="taom_fiefgrant_ballot_count" text="{=taom_fiefgrant_ballot_count}Current fiefs: {COUNT}" />
+	<string id="taom_fiefgrant_ballot_hint_title" text="{=taom_fiefgrant_ballot_hint_title}Fiefs held" />
+	<string id="taom_fiefgrant_ballot_hint_none" text="{=taom_fiefgrant_ballot_hint_none}Holds no town or castle." />
+	<string id="taom_fiefgrant_ballot_hint_excluded" text="{=taom_fiefgrant_ballot_hint_excluded}Not counting {SETTLEMENT}, the fief under vote" />
+
 </strings>

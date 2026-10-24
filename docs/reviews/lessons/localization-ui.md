@@ -1195,3 +1195,12 @@ runs option A, the deliberate confirm.
 - **Prevent:** before wiring a `ShowTwoOptionInquiry`, decide which choice is harmless when dismissed and
   make that option B. Name the Escape option in the feature doc and pin which callback is B in a test.
 - **Source:** `docs/reviews/rca-enlistment-term-end-2026-10-23.md` F1.
+### A StretchToParent child of a CoverChildren panel fills the whole offered space (fief-vote count row, #866, 2026-10-23)
+The fief-count row was a `CoverChildren` `ListPanel` holding a `TextWidget` and a `HintWidget` with
+`StretchToParent` on both axes. A `StretchToParent` child of a `CoverChildren` stack panel is measured against the space the
+parent is offered, so the row can grow to fill the space the card layout offers. A `HintWidget` only relays
+its parent's hover, so it needs no size at all.
+- **Why missed:** the prefab test read bindings and attribute names, never size policies.
+- **Prevent:** use vanilla's shape (`Inventory.xml:471-475`): one `TextWidget` with a size-less `HintWidget` child. A test asserts
+  that no inserted element is `StretchToParent` and that the `HintWidget` has no size policy.
+- **Source:** `/deep-review` of #866; `DecisionOptionFiefCountPrefabTests`.
