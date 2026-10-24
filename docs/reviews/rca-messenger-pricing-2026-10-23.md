@@ -41,6 +41,20 @@ button state needs a structural test for both. Findings 2 and 3 are local to thi
 
 ## Follow-ups (older code, not in this change)
 
-- `MessengerCampaignBehavior.ResolveHero` scans every character with LINQ; `Hero.Find` walks only the hero lists. Unverified for a removed hero.
-- `MessengerConfigProvider`'s two older range checks can use the new `Checked` helper.
-- `HeroSnapshot.IsInMapEvent` has no reader.
+- `MessengerCampaignBehavior.ResolveHero` scans every character with LINQ; `Hero.Find` walks only the hero lists. Rejected: `Hero.Find` misses a dead hero that the engine removed with `UnregisterDeadHero` (companions, notables and rebels), so the messenger would be dropped without the "messenger lost" notice.
+- `MessengerConfigProvider`'s two older range checks can use the new `Checked` helper. Done in the follow-up cleanup, 2026-10-24.
+- `HeroSnapshot.IsInMapEvent` has no reader. Done in the follow-up cleanup, 2026-10-24.
+
+## Follow-up cleanup review (2026-10-24)
+
+Six lenses (1 to 6) reviewed the cleanup; the XML lens had nothing in scope. No defect in behaviour: the moved
+checks are the exact complement of the old ones, and nothing read the deleted field. All findings were LOW and fixed.
+
+| # | Sev | Finding | Why missed | Fix |
+|---|---|---|---|---|
+| 1 | LOW | The rejected `Hero.Find` swap had no guard: `ResolveHero` carried no comment, and the hearth-roll lesson recommended `Hero.Find` for any by-id lookup of away or disabled heroes. | The lesson was written for a live hero; the unregistered-dead case was found later. | A comment at `ResolveHero`, and a clause in the lesson in `lessons/adapters-taleworlds-api.md`. |
+| 2 | LOW | Validation copied each field and then overwrote it; a new field with a check but no copy would keep its default with no warning. | The copy existed for the inline blocks this cleanup removed. | One object initializer of `Checked` calls. |
+| 3 | LOW | Doc drift: the "add a setting" step, two test files missing from the test list, and `race-age-system.md` calling `Hero.Find` O(1). | Older text nobody re-read. | Rewritten. |
+| 4 | NIT | The new bounds test did not check that a kept value logs no warning. | Copied only the value assert. | `DidNotReceive` on the kept rows. |
+
+No new rule: finding 1 extends an existing lesson.

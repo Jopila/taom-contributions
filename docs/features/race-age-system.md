@@ -190,7 +190,7 @@ The 6 XSLT cultures (empire/dunland, aserai/harad, vlandia/rohan, khuzait/rhun, 
 The daily tick iterates all alive heroes to check age-based death. Several optimizations minimize per-tick cost:
 
 - **Lazy enumeration with two-pass death** — `IHeroAgeAdapter.GetAllAliveHeroAges()` returns `IEnumerable<HeroAgeInfo>` (not a materialized list). `RaceAgeBehavior` uses a two-pass approach: first iterates the lazy enumerable to collect heroes that should die into a reusable `_deathList` field, then kills them in a second pass after enumeration is complete. This avoids both unnecessary list allocation AND the "collection was modified during enumeration" crash that occurs when killing a hero removes it from `Hero.AllAliveHeroes` mid-iteration. The `_deathList` is `.Clear()`'d each tick — zero GC allocation in the common case (no deaths).
-- **O(1) hero lookup** — `KillByOldAge` uses `Hero.Find(heroId)` (dictionary-backed via `CampaignObjectManager`) instead of `Hero.FindFirst` (O(n) linear scan over all characters).
+- **Hero lookup:** `KillByOldAge` uses `Hero.Find(heroId)`, a loop over only the dead-or-disabled and alive hero lists in `CampaignObjectManager`, instead of `Hero.FindFirst`, a scan over every character, troops included. The heroes it ages are alive, so the alive list holds them.
 - **Race entry cache** — `RaceAgeService` caches `raceId → RaceAgeEntry` in a `Dictionary<int, RaceAgeEntry>`. The string-based race name lookup (`IRaceManager.GetRaceNameFromId`) happens once per race ID ever, not on every property access for every hero every tick. This cache is purely in-memory on the singleton service — no save/load impact.
 
 ---

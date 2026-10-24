@@ -31,7 +31,6 @@ internal static class MessengerTargetReader
             isWanderer: hero.IsWanderer,
             isHumanPlayerCharacter: hero.IsHumanPlayerCharacter,
             isInPlayerParty: inPlayerParty,
-            isInMapEvent: hero.PartyBelongedTo?.MapEvent != null,
             sameSettlement: here != null && hero.CurrentSettlement == here,
             sameArmy: army != null && mainParty != null && hero.PartyBelongedTo != null
                       && army.DoesLeaderPartyAndAttachedPartiesContain(mainParty)

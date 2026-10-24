@@ -49,42 +49,20 @@ public class MessengerConfigProvider : IMessengerConfigProvider
 
     private MessengerConfig Validate(MessengerConfig parsed)
     {
-        var sanitized = new MessengerConfig
-        {
-            AccidentChancePerHour = parsed.AccidentChancePerHour,
-            TravelSpeedMultiplier = parsed.TravelSpeedMultiplier,
-            GoldPerTravelDay = parsed.GoldPerTravelDay,
-            AtWarMultiplier = parsed.AtWarMultiplier,
-            NeverMetMultiplier = parsed.NeverMetMultiplier,
-            BesiegedMultiplier = parsed.BesiegedMultiplier,
-        };
-
         var defaults = new MessengerConfig();
         var rejected = false;
 
-        // Codex review #34: '<' and '>' both fail for NaN, so an `accidentChancePerHour: NaN` would
-        // sneak past the range check and propagate NaN into RollAccident (silently false) and
-        // CalculateMessengerSpeed (poison NaN positions, prevent arrival). Reject non-finite up front.
-        if (float.IsNaN(sanitized.AccidentChancePerHour) || float.IsInfinity(sanitized.AccidentChancePerHour)
-            || sanitized.AccidentChancePerHour < 0f || sanitized.AccidentChancePerHour > 1f)
+        // Codex review #34: '<' and '>' both fail for NaN, so Checked rejects non-finite values up front; a NaN chance or
+        // speed would otherwise poison RollAccident and the travel positions.
+        var sanitized = new MessengerConfig
         {
-            _logger.LogWarning($"MessengerConfigProvider: accidentChancePerHour={sanitized.AccidentChancePerHour} not finite or outside [0,1], reverting to default {defaults.AccidentChancePerHour}");
-            sanitized.AccidentChancePerHour = defaults.AccidentChancePerHour;
-            rejected = true;
-        }
-
-        if (float.IsNaN(sanitized.TravelSpeedMultiplier) || float.IsInfinity(sanitized.TravelSpeedMultiplier)
-            || sanitized.TravelSpeedMultiplier < 0.1f || sanitized.TravelSpeedMultiplier > 10f)
-        {
-            _logger.LogWarning($"MessengerConfigProvider: travelSpeedMultiplier={sanitized.TravelSpeedMultiplier} not finite or outside [0.1,10], reverting to default {defaults.TravelSpeedMultiplier}");
-            sanitized.TravelSpeedMultiplier = defaults.TravelSpeedMultiplier;
-            rejected = true;
-        }
-
-        sanitized.GoldPerTravelDay = Checked("goldPerTravelDay", sanitized.GoldPerTravelDay, 0f, 1000f, defaults.GoldPerTravelDay, ref rejected);
-        sanitized.AtWarMultiplier = Checked("atWarMultiplier", sanitized.AtWarMultiplier, 1f, 10f, defaults.AtWarMultiplier, ref rejected);
-        sanitized.NeverMetMultiplier = Checked("neverMetMultiplier", sanitized.NeverMetMultiplier, 1f, 10f, defaults.NeverMetMultiplier, ref rejected);
-        sanitized.BesiegedMultiplier = Checked("besiegedMultiplier", sanitized.BesiegedMultiplier, 1f, 10f, defaults.BesiegedMultiplier, ref rejected);
+            AccidentChancePerHour = Checked("accidentChancePerHour", parsed.AccidentChancePerHour, 0f, 1f, defaults.AccidentChancePerHour, ref rejected),
+            TravelSpeedMultiplier = Checked("travelSpeedMultiplier", parsed.TravelSpeedMultiplier, 0.1f, 10f, defaults.TravelSpeedMultiplier, ref rejected),
+            GoldPerTravelDay = Checked("goldPerTravelDay", parsed.GoldPerTravelDay, 0f, 1000f, defaults.GoldPerTravelDay, ref rejected),
+            AtWarMultiplier = Checked("atWarMultiplier", parsed.AtWarMultiplier, 1f, 10f, defaults.AtWarMultiplier, ref rejected),
+            NeverMetMultiplier = Checked("neverMetMultiplier", parsed.NeverMetMultiplier, 1f, 10f, defaults.NeverMetMultiplier, ref rejected),
+            BesiegedMultiplier = Checked("besiegedMultiplier", parsed.BesiegedMultiplier, 1f, 10f, defaults.BesiegedMultiplier, ref rejected),
+        };
 
         if (rejected)
             _logger.LogWarning("MessengerConfigProvider: messenger_config.json contained invalid values. See prior warnings for details.");

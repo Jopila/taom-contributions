@@ -118,7 +118,7 @@ Out-of-range values revert to defaults with a warning. **JSON config requires a 
 | [Main/Features/Messengers/MessengerSettingsProvider.cs](../../Main/Features/Messengers/MessengerSettingsProvider.cs) | Reads `TaomSettings.Instance.*` |
 | [Main/Features/Messengers/IMessengerRandomSource.cs](../../Main/Features/Messengers/IMessengerRandomSource.cs) | Random-float contract (for accident roll testability) |
 | [Main/Features/Messengers/MessengerRandomSource.cs](../../Main/Features/Messengers/MessengerRandomSource.cs) | `MBRandom.RandomFloat` wrapper |
-| [Main/Features/Messengers/Domain/HeroSnapshot.cs](../../Main/Features/Messengers/Domain/HeroSnapshot.cs) | Boundary POCO (12 hero properties) for validation |
+| [Main/Features/Messengers/Domain/HeroSnapshot.cs](../../Main/Features/Messengers/Domain/HeroSnapshot.cs) | Boundary POCO (11 hero properties) for validation |
 | [Main/Features/Messengers/Domain/MessengerValidationResult.cs](../../Main/Features/Messengers/Domain/MessengerValidationResult.cs) | 13-value enum: Ok plus 12 rejections |
 | [Main/Features/Messengers/Domain/PendingMessenger.cs](../../Main/Features/Messengers/Domain/PendingMessenger.cs) | Saveable POCO + `Serialize`/`TryDeserialize` |
 | [Main/Features/Messengers/Domain/PositionUpdate.cs](../../Main/Features/Messengers/Domain/PositionUpdate.cs) | Service return struct (new position + arrived flag) |
@@ -216,6 +216,8 @@ Unit tests:
 - [TAOM.Tests/Features/Messengers/MessengerSessionRulesWiringTests.cs](../../TAOM.Tests/Features/Messengers/MessengerSessionRulesWiringTests.cs): one module line, Patch117 at GameInit, nothing registered by hand in `IoC.cs`.
 - [TAOM.Tests/Features/Messengers/MessengerCampaignBehaviorSourceTests.cs](../../TAOM.Tests/Features/Messengers/MessengerCampaignBehaviorSourceTests.cs): source pins on the recovery when opening throws or returns no mission, the cleanup `AbortConversation` schedules, the one offer behind the dialog, the send and the button, the in-person dialog path, the quote reads (war, stranger, siege) and the mixin's remote send.
 - [TAOM.Tests/Features/Messengers/MessengerEntryPolicyTests.cs](../../TAOM.Tests/Features/Messengers/MessengerEntryPolicyTests.cs): the army-attach rule and the source pin on the settlement branch.
+- [TAOM.Tests/Features/Messengers/MessengerCampaignBehaviorTests.cs](../../TAOM.Tests/Features/Messengers/MessengerCampaignBehaviorTests.cs): the registration in the IoC and SubModule, the behavior's dependencies, and the main-party guard in `IsPlayerAvailable`.
+- [TAOM.Tests/Features/Messengers/MessengerConversationStateTests.cs](../../TAOM.Tests/Features/Messengers/MessengerConversationStateTests.cs): the open-conversation flag, where the behavior opens it and every path that closes it.
 
 The boundary classes (`MessengerCampaignBehavior`, the UI mixin, `MessengerTargetReader`, `MessengerSettingsProvider`, `MessengerRandomSource`, `MessengerIoC`) follow TAOM's "boundaries are not unit-tested" convention and are validated through manual game-testing (see GitHub issue #109 manual test plan).
 
@@ -231,7 +233,7 @@ The boundary classes (`MessengerCampaignBehavior`, the UI mixin, `MessengerTarge
 ## How to add a new advanced tuning knob to messenger_config.json
 
 1. Add the property to `MessengerConfig.cs` with its default value.
-2. Add a validation block to `MessengerConfigProvider.Validate` (range-check, sign-check, revert-with-warning per the rule).
+2. Add one `Checked(key, parsed.Value, min, max, defaults.Value, ref rejected)` member to the initializer in `MessengerConfigProvider.Validate`. It rejects NaN, infinity and out-of-range values, logs a warning and reverts to the default.
 3. Consume the new property in `MessengerService` (or wherever the consumer lives).
 4. Add a unit test in `MessengerConfigProviderTests` named `GetConfig_<InvalidVariant>_RevertsToTheDefaultAndWarns` for each validation rule, plus a boundary test.
 5. Document the new field + range in the "JSON config" table above.
