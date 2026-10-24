@@ -209,7 +209,7 @@ Setup once: start a campaign with cheat mode on. The console command `campaign.a
 ## GitHub Issue
 
 - **Issue:** #863: Gifts: give trade goods or gold to companions and lords for relation
-- **Status:** Open
+- **Status:** Shipped on `bannerlord-1.5.x` in `4fe70035f`, with the side fix `8788283e8` (v2.0.35). Closed with `triage-needs-ingame`: the in-game checks are owed.
 
 ---
 

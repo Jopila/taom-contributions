@@ -174,7 +174,7 @@ Setup once: a campaign with cheat mode on. `campaign.add_hero_relation [Hero] | 
 ## GitHub Issue
 
 - **Issue:** #864, [Relation rewards for releasing prisoners, donating them and winning tournaments](https://github.com/haterade22/TAOM/issues/864)
-- **Status:** Open. In-game checks owed.
+- **Status:** Shipped on `bannerlord-1.5.x` in `ad8772a3e` (v2.0.35). Closed with `triage-needs-ingame`: the in-game checks are owed.
 
 ---
 

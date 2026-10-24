@@ -158,7 +158,7 @@ Setup: a campaign with cheat mode on; `campaign.declare_war` to put the player a
 ## GitHub Issue
 
 - **Issue:** #869, [Captured lords can be asked to join the player's kingdom](https://github.com/haterade22/TAOM/issues/869)
-- **Status:** Open. In-game checks owed.
+- **Status:** Shipped on `bannerlord-1.5.x` in `da6af0c0b` (v2.0.35). Closed with `triage-needs-ingame`: the in-game checks are owed.
 
 ---
 

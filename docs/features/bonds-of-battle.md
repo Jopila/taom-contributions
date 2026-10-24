@@ -157,7 +157,7 @@ New lines, all in `taom_module_strings.xml`: `taom_bonds_together`, `taom_bonds_
 ## GitHub Issue
 
 - **Issue:** #861
-- **Status:** Open
+- **Status:** Shipped on `bannerlord-1.5.x` in `c34284a73` and `876e32af9` (v2.0.35). Closed with `triage-needs-ingame`: the in-game checks are owed.
 
 ---
 

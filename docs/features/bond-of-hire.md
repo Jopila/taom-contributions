@@ -141,4 +141,4 @@ Not yet confirmed in the running game:
 ## GitHub Issue
 
 - **Issues:** [#867 Bond of Hire](https://github.com/haterade22/TAOM/issues/867), [#868 the Clans panel line](https://github.com/haterade22/TAOM/issues/868)
-- **Status:** Open
+- **Status:** Shipped on `bannerlord-1.5.x` in `c7487f075` (v2.0.35). Closed with `triage-needs-ingame`: the in-game checks are owed.

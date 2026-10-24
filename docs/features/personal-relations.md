@@ -181,7 +181,7 @@ The provider also joins `CampaignHotPathSettingsProvidersTests`. The pair overri
 ## GitHub Issue
 
 - **Issue:** #862
-- **Status:** Open
+- **Status:** Shipped on `bannerlord-1.5.x` in `e6204df97` (v2.0.35). Closed with `triage-needs-ingame`: the in-game checks are owed.
 
 ---
 

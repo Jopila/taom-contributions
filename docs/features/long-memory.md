@@ -177,7 +177,7 @@ Setup once: a campaign with cheat mode on. Read the `[Relations]` lines in the T
 ## GitHub Issue
 
 - **Issue:** #865, [Heavier relation loss for raiding and coercing villages, scaled by alignment](https://github.com/haterade22/TAOM/issues/865)
-- **Status:** Open. In-game checks owed.
+- **Status:** Shipped on `bannerlord-1.5.x` in `30134a9d9` (v2.0.35). Closed with `triage-needs-ingame`: the in-game checks are owed.
 
 ---
 

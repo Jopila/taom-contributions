@@ -83,7 +83,7 @@ None. The four clan ids, the two target cultures and the clone naming (`taom_` +
 ## GitHub Issue
 
 - **Issue:** [#957](https://github.com/haterade22/TAOM/issues/957)
-- **Status:** In progress (part 2 is uncommitted on feat/relations-politics)
+- **Status:** Shipped on `bannerlord-1.5.x` in `8788283e8` (part 1) and `5e43518df` (part 2) (v2.0.35). Closed with `triage-needs-ingame`: the in-game checks are owed.
 
 ---
 

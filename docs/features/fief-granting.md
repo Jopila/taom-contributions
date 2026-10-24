@@ -547,8 +547,9 @@ covered by `SettingsFingerprint`.
   behind #565 were that smoke test, and it failed.
 - **Issue:** #565, [Fief grants: players win fiefs from sieges they never joined](https://github.com/haterade22/TAOM/issues/565).
   Open until the smoke tests below pass.
-- **Issue:** #866, the fief-vote ballot shows each candidate's fief count and a hover list. Open until
-  the smoke tests for #866 below pass.
+- **Issue:** #866, the fief-vote ballot shows each candidate's fief count and a hover list. Shipped on
+  `bannerlord-1.5.x` in `3f3af7181` (v2.0.35); closed with `triage-needs-ingame`: the smoke tests for
+  #866 below are owed.
 - **Follow-up:** [#460](https://github.com/haterade22/TAOM/issues/460) carries the two design
   questions the first review surfaced (merit weights the election but does not decide it; the King's
   Vote cap binds AI rulers only). Unchanged by #565.
