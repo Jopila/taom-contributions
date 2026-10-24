@@ -30,6 +30,7 @@ using TAOM.Features.Namegiving;
 using TAOM.Features.PartyIconScale;
 using TAOM.Features.PosternGate;
 using TAOM.Features.QuickActions;
+using TAOM.Features.RedArrow;
 using TAOM.Features.Relations;
 using TAOM.Features.RealmBorders;
 using TAOM.Features.LoremastersLine;
@@ -128,6 +129,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(CastlePatrolSettingsProvider))]
     // Watch-Silver and Tidings of the Lists: read when a conversation or an arena menu is built; the accessor takes the settings once.
     [DataRow(typeof(TAOM.Features.SettlementServices.SettlementServicesSettingsProvider))]
+    // #873: not a hot path (read a few times per party row when the Army Management screen opens); it still takes the settings once.
+    [DataRow(typeof(RedArrowSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)

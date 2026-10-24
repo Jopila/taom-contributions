@@ -130,6 +130,9 @@ Reflection against engine members performed *outside* a patch's target resolutio
 | `TaleWorlds.MountAndBlade.MissionBehavior` | `AfterStart` | method (public virtual) | `MissionStartGuardSwaps.cs:27` | MissionStartGuard. As above |
 | `TaleWorlds.MountAndBlade.MissionObject` | `AfterMissionStart` | method (public virtual) | `MissionStartGuardSwaps.cs:28` | MissionStartGuard. As above |
 | `TaleWorlds.CampaignSystem.CampaignBehaviors.RecruitmentCampaignBehavior` | `CheckRecruiting` | method (private) | `CastleAiRecruitDispatcher.cs:42` | CastleRecruitment (#886). Bound once per campaign to a closed delegate; an AI lord in a castle recruits hourly through vanilla's own logic (caravans never recruit in a castle). Missing: one warning per session launch and the hourly in-castle top-up stops; lords still recruit on entry through vanilla's OnBeforeSettlementEntered |
+| `TaleWorlds.CampaignSystem.ViewModelCollection.ArmyManagement.ArmyManagementItemVM` | `_eligibilityReason` | field (private) | `ArmyManagementItemVM_UpdateEligibility_RedArrow_Patch.cs:30` | RedArrow (Patch115, #873). The refusal text a row shows when it is not eligible; the `UpdateEligibility` postfix rewrites it through `AccessTools.FieldRefAccess` when the Red Arrow lifts a siege block. Missing: `Prepare` logs once and skips both Red Arrow patches (the constructor patch defers to it), so vanilla's siege block stays |
+
+Status (2026-10-23): RedArrow (Patch115) adds one row (`ArmyManagementItemVM._eligibilityReason`, a private field bound with `AccessTools.FieldRefAccess`); it resolves against installed v1.5.5 (`ReflectionSiteBindingTests`).
 
 Status (2026-10-19): HiddenHosts phase 2 adds two rows (`TooltipBaseVM._invokedType` and `_invokedArgs`, protected fields bound with `AccessTools.FieldRefAccess`); they resolve against installed v1.5.5 (`ReflectionSiteBindingTests`).
 

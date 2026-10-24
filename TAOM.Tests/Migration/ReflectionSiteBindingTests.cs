@@ -194,6 +194,9 @@ public class ReflectionSiteBindingTests
     // A miss logs one warning per session launch and the hourly in-castle top-up stops; lords still recruit
     // on entry through vanilla's OnBeforeSettlementEntered.
     [DataRow("TaleWorlds.CampaignSystem.CampaignBehaviors.RecruitmentCampaignBehavior", "RecruitmentCampaignBehavior", "CheckRecruiting", "Method", "CastleAiRecruitDispatcher.cs:42")]
+    // --- RedArrow (Patch115): the private text the army-management row shows for a refusal, rewritten by a postfix through
+    // AccessTools.FieldRefAccess. A miss logs once in Prepare and skips both Red Arrow patches, so vanilla's siege block stays.
+    [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.ArmyManagement.ArmyManagementItemVM", "ArmyManagementItemVM", "_eligibilityReason", "Field", "ArmyManagementItemVM_UpdateEligibility_RedArrow_Patch.cs:30")]
     public void ReflectionSite_ResolvesAgainstInstalledEngine(string fullName, string simpleName, string member, string kind, string source)
     {
         if (!_gameLoaded)
