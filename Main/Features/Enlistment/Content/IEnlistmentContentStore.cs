@@ -12,6 +12,9 @@ public interface IEnlistmentContentStore
 {
     ServiceContentRecord Record { get; }
 
+    /// <summary>The saved list of past contracts (#837). A discharge resets only <see cref="Record"/>, so it survives; <see cref="Clear"/> (a new campaign) drops it.</summary>
+    ServiceHistory History { get; }
+
     string Serialize();
 
     void Deserialize(string section);

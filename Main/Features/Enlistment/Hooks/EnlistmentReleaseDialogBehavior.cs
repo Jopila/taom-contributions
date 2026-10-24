@@ -86,12 +86,11 @@ public class EnlistmentReleaseDialogBehavior : CampaignBehaviorBase
             "taom_enlist_release_desert",
             "taom_enlist_release_soon_reply",
             "taom_enlist_release_desert_answer",
-            "{=!}{LINE} {COST}",
-            null,
-            null,
-            110).Text
+            "{=!}{LINE} {COST} {MEMORY}",
+            null, null, 110).Text
             .SetTextVariable("LINE", new TextObject("{=taom_enlist_release_desert}Then I am done with your company. I take my leave, oath or no."))
-            .SetTextVariable("COST", new TextObject("{=taom_enlist_desert_cost_reply}(This will cost me my commander's favor and my good name.)"));
+            .SetTextVariable("COST", new TextObject("{=taom_enlist_desert_cost_reply}(This will cost me my commander's favor and my good name.)"))
+            .SetTextVariable("MEMORY", new TextObject("{=taom_enlist_desert_memory_reply}(My commander will not take my oath again for a time, and this term will count for nothing.)"));
 
         starter.AddPlayerLine(
             "taom_enlist_release_relent",

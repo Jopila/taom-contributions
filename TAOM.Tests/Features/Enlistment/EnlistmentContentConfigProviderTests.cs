@@ -961,4 +961,45 @@ public class EnlistmentContentConfigProviderTests
         Assert.AreEqual(365, c.RenewalBonusWageDays);
         Assert.AreEqual(0, c.RenewalTrust);
     }
+
+    // ---- past service (#837) ----
+
+    [TestMethod]
+    public void ShippedConfig_PastService_EqualsTheCompiledDefaults()
+    {
+        var d = EnlistmentContentConfigProvider.BuildDefaults();
+        var raw = JObject.Parse(File.ReadAllText(Path.Combine(ShippedModuleDataPath(), "enlistment", "enlistment_config.json")));
+        Assert.AreEqual(d.ServiceHistoryExpiryDays, (int)raw["serviceHistoryExpiryDays"]);
+        Assert.AreEqual(d.ServiceHistoryMaxEntries, (int)raw["serviceHistoryMaxEntries"]);
+        Assert.AreEqual(d.DesertionCooldownDays, (int)raw["desertionCooldownDays"]);
+    }
+
+    [DataTestMethod]
+    [DataRow("{\"serviceHistoryExpiryDays\":0}", "serviceHistoryExpiryDays")]
+    [DataRow("{\"serviceHistoryExpiryDays\":3651}", "serviceHistoryExpiryDays")]
+    [DataRow("{\"serviceHistoryMaxEntries\":0}", "serviceHistoryMaxEntries")]
+    [DataRow("{\"serviceHistoryMaxEntries\":51}", "serviceHistoryMaxEntries")]
+    [DataRow("{\"desertionCooldownDays\":-1}", "desertionCooldownDays")]
+    [DataRow("{\"desertionCooldownDays\":366}", "desertionCooldownDays")]
+    public void GetConfig_PastServiceOutOfRange_RevertsWithWarning(string json, string key)
+    {
+        WriteConfig(json);
+
+        var c = Provider().GetConfig();
+
+        Assert.AreEqual(730, c.ServiceHistoryExpiryDays);
+        Assert.AreEqual(10, c.ServiceHistoryMaxEntries);
+        Assert.AreEqual(60, c.DesertionCooldownDays);
+        _logger.Received().LogWarning(Arg.Is<string>(m => m.Contains(key)));
+    }
+
+    [TestMethod]
+    public void GetConfig_PastServiceBoundaries_AreKept()
+    {
+        WriteConfig("{\"serviceHistoryExpiryDays\":1,\"serviceHistoryMaxEntries\":50,\"desertionCooldownDays\":0}");
+        var c = Provider().GetConfig();
+        Assert.AreEqual(1, c.ServiceHistoryExpiryDays);
+        Assert.AreEqual(50, c.ServiceHistoryMaxEntries);
+        Assert.AreEqual(0, c.DesertionCooldownDays);
+    }
 }

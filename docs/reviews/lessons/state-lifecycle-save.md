@@ -1199,3 +1199,16 @@ test passed.
 - **Prevent:** deserialize every config with `ObjectCreationHandling.Replace` (the Watchful Holds and Field Commission
   providers already do), and test a non-default list value through the real provider, not a hand-built object.
 - **Source:** `docs/reviews/rca-hold-the-walls-2026-10-23.md` finding 1.
+
+### Name the lifetime of new state before choosing where it lives (#837, 2026-10-24)
+Enlistment's service history was kept in a singleton store and deliberately survived the store's
+`Clear()` so a discharge would keep it; `Clear()` was also the new-campaign reset, and the engine loads a
+behavior's saved data only for a saved campaign that holds it. A new campaign, or a save without the data,
+inherited the previous campaign's history, and fixed lord ids made the old entries match.
+- **Why missed:** the design asked what survives a discharge, not what survives a new campaign, and one
+  method answered both.
+- **Prevent:** for any new state, write its lifetime in the summary (one battle, one term, one campaign,
+  one process) and test the reset at the end of that lifetime through the real new-game and
+  load-without-data paths, not only the save round trip.
+- **Source:** `docs/reviews/rca-enlistment-past-service-2026-10-24.md` F1. A repeat of the #861 singleton-state
+  lesson above.

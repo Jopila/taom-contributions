@@ -185,6 +185,27 @@ public class EnlistmentContainerWiringTests
     }
 
     [TestMethod]
+    public void ServiceHistoryService_Resolvable_AndItsConsumersToo()
+    {
+        // The four services that take it have it as a REQUIRED constructor argument (#837).
+        var container = BuildContainer();
+
+        foreach (var type in new[]
+                 {
+                     typeof(IServiceHistoryService), typeof(IDischargeService), typeof(global::TAOM.Features.Enlistment.Content.IDischargeConsequenceService),
+                     typeof(IEnlistmentDialogGateService), typeof(IEnlistmentService),
+                 })
+        {
+            var errors = container.Validate(type);
+
+            Assert.AreEqual(
+                0,
+                errors.Length,
+                type.Name + " is not resolvable: " + string.Join("; ", errors.Select(e => e.Value.Message)));
+        }
+    }
+
+    [TestMethod]
     public void DeploymentService_Resolvable_ModelDependencySatisfied()
     {
         // TaomBattleInitializationModel is constructed in SubModule.OnGameStart with this service;

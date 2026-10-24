@@ -17,6 +17,7 @@ public class EnlistmentService : IEnlistmentService
     private readonly IEnlistmentConfigProvider _config;
     private readonly IServiceDiplomacyService _diplomacy;
     private readonly IModLogger _logger;
+    private readonly IServiceHistoryService _history;
 
     public EnlistmentService(
         IEnlistmentStore store,
@@ -28,7 +29,8 @@ public class EnlistmentService : IEnlistmentService
         IEncounterOwnershipPolicy ownership,
         IEnlistmentConfigProvider config,
         IServiceDiplomacyService diplomacy,
-        IModLogger logger)
+        IModLogger logger,
+        IServiceHistoryService history)
     {
         _store = store;
         _machine = machine;
@@ -40,6 +42,7 @@ public class EnlistmentService : IEnlistmentService
         _config = config;
         _diplomacy = diplomacy;
         _logger = logger;
+        _history = history;
     }
 
     public event Action<string> EnlistmentStarted;
@@ -98,7 +101,10 @@ public class EnlistmentService : IEnlistmentService
         // here too (RFEnlistmentCampaignBehavior.FinalizeEnlistmentConversation: Finish() then
         // attach) — ordering matters, the encounter must go before the park. The ownership policy
         // decides WHETHER it is ours: a settlement visit or someone else's business is left alone.
-        var commanderPartyId = _commander.GetSnapshot(commanderHeroId).PartyId;
+        var commanderSnapshot = _commander.GetSnapshot(commanderHeroId);
+        var commanderPartyId = commanderSnapshot.PartyId;
+        // Past service (#837): the rank this oath is owed, before the announcement below.
+        _history.RestoreOnOath(commanderHeroId, enlistedHeroId, commanderSnapshot);
         var verdict = _ownership.Evaluate(EncounterFinishIntent.OathHandoff, _encounter.GetOwnership(commanderPartyId));
         if (verdict == EncounterFinishVerdict.Finish)
         {

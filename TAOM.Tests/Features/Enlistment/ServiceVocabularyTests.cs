@@ -29,6 +29,25 @@ public class ServiceVocabularyTests
         StringAssert.Contains(hint.Value, "{=taom_enlist_no_at_war}");
     }
 
+    [TestMethod]
+    public void EnlistUnavailableReason_DesertedFromHim_NamesTheCommanderOnTheTextObject()
+    {
+        var hint = ServiceVocabulary.EnlistUnavailableReason(EnlistGateResult.DesertedFromHim, "Boromir");
+
+        StringAssert.Contains(hint.Value, "{=taom_enlist_refused_deserter}");
+        StringAssert.Contains(hint.Value, "{COMMANDER}");
+        Assert.IsNotNull(hint.Attributes, "The name must ride on the TextObject: a conversation hint renders late.");
+        Assert.AreEqual("Boromir", hint.Attributes["COMMANDER"]);
+    }
+
+    [TestMethod]
+    public void EnlistUnavailableReason_DesertedFromHim_WithNoName_BindsAnEmptyName()
+    {
+        var hint = ServiceVocabulary.EnlistUnavailableReason(EnlistGateResult.DesertedFromHim, null);
+
+        Assert.AreEqual("", hint.Attributes["COMMANDER"]);
+    }
+
     /// <summary>
     /// These verdicts HIDE the offer, so the default arm is unreachable while the visibility split
     /// holds. Pinned anyway: the failure mode of an unreachable switch arm is that someone adds a

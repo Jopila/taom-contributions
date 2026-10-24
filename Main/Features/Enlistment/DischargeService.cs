@@ -18,6 +18,7 @@ public class DischargeService : IDischargeService
     private readonly IArmyMembershipAdapter _army;
     private readonly IDesertionPenaltyService _desertion;
     private readonly IModLogger _logger;
+    private readonly IServiceHistoryService _history;
 
     public DischargeService(
         IEnlistmentStore store,
@@ -30,7 +31,8 @@ public class DischargeService : IDischargeService
         IServiceDiplomacyService diplomacy,
         IArmyMembershipAdapter army,
         IDesertionPenaltyService desertion,
-        IModLogger logger)
+        IModLogger logger,
+        IServiceHistoryService history)
     {
         _store = store;
         _machine = machine;
@@ -43,6 +45,7 @@ public class DischargeService : IDischargeService
         _army = army;
         _desertion = desertion;
         _logger = logger;
+        _history = history;
     }
 
     public event Action<DischargeReason> EnlistmentEnded;
@@ -71,6 +74,9 @@ public class DischargeService : IDischargeService
         // Never let a null snapshot throw here: this pipeline must complete for EVERY reason,
         // including ones raised precisely because the commander is gone.
         var commander = _commander.GetSnapshot(commanderHeroId) ?? CommanderSnapshot.Missing;
+        // Past service (#837): remember who he served now, while the record still knows; the consequence
+        // step writes the entry once it knows the rank and what became of the kit.
+        _history.NoteCommander(commanderHeroId, _store.Record.EnlistedHeroId, commander);
 
         // 4 — begin
         var before = _attachment.GetPresence(commanderHeroId);

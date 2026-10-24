@@ -263,6 +263,11 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
         rejected |= RevertIfOutOfRange(() => config.DesertionRelationPenalty, v => config.DesertionRelationPenalty = v, defaults.DesertionRelationPenalty, -100, 0, "desertionRelationPenalty");
         rejected |= RevertIfOutOfRange(() => config.DesertionHonorXpPenalty, v => config.DesertionHonorXpPenalty = v, defaults.DesertionHonorXpPenalty, -1000, 0, "desertionHonorXpPenalty");
 
+        // Past service (#837): out of range reverts the key to its compiled default with a warning.
+        rejected |= RevertIfOutOfRange(() => config.ServiceHistoryExpiryDays, v => config.ServiceHistoryExpiryDays = v, defaults.ServiceHistoryExpiryDays, 1, 3650, "serviceHistoryExpiryDays");
+        rejected |= RevertIfOutOfRange(() => config.ServiceHistoryMaxEntries, v => config.ServiceHistoryMaxEntries = v, defaults.ServiceHistoryMaxEntries, 1, 50, "serviceHistoryMaxEntries");
+        rejected |= RevertIfOutOfRange(() => config.DesertionCooldownDays, v => config.DesertionCooldownDays = v, defaults.DesertionCooldownDays, 0, 365, "desertionCooldownDays");
+
         // Term-end renewal (#836): out of range reverts the key to its compiled default with a warning.
         rejected |= RevertIfOutOfRange(() => config.RenewalBonusWageDays, v => config.RenewalBonusWageDays = v, defaults.RenewalBonusWageDays, 0, 365, "renewalBonusWageDays");
         rejected |= RevertIfOutOfRange(() => config.RenewalTrust, v => config.RenewalTrust = v, defaults.RenewalTrust, 0, 100, "renewalTrust");

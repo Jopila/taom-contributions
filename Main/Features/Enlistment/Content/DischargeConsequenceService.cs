@@ -19,6 +19,7 @@ public class DischargeConsequenceService : IDischargeConsequenceService
     private readonly IEnlistmentFeatureSettingsProvider _feature;
     private readonly IInquiryAdapter _inquiry;
     private readonly IModLogger _logger;
+    private readonly IServiceHistoryService _history;
 
     public DischargeConsequenceService(
         IEnlistmentContentStore contentStore,
@@ -27,7 +28,8 @@ public class DischargeConsequenceService : IDischargeConsequenceService
         IPartyItemRosterAdapter partyItems,
         IEnlistmentFeatureSettingsProvider feature,
         IInquiryAdapter inquiry,
-        IModLogger logger)
+        IModLogger logger,
+        IServiceHistoryService history)
     {
         _contentStore = contentStore;
         _rewards = rewards;
@@ -36,11 +38,14 @@ public class DischargeConsequenceService : IDischargeConsequenceService
         _feature = feature;
         _inquiry = inquiry;
         _logger = logger;
+        _history = history;
     }
 
     public void ApplyConsequences(DischargeReason reason)
     {
         var record = _contentStore.Record;
+        var issuedCount = _ledger?.IssuedItemIds?.Count ?? 0;
+        var reclaimed = 0;
 
         switch (reason)
         {
@@ -50,7 +55,7 @@ public class DischargeConsequenceService : IDischargeConsequenceService
                 record.DeferredWages = 0;
                 // The kit walks out with the deserter, deliberately: it is the one thing they
                 // gain by breaking the oath, against forfeited pay and a commander who
-                // remembers. Nobody is left to collect it either.
+                // remembers. Nobody is left to collect it either (reclaimed stays 0).
                 break;
 
             case DischargeReason.PlayerRequest:
@@ -65,7 +70,7 @@ public class DischargeConsequenceService : IDischargeConsequenceService
                     _rewards.Grant(new RewardSpec { Gold = record.DeferredWages }, "final-settlement");
                     record.DeferredWages = 0;
                 }
-                ReclaimIssuedKit(reason);
+                reclaimed = ReclaimIssuedKit(reason);
                 break;
 
             // HeirSuccessionOrPossessionMismatch / SaveNormalization are quiet, penalty-free
@@ -73,7 +78,15 @@ public class DischargeConsequenceService : IDischargeConsequenceService
             // of the player's, and both can fire on a load path.
         }
 
-        _contentStore.Clear();
+        // Past service (#837), before the content record is reset: the rank and the kit are still here. One
+        // kit rule for every reason: whatever the quartermaster did not take back stayed with him, and a
+        // tier with no item ids (a restore seed) counts as a kit kept. The history service alone decides
+        // which reasons leave no entry.
+        var kitStayed = issuedCount > reclaimed || (issuedCount == 0 && _ledger?.HighestIssuedTier != null);
+        _history.RecordEnd(reason, record.Rank, kitStayed ? _ledger?.HighestIssuedTier : null);
+
+        // Only the record: a discharge ends the progress, not the past (the history is cleared with the campaign).
+        record.Reset();
     }
 
     /// <summary>
@@ -94,7 +107,7 @@ public class DischargeConsequenceService : IDischargeConsequenceService
     /// exposes no Value — so <c>EquipmentPayoffCalculator</c> stays unused until one does.
     /// Deferred deliberately, not forgotten.</para>
     /// </summary>
-    private void ReclaimIssuedKit(DischargeReason reason)
+    private int ReclaimIssuedKit(DischargeReason reason)
     {
         // The shipped MCM hint for TaomSettings.EnableEnlistment promises that switching the
         // feature OFF releases a serving player "honourably (you keep your pay and your gear)".
@@ -104,17 +117,17 @@ public class DischargeConsequenceService : IDischargeConsequenceService
         if (_feature?.IsEnabled == false)
         {
             _logger?.LogInfo($"[Enlistment] discharge({reason}) with the feature switched off — the kit stays with the player");
-            return;
+            return 0;
         }
 
         var issued = _ledger?.IssuedItemIds;
         if (issued == null || issued.Count == 0)
-            return;
+            return 0;
 
         if (!_partyItems.IsMainPartyAvailable())
         {
             _logger?.LogWarning($"[Enlistment] discharge({reason}): main party unavailable — {issued.Count} issued item(s) left with the player");
-            return;
+            return 0;
         }
 
         var reclaimed = 0;
@@ -133,5 +146,7 @@ public class DischargeConsequenceService : IDischargeConsequenceService
         // that the game tried to take it. The number that matters is in the log either way.
         if (reclaimed > 0)
             _inquiry?.ShowMessage(KitReclaimedKey, KitReclaimedFallback, "COUNT", reclaimed.ToString());
+
+        return reclaimed;
     }
 }

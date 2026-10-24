@@ -286,5 +286,9 @@
     <string id="taom_enlist_term_renew" text="Sign on again" />
     <string id="taom_enlist_term_title" text="Your term is served" />
     <string id="taom_enlist_term_bonus_paid" text="You receive {GOLD} denars for signing on again." />
+    <string id="taom_enlist_oath_remembered" text="{COMMANDER} remembers your service: you begin as {RANK}." />
+    <string id="taom_enlist_refused_deserter" text="{COMMANDER} remembers your desertion and will not take your oath." />
+    <string id="taom_enlist_desert_memory" text="Your commander will not take your oath again for a time, and this term will count for nothing if you return." />
+    <string id="taom_enlist_desert_memory_reply" text="(My commander will not take my oath again for a time, and this term will count for nothing.)" />
   </strings>
 </base>

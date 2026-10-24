@@ -93,11 +93,13 @@ public static class ServiceVocabulary
     /// <summary>
     /// Why the enlist offer is greyed out, as words for the disabled-option hint.
     ///
-    /// Exactly ONE rejection reaches this method in practice, and the split is deliberate:
+    /// Two rejections reach this method in practice, the war and the deserter, and the split is deliberate:
     ///
     /// * <see cref="EnlistGateResult.AtWarWithYourKingdom"/> is SHOWN and greyed, because a player
     ///   cannot work it out unaided. The lord is standing there, alive, with a column behind him;
     ///   nothing on screen connects his war to your crown's. A vanished line teaches "broken".
+    /// * <see cref="EnlistGateResult.DesertedFromHim"/> is SHOWN and greyed too: the player did it, but
+    ///   a cooldown with no explanation reads as a bug, so the hint names the commander and the reason.
     /// * <see cref="EnlistGateResult.CommanderUnavailable"/> is HIDDEN, and that is not an
     ///   oversight. It fires for every governor and every garrison-sitting lord — a large fraction
     ///   of the nobility, for the entire campaign. Greying it would park a permanently-dead line
@@ -109,12 +111,19 @@ public static class ServiceVocabulary
     /// The default arm is unreachable while that split holds. It exists so a verdict added to the
     /// enum later surfaces as a vague hint instead of an unhandled case.
     /// </summary>
-    public static TextObject EnlistUnavailableReason(EnlistGateResult verdict)
+    public static TextObject EnlistUnavailableReason(EnlistGateResult verdict, string commanderName = null)
     {
         switch (verdict)
         {
             case EnlistGateResult.AtWarWithYourKingdom:
                 return new TextObject("{=taom_enlist_no_at_war}Your kingdom is at war with his. You cannot take his coin and keep your own oath.");
+            case EnlistGateResult.DesertedFromHim:
+            {
+                // Bound to THIS TextObject: a conversation hint renders late (see ReassignCooldownReason).
+                var line = new TextObject("{=taom_enlist_refused_deserter}{COMMANDER} remembers your desertion and will not take your oath.");
+                line.SetTextVariable("COMMANDER", commanderName ?? "");
+                return line;
+            }
             default:
                 return new TextObject("{=taom_enlist_no_generic}You cannot enlist under him just now.");
         }

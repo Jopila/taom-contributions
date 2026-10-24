@@ -57,6 +57,9 @@ public sealed class CommanderSnapshot
 
     public string CultureId { get; }
     public string FactionId { get; }
+
+    /// <summary>The commander's clan id (#837), or null.</summary>
+    public string ClanId { get; }
     public string Name { get; }
 
     public bool HasParty => !string.IsNullOrEmpty(PartyId);
@@ -79,7 +82,8 @@ public sealed class CommanderSnapshot
         string cultureId = null,
         string factionId = null,
         string name = null,
-        bool partyIsRaiding = false)
+        bool partyIsRaiding = false,
+        string clanId = null)
     {
         Exists = exists;
         IsAlive = isAlive;
@@ -98,6 +102,7 @@ public sealed class CommanderSnapshot
         SettlementMenuId = settlementMenuId;
         CultureId = cultureId;
         FactionId = factionId;
+        ClanId = clanId;
         Name = name;
     }
 

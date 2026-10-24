@@ -11,6 +11,9 @@ public enum EnlistGateResult
 
     /// <summary>The whole feature is switched off in MCM.</summary>
     FeatureDisabled = 6,
+
+    /// <summary>He deserted from this commander recently and the cooldown has not run out (#837).</summary>
+    DesertedFromHim = 7,
 }
 
 /// <summary>

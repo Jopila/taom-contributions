@@ -121,7 +121,9 @@ public class EnlistmentWaitMenuPresenterTests
             Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<Action>(), Arg.Any<Action>(),
             "DAYS", "18",
-            bodyAppendKey: "taom_enlist_desert_cost", bodyAppendFallback: "Deserting will also cost you your commander's favor and your good name.");
+            bodyAppendKey: "taom_enlist_desert_cost", bodyAppendFallback: "Deserting will also cost you your commander's favor and your good name.",
+            secondAppendKey: "taom_enlist_desert_memory",
+            secondAppendFallback: "Your commander will not take your oath again for a time, and this term will count for nothing if you return.");
     }
 
     [TestMethod]

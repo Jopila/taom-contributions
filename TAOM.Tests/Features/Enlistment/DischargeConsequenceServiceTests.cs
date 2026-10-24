@@ -43,6 +43,7 @@ public class DischargeConsequenceServiceTests
     private IPartyItemRosterAdapter _partyItems = null!;
     private IEnlistmentFeatureSettingsProvider _feature = null!;
     private IInquiryAdapter _inquiry = null!;
+    private IServiceHistoryService _history = null!;
     private DischargeConsequenceService _service = null!;
 
     /// <summary>The reasons the service treats as an honourable end of service.</summary>
@@ -66,6 +67,7 @@ public class DischargeConsequenceServiceTests
         _partyItems = Substitute.For<IPartyItemRosterAdapter>();
         _feature = Substitute.For<IEnlistmentFeatureSettingsProvider>();
         _inquiry = Substitute.For<IInquiryAdapter>();
+        _history = Substitute.For<IServiceHistoryService>();
 
         // Defaults: healthy party, feature on, every removal succeeds. Individual tests
         // break exactly one link.
@@ -74,7 +76,7 @@ public class DischargeConsequenceServiceTests
         _feature.IsEnabled.Returns(true);
 
         _service = new DischargeConsequenceService(
-            _contentStore, _rewards, _ledger, _partyItems, _feature, _inquiry, _logger);
+            _contentStore, _rewards, _ledger, _partyItems, _feature, _inquiry, _logger, _history);
     }
 
     private void IssueKit(params string[] itemIds)
@@ -354,5 +356,131 @@ public class DischargeConsequenceServiceTests
             errors.Length,
             "IDischargeConsequenceService is not resolvable: "
                 + string.Join("; ", errors.Select(e => e.Value.Message)));
+    }
+
+    // ---- the past-service entry (#837) ----
+
+    [TestMethod]
+    public void Apply_AnExistingHistoryEntry_SurvivesTheDischarge()
+    {
+        _contentStore.History.Entries.Add(new ServiceHistoryEntry("lord_a", "c", "k", ServiceRank.Sergeant, DischargeReason.PlayerRequest, 50, null, "hero_1"));
+        _contentStore.Record.Rank = ServiceRank.Specialist;
+
+        _service.ApplyConsequences(DischargeReason.PlayerRequest);
+
+        Assert.AreEqual(1, _contentStore.History.Entries.Count, "a discharge clears progress, not the past");
+        Assert.AreEqual(ServiceRank.Private, _contentStore.Record.Rank);
+    }
+
+    [TestMethod]
+    public void Apply_Honourable_FullReclaim_RecordsNoKitTier()
+    {
+        IssueKit("a", "b");
+        _contentStore.Record.Rank = ServiceRank.Sergeant;
+
+        _service.ApplyConsequences(DischargeReason.PlayerRequest);
+
+        _history.Received(1).RecordEnd(DischargeReason.PlayerRequest, ServiceRank.Sergeant, null);
+    }
+
+    [TestMethod]
+    public void Apply_Honourable_PartialReclaim_RecordsTheHighestIssuedTier()
+    {
+        _ledger.RecordIssue(EnlistmentKitTier.Veteran, new[] { "a", "b" });
+        _partyItems.RemoveItem("a", 1).Returns(1);
+        _partyItems.RemoveItem("b", 1).Returns(0);
+
+        _service.ApplyConsequences(DischargeReason.PlayerRequest);
+
+        _history.Received(1).RecordEnd(DischargeReason.PlayerRequest, Arg.Any<ServiceRank>(), EnlistmentKitTier.Veteran);
+    }
+
+    [TestMethod]
+    public void Apply_FeatureOffWithIssuedKit_RecordsTheTier()
+    {
+        IssueKit("a");
+        _feature.IsEnabled.Returns(false);
+
+        _service.ApplyConsequences(DischargeReason.PlayerRequest);
+
+        _history.Received(1).RecordEnd(DischargeReason.PlayerRequest, Arg.Any<ServiceRank>(), EnlistmentKitTier.Recruit);
+    }
+
+    [TestMethod]
+    public void Apply_PartyUnavailable_RecordsTheKitAsKept()
+    {
+        IssueKit("a");
+        _partyItems.IsMainPartyAvailable().Returns(false);
+
+        _service.ApplyConsequences(DischargeReason.PlayerRequest);
+
+        _history.Received(1).RecordEnd(DischargeReason.PlayerRequest, Arg.Any<ServiceRank>(), EnlistmentKitTier.Recruit);
+    }
+
+    [TestMethod]
+    public void Apply_Desertion_WithIssuedKit_RecordsTheTier_ByTheSameRule()
+    {
+        IssueKit("a");
+
+        _service.ApplyConsequences(DischargeReason.Desertion);
+
+        _history.Received(1).RecordEnd(DischargeReason.Desertion, Arg.Any<ServiceRank>(), EnlistmentKitTier.Recruit);
+        _partyItems.DidNotReceive().RemoveItem(Arg.Any<string>(), Arg.Any<int>());
+    }
+
+    [TestMethod]
+    public void Apply_NoKitEverIssued_RecordsNoTier()
+    {
+        _service.ApplyConsequences(DischargeReason.PlayerRequest);
+
+        _history.Received(1).RecordEnd(DischargeReason.PlayerRequest, Arg.Any<ServiceRank>(), null);
+    }
+
+    [TestMethod]
+    public void Apply_ASeededTierWithNoItems_CountsAsKitKept()
+    {
+        // Only a restore seed leaves a tier with no item ids behind.
+        _ledger.RecordIssue(EnlistmentKitTier.Soldier, Array.Empty<string>());
+
+        _service.ApplyConsequences(DischargeReason.PlayerRequest);
+
+        _history.Received(1).RecordEnd(DischargeReason.PlayerRequest, Arg.Any<ServiceRank>(), EnlistmentKitTier.Soldier);
+    }
+
+    [TestMethod]
+    public void Apply_EveryReason_CallsRecordEnd_TheHistoryServiceFiltersTheQuietOnes()
+    {
+        foreach (var reason in Enum.GetValues(typeof(DischargeReason)).Cast<DischargeReason>())
+        {
+            Setup();
+
+            _service.ApplyConsequences(reason);
+
+            _history.Received(1).RecordEnd(reason, Arg.Any<ServiceRank>(), Arg.Any<EnlistmentKitTier?>());
+        }
+    }
+
+    [TestMethod]
+    public void Apply_EveryReason_WithTheRealHistoryService_WritesAllButTheQuietTwo()
+    {
+        foreach (var reason in Enum.GetValues(typeof(DischargeReason)).Cast<DischargeReason>())
+        {
+            Setup();
+            var config = Substitute.For<IEnlistmentContentConfigProvider>();
+            config.GetConfig().Returns(EnlistmentContentConfigProvider.BuildDefaults());
+            var clock = Substitute.For<ICampaignClockAdapter>();
+            clock.NowDays.Returns(300.0);
+            var history = new ServiceHistoryService(
+                _contentStore, config, _ledger, Substitute.For<TAOM.Features.Enlistment.Presentation.IServiceDailyAnnouncer>(),
+                clock, Substitute.For<IPlayerPartyAdapter>(), _logger);
+            history.NoteCommander("lord_a", "hero_1", new CommanderSnapshot(exists: true, isAlive: true, partyId: "p", clanId: "c", factionId: "k"));
+            var service = new DischargeConsequenceService(
+                _contentStore, _rewards, _ledger, _partyItems, _feature, _inquiry, _logger, history);
+
+            service.ApplyConsequences(reason);
+
+            var quiet = reason == DischargeReason.HeirSuccessionOrPossessionMismatch || reason == DischargeReason.SaveNormalization;
+            Assert.AreEqual(quiet ? 0 : 1, _contentStore.History.Entries.Count, reason.ToString());
+        }
     }
 }

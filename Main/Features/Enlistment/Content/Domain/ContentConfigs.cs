@@ -22,6 +22,15 @@ public sealed class EnlistmentContentConfig
     /// <summary>Honor trait XP lost by the same desertion (#833). In [-1000, 0], same validation.</summary>
     public int DesertionHonorXpPenalty { get; set; } = -100;
 
+    /// <summary>Days a past contract stays in the service history (#837). In [1, 3650].</summary>
+    public int ServiceHistoryExpiryDays { get; set; } = 730;
+
+    /// <summary>Most past contracts kept; the oldest go first (#837). In [1, 50].</summary>
+    public int ServiceHistoryMaxEntries { get; set; } = 10;
+
+    /// <summary>Days after a desertion that the same commander refuses the oath (#837). In [0, 365]; 0 turns it off.</summary>
+    public int DesertionCooldownDays { get; set; } = 60;
+
     /// <summary>Days of the current rank's wage paid as a bonus when the player signs on for another term (#836). In [0, 365].</summary>
     public int RenewalBonusWageDays { get; set; } = 30;
 

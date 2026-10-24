@@ -23,6 +23,7 @@ public class DischargeServiceTests
     private EnlistmentStateMachine _machine = null!;
     private IMobilePartyAttachmentAdapter _attachment = null!;
     private IDesertionPenaltyService _penalty = null!;
+    private IServiceHistoryService _history = null!;
     private DischargeService _service = null!;
     private IEncounterAdapter _encounter = null!;
     private ICommanderLordAdapter _commanderAdapter = null!;
@@ -46,8 +47,9 @@ public class DischargeServiceTests
         _attachment.MoveIntoSettlement(Arg.Any<string>()).Returns(true);
         _encounter.EnsureSettlementEncounter(Arg.Any<string>()).Returns(true);
         _penalty = Substitute.For<IDesertionPenaltyService>();
+        _history = Substitute.For<IServiceHistoryService>();
         _service = new DischargeService(_store, _machine, _attachment, _encounter,
-            new EncounterOwnershipPolicy(), _commanderAdapter, _gameMenu, Substitute.For<IServiceDiplomacyService>(), _army, _penalty, _logger);
+            new EncounterOwnershipPolicy(), _commanderAdapter, _gameMenu, Substitute.For<IServiceDiplomacyService>(), _army, _penalty, _logger, _history);
     }
 
     private void MakeEnlisted(EnlistmentState state = EnlistmentState.EnlistedAttached)
@@ -592,5 +594,30 @@ public class DischargeServiceTests
             s.Contains("normal for a release in a settlement")));
         _logger.DidNotReceive().LogError(Arg.Is<string>(s =>
             s.Contains("LEFT THE PLAYER UNABLE TO START ENCOUNTERS")));
+    }
+
+    [TestMethod]
+    public void Execute_NotesTheCommanderForTheHistory_BeforeTheRecordIsReset()
+    {
+        MakeEnlisted();
+        var snapshot = new CommanderSnapshot(exists: true, isAlive: true, partyId: "p", clanId: "clan_a", factionId: "k_a");
+        _commanderAdapter.GetSnapshot("lord_1_1").Returns(snapshot);
+
+        _service.Execute(DischargeReason.PlayerRequest);
+
+        _history.Received(1).NoteCommander("lord_1_1", "main_hero", snapshot);
+    }
+
+    [TestMethod]
+    public void Execute_NotesTheCommander_BeforeEnlistmentEnded_FiresTheConsequenceStep()
+    {
+        MakeEnlisted();
+        var notedWhenEnded = false;
+        _service.EnlistmentEnded += _ =>
+            notedWhenEnded = _history.ReceivedCalls().Any(c => c.GetMethodInfo().Name == nameof(IServiceHistoryService.NoteCommander));
+
+        _service.Execute(DischargeReason.PlayerRequest);
+
+        Assert.IsTrue(notedWhenEnded, "RecordEnd runs inside EnlistmentEnded, so the commander must already be noted");
     }
 }

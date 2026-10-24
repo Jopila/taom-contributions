@@ -56,6 +56,7 @@ public sealed class CommanderLordAdapter : ICommanderLordAdapter
                 captorName: captivity?.MapFaction?.Name?.ToString(),
                 captivitySettlementName: captivity?.Settlement?.Name?.ToString(),
                 cultureId: hero.Culture?.StringId,
+                clanId: hero.Clan?.StringId,
                 factionId: hero.Clan?.MapFaction?.StringId,
                 name: hero.Name?.ToString(),
                 partyIsRaiding: VillageRaidReader.IsRaiding(party));

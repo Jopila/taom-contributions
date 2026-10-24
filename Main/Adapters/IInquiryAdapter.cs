@@ -30,6 +30,8 @@ public interface IInquiryAdapter
     /// <paramref name="bodyAppendKey"/>/<paramref name="bodyAppendFallback"/> are an optional keyed
     /// sentence appended after the body with one space, rendered at show time, so an already
     /// translated body row can gain a sentence without being edited (#833).
+    /// <paramref name="secondAppendKey"/>/<paramref name="secondAppendFallback"/> are a second such sentence,
+    /// appended after the first (#837).
     /// </summary>
     void ShowTwoOptionInquiry(
         string titleKey, string titleFallback,
@@ -40,7 +42,8 @@ public interface IInquiryAdapter
         string bodyVariableName = null, string bodyVariableValue = null,
         IReadOnlyDictionary<string, string> bodyVariables = null,
         bool prioritize = false,
-        string bodyAppendKey = null, string bodyAppendFallback = null);
+        string bodyAppendKey = null, string bodyAppendFallback = null,
+        string secondAppendKey = null, string secondAppendFallback = null);
 
     /// <summary>
     /// Fire-and-forget toast. Both variable pairs are optional — pass null to skip a substitution.

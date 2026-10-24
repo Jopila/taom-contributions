@@ -15,6 +15,7 @@ public class EnlistmentDialogGateServiceTests
     private IPlayerContextAdapter _playerContext = null!;
     private IEnlistmentConfigProvider _config = null!;
     private EnlistmentDialogGateService _gate = null!;
+    private IServiceHistoryService _history = null!;
 
     [TestInitialize]
     public void Setup()
@@ -24,7 +25,8 @@ public class EnlistmentDialogGateServiceTests
         _playerContext = Substitute.For<IPlayerContextAdapter>();
         _config = Substitute.For<IEnlistmentConfigProvider>();
         _config.GetConfig().Returns(new EnlistmentCoreConfig());
-        _gate = new EnlistmentDialogGateService(_store, _commander, _playerContext, _config, null);
+        _history = Substitute.For<IServiceHistoryService>();
+        _gate = new EnlistmentDialogGateService(_store, _commander, _playerContext, _config, null, _history);
 
         _commander.IsLord("lord_1_1").Returns(true);
         _commander.GetSnapshot("lord_1_1").Returns(new CommanderSnapshot(
@@ -145,4 +147,19 @@ public class EnlistmentDialogGateServiceTests
             "losing your commander must not make you a deserter for leaving");
     }
 
+    [TestMethod]
+    public void CanEnlist_DesertedFromThatCommanderRecently_IsRefused()
+    {
+        _history.IsInDesertionCooldown("lord_1_1").Returns(true);
+
+        Assert.AreEqual(EnlistGateResult.DesertedFromHim, _gate.CanEnlistWith("lord_1_1"));
+    }
+
+    [TestMethod]
+    public void CanEnlist_NoCooldown_StillOk()
+    {
+        _history.IsInDesertionCooldown("lord_1_1").Returns(false);
+
+        Assert.AreEqual(EnlistGateResult.Ok, _gate.CanEnlistWith("lord_1_1"));
+    }
 }

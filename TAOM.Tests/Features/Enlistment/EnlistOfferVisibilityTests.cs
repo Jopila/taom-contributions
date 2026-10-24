@@ -9,7 +9,7 @@ using TAOM.Features.Enlistment.Hooks;
 namespace TAOM.Tests.Features.Enlistment;
 
 /// <summary>
-/// The enlist offer is now SHOWN for two verdicts and hidden for the rest, and the split is only
+/// The enlist offer is SHOWN for three verdicts (Ok, and the greyed AtWarWithYourKingdom and DesertedFromHim) and hidden for the rest, and the split is only
 /// safe because <see cref="EnlistGateResult"/> is decided by an ORDERED ladder: reaching a verdict
 /// proves every verdict above it passed. That makes the ladder's order load-bearing on a UI
 /// decision, which is exactly the kind of coupling that breaks silently when someone reorders the
@@ -23,6 +23,7 @@ public class EnlistOfferVisibilityTests
     private IPlayerContextAdapter _playerContext = null!;
     private IEnlistmentConfigProvider _config = null!;
     private EnlistmentDialogGateService _gate = null!;
+    private IServiceHistoryService _history = null!;
 
     [TestInitialize]
     public void Setup()
@@ -32,7 +33,8 @@ public class EnlistOfferVisibilityTests
         _playerContext = Substitute.For<IPlayerContextAdapter>();
         _config = Substitute.For<IEnlistmentConfigProvider>();
         _config.GetConfig().Returns(new EnlistmentCoreConfig());
-        _gate = new EnlistmentDialogGateService(_store, _commander, _playerContext, _config, null);
+        _history = Substitute.For<IServiceHistoryService>();
+        _gate = new EnlistmentDialogGateService(_store, _commander, _playerContext, _config, null, _history);
 
         _commander.IsLord("lord_1_1").Returns(true);
         _playerContext.IsUnderMercenaryService().Returns(false);
@@ -59,12 +61,13 @@ public class EnlistOfferVisibilityTests
     [DataTestMethod]
     [DataRow(EnlistGateResult.Ok, true)]
     [DataRow(EnlistGateResult.AtWarWithYourKingdom, true)]
+    [DataRow(EnlistGateResult.DesertedFromHim, true)]
     [DataRow(EnlistGateResult.AlreadyEnlisted, false)]
     [DataRow(EnlistGateResult.NotALord, false)]
     [DataRow(EnlistGateResult.UnderMercenaryContract, false)]
     [DataRow(EnlistGateResult.CommanderUnavailable, false)]
     [DataRow(EnlistGateResult.FeatureDisabled, false)]
-    public void ShowsOfferFor_EachVerdict_ShowsOnlyOkAndAtWar(EnlistGateResult verdict, bool expected)
+    public void ShowsOfferFor_EachVerdict_ShowsOnlyOkAtWarAndDeserter(EnlistGateResult verdict, bool expected)
     {
         Assert.AreEqual(expected, EnlistmentDialogBehavior.ShowsOfferFor(verdict, deferToHost: false));
     }
@@ -72,6 +75,7 @@ public class EnlistOfferVisibilityTests
     [DataTestMethod]
     [DataRow(EnlistGateResult.Ok)]
     [DataRow(EnlistGateResult.AtWarWithYourKingdom)]
+    [DataRow(EnlistGateResult.DesertedFromHim)]
     [DataRow(EnlistGateResult.AlreadyEnlisted)]
     [DataRow(EnlistGateResult.NotALord)]
     [DataRow(EnlistGateResult.UnderMercenaryContract)]
@@ -85,6 +89,7 @@ public class EnlistOfferVisibilityTests
     [DataTestMethod]
     [DataRow(EnlistGateResult.Ok, true)]
     [DataRow(EnlistGateResult.AtWarWithYourKingdom, false)]
+    [DataRow(EnlistGateResult.DesertedFromHim, false)]
     [DataRow(EnlistGateResult.CommanderUnavailable, false)]
     public void OfferIsTakeable_EachVerdict_OnlyACleanOkIsClickable(EnlistGateResult verdict, bool expected)
     {
@@ -99,7 +104,7 @@ public class EnlistOfferVisibilityTests
     public void EnlistGateResult_MemberCount_MatchesTheSplitPinnedHere()
     {
         Assert.AreEqual(
-            7,
+            8,
             Enum.GetValues(typeof(EnlistGateResult)).Length,
             "EnlistGateResult changed. Decide explicitly whether the new verdict SHOWS greyed or HIDES, then extend the rows in this class.");
     }
@@ -122,7 +127,7 @@ public class EnlistOfferVisibilityTests
     }
 
     /// <summary>
-    /// AtWarWithYourKingdom is the ONLY greyed verdict, so it must sit at the bottom of the ladder.
+    /// AtWarWithYourKingdom and DesertedFromHim are the greyed verdicts, so they sit at the bottom of the ladder.
     /// A mercenary player whose commander is also at war with their kingdom must not see the greyed
     /// war line — the mercenary contract is the real blocker and hides the option outright.
     /// </summary>
@@ -149,6 +154,33 @@ public class EnlistOfferVisibilityTests
         MakeCommanderPartyless();
 
         Assert.AreEqual(EnlistGateResult.CommanderUnavailable, _gate.CanEnlistWith("lord_1_1"));
+    }
+
+    /// <summary>
+    /// A lord with no party plus a live desertion cooldown: CommanderUnavailable is decided first, so
+    /// the greyed refusal never shows on a lord who leads no column.
+    /// </summary>
+    [TestMethod]
+    public void CanEnlistWith_PartylessLordInDesertionCooldown_ReturnsCommanderUnavailable()
+    {
+        _history.IsInDesertionCooldown("lord_1_1").Returns(true);
+        MakeCommanderPartyless();
+
+        Assert.AreEqual(EnlistGateResult.CommanderUnavailable, _gate.CanEnlistWith("lord_1_1"));
+    }
+
+    /// <summary>A healthy commander he deserted from: the greyed refusal, shown but not takeable.</summary>
+    [TestMethod]
+    public void CanEnlistWith_HealthyCommanderInDesertionCooldown_ReturnsDeserterAndIsShownGreyed()
+    {
+        _history.IsInDesertionCooldown("lord_1_1").Returns(true);
+        GiveCommanderALiveColumn();
+
+        var verdict = _gate.CanEnlistWith("lord_1_1");
+
+        Assert.AreEqual(EnlistGateResult.DesertedFromHim, verdict);
+        Assert.IsTrue(EnlistmentDialogBehavior.ShowsOfferFor(verdict, deferToHost: false));
+        Assert.IsFalse(EnlistmentDialogBehavior.OfferIsTakeable(verdict));
     }
 
     /// <summary>The greyed case is genuinely reachable — a healthy commander, blocked only by the war.</summary>

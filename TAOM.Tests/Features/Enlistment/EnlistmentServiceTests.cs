@@ -18,6 +18,7 @@ public class EnlistmentServiceTests
     private IEncounterAdapter _encounter = null!;
     private DischargeService _discharge = null!;
     private EnlistmentService _service = null!;
+    private IServiceHistoryService _history = null!;
 
     [TestInitialize]
     public void Setup()
@@ -29,12 +30,13 @@ public class EnlistmentServiceTests
         _attachment = Substitute.For<IMobilePartyAttachmentAdapter>();
         _attachment.RestorePresence().Returns(true);
         _attachment.ParkNear(Arg.Any<string>()).Returns(true);
-        _discharge = new DischargeService(_store, _machine, _attachment, Substitute.For<IEncounterAdapter>(), new EncounterOwnershipPolicy(), Substitute.For<ICommanderLordAdapter>(), Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IDesertionPenaltyService>(), _logger);
+        _discharge = new DischargeService(_store, _machine, _attachment, Substitute.For<IEncounterAdapter>(), new EncounterOwnershipPolicy(), Substitute.For<ICommanderLordAdapter>(), Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IDesertionPenaltyService>(), _logger, Substitute.For<IServiceHistoryService>());
+        _history = Substitute.For<IServiceHistoryService>();
         _encounter = Substitute.For<IEncounterAdapter>();
         _encounter.Finish(Arg.Any<bool>()).Returns(true);
         _service = new EnlistmentService(
             _store, _machine, _discharge, _commander, _attachment, _encounter, new EncounterOwnershipPolicy(),
-            new EnlistmentConfigProvider(_logger), Substitute.For<IServiceDiplomacyService>(), _logger);
+            new EnlistmentConfigProvider(_logger), Substitute.For<IServiceDiplomacyService>(), _logger, _history);
 
         _commander.GetSnapshot("lord_1_1").Returns(new CommanderSnapshot(
             exists: true, isAlive: true, isPrisoner: false,
@@ -233,5 +235,13 @@ public class EnlistmentServiceTests
         _attachment.Received(1).ParkNear("lord_1_1");
     }
 
+    [TestMethod]
+    public void CompleteOath_RestoresPastServiceForTheCommander()
+    {
+        _service.SubmitPetition("lord_1_1");
 
+        Assert.AreEqual(OathResult.Sworn, _service.CompleteOath("lord_1_1", "main_hero", 100.0));
+
+        _history.Received(1).RestoreOnOath("lord_1_1", "main_hero", Arg.Any<CommanderSnapshot>());
+    }
 }

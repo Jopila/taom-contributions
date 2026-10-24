@@ -45,7 +45,7 @@ public class EnlistmentReconcilerTests
         _partyAdapter.ParkNear(Arg.Any<string>()).Returns(true);
         _partyAdapter.SyncPositionTo(Arg.Any<string>()).Returns(true);
         _attachment = new ServiceAttachmentService(_partyAdapter, Substitute.For<IGameMenuAdapter>(), _logger);
-        _discharge = new DischargeService(_store, _machine, _partyAdapter, Substitute.For<IEncounterAdapter>(), new EncounterOwnershipPolicy(), Substitute.For<ICommanderLordAdapter>(), Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IDesertionPenaltyService>(), _logger);
+        _discharge = new DischargeService(_store, _machine, _partyAdapter, Substitute.For<IEncounterAdapter>(), new EncounterOwnershipPolicy(), Substitute.For<ICommanderLordAdapter>(), Substitute.For<IGameMenuAdapter>(), Substitute.For<IServiceDiplomacyService>(), Substitute.For<IArmyMembershipAdapter>(), Substitute.For<IDesertionPenaltyService>(), _logger, Substitute.For<IServiceHistoryService>());
         _encounter = Substitute.For<IEncounterAdapter>();
         _army = Substitute.For<IArmyMembershipAdapter>();
         _diplomacy = Substitute.For<IServiceDiplomacyService>();

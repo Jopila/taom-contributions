@@ -28,6 +28,9 @@ public interface IServiceDailyAnnouncer
     /// </summary>
     void AnnouncePromotion(ServiceRank rank);
 
+    /// <summary>The oath line when past service restored a rank (#837).</summary>
+    void AnnounceRemembered(string commanderName, ServiceRank rank);
+
     /// <summary>The merit toast for the battle's band. Silent when the battle had no sample.</summary>
     void AnnounceMerit(string gradeKey);
 
@@ -107,6 +110,14 @@ public sealed class ServiceDailyAnnouncer : IServiceDailyAnnouncer
 
         // Neutral text: no commander to name, or the notice could not be shown.
         var text = new TextObject("{=taom_enlist_promoted}You have been promoted to {RANK}.");
+        text.SetTextVariable("RANK", ServiceVocabulary.RankName(rank));
+        InformationManager.DisplayMessage(new InformationMessage(text.ToString()));
+    }
+
+    public void AnnounceRemembered(string commanderName, ServiceRank rank)
+    {
+        var text = new TextObject("{=taom_enlist_oath_remembered}{COMMANDER} remembers your service: you begin as {RANK}.");
+        text.SetTextVariable("COMMANDER", commanderName ?? "");
         text.SetTextVariable("RANK", ServiceVocabulary.RankName(rank));
         InformationManager.DisplayMessage(new InformationMessage(text.ToString()));
     }

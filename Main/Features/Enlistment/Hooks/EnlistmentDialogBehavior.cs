@@ -99,7 +99,7 @@ public class EnlistmentDialogBehavior : CampaignBehaviorBase
     private static string PartnerId() => Hero.OneToOneConversationHero?.StringId;
 
     /// <summary>
-    /// The two verdicts that put the offer on screen; everything else hides the line. Why
+    /// The verdicts that put the offer on screen (Ok, and the greyed war and deserter refusals); the rest hide it. Why
     /// CommanderUnavailable is deliberately NOT among them is argued in
     /// <see cref="Presentation.ServiceVocabulary.EnlistUnavailableReason"/>. Static because the
     /// split is load-bearing on EnlistGateResult's ladder ORDER — <c>EnlistOfferVisibilityTests</c>.
@@ -107,7 +107,7 @@ public class EnlistmentDialogBehavior : CampaignBehaviorBase
     /// world, and a player-hosted host and a solo player are not guests, so they keep it.
     /// </summary>
     public static bool ShowsOfferFor(EnlistGateResult verdict, bool deferToHost) =>
-        !deferToHost && (verdict == EnlistGateResult.Ok || verdict == EnlistGateResult.AtWarWithYourKingdom);
+        !deferToHost && (verdict == EnlistGateResult.Ok || verdict == EnlistGateResult.AtWarWithYourKingdom || verdict == EnlistGateResult.DesertedFromHim);
 
     /// <summary>Only a clean Ok is takeable; any other shown verdict renders greyed.</summary>
     public static bool OfferIsTakeable(EnlistGateResult verdict) => verdict == EnlistGateResult.Ok;
@@ -126,7 +126,7 @@ public class EnlistmentDialogBehavior : CampaignBehaviorBase
             return true;
         }
 
-        explanation = Presentation.ServiceVocabulary.EnlistUnavailableReason(verdict);
+        explanation = Presentation.ServiceVocabulary.EnlistUnavailableReason(verdict, Hero.OneToOneConversationHero?.Name?.ToString());
         return false;
     }
 

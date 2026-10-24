@@ -9,19 +9,22 @@ public class EnlistmentDialogGateService : IEnlistmentDialogGateService
     private readonly IPlayerContextAdapter _playerContext;
     private readonly IEnlistmentConfigProvider _config;
     private readonly IEnlistmentFeatureSettingsProvider _feature;
+    private readonly IServiceHistoryService _history;
 
     public EnlistmentDialogGateService(
         IEnlistmentStore store,
         ICommanderLordAdapter commander,
         IPlayerContextAdapter playerContext,
         IEnlistmentConfigProvider config,
-        IEnlistmentFeatureSettingsProvider feature)
+        IEnlistmentFeatureSettingsProvider feature,
+        IServiceHistoryService history)
     {
         _store = store;
         _commander = commander;
         _playerContext = playerContext;
         _config = config;
         _feature = feature;
+        _history = history;
     }
 
     public EnlistGateResult CanEnlistWith(string partnerHeroId)
@@ -51,6 +54,10 @@ public class EnlistmentDialogGateService : IEnlistmentDialogGateService
         {
             return EnlistGateResult.AtWarWithYourKingdom;
         }
+
+        // He deserted from this lord not long ago and the cooldown has not run out (#837).
+        if (_history.IsInDesertionCooldown(partnerHeroId))
+            return EnlistGateResult.DesertedFromHim;
 
         return EnlistGateResult.Ok;
     }

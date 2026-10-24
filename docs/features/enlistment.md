@@ -443,7 +443,11 @@ confirmations name the cost through two new keys that hold only the cost sentenc
 the unchanged, already translated rows: `taom_enlist_desert_cost` (appended to the wait-menu body
 through the inquiry adapter's `bodyAppendKey`) and `taom_enlist_desert_cost_reply` (appended to the
 in-person player line, composed with a `{LINE} {COST}` text variable). Both are gender-neutral
-("your commander's favor"). The relation change is silent (no notification). The Honor change: the
+("your commander's favor"). Since #837 both also name what the history now
+costs through a third key, `taom_enlist_desert_memory` ("Your commander will not take your oath again
+for a time, and this term will count for nothing if you return."), appended after the cost sentence (the inquiry
+adapter's `secondAppendKey`, and a `{MEMORY}` variable on the in-person line, which uses the
+first-person key `taom_enlist_desert_memory_reply`). The relation change is silent (no notification). The Honor change: the
 engine sets a player's Honor XP exactly at his level's threshold at character creation and on a
 player-character change, so a player at Honor +1 or +2 who has gained no Honor since then drops one
 level on his first desertion (a map notice); from level 0 it takes ten desertions to reach -1. XP is
@@ -2388,6 +2392,82 @@ key),
 `ServiceRewardServiceTests` (the bonus paid like wages), `EnlistmentRecordTests` (an old save carrying the retired stamp, including garbage values), `EnlistmentContentConfigProviderTests` (renewal defaults, shipped parity, range) and
 `EnlistmentContainerWiringTests` (the content behavior resolves).
 
+## Past service (#837)
+
+A soldier who served before is remembered. A discharge used to wipe the content record, so a veteran who
+took the oath again began as a Private.
+
+- **History.** `ServiceHistory` is a saved list of past contracts (`ServiceHistoryEntry`: the enlisted
+  hero id, commander id, clan id, kingdom id (empty for an independent clan; a mercenary clan records the
+  kingdom that hired it), rank, discharge reason, end day, and the `EnlistmentKitTier?` that stayed with
+  the player). It lives in `EnlistmentContentStore.History` and is saved in the content section as one more
+  `history=` key (rows joined by `~`, fields by `|`; the kit tier field is empty or the tier ordinal). The
+  parse is hardened like the other records: a bad row (unknown rank, reason or tier, non-finite day, wrong
+  field count, empty commander or hero id) is dropped and the rest survive, an old save without the key
+  loads empty, and a malformed progression record does not cost the history.
+- **What clears it.** A discharge resets only the content record (`DischargeConsequenceService` calls the
+  record's own `Reset`), so the history survives it. `EnlistmentContentStore.Clear()` also drops the history,
+  and its two callers in `EnlistmentContentBehavior` (a new game, and a session launch that did not follow
+  a save load) are the new-campaign reset. A save with no enlistment data does not call `SyncData` (the
+  engine skips behaviors that have no saved data), so that case is reset by the session-launch `Clear()`,
+  not by `Deserialize`. The history belongs to its campaign.
+- **Pruning.** On write, `Prune(now, expiry, max, cooldown)` drops entries older than
+  `serviceHistoryExpiryDays` (730 DAYS: a game year is 84 days at normal pace (24 in Fast mode), and 730 days is two 365-day contracts, so
+  never write "2 years") and entries dated after now, then the oldest beyond `serviceHistoryMaxEntries`.
+  A desertion still inside its cooldown is never removed, by expiry or by the cap (only the oldest other
+  rows go, so the cap can be passed by cooling rows). The enlist gate and the prune read one predicate,
+  `ServiceHistoryEntry.IsCoolingDownDesertion`. `Restore` and the cooldown ignore future-dated entries too.
+- **Whose entries count.** An entry belongs to the hero who served (`Record.EnlistedHeroId` at the
+  discharge). The policy and the cooldown consider only entries of the current main hero, so a Player
+  Switcher swap or an heir starts fresh. The oath passes its `enlistedHeroId`; the gate's cooldown check
+  reads the main hero id through `IPlayerPartyAdapter`.
+- **When an entry is written.** `DischargeService.Execute` notes the commander and the enlisted hero at
+  step 3 (`IServiceHistoryService.NoteCommander`, with the clan and kingdom ids from the snapshot), and
+  `DischargeConsequenceService.ApplyConsequences` calls `RecordEnd(reason, rank, kitTier)` for every
+  reason, before the content record is reset, on the host. Only `RecordEnd` filters the quiet reasons: heir
+  succession and save normalization write nothing.
+- **One kit rule.** `ReclaimIssuedKit` returns the number of items it took back (0 on every early exit:
+  feature off, nothing issued, main party unavailable), and a desertion reclaims nothing. The kit stayed
+  with him when `issuedCount > reclaimed`, or when a tier is recorded with no item ids (only a restore
+  seed leaves that). The entry stores `ledger.HighestIssuedTier` when the kit stayed, else nothing.
+- **The restored rank** (`ReenlistmentPolicy.Restore`, pure): the best of the same commander's old rank
+  minus one, the same clan's minus one, and the same kingdom's minus two, never below Private. Ties go to
+  the most recent entry, whose kit tier is the one carried. A desertion gives no credit. Expired entries
+  give nothing. `CompleteOath` applies it through `IServiceHistoryService.RestoreOnOath` (no return
+  value): rank only, so service XP and days served restart and the next promotion's gates count from this
+  oath. It never lowers a rank already held. The oath line (`taom_enlist_oath_remembered`, "{COMMANDER}
+  remembers your service: you begin as {RANK}.") shows only when a rank was restored.
+- **Kit ledger.** The oath seeds the ledger with the tier he really kept (`RecordIssue(tier, no items)`),
+  and only when the entry has one. After a full reclaim it stays empty so the veteran can draw kit for
+  his rank again. A seeded tier lower than the new rank's own still leaves a kit waiting after the next
+  promotion (`KitWaits`).
+- **Desertion cooldown.** `ReenlistmentPolicy.InDesertionCooldown`: this hero deserted from this
+  commander less than `desertionCooldownDays` ago (0 turns it off).
+  `EnlistmentDialogGateService.CanEnlistWith` returns `EnlistGateResult.DesertedFromHim`, shown greyed
+  with `taom_enlist_refused_deserter` ("{COMMANDER} remembers your desertion and will not take your
+  oath."). It sits below the commander checks, so a lord with no party gives `CommanderUnavailable`
+  first. Another lord is not affected. All four consumers of `IServiceHistoryService` (`DischargeService`,
+  `DischargeConsequenceService`, `EnlistmentDialogGateService`, `EnlistmentService`) take it as a required
+  constructor argument.
+- **The warning names it.** The wait-menu prompt appends `taom_enlist_desert_memory` ("Your commander
+  will not take your oath again for a time, and this term will count for nothing if you return.") after
+  the cost sentence (see "What desertion costs (#833)"). The in-person line is the player's own speech, so
+  it composes the first-person twin `taom_enlist_desert_memory_reply` ("(My commander will not take my oath
+  again for a time, and this term will count for nothing.)"). An older honourable entry still gives credit
+  after a desertion; only the desertion's own term counts for nothing.
+- **Config** (`enlistment_config.json`, validated, out of range reverts that key with a warning):
+  `serviceHistoryExpiryDays` 730 (1 to 3650), `serviceHistoryMaxEntries` 10 (1 to 50),
+  `desertionCooldownDays` 60 (0 to 365).
+- **Keys:** `taom_enlist_oath_remembered`, `taom_enlist_refused_deserter`, `taom_enlist_desert_memory`, `taom_enlist_desert_memory_reply`.
+
+Tests: `PastServiceTests` (the list, pruning, the store and its new-campaign reset, the policy, the
+cooldown edges, hero identity, the service), `EnlistOfferVisibilityTests` (the gate ladder and the
+greyed verdict), `ServiceVocabularyTests` (the refusal text), `DischargeConsequenceServiceTests` (the kit
+rule per path, every reason), `DischargeServiceTests` (the commander is noted before the event),
+`EnlistmentServiceTests` and `EnlistmentDialogGateServiceTests` (the wiring), `DesertionCostTextTests`
+and `EnlistmentWaitMenuPresenterTests` (the warning), `EnlistmentContentConfigProviderTests` (defaults,
+shipped parity, range).
+
 ## Interactions with the rest of TAOM
 
 **Leader-keyed attribution is the recurring hazard.** For months of game time the player fights
@@ -2511,6 +2591,11 @@ What actually remains, each a state no test can reach:
 - **A field battle with the commander in an army.** Still the case most likely to fail:
   `FindCommanderPartyIdIn` matches only the commander's own party in `InvolvedParties`, and an
   attached army member may not appear there.
+- **Past service (#837).** Reach Sergeant under one lord (25 days, 350 XP, 2 duty wins), leave
+  honorably, and take the oath with him again: you begin as Specialist and the kit can be drawn. A lord of
+  ANOTHER clan of the same kingdom gives two ranks lower, so it takes a Staff Sergeant to show a gain.
+  Desert and try him again: the offer is greyed with his refusal for 60 days, and the desertion warning
+  names that cost. The oath line names the restored rank. Service XP and days served restart at zero.
 - **End of the term (#836).** Run `taom.set_term_end` while enlisted (cheat mode on), then let a day
   tick: the inquiry shows once. Press Escape on it: he signs on again (the bonus, if the commander can
   pay it, and the trust arrive, and the term restarts). Run it again and choose "Leave with honor": an

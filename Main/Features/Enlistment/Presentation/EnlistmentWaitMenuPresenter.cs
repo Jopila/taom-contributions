@@ -286,7 +286,10 @@ public sealed class EnlistmentWaitMenuPresenter : IEnlistmentWaitMenuPresenter
             // The cost sentence is its own key, appended to the original body (#833), so the already
             // translated body row is never edited.
             bodyAppendKey: "taom_enlist_desert_cost",
-            bodyAppendFallback: "Deserting will also cost you your commander's favor and your good name.");
+            bodyAppendFallback: "Deserting will also cost you your commander's favor and your good name.",
+            // What the history now remembers (#837): a cooldown with him, and no credit at the next oath.
+            secondAppendKey: "taom_enlist_desert_memory",
+            secondAppendFallback: "Your commander will not take your oath again for a time, and this term will count for nothing if you return.");
     }
 
     /// <summary>
