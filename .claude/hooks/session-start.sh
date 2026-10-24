@@ -181,7 +181,7 @@ fi
 # full copy of the tree on E:, and nothing else counts them. One bounded `git worktree list`
 # (about 0.05 s); more than 15 prints the audit command. Pruning stays the maintainer's call.
 # Fail open, never silent: a spent budget, an overrun or a failed call says "unchecked".
-WT_MAX=1000
+WT_MAX=15
 if ! ss_probe_budget; then
   echo ""
   echo "NOTE: worktree count UNCHECKED this session (session-start time budget spent)."
