@@ -8,7 +8,6 @@ public sealed class DailySummary
     public WageDecision Wage { get; set; } = new WageDecision();
     public bool Promoted { get; set; }
     public ServiceRank NewRank { get; set; }
-    public bool ContractExpiredToday { get; set; }
 
     /// <summary>
     /// The tick ran while the commander had no command, so nothing past the day counter happened:

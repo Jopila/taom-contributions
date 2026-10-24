@@ -30,7 +30,6 @@
     <string id="taom_enlist_reassign_sup" text="Les bagages et les blessés ont besoin de bras." />
     <string id="taom_enlist_status_body" text="Commandant : {COMMANDER}. Engagé le jour {ENLISTED_DAY} ; le contrat s'achève le jour {CONTRACT_END}." />
     <string id="taom_enlist_status_title" text="Livret de service" />
-    <string id="taom_enlist_term_served" text="Votre terme de service est achevé — vous pouvez demander votre libération avec honneur, ou poursuivre la marche." />
     <string id="taom_enlist_wage_deferred" text="Le coffre de paie est à sec — {AMOUNT}{GOLD_ICON} de votre solde vous est dû pour plus tard." />
     <string id="taom_enlist_wage_forfeited" text="La colonne ne peut plus rendre compte de {AMOUNT}{GOLD_ICON} de votre arriéré de solde." />
     <string id="taom_enlist_wage_paid" text="Solde reçue : {AMOUNT}{GOLD_ICON}" />
@@ -282,5 +281,10 @@
     <string id="taom_enlist_promoted_kit" text="The quartermaster has kit for your new rank." />
     <string id="taom_enlist_promoted_notice" text="{COMMANDER} names you {RANK}." />
     <string id="taom_enlist_board_kit" text="{NEWLINE}Kit to draw: the quartermaster holds gear for your rank." />
+    <string id="taom_enlist_term_body" text="{COMMANDER} offers you up to {BONUS} denars and renewed trust to sign on for another term, or you may leave the service with honor." />
+    <string id="taom_enlist_term_leave" text="Leave with honor" />
+    <string id="taom_enlist_term_renew" text="Sign on again" />
+    <string id="taom_enlist_term_title" text="Your term is served" />
+    <string id="taom_enlist_term_bonus_paid" text="You receive {GOLD} denars for signing on again." />
   </strings>
 </base>

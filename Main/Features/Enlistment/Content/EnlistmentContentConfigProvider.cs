@@ -263,6 +263,10 @@ public class EnlistmentContentConfigProvider : IEnlistmentContentConfigProvider
         rejected |= RevertIfOutOfRange(() => config.DesertionRelationPenalty, v => config.DesertionRelationPenalty = v, defaults.DesertionRelationPenalty, -100, 0, "desertionRelationPenalty");
         rejected |= RevertIfOutOfRange(() => config.DesertionHonorXpPenalty, v => config.DesertionHonorXpPenalty = v, defaults.DesertionHonorXpPenalty, -1000, 0, "desertionHonorXpPenalty");
 
+        // Term-end renewal (#836): out of range reverts the key to its compiled default with a warning.
+        rejected |= RevertIfOutOfRange(() => config.RenewalBonusWageDays, v => config.RenewalBonusWageDays = v, defaults.RenewalBonusWageDays, 0, 365, "renewalBonusWageDays");
+        rejected |= RevertIfOutOfRange(() => config.RenewalTrust, v => config.RenewalTrust = v, defaults.RenewalTrust, 0, 100, "renewalTrust");
+
         // Personal spoils (#834): out of range reverts the key to its compiled default with a warning.
         rejected |= RevertIfOutOfRange(() => config.SpoilsMaxItemsPerBattle, v => config.SpoilsMaxItemsPerBattle = v, defaults.SpoilsMaxItemsPerBattle, 0, 10, "spoilsMaxItemsPerBattle");
         rejected |= RevertIfNotFiniteInRange(() => config.SpoilsValueScalePerRank, v => config.SpoilsValueScalePerRank = v, defaults.SpoilsValueScalePerRank, 0, 2, "spoilsValueScalePerRank");

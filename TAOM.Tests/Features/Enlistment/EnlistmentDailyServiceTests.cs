@@ -44,12 +44,12 @@ public class EnlistmentDailyServiceTests
         _service = new EnlistmentDailyService(_store, _contentStore, _config, _rewards, _rhythm, _skillXp, _promotion, _world, _commanderAdapter, _logger);
     }
 
-    private void MakeEnlisted(double contractEnd = 465.0)
+    private void MakeEnlisted()
     {
         _store.Record.State = EnlistmentState.EnlistedAttached;
         _store.Record.EnlistedHeroId = "main_hero";
         _store.Record.CommanderHeroId = "lord_1_1";
-        _store.Record.ContractEndDay = contractEnd;
+        _store.Record.ContractEndDay = 465.0;
     }
 
     [TestMethod]
@@ -119,16 +119,6 @@ public class EnlistmentDailyServiceTests
 
         _skillXp.GetSkillValue("main_hero", "Leadership").Returns(8);
         Assert.IsTrue(_service.RunDailyTick(200.0, 12.0).Promoted);
-    }
-
-    [TestMethod]
-    public void DailyTick_ContractExpiry_FlagsExactlyOnce()
-    {
-        MakeEnlisted(contractEnd: 200.5);
-
-        Assert.IsFalse(_service.RunDailyTick(199.8, 12.0).ContractExpiredToday);
-        Assert.IsTrue(_service.RunDailyTick(200.8, 12.0).ContractExpiredToday, "first tick past the end day");
-        Assert.IsFalse(_service.RunDailyTick(201.8, 12.0).ContractExpiredToday, "not re-flagged");
     }
 }
 

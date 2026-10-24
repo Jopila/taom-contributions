@@ -22,6 +22,12 @@ public sealed class EnlistmentContentConfig
     /// <summary>Honor trait XP lost by the same desertion (#833). In [-1000, 0], same validation.</summary>
     public int DesertionHonorXpPenalty { get; set; } = -100;
 
+    /// <summary>Days of the current rank's wage paid as a bonus when the player signs on for another term (#836). In [0, 365].</summary>
+    public int RenewalBonusWageDays { get; set; } = 30;
+
+    /// <summary>Trust added when the player signs on for another term (#836). In [0, 100].</summary>
+    public int RenewalTrust { get; set; } = 10;
+
     /// <summary>Most personal spoils (items from his own kills) a won battle can pay (#834). In [0, 10].</summary>
     public int SpoilsMaxItemsPerBattle { get; set; } = 3;
 

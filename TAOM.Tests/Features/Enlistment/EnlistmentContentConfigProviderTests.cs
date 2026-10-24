@@ -915,4 +915,50 @@ public class EnlistmentContentConfigProviderTests
         Assert.AreEqual(0.0, c.SpoilsRandomMin);
         Assert.AreEqual(2.0, c.SpoilsRandomMax);
     }
+
+    // ---- term-end renewal (#836) ----
+
+    [TestMethod]
+    public void RenewalDefaults_AreTheDecidedValues()
+    {
+        var d = EnlistmentContentConfigProvider.BuildDefaults();
+        Assert.AreEqual(30, d.RenewalBonusWageDays);
+        Assert.AreEqual(10, d.RenewalTrust);
+    }
+
+    [TestMethod]
+    public void ShippedConfig_Renewal_EqualsTheCompiledDefaults()
+    {
+        var d = EnlistmentContentConfigProvider.BuildDefaults();
+        var raw = JObject.Parse(File.ReadAllText(Path.Combine(ShippedModuleDataPath(), "enlistment", "enlistment_config.json")));
+        Assert.AreEqual(d.RenewalBonusWageDays, (int)raw["renewalBonusWageDays"]);
+        Assert.AreEqual(d.RenewalTrust, (int)raw["renewalTrust"]);
+        new EnlistmentContentConfigProvider(ShippedPaths(), _logger).GetConfig();
+        _logger.DidNotReceive().LogWarning(Arg.Is<string>(m => m.Contains("renewal")));
+    }
+
+    [DataTestMethod]
+    [DataRow("{\"renewalBonusWageDays\":-1}", "renewalBonusWageDays")]
+    [DataRow("{\"renewalBonusWageDays\":366}", "renewalBonusWageDays")]
+    [DataRow("{\"renewalTrust\":-1}", "renewalTrust")]
+    [DataRow("{\"renewalTrust\":101}", "renewalTrust")]
+    public void GetConfig_RenewalOutOfRange_RevertsWithWarning(string json, string key)
+    {
+        WriteConfig(json);
+
+        var c = Provider().GetConfig();
+
+        Assert.AreEqual(30, c.RenewalBonusWageDays);
+        Assert.AreEqual(10, c.RenewalTrust);
+        _logger.Received().LogWarning(Arg.Is<string>(m => m.Contains(key)));
+    }
+
+    [TestMethod]
+    public void GetConfig_RenewalBoundaries_AreKept()
+    {
+        WriteConfig("{\"renewalBonusWageDays\":365,\"renewalTrust\":0}");
+        var c = Provider().GetConfig();
+        Assert.AreEqual(365, c.RenewalBonusWageDays);
+        Assert.AreEqual(0, c.RenewalTrust);
+    }
 }

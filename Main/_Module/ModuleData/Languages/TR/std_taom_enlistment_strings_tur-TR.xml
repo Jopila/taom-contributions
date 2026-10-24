@@ -30,7 +30,6 @@
     <string id="taom_enlist_reassign_sup" text="Yük ve yaralılar için el gerek." />
     <string id="taom_enlist_status_body" text="Komutan: {COMMANDER}. {ENLISTED_DAY}. günde askere yazıldın; sözleşme {CONTRACT_END}. günde sona eriyor." />
     <string id="taom_enlist_status_title" text="Hizmet kaydı" />
-    <string id="taom_enlist_term_served" text="Hizmet süren tamamlandı — onurla salıverilmeyi isteyebilir ya da yürüyüşe devam edebilirsin." />
     <string id="taom_enlist_wage_deferred" text="Ödeme sandığı yetersiz — maaşının {AMOUNT}{GOLD_ICON} kadarı sonraya borç kaldı." />
     <string id="taom_enlist_wage_forfeited" text="Kol, birikmiş maaşının {AMOUNT}{GOLD_ICON} kadarının hesabını artık veremiyor." />
     <string id="taom_enlist_wage_paid" text="Alınan maaş: {AMOUNT}{GOLD_ICON}" />
@@ -282,5 +281,10 @@
     <string id="taom_enlist_promoted_kit" text="The quartermaster has kit for your new rank." />
     <string id="taom_enlist_promoted_notice" text="{COMMANDER} names you {RANK}." />
     <string id="taom_enlist_board_kit" text="{NEWLINE}Kit to draw: the quartermaster holds gear for your rank." />
+    <string id="taom_enlist_term_body" text="{COMMANDER} offers you up to {BONUS} denars and renewed trust to sign on for another term, or you may leave the service with honor." />
+    <string id="taom_enlist_term_leave" text="Leave with honor" />
+    <string id="taom_enlist_term_renew" text="Sign on again" />
+    <string id="taom_enlist_term_title" text="Your term is served" />
+    <string id="taom_enlist_term_bonus_paid" text="You receive {GOLD} denars for signing on again." />
   </strings>
 </base>

@@ -1,6 +1,4 @@
 using TaleWorlds.CampaignSystem;
-using TaleWorlds.Library;
-using TaleWorlds.Localization;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.Enlistment.Content;
 using TAOM.Features.Enlistment.Domain;
@@ -24,6 +22,7 @@ public class EnlistmentContentBehavior : CampaignBehaviorBase
     private readonly IDischargeService _discharge;
     private readonly ICoopSessionProvider _coopSession;
     private readonly Presentation.IServiceDailyAnnouncer _announcer;
+    private readonly ContractRenewalService _renewal;
 
     private CampaignGameStarter _lastSessionStarter;
     private bool _justLoadedFromSave;
@@ -36,7 +35,8 @@ public class EnlistmentContentBehavior : CampaignBehaviorBase
         Duties.IDutyOrchestrationService duties,
         IDischargeService discharge,
         ICoopSessionProvider coopSession,
-        Presentation.IServiceDailyAnnouncer announcer)
+        Presentation.IServiceDailyAnnouncer announcer,
+        ContractRenewalService renewal)
     {
         _contentStore = contentStore;
         _daily = daily;
@@ -46,6 +46,7 @@ public class EnlistmentContentBehavior : CampaignBehaviorBase
         _discharge = discharge;
         _coopSession = coopSession;
         _announcer = announcer;
+        _renewal = renewal;
     }
 
     public override void RegisterEvents()
@@ -110,11 +111,9 @@ public class EnlistmentContentBehavior : CampaignBehaviorBase
         if (summary.Promoted)
             _announcer.AnnouncePromotion(summary.NewRank);
 
-        if (summary.ContractExpiredToday)
-        {
-            InformationManager.DisplayMessage(new InformationMessage(
-                new TextObject("{=taom_enlist_term_served}Your term of service is complete — you may ask for release with honor, or march on.").ToString()));
-        }
+        // The end of the term (#836): a once-per-term offer. A blocked offer (battle, conversation)
+        // retries on the next daily tick.
+        _renewal.OfferIfDue(CampaignTime.Now.ToDays);
     }
 
     // Consequence policy lives in the service; this only forwards the event.

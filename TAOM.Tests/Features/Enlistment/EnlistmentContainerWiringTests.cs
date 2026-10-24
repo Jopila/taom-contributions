@@ -49,6 +49,9 @@ public class EnlistmentContainerWiringTests
         // IRandomProvider (TroopProgressionIoC) is registered by Main/IoC.cs; the payout service rolls
         // the personal spoils with it (#834).
         container.RegisterInstance(Substitute.For<global::TAOM.Features.TroopProgression.IRandomProvider>());
+        // IDutyWorldAdapter (registered outside the Enlistment module) is read by the daily service, so
+        // the content behavior root needs it to resolve (#836).
+        container.RegisterInstance(Substitute.For<global::TAOM.Adapters.IDutyWorldAdapter>());
 
         EnlistmentIoC.RegisterEnlistmentFeature(container);
         return container;
@@ -95,6 +98,20 @@ public class EnlistmentContainerWiringTests
             0,
             errors.Length,
             "IServiceDailyAnnouncer is not resolvable: "
+                + string.Join("; ", errors.Select(e => e.Value.Message)));
+    }
+
+    [TestMethod]
+    public void ContentBehavior_Resolvable_ContractRenewalDependenciesSatisfied()
+    {
+        var container = BuildContainer();
+
+        var errors = container.Validate(typeof(global::TAOM.Features.Enlistment.Hooks.EnlistmentContentBehavior));
+
+        Assert.AreEqual(
+            0,
+            errors.Length,
+            "EnlistmentContentBehavior is not resolvable: "
                 + string.Join("; ", errors.Select(e => e.Value.Message)));
     }
 

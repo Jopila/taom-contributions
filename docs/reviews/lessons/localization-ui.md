@@ -1184,3 +1184,14 @@ empty space. This is the same default-left class as the fixed-width columns entr
 - **Prevent:** when a copied layout changes a size, check every container's alignment default against the new
   sizes; pin a needed `HorizontalAlignment` with a source test.
 - **Source:** [rca-lines-of-descent-2026-10-23.md](../rca-lines-of-descent-2026-10-23.md) finding 4.
+
+### Option B of a two-option inquiry is the Escape key: put the safe choice there (End of the term, 2026-10-23)
+The end-of-term offer put "Sign on again" in the first button and "Leave with honor" in the second. The
+engine runs the negative option (B) on Escape and the gamepad B button, whatever the button state, so a
+player who pressed Escape to dismiss the popup would have been discharged (caught in review, before any commit). Enter
+runs option A, the deliberate confirm.
+- **Why missed:** the button order followed the reading order of the text ("sign on, or leave"), and nobody
+  asked what Escape does on a modal two-option inquiry.
+- **Prevent:** before wiring a `ShowTwoOptionInquiry`, decide which choice is harmless when dismissed and
+  make that option B. Name the Escape option in the feature doc and pin which callback is B in a test.
+- **Source:** `docs/reviews/rca-enlistment-term-end-2026-10-23.md` F1.

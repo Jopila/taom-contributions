@@ -34,8 +34,12 @@
 	<string id="taom_enlist_promoted_kit" text="{=taom_enlist_promoted_kit}The quartermaster has kit for your new rank." />
 	<string id="taom_enlist_promoted_notice" text="{=taom_enlist_promoted_notice}{COMMANDER} names you {RANK}." />
 	<string id="taom_enlist_board_kit" text="{=taom_enlist_board_kit}{NEWLINE}Kit to draw: the quartermaster holds gear for your rank." />
+	<string id="taom_enlist_term_body" text="{=taom_enlist_term_body}{COMMANDER} offers you up to {BONUS} denars and renewed trust to sign on for another term, or you may leave the service with honor." />
+	<string id="taom_enlist_term_bonus_paid" text="{=taom_enlist_term_bonus_paid}You receive {GOLD} denars for signing on again." />
+	<string id="taom_enlist_term_leave" text="{=taom_enlist_term_leave}Leave with honor" />
+	<string id="taom_enlist_term_renew" text="{=taom_enlist_term_renew}Sign on again" />
+	<string id="taom_enlist_term_title" text="{=taom_enlist_term_title}Your term is served" />
 	<string id="taom_enlist_spoils" text="{=taom_enlist_spoils}Spoils of your own blade: {ITEMS}" />
-	<string id="taom_enlist_term_served" text="{=taom_enlist_term_served}Your term of service is complete — you may ask for release with honor, or march on." />
 	<string id="taom_enlist_wage_deferred" text="{=taom_enlist_wage_deferred}The paychest is short — {AMOUNT}{GOLD_ICON} of your wages is owed against later." />
 	<string id="taom_enlist_wage_forfeited" text="{=taom_enlist_wage_forfeited}The column can no longer account for {AMOUNT}{GOLD_ICON} of your back pay." />
 	<string id="taom_enlist_wage_paid" text="{=taom_enlist_wage_paid}Wages received: {AMOUNT}{GOLD_ICON}" />

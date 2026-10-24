@@ -16,6 +16,13 @@ public interface IServiceRewardService
     /// <summary>Commander-funded daily wage per WagePolicy; mutates arrears in the content record.</summary>
     WageDecision PayDailyWage();
 
+    /// <summary>
+    /// Pays a one-off bonus (#836) as a gift: from the commander's purse above the wage floor when wages are
+    /// commander-funded (never more than he holds above it), minted in full when wages are. The unpaid part
+    /// is not owed and arrears are untouched. Returns what reached the player.
+    /// </summary>
+    int PayBonusFromCommander(int amount, string reason);
+
     void AdjustTrust(int delta);
 
     void ApplyReputation(ReputationDomain domain, int amount);

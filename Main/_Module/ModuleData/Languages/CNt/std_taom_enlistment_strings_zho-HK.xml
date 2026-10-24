@@ -30,7 +30,6 @@
     <string id="taom_enlist_reassign_sup" text="行囊與傷兵需要人手。" />
     <string id="taom_enlist_status_body" text="指揮官：{COMMANDER}。入伍於第 {ENLISTED_DAY} 天；契約於第 {CONTRACT_END} 天結束。" />
     <string id="taom_enlist_status_title" text="軍役記錄" />
-    <string id="taom_enlist_term_served" text="你的役期已滿——你可光榮請退，或繼續隨軍前行。" />
     <string id="taom_enlist_wage_deferred" text="餉櫃短缺——你有 {AMOUNT}{GOLD_ICON} 的薪餉將延後補發。" />
     <string id="taom_enlist_wage_forfeited" text="這支隊伍再也無法交代你 {AMOUNT}{GOLD_ICON} 的欠餉。" />
     <string id="taom_enlist_wage_paid" text="已領取薪餉：{AMOUNT}{GOLD_ICON}" />
@@ -282,5 +281,10 @@
     <string id="taom_enlist_promoted_kit" text="The quartermaster has kit for your new rank." />
     <string id="taom_enlist_promoted_notice" text="{COMMANDER} names you {RANK}." />
     <string id="taom_enlist_board_kit" text="{NEWLINE}Kit to draw: the quartermaster holds gear for your rank." />
+    <string id="taom_enlist_term_body" text="{COMMANDER} offers you up to {BONUS} denars and renewed trust to sign on for another term, or you may leave the service with honor." />
+    <string id="taom_enlist_term_leave" text="Leave with honor" />
+    <string id="taom_enlist_term_renew" text="Sign on again" />
+    <string id="taom_enlist_term_title" text="Your term is served" />
+    <string id="taom_enlist_term_bonus_paid" text="You receive {GOLD} denars for signing on again." />
   </strings>
 </base>

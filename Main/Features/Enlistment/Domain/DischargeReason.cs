@@ -9,8 +9,8 @@ namespace TAOM.Features.Enlistment.Domain;
 /// CommanderUnavailableGraceExpired, HeirSuccessionOrPossessionMismatch and
 /// CommanderAtWarWithYourRealm (#832, raised by the reconciler) are live, and so is
 /// Desertion (two producers: the release dialogue and the wait menu, #833).
-/// Commission / ContractNotRenewed are RESERVED for the content phase
-/// (issue #375 Phase 3: contract-expiry check); SaveNormalization is reserved for load paths that can safely run the
+/// ContractNotRenewed (#836: "Leave with honor" at the end of a term) is live.
+/// Commission is RESERVED for the content phase; SaveNormalization is reserved for load paths that can safely run the
 /// world-touching pipeline — see the note on <see cref="SaveNormalization"/>.
 /// </summary>
 public enum DischargeReason
@@ -33,7 +33,7 @@ public enum DischargeReason
     /// <summary>Commander stayed party-less (captured/disbanded) past the grace window.</summary>
     CommanderUnavailableGraceExpired = 4,
 
-    /// <summary>(Content phase — requires the contract-expiry check.)</summary>
+    /// <summary>The player chose to leave with honor at the end of his term (#836). Honourable, penalty-free.</summary>
     ContractNotRenewed = 5,
 
     /// <summary>EnlistedHeroId no longer matches MainHero (co-op join, heir succession). Quiet, penalty-free.</summary>

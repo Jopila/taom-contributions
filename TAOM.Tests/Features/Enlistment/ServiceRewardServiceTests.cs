@@ -363,4 +363,59 @@ public class ServiceRewardServiceTests
 
         _renown.DidNotReceive().AddClanRenown(Arg.Any<string>(), Arg.Any<int>());
     }
+
+    // ---- the renewal bonus: a gift from the commander's purse above the wage floor, never owed (#836) ----
+
+    [TestMethod]
+    public void PayBonusFromCommander_PaysOnlyWhatLiesAboveTheFloor_AndNeverTouchesArrears()
+    {
+        _configValue.WagePolicy.PayFromCommanderGold = true;
+        _goldTransfer.GetHeroGold("lord_1_1").Returns(600);
+        _contentStore.Record.DeferredWages = 40;
+
+        var delivered = _service.PayBonusFromCommander(660, "contract-renewal");
+
+        Assert.AreEqual(100, delivered, "600 gold minus the 500 floor");
+        _goldTransfer.Received(1).TransferToPlayer("lord_1_1", 100);
+        Assert.AreEqual(40, _contentStore.Record.DeferredWages, "the unpaid part of a bonus is not owed");
+    }
+
+    [TestMethod]
+    public void PayBonusFromCommander_RichCommander_PaysInFull()
+    {
+        _configValue.WagePolicy.PayFromCommanderGold = true;
+        _goldTransfer.GetHeroGold("lord_1_1").Returns(10000);
+
+        Assert.AreEqual(660, _service.PayBonusFromCommander(660, "contract-renewal"));
+        _goldTransfer.Received(1).TransferToPlayer("lord_1_1", 660);
+        _goldGift.DidNotReceiveWithAnyArgs().GiveGoldToHero(default!, default);
+    }
+
+    [TestMethod]
+    public void PayBonusFromCommander_WagesNotCommanderFunded_MintsTheFullBonus()
+    {
+        _configValue.WagePolicy.PayFromCommanderGold = false;
+        _goldTransfer.GetHeroGold("lord_1_1").Returns(0);
+
+        Assert.AreEqual(660, _service.PayBonusFromCommander(660, "contract-renewal"));
+        _goldGift.Received(1).GiveGoldToHero("main_hero", 660);
+        _goldTransfer.DidNotReceiveWithAnyArgs().TransferToPlayer(default!, default);
+    }
+
+    [TestMethod]
+    public void PayBonusFromCommander_CommanderBelowTheFloor_PaysNothing()
+    {
+        _configValue.WagePolicy.PayFromCommanderGold = true;
+        _goldTransfer.GetHeroGold("lord_1_1").Returns(300);
+
+        Assert.AreEqual(0, _service.PayBonusFromCommander(660, "contract-renewal"));
+        _goldTransfer.DidNotReceiveWithAnyArgs().TransferToPlayer(default!, default);
+    }
+
+    [TestMethod]
+    public void PayBonusFromCommander_NothingToPay_DeliversNothing()
+    {
+        Assert.AreEqual(0, _service.PayBonusFromCommander(0, "contract-renewal"));
+        _goldTransfer.DidNotReceiveWithAnyArgs().TransferToPlayer(default!, default);
+    }
 }

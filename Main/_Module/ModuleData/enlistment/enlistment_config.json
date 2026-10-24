@@ -61,6 +61,8 @@
   },
   "desertionRelationPenalty": -15,
   "desertionHonorXpPenalty": -100,
+  "renewalBonusWageDays": 30,
+  "renewalTrust": 10,
   "spoilsMaxItemsPerBattle": 3,
   "spoilsValueScalePerRank": 0.25,
   "spoilsRandomMin": 0.1,

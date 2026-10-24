@@ -2331,6 +2331,63 @@ shapes), `ServiceStatusServiceTests` (`KitWaits` on the board and in equality),
 `EnlistmentBattlePayoutServiceTests` (no promotion in the grace state) and `EnlistmentContainerWiringTests`
 (the announcer resolves).
 
+## End of the term (#836)
+
+When the term set at the oath ends (`ContractEndDay`), the player used to get a toast and nothing else.
+Now a modal two-option inquiry opens and forces a choice. It replaces the old toast: the
+`taom_enlist_term_served` key is retired (its rows are gone from the English file, the 12 language files
+and the translation caches).
+
+- **Offer.** `ContractRenewalService.OfferIfDue(nowDays)`, called from `EnlistmentContentBehavior`'s daily
+  tick after the daily work, on the host only (the service checks the co-op authority itself): "{COMMANDER}
+  offers you {BONUS} denars and renewed trust to sign on for another term, or you may leave the service
+  with honor."
+- **Option B is Escape.** The engine runs the negative option on Escape and the gamepad B button, whatever
+  the button state. So option A is "Leave with honor" and option B is "Sign on again": Escape (and gamepad B) runs
+  option B and keeps the soldier in service, while Enter (and gamepad A) runs option A, the deliberate
+  confirm, as in the desertion prompt. Renewing holds him to nothing: he may still ask for release at once, and the bonus is
+  bounded (at most `renewalBonusWageDays` of wage, once per year served).
+- **Renew.** Adds `renewalTrust` through `IServiceRewardService.Grant`, and pays the bonus
+  (`renewalBonusWageDays` x the current rank's daily wage, computed in a long and clamped) through
+  `IServiceRewardService.PayBonusFromCommander`. The bonus is a gift, never a debt: with commander-funded
+  wages it comes from the commander's purse and is at most what he holds above the same gold floor wages
+  keep (`wagePolicy.commanderGoldFloor`, 500), so a poor commander pays less or nothing; it is minted in
+  full only when wages are minted. The unpaid part of the bonus is not owed and arrears are never touched.
+  A notice (`taom_enlist_term_bonus_paid`) states the amount actually received, and none is shown for 0.
+  Then `ContractEndDay = now + ContractDays`, the oath's own expression.
+- **Leave.** Only while `EnlistedAttached` (a battle can start in the same frame after the offer shows):
+  `DischargeService.Execute(DischargeReason.ContractNotRenewed)`, the first producer of that reason, with
+  the existing honourable consequences. If refused because he is no longer attached, the guard is cleared
+  and the offer returns on the next daily tick. `Commission` still has no producer.
+- **Gates.** `ContractRenewalPolicy.IsDue` is the cheap gate (attached, end day reached, no offer already
+  made for this end day) and runs before any adapter read. Then the service waits unless the commander
+  exists, is alive and is not a prisoner, and waits while the commander is in a map event, the player is in
+  a map event, a battle encounter is open (dormant until #796: the adapter does not pass it yet; the map-event and attached gates still hold), the ownership read failed or a conversation is in progress. A
+  settlement encounter alone does not block, because a soldier held in the commander's town always has
+  one. A blocked offer retries on the next daily tick. The choice lands on a later frame, so the callbacks
+  re-check the authority and that the soldier is still enlisted.
+- **Once per term, in memory only.** `ContractRenewalService` keeps the end day it already offered for in a
+  field, set before the inquiry shows, cleared on a refused Leave and on a new campaign session
+  (`ServiceMaintenanceService.ResetSessionCaches`). The reason: the engine can run the daily tick twice in
+  one frame (`MBCampaignEvent.CheckUpdate` loops while the trigger time is past). It is not saved on
+  purpose, since a saved stamp could lose the offer when Save And Exit hides the inquiry without an
+  answer. Renewing
+  moves the end day, so the next term offers again. Co-op: the co-op layer can call `HideInquiry` and
+  dismiss the offer without an answer, which leaves the guard set for the session (UNVERIFIED; release
+  still works).
+- **Console.** `taom.set_term_end` (host only, campaign gate) sets `ContractEndDay` to today while
+  enlisted, so the next daily tick makes the offer. See [dev-console.md](dev-console.md).
+- **Config** (`enlistment_config.json`, validated, out of range reverts that key with a warning):
+  `renewalBonusWageDays` 30 (0 to 365) and `renewalTrust` 10 (0 to 100).
+- **Keys:** `taom_enlist_term_title`, `taom_enlist_term_body`, `taom_enlist_term_renew`,
+  `taom_enlist_term_leave`, `taom_enlist_term_bonus_paid`.
+
+Tests: `ContractRenewalTests` (the cheap gate, each service gate, the offer once, the session reset, which
+option is Escape, renew, leave and its refusal, the callbacks' re-checks, the console command, the retired
+key),
+`ServiceRewardServiceTests` (the bonus paid like wages), `EnlistmentRecordTests` (an old save carrying the retired stamp, including garbage values), `EnlistmentContentConfigProviderTests` (renewal defaults, shipped parity, range) and
+`EnlistmentContainerWiringTests` (the content behavior resolves).
+
 ## Interactions with the rest of TAOM
 
 **Leader-keyed attribution is the recurring hazard.** For months of game time the player fights
@@ -2454,6 +2511,11 @@ What actually remains, each a state no test can reach:
 - **A field battle with the commander in an army.** Still the case most likely to fail:
   `FindCommanderPartyIdIn` matches only the commander's own party in `InvolvedParties`, and an
   attached army member may not appear there.
+- **End of the term (#836).** Run `taom.set_term_end` while enlisted (cheat mode on), then let a day
+  tick: the inquiry shows once. Press Escape on it: he signs on again (the bonus, if the commander can
+  pay it, and the trust arrive, and the term restarts). Run it again and choose "Leave with honor": an
+  honourable discharge (wages settled, kit reclaimed). A battle or conversation at that moment delays the
+  offer to the next daily tick.
 - **Promotion notice (#835).** A promotion shows the notice with the commander's portrait. The kit line
   appears on the board when a kit waits and disappears after drawing it from the quartermaster. A
   promotion inside the top tier (Sergeant First Class and above) promises no kit after drawing the Staff

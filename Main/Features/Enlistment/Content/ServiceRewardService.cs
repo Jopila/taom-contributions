@@ -103,6 +103,45 @@ public class ServiceRewardService : IServiceRewardService, IEnlistmentWagePrevie
         => _store.Record.IsEnlisted
            && _store.Record.State != EnlistmentState.CommanderUnavailable;
 
+    /// <summary>
+    /// The one payment step wages and the renewal bonus share: from the commander's purse when
+    /// <c>PayFromCommanderGold</c>, otherwise minted, and never both. Returns what actually reached the player.
+    /// </summary>
+    private int DeliverGold(WagePolicyConfig policy, string commanderId, int fromCommander, int minted)
+    {
+        if (policy.PayFromCommanderGold)
+        {
+            var delivered = fromCommander > 0 ? _goldTransfer.TransferToPlayer(commanderId, fromCommander) : 0;
+            if (delivered < fromCommander)
+                _logger?.LogDebug($"[Enlistment] transfer shortfall {fromCommander - delivered}");
+            return delivered;
+        }
+
+        if (minted > 0)
+            _goldGift.GiveGoldToHero(_store.Record.EnlistedHeroId, minted);
+        return minted;
+    }
+
+    /// <inheritdoc />
+    public int PayBonusFromCommander(int amount, string reason)
+    {
+        if (amount <= 0)
+            return 0;
+        var policy = _config.GetConfig().WagePolicy;
+        var commanderId = _store.Record.CommanderHeroId;
+
+        // A GIFT, never a debt: from the commander's purse only what lies above the same floor wages
+        // keep, minted in full only when wages are minted. The unpaid part is not owed and arrears are
+        // never touched.
+        var fromPurse = policy.PayFromCommanderGold
+            ? System.Math.Min(amount, System.Math.Max(0, _goldTransfer.GetHeroGold(commanderId) - System.Math.Max(0, policy.CommanderGoldFloor)))
+            : 0;
+        var delivered = DeliverGold(policy, commanderId, fromPurse, amount);
+        if (delivered < amount)
+            _logger?.LogInfo($"[Enlistment] bonus '{reason}': {delivered} of {amount} paid; the rest is not owed");
+        return delivered;
+    }
+
     public WageDecision PayDailyWage()
     {
         var record = _contentStore.Record;
@@ -118,20 +157,8 @@ public class ServiceRewardService : IServiceRewardService, IEnlistmentWagePrevie
         // channel from Minted>0 (as an earlier revision did) paid ArrearsReleased through
         // BOTH the commander transfer and the mint, and drained real commander gold in
         // mint mode. Branching on the config makes that unrepresentable.
-        int delivered;
-        if (config.WagePolicy.PayFromCommanderGold)
-        {
-            var requested = plan.PaidFromCommander + plan.ArrearsReleased;
-            delivered = requested > 0 ? _goldTransfer.TransferToPlayer(commanderId, requested) : 0;
-            if (delivered < requested)
-                _logger?.LogDebug($"[Enlistment] wage transfer shortfall {requested - delivered} — re-deferred");
-        }
-        else
-        {
-            delivered = plan.Minted + plan.ArrearsReleased;
-            if (delivered > 0)
-                _goldGift.GiveGoldToHero(_store.Record.EnlistedHeroId, delivered);
-        }
+        var delivered = DeliverGold(
+            config.WagePolicy, commanderId, plan.PaidFromCommander + plan.ArrearsReleased, plan.Minted + plan.ArrearsReleased);
 
         // Ledger by conservation, never by patching the plan's fields: everything owed
         // this tick (today's wage + the standing debt) minus what actually reached the

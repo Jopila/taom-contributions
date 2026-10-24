@@ -53,6 +53,7 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
     // Singletons holding per-battle state that must not leak into the next campaign (#830).
     private readonly SitOutLedger _sitOutLedger;
     private readonly Content.IBattleMeritAccumulator _meritAccumulator;
+    private readonly Content.ContractRenewalService _renewal;
     private readonly IModLogger _logger;
 
     private float _budget;
@@ -77,6 +78,7 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         Content.IArmyRhythmSnapshotService rhythm,
         SitOutLedger sitOutLedger,
         Content.IBattleMeritAccumulator meritAccumulator,
+        Content.ContractRenewalService renewal,
         IModLogger logger)
     {
         _store = store;
@@ -94,6 +96,7 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         _rhythm = rhythm;
         _sitOutLedger = sitOutLedger;
         _meritAccumulator = meritAccumulator;
+        _renewal = renewal;
         _logger = logger;
     }
 
@@ -239,6 +242,7 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         // battle of the next one.
         _sitOutLedger?.Consume();
         _meritAccumulator?.ResetForNewSession();
+        _renewal?.ResetForNewSession();
 
         _cachedCommanderPartyId = null;
         _lastJoinRequestedForMapEventToken = 0;

@@ -59,7 +59,7 @@ public class ServiceMaintenanceServiceTests
         _pump = new ServiceMaintenanceService(
             _store, _machine, _attachment, _commander, _gameMenu, _menuService,
             _status, _army, _encounter, new EncounterOwnershipPolicy(),
-            _reconciler, _presenter, _rhythm, _sitOutLedger, _accumulator, _logger);
+            _reconciler, _presenter, _rhythm, _sitOutLedger, _accumulator, EnlistmentTestDoubles.ContractRenewal(), _logger);
 
         Commander(followable: true);
         Presence(parked: true);

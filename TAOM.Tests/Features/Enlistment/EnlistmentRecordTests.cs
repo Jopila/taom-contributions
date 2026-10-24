@@ -349,5 +349,4 @@ public class EnlistmentRecordTests
         Assert.IsFalse(record.PendingCommanderAttachment);
         Assert.IsNull(record.NextAttachRetryAtHours);
     }
-
 }

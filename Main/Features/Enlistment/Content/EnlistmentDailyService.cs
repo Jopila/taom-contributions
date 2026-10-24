@@ -218,10 +218,6 @@ public class EnlistmentDailyService : IEnlistmentDailyService
         summary.Promoted = promotion.Promoted;
         summary.NewRank = promotion.NewRank;
 
-        var contractEnd = _store.Record.ContractEndDay;
-        if (contractEnd.HasValue && nowDays >= contractEnd.Value && nowDays - 1.0 < contractEnd.Value)
-            summary.ContractExpiredToday = true;
-
         return summary;
     }
 

@@ -20,4 +20,19 @@ internal static class EnlistmentTestDoubles
         provider.IsEnabled.Returns(true);
         return provider;
     }
+
+    /// <summary>A real renewal service over substitutes, for tests that construct the maintenance pump (#836).</summary>
+    public static TAOM.Features.Enlistment.Content.ContractRenewalService ContractRenewal() =>
+        new TAOM.Features.Enlistment.Content.ContractRenewalService(
+            NSubstitute.Substitute.For<TAOM.Features.Enlistment.IEnlistmentStore>(),
+            NSubstitute.Substitute.For<TAOM.Features.Enlistment.Content.IEnlistmentContentStore>(),
+            NSubstitute.Substitute.For<TAOM.Features.Enlistment.Content.IEnlistmentContentConfigProvider>(),
+            NSubstitute.Substitute.For<TAOM.Features.Enlistment.IEnlistmentConfigProvider>(),
+            NSubstitute.Substitute.For<TAOM.Features.Enlistment.Content.IServiceRewardService>(),
+            NSubstitute.Substitute.For<TAOM.Features.Enlistment.IDischargeService>(),
+            NSubstitute.Substitute.For<TAOM.Features.CoopInterop.ICoopSessionProvider>(),
+            NSubstitute.Substitute.For<TAOM.Adapters.ICommanderLordAdapter>(),
+            NSubstitute.Substitute.For<TAOM.Adapters.IEncounterAdapter>(),
+            NSubstitute.Substitute.For<TAOM.Adapters.IInquiryAdapter>(),
+            NSubstitute.Substitute.For<TAOM.Core.Logging.IModLogger>());
 }
