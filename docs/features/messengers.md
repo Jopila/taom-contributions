@@ -255,7 +255,7 @@ The boundary classes (`MessengerCampaignBehavior`, the UI mixin, `MessengerTarge
 ## GitHub Issue
 
 - **Issue:** [#898 (messenger refinements)](https://github.com/haterade22/TAOM/issues/898)
-- **Status:** Open
+- **Status:** Closed; in-game checks owed (label `triage-needs-ingame`, checklist above)
 
 - **Issue:** [#109 — feat(messengers): port LOTRAOM messenger system to TAOM (1.3.15)](https://github.com/haterade22/TAOM/issues/109)
 - **Status:** Closed

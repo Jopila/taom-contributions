@@ -217,7 +217,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [arena](features/arena.md): TaomTournamentModel with practice-fight culture armor + prize pools
 - [tournament-rewards](features/tournament-rewards.md): MCM bet cap, renown and influence by the field and the winner's culture, the prize and the skill chosen at Join (Patch96)
 - [tournament-alignment-filter](features/tournament-alignment-filter.md): tournaments keep Free and Evil entrants apart, each replaced by the town's own troop (Patch69, #744)
-- [messengers](features/messengers.md) — paid messenger dispatch + travel arrival inquiry
+- [messengers](features/messengers.md) — paid messenger dispatch, priced by distance, + travel arrival inquiry
 - [shader-precompilation](features/shader-precompilation.md): pre-compile shaders menu option (Patch21), parked 2026-09-25: every character in batches, scene passes an MCM opt-in
 - [time-acceleration](features/time-acceleration.md) — campaign time scale knobs
 - [atmosphere-persistence](features/atmosphere-persistence.md) — forced-atmosphere scenes (Patch16); exonerated as the `_forceatmo` battle-load crash cause (2026-06-19)
