@@ -70,7 +70,7 @@ public class WandererAllegianceService
         var wandererSide = _alignment.GetCultureSide(wandererCultureId!);
         var playerSide = _alignment.ResolveSide(player);
 
-        if (wandererSide == FactionSide.Neutral || playerSide == FactionSide.Neutral || wandererSide == playerSide)
+        if (!FactionSideRules.AreOpposed(wandererSide, playerSide))
             return WandererHireVerdict.Allowed;
 
         // Both sides are non-Neutral and differ, so this is a Free/Evil opposition either way round.

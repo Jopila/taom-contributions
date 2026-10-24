@@ -992,3 +992,22 @@ Khand (`battania`) keeps vanilla's forest feat as well as Dunland.
   `RNM1` header, an LZ4 block from offset 48 holding `NMG9` geometry, 24-byte edge records, then face records whose third
   trailing u32 is the face group, which matches `TerrainType`; observed on this one file, 2026-10-23).
 - **Source:** `docs/reviews/rca-under-the-eaves-2026-10-23.md` findings 1 to 5.
+
+### Check every ChangeKingdomActionDetail a flow can raise before keying on one (Sworn Anew, #869, 2026-10-24)
+The planned change vetoed vanilla's "join us" line on lore and alignment only. A mercenary-clan prisoner's join
+raises `JoinAsMercenary`, not the detail the commit was armed on, so the change would have reopened that road and the
+commit would never have fired. Lens 5 caught it before it was built.
+- **Why missed:** the flow was read for the detail it usually raises. The other members of `ChangeKingdomActionDetail`
+  that the same dialog can reach were not listed.
+- **Prevent:** before keying a gate, latch or commit on one `ChangeKingdomActionDetail`, list every detail the flow can
+  raise (read the action's callers in the decompile) and say what each does to the feature.
+- **Source:** `docs/reviews/rca-sworn-anew-2026-10-24.md` finding 6.
+
+### A veto that only hides a line locally runs on every co-op peer (Sworn Anew, #869, 2026-10-24)
+The feature's co-op suppression switched the whole feature off on peers, including the veto that hides a vanilla line.
+The co-op server checks no alignment, so a client with the veto off could recruit across sides.
+- **Why missed:** the co-op switch was applied to the feature as one unit, and the three co-op questions (loaded, peer
+  authority, dedicated server) were not asked of each part.
+- **Prevent:** split a feature's parts by what they do. A step that only hides an option locally has no authority to
+  conflict with and runs everywhere; a step that writes campaign state keeps the co-op suppression.
+- **Source:** `docs/reviews/rca-sworn-anew-2026-10-24.md` finding 3.

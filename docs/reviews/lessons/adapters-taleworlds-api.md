@@ -1421,3 +1421,27 @@ tinted while the clan screen still listed it.
   (`Hero.MainHero?.GetRelation(hero)`). A by-id lookup that must also find away, captive or disabled heroes uses
   `Hero.Find`, which walks the dead-or-disabled list too.
 - **Source:** [rca-hearth-roll-2026-10-23.md](../rca-hearth-roll-2026-10-23.md) finding 1.
+### Before gating a decision through a GameModel, list every engine path to the outcome (Sworn Anew, #869, 2026-10-24)
+Sworn Anew gates a captured lord's offer to join a ruler. The plan overrode `DefectionModel`, but vanilla v1.5.5
+already offers a ruler a "join us, and be set free" line to a prisoner that never asks that model. A model override
+alone would have left it open: a Gondor ruler could recruit a captured Mordor clan leader.
+- **Why missed:** the plan listed the callers of the model it meant to override and stopped. The conversation line
+  reaches the same outcome by a second road, and only the planning architect traced it.
+- **Prevent:** before gating an outcome through a GameModel, list every engine path that produces the outcome (the
+  model's callers, the conversation lines, the campaign behaviors) with a line cite each, and gate each one. Apply the
+  same verdict from one shared rule, not a second copy.
+- **Source:** `docs/reviews/rca-sworn-anew-2026-10-24.md` finding 1.
+
+### Force a party screen Done only when it is bound to the live roster you mean to protect (Sworn Anew, #869, 2026-10-24)
+The H4 lesson above says to commit an open party screen after a roster write made from a conversation. Hard
+Questions, Tokens of Esteem and Sworn Anew did that on any open party screen. On the ransom-broker screen, which
+holds cloned rosters and a Done handler that sells again, a forced Done would sell prisoners and ransom heroes a
+second time.
+- **Why missed:** the lesson was precise about what to do and silent about when not to, so the builders copied it
+  unguarded and no test opened a screen that was not the main party's.
+- **Prevent:** call `PartyScreenCommit.CommitIfMainParty`: force Done only on a screen whose right owner is the main
+  party, and skip the one mode whose Done handler is not idempotent (the ransom screen with prisoners on the broker
+  side). A prison-roster check alone drops commits that protect the item roster. Never call `DoneLogic(true)` on the
+  first `PartyState` you find. Any new forced Done goes through that helper.
+- **Source:** `docs/reviews/rca-sworn-anew-2026-10-24.md` finding 2 (a second occurrence of
+  `rca-hard-questions-2026-10-19.md` H4).

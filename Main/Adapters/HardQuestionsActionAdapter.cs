@@ -1,7 +1,6 @@
 using System;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
-using TaleWorlds.CampaignSystem.GameState;
 using TaleWorlds.CampaignSystem.Settlements.Locations;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
@@ -109,17 +108,7 @@ public sealed class HardQuestionsActionAdapter : IHardQuestionsActionAdapter
         }
     }
 
-    public void CommitOpenPartyScreen()
-    {
-        try
-        {
-            GameStateManager.Current?.LastOrDefault<PartyState>()?.PartyScreenLogic?.DoneLogic(true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"[HardQuestions] Committing the open party screen failed: {ex.Message}");
-        }
-    }
+    public void CommitOpenPartyScreen() => PartyScreenCommit.CommitIfMainParty(_logger, "HardQuestions");
 
     private static Hero? Find(string heroId) =>
         string.IsNullOrEmpty(heroId) ? null : Campaign.Current?.CampaignObjectManager?.Find<Hero>(heroId);

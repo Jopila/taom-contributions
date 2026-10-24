@@ -138,7 +138,7 @@ public sealed class BattleRelationService
             // same reading the tournament filter uses (TournamentAlignmentFilterService): AreEnemyAlignments is not used
             // because it counts Neutral as everyone's enemy.
             var townSide = _alignment.ResolveSide(town.Owner);
-            if (town.Notables.Count == 0 || (playerSide != FactionSide.Neutral && townSide != FactionSide.Neutral && playerSide != townSide))
+            if (town.Notables.Count == 0 || FactionSideRules.AreOpposed(playerSide, townSide))
                 continue;
 
             var pick = Math.Max(0, Math.Min(town.Notables.Count - 1, _random.Next(0, town.Notables.Count)));

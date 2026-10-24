@@ -71,6 +71,58 @@ public class FeatureModulesTests
         AssertNotHandWiredToo(declared.Select(d => (d.Module, Type: d.Decl.ModelType)).ToList(), "registered");
     }
 
+    // A type fills a slot when its base list names the slot's model or the slot's Default model. A file that only reads
+    // Campaign.Current.Models.XxxModel fills nothing and must not count.
+    private static bool FillsTheSlot(string strippedSource, string slotName) =>
+        Regex.IsMatch(strippedSource, @"\bclass\s+\w+\s*(?:<[^>]*>)?\s*:\s*[^{;]*\b(?:Default)?" + Regex.Escape(slotName) + @"\b");
+
+    private static string SlotName(Type slotType) =>
+        slotType.Name.StartsWith("Default", StringComparison.Ordinal) ? slotType.Name.Substring("Default".Length) : slotType.Name;
+
+    // A source scan, not reflection: GetTypes() on TAOM's assembly needs the game. Two models on one slot would make the later one
+    // win and drop the other's rule (gamemodels.md rule 7). It replaces the per-feature copies of this scan.
+    [TestMethod]
+    public void EveryDeclaredGameModel_IsTheOnlyTaomFileFillingItsSlot()
+    {
+        var sources = RepoPaths.CSharpFiles()
+            .Select(f => (Name: Path.GetFileName(f), Text: RepoPaths.StripComments(File.ReadAllText(f))))
+            .ToList();
+
+        var wrong = new List<string>();
+        foreach (var decl in FeatureModules.All.SelectMany(m => m.GameModels))
+        {
+            var slot = SlotName(decl.SlotType);
+            var fillers = sources
+                .Where(s => s.Text.IndexOf(slot, StringComparison.Ordinal) >= 0 && FillsTheSlot(s.Text, slot))
+                .Select(s => s.Name)
+                .OrderBy(n => n, StringComparer.Ordinal)
+                .ToList();
+            if (!fillers.SequenceEqual(new[] { decl.ModelType.Name + ".cs" }))
+                wrong.Add($"{slot}: expected only {decl.ModelType.Name}.cs, found [{string.Join(", ", fillers)}]");
+        }
+
+        Assert.AreEqual(0, wrong.Count, string.Join("; ", wrong));
+    }
+
+    [DataTestMethod]
+    [DataRow("public class TaomX : DefaultDefectionModel { }", true)]
+    [DataRow("public class TaomX : TaleWorlds.CampaignSystem.ComponentInterfaces.DefectionModel { }", true)]
+    [DataRow("public sealed class TaomX<T> : IFoo, DefectionModel\n{\n}", true)]
+    [DataRow("public class Reader { void F() { var m = Campaign.Current.Models.DefectionModel; } }", false)]
+    [DataRow("public class Reader : CampaignBehaviorBase\n{\n void F() { var m = Campaign.Current.Models.DefectionModel; }\n}", false)]
+    [DataRow("public class Other : DefaultPartyWageModel { }", false)]
+    public void FillsTheSlot_OnlyAClassDerivingFromTheModel_Matches(string source, bool expected)
+    {
+        Assert.AreEqual(expected, FillsTheSlot(source, "DefectionModel"));
+    }
+
+    [TestMethod]
+    public void SlotName_StripsOneLeadingDefault()
+    {
+        Assert.AreEqual("DefectionModel", SlotName(typeof(TaleWorlds.CampaignSystem.GameComponents.DefaultDefectionModel)));
+        Assert.AreEqual("DefectionModel", SlotName(typeof(TaleWorlds.CampaignSystem.ComponentInterfaces.DefectionModel)));
+    }
+
     // The module step (AddGameStartContent) runs after RegisterCustomBattleModels and MissionGameModels takes the LAST model
     // added for a slot, so a module declaration for a slot the Custom Battle step fills by hand would shadow it silently. The
     // Custom Battle damage twin (#788) is the case: it is hand-wired, so no module may declare AgentApplyDamageModel for it.

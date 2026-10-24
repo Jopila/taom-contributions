@@ -44,7 +44,7 @@ Each override follows the established TAOM pattern (feature module + service + a
 | Model | Override Goal |
 |-------|---------------|
 | `MapVisibilityModel` | ~~Ranger scouting range, Orc night vision~~ SLOT TAKEN: `TaomMapVisibilityModel` (CareerSystem) registered in `SubModule.OnGameStart` alongside the other campaign models (grep `TaomMapVisibilityModel` in `SubModule.cs`); FieldCamp's lookout, Far Watch's scout and Under the Eaves' forest penalty also layer through it. New spotting logic joins that model via its service seam, never a second `AddModel` |
-| `DefectionModel` | Racial loyalty (Dwarves don't defect) |
+| `DefectionModel` | ~~Racial loyalty (Dwarves don't defect)~~ SLOT TAKEN: `TaomDefectionModel` (Sworn Anew, #869) lets a captured lord be asked to join the player's kingdom, gated by alignment and the lore heroes; a free hero still falls through to vanilla, so racial loyalty for free lords is still open |
 
 ## Recommended Implementation Order
 

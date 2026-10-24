@@ -2601,4 +2601,14 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Tint Unhappy Companions", Order = 0, RequireRestart = false,
         HintText = "On the Members tab of the clan screen, gives the row of a companion of your clan a faint red tint when their relation with you has fallen below zero, a warning before they leave. The age beside each child's name is always shown. Applies the next time the clan screen opens. Default: on.")]
     public bool EnableUnhappyCompanionTint { get; set; } = true;
+    // --- Sworn Anew (docs/features/sworn-anew.md, #869) ---
+    //
+    // Read at each conversation question (the diplomacy option and the ruler's prisoner line), through
+    // SwornAnewSettingsProvider's one cached settings reference, so it needs no restart. GroupOrder 71 is used by no other group.
+    // A new setting, so the default (on) reaches every install.
+
+    [SettingPropertyGroup("World/Sworn Anew", GroupOrder = 71)]
+    [SettingPropertyBool("Enable Sworn Anew", Order = 0, RequireRestart = false,
+        HintText = "When enabled (default), a captured lord can be asked to join your kingdom, in a conversation or from the party screen, and serves it instead of being ransomed. The lord must hold a clan of another kingdom (not its ruler, and not a mercenary or minor clan), must be held by your party or in a settlement your clan owns, and must not be a lord who can never be captured, such as Sauron and the Nazgul. A Free Peoples lord is never asked to join an Evil realm, and an Evil lord is never asked to join a Free one. The base game's blood feud rule still applies. When off, the base game's rules apply: only a kingdom's ruler can recruit a captured lord, through its 'join us, and be set free' line, which checks no realm. When on, both lines pass this check, and the ruler-only line also needs the lord held by your party or in your clan's dungeon. Applies at once, no restart.")]
+    public bool SwornAnewEnabled { get; set; } = TAOM.Features.SwornAnew.SwornAnewSettingsProvider.DefaultEnabled;
 }

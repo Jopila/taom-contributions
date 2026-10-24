@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using TaleWorlds.CampaignSystem;
-using TaleWorlds.CampaignSystem.GameState;
 using TaleWorlds.Core;
 using TaleWorlds.ObjectSystem;
 using TAOM.Core.Logging;
@@ -63,15 +62,5 @@ public sealed class GiftItemAdapter : IGiftItemAdapter
         return goods;
     }
 
-    public void CommitOpenPartyScreen()
-    {
-        try
-        {
-            GameStateManager.Current?.LastOrDefault<PartyState>()?.PartyScreenLogic?.DoneLogic(true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"[Gifts] Committing the open party screen failed: {ex.Message}");
-        }
-    }
+    public void CommitOpenPartyScreen() => PartyScreenCommit.CommitIfMainParty(_logger, "Gifts");
 }

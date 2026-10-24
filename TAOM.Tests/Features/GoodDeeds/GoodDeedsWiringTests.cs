@@ -172,37 +172,6 @@ public class GoodDeedsWiringTests
         StringAssert.Contains(src, "base.CalculateRelationGainAfterHeroPrisonerDonate(");
     }
 
-    // A type fills the slot when its base list names PrisonerDonationModel or DefaultPrisonerDonationModel. A file that only reads
-    // Campaign.Current.Models.PrisonerDonationModel (a courtesy, a report) fills nothing and must not fail the scan.
-    private static bool FillsThePrisonerDonationSlot(string strippedSource) =>
-        Regex.IsMatch(strippedSource, @"\bclass\s+\w+\s*(?:<[^>]*>)?\s*:\s*[^{;]*\b(?:Default)?PrisonerDonationModel\b");
-
-    [TestMethod]
-    public void NoOtherTaomModelFillsThePrisonerDonationSlot()
-    {
-        // A source scan, not reflection: GetTypes() on TAOM's assembly needs the game. Two models on one slot would make the
-        // later one win and drop the other's rule (gamemodels.md rule 7). Each file is read once.
-        var fillers = RepoPaths.CSharpFiles()
-            .Where(f => FillsThePrisonerDonationSlot(RepoPaths.StripComments(File.ReadAllText(f))))
-            .Select(Path.GetFileName)
-            .OrderBy(n => n, StringComparer.Ordinal)
-            .ToList();
-
-        CollectionAssert.AreEqual(new[] { "TaomPrisonerDonationModel.cs" }, fillers, "the slot is filled by exactly one file");
-    }
-
-    [DataTestMethod]
-    [DataRow("public class TaomX : DefaultPrisonerDonationModel { }", true)]
-    [DataRow("public class TaomX : TaleWorlds.CampaignSystem.ComponentInterfaces.PrisonerDonationModel { }", true)]
-    [DataRow("public sealed class TaomX<T> : IFoo, PrisonerDonationModel\n{\n}", true)]
-    [DataRow("public class Reader { void F() { var m = Campaign.Current.Models.PrisonerDonationModel; } }", false)]
-    [DataRow("public class Reader : CampaignBehaviorBase\n{\n void F() { var m = Campaign.Current.Models.PrisonerDonationModel; }\n}", false)]
-    [DataRow("public class Other : DefaultPartyWageModel { }", false)]
-    public void FillsThePrisonerDonationSlot_OnlyAClassDerivingFromTheModel_Matches(string source, bool expected)
-    {
-        Assert.AreEqual(expected, FillsThePrisonerDonationSlot(source));
-    }
-
     // --- the tournament listener ----------------------------------------------------------------------------------------
 
     [TestMethod]

@@ -51,7 +51,7 @@ public sealed class LordCourtesiesService
     /// deliberately not <c>IAlignmentService.AreEnemyAlignments</c>, which calls Neutral the enemy of everyone.
     /// </summary>
     public static bool SidesAllowGift(FactionSide player, FactionSide lord) =>
-        !((player == FactionSide.Free && lord == FactionSide.Evil) || (player == FactionSide.Evil && lord == FactionSide.Free));
+        !FactionSideRules.AreOpposed(player, lord);
 
     /// <summary>
     /// Whether the lord's reply to the holdings question is the refusal line. Revealed and Landless have their own

@@ -73,5 +73,6 @@ internal static class FeatureModules
         new Features.UnderTheEaves.UnderTheEavesModule(),
         new Features.AlignmentRecruitment.AlignmentRecruitmentModule(),
         new Features.UnlookedForAid.UnlookedForAidModule(),
+        new Features.SwornAnew.SwornAnewModule(),
     };
 }

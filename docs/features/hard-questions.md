@@ -61,7 +61,7 @@ All of these must hold (`InterrogationService.Eligible`; the used-topic check ru
   - Traits: Mercy -160 or -300, Honor -100 or -200, scaled by side. The player gains 80 or 150 Roguery experience.
   - Companions with Mercy above 0 lose relation: the cap (-2) at Mercy level 2, half of it (-1) at level 1.
   - Outcome: on the kingdom topic, an already wounded lord dies with a 5% roll. The Honor cost of the death (200 extra experience) is charged only when the lord really dies; the engine may refuse the kill, and then the lands are revealed as for any survivor. A death reveals nothing, and a dungeon death also removes the dead lord's character from the prison location. Otherwise a lord who is not wounded has a 15% roll to be wounded (his hit points are set to 1), on either topic.
-- **Party screen:** a conversation opened from the party screen leaves the screen's pre-conversation snapshot alive, and closing the screen with Escape refills the prison and item rosters from it. After a force or a strip, `CommitOpenPartyScreen` finds the open `PartyState` on the game-state stack and calls `PartyScreenLogic.DoneLogic(true)`, which is what vanilla does when a companion is removed under the screen.
+- **Party screen:** a conversation opened from the party screen leaves the screen's pre-conversation snapshot alive, and closing the screen with Escape refills the prison and item rosters from it. After a force or a strip, `CommitOpenPartyScreen` goes through the shared `PartyScreenCommit.CommitIfMainParty`: it finds the open `PartyState` on the game-state stack and, only when the screen's right owner is the main party, calls `PartyScreenLogic.DoneLogic(true)` (vanilla commits unguarded when a companion is removed under the screen). The one skipped case is the ransom broker's screen with prisoners on the broker's side: it binds the live item roster but cloned troop rosters, and its Done handler sells the broker's side again.
 
 ## The strip
 
@@ -158,7 +158,7 @@ If Armour Acquisition's gate fails at game init (it logs when it does), named pi
 10. After a force and after a strip, the summary line appears once, with the right lord count (singular for one lord).
 11. A dungeon death: before you leave, note whether his standing figure still offers a conversation; then leave and re-enter the dungeon: he is gone.
 12. In German, the 19 lines show English seed text with `{PRICE}`, `{COMPANION}` and `{COUNT}` filled.
-13. In the ransom broker's sell-prisoners screen, sell a prisoner, then talk to a captive lord there and strip him: the sale pays once, not twice (the deed commits the open screen, which reruns its done handler).
+13. In the ransom broker's sell-prisoners screen, put a prisoner up for sale, then talk to a captive lord there, strip them and leave with Escape: the sale pays once, not twice (the commit skips this screen while prisoners are on the broker's side, because forcing it done reruns its sale handler). Then open the ransom screen with nothing for sale, and the alley screen, strip a captive, move a troop and press Escape: the kit stays gone.
 14. Neutral realm (owed, #957): as a player whose clan serves a Neutral realm (Khand, Umbar, Shaghana or Abanissa) with a Free-culture hero, force a clan topic on a Free captive and on an Evil captive: both read the Neutral multiplier (Honor and Mercy at the base amount), not the same-side 1.5 times.
 
 ## Translations

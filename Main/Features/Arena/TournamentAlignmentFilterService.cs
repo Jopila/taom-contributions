@@ -83,7 +83,7 @@ public sealed class TournamentAlignmentFilterService
             return false;
 
         var side = _alignment.ResolveSide(entrant.Side);
-        return side != FactionSide.Neutral && side != hostSide;
+        return FactionSideRules.AreOpposed(side, hostSide);
     }
 
     private static bool SameId(string a, string? b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);

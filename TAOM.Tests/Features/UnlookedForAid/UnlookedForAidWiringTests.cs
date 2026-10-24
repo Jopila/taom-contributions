@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Text.RegularExpressions;
 using DryIoc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -140,35 +139,6 @@ public class UnlookedForAidWiringTests
 
         CollectionAssert.AreEqual(new[] { nameof(MobilePartyAIModel.ShouldConsiderAvoiding) }, overridden);
         Assert.AreEqual(typeof(DefaultMobilePartyAIModel), typeof(TaomMobilePartyAIModel).BaseType);
-    }
-
-    // A type fills the slot when its base list names MobilePartyAIModel or DefaultMobilePartyAIModel. A file that only reads
-    // Campaign.Current.Models.MobilePartyAIModel fills nothing and must not fail the scan.
-    private static bool FillsTheMobilePartyAISlot(string strippedSource) =>
-        Regex.IsMatch(strippedSource, @"\bclass\s+\w+\s*(?:<[^>]*>)?\s*:\s*[^{;]*\b(?:Default)?MobilePartyAIModel\b");
-
-    [TestMethod]
-    public void NoOtherTaomModelFillsTheMobilePartyAISlot()
-    {
-        // A source scan, not reflection: GetTypes() on TAOM's assembly needs the game. Two models on one slot would make the
-        // later one win and drop the other's rule (gamemodels.md rule 7).
-        var fillers = RepoPaths.CSharpFiles()
-            .Where(f => FillsTheMobilePartyAISlot(RepoPaths.StripComments(File.ReadAllText(f))))
-            .Select(Path.GetFileName)
-            .OrderBy(n => n, StringComparer.Ordinal)
-            .ToList();
-
-        CollectionAssert.AreEqual(new[] { "TaomMobilePartyAIModel.cs" }, fillers, "the slot is filled by exactly one file");
-    }
-
-    [DataTestMethod]
-    [DataRow("public class TaomX : DefaultMobilePartyAIModel { }", true)]
-    [DataRow("public sealed class TaomX<T> : IFoo, MobilePartyAIModel\n{\n}", true)]
-    [DataRow("public class Reader { void F() { var m = Campaign.Current.Models.MobilePartyAIModel; } }", false)]
-    [DataRow("public class Other : DefaultPartyWageModel { }", false)]
-    public void FillsTheMobilePartyAISlot_OnlyAClassDerivingFromTheModel_Matches(string source, bool expected)
-    {
-        Assert.AreEqual(expected, FillsTheMobilePartyAISlot(source));
     }
 
     // A bare uninitialized MobileParty: IsLordParty has a private setter (v1.5.5 MobileParty.cs:1270). With no besieger

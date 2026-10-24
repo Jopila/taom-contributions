@@ -33,6 +33,7 @@ using TAOM.Features.RealmBorders;
 using TAOM.Features.LoremastersLine;
 using TAOM.Features.HearthRoll;
 using TAOM.Features.ReevesLedger;
+using TAOM.Features.SwornAnew;
 using TAOM.Features.TimeAcceleration;
 using TAOM.Features.UnderTheEaves;
 using TAOM.Features.UnlookedForAid;
@@ -117,6 +118,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(RecruitmentAlignmentSettingsProvider))]
     // #872: read on the AI worker thread for every avoid question; the constructor takes the settings once, on the main thread.
     [DataRow(typeof(UnlookedForAidSettingsProvider))]
+    // #869: read at each conversation question and by the ruler's prisoner line's condition; the accessor takes the settings once.
+    [DataRow(typeof(SwornAnewSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -163,6 +166,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(HearthRollSettingsProvider), typeof(HearthRollSettingsProvider))]
     [DataRow(typeof(IFireAndTributeSettings), typeof(FireAndTributeSettingsProvider))]
     [DataRow(typeof(IUnlookedForAidSettingsProvider), typeof(UnlookedForAidSettingsProvider))]
+    [DataRow(typeof(ISwornAnewSettingsProvider), typeof(SwornAnewSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();

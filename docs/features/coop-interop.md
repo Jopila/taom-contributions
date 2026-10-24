@@ -310,6 +310,7 @@ behaviour's whole `RegisterEvents` and follow each handler to the service.
 | `GiftBehavior` | `GiftConversationFlow.CanOffer`, `CanChoose`, `Ask` and `Pick` (`ShouldDeferToHost`), the methods its dialog lines call | Moves the player's gold, inventory and relation, and saves the cooldown ledger in TAOM `SyncData`. A co-op client (and any peer running a co-op mod TAOM cannot probe) sees no gift line, and `CanChoose`, `Ask` and `Pick` re-check the gate so a line rendered before a session went live does nothing. A co-op host can give. The dedicated-server rule lives in `RelationGrantService.Grant`, which lands nothing there ([Tokens of Esteem](tokens-of-esteem.md)). |
 | `GoodDeedsBehavior` | the `HeroPrisonerReleased` and `TournamentFinished` listeners and `TaomPrisonerDonationModel`, through `GoodDeedsService.OnPrisonerReleased`, `OnTournamentFinished` and `DonationRelation` (one private gate, `IsDedicatedServer \|\| ShouldDeferToHost`) | Changes the player's relation with lords and notables, which a client's own `Hero.MainHero` makes differ per peer. Three entry points behind one gate: a release and a tournament win grant nothing on a deferring peer or a dedicated server, and the model returns vanilla's own value there, so a co-op client sees vanilla's donation relation. A co-op host earns as usual ([Good Deeds](good-deeds.md)). |
 | `LongMemoryBehavior` | the `RaidCompletedEvent`, `ForceSuppliesCompletedEvent`, `ForceVolunteersCompletedEvent` and `GameMenuOptionSelectedEvent` listeners, through `LongMemoryService.OnRaidCompleted`, `OnCoercionCompleted` and `OnMenuOptionSelected` (one private gate, `IsDedicatedServer \|\| ShouldDeferToHost`) | Takes the player's relation with a village owner's clan leader and the village's notables, which a client's own `Hero.MainHero` makes differ per peer. A raid, a forced taking the villagers resisted and one they did not (only the two no-resist "Continue" options) cost nothing on a deferring peer or a dedicated server; a co-op host loses relation as usual ([Long Memory](long-memory.md)). |
+| `SwornAnewBehavior` | the `OnClanChangedKingdomEvent` listener (which queues the party-screen commit on the conversation's end), `TaomDefectionModel` and the Patch116 postfix on the prisoner line, through `SwornAnewService.CanPrisonerDefect`, `CommitsPartyScreenAfter` (one private gate, `IsDedicatedServer \|\| ShouldDeferToHost`) and `HidesPrisonerLine` (no gate) | A captured lord joining the player's kingdom moves a clan between kingdoms, a world write the other peers must see. On a deferring peer or a dedicated server the service answers no verdict: the model falls through to vanilla (a prisoner never defects, so the diplomacy option stays hidden) and the party-screen commit never arms. The postfix still takes the prisoner line away from a prisoner the service refuses, because that only hides a line on that machine. A co-op host offers the option as in single player. BannerlordCoop does not disable `LordDefectionCampaignBehavior`: its `LordBarterPatch` routes the defection barter to the server and `LordDefectionConversationPatch` blocks the barter-less branch on clients (read in the local BannerlordCoop clone, 2026-10-23; not yet exercised in a session). The behavior holds no state and saves nothing ([Sworn Anew](sworn-anew.md)). |
 | `OathsOfServiceCampaignBehavior` | `OnDailyTick` raises a flag, `OnHourlyTick` runs `HomeAnchorService` (`IsAuthority`) | The anchor moves heroes and the ledger rides TAOM `SyncData`. Under BannerlordTogether `IsAuthority` fails open, so every peer may run the anchor (UNVERIFIED whether that mod's client-side suppression contains it). See [oaths-of-service.md](oaths-of-service.md). |
 | `OathsOfServiceDialogBehavior` | the hire accept, the topic lines and their consequences, through `HireTermsService`, `OathTopicService` and `OathLedger` (`MayWriteSaveBackedState`) | Pays gold and items, hires, changes relation and writes the saved ledger. A co-op client sees the accept and topic lines greyed, and `IOathFlagStore.Set` returns false. |
 | `EyeOfSauronBehavior` | `OnDailyTick` (the start and the running hunt's daily check), `OnHourlyTickParty`, `OnSessionLaunched` and the console's `TryStartHunt`, through `EyeOfSauronService.IsSinglePlayer` | **Single-player only** ([Eye of Sauron](eye-of-sauron.md)): stands down on every peer while a session is live, while a co-op mod TAOM cannot probe is loaded, or on a dedicated server (`IsSessionActive \|\| ShouldDeferToHost \|\| IsDedicatedServer`). No hunt starts; a running hunt ends (`SessionLive`) at the daily or hourly end gate, a restored one at session launch, and the end releases its pin. Not gated as handlers: `OnMapEventEnded` ends a hunt its battle decided on any peer, but the deed scoring inside it returns before touching the save-backed score unless single-player; `OnMobilePartyDestroyed` only ends the hunt; `OnTick` publishes the hunt's snapshot, which the two model seams only read, and while a hunt runs it can also stand the hunter off and refresh his speed cache. All three do nothing without a hunt, and a session that goes live mid-hunt ends it at the hunter's next hourly tick. Trade-off (the maintainer's call): a solo player with Bannerlord Together enabled, or `coop-force-active.flag` present, gets no hunt, while a BannerlordCoop-enabled solo player keeps it. |
@@ -557,12 +558,12 @@ to characterise. The existing try/catch around acceptance is containment, not co
 
 ## What is NOT done
 
-- **No MCM settings parity: reported, not yet exchanged.** TAOM ships **458** settings across
+- **No MCM settings parity: reported, not yet exchanged.** TAOM ships **459** settings across
   four MCM classes (the 284 here counted `[SettingPropertyGroup]` lines alongside the properties;
-  the split is 428 in `TaomSettings`, 19 in `BattleLoadDiagnosticsSettings`, 10 in
+  the split is 429 in `TaomSettings`, 19 in `BattleLoadDiagnosticsSettings`, 10 in
   `CrashReportSettings` and 1 in `BlowDiagnosticsSettings`).
-  **307 are simulation-relevant**, traced to the feature that consumes each one and kept when that feature
-  ships a GameModel, CampaignBehavior, MissionBehavior or Harmony patch; all 307 are in
+  **308 are simulation-relevant**, traced to the feature that consumes each one and kept when that feature
+  ships a GameModel, CampaignBehavior, MissionBehavior or Harmony patch; all 308 are in
   `TaomSettings`. The 151 excluded (67 counted 2026-09-22, less the Native Skin Fixes toggle removed with the feature 2026-10-05, the 38 Realm Borders settings added from 2026-09-30 to 2026-10-08, the Crash Report AfterStart dev trigger added 2026-10-01, the Battle Corpses advice toggle and button added 2026-10-01, and the thirteen Menus & Loading Screens settings added 2026-10-01, #704, and the three tick profiler settings added 2026-10-02, and the hitch probe toggle added 2026-10-02, and the Animation Clip Memory probe toggle added 2026-10-02, and the map profiler toggle added 2026-10-03, and the Load-Time Stamps toggle added 2026-10-03, and the Race Abilities war cry, message and debug-log toggles added 2026-10-04, and the Race Abilities glow toggle added 2026-10-04, and the Crash Report mission-start survival toggle added 2026-10-08, and the Crash Report skeleton buffer guard and watch toggles added 2026-10-08, and the Map Performance nameplate cull and map view release settings added 2026-10-08, and the War Chronicle announcements toggle added 2026-10-08, and the three Animation Variety settings and the swing alternative probe toggle added 2026-10-17, and the Hidden Hosts toggle added 2026-10-18, and the Fell Foes debug log toggle added 2026-10-19, the two Telchar's Mark settings added 2026-10-19, #875, the two Reeve's Ledger switches added 2026-10-19, #857, and the Lost Footing census toggle added 2026-10-20, #894, less the two Quick Actions "include equipped" toggles removed 2026-10-23, #925, and the Cardolan and Rhudaur realm colours added 2026-10-23, #978, and the Loremaster's Line switch added 2026-10-23, #877, and the Hearth Roll tint toggle added 2026-10-23, #906) are instrumentation, player-local convenience,
   presentation, two action buttons, and the three time-acceleration knobs whose UI co-op already
   suppresses; the list with its reasons is
@@ -575,7 +576,7 @@ to characterise. The existing try/catch around acceptance is containment, not co
   excluded name may stop matching a real property, and no two settings classes may share a
   property name.
 
-  `SettingsFingerprint` hashes those 307: one code per MCM group plus a global, culture-invariant
+  `SettingsFingerprint` hashes those 308: one code per MCM group plus a global, culture-invariant
   so a comma decimal separator cannot fake a mismatch — and `SettingsFingerprintLog` writes them
   to each peer's log under the co-op gate. Floats and doubles hash as their IEEE bit patterns
   (-0 folded to 0), not as runtime-formatted text, so a .NET 6 server and a net472 client agree on
@@ -584,7 +585,7 @@ to characterise. The existing try/catch around acceptance is containment, not co
   every diagnostics property is excluded so this moves no hash today (a test asserts exactly
   that), and it means a simulation-affecting setting added to a diagnostics page later is covered
   the day it lands. That makes the "compare settings manually" workaround a comparison of a few
-  short strings instead of 307 values read off two screens.
+  short strings instead of 308 values read off two screens.
 
   **All four classes are `AttributeGlobalSettings<T>`, and the reasoning above depends on it.**
   MCM has three scopes, and only one of them travels with a save. Verified against MCM 5.12.1:
@@ -603,12 +604,12 @@ to characterise. The existing try/catch around acceptance is containment, not co
   PerSave class would be equal by construction and need not be hashed; a PerCampaign one would
   need hashing more urgently than a global, not less.
 
-  **A matching fingerprint means the MCM settings agree, and nothing wider.** It covers the 307
+  **A matching fingerprint means the MCM settings agree, and nothing wider.** It covers the 308
   values on the four settings pages. It does not cover the `ModuleData` JSON/XML that several
   features fall back to when a setting is unset (on a client only; a server never reads them for an
   MCM-backed field), the `TAOM.Dependencies` flag files
   (`patchshield-disabled.flag`, `saveshield-swallow-disabled.flag`, `coop-force-active.flag`),
-  or any difference outside TAOM. None of those three flags gates a setting in the 307 (each
+  or any difference outside TAOM. None of those three flags gates a setting in the 308 (each
   governs a Dependencies-side shield with no MCM property), but the general point holds: read the
   log line as "our settings pages match", not as "our installs are equivalent".
 
