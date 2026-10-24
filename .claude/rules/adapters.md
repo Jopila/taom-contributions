@@ -66,5 +66,6 @@ requested on the wrong monster is a TAOM log line, not a native warning of unkno
   `ChangeRelationAction` ignores `affectRelatives`; never pass it as true (`AffectRelativesGateTests`, #923). Key a penalty list on that owner, strongest delta once per owner,
   and list every lord the deed should cost: never drop a hit because today's mapping merges it.
 - **A write made in a conversation opened from the party screen is reverted by Escape** (`PartyScreenData.ResetUsing`):
-  after a roster, inventory or hero-state write, commit the screen with `PartyScreenLogic.DoneLogic(true)`.
+  after a roster, inventory or hero-state write, commit the screen with `PartyScreenCommit.CommitIfMainParty`, the one
+  way to force a party screen done (main party's own screen only; it skips the ransom screen with prisoners on the broker side).
 - Both, with sources: [lessons](../../docs/reviews/lessons/adapters-taleworlds-api.md) (2026-10-19).

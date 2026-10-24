@@ -138,8 +138,9 @@ This is the central method in `TaleWorlds.CampaignSystem.Actions.KillCharacterAc
 > `ChangeKingdomAction.ApplyByLeaveKingdomByClanDestruction`, which nulls `Clan.Kingdom`. So by the
 > time the relation pass runs, an executed lord who was the last adult of his clan has **no kingdom
 > left to read**. Anything that re-derives the victim's identity during step 11 gets `null`. This is
-> what `ExecutionContext` exists to defeat: it snapshots victim and executor at the top of
-> `ApplyInternal`, before either step can run. The tell that this is happening in a live game is that
+> what the v1.4.8 `ExecutionContext` snapshot existed to defeat (it recorded victim and executor at the top of
+> `ApplyInternal`, before either step could run); today `FactionSides.OfHero` gives a kingdom-less victim his own
+> clan's pair. The tell that this is happening in a live game is that
 > the pre-confirm preview shows one set of numbers and the applied result is different, because the
 > preview runs the same model before the kill. Cost the project #556.
 
@@ -207,7 +208,7 @@ When a clan is destroyed via `DestroyClanAction`, fiefs are redistributed by `Fa
 
 We intercept two independent points in the vanilla execution flow:
 
-### Override 1: Relation Penalties — GameModel Override
+### Override 1 (v1.4.8, removed): Relation Penalties by GameModel Override
 
 **`TaomExecutionRelationModel : DefaultExecutionRelationModel`**
 
@@ -215,7 +216,7 @@ Registered via `campaignStarter.AddModel()` in `SubModule.OnGameStart`. Bannerlo
 
 We override `GetRelationChangeForExecutingHero()`:
 1. Call `base.GetRelationChangeForExecutingHero()` to get the vanilla penalty
-2. Build three `ExecutionParticipant` values (faction id + culture id). Executor and victim come from `ExecutionContext.ResolveExecutor` / `ResolveVictim`, which return the snapshot when a kill is in flight and the live values otherwise. The evaluator is always live, because the kill does not touch the evaluator
+2. Build three `SideIds` pairs through `FactionSides` (#957), each the id and culture of ONE entity: the executor from `OfPlayer()`, the victim from `OfHero(dyingHero)`, the evaluator from `Of(otherClan.MapFaction)`. The v1.5.x patches build them the same way; nothing is snapshotted, because the victim is read from the argument the engine passes in
 3. Delegate to `IExecutionRelationService.GetRelationModifier()`, which resolves each side and applies the alignment logic
 4. Return its delta and notification flag
 
@@ -223,7 +224,7 @@ The model is thin and contains **no branching at all**, per `.claude/rules/gamem
 
 The live fallback is load-bearing rather than defensive. `HeroExecutionSceneNotificationData` calls this same model to build the pre-confirm relation preview, when no kill is in flight and nothing has been destroyed. Routing preview and applied value through one model is what keeps them agreeing; a divergence between the two is the symptom to look for when this feature misbehaves.
 
-### Override 2: Honor Penalty — Two Harmony Patches
+### Override 2 (v1.4.8, removed): Honor Penalty by Two Harmony Patches
 
 The honor penalty is applied deep inside `KillCharacterAction.ApplyInternal()` via `TraitLevelingHelper.OnLordExecuted()` — a parameterless static method. We can't override it via GameModel, and we can't know the victim/killer inside `OnLordExecuted()` since it takes no arguments.
 
@@ -240,7 +241,7 @@ The honor penalty is applied deep inside `KillCharacterAction.ApplyInternal()` v
 
 Both patches share `[HarmonyPatchCategory("Patch14_Execution")]` and are applied in `SubModule.OnGameInitializationFinished`.
 
-### Thread-Local Context Pattern
+### Thread-Local Context Pattern (v1.4.8, removed)
 
 `ExecutionContext` uses `System.Threading.ThreadLocal<string>` for two values: `VictimKingdomId` and `ExecutorKingdomId`. This is necessary because:
 - `KillCharacterAction.ApplyInternal` is the only place that has both `victim` and `killer`
@@ -476,19 +477,14 @@ AlignmentConfigProvider ── IPathService
       |
 AlignmentService (IAlignmentService)
       |
-ExecutionActionHook (IOnExecutionAction)
+ExecutionActionHook (IOnExecutionAction) ──> ExecutionRelationService
      / \
     /   \
-   /     \
-TaomExecution         TraitLevelingHelper
-RelationModel         _OnLordExecuted_Patch
-(GameModel override)      |
-   |               ExecutionContext (ThreadLocal)
-   |                      |
-   |               KillCharacterAction
-   |               _ApplyInternal_Patch
-   |                      |
-   +---------- both read from IOnExecutionAction
+TraitLevelingHelper_            ExecutionCampaignBehavior_
+OnBloodFeudStarted_Patch        BloodFeudRelationPenalty_Patch
+(Prefix: honor hit)             (Postfix: per-clan relation penalty)
+    \   /
+     FactionSides builds the SideIds for both
 ```
 
 ### Data Flow for a Cross-Alignment Execution
@@ -497,73 +493,52 @@ RelationModel         _OnLordExecuted_Patch
 Player clicks Execute on Mordor lord (party screen)
     |
     v
-[Vanilla] PartyScreenLogic.IsExecutable() → true
+[Vanilla] HeroExecutionSceneNotificationData: relation preview
+    |  (calls the static GetBloodFeudStartRelationPenaltyToOtherClan per clan,
+    |   so the relation postfix shapes the preview too)
+    v
+Player confirms: KillCharacterAction.ApplyByExecution(victim, Hero.MainHero)
     |
     v
-[Vanilla] HeroExecutionSceneNotificationData — shows relation preview
-    |  (calls TaomExecutionRelationModel.GetRelationChangeForExecutingHero
-    |   for each clan leader — cross-alignment allies see 0)
-    v
-Player confirms → KillCharacterAction.ApplyByExecution(victim, Hero.MainHero)
+[Vanilla] ApplyInternal: obituary, succession, MakeDead, clan destruction
     |
     v
-KillCharacterAction.ApplyInternal(victim, killer, Executed, ...)
+[Vanilla] OnHeroKilled -> ExecutionCampaignBehavior.OnPlayerExecutedHero
     |
-    +--[Patch A Prefix]-- ExecutionContext.Set(mordor, gondor)
+    +-- StartBloodFeudWithClanByPlayerExecutingAHero
     |
+    +-- TraitLevelingHelper.OnBloodFeudStarted(victim)
+    |     [Prefix] ShouldApplyHonorPenalty(OfHero(victim), OfPlayer())
+    |       Free vs Evil is cross-alignment: false, the Honor hit is skipped
     v
-[Vanilla] ... obituary, succession, army, MakeDead ...
-    |
-    v
-[Vanilla] Checks: is Executed? killer == MainHero? victim.Honor >= 0?
-    |
-    v
-TraitLevelingHelper.OnLordExecuted()
-    |
-    +--[Patch B Prefix]-- Reads ExecutionContext → mordor vs gondor
-    |                      → AreEnemyAlignments = true
-    |                      → ShouldApplyHonorPenalty = false
-    |                      → return false (SKIP vanilla -1000 XP)
-    v
-[Vanilla] CampaignEventDispatcher.OnHeroKilled
-    |
-    v
-CharacterRelationCampaignBehavior.OnHeroKilled
-    |  For each clan leader:
-    |    calls TaomExecutionRelationModel.GetRelationChangeForExecutingHero
-    |      → base returns vanilla -60 (same clan)
-    |      → GetRelationModifier(executor, victim, evaluator, -60)
-    |        → each participant: ResolveSide(kingdomId, cultureId)
-    |          (victim's kingdom is already null here if his clan was
-    |           just destroyed — the snapshot is what saves this)
-    |        → executor Free vs victim Evil: cross-alignment
-    |        → evaluator Free?    return 0
-    |        → evaluator Evil?    return -60 (vanilla)
-    |        → evaluator Neutral? return 0
-    |      → applies modified value via ChangeRelationAction
-    v
-[Patch A Finalizer] ExecutionContext.Clear()
+[Vanilla] OnBloodFeudStateChanged: for each other clan
+    |  GetBloodFeudStartRelationPenaltyToOtherClan(victim, clan)
+    |    [Postfix] GetRelationModifier(OfPlayer(), OfHero(victim), Of(clan.MapFaction), vanilla)
+    |      executor Free vs victim Evil: cross-alignment
+    |      evaluator Free?    0 (the engine skips the clan)
+    |      evaluator Evil?    vanilla number
+    |      evaluator Neutral? 0
+    |    (the victim's kingdom is already null if his clan was just destroyed;
+    |     his pair is then the clan's own, and the rest follows the same rule)
 ```
 
 ### Dependency Chain
 
 ```
 ExecutionIoC registers:
-  IAlignmentConfigProvider → AlignmentConfigProvider (loads alignment.json)
-  IAlignmentService → AlignmentService (kingdom side lookups)
-  IOnExecutionAction → ExecutionActionHook (penalty calculations)
+  IAlignmentConfigProvider -> AlignmentConfigProvider (loads alignment.json)
+  IAlignmentService -> AlignmentService (side lookups)
+  IOnExecutionAction -> ExecutionActionHook (penalty calculations)
+  IExecutionRelationService -> ExecutionRelationService
 
 SubModule.OnSubModuleLoad:
-  ExecutionIoC.InitializeHooks(executionHook)
-    → TraitLevelingHelper_OnLordExecuted_Patch.Initialize(hook)
-
-SubModule.OnGameStart:
-  campaignStarter.AddModel(new TaomExecutionRelationModel(executionAction))
+  ExecutionIoC.InitializeHooks(executionHook, playerContext)
+    -> TraitLevelingHelper_OnBloodFeudStarted_Patch.Initialize(hook)
+    -> ExecutionCampaignBehavior_BloodFeudRelationPenalty_Patch.Initialize(hook, playerContext)
 
 SubModule.OnGameInitializationFinished:
-  _harmony.PatchCategory("Patch14_Execution")
-    → Applies KillCharacterAction_ApplyInternal_Patch
-    → Applies TraitLevelingHelper_OnLordExecuted_Patch
+  TryPatchCategory("Patch14_Execution")
+    -> applies both patches
 ```
 
 ## Key Files

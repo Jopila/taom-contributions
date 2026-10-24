@@ -35,12 +35,12 @@ With personal relations engaged, a player grant lands on the lord named: `GetHer
 ### Rules for callers
 
 - **Key any throttle on the relation owner.** Ask `DiplomacyModel.GetHeroesForEffectiveRelation(player, hero, ...)` and key a cooldown, a daily cap or a "once per" ledger on the second hero it returns (the hero itself when it returns none). With Personal Relations off a change lands on the clan leader, so two kinsmen share one relation and a throttle keyed on the hero lets the player repeat it once per kinsman. Bonds of Battle's hand-over cap and Tokens of Esteem's gift cooldown both do this.
-- **List the heroes, then call `GrantStrongestPerOwner`.** A caller that asks several heroes at once builds a `RelationAsk(RelationTarget?, delta)` for each (a null target, a dead hero, the player and a zero delta are skipped) and calls `grants.GrantStrongestPerOwner(asks, reasonForLog)` (`RelationGrantServiceExtensions`). It grants the strongest ask once per relation owner (the largest `|delta|`, the first listed on a tie, owners in the order they first appear, a blank owner falling back to the hero) and returns how many landed. It is an extension, not a member of the interface, so a fake of the seam needs no change. `RelationTargets.Of(player, hero)` in `Main/Adapters` builds a `RelationTarget` from an engine hero; `SideMultipliers.For(first, second)` is the shared side pairing (Neutral when either side is Neutral, Same, Opposite). Good Deeds and Long Memory use all three.
+- **List the heroes, then call `GrantStrongestPerOwner`.** A caller that asks several heroes at once builds a `RelationAsk(RelationTarget?, delta)` for each (a null target, a dead hero, the player and a zero delta are skipped) and calls `grants.GrantStrongestPerOwner(asks, reasonForLog)` (`RelationGrantServiceExtensions`). It grants the strongest ask once per relation owner (the largest `|delta|`, the first listed on a tie, owners in the order they first appear, a blank owner falling back to the hero) and returns how many landed. It is an extension, not a member of the interface, so a fake of the seam needs no change. `RelationTargets.Of(player, hero)` in `Main/Adapters` builds a `RelationTarget` from an engine hero; `SideMultipliers` is the shared record of three multipliers (`Same`, `Neutral`, `Opposite`), and its `For(first, second)` picks one for a pair of sides (Neutral when either side is Neutral, then Same, else Opposite); the sides themselves come from `IAlignmentService.ResolveSide(SideIds)` over a `FactionSides` pair. Good Deeds and Long Memory use all three.
 - **The landed change can differ from the ask.** The Charm bonus and perks can add to a positive change, and the engine clamps the result to -100..100, so the number `Grant` returns is the one to show, to log and to count against a cap. Never assume the ask landed.
 
 ### Callers outside the seam
 
-Three older callers still change relation directly and are migration candidates: `CommanderLordAdapter.ApplyPlayerRelation`, `ArmouryPlayerAdapter.ChangeRelationWith` and `SiegeDefenseService.GrantReward`. An amount that a game model returns (the barter overpay, and Good Deeds' donation bonus) is applied by vanilla, not by the seam.
+Six older callers still change relation directly and are migration candidates: `CommanderLordAdapter.ApplyPlayerRelation`, `ArmouryPlayerAdapter.ChangeRelationWith`, `SiegeDefenseService.GrantReward`, `AshesWorldAdapter`, `HardQuestionsActionAdapter` and `NamedCompanionAdapter`. An amount that a game model returns (the barter overpay, and Good Deeds' donation bonus) is applied by vanilla, not by the seam.
 
 ### One registration only
 
@@ -89,7 +89,7 @@ ChangeRelationAction
 
 ## Known Limits
 
-The seam reports the change that landed, so a diplomacy model that scaled or zeroed the amount is visible to the caller. The seam has three direct callers it does not cover, and it does not handle amounts a game model returns.
+The seam reports the change that landed, so a diplomacy model that scaled or zeroed the amount is visible to the caller. The seam has six direct callers it does not cover, and it does not handle amounts a game model returns.
 
 ## Changelog
 
