@@ -27,11 +27,16 @@ permission outcomes, tool-error signatures (RECURRING at three or more sessions)
 (three or more assistant messages, not parallel calls of one), user corrections, skill and slash
 command usage, subagent usage, memory health, and tool output size (section 9: characters of
 results by tool and by shell command family, the baseline for any output-trimming change).
+Section 9 also compares each family's share of all output with the newest earlier run beside
+the report folder (dated folders under one root by default) and lists every family that grew by
+2 points or more; the console line `output growth:` says how many.
 
 Also run `python tools/analyze_reviews.py --summary --no-plot` for the reviewer accuracy that
 `REVIEW-LOG.md` already tracks (`--no-plot` leaves the committed `progress.png` alone).
 
-If the miner prints UNCHECKED, stop: no evidence means no retro, not a clean one.
+If the miner exits 3 with UNCHECKED, stop: no evidence means no retro, not a clean one. An
+`output growth: UNCHECKED` line on a normal run only means no earlier run was found to compare
+with; continue, and say so in the record.
 
 ### 2. List the harness changes since the last retro
 
@@ -55,6 +60,10 @@ One row per change older than seven days: the component, the change (commit), wh
 | confounded | One commit changed several components, or one session is all the evidence. Prefer this to a guessed attribution: a wrong "helped" misleads every later retro |
 | too early | The window does not yet hold the situation it targets |
 
+A change meant to trim what sessions read (an output filter, a quieter flag, a rule about how
+much to read) takes its verdict from section 9: the family it targets must shrink against the
+growth baseline, or it is "no observed effect".
+
 A gate that guards a rare, costly event (force-push, `--no-verify`, a dangerous git form) is kept
 with zero fires; record it as a guard, not as dead. A change with "no observed effect" in two
 retros becomes a deletion proposal: a deletion that holds parity is always kept
@@ -68,6 +77,10 @@ error, a runaway). A proposal that cannot name a moment is speculation; drop it.
 - **Priority:** a divergence first (the agent did it right in some sessions and wrong in others,
   so it can do it and the harness leaves it to chance), then a failure repeated across sessions,
   then a risk seen but not yet realised.
+- **Output growth:** each row of section 9's growth table is a candidate. Name the sessions behind
+  the family (the report's family key is the command), and propose only when the cause is a
+  harness gap, such as a whole file read where a range would do; growth from more work is not a
+  defect.
 - **Form, cheapest first:** a gate or hook (it acts in the tool loop and costs no context), then a
   script in `tools/`, then a skill or path rule (loaded only when needed), then always-on text in
   AGENTS.md or CLAUDE.md last. A proposal that adds always-on text names what it cuts. Route by
@@ -87,7 +100,9 @@ normal tiers, tests and commit rules.
 retro's start, and it silences the banner. Contents:
 
 - **Window and coverage:** dates, session counts, parse failures.
-- **Signals:** the aggregate tables that bear on a verdict or proposal, with session ids.
+- **Signals:** the aggregate tables that bear on a verdict or proposal, with session ids, and
+  always section 9's top families and growth table: the report folder is outside the repo and can
+  be cleaned, so the record is the durable baseline.
 - **Verdicts:** the phase 3 rows.
 - **Proposals:** each with its evidence and Mike's decision.
 

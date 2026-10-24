@@ -560,6 +560,49 @@ def output_rows(table, label, total, n, shell_total=None):
     return rows
 
 
+GROWTH_POINTS = 0.02   # a family whose share of all output grew by 2 points or more is flagged
+
+
+def previous_signals(out):
+    """(path, signals) of the newest other run beside `out` that has section 9, else (None, None).
+    Runs land in dated folders under one root by default, so the last retro's run is a sibling."""
+    best = None
+    for p in out.parent.glob("*/signals.json"):
+        if p.parent == out:
+            continue
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(d, dict) or not isinstance(d.get("output_size"), dict):
+            continue
+        key = (str((d.get("window") or {}).get("today", "")), p.stat().st_mtime)
+        if best is None or key > best[0]:
+            best = (key, p, d)
+    return (best[1], best[2]) if best else (None, None)
+
+
+def output_growth(families, out):
+    """Shell families whose share of all output grew by GROWTH_POINTS since the previous run. A
+    family the previous run folded into `(other)` has no known share and is not flagged as new."""
+    path, prev = previous_signals(out)
+    if prev is None:
+        return {"baseline": None, "looked_in": str(out.parent), "rows": []}
+    old = [r for r in prev["output_size"].get("families", []) if isinstance(r, dict)]
+    then = {r.get("family"): r.get("share", 0) for r in old}
+    complete = "(other)" not in then
+    rows = []
+    for r in families:
+        if r["family"] == "(other)" or (r["family"] not in then and not complete):
+            continue
+        before = then.get(r["family"], 0)
+        if r["share"] - before >= GROWTH_POINTS:
+            rows.append({"family": r["family"], "then": before, "now": r["share"],
+                         "delta": round(r["share"] - before, 4)})
+    rows.sort(key=lambda r: -r["delta"])
+    return {"baseline": str(path), "baseline_today": (prev.get("window") or {}).get("today"), "rows": rows}
+
+
 def output_size(stats, n):
     total = sum(v[1] for v in stats.out_tools.values())
     shell = sum(v[1] for v in stats.out_families.values())
@@ -692,6 +735,17 @@ def render(sig):
     L += table(["Family", "Results", "Chars", "Share of all", "Share of shell", "Mean", "Max"],
                [[r["family"], r["results"], r["chars"], "%.1f%%" % (100 * r["share"]),
                  "%.1f%%" % (100 * r["shell_share"]), r["mean"], r["max"]] for r in o["families"]])
+    g = o.get("growth") or {}
+    L += ["### Growth since the previous run", ""]
+    if not g.get("baseline"):
+        L += ["No earlier signals.json found beside this run (looked in %s): growth UNCHECKED, not absent."
+              % g.get("looked_in", "?"), ""]
+    else:
+        L += ["Against the run of %s (%s). Each row is a proposal candidate for the retro." % (
+            g.get("baseline_today"), g["baseline"]), ""]
+        L += table(["Family", "Then", "Now", "Grew by"],
+                   [[r["family"], "%.1f%%" % (100 * r["then"]), "%.1f%%" % (100 * r["now"]),
+                     "%.1f points" % (100 * r["delta"])] for r in g["rows"]])
     return "\n".join(L) + "\n"
 
 
@@ -744,11 +798,13 @@ def main(argv=None):
         return 3
 
     sig = build_signals(stats, args, since, today, main_files, sub_files)
+    sig["output_size"]["growth"] = output_growth(sig["output_size"]["families"], out)
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.md").write_text(render(sig), encoding="utf-8")
     (out / "signals.json").write_text(json.dumps(sig, indent=2), encoding="utf-8")
 
     s = sig["sessions"]
+    g = sig["output_size"]["growth"]
     print("report:  %s" % (out / "report.md"))
     print("signals: %s" % (out / "signals.json"))
     print("sessions: %d main, %d subagent transcripts, %d records, %d parse failures, %d compactions" % (
@@ -767,6 +823,12 @@ def main(argv=None):
         len(sig["unused_skills"])))
     print("memory: %s bytes, %s lines, %d stale cards" % (
         sig["memory"]["memory_md_bytes"], sig["memory"]["memory_md_lines"], len(sig["memory"]["stale_cards"])))
+    if g["baseline"]:
+        print("output growth: %d shell family(ies) grew %d+ points since %s%s" % (
+            len(g["rows"]), round(100 * GROWTH_POINTS), g["baseline_today"],
+            "" if not g["rows"] else ": " + ", ".join(r["family"] for r in g["rows"])))
+    else:
+        print("output growth: UNCHECKED, no earlier run beside %s" % out)
     return 0
 
 

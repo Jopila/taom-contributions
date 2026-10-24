@@ -466,6 +466,35 @@ class OutputSizeTests(Base):
         self.assertEqual(f("pwsh -NoProfile -ExecutionPolicy Bypass -File tools/x.ps1"), "pwsh x.ps1")
         self.assertEqual(f("gh -R a/b pr list"), "gh pr")
 
+    def _two_families(self):
+        self.env.write("a.jsonl", [
+            tool_use("t1", "Bash", command="git diff HEAD~1"), tool_result("t1", "d" * 300, error=False),
+            tool_use("t2", "Bash", command="grep -rn foo ."), tool_result("t2", "g" * 100, error=False),
+            tool_use("t3", "Read", file_path="/x"), tool_result("t3", "r" * 600, error=False)])
+
+    def test_growth_against_the_previous_run(self):
+        self._two_families()
+        prev = self.env.root / "2026-10-01"
+        prev.mkdir()
+        (prev / "signals.json").write_text(json.dumps({
+            "window": {"since": "2026-09-24", "today": "2026-10-01"},
+            "output_size": {"families": [{"family": "git diff", "share": 0.10},
+                                         {"family": "grep", "share": 0.10}]}}), encoding="utf-8")
+        code, out = self.env.run()
+        g = self.env.signals()["output_size"]["growth"]
+        self.assertEqual(g["baseline_today"], "2026-10-01")
+        self.assertEqual([r["family"] for r in g["rows"]], ["git diff"])
+        self.assertAlmostEqual(g["rows"][0]["delta"], 0.20)
+        self.assertIn("### Growth since the previous run", self.env.report())
+        self.assertIn("output growth: 1 shell family", out)
+
+    def test_growth_without_a_previous_run_says_unchecked(self):
+        self._two_families()
+        code, out = self.env.run()
+        self.assertIsNone(self.env.signals()["output_size"]["growth"]["baseline"])
+        self.assertIn("growth UNCHECKED", self.env.report())
+        self.assertIn("output growth: UNCHECKED", out)
+
     def test_tool_table_folds_past_top(self):
         recs = []
         for i, name in enumerate(["Read", "Bash", "Grep", "Glob"]):
