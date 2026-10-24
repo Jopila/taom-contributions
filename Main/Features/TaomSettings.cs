@@ -834,6 +834,14 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Lets the ruler of your realm rename its towns, castles and villages from the Fiefs tab of the kingdom screen for influence, and lets four fiefs take an older or darker name while the matching side holds them. A name you chose is never overwritten. Single-player only. Switching it off gives those fiefs their map names back; a name you chose stays. The button follows the next time the kingdom screen opens; the older names change at the next capture, load or change of realm. Default: on.")]
     public bool EnableNamegiving { get; set; } = true;
 
+    // --- Character Screen / Loremaster's Line (#877) ---
+
+    // GroupOrder 44 orders the "Loremaster's Line" subgroup inside "Character Screen"; the group's first property carries it.
+    [SettingPropertyGroup("Character Screen/Loremaster's Line", GroupOrder = 44)]
+    [SettingPropertyBool("{=taom_ll_mcm_enable}Loremaster's Line", Order = 0, RequireRestart = false,
+        HintText = "{=taom_ll_mcm_enable_hint}On the character screen, marks the level past which the selected skill learns at its slowest: a red arrow and a red band to the end of the bar; hover the band for the details. Also adds a line to the learning limit tooltip. Applies the next time the character screen opens. Default: on.")]
+    public bool EnableLoremastersLine { get; set; } = true;
+
     // --- Inventory / Quick Actions ---
 
     [SettingPropertyGroup("Inventory/Quick Actions", GroupOrder = 30)]

@@ -2213,3 +2213,13 @@ was checked at the outer loop, and the inner loop added a whole neighbour list. 
 - **Prevent:** put a bound check at the line that increments the counted thing, and test it with a group larger
   than the remaining budget (150 married children, a fan-out past the visited cap).
 - **Source:** [rca-lines-of-descent-2026-10-23.md](../rca-lines-of-descent-2026-10-23.md) findings 1 and 3.
+### A build brief names the no-game unit step when a new test reads engine attributes (Loremaster's Line, 2026-10-23)
+A new wiring test called `GetCustomAttributes` on `[DataSourceProperty]` members. The desktop suite loads the
+real DLLs and passed; in the reference assemblies of the no-game step that constructor is `throw null`, so the
+step would have failed. `.claude/rules/tests.md` already names this case, and the 2026-10-08 entry above says an
+engine-executing test joins its gate in the same commit.
+- **Why missed:** a repeat. The builder ran only the game-loaded suite, and the brief did not name the no-game
+  step from `.ai/verification.md`.
+- **Prevent:** a brief for any test that reflects over engine types names the RefAsm build and unit filter as a
+  required run; read attribute metadata (`CustomAttributes`, by type name) instead of constructing attributes.
+- **Source:** `docs/reviews/rca-loremasters-line-2026-10-23.md` finding 2.

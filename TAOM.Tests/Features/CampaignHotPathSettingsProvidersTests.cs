@@ -30,6 +30,7 @@ using TAOM.Features.PosternGate;
 using TAOM.Features.QuickActions;
 using TAOM.Features.Relations;
 using TAOM.Features.RealmBorders;
+using TAOM.Features.LoremastersLine;
 using TAOM.Features.ReevesLedger;
 using TAOM.Features.TimeAcceleration;
 using TAOM.Features.UnderTheEaves;
@@ -105,6 +106,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(LongMemorySettingsProvider))]
     // Not a hot path: both switches are read once, when the town management window opens. The accessor still takes the settings once.
     [DataRow(typeof(ReevesLedgerSettingsProvider))]
+    // Not a hot path: read once per skill view model, when the screen builds it, never per click or frame. The accessor still takes the settings once.
+    [DataRow(typeof(LoremastersLineSettingsProvider))]
     // #870: the four switches are read on every hourly tick while a raiding host rides.
     [DataRow(typeof(FireAndTributeSettingsProvider))]
     // #887: read per foreign candidate per AI lord think (Patch114) and per notable per party-hour (TaomVolunteerModel).
@@ -153,6 +156,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IGoodDeedsSettingsProvider), typeof(GoodDeedsSettingsProvider))]
     [DataRow(typeof(ILongMemorySettingsProvider), typeof(LongMemorySettingsProvider))]
     [DataRow(typeof(ReevesLedgerSettingsProvider), typeof(ReevesLedgerSettingsProvider))]
+    [DataRow(typeof(LoremastersLineSettingsProvider), typeof(LoremastersLineSettingsProvider))]
     [DataRow(typeof(IFireAndTributeSettings), typeof(FireAndTributeSettingsProvider))]
     [DataRow(typeof(IUnlookedForAidSettingsProvider), typeof(UnlookedForAidSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
@@ -483,6 +487,18 @@ public class CampaignHotPathSettingsProvidersTests
 
         Assert.IsFalse(sut.LedgerEnabled);
         Assert.IsFalse(sut.StepsEnabled);
+    }
+
+    [TestMethod]
+    public void LoremastersLine_ReadsThroughTheCachedSettings()
+    {
+        var settings = new TaomSettings();
+        var sut = new LoremastersLineSettingsProvider(settings);
+        Assert.IsTrue(sut.Enabled);
+
+        settings.EnableLoremastersLine = false;
+
+        Assert.IsFalse(sut.Enabled);
     }
 
     [TestMethod]

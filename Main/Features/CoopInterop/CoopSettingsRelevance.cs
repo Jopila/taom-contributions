@@ -180,6 +180,9 @@ public static class CoopSettingsRelevance
         // Reeve's Ledger (#857): the town management window's title, two stat rows and two icon tooltips, drawn on this
         // client only. They read the fief and write nothing.
         "EnableReevesLedger",
+        // Loremaster's Line (#877): a marker on the character screen's skill bar and one tooltip line. It reads the learning
+        // rate and writes nothing.
+        "EnableLoremastersLine",
         // Campaign map performance (Battle Load Diagnostics page, Map Performance): whether hidden settlement
         // nameplates are skipped each frame (Patch104), and whether a covered map releases its render targets and how
         // often (a layer-event handler, no patch). Both change what this client draws and how much graphics memory it holds, never the campaign.

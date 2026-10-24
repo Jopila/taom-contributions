@@ -102,8 +102,8 @@ public class ClientIsolationGateTests
 
         var inClient = CoopUiRegistrationPolicy.CollectUiExtensionTypes(typeof(TAOM.Client.ClientSubModule).Assembly);
 
-        Assert.AreEqual(33, inClient.Count,
-            "15 view model mixins and 18 prefab extension classes: " + string.Join(", ", inClient.Select(t => t.Name)));
+        Assert.AreEqual(35, inClient.Count,
+            "16 view model mixins and 19 prefab extension classes: " + string.Join(", ", inClient.Select(t => t.Name)));
         CollectionAssert.AreEquivalent(
             new[]
             {

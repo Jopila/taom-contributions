@@ -45,6 +45,8 @@ public class ReflectionSiteBindingTests
     [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.Inventory.SPInventoryVM", "SPInventoryVM", "RefreshInformationValues", "Method", "InventoryVMAdapter.cs:30")]
     // --- Telchar's Mark filter re-run (InventoryUpgradeScreen.cs, #875) ---
     [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.Inventory.SPInventoryVM", "SPInventoryVM", "UpdateFilteredStatusOfItem", "Method", "InventoryUpgradeScreen.cs:102")]
+    // --- Loremaster's Line skill marker (LoremastersLineSkillAccess.cs, #877) ---
+    [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.CharacterDeveloper.SkillVM", "SkillVM", "_heroItem", "Field", "LoremastersLineSkillAccess.cs:40")]
     // --- CompanionTactics formation-preset overlay (OOBOverlayService.cs) ---
     [DataRow("TaleWorlds.MountAndBlade.GauntletUI.Mission.Singleplayer.MissionGauntletOrderOfBattleUIHandler", "MissionGauntletOrderOfBattleUIHandler", "_isActive", "Field", "OOBOverlayService.cs:64")]
     [DataRow("TaleWorlds.MountAndBlade.GauntletUI.Mission.Singleplayer.MissionGauntletOrderOfBattleUIHandler", "MissionGauntletOrderOfBattleUIHandler", "_dataSource", "Field", "OOBOverlayService.cs:65")]

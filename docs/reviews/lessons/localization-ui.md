@@ -1204,3 +1204,31 @@ its parent's hover, so it needs no size at all.
 - **Prevent:** use vanilla's shape (`Inventory.xml:471-475`): one `TextWidget` with a size-less `HintWidget` child. A test asserts
   that no inserted element is `StretchToParent` and that the `HintWidget` has no size policy.
 - **Source:** `/deep-review` of #866; `DecisionOptionFiefCountPrefabTests`.
+
+### A hover target lies inside every ancestor's rectangle: Gauntlet hit-tests by containment (Loremaster's Line, 2026-10-23)
+`EventManager.CollectEnableWidgetsAt` (v1.5.5 EventManager.cs:880-901) descends into a child only when the
+pointer is inside that child's own `AreaRect`, and a `HintWidget` relays only its parent's hover. A widget placed
+outside its parent (a negative `PositionYOffset`, an offset past the parent's edge) still draws, because nothing
+clips it, but no pointer ever reaches it. The skill-bar arrow sat 30 px above the bar, so its "Skill Limit"
+tooltip could never open; vanilla's own indicator, which the markup copied, is a sibling inside the container.
+- **Why missed:** the markup was copied without its place, and nobody walked the hit test. This is the second
+  hover-path miss after "A hint on a disabled button needs an enabled parent" (Reeve's Ledger).
+- **Prevent:** put a hint on an enabled widget that lies inside every ancestor's rectangle, give that widget
+  `DoNotPassEventsToChildren` when it has enabled children (children are collected first), and pin it with a
+  structural test (the hint's parent, its events flags, no offset out of the parent). Hover it in game.
+- **Source:** `docs/reviews/rca-loremasters-line-2026-10-23.md` finding 1.
+
+### Before writing a widget that sizes or places a child from numbers, look for the engine's (Loremaster's Line, 2026-10-23)
+The first build placed a band and an arrow on the skill bar from a custom widget that copied the bar's private
+maths every frame. The engine's `FillBarHorizontalWidget` (TaleWorlds.GauntletUI.ExtraWidgets) already sizes a
+child from `InitialAmount / MaxAmount` of its parent's width, right- or left-anchored, and vanilla uses it with a
+child riding the fill's edge (`DeclareWarDecisionPanel.xml:129-136`). The swap deleted a 143-line widget, its
+copied maths and every per-frame TAOM path. A TAOM widget redeclaring a sprite also matters: `TAOMSpriteData.xml`
+redeclares vanilla names in `ui_taom`, and that re-skin is what draws, so the art (and its direction) comes from
+TAOM's sheet, not SandBox's.
+- **Why missed:** the plan searched for a seam on the bar (a patch or a child widget), not for an engine widget,
+  and read only SandBox's sprite sheet although `.claude/rules/gui-ui.md` says to read TAOM's first.
+- **Prevent:** rung 1 of `think-before-coding.md` covers widgets too: grep the installed ExtraWidgets and
+  vanilla prefabs for a widget that does the layout before writing one. Pin sprites against `TAOMSpriteData.xml`
+  (SpritePart and GenericSprite).
+- **Source:** `docs/reviews/rca-loremasters-line-2026-10-23.md` findings 7 and 13.

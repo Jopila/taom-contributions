@@ -205,6 +205,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [quick-actions](features/quick-actions.md) — inventory "Sell All" multi-action menu (Patch34)
 - [telchars-mark](features/telchars-mark.md): inventory tints for upgrades (green) and sidegrades (yellow), and a "Show only better items" checkbox (Patch109, #875)
 - [bills-burden](features/bills-burden.md): a map-bar row showing the party's cargo fill as a percent of capacity, red above 100% (#876)
+- [loremasters-line](features/loremasters-line.md): a red arrow and band on the character screen skill bar where learning is slowest, and a line on the learning limit tooltip (#877)
 - [fief-management](features/fief-management.md) — custom GameState for fief management
 - [fief-granting](features/fief-granting.md): who gets a captured town or castle (Patch70 decision swap, siege participation record, ten MCM knobs; the ballot shows each candidate's fief count and a hover list; #458, #565, #866)
 - [arena](features/arena.md): TaomTournamentModel with practice-fight culture armor + prize pools

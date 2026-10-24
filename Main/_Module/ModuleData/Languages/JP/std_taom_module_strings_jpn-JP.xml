@@ -6561,6 +6561,20 @@
 
     <string id="taom_fiefgrant_ballot_hint_excluded" text="Not counting {SETTLEMENT}, the fief under vote" />
 
+    <string id="taom_ll_limit_line" text="Up to the learning limit this skill learns at full speed; past it, learning slows until the red marker." />
+
+    <string id="taom_ll_tt_title" text="Skill Limit" />
+
+    <string id="taom_ll_tt_after" text="Slowest learning after {LEVEL}" />
+
+    <string id="taom_ll_tt_capped" text="Past it, practice no longer improves this skill" />
+
+    <string id="taom_ll_tt_rate" text="Past it, learning keeps {PERCENT} of full speed" />
+
+    <string id="taom_ll_mcm_enable" text="Loremaster's Line" />
+
+    <string id="taom_ll_mcm_enable_hint" text="On the character screen, marks the level past which the selected skill learns at its slowest: a red arrow and a red band to the end of the bar; hover the band for the details. Also adds a line to the learning limit tooltip. Applies the next time the character screen opens. Default: on." />
+
   </strings>
 
 </base>

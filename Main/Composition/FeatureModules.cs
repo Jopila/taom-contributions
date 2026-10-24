@@ -55,6 +55,7 @@ internal static class FeatureModules
         new Features.TokensOfEsteem.TokensOfEsteemModule(),
         new Features.TavernSpecialities.TavernSpecialitiesModule(),
         new Features.ReevesLedger.ReevesLedgerModule(),
+        new Features.LoremastersLine.LoremastersLineModule(),
         new Features.LordCourtesies.LordCourtesiesModule(),
         new Features.LordFaceVariety.LordFaceVarietyModule(),
         new Features.CrownGuard.CrownGuardModule(),

@@ -37,6 +37,7 @@ Reflection against engine members performed *outside* a patch's target resolutio
 | `…ViewModelCollection.Inventory.SPInventoryVM` | `UpdateRightCharacter` | method | `InventoryVMAdapter.cs:29` | QuickActions and EquipPresets paper doll and stats after a batch transfer |
 | `…ViewModelCollection.Inventory.SPInventoryVM` | `RefreshInformationValues` | method | `InventoryVMAdapter.cs:30` | QuickActions and EquipPresets capacity and Done state after a batch transfer |
 | `…ViewModelCollection.Inventory.SPInventoryVM` | `UpdateFilteredStatusOfItem` | method | `InventoryUpgradeScreen.cs:102` | Telchar's Mark "show only better items" filter re-run |
+| `…ViewModelCollection.CharacterDeveloper.SkillVM` | `_heroItem` | field | `LoremastersLineSkillAccess.cs:40` | Loremaster's Line: the hero's preview attributes for the learning-rate probe |
 | `…GauntletUI.Mission.Singleplayer.MissionGauntletOrderOfBattleUIHandler` | `_isActive` | field | `OOBOverlayService.cs:64` | CompanionTactics OOB overlay attach |
 | `…MissionGauntletOrderOfBattleUIHandler` | `_dataSource` | field | `OOBOverlayService.cs:65` | CompanionTactics OOB overlay data |
 | `…ViewModelCollection.Party.PartyCharacterVM` | `TypeIconData` | property | `RoleTooltipDecorator.cs:40` | Companion role tooltip |
