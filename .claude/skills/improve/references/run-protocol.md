@@ -263,6 +263,7 @@ merge" below).
        `git branch --merged origin/<trunk> --format="%(refname:short)" --list "improve/*" "integrate/*"`.
     2. `git worktree remove` each plan worktree that has one of them checked out
        (`git worktree list`), keeping the integration worktree.
+       Run `python tools/worktree_audit.py` first and treat its bucket as advice, never permission.
     3. Delete the listed branches other than this run's `integrate/<date>` from the integration
        worktree, whose HEAD is the pushed trunk: `git -C "<wt-integrate>" branch -d <branch> ...`.
     4. `git worktree remove "<wt-integrate>"`.

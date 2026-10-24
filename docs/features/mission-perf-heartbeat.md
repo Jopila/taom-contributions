@@ -1011,6 +1011,7 @@ when the probe never armed). `SyntheticNativeImage` builds the fake module.
 
 ## Reading an A/B
 
+The method (move order, stop rule, attempt log) is [perf-method.md](../ai-includes/perf-method.md).
 `tools/perf_runs.py` does the arithmetic. Run the same scene several times with the change off and
 several times with it on, keep each log, then:
 

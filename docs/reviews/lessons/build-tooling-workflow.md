@@ -4440,3 +4440,15 @@ came with no detail.
 - **Prevent:** a brief for a new gate names every consumer (the hook, the skill step, `/verify`) and asks for one test
   through each: the hook fires for the gate's own file paths, judges what the commit records, and quotes the failure.
 - **Source:** `docs/reviews/rca-review-followups-2026-10-23.md` findings 2 to 4.
+### Moving work to a branch by patch carries other sessions' hunks (2026-10-24)
+
+Work done in the main checkout was moved to a new worktree with `git diff -- <paths>`, applied there and
+reverse-applied in the main checkout. A second session was editing the same checkout, and one of the named files
+(`.claude/skills/improve/references/run-protocol.md`) held three of its lines. `git diff` takes every change in a
+file, so those lines moved to the wrong branch and left the main checkout. A per-file read of the moved diff found
+them, and they were put back by hand.
+- **Why missed:** the move script checked that the files were this session's, not that each hunk was.
+- **Prevent:** before a patch move, list each named file's changed lines (`git diff -U0 -- <file>`) and compare them
+  with what this session wrote; a file with a foreign hunk moves by hand edit, never by whole-file patch. Better:
+  start work that may need its own branch in a worktree from the first edit.
+- **Source:** [adopt-pstack-2026-10-24.md](../adopt-pstack-2026-10-24.md).

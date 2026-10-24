@@ -73,6 +73,15 @@ Table of current configuration values with notes explaining the choices.
 - `TAOM.Tests/Features/<Name>/BehaviorTests.cs` — N tests covering [summary]
 - A campaign behavior declared by a feature module also needs its co-op row in `docs/features/coop-interop.md` (gated table or "Deliberately NOT gated"); `CoopGateDocCoverageTests` enforces it. Behaviors that predate the test are listed in its `Baseline` and still need classifying; behaviors added by hand in `Main/SubModule.cs` are not checked by the test but still need a row.
 
+## How to verify in game
+
+**Preconditions:** new campaign or existing save, whether a restart is needed, the MCM toggle, the module set.
+
+1. One exact `taom.*` console command or UI action, then the observable result that proves it (a printed value, a menu option, a log line).
+2. Next step, same pairing.
+
+An unreachable step is reported with the command tried and the unmet precondition. Never mark it verified through another path.
+
 ## How to [Common Operation]
 
 Step-by-step guide for the most common modification (e.g., "How to add a new race", "How to add a new culture", "How to change X threshold").
