@@ -183,6 +183,8 @@ public static class CoopSettingsRelevance
         // Loremaster's Line (#877): a marker on the character screen's skill bar and one tooltip line. It reads the learning
         // rate and writes nothing.
         "EnableLoremastersLine",
+        // Hearth Roll (#906): the red tint on a companion's row of the clan screen's Members list, drawn on this client only.
+        "EnableUnhappyCompanionTint",
         // Campaign map performance (Battle Load Diagnostics page, Map Performance): whether hidden settlement
         // nameplates are skipped each frame (Patch104), and whether a covered map releases its render targets and how
         // often (a layer-event handler, no patch). Both change what this client draws and how much graphics memory it holds, never the campaign.

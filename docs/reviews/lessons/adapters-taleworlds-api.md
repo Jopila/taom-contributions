@@ -1407,3 +1407,17 @@ builder rejected such stale children, but the relation search over the same list
 - **Prevent:** when you find an engine-data trap, grep every reader of that data in the change and apply the
   rule once, in a shared helper; test each reader with the stale case.
 - **Source:** [rca-lines-of-descent-2026-10-23.md](../rca-lines-of-descent-2026-10-23.md) finding 2.
+
+### Hero.AllAliveHeroes excludes a Disabled hero: when you already hold the Hero, use it (Hearth Roll, 2026-10-23)
+The clan screen tint read the relation through an adapter that looks the hero up again by id in
+`Hero.AllAliveHeroes`. A companion sent away on an issue's alternative solution is Disabled
+(`IssueBase.StartIssueWithAlternativeSolution` -> `DisableHeroAction`), and `CampaignObjectManager` moves a Disabled
+hero into its dead-or-disabled list, so the lookup failed, the adapter returned 0, and that companion's row was never
+tinted while the clan screen still listed it.
+- **Why missed:** the plan reused the adapter to avoid a new interface; `AllAliveHeroes` is TAOM's lookup convention
+  (the field commission entry above), which is right for "is this hero alive" and wrong for a hero the caller already
+  holds.
+- **Prevent:** in a view-model mixin or any boundary that already has the `Hero`, read it directly
+  (`Hero.MainHero?.GetRelation(hero)`). A by-id lookup that must also find away, captive or disabled heroes uses
+  `Hero.Find`, which walks the dead-or-disabled list too.
+- **Source:** [rca-hearth-roll-2026-10-23.md](../rca-hearth-roll-2026-10-23.md) finding 1.

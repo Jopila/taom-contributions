@@ -6575,6 +6575,10 @@
 
     <string id="taom_ll_mcm_enable_hint" text="On the character screen, marks the level past which the selected skill learns at its slowest: a red arrow and a red band to the end of the bar; hover the band for the details. Also adds a line to the learning limit tooltip. Applies the next time the character screen opens. Default: on." />
 
+    <string id="taom_hr_age_one" text="{AGE} year old" />
+
+    <string id="taom_hr_age_many" text="{AGE} years old" />
+
   </strings>
 
 </base>

@@ -2591,4 +2591,14 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyFloatingInteger("Opposite Side Multiplier", TAOM.Features.LongMemory.LongMemorySettingsProvider.MinMultiplier, TAOM.Features.LongMemory.LongMemorySettingsProvider.MaxMultiplier, "0.00", Order = 9, RequireRestart = false,
         HintText = "Multiplier on the loss when you and the village owner's realm are on opposite sides, such as an Evil warband raiding a Free village, where raiding is expected. Default: 0.10.")]
     public float LongMemoryOpposite { get; set; } = TAOM.Features.LongMemory.LongMemorySettingsProvider.DefaultOpposite;
+
+    // --- Hearth Roll (docs/features/hearth-roll.md, #906) ---
+    //
+    // GroupOrder 68 follows Long Memory at 67. The switch is read through HearthRollSettingsProvider's one cached settings
+    // reference each time a clan member row refreshes, so it needs no restart.
+
+    [SettingPropertyGroup("Hearth Roll", GroupOrder = 68)]
+    [SettingPropertyBool("Tint Unhappy Companions", Order = 0, RequireRestart = false,
+        HintText = "On the Members tab of the clan screen, gives the row of a companion of your clan a faint red tint when their relation with you has fallen below zero, a warning before they leave. The age beside each child's name is always shown. Applies the next time the clan screen opens. Default: on.")]
+    public bool EnableUnhappyCompanionTint { get; set; } = true;
 }

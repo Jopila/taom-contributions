@@ -3865,4 +3865,7 @@
 	<string id="taom_ll_mcm_enable" text="{=taom_ll_mcm_enable}Loremaster's Line" />
 	<string id="taom_ll_mcm_enable_hint" text="{=taom_ll_mcm_enable_hint}On the character screen, marks the level past which the selected skill learns at its slowest: a red arrow and a red band to the end of the bar; hover the band for the details. Also adds a line to the learning limit tooltip. Applies the next time the character screen opens. Default: on." />
 
+	<!-- Hearth Roll (#906) -->
+	<string id="taom_hr_age_one" text="{=taom_hr_age_one}{AGE} year old" />
+	<string id="taom_hr_age_many" text="{=taom_hr_age_many}{AGE} years old" />
 </strings>

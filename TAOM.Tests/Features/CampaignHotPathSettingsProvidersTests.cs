@@ -31,6 +31,7 @@ using TAOM.Features.QuickActions;
 using TAOM.Features.Relations;
 using TAOM.Features.RealmBorders;
 using TAOM.Features.LoremastersLine;
+using TAOM.Features.HearthRoll;
 using TAOM.Features.ReevesLedger;
 using TAOM.Features.TimeAcceleration;
 using TAOM.Features.UnderTheEaves;
@@ -108,6 +109,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(ReevesLedgerSettingsProvider))]
     // Not a hot path: read once per skill view model, when the screen builds it, never per click or frame. The accessor still takes the settings once.
     [DataRow(typeof(LoremastersLineSettingsProvider))]
+    // Not a hot path: read on each row refresh, a few times per row when the clan screen opens or comes back to the front, never per frame. The accessor still takes the settings once.
+    [DataRow(typeof(HearthRollSettingsProvider))]
     // #870: the four switches are read on every hourly tick while a raiding host rides.
     [DataRow(typeof(FireAndTributeSettingsProvider))]
     // #887: read per foreign candidate per AI lord think (Patch114) and per notable per party-hour (TaomVolunteerModel).
@@ -157,6 +160,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(ILongMemorySettingsProvider), typeof(LongMemorySettingsProvider))]
     [DataRow(typeof(ReevesLedgerSettingsProvider), typeof(ReevesLedgerSettingsProvider))]
     [DataRow(typeof(LoremastersLineSettingsProvider), typeof(LoremastersLineSettingsProvider))]
+    [DataRow(typeof(HearthRollSettingsProvider), typeof(HearthRollSettingsProvider))]
     [DataRow(typeof(IFireAndTributeSettings), typeof(FireAndTributeSettingsProvider))]
     [DataRow(typeof(IUnlookedForAidSettingsProvider), typeof(UnlookedForAidSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
@@ -497,6 +501,18 @@ public class CampaignHotPathSettingsProvidersTests
         Assert.IsTrue(sut.Enabled);
 
         settings.EnableLoremastersLine = false;
+
+        Assert.IsFalse(sut.Enabled);
+    }
+
+    [TestMethod]
+    public void HearthRoll_ReadsThroughTheCachedSettings()
+    {
+        var settings = new TaomSettings();
+        var sut = new HearthRollSettingsProvider(settings);
+        Assert.IsTrue(sut.Enabled);
+
+        settings.EnableUnhappyCompanionTint = false;
 
         Assert.IsFalse(sut.Enabled);
     }

@@ -134,7 +134,7 @@ hand-kitbashed in the editor — see the [build reference](docs/kitbash/erebor/)
   Dark Powers; configurable via JSON + MCM.
 - **Race & Age System** — race-appropriate lifespans and fertility (immortal elves, 250-year
   dwarves, fast-breeding orcs, ageless Nazgûl).
-- **Named Companions** — 18 lore companions (Aragorn, Legolas, Gimli, …) as recruitable wanderers.
+- **Named Companions**: 17 lore companions (Aragorn, Legolas, Gimli, …) as recruitable wanderers.
 - **Bandit Management** — five LOTR bandit cultures replace vanilla hideouts, with configurable
   density and themed encounter flavor.
 - **Localization** — full text support across **12 languages** with graceful English fallback.
