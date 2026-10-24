@@ -1242,3 +1242,14 @@ TAOM's sheet, not SandBox's.
   vanilla prefabs for a widget that does the layout before writing one. Pin sprites against `TAOMSpriteData.xml`
   (SpritePart and GenericSprite).
 - **Source:** `docs/reviews/rca-loremasters-line-2026-10-23.md` findings 7 and 13.
+
+### An unknown brush name draws the default brush with no log: check names against the loaded brushes (#989, 2026-10-24)
+The Messengers hero-page button named two brushes no module defines. `BrushFactory.GetBrush` returns null and
+`BrushWidget` falls back to the UI's default brush, so the button drew with no art and no state looks, and nothing was
+logged. Separately, a `ButtonWidget` passes its enabled, hover and disabled state to child widgets only with
+`UpdateChildrenStates="true"`; without it the label keeps full brightness on a disabled button.
+- **Why missed:** a wrong brush name or a missing state attribute draws something plausible, so no run fails.
+- **Prevent:** `PrefabExtensionBrushTests` checks every brush-typed attribute in a PrefabExtension against the
+  brushes the engine loads; a button whose label should follow its state sets `UpdateChildrenStates="true"`, as vanilla
+  and the Family Tree buttons do.
+- **Source:** [rca-messengers-brushes-2026-10-24.md](../rca-messengers-brushes-2026-10-24.md) findings 0 and 1.

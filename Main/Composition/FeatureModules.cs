@@ -78,5 +78,6 @@ internal static class FeatureModules
         new Features.Provender.ProvenderModule(),
         new Features.SettlementServices.SettlementServicesModule(),
         new Features.Messengers.MessengerSessionRulesModule(),
+        new Features.RedArrow.RedArrowModule(),
     };
 }

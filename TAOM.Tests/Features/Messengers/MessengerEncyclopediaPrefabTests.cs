@@ -52,5 +52,7 @@ public class MessengerEncyclopediaPrefabTests
         Assert.IsNotNull(inner, "the enabled state needs a hint inside the button");
         Assert.AreEqual("{SendMessengerHint}", inner.GetAttribute("DataSource"));
         Assert.IsFalse(inner.HasAttribute("IsDisabled"), "the inner hint must be hoverable");
+        // ButtonWidget.RefreshState hands its state to the label only when UpdateChildrenStates is set (#989).
+        Assert.AreEqual("true", button.GetAttribute("UpdateChildrenStates"), "the label must dim with the disabled button");
     }
 }

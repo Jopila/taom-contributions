@@ -2279,6 +2279,17 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Lords stop fleeing sieges", Order = 0, RequireRestart = false,
         HintText = "When enabled (default), an AI lord stops running from an army that besieges a settlement when the lord, with its army if it leads one or is attached to it, is at least half as strong as the entire siege camp (0.5 by default, unlooked_for_aid.json). Lords can then pass a siege or gather near it. A lord shut inside a besieged settlement is never fled from, whatever the strengths. A weaker lord still flees, so it is not caught when the siege lifts beside it. At a siege you lead, AI lords keep the base game behaviour. Caravans, villagers, bandits, patrols and garrisons are unchanged. When off, lords flee exactly as in the base game. Applies at once, no restart.")]
     public bool EnableUnlookedForAid { get; set; } = true;
+
+    // --- The Red Arrow (docs/features/red-arrow.md, #873) ---
+    //
+    // Read live from the Army Management screen (main thread), so RequireRestart = false. GroupOrder 76 is unused; it is
+    // the group's first property, so it carries the order (MCM ignores a GroupOrder on any later one). The group is meant to hold the other army features too.
+
+    [SettingPropertyGroup("War of the Ring/Armies", GroupOrder = 76)]
+    [SettingPropertyBool("Call armies during your siege", Order = 0, RequireRestart = false,
+        HintText = "When enabled (default), the Army Management screen works during a siege you lead as the besieger: you can call parties into your army and release them while the siege goes on, at the usual influence cost. The base game's other limits still apply (a party that is fighting, too weak, disbanding, too far away or at sea is refused, and so is a party already at the siege outside your army). Defending a siege, having no army and being in a map event keep the base game block. Singleplayer only: in a co-op session this does nothing. When off, the block is exactly the base game's. Takes effect the next time the screen opens, no restart.")]
+    public bool EnableRedArrow { get; set; } = true;
+
     // --- Bonds of Battle (relations earned on campaign, docs/features/bonds-of-battle.md) ---
     //
     // Every value is read live where it is used (at a battle's end, a troop hand-over, a barter), so nothing is applied once

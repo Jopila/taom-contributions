@@ -2235,3 +2235,13 @@ ids from the install (`LiveInstall`), and never assert a state the engine cannot
 - **Why missed:** each fake was written from the rule's intent, not from the engine's behaviour.
 - **Prevent:** when a fake stands in for an engine figure, write one test that feeds it the engine's awkward shape.
 - **Source:** `docs/reviews/rca-provender-2026-10-23.md` pattern B.
+
+### A gate over engine resources models what the engine loads, not what is on disk (#989, 2026-10-24)
+The first brush gate collected every brush file of every installed module, about 200 names more than the engine loads
+for TAOM: modules TAOM does not depend on, files in subfolders, and vanilla files a same-named TAOM file replaces. A
+brush that draws unstyled in game could have passed.
+- **Why missed:** the test was written from the file system; the sibling `PrefabExtensionBindingTests` already states
+  the loader's rules (dependency modules in order, last same-named file wins, read the repo copy).
+- **Prevent:** before writing a gate over engine resources, read the loader (`UIResourceManager`, `ResourceDepot`,
+  `BrushFactory` here) and the nearest sibling gate, model the same set, and pin one name the model must exclude.
+- **Source:** [rca-messengers-brushes-2026-10-24.md](../rca-messengers-brushes-2026-10-24.md) finding 2.
