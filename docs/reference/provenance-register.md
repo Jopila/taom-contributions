@@ -106,6 +106,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | Harness² (Google Research) | `Harness²` `harness2` `google-research/harness2` | Apache-2.0 | behavioural-port | `docs/ai-includes/harness-retro.md`; `.claude/skills/harness-retro/SKILL.md` (the verdict and proposal rules; `tools/harness_retro.py` is TAOM original, see detail) | cleared |
 | Stuck Battle Guard v1.0.0 (a TAOM player's workaround module) | `StuckBattleGuard` `stuckbattle.` | UNKNOWN | behavioural-port | the stuck AI battle sweep in `Main/Features/MapEventGuard/` and `Main/Adapters/StuckBattle*Adapter.cs`; see detail | uncleared |
 | Kingdom Borders (Nexus mod 10699) | `Kingdom Borders` `KingdomBorders` | UNKNOWN | behavioural-port | `Main/Adapters/BorderRenderAdapter.cs`; the Heraldic layout in `Main/Features/RealmBorders/Domain/BorderPainter.cs`; the module-id check in `Main/Features/RealmBorders/Hooks/RealmBordersCampaignBehavior.cs` (interop); see detail | uncleared |
+| rtk (Rust Token Killer) | `rtk` `rtk-ai/rtk` `Rust Token Killer` | Apache-2.0 (the CLI in `src/`; `engine/` and `proxy/` are BUSL-1.1 and nothing derives from them) | behavioural-port | `.claude/hooks/_shellwords.py` (`command_index`, `peel`); `tools/harness_retro.py` (`command_family`, report section 9) | cleared |
 
 <!-- provenance-register-end -->
 
@@ -869,6 +870,18 @@ Everything else differs by design: terrain-aware provinces grown from every fief
 split of settlement points, borders chosen from province ownership, tiled meshes instead of one entity
 per strip, and the Atlas look, palette, map modes, names and notices are TAOM's. Nothing of it ships.
 Clearing the row needs its author's terms.
+
+### rtk (Rust Token Killer)
+
+Upstream: https://github.com/rtk-ai/rtk, branch `develop` at `32b2ec4`. Two ideas were taken after
+reading its source, so the derivation is a behavioural port. From `src/hooks/permissions.rs`: a
+command is judged from its command word, read past assignments, wrapper words and the grammar a
+segment split leaves behind; TAOM's `command_index` and `peel` are written from TAOM's own design
+and tests (#985). From `rtk discover`: measuring which commands produce the most output in Claude
+Code transcripts, which became section 9 of `tools/harness_retro.py`. No rtk code or text was
+copied, so no Apache-2.0 notice is carried. The rtk v1.0.1 binary was run once, offline, on
+2026-10-23 to measure it (Mike's explicit trial decision): checksum-verified, never initialised,
+never in a hook or on PATH, then deleted. Record: [`docs/reviews/adopt-rtk-2026-10-23.md`](../reviews/adopt-rtk-2026-10-23.md).
 
 ---
 

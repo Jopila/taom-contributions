@@ -4414,3 +4414,9 @@ shape or from its own parser instead of from the engine's consumer.
   the engine's, either parse the way the engine does or word the line as the tool's own verdict. Replay one edge case
   on the engine's real reader when the two might differ.
 - **Source:** `docs/reviews/rca-schema-check-2026-10-23.md` finding 1 and C1.
+
+### A first-word anchor is not a command reader: wrappers and shell grammar hide the call (#985, 2026-10-23)
+`block-dangerous-git.sh` and `block-broad-git-add.sh` allowed `timeout 60 git reset --hard`, `{ git reset --hard; }`, `! git ...`, `then git ...` and seven more forms; `check-commit-subject-version.sh` allowed a wrapped unlabeled commit; `mark-verification-run.sh` never marked `timeout 600 dotnet test`, a form the local transcripts hold 372 times. Each hook found the command by its segment's first word after skipping `VAR=value`, each with its own loop (D41 was the same bug in the marker's copy). Found while reading rtk-ai/rtk's permission matcher, which reads past wrappers and grammar.
+- **Why missed:** plan 027 gave every gate one reader for the command text, but each gate still found the command word itself, and the test rows only held bare `git` forms.
+- **Prevent:** a gate reads segments from `_shellwords.py commands` and a parsed call through `_git_call`, which share `command_index`. A new gate's test rows include a wrapped form and a grammar form for each case it gates (`hook-authoring.md` forms table).
+- **Source:** [adopt-rtk-2026-10-23.md](../adopt-rtk-2026-10-23.md); issue #985.
