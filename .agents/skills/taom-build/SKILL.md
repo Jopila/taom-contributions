@@ -25,7 +25,9 @@ Inspect unchanged consumers and missing configuration rows as well as the diff.
 Find the consumers of every TAOM type you change with
 `python tools/graphify_taom.py affected "<Type>" --depth 2`, after
 `python tools/graphify_taom.py refresh --if-stale`; never run `graphify` itself
-([code graph](../../../docs/features/graphify-code-graph.md)).
+([code graph](../../../docs/features/graphify-code-graph.md)). While iterating,
+`python tools/graphify_taom.py tests "<Type>"` prints the filtered test command;
+run the full suite before handing off.
 Update feature documentation and actual test evidence when the task warrants
 them; the commit body is the changelog entry (`/release` writes CHANGELOG.md).
 Report unavailable engine/runtime verification explicitly.

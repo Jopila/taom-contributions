@@ -84,6 +84,7 @@ graphify <verb> ... --graph <out>/graphify-out/graph.json
 | Setting | Default | Meaning |
 |---|---|---|
 | `TAOM_GRAPHIFY_OUT` | `E:\graphify\TAOM` (worktree: `E:\graphify\TAOM-wt-<folder>`) | Output root; the graph is `<root>\graphify-out\graph.json` |
+| `TAOM_GRAPHIFY_AUTOREFRESH` | on | Set to `0` to stop `refresh --detach` from starting a background refresh (the SessionStart caller prints the reason and moves on) |
 | `graphify` on PATH | `C:\Users\mikew\.local\bin\graphify.exe` | Installed with `uv tool install --python 3.12 'graphifyy[leiden]'`. The 3.12 pin is load-bearing: the `leiden` extra needs Python below 3.13 |
 
 Exit codes: `0` fresh or done, `1` stale, `2` missing, `3` environment (graphify, git or the drive
@@ -94,8 +95,8 @@ the lock.
 
 | File | Purpose |
 |------|---------|
-| [tools/graphify_taom.py](../../tools/graphify_taom.py) | The wrapper: `refresh`, `status`, `report`, the query verbs, and `gate` (the hook's judge) |
-| [tools/tests/test_graphify_taom.py](../../tools/tests/test_graphify_taom.py) | Out root, commands, stamp and staleness on a temp git repo, lock, contamination, the gate's command table |
+| [tools/graphify_taom.py](../../tools/graphify_taom.py) | The wrapper: `refresh` (and `refresh --detach`), `status`, `report`, the query verbs, `tests`, and `gate` (the hook's judge) |
+| [tools/tests/test_graphify_taom.py](../../tools/tests/test_graphify_taom.py) | Out root, commands, stamp and staleness on a temp git repo, lock, contamination, the gate's command table, and a small fake `graph.json` for supertypes, candidates, answer-scoped staleness, `tests` and `--detach` (graphify itself is stubbed) |
 | [.claude/hooks/check-graphify-usage.sh](../../.claude/hooks/check-graphify-usage.sh) | PreToolUse gate on Bash and PowerShell |
 | [.claude/hooks/session-start.sh](../../.claude/hooks/session-start.sh) | Prints the graph's freshness at startup |
 | [tools/test_hooks.sh](../../tools/test_hooks.sh) | Section 7f, plus the 4c, 4d and 5 rows for the gate |
@@ -112,7 +113,7 @@ the lock.
 
 ## Tests
 
-- `python -m unittest discover -s tools/tests -p "test_graphify_taom.py"`: 38 tests, hermetic.
+- `python -m unittest discover -s tools/tests -p "test_graphify_taom.py"`: 82 tests, hermetic.
 - `bash tools/test_hooks.sh`: section 7f runs the gate through the real hook on both shells.
 
 ## How to use it
@@ -120,24 +121,77 @@ the lock.
 ```bash
 python tools/graphify_taom.py status                          # fresh / STALE / MISSING
 python tools/graphify_taom.py refresh --if-stale              # about 2.5 min when stale; run it in the background
+python tools/graphify_taom.py refresh --if-stale --detach     # start that refresh as a detached child and return at once
 python tools/graphify_taom.py affected "ICoopSessionProvider" --depth 2
+python tools/graphify_taom.py affected "Foo" --no-interfaces  # graphify's own answer only
+python tools/graphify_taom.py tests "TaomPartySizeModel" "Main/Features/X/Y.cs"   # prints a dotnet test filter
 python tools/graphify_taom.py explain "TaomPartySizeModel"
 python tools/graphify_taom.py god-nodes --top 15
 python tools/graphify_taom.py path "A" "B"
 python tools/graphify_taom.py report                          # path of GRAPH_REPORT.md
 ```
 
+**Callers through an interface or base class (#995).** graphify's `affected` on a class lists the
+class's own dependents, and a service is usually reached through its interface, so the production
+callers were missing (`affected "FiefSiegeParticipationService"` listed only its test file). After
+graphify answers, the wrapper reads `graph.json` once, finds the target's outgoing `implements`,
+`inherits` and `extends` links whose target is defined in a TAOM file, runs `affected` on each
+supertype's `.cs` path (up to six, side by side) and prints the extra lines under
+`Via <IFoo> (<path>):`, minus lines already printed. External engine types have no source file in
+the graph and are skipped. `--no-interfaces` turns this off. If `graph.json` cannot be read, one
+`NOTE:` line says so and graphify's own answer stands. The cost is a second graphify call (each
+reads the whole graph, about 3 s), so a class with a supertype takes about 6 s instead of 3 s.
+
+**Member callers.** graphify's `affected` stops at the type node and never walks to its members, so
+a caller that only calls an interface's methods and never names the interface is invisible to it
+(`FiefGrantFactsBuilder.Build()` and `FiefGrantingCampaignBehavior.SyncData()` call
+`IFiefSiegeParticipationService` members through a field or parameter). The wrapper fills that gap
+from the `graph.json` it already loaded, with no extra graphify call: for the target and each
+supertype it takes the type's member nodes (outgoing `method` links), then every `calls` or
+`references` link into one of them, and prints
+`Member callers of <Type>:` followed by `- <caller> [calls <member>] <file>:<line>`, minus lines
+already printed and minus the type's own members calling each other. `--no-interfaces` skips the
+supertypes but keeps the target's own member callers. Calls through a lambda or a string-keyed
+registration are not links in the graph, so they stay a Grep question.
+
+**Which tests to run (#995).** `tests <type-or-file>...` takes the dependents of each input
+through the same path (depth 2, `--depth N`), keeps the ones in `TAOM.Tests/`, maps them to test
+class names and prints one line, `dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId=
+--filter "FullyQualifiedName~A|FullyQualifiedName~B"`. It exists because the full suite took 123 s
+wall time on 2026-10-24 (25,930 tests, 1 m 42 s of test time), too long to run after every edit; the
+filter is the part of it the change can reach. It also follows each production file named in a
+member-callers block (up to eight) with one more `affected`, so tests that reach a type through
+the code that calls its members count. It is a lower bound: the graph misses DI by string and
+lambda calls, so the full suite stays the pre-review run. When no test is reached it
+prints a `NOTE:` and exits 0.
+
+**Background refresh (#995).** `refresh --detach` starts the same refresh as a detached child
+(output in `<out>\graphify-out\autorefresh.log`, outside the repo) and returns in about 1 s with
+`graphify_taom: background refresh started (pid N, log <path>).` It prints its reason and starts
+nothing when the graph is fresh, another refresh holds the lock, `TAOM_GRAPHIFY_AUTOREFRESH=0`, a
+Bannerlord process is running, or that check (`tasklist`, 1.5 s limit) timed out or failed. Every
+such case exits 0. `.claude/hooks/session-start.sh` calls it when `status` reports STALE and prints
+its one line, so a stale graph rebuilds while the session starts. The log is moved to
+`autorefresh.log.1` once it passes 1 MB.
+
 **When a name will not resolve.** graphify mints a reference node per file for a type another file
 uses, so `IModLogger` can come back "Ambiguous" with a list of candidates: rerun with the
-repo-relative `.cs` path it prints, or the node id. A type name that returns no dependents can still
+repo-relative `.cs` path it prints, or the node id. When graphify prints `No unique node match`,
+the wrapper searches the graph itself and prints up to ten candidates as `id  label
+source_file:source_location` (labels equal to the name or `name.cs` first, defining nodes before
+reference stubs, then labels that contain it). If exactly one file defines the name, it retries
+once with that path and says so in one line (`affected "IFiefSiegeParticipationService"` now
+resolves this way). A type name that returns no dependents can still
 have some through a file-level import (a GameModel is reached only from `SubModule.cs`): retry with
 its file path, `affected "Main/Features/CulturalFeats/Models/TaomPartySizeModel.cs"`, before
 concluding nothing uses it. **Engine types are not single nodes** (54 separate `MobileParty` nodes,
 one per referencing file), so "which TAOM code uses engine type X" is a Grep or Serena question.
 
 **Evidence standard.** Code-only nodes are parsed from real files, so their paths and lines are
-accurate at build time. Staleness is the risk: read the files it names before acting, and treat a
-STALE warning as "refresh or confirm by hand".
+accurate at build time. Staleness is the risk. A stale query now prints, on stderr,
+`STALE in this answer: <files>: Read them directly before acting.` for the changed files that
+appear in the answer, then one line with the total count and the refresh command. A stale answer
+exits as before (graphify's own code). Treat any STALE line as "refresh or confirm by hand".
 
 **On another machine.** Set `TAOM_GRAPHIFY_OUT` to a local folder. Without graphify on PATH every
 verb exits 3 and the workflow steps record UNCHECKED rather than silently skipping.
@@ -146,12 +200,18 @@ verb exits 3 and the workflow steps record UNCHECKED rather than silently skippi
 
 Measured on the desktop, 2026-09-26: cold extract 150 s plus 45 s clustering (3,679 files); warm
 refresh through the wrapper 109 s in total; 42,984 nodes, 97,891 edges, 1,690 communities; the graph
-is 75 MB. `status` measured 0.21 to 0.33 s on a quiet machine and up to 1.1 s under load (four git
+was 75 MB then and measured 150 MB on 2026-10-24 (80,420 nodes, 185,479 links, loaded in
+about 0.9 s by the wrapper while graphify's own call takes about 3 s). `status` measured 0.21 to 0.33 s on a quiet machine and up to 1.1 s under load (four git
 calls), inside SessionStart's 4 s bound; the gate adds one Python start only when a command's raw
 text contains `graphify` or a JSON escape.
 
 ## Changelog
 
+- 2026-10-24: `affected` adds callers through implemented interfaces and base classes (`Via ...`
+  blocks, `--no-interfaces`), lists candidates and retries once on a name that does not resolve,
+  adds `Member callers of <Type>:` blocks computed from the loaded graph, and scopes the STALE
+  warning to the files in the answer. New `tests` verb prints the filtered
+  `dotnet test` line, and `refresh --detach` starts a background refresh (#995).
 - 2026-09-26: Wired into the workflow (ADR-012): wrapper, gate, SessionStart freshness line,
   per-worktree output roots, the absolute `GRAPHIFY_OUT` fix for the incremental stat-index leak,
   and mandatory steps in `/deep-review`, `/investigate`, `/new-feature`, `/research`, the builder

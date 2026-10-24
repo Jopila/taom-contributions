@@ -157,7 +157,7 @@ const CODE = args.codeRoot
 const COMMANDS = `Use exactly these non-deploying commands in the plan:
 - Build: dotnet build Main/TAOM.csproj -p:DisableModuleCopy=true -p:ModuleId=
 - Test: dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId=
-- Filtered test: dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId= --filter "FullyQualifiedName~<ClassName>"
+- Filtered test: dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId= --filter "FullyQualifiedName~<ClassName>" (python tools/graphify_taom.py tests "<Type>" prints the filter for the tests a change reaches)
 - Data: python tools/validate_moduledata.py
 - Docs: python tools/lint_docs.py --fail-on-drift
 Never ./build.ps1. Baseline at ${args.base}: ${args.baseline}`

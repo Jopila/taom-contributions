@@ -2,7 +2,7 @@
 # SessionStart hook: Print recent project context on fresh startup
 # Only fires on "startup" source — resume/compact/clear already have context
 
-# The two bounded probes below (the Armory tpac scan, the graphify status) share one deadline counted
+# The bounded probes below (the Armory tpac scan, the graphify status and its background-refresh start) share one deadline counted
 # from this first command, so together they leave the tail (git log, diff, ls-files, the TODO grep) about
 # 2 s of the 10 s registration: two 4 s probes, their kill grace and a slow tail could pass 10 s, and a
 # killed hook prints nothing (Codex review 2026-10-16). EPOCHREALTIME's digits are microseconds; it is
@@ -171,6 +171,22 @@ elif [[ -n "${PYBIN:-}" && -f tools/graphify_taom.py ]]; then
     echo "NOTE: graphify code graph freshness UNCHECKED this session (status overran ${SS_PROBE_BUDGET%????} s or printed nothing)."
   else
     printf '%s\n' "$GRAPH_STATUS"
+  fi
+  # A stale graph refreshes itself in a detached child (#995): one day of merges left it 645 files
+  # behind, and every workflow step then paid the refresh or answered from old code. The wrapper
+  # returns at once and prints why it did or did not start (opt-out, lock, Bannerlord running).
+  if [[ $GRAPH_RC -eq 1 ]]; then
+    if ss_probe_budget; then
+      GRAPH_AUTO=$(timeout -k 0.5 "$SS_PROBE_BUDGET" "$PYBIN" tools/graphify_taom.py refresh --if-stale --detach 2>/dev/null)
+      GRAPH_AUTO_RC=$?
+      if [[ $GRAPH_AUTO_RC -eq 124 || $GRAPH_AUTO_RC -eq 137 || -z "$GRAPH_AUTO" ]]; then
+        echo "NOTE: graphify background refresh UNCHECKED this session (the start overran ${SS_PROBE_BUDGET%????} s or printed nothing)."
+      else
+        printf '%s\n' "$GRAPH_AUTO"
+      fi
+    else
+      echo "NOTE: graphify background refresh not started (session-start time budget spent)."
+    fi
   fi
 else
   echo ""

@@ -40,7 +40,7 @@ This gates claims, not edits. The cadence that keeps it cheap:
 | When | Run |
 |---|---|
 | After each edit | a compile |
-| Iterating on one component | the filtered suite, `dotnet test TAOM.Tests --filter FullyQualifiedName~XxxTests` |
+| Iterating on one component | the filtered suite: `python tools/graphify_taom.py tests "<changed type or file>"` prints the `dotnet test --filter` line for the tests the change reaches |
 | At each work-item boundary, and once before the review gate | the full suite; this is the run you quote |
 
 Batch related `taom-src` lookups into one command. A verification you ran this turn and have not

@@ -342,5 +342,429 @@ class GateDecisionTests(unittest.TestCase):
         self.assertEqual(json.loads(out.stdout)["hookSpecificOutput"]["permissionDecision"], "deny")
 
 
+def _node(nid, label, source_file="", loc="", klass=False):
+    node = {"id": nid, "label": label, "source_file": source_file, "source_location": loc,
+            "norm_label": label.lower()}
+    if klass:
+        node["_callable_class"] = True
+    return node
+
+
+def _link(src, tgt, rel, source_file="x.cs", loc="L1"):
+    return {"source": src, "target": tgt, "relation": rel, "source_file": source_file,
+            "source_location": loc}
+
+
+def fake_graph() -> dict:
+    """IFoo (own file), Foo : IFoo, Bar (production) references IFoo, FooTests references Foo,
+    Derived : BaseThing, and an external stub MissionLogic with no source file."""
+    nodes = [
+        _node("ifoo", "IFoo", "Main/Features/Foo/IFoo.cs", "L5", True),
+        _node("ifoo_file", "IFoo.cs", "Main/Features/Foo/IFoo.cs", "L1"),
+        _node("ifoo_stub", "IFoo", "", ""),
+        _node("foo", "Foo", "Main/Features/Foo/Foo.cs", "L9", True),
+        _node("bar", "Bar", "Main/Features/Foo/Bar.cs", "L3", True),
+        _node("footests", "FooTests", "TAOM.Tests/Features/Foo/FooTests.cs", "L7", True),
+        _node("footests_m", ".Works()", "TAOM.Tests/Features/Foo/FooTests.cs", "L9"),
+        _node("footests_file", "FooTests.cs", "TAOM.Tests/Features/Foo/FooTests.cs", "L1"),
+        _node("basething", "BaseThing", "Main/Core/BaseThing.cs", "L4", True),
+        _node("derived", "Derived", "Main/Core/Derived.cs", "L6", True),
+        _node("missionlogic", "MissionLogic", "", ""),
+        _node("twin_a", "Twin", "Main/A/Twin.cs", "L1", True),
+        _node("twin_b", "Twin", "Main/B/Twin.cs", "L1", True),
+        _node("ifoo_m", ".DoIt()", "Main/Features/Foo/IFoo.cs", "L7"),
+        _node("foo_m", ".DoIt()", "Main/Features/Foo/Foo.cs", "L11"),
+        _node("baz_m", ".Run()", "Main/Features/Foo/Baz.cs", "L10"),
+        _node("qux_m", ".Go()", "Main/Q.cs", "L2"),
+    ]
+    links = [
+        _link("foo", "ifoo", "implements"),
+        _link("bar", "ifoo", "references"),
+        _link("footests", "foo", "references"),
+        _link("derived", "basething", "inherits"),
+        _link("derived", "missionlogic", "inherits"),
+        _link("ifoo", "ifoo_m", "method"),
+        _link("foo", "foo_m", "method"),
+        _link("baz_m", "ifoo_m", "calls", "Main/Features/Foo/Baz.cs", "L12"),
+        _link("qux_m", "foo_m", "calls", "Main/Q.cs", "L3"),
+        _link("footests_m", "foo_m", "calls", "TAOM.Tests/Features/Foo/FooTests.cs", "L10"),
+        _link("foo_m", "foo_m", "calls", "Main/Features/Foo/Foo.cs", "L12"),
+    ]
+    return {"nodes": nodes, "links": links}
+
+
+def write_graph(directory: Path, graph=None) -> Path:
+    path = directory / "graph.json"
+    path.write_text(json.dumps(graph or fake_graph()), encoding="utf-8")
+    return path
+
+
+def affected_text(label, *hits) -> str:
+    lines = [f"Affected nodes for {label}", "Relations: calls, references", "Depth: 2"]
+    lines += [f"- {h}" for h in hits]
+    return "\n".join(lines) + "\n"
+
+
+class GraphDataTests(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.data = gt.GraphData.load(write_graph(Path(self._tmp.name)))
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_class_name_finds_the_interface_it_implements(self):
+        self.assertEqual(self.data.supertypes("Foo"), [("IFoo", "Main/Features/Foo/IFoo.cs")])
+
+    def test_file_path_finds_the_interface_too(self):
+        self.assertEqual(self.data.supertypes("Main/Features/Foo/Foo.cs"),
+                         [("IFoo", "Main/Features/Foo/IFoo.cs")])
+
+    def test_a_base_class_counts_and_an_external_stub_does_not(self):
+        self.assertEqual(self.data.supertypes("Derived"),
+                         [("BaseThing", "Main/Core/BaseThing.cs")])
+
+    def test_a_type_without_supertypes_has_none(self):
+        self.assertEqual(self.data.supertypes("Bar"), [])
+
+    def test_candidates_put_the_defining_node_before_the_stub(self):
+        found = self.data.candidates("IFoo")
+        self.assertEqual([n["id"] for n in found][:2], ["ifoo", "ifoo_file"])
+        self.assertIn("ifoo_stub", [n["id"] for n in found])
+
+    def test_candidates_are_capped_at_ten(self):
+        graph = fake_graph()
+        graph["nodes"] += [_node(f"s{i}", f"FooHelper{i}", f"Main/S{i}.cs", "L1", True)
+                           for i in range(30)]
+        with tempfile.TemporaryDirectory() as d:
+            data = gt.GraphData.load(write_graph(Path(d), graph))
+            self.assertEqual(len(data.candidates("Foo")), 10)
+
+    def test_one_defining_file_is_the_retry_target(self):
+        self.assertEqual(self.data.sole_definition("IFoo"), "Main/Features/Foo/IFoo.cs")
+
+    def test_two_defining_files_give_no_retry_target(self):
+        self.assertIsNone(self.data.sole_definition("Twin"))
+
+    def test_test_classes_in_a_file(self):
+        self.assertEqual(self.data.classes_in("TAOM.Tests/Features/Foo/FooTests.cs"),
+                         ["FooTests"])
+
+    def test_member_callers_of_a_class(self):
+        label, lines = self.data.member_callers("Foo")
+        self.assertEqual(label, "Foo")
+        self.assertIn("- Go() [calls DoIt()] Main/Q.cs:L3", lines)
+        self.assertIn("- Works() [calls DoIt()] TAOM.Tests/Features/Foo/FooTests.cs:L10", lines)
+
+    def test_a_types_own_members_are_not_its_callers(self):
+        _, lines = self.data.member_callers("Foo")
+        self.assertFalse([l for l in lines if "Foo.cs" in l])
+
+    def test_member_callers_of_an_interface_found_by_path(self):
+        label, lines = self.data.member_callers("Main/Features/Foo/IFoo.cs")
+        self.assertEqual(label, "IFoo")
+        self.assertEqual(lines, ["- Run() [calls DoIt()] Main/Features/Foo/Baz.cs:L12"])
+
+    def test_a_type_without_members_has_no_member_callers(self):
+        self.assertEqual(self.data.member_callers("Bar")[1], [])
+
+    def test_unreadable_graph_is_none(self):
+        self.assertIsNone(gt.GraphData.load(Path(self._tmp.name) / "missing.json"))
+
+
+class FakeGraphify:
+    """Stands in for the graphify subprocess: answers by the query, the first arg after the verb."""
+
+    def __init__(self, answers):
+        self.answers = answers
+        self.calls = []
+
+    def __call__(self, cmd, env):
+        self.calls.append(cmd)
+        return 0, self.answers.get(cmd[2], "No unique node match for " + cmd[2] + "\n"), ""
+
+
+class AffectedAnswerTests(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.gpath = write_graph(Path(self._tmp.name))
+        self.cache = gt.GraphCache(self.gpath)
+        self.fake = FakeGraphify({
+            "Foo": affected_text("Foo", "FooTests [references] TAOM.Tests/Features/Foo/FooTests.cs:L7"),
+            "Main/Features/Foo/IFoo.cs": affected_text(
+                "IFoo.cs",
+                "Bar [references] Main/Features/Foo/Bar.cs:L3",
+                "FooTests [references] TAOM.Tests/Features/Foo/FooTests.cs:L7"),
+            "Main/Features/Foo/Foo.cs": affected_text(
+                "Foo.cs", "FooTests [references] TAOM.Tests/Features/Foo/FooTests.cs:L7"),
+        })
+        self._orig = gt._capture
+        gt._capture = self.fake
+
+    def tearDown(self):
+        gt._capture = self._orig
+        self._tmp.cleanup()
+
+    def run_affected(self, rest, interfaces=True, cache=None):
+        return gt.affected_answer("graphify", self.gpath, {}, rest, interfaces,
+                                  cache or self.cache)
+
+    def test_supertype_callers_are_added_under_a_via_header(self):
+        rc, out, _ = self.run_affected(["Foo", "--depth", "2"])
+        self.assertEqual(rc, 0)
+        self.assertIn("Via IFoo (Main/Features/Foo/IFoo.cs):", out)
+        self.assertIn("- Bar [references] Main/Features/Foo/Bar.cs:L3", out)
+
+    def test_lines_already_printed_are_dropped_from_the_via_block(self):
+        _, out, _ = self.run_affected(["Foo"])
+        self.assertEqual(out.count("FooTests [references]"), 1)
+
+    def test_the_supertype_query_keeps_the_depth_flag(self):
+        self.run_affected(["Foo", "--depth", "3"])
+        self.assertEqual(self.fake.calls[1][2:5], ["Main/Features/Foo/IFoo.cs", "--depth", "3"])
+
+    def test_no_interfaces_runs_graphify_once(self):
+        _, out, _ = self.run_affected(["Foo"], interfaces=False)
+        self.assertEqual(len(self.fake.calls), 1)
+        self.assertNotIn("Via ", out)
+
+    def test_unreadable_graph_keeps_graphifys_answer_and_says_so(self):
+        cache = gt.GraphCache(Path(self._tmp.name) / "missing.json")
+        _, out, _ = self.run_affected(["Foo"], cache=cache)
+        self.assertIn("FooTests [references]", out)
+        self.assertIn("NOTE", out)
+
+    def test_member_callers_of_the_target_and_its_supertype_are_listed(self):
+        _, out, _ = self.run_affected(["Foo"])
+        self.assertIn("Member callers of Foo:\n- Go() [calls DoIt()] Main/Q.cs:L3", out)
+        self.assertIn("Member callers of IFoo:\n- Run() [calls DoIt()] "
+                      "Main/Features/Foo/Baz.cs:L12", out)
+
+    def test_no_interfaces_keeps_the_targets_own_member_callers(self):
+        _, out, _ = self.run_affected(["Foo"], interfaces=False)
+        self.assertIn("Member callers of Foo:", out)
+        self.assertNotIn("Member callers of IFoo:", out)
+        self.assertEqual(len(self.fake.calls), 1)
+
+    def test_a_member_caller_line_already_printed_is_dropped(self):
+        self.fake.answers["Foo"] = affected_text("Foo", "Go() [calls DoIt()] Main/Q.cs:L3")
+        _, out, _ = self.run_affected(["Foo"])
+        self.assertEqual(out.count("Go() [calls DoIt()]"), 1)
+
+    def test_a_failed_name_retries_with_its_one_defining_file(self):
+        self.fake.answers["IFoo"] = "No unique node match for IFoo\n"
+        rc, out, _ = self.run_affected(["IFoo", "--depth", "2"])
+        self.assertEqual(self.fake.calls[1][2], "Main/Features/Foo/IFoo.cs")
+        self.assertIn("retrying with Main/Features/Foo/IFoo.cs", out)
+        self.assertIn("Bar [references]", out)
+
+    def test_a_failed_name_with_two_definitions_lists_candidates(self):
+        _, out, _ = self.run_affected(["Twin"])
+        self.assertEqual(len(self.fake.calls), 1)
+        self.assertIn("Candidates for Twin:", out)
+        self.assertIn("twin_a  Twin  Main/A/Twin.cs:L1", out)
+        self.assertIn("twin_b  Twin  Main/B/Twin.cs:L1", out)
+
+    def test_a_failed_name_with_no_candidate_says_so(self):
+        _, out, _ = self.run_affected(["Nothing"])
+        self.assertIn("No node label contains", out)
+
+
+class StaleScopeTests(unittest.TestCase):
+    def test_only_files_in_the_answer_are_named(self):
+        detail = ["Main/A.cs", "Main/B.cs", "docs/x.sh"]
+        text = "- Foo [calls] Main/B.cs:L4\n"
+        self.assertEqual(gt.stale_in_answer(detail, text), ["Main/B.cs"])
+
+    def test_backslash_paths_in_the_answer_match(self):
+        self.assertEqual(gt.stale_in_answer(["Main/B.cs"], "Main\\B.cs:L4"), ["Main/B.cs"])
+
+    def test_warning_leads_with_the_answers_files_then_the_total(self):
+        lines = gt.stale_warning(["Main/A.cs", "Main/B.cs"], "x Main/B.cs:L1")
+        self.assertEqual(lines[0], "STALE in this answer: Main/B.cs: Read them directly before "
+                                   "acting.")
+        self.assertIn("2 code file(s) changed", lines[1])
+        self.assertIn("python tools/graphify_taom.py refresh", lines[1])
+
+    def test_warning_without_a_hit_has_only_the_total(self):
+        lines = gt.stale_warning(["Main/A.cs"], "nothing")
+        self.assertEqual(len(lines), 1)
+
+
+class TestsVerbTests(unittest.TestCase):
+    def test_filter_command_joins_class_names(self):
+        self.assertEqual(
+            gt.test_filter_command(["A", "B"]),
+            'dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId= '
+            '--filter "FullyQualifiedName~A|FullyQualifiedName~B"')
+
+    def test_hits_parse_into_paths(self):
+        text = affected_text("Foo", "FooTests [references] TAOM.Tests/F/FooTests.cs:L7",
+                             "Bar [calls] Main/Bar.cs:L3")
+        self.assertEqual(gt.hit_files(text), ["TAOM.Tests/F/FooTests.cs", "Main/Bar.cs"])
+
+    def test_verb_prints_one_filter_line_for_the_reached_tests(self):
+        with tempfile.TemporaryDirectory() as d:
+            gpath = write_graph(Path(d))
+            fake = FakeGraphify({
+                "Foo": affected_text(
+                    "Foo", "FooTests [references] TAOM.Tests/Features/Foo/FooTests.cs:L7"),
+                "Main/Features/Foo/IFoo.cs": affected_text("IFoo.cs"),
+            })
+            orig = gt._capture
+            gt._capture = fake
+            try:
+                note, line = gt.tests_for(["Foo"], "graphify", gpath, {}, 2, True)
+            finally:
+                gt._capture = orig
+        self.assertIsNone(note)
+        self.assertIn('--filter "FullyQualifiedName~FooTests"', line)
+
+    def test_member_caller_files_come_from_the_member_section_only(self):
+        text = (affected_text("Foo", "Bar [calls] Main/Bar.cs:L3")
+                + "Member callers of Foo:\n- Go() [calls DoIt()] Main/Q.cs:L3\n"
+                  "- Works() [calls DoIt()] TAOM.Tests/F/FooTests.cs:L10\n")
+        self.assertEqual(gt.member_caller_files(text), ["Main/Q.cs", "TAOM.Tests/F/FooTests.cs"])
+
+    def test_tests_reached_through_a_member_caller_are_included(self):
+        with tempfile.TemporaryDirectory() as d:
+            gpath = write_graph(Path(d))
+            fake = FakeGraphify({
+                "Foo": affected_text("Foo"),
+                "Main/Features/Foo/IFoo.cs": affected_text("IFoo.cs"),
+                "Main/Q.cs": affected_text("Q.cs", "QTests [imports] TAOM.Tests/Q/QTests.cs:L1"),
+                "Main/Features/Foo/Baz.cs": affected_text("Baz.cs"),
+            })
+            orig = gt._capture
+            gt._capture = fake
+            try:
+                _, line = gt.tests_for(["Foo"], "graphify", gpath, {}, 2, True)
+            finally:
+                gt._capture = orig
+        self.assertIn("FullyQualifiedName~FooTests", line)
+        self.assertIn("FullyQualifiedName~QTests", line)
+
+    def test_no_test_reached_is_a_note(self):
+        with tempfile.TemporaryDirectory() as d:
+            gpath = write_graph(Path(d))
+            orig = gt._capture
+            gt._capture = FakeGraphify({"Bar": affected_text("Bar")})
+            try:
+                note, line = gt.tests_for(["Bar"], "graphify", gpath, {}, 2, True)
+            finally:
+                gt._capture = orig
+        self.assertIsNone(line)
+        self.assertIn("NOTE", note)
+
+
+class DetachTests(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.out = Path(self._tmp.name) / "out"
+        self.saved = {n: getattr(gt, n) for n in ("out_root", "staleness", "_bannerlord_running",
+                                                  "_spawn_detached", "_graphify_exe")}
+        gt.out_root = lambda *a, **k: self.out
+        gt.staleness = lambda repo, gdir: ("stale", ["Main/A.cs"])
+        gt._bannerlord_running = lambda timeout: False
+        self.spawned = []
+        gt._spawn_detached = lambda cmd, log: self.spawned.append((cmd, log)) or 4242
+        gt._graphify_exe = lambda: "graphify"
+        self.env = os.environ.pop("TAOM_GRAPHIFY_AUTOREFRESH", None)
+
+    def tearDown(self):
+        for name, value in self.saved.items():
+            setattr(gt, name, value)
+        os.environ.pop("TAOM_GRAPHIFY_AUTOREFRESH", None)
+        if self.env is not None:
+            os.environ["TAOM_GRAPHIFY_AUTOREFRESH"] = self.env
+        self._tmp.cleanup()
+
+    def detach(self, *extra):
+        import contextlib
+        import io
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = gt.main(["refresh", "--if-stale", "--detach", *extra])
+        return rc, buf.getvalue()
+
+    def test_stale_graph_starts_a_detached_refresh(self):
+        rc, out = self.detach()
+        self.assertEqual(rc, 0)
+        self.assertEqual(len(self.spawned), 1)
+        cmd, log = self.spawned[0]
+        self.assertIn("refresh", cmd)
+        self.assertNotIn("--detach", cmd)
+        self.assertEqual(log, gt.graph_dir(self.out) / "autorefresh.log")
+        self.assertIn("background refresh started (pid 4242, log", out)
+
+    def test_fresh_graph_starts_nothing(self):
+        gt.staleness = lambda repo, gdir: ("fresh", [])
+        rc, out = self.detach()
+        self.assertEqual((rc, self.spawned), (0, []))
+        self.assertIn("current", out)
+
+    def test_held_lock_starts_nothing(self):
+        self.out.mkdir(parents=True)
+        (self.out / gt.LOCK_NAME).write_text("1 1\n", encoding="utf-8")
+        rc, out = self.detach()
+        self.assertEqual((rc, self.spawned), (0, []))
+        self.assertIn("holds", out)
+
+    def test_env_switch_off_starts_nothing(self):
+        os.environ["TAOM_GRAPHIFY_AUTOREFRESH"] = "0"
+        rc, out = self.detach()
+        self.assertEqual((rc, self.spawned), (0, []))
+        self.assertIn("TAOM_GRAPHIFY_AUTOREFRESH=0", out)
+
+    def test_running_game_starts_nothing(self):
+        gt._bannerlord_running = lambda timeout: True
+        rc, out = self.detach()
+        self.assertEqual((rc, self.spawned), (0, []))
+        self.assertIn("Bannerlord is running", out)
+
+    def test_unknown_game_state_starts_nothing(self):
+        gt._bannerlord_running = lambda timeout: None
+        rc, out = self.detach()
+        self.assertEqual((rc, self.spawned), (0, []))
+        self.assertIn("skipped", out)
+
+    def test_missing_graph_starts_a_refresh(self):
+        gt.staleness = lambda repo, gdir: ("missing", ["no graph"])
+        self.detach()
+        self.assertEqual(len(self.spawned), 1)
+
+
+class AutorefreshLogCapTests(unittest.TestCase):
+    """Each stale session appends one refresh to the log, so a full log is moved aside first."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.log = Path(self._tmp.name) / "autorefresh.log"
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _spawn_and_wait(self):
+        pid = gt._spawn_detached([sys.executable, "-c", "print('child ran')"], self.log)
+        self.assertIsInstance(pid, int)
+        deadline = time.time() + 10
+        while time.time() < deadline and b"child ran" not in self.log.read_bytes():
+            time.sleep(0.05)
+
+    def test_a_log_over_the_cap_is_kept_once_as_dot_1(self):
+        self.log.write_bytes(b"x" * (gt.AUTOREFRESH_LOG_CAP + 1))
+        self._spawn_and_wait()
+        rotated = self.log.with_name("autorefresh.log.1")
+        self.assertEqual(rotated.stat().st_size, gt.AUTOREFRESH_LOG_CAP + 1)
+        self.assertIn(b"child ran", self.log.read_bytes())
+        self.assertLess(self.log.stat().st_size, 1000)
+
+    def test_a_log_under_the_cap_is_appended(self):
+        self.log.write_bytes(b"earlier run\n")
+        self._spawn_and_wait()
+        self.assertTrue(self.log.read_bytes().startswith(b"earlier run\n"))
+        self.assertFalse(self.log.with_name("autorefresh.log.1").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
