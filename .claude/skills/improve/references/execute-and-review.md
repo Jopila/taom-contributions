@@ -83,6 +83,11 @@ plan's copy in the main checkout, committed with the next plans record, and a fr
 `note` names the amendment) or RE-CUT through `plans.js`. A second STOP on the same plan goes to the
 maintainer with both reasons. Set the index row to STOPPED with the reason while it waits.
 
+**Run breaker.** Three executor results in a row that are not DONE, across different plans, pause
+the run: a shared cause (a stale base, a broken environment, a usage limit) is likelier than three bad
+plans. Dispatch nothing more. Write the pause and the three stop reasons to FOR-MIKE.md, and look for
+the shared cause before any plan is amended.
+
 ## Stage 2: the review
 
 1. **Blast radius** (deep-review Step 1), with the worktree's own copy so it reads the branch's code:

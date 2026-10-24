@@ -38,7 +38,8 @@ Pick the narrowest trigger that fires every time the fact is needed:
 6. A trap: its full text in the owning doc, plus one line in the orientation.md trap index.
 7. A lesson: append to `docs/reviews/lessons/<category>.md`; promote a standing rule as one line
    into 3 or 4.
-8. Uncommitted or unpushed work on this machine: a memory resume card, deleted once pushed.
+8. Uncommitted or unpushed work on this machine: a memory resume card (state, next step, dead
+   ends), deleted once pushed.
 
 Never put counts nothing computes, incident narratives, or copies of another tier's text into 2 or 3.
 

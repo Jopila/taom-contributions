@@ -18,12 +18,18 @@ With no fresh user prompt, continue established work; don't start new work.
   the transcript and recombine near-misses.
 - A trivial failure (typo, missing import, a flake): fix and retry. A fundamentally broken approach:
   record the outcome (commit body, log) and move on.
+- A loop that drives work (not one that watches CI or other outside state) stops after three ticks in
+  a row with no new commit and no tracked-file change, and reports what it tried. Progress is what
+  `git` shows, never the agent's own report.
 
 ## Edit scope
 
 Every changed line traces to the request. A bug fix doesn't reformat its method; a feature doesn't
 rename existing variables. A refactor worth doing gets its own change: raise it after the requested
 one is done.
+
+Fix a bad value where it is produced, not in each consumer that receives it. Before you close a
+finding, state the root cause, the fix, the validation, and the cleanup left over (a follow-up issue).
 
 This is hardest during a review gate. While `/deep-review` agents are running, act only on findings
 that change runtime behaviour: editing a file an agent is reading invalidates its report. The one

@@ -19,10 +19,10 @@ Determine from `$ARGUMENTS` whether this is a `bug`/`crash` fix or a `feature`.
 Write the filled template to a file with the Write tool, run `python tools/check_public_text.py <file>`, then run `gh issue create --title "<title>" --label "<bug|feature>" --body-file <file>`. Sections of the bug/crash template:
 
 - `## Problem`: exact error message or symptom, stack trace if available, steps to reproduce.
-- `## Analysis`: root cause, what was examined, why it happened, which TaleWorlds internals were involved.
+- `## Analysis`: root cause, what was examined, why it happened, which TaleWorlds internals were involved. Mark each point **observed** (a log, a run, a dump), **source-derived** (read from code or a decompile) or **hypothesis**. A missing answer is `UNVERIFIED: <what is missing>`, never a guess.
 - `## Solution`: what was changed, and why this approach over the alternatives.
 - `## Files Changed`: a table of `File | Change`, one line per file.
-- `## Testing`: how the fix was verified, unit tests added or updated, manual testing steps.
+- `## Testing`: only checks that ran, unit tests added or updated, manual testing steps. Never claim a reproduction that did not happen; an in-game check still owed gets the `triage-needs-ingame` label.
 
 ## For Feature Issues
 

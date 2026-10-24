@@ -247,6 +247,7 @@ class LintReport:
     model_registry: list[tuple[Path, int, str, str]] = field(default_factory=list)
     dashes: list[tuple[Path, int, str, str]] = field(default_factory=list)
     rca_followups: list[tuple[Path, int, str, str]] = field(default_factory=list)
+    feature_verify: list[tuple[Path, int, str, str]] = field(default_factory=list)
 
     @property
     def total(self) -> int:
@@ -263,6 +264,7 @@ class LintReport:
             + len(self.model_registry)
             + len(self.dashes)
             + len(self.rca_followups)
+            + len(self.feature_verify)
         )
 
 
@@ -1394,6 +1396,53 @@ def check_rca_followups(base: str = "HEAD", staged: bool = False) -> list[tuple[
     return findings
 
 
+VERIFY_HEADING = "## How to verify in game"
+_FEATURE_DOC_SKIP = {"TEMPLATE.md", "README.md"}
+
+
+def check_feature_doc_verify_section(
+    base: str = "HEAD", staged: bool = False
+) -> list[tuple[Path, int, str, str]]:
+    """A NEW docs/features/*.md with no line exactly `## How to verify in game`.
+
+    New means ADDED against `base` (`git diff --name-status --diff-filter=A`; staged=True diffs the
+    index and reads the file from it). Working-tree mode also counts untracked files. A modified
+    existing doc is never checked, and neither are TEMPLATE.md and README.md.
+    """
+    cached = ["--cached"] if staged else []
+    listing = _git_out("-c", "core.quotePath=false", "diff", *cached, "--name-status",
+                       "--diff-filter=A", base, "--", "docs/features/*.md")
+    names: list[str] = []
+    for line in (listing or "").splitlines():
+        parts = line.split("\t")
+        if len(parts) >= 2:
+            names.append(parts[-1].strip())
+    if not staged:
+        untracked = _git_out("-c", "core.quotePath=false", "ls-files", "--others",
+                             "--exclude-standard", "--", "docs/features/*.md")
+        names.extend(n.strip() for n in (untracked or "").splitlines() if n.strip())
+    findings: list[tuple[Path, int, str, str]] = []
+    for name in sorted(set(names)):
+        path = REPO_ROOT / name
+        if path.parent != REPO_ROOT / "docs" / "features" or path.name in _FEATURE_DOC_SKIP:
+            continue
+        if staged:
+            text = _git_out("show", f":{name}")
+            if text is None:
+                continue
+        else:
+            try:
+                text = path.read_text(encoding="utf-8-sig")
+            except Exception:
+                continue
+        if any(ln.rstrip() == VERIFY_HEADING for ln in text.lstrip("\ufeff").splitlines()):
+            continue
+        findings.append((path, 1, "no-verify-section",
+                         f"the doc lacks `{VERIFY_HEADING}` (see docs/features/TEMPLATE.md); "
+                         'write the steps, or write "Not applicable:" with a reason under the heading'))
+    return findings
+
+
 def rel(p: Path) -> str:
     try:
         return str(p.relative_to(REPO_ROOT)).replace("\\", "/")
@@ -1410,6 +1459,7 @@ def format_report(report: LintReport, quick: bool, drift_only: bool = False) -> 
         f"- Version mismatches (Target line / snapshot != pin): **{len(report.version_mismatches)}**",
         f"- Context budget (entry docs, trap index, rules{'' if CONTEXT_BUDGET_ENFORCE else ', warn-only'}): **{len(report.budget)}**",
         f"- RCA FOLLOW-UP lines with no issue or reason (new lines only): **{len(report.rca_followups)}**",
+        f"- New feature docs with no `{VERIFY_HEADING}` section: **{len(report.feature_verify)}**",
     ]
     if drift_only:
         out.append("Only the checks `--fail-on-drift` gates on (`--drift-only`); run without it for the rest.")
@@ -1543,6 +1593,15 @@ def format_report(report: LintReport, quick: bool, drift_only: bool = False) -> 
             for f, lineno, kind, snippet in report.rca_followups:
                 out.append(f"- `{rel(f)}:{lineno}` — [{kind}] `{snippet}`")
             out.append("")
+        if report.feature_verify:
+            out.append("## Feature docs with no in-game verification section")
+            out.append("")
+            out.append(f"A newly added `docs/features/*.md` needs a `{VERIFY_HEADING}` heading "
+                       "(docs/features/TEMPLATE.md). Existing docs are not checked.")
+            out.append("")
+            for f, lineno, kind, snippet in report.feature_verify:
+                out.append(f"- `{rel(f)}:{lineno}` [{kind}] {snippet}")
+            out.append("")
     if report.total == 0:
         out.append("**Clean — no findings.**")
         out.append("")
@@ -1594,6 +1653,7 @@ def main(argv: list[str]) -> int:
         report.version_mismatches = check_version_consistency()
         report.budget = check_context_budget()
         report.rca_followups = check_rca_followups(args.dash_base, staged=args.staged)
+        report.feature_verify = check_feature_doc_verify_section(args.dash_base, staged=args.staged)
     else:
         link_files = files + harness_link_files()
         report.dead_links = check_dead_links(link_files)
@@ -1609,6 +1669,7 @@ def main(argv: list[str]) -> int:
         report.model_registry = check_model_registry()
         report.dashes = check_ai_dashes(args.dash_base)
         report.rca_followups = check_rca_followups(args.dash_base, staged=args.staged)
+        report.feature_verify = check_feature_doc_verify_section(args.dash_base, staged=args.staged)
 
     if args.summary:
         # Structured grep-friendly block, modeled on autoresearch's train.py final output
@@ -1618,10 +1679,10 @@ def main(argv: list[str]) -> int:
             ("missing_features", report.missing_feature_docs), ("config_drift", report.config_drift),
             ("version_mismatch", report.version_mismatches), ("context_budget", report.budget),
             ("model_registry", report.model_registry), ("ai_dashes", report.dashes),
-            ("rca_followups", report.rca_followups),
+            ("rca_followups", report.rca_followups), ("feature_verify", report.feature_verify),
         ]
         if args.drift_only:
-            counters = [c for c in counters if c[0] in ("config_drift", "version_mismatch", "context_budget", "rca_followups")]
+            counters = [c for c in counters if c[0] in ("config_drift", "version_mismatch", "context_budget", "rca_followups", "feature_verify")]
         summary = "\n".join(["---"]
                             + [f"{(name + ':').ljust(19)}{len(items)}" for name, items in counters]
                             + [f"total_findings:    {report.total}", "---", ""])
@@ -1649,6 +1710,7 @@ def main(argv: list[str]) -> int:
         or report.version_mismatches
         or (CONTEXT_BUDGET_ENFORCE and gating_budget)
         or report.rca_followups
+        or report.feature_verify
     ):
         return 1
     return 0

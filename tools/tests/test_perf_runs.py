@@ -1104,6 +1104,30 @@ class SpawnWindowPositionTests(unittest.TestCase):
         self.assertAlmostEqual(r["gc0_per_min"], 36.0)
 
 
+class InconclusiveTests(unittest.TestCase):
+    def _rows(self, n):
+        return [_context_row(100.0 + i, at=100 * i) for i in range(n)]
+
+    def test_three_against_five_is_inconclusive_and_names_the_small_group(self):
+        result = pr.compare_rows(self._rows(3), self._rows(5))
+        self.assertEqual(pr.MIN_RUNS_PER_GROUP, 5)
+        self.assertEqual(len(result["inconclusive"]), 1)
+        self.assertIn("group A has 3 run(s)", result["inconclusive"][0])
+        self.assertIn("at least 5 per group", result["inconclusive"][0])
+        line = next(x for x in pr.format_compare(result).splitlines() if x.startswith("INCONCLUSIVE:"))
+        self.assertIn("group A has 3 run(s)", line)
+        self.assertTrue(line.endswith(" (docs/ai-includes/perf-method.md)"))
+
+    def test_both_groups_small_gives_one_reason_each(self):
+        result = pr.compare_rows(self._rows(2), self._rows(4))
+        self.assertEqual(len(result["inconclusive"]), 2)
+
+    def test_five_against_five_is_conclusive(self):
+        result = pr.compare_rows(self._rows(5), self._rows(5))
+        self.assertEqual(result["inconclusive"], [])
+        self.assertNotIn("INCONCLUSIVE", pr.format_compare(result))
+
+
 class UncheckedSettingsTests(unittest.TestCase):
     def test_na_texture_quality_is_not_refused_but_counted_unchecked(self):
         a, b = [_context_row(100.0, textures="na")], [_context_row(90.0, textures="2")]

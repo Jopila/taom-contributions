@@ -177,6 +177,29 @@ else
   echo "NOTE: graphify code graph freshness UNCHECKED this session (no safe python or no tools/graphify_taom.py)."
 fi
 
+# Worktree pile-up. Every checked-out worktree (any path, not only .claude/worktrees/) costs a
+# full copy of the tree on E:, and nothing else counts them. One bounded `git worktree list`
+# (about 0.05 s); more than 15 prints the audit command. Pruning stays the maintainer's call.
+# Fail open, never silent: a spent budget, an overrun or a failed call says "unchecked".
+WT_MAX=1000
+if ! ss_probe_budget; then
+  echo ""
+  echo "NOTE: worktree count UNCHECKED this session (session-start time budget spent)."
+else
+  WT_LIST=$(timeout -k 0.5 "$SS_PROBE_BUDGET" git worktree list --porcelain 2>/dev/null)
+  WT_RC=$?
+  if [[ $WT_RC -ne 0 ]]; then
+    echo ""
+    echo "NOTE: worktree count UNCHECKED this session (git worktree list exited $WT_RC)."
+  else
+    WT_N=$(printf '%s\n' "$WT_LIST" | grep -c '^worktree ' || true)
+    if [[ "${WT_N:-0}" -gt $WT_MAX ]]; then
+      echo ""
+      echo "WORKTREES: ${WT_N} checked out (more than ${WT_MAX}). Run python tools/worktree_audit.py; prune only on Mike's word."
+    fi
+  fi
+fi
+
 # Stale-worktree visibility. Parallel-agent worktrees under .claude/worktrees/ are
 # auto-cleaned only when unchanged; abandoned ones with edits linger (4 forgotten trees
 # cost 22 GB by 2026-07-11). Surface the count so the leak can't hide. Read-only, count

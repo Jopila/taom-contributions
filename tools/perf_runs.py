@@ -110,6 +110,9 @@ Usage:
   python tools/perf_runs.py <log> [<log> ...] [--json]
   python tools/perf_runs.py compare --a <log> [...] --b <log> [...] [--scene <id>] [--allow-mixed] [--json]
 
+A compare whose group holds fewer than MIN_RUNS_PER_GROUP (5) runs adds an `INCONCLUSIVE:` line and
+an `inconclusive` list to --json; the exit code does not change (docs/ai-includes/perf-method.md).
+
 Exit code: 0 rows found (compare: both groups have rows), 1 no mission found, 2 usage error,
 unreadable file, or a compare refused over mixed build or texture settings.
 """
@@ -800,6 +803,9 @@ def _mixed(rows: list, key: str) -> list:
     return sorted(values) if len(values) > 1 else []
 
 
+MIN_RUNS_PER_GROUP = 5   # the perf method needs this many runs per group before a delta is evidence
+
+
 def compare_rows(rows_a: list, rows_b: list, allow_mixed: bool = False) -> dict:
     if not allow_mixed:
         for key in _COMPARED_KEYS:
@@ -829,9 +835,13 @@ def compare_rows(rows_a: list, rows_b: list, allow_mixed: bool = False) -> dict:
         return sum(1 for r in rows if r["context"] is None
                    or any(r["context"].get(k) in (None, "na") for k in _COMPARED_KEYS))
 
+    inconclusive = [f"group {side} has {len(rows)} run(s); the perf method needs at least "
+                    f"{MIN_RUNS_PER_GROUP} per group"
+                    for side, rows in (("A", rows_a), ("B", rows_b)) if len(rows) < MIN_RUNS_PER_GROUP]
     return {"a": {"rows": len(rows_a)}, "b": {"rows": len(rows_b)}, "metrics": metrics,
             "flags": {"a": flag_counts(rows_a), "b": flag_counts(rows_b)},
-            "context_unchecked": {"a": unchecked(rows_a), "b": unchecked(rows_b)}}
+            "context_unchecked": {"a": unchecked(rows_a), "b": unchecked(rows_b)},
+            "inconclusive": inconclusive}
 
 
 # --------------------------------------------------------------------------- #
@@ -920,6 +930,9 @@ def format_compare(result: dict) -> str:
         if result["context_unchecked"][side]:
             out.append(f"  {result['context_unchecked'][side]} {side.upper()} row(s) without a "
                        "[PerfContext] build and texture quality: those settings unchecked")
+    if result["inconclusive"]:
+        out.append("INCONCLUSIVE: " + "; ".join(result["inconclusive"])
+                   + " (docs/ai-includes/perf-method.md)")
     return "\n".join(out)
 
 

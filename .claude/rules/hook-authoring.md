@@ -140,6 +140,14 @@ Test the inputs that go missing too: a non-ASCII command, a multi-line one.
 
 Never feed unbounded text through `<<<` or an expanding here-document (Git Bash 5.3 hangs forever on a document of 65,537 to 65,664 bytes, text of 65,536 to 65,663 plus the newline a here-string adds, and a killed gate fails open): split it under `set -f` with `set -f; IFS=$'\n'; A=($X); IFS=$' \t\n'; set +f` and a `for` loop, or `set -f; T=($X); set +f` for words, never `< <(printf ...)`, which forks per call; `tools/test_hooks.sh` 4e enforces it in every script a registration runs, comments included, so name the construct in words there.
 
+## Digits only into bash arithmetic (ported from ralph-claude-code, #996)
+
+Bash evaluates every operand of `$(( ))`, `(( ))` and the `-eq`/`-gt` family inside `[[ ]]` as an
+expression, so an operand that holds an array subscript with a command substitution runs that
+command. A value from tool input, a file, git output or the environment enters arithmetic only after
+`tr -cd '0-9'` or a `^[0-9]+$` check (`mcp-health-check.sh` reads its marker that way); counts from
+`grep -c`, `wc -l` and `date +%s` are already digits.
+
 ## Never spell it `python3` (EMPIRICAL: TAOM 2026-08-31)
 
 On the dev machine `python3` resolves only to

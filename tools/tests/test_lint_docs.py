@@ -1148,5 +1148,96 @@ class RcaFollowUpGateTests(_GitRepo):
         self.assertIn("rca-sample-2026-10-23.md:3", out)
 
 
+class FeatureDocVerifySectionTests(_GitRepo):
+    """check_feature_doc_verify_section: a NEW docs/features/*.md needs `## How to verify in game`."""
+
+    HEADING = "## How to verify in game"
+
+    def setUp(self):
+        super().setUp()
+        _write(self.root / "docs" / "seed.md", "# seed\n")
+        self._commit()
+        self.feat = self.root / "docs" / "features" / "sample-thing.md"
+
+    def _names(self, staged=False):
+        return [f.name for f, _n, _k, _t in ld.check_feature_doc_verify_section(staged=staged)]
+
+    def test_an_added_doc_without_the_heading_is_flagged(self):
+        _write(self.feat, "# thing\n\nText.\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [self.feat.name])
+        self.assertEqual(self._names(), [self.feat.name], "working-tree mode sees it too")
+
+    def test_the_finding_message_names_the_heading_and_the_template(self):
+        _write(self.feat, "# thing\n")
+        self._git("add", "-A")
+        msg = ld.check_feature_doc_verify_section(staged=True)[0][3]
+        self.assertIn("## How to verify in game", msg)
+        self.assertIn("TEMPLATE.md", msg)
+        self.assertIn("Not applicable:", msg)
+
+    def test_an_untracked_doc_is_flagged_in_working_tree_mode_only(self):
+        _write(self.feat, "# thing\n")
+        self.assertEqual(self._names(), [self.feat.name])
+        self.assertEqual(self._names(staged=True), [])
+
+    def test_an_added_doc_with_the_heading_passes(self):
+        _write(self.feat, f"# thing\n\n{self.HEADING}\n\n1. Start a campaign.\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [])
+
+    def test_not_applicable_under_the_heading_passes(self):
+        _write(self.feat, f"# thing\n\n{self.HEADING}\n\nNot applicable: pure tooling.\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [])
+
+    def test_staged_mode_reads_the_index_not_the_working_copy(self):
+        _write(self.feat, "# thing\n")
+        self._git("add", "-A")
+        _write(self.feat, f"# thing\n{self.HEADING}\n")
+        self.assertEqual(self._names(staged=True), [self.feat.name])
+
+    def test_a_modified_existing_doc_without_the_heading_is_not_checked(self):
+        _write(self.feat, "# thing\n")
+        self._commit()
+        _write(self.feat, "# thing\n\nmore text\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [])
+        self.assertEqual(self._names(), [])
+
+    def test_template_and_readme_are_excluded(self):
+        _write(self.root / "docs" / "features" / "TEMPLATE.md", "# template\n")
+        _write(self.root / "docs" / "features" / "README.md", "# readme\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [])
+        self.assertEqual(self._names(), [])
+
+    def test_a_doc_outside_docs_features_is_ignored(self):
+        _write(self.root / "docs" / "reference" / "thing.md", "# thing\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [])
+
+    def _gate(self, *argv):
+        with mock.patch.object(ld, "DOC_ROOTS", [self.root / "docs"]), \
+                mock.patch.object(ld, "check_context_budget", return_value=[]), \
+                mock.patch.object(ld, "check_version_consistency", return_value=[]), \
+                mock.patch("sys.stdout", new_callable=io.StringIO) as out:
+            return ld.main(list(argv)), out.getvalue()
+
+    def test_the_drift_gate_fails_and_reports_a_new_doc_without_the_section(self):
+        _write(self.feat, "# thing\n")
+        self._git("add", "-A")
+        rc, out = self._gate("--drift-only", "--staged")
+        self.assertEqual(rc, 1)
+        self.assertIn("sample-thing.md", out)
+        self.assertIn("## Feature docs with no in-game verification section", out)
+        self.assertEqual(self._gate("--fail-on-drift", "--staged")[0], 1)
+
+    def test_the_drift_gate_passes_once_the_section_exists(self):
+        _write(self.feat, f"# thing\n{self.HEADING}\nNot applicable: tooling.\n")
+        self._git("add", "-A")
+        self.assertEqual(self._gate("--drift-only", "--staged")[0], 0)
+
+
 if __name__ == "__main__":
     unittest.main()

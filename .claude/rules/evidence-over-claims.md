@@ -28,7 +28,8 @@ catch!". Say what you verified and what you are changing instead.
 ## B. Verify before "done"
 
 Before claiming built, passing, fixed or done: name the command that proves it, run it now, read the
-exit code and output, then state the claim with that evidence, or report the failure with it.
+exit code and output, then state the claim with that evidence, or report the failure with it. Name
+what the run did not cover (no in-game check, one build, the laptop untested) beside the claim.
 
 Not verification: an earlier run, "should pass", a linter pass (it does not compile), a subagent's
 self-report, your own confidence. Stop and verify if you are about to type "Done!" or commit on an
@@ -56,5 +57,7 @@ and API behaviour as much as counts and hashes. The traps behind past fabricatio
    cannot see a Git Bash `/tmp` path, so put scratch files in the session scratchpad.
 3. **Trusting your own earlier result from memory.** A cancelled or errored call leaves no trace but
    your belief that it ran. Re-run `git log`, re-read the file.
+4. **Reporting an empty search as absence.** No hit proves absence only inside what was searched:
+   name the scope (which build, which modules, which folders) with the negative result.
 
 Incidents behind each facet: [rule-provenance.md](../../docs/reference/rule-provenance.md).
