@@ -1,0 +1,4 @@
+{
+  "spawnDays": [10, 8, 6],
+  "sizeLimits": [15, 20, 25]
+}

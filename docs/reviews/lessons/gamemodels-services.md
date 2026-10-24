@@ -1281,3 +1281,15 @@ no or the feature was off.
 - **Prevent:** when the override can only turn vanilla's true into false, write `base(...) && Decide(Read(...))`;
   in the reader take expensive values only on the branch that uses them, and report unread values as NaN, never 0.
 - **Source:** [rca-unlooked-for-aid-2026-10-23.md](../rca-unlooked-for-aid-2026-10-23.md) finding 2.
+
+### A model's "may it exist" gate is not a gate on its other members: list each member's engine callers (#888, 2026-10-23)
+Keep Wardens gated all three `SettlementPatrolModel` answers on its MCM switch. Vanilla's hourly refill
+(`PatrolPartiesCampaignBehavior.ReplenishParty`) asks for a live patrol's template without asking whether the settlement
+may have patrols, so with the switch off the castle fell through to base, base returned null, and the roster code threw.
+TAOM's own size hook kept the refill reachable.
+- **Why missed:** the design treated the model's members as one decision, reasoning from what TAOM overrides rather than
+  from where the engine calls each member and what each caller has already checked.
+- **Prevent:** for every overridden model member, grep the installed engine for its callers and note which ones skip the
+  slot's "may it exist" check. A member such a caller can reach must keep answering for anything already alive (a live
+  party, a built building) whatever a switch says; put the switch only on the member that creates new things.
+- **Source:** `docs/reviews/rca-keep-wardens-2026-10-23.md` finding 1.

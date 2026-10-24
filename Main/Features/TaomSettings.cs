@@ -842,6 +842,12 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "{=taom_ll_mcm_enable_hint}On the character screen, marks the level past which the selected skill learns at its slowest: a red arrow and a red band to the end of the bar; hover the band for the details. Also adds a line to the learning limit tooltip. Applies the next time the character screen opens. Default: on.")]
     public bool EnableLoremastersLine { get; set; } = true;
 
+    // GroupOrder 4 sorts it after the Namegiving group (3); the group's first property carries it.
+    [SettingPropertyGroup("Fief Management/Keep Wardens", GroupOrder = 4)]
+    [SettingPropertyBool("{=taom_keep_wardens_label}Castle Patrols", Order = 0, RequireRestart = false,
+        HintText = "{=taom_keep_wardens_hint}A castle with a built Guard House fields one patrol party of its owner's culture at a time, as a town does: stronger at each Guard House level. A lost patrol is replaced after 10, 8 or 6 days (castle_patrols.json). When off, no new castle patrol is queued, and the game's daily check removes the castle patrols already out. Default: on.")]
+    public bool EnableCastlePatrols { get; set; } = true;
+
     // --- Inventory / Quick Actions ---
 
     [SettingPropertyGroup("Inventory/Quick Actions", GroupOrder = 30)]

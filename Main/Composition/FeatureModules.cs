@@ -50,6 +50,7 @@ internal static class FeatureModules
         new Features.Relations.RelationsModule(),
         new Features.TaomBuildings.TaomBuildingsModule(),
         new Features.PosternGate.PosternGateModule(),
+        new Features.KeepWardens.KeepWardensModule(),
         new Features.FromTheAshes.FromTheAshesModule(),
         new Features.BardTownGuard.BardTownGuardModule(),
         new Features.FellFoes.FellFoesModule(),

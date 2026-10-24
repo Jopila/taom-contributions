@@ -9,6 +9,7 @@ using TAOM.Features.CareerSystem;
 using TAOM.Features.CareerSystem.Domain;
 using TAOM.Features.CulturalFeats.Diagnostics;
 using TAOM.Features.EyeOfSauron;
+using TAOM.Features.KeepWardens;
 using TAOM.Features.TroopWeight;
 
 namespace TAOM.Features.CulturalFeats.Models;
@@ -22,6 +23,7 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
     // TEMPORARY (2026-07-17) — only the load-order probe below needs this; remove with the diagnostic.
     private readonly IModLogger _logger;
     private readonly IEyeOfSauronHook _eyeOfSauron;
+    private readonly ICastlePatrolSizeHook _castlePatrolSize;
     // Built once: a lambda over the method parameter would allocate a closure and a Func on every call, every party.
     private readonly System.Func<object?, float> _weightedCountOf;
 
@@ -39,6 +41,8 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
         _aiPartySize = aiPartySize;
         _logger = logger;
         _eyeOfSauron = eyeOfSauron;
+        // Resolved once here, not as a constructor parameter: that would need an edit to SubModule.cs, where this model is built.
+        _castlePatrolSize = IoC.Resolve<ICastlePatrolSizeHook>();
         _weightedCountOf = p => _troopWeight.CalculateWeightedMemberCount((PartyBase)p!);
     }
 
@@ -46,6 +50,10 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
         PartyBase party, bool includeDescriptions = false)
     {
         var result = base.GetPartyMemberSizeLimit(party, includeDescriptions);
+        // Keep Wardens (#888): vanilla's patrol limit reads only the town Guard House and answers 0 for a castle patrol. MUST run
+        // right after the base call, which returns the 0 it replaces, and before the culture feats, whose factors then apply to the
+        // replaced number. Pinned by CastlePatrolSizeHookTests.
+        _castlePatrolSize.ApplyCastlePatrolSize(party, ref result, includeDescriptions);
         // Vanilla PartyBaseHelper.HasFeat precedence — see CultureFeatAdapter.FromOrNull(PartyBase).
         // Replaces the prior `party.Owner?.Culture ?? party.Culture` which skipped LeaderHero.Culture
         // (Codex review 43 caught the same systemic gap in TaomPartySpeedModel).

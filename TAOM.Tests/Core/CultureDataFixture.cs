@@ -29,10 +29,11 @@ internal static class CultureDataFixture
     /// <item><c>CompanionRolesCampaignBehavior</c> reads <c>companionHero.Culture.LordTemplates</c>
     /// when a companion is granted a fief. TAOM ships 208 wanderers across 18 cultures and none of
     /// them is one of these eight, so no companion can carry one of these cultures.</item>
-    /// <item><c>DefaultSettlementPatrolModel.CanSettlementHavePatrolParties</c> requires
-    /// <c>settlement.IsTown</c>, <c>VillagerCampaignBehavior</c> requires a village, and
+    /// <item>Patrol parties are fielded by towns, and by castles through Keep Wardens (#888, which asks the
+    /// owner culture for its patrol templates); <c>VillagerCampaignBehavior</c> requires a village, and
     /// <c>CaravansCampaignBehavior.SpawnCaravan</c> requires a town notable. None of the three can
-    /// reach a hideout-only culture, so its party templates are never read.</item>
+    /// reach a hideout-only culture, so its party templates are never read. <c>ShippedCastleOwnerCultureTests</c>
+    /// checks that no castle owner clan carries one of these cultures.</item>
     /// </list>
     ///
     /// Give any of them a town and every exemption is void: the lists become empty

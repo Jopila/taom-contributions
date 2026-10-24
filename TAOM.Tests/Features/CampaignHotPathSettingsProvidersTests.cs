@@ -18,6 +18,7 @@ using TAOM.Features.FieldCommission;
 using TAOM.Features.FireAndTribute;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HiddenHosts;
+using TAOM.Features.KeepWardens;
 using TAOM.Features.FromTheAshes;
 using TAOM.Features.GoodDeeds;
 using TAOM.Features.LongMemory;
@@ -120,6 +121,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(UnlookedForAidSettingsProvider))]
     // #869: read at each conversation question and by the ruler's prisoner line's condition; the accessor takes the settings once.
     [DataRow(typeof(SwornAnewSettingsProvider))]
+    // #888: the patrol queue asks the castle patrol model for every settlement it visits.
+    [DataRow(typeof(CastlePatrolSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -157,6 +160,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IUnderTheEavesSettings), typeof(UnderTheEavesSettingsProvider))]
     [DataRow(typeof(IPersonalRelationSettingsProvider), typeof(PersonalRelationSettingsProvider))]
     [DataRow(typeof(IPosternGateSettingsProvider), typeof(PosternGateSettingsProvider))]
+    [DataRow(typeof(ICastlePatrolSettingsProvider), typeof(CastlePatrolSettingsProvider))]
     [DataRow(typeof(IFromTheAshesSettingsProvider), typeof(FromTheAshesSettingsProvider))]
     [DataRow(typeof(IGiftSettingsProvider), typeof(GiftSettingsProvider))]
     [DataRow(typeof(IGoodDeedsSettingsProvider), typeof(GoodDeedsSettingsProvider))]
@@ -468,6 +472,18 @@ public class CampaignHotPathSettingsProvidersTests
         settings.EnablePosternGate = false;
 
         Assert.IsFalse(sut.CutEnabled);
+    }
+
+    [TestMethod]
+    public void CastlePatrols_ReadsThroughTheCachedSettings()
+    {
+        var settings = new TaomSettings();
+        var sut = new CastlePatrolSettingsProvider(settings);
+        Assert.IsTrue(sut.Enabled);
+
+        settings.EnableCastlePatrols = false;
+
+        Assert.IsFalse(sut.Enabled);
     }
 
     [TestMethod]

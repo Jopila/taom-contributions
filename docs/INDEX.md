@@ -94,6 +94,8 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [volunteer-recruitment](features/volunteer-recruitment.md) — per-settlement / clan / culture recruitment pools (TaomVolunteerModel)
 - [tavern-mercenaries](features/tavern-mercenaries.md) — culture-specific `<basic_mercenary_troops>`: how the town's daily offer is rolled (70/30 split, upgrade walk, tier-inverse stack size), and why the hires are dedicated leaf `*_merc` copies of each culture's rarest recruitment-pool troops
 - [prisoner-recruitment](features/prisoner-recruitment.md) — no morale lost recruiting a prisoner of your own faction or alignment side (TaomPrisonerRecruitmentCalculationModel)
+- [castle-recruitment](features/castle-recruitment.md): castle notables with volunteers, the player and AI lords recruiting at castles, the AI gate on castles that hold volunteers, and the AI toggle covering every AI lord path
+- [alignment-recruitment](features/alignment-recruitment.md): the Free and Evil recruitment rule, applied at recruit time and in AI trip scoring
 - [equip-presets](features/equip-presets.md) — save/load equipment preset overlay on inventory
 - [lord-skills](features/lord-skills.md) — lore-driven SkillSets for every TAOM lord (~880 NPCs, 17 cultures, 35 archetypes); authoring guide [lord-skills-authoring.md](ai-includes/lord-skills-authoring.md)
 - [enlistment](features/enlistment.md) — serve as a common soldier under a lord (#375): persisted service state machine (party presence is an OUTPUT, never state), single discharge pipeline that always restores presence, commander-funded wages with arrears, ranks/trust/reputation, 13 field duties over 5 mechanics + 11 interactive + 3 incidents, per-culture-per-kit-tier issued armour. Patch66 menu guard
@@ -146,6 +148,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [startup-resources](features/startup-resources.md) — per-culture player startup gold/items
 - [cultural-feats](features/cultural-feats.md) — 16 culture-feat GameModel overrides (Patch18)
 - [party-template-sizing](reference/party-template-sizing.md): what `max_value` in `taom_partyTemplates.xml` actually controls. The max sum is the SPAWN ceiling (expected roster = the midpoint of the min and max sums, ratio drawn per party and independent of the template), not the steady-state size, which belongs to `PartySizeLimit` / `TaomPartySizeModel`. Current per-culture targets, which cultures share another's templates, the new-game top-up that also weights WHICH troops get added, and `tools/rebalance_party_template_maxes.py`
+- [keep-wardens](features/keep-wardens.md): castles with a built Guard House field a patrol party of their owner's culture, as towns do; models only, size limit 15, 20 or 25 by level (#888)
 
 ### Faction, kingdom, & diplomacy
 - [diplomacy](features/diplomacy.md) — TaomDiplomacyModel for LOTR faction relationships
