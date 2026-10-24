@@ -213,6 +213,8 @@ The recurring failure is conflating severity with importance for RCA: we patch L
 
 **Append the durable lesson to the master record.** For each systemic finding, also add an entry to the matching category file under `docs/reviews/lessons/` (e.g. `lessons/gamemodels-services.md`, `lessons/harmony-il.md`; index: `docs/reviews/LESSONS-LEARNED.md`), in the house shape (`### <imperative rule>` → `**Why missed:**` → `**Prevent:**` → `**Source:**`). The per-feature `rca-*.md` is the incident report; the lessons entry is the cross-feature rule that stops the *category* from recurring — it is the canonical, always-consulted record (indexed from the harness `MEMORY.md`). Read the relevant category FILE before the next review of that subsystem (per-category files keep the read cheap). Only touch `MEMORY.md` if a new feature/topic memory file is involved.
 
+**A deferred finding needs an owner.** Every uppercase `FOLLOW-UP` line you write in an RCA cites an issue (`#<number>`) or says `no issue:` and why; `python tools/lint_docs.py --fail-on-drift` fails on a new line that does neither (#984), and the commit hook runs the same check on the staged RCA. To mention the marker in passing, put it in backticks (`` `FOLLOW-UP` ``); an issue number in backticks does not count as a citation.
+
 **This file MUST exist BEFORE the closing commit.** The commit message should reference the RCA path.
 
 If the RCA reveals a rule that's already documented but wasn't followed (scope gap or agent prompt missing the rule), update the rule file or agent prompt in a follow-up commit. Commit graph: review → fixes → RCA → preventive-rule update.

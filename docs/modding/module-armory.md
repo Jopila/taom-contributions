@@ -68,7 +68,7 @@ Nothing in `ModuleData/` loads because it is there. It loads because one of two 
 | Manifest | `SubModule.xml`, `<Xmls>/<XmlNode>/<XmlName id= path=>` | `ModuleData/project.mbproj`, `<base>/<file id= name= type=>` |
 | Read by | `MBObjectManager.GetMergedXmlForManaged` (`MBObjectManager.cs:877`) | `XmlResource.GetMbprojxmls` (`XmlResource.cs:107`), then `GetMergedXmlForNative` (`MBObjectManager.cs:920`) |
 | Path shape | `path="LOTRLOME_items/gondor"`, no `ModuleData/`, no `.xml` (`ModuleHelper.cs:232`) | `name="ModuleData/skins.xml"`, with both (`ModuleHelper.cs:211`) |
-| Legal ids | The object-type names: `Items`, `Monsters`, `CraftingPieces`, `CraftingTemplates`, `WeaponDescriptions`, `ModuleSounds` | Only `soln_*` ids something asks for. An invented id is inert. |
+| Legal ids | The object-type names: `Items`, `Monsters`, `CraftingPieces`, `CraftingTemplates`, `WeaponDescriptions`, `ModuleSounds` | Only `soln_*` ids something asks for, or a `type` native loads by type (`NATIVE_BY_TYPE` in `tools/audit_mbproj_registration.py`). Any other invented id is inert. |
 | Carries | Items, crafting, monsters, sounds | Skins, action sets, action types, monster usage sets, monsters, physics, collision, sounds |
 
 <!-- measured: grep -c "<XmlNode>" SubModule.xml; grep -o 'id="soln_[a-z_]*"' ModuleData/project.mbproj | sort | uniq -c 2026-09-05 -->

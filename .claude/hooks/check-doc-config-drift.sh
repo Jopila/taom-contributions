@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # check-doc-config-drift.sh
 # PreToolUse (Bash and PowerShell) hook: when `git commit` is about to run touching a feature doc,
-# a shipped ModuleData JSON config, or a game-version marker, run the doc-linter's
-# drift checks and BLOCK the commit if they find:
-#   - config-example drift: a docs/features/*.md ```json example whose values disagree
-#     with the shipped Main/_Module/ModuleData/**/*.json config it mirrors, or a doc
-#     key absent from the shipped file (renamed/removed).
-#   - version mismatch: the "Target: Bannerlord X" line (AGENTS.md) or an API-snapshot
-#     header that disagrees with .claude/pinned-game-version.txt.
-#   - a context-budget breach (ADR-011): CLAUDE.md with its imports, the trap index, or the
-#     rules without paths:. The same check runs in CI for every committer.
+# a shipped ModuleData JSON config, a game-version marker, a context-budget file or an RCA, run
+# the doc-linter's gating checks (`tools/lint_docs.py --drift-only --staged`, the same set
+# `--fail-on-drift` gates on) and BLOCK the commit if one finds something. The linter owns the
+# list; read its report for what each check means. In outline:
+#   - config-example drift: a docs/features/*.md ```json example that disagrees with the shipped
+#     Main/_Module/ModuleData/**/*.json config it mirrors.
+#   - version mismatch against .claude/pinned-game-version.txt.
+#   - a context-budget breach (ADR-011).
+#   - a new FOLLOW-UP line in a staged docs/reviews/rca-*.md with no issue and no reason (#984).
 #
 # Why: this is the enforcement for the v1.4.7-bump deep-review finding -- flipping
 # banner_color_config.json's EnableLayerLimitTranspiler default left the feature doc's
@@ -78,8 +78,8 @@ case "$COMMAND" in
         ;;
 esac
 
-# Only run when the commit touches a surface the drift checks care about: a feature doc, a
-# shipped ModuleData JSON, a version marker, or a file the ADR-011 context budget measures.
+# Only run when the commit touches a surface the gating checks read: a feature doc, a shipped
+# ModuleData JSON, a version marker, a file the ADR-011 context budget measures, or an RCA.
 RELEVANT=0
 # Split into an array under set -f, never a here-string: Git Bash 5.3 hangs forever on one of
 # 65,536 to 65,663 bytes of text, and a name list that size is reachable (#681). An empty line is dropped,
@@ -88,6 +88,7 @@ set -f; IFS=$'\n'; STAGED_LIST=($STAGED); IFS=$' \t\n'; set +f
 for f in "${STAGED_LIST[@]}"; do
     case "$f" in
         docs/features/*.md) RELEVANT=1; break ;;
+        docs/reviews/rca-*.md) RELEVANT=1; break ;;
         Main/_Module/ModuleData/*.json) RELEVANT=1; break ;;
         .claude/pinned-game-version.txt) RELEVANT=1; break ;;
         CLAUDE.md|AGENTS.md|docs/ai-includes/orientation.md) RELEVANT=1; break ;;
@@ -101,39 +102,43 @@ done
 PY="$PYBIN"
 [[ -z "$PY" ]] && { echo '{}'; exit 0; }
 
-# Run the drift gate. --drift-only runs just the three checks that can block (config-example
-# drift, version, context budget) and exits 1 iff one of them fails; 0 otherwise. Only rc=1
-# blocks. It takes about 0.15 s; the full run adds 8 s of report-only checks (orphans, dead
-# links) that never gate, and CI runs those.
+# Run the drift gate. --drift-only runs just the checks that can block and exits 1 iff one of
+# them fails; 0 otherwise. Only rc=1 blocks. --staged makes the RCA check read the index, which
+# is what the commit records. It takes about 0.2 s; the full run adds 8 s of report-only checks
+# (orphans, dead links) that never gate.
 #
 # Inner bound, below the 30s registered timeout. A harness kill discards this hook's
 # output, which reads as a clean pass; this gate was dead from 2026-08-31 when it ran at
 # a 5s registration against a measured 7.8s runtime. Keep the overrun inside the hook.
-OUT=$(timeout -k 2 20 "$PY" tools/lint_docs.py --drift-only 2>/dev/null)
+OUT=$(timeout -k 2 20 "$PY" tools/lint_docs.py --drift-only --staged 2>/dev/null)
 RC=$?
 
 # 124 = the inner timeout fired. Not a pass. Ask rather than block: an overrun is an
 # infrastructure fault, and a hook's own fault must never hard-block the user.
 if [[ $RC -eq 124 ]]; then
-    printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"[check-doc-config-drift] The doc drift gate exceeded its 20s budget and was stopped. This commit is UNCHECKED for config-example drift, version-marker mismatches and the context budget. This is NOT a pass. Run: python tools/lint_docs.py --drift-only"}}'
+    printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"[check-doc-config-drift] The doc drift gate exceeded its 20s budget and was stopped. This commit is UNCHECKED by the doc linter gating checks. This is NOT a pass. Run: python tools/lint_docs.py --drift-only --staged"}}'
     exit 0
 fi
 
 [[ $RC -ne 1 ]] && { echo '{}'; exit 0; }
 
-# Extract the gating sections (--drift-only prints nothing else below them), bounded.
-DETAILS=$(printf '%s' "$OUT" | awk '/^## (Config-example drift|Version mismatches|Context budget)/{f=1} f' | head -40)
+# Extract every `## ` section of the report (--drift-only prints only the gating checks, so the
+# list of checks lives in the linter, not here), without the report-only lines (lint_docs.py
+# REPORT_ONLY_BUDGET_KINDS: [size-warn], [frontmatter-unchecked]). A section left with no finding
+# line after that is dropped whole, header included. Bounded.
+DETAILS=$(printf '%s\n' "$OUT" | awk '
+function flush() { if (keep) printf "%s", buf; buf = ""; keep = 0 }
+/^## / { flush(); f = 1 }
+f { if ($0 ~ /\[(size-warn|frontmatter-unchecked)\]/) next; buf = buf $0 "\n"; if ($0 ~ /^- /) keep = 1 }
+END { flush() }' | head -40)
 
 MSG=$(printf '%s' "$DETAILS" | "$PYBIN" -c '
 import sys, json
 lines = [l for l in sys.stdin.read().splitlines() if l.strip()][:36]
 print(json.dumps(
-    "[check-doc-config-drift] git commit BLOCKED: a documented config example or version "
-    "marker drifted from its source of truth, or the ADR-011 context budget broke (CLAUDE.md "
-    "with its imports, the trap index, or the rules without paths:). Sync the doc example to "
-    "the shipped ModuleData config, the version marker to .claude/pinned-game-version.txt, or "
-    "move the detail out of the entry doc or rule into its owning doc, then re-stage. "
-    "Details: python tools/lint_docs.py\n\n" + "\n".join(lines)))
+    "[check-doc-config-drift] git commit BLOCKED by the doc linter (tools/lint_docs.py "
+    "--drift-only --staged). Fix each finding quoted below, then re-stage; each section names "
+    "the rule it enforces. Details: python tools/lint_docs.py\n\n" + "\n".join(lines)))
 ' 2>/dev/null)
 [[ -z "$MSG" ]] && { echo '{}'; exit 0; }
 

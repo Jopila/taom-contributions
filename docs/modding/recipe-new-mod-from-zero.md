@@ -275,7 +275,8 @@ extension, the opposite convention from `<XmlName path>`.
 
 Use only ids the engine asks for. `GetMergedXmlForNative` matches on exact string equality and is
 reached from a fixed set of call sites, so an invented `soln_*` id opens no file and logs nothing;
-the row reads exactly like working registration. The audit prints the vanilla vocabulary, 39 ids.
+the row reads exactly like working registration. Native also loads thirteen kinds of file by their
+`type` and ignores the id (`NATIVE_BY_TYPE` in `tools/audit_mbproj_registration.py`). The audit prints `Requested ids: 40 (39 soln_* ids of Native's project.mbproj as a stand-in for the ids native requests, plus the managed requesters), 13 native types`.
 <!-- measured: python tools/audit_mbproj_registration.py 2026-09-05 -->
 
 **Monsters are the exception, and they go both ways.** `Monster` is a managed object type: the

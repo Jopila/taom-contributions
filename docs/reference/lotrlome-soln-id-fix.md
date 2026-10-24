@@ -22,18 +22,36 @@ foreach (MbObjectXmlInformation mbprojXml in XmlResource.MbprojXmls)
 }
 ```
 
-It is reached two ways, and neither can ever produce a custom id:
+It is reached from a fixed set of requesters, and none of them can ever ask for a custom id:
 
 - Eight hardcoded call sites in `Module.CreateProcessed*XMLForNative` (`soln_skins`,
   `soln_item_holsters`, `soln_action_sets`, `soln_action_types`, `soln_animations`,
   `soln_voice_definitions`, `soln_sound_event_data`, `soln_sound_parameter_data`).
+- `MapColorGradeManager.ReadColorGradesXml` (`soln_worldmap_color_grades`), and `MBMusicManager`,
+  which reads `XmlResource.MbprojXmls` itself for `soln_soundtrack` rather than going through
+  `GetMergedXmlForNative` (the row's name is ignored and the music loads from
+  `<module>/Music/soundtrack.xml`).
 - One `[MBCallback]`, `CreateProcessedModuleDataXMLForNative(string xmlType)`, which builds
-  `"soln_" + xmlType` from a type name **native** passes in. Native only ever asks for its own
-  standard types.
+  `"soln_" + xmlType` from a type name **native** passes in: `soln_movement_sets`,
+  `soln_full_movement_sets`, `soln_bone_body_types`, `soln_monster_usage_sets` and
+  `soln_item_usage_sets` among them. Native only ever asks for its own standard types.
 
-So a row with an id nothing requests is never iterated. No file is opened, no warning is logged, and
-the row reads exactly like working registration. Vanilla's own `project.mbproj` defines the entire
-legitimate vocabulary: 39 ids. Measured across the 12 installed modules, `LOTRLOME_Armory` was the
+So a row with an id nothing requests is never iterated by that route. No file is opened, no warning
+is logged, and the row reads exactly like working registration. Vanilla's own `project.mbproj`
+defines the legitimate id vocabulary: 39 ids (the audit uses them as a stand-in for the native
+requests, a superset of the exact list; switching to the exact list is #987).
+
+**The second loader reads `type`, not `id`.** Native code parses `project.mbproj` itself and asks
+for thirteen kinds of file by `type` (the callers of `FUN_180719810`, the table `NATIVE_BY_TYPE` in
+`tools/audit_mbproj_registration.py`), reading each matching row's `name` and never its `id`. A row
+of one of those types loads whatever its id is: `soln_module_sound` is one. A `type` outside the
+thirteen does nothing, and that includes `action_set`, `action_type`, `monster` and
+`monster_usage_set`, the types the dead rows below carried. An earlier version of the gate
+accepted any type the vanilla manifest ships, which cleared all six of those rows. Two tests pin the
+fix: `NativeTypeTable.test_spider_era_rows_are_dead` copies the six rows verbatim and expects each to
+be a DEAD-ID, and `MainEntry.test_the_installed_native_manifests_own_types_never_rescue_a_dead_row`
+runs `main()` against a Native manifest whose rows carry `monster`, `action_set` and
+`monster_usage_set` and expects exit 1 with both spider rows dead. Measured across the 12 installed modules, `LOTRLOME_Armory` was the
 **only** one that had invented any; ADOD, ADOD_Beasts and Alliance.Wargs all use vanilla ids
 exclusively.
 
@@ -130,6 +148,13 @@ so an `.xml` backup injects duplicate ids.
 ```
 python tools/audit_mbproj_registration.py           # TAOM's three modules; --all to sweep everything
 ```
+
+Replay of the pre-fix state: the backup `project.mbproj.bak-solnfix-20260828` (under
+`E:\Bannerlord_Backups\module_bak_sweep_2026-09-01\LOTRLOME_Armory\ModuleData\`) was copied into a
+scratch install next to vanilla's Native manifest and audited with `--game-dir` and `--module
+LOTRLOME_Armory` on 2026-10-23: **2 errors, exit 1**, `DEAD-ID soln_spider_monster` and
+`DEAD-ID soln_lotr_misc_action_types`. The four spider-era rows of lotraom-assets `7b45ffb97` are
+dead the same way, and the audit's `NativeTypeTable.test_spider_era_rows_are_dead` pins all six.
 
 Measured after the change:
 

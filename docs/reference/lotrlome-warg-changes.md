@@ -164,9 +164,11 @@ and `soln_action_types` are among them, which is why the warg content for those 
 the existing files instead.
 
 **Do not invent custom `soln_*` ids.** `GetMergedXmlForNative` matches `XmlResource.MbprojXmls`
-entries on exact string equality, and it is reached only from eight hardcoded ids plus a native
-callback that builds `"soln_" + xmlType` from type names native itself supplies, so a custom id
-matches nothing. LOTRLOME's pre-existing `soln_spider_monster` and `soln_lotr_misc_action_types` were
+entries on exact string equality, and it is reached only from a fixed set of requesters (eight
+hardcoded ids, the map colour-grade reader, and a native callback that builds
+`"soln_" + xmlType` from type names native itself supplies; the music manager reads `XmlResource.MbprojXmls` itself for `soln_soundtrack`), so a custom id matches nothing. Native
+also loads thirteen kinds of file by `type` and ignores the id (`NATIVE_BY_TYPE` in
+`tools/audit_mbproj_registration.py`); the spider-era rows carried none of them. LOTRLOME's pre-existing `soln_spider_monster` and `soln_lotr_misc_action_types` were
 dead for exactly this reason. **Both were removed on 2026-08-28**, after this was written: the spider
 row was inert but harmless, since the Monster is also registered managed-side in `SubModule.xml`,
 while the misc row meant 20 action types had never loaded at all while `action_sets.xml` bound them

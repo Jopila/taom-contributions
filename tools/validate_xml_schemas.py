@@ -250,6 +250,34 @@ def applied_stylesheets(module_dir: Path) -> dict:
     return sheets
 
 
+def mbproj_rows(mbproj: Path):
+    """(rows, problems) of one project.mbproj, parsed as the engine reads it (XmlResource.GetMbprojxmls).
+    rows are `(id, name, type or None)` for each `<file>` under the root `<base>` that has an id and a
+    name; problems are human-readable reasons the engine throws at startup, in document order: the file
+    does not parse, its root is not <base>, a row has no id or no name (that row is not in rows). A
+    path that is not a file has neither."""
+    mbproj = Path(mbproj)
+    rows: list[tuple[str, str, str | None]] = []
+    problems: list[str] = []
+    if not mbproj.is_file():
+        return rows, problems
+    try:
+        root = _parse_like_engine(mbproj)
+    except (ET.ParseError, OSError, ValueError, LookupError) as exc:
+        return rows, [f"{mbproj} cannot be loaded ({exc}): {_THROWS_MBPROJ}"]
+    if root.tag != "base":
+        return rows, [f"the root of {mbproj} is <{root.tag}>, not <base>: {_THROWS_MBPROJ}"]
+    for row in root.iterfind("file"):
+        row_id, name = row.get("id"), row.get("name")
+        if row_id is None or name is None:
+            shown = "".join(f' {k}="{v}"' for k, v in row.attrib.items())
+            problems.append(f"<file{shown}> in {mbproj} has no 'id' or no 'name' attribute: "
+                            f"{_THROWS_MBPROJ}")
+            continue
+        rows.append((row_id, name, row.get("type")))
+    return rows, problems
+
+
 def native_files(module_dir: Path):
     """(found, problems). found is {_key(file): (file, row id, "data" or "stylesheet", row type or
     None)} for the files named by this module's `ModuleData/project.mbproj`. The engine reads each
@@ -263,22 +291,9 @@ def native_files(module_dir: Path):
     4 characters GetXsltPathForNative removes is no problem here: only a requested id reaches that call."""
     module_dir = Path(module_dir)
     mbproj = module_dir / "ModuleData" / "project.mbproj"
-    found, problems = {}, []
-    if not mbproj.is_file():
-        return found, problems
-    try:
-        root = _parse_like_engine(mbproj)
-    except (ET.ParseError, OSError, ValueError, LookupError) as exc:
-        return found, [f"{mbproj} cannot be loaded ({exc}): {_THROWS_MBPROJ}"]
-    if root.tag != "base":
-        return found, [f"the root of {mbproj} is <{root.tag}>, not <base>: {_THROWS_MBPROJ}"]
-    for row in root.iterfind("file"):
-        row_id, name, row_type = row.get("id"), row.get("name"), row.get("type")
-        if row_id is None or name is None:
-            shown = "".join(f' {k}="{v}"' for k, v in row.attrib.items())
-            problems.append(f"<file{shown}> in {mbproj} has no 'id' or no 'name' attribute: "
-                            f"{_THROWS_MBPROJ}")
-            continue
+    found = {}
+    rows, problems = mbproj_rows(mbproj)
+    for row_id, name, row_type in rows:
         relative = name.lstrip("/\\")
         data = Path(f"{module_dir}/{relative}")
         if data.is_file():

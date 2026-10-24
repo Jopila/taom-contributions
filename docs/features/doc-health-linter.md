@@ -4,9 +4,9 @@
 
 One read-only pass over `docs/` (plus the files CLAUDE.md loads, `AGENTS.md`, `.claude/rules/`, and
 the shipped ModuleData configs) that reports **doc rot**: the class of defect where the code moved
-and the prose did not. Seven checks, pure stdlib, no game install required. Three of the seven
-**block** a commit through `.claude/hooks/check-doc-config-drift.sh` (the GitHub workflow that also
-ran them on every push was removed on 2026-10-05). The other four are advisory.
+and the prose did not. Pure stdlib, no game install required. Checks 5 to 8 below **block** a
+commit through `.claude/hooks/check-doc-config-drift.sh` (the GitHub workflow that also ran them on
+every push was removed on 2026-10-05); the others are advisory.
 
 Run `python tools/lint_docs.py` directly. Backs [ADR-010](../adrs/010-knowledge-base-architecture.md).
 Sibling validators: [moduledata-validation.md](moduledata-validation.md) (game data),
@@ -26,14 +26,14 @@ fact:
   `project_doc_max_bytes` — so every Codex review ran without them. Now the eager-load budget check.
 - **CLAUDE.md regrew from 28 KB to 49 KB in six weeks, past its own cap,** because the only gate was
   a Claude PreToolUse hook and commits made from the IDE never run it. Now the ADR-011 context
-  budget (check 7), which CI runs on every branch (#647).
+  budget (check 7), enforced by the commit hook (#647).
 
 The fourth lesson is about the linter itself and is the reason the "what counts as a finding"
 section below is so specific: **a check that is wrong every time is a deleted check.** The
 stale-version check spent months at 29 findings and 0 true positives, which trains every reader to
 skip the whole report — including the six checks that were correct.
 
-## The seven checks
+## The checks
 
 | # | Check | Blocks a commit? | What it means |
 |---|---|---|---|
@@ -45,6 +45,7 @@ skip the whole report — including the six checks that were correct.
 | 5 | **Config-example drift** | **yes** | a `docs/features/*.md` ```json block labelled with a config path whose values disagree with the shipped `Main/_Module/ModuleData/**/*.json`, or a doc key the shipped config no longer has. Shared keys only, so a partial example is fine; an unparseable (annotated) block is skipped rather than guessed at |
 | 6 | **Version mismatch** | **yes** | the `Target: Bannerlord X` line (AGENTS.md, or CLAUDE.md) or a `(vX snapshot)` header in `docs/reference/taleworlds-api-snapshot/{gamemodel-bases,patch-targets}.md` disagreeing with `.claude/pinned-game-version.txt`. No `Target:` line in either file is itself a finding, so moving the line cannot switch the check off |
 | 7 | **Context budget** ([ADR-011](../adrs/011-knowledge-delivery-tiers.md)) | **yes** (except `size-warn`) | everything CLAUDE.md loads at launch (its `@`-imports, read from CLAUDE.md itself), the orientation.md trap index, and the rules without `paths:`. These load into every session and every custom agent spawn, so bytes here are a per-turn tax. An oversized path-scoped rule warns until the path-rule diet |
+| 8 | **RCA FOLLOW-UP owner** ([#984](https://github.com/haterade22/TAOM/issues/984)) | **yes** | a newly written line of `docs/reviews/rca-*.md` with an uppercase `FOLLOW-UP` (or `FOLLOW-UPS`) and neither an issue reference (`#<number>` or an `/issues/<number>` URL) nor a stated reason (`no issue: <reason>`, `no issue filed, <reason>`, `none is filed because <reason>`). See "Check 8" below |
 
 **Why 3b exists (2026-08-09).** `docs/features/enlistment.md` had **51 lines** of a live-session
 record sitting below its `backlinks-start` marker, and the regeneration was already armed — today's
@@ -54,9 +55,34 @@ pass then destroyed **50 lines of `REVIEW-LOG.md`** (Review 84's entire record) 
 reason, which had to be restored from `HEAD` — the bug demonstrating itself mid-fix is the reason
 this is a check and not a note.
 
-`--fail-on-drift` gates on **5, 6, and 7**; checks 1-4 never block. Within 7, only hard violations
-gate; a `size-warn` finding is report-only by design. `--drift-only` runs just those three checks
-(about 0.15 s against the full run's 9 s) and is what the commit hook calls.
+`--fail-on-drift` gates on **5 to 8**; checks 1-4 never block. Within 7, only hard violations
+gate; a `size-warn` finding is report-only by design. `--drift-only` runs just the gating checks
+(about 0.2 s against the full run's 9 s) and is what the commit hook calls, with `--staged`.
+
+### Check 8: the RCA FOLLOW-UP owner
+
+Three times a deferred finding sat in an RCA as a bare `FOLLOW-UP` until someone filed an issue for
+it (#984), so a new one needs an owner on its own line. A table row is one line, so an issue in
+another cell counts.
+
+- **Scope is new lines only**, found the way the dash check finds them: `git diff -U0` against
+  `--dash-base` (default `HEAD`) restricted to `docs/reviews/rca-*.md`, plus untracked RCAs read in
+  full. `--staged` swaps both for the index (`git diff --cached`, file text from `git show :<path>`),
+  which is what a commit records and what the hook runs, so an unstaged edit can neither hide a
+  staged bare line nor trip the gate. A file renamed into an RCA from a non-RCA path reads as new
+  and is checked in full.
+- **Matching** runs on the line with inline code spans and link targets removed. A `#<number>`
+  counts unless it follows a label that numbers something else (finding, crash, case, step, item,
+  row, line), is a six-digit hex colour, or sits inside `C#7` or an HTML entity. A Markdown link
+  whose target is `/issues/<number>` is kept as a citation; any other link target, anchors such as
+  `#3-details` included, is dropped. The reason must follow the phrase (`no issue:` with nothing
+  after it is bare).
+- **To exempt a passing mention**, put the word in backticks (`` `FOLLOW-UP` ``). A citation in
+  backticks does not count: write the issue number in plain text.
+- **Blind spot:** an edited legacy line becomes a new line. Rewording an old bare `FOLLOW-UP` in an
+  existing RCA trips the gate until it cites an issue or a reason. Run on the 2026-10-23 tree, the
+  whole-file scan flags 26 legacy lines across the existing RCAs, none of them reachable until the
+  line is touched.
 
 ### Budget constants (check 7)
 
@@ -162,8 +188,9 @@ python tools/lint_docs.py --summary        # --- delimited, grep-friendly counts
 python tools/lint_docs.py --quick          # dead links only (fastest; tight loops)
 python tools/lint_docs.py --report docs/reviews/doc-lint-$(date +%F).md   # atomic .tmp+rename
 python tools/lint_docs.py --fail-on-dead   # exit 1 on any dead link
-python tools/lint_docs.py --fail-on-drift  # exit 1 on checks 5/6/7: the CI gate
-python tools/lint_docs.py --drift-only     # only checks 5/6/7, gating: the commit hook's mode
+python tools/lint_docs.py --fail-on-drift  # exit 1 on checks 5 to 8 (gating checks, with the full report)
+python tools/lint_docs.py --drift-only     # only the gating checks, and gate on them
+python tools/lint_docs.py --drift-only --staged   # the commit hook's mode: check 8 reads the index
 python tools/lint_docs.py --context-budget-json   # entry docs, rules and caps, for tools
 ```
 
@@ -183,9 +210,9 @@ before treating it as an all-clear.
 
 | File | Role |
 |---|---|
-| `tools/lint_docs.py` | the linter: all seven checks, stdlib only |
+| `tools/lint_docs.py` | the linter: every check above, stdlib only |
 | `tools/tests/test_lint_docs.py` | unit tests over synthetic repo trees, including the exit codes the gates act on |
-| `.claude/hooks/check-doc-config-drift.sh` | pre-commit gate; runs `--drift-only` when a commit stages a file the three checks read (`tools/test_hooks.sh` 5d pins that list to the entry docs) |
+| `.claude/hooks/check-doc-config-drift.sh` | pre-commit gate; runs `--drift-only --staged` when a commit stages a file the gating checks read, an RCA included, and quotes every `## ` section of the report except `size-warn` lines (`tools/test_hooks.sh` 5d pins that list to the entry docs and to the RCA glob) |
 | `.claude/pinned-game-version.txt` | the pin checks 2 and 6 read |
 | `.claude/hooks/detect-docs-gaps.sh` | SessionStart sibling of check 4; shares the slug algorithm |
 

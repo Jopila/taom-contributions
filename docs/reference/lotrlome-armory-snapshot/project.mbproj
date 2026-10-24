@@ -14,9 +14,20 @@
 	     old Animations/ + MonsterUsage/ subfolder copies are now superseded and unused. -->
 	<file id="soln_action_types" name="ModuleData/action_types.xml" type="action_type" />
 	<file id="soln_monster_usage_sets" name="ModuleData/monster_usage_sets.xml" type="monster_usage_set" />
-	<file id="soln_spider_monster" name="ModuleData/Monsters/LOTR/lotr_monster_spider.xml" type="monster" />
-	<!-- LOTR misc action_type declarations (CC father/mother, drunk_trio, lancer_ride, polearm_brace) -->
-	<file id="soln_lotr_misc_action_types" name="ModuleData/Animations/action_types_lotr_misc.xml" type="action_type" />
+	<!-- soln_spider_monster REMOVED 2026-08-28. It was a CUSTOM id, so GetMergedXmlForNative
+	     (which matches MbprojXmls entries by exact id) never requested it and the row was inert,
+	     exactly as the comment above warns. The spider Monster was never affected because it is
+	     registered the managed way, in SubModule.xml <XmlName id="Monsters">, which is also how
+	     the mumakil, chariot and war ram load. Do not re-add it as soln_monsters "to be safe":
+	     that would start merging it into the native monster table, a change to a shipping feature
+	     with nothing asking for it. Ledger: docs/reference/lotrlome-soln-id-fix.md -->
+	<!-- soln_lotr_misc_action_types REMOVED 2026-08-28, same dead-custom-id class as the spider row
+	     above, but this one had a real consequence: its 20 action declarations never reached the
+	     engine while action_sets.xml referenced them 221 times. They now live in the single
+	     soln_action_types file (action_types.xml, above); Animations/action_types_lotr_misc.xml is
+	     retired to a .bak. A second soln_action_types row was rejected deliberately:
+	     soln_action_types.xsd exists, so it would take the MergeElements path and risk the
+	     elephant Crash #3 KeyNotFoundException. Ledger: docs/reference/lotrlome-soln-id-fix.md -->
 	<!-- Elephant: monster def only. Elephant action_sets (as_elephant, as_elephant_town_and_village,
 	     as_elephant_map) are merged into the SINGLE soln_action_sets file above (action_sets.xml),
 	     mirroring the spider pattern. DO NOT add a second soln_action_sets entry pointing at a separate
@@ -33,6 +44,7 @@
 	     soln_monsters / soln_physics_materials / soln_collision_infos have NO XSD, so duplicating those
 	     ids is a plain concat, not a MergeElements pass. Ledger: docs/reference/lotrlome-warg-changes.md -->
 	<file id="soln_monsters" name="ModuleData/Monsters/LOTR/lotr_monster_warg.xml" type="monster" />
+	<file id="soln_monsters" name="ModuleData/Monsters/LOTR/lotr_monster_fell_warg.xml" type="monster" />
 	<file id="soln_physics_materials" name="ModuleData/physics_materials.xml" type="physics_material" />
 	<file id="soln_collision_infos" name="ModuleData/CollisionInfos/LOTR/collision_infos_warg.xml" type="collision_infos" />
 </base>

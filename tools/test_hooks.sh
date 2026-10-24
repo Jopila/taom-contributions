@@ -955,6 +955,21 @@ else
     done <<< "$ENTRY_DOC_LIST"
 fi
 
+# The FOLLOW-UP check reads docs/reviews/rca-*.md (tools/lint_docs.py _RCA_PATHSPEC); the trigger list
+# must cover that same glob, or an RCA-only commit would skip the gate (#984).
+RCA_GLOB=$("$HPY" -c 'import sys; sys.path.insert(0, "tools"); import lint_docs; print(lint_docs._RCA_PATHSPEC)' 2>/dev/null | tr -d '\r')
+rca_covered=0
+while IFS= read -r pat; do
+    IFS='|' read -r -a alts <<< "$pat"
+    for alt in "${alts[@]}"; do
+        # shellcheck disable=SC2053  # $alt is a glob on purpose, as in the hook's case
+        [[ -n "$RCA_GLOB" && "${RCA_GLOB//\*/sample-2026-10-23}" == $alt ]] && rca_covered=1
+    done
+done <<< "$RELEVANT_PATTERNS"
+[[ $rca_covered -eq 1 ]] \
+    && ok "the drift hook's RELEVANT list covers the RCA glob the FOLLOW-UP check reads ($RCA_GLOB)" \
+    || bad "the drift hook's RELEVANT list misses the RCA glob '$RCA_GLOB' the linter's FOLLOW-UP check reads"
+
 # ---------------------------------------------------------------------------
 head2 "6. check-commit-subject-version: subject cases against the real SubModule.xml"
 # The gate reads <Version value="..."> from Main/_Module/SubModule.xml, so it runs here
@@ -1473,6 +1488,49 @@ if [[ "$(decision_of "$OUT")" == allow && ! -e "$PRJ_FOREIGN/tools/ran.txt" ]]; 
 else
     bad "check-doc-config-drift judged another repository or ran its tools/lint_docs.py"
 fi
+# A commit staging only an RCA runs the linter (#984), the linter is asked to read the index, and the
+# deny quotes every `## ` section of the report except its report-only [size-warn] lines, so the
+# hook names no fixed list of checks.
+printf 'import os, sys\nopen(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ran.txt"), "w").write(" ".join(sys.argv[1:]))\nprint("# Doc lint report")\nprint("## Context budget")\nprint("")\nprint("Prose under the header.")\nprint("- `CLAUDE.md` - [size-warn] only a warning")\nprint("- `r.md` - [frontmatter-unchecked] skipped")\nprint("")\nprint("## Some future gating check")\nprint("- `docs/reviews/rca-x.md:2` - [followup-no-owner] `FOLLOW-UP bare`")\nprint("- `CLAUDE.md` - [size-warn] only a warning")\nsys.exit(1)\n' > "$PRJ_WT/tools/lint_docs.py"
+rm -f "$PRJ_WT/tools/ran.txt"
+git -C "$PRJ_WT" reset -q 2>/dev/null
+mkdir -p "$PRJ_WT/docs/reviews"
+printf '# notes\n' > "$PRJ_WT/docs/reviews/notes.md"
+git -C "$PRJ_WT" add docs/reviews/notes.md 2>/dev/null
+OUT=$(drift_run "$(cygpath -m "$PRJ_WT" 2>/dev/null || echo "$PRJ_WT")")
+if [[ "$(decision_of "$OUT")" == allow && ! -e "$PRJ_WT/tools/ran.txt" ]]; then
+    ok "check-doc-config-drift ignores a commit staging only a non-RCA review doc"
+else
+    bad "check-doc-config-drift ran for a staged docs/reviews/notes.md: $(printf '%s' "$OUT" | head -c 160)"
+fi
+git -C "$PRJ_WT" reset -q 2>/dev/null
+printf '# rca\n' > "$PRJ_WT/docs/reviews/rca-x-2026-10-23.md"
+git -C "$PRJ_WT" add docs/reviews/rca-x-2026-10-23.md 2>/dev/null
+OUT=$(drift_run "$(cygpath -m "$PRJ_WT" 2>/dev/null || echo "$PRJ_WT")")
+if [[ "$(decision_of "$OUT")" == deny && -e "$PRJ_WT/tools/ran.txt" ]] \
+    && grep -q 'followup-no-owner' <<< "$OUT" && grep -q 'Some future gating check' <<< "$OUT"; then
+    ok "check-doc-config-drift runs the linter for a staged RCA and quotes every report section"
+else
+    bad "check-doc-config-drift did not deny a staged RCA with the linter's own sections: $(printf '%s' "$OUT" | head -c 200)"
+fi
+grep -q -- '--drift-only --staged' "$PRJ_WT/tools/ran.txt" 2>/dev/null \
+    && ok "check-doc-config-drift asks the linter to read the index (--drift-only --staged)" \
+    || bad "check-doc-config-drift did not pass --drift-only --staged: $(cat "$PRJ_WT/tools/ran.txt" 2>/dev/null)"
+if grep -q 'size-warn' <<< "$OUT" || grep -q 'frontmatter-unchecked' <<< "$OUT"; then
+    bad "check-doc-config-drift quoted a report-only line ([size-warn] or [frontmatter-unchecked]) in its deny"
+else
+    ok "check-doc-config-drift drops the report-only lines from its deny"
+fi
+grep -q 'Context budget' <<< "$OUT" \
+    && bad "check-doc-config-drift kept a section header whose findings were all report-only" \
+    || ok "check-doc-config-drift drops a section left with only report-only lines"
+grep -q 'ADR-011\|config example\|version marker' <<< "$OUT" \
+    && bad "check-doc-config-drift deny prose names a fixed list of checks" \
+    || ok "check-doc-config-drift deny prose names no fixed list of checks"
+grep -qF 'Run: python tools/lint_docs.py --drift-only --staged' "$REPO/.claude/hooks/check-doc-config-drift.sh" \
+    && ok "check-doc-config-drift timeout message suggests --drift-only --staged" \
+    || bad "check-doc-config-drift timeout message does not suggest --drift-only --staged"
+git -C "$PRJ_WT" reset -q 2>/dev/null
 # The subject gate reads the <Version> of the repository the session works in, the payload's cwd.
 SUBJ_WT="$SANDBOX/subj-wt"
 mkdir -p "$SUBJ_WT/Main/_Module"

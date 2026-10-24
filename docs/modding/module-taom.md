@@ -165,7 +165,7 @@ The three `<outputDirectory>`, `<XMLDirectory>` and `<ModuleAssemblyDirectory>` 
 TAOM's five rows are its only registration for `lotr_uruk_voice_def.xml`, `lotr_dwarf_voice_def.xml`, `lotr_uruk_hai_voice_def.xml`, `VoiceDefinitions/LOTR/lotr_warg_voice_def.xml` and `module_sounds.xml`. None of those five names appears anywhere in `SubModule.xml`, so dropping `project.mbproj` from a release would silently kill every custom voice and sound while the build and the tests stayed green; `tools/package_release.py:126-135` carries a standing note never to exclude it. Two more facts about those rows:
 
 - `soln_voice_definitions.xsd` exists in the install's `XmlSchemas/` and `soln_module_sound.xsd` does not. <!-- measured: test -f "<game>/XmlSchemas/soln_voice_definitions.xsd"; test -f "<game>/XmlSchemas/soln_module_sound.xsd" 2026-09-05 --> With a schema present, `GetMergedXmlForNative` keeps the schema path (`MBObjectManager.cs:925-929`) and the four voice rows merge through `MergeElements` instead of being appended; `python tools/audit_mbproj_registration.py --module TAOM` reports exactly that as one `MERGE-RISK` warning and zero errors. <!-- measured: python tools/audit_mbproj_registration.py --module TAOM 2026-09-05 --> After the merge, `CreateProcessedVoiceDefinitionsXMLForNative` folds every `voice_type_declarations` block into the first and merges `voice_definition` elements whose first attribute matches (`Module.cs:1447-1470`).
-- The `<file>` rows carry a `type` attribute the engine never reads, so a wrong `type` is invisible and a wrong `id` is invisible; only the audit tool sees either.
+- A managed row loads only when its exact `id` is requested; native code also loads thirteen kinds of file by `type`, whatever the id (`NATIVE_BY_TYPE` in `tools/audit_mbproj_registration.py`). An invented `id` on any other `type` is invisible in game, and only the audit tool sees it. The audit does not see a wrong `type` on a row whose id it already accepts, such as TAOM's own `soln_module_sound` row (known gap, #987 item 1).
 
 ### Files the engine opens with no registration at all
 
@@ -260,9 +260,9 @@ Three verbatim pieces. The first is the whole of `project.mbproj`, the second is
 </base>
 ```
 
-1. **`id`** is the only thing that decides whether the row loads. It must be one of the ids the engine asks for by name (`Module.cs:1366-1504`); `soln_voice_definitions` and `soln_module_sound` are two of them.
+1. **`id`** decides whether a managed row loads. It must be one of the ids the engine asks for by name (`Module.cs:1366-1504`); `soln_voice_definitions` is one. `soln_module_sound` loads through native's by-type loader, and the audit's id stand-in also holds that id, so a wrong `type` on it would go unflagged (#987 item 1).
 2. **`name`** is a path from the module root with its extension written out, so `ModuleData/` has to be part of it (`ModuleHelper.cs:211-214`).
-3. **`type`** is never read (`XmlResource.cs:122-138`). Keep it for the Kit; do not expect the engine to react to it.
+3. **`type`** is never read by the managed loader (`XmlResource.cs:122-138`), but native code loads thirteen kinds of file by `type` and ignores their id (`NATIVE_BY_TYPE` in `tools/audit_mbproj_registration.py`). For any other `type`, keep it for the Kit and do not expect the engine to react to it.
 
 <!-- excerpt file="Main/_Module/SubModule.xml" -->
 ```xml

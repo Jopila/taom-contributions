@@ -1626,6 +1626,11 @@ out). That limitation is real, but it is not why #448 is missed; the fix repeate
   as a test case before writing the claim. If the check cannot catch it, the test pins the limitation
   (`test_issue_448s_module_level_sacks_are_not_read`) and the docs say what it cannot see.
 - **Source:** `docs/reviews/rca-release-shader-cache-check-2026-10-02.md` F2.
+- **Recurrence (2026-10-23, #983):** the `project.mbproj` audit was rewritten without replaying the 2026-06 spider
+  incident it was built for; its fixtures had no `type` attribute while every real row has one, and the new type rule
+  passed the incident rows. The fix's own first regression test then repeated the gap one level down: it ran without a
+  Native manifest carrying types, so re-adding the vanilla-type union still passed. Replay the incident with every input
+  the code reads, each in its real shape. Source: `docs/reviews/rca-review-followups-2026-10-23.md` finding 1 and C1.
 
 ### A binary reader's fixture takes every width branch the shipped files take, proven by mutation (plan 035, 2026-10-02)
 The packager's DebuggableAttribute reader had one fixture: PE32+, 2-byte heap and coded indexes, one row per table.

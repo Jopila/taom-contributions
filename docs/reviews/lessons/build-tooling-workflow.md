@@ -4363,6 +4363,10 @@ UIExtenderEx's `Register(Assembly)` reads the types of the one assembly it is gi
 - **Why missed:** the fix was tested against the one false positive it removed, not against the damage the old behaviour happened to report.
 - **Prevent:** before you narrow what a gate or a writer matches, list every input the old code rejected or changed, and keep a test that each one still fails. For a marker region, write through `tools/_marker_region.py` `replace_region` (#975), which counts BEGIN and END and refuses anything but zero or one complete region.
 - **Source:** [rca-ui-data-sweep-2026-10-23.md](../rca-ui-data-sweep-2026-10-23.md) findings 1 to 3.
+- **Recurrence (2026-10-23, #983):** the same day, a rewrite of `audit_mbproj_registration.py` that taught it a second
+  loader widened the accepted set from the 13 types native reads by type to its whole 41-name table plus vanilla's
+  types, and stopped catching the spider-era dead rows the old id-only check caught. Source:
+  `docs/reviews/rca-review-followups-2026-10-23.md` finding 1.
 
 ### Before you add a gate, prove no gate already catches the case (#974, 2026-10-23)
 A review said nothing caught a repeated clan, hero or kingdom id, and the claim went into an RCA, a lesson, two docs and an issue, then three new duplicate-id schemas. The next review showed `SCHEMA_INVALID` already blocked it at commit: the engine XSDs declare those ids unique (`xs:unique`), and the hook validates the registered files against them. The schemas only reported each duplicate twice and were removed.
@@ -4420,3 +4424,15 @@ shape or from its own parser instead of from the engine's consumer.
 - **Why missed:** plan 027 gave every gate one reader for the command text, but each gate still found the command word itself, and the test rows only held bare `git` forms.
 - **Prevent:** a gate reads segments from `_shellwords.py commands` and a parsed call through `_git_call`, which share `command_index`. A new gate's test rows include a wrapped form and a grammar form for each case it gates (`hook-authoring.md` forms table).
 - **Source:** [adopt-rtk-2026-10-23.md](../adopt-rtk-2026-10-23.md); issue #985.
+### A gate is tested through the thing that runs it, not only as a function (#984, 2026-10-23)
+
+The RCA FOLLOW-UP check in `lint_docs.py` was built test first and passed every test, but the commit hook that runs
+`--drift-only` only starts the linter when a staged path is on its trigger list, and `docs/reviews/` was not; an RCA-only
+commit (9 of the last 60 RCA commits) never reached the check. The hook also judged the working tree, so another
+session's untracked draft could block a commit, and its deny message extracted named sections only, so the new failure
+came with no detail.
+- **Why missed:** the brief named the linter, not its consumer; `tools/test_hooks.sh` section 5d (the trigger list
+  covers what the gate checks) exists for exactly this, after the #647 review, and was not extended.
+- **Prevent:** a brief for a new gate names every consumer (the hook, the skill step, `/verify`) and asks for one test
+  through each: the hook fires for the gate's own file paths, judges what the commit records, and quotes the failure.
+- **Source:** `docs/reviews/rca-review-followups-2026-10-23.md` findings 2 to 4.

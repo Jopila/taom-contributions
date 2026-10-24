@@ -1111,6 +1111,15 @@ class NativeBucketTests(_Tree):
         found, problems = vx.native_files(self.module)
         self.assertEqual((found, problems), ({}, []))
 
+    def test_mbproj_rows_returns_id_name_type_and_one_problem_per_bad_row(self):
+        self._mbproj('<base><file name="a.xml" id="x" type="t"/><file id="y" name="b.xml"/>'
+                            '<file id="z"/><!-- <file id="c" name="c.xml"/> --></base>')
+        rows, problems = vx.mbproj_rows(self.md / "project.mbproj")
+        self.assertEqual(rows, [("x", "a.xml", "t"), ("y", "b.xml", None)])
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn('<file id="z">', problems[0])
+        self.assertEqual(vx.mbproj_rows(self.md / "absent.mbproj"), ([], []))
+
     def test_native_files_returns_the_files_and_the_problems(self):
         self._mbproj()
         found, problems = vx.native_files(self.module)
