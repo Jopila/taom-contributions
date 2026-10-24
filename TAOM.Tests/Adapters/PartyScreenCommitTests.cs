@@ -43,6 +43,7 @@ public class PartyScreenCommitTests
     [DataRow("Main/Adapters/SwornAnewAdapter.cs", "SwornAnew")]
     [DataRow("Main/Adapters/HardQuestionsActionAdapter.cs", "HardQuestions")]
     [DataRow("Main/Adapters/GiftItemAdapter.cs", "Gifts")]
+    [DataRow("Main/Adapters/ProvenderWorldAdapter.cs", "Provender")]
     public void TheAdapterCommit_GoesThroughTheHelper_UnderItsOwnTag(string path, string tag)
     {
         var src = RepoPaths.ReadSource(path, stripComments: true);

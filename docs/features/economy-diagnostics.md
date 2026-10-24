@@ -54,7 +54,7 @@ and is an inflow).
 | `DailyMint` | `ItemConsumptionBehavior.UpdateTownGold` → `GetTownGoldChange` |
 | `ResidentConsumption` | `ItemConsumptionBehavior.MakeConsumption` — residents buying shelf stock |
 | `VillagerDelivery` | `SellGoodsForTradeAction` — the prime suspect, see below |
-| `Trade` | `SellItemsAction` — **AI only** (all 7 callers gate on `IsMainParty`): caravan sales/purchases, AI party food + horse purchases, AI lord loot sales |
+| `Trade` | `SellItemsAction`: **AI only** (all 7 vanilla callers gate on `IsMainParty`): caravan sales/purchases, AI party food + horse purchases, AI lord loot sales; plus the Provender-master's purchases for the player ([provender.md](provender.md)) |
 | `Other` | anything untagged: **the player's own trade screen**, workshops, bandit-loot returns, the 20,000 town init |
 
 **The prime suspect.** `SellGoodsForTradeAction.ApplyInternal` (:52-57) walks a villager's entire
@@ -159,7 +159,9 @@ Wiring: `Main/IoC.cs`, `Main/SubModule.cs` (`Patch68_EconomyDiagnostics` in the 
 - **`Trade` is AI-only, and one bucket.** All seven `SellItemsAction.Apply` callers gate on
   `IsMainParty`, so the player's own market trades are **not** in it — they reach `ChangeGold` through
   `InventoryLogic.DoneLogic` → `MerchantInventoryListener.SetGold` and land in `Other`. **A large
-  `Other` is therefore not evidence of a workshop drain — check your own trading first.** Note the
+  `Other` is therefore not evidence of a workshop drain; check your own trading first.** The one
+  player-side `SellItemsAction` caller is the Provender-master's food and ration purchases
+  (`ProvenderWorldAdapter.Buy`), which land in `Trade`. Note the
   asymmetry: a player *sale* is clamped by the zero-floor, but a player *purchase* credits the town
   uncapped and can mask a real drain in the NET line. If splitting is ever warranted the target is
   the public `InventoryLogic.DoneLogic`, never the private nested listener.

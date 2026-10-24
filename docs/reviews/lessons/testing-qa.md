@@ -2228,3 +2228,10 @@ engine-executing test joins its gate in the same commit.
 - **Prevent:** a brief for any test that reflects over engine types names the RefAsm build and unit filter as a
   required run; read attribute metadata (`CustomAttributes`, by type name) instead of constructing attributes.
 - **Source:** `docs/reviews/rca-loremasters-line-2026-10-23.md` finding 2.
+### A fake for an engine quantity must take every shape the engine gives it (Provender-master, 2026-10-23)
+A flat-price purchase fake, days of food without a herd, a race list mocked to match the data under test and a castle that
+is also a town each let a wrong rule pass. Fake rising prices, include the herd in the food the engine reports, read live
+ids from the install (`LiveInstall`), and never assert a state the engine cannot produce (or label it defensive).
+- **Why missed:** each fake was written from the rule's intent, not from the engine's behaviour.
+- **Prevent:** when a fake stands in for an engine figure, write one test that feeds it the engine's awkward shape.
+- **Source:** `docs/reviews/rca-provender-2026-10-23.md` pattern B.

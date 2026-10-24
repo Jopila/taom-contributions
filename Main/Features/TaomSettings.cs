@@ -2617,4 +2617,51 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Enable Sworn Anew", Order = 0, RequireRestart = false,
         HintText = "When enabled (default), a captured lord can be asked to join your kingdom, in a conversation or from the party screen, and serves it instead of being ransomed. The lord must hold a clan of another kingdom (not its ruler, and not a mercenary or minor clan), must be held by your party or in a settlement your clan owns, and must not be a lord who can never be captured, such as Sauron and the Nazgul. A Free Peoples lord is never asked to join an Evil realm, and an Evil lord is never asked to join a Free one. The base game's blood feud rule still applies. When off, the base game's rules apply: only a kingdom's ruler can recruit a captured lord, through its 'join us, and be set free' line, which checks no realm. When on, both lines pass this check, and the ruler-only line also needs the lord held by your party or in your clan's dungeon. Applies at once, no restart.")]
     public bool SwornAnewEnabled { get; set; } = TAOM.Features.SwornAnew.SwornAnewSettingsProvider.DefaultEnabled;
+    // --- Provender-master (docs/features/provender.md, #908) ---
+    //
+    // Standing orders and morale options for the hero in the party's Quartermaster role. Every value is read when an order is
+    // judged, through ProvenderSettingsProvider's one cached settings reference, so none needs a restart. GroupOrder 70
+    // follows Hearth Roll at 69; 100 is the Map Tools group. Defaults and ranges live in ProvenderSettingsProvider so the
+    // fallback before MCM is up and the hint texts cannot drift from them. These are new settings, so no existing TAOM.json
+    // holds an older default for any of them.
+
+    [SettingPropertyGroup("Provender-master", GroupOrder = 70)]
+    [SettingPropertyBool("Enable Provender-master", Order = 0, RequireRestart = false,
+        HintText = "Lets the hero you name Quartermaster (never you, and only while that hero is in your party) take standing orders in conversation: buy food at markets, slaughter livestock when the stores run low, and lift the host's spirits with pay or drink. Orders stand down for an enlisted player and for a co-op client. Default: on.")]
+    public bool ProvenderEnabled { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultEnabled;
+
+    [SettingPropertyGroup("Provender-master")]
+    [SettingPropertyInteger("Low Food Days", TAOM.Features.Provender.ProvenderSettingsProvider.MinLowFoodDays, TAOM.Features.Provender.ProvenderSettingsProvider.MaxLowFoodDays, Order = 1, RequireRestart = false,
+        HintText = "When the food in the stores, not counting the herd, lasts fewer days than this, the slaughter order turns livestock into meat, a head at a time, until it lasts this long again. Between 1 and 30. Default: 3.")]
+    public int ProvenderLowFoodDays { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultLowFoodDays;
+
+    [SettingPropertyGroup("Provender-master")]
+    [SettingPropertyInteger("Livestock Kept Per Type", TAOM.Features.Provender.ProvenderSettingsProvider.MinKeepPerType, TAOM.Features.Provender.ProvenderSettingsProvider.MaxKeepPerType, Order = 2, RequireRestart = false,
+        HintText = "The slaughter order always leaves this many head of each livestock type alive. The game itself still slaughters livestock when every other food is gone. Between 0 and 20. Default: 2.")]
+    public int ProvenderKeepPerType { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultKeepPerType;
+
+    [SettingPropertyGroup("Provender-master")]
+    [SettingPropertyInteger("Small Pay: Gold Per Soldier", TAOM.Features.Provender.ProvenderSettingsProvider.MinPayGold, TAOM.Features.Provender.ProvenderSettingsProvider.MaxPayGold, Order = 3, RequireRestart = false,
+        HintText = "Gold paid to each soldier (not you) by the small pay option, in a settlement or a ready field camp. Between 10 and 500. Default: 50.")]
+    public int ProvenderSmallPayGold { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultSmallPayGold;
+
+    [SettingPropertyGroup("Provender-master")]
+    [SettingPropertyInteger("Small Pay: Morale Gained", TAOM.Features.Provender.ProvenderSettingsProvider.MinPayMorale, TAOM.Features.Provender.ProvenderSettingsProvider.MaxPayMorale, Order = 4, RequireRestart = false,
+        HintText = "Morale the party gains from the small pay option. Between 1 and 30. Default: 5.")]
+    public int ProvenderSmallPayMorale { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultSmallPayMorale;
+
+    [SettingPropertyGroup("Provender-master")]
+    [SettingPropertyInteger("Large Pay: Gold Per Soldier", TAOM.Features.Provender.ProvenderSettingsProvider.MinPayGold, TAOM.Features.Provender.ProvenderSettingsProvider.MaxPayGold, Order = 5, RequireRestart = false,
+        HintText = "Gold paid to each soldier (not you) by the large pay option. Never read below the small pay's gold. Between 10 and 500. Default: 100.")]
+    public int ProvenderLargePayGold { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultLargePayGold;
+
+    [SettingPropertyGroup("Provender-master")]
+    [SettingPropertyInteger("Large Pay: Morale Gained", TAOM.Features.Provender.ProvenderSettingsProvider.MinPayMorale, TAOM.Features.Provender.ProvenderSettingsProvider.MaxPayMorale, Order = 6, RequireRestart = false,
+        HintText = "Morale the party gains from the large pay option. Never read below the small pay's morale. Between 1 and 30. Default: 10.")]
+    public int ProvenderLargePayMorale { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultLargePayMorale;
+
+    [SettingPropertyGroup("Provender-master")]
+    [SettingPropertyInteger("Wage Days Kept", TAOM.Features.Provender.ProvenderSettingsProvider.MinWageDaysKept, TAOM.Features.Provender.ProvenderSettingsProvider.MaxWageDaysKept, Order = 7, RequireRestart = false,
+        HintText = "The food order never spends the gold your party needs for this many days of wages, so buying food cannot leave your troops unpaid. 0 lets it spend the whole purse. Morale purchases are not limited: they show their price. Between 0 and 30. Default: 3.")]
+    public int ProvenderWageDaysKept { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultWageDaysKept;
 }

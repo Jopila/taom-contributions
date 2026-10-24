@@ -75,7 +75,8 @@ internal static class TownGoldFlowTagPatches
     /// <summary>
     /// AI trade in both directions — caravan sales/purchases, AI party food and horse purchases, and
     /// AI lord loot sales. All seven callers of this method gate on `IsMainParty`, so the player's own
-    /// market trades are NOT here; they bypass `SellItemsAction` entirely (see `TownGoldFlow.Other`).
+    /// market trades are NOT here; they bypass `SellItemsAction` entirely (see `TownGoldFlow.Other`). The one
+    /// player-side caller is the Provender-master's purchases (`ProvenderWorldAdapter.Buy`), which land here.
     /// One bucket on purpose: telling the AI flows apart needs a tag per caller, and the measurement
     /// comes first.
     /// </summary>

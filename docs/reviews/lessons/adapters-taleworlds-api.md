@@ -1445,3 +1445,20 @@ second time.
   first `PartyState` you find. Any new forced Done goes through that helper.
 - **Source:** `docs/reviews/rca-sworn-anew-2026-10-24.md` finding 2 (a second occurrence of
   `rca-hard-questions-2026-10-19.md` H4).
+### A bulk engine action prices and notifies per unit: quote from the same per-unit model (Provender-master, 2026-10-23)
+`SellItemsAction.ApplyInternal` re-prices every unit, and a town re-stocks after each one (`RosterUpdatedEvent` to
+`TownMarketData.AddNumberInStore`), so n units cost more than n times the first price; every call the player pays also shows
+a gold notice and a coin sound (`DefaultNotificationsCampaignBehavior`). Quote and size a purchase from the per-unit prices
+(`TradeItemPriceFactorModel.GetPrice` over the falling `InStoreValue`; a village sale moves no price), and make one call
+per batch.
+- **Why missed:** the plan read the action's signature, not its loop; the test fake priced every unit flat.
+- **Prevent:** before calling an engine action with a count, read its loop for per-unit pricing, events and notices.
+- **Source:** `docs/reviews/rca-provender-2026-10-23.md` row 2 and S1.
+
+### Conversation option text resolves after every condition: give each line its own variables (Provender-master, 2026-10-23)
+`ConversationManager.GetSentenceOptions` keeps an unresolved copy of each option's text, and `MissionConversationVM`
+resolves them all after the conditions have run (`ConversationItemVM`), so player lines that set the same
+`MBTextManager` variable all show the last line's value.
+- **Why missed:** caught before review by reading the view; it would have shipped otherwise, since only the game shows it.
+- **Prevent:** every player line sets variables no other line on the same token uses; a test pins it from the source.
+- **Source:** `docs/reviews/rca-provender-2026-10-23.md` row S3.

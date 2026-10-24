@@ -48,7 +48,8 @@ public enum TownGoldFlow
     ///
     /// Emphatically NOT the player's own market trades — those never touch this action at all and
     /// land in <see cref="Other"/>. Calling this bucket "player trades" would send an investigator
-    /// after the wrong drain.
+    /// after the wrong drain. One exception: the Provender-master's purchases for the player
+    /// (<c>ProvenderWorldAdapter.Buy</c>) go through this action and land here.
     /// </summary>
     Trade,
 }

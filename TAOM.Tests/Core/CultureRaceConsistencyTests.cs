@@ -117,7 +117,7 @@ public class CultureRaceConsistencyTests
     /// Race ids the installed skins.xml files register. They live in the Armory, a game-install
     /// path, so a caller skips (Inconclusive) rather than fails when the install is not present.
     /// </summary>
-    private static HashSet<string> RegisteredRaces()
+    internal static HashSet<string> RegisteredRaces()
     {
         var skins = new[]
         {

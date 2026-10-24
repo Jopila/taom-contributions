@@ -23,6 +23,7 @@ using TAOM.Features.FromTheAshes;
 using TAOM.Features.GoodDeeds;
 using TAOM.Features.LongMemory;
 using TAOM.Features.TokensOfEsteem;
+using TAOM.Features.Provender;
 using TAOM.Features.FieldCommission.Domain;
 using TAOM.Features.NameplateCull;
 using TAOM.Features.Namegiving;
@@ -107,6 +108,8 @@ public class CampaignHotPathSettingsProvidersTests
     // and at the two no-resist options (the option id is tested before the read). The accessor still takes the settings once.
     [DataRow(typeof(GoodDeedsSettingsProvider))]
     [DataRow(typeof(LongMemorySettingsProvider))]
+    // Read on a main-party settlement visit or a daily tick while an order is on, the Quartermaster's listing and each morale line.
+    [DataRow(typeof(ProvenderSettingsProvider))]
     // Not a hot path: both switches are read once, when the town management window opens. The accessor still takes the settings once.
     [DataRow(typeof(ReevesLedgerSettingsProvider))]
     // Not a hot path: read once per skill view model, when the screen builds it, never per click or frame. The accessor still takes the settings once.
@@ -165,6 +168,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IGiftSettingsProvider), typeof(GiftSettingsProvider))]
     [DataRow(typeof(IGoodDeedsSettingsProvider), typeof(GoodDeedsSettingsProvider))]
     [DataRow(typeof(ILongMemorySettingsProvider), typeof(LongMemorySettingsProvider))]
+    [DataRow(typeof(IProvenderSettingsProvider), typeof(ProvenderSettingsProvider))]
     [DataRow(typeof(ReevesLedgerSettingsProvider), typeof(ReevesLedgerSettingsProvider))]
     [DataRow(typeof(LoremastersLineSettingsProvider), typeof(LoremastersLineSettingsProvider))]
     [DataRow(typeof(HearthRollSettingsProvider), typeof(HearthRollSettingsProvider))]
@@ -228,6 +232,21 @@ public class CampaignHotPathSettingsProvidersTests
 
         Assert.IsFalse(sut.Get().Enabled);
         Assert.AreEqual(70, sut.Get().RaidOwnerAmount);
+    }
+
+    [TestMethod]
+    public void Provender_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new ProvenderSettingsProvider(mcm);
+        Assert.IsTrue(sut.Get().Enabled);
+        Assert.AreEqual(3, sut.Get().WageDaysKept);
+
+        mcm.ProvenderEnabled = false;
+        mcm.ProvenderWageDaysKept = 12;
+
+        Assert.IsFalse(sut.Get().Enabled);
+        Assert.AreEqual(12, sut.Get().WageDaysKept);
     }
 
     [TestMethod]

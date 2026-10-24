@@ -3871,4 +3871,33 @@
 	<!-- Keep Wardens (#888), TaomSettings.cs -->
 	<string id="taom_keep_wardens_label" text="{=taom_keep_wardens_label}Castle Patrols" />
 	<string id="taom_keep_wardens_hint" text="{=taom_keep_wardens_hint}A castle with a built Guard House fields one patrol party of its owner's culture at a time, as a town does: stronger at each Guard House level. A lost patrol is replaced after 10, 8 or 6 days (castle_patrols.json). When off, no new castle patrol is queued, and the game's daily check removes the castle patrols already out. Default: on." />
+	<!-- ProvenderWorldAdapter -->
+	<string id="taom_provender_msg_food" text="{=taom_provender_msg_food}Your Provender-master bought {COUNT} food for {GOLD} gold." />
+	<string id="taom_provender_msg_slaughter" text="{=taom_provender_msg_slaughter}Your Provender-master slaughtered {COUNT} head of livestock for meat." />
+	<string id="taom_provender_msg_paid" text="{=taom_provender_msg_paid}You paid your soldiers {GOLD} gold. Morale rises by {COUNT}." />
+	<string id="taom_provender_msg_drank" text="{=taom_provender_msg_drank}The host shares out {COUNT} of the stores. Spirits rise, but the camp falls into disorder." />
+	<!-- Provender -->
+	<string id="taom_provender_entry" text="{=taom_provender_entry}I have orders for you, Provender-master." />
+	<string id="taom_provender_greet" text="{=taom_provender_greet}The stores are in my keeping. What would you have me do?" />
+	<string id="taom_provender_food_on" text="{=taom_provender_food_on}Buy food for the host whenever we reach a market." />
+	<string id="taom_provender_food_off" text="{=taom_provender_food_off}Stop buying food at the markets." />
+	<string id="taom_provender_slaughter_on" text="{=taom_provender_slaughter_on}When the stores run low, slaughter some of the herd." />
+	<string id="taom_provender_slaughter_off" text="{=taom_provender_slaughter_off}Leave the herd alone from now on." />
+	<string id="taom_provender_morale" text="{=taom_provender_morale}The host needs its spirits lifted." />
+	<string id="taom_provender_done" text="{=taom_provender_done}That is all." />
+	<string id="taom_provender_ack" text="{=taom_provender_ack}It will be done. Anything else?" />
+	<string id="taom_provender_morale_ask" text="{=taom_provender_morale_ask}Coin or drink, it is your choice. Both cost us something." />
+	<string id="taom_provender_pay_small" text="{=taom_provender_pay_small}Pay every soldier {PROV_SMALL_EACH} gold ({PROV_SMALL_TOTAL} in all)." />
+	<string id="taom_provender_pay_large" text="{=taom_provender_pay_large}Pay every soldier {PROV_LARGE_EACH} gold ({PROV_LARGE_TOTAL} in all), a generous reward." />
+	<string id="taom_provender_drink" text="{=taom_provender_drink}Share out {PROV_DRINK_COUNT} {PROV_DRINK_ITEM} among the host." />
+	<string id="taom_provender_drink_buy" text="{=taom_provender_drink_buy}Share out {PROV_BUY_COUNT} {PROV_BUY_ITEM} among the host, buying {PROV_BUY_EXTRA} here for {PROV_BUY_GOLD} gold." />
+	<string id="taom_provender_morale_back" text="{=taom_provender_morale_back}Not now." />
+	<string id="taom_provender_morale_lifted" text="{=taom_provender_morale_lifted}It is done. Listen to them: the mood of the camp is better already." />
+	<string id="taom_provender_morale_failed" text="{=taom_provender_morale_failed}Something went wrong, and nothing was handed out." />
+	<string id="taom_provender_block_place" text="{=taom_provender_block_place}Only in a settlement or a ready field camp." />
+	<string id="taom_provender_block_troops" text="{=taom_provender_block_troops}You have no soldiers to reward." />
+	<string id="taom_provender_block_gold" text="{=taom_provender_block_gold}You do not carry enough gold." />
+	<string id="taom_provender_block_stock" text="{=taom_provender_block_stock}The stores and the market here do not hold enough." />
+	<string id="taom_provender_block_market" text="{=taom_provender_block_market}The stores do not hold enough, and there is no market here to buy the rest." />
+	<string id="taom_provender_block_closed" text="{=taom_provender_block_closed}This cannot be done now." />
 </strings>

@@ -1,0 +1,8 @@
+{
+  "_about": "Provender-master rations (docs/features/provender.md, #908). Each ration is an ITEM the host is given to lift its spirits: 'item' is an item id, 'troopsPerItem' how many troops one item serves (1 to 1000), 'morale' what it adds (1 to 30). The host is given the ration its MAJORITY troop race prefers, else the one the party leader's culture prefers, else the one marked 'default' (at most one). Races: skin names from skins.xml. Cultures: the Rohirrim are 'vlandia', Dunland is 'empire', Khand is 'battania'. At load every item, race and culture is checked against the game and an unknown one is dropped with one log line. There is no mead in the game, so there is no mead ration. Edits need a full game restart.",
+  "rations": [
+    { "id": "beer", "item": "beer", "troopsPerItem": 7, "morale": 15, "default": true, "races": ["dwarf"], "cultures": ["vlandia"] },
+    { "id": "wine", "item": "wine", "troopsPerItem": 20, "morale": 20, "races": ["elf"] },
+    { "id": "meat", "item": "meat", "troopsPerItem": 5, "morale": 15, "races": ["orc", "uruk", "uruk_hai", "pale_uruk", "dg_uruk", "goblin", "berserker", "cave_troll", "hill_troll"] }
+  ]
+}

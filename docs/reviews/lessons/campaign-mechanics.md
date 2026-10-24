@@ -1011,3 +1011,20 @@ The co-op server checks no alignment, so a client with the veto off could recrui
 - **Prevent:** split a feature's parts by what they do. A step that only hides an option locally has no authority to
   conflict with and runs everywhere; a step that writes campaign state keeps the co-op suppression.
 - **Source:** `docs/reviews/rca-sworn-anew-2026-10-24.md` finding 3.
+### ItemRoster.TotalFood counts the herd: measure the stores without it (Provender-master, 2026-10-23)
+`ItemRoster.OnRosterUpdated` adds `count * MeatCount` to `TotalFood` for every live head, and `GetNumDaysForFoodToLast`
+divides that total, so turning a head into meat never moves the engine's days of food. A slaughter order keyed on it fires
+every day until each herd is at its floor. Measure the food items plus `RemainingFoodPercentage / 100` against the burn.
+- **Why missed:** the plan read the getter, not the roster code that builds the total (a repeat of the Lost Footing lesson
+  in adapters-taleworlds-api.md, three days earlier).
+- **Prevent:** for every engine figure a rule measures, cite the line that builds it and one vanilla caller in the plan.
+- **Source:** `docs/reviews/rca-provender-2026-10-23.md` row 1.
+
+### An automatic spend keeps a reserve the player cannot see it take (Provender-master, 2026-10-23)
+An order that buys on its own (food on every market visit) spent down to 0 gold; the next wage tick then pays short and
+applies the unpaid-wage morale penalty (`DefaultClanFinanceModel`). Keep N days of `MobileParty.TotalWage` out of any
+automatic budget; a purchase the player clicks, with its price shown, needs no reserve.
+- **Why missed:** the reference rule ("paid from the leader's gold") was copied without asking what an automatic spend
+  must never take.
+- **Prevent:** for every automatic spend, name what it must leave untouched before writing the budget.
+- **Source:** `docs/reviews/rca-provender-2026-10-23.md` row 3.

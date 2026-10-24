@@ -6578,6 +6578,59 @@
     <string id="taom_hr_age_one" text="{AGE} year old" />
 
     <string id="taom_hr_age_many" text="{AGE} years old" />
+    <string id="taom_provender_msg_food" text="Your Provender-master bought {COUNT} food for {GOLD} gold." />
+
+    <string id="taom_provender_msg_slaughter" text="Your Provender-master slaughtered {COUNT} head of livestock for meat." />
+
+    <string id="taom_provender_msg_paid" text="You paid your soldiers {GOLD} gold. Morale rises by {COUNT}." />
+
+    <string id="taom_provender_msg_drank" text="The host shares out {COUNT} of the stores. Spirits rise, but the camp falls into disorder." />
+
+    <string id="taom_provender_entry" text="I have orders for you, Provender-master." />
+
+    <string id="taom_provender_greet" text="The stores are in my keeping. What would you have me do?" />
+
+    <string id="taom_provender_food_on" text="Buy food for the host whenever we reach a market." />
+
+    <string id="taom_provender_food_off" text="Stop buying food at the markets." />
+
+    <string id="taom_provender_slaughter_on" text="When the stores run low, slaughter some of the herd." />
+
+    <string id="taom_provender_slaughter_off" text="Leave the herd alone from now on." />
+
+    <string id="taom_provender_morale" text="The host needs its spirits lifted." />
+
+    <string id="taom_provender_done" text="That is all." />
+
+    <string id="taom_provender_ack" text="It will be done. Anything else?" />
+
+    <string id="taom_provender_morale_ask" text="Coin or drink, it is your choice. Both cost us something." />
+
+    <string id="taom_provender_pay_small" text="Pay every soldier {PROV_SMALL_EACH} gold ({PROV_SMALL_TOTAL} in all)." />
+
+    <string id="taom_provender_pay_large" text="Pay every soldier {PROV_LARGE_EACH} gold ({PROV_LARGE_TOTAL} in all), a generous reward." />
+
+    <string id="taom_provender_drink" text="Share out {PROV_DRINK_COUNT} {PROV_DRINK_ITEM} among the host." />
+
+    <string id="taom_provender_morale_back" text="Not now." />
+
+    <string id="taom_provender_morale_lifted" text="It is done. Listen to them: the mood of the camp is better already." />
+
+    <string id="taom_provender_morale_failed" text="Something went wrong, and nothing was handed out." />
+
+    <string id="taom_provender_block_place" text="Only in a settlement or a ready field camp." />
+
+    <string id="taom_provender_block_troops" text="You have no soldiers to reward." />
+
+    <string id="taom_provender_block_gold" text="You do not carry enough gold." />
+
+    <string id="taom_provender_block_stock" text="The stores and the market here do not hold enough." />
+
+    <string id="taom_provender_block_market" text="The stores do not hold enough, and there is no market here to buy the rest." />
+
+    <string id="taom_provender_block_closed" text="This cannot be done now." />
+
+    <string id="taom_provender_drink_buy" text="Share out {PROV_BUY_COUNT} {PROV_BUY_ITEM} among the host, buying {PROV_BUY_EXTRA} here for {PROV_BUY_GOLD} gold." />
 
     <string id="taom_keep_wardens_label" text="Castle Patrols" />
 

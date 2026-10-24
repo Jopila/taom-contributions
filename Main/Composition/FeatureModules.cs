@@ -75,5 +75,6 @@ internal static class FeatureModules
         new Features.AlignmentRecruitment.AlignmentRecruitmentModule(),
         new Features.UnlookedForAid.UnlookedForAidModule(),
         new Features.SwornAnew.SwornAnewModule(),
+        new Features.Provender.ProvenderModule(),
     };
 }
