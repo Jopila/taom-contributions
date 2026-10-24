@@ -10,7 +10,8 @@ Why this exists: it was written to author the NativeSkinFixes detours (removed
 specific, so every value had to be proven against the installed binary before it
 shipped. It now serves native crash triage and the AnimMemory probe's signature
 pins. The `diff` subcommand and its TARGETS table still hold the old NativeSkinFixes
-hook RVAs and have no current use.
+hook RVAs and have no current use; to carry an RVA to a newer build, use
+tools/native_build_match.py.
 
 Capabilities:
   * PE load (pefile): image base, section map, RVA<->file-offset.

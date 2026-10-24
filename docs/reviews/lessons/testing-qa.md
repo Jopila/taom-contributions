@@ -2245,3 +2245,12 @@ brush that draws unstyled in game could have passed.
 - **Prevent:** before writing a gate over engine resources, read the loader (`UIResourceManager`, `ResourceDepot`,
   `BrushFactory` here) and the nearest sibling gate, model the same set, and pin one name the model must exclude.
 - **Source:** [rca-messengers-brushes-2026-10-24.md](../rca-messengers-brushes-2026-10-24.md) finding 2.
+
+### An oracle over two near-identical inputs proves little; add a hard control (#997, 2026-10-24)
+`native_build_match.py` scored zero wrong on v1.5.3 to v1.5.4 and v1.5.4 to v1.5.5, whose binaries differ by a handful of
+functions. Run on the v1.5.5 client against the wEditor build (a separate compile), it made 15 wrong matches, 14 by unique
+hash: a class gained a member, the field offsets shifted, and a neighbour's code became identical to the old function's.
+- **Why missed:** both oracle pairs were easy; nothing measured the tool where its matching key collides.
+- **Prevent:** test a matcher, classifier or gate on one input built to stress its key (here another compile of the same
+  engine), and keep that control in the integration test.
+- **Source:** [adopt-rea-2026-10-24.md](../adopt-rea-2026-10-24.md) "The review's HIGH finding".

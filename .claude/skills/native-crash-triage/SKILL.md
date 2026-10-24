@@ -38,7 +38,13 @@ protocol has produced was DATA (XML) or a routing patch — never a blind retry.
    disassembly when the faulting module is the local `--dll`. **Build-version caveat:** RVAs
    transfer to a local disassembly only when the reporter's Build Source matches the installed
    build — compare the bundle's build line against the local install; the tool prints both the
-   dump-side module path and the local `--dll` it disassembles, so a mismatch is visible.
+   dump-side module path and the local `--dll` it disassembles, so a mismatch is visible. On a
+   mismatch, pass `--dll` the archived DLL of the report's build (step 7), then carry the fault RVA
+   to the installed build: `python tools/native_build_match.py --old <that DLL> --oracle` first
+   (exit 1: do not carry on this pair; exit 2, no map for that build: the pair is unscored), then
+   `--rva 0x<rva>`. Only `MATCHED ... (hash)` carries the exact offset, and it means identical code,
+   not proven identity: decompile both addresses and compare before you name the site
+   ([native-build-match.md](../../../docs/features/native-build-match.md)).
 3. Game-side timeline: newest `Logs/taom_debug_*.log` (game bin) + newest
    `C:\ProgramData\Mount and Blade II Bannerlord\logs\rgl_log_*.txt` — last lines date the
    crash relative to gameplay events (charge orders, scene loads).
@@ -76,7 +82,8 @@ protocol has produced was DATA (XML) or a routing patch — never a blind retry.
    for managed assemblies only — native modules are merely *listed* in `_native_dlls.txt`).
    Consequence: the open player report `crashz/report.json` (untracked; `git show b2e387db:crashz/report.json`; `BannerlordVersion v1.4.7.117484`)
    **cannot currently be triaged locally** — there is no v1.4.7 image to disassemble against.
-   Copy both `TaleWorlds.Native.dll` files aside before the next update lands.
+   Copy both `TaleWorlds.Native.dll` files aside before the next update lands. The archive holds
+   client builds from v1.5.2 on; a report from any of them is read against its own image.
 
 ## Phase 2 — Name the site (offline, fully scripted)
 

@@ -108,6 +108,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | Kingdom Borders (Nexus mod 10699) | `Kingdom Borders` `KingdomBorders` | UNKNOWN | behavioural-port | `Main/Adapters/BorderRenderAdapter.cs`; the Heraldic layout in `Main/Features/RealmBorders/Domain/BorderPainter.cs`; the module-id check in `Main/Features/RealmBorders/Hooks/RealmBordersCampaignBehavior.cs` (interop); see detail | uncleared |
 | rtk (Rust Token Killer) | `rtk` `rtk-ai/rtk` `Rust Token Killer` | Apache-2.0 (the CLI in `src/`; `engine/` and `proxy/` are BUSL-1.1 and nothing derives from them) | behavioural-port | `.claude/hooks/_shellwords.py` (`command_index`, `peel`); `tools/harness_retro.py` (`command_family`, report section 9) | cleared |
 | CodeGraph | `codegraph` `colbymchenry/codegraph` `@colbymchenry/codegraph` | MIT | behavioural-port | `tools/graphify_taom.py` (interface callers in `affected`, the `tests` verb, answer-scoped staleness, `refresh --detach`); see detail | cleared |
+| rea | `rea` `morluto/rea` `rea-agents` | MIT | behavioural-port | `tools/native_build_match.py` (the matching method, from its documentation; see detail); rule lines in `.claude/rules/{evidence-over-claims,simplicity-criterion,working-discipline}.md` and `.claude/skills/issue/SKILL.md` (comparison-only) | cleared |
 
 <!-- provenance-register-end -->
 
@@ -893,6 +894,18 @@ that names only the pending files an answer cites, and an index that refreshes i
 `src/telemetry/index.ts`, `install.ps1` and `package.json` were read for the security pass only. No
 CodeGraph code or text was copied, so no MIT notice is carried. Nothing was installed or run.
 Record: [`docs/reviews/adopt-codegraph-2026-10-24.md`](../reviews/adopt-codegraph-2026-10-24.md).
+
+### rea
+
+Upstream: https://github.com/morluto/rea, `main` at `d361c53c5`, read on 2026-10-24 through the
+GitHub API only: nothing was cloned, installed or run. The cross-build function matching in
+`tools/native_build_match.py` follows the method rea's `docs/native-function-matching.md` describes
+(exact keys first, ambiguity kept, a missing counterpart reported as unknown, never as removed). Only
+that document was read, not rea's code, and the masking of x64 displacements is TAOM's own addition,
+so the derivation is a behavioural port of a documented method. Five rule lines restate ideas from
+rea's `AGENTS.md` and its reverse-engineering skill in TAOM's words (comparison-only). No rea text or
+code was copied, so no MIT notice is carried. Record:
+[`docs/reviews/adopt-rea-2026-10-24.md`](../reviews/adopt-rea-2026-10-24.md).
 
 ---
 

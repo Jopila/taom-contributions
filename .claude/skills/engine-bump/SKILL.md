@@ -29,7 +29,8 @@ misattributed crashes) or we migrate deliberately. The session-start hook warns 
    every offset taken before that jump was against a v1.4.5 image, and it moved with no signal.
    Steam overwrites in place and nothing archives native modules (the decompile stack only *lists*
    them in `_native_dlls.txt`), so **copy both `bin/Win64_Shipping_{Client,wEditor}/TaleWorlds.Native.dll`
-   aside now** — that copy is the only baseline the NEXT bump will have. The cost of not having one
+   aside now**, as `E:\Decompiled_Bannerlord\_native\TaleWorlds.Native.v<old>.{client,wEditor}.dll`:
+   that copy is the only baseline the NEXT bump will have, and `native_build_match.py` reads it. The cost of not having one
    is already booked: the open player report (untracked; read it with
    `git show b2e387db:crashz/report.json`; `BannerlordVersion v1.4.7.117484`) can no longer be
    triaged against a local binary.
@@ -43,7 +44,12 @@ misattributed crashes) or we migrate deliberately. The session-start hook warns 
    `--engine-method` refuses that assembly and the project is not seeded until `tools/native_engine_methods.py`
    reads every id. Fix the sweep before trusting native answers for that build. Native offsets quoted in
    docs and RCAs belong to their old binary; re-derive one by engine method or string, not by
-   offset ([ghidra-native-decompile.md](../../../docs/features/ghidra-native-decompile.md)).
+   offset ([ghidra-native-decompile.md](../../../docs/features/ghidra-native-decompile.md)), or
+   carry it: run `python tools/native_build_match.py --old <archived old client DLL> --oracle` once
+   (exit 1, a wrong match: do not use it on this pair; exit 2, no map for the old build: the pair is
+   unscored), then `--rva <old offset>`. Only `MATCHED ... (hash)` gives an exact offset, and it
+   means identical code, not proven identity: read the new address with `native_decompile.py --rva`
+   before it goes into a pin ([native-build-match.md](../../../docs/features/native-build-match.md)).
 5. **Resolve the last RELEASED `TAOM.dll` against the new engine, not just a fresh build.** A fresh
    compile binds whatever overload the new engine offers, so it hides a removed member that a shipped
    binary still calls (v1.5.4 removed a `TooltipProperty` constructor: every gate stayed green while
@@ -212,7 +218,8 @@ abstract method resolves by name. A row it cannot resolve is a failure, not a pa
      the rows, which is expected. `PINS` in `tools/tests/test_native_decompile.py` and the `pins`
      table in `tools/tests/test_native_engine_methods.py` still SKIP on an unknown build and run only
      with `TAOM_GHIDRA_IT=1`, so read their skip count. Add a row
-     per build; derive engine methods with `native_engine_methods.load_or_build`. The engine-method map
+     per build; derive engine methods with `native_engine_methods.load_or_build`, other addresses
+     with `native_build_match.py --rva` (Phase 1 item 4). The engine-method map
      counts are version-keyed and the `ProcessPreloadQueue` thunk target is a per-row `thunk_target`
      key. The latest numbers are in `docs/migration/v<ver>-impact.md`.
    - The category tree (`decompile_to_folder.ps1 -Destination _categories_v<new>`) and the three
