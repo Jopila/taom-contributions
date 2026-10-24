@@ -62,6 +62,7 @@ public class ReflectionSiteBindingTests
     [DataRow("TaleWorlds.Core.ViewModelCollection.Selector.SelectorVM`1", "SelectorVM`1", "_onChange", "Field", "FaceGenRaceSelectorRebuilder.cs:213 / CommanderSelectorRebuilder.cs:21")]
     // --- CustomBattles faction injection (CustomBattleSideVM_Constructor_Patch.cs) ---
     [DataRow("TaleWorlds.MountAndBlade.CustomBattle.CustomBattleSideVM", "CustomBattleSideVM", "OnCultureSelection", "Method", "CustomBattleSideVM_Constructor_Patch.cs:24")]
+    [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.ClanManagement.ClanPartiesVM", "ClanPartiesVM", "OnPartySelection", "Method", "RefugeClanScreenPatch.cs:45")]
     // --- AdvancedCombat custom attacks (CustomAttacksUtils.cs) ---
     [DataRow("TaleWorlds.MountAndBlade.Mission", "Mission", "RegisterBlow", "Method", "CustomAttacksUtils.cs:60")]
     // --- MissionPerf tick profiler: the private wait it times at its call site (MissionTickProfilerInstaller.cs) ---

@@ -1265,3 +1265,20 @@ have run under the next column.
   `MaxWidth`) and `HeightSizePolicy="CoverChildren"`, as vanilla's explanation texts do; keep CoverChildren width for
   short labels only.
 - **Source:** `docs/reviews/rca-bond-of-hire-2026-10-24.md` finding 2.
+### Follow a UI value to what renders it before you write it (#993, #994, 2026-10-24; repeat of #591)
+Five BannerColorPersistence patches set `Color1` and `Color2` on a `CharacterCode` after
+`CreateFrom` had built its `Code` string. `Code` has a private setter and is the only field the
+portrait pipeline keeps and parses, so no clan colour reached a portrait since the feature shipped,
+and the feature doc told the next author to do the same. In the same review, Refuge wrote a "zero
+wage" line that no v1.5.5 prefab binds, and decorated clan rows at list build when every row's own
+refresh reset the name a moment later.
+- **Why missed:** each write looked correct against the property it set; nobody traced the value to
+  the widget binding or the renderer's input, and nothing in game or in a test compared the result.
+  This is the class of the nameplate redesign that lost relation colour for five months (#591).
+- **Prevent:** before writing a UI value, find who reads it on the installed version (the prefab's
+  `@Binding`, or the method that builds the renderer's input) and when that reader runs; list every
+  place the engine builds the object (a constructor can bypass the method you patch). For a built
+  value object such as `CharacterCode`, rebuild it, never mutate a field the builder already
+  consumed. Pin the chain with a test, and a gate where a pattern is known bad (here a source scan for
+  `.Color1 =` in the BannerColorPersistence hooks).
+- **Source:** `docs/reviews/rca-banner-colors-refuge-rows-2026-10-24.md` findings 1 to 4.

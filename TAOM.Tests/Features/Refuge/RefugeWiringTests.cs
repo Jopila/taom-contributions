@@ -62,7 +62,7 @@ public class RefugeWiringTests
         var src = RepoPaths.ReadSource("Main/Features/Refuge/RefugeIoC.cs", stripComments: true);
 
         var guarded = new System.Text.RegularExpressions.Regex(
-            @"if \(!TAOM\.Composition\.ClientComposition\.IsDedicatedServer\(\)\)\s*InitializeClanScreenPatch\(refugeService\);");
+            @"if \(!TAOM\.Composition\.ClientComposition\.IsDedicatedServer\(\)\)\s*InitializeClanScreenPatch\(refugeService, container\.Resolve<IRefugeBook>\(\)\);");
         Assert.AreEqual(1, guarded.Matches(src).Count,
             "the clan-screen patch Initialize must run only when this is not a dedicated server");
         Assert.AreEqual(1, System.Text.RegularExpressions.Regex.Matches(src, @"RefugeClanScreenPatch\.Initialize").Count,

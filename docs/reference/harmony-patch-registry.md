@@ -183,6 +183,8 @@ Border proximity floor for priority-list targets
 
 ## Patch23_BannerColorPersistence
 
+**GetCharacterCode postfixes (#993):** the five portrait postfixes (`CampaignUIHelper`, `SandBoxUIHelper`, `ClanPartyItemVM`, `PartyCharacterVM`, and the `OrderOfBattleHeroItemVM` rebuild, which targets both `RefreshInformation` and the `(Agent)` constructor via `TargetMethods()` because `OrderOfBattleVM` builds every hero through the constructor) return the result through `ClanColoredCharacterCode.Recolor`, which rebuilds the `CharacterCode` via the 8-argument `CreateFrom`. `CharacterCode.Code` is built at creation and has a private setter, so assigning `Color1/Color2` afterwards never reached the renderer. `PartyCharacterVM` sets `IsPrisoner` (:1103) only after the `Troop` assignment (:1099) has run `GetCharacterCode`, so the old prisoner check always read false; the postfix reads type and side from the arguments.
+
 **Target:** `CampaignUIHelper`, `SandBoxUIHelper`, `SPInventoryVM`, `PartyVM`, `HeroViewModel`, `PartyCharacterVM`, `ClanPartyItemVM`, `Mission`, `CampaignSceneNotificationHelper`, `Banner`, `BannerEditorView`, `AgentVisuals.Create` (manual), `MapConversationTableau` (manual ×2), `MobilePartyVisualHelper.GetHumanAgentPartyVisual` (manual, Transpiler), `OrderOfBattleHeroItemVM`
 
 **Dedicated server (ADR-013, B6c):** the four manual entries (`AgentVisuals.Create`, `MapConversationTableau` x2, `MobilePartyVisualHelper`) are not applied (`ManualPatchApplicator.ApplyVisualPatches`), and `BannerEditorView_OnTick_Patch.Initialize` is skipped (`SubModule.InitializeBannerEditorHook`).
@@ -782,11 +784,11 @@ Injects a camp-type icon (lookout monocular, ambush, camp) above the player's pa
 
 ## Patch75_Refuge
 
-**Targets:** `ClanPartiesVM.RefreshPartiesList()` (public, Postfix) + `PlayerEncounter.DoMeeting()` (public static, Prefix). Two patch classes, one category.
+**Targets:** `ClanPartiesVM.RefreshPartiesList()` (public, Postfix) + `ClanPartyItemWithPartyVM.UpdateProperties()` (Postfix, #994) + `PlayerEncounter.DoMeeting()` (public static, Prefix). Three patch classes, one category.
 
-**Feature:** Refuge, `Main/Features/Refuge/Hooks/RefugeClanScreenPatch.cs` + `RefugeEncounterPatch.cs`. **Status:** ACTIVE.
+**Feature:** Refuge, `Main/Features/Refuge/Hooks/RefugeClanScreenPatch.cs` + `RefugeClanRowRefreshPatch.cs` + `RefugeEncounterPatch.cs`. **Status:** ACTIVE.
 
-The clan-screen postfix appends ready refuges to the Garrisons list as `ClanPartyItemVM` rows (selection wired via AccessTools to the private `OnPartySelection`). The encounter prefix is click-to-manage: when the LOCAL player meets their own ready refuge, the meeting conversation is swapped for the refuge menu (`return false`); suppressed while enlisted, because Enlistment owns encounter policy (INV-D1). Co-op disposition: ReviewedSafe (player-local UI redirect, no shared mutation skipped; `CoopVetoClassificationTests`).
+The clan-screen postfix appends every refuge (ready, building, orphan-adopted) to the Garrisons list as `ClanPartyItemWithPartyVM` rows (selection wired via AccessTools to the private `OnPartySelection`). The `UpdateProperties` postfix re-applies the refuge row decoration (hidden wage slider, "(being raised)" suffix on a building refuge) after every refresh, because vanilla's `UpdateProperties` resets `Name` and the wage state; it shares that method with Patch17's TroopWeight postfix and touches different fields. The encounter prefix is click-to-manage: when the LOCAL player meets their own ready refuge, the meeting conversation is swapped for the refuge menu (`return false`); suppressed while enlisted, because Enlistment owns encounter policy (INV-D1). Co-op disposition: ReviewedSafe (player-local UI redirect, no shared mutation skipped; `CoopVetoClassificationTests`).
 
 **What is deliberately NOT here:** the source module's two combat patches (`SimulateHit`, `ApplyDamageReductions`). Both targets are TAOM-owned model slots, so the defender damage reduction rides the model chain instead: `TaomCombatMechanicsModel.ApplyDamageReductions` (real-time) and `TaomCombatSimulationModel.SimulateHit` (auto-resolve), both consulting `IRefugeDefenseService`. One decision, two consumers, no Harmony ordering accident.
 

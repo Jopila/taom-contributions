@@ -34,7 +34,7 @@ public static class RefugeIoC
         // ADR-013: the clan-screen patch type initializer names ClanPartiesVM, which a dedicated server cannot load at
         // boot. The patch is [ClientOnly] and never applies there, so its statics stay unset.
         if (!TAOM.Composition.ClientComposition.IsDedicatedServer())
-            InitializeClanScreenPatch(refugeService);
+            InitializeClanScreenPatch(refugeService, container.Resolve<IRefugeBook>());
         RefugeEncounterPatch.Initialize(
             refugeService,
             container.Resolve<TAOM.Features.Enlistment.IEnlistmentStateQuery>(),
@@ -42,5 +42,9 @@ public static class RefugeIoC
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void InitializeClanScreenPatch(IRefugeService refuges) => RefugeClanScreenPatch.Initialize(refuges);
+    private static void InitializeClanScreenPatch(IRefugeService refuges, IRefugeBook book)
+    {
+        RefugeClanScreenPatch.Initialize(refuges);
+        RefugeClanRowRefreshPatch.Initialize(book);
+    }
 }

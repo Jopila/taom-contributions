@@ -110,13 +110,12 @@ public class Patch75BindingTests
     {
         // The postfix suppresses the non-functional wage control post-construction:
         // ShouldPartyHaveExpense=false hides the slider panel (ClanPartiesRightPanel.xml binds
-        // its IsVisible to it), ExpenseItem=null drops the dead VM, and PartyWageSubTitleText is
-        // recomposed to the honest 0 (the figure is never charged for a refuge). Name is set on
-        // building rows. All four must stay public writable instance properties.
+        // its IsVisible to it), ExpenseItem=null drops the dead VM. Name is set on building rows.
+        // All three must stay public writable instance properties.
         RequireGame();
         foreach (var name in new[]
         {
-            "ShouldPartyHaveExpense", "ExpenseItem", "PartyWageSubTitleText", "Name",
+            "ShouldPartyHaveExpense", "ExpenseItem", "Name",
         })
         {
             var property = AccessTools.Property(typeof(ClanPartyItemVM), name);
@@ -183,9 +182,9 @@ public class Patch75BindingTests
     // ---- Category pins (SubModule applies the category by string) ----
 
     [TestMethod]
-    public void BothPatches_CarryThePatch75Category()
+    public void AllPatches_CarryThePatch75Category()
     {
-        foreach (var patchType in new[] { typeof(RefugeClanScreenPatch), typeof(RefugeEncounterPatch) })
+        foreach (var patchType in new[] { typeof(RefugeClanScreenPatch), typeof(RefugeEncounterPatch), typeof(RefugeClanRowRefreshPatch) })
         {
             var attributes = patchType.GetCustomAttributes(typeof(HarmonyPatchCategory), inherit: false);
             Assert.AreEqual(1, attributes.Length, patchType.Name + " lost its HarmonyPatchCategory attribute.");
