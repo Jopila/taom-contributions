@@ -1308,3 +1308,13 @@ daily tick pays nothing, and it showed in a message after the oath, where the is
   (`IEnlistmentWagePreview`), not its table; put a cost the player weighs on the line where he can still decline,
   and quote a value the following step grants from the same method that grants it.
 - **Source:** [rca-enlistment-retinue-cost-2026-10-24.md](../rca-enlistment-retinue-cost-2026-10-24.md) F1, F2.
+### When a patch on a model's only caller decides every case, drop the model override (#873, 2026-10-24)
+The Red Arrow overrode `CheckPartyEligibility` and also postfixed `ArmyManagementItemVM.UpdateEligibility`, the
+method's only engine caller, because the screen had a second siege block no model controls. Whenever the feature
+applied, the postfix overwrote both outputs, so the override never reached the screen; it still cost a
+single-owner `SubModule.cs` edit, a cross-feature constructor argument and a duplicate check per row.
+- **Why missed:** the plan took the model seam first as the preferred rung, then added the patch, and never asked
+  again whether the model seam was still needed.
+- **Prevent:** after the plan adds a patch, list the model method's engine callers (`taom-src`, dump grep); if the
+  patch covers every caller in every applied case, keep only the patch, and pin the copied engine body instead.
+- **Source:** [rca-red-arrow-2026-10-24.md](../rca-red-arrow-2026-10-24.md) finding 1.
