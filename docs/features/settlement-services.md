@@ -65,7 +65,7 @@ Two MCM switches, both default on, both applied at the next conversation or menu
 | `EnableWatchSilver` | Fief Management/Watch-Silver (GroupOrder 5) | the governor's silver line |
 | `EnableTidingsOfTheLists` | Tournaments (Order 4) | the arena option |
 
-Both are `PlayerLocal` in `CoopSettingsRelevance` and so excluded from the co-op fingerprint: each switch only gates a player's click, and every write is behind the single-player predicate, so two peers with different values never compute differently. The total of MCM settings rises by 2 (see [coop-interop.md](coop-interop.md)). Switching a switch off leaves nothing to restore, since TAOM wrote nothing that persists as TAOM state. The Tidings switch also appears in the Tournaments table of [tournament-rewards.md](tournament-rewards.md).
+Both are `PlayerLocal` in `CoopSettingsRelevance` and so excluded from the co-op fingerprint: each switch only gates a player's click, and every write is behind `CoopSessionPolicy.IsSinglePlayerAuthority`, so two peers with different values never compute differently. The total of MCM settings rises by 2 (see [coop-interop.md](coop-interop.md)). Switching a switch off leaves nothing to restore, since TAOM wrote nothing that persists as TAOM state. The Tidings switch also appears in the Tournaments table of [tournament-rewards.md](tournament-rewards.md).
 
 ## Key Files
 
@@ -86,7 +86,7 @@ Both are `PlayerLocal` in `CoopSettingsRelevance` and so excluded from the co-op
 
 ## Dependencies
 
-- `ICoopSessionProvider`, `IDedicatedServerProvider` (CoopInterop): the single-player predicate `!IsSessionActive && !ShouldDeferToHost && !IsDedicatedServer && IsAuthority`, as in From the Ashes and Namegiving.
+- `ICoopSessionProvider`, `IDedicatedServerProvider` (CoopInterop): the single-player predicate `CoopSessionPolicy.IsSinglePlayerAuthority` (no live session, no deferral to a host, no dedicated server, and `IsAuthority`), shared with From the Ashes, Namegiving and the other world-writing services.
 - `ISettlementServicesAdapter` (Adapters): `Hero.OneToOneConversationHero.GovernorOf`, `Town.Loyalty`, `Settlement.Militia`, `Town.AllTowns` with `TournamentManager.GetTournamentGame`, `MapDistanceModel.GetDistance` (Default navigation) and `GiveGoldAction`.
 - [Revolt Tuning](revolt-tuning.md): context only. It does not change; the ceiling of 50 sits at the drift medium it works against.
 - Culture Conversion (optional stable-loyalty gate, `CultureConversionRequireStableLoyalty`, off by default, minimum 50): a payment can land a fief exactly on 50, which meets that gate. The cap of 50 stays by decision; this is documented, not guarded.

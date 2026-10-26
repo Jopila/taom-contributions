@@ -46,7 +46,7 @@ internal sealed partial class FarWatchService
     /// TAOM cannot probe is loaded, on a dedicated server and on a peer that may not write the world.
     /// </summary>
     private bool IsSinglePlayer =>
-        !_coop.IsSessionActive && !_coop.ShouldDeferToHost && !_dedicated.IsDedicatedServer && _coop.IsAuthority;
+        CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _dedicated);
 
     // --- The offer ---------------------------------------------------------------------------------------------------
 

@@ -15,6 +15,7 @@ using TAOM.Features.HearthRoll.UI;
 using TAOM.Features.LinesOfDescent.UI;
 using TAOM.Tests.Migration;
 using static TAOM.Tests.Infrastructure.RepoPaths;
+using TAOM.Tests.Infrastructure;
 
 namespace TAOM.Tests.Features.HearthRoll;
 
@@ -55,12 +56,7 @@ public class HearthRollUiWiringTests
         return doc;
     }
 
-    private static List<XmlElement> InsertedNodes(Type extension)
-    {
-        var instance = Activator.CreateInstance(extension, nonPublic: true)!;
-        var method = extension.GetMethods().Single(m => m.CustomAttributes.Any(a => a.AttributeType.Name == "PrefabExtensionXmlNodesAttribute"));
-        return ((IEnumerable<XmlNode>)method.Invoke(instance, null)!).OfType<XmlElement>().ToList();
-    }
+    private static List<XmlElement> InsertedNodes(Type extension) => PrefabNodes.Of(extension);
 
     [TestMethod]
     public void EveryExtension_TargetsClanLordTuple_WithAStructuralXPath()

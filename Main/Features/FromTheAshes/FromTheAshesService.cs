@@ -51,10 +51,10 @@ public sealed class FromTheAshesService
 
     /// <summary>
     /// Read live on every use (ICoopSessionProvider's contract). Stands down while a co-op session is live, while a co-op mod
-    /// TAOM cannot probe is loaded, on a dedicated server and on a peer that may not write the world (the Eye of Sauron's rule).
+    /// TAOM cannot probe is loaded, on a dedicated server and on a peer that may not write the world (the shared single-player predicate).
     /// </summary>
     private bool IsSinglePlayer =>
-        !_coop.IsSessionActive && !_coop.ShouldDeferToHost && !_dedicated.IsDedicatedServer && _coop.IsAuthority;
+        CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _dedicated);
 
     // --- Rules ------------------------------------------------------------------------------------------------------
 

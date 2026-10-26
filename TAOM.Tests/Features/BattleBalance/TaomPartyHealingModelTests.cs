@@ -1,4 +1,6 @@
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using TAOM.Features.BattleBalance;
 using TAOM.Features.BattleBalance.Models;
 
@@ -14,7 +16,7 @@ public class TaomPartyHealingModelTests
         float vanillaSurvival = 0.75f;
 
         // Act
-        float result = TaomPartyHealingModel.ApplyCulturalSurvivalBonus(vanillaSurvival, 0f);
+        float result = SurvivalChanceMath.ApplyCulturalSurvivalBonus(vanillaSurvival, 0f);
 
         // Assert
         Assert.AreEqual(vanillaSurvival, result, 0.001f);
@@ -29,7 +31,7 @@ public class TaomPartyHealingModelTests
         float expectedSurvival = 1f - 0.175f; // 0.825
 
         // Act
-        float result = TaomPartyHealingModel.ApplyCulturalSurvivalBonus(vanillaSurvival, bonus);
+        float result = SurvivalChanceMath.ApplyCulturalSurvivalBonus(vanillaSurvival, bonus);
 
         // Assert
         Assert.AreEqual(expectedSurvival, result, 0.001f);
@@ -44,7 +46,7 @@ public class TaomPartyHealingModelTests
         float expectedSurvival = 1f - 0.30f; // 0.70
 
         // Act
-        float result = TaomPartyHealingModel.ApplyCulturalSurvivalBonus(vanillaSurvival, bonus);
+        float result = SurvivalChanceMath.ApplyCulturalSurvivalBonus(vanillaSurvival, bonus);
 
         // Assert
         Assert.AreEqual(expectedSurvival, result, 0.001f);
@@ -59,7 +61,7 @@ public class TaomPartyHealingModelTests
         // Should clamp to 1.0f
 
         // Act
-        float result = TaomPartyHealingModel.ApplyCulturalSurvivalBonus(vanillaSurvival, bonus);
+        float result = SurvivalChanceMath.ApplyCulturalSurvivalBonus(vanillaSurvival, bonus);
 
         // Assert
         Assert.IsTrue(result <= 1.0f, "Survival chance must not exceed 1.0");
@@ -75,7 +77,7 @@ public class TaomPartyHealingModelTests
         // Should clamp to 0.0f
 
         // Act
-        float result = TaomPartyHealingModel.ApplyCulturalSurvivalBonus(vanillaSurvival, bonus);
+        float result = SurvivalChanceMath.ApplyCulturalSurvivalBonus(vanillaSurvival, bonus);
 
         // Assert
         Assert.AreEqual(0f, result, 0.001f, "Survival chance must not go below 0.0");
@@ -91,10 +93,52 @@ public class TaomPartyHealingModelTests
         float vanillaSurvival, float bonus, float expected)
     {
         // Act
-        float result = TaomPartyHealingModel.ApplyCulturalSurvivalBonus(vanillaSurvival, bonus);
+        float result = SurvivalChanceMath.ApplyCulturalSurvivalBonus(vanillaSurvival, bonus);
 
         // Assert
         Assert.AreEqual(expected, result, 0.001f);
+    }
+
+    [TestMethod]
+    public void ApplyCareerSurvival_ZeroMagnitude_ReturnsInputUncapped()
+    {
+        // The roll skipped the career step entirely at zero, so even an out-of-range input passes through.
+        Assert.AreEqual(1.2f, SurvivalChanceMath.ApplyCareerSurvival(1.2f, 0f), 0.0001f);
+    }
+
+    [TestMethod]
+    [DataRow(0.50f, 0.10f, 0.55f)]
+    [DataRow(0.90f, 0.20f, 1.00f)]
+    [DataRow(0.80f, -0.25f, 0.60f)]
+    public void ApplyCareerSurvival_Magnitude_MultipliesAndCapsAtOne(float survival, float magnitude, float expected)
+    {
+        Assert.AreEqual(expected, SurvivalChanceMath.ApplyCareerSurvival(survival, magnitude), 0.0001f);
+    }
+
+    [TestMethod]
+    public void RedirectEnlistedPlayer_NullParty_ReturnsNullWithoutTouchingService()
+    {
+        var enlistment = NSubstitute.Substitute.For<TAOM.Features.Enlistment.IEnlistmentStateQuery>();
+
+        var result = TAOM.Features.BattleBalance.Hooks.SurvivalChanceLine.RedirectEnlistedPlayer(enlistment, null, null);
+
+        Assert.IsNull(result);
+        Assert.AreEqual(0, enlistment.ReceivedCalls().Count());
+    }
+
+    [TestMethod]
+    public void Apply_NullParty_ReturnsVanillaSurvivalAndTouchesNothing()
+    {
+        var settings = Substitute.For<IBattleBalanceSettingsProvider>();
+        var config = Substitute.For<IBattleBalanceConfigProvider>();
+        var careers = Substitute.For<TAOM.Features.CareerSystem.ICareerPassiveService>();
+
+        var result = TAOM.Features.BattleBalance.Hooks.SurvivalChanceLine.Apply(settings, config, careers, null, 0.42f);
+
+        Assert.AreEqual(0.42f, result, 0.0001f);
+        Assert.AreEqual(0, settings.ReceivedCalls().Count());
+        Assert.AreEqual(0, config.ReceivedCalls().Count());
+        Assert.AreEqual(0, careers.ReceivedCalls().Count());
     }
 }
 

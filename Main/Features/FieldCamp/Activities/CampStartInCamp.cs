@@ -61,7 +61,7 @@ internal sealed class CampStartInCamp
 
     private void Pitch()
     {
-        if (!CampGate.IsSinglePlayer(_coop, _dedicated)) return;
+        if (!CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _dedicated)) return;
 
         // Only the town and castle distance is waived: every default start stands near its town gate, so the rule would block them all.
         var reason = _camps.CanEstablish(CampType.Field, ignoreTownDistance: true);

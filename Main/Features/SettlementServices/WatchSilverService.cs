@@ -50,7 +50,7 @@ public sealed class WatchSilverService
     /// cannot probe, no dedicated server, and a peer that may write the world. Read live on every use (ICoopSessionProvider's contract).
     /// </summary>
     private bool MayWriteWorld =>
-        !_coop.IsSessionActive && !_coop.ShouldDeferToHost && !_dedicated.IsDedicatedServer && _coop.IsAuthority;
+        CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _dedicated);
 
     /// <summary>
     /// The gate, and when it is None the offers. Reads the fief now. The block is the first that applies: switch off, not

@@ -128,7 +128,7 @@ TAOM's loose `Assets/` tree instead of `AssetPackages/`. Where they should live 
 | `Client/Features/FieldCamp/CampVisualService.cs` + `Visuals/CampLayoutBuilder.cs` | Entities, wind ticker (500 ms throttle), fallback chain. TAOM.Client (ADR-013); core registers `NullCampVisualService`, whose `Show` reports not ready |
 | `LookoutSpottingContributor.cs` | The sight bonus through the model seam (its cap member returns 0; Far Watch's scout is the second contributor, see [far-watch.md](far-watch.md) "The seam"; Under the Eaves' forest penalty is the third, see [under-the-eaves.md](under-the-eaves.md)) |
 | `Hooks/FieldCampCampaignBehavior.cs` + `FieldCampMenuController.cs` | Events, SyncData, menus (index 4 on both menus reserved for Refuge; index 5 on the camp sub-menu is shared by Host Review, Far Watch and camp work, all before Leave: the camp sub-menu's options end up Forage, Fortify, Supplies, Break, Refuge, Review the host, Send a scout, Set the men to work, Leave, see [host-review.md](host-review.md), [far-watch.md](far-watch.md) and "Camp work" below) |
-| `Activities/` | Camp work, rest healing and start in camp (#860): `CampActivityRules` (pure numbers and the one hunting table), `CampActivityService` (decisions), `ICampWorkAdapter` / `CampWorkAdapter` (engine reads and writes), `CampWorkTypes.cs` (the six value types), `CampRestHealing` (when a party rests, and the one `Grant` the healing model asks), `CampStartInCamp` (the new-campaign hook), `CampGate` (the single-player predicate the three share), `CampActivitiesModule`; `Activities/Hooks/` holds the behavior, the camp option and pick menu, the wait menu, the landing and the texts |
+| `Activities/` | Camp work, rest healing and start in camp (#860): `CampActivityRules` (pure numbers and the one hunting table), `CampActivityService` (decisions), `ICampWorkAdapter` / `CampWorkAdapter` (engine reads and writes), `CampWorkTypes.cs` (the six value types), `CampRestHealing` (when a party rests, and the one `Grant` the healing model asks), `CampStartInCamp` (the new-campaign hook), `CampActivitiesModule`, and the shared `CoopSessionPolicy.IsSinglePlayerAuthority` that the service, `CampRestHealing` and `CampStartInCamp` all call; `Activities/Hooks/` holds the behavior, the camp option and pick menu, the wait menu, the landing and the texts |
 | `Hooks/PartyNameplateCampIconPatch.cs` | Patch74 thin guarded body (registry entry has the never-throw contract) |
 | `Hooks/CampNameplateIconPresenter.cs` | Patch74's widget half: icon creation, sprite memo (same never-throw posture) |
 | `UI/FieldCampOverlayVM.cs` (core) + `Client/Features/FieldCamp/UI/FieldCampMapView.cs` (TAOM.Client) | Overlay button + status panel, 4 Hz refresh. The behavior attaches the view through `IFieldCampOverlayAdapter` (`FieldCampCampaignBehavior.Overlay`, set by `FieldCampIoC.InitializePatchStatics` after the client composition; core registers a null adapter) |
@@ -182,8 +182,6 @@ panel's option reads "Return to the work" and opens the wait menu again; it is g
 **Rules.**
 
 - **What counts as a work camp:** a ready Field or Fortified camp. An ambush or lookout camp stays small and hidden and never works.
-- **Goods cut:** honey and wax were considered. No such item exists in the game data (vanilla or TAOM's modules), so camp work is
-  hunting, timber and fishing only; two new trade goods would be a separate follow-up.
 - **Goods:** hunting brings in meat, timber brings in hardwood (forest only), fishing brings in fish. Yield is `min(cap, round(perTen
   x healthy men / 10 x ground factor))`, defaults 10 per ten men and a cap of 30. The ground factor for hunting is 1.0 in forest, 0.7 on
   plain, steppe and swamp, 0.5 on mountain, canyon, snow and farmland (`RuralArea`, farmland round a village: some game, thinner than open country),
@@ -204,7 +202,7 @@ panel's option reads "Return to the work" and opens the wait menu again; it is g
 - **The master toggle** ends a work the way Far Watch ends a ride when Field Camps are switched off. With the toggle off no work
   starts (the option is hidden and the offers refuse), and a saved work is cleared at the wait's next call, pays nothing and lets the
   wait land on the map; a completion that arrives first pays nothing either.
-- **Single-player only.** The gate is the Far Watch predicate; a shared campaign greys the option. A work already running when a
+- **Single-player only.** The gate is `CoopSessionPolicy.IsSinglePlayerAuthority`; a shared campaign greys the option. A work already running when a
   shared campaign begins ends at the wait's next tick, before any injury roll: it is cleared, nothing is paid, the wait lands on the
   map, and one message says camp work is not available in a shared campaign. A completion that arrives first drops the work silently.
   A Far Watch ride out greys the work option too ([far-watch.md](far-watch.md)).
@@ -271,7 +269,7 @@ a stationary party with the panel closed. The healing roll shows a line "Resting
   both methods), so the camp applies them through `PerkHelper.AddPerkBonusForParty` with vanilla's own flags, and only when the
   party is not in a settlement, so a perk is never counted twice and no value is guessed. Triage Tent is not repeated: vanilla gives it
   to any party that is not moving, camp or not.
-- **Single-player only,** the Far Watch predicate (`CampGate`). In a shared campaign the bonus is off and the panel shows no resting line.
+- **Single-player only,** the shared predicate (`CoopSessionPolicy.IsSinglePlayerAuthority`). In a shared campaign the bonus is off and the panel shows no resting line.
 
 **Wiring.** `CampRestHealing` (in `Activities/`, registered by `CampActivitiesModule`) decides; the model only reads the engine and
 applies the answer. Each override passes vanilla's number to `CampRestModelLine.Apply` (in `Activities/Hooks/`), which reads four engine facts (is this the main party, are these prisoners, is the party
@@ -358,7 +356,6 @@ A co-op guest gets no camp. `ICampMenuActivationQuery.DefersToCoopHost` (`MapScr
   + fallback).
 - In-game smoke for #860: the three checklists above ("Camp work", "Rest healing", "Start in camp"), none run in game yet.
 - 12-language TRANSLATION run for the `{=taom_camp_*}` keys of #860 (backlog issue #931; the rows carry English until then).
-- Honey and wax: two new trade goods would be needed before camp work can bring them in. Follow-up issue not filed yet.
 - 12-language TRANSLATION run for the `{=taom_fcamp_*}` keys (backlog issue #508). Registration
   is done: batch-2 integration purged every `taom_fc_` row from `taom_module_strings.xml`,
   registered all 58 `taom_fcamp_` keys, and rebuilt the 12 language files with English fallbacks;

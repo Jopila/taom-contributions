@@ -21,13 +21,7 @@ public class MercenaryTermPrefabTests
 {
     private static readonly Type Vm = typeof(TaleWorlds.CampaignSystem.ViewModelCollection.KingdomManagement.Clans.KingdomClanVM);
 
-    private static List<XmlElement> Nodes()
-    {
-        var prefab = typeof(MercenaryTermPrefab);
-        var instance = Activator.CreateInstance(prefab, nonPublic: true)!;
-        var method = prefab.GetMethods().Single(m => m.CustomAttributes.Any(a => a.AttributeType.Name == "PrefabExtensionXmlNodesAttribute"));
-        return ((IEnumerable<XmlNode>)method.Invoke(instance, null)!).Cast<XmlElement>().ToList();
-    }
+    private static List<XmlElement> Nodes() => PrefabNodes.Of(typeof(MercenaryTermPrefab));
 
     private static IEnumerable<XmlElement> All() =>
         Nodes().SelectMany(n => new[] { n }.Concat(n.SelectNodes(".//*")!.Cast<XmlElement>()));

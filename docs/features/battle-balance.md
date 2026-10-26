@@ -109,7 +109,7 @@ Both providers register `Reuse.Singleton`, so the JSON file is cached for the en
 |---|---|
 | [Main/Features/BattleBalance/Models/TaomMilitaryPowerModel.cs](../../Main/Features/BattleBalance/Models/TaomMilitaryPowerModel.cs) | Override — tier power table + hero/mounted multipliers |
 | [Main/Features/BattleBalance/Models/TaomCombatSimulationModel.cs](../../Main/Features/BattleBalance/Models/TaomCombatSimulationModel.cs) | Override — player vs AI blunt-damage chance |
-| [Main/Features/BattleBalance/Models/TaomPartyHealingModel.cs](../../Main/Features/BattleBalance/Models/TaomPartyHealingModel.cs) | Override — cultural survival bonus + career passive integration |
+| [Main/Features/BattleBalance/Models/TaomPartyHealingModel.cs](../../Main/Features/BattleBalance/Models/TaomPartyHealingModel.cs) | Override, a thin entry point: `GetSurvivalChance` is base plus `Hooks/SurvivalChanceLine` (enlisted-player redirect, cultural bonus, career passive) over the pure `SurvivalChanceMath` |
 | [Main/Features/BattleBalance/BattleBalanceConfig.cs](../../Main/Features/BattleBalance/BattleBalanceConfig.cs) | POCOs (`TroopPowerSection`, `CasualtyRatiosSection`) with default-valued dictionaries baked in |
 | [Main/Features/BattleBalance/BattleBalanceConfigProvider.cs](../../Main/Features/BattleBalance/BattleBalanceConfigProvider.cs) | Loads + caches `battle_balance_config.json`; logs warnings on missing/malformed |
 | [Main/Features/BattleBalance/BattleBalanceSettingsProvider.cs](../../Main/Features/BattleBalance/BattleBalanceSettingsProvider.cs) | MCM proxy with compile-time fallbacks |
@@ -125,17 +125,17 @@ Both providers register `Reuse.Singleton`, so the JSON file is cached for the en
 - `IBattleBalanceSettingsProvider` (this feature)
 - `IPathService` (Core/Infrastructure) — locates `Main/_Module/ModuleData/`
 - `IModLogger` (Core/Logging)
-- `ICareerPassiveService` (`CareerSystem`) — resolved lazily inside `TaomPartyHealingModel.GetSurvivalChance` via `IoC.Resolve` to avoid hard coupling at construction. Provides `TroopSurvival` passive magnitude per hero.
+- `ICareerPassiveService` (`CareerSystem`): injected into `TaomPartyHealingModel` through its constructor and passed to `SurvivalChanceLine.Apply`. Provides `TroopSurvival` passive magnitude per hero.
 
 ## Tests
 
 - [TAOM.Tests/Features/BattleBalance/TaomMilitaryPowerModelTests.cs](../../TAOM.Tests/Features/BattleBalance/TaomMilitaryPowerModelTests.cs) — **10 tests**: T7-T10 configured values, T6 vanilla/override fallback, T11+ formula extension, low-tier override behavior.
 - [TAOM.Tests/Features/BattleBalance/TaomCombatSimulationModelTests.cs](../../TAOM.Tests/Features/BattleBalance/TaomCombatSimulationModelTests.cs) — **5 tests**: player vs AI blunt-chance routing, fallback to vanilla when `EnableCustomCasualtyRatios=false`.
-- [TAOM.Tests/Features/BattleBalance/TaomPartyHealingModelTests.cs](../../TAOM.Tests/Features/BattleBalance/TaomPartyHealingModelTests.cs) — **13 tests**: cultural bonus zero / positive / negative, boundary clamping (0..1), career passive multiplier integration, null-safety paths.
+- [TAOM.Tests/Features/BattleBalance/TaomPartyHealingModelTests.cs](../../TAOM.Tests/Features/BattleBalance/TaomPartyHealingModelTests.cs): **17 `[TestMethod]`s** across three classes (this file also holds the casualty-ratio and troop-power config tests): cultural bonus zero / positive / negative, boundary clamping (0..1), the career multiplier and its cap, and the null-party paths of `SurvivalChanceLine`.
 - [TAOM.Tests/Features/BattleBalance/ShippedBattleBalanceConfigTests.cs](../../TAOM.Tests/Features/BattleBalance/ShippedBattleBalanceConfigTests.cs): **1 test**, Lindon's row in the shipped JSON equals Rivendell's (#749). It reads the file with `ObjectCreationHandling.Replace`, because the provider's default merge would fill a missing key from the compiled dictionary and hide its absence.
 - [TAOM.Tests/Features/BattleBalance/BattleBalanceSettingsProviderTests.cs](../../TAOM.Tests/Features/BattleBalance/BattleBalanceSettingsProviderTests.cs): **10 tests**: the no-MCM fallbacks (six literal pins, and all twelve against the `TaomSettings` compiled defaults), read-through (one setting edited per pass, after every getter has been read once, reaches its own getter and no other), resolution from a real DryIoc container, and an IL rule that no getter or constructor calls `TaomSettings.Instance`, only the private lazy accessor (PERF-04).
 
-The models themselves test the static helpers (`CalculateTierPower`, `CalculateBluntChance`, `ApplyCulturalSurvivalBonus`) — the `override`-method paths that touch `IoC.Resolve` and live game state are exercised in-game.
+The models themselves test the static helpers (`CalculateTierPower`, `CalculateBluntChance`, and `SurvivalChanceMath.ApplyCulturalSurvivalBonus`): the `override`-method paths that touch `IoC.Resolve` and live game state are exercised in-game.
 
 ## How to Add a Cultural Survival Bonus for a New Culture
 

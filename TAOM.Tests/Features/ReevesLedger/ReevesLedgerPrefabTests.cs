@@ -39,12 +39,7 @@ public class ReevesLedgerPrefabTests
     [ClassInitialize]
     public static void Init(Microsoft.VisualStudio.TestTools.UnitTesting.TestContext _) => _gameLoaded = GameAssemblies.EnsureLoaded();
 
-    private static List<XmlElement> NodesOf(Type prefab)
-    {
-        var instance = Activator.CreateInstance(prefab, nonPublic: true)!;
-        var method = prefab.GetMethods().Single(m => m.GetCustomAttributes(inherit: false).Any(a => a.GetType().Name == "PrefabExtensionXmlNodesAttribute"));
-        return ((IEnumerable<XmlNode>)method.Invoke(instance, null)!).Cast<XmlElement>().ToList();
-    }
+    private static List<XmlElement> NodesOf(Type prefab) => PrefabNodes.Of(prefab);
 
     [TestMethod]
     public void BothExtensions_TargetTheTownManagementMovie_AtTheIntendedAnchors_AppendingAsSiblings()

@@ -33,7 +33,7 @@ public sealed class ReevesLedgerService
     /// Read live on every use (ICoopSessionProvider's contract).
     /// </summary>
     public bool MayWriteWorld =>
-        !_coop.IsSessionActive && !_coop.ShouldDeferToHost && !_dedicated.IsDedicatedServer && _coop.IsAuthority;
+        CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _dedicated);
 
     /// <summary>
     /// The profit tooltip: settlement tax, tariffs, projects, each bound village, then the garrison wage as a negative

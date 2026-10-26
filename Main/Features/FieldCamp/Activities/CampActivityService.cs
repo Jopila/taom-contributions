@@ -45,7 +45,7 @@ internal sealed class CampActivityService
     /// Read live on every use (ICoopSessionProvider's contract). Stands down while a co-op session is live, while a co-op mod
     /// TAOM cannot probe is loaded, on a dedicated server and on a peer that may not write the world.
     /// </summary>
-    private bool IsSinglePlayer => CampGate.IsSinglePlayer(_coop, _dedicated);
+    private bool IsSinglePlayer => CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _dedicated);
 
     // --- The offer ---------------------------------------------------------------------------------------------------
 

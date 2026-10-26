@@ -49,9 +49,18 @@ between the plan and the tests, and one estimate ("many") was never measured.
 
 - The camp-work adapter and its interface stay in the feature folder, not `Main/Adapters/`. Seven feature-local adapters have the same shape.
 - The adapter reads Far Watch's `FarWatchStore` directly: `IScoutIntelQuery.IsScoutAway` covers only settlement rides, and work must also stop for any ride.
-- The older inline logic in `TaomPartyHealingModel.GetSurvivalChance` keeps the file above 150 lines. FOLLOW-UP: no issue: pre-existing code outside this change; a move to a service is the single-player predicate follow-up's sibling and waits for Mike's word.
-- The single-player predicate is now copied in seven services (ten with the three-term copies). FOLLOW-UP: no issue: Mike's word is owed for the shared-predicate refactor; `CampGate` is the seed.
-- Honey and wax activities: no such item exists in any installed module. FOLLOW-UP: no issue: creating an issue for two trade goods needs Mike's word.
+- FOLLOW-UP: no issue: the enlisted survival redirect (`SurvivalChanceLine.RedirectEnlistedPlayer`) rolls the player against the commander's surgeon, which can make an enlisted player with Cheat Death or higher Medicine more likely to die than freelancing. This is an Enlistment design question for Mike.
+
+## Follow-ups (2026-10-26)
+
+The follow-up change did these, at Mike's direction:
+
+- **Shared predicate:** the seven identical copies of the single-player predicate now call `CoopSessionPolicy.IsSinglePlayerAuthority`, and `CampGate` is deleted. The three-term copies in other features (no authority term) stay as they are.
+- **Survival split:** `TaomPartyHealingModel.GetSurvivalChance` moved to `SurvivalChanceLine` (engine reads) and `SurvivalChanceMath` (pure math); the model is now 52 lines.
+- **Walker scope stack:** `PrefabBindingWalker` keeps a scope stack, so each `{..}` pops one level, and checks member kinds more strictly: an `@value` or `DataSource` binds a property, a `Command` binds a method, and a private base-class member is invisible.
+- **Shared reader:** `PrefabNodes.Of` replaces the six copies of the prefab node reader in the tests.
+- **Translator placeholder check:** it now sees `{newline}`, mixed-case tokens and expression conditional heads like `{?DAYS>1}`.
+- **Honey and wax:** dropped by Mike's decision. No such item exists in any installed module, so camp work yields only goods the game has: meat, hardwood and fish.
 
 ## Lessons appended
 

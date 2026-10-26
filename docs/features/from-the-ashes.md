@@ -31,7 +31,7 @@ From the Ashes lets the player's company work on the map's buildings. In a loote
 - **Ownership.** A rebuild needs the village's map faction to be the player's map faction (an independent player's is his own clan). Project help needs the player's clan to own the fief and `!Town.IsOwnerUnassigned`, the gate vanilla's keep stash uses. The materials' stash obeys the same gate.
 - **Materials** come from the party first, then from the stash of the fortification that owns the settlement (the village's bound fortress, or the fief itself), only when the player's clan owns that fortification and its owner is assigned. Counting and taking walk the same sources in the same order.
 - **One site rule.** `CanStart` and `Validate` call the same private `SiteBlock(kind, site)`, so a start refusal and a running job's cancel cannot drift apart. Its last check is the empty queue, so an enlisted player is told about enlistment before an empty queue. `CanStart` shows the hide-class blocks (not a looted village, not the owner, nothing to do here, busy) before it asks the single-player question, so a co-op peer sees no option exactly where single-player sees none.
-- **Single-player only.** The start gate is `!IsSessionActive && !ShouldDeferToHost && !IsDedicatedServer && IsAuthority` (the Eye of Sauron's predicate). `Validate` applies the same predicate to a running job, so a job carried into a co-op session cancels with no penalty. Every world write also checks `ICoopSessionProvider.IsAuthority`.
+- **Single-player only.** The start gate is `CoopSessionPolicy.IsSinglePlayerAuthority` (no live session, no deferral to a host, no dedicated server, and `IsAuthority`). `Validate` applies the same predicate to a running job, so a job carried into a co-op session cancels with no penalty. Every world write also checks `ICoopSessionProvider.IsAuthority`.
 - **The MCM switch** (`Fief Management / From the Ashes`, default on) hides only the start options. A running job always finishes or stops normally, and the hourly reconcile never reads the switch.
 - **Pre-emption.** A `MapEventStarted` listener cancels the job (no penalty, refund) when the main party is among the involved parties. The hourly reconcile and the wait menu's own tick catch the rest (a map event the listener missed, a siege, a changed owner).
 
@@ -87,7 +87,7 @@ HourlyTickEvent, MapEventStarted ─ Reconcile ─┤     │
 | Player captured, or the party leaves the settlement | `CurrentSite` is null or another settlement | cancel, project materials refunded |
 | Enlisted, or in another lord's army | `Validate` | cancel, project materials refunded |
 | Switch off mid-job | n/a | the job continues; only the start options hide |
-| Co-op session live, or the peer loses authority | `Validate` (the single-player predicate) | cancel, no penalty; the refund and every other write need `IsAuthority` |
+| Co-op session live, or the peer loses authority | `Validate` (`CoopSessionPolicy.IsSinglePlayerAuthority`) | cancel, no penalty; the refund and every other write need `IsAuthority` |
 | Queue empties mid-job (project) | `AddConstruction` returns false, or `Validate` | complete early, rewards paid, the message names the last building |
 | The next queued project becomes the head | the next credit | the points go to the new head; the status line names it |
 | Materials gone at completion (rebuild) | `End` | message, nothing taken, nothing rebuilt |

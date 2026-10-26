@@ -48,7 +48,7 @@ public sealed class NamegivingService
     /// every use (ICoopSessionProvider's contract).
     /// </summary>
     public bool MayWriteWorld =>
-        !_coop.IsSessionActive && !_coop.ShouldDeferToHost && !_dedicated.IsDedicatedServer && _coop.IsAuthority;
+        CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _dedicated);
 
     public static int CostFor(FiefKind kind) => kind switch
     {

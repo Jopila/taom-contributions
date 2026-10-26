@@ -21,13 +21,7 @@ public class NamegivingPrefabTests
 {
     private static readonly Type Vm = typeof(TaleWorlds.CampaignSystem.ViewModelCollection.KingdomManagement.KingdomManagementVM);
 
-    private static List<XmlElement> Nodes()
-    {
-        var prefab = typeof(FiefActionsRenamePrefab);
-        var instance = Activator.CreateInstance(prefab, nonPublic: true)!;
-        var method = prefab.GetMethods().Single(m => m.CustomAttributes.Any(a => a.AttributeType.Name == "PrefabExtensionXmlNodesAttribute"));
-        return ((IEnumerable<XmlNode>)method.Invoke(instance, null)!).Cast<XmlElement>().ToList();
-    }
+    private static List<XmlElement> Nodes() => PrefabNodes.Of(typeof(FiefActionsRenamePrefab));
 
     private static IEnumerable<XmlElement> All() =>
         Nodes().SelectMany(n => new[] { n }.Concat(n.SelectNodes(".//*")!.Cast<XmlElement>()));
@@ -92,8 +86,8 @@ public class NamegivingPrefabTests
     [TestMethod]
     public void EveryBindingCommandAndDataSource_ResolvesToAMixinOrVanillaMember()
     {
-        // One level up from the FiefsPanel's Settlement view model is the KingdomManagementVM: the scope the walk starts in.
-        var (failures, count) = PrefabBindingWalker.Walk(Nodes()[0], Vm, typeof(FiefNamingMixin), Vm, typeof(FiefNamingMixin));
+        // The inserted row sits in the Settlement view model's scope; one level up is the FiefsPanel's own view model.
+        var (failures, count) = PrefabBindingWalker.Walk(Nodes()[0], Vm.GetProperty("Settlement")!.PropertyType, null, Vm, typeof(FiefNamingMixin));
 
         Assert.AreEqual(0, failures.Count, string.Join(Environment.NewLine, failures));
         Assert.IsTrue(count >= 10, "the walk found only " + count + " bindings; it is not reading the inserted XML");

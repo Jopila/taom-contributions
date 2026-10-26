@@ -138,7 +138,7 @@ The option is added from `OnAfterSessionLaunched`. FieldCamp builds the panel in
 
 ### Co-op
 
-Single-player only, as From the Ashes and Host Review: the start gate is `!IsSessionActive && !ShouldDeferToHost && !IsDedicatedServer && IsAuthority`. A ride carried into a co-op session ends at the next hourly look with a message, no report and no XP, unless the wait menu's own completion comes first: that completion does not check the session, so it reports and raises the sight like any other and pays the XP only where the authority gate allows (`IsAuthority` and `MayWriteSaveBackedState(IsCoopClient)`). A saved kept sight loaded into a session affects only that peer's own map sight, as the lookout does. See [coop-interop.md](coop-interop.md).
+Single-player only, as From the Ashes and Host Review: the start gate is `CoopSessionPolicy.IsSinglePlayerAuthority` (no live session, no deferral to a host, no dedicated server, and `IsAuthority`). A ride carried into a co-op session ends at the next hourly look with a message, no report and no XP, unless the wait menu's own completion comes first: that completion does not check the session, so it reports and raises the sight like any other and pays the XP only where the authority gate allows (`IsAuthority` and `MayWriteSaveBackedState(IsCoopClient)`). A saved kept sight loaded into a session affects only that peer's own map sight, as the lookout does. See [coop-interop.md](coop-interop.md).
 
 ### Component Diagram
 

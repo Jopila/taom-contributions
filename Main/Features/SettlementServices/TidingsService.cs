@@ -37,7 +37,7 @@ public sealed class TidingsService
 
     // The fee is the only write, so the same single-player predicate as the other world-writing services.
     private bool MayWriteWorld =>
-        !_coop.IsSessionActive && !_coop.ShouldDeferToHost && !_dedicated.IsDedicatedServer && _coop.IsAuthority;
+        CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _dedicated);
 
     /// <summary>The option is shown while nothing blocks it or only a short purse does (then it is greyed); every other block hides it.</summary>
     public static bool IsShown(TidingsBlock block) => block == TidingsBlock.None || block == TidingsBlock.NotEnoughGold;

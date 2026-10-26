@@ -75,7 +75,7 @@ public class CampRestHealing
 
     // CampReady() is true only for a standing camp whose raise is done, so no separate "a camp exists" check is needed.
     private bool CanRest() =>
-        _settings.Enabled && CampGate.IsSinglePlayer(_coop, _dedicated) && _work.CampReady()
+        _settings.Enabled && CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _dedicated) && _work.CampReady()
         && (Rate(_settings.CampRestHealRegularsPerDay) > 0f || Rate(_settings.CampRestHealHeroesPerDay) > 0f);
 
     private static float Rate(float value) => FiniteFloatValidator.IsFinite(value) && value > 0f ? value : 0f;

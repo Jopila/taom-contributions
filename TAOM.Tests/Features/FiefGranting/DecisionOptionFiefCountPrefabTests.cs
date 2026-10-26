@@ -21,13 +21,7 @@ public class DecisionOptionFiefCountPrefabTests
 {
     private static readonly Type Vm = typeof(TaleWorlds.CampaignSystem.ViewModelCollection.KingdomManagement.Decisions.DecisionOptionVM);
 
-    private static List<XmlElement> Nodes()
-    {
-        var prefab = typeof(DecisionOptionFiefCountPrefab);
-        var instance = Activator.CreateInstance(prefab, nonPublic: true)!;
-        var method = prefab.GetMethods().Single(m => m.CustomAttributes.Any(a => a.AttributeType.Name == "PrefabExtensionXmlNodesAttribute"));
-        return ((IEnumerable<XmlNode>)method.Invoke(instance, null)!).Cast<XmlElement>().ToList();
-    }
+    private static List<XmlElement> Nodes() => PrefabNodes.Of(typeof(DecisionOptionFiefCountPrefab));
 
     private static IEnumerable<XmlElement> All() =>
         Nodes().SelectMany(n => new[] { n }.Concat(n.SelectNodes(".//*")!.Cast<XmlElement>()));
