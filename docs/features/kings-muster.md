@@ -148,4 +148,4 @@ All owed; none done yet.
 ## GitHub Issue
 
 - **Issue:** #874, [The King's Muster: AI rulers call hosts for less influence](https://github.com/haterade22/TAOM/issues/874)
-- **Status:** Open until the in-game checks and the balance check are done.
+- **Status:** Shipped on `bannerlord-1.5.x` in `f61c2f355` (v2.0.35). Issue open: the in-game checks and the balance check are owed.
