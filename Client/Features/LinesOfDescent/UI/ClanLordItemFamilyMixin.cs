@@ -17,10 +17,16 @@ namespace TAOM.Features.LinesOfDescent.UI;
 [ViewModelMixin("UpdateProperties")]
 internal sealed class ClanLordItemFamilyMixin : BaseViewModelMixin<ClanLordItemVM>
 {
+    private readonly IFamilyTreeService _service;
+    private readonly FamilyTreePopup _popup;
+    private readonly IModLogger _logger;
     private bool _logged;
 
     public ClanLordItemFamilyMixin(ClanLordItemVM viewModel) : base(viewModel)
     {
+        _service = IoC.Resolve<IFamilyTreeService>();
+        _popup = IoC.Resolve<FamilyTreePopup>();
+        _logger = IoC.Resolve<IModLogger>();
         FamilyTreeText = FamilyTreeTexts.Button().ToString();
         // No OnRefresh() here: UIExtenderEx replays the view model constructor's UpdateProperties call on the mixin as OnRefresh.
     }
@@ -47,7 +53,7 @@ internal sealed class ClanLordItemFamilyMixin : BaseViewModelMixin<ClanLordItemV
         {
             var hero = ViewModel?.GetHero();
             if (hero != null)
-                IoC.Resolve<FamilyTreePopup>().Open(hero.StringId, fromClanMembers: true);
+                _popup.Open(hero.StringId, fromClanMembers: true);
         }
         catch (Exception ex)
         {
@@ -62,7 +68,7 @@ internal sealed class ClanLordItemFamilyMixin : BaseViewModelMixin<ClanLordItemV
         var main = Hero.MainHero;
         if (vm == null || hero == null || main == null || hero == main)
             return;
-        var phrase = IoC.Resolve<IFamilyTreeService>().Describe(hero.StringId, main.StringId);
+        var phrase = _service.Describe(hero.StringId, main.StringId);
         if (phrase != null)
             vm.RelationToMainHeroText = FamilyTreeTexts.Render(phrase).ToString();
     }
@@ -72,6 +78,6 @@ internal sealed class ClanLordItemFamilyMixin : BaseViewModelMixin<ClanLordItemV
         if (_logged)
             return;
         _logged = true;
-        IoC.Resolve<IModLogger>().LogError($"[FamilyTree] clan member {site} threw. Logged once per row; later calls still run. Root cause: {ex}");
+        _logger.LogError($"[FamilyTree] clan member {site} threw. Logged once per row; later calls still run. Root cause: {ex}");
     }
 }

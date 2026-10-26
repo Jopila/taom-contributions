@@ -294,5 +294,24 @@ public class FamilyTreeUiWiringTests
         }
     }
 
+    // #1006: the container is resolved once per mixin, in its constructor (the types are core singletons registered before any
+    // screen opens), never in a refresh or a click handler, so a failure path cannot throw from the resolve it logs with.
+    [TestMethod]
+    public void NoMixinResolvesFromTheContainerOutsideItsConstructor()
+    {
+        foreach (var file in new[] { "ClanLordItemFamilyMixin.cs", "EncyclopediaHeroFamilyTreeMixin.cs" })
+        {
+            var source = ReadSource(UiDir + file, stripComments: true);
+            var constructor = System.Text.RegularExpressions.Regex.Match(source,
+                @"public \w+\([^)]*\)\s*:\s*base\([^)]*\)\s*\{(?<body>.*?)\r?\n    \}", System.Text.RegularExpressions.RegexOptions.Singleline);
+            Assert.IsTrue(constructor.Success, file);
+            StringAssert.Contains(constructor.Groups["body"].Value, "IoC.Resolve<IModLogger>()", file);
+            StringAssert.Contains(constructor.Groups["body"].Value, "IoC.Resolve<FamilyTreePopup>()", file);
+
+            var outside = source.Remove(constructor.Index, constructor.Length);
+            StringAssert.DoesNotMatch(outside, new System.Text.RegularExpressions.Regex(@"IoC\.Resolve"), file);
+        }
+    }
+
     private static List<XmlElement> InsertedNodes(Type extension) => PrefabNodes.Of(extension);
 }

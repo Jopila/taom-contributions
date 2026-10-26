@@ -6,7 +6,7 @@ namespace TAOM.Features.LinesOfDescent.UI;
 
 /// <summary>
 /// Opens the Lines of Descent popup (#905), one at a time, on whatever screen is on top. Registered once in
-/// <c>TaomClientComposition</c>; the two mixins resolve it when the player clicks. A second click while a popup is open does
+/// <c>TaomClientComposition</c>; the two mixins capture it in their constructors. A second click while a popup is open does
 /// nothing; a throw while opening closes the half-built layer and is logged, so the click is the only thing lost.
 /// </summary>
 internal sealed class FamilyTreePopup

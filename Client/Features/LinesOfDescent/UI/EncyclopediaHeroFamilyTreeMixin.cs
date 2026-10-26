@@ -17,11 +17,15 @@ namespace TAOM.Features.LinesOfDescent.UI;
 [ViewModelMixin("Refresh")]
 internal sealed class EncyclopediaHeroFamilyTreeMixin : BaseViewModelMixin<EncyclopediaHeroPageVM>
 {
+    private readonly IModLogger _logger;
+    private readonly FamilyTreePopup _popup;
     private bool _hasFamilyTree;
     private bool _logged;
 
     public EncyclopediaHeroFamilyTreeMixin(EncyclopediaHeroPageVM viewModel) : base(viewModel)
     {
+        _logger = IoC.Resolve<IModLogger>();
+        _popup = IoC.Resolve<FamilyTreePopup>();
         FamilyTreeText = FamilyTreeTexts.Button().ToString();
         // No OnRefresh() here: UIExtenderEx replays the view model constructor's Refresh call on the mixin as OnRefresh.
     }
@@ -61,7 +65,7 @@ internal sealed class EncyclopediaHeroFamilyTreeMixin : BaseViewModelMixin<Encyc
         try
         {
             if (ViewModel?.Obj is Hero hero)
-                IoC.Resolve<FamilyTreePopup>().Open(hero.StringId, fromClanMembers: false);
+                _popup.Open(hero.StringId, fromClanMembers: false);
         }
         catch (Exception ex)
         {
@@ -74,6 +78,6 @@ internal sealed class EncyclopediaHeroFamilyTreeMixin : BaseViewModelMixin<Encyc
         if (_logged)
             return;
         _logged = true;
-        IoC.Resolve<IModLogger>().LogError($"[FamilyTree] hero page {site} threw. Logged once per page; later calls still run. Root cause: {ex}");
+        _logger.LogError($"[FamilyTree] hero page {site} threw. Logged once per page; later calls still run. Root cause: {ex}");
     }
 }
