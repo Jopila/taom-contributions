@@ -152,14 +152,6 @@ public class ContractRenewalTests
     }
 
     [TestMethod]
-    public void OfferIfDue_ABattleEncounterIsOpen_Waits()
-    {
-        _encounter.GetOwnership(Arg.Any<string>()).Returns(new EncounterOwnershipSnapshot(hasEncounter: true, isBattleEncounter: true));
-
-        Assert.IsFalse(_sut.OfferIfDue(400));
-    }
-
-    [TestMethod]
     public void OfferIfDue_InAConversation_Waits()
     {
         _encounter.GetOwnership(Arg.Any<string>()).Returns(new EncounterOwnershipSnapshot(hasEncounter: true, conversationInProgress: true));

@@ -34,7 +34,6 @@
     <string id="taom_enlist_wage_forfeited" text="La colonna non può più rendere conto di {AMOUNT}{GOLD_ICON} dei tuoi arretrati." />
     <string id="taom_enlist_wage_paid" text="Salario ricevuto: {AMOUNT}{GOLD_ICON}" />
     <string id="taom_enlist_wage_line" text="Paga di servizio" />
-    <string id="taom_enlist_wait_text" text="Servi nella compagnia di {COMMANDER}. La colonna avanza al passo del tuo comandante." />
     <string id="taom_enlist_welcome" text="Benvenuto nella colonna, soldato. In riga." />
     <string id="taom_fc_accept" text="Promuovi" />
     <string id="taom_fc_acknowledge" text="Inteso" />
@@ -292,5 +291,6 @@
     <string id="taom_enlist_desert_memory_reply" text="(My commander will not take my oath again for a time, and this term will count for nothing.)" />
     <string id="taom_enlist_board_column" text="{NEWLINE}Column: {COLUMN}" />
     <string id="taom_enlist_retinue_cost" text="Your own men cost {COST}{COIN} a day; service pays {PAY}{COIN}." />
+    <string id="taom_enlist_act_sitout" text="Your commander is fighting a battle your oath keeps you out of." />
   </strings>
 </base>

@@ -123,7 +123,6 @@ public class EnlistmentService : IEnlistmentService
     private bool IsCommanderFit(string commanderHeroId)
     {
         var snapshot = _commander.GetSnapshot(commanderHeroId);
-        return snapshot.Exists && snapshot.IsAlive && !snapshot.IsPrisoner
-            && snapshot.HasParty && snapshot.PartyIsActive;
+        return snapshot.IsFit;
     }
 }

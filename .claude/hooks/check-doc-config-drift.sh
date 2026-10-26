@@ -132,7 +132,8 @@ done
 # working tree (--also-new). Any error here leaves the list empty, which only skips the extra check.
 ALSO_NEW=()
 FEATURE_DOC_TOKEN='docs/features/[^/[:space:]"'"'"']+\.md'
-set -f; ALSO_NEW_TOKENS=($(printf '%s\n' "$COMMAND" | grep -oE "$FEATURE_DOC_TOKEN" 2>/dev/null | sort -u | head -20)); set +f
+# shellcheck disable=SC2207  # word split under set -f is the point: a token is a path with no space
+{ set -f; ALSO_NEW_TOKENS=($(printf '%s\n' "$COMMAND" | grep -oE "$FEATURE_DOC_TOKEN" 2>/dev/null | sort -u | head -20)); set +f; }
 for t in "${ALSO_NEW_TOKENS[@]+"${ALSO_NEW_TOKENS[@]}"}"; do
     ALSO_NEW+=(--also-new "$t"); RELEVANT=1
 done

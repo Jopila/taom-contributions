@@ -141,6 +141,8 @@ public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
         {
             case CommanderActivity.InBattle:
                 return Named("{=taom_enlist_act_battle}{COMMANDER} is engaged. Hold your place in the line.", status.CommanderName);
+            case CommanderActivity.SittingOut:
+                return new TextObject("{=taom_enlist_act_sitout}Your commander is fighting a battle your oath keeps you out of.");
             case CommanderActivity.Raiding:
                 return new TextObject("{=taom_enlist_act_raid}The column is raiding.");
             case CommanderActivity.Besieging:

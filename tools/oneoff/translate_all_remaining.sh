@@ -9,7 +9,8 @@ set -e
 LANG_CODE="${1:?usage: $0 LANG MODULE}"
 MODULE="${2:?usage: $0 LANG MODULE}"
 
-export ANTHROPIC_API_KEY=$(cat ~/.taom_anthropic_key)
+ANTHROPIC_API_KEY=$(cat ~/.taom_anthropic_key)
+export ANTHROPIC_API_KEY
 LOG=tools/translation_cache/_progress.log
 mkdir -p tools/translation_cache
 

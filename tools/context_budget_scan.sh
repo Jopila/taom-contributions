@@ -200,7 +200,7 @@ scan_skills() {
     local root="$REPO_ROOT/.claude/skills"
     [[ ! -d "$root" ]] && return
     while IFS= read -r -d '' skilldir; do
-        local name=$(basename "$skilldir")
+        local name; name=$(basename "$skilldir")
         local skillmd="$skilldir/SKILL.md"
         [[ ! -f "$skillmd" ]] && continue
         local lines eager lazy desc desc_words
@@ -361,7 +361,7 @@ scan_hooks() {
     local dir="$REPO_ROOT/.claude/hooks"
     [[ ! -d "$dir" ]] && return
     while IFS= read -r -d '' file; do
-        local name=$(basename "$file")
+        local name; name=$(basename "$file")
         local tokens
         tokens=$(estimate_code_tokens "$file")
         HOOKS_TOKENS=$(( HOOKS_TOKENS + tokens ))

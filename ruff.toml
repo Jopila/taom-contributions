@@ -1,0 +1,17 @@
+# Python bug-class lint gate (issue #1020), run by tools/tests/test_python_lint_gate.py.
+# Bug classes only: a finding here is a crash waiting on a code path nobody ran.
+#   E9   E902, a file Ruff cannot read (invalid-syntax errors are reported whatever is selected)
+#   F63  invalid comparisons and assertions (is with a literal, assert on a tuple)
+#   F7   misplaced break/continue/return/yield and similar statement-level errors
+#   F82  undefined names (F821 name, F822 __all__ entry, F823 used before assignment)
+#   F811 redefinition of an unused name (zero hits on the tree when added)
+# Style classes are deliberately not selected: the tree carries about 132 F541, 50 F401 and
+# 31 F841, and cleaning them is churn with no crash behind it.
+# The one Blender exec layer (tools/blender/spider_cfg.py) carries its own `# ruff: noqa: F821`.
+
+# The newest Python, Mike's call 2026-10-26. Blender 5.2's bundled Python 3.13 runs tools/blender
+# and the PyGhidra venv is 3.13, so syntax only 3.14 accepts can still break those scripts at run time.
+target-version = "py314"
+
+[lint]
+select = ["E9", "F63", "F7", "F82", "F811"]

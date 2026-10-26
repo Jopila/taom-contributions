@@ -12,6 +12,9 @@ public enum CommanderActivity
     Besieging = 3,
     Unavailable = 4,
     Raiding = 5,
+
+    /// <summary>The commander is fighting a battle the soldier's oath keeps him out of (#1016).</summary>
+    SittingOut = 6,
 }
 
 /// <summary>

@@ -104,7 +104,7 @@ public class EnlistmentContentBehavior : CampaignBehaviorBase
         if (!_coopSession.IsAuthority)
             return;
 
-        var summary = _daily.RunDailyTick(CampaignTime.Now.ToDays);
+        var summary = _daily.RunDailyTick();
 
         _announcer.AnnounceWage(summary.Wage);
 

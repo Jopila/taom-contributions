@@ -51,7 +51,6 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
     private readonly IEnlistmentReconciler _reconciler;
     // For ResetSessionCaches only: a service never calls presentation (popups stay presenter-side).
     private readonly Presentation.IEnlistmentWaitMenuPresenter _presenter;
-    private readonly Content.IArmyRhythmSnapshotService _rhythm;
     // Singletons holding per-battle state that must not leak into the next campaign (#830).
     private readonly SitOutLedger _sitOutLedger;
     private readonly Content.IBattleMeritAccumulator _meritAccumulator;
@@ -82,7 +81,6 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         IEncounterOwnershipPolicy ownership,
         IEnlistmentReconciler reconciler,
         Presentation.IEnlistmentWaitMenuPresenter presenter,
-        Content.IArmyRhythmSnapshotService rhythm,
         SitOutLedger sitOutLedger,
         Content.IBattleMeritAccumulator meritAccumulator,
         Content.ContractRenewalService renewal,
@@ -100,7 +98,6 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         _ownership = ownership;
         _reconciler = reconciler;
         _presenter = presenter;
-        _rhythm = rhythm;
         _sitOutLedger = sitOutLedger;
         _meritAccumulator = meritAccumulator;
         _renewal = renewal;
@@ -295,7 +292,7 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         // The reconciler is a singleton too, and its stale-battle-latch anchor is an absolute
         // campaign day (#551). A campaign that ended WHILE latched leaves that anchor behind; load a
         // later save and the elapsed time is enormous, so the recovery fires on the first latched
-        // tick and finishes a live loot screen with no real waiting. Dropped here for the same
+        // tick and finishes an encounter with no real waiting. Dropped here for the same
         // reason the army handle is, rather than being wired separately into a lifecycle hook.
         // The same reset re-arms the commander-loss modal's shown-once latch (#656).
         _reconciler?.ResetForNewSession();
@@ -308,10 +305,6 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         // cached commander MobileParty (the StringId hazard in the summary above).
         _attachment.ResetForNewSession();
         _presenter?.ResetForNewSession();
-
-        // The rhythm snapshot is keyed on an equal hour stamp, not an elapsed time: its hazard is
-        // a reload inside the same campaign hour serving the previous world's snapshot.
-        _rhythm?.ResetForNewSession();
     }
 
     public void OnPartyJoinedRunningMapEvent(string partyId)

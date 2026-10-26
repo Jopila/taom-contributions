@@ -1372,6 +1372,7 @@ stop_expect() {  # hook payload want label
         bad "$1: expected $3 ($4), got '$got', rc $(cat "$SANDBOX/stop.rc" 2>/dev/null), stderr: $(head -c 100 "$SANDBOX/stop.err" 2>/dev/null)"
     fi
 }
+# shellcheck disable=SC2010  # counts one fixed marker suffix; the names are ours, not user input
 stop_markers() { ls -A "$STOP_REPO/.claude/logs" 2>/dev/null | grep -c -- '-reminded$'; }
 # Ends (clear) or restarts (set) each hook's streak the way a session would. The verification
 # streak ends through the real writer, called as the PowerShell tool, so the writer's marker path
@@ -2030,6 +2031,7 @@ done
 # PowerShell's typographic quotes (deep review of plan 027): read as ASCII text, the ` #` inside
 # them was taken for a comment and the push was dropped. Each shape is sent twice: with the literal
 # U+2018 and U+2019 characters, and with the JSON escapes \u2018 and \u2019 (convergence).
+# shellcheck disable=SC1112  # the typographic quotes are the test data, as the comment above says
 for cmd in 'if (‘a #'\'' -ne '\''x’) { git push --force origin bannerlord-1.5.x }' \
            'git push --force -o ‘ci #1’ origin bannerlord-1.5.x' \
            'if (\u2018a #'\'' -ne '\''x\u2019) { git push --force origin bannerlord-1.5.x }' \
@@ -2629,6 +2631,7 @@ else
 fi
 # #985: the `commands` mode failing leaves the sed split of the same gates, which still reads a
 # bare git after `&&`.
+# shellcheck disable=SC2043  # one hook today; the loop keeps the shape of its siblings
 for hook in block-dangerous-git.sh; do
     out=$(pre_payload Bash "cd x && git reset --hard" \
         | timeout -k 2 30 env CLAUDE_PROJECT_DIR="$SANDBOX" bash "$NOREADER/$hook" 2>/dev/null)
@@ -2707,8 +2710,8 @@ done
 # same answer stands; mutant H10, which exits 0 there, passed every row above. A right answer that
 # misses the 4 s bar runs once more, since load alone can cross it; rc 124 at 10 s always fails.
 vp_raw() {  # $1 hooks dir, $2 payload file, $3 expected "rc=<n> <decision>", $4 stderr note or "", $5 label
-    local out rc got ms s try
-    for try in 1 2; do
+    local out rc got ms s
+    for _ in 1 2; do
         s=$(date +%s%N)
         out=$( cd "$VP_TRUNK" && timeout -k 2 10 env CLAUDE_PROJECT_DIR="$SANDBOX" bash "$1/validate-push.sh" < "$2" 2>"$SANDBOX/vpraw.err" )
         rc=$?
@@ -2939,9 +2942,9 @@ print(next((h.get("timeout", 600) for g in d["hooks"].get(sys.argv[1], []) for h
 # One row: $1 hook, $2 event, $3 project dir, $4 payload file, $5 expected (rc2, ask, allow or mark),
 # $6 label. The hook runs from the repo, and a mark row reads its marker in the project dir.
 hw_row() {
-    local reg out rc ms s got answered try
+    local reg out rc ms s got answered
     reg=$(hw_reg "$2" "$1")
-    for try in 1 2; do
+    for _ in 1 2; do
         rm -rf "$3/.claude"
         s=$(date +%s%N)
         out=$(timeout -k 2 10 env CLAUDE_PROJECT_DIR="$3" bash ".claude/hooks/$1" < "$4" 2>/dev/null)
@@ -3045,7 +3048,7 @@ for shape in A D E; do
     for size in 256000 409600 819200 2097152; do
         for tool in Bash PowerShell; do
             vpi_payload "$shape" "$tool" "$size"
-            for try in 1 2; do
+            for _ in 1 2; do
                 S=$(date +%s%N)
                 timeout -k 2 10 env CLAUDE_PROJECT_DIR="$SANDBOX" bash .claude/hooks/validate-push.sh < "$SANDBOX/vpi.json" >/dev/null 2>&1
                 rc=$?
@@ -3076,8 +3079,8 @@ cp .claude/hooks/*.sh .claude/hooks/*.py "$VPI_PROBE/"
 printf '\nsleep 2.8\n' >> "$VPI_PROBE/_pybin.sh"
 pre_payload Bash "git push --force origin bannerlord-1.5.x" > "$SANDBOX/vpi.json"
 vpi_overrun() {  # $1 hooks dir, $2 shell text run first (empty: run the hook directly), $3 the ask's reason, $4 label
-    local out rc ms s try
-    for try in 1 2; do
+    local out rc ms s
+    for _ in 1 2; do
         s=$(date +%s%N)
         if [[ -n "$2" ]]; then
             out=$(timeout -k 2 10 env CLAUDE_PROJECT_DIR="$SANDBOX" bash -c "$2"'. "$0"' "$1/validate-push.sh" \
@@ -3200,6 +3203,7 @@ fi
 # With no python the hook cannot encode JSON: it answers with exit 2 and stderr (also a channel
 # Claude reads) and mutes, so the same "did not run" line does not repeat on every edit.
 rm -f "$PG/.claude/logs/.polearm-gate-reported-v2"
+# shellcheck disable=SC2069  # 2>&1 >/dev/null on purpose: capture stderr only, drop stdout
 pg_nopy() { printf '%s' "$PG_PAYLOAD" | timeout -k 2 30 env -u TAOM_PYBIN PATH=/usr/bin:/bin CLAUDE_PROJECT_DIR="$PG" bash "$REPO/.claude/hooks/check-polearm-shield-parity.sh" 2>&1 >/dev/null; }
 PG_ERR=$(pg_nopy); PG_RC=$?
 if [[ $PG_RC -eq 2 && "$PG_ERR" == *"did not run"* ]]; then

@@ -100,5 +100,9 @@ new blanket gameplay smoke gate. Agree task-specific runtime expectations and
 document what static checks cannot establish.
 
 The Python tool tests (`python -m unittest discover -s tools/tests -t .`, `/verify`
-Step 2b) include the review-tool and documentation tests. That tests the tools; it
+Step 2b) include the review-tool and documentation tests and three lint gates (#1020): Ruff on
+bug classes, ShellCheck on every `.sh`, and the Claude config lint. Those gates need Ruff, PyYAML
+and ShellCheck (`docs/reference/development-machines.md` "Lint gates"); a missing tool fails its
+gate, and a run with `TAOM_ALLOW_NO_RUFF`, `TAOM_ALLOW_NO_YAML` or `TAOM_ALLOW_NO_SHELLCHECK` set
+reports that gate as skipped, never passed. That tests the tools; it
 does not run AI reviewers, verify their identity or create a protected merge check.

@@ -18717,7 +18717,6 @@
   "taom_enlist_wage_paid": "Alınan maaş: {AMOUNT}{GOLD_ICON}",
   "taom_enlist_wait_board": "{ACTIVITY}{NEWLINE}{NEWLINE}Rütbe: {RANK} · {SECTION}{NEWLINE}Hizmet günü: {DAYS} · İtibar: {TRUST}{ARREARS}{DUTY}",
   "taom_enlist_wait_board_v2": "{ACTIVITY}{NEWLINE}{NEWLINE}Rütbe: {RANK} · {SECTION}{NEWLINE}Hizmet günü: {DAYS} · İtibar: {TRUST}{NEWLINE}Hizmet kaydı: {XP} TP · Günlük ücret: {WAGE}{COIN}{LADDER}{ARREARS}{DUTY}",
-  "taom_enlist_wait_text": "{COMMANDER} bölüğünde hizmet ediyorsun. Kol, komutanının hızıyla ilerliyor.",
   "taom_enlist_welcome": "Kola hoş geldin, asker. Safa gir.",
   "taom_ep_bad_name": "Hazır donanım adı boş olamaz.",
   "taom_ep_cancel": "İptal",

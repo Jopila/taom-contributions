@@ -1,6 +1,8 @@
 # Spider config layer over the elephant harness. exec this instead of harness.py for spider work:
 #   exec(open(r'E:\repos\TAOM\tools\blender\spider_cfg.py').read(), globals())
 # The repo copy is canonical since 2026-09-29; the E:\LOTRAOMAssets copy forwards here.
+# ruff: noqa: F821
+# Blender exec layer: bpy, aim_cam and world_bbox come from the globals harness.py defines.
 import os
 exec(open(r'E:\repos\TAOM\tools\blender\harness.py').read(), globals())
 
