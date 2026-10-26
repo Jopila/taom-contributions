@@ -52,6 +52,15 @@ A1, A2 and A4 needed no new hook, because the skill they live in is already requ
 are machine checks, the first rung of the CLAUDE.md ladder. `/harness-retro` gives each of them a
 verdict at its next run.
 
+## Review follow-ups, done 2026-10-26
+
+- An unresolvable `--dash-base` stops `lint_docs.py` with exit 2 before any check runs, instead of
+  surfacing later as a gating `git-diff-failed` finding.
+- An amended commit is checked against `HEAD~1` (the empty tree for a root commit); scratch-repo
+  tests prove a feature doc added in the amended commit is gated.
+- `perf_runs.py compare` also calls a result inconclusive when its rows span more than one scene,
+  or when a metric has fewer than 5 values in a group.
+
 ## Offered, not built
 
 - `/deep-review` triage: "no findings is a valid result", and trace the call site before a

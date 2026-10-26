@@ -1708,8 +1708,9 @@ def format_report(report: LintReport, quick: bool, drift_only: bool = False) -> 
         out.append("## Git diff failed")
         out.append("")
         out.append("The new-lines checks (dashes and RCA FOLLOW-UP lines) read `git diff` against a base, "
-                   "and git could not produce it, so they did not run. This gates like a finding: fix "
-                   "the base (`--dash-base`) and run again.")
+                   "and git could not produce it, so they did not run. The base was verified first, so "
+                   "this means repository damage (a broken index or a missing object): run `git status` "
+                   "and `git fsck`. This gates like a finding.")
         out.append("")
         for f, lineno, kind, snippet in report.git_diff_failures:
             out.append(f"- `{rel(f)}:{lineno}` — [{kind}] `{snippet}`")
@@ -1718,6 +1719,19 @@ def format_report(report: LintReport, quick: bool, drift_only: bool = False) -> 
         out.append("**Clean — no findings.**")
         out.append("")
     return "\n".join(out)
+
+
+def _dash_base_resolves(ref: str) -> bool:
+    """False only when git ran inside a work tree and cannot resolve REF (a commit, a tag or a tree
+    id such as the empty tree). No git, no work tree, and the unborn HEAD of a fresh repository
+    stay True: those fail open in the checks themselves, with their own notes."""
+    proc = _git_run("rev-parse", "--verify", "-q", f"{ref}^{{tree}}")
+    if proc is None or proc.returncode == 0:
+        return True
+    if ref == "HEAD" and _is_unborn_head():
+        return True
+    inside = _git_run("rev-parse", "--is-inside-work-tree")
+    return inside is None or inside.returncode != 0
 
 
 def main(argv: list[str]) -> int:
@@ -1757,13 +1771,18 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--dash-base", default="HEAD", metavar="REF",
                     help="Base ref for the new-lines-only checks (em/en dashes, RCA FOLLOW-UP "
                          "lines; default HEAD, i.e. uncommitted writing). Pass a branch point to "
-                         "scan a whole branch. A ref git cannot resolve is a git-diff-failed "
-                         "finding that gates --fail-on-drift and --drift-only.")
+                         "scan a whole branch; a tree id such as the empty tree "
+                         "counts every file as added. A ref git cannot resolve is an error: "
+                         "exit 2, no report.")
     args = ap.parse_args(argv)
 
     if args.context_budget_json:
         sys.stdout.write(json.dumps(context_budget_snapshot(), indent=2) + "\n")
         return 0
+
+    if not _dash_base_resolves(args.dash_base):
+        print(f"lint_docs: --dash-base {args.dash_base} does not resolve", file=sys.stderr)
+        return 2
 
     files: list[Path] = []
     for root in DOC_ROOTS:

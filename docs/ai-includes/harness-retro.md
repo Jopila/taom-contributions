@@ -36,11 +36,15 @@ share of Read output, folded across worktrees, with a `file growth:` line for fi
 
 Section 10 (tokens and cache) reads `message.usage` of every request once (deduplicated by request
 id, so a request copied into a resumed session is not counted twice) and reports the totals, the
-cache-read share of input, the top five skills (main-session tokens after the skill was invoked)
-and subagent types by total tokens, and the count of cache breaks (one request writing more than
-100,000 tokens to the cache). It is for spotting where cost goes and where the prompt cache breaks.
-Output tokens are a floor (many subagent requests are written only mid-stream, and the report
-says how many). It is not a verdict by itself, and a skill's total grows with the work it was given.
+cache-read share of input, the top five skills (main-session tokens after the skill was invoked) and
+subagent types by total tokens, and the count of cache breaks (one request writing more than 100,000
+tokens to the cache). The skill and subagent tables also split out output and cache-write tokens
+(the total is mostly cache reads), and signals.json keeps all four fields. It is for spotting where
+cost goes and where the prompt cache breaks. A user record the transcript marks human (`origin.kind`
+or `turnOrigin` is "human") counts as a human turn even when it opens with an injected block such as
+`<ide_opened_file>`; its typed text after those blocks is what the correction detector reads. Output
+tokens are a floor (many subagent requests are written only mid-stream, and the report says how
+many). It is not a verdict by itself, and a skill's total grows with the work it was given.
 
 Also run `python tools/analyze_reviews.py --summary --no-plot` for the reviewer accuracy that
 `REVIEW-LOG.md` already tracks (`--no-plot` leaves the committed `progress.png` alone).

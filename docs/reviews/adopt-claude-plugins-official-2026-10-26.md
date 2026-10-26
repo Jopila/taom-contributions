@@ -81,10 +81,11 @@ before commit:
 - **The canary's failure message** names its cause, so a stray exported variable is not "fixed"
   by disabling the test.
 
-Follow-ups, not done: sections 5 and 6 of `harness_retro.py` have the same typed-while-busy blind
-spot (it predates this change); the token tables could show output and cache-creation columns,
-because cache reads are about 98% of the total; section 3b has no self-test that proves it can
-fail.
+Follow-ups, done 2026-10-26 on branch `taom-followups`: sections 5 and 6 of `harness_retro.py`
+now treat a typed-while-busy prompt as a human turn through the same helper as section 10; the
+token tables show output and cache-write columns, because cache reads are about 98% of the total;
+section 3b runs a self-test on a planted tree, and decides a file's kind from its path under
+`.claude`.
 
 ## Offered, not built
 

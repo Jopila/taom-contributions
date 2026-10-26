@@ -245,8 +245,8 @@ merge" below).
    failure set; the worktree's own lint copy (each copy lints the checkout it sits in),
    `python "<wt-integrate>/tools/lint_docs.py" --fail-on-drift --summary --dash-base <step 4 SHA>`
    (the default base, HEAD, sees nothing once the merge is committed), whose exit gates drift only
-   (a bare `FOLLOW-UP` line in a merged RCA is a gated finding too, #984, and so is a base git cannot
-   resolve, counted apart as `git_diff_failed:`) and ignores dashes, so also compare its `ai_dashes:` count with step 4's: a higher count is new
+   (a bare `FOLLOW-UP` line in a merged RCA is a gated finding too, #984, and so is a diff that fails on a resolvable base,
+   counted apart as `git_diff_failed:`; a mistyped SHA gives exit 2 with no summary block) and ignores dashes, so also compare its `ai_dashes:` count with step 4's: a higher count is new
    prose with an em or en dash; `validate_moduledata.py` when ModuleData changed; the hook suite when
    `.claude/` or `tools/test_hooks.sh` changed; the no-game replay (`.ai/verification.md`, its three
    RefAsm commands) when C# or tests changed. When a plan adds a gate, replay it on every
