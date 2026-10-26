@@ -818,6 +818,13 @@ class _GitRepo(unittest.TestCase):
         self._git("add", "-A")
         self._git("commit", "-q", "-m", msg)
 
+    def _gate(self, *argv):
+        with mock.patch.object(ld, "DOC_ROOTS", [self.root / "docs"]), \
+                mock.patch.object(ld, "check_context_budget", return_value=[]), \
+                mock.patch.object(ld, "check_version_consistency", return_value=[]), \
+                mock.patch("sys.stdout", new_callable=io.StringIO) as out:
+            return ld.main(list(argv)), out.getvalue()
+
 
 class AiDashGitScopeTests(_GitRepo):
     """check_ai_dashes reports NEW writing only.
@@ -1110,13 +1117,6 @@ class RcaFollowUpGateTests(_GitRepo):
         self._git("rm", "-q", "docs/reviews/rca-sample-2026-10-23.md")
         self.assertEqual(self._staged(), [])
 
-    def _gate(self, *argv):
-        with mock.patch.object(ld, "DOC_ROOTS", [self.root / "docs"]), \
-                mock.patch.object(ld, "check_context_budget", return_value=[]), \
-                mock.patch.object(ld, "check_version_consistency", return_value=[]), \
-                mock.patch("sys.stdout", new_callable=io.StringIO) as out:
-            return ld.main(list(argv)), out.getvalue()
-
     def test_a_flagged_line_fails_the_drift_gate_and_is_reported(self):
         _write(self.rca, "# rca\nFOLLOW-UP ok #1.\n")
         self.assertEqual(self._gate("--fail-on-drift")[0], 0)
@@ -1302,13 +1302,6 @@ class FeatureDocVerifySectionTests(_GitRepo):
         self.assertEqual(self._names(staged=True), [])
         self.assertEqual(self._names(), [])
 
-    def _gate(self, *argv):
-        with mock.patch.object(ld, "DOC_ROOTS", [self.root / "docs"]), \
-                mock.patch.object(ld, "check_context_budget", return_value=[]), \
-                mock.patch.object(ld, "check_version_consistency", return_value=[]), \
-                mock.patch("sys.stdout", new_callable=io.StringIO) as out:
-            return ld.main(list(argv)), out.getvalue()
-
     def test_the_drift_gate_fails_and_reports_a_new_doc_without_the_section(self):
         _write(self.feat, "# thing\n")
         self._git("add", "-A")
@@ -1322,6 +1315,214 @@ class FeatureDocVerifySectionTests(_GitRepo):
         _write(self.feat, f"# thing\n{self.HEADING}\nNot applicable: tooling.\n")
         self._git("add", "-A")
         self.assertEqual(self._gate("--drift-only", "--staged")[0], 0)
+
+
+class SharedFenceWalkerTests(unittest.TestCase):
+    """#987 item 5: the dash scanner and the FOLLOW-UP scanner walk fences the same way, and a
+    closing fence needs a run at least as long as its opener (nested fences)."""
+
+    P = Path("docs/reviews/rca-sample-2026-10-23.md")
+
+    def _dashes(self, text):
+        return [n for _p, n, _k, _t in ld.scan_text_for_dashes(Path("docs/features/a.md"), text)]
+
+    def _followups(self, text):
+        return [n for _p, n, _k, _t in ld.scan_text_for_followups(self.P, text)]
+
+    def test_a_dash_inside_a_fence_indented_four_spaces_in_a_list_is_not_reported(self):
+        self.assertEqual(self._dashes(f"- item\n\n    ```\n    code {EM} sample\n    ```\n"), [])
+
+    def test_a_four_backtick_block_holding_a_three_backtick_line_stays_open_for_dashes(self):
+        self.assertEqual(self._dashes(f"````\n```\ncode {EM} sample\n````\n"), [])
+
+    def test_a_four_backtick_block_holding_a_three_backtick_line_stays_open_for_follow_ups(self):
+        self.assertEqual(self._followups("````\n```\nFOLLOW-UP bare\n````\n"), [])
+
+    def test_prose_after_the_long_closer_is_checked_again(self):
+        self.assertEqual(self._followups("````\n```\n````\nFOLLOW-UP bare\n"), [4])
+        self.assertEqual(self._dashes(f"````\n```\n````\nProse {EM} here\n"), [4])
+
+    def test_a_longer_closer_closes_a_shorter_opener(self):
+        self.assertEqual(self._dashes(f"```\ncode\n`````\nProse {EM} here\n"), [4])
+
+
+class GitDiffFailureTests(_GitRepo):
+    """#987 item 6: a --dash-base git cannot resolve is a finding that gates, never zero findings.
+    A git that cannot run at all keeps failing open, with a note."""
+
+    def setUp(self):
+        super().setUp()
+        _write(self.root / "docs" / "seed.md", "# seed\n")
+        self._commit()
+        self.rca = self.root / "docs" / "reviews" / "rca-sample-2026-10-23.md"
+
+    def _kinds(self, findings):
+        return [k for _p, _n, k, _t in findings]
+
+    def test_the_dash_check_reports_an_unresolvable_base(self):
+        failures = []
+        self.assertEqual([], ld.check_ai_dashes("no-such-ref", failures=failures))
+        self.assertEqual(["git-diff-failed"], self._kinds(failures))
+
+    def test_the_follow_up_check_reports_an_unresolvable_base(self):
+        failures = []
+        self.assertEqual([], ld.check_rca_followups("no-such-ref", failures=failures))
+        self.assertEqual(["git-diff-failed"], self._kinds(failures))
+        self.assertIn("no-such-ref", failures[0][3])
+
+    def test_the_staged_check_reports_an_unresolvable_base(self):
+        failures = []
+        ld.check_rca_followups("no-such-ref", staged=True, failures=failures)
+        self.assertEqual(["git-diff-failed"], self._kinds(failures))
+
+    def test_two_checks_sharing_one_list_report_the_failure_once(self):
+        failures = []
+        ld.check_ai_dashes("no-such-ref", failures=failures)
+        ld.check_rca_followups("no-such-ref", failures=failures)
+        self.assertEqual(["git-diff-failed"], self._kinds(failures))
+
+    def test_a_resolvable_base_reports_nothing(self):
+        failures = []
+        self.assertEqual([], ld.check_rca_followups("HEAD", failures=failures))
+        self.assertEqual([], ld.check_ai_dashes("HEAD", failures=failures))
+        self.assertEqual([], failures)
+
+    def test_drift_only_exits_1_on_an_unresolvable_base(self):
+        rc, out = self._gate("--drift-only", "--dash-base", "no-such-ref")
+        self.assertEqual(1, rc, out)
+        self.assertIn("git-diff-failed", out)
+
+    def test_fail_on_drift_exits_1_on_an_unresolvable_base(self):
+        rc, out = self._gate("--fail-on-drift", "--dash-base", "no-such-ref")
+        self.assertEqual(1, rc, out)
+
+    def test_drift_only_staged_exits_1_on_an_unresolvable_base(self):
+        self.assertEqual(1, self._gate("--drift-only", "--staged", "--dash-base", "no-such-ref")[0])
+
+    def test_a_failed_diff_has_its_own_section_not_the_follow_up_one(self):
+        rc, out = self._gate("--drift-only", "--dash-base", "no-such-ref")
+        self.assertEqual(1, rc, out)
+        self.assertIn("## Git diff failed", out)
+        self.assertNotIn("## RCA FOLLOW-UP lines", out)
+        self.assertIn("RCA FOLLOW-UP lines with no issue or reason (new lines only): **0**", out)
+        self.assertEqual(1, out.count("[git-diff-failed]"), out)
+
+    def test_a_failed_diff_has_its_own_summary_counter(self):
+        rc, out = self._gate("--drift-only", "--summary", "--dash-base", "no-such-ref")
+        self.assertEqual(1, rc, out)
+        self.assertIn("git_diff_failed:   1", out)
+        self.assertIn("rca_followups:     0", out)
+        self.assertIn("total_findings:    1", out)
+
+    def test_a_good_base_still_exits_0(self):
+        self.assertEqual(0, self._gate("--drift-only", "--dash-base", "HEAD")[0])
+
+    def test_a_missing_git_fails_open_with_a_note(self):
+        _write(self.rca, "# rca\nFOLLOW-UP bare.\n")
+        with mock.patch.object(ld.subprocess, "run", side_effect=FileNotFoundError("git")), \
+                mock.patch("sys.stderr", new_callable=io.StringIO) as err:
+            failures = []
+            self.assertEqual([], ld.check_rca_followups(failures=failures))
+            self.assertEqual([], ld.check_ai_dashes(failures=failures))
+        self.assertEqual([], failures)
+        self.assertIn("git", err.getvalue())
+        self.assertIn("read nothing", err.getvalue())
+
+    def test_a_directory_that_is_no_git_work_tree_fails_open_with_a_note(self):
+        with tempfile.TemporaryDirectory() as plain:
+            ld.REPO_ROOT = Path(plain)
+            with mock.patch("sys.stderr", new_callable=io.StringIO) as err:
+                self.assertEqual([], ld.check_rca_followups("HEAD"))
+        self.assertIn("not a git work tree", err.getvalue())
+
+    def test_a_repo_with_no_commits_is_not_a_failed_diff(self):
+        with tempfile.TemporaryDirectory() as fresh:
+            ld.REPO_ROOT = Path(fresh)
+            subprocess.run(["git", "-C", fresh, "init", "-q"], check=True, capture_output=True)
+            _write(Path(fresh) / "docs" / "reviews" / "rca-x-2026-10-23.md", "# rca\nFOLLOW-UP bare.\n")
+            subprocess.run(["git", "-C", fresh, "add", "-A"], check=True, capture_output=True)
+            found = ld.check_rca_followups("HEAD", staged=True)
+        self.assertEqual(["followup-no-owner"], self._kinds(found))
+
+
+class CommitOnlyPathsTests(_GitRepo):
+    """#987 item 7, linter side: `git commit -- <paths>` records the named paths' working copies,
+    so --only-paths reads those from the working tree whatever --staged says."""
+
+    def setUp(self):
+        super().setUp()
+        self.rca = self.root / "docs" / "reviews" / "rca-sample-2026-10-23.md"
+        self.other = self.root / "docs" / "reviews" / "rca-other-2026-10-23.md"
+        _write(self.rca, "# rca\n")
+        _write(self.other, "# rca\n")
+        self._commit()
+
+    def test_an_unstaged_edit_of_a_named_path_is_judged(self):
+        _write(self.rca, "# rca\nFOLLOW-UP bare.\n")
+        self.assertEqual(0, self._gate("--drift-only", "--staged")[0], "the index holds nothing new")
+        rc, out = self._gate("--drift-only", "--staged", "--only-paths", "docs/reviews/rca-sample-2026-10-23.md")
+        self.assertEqual(1, rc, out)
+
+    def test_a_bad_line_in_an_unnamed_path_is_not_judged(self):
+        _write(self.other, "# rca\nFOLLOW-UP bare.\n")
+        rc, out = self._gate("--drift-only", "--staged", "--only-paths", "docs/reviews/rca-sample-2026-10-23.md")
+        self.assertEqual(0, rc, out)
+
+    def test_a_staged_bad_line_that_the_working_copy_fixed_is_not_judged(self):
+        _write(self.rca, "# rca\nFOLLOW-UP bare.\n")
+        self._git("add", "-A")
+        _write(self.rca, "# rca\nFOLLOW-UP fixed in #987.\n")
+        self.assertEqual(1, self._gate("--drift-only", "--staged")[0], "the index still holds the bare line")
+        rc, out = self._gate("--drift-only", "--staged", "--only-paths", "docs/reviews/rca-sample-2026-10-23.md")
+        self.assertEqual(0, rc, out)
+
+    def test_a_directory_path_covers_its_files(self):
+        _write(self.rca, "# rca\nFOLLOW-UP bare.\n")
+        self.assertEqual(1, self._gate("--drift-only", "--staged", "--only-paths", "docs/reviews")[0])
+
+    def _git_calls(self, fn):
+        calls = []
+        real = ld._git_run
+
+        def spy(*args):
+            calls.append(args)
+            return real(*args)
+        with mock.patch.object(ld, "_git_run", spy):
+            result = fn()
+        return result, calls
+
+    def _diff_specs(self, calls):
+        return [list(a[a.index("--") + 1:]) for a in calls if "diff" in a]
+
+    def test_only_paths_reads_only_the_rca_docs_it_names(self):
+        seed = self.root / "docs" / "seed.md"
+        _write(seed, "# seed\n")
+        self._commit()
+        _write(self.rca, "# rca\nFOLLOW-UP bare.\n")
+        _write(seed, "# seed\nedited\n")
+        found, calls = self._git_calls(lambda: ld.check_rca_followups(
+            only_paths=["docs/seed.md", "docs/reviews/rca-sample-2026-10-23.md"]))
+        self.assertEqual(1, len(found))
+        self.assertEqual([["docs/reviews/rca-sample-2026-10-23.md"]], self._diff_specs(calls))
+
+    def test_only_paths_naming_no_rca_doc_runs_no_diff(self):
+        seed = self.root / "docs" / "seed.md"
+        _write(seed, "# seed\n")
+        self._commit()
+        found, calls = self._git_calls(lambda: ld.check_rca_followups(only_paths=["docs/seed.md"]))
+        self.assertEqual([], found)
+        self.assertEqual([], self._diff_specs(calls))
+
+    def test_only_paths_accepts_the_absolute_paths_the_hook_passes(self):
+        _write(self.rca, "# rca\nFOLLOW-UP bare.\n")
+        found, calls = self._git_calls(lambda: ld.check_rca_followups(only_paths=[self.rca.as_posix()]))
+        self.assertEqual([(self.rca.name, 2)], [(f.name, n) for f, n, _k, _t in found])
+        self.assertEqual([["docs/reviews/rca-sample-2026-10-23.md"]], self._diff_specs(calls))
+
+    def test_a_resolvable_head_is_not_probed_for_an_unborn_branch(self):
+        _write(self.rca, "# rca\nFOLLOW-UP bare.\n")
+        _found, calls = self._git_calls(lambda: ld.check_rca_followups())
+        self.assertEqual([], [a for a in calls if "rev-parse" in a and "HEAD^{commit}" in a])
 
 
 if __name__ == "__main__":

@@ -233,6 +233,9 @@ abstract method resolves by name. A row it cannot resolve is a failure, not a pa
    - The hand-copied engine id sets, which stay green when the engine drops an id: the 32 policy ids
      in `KingdomPolicyIdsTests.EnginePolicyIds` (re-read `DefaultPolicies.RegisterAll`, #756) and
      `ENGINE_REGISTERED_ITEMS` in `tools/validate_moduledata.py` (`DefaultItems`).
+     - Re-derive `REQUESTED_IDS` and `NATIVE_BY_TYPE` in `tools/audit_mbproj_registration.py` from the
+       new engine (the managed requesters in `Module.cs`, `MapColorGradeManager` and
+       `MBMusicManager`; the native by-type loader's callers) and `MANAGED_TWIN` from `Game.cs`.
 8. `TAOM.Dependencies` binds some engine members by name. The binding gate (item 1) covers two of
    them, `ModuleHelper.GetActiveModules` and `ApplicationVersion.FromParametersFile` (Category B of
    `reflection-sites.md`). Re-check the rest by hand: `ModuleInfo.Id` (`IncompatibleModDetector.cs`,

@@ -45,7 +45,7 @@ Monster is registered.
 **`<XmlName id="Monsters">` is what makes a Monster exist. `soln_monsters` is a different mechanism.**
 The Armory's `ModuleData/project.mbproj` carries four `soln_monsters` rows
 <!-- measured: rg -c 'id="soln_monsters"' LOTRLOME_Armory/ModuleData/project.mbproj from the Modules folder 2026-09-05 -->
-that feed the native side, not the managed object manager; the war ram, the mumakil, the chariot and
+that nothing reads (the audit reports them `INERT-ROW`; they do not feed the native monster table); the war ram, the mumakil, the chariot and
 the spider have no such row and load anyway. The file's own comment at
 `LOTRLOME_Armory/ModuleData/project.mbproj:17-23` says not to add one "to be safe". Both mechanisms
 are in [Submodule and registration](submodule-and-registration.md).
@@ -385,7 +385,7 @@ Code: No code changes needed
 7. Restart the game fully and check the mount spawns WITH its rider. A riderless mount means the
    skeleton resource did not ship, not that the data is wrong.
 
-Check: `python tools/validate_moduledata.py` then `python tools/audit_mbproj_registration.py --all`
+Check: `python tools/validate_moduledata.py` then `python tools/audit_mbproj_registration.py` (TAOM's three modules; `--all` adds third-party modules and exits 1 on their rows)
 Takes effect: full game restart
 Code: No code changes needed for a reskin. A bespoke creature needs a behaviour tree and usually a Harmony patch, so its trailer is `Code changes required in Main/Features/`, and its authoring sequence is [creature-mount-authoring](../ai-includes/creature-mount-authoring.md) Phases 1 to 5
 
@@ -547,7 +547,7 @@ deserializer, so its attributes are readable only by experiment or from
 | 8 ram bardings, values 20 to 54 | `rg -c 'id="taom_ram_barding' LOTRLOME_Armory/ModuleData/LOTRLOME_items/LOTRAOM_horses.xml`, values from [lotrlome-war-ram-changes](../reference/lotrlome-war-ram-changes.md) lines 143-152 | 2026-09-05 |
 | `subtype` is read nowhere in the managed engine | `grep -rn '"subtype"' ` over the v1.4.8 `Core` decompile tree, zero hits | 2026-09-05 |
 | the four harness and dwarf codes pass today | `python tools/validate_moduledata.py --code MISSING_HARNESS_FAMILY_TYPE --code HARNESS_FAMILY_MISMATCH --code MOUNT_WITHOUT_HARNESS --code MOUNTED_DWARF`, `PASS: no validation issues found`, exit 0 | 2026-09-06 |
-| `audit_mount_parity.py` prints 431 lines and exits 0; `audit_mbproj_registration.py --all` audits 7 modules with 0 errors and 5 warnings | `python tools/audit_mount_parity.py > out.txt` then `wc -l out.txt`, and `python tools/audit_mbproj_registration.py --all` | 2026-09-05 |
+| `audit_mount_parity.py` prints 431 lines and exits 0; `audit_mbproj_registration.py --all` audits 5 modules (official ones skipped) with 2 errors in third-party modules and 5 warnings (2026-10-24) | `python tools/audit_mount_parity.py > out.txt` then `wc -l out.txt`, and `python tools/audit_mbproj_registration.py --all` | 2026-09-05 and 2026-10-24 |
 
 ## Read next
 

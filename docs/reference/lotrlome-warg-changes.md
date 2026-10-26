@@ -159,13 +159,13 @@ was needed. 43 items total afterwards, no duplicate ids.
 selects every `<file>` row with that id across all modules and merges them. Whether the merge takes
 the crash-prone `MergeElements` path or a plain concat depends on whether `XmlSchemas/<id>.xsd`
 exists. The install ships exactly 14 `soln_*.xsd`, and `soln_monsters`, `soln_physics_materials` and
-`soln_collision_infos` are **not** among them, so those three take the concat path. `soln_action_sets`
+`soln_collision_infos` are **not** among them, so those three take the concat path. (`soln_monsters` has no reader at all, so its rows are `INERT-ROW`: the Monster loads through `<XmlName id="Monsters">`.) `soln_action_sets`
 and `soln_action_types` are among them, which is why the warg content for those two was merged into
 the existing files instead.
 
 **Do not invent custom `soln_*` ids.** `GetMergedXmlForNative` matches `XmlResource.MbprojXmls`
-entries on exact string equality, and it is reached only from a fixed set of requesters (eight
-hardcoded ids, the map colour-grade reader, and a native callback that builds
+entries on exact string equality, and it is reached only from a fixed set of requesters (six
+hardcoded ids that something calls, the map colour-grade reader, and a native callback that builds
 `"soln_" + xmlType` from type names native itself supplies; the music manager reads `XmlResource.MbprojXmls` itself for `soln_soundtrack`), so a custom id matches nothing. Native
 also loads thirteen kinds of file by `type` and ignores the id (`NATIVE_BY_TYPE` in
 `tools/audit_mbproj_registration.py`); the spider-era rows carried none of them. LOTRLOME's pre-existing `soln_spider_monster` and `soln_lotr_misc_action_types` were

@@ -1213,6 +1213,65 @@ class NativeBucketCliTests(_Tree):
         self.assertEqual(code, 0, out)
 
 
+class EngineReaderTests(unittest.TestCase):
+    """_parse_like_engine reads bytes the way `new StreamReader(path)` does (XmlResource.cs:92): UTF-8 by
+    default, a byte order mark picks its own encoding, the declared encoding is ignored (#987 item 3)."""
+
+    DOC = '<base><file id="x" name="a.xml"/></base>'
+
+    def _parse(self, data: bytes):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "project.mbproj"
+            path.write_bytes(data)
+            return vx._parse_like_engine(path)
+
+    def test_a_bom_less_utf16_file_is_not_well_formed_like_the_engine_reads_it(self):
+        for codec in ("utf-16-le", "utf-16-be"):
+            with self.subTest(codec):
+                with self.assertRaises((vx.ET.ParseError, ValueError)):
+                    self._parse(self.DOC.encode(codec))
+
+    def test_a_bom_less_utf16_file_declaring_utf16_is_still_utf8_to_the_engine(self):
+        doc = '<?xml version="1.0" encoding="utf-16"?>' + self.DOC
+        with self.assertRaises((vx.ET.ParseError, ValueError)):
+            self._parse(doc.encode("utf-16-le"))
+
+    def test_a_utf16_file_with_a_bom_loads(self):
+        for codec in ("utf-16", "utf-16-be"):
+            with self.subTest(codec):
+                data = self.DOC.encode(codec)
+                if codec == "utf-16-be":
+                    data = b"\xfe\xff" + data
+                self.assertEqual("base", self._parse(data).tag)
+
+    def test_a_utf32le_bom_file_loads(self):
+        # The UTF-32 little-endian mark begins with the UTF-16 one (FF FE): it must not read as UTF-16.
+        self.assertEqual("base", self._parse(b"\xff\xfe\x00\x00" + self.DOC.encode("utf-32-le")).tag)
+        self.assertEqual("base", self._parse(b"\x00\x00\xfe\xff" + self.DOC.encode("utf-32-be")).tag)
+
+    def test_a_raw_nul_in_valid_utf8_is_named_a_nul_not_bad_utf8(self):
+        with self.assertRaises(vx.ET.ParseError) as caught:
+            self._parse(b'<base><file id="x" name="a\x00.xml"/></base>')
+        self.assertIn("contains a NUL character", str(caught.exception))
+        self.assertNotIn("not UTF-8", str(caught.exception))
+
+    def test_a_utf8_bom_loads(self):
+        self.assertEqual("base", self._parse(b"\xef\xbb\xbf" + self.DOC.encode("utf-8")).tag)
+
+    def test_a_latin1_byte_reads_as_a_replacement_character_not_as_latin1(self):
+        doc = '<?xml version="1.0" encoding="iso-8859-1"?><base><file id="a\xe9" name="n.xml"/></base>'
+        root = self._parse(doc.encode("latin-1"))
+        self.assertEqual("a\ufffd", root.find("file").get("id"))
+
+    def test_mbproj_rows_reports_a_bom_less_utf16_file_as_a_startup_throw(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "project.mbproj"
+            path.write_bytes(self.DOC.encode("utf-16-le"))
+            rows, problems = vx.mbproj_rows(path)
+        self.assertEqual([], rows)
+        self.assertEqual(1, len(problems), problems)
+
+
 class EngineIdUniquenessTests(unittest.TestCase):
     """#974: a repeated clan, hero or kingdom id needs no TAOM schema. The engine's own XSDs declare the row id
     unique (`xs:unique` on `@id`), and `SCHEMA_INVALID` validates the registered files against them in the commit

@@ -4466,3 +4466,19 @@ Since 2026-10-01, `deep-reviewer` agents read `csharp-architecture.md` (29 KB) w
 - **Why missed:** nothing measured which files agents read until section 9 of `tools/harness_retro.py` gained its "Top files read" table (#1002); a lens grows one "Why this rule exists" paragraph per incident and nothing pushes back.
 - **Prevent:** an agent definition or lens says "make sure you have the rule", never "read it": Read a `paths:` rule only if it has not arrived, and then only its section (`deep-reviewer.md`, agent operating manual item 6). A lens keeps the check and one `Source:` pointer; the history stays in the RCA or lessons file. The weekly retro's file growth table shows a regression.
 - **Source:** [adopt-context-mode-2026-10-26.md](../adopt-context-mode-2026-10-26.md); issue #1003.
+
+### A gate that checks less on a parsed reading falls back to the old check when the reading resolves nothing (#987, 2026-10-26)
+
+To judge `--amend` and path commits, the doc-drift commit hook began asking `_shellwords.py commit-plan` for the
+paths after `git commit` and checking only those. The reader took `2>&1` as the paths `2`, `>&`, `1`; the hook found
+no relevant file among them and allowed the commit without running the linter, on half the commit calls in recent
+transcripts. A path commit typed from a subdirectory and the `>|` form failed the same way. Before the change the hook
+judged the index for every commit, so a misread command could not shrink the check; after it, any misread path list
+narrowed it to nothing. The same review found the audit's new INERT-ROW exemption written from the brief's example
+(any `<XmlName>` registering the file) instead of the engine's condition for a load (an exact requested id).
+- **Why missed:** the reader was tested on the command shapes the brief listed, not replayed on real commands; the
+  #985 lesson (wrapped and grammar forms in every gate's test rows) was not applied to a reader that narrows a gate.
+- **Prevent:** when a parsed reading makes a gate check less (a narrower path set, a downgrade to a warning), keep a
+  fallback to the old check when the reading resolves nothing, and replay the gate on real inputs (the local
+  transcripts, the live install) against the base version before review.
+- **Source:** `docs/reviews/rca-tool-987-2026-10-26.md` findings 1 to 3 and 9.

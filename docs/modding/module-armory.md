@@ -95,7 +95,7 @@ That cost TAOM a crash. `soln_spider_action_sets`, `soln_spider_action_types` an
 
 You may repeat a standard id. Whether that is safe depends on one thing: whether the id has an XSD. `CreateMergedXmlFile` calls `MergeTwoXmls` once per extra contributor against the fully accumulated document, and with an XSD path in hand that call routes into `MergeElements`, which indexes `XmlResource.XsdElementDictionary[xsdPath]` and then `elementSchema[GetFullXPathOfElement(...)]` with no `TryGetValue` (`MBObjectManager.cs:820-874`). Any XPath present in the accumulated tree but absent from that schema throws `KeyNotFoundException` at startup, before the main menu. That is the elephant "Crash #3".
 
-So: `soln_action_sets` and `soln_action_types` have schemas, and a second row for either is forbidden. New action sets are appended into the single `action_sets.xml` instead. `soln_monsters`, `soln_physics_materials` and `soln_collision_infos` have no schema, so a repeat is a plain concatenation, which is why four `soln_monsters` rows ship today without incident. The file's own comment block records both halves.
+So: `soln_action_sets` and `soln_action_types` have schemas, and a second row for either is forbidden. New action sets are appended into the single `action_sets.xml` instead. `soln_monsters`, `soln_physics_materials` and `soln_collision_infos` have no schema, so a repeat is a plain concatenation. The four `soln_monsters` rows that ship today are read by nothing (the audit reports them `INERT-ROW`), so they are not evidence that a repeat is safe. The file's own comment block records both halves.
 
 ## The art side: FBX to tpac to `mesh=`
 
@@ -205,6 +205,8 @@ The native manifest in full. Half of it is comments, and the comments are the re
 	<file id="soln_collision_infos" name="ModuleData/CollisionInfos/LOTR/collision_infos_warg.xml" type="collision_infos" />
 </base>
 ```
+
+The comment block quoted above says a `soln_monsters` row would merge a Monster into the native monster table. That stated reason is wrong: nothing requests the id `soln_monsters` and `monster` is not a type native loads, so such a row is read by nothing (`INERT-ROW`, or `DEAD-ID` without the `<XmlName id="Monsters">` registration). Do not add one, but not for that reason.
 
 The three lines a reader changes first:
 
@@ -365,7 +367,7 @@ Code: No code changes needed
 5. The rest of the wiring (which cultures may pick the race, body properties, the position offset) is [recipe-add-a-race-or-creature](recipe-add-a-race-or-creature.md) and [`docs/features/hero-race.md`](../features/hero-race.md).
 
 Check: `python tools/audit_action_set_parity.py; python tools/audit_civilian_action_set_coverage.py`
-Takes effect: full game restart. `skins.xml` and `action_sets.xml` reach the engine through native callbacks the process runs once at boot (`Module.cs:1363-1366` and `:1387-1389`), off a registry built once in `Module.Initialize` (`Module.cs:267`, `:1031-1032`), so the race does not exist at all until you relaunch. Whether you also need a new campaign depends on what consumes the race, not on this file: `monsters.xml` goes through the managed channel and is re-read on every campaign load (`Game.cs:437`, called from `Campaign.cs:1470`), while anything the save already stores about an existing character does not change.
+Takes effect: full game restart. `skins.xml` and `action_sets.xml` reach the engine through native callbacks the process runs once at boot (`Module.cs:1443-1446` and `:1467-1469`, v1.5.5), off a registry built once in `Module.Initialize` (`Module.cs:267`, `:1031-1032`), so the race does not exist at all until you relaunch. Whether you also need a new campaign depends on what consumes the race, not on this file: `monsters.xml` goes through the managed channel and is re-read on every campaign load (`Game.cs:437`, called from `Campaign.cs:1470`), while anything the save already stores about an existing character does not change.
 Code: Code changes required in `Main/Features/` for a race TAOM must persist; see [`docs/features/hero-race.md`](../features/hero-race.md)
 
 ### Modify: ship an Armory fix so a reinstall does not revert it

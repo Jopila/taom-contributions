@@ -68,8 +68,9 @@ with it, none of which an XSD checks:
     applies no stylesheet. This tool hard-codes neither the engine's id list nor its type list, so it
     names the row's id and type and claims no load. An unloadable `project.mbproj` (it does not parse,
     its root is not `<base>`, a row has no id or name) makes the engine
-    throw at startup, and it is read as the engine reads it (as UTF-8 text, the declared encoding
-    ignored; a character reference the engine accepts with CheckCharacters=false, such as `&#1;`, still
+    throw at startup, and it is read as the engine reads it (as a StreamReader reads it: UTF-8 unless a
+    byte order mark says otherwise, the declared encoding ignored, a BOM-less UTF-16 file not well-formed;
+    a character reference the engine accepts with CheckCharacters=false, such as `&#1;`, still
     fails here): passed by name, it is reported like a bad SubModule.xml. No XSD here checks
     any of it; the gates are in `.claude/rules/moduledata-validation.md` "Gate per file kind".
 A file passed by name that is a real fault (a manifest the engine cannot load, an unlisted .xml under
@@ -159,23 +160,38 @@ _THROWS = "the engine throws on it at startup (XmlResource.GetXmlListAndApply)"
 _THROWS_MBPROJ = "the engine throws on it at startup (XmlResource.GetMbprojxmls)"
 
 
-_XML_ENCODING_RE = re.compile(r"""^(\s*<\?xml[^?]*?)\s+encoding\s*=\s*(?:"[^"]*"|'[^']*')""")
+#: The byte order marks `new StreamReader(path)` detects (XmlResource.cs:92), longest first because the
+#: UTF-32 little-endian mark begins with the UTF-16 one.
+_BOMS = ((b"\xff\xfe\x00\x00", "utf-32-le"), (b"\x00\x00\xfe\xff", "utf-32-be"),
+         (b"\xef\xbb\xbf", "utf-8"), (b"\xff\xfe", "utf-16-le"), (b"\xfe\xff", "utf-16-be"))
+
+
+def _read_like_engine(path) -> str:
+    """The text of `path` as `new StreamReader(path)` decodes it: a byte order mark picks its own
+    encoding and is dropped, anything else is UTF-8 with an invalid byte read as U+FFFD. A UTF-16 file
+    with no mark is therefore UTF-8 text full of NULs, which no XML parser accepts."""
+    data = Path(path).read_bytes()
+    for bom, codec in _BOMS:
+        if data.startswith(bom):
+            return data[len(bom):].decode(codec, errors="replace")
+    return data.decode("utf-8", errors="replace")
 
 
 def _parse_like_engine(path):
     """The root element of `path`, read as the engine reads project.mbproj (XmlResource) and
-    language_data.xml (LocalizedTextManager): as UTF-8 text through a StreamReader, so the declared
-    encoding is ignored and a file declaring one expat does not know still loads. Plain ET.parse
-    first; on ParseError, ValueError or LookupError the bytes are decoded as UTF-8 (BOM allowed), the
-    declaration's encoding attribute is dropped and the text is parsed again. Raises when that fails
-    too. Limit: a character reference the engine accepts with CheckCharacters=false (such as &#1;)
-    still fails here."""
-    try:
-        return ET.parse(path).getroot()
-    except (ET.ParseError, ValueError, LookupError):
-        pass
-    text = Path(path).read_bytes().decode("utf-8-sig", errors="replace")
-    return ET.fromstring(_XML_ENCODING_RE.sub(r"\1", text, count=1))
+    language_data.xml (LocalizedTextManager): through a StreamReader (`_read_like_engine`), so the
+    declared encoding is ignored, a byte order mark is honoured and a file declaring an encoding expat
+    does not know still loads (expat ignores the declaration when it is given a str).
+    Raises ParseError when the text is not well-formed, which includes any NUL: a BOM-less UTF-16
+    file reads as UTF-8 text with a NUL after every character, and .NET rejects `<` followed by NUL
+    (a name cannot start with it), where expat would sniff the UTF-16 and parse it. A raw NUL anywhere
+    fails in the engine too, so rejecting it matches. Limit: a character reference the engine accepts
+    with CheckCharacters=false (such as &#1;) still fails here."""
+    text = _read_like_engine(path)
+    if "\x00" in text:
+        raise ET.ParseError("the text contains a NUL character (a BOM-less UTF-16 file reads as UTF-8 "
+                            "with a NUL after every character)")
+    return ET.fromstring(text)
 
 
 def _stylesheet(xsl: Path):

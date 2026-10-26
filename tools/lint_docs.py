@@ -248,6 +248,7 @@ class LintReport:
     dashes: list[tuple[Path, int, str, str]] = field(default_factory=list)
     rca_followups: list[tuple[Path, int, str, str]] = field(default_factory=list)
     feature_verify: list[tuple[Path, int, str, str]] = field(default_factory=list)
+    git_diff_failures: list[tuple[Path, int, str, str]] = field(default_factory=list)
 
     @property
     def total(self) -> int:
@@ -265,6 +266,7 @@ class LintReport:
             + len(self.dashes)
             + len(self.rca_followups)
             + len(self.feature_verify)
+            + len(self.git_diff_failures)
         )
 
 
@@ -297,25 +299,24 @@ def resolve_link(source_file: Path, target: str) -> Path | None:
     return (source_file.parent / target).resolve()
 
 
-FENCE_RE = re.compile(r"^\s*(```|~~~)")
+FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
 
 
 def iter_lines_outside_code_fences(text: str):
-    """Yield (lineno, line) skipping anything inside ``` or ~~~ fenced blocks."""
-    in_fence = False
+    """Yield (lineno, line) skipping anything inside ``` or ~~~ fenced blocks, at any indent.
+    A fence closes only on the opener's character with a run at least as long as the opener's,
+    so a three-backtick line inside a four-backtick block stays inside it (nested fences)."""
     fence_marker: str | None = None
     for lineno, line in enumerate(text.splitlines(), start=1):
         m = FENCE_RE.match(line)
         if m:
             marker = m.group(1)
-            if not in_fence:
-                in_fence = True
+            if fence_marker is None:
                 fence_marker = marker
-            elif marker == fence_marker:
-                in_fence = False
+            elif marker[0] == fence_marker[0] and len(marker) >= len(fence_marker):
                 fence_marker = None
             continue
-        if in_fence:
+        if fence_marker is not None:
             continue
         yield lineno, line
 
@@ -1179,7 +1180,6 @@ def check_model_registry() -> list[tuple[Path, int, str, str]]:
 # and be ignored within a day, so this one reads git: added lines vs a base ref,
 # plus untracked markdown in full.
 DASH_CHARS = {"—": "em-dash", "–": "en-dash"}
-_FENCE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
 _INLINE_CODE_RE = re.compile(r"(`+).*?\1")
 _LINK_TARGET_RE = re.compile(r"\]\([^)]*\)")
 _BARE_URL_RE = re.compile(r"<?https?://\S+")
@@ -1193,23 +1193,12 @@ def scan_text_for_dashes(
 ) -> list[tuple[Path, int, str, str]]:
     """Report em/en dashes in prose. only_lines=None scans the whole file.
 
-    Fence state is tracked across the WHOLE file even when only_lines restricts
-    what is reported, because an added line inside a code block is only
+    Fence state is tracked across the WHOLE file (iter_lines_outside_code_fences) even when
+    only_lines restricts what is reported, because an added line inside a code block is only
     identifiable from the lines above it.
     """
     findings: list[tuple[Path, int, str, str]] = []
-    fence: str | None = None
-    for lineno, raw in enumerate(text.splitlines(), 1):
-        opener = _FENCE_RE.match(raw)
-        if opener:
-            marker = opener.group(1)[0]
-            if fence is None:
-                fence = marker
-            elif marker == fence:
-                fence = None
-            continue
-        if fence is not None:
-            continue
+    for lineno, raw in iter_lines_outside_code_fences(text):
         if only_lines is not None and lineno not in only_lines:
             continue
         if _DASH_ALLOW_RE.search(raw):
@@ -1224,25 +1213,53 @@ def scan_text_for_dashes(
     return findings
 
 
-def _git_out(*args: str) -> str | None:
-    """Run git in REPO_ROOT. Returns None on any failure (fail open)."""
+_EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
+
+def _git_run(*args: str) -> subprocess.CompletedProcess | None:
+    """Run git in REPO_ROOT. None when git cannot be run at all (not installed, not executable):
+    the new-lines checks then fail open, with a note on stderr, because a machine without git has
+    nothing to diff. A git that ran and failed comes back with its return code (#987)."""
     try:
-        proc = subprocess.run(
+        return subprocess.run(
             ["git", "-C", str(REPO_ROOT), *args],
             capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
-    except Exception:
+    except Exception as exc:
+        print(f"lint_docs: git could not be run ({exc}); the new-lines checks (dashes, RCA "
+              f"FOLLOW-UP) read nothing.", file=sys.stderr)
         return None
-    return proc.stdout if proc.returncode == 0 else None
+
+
+def _git_out(*args: str) -> str | None:
+    """Run git in REPO_ROOT. Returns None on any failure (fail open)."""
+    proc = _git_run(*args)
+    return proc.stdout if proc is not None and proc.returncode == 0 else None
+
+
+def _is_unborn_head() -> bool:
+    """True when the repository has no commit yet (`rev-parse HEAD^{commit}` exits 1, silent)."""
+    proc = _git_run("rev-parse", "--verify", "-q", "HEAD^{commit}")
+    return proc is not None and proc.returncode == 1 and not proc.stdout.strip()
+
+
+def _diff_failure(path: Path, base: str, proc: subprocess.CompletedProcess) -> tuple[Path, int, str, str]:
+    detail = (proc.stderr or "").strip().splitlines()
+    why = detail[0][:100] if detail else f"exit {proc.returncode}"
+    return (path, 0, "git-diff-failed",
+            f"git diff against {base!r} failed ({why}); the new-lines checks cannot run")
 
 
 _HUNK_RE = re.compile(r"^@@ -\S+ \+(\d+)(?:,(\d+))? @@")
 
 
 def _changed_markdown_lines(
-    base: str, staged: bool = False, pathspec: str = "*.md"
+    base: str, staged: bool = False, pathspec: str | list[str] = "*.md",
+    failures: list[tuple[Path, int, str, str]] | None = None,
 ) -> dict[Path, set[int] | None]:
-    """Added line numbers per file matching `pathspec`. None means 'the whole file is new'.
+    """Added line numbers per file matching `pathspec` (one or several). None means 'the whole
+    file is new'. A git diff that ran and failed (an unresolvable base) appends a git-diff-failed
+    finding to `failures`; git not runnable at all appends nothing (fail open).
 
     staged=True diffs the index against `base` (`git diff --cached`) and skips the untracked
     listing: what a commit would record, not what is on disk. A file renamed into the pathspec
@@ -1250,7 +1267,22 @@ def _changed_markdown_lines(
     """
     changed: dict[Path, set[int] | None] = {}
     cached = ["--cached"] if staged else []
-    diff = _git_out("-c", "core.quotePath=false", "diff", *cached, "-U0", base, "--", pathspec)
+    specs = [pathspec] if isinstance(pathspec, str) else list(pathspec)
+    proc = _git_run("-c", "core.quotePath=false", "diff", *cached, "-U0", base, "--", *specs)
+    if proc is not None and proc.returncode != 0 and base == "HEAD" and _is_unborn_head():
+        # The first commit of a repository is read in full, against the empty tree.
+        base = _EMPTY_TREE
+        proc = _git_run("-c", "core.quotePath=false", "diff", *cached, "-U0", base, "--", *specs)
+    diff = proc.stdout if proc is not None and proc.returncode == 0 else None
+    if proc is not None and proc.returncode != 0 and failures is not None:
+        inside = _git_run("rev-parse", "--is-inside-work-tree")
+        if inside is not None and inside.returncode == 0:
+            failure = _diff_failure(REPO_ROOT, base, proc)
+            if failure not in failures:
+                failures.append(failure)
+        else:  # no repository (an export, a tarball): nothing to diff, like no git at all
+            print(f"lint_docs: {REPO_ROOT} is not a git work tree; the new-lines checks (dashes, "
+                  f"RCA FOLLOW-UP) read nothing.", file=sys.stderr)
     if diff:
         current: Path | None = None
         prev = ""
@@ -1277,7 +1309,7 @@ def _changed_markdown_lines(
                         lines.update(range(start, start + count))
             prev = line
     untracked = None if staged else _git_out(
-        "-c", "core.quotePath=false", "ls-files", "--others", "--exclude-standard", "--", pathspec
+        "-c", "core.quotePath=false", "ls-files", "--others", "--exclude-standard", "--", *specs
     )
     if untracked:
         for name in untracked.splitlines():
@@ -1287,9 +1319,15 @@ def _changed_markdown_lines(
     return changed
 
 
-def check_ai_dashes(base: str = "HEAD") -> list[tuple[Path, int, str, str]]:
+def check_ai_dashes(
+    base: str = "HEAD", failures: list[tuple[Path, int, str, str]] | None = None
+) -> list[tuple[Path, int, str, str]]:
+    """Em and en dashes in the new lines of the markdown docs. A diff that failed appends a
+    git-diff-failed finding to `failures`, not to the result."""
     findings: list[tuple[Path, int, str, str]] = []
-    for path, lines in sorted(_changed_markdown_lines(base).items(), key=lambda kv: str(kv[0])):
+    failures = [] if failures is None else failures
+    changed = _changed_markdown_lines(base, failures=failures)
+    for path, lines in sorted(changed.items(), key=lambda kv: str(kv[0])):
         if not path.is_file():
             continue
         try:
@@ -1372,11 +1410,26 @@ def scan_text_for_followups(
     return findings
 
 
-def check_rca_followups(base: str = "HEAD", staged: bool = False) -> list[tuple[Path, int, str, str]]:
+def check_rca_followups(
+    base: str = "HEAD", staged: bool = False, only_paths: list[str] | None = None,
+    failures: list[tuple[Path, int, str, str]] | None = None,
+) -> list[tuple[Path, int, str, str]]:
     """Bare FOLLOW-UP lines in the new lines of docs/reviews/rca-*.md. staged=True reads the
-    index (`git diff --cached`, `git show :<path>`) instead of the working tree."""
+    index (`git diff --cached`, `git show :<path>`) instead of the working tree. only_paths
+    narrows the check to those paths' working copies (`git commit -- <paths>` records them, not
+    the index), whatever staged says; only the RCA docs among them are diffed. An unresolvable
+    base appends a git-diff-failed finding to `failures`, not to the result."""
     findings: list[tuple[Path, int, str, str]] = []
-    changed = _changed_markdown_lines(base, staged=staged, pathspec=_RCA_PATHSPEC)
+    failures = [] if failures is None else failures
+    pathspec: str | list[str] = _RCA_PATHSPEC
+    if only_paths:
+        staged = False
+        listed = _git_out("-c", "core.quotePath=false", "ls-files", "--", *only_paths) or ""
+        pathspec = [n for n in dict.fromkeys(x.strip() for x in listed.splitlines())
+                    if n and _is_rca_doc(REPO_ROOT / n)]
+        if not pathspec:
+            return findings
+    changed = _changed_markdown_lines(base, staged=staged, pathspec=pathspec, failures=failures)
     for path, lines in sorted(changed.items(), key=lambda kv: str(kv[0])):
         if not _is_rca_doc(path):
             continue
@@ -1508,6 +1561,7 @@ def format_report(report: LintReport, quick: bool, drift_only: bool = False) -> 
         f"- Context budget (entry docs, trap index, rules{'' if CONTEXT_BUDGET_ENFORCE else ', warn-only'}): **{len(report.budget)}**",
         f"- RCA FOLLOW-UP lines with no issue or reason (new lines only): **{len(report.rca_followups)}**",
         f"- New feature docs with no `{VERIFY_HEADING}` section: **{len(report.feature_verify)}**",
+        f"- Git diff failed, so the new-lines checks could not run: **{len(report.git_diff_failures)}**",
     ]
     if drift_only:
         out.append("Only the checks `--fail-on-drift` gates on (`--drift-only`); run without it for the rest.")
@@ -1650,6 +1704,16 @@ def format_report(report: LintReport, quick: bool, drift_only: bool = False) -> 
             for f, lineno, kind, snippet in report.feature_verify:
                 out.append(f"- `{rel(f)}:{lineno}` [{kind}] {snippet}")
             out.append("")
+    if report.git_diff_failures:
+        out.append("## Git diff failed")
+        out.append("")
+        out.append("The new-lines checks (dashes and RCA FOLLOW-UP lines) read `git diff` against a base, "
+                   "and git could not produce it, so they did not run. This gates like a finding: fix "
+                   "the base (`--dash-base`) and run again.")
+        out.append("")
+        for f, lineno, kind, snippet in report.git_diff_failures:
+            out.append(f"- `{rel(f)}:{lineno}` — [{kind}] `{snippet}`")
+        out.append("")
     if report.total == 0:
         out.append("**Clean — no findings.**")
         out.append("")
@@ -1683,10 +1747,18 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--context-budget-json", action="store_true",
                     help="Print the context-budget inputs (entry docs, rules, caps) as JSON and exit.")
     ap.add_argument("--summary", action="store_true", help="Emit a --- delimited grep-friendly summary block instead of the full markdown report")
+    ap.add_argument("--only-paths", nargs="+", metavar="PATH", default=None,
+                    help="Read the RCA FOLLOW-UP check from these paths' working copies, not the "
+                         "index: what `git commit -- PATH...` records. Give it last. Only the RCA docs "
+                         "among them are read. Limits (the hook, not this tool): `git commit "
+                         "-i/--include` and `--pathspec-from-file` are judged as index commits, and "
+                         "more than ~450 named paths exceed the Windows argument limit and fall back "
+                         "to the index.")
     ap.add_argument("--dash-base", default="HEAD", metavar="REF",
                     help="Base ref for the new-lines-only checks (em/en dashes, RCA FOLLOW-UP "
                          "lines; default HEAD, i.e. uncommitted writing). Pass a branch point to "
-                         "scan a whole branch.")
+                         "scan a whole branch. A ref git cannot resolve is a git-diff-failed "
+                         "finding that gates --fail-on-drift and --drift-only.")
     args = ap.parse_args(argv)
 
     if args.context_budget_json:
@@ -1704,7 +1776,9 @@ def main(argv: list[str]) -> int:
         report.config_drift = check_config_example_drift(files)
         report.version_mismatches = check_version_consistency()
         report.budget = check_context_budget()
-        report.rca_followups = check_rca_followups(args.dash_base, staged=args.staged)
+        report.rca_followups = check_rca_followups(
+            args.dash_base, staged=args.staged, only_paths=args.only_paths,
+            failures=report.git_diff_failures)
         report.feature_verify = check_feature_doc_verify_section(args.dash_base, staged=args.staged,
                                                                   also_new=args.also_new)
     else:
@@ -1720,8 +1794,10 @@ def main(argv: list[str]) -> int:
         report.version_mismatches = check_version_consistency()
         report.budget = check_context_budget()
         report.model_registry = check_model_registry()
-        report.dashes = check_ai_dashes(args.dash_base)
-        report.rca_followups = check_rca_followups(args.dash_base, staged=args.staged)
+        report.dashes = check_ai_dashes(args.dash_base, failures=report.git_diff_failures)
+        report.rca_followups = check_rca_followups(
+            args.dash_base, staged=args.staged, only_paths=args.only_paths,
+            failures=report.git_diff_failures)
         report.feature_verify = check_feature_doc_verify_section(args.dash_base, staged=args.staged,
                                                                   also_new=args.also_new)
 
@@ -1734,9 +1810,11 @@ def main(argv: list[str]) -> int:
             ("version_mismatch", report.version_mismatches), ("context_budget", report.budget),
             ("model_registry", report.model_registry), ("ai_dashes", report.dashes),
             ("rca_followups", report.rca_followups), ("feature_verify", report.feature_verify),
+            ("git_diff_failed", report.git_diff_failures),
         ]
         if args.drift_only:
-            counters = [c for c in counters if c[0] in ("config_drift", "version_mismatch", "context_budget", "rca_followups", "feature_verify")]
+            counters = [c for c in counters if c[0] in ("config_drift", "version_mismatch", "context_budget", "rca_followups",
+                                                  "feature_verify", "git_diff_failed")]
         summary = "\n".join(["---"]
                             + [f"{(name + ':').ljust(19)}{len(items)}" for name, items in counters]
                             + [f"total_findings:    {report.total}", "---", ""])
@@ -1765,6 +1843,7 @@ def main(argv: list[str]) -> int:
         or (CONTEXT_BUDGET_ENFORCE and gating_budget)
         or report.rca_followups
         or report.feature_verify
+        or report.git_diff_failures
     ):
         return 1
     return 0

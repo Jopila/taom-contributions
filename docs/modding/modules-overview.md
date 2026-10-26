@@ -147,8 +147,9 @@ Three consequences, each with its file-level detail in [File catalogue](file-cat
 - **`TAOM_Map`'s `project.mbproj` is inert.** 9 `<Module id=...>` rows and 0 `<file>` rows, and
   `GetMbprojxmls` selects only `base/file` nodes (`XmlResource.cs:117`); `TAOM`'s mbproj has 5 `<file>`
   rows and `LOTRLOME_Armory`'s 11, the form `Native` uses. <!-- measured: grep -c '<file ' and grep -c '<Module ' on each project.mbproj 2026-09-05 -->
-  The channel's gate, `python tools/audit_mbproj_registration.py`, reports 39 vanilla `soln_*` ids,
-  0 errors and 1 warning today ([lotrlome-soln-id-fix](../reference/lotrlome-soln-id-fix.md)). <!-- measured: python tools/audit_mbproj_registration.py 2026-09-05 -->
+  The channel's gate, `python tools/audit_mbproj_registration.py`, checks rows against the 13 ids the
+  engine requests and reports 0 errors and 5 warnings today (one `MERGE-RISK`, four `INERT-ROW` for the
+  Armory's `soln_monsters` rows; [lotrlome-soln-id-fix](../reference/lotrlome-soln-id-fix.md)). <!-- measured: python tools/audit_mbproj_registration.py 2026-10-24 -->
 
 ## Which folder is authoritative: repo or game install
 
@@ -539,7 +540,7 @@ All measured 2026-09-05 on this machine; the game install is referred to as `<ga
 - Manifest element counts (Main / Dependencies / Map / Armory): `<XmlNode>` 100 / 0 / 8 / 33; `<DependedModule>` 4 / 0 / 4 / 4; `<ModulesToLoadAfterThis>` rows 3 / 35 / 0 / 0; `<DependedModuleMetadata>` 7 / 5 / 5 / 4; `<SubModule>` 1 / 7 / 0 / 0: Python `xml.etree.ElementTree` `findall` over each file.
 - Registered ids per manifest (the "Who owns what data" table and the vanilla counts): `grep -o 'XmlName id="[^"]*"' <file> | sort | uniq -c`.
 - `project.mbproj` rows: `TAOM` 5 `<file>` (4 voice definitions, 1 module sound), `LOTRLOME_Armory` 11 `<file>`, `TAOM_Map` 0 `<file>` and 9 `<Module>`, `Native` 50 `<file>`, `SandBox` 0 `<file>`; `SandBoxCore`, `CustomBattle` and `TAOM.Dependencies` have no `project.mbproj` at all: `grep -c '<file '` and `grep -c '<Module '` over each, and `test -f`.
-- 39 distinct `soln_*` ids in `Native/ModuleData/project.mbproj` (`grep -o 'id="[^"]*"' <file> | sort -u | wc -l`), which the audit uses as a stand-in for the ids native requests (`vanilla_ids` in `audit_mbproj_registration.py`; a managed row also loads for the audit's `MANAGED_IDS`, and a row of one of the thirteen `NATIVE_BY_TYPE` types loads whatever its id); the audit itself reports the same 39, 0 errors and 1 warning: `python tools/audit_mbproj_registration.py`.
+- 39 distinct `soln_*` ids in `Native/ModuleData/project.mbproj` (`grep -o 'id="[^"]*"' <file> | sort -u | wc -l`), which the audit no longer uses as its vocabulary (#987): it checks rows against the 13 ids of `REQUESTED_IDS` in `audit_mbproj_registration.py`, and a row of one of the thirteen `NATIVE_BY_TYPE` types loads whatever its id (several of Native's own 39 ids, such as `soln_monsters`, are asked for by nothing); the audit reports 0 errors and 5 warnings (2026-10-24): `python tools/audit_mbproj_registration.py`.
 - `TAOM_Map` stub data files 197 to 245 bytes: `wc -c` on the seven files its manifest names. Its two unregistered music files are 7,390 and 3,346 bytes, and `grep -c settlement_track` returns 0 for both its manifest and its `project.mbproj`.
 - Settlements: repo shadow 863 elements in 1,023,041 bytes, live 988 in 1,153,217 bytes: Python `re.findall(rb'<Settlement\s', data)` and `len(data)`; 0 `id="Settlements"` rows in `Main/_Module/SubModule.xml`: `grep -c`.
 - `ModuleData` file counts: repo 367, deployed 371 (`find -type f | wc -l`); XML / XSLT: `Main` 284 / 8, `LOTRLOME_Armory` 425 / 8, `TAOM_Map` 44 / 1 (`find -name "*.xml" | wc -l`, `-name "*.xslt"`).

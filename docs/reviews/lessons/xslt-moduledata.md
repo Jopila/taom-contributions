@@ -363,6 +363,13 @@ means `MergeElements`, whose `elementSchema[...]` lookup throws on any element X
 not carry. `soln_action_types`, `soln_action_sets`, `soln_skins` and `soln_monster_usage_sets` all
 have one; `soln_monsters`, `soln_physics_materials`, `soln_collision_infos` and `soln_module_sound`
 do not.
+Correction (2026-10-24, #987): the `soln_monsters` rows shipped "without incident" because nothing reads
+them, not because a plain append is safe. Nothing requests that id; the audit reports the rows
+`INERT-ROW`, and the Monster loads through `<XmlName id="Monsters">`.
+Correction (2026-10-26, #987): "eight hardcoded ids" undercounts. v1.5.5 requests 13 ids: six from
+`Module.cs` that something calls (the animations and sound-event-data callbacks have no caller), the
+world-map colour grades, the soundtrack and five that native code asks for by type name. The earlier
+count stands above as history.
 - **Why missed:** the spider's 2026-06 `soln_spider_*` DivideByZero taught rule one, and the lesson
   was written as a comment at the top of the Armory's own `project.mbproj`. Two custom-id rows
   survived that cleanup for two years, one sitting directly underneath the comment explaining why it

@@ -49,7 +49,8 @@ as proof that `<YourModule>` is sound.
 - `python tools/validate_mesh_refs.py` defaults to the Armory's item tree and its asset packs, and
   takes `--items` and `--tpac-modules` to look at yours instead.
 - `python tools/audit_mbproj_registration.py --module <YourId>` is the one gate that takes a module
-  id directly and needs nothing else.
+  id directly and needs nothing else (a module that is not installed, or has no `project.mbproj`,
+  exits 2).
 - `python tools/audit_scene_names.py` takes no arguments at all and reads four hardcoded settlement
   files (`tools/audit_scene_names.py:25-31`). Stage 16 says what that leaves uncovered.
 
@@ -276,8 +277,8 @@ extension, the opposite convention from `<XmlName path>`.
 Use only ids the engine asks for. `GetMergedXmlForNative` matches on exact string equality and is
 reached from a fixed set of call sites, so an invented `soln_*` id opens no file and logs nothing;
 the row reads exactly like working registration. Native also loads thirteen kinds of file by their
-`type` and ignores the id (`NATIVE_BY_TYPE` in `tools/audit_mbproj_registration.py`). The audit prints `Requested ids: 40 (39 soln_* ids of Native's project.mbproj as a stand-in for the ids native requests, plus the managed requesters), 13 native types`.
-<!-- measured: python tools/audit_mbproj_registration.py 2026-09-05 -->
+`type` and ignores the id (`NATIVE_BY_TYPE` in `tools/audit_mbproj_registration.py`). The audit prints `Requested ids: 13 (the exact set the engine asks for), 13 native types`.
+<!-- measured: python tools/audit_mbproj_registration.py 2026-10-24 -->
 
 **Monsters are the exception, and they go both ways.** `Monster` is a managed object type: the
 engine registers it as `RegisterType<Monster>("Monster", "Monsters", 2u)` (`Game.cs:307`) and reads
@@ -285,7 +286,8 @@ it with `ObjectManager.LoadXML("Monsters")` (`Game.cs:437`), so a monster meant 
 or any spawned agent needs an `<XmlName id="Monsters" path="..."/>` row in `SubModule.xml` like any
 other data file. That is the copy `FaceGen` looks up at runtime, through
 `Game.Current.ObjectManager.GetObject<Monster>` (`FaceGen.cs:38`, `56`). The `soln_monsters` row in
-`project.mbproj` feeds the separate native monster table instead. The live
+`project.mbproj` is read by nothing in v1.5.5 (the audit reports it `INERT-ROW` beside the
+`<XmlName>` and `DEAD-ID` without it), so the Monster loads through `<XmlName id="Monsters">` only. The live
 `LOTRLOME_Armory/SubModule.xml` carries 8 `<XmlName id="Monsters">` rows (spider, elephant, mumakil,
 chariot, warg, fell warg, war ram and the module's own `monsters.xml`) alongside 4 `soln_monsters`
 rows in its `project.mbproj`, and a comment in that file records why: a `soln_` row that was removed
@@ -659,7 +661,7 @@ Measured 2026-09-05 against the installed v1.4.8 game and this repo. `$MODULES` 
 | TAOM's 100 rows cover 12 distinct ids | `grep -o '<XmlName id="[^"]*"' Main/_Module/SubModule.xml \| sort -u \| wc -l` |
 | 8 XSLT-only registrations, each a `.xslt` with no `.xml` or `.xsl` sibling | `ls Main/_Module/ModuleData/{spkingdoms,spcultures,spclans,lords,heroes,module_strings,action_strings,comment_strings}.*` |
 | 17 stylesheets across the three live modules, all clean | `python tools/check_external_xslt.py` |
-| 39 vanilla `soln_*` ids | `python tools/audit_mbproj_registration.py` |
+| 13 requested `soln_*` ids (`REQUESTED_IDS`, 2026-10-24) | `python tools/audit_mbproj_registration.py` |
 | Armory `<XmlName id="Monsters">` rows 8, `soln_monsters` rows 4 | `grep -c 'XmlName id="Monsters"' "$MODULES/LOTRLOME_Armory/SubModule.xml"`; `grep -c 'id="soln_monsters"' "$MODULES/LOTRLOME_Armory/ModuleData/project.mbproj"` |
 | 10 child element names filtered out of the `empire` passthrough in `spcultures.xslt` | `sed -n '317p' Main/_Module/ModuleData/spcultures.xslt \| grep -o 'self::[a-z_]*' \| wc -l` |
 | TAOM `project.mbproj`: 5 `<file>` rows | `grep -c '<file ' Main/_Module/ModuleData/project.mbproj` |
