@@ -27,7 +27,7 @@ public class EnlistmentMenuServiceTests
         _contentConfig = Substitute.For<IEnlistmentContentConfigProvider>();
         _contentConfig.GetConfig().Returns(EnlistmentContentConfigProvider.BuildDefaults());
         _ledger = new SitOutLedger();
-        _service = new EnlistmentMenuService(_store, new EnlistmentConfigProvider(_logger), Substitute.For<IMobilePartyAttachmentAdapter>(), _encounter, _contentConfig, _ledger, _logger);
+        _service = new EnlistmentMenuService(_store, new EnlistmentConfigProvider(), Substitute.For<IMobilePartyAttachmentAdapter>(), _encounter, _contentConfig, _ledger, _logger);
     }
 
     [TestMethod]

@@ -152,18 +152,16 @@ public class FieldDutyRuntimeTests
 
         _rewards.Received(1).Grant(duty.ReportReward, "duty:recon_sweep");
         Assert.AreEqual(1, _contentStore.Record.DutySuccesses);
-        Assert.AreEqual(0, _contentStore.Record.DutyFailures);
         Assert.IsFalse(_contentStore.Record.HasActiveDuty);
     }
 
     [TestMethod]
-    public void HourlyUpdate_ShiftEndAndCheckFails_GrantsFailureRewardAndCountsIt()
+    public void HourlyUpdate_ShiftEndAndCheckFails_GrantsFailureReward()
     {
         var duty = Duty();
         StartAndReachShiftEnd(duty, passes: false);
 
         _rewards.Received(1).Grant(duty.FailureReward, "duty-failed:recon_sweep");
-        Assert.AreEqual(1, _contentStore.Record.DutyFailures);
         Assert.AreEqual(0, _contentStore.Record.DutySuccesses);
         Assert.IsFalse(_contentStore.Record.HasActiveDuty);
     }
@@ -241,7 +239,6 @@ public class FieldDutyRuntimeTests
 
         Assert.IsFalse(_contentStore.Record.HasActiveDuty, "captivity must cancel, not orphan");
         _rewards.DidNotReceiveWithAnyArgs().Grant(default, default);
-        Assert.AreEqual(0, _contentStore.Record.DutyFailures, "being taken prisoner is not a duty failure");
     }
 
     [TestMethod]
@@ -272,7 +269,6 @@ public class FieldDutyRuntimeTests
 
         Assert.IsFalse(_contentStore.Record.HasActiveDuty);
         _rewards.DidNotReceiveWithAnyArgs().Grant(default, default);
-        Assert.AreEqual(0, _contentStore.Record.DutyFailures, "a mechanic change is not the player's failure");
     }
 
     [TestMethod]
@@ -306,7 +302,6 @@ public class FieldDutyRuntimeTests
 
         Assert.IsFalse(_contentStore.Record.HasActiveDuty);
         _rewards.DidNotReceiveWithAnyArgs().Grant(default, default);
-        Assert.AreEqual(0, _contentStore.Record.DutyFailures);
     }
 
     // ---- Result line is readable ----

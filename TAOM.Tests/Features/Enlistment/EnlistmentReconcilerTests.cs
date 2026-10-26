@@ -51,7 +51,7 @@ public class EnlistmentReconcilerTests
         _diplomacy = Substitute.For<IServiceDiplomacyService>();
         _inquiry = Substitute.For<IInquiryAdapter>();
         _reconciler = new EnlistmentReconciler(_store, _machine, _attachment, _commander, _discharge,
-            new EnlistmentConfigProvider(_logger), _encounter, new EncounterOwnershipPolicy(), Substitute.For<IEnlistmentDiagnosticsSettingsProvider>(),
+            new EnlistmentConfigProvider(), _encounter, new EncounterOwnershipPolicy(), Substitute.For<IEnlistmentDiagnosticsSettingsProvider>(),
             EnlistmentTestDoubles.FeatureOn(), _inquiry, _army, _diplomacy, _logger);
     }
 

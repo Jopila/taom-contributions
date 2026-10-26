@@ -35,7 +35,7 @@ public class PersistedEquipmentIssueLedgerTests
         _ledger.RecordIssue(EnlistmentKitTier.Recruit, new[] { "sk_a", "sk_b", "sk_b" });
 
         Assert.AreEqual(EnlistmentKitTier.Recruit, _ledger.HighestIssuedTier);
-        Assert.AreEqual(3, _ledger.IssuedItemIds.Count, "duplicate instances preserved for the payoff sum");
+        Assert.AreEqual(3, _ledger.IssuedItemIds.Count, "duplicate instances preserved for the per-item reclaim");
         Assert.IsTrue(_ledger.HasIssuedForTier(EnlistmentKitTier.Recruit));
     }
 
@@ -73,6 +73,27 @@ public class PersistedEquipmentIssueLedgerTests
         Assert.AreEqual(EnlistmentKitTier.Soldier, reloadedLedger.HighestIssuedTier);
         CollectionAssert.AreEqual(new[] { "sk_head", "sk_body" }, reloadedLedger.IssuedItemIds.ToArray());
         Assert.IsTrue(reloadedLedger.HasIssuedForTier(EnlistmentKitTier.Soldier));
+    }
+
+    [TestMethod]
+    public void RecordIssue_AccumulatesDuplicateItemInstances()
+    {
+        // The same armor piece issued at two tiers = two physical items to reclaim.
+        _ledger.RecordIssue(EnlistmentKitTier.Recruit, new[] { "item_a" });
+        _ledger.RecordIssue(EnlistmentKitTier.Soldier, new[] { "item_a", "item_c" });
+
+        CollectionAssert.AreEqual(new[] { "item_a", "item_a", "item_c" },
+            (System.Collections.ICollection)_ledger.IssuedItemIds);
+    }
+
+    [TestMethod]
+    public void RecordIssue_NullOrEmptyItemLists_ToleratedButTierStillRecorded()
+    {
+        _ledger.RecordIssue(EnlistmentKitTier.Recruit, null);
+        _ledger.RecordIssue(EnlistmentKitTier.Soldier, new string[0]);
+
+        Assert.AreEqual(EnlistmentKitTier.Soldier, _ledger.HighestIssuedTier);
+        Assert.AreEqual(0, _ledger.IssuedItemIds.Count);
     }
 
     [TestMethod]

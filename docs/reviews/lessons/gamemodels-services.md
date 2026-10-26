@@ -1336,3 +1336,12 @@ rolled its injury and paid with the feature off or in a shared campaign, and a r
 - **Prevent:** list every step that writes (tick, roll, payout, resume) and call the start's gate function from each,
   as `FarWatchService` ends its ride when the toggle goes off. A test per step drives the gate closed mid-job.
 - **Source:** [rca-camp-work-2026-10-26.md](../rca-camp-work-2026-10-26.md) findings 2, 7, 8.
+### A deletion is not done until nothing it orphaned is left, and a kept safety branch has a real caller (#844, 2026-10-26)
+The enlistment dead-surface cleanup deleted each listed member after checking it had no reader, but left what
+those deletions orphaned (an hour parameter through five signatures, a probe field, a counter, an adapter
+method, a one-caller clamp class), and kept a petition rollback whose only caller could never reach it.
+- **Why missed:** the check was per member ("does it have a reader?"), never per deletion ("what lost its last
+  reader because of this?"), and the kept branch was justified by a note, not by tracing its caller.
+- **Prevent:** after deleting a member, grep every value it read and every member that fed it, and delete what
+  has no reader left; before keeping code "for safety", trace its callers and show one that reaches it.
+- **Source:** [rca-enlistment-dead-surface-2026-10-26.md](../rca-enlistment-dead-surface-2026-10-26.md) F1, F4.

@@ -1,4 +1,3 @@
-using System;
 using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.Enlistment.Domain;
@@ -45,8 +44,6 @@ public class EnlistmentService : IEnlistmentService
         _history = history;
     }
 
-    public event Action<string> EnlistmentStarted;
-
     public PetitionResult SubmitPetition(string commanderHeroId)
     {
         if (_store.Record.IsEnlisted)
@@ -63,16 +60,6 @@ public class EnlistmentService : IEnlistmentService
 
         _logger?.LogInfo($"[Enlistment] petition submitted to {commanderHeroId}");
         return PetitionResult.Accepted;
-    }
-
-    public bool WithdrawPetition()
-    {
-        if (_store.Record.State != EnlistmentState.PetitionPending)
-            return false;
-
-        _machine.TryTransition(EnlistmentState.NotEnlisted);
-        _store.Record.PetitionCommanderId = null;
-        return true;
     }
 
     public OathResult CompleteOath(string commanderHeroId, string enlistedHeroId, double nowDays)
@@ -103,7 +90,7 @@ public class EnlistmentService : IEnlistmentService
         // decides WHETHER it is ours: a settlement visit or someone else's business is left alone.
         var commanderSnapshot = _commander.GetSnapshot(commanderHeroId);
         var commanderPartyId = commanderSnapshot.PartyId;
-        // Past service (#837): the rank this oath is owed, before the announcement below.
+        // Past service (#837): restore the rank this oath is owed.
         _history.RestoreOnOath(commanderHeroId, enlistedHeroId, commanderSnapshot);
         var verdict = _ownership.Evaluate(EncounterFinishIntent.OathHandoff, _encounter.GetOwnership(commanderPartyId));
         if (verdict == EncounterFinishVerdict.Finish)
@@ -124,18 +111,8 @@ public class EnlistmentService : IEnlistmentService
         if (!_attachment.ParkNear(commanderHeroId))
             _logger?.LogWarning($"[Enlistment] ParkNear failed right after the oath with {commanderHeroId} — reconciler will re-park");
 
-        // Mirror the commander's wars BEFORE announcing the oath, so any subscriber that reads
-        // diplomatic state sees the finished picture rather than a half-applied one.
+        // Mirror the commander's wars once the oath is final.
         _diplomacy.ApplyServiceWars(commanderHeroId);
-
-        try
-        {
-            EnlistmentStarted?.Invoke(commanderHeroId);
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError($"[Enlistment] EnlistmentStarted subscriber threw: {ex.Message}");
-        }
 
         _logger?.LogInfo($"[Enlistment] oath sworn to {commanderHeroId}, contract ends day {_store.Record.ContractEndDay:F1}");
         return OathResult.Sworn;

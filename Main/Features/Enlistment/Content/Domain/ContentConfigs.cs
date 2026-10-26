@@ -75,8 +75,8 @@ public sealed class EnlistmentDutiesConfig
 }
 
 /// <summary>
-/// Hourly-cached world snapshot for the duty scheduler (replaces the donor's
-/// GetCurrentArmyRhythmState — 2 full MobileParty.All scans × 11 call sites per tick chain).
+/// World snapshot for the duty scheduler. At most one probe per game hour (the cache key); called
+/// by the daily service tick, the daily duty offer and a duty request.
 /// Pure data; the snapshot service owns the engine reads.
 /// </summary>
 public sealed class ArmyRhythmSnapshot
@@ -99,7 +99,6 @@ public sealed class ServiceProgressSnapshot
     public int ServiceXp { get; set; }
     public int LeadershipSkill { get; set; }
     public int DutySuccesses { get; set; }
-    public int DutyFailures { get; set; }
     public int Trust { get; set; }
     public int DeferredWages { get; set; }
 }

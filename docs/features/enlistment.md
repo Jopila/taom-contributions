@@ -80,6 +80,12 @@ version) reset to NotEnlisted and the load normalizer's ownerless-parked rescue 
 the party — a hidden inactive MainParty with no service record never survives a load,
 including foreign/corrupt saves.
 
+The content record (`_taom_enlistment_content`) reads by key name and defaults a missing key, so
+saves written before the #844 cleanup still load. Their retired keys (`repF`, `repL`, `repC`,
+`repS`, `wins`, `losses`, `tourneys`, `dutyFood`, `dutyFails`) are ignored on read and not written back
+(`ContentRecord_SaveWithRetiredKeys_StillLoads`). The same goes for `trainingSessionXp`,
+`reputationMax`, `repDomain` and `repAmount` in the JSON configs: a leftover key loads quietly.
+
 ## Menu + battle layers
 
 **Fixed (#828, closes #573; found 2026-09-12 by the Codex pass on #567):** the wait menu's
@@ -924,9 +930,10 @@ One incident row is worse than that exemption can carry, and it predates this ch
 cannot pass, and it charges 1 trust on **both** outcomes. Its sibling `wait_it_out` is Steward 50,
 pays +1 on success, costs nothing on failure, and triggers the same `ReleaseDeferredPay` effect,
 because the effect is keyed on the incident and fires for whichever option passes. `press_claim` is
-therefore strictly dominated: harder, always costs standing, and buys only `repDomain: Command`,
-which has no reader. Left alone here deliberately and tracked as #521, because retuning an incident
-belongs in its own change rather than folded into the field-duty economy.
+therefore dominated in practice: harder, always costs standing, and pays only 4 more service XP on
+success (20 against 16); the reputation it also paid is no longer tracked. Left alone here
+deliberately and tracked as #521, because retuning an incident belongs in its own change rather
+than folded into the field-duty economy.
 
 `FieldDutyReachabilityTests` now pins a third floor beside the two above: at skill 0, for the
 weakest player a row's own gates admit, the expectation `p·success + (1-p)·failure` must be `>= 0`.
@@ -1008,16 +1015,21 @@ and the alternative is a permanent zero), and it is why the trust boundary is he
 observed the resulting `CohesionRatio` in a live battle.
 
 Three consequences worth naming, because the score feeds more than trust.
-`EnlistmentBattlePayoutService` grants the band's `ServiceXp`, `Gold`, `Trust`, `RepDomain`/
-`RepAmount` and folds `band.Renown` into `BattleRenownPolicy`:
+`EnlistmentBattlePayoutService` grants the band's `ServiceXp`, `Gold` and `Trust` and folds
+`band.Renown` into `BattleRenownPolicy`:
 
 - **`distinguished` becomes reachable for Infantry for the first time.** With cohesion pinned at 0
   the Infantry ceiling was `30 + 25 + 10 + 10 = 75`, under the band's `minScore: 80`. It is now 100.
-  That unlocks 30 XP, 20 gold, 2 trust, 3 renown and 2 FieldRep at the top of the ladder.
-- **Reputation accrues into nothing.** `FieldRep` and its three siblings have one writer and no
-  reader; `TrustLedger.DominantDomain` claims to drive "officer-duty selection + status flavor" and
-  is called from no production path. The rhythm snapshot used to carry a `HighScrutiny` flag of
-  the same shape; it was deleted with the other unread snapshot fields (#843).
+  That unlocks 30 XP, 20 gold, 2 trust, and 3 renown at the top of the ladder.
+- **Reputation is gone (#844).** The four domains (`FieldRep` and its siblings) were written by
+  merit bands and the `repDomain` rows in the duty and config JSON, and read only by
+  `TrustLedger.DominantDomain`, which no production path called. The fields, the `repDomain` and
+  `repAmount` keys, `reputationMax` and the rhythm snapshot's `HighScrutiny` flag (#843) were
+  deleted together. Battle counters, tournament wins, the duty food requirement,
+  `trainingSessionXp`, `EnlistmentStarted`, `EnlistmentStateMachine.Transitioned`,
+  `EquipmentPayoffCalculator`, `WithdrawPetition`, the duty failure counter (`DutyFailures`) and the
+  `TrustLedger` helper (its one clamp is now inline in `ServiceRewardService`) went the same way:
+  nothing read them or they had a single caller.
 - **Renown is the one payout that reaches the wider campaign**, through `GainRenownAction` to the
   player's own clan, so a better merit distribution is mild clan-tier inflation.
 
@@ -2618,7 +2630,7 @@ menu redirect policy + cap, battle ordering/rollback/loot-guard, binding pins, c
 semantic validation (one test per rule), wage orchestration (solvency × arrears × channel,
 incl. regression tests for the mint-mode double-payment and shortfall-overcount bugs),
 promotion thresholds at both evaluation points, merit scoring/bands incl. NaN ratios, duty
-gating/rotation/lifecycle per mechanic, equipment resolver fallback + payoff math, the persisted
+gating/rotation/lifecycle per mechanic, equipment resolver fallback, the persisted
 issue-ledger across a save round-trip, role-fit bands per assignment, and one regression test per
 Codex finding (`CodexFindingRegressionTests`). Since #551 the suite also pins the battle-end gate's event identity, the detach precondition, R1c and the stale-latch timer, and the cross-campaign reset of that timer's anchor.
 

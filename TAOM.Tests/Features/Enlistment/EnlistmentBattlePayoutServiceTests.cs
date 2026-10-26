@@ -60,7 +60,6 @@ public class EnlistmentBattlePayoutServiceTests
         Assert.IsTrue(_service.PayOutBattle(won: true, playerSimulated: true));
 
         Assert.AreEqual(20, _contentStore.Record.ServiceXp, "half of the 40 win XP");
-        Assert.AreEqual(1, _contentStore.Record.BattleVictories, "counters are unchanged");
         _rewards.DidNotReceive().Grant(Arg.Is<RewardSpec>(r => PaysRenown(r)), Arg.Any<string>());
         _rewards.Received(1).Grant(Arg.Is<RewardSpec>(r => r.Trust == -1 && r.Renown == 0 && r.ServiceXp == 0), Arg.Any<string>());
         Assert.AreEqual(SitOutVerdict.OverwhelmingCost, _service.LastSatOutReason);
@@ -110,7 +109,6 @@ public class EnlistmentBattlePayoutServiceTests
         _service.PayOutBattle(won: false, playerSimulated: true);
 
         Assert.AreEqual(8, _contentStore.Record.ServiceXp, "15 x 0.5 = 7.5 rounds up to 8 (to-even gives 8 too)");
-        Assert.AreEqual(1, _contentStore.Record.BattleDefeats);
     }
 
     [TestMethod]
@@ -258,25 +256,23 @@ public class EnlistmentBattlePayoutServiceTests
     }
 
     [TestMethod]
-    public void PayOut_WonNoSample_AwardsBaseXpAndCountsVictory()
+    public void PayOut_WonNoSample_AwardsBaseXp()
     {
         MakeEnlisted();
 
         Assert.IsTrue(_service.PayOutBattle(won: true, playerSimulated: false));
         Assert.AreEqual(40, _contentStore.Record.ServiceXp);
-        Assert.AreEqual(1, _contentStore.Record.BattleVictories);
         Assert.AreEqual("", _service.LastBandGradeKey);
     }
 
     [TestMethod]
-    public void PayOut_Lost_AwardsLossXpAndCountsDefeat()
+    public void PayOut_Lost_AwardsLossXp()
     {
         MakeEnlisted();
 
         _service.PayOutBattle(won: false, playerSimulated: false);
 
         Assert.AreEqual(15, _contentStore.Record.ServiceXp);
-        Assert.AreEqual(1, _contentStore.Record.BattleDefeats);
     }
 
     [TestMethod]

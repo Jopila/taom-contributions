@@ -85,11 +85,6 @@ public class EnlistmentBattlePayoutService
         var config = _config.GetConfig();
         var tables = config.Progression;
 
-        if (won)
-            record.BattleVictories++;
-        else
-            record.BattleDefeats++;
-
         var sample = _accumulator.Consume();
 
         // A simulated player battle (he chose 'Send troops') is a battle he sat out when the menu gate
@@ -144,8 +139,6 @@ public class EnlistmentBattlePayoutService
                     ServiceXp = band.ServiceXp,
                     Gold = band.Gold,
                     Trust = sample.LeftTheField ? 0 : band.Trust,
-                    RepDomain = band.RepDomain,
-                    RepAmount = band.RepAmount,
                 }, $"merit-{band.GradeKey}");
                 LastBandGradeKey = band.GradeKey;
                 bandRenown = band.Renown;
