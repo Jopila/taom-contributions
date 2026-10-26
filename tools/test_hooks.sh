@@ -3142,6 +3142,50 @@ elif (( SS_SECS >= 9 )); then
 else
     ok "session-start.sh with a hung graphify probe: the UNCHECKED note, back in ${SS_SECS} s"
 fi
+# The native-build archive probe (#1004): its one line is echoed, silence stays silent, a hung probe
+# says UNCHECKED inside the shared deadline, and it is called with --detach and the resolved install.
+mkdir -p "$UP/fakegame/bin/Win64_Shipping_Client"
+printf '<Version><Singleplayer Value="v9.9.9"/></Version>' > "$UP/fakegame/bin/Win64_Shipping_Client/Version.xml"
+: > "$UP/tools/native_archive.py"
+cat > "$UP/fakepy-native" <<'FAKE'
+#!/bin/sh
+if [ "$1" = "tools/native_archive.py" ]; then
+  case "$FAKE_NATIVE" in
+    hang) exec sleep 30 ;;
+    say) echo "native archive: archiving v9.9.9 client in the background (log: x) args: $*"; exit 0 ;;
+    *) exit 0 ;;
+  esac
+fi
+printf taompy; exit 0
+FAKE
+chmod +x "$UP/fakepy-native" 2>/dev/null
+ss_native() {   # $1 the fake's mode; stdout of session-start.sh in $UP
+    printf '{"source":"startup"}' | timeout -k 2 20 env CLAUDE_PROJECT_DIR="$UP" TAOM_PYBIN="$UP/fakepy-native" \
+        BANNERLORD_GAME_DIR="$UP/fakegame" FAKE_NATIVE="$1" \
+        bash "$UP/.claude/hooks/session-start.sh" 2>/dev/null
+}
+NA_SAY=$(ss_native say)
+if grep -q "^native archive: archiving v9.9.9 client in the background (log: x) args: tools/native_archive.py --detach --game-dir $UP/fakegame\$" <<< "$NA_SAY"; then
+    ok "native archive probe: its line is echoed, called with --detach and the resolved install"
+else
+    bad "native archive probe: its line was not echoed, or it was not called with --detach --game-dir"
+fi
+if grep -qE 'native (archive|engine build archive)' <<< "$(ss_native quiet)"; then
+    bad "native archive probe: a silent probe still printed a native archive line"
+else
+    ok "native archive probe: a silent probe prints nothing"
+fi
+SS_T0=$SECONDS
+NA_HANG=$(ss_native hang)
+SS_SECS=$((SECONDS - SS_T0))
+if ! grep -q 'native engine build archive UNCHECKED this session' <<< "$NA_HANG"; then
+    bad "native archive probe: a hung probe printed no UNCHECKED note"
+elif (( SS_SECS >= 9 )); then
+    bad "native archive probe: a hung probe took ${SS_SECS} s of the 10 s registration"
+else
+    ok "native archive probe: a hung probe says UNCHECKED, back in ${SS_SECS} s"
+fi
+rm -rf "$UP/fakegame" "$UP/tools/native_archive.py" "$UP/fakepy-native"
 # The harness retro cadence line (#962): due with no record, quiet with a record dated today, due
 # with the day count once the newest record is seven days old, and UNCHECKED, not silent, when the
 # record's date does not parse.

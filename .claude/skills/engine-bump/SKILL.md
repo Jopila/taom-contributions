@@ -27,9 +27,12 @@ misattributed crashes) or we migrate deliberately. The session-start hook warns 
    **What skipping it breaks: native crash triage, silently.** `/native-crash-triage` derives fault
    offsets from the wEditor `TaleWorlds.Native.dll`, so that binary's version *is* the offset base —
    every offset taken before that jump was against a v1.4.5 image, and it moved with no signal.
-   Steam overwrites in place and nothing archives native modules (the decompile stack only *lists*
-   them in `_native_dlls.txt`), so **copy both `bin/Win64_Shipping_{Client,wEditor}/TaleWorlds.Native.dll`
-   aside now**, as `E:\Decompiled_Bannerlord\_native\TaleWorlds.Native.v<old>.{client,wEditor}.dll`:
+   Steam overwrites in place, so since 2026-10-26 (#1004) the session-start hook archives each new
+   client and wEditor `TaleWorlds.Native.dll` the first session it appears, with its engine-method
+   map and matcher index, into `E:\Decompiled_Bannerlord\_native\TaleWorlds.Native.v<ver>.{client,wEditor}.dll`.
+   **Check it ran:** `python tools/native_archive.py --status` must list the OLD build with `map=ok`;
+   if it does not, copy both `bin/Win64_Shipping_{Client,wEditor}/TaleWorlds.Native.dll` aside by hand
+   now:
    that copy is the only baseline the NEXT bump will have, and `native_build_match.py` reads it. The cost of not having one
    is already booked: the open player report (untracked; read it with
    `git show b2e387db:crashz/report.json`; `BannerlordVersion v1.4.7.117484`) can no longer be

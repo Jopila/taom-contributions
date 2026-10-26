@@ -2,7 +2,7 @@
 # SessionStart hook: Print recent project context on fresh startup
 # Startup prints the full context; compact prints only recent Dead ends (resume/clear print nothing)
 
-# The bounded probes below (the Armory tpac scan, the graphify status and its background-refresh start, the worktree list) share one deadline counted
+# The bounded probes below (the Armory tpac scan, the graphify status and its background-refresh start, the native-build archive check, the worktree list) share one deadline counted
 # from this first command, so together they leave the tail (git log, diff, ls-files, the TODO grep) about
 # 2 s of the 10 s registration: three 4 s probes, their kill grace and a slow tail could pass 10 s, and a
 # killed hook prints nothing (Codex review 2026-10-16). EPOCHREALTIME's digits are microseconds; it is
@@ -204,6 +204,29 @@ elif [[ -n "${PYBIN:-}" && -f tools/graphify_taom.py ]]; then
 else
   echo ""
   echo "NOTE: graphify code graph freshness UNCHECKED this session (no safe python or no tools/graphify_taom.py)."
+fi
+
+# Native engine build archive (#1004). A Steam update replaces TaleWorlds.Native.dll, and
+# `native_build_match.py --old` and crash triage against the previous build need its binary. The
+# check is stat-only (about 0.1 s) and silent when both builds are archived; a changed or new DLL is
+# archived by a detached child that this call does not wait for. It prints nothing when the install
+# is missing (the drift check above already notes that). Fail open, never silent: a spent budget or
+# an overrun says "unchecked".
+if [[ -n "${PYBIN:-}" && -f tools/native_archive.py && -n "$GAME_DIR_RESOLVED" ]]; then
+  if ! ss_probe_budget; then
+    echo ""
+    echo "NOTE: native engine build archive UNCHECKED this session (session-start time budget spent)."
+  else
+    NATIVE_ARCH=$(timeout -k 0.5 "$SS_PROBE_BUDGET" "$PYBIN" tools/native_archive.py --detach --game-dir "$GAME_DIR_RESOLVED" 2>/dev/null)
+    NATIVE_ARCH_RC=$?
+    if [[ $NATIVE_ARCH_RC -eq 124 || $NATIVE_ARCH_RC -eq 137 ]]; then
+      echo ""
+      echo "NOTE: native engine build archive UNCHECKED this session (the check overran ${SS_PROBE_BUDGET%????} s)."
+    elif [[ -n "$NATIVE_ARCH" ]]; then
+      echo ""
+      printf '%s\n' "$NATIVE_ARCH"
+    fi
+  fi
 fi
 
 # Worktree pile-up. Every checked-out worktree (any path, not only .claude/worktrees/) costs a

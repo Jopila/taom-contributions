@@ -12,9 +12,10 @@ code's RVA in the new build, or says it cannot tell. An offline tool: no game, n
   each engine bump, every address TAOM knew (crash sites, hang frames, the skeleton-pool spins, the
   `KnownBuilds` pin rows) was found again by hand. `native_sig_author.py diff` still holds the old
   NativeSkinFixes targets and has no current use.
-- **The need:** `/engine-bump` archives each old client DLL to `E:\Decompiled_Bannerlord\_native`
-  (v1.5.2 to v1.5.5 today), and a player's crash report can come from an older build than the one
-  installed.
+- **The need:** the session-start hook archives each new client and wEditor DLL to
+  `E:\Decompiled_Bannerlord\_native` with its engine-method map and this tool's index
+  (`tools/native_archive.py`, #1004; v1.5.2 to v1.5.5 today, and v1.5.2 has no map), and a
+  player's crash report can come from an older build than the one installed.
 - **Without it:** an old address is useless after an update until someone re-derives it by reading
   disassembly.
 
