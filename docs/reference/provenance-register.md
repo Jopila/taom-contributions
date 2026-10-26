@@ -109,6 +109,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | rtk (Rust Token Killer) | `rtk` `rtk-ai/rtk` `Rust Token Killer` | Apache-2.0 (the CLI in `src/`; `engine/` and `proxy/` are BUSL-1.1 and nothing derives from them) | behavioural-port | `.claude/hooks/_shellwords.py` (`command_index`, `peel`); `tools/harness_retro.py` (`command_family`, report section 9) | cleared |
 | CodeGraph | `codegraph` `colbymchenry/codegraph` `@colbymchenry/codegraph` | MIT | behavioural-port | `tools/graphify_taom.py` (interface callers in `affected`, the `tests` verb, answer-scoped staleness, `refresh --detach`); see detail | cleared |
 | rea | `rea` `morluto/rea` `rea-agents` | MIT | behavioural-port | `tools/native_build_match.py` (the matching method, from its documentation; see detail); rule lines in `.claude/rules/{evidence-over-claims,simplicity-criterion,working-discipline}.md`, `.claude/skills/issue/SKILL.md` and `docs/ai-includes/perf-method.md` section 4 (comparison-only) | cleared |
+| context-mode | `context-mode` `mksglu/context-mode` | Elastic-2.0 | behavioural-port | `docs/ai-includes/agent-operating-manual.md` (execution model item 6) | cleared |
 
 <!-- provenance-register-end -->
 
@@ -884,6 +885,15 @@ Code transcripts, which became section 9 of `tools/harness_retro.py`. No rtk cod
 copied, so no Apache-2.0 notice is carried. The rtk v1.0.1 binary was run once, offline, on
 2026-10-23 to measure it (Mike's explicit trial decision): checksum-verified, never initialised,
 never in a hook or on PATH, then deleted. Record: [`docs/reviews/adopt-rtk-2026-10-23.md`](../reviews/adopt-rtk-2026-10-23.md).
+
+### context-mode
+
+Upstream: https://github.com/mksglu/context-mode, `main` at `7e9ebef` · Elastic License 2.0. Its
+README's "think in code" principle (a script computes across files and prints only the result) was
+read while writing item 6 of the agent operating manual, so the derivation is a behavioural port.
+The per-file Read table in section 9 of `tools/harness_retro.py` (#1002) is TAOM's own measurement
+and has no counterpart upstream. No code or text was copied, so no ELv2 notice is carried, and
+nothing was installed or run. Record: [`docs/reviews/adopt-context-mode-2026-10-26.md`](../reviews/adopt-context-mode-2026-10-26.md).
 
 ### CodeGraph
 
