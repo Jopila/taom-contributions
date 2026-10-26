@@ -162,8 +162,26 @@
                                           </Children>
                                         </Widget>
 
+                                        <!--Family Divider-->
+                                        <EncyclopediaDivider Id="FamilyDivider" MarginTop="30" Parameter.Title="@FamilyText" Parameter.ItemList="..\FamilyGrid" GamepadNavigationIndex="0"/>
+
+                                        <!--Family Grid-->
+																				<NavigationScopeTargeter ScopeID="EncyclopediaHeroFamilyContentScope" ScopeParent="..\FamilyGrid" ScopeMovements="Horizontal" AlternateScopeMovements="Vertical" AlternateMovementStepSize="7" />
+                                        <NavigatableGridWidget Id="FamilyGrid" DataSource="{Family}" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" SuggestedWidth="350" SuggestedHeight="350" DefaultCellWidth="100" DefaultCellHeight="110" HorizontalAlignment="Left" ColumnCount="7" MarginTop="25" MarginLeft="20" MarginBottom="10" AutoScrollTopOffset="35" AutoScrollBottomOffset="35">
+                                          <ItemTemplate>
+
+                                            <!--Family-->
+                                            <EncyclopediaSubPageElement>
+                                              <Children>
+                                                <TextWidget WidthSizePolicy = "CoverChildren" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" Text="@Role" PositionYOffset="-17" Brush="Encyclopedia.SubPage.Element.Name.Text"/>
+                                              </Children>
+                                            </EncyclopediaSubPageElement>
+
+                                          </ItemTemplate>
+                                        </NavigatableGridWidget>
+
                                         <!--Allies Divider-->
-                                        <EncyclopediaDivider Id="AlliesDivider" MarginTop="50" Parameter.Title="@AlliesText" Parameter.ItemList="..\AlliesGridParent" GamepadNavigationIndex="0"/>
+                                        <EncyclopediaDivider Id="AlliesDivider" MarginTop="20" Parameter.Title="@AlliesText" Parameter.ItemList="..\AlliesGridParent" GamepadNavigationIndex="0"/>
 
                                         <!--Allies Grid-->
                                         <Widget Id="AlliesGridParent" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="10" MarginLeft="15">
@@ -195,10 +213,10 @@
                                         </Widget>
 
                                         <!--Enemies Divider-->
-                                        <EncyclopediaDivider Id="EnemiesDivider" MarginTop="30" Parameter.Title="@EnemiesText" Parameter.ItemList="..\EnemiesGridParent" GamepadNavigationIndex="0"/>
+                                        <EncyclopediaDivider Id="EnemiesDivider" MarginTop="20" Parameter.Title="@EnemiesText" Parameter.ItemList="..\EnemiesGridParent" GamepadNavigationIndex="0"/>
 
                                         <!--Enemies Grid-->
-                                        <Widget Id="EnemiesGridParent" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="10" MarginLeft="15">
+                                        <Widget Id="EnemiesGridParent" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="10" MarginLeft="15" MarginBottom="50">
                                           <Children>
                                             <GridWidget Id="EnemiesGrid" DataSource="{Enemies}" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" DefaultCellWidth="100" DefaultCellHeight="100" HorizontalAlignment="Left" ColumnCount="7" AutoScrollTopOffset="35" AutoScrollBottomOffset="35">
                                               <ItemTemplate>
@@ -225,24 +243,6 @@
                                             </TextWidget>
                                           </Children>
                                         </Widget>
-
-                                        <!--Family Divider-->
-                                        <EncyclopediaDivider Id="FamilyDivider" MarginTop="20" Parameter.Title="@FamilyText" Parameter.ItemList="..\FamilyGrid" GamepadNavigationIndex="0"/>
-
-                                        <!--Family Grid-->
-																				<NavigationScopeTargeter ScopeID="EncyclopediaHeroFamilyContentScope" ScopeParent="..\FamilyGrid" ScopeMovements="Horizontal" AlternateScopeMovements="Vertical" AlternateMovementStepSize="7" />
-                                        <NavigatableGridWidget Id="FamilyGrid" DataSource="{Family}" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" SuggestedWidth="350" SuggestedHeight="350" DefaultCellWidth="100" DefaultCellHeight="110" HorizontalAlignment="Left" ColumnCount="7" MarginTop="30" MarginLeft="20" MarginBottom="50" AutoScrollTopOffset="35" AutoScrollBottomOffset="35">
-                                          <ItemTemplate>
-
-                                            <!--Family-->
-                                            <EncyclopediaSubPageElement>
-                                              <Children>
-                                                <TextWidget WidthSizePolicy = "CoverChildren" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" Text="@Role" PositionYOffset="-17" Brush="Encyclopedia.SubPage.Element.Name.Text"/>
-                                              </Children>
-                                            </EncyclopediaSubPageElement>
-
-                                          </ItemTemplate>
-                                        </NavigatableGridWidget>
 
                                       </Children>
                                     </ListPanel>

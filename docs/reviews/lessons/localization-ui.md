@@ -1293,3 +1293,13 @@ detect". The wrong text went into the C# attribute, the strings file and 12 lang
 - **Prevent:** before writing co-op player text, read the gate's rows and reuse the sibling wording in `TaomSettings.cs`
   ("Applies on the host in co-op."; "a co-op mod TAOM cannot probe").
 - **Source:** `docs/reviews/rca-seasoned-hosts-2026-10-26.md` finding 5.
+
+### A margin that ends a column belongs to the column's last block: move it when the blocks move (#907, 2026-10-24)
+Moving the hero page's Family block above Allies carried vanilla's `MarginBottom="50"` with the Family grid, so the
+Enemies grid, now last, touched the page end. Separately, the harvest tool writes a blank line before `</strings>` on
+purpose; removing it by hand makes the next harvest produce a whitespace diff (done in #905, #906 and #907).
+- **Why missed:** the layout test pinned the block order, not the end margin; the blank line looked like noise.
+- **Prevent:** when a prefab change reorders sibling blocks, list each block's margins and decide which belong to a
+  position (first, last) rather than to the block; pin the last block's bottom margin. Leave generator output in a
+  strings file as the generator writes it.
+- **Source:** [rca-encyclopedia-filters-2026-10-26.md](../rca-encyclopedia-filters-2026-10-26.md) findings 4 and 6.

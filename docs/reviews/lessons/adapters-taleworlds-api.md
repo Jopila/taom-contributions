@@ -1501,3 +1501,12 @@ data. Before replacing an engine object (a roster, a listener, a close path), li
 - **Why missed:** the plan copied a reference shape (an empty merchant roster) without asking what vanilla's roster did.
 - **Prevent:** for each substituted engine object, the plan names its events and side effects and how each is kept.
 - **Source:** `docs/reviews/rca-provender-sale-2026-10-24.md` row S1.
+### A value vanilla hides from the player stays hidden in TAOM's new readers (#907, 2026-10-24)
+The new Age filter on the encyclopedia hero list sorted heroes by their real age, although vanilla hides an unmet
+hero's age on the list and the page through `InformationRestrictionModel.DoesPlayerKnowDetailsOf`. TAOM's "Show all
+encyclopedia characters" setting (on by default) masked the leak in normal play.
+- **Why missed:** the brief listed the age read's edge cases (dead heroes, future birthdays) but not the visibility
+  rule vanilla applies to the same value.
+- **Prevent:** before a feature reads a hero fact the player sees (age, traits, relations, wealth), find where vanilla
+  displays it and copy its visibility check into the new reader; test with a hero the player does not know.
+- **Source:** [rca-encyclopedia-filters-2026-10-26.md](../rca-encyclopedia-filters-2026-10-26.md) finding 1.

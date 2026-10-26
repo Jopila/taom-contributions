@@ -6794,6 +6794,36 @@
 
     <string id="taom_camp_ended_coop" text="Camp work is not available in a shared campaign. The men stand down." />
 
+    <string id="taom_ency_hero_level_skills" text="Lvl: {LEVEL}, Skills:" />
+
+    <string id="taom_ency_filter_race" text="Race" />
+
+    <string id="taom_ency_race_men" text="Men" />
+
+    <string id="taom_ency_race_elves" text="Elves" />
+
+    <string id="taom_ency_race_dwarves" text="Dwarves" />
+
+    <string id="taom_ency_race_orcs" text="Orcs" />
+
+    <string id="taom_ency_race_goblins" text="Goblins" />
+
+    <string id="taom_ency_race_uruks" text="Uruk-hai" />
+
+    <string id="taom_ency_race_trolls" text="Trolls" />
+
+    <string id="taom_ency_race_maiar" text="Maiar and Wraiths" />
+
+    <string id="taom_ency_age_young" text="Young" />
+
+    <string id="taom_ency_age_adult" text="Adult" />
+
+    <string id="taom_ency_age_mature" text="Mature" />
+
+    <string id="taom_ency_age_elder" text="Elder" />
+
+    <string id="taom_ency_age_venerable" text="Venerable" />
+
   </strings>
 
 </base>

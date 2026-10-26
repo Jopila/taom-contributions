@@ -1448,6 +1448,17 @@ Vanilla grants 1000 Steward XP through `OnSettlementSkillExercised` each time a 
 **PatchShield.** `TaleWorlds.CampaignSystem.CharacterDevelopment` is not an excluded namespace and the target is not on `ExcludedTargetMethods`, so the shield's finalizer can wrap it (`PatchShieldPolicy.ExcludedTargetNamespacePrefixes` lists GauntletUI, TwoDimension and ManagedCallbacks only). The prefix catches what its body throws. If the shield ever strips the prefix, the grant goes back to vanilla's.
 
 **Co-op.** A skipping prefix on a replicated mutation (XP on a hero's developer) whose condition is a per-peer MCM value, so it is classified `GatedForCoop` in `CoopVetoClassificationTests` (listed in `GatedVetoes_AreExactlyThePinnedSet`) and `SeasonedHostsService.SkipsProjectStewardXp` returns false while `ShouldDeferToHost`. Feature: [seasoned-hosts.md](../features/seasoned-hosts.md). **Tests:** `SeasonedHostsBindingTests` (11: the single overload, the category attaching one bool prefix and the JIT accepting it, the caller), `Patch118ProjectStewardXpTests` (5: the prefix verdict through the module's statics handshake, the fault path and the log-once), `SeasonedHostsServiceTests` (27: the verdict and the host deferral), `SeasonedHostsWiringTests` (16). **ACTIVE**, off by default (the switch), not yet checked in game.
+## Patch119_EncyclopediaHeroFilters
+
+**Targets:** `TaleWorlds.CampaignSystem.Encyclopedia.Pages.DefaultEncyclopediaHeroPage.InitializeFilterItems()`, a `protected override IEnumerable<EncyclopediaFilterGroup>` with no parameters (v1.5.5, `DefaultEncyclopediaHeroPage.cs:175-212`), one Postfix in `Main/Features/Encyclopedia/Hooks/DefaultEncyclopediaHeroPageInitializeFilterItemsPatch.cs`, category `Patch119_EncyclopediaHeroFilters`, applied by `EncyclopediaFiltersModule` at ProcessLoad (OnSubModuleLoad). #907, 2026-10-24.
+
+**Why:** the hero page has no Race or Age filter. The postfix copies `__result`, appends the groups from `IEncyclopediaHeroFilterAdapter` and assigns the copy back; a throw leaves the incoming list. ProcessLoad, not GameInit, because SandBox builds the encyclopedia pages in its own `OnGameInitializationFinished` (`SandBoxSubModule.cs:117,125`), which runs before TAOM's, so a GameInit patch would miss the first campaign. The co-op module postfixes the same method with a lazy AddItem, so `__result` is never cast to a `List`.
+
+**Callers and thread:** `EncyclopediaPage` runs `InitializeFilterItems` once, in its constructor (`_filters = InitializeFilterItems()`), on the main thread; `IsFiltered` then runs each group predicate (`EncyclopediaPage.IsFiltered`, no catch), which is why every predicate the adapter builds catches and lets the hero through.
+
+**PatchShield.** PatchShield wraps this vanilla method (it skips only TAOM-declared methods, `Dependencies/Foundation/PatchShield.cs:200-209`), installs nothing when a co-op module is active (`:150-162`), and returns the original's value after a postfix fault (`:299-307`). This postfix catches everything itself, so the finalizer never fires for it.
+
+**Co-op.** A postfix on a UI list builder: nothing skipped, no campaign state written, so `CoopVetoClassificationTests` needs no entry. Config: `ModuleData/encyclopedia/hero_filters.json`. **ACTIVE**, not yet checked in game.
 
 ## Patch_MainRosterLossDiag
 

@@ -7,9 +7,9 @@ using Bannerlord.UIExtenderEx.Prefabs2;
 namespace TAOM.Features.LinesOfDescent.UI;
 
 // Lines of Descent (#905): the Family Tree button on the encyclopedia hero page, inserted as the sibling just before the Family
-// grid's gamepad scope targeter (TAOM's EncyclopediaHeroPage.xml:233), so it sits between the Family divider and the grid inside
+// grid's gamepad scope targeter (TAOM's EncyclopediaHeroPage.xml, ScopeID EncyclopediaHeroFamilyContentScope), so it sits between the Family divider and the grid inside
 // the page's vertical ListPanel. The anchor is a NavigationScopeTargeter that exists once; a wiring test pins it. The shared
-// prefab is not edited. InsertType.Prepend is InsertBefore on the matched node (UIExtenderEx 2.13.3 PrefabComponent), and the
+// prefab: Lines of Descent does not edit it. InsertType.Prepend is InsertBefore on the matched node (UIExtenderEx 2.13.3 PrefabComponent), and the
 // nodes after the first follow it in order, so the button's own scope targeter and the button both land before the anchor. The
 // button joins the page's navigation the way the Family divider beside it does (GamepadNavigationIndex 0). Bindings
 // resolve on EncyclopediaHeroPageVM, which EncyclopediaHeroFamilyTreeMixin extends, and the button shows only when the page

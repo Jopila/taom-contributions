@@ -1,0 +1,13 @@
+{
+  "defaultGroup": "men",
+  "groups": [
+    { "id": "men", "races": ["human"], "ageUpperBounds": [25, 35, 45, 55] },
+    { "id": "elves", "races": ["elf"], "ageUpperBounds": [24, 28, 32, 40] },
+    { "id": "dwarves", "races": ["dwarf"], "ageUpperBounds": [20, 25, 30, 38] },
+    { "id": "orcs", "races": ["orc"], "ageUpperBounds": [23, 27, 32, 40] },
+    { "id": "goblins", "races": ["goblin"], "ageUpperBounds": [30, 35, 40, 45] },
+    { "id": "uruks", "races": ["uruk", "uruk_hai", "pale_uruk", "dg_uruk", "berserker"], "ageUpperBounds": [22, 26, 32, 40] },
+    { "id": "trolls", "races": ["cave_troll", "hill_troll"], "ageUpperBounds": [25, 35, 45, 55] },
+    { "id": "maiar", "races": ["nazghul", "saruman", "sauron"], "ageUpperBounds": [25, 35, 45, 55] }
+  ]
+}
