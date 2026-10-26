@@ -108,3 +108,13 @@ fail.
 | `plugin-dev` validators | `tools/test_hooks.sh` checks hooks more deeply; its scripts exit on the first finding under `set -e` |
 | `receipts`, `project-artifact`, output styles | Out of domain or a context cost every session |
 | `agent-sdk-dev`, marketplace CI | Out of domain |
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/external-repo-adoption.md](../ai-includes/external-repo-adoption.md)
+
+<!-- backlinks-end -->
