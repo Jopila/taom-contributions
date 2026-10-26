@@ -4,6 +4,8 @@
 #         5h: N% (resets 1h30m) | week: N% (!) (resets 1d4h) | cache: warm until HH:MM
 #         The second line appears only when Claude Code sends rate_limits (#1012); (!) marks 80%+.
 #         Tests: tools/tests/test_statusline.py.
+#         Shown by the terminal CLI and the VS Code extension's terminal mode only; the graphical
+#         panel shows a context indicator in the prompt box and /usage instead (2026-10-26).
 #
 # PERFORMANCE NOTE (2026-08-31)
 # This runs on every status-line repaint, which is the most frequent script in the whole

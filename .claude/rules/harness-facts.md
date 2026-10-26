@@ -103,6 +103,7 @@ which loads with any hook file.
 
 | Fact | Source | Why we care |
 |---|---|---|
+| `statusLine` renders only in the terminal CLI and the extension's terminal mode; the VS Code graphical panel shows a prompt-box context indicator and `/usage` (session and week bars with reset times) instead. | statusline and vs-code docs (DOC, 2026-10-26) | Mike works in the panel: point him to `/usage` for `statusline.sh`'s usage line (#1012) |
 | In an unattended session (`claude -p`, the Agent SDK, CI, a cloud session), a background Bash or PowerShell command stops at its `timeout` (default 30 min, max 2 h) and Claude is told why. An interactive session in the terminal, the desktop app or VS Code has no limit (v2.1.288+; from v2.1.285 to v2.1.287 the limit applied to every session). | https://code.claude.com/docs/en/tools-reference "Time limit for background commands" (DOC, 2026-10-08) | `/review-codex` and `/deep-review` Step 0 pass 7200000 so an unattended Codex run is not cut at 30 min. |
 | In the VS Code panel, Stop and Escape end only the current turn; background agents keep running and are stopped one by one from the agent map (v2.1.286). The terminal CLI was not checked. | CHANGELOG 2.1.286 `[VSCode]` (DOC, 2026-10-08); live probe owed | CLAUDE.md "Subagents". |
 | The Todo/Task tracking tools are not offered on Opus 5.5 and other newer models (v2.1.268); `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` restores them. | CHANGELOG 2.1.268 (DOC, 2026-10-08) | A skill step that says "use TodoWrite" finds no tool. |

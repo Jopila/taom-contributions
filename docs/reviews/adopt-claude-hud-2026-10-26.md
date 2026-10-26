@@ -27,5 +27,6 @@ its optional `--extra-cmd` runs a shell command on every repaint only when
 | X1 | Install the plugin | Declined: a Node start on every repaint, and it would replace a status line that is tuned and documented |
 | X2 | Tool, agent and todo lines | Not ported: they need the transcript parsed on every repaint, too slow for a bash status line. The VS Code agent map shows running agents |
 | X3 | Cost lines | Not ported: TAOM uses a subscription, so a list-price cost misleads |
+| X4 | The VS Code panel | The status line shows only in the terminal and the extension's terminal mode, and Mike works in the graphical panel. There, the prompt box shows context use and `/usage` shows the session and week bars with reset times. Mike chose `/usage` on 2026-10-26; an always-visible TAOM mod (a plugin can draw a status line above the prompt box, extension 2.1.299 or later) was offered and not built |
 
 ---
