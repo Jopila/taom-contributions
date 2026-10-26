@@ -111,11 +111,13 @@ turning either off takes effect from the next mission (the profiler's stops beha
 measuring unless the profiler is on, whose full mode keeps every probe bracket); the map toggle is read again at each
 campaign session start, so turning it off stops measuring from the next session. The patches stay until a restart.
 
-**A moved compiled default reaches fresh `TAOM.json` files only.** MCM persists per property and loads
-the file over the compiled default from then on, so an existing install keeps the old value until the
-player resets the group. The setting's own `HintText` says so when a default moves
-(`.claude/rules/csharp-architecture.md`, "Doc requirement"); the CHANGELOG is for us, the tooltip is
-what the player reads.
+**Never flip a compiled default; rename the setting.** MCM persists per property and loads the file
+over the compiled default from then on, so a default moved under an unchanged name reaches fresh
+installs only. Rename the setting (comment why) and the new default reaches every player; the gate
+`python tools/check_mcm_default_flips.py` fails on a flip (#1017), unless it is allowlisted with a
+reason. The renamed setting's `HintText` tells the player their saved value was reset and to set
+their own again (`.claude/rules/csharp-architecture.md`, "Doc requirement"); the CHANGELOG is for
+us, the tooltip is what the player reads.
 
 **A JSON behind an MCM knob is dead.** `GlobalSettings<T>.Instance` is non-null whenever MCM is
 loaded, UI opened or not, so a `SettingClamp.Clamp(TaomSettings.Instance?.X, jsonValue, ...)`

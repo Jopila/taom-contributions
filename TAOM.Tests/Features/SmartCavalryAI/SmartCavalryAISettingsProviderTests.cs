@@ -34,7 +34,7 @@ public class SmartCavalryAISettingsProviderTests
     {
         var rows = new (Action<TaomSettings> Edit, Func<SmartCavalryAISettingsProvider, object> Get, object Expected)[]
         {
-            (s => s.EnableSmartCavalryAI = true, p => p.IsEnabled, true),
+            (s => s.EnableSmartCavalryCharge = true, p => p.IsEnabled, true),
             (s => s.SmartCavalryAvoidFriendlies = false, p => p.AvoidFriendlies, false),
             (s => s.SmartCavalryChargeStrictness = 0.3f, p => p.ChargeFormationStrictness, 0.3f),
             (s => s.SmartCavalryReformDistance = 40f, p => p.ReformDistanceAfterCharge, 40f),

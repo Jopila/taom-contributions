@@ -110,7 +110,7 @@ documented here. The full list of keys with their server defaults is generated o
 // Only the keys you change.
 {
   "CastleNotablesPerCastle": 4,
-  "AiLordPartySizeFactor": 2.5,
+  "AiLordPartyScale": 2.5,
   "AiPlayerClanPartyScaling": "Always"
 }
 ```
@@ -159,7 +159,7 @@ exists, so the compiled MCM default or the file value applies instead. The shipp
 compiled defaults; a customized config needs its keys moved into `taom-server-settings.json`.
 
 **Effective values.** Cross-field invariants stay in the providers. For example
-`CombatMechanicsSettingsProvider` lifts `ChargeAutoKnockdownWeightRatio` to a floor, so a logged
+`CombatMechanicsSettingsProvider` lifts the auto-knockdown ratio (`ChargeAutoKnockdownRatio`) to a floor, so a logged
 `set K = v` can differ from the value the game uses.
 
 ### Boot line

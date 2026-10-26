@@ -13,7 +13,7 @@ public sealed class SmartCavalryAISettingsProvider : ISmartCavalryAISettingsProv
     public SmartCavalryAISettingsProvider() { }
     internal SmartCavalryAISettingsProvider(TaomSettings settings) => _settings = settings;
 
-    public bool IsEnabled => Settings?.EnableSmartCavalryAI ?? false;
+    public bool IsEnabled => Settings?.EnableSmartCavalryCharge ?? false;
 
     public bool AvoidFriendlies => Settings?.SmartCavalryAvoidFriendlies ?? true;
 

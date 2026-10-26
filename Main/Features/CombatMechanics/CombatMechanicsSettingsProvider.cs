@@ -65,7 +65,7 @@ public sealed class CombatMechanicsSettingsProvider : ICombatMechanicsSettingsPr
     {
         get
         {
-            var mcm = Settings?.ChargeAutoKnockdownWeightRatio;
+            var mcm = Settings?.ChargeAutoKnockdownRatio;
             if (!mcm.HasValue)
                 return _defaults.ChargeKnockdown.AutoKnockdownWeightRatio;
 

@@ -36,7 +36,7 @@ public class CombatMechanicsSettingsProviderTests
         var settings = new TaomSettings();
         var json = new ChargeKnockdownConfig();
 
-        Assert.AreEqual((int)json.AutoKnockdownWeightRatio, settings.ChargeAutoKnockdownWeightRatio);
+        Assert.AreEqual((int)json.AutoKnockdownWeightRatio, settings.ChargeAutoKnockdownRatio);
         Assert.AreEqual(json.NeutralWeightRatio, settings.ChargeNeutralWeightRatio, 0.0001f);
         Assert.AreEqual(json.HorseChargePenetration, settings.ChargeHorsePenetration, 0.0001f);
         Assert.AreEqual(json.MinPenetrationFactor, settings.ChargeMinPenetrationFactor, 0.0001f);
@@ -137,7 +137,7 @@ public class CombatMechanicsSettingsProviderTests
             (s => s.EnableCultureChargeDamage = false, p => p.CultureChargeDamageEnabled, false),
             (s => s.EnableShieldBashKnockdown = false, p => p.ShieldBashKnockdownEnabled, false),
             (s => s.CrushThroughMaxChance = 0.25f, p => p.CrushThroughMaxChance, 0.25f),
-            (s => s.ChargeAutoKnockdownWeightRatio = 10, p => p.ChargeAutoKnockdownWeightRatio, 10f),
+            (s => s.ChargeAutoKnockdownRatio = 10, p => p.ChargeAutoKnockdownWeightRatio, 10f),
             (s => s.ChargeNeutralWeightRatio = 4f, p => p.ChargeNeutralWeightRatio, 4f),
             (s => s.ChargeHorsePenetration = 0.6f, p => p.ChargeHorsePenetration, 0.6f),
             (s => s.ChargeMinPenetrationFactor = 0.5f, p => p.ChargeMinPenetrationFactor, 0.5f),

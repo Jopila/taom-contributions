@@ -1,0 +1,12 @@
+{
+  "TaomSettings.EnableShieldPenetration": {
+    "from": "true",
+    "to": "false",
+    "reason": "ae57fba08 (#320) turned javelin shield penetration off with EMPTY grant lists in combat_mechanics_config.json, so a saved true grants nothing and the old value is harmless."
+  },
+  "TaomSettings.CultureConversionHoldDays": {
+    "from": "45",
+    "to": "1",
+    "reason": "b8a7c9cb9 (#333) moved the default 45 to 1; the 45 was only ever saved on v2.0.7 to v2.0.10. A rename would convert every pending fief at once at the next check, so those few saved values are left alone."
+  }
+}

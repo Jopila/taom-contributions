@@ -21,7 +21,7 @@ public class CompanionTacticsSettingsProviderTests
         Assert.IsTrue(sut.EnableCompanionRoleTooltips, nameof(sut.EnableCompanionRoleTooltips));
         Assert.IsTrue(sut.EnableOOBRoleDisplay, nameof(sut.EnableOOBRoleDisplay));
         Assert.IsFalse(sut.CompanionRolesDebug, nameof(sut.CompanionRolesDebug));
-        Assert.IsFalse(sut.EnableFormationPresets, nameof(sut.EnableFormationPresets));
+        Assert.IsFalse(sut.EnableOobFormationPresets, nameof(sut.EnableOobFormationPresets));
         Assert.AreEqual(10, sut.MaxFormationPresets, nameof(sut.MaxFormationPresets));
         Assert.IsFalse(sut.FormationPresetsDebug, nameof(sut.FormationPresetsDebug));
         Assert.IsFalse(sut.ShowBattleActionBar, nameof(sut.ShowBattleActionBar));

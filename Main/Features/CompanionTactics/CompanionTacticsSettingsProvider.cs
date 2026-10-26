@@ -19,7 +19,7 @@ public sealed class CompanionTacticsSettingsProvider : ICompanionTacticsSettings
     public bool EnableOOBRoleDisplay => Settings?.EnableOOBRoleDisplay ?? true;
     public bool CompanionRolesDebug => Settings?.CompanionRolesDebug ?? false;
 
-    public bool EnableFormationPresets => Settings?.EnableFormationPresets ?? false;
+    public bool EnableOobFormationPresets => Settings?.EnableOobFormationPresets ?? false;
     public int MaxFormationPresets => Settings?.MaxFormationPresets ?? 10;
     public bool FormationPresetsDebug => Settings?.FormationPresetsDebug ?? false;
 

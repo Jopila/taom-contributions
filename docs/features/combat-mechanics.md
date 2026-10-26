@@ -158,8 +158,8 @@ race rows do the resisting: `cave_troll` / `hill_troll` 4.0 (threshold about 200
 horse; a mumak is Branch A), `dwarf` 2.5, `sauron` 3.0, `uruk_hai` no longer 1.25. Branch B's
 `false` is still an owned verdict. The three Branch B knobs are MCM sliders (Combat Mechanics
 group) read per hit, so the feel is tunable in a running game; the auto slider's floor follows
-the live neutral value. An existing `TAOM.json` keeps the old auto-ratio (8) until the slider is
-moved or the group reset (MCM persists per property). `ChargeKnockdownContext` stays the extension
+the live neutral value. The slider is `ChargeAutoKnockdownRatio`, renamed in #1017 from
+`ChargeAutoKnockdownWeightRatio` so a saved 8 is reset to the new 6 (MCM persists per property). `ChargeKnockdownContext` stays the extension
 point for future factors (collision angle, tiers, perks, attacker race).
 
 ### Charge damage by culture (#610)
@@ -297,7 +297,7 @@ features (Fell Foes, Lost Footing); no `/localize` run.
 
 `Main/_Module/ModuleData/combat_mechanics/combat_mechanics_config.json`: per-mechanic enables, all curve constants, creature id lists, unstoppable damage thresholds, shield-pen item/class lists, and the `raceModifiers` table (keyed by race NAME, `raceage/race_age_config.json` precedent). Validated by `CombatMechanicsConfigProvider` (`FiniteFloatValidator` before every range check; ordering invariants; unknown `weaponClasses` entries skipped via `Enum.TryParse<WeaponClass>`; revert-to-default + summary warning). Deserialized with `ObjectCreationHandling.Replace` so JSON lists/dicts replace compiled defaults instead of append-merging. **Reload scope: full application restart** (Singleton provider). A `raceModifiers` row may also set `baseHitPoints` (0 to 1,000; 0 or absent means the engine's 100): `TaomCharacterStatsModel.MaxHitpoints` adds `baseHitPoints` less 100 through `IRaceCombatModifiersResolver.BaseHitPointsBonus`, so it reaches every campaign agent built from a character of that race. Only `cave_troll` and `hill_troll` set it (200, 2026-09-25). Custom Battle does not read the campaign model: its health is the race Monster's `hit_points` in the Armory, which `TrollHitPointsLiveDataTests` (LiveInstall) keeps equal to this value.
 
-MCM: "Combat Mechanics" group (GroupOrder 24), 18 members as of 2026-10-20: the master, 11 per-mechanic toggles (skill crush-through, monster crush-through, orc shield crush-through, creature cleave, creature stagger immunity, weight-based charge knockdown, shield penetration, race combat modifiers, culture charge damage, signature strikes, Hammerhand) and 6 sliders (`CrushThroughMaxChance`, `ChargeAutoKnockdownWeightRatio`, `ChargeNeutralWeightRatio`, `ChargeHorsePenetration`, `ChargeMinPenetrationFactor`, `SignatureStrikeCooldownMultiplier`). MCM merges over JSON per read (`CombatMechanicsSettingsProvider`, `SettingClamp`).
+MCM: "Combat Mechanics" group (GroupOrder 24), 18 members as of 2026-10-20: the master, 11 per-mechanic toggles (skill crush-through, monster crush-through, orc shield crush-through, creature cleave, creature stagger immunity, weight-based charge knockdown, shield penetration, race combat modifiers, culture charge damage, signature strikes, Hammerhand) and 6 sliders (`CrushThroughMaxChance`, `ChargeAutoKnockdownRatio` (renamed from `ChargeAutoKnockdownWeightRatio` in #1017, so the default of 6 reaches saved settings), `ChargeNeutralWeightRatio`, `ChargeHorsePenetration`, `ChargeMinPenetrationFactor`, `SignatureStrikeCooldownMultiplier`). MCM merges over JSON per read (`CombatMechanicsSettingsProvider`, `SettingClamp`).
 
 ## Key Files
 

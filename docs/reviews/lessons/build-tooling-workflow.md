@@ -4515,3 +4515,11 @@ run from a subfolder or outside the repo reported "no leaks" with exit 0.
   not read as a pass). Prefer passing a tool's options on the command line over a tracked config
   file that a CR-intolerant tool reads.
 - **Source:** `docs/reviews/rca-quality-gates-2026-10-26.md` findings 1 to 4, 6 and 11 (#1020).
+
+### A gate checked only against the case it was written for misses the history it guards (#1017, 2026-10-26)
+
+The first `check_mcm_default_flips.py` compared the settings against one release tag, so every flip that had shipped earlier was invisible, and it compared constant defaults as text, so a changed constant passed. Rebuilt to compare against every reachable release tag and to resolve constants, it found nine more settings.
+
+- **Why missed:** one base tag, constants compared as text, and silent OK paths (no tag, no settings found, a failed read, a partial class) that printed a pass.
+- **Prevent:** compare against every release the trap can reach; make every degenerate input fail loudly; prove the gate on the commit before the fix (it must fail there) before trusting a green run.
+- **Source:** [rca-settings-default-flips-2026-10-26.md](../rca-settings-default-flips-2026-10-26.md).

@@ -136,9 +136,9 @@ public sealed class FieldCommissionSettingsProvider : IFieldCommissionConfigProv
             s?.EnableFieldCommission,
             s?.FieldCommissionRatioThreshold,
             s?.FieldCommissionMeritPerKill,
-            s?.FieldCommissionMeritThreshold,
+            s?.FieldCommissionMeritToPromote,
             s?.FieldCommissionRetainerAllowance,
-            s?.FieldCommissionMaxOffersPerBattle,
+            s?.FieldCommissionOffersPerBattle,
             s?.EnableFieldCommissionDiagnostics);
     }
 }

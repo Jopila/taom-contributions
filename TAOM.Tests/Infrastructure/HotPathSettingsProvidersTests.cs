@@ -176,7 +176,7 @@ public class HotPathSettingsProvidersTests
         [typeof(HowdahDiagnosticsSettingsProvider)] = (() => new HowdahDiagnosticsSettingsProvider(),
             nameof(IHowdahDiagnosticsSettingsProvider.IsEnabled), nameof(TaomSettings.EnableHowdahDiagnostics), () => new TaomSettings()),
         [typeof(SmartCavalryAISettingsProvider)] = (() => new SmartCavalryAISettingsProvider(),
-            nameof(ISmartCavalryAISettingsProvider.IsEnabled), nameof(TaomSettings.EnableSmartCavalryAI), () => new TaomSettings()),
+            nameof(ISmartCavalryAISettingsProvider.IsEnabled), nameof(TaomSettings.EnableSmartCavalryCharge), () => new TaomSettings()),
         [typeof(CultureDoctrineSettingsProvider)] = (() => new CultureDoctrineSettingsProvider(Substitute.For<ICultureDoctrineConfigProvider>()),
             nameof(ICultureDoctrineSettingsProvider.IsDebug), nameof(TaomSettings.CultureDoctrineDebug), () => new TaomSettings()),
         [typeof(SiegePropDiagnosticsSettingsProvider)] = (() => new SiegePropDiagnosticsSettingsProvider(),

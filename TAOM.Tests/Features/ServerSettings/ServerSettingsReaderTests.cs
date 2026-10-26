@@ -100,50 +100,50 @@ public class ServerSettingsReaderTests
         Assert.AreEqual(1, r.Applied);
     }
 
-    // Float (AiLordPartySizeFactor, 1..20, default 1)
+    // Float (AiLordPartyScale, 1..20, default 1)
 
     [TestMethod]
     public void Float_NaNLiteral_Reverts()
     {
-        var r = Read("{ \"AiLordPartySizeFactor\": NaN }");
+        var r = Read("{ \"AiLordPartyScale\": NaN }");
 
-        Assert.AreEqual(1.0f, Settings.AiLordPartySizeFactor);
+        Assert.AreEqual(1.0f, Settings.AiLordPartyScale);
         Assert.AreEqual(1, r.Reverted);
     }
 
     [TestMethod]
     public void Float_Infinity_Reverts()
     {
-        var r = Read("{ \"AiLordPartySizeFactor\": Infinity }");
+        var r = Read("{ \"AiLordPartyScale\": Infinity }");
 
-        Assert.AreEqual(1.0f, Settings.AiLordPartySizeFactor);
+        Assert.AreEqual(1.0f, Settings.AiLordPartyScale);
         Assert.AreEqual(1, r.Reverted);
     }
 
     [TestMethod]
     public void Float_OverflowingSingle_Reverts()
     {
-        var r = Read("{ \"AiLordPartySizeFactor\": 1e300 }");
+        var r = Read("{ \"AiLordPartyScale\": 1e300 }");
 
-        Assert.AreEqual(1.0f, Settings.AiLordPartySizeFactor);
+        Assert.AreEqual(1.0f, Settings.AiLordPartyScale);
         Assert.AreEqual(1, r.Reverted);
     }
 
     [TestMethod]
     public void Float_OutOfRange_Reverts()
     {
-        var r = Read("{ \"AiLordPartySizeFactor\": 20.5 }");
+        var r = Read("{ \"AiLordPartyScale\": 20.5 }");
 
-        Assert.AreEqual(1.0f, Settings.AiLordPartySizeFactor);
+        Assert.AreEqual(1.0f, Settings.AiLordPartyScale);
         Assert.AreEqual(1, r.Reverted);
     }
 
     [TestMethod]
     public void Float_IntegerToken_IsAccepted()
     {
-        var r = Read("{ \"AiLordPartySizeFactor\": 4 }");
+        var r = Read("{ \"AiLordPartyScale\": 4 }");
 
-        Assert.AreEqual(4.0f, Settings.AiLordPartySizeFactor);
+        Assert.AreEqual(4.0f, Settings.AiLordPartyScale);
         Assert.AreEqual(1, r.Applied);
     }
 
@@ -266,7 +266,7 @@ public class ServerSettingsReaderTests
     [TestMethod]
     public void AnyRevert_EmitsOneSummaryWithCount()
     {
-        var r = Read("{ \"CastleNotablesPerCastle\": 99, \"AiLordPartySizeFactor\": 99 }");
+        var r = Read("{ \"CastleNotablesPerCastle\": 99, \"AiLordPartyScale\": 99 }");
 
         var summaries = r.Lines.Where(l => l.Level == ServerSettingsLevel.Warning && l.Text.Contains("2 value(s) reverted")).ToList();
         Assert.AreEqual(1, summaries.Count, Joined(r));
@@ -339,7 +339,7 @@ public class ServerSettingsReaderTests
         var r = Read("{ \"CastleNotablesPerCastle\": 5 }");
 
         Assert.AreEqual(5, Settings.CastleNotablesPerCastle);
-        Assert.AreEqual(other.AiLordPartySizeFactor, Settings.AiLordPartySizeFactor);
+        Assert.AreEqual(other.AiLordPartyScale, Settings.AiLordPartyScale);
         Assert.AreEqual(other.ShowAllEncyclopediaCharacters, Settings.ShowAllEncyclopediaCharacters);
         Assert.AreEqual(1, r.Applied);
     }

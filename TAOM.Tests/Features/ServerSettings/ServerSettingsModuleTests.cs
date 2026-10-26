@@ -25,7 +25,7 @@ public class ServerSettingsModuleTests
     public void Setup()
     {
         ServerSettingsSource.ResetForTests();
-        _store = FakeServerSettingsFileStore.WithText("{ \"CastleNotablesPerCastle\": 5, \"AiLordPartySizeFactor\": 99 }");
+        _store = FakeServerSettingsFileStore.WithText("{ \"CastleNotablesPerCastle\": 5, \"AiLordPartyScale\": 99 }");
         ServerSettingsSource.Store = _store;
         _log = new RecordingLogger();
         _container = new Container();
@@ -80,7 +80,7 @@ public class ServerSettingsModuleTests
         var expected = "INFO [ServerSettings] TAOM server settings (MCM is not loaded on a dedicated server): loaded 1 key(s) from "
                        + _store.Where.Path + " (BANNERLORD_USER_DIR), 1 reverted, 0 unknown";
         Assert.IsTrue(_log.Lines.Contains(expected), string.Join("\n", _log.Lines));
-        Assert.IsTrue(_log.Lines.Any(l => l.StartsWith("WARN ") && l.Contains("AiLordPartySizeFactor")));
+        Assert.IsTrue(_log.Lines.Any(l => l.StartsWith("WARN ") && l.Contains("AiLordPartyScale")));
     }
 
     [TestMethod]

@@ -77,7 +77,7 @@ public sealed class OOBOverlayService : IOOBOverlayService
         // Campaign only: only the campaign behavior persists the preset store (SyncData) or resets it (a new game), so
         // a preset saved in Custom Battle would be lost; and Custom Battle agents are BasicCharacterObject
         // (TaleWorlds.MountAndBlade.CustomBattle.dll references no TaleWorlds.CampaignSystem), so Auto-Assign finds no hero there.
-        if (!_settings.EnableFormationPresets || Campaign.Current == null)
+        if (!_settings.EnableOobFormationPresets || Campaign.Current == null)
         {
             // Toggle flipped to off mid-mission (or no campaign) — guarantee detach.
             if (_wasActive) Detach();

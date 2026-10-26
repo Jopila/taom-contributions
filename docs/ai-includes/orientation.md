@@ -34,7 +34,7 @@ and the gate.
 | Unversioned modules | A fix in the live Armory or TAOM_Map reverts on reinstall; land an in-repo gate with it | [coverage](../features/moduledata-validation.md) |
 | Artist commit ports | Base: mirror revision nearest the file, not the commit parent: `merge_live_file.py --base-search` | [lesson](../reviews/lessons/data-content-cultures.md) |
 | Parked features | NavalTravel, ShaderPrecompilation: off in `SubModule.cs`; sweep every file the last toggle touched | [map](../reference/feature-map.md) |
-| Persisted MCM defaults | json2 keeps the old value: rename a setting (comment why) to change its default, never flip it | [shaders](../features/shader-precompilation.md) |
+| Persisted MCM defaults | json2 keeps saved values: rename (comment why), never flip a default; `check_mcm_default_flips.py` | [shaders](../features/shader-precompilation.md) |
 | Moving platforms | Agents need a navmesh riding the entity, plus physics; teleporting fails. Crew stand inside the deck | [mumakil](../features/mumakil.md) |
 | Vendored DLLs | `Main/_Module/bin/Win64_Shipping_Client/` ships no vendored binary (`TAOM.dll` is build output); never MCMv5 | [deps](../modding/module-dependencies.md) |
 | Mission logic | Logic `BehaviorType` needs `: MissionLogic`; keep `AfterStart` throw-safe | [lifecycle](../reference/engine/mission-and-missionbehavior-lifecycle.md) |
