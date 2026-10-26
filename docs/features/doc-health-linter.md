@@ -46,7 +46,7 @@ skip the whole report — including the six checks that were correct.
 | 6 | **Version mismatch** | **yes** | the `Target: Bannerlord X` line (AGENTS.md, or CLAUDE.md) or a `(vX snapshot)` header in `docs/reference/taleworlds-api-snapshot/{gamemodel-bases,patch-targets}.md` disagreeing with `.claude/pinned-game-version.txt`. No `Target:` line in either file is itself a finding, so moving the line cannot switch the check off |
 | 7 | **Context budget** ([ADR-011](../adrs/011-knowledge-delivery-tiers.md)) | **yes** (except `size-warn`) | everything CLAUDE.md loads at launch (its `@`-imports, read from CLAUDE.md itself), the orientation.md trap index, and the rules without `paths:`. These load into every session and every custom agent spawn, so bytes here are a per-turn tax. An oversized path-scoped rule warns until the path-rule diet |
 | 8 | **RCA FOLLOW-UP owner** ([#984](https://github.com/haterade22/TAOM/issues/984)) | **yes** | a newly written line of `docs/reviews/rca-*.md` with an uppercase `FOLLOW-UP` (or `FOLLOW-UPS`) and neither an issue reference (`#<number>` or an `/issues/<number>` URL) nor a stated reason (`no issue: <reason>`, `no issue filed, <reason>`, `none is filed because <reason>`). See "Check 8" below |
-| 9 | **Git diff failed** ([#987](https://github.com/haterade22/TAOM/issues/987)) | **yes** | the new-lines checks (dashes, check 8) could not diff because git cannot resolve the base, usually a mistyped `--dash-base`. Reported once under its own heading and `git_diff_failed:` counter; it used to read as zero findings |
+| 9 | **Git diff failed** ([#987](https://github.com/haterade22/TAOM/issues/987)) | **yes** | the new-lines checks (dashes, check 8) could not diff because the diff failed on a resolvable base, which means repository damage (a broken index or a missing object; a mistyped `--dash-base` exits 2 instead). Reported once under its own heading and `git_diff_failed:` counter; it used to read as zero findings |
 
 **Why 3b exists (2026-08-09).** `docs/features/enlistment.md` had **51 lines** of a live-session
 record sitting below its `backlinks-start` marker, and the regeneration was already armed — today's
@@ -86,10 +86,11 @@ another cell counts.
   index commits. More than about 450 named paths exceed the Windows argument limit and fall back to
   the index. A path amend (`--amend -- <paths>`) is judged on its paths alone, so HEAD's lines in
   other files are not re-checked.
-- **A base git cannot resolve** (a mistyped `--dash-base`) is a `git-diff-failed` finding in the dash
-  and FOLLOW-UP checks, reported once under its own heading and `git_diff_failed:` summary counter
-  (not as a FOLLOW-UP line), and it gates `--fail-on-drift` and `--drift-only`; it used to
-  mean zero findings and exit 0. A repository with no commit yet reads `HEAD` as the empty tree. A
+- **A base git cannot resolve** (a mistyped `--dash-base`) exits 2 before any check runs, with a
+  note on stderr and no summary block. A `git-diff-failed` finding remains for a diff that fails on
+  a resolvable base (repository damage such as a broken index or a missing object): the dash and
+  FOLLOW-UP checks report it once under its own heading and `git_diff_failed:` summary counter (not
+  as a FOLLOW-UP line), and it gates `--fail-on-drift` and `--drift-only`. A repository with no commit yet reads `HEAD` as the empty tree. A
   git that is missing, or a directory that is no work tree, still fails open and prints a note on
   stderr.
 - **Fences.** The dash and FOLLOW-UP scanners walk fences with the shared
@@ -266,6 +267,8 @@ may delete this one.
 
 ## Changelog
 
+- **2026-10-26**: an unresolvable `--dash-base` now exits 2 before any check runs. `git-diff-failed`
+  stays for a diff that fails on a resolvable base (repository damage).
 - **2026-10-26**: #987 review fixes. `>|` is no path; a directory path commit runs the gate only for
   files changed in it; `--only-paths` diffs only the RCA docs it names; the base probe runs only after
   a failed diff.

@@ -1347,8 +1347,9 @@ class SharedFenceWalkerTests(unittest.TestCase):
 
 
 class GitDiffFailureTests(_GitRepo):
-    """#987 item 6: a --dash-base git cannot resolve is a finding that gates, never zero findings.
-    A git that cannot run at all keeps failing open, with a note."""
+    """#987 item 6: an unresolvable --dash-base exits 2 before any check runs. A diff that fails on
+    a resolvable base (repository damage) is a git-diff-failed finding that gates, never zero
+    findings. A git that cannot run at all keeps failing open, with a note."""
 
     def setUp(self):
         super().setUp()
@@ -1387,20 +1388,57 @@ class GitDiffFailureTests(_GitRepo):
         self.assertEqual([], ld.check_ai_dashes("HEAD", failures=failures))
         self.assertEqual([], failures)
 
-    def test_drift_only_exits_1_on_an_unresolvable_base(self):
-        rc, out = self._gate("--drift-only", "--dash-base", "no-such-ref")
-        self.assertEqual(1, rc, out)
-        self.assertIn("git-diff-failed", out)
+    def _gate_err(self, *argv):
+        with mock.patch("sys.stderr", new_callable=io.StringIO) as err:
+            rc, out = self._gate(*argv)
+        return rc, out, err.getvalue()
 
-    def test_fail_on_drift_exits_1_on_an_unresolvable_base(self):
-        rc, out = self._gate("--fail-on-drift", "--dash-base", "no-such-ref")
-        self.assertEqual(1, rc, out)
+    def test_drift_only_exits_2_on_an_unresolvable_base(self):
+        rc, out, err = self._gate_err("--drift-only", "--dash-base", "no-such-ref")
+        self.assertEqual(2, rc, out)
+        self.assertEqual("", out)
+        self.assertIn("lint_docs: --dash-base no-such-ref does not resolve", err)
 
-    def test_drift_only_staged_exits_1_on_an_unresolvable_base(self):
-        self.assertEqual(1, self._gate("--drift-only", "--staged", "--dash-base", "no-such-ref")[0])
+    def test_fail_on_drift_exits_2_on_an_unresolvable_base(self):
+        rc, out, err = self._gate_err("--fail-on-drift", "--dash-base", "no-such-ref")
+        self.assertEqual(2, rc, out)
+        self.assertIn("does not resolve", err)
+
+    def test_the_full_report_exits_2_on_an_unresolvable_base(self):
+        self.assertEqual(2, self._gate_err("--dash-base", "no-such-ref")[0])
+
+    def test_drift_only_staged_exits_2_on_an_unresolvable_base(self):
+        self.assertEqual(2, self._gate_err("--drift-only", "--staged", "--dash-base", "no-such-ref")[0])
+
+    def test_a_tree_id_is_a_valid_base(self):
+        rc, out, err = self._gate_err("--drift-only", "--staged", "--dash-base", ld._EMPTY_TREE)
+        self.assertEqual(0, rc, out + err)
+
+    def test_the_empty_tree_base_counts_every_staged_file_as_added(self):
+        _write(self.root / "docs" / "features" / "x.md", "# x\n\nNo verify heading.\n")
+        self._commit("x")
+        rc, out, err = self._gate_err("--drift-only", "--staged", "--dash-base", "HEAD")
+        self.assertEqual(0, rc, out + err)
+        rc, out, _err = self._gate_err("--drift-only", "--staged", "--dash-base", ld._EMPTY_TREE)
+        self.assertEqual(1, rc, out)
+        self.assertIn("no-verify-section", out)
+
+    def test_an_unborn_head_is_not_an_unresolvable_base(self):
+        with tempfile.TemporaryDirectory() as fresh:
+            ld.REPO_ROOT = Path(fresh)
+            subprocess.run(["git", "-C", fresh, "init", "-q"], check=True, capture_output=True)
+            with mock.patch.object(ld, "DOC_ROOTS", [Path(fresh) / "docs"]), \
+                    mock.patch.object(ld, "check_context_budget", return_value=[]), \
+                    mock.patch.object(ld, "check_version_consistency", return_value=[]), \
+                    mock.patch("sys.stdout", new_callable=io.StringIO):
+                self.assertEqual(0, ld.main(["--drift-only"]))
+
+    def _break_the_index(self):
+        (self.root / ".git" / "index").write_bytes(b"DIRCgarbage")
 
     def test_a_failed_diff_has_its_own_section_not_the_follow_up_one(self):
-        rc, out = self._gate("--drift-only", "--dash-base", "no-such-ref")
+        self._break_the_index()
+        rc, out = self._gate("--drift-only", "--dash-base", "HEAD")
         self.assertEqual(1, rc, out)
         self.assertIn("## Git diff failed", out)
         self.assertNotIn("## RCA FOLLOW-UP lines", out)
@@ -1408,7 +1446,8 @@ class GitDiffFailureTests(_GitRepo):
         self.assertEqual(1, out.count("[git-diff-failed]"), out)
 
     def test_a_failed_diff_has_its_own_summary_counter(self):
-        rc, out = self._gate("--drift-only", "--summary", "--dash-base", "no-such-ref")
+        self._break_the_index()
+        rc, out = self._gate("--drift-only", "--summary", "--dash-base", "HEAD")
         self.assertEqual(1, rc, out)
         self.assertIn("git_diff_failed:   1", out)
         self.assertIn("rca_followups:     0", out)

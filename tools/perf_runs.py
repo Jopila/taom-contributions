@@ -110,8 +110,10 @@ Usage:
   python tools/perf_runs.py <log> [<log> ...] [--json]
   python tools/perf_runs.py compare --a <log> [...] --b <log> [...] [--scene <id>] [--allow-mixed] [--json]
 
-A compare whose group holds fewer than MIN_RUNS_PER_GROUP (5) runs adds an `INCONCLUSIVE:` line and
-an `inconclusive` list to --json; the exit code does not change (docs/ai-includes/perf-method.md).
+A compare adds an `INCONCLUSIVE:` line and an `inconclusive` list to --json for any of three reasons:
+a group holds fewer than MIN_RUNS_PER_GROUP (5) runs, the rows span more than one scene, or a metric
+has fewer than 5 values in a group while both groups have some. The exit code does not change
+(docs/ai-includes/perf-method.md).
 
 Exit code: 0 rows found (compare: both groups have rows), 1 no mission found, 2 usage error,
 unreadable file, or a compare refused over mixed build or texture settings.
@@ -838,6 +840,15 @@ def compare_rows(rows_a: list, rows_b: list, allow_mixed: bool = False) -> dict:
     inconclusive = [f"group {side} has {len(rows)} run(s); the perf method needs at least "
                     f"{MIN_RUNS_PER_GROUP} per group"
                     for side, rows in (("A", rows_a), ("B", rows_b)) if len(rows) < MIN_RUNS_PER_GROUP]
+    scenes = {r["scene"] for r in rows_a + rows_b}
+    if len(scenes) > 1:
+        inconclusive.append(f"rows span {len(scenes)} scenes; compare one scene with --scene")
+    for m in metrics:   # a metric with no value in a group prints no delta, so it needs no warning
+        short = [f"{m[k]} value(s) in {side}"
+                 for k, side, rows in (("n_a", "A", rows_a), ("n_b", "B", rows_b))
+                 if m[k] < MIN_RUNS_PER_GROUP <= len(rows)]
+        if short and m["n_a"] and m["n_b"]:
+            inconclusive.append(f"{m['metric']} has " + ", ".join(short))
     return {"a": {"rows": len(rows_a)}, "b": {"rows": len(rows_b)}, "metrics": metrics,
             "flags": {"a": flag_counts(rows_a), "b": flag_counts(rows_b)},
             "context_unchecked": {"a": unchecked(rows_a), "b": unchecked(rows_b)},

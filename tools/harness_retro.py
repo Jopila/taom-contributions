@@ -259,8 +259,8 @@ class Stats:
         self.seen_requests = set()
         self.tok = [0, 0, 0, 0, 0]   # input, output, cache read, cache creation, requests
         self.output_partial = 0
-        self.tok_skills = Counter()
-        self.tok_agents = Counter()
+        self.tok_skills = defaultdict(lambda: [0, 0, 0, 0])   # skill -> input, output, cache read, cache creation
+        self.tok_agents = defaultdict(lambda: [0, 0, 0, 0])
         self.cache_breaks = 0
         # Budget by agent type and model (#1008; the idea of paperclipai/paperclip's budget tracking,
         # docs/reference/provenance-register.md).
@@ -331,11 +331,10 @@ def commit_usage(stats, calls, agent, stem=""):
         stats.tok[4] += 1
         if not final:
             stats.output_partial += 1
-        total = sum(usage)
-        if agent is not None:
-            stats.tok_agents[agent] += total
-        elif skill:
-            stats.tok_skills[skill] += total
+        bucket = stats.tok_agents[agent] if agent is not None else stats.tok_skills[skill] if skill else None
+        if bucket is not None:
+            for i in range(4):
+                bucket[i] += usage[i]
         if usage[3] > CACHE_BREAK_TOKENS:
             stats.cache_breaks += 1
     if spent:
@@ -404,7 +403,25 @@ def handle_attachment(stats, att, sid, ts=None):
             stats.cancel_timeouts[label] += 1
 
 
+def queued_prompt_text(prompt):
+    """The text of a queued_command prompt: a string, or content blocks of which only text counts."""
+    if isinstance(prompt, str):
+        return prompt
+    if isinstance(prompt, list):
+        return "\n".join(b.get("text", "") for b in prompt
+                         if isinstance(b, dict) and b.get("type") == "text" and isinstance(b.get("text"), str))
+    return ""
+
+
 def human_text(r):
+    """The text a person typed in record `r`, or None when it is not a human turn. A prompt typed while
+    the model works has no `user` record: it is an `attachment` of type queued_command with
+    humanTurn true, and its prompt holds the text (possibly empty for an image-only prompt)."""
+    if r.get("type") == "attachment":
+        att = r.get("attachment")
+        if isinstance(att, dict) and att.get("type") == "queued_command" and att.get("humanTurn") is True:
+            return queued_prompt_text(att.get("prompt"))
+        return None
     msg = r.get("message")
     content = msg.get("content") if isinstance(msg, dict) else None
     if isinstance(content, str):
@@ -418,21 +435,50 @@ def human_text(r):
     return None
 
 
+_INJECTED_BLOCK_RE = re.compile(r"\A\s*<([A-Za-z_][\w-]*)[^>]*>.*?</\1>", re.S)
+
+
+def human_marked(r):
+    """True when the transcript itself marks a user record as typed by a person (`origin.kind` or
+    `turnOrigin` is "human"), even when it opens with an injected block such as <ide_opened_file>."""
+    if r.get("type") != "user":
+        return False
+    origin = r.get("origin")
+    return r.get("turnOrigin") == "human" or (isinstance(origin, dict) and origin.get("kind") == "human")
+
+
+def strip_injected_blocks(text):
+    """`text` without its leading <tag>...</tag> blocks: what a person typed after injected context."""
+    while True:
+        m = _INJECTED_BLOCK_RE.match(text)
+        if not m:
+            return text.strip()
+        text = text[m.end():]
+
+
 def handle_human(stats, r, sid, ts):
-    """Count one user record that carries no tool result. True when a person typed it."""
+    """Count one user or queued-prompt record that carries no tool result. True when a person typed it."""
     if r.get("isSidechain") or r.get("isMeta") or r.get("isCompactSummary"):
         return False
     text = human_text(r)
+    marked = human_marked(r)
     if text is None:
-        return False
+        if not marked:
+            return False
+        text = ""
     stripped = text.strip()
+    queued = r.get("type") == "attachment"
     cmd = COMMAND_NAME_RE.search(stripped)
     if cmd:
         # Built-ins such as /model share this tag, so slash commands are counted apart from skills.
         stats.slash_commands[cmd.group(1)] += 1
         return True
-    if not stripped or stripped.startswith("<"):
-        return False
+    if marked:
+        stripped = strip_injected_blocks(stripped)   # the typed text after pasted or IDE context
+        if not stripped:
+            return True
+    elif not stripped or stripped.startswith("<"):
+        return queued   # an image-only queued prompt is still a human turn; a user record like it is not
     if any(rx.search(stripped) for rx in CORRECTION_RES):
         stats.corr_count += 1
         stats.corr_sessions.add(sid)
@@ -535,8 +581,9 @@ def scan_file(stats, path, since_str, agent=None):
             elif rtype == "attachment":
                 att = r.get("attachment")
                 handle_attachment(stats, att, sid, ts)
-                if isinstance(att, dict) and att.get("type") == "queued_command" and att.get("humanTurn") is True:
-                    skill = None  # typed while the model worked: no twin user record, still a human turn
+                if handle_human(stats, r, sid, ts):
+                    flush()   # typed while the model worked: no twin user record, still a human turn
+                    skill = None
             elif rtype == "user":
                 msg = r.get("message")
                 content = msg.get("content") if isinstance(msg, dict) else None
@@ -751,8 +798,12 @@ def output_size(stats, n):
             "files": read_rows(stats, total, n)}
 
 
-def token_rows(counter, n):
-    return [{"name": redact(k), "total": v} for k, v in counter.most_common(n)]
+def token_rows(table, n):
+    """Top rows by total, each with the four fields: the total is about 98% cache reads, so the
+    output and cache-write columns are what show who did the work and who rebuilt the cache."""
+    ranked = sorted(table.items(), key=lambda kv: -sum(kv[1]))[:n]
+    return [{"name": redact(k), "total": sum(v), "input": v[0], "output": v[1],
+             "cache_read": v[2], "cache_creation": v[3]} for k, v in ranked]
 
 
 def token_summary(stats, n):
@@ -962,9 +1013,11 @@ def render(sig):
             L += ["Output is a floor: %d requests (%.0f%%) were written mid-stream with no final count." % (
                 t["output_partial"], 100 * t["output_partial"] / t["requests"]), ""]
         L += ["### Top skills by total tokens (main-session tokens after the skill was invoked)", ""]
-        L += table(["Skill", "Tokens"], [[r["name"], r["total"]] for r in t["skills"]])
+        L += table(["Skill", "Output", "Cache write", "Tokens"],
+                   [[r["name"], r["output"], r["cache_creation"], r["total"]] for r in t["skills"]])
         L += ["### Top subagent types by total tokens", ""]
-        L += table(["Type", "Tokens"], [[r["name"], r["total"]] for r in t["subagent_types"]])
+        L += table(["Type", "Output", "Cache write", "Tokens"],
+                   [[r["name"], r["output"], r["cache_creation"], r["total"]] for r in t["subagent_types"]])
         L += ["### By agent type and model", "",
               "Requests counted once by request id, as above; models `<synthetic>` and all-zero requests are "
               "skipped. No prices are applied. Share is of cache creation plus output.", ""]

@@ -295,6 +295,38 @@ class ErrorSignatureTests(Base):
         self.env.run()
         self.assertEqual(self.env.signals()["runaways"], [])
 
+    def test_marked_human_record_with_an_injected_block_breaks_runaway(self):
+        for turn, broken in ((human("<ide_opened_file>x</ide_opened_file>", origin={"kind": "human"}), True),
+                             (rec("user", "s1", TS, message={"content": [{"type": "image", "source": {}}]},
+                                  turnOrigin="human"), True),
+                             (human("<ide_opened_file>x</ide_opened_file>"), False)):
+            with self.subTest(broken=broken):
+                recs = [tool_use("a0", "Bash"), tool_result("a0", "same failure"), turn]
+                for i in (1, 2):
+                    recs += [tool_use(f"a{i}", "Bash"), tool_result(f"a{i}", "same failure")]
+                self.env.write("a.jsonl", recs)
+                self.env.run()
+                self.assertEqual(len(self.env.signals()["runaways"]), 0 if broken else 1)
+
+    def test_queued_human_turn_breaks_runaway_like_a_user_record(self):
+        for turn in (human("try again"),
+                     attachment(type="queued_command", humanTurn=True, prompt=[{"type": "text", "text": "try again"}])):
+            recs = [tool_use("a0", "Bash"), tool_result("a0", "same failure"), turn]
+            for i in (1, 2):
+                recs += [tool_use(f"a{i}", "Bash"), tool_result(f"a{i}", "same failure")]
+            self.env.write("a.jsonl", recs)
+            self.env.run()
+            self.assertEqual(self.env.signals()["runaways"], [])
+
+    def test_queued_command_without_human_turn_does_not_break_runaway(self):
+        recs = [tool_use("a0", "Bash"), tool_result("a0", "same failure"),
+                attachment(type="queued_command", prompt="a task notification")]
+        for i in (1, 2):
+            recs += [tool_use(f"a{i}", "Bash"), tool_result(f"a{i}", "same failure")]
+        self.env.write("a.jsonl", recs)
+        self.env.run()
+        self.assertEqual(len(self.env.signals()["runaways"]), 1)
+
 
 class CorrectionTests(Base):
     def test_corrections(self):
@@ -311,6 +343,52 @@ class CorrectionTests(Base):
         c = self.env.signals()["corrections"]
         self.assertEqual(c["count"], 1)
         self.assertEqual(c["sessions"], 1)
+
+    def test_queued_human_turn_is_read_like_a_user_message(self):
+        queued = lambda prompt: attachment(type="queued_command", humanTurn=True, prompt=prompt)
+        self.env.write("a.jsonl", [
+            queued([{"type": "text", "text": "no, I said use the adapter"}]),
+            queued("wait, undo that"),
+            queued([{"type": "image", "source": {}}]),
+            attachment(type="queued_command", prompt="no, this one is not a human turn"),
+            queued([{"type": "text", "text": "looks good"}]),
+        ])
+        self.env.run()
+        c = self.env.signals()["corrections"]
+        self.assertEqual((c["count"], c["sessions"]), (2, 1))
+
+    def test_queued_slash_command_counts_as_a_slash_command(self):
+        # The shape is assumed, not observed: no queued slash command record exists on this machine.
+        self.env.write("a.jsonl", [attachment(type="queued_command", humanTurn=True,
+                                              prompt="<command-name>/model</command-name>")])
+        self.env.run()
+        self.assertEqual(self.env.signals()["usage"]["slash_commands"], {"model": 1})
+
+    IDE = "<ide_opened_file>The user opened a.cs in the IDE.</ide_opened_file>\n"
+
+    def test_marked_record_opening_with_an_injected_block_is_read_for_corrections(self):
+        for extra in ({"origin": {"kind": "human"}}, {"turnOrigin": "human"}):
+            with self.subTest(extra=extra):
+                self.env.write("a.jsonl", [human(self.IDE + "no, I said use the adapter", **extra)])
+                self.env.run()
+                self.assertEqual(self.env.signals()["corrections"]["count"], 1)
+
+    def test_the_same_record_without_the_marker_is_not_a_human_turn(self):
+        self.env.write("a.jsonl", [human(self.IDE + "no, I said use the adapter")])
+        self.env.run()
+        self.assertEqual(self.env.signals()["corrections"]["count"], 0)
+
+    def test_marked_record_with_only_an_injected_block_is_not_a_correction(self):
+        self.env.write("a.jsonl", [human("<pasted_content>no, I said use the adapter</pasted_content>",
+                                         origin={"kind": "human"})])
+        self.env.run()
+        self.assertEqual(self.env.signals()["corrections"]["count"], 0)
+
+    def test_marked_record_with_a_slash_command_still_counts_as_one(self):
+        self.env.write("a.jsonl", [human(self.IDE + "<command-name>/model</command-name>",
+                                         origin={"kind": "human"})])
+        self.env.run()
+        self.assertEqual(self.env.signals()["usage"]["slash_commands"], {"model": 1})
 
     def test_secret_redacted_in_excerpt(self):
         secret = "sk_" + "live_" + "A1b2C3d4E5f6G7h8I9j0"
@@ -565,9 +643,51 @@ class TokenTests(Base):
     def test_human_message_ends_skill_attribution(self):
         self.assertEqual(self._skill_then_human(human("now do something else")), {"verify": 31})
 
+    def test_marked_human_record_with_an_injected_block_ends_skill_attribution(self):
+        turn = human("<ide_opened_file>x</ide_opened_file>", origin={"kind": "human"})
+        self.assertEqual(self._skill_then_human(turn), {"verify": 31})
+
+    def test_unmarked_record_with_an_injected_block_does_not_end_skill_attribution(self):
+        turn = human("<ide_opened_file>x</ide_opened_file>")
+        self.assertNotEqual(self._skill_then_human(turn), {"verify": 31})
+
     def test_queued_command_attachment_ends_skill_attribution(self):
         turn = attachment(type="queued_command", humanTurn=True, prompt="typed while busy")
         self.assertEqual(self._skill_then_human(turn), {"verify": 31})
+
+    def test_queued_image_only_turn_ends_skill_attribution(self):
+        turn = attachment(type="queued_command", humanTurn=True, prompt=[{"type": "image", "source": {}}])
+        self.assertEqual(self._skill_then_human(turn), {"verify": 31})
+
+    def test_token_tables_split_output_and_cache_write_per_skill_and_type(self):
+        def skill_call(request, skill):
+            return rec("assistant", uuid="u_" + request, requestId=request, message={
+                "id": "msg_" + request, "usage": {}, "stop_reason": "tool_use",
+                "content": [{"type": "tool_use", "id": "t" + request, "name": "Skill", "input": {"skill": skill}}]})
+        # Both skills total 1000 tokens, split differently.
+        self.env.write("a.jsonl", [skill_call("s1", "alpha"),
+                                   self.usage_rec("u1", "r1", inp=10, out=500, read=450, create=40, stop="end_turn"),
+                                   skill_call("s2", "beta"),
+                                   self.usage_rec("u2", "r2", inp=10, out=20, read=900, create=70, stop="end_turn")])
+        self.env.write("a/subagents/agent-1.jsonl", [self.usage_rec("u3", "r3", inp=1, out=7, read=20, create=3)])
+        (self.env.tr / "a" / "subagents" / "agent-1.meta.json").write_text(
+            json.dumps({"agentType": "deep-reviewer"}), encoding="utf-8")
+        self.env.run()
+        t = self.tokens()
+        rows = {r["name"]: r for r in t["skills"]}
+        self.assertEqual(rows["alpha"]["total"], rows["beta"]["total"])
+        self.assertEqual((rows["alpha"]["input"], rows["alpha"]["output"], rows["alpha"]["cache_read"],
+                          rows["alpha"]["cache_creation"]), (10, 500, 450, 40))
+        self.assertEqual((rows["beta"]["output"], rows["beta"]["cache_creation"]), (20, 70))
+        agent = t["subagent_types"][0]
+        self.assertEqual((agent["name"], agent["input"], agent["output"], agent["cache_read"],
+                          agent["cache_creation"], agent["total"]), ("deep-reviewer", 1, 7, 20, 3, 31))
+        report = self.env.report()
+        self.assertIn("| Skill | Output | Cache write | Tokens |", report)
+        self.assertIn("| alpha | 500 | 40 | 1000 |", report)
+        self.assertIn("| beta | 20 | 70 | 1000 |", report)
+        self.assertIn("| Type | Output | Cache write | Tokens |", report)
+        self.assertIn("| deep-reviewer | 7 | 3 | 31 |", report)
 
     def test_output_partial_counts_requests_without_a_final_stop_reason(self):
         self.env.write("a.jsonl", [self.usage_rec("u1", "r1", inp=10, out=5, read=100),

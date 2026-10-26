@@ -25,7 +25,9 @@ differ.
 
 ## 3. The metric
 
-The median of at least 5 runs per side, A and B alternated (A, B, A, B), never one run. Capture with:
+The median of at least 5 runs per side, A and B alternated (A, B, A, B), never one run. The tool
+also flags rows from mixed scenes and a metric with fewer than 5 values in a group as inconclusive.
+Capture with:
 
 ```
 python tools/perf_runs.py <logs...>
