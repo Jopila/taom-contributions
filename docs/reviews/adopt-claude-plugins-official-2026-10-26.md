@@ -87,15 +87,16 @@ token tables show output and cache-write columns, because cache reads are about 
 section 3b runs a self-test on a planted tree, and decides a file's kind from its path under
 `.claude`.
 
-## Offered, not built
+## Offers, decided 2026-10-26
 
-- A controlled with/without run of a harness change (`skill-creator`): the
-  [harness2 review](adopt-harness2-2026-10-21.md) deferred the same idea (D1) because it spends
-  real usage.
-- Held-out testing of a reworded skill description, when a skill is found not firing.
-- A confidence score to rank review findings, never to drop one.
-- Session isolation for Stop-hook streak markers (`ralph-loop/hooks/stop-hook.sh`); no evidence yet
-  that two sessions collide.
+Mike asked for the recommendation on each offer to be carried out. None was built.
+
+| Offer | Decision | Reason |
+|---|---|---|
+| A controlled with/without run of a harness change (`skill-creator`) | Rejected for now | The [harness2 review](adopt-harness2-2026-10-21.md) deferred the same idea (D1) because it spends real usage; revisit when retro verdicts stay confounded |
+| Held-out testing of a reworded skill description | Rejected | No skill has been found not firing; a procedure for a case that has not happened is YAGNI |
+| A confidence score to rank review findings | Rejected | Findings are already ranked by severity, with UNVERIFIED kept below HIGH; the gain is small |
+| Session isolation for Stop-hook streak markers (`ralph-loop/hooks/stop-hook.sh`) | Rejected | A guard for a collision nobody has seen (`simplicity-criterion.md`) |
 
 ## Declined
 

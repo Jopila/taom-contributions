@@ -107,6 +107,9 @@ error, a runaway). A proposal that cannot name a moment is speculation; drop it.
 - **Token growth:** a section 10 token growth row or a model override is a candidate. Name the sessions
   behind it; propose only when the cause is a harness gap (a definition that does not pin its
   model, a lens that re-sends a large prompt), since more review work also raises a share.
+- **A rule broken again:** when the moment breaks a rule that is already written, more text is not a
+  proposal. Propose the enforcer (a gate, a test, a check in a skill step that runs), or name why
+  none can exist.
 - **Form, cheapest first:** a gate or hook (it acts in the tool loop and costs no context), then a
   script in `tools/`, then a skill or path rule (loaded only when needed), then always-on text in
   AGENTS.md or CLAUDE.md last. A proposal that adds always-on text names what it cuts. Route by
