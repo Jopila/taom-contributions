@@ -4491,3 +4491,12 @@ all 177 deleted rows back, from the cache or as English that the translator then
   and route all of them through one shared function, with a test per writer that runs on a synthetic tree. Prune any
   cache that would let a bypassing writer restore the data for free.
 - **Source:** `docs/reviews/rca-english-only-overrides-2026-10-26.md` finding 1.
+
+### Deleting a GUI or data file from the repo does not delete it from the install (#1022, 2026-10-26)
+A deploy copies files into `Modules/TAOM` and never removes one, so `EventXml.xml` (deleted in #1005) and
+`PreviewPanel.xml` (deleted in #1022) stayed in the installed `GUI/Prefabs` folder. A stale prefab, brush or data file
+there still loads (a prefab by its bare file name, a brush file by name), so a deletion meant to stop it can silently fail.
+- **Why missed:** the repo tree was the only thing checked; nothing compares the installed module with it.
+- **Prevent:** when a change deletes a file under `Main/_Module/`, delete the installed copy too after a byte comparison
+  with its git blob, and say so in the commit body; the deploy guard is tracked in #1024.
+- **Source:** [rca-previewpanel-dead-prefab-2026-10-26.md](../rca-previewpanel-dead-prefab-2026-10-26.md) finding 6.

@@ -39,7 +39,7 @@ brush is its own declaration. Shipped instances of this bug: `ButtonBrush1.Text`
 PresetsOverlay), `CharacterDeveloper.SkillNameText`/`.DescriptionText` (CareerScreen.xml; all
 since repointed, see `docs/reviews/rca-career-ux-arc-2026-08-05.md` finding #3).
 
-**Gate:** `PrefabExtensionBrushTests` fails a brush-typed attribute (`Brush`, `IconBrush`, ...) in a PrefabExtension that no module in TAOM's DependedModule set declares (#989); `EveryGuiPrefabBrush_IsDeclaredByAModule` does the same for every literal brush in `Main/_Module/GUI/PreFabs/**/*.xml`, allowing only `Naval.Map.Party.Nameplate.Ship.Banner.Frame` (a NavalDLC brush) and skipping the `MarinerTroopBrush` attribute (`PartyUpgradeButtonWidget.MarinerTroopBrush` is a `BrushWidget` that takes a child widget Id, not a brush name).
+**Gate:** `PrefabExtensionBrushTests` fails a brush-typed attribute (`Brush`, `IconBrush`, ...) in a PrefabExtension that no module in TAOM's DependedModule set declares (#989); `EveryGuiPrefabBrush_IsDeclaredByAModule` does the same for every literal brush in `Main/_Module/GUI/PreFabs/**/*.xml`, allowing only `Naval.Map.Party.Nameplate.Ship.Banner.Frame` (a NavalDLC brush) and skipping the `MarinerTroopBrush` attribute (`PartyUpgradeButtonWidget.MarinerTroopBrush` is a `BrushWidget` that takes a child widget Id, not a brush name); `EveryGuiPrefabBrushProperty_NamesABrushProperty` fails a `Brush.<Property>` attribute, in GUI prefab XML and in PrefabExtension sources, whose first segment after `Brush.` is not a public property of `TaleWorlds.GauntletUI.Brush`, compared case-sensitively (Gauntlet drops an unknown name silently).
 
 ### Adding a NEW sprite (not just referencing an existing one)
 
