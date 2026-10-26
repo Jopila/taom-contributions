@@ -33,6 +33,23 @@ public class ReevesLedgerServiceTests
         GarrisonWage = wage,
     };
 
+    // --- ShowsPatrolRow (#992) --------------------------------------------------------------------------------------
+
+    [DataTestMethod]
+    [DataRow(true, false, false, false, true)]
+    [DataRow(true, false, true, true, true)]
+    [DataRow(false, true, true, false, true)]
+    [DataRow(false, true, false, true, true)]
+    [DataRow(false, true, true, true, true)]
+    [DataRow(false, true, false, false, false)]
+    [DataRow(false, false, false, false, false)]
+    [DataRow(false, false, true, true, false)]
+    public void ShowsPatrolRow_ATown_Always_ACastleWithAPatrolOrAModelThatAllowsOne_NothingElse(
+        bool isTown, bool isCastle, bool patrolAlive, bool modelAllows, bool expected)
+    {
+        Assert.AreEqual(expected, _sut.ShowsPatrolRow(isTown, isCastle, patrolAlive, modelAllows));
+    }
+
     // --- ComposeProfit ----------------------------------------------------------------------------------------------
 
     [TestMethod]

@@ -685,3 +685,11 @@ differ if anything changed in between. Pass the chosen object's id through, and 
 - **Why missed:** the safety re-check on Open was added without carrying the player's choice into it.
 - **Prevent:** a re-validation step looks the choice up by its id; an index is only valid against the list it came from.
 - **Source:** `docs/reviews/rca-provender-sale-2026-10-24.md` row 2.
+### Sweep docs for the facts a change alters, not for the feature's name (#889, 2026-10-26)
+Keep Wardens part 2 gave castles patrols with 25/40/56 limits. Six docs that never named the feature still said castles have
+no patrols or that patrol limits are 15/20/25 (`bandit-management.md`, `party-templates.md`, `party-template-sizing.md`,
+`troops-and-parties.md`, `INDEX.md`, `troop-weight-system.md`); the last was found only by the convergence pass.
+- **Why missed:** the stale-doc sweep grepped for the feature's names and files.
+- **Prevent:** list each fact the change makes false, and grep the docs for that fact's words and numbers
+  (`patrol`, `10 + 5`, `15, 20`), not only for the feature's names.
+- **Source:** `docs/reviews/rca-keep-wardens-security-2026-10-26.md` finding 7.

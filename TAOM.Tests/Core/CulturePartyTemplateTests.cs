@@ -299,6 +299,28 @@ public class CulturePartyTemplateTests
             "dereference it without a guard.");
     }
 
+    [TestMethod]
+    public void EveryPatrolTemplate_Level1To3_HasAStackWithAPositiveMaximum()
+    {
+        // #991: PatrolRosterService scales a patrol's roster to its size limit proportionally. A template with no stack above
+        // zero has nothing to scale, so the patrol would spawn empty (and an empty roster passes through unchanged).
+        var path = Path.Combine(CultureDataFixture.ModuleDataPath(), "taom_partyTemplates.xml");
+        Assert.IsTrue(File.Exists(path), $"taom_partyTemplates.xml not found at {path}");
+        var patrol = new System.Text.RegularExpressions.Regex(@"^patrol_party_.+_template_level_[123]$");
+        var templates = XDocument.Load(path).Descendants("MBPartyTemplate")
+            .Where(t => patrol.IsMatch(t.Attribute("id")?.Value ?? ""))
+            .ToList();
+        Assert.IsTrue(templates.Count >= 54, $"Only {templates.Count} patrol templates matched; 18 patrol families have three levels each.");
+
+        var offenders = templates
+            .Where(t => !t.Descendants("PartyTemplateStack").Any(stack =>
+                int.TryParse(stack.Attribute("max_value")?.Value, out var max) && max > 0))
+            .Select(t => t.Attribute("id")!.Value)
+            .ToList();
+
+        Assert.AreEqual(0, offenders.Count, "Patrol templates with no stack whose max_value is above 0:\n  " + string.Join("\n  ", offenders));
+    }
+
     // ---------------------------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------------------------

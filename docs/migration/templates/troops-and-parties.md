@@ -300,7 +300,7 @@ From `SandBox/partyTemplates.xml`:
 - **The `max_value` sum is the SPAWN ceiling, not the party's size.** Because one shared `r` drives
   every stack, a *lord* party's expected spawn roster is the midpoint of the min sum and the max sum.
   Patrol parties and the player's own caravans are the exception: those branches return `1f` (`:410`,
-  `:406`), so they spawn the max sum exactly. Steady-state size belongs to `PartySizeLimit`, a
+  `:406`), so they spawn the max sum exactly (TAOM then fits a land patrol's roster to its size limit, #991). Steady-state size belongs to `PartySizeLimit`, a
   separate model: a party spawned above its limit cannot recruit, and
   `DefaultPartyDesertionModel.GetTroopsToDesertDueToWageAndPartySize` (`:50-76`) sheds a quarter of
   the excess on every daily party tick until it is back under.
@@ -706,7 +706,7 @@ Vanilla covers 6 cultures × `stage_<n>_page_<p>_branch_<b>`. TAOM extends to LO
 
 **Impact:** TAOM bandit/forest-ranger parties may feel different. No XML change.
 
-**Mitigation:** If certain TAOM patrol parties become invisible in mid-game, raise their min/max stack sizes in `taom_partyTemplates.xml`.
+**Mitigation:** If certain TAOM patrol parties become invisible in mid-game, raise their size limit (a patrol's head count follows its limit since #991, so stack sizes only set the troop mix; castle limits are in `castle_patrols.json`, town limits are vanilla's 15, 20 and 25).
 
 ---
 

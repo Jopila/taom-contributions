@@ -154,7 +154,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 - [startup-resources](features/startup-resources.md) — per-culture player startup gold/items
 - [cultural-feats](features/cultural-feats.md) — 16 culture-feat GameModel overrides (Patch18)
 - [party-template-sizing](reference/party-template-sizing.md): what `max_value` in `taom_partyTemplates.xml` actually controls. The max sum is the SPAWN ceiling (expected roster = the midpoint of the min and max sums, ratio drawn per party and independent of the template), not the steady-state size, which belongs to `PartySizeLimit` / `TaomPartySizeModel`. Current per-culture targets, which cultures share another's templates, the new-game top-up that also weights WHICH troops get added, and `tools/rebalance_party_template_maxes.py`
-- [keep-wardens](features/keep-wardens.md): castles with a built Guard House field a patrol party of their owner's culture, as towns do; models only, size limit 15, 20 or 25 by level (#888)
+- [keep-wardens](features/keep-wardens.md): castles with a built Guard House field a patrol party of their owner's culture, as towns do; models, a size hook, a roster hook and one small behavior, castle size limit 25, 40 or 56 by Guard House level (#888, #889, #991, #992)
 
 ### Faction, kingdom, & diplomacy
 - [diplomacy](features/diplomacy.md) — TaomDiplomacyModel for LOTR faction relationships

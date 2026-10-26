@@ -23,9 +23,15 @@ public interface IFiefLedgerAdapter
     /// <summary>The prison roster, one entry per hero and per regular troop type.</summary>
     IReadOnlyList<PrisonerEntry> ReadPrisoners(Settlement settlement);
 
-    /// <summary>Men in the town's patrol party, or 0 when it has none.</summary>
+    /// <summary>Men in the fief's patrol party, or 0 when it has none.</summary>
     int ReadPatrolMen(Settlement settlement);
 
-    /// <summary>The engine's patrol tooltip text, or an empty string when the town has no patrol party and no patrol behaviour.</summary>
+    /// <summary>True when the fief has a live (land) patrol party right now.</summary>
+    bool ReadPatrolAlive(Settlement settlement);
+
+    /// <summary>True when the campaign's settlement patrol model allows the fief a land patrol party (a town, or a castle with a built Guard House).</summary>
+    bool PatrolModelAllows(Settlement settlement);
+
+    /// <summary>The engine's patrol tooltip text, or an empty string when the fief has no patrol party and no patrol behaviour.</summary>
     string PatrolTooltip(Settlement settlement);
 }

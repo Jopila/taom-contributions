@@ -68,6 +68,15 @@ public class FiefLedgerAdapterPinTests
     }
 
     [TestMethod]
+    public void PatrolRow_ReadsTheLivePatrolAndTheCampaignModelsAnswer_ForALandPatrol()
+    {
+        var src = Ledger();
+
+        StringAssert.Contains(src, "settlement.PatrolParty != null");
+        StringAssert.Contains(src, "Campaign.Current.Models.SettlementPatrolModel.CanSettlementHavePatrolParties(settlement, false)");
+    }
+
+    [TestMethod]
     public void Lists_ReadTheStashAndThePrisonRosterOfTheSettlement()
     {
         var src = Ledger();

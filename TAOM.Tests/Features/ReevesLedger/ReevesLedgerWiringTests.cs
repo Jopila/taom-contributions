@@ -103,6 +103,16 @@ public class ReevesLedgerWiringTests
     }
 
     [TestMethod]
+    public void ThePatrolRow_IsGatedByTheServiceRule_NotByIsTown()
+    {
+        // #992: a castle with a patrol, or one the patrol model allows, shows the row too.
+        var src = Mixin("TownManagementLedgerMixin.cs");
+
+        StringAssert.Contains(src, "_service!.ShowsPatrolRow(");
+        Assert.IsFalse(src.Contains("!_settlement!.IsTown"), "the gate is the service rule, not a town-only check");
+    }
+
+    [TestMethod]
     public void TheHoverFunctions_RunInsideTheGuard_SoTheyReturnEmptyInsteadOfThrowing()
     {
         var src = Mixin("TownManagementLedgerMixin.cs");

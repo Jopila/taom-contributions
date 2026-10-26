@@ -7,7 +7,8 @@ namespace TAOM.Features.ReevesLedger;
 
 /// <summary>
 /// The rules of the Reeve's Ledger (docs/features/reeves-ledger.md), as plain numbers in and plain numbers out: the
-/// profit lines of a fief, what a +10K or -10K press moves, and the capped stash and prison lists. It reads nothing
+/// profit lines of a fief, what a +10K or -10K press moves, the capped stash and prison lists, and whether a fief gets the
+/// Patrol row. It reads nothing
 /// from the engine, so it takes no adapter; the engine side is <c>IFiefLedgerAdapter</c>, and the step buttons move gold
 /// through the reserve view model's own confirm.
 /// The one live read is <see cref="MayWriteWorld"/>, which asks the co-op providers each time they are used.
@@ -74,6 +75,14 @@ public sealed class ReevesLedgerService
         var taken = Math.Max(0, Math.Min(StepSize, reserve));
         return new ReserveStep(reserve - taken, taken);
     }
+
+    /// <summary>
+    /// Whether the town management window gets the Patrol row (#992): every town, and a castle that has a live patrol or that
+    /// the campaign's patrol model allows one (a built Guard House). A castle that cannot have a patrol gets no row, since
+    /// the engine's only answer there would be "No Guard House". A village never has the window.
+    /// </summary>
+    public bool ShowsPatrolRow(bool isTown, bool isCastle, bool patrolAlive, bool modelAllows) =>
+        isTown || (isCastle && (patrolAlive || modelAllows));
 
     /// <summary>The stash tooltip's lines: biggest stack first, ties by name, at most <paramref name="maxLines"/> shown.</summary>
     public StashSummary SummarizeStash(IReadOnlyList<StashEntry> entries, int maxLines)

@@ -42,4 +42,12 @@ public class CastlePatrolAdapterTests
         Assert.AreEqual(1, System.Text.RegularExpressions.Regex.Matches(src, @"DefaultBuildingTypes\.").Count,
             "the castle Guard House is the only building read; the town one is what vanilla reads");
     }
+
+    [TestMethod]
+    public void Read_FillsPatrolAlive_FromTheSettlementsPatrolParty()
+    {
+        // #889: the castle security bonus needs a live patrol. Dropping this argument leaves PatrolAlive false, the bonus 0
+        // for every castle, and every service test green (they build the snapshot by hand).
+        StringAssert.Contains(Source(), "PatrolAlive: settlement.PatrolParty != null");
+    }
 }

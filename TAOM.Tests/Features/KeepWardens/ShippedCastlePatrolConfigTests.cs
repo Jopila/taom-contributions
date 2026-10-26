@@ -23,7 +23,7 @@ public class ShippedCastlePatrolConfigTests
     }
 
     [TestMethod]
-    public void TheShippedFile_LoadsThroughTheProvider_AsVanillasTownValues_WithNoWarning()
+    public void TheShippedFile_LoadsThroughTheProvider_WithTheKeepWardensValues_AndNoWarning()
     {
         var paths = Substitute.For<IPathService>();
         paths.ModuleDataPath.Returns(ModuleData);
@@ -32,7 +32,9 @@ public class ShippedCastlePatrolConfigTests
         var provider = new CastlePatrolConfigProvider(paths, logger);
 
         CollectionAssert.AreEqual(new[] { 10f, 8f, 6f }, provider.SpawnDays.ToArray());
-        CollectionAssert.AreEqual(new[] { 15, 20, 25 }, provider.SizeLimits.ToArray());
+        CollectionAssert.AreEqual(new[] { 25, 40, 56 }, provider.SizeLimits.ToArray());
+        CollectionAssert.AreEqual(new[] { 1f, 1.5f, 2f }, provider.SecurityPerDay.ToArray());
+        Assert.AreEqual(0.6f, provider.GuardHousePriorityChance);
         logger.DidNotReceive().LogWarning(Arg.Any<string>());
         logger.DidNotReceive().LogError(Arg.Any<string>());
     }

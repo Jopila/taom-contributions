@@ -157,9 +157,9 @@ penalty exempts garrisons too (2026-10-16): with the limit deflated by weight, e
 deserted every day while lords refilled them to the unweighted limit (yotthani's run 5 counted about
 20.6 k deserters in the whole free block over 150 days, 19.6 k of them in four elven realms; the cause
 is yotthani's reading, [adopt-yotthani-2026-10-16.md](../reviews/adopt-yotthani-2026-10-16.md)).
-Patrol parties are exempt for the same reason: their limit is `10 + 5 x guard house level`
-(`CalculatePatrolPartySizeLimit`), nothing sheds or deserts them, and they spawn and refill at full
-size, so a deflated limit left an elite patrol over its limit for good and under vanilla's
+Patrol parties are exempt for the same reason: their limit comes from the Guard House level
+(`10 + 5 x level` for a town through `CalculatePatrolPartySizeLimit`, `castle_patrols.json` for a
+castle), nothing sheds or deserts them, and they spawn and refill at that limit (#991), so a deflated limit left an elite patrol over its limit for good and under vanilla's
 over-limit speed factor (`DefaultPartySpeedCalculatingModel`). One predicate,
 `TroopWeightPenaltyScope.PaysSizePenalty`, decides for the penalty and for every capacity display;
 `DisplayFrameSourceTests` pins both. The garrison tooltip below stays deferred as "not

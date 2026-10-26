@@ -13,13 +13,15 @@ namespace TAOM.Adapters;
 /// </param>
 /// <param name="HasModerateTemplate">The owner culture's moderate (level 2) patrol template exists.</param>
 /// <param name="HasStrongTemplate">The owner culture's strong (level 3) patrol template exists.</param>
+/// <param name="PatrolAlive">The castle has a live (land) patrol party right now. Defaults to false so a plan caller can ignore it.</param>
 public readonly record struct CastlePatrolSnapshot(
     bool IsCastle,
     bool OwnerIsRebel,
     int GuardHouseLevel,
     bool HasWeakTemplate,
     bool HasModerateTemplate,
-    bool HasStrongTemplate)
+    bool HasStrongTemplate,
+    bool PatrolAlive = false)
 {
     /// <summary>The Guard House level value <see cref="ICastlePatrolAdapter.CastlePatrolGuardHouseLevel"/> gives a party that is not a castle patrol.</summary>
     public const int NotACastlePatrol = -1;

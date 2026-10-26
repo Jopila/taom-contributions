@@ -13,7 +13,7 @@ namespace TAOM.Features.ReevesLedger.UI;
 
 /// <summary>
 /// The Reeve's Ledger on the town management window (docs/features/reeves-ledger.md): the fief's name as the title, a Profit
-/// row and (towns) a Patrol row appended to the stat lists, and tooltips on the stash and prison icons the prefab inserts.
+/// row and a Patrol row (towns, and castles with a patrol) appended to the stat lists, and tooltips on the stash and prison icons the prefab inserts.
 /// Hooked on RefreshTownManagementStats, which clears and refills both lists, so the rows are appended after every refill: at
 /// construction (UIExtenderEx replays the constructor's refresh once the mixin exists), on a queue change, a governor change
 /// and a reserve confirm. The title is set there too, after RefreshValues has written "Manage" in the constructor.
@@ -100,7 +100,7 @@ internal class TownManagementLedgerMixin : BaseViewModelMixin<TownManagementVM>
     private void AddPatrolRow()
     {
         var vm = ViewModel;
-        if (vm == null || !_settlement!.IsTown)
+        if (vm == null || !_service!.ShowsPatrolRow(_settlement!.IsTown, _settlement.IsCastle, _fief!.ReadPatrolAlive(_settlement), _fief.PatrolModelAllows(_settlement)))
             return;
         var title = GameTexts.FindText("str_LEFT_colon").SetTextVariable("LEFT", GameTexts.FindText("str_patrol"));
         _patrolTooltip.SetHintCallback(() => _faults!.Text("patrol tooltip", () => _fief!.PatrolTooltip(_settlement!)));

@@ -101,7 +101,7 @@ The shared pipeline's files are listed in [taom-buildings.md](taom-buildings.md)
 ## Known Limits
 
 - Removing TAOM from a save drops the building and clears the build queue of each town that had it (`Town.AfterLoad`).
-- AI fiefs build it too (their project choice is random).
+- AI fiefs build it too. Their next build is a random pick among what they can still build, except that Keep Wardens (#889) queues the Guard House first, so the Postern Gate takes its turn among the remaining picks.
 - Only the player's party, or the army it leads, pays this toll: the engine passes `MainParty` to the break-in and break-out action.
 - The hover tooltip shows the previous level's line, as for every vanilla building (`Building.GetBonusExplanation` uses `CurrentLevel - 1`).
 - Moving a culture between variants affects only fiefs seeded later.

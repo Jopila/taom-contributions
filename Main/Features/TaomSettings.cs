@@ -857,8 +857,13 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     // GroupOrder 4 sorts it after the Namegiving group (3); the group's first property carries it.
     [SettingPropertyGroup("Fief Management/Keep Wardens", GroupOrder = 4)]
     [SettingPropertyBool("{=taom_keep_wardens_label}Castle Patrols", Order = 0, RequireRestart = false,
-        HintText = "{=taom_keep_wardens_hint}A castle with a built Guard House fields one patrol party of its owner's culture at a time, as a town does: stronger at each Guard House level. A lost patrol is replaced after 10, 8 or 6 days (castle_patrols.json). When off, no new castle patrol is queued, and the game's daily check removes the castle patrols already out. Default: on.")]
+        HintText = "{=taom_keep_wardens_hint}A castle with a built Guard House fields one patrol party of its owner's culture at a time, as a town does: stronger at each Guard House level. A lost patrol is replaced after 10, 8 or 6 days. While a castle's patrol is alive, the castle also gains security each day: 1, 1.5 or 2 by Guard House level (both in castle_patrols.json). When off, no new castle patrol is queued, and the game's daily check removes the castle patrols already out. Default: on.")]
     public bool EnableCastlePatrols { get; set; } = true;
+
+    [SettingPropertyGroup("Fief Management/Keep Wardens")]
+    [SettingPropertyBool("{=taom_keep_wardens_build_label}Guard House Build Priority", Order = 1, RequireRestart = false,
+        HintText = "{=taom_keep_wardens_build_hint}The AI builds a Guard House in its towns and castles ahead of other buildings: always while it has none, and about 60 percent of the time while it can still be upgraded (guardHousePriorityChance in castle_patrols.json). Your own fiefs are never touched. Default: on.")]
+    public bool EnableGuardHouseBuildPriority { get; set; } = true;
 
     // --- Inventory / Quick Actions ---
 

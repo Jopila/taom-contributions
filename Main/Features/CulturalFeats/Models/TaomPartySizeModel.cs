@@ -1,6 +1,7 @@
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.CampaignSystem.Party;
+using TaleWorlds.CampaignSystem.Roster;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Core;
 using TAOM.Core.Logging;
@@ -24,6 +25,7 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
     private readonly IModLogger _logger;
     private readonly IEyeOfSauronHook _eyeOfSauron;
     private readonly ICastlePatrolSizeHook _castlePatrolSize;
+    private readonly IPatrolRosterHook _patrolRoster;
     // Built once: a lambda over the method parameter would allocate a closure and a Func on every call, every party.
     private readonly System.Func<object?, float> _weightedCountOf;
 
@@ -43,6 +45,7 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
         _eyeOfSauron = eyeOfSauron;
         // Resolved once here, not as a constructor parameter: that would need an edit to SubModule.cs, where this model is built.
         _castlePatrolSize = IoC.Resolve<ICastlePatrolSizeHook>();
+        _patrolRoster = IoC.Resolve<IPatrolRosterHook>();
         _weightedCountOf = p => _troopWeight.CalculateWeightedMemberCount((PartyBase)p!);
     }
 
@@ -106,6 +109,13 @@ public class TaomPartySizeModel : DefaultPartySizeLimitModel
         PartySizeLoadOrderDiagnostic.RecordFirstMainPartyLimit(party, result.ResultNumber, _careerPassives, _logger);
         return result;
     }
+
+    // Keep Wardens (#991): vanilla fills each template stack to its maximum, so a patrol spawns and refills at its template's head
+    // count, not its limit, and one under 90 percent of the limit never leaves home. Base FIRST, so TAOM's Patch39 postfix and the
+    // co-op postfix on the base still see the roster they patch; the hook then fits a land patrol's roster and leaves every other
+    // party's alone. One expression (gamemodels.md rule 4); pinned by PatrolRosterHookTests.
+    public override TroopRoster FindAppropriateInitialRosterForMobileParty(MobileParty party, PartyTemplateObject partyTemplate) =>
+        _patrolRoster.FitToLimit(party, base.FindAppropriateInitialRosterForMobileParty(party, partyTemplate));
 
     public override ExplainedNumber CalculateGarrisonPartySizeLimit(
         Settlement settlement, bool includeDescriptions = false)

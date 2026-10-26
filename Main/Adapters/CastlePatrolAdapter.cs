@@ -24,7 +24,8 @@ public sealed class CastlePatrolAdapter : ICastlePatrolAdapter
             GuardHouseLevel: GuardHouseLevel(settlement),
             HasWeakTemplate: TemplateFor(settlement, 1) != null,
             HasModerateTemplate: TemplateFor(settlement, 2) != null,
-            HasStrongTemplate: TemplateFor(settlement, 3) != null);
+            HasStrongTemplate: TemplateFor(settlement, 3) != null,
+            PatrolAlive: settlement.PatrolParty != null);
     }
 
     public PartyTemplateObject? TemplateFor(Settlement settlement, int strength)

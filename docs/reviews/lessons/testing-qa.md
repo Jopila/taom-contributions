@@ -2254,3 +2254,12 @@ hash: a class gained a member, the field offsets shifted, and a neighbour's code
 - **Prevent:** test a matcher, classifier or gate on one input built to stress its key (here another compile of the same
   engine), and keep that control in the integration test.
 - **Source:** [adopt-rea-2026-10-24.md](../adopt-rea-2026-10-24.md) "The review's HIGH finding".
+
+### A new snapshot field needs a test that fails when the adapter stops filling it (#889, 2026-10-26)
+Keep Wardens added `PatrolAlive` to the castle patrol snapshot, and the security bonus keys on it. Every service test built
+the snapshot by hand, so deleting the adapter line `PatrolAlive: settlement.PatrolParty != null` would have set every
+castle's bonus to 0 with all tests green.
+- **Why missed:** the tests exercised the decision, and nothing exercised the adapter line that feeds it.
+- **Prevent:** for every field added to an adapter snapshot, add an adapter pin (source or behavioural) and one service test
+  where that field alone turns the result off.
+- **Source:** `docs/reviews/rca-keep-wardens-security-2026-10-26.md` finding 1.

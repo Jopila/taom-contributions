@@ -254,7 +254,7 @@ The five strings live in [`taom_module_strings.xml`](../../Main/_Module/ModuleDa
 ## Dependencies
 
 - `DefaultBanditDensityModel` — overridden via `campaignStarter.AddModel` in [SubModule.cs](../../Main/SubModule.cs).
-- `DefaultPartySizeLimitModel.FindAppropriateInitialRosterForMobileParty` — Harmony Postfix. Coexists peacefully with [TaomPartySizeModel](../../Main/Features/CulturalFeats/Models/TaomPartySizeModel.cs) (which overrides `GetPartyMemberSizeLimit` only).
+- `DefaultPartySizeLimitModel.FindAppropriateInitialRosterForMobileParty`: Harmony Postfix. Coexists peacefully with [TaomPartySizeModel](../../Main/Features/CulturalFeats/Models/TaomPartySizeModel.cs) (which overrides `GetPartyMemberSizeLimit` and, since #991, `FindAppropriateInitialRosterForMobileParty`, where it calls base first and then fits a land patrol's roster to its limit, so this postfix still sees the base roster).
 - `Helpers.MapEventHelper.GetPriorityListForHideoutMission`: Harmony Prefix, skip original (Patch86, assault route). Public static, single caller `SandBoxMissions.OpenHideoutBattleMission`.
 - `SandBox.Missions.MissionLogics.Hideout.HideoutAmbushMissionController.SpawnRemainingTroopsForBossFight`: Harmony Prefix, original still runs (Patch86, sneak-in route). Private instance method in SandBox.dll; three private fields injected (`_allEnemyTroops`, `_overriddenHideoutBossAgentOrigin`, `_allEnemyTroopTypesCache`), pinned by `ReflectionSiteBindingTests`.
 - `TaomSettings` (MCM): 8 properties in the `World/Bandit Scaling` group (`BanditInitialHideoutsPerFaction` added 2026-05-29, `BanditHideoutBossBodyguards` added by #564).

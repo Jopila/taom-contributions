@@ -10,39 +10,48 @@ namespace TAOM.Features.KeepWardens;
 
 /// <summary>
 /// Validating loader for <c>configs/castle_patrols.json</c>:
-/// <c>{ "spawnDays": [10, 8, 6], "sizeLimits": [15, 20, 25] }</c> (csharp-architecture.md "Config Providers MUST Validate").
-/// Each field reverts to its default on its own when it is missing, not an array of three, or holds a value that is not a
-/// number, is not finite, is zero or negative, or is above its maximum (60 days, 500 troops). Size limits must be JSON
-/// integers: a fractional one is refused rather than rounded. One summary warning names every field that reverted; a missing
-/// file or text that is not a JSON object reverts both. The load never throws (a faulted Lazy rethrows for ever) and happens
-/// once per process, so an edit needs a full restart.
+/// <c>{ "spawnDays": [10, 8, 6], "sizeLimits": [25, 40, 56], "securityPerDay": [1, 1.5, 2], "guardHousePriorityChance": 0.6 }</c>
+/// (csharp-architecture.md "Config Providers MUST Validate").
+/// Each field reverts to its default on its own when it is missing, not an array of three (the chance is one number), or holds
+/// a value that is not a number, is not finite, or is outside its range: days above 0 to 60, sizes 1 to 500, security 0 to 10,
+/// the chance 0 to 1. Size limits must be JSON integers: a fractional one is refused rather than rounded. One summary warning
+/// names every field that reverted; a missing file or text that is not a JSON object reverts all four. The load never throws
+/// (a faulted Lazy rethrows for ever) and happens once per process, so an edit needs a full restart.
 /// </summary>
 public sealed class CastlePatrolConfigProvider : ICastlePatrolConfigProvider
 {
     private const string Tag = "CastlePatrolConfigProvider";
     private const float DaysMax = 60f;
     private const int SizeMax = 500;
+    private const float SecurityMax = 10f;
     private const int Levels = 3;
+    private const float DefaultChance = 0.6f;
 
     private static readonly float[] DefaultDays = { 10f, 8f, 6f };
-    private static readonly int[] DefaultSizes = { 15, 20, 25 };
+    private static readonly int[] DefaultSizes = { 25, 40, 56 };
+    private static readonly float[] DefaultSecurity = { 1f, 1.5f, 2f };
+    private static readonly Loaded Defaults = new(DefaultDays, DefaultSizes, DefaultSecurity, DefaultChance);
 
     private readonly IPathService _pathService;
     private readonly IModLogger _logger;
-    private readonly Lazy<(float[] Days, int[] Sizes)> _loaded;
+    private readonly Lazy<Loaded> _loaded;
 
     public CastlePatrolConfigProvider(IPathService pathService, IModLogger logger)
     {
         _pathService = pathService;
         _logger = logger;
-        _loaded = new Lazy<(float[], int[])>(Load);
+        _loaded = new Lazy<Loaded>(Load);
     }
 
     public IReadOnlyList<float> SpawnDays => _loaded.Value.Days;
 
     public IReadOnlyList<int> SizeLimits => _loaded.Value.Sizes;
 
-    private (float[], int[]) Load()
+    public IReadOnlyList<float> SecurityPerDay => _loaded.Value.Security;
+
+    public float GuardHousePriorityChance => _loaded.Value.Chance;
+
+    private Loaded Load()
     {
         try
         {
@@ -66,11 +75,13 @@ public sealed class CastlePatrolConfigProvider : ICastlePatrolConfigProvider
             var problems = new List<string>();
             var days = ReadDays(json, problems) ?? DefaultDays;
             var sizes = ReadSizes(json, problems) ?? DefaultSizes;
+            var security = ReadSecurity(json, problems) ?? DefaultSecurity;
+            var chance = ReadChance(json, problems) ?? DefaultChance;
             if (problems.Count > 0)
                 _logger.LogWarning($"{Tag}: reverted to the default for {string.Join("; ", problems)}");
             else
                 _logger.LogInfo($"{Tag}: loaded castle_patrols.json");
-            return (days, sizes);
+            return new Loaded(days, sizes, security, chance);
         }
         catch (Exception ex)
         {
@@ -86,27 +97,83 @@ public sealed class CastlePatrolConfigProvider : ICastlePatrolConfigProvider
         var values = new float[Levels];
         for (var i = 0; i < Levels; i++)
         {
-            if (array[i].Type != JTokenType.Float && array[i].Type != JTokenType.Integer)
-                return Reject<float>(problems, "spawnDays", "holds a value that is not a number");
-            double value;
-            try
-            {
-                value = array[i].Value<double>();
-            }
-            catch (Exception ex) when (ex is OverflowException || ex is InvalidCastException)
-            {
-                return Reject<float>(problems, "spawnDays", "holds a value out of range");
-            }
-
-            if (!FiniteFloatValidator.IsFinite(value))
-                return Reject<float>(problems, "spawnDays", "holds a value that is not finite");
-            var asFloat = (float)value;
-            if (!FiniteFloatValidator.IsFinite(asFloat) || asFloat <= 0f || asFloat > DaysMax)
+            if (!TryReadNumber(array[i], problems, "spawnDays", out var value))
+                return null;
+            if (value <= 0f || value > DaysMax)
                 return Reject<float>(problems, "spawnDays", "holds a value that is not above 0 and at most 60");
-            values[i] = asFloat;
+            values[i] = value;
         }
 
         return values;
+    }
+
+    private static float[]? ReadSecurity(JObject json, List<string> problems)
+    {
+        if (!(json.TryGetValue("securityPerDay", out var token) && token is JArray array) || array.Count != Levels)
+            return Reject<float>(problems, "securityPerDay", "is not an array of three numbers");
+
+        var values = new float[Levels];
+        for (var i = 0; i < Levels; i++)
+        {
+            if (!TryReadNumber(array[i], problems, "securityPerDay", out var value))
+                return null;
+            if (!FiniteFloatValidator.IsFiniteInRange(value, 0f, SecurityMax))
+                return Reject<float>(problems, "securityPerDay", "holds a value outside 0 to 10");
+            values[i] = value;
+        }
+
+        return values;
+    }
+
+    private static float? ReadChance(JObject json, List<string> problems)
+    {
+        if (!json.TryGetValue("guardHousePriorityChance", out var token))
+        {
+            problems.Add("'guardHousePriorityChance' (is missing)");
+            return null;
+        }
+
+        if (!TryReadNumber(token, problems, "guardHousePriorityChance", out var value))
+            return null;
+        if (!FiniteFloatValidator.IsFiniteInRange(value, 0f, 1f))
+        {
+            problems.Add("'guardHousePriorityChance' (is outside 0 to 1)");
+            return null;
+        }
+
+        return value;
+    }
+
+    /// <summary>A finite JSON number as a float; on failure it records the problem and returns false.</summary>
+    private static bool TryReadNumber(JToken token, List<string> problems, string field, out float result)
+    {
+        result = 0f;
+        if (token.Type != JTokenType.Float && token.Type != JTokenType.Integer)
+        {
+            problems.Add($"'{field}' (holds a value that is not a number)");
+            return false;
+        }
+
+        double value;
+        try
+        {
+            value = token.Value<double>();
+        }
+        catch (Exception ex) when (ex is OverflowException || ex is InvalidCastException)
+        {
+            problems.Add($"'{field}' (holds a value out of range)");
+            return false;
+        }
+
+        var asFloat = (float)value;
+        if (!FiniteFloatValidator.IsFinite(value) || !FiniteFloatValidator.IsFinite(asFloat))
+        {
+            problems.Add($"'{field}' (holds a value that is not finite)");
+            return false;
+        }
+
+        result = asFloat;
+        return true;
     }
 
     private static int[]? ReadSizes(JObject json, List<string> problems)
@@ -143,9 +210,11 @@ public sealed class CastlePatrolConfigProvider : ICastlePatrolConfigProvider
         return null;
     }
 
-    private (float[], int[]) Fallback(string reason)
+    private Loaded Fallback(string reason)
     {
-        _logger.LogWarning($"{Tag}: {reason}; the spawn days and size limits revert to the defaults (spawnDays and sizeLimits)");
-        return (DefaultDays, DefaultSizes);
+        _logger.LogWarning($"{Tag}: {reason}; every field reverts to its default (spawnDays, sizeLimits, securityPerDay and guardHousePriorityChance)");
+        return Defaults;
     }
+
+    private sealed record Loaded(float[] Days, int[] Sizes, float[] Security, float Chance);
 }

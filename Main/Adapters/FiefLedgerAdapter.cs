@@ -75,6 +75,12 @@ public sealed class FiefLedgerAdapter : IFiefLedgerAdapter
     public int ReadPatrolMen(Settlement settlement) =>
         settlement.PatrolParty?.MobileParty?.MemberRoster.TotalManCount ?? 0;
 
+    public bool ReadPatrolAlive(Settlement settlement) => settlement.PatrolParty != null;
+
+    // The model slot, not the Guard House: a castle's answer comes from TaomSettlementPatrolModel (Keep Wardens, #888).
+    public bool PatrolModelAllows(Settlement settlement) =>
+        Campaign.Current.Models.SettlementPatrolModel.CanSettlementHavePatrolParties(settlement, false);
+
     public string PatrolTooltip(Settlement settlement)
     {
         var town = settlement.Town;

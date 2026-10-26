@@ -1,4 +1,6 @@
 {
   "spawnDays": [10, 8, 6],
-  "sizeLimits": [15, 20, 25]
+  "sizeLimits": [25, 40, 56],
+  "securityPerDay": [1, 1.5, 2],
+  "guardHousePriorityChance": 0.6
 }

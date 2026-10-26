@@ -59,7 +59,7 @@ One ratio `r` is drawn for the whole party, then applied to every stack. Callers
 | Bandit with ship hulls | one of two bands, `[0, 0.33]` or `[0.66, 1]`, 40/60 split (`:395-398`) |
 | Bandit, land | `(0.4 + 0.8 * PlayerProgress) * RandomFloatRanged(0.2, 0.8)` (`:399-402`) |
 | Player-owned caravan | `1f` (`:404-407`) |
-| Patrol party | `1f` (`:408-411`) |
+| Patrol party | `1f` (`:408-411`); TAOM then fits a land patrol's roster to its size limit (#991, [keep-wardens.md](../features/keep-wardens.md)) |
 | **Everything else, including every kingdom lord party** | `party.RandomFloat()` (`:412`) |
 
 `RandomFloat()` on a party is `RandomValue / 2.1474836e9` (`RandomOwnerExtensions.cs:53-56`), and

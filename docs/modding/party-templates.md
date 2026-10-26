@@ -119,7 +119,8 @@ rather than as a promise about the roster. Every other party type stays inside t
 
 `r` comes from `GetInitialPartySizeRatioForMobileParty` (`DefaultPartySizeLimitModel.cs:390-413`): a
 player caravan and a patrol party both get `1f` and therefore always spawn at the max sum
-(`:404-411`), a land bandit gets a player-progress term, and **everything else, every kingdom lord
+(`:404-411`; TAOM then fits a land patrol's roster to its size limit, so a patrol's head count
+follows the limit and not the template, see [keep-wardens.md](../features/keep-wardens.md)), a land bandit gets a player-progress term, and **everything else, every kingdom lord
 party included, gets `party.RandomFloat()`** (`:412`), rolled once when the party is built and fixed
 for its life. Nothing in that path consults `PartySizeLimit`, which is a separate model and is the
 number a party settles at afterwards. Full engine write-up:

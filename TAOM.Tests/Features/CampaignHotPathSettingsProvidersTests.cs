@@ -556,6 +556,18 @@ public class CampaignHotPathSettingsProvidersTests
     }
 
     [TestMethod]
+    public void GuardHouseBuildPriority_ReadsThroughTheCachedSettings()
+    {
+        var settings = new TaomSettings();
+        var sut = new CastlePatrolSettingsProvider(settings);
+        Assert.IsTrue(sut.BuildPriorityEnabled);
+
+        settings.EnableGuardHouseBuildPriority = false;
+
+        Assert.IsFalse(sut.BuildPriorityEnabled);
+    }
+
+    [TestMethod]
     public void FromTheAshes_ReadsThroughTheCachedSettings()
     {
         var settings = new TaomSettings();

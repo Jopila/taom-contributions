@@ -16,6 +16,11 @@ public sealed class CastlePatrolSettingsProvider : ICastlePatrolSettingsProvider
 
     public bool Enabled => From(Settings);
 
+    public bool BuildPriorityEnabled => BuildPriorityFrom(Settings);
+
+    /// <summary>The build priority setting, or on when MCM has not built its settings yet.</summary>
+    public static bool BuildPriorityFrom(TaomSettings? settings) => settings?.EnableGuardHouseBuildPriority ?? true;
+
     /// <summary>The setting, or on when MCM has not built its settings yet (its Instance is null until its own provider is up).</summary>
     public static bool From(TaomSettings? settings) => settings?.EnableCastlePatrols ?? true;
 }
