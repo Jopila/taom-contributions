@@ -61,18 +61,18 @@ verdict at its next run.
 - `perf_runs.py compare` also calls a result inconclusive when its rows span more than one scene,
   or when a metric has fewer than 5 values in a group.
 
-## Offered, not built
+## Offers, decided 2026-10-26
 
-- `/deep-review` triage: "no findings is a valid result", and trace the call site before a
-  hypothetical finding counts (`interrogate/references/lead-judgment.md`).
-- `/harness-retro`: a proposal type for a rule that was broken again and has no enforcer
-  (`skills/correct`).
-- A `plan-lint` subcommand for `plans/` (`scripts/check-plan.mjs`, the mechanism only).
-- An owed-work digest for `/improve`, grouped by kind, each item with a pick, the evidence and the
-  risk (`skills/ketchup`).
-- `think-before-coding.md`: a fact that a quick run can show is not the user's question.
-- `evidence-over-claims.md`: name the test that failed before a bug fix. This costs always-load
-  bytes.
+Mike asked for the recommendation on each offer to be carried out.
+
+| Offer | Decision | Reason |
+|---|---|---|
+| `/deep-review`: "no findings is valid"; trace the call site before a hypothetical finding counts (`interrogate/references/lead-judgment.md`) | Built, the second half only | `deep-reviewer.md` already said an empty report is valid; it now says a finding that needs a particular input or state names the call site, else it is hypothetical, LOW at most |
+| `/harness-retro`: a rule broken again gets an enforcer, not more text (`skills/correct`) | Built | One bullet in `docs/ai-includes/harness-retro.md` phase 4 |
+| `think-before-coding.md`: a fact a quick run can show is not the user's question | Built | Three words in the existing "Don't ask" sentence; the always-load rules sit at about 16,280 of 16,384 bytes |
+| `plan-lint` for `plans/` (`scripts/check-plan.mjs`) | Rejected | All 41 numbered plans already carry Status, Drift check, STOP, Out of scope and Executor instructions; the cold review in `/improve` holds the template |
+| Owed-work digest (`skills/ketchup`) | Rejected | Duplicate: FOR-MIKE.md opens with `## Waiting on you`, one line per item with the recommended answer and the evidence (`improve/references/run-protocol.md`) |
+| `evidence-over-claims.md`: name the test that failed before a bug fix | Rejected | `tests.md` (RED first) and the two-edit test check cover it, and the always-load budget has no room |
 
 ## Declined
 

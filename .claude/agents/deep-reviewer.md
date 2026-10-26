@@ -60,5 +60,7 @@ completely, in the output format it gives.
 Every finding carries `file:line` and the read that proves it. A claim you could not verify
 (engine cost, native behaviour, external data) is reported as **UNVERIFIED**, never HIGH. Do not
 manufacture findings to fill a lens; "nothing found, here is what I covered" is a valid report.
+A finding that needs a particular input or state (a null, another thread, an order of events) names
+the call site that produces it; with no such caller it is hypothetical, LOW at most.
 The discipline is `.claude/rules/evidence-over-claims.md`; if it did not reach you, the rule is:
 never state a count, signature, path or result you have not read this run.

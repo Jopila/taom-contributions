@@ -15,7 +15,7 @@ up, improve, add support for), a system named without its version or mode, an ou
 boundary ("make X faster": which path?).
 
 **Don't ask** about trivial or mechanical work, routing you can decide (which skill, agent or DLL),
-anything an ADR or rule already settles (an adapter for a sealed type is not a question: ADR-007),
+anything an ADR, rule or quick run settles (an adapter for a sealed type is not a question: ADR-007),
 or a cheap edit you can revert in seconds. Over-asking is its own failure.
 
 **Make the goal testable before the first edit.** "Fix the bug" becomes "write a failing test that
