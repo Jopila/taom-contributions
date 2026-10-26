@@ -1341,3 +1341,16 @@ reads wrong. Vanilla's robbery lines never name the listener's people.
   every playable race and gender ("stranger", "traveller", an insult that names no people). Add a pattern test over
   the strings file for listener names and gendered words, as `BanditVoicesDataTests` does.
 - **Source:** `docs/reviews/rca-bandit-voices-2026-10-26.md` finding 1.
+
+### Before deleting a translation row as redundant, render the vanilla row it falls back to (2026-10-26)
+TAOM's language rows for 177 vanilla keys looked redundant: each only reworded vanilla's English, and the rule says a
+rewording takes no TAOM row. Deleting them all would have shown blank kingdom names and gold amounts in 35 pairs, where
+vanilla's own translation uses a variable the game never sets, and wrong articles or dropped prepositions in 334 more, where vanilla's
+grammar functions need a gender tag or a `{@Type}` attribute that TAOM's names lack.
+- **Why missed:** the triage compared English text and meaning, not what each language's vanilla row renders with
+  TAOM's data.
+- **Prevent:** for each (language, id) a deletion hands back to vanilla, check every variable in vanilla's row against
+  what the v1.5.5 call site sets, and every grammar function or token (`{#GENDER}`, `{#TYPE}`, `{.cl}`, Italian `{.di}`/`{.a}`/`{.da}`) against the tags
+  on TAOM's names. Keep TAOM's row where vanilla's would render wrong, and record the pair with its reason in
+  `kept-vanilla-key-rows.txt`. Decode vanilla's language files by their BOM: the TR files declare utf-16 but are UTF-8.
+- **Source:** `docs/reviews/rca-english-only-overrides-2026-10-26.md` findings 2 and 3.

@@ -4482,3 +4482,12 @@ narrowed it to nothing. The same review found the audit's new INERT-ROW exemptio
   fallback to the old check when the reading resolves nothing, and replay the gate on real inputs (the local
   transcripts, the live install) against the base version before review.
 - **Source:** `docs/reviews/rca-tool-987-2026-10-26.md` findings 1 to 3 and 9.
+### A data rule enforced in one writer is not enforced: list every tool that writes the file (2026-10-26)
+The fix taught `translate_with_claude.py` to skip English-only overrides. `rebuild_translation_files.py` and
+`generate_translation_template.py` also write the language files, and the translator guide prescribes both; each wrote
+all 177 deleted rows back, from the cache or as English that the translator then filled.
+- **Why missed:** the fix was tested against the tool it changed, not against the file it protects.
+- **Prevent:** before relying on a rule about what a data file may hold, grep `tools/` for every writer of that file
+  and route all of them through one shared function, with a test per writer that runs on a synthetic tree. Prune any
+  cache that would let a bypassing writer restore the data for free.
+- **Source:** `docs/reviews/rca-english-only-overrides-2026-10-26.md` finding 1.

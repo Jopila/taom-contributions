@@ -107,8 +107,8 @@ commits: `std_taom_module_strings_*` was doubled on 2026-08-14 and has been stor
 merge `85cbd20c8` (2026-10-19). Measure the file in front of you.
 
 The doubled CR is produced, not inherited. `build_translation_xml` in
-`tools/rebuild_translation_files.py` joins its lines on `\r\n` (`:107`), and `rebuild_language`
-writes the result with `Path.write_text(content, encoding="utf-8")` (`:159`). Default text mode
+`tools/rebuild_translation_files.py` joins its lines on `\r\n` (the last line of `build_translation_xml`), and `rebuild_language`
+writes the result with `Path.write_text(content, encoding="utf-8")` (the `tgt_path.write_text` call). Default text mode
 expands each `\n` to `\r\n` on Windows, so `\r\n` goes in and `\r\r\n` comes out, and any other
 generator that writes `\r\n`-joined text in text mode does the same.
 
@@ -271,13 +271,10 @@ do" for a module it never looked at.
 > keeps the English cannot survive in the language file alone: pin it in
 > `tools/translation_overrides/<lang>.json` and put the same text in the cache.
 
-After running the API translator, run the rebuild step to inject the cached translations into the actual XML files:
-
-```bash
-python tools/rebuild_translation_files.py --lang PL
-# or for all 12 languages:
-python tools/rebuild_translation_files.py --all
-```
+The translator writes the translated rows into the language files itself (`write_back`), so the TAOM module needs no further
+step. `tools/rebuild_translation_files.py` rebuilds a language file from cache and overrides, but it keeps its own list of
+10 TAOM sources and no `key_owners`, and it overwrites a row corrected by hand: do not use it on the TAOM module. It does skip
+the English-only overrides of vanilla keys (see "Rewording a vanilla key: English only" below), as `--sync-ids` does.
 
 ### Option B — Manual translation from scratch
 
@@ -319,7 +316,7 @@ gets none of the new ones, and the cache stays keyed on the old ids. Carry the t
 cache across by construction instead (`tools/sync_ranged_ladder_translations.py` does it for the
 ranged ladder, #617).
 
-**`rebuild_translation_files.py` does not close it either.** Its `resolve` (`:124-129`) does visit
+**`rebuild_translation_files.py` does not close it either.** Its inner `resolve` function does visit
 every key in the English source, but it resolves override, then cache, then English fallback, and
 that cache is the same `string_id`-keyed dictionary. It writes the stale translation back, and
 because it rebuilds the whole file it will also overwrite a row you corrected by hand.
@@ -400,6 +397,30 @@ translations), carries a word from the wrong writing system: the translator mode
 in Turkish and Latin letters inside Russian words, and the placeholder check cannot see either. After a translator run, reset any
 flagged row to its English, drop its cache entry and re-run, or fix row and cache together by hand.
 
+### Rewording a vanilla key: English only
+
+A vanilla key TAOM rewords (the `{=0CsbbwtN}` row that drops "the" before a kingdom name, say) is an English-only override
+([localization-override.md](../features/localization-override.md)): one English row in
+`taom_module_strings.xml` and, by default, no language rows. Vanilla's row then applies in every other language. A language
+row would replace it and lose its grammar tokens, so `VanillaKeyOverrideTests` fails on any TAOM language row whose id is a
+vanilla key (it reads the ids from the installed game's data XML and root-level `Languages/std_*.xml`), and
+`LanguageFileCoverageTests` does not ask for one.
+
+Some pairs keep TAOM's row, because vanilla's row is wrong for TAOM in that language: it uses a variable the game never sets
+for that text or is malformed (`variable`), it selects a form or a preposition with a gender tag that TAOM's translated names
+lack (`gender-tag`: Portuguese `{#GENDER}`, French `{.cl}`, Italian `{.di}`, `{.a}` and `{.da}`), or it picks a German article
+or case form TAOM's names cannot select (`article`, `{#TYPE}`).
+`TAOM.Tests/Infrastructure/Localization/kept-vanilla-key-rows.txt` is the record, and the test fails on a listed pair that
+is no longer a TAOM row of a vanilla key: the row is gone, or vanilla no longer declares the id. Gender tags on TAOM's
+translated names are the remaining fix for the Portuguese `gender-tag` pairs; the German `article` pairs keep TAOM's row,
+and whether tags fix the French `{.cl}` rows is not verified. A lone French `{.dl}` before an untagged TAOM name is not a
+keep reason but an accepted limit: it gives "de" with no elision and no "du" or "des". The translator does not fill an
+English-only override's language row, except the pairs in that file, which keep TAOM's row and are still filled.
+
+`--sync-ids` skips such rows: it seeds nothing for an 8-character vanilla-style id of `taom_module_strings.xml`, the
+translator does not discover it, and `rebuild_translation_files.py` and `generate_translation_template.py` leave it out,
+unless the language file already holds a row for that id.
+
 ---
 
 ## Adding Canonical Translations to Overrides
@@ -415,7 +436,7 @@ If you want certain key terms translated consistently (e.g., always render "Stri
 }
 ```
 
-The translator script applies overrides BEFORE consulting the cache or API, so they always win. Edit the JSON, re-run `python tools/rebuild_translation_files.py --lang RU`, and your overrides propagate everywhere the key is referenced.
+The translator script applies overrides BEFORE consulting the cache or API, so they always win. Edit the JSON, reset the row to its English text, and re-run `python tools/translate_with_claude.py --lang RU --module TAOM --apply --max-entries 0` (free: no provider call), and the override propagates everywhere the key is referenced.
 
 ---
 
@@ -598,7 +619,8 @@ the wrong order costs a full re-run — as it did on 2026-08-08, when 84 late-re
 blanked all 12 freshly-translated enlistment files.
 
 **A non-zero exit is not necessarily failure.** The translator exits 1 if ANY entry failed
-validation. Four pre-existing vanilla-derived strings with nested gender conditionals
-(`{?TARGET_HERO.GENDER}lady{?}lord{\?}`) fail on every language that has not cached them:
-`uc4M4bhG`, `qa4FlTWS`, `uiY3ds0Z`, `V097rA1v`. Check the failed-ID list before treating exit 1 as
-a problem with your own strings.
+validation. Four vanilla-derived strings with nested gender conditionals
+(`{?TARGET_HERO.GENDER}lady{?}lord{\?}`), `uc4M4bhG`, `qa4FlTWS`, `uiY3ds0Z` and `V097rA1v`, used to fail
+on every language that had not cached them. They are English-only overrides now and have a language row
+in Portuguese only (`kept-vanilla-key-rows.txt`), so they no longer reach the translator. Check the
+failed-ID list before treating exit 1 as a problem with your own strings.

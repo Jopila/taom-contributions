@@ -457,7 +457,6 @@
 	<string id="taom_the_fix_AXsbnTBb" text="{=AXsbnTBb}{QUEST_GIVER.LINK} has made peace with {ENEMYFACTION_INFORMALNAME}. Your agreement with {QUEST_GIVER.LINK} has been canceled." />
 	<string id="taom_the_fix_az3K3j4C" text="{=az3K3j4C}Right now we are stronger than {ENEMY_KINGDOM_INFORMAL_NAME}. We should strike while we can." />
 	<string id="taom_the_fix_B818zx3W" text="{=B818zx3W}Your clan is at war with factions with which {KINGDOM} is at peace." />
-	<string id="taom_the_fix_bjEN2OzZ" text="{=bjEN2OzZ}As a result of your hostile intent towards a neutral village, {KINGDOM} declares war on you." />
 	<string id="taom_the_fix_Bk3Wqy5j" text="{=Bk3Wqy5j}{RULER.NAME} has decided not to answer the call of {CALLING_KINGDOM} name and will not war on {KINGDOM_TO_CALL_TO_WAR_AGAINST}." />
 	<string id="taom_the_fix_BlVjIlZF" text="{=BlVjIlZF}{FACTION_LEADER} will decide if {KINGDOM_CONSIDERING_PEACE_NAME} will make peace with {KINGDOM_NAME} by paying {TRIBUTE_AMOUNT} as tribute for {TRIBUTE_DURATION} days. You can pick your stance regarding this decision." />
 	<string id="taom_the_fix_bMCZ5rWQ" text="{=bMCZ5rWQ}{RULER.NAME} has decided not to call {CALLED_KINGDOM} to war against {KINGDOM_TO_CALL_TO_WAR_AGAINST}. The decision had the support of {?RULER.GENDER}her{?}his{\?} council." />
@@ -468,7 +467,6 @@
 	<string id="taom_the_fix_cRpsjvOM" text="{=cRpsjvOM}{AGGRESSOR_RULER.NAME} of {AGGRESSOR_KINGDOM} has declared war on {KINGDOM} with the support of {?AGGRESSOR_RULER.GENDER}her{?}his{\?} council." />
 	<string id="taom_the_fix_CrzFdo2H" text="{=CrzFdo2H}Yes. It's about the war with {ENEMYFACTION_INFORMALNAME}. [ib:hip][if:convo_excited]We need to tie up some of their forces. A relatively small force moving quickly through their lands and raiding their villages succesfully should be a good distraction. Their lords will need to chase the raiders and won't be able to threaten us elsewhere. You seem to be the right {?PLAYER.GENDER}warrior{?}man{\?} for the job. What do you say? You'll have my gratitude and you'll be well rewarded if you succeed." />
 	<string id="taom_the_fix_CswzBb02" text="{=CswzBb02}{PEACEMAKER_RULER.NAME} of {KINGDOM_CONSIDERING_PEACE} has decided to make peace with {KINGDOM}." />
-	<string id="taom_the_fix_d6KbdIWg" text="{=d6KbdIWg} As a result of your hostile intent towards a neutral village, {MERCENARY_KINGDOM} ends its contract with you, and {KINGDOM} declares war on you." />
 	<string id="taom_the_fix_dCDBqYsh" text="{=dCDBqYsh}{RULER.NAME} of {KINGDOM} has chosen not to sign a trade agreement with {OTHER_KINGDOM} with the support of {?RULER.GENDER}her{?}his{\?} council." />
 	<string id="taom_the_fix_dDsJyerw" text="{=dDsJyerw}Call {CALLED_KINGDOM} to War Against {KINGDOM_TO_CALL_TO_WAR_AGAINST}." />
 	<string id="taom_the_fix_dEsIQDo3" text="{=dEsIQDo3}It is time to call our ally {CALLED_KINGDOM} to war!" />

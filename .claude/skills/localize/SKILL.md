@@ -32,7 +32,7 @@ Get new player-facing text into all 12 supported languages (BR, CNs, CNt, DE, FR
 
 ## Tools
 - `tools/translate_with_claude.py` — 4-tier fallback (override → cache → LLM → English); cache in `tools/translation_cache/<lang>.json` is git-tracked, so re-runs are free. `--provider anthropic` (default, `claude-opus-5`) | `deepseek` | `openrouter`; the last two need no SDK and read `DEEPSEEK_API_KEY` / `OPENROUTER_API_KEY`. `--module TAOM` works with no game installed; `--module all` reads TAOM_Map and Armory from the install, so it needs `$BANNERLORD_GAME_DIR` and exits 2 without it.
-- `tools/rebuild_translation_files.py` — rebuild per-language files from cache.
+- `tools/rebuild_translation_files.py`: rebuild per-language files from cache; not for the TAOM module (own source list, overwrites hand edits), and it skips English-only overrides of vanilla keys.
 - `tools/translation_status.sh` — coverage report.
 
 ## Validate
@@ -40,7 +40,7 @@ Get new player-facing text into all 12 supported languages (BR, CNs, CNt, DE, FR
 - `LanguageDataXmlTests`: one LanguageFile per English source in every language (`LanguageManifests_EveryEnglishSource_HasExactlyOneLanguageFile`), well-formed XML, no missing files.
 - `VanillaKeyOverrideTests` (LiveInstall): no TAOM language row replaces a vanilla key's translation outside its allowlist.
 - `LanguageTextIntegrityTests`: decoding damage and wrong-writing-system words (any non-Latin, non-CJK, non-Cyrillic letter, e.g. Devanagari, counts as foreign) in the rows and the cache.
-- `LanguageFileCoverageTests` — every key the English source declares has a row in all 12 language files. Red here means you registered but never propagated: run the translator with `--sync-ids`.
+- `LanguageFileCoverageTests`: every key the English source declares has a row in all 12 language files, except an English-only override of a vanilla key. Red here means you registered but never propagated: run the translator with `--sync-ids`.
 - `UnregisteredLocalizationKeyBaselineTests` — no `{=taom_*}` literal in C# lacks a ModuleData row. Red means you skipped step 2; `python tools/harvest_literal_loc_keys.py --apply` does it.
 
 Then, after translating, run `python tools/loc_length_report.py --since <base>`: it lists translations much longer than their English. For each flagged key shown in a fixed-size Gauntlet widget, check that screen in game in that language, or record it under `Not-tested:` in the commit body. A key counted as "untranslated or identical to English" is checked after its translation lands.
