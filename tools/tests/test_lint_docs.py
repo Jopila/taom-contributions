@@ -1274,6 +1274,28 @@ class FeatureDocVerifySectionTests(_GitRepo):
         self._git("add", "-A")
         self.assertEqual(self._names(staged=True), [])
 
+    def _merge_side_branch_adding(self, side_doc_text):
+        """Commit a doc on a side branch, then start a no-commit merge of it into the first branch."""
+        self._git("checkout", "-q", "-b", "side")
+        _write(self.feat, side_doc_text)
+        self._commit("side adds a doc")
+        self._git("checkout", "-q", "-")
+        _write(self.root / "docs" / "other.md", "# other\n")
+        self._commit("main moves on")
+        self._git("merge", "-q", "--no-ff", "--no-commit", "side")
+
+    def test_a_doc_the_merged_branch_already_has_is_not_new(self):
+        self._merge_side_branch_adding("# thing\n\nNo verify section.\n")
+        self.assertEqual(self._names(staged=True), [])
+        self.assertEqual(self._names(), [])
+
+    def test_a_doc_added_in_the_merge_itself_is_still_new(self):
+        self._merge_side_branch_adding(f"# thing\n\n{self.HEADING}\n\nNot applicable: tooling.\n")
+        fresh = self.root / "docs" / "features" / "fresh-thing.md"
+        _write(fresh, "# fresh\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [fresh.name])
+
     def test_a_doc_in_a_features_subdirectory_is_not_checked(self):
         _write(self.root / "docs" / "features" / "elephant" / "x.md", "# x\n")
         self._git("add", "-A")

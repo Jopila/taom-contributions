@@ -1419,6 +1419,20 @@ def _has_verify_section(text: str) -> bool:
     return False
 
 
+def _merge_heads() -> list[str]:
+    """The commits an in-progress merge brings in (MERGE_HEAD, one per line), or none."""
+    path = _git_out("rev-parse", "--git-path", "MERGE_HEAD")
+    if not path:
+        return []
+    merge_head = Path(path.strip())
+    if not merge_head.is_absolute():
+        merge_head = REPO_ROOT / merge_head
+    try:
+        return [ln.strip() for ln in merge_head.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    except OSError:
+        return []
+
+
 def check_feature_doc_verify_section(
     base: str = "HEAD", staged: bool = False, also_new: list[str] | None = None
 ) -> list[tuple[Path, int, str, str]]:
@@ -1442,6 +1456,10 @@ def check_feature_doc_verify_section(
         untracked = _git_out("-c", "core.quotePath=false", "ls-files", "--others",
                              "--exclude-standard", "--", _FEATURE_DOC_PATHSPEC)
         names.extend(n.strip() for n in (untracked or "").splitlines() if n.strip())
+    # During a merge, a doc the merged branch already has is not new to this change.
+    merge_parents = _merge_heads()
+    names = [n for n in names
+             if not any(_git_out("cat-file", "-e", f"{sha}:{n}") is not None for sha in merge_parents)]
     pending: set[str] = set()
     for name in also_new or []:
         name = name.strip().replace("\\", "/")
