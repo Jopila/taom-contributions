@@ -81,3 +81,14 @@ verdict at its next run.
 | `outcome-oriented-execution` | Conflicts with ADR-004 (every step stays green) |
 | The `tdd` skip clause | Conflicts with "Test first, always" |
 | The plugin itself | Never installed (see Security) |
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/ai-includes/external-repo-adoption.md](../ai-includes/external-repo-adoption.md)
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+
+<!-- backlinks-end -->

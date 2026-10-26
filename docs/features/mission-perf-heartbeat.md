@@ -1151,6 +1151,7 @@ file or a refused compare.
 
 ## Referenced by
 
+- [docs/ai-includes/perf-method.md](../ai-includes/perf-method.md)
 - [docs/features/map-perf-profiler.md](./map-perf-profiler.md)
 - [docs/reference/engine/mission-frame-threads-and-native-costs.md](../reference/engine/mission-frame-threads-and-native-costs.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)

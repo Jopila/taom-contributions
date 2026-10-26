@@ -62,3 +62,14 @@ Say why the number moved or did not: main-thread bound (`mainMs` near `avgMs`), 
 limiter is reported as inconclusive, with the gap named.
 
 Adapted from backnotprop/pstack (MIT).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/mission-perf-heartbeat.md](../features/mission-perf-heartbeat.md)
+- [docs/INDEX.md](../INDEX.md)
+
+<!-- backlinks-end -->
