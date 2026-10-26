@@ -83,22 +83,13 @@ public class ServiceBattleService : IServiceBattleService
             return;
         }
 
-        // SERVING AGAINST HIS OWN CROWN (#832): the commander's realm is at war with the player's own
-        // faction. The soldier sits the battle out until the reconciler releases him (it waits on
-        // battles, so this is the only thing that keeps him out of one). Same carve-out as the raid
-        // floor: a player already in a map event falls through to the existing join path.
-        if (!_encounter.IsMainPartyInMapEvent && _diplomacy.IsServingAgainstOwnCrown())
+        var sitOut = OathSitOutRule.Decide(_encounter, _diplomacy, commanderPartyId, out var foe);
+        if (sitOut == OathSitOutReason.OwnCrown)
         {
             _logger?.LogInfo($"[Enlistment] commander's realm is at war with the player's own: not joining ({trigger})");
             return;
         }
-
-        var foe = _encounter.GetOpposingLeaderFactionId(commanderPartyId);
-
-        // A VASSAL SITS OUT a battle his kingdom is not at war in (#960): choosing Attack there would
-        // declare a kingdom-wide war on the commander's behalf (BeHostileAction), which discharge never
-        // unwinds. No transition, no join. Same carve-out as the other floors, and it fails open.
-        if (!_encounter.IsMainPartyInMapEvent && !string.IsNullOrEmpty(foe) && _diplomacy.ShouldSitOutAsVassal(foe))
+        if (sitOut == OathSitOutReason.Vassal)
         {
             _logger?.LogInfo($"[Enlistment] the player's kingdom is not at war with '{foe}': sitting this battle out ({trigger})");
             return;

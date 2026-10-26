@@ -18737,7 +18737,6 @@
   "taom_enlist_wage_paid": "受け取った給金：{AMOUNT}{GOLD_ICON}",
   "taom_enlist_wait_board": "{ACTIVITY}{NEWLINE}{NEWLINE}階級: {RANK} · {SECTION}{NEWLINE}従軍日数: {DAYS} · 評価: {TRUST}{ARREARS}{DUTY}",
   "taom_enlist_wait_board_v2": "{ACTIVITY}{NEWLINE}{NEWLINE}階級: {RANK} · {SECTION}{NEWLINE}従軍日数: {DAYS} · 信望: {TRUST}{NEWLINE}軍歴: {XP} XP · 日給: {WAGE}{COIN}{LADDER}{ARREARS}{DUTY}",
-  "taom_enlist_wait_text": "あなたは{COMMANDER}の部隊に従軍している。隊列は指揮官の歩調で進む。",
   "taom_enlist_welcome": "隊列へようこそ、兵士。列に入れ。",
   "taom_ep_bad_name": "プリセット名を空にはできません。",
   "taom_ep_cancel": "キャンセル",

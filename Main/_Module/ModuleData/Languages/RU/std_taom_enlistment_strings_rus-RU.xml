@@ -34,7 +34,6 @@
     <string id="taom_enlist_wage_forfeited" text="Отряд больше не может отчитаться за {AMOUNT}{GOLD_ICON} вашего невыплаченного жалованья." />
     <string id="taom_enlist_wage_paid" text="Получено жалованье: {AMOUNT}{GOLD_ICON}" />
     <string id="taom_enlist_wage_line" text="Жалованье за службу" />
-    <string id="taom_enlist_wait_text" text="Вы служите в отряде {COMMANDER}. Колонна идёт со скоростью вашего командира." />
     <string id="taom_enlist_welcome" text="Добро пожаловать в колонну, солдат. Встань в строй." />
     <string id="taom_fc_accept" text="Повысить" />
     <string id="taom_fc_acknowledge" text="Понятно" />
@@ -292,5 +291,6 @@
     <string id="taom_enlist_desert_memory_reply" text="(My commander will not take my oath again for a time, and this term will count for nothing.)" />
     <string id="taom_enlist_board_column" text="{NEWLINE}Column: {COLUMN}" />
     <string id="taom_enlist_retinue_cost" text="Your own men cost {COST}{COIN} a day; service pays {PAY}{COIN}." />
+    <string id="taom_enlist_act_sitout" text="Your commander is fighting a battle your oath keeps you out of." />
   </strings>
 </base>

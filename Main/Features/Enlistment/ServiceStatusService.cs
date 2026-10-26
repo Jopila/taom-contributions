@@ -31,7 +31,8 @@ public interface IServiceStatusService
     /// <summary>
     /// Rebuild and push the menu text if anything changed. Cheap on the unchanged path — one
     /// snapshot read, one behaviour text render (a hero lookup and a few TextObjects), one party wage
-    /// read (the roster's wage sum) and a value comparison; no TextObject is built for the board itself.
+    /// read (the roster's wage sum), the oath rule's reads (the opposing-faction lookup, only while the
+    /// commander is in a non-raid battle) and a value comparison; no TextObject is built for the board itself.
     /// </summary>
     bool RefreshIfChanged();
 
@@ -50,6 +51,8 @@ public class ServiceStatusService : IServiceStatusService
     private readonly Equipment.IEquipmentIssueLedger _ledger;
     private readonly IPlayerPartyAdapter _playerParty;
     private readonly Content.IEnlistmentContentConfigProvider _config;
+    private readonly IEncounterAdapter _encounter;
+    private readonly IServiceDiplomacyService _diplomacy;
 
     private ServiceStatusModel _last;
 
@@ -62,7 +65,9 @@ public class ServiceStatusService : IServiceStatusService
         IEnlistmentWagePreview wagePreview,
         Equipment.IEquipmentIssueLedger ledger,
         IPlayerPartyAdapter playerParty,
-        Content.IEnlistmentContentConfigProvider config)
+        Content.IEnlistmentContentConfigProvider config,
+        IEncounterAdapter encounter,
+        IServiceDiplomacyService diplomacy)
     {
         _store = store;
         _content = content;
@@ -73,6 +78,8 @@ public class ServiceStatusService : IServiceStatusService
         _ledger = ledger;
         _playerParty = playerParty;
         _config = config;
+        _encounter = encounter;
+        _diplomacy = diplomacy;
     }
 
     public ServiceStatusModel Build()
@@ -82,6 +89,7 @@ public class ServiceStatusService : IServiceStatusService
             return null;
 
         var commander = _commander.GetSnapshot(record.CommanderHeroId) ?? CommanderSnapshot.Missing;
+        var activity = ResolveActivity(commander);
         var content = _content.Record;
 
         // Peek(), never EvaluateAndApply(): a render path must not be able to promote anyone. The
@@ -96,7 +104,7 @@ public class ServiceStatusService : IServiceStatusService
 
         return new ServiceStatusModel(
             commanderName: commander.Name,
-            activity: ResolveActivity(commander),
+            activity: activity,
             settlementName: commander.SettlementName,
             rank: content.Rank,
             assignment: content.Assignment,
@@ -112,7 +120,7 @@ public class ServiceStatusService : IServiceStatusService
             nextRequirementTarget: showLadder ? promotion.MostBindingUnmetTarget : 0,
             kitWaits: Equipment.EnlistmentKitTiers.KitWaits(content.Rank, _ledger),
             // Left out in a settlement: the engine blanks this text there and the activity line already says where he is.
-            columnText: commander.HasParty && !commander.PartyIsInSettlement
+            columnText: activity != CommanderActivity.Unavailable && !commander.PartyIsInSettlement
                 ? _commander.GetPartyBehaviorText(record.CommanderHeroId)
                 : null,
             retinueWage: _playerParty.GetMainPartyDailyWage(),
@@ -128,19 +136,21 @@ public class ServiceStatusService : IServiceStatusService
                 activeDutyId, Content.Domain.DutyText.TitleSuffix, "a task for the company");
 
     /// <summary>
-    /// Order matters: a village raid (#831) outranks the battle check, since the soldier is not in it;
-    /// a battle outranks a siege outranks being in a settlement. A commander
-    /// assaulting a town is in all three states at once, and "in battle" is the one the player
-    /// needs to see.
+    /// Order matters: a raid (#831) outranks a battle, a battle (or a sit-out of it) outranks a siege,
+    /// and a siege outranks a settlement; an assault is all three, and "in battle" is the one to show.
     /// </summary>
-    private static CommanderActivity ResolveActivity(CommanderSnapshot commander)
+    private CommanderActivity ResolveActivity(CommanderSnapshot commander)
     {
-        if (!commander.Exists || !commander.IsAlive || commander.IsPrisoner || !commander.HasParty)
+        if (!commander.IsFit)
             return CommanderActivity.Unavailable;
         if (commander.PartyIsRaiding)
             return CommanderActivity.Raiding;
         if (commander.PartyIsInMapEvent)
-            return CommanderActivity.InBattle;
+        {
+            return OathSitOutRule.Decide(_encounter, _diplomacy, commander.PartyId, out _) != OathSitOutReason.None
+                ? CommanderActivity.SittingOut
+                : CommanderActivity.InBattle;
+        }
         if (commander.PartyIsBesieging)
             return CommanderActivity.Besieging;
         if (commander.PartyIsInSettlement)

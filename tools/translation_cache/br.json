@@ -18872,7 +18872,6 @@
   "taom_enlist_wage_paid": "Soldo recebido: {AMOUNT}{GOLD_ICON}",
   "taom_enlist_wait_board": "{ACTIVITY}{NEWLINE}{NEWLINE}Posto: {RANK} · {SECTION}{NEWLINE}Dias servidos: {DAYS} · Reputação: {TRUST}{ARREARS}{DUTY}",
   "taom_enlist_wait_board_v2": "{ACTIVITY}{NEWLINE}{NEWLINE}Posto: {RANK} · {SECTION}{NEWLINE}Dias de serviço: {DAYS} · Reputação: {TRUST}{NEWLINE}Registro de serviço: {XP} XP · Pagamento diário: {WAGE}{COIN}{LADDER}{ARREARS}{DUTY}",
-  "taom_enlist_wait_text": "Você serve na companhia de {COMMANDER}. A coluna avança no ritmo do seu comandante.",
   "taom_enlist_welcome": "Bem-vindo à coluna, soldado. Entre em forma.",
   "taom_ep_bad_name": "O nome do conjunto não pode ficar vazio.",
   "taom_ep_cancel": "Cancelar",

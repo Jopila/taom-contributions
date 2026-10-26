@@ -18736,7 +18736,6 @@
   "taom_enlist_wage_paid": "已領取薪餉：{AMOUNT}{GOLD_ICON}",
   "taom_enlist_wait_board": "{ACTIVITY}{NEWLINE}{NEWLINE}階級：{RANK} · {SECTION}{NEWLINE}服役天數：{DAYS} · 聲望：{TRUST}{ARREARS}{DUTY}",
   "taom_enlist_wait_board_v2": "{ACTIVITY}{NEWLINE}{NEWLINE}軍階：{RANK} · {SECTION}{NEWLINE}服役天數：{DAYS} · 聲望：{TRUST}{NEWLINE}服役記錄：{XP} 經驗 · 每日薪資：{WAGE}{COIN}{LADDER}{ARREARS}{DUTY}",
-  "taom_enlist_wait_text": "你在{COMMANDER}的隊伍中服役。行列依指揮官的步調前進。",
   "taom_enlist_welcome": "歡迎加入行列，士兵。列隊。",
   "taom_ep_bad_name": "預設名稱不可為空。",
   "taom_ep_cancel": "取消",

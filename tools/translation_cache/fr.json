@@ -18741,7 +18741,6 @@
   "taom_enlist_wage_paid": "Solde reçue : {AMOUNT}{GOLD_ICON}",
   "taom_enlist_wait_board": "{ACTIVITY}{NEWLINE}{NEWLINE}Rang : {RANK} · {SECTION}{NEWLINE}Jours de service : {DAYS} · Réputation : {TRUST}{ARREARS}{DUTY}",
   "taom_enlist_wait_board_v2": "{ACTIVITY}{NEWLINE}{NEWLINE}Rang : {RANK} · {SECTION}{NEWLINE}Jours de service : {DAYS} · Réputation : {TRUST}{NEWLINE}Dossier de service : {XP} XP · Solde journalière : {WAGE}{COIN}{LADDER}{ARREARS}{DUTY}",
-  "taom_enlist_wait_text": "Vous servez dans la compagnie de {COMMANDER}. La colonne avance au rythme de votre commandant.",
   "taom_enlist_welcome": "Bienvenue dans la colonne, soldat. Prenez les rangs.",
   "taom_ep_bad_name": "Le nom du préréglage ne peut pas être vide.",
   "taom_ep_cancel": "Annuler",

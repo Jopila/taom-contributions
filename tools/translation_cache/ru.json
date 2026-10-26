@@ -18722,7 +18722,6 @@
   "taom_enlist_wage_paid": "Получено жалованье: {AMOUNT}{GOLD_ICON}",
   "taom_enlist_wait_board": "{ACTIVITY}{NEWLINE}{NEWLINE}Звание: {RANK} · {SECTION}{NEWLINE}Дней службы: {DAYS} · Репутация: {TRUST}{ARREARS}{DUTY}",
   "taom_enlist_wait_board_v2": "{ACTIVITY}{NEWLINE}{NEWLINE}Звание: {RANK} · {SECTION}{NEWLINE}Дней службы: {DAYS} · Репутация: {TRUST}{NEWLINE}Послужной список: {XP} опыта · Дневное жалованье: {WAGE}{COIN}{LADDER}{ARREARS}{DUTY}",
-  "taom_enlist_wait_text": "Вы служите в отряде {COMMANDER}. Колонна идёт со скоростью вашего командира.",
   "taom_enlist_welcome": "Добро пожаловать в колонну, солдат. Встань в строй.",
   "taom_ep_bad_name": "Название набора не может быть пустым.",
   "taom_ep_cancel": "Отмена",

@@ -30,6 +30,8 @@ public class ServiceStatusServiceTests
     private ServiceStatusService _sut;
     private IPlayerPartyAdapter _playerParty;
     private IEnlistmentWagePreview _wagePreview;
+    private IEncounterAdapter _encounter;
+    private IServiceDiplomacyService _diplomacy;
 
     [TestInitialize]
     public void Setup()
@@ -54,21 +56,23 @@ public class ServiceStatusServiceTests
         // the numbers on screen free to drift from the numbers that grant the rank.
         _promotion = new PromotionService(_content, _config, _skillXp, _store, logger);
 
+        _encounter = Substitute.For<IEncounterAdapter>();
+        _diplomacy = Substitute.For<IServiceDiplomacyService>();
         Commander();
         _store.Record.State = EnlistmentState.EnlistedAttached;
         _store.Record.EnlistedHeroId = "main_hero";
         _store.Record.CommanderHeroId = "lord_1";
 
-        _sut = new ServiceStatusService(_store, _content, _commander, _writer, _promotion, _wagePreview, new TAOM.Features.Enlistment.Equipment.PersistedEquipmentIssueLedger(_content), _playerParty, _config);
+        _sut = new ServiceStatusService(_store, _content, _commander, _writer, _promotion, _wagePreview, new TAOM.Features.Enlistment.Equipment.PersistedEquipmentIssueLedger(_content), _playerParty, _config, _encounter, _diplomacy);
     }
 
     private void Commander(
         bool inMapEvent = false, bool besieging = false,
         string settlementId = null, string settlementName = null, bool alive = true,
-        bool raiding = false)
+        bool raiding = false, bool active = true)
     {
         _commander.GetSnapshot("lord_1").Returns(new CommanderSnapshot(
-            exists: true, isAlive: alive, partyId: "lord_party", partyIsActive: true,
+            exists: true, isAlive: alive, partyId: "lord_party", partyIsActive: active,
             partyIsInMapEvent: inMapEvent, partyIsBesieging: besieging,
             partyIsRaiding: raiding,
             partyIsInSettlement: !string.IsNullOrEmpty(settlementId),
@@ -424,6 +428,85 @@ public class ServiceStatusServiceTests
         StringAssert.Contains(body, "_wageFailureLogged = true;");
         StringAssert.Contains(body, "_wageFailureLogged = false;");
     }
+
+    // ---- sit-out and grace state (#1016) ----
+
+    [TestMethod]
+    public void Build_InactiveCommanderParty_IsUnavailable_WithNoColumnText()
+    {
+        Commander(active: false);
+        _commander.GetPartyBehaviorText("lord_1").Returns("Besieging Osgiliath.");
+
+        var model = _sut.Build();
+
+        Assert.AreEqual(CommanderActivity.Unavailable, model.Activity);
+        Assert.IsNull(model.ColumnText);
+    }
+
+    [TestMethod]
+    public void Build_CommanderInBattle_VassalSitOut_IsSittingOut()
+    {
+        Commander(inMapEvent: true);
+        _encounter.GetOpposingLeaderFactionId("lord_party").Returns("mordor");
+        _diplomacy.ShouldSitOutAsVassal("mordor").Returns(true);
+
+        Assert.AreEqual(CommanderActivity.SittingOut, _sut.Build().Activity);
+    }
+
+    [TestMethod]
+    public void Build_CommanderInBattle_ServingAgainstOwnCrown_IsSittingOut()
+    {
+        Commander(inMapEvent: true);
+        _diplomacy.IsServingAgainstOwnCrown().Returns(true);
+
+        Assert.AreEqual(CommanderActivity.SittingOut, _sut.Build().Activity);
+    }
+
+    [TestMethod]
+    public void Build_CommanderInBattle_AtWar_IsInBattle()
+    {
+        Commander(inMapEvent: true);
+        _encounter.GetOpposingLeaderFactionId("lord_party").Returns("mordor");
+        _diplomacy.ShouldSitOutAsVassal("mordor").Returns(false);
+
+        Assert.AreEqual(CommanderActivity.InBattle, _sut.Build().Activity);
+    }
+
+    [TestMethod]
+    public void Build_CommanderInBattle_PlayerAlreadyInAMapEvent_IsInBattle()
+    {
+        Commander(inMapEvent: true);
+        _encounter.IsMainPartyInMapEvent.Returns(true);
+        _diplomacy.IsServingAgainstOwnCrown().Returns(true);
+        _encounter.GetOpposingLeaderFactionId("lord_party").Returns("mordor");
+        _diplomacy.ShouldSitOutAsVassal("mordor").Returns(true);
+
+        Assert.AreEqual(CommanderActivity.InBattle, _sut.Build().Activity);
+    }
+
+    [TestMethod]
+    public void Build_CommanderRaiding_NeverAsksTheSitOutRule()
+    {
+        Commander(inMapEvent: true, raiding: true);
+        _diplomacy.IsServingAgainstOwnCrown().Returns(true);
+
+        Assert.AreEqual(CommanderActivity.Raiding, _sut.Build().Activity);
+        _diplomacy.DidNotReceive().IsServingAgainstOwnCrown();
+        _encounter.DidNotReceive().GetOpposingLeaderFactionId(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void TheBoardWriter_HasASitOutLine_AndTheJoinSharesTheRule()
+    {
+        var writer = RepoPaths.ReadSource("Main/Features/Enlistment/Presentation/ServiceStatusTextWriter.cs", stripComments: true);
+        StringAssert.Contains(writer, "case CommanderActivity.SittingOut:");
+        StringAssert.Contains(writer, "{=taom_enlist_act_sitout}");
+        var join = RepoPaths.ReadSource("Main/Features/Enlistment/ServiceBattleService.cs", stripComments: true);
+        StringAssert.Contains(join, "OathSitOutRule.Decide(");
+        var board = RepoPaths.ReadSource("Main/Features/Enlistment/ServiceStatusService.cs", stripComments: true);
+        StringAssert.Contains(board, "OathSitOutRule.Decide(");
+    }
+
 
     // ---- the column line (#838) ----
 

@@ -2896,6 +2896,32 @@ Specifically owed, because each is a state a test structurally cannot reach:
   left-the-field fix paid that down to 139 by extracting its inline geometry into
   `MeritGeometryAccumulator` + `MeritGeometryScanner`.
 
+## Board activities: sit-out and the grace state (#1016)
+
+`ServiceStatusService.ResolveActivity` picks the board's activity line, first match wins:
+
+| Activity | When | Line |
+|---|---|---|
+| `Unavailable` | no commander, dead, captive, no party, or a party that is not active | `taom_enlist_act_lost` |
+| `Raiding` | the commander's party is raiding | `taom_enlist_act_raid` |
+| `SittingOut` | in a map event, and `OathSitOutRule` says the oath keeps the soldier out of that battle | `taom_enlist_act_sitout` |
+| `InBattle` | in a map event otherwise | `taom_enlist_act_battle` |
+| `Besieging`, `InSettlement`, `Marching` | as before | their own keys |
+
+- **One rule.** `OathSitOutRule.Decide` is the single place that decides a battle the oath keeps him out of: the commander's realm at war with the
+  player's own faction (#832), or a vassal whose kingdom is not at war with the opposing leader's faction (#960). Both
+  `ServiceBattleService.TryJoin` and the board call it, so the board cannot promise a place in the line for such a battle. The board does not mirror the join's other refusals (state, no side, not joinable). It
+  never sits out a player who is already in a map event, the same carve-out the join has.
+- **Inactive party.** An inactive commander party counts as unavailable, matching the attach check and the grace logic, and the "Column:" line is left out.
+  In v1.5.5 the engine clears the hero's party whenever it deactivates one (`MobileParty.RemoveParty` sets `Hero.PartyBelongedTo = null`), so nothing visible changes today.
+- **Retired:** `taom_enlist_wait_text` had no reader since 3164fb291 and is gone from the English file, the 12 language files
+  and the translation caches.
+
+**Owed in-game checks.** (1) Sit-out: as a vassal, with the commander fighting a faction your kingdom is not at war with, the
+board reads "Your commander is fighting a battle your oath keeps you out of." and not "Hold your place in the line"; at war
+with that faction it still reads the battle line. (2) Regression check, grace: after the commander is captured or loses his party, the board
+reads "You have lost the column" with no "Column:" line underneath.
+
 ## Co-op (#967)
 
 Two enlistment mission behaviors have the co-op role `Unsafe` in `CoopMissionRoles`, so `AddTaomBehavior` does not add them to a mission while a co-op session is live: `EnlistmentMeritMissionBehavior` (it scores the enlisted player's battle merit into this save's enlistment state) and `FieldCommissionMissionLogic` (it already required `IsAuthority`, which is false on every peer that runs a mission). In a session, battle merit is not scored and field commission logic does not run; outside a session nothing changes. `EnlistmentBattleRoleMissionBehavior` and `EnlistmentBattleFormationMissionBehavior` shape only this peer's own player slot and stay `Local`. The table and the in-game list are in [coop-interop.md](coop-interop.md#mission-behaviors-967-c7); the offer-hiding half for guests (#966) is the ledger's row C7 in [coop-compat-gap-ledger.md](../research/coop-compat-gap-ledger.md).

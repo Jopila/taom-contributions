@@ -18811,7 +18811,6 @@
   "taom_enlist_wage_paid": "Salario ricevuto: {AMOUNT}{GOLD_ICON}",
   "taom_enlist_wait_board": "{ACTIVITY}{NEWLINE}{NEWLINE}Grado: {RANK} · {SECTION}{NEWLINE}Giorni di servizio: {DAYS} · Reputazione: {TRUST}{ARREARS}{DUTY}",
   "taom_enlist_wait_board_v2": "{ACTIVITY}{NEWLINE}{NEWLINE}Grado: {RANK} · {SECTION}{NEWLINE}Giorni di servizio: {DAYS} · Reputazione: {TRUST}{NEWLINE}Fascicolo di servizio: {XP} PE · Paga giornaliera: {WAGE}{COIN}{LADDER}{ARREARS}{DUTY}",
-  "taom_enlist_wait_text": "Servi nella compagnia di {COMMANDER}. La colonna avanza al passo del tuo comandante.",
   "taom_enlist_welcome": "Benvenuto nella colonna, soldato. In riga.",
   "taom_ep_bad_name": "Il nome del preset non può essere vuoto.",
   "taom_ep_cancel": "Annulla",
