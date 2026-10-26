@@ -2734,6 +2734,14 @@ What actually remains, each a state no test can reach:
   paused and right after loading onto the menu; a commander joining a running battle is still followed (the
   pump fallback now waits up to 18 campaign minutes). A `TAOM.json` carrying `"EnableEnlistmentDiagnostics": true`
   ends up with the trace off (the old key is ignored), and switching "Enable Enlistment Trace" on records it.
+- **Duty words in English and one translation (#845).** With English text, ask for work until a field duty
+  is assigned: the order toast and the board name the duty itself (for example "a reconnaissance sweep"), not
+  "a task for the company", and its result toast is the duty's own line, not "It went well.". Night patrol,
+  an incident and their choices read as before. Switch to Deutsch and repeat: the same duties in German. The
+  debug log shows the duties loaded with no "duty '...' skipped" line.
+- **Cleanups (#842, #843, #844).** Nothing should change: an existing save with an enlisted soldier loads,
+  duties are still offered by the column's state (march, siege, garrison), and battle pay, trust and
+  promotion work as before.
 - **Column line (#838).** On the wait menu the board shows, under the activity line, "Column: ..." with the commander party's
   current activity (for example besieging or travelling to a settlement). Let the column change what it is
   doing and the line follows within a few seconds; with the commander in a battle, note what the engine
