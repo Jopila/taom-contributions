@@ -31,14 +31,15 @@ Before writing ANY `Sprite="X"` in XML or `GetSprite("X")` in C#:
 
 **The same rule applies to `Brush="X"` (added 2026-08-05).** `BrushFactory.GetBrush(name)` returns
 null SILENTLY for an unregistered name (verified `BrushFactory.cs:934-940`, installed v1.4.7) —
-the widget renders with default styling, no crash, no log. Before writing any `Brush="X"`, grep
-`Main/_Module/GUI/Brushes/*.xml` AND the relevant vanilla `Modules/{Native,SandBox}/GUI/Brushes/*.xml`
-for `<Brush Name="X"`. The vanilla `"<X>.Text"` naming pattern is NOT auto-derived — each `.Text`
+the widget renders with default styling, no crash, no log. Before writing any `Brush="X"`, run
+`PrefabExtensionBrushTests` rather than grepping (SandBoxCore declares the `CustomBattle.*` brushes TAOM's custom battle prefabs use, and a
+brush in one of the vanilla brush files TAOM replaces whole is never loaded, so a grep finds names
+the engine never sees). The vanilla `"<X>.Text"` naming pattern is NOT auto-derived: each `.Text`
 brush is its own declaration. Shipped instances of this bug: `ButtonBrush1.Text` (AbilityHUD,
-PresetsOverlay), `CharacterDeveloper.SkillNameText`/`.DescriptionText` (CareerScreen.xml ×14 —
-deferred cleanup, see `docs/reviews/rca-career-ux-arc-2026-08-05.md` finding #3).
+PresetsOverlay), `CharacterDeveloper.SkillNameText`/`.DescriptionText` (CareerScreen.xml; all
+since repointed, see `docs/reviews/rca-career-ux-arc-2026-08-05.md` finding #3).
 
-**Gate:** `PrefabExtensionBrushTests` fails a brush-typed attribute (`Brush`, `IconBrush`, ...) in a PrefabExtension that no module in TAOM's DependedModule set declares (#989). It does not cover prefab XML files.
+**Gate:** `PrefabExtensionBrushTests` fails a brush-typed attribute (`Brush`, `IconBrush`, ...) in a PrefabExtension that no module in TAOM's DependedModule set declares (#989); `EveryGuiPrefabBrush_IsDeclaredByAModule` does the same for every literal brush in `Main/_Module/GUI/PreFabs/**/*.xml`, allowing only `Naval.Map.Party.Nameplate.Ship.Banner.Frame` (a NavalDLC brush) and skipping the `MarinerTroopBrush` attribute (`PartyUpgradeButtonWidget.MarinerTroopBrush` is a `BrushWidget` that takes a child widget Id, not a brush name).
 
 ### Adding a NEW sprite (not just referencing an existing one)
 

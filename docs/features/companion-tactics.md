@@ -266,6 +266,7 @@ A preset is a named copy of the Order of Battle layout: the formation type of ea
 
 ## Changelog
 
+- 2026-10-26 (#1005): the action bar uses `Tooltip.Text`; the old `Popup.Text.Small` brush was missing.
 - 2026-10-09 (#779): formation presets work. Save captures the formation types, captains and hero troops of the Order of Battle; Load applies them through vanilla's class selector and click path, with a verify after each step, and the overlay strings are localized (`taom_oob_*`). Campaign only; the toggle stays off until an in-game check.
 - 2026-09-24 (plan 022): the Assign Heroes button places captains through `HeroAutoAssigner.PlanCaptains` and vanilla's accept-captain path (it was a placeholder message). Review follow-up: roles come from the agent's spawn equipment, so horse owners are placed in sieges. No issue filed yet; in-game check owed.
 - 2026-09-13 (#595): `TroopStanceManager` takes a lock. Patch35 clears a stance from `Formation.SetMovementOrder`,
@@ -291,7 +292,6 @@ A preset is a named copy of the Order of Battle layout: the formation type of ea
   view shows a cursor, such as the Esc menu. Make it usable when stances do something: for example show the cursor on the
   bar's layer while the order menu is open, as vanilla deployment does.
 - **Known, LOW:** a sally-out sortie is not a field battle for the bar (`Mission.IsFieldBattle`); not changed here.
-- **Known, LOW:** the prefab uses the `Popup.Text.Small` brush, which is missing, so the labels fall back to the default font; not changed here.
 - **In-game check owed** (turn `Show Battle Action Bar` on first): the log shows `[BattleActionBar] screen init` at load;
   after Begin battle the cursor is hidden, left-click attacks, right-click blocks and the camera follows the mouse; a ground
   click with the order menu open gives a move order; with Esc open, clicking a bar button highlights it; turning the
