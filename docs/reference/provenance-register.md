@@ -114,6 +114,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | context-mode | `context-mode` `mksglu/context-mode` | Elastic-2.0 | behavioural-port | `docs/ai-includes/agent-operating-manual.md` (execution model item 6) | cleared |
 | Agent Reach | `Agent-Reach` `Panniantong/Agent-Reach` `agent-reach` | MIT | comparison-only | `tools/ingame_ledger.py` and `/release` Phase 1 item 7 and Phase 5 (the idea of a per-release acceptance ledger, from its release gate; TAOM's tool, its non-blocking design and its text are TAOM's own) | cleared |
 | Paperclip | `paperclip` `paperclipai/paperclip` | MIT | behavioural-port | `tools/harness_retro.py` (section 10: tokens by agent type and model, model overrides, costliest transcripts, token growth) | cleared |
+| claude-hud | `claude-hud` `jarrodwatts/claude-hud` | MIT | behavioural-port | `.claude/statusline.sh` (the usage line) | cleared |
 
 <!-- provenance-register-end -->
 
