@@ -1122,6 +1122,8 @@ build later; that lesson sits in this file and the feature's build never loaded 
 - **Prevent:** words for a hero of unknown gender use "their" or restructure; run the gender check on settings labels
   and hints as well as dialog lines. Add a test that each hint quotes the compiled default.
 - **Source:** `docs/reviews/rca-good-deeds-2026-10-20.md` finding 6.
+- **Repeat (#874, 2026-10-24):** the King's Muster hint said "he calls" and "his hosts" for a ruler; fixed in review
+  (`docs/reviews/rca-kings-muster-2026-10-24.md` finding 4).
 
 ### UIExtenderEx InsertType.Append inserts a sibling, never a child (Namegiving, 2026-10-20)
 

@@ -745,6 +745,13 @@ relation below -10.
   companions, family) and grep the decompile for `HeroRelationChanged` listeners. Exclude player-clan heroes or keep
   vanilla's amount for them.
 - **Source:** `docs/reviews/rca-personal-relations-2026-10-19.md` finding 1.
+- **Repeat (#874, 2026-10-24):** The King's Muster planned a TAOM filter over the same candidate list to keep
+  player-clan parties out of AI armies, from a reading of `DefaultArmyManagementCalculationModel.cs:131` (v1.5.5) that missed `!CanJoinArmy`. That flag is a saved
+  per-party switch the player sets in the clan screen (`PartyConfiguration`, "Allow joining other armies"), so the
+  filter overrode the player's choice and was deleted. Before adding a filter over an engine candidate list, quote
+  every condition of the engine's own filter line in the plan, and check `PartyConfiguration` (`CanJoinArmy`,
+  `CanRaid`, `CanDonateTroopsToGarrison`) for an existing player switch. Source:
+  `docs/reviews/rca-kings-muster-2026-10-24.md` finding 1.
 
 ### An override that changes who owns a relation must be checked against every writer that assumes the old owner (#862, 2026-10-19)
 Keeping the player's relations personal broke three engine paths that use the clan leader to mean the clan:
