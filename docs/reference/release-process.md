@@ -86,7 +86,7 @@ Use `/release`. It runs the sequence below and fails closed on the #371 pairing 
    found 781 of them, 937 MB. See [module-backup-sweep](module-backup-sweep.md).
 4. Bump the version fields above.
 5. Generate the CHANGELOG section: `python tools/changelog_from_commits.py --version vX.Y.Z --write` (every non-merge commit since the previous tag, subject and body verbatim, grouped by type). Its summary names the commit the range ends at.
-6. Write `docs/releases/vX.Y.Z-discord.md` from that section (shape: [`v2.0.15-discord.md`](../releases/v2.0.15-discord.md)).
+6. Write `docs/releases/vX.Y.Z-discord.md` from that section (shape: [`v2.0.15-discord.md`](../releases/v2.0.15-discord.md)). Then write the testers' checklist for the testing channel: `python tools/ingame_ledger.py --since <previous tag> --format md` into `docs/releases/vX.Y.Z-testers.md`. It lists every issue closed since the previous tag that still carries `triage-needs-ingame` (#1010). It never blocks a release; a tester's confirmation removes the label.
 7. Confirm `HEAD` is still the commit step 5 ended at (if not, restore `CHANGELOG.md` and repeat step 5), then commit `chore(release): vX.Y.Z - TAOM vX.Y.Z`, staging release paths explicitly. Every other
    commit carries the CURRENT version the same way (`<type>: vX.Y.Z - <description>`, user rule
    2026-09-13, hook `check-commit-subject-version.sh`), so between releases

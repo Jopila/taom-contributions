@@ -38,6 +38,10 @@ characters to players. Full contract: [`docs/reference/release-process.md`](../.
 6. Every release channel's `TAOM_Map` package carries each settlement TAOM data names; Arthedain's
    `town_AN1` to `town_AN3` are the open case. The check per channel is in
    [`release-process.md`](../../../docs/reference/release-process.md) ("TAOM_Map ships in the same release").
+7. **Owed in-game checks (never blocks):** `python tools/ingame_ledger.py` lists the issues closed since
+   the last tag that still carry `triage-needs-ingame`. Tell Mike the count; Phase 5 hands the list to
+   the testers. Exit 3 is a `gh` or `git` failure: report it, and note in the release note that the
+   list is missing.
 
 ## Phase 2 — Verify
 
@@ -104,13 +108,19 @@ of lines, so list it first: `awk '/^## v/{n++} n==1 && /^###/' CHANGELOG.md` pri
 subject lines only. Open the bodies you need (`git show -s --format=%b <sha>`), and grep the
 section for `MCM` before writing the persisted-settings line.
 
+Then the testers' checklist, for the testing channel only (issue titles are developer text, so they
+stay out of the Discord note): `python tools/ingame_ledger.py --since <previous tag> --format md`
+into `docs/releases/vX.Y.Z-testers.md`, under a first line naming the release. Stage it with the
+release note in Phase 6. A tester who confirms a check closes the loop: remove the label from that
+issue.
+
 ## Phase 6 — Commit
 
 First, `git rev-parse HEAD` must print the SHA Phase 4 ended at. If another commit landed since,
 the section misses it: `git checkout -- CHANGELOG.md` and run Phase 4 again.
 
 Stage **explicitly** with `git add <paths>`, never `-A`: the Phase 3 version files, `CHANGELOG.md`
-(Phase 4) and the release note (Phase 5). A shared file routinely holds two sessions' edits.
+(Phase 4), the release note and the testers' checklist (Phase 5). A shared file routinely holds two sessions' edits.
 
 ```
 chore(release): vX.Y.Z - TAOM vX.Y.Z
