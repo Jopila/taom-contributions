@@ -88,13 +88,22 @@ def _groups(commits):
 
 
 def render_section(version, date, since, commits):
-    """The Markdown section for one release, ending in exactly one newline."""
+    """The Markdown section for one release, ending in exactly one newline. A commit whose subject
+    and body repeat an earlier one exactly landed twice on trunk and is listed once (#1009)."""
+    seen, unique = set(), []
+    for c in commits:
+        if (c.subject, c.body) not in seen:
+            seen.add((c.subject, c.body))
+            unique.append(c)
+    repeats = len(commits) - len(unique)
+    commits = unique
     labelled = sum(1 for c in commits if c.type is not None)
     lines = [
         f"## {version} ({date})",
         "",
         f"Commits since {since}: {len(commits)} ({labelled} with the version label, "
-        f"{len(commits) - labelled} without).",
+        f"{len(commits) - labelled} without)"
+        + (f"; {repeats} landed twice and {'is' if repeats == 1 else 'are'} listed once." if repeats else "."),
         "",
     ]
     for heading, members in _groups(commits):

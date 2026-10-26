@@ -104,6 +104,20 @@ class RenderSectionTests(unittest.TestCase):
         text = self.render(second_fix + FIX)
         self.assertLess(text.index("a later fix"), text.index("park off-thread"))
 
+    def test_render_lists_a_commit_that_landed_twice_once(self):
+        again = record("1" * 40, "feat(nazgul): v2.0.30 - the Nine scream (#645)",
+                       "The SCREAM is a second signature.\n\nNot-tested: in game.")
+        text = self.render(FEAT + again + FIX)
+        self.assertEqual(text.count("#### feat(nazgul): v2.0.30 - the Nine scream (#645)"), 1)
+        self.assertIn("Commits since v2.0.30: 2 (2 with the version label, 0 without); "
+                      "1 landed twice and is listed once.", text)
+
+    def test_render_keeps_one_subject_with_two_different_bodies(self):
+        other = record("2" * 40, "feat(nazgul): v2.0.30 - the Nine scream (#645)", "A different change.")
+        text = self.render(FEAT + other)
+        self.assertEqual(text.count("#### feat(nazgul): v2.0.30 - the Nine scream (#645)"), 2)
+        self.assertNotIn("landed twice", text)
+
     def test_render_omits_empty_groups_and_ends_with_one_newline(self):
         text = self.render(FIX)
         self.assertNotIn("### Features", text)
