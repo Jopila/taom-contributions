@@ -108,7 +108,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | Kingdom Borders (Nexus mod 10699) | `Kingdom Borders` `KingdomBorders` | UNKNOWN | behavioural-port | `Main/Adapters/BorderRenderAdapter.cs`; the Heraldic layout in `Main/Features/RealmBorders/Domain/BorderPainter.cs`; the module-id check in `Main/Features/RealmBorders/Hooks/RealmBordersCampaignBehavior.cs` (interop); see detail | uncleared |
 | rtk (Rust Token Killer) | `rtk` `rtk-ai/rtk` `Rust Token Killer` | Apache-2.0 (the CLI in `src/`; `engine/` and `proxy/` are BUSL-1.1 and nothing derives from them) | behavioural-port | `.claude/hooks/_shellwords.py` (`command_index`, `peel`); `tools/harness_retro.py` (`command_family`, report section 9) | cleared |
 | CodeGraph | `codegraph` `colbymchenry/codegraph` `@colbymchenry/codegraph` | MIT | behavioural-port | `tools/graphify_taom.py` (interface callers in `affected`, the `tests` verb, answer-scoped staleness, `refresh --detach`); see detail | cleared |
-| rea | `rea` `morluto/rea` `rea-agents` | MIT | behavioural-port | `tools/native_build_match.py` (the matching method, from its documentation; see detail); rule lines in `.claude/rules/{evidence-over-claims,simplicity-criterion,working-discipline}.md` and `.claude/skills/issue/SKILL.md` (comparison-only) | cleared |
+| rea | `rea` `morluto/rea` `rea-agents` | MIT | behavioural-port | `tools/native_build_match.py` (the matching method, from its documentation; see detail); rule lines in `.claude/rules/{evidence-over-claims,simplicity-criterion,working-discipline}.md`, `.claude/skills/issue/SKILL.md` and `docs/ai-includes/perf-method.md` section 4 (comparison-only) | cleared |
 
 <!-- provenance-register-end -->
 

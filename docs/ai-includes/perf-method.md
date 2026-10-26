@@ -38,7 +38,9 @@ A gap inside the run-to-run range is no measurable difference.
 
 Before trusting a number, confirm the work happened inside the timed region: the mission ticked
 (steady windows exist, `active` above 0, the heartbeat reached `t=+30s`), and the harness's work
-count matches the baseline. A timing for a path that never ran is the usual false win.
+count matches the baseline. A timing for a path that never ran is the usual false win. Check that
+the faster path gives the same result against something the change did not touch (a test, the
+baseline's output), never against a second copy of the changed code.
 
 ## 5. Stop rule
 
@@ -61,7 +63,7 @@ Say why the number moved or did not: main-thread bound (`mainMs` near `avgMs`), 
 (`renderMs` near `avgMs`), the frame limiter, GC (`gc2` per minute). A result with no nameable
 limiter is reported as inconclusive, with the gap named.
 
-Adapted from backnotprop/pstack (MIT).
+Adapted from backnotprop/pstack (MIT); the independent-check line in section 4 from morluto/rea (MIT).
 
 ---
 
