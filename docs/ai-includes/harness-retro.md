@@ -42,6 +42,12 @@ and subagent types by total tokens, and the count of cache breaks (one request w
 Output tokens are a floor (many subagent requests are written only mid-stream, and the report
 says how many). It is not a verdict by itself, and a skill's total grows with the work it was given.
 
+The same requests are also split by agent type and model (`main` or the subagent type from its
+`.meta.json`; no prices), with the five costliest transcripts and the model overrides (a
+definition in `.claude/agents/` sets `model:` but the requests ran on another family). Each
+agent's share of cache creation plus output is compared with the previous run: the console lines
+`token growth:` (5 points or more) and `model overrides:` (#1008).
+
 Also run `python tools/analyze_reviews.py --summary --no-plot` for the reviewer accuracy that
 `REVIEW-LOG.md` already tracks (`--no-plot` leaves the committed `progress.png` alone).
 
@@ -94,6 +100,9 @@ error, a runaway). A proposal that cannot name a moment is speculation; drop it.
   the command, the file key its path in the repo), and propose only when the cause is a
   harness gap, such as a whole file read where a range would do; growth from more work is not a
   defect.
+- **Token growth:** a section 10 token growth row or a model override is a candidate. Name the sessions
+  behind it; propose only when the cause is a harness gap (a definition that does not pin its
+  model, a lens that re-sends a large prompt), since more review work also raises a share.
 - **Form, cheapest first:** a gate or hook (it acts in the tool loop and costs no context), then a
   script in `tools/`, then a skill or path rule (loaded only when needed), then always-on text in
   AGENTS.md or CLAUDE.md last. A proposal that adds always-on text names what it cuts. Route by

@@ -44,6 +44,9 @@ DEFAULT_SLUG = "e--repos-TAOM"
 RECURRING_SESSIONS = 3
 RUNAWAY_LEN = 3
 STALE_CARD_DAYS = 21
+TOKEN_GROWTH_POINTS = 0.05   # an agent whose share of cache creation plus output grew by 5 points or more
+TOP_TRANSCRIPTS = 5
+MODEL_FAMILIES = ("sonnet", "opus", "haiku", "fable")
 CACHE_BREAK_TOKENS = 100_000   # one request that writes more than this to the cache re-sent the prompt
 UNATTRIBUTED = "subagents (unattributed)"
 
@@ -259,6 +262,10 @@ class Stats:
         self.tok_skills = Counter()
         self.tok_agents = Counter()
         self.cache_breaks = 0
+        # Budget by agent type and model (#1008; the idea of paperclipai/paperclip's budget tracking,
+        # docs/reference/provenance-register.md).
+        self.by_agent_model = defaultdict(lambda: [0, 0, 0, 0, 0])  # (agent, model) -> requests, in, out, read, create
+        self.file_tokens = []                                       # (agent, file stem, total tokens)
 
 
 def add_output(table, key, size):
@@ -289,7 +296,7 @@ def _num(v):
 
 
 def read_usage(r):
-    """(request key, (input, output, cache read, cache creation), final) of an assistant record, or None.
+    """(request key, (input, output, cache read, cache creation), final, model) of an assistant record, or None.
     One API request is written as several records (one per content block) that share a requestId.
     Input and cache fields are identical across them. Output_tokens grows as the request streams, so
     the record with the most output is used, but some requests (many in subagent transcripts) are
@@ -302,15 +309,23 @@ def read_usage(r):
     key = r.get("requestId") or msg.get("id") or "uuid:%s" % r.get("uuid")
     counts = (_num(usage.get("input_tokens")), _num(usage.get("output_tokens")),
               _num(usage.get("cache_read_input_tokens")), _num(usage.get("cache_creation_input_tokens")))
-    return str(key), counts, msg.get("stop_reason") is not None
+    return str(key), counts, msg.get("stop_reason") is not None, str(msg.get("model") or "")
 
 
-def commit_usage(stats, calls, agent):
+def commit_usage(stats, calls, agent, stem=""):
     """Add one file's deduplicated requests. `agent` is the subagent type, None for a main file."""
-    for key, (usage, skill, final) in calls.items():
+    label = agent or "main"
+    spent = 0
+    for key, (usage, skill, final, model) in calls.items():
         if key in stats.seen_requests:
             continue
         stats.seen_requests.add(key)
+        spent += sum(usage)
+        if model != "<synthetic>" and any(usage):
+            row = stats.by_agent_model[(label, model or "(unknown)")]
+            row[0] += 1
+            for i in range(4):
+                row[i + 1] += usage[i]
         for i in range(4):
             stats.tok[i] += usage[i]
         stats.tok[4] += 1
@@ -323,6 +338,8 @@ def commit_usage(stats, calls, agent):
             stats.tok_skills[skill] += total
         if usage[3] > CACHE_BREAK_TOKENS:
             stats.cache_breaks += 1
+    if spent:
+        stats.file_tokens.append((label, stem, spent))
 
 
 def agent_type(path):
@@ -502,9 +519,9 @@ def scan_file(stats, path, since_str, agent=None):
                     prev = calls.get(got[0])
                     final = got[2] or (prev is not None and prev[2])
                     if prev is None or got[1][1] >= prev[0][1]:
-                        calls[got[0]] = (got[1], skill, final)
+                        calls[got[0]] = (got[1], skill, final, got[3])
                     else:
-                        calls[got[0]] = prev[:2] + (final,)
+                        calls[got[0]] = prev[:2] + (final, prev[3])
                 msg = r.get("message")
                 blocks = msg.get("content") if isinstance(msg, dict) else None
                 for b in blocks if isinstance(blocks, list) else []:
@@ -548,7 +565,7 @@ def scan_file(stats, path, since_str, agent=None):
                         if key is not None:
                             run = [key, sid, {msg_id}]
     flush()
-    commit_usage(stats, calls, agent)
+    commit_usage(stats, calls, agent, path.stem)
 
 
 def discover(transcripts, since_dt):
@@ -688,14 +705,17 @@ def previous_signals(out):
     return (best[1], best[2]) if best else (None, None)
 
 
-def output_growth(rows, out, label="family", section="families", share="share"):
+def output_growth(rows, out, label="family", section="families", share="share",
+                  container="output_size", points=GROWTH_POINTS):
     """Rows whose `share` grew by GROWTH_POINTS since the previous run: shell families (share of all
     output) or files (share of Read output, #1002). A key the previous run folded into `(other)` has
-    no known share and is not flagged as new; a previous run without this section is no baseline."""
+    no known share and is not flagged as new; a previous run without this section is no baseline.
+    `container` and `points` let section 10 reuse this against its own table and threshold."""
     path, prev = previous_signals(out)
-    if prev is None or section not in prev["output_size"]:
+    held = prev.get(container) if prev else None
+    if not isinstance(held, dict) or section not in held:
         return {"baseline": None, "looked_in": str(out.parent), "rows": []}
-    old = [r for r in prev["output_size"].get(section, []) if isinstance(r, dict)]
+    old = [r for r in held.get(section, []) if isinstance(r, dict)]
     then = {r.get(label): r.get(share, 0) for r in old}
     complete = "(other)" not in then
     grown = []
@@ -703,7 +723,7 @@ def output_growth(rows, out, label="family", section="families", share="share"):
         if r[label] == "(other)" or (r[label] not in then and not complete):
             continue
         before = then.get(r[label], 0)
-        if r[share] - before >= GROWTH_POINTS:
+        if r[share] - before >= points:
             grown.append({label: r[label], "then": before, "now": r[share], "delta": round(r[share] - before, 4)})
     grown.sort(key=lambda r: -r["delta"])
     return {"baseline": str(path), "baseline_today": (prev.get("window") or {}).get("today"), "rows": grown}
@@ -745,6 +765,57 @@ def token_summary(stats, n):
             "subagent_types": token_rows(stats.tok_agents, n)}
 
 
+def token_agents(stats, n, repo):
+    """Section 10 additions: tokens by agent type and model, the costliest files, the model overrides."""
+    def spend(v):
+        return v[2] + v[4]
+    ranked = sorted(stats.by_agent_model.items(), key=lambda kv: -spend(kv[1]))
+    if len(ranked) > n:
+        rest = ranked[n:]
+        ranked = ranked[:n] + [("(other)", [sum(v[i] for _k, v in rest) for i in range(5)])]
+    total = sum(spend(v) for v in stats.by_agent_model.values())
+    rows = []
+    for key, v in ranked:
+        name = key if isinstance(key, str) else "%s / %s" % key
+        rows.append({"agent": redact(name), "messages": v[0], "input": v[1], "output": v[2],
+                     "cache_read": v[3], "cache_creation": v[4],
+                     "share": round(spend(v) / total, 4) if total else 0})
+    costly = sorted(stats.file_tokens, key=lambda t: -t[2])[:TOP_TRANSCRIPTS]
+    return {"by_agent_model": rows,
+            "transcripts": [{"transcript": redact("%s %s" % (a, re.sub(r"^agent-", "", stem)[:8])), "tokens": t}
+                            for a, stem, t in costly],
+            "overrides": model_overrides(stats, repo)}
+
+
+def family_of(model):
+    low = str(model).lower()
+    return next((f for f in MODEL_FAMILIES if f in low), None)
+
+
+def defined_model(repo, kind):
+    """The `model:` of .claude/agents/<kind>.md, or None (no definition, no model line)."""
+    try:
+        text = (Path(repo) / ".claude" / "agents" / (kind + ".md")).read_text(encoding="utf-8-sig")
+    except (OSError, ValueError):
+        return None
+    fm = re.match(r"---\s*\n(.*?)\n---", text, re.S)
+    m = re.search(r"^model:\s*[\"']?([^\s\"'#]+)", fm.group(1), re.M) if fm else None
+    return m.group(1) if m else None
+
+
+def model_overrides(stats, repo):
+    """Agent types whose definition sets a model whose messages ran on another model family."""
+    found = []
+    for (kind, model), v in sorted(stats.by_agent_model.items()):
+        want = defined_model(repo, kind) if re.fullmatch(r"[\w.-]+", kind) else None
+        if not want or want == "inherit":
+            continue
+        fam, seen = family_of(want), family_of(model)
+        if fam and seen and fam != seen:
+            found.append({"agent": kind, "defined": want, "observed": model, "messages": v[0]})
+    return found
+
+
 def build_signals(stats, args, since, today, main, sub):
     n = args.top
     tool_rows = top_groups(stats.tool_errors, n, ("signature", "tool"))
@@ -780,7 +851,7 @@ def build_signals(stats, args, since, today, main, sub):
         "unused_skills": unused_skills(args.repo, used),
         "memory": memory_health(args.memory, today),
         "output_size": output_size(stats, n),
-        "tokens": token_summary(stats, 5),
+        "tokens": dict(token_summary(stats, 5), **token_agents(stats, n, args.repo)),
     }
 
 
@@ -894,6 +965,20 @@ def render(sig):
         L += table(["Skill", "Tokens"], [[r["name"], r["total"]] for r in t["skills"]])
         L += ["### Top subagent types by total tokens", ""]
         L += table(["Type", "Tokens"], [[r["name"], r["total"]] for r in t["subagent_types"]])
+        L += ["### By agent type and model", "",
+              "Requests counted once by request id, as above; models `<synthetic>` and all-zero requests are "
+              "skipped. No prices are applied. Share is of cache creation plus output.", ""]
+        L += table(["Agent and model", "Requests", "Input", "Output", "Cache read", "Cache creation", "Share"],
+                   [[r["agent"], r["messages"], r["input"], r["output"], r["cache_read"], r["cache_creation"],
+                     "%.1f%%" % (100 * r["share"])] for r in t["by_agent_model"]])
+        L += ["### Model overrides", "",
+              "Agent types whose definition sets `model:` but whose requests ran on another model family.", ""]
+        L += table(["Agent", "Defined", "Observed", "Requests"],
+                   [[r["agent"], r["defined"], r["observed"], r["messages"]] for r in t["overrides"]])
+        L += ["### Costliest transcripts", "", "By total tokens (all four counts).", ""]
+        L += table(["Transcript", "Tokens"], [[r["transcript"], r["tokens"]] for r in t["transcripts"]])
+        L += render_growth(t.get("growth") or {}, "agent", "Token growth since the previous run",
+                           "of cache creation plus output")
     return "\n".join(L) + "\n"
 
 
@@ -961,6 +1046,8 @@ def main(argv=None):
     sig = build_signals(stats, args, since, today, main_files, sub_files)
     sig["output_size"]["growth"] = output_growth(sig["output_size"]["families"], out)
     sig["output_size"]["file_growth"] = output_growth(sig["output_size"]["files"], out, "file", "files", "read_share")
+    sig["tokens"]["growth"] = output_growth(sig["tokens"]["by_agent_model"], out, "agent", "by_agent_model",
+                                            "share", "tokens", TOKEN_GROWTH_POINTS)
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.md").write_text(render(sig), encoding="utf-8")
     (out / "signals.json").write_text(json.dumps(sig, indent=2), encoding="utf-8")
@@ -1001,6 +1088,14 @@ def main(argv=None):
             "" if not fg["rows"] else ": " + ", ".join(r["file"] for r in fg["rows"])))
     else:
         print("file growth: UNCHECKED, no earlier run with a files table beside %s" % out)
+    tg = sig["tokens"]["growth"]
+    if tg["baseline"]:
+        print("token growth: %d agent(s) grew %d+ points since %s%s" % (
+            len(tg["rows"]), round(100 * TOKEN_GROWTH_POINTS), tg["baseline_today"],
+            "" if not tg["rows"] else ": " + ", ".join(r["agent"] for r in tg["rows"])))
+    else:
+        print("token growth: UNCHECKED, no earlier run with tokens.by_agent_model beside %s" % out)
+    print("model overrides: %d" % len(sig["tokens"]["overrides"]))
     return 0
 
 

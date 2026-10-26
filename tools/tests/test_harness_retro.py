@@ -652,6 +652,118 @@ class TokenTests(Base):
         self.assertEqual((self.tokens()["input"], self.tokens()["output"]), (0, 4))
 
 
+class TokenAgentTests(Base):
+    def asst(self, mid, model, create=0, out=0, inp=0, read=0, ts=TS, session="s1", line="a"):
+        u = {"input_tokens": inp, "cache_creation_input_tokens": create,
+             "cache_read_input_tokens": read, "output_tokens": out}
+        return rec("assistant", session, ts, uuid="%s-%s" % (mid, line), requestId=mid,
+                   message={"id": mid, "model": model, "usage": u, "content": []})
+
+    def sub(self, name, agent, records):
+        self.env.write("s1/subagents/agent-%s.jsonl" % name, records)
+        (self.env.tr / "s1" / "subagents" / ("agent-%s.meta.json" % name)).write_text(
+            json.dumps({"agentType": agent}), encoding="utf-8")
+
+    def usage(self):
+        return self.env.signals()["tokens"]
+
+    def test_a_request_split_over_lines_counts_once(self):
+        self.env.write("a.jsonl", [self.asst("m1", "claude-opus-5-5", create=10, out=5, inp=2, read=100, line="a"),
+                                   self.asst("m1", "claude-opus-5-5", create=10, out=5, inp=2, read=100, line="b"),
+                                   self.asst("m2", "claude-opus-5-5", create=1, out=1, ts=OLD_TS)])
+        self.env.run()
+        row = self.usage()["by_agent_model"][0]
+        self.assertEqual(row["agent"], "main / claude-opus-5-5")
+        self.assertEqual((row["messages"], row["input"], row["cache_creation"], row["cache_read"], row["output"]),
+                         (1, 2, 10, 100, 5))
+
+    def test_skips_synthetic_and_all_zero_requests(self):
+        self.env.write("a.jsonl", [self.asst("m1", "<synthetic>"), self.asst("m2", "claude-opus-5-5"),
+                                   self.asst("m3", "claude-opus-5-5", out=3)])
+        self.env.run()
+        self.assertEqual([(r["agent"], r["messages"]) for r in self.usage()["by_agent_model"]],
+                         [("main / claude-opus-5-5", 1)])
+
+    def test_request_copied_to_another_file_counts_once(self):
+        self.env.write("a.jsonl", [self.asst("m1", "claude-opus-5-5", out=3)])
+        self.env.write("b.jsonl", [self.asst("m1", "claude-opus-5-5", out=3, session="s2")])
+        self.env.run()
+        self.assertEqual(self.usage()["by_agent_model"][0]["messages"], 1)
+
+    def test_b_subagent_uses_meta_and_main_is_main(self):
+        self.env.write("a.jsonl", [self.asst("m1", "claude-opus-5-5", create=1)])
+        self.sub("1", "implementer", [self.asst("m2", "claude-sonnet-5-5", create=7)])
+        self.env.run()
+        names = {r["agent"] for r in self.usage()["by_agent_model"]}
+        self.assertEqual(names, {"main / claude-opus-5-5", "implementer / claude-sonnet-5-5"})
+        self.assertEqual(self.usage()["transcripts"][0]["transcript"], "implementer 1")
+        self.assertIn("### By agent type and model", self.env.report())
+
+    def test_c_shares_and_other_fold(self):
+        self.env.write("a.jsonl", [self.asst("m1", "claude-opus-5-5", create=250, out=50)])
+        self.sub("1", "implementer", [self.asst("m2", "claude-sonnet-5-5", create=60, out=40)])
+        self.sub("2", "architect", [self.asst("m3", "claude-opus-5-5", create=70, out=30)])
+        self.env.run("--top", "1")
+        rows = self.usage()["by_agent_model"]
+        self.assertEqual([r["agent"] for r in rows], ["main / claude-opus-5-5", "(other)"])
+        self.assertEqual((rows[0]["share"], rows[1]["share"]), (0.6, 0.4))
+        self.assertEqual((rows[1]["messages"], rows[1]["cache_creation"], rows[1]["output"]), (2, 130, 70))
+
+    def _previous(self, rows):
+        prev = self.env.root / "2026-10-01"
+        prev.mkdir()
+        sig = {"window": {"today": "2026-10-01"}, "output_size": {}, "tokens": {}}
+        if rows is not None:
+            sig["tokens"]["by_agent_model"] = rows
+        (prev / "signals.json").write_text(json.dumps(sig), encoding="utf-8")
+
+    def _two_agents(self):
+        self.env.write("a.jsonl", [self.asst("m1", "claude-opus-5-5", create=600)])
+        self.sub("1", "implementer", [self.asst("m2", "claude-sonnet-5-5", create=400)])
+
+    def test_d_growth_flags_only_a_five_point_riser(self):
+        self._two_agents()
+        self._previous([{"agent": "main / claude-opus-5-5", "share": 0.58},
+                        {"agent": "implementer / claude-sonnet-5-5", "share": 0.10}])
+        code, out = self.env.run()
+        g = self.usage()["growth"]
+        self.assertEqual([r["agent"] for r in g["rows"]], ["implementer / claude-sonnet-5-5"])
+        self.assertIn("token growth: 1 agent(s) grew 5+ points since 2026-10-01", out)
+        self.assertIn("### Token growth since the previous run", self.env.report())
+
+    def test_d_previous_run_without_by_agent_model_is_unchecked(self):
+        self._two_agents()
+        self._previous(None)
+        code, out = self.env.run()
+        self.assertIsNone(self.usage()["growth"]["baseline"])
+        self.assertIn("token growth: UNCHECKED", out)
+
+    def _agent_def(self, model):
+        d = self.env.repo / ".claude" / "agents"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "x.md").write_text("---\nname: x\nmodel: %s\n---\nbody\n" % model, encoding="utf-8")
+
+    def test_e_override_when_model_family_differs(self):
+        self._agent_def("sonnet")
+        self.sub("1", "x", [self.asst("m1", "claude-opus-5-5", create=1), self.asst("m2", "claude-opus-5-5", create=1),
+                            self.asst("m3", "claude-sonnet-5-5", create=1)])
+        code, out = self.env.run()
+        self.assertEqual(self.usage()["overrides"],
+                         [{"agent": "x", "defined": "sonnet", "observed": "claude-opus-5-5", "messages": 2}])
+        self.assertIn("### Model overrides", self.env.report())
+        self.assertIn("model overrides: 1", out)
+
+    def test_e_no_override_when_matching_or_inherit_or_undefined(self):
+        self._agent_def("claude-sonnet-5-5")
+        self.sub("1", "x", [self.asst("m1", "claude-sonnet-5-5", create=1)])
+        self.sub("2", "Explore", [self.asst("m2", "claude-opus-5-5", create=1)])
+        self.env.run()
+        self.assertEqual(self.usage()["overrides"], [])
+        self._agent_def("inherit")
+        self.env.run()
+        self.assertEqual(self.usage()["overrides"], [])
+
+
 class MemoryTests(Base):
     def test_stale_card_and_memory_size(self):
         (self.env.mem / "MEMORY.md").write_bytes(b"one\ntwo\nthree\n")
