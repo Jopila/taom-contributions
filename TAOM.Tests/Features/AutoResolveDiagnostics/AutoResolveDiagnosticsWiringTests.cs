@@ -100,6 +100,16 @@ public class AutoResolveDiagnosticsWiringTests
     }
 
     [TestMethod]
+    public void Behavior_RegisterEvents_SubscribesTheCensusToTheAfterLaunchEvent()
+    {
+        var source = RepoPaths.ReadSource("Main/Features/AutoResolveDiagnostics/AutoResolveDiagnosticsBehavior.cs", stripComments: true);
+
+        StringAssert.Contains(source,
+            "CampaignEvents.OnAfterSessionLaunchedEvent.AddNonSerializedListener(this, _ => OnAfterSessionLaunched())",
+            "the census runs from the after-launch event so it sees the races TAOM's restore put back");
+    }
+
+    [TestMethod]
     public void SubModule_AddsTheBehaviorToTheCampaign()
     {
         var source = RepoPaths.ReadSource("Main/SubModule.cs", stripComments: true);

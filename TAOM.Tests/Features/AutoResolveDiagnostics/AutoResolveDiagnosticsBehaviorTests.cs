@@ -150,15 +150,30 @@ public class AutoResolveDiagnosticsBehaviorTests
     // ---- session boundary ---------------------------------------------------------------------
 
     [TestMethod]
-    public void OnSessionLaunched_ResetsTheWriterAndWritesTheCensus()
+    public void OnSessionLaunched_ResetsTheWriter_ButLeavesTheCensusForAfterTheLaunch()
     {
         _sut.OnSessionLaunched();
 
-        Received.InOrder(() =>
-        {
-            _writer.BeginSession();
-            _writer.WriteCensus();
-        });
+        _writer.Received(1).BeginSession();
+        _writer.DidNotReceive().WriteCensus();
+    }
+
+    // The census reads every character's race, and TAOM's race restore runs on session launch. Written
+    // from OnAfterSessionLaunchedEvent (raised after it), it records the restored races, not the engine's reset ones.
+    [TestMethod]
+    public void OnAfterSessionLaunched_WritesTheCensus()
+    {
+        _sut.OnAfterSessionLaunched();
+
+        _writer.Received(1).WriteCensus();
+    }
+
+    [TestMethod]
+    public void OnAfterSessionLaunched_WhenTheWriterThrows_DoesNotPropagate()
+    {
+        _writer.When(w => w.WriteCensus()).Throw(new System.Exception("engine not ready"));
+
+        _sut.OnAfterSessionLaunched();   // must not throw: this runs during session launch
     }
 
     [TestMethod]

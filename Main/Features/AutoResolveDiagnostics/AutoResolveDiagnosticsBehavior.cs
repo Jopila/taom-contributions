@@ -61,6 +61,7 @@ public class AutoResolveDiagnosticsBehavior : CampaignBehaviorBase
         CampaignEvents.OnPartyAddedToMapEventEvent.AddNonSerializedListener(this, OnPartyAddedToMapEvent);
         CampaignEvents.MapEventEnded.AddNonSerializedListener(this, OnMapEventEnded);
         CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, _ => OnSessionLaunched());
+        CampaignEvents.OnAfterSessionLaunchedEvent.AddNonSerializedListener(this, _ => OnAfterSessionLaunched());
     }
 
     /// <summary>A second campaign in the same process must not inherit the first one's state.</summary>
@@ -70,12 +71,25 @@ public class AutoResolveDiagnosticsBehavior : CampaignBehaviorBase
         {
             _pending.Clear();
             _writer.BeginSession();
-            _writer.WriteCensus();
         }
         catch
         {
             // A diagnostic must never propagate into session launch — a throw here would take the
             // whole campaign down at the least recoverable moment.
+        }
+    }
+
+    /// <summary>The census runs after session launch so it sees the races TAOM's restore put back
+    /// (the engine resets non-original characters to their template on load).</summary>
+    internal void OnAfterSessionLaunched()
+    {
+        try
+        {
+            _writer.WriteCensus();
+        }
+        catch
+        {
+            // Same containment as OnSessionLaunched.
         }
     }
 

@@ -199,7 +199,9 @@ co-op settings fingerprint: they gate log lines and change nothing the simulatio
 
 Once per session the feature also dumps every `CharacterObject`'s engine-side stats — tier, the
 power the simulation actually scores it at, formation class, hit points, race — tagged
-`[AutoResolveCensus]`. That turns the offline analyzer's assumptions into data.
+`[AutoResolveCensus]`. That turns the offline analyzer's assumptions into data. It is written on
+`OnAfterSessionLaunchedEvent`, after TAOM's race restore on session launch, so the race column holds the
+restored races and not the engine's template reset; the writer reset stays on session launch.
 
 First run validated: **829/829 tier derivations correct**, **829/829 classifier agreements**, hit
 points **uniformly 100** (so race and armour never reach the removal roll). It also caught a real
@@ -241,7 +243,7 @@ multipliers from what actually fought.
 | `Main/Features/AutoResolveDiagnostics/Domain/BattleLogRecord.cs` | engine-free DTO; the `[JsonProperty]` names are the contract with the Python tool |
 | `Main/Features/AutoResolveDiagnostics/Domain/BattleStartSnapshot.cs` | the start-of-battle capture: per-party rosters plus each side's leader-derived inputs |
 | `Main/Features/AutoResolveDiagnostics/AutoResolveLogFormatter.cs` | pure DTO → one tagged JSON line; the whole testable surface |
-| `Main/Features/AutoResolveDiagnostics/AutoResolveDiagnosticsBehavior.cs` | `CampaignBehaviorBase`. Event wiring plus the pending-battle map, nothing else (ADR-002). Subscribes `MapEventStarted`, `OnPartyAddedToMapEventEvent`, `MapEventEnded` and `OnSessionLaunchedEvent` |
+| `Main/Features/AutoResolveDiagnostics/AutoResolveDiagnosticsBehavior.cs` | `CampaignBehaviorBase`. Event wiring plus the pending-battle map, nothing else (ADR-002). Subscribes `MapEventStarted`, `OnPartyAddedToMapEventEvent`, `MapEventEnded`, `OnSessionLaunchedEvent` (reset) and `OnAfterSessionLaunchedEvent` (census) |
 | `Main/Features/AutoResolveDiagnostics/IAutoResolveLogWriter.cs` + `AutoResolveLogWriter.cs` | the write half — record ids, the once-per-session census, emit policy. Split out of the behavior, which had reached 237 lines against ADR-002's 150. The pending map stayed behind because it is keyed by the sealed `MapEvent` (ADR-007) |
 | `Main/Features/AutoResolveDiagnostics/AutoResolveDiagnosticsSettingsProvider.cs` | MCM seam; each `??` fallback pinned against the matching compiled default (`?? true` for the master, `?? false` for the census) |
 | `Main/Features/AutoResolveDiagnostics/AutoResolveDiagnosticsIoC.cs` | DryIoc registration |
