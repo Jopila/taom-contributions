@@ -1016,8 +1016,8 @@ Three consequences worth naming, because the score feeds more than trust.
   That unlocks 30 XP, 20 gold, 2 trust, 3 renown and 2 FieldRep at the top of the ladder.
 - **Reputation accrues into nothing.** `FieldRep` and its three siblings have one writer and no
   reader; `TrustLedger.DominantDomain` claims to drive "officer-duty selection + status flavor" and
-  is called from no production path. `ArmyRhythmSnapshotService.HighScrutiny` is the same shape:
-  assigned, never read.
+  is called from no production path. The rhythm snapshot used to carry a `HighScrutiny` flag of
+  the same shape; it was deleted with the other unread snapshot fields (#843).
 - **Renown is the one payout that reaches the wider campaign**, through `GainRenownAction` to the
   player's own clan, so a better merit distribution is mild clan-tier inflation.
 
