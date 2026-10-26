@@ -49,21 +49,27 @@ between the plan and the tests, and one estimate ("many") was never measured.
 
 - The camp-work adapter and its interface stay in the feature folder, not `Main/Adapters/`. Seven feature-local adapters have the same shape.
 - The adapter reads Far Watch's `FarWatchStore` directly: `IScoutIntelQuery.IsScoutAway` covers only settlement rides, and work must also stop for any ride.
-- FOLLOW-UP: no issue: the enlisted survival redirect (`SurvivalChanceLine.RedirectEnlistedPlayer`) rolls the player against the commander's surgeon, which can make an enlisted player with Cheat Death or higher Medicine more likely to die than freelancing. This is an Enlistment design question for Mike.
 
 ## Follow-ups (2026-10-26)
 
-The follow-up change did these, at Mike's direction:
-
+The follow-up change (113d3483b) did these, at Mike's direction:
 - **Shared predicate:** the seven identical copies of the single-player predicate now call `CoopSessionPolicy.IsSinglePlayerAuthority`, and `CampGate` is deleted. The three-term copies in other features (no authority term) stay as they are.
-- **Survival split:** `TaomPartyHealingModel.GetSurvivalChance` moved to `SurvivalChanceLine` (engine reads) and `SurvivalChanceMath` (pure math); the model is now 52 lines.
+- **Survival split:** `TaomPartyHealingModel.GetSurvivalChance` moved to `SurvivalChanceLine` (engine reads) and `SurvivalChanceMath` (pure math).
 - **Walker scope stack:** `PrefabBindingWalker` keeps a scope stack, so each `{..}` pops one level, and checks member kinds more strictly: an `@value` or `DataSource` binds a property, a `Command` binds a method, and a private base-class member is invisible.
 - **Shared reader:** `PrefabNodes.Of` replaces the six copies of the prefab node reader in the tests.
 - **Translator placeholder check:** it now sees `{newline}`, mixed-case tokens and expression conditional heads like `{?DAYS>1}`.
 - **Honey and wax:** dropped by Mike's decision. No such item exists in any installed module, so camp work yields only goods the game has: meat, hardwood and fish.
+
+A second change removed the enlisted survival redirect (Mike: do what is best for long-term stability):
+- **Enlisted survival roll:** the healing model rolled an enlisted player against his commander's party. Its premise, that
+  his own party had no surgeon, was false: vanilla reads the Medicine bonus and Cheat Death off that party's `MobileParty.EffectiveSurgeon`, which is his assigned surgeon while that hero is in his party and otherwise himself as party leader. The redirect replaced his surgeon with the commander's, worse for
+  some players, and it also gave him the commander's culture survival bonus and the commander side's career TroopSurvival
+  passive, and it made the model read Enlistment state on the player's own rolls. An enlisted player now rolls exactly as a
+  freelancer does, with his own surgeon, culture bonus and passive; the healing model takes no Enlistment state and is 46 lines.
 
 ## Lessons appended
 
 - `lessons/gamemodels-services.md`: a timed job re-checks every gate its start checks, on each step that writes.
 - `lessons/build-tooling-workflow.md`: a plan's direction words become test names, and a plan decision resting on "many" is measured first.
 - `lessons/testing-qa.md`: a service returns a reason, the hook renders the text, or the service's tests need the game.
+- `lessons/adapters-taleworlds-api.md`: read the engine's fallback before compensating for a missing role.

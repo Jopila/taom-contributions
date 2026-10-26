@@ -24,6 +24,10 @@ inactive one-hero party with no surgeon and no perks, so going down in the comma
 against nothing. **Serving made the player strictly more likely to die than freelancing**, with no
 in-game signal.
 
+**Superseded 2026-10-26:** the premise above is false. `MobileParty.EffectiveSurgeon` falls back to the party
+leader, so the enlisted player's own party rolled him with his own Medicine and Cheat Death. The redirect built on
+this claim is removed; see `docs/reviews/rca-camp-work-2026-10-26.md`.
+
 SAS fixes this with a Prefix on `GetSurvivalChance` plus a `[ThreadStatic]` flag plus a
 `PartyBase.get_MapEvent` Postfix (their MainParty has no MapEvent to satisfy the redirect). TAOM
 already owns `TaomPartyHealingModel`, so the fix is eleven lines inside a GameModel we control and

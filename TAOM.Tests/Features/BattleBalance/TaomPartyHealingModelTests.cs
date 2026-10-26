@@ -115,15 +115,14 @@ public class TaomPartyHealingModelTests
         Assert.AreEqual(expected, SurvivalChanceMath.ApplyCareerSurvival(survival, magnitude), 0.0001f);
     }
 
+    // An enlisted player rolls survival with his own party, as a freelancer does: vanilla reads Medicine and Cheat Death off
+    // that party's EffectiveSurgeon (his assigned surgeon, else himself). The old redirect to the commander's party is gone
+    // (2026-10-26), so the model takes no Enlistment state.
     [TestMethod]
-    public void RedirectEnlistedPlayer_NullParty_ReturnsNullWithoutTouchingService()
+    public void SurvivalRoll_ReadsNoEnlistmentState()
     {
-        var enlistment = NSubstitute.Substitute.For<TAOM.Features.Enlistment.IEnlistmentStateQuery>();
-
-        var result = TAOM.Features.BattleBalance.Hooks.SurvivalChanceLine.RedirectEnlistedPlayer(enlistment, null, null);
-
-        Assert.IsNull(result);
-        Assert.AreEqual(0, enlistment.ReceivedCalls().Count());
+        var parameters = typeof(TaomPartyHealingModel).GetConstructors().Single().GetParameters();
+        Assert.IsFalse(parameters.Any(p => p.ParameterType == typeof(TAOM.Features.Enlistment.IEnlistmentStateQuery)));
     }
 
     [TestMethod]

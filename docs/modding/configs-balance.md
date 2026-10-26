@@ -86,7 +86,7 @@ A culture with no row gets nothing. There is no fallback culture.
 | Field | Type | Required | Default when absent | What it does | Read at (file:line) |
 |---|---|---|---|---|---|
 | `TroopPower.TierPower.T0` to `T10` | float | no | `(2 + tier) * (10 + tier) * 0.02` | Base military power of a troop at that tier. Legal `[0.01, 1000]`, else reverts to the compiled default with a warning | `BattleBalanceConfigProvider.cs:66`, `BattleBalanceConfig.cs:20` |
-| `CasualtyRatios.EnableCulturalSurvivalBonuses` | bool | no | `true` | Second gate on the culture bonuses below | `TaomPartyHealingModel.cs:57` |
+| `CasualtyRatios.EnableCulturalSurvivalBonuses` | bool | no | `true` | Second gate on the culture bonuses below | `Hooks/SurvivalChanceLine.cs` (`Apply`) |
 | `CasualtyRatios.CulturalSurvivalBonuses.<cultureId>` | float | no | 0 | `newDeathChance = vanillaDeathChance * (1 - bonus)`. Legal `[-1, 1]`, else reverts to 0 with a warning | `BattleBalanceConfigProvider.cs:82-85` |
 
 **Read the tier block twice before you edit it.** `T7` to `T10` are never read while MCM is loaded: `CalculateTierPower` switches straight to the four MCM sliders for tier 7 and up (`TaomMilitaryPowerModel.cs:42-48`), whose defaults are 2.91 / 3.26 / 3.61 / 3.96 (`TaomSettings.cs:255-270`), the same numbers the JSON happens to carry. `T0` to `T6` are read only when "Override Vanilla Tiers (T1-T6)" is on, and it ships off (`TaomSettings.cs:250`). So out of the box every value in the `TierPower` block is inert and the tier curve you feel in play is vanilla's formula plus four sliders.

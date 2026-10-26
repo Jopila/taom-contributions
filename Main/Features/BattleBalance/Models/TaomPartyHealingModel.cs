@@ -13,29 +13,23 @@ public class TaomPartyHealingModel : DefaultPartyHealingModel
     private readonly IBattleBalanceSettingsProvider _settings;
     private readonly IBattleBalanceConfigProvider _configProvider;
     private readonly ICareerPassiveService _careerPassives;
-    private readonly TAOM.Features.Enlistment.IEnlistmentStateQuery _enlistment;
     private readonly TAOM.Features.FieldCamp.Activities.CampRestHealing _campRest;
 
     public TaomPartyHealingModel(IBattleBalanceSettingsProvider settings,
         IBattleBalanceConfigProvider configProvider,
-        ICareerPassiveService careerPassives,
-        TAOM.Features.Enlistment.IEnlistmentStateQuery enlistment, TAOM.Features.FieldCamp.Activities.CampRestHealing campRest)
+        ICareerPassiveService careerPassives, TAOM.Features.FieldCamp.Activities.CampRestHealing campRest)
     {
         _campRest = campRest;
         _settings = settings;
         _configProvider = configProvider;
         _careerPassives = careerPassives;
-        _enlistment = enlistment;
     }
 
-    // The enlisted-player redirect has to run before vanilla's roll, the cultural and career adjustments after it.
+    // The cultural and career adjustments apply on top of vanilla's roll.
     public override float GetSurvivalChance(PartyBase party, CharacterObject character,
-        DamageTypes damageType, bool canDamageKillEvenIfBlunt, PartyBase enemyParty = null)
-    {
-        party = SurvivalChanceLine.RedirectEnlistedPlayer(_enlistment, party, character);
-        return SurvivalChanceLine.Apply(_settings, _configProvider, _careerPassives, party,
+        DamageTypes damageType, bool canDamageKillEvenIfBlunt, PartyBase enemyParty = null) =>
+        SurvivalChanceLine.Apply(_settings, _configProvider, _careerPassives, party,
             base.GetSurvivalChance(party, character, damageType, canDamageKillEvenIfBlunt, enemyParty));
-    }
 
     public override ExplainedNumber GetDailyHealingForRegulars(PartyBase party, bool isPrisoners, bool includeDescriptions = false) =>
         TAOM.Features.FieldCamp.Activities.Hooks.CampRestModelLine.Apply(_campRest, party, isPrisoners, false, base.GetDailyHealingForRegulars(party, isPrisoners, includeDescriptions));

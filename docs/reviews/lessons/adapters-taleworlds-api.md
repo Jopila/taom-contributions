@@ -1529,3 +1529,12 @@ differs; `IRelationGrantService.Grant` returns it.
 - **Prevent:** a notice reads the value `Grant` returns, and a test fakes a landed value that differs from the ask.
   Prefer vanilla's localized `str_your_relation_increased_with_notable` text (as Tokens of Esteem does) over a new key.
 - **Source:** `docs/reviews/rca-notable-services-2026-10-26.md` finding 3.
+### Read the engine's fallback before compensating for a missing role (enlisted survival redirect, 2026-10-26)
+The healing model redirected an enlisted player's survival roll to his commander's party, on the premise that his own
+one-hero party had no surgeon. Vanilla's effective surgeon falls back to the party leader, so the player already rolled
+with his own Medicine and Cheat Death, and the redirect made some players more likely to die.
+- **Why missed:** the comment stated the premise. The 2026-08-08 review did read the effective-role getters and their
+  leader fallback, but applied them to the commander's party and never to the player's own party.
+- **Prevent:** before code that makes up for an engine gap (a missing role, perk or bonus), read the engine getter that
+  fills that role and quote its fallback in the comment. If the fallback already covers the case, delete the workaround.
+- **Source:** [rca-camp-work-2026-10-26.md](../rca-camp-work-2026-10-26.md) Follow-ups.
