@@ -30,6 +30,11 @@ public class CoopPlayerControlQueryTests
             => throw new InvalidOperationException("registry torn down");
     }
 
+    public static class OddShapePlayerManager
+    {
+        public static bool TryGetControlledObjectInfo(object obj, object info) => true;
+    }
+
     private static ICoopSessionProvider Session(bool active)
     {
         var s = Substitute.For<ICoopSessionProvider>();
@@ -133,6 +138,31 @@ public class CoopPlayerControlQueryTests
         Assert.AreEqual(PlayerControl.Unknown, q.Classify(new object(), false));
 
         logger.Received(1).LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void CompiledProbeBound_TheFakeRegistry_BindsAndCompiles()
+    {
+        var q = new CoopPlayerControlQuery(Session(true), Substitute.For<IModLogger>(), _ => typeof(FakePlayerManager));
+
+        Assert.IsTrue(q.CompiledProbeBound, "the registry probe must be compiled, not reflected, on the hot path");
+    }
+
+    [TestMethod]
+    public void CompiledProbeBound_ARegistryOfAnotherShape_KeepsTheInvokePath()
+    {
+        var q = new CoopPlayerControlQuery(Session(true), Substitute.For<IModLogger>(), _ => typeof(OddShapePlayerManager));
+
+        Assert.IsFalse(q.CompiledProbeBound);
+        Assert.AreEqual(PlayerControl.Player, q.Classify(new object(), false));
+    }
+
+    [TestMethod]
+    public void CompiledProbeBound_NoRegistryType_IsFalse()
+    {
+        var q = new CoopPlayerControlQuery(Session(true), Substitute.For<IModLogger>(), _ => null);
+
+        Assert.IsFalse(q.CompiledProbeBound);
     }
 
     [TestMethod]

@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Reflection;
 using TAOM.Core.Logging;
 using TAOM.Dependencies.Foundation;
@@ -15,8 +16,9 @@ namespace TAOM.Features.CoopInterop;
 /// ControlledObjectInfo)</c> -> bool. One method answers for a party and a clan (a clan counts when its
 /// leader is registered). During a session the registry alone decides, including for the local entity.
 ///
-/// The registry lists joiners only; the server's own placeholder hero is never in it. Only the MethodInfo
-/// is cached: whether an entity is a player changes as peers join and leave.
+/// The registry lists joiners only; the server's own placeholder hero is never in it. Only the bound method and its
+/// compiled form are cached: whether an entity is a player changes as peers join and leave. The probe is compiled once into
+/// a <c>Func&lt;object, bool&gt;</c>; a method of another shape keeps the <c>MethodInfo.Invoke</c> path.
 /// </summary>
 public sealed class CoopPlayerControlQuery : IPlayerControlQuery
 {
@@ -25,7 +27,7 @@ public sealed class CoopPlayerControlQuery : IPlayerControlQuery
     private readonly ICoopSessionProvider _session;
     private readonly IModLogger _logger;
     private readonly Func<string, Type?> _findType;
-    private readonly Lazy<MethodInfo?> _tryGetControlledObjectInfo;
+    private readonly Lazy<RegistryProbe?> _probe;
     private bool _warnedOnce;
 
     public CoopPlayerControlQuery(ICoopSessionProvider session, IModLogger logger)
@@ -43,8 +45,11 @@ public sealed class CoopPlayerControlQuery : IPlayerControlQuery
         // Bind once, success or failure. The registry type lives in GameInterface, which Coop loads
         // in its own OnSubModuleLoad, so it is present before any session can be live; a retry would
         // only rescan the AppDomain for an answer that cannot change.
-        _tryGetControlledObjectInfo = new Lazy<MethodInfo?>(Bind);
+        _probe = new Lazy<RegistryProbe?>(Bind);
     }
+
+    // Internal for TAOM.Tests: true when the registry method was bound and compiled to a delegate.
+    internal bool CompiledProbeBound => _probe.Value?.Compiled != null;
 
     public PlayerControl OfParty(MobileParty? party)
     {
@@ -81,14 +86,24 @@ public sealed class CoopPlayerControlQuery : IPlayerControlQuery
 
     private PlayerControl ReadRegistry(object entity)
     {
-        var method = _tryGetControlledObjectInfo.Value;
-        if (method == null) return PlayerControl.Unknown;
+        var probe = _probe.Value;
+        if (probe == null) return PlayerControl.Unknown;
 
         try
         {
-            // bool TryGetControlledObjectInfo(object, out ControlledObjectInfo): only the bool matters.
-            var args = new object?[] { entity, null };
-            return method.Invoke(null, args) is true ? PlayerControl.Player : PlayerControl.NotPlayer;
+            bool registered;
+            if (probe.Compiled != null)
+            {
+                registered = probe.Compiled(entity);
+            }
+            else
+            {
+                // bool TryGetControlledObjectInfo(object, out ControlledObjectInfo): only the bool matters.
+                var args = new object?[] { entity, null };
+                registered = probe.Method.Invoke(null, args) is true;
+            }
+
+            return registered ? PlayerControl.Player : PlayerControl.NotPlayer;
         }
         catch (Exception ex)
         {
@@ -98,7 +113,7 @@ public sealed class CoopPlayerControlQuery : IPlayerControlQuery
         }
     }
 
-    private MethodInfo? Bind()
+    private RegistryProbe? Bind()
     {
         try
         {
@@ -111,14 +126,51 @@ public sealed class CoopPlayerControlQuery : IPlayerControlQuery
                 LogOnce($"'{PlayerManagerTypeName}.TryGetControlledObjectInfo' not found: a co-op session " +
                         "is live but its player registry is unreadable, so player control is treated as " +
                         "unknown. If this is BannerlordCoop, its API may have changed.");
+                return null;
             }
-            return method;
+
+            return new RegistryProbe(method, Compile(method));
         }
         catch (Exception ex)
         {
             LogOnce($"binding failed, treating player control as unknown: {ex.Message}");
             return null;
         }
+    }
+
+    // Builds e => TryGetControlledObjectInfo(e, out _). Any other shape or a compile failure returns null, so the
+    // reflection path still answers: the compiled form is an optimisation, never a requirement.
+    private static Func<object, bool>? Compile(MethodInfo method)
+    {
+        try
+        {
+            var parameters = method.GetParameters();
+            if (method.ReturnType != typeof(bool) || parameters.Length != 2
+                || parameters[0].ParameterType != typeof(object) || !parameters[1].ParameterType.IsByRef)
+                return null;
+
+            var entity = Expression.Parameter(typeof(object), "entity");
+            var info = Expression.Variable(parameters[1].ParameterType.GetElementType()!);
+            return Expression.Lambda<Func<object, bool>>(
+                Expression.Block(new[] { info }, Expression.Call(method, entity, info)), entity).Compile();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private sealed class RegistryProbe
+    {
+        internal RegistryProbe(MethodInfo method, Func<object, bool>? compiled)
+        {
+            Method = method;
+            Compiled = compiled;
+        }
+
+        internal MethodInfo Method { get; }
+
+        internal Func<object, bool>? Compiled { get; }
     }
 
     private void LogOnce(string message)

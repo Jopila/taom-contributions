@@ -139,6 +139,29 @@ public class CoopMissionBindingTests
 
     [TestMethod]
     [TestCategory("BindingVerification")]
+    public void PlayerManager_HasTheRegistryProbeTheControlQueryCompiles()
+    {
+        var manager = Require("GameInterface.Services.Players.PlayerManager");
+
+        var probe = manager.GetMethod("TryGetControlledObjectInfo", BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(probe, "PlayerManager.TryGetControlledObjectInfo(object, out ControlledObjectInfo)");
+        Assert.AreEqual(typeof(bool), probe!.ReturnType);
+        var parameters = probe.GetParameters();
+        Assert.AreEqual(2, parameters.Length);
+        Assert.AreEqual(typeof(object), parameters[0].ParameterType);
+        Assert.IsTrue(parameters[1].ParameterType.IsByRef, "the second parameter is the out ControlledObjectInfo");
+
+        var logger = Substitute.For<IModLogger>();
+        var session = Substitute.For<ICoopSessionProvider>();
+        session.IsSessionActive.Returns(true);
+        var query = new CoopPlayerControlQuery(session, logger, Find);
+
+        Assert.IsTrue(query.CompiledProbeBound, "the real registry method binds and compiles");
+        logger.DidNotReceive().LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    [TestCategory("BindingVerification")]
     public void RealBind_OfTheAuthorityAndTheSessionProvider_WarnsNothing()
     {
         var logger = Substitute.For<IModLogger>();

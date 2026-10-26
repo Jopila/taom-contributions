@@ -80,6 +80,12 @@ public class CoopVetoClassificationTests
             "which defers to the host under co-op; the same unreplicated WarOfTheRingService.CurrentPhase."),
         ["AcceptCallToWarAgreementDecision_IsAllowed_Patch"] = new(CoopVeto.GatedForCoop,
             "The called kingdom's side of the same ballot; same hook, same host deferral."),
+        ["Patch118_ProjectStewardXp"] = new(CoopVeto.GatedForCoop,
+            "Seasoned Hosts (#890): skips DefaultSkillLevelingManager.OnSettlementProjectFinished, a replicated " +
+            "mutation (1000 Steward XP on a hero's developer). The condition is a per-peer MCM switch, which no " +
+            "co-op mod exchanges, so two peers can hold different values. SeasonedHostsService.SkipsProjectStewardXp " +
+            "returns false while ICoopSessionProvider.ShouldDeferToHost, so a co-op client, and every peer when the " +
+            "role is unprobeable, runs vanilla and the host's grant is the only one."),
 
         // --- Reviewed, safe to keep enforcing ------------------------------------------------
         ["SupplyCaravanEncounterPatch"] = new(CoopVeto.ReviewedSafe,
@@ -564,10 +570,10 @@ public class CoopVetoClassificationTests
     }
 
     [TestMethod]
-    public void GatedVetoes_AreExactlyTheDiplomacySeven()
+    public void GatedVetoes_AreExactlyThePinnedSet()
     {
-        // Pins the D1 fix. If a gate is removed, this fails rather than the divergence silently
-        // returning — the failure mode is a corrupted co-op save, which no other test can catch.
+        // Pins the seven diplomacy gates (D1) and Seasoned Hosts' Patch118 (#890). If a gate is removed, this fails
+        // rather than the divergence silently returning; the failure mode is a corrupted co-op save, which no other test can catch.
         var gated = Registry
             .Where(kv => kv.Value.Veto == CoopVeto.GatedForCoop)
             .Select(kv => kv.Key)
@@ -583,6 +589,7 @@ public class CoopVetoClassificationTests
                 "AllianceCampaignBehavior_StartCallToWarAgreement_Patch",
                 "DeclareWarAction_ApplyInternal_Patch",
                 "MakePeaceAction_ApplyInternal_Patch",
+                "Patch118_ProjectStewardXp",
                 "ProposeCallToWarAgreementDecision_IsAllowed_Patch",
             },
             gated.ToArray());

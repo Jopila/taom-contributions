@@ -6690,6 +6690,22 @@
 
     <string id="taom_provender_block_encounter" text="Not while another party stands before us." />
 
+    <string id="taom_seasoned_hosts_training_bonus" text="AI Lord Party Training Bonus" />
+
+    <string id="taom_seasoned_hosts_training_bonus_hint" text="Extra daily and battle training XP for the troops of AI lord parties, as a fraction: 0.25 is 25 percent more. Applies to a lord party that is not yours, not in your clan and not in an army you lead; caravans and garrisons are left out. In a co-op session only the host's value applies; while a co-op mod TAOM cannot probe (such as BannerlordTogether) is enabled, it is off for every player. 0 is vanilla. Between 0 and 1. Default: 0.25." />
+
+    <string id="taom_seasoned_hosts_skill_xp" text="AI Lord Skill XP Multiplier" />
+
+    <string id="taom_seasoned_hosts_skill_xp_hint" text="Multiplies the skill XP that AI lords earn, so their skills climb faster. Skills only: a lord's hero level is not sped up. Never applies to you or to any lord of your clan, spouse and family included. In a co-op session only the host's value applies; while a co-op mod TAOM cannot probe (such as BannerlordTogether) is enabled, it is off for every player. 1 is vanilla. Between 1 and 2. Default: 1.25." />
+
+    <string id="taom_seasoned_hosts_learning_floor" text="Learning Never Stops" />
+
+    <string id="taom_seasoned_hosts_learning_floor_hint" text="Past a skill's learning limit the game lowers the learning rate until it reaches zero and the skill stops growing. When on, the rate never falls below 0.05, so a skill keeps growing very slowly. This applies to every hero, you included. When off, the game's own rule applies. Default: on." />
+
+    <string id="taom_seasoned_hosts_no_steward_xp" text="No Steward XP From Finished Projects" />
+
+    <string id="taom_seasoned_hosts_no_steward_xp_hint" text="When on, a settlement project that finishes grants no Steward XP, which the game otherwise gives 1000 of each time. This covers every settlement, yours included. In a co-op session only the host skips the grant; while a co-op mod TAOM cannot probe (such as BannerlordTogether) is enabled, the game's grant is left alone. Default: off." />
+
   </strings>
 
 </base>

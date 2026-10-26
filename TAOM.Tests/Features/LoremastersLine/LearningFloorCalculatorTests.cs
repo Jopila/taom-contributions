@@ -33,6 +33,22 @@ public class LearningFloorCalculatorTests
         Assert.AreEqual(1.25f * (1f + 2f + 2f), floor.FullRate, 1e-4f);
     }
 
+    [DataTestMethod]
+    [DataRow(40, 5f, 2)]
+    [DataRow(0, 1f, 0)]
+    [DataRow(100, 10f, 5)]
+    public void VanillaShaped_ARateFloorOfFivePercent_LeavesTheMarkerWhereItWas(int limit, float attribute, int focus)
+    {
+        var vanilla = Vanilla(limit, attribute, focus);
+
+        var withoutFloor = LearningFloorCalculator.Find(vanilla);
+        var withFloor = LearningFloorCalculator.Find(skill => Math.Max(0.05f, vanilla(skill)));
+
+        Assert.IsTrue(withoutFloor.HasFloor);
+        Assert.AreEqual(withoutFloor.Level, withFloor.Level);
+        Assert.AreEqual(0.05f, withFloor.FloorRate, 1e-6f);
+    }
+
     [TestMethod]
     public void Steep_FloorIsFoundOneLevelPastTheLimit()
     {

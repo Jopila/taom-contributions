@@ -239,8 +239,10 @@ is scanned. In a session the registry alone decides, the local entity included: 
 authority process, the registry lists joiners only, and on the co-op server `Hero.MainHero`, `MainParty`
 and the player faction are temporarily a guest's inside `BarterPlayerContext` and `MainHeroSubstitutionScope`,
 so the local comparison is not a stable identity there. The decision is one reflection call to Coop's static
-`PlayerManager.TryGetControlledObjectInfo(object, out ControlledObjectInfo)` (`:90-91`). The
-`MethodInfo` is bound once through a `Lazy`, success or failure; the answer is never cached because
+`PlayerManager.TryGetControlledObjectInfo(object, out ControlledObjectInfo)`. The method is bound
+once through a `Lazy`, success or failure, and compiled there into a `Func<object, bool>` (an expression
+with a block variable for the `out` parameter, as `CoopSessionProvider` does); a method of another shape
+keeps the `MethodInfo.Invoke` path. The answer is never cached because
 players join and leave. A clan counts when its `Leader` is registered. Coop registers each player's
 hero, main party and clan. It does not register companions or companion-led parties, and an offline
 player's party stays registered. The server's own placeholder hero is not in the registry.
@@ -254,6 +256,7 @@ side that costs least:
 | Alignment desertion (`DesertionOwnerPolicy.ShouldSkip`) | Player: no troops desert | Same reason |
 | War of the Ring participation (`WarEventSnapshotAdapter.IsPlayerRelated`) | Not involved | A guess would let a stranger's wars move the shared meter |
 | Special resource earning (`SpecialResourceEarnPolicy.MayEarn`) | Not a player: nobody earns | An earn writes a balance, so doubt means no write |
+| Seasoned Hosts (`SeasonedHostsAdapter`) | Player: no bonus | The skill XP multiplier and the training factor are boosts for AI only, so doubt means none |
 
 The recruit charge does not use this query: it follows the Patch113 scope instead (below).
 
@@ -261,9 +264,9 @@ The recruit charge does not use this query: it follows the Patch113 scope instea
 reads `NotPlayer` and the troop weight shed still applies to it; desertion goes by owner clan, which
 is registered through its leader.
 
-**Cost.** About 0.3 microseconds and 217 bytes per non-local entity in a live session (reflection
-invoke plus the argument array, `IPlayerControlQuery.cs:14-16`). Convert to compiled delegates
-before adding an hourly or per-frame caller.
+**Cost.** One compiled delegate call per non-local entity in a live session, with no argument array.
+The reflection invoke it replaced cost about 0.3 microseconds and 217 bytes; it remains only as the
+fallback for a registry method of another shape.
 
 **Recruit attribution (Patch113).** Coop's server applies a guest's recruitment inside
 `TroopRosterInterface.HandleOnRecruitmentDone(string mobilePartyId, TroopInfo[])`, run on the game
@@ -389,6 +392,8 @@ BannerlordCoop does not use. Its three settings are classified as presentation a
 Lines of Descent (the Family Tree popup and clan relation text, [lines-of-descent.md](lines-of-descent.md)) is deliberately ungated: it is a read-only UI with no campaign behavior, no Harmony patch and nothing saved, so every peer reads the family lists it already holds.
 
 `TaomMobilePartyAIModel` (Help Unlooked-For, [unlooked-for-aid.md](unlooked-for-aid.md)) has no gate because it is a game model, not a campaign behavior, so `CoopGateDocCoverageTests` asks for no row. Its one override, `ShouldConsiderAvoiding`, is a calculation inside the engine's party AI tick, which the co-op mod already limits to the host; it writes no state and reads only the two parties' own fields, plus the besieger camp's parties and the lord's army for their strength. The model is reached on the AI worker and on the main thread (`CheckPartyNeedsUpdate` runs `Tick(0)`). The player-led exclusion keys on `MobileParty.MainParty`: on a co-op host only the host's own siege is excluded, because the server has no main party for a client, so an AI lord can still be lifted at a client's siege.
+
+Seasoned Hosts (AI lord training and skill XP, the learning floor and the Steward XP skip, [seasoned-hosts.md](seasoned-hosts.md)) has no campaign behavior to gate, so `CoopGateDocCoverageTests` asks for no row. The two bonuses are model answers (`TaomGenericXpModel.GetXpMultiplier`, `TaomPartyTrainingModel`) that return the neutral factor while `ICoopSessionProvider.ShouldDeferToHost`, so a co-op client gets no bonus, the host's campaign applies it, and every peer is off while a co-op mod TAOM cannot probe is enabled. Eligibility reads `IPlayerControlQuery`, and `Unknown` counts as a player (no bonus). The learning floor (`TaomCharacterDevelopmentModel`) runs on every peer from a per-peer setting, since its signature carries no hero. It shapes the skill XP `HeroDeveloper.AddSkillXp` writes, but BannerlordCoop lets only the host write skill XP, so the host's setting decides there; under a co-op mod TAOM cannot probe, each peer applies its own (UNVERIFIED whether that mod syncs skill XP). `Patch118_ProjectStewardXp` skips a replicated mutation (1000 Steward XP on a hero's developer), so it is `GatedForCoop` and `SkipsProjectStewardXp` returns false while deferring.
 
 Hearth Roll (the red tint on an unhappy companion's row and the age beside a child's name on the clan screen, [hearth-roll.md](hearth-roll.md)) is deliberately ungated: it is a read-only UI with nothing saved, and each peer sees its own companions.
 
@@ -564,12 +569,12 @@ to characterise. The existing try/catch around acceptance is containment, not co
 
 ## What is NOT done
 
-- **No MCM settings parity: reported, not yet exchanged.** TAOM ships **475** settings across
+- **No MCM settings parity: reported, not yet exchanged.** TAOM ships **479** settings across
   four MCM classes (the 284 here counted `[SettingPropertyGroup]` lines alongside the properties;
-  the split is 445 in `TaomSettings`, 19 in `BattleLoadDiagnosticsSettings`, 10 in
+  the split is 449 in `TaomSettings`, 19 in `BattleLoadDiagnosticsSettings`, 10 in
   `CrashReportSettings` and 1 in `BlowDiagnosticsSettings`).
-  **322 are simulation-relevant**, traced to the feature that consumes each one and kept when that feature
-  ships a GameModel, CampaignBehavior, MissionBehavior or Harmony patch; all 322 are in
+  **326 are simulation-relevant**, traced to the feature that consumes each one and kept when that feature
+  ships a GameModel, CampaignBehavior, MissionBehavior or Harmony patch; all 326 are in
   `TaomSettings`. The 153 excluded (67 counted 2026-09-22, less the Native Skin Fixes toggle removed with the feature 2026-10-05, the 38 Realm Borders settings added from 2026-09-30 to 2026-10-08, the Crash Report AfterStart dev trigger added 2026-10-01, the Battle Corpses advice toggle and button added 2026-10-01, and the thirteen Menus & Loading Screens settings added 2026-10-01, #704, and the three tick profiler settings added 2026-10-02, and the hitch probe toggle added 2026-10-02, and the Animation Clip Memory probe toggle added 2026-10-02, and the map profiler toggle added 2026-10-03, and the Load-Time Stamps toggle added 2026-10-03, and the Race Abilities war cry, message and debug-log toggles added 2026-10-04, and the Race Abilities glow toggle added 2026-10-04, and the Crash Report mission-start survival toggle added 2026-10-08, and the Crash Report skeleton buffer guard and watch toggles added 2026-10-08, and the Map Performance nameplate cull and map view release settings added 2026-10-08, and the War Chronicle announcements toggle added 2026-10-08, and the three Animation Variety settings and the swing alternative probe toggle added 2026-10-17, and the Hidden Hosts toggle added 2026-10-18, and the Fell Foes debug log toggle added 2026-10-19, the two Telchar's Mark settings added 2026-10-19, #875, the two Reeve's Ledger switches added 2026-10-19, #857, and the Lost Footing census toggle added 2026-10-20, #894, the Watch-Silver and Tidings of the Lists switches added 2026-10-21, #859, less the two Quick Actions "include equipped" toggles removed 2026-10-23, #925, and the Cardolan and Rhudaur realm colours added 2026-10-23, #978, and the Loremaster's Line switch added 2026-10-23, #877, and the Hearth Roll tint toggle added 2026-10-23, #906) are instrumentation, player-local convenience,
   presentation, two action buttons, and the three time-acceleration knobs whose UI co-op already
   suppresses; the list with its reasons is
@@ -582,7 +587,7 @@ to characterise. The existing try/catch around acceptance is containment, not co
   excluded name may stop matching a real property, and no two settings classes may share a
   property name.
 
-  `SettingsFingerprint` hashes those 322: one code per MCM group plus a global, culture-invariant
+  `SettingsFingerprint` hashes those 326: one code per MCM group plus a global, culture-invariant
   so a comma decimal separator cannot fake a mismatch — and `SettingsFingerprintLog` writes them
   to each peer's log under the co-op gate. Floats and doubles hash as their IEEE bit patterns
   (-0 folded to 0), not as runtime-formatted text, so a .NET 6 server and a net472 client agree on
@@ -591,7 +596,7 @@ to characterise. The existing try/catch around acceptance is containment, not co
   every diagnostics property is excluded so this moves no hash today (a test asserts exactly
   that), and it means a simulation-affecting setting added to a diagnostics page later is covered
   the day it lands. That makes the "compare settings manually" workaround a comparison of a few
-  short strings instead of 322 values read off two screens.
+  short strings instead of 326 values read off two screens.
 
   **All four classes are `AttributeGlobalSettings<T>`, and the reasoning above depends on it.**
   MCM has three scopes, and only one of them travels with a save. Verified against MCM 5.12.1:
@@ -610,12 +615,12 @@ to characterise. The existing try/catch around acceptance is containment, not co
   PerSave class would be equal by construction and need not be hashed; a PerCampaign one would
   need hashing more urgently than a global, not less.
 
-  **A matching fingerprint means the MCM settings agree, and nothing wider.** It covers the 322
+  **A matching fingerprint means the MCM settings agree, and nothing wider.** It covers the 326
   values on the four settings pages. It does not cover the `ModuleData` JSON/XML that several
   features fall back to when a setting is unset (on a client only; a server never reads them for an
   MCM-backed field), the `TAOM.Dependencies` flag files
   (`patchshield-disabled.flag`, `saveshield-swallow-disabled.flag`, `coop-force-active.flag`),
-  or any difference outside TAOM. None of those three flags gates a setting in the 322 (each
+  or any difference outside TAOM. None of those three flags gates a setting in the 326 (each
   governs a Dependencies-side shield with no MCM property), but the general point holds: read the
   log line as "our settings pages match", not as "our installs are equivalent".
 

@@ -693,11 +693,16 @@ count toward days served but grant no Leadership. `ShippedLeadershipGates_AreRea
 `enlistment_config.json`, and fails if a retune makes a gate unreachable by its day threshold.
 Part of the earlier gating on this ladder is addressed here (#521).
 
+Seasoned Hosts' "Learning Never Stops" (#890, default on) keeps the learning rate at 0.05 or more instead of letting it fall
+to 0, so a hero past the learning limit keeps training slowly where this section says the grant stops. Skill gates only
+get easier with it; the simulation above is the setting-off case. See [seasoned-hosts.md](seasoned-hosts.md).
+
 Rank still grants no battlefield command (#576).
 
 **Known limitation.** A Social 1 hero with no Leadership focus has a learning limit of 0 and stops
 at Leadership 4, one short of Staff Sergeant's gate of 5. A Leadership focus point fixes it (that
 hero then reaches 5 on day 9). The gate is a real Leadership ask, not a formality.
+With "Learning Never Stops" on, that hero is slowed past the limit rather than stopped, so the gate is reachable, slowly.
 
 **Battle merit.** `EnlistmentMeritMissionBehavior` (`: MissionLogic`, registered
 unconditionally, self-filtering) samples cohesion, commander proximity, engagement and

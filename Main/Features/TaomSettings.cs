@@ -2714,4 +2714,30 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyInteger("Minimum Mercenary Contract (Days)", TAOM.Features.BondOfHire.BondOfHireSettingsProvider.MinDays, TAOM.Features.BondOfHire.BondOfHireSettingsProvider.MaxDays, Order = 0, RequireRestart = false,
         HintText = "The fewest days a clan that signs on as a mercenary stays with its kingdom. Until then it cannot leave a ruler who is in debt, be hired away by another kingdom, or leave in its daily consideration of whether to stay. A clan with more time left is not shortened. Your own clan is not bound, and neither is dismissing or hiring away a mercenary yourself. 0 turns it off. Applies when a clan signs on; clans already serving get it at their next signing. Between 0 and 120. Default: 30.")]
     public int BondOfHireMinimumDays { get; set; } = TAOM.Features.BondOfHire.BondOfHireSettingsProvider.DefaultMinimumDays;
+
+    // --- Seasoned Hosts (docs/features/seasoned-hosts.md, #890) ---
+    //
+    // The skill XP multiplier is read at every skill XP grant and the training bonus for every troop of every AI lord party
+    // each day, through SeasonedHostsSettingsProvider's one cached settings reference, so none needs a restart. Four new
+    // settings, so their defaults reach every install. GroupOrder 73 is used by no other group.
+
+    [SettingPropertyGroup("World/Seasoned Hosts", GroupOrder = 73)]
+    [SettingPropertyFloatingInteger("{=taom_seasoned_hosts_training_bonus}AI Lord Party Training Bonus", TAOM.Features.SeasonedHosts.SeasonedHostsSettingsProvider.MinTrainingBonus, TAOM.Features.SeasonedHosts.SeasonedHostsSettingsProvider.MaxTrainingBonus, "0.00", Order = 0, RequireRestart = false,
+        HintText = "{=taom_seasoned_hosts_training_bonus_hint}Extra daily and battle training XP for the troops of AI lord parties, as a fraction: 0.25 is 25 percent more. Applies to a lord party that is not yours, not in your clan and not in an army you lead; caravans and garrisons are left out. In a co-op session only the host's value applies; while a co-op mod TAOM cannot probe (such as BannerlordTogether) is enabled, it is off for every player. 0 is vanilla. Between 0 and 1. Default: 0.25.")]
+    public float SeasonedHostsTrainingBonus { get; set; } = TAOM.Features.SeasonedHosts.SeasonedHostsSettingsProvider.DefaultTrainingBonus;
+
+    [SettingPropertyGroup("World/Seasoned Hosts")]
+    [SettingPropertyFloatingInteger("{=taom_seasoned_hosts_skill_xp}AI Lord Skill XP Multiplier", TAOM.Features.SeasonedHosts.SeasonedHostsSettingsProvider.MinSkillXpMultiplier, TAOM.Features.SeasonedHosts.SeasonedHostsSettingsProvider.MaxSkillXpMultiplier, "0.00", Order = 1, RequireRestart = false,
+        HintText = "{=taom_seasoned_hosts_skill_xp_hint}Multiplies the skill XP that AI lords earn, so their skills climb faster. Skills only: a lord's hero level is not sped up. Never applies to you or to any lord of your clan, spouse and family included. In a co-op session only the host's value applies; while a co-op mod TAOM cannot probe (such as BannerlordTogether) is enabled, it is off for every player. 1 is vanilla. Between 1 and 2. Default: 1.25.")]
+    public float SeasonedHostsSkillXpMultiplier { get; set; } = TAOM.Features.SeasonedHosts.SeasonedHostsSettingsProvider.DefaultSkillXpMultiplier;
+
+    [SettingPropertyGroup("World/Seasoned Hosts")]
+    [SettingPropertyBool("{=taom_seasoned_hosts_learning_floor}Learning Never Stops", Order = 2, RequireRestart = false,
+        HintText = "{=taom_seasoned_hosts_learning_floor_hint}Past a skill's learning limit the game lowers the learning rate until it reaches zero and the skill stops growing. When on, the rate never falls below 0.05, so a skill keeps growing very slowly. This applies to every hero, you included. When off, the game's own rule applies. Default: on.")]
+    public bool SeasonedHostsLearningNeverStops { get; set; } = TAOM.Features.SeasonedHosts.SeasonedHostsSettingsProvider.DefaultLearningNeverStops;
+
+    [SettingPropertyGroup("World/Seasoned Hosts")]
+    [SettingPropertyBool("{=taom_seasoned_hosts_no_steward_xp}No Steward XP From Finished Projects", Order = 3, RequireRestart = false,
+        HintText = "{=taom_seasoned_hosts_no_steward_xp_hint}When on, a settlement project that finishes grants no Steward XP, which the game otherwise gives 1000 of each time. This covers every settlement, yours included. In a co-op session only the host skips the grant; while a co-op mod TAOM cannot probe (such as BannerlordTogether) is enabled, the game's grant is left alone. Default: off.")]
+    public bool SeasonedHostsNoStewardXp { get; set; } = TAOM.Features.SeasonedHosts.SeasonedHostsSettingsProvider.DefaultNoStewardXp;
 }

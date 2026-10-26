@@ -1282,3 +1282,12 @@ refresh reset the name a moment later.
   consumed. Pin the chain with a test, and a gate where a pattern is known bad (here a source scan for
   `.Color1 =` in the BannerColorPersistence hooks).
 - **Source:** `docs/reviews/rca-banner-colors-refuge-rows-2026-10-24.md` findings 1 to 4.
+### Write a co-op hint from the gate's truth table, not from a summary of it (#890, 2026-10-26)
+A fix round rewrote three Seasoned Hosts MCM hints to say the settings are "off in a co-op session". The code defers only on
+clients (a BannerlordCoop host applies them), and the excluded mod is one TAOM detects but cannot probe, not one it "cannot
+detect". The wrong text went into the C# attribute, the strings file and 12 language seeds.
+- **Why missed:** the hint was written from the brief's one-line description of `ShouldDeferToHost`, not from
+  `CoopSessionPolicy.ShouldDeferToHost`'s rows.
+- **Prevent:** before writing co-op player text, read the gate's rows and reuse the sibling wording in `TaomSettings.cs`
+  ("Applies on the host in co-op."; "a co-op mod TAOM cannot probe").
+- **Source:** `docs/reviews/rca-seasoned-hosts-2026-10-26.md` finding 5.

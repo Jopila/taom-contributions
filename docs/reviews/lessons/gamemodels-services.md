@@ -1318,3 +1318,13 @@ single-owner `SubModule.cs` edit, a cross-feature constructor argument and a dup
 - **Prevent:** after the plan adds a patch, list the model method's engine callers (`taom-src`, dump grep); if the
   patch covers every caller in every applied case, keep only the patch, and pin the copied engine body instead.
 - **Source:** [rca-red-arrow-2026-10-24.md](../rca-red-arrow-2026-10-24.md) finding 1.
+
+### A "not a player" gate needs the unprobed-co-op answer too: AND it with `!ShouldDeferToHost` (#890, 2026-10-26)
+Seasoned Hosts gave AI lords extra training and skill XP, and told AI from player through `IPlayerControlQuery`. That query
+reads only BannerlordCoop's registry, so under a co-op mod TAOM detects but cannot probe (BannerlordTogether) every other
+human player's clan read as AI and would have received the AI bonuses.
+- **Why missed:** the plan asked "is this hero a player's?" of one query and never asked what that query answers under each
+  co-op row (solo, BannerlordCoop host, client, unprobed mod).
+- **Prevent:** a bonus or penalty that must reach AI only also requires `!ICoopSessionProvider.ShouldDeferToHost`, which is
+  true on clients and on every peer under an unprobed co-op mod; pin the deferring case with a test.
+- **Source:** `docs/reviews/rca-seasoned-hosts-2026-10-26.md` finding 1.

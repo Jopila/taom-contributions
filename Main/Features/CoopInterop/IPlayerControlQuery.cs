@@ -11,9 +11,9 @@ namespace TAOM.Features.CoopInterop;
 /// Without a live co-op session the answer is exactly the local-player comparison, so singleplayer
 /// behaviour is unchanged. Read live; never cache an answer, since players join and leave.
 ///
-/// Cost: a check costs about 0.3 microseconds and about 217 bytes per non-local entity in a live
-/// session (reflection invoke plus the argument array). Convert the reflection calls to compiled
-/// delegates before adding an hourly or per-frame caller.
+/// Cost: in a live session a check is one compiled delegate call per non-local entity, with no
+/// argument array; a registry method of another shape falls back to a reflection invoke (about
+/// 0.3 microseconds and 217 bytes).
 /// </summary>
 public interface IPlayerControlQuery
 {

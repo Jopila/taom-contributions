@@ -37,7 +37,7 @@ Each override follows the established TAOM pattern (feature module + service + a
 
 | Model | Override Goal |
 |-------|---------------|
-| `CharacterDevelopmentModel` | Race-locked skill caps |
+| `CharacterDevelopmentModel` | Race-locked skill caps. SLOT TAKEN: `TaomCharacterDevelopmentModel` (Seasoned Hosts, #890) raises the learning rate's minimum past a skill's limit; a race skill cap rule goes into that model, not a second one |
 
 ### Tier 4 — Polish
 
@@ -50,7 +50,7 @@ Each override follows the established TAOM pattern (feature module + service + a
 
 1. `AgentStatCalculateModel` (Tier 1 — race stat bonuses)
 2. `BattleMoraleModel` (Tier 2, now only fearless undead + cultural bravery; racial dread shipped without it)
-3. `CharacterDevelopmentModel` (Tier 3 — race skill caps)
+3. `CharacterDevelopmentModel` (Tier 3, race skill caps; the slot is taken by Seasoned Hosts, so the rule joins `TaomCharacterDevelopmentModel`)
 
 ## Notes
 

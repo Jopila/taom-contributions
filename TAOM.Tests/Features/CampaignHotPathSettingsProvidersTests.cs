@@ -37,6 +37,7 @@ using TAOM.Features.RealmBorders;
 using TAOM.Features.LoremastersLine;
 using TAOM.Features.HearthRoll;
 using TAOM.Features.ReevesLedger;
+using TAOM.Features.SeasonedHosts;
 using TAOM.Features.SwornAnew;
 using TAOM.Features.TimeAcceleration;
 using TAOM.Features.UnderTheEaves;
@@ -134,6 +135,9 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(RedArrowSettingsProvider))]
     // #867: not a hot path; read once when a clan signs on as a mercenary. The accessor still takes the settings once.
     [DataRow(typeof(BondOfHireSettingsProvider))]
+
+    // #890: the skill XP multiplier is read at every skill XP grant, the training bonus for every troop of every AI lord party each day.
+    [DataRow(typeof(SeasonedHostsSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -184,6 +188,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IUnlookedForAidSettingsProvider), typeof(UnlookedForAidSettingsProvider))]
     [DataRow(typeof(ISwornAnewSettingsProvider), typeof(SwornAnewSettingsProvider))]
     [DataRow(typeof(IBondOfHireSettingsProvider), typeof(BondOfHireSettingsProvider))]
+
+    [DataRow(typeof(ISeasonedHostsSettingsProvider), typeof(SeasonedHostsSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -268,6 +274,25 @@ public class CampaignHotPathSettingsProvidersTests
         mcm.BondOfHireMinimumDays = 60;
 
         Assert.AreEqual(60, sut.MinimumDays);
+    }
+
+    [TestMethod]
+    public void SeasonedHosts_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new SeasonedHostsSettingsProvider(mcm);
+        Assert.AreEqual(SeasonedHostsSettingsProvider.DefaultTrainingBonus, sut.TrainingBonus);
+        Assert.IsTrue(sut.LearningNeverStops);
+
+        mcm.SeasonedHostsTrainingBonus = 0.5f;
+        mcm.SeasonedHostsSkillXpMultiplier = 1.5f;
+        mcm.SeasonedHostsLearningNeverStops = false;
+        mcm.SeasonedHostsNoStewardXp = true;
+
+        Assert.AreEqual(0.5f, sut.TrainingBonus);
+        Assert.AreEqual(1.5f, sut.SkillXpMultiplier);
+        Assert.IsFalse(sut.LearningNeverStops);
+        Assert.IsTrue(sut.NoStewardXp);
     }
 
     [TestMethod]

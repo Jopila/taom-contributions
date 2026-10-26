@@ -6,7 +6,7 @@ paths:
 
 # GameModel Override Rules
 
-TAOM has 64 GameModel overrides, the parked and abstract ones included (`tools/lint_docs.py` checks the total). All follow the same pattern.
+TAOM has 67 GameModel overrides, the parked and abstract ones included (`tools/lint_docs.py` checks the total). All follow the same pattern.
 
 ## Pattern
 
@@ -41,7 +41,7 @@ public class TaomFooModel : DefaultFooModel
 8. **Tests** — Service logic is fully unit-tested. The model class itself is thin enough to not need direct tests.
 9. **Cross-entity propagation (MANDATORY when the override returns a per-entity capability/value)** — If your override returns a per-entity value (per party, per hero, per settlement) that the engine **propagates** to related entities or **recomputes per-entity**, you MUST decompile the engine *consumer* of your result and mirror that propagation — or related entities desync. Before overriding, answer two questions from the decompiled engine code: (a) **Propagation** — does the value get pushed onto attached/child entities (army attached parties, settlement bound villages, family members)? (b) **Recompute** — is it recomputed per-entity from a per-entity getter the engine drives across the group? If yes to either, the override is NOT a per-entity-isolated decision. Also encode **lifecycle**: an entity already mid-transition must retain the capability to *complete/exit* (e.g. a party already at sea keeps naval capability to reach land regardless of toggles; gates govern only new transitions). **Worked example (NavalTravel #296, the bug this rule prevents):** `PartyNavigationModel.HasNavalNavigationCapability` keyed only on `IsMainParty` stranded a player-led army's attached AI parties — the engine force-propagates `MobileParty.IsCurrentlyAtSea` down the attachment tree AND recomputes `NavigationCapability` per party (`MobileParty.cs:464-479,493-496`), so attached parties were dragged to sea with `Default`-only navigation. The donor model (NavalDLC's `NavalPartyNavigationModel`) encoded attached-to inheritance; the port dropped that limb when it rewrote the one method it changed. Caught by Codex, missed by all 5 deep-review agents (none opened `MobileParty`). Extract the full decision to a pure service method and pin it with a decision-matrix test. See `feedback_gamemodel_capability_engine_propagation` + `docs/reviews/rca-navaltravel-2026-06-24.md`. **Corollary:** when you keep N-1 limbs of a faithful engine-model port and rewrite limb N, re-audit limb N's *entire* behavior, not just the sub-change you intended.
 
-## Existing Overrides (64 total)
+## Existing Overrides (67 total)
 
 | Model | Base | Feature |
 |-------|------|---------|
@@ -108,3 +108,6 @@ public class TaomFooModel : DefaultFooModel
 | `TaomPrisonerDonationModel` | `DefaultPrisonerDonationModel` | `GoodDeeds` (campaign only, declared by the feature module through `GameModelDecl`; base first, then the bonus and the captive-against-owner side scaling; detail in gamemodel-registry.md) |
 | `TaomMobilePartyAIModel` | `DefaultMobilePartyAIModel` | `UnlookedForAid` (campaign only; `ShouldConsiderAvoiding` only, base first; async AI worker; detail in gamemodel-registry.md) |
 | `TaomDefectionModel` | `DefaultDefectionModel` | `SwornAnew` (campaign only; `GameModelDecl` slot argument `DefaultDefectionModel`; `CanHeroDefectToFaction` only; detail in gamemodel-registry.md) |
+| `TaomGenericXpModel` | `DefaultGenericXpModel` | `SeasonedHosts` (campaign only, declared by the feature module through `GameModelDecl`; `GetXpMultiplier` only, base times the service factor; detail in gamemodel-registry.md) |
+| `TaomPartyTrainingModel` | `DefaultPartyTrainingModel` | `SeasonedHosts` (campaign only; `GetEffectiveDailyExperience` and `CalculateXpGainFromBattles`, base first then one `AddFactor`; detail in gamemodel-registry.md) |
+| `TaomCharacterDevelopmentModel` | `DefaultCharacterDevelopmentModel` | `SeasonedHosts` (campaign only; `CalculateLearningRate` only, base first then a raised minimum; detail in gamemodel-registry.md) |

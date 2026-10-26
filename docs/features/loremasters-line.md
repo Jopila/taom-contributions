@@ -79,6 +79,13 @@ and so does the extra limit line.
 **Non-monotonic models:** bisection finds a boundary (the rate at the level is at the floor, the rate one level below is
 not), not always the lowest one. The default model is monotonic.
 
+**Seasoned Hosts floor (#890):** with "Learning Never Stops" on (the default), `TaomCharacterDevelopmentModel` raises the
+rate's minimum from 0 to 0.05 for every hero. The marker stays where it was: past the limit the rate falls 0.125 per
+point, so the first level at or under 0.05 is the level where vanilla's rate reached 0. Only the band tooltip changes: it
+reads "learning keeps P of full speed" instead of "practice no longer improves this skill", because the floor is above 0,
+and P can read 0 when the full rate is above 10. Switching the setting off restores vanilla's tooltip. See
+[seasoned-hosts.md](seasoned-hosts.md).
+
 **Co-op:** local, read-only UI with nothing to gate. The setting is classed Presentation, outside the fingerprint.
 
 ### Component Diagram
@@ -191,6 +198,7 @@ re-seeded in all twelve language files. The paid translation is owed in the tran
 ## Changelog
 
 - 2026-10-23: Loremaster's Line added (#877).
+- 2026-10-24: noted that Seasoned Hosts' learning floor changes the band tooltip and leaves the marker in place (#890).
 
 ## GitHub Issue
 
