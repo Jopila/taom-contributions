@@ -249,6 +249,8 @@ class Stats:
         self.models = Counter()
         self.out_tools = defaultdict(lambda: [0, 0, 0])  # tool -> [results, chars, max]
         self.out_families = defaultdict(lambda: [0, 0, 0])
+        self.out_reads = defaultdict(lambda: [0, 0, 0])   # read_path -> [results, chars, max]
+        self.read_whole = Counter()                        # read_path -> reads with no offset or limit
 
 
 def add_output(table, key, size):
@@ -256,6 +258,22 @@ def add_output(table, key, size):
     row[0] += 1
     row[1] += size
     row[2] = max(row[2], size)
+
+
+def read_path(path):
+    """A Read path as one key across checkouts: the part inside `<x>/repos/<repo>/` (so a worktree's
+    copy counts with the main checkout's), `~/.claude/...` for the user config, else the last three
+    parts. Lower-cased, since Windows paths are case-insensitive (#1002)."""
+    p = str(path or "").replace("\\", "/").lower()
+    if not p:
+        return "(unknown)"
+    m = re.search(r"/repos/[^/]+/(.+)$", p)
+    if m:
+        return m.group(1)
+    m = re.search(r"/(\.claude/.+)$", p)
+    if m:
+        return "~/" + m.group(1)
+    return ".../" + "/".join(p.split("/")[-3:])
 
 
 def classify_error(stats, text, tool, sid, ts=None):
@@ -347,9 +365,9 @@ def handle_human(stats, r, sid, ts):
 
 
 def handle_assistant(stats, r, tools, count):
-    """Map each tool_use id to (tool name, the id of the assistant message that sent it, the shell
-    command or None). The family is read only when a result is counted, so records outside the window
-    cost no parse."""
+    """Map each tool_use id to (tool name, the id of the assistant message that sent it, a detail): the
+    shell command, or for Read (path key, whole read), else None. The family is read only when a
+    result is counted, so records outside the window cost no parse."""
     msg = r.get("message")
     content = msg.get("content") if isinstance(msg, dict) else None
     if not isinstance(content, list):
@@ -360,8 +378,13 @@ def handle_assistant(stats, r, tools, count):
         name = str(b.get("name", "?"))
         inp = b.get("input") if isinstance(b.get("input"), dict) else {}
         if b.get("id"):
-            command = str(inp.get("command", ""))[:FAMILY_HEAD] if name in ("Bash", "PowerShell") else None
-            tools[b["id"]] = (name, str(msg.get("id") or b["id"]), command)
+            if name in ("Bash", "PowerShell"):
+                detail = str(inp.get("command", ""))[:FAMILY_HEAD]
+            elif name == "Read":
+                detail = (read_path(inp.get("file_path")), not (inp.get("offset") or inp.get("limit")))
+            else:
+                detail = None
+            tools[b["id"]] = (name, str(msg.get("id") or b["id"]), detail)
         if not count:
             continue
         if name == "Skill" and inp.get("skill"):
@@ -427,11 +450,14 @@ def scan_file(stats, path, since_str):
                 if not results and handle_human(stats, r, sid, ts):
                     flush()  # a person answered between the failures: not a runaway
                 for b in results:
-                    tool, msg_id, command = tools.get(b.get("tool_use_id"), ("?", b.get("tool_use_id"), None))
+                    tool, msg_id, detail = tools.get(b.get("tool_use_id"), ("?", b.get("tool_use_id"), None))
                     text = result_text(b.get("content"))
                     add_output(stats.out_tools, tool, len(text))
-                    if command is not None:
-                        add_output(stats.out_families, command_family(command, tool), len(text))
+                    if isinstance(detail, str):
+                        add_output(stats.out_families, command_family(detail, tool), len(text))
+                    elif isinstance(detail, tuple):
+                        add_output(stats.out_reads, detail[0], len(text))
+                        stats.read_whole[detail[0]] += detail[1]
                     if b.get("is_error") is True:
                         key = classify_error(stats, text, tool, sid, ts)
                     else:
@@ -582,25 +608,38 @@ def previous_signals(out):
     return (best[1], best[2]) if best else (None, None)
 
 
-def output_growth(families, out):
-    """Shell families whose share of all output grew by GROWTH_POINTS since the previous run. A
-    family the previous run folded into `(other)` has no known share and is not flagged as new."""
+def output_growth(rows, out, label="family", section="families", share="share"):
+    """Rows whose `share` grew by GROWTH_POINTS since the previous run: shell families (share of all
+    output) or files (share of Read output, #1002). A key the previous run folded into `(other)` has
+    no known share and is not flagged as new; a previous run without this section is no baseline."""
     path, prev = previous_signals(out)
-    if prev is None:
+    if prev is None or section not in prev["output_size"]:
         return {"baseline": None, "looked_in": str(out.parent), "rows": []}
-    old = [r for r in prev["output_size"].get("families", []) if isinstance(r, dict)]
-    then = {r.get("family"): r.get("share", 0) for r in old}
+    old = [r for r in prev["output_size"].get(section, []) if isinstance(r, dict)]
+    then = {r.get(label): r.get(share, 0) for r in old}
     complete = "(other)" not in then
-    rows = []
-    for r in families:
-        if r["family"] == "(other)" or (r["family"] not in then and not complete):
+    grown = []
+    for r in rows:
+        if r[label] == "(other)" or (r[label] not in then and not complete):
             continue
-        before = then.get(r["family"], 0)
-        if r["share"] - before >= GROWTH_POINTS:
-            rows.append({"family": r["family"], "then": before, "now": r["share"],
-                         "delta": round(r["share"] - before, 4)})
-    rows.sort(key=lambda r: -r["delta"])
-    return {"baseline": str(path), "baseline_today": (prev.get("window") or {}).get("today"), "rows": rows}
+        before = then.get(r[label], 0)
+        if r[share] - before >= GROWTH_POINTS:
+            grown.append({label: r[label], "then": before, "now": r[share], "delta": round(r[share] - before, 4)})
+    grown.sort(key=lambda r: -r["delta"])
+    return {"baseline": str(path), "baseline_today": (prev.get("window") or {}).get("today"), "rows": grown}
+
+
+def read_rows(stats, total, n):
+    """Top files the Read tool returned, with whole reads and share of Read output (#1002)."""
+    read_total = sum(v[1] for v in stats.out_reads.values())
+    rows = output_rows(stats.out_reads, "file", total, n)
+    ranked = [k for k, _v in sorted(stats.out_reads.items(), key=lambda kv: -kv[1][1])]
+    for i, row in enumerate(rows):
+        # output_rows ranks the same way, so row i is ranked[i]; a folded `(other)` row is last.
+        keys = ranked[i:i + 1] if i < n else ranked[n:]
+        row["whole"] = sum(stats.read_whole[k] for k in keys)
+        row["read_share"] = round(row["chars"] / read_total, 4) if read_total else 0
+    return rows
 
 
 def output_size(stats, n):
@@ -608,7 +647,8 @@ def output_size(stats, n):
     shell = sum(v[1] for v in stats.out_families.values())
     return {"total_chars": total,
             "tools": output_rows(stats.out_tools, "tool", total, n),
-            "families": output_rows(stats.out_families, "family", total, n, shell)}
+            "families": output_rows(stats.out_families, "family", total, n, shell),
+            "files": read_rows(stats, total, n)}
 
 
 def build_signals(stats, args, since, today, main, sub):
@@ -735,18 +775,27 @@ def render(sig):
     L += table(["Family", "Results", "Chars", "Share of all", "Share of shell", "Mean", "Max"],
                [[r["family"], r["results"], r["chars"], "%.1f%%" % (100 * r["share"]),
                  "%.1f%%" % (100 * r["shell_share"]), r["mean"], r["max"]] for r in o["families"]])
-    g = o.get("growth") or {}
-    L += ["### Growth since the previous run", ""]
-    if not g.get("baseline"):
-        L += ["No earlier signals.json found beside this run (looked in %s): growth UNCHECKED, not absent."
-              % g.get("looked_in", "?"), ""]
-    else:
-        L += ["Against the run of %s (%s). Each row is a proposal candidate for the retro." % (
-            g.get("baseline_today"), g["baseline"]), ""]
-        L += table(["Family", "Then", "Now", "Grew by"],
-                   [[r["family"], "%.1f%%" % (100 * r["then"]), "%.1f%%" % (100 * r["now"]),
-                     "%.1f points" % (100 * r["delta"])] for r in g["rows"]])
+    L += render_growth(o.get("growth") or {}, "family", "Growth since the previous run", "of all output")
+    L += ["### Top files read", "",
+          "Paths inside a repository are folded across worktrees. Whole reads gave no offset or limit.", ""]
+    L += table(["File", "Reads", "Whole", "Chars", "Share of Read", "Mean", "Max"],
+               [[r["file"], r["results"], r["whole"], r["chars"], "%.1f%%" % (100 * r["read_share"]),
+                 r["mean"], r["max"]] for r in o.get("files", [])])
+    L += render_growth(o.get("file_growth") or {}, "file", "File growth since the previous run", "of Read output")
     return "\n".join(L) + "\n"
+
+
+def render_growth(g, label, heading, unit):
+    """One growth table (shell families or files), or the explicit UNCHECKED line."""
+    L = ["### " + heading, ""]
+    if not g.get("baseline"):
+        return L + ["No earlier signals.json with this table found beside this run (looked in %s): growth "
+                    "UNCHECKED, not absent." % g.get("looked_in", "?"), ""]
+    L += ["Against the run of %s (%s); shares are %s. Each row is a proposal candidate for the retro." % (
+        g.get("baseline_today"), g["baseline"], unit), ""]
+    return L + table([label.capitalize(), "Then", "Now", "Grew by"],
+                     [[r[label], "%.1f%%" % (100 * r["then"]), "%.1f%%" % (100 * r["now"]),
+                       "%.1f points" % (100 * r["delta"])] for r in g["rows"]])
 
 
 def parse_args(argv):
@@ -799,6 +848,7 @@ def main(argv=None):
 
     sig = build_signals(stats, args, since, today, main_files, sub_files)
     sig["output_size"]["growth"] = output_growth(sig["output_size"]["families"], out)
+    sig["output_size"]["file_growth"] = output_growth(sig["output_size"]["files"], out, "file", "files", "read_share")
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.md").write_text(render(sig), encoding="utf-8")
     (out / "signals.json").write_text(json.dumps(sig, indent=2), encoding="utf-8")
@@ -829,6 +879,13 @@ def main(argv=None):
             "" if not g["rows"] else ": " + ", ".join(r["family"] for r in g["rows"])))
     else:
         print("output growth: UNCHECKED, no earlier run beside %s" % out)
+    fg = sig["output_size"]["file_growth"]
+    if fg["baseline"]:
+        print("file growth: %d file(s) grew %d+ points of Read output since %s%s" % (
+            len(fg["rows"]), round(100 * GROWTH_POINTS), fg["baseline_today"],
+            "" if not fg["rows"] else ": " + ", ".join(r["file"] for r in fg["rows"])))
+    else:
+        print("file growth: UNCHECKED, no earlier run with a files table beside %s" % out)
     return 0
 
 

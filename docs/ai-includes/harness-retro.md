@@ -29,7 +29,10 @@ command usage, subagent usage, memory health, and tool output size (section 9: c
 results by tool and by shell command family, the baseline for any output-trimming change).
 Section 9 also compares each family's share of all output with the newest earlier run beside
 the report folder (dated folders under one root by default) and lists every family that grew by
-2 points or more; the console line `output growth:` says how many.
+2 points or more; the console line `output growth:` says how many. Its "Top files read" table
+does the same for the Read tool, about half of all output: each file's reads, whole reads and
+share of Read output, folded across worktrees, with a `file growth:` line for files that grew by
+2 points of Read output (#1002).
 
 Also run `python tools/analyze_reviews.py --summary --no-plot` for the reviewer accuracy that
 `REVIEW-LOG.md` already tracks (`--no-plot` leaves the committed `progress.png` alone).
@@ -77,8 +80,10 @@ error, a runaway). A proposal that cannot name a moment is speculation; drop it.
 - **Priority:** a divergence first (the agent did it right in some sessions and wrong in others,
   so it can do it and the harness leaves it to chance), then a failure repeated across sessions,
   then a risk seen but not yet realised.
-- **Output growth:** each row of section 9's growth table is a candidate. Name the sessions behind
-  the family (the report's family key is the command), and propose only when the cause is a
+- **Output growth:** each row of section 9's growth tables (shell families and files) is a
+  candidate, and so is a file at the top of "Top files read" that every session reads whole, such
+  as a review lens or a path rule. Name the sessions behind the row (the report's family key is
+  the command, the file key its path in the repo), and propose only when the cause is a
   harness gap, such as a whole file read where a range would do; growth from more work is not a
   defect.
 - **Form, cheapest first:** a gate or hook (it acts in the tool loop and costs no context), then a

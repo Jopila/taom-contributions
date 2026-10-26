@@ -495,6 +495,44 @@ class OutputSizeTests(Base):
         self.assertIn("growth UNCHECKED", self.env.report())
         self.assertIn("output growth: UNCHECKED", out)
 
+    def test_read_path_folds_repos_and_worktrees(self):
+        f = hr.read_path
+        self.assertEqual(f("E:\\repos\\taom-wrapper-peel\\Tools\\harness_retro.py"), "tools/harness_retro.py")
+        self.assertEqual(f("e:/repos/TAOM/.claude/rules/x.md"), ".claude/rules/x.md")
+        self.assertEqual(f("C:/Users/someone/.claude/projects/p/memory/MEMORY.md"), "~/.claude/projects/p/memory/memory.md")
+        self.assertEqual(f("D:/a/b/c/d.txt"), ".../b/c/d.txt")
+        self.assertEqual(f(""), "(unknown)")
+
+    def _reads(self):
+        self.env.write("a.jsonl", [
+            tool_use("r1", "Read", file_path="E:/repos/TAOM/docs/a.md"), tool_result("r1", "a" * 300, error=False),
+            tool_use("r2", "Read", file_path="E:/repos/taom-x/docs/a.md", offset=10, limit=5),
+            tool_result("r2", "a" * 100, error=False),
+            tool_use("r3", "Read", file_path="E:/repos/TAOM/main/b.cs"), tool_result("r3", "b" * 600, error=False)])
+
+    def test_top_files_read(self):
+        self._reads()
+        self.env.run()
+        files = {r["file"]: r for r in self.env.signals()["output_size"]["files"]}
+        self.assertEqual(files["main/b.cs"]["read_share"], 0.6)
+        self.assertEqual(files["docs/a.md"]["results"], 2)
+        self.assertEqual(files["docs/a.md"]["whole"], 1)
+        self.assertIn("### Top files read", self.env.report())
+
+    def test_file_growth_against_the_previous_run(self):
+        self._reads()
+        prev = self.env.root / "2026-10-01"
+        prev.mkdir()
+        (prev / "signals.json").write_text(json.dumps({
+            "window": {"today": "2026-10-01"},
+            "output_size": {"families": [], "files": [{"file": "docs/a.md", "read_share": 0.1},
+                                                      {"file": "main/b.cs", "read_share": 0.6}]}}), encoding="utf-8")
+        code, out = self.env.run()
+        g = self.env.signals()["output_size"]["file_growth"]
+        self.assertEqual([r["file"] for r in g["rows"]], ["docs/a.md"])
+        self.assertAlmostEqual(g["rows"][0]["delta"], 0.3)
+        self.assertIn("file growth: 1 file", out)
+
     def test_tool_table_folds_past_top(self):
         recs = []
         for i, name in enumerate(["Read", "Bash", "Grep", "Glob"]):
