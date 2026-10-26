@@ -134,7 +134,7 @@ Every exit lands through `FarWatchLanding.Land`: the engine's own choice first (
 
 ### The camp menu order
 
-The option is added from `OnAfterSessionLaunched`. FieldCamp builds the panel in `OnSessionLaunched` (forage 0, fortify 1, supplies 2, break 3, Leave appended), Refuge inserts at 4, and listeners of one event run newest first, so this module's listener inserts at 5 first and Host Review, listed before it, inserts at 5 after and pushes it down: **Refuge 4, Review 5, Scout 6, Leave 7**. `GameMenu.AddOption` inserts only when `Count >= index`, so Leave stays last. `FarWatchWiringTests` composes the order from the indexes in the sources, the module order and the two engine rules (pinned in `FarWatchEngineFactsTests`).
+The option is added from `OnAfterSessionLaunched`. FieldCamp builds the panel in `OnSessionLaunched` (forage 0, fortify 1, supplies 2, break 3, Leave appended), Refuge inserts at 4, and listeners of one event run newest first, so camp work (#860), listed after this module, inserts at 5 first, this module's listener inserts at 5 next and pushes it down, and Host Review, listed before this module, inserts last and pushes both down: **Refuge 4, Review 5, Scout 6, Work 7, Leave 8**. `GameMenu.AddOption` inserts only when `Count >= index`, so Leave stays last. `FarWatchWiringTests` composes the order from the indexes in the sources, the module order and the two engine rules (pinned in `FarWatchEngineFactsTests`).
 
 ### Co-op
 
@@ -258,7 +258,7 @@ Each step names what it expects to see.
 7. **A solo player** (no companions): "Ride out to scout", and the hero is away for the length of the ride.
 8. **The sight cap with a strong scout** (Scouting 300 with perks and a lookout): the sight tooltip shows the "Limit" line above 60 (up to 77.4) during the raised sight, and falls back to 60 when it ends.
 9. **A second campaign in one process** starts with no ride, no sight and no rest.
-10. The camp panel order: Refuge, Review the host, Send a scout, Leave. With the panel open during a rest, the option's tooltip counts the hours down and turns to "Send a scout" when the rest ends, without leaving the panel.
+10. The camp panel order: Refuge, Review the host, Send a scout, Set the men to work, Leave. With the panel open during a rest, the option's tooltip counts the hours down and turns to "Send a scout" when the rest ends, without leaving the panel.
 11. **A solo player**: while the ride runs the camp option reads "Continue the ride" and the wait menu offers "Ride back to camp".
 12. **Field Camp switched off** in the MCM mid-ride: the ride ends at the next hourly look with the camp line, and sight and the fog return to normal together.
 

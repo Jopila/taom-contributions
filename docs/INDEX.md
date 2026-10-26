@@ -200,7 +200,7 @@ Codex, Claude, Kimi and other models use the same policy and evidence records.
 
 ### Sandbox, lifecycle, & UI
 - [supply-lines](features/supply-lines.md): resupply convoys from towns/castles/lords (yotthani port #505): real stock deducted, sources credited, full-screen Gauntlet order UI, TAOM's first custom PartyComponent
-- [field-camp](features/field-camp.md): campaign-map camps (yotthani port #506): field/fortified/ambush/lookout, forage + morale, tpac visuals, map-overlay Make Camp, `taom_fcamp_` loc prefix (taom_fc_ is FieldCommission's)
+- [field-camp](features/field-camp.md): campaign-map camps (yotthani port #506): field/fortified/ambush/lookout, forage + morale, tpac visuals, map-overlay Make Camp, `taom_fcamp_` loc prefix (taom_fc_ is FieldCommission's); camp work (hunt, timber, fish), rest healing and start in camp (#860, `taom_camp_` loc prefix)
 - [host-review](features/host-review.md): "Review the host" on the Field Camp wait sub-menu (#891): a friendly, enemy-free scene with the healthy party in formation, vanilla orders, nobody can be hurt, the leave key exits
 - [far-watch](features/far-watch.md): "Send a scout" on the Field Camp wait sub-menu (#847): a surroundings ride raises sight and reports the hosts in sight, a settlement ride lowers it and reports the defenders; the sight rides the contributor seam with a cap bonus; Hidden Hosts reads the scout through `IScoutIntelQuery`
 - [under-the-eaves](features/under-the-eaves.md): forest cuts the main party's sight by 30 percent of base while it travels through forest (half with Keen Sight, none inside a settlement) (#849): one spotting contributor, the party's own navigation face read through `IMapTerrainAdapter`, one MCM toggle, no patch and no save data

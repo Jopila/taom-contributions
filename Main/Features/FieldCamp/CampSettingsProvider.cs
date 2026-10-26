@@ -24,6 +24,11 @@ public class CampSettingsProvider : ICampSettingsProvider
     public const float DefaultBaseAmbushChance = 0.5f;
     public const float DefaultMinTownDistance = 10f;
     public const int DefaultFortifyCost = 500;
+    public const float DefaultActivityHours = 10f;
+    public const float DefaultActivityYieldPerTenMen = 10f;
+    public const int DefaultActivityYieldCap = 30;
+    public const float DefaultRestHealRegulars = 15f;
+    public const float DefaultRestHealHeroes = 19f;
 
     public bool Enabled => Settings?.EnableFieldCamps ?? true;
 
@@ -53,6 +58,29 @@ public class CampSettingsProvider : ICampSettingsProvider
             return raw < 0 || raw > 10000 ? DefaultFortifyCost : raw;
         }
     }
+
+    public float CampActivityHours =>
+        Sane(Settings?.CampActivityHours, 1f, 48f, DefaultActivityHours);
+
+    public float CampActivityYieldPerTenMen =>
+        Sane(Settings?.CampActivityYieldPerTenMen, 0f, 50f, DefaultActivityYieldPerTenMen);
+
+    public int CampActivityYieldCap
+    {
+        get
+        {
+            var raw = Settings?.CampActivityYieldCap ?? DefaultActivityYieldCap;
+            return raw < 0 || raw > 200 ? DefaultActivityYieldCap : raw;
+        }
+    }
+
+    public float CampRestHealRegularsPerDay =>
+        Sane(Settings?.CampRestHealRegularsPerDay, 0f, 50f, DefaultRestHealRegulars);
+
+    public float CampRestHealHeroesPerDay =>
+        Sane(Settings?.CampRestHealHeroesPerDay, 0f, 50f, DefaultRestHealHeroes);
+
+    public bool CampStartInCamp => Settings?.CampStartInCamp ?? false;
 
     private static float Sane(float? raw, float min, float max, float fallback)
     {

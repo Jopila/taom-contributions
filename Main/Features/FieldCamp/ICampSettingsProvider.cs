@@ -29,4 +29,22 @@ public interface ICampSettingsProvider
 
     /// <summary>Gold cost to fortify a field camp (default 500).</summary>
     int FortifiedUpgradeCost { get; }
+
+    /// <summary>Hours a camp work (hunt, timber, fish) takes once started (default 10).</summary>
+    float CampActivityHours { get; }
+
+    /// <summary>Goods a work brings in per ten healthy men on good ground (default 10).</summary>
+    float CampActivityYieldPerTenMen { get; }
+
+    /// <summary>Most goods one finished work can bring in (default 30).</summary>
+    int CampActivityYieldCap { get; }
+
+    /// <summary>Extra healing per day for the troops while the camp panel is open (default 15).</summary>
+    float CampRestHealRegularsPerDay { get; }
+
+    /// <summary>Extra healing points per day for heroes while the camp panel is open (default 19).</summary>
+    float CampRestHealHeroesPerDay { get; }
+
+    /// <summary>A new campaign starts with a field camp pitched, when the ground allows it (default off).</summary>
+    bool CampStartInCamp { get; }
 }

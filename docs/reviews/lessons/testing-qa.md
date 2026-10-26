@@ -2263,3 +2263,11 @@ castle's bonus to 0 with all tests green.
 - **Prevent:** for every field added to an adapter snapshot, add an adapter pin (source or behavioural) and one service test
   where that field alone turns the result off.
 - **Source:** `docs/reviews/rca-keep-wardens-security-2026-10-26.md` finding 1.
+### A service returns a reason; the hook renders the text, or the service's tests need the game (#860, 2026-10-26)
+Three camp services built `TextObject`s, so 13 of their tests ran engine code with no `RequiresGame` tag. The
+Far Watch code the feature copied returns `ScoutEndReason` and lets its presenter render it.
+- **Why missed:** the builder composed the text where the decision was made; the copied precedent's layering was
+  not named in the brief.
+- **Prevent:** a service under unit test returns an enum, a number or a struct; only a hook or presenter builds a
+  `TextObject`. Grep a new service for `TextObject` before review.
+- **Source:** [rca-camp-work-2026-10-26.md](../rca-camp-work-2026-10-26.md) finding 5.

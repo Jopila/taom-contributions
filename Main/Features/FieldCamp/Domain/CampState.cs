@@ -29,6 +29,24 @@ public sealed class CampState
     [SaveableField(106)] public int ForagedTotal;
     [SaveableField(107)] public bool VisualShown;
 
+    // Camp work (#860). Progress is the hours this work's wait menu has ticked, saved here, never derived from a start time: the
+    // engine gives the tick only the time that passed while the wait was active, so time in an interrupting encounter or on the
+    // map does not count, and a start time would count it. A save from before the feature has none of these keys, so they read as
+    // zero: no activity.
+    [SaveableField(108)] public int Activity;
+    [SaveableField(109)] public float ActivityHoursDone;
+    [SaveableField(110)] public float ActivityTargetHours;
+    [SaveableField(111)] public bool InjuryRolled;
+
+    /// <summary>Clears the running work and its progress. Used by the finish, the stop, and a fault.</summary>
+    public void ClearActivity()
+    {
+        Activity = 0;
+        ActivityHoursDone = 0f;
+        ActivityTargetHours = 0f;
+        InjuryRolled = false;
+    }
+
     public CampType TypeEnum
     {
         get => (CampType)Type;

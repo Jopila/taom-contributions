@@ -4452,3 +4452,11 @@ them, and they were put back by hand.
   with what this session wrote; a file with a foreign hunk moves by hand edit, never by whole-file patch. Better:
   start work that may need its own branch in a worktree from the first edit.
 - **Source:** [adopt-pstack-2026-10-24.md](../adopt-pstack-2026-10-24.md).
+### A plan's direction words become test names, and a decision resting on "many" is measured first (#860, 2026-10-26)
+The plan said a morale cost; the build shipped a gain, with tests and text to match. The plan kept a town-distance
+rule for start in camp because "many" starts were near a town; all 25 were, so the feature could never work.
+- **Why missed:** the builder wrote tests from its own reading of the formula, and nobody measured the start
+  positions before the decision. Faked collaborators hid both from the unit tests.
+- **Prevent:** put each direction word of a plan (cost, gain, cap, floor, never) in a test name. Before a plan
+  decision rests on a count word, run the measurement on the shipped data and write the number in the plan.
+- **Source:** [rca-camp-work-2026-10-26.md](../rca-camp-work-2026-10-26.md) findings 1, 3.

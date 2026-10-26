@@ -5,6 +5,8 @@ using TaleWorlds.CampaignSystem.GameMenus;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
+using TAOM.Features.FieldCamp.Activities;
+using TAOM.Features.FieldCamp.Activities.Hooks;
 using TAOM.Adapters;
 using TAOM.Features.FieldCamp.Domain;
 using TAOM.Features.FieldCamp.UI;
@@ -49,7 +51,7 @@ public sealed class FieldCampMenuController
         starter.AddGameMenu(
             FieldCampCampaignBehavior.BaseMenuId,
             "{=taom_fcamp_menu_base}Your party makes camp.{NEWLINE}{TAOM_FC_STATUS}",
-            new OnInitDelegate(OnMenuInit),
+            new OnInitDelegate(args => RefreshStatusVariables(onCampPanel: false)),
             GameMenu.MenuOverlayType.None);
 
         starter.AddGameMenuOption(FieldCampCampaignBehavior.BaseMenuId, "taom_fc_ambush",
@@ -107,7 +109,7 @@ public sealed class FieldCampMenuController
         starter.AddWaitGameMenu(
             FieldCampCampaignBehavior.CampSubMenuId,
             "{=!}{TAOM_FC_STATUS}",
-            new OnInitDelegate(OnMenuInit),
+            new OnInitDelegate(args => RefreshStatusVariables(onCampPanel: true)),
             args => true,
             null,
             new OnTickDelegate(OnSubMenuTick),
@@ -125,7 +127,7 @@ public sealed class FieldCampMenuController
                 _camps.ToggleForaging();
                 // In-place re-render of the toggled TAOM_FC_FORAGE label. NOT SwitchTo(same id):
                 // that re-initialises the menu, which on a wait menu restarts the wait.
-                RefreshStatusVariables();
+                RefreshStatusVariables(onCampPanel: true);
                 _menus.RefreshCurrent();
             },
             isLeave: false, index: 0);
@@ -178,21 +180,23 @@ public sealed class FieldCampMenuController
             isLeave: true, index: 5);
     }
 
-    private void OnMenuInit(MenuCallbackArgs args)
-    {
-        RefreshStatusVariables();
-    }
-
     /// <summary>Wait-menu tick: keeps the raise percent and forage grain live while the panel
     /// is open. Text-variable writes only; the engine re-renders the body from them.</summary>
     private void OnSubMenuTick(MenuCallbackArgs args, CampaignTime dt)
     {
-        RefreshStatusVariables();
+        RefreshStatusVariables(onCampPanel: true);
     }
+
+    /// <summary>
+    /// The camp work module's rest healing, which the panel asks for its resting rates (#860). A static because SubModule builds the
+    /// Field Camp behavior, and so this controller, with new and cannot pass it in; the module sets it from InitializeStatics. Null
+    /// until then, and the panel shows no resting line.
+    /// </summary>
+    internal static CampRestHealing? RestStatus { get; set; }
 
     /// <summary>Both menu bodies render from these two text variables (source module pattern);
     /// re-set on every menu init so the raise percent and forage toggle stay current.</summary>
-    private void RefreshStatusVariables()
+    private void RefreshStatusVariables(bool onCampPanel)
     {
         var camp = _camps.PlayerCamp;
         TextObject status;
@@ -216,6 +220,16 @@ public sealed class FieldCampMenuController
         {
             status = new TextObject("{=taom_fcamp_menu_active}Active: {CAMP}");
             status.SetTextVariable("CAMP", FieldCampTexts.TypeLabel(camp.TypeEnum));
+        }
+
+        // Resting (#860): the camp panel, and only it, says what the open panel adds to healing. StatusRates is null when nothing
+        // would apply (feature off, shared campaign, no camp or one still being raised, both rates 0), and RestStatus is null until
+        // the camp work module's static initialisation sets it.
+        var rates = onCampPanel ? RestStatus?.StatusRates() : null;
+        if (rates != null)
+        {
+            status = new TextObject("{=!}{STATUS}{NEWLINE}{REST}").SetTextVariable("STATUS", status)
+                .SetTextVariable("REST", CampRestStartTexts.RestStatus(rates.Value.Regulars, rates.Value.Heroes));
         }
 
         MBTextManager.SetTextVariable("TAOM_FC_STATUS", status, false);

@@ -3928,6 +3928,52 @@
 	<!-- BondOfHire -->
 	<string id="taom_boh_term_days" text="{=taom_boh_term_days}These mercenaries agreed to serve for at least {DAYS} more {?IS_PLURAL}days{?}day{\?}" />
 	<string id="taom_boh_term_unknown" text="{=taom_boh_term_unknown}It is not known how long these mercenaries will serve" />
+	<!-- FieldCamp -->
+	<string id="taom_camp_opt_back" text="{=taom_camp_opt_back}Back to camp" />
+	<string id="taom_camp_opt_resume_work" text="{=taom_camp_opt_resume_work}Return to the work" />
+	<string id="taom_camp_opt_work" text="{=taom_camp_opt_work}Set the men to work" />
+	<string id="taom_camp_pick_body" text="{=taom_camp_pick_body}What should the men turn their hands to? Each task takes some hours and brings in goods when it is done." />
+	<string id="taom_camp_opt_timber" text="{=taom_camp_opt_timber}Fell timber" />
+	<string id="taom_camp_opt_fish" text="{=taom_camp_opt_fish}Fish the waters" />
+	<string id="taom_camp_opt_hunt" text="{=taom_camp_opt_hunt}Hunt for game" />
+	<string id="taom_camp_wait_timber" text="{=taom_camp_wait_timber}The men are felling timber for the camp." />
+	<string id="taom_camp_wait_fish" text="{=taom_camp_wait_fish}The men are fishing the waters near the camp." />
+	<string id="taom_camp_wait_hunt" text="{=taom_camp_wait_hunt}The men are out hunting game for the camp." />
+	<string id="taom_camp_block_coop" text="{=taom_camp_block_coop}Camp work is not available in a shared campaign." />
+	<string id="taom_camp_block_busy" text="{=taom_camp_block_busy}The men cannot be set to work during an encounter." />
+	<string id="taom_camp_block_camp" text="{=taom_camp_block_camp}Raise a field or fortified camp first." />
+	<string id="taom_camp_block_scout" text="{=taom_camp_block_scout}The men cannot work while a scout is out." />
+	<string id="taom_camp_block_working" text="{=taom_camp_block_working}The men are already at work." />
+	<string id="taom_camp_block_nomen" text="{=taom_camp_block_nomen}No man in the party is fit to work." />
+	<string id="taom_camp_block_tools" text="{=taom_camp_block_tools}This many men need {N} tools, and the party holds too few." />
+	<string id="taom_camp_nothing_timber" text="{=taom_camp_nothing_timber}Only a forest has timber worth felling." />
+	<string id="taom_camp_nothing_fish" text="{=taom_camp_nothing_fish}There is no water close enough to fish." />
+	<string id="taom_camp_nothing_hunt" text="{=taom_camp_nothing_hunt}There is no game to hunt on this ground." />
+	<string id="taom_camp_done_morale" text="{=taom_camp_done_morale}The long work wears on the men (morale -{N})." />
+	<string id="taom_camp_done_none" text="{=taom_camp_done_none}The men return empty-handed." />
+	<string id="taom_camp_done_timber" text="{=taom_camp_done_timber}The woodcutters return with {N} hardwood." />
+	<string id="taom_camp_done_fish" text="{=taom_camp_done_fish}The fishers return with {N} fish." />
+	<string id="taom_camp_done_hunt" text="{=taom_camp_done_hunt}The hunters return with {N} meat." />
+	<string id="taom_camp_injured_one" text="{=taom_camp_injured_one}A man was hurt at the work." />
+	<string id="taom_camp_injured_many" text="{=taom_camp_injured_many}{N} men were hurt at the work." />
+	<string id="taom_camp_stopped" text="{=taom_camp_stopped}The men stand down. The work is abandoned." />
+	<string id="taom_camp_opt_stop" text="{=taom_camp_opt_stop}Stop work" />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- BattleBalance -->
+	<string id="taom_camp_rest_label" text="{=taom_camp_rest_label}Resting in camp" />
+	<!-- FieldCamp -->
+	<string id="taom_camp_rest_status" text="{=taom_camp_rest_status}Resting here heals {R} more wounded troops a day, and the heroes {H} more hit points a day." />
+	<string id="taom_camp_start_settlement" text="{=taom_camp_start_settlement}the party stands inside a settlement." />
+	<string id="taom_camp_start_moving" text="{=taom_camp_start_moving}the party is on the move." />
+	<string id="taom_camp_start_external" text="{=taom_camp_start_external}something nearby forbids a camp here." />
+	<string id="taom_camp_start_other" text="{=taom_camp_start_other}a camp cannot be pitched here." />
+	<string id="taom_camp_start_blocked" text="{=taom_camp_start_blocked}Your campaign begins without a camp: {REASON}" />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- FieldCamp -->
+	<string id="taom_camp_block_off" text="{=taom_camp_block_off}Camp work is off while field camps are disabled in the mod options." />
+	<string id="taom_camp_done_tools_one" text="{=taom_camp_done_tools_one}A tool is worn out." />
+	<string id="taom_camp_done_tools_many" text="{=taom_camp_done_tools_many}{N} tools are worn out." />
+	<string id="taom_camp_ended_coop" text="{=taom_camp_ended_coop}Camp work is not available in a shared campaign. The men stand down." />
 
 	<string id="taom_provender_block_buyer" text="{=taom_provender_block_buyer}No town within reach will buy from us." />
 	<string id="taom_provender_block_encounter" text="{=taom_provender_block_encounter}Not while another party stands before us." />

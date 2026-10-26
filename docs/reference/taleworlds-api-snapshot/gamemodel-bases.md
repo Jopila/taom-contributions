@@ -279,6 +279,7 @@ Models: 68. Regenerate after any engine bump: `pwsh tools/snapshot_api_surface.p
 ## TaomPartyHealingModel : DefaultPartyHealingModel
 `Base: TaleWorlds.CampaignSystem.GameComponents.DefaultPartyHealingModel`
 
+- `ExplainedNumber GetDailyHealingForRegulars(PartyBase partyBase, Boolean isPrisoner, Boolean includeDescriptions)`
 - `ExplainedNumber GetDailyHealingHpForHeroes(PartyBase partyBase, Boolean isPrisoners, Boolean includeDescriptions)`
 - `Single GetSurvivalChance(PartyBase party, CharacterObject agentCharacter, DamageTypes damageType, Boolean canDamageKillEvenIfBlunt, PartyBase enemyParty)`
 

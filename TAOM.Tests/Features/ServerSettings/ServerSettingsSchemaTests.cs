@@ -86,7 +86,7 @@ public class ServerSettingsSchemaTests
             CollectionAssert.AreEqual(expected, actual, type.Name);
         }
 
-        Assert.AreEqual(481, ServerSettingsSchema.All.Count);
+        Assert.AreEqual(487, ServerSettingsSchema.All.Count);
     }
 
     [TestMethod]

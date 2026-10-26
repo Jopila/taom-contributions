@@ -82,5 +82,6 @@ internal static class FeatureModules
         new Features.BondOfHire.BondOfHireModule(),
         new Features.SeasonedHosts.SeasonedHostsModule(),
         new Features.KingsMuster.KingsMusterModule(),
+        new Features.FieldCamp.Activities.CampActivitiesModule(),
     };
 }

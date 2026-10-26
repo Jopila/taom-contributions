@@ -1142,6 +1142,125 @@ public class CampServiceTests
         _sut.HourlyTick();
     }
 
+    // --- start in camp skips only the town distance (#860 review fix 7) ---
+
+    [TestMethod]
+    public void CanEstablish_NearATown_IsTooClose_UnlessTheDistanceRuleIsIgnored()
+    {
+        _sut.NearestFortDistance = 3f;
+
+        Assert.AreEqual(CampBlockReason.TooCloseToTown, _sut.CanEstablish(CampType.Field));
+        Assert.AreEqual(CampBlockReason.TooCloseToTown, _sut.CanEstablish(CampType.Fortified));
+        Assert.AreEqual(CampBlockReason.None, _sut.CanEstablish(CampType.Field, ignoreTownDistance: true));
+        Assert.AreEqual(CampBlockReason.None, _sut.CanEstablish(CampType.Fortified, ignoreTownDistance: true));
+    }
+
+    [TestMethod]
+    public void CanEstablish_IgnoringTheDistance_StillFailsEveryOtherBlock()
+    {
+        _sut.NearestFortDistance = 3f;
+
+        _sut.InSettlement = true;
+        Assert.AreEqual(CampBlockReason.InSettlement, _sut.CanEstablish(CampType.Field, ignoreTownDistance: true));
+        _sut.InSettlement = false;
+
+        _sut.Moving = true;
+        Assert.AreEqual(CampBlockReason.Moving, _sut.CanEstablish(CampType.Field, ignoreTownDistance: true));
+        _sut.Moving = false;
+
+        _enlistment.IsEnlisted.Returns(true);
+        Assert.AreEqual(CampBlockReason.Enlisted, _sut.CanEstablish(CampType.Field, ignoreTownDistance: true));
+        _enlistment.IsEnlisted.Returns(false);
+
+        _settings.Enabled.Returns(false);
+        Assert.AreEqual(CampBlockReason.FeatureDisabled, _sut.CanEstablish(CampType.Field, ignoreTownDistance: true));
+        _settings.Enabled.Returns(true);
+
+        _sut.PartyId = null;
+        Assert.AreEqual(CampBlockReason.FeatureDisabled, _sut.CanEstablish(CampType.Field, ignoreTownDistance: true), "no main party");
+        _sut.PartyId = "main_party";
+
+        Assert.AreEqual(CampBlockReason.None, _sut.CanEstablish(CampType.Field, ignoreTownDistance: true));
+        Assert.IsTrue(_sut.Establish(CampType.Field, ignoreTownDistance: true));
+        Assert.AreEqual(CampBlockReason.AlreadyCamped, _sut.CanEstablish(CampType.Field, ignoreTownDistance: true));
+    }
+
+    [TestMethod]
+    public void Establish_NearATown_NeedsTheIgnoreFlag_AndABlockedOneStillRefuses()
+    {
+        _sut.NearestFortDistance = 3f;
+
+        Assert.IsFalse(_sut.Establish(CampType.Field));
+        Assert.IsNull(_sut.PlayerCamp);
+
+        _sut.Moving = true;
+        Assert.IsFalse(_sut.Establish(CampType.Field, ignoreTownDistance: true));
+        _sut.Moving = false;
+
+        Assert.IsTrue(_sut.Establish(CampType.Field, ignoreTownDistance: true));
+        Assert.IsNotNull(_sut.PlayerCamp);
+    }
+
+    // --- camp work records (#860) ---
+
+    [TestMethod]
+    public void LoadFrom_AUsableWorkRecord_IsKept()
+    {
+        var book = new Dictionary<string, CampState>
+        {
+            ["main_party"] = new CampState { TypeEnum = CampType.Field, Activity = 2, ActivityHoursDone = 3f, ActivityTargetHours = 10f, InjuryRolled = true },
+        };
+
+        _sut.LoadFrom(book);
+
+        var camp = _sut.PlayerCamp;
+        Assert.AreEqual(2, camp.Activity);
+        Assert.AreEqual(3f, camp.ActivityHoursDone);
+        Assert.IsTrue(camp.InjuryRolled);
+        _logger.DidNotReceive().LogWarning(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void LoadFrom_AnOldSave_ZeroedFields_MeansNoWork_AndNoWarning()
+    {
+        var book = new Dictionary<string, CampState> { ["main_party"] = new CampState { TypeEnum = CampType.Field } };
+
+        _sut.LoadFrom(book);
+
+        Assert.AreEqual(0, _sut.PlayerCamp.Activity);
+        _logger.DidNotReceive().LogWarning(Arg.Any<string>());
+    }
+
+    [DataTestMethod]
+    [DataRow(1, float.NaN, 10f)]
+    [DataRow(1, -2f, 10f)]
+    [DataRow(1, float.PositiveInfinity, 10f)]
+    [DataRow(1, 3f, float.NaN)]
+    [DataRow(1, 3f, 0f)]
+    [DataRow(9, 3f, 10f)]
+    [DataRow(-1, 3f, 10f)]
+    public void LoadFrom_AWorkRecordThatCannotRun_IsClearedAndLoggedOnce_TheCampStays(int activity, float done, float target)
+    {
+        var book = new Dictionary<string, CampState>
+        {
+            ["main_party"] = new CampState
+            {
+                TypeEnum = CampType.Field, Activity = activity, ActivityHoursDone = done, ActivityTargetHours = target, InjuryRolled = true,
+            },
+            ["other_party"] = new CampState { TypeEnum = CampType.Field, Activity = activity, ActivityHoursDone = done, ActivityTargetHours = target },
+        };
+
+        _sut.LoadFrom(book);
+
+        var camp = _sut.PlayerCamp;
+        Assert.IsNotNull(camp, "only the work is dropped");
+        Assert.AreEqual(0, camp.Activity);
+        Assert.AreEqual(0f, camp.ActivityHoursDone);
+        Assert.AreEqual(0f, camp.ActivityTargetHours);
+        Assert.IsFalse(camp.InjuryRolled);
+        _logger.Received(1).LogWarning(Arg.Any<string>());
+    }
+
     // --- establish/ready announcements ---
 
     [TestMethod]

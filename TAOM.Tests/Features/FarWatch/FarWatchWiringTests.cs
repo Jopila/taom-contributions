@@ -171,7 +171,7 @@ public class FarWatchWiringTests
         Assert.AreNotSame(decl.Create(container), decl.Create(container), "a fresh behavior per campaign start");
     }
 
-    // ---- The camp menu order: Refuge 4, Review 5, Scout 6, Leave 7
+    // ---- The camp menu order: Refuge 4, Review 5, Scout 6, Work 7, Leave 8
 
     private static int IndexIn(string path, string optionIdOrAnchor)
     {
@@ -194,10 +194,12 @@ public class FarWatchWiringTests
         int refuge = IndexIn("Main/Features/Refuge/Hooks/RefugeMenuController.cs", "\"taom_rf_found\"");
         int review = IndexIn("Main/Features/HostReview/Hooks/HostReviewCampaignBehavior.cs", "CampSubMenuId, OptionId");
         int scout = IndexIn("Main/Features/FarWatch/Hooks/FarWatchCampOption.cs", "CampSubMenuId, OptionId");
+        int work = IndexIn("Main/Features/FieldCamp/Activities/Hooks/CampWorkMenu.cs", "CampSubMenuId, OptionId");
 
         // The engine's rule (GameMenu.AddOption): insert at the index when Count >= index, else append. Session listeners of one
         // event run newest first, and the modules' behaviors are added in list order, so Far Watch's after-launch listener runs
-        // first, then Host Review's. FieldCamp builds its panel and Refuge inserts in OnSessionLaunched, before any of them.
+        // first, then Host Review's; camp work (#860) is listed after Far Watch, so its listener runs before both. FieldCamp builds
+        // its panel and Refuge inserts in OnSessionLaunched, before any of them.
         var menu = new List<string>();
         void Add(string id, int index)
         {
@@ -211,11 +213,12 @@ public class FarWatchWiringTests
         Add("break", breakCamp);
         Add("leave", leave);
         Add("refuge", refuge);
+        Add("work", work);
         Add("scout", scout);
         Add("review", review);
 
-        CollectionAssert.AreEqual(new[] { "forage", "fortify", "supplies", "break", "refuge", "review", "scout", "leave" }, menu,
-            "Leave stays last; Scout sits under Review, which sits under Refuge");
+        CollectionAssert.AreEqual(new[] { "forage", "fortify", "supplies", "break", "refuge", "review", "scout", "work", "leave" }, menu,
+            "Leave stays last; Work sits under Scout, which sits under Review, which sits under Refuge");
     }
 
     [TestMethod]

@@ -119,6 +119,13 @@ public static class CoopSettingsRelevance
         // switch is inert under co-op: the buttons are hidden and a click refuses. A peer holding a different value never
         // changes a running simulation.
         "EnableReserveSteps",
+        // Camp work (#860): the men hunt, fell timber or fish from a raised camp. A work starts only behind the single-player
+        // predicate (CampActivityService.GlobalBlock), and one already running when a shared campaign begins is cleared at the wait's
+        // next tick with nothing paid, so a peer holding a different value never changes a running simulation.
+        "CampActivityHours", "CampActivityYieldPerTenMen", "CampActivityYieldCap",
+        // Rest healing and start in camp (#860): both are gated by the same single-player predicate, so a peer holding a different
+        // value never changes a running simulation.
+        "CampRestHealRegularsPerDay", "CampRestHealHeroesPerDay", "CampStartInCamp",
         // Watch-Silver and Tidings of the Lists (#859): each switch only gates a player's click, and every write (a fief's loyalty,
         // the player's gold) is behind the single-player predicate, so peers holding different values never compute differently.
         "EnableWatchSilver", "EnableTidingsOfTheLists",

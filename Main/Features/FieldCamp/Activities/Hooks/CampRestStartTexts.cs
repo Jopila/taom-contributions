@@ -1,0 +1,39 @@
+using System.Globalization;
+using TaleWorlds.Localization;
+
+namespace TAOM.Features.FieldCamp.Activities.Hooks;
+
+/// <summary>The player-facing words of rest healing and start in camp (#860 parts B and C), apart from the healing line's label in
+/// <see cref="CampRestModelLine"/>; every string is a <c>{=taom_camp_*}</c> key with its English default.</summary>
+internal static class CampRestStartTexts
+{
+    internal static TextObject RestStatus(float regulars, float heroes) =>
+        new TextObject("{=taom_camp_rest_status}Resting here heals {R} more wounded troops a day, and the heroes {H} more hit points a day.")
+            .SetTextVariable("R", Number(regulars)).SetTextVariable("H", Number(heroes));
+
+    /// <summary>The one message of a new campaign that could not start in camp.</summary>
+    internal static string StartBlocked(CampBlockReason reason)
+    {
+        TextObject why;
+        switch (reason)
+        {
+            case CampBlockReason.InSettlement:
+                why = new TextObject("{=taom_camp_start_settlement}the party stands inside a settlement.");
+                break;
+            case CampBlockReason.Moving:
+                why = new TextObject("{=taom_camp_start_moving}the party is on the move.");
+                break;
+            case CampBlockReason.External:
+                why = new TextObject("{=taom_camp_start_external}something nearby forbids a camp here.");
+                break;
+            default:
+                why = new TextObject("{=taom_camp_start_other}a camp cannot be pitched here.");
+                break;
+        }
+
+        return new TextObject("{=taom_camp_start_blocked}Your campaign begins without a camp: {REASON}")
+            .SetTextVariable("REASON", why).ToString();
+    }
+
+    private static string Number(float value) => value.ToString("0.#", CultureInfo.InvariantCulture);
+}

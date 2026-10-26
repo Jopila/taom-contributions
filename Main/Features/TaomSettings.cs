@@ -1708,6 +1708,41 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Gold to fortify a raised field camp. Default 500.")]
     public int CampFortifiedUpgradeCost { get; set; } = 500;
 
+    // Camp work (#860): the men hunt, fell timber or fish from a raised camp. Single-player only, so the three knobs are
+    // player-local (CoopSettingsRelevance).
+
+    [SettingPropertyGroup("Field Camps")]
+    [SettingPropertyFloatingInteger("Camp Work Hours", 1f, 48f, "#0.0", Order = 8, RequireRestart = false,
+        HintText = "Hours a camp work (hunt, fell timber, fish) takes once the men are set to it. Default 10.")]
+    public float CampActivityHours { get; set; } = 10f;
+
+    [SettingPropertyGroup("Field Camps")]
+    [SettingPropertyFloatingInteger("Camp Work Yield Per Ten Men", 0f, 50f, "#0.0", Order = 9, RequireRestart = false,
+        HintText = "Goods a finished camp work brings in for every ten healthy men, on the best ground for it; poorer ground brings in less. Default 10.")]
+    public float CampActivityYieldPerTenMen { get; set; } = 10f;
+
+    [SettingPropertyGroup("Field Camps")]
+    [SettingPropertyInteger("Camp Work Yield Cap", 0, 200, "0", Order = 10, RequireRestart = false,
+        HintText = "Most goods one finished camp work can bring in, however many men are sent. Default 30.")]
+    public int CampActivityYieldCap { get; set; } = 30;
+
+    // Rest healing and start in camp (#860). Single-player only, so all three are player-local (CoopSettingsRelevance).
+
+    [SettingPropertyGroup("Field Camps")]
+    [SettingPropertyFloatingInteger("Camp Rest Healing: Troops Per Day", 0f, 50f, "#0.0", Order = 11, RequireRestart = false,
+        HintText = "Extra wounded troops healed per day: a base amount that the usual healing percentages raise too. Works only while the camp panel is open (Camp Options, then Manage camp); the work menus do not count (set both to 0 to turn rest healing off, lodging perks included). Default 15.")]
+    public float CampRestHealRegularsPerDay { get; set; } = 15f;
+
+    [SettingPropertyGroup("Field Camps")]
+    [SettingPropertyFloatingInteger("Camp Rest Healing: Heroes Per Day", 0f, 50f, "#0.0", Order = 12, RequireRestart = false,
+        HintText = "Extra hit points per day for wounded heroes: a base amount that the usual healing percentages raise too. Works only while the camp panel is open (Camp Options, then Manage camp); the work menus do not count (set both to 0 to turn rest healing off, lodging perks included). Default 19.")]
+    public float CampRestHealHeroesPerDay { get; set; } = 19f;
+
+    [SettingPropertyGroup("Field Camps")]
+    [SettingPropertyBool("Start New Campaigns In Camp", Order = 13, RequireRestart = false,
+        HintText = "A new campaign begins with a field camp pitched where the party starts, if the ground allows it; otherwise a message says why and the game goes on as usual. Off by default.")]
+    public bool CampStartInCamp { get; set; } = false;
+
     // --- Refuge ---
     //
     // Movable player bases raised from field camps (#507, port of the yotthani Refuge module).

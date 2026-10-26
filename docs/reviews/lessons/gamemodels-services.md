@@ -1328,3 +1328,11 @@ human player's clan read as AI and would have received the AI bonuses.
 - **Prevent:** a bonus or penalty that must reach AI only also requires `!ICoopSessionProvider.ShouldDeferToHost`, which is
   true on clients and on every peer under an unprobed co-op mod; pin the deferring case with a test.
 - **Source:** `docs/reviews/rca-seasoned-hosts-2026-10-26.md` finding 1.
+### A timed job re-checks every gate its start checks, on each step that writes (#860, 2026-10-26)
+Camp work checked the master toggle and the single-player gate when the player picked a task. The wait then ticked,
+rolled its injury and paid with the feature off or in a shared campaign, and a resume skipped every start block.
+- **Why missed:** the gates were written where the player chooses; the tick, the roll and the payout were read as the
+  same decision already made, though a wait runs for hours and a save can carry it into another session.
+- **Prevent:** list every step that writes (tick, roll, payout, resume) and call the start's gate function from each,
+  as `FarWatchService` ends its ride when the toggle goes off. A test per step drives the gate closed mid-job.
+- **Source:** [rca-camp-work-2026-10-26.md](../rca-camp-work-2026-10-26.md) findings 2, 7, 8.

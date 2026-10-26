@@ -6711,6 +6711,89 @@
 
     <string id="taom_seasoned_hosts_no_steward_xp_hint" text="When on, a settlement project that finishes grants no Steward XP, which the game otherwise gives 1000 of each time. This covers every settlement, yours included. In a co-op session only the host skips the grant; while a co-op mod TAOM cannot probe (such as BannerlordTogether) is enabled, the game's grant is left alone. Default: off." />
 
+    <string id="taom_camp_opt_back" text="Back to camp" />
+
+    <string id="taom_camp_opt_resume_work" text="Return to the work" />
+
+    <string id="taom_camp_opt_work" text="Set the men to work" />
+
+    <string id="taom_camp_pick_body" text="What should the men turn their hands to? Each task takes some hours and brings in goods when it is done." />
+
+    <string id="taom_camp_opt_timber" text="Fell timber" />
+
+    <string id="taom_camp_opt_fish" text="Fish the waters" />
+
+    <string id="taom_camp_opt_hunt" text="Hunt for game" />
+
+    <string id="taom_camp_wait_timber" text="The men are felling timber for the camp." />
+
+    <string id="taom_camp_wait_fish" text="The men are fishing the waters near the camp." />
+
+    <string id="taom_camp_wait_hunt" text="The men are out hunting game for the camp." />
+
+    <string id="taom_camp_block_coop" text="Camp work is not available in a shared campaign." />
+
+    <string id="taom_camp_block_busy" text="The men cannot be set to work during an encounter." />
+
+    <string id="taom_camp_block_camp" text="Raise a field or fortified camp first." />
+
+    <string id="taom_camp_block_scout" text="The men cannot work while a scout is out." />
+
+    <string id="taom_camp_block_working" text="The men are already at work." />
+
+    <string id="taom_camp_block_nomen" text="No man in the party is fit to work." />
+
+    <string id="taom_camp_block_tools" text="This many men need {N} tools, and the party holds too few." />
+
+    <string id="taom_camp_nothing_timber" text="Only a forest has timber worth felling." />
+
+    <string id="taom_camp_nothing_fish" text="There is no water close enough to fish." />
+
+    <string id="taom_camp_nothing_hunt" text="There is no game to hunt on this ground." />
+
+    <string id="taom_camp_done_morale" text="The long work wears on the men (morale -{N})." />
+
+
+    <string id="taom_camp_done_none" text="The men return empty-handed." />
+
+    <string id="taom_camp_done_timber" text="The woodcutters return with {N} hardwood." />
+
+    <string id="taom_camp_done_fish" text="The fishers return with {N} fish." />
+
+    <string id="taom_camp_done_hunt" text="The hunters return with {N} meat." />
+
+    <string id="taom_camp_injured_one" text="A man was hurt at the work." />
+
+    <string id="taom_camp_injured_many" text="{N} men were hurt at the work." />
+
+    <string id="taom_camp_stopped" text="The men stand down. The work is abandoned." />
+
+    <string id="taom_camp_opt_stop" text="Stop work" />
+
+    <string id="taom_camp_rest_label" text="Resting in camp" />
+
+    <string id="taom_camp_rest_status" text="Resting here heals {R} more wounded troops a day, and the heroes {H} more hit points a day." />
+
+    <string id="taom_camp_start_settlement" text="the party stands inside a settlement." />
+
+
+    <string id="taom_camp_start_moving" text="the party is on the move." />
+
+    <string id="taom_camp_start_external" text="something nearby forbids a camp here." />
+
+    <string id="taom_camp_start_other" text="a camp cannot be pitched here." />
+
+    <string id="taom_camp_start_blocked" text="Your campaign begins without a camp: {REASON}" />
+
+
+    <string id="taom_camp_block_off" text="Camp work is off while field camps are disabled in the mod options." />
+
+    <string id="taom_camp_done_tools_one" text="A tool is worn out." />
+
+    <string id="taom_camp_done_tools_many" text="{N} tools are worn out." />
+
+    <string id="taom_camp_ended_coop" text="Camp work is not available in a shared campaign. The men stand down." />
+
   </strings>
 
 </base>

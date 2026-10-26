@@ -30,11 +30,12 @@ public interface ICampService
     /// <summary>The main party's camp, or null.</summary>
     CampState PlayerCamp { get; }
 
-    /// <summary>Whether the main party could pitch this camp type here right now.</summary>
-    CampBlockReason CanEstablish(CampType type);
+    /// <summary>Whether the main party could pitch this camp type here right now. <paramref name="ignoreTownDistance"/> waives the
+    /// town and castle keep-out (<c>CampMinTownDistance</c>) and nothing else; only start in camp passes true.</summary>
+    CampBlockReason CanEstablish(CampType type, bool ignoreTownDistance = false);
 
     /// <summary>Pitches the camp (holds the party, starts the raise). False when blocked.</summary>
-    bool Establish(CampType type);
+    bool Establish(CampType type, bool ignoreTownDistance = false);
 
     /// <summary>Breaks the player camp: removes visuals, cancels supply orders PLACED FROM THE
     /// CAMP (town-placed orders keep advancing), frees movement. Safe to call with no camp.</summary>

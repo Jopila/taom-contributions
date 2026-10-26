@@ -210,7 +210,7 @@ public class CampService : ICampService
         }
     }
 
-    public CampBlockReason CanEstablish(CampType type)
+    public CampBlockReason CanEstablish(CampType type, bool ignoreTownDistance = false)
     {
         if (!_settings.Enabled)
             return CampBlockReason.FeatureDisabled;
@@ -234,7 +234,7 @@ public class CampService : ICampService
 
         // Ambush and lookout camps stay hidden and small, so only the visible camp types keep
         // their distance from garrisoned walls.
-        if (type == CampType.Field || type == CampType.Fortified)
+        if (!ignoreTownDistance && (type == CampType.Field || type == CampType.Fortified))
         {
             float minDistance = _settings.MinTownDistance;
             if (FiniteFloatValidator.IsFinite(minDistance) && minDistance > 0f
@@ -252,9 +252,9 @@ public class CampService : ICampService
         return CampBlockReason.None;
     }
 
-    public bool Establish(CampType type)
+    public bool Establish(CampType type, bool ignoreTownDistance = false)
     {
-        if (CanEstablish(type) != CampBlockReason.None)
+        if (CanEstablish(type, ignoreTownDistance) != CampBlockReason.None)
             return false;
 
         var id = MainPartyId();
@@ -422,6 +422,7 @@ public class CampService : ICampService
     public void LoadFrom(Dictionary<string, CampState> camps)
     {
         _camps = ScrubNullRows(camps);
+        ScrubActivities(_camps);
         // Stale transients must never survive into a loaded save: a forward-set ambush clock
         // stalls every scan, a stuck move latch kills the break guard, and a pending inquiry
         // latch from a dead session would block the first scan forever.
@@ -467,6 +468,22 @@ public class CampService : ICampService
         if (dropped > 0)
             _logger.LogWarning($"[FieldCamp] dropped {dropped} null camp record(s) from the loaded book");
         return camps;
+    }
+
+    /// <summary>Clears a saved work record that cannot run: an unknown kind, or hours or a target that are not finite (#860). A
+    /// stale record would otherwise tick forever or pay at once; the camp itself is kept.</summary>
+    private void ScrubActivities(Dictionary<string, CampState> camps)
+    {
+        int cleared = 0;
+        foreach (var camp in camps.Values)
+        {
+            if (Activities.CampActivityRules.IsSane(camp.Activity, camp.ActivityHoursDone, camp.ActivityTargetHours))
+                continue;
+            camp.ClearActivity();
+            cleared++;
+        }
+        if (cleared > 0)
+            _logger.LogWarning($"[FieldCamp] cleared {cleared} unusable camp work record(s) from the loaded book");
     }
 
     public void SaveInto(out Dictionary<string, CampState> camps)
