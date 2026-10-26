@@ -12,7 +12,6 @@ using TaleWorlds.Localization;
 using TAOM.Composition;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
-using TAOM.Features.CulturalFeats;
 using TAOM.Features.CulturalFeats.Models;
 using TAOM.Features.RedArrow;
 using TAOM.Features.RedArrow.Hooks;
@@ -21,7 +20,7 @@ using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.RedArrow;
 
-/// <summary>Wiring guard for the Red Arrow (#873): the module line, the patch category, an untouched army-management model, and the engine members the two postfixes touch.</summary>
+/// <summary>Wiring guard for the Red Arrow (#873): the module line, the patch category, an army-management model with no Red Arrow seam, and the engine members the two postfixes touch.</summary>
 [TestClass]
 public class RedArrowWiringTests
 {
@@ -66,20 +65,18 @@ public class RedArrowWiringTests
 
     [TestMethod]
     [TestCategory("RequiresGame")]
-    public void TaomArmyManagementModel_IsUntouched_DeclaresOnlyItsTrunkOverrides_AndTakesOnlyTheFeats()
+    public void TaomArmyManagementModel_DoesNotOverrideTheEligibilityCheck()
     {
         var overridden = typeof(TaomArmyManagementModel)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
             .Select(m => m.Name)
-            .OrderBy(n => n, StringComparer.Ordinal)
             .ToList();
 
-        CollectionAssert.AreEqual(new[] { "CalculatePartyInfluenceCost", "DailyBeingAtArmyInfluenceAward" }, overridden,
+        // Only this one name is pinned here: the model's full override list belongs to KingsMusterWiringTests, so a later feature
+        // that adds a method to the model does not have to edit this test.
+        CollectionAssert.DoesNotContain(overridden, "CheckPartyEligibility",
             "the Red Arrow adds no model seam: the eligibility check stays vanilla's and the view-model postfix redoes it");
         Assert.AreEqual(typeof(DefaultArmyManagementCalculationModel), typeof(TaomArmyManagementModel).BaseType);
-        CollectionAssert.AreEqual(
-            new[] { typeof(ICulturalFeatsService) },
-            typeof(TaomArmyManagementModel).GetConstructors().Single().GetParameters().Select(p => p.ParameterType).ToArray());
     }
 
     [TestMethod]

@@ -64,7 +64,7 @@ public class TaomFooModel : DefaultFooModel
 | `TaomCharacterStatsModel` | `DefaultCharacterStatsModel` | `TroopProgression` |
 | `TaomPartyWageModel` | `DefaultPartyWageModel` | `CulturalFeats` |
 | `TaomVolunteerModel` | `DefaultVolunteerModel` | `TroopProgression` (+ the WarChronicle `VolunteerRate` multiplier through `VolunteerProductionService`; none for the player's own clan; `AlignmentRecruitment`, `CastleRecruitment`) |
-| `TaomArmyManagementModel` | `DefaultArmyManagementCalculationModel` | `CulturalFeats` |
+| `TaomArmyManagementModel` | `DefaultArmyManagementCalculationModel` | `CulturalFeats` (+ the `KingsMuster` ruler cost discount) |
 | `TaomPartySpeedModel` | `DefaultPartySpeedCalculatingModel` | `CulturalFeats` (+ the EyeOfSauron hunter speed floor, last, `IEyeOfSauronHook`; worker threads, snapshot only) |
 | `TaomSettlementProsperityModel` | `DefaultSettlementProsperityModel` | `CulturalFeats` |
 | `TaomSettlementMilitiaModel` | `DefaultSettlementMilitiaModel` | `CulturalFeats` |

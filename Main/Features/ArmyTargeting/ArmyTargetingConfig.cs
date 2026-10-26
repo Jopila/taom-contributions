@@ -59,6 +59,18 @@ public class ArmyTargetingConfig
     /// </summary>
     public float ForeignTheaterWeight { get; set; } = 0.35f;
 
+    /// <summary>The lowest legal <see cref="RulerCallCostFactor"/>; see there for why it is not lower.</summary>
+    public const float MinRulerCallCostFactor = 0.25f;
+
+    /// <summary>
+    /// The King's Muster (#874): the fraction of the influence cost (after the culture feats) an AI kingdom ruler pays for each party
+    /// called into an army. Finite, from 0.25 to 1 inclusive (1 is no discount; a surcharge was rejected in the design). The floor exists because
+    /// the discounted cost is also vanilla's candidate ranking key (<c>strength / (cost + 0.1)</c>,
+    /// DefaultArmyManagementCalculationModel.cs:156-159): a cost truncated toward 0 reorders the ranking, and a factor of 0 would
+    /// make it plain ascending strength.
+    /// </summary>
+    public float RulerCallCostFactor { get; set; } = 0.5f;
+
     /// <summary>
     /// Hold the Walls (#871): how long a good army that just took a fortress stays inside it. Validated on load; a
     /// missing section is the compiled defaults.

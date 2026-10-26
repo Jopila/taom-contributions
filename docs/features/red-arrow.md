@@ -18,7 +18,7 @@ While leading an army that is besieging, open Army Management as usual. Every pa
 
 ### Design Challenge
 
-- The refusal lives in three vanilla places: the model method `CheckPartyEligibility` (branch 1), the static `CampaignUIHelper.GetMapScreenActionIsEnabledWithReason` (two siege blocks), and the item view model constructor (`IsTransferDisabled`). The model's only caller is `ArmyManagementItemVM.UpdateEligibility`, so no model override is needed: the model slot (already filled by `TaomArmyManagementModel`, CulturalFeats) stays exactly as it is, and `SubModule.cs` gains nothing.
+- The refusal lives in three vanilla places: the model method `CheckPartyEligibility` (branch 1), the static `CampaignUIHelper.GetMapScreenActionIsEnabledWithReason` (two siege blocks), and the item view model constructor (`IsTransferDisabled`). The model's only caller is `ArmyManagementItemVM.UpdateEligibility`, so no model override is needed: the model slot (already filled by `TaomArmyManagementModel`, CulturalFeats) gets no Red Arrow seam (the King's Muster, #874, wraps its call cost there, see [kings-muster.md](kings-muster.md)), and `SubModule.cs` gains nothing.
 - Two Harmony postfixes on `ArmyManagementItemVM` (no transpiler) do the whole job. The `UpdateEligibility` postfix redoes the party check and the map check over vanilla's refusal and writes the private `_eligibilityReason`, so it needs a field reference.
 - A defender also has a siege event, so the test for "the besieger side" is `MobileParty.MainParty.BesiegerCamp != null`, not the siege event.
 
@@ -56,7 +56,7 @@ Branch 1, the player's siege, is the one the feature lifts. The snapshot (`ArmyC
 
 **Wiring.**
 
-- No model seam: `TaomArmyManagementModel`, `SubModule.cs` and `Main/IoC.cs` are untouched, and `RedArrowModule` registers the services. `RedArrowWiringTests` pins that the model declares only its two trunk overrides and that neither single-owner file names the feature.
+- No model seam: the Red Arrow adds nothing to `TaomArmyManagementModel` (the King's Muster wraps its call cost), and `SubModule.cs` and `Main/IoC.cs` are untouched; `RedArrowModule` registers the services. `RedArrowWiringTests` pins that the model does not override `CheckPartyEligibility` (its full override list is pinned by `KingsMusterWiringTests`) and that neither single-owner file names the feature.
 - `ArmyManagementItemVM_Constructor_RedArrow_Patch`: a postfix on the constructor that sets `IsTransferDisabled` from the service.
 - `ArmyManagementItemVM_UpdateEligibility_RedArrow_Patch`: a postfix on `UpdateEligibility`. It returns at once when vanilla's own skip branch decided the row (`CanJoinBackWithoutCost`, or `IsInCart && !IsAlreadyWithPlayer`). Otherwise, when the feature applies, `RedArrowArmyBoundary.TryRecheck` reads the candidate through the adapter and asks the service for the party check (vanilla's text on a refusal) and, if that passed, for the map-action check, then the postfix writes `_eligibilityReason` (a field reference bound in `Prepare`) and `IsEligible`.
 - Fail safe: `Prepare` returns false, with one logged error, when `_eligibilityReason` is missing, which skips both patches (the constructor patch defers to that `Prepare`). That coupling covers only the missing field: if one target alone moved, the other postfix would still apply, and `HarmonyPatchBindingTests` is the guard for a moved target. A fault inside a postfix or the boundary is caught and logged once, and vanilla's value (the block) stays.
@@ -123,7 +123,7 @@ No config file. MCM: "War of the Ring/Armies" (`GroupOrder = 76`), "Call armies 
 - `TAOM.Tests/Features/RedArrow/RedArrowPostfixTests.cs` (`RequiresGame`): both postfixes on a bare `ArmyManagementItemVM`: what each writes, and that each skip state (vanilla's skip branch, the feature off, no boundary) writes nothing.
 - `TAOM.Tests/Features/RedArrow/RedArrowBindingTests.cs` (`BindingVerification`, `RequiresGameIL`): the IL fingerprint of vanilla's `CheckPartyEligibility` and `GetMapScreenActionIsEnabledWithReason`, including every `{=key}` text and the order of the checks.
 - `TAOM.Tests/Features/RedArrow/RedArrowSettingsProviderTests.cs`: default on, the MCM attributes, the unique group order.
-- `TAOM.Tests/Features/RedArrow/RedArrowWiringTests.cs`: module listed once, category and phase, services resolve, the army-management model untouched, both patch targets and the `_eligibilityReason` binding resolve against the installed engine, `Prepare` true, postfix parameter names, single-owner files.
+- `TAOM.Tests/Features/RedArrow/RedArrowWiringTests.cs`: module listed once, category and phase, services resolve, the army-management model not overriding `CheckPartyEligibility`, both patch targets and the `_eligibilityReason` binding resolve against the installed engine, `Prepare` true, postfix parameter names, single-owner files.
 - Binding gate: `HarmonyPatchBindingTests` (both targets), `ReflectionSiteBindingTests` (`_eligibilityReason`), and the regenerated `taleworlds-api-snapshot` files.
 
 ## How to Retune

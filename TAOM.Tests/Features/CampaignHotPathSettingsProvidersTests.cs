@@ -19,6 +19,7 @@ using TAOM.Features.FireAndTribute;
 using TAOM.Features.FiefManagement;
 using TAOM.Features.HiddenHosts;
 using TAOM.Features.KeepWardens;
+using TAOM.Features.KingsMuster;
 using TAOM.Features.FromTheAshes;
 using TAOM.Features.GoodDeeds;
 using TAOM.Features.BondOfHire;
@@ -138,6 +139,8 @@ public class CampaignHotPathSettingsProvidersTests
 
     // #890: the skill XP multiplier is read at every skill XP grant, the training bonus for every troop of every AI lord party each day.
     [DataRow(typeof(SeasonedHostsSettingsProvider))]
+    // #874: the call cost runs on the AI's hourly army think, once per candidate (vanilla's CanLordCreateArmy prices each); the constructor takes the settings once.
+    [DataRow(typeof(KingsMusterSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -190,6 +193,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(IBondOfHireSettingsProvider), typeof(BondOfHireSettingsProvider))]
 
     [DataRow(typeof(ISeasonedHostsSettingsProvider), typeof(SeasonedHostsSettingsProvider))]
+    [DataRow(typeof(IKingsMusterSettingsProvider), typeof(KingsMusterSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();

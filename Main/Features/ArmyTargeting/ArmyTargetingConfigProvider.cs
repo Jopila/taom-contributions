@@ -174,6 +174,15 @@ public class ArmyTargetingConfigProvider : IArmyTargetingConfigProvider
             rejected = true;
         }
 
+        // The King's Muster (#874): the floor keeps the discounted cost (vanilla's candidate ranking key) from truncating toward 0,
+        // and 1 is the off value. A surcharge or a non-number reverts alone, as its siblings do.
+        if (!FiniteFloatValidator.IsFiniteInRange(parsed.RulerCallCostFactor, ArmyTargetingConfig.MinRulerCallCostFactor, 1f))
+        {
+            _logger.LogWarning($"ArmyTargetingConfigProvider: RulerCallCostFactor={parsed.RulerCallCostFactor} must be finite in [{ArmyTargetingConfig.MinRulerCallCostFactor},1], reverting to {defaults.RulerCallCostFactor}");
+            parsed.RulerCallCostFactor = defaults.RulerCallCostFactor;
+            rejected = true;
+        }
+
         parsed.CapturedFortHold ??= new CapturedFortHoldConfig();
         ValidateCapturedFortHold(parsed.CapturedFortHold, ref rejected);
 

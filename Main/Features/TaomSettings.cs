@@ -2291,6 +2291,17 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "When enabled (default), the Army Management screen works during a siege you lead as the besieger: you can call parties into your army and release them while the siege goes on, at the usual influence cost. The base game's other limits still apply (a party that is fighting, too weak, disbanding, too far away or at sea is refused, and so is a party already at the siege outside your army). Defending a siege, having no army and being in a map event keep the base game block. Singleplayer only: in a co-op session this does nothing. When off, the block is exactly the base game's. Takes effect the next time the screen opens, no restart.")]
     public bool EnableRedArrow { get; set; } = true;
 
+    // --- The King's Muster (docs/features/kings-muster.md, #874) ---
+    //
+    // One switch, read live on the AI's hourly army think (main thread), through the settings object the provider took when the
+    // army-management model was built, so RequireRestart = false. It joins the "War of the Ring/Armies" group above, which
+    // already carries its GroupOrder on EnableRedArrow (MCM ignores a GroupOrder on any later property).
+
+    [SettingPropertyGroup("War of the Ring/Armies")]
+    [SettingPropertyBool("Rulers call hosts for less influence", Order = 1, RequireRestart = false,
+        HintText = "When enabled (default), an AI kingdom ruler, Good or Evil, pays half the influence (0.5 by default, RulerCallCostFactor in army_targeting.json) for each party called into an army, after culture feats. Cheaper calls also make the influence an army spends on keeping itself together cheaper for the ruler, so those hosts hold longer and the ruler's clan keeps more influence for votes. Your own calls, as a ruler or a vassal, cost what they always did. Singleplayer only: in a co-op session this does nothing. When off, the cost is what it was before this feature (culture feats still apply). Applies at once, no restart.")]
+    public bool EnableKingsMusterDiscount { get; set; } = true;
+
     // --- Bonds of Battle (relations earned on campaign, docs/features/bonds-of-battle.md) ---
     //
     // Every value is read live where it is used (at a battle's end, a troop hand-over, a barter), so nothing is applied once

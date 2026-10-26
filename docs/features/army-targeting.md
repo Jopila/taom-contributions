@@ -113,7 +113,7 @@ ArmyTargetingSettingsProvider (reads TaomSettings.Instance with defaults)
 
 ### Config File: `Main/_Module/ModuleData/configs/army_targeting.json`
 
-All sections optional, missing entries default to vanilla behaviour. **Every value is validated on load**; a rejected field reverts to the compiled default with a warning, and one summary warning fires so the earlier lines get read. A missing `CapturedFortHold` section loads the compiled defaults, so Free armies hold.
+All sections optional, missing entries default to vanilla behaviour. **Every value is validated on load**; a rejected field reverts to the compiled default with a warning, and one summary warning fires so the earlier lines get read. A missing `CapturedFortHold` section loads the compiled defaults, so Free armies hold, and a missing `RulerCallCostFactor` loads 0.5, so AI rulers get the discount.
 
 > **This file is read once per Bannerlord process.** `ArmyTargetingConfigProvider` is a
 > `Reuse.Singleton` in a container built at module load, so an edit needs a **full application
@@ -142,6 +142,7 @@ All sections optional, missing entries default to vanilla behaviour. **Every val
 - **`FactionPriorityTargets`:** ordered target lists. Earlier entries score higher, decaying from `MaxPriorityBoost` to 1.0 across the list. Because the decay spans the list, pruning an entry re-steepens it for the survivors.
 - **`FactionAggressionMultipliers`:** how much to inflate `ourStrength` before the vanilla `2x defender` strength gate. At 2.0 the faction can siege at 1:1 parity instead of requiring 2:1.
 - **`CapturedFortHold`:** Hold the Walls' numbers, with the valid range of each field in [hold-the-walls.md](hold-the-walls.md). A rejected field reverts to its default alone, a violated pair (`ReleaseCohesion` above `MinCohesionToHold`, `MinHours` above `MaxHours`) reverts both, and an unknown `Sides` entry is dropped with a warning.
+- **`RulerCallCostFactor`:** the King's Muster (#874): the fraction of the influence cost (after the culture feats) an AI kingdom ruler pays for each party called into an army. Finite, from 0.25 to 1 inclusive; a rejected value reverts to 0.5 alone. Read once; see [kings-muster.md](kings-muster.md).
 
 ### Army focus
 

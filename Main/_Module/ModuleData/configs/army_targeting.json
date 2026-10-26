@@ -31,6 +31,7 @@
   "PrimaryTheaterWeight": 1.25,
   "SecondaryTheaterWeight": 1.0,
   "ForeignTheaterWeight": 0.35,
+  "RulerCallCostFactor": 0.5,
   "FactionPriorityTargets": {
     "empire_s": ["town_EW3", "town_EW2", "town_EW1", "town_EW4"],
     "isengard": ["town_V2", "town_V1"],
