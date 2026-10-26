@@ -325,6 +325,10 @@ window open in the very writer whose fix was meant to close it.
   another test had loaded the game assemblies. Tag by what each test executes, not by file, and run a new reflection
   test alone once (`--filter` on its name) before calling it green. Source: `docs/reviews/rca-far-watch-2026-10-20.md`
   findings 6 and 7.
+- **Recurrence (2026-10-26, Harvest Road):** a `BindingVerification` test that called `EquipmentElement.Equals` had no
+  `RequiresGameIL`, so the reference-assembly gate would run it on a `throw null` stub. The builder brief again did not
+  name the category. Every builder brief that asks for binding tests now says: a test that calls, constructs or reads
+  the value of an engine member carries `RequiresGameIL`; one that only reflects over signatures does not. Source: [rca-harvest-road-2026-10-26.md](../rca-harvest-road-2026-10-26.md) finding 2.
 
 ### An in-game check names the log line it expects and traces the trigger that produces it (2026-10-08)
 - **Why missed:** the mission-start guard's "guard off" step promised an endless loading loop, but the QA trigger

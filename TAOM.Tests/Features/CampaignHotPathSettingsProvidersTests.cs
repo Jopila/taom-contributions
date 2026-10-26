@@ -17,6 +17,7 @@ using TAOM.Features.EyeOfSauron;
 using TAOM.Features.FieldCommission;
 using TAOM.Features.FireAndTribute;
 using TAOM.Features.FiefManagement;
+using TAOM.Features.HarvestRoad;
 using TAOM.Features.HiddenHosts;
 using TAOM.Features.KeepWardens;
 using TAOM.Features.KingsMuster;
@@ -130,6 +131,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(SwornAnewSettingsProvider))]
     // #888: the patrol queue asks the castle patrol model for every settlement it visits.
     [DataRow(typeof(CastlePatrolSettingsProvider))]
+    // #912: read at each villager delivery into a town and at each hourly food check of an AI party standing in one.
+    [DataRow(typeof(HarvestRoadSettingsProvider))]
     // Watch-Silver and Tidings of the Lists: read when a conversation or an arena menu is built; the accessor takes the settings once.
     [DataRow(typeof(TAOM.Features.SettlementServices.SettlementServicesSettingsProvider))]
     // Notable Services: read by each of three dialog conditions when a conversation is built; the accessor takes the settings once.

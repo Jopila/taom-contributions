@@ -1059,3 +1059,14 @@ player's own event (`MapEventManager.cs:59-61`, `Campaign.cs:980-982`).
   an hourly or daily event, a mission tick), read the engine's frame order for both and list what runs
   between them; an action that joins, starts or ends a map event belongs where time does not advance first.
 - **Source:** [rca-enlistment-trace-and-pump-clock-2026-10-24.md](../rca-enlistment-trace-and-pump-clock-2026-10-24.md) F1.
+
+### A claim about which parties reach a seam reads every gate on the way in, the models included (#912, 2026-10-26)
+The Harvest Road hint promised a "bought" notice when a caravan buys food. `BuyFoodInternal`'s caller,
+`TryBuyingFood`, also asks `MobilePartyFoodConsumptionModel.DoesPartyConsumeFood`, which is false for every caravan
+(`DefaultMobilePartyFoodConsumptionModel.cs:89`), so no caravan ever arrives. A comment in the same feature said the food
+seam runs in towns only; the caller also accepts villages.
+- **Why missed:** the plan read the caller's settlement test and stopped; the model it consults was one call deeper.
+- **Prevent:** before text or a comment says who triggers a patched method, list every condition on each caller's path
+  in, including the GameModel methods it calls, and check TAOM's overrides of those models. Write the claim from that
+  list, and say which gate drops the rest.
+- **Source:** [rca-harvest-road-2026-10-26.md](../rca-harvest-road-2026-10-26.md) findings 1 and 5.

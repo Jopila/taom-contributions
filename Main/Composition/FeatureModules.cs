@@ -85,5 +85,6 @@ internal static class FeatureModules
         new Features.FieldCamp.Activities.CampActivitiesModule(),
         new Features.Encyclopedia.EncyclopediaFiltersModule(),
         new Features.NotableServices.NotableServicesModule(),
+        new Features.HarvestRoad.HarvestRoadModule(),
     };
 }

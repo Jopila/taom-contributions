@@ -1460,6 +1460,18 @@ Vanilla grants 1000 Steward XP through `OnSettlementSkillExercised` each time a 
 
 **Co-op.** A postfix on a UI list builder: nothing skipped, no campaign state written, so `CoopVetoClassificationTests` needs no entry. Config: `ModuleData/encyclopedia/hero_filters.json`. **ACTIVE**, not yet checked in game.
 
+## Patch120_HarvestRoad
+
+**Targets:** `public static void TaleWorlds.CampaignSystem.Actions.SellGoodsForTradeAction.ApplyByVillagerTrade(Settlement settlement, MobileParty villagerParty)` (v1.5.5, `SellGoodsForTradeAction.cs:70`) and `private void TaleWorlds.CampaignSystem.CampaignBehaviors.PartiesBuyFoodCampaignBehavior.BuyFoodInternal(MobileParty mobileParty, Settlement settlement, int numberOfFoodItemsNeededToBuy)` (`PartiesBuyFoodCampaignBehavior.cs:56`), both resolved with pinned argument types. Two nested prefix and postfix classes in `Main/Features/HarvestRoad/Hooks/HarvestRoadPatches.cs`, `VillagerSalePatch` and `FoodPurchasePatch`, category `Patch120_HarvestRoad` (GameInit, declared by `HarvestRoadModule`). #912, 2026-10-26.
+
+**Why:** vanilla raises `OnCaravanTransactionCompleted` only for caravans (`SellGoodsForTradeAction.cs:64-66`). The prefix keeps a snapshot of the party's item roster in `__state` (null when the gates say no), the postfix diffs it against the roster after the call and raises the event for the lines that left (villager, positive counts) or arrived (food buyer, negative counts). The notice reads the sign of the first line, so each list carries one sign. Every body is in try/catch with a one-time warning; the prefix assigns `__state = null` before anything can throw.
+
+**Callers and thread:** `ApplyByVillagerTrade` has one caller, `VillagerCampaignBehavior.OnSettlementEntered` (`:324-330`, towns only). `BuyFoodInternal` is reached from `TryBuyingFood` (settlement entry and the hourly party tick, `doParallel: false`, so the main thread) and `BuyFoodForArmy`; it is called hourly with an amount of 0 for stocked parties, which the prefix skips without a snapshot. A castle is neither `IsTown` nor `IsVillage`, so neither seam reaches one in v1.5.5. Patch68's diagnostics prefix and postfix sit on `ApplyByVillagerTrade` too and coexist.
+
+**PatchShield.** Neither target is on `PatchShieldPolicy.ExcludedTargetNamespacePrefixes` or `ExcludedTargetMethods`, so the shield's finalizer attaches from a process's second game start. A postfix that throws leaves vanilla's trade untouched either way.
+
+**Co-op.** Prefix and postfix write no campaign state and skip nothing, so `CoopVetoClassificationTests` needs no entry. The event is the one Coop already forwards from the server to every client, so the server's switch decides for all peers. Feature: [harvest-road.md](../features/harvest-road.md). **Tests:** `HarvestRoadBindingTests` (targets, parameter names, dispatcher shape, engine members, category and JIT), `HarvestRoadPatchTests`, `HarvestRoadWiringTests`. **ACTIVE**, not yet checked in game.
+
 ## Patch_MainRosterLossDiag
 
 **Targets:** `TroopRoster.AddToCountsAtIndex(int, int, int, int, bool)` and `TroopRoster.SetElementNumber(int, int)` (both Prefix, observe-only, never skip the original). **ACTIVE, TEMPORARY diagnostic.** Code: `Main/Features/TroopWeight/Diagnostics/` (`TroopRoster_AddToCountsAtIndex_Patch`, `TroopRoster_SetElementNumber_Patch`, `MainRosterLossDiagnostics`).
@@ -1515,6 +1527,7 @@ A culprit is a same-tick run that drives `regulars` toward the surviving count w
 ## Referenced by
 
 - [docs/ai-includes/orientation.md](../ai-includes/orientation.md)
+- [docs/features/alignment-recruitment.md](../features/alignment-recruitment.md)
 - [docs/features/arena.md](../features/arena.md)
 - [docs/features/banner-bearers.md](../features/banner-bearers.md)
 - [docs/features/coop-interop.md](../features/coop-interop.md)

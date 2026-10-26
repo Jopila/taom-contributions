@@ -450,6 +450,9 @@ feature claims a prefix, grep every ModuleData *_strings.xml for it; and a round
 code-default scan must exclude ALL registration XMLs, or the gate is circular. The renaming fix
 (taom_fc_ -> taom_fcamp_) was free only because the keys were still untranslated English
 fallbacks; after a translator run the same mistake costs 12 languages of churn.
+- **Recurrence (2026-10-26, Harvest Road):** the builder took `taom_hr_` (an acronym of the feature name), which Hearth
+  Roll already owned. Renamed to `taom_hroad_` while the language rows were English. A two-letter acronym is the likely
+  clash: spell a distinct word of the feature name, then grep. Source: [rca-harvest-road-2026-10-26.md](../rca-harvest-road-2026-10-26.md) finding 3.
 
 ### A literal {=key} in a Gauntlet prefab renders the raw token; label text lives on the VM (supply order screen, 2026-08-25)
 

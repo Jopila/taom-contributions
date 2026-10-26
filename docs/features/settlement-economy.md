@@ -136,6 +136,8 @@ NaN/Infinity literals and the rate-0 accepted extreme).
   the engine's full food/prosperity/gold loop, including the town-gold drain/inflow map.
 - [settlement-food.md](settlement-food.md) — the donor pattern (thin model + pure service +
   validated config + MCM toggle).
+- [harvest-road.md](harvest-road.md): the visible side of village deliveries: the caravan trade
+  pop-up over a town's nameplate also appears for villager deliveries and AI food purchases (#912).
 - [settlement-building-levels.md](settlement-building-levels.md) — the sibling data-side pass on
   the same LIVE `settlements.xml` (per-fief starting building levels; same dump/apply/`.bak`/idempotent
   machinery as the prosperity tools above).
@@ -146,6 +148,7 @@ NaN/Infinity literals and the rate-0 accepted extreme).
 
 ## Referenced by
 
+- [docs/features/harvest-road.md](./harvest-road.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/configs-balance.md](../modding/configs-balance.md)
 - [docs/reference/engine/settlement-economy-food-prosperity.md](../reference/engine/settlement-economy-food-prosperity.md)

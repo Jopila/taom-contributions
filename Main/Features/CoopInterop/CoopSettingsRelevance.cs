@@ -165,6 +165,9 @@ public static class CoopSettingsRelevance
         "NameplateFadeFarDistance", "NameplateFadeNearDistance",
         "EnableNameplateRelationColors", "NameplateRelationTintStrength",
         "NameplateNeutralPlateOpacity", "NameplateRelationPlateOpacity",
+        // Harvest Road (#912): the pop-up is drawn on this client; it raises vanilla's caravan notice event, which Coop
+        // forwards to every client from the server, so the server's setting decides for all peers. No state is written.
+        "EnableHarvestRoadNotices",
         "EnableShaderPrecompileScenePasses", "EnableShaderPrecompilation",
         // Already suppressed under co-op — TimeAcceleration's UI carries
         // [CoopSuppressedUi("BannerlordTogether owns campaign time under co-op")].

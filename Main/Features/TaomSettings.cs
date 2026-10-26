@@ -1518,6 +1518,11 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "Opacity of a plate owned by your own faction, an enemy or an allied kingdom. Vanilla uses 50 for your own faction and 35 for the others. Tracked settlements keep vanilla's 80. Applies immediately. Default 50.")]
     public float NameplateRelationPlateOpacity { get; set; } = 50f;
 
+    [SettingPropertyGroup("Map UI/Settlement Nameplates")]
+    [SettingPropertyBool("{=taom_hroad_mcm_enable}Harvest Road notices", Order = 7, RequireRestart = false,
+        HintText = "{=taom_hroad_mcm_enable_hint}Over a town's nameplate, show the small trade pop-ups the base game raises only for caravans, also when a villager delivers goods there and when a lord's party buys food there. Display only: the trades themselves are unchanged. Applies immediately. Default: on.")]
+    public bool EnableHarvestRoadNotices { get; set; } = true;
+
     // --- Map UI / Party Icons ---
 
     [SettingPropertyGroup("Map UI/Party Icons", GroupOrder = 41)]

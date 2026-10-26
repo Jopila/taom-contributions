@@ -4029,4 +4029,8 @@
 	<string id="taom_seasoned_hosts_learning_floor_hint" text="{=taom_seasoned_hosts_learning_floor_hint}Past a skill's learning limit the game lowers the learning rate until it reaches zero and the skill stops growing. When on, the rate never falls below 0.05, so a skill keeps growing very slowly. This applies to every hero, you included. When off, the game's own rule applies. Default: on." />
 	<string id="taom_seasoned_hosts_no_steward_xp" text="{=taom_seasoned_hosts_no_steward_xp}No Steward XP From Finished Projects" />
 	<string id="taom_seasoned_hosts_no_steward_xp_hint" text="{=taom_seasoned_hosts_no_steward_xp_hint}When on, a settlement project that finishes grants no Steward XP, which the game otherwise gives 1000 of each time. This covers every settlement, yours included. In a co-op session only the host skips the grant; while a co-op mod TAOM cannot probe (such as BannerlordTogether) is enabled, the game's grant is left alone. Default: off." />
+
+	<!-- Harvest Road (#912), TaomSettings.cs -->
+	<string id="taom_hroad_mcm_enable" text="{=taom_hroad_mcm_enable}Harvest Road notices" />
+	<string id="taom_hroad_mcm_enable_hint" text="{=taom_hroad_mcm_enable_hint}Over a town's nameplate, show the small trade pop-ups the base game raises only for caravans, also when a villager delivers goods there and when a lord's party buys food there. Display only: the trades themselves are unchanged. Applies immediately. Default: on." />
 </strings>

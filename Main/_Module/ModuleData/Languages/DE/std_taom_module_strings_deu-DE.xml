@@ -6860,6 +6860,10 @@
 
     <string id="taom_ns_reveal" text="Point me to the holds near here ({PRICE}{GOLD_ICON})." />
 
+    <string id="taom_hroad_mcm_enable" text="Harvest Road notices" />
+
+    <string id="taom_hroad_mcm_enable_hint" text="Over a town's nameplate, show the small trade pop-ups the base game raises only for caravans, also when a villager delivers goods there and when a lord's party buys food there. Display only: the trades themselves are unchanged. Applies immediately. Default: on." />
+
   </strings>
 
 </base>
