@@ -37,6 +37,8 @@ Report:
 - Passed / Failed / Skipped
 - Any failure details (test name + assertion message)
 
+A total under 20,000 (today about 26,192) means discovery broke: not a pass.
+
 ## Step 2b: Python tool tests
 
 ```bash
@@ -50,6 +52,17 @@ minutes on the desktop with the live install; tests that need the install skip w
 
 Report `Ran N tests` and the failures. No `Ran N tests` line, or fewer than 2,500 tests, means
 discovery broke: not a pass.
+
+## Step 2c: Canary
+
+```bash
+TAOM_VERIFY_CANARY=1 dotnet test TAOM.Tests --no-build -p:DisableModuleCopy=true -p:ModuleId= --filter FullyQualifiedName~VerifyCanaryTests 2>&1
+```
+
+`--no-build` is safe here: Step 2 just built the test DLL. This proves the runner can report a
+failure without editing any source (`TAOM.Tests/Infrastructure/VerifyCanaryTests.cs`). The canary
+PASSES only when the run exits non-zero AND its output contains `VERIFY_CANARY_TRIPPED`. An exit 0
+or a missing token means the runner cannot report failures, so the whole verify FAILS.
 
 ## Step 3: Git Status
 
@@ -93,6 +106,7 @@ VERIFICATION REPORT
 Build:      [PASS/FAIL]
 Tests:      [X/Y passed, Z failed]
 Tool tests: [N ran, F failed, S skipped]
+Canary:     [TRIPPED (expected)/NOT TRIPPED (verify FAILS)]
 Uncommitted: [X files modified, Y staged, Z untracked]
 TODOs:      [X in Main/]
 CHANGELOG:  [Untouched/HAND-EDITED]

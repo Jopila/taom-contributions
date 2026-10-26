@@ -71,6 +71,10 @@ TRACE THESE DATA FLOWS:
    - **Which thread runs this code?** `MissionBehavior.OnMissionTick` and the engine's agent callbacks are main-thread; `AgentComponent.OnTick`/`OnTickParallel`, `TickAsAI`, `Team.Tick`, `TeamAI`, AI-issued `Formation.SetMovementOrder`, `Formation.GetOrderPositionOfUnit` for AI units, and `AfterAsyncTickTick` are not (`.claude/rules/harmony-patches.md` "Which thread runs your target"). Off-main-thread code that registers a blow, plays an action, spawns or fades an agent, or touches a collection a main-thread callback writes is HIGH. A team filter is not a thread filter.
    - Source: #592, #595 (`docs/reviews/rca-warg-clip-on-horse-2026-09-13.md`).
 
+5f. **Safety Claims and Missing Guards (MANDATORY for every new or changed patch, handler, menu callback or event subscriber).**
+   - **A claim is not evidence:** a comment or name that asserts safety ("validated upstream", "never null here", "only called on the main thread", a `Safe...` wrapper) is a claim. Verify the invariant in the visible code or the engine source (rule 5e for threads); a wrapper guards only the paths that go through it.
+   - **Compare with siblings:** read the sibling handlers in the same file or feature. When they check a guard (`IsMainThread`, hero alive, settlement not null, co-op authority, `IsEnabled`) and the new one does not, the missing check is the finding. This is the same gap as the entity state matrix in rule 5: an `OnGameLoaded` mutation that skips a state its neighbours guard.
+
 6. **Event Hook Coverage:** For behaviors that register campaign/mission events, verify all relevant events are hooked.
    - Example bug pattern: `OnAgentRemoved` emits kill charges but no hook exists for damage-dealt charges, even though most careers use `DamageDone` charge type.
    - Check: Read the behavior's RegisterEvents/constructor, cross-reference with the data it needs to provide.
