@@ -1220,3 +1220,9 @@ Move each stack on its own, run the commit in a `finally`, and treat a stack tha
 - **Why missed:** the step was one try block around gold, goods and commit, written for the happy path.
 - **Prevent:** a step that runs after money has moved is written so that any one failure leaves goods with an owner.
 - **Source:** `docs/reviews/rca-provender-sale-2026-10-24.md` row 1.
+
+### The engine re-initializes dead characters from their template on load, so per-hero state must enumerate every hero character (`Hero.FindAll`), not the alive and dead lists (#1011, 2026-10-26)
+`SandBoxManager.InitializeCharactersAfterLoad` resets `CharacterObject.Race` from the template for every non-original character, dead and disabled ones too. `RacePersistenceService` captured and restored races through a roster that read only `Hero.AllAliveHeroes`, so a dead hero's race was never saved and came back reverted after every load. The encyclopedia and family tree effect is derived from the source, not observed in game. Heroes who died before the fix keep the reverted race, because nothing was ever captured for them.
+- **Why missed:** "all heroes" was read as `AllAliveHeroes`, and the service tests feed a fake roster, so nothing exercised the alive/dead split.
+- **Prevent:** any per-hero state TAOM persists or restores across a load enumerates `Hero.FindAll` (it reaches dead heroes the engine removed from `DeadOrDisabledHeroes`), unless the state is meaningless once the hero is dead. Name the choice where the roster is read.
+- **Source:** issue #1011.

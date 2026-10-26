@@ -2279,3 +2279,12 @@ Far Watch code the feature copied returns `ScoutEndReason` and lets its presente
 - **Prevent:** a service under unit test returns an enum, a number or a struct; only a hook or presenter builds a
   `TextObject`. Grep a new service for `TextObject` before review.
 - **Source:** [rca-camp-work-2026-10-26.md](../rca-camp-work-2026-10-26.md) finding 5.
+
+### When the fix lives in a thin adapter, pin the adapter: service tests over a fake roster cannot fail (#1011, 2026-10-26)
+The dead-hero race fix changed only `HeroRosterAdapter` (which heroes it reads); the service diff was a rename. The seven
+new service tests fed a fake roster to an unchanged service, so they passed on the unfixed code, and the only RED was a
+compile error from the rename.
+- **Why missed:** TAOM does not unit-test thin adapters, and a green service test looked like coverage of the fix.
+- **Prevent:** before calling a fix tested, revert the fix's own lines and run the new tests; if they stay green, add a
+  test on the layer that changed (for an adapter, a source pin on the engine member it must read).
+- **Source:** [rca-b09-followups-2026-10-26.md](../rca-b09-followups-2026-10-26.md) finding 2.
