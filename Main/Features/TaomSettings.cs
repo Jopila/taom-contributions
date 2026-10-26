@@ -2804,4 +2804,27 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("{=taom_seasoned_hosts_no_steward_xp}No Steward XP From Finished Projects", Order = 3, RequireRestart = false,
         HintText = "{=taom_seasoned_hosts_no_steward_xp_hint}When on, a settlement project that finishes grants no Steward XP, which the game otherwise gives 1000 of each time. This covers every settlement, yours included. In a co-op session only the host skips the grant; while a co-op mod TAOM cannot probe (such as BannerlordTogether) is enabled, the game's grant is left alone. Default: off.")]
     public bool SeasonedHostsNoStewardXp { get; set; } = TAOM.Features.SeasonedHosts.SeasonedHostsSettingsProvider.DefaultNoStewardXp;
+
+    // --- Smith's Measure (docs/features/smiths-measure.md, #910) ---
+    //
+    // Read through SmithsMeasureSettingsProvider's one cached settings reference: the smelt cap whenever TaomSmithingModel
+    // answers a smelting output (the smelting list and preview, and the smelt itself), the Make Tools switch whenever the
+    // refinement tab refreshes. None needs a restart. GroupOrder 74 is the group's first property here and also names the
+    // group in #911's bulk smelting (MCM keeps the first order it meets). Order 0 to 9 is this feature's; #911 takes 10 and up.
+    // The text is the {=KEY}English form, as Telchar's Mark does. All three are new settings, so the defaults reach every install.
+
+    [SettingPropertyGroup("Smithing", GroupOrder = 74)]
+    [SettingPropertyBool("{=taom_sm_mcm_cap}Cap Smelting Yield", Order = 0, RequireRestart = false,
+        HintText = "{=taom_sm_mcm_cap_hint}Smelting a weapon returns at most the number set below of each iron grade, of iron ore and of hardwood, and no hardwood at all when any metal comes out. Charcoal use is unchanged. This curbs the loop of selling looted weapons as iron. Default: on.")]
+    public bool SmithsMeasureCapSmelting { get; set; } = TAOM.Features.SmithsMeasure.SmithsMeasureSettingsProvider.DefaultCapSmelting;
+
+    [SettingPropertyGroup("Smithing")]
+    [SettingPropertyInteger("{=taom_sm_mcm_cap_value}Smelting Yield Cap", TAOM.Features.SmithsMeasure.SmithsMeasureSettingsProvider.MinYieldCap, TAOM.Features.SmithsMeasure.SmithsMeasureSettingsProvider.MaxYieldCap, Order = 1, RequireRestart = false,
+        HintText = "{=taom_sm_mcm_cap_value_hint}The most of each iron grade, of iron ore and of hardwood that one smelt returns while the cap is on. Between 1 and 10; a value outside that range counts as 1. Default: 1.")]
+    public int SmithsMeasureYieldCap { get; set; } = TAOM.Features.SmithsMeasure.SmithsMeasureSettingsProvider.DefaultYieldCap;
+
+    [SettingPropertyGroup("Smithing")]
+    [SettingPropertyBool("{=taom_sm_mcm_make_tools}Enable Make Tools", Order = 2, RequireRestart = false,
+        HintText = "{=taom_sm_mcm_make_tools_hint}Adds a Make Tools button to the Refine tab of the smithing screen: one Iron and one Hardwood make one Tools, for smithy stamina and a little Smithing experience. Not shown in a co-op session. Default: on.")]
+    public bool SmithsMeasureMakeTools { get; set; } = TAOM.Features.SmithsMeasure.SmithsMeasureSettingsProvider.DefaultMakeTools;
 }

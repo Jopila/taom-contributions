@@ -142,6 +142,9 @@ public static class CoopSettingsRelevance
         // Whether YOUR inventory tints better items, and whether its filter starts ticked (Telchar's Mark,
         // #875). Display only: Take all on a filtered screen moves what the player sees, a player action.
         "EnableTelcharsMark", "TelcharsMarkShowOnlyUpgradesByDefault",
+        // Whether YOUR smithing screen shows the Make Tools card (#910). The card is suppressed under co-op and a dedicated
+        // server never loads Client, so no peer ever reads the switch.
+        "SmithsMeasureMakeTools",
         // Whether YOUR client pops the shore-leave offer when the column halts. The pass it
         // offers is host-gated in EnlistmentWaitMenuPresenter.OfferTownLeave, so two peers
         // disagreeing about the prompt cannot make them simulate differently (#512).

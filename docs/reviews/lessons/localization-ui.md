@@ -1107,6 +1107,10 @@ while the button is enabled; a "why is this greyed out" hint there can never app
   button. The structural test pinned the outer hint and asserted that no inner hint exists. So a fix for one state
   needs a test for both: a hint inside the button for the enabled state, and one on the wrapper for the disabled
   state (`docs/reviews/rca-messenger-pricing-2026-10-23.md` finding 1).
+- **Repeat (Smith's Measure, #910, 2026-10-26):** the third time. The Make Tools card put its hint under a root with
+  `DoNotAcceptEvents="true"`, so it never showed, and the first planned fix (hint inside the button) would have lost
+  the disabled state. A rule and two lessons did not stop it, so it is now a gate: `PrefabHintParentGateTests` builds
+  every in-code prefab extension and fails a hint whose parent refuses events. Source: [rca-smiths-measure-2026-10-26.md](../rca-smiths-measure-2026-10-26.md) finding 1.
 ### Any English edit on a seeded key edits all 12 rows by hand, and a per-feature wording test pins them (#864, 2026-10-20)
 Good Deeds changed "honour" to "honor" after its keys were seeded. Harvest skips registered keys and `--sync-ids` only
 appends, so no tool rewrites an existing row: the change was 13 hand edits (English plus 12 languages). The paid
@@ -1317,3 +1321,13 @@ duty: for English, `MBTextManager.GetLocalizedText` returns the inline text and 
   a generic inline fallback is for a row that no longer exists, never the normal path. Test the English
   path by asserting the source string, not only the key.
 - **Source:** [rca-enlistment-duty-text-2026-10-26.md](../rca-enlistment-duty-text-2026-10-26.md) F1, F2.
+
+### Player text names game things as the game shows them, not by their code ids (#910, 2026-10-26)
+Make Tools said "Crafting experience", "the Refinement tab" and "one iron". The game shows the skill as Smithing
+(`DefaultSkills.cs:96`), the tab as Refine, and the recipe takes one grade, named Iron, of six iron grades. A player
+holding Steel was told to get iron. It also added its own "too tired" line where vanilla's translated one says the same.
+- **Why missed:** the strings were written from `DefaultSkills.Crafting`, `IsInRefinementMode` and `CraftingMaterials.Iron3`.
+- **Prevent:** before writing a string that names a skill, tab, item or rule, find the game's own text for it (the
+  `{=key}` in the engine source or the vanilla prefab) and use that name; if vanilla already has a translated line for
+  the same message on the same screen, use its key and register nothing.
+- **Source:** [rca-smiths-measure-2026-10-26.md](../rca-smiths-measure-2026-10-26.md) findings 3 and 4.

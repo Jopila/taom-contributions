@@ -102,16 +102,17 @@ public class ClientIsolationGateTests
 
         var inClient = CoopUiRegistrationPolicy.CollectUiExtensionTypes(typeof(TAOM.Client.ClientSubModule).Assembly);
 
-        Assert.AreEqual(42, inClient.Count,
-            "19 view model mixins and 23 prefab extension classes: " + string.Join(", ", inClient.Select(t => t.Name)));
+        Assert.AreEqual(44, inClient.Count,
+            "20 view model mixins and 24 prefab extension classes: " + string.Join(", ", inClient.Select(t => t.Name)));
         CollectionAssert.AreEquivalent(
             new[]
             {
                 "TimeAccelerationMixin", "PrefabCenterPanel", "PrefabFastForwardButton", "PrefabPlayButton",
                 "PrefabPauseButton", "PrefabInsertExtraFastForward",
+                "MakeToolsMixin", "MakeToolsPrefab",
             },
             CoopUiRegistrationPolicy.Suppressed(inClient).Select(t => t.Name).ToArray(),
-            "the co-op registration drops exactly the time-control extensions");
+            "the co-op registration drops exactly the time-control extensions and the Make Tools card");
     }
 
     [TestMethod]

@@ -6864,6 +6864,26 @@
 
     <string id="taom_hroad_mcm_enable_hint" text="Over a town's nameplate, show the small trade pop-ups the base game raises only for caravans, also when a villager delivers goods there and when a lord's party buys food there. Display only: the trades themselves are unchanged. Applies immediately. Default: on." />
 
+    <string id="taom_sm_make_tools" text="Make Tools" />
+
+    <string id="taom_sm_make_tools_hint" text="One Iron and one Hardwood make one Tools. It costs {COST} smithy stamina and earns Smithing experience." />
+
+    <string id="taom_sm_need_iron" text="You need one Iron." />
+
+    <string id="taom_sm_need_wood" text="You need one Hardwood." />
+
+    <string id="taom_sm_mcm_cap" text="Cap Smelting Yield" />
+
+    <string id="taom_sm_mcm_cap_hint" text="Smelting a weapon returns at most the number set below of each iron grade, of iron ore and of hardwood, and no hardwood at all when any metal comes out. Charcoal use is unchanged. This curbs the loop of selling looted weapons as iron. Default: on." />
+
+    <string id="taom_sm_mcm_cap_value" text="Smelting Yield Cap" />
+
+    <string id="taom_sm_mcm_cap_value_hint" text="The most of each iron grade, of iron ore and of hardwood that one smelt returns while the cap is on. Between 1 and 10; a value outside that range counts as 1. Default: 1." />
+
+    <string id="taom_sm_mcm_make_tools" text="Enable Make Tools" />
+
+    <string id="taom_sm_mcm_make_tools_hint" text="Adds a Make Tools button to the Refine tab of the smithing screen: one Iron and one Hardwood make one Tools, for smithy stamina and a little Smithing experience. Not shown in a co-op session. Default: on." />
+
   </strings>
 
 </base>

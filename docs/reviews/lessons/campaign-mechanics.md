@@ -1070,3 +1070,11 @@ seam runs in towns only; the caller also accepts villages.
   in, including the GameModel methods it calls, and check TAOM's overrides of those models. Write the claim from that
   list, and say which gate drops the rest.
 - **Source:** [rca-harvest-road-2026-10-26.md](../rca-harvest-road-2026-10-26.md) findings 1 and 5.
+### A TAOM action beside a vanilla one applies the vanilla action's own gate (#910, 2026-10-26)
+Make Tools let a player press at stamina 6 to 10, where the vanilla Refine button beside it is greyed with "You must rest":
+every smithy action needs stamina above 10 (`CraftingVM.cs:1034-1041`), and the co-op host refuses at 10 or less.
+- **Why missed:** the plan derived the rule from the cost model (stamina at least the cost) and never read the screen's
+  enable rule.
+- **Prevent:** before a new action goes on a vanilla screen, read the enable rule of the vanilla action next to it
+  (`RefreshEnableMainAction` here) and apply the same conditions, then add the action's own.
+- **Source:** [rca-smiths-measure-2026-10-26.md](../rca-smiths-measure-2026-10-26.md) finding 2.

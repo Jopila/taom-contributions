@@ -404,6 +404,7 @@ Models: 68. Regenerate after any engine bump: `pwsh tools/snapshot_api_surface.p
 - `Int32 GetEnergyCostForRefining(ref RefiningFormula refineFormula, Hero hero)`
 - `Int32 GetEnergyCostForSmelting(ItemObject item, Hero hero)`
 - `Int32 GetEnergyCostForSmithing(ItemObject item, Hero hero)`
+- `Int32[] GetSmeltingOutputForItem(ItemObject item)`
 
 ## TaomTargetScoreModel : DefaultTargetScoreCalculatingModel
 `Base: TaleWorlds.CampaignSystem.GameComponents.DefaultTargetScoreCalculatingModel`

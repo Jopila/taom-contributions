@@ -3,6 +3,7 @@ using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.Core;
 using TAOM.Features.CareerSystem;
 using TAOM.Features.CareerSystem.Domain;
+using TAOM.Features.SmithsMeasure;
 
 namespace TAOM.Features.CulturalFeats.Models;
 
@@ -10,12 +11,30 @@ public class TaomSmithingModel : DefaultSmithingModel
 {
     private readonly ICulturalFeatsService _feats;
     private readonly ICareerPassiveService _careerPassives;
+    private readonly ISmithsMeasureSettingsProvider _smithsMeasure;
 
+    // Resolved here, not passed in: a constructor parameter would need an edit to SubModule.cs, where this model is built
+    // (TaomPartySizeModel does the same for its patrol hook). The provider reads its settings live, so one resolve serves the campaign.
     public TaomSmithingModel(ICulturalFeatsService feats, ICareerPassiveService careerPassives)
+        : this(feats, careerPassives, IoC.Resolve<ISmithsMeasureSettingsProvider>())
+    {
+    }
+
+    // The seam for TAOM.Tests.
+    internal TaomSmithingModel(ICulturalFeatsService feats, ICareerPassiveService careerPassives, ISmithsMeasureSettingsProvider smithsMeasure)
     {
         _feats = feats;
         _careerPassives = careerPassives;
+        _smithsMeasure = smithsMeasure;
     }
+
+    // Smith's Measure (#910): the engine's output, with its own reductions and the charcoal cost already applied, then the cap.
+    // The smelting list, its preview and the smelt itself all ask this method.
+    public override int[] GetSmeltingOutputForItem(ItemObject item)
+        => CapSmelting(base.GetSmeltingOutputForItem(item));
+
+    internal int[] CapSmelting(int[] output)
+        => _smithsMeasure.CapSmelting ? SmeltingYieldCap.Apply(output, _smithsMeasure.YieldCap) : output;
 
     public override int GetEnergyCostForSmithing(ItemObject item, Hero hero)
         => ApplyFeatReduction(base.GetEnergyCostForSmithing(item, hero), hero);

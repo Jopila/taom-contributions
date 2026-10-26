@@ -86,5 +86,6 @@ internal static class FeatureModules
         new Features.Encyclopedia.EncyclopediaFiltersModule(),
         new Features.NotableServices.NotableServicesModule(),
         new Features.HarvestRoad.HarvestRoadModule(),
+        new Features.SmithsMeasure.SmithsMeasureModule(),
     };
 }

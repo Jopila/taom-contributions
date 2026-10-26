@@ -24,6 +24,7 @@ using TAOM.Features.KingsMuster;
 using TAOM.Features.FromTheAshes;
 using TAOM.Features.GoodDeeds;
 using TAOM.Features.BondOfHire;
+using TAOM.Features.SmithsMeasure;
 using TAOM.Features.LongMemory;
 using TAOM.Features.TokensOfEsteem;
 using TAOM.Features.Provender;
@@ -146,6 +147,9 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(SeasonedHostsSettingsProvider))]
     // #874: the call cost runs on the AI's hourly army think, once per candidate (vanilla's CanLordCreateArmy prices each); the constructor takes the settings once.
     [DataRow(typeof(KingsMusterSettingsProvider))]
+
+    // #910: the smithing model asks for the cap once per smelting-list item and per smelt; the accessor takes the settings once.
+    [DataRow(typeof(SmithsMeasureSettingsProvider))]
     public void OnlyTheLazySettingsAccessor_ReadsTheMcmInstance(Type provider)
     {
         var accessor = provider.GetProperty("Settings", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
@@ -200,6 +204,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(ISeasonedHostsSettingsProvider), typeof(SeasonedHostsSettingsProvider))]
     [DataRow(typeof(IKingsMusterSettingsProvider), typeof(KingsMusterSettingsProvider))]
     [DataRow(typeof(TAOM.Features.NotableServices.INotableServicesSettingsProvider), typeof(TAOM.Features.NotableServices.NotableServicesSettingsProvider))]
+    [DataRow(typeof(ISmithsMeasureSettingsProvider), typeof(SmithsMeasureSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();
@@ -303,6 +308,24 @@ public class CampaignHotPathSettingsProvidersTests
         Assert.AreEqual(1.5f, sut.SkillXpMultiplier);
         Assert.IsFalse(sut.LearningNeverStops);
         Assert.IsTrue(sut.NoStewardXp);
+    }
+
+    [TestMethod]
+    public void SmithsMeasure_ReadsThroughTheCachedSettings()
+    {
+        var mcm = new TaomSettings();
+        var sut = new SmithsMeasureSettingsProvider(mcm, Substitute.For<TAOM.Core.Logging.IModLogger>());
+        Assert.IsTrue(sut.CapSmelting);
+        Assert.AreEqual(SmithsMeasureSettingsProvider.DefaultYieldCap, sut.YieldCap);
+        Assert.IsTrue(sut.MakeToolsEnabled);
+
+        mcm.SmithsMeasureCapSmelting = false;
+        mcm.SmithsMeasureYieldCap = 4;
+        mcm.SmithsMeasureMakeTools = false;
+
+        Assert.IsFalse(sut.CapSmelting);
+        Assert.AreEqual(4, sut.YieldCap);
+        Assert.IsFalse(sut.MakeToolsEnabled);
     }
 
     [TestMethod]
