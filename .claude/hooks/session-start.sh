@@ -2,9 +2,9 @@
 # SessionStart hook: Print recent project context on fresh startup
 # Startup prints the full context; compact prints only recent Dead ends (resume/clear print nothing)
 
-# The bounded probes below (the Armory tpac scan, the graphify status and its background-refresh start) share one deadline counted
+# The bounded probes below (the Armory tpac scan, the graphify status and its background-refresh start, the worktree list) share one deadline counted
 # from this first command, so together they leave the tail (git log, diff, ls-files, the TODO grep) about
-# 2 s of the 10 s registration: two 4 s probes, their kill grace and a slow tail could pass 10 s, and a
+# 2 s of the 10 s registration: three 4 s probes, their kill grace and a slow tail could pass 10 s, and a
 # killed hook prints nothing (Codex review 2026-10-16). EPOCHREALTIME's digits are microseconds; it is
 # empty in a bash older than 5.0, and each probe then gets its full 4 s.
 T0=${EPOCHREALTIME//[!0-9]/}
@@ -238,7 +238,7 @@ if [[ -d "$WORKTREE_DIR" ]]; then
   WT_COUNT=$(find "$WORKTREE_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
   if [[ -n "$WT_COUNT" && "$WT_COUNT" -gt 0 ]]; then
     echo ""
-    echo "Worktrees: ${WT_COUNT} lingering under $WORKTREE_DIR — if abandoned, prune (git worktree remove) to reclaim disk."
+    echo "Worktrees: ${WT_COUNT} lingering under $WORKTREE_DIR. Run python tools/worktree_audit.py; prune only on Mike's word."
   fi
 fi
 

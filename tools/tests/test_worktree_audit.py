@@ -7,6 +7,7 @@ Each test builds a throwaway git repo in a temp dir (local user config, base bra
 bannerlord-1.5.x) and adds worktrees inside it. No network, no TAOM repo access.
 """
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -69,6 +70,70 @@ class WorktreeAuditTests(unittest.TestCase):
         self.assertEqual(b["ahead"], "hold-unmerged")
         self.assertEqual(b["wip"], "hold-wip")
         self.assertEqual(b["untracked"], "review")
+
+    def rows(self):
+        return {Path(r["path"]).name: r for r in wa.audit(str(self.repo), "bannerlord-1.5.x")}
+
+    def test_a_worktree_nested_in_another_makes_the_parent_review(self):
+        parent = self.add_wt("parent")
+        child = parent / ".claude" / "worktrees" / "child"
+        git(self.repo, "worktree", "add", "-b", "child", str(child))
+        rows = self.rows()
+        self.assertEqual(rows["parent"]["bucket"], "review")
+        self.assertIn("child", rows["parent"]["note"])
+        self.assertEqual(rows["child"]["bucket"], "safe")
+        self.assertEqual(rows["child"]["note"], "")
+        self.assertEqual(rows["main"]["bucket"], "main")
+
+    def test_main_is_never_demoted_by_a_nested_worktree(self):
+        nested = self.repo / ".claude" / "worktrees" / "inner"
+        git(self.repo, "worktree", "add", "-b", "inner", str(nested))
+        self.assertEqual(self.rows()["main"]["bucket"], "main")
+
+    def test_a_sibling_with_a_common_name_prefix_is_not_nested(self):
+        self.add_wt("wt")
+        self.add_wt("wt-2")
+        b = self.buckets()
+        self.assertEqual((b["wt"], b["wt-2"]), ("safe", "safe"))
+
+    def test_status_does_not_refresh_the_worktree_index(self):
+        wt = self.add_wt("stat")
+        idx = self.repo / ".git" / "worktrees" / "stat" / "index"
+        before = idx.read_bytes()
+        os.utime(wt / "a.txt", (1000000000, 1000000000))  # stat change, same content
+        self.buckets()
+        self.assertEqual(idx.read_bytes(), before)
+
+    def test_untracked_files_show_even_when_the_config_hides_them(self):
+        wt = self.add_wt("hidden")
+        git(self.repo, "config", "status.showUntrackedFiles", "no")
+        (wt / "notes.txt").write_text("work\n")
+        self.assertEqual(self.buckets()["hidden"], "review")
+
+    def test_a_failed_status_is_review_not_clean(self):
+        wt = self.add_wt("broken")
+        (wt / "a.txt").write_text("CHANGED\n")
+        (self.repo / ".git" / "worktrees" / "broken" / "index").write_text("garbage")
+        row = self.rows()["broken"]
+        self.assertEqual(row["bucket"], "review")
+        self.assertIn("status failed", row["note"])
+
+    def test_a_missing_worktree_path_is_review(self):
+        wt = self.add_wt("gone")
+        shutil.rmtree(wt, ignore_errors=True)
+        row = self.rows()["gone"]
+        self.assertFalse(row["exists"])
+        self.assertEqual(row["bucket"], "review")
+
+    def test_a_locked_worktree_is_review(self):
+        self.add_wt("held")
+        git(self.repo, "worktree", "lock", str(self.root / "held"))
+        self.assertEqual(self.buckets()["held"], "review")
+
+    def test_text_output_shows_the_note(self):
+        parent = self.add_wt("parent")
+        git(self.repo, "worktree", "add", "-b", "child", str(parent / "sub" / "child"))
+        self.assertIn("contains worktree", wa.format_table(wa.audit(str(self.repo), "bannerlord-1.5.x")))
 
     def test_parse_detached_and_prunable(self):
         text = (

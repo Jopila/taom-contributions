@@ -1014,6 +1014,21 @@ done <<< "$RELEVANT_PATTERNS"
     && ok "the drift hook's RELEVANT list covers the RCA glob the FOLLOW-UP check reads ($RCA_GLOB)" \
     || bad "the drift hook's RELEVANT list misses the RCA glob '$RCA_GLOB' the linter's FOLLOW-UP check reads"
 
+# The new-feature-doc check reads docs/features/*.md (tools/lint_docs.py _FEATURE_DOC_PATHSPEC); the
+# trigger list must cover that same glob, or a commit adding only a feature doc would skip the gate.
+FEAT_GLOB=$("$HPY" -c 'import sys; sys.path.insert(0, "tools"); import lint_docs; print(lint_docs._FEATURE_DOC_PATHSPEC)' 2>/dev/null | tr -d '\r')
+feat_covered=0
+while IFS= read -r pat; do
+    IFS='|' read -r -a alts <<< "$pat"
+    for alt in "${alts[@]}"; do
+        # shellcheck disable=SC2053  # $alt is a glob on purpose, as in the hook's case
+        [[ -n "$FEAT_GLOB" && "${FEAT_GLOB//\*/sample-thing}" == $alt ]] && feat_covered=1
+    done
+done <<< "$RELEVANT_PATTERNS"
+[[ $feat_covered -eq 1 ]] \
+    && ok "the drift hook's RELEVANT list covers the feature-doc glob the verify-section check reads ($FEAT_GLOB)" \
+    || bad "the drift hook's RELEVANT list misses the feature-doc glob '$FEAT_GLOB' the linter's verify-section check reads"
+
 # ---------------------------------------------------------------------------
 head2 "6. check-commit-subject-version: subject cases against the real SubModule.xml"
 # The gate reads <Version value="..."> from Main/_Module/SubModule.xml, so it runs here
@@ -1574,6 +1589,39 @@ grep -q 'ADR-011\|config example\|version marker' <<< "$OUT" \
 grep -qF 'Run: python tools/lint_docs.py --drift-only --staged' "$REPO/.claude/hooks/check-doc-config-drift.sh" \
     && ok "check-doc-config-drift timeout message suggests --drift-only --staged" \
     || bad "check-doc-config-drift timeout message does not suggest --drift-only --staged"
+git -C "$PRJ_WT" reset -q 2>/dev/null
+# `git add <doc> && git commit` in ONE command: the doc is not staged when the hook runs, so the hook
+# reads the command text and hands each docs/features/*.md token to the linter as --also-new. The
+# real linter runs here (its context-budget and version checks stubbed out, as the unit tests do).
+cat > "$PRJ_WT/tools/lint_docs.py" <<'REALWRAP'
+import os, pathlib, sys
+sys.path.insert(0, os.environ["TAOM_REAL_TOOLS"])
+import lint_docs as ld
+ld.REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+ld.DOC_ROOTS = [ld.REPO_ROOT / "docs"]
+ld.check_context_budget = lambda: []
+ld.check_version_consistency = lambda: []
+sys.exit(ld.main(sys.argv[1:]))
+REALWRAP
+export TAOM_REAL_TOOLS; TAOM_REAL_TOOLS=$(cygpath -m "$REPO/tools" 2>/dev/null || echo "$REPO/tools")
+drift_cmd() {   # $1 the command text, $2 the payload cwd
+    "$HPY" -c 'import json,sys; print(json.dumps({"tool_name":"Bash","tool_input":{"command":sys.argv[1]},"cwd":sys.argv[2],"hook_event_name":"PreToolUse"}))' "$1" "$2" \
+        | CLAUDE_PROJECT_DIR="$PRJ" timeout -k 2 40 bash "$REPO/.claude/hooks/check-doc-config-drift.sh" 2>/dev/null
+}
+PRJ_WT_M=$(cygpath -m "$PRJ_WT" 2>/dev/null || echo "$PRJ_WT")
+rm -f "$PRJ_WT/tools/ran.txt" "$PRJ_WT/docs/reviews/rca-x-2026-10-23.md"
+printf '# new thing\n\nText, no verify heading.\n' > "$PRJ_WT/docs/features/x.md"
+OUT=$(drift_cmd "git add docs/features/x.md && git commit -m m" "$PRJ_WT_M")
+[[ "$(decision_of "$OUT")" == deny ]] && grep -q 'no-verify-section' <<< "$OUT" \
+    && ok "check-doc-config-drift denies 'git add <new feature doc> && git commit' when the doc lacks the verify section" \
+    || bad "check-doc-config-drift missed a same-command git add of a feature doc with no verify section: $(printf '%s' "$OUT" | head -c 200)"
+printf '# new thing\n\n## How to verify in game\n\nNot applicable: tooling.\n' > "$PRJ_WT/docs/features/x.md"
+OUT=$(drift_cmd "git add docs/features/x.md && git commit -m m" "$PRJ_WT_M")
+[[ "$(decision_of "$OUT")" == allow ]] \
+    && ok "check-doc-config-drift allows 'git add <new feature doc> && git commit' once the verify section exists" \
+    || bad "check-doc-config-drift blocked a same-command git add of a feature doc that has the verify section: $(printf '%s' "$OUT" | head -c 200)"
+rm -f "$PRJ_WT/docs/features/x.md"
+unset TAOM_REAL_TOOLS
 git -C "$PRJ_WT" reset -q 2>/dev/null
 # The subject gate reads the <Version> of the repository the session works in, the payload's cwd.
 SUBJ_WT="$SANDBOX/subj-wt"
@@ -3045,7 +3093,7 @@ if grep -q 'tools/upstream_watch.py' .claude/hooks/session-start.sh; then
 else
     ok "session-start.sh leaves the upstream check to upstream-watch.sh"
 fi
-# session-start.sh's two bounded probes share one deadline from its first command (Codex review
+# session-start.sh's three bounded probes share one deadline from its first command (Codex review
 # 2026-10-16): with the graphify probe hung, the hook still returns well inside its 10 s registration
 # and says the check was not made.
 cp .claude/hooks/session-start.sh "$UP/.claude/hooks/"

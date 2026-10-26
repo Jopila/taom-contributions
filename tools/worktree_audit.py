@@ -8,11 +8,14 @@ hold-wip (tracked changes) or hold-unmerged (HEAD not in the base branch).
 Usage:
     python tools/worktree_audit.py [--repo PATH] [--base BRANCH] [--json]
 Defaults: --repo is the current directory, --base is bannerlord-1.5.x.
-Exit code 0 on success; 2 with a message on stderr when --repo is not a git repo or --base
-does not exist.
+Exit code 0 on success; 2 with a message on stderr when --repo is not a git repo, --base
+does not exist or `git worktree list` fails.
 
-Read-only guarantee: only `git worktree list`, `rev-parse`, `merge-base`, `rev-list`, `status`
-and `log` run. It never fetches, writes a file or deletes anything. The bucket is advice.
+A worktree that contains another worktree, or whose `git status` failed, is `review` with a
+`note` saying why.
+
+Read-only guarantee: only `git worktree list`, `rev-parse`, `merge-base`, `rev-list`,
+`status --no-optional-locks` (it does not refresh the index) and `log` run. It never fetches, writes a file or deletes anything. The bucket is advice.
 """
 import argparse
 import json
@@ -59,10 +62,10 @@ def parse_porcelain(text):
     return blocks
 
 
-def classify(is_main, missing, locked, dirty, merged, untracked):
+def classify(is_main, missing, locked, dirty, merged, untracked, status_ok=True):
     if is_main:
         return "main"
-    if missing or locked:
+    if missing or locked or not status_ok:
         return "review"
     if dirty > 0:
         return "hold-wip"
@@ -99,9 +102,12 @@ def audit(repo, base):
                 behind, ahead = int(parts[0]), int(parts[1])
             last = run_git(repo, "log", "-1", "--format=%cs", sha)[1].strip()
         dirty = untracked = 0
+        status_ok = True
         if exists:
-            rc, st = run_git(wt["path"], "status", "--porcelain")
-            if rc == 0:
+            rc, st = run_git(wt["path"], "--no-optional-locks", "status", "--porcelain",
+                             "--untracked-files=normal")
+            status_ok = rc == 0
+            if status_ok:
                 for line in st.splitlines():
                     if line.startswith("??"):
                         untracked += 1
@@ -112,15 +118,37 @@ def audit(repo, base):
             "path": wt["path"], "branch": wt["branch"], "head": sha[:8], "exists": exists,
             "merged": merged, "ahead": ahead, "behind": behind, "dirty": dirty,
             "untracked": untracked, "last_commit": last, "locked": wt["locked"],
-            "bucket": classify(i == 0, missing, wt["locked"], dirty, merged, untracked),
+            "bucket": classify(i == 0, missing, wt["locked"], dirty, merged, untracked, status_ok),
+            "note": "" if status_ok else "git status failed",
         })
+    mark_nested(rows)
     return rows
 
 
+def _norm(path):
+    return os.path.normcase(os.path.normpath(path))
+
+
+def mark_nested(rows):
+    """A worktree that contains another one is `review`: removing it deletes the inner one."""
+    norms = [_norm(r["path"]) for r in rows]
+    for i, row in enumerate(rows):
+        if i == 0:
+            continue
+        prefix = norms[i].rstrip(os.sep) + os.sep
+        inner = [os.path.basename(rows[j]["path"]) for j in range(len(rows))
+                 if j != i and norms[j].startswith(prefix)]
+        if inner:
+            row["bucket"] = "review"
+            note = "contains worktree " + ", ".join(inner)
+            row["note"] = f"{row['note']}; {note}" if row["note"] else note
+
+
 def format_table(rows):
-    header = ("path", "branch", "bucket", "ahead/behind", "dirty", "untracked", "last commit")
+    header = ("path", "branch", "bucket", "ahead/behind", "dirty", "untracked", "last commit", "note")
     body = [(r["path"], r["branch"], r["bucket"], f"{r['ahead']}/{r['behind']}",
-             str(r["dirty"]), str(r["untracked"]), r["last_commit"] or "-") for r in rows]
+             str(r["dirty"]), str(r["untracked"]), r["last_commit"] or "-", r["note"])
+            for r in rows]
     widths = [max(len(x[c]) for x in [header] + body) for c in range(len(header))]
     lines = ["  ".join(x[c].ljust(widths[c]) for c in range(len(header))).rstrip()
              for x in [header] + body]

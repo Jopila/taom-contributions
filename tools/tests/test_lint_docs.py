@@ -1217,6 +1217,69 @@ class FeatureDocVerifySectionTests(_GitRepo):
         self._git("add", "-A")
         self.assertEqual(self._names(staged=True), [])
 
+    def _also(self, *paths, staged=True):
+        return [f.name for f, _n, _k, _t in
+                ld.check_feature_doc_verify_section(staged=staged, also_new=list(paths))]
+
+    REL = "docs/features/sample-thing.md"
+
+    def test_also_new_flags_an_untracked_doc_without_the_heading(self):
+        _write(self.feat, "# thing\n")
+        self.assertEqual(self._also(self.REL), [self.feat.name])
+
+    def test_also_new_passes_an_untracked_doc_with_the_heading(self):
+        _write(self.feat, f"# thing\n\n{self.HEADING}\n\nNot applicable: tooling.\n")
+        self.assertEqual(self._also(self.REL), [])
+
+    def test_also_new_ignores_a_doc_that_exists_in_head(self):
+        _write(self.feat, "# thing\n")
+        self._commit()
+        _write(self.feat, "# thing\n\nedited\n")
+        self.assertEqual(self._also(self.REL), [])
+
+    def test_also_new_ignores_a_missing_file_a_template_and_a_subdirectory(self):
+        _write(self.root / "docs" / "features" / "TEMPLATE.md", "# t\n")
+        _write(self.root / "docs" / "features" / "sub" / "x.md", "# x\n")
+        self.assertEqual(self._also(self.REL, "docs/features/TEMPLATE.md",
+                                    "docs/features/sub/x.md", "docs/reference/y.md"), [])
+
+    def test_also_new_is_deduplicated_with_the_staged_set(self):
+        _write(self.feat, "# thing\n")
+        self._git("add", "-A")
+        self.assertEqual(self._also(self.REL, self.REL), [self.feat.name])
+
+    def test_cli_also_new_option_feeds_the_check(self):
+        _write(self.feat, "# thing\n")
+        rc, out = self._gate("--drift-only", "--staged", "--also-new", self.REL)
+        self.assertEqual(rc, 1)
+        self.assertIn("sample-thing.md", out)
+
+    def test_a_heading_inside_a_code_fence_does_not_count(self):
+        _write(self.feat, f"# thing\n\n```\n{self.HEADING}\nsteps\n```\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [self.feat.name])
+
+    def test_an_empty_section_is_flagged(self):
+        _write(self.feat, f"# thing\n\n{self.HEADING}\n\n\n## Next\n\ntext\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [self.feat.name])
+
+    def test_an_empty_section_at_end_of_file_is_flagged(self):
+        _write(self.feat, f"# thing\n\n{self.HEADING}\n\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [self.feat.name])
+
+    def test_a_section_with_a_fenced_block_only_passes(self):
+        _write(self.feat, f"# thing\n\n{self.HEADING}\n\n```\n## inside\nrun it\n```\n\n## Next\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [])
+
+    def test_a_doc_in_a_features_subdirectory_is_not_checked(self):
+        _write(self.root / "docs" / "features" / "elephant" / "x.md", "# x\n")
+        self._git("add", "-A")
+        self.assertEqual(self._names(staged=True), [])
+        self.assertEqual(self._names(), [])
+
     def _gate(self, *argv):
         with mock.patch.object(ld, "DOC_ROOTS", [self.root / "docs"]), \
                 mock.patch.object(ld, "check_context_budget", return_value=[]), \
