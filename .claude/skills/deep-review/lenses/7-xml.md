@@ -61,5 +61,5 @@ OUTPUT FORMAT:
   failure, CTD, hang, server boot kill; HIGH: silent misread or wrong gameplay data; MEDIUM: dead
   or redundant data; LOW: byte hygiene), and the fix
 - TESTS FOR THE ORCHESTRATOR: the shipped-data test classes to run
-- OWED: in-game checks no static gate can prove (restart plus visual, new-campaign-only data)
+- OWED: in-game checks no static gate can prove (restart plus visual, new-campaign-only data), written in the format of the "How to verify in game" section of `docs/features/TEMPLATE.md`
 Summary: N files, G gates run (F failed, X not run), K findings by severity

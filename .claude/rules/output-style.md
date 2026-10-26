@@ -49,5 +49,9 @@ to"), stacked hedges, generic conclusions, staccato punchlines, aphorism formula
 language of Y"), signposting ("let's dive in"), chatbot closers ("I hope this helps!"). Replace each
 with the concrete claim.
 
+**More tells:** metaphor nouns (substrate, wedge, ratchet, north star: use the concrete word);
+a feeling instead of the mechanism or a number; passive voice that hides the actor (name who
+validates, parses or writes); over-compression (dropped articles, arrows: write whole sentences).
+
 **TAOM house style stays:** boldface, inline `**Label:**` headers, tables and backticked paths are
 deliberate semantic markers.

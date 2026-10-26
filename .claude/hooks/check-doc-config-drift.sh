@@ -10,6 +10,8 @@
 #   - version mismatch against .claude/pinned-game-version.txt.
 #   - a context-budget breach (ADR-011).
 #   - a new FOLLOW-UP line in a staged docs/reviews/rca-*.md with no issue and no reason (#984).
+#   - a new docs/features/*.md with no `## How to verify in game` section that has a body; a doc
+#     that `git add` stages in the SAME command is read from the command text (--also-new).
 #
 # Why: this is the enforcement for the v1.4.7-bump deep-review finding -- flipping
 # banner_color_config.json's EnableLayerLimitTranspiler default left the feature doc's
@@ -96,6 +98,17 @@ for f in "${STAGED_LIST[@]}"; do
         docs/reference/taleworlds-api-snapshot/*.md) RELEVANT=1; break ;;
     esac
 done
+
+# A feature doc that `git add <doc> && git commit` stages in one command is not in the index yet:
+# take every docs/features/<name>.md token of the command text and let the linter read it from the
+# working tree (--also-new). Any error here leaves the list empty, which only skips the extra check.
+ALSO_NEW=()
+FEATURE_DOC_TOKEN='docs/features/[^/[:space:]"'"'"']+\.md'
+set -f; ALSO_NEW_TOKENS=($(printf '%s\n' "$COMMAND" | grep -oE "$FEATURE_DOC_TOKEN" 2>/dev/null | sort -u | head -20)); set +f
+for t in "${ALSO_NEW_TOKENS[@]+"${ALSO_NEW_TOKENS[@]}"}"; do
+    ALSO_NEW+=(--also-new "$t"); RELEVANT=1
+done
+
 [[ $RELEVANT -eq 0 ]] && { echo '{}'; exit 0; }
 
 # Locate python (fail open if absent).
@@ -110,7 +123,7 @@ PY="$PYBIN"
 # Inner bound, below the 30s registered timeout. A harness kill discards this hook's
 # output, which reads as a clean pass; this gate was dead from 2026-08-31 when it ran at
 # a 5s registration against a measured 7.8s runtime. Keep the overrun inside the hook.
-OUT=$(timeout -k 2 20 "$PY" tools/lint_docs.py --drift-only --staged 2>/dev/null)
+OUT=$(timeout -k 2 20 "$PY" tools/lint_docs.py --drift-only --staged ${ALSO_NEW[@]+"${ALSO_NEW[@]}"} 2>/dev/null)
 RC=$?
 
 # 124 = the inner timeout fired. Not a pass. Ask rather than block: an overrun is an

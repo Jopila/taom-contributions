@@ -1398,20 +1398,41 @@ def check_rca_followups(base: str = "HEAD", staged: bool = False) -> list[tuple[
 
 VERIFY_HEADING = "## How to verify in game"
 _FEATURE_DOC_SKIP = {"TEMPLATE.md", "README.md"}
+_FEATURE_DOC_PATHSPEC = "docs/features/*.md"
+
+
+def _has_verify_section(text: str) -> bool:
+    """True when `## How to verify in game` sits outside a code fence and its section (up to the
+    next `## ` heading or the end of the file) holds at least one non-blank line."""
+    text = text.lstrip("\ufeff")
+    lines = text.splitlines()
+    outside = dict(iter_lines_outside_code_fences(text))
+    for lineno, line in outside.items():
+        if line.rstrip() != VERIFY_HEADING:
+            continue
+        for i in range(lineno + 1, len(lines) + 1):
+            if i in outside and outside[i].startswith("## "):
+                break
+            if lines[i - 1].strip():
+                return True
+        return False
+    return False
 
 
 def check_feature_doc_verify_section(
-    base: str = "HEAD", staged: bool = False
+    base: str = "HEAD", staged: bool = False, also_new: list[str] | None = None
 ) -> list[tuple[Path, int, str, str]]:
-    """A NEW docs/features/*.md with no line exactly `## How to verify in game`.
+    """A NEW docs/features/*.md with no `## How to verify in game` section that has a body.
 
     New means ADDED against `base` (`git diff --name-status --diff-filter=A`; staged=True diffs the
     index and reads the file from it). Working-tree mode also counts untracked files. A modified
-    existing doc is never checked, and neither are TEMPLATE.md and README.md.
+    existing doc is never checked, and neither are TEMPLATE.md, README.md and a subdirectory doc.
+    `also_new` names paths a pending `git add` in the same command will add: each one absent from
+    HEAD and present in the working tree is checked from the working tree.
     """
     cached = ["--cached"] if staged else []
     listing = _git_out("-c", "core.quotePath=false", "diff", *cached, "--name-status",
-                       "--diff-filter=A", base, "--", "docs/features/*.md")
+                       "--diff-filter=A", base, "--", _FEATURE_DOC_PATHSPEC)
     names: list[str] = []
     for line in (listing or "").splitlines():
         parts = line.split("\t")
@@ -1419,14 +1440,22 @@ def check_feature_doc_verify_section(
             names.append(parts[-1].strip())
     if not staged:
         untracked = _git_out("-c", "core.quotePath=false", "ls-files", "--others",
-                             "--exclude-standard", "--", "docs/features/*.md")
+                             "--exclude-standard", "--", _FEATURE_DOC_PATHSPEC)
         names.extend(n.strip() for n in (untracked or "").splitlines() if n.strip())
+    pending: set[str] = set()
+    for name in also_new or []:
+        name = name.strip().replace("\\", "/")
+        path = REPO_ROOT / name
+        if path.parent != REPO_ROOT / "docs" / "features" or path.suffix != ".md" \
+                or not path.is_file() or _git_out("cat-file", "-e", f"HEAD:{name}") is not None:
+            continue
+        pending.add(name)
     findings: list[tuple[Path, int, str, str]] = []
-    for name in sorted(set(names)):
+    for name in sorted(set(names) | pending):
         path = REPO_ROOT / name
         if path.parent != REPO_ROOT / "docs" / "features" or path.name in _FEATURE_DOC_SKIP:
             continue
-        if staged:
+        if staged and name not in pending:
             text = _git_out("show", f":{name}")
             if text is None:
                 continue
@@ -1435,10 +1464,11 @@ def check_feature_doc_verify_section(
                 text = path.read_text(encoding="utf-8-sig")
             except Exception:
                 continue
-        if any(ln.rstrip() == VERIFY_HEADING for ln in text.lstrip("\ufeff").splitlines()):
+        if _has_verify_section(text):
             continue
         findings.append((path, 1, "no-verify-section",
-                         f"the doc lacks `{VERIFY_HEADING}` (see docs/features/TEMPLATE.md); "
+                         f"the doc lacks a `{VERIFY_HEADING}` section with a body (see "
+                         "docs/features/TEMPLATE.md); "
                          'write the steps, or write "Not applicable:" with a reason under the heading'))
     return findings
 
@@ -1621,13 +1651,17 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--fail-on-dead", action="store_true", help="Exit 1 if any dead links found")
     ap.add_argument("--fail-on-drift", action="store_true",
                     help="Exit 1 on config-example drift, a version mismatch, a context-budget "
-                         "breach (size-warn findings excepted), or a newly written RCA FOLLOW-UP "
-                         "line with no issue or reason.")
+                         "breach (size-warn findings excepted), a newly written RCA FOLLOW-UP "
+                         "line with no issue or reason, or a new feature doc with no "
+                         "'## How to verify in game' section.")
     ap.add_argument("--drift-only", action="store_true",
                     help="Run only the checks --fail-on-drift gates on, and gate on them.")
     ap.add_argument("--staged", action="store_true",
-                    help="Read the RCA FOLLOW-UP check's lines from the index, not the working "
-                         "tree: what a commit would record. The commit hook's mode.")
+                    help="Read the RCA FOLLOW-UP and new-feature-doc checks from the index, not "
+                         "the working tree: what a commit would record. The commit hook's mode.")
+    ap.add_argument("--also-new", action="append", default=[], metavar="PATH",
+                    help="A docs/features/*.md that a pending `git add` will add (repeatable): "
+                         "checked from the working tree if HEAD lacks it.")
     ap.add_argument("--context-budget-json", action="store_true",
                     help="Print the context-budget inputs (entry docs, rules, caps) as JSON and exit.")
     ap.add_argument("--summary", action="store_true", help="Emit a --- delimited grep-friendly summary block instead of the full markdown report")
@@ -1653,7 +1687,8 @@ def main(argv: list[str]) -> int:
         report.version_mismatches = check_version_consistency()
         report.budget = check_context_budget()
         report.rca_followups = check_rca_followups(args.dash_base, staged=args.staged)
-        report.feature_verify = check_feature_doc_verify_section(args.dash_base, staged=args.staged)
+        report.feature_verify = check_feature_doc_verify_section(args.dash_base, staged=args.staged,
+                                                                  also_new=args.also_new)
     else:
         link_files = files + harness_link_files()
         report.dead_links = check_dead_links(link_files)
@@ -1669,7 +1704,8 @@ def main(argv: list[str]) -> int:
         report.model_registry = check_model_registry()
         report.dashes = check_ai_dashes(args.dash_base)
         report.rca_followups = check_rca_followups(args.dash_base, staged=args.staged)
-        report.feature_verify = check_feature_doc_verify_section(args.dash_base, staged=args.staged)
+        report.feature_verify = check_feature_doc_verify_section(args.dash_base, staged=args.staged,
+                                                                  also_new=args.also_new)
 
     if args.summary:
         # Structured grep-friendly block, modeled on autoresearch's train.py final output

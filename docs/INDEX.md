@@ -356,6 +356,7 @@ Other standards: [ADR-001 XML config](adrs/001-xml-config.md), [ADR-003 No `#reg
 - [ai-includes/multi-approach-validation.md](ai-includes/multi-approach-validation.md) — comparing alternative implementations
 - [ai-includes/code-quality.md](ai-includes/code-quality.md) — non-negotiable C# quality rules
 - [ai-includes/security.md](ai-includes/security.md) — input validation, boundary trust
+- [ai-includes/perf-method.md](ai-includes/perf-method.md): cheapest-first perf moves, frozen harness, median-of-5 A/B, stop rule, attempt log
 - [ai-includes/new-culture-authoring.md](ai-includes/new-culture-authoring.md) — repeatable end-to-end culture authoring (Dale + Gondor)
 
 ## Cross-cutting concerns (where memory ↔ docs intersect)

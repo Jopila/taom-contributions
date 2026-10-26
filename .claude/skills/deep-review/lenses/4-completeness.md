@@ -13,6 +13,8 @@ FILES: the list in your spawn prompt.
 7. **SubModule.xml:** If new behaviors or models were added, verify they don't need SubModule.xml registration (most don't, but check).
 8. **No gate turned green by editing the gate:** a removed `[TestMethod]`, an added `[Ignore]`, a weakened `Assert`, or a new validator allowlist entry (`_BY_DESIGN`, `_EXEMPT`, `exempt_troops` and the like) must say why in the entry or the commit body. Without a reason it is a finding: the check was silenced, not passed. The mechanical part: `git diff <base> -U0 | grep -nE '^-\s*\[TestMethod|^\+\s*\[Ignore|^\+.*(_BY_DESIGN|_EXEMPT|exempt_troops|KNOWN_FAILURES)'`; a weakened `Assert` still has to be read.
 
+9. **Two-edit test check:** judge each new or changed test by two edits. Break the behaviour: the test must fail, and one that still passes proves nothing (causes: the expected value is computed by the code under test, the assertion checks data the test itself built, a restated constant). Change only the internals: the test must still pass, and one that fails is pinned to the implementation. A `DidNotReceive()` assertion needs a paired positive case that shows the path can call it.
+
 OUTPUT FORMAT:
 - ✅ Tests: [X test files, Y test methods]
 - ✅/❌ Feature Doc: [exists at path / MISSING]

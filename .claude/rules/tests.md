@@ -12,6 +12,8 @@ paths:
 2. Write minimum production code to pass (GREEN)
 3. Refactor while keeping tests green
 
+Judge every test by the two-edit test: break the behaviour (it must fail), change only the internals (it must pass); see `4-completeness.md` item 9 in `.claude/skills/deep-review/lenses/`.
+
 ## Naming Convention
 `MethodName_StateUnderTest_ExpectedBehavior`
 
