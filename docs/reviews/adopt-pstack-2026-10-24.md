@@ -98,6 +98,7 @@ verdict at its next run.
 ## Referenced by
 
 - [docs/ai-includes/external-repo-adoption.md](../ai-includes/external-repo-adoption.md)
+- [docs/reviews/adopt-claude-plugins-official-2026-10-26.md](./adopt-claude-plugins-official-2026-10-26.md)
 - [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
 
 <!-- backlinks-end -->
