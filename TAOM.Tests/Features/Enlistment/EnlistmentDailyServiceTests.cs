@@ -35,7 +35,7 @@ public class EnlistmentDailyServiceTests
         _rewards = Substitute.For<IServiceRewardService>();
         _rewards.PayDailyWage().Returns(new WageDecision { PaidFromCommander = 5 });
         _rhythm = Substitute.For<IArmyRhythmSnapshotService>();
-        _rhythm.GetSnapshot(Arg.Any<double>()).Returns(new ArmyRhythmSnapshot());
+        _rhythm.GetSnapshot().Returns(new ArmyRhythmSnapshot());
         _skillXp = Substitute.For<IHeroSkillXpAdapter>();
         _promotion = new PromotionService(_contentStore, _config, _skillXp, _store, _logger);
         _world = Substitute.For<IDutyWorldAdapter>();
@@ -55,7 +55,7 @@ public class EnlistmentDailyServiceTests
     [TestMethod]
     public void DailyTick_NotEnlisted_NoOp()
     {
-        _service.RunDailyTick(200.0);
+        _service.RunDailyTick();
 
         _rewards.DidNotReceive().PayDailyWage();
         Assert.AreEqual(0, _contentStore.Record.DaysServed);
@@ -66,7 +66,7 @@ public class EnlistmentDailyServiceTests
     {
         MakeEnlisted();
 
-        var summary = _service.RunDailyTick(200.0);
+        var summary = _service.RunDailyTick();
 
         Assert.AreEqual(1, _contentStore.Record.DaysServed);
         Assert.AreEqual(5, summary.Wage.PaidFromCommander);
@@ -80,10 +80,10 @@ public class EnlistmentDailyServiceTests
     {
         // Priority-exclusive context XP — the donor stacked all four in one day.
         MakeEnlisted();
-        _rhythm.GetSnapshot(Arg.Any<double>())
+        _rhythm.GetSnapshot()
             .Returns(new ArmyRhythmSnapshot { SiegePressure = true, Naval = true, InArmy = true });
 
-        _service.RunDailyTick(200.0);
+        _service.RunDailyTick();
 
         _skillXp.Received(1).AddSkillXp("main_hero", "Engineering", 8);
         _skillXp.DidNotReceive().AddSkillXp("main_hero", "Tactics", Arg.Any<float>());
@@ -96,7 +96,7 @@ public class EnlistmentDailyServiceTests
         _contentStore.Record.DaysServed = 7; // becomes 8 on tick
         _contentStore.Record.ServiceXp = 95; // +10 → 105
 
-        var summary = _service.RunDailyTick(200.0);
+        var summary = _service.RunDailyTick();
 
         Assert.IsTrue(summary.Promoted);
         Assert.AreEqual(ServiceRank.Specialist, summary.NewRank);
@@ -115,10 +115,10 @@ public class EnlistmentDailyServiceTests
         _contentStore.Record.Trust = 6;
         _skillXp.GetSkillValue("main_hero", "Leadership").Returns(2);
 
-        Assert.IsFalse(_service.RunDailyTick(200.0).Promoted);
+        Assert.IsFalse(_service.RunDailyTick().Promoted);
 
         _skillXp.GetSkillValue("main_hero", "Leadership").Returns(8);
-        Assert.IsTrue(_service.RunDailyTick(200.0).Promoted);
+        Assert.IsTrue(_service.RunDailyTick().Promoted);
     }
 }
 
@@ -151,7 +151,7 @@ public class EnlistmentProvisioningTests
         var promotion = Substitute.For<IPromotionService>();
         promotion.EvaluateAndApply().Returns(new PromotionOutcome());
         var rhythm = Substitute.For<IArmyRhythmSnapshotService>();
-        rhythm.GetSnapshot(Arg.Any<double>()).Returns(new ArmyRhythmSnapshot());
+        rhythm.GetSnapshot().Returns(new ArmyRhythmSnapshot());
 
         _service = new EnlistmentDailyService(
             _store, _content, config, Substitute.For<IServiceRewardService>(), rhythm,
@@ -171,7 +171,7 @@ public class EnlistmentProvisioningTests
         // An enlisted player is one hero parked in the field; nothing else feeds them.
         _world.CountPlayerFood().Returns(0);
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.Received(1).GrantPlayerFood(3);
     }
@@ -182,7 +182,7 @@ public class EnlistmentProvisioningTests
         // Not a daily handout: it tops up to a floor, so it cannot be farmed as a supply source.
         _world.CountPlayerFood().Returns(5);
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.DidNotReceiveWithAnyArgs().GrantPlayerFood(default);
     }
@@ -192,7 +192,7 @@ public class EnlistmentProvisioningTests
     {
         _world.CountPlayerFood().Returns(1);
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.Received(1).GrantPlayerFood(2);
     }
@@ -202,7 +202,7 @@ public class EnlistmentProvisioningTests
     {
         // Below 25 an attached party counts as "low morale" in CalculateCohesionChangeInternal and
         // drags the whole army's cohesion — so this is upkeep for the commander, not just comfort.
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.Received(1).RaisePlayerMoraleTo(40f);
     }
@@ -214,7 +214,7 @@ public class EnlistmentProvisioningTests
         // party's heroes +11/day; an enlisted player is a hidden, inactive, one-man party that the
         // engine's healing path was never written for — a real player reached 19% HP with no
         // recovery. The surgeon is explicit rather than a side effect.
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.Received(1).HealPlayerHero(11);
     }
@@ -225,7 +225,7 @@ public class EnlistmentProvisioningTests
         // The company only feeds its own. A discharged player is on their own again.
         _store.Record.State = EnlistmentState.NotEnlisted;
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.DidNotReceiveWithAnyArgs().GrantPlayerFood(default);
         _world.DidNotReceiveWithAnyArgs().RaisePlayerMoraleTo(default);
@@ -239,7 +239,7 @@ public class EnlistmentProvisioningTests
         // recovered at identical speed, telling the player their Medicine does nothing in service.
         _skillXp.GetSkillValue(Arg.Any<string>(), "Medicine").Returns(120);
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.Received(1).HealPlayerHero(23);   // 11 base + 120/10
     }
@@ -251,7 +251,7 @@ public class EnlistmentProvisioningTests
         // the party is not out living its own life on the map. Same regime as attached.
         _store.Record.State = EnlistmentState.EnlistedBattle;
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.Received(1).HealPlayerHero(11);
     }
@@ -265,7 +265,7 @@ public class EnlistmentProvisioningTests
         // detach (only WaitHours stays attached), so this was the common case, not an edge.
         _store.Record.State = EnlistmentState.EnlistedDetachedOnDuty;
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.DidNotReceiveWithAnyArgs().HealPlayerHero(default);
     }
@@ -276,7 +276,7 @@ public class EnlistmentProvisioningTests
         // The 7-day grace also restores presence (EnlistmentReconciler:349), so vanilla is healing.
         _store.Record.State = EnlistmentState.CommanderUnavailable;
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.DidNotReceiveWithAnyArgs().HealPlayerHero(default);
     }
@@ -287,7 +287,7 @@ public class EnlistmentProvisioningTests
         // Vanilla captivity owns the party entirely. A prisoner is not drawing the company surgeon.
         _store.Record.State = EnlistmentState.EnlistedPlayerCaptive;
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.DidNotReceiveWithAnyArgs().HealPlayerHero(default);
     }
@@ -301,7 +301,7 @@ public class EnlistmentProvisioningTests
         _store.Record.State = EnlistmentState.EnlistedDetachedOnDuty;
         _world.CountPlayerFood().Returns(0);
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.Received(1).GrantPlayerFood(3);
         _world.Received(1).RaisePlayerMoraleTo(40f);
@@ -316,7 +316,7 @@ public class EnlistmentProvisioningTests
             exists: true, isAlive: true, partyId: "lord_party", partyIsActive: true,
             partyIsInSettlement: true, settlementId: "town_EW1"));
 
-        _service.RunDailyTick(5.0);
+        _service.RunDailyTick();
 
         _world.Received(1).HealPlayerHero(22);   // 11 base x2 resting
     }
@@ -330,7 +330,7 @@ public class EnlistmentProvisioningTests
         // promotion is what gives it away: there is no chain of command left to promote anyone.
         _store.Record.State = EnlistmentState.CommanderUnavailable;
 
-        var summary = _service.RunDailyTick(200.0);
+        var summary = _service.RunDailyTick();
 
         Assert.IsTrue(summary.CommanderUnavailable, "the summary must say why the tick did nothing");
         Assert.IsFalse(summary.Promoted, "no chain of command is left to promote anyone");

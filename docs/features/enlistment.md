@@ -612,8 +612,11 @@ evaluates promotion. Config: `ModuleData/enlistment/enlistment_config.json`.
 floor; the shortfall defers into arrears capped at `wagePolicy.maxDeferredWageDays` (default
 **14**) days of the player's *current* rank wage: 70 gold at Private, 560 at Sergeant Major.
 `ServiceRewardService.PayDailyWage` spends that plan through exactly ONE channel (commander
-transfer or mint, per config) and derives the new debt by conservation — owed minus delivered
-— rather than patching the plan's fields. Anything owed above the cap is forfeited, and the
+transfer or mint, per config) and derives the new debt by conservation (owed minus delivered)
+rather than patching the plan's fields. Today's wage is paid first: only what the commander
+delivers beyond it counts against the debt already banked, so a debt above the cap (after a mid-term
+change of the wage table or the cap) stays whole while the commander pays each day's wage. Anything
+owed above the cap is forfeited, and the
 service logs `deferred-wage cap reached — N gold of back pay forfeited` when that happens; it
 used to be destroyed silently. An honorable discharge settles remaining arrears; desertion
 forfeits them.
@@ -739,7 +742,12 @@ conversation, which made the choice weightless).
 
 **Duties.** 13 field duties, plus 11 interactive skill-check duties and 3 camp incidents through
 one presenter. Rows failing validation are SKIPPED with a warning (never silently defaulted).
-`IArmyRhythmSnapshotService` caches the world read once per game hour.
+`IArmyRhythmSnapshotService` probes the commander's column fresh on every call (the daily service
+tick, the daily duty offer and a duty request); it has no cache. The probe counts the column as
+under siege when `MobileParty.SiegeEvent` is set (the besieger's camp event) **or** when the
+commander's current settlement is under siege (`Settlement.SiegeEvent`), so a soldier whose
+commander defends a besieged town gets the siege duties and the siege skill context, not the quiet-day
+`night_patrol`.
 
 A field duty is **camp work, not a journey** (reworked 2026-08-09, #428): you are given orders, they
 occupy you for `durationHours` (4–8), and one `ISkillCheckService` roll against the row's
@@ -2034,14 +2042,16 @@ the ungated call safe. `SubModule.OnGameEnd` calls it as well, so the cached com
 roots can still hold that campaign at the main menu (`CommanderLordAdapter._lastSeenMapEvent`, and
 the singleton behaviors' `_lastSessionStarter`), so the heap benefit is unmeasured and not claimed. `ResetSessionCaches` also clears the settlement-dwell anchor and the adapter's cached
 commander party (`IServiceAttachmentService.ResetForNewSession`), the arrival-offer settlement id
-and 24-hour cooldown (`IEnlistmentWaitMenuPresenter.ResetForNewSession`) and the per-hour
-army-rhythm snapshot (`IArmyRhythmSnapshotService.ResetForNewSession`). The dwell anchor and the
+and 24-hour cooldown (`IEnlistmentWaitMenuPresenter.ResetForNewSession`). It also drops the
+sit-out ledger's verdict (`SitOutLedger.Consume`), the pending raid join, the pending battle-merit
+sample (`BattleMeritAccumulator._pending`, cleared by `Consume` and by `ResetForNewSession`) and the
+contract-renewal state (`ContractRenewalService.ResetForNewSession`). The army-rhythm snapshot
+used to have an hourly cache and a reset here; both are gone, because it now probes fresh on every
+call. The dwell anchor and the
 offer cooldown held an absolute campaign hour. Before this, loading an earlier save left those
 stamps in the future, which the code read as "a moment ago": the exit sweep held the player in a
 town the commander had left until the new clock passed the old stamp plus 6 hours, and the
-shore-leave offer stayed silent until it passed the old stamp plus a day. The rhythm snapshot is
-keyed on an equal hour stamp, so a reload inside the same campaign hour served the previous
-world's snapshot. The reconciler's reset also clears the commander-loss modal's shown-once latch
+shore-leave offer stayed silent until it passed the old stamp plus a day. The reconciler's reset also clears the commander-loss modal's shown-once latch
 (`_lossAnnouncedFor`), which discharge clears as well.
 
 **A save with no Enlistment data loads with no record.** The engine calls a behavior's `SyncData`
@@ -2060,8 +2070,7 @@ reset, the no-data clear, and a source check that `SubModule.OnGameEnd` reaches 
 
 Not every per-session value is reset yet. `FieldDutyRuntime`'s real-time pace estimate survives a session
 change (cosmetic: the first duty after a load can fold its assignment toast into the result).
-`BattleMeritAccumulator._pending`, the pending battle-merit sample, is cleared only by `Consume`
-(reachability across a session change unverified). `CommanderLordAdapter`'s one-slot `MapEvent`
+`CommanderLordAdapter`'s one-slot `MapEvent`
 cache (`_lastSeenMapEvent`) is never cleared, so it keeps one finished battle referenced. These are
 follow-ups, not part of this reset, and the list comes from the review's field sweep, so it may
 not be complete.

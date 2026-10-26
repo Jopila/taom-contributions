@@ -51,7 +51,6 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
     private readonly IEnlistmentReconciler _reconciler;
     // For ResetSessionCaches only: a service never calls presentation (popups stay presenter-side).
     private readonly Presentation.IEnlistmentWaitMenuPresenter _presenter;
-    private readonly Content.IArmyRhythmSnapshotService _rhythm;
     // Singletons holding per-battle state that must not leak into the next campaign (#830).
     private readonly SitOutLedger _sitOutLedger;
     private readonly Content.IBattleMeritAccumulator _meritAccumulator;
@@ -82,7 +81,6 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         IEncounterOwnershipPolicy ownership,
         IEnlistmentReconciler reconciler,
         Presentation.IEnlistmentWaitMenuPresenter presenter,
-        Content.IArmyRhythmSnapshotService rhythm,
         SitOutLedger sitOutLedger,
         Content.IBattleMeritAccumulator meritAccumulator,
         Content.ContractRenewalService renewal,
@@ -100,7 +98,6 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         _ownership = ownership;
         _reconciler = reconciler;
         _presenter = presenter;
-        _rhythm = rhythm;
         _sitOutLedger = sitOutLedger;
         _meritAccumulator = meritAccumulator;
         _renewal = renewal;
@@ -308,10 +305,6 @@ public class ServiceMaintenanceService : IServiceMaintenanceService
         // cached commander MobileParty (the StringId hazard in the summary above).
         _attachment.ResetForNewSession();
         _presenter?.ResetForNewSession();
-
-        // The rhythm snapshot is keyed on an equal hour stamp, not an elapsed time: its hazard is
-        // a reload inside the same campaign hour serving the previous world's snapshot.
-        _rhythm?.ResetForNewSession();
     }
 
     public void OnPartyJoinedRunningMapEvent(string partyId)
