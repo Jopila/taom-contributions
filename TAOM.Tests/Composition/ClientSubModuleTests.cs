@@ -38,36 +38,51 @@ public class ClientSubModuleTests
     }
 
     // ADR-013, B5: UIExtenderEx reads one assembly per Register call and refuses a second call under one module
-    // name. The refusal is not invisible: it reaches only ButterLib's Configs/ModLogs/default<date>.log, as an [ERR]
-    // "Failed to load extension module TAOM - already loaded!" line, which nothing shows during OnSubModuleLoad. So every TAOM extension lives in TAOM.Client and
-    // the client registers once, under the name "TAOM" that the census and PatchShieldPolicy match.
+    // name. The refusal traces an [ERR] "Failed to load extension module TAOM - already loaded!" line to ButterLib's
+    // Configs/ModLogs/default<date>.log and, once Native has created the chat log, posts it as a red chat message;
+    // the extensions of the refused call never load. So every TAOM extension lives in TAOM.Client and the client
+    // registers once, under the name "TAOM" that the census and PatchShieldPolicy match. The once-guard, checked
+    // before Create, keeps a second campaign or a custom battle from registering again.
     [TestMethod]
-    public void OnSubModuleLoad_RegistersTheClientAssemblyUnderTheTaomName()
+    public void OnGameStart_RegistersTheClientAssemblyOnceUnderTheTaomName()
     {
         var source = Collapse(RepoPaths.ReadSource("Client/ClientSubModule.cs", stripComments: true));
 
         StringAssert.Contains(source, "private const string UiExtenderModuleName = \"TAOM\";");
-        var start = source.IndexOf("protected override void OnSubModuleLoad()", StringComparison.Ordinal);
-        Assert.AreNotEqual(-1, start, "ClientSubModule has no OnSubModuleLoad: nothing registers the screen extensions.");
-        StringAssert.Contains(source.Substring(start),
-            "{ base.OnSubModuleLoad(); _uiExtender = UIExtender.Create(UiExtenderModuleName); "
+        var start = source.IndexOf("protected override void OnGameStart(", StringComparison.Ordinal);
+        Assert.AreNotEqual(-1, start, "ClientSubModule has no OnGameStart: nothing registers the screen extensions.");
+        var body = source.Substring(start);
+        var guard = body.IndexOf("if (_uiExtender != null) return;", StringComparison.Ordinal);
+        var create = body.IndexOf("_uiExtender = UIExtender.Create(UiExtenderModuleName);", StringComparison.Ordinal);
+        Assert.IsTrue(guard >= 0 && create > guard, "OnGameStart must return when the UIExtender exists, before it creates one.");
+        StringAssert.Contains(body.Substring(create),
+            "_uiExtender = UIExtender.Create(UiExtenderModuleName); "
             + "ClientUiExtensions.Register(_uiExtender, typeof(ClientSubModule).Assembly); _uiExtender.Enable(); }");
     }
 
-    // The IL, not the source text: a UIExtender made in core would register under the same module name and be
-    // refused by UIExtenderEx's one-assembly rule, so the only creator is ClientSubModule.OnSubModuleLoad.
+    // The IL, not the source text. A UIExtender made in core would register under the same module name and be
+    // refused by UIExtenderEx's one-assembly rule. And registration must wait for a game: Register compiles every
+    // mixin target, and the .NET Framework JIT may then run CampaignUIHelper's static initializer, which reads
+    // GameTexts. GameTexts is null until Game.Initialize (OnSubModuleLoad, the first main menu, and the main menu
+    // after a campaign ends), the initializer throws there, and .NET keeps CampaignUIHelper broken for the
+    // process: TAOM patches on it can fail, and character creation crashes.
     [TestMethod]
     [TestCategory("RequiresGame")]
-    public void UIExtenderCreate_IsCalledOnlyByTheClientSubModule()
+    [DataRow("Create")]
+    [DataRow("Register")]
+    public void UIExtenderCreateAndRegister_AreCalledOnlyFromTheClientOnGameStart(string uiExtenderMember)
     {
         var callers = TaomAssemblies.FindCallers(
-            m => m.DeclaringType == typeof(UIExtender) && m.Name == "Create",
+            m => uiExtenderMember == "Create"
+                ? m.DeclaringType == typeof(UIExtender) && m.Name == "Create"
+                : m.DeclaringType == typeof(ClientUiExtensions) && m.Name == "Register"
+                    && m.GetParameters().Length == 2 && m.GetParameters()[0].ParameterType == typeof(UIExtender),
             out var unreadable, out var scanned);
 
         Assert.IsTrue(scanned > 1000, "Only " + scanned + " bodies scanned across the TAOM assemblies.");
         Assert.AreEqual(0, unreadable.Count, "unreadable bodies cannot vouch: " + string.Join("; ", unreadable));
-        CollectionAssert.AreEqual(new[] { typeof(ClientSubModule).FullName + ".OnSubModuleLoad" }, callers,
-            "core must not create a UIExtender (ADR-013)");
+        CollectionAssert.AreEqual(new[] { typeof(ClientSubModule).FullName + ".OnGameStart" }, callers,
+            "only the client's OnGameStart may create or register the UIExtender (ADR-013, CampaignUIHelper)");
     }
 
     [TestMethod]

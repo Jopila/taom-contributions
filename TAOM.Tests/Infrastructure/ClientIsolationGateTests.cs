@@ -73,7 +73,7 @@ public class ClientIsolationGateTests
         Assert.IsFalse(ForbiddenInTheClient.IsMatch(source), source);
 
     // UIExtenderEx's Register(Assembly) reads one assembly and refuses a second call under one module name, so TAOM
-    // registers once, from ClientSubModule.OnSubModuleLoad, and every extension lives in TAOM.Client (ADR-013).
+    // registers once, from ClientSubModule.OnGameStart, and every extension lives in TAOM.Client (ADR-013).
     [TestMethod]
     [TestCategory("RequiresGame")]
     public void TaomCore_DeclaresNoUiExtension()
@@ -91,7 +91,7 @@ public class ClientIsolationGateTests
 
         Assert.IsTrue(coreTypes.Length > 1000, "The scan read only " + coreTypes.Length + " core types.");
         CollectionAssert.AreEqual(new string[0], inCore,
-            "UIExtenderEx reads only TAOM.Client (ClientSubModule.OnSubModuleLoad), so a core extension would never load.");
+            "UIExtenderEx reads only TAOM.Client (ClientSubModule.OnGameStart), so a core extension would never load.");
     }
 
     [TestMethod]

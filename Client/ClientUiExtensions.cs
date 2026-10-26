@@ -22,7 +22,7 @@ internal static class ClientUiExtensions
     ///
     /// Mirrors UIExtenderEx's own <c>Register(Assembly)</c> type selection (any type carrying an
     /// attribute derived from <c>BaseUIExtenderAttribute</c>), then filters. Registration is a
-    /// one-shot here in <c>OnSubModuleLoad</c>, so this is the only point at which a widget can be
+    /// one-shot in the client's first <c>OnGameStart</c>, so this is the only point at which a widget can be
     /// kept out of the prefab — a runtime check inside a mixin cannot un-inject one.
     ///
     /// Never throws: a failure here would cost every TAOM UI extension, so the fallback is the
@@ -64,7 +64,7 @@ internal static class ClientUiExtensions
             // Decompiled v1.4.7 settles it (two independent Codex passes, 2026-08-01):
             // Module.Initialize populates ModuleHelper's _loadedModules from the native module-code
             // string BEFORE calling LoadSubModules, which is what invokes OnSubModuleLoad. The list
-            // is therefore complete here — even a SubModule constructor already sees it. The
+            // is therefore complete here, in the later OnGameStart, as it already was in OnSubModuleLoad. The
             // "may not be populated this early" caution in CoopPresence.Refresh's docs is about the
             // pre-managed native string, not an OnSubModuleLoad race, and no extra Refresh() helps
             // with that. Removed the redundant re-probe accordingly.
@@ -83,7 +83,8 @@ internal static class ClientUiExtensions
         {
             // Logged unconditionally: this line's ABSENCE is the only way to tell a genuine solo
             // session from a co-op session whose detection ran too late, and the boot matrix has to
-            // be able to tell those apart.
+            // be able to tell those apart. It is written at the first game start, not at boot, so a
+            // launch that stops at the main menu shows no registration line either way.
             logger.LogInfo(
                 "[CoopInterop] no co-op module detected at UI registration — registering all TAOM UI");
             registerAssembly(assembly);

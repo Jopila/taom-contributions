@@ -1099,6 +1099,19 @@ silent. Slow compile and wedge cannot be told apart from that log.
   wait out a shader compile that was not the cause.
 - **Source:** player bundle `taom_crash_20261018_184529_b18f3441`; fix in `tools/triage_battle_load.py`.
 
+### The end of the log is a second silence anchor when no watchdog line exists (2026-10-26)
+A player log from 2026-10-25 again got the DRAINING verdict: three `WaitingForRender` samples (2771, 2737, 2704),
+then 117 s of `[MemSample]` lines and no watchdog line, because the player closed the frozen game about 2 minutes
+into the wait. The 2026-10-18 fix measured the silence only up to the watchdog line, so with no watchdog it
+measured nothing and fell back to "draining".
+- **Why missed:** the fix assumed every frozen load lasts until the 300 s watchdog. A player who closes a "not
+  responding" window earlier produces a log with no watchdog line at all.
+- **Prevent:** a silence check needs an anchor that always exists. `[MemSample]` runs on a timer thread, so its
+  lines keep coming while the game thread is frozen. The tool now measures to the newest stamped line of any kind
+  when there is no watchdog line (`Timeline.last_ts`), and the report says "before the log ended".
+- **Source:** player log `taom_debug_2026-10-25_17-36-25.log` (TAOM `84f0459bc`); fix in
+  `tools/triage_battle_load.py`, test `test_silent_stream_before_the_log_ends_is_not_called_draining`.
+
 ### A feature that reads another feature's computed state gates on that feature's toggle, not on its state machine (#822, 2026-10-18)
 Watchful Holds reads the Realm Borders provinces through `RealmTerritoryService.State == Ready`. Realm Borders builds
 them only while it is on, but never clears them when it is switched off (`RealmBorderService.OnMapFrame` returns early

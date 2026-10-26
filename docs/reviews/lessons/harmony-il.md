@@ -1259,3 +1259,33 @@ throw ran on a co-op guest through BannerlordCoop's refresh handler.
   `SmeltingVM.cs:273-279`, `CraftingVM.ExecuteSwitchToSmelting`, the co-op handler) and restore the invariant they
   assume; test the state at that point on real view models (`SmeltingListFilterTests`).
 - **Source:** [rca-many-hammers-2026-10-26.md](../rca-many-hammers-2026-10-26.md) finding 1.
+
+### A UIExtenderEx mixin compiles vanilla code at Register: register after a game exists
+`UIExtender.Register` patches each mixin target's constructors, `OnFinalize` and refresh method at once
+(UIExtenderEx 2.13.3 `ViewModelWithMixinPatch.Patch`), and the patch compiles the vanilla IL. The .NET Framework
+JIT may then run the static initializer of a `beforefieldinit` type whose static field that IL reads, directly
+or through a small method it inlines; on this machine it did. `ClanLordItemVM.UpdateProperties` and
+`EncyclopediaHeroPageVM.Refresh` read `CampaignUIHelper.SkillObjectComparerInstance`, and `CampaignUIHelper`'s
+initializer calls `GameTexts.FindText` (`CampaignUIHelper.cs:210`, the same since v1.4.8). `GameTexts` is null
+until `Game.Initialize` sets it (`Game.cs:300`), so registered from `OnSubModuleLoad` the initializer threw. The
+runtime swallows the throw at JIT time and keeps the type failed: a net472 console repro showed every later use
+throwing `TypeInitializationException`. The symptom varied between two launches of one build: at 16:37
+`Patch17_TroopWeight`, `Patch23_BannerColorPersistence` and `Patch105_HiddenHosts` failed to apply, while at
+16:34 every patch category applied (`failed=0`). Both launches crashed when character creation opened the first
+narrative stage.
+- **Why missed:** the registration point predated the mixins that read `CampaignUIHelper` statics (Lines of
+  Descent and Hearth Roll on 2026-10-23, Encyclopedia on 2026-10-26). Nothing failed loudly: the NRE was
+  first-chance and swallowed, the debugger showed it only with "break when thrown" on, and failed patch
+  categories are not a reliable sign. The `MovementOrder` lesson above has the same mechanism, but it was
+  written for TAOM's own patch categories, not for UIExtenderEx's.
+- **Prevent:** `ClientSubModule` registers in its first `OnGameStart`. Every game type calls it from inside
+  `Game.Initialize`, after `GameTexts.Initialize` (`Game.cs:300-301`, `Campaign.cs:1410`, `CustomGame.cs:43`),
+  but before the models (`Campaign.cs:1412`) and default objects such as `DefaultSkills` (`Game.cs:425-433`)
+  exist. A mixin whose target IL reaches an initializer that reads those needs a later hook.
+  `ClientSubModuleTests` pins the only caller of `UIExtender.Create` and `ClientUiExtensions.Register` to that
+  method. Before you add a mixin target or move any Harmony or UIExtenderEx registration earlier, read the
+  initializers of every type whose static field the patched methods read, directly or through a small method
+  the JIT can inline (a static getter such as `Campaign.Current`).
+- **Source:** [rca-uiextender-ongamestart-2026-10-26.md](../rca-uiextender-ongamestart-2026-10-26.md); TAOM logs
+  `taom_debug_2026-10-26_16-34-58.log` (lines 201, 394-411) and `taom_debug_2026-10-26_16-37-09.log` (lines 197,
+  209, 226, 436-455).

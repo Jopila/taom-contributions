@@ -203,7 +203,7 @@ rendered and still accepted clicks while doing nothing.
 **Resolution (2026-08-01):** the five `TimeAcceleration` prefab extensions and the
 `MapTimeControlVM` mixin carry `[CoopSuppressedUi]`, and `ClientUiExtensions.Register` (TAOM.Client) filters
 them out of the UIExtenderEx registration when `CoopPresence.IsActive`. Registration is a one-shot at
-`OnSubModuleLoad`, so this is the only point where a widget can be kept out of the prefab — a
+the client's first `OnGameStart` (since 2026-10-26; before that, `OnSubModuleLoad`), so this is the only point where a widget can be kept out of the prefab: a
 runtime check inside the mixin cannot un-inject an already-built widget. Solo play is untouched; the
 registered/suppressed counts are logged either way, which is the first thing to check if a TAOM
 widget goes missing.
@@ -386,7 +386,9 @@ a hook where `Game.Current` is non-null. TAOM's RCA is precise enough to hand to
 ## Boot matrix — run this first
 
 Six launches to main menu, capturing `Logs/taom_debug_*.log`, `diag.log` and `rgl_log.txt` each time.
-Zero code required; it gates everything else.
+Zero code required; it gates everything else. TAOM writes its UI registration line (`[CoopInterop] ... at
+UI registration`) at the first game start, not at boot, so a launch that must check that line starts a
+campaign or a custom battle before it stops.
 
 | # | Modules | Flag files |
 |---|---|---|

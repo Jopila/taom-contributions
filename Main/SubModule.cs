@@ -244,7 +244,7 @@ public class SubModule : MBSubModuleBase
         }
 
         // TAOM's UIExtenderEx extensions all live in TAOM.Client, which registers them in its own
-        // OnSubModuleLoad (ADR-013); a dedicated server never loads them.
+        // first OnGameStart (ADR-013); a dedicated server never loads them.
 
         // Patch41_McmLayoutFix — flip MCM's embedded options-screen prefabs from VerticalBottomToTop
         // to VerticalTopToBottom (v1.4.0 layout regression). MCM's prefabs are embedded in

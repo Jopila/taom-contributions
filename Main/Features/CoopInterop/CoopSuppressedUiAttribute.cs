@@ -12,7 +12,7 @@ namespace TAOM.Features.CoopInterop;
 /// co-op session is active, so TAOM's extra fast-forward button still renders and still responds
 /// to clicks while doing nothing at all. A control that lies is worse than no control.
 ///
-/// Registration is a one-shot at <c>OnSubModuleLoad</c> — a runtime check inside the mixin cannot
+/// Registration is a one-shot at the client's first <c>OnGameStart</c> — a runtime check inside the mixin cannot
 /// remove an already-injected widget, which is why this is a registration-time filter and not a
 /// per-frame gate.
 /// </summary>

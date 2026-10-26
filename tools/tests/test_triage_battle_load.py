@@ -1755,6 +1755,37 @@ class RenderWaitSilenceTests(unittest.TestCase):
 
         self.assertEqual(293, tb.classify_phase_timings(tl)["render_wait"]["silent_s"])
 
+    def _ended_log(self, tail_ts):
+        # Player log 2026-10-25: three samples, no watchdog (the game was closed about 2 min
+        # into the freeze), and [MemSample] kept writing from its timer thread until the end.
+        return _log(
+            _init(), _init_done(), _finish_begin(), _after_start_begin(),
+            _after_start_done(), _finish_done(),
+            self._rw(55, 21113, 0, 2771, "2026-10-25 17:39:35"),
+            self._rw(56, 24748, 3636, 2737, "2026-10-25 17:39:39"),
+            self._rw(57, 26417, 5305, 2704, "2026-10-25 17:39:40"),
+            _mem(ts=tail_ts))
+
+    def test_silent_stream_before_the_log_ends_is_not_called_draining(self):
+        text = self._ended_log("2026-10-25 17:41:37")
+        tl = tb.parse_battle_load_log(text)
+        v = tb.classify(tl)
+        report = tb.format_report(v, tl, None)
+
+        self.assertEqual(v.kind, "RENDER_WAIT")
+        self.assertNotIn("DRAINING", report)
+        self.assertIn("frozen", v.summary)
+        self.assertIn("117s before the log ended", v.summary)
+        self.assertIn("117s before the log ended", report)
+        self.assertNotIn("watchdog fired", v.summary)
+        self.assertEqual(117, tb.classify_phase_timings(tl)["render_wait"]["silent_s"])
+
+    def test_log_ending_soon_after_the_last_sample_keeps_the_draining_message(self):
+        tl = tb.parse_battle_load_log(self._ended_log("2026-10-25 17:39:50"))
+
+        self.assertIsNone(tb.classify_phase_timings(tl)["render_wait"]["silent_s"])
+        self.assertIn("COLD SHADER CACHE", tb.classify(tl).summary)
+
     def test_continuing_stream_keeps_the_draining_message(self):
         text = self._continuing_log()
         tl = tb.parse_battle_load_log(text)
