@@ -178,6 +178,9 @@ public static class CoopSettingsRelevance
         // Harvest Road (#912): the pop-up is drawn on this client; it raises vanilla's caravan notice event, which Coop
         // forwards to every client from the server, so the server's setting decides for all peers. No state is written.
         "EnableHarvestRoadNotices",
+        // Bandit Voices (#900): the greeting is text drawn in the player's own conversation on this client. The feature reads the
+        // meeting record and the encounter, writes nothing, and rolls on TAOM's own random source, never the shared stream.
+        "EnableBanditGreetings",
         "EnableShaderPrecompileScenePasses", "EnableShaderPrecompilation",
         // Already suppressed under co-op — TimeAcceleration's UI carries
         // [CoopSuppressedUi("BannerlordTogether owns campaign time under co-op")].

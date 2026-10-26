@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<strings>
+
+	<!-- Bandit Voices (#900). Two kinds of rows, all keyed taom_bv_*; no row here reuses a vanilla key.
+
+	     Robbery lines: vanilla's bandit_start_defender_condition builds its pool from str_robbery_threat.1 to .6 and then, for
+	     each k from 1 to 6, from the variation <MapFaction.StringId>_<k> (the clan id and a number), three copies each, finding
+	     the pay agreement, conclusion and start-fight lines under the SAME variation with no fallback
+	     (BanditInteractionsCampaignBehavior). A variant that lacks one of its four rows would show an error line
+	     mid-robbery, so each clan has variations _1 and _2, each with all four, pinned by BanditVoicesDataTests.
+
+	     Greeting lines: str_taom_bv_greeting.<clanId>_harmless and _brothers, read by BanditVoicesService on a first meeting.
+	     The loader splits an id on ".", so a variation id holds no dot.
+
+	     Eight clans only: Dunlending, Rhun, Haradrim, Gundabad, Umbar, Gondor deserters, Blacklocks and Mirkwood Stalkers. The
+	     spiders and the wild trolls do not parley (Patch94) and looters stay vanilla. Every line is gender-neutral: vanilla's
+	     robbery lines are written for a male voice, and the bandits here are of any sex and race. -->
+
+	<!-- dunland_raiders: Dunlending hill-folk -->
+	<string id="str_robbery_threat.dunland_raiders_1" text="{=taom_bv_dunland_threat_1}Halt, stranger. These hills were ours before the horse-lords ever rode through them, and every traveller pays us a toll. Silver now, or we take it from your pack.[rf:convo_mocking_revenge]" />
+	<string id="str_robbery_pay_agreement.dunland_raiders_1" text="{=taom_bv_dunland_pay_agreement_1}Wise. We remember every road tax the valley lords ever took from us, so we take a little back. Name a price, and make it a kind one.[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.dunland_raiders_1" text="{=taom_bv_dunland_conclusion_1}That keeps the fires lit through the winter. Go on, and tell the valley lords the hills still have owners.[ib:closed][rf:convo_bemused]" />
+	<string id="str_robbery_start_fight.dunland_raiders_1" text="{=taom_bv_dunland_start_fight_1}Then the crows will have you. The hills remember who stood against them.[ib:aggressive][if:convo_annoyed]" />
+	<string id="str_robbery_threat.dunland_raiders_2" text="{=taom_bv_dunland_threat_2}You walk the old drovers' road, and the old drovers' road is ours. Coin, or your blood in the heather. Choose quickly, the weather is turning." />
+	<string id="str_robbery_pay_agreement.dunland_raiders_2" text="{=taom_bv_dunland_pay_agreement_2}A trade, is it? Good. My kin are hungry, and hungry kin are not patient. What are you worth?[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.dunland_raiders_2" text="{=taom_bv_dunland_conclusion_2}Fair dealing, for a stranger. Keep to the road, and the hills will let you pass this once." />
+	<string id="str_robbery_start_fight.dunland_raiders_2" text="{=taom_bv_dunland_start_fight_2}Brave, or foolish, and we have buried both. Show them what the hills do to trespassers." />
+	<string id="str_taom_bv_greeting.dunland_raiders_harmless" text="{=taom_bv_dunland_greeting_harmless}We are only shepherds out of the hills, stranger, nothing worth your sword." />
+	<string id="str_taom_bv_greeting.dunland_raiders_brothers" text="{=taom_bv_dunland_greeting_brothers}Best turn around, stranger. Half the clan waits in the heather behind those ridges, and they are not patient." />
+
+	<!-- rhun_raiders: Easterling riders of Rhûn -->
+	<string id="str_robbery_threat.rhun_raiders_1" text="{=taom_bv_rhun_threat_1}Hold, stranger. This grass belongs to the riders of Rhûn, and every foot that crosses it owes a tribute. Silver, or we take it with your hide.[rf:convo_mocking_revenge]" />
+	<string id="str_robbery_pay_agreement.rhun_raiders_1" text="{=taom_bv_rhun_pay_agreement_1}A trader's answer, good. Tell me what you carry, and whether you value your silver or your skin more.[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.rhun_raiders_1" text="{=taom_bv_rhun_conclusion_1}The riders of Rhûn are satisfied. Go west, and say the grass was kind to you.[ib:closed][rf:convo_bemused]" />
+	<string id="str_robbery_start_fight.rhun_raiders_1" text="{=taom_bv_rhun_start_fight_1}Then the grass will drink your blood, and my kin will sing of it. Ready yourself.[ib:aggressive][if:convo_bared_teeth]" />
+	<string id="str_robbery_threat.rhun_raiders_2" text="{=taom_bv_rhun_threat_2}You stand far from the Sea of Rhûn, stranger, and far from any friend. Our bows are drawn and our patience is short. Leave your silver on the ground and keep walking." />
+	<string id="str_robbery_pay_agreement.rhun_raiders_2" text="{=taom_bv_rhun_pay_agreement_2}Sensible. A rider respects a traveller who counts the arrows before speaking. What do you offer?[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.rhun_raiders_2" text="{=taom_bv_rhun_conclusion_2}Fair. The plains forget no debt, and neither do we. Ride on, and ride quickly." />
+	<string id="str_robbery_start_fight.rhun_raiders_2" text="{=taom_bv_rhun_start_fight_2}Then your name is lost to the wind. Sound the horns and loose the arrows.[ib:aggressive][if:convo_insulted]" />
+	<string id="str_taom_bv_greeting.rhun_raiders_harmless" text="{=taom_bv_rhun_greeting_harmless}We are only herders of the eastern grass, traveller, driving our horses to a fair. No threat to you." />
+	<string id="str_taom_bv_greeting.rhun_raiders_brothers" text="{=taom_bv_rhun_greeting_brothers}Turn aside, stranger. Two hundred riders wait beyond that ridge for my signal, and their horses are hungry for a charge." />
+
+	<!-- harad_raiders: Haradrim desert raiders -->
+	<string id="str_robbery_threat.harad_raiders_1" text="{=taom_bv_harad_threat_1}Slow your steps, traveller. The desert gives nothing for free, and the road through it is ours to sell. Pay the toll, or the sand will take the rest." />
+	<string id="str_robbery_pay_agreement.harad_raiders_1" text="{=taom_bv_harad_pay_agreement_1}A wise answer. Water costs less than blood, and so does passage. Name your price, and make it generous.[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.harad_raiders_1" text="{=taom_bv_harad_conclusion_1}The sun smiles on you today. Go in peace, and tell others the southern road has keepers.[ib:closed][rf:convo_bemused]" />
+	<string id="str_robbery_start_fight.harad_raiders_1" text="{=taom_bv_harad_start_fight_1}Then the vultures will feast before sunset. Raise the spears.[ib:aggressive][if:convo_annoyed]" />
+	<string id="str_robbery_threat.harad_raiders_2" text="{=taom_bv_harad_threat_2}Well met, stranger of the long road. We have walked long between wells, and you look well supplied. Your silver and your waterskins, or we take everything you own." />
+	<string id="str_robbery_pay_agreement.harad_raiders_2" text="{=taom_bv_harad_pay_agreement_2}Good. Bargaining is the breath of the south. Show me what you carry, and we will find the number together.[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.harad_raiders_2" text="{=taom_bv_harad_conclusion_2}A fair bargain. May your road be short and your skin stay cool. We will remember your face.[ib:closed]" />
+	<string id="str_robbery_start_fight.harad_raiders_2" text="{=taom_bv_harad_start_fight_2}So you choose the sword. The dunes have swallowed greater hosts than yours." />
+	<string id="str_taom_bv_greeting.harad_raiders_harmless" text="{=taom_bv_harad_greeting_harmless}Only nomads of the southern sands, traveller. We mean no harm to anyone." />
+	<string id="str_taom_bv_greeting.harad_raiders_brothers" text="{=taom_bv_harad_greeting_brothers}Be warned, traveller. The whole warband rests in the next wadi, spears ready, waiting for a single signal from us." />
+
+	<!-- gundabad_raiders: orcs of Gundabad -->
+	<string id="str_robbery_threat.gundabad_raiders_1" text="{=taom_bv_gundabad_threat_1}Stop, maggot! This is Gundabad's road. You pay us, or we gnaw your bones on it. Silver first, then we decide about the rest.[rf:convo_angry]" />
+	<string id="str_robbery_pay_agreement.gundabad_raiders_1" text="{=taom_bv_gundabad_pay_agreement_1}Heh. Smart, maggot. Smarter than the last one. Empty your pockets and we count. Quick![ib:hip][rf:convo_angry]" />
+	<string id="str_robbery_conclusion.gundabad_raiders_1" text="{=taom_bv_gundabad_conclusion_1}Enough. Go. Run before we change our minds. Gundabad is still hungry.[ib:closed]" />
+	<string id="str_robbery_start_fight.gundabad_raiders_1" text="{=taom_bv_gundabad_start_fight_1}Good! The pack has not eaten since the last snowfall. Tear them apart![ib:aggressive][if:convo_bared_teeth]" />
+	<string id="str_robbery_threat.gundabad_raiders_2" text="{=taom_bv_gundabad_threat_2}Hold, meat on legs. The Mountain claims all that crosses it, and we are the Mountain's teeth. Coin and trinkets, whatever shines, or teeth." />
+	<string id="str_robbery_pay_agreement.gundabad_raiders_2" text="{=taom_bv_gundabad_pay_agreement_2}Talk, talk. Fine. How much shiny? Show us, and be fast, the cold makes us cruel.[ib:hip][rf:convo_angry]" />
+	<string id="str_robbery_conclusion.gundabad_raiders_2" text="{=taom_bv_gundabad_conclusion_2}Keep walking, meat. The next pack may not be so kind. Or so full." />
+	<string id="str_robbery_start_fight.gundabad_raiders_2" text="{=taom_bv_gundabad_start_fight_2}Ha! Fresh meat and a fight, the best kind of day. Kill them all." />
+	<string id="str_taom_bv_greeting.gundabad_raiders_harmless" text="{=taom_bv_gundabad_greeting_harmless}Just hunters, you. Hunting rabbits. Only rabbits. Nothing to worry about, heh." />
+	<string id="str_taom_bv_greeting.gundabad_raiders_brothers" text="{=taom_bv_gundabad_greeting_brothers}Back off, maggot. The whole warren waits in the rocks above you, hungry, waiting for a signal." />
+
+	<!-- umbar_corsairs: Corsairs of Umbar ashore -->
+	<string id="str_robbery_threat.umbar_corsairs_1" text="{=taom_bv_umbar_threat_1}Ho there, you on the road! We came ashore to fill our holds, and you look like the first cargo. Silver now, and we part without a scratch.[rf:convo_mocking_revenge]" />
+	<string id="str_robbery_pay_agreement.umbar_corsairs_1" text="{=taom_bv_umbar_pay_agreement_1}Good. Even a landlubber can read the tide. Name an offer, and quickly, before the captain loses patience.[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.umbar_corsairs_1" text="{=taom_bv_umbar_conclusion_1}Fair winds to you. A share is a share, and Umbar remembers a fair deal.[ib:closed][rf:convo_bemused]" />
+	<string id="str_robbery_start_fight.umbar_corsairs_1" text="{=taom_bv_umbar_start_fight_1}Then we board you the old way. Blades out, and take what the sea has not.[ib:aggressive][if:convo_annoyed]" />
+	<string id="str_robbery_threat.umbar_corsairs_2" text="{=taom_bv_umbar_threat_2}Black sails are far off, traveller, but black blades are close. The corsairs of Umbar claim every road they walk. Pay the landing fee, or we take it from your pack." />
+	<string id="str_robbery_pay_agreement.umbar_corsairs_2" text="{=taom_bv_umbar_pay_agreement_2}Aye, we can talk. Even a pirate prefers a full purse to a bloody deck. What is your offer?[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.umbar_corsairs_2" text="{=taom_bv_umbar_conclusion_2}A pleasure doing business. Mind the road, and mind the sea if you are fool enough to sail it." />
+	<string id="str_robbery_start_fight.umbar_corsairs_2" text="{=taom_bv_umbar_start_fight_2}Mutiny against good sense, and I will not bargain with it. We sink you where you stand.[ib:aggressive][if:convo_insulted]" />
+	<string id="str_taom_bv_greeting.umbar_corsairs_harmless" text="{=taom_bv_umbar_greeting_harmless}Honest merchants of Umbar, traveller, ashore to stretch our legs and mend a sail. No trouble here." />
+	<string id="str_taom_bv_greeting.umbar_corsairs_brothers" text="{=taom_bv_umbar_greeting_brothers}Mind yourself, traveller. Our ships lie in the next cove with three hundred blades aboard, waiting for our signal." />
+
+	<!-- gondor_soldiers: Gondor deserters -->
+	<string id="str_robbery_threat.gondor_soldiers_1" text="{=taom_bv_gondor_threat_1}Stand where you are, traveller. We wore the White Tree once and bled for it, and what did it pay us? Silver for the road, and we need not make this ugly.[rf:convo_mocking_revenge]" />
+	<string id="str_robbery_pay_agreement.gondor_soldiers_1" text="{=taom_bv_gondor_pay_agreement_1}Thank you. I mean it, and I hate that I do. Name an offer. We have not eaten properly in a week.[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.gondor_soldiers_1" text="{=taom_bv_gondor_conclusion_1}May the Valar forgive us both. Go, and do not tell the garrison you saw us.[ib:closed]" />
+	<string id="str_robbery_start_fight.gondor_soldiers_1" text="{=taom_bv_gondor_start_fight_1}Then it is steel, and I am sorry for it. We have fought worse odds than yours and lost our honour long ago. There is little left to lose.[ib:aggressive][if:convo_very_stern]" />
+	<string id="str_robbery_threat.gondor_soldiers_2" text="{=taom_bv_gondor_threat_2}Halt. We marched these roads under the Steward's banner before the pay stopped coming. Now we collect our wages from travellers. Pay up." />
+	<string id="str_robbery_pay_agreement.gondor_soldiers_2" text="{=taom_bv_gondor_pay_agreement_2}Sensible. Believe me, none of us wants a fight. We have buried enough comrades. What can you give?[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.gondor_soldiers_2" text="{=taom_bv_gondor_conclusion_2}That feeds us until the first frost. You are kinder than the Steward ever was to us. Go on, and keep your head down." />
+	<string id="str_robbery_start_fight.gondor_soldiers_2" text="{=taom_bv_gondor_start_fight_2}So be it. Form up, as we were taught. If this is the end, it is at least a soldier's end.[ib:aggressive][if:convo_annoyed]" />
+	<string id="str_taom_bv_greeting.gondor_soldiers_harmless" text="{=taom_bv_gondor_greeting_harmless}Only a patrol of the Steward's guard, traveller, resting on the way. Nothing here to concern you." />
+	<string id="str_taom_bv_greeting.gondor_soldiers_brothers" text="{=taom_bv_gondor_greeting_brothers}Do not try us. The rest of the company is dug in on that hill, bows strung, and they answer to our signal and no one else's." />
+
+	<!-- erebor_warriors: Blacklock dwarves -->
+	<string id="str_robbery_threat.erebor_warriors_1" text="{=taom_bv_erebor_threat_1}Hold, stranger! This pass was cut by dwarven hands, and all who walk it pay the maker's toll. Gold, or the axe. We prefer gold, but we are not particular.[rf:convo_mocking_revenge]" />
+	<string id="str_robbery_pay_agreement.erebor_warriors_1" text="{=taom_bv_erebor_pay_agreement_1}A sensible answer, for a stranger. Gold speaks every tongue. Show us what you carry, and count it honestly.[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.erebor_warriors_1" text="{=taom_bv_erebor_conclusion_1}A fair toll, honestly paid. The mountain remembers it. Go on, and keep clear of our halls.[ib:closed][rf:convo_bemused]" />
+	<string id="str_robbery_start_fight.erebor_warriors_1" text="{=taom_bv_erebor_start_fight_1}Then we settle this the dwarven way. Axes up! Let the mountain hear it.[ib:aggressive][if:convo_bared_teeth]" />
+	<string id="str_robbery_threat.erebor_warriors_2" text="{=taom_bv_erebor_threat_2}Stop where you are. Our clan was cast out of its halls and left with little more than our axes and a long memory. The road is all the hall we have, and you owe it rent." />
+	<string id="str_robbery_pay_agreement.erebor_warriors_2" text="{=taom_bv_erebor_pay_agreement_2}Hm. Reasonable. Few travellers bargain before the axes come out. What are you offering?[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.erebor_warriors_2" text="{=taom_bv_erebor_conclusion_2}Paid in full. We never forget a debt, nor a debtor. Go well, and spread the word: the road has a rent now." />
+	<string id="str_robbery_start_fight.erebor_warriors_2" text="{=taom_bv_erebor_start_fight_2}Then you go in the ledger of grudges. Axes ready![ib:aggressive][if:convo_annoyed]" />
+	<string id="str_taom_bv_greeting.erebor_warriors_harmless" text="{=taom_bv_erebor_greeting_harmless}Only miners and smiths, traveller, heading home with our tools. We want no trouble." />
+	<string id="str_taom_bv_greeting.erebor_warriors_brothers" text="{=taom_bv_erebor_greeting_brothers}Think twice, stranger. The rest of the clan waits behind that hill, axes sharp and tempers shorter, waiting for our signal." />
+
+	<!-- mirkwood_stalkers: Mirkwood woodland outlaws -->
+	<string id="str_robbery_threat.mirkwood_stalkers_1" text="{=taom_bv_mirkwood_threat_1}Quietly now. The trees have counted your steps for the last hour, and so have we. Leave your silver on the moss and walk on.[rf:convo_mocking_revenge]" />
+	<string id="str_robbery_pay_agreement.mirkwood_stalkers_1" text="{=taom_bv_mirkwood_pay_agreement_1}Wise. The Wood has little patience for the loud, and less for the stubborn. Show us what you carry.[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.mirkwood_stalkers_1" text="{=taom_bv_mirkwood_conclusion_1}The Wood is content. Keep to the path, stranger, and do not look back at the shadows. They are not all ours.[ib:closed]" />
+	<string id="str_robbery_start_fight.mirkwood_stalkers_1" text="{=taom_bv_mirkwood_start_fight_1}The arrows are already nocked. You were never alone out here.[ib:aggressive][if:convo_very_stern]" />
+	<string id="str_robbery_threat.mirkwood_stalkers_2" text="{=taom_bv_mirkwood_threat_2}Do not reach for your sword. Bowstrings are drawn on you from five trees at once, and not one of us has blinked. Your silver for your life." />
+	<string id="str_robbery_pay_agreement.mirkwood_stalkers_2" text="{=taom_bv_mirkwood_pay_agreement_2}A calm answer in a dark place. We respect that. Name an offer, and keep your hands where we can see them.[ib:hip][rf:convo_bemused]" />
+	<string id="str_robbery_conclusion.mirkwood_stalkers_2" text="{=taom_bv_mirkwood_conclusion_2}Done. The Wood forgets you now. Walk on, and walk quietly, because other things here do not bargain." />
+	<string id="str_robbery_start_fight.mirkwood_stalkers_2" text="{=taom_bv_mirkwood_start_fight_2}Then the Wood keeps you. Loose![ib:aggressive][if:convo_annoyed]" />
+	<string id="str_taom_bv_greeting.mirkwood_stalkers_harmless" text="{=taom_bv_mirkwood_greeting_harmless}Only foresters, traveller, out gathering firewood. Nothing to fear from us." />
+	<string id="str_taom_bv_greeting.mirkwood_stalkers_brothers" text="{=taom_bv_mirkwood_greeting_brothers}I would turn back, stranger. A hundred bows are already trained on you from the branches, waiting for our signal." />
+
+</strings>

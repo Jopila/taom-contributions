@@ -4,9 +4,9 @@ This guide is for anyone translating TAOM (Tales From the Age of Men) into anoth
 
 ## Overview
 
-TAOM ships with translatable strings across **three modules** and **twenty-two TAOM file types** (13 pre-existing, 4 added 2026-09-17 for troop/lord/clan/kingdom names, 5 added 2026-10-01 for the data text below). Total, measured 2026-10-02: ~21,850 strings per language (TAOM 15,997 keys, TAOM_Map 1,241 rows, Armory 4,611 rows).
+TAOM ships with translatable strings across **three modules** and **twenty-three TAOM file types** (13 pre-existing, 4 added 2026-09-17 for troop/lord/clan/kingdom names, 5 added 2026-10-01 for the data text below, 1 added 2026-10-26 for Bandit Voices). Total, measured 2026-10-02: ~21,850 strings per language (TAOM 15,997 keys, TAOM_Map 1,241 rows, Armory 4,611 rows).
 
-### TAOM module (22 files, 15,997 keys measured 2026-10-02)
+### TAOM module (23 files, 15,997 keys measured 2026-10-02, plus 80 added 2026-10-26)
 
 Located at `Main/_Module/ModuleData/Languages/<LANG>/`:
 
@@ -33,6 +33,7 @@ Located at `Main/_Module/ModuleData/Languages/<LANG>/`:
 | `std_taom_hero_text_strings_{locale}.xml` | Hero biographies (encyclopedia text), generated from `characters/heroes.xml` (added 2026-10-01) | 460 |
 | `std_taom_career_data_strings_{locale}.xml` | Career, choice, rank, ability-template and career-quest names and descriptions, generated from `career_system/*.xml` (added 2026-10-01) | 792 |
 | `std_taom_character_name_strings_{locale}.xml` | Notable, townsfolk, wanderer, named-companion and creature names, generated from `characters/*.xml` (not lords, clans, heroes), `taom_wanderers.xml` and `named_companions.xml` (added 2026-10-01) | 1,622 |
+| `std_taom_bandit_voice_strings_{locale}.xml` | Bandit Voices (#900): the eight talking bandit clans' robbery lines and greetings; 45 of the 80 rows carry conversation animation tags (added 2026-10-26) | 80 |
 | `std_taom_battle_scene_strings_{locale}.xml` | Custom Battle scene names, generated from `custom_battle_scenes.xml` (added 2026-10-01) | 27 |
 
 ### TAOM_Map module (1 file, ~1,102 strings)
@@ -161,7 +162,11 @@ The `{?CONDITION}...{?}...{\?}` syntax handles gender. Translate the words insid
 
 ### Bracket Prefixes
 
-Equipment names in Armory files often start with culture tags like `[Gondor]`, `[Mordor]`. Keep the brackets; translate or transliterate the inner word per your language convention.
+Equipment names in Armory files often start with culture tags like `[Gondor]`, `[Mordor]`. Keep the brackets; translate or transliterate the inner word per your language convention. This rule covers culture tags only; conversation animation tags (next section) are never translated.
+
+### Conversation animation tags
+
+Dialogue rows can end in tags such as `[ib:closed]` or `[rf:convo_bemused]`. Copy them exactly and untranslated; the translator pipeline rejects a translation that drops or changes one. `ib` and `rb` set the speaker's body, `if` and `rf` the face. Their position in the sentence does not matter, so move one if your language needs it, but keep the count.
 
 ### Proper Nouns (Tolkien Names)
 

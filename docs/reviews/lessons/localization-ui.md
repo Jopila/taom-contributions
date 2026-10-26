@@ -1331,3 +1331,13 @@ holding Steel was told to get iron. It also added its own "too tired" line where
   `{=key}` in the engine source or the vanilla prefab) and use that name; if vanilla already has a translated line for
   the same message on the same screen, use its key and register nothing.
 - **Source:** [rca-smiths-measure-2026-10-26.md](../rca-smiths-measure-2026-10-26.md) findings 3 and 4.
+
+### A line a hostile NPC says to the player must not name the player's people (Bandit Voices, #900, 2026-10-26)
+The Blacklocks dwarves called the player "tall-folk", Gundabad orcs called them "softskin", and Dunlendings
+"lowlander". A TAOM player can be a dwarf or an orc, robbed by the bandits of their own people, and every such line then
+reads wrong. Vanilla's robbery lines never name the listener's people.
+- **Why missed:** each line was written in the speaker's voice, with a Man of the West in mind as the listener.
+- **Prevent:** write a line spoken to the player in the speaker's voice, but name the player only in words that fit
+  every playable race and gender ("stranger", "traveller", an insult that names no people). Add a pattern test over
+  the strings file for listener names and gendered words, as `BanditVoicesDataTests` does.
+- **Source:** `docs/reviews/rca-bandit-voices-2026-10-26.md` finding 1.

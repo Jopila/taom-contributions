@@ -198,6 +198,10 @@ public class ReflectionSiteBindingTests
     // --- RedArrow (Patch115): the private text the army-management row shows for a refusal, rewritten by a postfix through
     // AccessTools.FieldRefAccess. A miss logs once in Prepare and skips both Red Arrow patches, so vanilla's siege block stays.
     [DataRow("TaleWorlds.CampaignSystem.ViewModelCollection.ArmyManagement.ArmyManagementItemVM", "ArmyManagementItemVM", "_eligibilityReason", "Field", "ArmyManagementItemVM_UpdateEligibility_RedArrow_Patch.cs:30")]
+    // --- BanditVoices (Patch122, #900): vanilla's private record of the bandit parties the player has met, read through
+    // AccessTools.FieldRefAccess typed as object and read as the non-generic IDictionary (its value type is a private nested enum). A miss logs one
+    // warning and every first-meeting read answers false, so the clan greetings stay off and vanilla's text stands.
+    [DataRow("TaleWorlds.CampaignSystem.CampaignBehaviors.BanditInteractionsCampaignBehavior", "BanditInteractionsCampaignBehavior", "_interactedBandits", "Field", "BanditEncounterTextAdapter.cs:57")]
     public void ReflectionSite_ResolvesAgainstInstalledEngine(string fullName, string simpleName, string member, string kind, string source)
     {
         if (!_gameLoaded)

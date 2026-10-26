@@ -1264,6 +1264,14 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "When enabled, a notable of the settlement you stand in (an artisan, gang leader, merchant, rural notable or headman, but not a preacher) offers three lines in conversation: give men to the settlement (troops raise its militia, prisoners its hearth in a village or its prosperity in a town; a castle takes troops only), pay to be introduced to the other notables there, and pay to have the nearest towns and castles marked on your map. Single player only; all three lines are hidden during a messenger conversation. At war with the settlement's realm only the gift line is hidden: the introduction still works and the holds question is refused. The gift line is also hidden while a party screen is open or when you hold no regular troop or prisoner. Amounts are in notable_services.json. When off, none of the lines appear. Default: on.")]
     public bool EnableNotableServices { get; set; } = true;
 
+    // --- World / Bandit Voices (#900) ---
+
+    // GroupOrder 78 is used by no other group (77 is Notable Services, 76 War of the Ring/Armies; checked 2026-10-26).
+    [SettingPropertyGroup("World/Bandit Voices", GroupOrder = 78)]
+    [SettingPropertyBool("Enable Bandit Clan Greetings", Order = 0, RequireRestart = false,
+        HintText = "When enabled, if you attack on land a bandit party you have not dealt with before and it belongs to one of the eight talking clans (Dunlending, Rhun, Haradrim, Gundabad, Umbar, Gondor deserters, Blacklocks, Mirkwood Stalkers), there is a one in four chance that it greets you in its own words, and your ultimatum is vanilla's reply to that kind of greeting. Spiders, wild trolls and looters are unchanged. Applies to the next bandit conversation. Text only: nothing else about the encounter changes. When off, every greeting is vanilla's. The lines bandits use when they rob you are separate data and always apply. Default: on.")]
+    public bool EnableBanditGreetings { get; set; } = true;
+
     // --- Prisoner Recruitment ---
 
     [SettingPropertyGroup("World/Prisoner Recruitment", GroupOrder = 39)]

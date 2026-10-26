@@ -54,6 +54,7 @@ LANG_DIR = TAOM_BASE / "Languages"
 NOT_TEMPLATED = {
     "global_strings.xml", "taom_messenger_strings.xml", "taom_xslt_strings.xml", "taom_wotr_strings.xml",
     "taom_lotr_issue_strings.xml", "taom_emissary_strings.xml", "taom_player_switcher_strings.xml",
+    "taom_bandit_voice_strings.xml",
 }
 SOURCES = [
     (TAOM_BASE / src, tpl, Path(src).stem)
